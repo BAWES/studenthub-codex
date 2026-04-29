@@ -1,0 +1,19 @@
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: studenthub-next-mysql
+    environment:
+      MYSQL_DATABASE: studenthub_sample
+      MYSQL_USER: studenthub
+      MYSQL_PASSWORD: studenthub
+      MYSQL_ROOT_PASSWORD: studenthub_root
+    ports:
+      - "3307:3306"
+    volumes:
+      - studenthub-next-mysql:/var/lib/mysql
+    command:
+      - "--character-set-server=utf8mb4"
+      - "--collation-server=utf8mb4_unicode_ci"
+
+volumes:
+  studenthub-next-mysql:

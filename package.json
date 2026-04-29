@@ -1,0 +1,37 @@
+{
+  "name": "studenthub-next",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "test:build": "next build",
+    "test:smoke": "node scripts/smoke-test.mjs",
+    "db:inspect-dump": "node scripts/inspect-dump.mjs",
+    "db:create-sample": "node scripts/create-sample-sql.mjs",
+    "db:import-sample": "bash scripts/import-sample-db.sh",
+    "db:import-prod-local": "bash scripts/import-prod-local-db.sh",
+    "db:generate": "prisma generate",
+    "db:introspect": "prisma db pull",
+    "db:studio": "prisma studio"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.6.0",
+    "bcryptjs": "^3.0.3",
+    "next": "^15.3.1",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "zod": "^3.24.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.14.1",
+    "@types/react": "^19.0.10",
+    "@types/react-dom": "^19.0.4",
+    "eslint": "^9.24.0",
+    "eslint-config-next": "^15.3.1",
+    "prisma": "^6.6.0",
+    "typescript": "^5.8.3"
+  }
+}

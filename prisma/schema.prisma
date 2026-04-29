@@ -1,0 +1,2577 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model admin {
+  admin_id                                                  Int                    @id @default(autoincrement())
+  admin_name                                                String                 @db.VarChar(255)
+  admin_email                                               String                 @unique(map: "admin_email") @db.VarChar(255)
+  admin_auth_key                                            String                 @db.VarChar(32)
+  admin_password_hash                                       String                 @db.VarChar(255)
+  admin_password_reset_token                                String?                @unique(map: "admin_password_reset_token") @db.VarChar(255)
+  enable_two_step_auth                                      Boolean?               @default(false)
+  admin_status                                              Int                    @default(10) @db.SmallInt
+  admin_limited_access                                      Int?                   @default(0) @db.SmallInt
+  admin_created_at                                          DateTime               @db.DateTime(0)
+  admin_updated_at                                          DateTime               @db.DateTime(0)
+  admin_token                                               admin_token[]
+  expense_expense_created_byToadmin                         expense[]              @relation("expense_created_byToadmin")
+  expense_expense_updated_byToadmin                         expense[]              @relation("expense_updated_byToadmin")
+  permission_user                                           permission_user[]
+  transfer_bank_advice                                      transfer_bank_advice[]
+  transfer_file                                             transfer_file[]
+  transfer_file_entry_transfer_file_entry_created_byToadmin transfer_file_entry[]  @relation("transfer_file_entry_created_byToadmin")
+  transfer_file_entry_transfer_file_entry_updated_byToadmin transfer_file_entry[]  @relation("transfer_file_entry_updated_byToadmin")
+}
+
+model admin_token {
+  token_id                 Int       @id @default(autoincrement())
+  admin_id                 Int
+  token_value              String    @db.VarChar(255)
+  token_device             String?   @db.VarChar(255)
+  token_device_id          String?   @db.VarChar(255)
+  token_status             Int       @db.SmallInt
+  token_last_used_datetime DateTime? @db.DateTime(0)
+  token_expiry_datetime    DateTime? @db.DateTime(0)
+  total_attempt            Boolean?  @default(false)
+  otp                      String?   @db.Char(5)
+  ip_address               String?   @db.VarChar(45)
+  token_created_datetime   DateTime  @db.DateTime(0)
+  admin                    admin     @relation(fields: [admin_id], references: [admin_id], onDelete: Cascade, onUpdate: Restrict, map: "fk-admin_token-admin_id")
+
+  @@index([admin_id], map: "idx-admin_token-admin_id")
+}
+
+model area {
+  area_uuid       String      @id @db.VarChar(60)
+  country_id      Int
+  area_name_en    String      @db.VarChar(255)
+  area_name_ar    String      @db.VarChar(255)
+  area_latitude   Decimal?    @db.Decimal(9, 6)
+  area_longitude  Decimal?    @db.Decimal(9, 6)
+  area_created_at DateTime?   @db.DateTime(0)
+  area_updated_at DateTime?   @db.DateTime(0)
+  area_created_by String?     @db.VarChar(60)
+  area_updated_by String?     @db.VarChar(60)
+  country         country     @relation(fields: [country_id], references: [country_id], onUpdate: Restrict, map: "fk-area-country_id")
+  candidate       candidate[]
+  fulltimer       fulltimer[]
+  job             job[]
+
+  @@index([country_id], map: "idx-area-country_id")
+}
+
+model attachment {
+  attachment_uuid           String                      @id @db.Char(60)
+  file_path                 String?                     @db.VarChar(250)
+  ticket_attachment         ticket_attachment[]
+  ticket_comment_attachment ticket_comment_attachment[]
+}
+
+model bank {
+  bank_id            Int                  @id @default(autoincrement())
+  bank_name          String?              @db.VarChar(100)
+  bank_iban_code     String               @db.VarChar(64)
+  bank_swift_code    String?              @db.VarChar(100)
+  bank_code_abk      Int?
+  bank_address       String?              @db.VarChar(100)
+  bank_transfer_type String?              @db.Char(3)
+  deleted            Int                  @default(0) @db.SmallInt
+  candidate          candidate[]
+  transfer_candidate transfer_candidate[]
+}
+
+model bank_transaction {
+  bank_transaction_id        String                       @id @db.Char(60)
+  contact_id                 String?                      @db.Char(60)
+  currency_rate              Float?
+  currency_code              String?                      @default("KWD") @db.Char(3)
+  has_attachments            Boolean?                     @default(false)
+  is_reconciled              Boolean?                     @default(false)
+  line_amount_types          String?                      @db.VarChar(100)
+  overpayment_id             String?                      @db.VarChar(255)
+  prepayment_id              String?                      @db.VarChar(255)
+  reference                  String?                      @db.VarChar(255)
+  status                     String?                      @db.VarChar(255)
+  status_attribute_string    String?                      @db.VarChar(255)
+  sub_total                  Float?
+  total                      Float?
+  total_tax                  Float?
+  type                       String?                      @db.VarChar(255)
+  url                        String?                      @db.VarChar(255)
+  validation_errors          String?                      @db.VarChar(255)
+  date                       DateTime                     @db.DateTime(0)
+  created_at                 DateTime                     @db.DateTime(0)
+  updated_at                 DateTime                     @db.DateTime(0)
+  bank_transaction_contact   bank_transaction_contact?    @relation(fields: [contact_id], references: [contact_id], onDelete: Restrict, onUpdate: Restrict, map: "fk-bank_transaction-contact_id")
+  bank_transaction_line_item bank_transaction_line_item[]
+
+  @@index([contact_id], map: "idx-bank_transaction-contact_id")
+}
+
+model bank_transaction_contact {
+  contact_id       String             @id @db.Char(60)
+  name             String?            @db.VarChar(255)
+  created_at       DateTime           @db.DateTime(0)
+  updated_at       DateTime           @db.DateTime(0)
+  bank_transaction bank_transaction[]
+}
+
+model bank_transaction_line_item {
+  line_item_id         String            @id @db.Char(60)
+  bank_transaction_id  String?           @db.Char(60)
+  account_code         String?           @db.VarChar(255)
+  account_id           String?           @db.VarChar(255)
+  description          String?           @db.VarChar(255)
+  discount_amount      Float?
+  discount_rate        Float?
+  item_code            String?           @db.VarChar(255)
+  line_amount          Float?
+  quantity             Int?
+  repeating_invoice_id String?           @db.VarChar(255)
+  tax_amount           Float?
+  tax_type             String?           @db.VarChar(255)
+  unit_amount          Float?
+  bank_transaction     bank_transaction? @relation(fields: [bank_transaction_id], references: [bank_transaction_id], onDelete: Cascade, map: "fk-bank_transaction_line_item-bank_transaction_id")
+
+  @@index([bank_transaction_id], map: "idx-bank_transaction_line_item-bank_transaction_id")
+}
+
+model blocked_ip {
+  ip_uuid    String    @id @db.Char(60)
+  ip_address String?   @db.VarChar(45)
+  note       String?   @db.VarChar(255)
+  created_at DateTime? @db.DateTime(0)
+  updated_at DateTime? @db.DateTime(0)
+}
+
+model brand {
+  brand_uuid             String   @id @db.Char(60)
+  company_id             Int?
+  brand_name_en          String   @db.VarChar(255)
+  brand_name_ar          String   @db.VarChar(255)
+  brand_logo             String?  @db.VarChar(255)
+  brand_created_datetime DateTime @db.DateTime(0)
+  brand_updated_datetime DateTime @db.DateTime(0)
+  company                company? @relation(fields: [company_id], references: [company_id], onDelete: Cascade, onUpdate: Restrict, map: "fk-brand-CASCADE")
+  store                  store[]
+
+  @@index([company_id], map: "idx-brand-company_id")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model campaign {
+  utm_uuid        String            @id @db.Char(60)
+  utm_source      String?           @db.VarChar(100)
+  utm_medium      String?           @db.VarChar(100)
+  utm_campaign    String?           @db.VarChar(100)
+  utm_content     String?           @db.VarChar(100)
+  utm_term        String?           @db.VarChar(100)
+  no_of_signups   Int?
+  no_of_clicks    Int?
+  investment      Decimal?          @db.Decimal(10, 3)
+  total_revenue   Decimal?          @db.Decimal(10, 3)
+  created_at      DateTime?         @db.DateTime(0)
+  updated_at      DateTime?         @db.DateTime(0)
+  candidate       candidate[]
+  company_request company_request[]
+  contact         contact[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model candidate {
+  candidate_id                      Int                             @id @default(autoincrement())
+  utm_uuid                          String?                         @db.Char(64)
+  candidate_uid                     String?                         @db.VarChar(20)
+  store_id                          Int?
+  bank_id                           Int?
+  university_id                     Int?
+  country_id                        Int?
+  bank_account_name                 String?                         @db.VarChar(100)
+  candidate_iban                    String?                         @db.VarChar(100)
+  candidate_name                    String                          @db.VarChar(255)
+  candidate_name_ar                 String                          @db.VarChar(255)
+  candidate_gender                  Int?
+  candidate_objective               String?                         @db.VarChar(255)
+  candidate_intro                   String?                         @db.Text
+  candidate_personal_photo          String?                         @db.VarChar(255)
+  candidate_video                   String?                         @db.VarChar(255)
+  candidate_video_job_id            String?                         @db.VarChar(255)
+  candidate_video_processed         Boolean?                        @default(false)
+  candidate_email                   String                          @db.VarChar(255)
+  candidate_new_email               String?                         @db.VarChar(100)
+  candidate_email_verification      Boolean?
+  candidate_limit_email             DateTime?                       @db.DateTime(0)
+  candidate_phone                   String?                         @db.VarChar(20)
+  candidate_address_line1           String?                         @db.Text
+  candidate_area_uuid               String?                         @db.VarChar(60)
+  candidate_latitude                Decimal?                        @db.Decimal(9, 6)
+  candidate_longitude               Decimal?                        @db.Decimal(9, 6)
+  candidate_birth_date              DateTime?                       @db.Date
+  candidate_civil_id                String?                         @db.VarChar(255)
+  candidate_civil_expiry_date       DateTime?                       @db.Date
+  candidate_civil_photo_front       String?                         @db.VarChar(255)
+  candidate_civil_photo_back        String?                         @db.VarChar(255)
+  candidate_civil_need_verification Boolean?                        @default(false)
+  candidate_driving_license         Boolean?
+  candidate_resume                  String?                         @db.VarChar(255)
+  candidate_hourly_rate             Decimal?                        @db.Decimal(7, 3)
+  candidate_auth_key                String?                         @db.VarChar(32)
+  candidate_password_hash           String?                         @db.VarChar(255)
+  candidate_password_reset_token    String?                         @db.VarChar(255)
+  enable_two_step_auth              Boolean?                        @default(false)
+  candidate_language_pref           String?                         @default("en") @db.Char(2)
+  candidate_job_search_status       Int?                            @default(1) @db.TinyInt
+  candidate_job_search_updated_at   DateTime?                       @db.DateTime(0)
+  candidate_committed               Boolean                         @default(true)
+  candidate_preferred_time          String?                         @db.VarChar(255)
+  candidate_status                  Int                             @default(10) @db.SmallInt
+  approved                          Int                             @db.SmallInt
+  candidate_mom_kuwaiti             Boolean?
+  candidate_pending_profile         String?                         @db.Text
+  is_incomplete_profile             Boolean?                        @default(false)
+  profile_url                       String?                         @db.VarChar(225)
+  candidate_created_at              DateTime                        @db.DateTime(0)
+  candidate_updated_at              DateTime                        @db.DateTime(0)
+  deleted                           Int                             @default(0) @db.SmallInt
+  is_duplicate                      Boolean?                        @default(false)
+  ip_address                        String?                         @db.VarChar(45)
+  currency_code                     String?                         @default("KWD") @db.Char(3)
+  bank                              bank?                           @relation(fields: [bank_id], references: [bank_id], onDelete: Cascade, onUpdate: Restrict, map: "fk-candidate-bank_id")
+  area                              area?                           @relation(fields: [candidate_area_uuid], references: [area_uuid], onDelete: Restrict, onUpdate: Restrict, map: "fk-candidate-candidate_area_uuid")
+  country                           country?                        @relation(fields: [country_id], references: [country_id], onUpdate: Restrict, map: "fk-candidate-country_id")
+  store                             store?                          @relation(fields: [store_id], references: [store_id], onDelete: Cascade, onUpdate: Restrict, map: "fk-candidate-store_id")
+  university                        university?                     @relation(fields: [university_id], references: [university_id], onUpdate: Restrict, map: "fk-candidate-university_id")
+  campaign                          campaign?                       @relation(fields: [utm_uuid], references: [utm_uuid], onDelete: Restrict, onUpdate: Restrict, map: "fk-candidate-utm_uuid")
+  candidate_certificate             candidate_certificate[]
+  candidate_education               candidate_education[]
+  candidate_evaluation              candidate_evaluation[]
+  candidate_experience              candidate_experience[]
+  candidate_id_card                 candidate_id_card[]
+  candidate_link                    candidate_link[]
+  candidate_note                    candidate_note[]
+  candidate_notification            candidate_notification[]
+  candidate_skill                   candidate_skill[]
+  candidate_stats                   candidate_stats[]
+  candidate_tag                     candidate_tag[]
+  candidate_token                   candidate_token[]
+  candidate_video_log               candidate_video_log[]
+  candidate_warning                 candidate_warning[]
+  candidate_work_log_feedback       candidate_work_log_feedback[]
+  candidate_working_date            candidate_working_date[]
+  candidate_working_hour            candidate_working_hour[]
+  candidate_working_hour_appeal     candidate_working_hour_appeal[]
+  chat                              chat[]
+  contract                          contract[]
+  exam_question_answer              exam_question_answer[]
+  interview_evaluation              interview_evaluation[]
+  invitation                        invitation[]
+  job_interest                      job_interest[]
+  note                              note[]
+  request_application               request_application[]
+  request_interview                 request_interview[]
+  store_assignment_request          store_assignment_request[]
+  suggestion                        suggestion[]
+  ticket                            ticket[]
+  ticket_comment                    ticket_comment[]
+  transfer_candidate                transfer_candidate[]
+  transfer_cost                     transfer_cost[]
+
+  @@unique([candidate_password_reset_token, deleted], map: "idx-candidate-candidate_password_reset_token")
+  @@index([bank_id], map: "idx-candidate-bank_id")
+  @@index([candidate_area_uuid], map: "idx-candidate-candidate_area_uuid")
+  @@index([country_id], map: "idx-candidate-country_id")
+  @@index([store_id], map: "idx-candidate-store_id")
+  @@index([university_id], map: "idx-candidate-university_id")
+  @@index([utm_uuid], map: "ind-candidate-utm_uuid")
+}
+
+model candidate_certificate {
+  certificate_uuid                                         String                  @id @db.Char(60)
+  certificate_type                                         Boolean?                @default(false)
+  candidate_id                                             Int
+  candidate_work_history_id                                Int?
+  exam_uuid                                                String?                 @db.Char(60)
+  store_id                                                 Int?
+  company_id                                               Int?
+  parent_company_id                                        Int?
+  start_date                                               DateTime?               @db.Date
+  end_date                                                 DateTime?               @db.Date
+  staff_id                                                 Int?
+  is_deleted                                               Boolean?                @default(false)
+  created_at                                               DateTime?               @db.DateTime(0)
+  updated_at                                               DateTime?               @db.DateTime(0)
+  candidate                                                candidate               @relation(fields: [candidate_id], references: [candidate_id], onUpdate: Restrict, map: "fk-candidate_certificate-candidate_id")
+  candidate_work_history                                   candidate_work_history? @relation(fields: [candidate_work_history_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk-candidate_certificate-candidate_work_history_id")
+  company_candidate_certificate_company_idTocompany        company?                @relation("candidate_certificate_company_idTocompany", fields: [company_id], references: [company_id], onDelete: Restrict, onUpdate: Restrict, map: "fk-candidate_certificate-company_id")
+  exam                                                     exam?                   @relation(fields: [exam_uuid], references: [exam_uuid], onDelete: Restrict, onUpdate: Restrict, map: "fk-candidate_certificate-exam_uuid")
+  company_candidate_certificate_parent_company_idTocompany company?                @relation("candidate_certificate_parent_company_idTocompany", fields: [parent_company_id], references: [company_id], onDelete: Restrict, onUpdate: Restrict, map: "fk-candidate_certificate-parent_company_id")
+  staff                                                    staff?                  @relation(fields: [staff_id], references: [staff_id], onDelete: Restrict, onUpdate: Restrict, map: "fk-candidate_certificate-staff_id")
+  store                                                    store?                  @relation(fields: [store_id], references: [store_id], onDelete: Restrict, onUpdate: Restrict, map: "fk-candidate_certificate-store_id")
+
+  @@index([candidate_id], map: "idx-candidate_certificate-candidate_id")
+  @@index([candidate_work_history_id], map: "idx-candidate_certificate-candidate_work_history_id")
+  @@index([company_id], map: "idx-candidate_certificate-company_id")
+  @@index([exam_uuid], map: "idx-candidate_certificate-exam_uuid")
+  @@index([parent_company_id], map: "idx-candidate_certificate-parent_company_id")
+  @@index([staff_id], map: "idx-candidate_certificate-staff_id")
+  @@index([store_id], map: "idx-candidate_certificate-store_id")
+}
+
+model candidate_education {
+  education_uuid        String     @id @db.Char(60)
+  candidate_id          Int
+  university_id         Int
+  degree_uuid           String?    @db.Char(60)
+  major_uuid            String?    @db.Char(60)
+  graduation_year       Int?
+  is_currently_studying Boolean?   @default(false)
+  created_at            DateTime?  @db.DateTime(0)
+  updated_at            DateTime?  @db.DateTime(0)
+  candidate             candidate  @relation(fields: [candidate_id], references: [candidate_id], onUpdate: Restrict, map: "fk-candidate_education-candidate_id")
+  degree                degree?    @relation(fields: [degree_uuid], references: [degree_uuid], onDelete: Restrict, onUpdate: Restrict, map: "fk-candidate_education-degree_uuid")
+  major                 major?     @relation(fields: [major_uuid], references: [major_uuid], onDelete: Restrict, onUpdate: Restrict, map: "fk-candidate_education-major_uuid")
+  university            university @relation(fields: [university_id], references: [university_id], onUpdate: Restrict, map: "fk-candidate_education-university_id")
+
+  @@index([candidate_id], map: "idx-candidate_education-candidate_id")
+  @@index([degree_uuid], map: "idx-candidate_education-degree_uuid")
+  @@index([major_uuid], map: "idx-candidate_education-major_uuid")
+  @@index([university_id], map: "idx-candidate_education-university_id")
+}
+
+model candidate_email_verify_attempt {
+  ceva_uuid       String    @id @db.Char(60)
+  candidate_email String?   @db.VarChar(50)
+  code            String?   @db.VarChar(32)
+  ip_address      String?   @db.VarChar(45)
+  created_at      DateTime? @db.DateTime(0)
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model candidate_eval_dept_ques {
+  dept_id             Int?
+  ceq_uuid            String?              @db.Char(60)
+  candidate_eval_ques candidate_eval_ques? @relation(fields: [ceq_uuid], references: [ceq_uuid], onDelete: NoAction, onUpdate: Restrict, map: "fk_candidate_eval_dept_ques_ceq_uuid")
+
+  @@index([ceq_uuid], map: "idx_candidate_eval_dept_ques_ceq_uuid")
+  @@ignore
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model candidate_eval_ques {
+  ceq_uuid                    String                        @id @db.Char(60)
+  question                    String?                       @db.VarChar(225)
+  created_at                  DateTime                      @db.DateTime(0)
+  updated_at                  DateTime                      @db.DateTime(0)
+  candidate_eval_dept_ques    candidate_eval_dept_ques[]    @ignore
+  candidate_evaluation_answer candidate_evaluation_answer[] @ignore
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model candidate_evaluation {
+  can_eval_uuid               String                        @id @db.Char(60)
+  candidate_id                Int?
+  dept_id                     Int?
+  start_date                  DateTime?                     @db.Date
+  end_date                    DateTime?                     @db.Date
+  staff_id                    Int?
+  created_at                  DateTime                      @db.DateTime(0)
+  updated_at                  DateTime                      @db.DateTime(0)
+  candidate                   candidate?                    @relation(fields: [candidate_id], references: [candidate_id], onDelete: NoAction, onUpdate: Restrict, map: "fk_candidate_evaluation_candidate_id")
+  staff                       staff?                        @relation(fields: [staff_id], references: [staff_id], onDelete: NoAction, onUpdate: Restrict, map: "fk_candidate_evaluation_staff_id")
+  candidate_evaluation_answer candidate_evaluation_answer[] @ignore
+
+  @@index([candidate_id], map: "idx_candidate_evaluation_candidate_id")
+  @@index([staff_id], map: "idx_candidate_evaluation_staff_id")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model candidate_evaluation_answer {
+  can_eval_uuid        String?               @db.Char(60)
+  ceq_uuid             String                @db.Char(60)
+  question             String?               @db.VarChar(225)
+  answer               String?               @db.Text
+  rating               Int?                  @db.TinyInt
+  candidate_evaluation candidate_evaluation? @relation(fields: [can_eval_uuid], references: [can_eval_uuid], onDelete: NoAction, onUpdate: Restrict, map: "fk_candidate_evaluation_answer_can_eval_uuid")
+  candidate_eval_ques  candidate_eval_ques   @relation(fields: [ceq_uuid], references: [ceq_uuid], onDelete: NoAction, onUpdate: Restrict, map: "fk_candidate_evaluation_answer_ceq_uuid")
+
+  @@index([can_eval_uuid], map: "idx_candidate_evaluation_answer_can_eval_uuid")
+  @@index([ceq_uuid], map: "idx_candidate_evaluation_answer_ceq_uuid")
+  @@ignore
+}
+
+model candidate_experience {
+  candidate_experience_id         Int        @id @default(autoincrement())
+  candidate_id                    Int?
+  experience                      String     @db.VarChar(128)
+  deleted                         Int        @default(0) @db.SmallInt
+  candidate_experience_created_at DateTime?  @db.DateTime(0)
+  employer                        String?    @db.VarChar(255)
+  start_year                      Int?       @db.SmallInt
+  end_year                        Int?       @db.SmallInt
+  candidate                       candidate? @relation(fields: [candidate_id], references: [candidate_id], onDelete: Cascade, onUpdate: Restrict, map: "fk-candidate_experience-candidate_id")
+
+  @@index([candidate_id], map: "fk-candidate_experience-candidate_id")
+}
+
+model candidate_id_card {
+  id           Int        @id @default(autoincrement())
+  candidate_id Int?
+  expiry_date  DateTime?  @db.Date
+  deleted      Int        @default(0) @db.SmallInt
+  created_at   DateTime?  @db.DateTime(0)
+  updated_at   DateTime?  @db.DateTime(0)
+  candidate    candidate? @relation(fields: [candidate_id], references: [candidate_id], onUpdate: Restrict, map: "fk-candidate_id_card-candidate_id")
+
+  @@index([candidate_id], map: "idx-candidate_id_card-candidate_id")
+}
+
+model candidate_id_request {
+  cir_uuid                                     String    @id @db.Char(60)
+  candidate_ids                                String?   @db.Text
+  status                                       String?   @default("pending") @db.VarChar(100)
+  created_at                                   DateTime? @db.DateTime(0)
+  updated_at                                   DateTime? @db.DateTime(0)
+  created_by                                   Int?
+  updated_by                                   Int?
+  staff_candidate_id_request_created_byTostaff staff?    @relation("candidate_id_request_created_byTostaff", fields: [created_by], references: [staff_id], onDelete: NoAction, onUpdate: NoAction, map: "fk-candidate_id_request-created_by")
+  staff_candidate_id_request_updated_byTostaff staff?    @relation("candidate_id_request_updated_byTostaff", fields: [updated_by], references: [staff_id], onDelete: NoAction, onUpdate: NoAction, map: "fk-candidate_id_request-updated_by")
+
+  @@index([created_by], map: "idx-candidate_id_request-created_by")
+  @@index([updated_by], map: "idx-candidate_id_request-updated_by")
+}
+
+model candidate_link {
+  cl_uuid      String    @id @db.Char(60)
+  candidate_id Int
+  title        String    @db.VarChar(255)
+  url          String    @db.VarChar(255)
+  created_at   DateTime? @db.DateTime(0)
+  updated_at   DateTime? @db.DateTime(0)
+  candidate    candidate @relation(fields: [candidate_id], references: [candidate_id], onDelete: Cascade, map: "fk-candidate_link-candidate_id")
+
+  @@index([candidate_id], map: "idx-candidate_link-candidate_id")
+}
+
+model candidate_note {
+  candidate_note_uuid                    String     @id @db.Char(60)
+  candidate_id                           Int?
+  note_text                              String?    @db.Text
+  created_by                             Int?
+  updated_by                             Int?
+  note_created_datetime                  DateTime   @db.DateTime(0)
+  note_updated_datetime                  DateTime   @db.DateTime(0)
+  candidate                              candidate? @relation(fields: [candidate_id], references: [candidate_id], onDelete: Restrict, onUpdate: Restrict, map: "fk-candidate_note-candidate_id")
+  staff_candidate_note_created_byTostaff staff?     @relation("candidate_note_created_byTostaff", fields: [created_by], references: [staff_id], onDelete: Restrict, onUpdate: Restrict, map: "fk-candidate_note-created_by")
+  staff_candidate_note_updated_byTostaff staff?     @relation("candidate_note_updated_byTostaff", fields: [updated_by], references: [staff_id], onDelete: Restrict, onUpdate: Restrict, map: "fk-candidate_note-updated_by")
+
+  @@index([candidate_id], map: "idx-candidate_note-candidate_id")
+  @@index([created_by], map: "idx-candidate_note-created_by")
+  @@index([updated_by], map: "idx-candidate_note-updated_by")
+}
+
+model candidate_notification {
+  cn_uuid                       String                         @id @db.Char(60)
+  candidate_id                  Int
+  type                          Int                            @db.TinyInt
+  candidate_work_history_id     Int?
+  candidate_working_date_uuid   String?                        @db.Char(60)
+  candidate_working_hour_uuid   String?                        @db.Char(60)
+  invitation_uuid               String?                        @db.Char(60)
+  request_uuid                  String?                        @db.Char(60)
+  tc_id                         Int?
+  cwlf_uuid                     String?                        @db.Char(60)
+  job_interest_uuid             String?                        @db.Char(60)
+  job_uuid                      String?                        @db.Char(60)
+  company_id                    Int?
+  store_id                      Int?
+  staff_id                      Int?
+  is_new                        Boolean?                       @default(true)
+  message                       String?                        @db.Text
+  created_at                    DateTime?                      @db.DateTime(0)
+  updated_at                    DateTime?                      @db.DateTime(0)
+  appeal_uuid                   String?                        @db.Char(60)
+  candidate_working_hour_appeal candidate_working_hour_appeal? @relation(fields: [appeal_uuid], references: [appeal_uuid], onDelete: NoAction, onUpdate: NoAction, map: "fk-candidate_notification-appeal_uuid")
+  candidate                     candidate                      @relation(fields: [candidate_id], references: [candidate_id], onUpdate: Restrict, map: "fk-candidate_notification-candidate_id")
+  candidate_work_history        candidate_work_history?        @relation(fields: [candidate_work_history_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk-candidate_notification-candidate_work_history_id")
+  candidate_working_date        candidate_working_date?        @relation(fields: [candidate_working_date_uuid], references: [cwd_uuid], onDelete: Restrict, onUpdate: Restrict, map: "fk-candidate_notification-candidate_working_date_uuid")
+  candidate_working_hour        candidate_working_hour?        @relation(fields: [candidate_working_hour_uuid], references: [candidate_working_hour_uuid], onDelete: Restrict, onUpdate: Restrict, map: "fk-candidate_notification-candidate_working_hour_uuid")
+  company                       company?                       @relation(fields: [company_id], references: [company_id], onDelete: Restrict, onUpdate: Restrict, map: "fk-candidate_notification-company_id")
+  candidate_work_log_feedback   candidate_work_log_feedback?   @relation(fields: [cwlf_uuid], references: [cwlf_uuid], onDelete: Restrict, onUpdate: Restrict, map: "fk-candidate_notification-cwlf_uuid")
+  invitation                    invitation?                    @relation(fields: [invitation_uuid], references: [invitation_uuid], onDelete: Restrict, onUpdate: Restrict, map: "fk-candidate_notification-invitation_uuid")
+  job_interest                  job_interest?                  @relation(fields: [job_interest_uuid], references: [job_interest_uuid], onDelete: NoAction, onUpdate: NoAction, map: "fk-candidate_notification-job_interest_uuid")
+  job                           job?                           @relation(fields: [job_uuid], references: [job_uuid], onDelete: NoAction, onUpdate: NoAction, map: "fk-candidate_notification-job_uuid")
+  request                       request?                       @relation(fields: [request_uuid], references: [request_uuid], onDelete: Restrict, onUpdate: Restrict, map: "fk-candidate_notification-request_uuid")
+  staff                         staff?                         @relation(fields: [staff_id], references: [staff_id], onDelete: Restrict, onUpdate: Restrict, map: "fk-candidate_notification-staff_id")
+  store                         store?                         @relation(fields: [store_id], references: [store_id], onDelete: Restrict, onUpdate: Restrict, map: "fk-candidate_notification-store_id")
+  transfer_candidate            transfer_candidate?            @relation(fields: [tc_id], references: [tc_id], onDelete: Restrict, onUpdate: Restrict, map: "fk-candidate_notification-tc_id")
+
+  @@index([appeal_uuid], map: "idx-candidate_notification-appeal_uuid")
+  @@index([candidate_id], map: "idx-candidate_notification-candidate_id")
+  @@index([candidate_work_history_id], map: "idx-candidate_notification-candidate_work_history_id")
+  @@index([candidate_working_date_uuid], map: "idx-candidate_notification-candidate_working_date_uuid")
+  @@index([candidate_working_hour_uuid], map: "idx-candidate_notification-candidate_working_hour_uuid")
+  @@index([company_id], map: "idx-candidate_notification-company_id")
+  @@index([cwlf_uuid], map: "idx-candidate_notification-cwlf_uuid")
+  @@index([invitation_uuid], map: "idx-candidate_notification-invitation_uuid")
+  @@index([job_interest_uuid], map: "idx-candidate_notification-job_interest_uuid")
+  @@index([job_uuid], map: "idx-candidate_notification-job_uuid")
+  @@index([request_uuid], map: "idx-candidate_notification-request_uuid")
+  @@index([staff_id], map: "idx-candidate_notification-staff_id")
+  @@index([store_id], map: "idx-candidate_notification-store_id")
+  @@index([tc_id], map: "idx-candidate_notification-tc_id")
+}
+
+model candidate_skill {
+  candidate_skill_id         Int        @id @default(autoincrement())
+  candidate_id               Int?
+  skill                      String     @db.VarChar(128)
+  deleted                    Int        @default(0) @db.SmallInt
+  candidate_skill_created_at DateTime?  @db.DateTime(0)
+  candidate                  candidate? @relation(fields: [candidate_id], references: [candidate_id], onDelete: Cascade, onUpdate: Restrict, map: "fk-candidate_skill-candidate_id")
+
+  @@index([candidate_id], map: "fk-candidate_skill-candidate_id")
+}
+
+model candidate_stats {
+  cs_uuid       String     @id @db.Char(60)
+  candidate_id  Int?
+  total_revenue Decimal?   @default(0.000) @db.Decimal(12, 3)
+  currency_code String?    @default("KWD") @db.Char(3)
+  created_at    DateTime   @db.DateTime(0)
+  updated_at    DateTime   @db.DateTime(0)
+  candidate     candidate? @relation(fields: [candidate_id], references: [candidate_id], onUpdate: Restrict, map: "fk-candidate_stats-candidate_id")
+
+  @@index([candidate_id], map: "idx-candidate_stats-candidate_id")
+  @@index([currency_code], map: "idx-candidate_stats-currency_code")
+}
+
+model candidate_tag {
+  tag_id       Int        @id @default(autoincrement())
+  candidate_id Int?
+  tag          String     @db.VarChar(128)
+  reason       String?    @db.Text
+  deleted      Int        @default(0) @db.SmallInt
+  created_at   DateTime?  @db.DateTime(0)
+  created_by   Int?
+  updated_at   DateTime?  @db.DateTime(0)
+  candidate    candidate? @relation(fields: [candidate_id], references: [candidate_id], onDelete: Cascade, onUpdate: Restrict, map: "fk-candidate_tag-candidate_id")
+  staff        staff?     @relation(fields: [created_by], references: [staff_id], onDelete: Cascade, onUpdate: Restrict, map: "fk-candidate_tag-created_by")
+
+  @@index([candidate_id], map: "fk-candidate_tag-candidate_id")
+  @@index([created_by], map: "idx-candidate_tag-created_by")
+}
+
+model candidate_token {
+  token_id                 Int       @id @default(autoincrement())
+  candidate_id             Int
+  token_value              String    @db.VarChar(255)
+  token_device             String?   @db.VarChar(255)
+  token_device_id          String?   @db.VarChar(255)
+  token_status             Int       @db.SmallInt
+  token_last_used_datetime DateTime? @db.DateTime(0)
+  token_expiry_datetime    DateTime? @db.DateTime(0)
+  total_attempt            Boolean?  @default(false)
+  otp                      String?   @db.Char(5)
+  ip_address               String?   @db.VarChar(45)
+  token_created_datetime   DateTime  @db.DateTime(0)
+  candidate                candidate @relation(fields: [candidate_id], references: [candidate_id], onDelete: Cascade, onUpdate: Restrict, map: "fk-candidate_token-candidate_id")
+
+  @@index([candidate_id], map: "idx-candidate_token-candidate_id")
+}
+
+model candidate_video_log {
+  video_log_uuid String     @id @db.Char(60)
+  candidate_id   Int?
+  ip_address     String?    @db.VarChar(45)
+  created_at     DateTime   @db.DateTime(0)
+  candidate      candidate? @relation(fields: [candidate_id], references: [candidate_id], onDelete: Restrict, onUpdate: Restrict, map: "fk-candidate_video_log-candidate_id")
+
+  @@index([candidate_id], map: "idx-candidate_video_log-candidate_id")
+}
+
+model candidate_warning {
+  warning_id                                Int        @id @default(autoincrement())
+  candidate_id                              Int?
+  title                                     String?    @default("Not appearing for interview") @db.VarChar(100)
+  message                                   String     @db.Text
+  created_by                                Int?
+  updated_by                                Int?
+  created_at                                DateTime?  @db.DateTime(0)
+  updated_at                                DateTime?  @db.DateTime(0)
+  candidate                                 candidate? @relation(fields: [candidate_id], references: [candidate_id], onUpdate: Restrict, map: "fk-candidate_warning-candidate_id")
+  staff_candidate_warning_created_byTostaff staff?     @relation("candidate_warning_created_byTostaff", fields: [created_by], references: [staff_id], onUpdate: Restrict, map: "fk-candidate_warning-created_by")
+  staff_candidate_warning_updated_byTostaff staff?     @relation("candidate_warning_updated_byTostaff", fields: [updated_by], references: [staff_id], onUpdate: Restrict, map: "fk-candidate_warning-updated_by")
+
+  @@index([candidate_id], map: "idx-candidate_warning-candidate_id")
+  @@index([created_by], map: "idx-candidate_warning-created_by")
+  @@index([updated_by], map: "idx-candidate_warning-updated_by")
+}
+
+model candidate_work_history {
+  id                                                        Int                      @id @default(autoincrement())
+  candidate_id                                              Int?
+  contract_uuid                                             String?                  @db.Char(60)
+  store_id                                                  Int?
+  company_id                                                Int?
+  parent_company_id                                         Int?
+  staff_id                                                  Int?
+  start_date                                                DateTime?                @db.Date
+  end_date                                                  DateTime?                @db.Date
+  candidate_hourly_rate                                     Decimal?                 @db.Decimal(12, 3)
+  company_hourly_rate                                       Decimal?                 @db.Decimal(12, 3)
+  transfer_cost                                             Decimal?                 @db.Decimal(12, 3)
+  deleted                                                   Boolean?                 @default(false)
+  candidate_certificate                                     candidate_certificate[]
+  candidate_notification                                    candidate_notification[]
+  company_candidate_work_history_company_idTocompany        company?                 @relation("candidate_work_history_company_idTocompany", fields: [company_id], references: [company_id], onDelete: Restrict, onUpdate: Restrict, map: "fk-candidate_work_history-company_id")
+  company_candidate_work_history_parent_company_idTocompany company?                 @relation("candidate_work_history_parent_company_idTocompany", fields: [parent_company_id], references: [company_id], onDelete: Restrict, onUpdate: Restrict, map: "fk-candidate_work_history-parent_company_id")
+  staff                                                     staff?                   @relation(fields: [staff_id], references: [staff_id], onDelete: NoAction, onUpdate: Restrict, map: "fk-candidate_work_history-staff_id")
+
+  @@index([company_id], map: "idx-candidate_work_history-company_id")
+  @@index([parent_company_id], map: "idx-candidate_work_history-parent_company_id")
+  @@index([staff_id], map: "idx-candidate_work_history-staff_id")
+}
+
+model candidate_work_log_feedback {
+  cwlf_uuid                   String                   @id @db.Char(60)
+  candidate_id                Int
+  store_id                    Int
+  company_id                  Int
+  date                        DateTime                 @db.Date
+  candidate_working_hour_uuid String?                  @db.Char(60)
+  status                      Int?                     @default(1) @db.SmallInt
+  note                        String?                  @db.Text
+  reason                      String?                  @db.VarChar(255)
+  is_public                   Boolean?                 @default(false)
+  rating                      Boolean?
+  created_by                  String?                  @db.Char(60)
+  created_at                  DateTime?                @db.DateTime(0)
+  updated_at                  DateTime?                @db.DateTime(0)
+  candidate_notification      candidate_notification[]
+  candidate                   candidate                @relation(fields: [candidate_id], references: [candidate_id], onUpdate: Restrict, map: "fk-candidate_work_log_feedback-candidate_id")
+  candidate_working_hour      candidate_working_hour?  @relation(fields: [candidate_working_hour_uuid], references: [candidate_working_hour_uuid], onDelete: Restrict, onUpdate: Restrict, map: "fk-candidate_work_log_feedback-candidate_working_hour_uuid")
+  company                     company                  @relation(fields: [company_id], references: [company_id], onUpdate: Restrict, map: "fk-candidate_work_log_feedback-company_id")
+  contact                     contact?                 @relation(fields: [created_by], references: [contact_uuid], onDelete: Restrict, onUpdate: Restrict, map: "fk-candidate_work_log_feedback-created_by")
+  store                       store                    @relation(fields: [store_id], references: [store_id], onUpdate: Restrict, map: "fk-candidate_work_log_feedback-store_id")
+
+  @@index([candidate_id], map: "idx-candidate_work_log_feedback-candidate_id")
+  @@index([candidate_working_hour_uuid], map: "idx-candidate_work_log_feedback-candidate_working_hour_uuid")
+  @@index([company_id], map: "idx-candidate_work_log_feedback-company_id")
+  @@index([created_by], map: "idx-candidate_work_log_feedback-created_by")
+  @@index([store_id], map: "idx-candidate_work_log_feedback-store_id")
+}
+
+model candidate_working_date {
+  cwd_uuid               String                   @id @db.Char(60)
+  candidate_id           Int
+  store_id               Int
+  company_id             Int
+  date                   DateTime                 @db.Date
+  start_time             DateTime                 @db.DateTime(0)
+  end_time               DateTime?                @db.DateTime(0)
+  total_time             Int?
+  status                 Int?                     @default(0) @db.SmallInt
+  created_at             DateTime?                @db.DateTime(0)
+  updated_at             DateTime?                @db.DateTime(0)
+  total_approved         Int?
+  total_rejected         Int?
+  total_pending          Int?
+  candidate_notification candidate_notification[]
+  candidate              candidate                @relation(fields: [candidate_id], references: [candidate_id], onUpdate: Restrict, map: "fk-candidate_working_date-candidate_id")
+  company                company                  @relation(fields: [company_id], references: [company_id], onUpdate: Restrict, map: "fk-candidate_working_date-company_id")
+  store                  store                    @relation(fields: [store_id], references: [store_id], onUpdate: Restrict, map: "fk-candidate_working_date-store_id")
+
+  @@index([candidate_id], map: "idx-candidate_working_date-candidate_id")
+  @@index([company_id], map: "idx-candidate_working_date-company_id")
+  @@index([store_id], map: "idx-candidate_working_date-store_id")
+}
+
+model candidate_working_hour {
+  candidate_working_hour_uuid                                                                                     String                          @id @db.Char(60)
+  candidate_id                                                                                                    Int?
+  store_id                                                                                                        Int?
+  date                                                                                                            DateTime?                       @db.Date
+  start_time                                                                                                      DateTime?                       @db.DateTime(0)
+  end_time                                                                                                        DateTime?                       @db.DateTime(0)
+  total_time                                                                                                      Int?
+  start_location_lat                                                                                              Decimal?                        @db.Decimal(10, 8)
+  start_location_long                                                                                             Decimal?                        @db.Decimal(11, 8)
+  end_location_lat                                                                                                Decimal?                        @db.Decimal(10, 8)
+  end_location_long                                                                                               Decimal?                        @db.Decimal(11, 8)
+  created_at                                                                                                      DateTime?                       @db.DateTime(0)
+  updated_at                                                                                                      DateTime?                       @db.DateTime(0)
+  note                                                                                                            String?                         @db.Text
+  status                                                                                                          Int?                            @default(0) @db.SmallInt
+  via                                                                                                             String?                         @default("Timer") @db.VarChar(255)
+  appeal_uuid                                                                                                     String?                         @db.Char(60)
+  cwlf_uuid                                                                                                       String?                         @db.Char(60)
+  candidate_notification                                                                                          candidate_notification[]
+  candidate_work_log_feedback                                                                                     candidate_work_log_feedback[]
+  candidate_working_hour_appeal_candidate_working_hour_appeal_uuidTocandidate_working_hour_appeal                 candidate_working_hour_appeal?  @relation("candidate_working_hour_appeal_uuidTocandidate_working_hour_appeal", fields: [appeal_uuid], references: [appeal_uuid], onDelete: NoAction, onUpdate: NoAction, map: "fk-candidate_working_hour-appeal_uuid")
+  candidate                                                                                                       candidate?                      @relation(fields: [candidate_id], references: [candidate_id], onUpdate: Restrict, map: "fk-candidate_working_hour-candidate_id")
+  store                                                                                                           store?                          @relation(fields: [store_id], references: [store_id], onUpdate: Restrict, map: "fk-candidate_working_hour-store_id")
+  candidate_working_hour_appeal_candidate_working_hour_appeal_candidate_working_hour_uuidTocandidate_working_hour candidate_working_hour_appeal[] @relation("candidate_working_hour_appeal_candidate_working_hour_uuidTocandidate_working_hour")
+
+  @@index([appeal_uuid], map: "idx-candidate_working_hour-appeal_uuid")
+  @@index([candidate_id], map: "idx-candidate_working_hour-candidate_id")
+  @@index([store_id], map: "idx-candidate_working_hour-store_id")
+}
+
+model candidate_working_hour_appeal {
+  appeal_uuid                                                                                              String                                  @id @db.Char(60)
+  candidate_working_hour_uuid                                                                              String                                  @db.Char(60)
+  candidate_id                                                                                             Int
+  reason                                                                                                   String?                                 @db.Text
+  status                                                                                                   Int                                     @default(0) @db.TinyInt
+  created_at                                                                                               DateTime?                               @db.DateTime(0)
+  updated_at                                                                                               DateTime?                               @db.DateTime(0)
+  candidate_notification                                                                                   candidate_notification[]
+  candidate_working_hour_candidate_working_hour_appeal_uuidTocandidate_working_hour_appeal                 candidate_working_hour[]                @relation("candidate_working_hour_appeal_uuidTocandidate_working_hour_appeal")
+  candidate                                                                                                candidate                               @relation(fields: [candidate_id], references: [candidate_id], onDelete: NoAction, onUpdate: NoAction, map: "fk-cwha-candidate_id")
+  candidate_working_hour_candidate_working_hour_appeal_candidate_working_hour_uuidTocandidate_working_hour candidate_working_hour                  @relation("candidate_working_hour_appeal_candidate_working_hour_uuidTocandidate_working_hour", fields: [candidate_working_hour_uuid], references: [candidate_working_hour_uuid], onDelete: NoAction, onUpdate: NoAction, map: "fk-cwha-candidate_working_hour_uuid")
+  candidate_working_hour_appeal_updates                                                                    candidate_working_hour_appeal_updates[]
+
+  @@index([candidate_id], map: "idx-cwha-candidate_id")
+  @@index([candidate_working_hour_uuid], map: "idx-cwha-candidate_working_hour_uuid")
+}
+
+model candidate_working_hour_appeal_updates {
+  appeal_update_uuid            String                        @id @db.Char(60)
+  appeal_uuid                   String                        @db.Char(60)
+  update                        String?                       @db.VarChar(255)
+  detail                        String?                       @db.Text
+  created_at                    DateTime?                     @db.DateTime(0)
+  updated_at                    DateTime?                     @db.DateTime(0)
+  created_by                    Int?
+  updated_by                    Int?
+  is_new                        Boolean?                      @default(true)
+  candidate_working_hour_appeal candidate_working_hour_appeal @relation(fields: [appeal_uuid], references: [appeal_uuid], onDelete: Cascade, map: "fk-candidate_working_hour_appeal_updates-appeal_uuid")
+
+  @@index([appeal_uuid], map: "idx-candidate_working_hour_appeal_updates-appeal_uuid")
+}
+
+model chat {
+  chat_uuid                               String         @id @db.Char(60)
+  candidate_id                            Int
+  company_id                              Int
+  parent_company_id                       Int?
+  store_id                                Int
+  staff_id                                Int?
+  contact_uuid                            String?        @db.Char(60)
+  created_at                              DateTime?      @db.DateTime(0)
+  updated_at                              DateTime?      @db.DateTime(0)
+  candidate                               candidate      @relation(fields: [candidate_id], references: [candidate_id], onDelete: Cascade, onUpdate: Restrict, map: "fk-chat-candidate_id")
+  company_chat_company_idTocompany        company        @relation("chat_company_idTocompany", fields: [company_id], references: [company_id], onDelete: Cascade, onUpdate: Restrict, map: "fk-chat-company_id")
+  contact                                 contact?       @relation(fields: [contact_uuid], references: [contact_uuid], onDelete: Cascade, onUpdate: Restrict, map: "fk-chat-contact_uuid")
+  company_chat_parent_company_idTocompany company?       @relation("chat_parent_company_idTocompany", fields: [parent_company_id], references: [company_id], onDelete: Cascade, onUpdate: Restrict, map: "fk-chat-parent_company_id")
+  staff                                   staff?         @relation(fields: [staff_id], references: [staff_id], onDelete: Cascade, onUpdate: Restrict, map: "fk-chat-staff_id")
+  store                                   store          @relation(fields: [store_id], references: [store_id], onDelete: Cascade, onUpdate: Restrict, map: "fk-chat-store_id")
+  chat_message                            chat_message[]
+
+  @@index([candidate_id], map: "idx-chat-candidate_id")
+  @@index([company_id], map: "idx-chat-company_id")
+  @@index([contact_uuid], map: "idx-chat-contact_uuid")
+  @@index([parent_company_id], map: "idx-chat-parent_company_id")
+  @@index([staff_id], map: "idx-chat-staff_id")
+  @@index([store_id], map: "idx-chat-store_id")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model chat_message {
+  chat_message_uuid String             @id @db.Char(60)
+  chat_uuid         String             @db.Char(60)
+  from              chat_message_from?
+  message           String             @db.Text
+  message_index     Int?
+  status            Boolean?           @default(false)
+  created_at        DateTime?          @db.DateTime(0)
+  updated_at        DateTime?          @db.DateTime(0)
+  chat              chat               @relation(fields: [chat_uuid], references: [chat_uuid], onDelete: Cascade, onUpdate: Restrict, map: "fk-chat_message-chat_uuid")
+
+  @@index([chat_uuid], map: "idx-chat_message-chat_uuid")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model company {
+  company_id                                                               Int                           @id @default(autoincrement())
+  parent_company_id                                                        Int?
+  staff_id                                                                 Int?
+  company_name                                                             String                        @db.VarChar(255)
+  company_common_name_en                                                   String?                       @db.VarChar(255)
+  company_common_name_ar                                                   String?                       @db.VarChar(255)
+  company_description_en                                                   String?                       @db.Text
+  company_description_ar                                                   String?                       @db.Text
+  company_website                                                          String?                       @db.Text
+  company_email                                                            String?                       @db.VarChar(225)
+  company_logo                                                             String?                       @db.VarChar(255)
+  commercial_licence                                                       String?                       @db.VarChar(255)
+  company_hourly_rate                                                      Decimal?                      @db.Decimal(10, 3)
+  company_bonus_commission                                                 Decimal?                      @db.Decimal(6, 3)
+  company_followup                                                         Boolean?                      @default(true)
+  total_candidate                                                          BigInt?                       @default(0)
+  no_of_active_requests                                                    Int?                          @default(0)
+  is_request_updates_in_30_days                                            Boolean?                      @default(false)
+  company_followup_interval_weeks                                          Int?                          @default(1) @db.SmallInt
+  company_last_followup_datetime                                           DateTime?                     @default(now()) @db.DateTime(0)
+  company_next_followup_datetime                                           DateTime?                     @default(now()) @db.DateTime(0)
+  company_approved_to_hire                                                 Boolean?                      @default(true)
+  company_status_override                                                  Boolean?                      @default(false)
+  company_created_at                                                       DateTime                      @db.DateTime(0)
+  company_updated_at                                                       DateTime                      @db.DateTime(0)
+  last_request_datetime                                                    DateTime?                     @db.DateTime(0)
+  last_payment_datetime                                                    DateTime?                     @db.DateTime(0)
+  deleted                                                                  Int                           @default(0) @db.SmallInt
+  country_id                                                               Int?
+  currency_code                                                            String?                       @default("KWD") @db.Char(3)
+  brand                                                                    brand[]
+  candidate_certificate_candidate_certificate_company_idTocompany          candidate_certificate[]       @relation("candidate_certificate_company_idTocompany")
+  candidate_certificate_candidate_certificate_parent_company_idTocompany   candidate_certificate[]       @relation("candidate_certificate_parent_company_idTocompany")
+  candidate_notification                                                   candidate_notification[]
+  candidate_work_history_candidate_work_history_company_idTocompany        candidate_work_history[]      @relation("candidate_work_history_company_idTocompany")
+  candidate_work_history_candidate_work_history_parent_company_idTocompany candidate_work_history[]      @relation("candidate_work_history_parent_company_idTocompany")
+  candidate_work_log_feedback                                              candidate_work_log_feedback[]
+  candidate_working_date                                                   candidate_working_date[]
+  chat_chat_company_idTocompany                                            chat[]                        @relation("chat_company_idTocompany")
+  chat_chat_parent_company_idTocompany                                     chat[]                        @relation("chat_parent_company_idTocompany")
+  country                                                                  country?                      @relation(fields: [country_id], references: [country_id], onDelete: Restrict, onUpdate: Restrict, map: "fk-company-country_id")
+  company                                                                  company?                      @relation("companyTocompany", fields: [parent_company_id], references: [company_id], onDelete: Cascade, onUpdate: Restrict, map: "fk-company-parent_company_id")
+  other_company                                                            company[]                     @relation("companyTocompany")
+  staff                                                                    staff?                        @relation(fields: [staff_id], references: [staff_id], onDelete: NoAction, onUpdate: Restrict, map: "fk-company-staff_id")
+  company_contact                                                          company_contact[]
+  company_stats                                                            company_stats[]
+  company_token                                                            company_token[]
+  contact_invitation                                                       contact_invitation[]
+  contract_contract_company_idTocompany                                    contract[]                    @relation("contract_company_idTocompany")
+  contract_contract_parent_company_idTocompany                             contract[]                    @relation("contract_parent_company_idTocompany")
+  discount                                                                 discount[]
+  file                                                                     file[]
+  firing_hitmap                                                            firing_hitmap[]
+  interview_evaluation                                                     interview_evaluation[]
+  invitation_invitation_invitation_created_by_companyTocompany             invitation[]                  @relation("invitation_invitation_created_by_companyTocompany")
+  invitation_invitation_invitation_updated_by_companyTocompany             invitation[]                  @relation("invitation_invitation_updated_by_companyTocompany")
+  note                                                                     note[]
+  request                                                                  request[]
+  store                                                                    store[]
+  store_manager                                                            store_manager[]
+  transfer                                                                 transfer[]
+  transfer_candidate                                                       transfer_candidate[]
+  transfer_cost                                                            transfer_cost[]
+
+  @@index([parent_company_id], map: "idx-company-parent_company_id")
+  @@index([staff_id], map: "idx-company-staff_id")
+  @@index([country_id], map: "ind-company-country_id")
+  @@index([currency_code], map: "ind-company-currency_code")
+}
+
+model company_contact {
+  company_contact_uuid String   @id @db.Char(60)
+  contact_uuid         String?  @db.Char(60)
+  company_id           Int?
+  contact_position     String?  @db.VarChar(100)
+  allow_access         Boolean? @default(false)
+  created_at           DateTime @db.DateTime(0)
+  updated_at           DateTime @db.DateTime(0)
+  created_by           String?  @db.Char(60)
+  updated_by           String?  @db.Char(60)
+  company              company? @relation(fields: [company_id], references: [company_id], onDelete: Cascade, onUpdate: Restrict, map: "fk-company_contact-company_id")
+  contact              contact? @relation(fields: [contact_uuid], references: [contact_uuid], onDelete: Cascade, onUpdate: Restrict, map: "fk-company_contact-contact_uuid")
+
+  @@index([company_id], map: "idx-company_contact-company_id")
+  @@index([contact_uuid], map: "idx-company_contact-contact_uuid")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model company_request {
+  company_request_uuid  String    @id @db.Char(60)
+  utm_uuid              String?   @db.Char(64)
+  contact_uuid          String?   @db.Char(60)
+  company_name          String    @db.VarChar(100)
+  company_email         String    @db.VarChar(255)
+  contact_position      String?   @db.VarChar(100)
+  contact_name          String    @db.VarChar(100)
+  contact_receive_email Boolean?  @default(true)
+  phone_number          String?   @db.VarChar(255)
+  requesting_for        String?   @db.VarChar(255)
+  contact_password_hash String?   @db.VarChar(255)
+  status                Boolean?  @default(false)
+  created_at            DateTime? @db.DateTime(0)
+  updated_at            DateTime? @db.DateTime(0)
+  currency_code         String?   @default("KWD") @db.Char(3)
+  country_id            Int?
+  contact               contact?  @relation(fields: [contact_uuid], references: [contact_uuid], onUpdate: Restrict, map: "fk-company_request-contact_uuid")
+  country               country?  @relation(fields: [country_id], references: [country_id], onDelete: Restrict, onUpdate: Restrict, map: "fk-company_request-country_id")
+  campaign              campaign? @relation(fields: [utm_uuid], references: [utm_uuid], onDelete: Restrict, onUpdate: Restrict, map: "fk-company_request-utm_uuid")
+
+  @@index([contact_uuid], map: "idx-company_request-contact_uuid")
+  @@index([country_id], map: "ind-company_request-country_id")
+  @@index([currency_code], map: "ind-company_request-currency_code")
+  @@index([utm_uuid], map: "ind-company_request-utm_uuid")
+}
+
+model company_stats {
+  cs_uuid       String   @id @db.Char(60)
+  company_id    Int?
+  total_revenue Decimal? @default(0.000) @db.Decimal(12, 3)
+  currency_code String?  @default("KWD") @db.Char(3)
+  created_at    DateTime @db.DateTime(0)
+  updated_at    DateTime @db.DateTime(0)
+  company       company? @relation(fields: [company_id], references: [company_id], onUpdate: Restrict, map: "fk-company_stats-company_id")
+
+  @@index([company_id], map: "idx-company_stats-company_id")
+  @@index([currency_code], map: "idx-company_stats-currency_code")
+}
+
+model company_token {
+  token_id                 Int       @id @default(autoincrement())
+  company_id               Int
+  token_value              String    @db.VarChar(255)
+  token_device             String?   @db.VarChar(255)
+  token_device_id          String?   @db.VarChar(255)
+  token_status             Int       @db.SmallInt
+  token_last_used_datetime DateTime? @db.DateTime(0)
+  token_expiry_datetime    DateTime? @db.DateTime(0)
+  total_attempt            Boolean?  @default(false)
+  otp                      String?   @db.Char(5)
+  ip_address               String?   @db.VarChar(45)
+  token_created_datetime   DateTime  @db.DateTime(0)
+  company                  company   @relation(fields: [company_id], references: [company_id], onDelete: Cascade, onUpdate: Restrict, map: "fk-company_token-company_id")
+
+  @@index([company_id], map: "idx-company_token-company_id")
+}
+
+model contact {
+  contact_uuid                 String                        @id @db.Char(60)
+  utm_uuid                     String?                       @db.Char(64)
+  contact_name                 String                        @db.VarChar(255)
+  contact_email                String?                       @unique(map: "contact_email") @db.VarChar(255)
+  contact_new_email            String?                       @db.VarChar(255)
+  contact_email_verification   Boolean?                      @default(false)
+  contact_email_verified_by    Int?
+  contact_limit_email          DateTime?                     @db.DateTime(0)
+  contact_password_hash        String?                       @db.VarChar(255)
+  contact_receive_email        Boolean?                      @default(true)
+  contact_auth_key             String?                       @db.VarChar(32)
+  contact_password_reset_token String?                       @unique(map: "contact_password_reset_token") @db.VarChar(255)
+  enable_two_step_auth         Boolean?                      @default(false)
+  contact_receive_notification Boolean?                      @default(true)
+  contact_receive_suggestions  Boolean?                      @default(true)
+  contact_status               Int?                          @default(10) @db.TinyInt
+  contact_created_at           DateTime                      @db.DateTime(0)
+  contact_updated_at           DateTime                      @db.DateTime(0)
+  ip_address                   String?                       @db.VarChar(45)
+  deleted                      Boolean?                      @default(false)
+  candidate_work_log_feedback  candidate_work_log_feedback[]
+  chat                         chat[]
+  company_contact              company_contact[]
+  company_request              company_request[]
+  staff                        staff?                        @relation(fields: [contact_email_verified_by], references: [staff_id], onDelete: Restrict, onUpdate: Restrict, map: "fk-contact-contact_email_verified_by")
+  campaign                     campaign?                     @relation(fields: [utm_uuid], references: [utm_uuid], onDelete: Restrict, onUpdate: Restrict, map: "fk-contact-utm_uuid")
+  contact_email_records        contact_email[]
+  contact_invitation           contact_invitation[]
+  contact_phone                contact_phone[]
+  contact_token                contact_token[]
+  note                         note[]
+  request                      request[]
+  request_interview            request_interview[]
+  store                        store[]
+
+  @@index([contact_email_verified_by], map: "ind-contact-contact_email_verified_by")
+  @@index([utm_uuid], map: "ind-contact-utm_uuid")
+}
+
+model contact_email {
+  email_uuid             String   @id @db.Char(60)
+  contact_uuid           String?  @db.Char(60)
+  email_address          String   @db.VarChar(255)
+  email_created_datetime DateTime @db.DateTime(0)
+  email_updated_datetime DateTime @db.DateTime(0)
+  contact                contact? @relation(fields: [contact_uuid], references: [contact_uuid], onDelete: Cascade, onUpdate: Restrict, map: "fk-company_contact_email-CASCADE")
+
+  @@index([contact_uuid], map: "idx-company_contact_email-contact_uuid")
+}
+
+model contact_email_verify_attempt {
+  ceva_uuid  String    @id @db.Char(60)
+  email      String?   @db.VarChar(50)
+  code       String?   @db.VarChar(60)
+  ip_address String?   @db.VarChar(45)
+  created_at DateTime? @db.DateTime(0)
+}
+
+model contact_invitation {
+  contact_invitation_uuid String    @id @db.Char(60)
+  contact_uuid            String?   @db.Char(60)
+  company_id              Int?
+  email_to_invite         String    @db.VarChar(255)
+  role                    String?   @default("Owner") @db.Char(10)
+  otp                     String?   @unique(map: "otp") @db.VarChar(60)
+  accepted                Boolean?
+  is_deleted              Int?      @default(0) @db.TinyInt
+  created_at              DateTime? @db.DateTime(0)
+  updated_at              DateTime? @db.DateTime(0)
+  company                 company?  @relation(fields: [company_id], references: [company_id], onUpdate: Restrict, map: "fk-contact_invitation-company_id")
+  contact                 contact?  @relation(fields: [contact_uuid], references: [contact_uuid], onUpdate: Restrict, map: "fk-contact_invitation-contact_uuid")
+
+  @@index([company_id], map: "idx-contact_invitation-company_id")
+  @@index([contact_uuid], map: "idx-contact_invitation-contact_uuid")
+}
+
+model contact_phone {
+  phone_uuid             String   @id @db.Char(60)
+  contact_uuid           String?  @db.Char(60)
+  phone_number           String   @db.VarChar(255)
+  phone_created_datetime DateTime @db.DateTime(0)
+  phone_updated_datetime DateTime @db.DateTime(0)
+  contact                contact? @relation(fields: [contact_uuid], references: [contact_uuid], onDelete: Cascade, onUpdate: Restrict, map: "fk-company_contact_phone-CASCADE")
+
+  @@index([contact_uuid], map: "idx-company_contact_phone-contact_uuid")
+}
+
+model contact_token {
+  token_id                 Int       @id @default(autoincrement())
+  contact_uuid             String    @db.Char(60)
+  token_value              String    @db.VarChar(255)
+  token_device             String?   @db.VarChar(255)
+  token_device_id          String?   @db.VarChar(255)
+  token_status             Int       @db.SmallInt
+  token_last_used_datetime DateTime? @db.DateTime(0)
+  token_expiry_datetime    DateTime? @db.DateTime(0)
+  total_attempt            Boolean?  @default(false)
+  otp                      String?   @db.Char(5)
+  ip_address               String?   @db.VarChar(45)
+  token_created_datetime   DateTime  @db.DateTime(0)
+  contact                  contact   @relation(fields: [contact_uuid], references: [contact_uuid], onUpdate: Restrict, map: "fk-contact_token-contact_uuid")
+
+  @@index([contact_uuid], map: "idx-contact_token-contact_uuid")
+}
+
+model contract {
+  contract_uuid                               String                    @id @db.Char(60)
+  candidate_id                                Int?
+  parent_company_id                           Int?
+  store_id                                    Int?
+  company_id                                  Int
+  type                                        String                    @db.VarChar(255)
+  detail                                      String?                   @db.Text
+  start_date                                  DateTime?                 @db.DateTime(0)
+  end_date                                    DateTime?                 @db.DateTime(0)
+  transfer_cost                               Decimal?                  @default(0.000) @db.Decimal(12, 3)
+  currency_code                               String?                   @default("KWD") @db.Char(3)
+  status                                      Int                       @default(0) @db.TinyInt
+  created_by                                  Int?
+  created_at                                  DateTime?                 @db.DateTime(0)
+  updated_at                                  DateTime?                 @db.DateTime(0)
+  deleted                                     Boolean?                  @default(false)
+  auto_generate                               Boolean?                  @default(false)
+  candidate                                   candidate?                @relation(fields: [candidate_id], references: [candidate_id], onDelete: Cascade, onUpdate: NoAction, map: "fk-contract-candidate_id")
+  company_contract_company_idTocompany        company                   @relation("contract_company_idTocompany", fields: [company_id], references: [company_id], onUpdate: Restrict, map: "fk-contract-company_id")
+  staff                                       staff?                    @relation(fields: [created_by], references: [staff_id], onDelete: Restrict, onUpdate: Restrict, map: "fk-contract-created_by")
+  company_contract_parent_company_idTocompany company?                  @relation("contract_parent_company_idTocompany", fields: [parent_company_id], references: [company_id], onDelete: Cascade, onUpdate: NoAction, map: "fk-contract-parent_company_id")
+  store                                       store?                    @relation(fields: [store_id], references: [store_id], onDelete: Cascade, onUpdate: NoAction, map: "fk-contract-store_id")
+  fixed_price_contract                        fixed_price_contract[]
+  hourly_contract                             hourly_contract[]
+  monthly_salary_contract                     monthly_salary_contract[]
+  transfer                                    transfer[]
+  transfer_candidate                          transfer_candidate[]
+
+  @@index([candidate_id], map: "idx-contract-candidate_id")
+  @@index([company_id], map: "idx-contract-company_id")
+  @@index([created_by], map: "idx-contract-created_by")
+  @@index([parent_company_id], map: "idx-contract-parent_company_id")
+  @@index([store_id], map: "idx-contract-store_id")
+}
+
+model country {
+  country_id                                  Int               @id @default(autoincrement())
+  country_name_en                             String            @db.VarChar(100)
+  country_name_ar                             String?           @db.VarChar(100)
+  country_nationality_name_en                 String            @db.VarChar(100)
+  country_nationality_name_ar                 String?           @db.VarChar(100)
+  country_from_google_map                     Boolean?          @default(false)
+  iso                                         String?           @db.Char(3)
+  emoji                                       String?           @db.VarChar(255)
+  country_code                                Int?              @db.SmallInt
+  currency_code                               String?           @db.Char(3)
+  area                                        area[]
+  candidate                                   candidate[]
+  company                                     company[]
+  company_request                             company_request[]
+  fulltimer_fulltimer_country_idTocountry     fulltimer[]       @relation("fulltimer_country_idTocountry")
+  fulltimer_fulltimer_nationality_idTocountry fulltimer[]       @relation("fulltimer_nationality_idTocountry")
+  request                                     request[]
+}
+
+model cron_log {
+  id          Int       @id @default(autoincrement())
+  task        String    @db.VarChar(255)
+  last_ran_at DateTime? @db.DateTime(0)
+  last_output String?   @db.Text
+}
+
+model currency {
+  currency_id     Int       @id @default(autoincrement())
+  title           String    @db.VarChar(255)
+  code            String    @db.VarChar(255)
+  currency_symbol String?   @db.VarChar(255)
+  rate            Float?
+  decimal_place   Boolean?
+  sort_order      Int?      @db.SmallInt
+  status          Boolean?
+  datetime        DateTime? @db.DateTime(0)
+}
+
+model daily_standup_answer {
+  answer_uuid            String                  @id @db.Char(60)
+  staff_id               Int?
+  question_uuid          String?                 @db.Char(60)
+  question               String?                 @db.VarChar(255)
+  answer                 String?                 @db.Text
+  created_at             DateTime                @db.DateTime(0)
+  updated_at             DateTime                @db.DateTime(0)
+  daily_standup_question daily_standup_question? @relation(fields: [question_uuid], references: [question_uuid], onDelete: Restrict, onUpdate: Restrict, map: "fk-daily_standup_answer-question_uuid")
+  staff                  staff?                  @relation(fields: [staff_id], references: [staff_id], onDelete: Restrict, onUpdate: Restrict, map: "fk-daily_standup_answer-staff_id")
+
+  @@index([question_uuid], map: "idx-daily_standup_answer-question_uuid")
+  @@index([staff_id], map: "idx-daily_standup_answer-staff_id")
+}
+
+model daily_standup_question {
+  question_uuid        String                 @id @db.Char(60)
+  question             String?                @db.VarChar(255)
+  created_at           DateTime               @db.DateTime(0)
+  updated_at           DateTime               @db.DateTime(0)
+  daily_standup_answer daily_standup_answer[]
+}
+
+model degree {
+  degree_uuid         String                @id @db.Char(60)
+  degree_group_uuid   String?               @db.Char(60)
+  degree_name_en      String                @db.VarChar(255)
+  degree_name_ar      String?               @db.VarChar(255)
+  degree_sort_order   Int?                  @default(0)
+  degree_created_at   DateTime?             @db.DateTime(0)
+  degree_updated_at   DateTime?             @db.DateTime(0)
+  candidate_education candidate_education[]
+  degree_group        degree_group?         @relation(fields: [degree_group_uuid], references: [degree_group_uuid], onUpdate: Restrict, map: "fk-degree-degree_group_uuid")
+
+  @@index([degree_group_uuid], map: "idx-degree-degree_group_uuid")
+}
+
+model degree_group {
+  degree_group_uuid       String    @id @db.Char(60)
+  degree_group_name_en    String    @db.VarChar(255)
+  degree_group_name_ar    String?   @db.VarChar(255)
+  degree_group_sort_order Int?      @default(0)
+  skip_major              Int?      @db.TinyInt
+  degree_group_created_at DateTime? @db.DateTime(0)
+  degree_group_updated_at DateTime? @db.DateTime(0)
+  degree                  degree[]
+}
+
+model discount {
+  discount_uuid     String            @id @db.Char(60)
+  category_id       Int
+  company_id        Int
+  store_id          Int?
+  description_en    String            @db.Text
+  description_ar    String            @db.Text
+  how_to_apply_en   String?           @db.Text
+  how_to_apply_ar   String?           @db.Text
+  image             String?           @db.VarChar(255)
+  valid_until       DateTime?         @db.DateTime(0)
+  created_at        DateTime?         @db.DateTime(0)
+  updated_at        DateTime?         @db.DateTime(0)
+  discount_category discount_category @relation(fields: [category_id], references: [category_id], onUpdate: Restrict, map: "fk-discount-category_id")
+  company           company           @relation(fields: [company_id], references: [company_id], onUpdate: Restrict, map: "fk-discount-company_id")
+  store             store?            @relation(fields: [store_id], references: [store_id], onDelete: Restrict, onUpdate: Restrict, map: "fk-discount-store_id")
+
+  @@index([category_id], map: "idx-discount-category_id")
+  @@index([company_id], map: "idx-discount-company_id")
+  @@index([store_id], map: "idx-discount-store_id")
+}
+
+model discount_category {
+  category_id Int        @id @default(autoincrement())
+  name_en     String     @db.VarChar(255)
+  name_ar     String?    @db.VarChar(255)
+  image       String?    @db.VarChar(255)
+  created_at  DateTime?  @db.DateTime(0)
+  updated_at  DateTime?  @db.DateTime(0)
+  discount    discount[]
+}
+
+model email_campaign {
+  campaign_uuid          String                  @id @db.Char(60)
+  subject                String?                 @db.VarChar(255)
+  message                String?                 @db.Text
+  progress               Int?                    @default(0)
+  trigger_date_time      DateTime?               @db.DateTime(0)
+  last_trigger_date_time DateTime?               @db.DateTime(0)
+  is_recurring           Boolean?                @default(false)
+  trigger_period         Int?
+  target                 String?                 @default("both") @db.VarChar(10)
+  status                 Boolean?                @default(false)
+  created_at             DateTime?               @db.DateTime(0)
+  updated_at             DateTime?               @db.DateTime(0)
+  email_campaign_filter  email_campaign_filter[]
+}
+
+model email_campaign_filter {
+  cf_uuid        String         @id @db.Char(60)
+  campaign_uuid  String         @db.Char(60)
+  param          String?        @db.VarChar(50)
+  value          String?        @db.VarChar(100)
+  email_campaign email_campaign @relation(fields: [campaign_uuid], references: [campaign_uuid], onDelete: Cascade, onUpdate: Restrict, map: "fk-email_campaign_filter-customer_id")
+
+  @@index([campaign_uuid], map: "ind-email_campaign_filter-campaign_uuid")
+}
+
+model exam {
+  exam_uuid             String                  @id @db.Char(60)
+  title_en              String                  @db.VarChar(255)
+  title_ar              String?                 @db.VarChar(255)
+  description_en        String?                 @db.VarChar(255)
+  description_ar        String?                 @db.VarChar(255)
+  staff_id              Int?
+  is_deleted            Boolean?                @default(false)
+  created_at            DateTime?               @db.DateTime(0)
+  updated_at            DateTime?               @db.DateTime(0)
+  candidate_certificate candidate_certificate[]
+  exam_question         exam_question[]
+  exam_question_answer  exam_question_answer[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model exam_question {
+  question_uuid            String                 @id @db.Char(60)
+  exam_uuid                String?                @db.Char(60)
+  question_type            Int?                   @db.TinyInt
+  question_en              String                 @db.VarChar(255)
+  question_ar              String?                @db.VarChar(255)
+  question_file_extensions String?                @db.VarChar(255)
+  question_file_maxsize    Int?
+  staff_id                 Int?
+  question_sort_order      Int?
+  is_deleted               Boolean?               @default(false)
+  created_at               DateTime?              @db.DateTime(0)
+  updated_at               DateTime?              @db.DateTime(0)
+  exam                     exam?                  @relation(fields: [exam_uuid], references: [exam_uuid], onDelete: Restrict, onUpdate: Restrict, map: "fk-exam_question-exam_uuid")
+  staff                    staff?                 @relation(fields: [staff_id], references: [staff_id], onDelete: Restrict, onUpdate: Restrict, map: "fk-exam_question-staff_id")
+  exam_question_answer     exam_question_answer[]
+  exam_question_choice     exam_question_choice[]
+
+  @@index([exam_uuid], map: "idx-exam_question-exam_uuid")
+  @@index([staff_id], map: "idx-exam_question-staff_id")
+}
+
+model exam_question_answer {
+  answer_uuid   String         @id @db.Char(60)
+  exam_uuid     String?        @db.Char(60)
+  candidate_id  Int
+  question_uuid String?        @db.Char(60)
+  question_type Int?           @db.TinyInt
+  question_en   String         @db.VarChar(255)
+  question_ar   String?        @db.VarChar(255)
+  answer        String?        @db.VarChar(255)
+  is_deleted    Boolean?       @default(false)
+  created_at    DateTime?      @db.DateTime(0)
+  updated_at    DateTime?      @db.DateTime(0)
+  candidate     candidate      @relation(fields: [candidate_id], references: [candidate_id], onUpdate: Restrict, map: "fk-exam_question_answer-candidate_id")
+  exam          exam?          @relation(fields: [exam_uuid], references: [exam_uuid], onDelete: Restrict, onUpdate: Restrict, map: "fk-exam_question_answer-exam_uuid")
+  exam_question exam_question? @relation(fields: [question_uuid], references: [question_uuid], onDelete: Restrict, onUpdate: Restrict, map: "fk-exam_question_answer-question_uuid")
+
+  @@index([candidate_id], map: "idx-exam_question_answer-candidate_id")
+  @@index([exam_uuid], map: "idx-exam_question_answer-exam_uuid")
+  @@index([question_uuid], map: "idx-exam_question_answer-question_uuid")
+}
+
+model exam_question_choice {
+  choice_uuid       String         @id @db.Char(60)
+  question_uuid     String?        @db.Char(60)
+  choice_value_en   String         @db.VarChar(255)
+  choice_value_ar   String?        @db.VarChar(255)
+  choice_sort_order Int?
+  is_deleted        Boolean?       @default(false)
+  created_at        DateTime?      @db.DateTime(0)
+  updated_at        DateTime?      @db.DateTime(0)
+  exam_question     exam_question? @relation(fields: [question_uuid], references: [question_uuid], onDelete: Restrict, onUpdate: Restrict, map: "fk-exam_question_choice-question_uuid")
+
+  @@index([question_uuid], map: "idx-exam_question_choice-question_uuid")
+}
+
+model expense {
+  expense_uuid                    String    @id @db.Char(60)
+  title                           String    @db.VarChar(128)
+  type                            String    @db.VarChar(128)
+  detail                          String?   @db.Text
+  amount                          Decimal?  @db.Decimal(10, 3)
+  transaction_datetime            DateTime? @db.DateTime(0)
+  created_by                      Int?
+  updated_by                      Int?
+  created_at                      DateTime? @db.DateTime(0)
+  updated_at                      DateTime? @db.DateTime(0)
+  admin_expense_created_byToadmin admin?    @relation("expense_created_byToadmin", fields: [created_by], references: [admin_id], onUpdate: Restrict, map: "fk-expense-created_by")
+  admin_expense_updated_byToadmin admin?    @relation("expense_updated_byToadmin", fields: [updated_by], references: [admin_id], onUpdate: Restrict, map: "fk-expense-updated_by")
+
+  @@index([created_by], map: "idx-expense-created_by")
+  @@index([updated_by], map: "idx-expense-updated_by")
+}
+
+model file {
+  file_uuid             String   @id @db.Char(60)
+  company_id            Int?
+  file_title            String   @db.VarChar(255)
+  file_description      String?  @db.Text
+  file_name             String?  @db.VarChar(255)
+  file_type             String?  @db.VarChar(100)
+  file_size             Int?
+  file_s3_path          String?  @db.VarChar(225)
+  file_created_datetime DateTime @db.DateTime(0)
+  company               company? @relation(fields: [company_id], references: [company_id], onDelete: Cascade, onUpdate: Restrict, map: "fk-file-company_id")
+
+  @@index([company_id], map: "idx-file-company_id")
+}
+
+model firing_hitmap {
+  fh_uuid      String    @id @db.Char(60)
+  company_id   Int
+  firing_month Int       @db.TinyInt
+  firing_year  Int       @db.SmallInt
+  total        Int?      @default(0)
+  is_alerted   Boolean?  @default(false)
+  created_at   DateTime? @db.DateTime(0)
+  updated_at   DateTime? @db.DateTime(0)
+  company      company   @relation(fields: [company_id], references: [company_id], onUpdate: Restrict, map: "fk-firing_hitmap-company_id")
+
+  @@index([company_id], map: "idx-firing_hitmap-company_id")
+}
+
+model fixed_price_contract {
+  fp_contract_uuid      String   @id @db.Char(60)
+  contract_uuid         String   @db.Char(60)
+  candidate_total       Decimal  @db.Decimal(12, 3)
+  company_total         Decimal  @db.Decimal(12, 3)
+  completion_percentage Int?     @db.TinyInt
+  contract              contract @relation(fields: [contract_uuid], references: [contract_uuid], onUpdate: Restrict, map: "fk-fixed_price_contract-contract_uuid")
+
+  @@index([contract_uuid], map: "idx-fixed_price_contract-contract_uuid")
+}
+
+model fulltimer {
+  fulltimer_uuid                            String                 @id @db.Char(60)
+  nationality_id                            Int?
+  country_id                                Int?
+  university_id                             Int?
+  fulltimer_employed                        Boolean?
+  fulltimer_gender                          Boolean?
+  fulltimer_birth_date                      DateTime?              @db.Date
+  fulltimer_driving_license                 Boolean?
+  fulltimer_area_uuid                       String?                @db.Char(60)
+  fulltimer_latitude                        Decimal?               @db.Decimal(9, 6)
+  fulltimer_longitude                       Decimal?               @db.Decimal(9, 6)
+  fulltimer_name                            String                 @db.VarChar(255)
+  fulltimer_phone                           String?                @db.VarChar(255)
+  fulltimer_email                           String                 @unique(map: "fulltimer_email") @db.VarChar(255)
+  fulltimer_current_salary                  String?                @db.VarChar(100)
+  fulltimer_expected_salary                 String?                @db.VarChar(100)
+  fulltimer_pdf_cv                          String?                @db.VarChar(255)
+  fulltimer_created_datetime                DateTime               @db.DateTime(0)
+  fulltimer_updated_datetime                DateTime               @db.DateTime(0)
+  ip_address                                String?                @db.VarChar(45)
+  currency_code                             String?                @default("KWD") @db.Char(3)
+  country_fulltimer_country_idTocountry     country?               @relation("fulltimer_country_idTocountry", fields: [country_id], references: [country_id], onDelete: Restrict, onUpdate: Restrict, map: "fk-fulltimer-country_id")
+  area                                      area?                  @relation(fields: [fulltimer_area_uuid], references: [area_uuid], onDelete: Restrict, onUpdate: Restrict, map: "fk-fulltimer-fulltimer_area_uuid")
+  country_fulltimer_nationality_idTocountry country?               @relation("fulltimer_nationality_idTocountry", fields: [nationality_id], references: [country_id], onDelete: Cascade, onUpdate: Restrict, map: "fk-fulltimer-nationality_id")
+  university                                university?            @relation(fields: [university_id], references: [university_id], onUpdate: Restrict, map: "fk-fulltimer-university_id")
+  fulltimer_experience                      fulltimer_experience[]
+  fulltimer_skill                           fulltimer_skill[]
+  fulltimer_tags                            fulltimer_tags[]
+  note                                      note[]
+  request_application                       request_application[]
+  request_interview                         request_interview[]
+  suggestion                                suggestion[]
+
+  @@index([country_id], map: "idx-fulltimer-country_id")
+  @@index([fulltimer_area_uuid], map: "idx-fulltimer-fulltimer_area_uuid")
+  @@index([nationality_id], map: "idx-fulltimer-nationality_id")
+  @@index([university_id], map: "idx-fulltimer-university_id")
+}
+
+model fulltimer_experience {
+  fulltimer_experience_id         Int        @id @default(autoincrement())
+  fulltimer_uuid                  String?    @db.Char(60)
+  experience                      String     @db.VarChar(128)
+  fulltimer_experience_created_at DateTime?  @db.DateTime(0)
+  deleted                         Int        @default(0) @db.SmallInt
+  fulltimer                       fulltimer? @relation(fields: [fulltimer_uuid], references: [fulltimer_uuid], onDelete: Cascade, onUpdate: Restrict, map: "fk-fulltimer_experience-fulltimer_uuid")
+
+  @@index([fulltimer_uuid], map: "idx-fulltimer_experience-fulltimer_uuid")
+}
+
+model fulltimer_skill {
+  fulltimer_skill_id         Int        @id @default(autoincrement())
+  fulltimer_uuid             String?    @db.Char(60)
+  skill                      String     @db.VarChar(128)
+  fulltimer_skill_created_at DateTime?  @db.DateTime(0)
+  deleted                    Int        @default(0) @db.SmallInt
+  fulltimer                  fulltimer? @relation(fields: [fulltimer_uuid], references: [fulltimer_uuid], onDelete: Cascade, onUpdate: Restrict, map: "fk-fulltimer_skill-fulltimer_uuid")
+
+  @@index([fulltimer_uuid], map: "idx-fulltimer_skill-fulltimer_uuid")
+}
+
+model fulltimer_tags {
+  fulltimer_tags_id Int       @id @default(autoincrement())
+  fulltimer_uuid    String    @db.Char(60)
+  tag               String?   @db.VarChar(255)
+  fulltimer         fulltimer @relation(fields: [fulltimer_uuid], references: [fulltimer_uuid], onUpdate: Restrict, map: "fk-fulltimer_tags-fulltimer_uuid")
+
+  @@index([fulltimer_uuid], map: "idx-fulltimer_tags-fulltimer_uuid")
+}
+
+model hourly_contract {
+  h_contract_uuid       String   @id @db.Char(60)
+  contract_uuid         String   @db.Char(60)
+  candidate_hourly_rate Decimal  @db.Decimal(12, 3)
+  company_hourly_rate   Decimal  @db.Decimal(12, 3)
+  contract              contract @relation(fields: [contract_uuid], references: [contract_uuid], onUpdate: Restrict, map: "fk-hourly_contract-contract_uuid")
+
+  @@index([contract_uuid], map: "idx-hourly_contract-contract_uuid")
+}
+
+model inspector {
+  inspector_uuid                 String            @id @db.Char(60)
+  inspector_name                 String            @db.VarChar(255)
+  inspector_email                String            @db.VarChar(255)
+  inspector_auth_key             String            @db.VarChar(32)
+  inspector_password_hash        String            @db.VarChar(255)
+  inspector_password_reset_token String?           @db.VarChar(255)
+  enable_two_step_auth           Boolean?          @default(false)
+  inspector_status               Int               @default(10) @db.SmallInt
+  inspector_deleted              Int               @default(0) @db.SmallInt
+  inspector_created_at           DateTime          @db.DateTime(0)
+  inspector_updated_at           DateTime          @db.DateTime(0)
+  ip_address                     String?           @db.VarChar(45)
+  inspector_token                inspector_token[]
+
+  @@unique([inspector_email, inspector_deleted], map: "idx-inspector-inspector_email")
+  @@unique([inspector_password_reset_token, inspector_deleted], map: "idx-inspector-inspector_password_reset_token")
+}
+
+model inspector_token {
+  token_uuid               String    @id @db.Char(60)
+  inspector_uuid           String    @db.Char(60)
+  token_value              String    @db.VarChar(255)
+  token_device             String?   @db.VarChar(255)
+  token_device_id          String?   @db.VarChar(255)
+  token_status             Int       @db.SmallInt
+  token_last_used_datetime DateTime? @db.DateTime(0)
+  token_expiry_datetime    DateTime? @db.DateTime(0)
+  total_attempt            Boolean?  @default(false)
+  otp                      String?   @db.Char(5)
+  ip_address               String?   @db.VarChar(45)
+  token_created_datetime   DateTime  @db.DateTime(0)
+  inspector                inspector @relation(fields: [inspector_uuid], references: [inspector_uuid], onDelete: Cascade, onUpdate: Restrict, map: "fk-inspector_token-inspector_uuid")
+
+  @@index([inspector_uuid], map: "idx-inspector_token-inspector_uuid")
+}
+
+model interview_evaluation {
+  interview_evaluation_uuid         String                              @id @db.Char(60)
+  request_uuid                      String?                             @db.Char(60)
+  company_id                        Int?
+  candidate_id                      Int
+  staff_id                          Int?
+  created_at                        DateTime?                           @db.DateTime(0)
+  updated_at                        DateTime?                           @db.DateTime(0)
+  candidate                         candidate                           @relation(fields: [candidate_id], references: [candidate_id], onDelete: Cascade, onUpdate: Restrict, map: "fk-interview_evaluation-candidate_id")
+  company                           company?                            @relation(fields: [company_id], references: [company_id], onDelete: Cascade, onUpdate: Restrict, map: "fk-interview_evaluation-company_id")
+  request                           request?                            @relation(fields: [request_uuid], references: [request_uuid], onDelete: Cascade, onUpdate: Restrict, map: "fk-interview_evaluation-request_uuid")
+  staff                             staff?                              @relation(fields: [staff_id], references: [staff_id], onDelete: Restrict, onUpdate: Restrict, map: "fk-interview_evaluation-staff_id")
+  interview_evaluation_note_version interview_evaluation_note_version[]
+  note                              note[]
+
+  @@index([candidate_id], map: "idx-interview_evaluation-candidate_id")
+  @@index([company_id], map: "idx-interview_evaluation-company_id")
+  @@index([request_uuid], map: "idx-interview_evaluation-request_uuid")
+  @@index([staff_id], map: "idx-interview_evaluation-staff_id")
+  @@index([interview_evaluation_uuid], map: "idx-note-interview_evaluation_uuid")
+}
+
+model interview_evaluation_note {
+  ien_uuid  String  @id @db.Char(60)
+  ienv_uuid String? @db.Char(60)
+  note      String? @db.Text
+}
+
+model interview_evaluation_note_version {
+  ienv_uuid                 String                @id @db.Char(60)
+  interview_evaluation_uuid String?               @db.Char(60)
+  version                   Int?                  @default(1) @db.TinyInt
+  staff_id                  Int?
+  created_at                DateTime?             @db.DateTime(0)
+  updated_at                DateTime?             @db.DateTime(0)
+  interview_evaluation      interview_evaluation? @relation(fields: [interview_evaluation_uuid], references: [interview_evaluation_uuid], onDelete: Cascade, onUpdate: Restrict, map: "fk-interview_evaluation_note_version-interview_evaluation_uuid")
+  staff                     staff?                @relation(fields: [staff_id], references: [staff_id], onDelete: Restrict, onUpdate: Restrict, map: "fk-interview_evaluation_note_version-staff_id")
+
+  @@index([interview_evaluation_uuid], map: "idx-interview_evaluation_note_version-interview_evaluation_uuid")
+  @@index([staff_id], map: "idx-interview_evaluation_note_version-staff_id")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model invitation {
+  invitation_uuid                                           String                   @id @db.Char(60)
+  candidate_id                                              Int?
+  request_uuid                                              String                   @db.Char(60)
+  story_uuid                                                String?                  @db.Char(60)
+  invitation_status                                         Int?                     @default(0) @db.TinyInt
+  invitation_app_seen_at                                    DateTime?                @db.DateTime(0)
+  invitation_email_seen_at                                  DateTime?                @db.DateTime(0)
+  invitation_seen_in                                        Int?
+  invitation_seen_via                                       String?                  @db.VarChar(10)
+  invitation_created_by_staff                               Int?
+  invitation_updated_by_staff                               Int?
+  invitation_created_by_company                             Int?
+  invitation_updated_by_company                             Int?
+  invitation_created_at                                     DateTime?                @db.DateTime(0)
+  invitation_updated_at                                     DateTime?                @db.DateTime(0)
+  job_interest_uuid                                         String?                  @db.Char(60)
+  candidate_notification                                    candidate_notification[]
+  candidate                                                 candidate?               @relation(fields: [candidate_id], references: [candidate_id], onDelete: Restrict, onUpdate: Restrict, map: "fk-invitation-candidate_id")
+  company_invitation_invitation_created_by_companyTocompany company?                 @relation("invitation_invitation_created_by_companyTocompany", fields: [invitation_created_by_company], references: [company_id], onDelete: Restrict, onUpdate: Restrict, map: "fk-invitation-invitation_created_by_company")
+  staff_invitation_invitation_created_by_staffTostaff       staff?                   @relation("invitation_invitation_created_by_staffTostaff", fields: [invitation_created_by_staff], references: [staff_id], onDelete: Restrict, onUpdate: Restrict, map: "fk-invitation-invitation_created_by_staff")
+  company_invitation_invitation_updated_by_companyTocompany company?                 @relation("invitation_invitation_updated_by_companyTocompany", fields: [invitation_updated_by_company], references: [company_id], onDelete: Restrict, onUpdate: Restrict, map: "fk-invitation-invitation_updated_by_company")
+  staff_invitation_invitation_updated_by_staffTostaff       staff?                   @relation("invitation_invitation_updated_by_staffTostaff", fields: [invitation_updated_by_staff], references: [staff_id], onDelete: Restrict, onUpdate: Restrict, map: "fk-invitation-invitation_updated_by_staff")
+  job_interest                                              job_interest?            @relation(fields: [job_interest_uuid], references: [job_interest_uuid], onDelete: NoAction, onUpdate: NoAction, map: "fk-invitation-job_interest_uuid")
+  request                                                   request                  @relation(fields: [request_uuid], references: [request_uuid], onUpdate: Restrict, map: "fk-invitation-request_uuid")
+  story                                                     story?                   @relation(fields: [story_uuid], references: [story_uuid], onDelete: Restrict, onUpdate: Restrict, map: "fk-invitation-story_uuid")
+  note                                                      note[]
+
+  @@index([candidate_id], map: "idx-invitation-candidate_id")
+  @@index([invitation_created_by_company], map: "idx-invitation-invitation_created_by_company")
+  @@index([invitation_created_by_staff], map: "idx-invitation-invitation_created_by_staff")
+  @@index([invitation_updated_by_company], map: "idx-invitation-invitation_updated_by_company")
+  @@index([invitation_updated_by_staff], map: "idx-invitation-invitation_updated_by_staff")
+  @@index([job_interest_uuid], map: "idx-invitation-job_interest_uuid")
+  @@index([request_uuid], map: "idx-invitation-request_uuid")
+  @@index([story_uuid], map: "idx-invitation-story_uuid")
+}
+
+model invoice {
+  invoice_id     Int                     @id @default(autoincrement())
+  transfer_id    Int?
+  invoice_date   DateTime?               @db.Date
+  invoice_status invoice_invoice_status?
+  deleted        Int                     @default(0) @db.SmallInt
+  transfer       transfer?               @relation(fields: [transfer_id], references: [transfer_id], onUpdate: Restrict, map: "fk-invoice-transfer_id")
+
+  @@index([transfer_id], map: "idx-invoice-transfer_id")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model job {
+  job_uuid                    String                   @id @db.Char(60)
+  story_uuid                  String                   @db.Char(60)
+  request_uuid                String                   @db.Char(60)
+  area_uuid                   String?                  @db.Char(60)
+  position                    String                   @db.VarChar(255)
+  position_ar                 String?                  @db.VarChar(255)
+  description                 String?                  @db.Text
+  description_ar              String?                  @db.Text
+  hours_per_day               Int?                     @db.TinyInt
+  days_per_week               Boolean?
+  compensation_type           job_compensation_type?
+  compensation_amount         String?                  @db.VarChar(255)
+  compensation_description    String?                  @db.Text
+  compensation_description_ar String?                  @db.Text
+  min_age                     Int?                     @db.TinyInt
+  max_age                     Int?                     @db.TinyInt
+  gender                      Boolean?
+  available_from              DateTime?                @db.DateTime(0)
+  available_to                DateTime?                @db.DateTime(0)
+  status                      Boolean?                 @default(false)
+  created_at                  DateTime?                @db.DateTime(0)
+  updated_at                  DateTime?                @db.DateTime(0)
+  deleted_at                  DateTime?                @db.DateTime(0)
+  created_by                  Int?
+  updated_by                  Int?
+  deleted_by                  Int?
+  candidate_notification      candidate_notification[]
+  area                        area?                    @relation(fields: [area_uuid], references: [area_uuid], onDelete: NoAction, onUpdate: NoAction, map: "fk-job-area_uuid")
+  staff_job_created_byTostaff staff?                   @relation("job_created_byTostaff", fields: [created_by], references: [staff_id], onDelete: NoAction, onUpdate: NoAction, map: "fk-job-created_by")
+  staff_job_deleted_byTostaff staff?                   @relation("job_deleted_byTostaff", fields: [deleted_by], references: [staff_id], onDelete: NoAction, onUpdate: NoAction, map: "fk-job-deleted_by")
+  request                     request                  @relation(fields: [request_uuid], references: [request_uuid], onDelete: Cascade, onUpdate: NoAction, map: "fk-job-request_uuid")
+  story                       story                    @relation(fields: [story_uuid], references: [story_uuid], onDelete: NoAction, onUpdate: NoAction, map: "fk-job-story_uuid")
+  staff_job_updated_byTostaff staff?                   @relation("job_updated_byTostaff", fields: [updated_by], references: [staff_id], onDelete: NoAction, onUpdate: NoAction, map: "fk-job-updated_by")
+  job_interest                job_interest[]
+  job_skills                  job_skills[]
+
+  @@index([area_uuid], map: "idx-job-area_uuid")
+  @@index([created_by], map: "idx-job-created_by")
+  @@index([deleted_by], map: "idx-job-deleted_by")
+  @@index([request_uuid], map: "idx-job-request_uuid")
+  @@index([story_uuid], map: "idx-job-story_uuid")
+  @@index([updated_by], map: "idx-job-updated_by")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model job_interest {
+  job_interest_uuid      String                   @id @db.Char(60)
+  candidate_id           Int
+  job_uuid               String                   @db.Char(60)
+  status                 String?                  @default("PENDING") @db.VarChar(255)
+  notes                  String?                  @db.Text
+  seen_at                DateTime?                @db.DateTime(0)
+  created_at             DateTime?                @db.DateTime(0)
+  updated_at             DateTime?                @db.DateTime(0)
+  candidate_notification candidate_notification[]
+  invitation             invitation[]
+  candidate              candidate                @relation(fields: [candidate_id], references: [candidate_id], onDelete: Cascade, onUpdate: NoAction, map: "fk-job_interest-candidate_id")
+  job                    job                      @relation(fields: [job_uuid], references: [job_uuid], onDelete: Cascade, onUpdate: NoAction, map: "fk-job_interest-job_uuid")
+
+  @@index([candidate_id], map: "idx-job_interest-candidate_id")
+  @@index([job_uuid], map: "idx-job_interest-job_uuid")
+}
+
+model job_skills {
+  job_uuid String  @db.Char(60)
+  skill    String  @db.VarChar(255)
+  skill_ar String? @db.VarChar(255)
+  job      job     @relation(fields: [job_uuid], references: [job_uuid], onDelete: Cascade, onUpdate: NoAction, map: "fk-job_skills-job_uuid")
+
+  @@id([job_uuid, skill])
+}
+
+model mail_log {
+  mail_uuid  String   @id @db.Char(60)
+  from       String?  @db.VarChar(255)
+  to         String?  @db.VarChar(255)
+  subject    String?  @db.VarChar(255)
+  app        String?  @db.VarChar(255)
+  created_at DateTime @db.DateTime(0)
+  updated_at DateTime @db.DateTime(0)
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model major {
+  major_uuid          String                @id @db.Char(60)
+  major_name_en       String                @unique(map: "major_name_en") @db.VarChar(150)
+  major_name_ar       String                @unique(map: "major_name_ar") @db.VarChar(150)
+  data_source         Int?                  @db.SmallInt
+  major_created_at    DateTime?             @db.DateTime(0)
+  major_updated_at    DateTime?             @db.DateTime(0)
+  candidate_education candidate_education[]
+}
+
+model mall {
+  mall_uuid             String   @id @db.Char(60)
+  mall_name_en          String   @db.VarChar(255)
+  mall_name_ar          String   @db.VarChar(255)
+  mall_created_datetime DateTime @db.DateTime(0)
+  mall_updated_datetime DateTime @db.DateTime(0)
+  store                 store[]
+}
+
+model manager_token {
+  token_uuid               String         @id @db.Char(60)
+  store_manager_uuid       String?        @db.Char(60)
+  token_value              String         @db.VarChar(255)
+  token_device             String?        @db.VarChar(255)
+  token_device_id          String?        @db.VarChar(255)
+  token_status             Int            @db.SmallInt
+  token_last_used_datetime DateTime?      @db.DateTime(0)
+  token_expiry_datetime    DateTime?      @db.DateTime(0)
+  total_attempt            Boolean?       @default(false)
+  otp                      String?        @db.Char(5)
+  ip_address               String?        @db.VarChar(45)
+  token_created_datetime   DateTime       @db.DateTime(0)
+  store_manager            store_manager? @relation(fields: [store_manager_uuid], references: [store_manager_uuid], onDelete: Cascade, onUpdate: Restrict, map: "fk-manager_token-store_manager_uuid")
+
+  @@index([store_manager_uuid], map: "idx-manager_token-store_manager_uuid")
+}
+
+model migration {
+  version    String @id @db.VarChar(180)
+  apply_time Int?
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model monthly_salary_contract {
+  ms_contract_uuid String   @id @db.Char(60)
+  contract_uuid    String   @db.Char(60)
+  candidate_total  Decimal  @db.Decimal(12, 3)
+  company_total    Decimal  @db.Decimal(12, 3)
+  salary_day       Int?     @db.TinyInt
+  contract         contract @relation(fields: [contract_uuid], references: [contract_uuid], onUpdate: Restrict, map: "fk-monthly_salary_contract-contract_uuid")
+
+  @@index([contract_uuid], map: "idx-monthly_salary_contract-contract_uuid")
+}
+
+model note {
+  note_uuid                                   String                @id @db.Char(60)
+  company_id                                  Int?
+  candidate_id                                Int?
+  request_uuid                                String?               @db.Char(60)
+  interview_evaluation_uuid                   String?               @db.Char(60)
+  request_checklist_uuid                      String?               @db.Char(60)
+  invitation_uuid                             String?               @db.Char(60)
+  suggestion_uuid                             String?               @db.Char(60)
+  story_uuid                                  String?               @db.Char(60)
+  note_type                                   String?               @default("Internal Note") @db.VarChar(100)
+  contact_uuid                                String?               @db.Char(60)
+  fulltimer_uuid                              String?               @db.Char(60)
+  note_text                                   String?               @db.Text
+  created_by                                  Int?
+  updated_by                                  Int?
+  note_created_datetime                       DateTime              @db.DateTime(0)
+  note_updated_datetime                       DateTime              @db.DateTime(0)
+  candidate                                   candidate?            @relation(fields: [candidate_id], references: [candidate_id], onDelete: Restrict, onUpdate: Restrict, map: "fk-note-candidate_id")
+  company                                     company?              @relation(fields: [company_id], references: [company_id], onDelete: Cascade, onUpdate: Restrict, map: "fk-note-company_id")
+  contact                                     contact?              @relation(fields: [contact_uuid], references: [contact_uuid], onDelete: Restrict, onUpdate: Restrict, map: "fk-note-contact_uuid")
+  fulltimer                                   fulltimer?            @relation(fields: [fulltimer_uuid], references: [fulltimer_uuid], onDelete: Restrict, onUpdate: Restrict, map: "fk-note-fulltimer_uuid")
+  interview_evaluation                        interview_evaluation? @relation(fields: [interview_evaluation_uuid], references: [interview_evaluation_uuid], onDelete: Cascade, onUpdate: Restrict, map: "fk-note-interview_evaluation_uuid")
+  invitation                                  invitation?           @relation(fields: [invitation_uuid], references: [invitation_uuid], onDelete: Restrict, onUpdate: Restrict, map: "fk-note-invitation_uuid")
+  request_checklist                           request_checklist?    @relation(fields: [request_checklist_uuid], references: [request_checklist_uuid], onUpdate: Restrict, map: "fk-note-request_checklist_uuid")
+  request                                     request?              @relation(fields: [request_uuid], references: [request_uuid], onDelete: Restrict, onUpdate: Restrict, map: "fk-note-request_uuid")
+  story                                       story?                @relation(fields: [story_uuid], references: [story_uuid], onDelete: Restrict, onUpdate: Restrict, map: "fk-note-story_uuid")
+  suggestion_note_suggestion_uuidTosuggestion suggestion?           @relation("note_suggestion_uuidTosuggestion", fields: [suggestion_uuid], references: [suggestion_uuid], onDelete: Restrict, onUpdate: Restrict, map: "fk-note-suggestion_uuid")
+  suggestion_suggestion_note_uuidTonote       suggestion[]          @relation("suggestion_note_uuidTonote")
+
+  @@index([interview_evaluation_uuid], map: "fk-note-interview_evaluation_uuid")
+  @@index([candidate_id], map: "idx-note-candidate_id")
+  @@index([company_id], map: "idx-note-company_id")
+  @@index([contact_uuid], map: "idx-note-contact_uuid")
+  @@index([created_by], map: "idx-note-created_by")
+  @@index([fulltimer_uuid], map: "idx-note-fulltimer_uuid")
+  @@index([invitation_uuid], map: "idx-note-invitation_uuid")
+  @@index([request_checklist_uuid], map: "idx-note-request_checklist_uuid")
+  @@index([request_uuid], map: "idx-note-request_uuid")
+  @@index([story_uuid], map: "idx-note-story_uuid")
+  @@index([suggestion_uuid], map: "idx-note-suggestion_uuid")
+  @@index([updated_by], map: "idx-note-updated_by")
+}
+
+model permission_section {
+  permission_uuid        String                   @id @db.Char(60)
+  section_name           String?                  @db.VarChar(255)
+  created_at             DateTime                 @db.DateTime(0)
+  permission_sub_section permission_sub_section[]
+}
+
+model permission_sub_section {
+  permission_sub_section_uuid String              @id @db.Char(60)
+  sub_section_name            String?             @db.VarChar(255)
+  sub_section_slug            String?             @db.VarChar(255)
+  permission_uuid             String?             @db.Char(60)
+  created_at                  DateTime            @db.DateTime(0)
+  permission_section          permission_section? @relation(fields: [permission_uuid], references: [permission_uuid], onDelete: Restrict, onUpdate: Restrict, map: "fk-permission_sub_section-permission_uuid")
+  permission_user             permission_user[]
+
+  @@index([permission_uuid], map: "idx-permission_sub_section-permission_uuid")
+}
+
+model permission_user {
+  permission_user_uuid        String                  @id @db.Char(60)
+  admin_id                    Int?
+  staff_id                    Int?
+  permission_sub_section_uuid String?                 @db.Char(60)
+  created_at                  DateTime                @db.DateTime(0)
+  admin                       admin?                  @relation(fields: [admin_id], references: [admin_id], onDelete: Restrict, onUpdate: Restrict, map: "fk-permission_user-admin_id")
+  permission_sub_section      permission_sub_section? @relation(fields: [permission_sub_section_uuid], references: [permission_sub_section_uuid], onDelete: Restrict, onUpdate: Restrict, map: "fk-permission_user-permission_sub_section_uuid")
+  staff                       staff?                  @relation(fields: [staff_id], references: [staff_id], onDelete: Restrict, onUpdate: Restrict, map: "fk-permission_user-staff_id")
+
+  @@index([admin_id], map: "idx-permission_user-admin_id")
+  @@index([permission_sub_section_uuid], map: "idx-permission_user-permission_sub_section_uuid")
+  @@index([staff_id], map: "idx-permission_user-staff_id")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model request {
+  request_uuid                String                   @id @db.Char(60)
+  company_id                  Int?
+  contact_uuid                String?                  @db.Char(60)
+  staff_id                    Int?
+  request_created_by          Int?
+  request_updated_by          Int?
+  request_position_type       Int?                     @db.TinyInt
+  request_position_title      String?                  @db.VarChar(255)
+  request_job_description     String                   @db.Text
+  request_compensation        String                   @db.VarChar(255)
+  request_number_of_employees Int?                     @db.SmallInt
+  no_of_employees_per_story   Int                      @default(1) @db.SmallInt
+  request_location            String?                  @db.VarChar(255)
+  request_additional_info     String?                  @db.Text
+  request_status              request_request_status?
+  request_feedback            String?                  @db.VarChar(255)
+  num_hours_followup_interval Int?                     @default(1)
+  request_started_at          DateTime?                @db.DateTime(0)
+  request_assigned_at         DateTime?                @db.DateTime(0)
+  request_finished_at         DateTime?                @db.DateTime(0)
+  request_re_worked_at        DateTime?                @db.DateTime(0)
+  request_delivered_at        DateTime?                @db.DateTime(0)
+  request_cancelled_at        DateTime?                @db.DateTime(0)
+  request_created_datetime    DateTime                 @db.DateTime(0)
+  request_updated_datetime    DateTime                 @db.DateTime(0)
+  request_priority            Int?                     @default(0)
+  is_old                      Boolean?                 @default(false)
+  request_time_spent          Int?
+  gender                      Boolean?                 @default(false)
+  nationality_id              Int?
+  our_fees                    Decimal?                 @db.Decimal(10, 3)
+  our_fees_unit               String?                  @db.VarChar(15)
+  candidate_notification      candidate_notification[]
+  interview_evaluation        interview_evaluation[]
+  invitation                  invitation[]
+  job                         job[]
+  note                        note[]
+  company                     company?                 @relation(fields: [company_id], references: [company_id], onDelete: Cascade, onUpdate: Restrict, map: "fk-request-company_id")
+  contact                     contact?                 @relation(fields: [contact_uuid], references: [contact_uuid], onDelete: Cascade, onUpdate: Restrict, map: "fk-request-contact_uuid")
+  country                     country?                 @relation(fields: [nationality_id], references: [country_id], onDelete: Restrict, onUpdate: Restrict, map: "fk-request-nationality_id")
+  staff                       staff?                   @relation(fields: [staff_id], references: [staff_id], onDelete: Cascade, onUpdate: Restrict, map: "fk-request-staff_id")
+  request_activity            request_activity[]
+  request_application         request_application[]
+  request_interview           request_interview[]
+  request_skill               request_skill[]
+  story                       story[]
+  suggestion                  suggestion[]
+
+  @@index([company_id], map: "idx-request-company_id")
+  @@index([contact_uuid], map: "idx-request-contact_uuid")
+  @@index([request_created_by], map: "idx-request-request_created_by")
+  @@index([request_updated_by], map: "idx-request-request_updated_by")
+  @@index([staff_id], map: "idx-request-staff_id")
+  @@index([nationality_id], map: "ind-request-nationality_id")
+}
+
+model request_activity {
+  activity_uuid             String   @id @db.Char(60)
+  request_uuid              String   @db.Char(60)
+  staff_id                  Int?
+  activity_detail           String   @db.Text
+  activity_created_datetime DateTime @db.DateTime(0)
+  activity_updated_datetime DateTime @db.DateTime(0)
+  request                   request  @relation(fields: [request_uuid], references: [request_uuid], onDelete: Cascade, onUpdate: Restrict, map: "fk-request_activity-request_uuid")
+  staff                     staff?   @relation(fields: [staff_id], references: [staff_id], onDelete: Cascade, onUpdate: Restrict, map: "fk-request_activity-staff_id")
+
+  @@index([request_uuid], map: "idx-request_activity-request_uuid")
+  @@index([staff_id], map: "idx-request_activity-staff_id")
+}
+
+model request_application {
+  application_uuid  String              @id @db.Char(60)
+  request_uuid      String              @db.Char(60)
+  fulltimer_uuid    String?             @db.Char(60)
+  candidate_id      Int?
+  status            Int?                @default(0) @db.TinyInt
+  created_at        DateTime?           @db.DateTime(0)
+  updated_at        DateTime?           @db.DateTime(0)
+  candidate         candidate?          @relation(fields: [candidate_id], references: [candidate_id], onDelete: Cascade, onUpdate: Restrict, map: "fk-request_application-candidate_id")
+  fulltimer         fulltimer?          @relation(fields: [fulltimer_uuid], references: [fulltimer_uuid], onDelete: Cascade, onUpdate: Restrict, map: "fk-request_application-fulltimer_uuid")
+  request           request             @relation(fields: [request_uuid], references: [request_uuid], onDelete: Cascade, onUpdate: Restrict, map: "fk-request_application-request_uuid")
+  request_interview request_interview[]
+
+  @@index([candidate_id], map: "idx-request_application-candidate_id")
+  @@index([fulltimer_uuid], map: "idx-request_application-fulltimer_uuid")
+  @@index([request_uuid], map: "idx-request_application-request_uuid")
+}
+
+model request_checklist {
+  request_checklist_uuid String    @id @db.Char(60)
+  status_name            String    @db.VarChar(100)
+  status_name_ar         String?   @db.VarChar(100)
+  is_require             Boolean?
+  sort_order             Int?
+  created_at             DateTime? @db.DateTime(0)
+  updated_at             DateTime? @db.DateTime(0)
+  note                   note[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model request_interview {
+  request_interview_uuid String              @id @db.Char(60)
+  application_uuid       String              @db.Char(60)
+  request_uuid           String              @db.Char(60)
+  fulltimer_uuid         String?             @db.Char(60)
+  candidate_id           Int?
+  interview_at           DateTime?           @db.DateTime(0)
+  internal_note          String?             @db.Text
+  status                 Int?                @default(0) @db.TinyInt
+  staff_id               Int?
+  interview_note         String?             @db.Text
+  created_by             String?             @db.Char(60)
+  created_at             DateTime?           @db.DateTime(0)
+  updated_at             DateTime?           @db.DateTime(0)
+  request_application    request_application @relation(fields: [application_uuid], references: [application_uuid], onDelete: Cascade, onUpdate: Restrict, map: "fk-request_interview-application_uuid")
+  candidate              candidate?          @relation(fields: [candidate_id], references: [candidate_id], onDelete: Cascade, onUpdate: Restrict, map: "fk-request_interview-candidate_id")
+  contact                contact?            @relation(fields: [created_by], references: [contact_uuid], onDelete: Restrict, onUpdate: Restrict, map: "fk-request_interview-created_by")
+  fulltimer              fulltimer?          @relation(fields: [fulltimer_uuid], references: [fulltimer_uuid], onDelete: Cascade, onUpdate: Restrict, map: "fk-request_interview-fulltimer_uuid")
+  request                request             @relation(fields: [request_uuid], references: [request_uuid], onDelete: Cascade, onUpdate: Restrict, map: "fk-request_interview-request_uuid")
+  staff                  staff?              @relation(fields: [staff_id], references: [staff_id], onDelete: Restrict, onUpdate: Restrict, map: "fk-request_interview-staff_id")
+
+  @@index([application_uuid], map: "idx-request_interview-application_uuid")
+  @@index([candidate_id], map: "idx-request_interview-candidate_id")
+  @@index([created_by], map: "idx-request_interview-created_by")
+  @@index([fulltimer_uuid], map: "idx-request_interview-fulltimer_uuid")
+  @@index([request_uuid], map: "idx-request_interview-request_uuid")
+  @@index([staff_id], map: "idx-request_interview-staff_id")
+}
+
+model request_skill {
+  request_uuid String  @db.Char(60)
+  skill        String  @db.VarChar(128)
+  request      request @relation(fields: [request_uuid], references: [request_uuid], onDelete: Cascade, onUpdate: Restrict, map: "fk-request_skill-request_uuid")
+
+  @@id([request_uuid, skill])
+  @@index([request_uuid], map: "ind-request_skill-request_uuid")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model setting {
+  setting_uuid String    @id @db.Char(60)
+  code         String    @db.VarChar(128)
+  key          String    @db.VarChar(128)
+  value        String?   @db.Text
+  serialized   Boolean?  @default(false)
+  created_at   DateTime? @db.DateTime(0)
+  updated_at   DateTime? @db.DateTime(0)
+}
+
+model staff {
+  staff_id                                                    Int                                 @id @default(autoincrement())
+  staff_name                                                  String                              @db.VarChar(255)
+  staff_job_title                                             String?                             @db.VarChar(100)
+  staff_email                                                 String                              @db.VarChar(255)
+  staff_auth_key                                              String                              @db.VarChar(32)
+  staff_password_hash                                         String                              @db.VarChar(255)
+  staff_gmail_username                                        String?                             @db.Char(225)
+  staff_gmail_password                                        String?                             @db.Char(225)
+  staff_password_reset_token                                  String?                             @db.VarChar(255)
+  enable_two_step_auth                                        Boolean?                            @default(false)
+  staff_role                                                  Boolean?                            @default(true)
+  staff_salary                                                Decimal?                            @default(0.000) @db.Decimal(10, 3)
+  staff_salary_currency                                       String?                             @default("KWD") @db.Char(3)
+  staff_photo                                                 String?                             @db.VarChar(225)
+  staff_status                                                Int                                 @default(10) @db.SmallInt
+  staff_notification                                          Boolean?                            @default(true)
+  staff_created_at                                            DateTime                            @db.DateTime(0)
+  staff_updated_at                                            DateTime                            @db.DateTime(0)
+  deleted                                                     Int                                 @default(0) @db.SmallInt
+  staff_hourly_rate                                           Float                               @default(1.6)
+  week_start_day                                              Int?                                @default(7) @db.TinyInt
+  work_days                                                   Int?                                @default(5) @db.TinyInt
+  hours_per_day                                               Int?                                @default(8) @db.TinyInt
+  ip_address                                                  String?                             @db.VarChar(45)
+  candidate_certificate                                       candidate_certificate[]
+  candidate_evaluation                                        candidate_evaluation[]
+  candidate_id_request_candidate_id_request_created_byTostaff candidate_id_request[]              @relation("candidate_id_request_created_byTostaff")
+  candidate_id_request_candidate_id_request_updated_byTostaff candidate_id_request[]              @relation("candidate_id_request_updated_byTostaff")
+  candidate_note_candidate_note_created_byTostaff             candidate_note[]                    @relation("candidate_note_created_byTostaff")
+  candidate_note_candidate_note_updated_byTostaff             candidate_note[]                    @relation("candidate_note_updated_byTostaff")
+  candidate_notification                                      candidate_notification[]
+  candidate_tag                                               candidate_tag[]
+  candidate_warning_candidate_warning_created_byTostaff       candidate_warning[]                 @relation("candidate_warning_created_byTostaff")
+  candidate_warning_candidate_warning_updated_byTostaff       candidate_warning[]                 @relation("candidate_warning_updated_byTostaff")
+  candidate_work_history                                      candidate_work_history[]
+  chat                                                        chat[]
+  company                                                     company[]
+  contact                                                     contact[]
+  contract                                                    contract[]
+  daily_standup_answer                                        daily_standup_answer[]
+  exam_question                                               exam_question[]
+  interview_evaluation                                        interview_evaluation[]
+  interview_evaluation_note_version                           interview_evaluation_note_version[]
+  invitation_invitation_invitation_created_by_staffTostaff    invitation[]                        @relation("invitation_invitation_created_by_staffTostaff")
+  invitation_invitation_invitation_updated_by_staffTostaff    invitation[]                        @relation("invitation_invitation_updated_by_staffTostaff")
+  job_job_created_byTostaff                                   job[]                               @relation("job_created_byTostaff")
+  job_job_deleted_byTostaff                                   job[]                               @relation("job_deleted_byTostaff")
+  job_job_updated_byTostaff                                   job[]                               @relation("job_updated_byTostaff")
+  permission_user                                             permission_user[]
+  request                                                     request[]
+  request_activity                                            request_activity[]
+  request_interview                                           request_interview[]
+  staff_expenses                                              staff_expenses[]
+  staff_leave                                                 staff_leave[]
+  staff_notification_records                                  staff_notification[]
+  staff_salary_records                                        staff_salary[]
+  staff_token                                                 staff_token[]
+  staff_work_session                                          staff_work_session[]
+  story                                                       story[]
+  story_activity                                              story_activity[]
+  ticket                                                      ticket[]
+  ticket_comment                                              ticket_comment[]
+  transfer_transfer_transfer_created_byTostaff                transfer[]                          @relation("transfer_transfer_created_byTostaff")
+  transfer_transfer_transfer_updated_byTostaff                transfer[]                          @relation("transfer_transfer_updated_byTostaff")
+  webhook_webhook_created_byTostaff                           webhook[]                           @relation("webhook_created_byTostaff")
+  webhook_webhook_updated_byTostaff                           webhook[]                           @relation("webhook_updated_byTostaff")
+
+  @@unique([staff_email, deleted], map: "idx-staff-staff_email")
+  @@unique([staff_password_reset_token, deleted], map: "idx-staff-staff_password_reset_token")
+}
+
+model staff_expenses {
+  staff_expense_uuid String    @id @db.Char(60)
+  supplier           String?   @db.VarChar(225)
+  category           Int?
+  purchase_date      DateTime? @db.Date
+  total_amount       Float?    @db.Float
+  currency           Int?
+  vat                Float?    @db.Float
+  reimbursable       Boolean?  @default(false)
+  description        String?   @db.Text
+  file               String?   @db.VarChar(225)
+  staff_id           Int?
+  status             String?   @default("KWD") @db.Char(5)
+  created_at         DateTime? @db.DateTime(0)
+  updated_at         DateTime? @db.DateTime(0)
+  created_by         Int?
+  updated_by         Int?
+  staff              staff?    @relation(fields: [staff_id], references: [staff_id], onDelete: NoAction, onUpdate: Restrict, map: "fk_staff_expenses_staff_id")
+
+  @@index([staff_id], map: "idx_staff_expenses_staff_id")
+}
+
+model staff_leave {
+  staff_leave_uuid String    @id @db.Char(60)
+  staff_id         Int?
+  from_date        DateTime? @db.Date
+  to_date          DateTime? @db.Date
+  note             String?   @db.Text
+  category         String?   @db.VarChar(225)
+  file             String?   @db.VarChar(225)
+  status           Int?      @default(0) @db.TinyInt
+  created_at       DateTime  @db.DateTime(0)
+  updated_at       DateTime  @db.DateTime(0)
+  staff            staff?    @relation(fields: [staff_id], references: [staff_id], onDelete: Restrict, onUpdate: Restrict, map: "fk-staff_leave-staff_id")
+
+  @@index([staff_id], map: "idx-staff_leave-staff_id")
+}
+
+model staff_notification {
+  sn_uuid    String    @id @db.Char(60)
+  staff_id   Int?
+  permission String?   @db.VarChar(100)
+  created_at DateTime? @db.DateTime(0)
+  updated_at DateTime? @db.DateTime(0)
+  staff      staff?    @relation(fields: [staff_id], references: [staff_id], onDelete: Restrict, onUpdate: Restrict, map: "fk-staff_notification-staff_id")
+
+  @@index([staff_id], map: "idx-staff_notification-staff_id")
+}
+
+model staff_salary {
+  staff_salary_uuid String    @id @db.Char(60)
+  staff_id          Int?
+  salary            Decimal?  @db.Decimal(10, 3)
+  salary_currency   String?   @db.Char(3)
+  comment           String?   @db.VarChar(255)
+  salary_date       DateTime? @db.Date
+  created_at        DateTime? @db.DateTime(0)
+  updated_at        DateTime? @db.DateTime(0)
+  staff             staff?    @relation(fields: [staff_id], references: [staff_id], onUpdate: Restrict, map: "fk-staff_salary-staff_id")
+
+  @@index([staff_id], map: "idx-staff_salary-staff_id")
+}
+
+model staff_token {
+  token_id                 Int       @id @default(autoincrement())
+  staff_id                 Int
+  token_value              String    @db.VarChar(255)
+  token_device             String?   @db.VarChar(255)
+  token_device_id          String?   @db.VarChar(255)
+  token_status             Int       @db.SmallInt
+  token_last_used_datetime DateTime? @db.DateTime(0)
+  token_expiry_datetime    DateTime? @db.DateTime(0)
+  total_attempt            Boolean?  @default(false)
+  otp                      String?   @db.Char(5)
+  ip_address               String?   @db.VarChar(45)
+  token_created_datetime   DateTime  @db.DateTime(0)
+  staff                    staff     @relation(fields: [staff_id], references: [staff_id], onDelete: Cascade, onUpdate: Restrict, map: "fk-staff_token-staff_id")
+
+  @@index([staff_id], map: "idx-staff_token-staff_id")
+}
+
+model staff_work_session {
+  work_session_uuid String   @id @db.Char(60)
+  staff_id          Int?
+  total_minutes     Int?
+  created_at        DateTime @db.DateTime(0)
+  updated_at        DateTime @db.DateTime(0)
+  staff             staff?   @relation(fields: [staff_id], references: [staff_id], onDelete: Restrict, onUpdate: Restrict, map: "fk-staff_work_session-staff_id")
+
+  @@index([staff_id], map: "idx-staff_work_session-staff_id")
+}
+
+model store {
+  store_id                    Int                           @id @default(autoincrement())
+  company_id                  Int?
+  store_manager_uuid          String?                       @db.Char(60)
+  brand_uuid                  String?                       @db.Char(60)
+  mall_uuid                   String?                       @db.Char(60)
+  store_name                  String                        @db.VarChar(255)
+  store_location              String                        @db.VarChar(255)
+  store_total_candidates      Int?                          @default(0)
+  store_status                Int                           @default(10) @db.SmallInt
+  store_created_at            DateTime                      @db.DateTime(0)
+  store_updated_at            DateTime                      @db.DateTime(0)
+  deleted                     Int                           @default(0) @db.SmallInt
+  candidate                   candidate[]
+  candidate_certificate       candidate_certificate[]
+  candidate_notification      candidate_notification[]
+  candidate_work_log_feedback candidate_work_log_feedback[]
+  candidate_working_date      candidate_working_date[]
+  candidate_working_hour      candidate_working_hour[]
+  chat                        chat[]
+  contract                    contract[]
+  discount                    discount[]
+  brand                       brand?                        @relation(fields: [brand_uuid], references: [brand_uuid], onDelete: Cascade, onUpdate: Restrict, map: "fk-store-brand_uuid")
+  company                     company?                      @relation(fields: [company_id], references: [company_id], onDelete: Cascade, onUpdate: Restrict, map: "fk-store-company_id")
+  mall                        mall?                         @relation(fields: [mall_uuid], references: [mall_uuid], onDelete: Cascade, onUpdate: Restrict, map: "fk-store-mall_uuid")
+  contact                     contact?                      @relation(fields: [store_manager_uuid], references: [contact_uuid], onDelete: Restrict, onUpdate: Restrict, map: "fk-store-store_manager_uuid")
+  store_assignment_request    store_assignment_request[]
+  store_manager               store_manager[]
+  transfer_candidate          transfer_candidate[]
+
+  @@index([brand_uuid], map: "idx-store-brand_uuid")
+  @@index([company_id], map: "idx-store-company_id")
+  @@index([mall_uuid], map: "idx-store-mall_uuid")
+  @@index([store_manager_uuid], map: "idx-store-store_manager_uuid")
+}
+
+model store_assignment_request {
+  sar_uuid      String     @id @db.Char(60)
+  candidate_id  Int?
+  store_id      Int?
+  currency_code String?    @default("KWD") @db.Char(3)
+  status        Int?       @default(0) @db.TinyInt
+  created_at    DateTime?  @db.DateTime(0)
+  updated_at    DateTime?  @db.DateTime(0)
+  candidate     candidate? @relation(fields: [candidate_id], references: [candidate_id], onDelete: Cascade, onUpdate: Restrict, map: "fk-store_assignment_request-candidate_id")
+  store         store?     @relation(fields: [store_id], references: [store_id], onDelete: Restrict, onUpdate: Restrict, map: "fk-store_assignment_request-store_id")
+
+  @@index([candidate_id], map: "idx-store_assignment_request-candidate_id")
+  @@index([store_id], map: "idx-store_assignment_request-store_id")
+}
+
+model store_manager {
+  store_manager_uuid   String          @id @db.Char(60)
+  company_id           Int?
+  store_id             Int?
+  name                 String          @db.VarChar(100)
+  email                String?         @db.VarChar(100)
+  new_email            String?         @db.VarChar(100)
+  phone_number         String?         @db.VarChar(100)
+  password_hash        String?         @db.VarChar(255)
+  password_reset_token String?         @db.VarChar(255)
+  enable_two_step_auth Boolean?        @default(false)
+  auth_key             String?         @db.VarChar(255)
+  email_verification   Boolean?        @default(false)
+  limit_email          DateTime?       @db.DateTime(0)
+  created_at           DateTime?       @db.DateTime(0)
+  updated_at           DateTime?       @db.DateTime(0)
+  manager_token        manager_token[]
+  company              company?        @relation(fields: [company_id], references: [company_id], onDelete: Cascade, onUpdate: Restrict, map: "fk-store_manager-CASCADE")
+  store                store?          @relation(fields: [store_id], references: [store_id], onDelete: Cascade, onUpdate: Restrict, map: "fk-store_manager-store_id")
+
+  @@index([company_id], map: "idx-store_manager-company_id")
+  @@index([store_id], map: "idx-store_manager-store_id")
+}
+
+model story {
+  story_uuid                                   String           @id @db.Char(60)
+  request_uuid                                 String           @db.Char(60)
+  suggestion_uuid                              String?          @db.Char(60)
+  staff_id                                     Int?
+  number_of_employees                          Int?             @db.SmallInt
+  story_status                                 Int              @default(0) @db.SmallInt
+  is_old                                       Boolean?         @default(false)
+  story_time_spent                             Int?
+  story_created_at                             DateTime?        @db.DateTime(0)
+  story_last_updated_at                        DateTime?        @db.DateTime(0)
+  invitation                                   invitation[]
+  job                                          job[]
+  note                                         note[]
+  request                                      request          @relation(fields: [request_uuid], references: [request_uuid], onUpdate: Restrict, map: "fk-story-request_uuid")
+  staff                                        staff?           @relation(fields: [staff_id], references: [staff_id], onDelete: Cascade, onUpdate: Restrict, map: "fk-story-staff_id")
+  suggestion_story_suggestion_uuidTosuggestion suggestion?      @relation("story_suggestion_uuidTosuggestion", fields: [suggestion_uuid], references: [suggestion_uuid], onDelete: Restrict, onUpdate: Restrict, map: "fk-story-suggestion_uuid")
+  story_activity                               story_activity[]
+  suggestion_suggestion_story_uuidTostory      suggestion[]     @relation("suggestion_story_uuidTostory")
+
+  @@index([request_uuid], map: "idx-story-request_uuid")
+  @@index([staff_id], map: "idx-story-staff_id")
+  @@index([suggestion_uuid], map: "idx-story-suggestion_uuid")
+}
+
+model story_activity {
+  story_activity_uuid      String    @id @db.Char(60)
+  story_uuid               String    @db.Char(60)
+  staff_id                 Int?
+  activity_time_spent      Int?
+  activity_status          Int       @default(0) @db.SmallInt
+  activity_created_at      DateTime? @db.DateTime(0)
+  activity_last_updated_at DateTime? @db.DateTime(0)
+  staff                    staff?    @relation(fields: [staff_id], references: [staff_id], onDelete: Cascade, onUpdate: Restrict, map: "fk-story_activity-staff_id")
+  story                    story     @relation(fields: [story_uuid], references: [story_uuid], onUpdate: Restrict, map: "fk-story_activity-story_uuid")
+
+  @@index([staff_id], map: "idx-story_activity-staff_id")
+  @@index([story_uuid], map: "idx-story_activity-story_uuid")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model suggestion {
+  suggestion_uuid                         String     @id @db.Char(60)
+  request_uuid                            String     @db.Char(60)
+  fulltimer_uuid                          String?    @db.Char(60)
+  candidate_id                            Int?
+  note_uuid                               String     @db.Char(60)
+  story_uuid                              String?    @db.Char(60)
+  suggestion_status                       Int?       @default(0) @db.TinyInt
+  mail_to_company                         Boolean?   @default(false)
+  suggestion_datetime                     DateTime   @db.DateTime(0)
+  note_note_suggestion_uuidTosuggestion   note[]     @relation("note_suggestion_uuidTosuggestion")
+  story_story_suggestion_uuidTosuggestion story[]    @relation("story_suggestion_uuidTosuggestion")
+  candidate                               candidate? @relation(fields: [candidate_id], references: [candidate_id], onDelete: Restrict, onUpdate: Restrict, map: "fk-suggestion-candidate_id")
+  fulltimer                               fulltimer? @relation(fields: [fulltimer_uuid], references: [fulltimer_uuid], onDelete: Restrict, onUpdate: Restrict, map: "fk-suggestion-fulltimer_uuid")
+  note_suggestion_note_uuidTonote         note       @relation("suggestion_note_uuidTonote", fields: [note_uuid], references: [note_uuid], onUpdate: Restrict, map: "fk-suggestion-note_uuid")
+  request                                 request    @relation(fields: [request_uuid], references: [request_uuid], onUpdate: Restrict, map: "fk-suggestion-request_uuid")
+  story_suggestion_story_uuidTostory      story?     @relation("suggestion_story_uuidTostory", fields: [story_uuid], references: [story_uuid], onDelete: Restrict, onUpdate: Restrict, map: "fk-suggestion-story_uuid")
+
+  @@index([candidate_id], map: "idx-suggestion-candidate_id")
+  @@index([fulltimer_uuid], map: "idx-suggestion-fulltimer_uuid")
+  @@index([note_uuid], map: "idx-suggestion-note_uuid")
+  @@index([request_uuid], map: "idx-suggestion-request_uuid")
+  @@index([story_uuid], map: "idx-suggestion-story_uuid")
+}
+
+model tag {
+  tag_id     Int       @id @default(autoincrement())
+  tag        String    @db.VarChar(128)
+  created_at DateTime? @db.DateTime(0)
+  updated_at DateTime? @db.DateTime(0)
+}
+
+model ticket {
+  ticket_uuid         String              @id @db.Char(60)
+  candidate_id        Int?
+  staff_id            Int?
+  ticket_detail       String?             @db.Text
+  ticket_status       Int?                @default(0) @db.SmallInt
+  ticket_started_at   DateTime?           @db.DateTime(0)
+  ticket_completed_at DateTime?           @db.DateTime(0)
+  response_time       Int?
+  resolution_time     Int?
+  created_at          DateTime?           @db.DateTime(0)
+  updated_at          DateTime?           @db.DateTime(0)
+  candidate           candidate?          @relation(fields: [candidate_id], references: [candidate_id], onDelete: Restrict, onUpdate: Restrict, map: "fk-ticket-candidate_id")
+  staff               staff?              @relation(fields: [staff_id], references: [staff_id], onDelete: Restrict, onUpdate: Restrict, map: "fk-ticket-staff_id")
+  ticket_attachment   ticket_attachment[]
+  ticket_comment      ticket_comment[]
+
+  @@index([candidate_id], map: "idx-ticket-candidate_id")
+  @@index([staff_id], map: "idx-ticket-staff_id")
+}
+
+model ticket_attachment {
+  ticket_attachment_uuid String      @id @db.Char(60)
+  ticket_uuid            String?     @db.Char(60)
+  attachment_uuid        String?     @db.Char(60)
+  attachment             attachment? @relation(fields: [attachment_uuid], references: [attachment_uuid], onDelete: Restrict, onUpdate: Restrict, map: "fk-ticket_attachment-attachment_uuid")
+  ticket                 ticket?     @relation(fields: [ticket_uuid], references: [ticket_uuid], onDelete: Restrict, onUpdate: Restrict, map: "fk-ticket_attachment-candidate_id")
+
+  @@index([attachment_uuid], map: "idx-ticket_attachment-attachment_uuid")
+  @@index([ticket_uuid], map: "idx-ticket_attachment-candidate_id")
+}
+
+model ticket_comment {
+  ticket_comment_uuid       String                     @id @db.Char(60)
+  ticket_uuid               String?                    @db.Char(60)
+  candidate_id              Int?
+  staff_id                  Int?
+  ticket_comment_detail     String?                    @db.Text
+  created_at                DateTime?                  @db.DateTime(0)
+  updated_at                DateTime?                  @db.DateTime(0)
+  candidate                 candidate?                 @relation(fields: [candidate_id], references: [candidate_id], onDelete: Restrict, onUpdate: Restrict, map: "fk-ticket_comment-candidate_id")
+  staff                     staff?                     @relation(fields: [staff_id], references: [staff_id], onDelete: Restrict, onUpdate: Restrict, map: "fk-ticket_comment-staff_id")
+  ticket                    ticket?                    @relation(fields: [ticket_uuid], references: [ticket_uuid], onDelete: Restrict, onUpdate: Restrict, map: "fk-ticket_comment-ticket_uuid")
+  ticket_comment_attachment ticket_comment_attachment?
+
+  @@index([candidate_id], map: "idx-ticket_comment-candidate_id")
+  @@index([staff_id], map: "idx-ticket_comment-staff_id")
+  @@index([ticket_uuid], map: "idx-ticket_comment-ticket_uuid")
+}
+
+model ticket_comment_attachment {
+  ticket_comment_attachment_uuid String?        @db.Char(60)
+  ticket_comment_uuid            String         @id @db.Char(60)
+  attachment_uuid                String?        @db.Char(60)
+  attachment                     attachment?    @relation(fields: [attachment_uuid], references: [attachment_uuid], onDelete: Restrict, onUpdate: Restrict, map: "fk-ticket_comment_attachment-attachment_uuid")
+  ticket_comment                 ticket_comment @relation(fields: [ticket_comment_uuid], references: [ticket_comment_uuid], onUpdate: Restrict, map: "fk-ticket_comment_attachment-ticket_comment_uuid")
+
+  @@index([attachment_uuid], map: "idx-ticket_comment_attachment-attachment_uuid")
+  @@index([ticket_comment_uuid], map: "idx-ticket_comment_attachment-ticket_comment_uuid")
+}
+
+model transfer {
+  transfer_id                               Int                   @id @default(autoincrement())
+  parent_transfer_id                        Int?
+  company_id                                Int?
+  contract_uuid                             String?               @db.Char(60)
+  contract_type                             String?               @db.VarChar(255)
+  total                                     Decimal?              @db.Decimal(12, 3)
+  company_total                             Decimal?              @db.Decimal(12, 3)
+  payment_received_on                       DateTime?             @db.Date
+  transfer_status                           Int                   @default(10) @db.SmallInt
+  start_date                                DateTime?             @db.Date
+  end_date                                  DateTime?             @db.Date
+  transfer_created_by                       Int?
+  transfer_updated_by                       Int?
+  transfer_created_at                       DateTime              @db.DateTime(0)
+  transfer_updated_at                       DateTime              @db.DateTime(0)
+  deleted                                   Int                   @default(0) @db.SmallInt
+  currency_code                             String?               @default("KWD") @db.Char(3)
+  transfer_cost                             Decimal?              @default(0.000) @db.Decimal(12, 3)
+  invoice                                   invoice[]
+  company                                   company?              @relation(fields: [company_id], references: [company_id], onDelete: Cascade, onUpdate: Restrict, map: "fk-transfer-company_id")
+  contract                                  contract?             @relation(fields: [contract_uuid], references: [contract_uuid], onDelete: Restrict, onUpdate: Restrict, map: "fk-transfer-contract_uuid")
+  transfer                                  transfer?             @relation("transferTotransfer", fields: [parent_transfer_id], references: [transfer_id], onUpdate: Restrict, map: "fk-transfer-parent_transfer_id")
+  other_transfer                            transfer[]            @relation("transferTotransfer")
+  staff_transfer_transfer_created_byTostaff staff?                @relation("transfer_transfer_created_byTostaff", fields: [transfer_created_by], references: [staff_id], onDelete: Restrict, onUpdate: Restrict, map: "fk-transfer-transfer_created_by")
+  staff_transfer_transfer_updated_byTostaff staff?                @relation("transfer_transfer_updated_byTostaff", fields: [transfer_updated_by], references: [staff_id], onDelete: Restrict, onUpdate: Restrict, map: "fk-transfer-transfer_updated_by")
+  transfer_candidate                        transfer_candidate[]
+  transfer_file_entry                       transfer_file_entry[]
+
+  @@index([parent_transfer_id], map: "fk-transfer-parent_transfer_id")
+  @@index([company_id], map: "idx-transfer-company_id")
+  @@index([contract_uuid], map: "idx-transfer-contract_uuid")
+  @@index([transfer_created_by], map: "idx-transfer-transfer_created_by")
+  @@index([transfer_id], map: "idx-transfer-transfer_id")
+  @@index([transfer_updated_by], map: "idx-transfer-transfer_updated_by")
+  @@index([currency_code], map: "ind-transfer-currency_code")
+}
+
+model transfer_bank_advice {
+  tba_uuid   String    @id @db.Char(60)
+  serial_no  Int?
+  file_path  String?   @db.VarChar(255)
+  created_by Int?
+  created_at DateTime? @db.DateTime(0)
+  updated_at DateTime? @db.DateTime(0)
+  is_deleted Boolean?  @default(false)
+  admin      admin?    @relation(fields: [created_by], references: [admin_id], onDelete: Restrict, onUpdate: Restrict, map: "fk-transfer_bank_advice-admin_id")
+
+  @@index([created_by], map: "idx-transfer_bank_advice-created_by")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model transfer_candidate {
+  tc_id                    Int                      @id @default(autoincrement())
+  transfer_id              Int?
+  candidate_id             Int?
+  prev_candidate_id        Int?
+  store_id                 Int?
+  store_name               String?                  @db.VarChar(225)
+  company_id               Int?
+  company_name             String?                  @db.VarChar(225)
+  company_email            String?                  @db.VarChar(225)
+  bank_id                  Int?
+  transfer_confirmation_id String?                  @db.VarChar(128)
+  transfer_file_id         Int?
+  transfer_benef_name      String?                  @db.Char(60)
+  transfer_benef_iban      String?                  @db.Char(50)
+  candidate_hourly_rate    Decimal?                 @db.Decimal(10, 3)
+  company_hourly_rate      Decimal?                 @db.Decimal(10, 3)
+  hours                    Float?                   @default(0)
+  minutes                  Int?                     @default(0) @db.TinyInt
+  seconds                  Int?                     @default(0) @db.TinyInt
+  bonus                    Decimal?                 @db.Decimal(10, 3)
+  bonus_commission         Decimal?                 @db.Decimal(10, 3)
+  transfer_cost            Decimal?                 @db.Decimal(10, 3)
+  candidate_total          Decimal?                 @db.Decimal(10, 3)
+  company_total            Decimal?                 @db.Decimal(10, 3)
+  deleted                  Int                      @default(0) @db.SmallInt
+  paid                     Int                      @default(0) @db.SmallInt
+  is_candidate_notified    Boolean?                 @default(false)
+  tc_created_at            DateTime                 @db.DateTime(0)
+  tc_updated_at            DateTime                 @db.DateTime(0)
+  currency_code            String?                  @default("KWD") @db.Char(3)
+  contract_uuid            String?                  @db.Char(60)
+  candidate_notification   candidate_notification[]
+  candidate                candidate?               @relation(fields: [candidate_id], references: [candidate_id], onDelete: Cascade, onUpdate: Restrict, map: "fk-tc-candidate_id")
+  transfer                 transfer?                @relation(fields: [transfer_id], references: [transfer_id], onDelete: Cascade, onUpdate: Restrict, map: "fk-tc-transfer_id")
+  transfer_file            transfer_file?           @relation(fields: [transfer_file_id], references: [transfer_file_id], onDelete: Cascade, onUpdate: Restrict, map: "fk-transfer_candidate-CASCADE")
+  bank                     bank?                    @relation(fields: [bank_id], references: [bank_id], onDelete: Restrict, onUpdate: Restrict, map: "fk-transfer_candidate-bank_id")
+  company                  company?                 @relation(fields: [company_id], references: [company_id], onUpdate: Restrict, map: "fk-transfer_candidate-company_id")
+  store                    store?                   @relation(fields: [store_id], references: [store_id], onUpdate: Restrict, map: "fk-transfer_candidate-store_id")
+  contract                 contract?                @relation(fields: [contract_uuid], references: [contract_uuid], onUpdate: SetNull, map: "fk_transfer_candidate_contract")
+  transfer_file_entry      transfer_file_entry[]
+
+  @@unique([transfer_confirmation_id, bank_id, deleted], map: "idx-transfer_candidate-transfer_confirmation_id")
+  @@index([candidate_id], map: "idx-tc-candidate_id")
+  @@index([transfer_id], map: "idx-tc-transfer_id")
+  @@index([bank_id], map: "idx-transfer_candidate-bank_id")
+  @@index([company_id], map: "idx-transfer_candidate-company_id")
+  @@index([contract_uuid], map: "idx-transfer_candidate-contract_uuid")
+  @@index([store_id], map: "idx-transfer_candidate-store_id")
+  @@index([transfer_file_id], map: "idx-transfer_candidate-transfer_file_id")
+}
+
+model transfer_cost {
+  candidate_id  Int
+  company_id    Int
+  transfer_cost Decimal   @db.Decimal(12, 3)
+  created_at    DateTime? @db.DateTime(0)
+  updated_at    DateTime? @db.DateTime(0)
+  candidate     candidate @relation(fields: [candidate_id], references: [candidate_id], onDelete: Cascade, onUpdate: Restrict, map: "fk-transfer_cost-candidate_id")
+  company       company   @relation(fields: [company_id], references: [company_id], onDelete: Cascade, onUpdate: Restrict, map: "fk-transfer_cost-company_id")
+
+  @@id([candidate_id, company_id])
+  @@index([candidate_id], map: "idx-transfer_cost-candidate_id")
+  @@index([company_id], map: "idx-transfer_cost-company_id")
+}
+
+model transfer_file {
+  transfer_file_id         Int                   @id @default(autoincrement())
+  bank                     String?               @db.VarChar(100)
+  transfer_file_s3_path    String                @db.VarChar(255)
+  transfer_amount          Decimal?              @db.Decimal(12, 3)
+  transfer_file_created_at DateTime              @db.DateTime(0)
+  transfer_file_updated_at DateTime              @db.DateTime(0)
+  currency_code            String?               @default("KWD") @db.Char(3)
+  status                   Boolean?              @default(false)
+  error                    String?               @db.Text
+  admin_id                 Int?
+  transfer_candidate       transfer_candidate[]
+  admin                    admin?                @relation(fields: [admin_id], references: [admin_id], onDelete: Restrict, onUpdate: Restrict, map: "fk-transfer_file-admin_id")
+  transfer_file_entry      transfer_file_entry[]
+
+  @@index([admin_id], map: "idx-transfer_file-admin_id")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model transfer_file_entry {
+  tfe_uuid                                    String              @id @db.Char(60)
+  transfer_file_id                            Int?
+  status                                      String?             @db.VarChar(50)
+  status_description                          String?             @db.VarChar(255)
+  section_index                               String?             @db.VarChar(50)
+  transfer_method                             String?             @db.VarChar(50)
+  credit_amount                               Decimal?            @db.Decimal(10, 3)
+  credit_currency                             String?             @db.Char(3)
+  exchange_rate                               Decimal?            @db.Decimal(10, 3)
+  dealRefNo                                   String?             @db.VarChar(100)
+  value_date                                  String?             @db.VarChar(100)
+  debit_account_no                            String?             @db.VarChar(50)
+  credit_account_no                           String?             @db.VarChar(50)
+  debit_narrative                             Int?
+  credit_narrative                            Int?
+  payment_details_1                           String?             @db.VarChar(100)
+  payment_details_2                           String?             @db.VarChar(100)
+  payment_details_3                           String?             @db.VarChar(100)
+  payment_details_4                           String?             @db.VarChar(100)
+  beneficiary_name                            String?             @db.VarChar(100)
+  beneficiary_address_line_1                  String?             @db.VarChar(100)
+  beneficiary_address_line_2                  String?             @db.VarChar(100)
+  beneficiary_bank_name                       String?             @db.VarChar(100)
+  beneficiary_bank_address_1                  String?             @db.VarChar(100)
+  beneficiary_bank_address_2                  String?             @db.VarChar(100)
+  beneficiary_bank_address_3                  String?             @db.VarChar(100)
+  swift                                       String?             @db.VarChar(50)
+  intermediary_account                        String?             @db.VarChar(100)
+  intermediary_swift                          String?             @db.VarChar(50)
+  intrmediary_name                            String?             @db.VarChar(100)
+  intermediary_address_1                      String?             @db.VarChar(100)
+  intermediary_address_2                      String?             @db.VarChar(100)
+  intermediary_address_3                      String?             @db.VarChar(100)
+  charges_type                                String?             @db.VarChar(10)
+  sort_code                                   String?             @db.VarChar(100)
+  BIC_code                                    String?             @db.VarChar(100)
+  IBAN                                        String?             @db.VarChar(100)
+  ABA_routing_code                            String?             @db.VarChar(100)
+  created_by                                  Int?
+  updated_by                                  Int?
+  created_at                                  DateTime?           @db.DateTime(0)
+  updated_at                                  DateTime?           @db.DateTime(0)
+  admin_transfer_file_entry_created_byToadmin admin?              @relation("transfer_file_entry_created_byToadmin", fields: [created_by], references: [admin_id], onDelete: Restrict, onUpdate: Restrict, map: "fk-transfer_file_entry-created_by")
+  transfer_candidate                          transfer_candidate? @relation(fields: [credit_narrative], references: [tc_id], onDelete: Restrict, onUpdate: Restrict, map: "fk-transfer_file_entry-credit_narrative")
+  transfer                                    transfer?           @relation(fields: [debit_narrative], references: [transfer_id], onDelete: Restrict, onUpdate: Restrict, map: "fk-transfer_file_entry-debit_narrative")
+  transfer_file                               transfer_file?      @relation(fields: [transfer_file_id], references: [transfer_file_id], onDelete: Restrict, onUpdate: Restrict, map: "fk-transfer_file_entry-transfer_file_id")
+  admin_transfer_file_entry_updated_byToadmin admin?              @relation("transfer_file_entry_updated_byToadmin", fields: [updated_by], references: [admin_id], onDelete: Restrict, onUpdate: Restrict, map: "fk-transfer_file_entry-updated_by")
+
+  @@index([created_by], map: "idx-transfer_file_entry-created_by")
+  @@index([credit_narrative], map: "idx-transfer_file_entry-credit_narrative")
+  @@index([debit_narrative], map: "idx-transfer_file_entry-debit_narrative")
+  @@index([transfer_file_id], map: "idx-transfer_file_entry-transfer_file_id")
+  @@index([updated_by], map: "idx-transfer_file_entry-updated_by")
+}
+
+model university {
+  university_id          Int                   @id @default(autoincrement())
+  university_name_en     String?               @db.VarChar(100)
+  university_name_ar     String?               @db.VarChar(100)
+  university_data_source Int?                  @db.TinyInt
+  university_created_by  Int?
+  university_updated_by  Int?
+  university_created_at  DateTime?             @db.DateTime(0)
+  university_updated_at  DateTime?             @db.DateTime(0)
+  deleted                Int                   @default(0) @db.SmallInt
+  candidate              candidate[]
+  candidate_education    candidate_education[]
+  fulltimer              fulltimer[]
+}
+
+model webhook {
+  webhook_id                      Int             @id @default(autoincrement())
+  event                           String          @db.VarChar(50)
+  endpoint                        String          @db.VarChar(255)
+  method                          webhook_method?
+  created_by                      Int?
+  updated_by                      Int?
+  created_at                      DateTime?       @db.DateTime(0)
+  updated_at                      DateTime?       @db.DateTime(0)
+  staff_webhook_created_byTostaff staff?          @relation("webhook_created_byTostaff", fields: [created_by], references: [staff_id], onUpdate: Restrict, map: "fk-webhook-created_by")
+  staff_webhook_updated_byTostaff staff?          @relation("webhook_updated_byTostaff", fields: [updated_by], references: [staff_id], onUpdate: Restrict, map: "fk-webhook-updated_by")
+
+  @@index([created_by], map: "fk-webhook-created_by")
+  @@index([updated_by], map: "fk-webhook-updated_by")
+  @@index([event], map: "idx-webhook-event")
+}
+
+enum chat_message_from {
+  candidate
+  company
+  staff
+  contact
+}
+
+enum invoice_invoice_status {
+  paid
+  unpaid
+}
+
+enum webhook_method {
+  GET
+  POST
+  PUT
+  PATCH
+  DELETE
+}
+
+enum job_compensation_type {
+  FIXED_PRICE
+  HOURLY
+  MONTHLY_SALARY
+}
+
+enum request_request_status {
+  pending
+  started
+  delivered
+  cancelled
+  finished_by_recruitment
+  re_work
+}
