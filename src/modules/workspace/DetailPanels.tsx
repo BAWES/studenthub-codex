@@ -1,3 +1,6 @@
+import type { Route } from "next";
+import Link from "next/link";
+
 type Fact = {
   label: string;
   value: string | number | null | undefined;
@@ -8,6 +11,7 @@ type Row = {
   title: string;
   subtitle: string;
   meta?: string;
+  href?: string;
 };
 
 export function FactPanel({ title, facts }: { title: string; facts: Fact[] }) {
@@ -38,7 +42,13 @@ export function CompactList({ title, rows }: { title: string; rows: Row[] }) {
           rows.map((row) => (
             <article className="row" key={row.id}>
               <div className="rowMain">
-                <strong>{row.title}</strong>
+                {row.href ? (
+                  <Link href={row.href as Route}>
+                    <strong>{row.title}</strong>
+                  </Link>
+                ) : (
+                  <strong>{row.title}</strong>
+                )}
                 <span>{row.subtitle}</span>
               </div>
               {row.meta ? <div className="rowMeta">{row.meta}</div> : null}

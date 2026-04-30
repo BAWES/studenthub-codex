@@ -49,6 +49,28 @@
 - Added `npm run test:smoke` to sign local role sessions, discover representative prod-clone records, and verify every built route returns the expected status.
 - Verified `npm run test:smoke` passes against `http://127.0.0.1:3000`.
 - Expanded smoke coverage with response-time budgets and role/ownership guard checks.
+- Built the unified `/hub` command workspace with role switching, global search, priority queues, and selected-record previews.
+- Added in-hub production-data previews for candidates, companies, requests, transfers, and civil ID batches.
+- Added smoke coverage for selected hub records across admin, staff, candidate, company, and inspector sessions.
+- Removed visible dev role switching from the end-user hub and disabled `/dev/impersonate` unless `DEV_IMPERSONATION_ENABLED=1`.
+- Scoped staff candidate search/detail access to candidates connected to the signed-in staff account.
+- Added a contextual hub command menu with `Cmd/Ctrl K`, grouped navigation/search/queue/result actions, shortcut help, and `G then _` navigation patterns.
+- Tightened the hub visual system toward a denser operations workspace with compact headers, rounded command surfaces, and role-aware command actions.
+- Rebuilt `/staff/candidates` from a thin directory into a scoped candidate operations console:
+  - staff-owned candidate queues
+  - selected candidate preview without leaving the page
+  - action plan from approval/profile/civil ID/work-log/invitation/warning signals
+  - activity stream from work logs, invitations, appeals, and warnings
+  - skills, tags, warnings, links, and ID-card coverage from imported legacy tables
+- Added smoke coverage for `/staff/candidates?candidate=:id`.
+- Reframed `/staff/candidates` into a staff operating-system shell with persistent workflow navigation for:
+  - candidates
+  - requests
+  - time tracking
+  - candidate pay
+  - company invoices
+  - ID cards and PDF/document queues
+- Added live workflow cards backed by request, application, interview, story, work-log, appeal, transfer-candidate, invoice, and ID-request tables.
 
 ## Known Follow-Ups
 
@@ -67,7 +89,7 @@
 
 Build workflow-grade coverage around the highest-risk flows:
 
-1. Request pipeline parity: statuses, applications, invitations, interviews, stories.
-2. Candidate profile parity: completeness, documents, ID verification, availability, skills.
-3. Work-log parity: shift approval, appeals, feedback, transfer/payroll connection.
-4. Company portal parity: request lifecycle, contacts, stores, notes.
+1. Staff request pipeline console: statuses, applications, invitations, interviews, stories, and staff-owned next actions.
+2. Candidate self-service console: profile completeness, documents, ID verification, availability, skills, invitations, and work logs.
+3. Work-log/payroll console: shift approval, appeals, feedback, transfer/payroll connection, and export checks.
+4. Company portal console: request lifecycle, contacts, stores, notes, and candidate shortlists.

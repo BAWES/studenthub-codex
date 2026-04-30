@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 export default async function AdminCandidateDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await requireRole("admin");
   const { id } = await params;
-  const data = await getCandidateDetail(Number(id));
+  const data = await getCandidateDetail(Number(id), "/admin/requests");
 
   if (!data.candidate) {
     notFound();

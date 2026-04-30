@@ -1,4 +1,5 @@
 import type { SessionUser } from "@/modules/auth/types";
+import type { Route } from "next";
 import { logoutAction } from "@/modules/auth/actions";
 import Link from "next/link";
 import { navForRole } from "./navigation";
@@ -14,6 +15,7 @@ type Row = {
   title: string;
   subtitle: string;
   meta?: string;
+  href?: string;
 };
 
 export function WorkspaceShell({
@@ -101,7 +103,13 @@ function WorkspaceList({ title, rows }: { title: string; rows: Row[] }) {
           rows.map((row) => (
             <article className="row" key={row.id}>
               <div className="rowMain">
-                <strong>{row.title}</strong>
+                {row.href ? (
+                  <Link href={row.href as Route}>
+                    <strong>{row.title}</strong>
+                  </Link>
+                ) : (
+                  <strong>{row.title}</strong>
+                )}
                 <span>{row.subtitle}</span>
               </div>
               <div className="rowMeta">{row.meta ? <span>{row.meta}</span> : null}</div>

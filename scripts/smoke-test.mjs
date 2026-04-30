@@ -41,6 +41,17 @@ async function head(path, cookie) {
   return { status: response.status, durationMs: Math.round(performance.now() - started) };
 }
 
+async function get(path, cookie) {
+  const started = performance.now();
+  const response = await fetch(`${baseUrl}${path}`, {
+    method: "GET",
+    redirect: "manual",
+    headers: cookie ? { cookie: `studenthub_next_session=${cookie}` } : undefined
+  });
+  const text = await response.text();
+  return { status: response.status, text, durationMs: Math.round(performance.now() - started) };
+}
+
 async function expectStatus(path, expected, cookie, options = {}) {
   const { status, durationMs } = await head(path, cookie);
   if (status !== expected) {
@@ -51,6 +62,21 @@ async function expectStatus(path, expected, cookie, options = {}) {
     throw new Error(`${path} exceeded ${budgetMs}ms budget: ${durationMs}ms`);
   }
   console.log(`ok ${status} ${durationMs}ms ${path}`);
+}
+
+async function expectBodyIncludes(path, expected, expectedText, cookie, options = {}) {
+  const { status, text, durationMs } = await get(path, cookie);
+  if (status !== expected) {
+    throw new Error(`${path} expected ${expected}, got ${status}`);
+  }
+  if (!text.includes(expectedText)) {
+    throw new Error(`${path} expected body to include ${JSON.stringify(expectedText)}`);
+  }
+  const budgetMs = options.budgetMs ?? defaultBudgetMs;
+  if (durationMs > budgetMs) {
+    throw new Error(`${path} exceeded ${budgetMs}ms budget: ${durationMs}ms`);
+  }
+  console.log(`ok ${status} ${durationMs}ms body ${path}`);
 }
 
 async function expectOneOf(path, expectedStatuses, cookie, options = {}) {
@@ -78,6 +104,7 @@ async function main() {
     admin,
     staffRequest,
     staffCandidate,
+    unassignedStaffCandidate,
     adminCandidate,
     adminCompany,
     adminRequest,
@@ -113,6 +140,26 @@ async function main() {
         select: { staff_id: true, candidate_id: true, staff: { select: { staff_name: true, staff_email: true } } }
       })
     ),
+    firstOrThrow("unassigned staff candidate", async () => {
+      const base = await prisma.candidate_work_history.findFirst({
+        where: { staff_id: { not: null }, candidate_id: { not: null } },
+        orderBy: { end_date: "desc" },
+        select: { staff_id: true }
+      });
+      if (!base?.staff_id) return null;
+      const assigned = await prisma.candidate_work_history.findMany({
+        where: { staff_id: base.staff_id, candidate_id: { not: null } },
+        distinct: ["candidate_id"],
+        take: 1000,
+        select: { candidate_id: true }
+      });
+      const assignedIds = assigned.map((row) => row.candidate_id).filter(Boolean);
+      return prisma.candidate.findFirst({
+        where: { deleted: 0, candidate_id: { notIn: assignedIds } },
+        orderBy: { candidate_updated_at: "desc" },
+        select: { candidate_id: true }
+      });
+    }),
     firstOrThrow("admin candidate", () =>
       prisma.candidate.findFirst({
         where: { deleted: 0 },
@@ -334,9 +381,16 @@ async function main() {
   });
 
   await expectStatus("/login", 200);
+  await expectStatus("/hub", 307);
   await expectStatus("/admin", 307);
   await expectStatus("/staff", 307);
 
+  await expectStatus("/hub", 200, adminCookie);
+  await expectStatus(`/hub?scope=people&record=candidate-${adminCandidate.candidate_id}`, 200, adminCookie);
+  await expectStatus(`/hub?scope=companies&record=company-${adminCompany.company_id}`, 200, adminCookie);
+  await expectStatus(`/hub?scope=demand&record=request-${adminRequest.request_uuid}`, 200, adminCookie);
+  await expectStatus(`/hub?scope=money&record=transfer-${adminTransfer.transfer_id}`, 200, adminCookie);
+  await expectStatus(`/hub?scope=compliance&record=id-${idRequest.cir_uuid}`, 200, adminCookie);
   await expectStatus("/admin", 200, adminCookie);
   await expectStatus("/admin/candidates", 200, adminCookie);
   await expectStatus(`/admin/candidates/${adminCandidate.candidate_id}`, 200, adminCookie);
@@ -347,24 +401,35 @@ async function main() {
   await expectStatus("/admin/transfers", 200, adminCookie);
   await expectStatus(`/admin/transfers/${adminTransfer.transfer_id}`, 200, adminCookie);
 
+  await expectStatus("/hub", 200, staffCookie);
+  await expectStatus(`/hub?scope=demand&record=request-${staffRequest.request_uuid}`, 200, staffCookie);
+  await expectStatus(`/hub?scope=people&record=candidate-${staffCandidate.candidate_id}`, 200, staffCandidateCookie);
   await expectStatus("/staff", 200, staffCookie);
   await expectStatus("/staff/requests", 200, staffCookie);
   await expectStatus(`/staff/requests/${staffRequest.request_uuid}`, 200, staffCookie);
   await expectStatus("/staff/candidates", 200, staffCandidateCookie);
+  await expectStatus(`/staff/candidates?candidate=${staffCandidate.candidate_id}`, 200, staffCandidateCookie);
   await expectStatus(`/staff/candidates/${staffCandidate.candidate_id}`, 200, staffCandidateCookie);
 
+  await expectStatus("/hub", 200, candidateInvitationCookie);
+  await expectStatus(`/hub?scope=people&record=candidate-${candidateInvitation.candidate_id}`, 200, candidateInvitationCookie);
   await expectStatus("/candidate", 200, candidateInvitationCookie);
   await expectStatus("/candidate/invitations", 200, candidateInvitationCookie);
   await expectStatus(`/candidate/invitations/${candidateInvitation.invitation_uuid}`, 200, candidateInvitationCookie);
   await expectStatus("/candidate/work-logs", 200, candidateWorkLogCookie);
   await expectStatus(`/candidate/work-logs/${candidateWorkLog.candidate_working_hour_uuid}`, 200, candidateWorkLogCookie);
 
+  await expectStatus("/hub", 200, companyCookie);
+  await expectStatus(`/hub?scope=companies&record=company-${contactCompany.company_id}`, 200, companyCookie);
+  await expectStatus(`/hub?scope=demand&record=request-${contactRequest.company.request[0].request_uuid}`, 200, companyRequestCookie);
   await expectStatus("/company", 200, companyCookie);
   await expectStatus("/company/companies", 200, companyCookie);
   await expectStatus(`/company/companies/${contactCompany.company_id}`, 200, companyCookie);
   await expectStatus("/company/requests", 200, companyRequestCookie);
   await expectStatus(`/company/requests/${contactRequest.company.request[0].request_uuid}`, 200, companyRequestCookie);
 
+  await expectStatus("/hub", 200, inspectorCookie);
+  await expectStatus(`/hub?scope=compliance&record=id-${idRequest.cir_uuid}`, 200, inspectorCookie);
   await expectStatus("/inspector", 200, inspectorCookie);
   await expectStatus("/inspector/id-requests", 200, inspectorCookie);
   await expectStatus(`/inspector/id-requests/${idRequest.cir_uuid}`, 200, inspectorCookie);
@@ -379,6 +444,14 @@ async function main() {
   await expectStatus(`/candidate/work-logs/${otherCandidateWorkLog.candidate_working_hour_uuid}`, 404, candidateWorkLogCookie);
   await expectStatus(`/company/companies/${otherContactCompany.company_id}`, 404, companyCookie);
   await expectStatus(`/company/requests/${otherContactRequest.company.request[0].request_uuid}`, 404, companyRequestCookie);
+  await expectStatus(`/staff/candidates/${unassignedStaffCandidate.candidate_id}`, 404, staffCandidateCookie);
+  await expectStatus(`/hub?scope=people&record=candidate-${unassignedStaffCandidate.candidate_id}`, 200, staffCandidateCookie);
+  await expectBodyIncludes(
+    `/hub?scope=people&record=candidate-${unassignedStaffCandidate.candidate_id}`,
+    200,
+    "Candidate unavailable",
+    staffCandidateCookie
+  );
   await expectOneOf(`/staff/requests/${adminRequest.request_uuid}`, [200, 404], staffCookie);
 
   console.log("smoke tests passed");

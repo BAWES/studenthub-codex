@@ -1,9 +1,9 @@
 import type { Route } from "next";
 import Link from "next/link";
+import { logoutAction } from "@/modules/auth/actions";
 import { requireRole } from "@/modules/auth/session";
-import { DataTable } from "@/modules/workspace/DataTable";
-import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
-import { getStaffCandidateDirectoryRows, type StaffCandidateFilter } from "@/modules/workspace/data";
+import { StaffCandidateConsole } from "@/modules/workspace/StaffCandidateConsole";
+import { getStaffCandidateConsole, type StaffCandidateFilter } from "@/modules/workspace/data";
 
 export const dynamic = "force-dynamic";
 
@@ -20,83 +20,83 @@ function parseFilter(value: string | string[] | undefined): StaffCandidateFilter
   return filters.some((item) => item.value === filter) ? (filter as StaffCandidateFilter) : "all";
 }
 
+function parseCandidateId(value: string | string[] | undefined) {
+  const candidate = Array.isArray(value) ? value[0] : value;
+  const id = Number(candidate);
+  return Number.isInteger(id) && id > 0 ? id : undefined;
+}
+
 export default async function StaffCandidatesPage({
   searchParams
 }: {
-  searchParams: Promise<{ q?: string; filter?: string }>;
+  searchParams: Promise<{ q?: string; filter?: string; candidate?: string }>;
 }) {
   const session = await requireRole("staff");
   const params = await searchParams;
   const query = params.q ?? "";
   const filter = parseFilter(params.filter);
-  const data = await getStaffCandidateDirectoryRows({ search: query, filter });
+  const data = await getStaffCandidateConsole({
+    staffId: Number(session.id),
+    search: query,
+    filter,
+    candidateId: parseCandidateId(params.candidate)
+  });
 
   return (
-    <WorkspaceShell session={session} eyebrow="Staff" title="Candidate workspace" metrics={data.metrics}>
-      <section className="commandSurface">
-        <form className="searchForm">
-          <label>
-            Search candidates
-            <input name="q" placeholder="Name, email, or candidate ID" defaultValue={query} />
-          </label>
-          <input type="hidden" name="filter" value={filter} />
-          <button type="submit">Search</button>
-        </form>
-        <div className="filterRail" aria-label="Candidate filters">
-          {filters.map((item) => {
-            const href = `/staff/candidates?filter=${item.value}${query ? `&q=${encodeURIComponent(query)}` : ""}` as Route;
-            return (
-              <Link className={item.value === filter ? "active" : ""} href={href} key={item.value}>
-                {item.label}
-              </Link>
-            );
-          })}
-        </div>
-      </section>
+    <main className="studentOS">
+      <aside className="studentOSSidebar">
+        <Link className="studentOSBrand" href="/hub">
+          <span>SH</span>
+          <strong>StudentHub</strong>
+        </Link>
 
-      <DataTable
-        title="Candidate Directory"
-        description="Searchable staff candidate workspace from the production clone."
-        rows={data.rows}
-        rowHref={(row) => `/staff/candidates/${row.id}` as Route}
-        columns={[
-          {
-            key: "name",
-            label: "Candidate",
-            render: (row) => (
-              <span className="stackedCell">
-                <strong>{row.name}</strong>
-                <small>{row.uid}</small>
-              </span>
-            )
-          },
-          { key: "email", label: "Email", render: (row) => row.email },
-          { key: "country", label: "Country", render: (row) => row.country },
-          {
-            key: "assignment",
-            label: "Assignment",
-            render: (row) => (
-              <span className="stackedCell">
-                <strong>{row.company}</strong>
-                <small>{row.store}</small>
-              </span>
-            )
-          },
-          {
-            key: "status",
-            label: "Status",
-            render: (row) => (
-              <span className="statusCell">
-                <strong>{row.status}</strong>
-                {row.flags.map((flag) => (
-                  <small key={flag}>{flag}</small>
-                ))}
-              </span>
-            )
-          },
-          { key: "updated", label: "Updated", render: (row) => row.updated }
-        ]}
-      />
-    </WorkspaceShell>
+        <div className="studentOSUser">
+          <span>Staff workspace</span>
+          <strong>{session.name}</strong>
+          <small>{session.email}</small>
+        </div>
+
+        <nav className="studentOSNav" aria-label="Staff operating system">
+          {data.staffOS.tabs.map((tab) => (
+            <Link className={tab.active ? "active" : ""} href={tab.href as Route} key={tab.label}>
+              <span>{tab.label}</span>
+              <strong>{tab.value.toLocaleString("en-US")}</strong>
+            </Link>
+          ))}
+        </nav>
+
+        <section className="studentOSEstate" aria-label="Imported production data">
+          {data.staffOS.estate.map((item) => (
+            <div key={item.label}>
+              <span>{item.label}</span>
+              <strong>{item.value.toLocaleString("en-US")}</strong>
+              <small>{item.note}</small>
+            </div>
+          ))}
+        </section>
+
+        <form className="studentOSSignout" action={logoutAction}>
+          <button type="submit">Sign out</button>
+        </form>
+      </aside>
+
+      <section className="studentOSMain">
+        <header className="studentOSTop">
+          <div>
+            <p className="eyebrow">Staff OS</p>
+            <h1>Candidate operations</h1>
+            <p>One live workspace for hiring demand, candidate readiness, time, payroll, invoices, and ID documents.</p>
+          </div>
+          <div className="studentOSKeys" aria-label="Keyboard shortcuts">
+            <span>⌘K command</span>
+            <span>/ search</span>
+            <span>G R requests</span>
+            <span>G C candidates</span>
+          </div>
+        </header>
+
+        <StaffCandidateConsole data={data} filter={filter} filters={filters} query={query} />
+      </section>
+    </main>
   );
 }

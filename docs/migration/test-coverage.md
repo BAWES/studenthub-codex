@@ -12,6 +12,8 @@
   - Covers anonymous login, protected redirect, and role routes for admin, staff, candidate, company, and inspector.
   - Enforces a default per-route response budget of 5 seconds. Override with `SMOKE_BUDGET_MS`.
   - Checks cross-role redirects and ownership guards for candidate invitation/work-log detail and company account/request detail pages.
+  - Checks selected `/hub` preview URLs for candidate, company, request, transfer, and civil ID records across the relevant roles.
+  - Checks staff cannot open an unassigned candidate detail route.
 
 ## Covered Routes
 
@@ -54,7 +56,14 @@
 - Inspector:
   - `/inspector`
   - `/inspector/id-requests`
-  - `/inspector/id-requests/[id]`
+- `/inspector/id-requests/[id]`
+
+- Hub selected-record previews:
+  - `/hub?scope=people&record=candidate-[id]`
+  - `/hub?scope=companies&record=company-[id]`
+  - `/hub?scope=demand&record=request-[uuid]`
+  - `/hub?scope=money&record=transfer-[id]`
+  - `/hub?scope=compliance&record=id-[uuid]`
 
 ## Not Yet Covered
 
@@ -62,6 +71,8 @@
 - Old-system parity assertions for business rules.
 - Cross-role authorization denial checks beyond the basic protected redirect.
 - Deep cross-role authorization denial checks for every future mutation/action.
+- Content-level assertions for unavailable hub previews.
+- Automated keyboard/command-palette interaction tests.
 - Visual regression checks.
 - Performance budgets and slow-query detection.
 - File/media/document rendering.

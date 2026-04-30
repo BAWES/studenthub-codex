@@ -25,7 +25,7 @@ export async function loginAction(_state: LoginState, formData: FormData): Promi
   }
 
   await createSession(result.user);
-  redirect(`/${result.user.role}`);
+  redirect("/hub");
 }
 
 export async function logoutAction() {

@@ -19,6 +19,7 @@ Use this as the working definition of "ready to migrate." A page existing is not
 
 - [x] Admin candidate list renders.
 - [x] Admin/staff candidate detail renders profile, invitations, work history, work logs, notes.
+- [x] Staff candidate console renders scoped operating queues, selected record preview, activity stream, action plan, skills, tags, warnings, and ID-card coverage.
 - [x] Candidate invitation list/detail renders.
 - [ ] Candidate profile edit implemented.
 - [ ] Profile completeness rules mapped.
@@ -59,6 +60,7 @@ Use this as the working definition of "ready to migrate." A page existing is not
 - [x] Build test added.
 - [x] Route smoke test added.
 - [x] Basic cross-role/ownership smoke checks added.
+- [x] Staff candidate console smoke coverage includes selected-record query mode.
 - [ ] Real auth provider plan finalized.
 - [ ] Algolia/search replacement isolated behind module.
 - [ ] File storage/media strategy implemented.
