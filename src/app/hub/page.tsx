@@ -2,7 +2,7 @@ import type { Route } from "next";
 import Link from "next/link";
 import { logoutAction } from "@/modules/auth/actions";
 import { requireSession } from "@/modules/auth/session";
-import type { Role } from "@/modules/auth/types";
+import { roles, type Role } from "@/modules/auth/types";
 import { getUnifiedHub, parseHubScope } from "@/modules/hub/data";
 import { HubShortcuts, type HubCommand } from "@/modules/hub/HubShortcuts";
 
@@ -11,11 +11,12 @@ export const dynamic = "force-dynamic";
 export default async function HubPage({
   searchParams
 }: {
-  searchParams: Promise<{ q?: string; scope?: string; record?: string }>;
+  searchParams: Promise<{ q?: string; scope?: string; record?: string; required?: string }>;
 }) {
   const session = await requireSession();
   const params = await searchParams;
   const scope = parseHubScope(params.scope);
+  const requiredRole = parseRequiredRole(params.required);
   const data = await getUnifiedHub(session, { query: params.q, scope, record: params.record });
   const hubContext = hubContextHref(data.query, data.scope);
   const commands = buildCommands(data);
@@ -70,6 +71,17 @@ export default async function HubPage({
         </header>
 
         <section className="journeyHome">
+          {requiredRole && requiredRole !== session.role ? (
+            <section className="roleBoundaryNotice" aria-label="Role access notice">
+              <div>
+                <span>Access boundary</span>
+                <strong>You are signed in as {session.role}, not {requiredRole}.</strong>
+                <p>Use the matching production credentials to enter that workspace. This keeps candidate, staff, company, and admin data separated.</p>
+              </div>
+              <Link href="/login">Switch account</Link>
+            </section>
+          ) : null}
+
           <section className="journeyHero">
             <div>
               <span className="journeyEyebrow">Start here</span>
@@ -188,6 +200,11 @@ function hubRecordHref(query: string, scope: string, record: string) {
   params.set("scope", scope);
   params.set("record", record);
   return `/hub?${params.toString()}` as Route;
+}
+
+function parseRequiredRole(value: string | string[] | undefined): Role | null {
+  const role = Array.isArray(value) ? value[0] : value;
+  return role && roles.includes(role as Role) ? (role as Role) : null;
 }
 
 type HubData = Awaited<ReturnType<typeof getUnifiedHub>>;
