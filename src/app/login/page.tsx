@@ -1,61 +1,51 @@
+import Link from "next/link";
+import type { Route } from "next";
 import { redirect } from "next/navigation";
-import { LoginForm } from "@/modules/auth/LoginForm";
 import { getSession } from "@/modules/auth/session";
+import { portalContent } from "@/modules/auth/portalContent";
+import { ThemeToggle } from "@/modules/theme/ThemeToggle";
 
 export const dynamic = "force-dynamic";
 
 export default async function LoginPage() {
   const session = await getSession();
-  if (session) redirect(`/${session.role}`);
+  if (session) redirect("/hub");
 
   return (
-    <main className="loginShell">
-      <section className="loginBrandPanel" aria-label="StudentHub">
-        <div className="loginMasthead">
-          <span className="brandMark">SH</span>
-          <div>
-            <strong>StudentHub</strong>
-            <small>Operations console</small>
-          </div>
-        </div>
+    <main className="portalChooserShell">
+      <nav className="landingNav" aria-label="StudentHub login navigation">
+        <Link className="landingBrand" href="/">
+          <span>SH</span>
+          <strong>StudentHub</strong>
+        </Link>
+        <ThemeToggle />
+      </nav>
 
-        <div className="loginHero">
-          <p className="eyebrow">Local Production Validation</p>
-          <h1>One console for every workspace.</h1>
-          <p>
-            Sign in with the same production credentials and review the rebuild against the imported local data clone.
-          </p>
-        </div>
-
-        <div className="loginProof" aria-label="Imported data coverage">
-          <div>
-            <span>Candidates</span>
-            <strong>53k+</strong>
-          </div>
-          <div>
-            <span>Companies</span>
-            <strong>500+</strong>
-          </div>
-          <div>
-            <span>Workspaces</span>
-            <strong>5</strong>
-          </div>
-        </div>
-
-        <div className="loginSignal">
-          <div>
-            <span>Database</span>
-            <strong>studenthub_prod_local</strong>
-          </div>
-          <div>
-            <span>Mode</span>
-            <strong>Read-only validation</strong>
-          </div>
+      <section className="portalChooserHero">
+        <p className="eyebrow">Choose your login</p>
+        <h1>Enter through the portal that matches your role.</h1>
+        <p>
+          The advanced app shares modules behind the scenes, but access stays separated for candidates, staff, companies,
+          admins, and inspectors.
+        </p>
+        <div className="portalChooserPromise">
+          <span>Same production credentials</span>
+          <span>No account switching tricks</span>
+          <span>Shared modules after access is verified</span>
         </div>
       </section>
 
-      <section className="loginPanel" aria-label="Sign in">
-        <LoginForm />
+      <section className="portalChoiceGrid" aria-label="Role-specific logins">
+        {(["candidate", "staff", "company", "admin", "inspector"] as const).map((role) => {
+          const portal = portalContent[role];
+          return (
+            <Link href={portal.href as Route} key={role}>
+              <span>{portal.label}</span>
+              <strong>{portal.audience}</strong>
+              <small>{portal.promise}</small>
+            </Link>
+          );
+        })}
       </section>
     </main>
   );

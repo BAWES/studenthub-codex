@@ -13,16 +13,22 @@
     "db:create-sample": "node scripts/create-sample-sql.mjs",
     "db:import-sample": "bash scripts/import-sample-db.sh",
     "db:import-prod-local": "bash scripts/import-prod-local-db.sh",
+    "search:index-candidates": "node scripts/index-candidates-meilisearch.mjs",
     "db:generate": "prisma generate",
     "db:introspect": "prisma db pull",
     "db:studio": "prisma studio"
   },
   "dependencies": {
     "@prisma/client": "^6.6.0",
+    "@radix-ui/react-slot": "^1.2.4",
     "bcryptjs": "^3.0.3",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^1.14.0",
     "next": "^15.3.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "tailwind-merge": "^3.5.0",
     "zod": "^3.24.3"
   },
   "devDependencies": {

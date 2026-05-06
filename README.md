@@ -4,6 +4,8 @@ Modern rebuild workspace for StudentHub.
 
 This app is intentionally separate from the Yii2 backend and Angular/Ionic frontends. The current system remains the reference while this project rebuilds the product as one role-based Next.js app.
 
+The current execution contract is in `docs/migration/nextgen-execution-plan.md`. Use it as the source of truth for the next rebuild steps.
+
 ## Setup
 
 ```bash
@@ -41,7 +43,17 @@ The local login page is at:
 http://localhost:3000/login
 ```
 
-Choose the role that matches the old portal and use the existing credentials from the imported local production clone.
+Current local validation still includes the temporary role-based login flow. The target plan is one email/password login that resolves the account type server-side, then opens the correct capability-scoped workspace automatically.
+
+## Candidate Search Index
+
+The app currently renders candidate search from MySQL and includes a Meilisearch indexing path for the open-source search layer:
+
+```bash
+MEILI_HOST=http://127.0.0.1:7700 MEILI_MASTER_KEY=dev-master-key npm run search:index-candidates
+```
+
+See `docs/migration/search.md` for the candidate index shape and migration gates.
 
 ## Data Safety
 

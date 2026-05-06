@@ -31,6 +31,12 @@ node scripts/create-sample-sql.mjs --dump="../StudentHub Backup.sql" --output=".
 
 ## Migration Shape
 
+The product direction and execution contract now live in:
+
+- `docs/migration/nextgen-execution-plan.md`
+
+Follow that file before making broad UX, auth, routing, or migration decisions. The short version: one public landing page, one login that resolves the account server-side, one authenticated app shell, shared entity modules, capability-scoped actions, and production-clone parity tests.
+
 The new app should be a modular monolith:
 
 - `src/modules/auth`
@@ -48,7 +54,7 @@ Start with read-only views against the sample database, then migrate vertical sl
 
 ## First Vertical Slice
 
-Recommended first slice:
+The original recommended first slice was:
 
 1. Role-aware login shell.
 2. Candidate list.
@@ -57,3 +63,5 @@ Recommended first slice:
 5. Request list/detail.
 
 That slice touches the important shape of the business without starting with payroll, reports, mobile packaging, or external integrations.
+
+The next actual slice should be Milestone 1 from `nextgen-execution-plan.md`: unified auth and account resolution, because the current role-picker login is the wrong foundation for the target product.

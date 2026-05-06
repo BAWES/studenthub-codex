@@ -5,6 +5,7 @@ import { requireSession } from "@/modules/auth/session";
 import { roles, type Role } from "@/modules/auth/types";
 import { getUnifiedHub, parseHubScope } from "@/modules/hub/data";
 import { HubShortcuts, type HubCommand } from "@/modules/hub/HubShortcuts";
+import { ThemeToggle } from "@/modules/theme/ThemeToggle";
 
 export const dynamic = "force-dynamic";
 
@@ -27,6 +28,7 @@ export default async function HubPage({
       <aside className="commandRail">
         <Link className="commandBrand" href="/hub" aria-label="StudentHub command home">
           <span>SH</span>
+          <strong>StudentHub</strong>
         </Link>
 
         <nav className="commandRailNav" aria-label="Workspace navigation">
@@ -37,15 +39,18 @@ export default async function HubPage({
               key={item.href}
               title={`${item.label}: ${item.description}`}
             >
-              <span>{railToken(item.label)}</span>
               <strong>{item.label}</strong>
+              <small>{item.description}</small>
             </Link>
           ))}
         </nav>
 
-        <form className="commandRailSignout" action={logoutAction}>
-          <button type="submit">Sign out</button>
-        </form>
+        <div className="commandRailFooter">
+          <ThemeToggle />
+          <form className="commandRailSignout" action={logoutAction}>
+            <button type="submit">Sign out</button>
+          </form>
+        </div>
       </aside>
 
       <section className="commandDesk">
@@ -180,10 +185,84 @@ export default async function HubPage({
                 {data.results.length === 0 ? <p>No matching records for this login and scope.</p> : null}
               </div>
             </div>
+
+            {data.preview ? <RecordPreview preview={data.preview} /> : null}
           </section>
         </section>
       </section>
     </main>
+  );
+}
+
+function RecordPreview({ preview }: { preview: NonNullable<HubData["preview"]> }) {
+  return (
+    <section className="journeyPanel previewPanel" aria-label="Selected record preview">
+      <div className="previewHeader">
+        <span>{preview.type}</span>
+        <h2>{preview.title}</h2>
+        <p>{preview.subtitle}</p>
+        <small>{preview.meta}</small>
+      </div>
+
+      {preview.flags.length ? (
+        <div className="previewFlags">
+          {preview.flags.map((flag) => (
+            <span key={flag}>{flag}</span>
+          ))}
+        </div>
+      ) : null}
+
+      {preview.actions.length ? (
+        <div className="previewActions">
+          {preview.actions.map((action) => (
+            <a href={action.href} key={`${action.label}-${action.href}`}>
+              {action.label}
+            </a>
+          ))}
+        </div>
+      ) : null}
+
+      <div className="previewFacts">
+        {preview.facts.map((fact) => (
+          <div key={fact.label}>
+            <span>{fact.label}</span>
+            <strong>{fact.value}</strong>
+          </div>
+        ))}
+      </div>
+
+      {preview.related.length ? (
+        <div className="previewRelated">
+          {preview.related.map((section) => (
+            <section key={section.title}>
+              <div className="previewRelatedHeader">
+                <span>Related</span>
+                <h3>{section.title}</h3>
+              </div>
+              {section.rows.length ? (
+                section.rows.map((row) =>
+                  row.href ? (
+                    <Link className="previewRow" href={row.href} key={row.id}>
+                      <strong>{row.title}</strong>
+                      <span>{row.subtitle}</span>
+                      <small>{row.meta}</small>
+                    </Link>
+                  ) : (
+                    <article className="previewRow" key={row.id}>
+                      <strong>{row.title}</strong>
+                      <span>{row.subtitle}</span>
+                      <small>{row.meta}</small>
+                    </article>
+                  )
+                )
+              ) : (
+                <p className="previewEmpty">No related records visible to this login.</p>
+              )}
+            </section>
+          ))}
+        </div>
+      ) : null}
+    </section>
   );
 }
 
@@ -395,19 +474,6 @@ function buildRoleGuide(role: Role, data: HubData): RoleGuide {
   }
 
   return guides[role];
-}
-
-function railToken(label: string) {
-  const normalized = label.toLowerCase();
-  if (normalized.includes("candidate")) return "Ca";
-  if (normalized.includes("company")) return "Co";
-  if (normalized.includes("request")) return "Rq";
-  if (normalized.includes("transfer")) return "Tr";
-  if (normalized.includes("invitation")) return "In";
-  if (normalized.includes("work")) return "Wk";
-  if (normalized.includes("id")) return "ID";
-  if (normalized.includes("hub") || normalized.includes("command")) return "⌘";
-  return label.slice(0, 2);
 }
 
 function buildCommands(data: Awaited<ReturnType<typeof getUnifiedHub>>): HubCommand[] {

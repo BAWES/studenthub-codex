@@ -1,21 +1,15 @@
 import { requireRole } from "@/modules/auth/session";
-import { StaffCandidateConsole } from "@/modules/workspace/StaffCandidateConsole";
+import { CandidateSearchOS } from "@/modules/candidates/CandidateSearchOS";
+import { getCandidateSearchWorkspace, type CandidateSearchFilter } from "@/modules/candidates/search";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
-import { getStaffCandidateConsole, type StaffCandidateFilter } from "@/modules/workspace/data";
 
 export const dynamic = "force-dynamic";
 
-const filters: { label: string; value: StaffCandidateFilter }[] = [
-  { label: "All", value: "all" },
-  { label: "Active", value: "active" },
-  { label: "Needs review", value: "needs-review" },
-  { label: "Incomplete", value: "incomplete" },
-  { label: "Civil ID", value: "civil-id" }
-];
+const filterValues: CandidateSearchFilter[] = ["all", "active", "needs-review", "incomplete", "civil-id"];
 
-function parseFilter(value: string | string[] | undefined): StaffCandidateFilter {
+function parseFilter(value: string | string[] | undefined): CandidateSearchFilter {
   const filter = Array.isArray(value) ? value[0] : value;
-  return filters.some((item) => item.value === filter) ? (filter as StaffCandidateFilter) : "all";
+  return filterValues.includes(filter as CandidateSearchFilter) ? (filter as CandidateSearchFilter) : "all";
 }
 
 function parseCandidateId(value: string | string[] | undefined) {
@@ -27,27 +21,31 @@ function parseCandidateId(value: string | string[] | undefined) {
 export default async function StaffCandidatesPage({
   searchParams
 }: {
-  searchParams: Promise<{ q?: string; filter?: string; candidate?: string }>;
+  searchParams: Promise<{ q?: string; filter?: string; candidate?: string; country?: string; university?: string; company?: string; skill?: string }>;
 }) {
   const session = await requireRole("staff");
   const params = await searchParams;
-  const query = params.q ?? "";
-  const filter = parseFilter(params.filter);
-  const data = await getStaffCandidateConsole({
+  const search = {
+    role: "staff" as const,
     staffId: Number(session.id),
-    search: query,
-    filter,
-    candidateId: parseCandidateId(params.candidate)
-  });
+    query: params.q ?? "",
+    filter: parseFilter(params.filter),
+    candidateId: parseCandidateId(params.candidate),
+    country: params.country,
+    university: params.university,
+    company: params.company,
+    skill: params.skill
+  };
+  const data = await getCandidateSearchWorkspace(search);
 
   return (
     <WorkspaceShell
       session={session}
       eyebrow="Staff workspace"
-      title="Work candidates from one focused operating desk."
+      title="Search and work candidates from one operating desk."
       metrics={data.metrics}
     >
-      <StaffCandidateConsole data={data} filter={filter} filters={filters} query={query} />
+      <CandidateSearchOS basePath="/staff/candidates" data={data} detailPath="/staff/candidates" params={search} />
     </WorkspaceShell>
   );
 }

@@ -71,6 +71,20 @@
   - company invoices
   - ID cards and PDF/document queues
 - Added live workflow cards backed by request, application, interview, story, work-log, appeal, transfer-candidate, invoice, and ID-request tables.
+- Replaced the admin/staff candidate list surface with a shared production-backed candidate search OS:
+  - scoped admin/staff access
+  - query search over names, email, phone, UID, IDs, skills, and tags
+  - facets for country, university, company, and skills
+  - selected candidate preview with profile, invitations, work history, time logs, notes, skills, and tags
+- Added a Meilisearch candidate indexing script so the current MySQL search surface can move to a dedicated open-source search index without changing the workflow UI.
+- Expanded smoke coverage with content checks for the shared candidate search OS and staff candidate access denial preview.
+- Rebuilt admin/staff request detail into a request fulfillment desk:
+  - request brief, skills, status, seats, and company context
+  - pipeline stages for matches, suggestions, invitations, applications, interviews, and stories
+  - skill-based candidate match rows from prod-clone data
+  - local add-suggestion action that creates the legacy `note` + `suggestion` records and updates the request timestamp
+  - mailto draft for employer suggestion emails without auto-sending anything
+- Expanded smoke coverage with content checks for the new admin/staff request fulfillment desk.
 
 ## Known Follow-Ups
 
@@ -89,7 +103,7 @@
 
 Build workflow-grade coverage around the highest-risk flows:
 
-1. Staff request pipeline console: statuses, applications, invitations, interviews, stories, and staff-owned next actions.
-2. Candidate self-service console: profile completeness, documents, ID verification, availability, skills, invitations, and work logs.
-3. Work-log/payroll console: shift approval, appeals, feedback, transfer/payroll connection, and export checks.
-4. Company portal console: request lifecycle, contacts, stores, notes, and candidate shortlists.
+1. Candidate self-service console: profile completeness, documents, ID verification, availability, skills, invitations, and work logs.
+2. Work-log/payroll console: shift approval, appeals, feedback, transfer/payroll connection, and export checks.
+3. Company portal console: request lifecycle, contacts, stores, notes, and candidate shortlists.
+4. PDF/document generation: CV exports, ID cards, invoices, and transfer files.

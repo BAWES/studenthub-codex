@@ -14,6 +14,8 @@
   - Checks cross-role redirects and ownership guards for candidate invitation/work-log detail and company account/request detail pages.
   - Checks selected `/hub` preview URLs for candidate, company, request, transfer, and civil ID records across the relevant roles.
   - Checks staff cannot open an unassigned candidate detail route.
+  - Checks the shared admin/staff candidate search OS renders and staff get an unavailable preview for unassigned candidates.
+  - Checks the admin/staff request fulfillment desk renders for representative prod-clone requests.
 
 ## Covered Routes
 
@@ -68,6 +70,7 @@
 ## Not Yet Covered
 
 - Form submissions and mutations.
+- Mutation smoke coverage for local-only suggestion creation and duplicate handling.
 - Old-system parity assertions for business rules.
 - Cross-role authorization denial checks beyond the basic protected redirect.
 - Deep cross-role authorization denial checks for every future mutation/action.
@@ -77,6 +80,7 @@
 - Performance budgets and slow-query detection.
 - File/media/document rendering.
 - External dependencies such as Algolia, email, notifications, storage, payment/payroll exports, and third-party identity providers.
+- Meilisearch integration tests for indexing, filtering, typo tolerance, and MySQL fallback behavior.
 
 ## Migration Gate
 

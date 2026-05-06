@@ -393,11 +393,13 @@ async function main() {
   await expectStatus(`/hub?scope=compliance&record=id-${idRequest.cir_uuid}`, 200, adminCookie);
   await expectStatus("/admin", 200, adminCookie);
   await expectStatus("/admin/candidates", 200, adminCookie);
+  await expectBodyIncludes("/admin/candidates?q=jaafar", 200, "Candidate intelligence", adminCookie);
   await expectStatus(`/admin/candidates/${adminCandidate.candidate_id}`, 200, adminCookie);
   await expectStatus("/admin/companies", 200, adminCookie);
   await expectStatus(`/admin/companies/${adminCompany.company_id}`, 200, adminCookie);
   await expectStatus("/admin/requests", 200, adminCookie);
   await expectStatus(`/admin/requests/${adminRequest.request_uuid}`, 200, adminCookie);
+  await expectBodyIncludes(`/admin/requests/${adminRequest.request_uuid}`, 200, "Request fulfillment", adminCookie);
   await expectStatus("/admin/transfers", 200, adminCookie);
   await expectStatus(`/admin/transfers/${adminTransfer.transfer_id}`, 200, adminCookie);
 
@@ -407,8 +409,15 @@ async function main() {
   await expectStatus("/staff", 200, staffCookie);
   await expectStatus("/staff/requests", 200, staffCookie);
   await expectStatus(`/staff/requests/${staffRequest.request_uuid}`, 200, staffCookie);
+  await expectBodyIncludes(`/staff/requests/${staffRequest.request_uuid}`, 200, "Request fulfillment", staffCookie);
   await expectStatus("/staff/candidates", 200, staffCandidateCookie);
   await expectStatus(`/staff/candidates?candidate=${staffCandidate.candidate_id}`, 200, staffCandidateCookie);
+  await expectBodyIncludes(
+    `/staff/candidates?candidate=${staffCandidate.candidate_id}`,
+    200,
+    "Candidate intelligence",
+    staffCandidateCookie
+  );
   await expectStatus(`/staff/candidates/${staffCandidate.candidate_id}`, 200, staffCandidateCookie);
 
   await expectStatus("/hub", 200, candidateInvitationCookie);
@@ -445,6 +454,12 @@ async function main() {
   await expectStatus(`/company/companies/${otherContactCompany.company_id}`, 404, companyCookie);
   await expectStatus(`/company/requests/${otherContactRequest.company.request[0].request_uuid}`, 404, companyRequestCookie);
   await expectStatus(`/staff/candidates/${unassignedStaffCandidate.candidate_id}`, 404, staffCandidateCookie);
+  await expectBodyIncludes(
+    `/staff/candidates?candidate=${unassignedStaffCandidate.candidate_id}`,
+    200,
+    "Candidate unavailable",
+    staffCandidateCookie
+  );
   await expectStatus(`/hub?scope=people&record=candidate-${unassignedStaffCandidate.candidate_id}`, 200, staffCandidateCookie);
   await expectBodyIncludes(
     `/hub?scope=people&record=candidate-${unassignedStaffCandidate.candidate_id}`,

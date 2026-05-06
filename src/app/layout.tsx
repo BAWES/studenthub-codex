@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ThemeScript } from "@/modules/theme/ThemeScript";
 import "./styles.css";
 
 export const metadata: Metadata = {
@@ -12,8 +13,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body>{children}</body>
+    <html lang="en" suppressHydrationWarning>
+      <body>
+        <ThemeScript />
+        {children}
+      </body>
     </html>
   );
 }

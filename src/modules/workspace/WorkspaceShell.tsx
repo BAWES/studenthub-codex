@@ -1,6 +1,7 @@
 import type { SessionUser } from "@/modules/auth/types";
 import type { Route } from "next";
 import { logoutAction } from "@/modules/auth/actions";
+import { ThemeToggle } from "@/modules/theme/ThemeToggle";
 import Link from "next/link";
 import { navForRole } from "./navigation";
 import { WorkspaceMobileNavigation, WorkspaceNavigation } from "./WorkspaceNavigation";
@@ -42,12 +43,16 @@ export function WorkspaceShell({
     <main className="shell">
       <aside className="workspaceRail">
         <Link className="workspaceMark" href="/hub" aria-label="StudentHub hub">
-          SH
+          <span>SH</span>
+          <strong>StudentHub</strong>
         </Link>
         <WorkspaceNavigation items={navItems} role={session.role} />
-        <form className="workspaceSignout" action={logoutAction}>
-          <button type="submit">Sign out</button>
-        </form>
+        <div className="workspaceRailFooter">
+          <ThemeToggle />
+          <form className="workspaceSignout" action={logoutAction}>
+            <button type="submit">Sign out</button>
+          </form>
+        </div>
       </aside>
 
       <section className="workspaceStage">
