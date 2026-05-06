@@ -1,6 +1,6 @@
 import type { Route } from "next";
 import Link from "next/link";
-import { requireRole } from "@/modules/auth/session";
+import { requireRoleCapability } from "@/modules/auth/session";
 import { DataTable } from "@/modules/workspace/DataTable";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { getAdminTransferRows } from "@/modules/workspace/data";
@@ -8,7 +8,7 @@ import { getAdminTransferRows } from "@/modules/workspace/data";
 export const dynamic = "force-dynamic";
 
 export default async function AdminTransfersPage() {
-  const session = await requireRole("admin");
+  const session = await requireRoleCapability("admin", "finance.read");
   const rows = await getAdminTransferRows();
   const latest = rows[0];
 

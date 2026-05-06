@@ -1,11 +1,11 @@
-import { requireRole } from "@/modules/auth/session";
+import { requireRoleCapability } from "@/modules/auth/session";
 import { getInspectorWorkspace } from "@/modules/workspace/data";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 
 export const dynamic = "force-dynamic";
 
 export default async function InspectorPage() {
-  const session = await requireRole("inspector");
+  const session = await requireRoleCapability("inspector", "id_review.read");
   const data = await getInspectorWorkspace(session.id);
 
   return (

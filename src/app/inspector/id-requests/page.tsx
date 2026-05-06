@@ -1,5 +1,5 @@
 import type { Route } from "next";
-import { requireRole } from "@/modules/auth/session";
+import { requireRoleCapability } from "@/modules/auth/session";
 import { DataTable } from "@/modules/workspace/DataTable";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { getInspectorIdRequestRows } from "@/modules/workspace/data";
@@ -7,7 +7,7 @@ import { getInspectorIdRequestRows } from "@/modules/workspace/data";
 export const dynamic = "force-dynamic";
 
 export default async function InspectorIdRequestsPage() {
-  const session = await requireRole("inspector");
+  const session = await requireRoleCapability("inspector", "id_review.read");
   const rows = await getInspectorIdRequestRows();
 
   return (

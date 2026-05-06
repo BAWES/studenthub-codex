@@ -1,4 +1,4 @@
-import { requireRole } from "@/modules/auth/session";
+import { requireRoleCapability } from "@/modules/auth/session";
 import { CandidateSearchOS } from "@/modules/candidates/CandidateSearchOS";
 import { getCandidateSearchWorkspace, type CandidateSearchFilter } from "@/modules/candidates/search";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
@@ -23,7 +23,7 @@ export default async function StaffCandidatesPage({
 }: {
   searchParams: Promise<{ q?: string; filter?: string; candidate?: string; country?: string; university?: string; company?: string; skill?: string }>;
 }) {
-  const session = await requireRole("staff");
+  const session = await requireRoleCapability("staff", "candidate.search");
   const params = await searchParams;
   const search = {
     role: "staff" as const,

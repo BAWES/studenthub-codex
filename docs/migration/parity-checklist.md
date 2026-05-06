@@ -61,12 +61,13 @@ Use this as the working definition of "ready to migrate." A page existing is not
 - [x] Existing Yii bcrypt password hashes validate locally.
 - [x] Unified `/login` resolves active legacy account type from verified email/password credentials.
 - [x] Sessions are enriched with an initial capability registry for account-scoped modules.
+- [x] Current authenticated routes use role + capability bridge guards.
 - [x] Role session cookies implemented for local validation.
 - [x] Build test added.
 - [x] Route smoke test added.
 - [x] Basic cross-role/ownership smoke checks added.
 - [x] Staff candidate console smoke coverage includes selected-record query mode.
-- [ ] Existing feature routes migrated from role guards to capability guards.
+- [ ] Shared `/app/*` feature routes migrated to capability-only guards.
 - [ ] Real auth provider plan finalized.
 - [x] Algolia/search replacement isolated behind module.
 - [ ] Search read adapter queries Meilisearch with MySQL fallback.

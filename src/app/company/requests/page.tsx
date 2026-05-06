@@ -1,5 +1,5 @@
 import type { Route } from "next";
-import { requireRole } from "@/modules/auth/session";
+import { requireRoleCapability } from "@/modules/auth/session";
 import { DataTable } from "@/modules/workspace/DataTable";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { getCompanyRequestRows } from "@/modules/workspace/data";
@@ -7,7 +7,7 @@ import { getCompanyRequestRows } from "@/modules/workspace/data";
 export const dynamic = "force-dynamic";
 
 export default async function CompanyRequestsPage() {
-  const session = await requireRole("company");
+  const session = await requireRoleCapability("company", "request.read.linked");
   const rows = await getCompanyRequestRows(session.id);
 
   return (

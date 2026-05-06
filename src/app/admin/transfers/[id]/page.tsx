@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { requireRole } from "@/modules/auth/session";
+import { requireRoleCapability } from "@/modules/auth/session";
 import { CompactList, FactPanel } from "@/modules/workspace/DetailPanels";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { getAdminTransferDetail } from "@/modules/workspace/data";
@@ -8,7 +8,7 @@ import { formatDate, formatMoney } from "@/modules/workspace/format";
 export const dynamic = "force-dynamic";
 
 export default async function AdminTransferDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const session = await requireRole("admin");
+  const session = await requireRoleCapability("admin", "finance.read");
   const { id } = await params;
   const data = await getAdminTransferDetail(Number(id));
 

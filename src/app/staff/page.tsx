@@ -1,4 +1,4 @@
-import { requireRole } from "@/modules/auth/session";
+import { requireRoleCapability } from "@/modules/auth/session";
 import { getStaffWorkspace } from "@/modules/workspace/data";
 import { FeatureGrid } from "@/modules/workspace/FeatureGrid";
 import { navForRole } from "@/modules/workspace/navigation";
@@ -7,7 +7,7 @@ import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 export const dynamic = "force-dynamic";
 
 export default async function StaffPage() {
-  const session = await requireRole("staff");
+  const session = await requireRoleCapability("staff", "request.read.assigned");
   const data = await getStaffWorkspace(Number(session.id));
 
   return (

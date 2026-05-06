@@ -18,6 +18,7 @@
   - Checks the admin/staff request fulfillment desk renders for representative prod-clone requests.
   - Checks `/login` renders the unified login language and role-specific login URLs redirect back to the unified login.
   - Existing signed smoke sessions are decoded through the same session enrichment path used by unified login.
+  - Current role compatibility routes pass through role + capability bridge guards.
 
 ## Covered Routes
 
@@ -77,6 +78,7 @@
 - End-to-end credential submission for unified login server actions.
 - Multiple-account verified chooser flow.
 - Direct assertions for individual capability decisions.
+- Capability-only route coverage for future shared `/app/*` modules.
 - Mutation smoke coverage for local-only suggestion creation and duplicate handling.
 - Old-system parity assertions for business rules.
 - Cross-role authorization denial checks beyond the basic protected redirect.

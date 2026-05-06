@@ -1,11 +1,11 @@
-import { requireRole } from "@/modules/auth/session";
+import { requireRoleCapability } from "@/modules/auth/session";
 import { getCompanyWorkspace } from "@/modules/workspace/data";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 
 export const dynamic = "force-dynamic";
 
 export default async function CompanyPage() {
-  const session = await requireRole("company");
+  const session = await requireRoleCapability("company", "company.read.linked");
   const data = await getCompanyWorkspace(session.id);
 
   return (

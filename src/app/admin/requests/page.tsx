@@ -1,5 +1,5 @@
 import type { Route } from "next";
-import { requireRole } from "@/modules/auth/session";
+import { requireRoleCapability } from "@/modules/auth/session";
 import { DataTable } from "@/modules/workspace/DataTable";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { getAdminRequestRows } from "@/modules/workspace/data";
@@ -7,7 +7,7 @@ import { getAdminRequestRows } from "@/modules/workspace/data";
 export const dynamic = "force-dynamic";
 
 export default async function AdminRequestsPage() {
-  const session = await requireRole("admin");
+  const session = await requireRoleCapability("admin", "request.read.any");
   const rows = await getAdminRequestRows();
 
   return (

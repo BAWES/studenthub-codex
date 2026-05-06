@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { requireRole } from "@/modules/auth/session";
+import { requireRoleCapability } from "@/modules/auth/session";
 import { CompactList, FactPanel } from "@/modules/workspace/DetailPanels";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { getStaffCandidateDetail } from "@/modules/workspace/data";
@@ -9,7 +9,7 @@ import { formatDate } from "@/modules/workspace/format";
 export const dynamic = "force-dynamic";
 
 export default async function StaffCandidateDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const session = await requireRole("staff");
+  const session = await requireRoleCapability("staff", "candidate.read.assigned");
   const { id } = await params;
   const data = await getStaffCandidateDetail(Number(session.id), Number(id));
 

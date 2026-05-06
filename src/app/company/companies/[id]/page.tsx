@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { requireRole } from "@/modules/auth/session";
+import { requireRoleCapability } from "@/modules/auth/session";
 import { CompactList, FactPanel } from "@/modules/workspace/DetailPanels";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { getCompanyAccountDetail } from "@/modules/workspace/data";
@@ -8,7 +8,7 @@ import { formatDate } from "@/modules/workspace/format";
 export const dynamic = "force-dynamic";
 
 export default async function CompanyAccountDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const session = await requireRole("company");
+  const session = await requireRoleCapability("company", "company.read.linked");
   const { id } = await params;
   const data = await getCompanyAccountDetail(session.id, Number(id));
 

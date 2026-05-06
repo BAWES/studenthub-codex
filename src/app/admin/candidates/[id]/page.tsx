@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { requireRole } from "@/modules/auth/session";
+import { requireRoleCapability } from "@/modules/auth/session";
 import { CompactList, FactPanel } from "@/modules/workspace/DetailPanels";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { getCandidateDetail } from "@/modules/workspace/data";
@@ -8,7 +8,7 @@ import { formatDate } from "@/modules/workspace/format";
 export const dynamic = "force-dynamic";
 
 export default async function AdminCandidateDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const session = await requireRole("admin");
+  const session = await requireRoleCapability("admin", "candidate.read.any");
   const { id } = await params;
   const data = await getCandidateDetail(Number(id), "/admin/requests");
 

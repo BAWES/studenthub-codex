@@ -89,6 +89,12 @@ export async function requireCapability(capability: Capability) {
   return session;
 }
 
+export async function requireRoleCapability(role: Role, capability: Capability) {
+  const session = await requireRole(role);
+  if (!hasCapability(session, capability)) redirect("/hub?required=access");
+  return session;
+}
+
 export async function createPendingAccounts(accounts: VerifiedLegacyAccount[]) {
   const cookieStore = await cookies();
   cookieStore.set(pendingAccountCookieName, encodeSession({ role: "admin", id: "pending", name: "Pending", email: "pending@studenthub.local", issuedAt: Date.now(), accounts } as SessionUser & { accounts: VerifiedLegacyAccount[] }), {

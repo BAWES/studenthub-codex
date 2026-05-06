@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { requireRole } from "@/modules/auth/session";
+import { requireRoleCapability } from "@/modules/auth/session";
 import { RequestFulfillmentOS } from "@/modules/requests/RequestFulfillmentOS";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { getRequestDetail } from "@/modules/workspace/data";
@@ -13,7 +13,7 @@ export default async function StaffRequestDetailPage({
   params: Promise<{ id: string }>;
   searchParams: Promise<{ notice?: string }>;
 }) {
-  const session = await requireRole("staff");
+  const session = await requireRoleCapability("staff", "request.read.assigned");
   const { id } = await params;
   const { notice } = await searchParams;
   const data = await getRequestDetail(id, Number(session.id));

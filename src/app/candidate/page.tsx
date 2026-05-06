@@ -1,11 +1,11 @@
-import { requireRole } from "@/modules/auth/session";
+import { requireRoleCapability } from "@/modules/auth/session";
 import { getCandidateWorkspace } from "@/modules/workspace/data";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 
 export const dynamic = "force-dynamic";
 
 export default async function CandidatePage() {
-  const session = await requireRole("candidate");
+  const session = await requireRoleCapability("candidate", "candidate.read.own");
   const data = await getCandidateWorkspace(Number(session.id));
 
   return (

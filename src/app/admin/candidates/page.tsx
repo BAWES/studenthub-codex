@@ -1,4 +1,4 @@
-import { requireRole } from "@/modules/auth/session";
+import { requireRoleCapability } from "@/modules/auth/session";
 import { CandidateSearchOS } from "@/modules/candidates/CandidateSearchOS";
 import { getCandidateSearchWorkspace, type CandidateSearchFilter } from "@/modules/candidates/search";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
@@ -23,7 +23,7 @@ export default async function AdminCandidatesPage({
 }: {
   searchParams: Promise<{ q?: string; filter?: string; candidate?: string; country?: string; university?: string; company?: string; skill?: string }>;
 }) {
-  const session = await requireRole("admin");
+  const session = await requireRoleCapability("admin", "candidate.search");
   const params = await searchParams;
   const search = {
     role: "admin" as const,
