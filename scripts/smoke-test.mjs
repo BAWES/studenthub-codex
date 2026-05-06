@@ -431,6 +431,7 @@ async function main() {
   await expectStatus("/hub", 200, candidateInvitationCookie);
   await expectStatus(`/hub?scope=people&record=candidate-${candidateInvitation.candidate_id}`, 200, candidateInvitationCookie);
   await expectStatus("/candidate", 200, candidateInvitationCookie);
+  await expectBodyIncludes("/candidate", 200, "Readiness", candidateInvitationCookie);
   await expectStatus("/candidate/invitations", 200, candidateInvitationCookie);
   await expectStatus(`/candidate/invitations/${candidateInvitation.invitation_uuid}`, 200, candidateInvitationCookie);
   await expectStatus("/candidate/work-logs", 200, candidateWorkLogCookie);
