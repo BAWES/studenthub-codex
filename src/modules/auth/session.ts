@@ -1,7 +1,8 @@
 import crypto from "node:crypto";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import type { Role, SessionUser } from "./types";
+import { enrichSessionUser, hasCapability } from "./capabilities";
+import type { Capability, Role, SessionUser } from "./types";
 import type { VerifiedLegacyAccount } from "./service";
 
 const cookieName = "studenthub_next_session";
@@ -26,7 +27,7 @@ function sign(payload: string) {
 }
 
 function encodeSession(user: SessionUser) {
-  const payload = base64Url(JSON.stringify(user));
+  const payload = base64Url(JSON.stringify(enrichSessionUser(user)));
   return `${payload}.${sign(payload)}`;
 }
 
@@ -41,7 +42,7 @@ function decodeSession(value: string | undefined): SessionUser | null {
   try {
     const parsed = JSON.parse(Buffer.from(payload, "base64url").toString("utf8")) as SessionUser;
     if (!parsed.role || !parsed.id || !parsed.email) return null;
-    return parsed;
+    return enrichSessionUser(parsed);
   } catch {
     return null;
   }
@@ -79,6 +80,12 @@ export async function requireSession() {
 export async function requireRole(role: Role) {
   const session = await requireSession();
   if (session.role !== role) redirect(`/hub?required=${role}`);
+  return session;
+}
+
+export async function requireCapability(capability: Capability) {
+  const session = await requireSession();
+  if (!hasCapability(session, capability)) redirect("/hub?required=access");
   return session;
 }
 

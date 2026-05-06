@@ -90,6 +90,9 @@
   - server action checks all active legacy identity tables and creates the right session when exactly one account matches.
   - if credentials match multiple active legacy accounts, the user chooses only from verified accounts.
   - `/login/[role]` URLs are compatibility redirects to `/login?intent=:role`, not separate role-selected login forms.
+- Added the first capability registry under the existing role routes:
+  - sessions are enriched with `accountKey`, `legacyType`, and capabilities.
+  - existing route guards still work, but new modules can begin using capability checks instead of hard-coded role checks.
 
 ## Known Follow-Ups
 
@@ -100,7 +103,7 @@
 - The sample generator currently keeps representative slices by table-level limits; the next improvement is relationship-aware sampling around selected companies/candidates/requests.
 - Production-clone mode is local-only and should not be deployed with real data or the local auth secret.
 - Login currently supports password auth only. Google/Auth0/Apple/two-step login flows still need parity mapping.
-- The session still stores one selected legacy role after unified login. The next auth slice should move from role sessions to normalized account/capability sessions.
+- The session still stores one selected legacy role for route compatibility. The next auth slice should migrate individual modules from role guards to capability guards.
 - The smoke suite proves route renderability, not business correctness. Workflow-level tests still need to cover old-vs-new behavior for create/update/approve/payroll flows before migration.
 - Staff candidate detail currently renders candidate detail data for a linked staff fixture; deeper authorization tests should assert staff cannot open unrelated candidates once editing/actions begin.
 - Current performance budget is a route-level smoke threshold, not a production load test.
