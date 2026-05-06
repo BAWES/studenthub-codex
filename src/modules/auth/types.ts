@@ -10,10 +10,18 @@ export type SessionUser = {
   issuedAt: number;
 };
 
+export type LoginAccountChoice = {
+  accountKey: string;
+  role: Role;
+  label: string;
+  name: string;
+  email: string;
+};
+
 export type LoginState = {
   error?: string;
   email?: string;
-  role?: Role;
+  accounts?: LoginAccountChoice[];
 };
 
 export function isRole(value: FormDataEntryValue | null): value is Role {

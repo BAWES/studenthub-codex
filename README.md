@@ -43,7 +43,7 @@ The local login page is at:
 http://localhost:3000/login
 ```
 
-Current local validation still includes the temporary role-based login flow. The target plan is one email/password login that resolves the account type server-side, then opens the correct capability-scoped workspace automatically.
+Use existing credentials from the imported local production clone. The login form asks for email/password only and resolves the matching legacy account type server-side.
 
 ## Candidate Search Index
 

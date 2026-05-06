@@ -1044,6 +1044,11 @@ h2 {
   box-shadow: 0 30px 90px rgba(16, 24, 40, 0.16);
 }
 
+.loginStack {
+  display: grid;
+  gap: 14px;
+}
+
 .loginForm {
   display: grid;
   gap: 18px;
@@ -1072,6 +1077,15 @@ h2 {
   font-size: 12px;
   font-weight: 900;
   text-transform: uppercase;
+}
+
+.loginFormHeader small {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--green) 10%, var(--surface));
+  color: var(--ink);
+  padding: 10px 12px;
+  line-height: 1.4;
 }
 
 .loginForm label {
@@ -1213,6 +1227,112 @@ h2 {
   color: var(--rose);
   font-weight: 700;
   margin: 0;
+}
+
+.unifiedLoginShell {
+  align-items: start;
+}
+
+.unifiedLoginShell .landingNav {
+  grid-column: 1 / -1;
+}
+
+.unifiedLoginIntro {
+  min-height: auto;
+}
+
+.unifiedLoginPanel {
+  align-self: start;
+}
+
+.verifiedAccounts {
+  display: grid;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  padding: 18px;
+}
+
+.verifiedAccounts > div {
+  display: grid;
+  gap: 4px;
+}
+
+.verifiedAccounts span {
+  color: var(--blue);
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.verifiedAccounts p {
+  color: var(--muted);
+  margin: 0;
+}
+
+.verifiedAccounts form {
+  margin: 0;
+}
+
+.verifiedAccounts button {
+  width: 100%;
+  min-height: 72px;
+  display: grid;
+  gap: 4px;
+  text-align: left;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-soft);
+  color: var(--ink);
+  padding: 12px 14px;
+  cursor: pointer;
+}
+
+.verifiedAccounts button:hover {
+  border-color: var(--blue);
+  background: color-mix(in srgb, var(--blue) 8%, var(--surface));
+}
+
+.verifiedAccounts button strong {
+  font-size: 16px;
+}
+
+.verifiedAccounts button small {
+  color: var(--muted);
+}
+
+.unifiedLoginNotes {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.unifiedLoginNotes article {
+  display: grid;
+  gap: 5px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  padding: 14px;
+}
+
+.unifiedLoginNotes span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.unifiedLoginNotes strong {
+  font-size: 14px;
+}
+
+@media (max-width: 760px) {
+  .unifiedLoginNotes {
+    grid-template-columns: 1fr;
+  }
 }
 
 .environment span,

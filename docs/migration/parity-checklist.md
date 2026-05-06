@@ -59,11 +59,13 @@ Use this as the working definition of "ready to migrate." A page existing is not
 ## Platform Readiness
 
 - [x] Existing Yii bcrypt password hashes validate locally.
+- [x] Unified `/login` resolves active legacy account type from verified email/password credentials.
 - [x] Role session cookies implemented for local validation.
 - [x] Build test added.
 - [x] Route smoke test added.
 - [x] Basic cross-role/ownership smoke checks added.
 - [x] Staff candidate console smoke coverage includes selected-record query mode.
+- [ ] Normalized account/capability session model implemented.
 - [ ] Real auth provider plan finalized.
 - [x] Algolia/search replacement isolated behind module.
 - [ ] Search read adapter queries Meilisearch with MySQL fallback.

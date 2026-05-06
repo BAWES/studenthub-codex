@@ -16,11 +16,14 @@
   - Checks staff cannot open an unassigned candidate detail route.
   - Checks the shared admin/staff candidate search OS renders and staff get an unavailable preview for unassigned candidates.
   - Checks the admin/staff request fulfillment desk renders for representative prod-clone requests.
+  - Checks `/login` renders the unified login language and role-specific login URLs redirect back to the unified login.
 
 ## Covered Routes
 
 - Login:
   - `/login`
+  - `/login/admin`
+  - `/login/candidate`
   - protected redirect from `/admin`
 
 - Admin:
@@ -70,6 +73,8 @@
 ## Not Yet Covered
 
 - Form submissions and mutations.
+- End-to-end credential submission for unified login server actions.
+- Multiple-account verified chooser flow.
 - Mutation smoke coverage for local-only suggestion creation and duplicate handling.
 - Old-system parity assertions for business rules.
 - Cross-role authorization denial checks beyond the basic protected redirect.

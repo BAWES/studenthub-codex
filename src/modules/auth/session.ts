@@ -2,9 +2,12 @@ import crypto from "node:crypto";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import type { Role, SessionUser } from "./types";
+import type { VerifiedLegacyAccount } from "./service";
 
 const cookieName = "studenthub_next_session";
+const pendingAccountCookieName = "studenthub_pending_accounts";
 const maxAge = 60 * 60 * 24 * 7;
+const pendingMaxAge = 60 * 10;
 
 function secret() {
   const value = process.env.AUTH_SECRET;
@@ -53,6 +56,7 @@ export async function createSession(user: Omit<SessionUser, "issuedAt">) {
     path: "/",
     maxAge
   });
+  cookieStore.delete(pendingAccountCookieName);
 }
 
 export async function getSession() {
@@ -63,6 +67,7 @@ export async function getSession() {
 export async function clearSession() {
   const cookieStore = await cookies();
   cookieStore.delete(cookieName);
+  cookieStore.delete(pendingAccountCookieName);
 }
 
 export async function requireSession() {
@@ -75,4 +80,28 @@ export async function requireRole(role: Role) {
   const session = await requireSession();
   if (session.role !== role) redirect(`/hub?required=${role}`);
   return session;
+}
+
+export async function createPendingAccounts(accounts: VerifiedLegacyAccount[]) {
+  const cookieStore = await cookies();
+  cookieStore.set(pendingAccountCookieName, encodeSession({ role: "admin", id: "pending", name: "Pending", email: "pending@studenthub.local", issuedAt: Date.now(), accounts } as SessionUser & { accounts: VerifiedLegacyAccount[] }), {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: pendingMaxAge
+  });
+}
+
+export async function getPendingAccounts() {
+  const cookieStore = await cookies();
+  const pending = decodeSession(cookieStore.get(pendingAccountCookieName)?.value) as (SessionUser & {
+    accounts?: VerifiedLegacyAccount[];
+  }) | null;
+  return pending?.accounts ?? [];
+}
+
+export async function clearPendingAccounts() {
+  const cookieStore = await cookies();
+  cookieStore.delete(pendingAccountCookieName);
 }

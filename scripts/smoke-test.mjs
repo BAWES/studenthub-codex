@@ -381,6 +381,9 @@ async function main() {
   });
 
   await expectStatus("/login", 200);
+  await expectBodyIncludes("/login", 200, "One StudentHub login");
+  await expectStatus("/login/admin", 307);
+  await expectStatus("/login/candidate", 307);
   await expectStatus("/hub", 307);
   await expectStatus("/admin", 307);
   await expectStatus("/staff", 307);
