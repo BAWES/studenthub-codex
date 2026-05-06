@@ -7449,6 +7449,569 @@ kbd {
   }
 }
 
+/* Candidate workspace v2 */
+.candidateSearchOS {
+  gap: 10px;
+}
+
+.candidateSearchHero {
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 420px);
+  overflow: hidden;
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--blue) 9%, transparent), transparent 58%),
+    var(--surface);
+  padding: 16px;
+}
+
+.candidateSearchHero h2 {
+  max-width: 900px;
+  font-size: clamp(28px, 3.2vw, 48px);
+  line-height: 1.03;
+}
+
+.candidateSearchHeroRail {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.candidateSearchHeroRail article {
+  min-width: 0;
+  display: grid;
+  align-content: end;
+  gap: 5px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--surface) 86%, var(--blue));
+  padding: 12px;
+}
+
+.candidateSearchHeroRail strong {
+  overflow: hidden;
+  font-size: 24px;
+  line-height: 1;
+  text-overflow: ellipsis;
+}
+
+.candidateSearchGrid {
+  grid-template-columns: minmax(220px, 280px) minmax(360px, 0.88fr) minmax(420px, 1.12fr);
+  gap: 10px;
+}
+
+.candidateFacetPanel,
+.candidateResultsPanel,
+.candidatePreviewPanel {
+  border-color: var(--line);
+  background: color-mix(in srgb, var(--surface) 96%, transparent);
+}
+
+.candidateFacetPanel {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  padding: 10px;
+}
+
+.candidateSearchForm {
+  grid-template-columns: 1fr;
+}
+
+.candidateSearchForm label {
+  color: var(--blue);
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.candidateSearchCommand .commandLauncher {
+  width: 100%;
+  min-height: 42px;
+  justify-content: center;
+}
+
+.candidateSearchFilters {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  border: 0;
+  padding: 0;
+}
+
+.candidateSearchFilters a {
+  min-height: 36px;
+  justify-content: center;
+  border-radius: 8px;
+  padding: 0 8px;
+}
+
+.candidateFacetHeader {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.candidateFacetGroup {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  padding: 10px;
+}
+
+.candidateResultsPanel {
+  max-height: calc(100svh - 118px);
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+}
+
+.candidateResultList {
+  overflow-y: auto;
+  align-content: start;
+}
+
+.candidateResultCard {
+  gap: 10px;
+  background: var(--surface);
+  box-shadow: none;
+}
+
+.candidateResultCard:hover,
+.candidateResultCard.active {
+  background: color-mix(in srgb, var(--blue) 7%, var(--surface));
+  box-shadow: 0 10px 30px rgba(16, 24, 40, 0.08);
+}
+
+.candidateResultMain {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.candidateResultAvatar,
+.candidateAvatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: var(--ink);
+  color: var(--surface);
+  font-weight: 950;
+}
+
+.candidateResultAvatar {
+  width: 42px;
+  height: 42px;
+  font-size: 13px;
+}
+
+.candidateResultMain strong,
+.candidateResultMain small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.candidateResultMain em {
+  border: 1px solid color-mix(in srgb, var(--green) 38%, var(--line));
+  border-radius: 999px;
+  color: var(--green);
+  padding: 4px 7px;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.candidatePreviewPanel {
+  max-height: calc(100svh - 118px);
+  overflow-y: auto;
+}
+
+.candidateProfile {
+  display: grid;
+  gap: 10px;
+}
+
+.candidateProfile.empty {
+  min-height: 360px;
+  align-content: center;
+  justify-items: center;
+  padding: 24px;
+  text-align: center;
+}
+
+.candidateProfile.empty span {
+  max-width: 340px;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.candidateProfileHero {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
+  border-bottom: 1px solid var(--line);
+  padding: 16px;
+}
+
+.candidateAvatar {
+  width: 64px;
+  height: 64px;
+  font-size: 18px;
+}
+
+.candidateProfileTitle {
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+}
+
+.candidateProfileTitle > span,
+.candidateReadinessScore span,
+.candidateFactGrid span,
+.candidateNarrative span,
+.candidatePanelHeader span,
+.candidateRows small,
+.candidateReadinessItems span {
+  color: var(--blue);
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.candidateProfileTitle h2 {
+  overflow-wrap: anywhere;
+  margin: 0;
+  font-size: clamp(28px, 3vw, 44px);
+  line-height: 0.98;
+}
+
+.candidateProfile.compact .candidateProfileTitle h2 {
+  font-size: 30px;
+}
+
+.candidateProfileTitle p,
+.candidateStatusLine span,
+.candidateRows span,
+.candidateRows small,
+.candidateNarrative p {
+  color: var(--muted);
+}
+
+.candidateProfileTitle p {
+  margin: 0;
+}
+
+.candidateStatusLine {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.candidateStatusLine strong {
+  border: 1px solid color-mix(in srgb, var(--green) 38%, var(--line));
+  border-radius: 999px;
+  color: var(--green);
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+.candidateProfileActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  border-bottom: 1px solid var(--line);
+  padding: 0 16px 14px;
+}
+
+.candidateProfileActions a,
+.candidateRows a {
+  text-decoration: none;
+}
+
+.candidateProfileActions a {
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-soft);
+  color: var(--ink);
+  padding: 0 11px;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.candidateProfileActions a:first-child {
+  border-color: var(--blue);
+  background: var(--blue);
+  color: #fff;
+}
+
+.candidateReadiness {
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr);
+  gap: 10px;
+  border-bottom: 1px solid var(--line);
+  padding: 0 16px 14px;
+}
+
+.candidateReadinessScore {
+  display: grid;
+  align-content: center;
+  gap: 5px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-soft);
+  padding: 12px;
+}
+
+.candidateReadinessScore strong {
+  font-size: 34px;
+  line-height: 1;
+}
+
+.candidateReadinessScore small {
+  color: var(--muted);
+  line-height: 1.35;
+}
+
+.candidateReadinessItems {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.candidateReadinessItems div {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  padding: 8px;
+}
+
+.candidateReadinessItems div.done span {
+  color: var(--green);
+}
+
+.candidateReadinessItems div.open span {
+  color: var(--rose);
+}
+
+.candidateReadinessItems strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+}
+
+.candidateFactGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  border-bottom: 1px solid var(--line);
+}
+
+.candidateFactGrid div {
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  padding: 11px 16px;
+}
+
+.candidateFactGrid div:nth-child(2n) {
+  border-right: 0;
+}
+
+.candidateFactGrid strong {
+  overflow-wrap: anywhere;
+  font-size: 13px;
+}
+
+.candidateNarrative {
+  display: grid;
+  gap: 7px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  padding: 14px;
+}
+
+.candidateNarrative p {
+  max-width: 980px;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.candidateProfileColumns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  padding: 0 16px 16px;
+}
+
+.workspaceStage > .candidateProfile .candidateProfileColumns,
+.workspaceStage > .candidateProfile .candidateNarrative {
+  margin-inline: 0;
+}
+
+.candidateProfilePanel {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.candidatePanelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border-bottom: 1px solid var(--line);
+  padding: 10px 12px;
+}
+
+.candidatePills,
+.candidateRows {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+}
+
+.candidatePills {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.candidatePills span {
+  min-height: 28px;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface-soft);
+  color: var(--ink);
+  padding: 0 9px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.candidateRows a,
+.candidateRows article {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-soft);
+  color: var(--ink);
+  padding: 10px;
+}
+
+.candidateRows a:hover {
+  border-color: var(--blue);
+  background: color-mix(in srgb, var(--blue) 7%, var(--surface));
+}
+
+.candidateRows strong,
+.candidateRows span,
+.candidateRows small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+[data-theme="dark"] .candidateSearchHeroRail article,
+[data-theme="dark"] .candidateFacetGroup,
+[data-theme="dark"] .candidateReadinessScore,
+[data-theme="dark"] .candidateReadinessItems div,
+[data-theme="dark"] .candidateNarrative,
+[data-theme="dark"] .candidateProfilePanel,
+[data-theme="dark"] .candidateRows a,
+[data-theme="dark"] .candidateRows article {
+  border-color: var(--line);
+  background: var(--surface);
+  color: var(--ink);
+}
+
+@media (max-width: 1180px) {
+  .candidateSearchGrid {
+    grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
+  }
+
+  .candidateResultsPanel,
+  .candidatePreviewPanel {
+    max-height: none;
+  }
+
+  .candidatePreviewPanel {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 760px) {
+  .candidateSearchHero,
+  .candidateSearchHeroRail,
+  .candidateSearchGrid,
+  .candidateReadiness,
+  .candidateProfileColumns {
+    grid-template-columns: 1fr;
+  }
+
+  .candidateSearchFilters,
+  .candidateReadinessItems,
+  .candidateFactGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .candidateFacetPanel,
+  .candidatePreviewPanel {
+    position: static;
+  }
+
+  .candidateResultMain {
+    grid-template-columns: 40px minmax(0, 1fr);
+  }
+
+  .candidateResultMain em {
+    grid-column: 1 / -1;
+    width: fit-content;
+  }
+
+  .candidateProfileHero {
+    grid-template-columns: 52px minmax(0, 1fr);
+    padding: 14px;
+  }
+
+  .candidateAvatar {
+    width: 52px;
+    height: 52px;
+  }
+
+  .candidateProfileActions,
+  .candidateReadiness,
+  .candidateProfileColumns {
+    padding-inline: 14px;
+  }
+
+  .candidateProfileActions a {
+    flex: 1 1 120px;
+  }
+
+  .candidateFactGrid div {
+    border-right: 0;
+  }
+}
+
 .requestOS {
   display: grid;
   gap: 18px;

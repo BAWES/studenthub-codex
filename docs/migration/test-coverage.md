@@ -14,7 +14,7 @@
   - Checks cross-role redirects and ownership guards for candidate invitation/work-log detail and company account/request detail pages.
   - Checks canonical `/app` access, selected `/app` preview URLs, and selected `/hub` compatibility preview URLs.
   - Checks staff cannot open an unassigned candidate detail route.
-  - Checks the shared admin/staff candidate search OS renders and staff get an unavailable preview for unassigned candidates.
+  - Checks the shared admin/staff candidate workspace renders from prod-clone data, full candidate detail pages expose readiness, and staff get an unavailable preview for unassigned candidates.
   - Checks the admin/staff request fulfillment desk renders for representative prod-clone requests.
   - Checks `/login` renders the unified login language and role-specific login URLs redirect back to the unified login.
   - Existing signed smoke sessions are decoded through the same session enrichment path used by unified login.

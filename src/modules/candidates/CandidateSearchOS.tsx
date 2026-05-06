@@ -1,6 +1,7 @@
 import type { Route } from "next";
 import Link from "next/link";
 import { HubShortcuts, type HubCommand } from "@/modules/hub/HubShortcuts";
+import { CandidateProfile } from "./CandidateProfile";
 import type {
   CandidateSearchFacet,
   CandidateSearchFilter,
@@ -21,57 +22,58 @@ export function CandidateSearchOS({
   detailPath: "/admin/candidates" | "/staff/candidates";
   params: CandidateSearchParams;
 }) {
-  const selected = data.selected?.candidate;
   const commands = buildCandidateSearchCommands(data, basePath, params);
 
   return (
     <section className="candidateSearchOS">
       <section className="candidateSearchHero">
         <div>
-          <span>Candidate intelligence</span>
-          <h2>Find the right person, understand the context, act from one place.</h2>
+          <span>Live candidate workspace</span>
+          <h2>Search production candidates and open the complete profile without losing flow.</h2>
           <p>
-            This is the production candidate corpus through a role-scoped search surface. Today it reads from MySQL; the
-            interface is already shaped for a dedicated search index.
+            This is not sample content. The list, facets, readiness state, notes, invitations, history, documents, and
+            work logs are pulled from the imported production database and scoped to this login.
           </p>
         </div>
-        <div className="candidateSearchSource">
-          <span>{data.source.current}</span>
-          <strong>{data.source.target}</strong>
-          <small>{data.source.note}</small>
+        <div className="candidateSearchHeroRail">
+          {data.metrics.slice(0, 3).map((metric) => (
+            <article key={metric.label}>
+              <span>{metric.label}</span>
+              <strong>{metric.value.toLocaleString("en-US")}</strong>
+            </article>
+          ))}
         </div>
       </section>
-
-      <section className="candidateSearchMetrics" aria-label="Candidate search metrics">
-        {data.metrics.map((metric) => (
-          <article key={metric.label}>
-            <span>{metric.label}</span>
-            <strong>{metric.value.toLocaleString("en-US")}</strong>
-            <small>{metric.note}</small>
-          </article>
-        ))}
-      </section>
-
-      <section className="candidateSearchToolbar">
-        <form className="candidateSearchForm" id="candidate-search">
-          <input data-command-search name="q" placeholder="Search name, email, phone, ID, UID, skill, tag" defaultValue={data.query} />
-          <input name="filter" type="hidden" value={data.filter} />
-          <HiddenFacetInputs data={data} />
-          <button type="submit">Search</button>
-        </form>
-        <HubShortcuts commands={commands} />
-      </section>
-
-      <nav className="candidateSearchFilters" aria-label="Candidate search filters">
-        {candidateFilterLinks.map((item) => (
-          <Link className={item.value === data.filter ? "active" : ""} href={candidateSearchHref(basePath, params, { filter: item.value, candidate: "" })} key={item.value}>
-            {item.label}
-          </Link>
-        ))}
-      </nav>
 
       <section className="candidateSearchGrid">
         <aside className="candidateFacetPanel" aria-label="Candidate facets">
+          <form className="candidateSearchForm" id="candidate-search">
+            <label htmlFor="candidate-query">Find candidate</label>
+            <input
+              data-command-search
+              id="candidate-query"
+              name="q"
+              placeholder="Name, email, phone, ID, skill, tag"
+              defaultValue={data.query}
+            />
+            <input name="filter" type="hidden" value={data.filter} />
+            <HiddenFacetInputs data={data} />
+            <button type="submit">Search</button>
+          </form>
+          <div className="candidateSearchCommand">
+            <HubShortcuts commands={commands} />
+          </div>
+          <nav className="candidateSearchFilters" aria-label="Candidate search filters">
+            {candidateFilterLinks.map((item) => (
+              <Link
+                className={item.value === data.filter ? "active" : ""}
+                href={candidateSearchHref(basePath, params, { filter: item.value, candidate: "" })}
+                key={item.value}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
           <div className="candidateFacetHeader">
             <span>Filters</span>
             <Link href={basePath}>Clear all</Link>
@@ -102,13 +104,16 @@ export function CandidateSearchOS({
                 href={candidateSearchHref(basePath, params, { candidate: String(row.id) })}
                 key={row.id}
               >
-                <div className="candidateResultTop">
-                  <span>{row.signal}</span>
+                <div className="candidateResultMain">
+                  <span className="candidateResultAvatar">{candidateInitials(row.name)}</span>
+                  <div>
+                    <strong>{row.name}</strong>
+                    <small>{row.email}</small>
+                  </div>
                   <em>{row.status}</em>
                 </div>
-                <strong>{row.name}</strong>
-                <small>{row.email}</small>
                 <div className="candidateResultMeta">
+                  <span>{row.signal}</span>
                   <span>{row.country}</span>
                   <span>{row.company}</span>
                   <span>{row.updated}</span>
@@ -130,57 +135,17 @@ export function CandidateSearchOS({
         </section>
 
         <aside className="candidatePreviewPanel" aria-label="Candidate preview">
-          {selected && data.selected ? (
-            <>
-              <div className="candidatePreviewHeader">
-                <span>{selected.candidate_uid ?? `#${selected.candidate_id}`}</span>
-                <h2>{selected.candidate_name}</h2>
-                <p>{selected.candidate_email}</p>
-              </div>
-              <div className="candidatePreviewActions">
-                {data.selectedActions.map((action) =>
-                  action.href.startsWith("/") ? (
-                    <Link href={action.href as Route} key={action.label}>
-                      {action.label}
-                    </Link>
-                  ) : (
-                    <a href={action.href} key={action.label}>
-                      {action.label}
-                    </a>
-                  )
-                )}
-              </div>
-              <div className="candidatePreviewFacts">
-                <Fact label="Status" value={selected.approved === 0 ? "Needs review" : `Status ${selected.candidate_status}`} />
-                <Fact label="Country" value={selected.country?.country_name_en ?? "Not set"} />
-                <Fact label="University" value={selected.university?.university_name_en ?? "Not set"} />
-                <Fact label="Rate" value={data.selected.metrics[1]?.value ?? "0"} />
-              </div>
-              <section className="candidatePreviewSection">
-                <div className="candidatePreviewSectionHeader">
-                  <span>Skills and tags</span>
-                  <strong>{data.selected.skills.length + data.selected.tags.length}</strong>
-                </div>
-                <div className="candidatePreviewPills">
-                  {[...data.selected.skills, ...data.selected.tags].slice(0, 14).map((item) => (
-                    <span key={`${item.title}-${item.id}`}>{item.title}</span>
-                  ))}
-                  {!data.selected.skills.length && !data.selected.tags.length ? <small>No skills or tags imported.</small> : null}
-                </div>
-              </section>
-              <RelatedSection rows={data.selected.invitations} title="Invitations" />
-              <RelatedSection rows={data.selected.histories} title="Work history" />
-              <RelatedSection rows={data.selected.workHours} title="Time logs" />
-              <RelatedSection rows={data.selected.notes} title="Notes" />
-              <Link className="candidatePreviewFullRecord" href={`${detailPath}/${selected.candidate_id}` as Route}>
-                Open complete candidate record
-              </Link>
-            </>
+          {data.selected?.candidate ? (
+            <CandidateProfile
+              compact
+              detail={data.selected}
+              actions={[
+                ...data.selectedActions.filter((action) => action.label !== "Open full record"),
+                { label: "Open complete record", href: `${detailPath}/${data.selected.candidate.candidate_id}` }
+              ]}
+            />
           ) : (
-            <div className="candidateEmptyState large">
-              <strong>No candidate selected</strong>
-              <span>Choose a candidate from the result list to preview profile, work history, notes, time, and document context.</span>
-            </div>
+            <CandidateProfile compact detail={data.selected} actions={[]} />
           )}
         </aside>
       </section>
@@ -225,50 +190,6 @@ function FacetGroup({ basePath, facet, params }: { basePath: "/admin/candidates"
   );
 }
 
-function Fact({ label, value }: { label: string; value: string | number }) {
-  return (
-    <div>
-      <span>{label}</span>
-      <strong>{value}</strong>
-    </div>
-  );
-}
-
-function RelatedSection({
-  title,
-  rows
-}: {
-  title: string;
-  rows: { id: string | number; title: string; subtitle: string; meta?: string; href?: string }[];
-}) {
-  return (
-    <section className="candidatePreviewSection">
-      <div className="candidatePreviewSectionHeader">
-        <span>{title}</span>
-        <strong>{rows.length}</strong>
-      </div>
-      <div className="candidatePreviewRows">
-        {rows.slice(0, 5).map((row) =>
-          row.href ? (
-            <Link href={row.href as Route} key={row.id}>
-              <strong>{row.title}</strong>
-              <span>{row.subtitle}</span>
-              {row.meta ? <small>{row.meta}</small> : null}
-            </Link>
-          ) : (
-            <article key={row.id}>
-              <strong>{row.title}</strong>
-              <span>{row.subtitle}</span>
-              {row.meta ? <small>{row.meta}</small> : null}
-            </article>
-          )
-        )}
-        {rows.length === 0 ? <small>No visible imported rows.</small> : null}
-      </div>
-    </section>
-  );
-}
-
 function candidateSearchHref(
   basePath: "/admin/candidates" | "/staff/candidates",
   params: CandidateSearchParams,
@@ -290,6 +211,15 @@ function candidateSearchHref(
   }
   const suffix = next.toString();
   return (suffix ? `${basePath}?${suffix}` : basePath) as Route;
+}
+
+function candidateInitials(name: string) {
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join("");
 }
 
 function buildCandidateSearchCommands(

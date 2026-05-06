@@ -100,6 +100,10 @@
 - Added `/app` as the canonical authenticated entry point:
   - login, existing-session login redirects, app CTAs, dev impersonation, and guard fallbacks now point to `/app`.
   - `/hub` remains live as a compatibility URL for existing bookmarked previews and smoke coverage.
+- Rebuilt the shared candidate list/detail surface:
+  - admin and staff candidate routes now use one reusable candidate profile module for selected preview and full record pages.
+  - candidate detail pulls richer prod-clone context: profile intro, store/company, email verification, civil ID dates, education, experience, certificates, revenue stats, warnings, links, notes, invitations, work history, and work logs.
+  - smoke coverage now checks the candidate workspace language and the readiness section on full candidate detail pages.
 
 ## Known Follow-Ups
 

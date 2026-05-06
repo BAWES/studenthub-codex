@@ -759,7 +759,7 @@ async function canStaffAccessCandidate(staffId: number, candidateId: number) {
 }
 
 export async function getCandidateDetail(candidateId: number, requestBasePath = "/staff/requests") {
-  const [candidate, invitations, workHours, histories, notes, skills, tags, warnings, links, idCards] = await prisma.$transaction([
+  const [candidate, invitations, workHours, histories, notes, skills, tags, warnings, links, idCards, education, experiences, certificates, stats] = await prisma.$transaction([
     prisma.candidate.findUnique({
       where: { candidate_id: candidateId },
       select: {
@@ -767,8 +767,15 @@ export async function getCandidateDetail(candidateId: number, requestBasePath = 
         candidate_uid: true,
         candidate_name: true,
         candidate_name_ar: true,
+        candidate_objective: true,
+        candidate_intro: true,
+        candidate_personal_photo: true,
+        candidate_resume: true,
         candidate_email: true,
+        candidate_email_verification: true,
         candidate_phone: true,
+        candidate_civil_id: true,
+        candidate_civil_expiry_date: true,
         candidate_status: true,
         approved: true,
         candidate_hourly_rate: true,
@@ -776,10 +783,12 @@ export async function getCandidateDetail(candidateId: number, requestBasePath = 
         candidate_job_search_status: true,
         candidate_civil_need_verification: true,
         is_incomplete_profile: true,
+        profile_url: true,
         candidate_created_at: true,
         candidate_updated_at: true,
         country: { select: { country_name_en: true } },
-        university: { select: { university_name_en: true } }
+        university: { select: { university_name_en: true } },
+        store: { select: { store_name: true, company: { select: { company_name: true } } } }
       }
     }),
     prisma.invitation.findMany({
@@ -889,6 +898,57 @@ export async function getCandidateDetail(candidateId: number, requestBasePath = 
         created_at: true,
         updated_at: true
       }
+    }),
+    prisma.candidate_education.findMany({
+      where: { candidate_id: candidateId },
+      orderBy: { updated_at: "desc" },
+      take: 6,
+      select: {
+        education_uuid: true,
+        graduation_year: true,
+        is_currently_studying: true,
+        university: { select: { university_name_en: true } },
+        degree: { select: { degree_name_en: true } },
+        major: { select: { major_name_en: true } },
+        updated_at: true
+      }
+    }),
+    prisma.candidate_experience.findMany({
+      where: { candidate_id: candidateId, deleted: 0 },
+      orderBy: { candidate_experience_created_at: "desc" },
+      take: 8,
+      select: {
+        candidate_experience_id: true,
+        experience: true,
+        employer: true,
+        start_year: true,
+        end_year: true,
+        candidate_experience_created_at: true
+      }
+    }),
+    prisma.candidate_certificate.findMany({
+      where: { candidate_id: candidateId, is_deleted: false },
+      orderBy: { updated_at: "desc" },
+      take: 6,
+      select: {
+        certificate_uuid: true,
+        certificate_type: true,
+        start_date: true,
+        end_date: true,
+        company_candidate_certificate_company_idTocompany: { select: { company_name: true } },
+        store: { select: { store_name: true } },
+        staff: { select: { staff_name: true } },
+        updated_at: true
+      }
+    }),
+    prisma.candidate_stats.findFirst({
+      where: { candidate_id: candidateId },
+      orderBy: { updated_at: "desc" },
+      select: {
+        total_revenue: true,
+        currency_code: true,
+        updated_at: true
+      }
     })
   ]);
 
@@ -945,17 +1005,41 @@ export async function getCandidateDetail(candidateId: number, requestBasePath = 
     })),
     links: links.map((link) => ({
       id: link.cl_uuid,
-      title: link.title,
-      subtitle: link.url,
+      title: link.title ?? "Candidate link",
+      subtitle: link.url ?? "No URL",
       meta: formatDate(link.updated_at),
-      href: link.url
+      href: link.url ?? undefined
     })),
     idCards: idCards.map((card) => ({
       id: card.id,
       title: `Civil ID card #${card.id}`,
       subtitle: `Expires ${formatDate(card.expiry_date)}`,
       meta: `Updated ${formatDate(card.updated_at ?? card.created_at)}`
-    }))
+    })),
+    education: education.map((item) => ({
+      id: item.education_uuid,
+      title: item.university.university_name_en ?? "Education",
+      subtitle: [item.degree?.degree_name_en, item.major?.major_name_en].filter(Boolean).join(" · ") || "Education",
+      meta: `${item.is_currently_studying ? "Currently studying" : "Graduated"}${item.graduation_year ? ` · ${item.graduation_year}` : ""}`
+    })),
+    experiences: experiences.map((item) => ({
+      id: item.candidate_experience_id,
+      title: item.experience,
+      subtitle: item.employer ?? "Experience",
+      meta: [item.start_year, item.end_year].filter(Boolean).join(" to ") || formatDate(item.candidate_experience_created_at)
+    })),
+    certificates: certificates.map((item) => ({
+      id: item.certificate_uuid,
+      title: item.company_candidate_certificate_company_idTocompany?.company_name ?? item.store?.store_name ?? "Certificate",
+      subtitle: item.certificate_type ? "Experience certificate" : "Certificate",
+      meta: `${formatDate(item.start_date)} to ${formatDate(item.end_date)} · ${item.staff?.staff_name ?? "No staff owner"}`
+    })),
+    stats: stats
+      ? {
+          totalRevenue: formatMoney(stats.total_revenue, stats.currency_code ?? candidate?.currency_code ?? "KWD"),
+          updated: formatDate(stats.updated_at)
+        }
+      : null
   };
 }
 
