@@ -26,7 +26,7 @@ export default async function Home() {
           <strong>StudentHub</strong>
         </Link>
         <div>
-          {session ? <Link href="/hub">Open app</Link> : <Link href="/login">Sign in</Link>}
+          {session ? <Link href="/app">Open app</Link> : <Link href="/login">Sign in</Link>}
           <ThemeToggle />
         </div>
       </nav>

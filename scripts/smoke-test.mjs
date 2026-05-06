@@ -384,10 +384,13 @@ async function main() {
   await expectBodyIncludes("/login", 200, "One StudentHub login");
   await expectStatus("/login/admin", 307);
   await expectStatus("/login/candidate", 307);
+  await expectStatus("/app", 307);
   await expectStatus("/hub", 307);
   await expectStatus("/admin", 307);
   await expectStatus("/staff", 307);
 
+  await expectStatus("/app", 200, adminCookie);
+  await expectStatus(`/app?scope=people&record=candidate-${adminCandidate.candidate_id}`, 200, adminCookie);
   await expectStatus("/hub", 200, adminCookie);
   await expectStatus(`/hub?scope=people&record=candidate-${adminCandidate.candidate_id}`, 200, adminCookie);
   await expectStatus(`/hub?scope=companies&record=company-${adminCompany.company_id}`, 200, adminCookie);

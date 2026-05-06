@@ -26,7 +26,7 @@ export default async function HubPage({
   return (
     <main className="commandOS">
       <aside className="commandRail">
-        <Link className="commandBrand" href="/hub" aria-label="StudentHub command home">
+        <Link className="commandBrand" href="/app" aria-label="StudentHub command home">
           <span>SH</span>
           <strong>StudentHub</strong>
         </Link>
@@ -34,7 +34,7 @@ export default async function HubPage({
         <nav className="commandRailNav" aria-label="Workspace navigation">
           {data.navigation.map((item) => (
             <Link
-              className={item.href === hubContext || item.href === "/hub" ? "active" : ""}
+              className={item.href === hubContext || item.href === "/app" ? "active" : ""}
               href={item.href}
               key={item.href}
               title={`${item.label}: ${item.description}`}
@@ -166,7 +166,7 @@ export default async function HubPage({
                   return (
                     <Link
                       className={item.value === data.scope ? "active" : ""}
-                      href={`/hub?scope=${item.value}${query}` as Route}
+                      href={`/app?scope=${item.value}${query}` as Route}
                       key={item.value}
                     >
                       {item.label}
@@ -270,7 +270,7 @@ function hubContextHref(query: string, scope: string) {
   const params = new URLSearchParams();
   if (query) params.set("q", query);
   params.set("scope", scope);
-  return `/hub?${params.toString()}` as Route;
+  return `/app?${params.toString()}` as Route;
 }
 
 function hubRecordHref(query: string, scope: string, record: string) {
@@ -278,7 +278,7 @@ function hubRecordHref(query: string, scope: string, record: string) {
   if (query) params.set("q", query);
   params.set("scope", scope);
   params.set("record", record);
-  return `/hub?${params.toString()}` as Route;
+  return `/app?${params.toString()}` as Route;
 }
 
 function parseRequiredRole(value: string | string[] | undefined): Role | null {
@@ -352,7 +352,7 @@ function buildRoleGuide(role: Role, data: HubData): RoleGuide {
           title: "Compliance",
           description: "Keep identity and civil ID review separate from day-to-day placement work.",
           steps: ["Review pending ID batches", "Resolve document status", "Return clean candidates to the pipeline"],
-          href: "/hub?scope=compliance" as Route,
+          href: "/app?scope=compliance" as Route,
           action: "Open compliance"
         }
       ]
@@ -480,7 +480,7 @@ function buildCommands(data: Awaited<ReturnType<typeof getUnifiedHub>>): HubComm
   const commands: HubCommand[] = [];
 
   for (const item of data.navigation) {
-    const shortcut = item.href === "/hub" ? "G H" : item.label.toLowerCase().includes("request") ? "G R" : item.label.toLowerCase().includes("candidate") || item.label.toLowerCase().includes("company") ? "G C" : undefined;
+    const shortcut = item.href === "/app" ? "G H" : item.label.toLowerCase().includes("request") ? "G R" : item.label.toLowerCase().includes("candidate") || item.label.toLowerCase().includes("company") ? "G C" : undefined;
     commands.push({
       id: `nav-${item.href}`,
       title: item.label,
@@ -500,7 +500,7 @@ function buildCommands(data: Awaited<ReturnType<typeof getUnifiedHub>>): HubComm
       title: `Search ${scope.label}`,
       subtitle: `Limit the workspace to ${scope.label.toLowerCase()}`,
       section: "Search scopes",
-      href: `/hub?${params.toString()}`
+      href: `/app?${params.toString()}`
     });
   }
 
@@ -543,7 +543,7 @@ function buildCommands(data: Awaited<ReturnType<typeof getUnifiedHub>>): HubComm
       title: "Open command menu",
       subtitle: "Universal action search",
       section: "Shortcuts",
-      href: "/hub",
+      href: "/app",
       shortcut: "Cmd/Ctrl K"
     },
     {
@@ -551,7 +551,7 @@ function buildCommands(data: Awaited<ReturnType<typeof getUnifiedHub>>): HubComm
       title: "Focus workspace search",
       subtitle: "Search records visible to this account",
       section: "Shortcuts",
-      href: "/hub",
+      href: "/app",
       shortcut: "/"
     }
   );

@@ -8,7 +8,7 @@ This is the product and engineering contract for continuing the rebuild without 
 - The new app is a Next.js app in `studenthub-next` with Prisma pointed at the imported local production clone.
 - The production backup is present locally as `../StudentHub Backup.sql` and is about 161 MB.
 - The dump manifest sees 128 legacy tables. Largest operational tables include `note`, `candidate_skill`, `candidate_experience`, `candidate`, `transfer_candidate`, `invitation`, `suggestion`, `transfer`, `invoice`, and `candidate_id_card`.
-- Existing Next routes cover read-only slices for admin, staff, candidate, company, inspector, a `/hub` command workspace, candidate search, request fulfillment, and admin transfers.
+- Existing Next routes cover read-only slices for admin, staff, candidate, company, inspector, a canonical `/app` command workspace, `/hub` compatibility, candidate search, request fulfillment, and admin transfers.
 - Current login is wrong for the target product: it asks the user to choose a role or portal before verifying credentials.
 - Current UI direction is inconsistent: there is a landing page, role login pages, hub, role shells, generic tables, and partial shadcn components mixed together.
 - TypeScript currently passes with `npx tsc --noEmit`.

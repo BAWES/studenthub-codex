@@ -25,7 +25,7 @@ export async function loginAction(_state: LoginState, formData: FormData): Promi
   if (accounts.length === 1) {
     const { accountKey: _accountKey, label: _label, ...user } = accounts[0];
     await createSession(user);
-    redirect("/hub");
+    redirect("/app");
   }
 
   await createPendingAccounts(accounts);
@@ -56,7 +56,7 @@ export async function chooseAccountAction(formData: FormData) {
 
   const { accountKey: _accountKey, label: _label, ...user } = account;
   await createSession(user);
-  redirect("/hub");
+  redirect("/app");
 }
 
 export async function logoutAction() {

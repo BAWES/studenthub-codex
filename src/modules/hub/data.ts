@@ -1191,7 +1191,7 @@ function requestListHref(session: SessionUser) {
 }
 
 function workspaceNavigation(role: Role): HubNavigationItem[] {
-  const shared = [{ label: "Command", description: "Search and triage", href: "/hub" as Route }];
+  const shared = [{ label: "Command", description: "Search and triage", href: "/app" as Route }];
   const items: Record<Role, HubNavigationItem[]> = {
     admin: [
       ...shared,

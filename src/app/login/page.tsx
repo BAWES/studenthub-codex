@@ -21,7 +21,7 @@ export default async function LoginPage({
   searchParams: Promise<{ intent?: string; error?: string }>;
 }) {
   const session = await getSession();
-  if (session) redirect("/hub");
+  if (session) redirect("/app");
   const params = await searchParams;
   const intent = params.intent ?? null;
   const hint = isRole(intent) ? loginHints[intent] : null;

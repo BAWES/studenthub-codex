@@ -12,7 +12,7 @@
   - Covers anonymous login, protected redirect, and role routes for admin, staff, candidate, company, and inspector.
   - Enforces a default per-route response budget of 5 seconds. Override with `SMOKE_BUDGET_MS`.
   - Checks cross-role redirects and ownership guards for candidate invitation/work-log detail and company account/request detail pages.
-  - Checks selected `/hub` preview URLs for candidate, company, request, transfer, and civil ID records across the relevant roles.
+  - Checks canonical `/app` access, selected `/app` preview URLs, and selected `/hub` compatibility preview URLs.
   - Checks staff cannot open an unassigned candidate detail route.
   - Checks the shared admin/staff candidate search OS renders and staff get an unavailable preview for unassigned candidates.
   - Checks the admin/staff request fulfillment desk renders for representative prod-clone requests.
@@ -26,7 +26,12 @@
   - `/login`
   - `/login/admin`
   - `/login/candidate`
+  - protected redirect from `/app`
   - protected redirect from `/admin`
+
+- Unified App:
+  - `/app`
+  - `/app?scope=people&record=candidate-[id]`
 
 - Admin:
   - `/admin`

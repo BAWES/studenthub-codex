@@ -42,7 +42,7 @@ export function WorkspaceShell({
   return (
     <main className="shell">
       <aside className="workspaceRail">
-        <Link className="workspaceMark" href="/hub" aria-label="StudentHub hub">
+        <Link className="workspaceMark" href="/app" aria-label="StudentHub app">
           <span>SH</span>
           <strong>StudentHub</strong>
         </Link>

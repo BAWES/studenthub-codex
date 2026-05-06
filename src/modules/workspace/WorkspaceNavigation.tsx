@@ -39,6 +39,6 @@ export function WorkspaceMobileNavigation({ items, role }: { items: NavItem[]; r
 }
 
 function isActive(pathname: string, href: string) {
-  if (href === "/hub") return pathname === href;
+  if (href === "/app") return pathname === href || pathname === "/hub";
   return pathname === href || pathname.startsWith(`${href}/`);
 }

@@ -79,19 +79,19 @@ export async function requireSession() {
 
 export async function requireRole(role: Role) {
   const session = await requireSession();
-  if (session.role !== role) redirect(`/hub?required=${role}`);
+  if (session.role !== role) redirect(`/app?required=${role}`);
   return session;
 }
 
 export async function requireCapability(capability: Capability) {
   const session = await requireSession();
-  if (!hasCapability(session, capability)) redirect("/hub?required=access");
+  if (!hasCapability(session, capability)) redirect("/app?required=access");
   return session;
 }
 
 export async function requireRoleCapability(role: Role, capability: Capability) {
   const session = await requireRole(role);
-  if (!hasCapability(session, capability)) redirect("/hub?required=access");
+  if (!hasCapability(session, capability)) redirect("/app?required=access");
   return session;
 }
 

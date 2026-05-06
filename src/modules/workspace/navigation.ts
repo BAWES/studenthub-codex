@@ -9,7 +9,7 @@ export type NavItem = {
 export function navForRole(role: Role): NavItem[] {
   if (role === "admin") {
     return [
-      { label: "Hub", href: "/hub" },
+      { label: "App", href: "/app" },
       { label: "Overview", href: "/admin" },
       { label: "Candidates", href: "/admin/candidates" },
       { label: "Companies", href: "/admin/companies" },
@@ -20,7 +20,7 @@ export function navForRole(role: Role): NavItem[] {
 
   if (role === "staff") {
     return [
-      { label: "Hub", href: "/hub" },
+      { label: "App", href: "/app" },
       { label: "Overview", href: "/staff" },
       { label: "My Requests", href: "/staff/requests" },
       { label: "Candidates", href: "/staff/candidates" }
@@ -29,7 +29,7 @@ export function navForRole(role: Role): NavItem[] {
 
   if (role === "candidate") {
     return [
-      { label: "Hub", href: "/hub" },
+      { label: "App", href: "/app" },
       { label: "Overview", href: "/candidate" },
       { label: "Invitations", href: "/candidate/invitations" },
       { label: "Work Logs", href: "/candidate/work-logs" }
@@ -38,7 +38,7 @@ export function navForRole(role: Role): NavItem[] {
 
   if (role === "company") {
     return [
-      { label: "Hub", href: "/hub" },
+      { label: "App", href: "/app" },
       { label: "Overview", href: "/company" },
       { label: "Requests", href: "/company/requests" },
       { label: "Companies", href: "/company/companies" }
@@ -46,7 +46,7 @@ export function navForRole(role: Role): NavItem[] {
   }
 
   return [
-    { label: "Hub", href: "/hub" },
+    { label: "App", href: "/app" },
     { label: "Overview", href: "/inspector" },
     { label: "ID Requests", href: "/inspector/id-requests" }
   ];

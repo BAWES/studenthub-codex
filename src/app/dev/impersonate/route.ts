@@ -26,7 +26,7 @@ export async function GET(request: Request) {
 
   await createSession(user);
   const next = url.searchParams.get("next");
-  const destination = next?.startsWith("/") && !next.startsWith("//") ? next : "/hub";
+  const destination = next?.startsWith("/") && !next.startsWith("//") ? next : "/app";
   return NextResponse.redirect(new URL(destination, url));
 }
 
