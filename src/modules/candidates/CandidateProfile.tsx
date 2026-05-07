@@ -35,6 +35,7 @@ export function CandidateProfile({
   const timeline = buildTimeline(detail);
   const status = candidate.approved === 0 ? "Needs review" : candidate.candidate_status === 10 ? "Active" : `Status ${candidate.candidate_status}`;
   const title = candidate.candidate_name_ar || candidate.candidate_name;
+  const profileActions = [...actions, ...legacyProfileActions(detail)];
 
   return (
     <section className={compact ? "candidateProfile compact" : "candidateProfile"}>
@@ -55,7 +56,7 @@ export function CandidateProfile({
 
       <div className="candidateProfileActions" aria-label="Candidate actions">
         {backHref ? <Link href={backHref}>Back to list</Link> : null}
-        {actions.map((action) =>
+        {profileActions.map((action) =>
           action.href.startsWith("/") ? (
             <Link href={action.href as Route} key={`${action.label}-${action.href}`}>
               {action.label}
@@ -122,6 +123,9 @@ export function CandidateProfile({
         <section className="candidateProfileColumns">
           <RowsPanel title="Education" rows={detail.education} />
           <RowsPanel title="Experience" rows={detail.experiences} />
+          <RowsPanel title="Applications" rows={detail.applications} />
+          <RowsPanel title="Interviews" rows={detail.interviews} />
+          <RowsPanel title="Suggestions" rows={detail.suggestions} />
           <RowsPanel title="Invitations" rows={detail.invitations} />
           <RowsPanel title="Work history" rows={detail.histories} />
           <RowsPanel title="Work logs" rows={detail.workHours} />
@@ -218,11 +222,32 @@ function buildReadiness(detail: CandidateDetailData) {
 
 function buildTimeline(detail: CandidateDetailData) {
   return [
+    ...detail.suggestions.map((row) => ({ ...row, title: `Suggested · ${row.title}` })),
+    ...detail.applications.map((row) => ({ ...row, title: `Applied · ${row.title}` })),
+    ...detail.interviews.map((row) => ({ ...row, title: `Interview · ${row.title}` })),
     ...detail.invitations.map((row) => ({ ...row, title: `Invitation · ${row.title}` })),
     ...detail.histories.map((row) => ({ ...row, title: `Assignment · ${row.title}` })),
     ...detail.workHours.map((row) => ({ ...row, title: `Work log · ${row.title}` })),
     ...detail.notes.map((row) => ({ ...row, title: `Note · ${row.title}` }))
   ].slice(0, 16);
+}
+
+function legacyProfileActions(detail: CandidateDetailData): CandidateAction[] {
+  const candidate = detail.candidate;
+  if (!candidate) return [];
+  return [
+    toAction("Resume", candidate.candidate_resume),
+    toAction("Profile URL", candidate.profile_url),
+    ...detail.links.slice(0, 2).map((link) => toAction(link.title, link.href))
+  ].filter((action): action is CandidateAction => Boolean(action));
+}
+
+function toAction(label: string, href: string | undefined | null) {
+  if (!href) return null;
+  if (href.startsWith("http://") || href.startsWith("https://") || href.startsWith("/") || href.startsWith("mailto:") || href.startsWith("tel:")) {
+    return { label, href };
+  }
+  return null;
 }
 
 function initials(name: string) {

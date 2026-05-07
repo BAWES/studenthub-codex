@@ -759,7 +759,25 @@ async function canStaffAccessCandidate(staffId: number, candidateId: number) {
 }
 
 export async function getCandidateDetail(candidateId: number, requestBasePath = "/staff/requests") {
-  const [candidate, invitations, workHours, histories, notes, skills, tags, warnings, links, idCards, education, experiences, certificates, stats] = await prisma.$transaction([
+  const [
+    candidate,
+    invitations,
+    workHours,
+    histories,
+    notes,
+    skills,
+    tags,
+    warnings,
+    links,
+    idCards,
+    applications,
+    interviews,
+    suggestions,
+    education,
+    experiences,
+    certificates,
+    stats
+  ] = await prisma.$transaction([
     prisma.candidate.findUnique({
       where: { candidate_id: candidateId },
       select: {
@@ -899,6 +917,59 @@ export async function getCandidateDetail(candidateId: number, requestBasePath = 
         updated_at: true
       }
     }),
+    prisma.request_application.findMany({
+      where: { candidate_id: candidateId },
+      orderBy: { created_at: "desc" },
+      take: 8,
+      select: {
+        application_uuid: true,
+        status: true,
+        created_at: true,
+        request: {
+          select: {
+            request_uuid: true,
+            request_position_title: true,
+            company: { select: { company_name: true } }
+          }
+        }
+      }
+    }),
+    prisma.request_interview.findMany({
+      where: { candidate_id: candidateId },
+      orderBy: { interview_at: "desc" },
+      take: 8,
+      select: {
+        request_interview_uuid: true,
+        status: true,
+        interview_at: true,
+        request: {
+          select: {
+            request_uuid: true,
+            request_position_title: true,
+            company: { select: { company_name: true } }
+          }
+        }
+      }
+    }),
+    prisma.suggestion.findMany({
+      where: { candidate_id: candidateId },
+      orderBy: { suggestion_datetime: "desc" },
+      take: 8,
+      select: {
+        suggestion_uuid: true,
+        suggestion_status: true,
+        mail_to_company: true,
+        suggestion_datetime: true,
+        request: {
+          select: {
+            request_uuid: true,
+            request_position_title: true,
+            company: { select: { company_name: true } }
+          }
+        },
+        note_suggestion_note_uuidTonote: { select: { note_text: true } }
+      }
+    }),
     prisma.candidate_education.findMany({
       where: { candidate_id: candidateId },
       orderBy: { updated_at: "desc" },
@@ -1015,6 +1086,27 @@ export async function getCandidateDetail(candidateId: number, requestBasePath = 
       title: `Civil ID card #${card.id}`,
       subtitle: `Expires ${formatDate(card.expiry_date)}`,
       meta: `Updated ${formatDate(card.updated_at ?? card.created_at)}`
+    })),
+    applications: applications.map((application) => ({
+      id: application.application_uuid,
+      title: application.request.request_position_title ?? "Application",
+      subtitle: application.request.company?.company_name ?? "No company",
+      meta: `Status ${application.status ?? 0} · ${formatDate(application.created_at)}`,
+      href: `${requestBasePath}/${application.request.request_uuid}`
+    })),
+    interviews: interviews.map((interview) => ({
+      id: interview.request_interview_uuid,
+      title: interview.request.request_position_title ?? "Interview",
+      subtitle: interview.request.company?.company_name ?? "No company",
+      meta: `Status ${interview.status ?? 0} · ${formatDate(interview.interview_at)}`,
+      href: `${requestBasePath}/${interview.request.request_uuid}`
+    })),
+    suggestions: suggestions.map((suggestion) => ({
+      id: suggestion.suggestion_uuid,
+      title: suggestion.request.request_position_title ?? "Suggestion",
+      subtitle: suggestion.note_suggestion_note_uuidTonote.note_text?.slice(0, 180) ?? suggestion.request.company?.company_name ?? "No note",
+      meta: `Status ${suggestion.suggestion_status ?? 0} · ${suggestion.mail_to_company ? "Mailed" : "Not mailed"} · ${formatDate(suggestion.suggestion_datetime)}`,
+      href: `${requestBasePath}/${suggestion.request.request_uuid}`
     })),
     education: education.map((item) => ({
       id: item.education_uuid,
@@ -1193,7 +1285,11 @@ export async function getCompanyDetail(companyId: number) {
   };
 }
 
-export async function getRequestDetail(requestUuid: string, staffId?: number) {
+export async function getRequestDetail(
+  requestUuid: string,
+  staffId?: number,
+  options: { candidateHref?: (candidateId: number) => string | undefined } = {}
+) {
   const where = staffId ? { request_uuid: requestUuid, staff_id: staffId } : { request_uuid: requestUuid };
   const [request, applications, interviews, invitations, activities, notes, stories, requestSkills, suggestions] = await prisma.$transaction([
     prisma.request.findFirst({
@@ -1400,9 +1496,11 @@ export async function getRequestDetail(requestUuid: string, staffId?: number) {
       subtitle: application.candidate?.candidate_email ?? "No email",
       meta: `Status ${application.status ?? 0} · ${formatDate(application.created_at)}`,
       href: application.candidate?.candidate_id
-        ? staffId
-          ? `/staff/candidates?candidate=${application.candidate.candidate_id}`
-          : `/admin/candidates/${application.candidate.candidate_id}`
+        ? options.candidateHref
+          ? options.candidateHref(application.candidate.candidate_id)
+          : staffId
+            ? `/staff/candidates?candidate=${application.candidate.candidate_id}`
+            : `/admin/candidates/${application.candidate.candidate_id}`
         : undefined
     })),
     interviews: interviews.map((interview) => ({
@@ -1924,7 +2022,7 @@ export async function getCompanyRequestDetail(contactUuid: string, requestUuid: 
     return null;
   }
 
-  return getRequestDetail(requestUuid);
+  return getRequestDetail(requestUuid, undefined, { candidateHref: (candidateId) => `/company/requests/${requestUuid}?candidate=${candidateId}` });
 }
 
 export async function getInspectorWorkspace(inspectorUuid: string) {

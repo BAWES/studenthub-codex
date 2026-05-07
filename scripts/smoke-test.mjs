@@ -400,8 +400,10 @@ async function main() {
   await expectStatus("/admin", 200, adminCookie);
   await expectStatus("/admin/candidates", 200, adminCookie);
   await expectBodyIncludes("/admin/candidates?q=jaafar", 200, "Live candidate workspace", adminCookie);
+  await expectBodyIncludes("/admin/candidates?q=jaafar", 200, "Filtered view", adminCookie);
   await expectStatus(`/admin/candidates/${adminCandidate.candidate_id}`, 200, adminCookie);
   await expectBodyIncludes(`/admin/candidates/${adminCandidate.candidate_id}`, 200, "Readiness", adminCookie);
+  await expectBodyIncludes(`/admin/candidates/${adminCandidate.candidate_id}`, 200, "Applications", adminCookie);
   await expectStatus("/admin/companies", 200, adminCookie);
   await expectStatus(`/admin/companies/${adminCompany.company_id}`, 200, adminCookie);
   await expectStatus("/admin/requests", 200, adminCookie);
@@ -427,6 +429,7 @@ async function main() {
   );
   await expectStatus(`/staff/candidates/${staffCandidate.candidate_id}`, 200, staffCandidateCookie);
   await expectBodyIncludes(`/staff/candidates/${staffCandidate.candidate_id}`, 200, "Readiness", staffCandidateCookie);
+  await expectBodyIncludes(`/staff/candidates/${staffCandidate.candidate_id}`, 200, "Suggestions", staffCandidateCookie);
 
   await expectStatus("/hub", 200, candidateInvitationCookie);
   await expectStatus(`/hub?scope=people&record=candidate-${candidateInvitation.candidate_id}`, 200, candidateInvitationCookie);

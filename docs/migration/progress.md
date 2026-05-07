@@ -104,7 +104,9 @@
   - admin and staff candidate routes now use one reusable candidate profile module for selected preview and full record pages.
   - the candidate self-service landing page now uses the same profile module, scoped to the signed-in candidate.
   - candidate detail pulls richer prod-clone context: profile intro, store/company, email verification, civil ID dates, education, experience, certificates, revenue stats, warnings, links, notes, invitations, work history, and work logs.
-  - smoke coverage now checks the candidate workspace language and the readiness section on full candidate detail pages.
+  - candidate detail now also includes request applications, interviews, and suggestions/shortlists from the legacy workflow tables.
+  - candidate search now shows active query/filter context with one-click clearing instead of leaving users guessing what data subset they are seeing.
+  - smoke coverage now checks the candidate workspace language, filtered search context, readiness, and workflow sections on full candidate detail pages.
 
 ## Known Follow-Ups
 

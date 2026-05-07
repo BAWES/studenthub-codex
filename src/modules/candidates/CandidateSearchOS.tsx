@@ -45,6 +45,8 @@ export function CandidateSearchOS({
         </div>
       </section>
 
+      <ActiveSearchContext basePath={basePath} data={data} params={params} />
+
       <section className="candidateSearchGrid">
         <aside className="candidateFacetPanel" aria-label="Candidate facets">
           <form className="candidateSearchForm" id="candidate-search">
@@ -149,6 +151,42 @@ export function CandidateSearchOS({
           )}
         </aside>
       </section>
+    </section>
+  );
+}
+
+function ActiveSearchContext({
+  basePath,
+  data,
+  params
+}: {
+  basePath: "/admin/candidates" | "/staff/candidates";
+  data: CandidateSearchData;
+  params: CandidateSearchParams;
+}) {
+  const activeFacets = data.facets.flatMap((facet) =>
+    facet.options.filter((option) => option.active).map((option) => ({ key: facet.key, label: `${facet.label}: ${option.label}` }))
+  );
+  const activeItems = [
+    data.query ? { key: "q" as const, label: `Search: ${data.query}` } : null,
+    data.filter !== "all" ? { key: "filter" as const, label: candidateFilterLinks.find((item) => item.value === data.filter)?.label ?? data.filter } : null,
+    ...activeFacets
+  ].filter((item): item is { key: "q" | "filter" | "country" | "university" | "company" | "skill"; label: string } => Boolean(item));
+
+  return (
+    <section className="candidateSearchContext" aria-label="Candidate search context">
+      <div>
+        <span>{activeItems.length ? "Filtered view" : "Default view"}</span>
+        <strong>{data.rows.length.toLocaleString("en-US")} candidates loaded from production data</strong>
+      </div>
+      <nav aria-label="Active candidate filters">
+        {activeItems.map((item) => (
+          <Link href={candidateSearchHref(basePath, params, { [item.key]: "", candidate: "" })} key={`${item.key}-${item.label}`}>
+            {item.label}
+          </Link>
+        ))}
+        {activeItems.length ? <Link href={basePath}>Clear all</Link> : <Link href={candidateSearchHref(basePath, params, { filter: "needs-review", candidate: "" })}>Review queue</Link>}
+      </nav>
     </section>
   );
 }
