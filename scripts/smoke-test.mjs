@@ -420,6 +420,8 @@ async function main() {
   await expectStatus(`/staff/requests/${staffRequest.request_uuid}`, 200, staffCookie);
   await expectBodyIncludes(`/staff/requests/${staffRequest.request_uuid}`, 200, "Request fulfillment", staffCookie);
   await expectStatus("/staff/candidates", 200, staffCandidateCookie);
+  await expectBodyIncludes("/staff/candidates", 200, "All production", staffCandidateCookie);
+  await expectBodyIncludes("/staff/candidates?view=assigned", 200, "Assigned to me", staffCandidateCookie);
   await expectStatus(`/staff/candidates?candidate=${staffCandidate.candidate_id}`, 200, staffCandidateCookie);
   await expectBodyIncludes(
     `/staff/candidates?candidate=${staffCandidate.candidate_id}`,
@@ -465,9 +467,15 @@ async function main() {
   await expectStatus(`/candidate/work-logs/${otherCandidateWorkLog.candidate_working_hour_uuid}`, 404, candidateWorkLogCookie);
   await expectStatus(`/company/companies/${otherContactCompany.company_id}`, 404, companyCookie);
   await expectStatus(`/company/requests/${otherContactRequest.company.request[0].request_uuid}`, 404, companyRequestCookie);
-  await expectStatus(`/staff/candidates/${unassignedStaffCandidate.candidate_id}`, 404, staffCandidateCookie);
+  await expectStatus(`/staff/candidates/${unassignedStaffCandidate.candidate_id}`, 200, staffCandidateCookie);
   await expectBodyIncludes(
     `/staff/candidates?candidate=${unassignedStaffCandidate.candidate_id}`,
+    200,
+    "Readiness",
+    staffCandidateCookie
+  );
+  await expectBodyIncludes(
+    `/staff/candidates?view=assigned&candidate=${unassignedStaffCandidate.candidate_id}`,
     200,
     "Candidate unavailable",
     staffCandidateCookie

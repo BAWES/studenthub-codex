@@ -7550,6 +7550,12 @@ kbd {
   color: var(--blue);
 }
 
+.candidateSearchContext a.active {
+  border-color: var(--blue);
+  background: var(--blue);
+  color: #fff;
+}
+
 .candidateSearchGrid {
   grid-template-columns: minmax(220px, 280px) minmax(360px, 0.88fr) minmax(420px, 1.12fr);
   gap: 10px;

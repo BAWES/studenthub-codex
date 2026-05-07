@@ -6,6 +6,7 @@ import { getCandidateDetail } from "@/modules/workspace/data";
 
 export type CandidateSearchRole = "admin" | "staff";
 export type CandidateSearchFilter = "all" | "active" | "needs-review" | "incomplete" | "civil-id";
+export type CandidateSearchVisibility = "all" | "assigned";
 
 export type CandidateSearchFacetKey = "country" | "university" | "company" | "skill";
 
@@ -14,6 +15,7 @@ export type CandidateSearchParams = {
   staffId?: number;
   query?: string;
   filter?: CandidateSearchFilter;
+  visibility?: CandidateSearchVisibility;
   candidateId?: number;
   country?: string;
   university?: string;
@@ -57,7 +59,9 @@ export const candidateSearchFilters: { label: string; value: CandidateSearchFilt
 export async function getCandidateSearchWorkspace(params: CandidateSearchParams) {
   const query = params.query?.trim() ?? "";
   const filter = params.filter ?? "all";
-  const scopedCandidateIds = params.role === "staff" ? await candidateIdsForStaff(params.staffId ?? 0) : null;
+  const visibility = params.role === "staff" ? params.visibility ?? "all" : "all";
+  const staffCandidateIds = params.role === "staff" ? await candidateIdsForStaff(params.staffId ?? 0) : null;
+  const scopedCandidateIds = params.role === "staff" && visibility === "assigned" ? staffCandidateIds : null;
   const scopeWhere = scopedCandidateIds ? candidateIdScope(scopedCandidateIds) : {};
   const facetParams = {
     country: parsePositiveInt(params.country),
@@ -109,6 +113,8 @@ export async function getCandidateSearchWorkspace(params: CandidateSearchParams)
     role: params.role,
     query,
     filter,
+    visibility,
+    assignedCount: staffCandidateIds?.length ?? null,
     selectedId,
     selectedBlocked: Boolean(params.candidateId && !selectedId),
     params: {

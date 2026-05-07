@@ -1547,7 +1547,7 @@ function stripHtml(value: string) {
 }
 
 export async function getStaffWorkspace(staffId: number) {
-  const [staff, assignedRequests, workHistories, stories, notes, recentRequests, recentStories] =
+  const [staff, productionCandidates, productionCompanies, assignedRequests, workHistories, stories, notes, recentRequests, recentStories] =
     await prisma.$transaction([
       prisma.staff.findUnique({
         where: { staff_id: staffId },
@@ -1559,6 +1559,8 @@ export async function getStaffWorkspace(staffId: number) {
           staff_salary_currency: true
         }
       }),
+      prisma.candidate.count({ where: { deleted: 0 } }),
+      prisma.company.count({ where: { deleted: 0 } }),
       prisma.request.count({ where: { staff_id: staffId } }),
       prisma.candidate_work_history.count({ where: { staff_id: staffId } }),
       prisma.story.count({ where: { staff_id: staffId } }),
@@ -1591,10 +1593,10 @@ export async function getStaffWorkspace(staffId: number) {
   return {
     staff,
     metrics: [
+      { label: "Candidates", value: productionCandidates, note: `${workHistories} assigned to this staff account` },
+      { label: "Companies", value: productionCompanies, note: "Employer records in the prod clone" },
       { label: "Assigned Requests", value: assignedRequests, note: "Requests owned by this staff member" },
-      { label: "Work Histories", value: workHistories, note: "Candidate assignments connected to this staff member" },
-      { label: "Stories", value: stories, note: "Operational stories in progress or history" },
-      { label: "Notes", value: notes, note: `Salary ${formatMoney(staff?.staff_salary, staff?.staff_salary_currency ?? "KWD")}` }
+      { label: "Stories", value: stories, note: `${notes} staff notes · ${formatMoney(staff?.staff_salary, staff?.staff_salary_currency ?? "KWD")}` }
     ],
     requests: recentRequests.map((request) => ({
       id: request.request_uuid,

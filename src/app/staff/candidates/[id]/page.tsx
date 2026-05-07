@@ -2,14 +2,14 @@ import { notFound } from "next/navigation";
 import { requireRoleCapability } from "@/modules/auth/session";
 import { CandidateProfile } from "@/modules/candidates/CandidateProfile";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
-import { getStaffCandidateDetail } from "@/modules/workspace/data";
+import { getCandidateDetail } from "@/modules/workspace/data";
 
 export const dynamic = "force-dynamic";
 
 export default async function StaffCandidateDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const session = await requireRoleCapability("staff", "candidate.read.assigned");
+  const session = await requireRoleCapability("staff", "candidate.search");
   const { id } = await params;
-  const data = await getStaffCandidateDetail(Number(session.id), Number(id));
+  const data = await getCandidateDetail(Number(id), "/staff/requests");
 
   if (!data?.candidate) {
     notFound();

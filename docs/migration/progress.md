@@ -107,6 +107,10 @@
   - candidate detail now also includes request applications, interviews, and suggestions/shortlists from the legacy workflow tables.
   - candidate search now shows active query/filter context with one-click clearing instead of leaving users guessing what data subset they are seeing.
   - smoke coverage now checks the candidate workspace language, filtered search context, readiness, and workflow sections on full candidate detail pages.
+- Changed staff candidate search migration behavior:
+  - staff candidate search now defaults to all production candidates so real staff accounts do not see an empty app just because `candidate_work_history.staff_id` has no rows for that account.
+  - staff can still switch to an explicit assigned-only view for scoped testing.
+  - staff landing metrics now show production candidate/company totals alongside assigned requests.
 
 ## Known Follow-Ups
 

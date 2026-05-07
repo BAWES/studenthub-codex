@@ -170,16 +170,30 @@ function ActiveSearchContext({
   const activeItems = [
     data.query ? { key: "q" as const, label: `Search: ${data.query}` } : null,
     data.filter !== "all" ? { key: "filter" as const, label: candidateFilterLinks.find((item) => item.value === data.filter)?.label ?? data.filter } : null,
+    data.role === "staff" && data.visibility === "assigned" ? { key: "view" as const, label: `Assigned: ${data.assignedCount ?? 0}` } : null,
     ...activeFacets
-  ].filter((item): item is { key: "q" | "filter" | "country" | "university" | "company" | "skill"; label: string } => Boolean(item));
+  ].filter((item): item is { key: "q" | "filter" | "view" | "country" | "university" | "company" | "skill"; label: string } => Boolean(item));
 
   return (
     <section className="candidateSearchContext" aria-label="Candidate search context">
       <div>
         <span>{activeItems.length ? "Filtered view" : "Default view"}</span>
-        <strong>{data.rows.length.toLocaleString("en-US")} candidates loaded from production data</strong>
+        <strong>
+          {data.rows.length.toLocaleString("en-US")} candidates loaded from{" "}
+          {data.role === "staff" && data.visibility === "assigned" ? "your assigned production records" : "all production data"}
+        </strong>
       </div>
       <nav aria-label="Active candidate filters">
+        {data.role === "staff" ? (
+          <>
+            <Link className={data.visibility === "all" ? "active" : ""} href={candidateSearchHref(basePath, params, { view: "", candidate: "" })}>
+              All production
+            </Link>
+            <Link className={data.visibility === "assigned" ? "active" : ""} href={candidateSearchHref(basePath, params, { view: "assigned", candidate: "" })}>
+              Assigned to me
+            </Link>
+          </>
+        ) : null}
         {activeItems.map((item) => (
           <Link href={candidateSearchHref(basePath, params, { [item.key]: "", candidate: "" })} key={`${item.key}-${item.label}`}>
             {item.label}
@@ -231,12 +245,13 @@ function FacetGroup({ basePath, facet, params }: { basePath: "/admin/candidates"
 function candidateSearchHref(
   basePath: "/admin/candidates" | "/staff/candidates",
   params: CandidateSearchParams,
-  overrides: Partial<Record<"q" | "filter" | "candidate" | "country" | "university" | "company" | "skill", string>>
+  overrides: Partial<Record<"q" | "filter" | "view" | "candidate" | "country" | "university" | "company" | "skill", string>>
 ) {
   const next = new URLSearchParams();
   const values = {
     q: params.query ?? "",
     filter: params.filter && params.filter !== "all" ? params.filter : "",
+    view: params.visibility === "assigned" ? "assigned" : "",
     candidate: params.candidateId ? String(params.candidateId) : "",
     country: params.country ?? "",
     university: params.university ?? "",
