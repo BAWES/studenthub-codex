@@ -1,7 +1,6 @@
 import { requireRoleCapability } from "@/modules/auth/session";
+import { StaffHome } from "@/modules/staff/StaffHome";
 import { getStaffWorkspace } from "@/modules/workspace/data";
-import { FeatureGrid } from "@/modules/workspace/FeatureGrid";
-import { navForRole } from "@/modules/workspace/navigation";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 
 export const dynamic = "force-dynamic";
@@ -16,10 +15,8 @@ export default async function StaffPage() {
       eyebrow="Staff Workspace"
       title={`Welcome back, ${data.staff?.staff_name ?? session.name}.`}
       metrics={data.metrics}
-      primary={{ title: "Assigned Requests", rows: data.requests }}
-      secondary={{ title: "Stories", rows: data.stories }}
     >
-      <FeatureGrid items={navForRole("staff").filter((item) => item.href !== "/staff")} />
+      <StaffHome data={data} />
     </WorkspaceShell>
   );
 }

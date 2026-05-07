@@ -416,6 +416,8 @@ async function main() {
   await expectStatus(`/hub?scope=demand&record=request-${staffRequest.request_uuid}`, 200, staffCookie);
   await expectStatus(`/hub?scope=people&record=candidate-${staffCandidate.candidate_id}`, 200, staffCandidateCookie);
   await expectStatus("/staff", 200, staffCookie);
+  await expectBodyIncludes("/staff", 200, "Staff operating home", staffCookie);
+  await expectBodyIncludes("/staff", 200, "Production data loaded", staffCookie);
   await expectStatus("/staff/requests", 200, staffCookie);
   await expectStatus(`/staff/requests/${staffRequest.request_uuid}`, 200, staffCookie);
   await expectBodyIncludes(`/staff/requests/${staffRequest.request_uuid}`, 200, "Request fulfillment", staffCookie);

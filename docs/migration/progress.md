@@ -111,6 +111,9 @@
   - staff candidate search now defaults to all production candidates so real staff accounts do not see an empty app just because `candidate_work_history.staff_id` has no rows for that account.
   - staff can still switch to an explicit assigned-only view for scoped testing.
   - staff landing metrics now show production candidate/company totals alongside assigned requests.
+- Replaced the generic staff home with a staff operating landing page:
+  - primary paths are candidate search, requests, time/pay, and documents.
+  - the hero confirms production candidate data is loaded.
 
 ## Known Follow-Ups
 
