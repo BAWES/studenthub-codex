@@ -13,6 +13,21 @@ import type {
 } from "./search";
 
 type CandidateSearchData = Awaited<ReturnType<typeof getCandidateSearchWorkspace>>;
+type CandidateSearchParamKey =
+  | "q"
+  | "filter"
+  | "view"
+  | "candidate"
+  | "tabs"
+  | "selected"
+  | "country"
+  | "university"
+  | "company"
+  | "skill"
+  | "gender"
+  | "profile"
+  | "assignment"
+  | "document";
 
 export function CandidateSearchOS({
   data,
@@ -28,6 +43,9 @@ export function CandidateSearchOS({
   params: CandidateSearchParams;
 }) {
   const commands = buildCandidateSearchCommands(data, basePath, params);
+  const selectedIds = params.selectedIds ?? [];
+  const selectedRows = data.rows.filter((row) => selectedIds.includes(row.id));
+  const facetGroups = [...data.facets].sort((a, b) => Number(hasActiveFacet(b)) - Number(hasActiveFacet(a)));
 
   return (
     <main className="candidateDesk">
@@ -47,6 +65,7 @@ export function CandidateSearchOS({
           <input name="filter" type="hidden" value={data.filter} />
           {params.visibility === "assigned" ? <input name="view" type="hidden" value="assigned" /> : null}
           {data.openTabs.length ? <input name="tabs" type="hidden" value={data.openTabs.map((tab) => tab.id).join(",")} /> : null}
+          {selectedIds.length ? <input name="selected" type="hidden" value={selectedIds.join(",")} /> : null}
           <HiddenFacetInputs data={data} />
           <button type="submit">Search</button>
         </form>
@@ -64,9 +83,15 @@ export function CandidateSearchOS({
       </header>
 
       <ActiveSearchContext basePath={basePath} data={data} params={params} />
+      <BulkCandidateBar basePath={basePath} params={params} selectedIds={selectedIds} selectedRows={selectedRows} />
 
       <section className="candidateDeskBody">
         <aside className="candidateSearchPanel" aria-label="Candidate search and filters">
+          <section className="candidateFacetRail" aria-label="Candidate power filters">
+            {facetGroups.map((facet) => (
+              <FacetGroup basePath={basePath} facet={facet} key={facet.key} params={params} />
+            ))}
+          </section>
           <nav className="candidateSearchFilters" aria-label="Candidate search filters">
             {candidateFilterLinks.map((item) => (
               <Link
@@ -83,7 +108,9 @@ export function CandidateSearchOS({
               <span>{data.role} scope</span>
               <strong>{data.query ? `Results for ${data.query}` : "Production candidates"}</strong>
             </div>
-            <small>{data.rows.length.toLocaleString("en-US")} shown</small>
+            <small>
+              {data.rows.length.toLocaleString("en-US")} of {data.matchingCount.toLocaleString("en-US")}
+            </small>
           </div>
           {data.selectedBlocked ? (
             <div className="candidateAccessNotice">
@@ -93,30 +120,35 @@ export function CandidateSearchOS({
           ) : null}
           <div className="candidateResultList">
             {data.rows.map((row) => (
-              <Link
+              <article
                 className={row.id === data.selectedId ? "candidateResultCard active" : "candidateResultCard"}
-                href={candidateSearchHref(basePath, params, { candidate: String(row.id) })}
                 key={row.id}
               >
-                <div className="candidateResultMain">
-                  <span className="candidateResultAvatar">{candidateInitials(row.name)}</span>
-                  <div>
-                    <strong>{row.name}</strong>
-                    <small>{row.email}</small>
+                <Link className="candidateResultSelect" href={candidateSearchHref(basePath, params, { selected: toggleCandidateId(selectedIds, row.id).join(",") })}>
+                  <span aria-hidden="true">{selectedIds.includes(row.id) ? "✓" : ""}</span>
+                  <small>{selectedIds.includes(row.id) ? "Selected" : "Select"}</small>
+                </Link>
+                <Link className="candidateResultOpen" href={candidateSearchHref(basePath, params, { candidate: String(row.id) })}>
+                  <div className="candidateResultMain">
+                    <span className="candidateResultAvatar">{candidateInitials(row.name)}</span>
+                    <div>
+                      <strong>{row.name}</strong>
+                      <small>{row.email}</small>
+                    </div>
+                    <em>{row.status}</em>
                   </div>
-                  <em>{row.status}</em>
-                </div>
-                <div className="candidateResultMeta">
-                  <span>{row.signal}</span>
-                  <span>{row.country}</span>
-                  <span>{row.updated}</span>
-                </div>
-                <div className="candidateResultTags">
-                  {[...row.flags, ...row.skills].slice(0, 3).map((flag) => (
-                    <span key={flag}>{flag}</span>
-                  ))}
-                </div>
-              </Link>
+                  <div className="candidateResultMeta">
+                    <span>{row.signal}</span>
+                    <span>{row.country}</span>
+                    <span>{row.updated}</span>
+                  </div>
+                  <div className="candidateResultTags">
+                    {[...row.flags, ...row.skills].slice(0, 3).map((flag) => (
+                      <span key={flag}>{flag}</span>
+                    ))}
+                  </div>
+                </Link>
+              </article>
             ))}
             {data.rows.length === 0 ? (
               <div className="candidateEmptyState">
@@ -125,15 +157,6 @@ export function CandidateSearchOS({
               </div>
             ) : null}
           </div>
-          <section className="candidateFacetStack" aria-label="Candidate facets">
-            <div className="candidateFacetHeader">
-              <span>Filters</span>
-              <Link href={basePath}>Clear all</Link>
-            </div>
-            {data.facets.map((facet) => (
-              <FacetGroup basePath={basePath} facet={facet} key={facet.key} params={params} />
-            ))}
-          </section>
         </aside>
 
         <section className="candidateTabWorkspace" aria-label="Open candidate tabs">
@@ -152,6 +175,43 @@ export function CandidateSearchOS({
         </section>
       </section>
     </main>
+  );
+}
+
+function hasActiveFacet(facet: CandidateSearchFacet) {
+  return facet.options.some((option) => option.active);
+}
+
+function BulkCandidateBar({
+  basePath,
+  params,
+  selectedIds,
+  selectedRows
+}: {
+  basePath: "/admin/candidates" | "/staff/candidates";
+  params: CandidateSearchParams;
+  selectedIds: number[];
+  selectedRows: CandidateSearchData["rows"];
+}) {
+  if (!selectedIds.length) return null;
+  const selectedValue = selectedIds.join(",");
+  const loadedEmailRecipients = selectedRows.map((row) => row.email).filter(Boolean).join(",");
+
+  return (
+    <section className="candidateBulkBar" aria-label="Selected candidate actions">
+      <div>
+        <span>Selection</span>
+        <strong>{selectedIds.length.toLocaleString("en-US")} selected</strong>
+      </div>
+      <nav>
+        <Link href={candidateSearchHref(basePath, params, { tabs: selectedValue, candidate: String(selectedIds[0] ?? ""), selected: selectedValue })}>Open as tabs</Link>
+        {selectedIds.length === 2 ? <Link href={candidateSearchHref(basePath, params, { selected: selectedValue })}>Merge review</Link> : null}
+        {loadedEmailRecipients ? <a href={`mailto:${loadedEmailRecipients}`}>Email loaded</a> : null}
+        <Link href={candidateSearchHref(basePath, params, { selected: selectedValue })}>Generate ID batch</Link>
+        <Link href={candidateSearchHref(basePath, params, { selected: selectedValue })}>Export CVs</Link>
+        <Link href={candidateSearchHref(basePath, params, { selected: "" })}>Deselect</Link>
+      </nav>
+    </section>
   );
 }
 
@@ -205,14 +265,14 @@ function ActiveSearchContext({
     data.filter !== "all" ? { key: "filter" as const, label: candidateFilterLinks.find((item) => item.value === data.filter)?.label ?? data.filter } : null,
     data.role === "staff" && data.visibility === "assigned" ? { key: "view" as const, label: `Assigned: ${data.assignedCount ?? 0}` } : null,
     ...activeFacets
-  ].filter((item): item is { key: "q" | "filter" | "view" | "country" | "university" | "company" | "skill"; label: string } => Boolean(item));
+  ].filter((item): item is { key: Exclude<CandidateSearchParamKey, "candidate" | "tabs" | "selected">; label: string } => Boolean(item));
 
   return (
     <section className="candidateSearchContext" aria-label="Candidate search context">
       <div>
         <span>{activeItems.length ? "Filtered view" : "Default view"}</span>
         <strong>
-          {data.rows.length.toLocaleString("en-US")} candidates loaded from{" "}
+          {data.matchingCount.toLocaleString("en-US")} matching candidates from{" "}
           {data.role === "staff" && data.visibility === "assigned" ? "your assigned production records" : "all production data"}
         </strong>
       </div>
@@ -253,6 +313,10 @@ function HiddenFacetInputs({ data }: { data: CandidateSearchData }) {
       {data.params.university ? <input name="university" type="hidden" value={data.params.university} /> : null}
       {data.params.company ? <input name="company" type="hidden" value={data.params.company} /> : null}
       {data.params.skill ? <input name="skill" type="hidden" value={data.params.skill} /> : null}
+      {data.params.gender ? <input name="gender" type="hidden" value={data.params.gender} /> : null}
+      {data.params.profile ? <input name="profile" type="hidden" value={data.params.profile} /> : null}
+      {data.params.assignment ? <input name="assignment" type="hidden" value={data.params.assignment} /> : null}
+      {data.params.document ? <input name="document" type="hidden" value={data.params.document} /> : null}
     </>
   );
 }
@@ -278,7 +342,7 @@ function FacetGroup({ basePath, facet, params }: { basePath: "/admin/candidates"
 function candidateSearchHref(
   basePath: "/admin/candidates" | "/staff/candidates",
   params: CandidateSearchParams,
-  overrides: Partial<Record<"q" | "filter" | "view" | "candidate" | "tabs" | "country" | "university" | "company" | "skill", string>>
+  overrides: Partial<Record<CandidateSearchParamKey, string>>
 ) {
   const next = new URLSearchParams();
   const existingTabs = (params.tabIds ?? []).join(",");
@@ -288,10 +352,15 @@ function candidateSearchHref(
     view: params.visibility === "assigned" ? "assigned" : "",
     candidate: params.candidateId ? String(params.candidateId) : "",
     tabs: existingTabs,
+    selected: (params.selectedIds ?? []).join(","),
     country: params.country ?? "",
     university: params.university ?? "",
     company: params.company ?? "",
     skill: params.skill ?? "",
+    gender: params.gender ?? "",
+    profile: params.profile ?? "",
+    assignment: params.assignment ?? "",
+    document: params.document ?? "",
     ...overrides
   };
   if (values.candidate && overrides.tabs === undefined) {
@@ -302,6 +371,10 @@ function candidateSearchHref(
   }
   const suffix = next.toString();
   return (suffix ? `${basePath}?${suffix}` : basePath) as Route;
+}
+
+function toggleCandidateId(ids: number[], id: number) {
+  return ids.includes(id) ? ids.filter((item) => item !== id) : [...ids, id];
 }
 
 function candidateInitials(name: string) {

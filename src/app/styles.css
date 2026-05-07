@@ -7453,7 +7453,7 @@ kbd {
 .candidateDesk {
   min-height: 100svh;
   display: grid;
-  grid-template-rows: auto auto minmax(0, 1fr);
+  grid-template-rows: auto auto auto minmax(0, 1fr);
   gap: 8px;
   background:
     linear-gradient(90deg, var(--grid-line) 1px, transparent 1px),
@@ -7615,7 +7615,7 @@ kbd {
 
 .candidateSearchPanel {
   display: grid;
-  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  grid-template-rows: auto auto auto minmax(0, 1fr);
 }
 
 .candidateTabWorkspace {
@@ -7841,6 +7841,56 @@ kbd {
   color: #fff;
 }
 
+.candidateBulkBar {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  border: 1px solid var(--blue);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--blue) 9%, var(--surface));
+  padding: 8px 10px;
+}
+
+.candidateBulkBar > div {
+  display: grid;
+  gap: 2px;
+}
+
+.candidateBulkBar span {
+  color: var(--blue);
+  font-size: 10px;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.candidateBulkBar strong {
+  color: var(--ink);
+  font-size: 14px;
+}
+
+.candidateBulkBar nav {
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.candidateBulkBar a {
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink);
+  padding: 0 10px;
+  font-size: 12px;
+  font-weight: 900;
+  text-decoration: none;
+}
+
 .candidateSearchGrid {
   grid-template-columns: minmax(220px, 280px) minmax(360px, 0.88fr) minmax(420px, 1.12fr);
   gap: 10px;
@@ -7898,11 +7948,35 @@ kbd {
   padding: 10px;
 }
 
+.candidateFacetRail {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(210px, 1fr);
+  gap: 8px;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--line);
+  padding: 8px;
+  scrollbar-width: thin;
+}
+
 .candidateFacetGroup {
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--surface);
-  padding: 10px;
+  padding: 8px;
+}
+
+.candidateFacetRail .candidateFacetGroup {
+  max-height: 176px;
+  overflow-y: auto;
+}
+
+.candidateFacetRail .candidateFacetGroup h3 {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--surface);
+  padding-bottom: 5px;
 }
 
 .candidateResultsPanel {
@@ -7948,10 +8022,61 @@ kbd {
 }
 
 .candidateResultCard {
+  position: relative;
   gap: 7px;
   background: var(--surface);
   box-shadow: none;
   padding: 9px 10px;
+}
+
+.candidateResultOpen {
+  display: grid;
+  gap: 7px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.candidateResultSelect {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 2;
+  width: 26px;
+  height: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-soft);
+  color: var(--blue);
+  text-decoration: none;
+}
+
+.candidateResultSelect span {
+  width: 14px;
+  height: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 950;
+}
+
+.candidateResultSelect:hover,
+.candidateResultCard:has(.candidateResultSelect:hover) .candidateResultSelect {
+  border-color: var(--blue);
+  background: color-mix(in srgb, var(--blue) 10%, var(--surface));
+}
+
+.candidateResultSelect small {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
 }
 
 .candidateResultCard:hover,
@@ -7966,6 +8091,7 @@ kbd {
   grid-template-columns: 36px minmax(0, 1fr) auto;
   gap: 9px;
   align-items: center;
+  padding-right: 30px;
 }
 
 .candidateResultAvatar,
@@ -8334,11 +8460,14 @@ kbd {
 [data-theme="dark"] .candidateDeskAccount,
 [data-theme="dark"] .candidateSearchPanel,
 [data-theme="dark"] .candidateTabWorkspace,
+[data-theme="dark"] .candidateBulkBar,
+[data-theme="dark"] .candidateBulkBar a,
 [data-theme="dark"] .candidateTabs,
 [data-theme="dark"] .candidateTabs > a,
 [data-theme="dark"] .candidateTabs > span,
 [data-theme="dark"] .candidateSearchContext,
 [data-theme="dark"] .candidateSearchContext a,
+[data-theme="dark"] .candidateResultSelect,
 [data-theme="dark"] .candidateFacetGroup,
 [data-theme="dark"] .candidateReadinessScore,
 [data-theme="dark"] .candidateReadinessItems div,
@@ -8450,6 +8579,20 @@ kbd {
     flex: 0 0 auto;
   }
 
+  .candidateBulkBar {
+    grid-template-columns: 1fr;
+  }
+
+  .candidateBulkBar nav {
+    flex-wrap: nowrap;
+    justify-content: start;
+    overflow-x: auto;
+  }
+
+  .candidateBulkBar a {
+    flex: 0 0 auto;
+  }
+
   .candidateSearchPanel,
   .candidateTabWorkspace {
     min-height: auto;
@@ -8472,9 +8615,14 @@ kbd {
 
   .candidateSearchFilters,
   .candidateSearchContext nav,
+  .candidateFacetRail,
   .candidateReadinessItems,
   .candidateFactGrid {
     grid-template-columns: 1fr;
+  }
+
+  .candidateFacetRail {
+    grid-auto-columns: minmax(210px, 76vw);
   }
 
   .candidateFacetPanel,

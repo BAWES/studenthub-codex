@@ -8,7 +8,7 @@ export type CandidateSearchRole = "admin" | "staff";
 export type CandidateSearchFilter = "all" | "active" | "needs-review" | "incomplete" | "civil-id";
 export type CandidateSearchVisibility = "all" | "assigned";
 
-export type CandidateSearchFacetKey = "country" | "university" | "company" | "skill";
+export type CandidateSearchFacetKey = "country" | "university" | "company" | "skill" | "gender" | "profile" | "assignment" | "document";
 
 export type CandidateSearchParams = {
   role: CandidateSearchRole;
@@ -18,10 +18,15 @@ export type CandidateSearchParams = {
   visibility?: CandidateSearchVisibility;
   candidateId?: number;
   tabIds?: number[];
+  selectedIds?: number[];
   country?: string;
   university?: string;
   company?: string;
   skill?: string;
+  gender?: string;
+  profile?: string;
+  assignment?: string;
+  document?: string;
 };
 
 export type CandidateSearchFacet = {
@@ -68,12 +73,16 @@ export async function getCandidateSearchWorkspace(params: CandidateSearchParams)
     country: parsePositiveInt(params.country),
     university: parsePositiveInt(params.university),
     company: parsePositiveInt(params.company),
-    skill: params.skill?.trim() || undefined
+    skill: params.skill?.trim() || undefined,
+    gender: parsePositiveInt(params.gender),
+    profile: parseEnum(params.profile, ["complete", "incomplete"]),
+    assignment: parseEnum(params.assignment, ["assigned", "unassigned"]),
+    document: parseEnum(params.document, ["resume", "no-resume", "civil-id"])
   };
   const where = buildCandidateWhere({ scopeWhere, query, filter, ...facetParams });
   const facetWhere = buildCandidateWhere({ scopeWhere, query, filter });
 
-  const [rows, metrics, facetRows] = await Promise.all([
+  const [rows, metrics, matchingCount, facetRows, exactFacets] = await Promise.all([
     prisma.candidate.findMany({
       where,
       orderBy: [{ candidate_updated_at: "desc" }, { candidate_id: "desc" }],
@@ -81,6 +90,7 @@ export async function getCandidateSearchWorkspace(params: CandidateSearchParams)
       select: candidateSearchSelect
     }),
     getCandidateSearchMetrics(scopeWhere),
+    prisma.candidate.count({ where }),
     prisma.candidate.findMany({
       where: facetWhere,
       orderBy: { candidate_updated_at: "desc" },
@@ -88,6 +98,11 @@ export async function getCandidateSearchWorkspace(params: CandidateSearchParams)
       select: {
         country_id: true,
         university_id: true,
+        candidate_gender: true,
+        is_incomplete_profile: true,
+        candidate_resume: true,
+        candidate_civil_need_verification: true,
+        store_id: true,
         store: { select: { company_id: true, company: { select: { company_name: true } } } },
         country: { select: { country_name_en: true } },
         university: { select: { university_name_en: true } },
@@ -97,7 +112,8 @@ export async function getCandidateSearchWorkspace(params: CandidateSearchParams)
           select: { skill: true }
         }
       }
-    })
+    }),
+    getExactFacetCounts(facetWhere)
   ]);
 
   const searchRows = rows.map(toCandidateSearchRow);
@@ -142,6 +158,7 @@ export async function getCandidateSearchWorkspace(params: CandidateSearchParams)
     filter,
     visibility,
     assignedCount: staffCandidateIds?.length ?? null,
+    matchingCount,
     selectedId,
     selectedBlocked: Boolean(params.candidateId && !selectedId),
     openTabs: orderedTabs,
@@ -149,11 +166,15 @@ export async function getCandidateSearchWorkspace(params: CandidateSearchParams)
       country: params.country ?? "",
       university: params.university ?? "",
       company: params.company ?? "",
-      skill: params.skill ?? ""
+      skill: params.skill ?? "",
+      gender: params.gender ?? "",
+      profile: params.profile ?? "",
+      assignment: params.assignment ?? "",
+      document: params.document ?? ""
     },
     rows: searchRows,
     metrics,
-    facets: buildFacets(facetRows, params),
+    facets: buildFacets(facetRows, params, exactFacets),
     source: {
       current: "Live MySQL",
       target: "Meilisearch index",
@@ -202,7 +223,11 @@ function buildCandidateWhere({
   country,
   university,
   company,
-  skill
+  skill,
+  gender,
+  profile,
+  assignment,
+  document
 }: {
   scopeWhere: Prisma.candidateWhereInput;
   query: string;
@@ -211,6 +236,10 @@ function buildCandidateWhere({
   university?: number;
   company?: number;
   skill?: string;
+  gender?: number;
+  profile?: "complete" | "incomplete";
+  assignment?: "assigned" | "unassigned";
+  document?: "resume" | "no-resume" | "civil-id";
 }): Prisma.candidateWhereInput {
   const numeric = Number(query);
   return {
@@ -224,6 +253,14 @@ function buildCandidateWhere({
     ...(university ? { university_id: university } : {}),
     ...(company ? { store: { company_id: company } } : {}),
     ...(skill ? { candidate_skill: { some: { deleted: 0, skill } } } : {}),
+    ...(gender ? { candidate_gender: gender } : {}),
+    ...(profile === "complete" ? { is_incomplete_profile: false } : {}),
+    ...(profile === "incomplete" ? { is_incomplete_profile: true } : {}),
+    ...(assignment === "assigned" ? { store_id: { not: null } } : {}),
+    ...(assignment === "unassigned" ? { store_id: null } : {}),
+    ...(document === "resume" ? { candidate_resume: { not: null } } : {}),
+    ...(document === "no-resume" ? { candidate_resume: null } : {}),
+    ...(document === "civil-id" ? { candidate_civil_need_verification: true } : {}),
     ...(query
       ? {
           OR: [
@@ -309,31 +346,65 @@ function buildFacets(
   rows: {
     country_id: number | null;
     university_id: number | null;
+    candidate_gender: number | null;
+    is_incomplete_profile: boolean | null;
+    candidate_resume: string | null;
+    candidate_civil_need_verification: boolean | null;
+    store_id: number | null;
     store: { company_id: number | null; company: { company_name: string } | null } | null;
     country: { country_name_en: string } | null;
     university: { university_name_en: string | null } | null;
     candidate_skill: { skill: string }[];
   }[],
-  params: CandidateSearchParams
+  params: CandidateSearchParams,
+  exactFacets: Awaited<ReturnType<typeof getExactFacetCounts>>
 ): CandidateSearchFacet[] {
   const facets: CandidateSearchFacet[] = [
     {
+      key: "gender",
+      label: "Gender",
+      options: exactFacets.gender.map((item) => ({ ...item, active: item.value === params.gender }))
+    },
+    {
+      key: "profile",
+      label: "Profile",
+      options: exactFacets.profile.map((item) => ({ ...item, active: item.value === params.profile }))
+    },
+    {
+      key: "assignment",
+      label: "Assignment",
+      options: exactFacets.assignment.map((item) => ({ ...item, active: item.value === params.assignment }))
+    },
+    {
+      key: "document",
+      label: "Documents",
+      options: exactFacets.document.map((item) => ({ ...item, active: item.value === params.document }))
+    },
+    {
       key: "country",
       label: "Country",
-      options: topFacet(
-        rows
-          .filter((row) => row.country_id && row.country?.country_name_en)
-          .map((row) => ({ value: String(row.country_id), label: row.country?.country_name_en ?? "Country" })),
+      options: mergeExactOptions(
+        exactFacets.country,
+        topFacet(
+          rows
+            .filter((row) => row.country_id && row.country?.country_name_en)
+            .map((row) => ({ value: String(row.country_id), label: row.country?.country_name_en ?? "Country" })),
+          params.country
+        ),
         params.country
       )
     },
     {
       key: "university",
       label: "University",
-      options: topFacet(
-        rows
-          .filter((row) => row.university_id && row.university?.university_name_en)
-          .map((row) => ({ value: String(row.university_id), label: row.university?.university_name_en ?? "University" })),
+      options: mergeExactOptions(
+        exactFacets.university,
+        topFacet(
+          rows
+            .filter((row) => row.university_id && row.university?.university_name_en)
+            .map((row) => ({ value: String(row.university_id), label: row.university?.university_name_en ?? "University" })),
+          params.university
+        ),
         params.university
       )
     },
@@ -359,6 +430,94 @@ function buildFacets(
   return facets.filter((facet) => facet.options.length);
 }
 
+function genderLabel(value: number | null) {
+  if (value === 1) return "Male";
+  if (value === 2) return "Female";
+  if (value === 3) return "Other";
+  return "Not set";
+}
+
+async function getExactFacetCounts(where: Prisma.candidateWhereInput) {
+  const [countries, universities, genders, complete, incomplete, assigned, unassigned, withResume, withoutResume, civilId] = await Promise.all([
+    prisma.candidate.groupBy({ by: ["country_id"], where: { ...where, country_id: { not: null } }, _count: { _all: true } }),
+    prisma.candidate.groupBy({ by: ["university_id"], where: { ...where, university_id: { not: null } }, _count: { _all: true } }),
+    prisma.candidate.groupBy({ by: ["candidate_gender"], where: { ...where, candidate_gender: { not: null } }, _count: { _all: true } }),
+    prisma.candidate.count({ where: { ...where, is_incomplete_profile: false } }),
+    prisma.candidate.count({ where: { ...where, is_incomplete_profile: true } }),
+    prisma.candidate.count({ where: { ...where, store_id: { not: null } } }),
+    prisma.candidate.count({ where: { ...where, store_id: null } }),
+    prisma.candidate.count({ where: { ...where, candidate_resume: { not: null } } }),
+    prisma.candidate.count({ where: { ...where, candidate_resume: null } }),
+    prisma.candidate.count({ where: { ...where, candidate_civil_need_verification: true } })
+  ]);
+
+  const countryIds = countries.map((item) => item.country_id).filter((id): id is number => Boolean(id));
+  const universityIds = universities.map((item) => item.university_id).filter((id): id is number => Boolean(id));
+  const [countryNames, universityNames] = await Promise.all([
+    countryIds.length
+      ? prisma.country.findMany({ where: { country_id: { in: countryIds } }, select: { country_id: true, country_name_en: true } })
+      : [],
+    universityIds.length
+      ? prisma.university.findMany({ where: { university_id: { in: universityIds } }, select: { university_id: true, university_name_en: true } })
+      : []
+  ]);
+  const countryNameById = new Map(countryNames.map((item) => [item.country_id, item.country_name_en]));
+  const universityNameById = new Map(universityNames.map((item) => [item.university_id, item.university_name_en ?? "University"]));
+
+  return {
+    country: countries
+      .map((item) => ({
+        value: String(item.country_id),
+        label: countryNameById.get(item.country_id ?? 0) ?? "Country",
+        count: item._count._all
+      }))
+      .sort(sortFacetOption)
+      .slice(0, 8),
+    university: universities
+      .map((item) => ({
+        value: String(item.university_id),
+        label: universityNameById.get(item.university_id ?? 0) ?? "University",
+        count: item._count._all
+      }))
+      .sort(sortFacetOption)
+      .slice(0, 8),
+    gender: genders
+      .map((item) => ({ value: String(item.candidate_gender), label: genderLabel(item.candidate_gender), count: item._count._all }))
+      .sort(sortFacetOption),
+    profile: [
+      { value: "complete", label: "Complete profile", count: complete },
+      { value: "incomplete", label: "Incomplete profile", count: incomplete }
+    ].filter((item) => item.count > 0),
+    assignment: [
+      { value: "assigned", label: "Assigned", count: assigned },
+      { value: "unassigned", label: "Unassigned", count: unassigned }
+    ].filter((item) => item.count > 0),
+    document: [
+      { value: "resume", label: "Has resume", count: withResume },
+      { value: "no-resume", label: "No resume", count: withoutResume },
+      { value: "civil-id", label: "Civil ID review", count: civilId }
+    ].filter((item) => item.count > 0)
+  };
+}
+
+function mergeExactOptions(
+  exactOptions: { value: string; label: string; count: number }[],
+  sampledOptions: CandidateSearchFacet["options"],
+  activeValue?: string
+) {
+  const merged = new Map<string, { value: string; label: string; count: number; active: boolean }>();
+  for (const item of [...sampledOptions, ...exactOptions]) {
+    merged.set(item.value, { ...item, active: item.value === activeValue });
+  }
+  return [...merged.values()]
+    .sort((a, b) => Number(b.active) - Number(a.active) || b.count - a.count || a.label.localeCompare(b.label))
+    .slice(0, 8);
+}
+
+function sortFacetOption(a: { label: string; count: number }, b: { label: string; count: number }) {
+  return b.count - a.count || a.label.localeCompare(b.label);
+}
+
 function topFacet(values: { value: string; label: string }[], activeValue?: string): CandidateSearchFacet["options"] {
   const counts = new Map<string, { label: string; count: number }>();
   for (const item of values) {
@@ -369,7 +528,7 @@ function topFacet(values: { value: string; label: string }[], activeValue?: stri
   }
   return [...counts.entries()]
     .map(([value, item]) => ({ value, label: item.label, count: item.count, active: value === activeValue }))
-    .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label))
+    .sort((a, b) => Number(b.active) - Number(a.active) || b.count - a.count || a.label.localeCompare(b.label))
     .slice(0, 8);
 }
 
@@ -419,6 +578,10 @@ function candidateIdScope(candidateIds: number[]): Prisma.candidateWhereInput {
 function parsePositiveInt(value?: string) {
   const parsed = Number(value);
   return Number.isInteger(parsed) && parsed > 0 ? parsed : undefined;
+}
+
+function parseEnum<T extends string>(value: string | undefined, allowed: T[]) {
+  return allowed.includes(value as T) ? (value as T) : undefined;
 }
 
 function uniqueCandidateIds(ids: number[]) {

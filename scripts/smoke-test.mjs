@@ -423,6 +423,7 @@ async function main() {
   await expectBodyIncludes(`/staff/requests/${staffRequest.request_uuid}`, 200, "Request fulfillment", staffCookie);
   await expectStatus("/staff/candidates", 200, staffCandidateCookie);
   await expectBodyIncludes("/staff/candidates", 200, "All production", staffCandidateCookie);
+  await expectBodyIncludes("/staff/candidates", 200, "matching candidates", staffCandidateCookie);
   await expectBodyIncludes("/staff/candidates?view=assigned", 200, "Assigned to me", staffCandidateCookie);
   await expectStatus(`/staff/candidates?candidate=${staffCandidate.candidate_id}`, 200, staffCandidateCookie);
   await expectBodyIncludes(
@@ -435,6 +436,12 @@ async function main() {
     `/staff/candidates?candidate=${staffCandidate.candidate_id}&tabs=${staffCandidate.candidate_id},${adminCandidate.candidate_id}`,
     200,
     "Open candidate tabs",
+    staffCandidateCookie
+  );
+  await expectBodyIncludes(
+    `/staff/candidates?candidate=${staffCandidate.candidate_id}&selected=${staffCandidate.candidate_id},${adminCandidate.candidate_id}`,
+    200,
+    "Selected candidate actions",
     staffCandidateCookie
   );
   await expectStatus(`/staff/candidates/${staffCandidate.candidate_id}`, 307, staffCandidateCookie);

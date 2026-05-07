@@ -17,20 +17,34 @@ function parseCandidateId(value: string | string[] | undefined) {
   return Number.isInteger(id) && id > 0 ? id : undefined;
 }
 
-function parseCandidateTabs(value: string | string[] | undefined) {
+function parseCandidateIds(value: string | string[] | undefined, limit = 8) {
   const raw = Array.isArray(value) ? value[0] : value;
   if (!raw) return [];
   return raw
     .split(",")
     .map((item) => Number(item))
     .filter((id) => Number.isInteger(id) && id > 0)
-    .slice(0, 8);
+    .slice(0, limit);
 }
 
 export default async function AdminCandidatesPage({
   searchParams
 }: {
-  searchParams: Promise<{ q?: string; filter?: string; candidate?: string; tabs?: string; country?: string; university?: string; company?: string; skill?: string }>;
+  searchParams: Promise<{
+    q?: string;
+    filter?: string;
+    candidate?: string;
+    tabs?: string;
+    selected?: string;
+    country?: string;
+    university?: string;
+    company?: string;
+    skill?: string;
+    gender?: string;
+    profile?: string;
+    assignment?: string;
+    document?: string;
+  }>;
 }) {
   const session = await requireRoleCapability("admin", "candidate.search");
   const params = await searchParams;
@@ -39,11 +53,16 @@ export default async function AdminCandidatesPage({
     query: params.q ?? "",
     filter: parseFilter(params.filter),
     candidateId: parseCandidateId(params.candidate),
-    tabIds: parseCandidateTabs(params.tabs),
+    tabIds: parseCandidateIds(params.tabs),
+    selectedIds: parseCandidateIds(params.selected, 100),
     country: params.country,
     university: params.university,
     company: params.company,
-    skill: params.skill
+    skill: params.skill,
+    gender: params.gender,
+    profile: params.profile,
+    assignment: params.assignment,
+    document: params.document
   };
   const data = await getCandidateSearchWorkspace(search);
 
