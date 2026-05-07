@@ -87,84 +87,6 @@ export function CandidateSearchOS({
       <BulkCandidateBar basePath={basePath} params={params} selectedIds={selectedIds} selectedRows={selectedRows} />
 
       <section className="candidateDeskBody">
-        <aside className="candidateSearchPanel" aria-label="Candidate search and filters">
-          <details className="candidatePowerFilters">
-            <summary>
-              <span>Filters</span>
-              <strong>{activeFacetCount ? `${activeFacetCount} active` : "Open power filters"}</strong>
-            </summary>
-            <section className="candidateFacetRail" aria-label="Candidate power filters">
-              {facetGroups.map((facet) => (
-                <FacetGroup basePath={basePath} facet={facet} key={facet.key} params={params} />
-              ))}
-            </section>
-          </details>
-          <nav className="candidateSearchFilters" aria-label="Candidate search filters">
-            {candidateFilterLinks.map((item) => (
-              <Link
-                className={item.value === data.filter ? "active" : ""}
-                href={candidateSearchHref(basePath, params, { filter: item.value, candidate: "" })}
-                key={item.value}
-              >
-                {item.label}
-              </Link>
-            ))}
-          </nav>
-          <div className="candidateResultsHeader">
-            <div>
-              <strong>{data.query ? `Results for ${data.query}` : "Candidates"}</strong>
-            </div>
-            <small>
-              {data.rows.length.toLocaleString("en-US")} of {data.matchingCount.toLocaleString("en-US")}
-            </small>
-          </div>
-          {data.selectedBlocked ? (
-            <div className="candidateAccessNotice">
-              <strong>Candidate unavailable</strong>
-              <span>This record is missing, deleted, or outside the candidates visible to this login.</span>
-            </div>
-          ) : null}
-          <div className="candidateResultList">
-            {data.rows.map((row) => (
-              <article
-                className={row.id === data.selectedId ? "candidateResultCard active" : "candidateResultCard"}
-                key={row.id}
-              >
-                <Link className="candidateResultSelect" href={candidateSearchHref(basePath, params, { selected: toggleCandidateId(selectedIds, row.id).join(",") })}>
-                  <span aria-hidden="true">{selectedIds.includes(row.id) ? "✓" : ""}</span>
-                  <small>{selectedIds.includes(row.id) ? "Selected" : "Select"}</small>
-                </Link>
-                <Link className="candidateResultOpen" href={candidateSearchHref(basePath, params, { candidate: String(row.id) })}>
-                  <div className="candidateResultMain">
-                    <span className="candidateResultAvatar">{candidateInitials(row.name)}</span>
-                    <div>
-                      <strong>{row.name}</strong>
-                      <small>{row.email}</small>
-                    </div>
-                    <em>{row.status}</em>
-                  </div>
-                  <div className="candidateResultMeta">
-                    <span>{row.signal}</span>
-                    <span>{row.country}</span>
-                    <span>{row.updated}</span>
-                  </div>
-                  <div className="candidateResultTags">
-                    {[...row.flags, ...row.skills].slice(0, 3).map((flag) => (
-                      <span key={flag}>{flag}</span>
-                    ))}
-                  </div>
-                </Link>
-              </article>
-            ))}
-            {data.rows.length === 0 ? (
-              <div className="candidateEmptyState">
-                <strong>No candidates match this search.</strong>
-                <span>Remove a facet or search a different name, email, phone, skill, or candidate ID.</span>
-              </div>
-            ) : null}
-          </div>
-        </aside>
-
         <section className="candidateTabWorkspace" aria-label="Open candidate tabs">
           <CandidateTabs basePath={basePath} data={data} params={params} />
           {data.selected?.candidate ? (
@@ -173,14 +95,115 @@ export function CandidateSearchOS({
               actions={data.selectedActions.filter((action) => action.label !== "Open full record")}
             />
           ) : (
-            <section className="candidateTabEmpty">
-              <strong>Search, open candidates, keep working.</strong>
-              <span>Select a candidate from the result list. Each candidate opens as a workspace tab, so your search stays intact.</span>
-            </section>
+            <CandidateSearchTab
+              activeFacetCount={activeFacetCount}
+              basePath={basePath}
+              data={data}
+              facetGroups={facetGroups}
+              params={params}
+              selectedIds={selectedIds}
+            />
           )}
         </section>
       </section>
     </main>
+  );
+}
+
+function CandidateSearchTab({
+  activeFacetCount,
+  basePath,
+  data,
+  facetGroups,
+  params,
+  selectedIds
+}: {
+  activeFacetCount: number;
+  basePath: "/admin/candidates" | "/staff/candidates";
+  data: CandidateSearchData;
+  facetGroups: CandidateSearchFacet[];
+  params: CandidateSearchParams;
+  selectedIds: number[];
+}) {
+  return (
+    <section className="candidateSearchPanel" aria-label="Candidate search and filters">
+      <header className="candidateSearchTabHeader">
+        <div>
+          <span>Search tab</span>
+          <strong>{data.query ? `Results for ${data.query}` : "Candidate search"}</strong>
+        </div>
+        <small>
+          {data.rows.length.toLocaleString("en-US")} of {data.matchingCount.toLocaleString("en-US")}
+        </small>
+      </header>
+      <details className="candidatePowerFilters">
+        <summary>
+          <span>Filters</span>
+          <strong>{activeFacetCount ? `${activeFacetCount} active` : "Open power filters"}</strong>
+        </summary>
+        <section className="candidateFacetRail" aria-label="Candidate power filters">
+          {facetGroups.map((facet) => (
+            <FacetGroup basePath={basePath} facet={facet} key={facet.key} params={params} />
+          ))}
+        </section>
+      </details>
+      <nav className="candidateSearchFilters" aria-label="Candidate search filters">
+        {candidateFilterLinks.map((item) => (
+          <Link
+            className={item.value === data.filter ? "active" : ""}
+            href={candidateSearchHref(basePath, params, { filter: item.value, candidate: "" })}
+            key={item.value}
+          >
+            {item.label}
+          </Link>
+        ))}
+      </nav>
+      {data.selectedBlocked ? (
+        <div className="candidateAccessNotice">
+          <strong>Candidate unavailable</strong>
+          <span>This record is missing, deleted, or outside the candidates visible to this login.</span>
+        </div>
+      ) : null}
+      <div className="candidateResultList">
+        {data.rows.map((row) => (
+          <article
+            className={row.id === data.selectedId ? "candidateResultCard active" : "candidateResultCard"}
+            key={row.id}
+          >
+            <Link className="candidateResultSelect" href={candidateSearchHref(basePath, params, { selected: toggleCandidateId(selectedIds, row.id).join(",") })}>
+              <span aria-hidden="true">{selectedIds.includes(row.id) ? "✓" : ""}</span>
+              <small>{selectedIds.includes(row.id) ? "Selected" : "Select"}</small>
+            </Link>
+            <Link className="candidateResultOpen" href={candidateSearchHref(basePath, params, { candidate: String(row.id) })}>
+              <div className="candidateResultMain">
+                <span className="candidateResultAvatar">{candidateInitials(row.name)}</span>
+                <div>
+                  <strong>{row.name}</strong>
+                  <small>{row.email}</small>
+                </div>
+                <em>{row.status}</em>
+              </div>
+              <div className="candidateResultMeta">
+                <span>{row.signal}</span>
+                <span>{row.country}</span>
+                <span>{row.updated}</span>
+              </div>
+              <div className="candidateResultTags">
+                {[...row.flags, ...row.skills].slice(0, 3).map((flag) => (
+                  <span key={flag}>{flag}</span>
+                ))}
+              </div>
+            </Link>
+          </article>
+        ))}
+        {data.rows.length === 0 ? (
+          <div className="candidateEmptyState">
+            <strong>No candidates match this search.</strong>
+            <span>Remove a facet or search a different name, email, phone, skill, or candidate ID.</span>
+          </div>
+        ) : null}
+      </div>
+    </section>
   );
 }
 

@@ -546,7 +546,7 @@ async function resolveSelectedCandidateId({
     const exists = await prisma.candidate.findFirst({ where: { candidate_id: requestedId, deleted: 0 }, select: { candidate_id: true } });
     return exists?.candidate_id ?? null;
   }
-  return rows[0]?.id ?? null;
+  return null;
 }
 
 function buildSelectedActions(role: CandidateSearchRole, candidate: Awaited<ReturnType<typeof getCandidateDetail>>["candidate"]) {
