@@ -399,7 +399,7 @@ async function main() {
   await expectStatus(`/hub?scope=compliance&record=id-${idRequest.cir_uuid}`, 200, adminCookie);
   await expectStatus("/admin", 200, adminCookie);
   await expectStatus("/admin/candidates", 200, adminCookie);
-  await expectBodyIncludes("/admin/candidates?q=jaafar", 200, "Live candidate workspace", adminCookie);
+  await expectBodyIncludes("/admin/candidates?q=jaafar", 200, "Open candidate tabs", adminCookie);
   await expectBodyIncludes("/admin/candidates?q=jaafar", 200, "Filtered view", adminCookie);
   await expectStatus(`/admin/candidates/${adminCandidate.candidate_id}`, 200, adminCookie);
   await expectBodyIncludes(`/admin/candidates/${adminCandidate.candidate_id}`, 200, "Readiness", adminCookie);
@@ -428,7 +428,13 @@ async function main() {
   await expectBodyIncludes(
     `/staff/candidates?candidate=${staffCandidate.candidate_id}`,
     200,
-    "Live candidate workspace",
+    "Open candidate tabs",
+    staffCandidateCookie
+  );
+  await expectBodyIncludes(
+    `/staff/candidates?candidate=${staffCandidate.candidate_id}&tabs=${staffCandidate.candidate_id},${adminCandidate.candidate_id}`,
+    200,
+    "Open candidate tabs",
     staffCandidateCookie
   );
   await expectStatus(`/staff/candidates/${staffCandidate.candidate_id}`, 200, staffCandidateCookie);

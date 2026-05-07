@@ -1,6 +1,9 @@
 import type { Route } from "next";
 import Link from "next/link";
+import { logoutAction } from "@/modules/auth/actions";
+import type { SessionUser } from "@/modules/auth/types";
 import { HubShortcuts, type HubCommand } from "@/modules/hub/HubShortcuts";
+import { ThemeToggle } from "@/modules/theme/ThemeToggle";
 import { CandidateProfile } from "./CandidateProfile";
 import type {
   CandidateSearchFacet,
@@ -15,56 +18,57 @@ export function CandidateSearchOS({
   data,
   basePath,
   detailPath,
+  homePath,
+  session,
   params
 }: {
   data: CandidateSearchData;
   basePath: "/admin/candidates" | "/staff/candidates";
   detailPath: "/admin/candidates" | "/staff/candidates";
+  homePath: Route;
+  session: SessionUser;
   params: CandidateSearchParams;
 }) {
   const commands = buildCandidateSearchCommands(data, basePath, params);
 
   return (
-    <section className="candidateSearchOS">
-      <section className="candidateSearchHero">
-        <div>
-          <span>Live candidate workspace</span>
-          <h2>Search production candidates and open the complete profile without losing flow.</h2>
-          <p>
-            This is not sample content. The list, facets, readiness state, notes, invitations, history, documents, and
-            work logs are pulled from the imported production database and scoped to this login.
-          </p>
+    <main className="candidateDesk">
+      <header className="candidateDeskTopbar">
+        <Link className="candidateDeskBrand" href={homePath}>
+          <span>SH</span>
+          <strong>Candidates</strong>
+        </Link>
+        <form className="candidateDeskSearch" id="candidate-search">
+          <input
+            data-command-search
+            id="candidate-query"
+            name="q"
+            placeholder="Search name, email, phone, ID, skill, tag"
+            defaultValue={data.query}
+          />
+          <input name="filter" type="hidden" value={data.filter} />
+          {params.visibility === "assigned" ? <input name="view" type="hidden" value="assigned" /> : null}
+          {data.openTabs.length ? <input name="tabs" type="hidden" value={data.openTabs.map((tab) => tab.id).join(",")} /> : null}
+          <HiddenFacetInputs data={data} />
+          <button type="submit">Search</button>
+        </form>
+        <div className="candidateDeskTools">
+          <HubShortcuts commands={commands} />
+          <ThemeToggle />
+          <div className="candidateDeskAccount" title={session.email}>
+            <span>{session.role}</span>
+            <strong>{session.name}</strong>
+          </div>
+          <form action={logoutAction}>
+            <button type="submit">Sign out</button>
+          </form>
         </div>
-        <div className="candidateSearchHeroRail">
-          {data.metrics.slice(0, 3).map((metric) => (
-            <article key={metric.label}>
-              <span>{metric.label}</span>
-              <strong>{metric.value.toLocaleString("en-US")}</strong>
-            </article>
-          ))}
-        </div>
-      </section>
+      </header>
 
       <ActiveSearchContext basePath={basePath} data={data} params={params} />
 
-      <section className="candidateSearchGrid">
-        <aside className="candidateFacetPanel" aria-label="Candidate facets">
-          <form className="candidateSearchForm" id="candidate-search">
-            <label htmlFor="candidate-query">Find candidate</label>
-            <input
-              data-command-search
-              id="candidate-query"
-              name="q"
-              placeholder="Name, email, phone, ID, skill, tag"
-              defaultValue={data.query}
-            />
-            <input name="filter" type="hidden" value={data.filter} />
-            <HiddenFacetInputs data={data} />
-            <button type="submit">Search</button>
-          </form>
-          <div className="candidateSearchCommand">
-            <HubShortcuts commands={commands} />
-          </div>
+      <section className="candidateDeskBody">
+        <aside className="candidateSearchPanel" aria-label="Candidate search and filters">
           <nav className="candidateSearchFilters" aria-label="Candidate search filters">
             {candidateFilterLinks.map((item) => (
               <Link
@@ -76,16 +80,6 @@ export function CandidateSearchOS({
               </Link>
             ))}
           </nav>
-          <div className="candidateFacetHeader">
-            <span>Filters</span>
-            <Link href={basePath}>Clear all</Link>
-          </div>
-          {data.facets.map((facet) => (
-            <FacetGroup basePath={basePath} facet={facet} key={facet.key} params={params} />
-          ))}
-        </aside>
-
-        <section className="candidateResultsPanel" aria-label="Candidate search results">
           <div className="candidateResultsHeader">
             <div>
               <span>{data.role} scope</span>
@@ -117,11 +111,10 @@ export function CandidateSearchOS({
                 <div className="candidateResultMeta">
                   <span>{row.signal}</span>
                   <span>{row.country}</span>
-                  <span>{row.company}</span>
                   <span>{row.updated}</span>
                 </div>
                 <div className="candidateResultTags">
-                  {[...row.flags, ...row.skills].slice(0, 5).map((flag) => (
+                  {[...row.flags, ...row.skills].slice(0, 3).map((flag) => (
                     <span key={flag}>{flag}</span>
                   ))}
                 </div>
@@ -134,24 +127,69 @@ export function CandidateSearchOS({
               </div>
             ) : null}
           </div>
-        </section>
+          <section className="candidateFacetStack" aria-label="Candidate facets">
+            <div className="candidateFacetHeader">
+              <span>Filters</span>
+              <Link href={basePath}>Clear all</Link>
+            </div>
+            {data.facets.map((facet) => (
+              <FacetGroup basePath={basePath} facet={facet} key={facet.key} params={params} />
+            ))}
+          </section>
+        </aside>
 
-        <aside className="candidatePreviewPanel" aria-label="Candidate preview">
+        <section className="candidateTabWorkspace" aria-label="Open candidate tabs">
+          <CandidateTabs basePath={basePath} data={data} params={params} />
           {data.selected?.candidate ? (
             <CandidateProfile
-              compact
               detail={data.selected}
               actions={[
                 ...data.selectedActions.filter((action) => action.label !== "Open full record"),
-                { label: "Open complete record", href: `${detailPath}/${data.selected.candidate.candidate_id}` }
+                { label: "Open full page", href: `${detailPath}/${data.selected.candidate.candidate_id}` }
               ]}
             />
           ) : (
-            <CandidateProfile compact detail={data.selected} actions={[]} />
+            <section className="candidateTabEmpty">
+              <strong>Search, open candidates, keep working.</strong>
+              <span>Select a candidate from the result list. Each candidate opens as a workspace tab, so your search stays intact.</span>
+            </section>
           )}
-        </aside>
+        </section>
       </section>
-    </section>
+    </main>
+  );
+}
+
+function CandidateTabs({
+  basePath,
+  data,
+  params
+}: {
+  basePath: "/admin/candidates" | "/staff/candidates";
+  data: CandidateSearchData;
+  params: CandidateSearchParams;
+}) {
+  return (
+    <nav className="candidateTabs" aria-label="Open candidate tabs">
+      <Link className={!data.selectedId ? "active" : ""} href={candidateSearchHref(basePath, params, { candidate: "" })}>
+        Search
+      </Link>
+      {data.openTabs.map((tab) => {
+        const remainingTabs = data.openTabs.filter((item) => item.id !== tab.id).map((item) => item.id);
+        const nextCandidate = data.selectedId === tab.id ? remainingTabs.at(-1) : data.selectedId;
+        return (
+          <span className={data.selectedId === tab.id ? "active" : ""} key={tab.id}>
+            <Link href={candidateSearchHref(basePath, params, { candidate: String(tab.id), tabs: data.openTabs.map((item) => item.id).join(",") })}>
+              <strong>{tab.title}</strong>
+              <small>{tab.status}</small>
+            </Link>
+            <Link aria-label={`Close ${tab.title}`} href={candidateSearchHref(basePath, params, { candidate: nextCandidate ? String(nextCandidate) : "", tabs: remainingTabs.join(",") })}>
+              x
+            </Link>
+          </span>
+        );
+      })}
+    </nav>
   );
 }
 
@@ -245,20 +283,25 @@ function FacetGroup({ basePath, facet, params }: { basePath: "/admin/candidates"
 function candidateSearchHref(
   basePath: "/admin/candidates" | "/staff/candidates",
   params: CandidateSearchParams,
-  overrides: Partial<Record<"q" | "filter" | "view" | "candidate" | "country" | "university" | "company" | "skill", string>>
+  overrides: Partial<Record<"q" | "filter" | "view" | "candidate" | "tabs" | "country" | "university" | "company" | "skill", string>>
 ) {
   const next = new URLSearchParams();
+  const existingTabs = (params.tabIds ?? []).join(",");
   const values = {
     q: params.query ?? "",
     filter: params.filter && params.filter !== "all" ? params.filter : "",
     view: params.visibility === "assigned" ? "assigned" : "",
     candidate: params.candidateId ? String(params.candidateId) : "",
+    tabs: existingTabs,
     country: params.country ?? "",
     university: params.university ?? "",
     company: params.company ?? "",
     skill: params.skill ?? "",
     ...overrides
   };
+  if (values.candidate && overrides.tabs === undefined) {
+    values.tabs = [...new Set([...(values.tabs ? values.tabs.split(",") : []), values.candidate])].filter(Boolean).join(",");
+  }
   for (const [key, value] of Object.entries(values)) {
     if (value) next.set(key, value);
   }

@@ -17,6 +17,7 @@ export type CandidateSearchParams = {
   filter?: CandidateSearchFilter;
   visibility?: CandidateSearchVisibility;
   candidateId?: number;
+  tabIds?: number[];
   country?: string;
   university?: string;
   company?: string;
@@ -108,6 +109,32 @@ export async function getCandidateSearchWorkspace(params: CandidateSearchParams)
   const selected = selectedId
     ? await getCandidateDetail(selectedId, params.role === "admin" ? "/admin/requests" : "/staff/requests")
     : null;
+  const openTabIds = uniqueCandidateIds([...(params.tabIds ?? []), ...(selectedId ? [selectedId] : [])]).slice(0, 8);
+  const openTabs = openTabIds.length
+    ? await prisma.candidate.findMany({
+        where: {
+          deleted: 0,
+          candidate_id: { in: openTabIds },
+          ...(scopedCandidateIds ? candidateIdScope(scopedCandidateIds) : {})
+        },
+        select: {
+          candidate_id: true,
+          candidate_name: true,
+          candidate_email: true,
+          approved: true,
+          candidate_status: true
+        }
+      })
+    : [];
+  const orderedTabs = openTabIds
+    .map((id) => openTabs.find((tab) => tab.candidate_id === id))
+    .filter((tab): tab is NonNullable<(typeof openTabs)[number]> => Boolean(tab))
+    .map((tab) => ({
+      id: tab.candidate_id,
+      title: tab.candidate_name,
+      subtitle: tab.candidate_email,
+      status: tab.approved === 0 ? "Needs review" : tab.candidate_status === 10 ? "Active" : `Status ${tab.candidate_status}`
+    }));
 
   return {
     role: params.role,
@@ -117,6 +144,7 @@ export async function getCandidateSearchWorkspace(params: CandidateSearchParams)
     assignedCount: staffCandidateIds?.length ?? null,
     selectedId,
     selectedBlocked: Boolean(params.candidateId && !selectedId),
+    openTabs: orderedTabs,
     params: {
       country: params.country ?? "",
       university: params.university ?? "",
@@ -391,4 +419,8 @@ function candidateIdScope(candidateIds: number[]): Prisma.candidateWhereInput {
 function parsePositiveInt(value?: string) {
   const parsed = Number(value);
   return Number.isInteger(parsed) && parsed > 0 ? parsed : undefined;
+}
+
+function uniqueCandidateIds(ids: number[]) {
+  return [...new Set(ids.filter((id) => Number.isInteger(id) && id > 0))];
 }

@@ -7220,12 +7220,12 @@ kbd {
 .candidateResultCard {
   min-width: 0;
   display: grid;
-  gap: 8px;
+  gap: 6px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--surface-soft);
   color: var(--ink);
-  padding: 12px;
+  padding: 9px 10px;
   transition: border-color 140ms ease, transform 140ms ease, box-shadow 140ms ease;
 }
 
@@ -7450,6 +7450,291 @@ kbd {
 }
 
 /* Candidate workspace v2 */
+.candidateDesk {
+  min-height: 100svh;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  gap: 8px;
+  background:
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px),
+    linear-gradient(180deg, var(--grid-line) 1px, transparent 1px),
+    var(--paper);
+  background-size: 44px 44px;
+  color: var(--ink);
+  padding: 8px;
+}
+
+.candidateDeskTopbar {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: auto minmax(320px, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
+  padding: 8px;
+}
+
+.candidateDeskBrand,
+.candidateDeskTools,
+.candidateDeskTools form {
+  display: flex;
+  align-items: center;
+}
+
+.candidateDeskBrand {
+  min-height: 40px;
+  gap: 9px;
+  color: var(--ink);
+  padding: 0 8px;
+  text-decoration: none;
+}
+
+.candidateDeskBrand span {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: var(--ink);
+  color: var(--surface);
+  font-weight: 950;
+}
+
+.candidateDeskBrand strong {
+  font-size: 14px;
+}
+
+.candidateDeskSearch {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.candidateDeskSearch input[type="text"],
+.candidateDeskSearch input[name="q"] {
+  min-width: 0;
+  height: 42px;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  padding: 0 13px;
+  font: inherit;
+  font-weight: 700;
+}
+
+.candidateDeskSearch input:focus {
+  outline: 0;
+}
+
+.candidateDeskSearch:focus-within {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--blue) 15%, transparent);
+}
+
+.candidateDeskSearch button,
+.candidateDeskTools form button {
+  min-height: 42px;
+  border: 0;
+  background: var(--surface-soft);
+  color: var(--ink);
+  padding: 0 12px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.candidateDeskSearch button {
+  border-left: 1px solid var(--line);
+}
+
+.candidateDeskTools {
+  gap: 6px;
+  justify-content: end;
+}
+
+.candidateDeskTools .commandLauncher {
+  min-height: 42px;
+}
+
+.candidateDeskAccount {
+  min-width: 140px;
+  max-width: 220px;
+  min-height: 42px;
+  display: grid;
+  align-content: center;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-soft);
+  padding: 0 11px;
+}
+
+.candidateDeskAccount span,
+.candidateDeskAccount strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.candidateDeskAccount span {
+  color: var(--blue);
+  font-size: 10px;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.candidateDeskAccount strong {
+  color: var(--ink);
+  font-size: 12px;
+}
+
+.candidateDeskBody {
+  min-width: 0;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(320px, 0.68fr) minmax(420px, 1.32fr);
+  gap: 8px;
+}
+
+.candidateSearchPanel,
+.candidateTabWorkspace {
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--surface) 96%, transparent);
+}
+
+.candidateSearchPanel {
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+}
+
+.candidateTabWorkspace {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+}
+
+.candidateTabs {
+  min-width: 0;
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+  padding: 6px;
+  scrollbar-width: none;
+}
+
+.candidateTabs::-webkit-scrollbar {
+  display: none;
+}
+
+.candidateTabs > a,
+.candidateTabs > span {
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-soft);
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.candidateTabs > a {
+  padding: 0 12px;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.candidateTabs > span {
+  overflow: hidden;
+  flex: 0 0 auto;
+  max-width: 260px;
+}
+
+.candidateTabs > a.active,
+.candidateTabs > span.active {
+  border-color: var(--blue);
+  background: color-mix(in srgb, var(--blue) 8%, var(--surface));
+}
+
+.candidateTabs > span > a:first-child {
+  min-width: 0;
+  display: grid;
+  gap: 1px;
+  color: inherit;
+  padding: 5px 10px;
+  text-decoration: none;
+}
+
+.candidateTabs > span > a:first-child strong,
+.candidateTabs > span > a:first-child small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.candidateTabs > span > a:first-child strong {
+  font-size: 13px;
+}
+
+.candidateTabs > span > a:first-child small {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.candidateTabs > span > a:last-child {
+  min-width: 34px;
+  align-self: stretch;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-left: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.candidateTabs > span > a:last-child:hover {
+  background: color-mix(in srgb, var(--rose) 10%, var(--surface));
+  color: var(--rose);
+}
+
+.candidateTabWorkspace > .candidateProfile {
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.candidateTabEmpty {
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 8px;
+  padding: 28px;
+  text-align: center;
+}
+
+.candidateTabEmpty strong {
+  font-size: 24px;
+}
+
+.candidateTabEmpty span {
+  max-width: 420px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
 .candidateSearchOS {
   gap: 10px;
 }
@@ -7626,15 +7911,47 @@ kbd {
   grid-template-rows: auto minmax(0, 1fr);
 }
 
+.candidateSearchPanel .candidateResultsHeader {
+  border-top: 1px solid var(--line);
+  padding: 10px 12px;
+}
+
+.candidateSearchPanel .candidateSearchFilters {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--line);
+  padding: 8px;
+  scrollbar-width: none;
+}
+
+.candidateSearchPanel .candidateSearchFilters::-webkit-scrollbar {
+  display: none;
+}
+
+.candidateSearchPanel .candidateSearchFilters a {
+  flex: 0 0 auto;
+  min-height: 32px;
+  border-radius: 8px;
+  padding: 0 10px;
+}
+
+.candidateSearchPanel .candidateResultList {
+  min-height: 0;
+  gap: 5px;
+  padding: 8px;
+}
+
 .candidateResultList {
   overflow-y: auto;
   align-content: start;
 }
 
 .candidateResultCard {
-  gap: 10px;
+  gap: 7px;
   background: var(--surface);
   box-shadow: none;
+  padding: 9px 10px;
 }
 
 .candidateResultCard:hover,
@@ -7646,8 +7963,8 @@ kbd {
 .candidateResultMain {
   min-width: 0;
   display: grid;
-  grid-template-columns: 42px minmax(0, 1fr) auto;
-  gap: 10px;
+  grid-template-columns: 36px minmax(0, 1fr) auto;
+  gap: 9px;
   align-items: center;
 }
 
@@ -7663,8 +7980,8 @@ kbd {
 }
 
 .candidateResultAvatar {
-  width: 42px;
-  height: 42px;
+  width: 36px;
+  height: 36px;
   font-size: 13px;
 }
 
@@ -7680,11 +7997,26 @@ kbd {
   border: 1px solid color-mix(in srgb, var(--green) 38%, var(--line));
   border-radius: 999px;
   color: var(--green);
-  padding: 4px 7px;
+  padding: 3px 7px;
   font-size: 11px;
   font-style: normal;
   font-weight: 900;
   white-space: nowrap;
+}
+
+.candidateSearchPanel .candidateResultMeta,
+.candidateSearchPanel .candidateResultTags {
+  gap: 5px;
+}
+
+.candidateSearchPanel .candidateResultMeta span {
+  font-size: 12px;
+}
+
+.candidateSearchPanel .candidateResultTags span {
+  min-height: 23px;
+  padding: 0 7px;
+  font-size: 11px;
 }
 
 .candidatePreviewPanel {
@@ -7694,6 +8026,7 @@ kbd {
 
 .candidateProfile {
   display: grid;
+  align-content: start;
   gap: 10px;
 }
 
@@ -7994,6 +8327,16 @@ kbd {
 }
 
 [data-theme="dark"] .candidateSearchHeroRail article,
+[data-theme="dark"] .candidateDeskTopbar,
+[data-theme="dark"] .candidateDeskSearch,
+[data-theme="dark"] .candidateDeskSearch button,
+[data-theme="dark"] .candidateDeskTools form button,
+[data-theme="dark"] .candidateDeskAccount,
+[data-theme="dark"] .candidateSearchPanel,
+[data-theme="dark"] .candidateTabWorkspace,
+[data-theme="dark"] .candidateTabs,
+[data-theme="dark"] .candidateTabs > a,
+[data-theme="dark"] .candidateTabs > span,
 [data-theme="dark"] .candidateSearchContext,
 [data-theme="dark"] .candidateSearchContext a,
 [data-theme="dark"] .candidateFacetGroup,
@@ -8008,7 +8351,16 @@ kbd {
   color: var(--ink);
 }
 
-@media (max-width: 1180px) {
+@media (max-width: 900px) {
+  .candidateDeskBody {
+    grid-template-columns: 1fr;
+  }
+
+  .candidateSearchPanel,
+  .candidateTabWorkspace {
+    min-height: 520px;
+  }
+
   .candidateSearchGrid {
     grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
   }
@@ -8024,6 +8376,91 @@ kbd {
 }
 
 @media (max-width: 760px) {
+  .candidateDesk {
+    padding: 6px;
+  }
+
+  .candidateDeskTopbar {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 6px;
+  }
+
+  .candidateDeskBrand {
+    justify-content: start;
+  }
+
+  .candidateDeskSearch {
+    grid-column: 1 / -1;
+    grid-template-columns: 1fr;
+    order: 3;
+  }
+
+  .candidateDeskSearch button {
+    border-top: 1px solid var(--line);
+    border-left: 0;
+  }
+
+  .candidateDeskTools {
+    min-width: 0;
+    justify-content: end;
+  }
+
+  .candidateDeskTools .commandLauncher,
+  .candidateDeskTools form {
+    display: none;
+  }
+
+  .candidateDeskTools .themeToggle {
+    width: 44px;
+    min-width: 44px;
+    padding: 0;
+  }
+
+  .candidateDeskTools .themeToggle span {
+    display: none;
+  }
+
+  .candidateDeskAccount {
+    min-width: 112px;
+    max-width: none;
+  }
+
+  .candidateSearchContext {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 9px 10px;
+  }
+
+  .candidateSearchContext strong {
+    white-space: normal;
+  }
+
+  .candidateSearchContext nav {
+    flex-wrap: nowrap;
+    justify-content: start;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .candidateSearchContext nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .candidateSearchContext a {
+    flex: 0 0 auto;
+  }
+
+  .candidateSearchPanel,
+  .candidateTabWorkspace {
+    min-height: auto;
+  }
+
+  .candidateTabs {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
   .candidateSearchHero,
   .candidateSearchHeroRail,
   .candidateSearchContext,
@@ -8046,12 +8483,14 @@ kbd {
   }
 
   .candidateResultMain {
-    grid-template-columns: 40px minmax(0, 1fr);
+    grid-template-columns: 40px minmax(0, 1fr) auto;
   }
 
   .candidateResultMain em {
-    grid-column: 1 / -1;
-    width: fit-content;
+    grid-column: auto;
+    max-width: 104px;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .candidateProfileHero {

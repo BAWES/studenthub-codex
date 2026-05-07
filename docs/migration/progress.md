@@ -114,6 +114,10 @@
 - Replaced the generic staff home with a staff operating landing page:
   - primary paths are candidate search, requests, time/pay, and documents.
   - the hero confirms production candidate data is loaded.
+- Rebuilt candidate search as a full-screen workspace:
+  - admin/staff candidate search no longer renders inside the generic sidebar shell.
+  - candidate records open inside URL-backed workspace tabs so users can switch and close candidates while keeping the search context.
+  - the layout is optimized around a top command/search bar, a results/facets column, and a tabbed candidate work area.
 
 ## Known Follow-Ups
 
