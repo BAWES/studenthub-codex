@@ -54,7 +54,5 @@ export default async function StaffCandidatesPage({
   };
   const data = await getCandidateSearchWorkspace(search);
 
-  return (
-    <CandidateSearchOS basePath="/staff/candidates" data={data} detailPath="/staff/candidates" homePath="/staff" params={search} session={session} />
-  );
+  return <CandidateSearchOS basePath="/staff/candidates" data={data} homePath="/staff" params={search} session={session} />;
 }

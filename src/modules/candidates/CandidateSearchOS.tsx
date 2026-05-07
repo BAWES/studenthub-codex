@@ -17,14 +17,12 @@ type CandidateSearchData = Awaited<ReturnType<typeof getCandidateSearchWorkspace
 export function CandidateSearchOS({
   data,
   basePath,
-  detailPath,
   homePath,
   session,
   params
 }: {
   data: CandidateSearchData;
   basePath: "/admin/candidates" | "/staff/candidates";
-  detailPath: "/admin/candidates" | "/staff/candidates";
   homePath: Route;
   session: SessionUser;
   params: CandidateSearchParams;
@@ -143,10 +141,7 @@ export function CandidateSearchOS({
           {data.selected?.candidate ? (
             <CandidateProfile
               detail={data.selected}
-              actions={[
-                ...data.selectedActions.filter((action) => action.label !== "Open full record"),
-                { label: "Open full page", href: `${detailPath}/${data.selected.candidate.candidate_id}` }
-              ]}
+              actions={data.selectedActions.filter((action) => action.label !== "Open full record")}
             />
           ) : (
             <section className="candidateTabEmpty">

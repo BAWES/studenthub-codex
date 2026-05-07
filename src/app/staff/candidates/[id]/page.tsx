@@ -1,35 +1,16 @@
-import { notFound } from "next/navigation";
+import { redirect } from "next/navigation";
 import { requireRoleCapability } from "@/modules/auth/session";
-import { CandidateProfile } from "@/modules/candidates/CandidateProfile";
-import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
-import { getCandidateDetail } from "@/modules/workspace/data";
 
 export const dynamic = "force-dynamic";
 
 export default async function StaffCandidateDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const session = await requireRoleCapability("staff", "candidate.search");
+  await requireRoleCapability("staff", "candidate.search");
   const { id } = await params;
-  const data = await getCandidateDetail(Number(id), "/staff/requests");
+  const candidateId = Number(id);
 
-  if (!data?.candidate) {
-    notFound();
+  if (!Number.isInteger(candidateId) || candidateId <= 0) {
+    redirect("/staff/candidates");
   }
 
-  return (
-    <WorkspaceShell
-      session={session}
-      eyebrow="Staff / Candidate"
-      title={data.candidate.candidate_name}
-      metrics={data.metrics}
-    >
-      <CandidateProfile
-        backHref="/staff/candidates"
-        detail={data}
-        actions={[
-          data.candidate.candidate_email ? { label: "Email", href: `mailto:${data.candidate.candidate_email}` } : null,
-          data.candidate.candidate_phone ? { label: "Call", href: `tel:${data.candidate.candidate_phone}` } : null
-        ].filter((action): action is { label: string; href: string } => Boolean(action))}
-      />
-    </WorkspaceShell>
-  );
+  redirect(`/staff/candidates?candidate=${candidateId}&tabs=${candidateId}`);
 }
