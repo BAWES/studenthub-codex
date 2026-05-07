@@ -46,6 +46,7 @@ export function CandidateSearchOS({
   const selectedIds = params.selectedIds ?? [];
   const selectedRows = data.rows.filter((row) => selectedIds.includes(row.id));
   const facetGroups = [...data.facets].sort((a, b) => Number(hasActiveFacet(b)) - Number(hasActiveFacet(a)));
+  const activeFacetCount = data.facets.reduce((count, facet) => count + facet.options.filter((option) => option.active).length, 0);
 
   return (
     <main className="candidateDesk">
@@ -87,11 +88,17 @@ export function CandidateSearchOS({
 
       <section className="candidateDeskBody">
         <aside className="candidateSearchPanel" aria-label="Candidate search and filters">
-          <section className="candidateFacetRail" aria-label="Candidate power filters">
-            {facetGroups.map((facet) => (
-              <FacetGroup basePath={basePath} facet={facet} key={facet.key} params={params} />
-            ))}
-          </section>
+          <details className="candidatePowerFilters">
+            <summary>
+              <span>Filters</span>
+              <strong>{activeFacetCount ? `${activeFacetCount} active` : "Open power filters"}</strong>
+            </summary>
+            <section className="candidateFacetRail" aria-label="Candidate power filters">
+              {facetGroups.map((facet) => (
+                <FacetGroup basePath={basePath} facet={facet} key={facet.key} params={params} />
+              ))}
+            </section>
+          </details>
           <nav className="candidateSearchFilters" aria-label="Candidate search filters">
             {candidateFilterLinks.map((item) => (
               <Link
@@ -105,8 +112,7 @@ export function CandidateSearchOS({
           </nav>
           <div className="candidateResultsHeader">
             <div>
-              <span>{data.role} scope</span>
-              <strong>{data.query ? `Results for ${data.query}` : "Production candidates"}</strong>
+              <strong>{data.query ? `Results for ${data.query}` : "Candidates"}</strong>
             </div>
             <small>
               {data.rows.length.toLocaleString("en-US")} of {data.matchingCount.toLocaleString("en-US")}
