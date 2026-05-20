@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { formatDate, formatMoney } from "./format";
+import { formatDate, formatMoney } from "@/modules/workspace/format";
 
 export async function getAdminCandidateRows() {
   const rows = await prisma.candidate.findMany({

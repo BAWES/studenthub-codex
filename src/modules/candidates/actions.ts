@@ -81,11 +81,47 @@ export async function updateCandidateProfile(_prevState: { error: string }, form
 
 const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads", "candidates");
 
-async function saveUpload(candidateId: number, field: string, file: File): Promise<string> {
+const ALLOWED_TYPES: Record<string, { mime: string[]; ext: string[]; maxSize: number }> = {
+  photo: {
+    mime: ["image/jpeg", "image/png", "image/webp", "image/gif"],
+    ext: [".jpg", ".jpeg", ".png", ".webp", ".gif"],
+    maxSize: 5 * 1024 * 1024, // 5 MB
+  },
+  cv: {
+    mime: ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"],
+    ext: [".pdf", ".doc", ".docx"],
+    maxSize: 10 * 1024 * 1024, // 10 MB
+  },
+  video: {
+    mime: ["video/mp4", "video/webm", "video/ogg", "video/quicktime"],
+    ext: [".mp4", ".webm", ".ogv", ".mov"],
+    maxSize: 50 * 1024 * 1024, // 50 MB
+  },
+  civilFront: {
+    mime: ["image/jpeg", "image/png", "image/webp", "image/gif"],
+    ext: [".jpg", ".jpeg", ".png", ".webp", ".gif"],
+    maxSize: 5 * 1024 * 1024,
+  },
+  civilBack: {
+    mime: ["image/jpeg", "image/png", "image/webp", "image/gif"],
+    ext: [".jpg", ".jpeg", ".png", ".webp", ".gif"],
+    maxSize: 5 * 1024 * 1024,
+  },
+};
+
+async function saveUpload(candidateId: number, field: string, file: File, typeConfig: typeof ALLOWED_TYPES[string]): Promise<string> {
+  const ext = path.extname(file.name).toLowerCase();
+  if (!typeConfig.ext.includes(ext)) {
+    throw new Error(`File type "${ext}" is not allowed for this document type.`);
+  }
+
+  if (file.size > typeConfig.maxSize) {
+    throw new Error(`File is too large. Maximum size is ${typeConfig.maxSize / 1024 / 1024} MB.`);
+  }
+
   const dir = path.join(UPLOAD_DIR, String(candidateId));
   await fs.mkdir(dir, { recursive: true });
 
-  const ext = path.extname(file.name) || ".bin";
   const filename = `${field}_${crypto.randomUUID()}${ext}`;
   const filepath = path.join(dir, filename);
 
@@ -111,24 +147,40 @@ export async function uploadDocument(_prevState: { error: string }, formData: Fo
     return { error: "Invalid document type." };
   }
 
-  const path_ = await saveUpload(candidateId, type, file);
+  const typeConfig = ALLOWED_TYPES[type];
+  if (type === "cv" && file.type && !typeConfig.mime.includes(file.type)) {
+    return { error: `Invalid file type for CV. Accepted: PDF, DOC, DOCX.` };
+  }
+  if (type !== "cv" && type !== "video" && file.type && !typeConfig.mime.includes(file.type)) {
+    return { error: `Invalid file type for ${type}. Accepted image formats.` };
+  }
 
-  const fieldMap: Record<string, Record<string, unknown>> = {
-    photo: { candidate_personal_photo: path_ },
-    cv: { candidate_resume: path_ },
-    video: { candidate_video: path_ },
-    civilFront: { candidate_civil_photo_front: path_ },
-    civilBack: { candidate_civil_photo_back: path_ },
-  };
+  if (file.size > typeConfig.maxSize) {
+    return { error: `File is too large. Maximum size is ${typeConfig.maxSize / 1024 / 1024} MB.` };
+  }
 
-  await prisma.candidate.update({
-    where: { candidate_id: candidateId },
-    data: fieldMap[type],
-  });
+  try {
+    const path_ = await saveUpload(candidateId, type, file, typeConfig);
 
-  revalidatePath("/candidate");
-  revalidatePath("/candidate/edit");
-  return { error: "" };
+    const fieldMap: Record<string, Record<string, unknown>> = {
+      photo: { candidate_personal_photo: path_ },
+      cv: { candidate_resume: path_ },
+      video: { candidate_video: path_ },
+      civilFront: { candidate_civil_photo_front: path_ },
+      civilBack: { candidate_civil_photo_back: path_ },
+    };
+
+    await prisma.candidate.update({
+      where: { candidate_id: candidateId },
+      data: fieldMap[type],
+    });
+
+    revalidatePath("/candidate");
+    revalidatePath("/candidate/edit");
+    return { error: "" };
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : "Upload failed." };
+  }
 }
 
 // ---------------------------------------------------------------------------
