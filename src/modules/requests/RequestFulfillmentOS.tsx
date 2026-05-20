@@ -1,14 +1,31 @@
 import type { Route } from "next";
 import Link from "next/link";
-import { Mail, Search, Send, UserRoundCheck } from "lucide-react";
+import { Mail, Plus, Search, Send, UserRoundCheck } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { addCandidateSuggestionAction } from "./actions";
+import { createInvitationAction } from "./invitation-actions";
+import { createStoryAction } from "./story-actions";
+import {
+  ApplicationStatusActions,
+  InterviewStatusActions,
+  InvitationStatusActions,
+  StoryStatusActions
+} from "./StageActions";
 import type { getRequestDetail } from "@/modules/workspace/data";
 
 type RequestDetailData = Awaited<ReturnType<typeof getRequestDetail>>;
+
+type ActionableRow = {
+  id: string | number;
+  title: string;
+  subtitle: string;
+  meta?: string;
+  href?: string;
+  status?: number | null;
+};
 
 export function RequestFulfillmentOS({
   data,
@@ -23,6 +40,7 @@ export function RequestFulfillmentOS({
 }) {
   if (!data.request) return null;
   const request = data.request;
+  const requestUuid = request.request_uuid;
 
   return (
     <section className="requestOS">
@@ -49,7 +67,7 @@ export function RequestFulfillmentOS({
 
       <section className="requestActionBar" aria-label="Request actions">
         <Button asChild variant="secondary">
-          <Link href={`${basePath}/${request.request_uuid}#matches` as Route}>
+          <Link href={`${basePath}/${requestUuid}#matches` as Route}>
             <Search aria-hidden="true" />
             Find candidates
           </Link>
@@ -63,7 +81,7 @@ export function RequestFulfillmentOS({
           </Button>
         ) : null}
         <Button asChild variant="ghost">
-          <Link href={`${basePath}/${request.request_uuid}#suggestions` as Route}>
+          <Link href={`${basePath}/${requestUuid}#suggestions` as Route}>
             <UserRoundCheck aria-hidden="true" />
             Review suggestions
           </Link>
@@ -81,6 +99,7 @@ export function RequestFulfillmentOS({
       </section>
 
       <section className="requestDeskGrid">
+        {/* Matches card */}
         <Card className="requestPanel" id="matches">
           <CardHeader className="requestPanelHeader">
             <div>
@@ -109,15 +128,25 @@ export function RequestFulfillmentOS({
                   <Badge variant="secondary">{candidate.university}</Badge>
                   <Badge variant="success">{candidate.rate}</Badge>
                 </div>
-                <form className="suggestionForm" action={addCandidateSuggestionAction}>
-                  <input name="request_uuid" type="hidden" value={request.request_uuid} />
-                  <input name="candidate_id" type="hidden" value={candidate.id} />
-                  <Input name="reason" placeholder="Why this candidate fits" />
-                  <Button type="submit">
-                    <Send aria-hidden="true" />
-                    Suggest
-                  </Button>
-                </form>
+                <div className="matchActionsRow">
+                  <form className="suggestionForm" action={addCandidateSuggestionAction}>
+                    <input name="request_uuid" type="hidden" value={requestUuid} />
+                    <input name="candidate_id" type="hidden" value={candidate.id} />
+                    <Input name="reason" placeholder="Why this candidate fits" />
+                    <Button type="submit">
+                      <Send aria-hidden="true" />
+                      Suggest
+                    </Button>
+                  </form>
+                  <form action={createInvitationAction}>
+                    <input name="request_uuid" type="hidden" value={requestUuid} />
+                    <input name="candidate_id" type="hidden" value={candidate.id} />
+                    <Button type="submit" variant="outline" size="sm">
+                      <Plus aria-hidden="true" />
+                      Invite
+                    </Button>
+                  </form>
+                </div>
                 <Button asChild variant="ghost" size="sm">
                   {role === "admin" ? (
                     <Link href={`/admin/candidates/${candidate.id}` as Route}>Open full profile</Link>
@@ -136,6 +165,7 @@ export function RequestFulfillmentOS({
           </CardContent>
         </Card>
 
+        {/* Suggestions card */}
         <Card className="requestPanel" id="suggestions">
           <CardHeader className="requestPanelHeader">
             <div>
@@ -149,6 +179,7 @@ export function RequestFulfillmentOS({
           </CardContent>
         </Card>
 
+        {/* Invitations card */}
         <Card className="requestPanel" id="invited">
           <CardHeader className="requestPanelHeader">
             <div>
@@ -158,10 +189,20 @@ export function RequestFulfillmentOS({
             <CardDescription>{data.invitations.length} shown</CardDescription>
           </CardHeader>
           <CardContent>
-            <RequestRows rows={data.invitations} />
+            <RequestRows
+              rows={data.invitations}
+              actions={(row) => (
+                <InvitationStatusActions
+                  invitationUuid={String(row.id)}
+                  requestUuid={requestUuid}
+                  currentStatus={row.status}
+                />
+              )}
+            />
           </CardContent>
         </Card>
 
+        {/* Applications card */}
         <Card className="requestPanel">
           <CardHeader className="requestPanelHeader">
             <div>
@@ -171,10 +212,20 @@ export function RequestFulfillmentOS({
             <CardDescription>{data.applications.length} shown</CardDescription>
           </CardHeader>
           <CardContent>
-            <RequestRows rows={data.applications} />
+            <RequestRows
+              rows={data.applications}
+              actions={(row) => (
+                <ApplicationStatusActions
+                  applicationUuid={String(row.id)}
+                  requestUuid={requestUuid}
+                  currentStatus={row.status}
+                />
+              )}
+            />
           </CardContent>
         </Card>
 
+        {/* Interviews card */}
         <Card className="requestPanel">
           <CardHeader className="requestPanelHeader">
             <div>
@@ -184,10 +235,20 @@ export function RequestFulfillmentOS({
             <CardDescription>{data.interviews.length} shown</CardDescription>
           </CardHeader>
           <CardContent>
-            <RequestRows rows={data.interviews} />
+            <RequestRows
+              rows={data.interviews}
+              actions={(row) => (
+                <InterviewStatusActions
+                  interviewUuid={String(row.id)}
+                  requestUuid={requestUuid}
+                  currentStatus={row.status}
+                />
+              )}
+            />
           </CardContent>
         </Card>
 
+        {/* Stories card */}
         <Card className="requestPanel">
           <CardHeader className="requestPanelHeader">
             <div>
@@ -197,7 +258,26 @@ export function RequestFulfillmentOS({
             <CardDescription>{data.activities.length + data.stories.length} rows</CardDescription>
           </CardHeader>
           <CardContent>
-            <RequestRows rows={[...data.stories, ...data.activities].slice(0, 12)} />
+            <form action={createStoryAction} className="storyForm">
+              <input name="request_uuid" type="hidden" value={requestUuid} />
+              <Input name="note" placeholder="What happened on this request?" />
+              <Button type="submit" variant="secondary" size="sm">
+                <Plus aria-hidden="true" />
+                Log update
+              </Button>
+            </form>
+            <RequestRows
+              rows={[...data.stories, ...data.activities].slice(0, 12)}
+              actions={(row) =>
+                row.status !== undefined ? (
+                  <StoryStatusActions
+                    storyUuid={String(row.id)}
+                    requestUuid={requestUuid}
+                    currentStatus={row.status}
+                  />
+                ) : null
+              }
+            />
           </CardContent>
         </Card>
       </section>
@@ -206,28 +286,33 @@ export function RequestFulfillmentOS({
 }
 
 function RequestRows({
-  rows
+  rows,
+  actions
 }: {
-  rows: { id: string | number; title: string; subtitle: string; meta?: string; href?: string }[];
+  rows: ActionableRow[];
+  actions?: (row: ActionableRow) => React.ReactNode;
 }) {
   return (
     <div className="requestRows">
       {rows.length ? (
-        rows.map((row) =>
-          row.href ? (
-            <Link href={row.href as Route} key={row.id}>
-              <strong>{row.title}</strong>
-              <span>{row.subtitle}</span>
-              {row.meta ? <small>{row.meta}</small> : null}
-            </Link>
-          ) : (
-            <article key={row.id}>
-              <strong>{row.title}</strong>
-              <span>{row.subtitle}</span>
-              {row.meta ? <small>{row.meta}</small> : null}
-            </article>
-          )
-        )
+        rows.map((row) => (
+          <div key={row.id} className="requestRow">
+            {row.href ? (
+              <Link href={row.href as Route} className="requestRowLink">
+                <strong>{row.title}</strong>
+                <span>{row.subtitle}</span>
+                {row.meta ? <small>{row.meta}</small> : null}
+              </Link>
+            ) : (
+              <div className="requestRowLink">
+                <strong>{row.title}</strong>
+                <span>{row.subtitle}</span>
+                {row.meta ? <small>{row.meta}</small> : null}
+              </div>
+            )}
+            {actions ? <div className="requestRowActions">{actions(row)}</div> : null}
+          </div>
+        ))
       ) : (
         <div className="requestEmpty">
           <strong>No imported rows here yet.</strong>
