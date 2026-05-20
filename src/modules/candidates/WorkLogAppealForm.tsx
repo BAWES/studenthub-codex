@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
-import { appealWorkLog } from "./actions";
+import { appealWorkLog } from "@/modules/candidates/actions";
 
 export function WorkLogAppealForm({ workLogUuid }: { workLogUuid: string }) {
   const [state, action, pending] = useActionState(appealWorkLog, { error: "" });

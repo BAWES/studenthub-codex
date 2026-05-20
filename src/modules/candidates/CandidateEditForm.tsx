@@ -8,7 +8,7 @@ import {
   removeCandidateSkill,
   addCandidateExperience,
   removeCandidateExperience,
-} from "./actions";
+} from "@/modules/candidates/actions";
 
 type Option = { id: number; label: string };
 

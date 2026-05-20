@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
-import { respondToInvitation } from "./actions";
+import { respondToInvitation } from "@/modules/candidates/actions";
 
 export function InvitationRespondForm({
   invitationUuid,
