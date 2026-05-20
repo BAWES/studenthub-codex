@@ -657,6 +657,14 @@ body {
   background: var(--paper);
 }
 
+/* Embedded mode: WorkspaceShell inside a WorkspaceOS layout.
+   The layout already provides the rail, so the inner shell is just a wrapper. */
+.shellEmbedded {
+  display: block;
+  min-height: 0;
+  grid-template-columns: none;
+}
+
 .workspaceRail {
   position: sticky;
   top: 0;
@@ -9549,4 +9557,62 @@ kbd {
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+/* ── Skeleton Loading States ───────────────────────────── */
+
+.skeletonContent {
+  padding: 18px 22px;
+}
+
+.skeletonTable {
+  padding: 18px 22px;
+}
+
+.skeletonTable .skeletonRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr 120px 100px;
+  gap: 12px;
+  padding: 12px 14px;
+  border-top: 1px solid var(--line);
+}
+
+/* Keyframe hints for skeleton rows — subtle shimmer */
+@keyframes skeletonPulse {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 0.55; }
+}
+
+.skeletonTable .skeletonRow > span,
+.skeletonContent > span {
+  animation: skeletonPulse 1.8s ease-in-out infinite;
+}
+
+/* ── Workspace OS Keyboard Shortcut Hints in Command Palette ── */
+
+.shortcutGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4px;
+  padding: 10px 14px;
+  border-top: 1px solid var(--line);
+}
+
+.shortcutGrid div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 8px;
+  border-radius: 6px;
+}
+
+.shortcutGrid kbd {
+  font-family: "SF Mono", "JetBrains Mono", "Fira Code", monospace;
+  font-size: 11px;
+  font-weight: 700;
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 1px 6px;
 }
