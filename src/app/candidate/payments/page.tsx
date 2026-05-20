@@ -1,3 +1,4 @@
+import type { Route } from "next";
 import { requireRoleCapability } from "@/modules/auth/session";
 import { DataTable } from "@/modules/workspace/DataTable";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
@@ -14,6 +15,7 @@ export default async function CandidatePaymentsPage() {
       <DataTable
         title="Transfer & Payment History"
         description="Payout rows linked to your candidate account. Paid status, amounts, and payment dates are from the imported production data."
+        rowHref={(row) => `/candidate/payments/${row.id}` as unknown as Route}
         rows={rows}
         columns={[
           { key: "company", label: "Company / Store", render: (row) => <strong>{row.company}</strong> },
