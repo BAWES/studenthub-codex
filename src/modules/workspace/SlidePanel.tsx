@@ -4,6 +4,7 @@ import { useState, useCallback } from "react";
 import {
   Sheet,
   SheetTrigger,
+  SheetClose,
   SheetContent,
   SheetHeader,
   SheetFooter,
@@ -103,9 +104,9 @@ export function SlidePanel({
 
 // ── SlidePanelTrigger ──────────────────────────────────────
 
-export function SlidePanelTrigger({ children, className, asChild }: SlidePanelTriggerProps) {
+export function SlidePanelTrigger({ children, className }: SlidePanelTriggerProps) {
   return (
-    <SheetTrigger className={className} asChild={asChild}>
+    <SheetTrigger className={className} asChild>
       {children}
     </SheetTrigger>
   );

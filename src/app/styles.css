@@ -1,28 +1,3 @@
-@import "tailwindcss";
-
-@theme {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted-shadcn);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-destructive-foreground: var(--destructive-foreground);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-  --radius: var(--radius);
-}
-
 :root {
   color-scheme: light;
   --ink: #182230;
@@ -9651,14 +9626,12 @@ kbd {
   background: rgba(0, 0, 0, 0.5);
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .sheetOverlay[data-state="closed"] {
-    animation: fadeOut 200ms ease-out;
-  }
+.sheetOverlay[data-state="closed"] {
+  animation: fadeOut 200ms ease-out;
+}
 
-  .sheetOverlay[data-state="open"] {
-    animation: fadeIn 200ms ease-out;
-  }
+.sheetOverlay[data-state="open"] {
+  animation: fadeIn 200ms ease-out;
 }
 
 .sheetContent {
@@ -9669,12 +9642,7 @@ kbd {
   gap: 16px;
   background: var(--background);
   box-shadow: var(--shadow);
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .sheetContent {
-    transition: transform 300ms ease-in-out;
-  }
+  transition: transform 300ms ease-in-out;
 }
 
 .sheetContentRight {
@@ -9685,14 +9653,12 @@ kbd {
   border-left: 1px solid var(--line);
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .sheetContentRight[data-state="closed"] {
-    animation: slideOutRight 200ms ease-in;
-  }
+.sheetContentRight[data-state="closed"] {
+  animation: slideOutRight 200ms ease-in;
+}
 
-  .sheetContentRight[data-state="open"] {
-    animation: slideInRight 300ms ease-out;
-  }
+.sheetContentRight[data-state="open"] {
+  animation: slideInRight 300ms ease-out;
 }
 
 .sheetContentLeft {
@@ -9703,14 +9669,12 @@ kbd {
   border-right: 1px solid var(--line);
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .sheetContentLeft[data-state="closed"] {
-    animation: slideOutLeft 200ms ease-in;
-  }
+.sheetContentLeft[data-state="closed"] {
+  animation: slideOutLeft 200ms ease-in;
+}
 
-  .sheetContentLeft[data-state="open"] {
-    animation: slideInLeft 300ms ease-out;
-  }
+.sheetContentLeft[data-state="open"] {
+  animation: slideInLeft 300ms ease-out;
 }
 
 .sheetContentTop {
@@ -9720,14 +9684,12 @@ kbd {
   border-bottom: 1px solid var(--line);
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .sheetContentTop[data-state="closed"] {
-    animation: slideOutUp 200ms ease-in;
-  }
+.sheetContentTop[data-state="closed"] {
+  animation: slideOutUp 200ms ease-in;
+}
 
-  .sheetContentTop[data-state="open"] {
-    animation: slideInDown 300ms ease-out;
-  }
+.sheetContentTop[data-state="open"] {
+  animation: slideInDown 300ms ease-out;
 }
 
 .sheetContentBottom {
@@ -9737,14 +9699,12 @@ kbd {
   border-top: 1px solid var(--line);
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .sheetContentBottom[data-state="closed"] {
-    animation: slideOutDown 200ms ease-in;
-  }
+.sheetContentBottom[data-state="closed"] {
+  animation: slideOutDown 200ms ease-in;
+}
 
-  .sheetContentBottom[data-state="open"] {
-    animation: slideInUp 300ms ease-out;
-  }
+.sheetContentBottom[data-state="open"] {
+  animation: slideInUp 300ms ease-out;
 }
 
 .sheetClose {
@@ -9823,55 +9783,52 @@ kbd {
 }
 
 /* ── Sheet animations ── */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
 
-@media (prefers-reduced-motion: no-preference) {
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
 
-  @keyframes fadeOut {
-    from { opacity: 1; }
-    to { opacity: 0; }
-  }
+@keyframes slideInRight {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
 
-  @keyframes slideInRight {
-    from { transform: translateX(100%); }
-    to { transform: translateX(0); }
-  }
+@keyframes slideOutRight {
+  from { transform: translateX(0); }
+  to { transform: translateX(100%); }
+}
 
-  @keyframes slideOutRight {
-    from { transform: translateX(0); }
-    to { transform: translateX(100%); }
-  }
+@keyframes slideInLeft {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
 
-  @keyframes slideInLeft {
-    from { transform: translateX(-100%); }
-    to { transform: translateX(0); }
-  }
+@keyframes slideOutLeft {
+  from { transform: translateX(0); }
+  to { transform: translateX(-100%); }
+}
 
-  @keyframes slideOutLeft {
-    from { transform: translateX(0); }
-    to { transform: translateX(-100%); }
-  }
+@keyframes slideInDown {
+  from { transform: translateY(-20%); }
+  to { transform: translateY(0); }
+}
 
-  @keyframes slideInDown {
-    from { transform: translateY(-20%); }
-    to { transform: translateY(0); }
-  }
+@keyframes slideOutUp {
+  from { transform: translateY(0); }
+  to { transform: translateY(-20%); }
+}
 
-  @keyframes slideOutUp {
-    from { transform: translateY(0); }
-    to { transform: translateY(-20%); }
-  }
+@keyframes slideInUp {
+  from { transform: translateY(20%); }
+  to { transform: translateY(0); }
+}
 
-  @keyframes slideInUp {
-    from { transform: translateY(20%); }
-    to { transform: translateY(0); }
-  }
-
-  @keyframes slideOutDown {
-    from { transform: translateY(0); }
-    to { transform: translateY(20%); }
-  }
+@keyframes slideOutDown {
+  from { transform: translateY(0); }
+  to { transform: translateY(20%); }
 }
