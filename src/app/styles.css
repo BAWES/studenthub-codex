@@ -9616,3 +9616,219 @@ kbd {
   border-radius: 4px;
   padding: 1px 6px;
 }
+
+/* ── Sheet / Slide-in Panel ──────────────────────────────── */
+
+.sheetOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.sheetOverlay[data-state="closed"] {
+  animation: fadeOut 200ms ease-out;
+}
+
+.sheetOverlay[data-state="open"] {
+  animation: fadeIn 200ms ease-out;
+}
+
+.sheetContent {
+  position: fixed;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: var(--background);
+  box-shadow: var(--shadow);
+  transition: transform 300ms ease-in-out;
+}
+
+.sheetContentRight {
+  inset-block: 0;
+  right: 0;
+  height: 100%;
+  width: min(75vw, 520px);
+  border-left: 1px solid var(--line);
+}
+
+.sheetContentRight[data-state="closed"] {
+  animation: slideOutRight 200ms ease-in;
+}
+
+.sheetContentRight[data-state="open"] {
+  animation: slideInRight 300ms ease-out;
+}
+
+.sheetContentLeft {
+  inset-block: 0;
+  left: 0;
+  height: 100%;
+  width: min(75vw, 520px);
+  border-right: 1px solid var(--line);
+}
+
+.sheetContentLeft[data-state="closed"] {
+  animation: slideOutLeft 200ms ease-in;
+}
+
+.sheetContentLeft[data-state="open"] {
+  animation: slideInLeft 300ms ease-out;
+}
+
+.sheetContentTop {
+  inset-inline: 0;
+  top: 0;
+  height: auto;
+  border-bottom: 1px solid var(--line);
+}
+
+.sheetContentTop[data-state="closed"] {
+  animation: slideOutUp 200ms ease-in;
+}
+
+.sheetContentTop[data-state="open"] {
+  animation: slideInDown 300ms ease-out;
+}
+
+.sheetContentBottom {
+  inset-inline: 0;
+  bottom: 0;
+  height: auto;
+  border-top: 1px solid var(--line);
+}
+
+.sheetContentBottom[data-state="closed"] {
+  animation: slideOutDown 200ms ease-in;
+}
+
+.sheetContentBottom[data-state="open"] {
+  animation: slideInUp 300ms ease-out;
+}
+
+.sheetClose {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  border-radius: 6px;
+  opacity: 0.7;
+  transition: opacity 0.15s;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  color: var(--muted);
+}
+
+.sheetClose:hover {
+  opacity: 1;
+  background: var(--secondary);
+}
+
+.sheetClose:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.sheetClose svg {
+  width: 16px;
+  height: 16px;
+}
+
+.sheetHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 18px 22px 0;
+}
+
+.sheetFooter {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 22px;
+  border-top: 1px solid var(--line);
+}
+
+.sheetTitle {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--foreground);
+  margin: 0;
+}
+
+.sheetDescription {
+  font-size: 0.8125rem;
+  color: var(--muted-foreground);
+  margin: 0;
+}
+
+.sheetBody {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 22px;
+}
+
+/* SlidePanel — consumer-level wrapper on Sheet */
+.slidePanel .sheetBody {
+  padding: 0;
+}
+
+.slidePanelInner {
+  padding: 0 22px 22px;
+  display: grid;
+  gap: 14px;
+}
+
+/* ── Sheet animations ── */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes slideOutRight {
+  from { transform: translateX(0); }
+  to { transform: translateX(100%); }
+}
+
+@keyframes slideInLeft {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes slideOutLeft {
+  from { transform: translateX(0); }
+  to { transform: translateX(-100%); }
+}
+
+@keyframes slideInDown {
+  from { transform: translateY(-20%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes slideOutUp {
+  from { transform: translateY(0); }
+  to { transform: translateY(-20%); }
+}
+
+@keyframes slideInUp {
+  from { transform: translateY(20%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes slideOutDown {
+  from { transform: translateY(0); }
+  to { transform: translateY(20%); }
+}
