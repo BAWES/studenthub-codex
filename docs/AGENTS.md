@@ -8,26 +8,56 @@
 studenthub-next/
   src/
     app/                    # Next.js 15 App Router pages
-      layout.tsx            # Root layout (theme, fonts)
+      layout.tsx            # Root layout (ThemeScript, TooltipProvider, Toaster, NoticeToast)
       page.tsx              # Landing → redirect to /app
-      styles.css            # Global CSS (being refactored to Tailwind)
+      styles.css            # Global CSS (+ component CSS)
       login/                # Unified login (email + password + auto-detect role)
       app/                  # Legacy hub redirect
-      hub/                  # Workspace hub (Cmd+K, scope-based navigation)
-      admin/                # Admin portal (candidates, companies, requests, transfers)
-      staff/                # Staff portal (candidates, requests)
-      candidate/            # Candidate portal (invitations, work-logs)
-      company/              # Company portal (accounts, requests)
-      inspector/            # Inspector portal (ID requests)
+      hub/                  # Workspace hub (standalone commandOS shell)
+      admin/
+        layout.tsx          # WorkspaceOS shell — persistent across admin navigation
+        loading.tsx         # Skeleton during route transitions
+        page.tsx            # Dashboard + FeatureGrid
+        candidates/         # Candidate search (shared with staff)
+        companies/          # Company list + detail
+        requests/           # Request list + detail + actions
+        transfers/          # Transfer list + detail + actions
+      staff/
+        layout.tsx          # WorkspaceOS shell
+        loading.tsx         # Skeleton during route transitions
+        page.tsx            # StaffHome
+        candidates/         # Candidate search (staff-scoped kanban)
+        requests/           # Request list + detail
+      candidate/
+        layout.tsx          # WorkspaceOS shell
+        loading.tsx         # Skeleton during route transitions
+        page.tsx            # Own profile
+        invitations/        # Invitation list + detail
+        work-logs/          # Work log list + detail
+      company/
+        layout.tsx          # WorkspaceOS shell
+        loading.tsx         # Skeleton during route transitions
+        page.tsx            # Overview + linked companies
+        companies/          # Linked company list + detail
+        requests/           # Request list + detail
+      inspector/
+        layout.tsx          # WorkspaceOS shell
+        loading.tsx         # Skeleton during route transitions
+        page.tsx            # Overview + ID requests
+        id-requests/        # ID request list + detail
       error.tsx             # Global error boundary
       not-found.tsx         # 404 page
-      loading.tsx           # Global loading state
+      loading.tsx           # Global loading state (spinner)
       middleware.ts          # Auth gate + security headers
     modules/                # Feature modules (domain logic, zero Next.js deps)
       auth/                 # Auth (session, login, password, capabilities)
       candidates/           # Candidate search, profile
       requests/             # Request fulfillment, suggestion, create-actions
-      workspace/            # Shell, navigation, data queries, tables, panels
+      workspace/            # Shell, navigation, data queries, tables, panels, skeletons
+        WorkspaceOS.tsx     # Unified OS shell: sidebar + Cmd+K + keyboard shortcuts
+        WorkspaceOSContext.tsx # Context for embedded shell detection
+        WorkspaceShell.tsx  # Context-aware: skips rail when inside WorkspaceOS layout
+        Skeletons.tsx       # Reusable skeleton components for loading states
       finance/              # Transfer/payment actions, UI
       dashboard/            # Dashboard data, shortcuts
       theme/                # Dark/light mode toggle
@@ -72,10 +102,33 @@ export async function someAction(formData: FormData) {
 - Single Prisma client (`src/lib/prisma.ts`)
 - MySQL 8.4 via Docker Compose (port 3307)
 
-### 4. Workspace Shell Pattern
-- `WorkspaceShell` is the main layout: sidebar + topbar + metrics + panels
-- Every role page wraps content in WorkspaceShell
-- Navigation items per role defined in `src/modules/workspace/navigation.ts`
+### 4. Workspace Shell Pattern (updated)
+
+**Two-tier shell architecture:**
+
+1. **WorkspaceOS** (`src/modules/workspace/WorkspaceOS.tsx`) — the outer shell provided by per-role layouts:
+   - Persistent sidebar rail (236px, sticky) — does NOT remount on page navigation
+   - Global Cmd+K command palette (search views, navigate, see shortcuts)
+   - Global keyboard shortcuts:
+     - `Cmd+K` / `?` → command palette
+     - `G` then `H`/`R`/`C`/`T`/`O` → go to hub/requests/candidates/transfers/companies
+     - `/` → focus workspace search
+     - `j` / `k` → navigate rows (vim-style)
+     - `Escape` → close palette
+   - Sets `WorkspaceOSContext` with `{ embedded: true, session }`
+   - Renders `<main class="shell">` with rail + `<section class="workspaceStage">{children}</section>`
+
+2. **WorkspaceShell** (`src/modules/workspace/WorkspaceShell.tsx`) — the inner content wrapper:
+   - When **embedded** (inside WorkspaceOS layout): renders only the content area (stage with topbar, metrics, children, lists). Uses `.shellEmbedded` class (display: block).
+   - When **standalone** (hub/app pages): renders the full shell including its own rail.
+   - Detection via `useWorkspaceOS()` context hook.
+   - **Zero page changes needed** — existing pages rendered seamlessly.
+
+**Per-role layouts** (e.g., `app/admin/layout.tsx`):
+- Server components that call `requireRoleCapability()` for auth
+- Render `<WorkspaceOS session={session}>{children}</WorkspaceOS>`
+- Sidebar persists across all pages under that role
+- Skeleton loading states automatically via `loading.tsx` in each role directory
 
 ### 5. Component Categories
 - **Pages** (`src/app/**/page.tsx`): Server components, fetch data, render shell
@@ -101,13 +154,20 @@ export async function someAction(formData: FormData) {
 - **Middleware** (route protection + security headers)
 - **Error boundaries** (error.tsx, not-found.tsx, loading.tsx)
 - **Validation suite** (63 automated tests)
+- **Global toast notifications** (NoticeToast + sonner, 16 notice types)
+- **Per-role WorkspaceOS layouts** (persistent sidebar, zero page changes)
+- **Global Cmd+K command palette** (search views, keyboard navigation)
+- **Power-user keyboard shortcuts** (G+chords, j/k rows, / search focus)
+- **Skeleton loading states** (per-role loading.tsx + reusable Skeletons component)
+- **11 shadcn/ui components** (command, dialog, dropdown-menu, select, separator, sheet, skeleton, sonner, tabs, tooltip)
+- **CI/CD pipeline** (GitHub Actions: typescript, build, lint, validate)
+- **PR workflow** (template, CodeRabbit auto-review, CODEOWNERS)
+- **Agent collaboration doc** (this file + architecture patterns)
 
 ### In Progress
-- Design system expansion (toast, dialog, dropdown, tabs, skeleton, etc.)
-- Unified workspace UX (one-app feel, slide-in panels)
-- Toast notifications replacing URL-param notices
-- Skeleton loading states
-- CSS refactor (Tailwind-first)
+- CSS refactor (Tailwind-first component styles)
+- Slide-in panel system for detail views (shadcn Sheet)
+- One-command local test flow
 
 ### Known Gaps
 - No file upload/storage (S3/Cloudinary integration needed)
@@ -116,7 +176,6 @@ export async function someAction(formData: FormData) {
 - No real-time features (WebSocket/SSE)
 - No i18n (Arabic fields exist in DB)
 - No E2E tests (only smoke + validation)
-- No CI/CD (GitHub Actions needed)
 
 ## UX Principles
 - **Operating system feel:** One unified shell, panels slide in, never leave the workspace

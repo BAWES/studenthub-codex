@@ -1,3 +1,5 @@
+"use client";
+
 import type { SessionUser } from "@/modules/auth/types";
 import type { Route } from "next";
 import { logoutAction } from "@/modules/auth/actions";
@@ -5,6 +7,7 @@ import { ThemeToggle } from "@/modules/theme/ThemeToggle";
 import Link from "next/link";
 import { navForRole } from "./navigation";
 import { WorkspaceMobileNavigation, WorkspaceNavigation } from "./WorkspaceNavigation";
+import { useWorkspaceOS } from "./WorkspaceOSContext";
 
 type Metric = {
   label: string;
@@ -37,57 +40,74 @@ export function WorkspaceShell({
   secondary?: { title: string; rows: Row[] };
   children?: React.ReactNode;
 }) {
+  const { embedded } = useWorkspaceOS();
   const navItems = navForRole(session.role);
+
+  const rail = (
+    <aside className="workspaceRail">
+      <Link className="workspaceMark" href="/app" aria-label="StudentHub app">
+        <span>SH</span>
+        <strong>StudentHub</strong>
+      </Link>
+      <WorkspaceNavigation items={navItems} role={session.role} />
+      <div className="workspaceRailFooter">
+        <ThemeToggle />
+        <form className="workspaceSignout" action={logoutAction}>
+          <button type="submit">Sign out</button>
+        </form>
+      </div>
+    </aside>
+  );
+
+  const stage = (
+    <section className="workspaceStage">
+      <section className="topbar">
+        <div>
+          <p className="eyebrow">{eyebrow}</p>
+          <h1>{title}</h1>
+        </div>
+        <div className="accountBox">
+          <span>{session.role}</span>
+          <strong>{session.name}</strong>
+          <small>{session.email}</small>
+        </div>
+      </section>
+
+      {metrics.length ? (
+        <section className="metrics" aria-label={`${session.role} workspace metrics`}>
+          {metrics.map((metric) => (
+            <article className="metric" key={metric.label}>
+              <span>{metric.label}</span>
+              <strong>{typeof metric.value === "number" ? metric.value.toLocaleString("en-US") : metric.value}</strong>
+              <p>{metric.note}</p>
+            </article>
+          ))}
+        </section>
+      ) : null}
+
+      {children}
+
+      <section className="lists">
+        {primary ? <WorkspaceList title={primary.title} rows={primary.rows} /> : null}
+        {secondary ? <WorkspaceList title={secondary.title} rows={secondary.rows} /> : null}
+      </section>
+    </section>
+  );
+
+  // When embedded in a WorkspaceOS layout, the layout already provides the rail.
+  if (embedded) {
+    return (
+      <main className="shell shellEmbedded">
+        {stage}
+        <WorkspaceMobileNavigation items={navItems} role={session.role} />
+      </main>
+    );
+  }
 
   return (
     <main className="shell">
-      <aside className="workspaceRail">
-        <Link className="workspaceMark" href="/app" aria-label="StudentHub app">
-          <span>SH</span>
-          <strong>StudentHub</strong>
-        </Link>
-        <WorkspaceNavigation items={navItems} role={session.role} />
-        <div className="workspaceRailFooter">
-          <ThemeToggle />
-          <form className="workspaceSignout" action={logoutAction}>
-            <button type="submit">Sign out</button>
-          </form>
-        </div>
-      </aside>
-
-      <section className="workspaceStage">
-        <section className="topbar">
-          <div>
-            <p className="eyebrow">{eyebrow}</p>
-            <h1>{title}</h1>
-          </div>
-          <div className="accountBox">
-            <span>{session.role}</span>
-            <strong>{session.name}</strong>
-            <small>{session.email}</small>
-          </div>
-        </section>
-
-        {metrics.length ? (
-          <section className="metrics" aria-label={`${session.role} workspace metrics`}>
-            {metrics.map((metric) => (
-              <article className="metric" key={metric.label}>
-                <span>{metric.label}</span>
-                <strong>{typeof metric.value === "number" ? metric.value.toLocaleString("en-US") : metric.value}</strong>
-                <p>{metric.note}</p>
-              </article>
-            ))}
-          </section>
-        ) : null}
-
-        {children}
-
-        <section className="lists">
-          {primary ? <WorkspaceList title={primary.title} rows={primary.rows} /> : null}
-          {secondary ? <WorkspaceList title={secondary.title} rows={secondary.rows} /> : null}
-        </section>
-      </section>
-
+      {rail}
+      {stage}
       <WorkspaceMobileNavigation items={navItems} role={session.role} />
     </main>
   );
