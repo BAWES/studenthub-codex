@@ -63,31 +63,49 @@ function roleChords(role: string): { keys: string; label: string }[] {
 // ── Build commands from nav items ──────────────────────────────
 
 function buildOSCommands(navItems: NavItem[], role: string): OSCommand[] {
+  const chordByHref: Record<string, string> = {};
+  chordByHref[`/${role}`] = "G H";
+  if (role === "admin") {
+    chordByHref[`/${role}/candidates`] = "G C";
+    chordByHref[`/${role}/requests`] = "G R";
+    chordByHref[`/${role}/transfers`] = "G T";
+    chordByHref[`/${role}/companies`] = "G O";
+  } else if (role === "staff") {
+    chordByHref[`/${role}/requests`] = "G R";
+    chordByHref[`/${role}/candidates`] = "G C";
+  } else if (role === "candidate") {
+    chordByHref[`/${role}/invitations`] = "G I";
+    chordByHref[`/${role}/work-logs`] = "G W";
+  }
+
+  const shortcutFor = (href: string) => chordByHref[href];
+
   const nav = navItems.map((item) => ({
     id: `nav-${item.href}`,
     title: item.label,
     subtitle: item.href,
     section: "Navigation",
-    href: item.href
+    href: item.href,
+    shortcut: shortcutFor(item.href)
   }));
 
   const scopes: OSCommand[] = [];
   if (role === "admin" || role === "staff") {
     scopes.push(
-      { id: "scope-candidates", title: "Candidates", subtitle: "Search and manage student candidates", section: "Quick Scopes", href: `/${role}/candidates` },
-      { id: "scope-requests", title: "Requests", subtitle: "Hiring requests and fulfillment", section: "Quick Scopes", href: `/${role}/requests` }
+      { id: "scope-candidates", title: "Candidates", subtitle: "Search and manage student candidates", section: "Quick Scopes", href: `/${role}/candidates`, shortcut: shortcutFor(`/${role}/candidates`) },
+      { id: "scope-requests", title: "Requests", subtitle: "Hiring requests and fulfillment", section: "Quick Scopes", href: `/${role}/requests`, shortcut: shortcutFor(`/${role}/requests`) }
     );
   }
   if (role === "admin") {
     scopes.push(
-      { id: "scope-companies", title: "Companies", subtitle: "Client company profiles", section: "Quick Scopes", href: "/admin/companies" },
-      { id: "scope-transfers", title: "Transfers", subtitle: "Financial transfers and payouts", section: "Quick Scopes", href: "/admin/transfers" }
+      { id: "scope-companies", title: "Companies", subtitle: "Client company profiles", section: "Quick Scopes", href: "/admin/companies", shortcut: shortcutFor("/admin/companies") },
+      { id: "scope-transfers", title: "Transfers", subtitle: "Financial transfers and payouts", section: "Quick Scopes", href: "/admin/transfers", shortcut: shortcutFor("/admin/transfers") }
     );
   }
   if (role === "candidate") {
     scopes.push(
-      { id: "scope-invitations", title: "Invitations", subtitle: "Your open invitations", section: "Quick Scopes", href: "/candidate/invitations" },
-      { id: "scope-work-logs", title: "Work Logs", subtitle: "Track your work activities", section: "Quick Scopes", href: "/candidate/work-logs" }
+      { id: "scope-invitations", title: "Invitations", subtitle: "Your open invitations", section: "Quick Scopes", href: "/candidate/invitations", shortcut: shortcutFor("/candidate/invitations") },
+      { id: "scope-work-logs", title: "Work Logs", subtitle: "Track your work activities", section: "Quick Scopes", href: "/candidate/work-logs", shortcut: shortcutFor("/candidate/work-logs") }
     );
   }
 
