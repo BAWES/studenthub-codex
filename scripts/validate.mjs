@@ -18,6 +18,18 @@ let passed = 0;
 let failed = 0;
 const failures = [];
 
+/** Fetch with retries — handles dev-server recovery between test phases. */
+async function fetchRetry(url, options = {}, retries = 3) {
+  for (let i = 0; i <= retries; i++) {
+    try {
+      return await fetch(url, options);
+    } catch (err) {
+      if (i === retries) throw err;
+      await new Promise((r) => setTimeout(r, 2000));
+    }
+  }
+}
+
 function ok(label, condition, detail) {
   if (condition) {
     console.log(`\x1b[32m✓ ${label}\x1b[0m`);
@@ -59,7 +71,7 @@ function section(title) {
     ok("POST /login with no body → 200 (re-render)", res.status === 200);
   }
   {
-    const res = await fetch(`${BASE}/login`);
+    const res = await fetchRetry(`${BASE}/login`);
     const text = await res.text();
     ok("Login has email input", text.includes('email'));
     ok("Login has password input", text.includes('password'));
@@ -79,7 +91,7 @@ function section(title) {
   // ── SECTION 5: Public Content Markers ──
   section("Public Content Markers");
   for (const [path] of [["/login", ["ignored"]]]) {
-    const res = await fetch(`${BASE}${path}`);
+    const res = await fetchRetry(`${BASE}${path}`);
     ok(`/${path} loads with status 200`, res.status === 200, `${res.status}`);
   }
 
@@ -136,7 +148,7 @@ function section(title) {
   // ── SECTION 10: Content Routes (via authenticated render) ──
   section("Route Content (Public Only)");
   {
-    const res = await fetch(`${BASE}/login`);
+    const res = await fetchRetry(`${BASE}/login`);
     ok(`/login renders with status 200`, res.status === 200, `${res.status}`);
   }
 
