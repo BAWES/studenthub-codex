@@ -19,8 +19,10 @@ export default async function CandidatePage() {
       <CandidateProfile
         detail={data}
         actions={[
+          { label: "Edit profile", href: "/candidate/edit" },
           { label: "Invitations", href: "/candidate/invitations" },
           { label: "Work logs", href: "/candidate/work-logs" },
+          { label: "Payments", href: "/candidate/payments" },
           data.candidate?.candidate_email ? { label: "Email support", href: `mailto:${data.candidate.candidate_email}` } : null
         ].filter((action): action is { label: string; href: string } => Boolean(action))}
       />

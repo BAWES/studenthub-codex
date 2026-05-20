@@ -794,6 +794,11 @@ export async function getCandidateDetail(candidateId: number, requestBasePath = 
         candidate_phone: true,
         candidate_civil_id: true,
         candidate_civil_expiry_date: true,
+        candidate_civil_photo_front: true,
+        candidate_civil_photo_back: true,
+        candidate_video: true,
+        candidate_address_line1: true,
+        candidate_birth_date: true,
         candidate_status: true,
         approved: true,
         candidate_hourly_rate: true,
@@ -804,7 +809,9 @@ export async function getCandidateDetail(candidateId: number, requestBasePath = 
         profile_url: true,
         candidate_created_at: true,
         candidate_updated_at: true,
+        country_id: true,
         country: { select: { country_name_en: true } },
+        university_id: true,
         university: { select: { university_name_en: true } },
         store: { select: { store_name: true, company: { select: { company_name: true } } } }
       }
@@ -1863,6 +1870,56 @@ export async function getCandidateWorkLogDetail(candidateId: number, workLogUuid
       meta: `${item.rating === true ? "Positive" : item.rating === false ? "Negative" : "No rating"} · ${formatDate(item.created_at)}`
     }))
   };
+}
+
+export async function getCandidateTransferRows(candidateId: number) {
+  const rows = await prisma.transfer_candidate.findMany({
+    where: { candidate_id: candidateId, deleted: 0 },
+    orderBy: { tc_updated_at: "desc" },
+    take: 80,
+    select: {
+      tc_id: true,
+      transfer_id: true,
+      candidate_total: true,
+      company_total: true,
+      transfer_cost: true,
+      hours: true,
+      minutes: true,
+      paid: true,
+      currency_code: true,
+      tc_updated_at: true,
+      company: { select: { company_name: true } },
+      store: { select: { store_name: true } },
+      transfer: {
+        select: {
+          transfer_status: true,
+          start_date: true,
+          end_date: true,
+          payment_received_on: true,
+          currency_code: true,
+        },
+      },
+    },
+  });
+
+  return rows.map((row) => ({
+    id: row.tc_id,
+    transferId: row.transfer_id,
+    company: row.company?.company_name ?? row.store?.store_name ?? "No company",
+    period: row.transfer?.start_date
+      ? `${formatDate(row.transfer.start_date)} to ${formatDate(row.transfer.end_date)}`
+      : "No period",
+    hours: `${row.hours ?? 0}h ${row.minutes ?? 0}m`,
+    candidateTotal: formatMoney(row.candidate_total, row.currency_code ?? row.transfer?.currency_code ?? "KWD"),
+    companyTotal: formatMoney(row.company_total, row.currency_code ?? row.transfer?.currency_code ?? "KWD"),
+    cost: formatMoney(row.transfer_cost, row.currency_code ?? row.transfer?.currency_code ?? "KWD"),
+    paid: row.paid ? "Paid" : "Unpaid",
+    transferStatus: `Transfer status ${row.transfer?.transfer_status ?? 0}`,
+    paymentDate: row.transfer?.payment_received_on
+      ? formatDate(row.transfer.payment_received_on)
+      : "Not received",
+    updated: formatDate(row.tc_updated_at),
+  }));
 }
 
 async function companyIdsForContact(contactUuid: string) {

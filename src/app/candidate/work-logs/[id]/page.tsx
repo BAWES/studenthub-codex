@@ -4,6 +4,7 @@ import { CompactList, FactPanel } from "@/modules/workspace/DetailPanels";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { getCandidateWorkLogDetail } from "@/modules/workspace/data";
 import { formatDate } from "@/modules/workspace/format";
+import { WorkLogAppealForm } from "@/modules/candidates/WorkLogAppealForm";
 
 export const dynamic = "force-dynamic";
 
@@ -33,9 +34,11 @@ export default async function CandidateWorkLogDetailPage({ params }: { params: P
           { label: "Store Location", value: data.workLog.store?.store_location },
           { label: "Start", value: formatDate(data.workLog.start_time) },
           { label: "End", value: formatDate(data.workLog.end_time) },
-          { label: "Note", value: data.workLog.note }
+          { label: "Note", value: data.workLog.note },
         ]}
       />
+
+      <WorkLogAppealForm workLogUuid={data.workLog.candidate_working_hour_uuid} />
     </WorkspaceShell>
   );
 }

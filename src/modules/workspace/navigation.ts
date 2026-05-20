@@ -32,7 +32,8 @@ export function navForRole(role: Role): NavItem[] {
       { label: "App", href: "/app" },
       { label: "Overview", href: "/candidate" },
       { label: "Invitations", href: "/candidate/invitations" },
-      { label: "Work Logs", href: "/candidate/work-logs" }
+      { label: "Work Logs", href: "/candidate/work-logs" },
+      { label: "Payments", href: "/candidate/payments" }
     ];
   }
 
