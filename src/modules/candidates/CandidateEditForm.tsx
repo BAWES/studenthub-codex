@@ -45,13 +45,17 @@ type Props = {
   experiences: Experience[];
 };
 
-export function CandidateEditForm({ candidate, countries, universities }: Props) {
+export function CandidateEditForm({ candidate, countries, universities, banks, skills, experiences }: Props) {
   const [profileState, profileAction, profilePending] = useActionState(updateCandidateProfile, {
     error: "",
   });
   const [uploadState, uploadAction, uploadPending] = useActionState(uploadDocument, {
     error: "",
   });
+  const [, addSkillAction, addSkillPending] = useActionState(addCandidateSkill, { error: "" });
+  const [, removeSkillAction, removeSkillPending] = useActionState(removeCandidateSkill, { error: "" });
+  const [, addExpAction, addExpPending] = useActionState(addCandidateExperience, { error: "" });
+  const [, removeExpAction, removeExpPending] = useActionState(removeCandidateExperience, { error: "" });
 
   return (
     <div className="candidateEditLayout">
@@ -115,6 +119,30 @@ export function CandidateEditForm({ candidate, countries, universities }: Props)
           <textarea name="address" rows={2} defaultValue={candidate.address} />
         </label>
 
+        <h2>Bank info</h2>
+
+        <label>
+          <span>Bank</span>
+          <select name="bankId" defaultValue={candidate.bankId ?? ""}>
+            <option value="">— Not set —</option>
+            {banks.map((b) => (
+              <option key={b.id} value={b.id}>
+                {b.label}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label>
+          <span>Account holder name</span>
+          <input name="bankAccountName" defaultValue={candidate.bankAccountName} />
+        </label>
+
+        <label>
+          <span>IBAN</span>
+          <input name="iban" defaultValue={candidate.iban} />
+        </label>
+
         <h2>Profile details</h2>
 
         <label>
@@ -169,6 +197,88 @@ export function CandidateEditForm({ candidate, countries, universities }: Props)
         <div className="formActions">
           <button type="submit" disabled={uploadPending}>
             {uploadPending ? "Uploading..." : "Upload document"}
+          </button>
+        </div>
+      </form>
+
+      <form action={addSkillAction} className="candidateEditForm">
+        <h2>Skills</h2>
+
+        {skills.length ? (
+          <ul className="editableList">
+            {skills.map((s) => (
+              <li key={s.id}>
+                <span>{s.title}</span>
+                <form action={removeSkillAction}>
+                  <input type="hidden" name="skillId" value={s.id} />
+                  <button type="submit" disabled={removeSkillPending} className="removeButton">
+                    Remove
+                  </button>
+                </form>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="formNotice">No skills added yet.</p>
+        )}
+
+        <label>
+          <span>Add skill</span>
+          <input name="skill" placeholder="e.g. Cashier, Barista, Driver..." />
+        </label>
+
+        <div className="formActions">
+          <button type="submit" disabled={addSkillPending}>
+            {addSkillPending ? "Adding..." : "Add skill"}
+          </button>
+        </div>
+      </form>
+
+      <form action={addExpAction} className="candidateEditForm">
+        <h2>Work experience</h2>
+
+        {experiences.length ? (
+          <ul className="editableList">
+            {experiences.map((e) => (
+              <li key={e.id}>
+                <span>{e.title}{e.subtitle ? ` at ${e.subtitle}` : ""}</span>
+                <form action={removeExpAction}>
+                  <input type="hidden" name="experienceId" value={e.id} />
+                  <button type="submit" disabled={removeExpPending} className="removeButton">
+                    Remove
+                  </button>
+                </form>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="formNotice">No work experience added yet.</p>
+        )}
+
+        <label>
+          <span>Job title / Role</span>
+          <input name="experience" placeholder="e.g. Sales Associate" required />
+        </label>
+
+        <label>
+          <span>Employer / Company</span>
+          <input name="employer" placeholder="e.g. Alshaya" />
+        </label>
+
+        <div className="inlineFields">
+          <label>
+            <span>Start year</span>
+            <input name="startYear" type="number" min="1950" max="2035" />
+          </label>
+          <label>
+            <span>End year</span>
+            <input name="endYear" type="number" min="1950" max="2035" />
+          </label>
+        </div>
+
+        <div className="formActions">
+          <button type="submit" disabled={addExpPending}>
+            {addExpPending ? "Adding..." : "Add experience"}
           </button>
         </div>
       </form>

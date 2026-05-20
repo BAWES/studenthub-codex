@@ -799,6 +799,9 @@ export async function getCandidateDetail(candidateId: number, requestBasePath = 
         candidate_video: true,
         candidate_address_line1: true,
         candidate_birth_date: true,
+        bank_id: true,
+        bank_account_name: true,
+        candidate_iban: true,
         candidate_status: true,
         approved: true,
         candidate_hourly_rate: true,
@@ -1502,6 +1505,7 @@ export async function getRequestDetail(
       title: application.candidate?.candidate_name ?? "Unknown candidate",
       subtitle: application.candidate?.candidate_email ?? "No email",
       meta: `Status ${application.status ?? 0} · ${formatDate(application.created_at)}`,
+      status: application.status,
       href: application.candidate?.candidate_id
         ? options.candidateHref
           ? options.candidateHref(application.candidate.candidate_id)
@@ -1514,13 +1518,15 @@ export async function getRequestDetail(
       id: interview.request_interview_uuid,
       title: interview.candidate?.candidate_name ?? "Interview",
       subtitle: interview.candidate?.candidate_email ?? "No email",
-      meta: `Status ${interview.status ?? 0} · ${formatDate(interview.interview_at)}`
+      meta: `Status ${interview.status ?? 0} · ${formatDate(interview.interview_at)}`,
+      status: interview.status
     })),
     invitations: invitations.map((invitation) => ({
       id: invitation.invitation_uuid,
       title: invitation.candidate?.candidate_name ?? "Invitation",
       subtitle: invitation.candidate?.candidate_email ?? "No email",
-      meta: `Status ${invitation.invitation_status ?? 0} · ${formatDate(invitation.invitation_created_at)}`
+      meta: `Status ${invitation.invitation_status ?? 0} · ${formatDate(invitation.invitation_created_at)}`,
+      status: invitation.invitation_status
     })),
     suggestions: suggestions.map((suggestion) => ({
       id: suggestion.suggestion_uuid,
@@ -1544,7 +1550,8 @@ export async function getRequestDetail(
       id: story.story_uuid,
       title: `Story ${story.story_uuid.slice(0, 12)}`,
       subtitle: `Status ${story.story_status}`,
-      meta: formatDate(story.story_last_updated_at)
+      meta: formatDate(story.story_last_updated_at),
+      status: story.story_status
     }))
   };
 }
