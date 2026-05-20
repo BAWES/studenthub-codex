@@ -1,8 +1,10 @@
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { requireRoleCapability } from "@/modules/auth/session";
 import { CompactList, FactPanel } from "@/modules/workspace/DetailPanels";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { getAdminTransferDetail } from "@/modules/workspace/data";
+import { TransferActionBar } from "@/modules/finance/TransferActionBar";
 import { formatDate, formatMoney } from "@/modules/workspace/format";
 
 export const dynamic = "force-dynamic";
@@ -25,6 +27,10 @@ export default async function AdminTransferDetailPage({ params }: { params: Prom
       primary={{ title: "Candidate Payouts", rows: data.candidates }}
       secondary={{ title: "Invoices", rows: data.invoices }}
     >
+      <Suspense fallback={<div className="transferActions"><p>Loading actions…</p></div>}>
+        <TransferActionBar data={data} />
+      </Suspense>
+
       <FactPanel
         title="Transfer Run"
         facts={[
