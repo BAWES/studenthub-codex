@@ -12,7 +12,7 @@
 
 Use [conventional commits](https://www.conventionalcommits.org/):
 
-```
+```text
 feat: add login flow with JWT session management
 fix: correct role check in middleware for inspector routes
 chore: update Prisma schema with new migration
@@ -38,9 +38,9 @@ PR titles follow: `[STU-N] Short description of change`
 ## TypeScript & Code Quality
 
 - Run `npm run test:types` before committing — zero type errors required
-- Run `npm run test:validate` for smoke tests against the dev server
+- Run `npm run test:validate` for the full validation suite against the dev server
 - Run `npm run lint` before pushing
-- Strict mode enabled — no implicit `any`, no unchecked index access
+- Strict mode enabled — no implicit `any`
 - Use `@/` path alias for all internal imports
 - Server actions use `"use server"` directive in `actions.ts` files
 
@@ -60,3 +60,4 @@ PR titles follow: `[STU-N] Short description of change`
 - Smoke tests: `node scripts/smoke-test.mjs`
 - Type check: `npx tsc --noEmit`
 - Full CI: `npm run test:all` (lint + types + build + validate)
+
