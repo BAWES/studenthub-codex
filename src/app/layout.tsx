@@ -1,5 +1,9 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { ThemeScript } from "@/modules/theme/ThemeScript";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { Toaster } from "@/components/ui/sonner";
+import { NoticeToast } from "@/modules/workspace/NoticeToast";
 import "./styles.css";
 
 export const metadata: Metadata = {
@@ -16,7 +20,13 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body>
         <ThemeScript />
-        {children}
+        <TooltipProvider>
+          {children}
+          <Suspense>
+            <NoticeToast />
+          </Suspense>
+        </TooltipProvider>
+        <Toaster richColors closeButton />
       </body>
     </html>
   );

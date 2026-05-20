@@ -1,0 +1,11 @@
+# Code owners for StudentHub Next
+# These users will be automatically requested for review on PRs
+
+# Core application
+/src/               @BAWES
+/prisma/             @BAWES
+/scripts/            @BAWES
+/docs/               @BAWES
+
+# CI and tooling
+/.github/            @BAWES

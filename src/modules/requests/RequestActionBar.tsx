@@ -1,6 +1,5 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -15,16 +14,6 @@ const statusOptions = [
   { value: "re_work", label: "Re-work" }
 ];
 
-const noticeCopy: Record<string, { title: string; body: string }> = {
-  "status-changed": { title: "Status updated", body: "Request status has been changed." },
-  "staff-assigned": { title: "Staff assigned", body: "A staff member has been assigned to this request." },
-  "request-updated": { title: "Request updated", body: "Request details have been saved." },
-  "invalid-params": { title: "Invalid request", body: "The requested action parameters were invalid." },
-  "not-found": { title: "Not found", body: "The requested record could not be found." },
-  "staff-not-found": { title: "Staff not found", body: "The specified staff member does not exist." },
-  "missing-fields": { title: "Missing fields", body: "Required fields were not provided." }
-};
-
 interface RequestActionBarProps {
   requestUuid: string;
   currentStatus: string | null;
@@ -35,10 +24,6 @@ interface RequestActionBarProps {
 }
 
 export function RequestActionBar({ requestUuid, currentStatus, currentStaffId, currentTitle, role, basePath }: RequestActionBarProps) {
-  const searchParams = useSearchParams();
-  const notice = searchParams.get("notice");
-  const activeNotice = notice && noticeCopy[notice] ? noticeCopy[notice] : null;
-
   return (
     <Card>
       <CardHeader>
@@ -46,13 +31,6 @@ export function RequestActionBar({ requestUuid, currentStatus, currentStaffId, c
         <CardDescription>Manage this request&rsquo;s status, assignment, and details.</CardDescription>
       </CardHeader>
       <CardContent>
-        {activeNotice ? (
-          <div className="requestNotice" role="alert" aria-live="polite" style={{ marginBottom: 16 }}>
-            <strong>{activeNotice.title}</strong>
-            <span>{activeNotice.body}</span>
-          </div>
-        ) : null}
-
         <div className="requestOSActions">
           <form action={transitionRequestStatusAction} className="requestActionForm">
             <input name="request_uuid" type="hidden" value={requestUuid} />

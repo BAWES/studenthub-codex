@@ -1,9 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
 import { Ban, CheckCircle, Clock, Lock, Unlock } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -28,34 +25,13 @@ type TransferDetail = {
   invoices: { id: number; title: string; subtitle: string; meta: string }[];
 };
 
-const noticeCopy: Record<string, { title: string; body: string }> = {
-  "paid-toggled": { title: "Payout updated", body: "Candidate payment status has been updated." },
-  "status-toggled": { title: "Transfer updated", body: "Transfer lock status has been changed." },
-  "payment-received": { title: "Payment recorded", body: "Payment received date has been set." },
-  "transfer-deleted": { title: "Transfer removed", body: "The transfer has been soft-deleted." },
-  "invalid-params": { title: "Invalid request", body: "The requested action parameters were invalid." },
-  "not-found": { title: "Not found", body: "The requested record could not be found." },
-  "invalid-date": { title: "Invalid date", body: "The payment date provided was invalid." },
-};
-
 export function TransferActionBar({ data }: { data: TransferDetail }) {
-  const searchParams = useSearchParams();
-  const notice = searchParams.get("notice");
-  const activeNotice = notice && noticeCopy[notice] ? noticeCopy[notice] : null;
-
   if (!data.transfer) return null;
 
   const isLocked = data.transfer.transfer_status !== 10;
 
   return (
     <section className="transferActions">
-      {activeNotice ? (
-        <div className="requestNotice" role="alert" aria-live="polite">
-          <strong>{activeNotice.title}</strong>
-          <span>{activeNotice.body}</span>
-        </div>
-      ) : null}
-
       <div className="transferActionButtons">
         <form action={toggleTransferStatusAction}>
           <input name="transfer_id" type="hidden" value={data.transfer.transfer_id} />

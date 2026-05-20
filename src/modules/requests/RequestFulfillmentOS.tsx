@@ -10,30 +10,11 @@ import type { getRequestDetail } from "@/modules/workspace/data";
 
 type RequestDetailData = Awaited<ReturnType<typeof getRequestDetail>>;
 
-const noticeCopy: Record<string, { title: string; body: string }> = {
-  "suggestion-added": {
-    title: "Suggestion added",
-    body: "The candidate is now in the request suggestion pipeline in the local production clone."
-  },
-  "duplicate-suggestion": {
-    title: "Already suggested",
-    body: "This candidate already has an active suggestion for this request."
-  },
-  "missing-suggestion": {
-    title: "Missing suggestion reason",
-    body: "Add a short reason before creating a suggestion."
-  },
-  "not-found": {
-    title: "Suggestion blocked",
-    body: "The request or candidate was not available to this login."
-  }
-};
-
 export function RequestFulfillmentOS({
   data,
   role,
   basePath,
-  notice
+  notice: _notice
 }: {
   data: RequestDetailData;
   role: "admin" | "staff";
@@ -42,17 +23,9 @@ export function RequestFulfillmentOS({
 }) {
   if (!data.request) return null;
   const request = data.request;
-  const activeNotice = notice ? noticeCopy[notice] : null;
 
   return (
     <section className="requestOS">
-      {activeNotice ? (
-        <div className="requestNotice">
-          <strong>{activeNotice.title}</strong>
-          <span>{activeNotice.body}</span>
-        </div>
-      ) : null}
-
       <section className="requestHero">
         <div>
           <span>Request fulfillment</span>

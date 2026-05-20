@@ -1,0 +1,94 @@
+name: StudentHub CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  typescript:
+    name: TypeScript Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "npm"
+      - run: npm ci
+      - run: npx tsc --noEmit
+
+  build:
+    name: Next.js Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "npm"
+      - run: npm ci
+      - name: Generate Prisma client
+        run: npx prisma generate
+      - name: Build
+        run: npx next build
+
+  lint:
+    name: ESLint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "npm"
+      - run: npm ci
+      - run: npm run lint
+
+  validate:
+    name: Validation Suite
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: studenthub
+          MYSQL_DATABASE: studenthub_prod_local
+          MYSQL_USER: studenthub
+          MYSQL_PASSWORD: studenthub
+        ports:
+          - 3307:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "npm"
+      - run: npm ci
+      - name: Generate Prisma client
+        run: npx prisma generate
+      - name: Push schema to MySQL
+        run: npx prisma db push --skip-generate
+        env:
+          DATABASE_URL: "mysql://studenthub:studenthub@localhost:3307/studenthub_prod_local"
+      - name: Build
+        run: npx next build
+      - name: Start and validate
+        run: |
+          npm run dev &
+          sleep 8
+          node scripts/validate.mjs
+        env:
+          DATABASE_URL: "mysql://studenthub:studenthub@localhost:3307/studenthub_prod_local"
