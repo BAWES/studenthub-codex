@@ -22,6 +22,7 @@ type UuidOption = { id: string; label: string };
 type Skill = { id: number; title: string };
 type Experience = { id: number; title: string; subtitle: string };
 type Certificate = { id: string; title: string; subtitle: string };
+type Language = { id: number; title: string; subtitle: string };
 type EducationEntry = {
   id: string;
   universityId: number;
@@ -63,12 +64,13 @@ type Props = {
   skills: Skill[];
   experiences: Experience[];
   certificates: Certificate[];
+  languages: Language[];
   educationEntries: EducationEntry[];
   degrees: UuidOption[];
   majors: UuidOption[];
 };
 
-export function CandidateEditForm({ candidate, countries, universities, banks, skills, experiences, certificates, educationEntries, degrees, majors }: Props) {
+export function CandidateEditForm({ candidate, countries, universities, banks, skills, experiences, certificates, languages, educationEntries, degrees, majors }: Props) {
   const [profileState, profileAction, profilePending] = useActionState(
     updateCandidateProfile,
     { success: false } as ProfileState,
