@@ -6,11 +6,31 @@ import { ThemeToggle } from "@/modules/theme/ThemeToggle";
 
 export const dynamic = "force-dynamic";
 
-const searchSignals = [
-  "Typo-tolerant candidate search",
-  "Country, university, status, skill, company, availability filters",
-  "Saved searches for staff and admin teams",
-  "Production-safe indexing from the existing MySQL database"
+const portalIcons: Record<string, string> = {
+  candidate: "🎓",
+  staff: "📋",
+  company: "🏭",
+  admin: "⚙️",
+  inspector: "🔍",
+};
+
+const benefits = [
+  {
+    title: "Purpose-built portals",
+    body: "Each role gets exactly the right tools — no clutter, no missing features, no one-size-fits-all compromises.",
+  },
+  {
+    title: "Smart candidate search",
+    body: "Typo-tolerant, filter-rich search across countries, skills, and statuses. Saved searches for repeat workflows.",
+  },
+  {
+    title: "End-to-end workflows",
+    body: "From profile readiness to timesheets and payments — every step is connected in one system.",
+  },
+  {
+    title: "Production-grade foundation",
+    body: "Built for real data volumes, real teams, and real compliance — not a prototype.",
+  },
 ];
 
 const portalRoles = ["candidate", "staff", "company", "admin", "inspector"] as const;
@@ -42,11 +62,11 @@ export default async function Home() {
             <div className="landingOpsMain">
               <div className="landingOpsSearch">
                 <span>Candidate search</span>
-                <strong>jaafar</strong>
-                <small>80 scoped results · FAD · needs review · Lebanon</small>
+                <strong>find talent</strong>
+                <small>80 results · filtered · ready for review</small>
               </div>
               <div className="landingOpsColumns">
-                {["Profile ready", "CV export", "Timesheet", "Payment"].map((item, index) => (
+                {["Profile", "CV export", "Timesheet", "Payment"].map((item, index) => (
                   <div key={item}>
                     <span>{item}</span>
                     <strong>{index === 1 ? "PDF" : "Live"}</strong>
@@ -55,27 +75,27 @@ export default async function Home() {
               </div>
             </div>
             <div className="landingOpsAside">
-              <span>Command</span>
-              <strong>Send CVs to employer</strong>
-              <small>Same action layer for staff and admin, scoped by role.</small>
+              <span>Actions</span>
+              <strong>Send CVs</strong>
+              <small>One click to share with employers.</small>
             </div>
           </div>
         </div>
         <div className="landingHeroCopy">
-          <p className="eyebrow">Next-generation StudentHub</p>
-          <h1>One modern platform, purpose-built portals.</h1>
+          <p className="eyebrow">The StudentHub platform</p>
+          <h1>Every role gets its own workspace.</h1>
           <p>
-            A Silicon Valley-grade rebuild for candidates, staff, companies, inspectors, and admins. Each person gets the
-            right login and workflow, while shared modules keep search, documents, payments, and reporting unified.
+            Candidates find jobs, staff place talent, companies hire, admins oversee, and inspectors verify — all
+            from a single platform with role-specific portals that adapt to how each person works.
           </p>
           <div className="landingActions">
-            <Link className="primary" href="/login/candidate">Students start here</Link>
-            <Link href="/login">Choose another portal</Link>
+            <Link className="primary" href="/login">Get started</Link>
+            <Link href="/login">Explore portals</Link>
           </div>
-          <div className="landingHeroStats" aria-label="StudentHub platform goals">
-            <span>Role-specific access</span>
-            <span>Shared search and documents</span>
-            <span>Production-data migration path</span>
+          <div className="landingHeroStats" aria-label="Platform highlights">
+            <span>5 role-specific portals</span>
+            <span>Unified search &amp; documents</span>
+            <span>End-to-end workflows</span>
           </div>
         </div>
       </section>
@@ -85,6 +105,7 @@ export default async function Home() {
           const portal = portalContent[role];
           return (
             <Link href={portal.href as Route} key={role}>
+              <span className="portalIcon" aria-hidden="true">{portalIcons[role]}</span>
               <span>{portal.label}</span>
               <strong>{portal.audience}</strong>
               <small>{portal.promise}</small>
@@ -93,20 +114,20 @@ export default async function Home() {
         })}
       </section>
 
-      <section className="landingSearchSection">
+      <section className="landingBenefitsSection">
         <div>
-          <p className="eyebrow">Search-first migration</p>
-          <h2>Candidate search should feel instant, forgiving, and operational.</h2>
+          <p className="eyebrow">Why StudentHub</p>
+          <h2>Built for how staffing actually works.</h2>
           <p>
-            The app should index the production candidate model into a dedicated search layer, then keep MySQL as the source
-            of truth for workflows, permissions, and writes.
+            Not a generic dashboard. Every feature is shaped by real placement workflows — search, shortlisting,
+            document exchange, timesheets, and payments run in one system.
           </p>
         </div>
-        <div className="searchSignalGrid">
-          {searchSignals.map((signal) => (
-            <article key={signal}>
-              <span>Search</span>
-              <strong>{signal}</strong>
+        <div className="benefitGrid">
+          {benefits.map((b) => (
+            <article key={b.title}>
+              <strong>{b.title}</strong>
+              <p>{b.body}</p>
             </article>
           ))}
         </div>
