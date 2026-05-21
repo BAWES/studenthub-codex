@@ -2,6 +2,7 @@ import type { Route } from "next";
 import Link from "next/link";
 import type { getCandidateDetail } from "@/modules/workspace/data";
 import { formatDate } from "@/modules/workspace/format";
+import { WorkLogStaffActions } from "./WorkLogStaffActions";
 
 type CandidateDetailData = Awaited<ReturnType<typeof getCandidateDetail>>;
 
@@ -14,12 +15,14 @@ export function CandidateProfile({
   detail,
   actions,
   backHref,
-  compact = false
+  compact = false,
+  viewerRole
 }: {
   detail: CandidateDetailData | null;
   actions: CandidateAction[];
   backHref?: Route;
   compact?: boolean;
+  viewerRole?: string;
 }) {
   const candidate = detail?.candidate;
   if (!candidate) {
@@ -140,7 +143,11 @@ export function CandidateProfile({
           <RowsPanel title="Suggestions" rows={detail.suggestions} />
           <RowsPanel title="Invitations" rows={detail.invitations} />
           <RowsPanel title="Work history" rows={detail.histories} />
-          <RowsPanel title="Work logs" rows={detail.workHours} />
+          {viewerRole === "staff" ? (
+            <WorkLogStaffPanel hours={detail.workHours as any} />
+          ) : (
+            <RowsPanel title="Work logs" rows={detail.workHours} />
+          )}
           <RowsPanel title="Notes" rows={detail.notes} />
           <RowsPanel title="Warnings" rows={detail.warnings} />
           <RowsPanel title="Documents and links" rows={[...detail.idCards, ...detail.certificates, ...detail.links]} />
@@ -211,6 +218,31 @@ function RowContent({ row }: { row: { title: string; subtitle: string; meta?: st
       <span>{row.subtitle}</span>
       {row.meta ? <small>{row.meta}</small> : null}
     </>
+  );
+}
+
+type WorkLogRow = {
+  id: string | number;
+  title: string;
+  subtitle: string;
+  meta?: string;
+  status: number;
+};
+
+function WorkLogStaffPanel({ hours }: { hours: WorkLogRow[] }) {
+  return (
+    <section className="candidateProfilePanel">
+      <PanelHeader title="Work logs" count={hours.length} />
+      <div className="candidateRows">
+        {hours.slice(0, 8).map((hour) => (
+          <article key={`worklog-${hour.id}`} className="workLogRow">
+            <RowContent row={hour} />
+            <WorkLogStaffActions workLogUuid={String(hour.id)} currentStatus={hour.status} />
+          </article>
+        ))}
+        {!hours.length ? <small>No work log records for this candidate.</small> : null}
+      </div>
+    </section>
   );
 }
 

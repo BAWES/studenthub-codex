@@ -986,6 +986,9 @@ export async function getCandidateDetail(candidateId: number, requestBasePath = 
       take: 6,
       select: {
         education_uuid: true,
+        university_id: true,
+        degree_uuid: true,
+        major_uuid: true,
         graduation_year: true,
         is_currently_studying: true,
         university: { select: { university_name_en: true } },
@@ -1014,6 +1017,9 @@ export async function getCandidateDetail(candidateId: number, requestBasePath = 
       select: {
         certificate_uuid: true,
         certificate_type: true,
+        certificate_title: true,
+        certificate_issuer: true,
+        certificate_url: true,
         start_date: true,
         end_date: true,
         company_candidate_certificate_company_idTocompany: { select: { company_name: true } },
@@ -1052,7 +1058,8 @@ export async function getCandidateDetail(candidateId: number, requestBasePath = 
       id: hour.candidate_working_hour_uuid,
       title: hour.store?.store_name ?? "Work log",
       subtitle: `${hour.total_time ?? 0} minutes`,
-      meta: `Status ${hour.status ?? 0} · ${formatDate(hour.date)}`
+      meta: `Status ${hour.status ?? 0} · ${formatDate(hour.date)}`,
+      status: hour.status ?? 0
     })),
     histories: histories.map((history) => ({
       id: history.id,
@@ -1124,6 +1131,14 @@ export async function getCandidateDetail(candidateId: number, requestBasePath = 
       subtitle: [item.degree?.degree_name_en, item.major?.major_name_en].filter(Boolean).join(" · ") || "Education",
       meta: `${item.is_currently_studying ? "Currently studying" : "Graduated"}${item.graduation_year ? ` · ${item.graduation_year}` : ""}`
     })),
+    educationEntries: education.map((item) => ({
+      id: item.education_uuid,
+      universityId: item.university_id,
+      degreeUuid: item.degree_uuid,
+      majorUuid: item.major_uuid,
+      graduationYear: item.graduation_year,
+      isCurrentlyStudying: item.is_currently_studying ?? false,
+    })),
     experiences: experiences.map((item) => ({
       id: item.candidate_experience_id,
       title: item.experience,
@@ -1132,8 +1147,8 @@ export async function getCandidateDetail(candidateId: number, requestBasePath = 
     })),
     certificates: certificates.map((item) => ({
       id: item.certificate_uuid,
-      title: item.company_candidate_certificate_company_idTocompany?.company_name ?? item.store?.store_name ?? "Certificate",
-      subtitle: item.certificate_type ? "Experience certificate" : "Certificate",
+      title: item.certificate_title ?? item.company_candidate_certificate_company_idTocompany?.company_name ?? item.store?.store_name ?? "Certificate",
+      subtitle: item.certificate_issuer ?? (item.certificate_type ? "Experience certificate" : "Certificate"),
       meta: `${formatDate(item.start_date)} to ${formatDate(item.end_date)} · ${item.staff?.staff_name ?? "No staff owner"}`
     })),
     stats: stats
@@ -2226,6 +2241,7 @@ export async function getInspectorIdRequestRows() {
       cir_uuid: true,
       candidate_ids: true,
       status: true,
+      rejection_reason: true,
       created_at: true,
       updated_at: true,
       staff_candidate_id_request_created_byTostaff: { select: { staff_name: true } },
