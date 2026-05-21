@@ -1,6 +1,14 @@
 import type { ReactNode } from "react";
 import type { Route } from "next";
 import Link from "next/link";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell
+} from "@/components/ui/table";
 
 export type DataTableColumn<T> = {
   key: string;
@@ -31,43 +39,43 @@ export function DataTable<T extends { id: string | number }>({
         <span>{rows.length} shown</span>
       </div>
       <div className="tableScroller">
-        <table>
-          <thead>
-            <tr>
+        <Table>
+          <TableHeader>
+            <TableRow>
               {columns.map((column) => (
-                <th key={column.key}>{column.label}</th>
+                <TableHead key={column.key}>{column.label}</TableHead>
               ))}
-              {rowHref ? <th aria-label="Open record" /> : null}
-            </tr>
-          </thead>
-          <tbody>
+              {rowHref ? <TableHead aria-label="Open record" /> : null}
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {rows.length ? (
               rows.map((row) => (
-                <tr key={row.id}>
+                <TableRow key={row.id}>
                   {columns.map((column) => (
-                    <td data-label={column.label} key={column.key}>
+                    <TableCell data-label={column.label} key={column.key}>
                       {column.render(row)}
-                    </td>
+                    </TableCell>
                   ))}
                   {rowHref ? (
-                    <td className="rowAction" data-label="Action">
+                    <TableCell className="rowAction" data-label="Action">
                       <Link href={rowHref(row)}>Open</Link>
-                    </td>
+                    </TableCell>
                   ) : null}
-                </tr>
+                </TableRow>
               ))
             ) : (
-              <tr className="emptyTableRow">
-                <td colSpan={columns.length + (rowHref ? 1 : 0)}>
+              <TableRow className="emptyTableRow">
+                <TableCell colSpan={columns.length + (rowHref ? 1 : 0)}>
                   <div className="emptyState">
                     <strong>No records found</strong>
                     <span>This view is connected to the prod clone, but this account has no matching rows yet.</span>
                   </div>
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             )}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
     </section>
   );
