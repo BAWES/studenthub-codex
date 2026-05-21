@@ -135,12 +135,7 @@ export async function authenticate(role: Role, email: string, password: string):
   const account = verified.find((item) => item.role === role);
   if (account) {
     const { accountKey: _accountKey, label: _label, ...user } = account;
-    // Include all matched roles so the session knows the user can switch
-    const allRoles = verified.map((v) => v.role);
-    return {
-      ok: true,
-      user: { ...user, roles: allRoles.length > 1 ? allRoles : undefined },
-    };
+    return { ok: true, user };
   }
 
   return { ok: false, message: "The credentials did not match this workspace." };

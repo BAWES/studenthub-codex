@@ -1,28 +1,29 @@
 "use client";
 
-import { useActionState, useEffect, useRef } from "react";
-import { LogIn } from "lucide-react";
-import { loginAction } from "./actions";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
+import { useActionState } from "react";
+import { chooseAccountAction, loginAction } from "./actions";
+import type { LoginAccountChoice } from "./types";
 
-export function LoginForm() {
+export function LoginForm({ hint }: { hint?: string }) {
   const [state, action, pending] = useActionState(loginAction, {});
-  const emailRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    emailRef.current?.focus();
-  }, []);
+  const accounts = state.accounts ?? [];
 
   return (
-    <div>
-      <form action={action} className="grid gap-5">
-        <div className="grid gap-2">
-          <Label htmlFor="login-email">Email</Label>
-          <Input
-            ref={emailRef}
-            id="login-email"
+    <div className="loginStack">
+      <form action={action} className="loginForm">
+        <div className="loginFormHeader">
+          <span>Secure sign in</span>
+          <strong>Continue to StudentHub</strong>
+          <p>
+            Use your existing production credentials. StudentHub will detect the right account and permissions after
+            your password is verified.
+          </p>
+          {hint ? <small>{hint}</small> : null}
+        </div>
+
+        <label>
+          Email
+          <input
             name="email"
             type="email"
             autoComplete="email"
@@ -30,35 +31,43 @@ export function LoginForm() {
             placeholder="name@studenthub.app"
             required
           />
-        </div>
+        </label>
 
-        <div className="grid gap-2">
-          <Label htmlFor="login-password">Password</Label>
-          <Input
-            id="login-password"
-            name="password"
-            type="password"
-            autoComplete="current-password"
-            placeholder="Your password"
-            required
-          />
-        </div>
+        <label>
+          Password
+          <input name="password" type="password" autoComplete="current-password" placeholder="Your password" required />
+        </label>
 
-        {state.error ? (
-          <div className="flex items-center gap-2 px-3.5 py-2.5 rounded-md text-[13px] font-semibold bg-destructive/10 text-destructive border border-destructive/20">
-            <span>{state.error}</span>
-          </div>
-        ) : null}
+        {state.error ? <p className="formError">{state.error}</p> : null}
 
-        <Button
-          type="submit"
-          disabled={pending}
-          className="w-full bg-primary text-white hover:bg-primary/90 disabled:bg-primary/80"
-        >
-          <LogIn className="size-4" />
+        <button type="submit" disabled={pending} className="primaryButton">
           {pending ? "Checking credentials..." : "Sign in"}
-        </Button>
+        </button>
       </form>
+
+      {accounts.length ? <VerifiedAccountChooser accounts={accounts} /> : null}
     </div>
+  );
+}
+
+function VerifiedAccountChooser({ accounts }: { accounts: LoginAccountChoice[] }) {
+  return (
+    <section className="verifiedAccounts" aria-label="Verified StudentHub accounts">
+      <div>
+        <span>Verified accounts</span>
+        <strong>Choose where to continue</strong>
+        <p>Your password matched more than one active account. Only verified accounts are shown here.</p>
+      </div>
+      {accounts.map((account) => (
+        <form action={chooseAccountAction} key={account.accountKey}>
+          <input name="accountKey" type="hidden" value={account.accountKey} />
+          <button type="submit">
+            <span>{account.label}</span>
+            <strong>{account.name}</strong>
+            <small>{account.email}</small>
+          </button>
+        </form>
+      ))}
+    </section>
   );
 }

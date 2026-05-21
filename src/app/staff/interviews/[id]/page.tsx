@@ -2,9 +2,9 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Route } from "next";
 import { requireRoleCapability } from "@/modules/auth/session";
-import { DetailSection } from "@/modules/workspace/DetailPanels";
+import { FactPanel } from "@/modules/workspace/DetailPanels";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
-import { getStaffInterviewDetail } from "../actions";
+import { getStaffInterviewDetail } from "@/modules/workspace/data";
 import { updateInterviewStatusAction } from "@/modules/requests/interview-actions";
 import { Button } from "@/components/ui/button";
 
@@ -26,54 +26,54 @@ export default async function StaffInterviewDetailPage({
   const session = await requireRoleCapability("staff", "request.interview");
   const { id } = await params;
   const { notice } = await searchParams;
-  const interview = await getStaffInterviewDetail({ interviewUuid: id });
+  const interview = await getStaffInterviewDetail(id, Number(session.id));
 
   if (!interview) {
     notFound();
   }
 
   const facts = [
-    { label: "Candidate", value: interview.candidateName },
-    { label: "Email", value: interview.candidateEmail },
-    { label: "Phone", value: interview.candidatePhone },
-    { label: "Request", value: interview.requestTitle },
-    { label: "Company", value: interview.companyName },
-    { label: "Scheduled At", value: interview.scheduledAt?.toLocaleString() },
+    { label: "Candidate", value: interview.candidate?.candidate_name },
+    { label: "Email", value: interview.candidate?.candidate_email },
+    { label: "Phone", value: interview.candidate?.candidate_phone },
+    { label: "Request", value: interview.request?.request_position_title },
+    { label: "Company", value: interview.request?.company?.company_name },
+    { label: "Scheduled At", value: interview.interview_at?.toLocaleString() },
     { label: "Status", value: statusLabel(interview.status) },
-    { label: "Staff", value: interview.staffName },
-    { label: "Internal Note", value: interview.note },
-    { label: "Interview Note", value: interview.interviewNote }
+    { label: "Staff", value: interview.staff?.staff_name },
+    { label: "Internal Note", value: interview.internal_note },
+    { label: "Interview Note", value: interview.interview_note }
   ];
 
   return (
     <WorkspaceShell
       session={session}
       eyebrow="Staff / Interviews"
-      title={interview.candidateName ?? "Interview Detail"}
+      title={interview.candidate?.candidate_name ?? "Interview Detail"}
       metrics={[]}
     >
-      <DetailSection title="Interview Details" facts={facts} />
+      <FactPanel title="Interview Details" facts={facts} />
 
       <section className="detailPanel">
         <h2>Actions</h2>
-        <div className="flex gap-2 flex-wrap">
+        <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
           {interview.status !== 1 && (
             <form action={updateInterviewStatusAction}>
-              <input type="hidden" name="interview_uuid" value={interview.interviewUuid} />
+              <input type="hidden" name="interview_uuid" value={interview.request_interview_uuid} />
               <input type="hidden" name="status" value={1} />
               <Button type="submit" variant="default">Mark Completed</Button>
             </form>
           )}
           {interview.status !== 2 && (
             <form action={updateInterviewStatusAction}>
-              <input type="hidden" name="interview_uuid" value={interview.interviewUuid} />
+              <input type="hidden" name="interview_uuid" value={interview.request_interview_uuid} />
               <input type="hidden" name="status" value={2} />
               <Button type="submit" variant="outline">Mark Cancelled</Button>
             </form>
           )}
           {interview.status !== 0 && interview.status !== null && (
             <form action={updateInterviewStatusAction}>
-              <input type="hidden" name="interview_uuid" value={interview.interviewUuid} />
+              <input type="hidden" name="interview_uuid" value={interview.request_interview_uuid} />
               <input type="hidden" name="status" value={0} />
               <Button type="submit" variant="secondary">Reset to Scheduled</Button>
             </form>
@@ -82,14 +82,14 @@ export default async function StaffInterviewDetailPage({
       </section>
 
       <section className="detailPanel">
-        <div className="flex gap-2 flex-wrap">
-          {interview.candidateId && (
-            <Link href={`/staff/candidates?candidate=${interview.candidateId}` as Route}>
+        <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+          {interview.candidate?.candidate_id && (
+            <Link href={`/staff/candidates?candidate=${interview.candidate.candidate_id}` as Route}>
               <Button variant="outline">View Candidate</Button>
             </Link>
           )}
-          {interview.requestUuid && (
-            <Link href={`/staff/requests/${interview.requestUuid}` as Route}>
+          {interview.request?.request_uuid && (
+            <Link href={`/staff/requests/${interview.request.request_uuid}` as Route}>
               <Button variant="outline">View Request</Button>
             </Link>
           )}

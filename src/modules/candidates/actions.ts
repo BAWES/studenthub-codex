@@ -8,27 +8,15 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability, requireRoleCapability } from "@/modules/auth/session";
-import { uploadFile, candidateKey, isS3Configured } from "@/lib/s3";
-import {
-  candidateErrorResultSchema,
-  profileStateSchema,
-  languageStateSchema,
-  educationStateSchema,
-  numericOptionSchema,
-  stringIdOptionSchema,
-} from "./schemas";
-import type {
-  ProfileState,
-  LanguageState,
-  EducationState,
-} from "./schemas";
-
-// Re-export types for external consumers (CandidateEditForm, etc.)
-export type { ProfileState, LanguageState, EducationState };
 
 // ---------------------------------------------------------------------------
 // Profile edit
 // ---------------------------------------------------------------------------
+
+export type ProfileState = {
+  success: boolean;
+  fieldErrors?: Record<string, string[] | undefined>;
+};
 
 const profileSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -111,17 +99,7 @@ export async function updateCandidateProfile(
 
   revalidatePath("/candidate");
   revalidatePath("/candidate/edit");
-
-  const profileResult = { success: true };
-  const profileParsed = profileStateSchema.safeParse(profileResult);
-  if (!profileParsed.success) {
-    console.error(
-      "[modules/candidates] updateCandidateProfile output validation failed:",
-      profileParsed.error.issues,
-    );
-  }
-
-  return profileResult;
+  return { success: true };
 }
 
 // ---------------------------------------------------------------------------
@@ -168,22 +146,13 @@ async function saveUpload(candidateId: number, field: string, file: File, typeCo
     throw new Error(`File is too large. Maximum size is ${typeConfig.maxSize / 1024 / 1024} MB.`);
   }
 
-  const mimeType = file.type || typeConfig.mime[0];
-  const buffer = Buffer.from(await file.arrayBuffer());
-
-  if (isS3Configured()) {
-    // Upload to S3-compatible storage
-    const key = candidateKey(candidateId, field, ext);
-    const result = await uploadFile(key, buffer, mimeType);
-    return result.url;
-  }
-
-  // Fallback: local disk storage
   const dir = path.join(UPLOAD_DIR, String(candidateId));
   await fs.mkdir(dir, { recursive: true });
 
   const filename = `${field}_${crypto.randomUUID()}${ext}`;
   const filepath = path.join(dir, filename);
+
+  const buffer = Buffer.from(await file.arrayBuffer());
   await fs.writeFile(filepath, buffer);
 
   return `/uploads/candidates/${candidateId}/${filename}`;
@@ -238,14 +207,7 @@ export async function uploadDocument(_prevState: { error: string }, formData: Fo
 
     revalidatePath("/candidate");
     revalidatePath("/candidate/edit");
-
-    const uploadResult = { error: "" };
-    const uploadParsed = candidateErrorResultSchema.safeParse(uploadResult);
-    if (!uploadParsed.success) {
-      console.error("[modules/candidates] uploadDocument output validation failed:", uploadParsed.error.issues);
-    }
-
-    return uploadResult;
+    return { error: "" };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Upload failed." };
   }
@@ -362,15 +324,10 @@ export async function getCountryOptions() {
     select: { country_id: true, country_name_en: true, country_nationality_name_en: true },
     take: 250,
   });
-  const result = rows.map((r) => ({
+  return rows.map((r) => ({
     id: r.country_id,
     label: `${r.country_name_en}${r.country_nationality_name_en && r.country_nationality_name_en !== r.country_name_en ? ` (${r.country_nationality_name_en})` : ""}`,
   }));
-  const outputParsed = z.array(numericOptionSchema).safeParse(result);
-  if (!outputParsed.success) {
-    console.error("[modules/candidates] getCountryOptions output validation failed:", outputParsed.error.issues);
-  }
-  return result;
 }
 
 export async function getUniversityOptions() {
@@ -380,15 +337,10 @@ export async function getUniversityOptions() {
     select: { university_id: true, university_name_en: true },
     take: 250,
   });
-  const result = rows.map((r) => ({
+  return rows.map((r) => ({
     id: r.university_id,
     label: r.university_name_en ?? `University #${r.university_id}`,
   }));
-  const outputParsed = z.array(numericOptionSchema).safeParse(result);
-  if (!outputParsed.success) {
-    console.error("[modules/candidates] getUniversityOptions output validation failed:", outputParsed.error.issues);
-  }
-  return result;
 }
 
 export async function getBankOptions() {
@@ -398,15 +350,10 @@ export async function getBankOptions() {
     select: { bank_id: true, bank_name: true },
     take: 100,
   });
-  const result = rows.map((r) => ({
+  return rows.map((r) => ({
     id: r.bank_id,
     label: r.bank_name ?? `Bank #${r.bank_id}`,
   }));
-  const outputParsed = z.array(numericOptionSchema).safeParse(result);
-  if (!outputParsed.success) {
-    console.error("[modules/candidates] getBankOptions output validation failed:", outputParsed.error.issues);
-  }
-  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -460,6 +407,11 @@ export async function removeCandidateSkill(_prevState: { error: string }, formDa
 
 // -- Language CRUD ---------------------------------------------------------
 
+export type LanguageState = {
+  success: boolean;
+  error?: string;
+};
+
 const PROFICIENCY_LEVELS = ["basic", "intermediate", "advanced", "native"] as const;
 
 const languageSchema = z.object({
@@ -471,45 +423,24 @@ export async function addCandidateLanguage(_prevState: LanguageState, formData: 
   const session = await requireCapability("candidate.profile.edit");
   const candidateId = Number(session.id);
   const parsed = languageSchema.safeParse({ language: formData.get("language"), proficiency: formData.get("proficiency") });
-  if (!parsed.success) {
-    const langResult = { success: false, error: parsed.error.errors.map((e) => e.message).join("; ") };
-    const langParsed = languageStateSchema.safeParse(langResult);
-    if (!langParsed.success) console.error("[modules/candidates] addCandidateLanguage output validation failed:", langParsed.error.issues);
-    return langResult;
-  }
+  if (!parsed.success) return { success: false, error: parsed.error.errors.map((e) => e.message).join("; ") };
   await prisma.candidate_language.create({ data: { candidate_id: candidateId, language: parsed.data.language, proficiency: parsed.data.proficiency, deleted: 0 } });
   revalidatePath("/candidate");
   revalidatePath("/candidate/edit");
-  const langResult = { success: true };
-  const langParsed = languageStateSchema.safeParse(langResult);
-  if (!langParsed.success) console.error("[modules/candidates] addCandidateLanguage output validation failed:", langParsed.error.issues);
-  return langResult;
+  return { success: true };
 }
 
 export async function removeCandidateLanguage(_prevState: LanguageState, formData: FormData) {
   const session = await requireCapability("candidate.profile.edit");
   const candidateId = Number(session.id);
   const languageId = Number(formData.get("languageId"));
-  if (!Number.isInteger(languageId) || languageId <= 0) {
-    const langRmResult = { success: false, error: "Invalid language ID." };
-    const langRmParsed = languageStateSchema.safeParse(langRmResult);
-    if (!langRmParsed.success) console.error("[modules/candidates] removeCandidateLanguage output validation failed:", langRmParsed.error.issues);
-    return langRmResult;
-  }
+  if (!Number.isInteger(languageId) || languageId <= 0) return { success: false, error: "Invalid language ID." };
   const row = await prisma.candidate_language.findFirst({ where: { candidate_language_id: languageId, candidate_id: candidateId, deleted: 0 } });
-  if (!row) {
-    const langRmResult = { success: false, error: "Language entry not found." };
-    const langRmParsed = languageStateSchema.safeParse(langRmResult);
-    if (!langRmParsed.success) console.error("[modules/candidates] removeCandidateLanguage output validation failed:", langRmParsed.error.issues);
-    return langRmResult;
-  }
+  if (!row) return { success: false, error: "Language entry not found." };
   await prisma.candidate_language.update({ where: { candidate_language_id: languageId }, data: { deleted: 1 } });
   revalidatePath("/candidate");
   revalidatePath("/candidate/edit");
-  const langRmResult = { success: true };
-  const langRmParsed = languageStateSchema.safeParse(langRmResult);
-  if (!langRmParsed.success) console.error("[modules/candidates] removeCandidateLanguage output validation failed:", langRmParsed.error.issues);
-  return langRmResult;
+  return { success: true };
 }
 
 // Degree & major lookup helpers
@@ -521,15 +452,10 @@ export async function getDegreeOptions() {
     select: { degree_uuid: true, degree_name_en: true },
     take: 250,
   });
-  const result = rows.map((r) => ({
+  return rows.map((r) => ({
     id: r.degree_uuid,
     label: r.degree_name_en,
   }));
-  const outputParsed = z.array(stringIdOptionSchema).safeParse(result);
-  if (!outputParsed.success) {
-    console.error("[modules/candidates] getDegreeOptions output validation failed:", outputParsed.error.issues);
-  }
-  return result;
 }
 
 export async function getMajorOptions() {
@@ -538,15 +464,10 @@ export async function getMajorOptions() {
     select: { major_uuid: true, major_name_en: true },
     take: 250,
   });
-  const result = rows.map((r) => ({
+  return rows.map((r) => ({
     id: r.major_uuid,
     label: r.major_name_en,
   }));
-  const outputParsed = z.array(stringIdOptionSchema).safeParse(result);
-  if (!outputParsed.success) {
-    console.error("[modules/candidates] getMajorOptions output validation failed:", outputParsed.error.issues);
-  }
-  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -613,6 +534,8 @@ export async function removeCandidateExperience(_prevState: { error: string }, f
 
 const certificateSchema = z.object({
   certificate_type: z.enum(["true", "false"]).transform((v) => v === "true"),
+  certificate_title: z.string().min(1, "Certificate title is required.").max(200, "Title must be under 200 characters."),
+  certificate_issuer: z.string().max(200, "Issuer must be under 200 characters.").optional(),
   start_date: z.string().max(10).optional(),
   end_date: z.string().max(10).optional(),
 });
@@ -668,7 +591,12 @@ export async function removeCandidateCertificate(_prevState: { error: string }, 
 // Education CRUD
 // ---------------------------------------------------------------------------
 
-const EDUCATION_SCHEMA = z.object({
+export type EducationState = {
+  success: boolean;
+  error?: string;
+};
+
+const educationSchema = z.object({
   universityId: z.coerce.number().int().positive("University is required."),
   degreeUuid: z.string().optional().default(""),
   majorUuid: z.string().optional().default(""),
@@ -687,7 +615,7 @@ function parseEducationFields(formData: FormData) {
     isCurrentlyStudying: formData.get("isCurrentlyStudying") ?? "0",
   };
 
-  const parsed = EDUCATION_SCHEMA.safeParse(raw);
+  const parsed = educationSchema.safeParse(raw);
   if (!parsed.success) {
     const err = parsed.error.flatten().fieldErrors;
     state.error = err.universityId?.[0] ?? "Invalid education fields.";
@@ -737,10 +665,7 @@ export async function addCandidateEducation(
 
   revalidatePath("/candidate");
   revalidatePath("/candidate/edit");
-  const addEduResult = { success: true };
-  const addEduParsed = educationStateSchema.safeParse(addEduResult);
-  if (!addEduParsed.success) console.error("[modules/candidates] addCandidateEducation output validation failed:", addEduParsed.error.issues);
-  return addEduResult;
+  return { success: true };
 }
 
 export async function editCandidateEducation(
@@ -751,12 +676,7 @@ export async function editCandidateEducation(
   const candidateId = Number(session.id);
 
   const educationUuid = String(formData.get("educationUuid") ?? "").trim();
-  if (!educationUuid) {
-    const editEduErr = { success: false, error: "Missing education identifier." };
-    const editEduParsed = educationStateSchema.safeParse(editEduErr);
-    if (!editEduParsed.success) console.error("[modules/candidates] editCandidateEducation output validation failed:", editEduParsed.error.issues);
-    return editEduErr;
-  }
+  if (!educationUuid) return { success: false, error: "Missing education identifier." };
 
   const result = parseEducationFields(formData);
   if (!result.fields) return result.state;
@@ -765,12 +685,7 @@ export async function editCandidateEducation(
     where: { education_uuid: educationUuid, candidate_id: candidateId },
     select: { education_uuid: true },
   });
-  if (!existing) {
-    const editEduErr = { success: false, error: "Education entry not found." };
-    const editEduParsed = educationStateSchema.safeParse(editEduErr);
-    if (!editEduParsed.success) console.error("[modules/candidates] editCandidateEducation output validation failed:", editEduParsed.error.issues);
-    return editEduErr;
-  }
+  if (!existing) return { success: false, error: "Education entry not found." };
 
   const f = result.fields;
   const newUuid = `edu_${crypto.randomUUID()}`;
@@ -797,10 +712,7 @@ export async function editCandidateEducation(
 
   revalidatePath("/candidate");
   revalidatePath("/candidate/edit");
-  const editEduOk = { success: true };
-  const editEduParsed = educationStateSchema.safeParse(editEduOk);
-  if (!editEduParsed.success) console.error("[modules/candidates] editCandidateEducation output validation failed:", editEduParsed.error.issues);
-  return editEduOk;
+  return { success: true };
 }
 
 export async function removeCandidateEducation(
@@ -811,23 +723,13 @@ export async function removeCandidateEducation(
   const candidateId = Number(session.id);
 
   const educationUuid = String(formData.get("educationUuid") ?? "").trim();
-  if (!educationUuid) {
-    const rmEduErr = { success: false, error: "Missing education identifier." };
-    const rmEduParsed = educationStateSchema.safeParse(rmEduErr);
-    if (!rmEduParsed.success) console.error("[modules/candidates] removeCandidateEducation output validation failed:", rmEduParsed.error.issues);
-    return rmEduErr;
-  }
+  if (!educationUuid) return { success: false, error: "Missing education identifier." };
 
   const row = await prisma.candidate_education.findFirst({
     where: { education_uuid: educationUuid, candidate_id: candidateId },
     select: { education_uuid: true },
   });
-  if (!row) {
-    const rmEduErr = { success: false, error: "Education entry not found." };
-    const rmEduParsed = educationStateSchema.safeParse(rmEduErr);
-    if (!rmEduParsed.success) console.error("[modules/candidates] removeCandidateEducation output validation failed:", rmEduParsed.error.issues);
-    return rmEduErr;
-  }
+  if (!row) return { success: false, error: "Education entry not found." };
 
   await prisma.candidate_education.delete({
     where: { education_uuid: educationUuid },
@@ -835,10 +737,7 @@ export async function removeCandidateEducation(
 
   revalidatePath("/candidate");
   revalidatePath("/candidate/edit");
-  const rmEduOk = { success: true };
-  const rmEduParsed = educationStateSchema.safeParse(rmEduOk);
-  if (!rmEduParsed.success) console.error("[modules/candidates] removeCandidateEducation output validation failed:", rmEduParsed.error.issues);
-  return rmEduOk;
+  return { success: true };
 }
 
 // ---------------------------------------------------------------------------

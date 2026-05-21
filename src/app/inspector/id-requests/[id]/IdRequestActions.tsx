@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { approveIdRequest, rejectIdRequest } from "@/modules/inspector/id-requests/[id]/actions";
+import { approveIdRequest, rejectIdRequest } from "@/modules/candidates/actions";
 
 export function IdRequestActions({
   requestUuid,

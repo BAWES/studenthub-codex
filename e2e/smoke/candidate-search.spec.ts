@@ -1,7 +1,9 @@
 import { test, expect } from "@playwright/test";
-import { getMockFixtures } from "../fixtures/mock";
+import { getFixtures, disconnectPrisma, signSession } from "../fixtures/auth";
 
-const mockFixtures = getMockFixtures();
+test.afterAll(async () => {
+  await disconnectPrisma();
+});
 
 test.describe("Candidate search", () => {
   test.describe.configure({ mode: "serial" });
@@ -10,8 +12,9 @@ test.describe("Candidate search", () => {
   let staffCookie: string;
 
   test.beforeAll(async () => {
-    adminCookie = mockFixtures.get("admin")!.cookie;
-    staffCookie = mockFixtures.get("staff")!.cookie;
+    const fixtures = await getFixtures();
+    adminCookie = fixtures.get("admin")!.cookie;
+    staffCookie = fixtures.get("staff")!.cookie;
   });
 
   test("admin can access candidate search page", async ({ browser }) => {
@@ -52,8 +55,7 @@ test.describe("Candidate search", () => {
         .locator(
           'input[type="search"], input[placeholder*="Search"], input[placeholder*="search"]',
         )
-        .or(page.locator("[cmdk-input]"))
-        .first(),
+        .or(page.locator("[cmdk-input]")),
     ).toBeVisible({ timeout: 15000 });
     await context.close();
   });
@@ -71,9 +73,7 @@ test.describe("Candidate search", () => {
     const page = await context.newPage();
     await page.goto("/admin/candidates?q=test");
     await expect(page).toHaveURL(/\/admin\/candidates\?q=test/);
-    await expect(
-      page.locator('text="Filtered view"').first(),
-    ).toBeVisible({
+    await expect(page.locator('text="Filtered view"')).toBeVisible({
       timeout: 15000,
     });
     await context.close();
@@ -92,7 +92,7 @@ test.describe("Candidate search", () => {
     const page = await context.newPage();
     await page.goto("/staff/candidates");
     await expect(page).toHaveURL("/staff/candidates");
-    await expect(page.locator('text="All production"').first()).toBeVisible({
+    await expect(page.locator('text="All production"')).toBeVisible({
       timeout: 15000,
     });
     await context.close();
@@ -111,7 +111,7 @@ test.describe("Candidate search", () => {
     const page = await context.newPage();
     await page.goto("/staff/candidates?view=assigned");
     await expect(page).toHaveURL(/\/staff\/candidates\?view=assigned/);
-    await expect(page.locator('text="Assigned to me"').first()).toBeVisible({
+    await expect(page.locator('text="Assigned to me"')).toBeVisible({
       timeout: 15000,
     });
     await context.close();

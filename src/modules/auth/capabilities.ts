@@ -11,35 +11,14 @@ const roleCapabilities: Record<Role, Capability[]> = {
     "request.read.any",
     "request.suggest",
     "request.interview",
-    "request.write",
-    "notes.read",
-    "notes.create",
-    "notes.update",
-    "notes.delete",
-    "suggestion.read",
-    "suggestion.write",
-    "candidate.evaluation.read",
-    "candidate.evaluation.write",
     "time.read.any",
     "time.approve",
     "finance.read",
     "finance.mutate",
-    "document.read",
-    "document.write",
     "document.export",
     "id_review.read",
     "id_review.mutate",
-    "admin.system",
-    "admin.read",
-    "admin.mutate",
-    "staff.read",
-    "staff_expense.read",
-    "staff_expense.write",
-    "client.read",
-    "client.write",
-    "setting.write",
-    "story.read",
-    "story.write",
+    "admin.system"
   ],
   staff: [
     "app.access",
@@ -49,27 +28,10 @@ const roleCapabilities: Record<Role, Capability[]> = {
     "request.read.assigned",
     "request.suggest",
     "request.interview",
-    "request.write",
-    "notes.read",
-    "notes.create",
-    "notes.update",
-    "notes.delete",
-    "suggestion.read",
-    "suggestion.write",
-    "candidate.evaluation.read",
-    "candidate.evaluation.write",
     "time.read.assigned",
     "time.approve",
-    "document.read",
     "document.export",
-    "id_review.read",
-    "tickets.read",
-    "tickets.create",
-    "staff_expense.read",
-    "staff_expense.write",
-    "story.read",
-    "contracts.read",
-    "staff_leave.read",
+    "id_review.read"
   ],
   company: [
     "app.access",
@@ -81,13 +43,11 @@ const roleCapabilities: Record<Role, Capability[]> = {
     "time.read.assigned",
     "time.approve",
     "finance.read",
-    "document.read",
     "document.export"
   ],
   candidate: [
     "app.access",
     "candidate.read.own",
-    "candidate.write",
     "candidate.profile.edit",
     "time.read.own",
     "document.export"
@@ -100,18 +60,11 @@ export function capabilitiesForRole(role: Role) {
 }
 
 export function enrichSessionUser(user: SessionUser): SessionUser {
-  // When user has multiple roles, merge capabilities from all roles
-  const mergedCapabilities = user.roles && user.roles.length > 1
-    ? [...new Set(user.roles.flatMap(r => capabilitiesForRole(r)))]
-    : undefined;
-
   return {
     ...user,
     accountKey: user.accountKey ?? `${user.role}:${user.id}`,
     legacyType: user.legacyType ?? user.role,
-    capabilities: user.capabilities?.length
-      ? user.capabilities
-      : (mergedCapabilities ?? capabilitiesForRole(user.role))
+    capabilities: user.capabilities?.length ? user.capabilities : capabilitiesForRole(user.role)
   };
 }
 

@@ -1,7 +1,5 @@
 import { requireSession } from "@/modules/auth/session";
-import { WorkspaceOS } from "@/modules/workspace/WorkspaceOS";
-import { getUnifiedHubAction } from "./actions";
-import { parseHubScope } from "./utils";
+import { getUnifiedHub, parseHubScope } from "@/modules/hub/data";
 import { HubContent } from "@/modules/hub/HubContent";
 import type { HubContentData } from "@/modules/hub/HubContent";
 import type { HubCommand } from "@/modules/hub/HubShortcuts";
@@ -20,20 +18,18 @@ export default async function AppPage({
   const params = await searchParams;
   const scope = parseHubScope(params.scope);
   const requiredRole = parseRequiredRole(params.required);
-  const data = await getUnifiedHubAction({ query: params.q, scope, record: params.record });
+  const data = await getUnifiedHub(session, { query: params.q, scope, record: params.record });
   const commands = buildCommands(data);
   const guide = buildRoleGuide(session.role, data);
 
   return (
-    <WorkspaceOS session={session}>
-      <HubContent
-        data={data as unknown as HubContentData}
-        guide={guide}
-        commands={commands}
-        session={session}
-        requiredRole={requiredRole}
-      />
-    </WorkspaceOS>
+    <HubContent
+      data={data as unknown as HubContentData}
+      guide={guide}
+      commands={commands}
+      session={session}
+      requiredRole={requiredRole}
+    />
   );
 }
 
@@ -44,7 +40,7 @@ function parseRequiredRole(value: string | string[] | undefined): Role | null {
   return role && roles.includes(role as Role) ? (role as Role) : null;
 }
 
-type HubData = Awaited<ReturnType<typeof getUnifiedHubAction>>;
+type HubData = Awaited<ReturnType<typeof getUnifiedHub>>;
 
 type RoleJourney = {
   kicker: string;
@@ -236,7 +232,7 @@ function buildRoleGuide(role: Role, data: HubData): RoleGuide {
   return guides[role];
 }
 
-function buildCommands(data: Awaited<ReturnType<typeof getUnifiedHubAction>>): HubCommand[] {
+function buildCommands(data: Awaited<ReturnType<typeof getUnifiedHub>>): HubCommand[] {
   const commands: HubCommand[] = [];
 
   for (const item of data.navigation) {

@@ -1,0 +1,42 @@
+{
+  "node": {
+    "00ebaa78ea81b296d377653e8be6ee315208120dc5": {
+      "workers": {
+        "app/login/page": {
+          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2FBAWES%2FSites%2Fstudenthub%2Fstudenthub-next%2Fsrc%2Fmodules%2Fauth%2Factions.ts%22%2C%5B%7B%22id%22%3A%2200ebaa78ea81b296d377653e8be6ee315208120dc5%22%2C%22exportedName%22%3A%22logoutAction%22%2C%22filename%22%3A%22modules%2Fauth%2Factions.ts%22%7D%2C%7B%22id%22%3A%22600f685c227cc8f8aa0336b61baef048f3c171bacd%22%2C%22exportedName%22%3A%22loginAction%22%2C%22filename%22%3A%22modules%2Fauth%2Factions.ts%22%7D%5D%5D%5D&__client_imported__=true!",
+          "async": false
+        },
+        "app/admin/page": {
+          "moduleId": "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2FBAWES%2FSites%2Fstudenthub%2Fstudenthub-next%2Fsrc%2Fmodules%2Fauth%2Factions.ts%22%2C%5B%7B%22id%22%3A%2200ebaa78ea81b296d377653e8be6ee315208120dc5%22%2C%22exportedName%22%3A%22logoutAction%22%2C%22filename%22%3A%22modules%2Fauth%2Factions.ts%22%7D%2C%7B%22id%22%3A%22600f685c227cc8f8aa0336b61baef048f3c171bacd%22%2C%22exportedName%22%3A%22loginAction%22%2C%22filename%22%3A%22modules%2Fauth%2Factions.ts%22%7D%5D%5D%5D&__client_imported__=!",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/login/page": "action-browser",
+        "app/admin/page": "rsc"
+      },
+      "filename": "modules/auth/actions.ts",
+      "exportedName": "logoutAction"
+    },
+    "600f685c227cc8f8aa0336b61baef048f3c171bacd": {
+      "workers": {
+        "app/login/page": {
+          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2FBAWES%2FSites%2Fstudenthub%2Fstudenthub-next%2Fsrc%2Fmodules%2Fauth%2Factions.ts%22%2C%5B%7B%22id%22%3A%2200ebaa78ea81b296d377653e8be6ee315208120dc5%22%2C%22exportedName%22%3A%22logoutAction%22%2C%22filename%22%3A%22modules%2Fauth%2Factions.ts%22%7D%2C%7B%22id%22%3A%22600f685c227cc8f8aa0336b61baef048f3c171bacd%22%2C%22exportedName%22%3A%22loginAction%22%2C%22filename%22%3A%22modules%2Fauth%2Factions.ts%22%7D%5D%5D%5D&__client_imported__=true!",
+          "async": false
+        },
+        "app/admin/page": {
+          "moduleId": "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2FBAWES%2FSites%2Fstudenthub%2Fstudenthub-next%2Fsrc%2Fmodules%2Fauth%2Factions.ts%22%2C%5B%7B%22id%22%3A%2200ebaa78ea81b296d377653e8be6ee315208120dc5%22%2C%22exportedName%22%3A%22logoutAction%22%2C%22filename%22%3A%22modules%2Fauth%2Factions.ts%22%7D%2C%7B%22id%22%3A%22600f685c227cc8f8aa0336b61baef048f3c171bacd%22%2C%22exportedName%22%3A%22loginAction%22%2C%22filename%22%3A%22modules%2Fauth%2Factions.ts%22%7D%5D%5D%5D&__client_imported__=!",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/login/page": "action-browser",
+        "app/admin/page": "rsc"
+      },
+      "filename": "modules/auth/actions.ts",
+      "exportedName": "loginAction"
+    }
+  },
+  "edge": {},
+  "encryptionKey": "+jYINfd9rdzk7lZqPkJVqXroB7/vIs1YC7bEZRFNEOY="
+}
