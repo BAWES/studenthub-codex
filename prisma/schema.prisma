@@ -300,6 +300,9 @@ model candidate_certificate {
   store_id                                                 Int?
   company_id                                               Int?
   parent_company_id                                        Int?
+  certificate_title                                        String?                 @db.VarChar(200)
+  certificate_issuer                                       String?                 @db.VarChar(200)
+  certificate_url                                          String?                 @db.VarChar(500)
   start_date                                               DateTime?               @db.Date
   end_date                                                 DateTime?               @db.Date
   staff_id                                                 Int?

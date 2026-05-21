@@ -492,6 +492,72 @@ export async function removeCandidateExperience(_prevState: { error: string }, f
 }
 
 // ---------------------------------------------------------------------------
+// Certificate CRUD
+// ---------------------------------------------------------------------------
+
+const certificateSchema = z.object({
+  certificate_type: z.string().transform((v) => v === "true").pipe(z.boolean()),
+  certificate_title: z.string().min(1, "Certificate title is required.").max(200, "Title must be under 200 characters."),
+  certificate_issuer: z.string().max(200, "Issuer must be under 200 characters.").optional(),
+  start_date: z.string().max(10).optional(),
+  end_date: z.string().max(10).optional(),
+  certificate_url: z.string().url("Please enter a valid URL.").max(500, "URL must be under 500 characters.").optional().or(z.literal("")),
+});
+
+export async function addCandidateCertificate(_prevState: { error: string }, formData: FormData) {
+  const session = await requireRoleCapability("candidate", "candidate.read.own");
+  const candidateId = Number(session.id);
+  const parsed = certificateSchema.safeParse({
+    certificate_type: formData.get("certificate_type"),
+    certificate_title: formData.get("certificate_title"),
+    certificate_issuer: formData.get("certificate_issuer") || undefined,
+    start_date: formData.get("start_date") || undefined,
+    end_date: formData.get("end_date") || undefined,
+    certificate_url: formData.get("certificate_url") || undefined,
+  });
+  if (!parsed.success) return { error: parsed.error.errors[0]?.message ?? "Validation failed." };
+  const { certificate_type, certificate_title, certificate_issuer, start_date, end_date, certificate_url } = parsed.data;
+  const now = new Date();
+  await prisma.candidate_certificate.create({
+    data: {
+      certificate_uuid: `cert_${crypto.randomUUID()}`,
+      candidate_id: candidateId,
+      certificate_type,
+      certificate_title,
+      certificate_issuer: certificate_issuer || null,
+      certificate_url: certificate_url || null,
+      start_date: start_date ? (isFinite(new Date(start_date).getTime()) ? new Date(start_date) : null) : null,
+      end_date: end_date ? (isFinite(new Date(end_date).getTime()) ? new Date(end_date) : null) : null,
+      is_deleted: false,
+      created_at: now,
+      updated_at: now,
+    },
+  });
+  revalidatePath("/candidate");
+  revalidatePath("/candidate/edit");
+  return { error: "" };
+}
+
+export async function removeCandidateCertificate(_prevState: { error: string }, formData: FormData) {
+  const session = await requireRoleCapability("candidate", "candidate.read.own");
+  const candidateId = Number(session.id);
+  const certificateUuid = String(formData.get("certificateUuid") ?? "");
+  if (!certificateUuid) return { error: "Missing certificate identifier." };
+  const row = await prisma.candidate_certificate.findFirst({
+    where: { certificate_uuid: certificateUuid, candidate_id: candidateId, is_deleted: false },
+    select: { certificate_uuid: true },
+  });
+  if (!row) return { error: "Certificate not found." };
+  await prisma.candidate_certificate.update({
+    where: { certificate_uuid: certificateUuid },
+    data: { is_deleted: true, updated_at: new Date() },
+  });
+  revalidatePath("/candidate");
+  revalidatePath("/candidate/edit");
+  return { error: "" };
+}
+
+// ---------------------------------------------------------------------------
 // Education CRUD
 // ---------------------------------------------------------------------------
 

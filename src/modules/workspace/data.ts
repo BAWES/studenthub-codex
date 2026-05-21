@@ -1017,6 +1017,9 @@ export async function getCandidateDetail(candidateId: number, requestBasePath = 
       select: {
         certificate_uuid: true,
         certificate_type: true,
+        certificate_title: true,
+        certificate_issuer: true,
+        certificate_url: true,
         start_date: true,
         end_date: true,
         company_candidate_certificate_company_idTocompany: { select: { company_name: true } },
@@ -1143,8 +1146,8 @@ export async function getCandidateDetail(candidateId: number, requestBasePath = 
     })),
     certificates: certificates.map((item) => ({
       id: item.certificate_uuid,
-      title: item.company_candidate_certificate_company_idTocompany?.company_name ?? item.store?.store_name ?? "Certificate",
-      subtitle: item.certificate_type ? "Experience certificate" : "Certificate",
+      title: item.certificate_title ?? item.company_candidate_certificate_company_idTocompany?.company_name ?? item.store?.store_name ?? "Certificate",
+      subtitle: item.certificate_issuer ?? (item.certificate_type ? "Experience certificate" : "Certificate"),
       meta: `${formatDate(item.start_date)} to ${formatDate(item.end_date)} · ${item.staff?.staff_name ?? "No staff owner"}`
     })),
     stats: stats
