@@ -252,6 +252,7 @@ model candidate {
   candidate_education               candidate_education[]
   candidate_evaluation              candidate_evaluation[]
   candidate_experience              candidate_experience[]
+  candidate_language                candidate_language[]
   candidate_id_card                 candidate_id_card[]
   candidate_link                    candidate_link[]
   candidate_note                    candidate_note[]
@@ -294,6 +295,9 @@ model candidate {
 model candidate_certificate {
   certificate_uuid                                         String                  @id @db.Char(60)
   certificate_type                                         Boolean?                @default(false)
+  certificate_title                                        String?                 @db.VarChar(200)
+  certificate_issuer                                       String?                 @db.VarChar(200)
+  certificate_url                                          String?                 @db.VarChar(500)
   candidate_id                                             Int
   candidate_work_history_id                                Int?
   exam_uuid                                                String?                 @db.Char(60)
@@ -422,6 +426,18 @@ model candidate_experience {
   candidate                       candidate? @relation(fields: [candidate_id], references: [candidate_id], onDelete: Cascade, onUpdate: Restrict, map: "fk-candidate_experience-candidate_id")
 
   @@index([candidate_id], map: "fk-candidate_experience-candidate_id")
+}
+
+model candidate_language {
+  candidate_language_id         Int        @id @default(autoincrement())
+  candidate_id                  Int?
+  language                      String     @db.VarChar(128)
+  proficiency                   String     @db.VarChar(32)
+  deleted                       Int        @default(0) @db.SmallInt
+  candidate_language_created_at DateTime   @default(now()) @db.DateTime(0)
+  candidate                     candidate? @relation(fields: [candidate_id], references: [candidate_id], onDelete: Cascade, onUpdate: Restrict, map: "fk-candidate_language-candidate_id")
+
+  @@index([candidate_id], map: "fk-candidate_language-candidate_id")
 }
 
 model candidate_id_card {

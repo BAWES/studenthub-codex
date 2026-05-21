@@ -64,6 +64,11 @@ export default async function CandidateEditPage() {
           title: c.title,
           subtitle: c.subtitle,
         }))}
+        languages={data.languages.map((l) => ({
+          id: l.id,
+          title: l.title,
+          subtitle: l.subtitle,
+        }))}
         educationEntries={data.educationEntries.map((e) => ({
           id: e.id,
           universityId: e.universityId,
