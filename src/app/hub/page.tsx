@@ -24,130 +24,145 @@ export default async function HubPage({
   const guide = buildRoleGuide(session.role, data);
 
   return (
-    <main className="commandOS">
-      <aside className="commandRail">
-        <Link className="commandBrand" href="/app" aria-label="StudentHub command home">
-          <span>SH</span>
+    <main className="grid grid-cols-[224px_minmax(0,1fr)] min-h-svh bg-[radial-gradient(circle_at_top_left,color-mix(in_srgb,var(--blue)_10%,transparent),transparent_32rem),var(--paper)] text-[var(--ink)]">
+      <aside className="sticky top-0 h-svh grid grid-rows-[auto_minmax(0,1fr)_auto] justify-items-stretch gap-2.5 border-r border-[var(--line)] bg-[color-mix(in_srgb,var(--surface)_94%,transparent)] py-3 px-2.5">
+        <Link className="w-full min-h-11 flex items-center gap-2.5 border border-[var(--line)] rounded-lg bg-[var(--ink)] text-[var(--surface)] px-3 font-black no-underline dark:bg-[#e7ecf5] dark:text-[#090d14]" href="/app" aria-label="StudentHub command home">
+          <span className="w-[30px] h-[30px] inline-flex items-center justify-center rounded-md bg-[rgba(255,255,255,0.14)]">SH</span>
           <strong>StudentHub</strong>
         </Link>
 
-        <nav className="commandRailNav" aria-label="Workspace navigation">
+        <nav className="w-full grid content-start gap-[5px]" aria-label="Workspace navigation">
           {data.navigation.map((item) => (
             <Link
-              className={item.href === hubContext || item.href === "/app" ? "active" : ""}
+              className={`w-full min-h-[46px] grid content-center gap-[3px] border rounded-lg px-3 no-underline ${
+                item.href === hubContext || item.href === "/app"
+                  ? "border-[var(--line)] bg-[var(--surface-soft)] text-[var(--blue)]"
+                  : "border-transparent text-[var(--muted)] hover:border-[var(--line)] hover:bg-[var(--surface-soft)] hover:text-[var(--blue)]"
+              }`}
               href={item.href}
               key={item.href}
               title={`${item.label}: ${item.description}`}
             >
-              <strong>{item.label}</strong>
-              <small>{item.description}</small>
+              <strong className="text-inherit text-sm">{item.label}</strong>
+              <small className="overflow-hidden text-[var(--muted)] text-xs text-ellipsis whitespace-nowrap">{item.description}</small>
             </Link>
           ))}
         </nav>
 
-        <div className="commandRailFooter">
+        <div className="grid gap-2">
           <ThemeToggle />
-          <form className="commandRailSignout" action={logoutAction}>
-            <button type="submit">Sign out</button>
+          <form action={logoutAction}>
+            <button
+              type="submit"
+              className="w-full min-h-10 border border-[var(--line)] rounded-lg bg-[var(--surface-soft)] text-[var(--ink)] text-[13px] font-black cursor-pointer hover:border-[var(--blue)] hover:text-[var(--blue)]"
+            >
+              Sign out
+            </button>
           </form>
         </div>
       </aside>
 
-      <section className="commandDesk">
-        <header className="commandTopbar">
-          <div className="commandIdentity">
-            <span>{session.role}</span>
-            <strong>{session.name}</strong>
-            <small>{session.email}</small>
+      <section className="min-w-0 grid grid-rows-[auto_minmax(0,1fr)] min-h-svh">
+        <header className="sticky top-0 z-20 min-h-16 grid grid-cols-[220px_minmax(280px,1fr)_auto] items-center gap-2.5 border-b border-[var(--line)] bg-[color-mix(in_srgb,var(--surface)_90%,transparent)] backdrop-blur-md px-3.5 py-2.5">
+          <div className="min-w-0 grid gap-0.5">
+            <span className="text-[#667085] text-[11px] font-black uppercase">{session.role}</span>
+            <strong className="overflow-hidden text-ellipsis whitespace-nowrap">{session.name}</strong>
+            <small className="overflow-hidden text-[#667085] text-ellipsis whitespace-nowrap">{session.email}</small>
           </div>
-          <form className="commandSearch">
+          <form className="grid grid-cols-[minmax(0,1fr)_auto] overflow-hidden border border-[var(--line)] rounded-lg bg-[var(--surface)] focus-within:border-[#8bb4ea] focus-within:shadow-[0_0_0_3px_rgba(11,99,206,0.12)]">
             <input
               aria-label="Find records"
               data-command-search
               defaultValue={data.query}
               id="hub-search"
               name="q"
+              className="min-w-0 h-[42px] border-0 bg-transparent text-[var(--ink)] px-[13px] font-inherit focus:outline-none"
               placeholder="Search candidates, companies, requests, transfers, ID batches"
             />
             <input type="hidden" name="scope" value={data.scope} />
-            <button type="submit">Search</button>
+            <button
+              type="submit"
+              className="border-0 border-l border-[var(--line)] bg-[var(--surface-soft)] text-[var(--ink)] px-3.5 font-black cursor-pointer"
+            >
+              Search
+            </button>
           </form>
           <HubShortcuts commands={commands} />
         </header>
 
-        <section className="journeyHome">
+        <section className="w-[min(100%,1500px)] min-w-0 min-h-0 overflow-y-auto grid content-start gap-3 mx-auto p-3.5">
           {requiredRole && requiredRole !== session.role ? (
-            <section className="roleBoundaryNotice" aria-label="Role access notice">
-              <div>
-                <span>Access boundary</span>
-                <strong>You are signed in as {session.role}, not {requiredRole}.</strong>
-                <p>Use the matching production credentials to enter that workspace. This keeps candidate, staff, company, and admin data separated.</p>
+            <section className="flex items-center justify-between gap-3.5 border border-[#f3c2d3] rounded-lg bg-[#fff8fb] p-3.5 px-4" aria-label="Role access notice">
+              <div className="grid gap-1">
+                <span className="text-[var(--rose)] text-[11px] font-black uppercase">Access boundary</span>
+                <strong className="text-[#101828]">You are signed in as {session.role}, not {requiredRole}.</strong>
+                <p className="text-[var(--muted)] m-0">Use the matching production credentials to enter that workspace. This keeps candidate, staff, company, and admin data separated.</p>
               </div>
-              <Link href="/login">Switch account</Link>
+              <Link className="min-h-[38px] inline-flex items-center border border-[#e8a6bd] rounded-lg bg-white text-[var(--rose)] px-3 font-black no-underline whitespace-nowrap" href="/login">Switch account</Link>
             </section>
           ) : null}
 
-          <section className="journeyHero">
+          <section className="grid grid-cols-[minmax(0,1fr)_minmax(250px,340px)] gap-3.5 border border-[var(--line)] rounded-lg bg-[linear-gradient(135deg,color-mix(in_srgb,var(--surface)_96%,var(--blue)),var(--surface))] p-4 dark:border-[var(--line)] dark:bg-[var(--surface)] dark:text-[var(--ink)]">
             <div>
-              <span className="journeyEyebrow">Start here</span>
-              <h1>{guide.title}</h1>
-              <p>{guide.description}</p>
-              <div className="journeyHeroActions">
-                <Link className="primary" href={guide.primary.href}>
+              <span className="text-[#667085] text-[11px] font-black uppercase tracking-normal">Start here</span>
+              <h1 className="max-w-[860px] text-[var(--ink)] text-3xl leading-[1.06] my-1.5 mx-0">{guide.title}</h1>
+              <p className="max-w-[780px] text-[var(--muted)] text-[15px] leading-relaxed m-0">{guide.description}</p>
+              <div className="flex flex-wrap gap-2.5 mt-[18px]">
+                <Link className="min-h-10 inline-flex items-center rounded-lg bg-[#111827] text-white px-[13px] font-black no-underline" href={guide.primary.href}>
                   {guide.primary.label}
                 </Link>
-                <Link href={hubContext}>Open focused search</Link>
+                <Link className="min-h-10 inline-flex items-center border border-[var(--line)] bg-[var(--surface)] text-[var(--ink)] px-4 font-bold text-sm no-underline rounded-lg whitespace-nowrap" href={hubContext}>Open focused search</Link>
               </div>
             </div>
-            <aside className="journeyGuardrail">
-              <span>Signed in as {session.role}</span>
+            <aside className="border border-[var(--line)] rounded-lg bg-[var(--surface)] p-3.5 dark:border-[var(--line)] dark:bg-[var(--surface)] dark:text-[var(--ink)]">
+              <span className="text-[#667085] text-[11px] font-black uppercase tracking-normal">Signed in as {session.role}</span>
               <strong>{session.name}</strong>
-              <p>{guide.guardrail}</p>
+              <p className="text-[var(--muted)] m-0">{guide.guardrail}</p>
             </aside>
           </section>
 
-          <section className="journeyGrid" aria-label={`${session.role} workflows`}>
+          <section className="grid grid-cols-2 gap-3 max-[1040px]:grid-cols-1" aria-label={`${session.role} workflows`}>
             {guide.journeys.map((journey) => (
-              <article className="journeyCard" key={journey.title}>
-                <div className="journeyCardHeader">
-                  <span>{journey.kicker}</span>
+              <article className="grid gap-2.5 border border-[var(--line)] rounded-lg bg-[var(--surface)] p-4 dark:border-[var(--line)] dark:bg-[var(--surface)] dark:text-[var(--ink)]" key={journey.title}>
+                <div className="grid gap-1.5">
+                  <span className="text-[#667085] text-[11px] font-black uppercase tracking-normal">{journey.kicker}</span>
                   <strong>{journey.title}</strong>
-                  <p>{journey.description}</p>
+                  <p className="text-[var(--muted)] m-0">{journey.description}</p>
                 </div>
-                <ol className="journeySteps">
+                <ol className="grid gap-2.5 list-none p-0 m-0">
                   {journey.steps.map((step, index) => (
-                    <li key={step}>
-                      <span>{index + 1}</span>
+                    <li className="grid grid-cols-[24px_minmax(0,1fr)] gap-2" key={step}>
+                      <span className="w-6 h-6 inline-flex items-center justify-center rounded-full bg-[var(--blue)] text-white text-xs font-bold">{index + 1}</span>
                       <strong>{step}</strong>
                     </li>
                   ))}
                 </ol>
-                <Link href={journey.href}>{journey.action}</Link>
+                <Link className="min-h-9 inline-flex items-center border border-[var(--line)] rounded-lg bg-[var(--surface-soft)] text-[var(--blue)] text-[13px] font-extrabold px-3 no-underline whitespace-nowrap w-fit hover:border-[var(--blue)] hover:bg-[#eef5ff]" href={journey.href}>{journey.action}</Link>
               </article>
             ))}
           </section>
 
-          <section className="journeyWorkbench" aria-label="Search and live queues">
-            <div className="journeyPanel">
-              <div className="journeyPanelHeader">
-                <span>Live queues</span>
+          <section className="grid gap-3" aria-label="Search and live queues">
+            <div className="border border-[var(--line)] rounded-lg bg-[var(--surface)] dark:border-[var(--line)] dark:bg-[var(--surface)] dark:text-[var(--ink)]">
+              <div className="grid gap-1.5 p-4 border-b border-[var(--line)]">
+                <span className="text-[#667085] text-[11px] font-black uppercase tracking-normal">Live queues</span>
                 <strong>What needs attention</strong>
               </div>
-              <div className="journeyQueueGrid">
+              <div className="grid grid-cols-2">
                 {data.queues.map((queue) => {
                   const content = (
                     <>
-                      <span>{queue.label}</span>
-                      <strong>{queue.value.toLocaleString("en-US")}</strong>
-                      <small>{queue.note}</small>
+                      <span className="text-[#667085] text-[11px] font-black uppercase tracking-normal">{queue.label}</span>
+                      <strong className="text-[22px] leading-none">{queue.value.toLocaleString("en-US")}</strong>
+                      <small className="text-[#667085] leading-[1.35]">{queue.note}</small>
                     </>
                   );
                   return queue.href ? (
-                    <Link className="journeyQueue" href={queue.href as Route} key={queue.label}>
+                    <Link className="grid gap-1 rounded-lg text-[#344054] p-2 px-2 no-underline hover:bg-[#f6f8fb]" href={queue.href as Route} key={queue.label}>
                       {content}
                     </Link>
                   ) : (
-                    <article className="journeyQueue" key={queue.label}>
+                    <article className="grid gap-1 rounded-lg text-[#344054] p-2 px-2" key={queue.label}>
                       {content}
                     </article>
                   );
@@ -155,17 +170,21 @@ export default async function HubPage({
               </div>
             </div>
 
-            <div className="journeyPanel">
-              <div className="journeyPanelHeader">
-                <span>{data.scope}</span>
+            <div className="border border-[var(--line)] rounded-lg bg-[var(--surface)] dark:border-[var(--line)] dark:bg-[var(--surface)] dark:text-[var(--ink)]">
+              <div className="grid gap-1.5 p-4 border-b border-[var(--line)]">
+                <span className="text-[#667085] text-[11px] font-black uppercase tracking-normal">{data.scope}</span>
                 <strong>{data.query ? `Search results for ${data.query}` : "Find a record"}</strong>
               </div>
-              <nav className="journeyScopePills" aria-label="Search scopes">
+              <nav className="flex flex-wrap gap-2 p-3" aria-label="Search scopes">
                 {data.scopes.map((item) => {
                   const query = data.query ? `&q=${encodeURIComponent(data.query)}` : "";
                   return (
                     <Link
-                      className={item.value === data.scope ? "active" : ""}
+                      className={`min-h-8 inline-flex items-center rounded-full px-2.5 text-xs font-extrabold no-underline ${
+                        item.value === data.scope
+                          ? "bg-[var(--blue)] text-white"
+                          : "bg-[#eef2f7] text-[#344054] hover:bg-[#dde5f3]"
+                      }`}
                       href={`/app?scope=${item.value}${query}` as Route}
                       key={item.value}
                     >
@@ -174,15 +193,15 @@ export default async function HubPage({
                   );
                 })}
               </nav>
-              <div className="journeyResults">
+              <div className="grid gap-1 p-3">
                 {data.results.slice(0, 6).map((result) => (
-                  <Link href={hubRecordHref(data.query, data.scope, result.id)} key={result.id}>
-                    <span>{result.type}</span>
-                    <strong>{result.title}</strong>
-                    <small>{result.meta}</small>
+                  <Link className="grid grid-cols-[92px_minmax(0,1fr)_minmax(160px,230px)] items-center gap-3 border border-transparent rounded-lg text-[#111827] px-2.5 py-2 no-underline hover:border-[#d7e4f7] hover:bg-white hover:shadow-[0_8px_24px_rgba(16,24,40,0.06)]" href={hubRecordHref(data.query, data.scope, result.id)} key={result.id}>
+                    <span className="text-[#667085] text-xs">{result.type}</span>
+                    <strong className="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap">{result.title}</strong>
+                    <small className="min-w-0 text-[#667085] text-xs overflow-hidden text-ellipsis whitespace-nowrap not-italic">{result.meta}</small>
                   </Link>
                 ))}
-                {data.results.length === 0 ? <p>No matching records for this login and scope.</p> : null}
+                {data.results.length === 0 ? <p className="text-[var(--muted)]">No matching records for this login and scope.</p> : null}
               </div>
             </div>
 
@@ -196,67 +215,67 @@ export default async function HubPage({
 
 function RecordPreview({ preview }: { preview: NonNullable<HubData["preview"]> }) {
   return (
-    <section className="journeyPanel previewPanel" aria-label="Selected record preview">
-      <div className="previewHeader">
-        <span>{preview.type}</span>
-        <h2>{preview.title}</h2>
-        <p>{preview.subtitle}</p>
-        <small>{preview.meta}</small>
+    <section className="border border-[var(--line)] rounded-lg bg-[var(--surface)] dark:border-[var(--line)] dark:bg-[var(--surface)] dark:text-[var(--ink)]" aria-label="Selected record preview">
+      <div className="grid gap-1.5 p-4 border-b border-[var(--line)]">
+        <span className="text-[#667085] text-[11px] font-black uppercase">{preview.type}</span>
+        <h2 className="break-words text-[22px] m-0">{preview.title}</h2>
+        <p className="text-[#667085] m-0 break-words">{preview.subtitle}</p>
+        <small className="text-[#667085] m-0 break-words">{preview.meta}</small>
       </div>
 
       {preview.flags.length ? (
-        <div className="previewFlags">
+        <div className="flex flex-wrap gap-2 p-3 px-4 border-b border-[var(--line)]">
           {preview.flags.map((flag) => (
-            <span key={flag}>{flag}</span>
+            <span className="min-h-[26px] inline-flex items-center rounded-full bg-[#eef2f7] text-[#344054] px-[9px] text-xs font-extrabold" key={flag}>{flag}</span>
           ))}
         </div>
       ) : null}
 
       {preview.actions.length ? (
-        <div className="previewActions">
+        <div className="flex flex-wrap gap-2 p-3 px-4 border-b border-[var(--line)]">
           {preview.actions.map((action) => (
-            <a href={action.href} key={`${action.label}-${action.href}`}>
+            <a className="min-h-9 inline-flex items-center border border-[#d9dee8] rounded-lg bg-[#fbfcfd] text-[#111827] px-2.5 text-[13px] font-black no-underline hover:border-[#8bb4ea] hover:text-[#0b63ce] hover:bg-[#eef5ff]" href={action.href} key={`${action.label}-${action.href}`}>
               {action.label}
             </a>
           ))}
         </div>
       ) : null}
 
-      <div className="previewFacts">
+      <div className="grid grid-cols-2 border-b border-[var(--line)]">
         {preview.facts.map((fact) => (
-          <div key={fact.label}>
-            <span>{fact.label}</span>
-            <strong>{fact.value}</strong>
+          <div className="min-w-0 min-h-[72px] grid content-center gap-[5px] border-r border-b border-[var(--line)] px-3 py-2.5 [&:nth-child(2n)]:border-r-0" key={fact.label}>
+            <span className="text-[#667085] text-[11px] font-black uppercase">{fact.label}</span>
+            <strong className="overflow-hidden text-ellipsis whitespace-nowrap text-sm">{fact.value}</strong>
           </div>
         ))}
       </div>
 
       {preview.related.length ? (
-        <div className="previewRelated">
+        <div className="grid">
           {preview.related.map((section) => (
-            <section key={section.title}>
-              <div className="previewRelatedHeader">
-                <span>Related</span>
-                <h3>{section.title}</h3>
+            <section className="border-b border-[var(--line)]" key={section.title}>
+              <div className="min-h-[42px] flex items-center justify-between gap-3 px-3">
+                <span className="text-[#667085] text-[11px] font-black uppercase">Related</span>
+                <h3 className="text-sm m-0">{section.title}</h3>
               </div>
               {section.rows.length ? (
                 section.rows.map((row) =>
                   row.href ? (
-                    <Link className="previewRow" href={row.href} key={row.id}>
-                      <strong>{row.title}</strong>
-                      <span>{row.subtitle}</span>
-                      <small>{row.meta}</small>
+                    <Link className="min-h-[58px] grid gap-1 text-[#111827] px-3 py-[9px] no-underline hover:bg-[#f6f8fb]" href={row.href} key={row.id}>
+                      <strong className="overflow-hidden text-ellipsis whitespace-nowrap">{row.title}</strong>
+                      <span className="overflow-hidden text-ellipsis whitespace-nowrap text-[#667085] text-xs">{row.subtitle}</span>
+                      <small className="overflow-hidden text-ellipsis whitespace-nowrap text-[#667085] text-xs">{row.meta}</small>
                     </Link>
                   ) : (
-                    <article className="previewRow" key={row.id}>
-                      <strong>{row.title}</strong>
-                      <span>{row.subtitle}</span>
-                      <small>{row.meta}</small>
+                    <article className="min-h-[58px] grid gap-1 text-[#111827] px-3 py-[9px]" key={row.id}>
+                      <strong className="overflow-hidden text-ellipsis whitespace-nowrap">{row.title}</strong>
+                      <span className="overflow-hidden text-ellipsis whitespace-nowrap text-[#667085] text-xs">{row.subtitle}</span>
+                      <small className="overflow-hidden text-ellipsis whitespace-nowrap text-[#667085] text-xs">{row.meta}</small>
                     </article>
                   )
                 )
               ) : (
-                <p className="previewEmpty">No related records visible to this login.</p>
+                <p className="grid gap-1.5 p-3.5 text-[#667085] text-xs">No related records visible to this login.</p>
               )}
             </section>
           ))}
