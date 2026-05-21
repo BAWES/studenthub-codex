@@ -378,7 +378,7 @@ body {
 .landingNav a:not(.landingBrand),
 .landingActions a,
 .switchPortalLink {
-  min-height: 40px;
+  min-height: 44px;
   display: inline-flex;
   align-items: center;
   border: 1px solid var(--line);
@@ -781,7 +781,7 @@ body {
 .workspaceSignout button,
 .themeToggle {
   width: 100%;
-  min-height: 40px;
+  min-height: 44px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--surface-soft);
@@ -6438,7 +6438,7 @@ kbd {
   }
 
   .landingBrand {
-    min-height: 42px;
+    min-height: 44px;
   }
 
   .landingHeroCopy h1,
