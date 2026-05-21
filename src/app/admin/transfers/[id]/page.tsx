@@ -27,7 +27,7 @@ export default async function AdminTransferDetailPage({ params }: { params: Prom
       primary={{ title: "Candidate Payouts", rows: data.candidates }}
       secondary={{ title: "Invoices", rows: data.invoices }}
     >
-      <Suspense fallback={<div className="transferActions"><p>Loading actions…</p></div>}>
+      <Suspense fallback={<div className="flex flex-col gap-4 mb-6"><p>Loading actions…</p></div>}>
         <TransferActionBar data={data} />
       </Suspense>
 
@@ -44,7 +44,7 @@ export default async function AdminTransferDetailPage({ params }: { params: Prom
           { label: "Updated", value: formatDate(data.transfer.transfer_updated_at) }
         ]}
       />
-      <section className="detailGrid">
+      <section className="grid grid-cols-2 gap-3 max-[1040px]:grid-cols-1">
         <CompactList title="Transfer File Entries" rows={data.fileEntries} />
       </section>
     </WorkspaceShell>

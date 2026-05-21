@@ -54,9 +54,9 @@ export default async function StaffInterviewDetailPage({
     >
       <FactPanel title="Interview Details" facts={facts} />
 
-      <section className="detailPanel">
-        <h2>Actions</h2>
-        <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+      <section className="mt-5 border border-[var(--line)] bg-[var(--surface)]">
+        <h2 className="m-0 p-[18px] border-b border-[var(--line)]">Actions</h2>
+        <div className="flex gap-2 flex-wrap p-[18px]">
           {interview.status !== 1 && (
             <form action={updateInterviewStatusAction}>
               <input type="hidden" name="interview_uuid" value={interview.request_interview_uuid} />
@@ -81,8 +81,8 @@ export default async function StaffInterviewDetailPage({
         </div>
       </section>
 
-      <section className="detailPanel">
-        <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+      <section className="mt-5 border border-[var(--line)] bg-[var(--surface)]">
+        <div className="flex gap-2 flex-wrap p-[18px]">
           {interview.candidate?.candidate_id && (
             <Link href={`/staff/candidates?candidate=${interview.candidate.candidate_id}` as Route}>
               <Button variant="outline">View Candidate</Button>
@@ -100,8 +100,8 @@ export default async function StaffInterviewDetailPage({
       </section>
 
       {notice && (
-        <section className="detailPanel">
-          <p className="notice">
+        <section className="mt-5 border border-[var(--line)] bg-[var(--surface)]">
+          <p className="m-0 p-[18px] text-[var(--muted)]">
             {notice === "interview-updated" && "Interview updated successfully."}
             {notice === "not-found" && "Interview not found."}
             {notice === "missing-fields" && "Missing required fields."}
