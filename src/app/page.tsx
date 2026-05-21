@@ -6,7 +6,7 @@ import { ThemeToggle } from "@/modules/theme/ThemeToggle";
 
 export const dynamic = "force-dynamic";
 
-const portalIcons: Record<string, string> = {
+const portalIcons: Record<(typeof portalRoles)[number], string> = {
   candidate: "🎓",
   staff: "📋",
   company: "🏭",
@@ -66,10 +66,15 @@ export default async function Home() {
                 <small>80 results · filtered · ready for review</small>
               </div>
               <div className="landingOpsColumns">
-                {["Profile", "CV export", "Timesheet", "Payment"].map((item, index) => (
-                  <div key={item}>
-                    <span>{item}</span>
-                    <strong>{index === 1 ? "PDF" : "Live"}</strong>
+                {[
+                  { label: "Profile", status: "Live" },
+                  { label: "CV export", status: "PDF" },
+                  { label: "Timesheet", status: "Live" },
+                  { label: "Payment", status: "Live" },
+                ].map((item) => (
+                  <div key={item.label}>
+                    <span>{item.label}</span>
+                    <strong>{item.status}</strong>
                   </div>
                 ))}
               </div>
