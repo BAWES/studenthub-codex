@@ -1,57 +1,62 @@
 import type { Route } from "next";
 import type { Role } from "@/modules/auth/types";
+import type { LucideIcon } from "lucide-react";
+import {
+  LayoutGrid, User, Mail, ClipboardList, CreditCard,
+  Building2, Phone, Store, FileCheck, Search, Users,
+  ArrowRightLeft, Calendar
+} from "lucide-react";
 
 export type NavItem = {
   label: string;
   href: Route;
+  icon: LucideIcon;
 };
+
+const SHARED_APP: NavItem = { label: "App", href: "/app", icon: LayoutGrid };
 
 export function navForRole(role: Role): NavItem[] {
   if (role === "admin") {
     return [
-      { label: "App", href: "/app" },
-      { label: "Overview", href: "/admin" },
-      { label: "Candidates", href: "/admin/candidates" },
-      { label: "Companies", href: "/admin/companies" },
-      { label: "Requests", href: "/admin/requests" },
-      { label: "Transfers", href: "/admin/transfers" }
+      SHARED_APP,
+      { label: "Overview", href: "/admin", icon: User },
+      { label: "Candidates", href: "/admin/candidates", icon: Users },
+      { label: "Companies", href: "/admin/companies", icon: Building2 },
+      { label: "Requests", href: "/admin/requests", icon: FileCheck },
+      { label: "Transfers", href: "/admin/transfers", icon: ArrowRightLeft }
     ];
   }
-
   if (role === "staff") {
     return [
-      { label: "App", href: "/app" },
-      { label: "Overview", href: "/staff" },
-      { label: "My Requests", href: "/staff/requests" },
-      { label: "Candidates", href: "/staff/candidates" },
-      { label: "Interviews", href: "/staff/interviews" as Route }
+      SHARED_APP,
+      { label: "Overview", href: "/staff", icon: User },
+      { label: "My Requests", href: "/staff/requests", icon: FileCheck },
+      { label: "Candidates", href: "/staff/candidates", icon: Users },
+      { label: "Interviews", href: "/staff/interviews" as Route, icon: Calendar }
     ];
   }
-
   if (role === "candidate") {
     return [
-      { label: "App", href: "/app" },
-      { label: "Overview", href: "/candidate" },
-      { label: "Invitations", href: "/candidate/invitations" },
-      { label: "Work Logs", href: "/candidate/work-logs" },
-      { label: "Payments", href: "/candidate/payments" }
+      SHARED_APP,
+      { label: "Overview", href: "/candidate", icon: User },
+      { label: "Invitations", href: "/candidate/invitations", icon: Mail },
+      { label: "Work Logs", href: "/candidate/work-logs", icon: ClipboardList },
+      { label: "Payments", href: "/candidate/payments", icon: CreditCard }
     ];
   }
-
   if (role === "company") {
     return [
-      { label: "App", href: "/app" },
-      { label: "Overview", href: "/company" },
-      { label: "Requests", href: "/company/requests" },
-      { label: "Companies", href: "/company/companies" },
-      { label: "Contacts", href: "/company/contacts" as Route },
-      { label: "Stores", href: "/company/stores" as Route }
+      SHARED_APP,
+      { label: "Overview", href: "/company", icon: User },
+      { label: "Requests", href: "/company/requests", icon: FileCheck },
+      { label: "Companies", href: "/company/companies", icon: Building2 },
+      { label: "Contacts", href: "/company/contacts" as Route, icon: Phone },
+      { label: "Stores", href: "/company/stores" as Route, icon: Store }
     ];
   }
-
   return [
-    { label: "App", href: "/app" },
-    { label: "Overview", href: "/inspector" },
-    { label: "ID Requests", href: "/inspector/id-requests" }
+    SHARED_APP,
+    { label: "Overview", href: "/inspector", icon: User },
+    { label: "ID Requests", href: "/inspector/id-requests", icon: Search }
   ];
 }
