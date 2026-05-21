@@ -26,6 +26,7 @@ const profileSchema = z.object({
   objective: z.string().optional().default(""),
   intro: z.string().optional().default(""),
   civilId: z.string().optional().default(""),
+  civilIdExpiry: z.string().optional().default(""),
   profileUrl: z.union([z.string().url("Invalid URL"), z.literal("")]).optional().default(""),
   countryId: z.string().optional().default(""),
   universityId: z.string().optional().default(""),
@@ -51,6 +52,7 @@ export async function updateCandidateProfile(
     objective: (formData.get("objective") ?? "") as string,
     intro: (formData.get("intro") ?? "") as string,
     civilId: (formData.get("civilId") ?? "") as string,
+    civilIdExpiry: (formData.get("civilIdExpiry") ?? "") as string,
     profileUrl: (formData.get("profileUrl") ?? "") as string,
     countryId: (formData.get("countryId") ?? "") as string,
     universityId: (formData.get("universityId") ?? "") as string,
@@ -81,6 +83,12 @@ export async function updateCandidateProfile(
       candidate_objective: d.objective || undefined,
       candidate_intro: d.intro || undefined,
       candidate_civil_id: d.civilId || undefined,
+      candidate_civil_expiry_date: d.civilIdExpiry
+        ? (() => {
+            const date = new Date(d.civilIdExpiry);
+            return isFinite(date.getTime()) ? date : undefined;
+          })()
+        : undefined,
       profile_url: d.profileUrl || undefined,
       candidate_address_line1: d.address || undefined,
       country_id: d.countryId ? Number(d.countryId) : null,

@@ -34,6 +34,10 @@ export default async function CandidateEditPage() {
           objective: c?.candidate_objective ?? "",
           intro: c?.candidate_intro ?? "",
           civilId: c?.candidate_civil_id ?? "",
+          civilIdExpiry: c?.candidate_civil_expiry_date
+            ? new Date(c.candidate_civil_expiry_date).toISOString().slice(0, 10)
+            : "",
+          civilIdNeedVerification: c?.candidate_civil_need_verification ?? false,
           profileUrl: c?.profile_url ?? "",
           birthDate: c?.candidate_birth_date
             ? new Date(c.candidate_birth_date).toISOString().slice(0, 10)

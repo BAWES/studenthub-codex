@@ -40,6 +40,8 @@ type Props = {
     objective: string;
     intro: string;
     civilId: string;
+    civilIdExpiry: string;
+    civilIdNeedVerification: boolean;
     profileUrl: string;
     birthDate: string;
     address: string;
@@ -199,13 +201,25 @@ export function CandidateEditForm({ candidate, countries, universities, banks, s
           <FieldError errors={profileState.fieldErrors?.iban} />
         </label>
 
-        <h2>Profile details</h2>
+        <h2>Civil ID Card</h2>
 
         <label>
-          <span>Civil ID</span>
+          <span>Civil ID number</span>
           <input name="civilId" defaultValue={candidate.civilId} />
           <FieldError errors={profileState.fieldErrors?.civilId} />
         </label>
+
+        <label>
+          <span>Expiry date</span>
+          <input name="civilIdExpiry" type="date" defaultValue={candidate.civilIdExpiry} />
+          <FieldError errors={profileState.fieldErrors?.civilIdExpiry} />
+        </label>
+
+        {candidate.civilIdNeedVerification ? (
+          <p className="formNotice">Your civil ID is pending verification.</p>
+        ) : null}
+
+        <h2>Profile details</h2>
 
         <label>
           <span>Objective / Headline</span>
