@@ -7,3 +7,7 @@ data/*.sql
 data/*.json
 data/*.log
 !.gitkeep
+
+# Test artifacts
+playwright-report/
+test-results/
