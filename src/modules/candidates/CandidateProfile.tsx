@@ -86,7 +86,13 @@ export function CandidateProfile({
         {readiness.missing?.length ? (
           <div className="candidateMissingFields">
             <span>Missing fields</span>
-            <p>{readiness.missing.join(" · ")}</p>
+            <ul>
+              {readiness.missing.map((item) => (
+                <li key={item.label}>
+                  <Link href="/candidate/edit">{item.label}</Link>
+                </li>
+              ))}
+            </ul>
           </div>
         ) : null}
       </section>
@@ -217,12 +223,14 @@ function buildReadiness(detail: CandidateDetailData) {
     { label: "Country", done: Boolean(c?.country_id), field: "Country / Nationality" },
     { label: "University", done: Boolean(c?.university_id), field: "University" },
     { label: "Objective", done: Boolean(c?.candidate_objective), field: "Objective / Headline" },
+    { label: "Intro", done: Boolean(c?.candidate_intro), field: "Profile introduction" },
     { label: "Civil ID number", done: Boolean(c?.candidate_civil_id), field: "Civil ID number" },
     { label: "Civil ID photos", done: Boolean(c?.candidate_civil_photo_front || c?.candidate_civil_photo_back), field: "Civil ID photos (front/back)" },
     { label: "Profile photo", done: Boolean(c?.candidate_personal_photo), field: "Profile photo upload" },
     { label: "CV / Resume", done: Boolean(c?.candidate_resume), field: "CV / Resume upload" },
     { label: "Bank info", done: Boolean(c?.bank_id || c?.candidate_iban), field: "Bank name or IBAN" },
     { label: "Skills", done: detail.skills.length > 0, field: "At least one skill tag" },
+    { label: "Education", done: detail.education.length > 0, field: "Education entries" },
     { label: "Experience", done: detail.experiences.length > 0, field: "Work experience entries" },
     { label: "Approved", done: Boolean(c && c.approved !== 0), field: "Staff approval" },
   ];
@@ -232,7 +240,7 @@ function buildReadiness(detail: CandidateDetailData) {
     score >= 85 ? "Ready to present"
     : score >= 60 ? "Usable with cleanup — fill in the open fields below"
     : "Needs attention — complete the missing fields to improve your profile visibility";
-  const missing = items.filter((item) => !item.done).map((item) => item.field ?? item.label);
+  const missing = items.filter((item) => !item.done).map((item) => ({ label: item.field ?? item.label }));
   return { items, missing, score, summary };
 }
 
