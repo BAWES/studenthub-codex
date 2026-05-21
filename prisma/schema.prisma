@@ -253,6 +253,7 @@ model candidate {
   candidate_evaluation              candidate_evaluation[]
   candidate_experience              candidate_experience[]
   candidate_id_card                 candidate_id_card[]
+  candidate_language                candidate_language[]
   candidate_link                    candidate_link[]
   candidate_note                    candidate_note[]
   candidate_notification            candidate_notification[]
@@ -419,6 +420,18 @@ model candidate_experience {
   candidate                       candidate? @relation(fields: [candidate_id], references: [candidate_id], onDelete: Cascade, onUpdate: Restrict, map: "fk-candidate_experience-candidate_id")
 
   @@index([candidate_id], map: "fk-candidate_experience-candidate_id")
+}
+
+model candidate_language {
+  candidate_language_id          Int        @id @default(autoincrement())
+  candidate_id                  Int?
+  language                      String     @db.VarChar(128)
+  proficiency                   String     @db.VarChar(32)
+  deleted                       Int        @default(0) @db.SmallInt
+  candidate_language_created_at DateTime?  @db.DateTime(0)
+  candidate                     candidate? @relation(fields: [candidate_id], references: [candidate_id], onDelete: Cascade, onUpdate: Restrict, map: "fk-candidate_language-candidate_id")
+
+  @@index([candidate_id], map: "fk-candidate_language-candidate_id")
 }
 
 model candidate_id_card {
