@@ -1,6 +1,6 @@
 import { requireRoleCapability } from "@/modules/auth/session";
 import { CandidateEditForm } from "@/modules/candidates/CandidateEditForm";
-import { getCountryOptions, getUniversityOptions, getBankOptions } from "@/modules/candidates/actions";
+import { getCountryOptions, getUniversityOptions, getBankOptions, getDegreeOptions, getMajorOptions } from "@/modules/candidates/actions";
 import { getCandidateDetail } from "@/modules/workspace/data";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 
@@ -8,11 +8,13 @@ export const dynamic = "force-dynamic";
 
 export default async function CandidateEditPage() {
   const session = await requireRoleCapability("candidate", "candidate.read.own");
-  const [data, countries, universities, banks] = await Promise.all([
+  const [data, countries, universities, banks, degrees, majors] = await Promise.all([
     getCandidateDetail(Number(session.id), "/candidate/invitations"),
     getCountryOptions(),
     getUniversityOptions(),
     getBankOptions(),
+    getDegreeOptions(),
+    getMajorOptions(),
   ]);
   const c = data.candidate;
 
@@ -57,6 +59,19 @@ export default async function CandidateEditPage() {
           title: e.title,
           subtitle: e.subtitle,
         }))}
+        educationEntries={data.educationEntries.map((e) => ({
+          id: e.id,
+          universityId: e.universityId,
+          degreeUuid: e.degreeUuid,
+          majorUuid: e.majorUuid,
+          graduationYear: e.graduationYear,
+          isCurrentlyStudying: e.isCurrentlyStudying,
+          universityLabel: universities.find((u) => u.id === e.universityId)?.label ?? `University #${e.universityId}`,
+          degreeLabel: e.degreeUuid ? degrees.find((d) => d.id === e.degreeUuid)?.label : undefined,
+          majorLabel: e.majorUuid ? majors.find((m) => m.id === e.majorUuid)?.label : undefined,
+        }))}
+        degrees={degrees}
+        majors={majors}
       />
     </WorkspaceShell>
   );
