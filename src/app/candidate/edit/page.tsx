@@ -57,6 +57,11 @@ export default async function CandidateEditPage() {
           title: e.title,
           subtitle: e.subtitle,
         }))}
+        certificates={data.certificates.map((c) => ({
+          id: c.id,
+          title: c.title,
+          subtitle: c.subtitle,
+        }))}
       />
     </WorkspaceShell>
   );

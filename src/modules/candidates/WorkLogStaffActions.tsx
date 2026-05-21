@@ -1,33 +1,8 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState } from "react";
+import { useActionState, useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { appealWorkLog } from "@/modules/candidates/actions";
-import { approveWorkLog, rejectWorkLog, resolveWorkLogAppeal } from "@/modules/candidates/worklog-actions";
-
-export function WorkLogAppealForm({ workLogUuid }: { workLogUuid: string }) {
-  const [state, action, pending] = useActionState(appealWorkLog, { error: "" });
-
-  return (
-    <form action={action} className="candidateEditForm">
-      <h2>Appeal this Work Log</h2>
-      {state.error ? <p className="formError">{state.error}</p> : null}
-
-      <input type="hidden" name="workLogUuid" value={workLogUuid} />
-
-      <label>
-        <span>Reason for appeal</span>
-        <textarea name="reason" rows={4} placeholder="Explain why this work log needs review..." required />
-      </label>
-
-      <div className="formActions">
-        <button type="submit" disabled={pending}>
-          {pending ? "Submitting..." : "Submit appeal"}
-        </button>
-      </div>
-    </form>
-  );
-}
+import { approveWorkLog, rejectWorkLog } from "@/modules/candidates/worklog-actions";
 
 export function WorkLogStaffActions({
   workLogUuid,
@@ -75,7 +50,13 @@ export function WorkLogStaffActions({
     return (
       <form action={rejectAction} className="workLogRejectForm">
         <input type="hidden" name="workLogUuid" value={workLogUuid} />
-        <input name="reason" placeholder="Rejection reason..." required className="workLogRejectInput" maxLength={500} />
+        <input
+          name="reason"
+          placeholder="Rejection reason..."
+          required
+          className="workLogRejectInput"
+          maxLength={500}
+        />
         <button type="submit" disabled={rejectPending} className="workLogRejectConfirm">
           {rejectPending ? "..." : "Confirm"}
         </button>
@@ -95,44 +76,6 @@ export function WorkLogStaffActions({
       <button type="button" onClick={() => setMode("reject")} className="workLogRejectBtn">
         Reject
       </button>
-    </form>
-  );
-}
-
-export function AppealResolveForm({ appealUuid }: { appealUuid: string }) {
-  const [state, action, pending] = useActionState(resolveWorkLogAppeal, { error: "" });
-  const prevError = useRef(state.error);
-
-  useEffect(() => {
-    if (state.error && state.error !== prevError.current) {
-      toast.error("Resolution failed", { description: state.error });
-    } else if (!pending && state.error === "" && prevError.current !== "") {
-      toast.success("Appeal resolved", { description: "The appeal has been resolved." });
-    }
-    prevError.current = state.error;
-  }, [state.error, pending]);
-
-  return (
-    <form action={action} className="appealResolveForm">
-      <input type="hidden" name="appealUuid" value={appealUuid} />
-      <h3>Resolve Appeal</h3>
-      <label>
-        <span>Resolution</span>
-        <select name="resolution" required defaultValue="">
-          <option value="" disabled>Choose resolution...</option>
-          <option value="approve">Approve appeal</option>
-          <option value="reject">Reject appeal</option>
-        </select>
-      </label>
-      <label>
-        <span>Note (optional)</span>
-        <textarea name="note" rows={3} placeholder="Add a note about this resolution..." maxLength={1000} />
-      </label>
-      <div className="formActions">
-        <button type="submit" disabled={pending}>
-          {pending ? "Submitting..." : "Submit resolution"}
-        </button>
-      </div>
     </form>
   );
 }

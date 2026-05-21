@@ -1,8 +1,6 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
-import { toast } from "sonner";
-import type { ProfileState } from "@/modules/candidates/actions";
+import { useActionState } from "react";
 import {
   updateCandidateProfile,
   uploadDocument,
@@ -10,12 +8,15 @@ import {
   removeCandidateSkill,
   addCandidateExperience,
   removeCandidateExperience,
+  addCandidateCertificate,
+  removeCandidateCertificate,
 } from "@/modules/candidates/actions";
 
 type Option = { id: number; label: string };
 
 type Skill = { id: number; title: string };
 type Experience = { id: number; title: string; subtitle: string };
+type Certificate = { id: string; title: string; subtitle: string };
 
 type Props = {
   candidate: {
@@ -45,21 +46,13 @@ type Props = {
   banks: Option[];
   skills: Skill[];
   experiences: Experience[];
+  certificates: Certificate[];
 };
 
-export function CandidateEditForm({ candidate, countries, universities, banks, skills, experiences }: Props) {
-  const [profileState, profileAction, profilePending] = useActionState(
-    updateCandidateProfile,
-    { success: false } as ProfileState,
-  );
-
-  useEffect(() => {
-    if (profileState.success) {
-      toast.success("Profile saved", {
-        description: "Your profile has been updated successfully.",
-      });
-    }
-  }, [profileState]);
+export function CandidateEditForm({ candidate, countries, universities, banks, skills, experiences, certificates }: Props) {
+  const [profileState, profileAction, profilePending] = useActionState(updateCandidateProfile, {
+    error: "",
+  });
   const [uploadState, uploadAction, uploadPending] = useActionState(uploadDocument, {
     error: "",
   });
@@ -67,40 +60,38 @@ export function CandidateEditForm({ candidate, countries, universities, banks, s
   const [, removeSkillAction, removeSkillPending] = useActionState(removeCandidateSkill, { error: "" });
   const [, addExpAction, addExpPending] = useActionState(addCandidateExperience, { error: "" });
   const [, removeExpAction, removeExpPending] = useActionState(removeCandidateExperience, { error: "" });
+  const [certState, addCertAction, addCertPending] = useActionState(addCandidateCertificate, { error: "" });
+  const [, removeCertAction, removeCertPending] = useActionState(removeCandidateCertificate, { error: "" });
 
   return (
     <div className="candidateEditLayout">
       <form action={profileAction} className="candidateEditForm">
         <h2>Personal info</h2>
+        {profileState.error ? <p className="formError">{profileState.error}</p> : null}
 
         <label>
           <span>Name (English)</span>
           <input name="name" defaultValue={candidate.name} required />
-          <FieldError errors={profileState.fieldErrors?.name} />
         </label>
 
         <label>
           <span>Name (Arabic)</span>
           <input name="nameAr" defaultValue={candidate.nameAr} />
-          <FieldError errors={profileState.fieldErrors?.nameAr} />
         </label>
 
         <label>
           <span>Email</span>
           <input name="email" type="email" defaultValue={candidate.email} />
-          <FieldError errors={profileState.fieldErrors?.email} />
         </label>
 
         <label>
           <span>Phone</span>
           <input name="phone" type="tel" defaultValue={candidate.phone} />
-          <FieldError errors={profileState.fieldErrors?.phone} />
         </label>
 
         <label>
           <span>Birth date</span>
           <input name="birthDate" type="date" defaultValue={candidate.birthDate} />
-          <FieldError errors={profileState.fieldErrors?.birthDate} />
         </label>
 
         <h2>Location & education</h2>
@@ -115,7 +106,6 @@ export function CandidateEditForm({ candidate, countries, universities, banks, s
               </option>
             ))}
           </select>
-          <FieldError errors={profileState.fieldErrors?.countryId} />
         </label>
 
         <label>
@@ -128,13 +118,11 @@ export function CandidateEditForm({ candidate, countries, universities, banks, s
               </option>
             ))}
           </select>
-          <FieldError errors={profileState.fieldErrors?.universityId} />
         </label>
 
         <label>
           <span>Address</span>
           <textarea name="address" rows={2} defaultValue={candidate.address} />
-          <FieldError errors={profileState.fieldErrors?.address} />
         </label>
 
         <h2>Bank info</h2>
@@ -149,19 +137,16 @@ export function CandidateEditForm({ candidate, countries, universities, banks, s
               </option>
             ))}
           </select>
-          <FieldError errors={profileState.fieldErrors?.bankId} />
         </label>
 
         <label>
           <span>Account holder name</span>
           <input name="bankAccountName" defaultValue={candidate.bankAccountName} />
-          <FieldError errors={profileState.fieldErrors?.bankAccountName} />
         </label>
 
         <label>
           <span>IBAN</span>
           <input name="iban" defaultValue={candidate.iban} />
-          <FieldError errors={profileState.fieldErrors?.iban} />
         </label>
 
         <h2>Profile details</h2>
@@ -169,25 +154,21 @@ export function CandidateEditForm({ candidate, countries, universities, banks, s
         <label>
           <span>Civil ID</span>
           <input name="civilId" defaultValue={candidate.civilId} />
-          <FieldError errors={profileState.fieldErrors?.civilId} />
         </label>
 
         <label>
           <span>Objective / Headline</span>
           <input name="objective" defaultValue={candidate.objective} />
-          <FieldError errors={profileState.fieldErrors?.objective} />
         </label>
 
         <label>
           <span>Profile URL</span>
           <input name="profileUrl" type="url" defaultValue={candidate.profileUrl} />
-          <FieldError errors={profileState.fieldErrors?.profileUrl} />
         </label>
 
         <label>
           <span>About / Intro</span>
           <textarea name="intro" rows={5} defaultValue={candidate.intro} />
-          <FieldError errors={profileState.fieldErrors?.intro} />
         </label>
 
         <div className="formActions">
@@ -323,6 +304,77 @@ export function CandidateEditForm({ candidate, countries, universities, banks, s
           <input type="hidden" name="experienceId" value={e.id} />
         </form>
       ))}
+      <form action={addCertAction} className="candidateEditForm">
+        <h2>Certificates</h2>
+        {certState.error ? <p className="formError">{certState.error}</p> : null}
+
+        {certificates.length ? (
+          <ul className="editableList">
+            {certificates.map((c) => (
+              <li key={c.id}>
+                <span>{c.title}{c.subtitle ? ` — ${c.subtitle}` : ""}</span>
+                <button
+                  type="submit"
+                  form={`remove-cert-${c.id}`}
+                  disabled={removeCertPending}
+                  className="removeButton"
+                >
+                  Remove
+                </button>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="formNotice">No certificates added yet.</p>
+        )}
+
+        <label>
+          <span>Certificate type</span>
+          <select name="certificate_type" defaultValue="false">
+            <option value="false">Training Certificate</option>
+            <option value="true">Experience Certificate</option>
+          </select>
+        </label>
+
+        <label>
+          <span>Title</span>
+          <input name="certificate_title" placeholder="e.g. IELTS, PMP, Food Safety..." required />
+        </label>
+
+        <label>
+          <span>Issuer</span>
+          <input name="certificate_issuer" placeholder="e.g. British Council, PMI..." />
+        </label>
+
+        <div className="inlineFields">
+          <label>
+            <span>Date obtained</span>
+            <input name="start_date" type="date" />
+          </label>
+          <label>
+            <span>Expiry date</span>
+            <input name="end_date" type="date" />
+          </label>
+        </div>
+
+        <label>
+          <span>Certificate URL</span>
+          <input name="certificate_url" type="url" placeholder="https://..." />
+        </label>
+
+        <div className="formActions">
+          <button type="submit" disabled={addCertPending}>
+            {addCertPending ? "Adding..." : "Add certificate"}
+          </button>
+        </div>
+      </form>
+
+      {certificates.map((c) => (
+        <form key={c.id} id={`remove-cert-${c.id}`} action={removeCertAction} hidden>
+          <input type="hidden" name="certificateUuid" value={c.id} />
+        </form>
+      ))}
+
     </div>
   );
 }
@@ -368,8 +420,4 @@ function acceptFor(type: string): string {
     default:
       return "*/*";
   }
-}
-
-function FieldError({ errors }: { errors?: string[] }) {
-  return errors?.[0] ? <p className="formError">{errors[0]}</p> : null;
 }
