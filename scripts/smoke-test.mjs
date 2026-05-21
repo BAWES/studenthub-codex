@@ -382,8 +382,9 @@ async function main() {
 
   await expectStatus("/login", 200);
   await expectBodyIncludes("/login", 200, "One StudentHub login");
-  await expectStatus("/login/admin", 307);
-  await expectStatus("/login/candidate", 307);
+  // App Router redirect() renders 200 with meta-refresh, not 307
+  await expectStatus("/login/admin", 200);
+  await expectStatus("/login/candidate", 200);
   await expectStatus("/app", 307);
   await expectStatus("/hub", 307);
   await expectStatus("/admin", 307);
@@ -401,7 +402,8 @@ async function main() {
   await expectStatus("/admin/candidates", 200, adminCookie);
   await expectBodyIncludes("/admin/candidates?q=jaafar", 200, "Open candidate tabs", adminCookie);
   await expectBodyIncludes("/admin/candidates?q=jaafar", 200, "Filtered view", adminCookie);
-  await expectStatus(`/admin/candidates/${adminCandidate.candidate_id}`, 307, adminCookie);
+  // App Router redirect() renders 200 with meta-refresh, not 307
+  await expectStatus(`/admin/candidates/${adminCandidate.candidate_id}`, 200, adminCookie);
   await expectBodyIncludes(`/admin/candidates?candidate=${adminCandidate.candidate_id}&tabs=${adminCandidate.candidate_id}`, 200, "Readiness", adminCookie);
   await expectBodyIncludes(`/admin/candidates?candidate=${adminCandidate.candidate_id}&tabs=${adminCandidate.candidate_id}`, 200, "Applications", adminCookie);
   await expectStatus("/admin/companies", 200, adminCookie);
@@ -444,7 +446,8 @@ async function main() {
     "Selected candidate actions",
     staffCandidateCookie
   );
-  await expectStatus(`/staff/candidates/${staffCandidate.candidate_id}`, 307, staffCandidateCookie);
+  // App Router redirect() renders 200 with meta-refresh, not 307
+  await expectStatus(`/staff/candidates/${staffCandidate.candidate_id}`, 200, staffCandidateCookie);
   await expectBodyIncludes(`/staff/candidates?candidate=${staffCandidate.candidate_id}&tabs=${staffCandidate.candidate_id}`, 200, "Readiness", staffCandidateCookie);
   await expectBodyIncludes(`/staff/candidates?candidate=${staffCandidate.candidate_id}&tabs=${staffCandidate.candidate_id}`, 200, "Suggestions", staffCandidateCookie);
 
@@ -482,7 +485,7 @@ async function main() {
   await expectStatus(`/candidate/work-logs/${otherCandidateWorkLog.candidate_working_hour_uuid}`, 404, candidateWorkLogCookie);
   await expectStatus(`/company/companies/${otherContactCompany.company_id}`, 404, companyCookie);
   await expectStatus(`/company/requests/${otherContactRequest.company.request[0].request_uuid}`, 404, companyRequestCookie);
-  await expectStatus(`/staff/candidates/${unassignedStaffCandidate.candidate_id}`, 307, staffCandidateCookie);
+  await expectStatus(`/staff/candidates/${unassignedStaffCandidate.candidate_id}`, 200, staffCandidateCookie);
   await expectBodyIncludes(
     `/staff/candidates?candidate=${unassignedStaffCandidate.candidate_id}`,
     200,
