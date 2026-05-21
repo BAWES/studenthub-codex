@@ -24,6 +24,17 @@ Format: `<type>: <present-tense description>`
 
 Do not commit directly to `main`. Every change goes through a PR.
 
+## Git Anti-Patterns (PROHIBITED)
+
+These operations have caused lost work. Never do any of the following:
+
+- **Cherry-pick between branches.** Each change needs its own branch and PR. Cherry-picking breaks the issue-to-commit audit trail and creates duplicate commits. If you need another branch's changes, merge the branch or open a PR.
+- **Reset branches containing others' work.** `git reset` on a branch with commits from multiple authors can silently drop work. If a branch has gone in the wrong direction, create a new branch from the correct base and re-apply changes properly.
+- **Delete a local branch that hasn't been pushed.** Before deleting any local branch, verify it is merged via PR or pushed to `origin`.
+- **Leave uncommitted changes on `main`.** Every change must be on a feature/fix/chore branch. Uncommitted work on main is at risk of being lost during checkout or pull operations.
+- **Work on multiple unrelated changes on one branch.** One branch = one issue = one PR. If you find yourself fixing something unrelated, create a new branch.
+- **Accumulate stashes.** Stashes are for temporary context switches (minutes, not days). If work will survive the current session, commit it to a branch and push. Prune stashes weekly.
+
 ## Pull Request Process
 
 1. Create a feature branch from `main`
