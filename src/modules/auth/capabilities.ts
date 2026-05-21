@@ -36,6 +36,7 @@ const roleCapabilities: Record<Role, Capability[]> = {
   company: [
     "app.access",
     "company.read.linked",
+    "company.write.linked",
     "request.read.linked",
     "request.create",
     "request.interview",
