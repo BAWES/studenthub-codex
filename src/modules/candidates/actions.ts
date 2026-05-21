@@ -1087,7 +1087,7 @@ export async function approveIdRequest(_prevState: { error: string }, formData: 
   });
 
   if (!request) return { error: "ID request not found." };
-  if (request.status === "approved") return { error: "This request is already approved." };
+  if (request.status !== "pending") return { error: "This request can only be processed from 'pending' status." };
 
   const staffId = Number(session.id);
   const now = new Date();
@@ -1139,7 +1139,7 @@ export async function rejectIdRequest(_prevState: { error: string }, formData: F
   });
 
   if (!request) return { error: "ID request not found." };
-  if (request.status === "rejected") return { error: "This request is already rejected." };
+  if (request.status !== "pending") return { error: "This request can only be processed from 'pending' status." };
 
   const staffId = Number(session.id);
   const now = new Date();

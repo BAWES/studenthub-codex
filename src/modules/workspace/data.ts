@@ -1195,6 +1195,9 @@ export async function getCandidateDetail(candidateId: number, requestBasePath = 
       majorUuid: item.major_uuid,
       graduationYear: item.graduation_year,
       isCurrentlyStudying: item.is_currently_studying ?? false,
+      universityLabel: item.university?.university_name_en ?? "",
+      degreeLabel: item.degree?.degree_name_en ?? undefined,
+      majorLabel: item.major?.major_name_en ?? undefined,
     })),
     experiences: experiences.map((item) => ({
       id: item.candidate_experience_id,

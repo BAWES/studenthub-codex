@@ -6276,6 +6276,10 @@ kbd {
     color: var(--blue);
   }
 
+  .shell {
+    display: block;
+  }
+
   .topbar {
     grid-template-columns: 1fr;
     padding: 14px;
@@ -6310,6 +6314,56 @@ kbd {
 
   .workspaceNav {
     display: none;
+  }
+
+  .workspaceRail {
+    display: none;
+  }
+
+  .workspaceStage {
+    width: auto;
+    padding: 10px 10px 88px;
+  }
+
+  .mobileTabBar {
+    position: fixed;
+    right: 10px;
+    bottom: 10px;
+    left: 10px;
+    z-index: 30;
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    border: 1px solid #c5cfdd;
+    background: rgba(255, 255, 255, 0.96);
+    box-shadow: var(--shadow);
+    padding: 8px;
+    scrollbar-width: none;
+  }
+
+  .mobileTabBar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .mobileTabBar a {
+    min-height: 44px;
+    min-width: max-content;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--line);
+    background: #fbfcfe;
+    color: var(--ink);
+    padding: 0 12px;
+    font-size: 13px;
+    font-weight: 800;
+    text-decoration: none;
+  }
+
+  .mobileTabBar a.active {
+    border-color: var(--blue);
+    background: #eef5ff;
+    color: var(--blue);
   }
 
   .metrics {
@@ -9076,85 +9130,10 @@ kbd {
 
   .candidateProfileActions a {
     flex: 1 1 120px;
-    min-height: 44px;
-  }
-
-  .candidateTabs > a,
-  .candidateTabs > span {
-    min-height: 44px;
   }
 
   .candidateFactGrid div {
     border-right: 0;
-  }
-
-  .candidateFactGrid strong {
-    font-size: 14px;
-  }
-
-  .candidateProfileTitle h2 {
-    font-size: 26px;
-  }
-}
-
-@media (max-width: 480px) {
-  .candidateProfileHero {
-    grid-template-columns: 1fr;
-    justify-items: center;
-    text-align: center;
-    gap: 10px;
-    padding: 12px;
-  }
-
-  .candidateAvatar {
-    width: 56px;
-    height: 56px;
-    font-size: 17px;
-  }
-
-  .candidateProfileTitle {
-    justify-items: center;
-  }
-
-  .candidateProfileTitle h2 {
-    font-size: 22px;
-  }
-
-  .candidateStatusLine {
-    justify-content: center;
-  }
-
-  .candidateProfileActions,
-  .candidateReadiness,
-  .candidateProfileColumns {
-    padding-inline: 10px;
-  }
-
-  .candidateProfileActions a {
-    flex: 1 1 100%;
-    min-height: 44px;
-  }
-
-  .candidateReadinessScore strong {
-    font-size: 28px;
-  }
-
-  .candidateFactGrid strong {
-    font-size: 13px;
-  }
-
-  .candidateProfilePanel {
-    min-width: 0;
-  }
-
-  .candidatePills,
-  .candidateRows {
-    padding: 10px;
-  }
-
-  .candidateRows a,
-  .candidateRows article {
-    padding: 10px 8px;
   }
 }
 
@@ -9985,229 +9964,6 @@ kbd {
   animation: spin 0.6s linear infinite;
 }
 
-/* ── Request fulfillment stage actions ──────────────────────────────── */
-.stageActions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 8px;
-}
-
-.inlineForm {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.compactTextarea {
-  width: 200px;
-  padding: 4px 8px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  font-size: 0.8125rem;
-  line-height: 1.4;
-  resize: vertical;
-  background: var(--background);
-  color: var(--foreground);
-}
-
-.stageActionError {
-  display: block;
-  width: 100%;
-  font-size: 0.8125rem;
-  color: var(--color-destructive, #dc2626);
-  line-height: 1.4;
-}
-
-.noticeBanner {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 16px;
-  border-radius: 8px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  margin-bottom: 16px;
-}
-
-.noticeBannerSuccess {
-  background: var(--color-success-bg, #dcfce7);
-  color: var(--color-success-fg, #166534);
-  border: 1px solid var(--color-success-border, #bbf7d0);
-}
-
-.noticeBannerError {
-  background: var(--color-destructive-bg, #fef2f2);
-  color: var(--color-destructive, #dc2626);
-  border: 1px solid var(--color-destructive-border, #fecaca);
-}
-
-.noticeBanner span {
-  flex: 1;
-}
-
-.noticeBannerDismiss {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  border: none;
-  border-radius: 4px;
-  background: transparent;
-  cursor: pointer;
-  opacity: 0.6;
-}
-
-.noticeBannerDismiss:hover {
-  opacity: 1;
-}
-
-/* ── Match actions row ─────────────────────────────────────────────── */
-.matchActionsRow {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 8px;
-}
-
-/* ── Story form ─────────────────────────────────────────────────────── */
-.storyForm {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 12px;
-}
-
-/* ── Request rows ───────────────────────────────────────────────────── */
-.requestRow {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 10px 0;
-  border-bottom: 1px solid var(--line);
-}
-
-.requestRow:last-child {
-  border-bottom: none;
-}
-
-.requestRowLink {
-  display: grid;
-  gap: 2px;
-  min-width: 0;
-  text-decoration: none;
-  color: inherit;
-  cursor: pointer;
-}
-
-.requestRowLink strong {
-  color: #111827;
-  font-size: 0.9375rem;
-}
-
-.requestRowLink span {
-  color: #64748b;
-  font-size: 0.8125rem;
-}
-
-.requestRowLink small {
-  color: #94a3b8;
-  font-size: 0.75rem;
-}
-
-.requestRowActions {
-  display: flex;
-  gap: 4px;
-  flex-shrink: 0;
-}
-
-/* ── Candidate edit form extras ─────────────────────────────────────── */
-.editableList {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.editableList li {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 6px 8px;
-  border-radius: 6px;
-  background: var(--surface);
-}
-
-.editableList li span {
-  font-size: 0.9375rem;
-}
-
-.removeButton {
-  padding: 2px 10px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  font-size: 0.8125rem;
-  background: transparent;
-  color: var(--muted-foreground);
-  cursor: pointer;
-}
-
-.removeButton:hover {
-  border-color: var(--destructive);
-  color: var(--destructive);
-}
-
-.inlineFields {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-
-.inlineFields > * {
-  flex: 1;
-  min-width: 180px;
-}
-
-.checkboxLabel {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-weight: normal;
-}
-
-/* ── Candidate profile missing fields ───────────────────────────────── */
-.candidateMissingFields {
-  padding: 10px 14px;
-  border-radius: 10px;
-  background: rgba(245, 158, 11, 0.1);
-  border: 1px solid rgba(245, 158, 11, 0.2);
-}
-
-.candidateMissingFields span {
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: #92400e;
-  text-transform: uppercase;
-}
-
-.candidateMissingFields p {
-  margin: 4px 0 0;
-  font-size: 0.875rem;
-  color: #78350f;
-}
-
-/* ── Detail panel note ──────────────────────────────────────────────── */
-.detailPanelNote {
-  padding: 12px 18px;
-  margin: 0;
-  font-size: 0.875rem;
-  color: var(--muted-foreground);
-  border-bottom: 1px solid var(--line);
-}
-
 @keyframes spin {
   to {
     transform: rotate(360deg);
@@ -10533,7 +10289,6 @@ kbd {
   to { transform: translateY(20%); }
 }
 
-/* ── Candidate profile completeness ── */
 
 .candidateMissingFields {
   grid-column: 1 / -1;
