@@ -13,6 +13,7 @@ export type Capability =
   | "company.read.any"
   | "company.read.assigned"
   | "company.read.linked"
+  | "company.write.linked"
   | "company.manage"
   | "request.read.any"
   | "request.read.assigned"
