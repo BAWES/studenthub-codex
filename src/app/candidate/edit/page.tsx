@@ -64,7 +64,22 @@ export default async function CandidateEditPage() {
           title: c.title,
           subtitle: c.subtitle,
         }))}
-        educationEntries={data.educationEntries}
+        languages={data.languages.map((l) => ({
+          id: l.id,
+          title: l.title,
+          subtitle: l.subtitle,
+        }))}
+        educationEntries={data.educationEntries.map((e) => ({
+          id: e.id,
+          universityId: e.universityId,
+          degreeUuid: e.degreeUuid,
+          majorUuid: e.majorUuid,
+          graduationYear: e.graduationYear,
+          isCurrentlyStudying: e.isCurrentlyStudying,
+          universityLabel: universities.find((u) => u.id === e.universityId)?.label ?? `University #${e.universityId}`,
+          degreeLabel: e.degreeUuid ? degrees.find((d) => d.id === e.degreeUuid)?.label : undefined,
+          majorLabel: e.majorUuid ? majors.find((m) => m.id === e.majorUuid)?.label : undefined,
+        }))}
         degrees={degrees}
         majors={majors}
       />

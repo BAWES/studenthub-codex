@@ -776,6 +776,7 @@ export async function getCandidateDetail(candidateId: number, requestBasePath = 
     education,
     experiences,
     certificates,
+    languages,
     stats
   ] = await prisma.$transaction([
     prisma.candidate.findUnique({
@@ -1025,6 +1026,16 @@ export async function getCandidateDetail(candidateId: number, requestBasePath = 
         updated_at: true
       }
     }),
+    prisma.candidate_language.findMany({
+      where: { candidate_id: candidateId, deleted: 0 },
+      orderBy: { candidate_language_created_at: "desc" },
+      take: 10,
+      select: {
+        candidate_language_id: true,
+        language: true,
+        proficiency: true,
+      }
+    }),
     prisma.candidate_stats.findFirst({
       where: { candidate_id: candidateId },
       orderBy: { updated_at: "desc" },
@@ -1150,6 +1161,11 @@ export async function getCandidateDetail(candidateId: number, requestBasePath = 
       title: item.company_candidate_certificate_company_idTocompany?.company_name ?? item.store?.store_name ?? "Certificate",
       subtitle: item.certificate_type ? "Experience certificate" : "Certificate",
       meta: `${formatDate(item.start_date)} to ${formatDate(item.end_date)} · ${item.staff?.staff_name ?? "No staff owner"}`
+    })),
+    languages: languages.map((item) => ({
+      id: item.candidate_language_id,
+      title: item.language,
+      subtitle: item.proficiency,
     })),
     stats: stats
       ? {

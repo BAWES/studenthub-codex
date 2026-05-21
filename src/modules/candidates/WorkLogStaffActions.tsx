@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { approveWorkLog, rejectWorkLog } from "@/modules/candidates/worklog-actions";
 
 type WorkLogAction = (state: { error: string }, formData: FormData) => Promise<{ error: string }>;
+type FormAction = (formData: FormData) => void;
 
 export function WorkLogStaffActions({
   workLogUuid,
@@ -54,7 +55,7 @@ export function WorkLogStaffActions({
 
   if (mode === "reject") {
     return (
-      <form action={rejectAction} className="workLogRejectForm">
+      <form action={rejectAction as FormAction} className="workLogRejectForm">
         <input type="hidden" name="workLogUuid" value={workLogUuid} />
         <input name="reason" placeholder="Rejection reason..." required className="workLogRejectInput" maxLength={500} />
         <button type="submit" disabled={rejectPending} className="workLogRejectConfirm">
@@ -66,7 +67,7 @@ export function WorkLogStaffActions({
   }
 
   return (
-    <form action={approveAction} className="workLogActions">
+    <form action={approveAction as FormAction} className="workLogActions">
       <input type="hidden" name="workLogUuid" value={workLogUuid} />
       <button type="submit" disabled={approvePending} className="workLogApproveBtn">
         {approvePending ? "..." : "Approve"}

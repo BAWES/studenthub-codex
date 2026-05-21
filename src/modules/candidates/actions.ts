@@ -405,7 +405,44 @@ export async function removeCandidateSkill(_prevState: { error: string }, formDa
   return { error: "" };
 }
 
-// ---------------------------------------------------------------------------
+// -- Language CRUD ---------------------------------------------------------
+
+export type LanguageState = {
+  success: boolean;
+  error?: string;
+};
+
+const PROFICIENCY_LEVELS = ["basic", "intermediate", "advanced", "native"] as const;
+
+const languageSchema = z.object({
+  language: z.string().min(1, "Language is required").max(128),
+  proficiency: z.enum(PROFICIENCY_LEVELS, { required_error: "Proficiency level is required" }),
+});
+
+export async function addCandidateLanguage(_prevState: LanguageState, formData: FormData) {
+  const session = await requireCapability("candidate.profile.edit");
+  const candidateId = Number(session.id);
+  const parsed = languageSchema.safeParse({ language: formData.get("language"), proficiency: formData.get("proficiency") });
+  if (!parsed.success) return { success: false, error: parsed.error.errors.map((e) => e.message).join("; ") };
+  await prisma.candidate_language.create({ data: { candidate_id: candidateId, language: parsed.data.language, proficiency: parsed.data.proficiency, deleted: 0 } });
+  revalidatePath("/candidate");
+  revalidatePath("/candidate/edit");
+  return { success: true };
+}
+
+export async function removeCandidateLanguage(_prevState: LanguageState, formData: FormData) {
+  const session = await requireCapability("candidate.profile.edit");
+  const candidateId = Number(session.id);
+  const languageId = Number(formData.get("languageId"));
+  if (!Number.isInteger(languageId) || languageId <= 0) return { success: false, error: "Invalid language ID." };
+  const row = await prisma.candidate_language.findFirst({ where: { candidate_language_id: languageId, candidate_id: candidateId, deleted: 0 } });
+  if (!row) return { success: false, error: "Language entry not found." };
+  await prisma.candidate_language.update({ where: { candidate_language_id: languageId }, data: { deleted: 1 } });
+  revalidatePath("/candidate");
+  revalidatePath("/candidate/edit");
+  return { success: true };
+}
+
 // Degree & major lookup helpers
 // ---------------------------------------------------------------------------
 
