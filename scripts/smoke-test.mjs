@@ -438,6 +438,10 @@ async function main() {
     email: inspector.inspector_email,
   });
 
+  await expectStatus("/", 200);
+  await expectBodyIncludes("/", 200, "Every role gets its own workspace.");
+  await expectBodyIncludes("/", 200, "Why StudentHub");
+  await expectBodyIncludes("/", 200, "Get started");
   await expectStatus("/login", 200);
   await expectBodyIncludes("/login", 200, "One StudentHub login");
   // App Router redirect() renders 200 with meta-refresh, not 307
