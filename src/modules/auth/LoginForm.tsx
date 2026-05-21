@@ -51,7 +51,7 @@ export function LoginForm() {
           />
         </div>
 
-        {state.error ? <p className="text-[var(--destructive)] font-bold m-0">{state.error}</p> : null}
+        {state.error ? <p role="alert" aria-live="assertive" className="text-[var(--destructive)] font-bold m-0">{state.error}</p> : null}
 
         <Button type="submit" disabled={pending} size="lg" className="min-h-[52px]">
           <LogIn className="size-4" />

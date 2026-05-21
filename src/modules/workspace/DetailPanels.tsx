@@ -46,7 +46,7 @@ export function CompactList({ title, rows }: { title: string; rows: Row[] }) {
         {rows.length ? (
           rows.map((row) => (
             <article
-              className="min-h-[72px] grid grid-cols-[minmax(0,1fr)_minmax(126px,auto)] gap-4 px-[18px] py-3.5 border-b border-[var(--line)] last:border-b-0"
+              className={`min-h-[72px] grid ${row.meta ? "grid-cols-[minmax(0,1fr)_minmax(126px,auto)]" : "grid-cols-[minmax(0,1fr)]"} gap-4 px-[18px] py-3.5 border-b border-[var(--line)] last:border-b-0`}
               key={row.id}
             >
               <div className="min-w-0 grid content-center gap-1.5">

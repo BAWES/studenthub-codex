@@ -104,7 +104,6 @@ export function WorkspaceShell({
     return (
       <main className="block min-h-0">
         {stage}
-        <WorkspaceMobileNavigation items={navItems} role={session.role} />
       </main>
     );
   }

@@ -14,7 +14,7 @@ export function WorkspaceNavigation({ items, role }: { items: NavItem[]; role: s
         return (
           <Link
             aria-current={active ? "page" : undefined}
-            className={`w-full min-h-[42px] flex items-center relative border rounded-lg px-3 no-underline ${
+            className={`w-full min-h-[42px] flex items-center gap-2 relative border rounded-lg px-3 no-underline ${
               active
                 ? "border-[#d9dee8] bg-[var(--surface-soft)] text-[var(--blue)] shadow-[inset_3px_0_0_var(--blue),0_8px_22px_rgba(16,24,40,0.08)]"
                 : "border-transparent text-[var(--muted)] hover:border-[#d9dee8] hover:bg-[var(--surface-soft)] hover:text-[var(--blue)] hover:shadow-[0_8px_22px_rgba(16,24,40,0.08)]"

@@ -78,10 +78,10 @@ export default async function LoginPage({
         aria-label="StudentHub sign in"
       >
         {params.error === "expired" ? (
-          <p className="text-[var(--destructive)] font-bold m-0 p-4 pb-0">That verified account choice expired. Sign in again to continue.</p>
+          <p role="alert" aria-live="assertive" className="text-[var(--destructive)] font-bold m-0 p-4 pb-0">That verified account choice expired. Sign in again to continue.</p>
         ) : null}
         {params.error === "account" ? (
-          <p className="text-[var(--destructive)] font-bold m-0 p-4 pb-0">Choose a verified account to continue.</p>
+          <p role="alert" aria-live="assertive" className="text-[var(--destructive)] font-bold m-0 p-4 pb-0">Choose a verified account to continue.</p>
         ) : null}
         <LoginForm />
       </section>
