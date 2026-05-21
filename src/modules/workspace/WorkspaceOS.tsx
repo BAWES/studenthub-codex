@@ -30,8 +30,6 @@ const builtinShortcuts = [
   { keys: "Esc", label: "Close menu or clear focus" }
 ];
 
-// ── Keyboard shortcut chords per role ──────────────────────────
-
 function roleChords(role: string): { keys: string; label: string }[] {
   const base = builtinShortcuts;
   if (role === "admin") {
@@ -60,8 +58,6 @@ function roleChords(role: string): { keys: string; label: string }[] {
   }
   return base;
 }
-
-// ── Build commands from nav items ──────────────────────────────
 
 function buildOSCommands(navItems: NavItem[], role: string): OSCommand[] {
   const chordByHref: Record<string, string> = {};
@@ -169,7 +165,6 @@ export function WorkspaceOS({
       const el = e.target as HTMLElement | null;
       const typing = el?.tagName === "INPUT" || el?.tagName === "TEXTAREA" || el?.isContentEditable === true;
 
-      // Cmd+K or ? → open command palette
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
         setCmdOpen(true);
@@ -187,7 +182,6 @@ export function WorkspaceOS({
         return;
       }
 
-      // G then key chord navigation
       if (!typing && e.key.toLowerCase() === "g") {
         seqRef.current = "g";
         window.setTimeout(() => { seqRef.current = ""; }, 900);
@@ -204,7 +198,6 @@ export function WorkspaceOS({
         return;
       }
 
-      // / → focus search
       if (!typing && e.key === "/") {
         const input = document.querySelector<HTMLInputElement>("[data-command-search]");
         if (input) {
@@ -215,7 +208,6 @@ export function WorkspaceOS({
         return;
       }
 
-      // Command palette open → arrow keys / enter / esc
       if (cmdOpen) {
         if (e.key === "Escape") {
           e.preventDefault();
@@ -240,7 +232,6 @@ export function WorkspaceOS({
         }
       }
 
-      // j/k navigation on rows (when not in input)
       if (!typing && !cmdOpen && (e.key === "j" || e.key === "k")) {
         const rows = document.querySelectorAll("[data-os-navigable]");
         if (!rows.length) return;
@@ -261,34 +252,42 @@ export function WorkspaceOS({
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [cmdOpen, cmdIndex, filtered, commands, visit]);
 
-  // Reset active index when query changes
   useEffect(() => { setCmdIndex(0); }, [cmdQuery]);
 
   const chords = useMemo(() => roleChords(session.role), [session.role]);
 
   return (
     <WorkspaceOSContext.Provider value={{ embedded: true, session }}>
-      <main className="shell">
+      <main className="grid grid-cols-[224px_minmax(0,1fr)] min-h-svh bg-[radial-gradient(circle_at_top_left,color-mix(in_srgb,var(--blue)_10%,transparent),transparent_32rem),var(--paper)] text-[var(--ink)] max-md:block">
         {/* ── Sidebar Rail ─────────────────────────────────── */}
-        <aside className="workspaceRail">
-          <Link className="workspaceMark" href="/app" aria-label="StudentHub app">
-            <span>SH</span>
+        <aside className="sticky top-0 h-svh grid grid-rows-[auto_minmax(0,1fr)_auto] justify-items-stretch gap-2.5 border-r border-[var(--line)] bg-[color-mix(in_srgb,var(--surface)_94%,transparent)] py-3 px-2.5 max-md:hidden">
+          <Link className="w-full min-h-11 flex items-center gap-2.5 border border-[var(--line)] rounded-lg bg-[var(--ink)] text-[var(--surface)] px-3 font-black no-underline" href="/app" aria-label="StudentHub app">
+            <span className="w-[30px] h-[30px] inline-flex items-center justify-center rounded-md bg-[rgba(255,255,255,0.14)]">SH</span>
             <strong>StudentHub</strong>
           </Link>
           <WorkspaceNavigation items={navItems} role={session.role} />
-          <div className="workspaceRailFooter">
-            <button className="commandLauncher" type="button" onClick={() => { setCmdOpen(true); }}>
-              <span>⌘K</span>
+          <div className="grid gap-2">
+            <button
+              className="min-h-[42px] rounded-lg border border-[var(--line)] bg-[var(--surface-soft)] text-[var(--ink)] text-[13px] font-black cursor-pointer hover:border-[var(--blue)] hover:text-[var(--blue)]"
+              type="button"
+              onClick={() => { setCmdOpen(true); }}
+            >
+              <span className="text-[11px] text-[var(--muted)] font-bold uppercase">⌘K</span>
             </button>
             <ThemeToggle />
-            <form className="workspaceSignout" action={logoutAction}>
-              <button type="submit">Sign out</button>
+            <form action={logoutAction}>
+              <button
+                type="submit"
+                className="w-full min-h-10 border border-[var(--line)] rounded-lg bg-[var(--surface-soft)] text-[var(--ink)] text-[13px] font-black cursor-pointer hover:border-[var(--blue)] hover:text-[var(--blue)]"
+              >
+                Sign out
+              </button>
             </form>
           </div>
         </aside>
 
         {/* ── Content Stage ───────────────────────────────── */}
-        <section className="workspaceStage">
+        <section className="min-w-0 grid grid-rows-[auto_minmax(0,1fr)] min-h-svh">
           {children}
         </section>
 
@@ -298,57 +297,67 @@ export function WorkspaceOS({
 
       {/* ── Command Palette Overlay ───────────────────────── */}
       {cmdOpen ? (
-        <div className="commandOverlay" role="dialog" aria-modal="true" aria-label="Command menu">
-          <button className="commandScrim" aria-label="Close" type="button" onClick={() => setCmdOpen(false)} />
-          <section className="commandMenu">
-            <div className="commandInputWrap">
-              <span>⌘</span>
+        <div className="fixed inset-0 z-50 grid justify-items-center p-4 pt-[12vh]" role="dialog" aria-modal="true" aria-label="Command menu">
+          <button
+            className="absolute inset-0 bg-[rgba(0,0,0,0.48)] backdrop-blur-[6px]"
+            aria-label="Close"
+            type="button"
+            onClick={() => setCmdOpen(false)}
+          />
+          <section className="relative z-10 w-full max-w-[640px] grid rounded-xl border border-[var(--line)] bg-[var(--surface)] shadow-[0_28px_100px_rgba(16,24,40,0.32)] overflow-hidden">
+            <div className="flex items-center min-h-[48px] border-b border-[var(--line)] bg-[var(--surface-soft)] px-3 gap-2">
+              <span className="text-[var(--muted)] text-xs font-bold">⌘</span>
               <input
                 ref={cmdInputRef}
                 autoFocus
+                className="flex-1 min-w-0 h-10 border-0 bg-transparent text-[var(--ink)] text-sm px-1 font-inherit focus:outline-none"
                 placeholder="Jump to a view, search records, or run an action..."
                 value={cmdQuery}
                 onChange={(e) => setCmdQuery(e.target.value)}
               />
-              <kbd>Esc</kbd>
+              <kbd className="text-[var(--muted)] text-[11px] font-bold bg-[var(--surface)] border border-[var(--line)] rounded px-1.5">Esc</kbd>
             </div>
-            <div className="commandList">
+            <div className="max-h-[420px] overflow-y-auto p-2 grid gap-1">
               {grouped.length ? (
                 grouped.map(([section, items]) => (
-                  <div className="commandGroup" key={section}>
-                    <h3>{section}</h3>
+                  <div key={section}>
+                    <h3 className="text-[var(--muted)] text-[11px] font-extrabold uppercase px-2 py-1.5">{section}</h3>
                     {items.map((cmd) => {
                       const idx = filtered.findIndex((f) => f.id === cmd.id);
                       return (
                         <button
-                          className={idx === cmdIndex ? "active" : ""}
+                          className={`w-full min-h-[48px] grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-lg px-2.5 py-1.5 text-left border cursor-pointer ${
+                            idx === cmdIndex
+                              ? "border-[var(--blue)] bg-[#eef5ff]"
+                              : "border-transparent hover:bg-[var(--surface-soft)]"
+                          }`}
                           key={cmd.id}
                           type="button"
                           onMouseEnter={() => setCmdIndex(idx)}
                           onClick={() => visit(cmd.href)}
                         >
-                          <span>
-                            <strong>{cmd.title}</strong>
-                            <small>{cmd.subtitle}</small>
+                          <span className="grid gap-0.5">
+                            <strong className="text-sm text-[var(--ink)]">{cmd.title}</strong>
+                            <small className="text-xs text-[var(--muted)] overflow-hidden text-ellipsis whitespace-nowrap">{cmd.subtitle}</small>
                           </span>
-                          {cmd.shortcut ? <kbd>{cmd.shortcut}</kbd> : null}
+                          {cmd.shortcut ? <kbd className="text-[11px] font-mono font-bold text-[var(--muted)] bg-[var(--surface-soft)] border border-[var(--line)] rounded px-1.5 py-0.5">{cmd.shortcut}</kbd> : null}
                         </button>
                       );
                     })}
                   </div>
                 ))
               ) : (
-                <div className="commandEmpty">
-                  <strong>No command found</strong>
-                  <span>Try a view, record name, scope, or shortcut.</span>
+                <div className="grid gap-1.5 py-8 px-3 justify-items-center text-center">
+                  <strong className="text-[var(--ink)]">No command found</strong>
+                  <span className="text-[var(--muted)] text-sm">Try a view, record name, scope, or shortcut.</span>
                 </div>
               )}
             </div>
-            <div className="shortcutGrid">
+            <div className="grid grid-cols-2 gap-1 px-3 py-2.5 border-t border-[var(--line)]">
               {chords.map((row) => (
-                <div key={row.keys}>
-                  <kbd>{row.keys}</kbd>
-                  <span>{row.label}</span>
+                <div key={row.keys} className="flex items-center justify-between px-2 py-1.5 rounded-md">
+                  <kbd className="font-mono text-[11px] font-bold bg-[var(--surface)] text-[var(--ink)] border border-[var(--line)] rounded px-1.5 py-px">{row.keys}</kbd>
+                  <span className="text-[var(--muted)] text-xs">{row.label}</span>
                 </div>
               ))}
             </div>

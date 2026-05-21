@@ -59,9 +59,9 @@ export default async function CandidatePaymentDetailPage({
       <FactPanel title="Payment Breakdown" facts={facts} />
       {transfer && <FactPanel title="Transfer Run" facts={transferFacts} />}
       {data.invoices.length > 0 && (
-        <section className="detailPanel">
-          <h2>Receipts & Invoices</h2>
-          <p className="detailPanelNote">
+        <section className="mt-5 border border-[var(--line)] bg-[var(--surface)]">
+          <h2 className="m-0 p-[18px] border-b border-[var(--line)]">Receipts & Invoices</h2>
+          <p className="text-[var(--muted)] p-[18px] pb-3.5 m-0">
             Paid invoices linked to this payment period serve as your receipt.
           </p>
           <CompactList title="Invoices" rows={data.invoices} />

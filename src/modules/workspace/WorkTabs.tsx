@@ -61,12 +61,10 @@ export function useWorkTabs() {
   const router = useRouter();
   const [tabs, setTabs] = useState<WorkTab[]>([]);
 
-  // Hydrate from localStorage on mount
   useEffect(() => {
     setTabs(readTabs());
   }, []);
 
-  // Add current path as a tab when it's a record detail page
   useEffect(() => {
     const label = deriveLabel(pathname);
     if (!label) return;
@@ -117,21 +115,34 @@ export function WorkTabs({ state }: { state: WorkTabState }) {
   if (!state.tabs.length) return null;
 
   return (
-    <nav className="workTabs" aria-label="Recently opened records">
+    <nav
+      className="flex items-center gap-1 overflow-x-auto pb-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      aria-label="Recently opened records"
+    >
       {state.tabs.map((tab) => {
         const active = pathname === tab.path;
         return (
-          <span key={tab.path} className={`workTab ${active ? "active" : ""}`}>
+          <span
+            key={tab.path}
+            className={`inline-flex items-center border rounded-md overflow-hidden shrink-0 ${
+              active
+                ? "border-[var(--blue)] bg-[#eef5ff] dark:border-[var(--blue)] dark:bg-[rgba(138,191,255,0.12)]"
+                : "border-[var(--line)] bg-[var(--surface-soft)] dark:border-[var(--line)] dark:bg-[var(--surface-soft)]"
+            }`}
+          >
             <button
               type="button"
               onClick={() => router.push(tab.path as Route)}
               aria-current={active ? "page" : undefined}
+              className={`min-h-8 inline-flex items-center border-0 bg-none text-xs font-bold px-2.5 cursor-pointer whitespace-nowrap ${
+                active ? "text-[var(--blue)]" : "text-[var(--ink)]"
+              }`}
             >
               {tab.label}
             </button>
             <button
               type="button"
-              className="workTabClose"
+              className="min-w-6 min-h-6 inline-flex items-center justify-center border-0 border-l border-[var(--line)] bg-none text-[var(--muted)] cursor-pointer p-0 hover:text-[var(--rose)] hover:bg-[rgba(180,35,87,0.08)]"
               aria-label={`Close ${tab.label}`}
               onClick={(e) => {
                 e.stopPropagation();
@@ -144,7 +155,12 @@ export function WorkTabs({ state }: { state: WorkTabState }) {
         );
       })}
       {state.tabs.length > 1 ? (
-        <button type="button" className="workTabsClear" onClick={state.closeAll} aria-label="Close all tabs">
+        <button
+          type="button"
+          className="min-h-8 inline-flex items-center border border-transparent rounded-md bg-none text-[var(--faint)] text-[11px] font-semibold px-2.5 cursor-pointer whitespace-nowrap shrink-0 hover:text-[var(--rose)] hover:border-[var(--line)]"
+          onClick={state.closeAll}
+          aria-label="Close all tabs"
+        >
           Clear all
         </button>
       ) : null}
