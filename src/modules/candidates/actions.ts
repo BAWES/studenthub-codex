@@ -406,6 +406,34 @@ export async function removeCandidateSkill(_prevState: { error: string }, formDa
 }
 
 // ---------------------------------------------------------------------------
+// Degree & major lookup helpers
+// ---------------------------------------------------------------------------
+
+export async function getDegreeOptions() {
+  const rows = await prisma.degree.findMany({
+    orderBy: { degree_name_en: "asc" },
+    select: { degree_uuid: true, degree_name_en: true },
+    take: 250,
+  });
+  return rows.map((r) => ({
+    id: r.degree_uuid,
+    label: r.degree_name_en,
+  }));
+}
+
+export async function getMajorOptions() {
+  const rows = await prisma.major.findMany({
+    orderBy: { major_name_en: "asc" },
+    select: { major_uuid: true, major_name_en: true },
+    take: 250,
+  });
+  return rows.map((r) => ({
+    id: r.major_uuid,
+    label: r.major_name_en,
+  }));
+}
+
+// ---------------------------------------------------------------------------
 // Work experience CRUD
 // ---------------------------------------------------------------------------
 
@@ -461,6 +489,225 @@ export async function removeCandidateExperience(_prevState: { error: string }, f
   revalidatePath("/candidate");
   revalidatePath("/candidate/edit");
   return { error: "" };
+}
+
+// ---------------------------------------------------------------------------
+// Certificate CRUD
+// ---------------------------------------------------------------------------
+
+const certificateSchema = z.object({
+  certificate_type: z.string().transform((v) => v === "true").pipe(z.boolean()),
+  certificate_title: z.string().min(1, "Certificate title is required.").max(200, "Title must be under 200 characters."),
+  certificate_issuer: z.string().max(200, "Issuer must be under 200 characters.").optional(),
+  start_date: z.string().max(10).optional(),
+  end_date: z.string().max(10).optional(),
+  certificate_url: z.string().url("Please enter a valid URL.").max(500, "URL must be under 500 characters.").optional().or(z.literal("")),
+});
+
+export async function addCandidateCertificate(_prevState: { error: string }, formData: FormData) {
+  const session = await requireRoleCapability("candidate", "candidate.read.own");
+  const candidateId = Number(session.id);
+  const parsed = certificateSchema.safeParse({
+    certificate_type: formData.get("certificate_type"),
+    certificate_title: formData.get("certificate_title"),
+    certificate_issuer: formData.get("certificate_issuer") || undefined,
+    start_date: formData.get("start_date") || undefined,
+    end_date: formData.get("end_date") || undefined,
+    certificate_url: formData.get("certificate_url") || undefined,
+  });
+  if (!parsed.success) return { error: parsed.error.errors[0]?.message ?? "Validation failed." };
+  const { certificate_type, certificate_title, certificate_issuer, start_date, end_date, certificate_url } = parsed.data;
+  const now = new Date();
+  await prisma.candidate_certificate.create({
+    data: {
+      certificate_uuid: `cert_${crypto.randomUUID()}`,
+      candidate_id: candidateId,
+      certificate_type,
+      certificate_title,
+      certificate_issuer: certificate_issuer || null,
+      certificate_url: certificate_url || null,
+      start_date: start_date ? (isFinite(new Date(start_date).getTime()) ? new Date(start_date) : null) : null,
+      end_date: end_date ? (isFinite(new Date(end_date).getTime()) ? new Date(end_date) : null) : null,
+      is_deleted: false,
+      created_at: now,
+      updated_at: now,
+    },
+  });
+  revalidatePath("/candidate");
+  revalidatePath("/candidate/edit");
+  return { error: "" };
+}
+
+export async function removeCandidateCertificate(_prevState: { error: string }, formData: FormData) {
+  const session = await requireRoleCapability("candidate", "candidate.read.own");
+  const candidateId = Number(session.id);
+  const certificateUuid = String(formData.get("certificateUuid") ?? "");
+  if (!certificateUuid) return { error: "Missing certificate identifier." };
+  const row = await prisma.candidate_certificate.findFirst({
+    where: { certificate_uuid: certificateUuid, candidate_id: candidateId, is_deleted: false },
+    select: { certificate_uuid: true },
+  });
+  if (!row) return { error: "Certificate not found." };
+  await prisma.candidate_certificate.update({
+    where: { certificate_uuid: certificateUuid },
+    data: { is_deleted: true, updated_at: new Date() },
+  });
+  revalidatePath("/candidate");
+  revalidatePath("/candidate/edit");
+  return { error: "" };
+}
+
+// ---------------------------------------------------------------------------
+// Education CRUD
+// ---------------------------------------------------------------------------
+
+export type EducationState = {
+  success: boolean;
+  error?: string;
+};
+
+const educationSchema = z.object({
+  universityId: z.coerce.number().int().positive("University is required."),
+  degreeUuid: z.string().optional().default(""),
+  majorUuid: z.string().optional().default(""),
+  graduationYear: z.union([z.coerce.number().int().min(1950).max(2035), z.literal("")]).optional().default(""),
+  isCurrentlyStudying: z.union([z.literal("1"), z.literal("0")]).optional().default("0"),
+});
+
+function parseEducationFields(formData: FormData) {
+  const state: EducationState = { success: false };
+
+  const raw = {
+    universityId: formData.get("universityId") ?? "",
+    degreeUuid: String(formData.get("degreeUuid") ?? ""),
+    majorUuid: String(formData.get("majorUuid") ?? ""),
+    graduationYear: formData.get("graduationYear") ?? "",
+    isCurrentlyStudying: formData.get("isCurrentlyStudying") ?? "0",
+  };
+
+  const parsed = educationSchema.safeParse(raw);
+  if (!parsed.success) {
+    const err = parsed.error.flatten().fieldErrors;
+    state.error = err.universityId?.[0] ?? "Invalid education fields.";
+    return { state, fields: null };
+  }
+
+  const d = parsed.data;
+  return {
+    state,
+    fields: {
+      universityId: d.universityId,
+      degreeUuid: d.degreeUuid || undefined,
+      majorUuid: d.majorUuid || undefined,
+      graduationYear: d.graduationYear === "" ? null : d.graduationYear,
+      isCurrentlyStudying: d.isCurrentlyStudying === "1",
+    },
+  };
+}
+
+export async function addCandidateEducation(
+  _prevState: EducationState,
+  formData: FormData,
+): Promise<EducationState> {
+  const session = await requireRoleCapability("candidate", "candidate.read.own");
+  const candidateId = Number(session.id);
+
+  const result = parseEducationFields(formData);
+  if (!result.fields) return result.state;
+
+  const f = result.fields;
+  const educationUuid = `edu_${crypto.randomUUID()}`;
+  const now = new Date();
+
+  await prisma.candidate_education.create({
+    data: {
+      education_uuid: educationUuid,
+      candidate_id: candidateId,
+      university_id: f.universityId,
+      degree_uuid: f.degreeUuid,
+      major_uuid: f.majorUuid,
+      graduation_year: f.graduationYear,
+      is_currently_studying: f.isCurrentlyStudying,
+      created_at: now,
+      updated_at: now,
+    },
+  });
+
+  revalidatePath("/candidate");
+  revalidatePath("/candidate/edit");
+  return { success: true };
+}
+
+export async function editCandidateEducation(
+  _prevState: EducationState,
+  formData: FormData,
+): Promise<EducationState> {
+  const session = await requireRoleCapability("candidate", "candidate.read.own");
+  const candidateId = Number(session.id);
+
+  const educationUuid = String(formData.get("educationUuid") ?? "").trim();
+  if (!educationUuid) return { success: false, error: "Missing education identifier." };
+
+  const result = parseEducationFields(formData);
+  if (!result.fields) return result.state;
+
+  const existing = await prisma.candidate_education.findFirst({
+    where: { education_uuid: educationUuid, candidate_id: candidateId },
+    select: { education_uuid: true },
+  });
+  if (!existing) return { success: false, error: "Education entry not found." };
+
+  const f = result.fields;
+  const newUuid = `edu_${crypto.randomUUID()}`;
+  const now = new Date();
+
+  await prisma.$transaction([
+    prisma.candidate_education.delete({
+      where: { education_uuid: educationUuid },
+    }),
+    prisma.candidate_education.create({
+      data: {
+        education_uuid: newUuid,
+        candidate_id: candidateId,
+        university_id: f.universityId,
+        degree_uuid: f.degreeUuid,
+        major_uuid: f.majorUuid,
+        graduation_year: f.graduationYear,
+        is_currently_studying: f.isCurrentlyStudying,
+        created_at: now,
+        updated_at: now,
+      },
+    }),
+  ]);
+
+  revalidatePath("/candidate");
+  revalidatePath("/candidate/edit");
+  return { success: true };
+}
+
+export async function removeCandidateEducation(
+  _prevState: EducationState,
+  formData: FormData,
+): Promise<EducationState> {
+  const session = await requireRoleCapability("candidate", "candidate.read.own");
+  const candidateId = Number(session.id);
+
+  const educationUuid = String(formData.get("educationUuid") ?? "").trim();
+  if (!educationUuid) return { success: false, error: "Missing education identifier." };
+
+  const row = await prisma.candidate_education.findFirst({
+    where: { education_uuid: educationUuid, candidate_id: candidateId },
+    select: { education_uuid: true },
+  });
+  if (!row) return { success: false, error: "Education entry not found." };
+
+  await prisma.candidate_education.delete({
+    where: { education_uuid: educationUuid },
+  });
+
+  revalidatePath("/candidate");
+  revalidatePath("/candidate/edit");
+  return { success: true };
 }
 
 // ---------------------------------------------------------------------------

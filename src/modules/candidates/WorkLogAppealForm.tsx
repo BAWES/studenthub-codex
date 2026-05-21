@@ -1,9 +1,7 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState } from "react";
-import { toast } from "sonner";
+import { useActionState } from "react";
 import { appealWorkLog } from "@/modules/candidates/actions";
-import { approveWorkLog, rejectWorkLog, resolveWorkLogAppeal } from "@/modules/candidates/worklog-actions";
 
 export function WorkLogAppealForm({ workLogUuid }: { workLogUuid: string }) {
   const [state, action, pending] = useActionState(appealWorkLog, { error: "" });
@@ -23,114 +21,6 @@ export function WorkLogAppealForm({ workLogUuid }: { workLogUuid: string }) {
       <div className="formActions">
         <button type="submit" disabled={pending}>
           {pending ? "Submitting..." : "Submit appeal"}
-        </button>
-      </div>
-    </form>
-  );
-}
-
-export function WorkLogStaffActions({
-  workLogUuid,
-  currentStatus,
-}: {
-  workLogUuid: string;
-  currentStatus: number | null;
-}) {
-  const [mode, setMode] = useState<"idle" | "reject">("idle");
-  const [approveState, approveAction, approvePending] = useActionState(approveWorkLog, { error: "" });
-  const [rejectState, rejectAction, rejectPending] = useActionState(rejectWorkLog, { error: "" });
-  const prevApproveError = useRef(approveState.error);
-  const prevRejectError = useRef(rejectState.error);
-
-  useEffect(() => {
-    if (approveState.error && approveState.error !== prevApproveError.current) {
-      toast.error("Approval failed", { description: approveState.error });
-    } else if (!approvePending && approveState.error === "" && prevApproveError.current !== "") {
-      toast.success("Work log approved", { description: "The work log entry has been approved." });
-    }
-    prevApproveError.current = approveState.error;
-  }, [approveState.error, approvePending]);
-
-  useEffect(() => {
-    if (rejectState.error && rejectState.error !== prevRejectError.current) {
-      toast.error("Rejection failed", { description: rejectState.error });
-    } else if (!rejectPending && rejectState.error === "" && prevRejectError.current !== "") {
-      toast.success("Work log rejected", { description: "The work log entry has been rejected." });
-      setMode("idle");
-    }
-    prevRejectError.current = rejectState.error;
-  }, [rejectState.error, rejectPending]);
-
-  const isPending = currentStatus === 0;
-
-  if (!isPending) {
-    return (
-      <span className="workLogStatusBadge" data-status={currentStatus}>
-        {currentStatus === 1 ? "Approved" : currentStatus === 2 ? "Rejected" : `Status ${currentStatus}`}
-      </span>
-    );
-  }
-
-  if (mode === "reject") {
-    return (
-      <form action={rejectAction} className="workLogRejectForm">
-        <input type="hidden" name="workLogUuid" value={workLogUuid} />
-        <input name="reason" placeholder="Rejection reason..." required className="workLogRejectInput" maxLength={500} />
-        <button type="submit" disabled={rejectPending} className="workLogRejectConfirm">
-          {rejectPending ? "..." : "Confirm"}
-        </button>
-        <button type="button" onClick={() => setMode("idle")} className="workLogRejectCancel">
-          Cancel
-        </button>
-      </form>
-    );
-  }
-
-  return (
-    <form action={approveAction} className="workLogActions">
-      <input type="hidden" name="workLogUuid" value={workLogUuid} />
-      <button type="submit" disabled={approvePending} className="workLogApproveBtn">
-        {approvePending ? "..." : "Approve"}
-      </button>
-      <button type="button" onClick={() => setMode("reject")} className="workLogRejectBtn">
-        Reject
-      </button>
-    </form>
-  );
-}
-
-export function AppealResolveForm({ appealUuid }: { appealUuid: string }) {
-  const [state, action, pending] = useActionState(resolveWorkLogAppeal, { error: "" });
-  const prevError = useRef(state.error);
-
-  useEffect(() => {
-    if (state.error && state.error !== prevError.current) {
-      toast.error("Resolution failed", { description: state.error });
-    } else if (!pending && state.error === "" && prevError.current !== "") {
-      toast.success("Appeal resolved", { description: "The appeal has been resolved." });
-    }
-    prevError.current = state.error;
-  }, [state.error, pending]);
-
-  return (
-    <form action={action} className="appealResolveForm">
-      <input type="hidden" name="appealUuid" value={appealUuid} />
-      <h3>Resolve Appeal</h3>
-      <label>
-        <span>Resolution</span>
-        <select name="resolution" required defaultValue="">
-          <option value="" disabled>Choose resolution...</option>
-          <option value="approve">Approve appeal</option>
-          <option value="reject">Reject appeal</option>
-        </select>
-      </label>
-      <label>
-        <span>Note (optional)</span>
-        <textarea name="note" rows={3} placeholder="Add a note about this resolution..." maxLength={1000} />
-      </label>
-      <div className="formActions">
-        <button type="submit" disabled={pending}>
-          {pending ? "Submitting..." : "Submit resolution"}
         </button>
       </div>
     </form>
