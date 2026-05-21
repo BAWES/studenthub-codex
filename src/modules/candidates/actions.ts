@@ -406,6 +406,34 @@ export async function removeCandidateSkill(_prevState: { error: string }, formDa
 }
 
 // ---------------------------------------------------------------------------
+// Degree & major lookup helpers
+// ---------------------------------------------------------------------------
+
+export async function getDegreeOptions() {
+  const rows = await prisma.degree.findMany({
+    orderBy: { degree_name_en: "asc" },
+    select: { degree_uuid: true, degree_name_en: true },
+    take: 250,
+  });
+  return rows.map((r) => ({
+    id: r.degree_uuid,
+    label: r.degree_name_en,
+  }));
+}
+
+export async function getMajorOptions() {
+  const rows = await prisma.major.findMany({
+    orderBy: { major_name_en: "asc" },
+    select: { major_uuid: true, major_name_en: true },
+    take: 250,
+  });
+  return rows.map((r) => ({
+    id: r.major_uuid,
+    label: r.major_name_en,
+  }));
+}
+
+// ---------------------------------------------------------------------------
 // Work experience CRUD
 // ---------------------------------------------------------------------------
 
@@ -461,6 +489,159 @@ export async function removeCandidateExperience(_prevState: { error: string }, f
   revalidatePath("/candidate");
   revalidatePath("/candidate/edit");
   return { error: "" };
+}
+
+// ---------------------------------------------------------------------------
+// Education CRUD
+// ---------------------------------------------------------------------------
+
+export type EducationState = {
+  success: boolean;
+  error?: string;
+};
+
+const educationSchema = z.object({
+  universityId: z.coerce.number().int().positive("University is required."),
+  degreeUuid: z.string().optional().default(""),
+  majorUuid: z.string().optional().default(""),
+  graduationYear: z.union([z.coerce.number().int().min(1950).max(2035), z.literal("")]).optional().default(""),
+  isCurrentlyStudying: z.union([z.literal("1"), z.literal("0")]).optional().default("0"),
+});
+
+function parseEducationFields(formData: FormData) {
+  const state: EducationState = { success: false };
+
+  const raw = {
+    universityId: formData.get("universityId") ?? "",
+    degreeUuid: String(formData.get("degreeUuid") ?? ""),
+    majorUuid: String(formData.get("majorUuid") ?? ""),
+    graduationYear: formData.get("graduationYear") ?? "",
+    isCurrentlyStudying: formData.get("isCurrentlyStudying") ?? "0",
+  };
+
+  const parsed = educationSchema.safeParse(raw);
+  if (!parsed.success) {
+    const err = parsed.error.flatten().fieldErrors;
+    state.error = err.universityId?.[0] ?? "Invalid education fields.";
+    return { state, fields: null };
+  }
+
+  const d = parsed.data;
+  return {
+    state,
+    fields: {
+      universityId: d.universityId,
+      degreeUuid: d.degreeUuid || undefined,
+      majorUuid: d.majorUuid || undefined,
+      graduationYear: d.graduationYear === "" ? null : d.graduationYear,
+      isCurrentlyStudying: d.isCurrentlyStudying === "1",
+    },
+  };
+}
+
+export async function addCandidateEducation(
+  _prevState: EducationState,
+  formData: FormData,
+): Promise<EducationState> {
+  const session = await requireRoleCapability("candidate", "candidate.read.own");
+  const candidateId = Number(session.id);
+
+  const result = parseEducationFields(formData);
+  if (!result.fields) return result.state;
+
+  const f = result.fields;
+  const educationUuid = `edu_${crypto.randomUUID()}`;
+  const now = new Date();
+
+  await prisma.candidate_education.create({
+    data: {
+      education_uuid: educationUuid,
+      candidate_id: candidateId,
+      university_id: f.universityId,
+      degree_uuid: f.degreeUuid,
+      major_uuid: f.majorUuid,
+      graduation_year: f.graduationYear,
+      is_currently_studying: f.isCurrentlyStudying,
+      created_at: now,
+      updated_at: now,
+    },
+  });
+
+  revalidatePath("/candidate");
+  revalidatePath("/candidate/edit");
+  return { success: true };
+}
+
+export async function editCandidateEducation(
+  _prevState: EducationState,
+  formData: FormData,
+): Promise<EducationState> {
+  const session = await requireRoleCapability("candidate", "candidate.read.own");
+  const candidateId = Number(session.id);
+
+  const educationUuid = String(formData.get("educationUuid") ?? "").trim();
+  if (!educationUuid) return { success: false, error: "Missing education identifier." };
+
+  const result = parseEducationFields(formData);
+  if (!result.fields) return result.state;
+
+  const existing = await prisma.candidate_education.findFirst({
+    where: { education_uuid: educationUuid, candidate_id: candidateId },
+    select: { education_uuid: true },
+  });
+  if (!existing) return { success: false, error: "Education entry not found." };
+
+  const f = result.fields;
+  const newUuid = `edu_${crypto.randomUUID()}`;
+  const now = new Date();
+
+  await prisma.$transaction([
+    prisma.candidate_education.delete({
+      where: { education_uuid: educationUuid },
+    }),
+    prisma.candidate_education.create({
+      data: {
+        education_uuid: newUuid,
+        candidate_id: candidateId,
+        university_id: f.universityId,
+        degree_uuid: f.degreeUuid,
+        major_uuid: f.majorUuid,
+        graduation_year: f.graduationYear,
+        is_currently_studying: f.isCurrentlyStudying,
+        created_at: now,
+        updated_at: now,
+      },
+    }),
+  ]);
+
+  revalidatePath("/candidate");
+  revalidatePath("/candidate/edit");
+  return { success: true };
+}
+
+export async function removeCandidateEducation(
+  _prevState: EducationState,
+  formData: FormData,
+): Promise<EducationState> {
+  const session = await requireRoleCapability("candidate", "candidate.read.own");
+  const candidateId = Number(session.id);
+
+  const educationUuid = String(formData.get("educationUuid") ?? "").trim();
+  if (!educationUuid) return { success: false, error: "Missing education identifier." };
+
+  const row = await prisma.candidate_education.findFirst({
+    where: { education_uuid: educationUuid, candidate_id: candidateId },
+    select: { education_uuid: true },
+  });
+  if (!row) return { success: false, error: "Education entry not found." };
+
+  await prisma.candidate_education.delete({
+    where: { education_uuid: educationUuid },
+  });
+
+  revalidatePath("/candidate");
+  revalidatePath("/candidate/edit");
+  return { success: true };
 }
 
 // ---------------------------------------------------------------------------

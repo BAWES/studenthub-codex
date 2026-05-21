@@ -2,7 +2,7 @@
 
 import { useActionState, useEffect } from "react";
 import { toast } from "sonner";
-import type { ProfileState } from "@/modules/candidates/actions";
+import type { ProfileState, EducationState } from "@/modules/candidates/actions";
 import {
   updateCandidateProfile,
   uploadDocument,
@@ -10,12 +10,26 @@ import {
   removeCandidateSkill,
   addCandidateExperience,
   removeCandidateExperience,
+  addCandidateEducation,
+  removeCandidateEducation,
 } from "@/modules/candidates/actions";
 
 type Option = { id: number; label: string };
+type UuidOption = { id: string; label: string };
 
 type Skill = { id: number; title: string };
 type Experience = { id: number; title: string; subtitle: string };
+type EducationEntry = {
+  id: string;
+  universityId: number;
+  degreeUuid: string | null;
+  majorUuid: string | null;
+  graduationYear: number | null;
+  isCurrentlyStudying: boolean;
+  universityLabel: string;
+  degreeLabel?: string;
+  majorLabel?: string;
+};
 
 type Props = {
   candidate: {
@@ -45,9 +59,12 @@ type Props = {
   banks: Option[];
   skills: Skill[];
   experiences: Experience[];
+  educationEntries: EducationEntry[];
+  degrees: UuidOption[];
+  majors: UuidOption[];
 };
 
-export function CandidateEditForm({ candidate, countries, universities, banks, skills, experiences }: Props) {
+export function CandidateEditForm({ candidate, countries, universities, banks, skills, experiences, educationEntries, degrees, majors }: Props) {
   const [profileState, profileAction, profilePending] = useActionState(
     updateCandidateProfile,
     { success: false } as ProfileState,
@@ -67,6 +84,24 @@ export function CandidateEditForm({ candidate, countries, universities, banks, s
   const [, removeSkillAction, removeSkillPending] = useActionState(removeCandidateSkill, { error: "" });
   const [, addExpAction, addExpPending] = useActionState(addCandidateExperience, { error: "" });
   const [, removeExpAction, removeExpPending] = useActionState(removeCandidateExperience, { error: "" });
+  const [addEduState, addEduAction, addEduPending] = useActionState(addCandidateEducation, { success: false } as EducationState);
+  const [removeEduState, removeEduAction, removeEduPending] = useActionState(removeCandidateEducation, { success: false } as EducationState);
+
+  useEffect(() => {
+    if (addEduState.success) {
+      toast.success("Education added", {
+        description: "Your education entry has been added.",
+      });
+    }
+  }, [addEduState]);
+
+  useEffect(() => {
+    if (removeEduState.success) {
+      toast.success("Education removed", {
+        description: "The education entry has been removed.",
+      });
+    }
+  }, [removeEduState]);
 
   return (
     <div className="candidateEditLayout">
@@ -321,6 +356,99 @@ export function CandidateEditForm({ candidate, countries, universities, banks, s
       {experiences.map((e) => (
         <form key={e.id} id={`remove-exp-${e.id}`} action={removeExpAction} hidden>
           <input type="hidden" name="experienceId" value={e.id} />
+        </form>
+      ))}
+
+      <form action={addEduAction} className="candidateEditForm">
+        <h2>Education</h2>
+
+        {educationEntries.length ? (
+          <ul className="editableList">
+            {educationEntries.map((e) => (
+              <li key={e.id}>
+                <span>
+                  {e.universityLabel}
+                  {e.degreeLabel ? ` · ${e.degreeLabel}` : ""}
+                  {e.majorLabel ? ` · ${e.majorLabel}` : ""}
+                  {e.graduationYear ? ` (${e.graduationYear})` : ""}
+                  {e.isCurrentlyStudying ? " · Currently studying" : ""}
+                </span>
+                <button
+                  type="submit"
+                  form={`remove-edu-${e.id}`}
+                  disabled={removeEduPending}
+                  className="removeButton"
+                >
+                  Remove
+                </button>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="formNotice">No education entries added yet.</p>
+        )}
+
+        <label>
+          <span>University</span>
+          <select name="universityId" required defaultValue="">
+            <option value="" disabled>
+              — Select university —
+            </option>
+            {universities.map((u) => (
+              <option key={u.id} value={u.id}>
+                {u.label}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label>
+          <span>Degree</span>
+          <select name="degreeUuid" defaultValue="">
+            <option value="">— None —</option>
+            {degrees.map((d) => (
+              <option key={d.id} value={d.id}>
+                {d.label}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label>
+          <span>Major</span>
+          <select name="majorUuid" defaultValue="">
+            <option value="">— None —</option>
+            {majors.map((m) => (
+              <option key={m.id} value={m.id}>
+                {m.label}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <div className="inlineFields">
+          <label>
+            <span>Graduation year</span>
+            <input name="graduationYear" type="number" min="1950" max="2035" />
+          </label>
+          <label className="checkboxLabel">
+            <input name="isCurrentlyStudying" type="checkbox" value="1" />
+            <span>Currently studying</span>
+          </label>
+        </div>
+
+        {addEduState.error ? <p className="formError">{addEduState.error}</p> : null}
+
+        <div className="formActions">
+          <button type="submit" disabled={addEduPending}>
+            {addEduPending ? "Adding..." : "Add education"}
+          </button>
+        </div>
+      </form>
+
+      {educationEntries.map((e) => (
+        <form key={e.id} id={`remove-edu-${e.id}`} action={removeEduAction} hidden>
+          <input type="hidden" name="educationUuid" value={e.id} />
         </form>
       ))}
     </div>

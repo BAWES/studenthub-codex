@@ -986,6 +986,9 @@ export async function getCandidateDetail(candidateId: number, requestBasePath = 
       take: 6,
       select: {
         education_uuid: true,
+        university_id: true,
+        degree_uuid: true,
+        major_uuid: true,
         graduation_year: true,
         is_currently_studying: true,
         university: { select: { university_name_en: true } },
@@ -1123,6 +1126,14 @@ export async function getCandidateDetail(candidateId: number, requestBasePath = 
       title: item.university.university_name_en ?? "Education",
       subtitle: [item.degree?.degree_name_en, item.major?.major_name_en].filter(Boolean).join(" · ") || "Education",
       meta: `${item.is_currently_studying ? "Currently studying" : "Graduated"}${item.graduation_year ? ` · ${item.graduation_year}` : ""}`
+    })),
+    educationEntries: education.map((item) => ({
+      id: item.education_uuid,
+      universityId: item.university_id,
+      degreeUuid: item.degree_uuid,
+      majorUuid: item.major_uuid,
+      graduationYear: item.graduation_year,
+      isCurrentlyStudying: item.is_currently_studying ?? false,
     })),
     experiences: experiences.map((item) => ({
       id: item.candidate_experience_id,
