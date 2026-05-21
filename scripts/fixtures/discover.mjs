@@ -54,7 +54,7 @@ async function main() {
 
   const staff = await firstOrThrow("staff (not deleted)", () =>
     prisma.staff.findFirst({
-      where: { deleted_at: null },
+      where: { deleted: 0 },
       select: { staff_id: true, staff_name: true, staff_email: true },
     }),
   );
@@ -91,14 +91,14 @@ async function main() {
     prisma.request.findFirst({
       where: { staff_id: { not: null } },
       orderBy: { request_updated_datetime: "desc" },
-      select: { request_uuid: true, staff_id: true, request_title: true },
+      select: { request_uuid: true, staff_id: true, request_position_title: true },
     }),
   );
 
   const adminRequest = await firstOrThrow("any request", () =>
     prisma.request.findFirst({
       orderBy: { request_updated_datetime: "desc" },
-      select: { request_uuid: true, request_title: true },
+      select: { request_uuid: true, request_position_title: true },
     }),
   );
 
@@ -117,7 +117,7 @@ async function main() {
             request: {
               orderBy: { request_updated_datetime: "desc" },
               take: 1,
-              select: { request_uuid: true, request_title: true },
+              select: { request_uuid: true, request_position_title: true },
             },
           },
         },
@@ -167,7 +167,7 @@ async function main() {
   // ── Aggregate record counts for key tables ──
   const counts = {
     admin: await countOrZero(() => prisma.admin.count()),
-    staff: await countOrZero(() => prisma.staff.count({ where: { deleted_at: null } })),
+    staff: await countOrZero(() => prisma.staff.count({ where: { deleted: 0 } })),
     candidate: await countOrZero(() => prisma.candidate.count({ where: { deleted: 0 } })),
     company: await countOrZero(() => prisma.company.count({ where: { deleted: 0 } })),
     inspector: await countOrZero(() => prisma.inspector.count({ where: { inspector_deleted: 0 } })),
@@ -220,16 +220,16 @@ async function main() {
         staff_request: {
           request_uuid: staffRequest.request_uuid,
           staff_id: staffRequest.staff_id,
-          title: staffRequest.request_title,
+          title: staffRequest.request_position_title,
         },
         admin_request: {
           request_uuid: adminRequest.request_uuid,
-          title: adminRequest.request_title,
+          title: adminRequest.request_position_title,
         },
         company_request: {
           request_uuid: companyRequest.company.request[0]?.request_uuid ?? null,
           contact_uuid: companyRequest.contact_uuid,
-          title: companyRequest.company.request[0]?.request_title ?? null,
+          title: companyRequest.company.request[0]?.request_position_title ?? null,
         },
         admin_company: {
           company_id: adminCompany.company_id,
