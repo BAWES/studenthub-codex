@@ -195,7 +195,7 @@ body {
 }
 
 .uiButton_defaultSize {
-  min-height: 40px;
+  min-height: 44px;
   padding: 0 14px;
 }
 
@@ -309,164 +309,23 @@ body {
   color: var(--muted-foreground);
 }
 
-.landingShell,
-.portalChooserShell,
-.roleLoginShell {
-  min-height: 100svh;
-  width: min(1240px, calc(100% - 32px));
-  margin: 0 auto;
-  display: grid;
-  align-content: start;
-  gap: 18px;
-  padding: 18px 0 42px;
-}
 
-.landingNav {
-  min-height: 58px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--surface) 88%, transparent);
-  padding: 8px;
-}
 
-.landingNav.compact {
-  border: 0;
-  background: transparent;
-  padding: 0;
-}
 
-.landingBrand,
-.landingNav > div,
-.landingActions,
-.portalGrid a,
-.portalChoiceGrid a,
-.switchPortalLink {
-  text-decoration: none;
-}
 
-.landingBrand {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  color: var(--ink);
-  padding: 0 8px;
-}
 
-.landingBrand span {
-  width: 36px;
-  height: 36px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 8px;
-  background: var(--ink);
-  color: var(--surface);
-  font-weight: 900;
-}
 
-.landingNav > div,
-.landingActions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
 
-.landingNav a:not(.landingBrand),
-.landingActions a,
-.switchPortalLink {
-  min-height: 40px;
-  display: inline-flex;
-  align-items: center;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--surface-soft);
-  color: var(--ink);
-  padding: 0 12px;
-  font-weight: 900;
-  white-space: nowrap;
-}
 
-.landingNav .themeToggle,
-.landingNav.compact .themeToggle,
-.loginMasthead .loginThemeToggle {
-  width: auto;
-  min-width: 112px;
-  padding: 0 12px;
-}
 
-.landingActions a.primary {
-  border-color: var(--ink);
-  background: var(--ink);
-  color: var(--surface);
-}
 
-.landingHero {
-  min-height: min(720px, calc(100svh - 100px));
-  display: grid;
-  grid-template-columns: minmax(360px, 0.95fr) minmax(0, 1.05fr);
-  align-items: center;
-  gap: 22px;
-}
 
-.landingHeroMedia {
-  min-height: 560px;
-  display: grid;
-  place-items: center;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  overflow: hidden;
-  background:
-    linear-gradient(135deg, color-mix(in srgb, var(--blue) 16%, transparent), transparent 42%),
-    radial-gradient(circle at 70% 30%, color-mix(in srgb, var(--green) 18%, transparent), transparent 34%),
-    var(--surface);
-}
 
-.landingMockWindow {
-  width: min(520px, calc(100% - 36px));
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--surface) 92%, transparent);
-  box-shadow: var(--shadow);
-  overflow: hidden;
-}
 
-.landingMockBar,
-.landingSearchDemo,
-.landingResultDemo div {
-  border-bottom: 1px solid var(--line);
-}
 
-.landingMockBar {
-  min-height: 48px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 0 14px;
-}
 
-.landingMockBar span {
-  width: 10px;
-  height: 10px;
-  border-radius: 999px;
-  background: var(--rose);
-  box-shadow: 18px 0 0 var(--amber), 36px 0 0 var(--green);
-}
 
-.landingSearchDemo {
-  display: grid;
-  gap: 7px;
-  padding: 18px;
-}
 
-.landingSearchDemo span,
-.landingResultDemo span,
-.portalGrid span,
-.portalChoiceGrid span,
-.searchSignalGrid span,
 .lockedRole span {
   color: var(--blue);
   font-size: 11px;
@@ -474,132 +333,29 @@ body {
   text-transform: uppercase;
 }
 
-.landingSearchDemo strong {
-  font-size: 36px;
-}
 
-.landingSearchDemo small,
-.landingResultDemo strong {
-  color: var(--muted);
-}
 
-.landingResultDemo {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
 
-.landingResultDemo div {
-  min-height: 100px;
-  display: grid;
-  align-content: center;
-  gap: 6px;
-  border-right: 1px solid var(--line);
-  padding: 14px;
-}
 
-.landingResultDemo div:nth-child(2n) {
-  border-right: 0;
-}
 
-.landingHeroCopy h1,
 .portalChooserHero h1,
-.roleLoginIntro h1 {
-  max-width: 760px;
-  font-size: clamp(42px, 5vw, 76px);
-  line-height: 0.96;
-  margin-bottom: 14px;
-}
 
-.landingHeroCopy p:not(.eyebrow),
 .portalChooserHero p:not(.eyebrow),
-.roleLoginIntro p:not(.eyebrow),
-.landingSearchSection p {
-  max-width: 720px;
-  color: var(--muted);
-  font-size: 17px;
-  line-height: 1.55;
-}
 
-.portalGrid,
-.portalChoiceGrid {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 10px;
-}
 
-.portalGrid a,
-.portalChoiceGrid a,
-.searchSignalGrid article {
-  min-width: 0;
-  display: grid;
-  align-content: start;
-  gap: 8px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--surface);
-  color: var(--ink);
-  padding: 14px;
-}
 
-.portalGrid a:hover,
-.portalChoiceGrid a:hover {
-  border-color: var(--blue);
-  background: color-mix(in srgb, var(--blue) 8%, var(--surface));
-}
 
-.portalGrid strong,
-.portalChoiceGrid strong {
-  line-height: 1.2;
-}
 
-.portalGrid small,
-.portalChoiceGrid small {
-  color: var(--muted);
-  line-height: 1.4;
-}
 
-.landingSearchSection {
-  display: grid;
-  grid-template-columns: minmax(0, 0.9fr) minmax(360px, 1.1fr);
-  gap: 16px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--surface);
-  padding: 18px;
-}
 
-.landingSearchSection h2 {
-  font-size: 34px;
-  line-height: 1.05;
-}
 
-.searchSignalGrid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-}
 
 .portalChooserHero {
   max-width: 820px;
   padding: 42px 0 12px;
 }
 
-.roleLoginShell {
-  grid-template-columns: minmax(0, 1fr) minmax(420px, 500px);
-  align-items: center;
-  min-height: 100svh;
-}
 
-.roleLoginIntro {
-  min-height: calc(100svh - 36px);
-  display: grid;
-  align-content: space-between;
-  gap: 22px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--surface) 82%, transparent);
-  padding: 24px;
-}
 
 [data-theme="dark"] .topbar,
 [data-theme="dark"] .accountBox,
@@ -1004,14 +760,6 @@ h2 {
 }
 
 .accountBox button,
-.loginForm button {
-  min-height: 38px;
-  border: 0;
-  background: var(--blue);
-  color: #fff;
-  font-weight: 700;
-  cursor: pointer;
-}
 
 .accountBox button {
   width: 100%;
@@ -1029,26 +777,8 @@ h2 {
   padding: 28px 0;
 }
 
-.loginBrandPanel {
-  min-height: calc(100svh - 56px);
-  display: grid;
-  align-content: space-between;
-  gap: 34px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--surface) 78%, transparent);
-  padding: 28px;
-}
 
-.loginMasthead {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
 
-.loginMasthead .loginThemeToggle {
-  margin-left: auto;
-}
 
 .brandMark {
   width: 44px;
@@ -1061,16 +791,8 @@ h2 {
   font-weight: 900;
 }
 
-.loginMasthead div {
-  display: grid;
-  gap: 3px;
-}
 
-.loginMasthead strong {
-  font-size: 18px;
-}
 
-.loginMasthead small,
 .loginSignal span,
 .loginProof span {
   color: var(--muted);
@@ -1105,49 +827,11 @@ h2 {
   background: #fff;
 }
 
-.loginPath {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  overflow: hidden;
-  background: var(--surface);
-}
 
-.loginPath article {
-  min-height: 128px;
-  display: grid;
-  align-content: start;
-  gap: 8px;
-  border-right: 1px solid var(--line);
-  padding: 16px;
-}
 
-.loginPath article:last-child {
-  border-right: 0;
-}
 
-.loginPath span {
-  width: 26px;
-  height: 26px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 999px;
-  background: #eef5ff;
-  color: var(--blue);
-  font-size: 12px;
-  font-weight: 900;
-}
 
-.loginPath strong {
-  font-size: 15px;
-}
 
-.loginPath small {
-  color: var(--muted);
-  line-height: 1.4;
-}
 
 .loginProof div {
   min-height: 104px;
@@ -1187,64 +871,14 @@ h2 {
   font-size: 14px;
 }
 
-.loginPanel {
-  border: 1px solid #c5cfdd;
-  border-radius: 8px;
-  background: var(--surface);
-  box-shadow: 0 30px 90px rgba(16, 24, 40, 0.16);
-}
 
-.loginStack {
-  display: grid;
-  gap: 14px;
-}
 
-.loginForm {
-  display: grid;
-  gap: 18px;
-  padding: 30px;
-}
 
-.loginFormHeader {
-  display: grid;
-  gap: 7px;
-  padding-bottom: 8px;
-}
 
-.loginFormHeader strong {
-  font-size: 28px;
-  line-height: 1.1;
-}
 
-.loginFormHeader p {
-  color: var(--muted);
-  line-height: 1.45;
-  margin: 0;
-}
 
-.loginFormHeader span {
-  color: var(--blue);
-  font-size: 12px;
-  font-weight: 900;
-  text-transform: uppercase;
-}
 
-.loginFormHeader small {
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--green) 10%, var(--surface));
-  color: var(--ink);
-  padding: 10px 12px;
-  line-height: 1.4;
-}
 
-.loginForm label {
-  display: grid;
-  gap: 8px;
-  color: var(--muted);
-  font-size: 13px;
-  font-weight: 700;
-}
 
 .rolePicker {
   display: grid;
@@ -1339,39 +973,10 @@ h2 {
   font-size: 12px;
 }
 
-.loginForm input,
-.loginForm select {
-  width: 100%;
-  min-height: 50px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--surface-soft);
-  color: var(--ink);
-  padding: 0 14px;
-  font: inherit;
-}
 
-.loginForm input:focus,
-.loginForm select:focus {
-  outline: 3px solid rgba(11, 99, 206, 0.14);
-  border-color: var(--blue);
-  background: var(--surface);
-}
 
-.loginForm button {
-  min-height: 52px;
-  border-radius: 8px;
-  background: var(--blue);
-}
 
-.loginForm button:hover {
-  background: var(--blue-deep);
-}
 
-.loginForm button:disabled {
-  cursor: wait;
-  opacity: 0.7;
-}
 
 .formError {
   color: var(--rose);
@@ -1477,110 +1082,24 @@ h2 {
   color: var(--muted-foreground);
 }
 
-.unifiedLoginShell {
-  align-items: start;
-}
 
-.unifiedLoginShell .landingNav {
-  grid-column: 1 / -1;
-}
 
-.unifiedLoginIntro {
-  min-height: auto;
-}
 
-.unifiedLoginPanel {
-  align-self: start;
-}
 
-.verifiedAccounts {
-  display: grid;
-  gap: 10px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--surface);
-  padding: 18px;
-}
 
-.verifiedAccounts > div {
-  display: grid;
-  gap: 4px;
-}
 
-.verifiedAccounts span {
-  color: var(--blue);
-  font-size: 12px;
-  font-weight: 900;
-  text-transform: uppercase;
-}
 
-.verifiedAccounts p {
-  color: var(--muted);
-  margin: 0;
-}
 
-.verifiedAccounts form {
-  margin: 0;
-}
 
-.verifiedAccounts button {
-  width: 100%;
-  min-height: 72px;
-  display: grid;
-  gap: 4px;
-  text-align: left;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--surface-soft);
-  color: var(--ink);
-  padding: 12px 14px;
-  cursor: pointer;
-}
 
-.verifiedAccounts button:hover {
-  border-color: var(--blue);
-  background: color-mix(in srgb, var(--blue) 8%, var(--surface));
-}
 
-.verifiedAccounts button strong {
-  font-size: 16px;
-}
 
-.verifiedAccounts button small {
-  color: var(--muted);
-}
 
-.unifiedLoginNotes {
-  grid-column: 1 / -1;
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px;
-}
 
-.unifiedLoginNotes article {
-  display: grid;
-  gap: 5px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--surface);
-  padding: 14px;
-}
 
-.unifiedLoginNotes span {
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 800;
-  text-transform: uppercase;
-}
 
-.unifiedLoginNotes strong {
-  font-size: 14px;
-}
 
 @media (max-width: 760px) {
-  .unifiedLoginNotes {
-    grid-template-columns: 1fr;
-  }
 }
 
 .environment span,
@@ -5494,14 +5013,6 @@ kbd {
     grid-template-columns: 1fr;
   }
 
-  .loginBrandPanel {
-    align-content: start;
-    align-self: start;
-    min-height: 0;
-    height: auto;
-    gap: 14px;
-    padding: 22px 24px;
-  }
 
   .loginHero h1 {
     max-width: 560px;
@@ -5535,38 +5046,12 @@ kbd {
     padding: 16px 0 32px;
   }
 
-  .landingHero,
-  .landingSearchSection,
-  .roleLoginShell {
-    grid-template-columns: 1fr;
-  }
 
-  .landingHero {
-    min-height: 0;
-  }
 
-  .landingHeroMedia {
-    min-height: 420px;
-    order: 2;
-  }
 
-  .portalGrid,
-  .portalChoiceGrid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
 
-  .roleLoginIntro {
-    min-height: 0;
-  }
 
-  .loginForm {
-    gap: 14px;
-    padding: 24px;
-  }
 
-  .loginFormHeader strong {
-    font-size: 26px;
-  }
 
   .studentOS {
     grid-template-columns: 1fr;
@@ -6498,50 +5983,14 @@ kbd {
     border-top: 1px solid var(--line);
   }
 
-  .landingShell,
-  .portalChooserShell,
-  .roleLoginShell {
-    width: min(100% - 20px, 720px);
-    padding: 10px 0 28px;
-  }
 
-  .landingNav,
-  .landingNav > div,
-  .landingActions {
-    align-items: stretch;
-    flex-direction: column;
-  }
 
-  .landingBrand {
-    min-height: 42px;
-  }
 
-  .landingHeroCopy h1,
   .portalChooserHero h1,
-  .roleLoginIntro h1 {
-    font-size: 38px;
-  }
 
-  .landingHeroMedia {
-    min-height: 340px;
-  }
 
-  .portalGrid,
-  .portalChoiceGrid,
-  .searchSignalGrid,
-  .landingResultDemo {
-    grid-template-columns: 1fr;
-  }
 
-  .landingResultDemo div,
-  .landingResultDemo div:nth-child(2n),
-  .loginPath article {
-    border-right: 0;
-  }
 
-  .loginPath {
-    grid-template-columns: 1fr;
-  }
 
   .row {
     grid-template-columns: 1fr;
@@ -6757,254 +6206,42 @@ kbd {
 }
 
 /* Public product entry points */
-.landingShell {
-  width: min(1320px, calc(100% - 28px));
-  gap: 16px;
-}
 
-.landingNav {
-  position: sticky;
-  top: 12px;
-  z-index: 20;
-  min-height: 62px;
-  border-color: color-mix(in srgb, var(--line) 84%, transparent);
-  background: color-mix(in srgb, var(--surface) 92%, transparent);
-  box-shadow: 0 18px 50px rgba(16, 24, 40, 0.08);
-}
 
-.landingNav a:not(.landingBrand),
-.landingActions a,
-.switchPortalLink {
-  text-decoration: none;
-}
 
-.landingNav a:not(.landingBrand):hover,
-.landingActions a:hover,
-.switchPortalLink:hover {
-  border-color: var(--blue);
-  color: var(--blue);
-}
 
-.landingHero {
-  position: relative;
-  min-height: min(760px, calc(100svh - 96px));
-  display: grid;
-  grid-template-columns: 1fr;
-  align-items: center;
-  overflow: hidden;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--surface);
-  padding: clamp(22px, 5vw, 76px);
-}
 
-.landingHero::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(90deg, var(--surface) 0%, color-mix(in srgb, var(--surface) 94%, transparent) 38%, transparent 78%),
-    linear-gradient(180deg, transparent 72%, var(--surface) 100%);
-  pointer-events: none;
-}
 
-.landingHeroStage {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center end;
-  padding: clamp(20px, 4vw, 58px);
-  opacity: 0.96;
-}
 
-.landingOpsFrame {
-  width: min(880px, 72vw);
-  min-height: 510px;
-  display: grid;
-  grid-template-columns: 132px minmax(0, 1fr) 220px;
-  gap: 10px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--surface-soft) 92%, transparent);
-  box-shadow: var(--shadow);
-  padding: 10px;
-}
 
-.landingOpsRail,
-.landingOpsMain,
-.landingOpsAside {
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--surface) 94%, transparent);
-}
 
-.landingOpsRail {
-  display: grid;
-  align-content: start;
-  gap: 8px;
-  padding: 12px;
-}
 
-.landingOpsRail span {
-  min-height: 36px;
-  display: flex;
-  align-items: center;
-  border-radius: 7px;
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 900;
-  padding: 0 10px;
-}
 
-.landingOpsRail span:first-child {
-  background: color-mix(in srgb, var(--blue) 12%, var(--surface));
-  color: var(--blue);
-}
 
-.landingOpsMain {
-  display: grid;
-  align-content: start;
-  gap: 10px;
-  padding: 14px;
-}
 
-.landingOpsSearch {
-  min-height: 170px;
-  display: grid;
-  align-content: end;
-  gap: 8px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--surface-soft);
-  padding: 18px;
-}
 
-.landingOpsSearch span,
-.landingOpsColumns span,
-.landingOpsAside span,
 .portalChooserPromise span,
-.roleLoginPromise span,
-.landingHeroStats span {
-  color: var(--blue);
-  font-size: 11px;
-  font-weight: 900;
-  text-transform: uppercase;
-}
 
-.landingOpsSearch strong {
-  font-size: clamp(42px, 6vw, 76px);
-  line-height: 0.88;
-}
 
-.landingOpsSearch small,
-.landingOpsAside small {
-  color: var(--muted);
-}
 
-.landingOpsColumns {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px;
-}
 
-.landingOpsColumns div {
-  min-height: 138px;
-  display: grid;
-  align-content: space-between;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--surface);
-  padding: 14px;
-}
 
-.landingOpsColumns strong {
-  font-size: 24px;
-}
 
-.landingOpsAside {
-  display: grid;
-  align-content: end;
-  gap: 8px;
-  padding: 16px;
-}
 
-.landingOpsAside strong {
-  font-size: 22px;
-  line-height: 1.08;
-}
 
-.landingHeroCopy {
-  position: relative;
-  z-index: 2;
-  max-width: 690px;
-}
 
-.landingHeroCopy h1,
 .portalChooserHero h1,
-.roleLoginIntro h1 {
-  margin-top: 0;
-  font-size: clamp(44px, 6.4vw, 92px);
-  line-height: 0.94;
-}
 
-.landingHeroCopy p:not(.eyebrow) {
-  max-width: 620px;
-  font-size: clamp(17px, 1.7vw, 21px);
-}
 
-.landingActions a {
-  min-height: 46px;
-  padding: 0 16px;
-}
 
-.landingHeroStats,
 .portalChooserPromise,
-.roleLoginPromise {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 18px;
-}
 
-.landingHeroStats span,
 .portalChooserPromise span,
-.roleLoginPromise span {
-  min-height: 32px;
-  display: inline-flex;
-  align-items: center;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--surface) 88%, transparent);
-  padding: 0 12px;
-}
 
-.portalGrid {
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-}
 
-.portalGrid a,
-.portalChoiceGrid a,
-.searchSignalGrid article {
-  transition: border-color 140ms ease, background 140ms ease, transform 140ms ease, box-shadow 140ms ease;
-}
 
-.portalGrid a:hover,
-.portalChoiceGrid a:hover,
-.searchSignalGrid article:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 16px 45px rgba(16, 24, 40, 0.1);
-}
 
-.landingSearchSection {
-  align-items: center;
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--surface) 94%, transparent);
-  box-shadow: 0 18px 60px rgba(16, 24, 40, 0.08);
-}
 
-.portalChooserShell {
-  width: min(1160px, calc(100% - 28px));
-}
 
 .portalChooserHero {
   max-width: 900px;
@@ -7015,53 +6252,15 @@ kbd {
   max-width: 900px;
 }
 
-.portalChoiceGrid {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
 
-.portalChoiceGrid a {
-  min-height: 150px;
-  padding: 18px;
-}
 
-.roleLoginShell {
-  width: min(1160px, calc(100% - 28px));
-  grid-template-columns: minmax(0, 1fr) minmax(400px, 500px);
-  gap: 16px;
-}
 
-.roleLoginIntro {
-  overflow: hidden;
-  background:
-    linear-gradient(135deg, color-mix(in srgb, var(--blue) 9%, transparent), transparent 48%),
-    var(--surface);
-}
 
-.roleLoginIntro h1 {
-  max-width: 760px;
-}
 
-.appLoginPanel {
-  box-shadow: 0 24px 80px rgba(16, 24, 40, 0.14);
-}
 
-.loginForm {
-  gap: 16px;
-}
 
-.loginFormHeader strong {
-  font-size: 30px;
-}
 
-.loginForm input {
-  min-height: 54px;
-}
 
-.loginForm button {
-  border: 0;
-  color: #fff;
-  font-weight: 900;
-}
 
 [data-theme="dark"] .landingHero::after {
   background:
@@ -7083,122 +6282,7 @@ kbd {
   background-color: var(--surface);
 }
 
-@media (max-width: 1040px) {
-  .landingHero {
-    min-height: auto;
-    padding: 28px;
-  }
 
-  .landingHero::after {
-    background: linear-gradient(180deg, var(--surface) 0%, color-mix(in srgb, var(--surface) 94%, transparent) 56%, var(--surface) 100%);
-  }
-
-  .landingHeroStage {
-    position: relative;
-    min-height: 360px;
-    order: 2;
-    padding: 18px 0 0;
-  }
-
-  .landingHeroCopy {
-    max-width: none;
-  }
-
-  .landingOpsFrame {
-    width: 100%;
-    min-height: 360px;
-    grid-template-columns: 92px minmax(0, 1fr);
-  }
-
-  .landingOpsAside {
-    display: none;
-  }
-
-  .portalGrid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .landingSearchSection,
-  .roleLoginShell {
-    grid-template-columns: 1fr;
-  }
-
-  .roleLoginIntro {
-    min-height: auto;
-  }
-}
-
-@media (max-width: 680px) {
-  .landingShell,
-  .portalChooserShell,
-  .roleLoginShell {
-    width: min(100% - 20px, 720px);
-  }
-
-  .landingNav {
-    position: static;
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .landingNav > div,
-  .landingActions {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .landingNav a:not(.landingBrand),
-  .landingNav .themeToggle {
-    justify-content: center;
-  }
-
-  .landingHero {
-    padding: 18px;
-  }
-
-  .landingHeroCopy h1,
-  .portalChooserHero h1,
-  .roleLoginIntro h1 {
-    font-size: 40px;
-  }
-
-  .landingOpsFrame {
-    grid-template-columns: 1fr;
-  }
-
-  .landingOpsRail {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-
-  .landingOpsRail span {
-    justify-content: center;
-    padding: 0 6px;
-  }
-
-  .landingOpsColumns,
-  .portalGrid,
-  .portalChoiceGrid,
-  .searchSignalGrid {
-    grid-template-columns: 1fr;
-  }
-
-  .landingOpsColumns div {
-    min-height: 92px;
-  }
-
-  .roleLoginShell {
-    grid-template-columns: 1fr;
-  }
-
-  .roleLoginIntro,
-  .loginForm {
-    padding: 18px;
-  }
-}
-
-.switchPortalLink {
-  justify-self: start;
-}
 
 .journeyWorkbench .previewPanel {
   grid-column: 1 / -1;
@@ -7216,18 +6300,8 @@ kbd {
 }
 
 @media (min-width: 760px) and (max-width: 1040px) {
-  .roleLoginShell {
-    grid-template-columns: minmax(0, 0.9fr) minmax(340px, 0.72fr);
-    align-items: center;
-  }
 
-  .roleLoginIntro {
-    min-height: calc(100svh - 36px);
-  }
 
-  .roleLoginIntro h1 {
-    font-size: clamp(42px, 5.2vw, 64px);
-  }
 }
 
 /* Candidate search operating system */
@@ -8628,7 +7702,7 @@ kbd {
 }
 
 .candidateProfileActions a {
-  min-height: 36px;
+  min-height: 44px;
   display: inline-flex;
   align-items: center;
   justify-content: center;

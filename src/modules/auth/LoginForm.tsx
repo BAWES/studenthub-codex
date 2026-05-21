@@ -1,48 +1,62 @@
 "use client";
 
 import { useActionState } from "react";
+import { LogIn } from "lucide-react";
 import { chooseAccountAction, loginAction } from "./actions";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import type { LoginAccountChoice } from "./types";
 
-export function LoginForm({ hint }: { hint?: string }) {
+export function LoginForm() {
   const [state, action, pending] = useActionState(loginAction, {});
   const accounts = state.accounts ?? [];
 
   return (
-    <div className="loginStack">
-      <form action={action} className="loginForm">
-        <div className="loginFormHeader">
-          <span>Secure sign in</span>
-          <strong>Continue to StudentHub</strong>
-          <p>
+    <div className="grid gap-[14px]">
+      <form action={action} className="grid gap-[18px] p-[30px]">
+        <div className="grid gap-[7px] pb-2">
+          <span className="text-[var(--blue)] text-xs font-black uppercase">Secure sign in</span>
+          <strong className="text-[28px] leading-[1.1]">Continue to StudentHub</strong>
+          <p className="text-[var(--muted)] leading-relaxed m-0">
             Use your existing production credentials. StudentHub will detect the right account and permissions after
             your password is verified.
           </p>
-          {hint ? <small>{hint}</small> : null}
         </div>
 
-        <label>
-          Email
-          <input
+        <div className="grid gap-2">
+          <Label htmlFor="login-email">Email</Label>
+          <Input
+            id="login-email"
             name="email"
             type="email"
             autoComplete="email"
             defaultValue={state.email ?? ""}
             placeholder="name@studenthub.app"
             required
+            className="min-h-[46px]"
           />
-        </label>
+        </div>
 
-        <label>
-          Password
-          <input name="password" type="password" autoComplete="current-password" placeholder="Your password" required />
-        </label>
+        <div className="grid gap-2">
+          <Label htmlFor="login-password">Password</Label>
+          <Input
+            id="login-password"
+            name="password"
+            type="password"
+            autoComplete="current-password"
+            placeholder="Your password"
+            required
+            className="min-h-[46px]"
+          />
+        </div>
 
-        {state.error ? <p className="formError">{state.error}</p> : null}
+        {state.error ? <p className="text-[var(--destructive)] font-bold m-0">{state.error}</p> : null}
 
-        <button type="submit" disabled={pending} className="primaryButton">
+        <Button type="submit" disabled={pending} size="lg" className="min-h-[52px]">
+          <LogIn className="size-4" />
           {pending ? "Checking credentials..." : "Sign in"}
-        </button>
+        </Button>
       </form>
 
       {accounts.length ? <VerifiedAccountChooser accounts={accounts} /> : null}
@@ -52,20 +66,25 @@ export function LoginForm({ hint }: { hint?: string }) {
 
 function VerifiedAccountChooser({ accounts }: { accounts: LoginAccountChoice[] }) {
   return (
-    <section className="verifiedAccounts" aria-label="Verified StudentHub accounts">
-      <div>
-        <span>Verified accounts</span>
-        <strong>Choose where to continue</strong>
-        <p>Your password matched more than one active account. Only verified accounts are shown here.</p>
+    <section className="grid gap-[14px] p-[30px] pt-0 border-t border-[var(--line)]" aria-label="Verified StudentHub accounts">
+      <div className="grid gap-[7px]">
+        <span className="text-[var(--blue)] text-xs font-black uppercase">Verified accounts</span>
+        <strong className="text-[28px] leading-[1.1]">Choose where to continue</strong>
+        <p className="text-[var(--muted)] leading-relaxed m-0">Your password matched more than one active account. Only verified accounts are shown here.</p>
       </div>
       {accounts.map((account) => (
         <form action={chooseAccountAction} key={account.accountKey}>
           <input name="accountKey" type="hidden" value={account.accountKey} />
-          <button type="submit">
-            <span>{account.label}</span>
-            <strong>{account.name}</strong>
-            <small>{account.email}</small>
-          </button>
+          <Button
+            type="submit"
+            variant="outline"
+            className="w-full min-h-[62px] justify-start h-auto p-3 gap-3 text-left"
+          >
+            <span className="grid gap-1 min-w-0">
+              <strong className="text-sm">{account.name}</strong>
+              <small className="text-[var(--muted)] text-xs font-normal">{account.email}</small>
+            </span>
+          </Button>
         </form>
       ))}
     </section>
