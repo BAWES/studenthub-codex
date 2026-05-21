@@ -404,66 +404,6 @@ body {
   color: var(--surface);
 }
 
-.landingHero {
-  min-height: min(720px, calc(100svh - 100px));
-  display: grid;
-  grid-template-columns: minmax(360px, 0.95fr) minmax(0, 1.05fr);
-  align-items: center;
-  gap: 22px;
-}
-
-.landingHeroMedia {
-  min-height: 560px;
-  display: grid;
-  place-items: center;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  overflow: hidden;
-  background:
-    linear-gradient(135deg, color-mix(in srgb, var(--blue) 16%, transparent), transparent 42%),
-    radial-gradient(circle at 70% 30%, color-mix(in srgb, var(--green) 18%, transparent), transparent 34%),
-    var(--surface);
-}
-
-.landingMockWindow {
-  width: min(520px, calc(100% - 36px));
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--surface) 92%, transparent);
-  box-shadow: var(--shadow);
-  overflow: hidden;
-}
-
-.landingMockBar,
-.landingSearchDemo,
-.landingResultDemo div {
-  border-bottom: 1px solid var(--line);
-}
-
-.landingMockBar {
-  min-height: 48px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 0 14px;
-}
-
-.landingMockBar span {
-  width: 10px;
-  height: 10px;
-  border-radius: 999px;
-  background: var(--rose);
-  box-shadow: 18px 0 0 var(--amber), 36px 0 0 var(--green);
-}
-
-.landingSearchDemo {
-  display: grid;
-  gap: 7px;
-  padding: 18px;
-}
-
-.landingSearchDemo span,
-.landingResultDemo span,
 .portalGrid span,
 .portalChoiceGrid span,
 .searchSignalGrid span,
@@ -472,33 +412,6 @@ body {
   font-size: 11px;
   font-weight: 900;
   text-transform: uppercase;
-}
-
-.landingSearchDemo strong {
-  font-size: 36px;
-}
-
-.landingSearchDemo small,
-.landingResultDemo strong {
-  color: var(--muted);
-}
-
-.landingResultDemo {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.landingResultDemo div {
-  min-height: 100px;
-  display: grid;
-  align-content: center;
-  gap: 6px;
-  border-right: 1px solid var(--line);
-  padding: 14px;
-}
-
-.landingResultDemo div:nth-child(2n) {
-  border-right: 0;
 }
 
 .landingHeroCopy h1,
@@ -558,7 +471,8 @@ body {
   line-height: 1.4;
 }
 
-.landingSearchSection {
+.landingSearchSection,
+.landingBenefitsSection {
   display: grid;
   grid-template-columns: minmax(0, 0.9fr) minmax(360px, 1.1fr);
   gap: 16px;
@@ -5523,7 +5437,8 @@ kbd {
   }
 
   .landingHero,
-  .landingSearchSection,
+  .landingBenefitsSection,
+  .landingBenefitsSection,
   .roleLoginShell {
     grid-template-columns: 1fr;
   }
@@ -6921,11 +6836,59 @@ kbd {
   transform: translateY(-2px);
   box-shadow: 0 16px 45px rgba(16, 24, 40, 0.1);
 }
+.portalIcon {
+  font-size: 22px;
+  line-height: 1;
+}
 
-.landingSearchSection {
-  align-items: center;
+.benefitGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.benefitGrid article {
+  min-width: 0;
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  padding: 16px;
+  transition: border-color 140ms ease, background 140ms ease, transform 140ms ease, box-shadow 140ms ease;
+}
+
+.benefitGrid article:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 45px rgba(16, 24, 40, 0.1);
+}
+
+.benefitGrid strong {
+  font-size: 16px;
+  line-height: 1.2;
+}
+
+.benefitGrid p {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.benefitGrid p:last-child {
+  margin-bottom: 0;
+}
+
+
+.landingBenefitsSection {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(360px, 1.1fr);
+  gap: 16px;
+  border: 1px solid var(--line);
   border-radius: 8px;
   background: color-mix(in srgb, var(--surface) 94%, transparent);
+  padding: 18px;
+  align-items: center;
   box-shadow: 0 18px 60px rgba(16, 24, 40, 0.08);
 }
 
@@ -7005,6 +6968,7 @@ kbd {
 [data-theme="dark"] .landingOpsSearch,
 [data-theme="dark"] .landingOpsColumns div,
 [data-theme="dark"] .landingSearchSection,
+[data-theme="dark"] .landingBenefitsSection,
 [data-theme="dark"] .roleLoginIntro {
   border-color: var(--line);
   background-color: var(--surface);
@@ -7046,6 +7010,7 @@ kbd {
   }
 
   .landingSearchSection,
+  .landingBenefitsSection,
   .roleLoginShell {
     grid-template-columns: 1fr;
   }
@@ -7105,7 +7070,8 @@ kbd {
   .landingOpsColumns,
   .portalGrid,
   .portalChoiceGrid,
-  .searchSignalGrid {
+  .searchSignalGrid,
+  .benefitGrid {
     grid-template-columns: 1fr;
   }
 
