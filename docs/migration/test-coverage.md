@@ -80,6 +80,19 @@
   - `/hub?scope=money&record=transfer-[id]`
   - `/hub?scope=compliance&record=id-[uuid]`
 
+## Playwright Smoke Tests (added STU-26)
+
+Playwright smoke tests live in `e2e/smoke/` and use fixture-signed session cookies
+for authenticated brower tests. Fixtures are discovered from the database via
+`scripts/fixtures/discover.mjs` and validated with `scripts/fixtures/validate.mjs`.
+
+- `e2e/smoke/login.spec.ts` — login page rendering, form fields, unauthenticated redirect
+- `e2e/smoke/candidate-search.spec.ts` — admin + staff candidate search, cross-role guards
+- `e2e/smoke/request-desk.spec.ts` — admin + staff + company request pages, cross-role guards
+- `e2e/smoke/role-portals.spec.ts` — full portal smoke per role (admin/staff/candidate/company/inspector), app/hub shell, cross-role guards
+
+Run with: `npx playwright test` (requires dev server at `PLAYWRIGHT_BASE_URL` and MySQL at `DATABASE_URL`).
+
 ## Not Yet Covered
 
 - Form submissions and mutations.
@@ -98,6 +111,35 @@
 - File/media/document rendering.
 - External dependencies such as Algolia, email, notifications, storage, payment/payroll exports, and third-party identity providers.
 - Meilisearch integration tests for indexing, filtering, typo tolerance, and MySQL fallback behavior.
+
+## Parity Checklist — Automated Test Gap Map
+
+Each gap from "Not Yet Covered" is mapped to whether automated testing is needed
+and the current implementation status.
+
+| # | Gap | Needs Automation | Status | Owner | Notes |
+|---|---|---|---|---|---|
+| 1 | Form submissions and mutations | Yes | Not started | QA | `e2e/smoke/` covers read-only routes; mutation tests need DB seeding + cleanup |
+| 2 | Credential submission E2E | Yes | Not started | QA | Requires test credentials in seed data; blocked until test accounts exist |
+| 3 | Multi-account chooser flow | Yes | Not started | QA | Needs DB with multi-identity users |
+| 4 | Capability decision assertions | Yes | Not started | QA | Unit-testable with `capabilities.ts`; can add Jest/Vitest suite |
+| 5 | Shared `/app/*` capability routes | Yes | Not started | QA | Gated on module delivery |
+| 6 | Suggestion mutation smoke | Yes | Not started | QA | Needs mutation test harness |
+| 7 | Old-system parity assertions | Manual | Not started | Role owners | Business-rule parity is manual sign-off per migration gate |
+| 8 | Cross-role auth denial (basic) | Done | Covered | QA | Playwright role-portal + candidate-search + request-desk |
+| 9 | Cross-role auth denial (deep) | Yes | Partial | QA | Basic redirect guards covered; per-mutation auth not tested |
+| 10 | Unavailable hub previews | Yes | Not started | QA | Can add to `role-portals.spec.ts` |
+| 11 | Keyboard/command-palette tests | Yes | Not started | QA | Playwright keyboard API; needs Cmd+K palette stable |
+| 12 | Visual regression checks | Yes | Blocked | UXDesigner | Gated on STU-21 (app shell delivery); use Playwright screenshot diffing |
+| 13 | Performance budgets | Yes | Not started | QA | `test:smoke` enforces per-route 5s budget; needs Lighthouse CI or similar |
+| 14 | File/media/document rendering | Manual | Not started | Role owners | Visual inspection needed |
+| 15 | External dependencies | No | Not started | DevOps | Algolia/email/storage/payment tested in their own stacks |
+| 16 | Meilisearch integration | Yes | Not started | QA | Needs Meilisearch instance; `search:index-candidates` exists |
+
+### Legend
+- **Needs Automation**: whether automated testing is appropriate
+- **Status**: Done / Partial / Not started / Blocked / Manual
+- **Owner**: who should deliver the test coverage
 
 ## Migration Gate
 
