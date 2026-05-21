@@ -5,6 +5,7 @@ import { LogIn } from "lucide-react";
 import { chooseAccountAction, loginAction } from "./actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import type { LoginAccountChoice } from "./types";
 
 export function LoginForm() {
@@ -23,9 +24,10 @@ export function LoginForm() {
           </p>
         </div>
 
-        <label className="grid gap-2 text-[var(--muted)] text-[13px] font-bold">
-          Email
+        <div className="grid gap-2">
+          <Label htmlFor="login-email">Email</Label>
           <Input
+            id="login-email"
             name="email"
             type="email"
             autoComplete="email"
@@ -34,11 +36,12 @@ export function LoginForm() {
             required
             className="min-h-[46px]"
           />
-        </label>
+        </div>
 
-        <label className="grid gap-2 text-[var(--muted)] text-[13px] font-bold">
-          Password
+        <div className="grid gap-2">
+          <Label htmlFor="login-password">Password</Label>
           <Input
+            id="login-password"
             name="password"
             type="password"
             autoComplete="current-password"
@@ -46,7 +49,7 @@ export function LoginForm() {
             required
             className="min-h-[46px]"
           />
-        </label>
+        </div>
 
         {state.error ? <p className="text-[var(--destructive)] font-bold m-0">{state.error}</p> : null}
 
