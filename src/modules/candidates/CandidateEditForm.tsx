@@ -1,6 +1,8 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
+import { toast } from "sonner";
+import type { ProfileState } from "@/modules/candidates/actions";
 import {
   updateCandidateProfile,
   uploadDocument,
@@ -46,9 +48,18 @@ type Props = {
 };
 
 export function CandidateEditForm({ candidate, countries, universities, banks, skills, experiences }: Props) {
-  const [profileState, profileAction, profilePending] = useActionState(updateCandidateProfile, {
-    error: "",
-  });
+  const [profileState, profileAction, profilePending] = useActionState(
+    updateCandidateProfile,
+    { success: false } as ProfileState,
+  );
+
+  useEffect(() => {
+    if (profileState.success) {
+      toast.success("Profile saved", {
+        description: "Your profile has been updated successfully.",
+      });
+    }
+  }, [profileState]);
   const [uploadState, uploadAction, uploadPending] = useActionState(uploadDocument, {
     error: "",
   });
@@ -61,31 +72,35 @@ export function CandidateEditForm({ candidate, countries, universities, banks, s
     <div className="candidateEditLayout">
       <form action={profileAction} className="candidateEditForm">
         <h2>Personal info</h2>
-        {profileState.error ? <p className="formError">{profileState.error}</p> : null}
 
         <label>
           <span>Name (English)</span>
           <input name="name" defaultValue={candidate.name} required />
+          <FieldError errors={profileState.fieldErrors?.name} />
         </label>
 
         <label>
           <span>Name (Arabic)</span>
           <input name="nameAr" defaultValue={candidate.nameAr} />
+          <FieldError errors={profileState.fieldErrors?.nameAr} />
         </label>
 
         <label>
           <span>Email</span>
           <input name="email" type="email" defaultValue={candidate.email} />
+          <FieldError errors={profileState.fieldErrors?.email} />
         </label>
 
         <label>
           <span>Phone</span>
           <input name="phone" type="tel" defaultValue={candidate.phone} />
+          <FieldError errors={profileState.fieldErrors?.phone} />
         </label>
 
         <label>
           <span>Birth date</span>
           <input name="birthDate" type="date" defaultValue={candidate.birthDate} />
+          <FieldError errors={profileState.fieldErrors?.birthDate} />
         </label>
 
         <h2>Location & education</h2>
@@ -100,6 +115,7 @@ export function CandidateEditForm({ candidate, countries, universities, banks, s
               </option>
             ))}
           </select>
+          <FieldError errors={profileState.fieldErrors?.countryId} />
         </label>
 
         <label>
@@ -112,11 +128,13 @@ export function CandidateEditForm({ candidate, countries, universities, banks, s
               </option>
             ))}
           </select>
+          <FieldError errors={profileState.fieldErrors?.universityId} />
         </label>
 
         <label>
           <span>Address</span>
           <textarea name="address" rows={2} defaultValue={candidate.address} />
+          <FieldError errors={profileState.fieldErrors?.address} />
         </label>
 
         <h2>Bank info</h2>
@@ -131,16 +149,19 @@ export function CandidateEditForm({ candidate, countries, universities, banks, s
               </option>
             ))}
           </select>
+          <FieldError errors={profileState.fieldErrors?.bankId} />
         </label>
 
         <label>
           <span>Account holder name</span>
           <input name="bankAccountName" defaultValue={candidate.bankAccountName} />
+          <FieldError errors={profileState.fieldErrors?.bankAccountName} />
         </label>
 
         <label>
           <span>IBAN</span>
           <input name="iban" defaultValue={candidate.iban} />
+          <FieldError errors={profileState.fieldErrors?.iban} />
         </label>
 
         <h2>Profile details</h2>
@@ -148,21 +169,25 @@ export function CandidateEditForm({ candidate, countries, universities, banks, s
         <label>
           <span>Civil ID</span>
           <input name="civilId" defaultValue={candidate.civilId} />
+          <FieldError errors={profileState.fieldErrors?.civilId} />
         </label>
 
         <label>
           <span>Objective / Headline</span>
           <input name="objective" defaultValue={candidate.objective} />
+          <FieldError errors={profileState.fieldErrors?.objective} />
         </label>
 
         <label>
           <span>Profile URL</span>
           <input name="profileUrl" type="url" defaultValue={candidate.profileUrl} />
+          <FieldError errors={profileState.fieldErrors?.profileUrl} />
         </label>
 
         <label>
           <span>About / Intro</span>
           <textarea name="intro" rows={5} defaultValue={candidate.intro} />
+          <FieldError errors={profileState.fieldErrors?.intro} />
         </label>
 
         <div className="formActions">
@@ -343,4 +368,8 @@ function acceptFor(type: string): string {
     default:
       return "*/*";
   }
+}
+
+function FieldError({ errors }: { errors?: string[] }) {
+  return errors?.[0] ? <p className="formError">{errors[0]}</p> : null;
 }

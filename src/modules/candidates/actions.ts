@@ -5,6 +5,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability, requireRoleCapability } from "@/modules/auth/session";
 
@@ -12,69 +13,93 @@ import { requireCapability, requireRoleCapability } from "@/modules/auth/session
 // Profile edit
 // ---------------------------------------------------------------------------
 
-export async function updateCandidateProfile(_prevState: { error: string }, formData: FormData) {
+export type ProfileState = {
+  success: boolean;
+  fieldErrors?: Record<string, string[] | undefined>;
+};
+
+const profileSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  nameAr: z.string().optional().default(""),
+  email: z.union([z.string().email("Invalid email address"), z.literal("")]).optional().default(""),
+  phone: z.string().optional().default(""),
+  objective: z.string().optional().default(""),
+  intro: z.string().optional().default(""),
+  civilId: z.string().optional().default(""),
+  profileUrl: z.union([z.string().url("Invalid URL"), z.literal("")]).optional().default(""),
+  countryId: z.string().optional().default(""),
+  universityId: z.string().optional().default(""),
+  bankId: z.string().optional().default(""),
+  bankAccountName: z.string().optional().default(""),
+  iban: z.string().optional().default(""),
+  birthDate: z.string().optional().default(""),
+  address: z.string().optional().default(""),
+});
+
+export async function updateCandidateProfile(
+  _prevState: ProfileState,
+  formData: FormData,
+): Promise<ProfileState> {
   const session = await requireRoleCapability("candidate", "candidate.read.own");
   const candidateId = Number(session.id);
 
-  const name = formData.get("name");
-  const nameAr = formData.get("nameAr");
-  const email = formData.get("email");
-  const phone = formData.get("phone");
-  const objective = formData.get("objective");
-  const intro = formData.get("intro");
-  const civilId = formData.get("civilId");
-  const profileUrl = formData.get("profileUrl");
-  const countryId = formData.get("countryId");
-  const universityId = formData.get("universityId");
-  const bankId = formData.get("bankId");
-  const bankAccountName = formData.get("bankAccountName");
-  const iban = formData.get("iban");
-  const birthDate = formData.get("birthDate");
-  const address = formData.get("address");
+  const raw = {
+    name: (formData.get("name") ?? "") as string,
+    nameAr: (formData.get("nameAr") ?? "") as string,
+    email: (formData.get("email") ?? "") as string,
+    phone: (formData.get("phone") ?? "") as string,
+    objective: (formData.get("objective") ?? "") as string,
+    intro: (formData.get("intro") ?? "") as string,
+    civilId: (formData.get("civilId") ?? "") as string,
+    profileUrl: (formData.get("profileUrl") ?? "") as string,
+    countryId: (formData.get("countryId") ?? "") as string,
+    universityId: (formData.get("universityId") ?? "") as string,
+    bankId: (formData.get("bankId") ?? "") as string,
+    bankAccountName: (formData.get("bankAccountName") ?? "") as string,
+    iban: (formData.get("iban") ?? "") as string,
+    birthDate: (formData.get("birthDate") ?? "") as string,
+    address: (formData.get("address") ?? "") as string,
+  };
 
-  if (typeof name !== "string" || !name.trim()) {
-    return { error: "Name is required." };
+  const parsed = profileSchema.safeParse(raw);
+  if (!parsed.success) {
+    return {
+      success: false,
+      fieldErrors: parsed.error.flatten().fieldErrors,
+    };
   }
 
-  const stringField = (value: unknown) =>
-    typeof value === "string" ? value.trim() : undefined;
-
-  const nullableStringField = (value: unknown) =>
-    typeof value === "string" ? (value.trim() || undefined) : undefined;
-
-  const nullableIntField = (value: unknown) => {
-    if (typeof value !== "string" || !value) return undefined;
-    const n = Number(value);
-    return Number.isInteger(n) && n > 0 ? n : undefined;
-  };
+  const d = parsed.data;
 
   await prisma.candidate.update({
     where: { candidate_id: candidateId },
     data: {
-      candidate_name: name.trim(),
-      candidate_name_ar: nullableStringField(nameAr),
-      candidate_email: stringField(email),
-      candidate_phone: nullableStringField(phone),
-      candidate_objective: nullableStringField(objective),
-      candidate_intro: nullableStringField(intro),
-      candidate_civil_id: nullableStringField(civilId),
-      profile_url: nullableStringField(profileUrl),
-      candidate_address_line1: nullableStringField(address),
-      country_id: nullableIntField(countryId),
-      university_id: nullableIntField(universityId),
-      bank_id: nullableIntField(bankId),
-      bank_account_name: nullableStringField(bankAccountName),
-      candidate_iban: nullableStringField(iban),
-      candidate_birth_date:
-        typeof birthDate === "string" && birthDate
-          ? (() => { const d = new Date(birthDate); return isFinite(d.getTime()) ? d : undefined; })()
-          : undefined,
+      candidate_name: d.name.trim(),
+      candidate_name_ar: d.nameAr || undefined,
+      candidate_email: d.email,
+      candidate_phone: d.phone || undefined,
+      candidate_objective: d.objective || undefined,
+      candidate_intro: d.intro || undefined,
+      candidate_civil_id: d.civilId || undefined,
+      profile_url: d.profileUrl || undefined,
+      candidate_address_line1: d.address || undefined,
+      country_id: d.countryId ? Number(d.countryId) : null,
+      university_id: d.universityId ? Number(d.universityId) : null,
+      bank_id: d.bankId ? Number(d.bankId) : null,
+      bank_account_name: d.bankAccountName || undefined,
+      candidate_iban: d.iban || undefined,
+      candidate_birth_date: d.birthDate
+        ? (() => {
+            const date = new Date(d.birthDate);
+            return isFinite(date.getTime()) ? date : undefined;
+          })()
+        : undefined,
     },
   });
 
   revalidatePath("/candidate");
   revalidatePath("/candidate/edit");
-  redirect("/candidate");
+  return { success: true };
 }
 
 // ---------------------------------------------------------------------------
