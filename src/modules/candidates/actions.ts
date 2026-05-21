@@ -496,7 +496,7 @@ export async function removeCandidateExperience(_prevState: { error: string }, f
 // ---------------------------------------------------------------------------
 
 const certificateSchema = z.object({
-  certificate_type: z.string().transform((v) => v === "true").pipe(z.boolean()),
+  certificate_type: z.enum(["true", "false"]).transform((v) => v === "true"),
   certificate_title: z.string().min(1, "Certificate title is required.").max(200, "Title must be under 200 characters."),
   certificate_issuer: z.string().max(200, "Issuer must be under 200 characters.").optional(),
   start_date: z.string().max(10).optional(),

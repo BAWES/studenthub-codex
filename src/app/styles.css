@@ -10470,5 +10470,5 @@ kbd {
 }
 
 .candidateMissingFields li a:hover {
-  color: var(--fg);
+  color: var(--foreground);
 }

@@ -108,7 +108,7 @@ export async function updateInterviewAction(formData: FormData) {
   const now = new Date();
 
   const data: Record<string, unknown> = { updated_at: now };
-  if (Number.isInteger(status)) data.status = status;
+  if (status === 2 || status === 3) data.status = status;
   if (interviewNote !== null) data.interview_note = interviewNote;
   if (internalNote !== null) data.internal_note = internalNote;
 

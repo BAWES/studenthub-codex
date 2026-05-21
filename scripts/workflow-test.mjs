@@ -158,6 +158,38 @@ function extractActionRefs(html, className) {
   return null;
 }
 
+/**
+ * Extract all hidden input fields from a form that contains a field with the
+ * given name. Returns a Map of field name \u2192 decoded value, or null if not found.
+ */
+function extractActionRefsByField(html, fieldName) {
+  const fieldPos = html.indexOf(`name="${fieldName}"`);
+  if (fieldPos === -1) return null;
+  const searchStart = html.lastIndexOf("<form", fieldPos);
+  if (searchStart === -1) return null;
+  const formEnd = html.indexOf("</form>", fieldPos);
+  if (formEnd === -1) return null;
+  const rawForm = html.substring(searchStart, formEnd);
+
+  const fields = new Map();
+  const inputRegex = /<input[^>]*\/>/g;
+  let m;
+  while ((m = inputRegex.exec(rawForm)) !== null) {
+    const tag = m[0];
+    if (!tag.includes('type="hidden"')) continue;
+    const nameMatch = tag.match(/name="([^"]+)"/);
+    const valueMatch = tag.match(/value="([^"]*)"/);
+    if (nameMatch) {
+      fields.set(nameMatch[1], valueMatch ? decodeHtml(valueMatch[1]) : "");
+    }
+  }
+
+  for (const key of fields.keys()) {
+    if (key.startsWith("$ACTION_REF_")) return fields;
+  }
+  return null;
+}
+
 async function postFormAction(path, fields, cookie) {
   const formData = new FormData();
   for (const [key, value] of fields) {
@@ -304,22 +336,25 @@ async function candidateProfileUpdateTest() {
   formData.set("birthDate", "");
   formData.set("address", "");
 
-  const { status: postStatus } = await postFormAction("/candidate/edit", formData, candidateCookie);
-  assert(postStatus === 303 || postStatus === 200,
-    `Profile update POST returned ${postStatus} (expected 303 or 200)`);
+  try {
+    const { status: postStatus } = await postFormAction("/candidate/edit", formData, candidateCookie);
+    assert(postStatus === 303 || postStatus === 200,
+      `Profile update POST returned ${postStatus} (expected 303 or 200)`);
 
-  const updated = await prisma.candidate.findUniqueOrThrow({
-    where: { candidate_id: candidate.candidate_id },
-    select: { candidate_name: true },
-  });
-  assert(updated.candidate_name === testName,
-    `Expected candidate_name "${testName}" but got "${updated.candidate_name}"`);
+    const updated = await prisma.candidate.findUniqueOrThrow({
+      where: { candidate_id: candidate.candidate_id },
+      select: { candidate_name: true },
+    });
+    assert(updated.candidate_name === testName,
+      `Expected candidate_name "${testName}" but got "${updated.candidate_name}"`);
 
-  await prisma.candidate.update({
-    where: { candidate_id: candidate.candidate_id },
-    data: { candidate_name: originalName },
-  });
-  console.log(`  (name "${originalName}" → "${testName}" → "${originalName}" restored)`);
+    console.log(`  (name "${originalName}" → "${testName}" verified)`);
+  } finally {
+    await prisma.candidate.update({
+      where: { candidate_id: candidate.candidate_id },
+      data: { candidate_name: originalName },
+    });
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -357,6 +392,7 @@ async function suggestionCreationTest() {
     select: { suggestion_uuid: true, note_uuid: true },
   });
   assert(record, "Suggestion was not created in the database");
+  assert(record.note_uuid, "Suggestion note was not created");
 
   await prisma.note.updateMany({ where: { suggestion_uuid: record.suggestion_uuid }, data: { suggestion_uuid: null } });
   await prisma.story.updateMany({ where: { suggestion_uuid: record.suggestion_uuid }, data: { suggestion_uuid: null } });
@@ -597,6 +633,62 @@ async function publicGamesPageLoads() {
 }
 
 // ---------------------------------------------------------------------------
+// Certificate CRUD workflow
+// ---------------------------------------------------------------------------
+
+async function certificateCrudTest() {
+  const candidate = await firstOrThrow("candidate", () =>
+    prisma.candidate.findFirst({
+      where: { deleted: 0 },
+      orderBy: { candidate_updated_at: "desc" },
+      select: { candidate_id: true, candidate_name: true, candidate_email: true },
+    }),
+  );
+
+  const candidateCookie = signSession({
+    role: "candidate",
+    id: String(candidate.candidate_id),
+    name: candidate.candidate_name ?? "Candidate",
+    email: candidate.candidate_email ?? "candidate@test.local",
+  });
+
+  const { status, text: pageHtml } = await getPage("/candidate/edit", candidateCookie);
+  assert(status === 200, \`Candidate edit page returned ${status}\`);
+
+  const actionFields = extractActionRefsByField(pageHtml, "certificate_title");
+  assert(actionFields, "Could not find certificate add form");
+
+  const testTitle = \`WFTEST_CERT_${Date.now()}\`;
+  const formData = new Map(actionFields);
+  formData.set("certificate_type", "false");
+  formData.set("certificate_title", testTitle);
+  formData.set("certificate_issuer", "Workflow Test Issuer");
+  formData.set("start_date", "2024-01-01");
+  formData.set("end_date", "");
+  formData.set("certificate_url", "");
+
+  const { status: postStatus } = await postFormAction("/candidate/edit", formData, candidateCookie);
+  assert(postStatus === 303 || postStatus === 200,
+    \`Certificate add POST returned ${postStatus} (expected 303 or 200)\`);
+
+  try {
+    const cert = await prisma.candidate_certificate.findFirst({
+      where: { candidate_id: candidate.candidate_id, certificate_title: testTitle, is_deleted: false },
+      select: { certificate_uuid: true, certificate_title: true },
+    });
+    assert(cert, "Certificate was not created in the database");
+    assert(cert.certificate_title === testTitle,
+      \`Expected title "${testTitle}" but got "${cert.certificate_title}"\`);
+    console.log(\`  (certificate "${testTitle}" created and verified)\`);
+  } finally {
+    await prisma.candidate_certificate.updateMany({
+      where: { candidate_id: candidate.candidate_id, certificate_title: testTitle },
+      data: { is_deleted: true },
+    });
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Main
 // ---------------------------------------------------------------------------
 
@@ -604,6 +696,7 @@ async function main() {
   console.log("Workflow regression tests\n");
 
   await test("Candidate profile update persists to database", candidateProfileUpdateTest);
+  await test("Certificate CRUD workflow creates and verifies row", certificateCrudTest);
 
   console.log("\nPipeline workflow tests\n");
 
