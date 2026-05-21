@@ -5,6 +5,7 @@ import type { SessionUser } from "@/modules/auth/types";
 import { HubShortcuts, type HubCommand } from "@/modules/hub/HubShortcuts";
 import { ThemeToggle } from "@/modules/theme/ThemeToggle";
 import { CandidateProfile } from "./CandidateProfile";
+import { ExportCVsForm } from "./ExportCVsForm";
 import type {
   CandidateSearchFacet,
   CandidateSearchFilter,
@@ -237,7 +238,7 @@ function BulkCandidateBar({
         {selectedIds.length === 2 ? <Link href={candidateSearchHref(basePath, params, { selected: selectedValue })}>Merge review</Link> : null}
         {loadedEmailRecipients ? <a href={`mailto:${loadedEmailRecipients}`}>Email loaded</a> : null}
         <Link href={candidateSearchHref(basePath, params, { selected: selectedValue })}>Generate ID batch</Link>
-        <Link href={candidateSearchHref(basePath, params, { selected: selectedValue })}>Export CVs</Link>
+        <ExportCVsForm candidateIds={selectedValue} />
         <Link href={candidateSearchHref(basePath, params, { selected: "" })}>Deselect</Link>
       </nav>
     </section>
