@@ -24,7 +24,8 @@
     "search:index-candidates": "node scripts/index-candidates-meilisearch.mjs",
     "db:generate": "prisma generate",
     "db:introspect": "prisma db pull",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "prepare": "husky"
   },
   "dependencies": {
     "@prisma/client": "^6.6.0",
@@ -43,7 +44,12 @@
     "tailwind-merge": "^3.5.0",
     "zod": "^3.24.3"
   },
+  "lint-staged": {
+    "*.{ts,tsx}": "eslint --fix"
+  },
   "devDependencies": {
+    "@commitlint/cli": "^21.0.1",
+    "@commitlint/config-conventional": "^21.0.1",
     "@playwright/test": "^1.60.0",
     "@tailwindcss/postcss": "^4.3.0",
     "@types/node": "^22.14.1",
@@ -52,6 +58,8 @@
     "autoprefixer": "^10.5.0",
     "eslint": "^9.24.0",
     "eslint-config-next": "^15.3.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.0.5",
     "postcss": "^8.5.15",
     "prisma": "^6.6.0",
     "tailwindcss": "^4.3.0",
