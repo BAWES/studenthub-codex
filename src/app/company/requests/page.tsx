@@ -4,21 +4,34 @@ import { requireRoleCapability } from "@/modules/auth/session";
 import { DataTable } from "@/modules/workspace/DataTable";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { getCompanyRequestRows } from "@/modules/workspace/data";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
 
 const statusBadge = (status: string) => {
-  const variants: Record<string, "default" | "secondary" | "success" | "warning" | "outline"> = {
-    pending: "secondary",
-    started: "default",
-    delivered: "success",
-    cancelled: "outline",
-    finished_by_recruitment: "outline",
+  const colors: Record<string, string> = {
+    pending: "#f59e0b",
+    started: "#3b82f6",
+    delivered: "#10b981",
+    cancelled: "#ef4444",
+    finished_by_recruitment: "#8b5cf6",
   };
-  const variant = variants[status] ?? "outline";
-  return <Badge variant={variant}>{status.replace(/_/g, " ")}</Badge>;
+  const color = colors[status] ?? "#6b7280";
+  return (
+    <span
+      style={{
+        display: "inline-block",
+        padding: "0.125rem 0.625rem",
+        borderRadius: "9999px",
+        fontSize: "0.75rem",
+        fontWeight: 600,
+        color: "#fff",
+        background: color,
+        textTransform: "capitalize",
+      }}
+    >
+      {status.replace(/_/g, " ")}
+    </span>
+  );
 };
 
 export default async function CompanyRequestsPage() {
@@ -27,10 +40,23 @@ export default async function CompanyRequestsPage() {
 
   return (
     <WorkspaceShell session={session} eyebrow="Company" title="Requests" metrics={[]}>
-      <div className="mb-4">
-        <Button asChild>
-          <Link href="/company/requests/create">+ New Request</Link>
-        </Button>
+      <div style={{ marginBottom: "1rem" }}>
+        <Link
+          href="/company/requests/create"
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            padding: "0.5rem 1rem",
+            background: "var(--primary, #2563eb)",
+            color: "#fff",
+            borderRadius: "6px",
+            fontWeight: 600,
+            fontSize: "0.875rem",
+            textDecoration: "none",
+          }}
+        >
+          + New Request
+        </Link>
       </div>
       <DataTable
         title="Hiring Requests"

@@ -1,105 +1,85 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { UserRound, Search, Building2, Shield, ClipboardCheck } from "lucide-react";
 import { getSession } from "@/modules/auth/session";
 import { LoginForm } from "@/modules/auth/LoginForm";
 import { ThemeToggle } from "@/modules/theme/ThemeToggle";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { isRole, type Role } from "@/modules/auth/types";
 
 export const dynamic = "force-dynamic";
 
-const roleNotes = [
-  { icon: UserRound, label: "Students", detail: "Profile, jobs, hours, pay" },
-  { icon: Search, label: "Staff", detail: "Requests, candidates, CVs, time" },
-  { icon: Building2, label: "Companies", detail: "Requests, candidates, invoices" },
-  { icon: Shield, label: "Admin", detail: "Finance, approvals, migration" },
-  { icon: ClipboardCheck, label: "Inspectors", detail: "ID review, document queues" }
-];
+const loginHints: Record<Role, string> = {
+  admin: "Admin access is detected after authentication.",
+  staff: "Staff access is detected after authentication.",
+  company: "Company contact access is detected after authentication.",
+  candidate: "Candidate access is detected after authentication.",
+  inspector: "Inspector access is detected after authentication."
+};
 
 export default async function LoginPage({
   searchParams
 }: {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ intent?: string; error?: string }>;
 }) {
   const session = await getSession();
   if (session) redirect("/app");
   const params = await searchParams;
+  const intent = params.intent ?? null;
+  const hint = isRole(intent) ? loginHints[intent] : null;
 
   return (
-    <main className="min-h-svh w-[min(1160px,calc(100%_-_28px))] mx-auto grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(400px,500px)] content-start items-start gap-4 pt-[18px] pb-[42px] max-sm:w-[min(calc(100%_-_20px),720px)]">
-      {/* Nav - spans full width */}
-      <nav
-        className="col-span-full sticky top-3 z-20 min-h-[62px] flex items-center justify-between gap-3.5 border border-border/80 rounded-lg bg-card/92 p-2 shadow-[0_18px_50px_rgba(16,24,40,0.08)] max-sm:static max-sm:flex-col max-sm:items-stretch"
-        aria-label="StudentHub login navigation"
-      >
-        <Link
-          className="inline-flex items-center gap-2.5 text-foreground px-2 no-underline"
-          href="/"
-        >
-          <span className="size-9 inline-flex items-center justify-center rounded-lg bg-foreground text-card font-black">
-            SH
-          </span>
+    <main className="roleLoginShell unifiedLoginShell">
+      <nav className="landingNav" aria-label="StudentHub login navigation">
+        <Link className="landingBrand" href="/">
+          <span>SH</span>
           <strong>StudentHub</strong>
         </Link>
         <ThemeToggle />
       </nav>
 
-      {/* Intro */}
-      <Card className="overflow-hidden border-border bg-gradient-to-br from-blue/10 via-transparent to-transparent">
-        <CardContent className="p-8 sm:p-10 lg:p-12">
-          <p className="text-blue text-[11px] font-black uppercase">One StudentHub login</p>
-          <h1 className="mt-0 max-w-[760px] text-[clamp(32px,5vw,72px)] leading-[0.94] max-sm:text-[36px]">
-            Sign in once. We&rsquo;ll open the right workspace.
-          </h1>
-          <p className="text-muted-foreground max-w-[620px] leading-relaxed">
+      <section className="roleLoginIntro unifiedLoginIntro">
+        <div>
+          <p className="eyebrow">One StudentHub login</p>
+          <h1>Sign in once. We’ll open the right workspace.</h1>
+          <p>
             No more guessing whether you are entering as admin, staff, candidate, company, or inspector. Your production
             credentials decide what you can see and do.
           </p>
-          <div className="flex flex-wrap gap-2 mt-5">
-            {["Production-compatible credentials", "Server-side account detection", "Capability-scoped workspaces"].map(
-              (item) => (
-                <Badge
-                  key={item}
-                  variant="outline"
-                  className="text-blue text-[11px] font-black uppercase px-3 py-1.5"
-                >
-                  {item}
-                </Badge>
-              )
-            )}
+          <div className="roleLoginPromise">
+            <span>Production-compatible credentials</span>
+            <span>Server-side account detection</span>
+            <span>Capability-scoped workspaces</span>
           </div>
-          <Link href="/" className="inline-block mt-4 text-sm no-underline text-muted-foreground hover:text-blue">
-            Back to landing
-          </Link>
-        </CardContent>
-      </Card>
+        </div>
+        <Link className="switchPortalLink" href="/">
+          Back to landing
+        </Link>
+      </section>
 
-      {/* Login panel */}
-      <Card
-        className="self-start border-border shadow-xl"
-        aria-label="StudentHub sign in"
-      >
+      <section className="loginPanel appLoginPanel unifiedLoginPanel" aria-label="StudentHub sign in">
         {params.error === "expired" ? (
-          <p className="text-destructive font-bold m-0 p-4 pb-0">That verified account choice expired. Sign in again to continue.</p>
+          <p className="formError">That verified account choice expired. Sign in again to continue.</p>
         ) : null}
-        {params.error === "account" ? (
-          <p className="text-destructive font-bold m-0 p-4 pb-0">Choose a verified account to continue.</p>
-        ) : null}
-        <LoginForm />
-      </Card>
+        {params.error === "account" ? <p className="formError">Choose a verified account to continue.</p> : null}
+        <LoginForm hint={hint ?? undefined} />
+      </section>
 
-      {/* Role notes - spans full width */}
-      <section className="col-span-full grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5" aria-label="Account detection notes">
-        {roleNotes.map(({ icon: Icon, label, detail }) => (
-          <Card key={label}>
-            <CardContent className="grid gap-1.5 p-3.5">
-              <Icon className="size-4 text-blue shrink-0" aria-hidden="true" />
-              <span className="text-muted-foreground text-xs font-extrabold uppercase">{label}</span>
-              <strong className="text-sm text-foreground">{detail}</strong>
-            </CardContent>
-          </Card>
-        ))}
+      <section className="unifiedLoginNotes" aria-label="Account detection notes">
+        <article>
+          <span>Students</span>
+          <strong>Profile, jobs, hours, pay</strong>
+        </article>
+        <article>
+          <span>Staff</span>
+          <strong>Requests, candidates, CVs, time</strong>
+        </article>
+        <article>
+          <span>Companies</span>
+          <strong>Requests, candidates, invoices</strong>
+        </article>
+        <article>
+          <span>Admin</span>
+          <strong>Finance, approvals, migration</strong>
+        </article>
       </section>
     </main>
   );

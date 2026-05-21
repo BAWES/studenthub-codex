@@ -1,0 +1,10 @@
+{
+  "/_not-found/page": "/_not-found",
+  "/staff/page": "/staff",
+  "/page": "/",
+  "/admin/page": "/admin",
+  "/login/page": "/login",
+  "/company/page": "/company",
+  "/candidate/page": "/candidate",
+  "/inspector/page": "/inspector"
+}

@@ -31,8 +31,8 @@ export function TransferActionBar({ data }: { data: TransferDetail }) {
   const isLocked = data.transfer.transfer_status !== 10;
 
   return (
-    <section className="flex flex-col gap-4 mb-6">
-      <div className="flex flex-wrap gap-2 items-center">
+    <section className="transferActions">
+      <div className="transferActionButtons">
         <form action={toggleTransferStatusAction}>
           <input name="transfer_id" type="hidden" value={data.transfer.transfer_id} />
           <Button type="submit" variant={isLocked ? "secondary" : "outline"}>
@@ -57,10 +57,12 @@ export function TransferActionBar({ data }: { data: TransferDetail }) {
           <CardHeader>
             <CardTitle>Candidate Payouts</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
-            {data.candidates.map((candidate) => (
-              <CandidatePayoutRow key={candidate.id} candidate={candidate} transferId={data.transfer!.transfer_id} />
-            ))}
+          <CardContent>
+            <div className="payoutList">
+              {data.candidates.map((candidate) => (
+                <CandidatePayoutRow key={candidate.id} candidate={candidate} transferId={data.transfer!.transfer_id} />
+              ))}
+            </div>
           </CardContent>
         </Card>
       ) : null}
@@ -72,11 +74,11 @@ function CandidatePayoutRow({ candidate, transferId }: { candidate: TransferDeta
   const isPaid = candidate.meta?.includes("Paid");
 
   return (
-    <div className="flex items-center justify-between gap-3 p-3 rounded-lg border border-border">
-      <div className="grid gap-0.5">
-        <strong className="text-foreground">{candidate.title}</strong>
-        <span className="text-sm text-muted-foreground">{candidate.subtitle}</span>
-        <small className="text-xs text-muted-foreground">{candidate.meta}</small>
+    <div className="payoutRow">
+      <div>
+        <strong>{candidate.title}</strong>
+        <span>{candidate.subtitle}</span>
+        <small>{candidate.meta}</small>
       </div>
       <form action={toggleCandidatePaidAction}>
         <input name="transfer_id" type="hidden" value={transferId} />
@@ -92,7 +94,7 @@ function CandidatePayoutRow({ candidate, transferId }: { candidate: TransferDeta
 
 function PaymentReceivedForm({ transferId, currentDate }: { transferId: number; currentDate: Date | null }) {
   return (
-    <form action={markPaymentReceivedAction} className="flex gap-2 items-center">
+    <form action={markPaymentReceivedAction} className="paymentDateForm">
       <input name="transfer_id" type="hidden" value={transferId} />
       <Input
         name="received_on"
