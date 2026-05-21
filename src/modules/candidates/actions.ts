@@ -534,11 +534,8 @@ export async function removeCandidateExperience(_prevState: { error: string }, f
 
 const certificateSchema = z.object({
   certificate_type: z.string().transform((v) => v === "true").pipe(z.boolean()),
-  certificate_title: z.string().min(1, "Certificate title is required.").max(200, "Title must be under 200 characters."),
-  certificate_issuer: z.string().max(200, "Issuer must be under 200 characters.").optional(),
   start_date: z.string().max(10).optional(),
   end_date: z.string().max(10).optional(),
-  certificate_url: z.string().url("Please enter a valid URL.").max(500, "URL must be under 500 characters.").optional().or(z.literal("")),
 });
 
 export async function addCandidateCertificate(_prevState: { error: string }, formData: FormData) {
@@ -546,23 +543,17 @@ export async function addCandidateCertificate(_prevState: { error: string }, for
   const candidateId = Number(session.id);
   const parsed = certificateSchema.safeParse({
     certificate_type: formData.get("certificate_type"),
-    certificate_title: formData.get("certificate_title"),
-    certificate_issuer: formData.get("certificate_issuer") || undefined,
     start_date: formData.get("start_date") || undefined,
     end_date: formData.get("end_date") || undefined,
-    certificate_url: formData.get("certificate_url") || undefined,
   });
   if (!parsed.success) return { error: parsed.error.errors[0]?.message ?? "Validation failed." };
-  const { certificate_type, certificate_title, certificate_issuer, start_date, end_date, certificate_url } = parsed.data;
+  const { certificate_type, start_date, end_date } = parsed.data;
   const now = new Date();
   await prisma.candidate_certificate.create({
     data: {
       certificate_uuid: `cert_${crypto.randomUUID()}`,
       candidate_id: candidateId,
       certificate_type,
-      certificate_title,
-      certificate_issuer: certificate_issuer || null,
-      certificate_url: certificate_url || null,
       start_date: start_date ? (isFinite(new Date(start_date).getTime()) ? new Date(start_date) : null) : null,
       end_date: end_date ? (isFinite(new Date(end_date).getTime()) ? new Date(end_date) : null) : null,
       is_deleted: false,
@@ -1094,7 +1085,7 @@ export async function approveIdRequest(_prevState: { error: string }, formData: 
   });
 
   if (!request) return { error: "ID request not found." };
-  if (request.status === "approved") return { error: "This request is already approved." };
+  if (request.status !== "pending") return { error: "This request can only be processed from 'pending' status." };
 
   const staffId = Number(session.id);
   const now = new Date();
@@ -1146,7 +1137,7 @@ export async function rejectIdRequest(_prevState: { error: string }, formData: F
   });
 
   if (!request) return { error: "ID request not found." };
-  if (request.status === "rejected") return { error: "This request is already rejected." };
+  if (request.status !== "pending") return { error: "This request can only be processed from 'pending' status." };
 
   const staffId = Number(session.id);
   const now = new Date();
