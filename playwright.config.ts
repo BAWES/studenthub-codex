@@ -21,6 +21,14 @@ export default defineConfig({
       name: "mobile",
       use: { ...devices["iPhone 14"] },
     },
+    {
+      name: "tablet",
+      use: {
+        ...devices["Desktop Chrome"],
+        viewport: { width: 768, height: 1024 },
+        deviceScaleFactor: 2,
+      },
+    },
   ],
   webServer: process.env.CI
     ? {
