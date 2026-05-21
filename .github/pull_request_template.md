@@ -22,7 +22,7 @@
 ## Checklist
 
 - [ ] Branch follows [CLAUDE.md](CLAUDE.md) naming: `feature/STU-N-*`, `fix/STU-N-*`, or `chore/STU-N-*`
-- [ ] Commits follow [conventional commits](https://www.conventionalcommits.org/): `feat:`, `fix:`, `chore:`, `docs:`, `test:`, `refactor:`, `ci:`
+- [ ] Commits follow [conventional commits](https://www.conventionalcommits.org/): `feat:`, `fix:`, `chore:`, `docs:`, `test:`, `refactor:`, `ci:`, `style:`, `perf:`
 - [ ] TypeScript passes (`npx tsc --noEmit`)
 - [ ] Build passes (`npx next build`)
 - [ ] Validation passes (`node scripts/validate.mjs`)
