@@ -542,7 +542,7 @@ async function resolveSelectedCandidateId({
   staffCandidateIds: number[] | null;
 }) {
   if (requestedId) {
-    // Staff must always be scoped to candidate_work_history, even when row visibility is "all"
+    // Staff must always pass scope enforcement, even when row visibility is "all"
     if (staffCandidateIds && !staffCandidateIds.includes(requestedId)) return null;
     const exists = await prisma.candidate.findFirst({ where: { candidate_id: requestedId, deleted: 0 }, select: { candidate_id: true } });
     return exists?.candidate_id ?? null;

@@ -1,19 +1,18 @@
 import type { Route } from "next";
 import Link from "next/link";
-import { Mail, Plus, Search, Send, UserRoundCheck } from "lucide-react";
+import { Mail, Plus, Search, UserRoundCheck } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { addCandidateSuggestionAction } from "./actions";
-import { createInvitationAction } from "./invitation-actions";
-import { createStoryAction } from "./story-actions";
+import { SuggestForm, InviteForm } from "@/modules/requests/MatchActions";
+import { createStoryAction } from "@/modules/requests/story-actions";
 import {
   ApplicationStatusActions,
   InterviewStatusActions,
   InvitationStatusActions,
   StoryStatusActions
-} from "./StageActions";
+} from "@/modules/requests/StageActions";
 import type { getRequestDetail } from "@/modules/workspace/data";
 
 type RequestDetailData = Awaited<ReturnType<typeof getRequestDetail>>;
@@ -129,23 +128,8 @@ export function RequestFulfillmentOS({
                   <Badge variant="success">{candidate.rate}</Badge>
                 </div>
                 <div className="matchActionsRow">
-                  <form className="suggestionForm" action={addCandidateSuggestionAction}>
-                    <input name="request_uuid" type="hidden" value={requestUuid} />
-                    <input name="candidate_id" type="hidden" value={candidate.id} />
-                    <Input name="reason" placeholder="Why this candidate fits" />
-                    <Button type="submit">
-                      <Send aria-hidden="true" />
-                      Suggest
-                    </Button>
-                  </form>
-                  <form action={createInvitationAction}>
-                    <input name="request_uuid" type="hidden" value={requestUuid} />
-                    <input name="candidate_id" type="hidden" value={candidate.id} />
-                    <Button type="submit" variant="outline" size="sm">
-                      <Plus aria-hidden="true" />
-                      Invite
-                    </Button>
-                  </form>
+                  <SuggestForm requestUuid={requestUuid} candidateId={candidate.id} />
+                  <InviteForm requestUuid={requestUuid} candidateId={candidate.id} />
                 </div>
                 <Button asChild variant="ghost" size="sm">
                   {role === "admin" ? (

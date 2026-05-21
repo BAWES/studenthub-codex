@@ -209,12 +209,14 @@ export function CandidateEditForm({ candidate, countries, universities, banks, s
             {skills.map((s) => (
               <li key={s.id}>
                 <span>{s.title}</span>
-                <form action={removeSkillAction}>
-                  <input type="hidden" name="skillId" value={s.id} />
-                  <button type="submit" disabled={removeSkillPending} className="removeButton">
-                    Remove
-                  </button>
-                </form>
+                <button
+                  type="submit"
+                  form={`remove-skill-${s.id}`}
+                  disabled={removeSkillPending}
+                  className="removeButton"
+                >
+                  Remove
+                </button>
               </li>
             ))}
           </ul>
@@ -234,6 +236,12 @@ export function CandidateEditForm({ candidate, countries, universities, banks, s
         </div>
       </form>
 
+      {skills.map((s) => (
+        <form key={s.id} id={`remove-skill-${s.id}`} action={removeSkillAction} hidden>
+          <input type="hidden" name="skillId" value={s.id} />
+        </form>
+      ))}
+
       <form action={addExpAction} className="candidateEditForm">
         <h2>Work experience</h2>
 
@@ -242,12 +250,14 @@ export function CandidateEditForm({ candidate, countries, universities, banks, s
             {experiences.map((e) => (
               <li key={e.id}>
                 <span>{e.title}{e.subtitle ? ` at ${e.subtitle}` : ""}</span>
-                <form action={removeExpAction}>
-                  <input type="hidden" name="experienceId" value={e.id} />
-                  <button type="submit" disabled={removeExpPending} className="removeButton">
-                    Remove
-                  </button>
-                </form>
+                <button
+                  type="submit"
+                  form={`remove-exp-${e.id}`}
+                  disabled={removeExpPending}
+                  className="removeButton"
+                >
+                  Remove
+                </button>
               </li>
             ))}
           </ul>
@@ -282,6 +292,12 @@ export function CandidateEditForm({ candidate, countries, universities, banks, s
           </button>
         </div>
       </form>
+
+      {experiences.map((e) => (
+        <form key={e.id} id={`remove-exp-${e.id}`} action={removeExpAction} hidden>
+          <input type="hidden" name="experienceId" value={e.id} />
+        </form>
+      ))}
     </div>
   );
 }
@@ -299,7 +315,7 @@ function DocumentUpload({
     <fieldset className="documentUploadField">
       <legend>{label}</legend>
       <input type="hidden" name="type" value={type} />
-      <input type="file" name="file" accept={acceptFor(type)} />
+      <input type="file" name={`file_${type}`} accept={acceptFor(type)} />
       {current ? (
         <small>
           Current:{" "}
