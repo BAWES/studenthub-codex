@@ -109,9 +109,11 @@ export function CandidateProfile({
         <Fact label="Store" value={candidate.store?.store_name ?? "Not assigned"} />
         <Fact label="Rate" value={detail.metrics[1]?.value ?? "0"} />
         <Fact label="Revenue" value={detail.stats?.totalRevenue ?? "No revenue stats"} />
-        <Fact label="Civil ID" value={candidate.candidate_civil_expiry_date ? `Expires ${formatDate(candidate.candidate_civil_expiry_date)}` : "Not set"} />
+        <Fact label="Civil ID" value={candidate.candidate_civil_id ?? (candidate.candidate_civil_need_verification ? "Needs verification" : "Not set")} />
         <Fact label="Updated" value={formatDate(candidate.candidate_updated_at)} />
       </section>
+
+      <CivilIdPanel candidate={candidate} viewerRole={viewerRole} />
 
       {!compact && candidate.candidate_intro ? (
         <section className="candidateNarrative">
@@ -163,6 +165,63 @@ function Fact({ label, value }: { label: string; value: string | number }) {
       <span>{label}</span>
       <strong>{value}</strong>
     </div>
+  );
+}
+
+
+function CivilIdPanel({ candidate, viewerRole }: { candidate: NonNullable<CandidateDetailData["candidate"]>; viewerRole?: string }) {
+  if (!candidate.candidate_civil_id && !candidate.candidate_civil_expiry_date && !candidate.candidate_civil_photo_front && !candidate.candidate_civil_photo_back && !candidate.candidate_civil_need_verification) {
+    return null;
+  }
+
+  const now = new Date();
+  const expiryDate = candidate.candidate_civil_expiry_date ? new Date(candidate.candidate_civil_expiry_date) : null;
+  const daysUntilExpiry = expiryDate ? Math.ceil((expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)) : null;
+  const isExpired = daysUntilExpiry !== null && daysUntilExpiry < 0;
+  const isNearExpiry = daysUntilExpiry !== null && daysUntilExpiry >= 0 && daysUntilExpiry <= 90;
+
+  const badges: string[] = [];
+  if (candidate.candidate_civil_need_verification) badges.push("Needs verification");
+  if (isExpired) badges.push("Expired");
+  else if (isNearExpiry) badges.push("Expires soon");
+
+  return (
+    <section className="civilIdPanel">
+      <div className="candidatePanelHeader">
+        <span>Civil ID</span>
+        <strong>{badges.length ? badges.join(" · ") : "On file"}</strong>
+      </div>
+      <div className="civilIdPanelBody">
+        <div className="civilIdPanelFields">
+          <div>
+            <span>ID Number</span>
+            <strong>{candidate.candidate_civil_id || "—"}</strong>
+          </div>
+          <div>
+            <span>Expiry date</span>
+            <strong className={isExpired ? "civilIdExpired" : isNearExpiry ? "civilIdWarning" : ""}>
+              {expiryDate ? formatDate(expiryDate) : "—"}
+            </strong>
+          </div>
+        </div>
+        {candidate.candidate_civil_photo_front || candidate.candidate_civil_photo_back ? (
+          <div className="civilIdPhotos">
+            {candidate.candidate_civil_photo_front ? (
+              <div>
+                <span>Photo (front)</span>
+                <img src={candidate.candidate_civil_photo_front} alt="Civil ID front" loading="lazy" />
+              </div>
+            ) : null}
+            {candidate.candidate_civil_photo_back ? (
+              <div>
+                <span>Photo (back)</span>
+                <img src={candidate.candidate_civil_photo_back} alt="Civil ID back" loading="lazy" />
+              </div>
+            ) : null}
+          </div>
+        ) : null}
+      </div>
+    </section>
   );
 }
 
