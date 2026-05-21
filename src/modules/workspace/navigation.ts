@@ -23,7 +23,8 @@ export function navForRole(role: Role): NavItem[] {
       { label: "App", href: "/app" },
       { label: "Overview", href: "/staff" },
       { label: "My Requests", href: "/staff/requests" },
-      { label: "Candidates", href: "/staff/candidates" }
+      { label: "Candidates", href: "/staff/candidates" },
+      { label: "Interviews", href: "/staff/interviews" as Route }
     ];
   }
 

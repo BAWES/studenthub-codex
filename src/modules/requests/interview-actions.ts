@@ -127,3 +127,34 @@ export async function updateInterviewAction(formData: FormData) {
   revalidatePath(basePath);
   redirect(`${detailPath}?notice=interview-updated` as Route);
 }
+
+
+export async function updateInterviewStatusAction(formData: FormData) {
+  const session = await requireCapability("request.interview");
+
+  const interviewUuid = String(formData.get("interview_uuid") ?? "").trim();
+  const status = Number(formData.get("status"));
+  const basePath = session.role === "admin" ? "/admin/interviews" : "/staff/interviews";
+
+  if (!interviewUuid || !Number.isInteger(status)) {
+    redirect(`${basePath}?notice=missing-fields` as Route);
+  }
+
+  if (session.role === "staff") {
+    const owned = await prisma.request_interview.findFirst({
+      where: { request_interview_uuid: interviewUuid, staff_id: Number(session.id) },
+      select: { request_interview_uuid: true }
+    });
+    if (!owned) redirect(`${basePath}?notice=not-found` as Route);
+  }
+
+  const now = new Date();
+  await prisma.request_interview.update({
+    where: { request_interview_uuid: interviewUuid },
+    data: { status, updated_at: now }
+  });
+
+  revalidatePath(basePath);
+  revalidatePath(`${basePath}/${interviewUuid}`);
+  redirect(`${basePath}/${interviewUuid}?notice=interview-updated` as Route);
+}
