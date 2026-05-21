@@ -83,6 +83,12 @@ export function CandidateProfile({
             </div>
           ))}
         </div>
+        {readiness.missing?.length ? (
+          <div className="candidateMissingFields">
+            <span>Missing fields</span>
+            <p>{readiness.missing.join(" · ")}</p>
+          </div>
+        ) : null}
       </section>
 
       <section className="candidateFactGrid" aria-label="Candidate facts">
@@ -203,21 +209,31 @@ function RowContent({ row }: { row: { title: string; subtitle: string; meta?: st
 }
 
 function buildReadiness(detail: CandidateDetailData) {
-  const candidate = detail.candidate;
+  const c = detail.candidate;
   const items = [
-    { label: "Approved", done: Boolean(candidate && candidate.approved !== 0) },
-    { label: "Active status", done: candidate?.candidate_status === 10 },
-    { label: "Profile complete", done: Boolean(candidate && !candidate.is_incomplete_profile) },
-    { label: "Civil ID clear", done: Boolean(candidate && !candidate.candidate_civil_need_verification) },
-    { label: "Contact verified", done: Boolean(candidate?.candidate_email_verification || candidate?.candidate_phone) },
-    { label: "Skills imported", done: detail.skills.length > 0 },
-    { label: "Work context", done: detail.histories.length > 0 || detail.invitations.length > 0 },
-    { label: "Document trail", done: detail.idCards.length > 0 || detail.links.length > 0 || Boolean(candidate?.candidate_resume) }
+    { label: "Name", done: Boolean(c?.candidate_name), field: "Name (English)" },
+    { label: "Email", done: Boolean(c?.candidate_email), field: "Email address" },
+    { label: "Phone", done: Boolean(c?.candidate_phone), field: "Phone number" },
+    { label: "Country", done: Boolean(c?.country_id), field: "Country / Nationality" },
+    { label: "University", done: Boolean(c?.university_id), field: "University" },
+    { label: "Objective", done: Boolean(c?.candidate_objective), field: "Objective / Headline" },
+    { label: "Civil ID number", done: Boolean(c?.candidate_civil_id), field: "Civil ID number" },
+    { label: "Civil ID photos", done: Boolean(c?.candidate_civil_photo_front || c?.candidate_civil_photo_back), field: "Civil ID photos (front/back)" },
+    { label: "Profile photo", done: Boolean(c?.candidate_personal_photo), field: "Profile photo upload" },
+    { label: "CV / Resume", done: Boolean(c?.candidate_resume), field: "CV / Resume upload" },
+    { label: "Bank info", done: Boolean(c?.bank_id || c?.candidate_iban), field: "Bank name or IBAN" },
+    { label: "Skills", done: detail.skills.length > 0, field: "At least one skill tag" },
+    { label: "Experience", done: detail.experiences.length > 0, field: "Work experience entries" },
+    { label: "Approved", done: Boolean(c && c.approved !== 0), field: "Staff approval" },
   ];
   const done = items.filter((item) => item.done).length;
   const score = Math.round((done / items.length) * 100);
-  const summary = score >= 85 ? "Ready to present" : score >= 60 ? "Usable with cleanup" : "Needs staff attention";
-  return { items, score, summary };
+  const summary =
+    score >= 85 ? "Ready to present"
+    : score >= 60 ? "Usable with cleanup — fill in the open fields below"
+    : "Needs attention — complete the missing fields to improve your profile visibility";
+  const missing = items.filter((item) => !item.done).map((item) => item.field ?? item.label);
+  return { items, missing, score, summary };
 }
 
 function buildTimeline(detail: CandidateDetailData) {

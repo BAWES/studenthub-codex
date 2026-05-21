@@ -1,3 +1,28 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted-shadcn);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius: var(--radius);
+}
+
 :root {
   color-scheme: light;
   --ink: #182230;
@@ -783,6 +808,112 @@ body {
   padding: 14px;
 }
 
+.workTabs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding: 0 0 2px;
+}
+
+.workTabs::-webkit-scrollbar {
+  display: none;
+}
+
+.workTab {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface-soft);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.workTab.active {
+  border-color: var(--blue);
+  background: #eef5ff;
+}
+
+.workTab button {
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 0 10px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.workTab.active button {
+  color: var(--blue);
+}
+
+.workTabClose {
+  min-width: 24px;
+  min-height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-left: 1px solid var(--line);
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 0;
+}
+
+.workTabClose:hover {
+  color: var(--rose);
+  background: rgba(180, 35, 87, 0.08);
+}
+
+.workTabsClear {
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: none;
+  color: var(--faint);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 0 10px;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.workTabsClear:hover {
+  color: var(--rose);
+  border-color: var(--line);
+}
+
+[data-theme="dark"] .workTab {
+  border-color: var(--line);
+  background: var(--surface-soft);
+}
+
+[data-theme="dark"] .workTab.active {
+  border-color: var(--blue);
+  background: rgba(138, 191, 255, 0.12);
+}
+
+[data-theme="dark"] .workTab.active button {
+  color: var(--blue);
+}
+
+[data-theme="dark"] .workTabClose {
+  border-color: var(--line);
+}
+
 .topbar {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(220px, 300px);
@@ -1235,6 +1366,104 @@ h2 {
   color: var(--rose);
   font-weight: 700;
   margin: 0;
+}
+
+.formNotice {
+  color: var(--muted-foreground);
+  margin: 0;
+}
+
+.candidateEditLayout {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.candidateEditForm {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.candidateEditForm h2 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 0;
+  padding-top: 0.5rem;
+}
+
+.candidateEditForm label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.candidateEditForm label span {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--muted-foreground);
+}
+
+.candidateEditForm input,
+.candidateEditForm textarea,
+.candidateEditForm select {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  font-size: 0.9375rem;
+  background: var(--background);
+  color: var(--foreground);
+}
+
+.candidateEditForm input:focus,
+.candidateEditForm textarea:focus,
+.candidateEditForm select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px var(--ring);
+}
+
+.formActions {
+  display: flex;
+  gap: 0.5rem;
+  padding-top: 0.5rem;
+}
+
+.formActions button {
+  padding: 0.5rem 1.25rem;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  cursor: pointer;
+}
+
+.formActions button:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
+.formActions button.acceptButton {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+
+.formActions button.rejectButton {
+  background: var(--destructive);
+  color: var(--destructive-foreground);
+}
+
+.documentUploadField {
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+}
+
+.documentUploadField legend {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--muted-foreground);
 }
 
 .unifiedLoginShell {
@@ -8961,6 +9190,54 @@ kbd {
 
   .staffHomeActions a {
     justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .mobileTabBar {
+    right: 6px;
+    bottom: 6px;
+    left: 6px;
+    padding: 6px;
+    gap: 4px;
+  }
+
+  .mobileTabBar a {
+    min-height: 38px;
+    padding: 0 10px;
+    font-size: 12px;
+  }
+
+  .workspaceStage {
+    padding: 8px 8px 82px;
+  }
+
+  .shell .workspaceStage {
+    width: auto;
+  }
+
+  .workTabs {
+    gap: 2px;
+    padding: 0 0 4px;
+  }
+
+  .workTab button {
+    min-height: 28px;
+    font-size: 11px;
+    padding: 0 8px;
+  }
+
+  .commandOverlay .commandMenu {
+    width: calc(100vw - 16px);
+    max-width: 360px;
+  }
+
+  .commandInputWrap input {
+    font-size: 14px;
+  }
+
+  body {
+    background-size: 28px 28px;
   }
 }
 
