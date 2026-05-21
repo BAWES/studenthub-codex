@@ -3,8 +3,8 @@
 import { Send, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { addCandidateSuggestionAction } from "./actions";
-import { createInvitationAction } from "./invitation-actions";
+import { addCandidateSuggestionAction } from "@/modules/requests/actions";
+import { createInvitationAction } from "@/modules/requests/invitation-actions";
 
 export function SuggestForm({
   requestUuid,

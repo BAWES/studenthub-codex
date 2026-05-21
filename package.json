@@ -13,6 +13,10 @@
     "test:smoke": "node scripts/smoke-test.mjs",
     "test:validate": "node scripts/validate.mjs",
     "test:all": "npm run lint && npx tsc --noEmit && next build && node scripts/validate.mjs",
+    "test:fixtures:discover": "node scripts/fixtures/discover.mjs",
+    "test:fixtures:validate": "node scripts/fixtures/validate.mjs",
+    "test:e2e": "npx playwright test",
+    "test:e2e:ui": "npx playwright test --ui",
     "db:inspect-dump": "node scripts/inspect-dump.mjs",
     "db:create-sample": "node scripts/create-sample-sql.mjs",
     "db:import-sample": "bash scripts/import-sample-db.sh",
@@ -40,6 +44,7 @@
     "zod": "^3.24.3"
   },
   "devDependencies": {
+    "@playwright/test": "^1.60.0",
     "@tailwindcss/postcss": "^4.3.0",
     "@types/node": "^22.14.1",
     "@types/react": "^19.0.10",

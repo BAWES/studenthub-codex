@@ -3,10 +3,10 @@
 import { useState } from "react";
 import { Check, MessageSquare, ThumbsDown, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { transitionApplicationAction } from "./application-actions";
-import { updateInterviewAction } from "./interview-actions";
-import { updateInvitationStatusAction } from "./invitation-actions";
-import { updateStoryStatusAction } from "./story-actions";
+import { transitionApplicationAction } from "@/modules/requests/application-actions";
+import { updateInterviewAction } from "@/modules/requests/interview-actions";
+import { updateInvitationStatusAction } from "@/modules/requests/invitation-actions";
+import { updateStoryStatusAction } from "@/modules/requests/story-actions";
 
 export function ApplicationStatusActions({
   applicationUuid,
@@ -28,7 +28,7 @@ export function ApplicationStatusActions({
         <input name="request_uuid" type="hidden" value={requestUuid} />
         <input name="status" type="hidden" value={2} />
         {showNote ? <textarea name="note" placeholder="Shortlist note" className="compactTextarea" rows={2} /> : null}
-        <Button type="submit" variant="outline" size="sm" onClick={() => setShowNote(false)}>
+        <Button type="submit" variant="outline" size="sm">
           <Check aria-hidden="true" />
           Shortlist
         </Button>
@@ -36,6 +36,8 @@ export function ApplicationStatusActions({
           type="button"
           variant="ghost"
           size="sm"
+          aria-label={showNote ? "Close note" : "Add note"}
+          aria-expanded={showNote}
           onClick={() => setShowNote(!showNote)}
         >
           <MessageSquare aria-hidden="true" />
@@ -73,7 +75,7 @@ export function InterviewStatusActions({
           <input name="request_uuid" type="hidden" value={requestUuid} />
           <input name="status" type="hidden" value={2} />
           {showNote ? <textarea name="interview_note" placeholder="Interview outcome" className="compactTextarea" rows={2} /> : null}
-          <Button type="submit" variant="outline" size="sm" onClick={() => setShowNote(false)}>
+          <Button type="submit" variant="outline" size="sm">
             <Check aria-hidden="true" />
             Complete
           </Button>
@@ -81,6 +83,8 @@ export function InterviewStatusActions({
             type="button"
             variant="ghost"
             size="sm"
+            aria-label={showNote ? "Close note" : "Add note"}
+            aria-expanded={showNote}
             onClick={() => setShowNote(!showNote)}
           >
             <MessageSquare aria-hidden="true" />

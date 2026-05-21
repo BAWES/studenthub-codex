@@ -6,8 +6,7 @@ import path from "node:path";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { requireCapability, requireRoleCapability, requireSession } from "@/modules/auth/session";
-import { hasCapability } from "@/modules/auth/capabilities";
+import { requireCapability, requireRoleCapability } from "@/modules/auth/session";
 
 // ---------------------------------------------------------------------------
 // Profile edit
@@ -46,7 +45,7 @@ export async function updateCandidateProfile(_prevState: { error: string }, form
   const nullableIntField = (value: unknown) => {
     if (typeof value !== "string" || !value) return undefined;
     const n = Number(value);
-    return Number.isFinite(n) ? n : undefined;
+    return Number.isInteger(n) && n > 0 ? n : undefined;
   };
 
   await prisma.candidate.update({
@@ -67,7 +66,9 @@ export async function updateCandidateProfile(_prevState: { error: string }, form
       bank_account_name: nullableStringField(bankAccountName),
       candidate_iban: nullableStringField(iban),
       candidate_birth_date:
-        typeof birthDate === "string" && birthDate ? new Date(birthDate) : undefined,
+        typeof birthDate === "string" && birthDate
+          ? (() => { const d = new Date(birthDate); return isFinite(d.getTime()) ? d : undefined; })()
+          : undefined,
     },
   });
 
@@ -136,23 +137,26 @@ export async function uploadDocument(_prevState: { error: string }, formData: Fo
   const session = await requireRoleCapability("candidate", "candidate.read.own");
   const candidateId = Number(session.id);
 
-  const type = String(formData.get("type") ?? "");
-  const file = formData.get("file");
+  const allowed = ["photo", "cv", "video", "civilFront", "civilBack"];
+  let type = "";
+  let file: File | null = null;
+  for (const t of allowed) {
+    const f = formData.get(`file_${t}`);
+    if (f instanceof File && f.size > 0) {
+      type = t;
+      file = f;
+      break;
+    }
+  }
 
-  if (!(file instanceof File) || file.size === 0) {
+  if (!file || file.size === 0) {
     return { error: "Please select a file to upload." };
   }
 
-  const allowed = ["photo", "cv", "video", "civilFront", "civilBack"];
-  if (!allowed.includes(type)) {
-    return { error: "Invalid document type." };
-  }
-
   const typeConfig = ALLOWED_TYPES[type];
-  if (type === "cv" && file.type && !typeConfig.mime.includes(file.type)) {
-    return { error: `Invalid file type for CV. Accepted: PDF, DOC, DOCX.` };
-  }
-  if (type !== "cv" && type !== "video" && file.type && !typeConfig.mime.includes(file.type)) {
+  if (file.type && !typeConfig.mime.includes(file.type)) {
+    if (type === "cv") return { error: "Invalid file type for CV. Accepted: PDF, DOC, DOCX." };
+    if (type === "video") return { error: "Invalid file type for video. Accepted: MP4, WebM, OGG, MOV." };
     return { error: `Invalid file type for ${type}. Accepted image formats.` };
   }
 
@@ -386,8 +390,10 @@ export async function addCandidateExperience(_prevState: { error: string }, form
 
   const experience = String(formData.get("experience") ?? "").trim();
   const employer = String(formData.get("employer") ?? "").trim();
-  const startYear = Number(formData.get("startYear"));
-  const endYear = Number(formData.get("endYear"));
+  const startYearStr = String(formData.get("startYear") ?? "").trim();
+  const endYearStr = String(formData.get("endYear") ?? "").trim();
+  const startYear = startYearStr ? parseInt(startYearStr, 10) : NaN;
+  const endYear = endYearStr ? parseInt(endYearStr, 10) : NaN;
 
   if (!experience) return { error: "Job title / experience is required." };
 
@@ -440,7 +446,7 @@ async function ensureStaffCandidateAccess(session: { role: string; id: string },
   if (session.role === "admin") return;
   const staffId = Number(session.id);
   const row = await prisma.candidate_work_history.findFirst({
-    where: { candidate_id: candidateId, staff_id: staffId },
+    where: { candidate_id: candidateId, staff_id: staffId, deleted: false },
     select: { id: true },
   });
   if (!row) throw new Error("Access denied.");
@@ -706,16 +712,20 @@ export async function setCandidateApproval(_prevState: { error: string }, formDa
 export async function setCandidateProfileComplete(_prevState: { error: string }, formData: FormData) {
   const session = await requireCapability("candidate.search");
   const candidateId = Number(formData.get("candidateId"));
-  const isIncomplete = String(formData.get("isIncomplete") ?? "");
 
   if (!Number.isInteger(candidateId) || candidateId <= 0) return { error: "Invalid candidate." };
-  if (isIncomplete !== "true" && isIncomplete !== "false") return { error: "isIncomplete must be 'true' or 'false'." };
 
   try { await ensureStaffCandidateAccess(session, candidateId); } catch { return { error: "Access denied." }; }
 
+  const candidate = await prisma.candidate.findFirst({
+    where: { candidate_id: candidateId, deleted: 0 },
+    select: { is_incomplete_profile: true },
+  });
+  if (!candidate) return { error: "Candidate not found." };
+
   await prisma.candidate.update({
     where: { candidate_id: candidateId },
-    data: { is_incomplete_profile: isIncomplete === "true", candidate_updated_at: new Date() },
+    data: { is_incomplete_profile: !candidate.is_incomplete_profile, candidate_updated_at: new Date() },
   });
 
   const base = staffBasePath(session.role);

@@ -91,16 +91,13 @@ export function useWorkTabs() {
       setTabs((prev) => {
         const next = prev.filter((t) => t.path !== path);
         writeTabs(next);
+        if (pathname === path && next.length > 0) {
+          router.push(next[0].path as Route);
+        }
         return next;
       });
-      if (pathname === path) {
-        const remaining = tabs.filter((t) => t.path !== path);
-        if (remaining.length > 0) {
-          router.push(remaining[0].path as Route);
-        }
-      }
     },
-    [pathname, router, tabs]
+    [pathname, router]
   );
 
   const closeAll = useCallback(() => {

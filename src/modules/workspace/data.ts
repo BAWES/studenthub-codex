@@ -1931,6 +1931,93 @@ export async function getCandidateTransferRows(candidateId: number) {
   }));
 }
 
+export async function getCandidateTransferDetail(tcId: number, candidateId: number) {
+  const tc = await prisma.transfer_candidate.findFirst({
+    where: { tc_id: tcId, deleted: 0 },
+    select: {
+      tc_id: true,
+      candidate_id: true,
+      transfer_id: true,
+      candidate_total: true,
+      company_total: true,
+      transfer_cost: true,
+      hours: true,
+      minutes: true,
+      paid: true,
+      currency_code: true,
+      candidate_hourly_rate: true,
+      company_hourly_rate: true,
+      bonus: true,
+      transfer_benef_name: true,
+      transfer_benef_iban: true,
+      tc_created_at: true,
+      tc_updated_at: true,
+      store: { select: { store_name: true } },
+      company: { select: { company_name: true } },
+      bank: { select: { bank_name: true } },
+      transfer: {
+        select: {
+          transfer_id: true,
+          transfer_status: true,
+          start_date: true,
+          end_date: true,
+          payment_received_on: true,
+          transfer_created_at: true,
+          currency_code: true,
+          invoice: {
+            where: { deleted: 0 },
+            orderBy: { invoice_date: "desc" },
+            select: { invoice_id: true, invoice_date: true, invoice_status: true },
+          },
+        },
+      },
+    },
+  });
+
+  if (!tc || tc.candidate_id !== candidateId) return null;
+
+  const t = tc.transfer;
+  const currency = tc.currency_code ?? t?.currency_code ?? "KWD";
+
+  return {
+    transferCandidate: {
+      id: tc.tc_id,
+      transferId: tc.transfer_id,
+      company: tc.company?.company_name ?? "No company",
+      store: tc.store?.store_name ?? null,
+      hours: `${tc.hours ?? 0}h ${tc.minutes ?? 0}m`,
+      hourlyRate: formatMoney(tc.candidate_hourly_rate, currency),
+      candidateTotal: formatMoney(tc.candidate_total, currency),
+      companyTotal: formatMoney(tc.company_total, currency),
+      cost: formatMoney(tc.transfer_cost, currency),
+      bonus: formatMoney(tc.bonus, currency),
+      paid: tc.paid ? "Paid" : "Unpaid",
+      beneficiary: tc.transfer_benef_name ?? null,
+      iban: tc.transfer_benef_iban ?? null,
+      bank: tc.bank?.bank_name ?? null,
+      created: formatDate(tc.tc_created_at),
+      updated: formatDate(tc.tc_updated_at),
+    },
+    transfer: t
+      ? {
+          id: t.transfer_id,
+          status: t.transfer_status,
+          period: t.start_date
+            ? `${formatDate(t.start_date)} to ${formatDate(t.end_date)}`
+            : "No period",
+          paymentReceived: formatDate(t.payment_received_on),
+          created: formatDate(t.transfer_created_at),
+        }
+      : null,
+    invoices: (t?.invoice ?? []).map((inv: { invoice_id: number; invoice_date: Date | null; invoice_status: string | null }) => ({
+      id: inv.invoice_id,
+      title: `Invoice #${inv.invoice_id}`,
+      subtitle: `${inv.invoice_status ?? "No status"}`,
+      meta: formatDate(inv.invoice_date),
+    })),
+  };
+}
+
 async function companyIdsForContact(contactUuid: string) {
   const links = await prisma.company_contact.findMany({
     where: { contact_uuid: contactUuid, allow_access: true },
