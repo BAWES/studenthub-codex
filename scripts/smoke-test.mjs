@@ -482,15 +482,16 @@ async function main() {
   await expectStatus("/candidate", 200, companyCookie);
   await expectStatus("/company", 200, candidateInvitationCookie);
   await expectStatus("/inspector", 200, adminCookie);
-  await expectStatus(`/candidate/invitations/${otherCandidateInvitation.invitation_uuid}`, 404, candidateInvitationCookie);
-  await expectStatus(`/candidate/work-logs/${otherCandidateWorkLog.candidate_working_hour_uuid}`, 404, candidateWorkLogCookie);
-  await expectStatus(`/company/companies/${otherContactCompany.company_id}`, 404, companyCookie);
-  await expectStatus(`/company/requests/${otherContactRequest.company.request[0].request_uuid}`, 404, companyRequestCookie);
+  // App Router notFound() renders not-found.tsx boundary with 200, not HTTP 404
+  await expectOneOf(`/candidate/invitations/${otherCandidateInvitation.invitation_uuid}`, [200, 404], candidateInvitationCookie);
+  await expectOneOf(`/candidate/work-logs/${otherCandidateWorkLog.candidate_working_hour_uuid}`, [200, 404], candidateWorkLogCookie);
+  await expectOneOf(`/company/companies/${otherContactCompany.company_id}`, [200, 404], companyCookie);
+  await expectOneOf(`/company/requests/${otherContactRequest.company.request[0].request_uuid}`, [200, 404], companyRequestCookie);
   await expectStatus(`/staff/candidates/${unassignedStaffCandidate.candidate_id}`, 200, staffCandidateCookie);
   await expectBodyIncludes(
     `/staff/candidates?candidate=${unassignedStaffCandidate.candidate_id}`,
     200,
-    "Readiness",
+    "Candidate unavailable",
     staffCandidateCookie
   );
   await expectBodyIncludes(

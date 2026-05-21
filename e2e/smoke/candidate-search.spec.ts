@@ -26,7 +26,7 @@ test.describe("Candidate search", () => {
     await page.goto("/admin/candidates");
     await expect(page).toHaveURL("/admin/candidates");
     // Should render the candidate workspace
-    await expect(page.locator('text="Open candidate tabs"')).toBeVisible({ timeout: 15000 });
+    await expect(page.getByRole("region", { name: "Open candidate tabs" })).toBeVisible({ timeout: 15000 });
     await context.close();
   });
 
