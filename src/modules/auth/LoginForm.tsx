@@ -14,7 +14,11 @@ export function LoginForm() {
 
   return (
     <div className="grid gap-[14px]">
-      <form action={action} className="grid gap-[18px] p-[30px]">
+      <form
+          action={action}
+          className="grid gap-[18px] p-[30px]"
+          aria-describedby={state.error ? "login-error" : undefined}
+        >
         <div className="grid gap-[7px] pb-2">
           <span className="text-[var(--blue)] text-xs font-black uppercase">Secure sign in</span>
           <strong className="text-[28px] leading-[1.1]">Continue to StudentHub</strong>
@@ -34,6 +38,7 @@ export function LoginForm() {
             defaultValue={state.email ?? ""}
             placeholder="name@studenthub.app"
             required
+            autoFocus={!!state.error}
             className="min-h-[46px]"
           />
         </div>
@@ -51,7 +56,7 @@ export function LoginForm() {
           />
         </div>
 
-        {state.error ? <p className="text-[var(--destructive)] font-bold m-0">{state.error}</p> : null}
+        {state.error ? <p id="login-error" role="alert" className="text-[var(--destructive)] font-bold m-0">{state.error}</p> : null}
 
         <Button type="submit" disabled={pending} size="lg" className="min-h-[52px]">
           <LogIn className="size-4" />
