@@ -94,7 +94,7 @@ export function WorkspaceShell({
     </section>
   );
 
-  // When embedded in a WorkspaceOS layout, the layout already provides the rail.
+  // When embedded in a WorkspaceOS layout, the layout already provides the rail and mobile nav.
   if (embedded) {
     return (
       <main className="shell shellEmbedded">
@@ -109,7 +109,7 @@ export function WorkspaceShell({
       {rail}
       {stage}
       <WorkspaceMobileNavigation items={navItems} role={session.role} />
-    </main>
+      </main>
   );
 }
 

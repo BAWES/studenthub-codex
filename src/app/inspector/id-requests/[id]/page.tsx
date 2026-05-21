@@ -39,6 +39,10 @@ export default async function InspectorIdRequestDetailPage({ params }: { params:
             : [])
         ]}
       />
+      <IdRequestActions
+        requestUuid={data.request.cir_uuid}
+        currentStatus={data.request.status}
+      />
     </WorkspaceShell>
   );
 }

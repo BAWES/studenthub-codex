@@ -224,6 +224,55 @@ export async function getStaffRequestRows(staffId: number) {
   }));
 }
 
+
+export async function getStaffInterviewRows(staffId: number) {
+  const rows = await prisma.request_interview.findMany({
+    where: { staff_id: staffId },
+    orderBy: { interview_at: "desc" },
+    take: 60,
+    select: {
+      request_interview_uuid: true,
+      interview_at: true,
+      status: true,
+      internal_note: true,
+      candidate: { select: { candidate_id: true, candidate_name: true, candidate_email: true } },
+      request: { select: { request_uuid: true, request_position_title: true } }
+    }
+  });
+
+  return rows.map((row) => ({
+    id: row.request_interview_uuid,
+    candidate: row.candidate?.candidate_name ?? "Unknown candidate",
+    candidateEmail: row.candidate?.candidate_email ?? "",
+    candidateId: row.candidate?.candidate_id ?? null,
+    requestTitle: row.request?.request_position_title ?? "Untitled request",
+    requestUuid: row.request?.request_uuid ?? "",
+    scheduledAt: row.interview_at ? formatDate(row.interview_at) : "Not scheduled",
+    status: row.status === 1 ? "Completed" : row.status === 2 ? "Cancelled" : "Scheduled",
+    note: row.internal_note ?? ""
+  }));
+}
+
+export async function getStaffInterviewDetail(interviewUuid: string, staffId: number) {
+  const interview = await prisma.request_interview.findFirst({
+    where: { request_interview_uuid: interviewUuid, staff_id: staffId },
+    select: {
+      request_interview_uuid: true,
+      interview_at: true,
+      status: true,
+      internal_note: true,
+      interview_note: true,
+      created_at: true,
+      updated_at: true,
+      candidate: { select: { candidate_id: true, candidate_name: true, candidate_email: true, candidate_phone: true } },
+      request: { select: { request_uuid: true, request_position_title: true, request_status: true, company: { select: { company_name: true } } } },
+      staff: { select: { staff_name: true } }
+    }
+  });
+
+  return interview;
+}
+
 export async function getStaffCandidateRows(staffId: number) {
   const histories = await prisma.candidate_work_history.findMany({
     where: { staff_id: staffId },
@@ -776,6 +825,7 @@ export async function getCandidateDetail(candidateId: number, requestBasePath = 
     education,
     experiences,
     certificates,
+    languages,
     stats
   ] = await prisma.$transaction([
     prisma.candidate.findUnique({
@@ -1017,15 +1067,22 @@ export async function getCandidateDetail(candidateId: number, requestBasePath = 
       select: {
         certificate_uuid: true,
         certificate_type: true,
-        certificate_title: true,
-        certificate_issuer: true,
-        certificate_url: true,
         start_date: true,
         end_date: true,
         company_candidate_certificate_company_idTocompany: { select: { company_name: true } },
         store: { select: { store_name: true } },
         staff: { select: { staff_name: true } },
         updated_at: true
+      }
+    }),
+    prisma.candidate_language.findMany({
+      where: { candidate_id: candidateId, deleted: 0 },
+      orderBy: { candidate_language_created_at: "desc" },
+      take: 10,
+      select: {
+        candidate_language_id: true,
+        language: true,
+        proficiency: true,
       }
     }),
     prisma.candidate_stats.findFirst({
@@ -1138,6 +1195,9 @@ export async function getCandidateDetail(candidateId: number, requestBasePath = 
       majorUuid: item.major_uuid,
       graduationYear: item.graduation_year,
       isCurrentlyStudying: item.is_currently_studying ?? false,
+      universityLabel: item.university?.university_name_en ?? "",
+      degreeLabel: item.degree?.degree_name_en ?? undefined,
+      majorLabel: item.major?.major_name_en ?? undefined,
     })),
     experiences: experiences.map((item) => ({
       id: item.candidate_experience_id,
@@ -1147,9 +1207,14 @@ export async function getCandidateDetail(candidateId: number, requestBasePath = 
     })),
     certificates: certificates.map((item) => ({
       id: item.certificate_uuid,
-      title: item.certificate_title ?? item.company_candidate_certificate_company_idTocompany?.company_name ?? item.store?.store_name ?? "Certificate",
-      subtitle: item.certificate_issuer ?? (item.certificate_type ? "Experience certificate" : "Certificate"),
+      title: item.company_candidate_certificate_company_idTocompany?.company_name ?? item.store?.store_name ?? "Certificate",
+      subtitle: item.certificate_type ? "Experience certificate" : "Certificate",
       meta: `${formatDate(item.start_date)} to ${formatDate(item.end_date)} · ${item.staff?.staff_name ?? "No staff owner"}`
+    })),
+    languages: languages.map((item) => ({
+      id: item.candidate_language_id,
+      title: item.language,
+      subtitle: item.proficiency,
     })),
     stats: stats
       ? {

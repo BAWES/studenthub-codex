@@ -47,7 +47,8 @@ function roleChords(role: string): { keys: string; label: string }[] {
     return [
       ...base,
       { keys: "G R", label: "Go to requests" },
-      { keys: "G C", label: "Go to candidates" }
+      { keys: "G C", label: "Go to candidates" },
+      { keys: "G I", label: "Go to interviews" }
     ];
   }
   if (role === "candidate") {
@@ -73,6 +74,7 @@ function buildOSCommands(navItems: NavItem[], role: string): OSCommand[] {
   } else if (role === "staff") {
     chordByHref[`/${role}/requests`] = "G R";
     chordByHref[`/${role}/candidates`] = "G C";
+    chordByHref[`/${role}/interviews`] = "G I";
   } else if (role === "candidate") {
     chordByHref[`/${role}/invitations`] = "G I";
     chordByHref[`/${role}/work-logs`] = "G W";
