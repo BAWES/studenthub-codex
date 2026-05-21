@@ -378,7 +378,7 @@ body {
 .landingNav a:not(.landingBrand),
 .landingActions a,
 .switchPortalLink {
-  min-height: 44px;
+  min-height: 40px;
   display: inline-flex;
   align-items: center;
   border: 1px solid var(--line);
@@ -781,7 +781,7 @@ body {
 .workspaceSignout button,
 .themeToggle {
   width: 100%;
-  min-height: 44px;
+  min-height: 40px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--surface-soft);
@@ -5937,6 +5937,62 @@ kbd {
   }
 }
 
+@media (max-width: 768px) {
+  .shell {
+    display: block;
+  }
+
+  .workspaceRail {
+    display: none;
+  }
+
+  .workspaceStage {
+    width: auto;
+    padding: 10px 10px 88px;
+  }
+
+  .mobileTabBar {
+    position: fixed;
+    right: 10px;
+    bottom: 10px;
+    left: 10px;
+    z-index: 30;
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    border: 1px solid #c5cfdd;
+    background: rgba(255, 255, 255, 0.96);
+    box-shadow: var(--shadow);
+    padding: 8px;
+    scrollbar-width: none;
+  }
+
+  .mobileTabBar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .mobileTabBar a {
+    min-height: 44px;
+    min-width: max-content;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--line);
+    background: #fbfcfe;
+    color: var(--ink);
+    padding: 0 12px;
+    font-size: 13px;
+    font-weight: 800;
+    text-decoration: none;
+  }
+
+  .mobileTabBar a.active {
+    border-color: var(--blue);
+    background: #eef5ff;
+    color: var(--blue);
+  }
+}
+
 @media (max-width: 680px) {
   body {
     background-size: 32px 32px;
@@ -6201,10 +6257,6 @@ kbd {
     color: var(--blue);
   }
 
-  .shell {
-    display: block;
-  }
-
   .topbar {
     grid-template-columns: 1fr;
     padding: 14px;
@@ -6239,56 +6291,6 @@ kbd {
 
   .workspaceNav {
     display: none;
-  }
-
-  .workspaceRail {
-    display: none;
-  }
-
-  .workspaceStage {
-    width: auto;
-    padding: 10px 10px 88px;
-  }
-
-  .mobileTabBar {
-    position: fixed;
-    right: 10px;
-    bottom: 10px;
-    left: 10px;
-    z-index: 30;
-    display: flex;
-    gap: 6px;
-    overflow-x: auto;
-    border: 1px solid #c5cfdd;
-    background: rgba(255, 255, 255, 0.96);
-    box-shadow: var(--shadow);
-    padding: 8px;
-    scrollbar-width: none;
-  }
-
-  .mobileTabBar::-webkit-scrollbar {
-    display: none;
-  }
-
-  .mobileTabBar a {
-    min-height: 44px;
-    min-width: max-content;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid var(--line);
-    background: #fbfcfe;
-    color: var(--ink);
-    padding: 0 12px;
-    font-size: 13px;
-    font-weight: 800;
-    text-decoration: none;
-  }
-
-  .mobileTabBar a.active {
-    border-color: var(--blue);
-    background: #eef5ff;
-    color: var(--blue);
   }
 
   .metrics {
@@ -6438,7 +6440,7 @@ kbd {
   }
 
   .landingBrand {
-    min-height: 44px;
+    min-height: 42px;
   }
 
   .landingHeroCopy h1,
@@ -10406,4 +10408,47 @@ kbd {
 @keyframes slideOutDown {
   from { transform: translateY(0); }
   to { transform: translateY(20%); }
+}
+
+/* ── Candidate profile completeness ── */
+
+.candidateMissingFields {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 6px;
+  border: 1px solid var(--amber, #f59e0b);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--amber, #f59e0b) 8%, transparent);
+  padding: 10px 14px;
+}
+
+.candidateMissingFields span {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--amber, #d97706);
+}
+
+.candidateMissingFields ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+}
+
+.candidateMissingFields li {
+  font-size: 13px;
+}
+
+.candidateMissingFields li a {
+  color: var(--muted);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.candidateMissingFields li a:hover {
+  color: var(--fg);
 }
