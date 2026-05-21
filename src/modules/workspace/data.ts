@@ -2325,6 +2325,7 @@ export async function getInspectorIdRequestDetail(requestUuid: string) {
       cir_uuid: true,
       candidate_ids: true,
       status: true,
+      rejection_reason: true,
       created_at: true,
       updated_at: true,
       staff_candidate_id_request_created_byTostaff: { select: { staff_name: true, staff_email: true } },
