@@ -127,7 +127,7 @@ async function main() {
       const actual = await (async () => {
         switch (table) {
           case "admin": return prisma.admin.count();
-          case "staff": return prisma.staff.count({ where: { deleted_at: null } });
+          case "staff": return prisma.staff.count({ where: { deleted: 0 } });
           case "candidate": return prisma.candidate.count({ where: { deleted: 0 } });
           case "company": return prisma.company.count({ where: { deleted: 0 } });
           case "inspector": return prisma.inspector.count({ where: { inspector_deleted: 0 } });
