@@ -54,7 +54,7 @@ export function WorkLogStaffActions({
 
   if (mode === "reject") {
     return (
-      <form action={rejectAction as WorkLogAction} className="workLogRejectForm">
+      <form action={rejectAction as unknown as (formData: FormData) => void} className="workLogRejectForm">
         <input type="hidden" name="workLogUuid" value={workLogUuid} />
         <input name="reason" placeholder="Rejection reason..." required className="workLogRejectInput" maxLength={500} />
         <button type="submit" disabled={rejectPending} className="workLogRejectConfirm">
@@ -66,7 +66,7 @@ export function WorkLogStaffActions({
   }
 
   return (
-    <form action={approveAction as WorkLogAction} className="workLogActions">
+    <form action={approveAction as unknown as (formData: FormData) => void} className="workLogActions">
       <input type="hidden" name="workLogUuid" value={workLogUuid} />
       <button type="submit" disabled={approvePending} className="workLogApproveBtn">
         {approvePending ? "..." : "Approve"}
