@@ -777,3 +777,123 @@ export async function clearCandidateCivilVerification(_prevState: { error: strin
   revalidatePath(base);
   return { error: "" };
 }
+
+// -- ID Request approve/reject -----------------------------------------------
+
+const rejectIdRequestSchema = z.object({
+  requestUuid: z.string().min(1, "Request UUID is required."),
+  reason: z
+    .string()
+    .min(10, "Rejection reason must be at least 10 characters.")
+    .max(500, "Rejection reason must be under 500 characters."),
+});
+
+function parseCandidateIdList(raw: string | null | undefined): number[] {
+  if (!raw) return [];
+  return raw
+    .split(/[^0-9]+/)
+    .map((item) => Number(item))
+    .filter((item) => Number.isInteger(item) && item > 0);
+}
+
+export async function approveIdRequest(_prevState: { error: string }, formData: FormData) {
+  const session = await requireRoleCapability("inspector", "id_review.mutate");
+  const requestUuid = formData.get("requestUuid");
+
+  if (typeof requestUuid !== "string" || !requestUuid.trim()) {
+    return { error: "Invalid request." };
+  }
+
+  const request = await prisma.candidate_id_request.findUnique({
+    where: { cir_uuid: requestUuid },
+    select: { cir_uuid: true, status: true, candidate_ids: true },
+  });
+
+  if (!request) return { error: "ID request not found." };
+  if (request.status === "approved") return { error: "This request is already approved." };
+
+  const staffId = Number(session.id);
+  const now = new Date();
+
+  await prisma.candidate_id_request.update({
+    where: { cir_uuid: requestUuid },
+    data: {
+      status: "approved",
+      updated_by: staffId,
+      updated_at: now,
+    },
+  });
+
+  const candidateIds = parseCandidateIdList(request.candidate_ids);
+  if (candidateIds.length > 0) {
+    await prisma.candidate_notification.createMany({
+      data: candidateIds.map((candidateId) => ({
+        cn_uuid: crypto.randomUUID(),
+        candidate_id: candidateId,
+        type: 50,
+        staff_id: staffId,
+        message: "Your ID verification request has been approved.",
+        is_new: true,
+        created_at: now,
+        updated_at: now,
+      })),
+    });
+  }
+
+  revalidatePath(`/inspector/id-requests/${requestUuid}`);
+  revalidatePath("/inspector/id-requests");
+  redirect(`/inspector/id-requests/${requestUuid}?notice=id-request-approved`);
+}
+
+export async function rejectIdRequest(_prevState: { error: string }, formData: FormData) {
+  const session = await requireRoleCapability("inspector", "id_review.mutate");
+  const requestUuid = formData.get("requestUuid");
+  const reason = formData.get("reason");
+
+  const parsed = rejectIdRequestSchema.safeParse({ requestUuid, reason });
+
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Invalid input." };
+  }
+
+  const request = await prisma.candidate_id_request.findUnique({
+    where: { cir_uuid: parsed.data.requestUuid },
+    select: { cir_uuid: true, status: true, candidate_ids: true },
+  });
+
+  if (!request) return { error: "ID request not found." };
+  if (request.status === "rejected") return { error: "This request is already rejected." };
+
+  const staffId = Number(session.id);
+  const now = new Date();
+
+  await prisma.candidate_id_request.update({
+    where: { cir_uuid: parsed.data.requestUuid },
+    data: {
+      status: "rejected",
+      rejection_reason: parsed.data.reason,
+      updated_by: staffId,
+      updated_at: now,
+    },
+  });
+
+  const candidateIds = parseCandidateIdList(request.candidate_ids);
+  if (candidateIds.length > 0) {
+    await prisma.candidate_notification.createMany({
+      data: candidateIds.map((candidateId) => ({
+        cn_uuid: crypto.randomUUID(),
+        candidate_id: candidateId,
+        type: 50,
+        staff_id: staffId,
+        message: `Your ID verification request has been rejected. Reason: ${parsed.data.reason}`,
+        is_new: true,
+        created_at: now,
+        updated_at: now,
+      })),
+    });
+  }
+
+  revalidatePath(`/inspector/id-requests/${requestUuid}`);
+  revalidatePath("/inspector/id-requests");
+  redirect(`/inspector/id-requests/${requestUuid}?notice=id-request-rejected`);
+}

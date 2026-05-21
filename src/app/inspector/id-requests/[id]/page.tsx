@@ -4,6 +4,7 @@ import { CompactList, FactPanel } from "@/modules/workspace/DetailPanels";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { getInspectorIdRequestDetail } from "@/modules/workspace/data";
 import { formatDate } from "@/modules/workspace/format";
+import { IdRequestActions } from "./IdRequestActions";
 
 export const dynamic = "force-dynamic";
 
@@ -32,7 +33,10 @@ export default async function InspectorIdRequestDetailPage({ params }: { params:
           { label: "Updated By", value: data.request.staff_candidate_id_request_updated_byTostaff?.staff_name },
           { label: "Created", value: formatDate(data.request.created_at) },
           { label: "Updated", value: formatDate(data.request.updated_at) },
-          { label: "Raw Candidate IDs", value: data.request.candidate_ids }
+          { label: "Raw Candidate IDs", value: data.request.candidate_ids },
+          ...(data.request.status === "rejected" && data.request.rejection_reason
+            ? [{ label: "Rejection reason", value: data.request.rejection_reason }]
+            : [])
         ]}
       />
     </WorkspaceShell>
