@@ -8952,10 +8952,85 @@ kbd {
 
   .candidateProfileActions a {
     flex: 1 1 120px;
+    min-height: 44px;
+  }
+
+  .candidateTabs > a,
+  .candidateTabs > span {
+    min-height: 44px;
   }
 
   .candidateFactGrid div {
     border-right: 0;
+  }
+
+  .candidateFactGrid strong {
+    font-size: 14px;
+  }
+
+  .candidateProfileTitle h2 {
+    font-size: 26px;
+  }
+}
+
+@media (max-width: 480px) {
+  .candidateProfileHero {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .candidateAvatar {
+    width: 56px;
+    height: 56px;
+    font-size: 17px;
+  }
+
+  .candidateProfileTitle {
+    justify-items: center;
+  }
+
+  .candidateProfileTitle h2 {
+    font-size: 22px;
+  }
+
+  .candidateStatusLine {
+    justify-content: center;
+  }
+
+  .candidateProfileActions,
+  .candidateReadiness,
+  .candidateProfileColumns {
+    padding-inline: 10px;
+  }
+
+  .candidateProfileActions a {
+    flex: 1 1 100%;
+    min-height: 44px;
+  }
+
+  .candidateReadinessScore strong {
+    font-size: 28px;
+  }
+
+  .candidateFactGrid strong {
+    font-size: 13px;
+  }
+
+  .candidateProfilePanel {
+    min-width: 0;
+  }
+
+  .candidatePills,
+  .candidateRows {
+    padding: 10px;
+  }
+
+  .candidateRows a,
+  .candidateRows article {
+    padding: 10px 8px;
   }
 }
 
