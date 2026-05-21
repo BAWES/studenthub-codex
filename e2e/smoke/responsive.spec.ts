@@ -1,5 +1,5 @@
 import { test, expect, type Page, type Browser } from "@playwright/test";
-import { getMockFixtures } from "../fixtures/mock";
+import { getFixtures, disconnectPrisma } from "../fixtures/auth";
 
 const mobileViewport = { width: 390, height: 844 };
 const tabletViewport = { width: 768, height: 1024 };
@@ -113,7 +113,7 @@ async function createAuthedPage(
   browser: Browser,
   viewport: { width: number; height: number },
 ) {
-  const fixtures = getMockFixtures();
+  const fixtures = await getFixtures();
   const candidate = fixtures.get("candidate")!;
   const context = await browser.newContext({ viewport });
   await context.addCookies([
@@ -333,4 +333,8 @@ test.describe("responsive — tablet viewport (768×1024)", () => {
     await assertTextReadable(page);
     await context.close();
   });
+});
+
+test.afterAll(async () => {
+  await disconnectPrisma();
 });
