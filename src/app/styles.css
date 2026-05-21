@@ -4212,10 +4212,6 @@ tr:last-child td {
 
 
 
-
-
-
-
 [data-theme="dark"] .landingHero::after {
   background:
     linear-gradient(90deg, var(--surface) 0%, color-mix(in srgb, var(--surface) 94%, transparent) 40%, transparent 78%),
@@ -4261,22 +4257,6 @@ tr:last-child td {
 /* Candidate search operating system */
 
 .candidateSearchHero,
-.candidateSearchSource,
-.candidateSearchMetrics article,
-.candidateSearchToolbar,
-.candidateSearchFilters,
-.candidateFacetPanel,
-.candidateResultsPanel,
-.candidatePreviewPanel {
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--surface);
-}
-
-
-
-.candidateSearchHero span,
-.candidateSearchSource span,
 .candidateSearchMetrics span,
 .candidateResultsHeader span,
 .candidateFacetHeader span,
