@@ -1,6 +1,14 @@
 import type { ReactNode } from "react";
 import type { Route } from "next";
 import Link from "next/link";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell
+} from "@/components/ui/table";
 
 export type DataTableColumn<T> = {
   key: string;
@@ -22,52 +30,57 @@ export function DataTable<T extends { id: string | number }>({
   rowHref?: (row: T) => Route;
 }) {
   return (
-    <section className="tableSurface">
-      <div className="tableHeader">
+    <section className="border border-[#dfe4ed] rounded-lg bg-white dark:border-[var(--line)] dark:bg-[var(--surface)]">
+      <div className="min-h-[76px] flex items-center justify-between gap-[18px] p-[18px] border-b border-[var(--line)]">
         <div>
-          <h2>{title}</h2>
-          <p>{description}</p>
+          <h2 className="mb-1">{title}</h2>
+          <p className="text-[var(--muted)] mb-0">{description}</p>
         </div>
-        <span>{rows.length} shown</span>
+        <span className="text-[var(--muted)] text-[13px] font-bold">{rows.length} shown</span>
       </div>
-      <div className="tableScroller">
-        <table>
-          <thead>
-            <tr>
+      <div className="overflow-x-auto">
+        <Table>
+          <TableHeader>
+            <TableRow>
               {columns.map((column) => (
-                <th key={column.key}>{column.label}</th>
+                <TableHead key={column.key}>{column.label}</TableHead>
               ))}
-              {rowHref ? <th aria-label="Open record" /> : null}
-            </tr>
-          </thead>
-          <tbody>
+              {rowHref ? <TableHead aria-label="Open record" /> : null}
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {rows.length ? (
               rows.map((row) => (
-                <tr key={row.id}>
+                <TableRow key={row.id}>
                   {columns.map((column) => (
-                    <td data-label={column.label} key={column.key}>
+                    <TableCell data-label={column.label} key={column.key}>
                       {column.render(row)}
-                    </td>
+                    </TableCell>
                   ))}
                   {rowHref ? (
-                    <td className="rowAction" data-label="Action">
-                      <Link href={rowHref(row)}>Open</Link>
-                    </td>
+                    <TableCell className="w-[1%] whitespace-nowrap" data-label="Action">
+                      <Link
+                        className="inline-flex min-h-9 items-center justify-center border border-[var(--line)] px-3.5 text-[var(--blue)] text-[13px] font-extrabold no-underline hover:border-[var(--blue)] hover:bg-[#eef5ff]"
+                        href={rowHref(row)}
+                      >
+                        Open
+                      </Link>
+                    </TableCell>
                   ) : null}
-                </tr>
+                </TableRow>
               ))
             ) : (
-              <tr className="emptyTableRow">
-                <td colSpan={columns.length + (rowHref ? 1 : 0)}>
-                  <div className="emptyState">
-                    <strong>No records found</strong>
+              <TableRow>
+                <TableCell className="p-0" colSpan={columns.length + (rowHref ? 1 : 0)}>
+                  <div className="grid gap-1.5 p-[18px] text-[var(--muted)]">
+                    <strong className="text-[var(--ink)] text-[15px]">No records found</strong>
                     <span>This view is connected to the prod clone, but this account has no matching rows yet.</span>
                   </div>
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             )}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
     </section>
   );

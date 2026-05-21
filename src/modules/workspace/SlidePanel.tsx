@@ -13,47 +13,26 @@ import {
   SheetBody,
 } from "@/components/ui/sheet";
 
-// ── Types ──────────────────────────────────────────────────
-
 export type SlidePanelSide = "top" | "right" | "bottom" | "left";
 
 export type SlidePanelProps = {
-  /** Controlled: whether the panel is open. */
   open?: boolean;
-  /** Controlled: callback when open state changes. */
   onOpenChange?: (open: boolean) => void;
-
-  /** The side from which the panel slides in. Default: "right". */
   side?: SlidePanelSide;
-  /** Panel title (rendered in SheetHeader). */
   title?: string;
-  /** Optional subtitle line below the title. */
   description?: string;
-  /** Small eyebrow label above the title. */
   eyebrow?: string;
-
-  /** Main panel body content. */
   children?: React.ReactNode;
-  /** Content rendered in the sticky footer at the bottom. */
   footer?: React.ReactNode;
-
-  /** Extra classes for the sheet content wrapper. */
   className?: string;
-
-  /** Whether to show the built-in X close button. Default: true. */
   showCloseButton?: boolean;
 };
 
-// ── Trigger convenience ────────────────────────────────────
-
 export type SlidePanelTriggerProps = {
   children: React.ReactNode;
-  /** When true, renders the trigger as a child wrapper instead of a button. */
   asChild?: boolean;
   className?: string;
 };
-
-// ── Hook: uncontrolled open state ──────────────────────────
 
 export function useSlidePanel(defaultOpen = false) {
   const [open, setOpen] = useState(defaultOpen);
@@ -62,8 +41,6 @@ export function useSlidePanel(defaultOpen = false) {
   const show = useCallback(() => setOpen(true), []);
   return { open, onOpenChange: setOpen, toggle, close, show };
 }
-
-// ── SlidePanel Component ───────────────────────────────────
 
 export function SlidePanel({
   open,
@@ -84,16 +61,20 @@ export function SlidePanel({
         showCloseButton={showCloseButton}
         className={className}
       >
-        <div className="slidePanel">
+        <div>
           {title || eyebrow || description ? (
             <SheetHeader>
-              {eyebrow ? <p className="eyebrow">{eyebrow}</p> : null}
+              {eyebrow ? (
+                <p className="text-[var(--blue)] text-xs font-bold uppercase m-0 mb-2.5">
+                  {eyebrow}
+                </p>
+              ) : null}
               {title ? <SheetTitle>{title}</SheetTitle> : null}
               {description ? <SheetDescription>{description}</SheetDescription> : null}
             </SheetHeader>
           ) : null}
           <SheetBody>
-            <div className="slidePanelInner">{children}</div>
+            <div className="px-[22px] pb-[22px] grid gap-3.5">{children}</div>
           </SheetBody>
           {footer ? <SheetFooter>{footer}</SheetFooter> : null}
         </div>
@@ -101,8 +82,6 @@ export function SlidePanel({
     </Sheet>
   );
 }
-
-// ── SlidePanelTrigger ──────────────────────────────────────
 
 export function SlidePanelTrigger({ children, className }: SlidePanelTriggerProps) {
   return (
