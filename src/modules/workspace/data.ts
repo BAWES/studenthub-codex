@@ -1107,7 +1107,8 @@ export async function getCandidateDetail(candidateId: number, requestBasePath = 
       id: hour.candidate_working_hour_uuid,
       title: hour.store?.store_name ?? "Work log",
       subtitle: `${hour.total_time ?? 0} minutes`,
-      meta: `Status ${hour.status ?? 0} · ${formatDate(hour.date)}`
+      meta: `Status ${hour.status ?? 0} · ${formatDate(hour.date)}`,
+      status: hour.status ?? 0
     })),
     histories: histories.map((history) => ({
       id: history.id,
@@ -2289,6 +2290,7 @@ export async function getInspectorIdRequestRows() {
       cir_uuid: true,
       candidate_ids: true,
       status: true,
+      rejection_reason: true,
       created_at: true,
       updated_at: true,
       staff_candidate_id_request_created_byTostaff: { select: { staff_name: true } },

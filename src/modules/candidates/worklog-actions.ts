@@ -37,12 +37,12 @@ async function resolveWorkLogScope(workLogUuid: string, staffId: number, role: s
     },
   });
 
-  if (!workLog) return { error: "Work log not found." as const };
-  if (workLog.candidate_id === null) return { error: "Work log has no associated candidate." as const };
+  if (!workLog) return { error: "Work log not found." };
+  if (workLog.candidate_id === null) return { error: "Work log has no associated candidate." };
 
   if (role !== "admin") {
     const inScope = await verifyStaffScope(staffId, workLog.candidate_id);
-    if (!inScope) return { error: "You are not assigned to this candidate." as const };
+    if (!inScope) return { error: "You are not assigned to this candidate." };
   }
 
   return { workLog };
@@ -59,11 +59,11 @@ async function resolveAppealScope(appealUuid: string, staffId: number, role: str
     },
   });
 
-  if (!appeal) return { error: "Appeal not found." as const };
+  if (!appeal) return { error: "Appeal not found." };
 
   if (role !== "admin") {
     const inScope = await verifyStaffScope(staffId, appeal.candidate_id);
-    if (!inScope) return { error: "You are not assigned to this candidate." as const };
+    if (!inScope) return { error: "You are not assigned to this candidate." };
   }
 
   return { appeal };

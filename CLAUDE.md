@@ -8,6 +8,19 @@
 - Chore branches: `chore/STU-N-short-description`
 - All branches are created off `main` and merged via pull request
 
+## Git Anti-Patterns (PROHIBITED)
+
+These rules exist because process violations on STU-146/STU-150 lost coder work.
+
+- **Never cherry-pick.** Cherry-picking between branches severs the issue-to-commit audit trail and creates duplicate commits. If you need work from another branch, merge it or open a PR.
+- **Never `git reset` on a branch with multiple authors' commits.** Resets silently drop work. If a branch needs to go a different direction, create a new branch from the correct base.
+- **Push at the end of every heartbeat.** No local-only branches survive past the session.
+- **Never commit directly to `main`.** Every commit lives on a feature/fix/chore branch. If you find uncommitted changes on main, stash them with a descriptive name, create a branch, and apply them.
+- **Before deleting a local branch**, verify it has been merged via PR or pushed to `origin`.
+- **Clean stashes weekly.** Stashes older than 7 days without a corresponding branch should be either committed to a branch or dropped.
+- **One branch = one issue = one PR.** Do not piggyback unrelated fixes onto a feature branch. Create a separate fix branch.
+- **Recovery before cleanup.** Before any destructive git operation (reset, rebase, branch delete), tag orphaned commits for recovery so work can be reconstructed.
+
 ## Commit Conventions
 
 Use [conventional commits](https://www.conventionalcommits.org/):

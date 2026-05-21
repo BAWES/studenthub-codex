@@ -2,6 +2,7 @@ import type { Route } from "next";
 import Link from "next/link";
 import type { getCandidateDetail } from "@/modules/workspace/data";
 import { formatDate } from "@/modules/workspace/format";
+import { WorkLogStaffActions } from "./WorkLogStaffActions";
 
 type CandidateDetailData = Awaited<ReturnType<typeof getCandidateDetail>>;
 
@@ -14,12 +15,14 @@ export function CandidateProfile({
   detail,
   actions,
   backHref,
-  compact = false
+  compact = false,
+  viewerRole
 }: {
   detail: CandidateDetailData | null;
   actions: CandidateAction[];
   backHref?: Route;
   compact?: boolean;
+  viewerRole?: string;
 }) {
   const candidate = detail?.candidate;
   if (!candidate) {
@@ -86,7 +89,13 @@ export function CandidateProfile({
         {readiness.missing?.length ? (
           <div className="candidateMissingFields">
             <span>Missing fields</span>
-            <p>{readiness.missing.join(" · ")}</p>
+            <ul>
+              {readiness.missing.map((item) => (
+                <li key={item.label}>
+                  <Link href="/candidate/edit">{item.label}</Link>
+                </li>
+              ))}
+            </ul>
           </div>
         ) : null}
       </section>
@@ -134,7 +143,11 @@ export function CandidateProfile({
           <RowsPanel title="Suggestions" rows={detail.suggestions} />
           <RowsPanel title="Invitations" rows={detail.invitations} />
           <RowsPanel title="Work history" rows={detail.histories} />
-          <RowsPanel title="Work logs" rows={detail.workHours} />
+          {viewerRole === "staff" ? (
+            <WorkLogStaffPanel hours={detail.workHours as any} />
+          ) : (
+            <RowsPanel title="Work logs" rows={detail.workHours} />
+          )}
           <RowsPanel title="Notes" rows={detail.notes} />
           <RowsPanel title="Warnings" rows={detail.warnings} />
           <RowsPanel title="Documents and links" rows={[...detail.idCards, ...detail.certificates, ...detail.links]} />
@@ -208,6 +221,31 @@ function RowContent({ row }: { row: { title: string; subtitle: string; meta?: st
   );
 }
 
+type WorkLogRow = {
+  id: string | number;
+  title: string;
+  subtitle: string;
+  meta?: string;
+  status: number;
+};
+
+function WorkLogStaffPanel({ hours }: { hours: WorkLogRow[] }) {
+  return (
+    <section className="candidateProfilePanel">
+      <PanelHeader title="Work logs" count={hours.length} />
+      <div className="candidateRows">
+        {hours.slice(0, 8).map((hour) => (
+          <article key={`worklog-${hour.id}`} className="workLogRow">
+            <RowContent row={hour} />
+            <WorkLogStaffActions workLogUuid={String(hour.id)} currentStatus={hour.status} />
+          </article>
+        ))}
+        {!hours.length ? <small>No work log records for this candidate.</small> : null}
+      </div>
+    </section>
+  );
+}
+
 function buildReadiness(detail: CandidateDetailData) {
   const c = detail.candidate;
   const items = [
@@ -217,12 +255,14 @@ function buildReadiness(detail: CandidateDetailData) {
     { label: "Country", done: Boolean(c?.country_id), field: "Country / Nationality" },
     { label: "University", done: Boolean(c?.university_id), field: "University" },
     { label: "Objective", done: Boolean(c?.candidate_objective), field: "Objective / Headline" },
+    { label: "Intro", done: Boolean(c?.candidate_intro), field: "Profile introduction" },
     { label: "Civil ID number", done: Boolean(c?.candidate_civil_id), field: "Civil ID number" },
     { label: "Civil ID photos", done: Boolean(c?.candidate_civil_photo_front || c?.candidate_civil_photo_back), field: "Civil ID photos (front/back)" },
     { label: "Profile photo", done: Boolean(c?.candidate_personal_photo), field: "Profile photo upload" },
     { label: "CV / Resume", done: Boolean(c?.candidate_resume), field: "CV / Resume upload" },
     { label: "Bank info", done: Boolean(c?.bank_id || c?.candidate_iban), field: "Bank name or IBAN" },
     { label: "Skills", done: detail.skills.length > 0, field: "At least one skill tag" },
+    { label: "Education", done: detail.education.length > 0, field: "Education entries" },
     { label: "Experience", done: detail.experiences.length > 0, field: "Work experience entries" },
     { label: "Approved", done: Boolean(c && c.approved !== 0), field: "Staff approval" },
   ];
@@ -232,7 +272,7 @@ function buildReadiness(detail: CandidateDetailData) {
     score >= 85 ? "Ready to present"
     : score >= 60 ? "Usable with cleanup — fill in the open fields below"
     : "Needs attention — complete the missing fields to improve your profile visibility";
-  const missing = items.filter((item) => !item.done).map((item) => item.field ?? item.label);
+  const missing = items.filter((item) => !item.done).map((item) => ({ label: item.field ?? item.label }));
   return { items, missing, score, summary };
 }
 
