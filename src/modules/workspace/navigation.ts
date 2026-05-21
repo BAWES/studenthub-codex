@@ -43,8 +43,8 @@ export function navForRole(role: Role): NavItem[] {
       { label: "Overview", href: "/company" },
       { label: "Requests", href: "/company/requests" },
       { label: "Companies", href: "/company/companies" },
-      { label: "Contacts", href: "/company/contacts" },
-      { label: "Stores", href: "/company/stores" }
+      { label: "Contacts", href: "/company/contacts" as Route },
+      { label: "Stores", href: "/company/stores" as Route }
     ];
   }
 
