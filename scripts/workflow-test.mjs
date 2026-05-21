@@ -271,6 +271,91 @@ async function candidateProfileUpdateTest() {
 }
 
 // ---------------------------------------------------------------------------
+// Regression: page load smoke tests
+// ---------------------------------------------------------------------------
+
+async function companyRequestsPageLoads() {
+  const user = await firstOrThrow("company contact", () =>
+    prisma.staff.findFirst({
+      where: { deleted: 0, staff_roles: { some: { role: { role_key: "company" } } } },
+      select: { staff_id: true, staff_name: true, staff_email: true },
+    }),
+  );
+
+  const cookie = signSession({
+    role: "company",
+    id: String(user.staff_id),
+    name: user.staff_name ?? "Company User",
+    email: user.staff_email ?? "company@test.local",
+  });
+
+  const { status } = await getPage("/company/requests", cookie);
+  assert(status === 200, `Company requests page returned ${status}`);
+}
+
+async function companyRequestCreatePageLoads() {
+  const user = await firstOrThrow("company contact", () =>
+    prisma.staff.findFirst({
+      where: { deleted: 0, staff_roles: { some: { role: { role_key: "company" } } } },
+      select: { staff_id: true, staff_name: true, staff_email: true },
+    }),
+  );
+
+  const cookie = signSession({
+    role: "company",
+    id: String(user.staff_id),
+    name: user.staff_name ?? "Company User",
+    email: user.staff_email ?? "company@test.local",
+  });
+
+  const { status } = await getPage("/company/requests/create", cookie);
+  assert(status === 200, `Company request create page returned ${status}`);
+}
+
+async function candidateEditPageLoads() {
+  const candidate = await firstOrThrow("candidate", () =>
+    prisma.candidate.findFirst({
+      where: { deleted: 0 },
+      select: { candidate_id: true, candidate_name: true, candidate_email: true },
+    }),
+  );
+
+  const cookie = signSession({
+    role: "candidate",
+    id: String(candidate.candidate_id),
+    name: candidate.candidate_name ?? "Candidate",
+    email: candidate.candidate_email ?? "candidate@test.local",
+  });
+
+  const { status } = await getPage("/candidate/edit", cookie);
+  assert(status === 200, `Candidate edit page returned ${status}`);
+}
+
+async function inspectorIdRequestsPageLoads() {
+  const user = await firstOrThrow("inspector", () =>
+    prisma.staff.findFirst({
+      where: { deleted: 0, staff_roles: { some: { role: { role_key: "inspector" } } } },
+      select: { staff_id: true, staff_name: true, staff_email: true },
+    }),
+  );
+
+  const cookie = signSession({
+    role: "inspector",
+    id: String(user.staff_id),
+    name: user.staff_name ?? "Inspector",
+    email: user.staff_email ?? "inspector@test.local",
+  });
+
+  const { status } = await getPage("/inspector/id-requests", cookie);
+  assert(status === 200, `Inspector ID requests page returned ${status}`);
+}
+
+async function publicGamesPageLoads() {
+  const { status } = await getPage("/games", null);
+  assert(status === 200, `Public games page returned ${status}`);
+}
+
+// ---------------------------------------------------------------------------
 // Main
 // ---------------------------------------------------------------------------
 
@@ -281,6 +366,14 @@ async function main() {
     "Candidate profile update persists to database",
     candidateProfileUpdateTest,
   );
+
+  console.log("\nRegression smoke tests\n");
+
+  await test("Company requests list page loads", companyRequestsPageLoads);
+  await test("Company request create page loads", companyRequestCreatePageLoads);
+  await test("Candidate edit page loads", candidateEditPageLoads);
+  await test("Inspector ID requests page loads", inspectorIdRequestsPageLoads);
+  await test("Public games page loads", publicGamesPageLoads);
 
   console.log(`\n${passed} passed, ${failed} failed`);
   if (failed > 0) process.exitCode = 1;
