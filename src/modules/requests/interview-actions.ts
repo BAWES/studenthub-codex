@@ -22,6 +22,11 @@ export async function scheduleInterviewAction(formData: FormData) {
     redirect(`${detailPath}?notice=missing-interview-fields` as Route);
   }
 
+  const parsedInterviewAt = new Date(interviewAt);
+  if (isNaN(parsedInterviewAt.getTime())) {
+    redirect(`${detailPath}?notice=invalid-interview-at` as Route);
+  }
+
   const request = await prisma.request.findFirst({
     where: session.role === "staff"
       ? { request_uuid: requestUuid, staff_id: Number(session.id) }
@@ -49,7 +54,7 @@ export async function scheduleInterviewAction(formData: FormData) {
         application_uuid: applicationUuid ?? interviewUuid,
         request_uuid: requestUuid,
         candidate_id: candidateId,
-        interview_at: new Date(interviewAt),
+        interview_at: parsedInterviewAt,
         status: 0,
         staff_id: staffId,
         internal_note: internalNote,
@@ -81,6 +86,14 @@ export async function updateInterviewAction(formData: FormData) {
 
   if (!interviewUuid || !requestUuid) {
     redirect(`${detailPath}?notice=missing-fields` as Route);
+  }
+
+  if (session.role === "staff") {
+    const owned = await prisma.request.findFirst({
+      where: { request_uuid: requestUuid, staff_id: Number(session.id) },
+      select: { request_uuid: true }
+    });
+    if (!owned) redirect(`${detailPath}?notice=not-found` as Route);
   }
 
   const interview = await prisma.request_interview.findFirst({

@@ -94,6 +94,14 @@ export async function updateStoryStatusAction(formData: FormData) {
     redirect(`${detailPath}?notice=missing-fields` as Route);
   }
 
+  if (session.role === "staff") {
+    const owned = await prisma.request.findFirst({
+      where: { request_uuid: requestUuid, staff_id: Number(session.id) },
+      select: { request_uuid: true }
+    });
+    if (!owned) redirect(`${detailPath}?notice=not-found` as Route);
+  }
+
   const story = await prisma.story.findFirst({
     where: { story_uuid: storyUuid, request_uuid: requestUuid },
     select: { story_uuid: true }

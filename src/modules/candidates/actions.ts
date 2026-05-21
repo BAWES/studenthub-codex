@@ -6,7 +6,8 @@ import path from "node:path";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { requireRoleCapability } from "@/modules/auth/session";
+import { requireCapability, requireRoleCapability, requireSession } from "@/modules/auth/session";
+import { hasCapability } from "@/modules/auth/capabilities";
 
 // ---------------------------------------------------------------------------
 // Profile edit
@@ -428,5 +429,316 @@ export async function removeCandidateExperience(_prevState: { error: string }, f
 
   revalidatePath("/candidate");
   revalidatePath("/candidate/edit");
+  return { error: "" };
+}
+
+// ---------------------------------------------------------------------------
+// Staff-side candidate management
+// ---------------------------------------------------------------------------
+
+async function ensureStaffCandidateAccess(session: { role: string; id: string }, candidateId: number) {
+  if (session.role === "admin") return;
+  const staffId = Number(session.id);
+  const row = await prisma.candidate_work_history.findFirst({
+    where: { candidate_id: candidateId, staff_id: staffId },
+    select: { id: true },
+  });
+  if (!row) throw new Error("Access denied.");
+}
+
+function staffBasePath(role: string) {
+  return role === "admin" ? "/admin/candidates" : "/staff/candidates";
+}
+
+// -- Notes ---------------------------------------------------------------
+
+export async function addStaffCandidateNote(_prevState: { error: string }, formData: FormData) {
+  const session = await requireCapability("candidate.search");
+  const candidateId = Number(formData.get("candidateId"));
+  const noteText = String(formData.get("noteText") ?? "").trim();
+  const noteType = String(formData.get("noteType") ?? "Internal Note").trim();
+
+  if (!Number.isInteger(candidateId) || candidateId <= 0) return { error: "Invalid candidate." };
+  if (!noteText) return { error: "Note text is required." };
+
+  try { await ensureStaffCandidateAccess(session, candidateId); } catch { return { error: "Access denied." }; }
+
+  const staffId = Number(session.id);
+  const now = new Date();
+  await prisma.note.create({
+    data: {
+      note_uuid: `note_${crypto.randomUUID()}`,
+      candidate_id: candidateId,
+      note_type: noteType,
+      note_text: noteText,
+      created_by: staffId,
+      updated_by: staffId,
+      note_created_datetime: now,
+      note_updated_datetime: now,
+    },
+  });
+
+  const base = staffBasePath(session.role);
+  revalidatePath(`${base}/${candidateId}`);
+  revalidatePath(base);
+  return { error: "" };
+}
+
+export async function editStaffCandidateNote(_prevState: { error: string }, formData: FormData) {
+  const session = await requireCapability("candidate.search");
+  const noteUuid = String(formData.get("noteUuid") ?? "");
+  const noteText = String(formData.get("noteText") ?? "").trim();
+
+  if (!noteUuid) return { error: "Missing note identifier." };
+  if (!noteText) return { error: "Note text is required." };
+
+  const note = await prisma.note.findUnique({
+    where: { note_uuid: noteUuid },
+    select: { note_uuid: true, candidate_id: true },
+  });
+  if (!note || !note.candidate_id) return { error: "Note not found." };
+
+  try { await ensureStaffCandidateAccess(session, note.candidate_id); } catch { return { error: "Access denied." }; }
+
+  await prisma.note.update({
+    where: { note_uuid: noteUuid },
+    data: {
+      note_text: noteText,
+      updated_by: Number(session.id),
+      note_updated_datetime: new Date(),
+    },
+  });
+
+  const base = staffBasePath(session.role);
+  revalidatePath(`${base}/${note.candidate_id}`);
+  revalidatePath(base);
+  return { error: "" };
+}
+
+// -- Tags ----------------------------------------------------------------
+
+export async function addStaffCandidateTag(_prevState: { error: string }, formData: FormData) {
+  const session = await requireCapability("candidate.search");
+  const candidateId = Number(formData.get("candidateId"));
+  const tag = String(formData.get("tag") ?? "").trim();
+  const reason = String(formData.get("reason") ?? "").trim();
+
+  if (!Number.isInteger(candidateId) || candidateId <= 0) return { error: "Invalid candidate." };
+  if (!tag) return { error: "Tag is required." };
+
+  try { await ensureStaffCandidateAccess(session, candidateId); } catch { return { error: "Access denied." }; }
+
+  const now = new Date();
+  const staffId = Number(session.id);
+  await prisma.candidate_tag.create({
+    data: {
+      candidate_id: candidateId,
+      tag,
+      reason: reason || undefined,
+      created_by: staffId,
+      created_at: now,
+      updated_at: now,
+      deleted: 0,
+    },
+  });
+
+  const base = staffBasePath(session.role);
+  revalidatePath(`${base}/${candidateId}`);
+  revalidatePath(base);
+  return { error: "" };
+}
+
+export async function removeStaffCandidateTag(_prevState: { error: string }, formData: FormData) {
+  const session = await requireCapability("candidate.search");
+  const tagId = Number(formData.get("tagId"));
+
+  if (!Number.isInteger(tagId) || tagId <= 0) return { error: "Invalid tag identifier." };
+
+  const tag = await prisma.candidate_tag.findFirst({
+    where: { tag_id: tagId, deleted: 0 },
+    select: { tag_id: true, candidate_id: true },
+  });
+  if (!tag || !tag.candidate_id) return { error: "Tag not found." };
+
+  try { await ensureStaffCandidateAccess(session, tag.candidate_id); } catch { return { error: "Access denied." }; }
+
+  await prisma.candidate_tag.update({
+    where: { tag_id: tagId },
+    data: { deleted: 1, updated_at: new Date() },
+  });
+
+  const base = staffBasePath(session.role);
+  revalidatePath(`${base}/${tag.candidate_id}`);
+  revalidatePath(base);
+  return { error: "" };
+}
+
+// -- Warnings ------------------------------------------------------------
+
+export async function addStaffCandidateWarning(_prevState: { error: string }, formData: FormData) {
+  const session = await requireCapability("candidate.search");
+  const candidateId = Number(formData.get("candidateId"));
+  const title = String(formData.get("title") ?? "Not appearing for interview").trim();
+  const message = String(formData.get("message") ?? "").trim();
+
+  if (!Number.isInteger(candidateId) || candidateId <= 0) return { error: "Invalid candidate." };
+  if (!message) return { error: "Warning message is required." };
+
+  try { await ensureStaffCandidateAccess(session, candidateId); } catch { return { error: "Access denied." }; }
+
+  const staffId = Number(session.id);
+  const now = new Date();
+  await prisma.candidate_warning.create({
+    data: {
+      candidate_id: candidateId,
+      title: title || "Not appearing for interview",
+      message,
+      created_by: staffId,
+      updated_by: staffId,
+      created_at: now,
+      updated_at: now,
+    },
+  });
+
+  const base = staffBasePath(session.role);
+  revalidatePath(`${base}/${candidateId}`);
+  revalidatePath(base);
+  return { error: "" };
+}
+
+export async function removeStaffCandidateWarning(_prevState: { error: string }, formData: FormData) {
+  const session = await requireCapability("candidate.search");
+  const warningId = Number(formData.get("warningId"));
+
+  if (!Number.isInteger(warningId) || warningId <= 0) return { error: "Invalid warning identifier." };
+
+  const warning = await prisma.candidate_warning.findUnique({
+    where: { warning_id: warningId },
+    select: { warning_id: true, candidate_id: true },
+  });
+  if (!warning || !warning.candidate_id) return { error: "Warning not found." };
+
+  try { await ensureStaffCandidateAccess(session, warning.candidate_id); } catch { return { error: "Access denied." }; }
+
+  await prisma.candidate_warning.delete({ where: { warning_id: warningId } });
+
+  const base = staffBasePath(session.role);
+  revalidatePath(`${base}/${warning.candidate_id}`);
+  revalidatePath(base);
+  return { error: "" };
+}
+
+// -- Skills (staff-side) ------------------------------------------------
+
+export async function addStaffCandidateSkill(_prevState: { error: string }, formData: FormData) {
+  const session = await requireCapability("candidate.search");
+  const candidateId = Number(formData.get("candidateId"));
+  const skill = String(formData.get("skill") ?? "").trim();
+
+  if (!Number.isInteger(candidateId) || candidateId <= 0) return { error: "Invalid candidate." };
+  if (!skill) return { error: "Skill name is required." };
+
+  try { await ensureStaffCandidateAccess(session, candidateId); } catch { return { error: "Access denied." }; }
+
+  await prisma.candidate_skill.create({
+    data: {
+      candidate_id: candidateId,
+      skill,
+      candidate_skill_created_at: new Date(),
+      deleted: 0,
+    },
+  });
+
+  const base = staffBasePath(session.role);
+  revalidatePath(`${base}/${candidateId}`);
+  revalidatePath(base);
+  return { error: "" };
+}
+
+export async function removeStaffCandidateSkill(_prevState: { error: string }, formData: FormData) {
+  const session = await requireCapability("candidate.search");
+  const skillId = Number(formData.get("skillId"));
+
+  if (!Number.isInteger(skillId) || skillId <= 0) return { error: "Invalid skill identifier." };
+
+  const row = await prisma.candidate_skill.findFirst({
+    where: { candidate_skill_id: skillId, deleted: 0 },
+    select: { candidate_skill_id: true, candidate_id: true },
+  });
+  if (!row || !row.candidate_id) return { error: "Skill not found." };
+
+  try { await ensureStaffCandidateAccess(session, row.candidate_id); } catch { return { error: "Access denied." }; }
+
+  await prisma.candidate_skill.update({
+    where: { candidate_skill_id: skillId },
+    data: { deleted: 1 },
+  });
+
+  const base = staffBasePath(session.role);
+  revalidatePath(`${base}/${row.candidate_id}`);
+  revalidatePath(base);
+  return { error: "" };
+}
+
+// -- Status mutations ---------------------------------------------------
+
+export async function setCandidateApproval(_prevState: { error: string }, formData: FormData) {
+  const session = await requireCapability("candidate.search");
+  const candidateId = Number(formData.get("candidateId"));
+  const approved = Number(formData.get("approved"));
+
+  if (!Number.isInteger(candidateId) || candidateId <= 0) return { error: "Invalid candidate." };
+  if (approved !== 0 && approved !== 1) return { error: "Approval value must be 0 or 1." };
+
+  try { await ensureStaffCandidateAccess(session, candidateId); } catch { return { error: "Access denied." }; }
+
+  await prisma.candidate.update({
+    where: { candidate_id: candidateId },
+    data: { approved, candidate_updated_at: new Date() },
+  });
+
+  const base = staffBasePath(session.role);
+  revalidatePath(`${base}/${candidateId}`);
+  revalidatePath(base);
+  return { error: "" };
+}
+
+export async function setCandidateProfileComplete(_prevState: { error: string }, formData: FormData) {
+  const session = await requireCapability("candidate.search");
+  const candidateId = Number(formData.get("candidateId"));
+  const isIncomplete = String(formData.get("isIncomplete") ?? "");
+
+  if (!Number.isInteger(candidateId) || candidateId <= 0) return { error: "Invalid candidate." };
+  if (isIncomplete !== "true" && isIncomplete !== "false") return { error: "isIncomplete must be 'true' or 'false'." };
+
+  try { await ensureStaffCandidateAccess(session, candidateId); } catch { return { error: "Access denied." }; }
+
+  await prisma.candidate.update({
+    where: { candidate_id: candidateId },
+    data: { is_incomplete_profile: isIncomplete === "true", candidate_updated_at: new Date() },
+  });
+
+  const base = staffBasePath(session.role);
+  revalidatePath(`${base}/${candidateId}`);
+  revalidatePath(base);
+  return { error: "" };
+}
+
+export async function clearCandidateCivilVerification(_prevState: { error: string }, formData: FormData) {
+  const session = await requireCapability("candidate.search");
+  const candidateId = Number(formData.get("candidateId"));
+
+  if (!Number.isInteger(candidateId) || candidateId <= 0) return { error: "Invalid candidate." };
+
+  try { await ensureStaffCandidateAccess(session, candidateId); } catch { return { error: "Access denied." }; }
+
+  await prisma.candidate.update({
+    where: { candidate_id: candidateId },
+    data: { candidate_civil_need_verification: false, candidate_updated_at: new Date() },
+  });
+
+  const base = staffBasePath(session.role);
+  revalidatePath(`${base}/${candidateId}`);
+  revalidatePath(base);
   return { error: "" };
 }

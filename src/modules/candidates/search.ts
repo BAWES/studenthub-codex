@@ -120,7 +120,7 @@ export async function getCandidateSearchWorkspace(params: CandidateSearchParams)
   const selectedId = await resolveSelectedCandidateId({
     requestedId: params.candidateId,
     rows: searchRows,
-    scopedCandidateIds
+    staffCandidateIds
   });
   const selected = selectedId
     ? await getCandidateDetail(selectedId, params.role === "admin" ? "/admin/requests" : "/staff/requests")
@@ -131,7 +131,7 @@ export async function getCandidateSearchWorkspace(params: CandidateSearchParams)
         where: {
           deleted: 0,
           candidate_id: { in: openTabIds },
-          ...(scopedCandidateIds ? candidateIdScope(scopedCandidateIds) : {})
+          ...(staffCandidateIds ? candidateIdScope(staffCandidateIds) : {})
         },
         select: {
           candidate_id: true,
@@ -535,14 +535,15 @@ function topFacet(values: { value: string; label: string }[], activeValue?: stri
 async function resolveSelectedCandidateId({
   requestedId,
   rows,
-  scopedCandidateIds
+  staffCandidateIds
 }: {
   requestedId?: number;
   rows: CandidateSearchRow[];
-  scopedCandidateIds: number[] | null;
+  staffCandidateIds: number[] | null;
 }) {
   if (requestedId) {
-    if (scopedCandidateIds && !scopedCandidateIds.includes(requestedId)) return null;
+    // Staff must always be scoped to candidate_work_history, even when row visibility is "all"
+    if (staffCandidateIds && !staffCandidateIds.includes(requestedId)) return null;
     const exists = await prisma.candidate.findFirst({ where: { candidate_id: requestedId, deleted: 0 }, select: { candidate_id: true } });
     return exists?.candidate_id ?? null;
   }

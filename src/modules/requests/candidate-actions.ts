@@ -112,12 +112,12 @@ export async function removeCandidateTagAction(formData: FormData) {
       ? `/admin/candidates/${candidateId}` as Route
       : `/staff/candidates?candidate=${candidateId}` as Route;
 
-  if (!Number.isInteger(tagId) || tagId <= 0) {
+  if (!Number.isInteger(tagId) || tagId <= 0 || !Number.isInteger(candidateId) || candidateId <= 0) {
     redirect(`${returnPath}?notice=missing-fields` as Route);
   }
 
-  await prisma.candidate_tag.update({
-    where: { tag_id: tagId },
+  await prisma.candidate_tag.updateMany({
+    where: { tag_id: tagId, candidate_id: candidateId },
     data: { deleted: 1, updated_at: new Date() }
   });
 

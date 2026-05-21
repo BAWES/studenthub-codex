@@ -1561,6 +1561,8 @@ function stripHtml(value: string) {
 }
 
 export async function getStaffWorkspace(staffId: number) {
+  const candidateIds = await getCandidateIdsForStaff(staffId);
+
   const [staff, productionCandidates, productionCompanies, assignedRequests, workHistories, stories, notes, recentRequests, recentStories] =
     await prisma.$transaction([
       prisma.staff.findUnique({
@@ -1573,7 +1575,7 @@ export async function getStaffWorkspace(staffId: number) {
           staff_salary_currency: true
         }
       }),
-      prisma.candidate.count({ where: { deleted: 0 } }),
+      prisma.candidate.count({ where: { deleted: 0, candidate_id: { in: candidateIds.length ? candidateIds : [-1] } } }),
       prisma.company.count({ where: { deleted: 0 } }),
       prisma.request.count({ where: { staff_id: staffId } }),
       prisma.candidate_work_history.count({ where: { staff_id: staffId } }),

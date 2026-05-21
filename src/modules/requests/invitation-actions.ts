@@ -86,6 +86,14 @@ export async function updateInvitationStatusAction(formData: FormData) {
     redirect(`${detailPath}?notice=missing-fields` as Route);
   }
 
+  if (session.role === "staff") {
+    const owned = await prisma.request.findFirst({
+      where: { request_uuid: requestUuid, staff_id: Number(session.id) },
+      select: { request_uuid: true }
+    });
+    if (!owned) redirect(`${detailPath}?notice=not-found` as Route);
+  }
+
   const invitation = await prisma.invitation.findFirst({
     where: { invitation_uuid: invitationUuid, request_uuid: requestUuid },
     select: { invitation_uuid: true }
