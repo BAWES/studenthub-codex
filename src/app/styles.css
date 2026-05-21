@@ -8672,6 +8672,109 @@ kbd {
   line-height: 1.5;
 }
 
+.civilIdPanel {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.civilIdPanelBody {
+  padding: 12px;
+  display: grid;
+  gap: 12px;
+}
+
+.civilIdPanelFields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.civilIdPanelFields div {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.civilIdPanelFields span {
+  font-size: 12px;
+  color: var(--ink-muted, #6b7280);
+}
+
+.civilIdPanelFields strong {
+  overflow-wrap: anywhere;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.civilIdExpired {
+  color: var(--rose, #e11d48);
+}
+
+.civilIdWarning {
+  color: var(--amber, #d97706);
+}
+
+.civilIdPhotos {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.civilIdPhotos div {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.civilIdPhotos span {
+  font-size: 12px;
+  color: var(--ink-muted, #6b7280);
+}
+
+.civilIdPhotos img {
+  max-width: 100%;
+  height: auto;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+}
+
+.civilIdClearVerification {
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+}
+
+.civilIdClearVerification button {
+  font-size: 13px;
+  padding: 6px 12px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.civilIdClearVerification button:hover {
+  background: var(--rose);
+  color: #fff;
+  border-color: var(--rose);
+}
+
+[data-theme="dark"] .civilIdPanel {
+  border-color: var(--line);
+  background: var(--surface);
+  color: var(--ink);
+}
+
+@media (max-width: 760px) {
+  .civilIdPhotos {
+    grid-template-columns: 1fr;
+  }
+}
+
 .candidateProfileColumns {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
