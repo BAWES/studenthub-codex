@@ -358,8 +358,10 @@ async function suggestionCreationTest() {
   });
   assert(record, "Suggestion was not created in the database");
 
-  await prisma.note.deleteMany({ where: { note_uuid: record.note_uuid } });
+  await prisma.note.updateMany({ where: { suggestion_uuid: record.suggestion_uuid }, data: { suggestion_uuid: null } });
+  await prisma.story.updateMany({ where: { suggestion_uuid: record.suggestion_uuid }, data: { suggestion_uuid: null } });
   await prisma.suggestion.delete({ where: { suggestion_uuid: record.suggestion_uuid } });
+  await prisma.note.deleteMany({ where: { note_uuid: record.note_uuid } });
   console.log(`  (suggestion ${record.suggestion_uuid} created + cleaned up)`);
 }
 
@@ -528,8 +530,10 @@ async function crossRoleSuggestionVisibilityTest() {
     select: { suggestion_uuid: true, note_uuid: true },
   });
   if (record) {
-    await prisma.note.deleteMany({ where: { note_uuid: record.note_uuid } });
+    await prisma.note.updateMany({ where: { suggestion_uuid: record.suggestion_uuid }, data: { suggestion_uuid: null } });
+    await prisma.story.updateMany({ where: { suggestion_uuid: record.suggestion_uuid }, data: { suggestion_uuid: null } });
     await prisma.suggestion.delete({ where: { suggestion_uuid: record.suggestion_uuid } });
+    await prisma.note.deleteMany({ where: { note_uuid: record.note_uuid } });
   }
   console.log(`  (suggestion visible to admin on request detail page + cleaned up)`);
 }
