@@ -1,112 +1,82 @@
 "use client";
 
-import { useActionState } from "react";
+import { useRouter } from "next/navigation";
+import { useActionState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { createCompanyRequestAction, type CreateCompanyRequestState } from "./company-create-actions";
+import { createCompanyRequest, type CompanyRequestFormState } from "./company-create-actions";
 
 interface CompanyRequestCreateFormProps {
   companies: { id: number; name: string }[];
 }
 
-const initialState: CreateCompanyRequestState = {};
+const initialState: CompanyRequestFormState = { success: false };
 
 export function CompanyRequestCreateForm({ companies }: CompanyRequestCreateFormProps) {
-  const [state, formAction, pending] = useActionState(createCompanyRequestAction, initialState);
+  const router = useRouter();
+  const [state, dispatch, pending] = useActionState(createCompanyRequest, initialState);
+
+  useEffect(() => {
+    if (state.success && state.requestUuid) {
+      router.push(`/company/requests/${state.requestUuid}`);
+    }
+  }, [state.success, state.requestUuid, router]);
 
   return (
-    <Card className="requestCreateForm">
+    <Card>
       <CardHeader>
         <CardTitle>New Hiring Request</CardTitle>
-        <CardDescription>
-          Submit a hiring request for your company. All fields marked with * are required.
-        </CardDescription>
+        <CardDescription>Fill in the required details for a new position.</CardDescription>
       </CardHeader>
       <CardContent>
-        <form action={formAction}>
-          {state.error ? <p className="formError">{state.error}</p> : null}
-
+        <form action={dispatch}>
           <label>
-            Company *
-            <select name="company_id" required defaultValue={state.values?.company_id ?? ""}>
-              <option value="" disabled>
-                Select a company...
-              </option>
-              {companies.map((company) => (
-                <option key={company.id} value={company.id}>
-                  {company.name}
+            Company
+            <select name="company_id" required>
+              <option value="">Select a company...</option>
+              {companies.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
                 </option>
               ))}
             </select>
           </label>
+          {state.errors?.company_id && <p className="fieldError">{state.errors.company_id}</p>}
 
           <label>
-            Job Title *
-            <Input
-              name="position_title"
-              placeholder="e.g. Sales Associate"
-              required
-              defaultValue={state.values?.position_title ?? ""}
-            />
+            Job Title
+            <Input name="position_title" placeholder="e.g. Sales Associate" required />
           </label>
+          {state.errors?.position_title && <p className="fieldError">{state.errors.position_title}</p>}
 
           <label>
-            Compensation *
-            <Input
-              name="compensation"
-              placeholder="e.g. 300 KWD / month"
-              required
-              defaultValue={state.values?.compensation ?? ""}
-            />
+            Compensation Type
+            <Input name="compensation" placeholder="e.g. 300 KWD / month" required />
           </label>
+          {state.errors?.compensation && <p className="fieldError">{state.errors.compensation}</p>}
 
           <label>
-            Store *
-            <Input name="store" placeholder="e.g. The Avenues Mall" required defaultValue={state.values?.store ?? ""} />
+            Store
+            <Input name="store" placeholder="e.g. Avenues Mall Branch" required />
           </label>
+          {state.errors?.store && <p className="fieldError">{state.errors.store}</p>}
 
           <label>
-            Brand *
-            <Input name="brand" placeholder="e.g. Nike" required defaultValue={state.values?.brand ?? ""} />
+            Brand
+            <Input name="brand" placeholder="e.g. Nike" required />
           </label>
+          {state.errors?.brand && <p className="fieldError">{state.errors.brand}</p>}
 
           <label>
-            Vacancy Count *
-            <Input
-              name="vacancy_count"
-              type="number"
-              min={1}
-              defaultValue={state.values?.vacancy_count ?? "1"}
-              required
-            />
+            Vacancy Count
+            <Input name="number_of_employees" type="number" min={1} defaultValue={1} required />
           </label>
+          {state.errors?.number_of_employees && <p className="fieldError">{state.errors.number_of_employees}</p>}
 
-          <label>
-            Job Description
-            <textarea
-              name="job_description"
-              rows={4}
-              placeholder="Describe the role and responsibilities..."
-              defaultValue={state.values?.job_description ?? ""}
-            />
-          </label>
+          {state.error && <p className="fieldError">{state.error}</p>}
 
-          <label>
-            Location
-            <Input name="location" placeholder="e.g. Kuwait City" defaultValue={state.values?.location ?? ""} />
-          </label>
-
-          <label>
-            Skills (comma-separated)
-            <Input
-              name="skills"
-              placeholder="e.g. Customer Service, POS Systems"
-              defaultValue={state.values?.skills ?? ""}
-            />
-          </label>
-
-          <Button type="submit" className="primaryButton" disabled={pending}>
+          <Button type="submit" disabled={pending} className="primaryButton">
             {pending ? "Creating..." : "Create Request"}
           </Button>
         </form>

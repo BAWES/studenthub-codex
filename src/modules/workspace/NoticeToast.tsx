@@ -98,6 +98,17 @@ const noticeCatalog: Record<string, { title: string; description: string; varian
     description: "Required fields were not provided. Please fill in all required fields.",
     variant: "error"
   },
+  // ID request notices
+  "id-request-approved": {
+    title: "ID request approved",
+    description: "The ID verification request has been approved and candidates have been notified.",
+    variant: "success"
+  },
+  "id-request-rejected": {
+    title: "ID request rejected",
+    description: "The ID verification request has been rejected.",
+    variant: "info"
+  },
 };
 
 export function NoticeToast() {

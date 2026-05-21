@@ -2,108 +2,81 @@
 
 import crypto from "node:crypto";
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { z } from "zod";
-import type { Route } from "next";
 import { prisma } from "@/lib/prisma";
 import { requireRoleCapability } from "@/modules/auth/session";
 
-const createCompanyRequestSchema = z.object({
-  company_id: z.coerce.number().int().positive("Select a company."),
-  position_title: z.string().min(1, "Job title is required.").max(255),
-  compensation: z.string().min(1, "Compensation is required.").max(255),
-  store: z.string().min(1, "Store name is required.").max(128),
-  brand: z.string().min(1, "Brand name is required.").max(128),
-  vacancy_count: z.coerce.number().int().positive("Vacancy count must be at least 1.").max(9999),
-  job_description: z.string().max(5000).optional(),
-  location: z.string().max(255).optional(),
-  skills: z.string().max(1000).optional(),
+const companyRequestSchema = z.object({
+  company_id: z.coerce.number().int().positive("Select a company"),
+  position_title: z.string().trim().min(1, "Job title is required").max(255),
+  compensation: z.string().trim().min(1, "Compensation type is required"),
+  store: z.string().trim().min(1, "Store name is required"),
+  brand: z.string().trim().min(1, "Brand name is required"),
+  number_of_employees: z.coerce.number().int().min(1, "Must hire at least 1 employee"),
 });
 
-export type CreateCompanyRequestState = {
+export type CompanyRequestFormState = {
+  success: boolean;
   error?: string;
-  values?: Record<string, string>;
+  errors?: Partial<Record<keyof z.infer<typeof companyRequestSchema>, string>>;
+  requestUuid?: string;
 };
 
-export async function createCompanyRequestAction(
-  _prevState: CreateCompanyRequestState,
+export async function createCompanyRequest(
+  _prev: CompanyRequestFormState,
   formData: FormData,
-): Promise<CreateCompanyRequestState> {
+): Promise<CompanyRequestFormState> {
   const session = await requireRoleCapability("company", "request.create");
 
-  const raw = {
-    company_id: formData.get("company_id"),
-    position_title: formData.get("position_title"),
-    compensation: formData.get("compensation"),
-    store: formData.get("store"),
-    brand: formData.get("brand"),
-    vacancy_count: formData.get("vacancy_count"),
-    job_description: formData.get("job_description"),
-    location: formData.get("location"),
-    skills: formData.get("skills"),
-  };
-
-  const parsed = createCompanyRequestSchema.safeParse(raw);
+  const raw = Object.fromEntries(formData);
+  const parsed = companyRequestSchema.safeParse(raw);
 
   if (!parsed.success) {
-    const kept: Record<string, string> = {};
-    for (const [key, value] of Object.entries(raw)) {
-      if (value !== null && value !== "" && key !== "company_id") {
-        kept[key] = String(value);
+    const fieldErrors: CompanyRequestFormState["errors"] = {};
+    for (const issue of parsed.error.issues) {
+      const key = issue.path[0] as keyof typeof fieldErrors;
+      if (!fieldErrors[key]) {
+        fieldErrors[key] = issue.message;
       }
     }
-    return {
-      error: parsed.error.errors[0]?.message ?? "Validation failed.",
-      values: kept,
-    };
+    return { success: false, errors: fieldErrors };
   }
 
-  const { company_id, position_title, compensation, store, brand, vacancy_count, job_description, location, skills } =
-    parsed.data;
+  const { company_id, position_title, compensation, store, brand, number_of_employees } = parsed.data;
 
-  const link = await prisma.company_contact.findFirst({
-    where: { contact_uuid: session.id, company_id, allow_access: true },
+  const company = await prisma.company.findUnique({
+    where: { company_id, deleted: 0 },
     select: { company_id: true },
   });
 
-  if (!link) {
-    return { error: "You do not have access to this company.", values: { position_title, compensation, store, brand } };
+  if (!company) {
+    return { success: false, error: "Selected company not found." };
   }
 
-  const requestUuid = `request_${crypto.randomUUID()}`;
+  const contactUuid = session.id;
   const now = new Date();
+  const requestUuid = `request_${crypto.randomUUID()}`;
 
-  const tagSkills = [store, brand];
-  const extraSkills = skills
-    ?.split(",")
-    .map((s) => s.trim())
-    .filter(Boolean)
-    .slice(0, 8);
-  const allSkills = [...tagSkills, ...(extraSkills ?? [])];
-
-  await prisma.$transaction([
-    prisma.request.create({
-      data: {
-        request_uuid: requestUuid,
-        company_id,
-        contact_uuid: session.id,
-        request_position_title: position_title,
-        request_compensation: compensation,
-        request_number_of_employees: vacancy_count,
-        request_job_description: job_description || "No description provided.",
-        request_location: location ?? null,
-        request_status: "pending",
-        request_created_datetime: now,
-        request_updated_datetime: now,
-      },
-    }),
-    ...allSkills.map((skill) =>
-      prisma.request_skill.create({
-        data: { request_uuid: requestUuid, skill },
-      }),
-    ),
-  ]);
+  await prisma.request.create({
+    data: {
+      request_uuid: requestUuid,
+      company_id,
+      contact_uuid: contactUuid,
+      request_position_title: position_title,
+      request_compensation: compensation,
+      request_number_of_employees: number_of_employees,
+      request_location: store,
+      request_job_description: `Brand: ${brand}`,
+      request_status: "pending",
+      request_created_by: 0,
+      request_updated_by: 0,
+      request_created_datetime: now,
+      request_updated_datetime: now,
+    },
+  });
 
   revalidatePath("/company/requests");
-  redirect(`/company/requests/${requestUuid}?notice=request-created` as Route);
+  revalidatePath("/company/requests/create");
+
+  return { success: true, requestUuid };
 }

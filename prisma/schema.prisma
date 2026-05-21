@@ -437,6 +437,7 @@ model candidate_id_request {
   cir_uuid                                     String    @id @db.Char(60)
   candidate_ids                                String?   @db.Text
   status                                       String?   @default("pending") @db.VarChar(100)
+  rejection_reason                             String?   @db.Text
   created_at                                   DateTime? @db.DateTime(0)
   updated_at                                   DateTime? @db.DateTime(0)
   created_by                                   Int?
