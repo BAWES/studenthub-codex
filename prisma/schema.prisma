@@ -295,6 +295,9 @@ model candidate {
 model candidate_certificate {
   certificate_uuid                                         String                  @id @db.Char(60)
   certificate_type                                         Boolean?                @default(false)
+  certificate_title                                        String?                 @db.VarChar(200)
+  certificate_issuer                                       String?                 @db.VarChar(200)
+  certificate_url                                          String?                 @db.VarChar(500)
   candidate_id                                             Int
   candidate_work_history_id                                Int?
   exam_uuid                                                String?                 @db.Char(60)
