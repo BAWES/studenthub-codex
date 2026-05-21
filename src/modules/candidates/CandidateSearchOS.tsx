@@ -94,6 +94,7 @@ export function CandidateSearchOS({
             <CandidateProfile
               detail={data.selected}
               actions={data.selectedActions.filter((action) => action.label !== "Open full record")}
+              viewerRole={session.role}
             />
           ) : (
             <CandidateSearchTab

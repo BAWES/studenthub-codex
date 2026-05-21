@@ -10,6 +10,8 @@ import {
   removeCandidateSkill,
   addCandidateExperience,
   removeCandidateExperience,
+  addCandidateCertificate,
+  removeCandidateCertificate,
   addCandidateEducation,
   removeCandidateEducation,
 } from "@/modules/candidates/actions";
@@ -19,6 +21,7 @@ type UuidOption = { id: string; label: string };
 
 type Skill = { id: number; title: string };
 type Experience = { id: number; title: string; subtitle: string };
+type Certificate = { id: string; title: string; subtitle: string };
 type EducationEntry = {
   id: string;
   universityId: number;
@@ -59,12 +62,13 @@ type Props = {
   banks: Option[];
   skills: Skill[];
   experiences: Experience[];
+  certificates: Certificate[];
   educationEntries: EducationEntry[];
   degrees: UuidOption[];
   majors: UuidOption[];
 };
 
-export function CandidateEditForm({ candidate, countries, universities, banks, skills, experiences, educationEntries, degrees, majors }: Props) {
+export function CandidateEditForm({ candidate, countries, universities, banks, skills, experiences, certificates, educationEntries, degrees, majors }: Props) {
   const [profileState, profileAction, profilePending] = useActionState(
     updateCandidateProfile,
     { success: false } as ProfileState,
@@ -84,6 +88,8 @@ export function CandidateEditForm({ candidate, countries, universities, banks, s
   const [, removeSkillAction, removeSkillPending] = useActionState(removeCandidateSkill, { error: "" });
   const [, addExpAction, addExpPending] = useActionState(addCandidateExperience, { error: "" });
   const [, removeExpAction, removeExpPending] = useActionState(removeCandidateExperience, { error: "" });
+  const [certState, addCertAction, addCertPending] = useActionState(addCandidateCertificate, { error: "" });
+  const [, removeCertAction, removeCertPending] = useActionState(removeCandidateCertificate, { error: "" });
   const [addEduState, addEduAction, addEduPending] = useActionState(addCandidateEducation, { success: false } as EducationState);
   const [removeEduState, removeEduAction, removeEduPending] = useActionState(removeCandidateEducation, { success: false } as EducationState);
 
@@ -356,6 +362,78 @@ export function CandidateEditForm({ candidate, countries, universities, banks, s
       {experiences.map((e) => (
         <form key={e.id} id={`remove-exp-${e.id}`} action={removeExpAction} hidden>
           <input type="hidden" name="experienceId" value={e.id} />
+        </form>
+      ))}
+
+      <form action={addCertAction} className="candidateEditForm">
+        <h2>Certificates</h2>
+
+        {certificates.length ? (
+          <ul className="editableList">
+            {certificates.map((c) => (
+              <li key={c.id}>
+                <span>{c.title}{c.subtitle ? ` — ${c.subtitle}` : ""}</span>
+                <button
+                  type="submit"
+                  form={`remove-cert-${c.id}`}
+                  disabled={removeCertPending}
+                  className="removeButton"
+                >
+                  Remove
+                </button>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="formNotice">No certificates added yet.</p>
+        )}
+
+        <label>
+          <span>Certificate type</span>
+          <select name="certificate_type" required defaultValue="false">
+            <option value="false">Training Certificate</option>
+            <option value="true">Experience Certificate</option>
+          </select>
+        </label>
+
+        <label>
+          <span>Certificate title</span>
+          <input name="certificate_title" placeholder="e.g. AWS Cloud Practitioner" required />
+        </label>
+
+        <label>
+          <span>Issuer / Organization</span>
+          <input name="certificate_issuer" placeholder="e.g. Amazon Web Services" />
+        </label>
+
+        <div className="inlineFields">
+          <label>
+            <span>Date obtained</span>
+            <input name="start_date" type="date" />
+          </label>
+          <label>
+            <span>Expiry date</span>
+            <input name="end_date" type="date" />
+          </label>
+        </div>
+
+        <label>
+          <span>Certificate URL</span>
+          <input name="certificate_url" type="url" placeholder="https://example.com/cert/123" />
+        </label>
+
+        {certState.error ? <p className="formError">{certState.error}</p> : null}
+
+        <div className="formActions">
+          <button type="submit" disabled={addCertPending}>
+            {addCertPending ? "Adding..." : "Add certificate"}
+          </button>
+        </div>
+      </form>
+
+      {certificates.map((c) => (
+        <form key={c.id} id={`remove-cert-${c.id}`} action={removeCertAction} hidden>
+          <input type="hidden" name="certificateUuid" value={c.id} />
         </form>
       ))}
 
