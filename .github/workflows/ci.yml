@@ -11,6 +11,41 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  branch-name:
+    name: Branch Name Check
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Validate branch name
+        run: |
+          BRANCH="${{ github.head_ref }}"
+          echo "Checking branch: $BRANCH"
+          if echo "$BRANCH" | grep -Eq '^(feature|fix|chore)/STU-[0-9]+-[a-z0-9-]+$'; then
+            echo "Branch name OK: $BRANCH"
+          else
+            echo "Branch name REJECTED: $BRANCH"
+            echo "Expected: feature/STU-N-*, fix/STU-N-*, or chore/STU-N-* (kebab-case)"
+            exit 1
+          fi
+
+  clean-tree:
+    name: Clean Working Tree
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "npm"
+      - run: npm ci
+      - name: Check for uncommitted changes
+        run: |
+          if ! git diff --exit-code; then
+            echo "Working tree is dirty after npm ci — uncommitted changes detected"
+            exit 1
+          fi
+          echo "Working tree is clean"
+
   typescript:
     name: TypeScript Check
     runs-on: ubuntu-latest
