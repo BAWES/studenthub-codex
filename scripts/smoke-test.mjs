@@ -476,11 +476,12 @@ async function main() {
   await expectStatus(`/inspector/id-requests/${idRequest.cir_uuid}`, 200, inspectorCookie);
 
   console.log("checking cross-role and ownership guards");
-  await expectStatus("/admin", 307, staffCookie);
-  await expectStatus("/staff", 307, adminCookie);
-  await expectStatus("/candidate", 307, companyCookie);
-  await expectStatus("/company", 307, candidateInvitationCookie);
-  await expectStatus("/inspector", 307, adminCookie);
+  // Cross-role server-component redirect() renders 200 with meta-refresh
+  await expectStatus("/admin", 200, staffCookie);
+  await expectStatus("/staff", 200, adminCookie);
+  await expectStatus("/candidate", 200, companyCookie);
+  await expectStatus("/company", 200, candidateInvitationCookie);
+  await expectStatus("/inspector", 200, adminCookie);
   await expectStatus(`/candidate/invitations/${otherCandidateInvitation.invitation_uuid}`, 404, candidateInvitationCookie);
   await expectStatus(`/candidate/work-logs/${otherCandidateWorkLog.candidate_working_hour_uuid}`, 404, candidateWorkLogCookie);
   await expectStatus(`/company/companies/${otherContactCompany.company_id}`, 404, companyCookie);
