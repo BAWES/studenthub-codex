@@ -18,9 +18,14 @@ test.describe("M5 Staff Request Fulfillment — Pipeline QA", () => {
 
       // Wait for redirect after successful login
       try {
-        await page.waitForURL((url) => !url.pathname.includes("/login"), { timeout: 15000 });
+        await page.waitForURL((url) => !url.pathname.includes("/login"), {
+          timeout: 15000,
+        });
       } catch {
-        const error = await page.locator(".formError").textContent().catch(() => "Unknown error");
+        const error = await page
+          .locator(".formError")
+          .textContent()
+          .catch(() => "Unknown error");
         throw new Error(`Login failed: ${error}`);
       }
     }
@@ -46,7 +51,10 @@ test.describe("M5 Staff Request Fulfillment — Pipeline QA", () => {
     await expect(page.locator("#invited")).toBeVisible();
 
     // Take screenshot for evidence
-    await page.screenshot({ path: "test-results/m5-request-dashboard.png", fullPage: true });
+    await page.screenshot({
+      path: "test-results/m5-request-dashboard.png",
+      fullPage: true,
+    });
   });
 
   test("2. Staff can suggest a matched candidate", async ({ page }) => {
@@ -59,7 +67,9 @@ test.describe("M5 Staff Request Fulfillment — Pipeline QA", () => {
 
     if (await suggestForm.isVisible()) {
       // Fill in the reason
-      await suggestForm.locator('input[name="reason"]').fill("QA test suggestion - good skill match");
+      await suggestForm
+        .locator('input[name="reason"]')
+        .fill("QA test suggestion - good skill match");
       // Click Suggest
       await suggestForm.locator('button[type="submit"]').click();
 
@@ -70,10 +80,18 @@ test.describe("M5 Staff Request Fulfillment — Pipeline QA", () => {
       await page.waitForLoadState("networkidle");
 
       // Verify the action was processed — suggestion form should be gone or notice shown
-      const formStillVisible = await matchCard.locator(".suggestionForm").isVisible().catch(() => false);
-      console.log("Suggest action processed, form still visible:", formStillVisible);
+      const formStillVisible = await matchCard
+        .locator(".suggestionForm")
+        .isVisible()
+        .catch(() => false);
+      console.log(
+        "Suggest action processed, form still visible:",
+        formStillVisible,
+      );
     } else {
-      console.log("No match cards with suggestion forms available — all candidates may already be in pipeline");
+      console.log(
+        "No match cards with suggestion forms available — all candidates may already be in pipeline",
+      );
     }
   });
 
@@ -99,7 +117,9 @@ test.describe("M5 Staff Request Fulfillment — Pipeline QA", () => {
     }
   });
 
-  test("4. Staff can transition invitation statuses (Responded / Declined)", async ({ page }) => {
+  test("4. Staff can transition invitation statuses (Responded / Declined)", async ({
+    page,
+  }) => {
     await page.goto(`/staff/requests/${REQUEST_UUID}`);
     await page.waitForLoadState("networkidle");
 
@@ -114,20 +134,26 @@ test.describe("M5 Staff Request Fulfillment — Pipeline QA", () => {
 
     if (count > 0) {
       // Click Responded on the first invitation
-      const respondedBtn = inviteRows.first().locator('button:has-text("Responded")');
+      const respondedBtn = inviteRows
+        .first()
+        .locator('button:has-text("Responded")');
       if (await respondedBtn.isVisible()) {
         await respondedBtn.click();
         await page.waitForTimeout(2000);
         console.log("Responded action: OK");
       } else {
         // Try Declined instead
-        const declinedBtn = inviteRows.first().locator('button:has-text("Declined")');
+        const declinedBtn = inviteRows
+          .first()
+          .locator('button:has-text("Declined")');
         if (await declinedBtn.isVisible()) {
           await declinedBtn.click();
           await page.waitForTimeout(2000);
           console.log("Declined action: OK");
         } else {
-          console.log("First invitation already in terminal state (all status buttons hidden)");
+          console.log(
+            "First invitation already in terminal state (all status buttons hidden)",
+          );
         }
       }
     } else {
@@ -135,7 +161,9 @@ test.describe("M5 Staff Request Fulfillment — Pipeline QA", () => {
     }
   });
 
-  test("5. Staff can create a story (Log update) and complete/cancel stories", async ({ page }) => {
+  test("5. Staff can create a story (Log update) and complete/cancel stories", async ({
+    page,
+  }) => {
     await page.goto(`/staff/requests/${REQUEST_UUID}`);
     await page.waitForLoadState("networkidle");
 
@@ -148,7 +176,9 @@ test.describe("M5 Staff Request Fulfillment — Pipeline QA", () => {
 
     if (await storyForm.isVisible()) {
       // Fill and submit
-      await storyForm.locator('input[name="note"]').fill("QA test story update");
+      await storyForm
+        .locator('input[name="note"]')
+        .fill("QA test story update");
       await storyForm.locator('button[type="submit"]').click();
 
       // Wait for server action to complete
@@ -160,12 +190,17 @@ test.describe("M5 Staff Request Fulfillment — Pipeline QA", () => {
     await page.goto(`/staff/requests/${REQUEST_UUID}`);
     await page.waitForLoadState("networkidle");
 
-    const storyRows = page.locator(".storyForm").locator("..").locator(".requestRow");
+    const storyRows = page
+      .locator(".storyForm")
+      .locator("..")
+      .locator(".requestRow");
     const storyCount = await storyRows.count();
     console.log(`Found ${storyCount} story rows`);
 
     if (storyCount > 0) {
-      const completeBtn = storyRows.first().locator('button:has-text("Complete")');
+      const completeBtn = storyRows
+        .first()
+        .locator('button:has-text("Complete")');
       if (await completeBtn.isVisible()) {
         await completeBtn.click();
         await page.waitForTimeout(2000);
@@ -174,12 +209,17 @@ test.describe("M5 Staff Request Fulfillment — Pipeline QA", () => {
     }
   });
 
-  test("6. Request desk grid — all panels render without errors", async ({ page }) => {
+  test("6. Request desk grid — all panels render without errors", async ({
+    page,
+  }) => {
     await page.goto(`/staff/requests/${REQUEST_UUID}`);
     await page.waitForLoadState("networkidle");
 
     // Take full page screenshot
-    await page.screenshot({ path: "test-results/m5-full-pipeline.png", fullPage: true });
+    await page.screenshot({
+      path: "test-results/m5-full-pipeline.png",
+      fullPage: true,
+    });
 
     // Check no React error overlays
     const errorOverlay = page.locator("nextjs-portal");
