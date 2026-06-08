@@ -1,9 +1,7 @@
-import { requireRoleCapability } from "@/modules/auth/session";
-import { WorkspaceOS } from "@/modules/workspace/WorkspaceOS";
+import { AdminLayout } from "@/modules/admin";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  const session = await requireRoleCapability("admin", "admin.system");
-  return <WorkspaceOS session={session}>{children}</WorkspaceOS>;
+export default async function AdminLayoutWrapper({ children }: { children: React.ReactNode }) {
+  return <AdminLayout>{children}</AdminLayout>;
 }
