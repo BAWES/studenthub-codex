@@ -112,6 +112,40 @@ type CountryListResult = {
   currency_code: string | null;
 };
 
+// ---------------------------------------------------------------------------
+// getCountry — validation + not-found scenario (pure)
+// ---------------------------------------------------------------------------
+
+const getCountrySchema = z.object({
+  id: z.number().int().positive(),
+});
+
+describe("getCountrySchema", () => {
+  it("accepts a valid positive integer id", () => {
+    const result = getCountrySchema.safeParse({ id: 1 });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects zero id", () => {
+    const result = getCountrySchema.safeParse({ id: 0 });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects negative id", () => {
+    const result = getCountrySchema.safeParse({ id: -5 });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects non-integer id", () => {
+    const result = getCountrySchema.safeParse({ id: "abc" });
+    expect(result.success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Return type shape
+// ---------------------------------------------------------------------------
+
 describe("CountryListResult shape", () => {
   it("defines the expected fields", () => {
     const mock: CountryListResult = {

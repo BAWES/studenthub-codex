@@ -71,3 +71,48 @@ export async function listCountries(params: ListCountriesParams = {}): Promise<C
 
   return countries;
 }
+
+// ---------------------------------------------------------------------------
+// Schema
+// ---------------------------------------------------------------------------
+
+const getCountrySchema = z.object({
+  id: z.number().int().positive(),
+});
+
+export type GetCountryParams = z.input<typeof getCountrySchema>;
+
+// ---------------------------------------------------------------------------
+// Server action
+// ---------------------------------------------------------------------------
+
+/**
+ * Get a single country by ID. Returns null if not found or if the country
+ * was auto-added by Google Maps. Mirrors the legacy Yii2 actionView pattern.
+ *
+ * @param params - Object with `id` (positive integer)
+ * @returns The country record, or null if not found
+ */
+export async function getCountry(params: GetCountryParams): Promise<CountryListResult | null> {
+  await requireCapability("candidate.read.own");
+
+  const { id } = getCountrySchema.parse(params);
+
+  const country = await prisma.country.findFirst({
+    where: {
+      country_id: id,
+      country_from_google_map: false,
+    },
+    select: {
+      country_id: true,
+      country_name_en: true,
+      country_name_ar: true,
+      iso: true,
+      emoji: true,
+      country_code: true,
+      currency_code: true,
+    },
+  });
+
+  return country;
+}
