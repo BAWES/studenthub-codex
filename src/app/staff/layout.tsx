@@ -1,9 +1,7 @@
-import { requireRoleCapability } from "@/modules/auth/session";
-import { WorkspaceOS } from "@/modules/workspace/WorkspaceOS";
+import { StaffLayout } from "@/modules/staff";
 
 export const dynamic = "force-dynamic";
 
-export default async function StaffLayout({ children }: { children: React.ReactNode }) {
-  const session = await requireRoleCapability("staff", "request.read.assigned");
-  return <WorkspaceOS session={session}>{children}</WorkspaceOS>;
+export default async function StaffLayoutWrapper({ children }: { children: React.ReactNode }) {
+  return <StaffLayout>{children}</StaffLayout>;
 }

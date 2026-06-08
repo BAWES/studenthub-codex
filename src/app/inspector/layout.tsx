@@ -1,9 +1,7 @@
-import { requireRoleCapability } from "@/modules/auth/session";
-import { WorkspaceOS } from "@/modules/workspace/WorkspaceOS";
+import { InspectorLayout } from "@/modules/inspector";
 
 export const dynamic = "force-dynamic";
 
-export default async function InspectorLayout({ children }: { children: React.ReactNode }) {
-  const session = await requireRoleCapability("inspector", "id_review.read");
-  return <WorkspaceOS session={session}>{children}</WorkspaceOS>;
+export default async function InspectorLayoutWrapper({ children }: { children: React.ReactNode }) {
+  return <InspectorLayout>{children}</InspectorLayout>;
 }
