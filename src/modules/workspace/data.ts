@@ -788,7 +788,7 @@ export async function getStaffCandidateDetail(staffId: number, candidateId: numb
   return getCandidateDetail(candidateId);
 }
 
-async function getCandidateIdsForStaff(staffId: number) {
+export async function getCandidateIdsForStaff(staffId: number) {
   const rows = await prisma.candidate_work_history.findMany({
     where: { staff_id: staffId, candidate_id: { not: null } },
     distinct: ["candidate_id"],
