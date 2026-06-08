@@ -34,12 +34,22 @@ export const listDiscountsSchema = z.object({
   limit: z.number().int().min(1).max(100).optional(),
 });
 
+export const listDiscountsByApplicantSchema = z.object({
+  applicant_id: z
+    .number({ required_error: "Applicant ID is required" })
+    .int("Applicant ID must be an integer")
+    .positive("Applicant ID must be positive"),
+  page: z.number().int().positive().optional(),
+  limit: z.number().int().min(1).max(100).optional(),
+});
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
 export type CreateDiscountInput = z.infer<typeof createDiscountSchema>;
 export type ListDiscountsInput = z.infer<typeof listDiscountsSchema>;
+export type ListDiscountsByApplicantInput = z.infer<typeof listDiscountsByApplicantSchema>;
 
 export type DiscountListItem = {
   discount_uuid: string;
@@ -144,4 +154,64 @@ export async function createDiscount(
 
   revalidatePath("/discounts");
   return { discount_uuid: discountUuid };
+}
+
+/**
+ * List discounts available to a specific applicant (candidate).
+ * Resolves the candidate's store -> company chain to find relevant discounts.
+ * Returns empty result if the candidate or their store/company cannot be found.
+ */
+export async function listDiscountsByApplicant(
+  params: ListDiscountsByApplicantInput,
+): Promise<ListDiscountsResult> {
+  await requireCapability("discount.read");
+
+  const parsed = listDiscountsByApplicantSchema.safeParse(params);
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid parameters");
+  }
+
+  const { applicant_id, page = 1, limit = 20 } = parsed.data;
+
+  // Resolve candidate -> store -> company to find applicable discounts
+  const candidate = await prisma.candidate.findUnique({
+    where: { candidate_id: applicant_id },
+    select: { store_id: true },
+  });
+
+  if (!candidate || !candidate.store_id) {
+    return { discounts: [], total: 0, page, limit, totalPages: 0 };
+  }
+
+  const store = await prisma.store.findUnique({
+    where: { store_id: candidate.store_id },
+    select: { company_id: true },
+  });
+
+  if (!store || !store.company_id) {
+    return { discounts: [], total: 0, page, limit, totalPages: 0 };
+  }
+
+  const where: Record<string, unknown> = {
+    company_id: store.company_id,
+    OR: [{ valid_until: { gte: new Date() } }, { valid_until: null }],
+  };
+
+  const [discounts, total] = await Promise.all([
+    prisma.discount.findMany({
+      where: where as any,
+      orderBy: { created_at: "desc" },
+      skip: (page - 1) * limit,
+      take: limit,
+    }),
+    prisma.discount.count({ where: where as any }),
+  ]);
+
+  return {
+    discounts: discounts as DiscountListItem[],
+    total,
+    page,
+    limit,
+    totalPages: Math.ceil(total / limit),
+  };
 }
