@@ -1,4 +1,4 @@
-export { Breadcrumbs, type BreadcrumbItem } from "./Breadcrumbs";
+export { Breadcrumbs, type BreadcrumbItem, useBreadcrumbs } from "./Breadcrumbs";
 export { RoleLayoutShell, type RoleBranding } from "./RoleLayoutShell";
 export { DataTable, type DataTableColumn } from "./DataTable";
 export { DataTablePage, type DataTablePageProps } from "./DataTablePage";

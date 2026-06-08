@@ -5,6 +5,8 @@ import Link from "next/link";
 import type { Route } from "next";
 import { ChevronRight } from "lucide-react";
 
+export type BreadcrumbsProps = Record<string, never>;
+
 export function humanize(segment: string): string {
   if (segment === "[id]" || segment === "id") return "Detail";
   return segment
@@ -23,7 +25,8 @@ export function useBreadcrumbs(): BreadcrumbItem[] {
   const segments = pathname.split("/").filter(Boolean);
 
   return segments.map((segment, i) => {
-    const href = "/" + segments.slice(0, i + 1).join("/") as Route;
+    const path = "/" + segments.slice(0, i + 1).join("/");
+    const href = path as Route;
     const isLast = i === segments.length - 1;
     return {
       label: humanize(segment),
@@ -32,7 +35,7 @@ export function useBreadcrumbs(): BreadcrumbItem[] {
   });
 }
 
-export function Breadcrumbs() {
+export function Breadcrumbs(_props: BreadcrumbsProps) {
   const trail = useBreadcrumbs();
 
   if (trail.length === 0) return null;
