@@ -33,6 +33,8 @@ export type Capability =
   | "discount.read"
   | "discount.write"
   | "bank.read"
+  | "admin.read"
+  | "admin.write"
   | "admin.system";
 
 export type SessionUser = {
