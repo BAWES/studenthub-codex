@@ -2,8 +2,6 @@ import { requireSession } from "@/modules/auth/session";
 import { getUnifiedHub, parseHubScope } from "@/modules/hub/data";
 import { HubContent } from "@/modules/hub/HubContent";
 import type { HubContentData } from "@/modules/hub/HubContent";
-import type { HubCommand } from "@/modules/hub/HubShortcuts";
-import type { SessionUser } from "@/modules/auth/types";
 import type { Route } from "next";
 import type { Role } from "@/modules/auth/types";
 
@@ -19,14 +17,12 @@ export default async function AppPage({
   const scope = parseHubScope(params.scope);
   const requiredRole = parseRequiredRole(params.required);
   const data = await getUnifiedHub(session, { query: params.q, scope, record: params.record });
-  const commands = buildCommands(data);
   const guide = buildRoleGuide(session.role, data);
 
   return (
     <HubContent
       data={data as unknown as HubContentData}
       guide={guide}
-      commands={commands}
       session={session}
       requiredRole={requiredRole}
     />
@@ -230,101 +226,4 @@ function buildRoleGuide(role: Role, data: HubData): RoleGuide {
   }
 
   return guides[role];
-}
-
-function buildCommands(data: Awaited<ReturnType<typeof getUnifiedHub>>): HubCommand[] {
-  const commands: HubCommand[] = [];
-
-  for (const item of data.navigation) {
-    const shortcut = item.href === "/app"
-      ? "G H"
-      : item.label.toLowerCase().includes("request")
-        ? "G R"
-        : item.label.toLowerCase().includes("candidate") || item.label.toLowerCase().includes("company")
-          ? "G C"
-          : undefined;
-    commands.push({
-      id: `nav-${item.href}`,
-      title: item.label,
-      subtitle: item.description,
-      section: "Navigation",
-      href: item.href,
-      shortcut,
-    });
-  }
-
-  for (const scope of data.scopes) {
-    const params = new URLSearchParams();
-    params.set("scope", scope.value);
-    if (data.query) params.set("q", data.query);
-    commands.push({
-      id: `scope-${scope.value}`,
-      title: `Search ${scope.label}`,
-      subtitle: `Limit the workspace to ${scope.label.toLowerCase()}`,
-      section: "Search scopes",
-      href: `/app?${params.toString()}`,
-    });
-  }
-
-  for (const queue of data.queues) {
-    if (!queue.href) continue;
-    commands.push({
-      id: `queue-${queue.label}`,
-      title: queue.label,
-      subtitle: queue.note,
-      section: "Priority queues",
-      href: queue.href,
-    });
-  }
-
-  for (const result of data.results) {
-    commands.push({
-      id: `result-${result.id}`,
-      title: result.title,
-      subtitle: `${result.type} · ${result.subtitle}`,
-      section: "Visible records",
-      href: hubRecordHref(data.query, data.scope, result.id),
-    });
-  }
-
-  if (data.preview) {
-    for (const action of data.preview.actions) {
-      commands.push({
-        id: `preview-${data.preview.id}-${action.label}`,
-        title: action.label,
-        subtitle: data.preview.title,
-        section: "Selected record",
-        href: action.href,
-      });
-    }
-  }
-
-  commands.push(
-    {
-      id: "shortcut-command",
-      title: "Open command menu",
-      subtitle: "Universal action search",
-      section: "Shortcuts",
-      href: "/app",
-      shortcut: "Cmd/Ctrl K",
-    },
-    {
-      id: "shortcut-search",
-      title: "Focus workspace search",
-      subtitle: "Search records visible to this account",
-      section: "Shortcuts",
-      href: "/app",
-      shortcut: "/",
-    }
-  );
-
-  return commands;
-}
-
-function hubRecordHref(query: string, scope: string, record: string) {
-  const params = new URLSearchParams();
-  if (query) params.set("q", query);
-  params.set("scope", scope);
-  params.set("record", record);
-  return `/app?${params.toString()}` as Route;
 }

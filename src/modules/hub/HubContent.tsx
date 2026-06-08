@@ -3,8 +3,6 @@
 import type { Route } from "next";
 import Link from "next/link";
 import type { SessionUser } from "@/modules/auth/types";
-import { useWorkspaceOS } from "@/modules/workspace/WorkspaceOSContext";
-import { HubShortcuts, type HubCommand } from "./HubShortcuts";
 
 type HubNavigationItem = {
   label: string;
@@ -98,17 +96,14 @@ export type HubContentData = {
 export function HubContent({
   data,
   guide,
-  commands,
   session,
   requiredRole,
 }: {
   data: HubContentData;
   guide: RoleGuide;
-  commands: HubCommand[];
   session: SessionUser;
   requiredRole?: string | null;
 }) {
-  const { embedded } = useWorkspaceOS();
   const hubContext = hubContextHref(data.query, data.scope);
 
   const desk = (
@@ -131,7 +126,6 @@ export function HubContent({
           <input type="hidden" name="scope" value={data.scope} />
           <button type="submit">Search</button>
         </form>
-        {embedded ? null : <HubShortcuts commands={commands} />}
       </header>
 
       <section className="journeyHome">

@@ -270,7 +270,7 @@ export function WorkspaceOS({
   const chords = useMemo(() => roleChords(session.role), [session.role]);
 
   return (
-    <WorkspaceOSContext.Provider value={{ embedded: true, session }}>
+    <WorkspaceOSContext.Provider value={{ session }}>
       <main className="shell">
         {/* ── Sidebar Rail ─────────────────────────────────── */}
         <aside className="workspaceRail">

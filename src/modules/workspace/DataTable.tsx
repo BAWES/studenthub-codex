@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import type { Route } from "next";
 import Link from "next/link";
+import { EmptyState } from "./EmptyState";
 
 export type DataTableColumn<T> = {
   key: string;
@@ -59,10 +60,7 @@ export function DataTable<T extends { id: string | number }>({
             ) : (
               <tr className="emptyTableRow">
                 <td colSpan={columns.length + (rowHref ? 1 : 0)}>
-                  <div className="emptyState">
-                    <strong>No records found</strong>
-                    <span>This view is connected to the prod clone, but this account has no matching rows yet.</span>
-                  </div>
+                  <EmptyState />
                 </td>
               </tr>
             )}

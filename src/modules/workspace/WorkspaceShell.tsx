@@ -2,12 +2,10 @@
 
 import type { SessionUser } from "@/modules/auth/types";
 import type { Route } from "next";
-import { logoutAction } from "@/modules/auth/actions";
-import { ThemeToggle } from "@/modules/theme/ThemeToggle";
 import Link from "next/link";
 import { navForRole } from "./navigation";
-import { WorkspaceMobileNavigation, WorkspaceNavigation } from "./WorkspaceNavigation";
-import { useWorkspaceOS } from "./WorkspaceOSContext";
+import { WorkspaceMobileNavigation } from "./WorkspaceNavigation";
+import { EmptyState } from "./EmptyState";
 
 type Metric = {
   label: string;
@@ -40,24 +38,7 @@ export function WorkspaceShell({
   secondary?: { title: string; rows: Row[] };
   children?: React.ReactNode;
 }) {
-  const { embedded } = useWorkspaceOS();
   const navItems = navForRole(session.role);
-
-  const rail = (
-    <aside className="workspaceRail">
-      <Link className="workspaceMark" href="/app" aria-label="StudentHub app">
-        <span>SH</span>
-        <strong>StudentHub</strong>
-      </Link>
-      <WorkspaceNavigation items={navItems} role={session.role} />
-      <div className="workspaceRailFooter">
-        <ThemeToggle />
-        <form className="workspaceSignout" action={logoutAction}>
-          <button type="submit">Sign out</button>
-        </form>
-      </div>
-    </aside>
-  );
 
   const stage = (
     <section className="workspaceStage">
@@ -94,22 +75,11 @@ export function WorkspaceShell({
     </section>
   );
 
-  // When embedded in a WorkspaceOS layout, the layout already provides the rail and mobile nav.
-  if (embedded) {
-    return (
-      <main className="shell shellEmbedded">
-        {stage}
-        <WorkspaceMobileNavigation items={navItems} role={session.role} />
-      </main>
-    );
-  }
-
   return (
-    <main className="shell">
-      {rail}
+    <main className="shell shellEmbedded">
       {stage}
       <WorkspaceMobileNavigation items={navItems} role={session.role} />
-      </main>
+    </main>
   );
 }
 
@@ -138,10 +108,7 @@ function WorkspaceList({ title, rows }: { title: string; rows: Row[] }) {
             </article>
           ))
         ) : (
-          <div className="emptyState">
-            <strong>No items here</strong>
-            <span>The imported database did not return rows for this panel.</span>
-          </div>
+          <EmptyState />
         )}
       </div>
     </section>
