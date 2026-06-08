@@ -35,6 +35,7 @@ export type Capability =
   | "bank.read"
   | "admin.read"
   | "admin.write"
+  | "staff.read"
   | "admin.system";
 
 export type SessionUser = {
