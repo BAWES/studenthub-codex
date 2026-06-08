@@ -33,6 +33,15 @@ const listDiscountsSchema = z.object({
   limit: z.number().int().min(1).max(100).optional(),
 });
 
+const listDiscountsByApplicantSchema = z.object({
+  applicant_id: z
+    .number({ required_error: "Applicant ID is required" })
+    .int("Applicant ID must be an integer")
+    .positive("Applicant ID must be positive"),
+  page: z.number().int().positive().optional(),
+  limit: z.number().int().min(1).max(100).optional(),
+});
+
 describe("createDiscountSchema", () => {
   it("accepts valid discount data", () => {
     const result = createDiscountSchema.safeParse({
@@ -141,6 +150,58 @@ describe("listDiscountsSchema", () => {
 
   it("rejects negative page", () => {
     const result = listDiscountsSchema.safeParse({ page: -1 });
+    expect(result.success).toBe(false);
+  });
+});
+
+describe("listDiscountsByApplicantSchema", () => {
+  it("accepts valid applicant_id", () => {
+    const result = listDiscountsByApplicantSchema.safeParse({
+      applicant_id: 42,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts applicant_id with pagination", () => {
+    const result = listDiscountsByApplicantSchema.safeParse({
+      applicant_id: 42,
+      page: 2,
+      limit: 50,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects missing applicant_id", () => {
+    const result = listDiscountsByApplicantSchema.safeParse({});
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects negative applicant_id", () => {
+    const result = listDiscountsByApplicantSchema.safeParse({
+      applicant_id: -1,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects zero applicant_id", () => {
+    const result = listDiscountsByApplicantSchema.safeParse({
+      applicant_id: 0,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects non-integer applicant_id", () => {
+    const result = listDiscountsByApplicantSchema.safeParse({
+      applicant_id: "abc",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects limit over 100", () => {
+    const result = listDiscountsByApplicantSchema.safeParse({
+      applicant_id: 42,
+      limit: 999,
+    });
     expect(result.success).toBe(false);
   });
 });
