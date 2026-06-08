@@ -4,6 +4,8 @@ export type Role = (typeof roles)[number];
 
 export type Capability =
   | "app.access"
+  | "candidate.read"
+  | "candidate.write"
   | "candidate.read.any"
   | "candidate.read.assigned"
   | "candidate.read.own"
