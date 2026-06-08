@@ -485,11 +485,11 @@ describe("respondToInvitation — action validation", () => {
   });
 
   it("rejects invalid action", () => {
-    expect(VALID_INVITATION_ACTIONS.includes("maybe")).toBe(false);
+    expect(VALID_INVITATION_ACTIONS.includes("maybe" as any)).toBe(false);
   });
 
   it("rejects empty action string", () => {
-    expect(VALID_INVITATION_ACTIONS.includes("")).toBe(false);
+    expect(VALID_INVITATION_ACTIONS.includes("" as any)).toBe(false);
   });
 
   it("rejects unexpected action values", () => {
