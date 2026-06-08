@@ -32,6 +32,7 @@ export type Capability =
   | "id_review.mutate"
   | "discount.read"
   | "discount.write"
+  | "bank.read"
   | "admin.system";
 
 export type SessionUser = {
