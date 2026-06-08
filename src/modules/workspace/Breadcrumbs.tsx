@@ -5,8 +5,6 @@ import Link from "next/link";
 import type { Route } from "next";
 import { ChevronRight } from "lucide-react";
 
-export type BreadcrumbsProps = Record<string, never>;
-
 export function humanize(segment: string): string {
   if (segment === "[id]" || segment === "id") return "Detail";
   return segment
@@ -25,8 +23,7 @@ export function useBreadcrumbs(): BreadcrumbItem[] {
   const segments = pathname.split("/").filter(Boolean);
 
   return segments.map((segment, i) => {
-    const path = "/" + segments.slice(0, i + 1).join("/");
-    const href = path as Route;
+    const href = "/" + segments.slice(0, i + 1).join("/") as Route;
     const isLast = i === segments.length - 1;
     return {
       label: humanize(segment),
@@ -35,23 +32,27 @@ export function useBreadcrumbs(): BreadcrumbItem[] {
   });
 }
 
-export function Breadcrumbs(_props: BreadcrumbsProps) {
+export function Breadcrumbs() {
   const trail = useBreadcrumbs();
 
   if (trail.length === 0) return null;
 
   return (
-    <nav aria-label="Breadcrumb" className="breadcrumbs">
-      <ol>
+    <nav aria-label="Breadcrumb" className="flex items-center gap-1 text-sm text-muted-foreground">
+      <ol className="flex items-center gap-1">
         {trail.map((item, i) => (
-          <li key={i}>
+          <li key={i} className="flex items-center gap-1">
             {item.href ? (
-              <Link href={item.href}>{item.label}</Link>
+              <Link href={item.href} className="hover:text-foreground transition-colors">
+                {item.label}
+              </Link>
             ) : (
-              <span aria-current="page">{item.label}</span>
+              <span aria-current="page" className="text-foreground font-medium">
+                {item.label}
+              </span>
             )}
             {i < trail.length - 1 ? (
-              <ChevronRight className="breadcrumbSep" size={14} aria-hidden="true" />
+              <ChevronRight size={14} aria-hidden="true" />
             ) : null}
           </li>
         ))}

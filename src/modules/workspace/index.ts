@@ -1,10 +1,2 @@
-export { Breadcrumbs, type BreadcrumbItem, useBreadcrumbs } from "./Breadcrumbs";
+export { Breadcrumbs, type BreadcrumbItem } from "./Breadcrumbs";
 export { RoleLayoutShell, type RoleBranding } from "./RoleLayoutShell";
-export { DataTable, type DataTableColumn } from "./DataTable";
-export { DataTablePage, type DataTablePageProps } from "./DataTablePage";
-export { DetailPage, type DetailPageProps, type DetailFactSection, type DetailRelatedRecord } from "./DetailPage";
-export { FormPage, type FormPageProps, type FormSection } from "./FormPage";
-export { DashboardGrid, type DashboardGridProps, type StatCard, type ActivityItem } from "./DashboardGrid";
-export { SearchInterface, type SearchInterfaceProps, type QuickFilter, type AdvancedFilter, type SavedSearch } from "./SearchInterface";
-export { FactPanel, CompactList } from "./DetailPanels";
-export { DataTableSkeleton, DetailPageSkeleton } from "./Skeletons";
