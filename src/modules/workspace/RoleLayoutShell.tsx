@@ -4,13 +4,13 @@ import { useWorkspaceOS } from "./WorkspaceOSContext";
 import { ThemeToggle } from "@/modules/theme/ThemeToggle";
 import { logoutAction } from "@/modules/auth/actions";
 import { Breadcrumbs } from "./Breadcrumbs";
+import type { LucideIcon } from "lucide-react";
 import {
   Shield,
   Briefcase,
   GraduationCap,
   Building2,
   SearchCheck,
-  type LucideIcon,
 } from "lucide-react";
 
 export type RoleBranding = {
@@ -26,54 +26,55 @@ const ROLE_BRANDING: Record<string, RoleBranding> = {
   inspector: { label: "Inspector", icon: SearchCheck },
 };
 
-export interface RoleLayoutShellProps {
-  role: string;
-  userName: string;
-  userEmail: string;
-  children: React.ReactNode;
-}
-
 export function RoleLayoutShell({
   role,
   userName,
   userEmail,
   children,
-}: RoleLayoutShellProps) {
-  // Integrate with WorkspaceOS context if available
+}: {
+  role: string;
+  userName: string;
+  userEmail: string;
+  children: React.ReactNode;
+}) {
   useWorkspaceOS();
 
   const branding = ROLE_BRANDING[role] ?? { label: role, icon: Shield };
   const Icon = branding.icon;
 
   return (
-    <div className="roleLayoutShell">
-      <header className="roleHeader">
-        <div className="roleHeaderBranding">
-          <span className="roleHeaderIcon">
+    <div className="flex flex-col gap-4">
+      <header className="flex items-center justify-between border-b pb-3">
+        <div className="flex items-center gap-2">
+          <span className="text-muted-foreground">
             <Icon size={20} strokeWidth={2} aria-hidden="true" />
           </span>
-          <h2 className="roleHeaderLabel">{branding.label}</h2>
+          <h2 className="text-lg font-semibold">{branding.label}</h2>
         </div>
 
-        <div className="roleHeaderUser">
+        <div className="flex items-center gap-3">
           <ThemeToggle />
-          <div className="roleHeaderUserInfo">
-            <span className="roleHeaderUserRole">{userName}</span>
-            <strong className="roleHeaderUserName">{userEmail}</strong>
+          <div className="flex flex-col items-end text-sm">
+            <span className="text-muted-foreground">{userName}</span>
+            <strong>{userEmail}</strong>
           </div>
           <form action={logoutAction}>
-            <button type="submit" className="roleHeaderSignout" title="Sign out">
+            <button
+              type="submit"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              title="Sign out"
+            >
               Sign out
             </button>
           </form>
         </div>
       </header>
 
-      <div className="roleBreadcrumbs">
+      <div className="px-1">
         <Breadcrumbs />
       </div>
 
-      <main className="roleContent">{children}</main>
+      <main className="flex-1">{children}</main>
     </div>
   );
 }

@@ -3,7 +3,6 @@ import type { NextRequest } from "next/server";
 
 const protectedPaths = [
   "/app",
-  "/hub",
   "/admin",
   "/staff",
   "/candidate",
