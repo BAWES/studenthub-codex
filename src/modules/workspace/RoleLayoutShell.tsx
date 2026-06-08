@@ -26,17 +26,19 @@ const ROLE_BRANDING: Record<string, RoleBranding> = {
   inspector: { label: "Inspector", icon: SearchCheck },
 };
 
+export interface RoleLayoutShellProps {
+  role: string;
+  userName: string;
+  userEmail: string;
+  children: React.ReactNode;
+}
+
 export function RoleLayoutShell({
   role,
   userName,
   userEmail,
   children,
-}: {
-  role: string;
-  userName: string;
-  userEmail: string;
-  children: React.ReactNode;
-}) {
+}: RoleLayoutShellProps) {
   // Integrate with WorkspaceOS context if available
   useWorkspaceOS();
 
