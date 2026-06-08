@@ -4,6 +4,8 @@ export type Role = (typeof roles)[number];
 
 export type Capability =
   | "app.access"
+  | "candidate.read"
+  | "candidate.write"
   | "candidate.read.any"
   | "candidate.read.assigned"
   | "candidate.read.own"
@@ -36,6 +38,8 @@ export type Capability =
   | "admin.read"
   | "admin.write"
   | "staff.read"
+  | "client.read"
+  | "client.write"
   | "admin.system";
 
 export type SessionUser = {
