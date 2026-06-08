@@ -177,7 +177,7 @@ describe("RoleLayoutShell", () => {
     const heading = screen.getByRole("heading", { level: 2, name: "Inspector" });
     expect(heading).toBeInTheDocument();
     // The icon is a lucide svg rendered from the SearchCheck icon
-    const icons = document.querySelectorAll(".roleHeaderIcon svg.lucide");
+    const icons = document.querySelectorAll("header svg[aria-hidden=\"true\"]");
     expect(icons.length).toBeGreaterThan(0);
   });
 });

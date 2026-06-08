@@ -166,7 +166,7 @@ describe("Breadcrumbs component", () => {
     mockPathname = "/admin/candidates";
     render(<Breadcrumbs />);
     // ChevronRight icon elements with aria-hidden should exist between items
-    const seps = document.querySelectorAll(".breadcrumbSep");
+    const seps = document.querySelectorAll("li svg[aria-hidden=\"true\"]");
     // With 2 items there should be 1 separator
     expect(seps.length).toBe(1);
   });
