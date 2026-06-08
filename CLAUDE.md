@@ -2,11 +2,13 @@
 
 ## Branch Strategy
 
-- `main` — production-ready, deployable at all times
-- Feature branches: `feature/STU-N-short-description` (e.g. `feature/STU-5-auth`)
-- Bug fix branches: `fix/STU-N-short-description`
-- Chore branches: `chore/STU-N-short-description`
-- All branches are created off `main` and merged via pull request
+- `main` — production-ready releases only. Merged from `develop` via release PRs.
+- `develop` — integration branch. All feature/fix/chore branches merge here via PR.
+- Feature branches: `feature/STU-N-short-description` (e.g. `feature/STU-5-auth`) — created off `develop`
+- Bug fix branches: `fix/STU-N-short-description` — created off `develop`
+- Chore branches: `chore/STU-N-short-description` — created off `develop`
+- Release branches: `release/X.Y.Z` — created off `develop`, merged to `main`
+- All branches (except `main` and `develop`) are merged via pull request
 
 ## Git Anti-Patterns (PROHIBITED)
 
@@ -39,21 +41,37 @@ Do not commit directly to `main`. Every change goes through a PR.
 
 ## Pull Request Process
 
-1. Create a feature branch from `main`
+1. Create a feature branch from `develop`
 2. Commit changes with conventional commit messages
 3. **Run the pre-push gate BEFORE pushing** (see CI/CD Enforcement below)
 4. Push the branch to `origin`
-5. Create a PR with a clear title and description
+5. Create a PR **against `develop`** with a clear title and description
 6. Request review from at least one team member
 7. Merge only after approval and passing checks
+8. For releases: create a PR from `develop` to `main`
 
 PR titles follow: `[STU-N] Short description of change`
+
+## TDD Enforcement
+
+**Test-driven development is mandatory.** Before writing implementation code:
+
+1. Write the test first (RED)
+2. Write the minimum code to make it pass (GREEN)
+3. Refactor while keeping tests green (REFACTOR)
+
+```
+npm run test:unit     # vitest — run before every commit
+```
 
 ## CI/CD Enforcement (CRITICAL — read before pushing)
 
 **Every branch pushed to origin must pass the full CI pipeline.** Pushing code that fails CI wastes reviewer time and blocks the board. These checks run on every PR and must be verified locally before pushing:
 
 ```bash
+# 0. Unit tests (TDD) — all must pass
+npm run test:unit
+
 # 1. TypeScript — zero errors required
 npx tsc --noEmit
 
@@ -64,11 +82,22 @@ npm run build
 npm run dev &  # start dev server, then:
 npm run test:validate
 
-# Or run all three together:
+# Or run all together:
 npm run test:all
 ```
 
-**Gate rule:** If any of `tsc --noEmit`, `npm run build`, or `npm run test:validate` fails locally, do NOT push. Fix the failures first. Only push when all three pass.
+**CI runs automatically on PRs to `develop` and `main`:**
+
+| Check | What it verifies |
+|-------|-----------------|
+| Branch Name | Matches `feature/STU-N-*`, `fix/STU-N-*`, `chore/STU-N-*` |
+| Clean Tree | No uncommitted modifications |
+| TypeScript | `npx tsc --noEmit` |
+| Build | `next build` |
+| Lint | `npm run lint` |
+| Unit Tests | `vitest run` |
+| Validation | Full integration suite (MySQL + dev server + validate.mjs) |
+| E2E | `playwright test` (where applicable) |
 
 **Stale cache warning:** When switching branches, always run `rm -rf .next && npx prisma generate` before type-checking. Stale `.next` caches and outdated Prisma clients cause false errors that masquerade as real bugs.
 
