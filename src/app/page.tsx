@@ -102,13 +102,18 @@ export default async function Home() {
                 <small className="text-[var(--muted)]">80 scoped results · FAD · needs review · Lebanon</small>
               </div>
               <div className="grid grid-cols-4 gap-2.5 max-sm:grid-cols-1">
-                {["Profile ready", "CV export", "Timesheet", "Payment"].map((item, index) => (
+                {[
+                  { label: "Profile ready", status: "Live" },
+                  { label: "CV export", status: "PDF" },
+                  { label: "Timesheet", status: "Live" },
+                  { label: "Payment", status: "Live" },
+                ].map((item) => (
                   <div
-                    key={item}
+                    key={item.label}
                     className="min-h-[138px] grid content-between border border-[var(--line)] rounded-lg bg-[var(--surface)] p-3.5 max-sm:min-h-[92px]"
                   >
-                    <span className="text-[var(--blue)] text-[11px] font-black uppercase">{item}</span>
-                    <strong className="text-2xl">{index === 1 ? "PDF" : "Live"}</strong>
+                    <span className="text-[var(--blue)] text-[11px] font-black uppercase">{item.label}</span>
+                    <strong className="text-2xl">{item.status}</strong>
                   </div>
                 ))}
               </div>
