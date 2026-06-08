@@ -62,6 +62,33 @@ export const candidateSearchFilters: { label: string; value: CandidateSearchFilt
   { label: "Civil ID", value: "civil-id" }
 ];
 
+export function parseFilter(value: string | string[] | undefined): CandidateSearchFilter {
+  const filter = Array.isArray(value) ? value[0] : value;
+  const validValues = candidateSearchFilters.map((f) => f.value);
+  return validValues.includes(filter as CandidateSearchFilter) ? (filter as CandidateSearchFilter) : "all";
+}
+
+export function parseCandidateId(value: string | string[] | undefined) {
+  const candidate = Array.isArray(value) ? value[0] : value;
+  const id = Number(candidate);
+  return Number.isInteger(id) && id > 0 ? id : undefined;
+}
+
+export function parseCandidateIds(value: string | string[] | undefined, limit = 8) {
+  const raw = Array.isArray(value) ? value[0] : value;
+  if (!raw) return [];
+  return raw
+    .split(",")
+    .map((item) => Number(item))
+    .filter((id) => Number.isInteger(id) && id > 0)
+    .slice(0, limit);
+}
+
+export function parseVisibility(value: string | string[] | undefined): CandidateSearchVisibility {
+  const visibility = Array.isArray(value) ? value[0] : value;
+  return visibility === "assigned" ? "assigned" : "all";
+}
+
 export async function getCandidateSearchWorkspace(params: CandidateSearchParams) {
   const query = params.query?.trim() ?? "";
   const filter = params.filter ?? "all";
