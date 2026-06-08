@@ -17,11 +17,15 @@
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
+  --color-overlay: var(--overlay);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
   --radius: var(--radius);
+  --font-size-label: 0.8125rem;
 }
+
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
 :root {
   color-scheme: light;
@@ -55,6 +59,7 @@
   --accent-foreground: #12376c;
   --destructive: #b42318;
   --destructive-foreground: #ffffff;
+  --overlay: rgba(0, 0, 0, 0.5);
   --border: var(--line);
   --input: var(--line);
   --ring: #2563eb;
@@ -93,6 +98,7 @@
   --accent-foreground: #cfe4ff;
   --destructive: #ff8a8a;
   --destructive-foreground: #090d14;
+  --overlay: rgba(0, 0, 0, 0.6);
   --border: var(--line);
   --input: var(--line);
   --ring: #8abfff;
