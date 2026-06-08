@@ -17,7 +17,7 @@ export async function createInterviewEvaluationAction(formData: FormData) {
 
   const requestUuid = String(formData.get("request_uuid") ?? "").trim();
   const candidateId = Number(formData.get("candidate_id"));
-  const basePath = session.role === "admin" ? "/admin/requests" : "/staff/requests";
+  const basePath = session.role === "admin" ? "/app/requests" : "/app/requests";
   const detailPath = `${basePath}/${requestUuid}`;
 
   if (!requestUuid || !Number.isInteger(candidateId) || candidateId <= 0) {
@@ -87,7 +87,7 @@ export async function addInterviewEvaluationNoteAction(formData: FormData) {
   const evaluationUuid = String(formData.get("interview_evaluation_uuid") ?? "").trim();
   const requestUuid = String(formData.get("request_uuid") ?? "").trim();
   const noteText = String(formData.get("note") ?? "").trim();
-  const basePath = session.role === "admin" ? "/admin/requests" : "/staff/requests";
+  const basePath = session.role === "admin" ? "/app/requests" : "/app/requests";
   const detailPath = `${basePath}/${requestUuid}`;
 
   if (!evaluationUuid || !requestUuid || !noteText) {

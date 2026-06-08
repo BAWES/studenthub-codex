@@ -97,8 +97,8 @@ export async function updateCandidateProfile(
     },
   });
 
-  revalidatePath("/candidate");
-  revalidatePath("/candidate/edit");
+  revalidatePath("/app/profile");
+  revalidatePath("/app/profile/edit");
   return { success: true };
 }
 
@@ -205,8 +205,8 @@ export async function uploadDocument(_prevState: { error: string }, formData: Fo
       data: fieldMap[type],
     });
 
-    revalidatePath("/candidate");
-    revalidatePath("/candidate/edit");
+    revalidatePath("/app/profile");
+    revalidatePath("/app/profile/edit");
     return { error: "" };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Upload failed." };
@@ -255,9 +255,9 @@ export async function respondToInvitation(_prevState: { error: string }, formDat
     },
   });
 
-  revalidatePath("/candidate/invitations");
-  revalidatePath(`/candidate/invitations/${invitationUuid}`);
-  redirect(`/candidate/invitations/${invitationUuid}`);
+  revalidatePath("/app/profile/invitations");
+  revalidatePath(`/app/profile/invitations/${invitationUuid}`);
+  redirect(`/app/profile/invitations/${invitationUuid}`);
 }
 
 // ---------------------------------------------------------------------------
@@ -309,9 +309,9 @@ export async function appealWorkLog(_prevState: { error: string }, formData: For
     }),
   ]);
 
-  revalidatePath("/candidate/work-logs");
-  revalidatePath(`/candidate/work-logs/${workLogUuid}`);
-  redirect(`/candidate/work-logs/${workLogUuid}`);
+  revalidatePath("/app/profile/work-logs");
+  revalidatePath(`/app/profile/work-logs/${workLogUuid}`);
+  redirect(`/app/profile/work-logs/${workLogUuid}`);
 }
 
 // ---------------------------------------------------------------------------
@@ -376,8 +376,8 @@ export async function addCandidateSkill(_prevState: { error: string }, formData:
     },
   });
 
-  revalidatePath("/candidate");
-  revalidatePath("/candidate/edit");
+  revalidatePath("/app/profile");
+  revalidatePath("/app/profile/edit");
   return { error: "" };
 }
 
@@ -400,8 +400,8 @@ export async function removeCandidateSkill(_prevState: { error: string }, formDa
     data: { deleted: 1 },
   });
 
-  revalidatePath("/candidate");
-  revalidatePath("/candidate/edit");
+  revalidatePath("/app/profile");
+  revalidatePath("/app/profile/edit");
   return { error: "" };
 }
 
@@ -425,8 +425,8 @@ export async function addCandidateLanguage(_prevState: LanguageState, formData: 
   const parsed = languageSchema.safeParse({ language: formData.get("language"), proficiency: formData.get("proficiency") });
   if (!parsed.success) return { success: false, error: parsed.error.errors.map((e) => e.message).join("; ") };
   await prisma.candidate_language.create({ data: { candidate_id: candidateId, language: parsed.data.language, proficiency: parsed.data.proficiency, deleted: 0 } });
-  revalidatePath("/candidate");
-  revalidatePath("/candidate/edit");
+  revalidatePath("/app/profile");
+  revalidatePath("/app/profile/edit");
   return { success: true };
 }
 
@@ -438,8 +438,8 @@ export async function removeCandidateLanguage(_prevState: LanguageState, formDat
   const row = await prisma.candidate_language.findFirst({ where: { candidate_language_id: languageId, candidate_id: candidateId, deleted: 0 } });
   if (!row) return { success: false, error: "Language entry not found." };
   await prisma.candidate_language.update({ where: { candidate_language_id: languageId }, data: { deleted: 1 } });
-  revalidatePath("/candidate");
-  revalidatePath("/candidate/edit");
+  revalidatePath("/app/profile");
+  revalidatePath("/app/profile/edit");
   return { success: true };
 }
 
@@ -499,8 +499,8 @@ export async function addCandidateExperience(_prevState: { error: string }, form
     },
   });
 
-  revalidatePath("/candidate");
-  revalidatePath("/candidate/edit");
+  revalidatePath("/app/profile");
+  revalidatePath("/app/profile/edit");
   return { error: "" };
 }
 
@@ -523,8 +523,8 @@ export async function removeCandidateExperience(_prevState: { error: string }, f
     data: { deleted: 1 },
   });
 
-  revalidatePath("/candidate");
-  revalidatePath("/candidate/edit");
+  revalidatePath("/app/profile");
+  revalidatePath("/app/profile/edit");
   return { error: "" };
 }
 
@@ -561,8 +561,8 @@ export async function addCandidateCertificate(_prevState: { error: string }, for
       updated_at: now,
     },
   });
-  revalidatePath("/candidate");
-  revalidatePath("/candidate/edit");
+  revalidatePath("/app/profile");
+  revalidatePath("/app/profile/edit");
   return { error: "" };
 }
 
@@ -580,8 +580,8 @@ export async function removeCandidateCertificate(_prevState: { error: string }, 
     where: { certificate_uuid: certificateUuid },
     data: { is_deleted: true, updated_at: new Date() },
   });
-  revalidatePath("/candidate");
-  revalidatePath("/candidate/edit");
+  revalidatePath("/app/profile");
+  revalidatePath("/app/profile/edit");
   return { error: "" };
 }
 
@@ -661,8 +661,8 @@ export async function addCandidateEducation(
     },
   });
 
-  revalidatePath("/candidate");
-  revalidatePath("/candidate/edit");
+  revalidatePath("/app/profile");
+  revalidatePath("/app/profile/edit");
   return { success: true };
 }
 
@@ -708,8 +708,8 @@ export async function editCandidateEducation(
     }),
   ]);
 
-  revalidatePath("/candidate");
-  revalidatePath("/candidate/edit");
+  revalidatePath("/app/profile");
+  revalidatePath("/app/profile/edit");
   return { success: true };
 }
 
@@ -733,8 +733,8 @@ export async function removeCandidateEducation(
     where: { education_uuid: educationUuid },
   });
 
-  revalidatePath("/candidate");
-  revalidatePath("/candidate/edit");
+  revalidatePath("/app/profile");
+  revalidatePath("/app/profile/edit");
   return { success: true };
 }
 
@@ -753,7 +753,7 @@ async function ensureStaffCandidateAccess(session: { role: string; id: string },
 }
 
 function staffBasePath(role: string) {
-  return role === "admin" ? "/admin/candidates" : "/staff/candidates";
+  return role === "admin" ? "/admin/candidates" : "/app/companies";
 }
 
 // -- Notes ---------------------------------------------------------------

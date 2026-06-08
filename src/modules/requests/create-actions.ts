@@ -23,7 +23,7 @@ export async function createRequestAction(formData: FormData) {
   const additionalInfo = String(formData.get("additional_info") ?? "").trim();
   const priority = Number(formData.get("priority") ?? 0);
   const skills = String(formData.get("skills") ?? "").trim();
-  const redirectTo = String(formData.get("redirect_to") ?? (session.role === "admin" ? "/admin/requests" : "/staff/requests")).trim();
+  const redirectTo = String(formData.get("redirect_to") ?? (session.role === "admin" ? "/app/requests" : "/app/requests")).trim();
 
   if (!positionTitle || !Number.isInteger(companyId) || companyId <= 0 || !(numberOfEmployees > 0)) {
     redirect(`${redirectTo}?notice=missing-fields` as Route);
@@ -79,8 +79,8 @@ export async function createRequestAction(formData: FormData) {
   ]);
 
   revalidatePath(redirectTo);
-  revalidatePath("/admin/requests");
-  revalidatePath("/staff/requests");
+  revalidatePath("/app/requests");
+  revalidatePath("/app/requests");
   redirect(`${redirectTo}/${requestUuid}?notice=request-created` as Route);
 }
 
@@ -98,7 +98,7 @@ export async function updateRequestAction(formData: FormData) {
   const location = String(formData.get("location") ?? "").trim();
   const additionalInfo = String(formData.get("additional_info") ?? "").trim();
   const newStatus = String(formData.get("status") ?? "").trim();
-  const basePath = session.role === "admin" ? "/admin/requests" : "/staff/requests";
+  const basePath = session.role === "admin" ? "/app/requests" : "/app/requests";
   const detailPath = `${basePath}/${requestUuid}`;
 
   if (!requestUuid) {
@@ -135,8 +135,8 @@ export async function updateRequestAction(formData: FormData) {
 
   revalidatePath(detailPath);
   revalidatePath(basePath);
-  revalidatePath("/admin/requests");
-  revalidatePath("/staff/requests");
+  revalidatePath("/app/requests");
+  revalidatePath("/app/requests");
   redirect(`${detailPath}?notice=request-updated` as Route);
 }
 
@@ -150,7 +150,7 @@ export async function assignStaffToRequestAction(formData: FormData) {
   const staffId = Number(formData.get("staff_id"));
 
   if (!requestUuid || !Number.isInteger(staffId) || staffId <= 0) {
-    redirect(`/admin/requests/${requestUuid}?notice=invalid-params` as Route);
+    redirect(`/app/requests/${requestUuid}?notice=invalid-params` as Route);
   }
 
   const staff = await prisma.staff.findFirst({
@@ -159,7 +159,7 @@ export async function assignStaffToRequestAction(formData: FormData) {
   });
 
   if (!staff) {
-    redirect(`/admin/requests/${requestUuid}?notice=staff-not-found` as Route);
+    redirect(`/app/requests/${requestUuid}?notice=staff-not-found` as Route);
   }
 
   const now = new Date();
@@ -174,10 +174,10 @@ export async function assignStaffToRequestAction(formData: FormData) {
     }
   });
 
-  revalidatePath(`/admin/requests/${requestUuid}`);
-  revalidatePath("/admin/requests");
-  revalidatePath("/staff/requests");
-  redirect(`/admin/requests/${requestUuid}?notice=staff-assigned` as Route);
+  revalidatePath(`/app/requests/${requestUuid}`);
+  revalidatePath("/app/requests");
+  revalidatePath("/app/requests");
+  redirect(`/app/requests/${requestUuid}?notice=staff-assigned` as Route);
 }
 
 /**
@@ -188,7 +188,7 @@ export async function transitionRequestStatusAction(formData: FormData) {
 
   const requestUuid = String(formData.get("request_uuid") ?? "").trim();
   const toStatus = String(formData.get("to_status") ?? "").trim();
-  const basePath = session.role === "admin" ? "/admin/requests" : "/staff/requests";
+  const basePath = session.role === "admin" ? "/app/requests" : "/app/requests";
   const detailPath = `${basePath}/${requestUuid}`;
 
   if (!requestUuid || !toStatus) {

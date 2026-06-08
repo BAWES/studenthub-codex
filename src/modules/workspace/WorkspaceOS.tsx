@@ -54,6 +54,7 @@ function roleChords(role: string): { keys: string; label: string }[] {
   if (role === "candidate") {
     return [
       ...base,
+      { keys: "G P", label: "Go to profile" },
       { keys: "G I", label: "Go to invitations" },
       { keys: "G W", label: "Go to work logs" }
     ];
@@ -76,8 +77,9 @@ function buildOSCommands(navItems: NavItem[], role: string): OSCommand[] {
     chordByHref[`/${role}/candidates`] = "G C";
     chordByHref[`/${role}/interviews`] = "G I";
   } else if (role === "candidate") {
-    chordByHref[`/${role}/invitations`] = "G I";
-    chordByHref[`/${role}/work-logs`] = "G W";
+    chordByHref["/app/profile"] = "G P";
+    chordByHref["/app/profile/invitations"] = "G I";
+    chordByHref["/app/profile/work-logs"] = "G W";
   }
 
   const shortcutFor = (href: string) => chordByHref[href];
@@ -100,14 +102,15 @@ function buildOSCommands(navItems: NavItem[], role: string): OSCommand[] {
   }
   if (role === "admin") {
     scopes.push(
-      { id: "scope-companies", title: "Companies", subtitle: "Client company profiles", section: "Quick Scopes", href: "/admin/companies", shortcut: shortcutFor("/admin/companies") },
+      { id: "scope-companies", title: "Companies", subtitle: "Client company profiles", section: "Quick Scopes", href: "/app/companies", shortcut: shortcutFor("/app/companies") },
       { id: "scope-transfers", title: "Transfers", subtitle: "Financial transfers and payouts", section: "Quick Scopes", href: "/admin/transfers", shortcut: shortcutFor("/admin/transfers") }
     );
   }
   if (role === "candidate") {
     scopes.push(
-      { id: "scope-invitations", title: "Invitations", subtitle: "Your open invitations", section: "Quick Scopes", href: "/candidate/invitations", shortcut: shortcutFor("/candidate/invitations") },
-      { id: "scope-work-logs", title: "Work Logs", subtitle: "Track your work activities", section: "Quick Scopes", href: "/candidate/work-logs", shortcut: shortcutFor("/candidate/work-logs") }
+      { id: "scope-profile", title: "Profile", subtitle: "Your candidate profile", section: "Quick Scopes", href: "/app/profile", shortcut: shortcutFor("/app/profile") },
+      { id: "scope-invitations", title: "Invitations", subtitle: "Your open invitations", section: "Quick Scopes", href: "/app/profile/invitations", shortcut: shortcutFor("/app/profile/invitations") },
+      { id: "scope-work-logs", title: "Work Logs", subtitle: "Track your work activities", section: "Quick Scopes", href: "/app/profile/work-logs", shortcut: shortcutFor("/app/profile/work-logs") }
     );
   }
 

@@ -19,7 +19,7 @@ export function CompanyRequestCreateForm({ companies }: CompanyRequestCreateForm
 
   useEffect(() => {
     if (state.success && state.requestUuid) {
-      router.push(`/company/requests/${state.requestUuid}`);
+      router.push(`/app/requests/${state.requestUuid}`);
     }
   }, [state.success, state.requestUuid, router]);
 

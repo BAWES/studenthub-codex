@@ -21,8 +21,8 @@ export function navForRole(role: Role): NavItem[] {
       SHARED_APP,
       { label: "Overview", href: "/admin", icon: User },
       { label: "Candidates", href: "/admin/candidates", icon: Users },
-      { label: "Companies", href: "/admin/companies", icon: Building2 },
-      { label: "Requests", href: "/admin/requests", icon: FileCheck },
+      { label: "Companies", href: "/app/companies", icon: Building2 },
+      { label: "Requests", href: "/app/requests", icon: FileCheck },
       { label: "Transfers", href: "/admin/transfers", icon: ArrowRightLeft }
     ];
   }
@@ -30,26 +30,26 @@ export function navForRole(role: Role): NavItem[] {
     return [
       SHARED_APP,
       { label: "Overview", href: "/staff", icon: User },
-      { label: "My Requests", href: "/staff/requests", icon: FileCheck },
-      { label: "Candidates", href: "/staff/candidates", icon: Users },
+      { label: "My Requests", href: "/app/requests", icon: FileCheck },
+      { label: "Candidates", href: "/app/companies", icon: Users },
       { label: "Interviews", href: "/staff/interviews" as Route, icon: Calendar }
     ];
   }
   if (role === "candidate") {
     return [
       SHARED_APP,
-      { label: "Overview", href: "/candidate", icon: User },
-      { label: "Invitations", href: "/candidate/invitations", icon: Mail },
-      { label: "Work Logs", href: "/candidate/work-logs", icon: ClipboardList },
-      { label: "Payments", href: "/candidate/payments", icon: CreditCard }
+      { label: "Profile", href: "/app/profile", icon: User },
+      { label: "Invitations", href: "/app/profile/invitations", icon: Mail },
+      { label: "Work Logs", href: "/app/profile/work-logs", icon: ClipboardList },
+      { label: "Payments", href: "/app/profile/payments", icon: CreditCard }
     ];
   }
   if (role === "company") {
     return [
       SHARED_APP,
       { label: "Overview", href: "/company", icon: User },
-      { label: "Requests", href: "/company/requests", icon: FileCheck },
-      { label: "Companies", href: "/company/companies", icon: Building2 },
+      { label: "Requests", href: "/app/requests", icon: FileCheck },
+      { label: "Companies", href: "/app/companies", icon: Building2 },
       { label: "Contacts", href: "/company/contacts" as Route, icon: Phone },
       { label: "Stores", href: "/company/stores" as Route, icon: Store }
     ];

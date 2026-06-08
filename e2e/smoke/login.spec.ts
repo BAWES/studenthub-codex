@@ -17,7 +17,7 @@ test.describe("Login flow", () => {
   });
 
   test("unauthenticated access redirects to login", async ({ page }) => {
-    const protectedPaths = ["/app", "/admin", "/staff", "/candidate", "/company", "/inspector", "/hub"];
+    const protectedPaths = ["/app", "/app/profile", "/admin", "/staff", "/candidate", "/company", "/inspector", "/hub"];
     for (const path of protectedPaths) {
       await page.goto(path);
       // Should redirect to /login (Next.js uses 307, browser follows)

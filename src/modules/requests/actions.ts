@@ -13,7 +13,7 @@ export async function addCandidateSuggestionAction(formData: FormData) {
   const requestUuid = String(formData.get("request_uuid") ?? "");
   const candidateId = Number(formData.get("candidate_id"));
   const reason = String(formData.get("reason") ?? "").trim();
-  const basePath = session.role === "admin" ? "/admin/requests" : "/staff/requests";
+  const basePath = session.role === "admin" ? "/app/requests" : "/app/requests";
   const detailPath = `${basePath}/${requestUuid}`;
 
   if (!requestUuid || !Number.isInteger(candidateId) || candidateId <= 0 || !reason) {

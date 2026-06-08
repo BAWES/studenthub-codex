@@ -38,7 +38,7 @@ export function CandidateSearchOS({
   params
 }: {
   data: CandidateSearchData;
-  basePath: "/admin/candidates" | "/staff/candidates";
+  basePath: "/admin/candidates" | "/staff/candidates" | "/app/companies";
   homePath: Route;
   session: SessionUser;
   params: CandidateSearchParams;
@@ -121,7 +121,7 @@ function CandidateSearchTab({
   selectedIds
 }: {
   activeFacetCount: number;
-  basePath: "/admin/candidates" | "/staff/candidates";
+  basePath: "/admin/candidates" | "/staff/candidates" | "/app/companies";
   data: CandidateSearchData;
   facetGroups: CandidateSearchFacet[];
   params: CandidateSearchParams;
@@ -219,7 +219,7 @@ function BulkCandidateBar({
   selectedIds,
   selectedRows
 }: {
-  basePath: "/admin/candidates" | "/staff/candidates";
+  basePath: "/admin/candidates" | "/staff/candidates" | "/app/companies";
   params: CandidateSearchParams;
   selectedIds: number[];
   selectedRows: CandidateSearchData["rows"];
@@ -251,7 +251,7 @@ function CandidateTabs({
   data,
   params
 }: {
-  basePath: "/admin/candidates" | "/staff/candidates";
+  basePath: "/admin/candidates" | "/staff/candidates" | "/app/companies";
   data: CandidateSearchData;
   params: CandidateSearchParams;
 }) {
@@ -284,7 +284,7 @@ function ActiveSearchContext({
   data,
   params
 }: {
-  basePath: "/admin/candidates" | "/staff/candidates";
+  basePath: "/admin/candidates" | "/staff/candidates" | "/app/companies";
   data: CandidateSearchData;
   params: CandidateSearchParams;
 }) {
@@ -352,7 +352,7 @@ function HiddenFacetInputs({ data }: { data: CandidateSearchData }) {
   );
 }
 
-function FacetGroup({ basePath, facet, params }: { basePath: "/admin/candidates" | "/staff/candidates"; facet: CandidateSearchFacet; params: CandidateSearchParams }) {
+function FacetGroup({ basePath, facet, params }: { basePath: "/admin/candidates" | "/staff/candidates" | "/app/companies"; facet: CandidateSearchFacet; params: CandidateSearchParams }) {
   return (
     <section className="candidateFacetGroup">
       <h3>{facet.label}</h3>
@@ -371,7 +371,7 @@ function FacetGroup({ basePath, facet, params }: { basePath: "/admin/candidates"
 }
 
 function candidateSearchHref(
-  basePath: "/admin/candidates" | "/staff/candidates",
+  basePath: "/admin/candidates" | "/staff/candidates" | "/app/companies",
   params: CandidateSearchParams,
   overrides: Partial<Record<CandidateSearchParamKey, string>>
 ) {
@@ -419,7 +419,7 @@ function candidateInitials(name: string) {
 
 function buildCandidateSearchCommands(
   data: CandidateSearchData,
-  basePath: "/admin/candidates" | "/staff/candidates",
+  basePath: "/admin/candidates" | "/staff/candidates" | "/app/companies",
   params: CandidateSearchParams
 ): HubCommand[] {
   return [

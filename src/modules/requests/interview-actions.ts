@@ -15,7 +15,7 @@ export async function scheduleInterviewAction(formData: FormData) {
   const applicationUuid = String(formData.get("application_uuid") ?? "").trim() || null;
   const interviewAt = String(formData.get("interview_at") ?? "").trim();
   const internalNote = String(formData.get("internal_note") ?? "").trim() || null;
-  const basePath = session.role === "admin" ? "/admin/requests" : "/staff/requests";
+  const basePath = session.role === "admin" ? "/app/requests" : "/app/requests";
   const detailPath = `${basePath}/${requestUuid}`;
 
   if (!requestUuid || !Number.isInteger(candidateId) || candidateId <= 0 || !interviewAt) {
@@ -81,7 +81,7 @@ export async function updateInterviewAction(formData: FormData) {
   const status = Number(formData.get("status"));
   const interviewNote = String(formData.get("interview_note") ?? "").trim() || null;
   const internalNote = String(formData.get("internal_note") ?? "").trim() || null;
-  const basePath = session.role === "admin" ? "/admin/requests" : "/staff/requests";
+  const basePath = session.role === "admin" ? "/app/requests" : "/app/requests";
   const detailPath = `${basePath}/${requestUuid}`;
 
   if (!interviewUuid || !requestUuid) {

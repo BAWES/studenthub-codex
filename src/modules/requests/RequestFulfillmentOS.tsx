@@ -34,7 +34,7 @@ export function RequestFulfillmentOS({
 }: {
   data: RequestDetailData;
   role: "admin" | "staff";
-  basePath: "/admin/requests" | "/staff/requests";
+  basePath: "/admin/requests" | "/staff/requests" | "/app/requests";
   notice?: string;
 }) {
   if (!data.request) return null;
@@ -135,7 +135,7 @@ export function RequestFulfillmentOS({
                   {role === "admin" ? (
                     <Link href={`/admin/candidates/${candidate.id}` as Route}>Open full profile</Link>
                   ) : (
-                    <Link href={`/staff/candidates?candidate=${candidate.id}` as Route}>Preview in candidate search</Link>
+                    <Link href={`/app/companies?candidate=${candidate.id}` as Route}>Preview in candidate search</Link>
                   )}
                 </Button>
               </Card>

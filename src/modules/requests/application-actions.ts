@@ -14,7 +14,7 @@ export async function transitionApplicationAction(formData: FormData) {
   const requestUuid = String(formData.get("request_uuid") ?? "").trim();
   const newStatus = Number(formData.get("status"));
   const note = String(formData.get("note") ?? "").trim() || null;
-  const basePath = session.role === "admin" ? "/admin/requests" : "/staff/requests";
+  const basePath = session.role === "admin" ? "/app/requests" : "/app/requests";
   const detailPath = `${basePath}/${requestUuid}`;
 
   if (!applicationUuid || !requestUuid || !Number.isInteger(newStatus)) {

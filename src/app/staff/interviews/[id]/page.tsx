@@ -84,12 +84,12 @@ export default async function StaffInterviewDetailPage({
       <section className="detailPanel">
         <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
           {interview.candidate?.candidate_id && (
-            <Link href={`/staff/candidates?candidate=${interview.candidate.candidate_id}` as Route}>
+            <Link href={`/app/companies?candidate=${interview.candidate.candidate_id}` as Route}>
               <Button variant="outline">View Candidate</Button>
             </Link>
           )}
           {interview.request?.request_uuid && (
-            <Link href={`/staff/requests/${interview.request.request_uuid}` as Route}>
+            <Link href={`/app/requests/${interview.request.request_uuid}` as Route}>
               <Button variant="outline">View Request</Button>
             </Link>
           )}

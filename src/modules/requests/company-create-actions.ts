@@ -75,8 +75,8 @@ export async function createCompanyRequest(
     },
   });
 
-  revalidatePath("/company/requests");
-  revalidatePath("/company/requests/create");
+  revalidatePath("/app/requests");
+  revalidatePath("/app/requests/create");
 
   return { success: true, requestUuid };
 }

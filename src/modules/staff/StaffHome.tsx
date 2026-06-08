@@ -13,28 +13,28 @@ export function StaffHome({ data }: { data: StaffWorkspaceData }) {
     {
       title: "Find candidates",
       subtitle: "Search all imported production candidates, then narrow to assigned records when needed.",
-      href: "/staff/candidates",
+      href: "/app/companies",
       icon: Search,
       metric: productionCandidates
     },
     {
       title: "Work requests",
       subtitle: "Open assigned employer demand, review matches, suggestions, interviews, and shortlists.",
-      href: "/staff/requests",
+      href: "/app/requests",
       icon: BriefcaseBusiness,
       metric: assignedRequests
     },
     {
       title: "Time and pay",
       subtitle: "Use candidate profiles to inspect work logs, appeals, transfer rows, and unpaid context.",
-      href: "/staff/candidates#time",
+      href: "/app/companies#time",
       icon: Clock3,
       metric: "Live"
     },
     {
       title: "Documents",
       subtitle: "Candidate CVs, profile links, civil ID records, certificates, and PDF/export work belong here.",
-      href: "/staff/candidates#documents",
+      href: "/app/companies#documents",
       icon: FileText,
       metric: "Next"
     }
@@ -51,11 +51,11 @@ export function StaffHome({ data }: { data: StaffWorkspaceData }) {
             attached to the same person.
           </p>
           <div className="staffHomeActions">
-            <Link className="primary" href="/staff/candidates">
+            <Link className="primary" href="/app/companies">
               <Users aria-hidden="true" size={16} />
               Search candidates
             </Link>
-            <Link href="/staff/requests">
+            <Link href="/app/requests">
               <BriefcaseBusiness aria-hidden="true" size={16} />
               Open requests
             </Link>

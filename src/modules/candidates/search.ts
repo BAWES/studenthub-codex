@@ -123,7 +123,7 @@ export async function getCandidateSearchWorkspace(params: CandidateSearchParams)
     staffCandidateIds
   });
   const selected = selectedId
-    ? await getCandidateDetail(selectedId, params.role === "admin" ? "/admin/requests" : "/staff/requests")
+    ? await getCandidateDetail(selectedId, params.role === "admin" ? "/app/requests" : "/app/requests")
     : null;
   const openTabIds = uniqueCandidateIds([...(params.tabIds ?? []), ...(selectedId ? [selectedId] : [])]).slice(0, 8);
   const openTabs = openTabIds.length
@@ -552,7 +552,7 @@ async function resolveSelectedCandidateId({
 
 function buildSelectedActions(role: CandidateSearchRole, candidate: Awaited<ReturnType<typeof getCandidateDetail>>["candidate"]) {
   if (!candidate) return [];
-  const base = role === "admin" ? "/admin/candidates" : "/staff/candidates";
+  const base = role === "admin" ? "/admin/candidates" : "/app/companies";
   return [
     { label: "Open full record", href: `${base}/${candidate.candidate_id}` as Route },
     candidate.candidate_email ? { label: "Email", href: `mailto:${candidate.candidate_email}` } : null,

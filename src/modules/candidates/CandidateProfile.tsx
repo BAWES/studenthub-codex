@@ -92,7 +92,7 @@ export function CandidateProfile({
             <ul>
               {readiness.missing.map((item) => (
                 <li key={item.label}>
-                  <Link href="/candidate/edit">{item.label}</Link>
+                  <Link href="/app/profile/edit">{item.label}</Link>
                 </li>
               ))}
             </ul>

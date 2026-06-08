@@ -14,7 +14,7 @@ export async function createStoryAction(formData: FormData) {
   const suggestionUuid = String(formData.get("suggestion_uuid") ?? "").trim() || null;
   const numberOfEmployees = Number(formData.get("number_of_employees")) || null;
   const note = String(formData.get("note") ?? "").trim() || null;
-  const basePath = session.role === "admin" ? "/admin/requests" : "/staff/requests";
+  const basePath = session.role === "admin" ? "/app/requests" : "/app/requests";
   const detailPath = `${basePath}/${requestUuid}`;
 
   if (!requestUuid) {
@@ -87,7 +87,7 @@ export async function updateStoryStatusAction(formData: FormData) {
   const storyUuid = String(formData.get("story_uuid") ?? "").trim();
   const requestUuid = String(formData.get("request_uuid") ?? "").trim();
   const newStatus = Number(formData.get("status"));
-  const basePath = session.role === "admin" ? "/admin/requests" : "/staff/requests";
+  const basePath = session.role === "admin" ? "/app/requests" : "/app/requests";
   const detailPath = `${basePath}/${requestUuid}`;
 
   if (!storyUuid || !requestUuid || !Number.isInteger(newStatus)) {

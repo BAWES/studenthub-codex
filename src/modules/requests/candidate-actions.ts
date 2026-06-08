@@ -13,12 +13,12 @@ export async function addCandidateNoteAction(formData: FormData) {
   const candidateId = Number(formData.get("candidate_id"));
   const noteText = String(formData.get("note_text") ?? "").trim();
   const requestUuid = String(formData.get("request_uuid") ?? "").trim() || null;
-  const basePath = session.role === "admin" ? "/admin/requests" : "/staff/requests";
+  const basePath = session.role === "admin" ? "/app/requests" : "/app/requests";
   const returnPath = requestUuid
     ? (`${basePath}/${requestUuid}` as Route)
     : session.role === "admin"
       ? `/admin/candidates/${candidateId}` as Route
-      : `/staff/candidates?candidate=${candidateId}` as Route;
+      : `/app/companies?candidate=${candidateId}` as Route;
 
   if (!Number.isInteger(candidateId) || candidateId <= 0 || !noteText) {
     redirect(`${returnPath}?notice=missing-fields` as Route);
@@ -60,12 +60,12 @@ export async function addCandidateTagAction(formData: FormData) {
   const tag = String(formData.get("tag") ?? "").trim();
   const reason = String(formData.get("reason") ?? "").trim() || null;
   const requestUuid = String(formData.get("request_uuid") ?? "").trim() || null;
-  const basePath = session.role === "admin" ? "/admin/requests" : "/staff/requests";
+  const basePath = session.role === "admin" ? "/app/requests" : "/app/requests";
   const returnPath = requestUuid
     ? (`${basePath}/${requestUuid}` as Route)
     : session.role === "admin"
       ? `/admin/candidates/${candidateId}` as Route
-      : `/staff/candidates?candidate=${candidateId}` as Route;
+      : `/app/companies?candidate=${candidateId}` as Route;
 
   if (!Number.isInteger(candidateId) || candidateId <= 0 || !tag) {
     redirect(`${returnPath}?notice=missing-fields` as Route);
@@ -105,12 +105,12 @@ export async function removeCandidateTagAction(formData: FormData) {
   const tagId = Number(formData.get("tag_id"));
   const candidateId = Number(formData.get("candidate_id"));
   const requestUuid = String(formData.get("request_uuid") ?? "").trim() || null;
-  const basePath = session.role === "admin" ? "/admin/requests" : "/staff/requests";
+  const basePath = session.role === "admin" ? "/app/requests" : "/app/requests";
   const returnPath = requestUuid
     ? (`${basePath}/${requestUuid}` as Route)
     : session.role === "admin"
       ? `/admin/candidates/${candidateId}` as Route
-      : `/staff/candidates?candidate=${candidateId}` as Route;
+      : `/app/companies?candidate=${candidateId}` as Route;
 
   if (!Number.isInteger(tagId) || tagId <= 0 || !Number.isInteger(candidateId) || candidateId <= 0) {
     redirect(`${returnPath}?notice=missing-fields` as Route);
@@ -133,12 +133,12 @@ export async function addCandidateWarningAction(formData: FormData) {
   const message = String(formData.get("message") ?? "").trim();
   const title = String(formData.get("title") ?? "").trim() || null;
   const requestUuid = String(formData.get("request_uuid") ?? "").trim() || null;
-  const basePath = session.role === "admin" ? "/admin/requests" : "/staff/requests";
+  const basePath = session.role === "admin" ? "/app/requests" : "/app/requests";
   const returnPath = requestUuid
     ? (`${basePath}/${requestUuid}` as Route)
     : session.role === "admin"
       ? `/admin/candidates/${candidateId}` as Route
-      : `/staff/candidates?candidate=${candidateId}` as Route;
+      : `/app/companies?candidate=${candidateId}` as Route;
 
   if (!Number.isInteger(candidateId) || candidateId <= 0 || !message) {
     redirect(`${returnPath}?notice=missing-fields` as Route);

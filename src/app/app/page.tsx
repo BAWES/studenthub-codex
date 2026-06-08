@@ -91,7 +91,7 @@ function buildRoleGuide(role: Role, data: HubData): RoleGuide {
           title: "Hiring pipeline",
           description: "Go from employer demand to a shortlist that staff can act on.",
           steps: ["Open the request", "Review matched candidates", "Send shortlist and CV pack"],
-          href: "/admin/requests" as Route,
+          href: "/app/requests" as Route,
           action: "Open requests",
         },
         {
@@ -117,14 +117,14 @@ function buildRoleGuide(role: Role, data: HubData): RoleGuide {
       description:
         "This workspace should feel like a daily operating desk: assigned demand first, candidate readiness second, then communication and CV/PDF actions from the record.",
       guardrail: "Staff only sees assigned requests and candidates connected to their staff account.",
-      primary: { label: "Open my requests", href: "/staff/requests" as Route },
+      primary: { label: "Open my requests", href: "/app/requests" as Route },
       journeys: [
         {
           kicker: "Demand",
           title: "Fill a position",
           description: "Start with the employer request, then work candidates against that specific need.",
           steps: ["Open assigned request", "Review matching candidates", "Send employer shortlist"],
-          href: "/staff/requests" as Route,
+          href: "/app/requests" as Route,
           action: "Open request desk",
         },
         {
@@ -132,7 +132,7 @@ function buildRoleGuide(role: Role, data: HubData): RoleGuide {
           title: "Prepare candidates",
           description: "Make profiles usable before they are sent to employers.",
           steps: ["Find incomplete profile", "Check work history and notes", "Export/share CV when ready"],
-          href: "/staff/candidates?filter=incomplete" as Route,
+          href: "/app/companies?filter=incomplete" as Route,
           action: "Open candidate desk",
         },
         {
@@ -141,7 +141,7 @@ function buildRoleGuide(role: Role, data: HubData): RoleGuide {
           description:
             "Use the candidate record as the action surface for calls, email, notes, and placement history.",
           steps: ["Open candidate", "Review notes and assignments", "Contact or update status"],
-          href: "/staff/candidates" as Route,
+          href: "/app/companies" as Route,
           action: "Find candidates",
         },
       ],
@@ -151,14 +151,14 @@ function buildRoleGuide(role: Role, data: HubData): RoleGuide {
       description:
         "A candidate should not land in an admin database. The path is profile readiness, invitations, work logs, then payment visibility.",
       guardrail: "Candidate login only exposes the signed-in candidate profile, invitations, and work history.",
-      primary: { label: "Continue my profile", href: "/candidate" as Route },
+      primary: { label: "Continue my profile", href: "/app/profile" as Route },
       journeys: [
         {
           kicker: "Profile",
           title: "Become job-ready",
           description: "Finish the details employers and staff need before sending you to a role.",
           steps: ["Check personal profile", "Complete missing fields", "Confirm documents"],
-          href: "/candidate" as Route,
+          href: "/app/profile" as Route,
           action: "Open my profile",
         },
         {
@@ -166,7 +166,7 @@ function buildRoleGuide(role: Role, data: HubData): RoleGuide {
           title: "Review invitations",
           description: "See the roles and requests sent to your account.",
           steps: ["Open invitation", "Review company and role", "Respond or follow up"],
-          href: "/candidate/invitations" as Route,
+          href: "/app/profile/invitations" as Route,
           action: "Open invitations",
         },
         {
@@ -174,7 +174,7 @@ function buildRoleGuide(role: Role, data: HubData): RoleGuide {
           title: "Track hours and pay",
           description: "Check imported shifts, timer records, and work history connected to payment.",
           steps: ["Open work logs", "Review shift history", "Confirm payment context"],
-          href: "/candidate/work-logs" as Route,
+          href: "/app/profile/work-logs" as Route,
           action: "Open work logs",
         },
       ],
@@ -184,14 +184,14 @@ function buildRoleGuide(role: Role, data: HubData): RoleGuide {
       description:
         "Company users should start from hiring demand, not from a mixed database. Requests become the home for shortlists, CVs, status, and invoice context.",
       guardrail: "Company login only exposes linked companies and requests for that company contact.",
-      primary: { label: "Open hiring requests", href: "/company/requests" as Route },
+      primary: { label: "Open hiring requests", href: "/app/requests" as Route },
       journeys: [
         {
           kicker: "Hiring",
           title: "Request candidates",
           description: "Create and manage demand by company, position, seats, and status.",
           steps: ["Open request", "Review proposed candidates", "Confirm next step with staff"],
-          href: "/company/requests" as Route,
+          href: "/app/requests" as Route,
           action: "Open requests",
         },
         {
@@ -199,7 +199,7 @@ function buildRoleGuide(role: Role, data: HubData): RoleGuide {
           title: "Company profile",
           description: "Keep employer identity, contacts, stores, and hiring access clean.",
           steps: ["Review company details", "Check linked locations", "Confirm hiring approval"],
-          href: "/company/companies" as Route,
+          href: "/app/companies" as Route,
           action: "Open company profile",
         },
       ],

@@ -107,8 +107,8 @@ test.describe("Role portal smoke tests", () => {
       { name: "studenthub_next_session", value: candidateCookie, domain: "127.0.0.1", path: "/" },
     ]);
     const page = await context.newPage();
-    await page.goto("/candidate");
-    await expect(page).toHaveURL("/candidate");
+    await page.goto("/app/profile");
+    await expect(page).toHaveURL("/app/profile");
     await expect(page.locator('text="Readiness"')).toBeVisible({ timeout: 15000 });
     await context.close();
   });
@@ -119,8 +119,8 @@ test.describe("Role portal smoke tests", () => {
       { name: "studenthub_next_session", value: candidateCookie, domain: "127.0.0.1", path: "/" },
     ]);
     const page = await context.newPage();
-    await page.goto("/candidate/invitations");
-    await expect(page).toHaveURL("/candidate/invitations");
+    await page.goto("/app/profile/invitations");
+    await expect(page).toHaveURL("/app/profile/invitations");
     await expect(page.locator("body")).toBeVisible({ timeout: 15000 });
     await context.close();
   });
@@ -131,8 +131,8 @@ test.describe("Role portal smoke tests", () => {
       { name: "studenthub_next_session", value: candidateCookie, domain: "127.0.0.1", path: "/" },
     ]);
     const page = await context.newPage();
-    await page.goto("/candidate/work-logs");
-    await expect(page).toHaveURL("/candidate/work-logs");
+    await page.goto("/app/profile/work-logs");
+    await expect(page).toHaveURL("/app/profile/work-logs");
     await expect(page.locator("body")).toBeVisible({ timeout: 15000 });
     await context.close();
   });
@@ -219,8 +219,8 @@ test.describe("Role portal smoke tests", () => {
       { name: "studenthub_next_session", value: companyCookie, domain: "127.0.0.1", path: "/" },
     ]);
     const page = await context.newPage();
-    await page.goto("/candidate");
-    await expect(page).not.toHaveURL("/candidate");
+    await page.goto("/app/profile");
+    await expect(page).not.toHaveURL("/app/profile");
     await context.close();
   });
 

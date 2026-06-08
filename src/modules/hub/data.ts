@@ -204,7 +204,7 @@ export async function getUnifiedHub(session: SessionUser, options: { query?: str
         value: companyApprovals,
         meta: "Companies not cleared to hire",
         progress: ratio(Math.max(0, activeCandidates - companyApprovals), activeCandidates),
-        href: session.role === "admin" ? ("/admin/companies" as Route) : session.role === "company" ? ("/company/companies" as Route) : undefined,
+        href: session.role === "admin" ? ("/app/companies" as Route) : session.role === "company" ? ("/app/companies" as Route) : undefined,
         tone: "warning"
       },
       {
@@ -1159,34 +1159,34 @@ function parseCandidateIds(value: string | null | undefined) {
 
 function candidateHref(session: SessionUser, candidateId: number) {
   if (session.role === "admin") return `/admin/candidates/${candidateId}` as Route;
-  if (session.role === "staff") return `/staff/candidates/${candidateId}` as Route;
-  if (session.role === "candidate" && Number(session.id) === candidateId) return "/candidate" as Route;
+  if (session.role === "staff") return `/app/companies/${candidateId}` as Route;
+  if (session.role === "candidate" && Number(session.id) === candidateId) return "/app/profile" as Route;
   return undefined;
 }
 
 function candidateListHref(session: SessionUser, filter: "needs-review" | "incomplete") {
   if (session.role === "admin") return "/admin/candidates" as Route;
-  if (session.role === "staff") return `/staff/candidates?filter=${filter}` as Route;
+  if (session.role === "staff") return `/app/companies?filter=${filter}` as Route;
   return undefined;
 }
 
 function companyHref(session: SessionUser, companyId: number) {
-  if (session.role === "admin") return `/admin/companies/${companyId}` as Route;
-  if (session.role === "company") return `/company/companies/${companyId}` as Route;
+  if (session.role === "admin") return `/app/companies/${companyId}` as Route;
+  if (session.role === "company") return `/app/companies/${companyId}` as Route;
   return undefined;
 }
 
 function requestHref(session: SessionUser, requestUuid: string) {
-  if (session.role === "admin") return `/admin/requests/${requestUuid}` as Route;
-  if (session.role === "staff") return `/staff/requests/${requestUuid}` as Route;
-  if (session.role === "company") return `/company/requests/${requestUuid}` as Route;
+  if (session.role === "admin") return `/app/requests/${requestUuid}` as Route;
+  if (session.role === "staff") return `/app/requests/${requestUuid}` as Route;
+  if (session.role === "company") return `/app/requests/${requestUuid}` as Route;
   return undefined;
 }
 
 function requestListHref(session: SessionUser) {
-  if (session.role === "admin") return "/admin/requests" as Route;
-  if (session.role === "staff") return "/staff/requests" as Route;
-  if (session.role === "company") return "/company/requests" as Route;
+  if (session.role === "admin") return "/app/requests" as Route;
+  if (session.role === "staff") return "/app/requests" as Route;
+  if (session.role === "company") return "/app/requests" as Route;
   return undefined;
 }
 
@@ -1196,24 +1196,25 @@ function workspaceNavigation(role: Role): HubNavigationItem[] {
     admin: [
       ...shared,
       { label: "Candidates", description: "Approval and profiles", href: "/admin/candidates" as Route },
-      { label: "Companies", description: "Employer accounts", href: "/admin/companies" as Route },
-      { label: "Requests", description: "Hiring pipeline", href: "/admin/requests" as Route },
+      { label: "Companies", description: "Employer accounts", href: "/app/companies" as Route },
+      { label: "Requests", description: "Hiring pipeline", href: "/app/requests" as Route },
       { label: "Transfers", description: "Payroll records", href: "/admin/transfers" as Route }
     ],
     staff: [
       ...shared,
-      { label: "My requests", description: "Assigned demand", href: "/staff/requests" as Route },
-      { label: "My candidates", description: "Assigned candidate records", href: "/staff/candidates" as Route }
+      { label: "My requests", description: "Assigned demand", href: "/app/requests" as Route },
+      { label: "My candidates", description: "Assigned candidate records", href: "/app/companies" as Route }
     ],
     candidate: [
       ...shared,
-      { label: "Invitations", description: "Job invitations", href: "/candidate/invitations" as Route },
-      { label: "Work logs", description: "Shifts and history", href: "/candidate/work-logs" as Route }
+      { label: "Profile", description: "Your candidate profile", href: "/app/profile" as Route },
+      { label: "Invitations", description: "Job invitations", href: "/app/profile/invitations" as Route },
+      { label: "Work logs", description: "Shifts and history", href: "/app/profile/work-logs" as Route }
     ],
     company: [
       ...shared,
-      { label: "Company profile", description: "Linked accounts", href: "/company/companies" as Route },
-      { label: "Requests", description: "Hiring requests", href: "/company/requests" as Route }
+      { label: "Company profile", description: "Linked accounts", href: "/app/companies" as Route },
+      { label: "Requests", description: "Hiring requests", href: "/app/requests" as Route }
     ],
     inspector: [
       ...shared,

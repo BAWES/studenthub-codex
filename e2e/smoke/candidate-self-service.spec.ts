@@ -49,7 +49,7 @@ test.describe("Candidate self-service — mobile smoke", () => {
       { name: "studenthub_next_session", value: candidateCookie, domain: "127.0.0.1", path: "/" },
     ]);
     const page = await context.newPage();
-    await page.goto("/candidate");
+    await page.goto("/app/profile");
 
     // Readiness section
     await expect(page.locator('text="Readiness"')).toBeVisible({ timeout: 15000 });
@@ -72,7 +72,7 @@ test.describe("Candidate self-service — mobile smoke", () => {
       { name: "studenthub_next_session", value: candidateCookie, domain: "127.0.0.1", path: "/" },
     ]);
     const page = await context.newPage();
-    await page.goto("/candidate");
+    await page.goto("/app/profile");
 
     await expect(page.locator(".candidateAvatar")).toBeVisible();
     await expect(page.locator(".candidateProfileTitle h2")).toBeVisible();
@@ -92,9 +92,9 @@ test.describe("Candidate self-service — mobile smoke", () => {
       { name: "studenthub_next_session", value: candidateCookie, domain: "127.0.0.1", path: "/" },
     ]);
     const page = await context.newPage();
-    await page.goto("/candidate/invitations");
+    await page.goto("/app/profile/invitations");
 
-    await expect(page).toHaveURL("/candidate/invitations");
+    await expect(page).toHaveURL("/app/profile/invitations");
     await expect(page.locator('text="Invitation History"')).toBeVisible({ timeout: 15000 });
 
     await context.close();
@@ -110,7 +110,7 @@ test.describe("Candidate self-service — mobile smoke", () => {
       { name: "studenthub_next_session", value: candidateCookie, domain: "127.0.0.1", path: "/" },
     ]);
     const page = await context.newPage();
-    await page.goto(`/candidate/invitations/${ownInvitationUuid}`);
+    await page.goto(`/app/profile/invitations/${ownInvitationUuid}`);
 
     // Either the respond form or the "already responded" message should be visible
     await expect(
@@ -131,9 +131,9 @@ test.describe("Candidate self-service — mobile smoke", () => {
       { name: "studenthub_next_session", value: candidateCookie, domain: "127.0.0.1", path: "/" },
     ]);
     const page = await context.newPage();
-    await page.goto("/candidate/work-logs");
+    await page.goto("/app/profile/work-logs");
 
-    await expect(page).toHaveURL("/candidate/work-logs");
+    await expect(page).toHaveURL("/app/profile/work-logs");
     await expect(page.locator('text="Work Log History"')).toBeVisible({ timeout: 15000 });
 
     await context.close();
@@ -149,7 +149,7 @@ test.describe("Candidate self-service — mobile smoke", () => {
       { name: "studenthub_next_session", value: candidateCookie, domain: "127.0.0.1", path: "/" },
     ]);
     const page = await context.newPage();
-    await page.goto(`/candidate/work-logs/${ownWorkLogUuid}`);
+    await page.goto(`/app/profile/work-logs/${ownWorkLogUuid}`);
 
     // Appeal form or shift record facts should be visible
     await expect(
@@ -167,9 +167,9 @@ test.describe("Candidate self-service — mobile smoke", () => {
       { name: "studenthub_next_session", value: candidateCookie, domain: "127.0.0.1", path: "/" },
     ]);
     const page = await context.newPage();
-    await page.goto("/candidate/payments");
+    await page.goto("/app/profile/payments");
 
-    await expect(page).toHaveURL("/candidate/payments");
+    await expect(page).toHaveURL("/app/profile/payments");
     await expect(page.locator('text="Transfer & Payment History"')).toBeVisible({ timeout: 15000 });
 
     await context.close();
@@ -183,9 +183,9 @@ test.describe("Candidate self-service — mobile smoke", () => {
       { name: "studenthub_next_session", value: candidateCookie, domain: "127.0.0.1", path: "/" },
     ]);
     const page = await context.newPage();
-    await page.goto("/candidate/edit");
+    await page.goto("/app/profile/edit");
 
-    await expect(page).toHaveURL("/candidate/edit");
+    await expect(page).toHaveURL("/app/profile/edit");
     await expect(page.locator('text="Update your candidate profile"')).toBeVisible({ timeout: 15000 });
     // Key form inputs present
     await expect(page.locator('input[name="name"]')).toBeVisible();
@@ -204,14 +204,14 @@ test.describe("Candidate self-service — mobile smoke", () => {
     const page = await context.newPage();
 
     const sections: { name: string; urlFragment: string }[] = [
-      { name: "Edit profile", urlFragment: "/candidate/edit" },
-      { name: "Invitations", urlFragment: "/candidate/invitations" },
-      { name: "Work logs", urlFragment: "/candidate/work-logs" },
-      { name: "Payments", urlFragment: "/candidate/payments" },
+      { name: "Edit profile", urlFragment: "/app/profile/edit" },
+      { name: "Invitations", urlFragment: "/app/profile/invitations" },
+      { name: "Work logs", urlFragment: "/app/profile/work-logs" },
+      { name: "Payments", urlFragment: "/app/profile/payments" },
     ];
 
     for (const section of sections) {
-      await page.goto("/candidate");
+      await page.goto("/app/profile");
       await page.waitForSelector('text="Readiness"', { timeout: 15000 });
       const link = page.locator(".candidateProfileActions").getByRole("link", { name: section.name });
       await expect(link).toBeVisible();
@@ -227,11 +227,11 @@ test.describe("Candidate self-service — mobile smoke", () => {
   test("unauthenticated mobile access redirects to login", async ({ page }) => {
     await page.setViewportSize(iphoneViewport);
     const paths = [
-      "/candidate",
-      "/candidate/invitations",
-      "/candidate/work-logs",
-      "/candidate/payments",
-      "/candidate/edit",
+      "/app/profile",
+      "/app/profile/invitations",
+      "/app/profile/work-logs",
+      "/app/profile/payments",
+      "/app/profile/edit",
     ];
     for (const path of paths) {
       await page.goto(path);
@@ -262,7 +262,7 @@ test.describe("Candidate self-service — mobile smoke", () => {
       { name: "studenthub_next_session", value: candidateCookie, domain: "127.0.0.1", path: "/" },
     ]);
     const page = await context.newPage();
-    await page.goto(`/candidate/invitations/${otherInv.invitation_uuid}`);
+    await page.goto(`/app/profile/invitations/${otherInv.invitation_uuid}`);
 
     // Should NOT show invitation detail content — ownership is enforced server-side
     await expect(page.locator('text="Respond to Invitation"')).not.toBeVisible({ timeout: 10000 });
@@ -280,8 +280,8 @@ test.describe("Candidate self-service — mobile smoke", () => {
       { name: "studenthub_next_session", value: staff.cookie, domain: "127.0.0.1", path: "/" },
     ]);
     const page = await context.newPage();
-    await page.goto("/candidate");
-    await expect(page).not.toHaveURL("/candidate");
+    await page.goto("/app/profile");
+    await expect(page).not.toHaveURL("/app/profile");
     await context.close();
   });
 });

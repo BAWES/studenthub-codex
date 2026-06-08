@@ -13,7 +13,7 @@ export async function createInvitationAction(formData: FormData) {
   const requestUuid = String(formData.get("request_uuid") ?? "");
   const candidateId = Number(formData.get("candidate_id"));
   const suggestionUuid = String(formData.get("suggestion_uuid") ?? "").trim() || null;
-  const basePath = session.role === "admin" ? "/admin/requests" : "/staff/requests";
+  const basePath = session.role === "admin" ? "/app/requests" : "/app/requests";
   const detailPath = `${basePath}/${requestUuid}`;
 
   if (!requestUuid || !Number.isInteger(candidateId) || candidateId <= 0) {
@@ -79,7 +79,7 @@ export async function updateInvitationStatusAction(formData: FormData) {
   const invitationUuid = String(formData.get("invitation_uuid") ?? "").trim();
   const newStatus = Number(formData.get("status"));
   const requestUuid = String(formData.get("request_uuid") ?? "").trim();
-  const basePath = session.role === "admin" ? "/admin/requests" : "/staff/requests";
+  const basePath = session.role === "admin" ? "/app/requests" : "/app/requests";
   const detailPath = `${basePath}/${requestUuid}`;
 
   if (!invitationUuid || !Number.isInteger(newStatus) || !requestUuid) {

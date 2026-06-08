@@ -43,7 +43,7 @@ test.describe("Candidate language CRUD", () => {
       },
     ]);
     const page = await context.newPage();
-    await page.goto("/candidate/edit");
+    await page.goto("/app/profile/edit");
 
     await expect(page.locator('h2:has-text("Languages")')).toBeVisible({
       timeout: 15000,
@@ -72,7 +72,7 @@ test.describe("Candidate language CRUD", () => {
       },
     ]);
     const page = await context.newPage();
-    await page.goto("/candidate/edit");
+    await page.goto("/app/profile/edit");
 
     // Either "No languages added yet." or the editable list exists
     const hasAnyLanguages = await page
@@ -102,7 +102,7 @@ test.describe("Candidate language CRUD", () => {
       },
     ]);
     const page = await context.newPage();
-    await page.goto("/candidate/edit");
+    await page.goto("/app/profile/edit");
 
     await expect(page.locator('h2:has-text("Languages")')).toBeVisible({
       timeout: 15000,
@@ -144,7 +144,7 @@ test.describe("Candidate language CRUD", () => {
       },
     ]);
     const page = await context.newPage();
-    await page.goto("/candidate/edit");
+    await page.goto("/app/profile/edit");
 
     await expect(page.locator('h2:has-text("Languages")')).toBeVisible({
       timeout: 15000,
@@ -197,10 +197,10 @@ test.describe("Candidate language CRUD", () => {
       },
     ]);
     const page = await context.newPage();
-    await page.goto("/candidate/edit");
+    await page.goto("/app/profile/edit");
 
     // Should redirect away from candidate edit
-    await expect(page).not.toHaveURL("/candidate/edit");
+    await expect(page).not.toHaveURL("/app/profile/edit");
 
     await context.close();
   });

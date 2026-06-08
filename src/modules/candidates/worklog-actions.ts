@@ -88,8 +88,8 @@ export async function approveWorkLog(_prevState: { error: string }, formData: Fo
     data: { status: WORK_LOG_APPROVED, updated_at: new Date() },
   });
 
-  revalidatePath("/staff/candidates");
-  revalidatePath("/candidate/work-logs");
+  revalidatePath("/app/companies");
+  revalidatePath("/app/profile/work-logs");
   return { error: "" };
 }
 
@@ -108,8 +108,8 @@ export async function rejectWorkLog(_prevState: { error: string }, formData: For
     data: { status: WORK_LOG_REJECTED, updated_at: new Date() },
   });
 
-  revalidatePath("/staff/candidates");
-  revalidatePath("/candidate/work-logs");
+  revalidatePath("/app/companies");
+  revalidatePath("/app/profile/work-logs");
   return { error: "" };
 }
 
@@ -158,8 +158,8 @@ export async function resolveWorkLogAppeal(_prevState: { error: string }, formDa
 
   await prisma.$transaction(operations);
 
-  revalidatePath("/staff/candidates");
-  revalidatePath("/candidate/work-logs");
+  revalidatePath("/app/companies");
+  revalidatePath("/app/profile/work-logs");
   return { error: "" };
 }
 
@@ -205,8 +205,8 @@ export async function addWorkLogFeedback(_prevState: { error: string }, formData
     },
   });
 
-  revalidatePath("/staff/candidates");
-  revalidatePath("/candidate/work-logs");
+  revalidatePath("/app/companies");
+  revalidatePath("/app/profile/work-logs");
   return { error: "" };
 }
 
@@ -240,7 +240,7 @@ export async function addAppealUpdateNote(_prevState: { error: string }, formDat
     },
   });
 
-  revalidatePath("/staff/candidates");
-  revalidatePath("/candidate/work-logs");
+  revalidatePath("/app/companies");
+  revalidatePath("/app/profile/work-logs");
   return { error: "" };
 }

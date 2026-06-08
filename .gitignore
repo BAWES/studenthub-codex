@@ -11,3 +11,6 @@ data/*.log
 # Test artifacts
 playwright-report/
 test-results/
+
+*storybook.log
+storybook-static

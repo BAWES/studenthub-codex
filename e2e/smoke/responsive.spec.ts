@@ -187,7 +187,7 @@ test.describe("responsive — mobile viewport (390×844)", () => {
 
   test("candidate portal shows mobile tab bar, hides sidebar", async ({ browser }) => {
     const { page, context } = await createAuthedPage(browser, mobileViewport);
-    await page.goto("/candidate");
+    await page.goto("/app/profile");
     await expect(page.locator('text="Readiness"')).toBeVisible({ timeout: 15000 });
 
     // Mobile tab bar should be visible and interactive
@@ -206,7 +206,7 @@ test.describe("responsive — mobile viewport (390×844)", () => {
 
   test("candidate portal has no horizontal overflow", async ({ browser }) => {
     const { page, context } = await createAuthedPage(browser, mobileViewport);
-    await page.goto("/candidate");
+    await page.goto("/app/profile");
     await expect(page.locator('text="Readiness"')).toBeVisible({ timeout: 15000 });
     await assertNoHorizontalOverflow(page);
     await context.close();
@@ -214,7 +214,7 @@ test.describe("responsive — mobile viewport (390×844)", () => {
 
   test("candidate portal nav tap targets meet 44px minimum", async ({ browser }) => {
     const { page, context } = await createAuthedPage(browser, mobileViewport);
-    await page.goto("/candidate");
+    await page.goto("/app/profile");
     await expect(page.locator('text="Readiness"')).toBeVisible({ timeout: 15000 });
 
     await assertTapTargets(page, ".mobileTabBar a");
@@ -224,7 +224,7 @@ test.describe("responsive — mobile viewport (390×844)", () => {
 
   test("candidate portal has readable text and no zero-height nodes", async ({ browser }) => {
     const { page, context } = await createAuthedPage(browser, mobileViewport);
-    await page.goto("/candidate");
+    await page.goto("/app/profile");
     await expect(page.locator('text="Readiness"')).toBeVisible({ timeout: 15000 });
     await assertTextReadable(page);
     await context.close();
@@ -289,7 +289,7 @@ test.describe("responsive — tablet viewport (768×1024)", () => {
 
   test("candidate portal shows floating tab bar, hides sidebar", async ({ browser }) => {
     const { page, context } = await createAuthedPage(browser, tabletViewport);
-    await page.goto("/candidate");
+    await page.goto("/app/profile");
     await expect(page.locator('text="Readiness"')).toBeVisible({ timeout: 15000 });
 
     // At 768px, the mobileTabBar should be visible (full-width bottom bar)
@@ -311,7 +311,7 @@ test.describe("responsive — tablet viewport (768×1024)", () => {
 
   test("candidate portal has no horizontal overflow on tablet", async ({ browser }) => {
     const { page, context } = await createAuthedPage(browser, tabletViewport);
-    await page.goto("/candidate");
+    await page.goto("/app/profile");
     await expect(page.locator('text="Readiness"')).toBeVisible({ timeout: 15000 });
     await assertNoHorizontalOverflow(page);
     await context.close();
@@ -319,7 +319,7 @@ test.describe("responsive — tablet viewport (768×1024)", () => {
 
   test("candidate profile action links meet 44px tap target minimum", async ({ browser }) => {
     const { page, context } = await createAuthedPage(browser, tabletViewport);
-    await page.goto("/candidate");
+    await page.goto("/app/profile");
     await expect(page.locator('text="Readiness"')).toBeVisible({ timeout: 15000 });
 
     await assertTapTargets(page, ".candidateProfileActions a");
@@ -328,7 +328,7 @@ test.describe("responsive — tablet viewport (768×1024)", () => {
 
   test("candidate portal has readable text and no zero-height nodes", async ({ browser }) => {
     const { page, context } = await createAuthedPage(browser, tabletViewport);
-    await page.goto("/candidate");
+    await page.goto("/app/profile");
     await expect(page.locator('text="Readiness"')).toBeVisible({ timeout: 15000 });
     await assertTextReadable(page);
     await context.close();
