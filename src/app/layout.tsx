@@ -5,6 +5,9 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
 import { NoticeToast } from "@/modules/workspace/NoticeToast";
 import "./styles.css";
+import "@/styles/ui.css";
+import "@/styles/shell.css";
+import "@/styles/pages.css";
 
 export const metadata: Metadata = {
   title: "StudentHub",
