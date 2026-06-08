@@ -264,7 +264,7 @@ export async function createCandidate(
   const candidate = await prisma.candidate.create({
     data: {
       candidate_name: d.name.trim(),
-      candidate_name_ar: d.nameAr || undefined,
+      candidate_name_ar: d.nameAr ?? "",
       candidate_email: d.email,
       candidate_phone: d.phone || undefined,
       candidate_password_hash: passwordHash,
