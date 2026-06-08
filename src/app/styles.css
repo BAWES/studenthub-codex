@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "../modules/design-system/tokens.css";
 
 @theme {
   --color-background: var(--background);
@@ -21,81 +22,6 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
   --radius: var(--radius);
-}
-
-:root {
-  color-scheme: light;
-  --ink: #182230;
-  --muted: #667085;
-  --faint: #8a95a6;
-  --line: #d6dce7;
-  --paper: #f5f7fa;
-  --surface: #ffffff;
-  --surface-soft: #fbfcfe;
-  --grid-line: rgba(214, 220, 231, 0.42);
-  --blue: #0b63ce;
-  --blue-deep: #084b9b;
-  --green: #24835b;
-  --amber: #a66212;
-  --rose: #b42357;
-  --shadow: 0 22px 80px rgba(16, 24, 40, 0.12);
-  --background: var(--paper);
-  --foreground: var(--ink);
-  --card: var(--surface);
-  --card-foreground: var(--ink);
-  --popover: var(--surface);
-  --popover-foreground: var(--ink);
-  --primary: #111827;
-  --primary-foreground: #ffffff;
-  --secondary: #eef2f7;
-  --secondary-foreground: #172033;
-  --muted-shadcn: #f4f6fa;
-  --muted-foreground: var(--muted);
-  --accent: #eaf2ff;
-  --accent-foreground: #12376c;
-  --destructive: #b42318;
-  --destructive-foreground: #ffffff;
-  --border: var(--line);
-  --input: var(--line);
-  --ring: #2563eb;
-  --radius: 8px;
-}
-
-[data-theme="dark"] {
-  color-scheme: dark;
-  --ink: #e7ecf5;
-  --muted: #9da8ba;
-  --faint: #78859b;
-  --line: #2a3547;
-  --paper: #090d14;
-  --surface: #111824;
-  --surface-soft: #151d2a;
-  --grid-line: rgba(80, 96, 126, 0.22);
-  --blue: #8abfff;
-  --blue-deep: #5aa4ff;
-  --green: #6ed5a0;
-  --amber: #e8ae63;
-  --rose: #ff8aac;
-  --shadow: 0 24px 90px rgba(0, 0, 0, 0.45);
-  --background: var(--paper);
-  --foreground: var(--ink);
-  --card: var(--surface);
-  --card-foreground: var(--ink);
-  --popover: var(--surface);
-  --popover-foreground: var(--ink);
-  --primary: #e7ecf5;
-  --primary-foreground: #090d14;
-  --secondary: #1b2534;
-  --secondary-foreground: #e7ecf5;
-  --muted-shadcn: #111824;
-  --muted-foreground: var(--muted);
-  --accent: #15263f;
-  --accent-foreground: #cfe4ff;
-  --destructive: #ff8a8a;
-  --destructive-foreground: #090d14;
-  --border: var(--line);
-  --input: var(--line);
-  --ring: #8abfff;
 }
 
 * {
@@ -122,7 +48,7 @@ body {
   border: 1px solid transparent;
   border-radius: var(--radius);
   font: inherit;
-  font-weight: 760;
+  font-weight: var(--weight-semibold);
   line-height: 1;
   text-decoration: none;
   white-space: nowrap;
@@ -225,7 +151,7 @@ body {
   border-radius: 999px;
   padding: 5px 8px;
   font-size: 0.76rem;
-  font-weight: 760;
+  font-weight: var(--weight-semibold);
   line-height: 1;
   white-space: nowrap;
 }
@@ -329,7 +255,7 @@ body {
 .lockedRole span {
   color: var(--blue);
   font-size: 11px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
   text-transform: uppercase;
 }
 
@@ -496,12 +422,12 @@ body {
   justify-content: center;
   border-radius: 7px;
   background: rgba(255, 255, 255, 0.14);
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
 }
 
 .workspaceMark strong {
   font-size: 15px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
 }
 
 .workspaceRailNav {
@@ -555,7 +481,7 @@ body {
   color: var(--ink);
   font: inherit;
   font-size: 13px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
   cursor: pointer;
 }
 
@@ -788,7 +714,7 @@ h2 {
   justify-content: center;
   background: var(--ink);
   color: #fff;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
 }
 
 
@@ -797,7 +723,7 @@ h2 {
 .loginProof span {
   color: var(--muted);
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 700;
   text-transform: uppercase;
 }
 
@@ -1147,7 +1073,7 @@ h2 {
 .financeSteps article span {
   color: var(--blue);
   font-size: 11px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
   text-transform: uppercase;
 }
 
@@ -1174,7 +1100,7 @@ h2 {
   background: #111827;
   color: #fff;
   padding: 0 13px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
   text-decoration: none;
 }
 
@@ -1248,7 +1174,7 @@ h2 {
 .linearPrimaryLabel {
   color: var(--blue);
   font-size: 11px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
   text-transform: uppercase;
 }
 
@@ -1305,7 +1231,7 @@ h2 {
   background: #fbfcfd;
   color: #344054;
   padding: 0 14px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
   cursor: pointer;
 }
 
@@ -1360,7 +1286,7 @@ h2 {
   background: #fff;
   color: #344054;
   padding: 0 12px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
   text-decoration: none;
   white-space: nowrap;
 }
@@ -1516,7 +1442,7 @@ h2 {
   color: #344054;
   padding: 0 8px;
   font-size: 11px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
 }
 
 .linearPeek {
@@ -1565,7 +1491,7 @@ h2 {
   background: #fbfcfd;
   color: var(--ink);
   padding: 0 10px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
   text-decoration: none;
 }
 
@@ -1613,7 +1539,7 @@ h2 {
 .linearNext article > span {
   color: var(--blue);
   font-size: 11px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
   text-transform: uppercase;
 }
 
@@ -1925,7 +1851,7 @@ h2 {
   gap: 7px;
   color: var(--muted);
   font-size: 12px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
   text-transform: uppercase;
 }
 
@@ -1945,7 +1871,7 @@ h2 {
   background: var(--ink);
   color: #fff;
   padding: 0 18px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
   cursor: pointer;
 }
 
@@ -1969,7 +1895,7 @@ h2 {
   color: var(--ink);
   padding: 0 12px;
   font-size: 13px;
-  font-weight: 800;
+  font-weight: 700;
   text-decoration: none;
   white-space: nowrap;
 }
@@ -1998,7 +1924,7 @@ h2 {
   background: #eef5ff;
   color: var(--blue);
   padding: 2px 6px;
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .candidateCommand {
@@ -2022,7 +1948,7 @@ h2 {
 .candidateIdentity > span {
   color: var(--blue);
   font-size: 12px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
   text-transform: uppercase;
 }
 
@@ -2047,7 +1973,7 @@ h2 {
   color: var(--blue);
   padding: 0 10px;
   font-size: 12px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
 }
 
 .candidateActions {
@@ -2064,7 +1990,7 @@ h2 {
   color: var(--ink);
   padding: 0 14px;
   font-size: 13px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
   text-decoration: none;
   white-space: nowrap;
 }
@@ -2123,7 +2049,7 @@ h2 {
   background: #fff;
   color: #101828;
   border-radius: 8px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
 }
 
 .studentOSUser {
@@ -2140,7 +2066,7 @@ h2 {
 .studentOSWorkflowHeader span {
   color: #98a2b3;
   font-size: 11px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
   text-transform: uppercase;
 }
 
@@ -2186,7 +2112,7 @@ h2 {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .studentOSNav strong {
@@ -2236,7 +2162,7 @@ h2 {
   border-radius: 8px;
   background: #fff;
   color: #101828;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
   cursor: pointer;
 }
 
@@ -2287,7 +2213,7 @@ h2 {
   color: var(--muted);
   padding: 0 9px;
   font-size: 12px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
 }
 
 .studentOSWorkflowGrid {
@@ -2382,7 +2308,7 @@ h2 {
   background: #fbfcfe;
   color: var(--blue);
   font-size: 13px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
 }
 
 .studentOSWorkflowAction:hover {
@@ -2419,7 +2345,7 @@ h2 {
 .opsStat span {
   color: var(--muted);
   font-size: 11px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
   text-transform: uppercase;
 }
 
@@ -2457,7 +2383,7 @@ h2 {
   gap: 7px;
   color: var(--muted);
   font-size: 12px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
   text-transform: uppercase;
 }
 
@@ -2483,7 +2409,7 @@ h2 {
   background: var(--ink);
   color: #fff;
   padding: 0 18px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
   cursor: pointer;
 }
 
@@ -2543,7 +2469,7 @@ h2 {
   background: #eef5ff;
   color: var(--blue);
   font-size: 12px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
 }
 
 .opsLaneCards,
@@ -2579,7 +2505,7 @@ h2 {
 .opsCandidateCard > span {
   color: var(--blue);
   font-size: 11px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
   text-transform: uppercase;
 }
 
@@ -2638,7 +2564,7 @@ h2 {
   color: var(--amber);
   padding: 0 7px;
   font-size: 11px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
 }
 
 .candidateOpsGrid {
@@ -2673,7 +2599,7 @@ h2 {
 .opsRecordHeader span {
   color: var(--blue);
   font-size: 12px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
   text-transform: uppercase;
 }
 
@@ -2724,7 +2650,7 @@ h2 {
 .opsFact span {
   color: var(--muted);
   font-size: 11px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
   text-transform: uppercase;
 }
 
@@ -2764,7 +2690,7 @@ h2 {
   color: var(--green);
   padding: 3px 7px;
   font-size: 11px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
   text-transform: uppercase;
 }
 
@@ -2857,7 +2783,7 @@ h2 {
   color: var(--rose);
   padding: 3px 7px;
   font-size: 11px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
   text-transform: uppercase;
 }
 
@@ -2907,7 +2833,7 @@ h2 {
   background: #fff;
   color: var(--ink);
   padding: 0 12px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
 }
 
 .opsNoSelectionActions a:hover {
@@ -2987,7 +2913,7 @@ tr:last-child td {
   padding: 0 14px;
   color: var(--blue);
   font-size: 13px;
-  font-weight: 800;
+  font-weight: 700;
   text-decoration: none;
 }
 
@@ -3029,7 +2955,7 @@ tr:last-child td {
   margin-bottom: 8px;
   color: var(--muted);
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 700;
   text-transform: uppercase;
 }
 
@@ -3193,7 +3119,7 @@ tr:last-child td {
   background: var(--ink);
   color: var(--surface);
   padding: 0 12px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
 }
 
 .commandBrand span {
@@ -3259,7 +3185,7 @@ tr:last-child td {
   color: var(--ink);
   font: inherit;
   font-size: 13px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
   cursor: pointer;
 }
 
@@ -3303,7 +3229,7 @@ tr:last-child td {
 .commandRelatedHeader span {
   color: #667085;
   font-size: 11px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
   text-transform: uppercase;
 }
 
@@ -3352,7 +3278,7 @@ tr:last-child td {
   background: var(--surface-soft);
   color: var(--ink);
   padding: 0 14px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
   cursor: pointer;
 }
 
@@ -3406,7 +3332,7 @@ tr:last-child td {
 .commandTabs span {
   color: #667085;
   font-size: 11px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
   text-transform: uppercase;
 }
 
@@ -3628,7 +3554,7 @@ tr:last-child td {
   color: #111827;
   padding: 0 10px;
   font-size: 13px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
 }
 
 .commandInspectorActions a:hover {
@@ -3646,7 +3572,7 @@ tr:last-child td {
   color: #344054;
   padding: 0 9px;
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .commandFacts {
@@ -3772,7 +3698,7 @@ tr:last-child td {
 .roleBoundaryNotice span {
   color: var(--rose);
   font-size: 11px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
   text-transform: uppercase;
 }
 
@@ -3794,7 +3720,7 @@ tr:last-child td {
   background: #fff;
   color: var(--rose);
   padding: 0 12px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
   text-decoration: none;
   white-space: nowrap;
 }
@@ -3834,7 +3760,7 @@ tr:last-child td {
 .journeyGuardrail span {
   color: #667085;
   font-size: 11px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
   letter-spacing: 0;
   text-transform: uppercase;
 }
@@ -3857,7 +3783,7 @@ tr:last-child td {
   background: var(--surface-soft);
   color: var(--ink);
   padding: 0 13px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
   text-decoration: none;
 }
 
@@ -3962,7 +3888,7 @@ tr:last-child td {
   background: #eef2f7;
   color: #344054;
   font-size: 12px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
 }
 
 .journeySteps li strong {
@@ -4044,7 +3970,7 @@ tr:last-child td {
   color: var(--ink);
   padding: 0 11px;
   font-size: 13px;
-  font-weight: 800;
+  font-weight: 700;
   text-decoration: none;
   white-space: nowrap;
 }
@@ -4141,7 +4067,7 @@ tr:last-child td {
   background: var(--ink);
   color: #fff;
   border-radius: 8px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
 }
 
 .hubBrand strong {
@@ -4168,7 +4094,7 @@ tr:last-child td {
 .hubSystem span {
   color: var(--blue);
   font-size: 11px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
   text-transform: uppercase;
 }
 
@@ -4217,7 +4143,7 @@ tr:last-child td {
   border-radius: 8px;
   background: var(--ink);
   color: #fff;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
   cursor: pointer;
 }
 
@@ -4316,7 +4242,7 @@ tr:last-child td {
   background: var(--blue);
   color: #fff;
   padding: 0 22px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
   cursor: pointer;
 }
 
@@ -4342,7 +4268,7 @@ tr:last-child td {
   color: var(--ink);
   padding: 0 13px;
   font-size: 13px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
   text-decoration: none;
   white-space: nowrap;
 }
@@ -4440,7 +4366,7 @@ tr:last-child td {
 .workstream span:first-child {
   color: var(--blue);
   font-size: 11px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
   text-transform: uppercase;
 }
 
@@ -4530,7 +4456,7 @@ tr:last-child td {
 
 .hubPanelHeader > span {
   font-size: 12px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
   text-transform: uppercase;
 }
 
@@ -4593,7 +4519,7 @@ tr:last-child td {
   padding: 0 12px;
   color: var(--blue);
   font-size: 12px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
 }
 
 .previewPanel {
@@ -4610,7 +4536,7 @@ tr:last-child td {
 .previewHeader span {
   color: var(--blue);
   font-size: 11px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
   text-transform: uppercase;
 }
 
@@ -4645,7 +4571,7 @@ tr:last-child td {
   color: var(--blue);
   padding: 0 9px;
   font-size: 12px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
 }
 
 .previewActions a {
@@ -4659,7 +4585,7 @@ tr:last-child td {
   color: var(--ink);
   padding: 0 12px;
   font-size: 13px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
   text-decoration: none;
 }
 
@@ -4692,7 +4618,7 @@ tr:last-child td {
 .previewRelatedHeader span {
   color: var(--muted);
   font-size: 11px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
   text-transform: uppercase;
 }
 
@@ -4822,7 +4748,7 @@ tr:last-child td {
   padding: 0 11px;
   font: inherit;
   font-size: 13px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
   cursor: pointer;
 }
 
@@ -4844,7 +4770,7 @@ kbd {
   padding: 0 6px;
   font-family: inherit;
   font-size: 11px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
   line-height: 1;
   white-space: nowrap;
 }
@@ -4895,7 +4821,7 @@ kbd {
   border-radius: 8px;
   background: #eef5ff;
   color: var(--blue);
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
 }
 
 .commandInputWrap input {
@@ -4906,7 +4832,7 @@ kbd {
   color: var(--ink);
   font: inherit;
   font-size: 16px;
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .commandList {
@@ -4925,7 +4851,7 @@ kbd {
   margin: 8px 8px 4px;
   color: var(--muted);
   font-size: 11px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
   text-transform: uppercase;
 }
 
@@ -5751,7 +5677,7 @@ kbd {
     color: var(--ink);
     padding: 0 12px;
     font-size: 13px;
-    font-weight: 900;
+    font-weight: var(--weight-semibold);
     text-transform: capitalize;
   }
 
@@ -5841,7 +5767,7 @@ kbd {
     color: var(--ink);
     padding: 0 12px;
     font-size: 13px;
-    font-weight: 800;
+    font-weight: 700;
     text-decoration: none;
   }
 
@@ -6167,7 +6093,7 @@ kbd {
     content: attr(data-label);
     color: var(--muted);
     font-size: 11px;
-    font-weight: 900;
+    font-weight: var(--weight-semibold);
     text-transform: uppercase;
   }
 
@@ -6349,7 +6275,7 @@ kbd {
 .candidatePreviewSectionHeader span {
   color: var(--blue);
   font-size: 11px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
   text-transform: uppercase;
 }
 
@@ -6437,7 +6363,7 @@ kbd {
   color: var(--ink);
   padding: 0 14px;
   font: inherit;
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .candidateSearchForm input:focus {
@@ -6453,7 +6379,7 @@ kbd {
   color: var(--surface);
   padding: 0 18px;
   font: inherit;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
 }
 
 .candidateSearchFilters {
@@ -6482,7 +6408,7 @@ kbd {
   color: var(--muted);
   padding: 0 12px;
   font-size: 13px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
   white-space: nowrap;
 }
 
@@ -6521,7 +6447,7 @@ kbd {
 .candidateFacetHeader a {
   color: var(--muted);
   font-size: 12px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
 }
 
 .candidateFacetGroup {
@@ -6642,7 +6568,7 @@ kbd {
   color: var(--green);
   font-size: 12px;
   font-style: normal;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
 }
 
 .candidateResultCard > strong {
@@ -6669,7 +6595,7 @@ kbd {
   color: var(--muted);
   padding: 0 8px;
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .candidatePreviewHeader {
@@ -6707,7 +6633,7 @@ kbd {
   color: var(--ink);
   padding: 0 12px;
   font-size: 13px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
 }
 
 .candidatePreviewActions a:first-child,
@@ -6886,7 +6812,7 @@ kbd {
   border-radius: 8px;
   background: var(--ink);
   color: var(--surface);
-  font-weight: 950;
+  font-weight: 700;
 }
 
 .candidateDeskBrand strong {
@@ -6933,7 +6859,7 @@ kbd {
   padding: 0 12px;
   font: inherit;
   font-size: 13px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
   cursor: pointer;
 }
 
@@ -6972,7 +6898,7 @@ kbd {
 .candidateDeskAccount span {
   color: var(--blue);
   font-size: 10px;
-  font-weight: 950;
+  font-weight: 700;
   text-transform: uppercase;
 }
 
@@ -7027,7 +6953,7 @@ kbd {
 .candidateSearchTabHeader span {
   color: var(--blue);
   font-size: 11px;
-  font-weight: 950;
+  font-weight: 700;
   text-transform: uppercase;
 }
 
@@ -7041,7 +6967,7 @@ kbd {
 .candidateSearchTabHeader small {
   color: var(--muted);
   font-size: 13px;
-  font-weight: 800;
+  font-weight: 700;
   white-space: nowrap;
 }
 
@@ -7075,7 +7001,7 @@ kbd {
 .candidateTabs > a {
   padding: 0 12px;
   font-size: 13px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
 }
 
 .candidateTabs > span {
@@ -7124,7 +7050,7 @@ kbd {
   border-left: 1px solid var(--line);
   color: var(--muted);
   font-size: 12px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
   text-decoration: none;
 }
 
@@ -7220,7 +7146,7 @@ kbd {
 .candidateSearchContext span {
   color: var(--blue);
   font-size: 11px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
   text-transform: uppercase;
 }
 
@@ -7248,7 +7174,7 @@ kbd {
   color: var(--ink);
   padding: 0 9px;
   font-size: 12px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
   text-decoration: none;
 }
 
@@ -7282,7 +7208,7 @@ kbd {
 .candidateBulkBar span {
   color: var(--blue);
   font-size: 10px;
-  font-weight: 950;
+  font-weight: 700;
   text-transform: uppercase;
 }
 
@@ -7309,7 +7235,7 @@ kbd {
   color: var(--ink);
   padding: 0 10px;
   font-size: 12px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
   text-decoration: none;
 }
 
@@ -7339,7 +7265,7 @@ kbd {
 .candidateSearchForm label {
   color: var(--blue);
   font-size: 11px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
   text-transform: uppercase;
 }
 
@@ -7386,7 +7312,7 @@ kbd {
 .candidatePowerFilters summary span {
   color: var(--blue);
   font-size: 11px;
-  font-weight: 950;
+  font-weight: 700;
   text-transform: uppercase;
 }
 
@@ -7397,7 +7323,7 @@ kbd {
   color: var(--ink);
   padding: 4px 8px;
   font-size: 11px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
 }
 
 .candidatePowerFilters[open] summary {
@@ -7508,7 +7434,7 @@ kbd {
   border: 1px solid var(--line);
   border-radius: 4px;
   font-size: 10px;
-  font-weight: 950;
+  font-weight: 700;
 }
 
 .candidateResultSelect:hover,
@@ -7548,7 +7474,7 @@ kbd {
   border-radius: 8px;
   background: var(--ink);
   color: var(--surface);
-  font-weight: 950;
+  font-weight: 700;
 }
 
 .candidateResultAvatar {
@@ -7572,7 +7498,7 @@ kbd {
   padding: 3px 7px;
   font-size: 11px;
   font-style: normal;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
   white-space: nowrap;
 }
 
@@ -7646,7 +7572,7 @@ kbd {
 .candidateReadinessItems span {
   color: var(--blue);
   font-size: 11px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
   text-transform: uppercase;
 }
 
@@ -7712,7 +7638,7 @@ kbd {
   color: var(--ink);
   padding: 0 11px;
   font-size: 13px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
 }
 
 .candidateProfileActions a:first-child {
@@ -7973,7 +7899,7 @@ kbd {
   color: var(--ink);
   padding: 0 9px;
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .candidateRows a,
@@ -8244,7 +8170,7 @@ kbd {
 .staffHomePanel > div span {
   color: var(--blue);
   font-size: 11px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
   text-transform: uppercase;
 }
 
@@ -8315,7 +8241,7 @@ kbd {
   color: var(--ink);
   padding: 0 12px;
   font-size: 13px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
 }
 
 .staffHomeActions a.primary {
@@ -8356,7 +8282,7 @@ kbd {
   color: var(--blue);
   font-style: normal;
   font-size: 12px;
-  font-weight: 900;
+  font-weight: var(--weight-semibold);
 }
 
 .staffHomeRows {
@@ -8558,7 +8484,7 @@ kbd {
 .matchCard > div:first-child span {
   color: #2563eb;
   font-size: 0.76rem;
-  font-weight: 760;
+  font-weight: var(--weight-semibold);
   text-transform: uppercase;
 }
 
@@ -8631,7 +8557,7 @@ kbd {
   padding: 0 13px;
   border-radius: 11px;
   color: #172033;
-  font-weight: 760;
+  font-weight: var(--weight-semibold);
   text-decoration: none;
 }
 
@@ -8664,7 +8590,7 @@ kbd {
 .requestPipeline span {
   color: #64748b;
   font-size: 0.78rem;
-  font-weight: 760;
+  font-weight: var(--weight-semibold);
 }
 
 .requestPipeline strong {
@@ -8763,7 +8689,7 @@ kbd {
   border-radius: 11px;
   background: #111827;
   color: #fff;
-  font-weight: 800;
+  font-weight: 700;
   cursor: pointer;
 }
 
@@ -9403,4 +9329,340 @@ kbd {
 
 .candidateMissingFields li a:hover {
   color: var(--foreground);
+}
+
+/* ── Checkbox ───────────────────────────────────────────────────────────── */
+
+.uiCheckbox {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border: 1px solid var(--input);
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--card) 86%, transparent);
+  color: transparent;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition:
+    background 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease;
+}
+
+.uiCheckbox:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--ring) 28%, transparent);
+  outline-offset: 2px;
+}
+
+.uiCheckbox[data-state="checked"] {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--primary-foreground);
+}
+
+.uiCheckbox:disabled {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.uiCheckboxIndicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.uiCheckboxIndicator svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* ── Textarea ───────────────────────────────────────────────────────────── */
+
+.uiTextarea {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  min-height: 88px;
+  border: 1px solid var(--input);
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--card) 86%, transparent);
+  color: var(--foreground);
+  padding: 10px 14px;
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.55;
+  resize: vertical;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.uiTextarea::placeholder {
+  color: var(--muted);
+}
+
+.uiTextarea:focus {
+  border-color: var(--ring);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 16%, transparent);
+  outline: none;
+}
+
+.uiTextarea:disabled {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+/* ── Avatar ─────────────────────────────────────────────────────────────── */
+
+.uiAvatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.uiAvatarImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.uiAvatarFallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+/* ── Alert ──────────────────────────────────────────────────────────────── */
+
+.uiAlert {
+  display: grid;
+  gap: 4px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+}
+
+.uiAlert_default {
+  background: color-mix(in srgb, var(--accent) 60%, transparent);
+  border-color: color-mix(in srgb, var(--ring) 20%, transparent);
+  color: var(--accent-foreground);
+}
+
+.uiAlert_destructive {
+  background: color-mix(in srgb, var(--destructive) 8%, transparent);
+  border-color: color-mix(in srgb, var(--destructive) 28%, transparent);
+  color: var(--destructive);
+}
+
+.uiAlertTitle {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.uiAlertDescription {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  opacity: 0.88;
+}
+
+/* ── Radio Group ─────────────────────────────────────────────────────────── */
+
+.uiRadioGroup {
+  display: grid;
+  gap: 8px;
+}
+
+.uiRadioGroupItem {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border: 1px solid var(--input);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--card) 86%, transparent);
+  color: transparent;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition:
+    background var(--duration-normal) var(--ease-out),
+    border-color var(--duration-normal) var(--ease-out),
+    color var(--duration-normal) var(--ease-out);
+}
+
+.uiRadioGroupItem:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--ring) 28%, transparent);
+  outline-offset: 2px;
+}
+
+.uiRadioGroupItem[data-state="checked"] {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--primary-foreground);
+}
+
+.uiRadioGroupItem:disabled {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.uiRadioGroupIndicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.uiRadioGroupIndicator svg {
+  width: 10px;
+  height: 10px;
+}
+
+/* ── Switch ──────────────────────────────────────────────────────────────── */
+
+.uiSwitch {
+  display: inline-flex;
+  width: 44px;
+  height: 24px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ink) 14%, transparent);
+  padding: 0;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background var(--duration-normal) var(--ease-out);
+}
+
+.uiSwitch:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--ring) 28%, transparent);
+  outline-offset: 2px;
+}
+
+.uiSwitch[data-state="checked"] {
+  background: var(--primary);
+}
+
+.uiSwitch:disabled {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.uiSwitchThumb {
+  display: block;
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  background: var(--surface);
+  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.12);
+  transition: transform var(--duration-normal) var(--ease-out);
+  transform: translateX(1px);
+}
+
+.uiSwitchThumb[data-state="checked"] {
+  transform: translateX(21px);
+}
+
+/* ── Alert Dialog ────────────────────────────────────────────────────────── */
+
+.uiAlertDialogOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: rgba(0, 0, 0, 0.45);
+  animation: fadeIn var(--duration-normal) var(--ease-out);
+}
+
+.uiAlertDialogContent {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  z-index: 50;
+  width: calc(100% - 32px);
+  max-width: 480px;
+  transform: translate(-50%, -50%);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--elevation-3);
+  padding: 24px;
+  animation: scaleIn var(--duration-normal) var(--ease-out);
+}
+
+.uiAlertDialogHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 20px;
+}
+
+.uiAlertDialogFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.uiAlertDialogTitle {
+  margin: 0;
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-tight);
+  color: var(--foreground);
+}
+
+.uiAlertDialogDescription {
+  margin: 0;
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  color: var(--muted);
+}
+
+/* ── Popover ─────────────────────────────────────────────────────────────── */
+
+.uiPopoverContent {
+  z-index: 50;
+  width: auto;
+  min-width: 200px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--elevation-2);
+  padding: 8px;
+  animation: scaleIn var(--duration-fast) var(--ease-out);
+  transform-origin: var(--radix-popover-content-transform-origin);
+}
+
+/* ── Shared animations ───────────────────────────────────────────────────── */
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
