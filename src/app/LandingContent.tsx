@@ -12,16 +12,12 @@ import {
   BarChart3,
   Layers,
   ChevronRight,
-  Command,
   Sparkles,
-  Search,
-  PanelRightOpen,
-  ArrowUpRight,
-  CheckCircle2,
 } from "lucide-react";
 import { ThemeToggle } from "@/modules/theme/ThemeToggle";
 import { GlassPanel } from "@/components/ui/glass-panel";
 import { portalContent } from "@/modules/auth/portalContent";
+import { HeroSection } from "@/components/marketing";
 import type { Role } from "@/modules/auth/types";
 
 // ── Props ─────────────────────────────────────────────────────
@@ -73,24 +69,26 @@ const portalIcons: Record<Role, React.ComponentType<{ className?: string }>> = {
   inspector: ClipboardCheck,
 };
 
-const features = [
+// ── Feature card data (simplified, integrated into FeatureGrid) ──
+
+const featureCards = [
   {
-    icon: Search,
+    icon: Zap,
     title: "Global search",
     body: "Typo-tolerant search across countries, skills, and statuses. One keystroke finds any candidate.",
     stat: "0.4s avg response",
   },
   {
-    icon: Command,
-    title: "Command palette",
-    body: "Cmd+K opens every action. Navigate, search, filter, export — all from the keyboard.",
-    stat: "42 available commands",
+    icon: Layers,
+    title: "Purpose-built portals",
+    body: "Each role gets exactly the right tools — no clutter, no missing features, no one-size-fits-all compromises.",
+    stat: "5 role-specific portals",
   },
   {
-    icon: PanelRightOpen,
-    title: "Slide-over details",
-    body: "Candidate profiles, documents, and payments slide in from the right. Never leave your workspace.",
-    stat: "200ms animated",
+    icon: Globe,
+    title: "End-to-end workflows",
+    body: "From profile readiness to timesheets and payments — every step is connected in one system.",
+    stat: "Integrated pipelines",
   },
 ];
 
@@ -122,7 +120,7 @@ export default function LandingContent({ session }: LandingContentProps) {
             ) : (
               <>
                 <Link
-                  href="/signup"
+                  href="/signup?role=candidate"
                   className="uiButton uiButton_default uiButton_defaultSize"
                 >
                   Get started <Sparkles className="size-3.5" />
@@ -140,195 +138,8 @@ export default function LandingContent({ session }: LandingContentProps) {
         </div>
       </nav>
 
-      {/* ── Hero section ── */}
-      <section
-        className="shSection relative min-h-[min(780px,calc(100svh_-_96px))] grid grid-cols-1 items-center overflow-hidden rounded-xl p-[clamp(22px,5vw,76px)] max-lg:min-h-auto max-lg:p-7"
-        aria-label="Hero introduction"
-      >
-        {/* Dramatic animated gradient */}
-        <div className="shHeroGradientDramatic" aria-hidden="true" />
-
-        {/* Floating ambient orbs */}
-        <div className="shOrb shOrbA" aria-hidden="true" />
-        <div className="shOrb shOrbB" aria-hidden="true" />
-        <div className="shOrb shOrbC" aria-hidden="true" />
-
-        {/* Particle grid overlay */}
-        <div className="shParticleGrid" aria-hidden="true" />
-
-        {/* Floating app mockup (enhanced) */}
-        <div
-          className="absolute inset-0 grid place-items-center place-content-end p-[clamp(20px,4vw,58px)] opacity-[0.92] max-lg:relative max-lg:min-h-[400px] max-lg:order-2 max-lg:p-0 max-lg:pt-[18px]"
-          aria-hidden="true"
-        >
-          <div className="shMockupDramatic">
-            {/* Left rail - navigation */}
-            <div className="grid content-start gap-2 p-2.5 rounded-xl bg-[var(--sh-glass-bg)]">
-              {["Search", "Queue", "Work", "Money"].map((item, i) => (
-                <span
-                  key={item}
-                  className="min-h-9 flex items-center rounded-[7px] px-2.5 text-xs font-black max-sm:justify-center max-sm:px-1.5"
-                  style={
-                    i === 0
-                      ? {
-                          background: "var(--sh-info-bg)",
-                          color: "var(--sh-info)",
-                        }
-                      : { color: "var(--muted)" }
-                  }
-                >
-                  {item}
-                </span>
-              ))}
-            </div>
-
-            {/* Center - main panel */}
-            <div className="grid content-start gap-2.5 p-3.5 rounded-xl bg-[var(--sh-glass-bg)]">
-              {/* Search bar */}
-              <div
-                className="min-h-[40px] flex items-center gap-2 rounded-lg px-3 bg-[var(--sh-glass-bg-strong)]"
-                style={{ border: "1px solid var(--sh-glass-border)" }}
-              >
-                <Search className="size-3.5 text-[var(--muted)] shrink-0" />
-                <span className="text-xs text-[var(--muted)]">Search candidates, jobs, documents...</span>
-                <span className="ml-auto text-[10px] px-1.5 py-0.5 rounded bg-[var(--sh-glass-bg)] text-[var(--muted)] font-mono">
-                  ⌘K
-                </span>
-              </div>
-
-              {/* Results panel */}
-              <div
-                className="min-h-[190px] grid content-start gap-1.5 rounded-lg p-[14px]"
-                style={{
-                  background: "var(--sh-glass-bg-strong)",
-                  border: "1px solid var(--sh-glass-border)",
-                }}
-              >
-                <span className="text-[var(--sh-info)] text-[11px] font-black uppercase tracking-wider">
-                  Candidate search
-                </span>
-                <strong className="text-[clamp(42px,6vw,76px)] leading-[0.88]" style={{ color: "var(--ink)" }}>
-                  jaafar
-                </strong>
-                <small style={{ color: "var(--muted)" }}>
-                  80 scoped results · FAD · needs review · Lebanon
-                </small>
-                <div className="flex gap-2 mt-1.5">
-                  <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-full bg-[var(--sh-success-bg)] text-[var(--sh-success)]">
-                    <CheckCircle2 className="size-3" /> Profile ready
-                  </span>
-                  <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-full bg-[var(--sh-info-bg)] text-[var(--sh-info)]">
-                    CV export
-                  </span>
-                </div>
-              </div>
-
-              {/* Action bar */}
-              <div className="grid grid-cols-4 gap-2 max-sm:grid-cols-1">
-                {[
-                  { label: "Profile", status: "Live" },
-                  { label: "CV", status: "PDF" },
-                  { label: "Timesheet", status: "Pending" },
-                  { label: "Payment", status: "Ready" },
-                ].map((item) => (
-                  <div
-                    key={item.label}
-                    className="min-h-[92px] grid content-between rounded-lg p-3 bg-[var(--sh-glass-bg)]"
-                    style={{ border: "1px solid var(--sh-glass-border)" }}
-                  >
-                    <span className="text-[var(--sh-info)] text-[10px] font-black uppercase tracking-wider">
-                      {item.label}
-                    </span>
-                    <strong className="text-lg" style={{ color: "var(--ink)" }}>
-                      {item.status}
-                    </strong>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Right panel - command detail */}
-            <div className="grid content-start gap-2.5 p-3.5 rounded-xl bg-[var(--sh-glass-bg)] max-lg:hidden">
-              <div
-                className="min-h-[140px] grid content-end gap-2 rounded-lg p-[14px]"
-                style={{
-                  background: "var(--sh-glass-bg-strong)",
-                  border: "1px solid var(--sh-glass-border)",
-                }}
-              >
-                <span className="text-[var(--sh-info)] text-[10px] font-black uppercase tracking-wider">
-                  Command
-                </span>
-                <strong className="text-[18px] leading-[1.1]" style={{ color: "var(--ink)" }}>
-                  Send CVs to employer
-                </strong>
-                <small style={{ color: "var(--muted)" }}>
-                  Same action layer for staff and admin, scoped by role.
-                </small>
-              </div>
-              <div
-                className="min-h-[100px] grid content-between rounded-lg p-[14px]"
-                style={{
-                  background: "var(--sh-glass-bg)",
-                  border: "1px solid var(--sh-glass-border)",
-                }}
-              >
-                <span className="text-[var(--sh-info)] text-[10px] font-black uppercase tracking-wider">
-                  Preview
-                </span>
-                <div className="flex items-center gap-2">
-                  <span className="size-6 rounded-full bg-[var(--sh-success-bg)] flex items-center justify-center">
-                    <CheckCircle2 className="size-3.5 text-[var(--sh-success)]" />
-                  </span>
-                  <span className="text-xs text-[var(--ink)]">CV ready for 4 candidates</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Hero copy */}
-        <div className="relative z-[2] max-w-[690px] max-lg:max-w-none">
-          <p className="shHeroEyebrow">
-            <Sparkles className="size-3" />
-            Next-generation StudentHub
-          </p>
-          <h1 className="shHeroTitle">
-            One modern platform,<br />
-            <span className="shHeroHighlight">purpose-built portals.</span>
-          </h1>
-          <p className="shHeroBody">
-            A Silicon Valley-grade rebuild for candidates, staff, companies, inspectors, and admins. One
-            login opens the right workspace, while shared modules keep search, documents, payments, and
-            reporting unified.
-          </p>
-          <div className="flex flex-wrap items-center gap-3.5 mt-4 max-sm:flex-col max-sm:items-stretch">
-            <Link
-              href="/signup"
-              className="uiButton uiButton_default uiButton_lg shGlowButton"
-            >
-              Get started <ArrowUpRight className="size-4" />
-            </Link>
-            <Link
-              href="/login"
-              className="uiButton uiButton_ghost uiButton_lg"
-            >
-              Sign in
-            </Link>
-          </div>
-          <div className="flex flex-wrap gap-2 mt-[18px]" aria-label="StudentHub platform goals">
-            {[
-              "Role-specific workspaces",
-              "Shared search and documents",
-              "Production-data migration path",
-            ].map((stat) => (
-              <span key={stat} className="shHeroPill">
-                {stat}
-              </span>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* ── Hero section — Candidate persona ── */}
+      <HeroSection persona="candidate" />
 
       {/* ── Platform stats bar ── */}
       <section
@@ -368,7 +179,7 @@ export default function LandingContent({ session }: LandingContentProps) {
         className="shSection grid grid-cols-1 sm:grid-cols-3 gap-2.5"
         aria-label="Key features"
       >
-        {features.map((feat, i) => {
+        {featureCards.map((feat, i) => {
           const Icon = feat.icon;
           return (
             <div
