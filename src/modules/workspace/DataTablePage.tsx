@@ -4,10 +4,16 @@ import { useState, useMemo } from "react";
 import type { ReactNode } from "react";
 import type { Route } from "next";
 import { DataTable, type DataTableColumn } from "./DataTable";
+import { EMPTY_NO_RECORDS, EMPTY_HINT_DEFAULT } from "./emptyStates";
 import { DataTableSkeleton } from "./Skeletons";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, X } from "lucide-react";
+import {
+  EMPTY_NO_RECORDS,
+  EMPTY_HINT_DEFAULT,
+  emptyNoResults,
+} from "./emptyStates";
 
 // ── Types ──────────────────────────────────────────────────
 
@@ -172,11 +178,11 @@ export function DataTablePage<T extends { id: string | number }>({
         />
       ) : (
         <div className="emptyState">
-          <strong>No records found</strong>
+          <strong>{EMPTY_NO_RECORDS}</strong>
           <span>
             {searchValue
-              ? `No results matching "${searchValue}". Try a different search term.`
-              : "No records are available yet in this view."}
+              ? emptyNoResults(searchValue)
+              : EMPTY_HINT_DEFAULT}
           </span>
         </div>
       )}

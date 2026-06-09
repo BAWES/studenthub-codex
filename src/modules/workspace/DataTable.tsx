@@ -2,6 +2,10 @@ import type { ReactNode } from "react";
 import type { Route } from "next";
 import Link from "next/link";
 import { Inbox, AlertCircle } from "lucide-react";
+import {
+  EMPTY_NO_RECORDS,
+  EMPTY_HINT_DEFAULT,
+} from "./emptyStates";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -283,10 +287,10 @@ export function DataTable<T extends { id: string | number }>({
                   <div className="emptyState">
                     <Inbox size={40} className="emptyStateIcon" />
                     <strong>
-                      {emptyMessage ?? "No records found"}
+                      {emptyMessage ?? EMPTY_NO_RECORDS}
                     </strong>
                     <span>
-                      {emptyHint ?? "No data is available yet in this view."}
+                      {emptyHint ?? EMPTY_HINT_DEFAULT}
                     </span>
                     {emptyAction ? (
                       <button type="button" onClick={emptyAction.onClick}>

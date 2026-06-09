@@ -8,6 +8,7 @@ import Link from "next/link";
 import { navForRole } from "./navigation";
 import { WorkspaceMobileNavigation, WorkspaceNavigation } from "./WorkspaceNavigation";
 import { useWorkspaceOS } from "./WorkspaceOSContext";
+import { EMPTY_NO_RECORDS, EMPTY_HINT_DEFAULT } from "./emptyStates";
 
 type Metric = {
   label: string;
@@ -139,8 +140,8 @@ function WorkspaceList({ title, rows }: { title: string; rows: Row[] }) {
           ))
         ) : (
           <div className="emptyState">
-            <strong>No items here</strong>
-            <span>The imported database did not return rows for this panel.</span>
+            <strong>{EMPTY_NO_RECORDS}</strong>
+            <span>{EMPTY_HINT_DEFAULT}</span>
           </div>
         )}
       </div>

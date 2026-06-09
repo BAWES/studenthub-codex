@@ -2,6 +2,10 @@ import type { Route } from "next";
 import Link from "next/link";
 import React from "react";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  EMPTY_NO_SECTION_DATA,
+  EMPTY_NO_IMPORTED_RECORDS,
+} from "./emptyStates";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -165,7 +169,7 @@ export function DetailSection({
             ))}
           </div>
         ) : (
-          <p className="emptyState">{emptyMessage ?? "No data for this section."}</p>
+          <p className="emptyState">{emptyMessage ?? EMPTY_NO_SECTION_DATA}</p>
         )}
       </section>
     );
@@ -198,7 +202,7 @@ export function DetailSection({
           ))}
         </div>
       ) : (
-        <p className="emptyState">{emptyMessage ?? "No imported records found here yet."}</p>
+        <p className="emptyState">{emptyMessage ?? EMPTY_NO_IMPORTED_RECORDS}</p>
       )}
     </section>
   );
