@@ -5,8 +5,19 @@ import Link from "next/link";
 import type { Route } from "next";
 import { ChevronRight } from "lucide-react";
 
+/**
+ * Custom label overrides for path segments that need better labels than
+ * the auto-generated Title Case from kebab-case.
+ */
+const CUSTOM_LABELS: Record<string, string> = {
+  "id-requests": "ID Requests",
+  "work-logs": "Work Logs",
+};
+
 export function humanize(segment: string): string {
   if (segment === "[id]" || segment === "id") return "Detail";
+  if (segment === "create") return "New";
+  if (CUSTOM_LABELS[segment]) return CUSTOM_LABELS[segment];
   return segment
     .split("-")
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
