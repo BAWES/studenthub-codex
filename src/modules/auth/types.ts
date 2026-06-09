@@ -60,6 +60,7 @@ export type Capability =
   | "expense.read"
   | "expense.write"
   | "staff_leave.read"
+  | "staff_leave.write"
   | "store.read";
 
 export type SessionUser = {

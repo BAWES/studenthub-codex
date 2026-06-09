@@ -21,6 +21,15 @@ const getStaffLeaveSchema = z.object({
   leaveUuid: z.string().min(1, "Leave UUID is required"),
 });
 
+const createStaffLeaveSchema = z.object({
+  staffId: z.coerce.number().int().positive().optional(),
+  fromDate: z.string().optional(),
+  toDate: z.string().optional(),
+  note: z.string().optional(),
+  category: z.string().optional(),
+  status: z.coerce.number().int().optional(),
+});
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -43,6 +52,10 @@ export type ListStaffLeavesResult = {
   page: number;
   limit: number;
   totalPages: number;
+};
+
+export type CreateStaffLeaveResult = {
+  staff_leave_uuid: string;
 };
 
 // ---------------------------------------------------------------------------
@@ -147,4 +160,42 @@ export async function getStaffLeave(
     created_at: raw.created_at?.toISOString() ?? null,
     updated_at: raw.updated_at?.toISOString() ?? null,
   };
+}
+
+// ---------------------------------------------------------------------------
+// createStaffLeave
+// ---------------------------------------------------------------------------
+
+/**
+ * Create a new staff leave record.
+ * Generates a UUID prefixed with "sl_".
+ * Mirrors the legacy Yii2 StaffLeaveController::actionCreate().
+ */
+export async function createStaffLeave(
+  data: z.input<typeof createStaffLeaveSchema>,
+): Promise<CreateStaffLeaveResult> {
+  await requireCapability("staff_leave.write");
+
+  const parsed = createStaffLeaveSchema.safeParse(data);
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid staff leave data");
+  }
+
+  const { staffId, fromDate, toDate, note, category, status } = parsed.data;
+
+  const leave = await prisma.staff_leave.create({
+    data: {
+      staff_leave_uuid: `sl_${crypto.randomUUID()}`,
+      staff_id: staffId ?? null,
+      from_date: fromDate ? new Date(fromDate) : null,
+      to_date: toDate ? new Date(toDate) : null,
+      note: note ?? null,
+      category: category ?? null,
+      status: status ?? null,
+    } as any,
+  });
+
+  revalidatePath("/staff-leaves");
+
+  return { staff_leave_uuid: leave.staff_leave_uuid };
 }
