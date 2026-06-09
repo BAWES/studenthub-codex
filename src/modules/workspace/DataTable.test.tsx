@@ -138,11 +138,19 @@ describe("DataTable — empty state", () => {
     render(
       <DataTable title="Test" description="" rows={[]} columns={columns} />,
     );
+    expect(screen.getByText("No records found")).toBeInTheDocument();
     expect(
-      screen.getByText(
-        "This view is connected to the prod clone, but this account has no matching rows yet.",
-      ),
+      screen.getByText("No data is available yet in this view."),
     ).toBeInTheDocument();
+  });
+
+  it("renders an Inbox icon in the default empty state", () => {
+    const { container } = render(
+      <DataTable title="Test" description="" rows={[]} columns={columns} />,
+    );
+    // Should contain an SVG icon (Inbox from lucide-react)
+    const svg = container.querySelector("svg");
+    expect(svg).toBeInTheDocument();
   });
 
   it("renders custom empty message when provided", () => {
@@ -156,6 +164,21 @@ describe("DataTable — empty state", () => {
       />,
     );
     expect(screen.getByText("No team members yet")).toBeInTheDocument();
+  });
+
+  it("renders custom empty description when provided", () => {
+    render(
+      <DataTable
+        title="Test"
+        description=""
+        rows={[]}
+        columns={columns}
+        emptyHint="Create a new member to get started."
+      />,
+    );
+    expect(
+      screen.getByText("Create a new member to get started."),
+    ).toBeInTheDocument();
   });
 
   it("renders empty action CTA when provided", () => {
@@ -188,6 +211,20 @@ describe("DataTable — error state", () => {
       />,
     );
     expect(screen.getByText("Failed to load data")).toBeInTheDocument();
+  });
+
+  it("renders an AlertCircle icon in the error state", () => {
+    const { container } = render(
+      <DataTable
+        title="Test"
+        description=""
+        rows={[]}
+        columns={columns}
+        error="Something went wrong"
+      />,
+    );
+    const svg = container.querySelector("svg");
+    expect(svg).toBeInTheDocument();
   });
 
   it("renders retry button when onRetry is provided", () => {
@@ -399,5 +436,100 @@ describe("DataTable — state precedence", () => {
     const skeletons = container.querySelectorAll('[data-slot="skeleton"]');
     expect(skeletons.length).toBeGreaterThan(0);
     expect(screen.queryByText("Error but loading")).not.toBeInTheDocument();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Role-scoping
+// ---------------------------------------------------------------------------
+
+describe("DataTable — role-scoped columns", () => {
+  type RoleItem = { id: number; name: string; salary: string; ssn: string };
+
+  it("renders all columns when no visibleRoles are set", () => {
+    const cols: DataTableColumn<RoleItem>[] = [
+      { key: "name", label: "Name", render: (r) => r.name },
+      { key: "salary", label: "Salary", render: (r) => r.salary },
+    ];
+    render(
+      <DataTable
+        title="Test"
+        description=""
+        rows={[{ id: 1, name: "Alice", salary: "$80k", ssn: "***-**-1234" }]}
+        columns={cols}
+        roleContext="staff"
+      />,
+    );
+    expect(screen.getByText("Name")).toBeInTheDocument();
+    expect(screen.getByText("Salary")).toBeInTheDocument();
+  });
+
+  it("hides columns with visibleRoles that don't match roleContext", () => {
+    const cols: DataTableColumn<RoleItem>[] = [
+      { key: "name", label: "Name", render: (r) => r.name },
+      {
+        key: "ssn",
+        label: "SSN",
+        render: (r) => r.ssn,
+        visibleRoles: ["admin"],
+      },
+    ];
+    render(
+      <DataTable
+        title="Test"
+        description=""
+        rows={[{ id: 1, name: "Alice", salary: "$80k", ssn: "***-**-1234" }]}
+        columns={cols}
+        roleContext="staff"
+      />,
+    );
+    expect(screen.getByText("Name")).toBeInTheDocument();
+    expect(screen.queryByText("SSN")).not.toBeInTheDocument();
+  });
+
+  it("shows columns with visibleRoles that match roleContext", () => {
+    const cols: DataTableColumn<RoleItem>[] = [
+      { key: "name", label: "Name", render: (r) => r.name },
+      {
+        key: "ssn",
+        label: "SSN",
+        render: (r) => r.ssn,
+        visibleRoles: ["admin", "staff"],
+      },
+    ];
+    render(
+      <DataTable
+        title="Test"
+        description=""
+        rows={[{ id: 1, name: "Alice", salary: "$80k", ssn: "***-**-1234" }]}
+        columns={cols}
+        roleContext="admin"
+      />,
+    );
+    expect(screen.getByText("Name")).toBeInTheDocument();
+    expect(screen.getByText("SSN")).toBeInTheDocument();
+  });
+
+  it("renders all columns when roleContext is not set", () => {
+    const cols: DataTableColumn<RoleItem>[] = [
+      { key: "name", label: "Name", render: (r) => r.name },
+      {
+        key: "ssn",
+        label: "SSN",
+        render: (r) => r.ssn,
+        visibleRoles: ["admin"],
+      },
+    ];
+    render(
+      <DataTable
+        title="Test"
+        description=""
+        rows={[{ id: 1, name: "Alice", salary: "$80k", ssn: "***-**-1234" }]}
+        columns={cols}
+      />,
+    );
+    // Without roleContext, all columns are visible
+    expect(screen.getByText("Name")).toBeInTheDocument();
+    expect(screen.getByText("SSN")).toBeInTheDocument();
   });
 });

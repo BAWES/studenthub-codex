@@ -1,15 +1,20 @@
 import type { ReactNode } from "react";
 import type { Route } from "next";
 import Link from "next/link";
+import { Inbox, AlertCircle } from "lucide-react";
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
+export type RoleContext = "admin" | "staff" | "candidate" | "company" | "inspector";
+
 export type DataTableColumn<T> = {
   key: string;
   label: string;
   render: (row: T) => ReactNode;
+  /** If set, this column is only rendered when the roleContext matches. */
+  visibleRoles?: RoleContext[];
 };
 
 export type EmptyAction = {
@@ -29,6 +34,8 @@ export type DataTableProps<T extends { id: string | number }> = {
   loadingSkeletonRows?: number;
   /** Custom empty state message. */
   emptyMessage?: string;
+  /** Custom hint text below the empty message. */
+  emptyHint?: string;
   /** Optional CTA button in the empty state. */
   emptyAction?: EmptyAction;
   /** Error message — shows error state when set (overrides empty). */
@@ -43,6 +50,8 @@ export type DataTableProps<T extends { id: string | number }> = {
   onPageChange?: (page: number) => void;
   /** Number of items per page (for display in row count). */
   pageSize?: number;
+  /** Role context for column visibility filtering. */
+  roleContext?: RoleContext;
 };
 
 // ---------------------------------------------------------------------------
@@ -94,6 +103,25 @@ function Pagination({
 }
 
 // ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Filter columns based on role context. If a column has `visibleRoles` set
+ * and `roleContext` is provided, the column is only included when the current
+ * role is in the visibleRoles list.
+ */
+function getVisibleColumns<T>(
+  columns: DataTableColumn<T>[],
+  roleContext?: RoleContext,
+): DataTableColumn<T>[] {
+  if (!roleContext) return columns;
+  return columns.filter(
+    (col) => !col.visibleRoles || col.visibleRoles.includes(roleContext),
+  );
+}
+
+// ---------------------------------------------------------------------------
 // DataTable component
 // ---------------------------------------------------------------------------
 
@@ -106,6 +134,7 @@ export function DataTable<T extends { id: string | number }>({
   loading = false,
   loadingSkeletonRows = 5,
   emptyMessage,
+  emptyHint,
   emptyAction,
   error,
   onRetry,
@@ -113,8 +142,10 @@ export function DataTable<T extends { id: string | number }>({
   page = 1,
   onPageChange,
   pageSize,
+  roleContext,
 }: DataTableProps<T>) {
-  const colCount = columns.length + (rowHref ? 1 : 0);
+  const visibleColumns = getVisibleColumns(columns, roleContext);
+  const colCount = visibleColumns.length + (rowHref ? 1 : 0);
 
   // ── Loading state ──────────────────────────────────────────
   if (loading) {
@@ -130,7 +161,7 @@ export function DataTable<T extends { id: string | number }>({
           <table>
             <thead>
               <tr>
-                {columns.map((column) => (
+                {visibleColumns.map((column) => (
                   <th key={column.key}>{column.label}</th>
                 ))}
                 {rowHref ? <th aria-label="Open record" /> : null}
@@ -139,7 +170,7 @@ export function DataTable<T extends { id: string | number }>({
             <tbody>
               {Array.from({ length: loadingSkeletonRows }).map((_, rowIdx) => (
                 <tr key={rowIdx}>
-                  {columns.map((column) => (
+                  {visibleColumns.map((column) => (
                     <td key={column.key}>
                       <Skeleton />
                     </td>
@@ -172,7 +203,7 @@ export function DataTable<T extends { id: string | number }>({
           <table>
             <thead>
               <tr>
-                {columns.map((column) => (
+                {visibleColumns.map((column) => (
                   <th key={column.key}>{column.label}</th>
                 ))}
                 {rowHref ? <th aria-label="Open record" /> : null}
@@ -182,6 +213,7 @@ export function DataTable<T extends { id: string | number }>({
               <tr className="emptyTableRow">
                 <td colSpan={colCount}>
                   <div className="errorState">
+                    <AlertCircle size={32} className="errorStateIcon" />
                     <strong>{error}</strong>
                     {onRetry ? (
                       <button type="button" onClick={onRetry}>
@@ -223,7 +255,7 @@ export function DataTable<T extends { id: string | number }>({
         <table>
           <thead>
             <tr>
-              {columns.map((column) => (
+              {visibleColumns.map((column) => (
                 <th key={column.key}>{column.label}</th>
               ))}
               {rowHref ? <th aria-label="Open record" /> : null}
@@ -233,7 +265,7 @@ export function DataTable<T extends { id: string | number }>({
             {rows.length ? (
               rows.map((row) => (
                 <tr key={row.id}>
-                  {columns.map((column) => (
+                  {visibleColumns.map((column) => (
                     <td data-label={column.label} key={column.key}>
                       {column.render(row)}
                     </td>
@@ -249,11 +281,12 @@ export function DataTable<T extends { id: string | number }>({
               <tr className="emptyTableRow">
                 <td colSpan={colCount}>
                   <div className="emptyState">
+                    <Inbox size={40} className="emptyStateIcon" />
                     <strong>
                       {emptyMessage ?? "No records found"}
                     </strong>
                     <span>
-                      This view is connected to the prod clone, but this account has no matching rows yet.
+                      {emptyHint ?? "No data is available yet in this view."}
                     </span>
                     {emptyAction ? (
                       <button type="button" onClick={emptyAction.onClick}>
