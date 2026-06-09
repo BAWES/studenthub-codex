@@ -39,6 +39,18 @@ vi.mock("lucide-react", () => ({
   ArrowUpRight: () => <span data-testid="icon-arrow-up-right" />,
   CheckCircle2: () => <span data-testid="icon-check-circle" />,
   Clock: () => <span data-testid="icon-clock" />,
+  CreditCard: () => <span data-testid="icon-credit-card" />,
+  Bell: () => <span data-testid="icon-bell" />,
+  MessageSquare: () => <span data-testid="icon-message-square" />,
+  FileText: () => <span data-testid="icon-file-text" />,
+  Quote: () => <span data-testid="icon-quote" />,
+  ChevronLeft: () => <span data-testid="icon-chevron-left" />,
+  Star: () => <span data-testid="icon-star" />,
+  ShieldCheck: () => <span data-testid="icon-shield-check" />,
+  UsersRound: () => <span data-testid="icon-users-round" />,
+  Check: () => <span data-testid="icon-check" />,
+  X: () => <span data-testid="icon-x" />,
+  Minus: () => <span data-testid="icon-minus" />,
 }));
 
 // ── Mock ThemeToggle ──────────────────────────────────────────
