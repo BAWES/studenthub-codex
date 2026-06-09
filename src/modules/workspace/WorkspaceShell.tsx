@@ -9,11 +9,20 @@ import { navForRole } from "./navigation";
 import { WorkspaceMobileNavigation, WorkspaceNavigation } from "./WorkspaceNavigation";
 import { useWorkspaceOS } from "./WorkspaceOSContext";
 import { EmptyState } from "./EmptyState";
+import { MetricCard } from "@/components/ui/metric-card";
 
 type Metric = {
   label: string;
   value: string | number;
   note: string;
+  /** Trend direction for arrows + colour */
+  trend?: "up" | "down" | "flat";
+  /** Trend change text (e.g. "+12%") */
+  trendLabel?: string;
+  /** Inline sparkline data points (3–12 numbers) */
+  sparklineData?: number[];
+  /** Accent colour for the sparkline & glow */
+  accent?: "primary" | "success" | "warning" | "info";
 };
 
 type Row = {
@@ -76,12 +85,18 @@ export function WorkspaceShell({
 
       {metrics.length ? (
         <section className="metrics" aria-label={`${session.role} workspace metrics`}>
-          {metrics.map((metric) => (
-            <article className="metric" key={metric.label}>
-              <span>{metric.label}</span>
-              <strong>{typeof metric.value === "number" ? metric.value.toLocaleString("en-US") : metric.value}</strong>
-              <p>{metric.note}</p>
-            </article>
+          {metrics.map((metric, i) => (
+            <MetricCard
+              key={metric.label}
+              label={metric.label}
+              value={metric.value}
+              note={metric.note}
+              trend={metric.trend}
+              trendLabel={metric.trendLabel}
+              sparklineData={metric.sparklineData}
+              accent={metric.accent}
+              entranceDelay={i * 60}
+            />
           ))}
         </section>
       ) : null}

@@ -2271,23 +2271,120 @@ h2 {
   transform: translateY(-1px);
 }
 
-.metric {
-  min-height: 118px;
-  padding: 18px;
-  border: 1px solid var(--line);
-  background: var(--surface);
+/* ------------------------------------------------------------------ */
+/*  MetricCard — glass card with value, label, sparkline, trend.       */
+/*  Replaces the old bordered .metric block.                           */
+/* ------------------------------------------------------------------ */
+
+.shMetricCard {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 130px;
+  padding: var(--space-4) var(--space-5);
+  background: var(--sh-glass-bg);
+  backdrop-filter: blur(var(--sh-glass-blur));
+  -webkit-backdrop-filter: blur(var(--sh-glass-blur));
+  border: 1px solid var(--sh-glass-border);
+  border-radius: var(--radius-xl);
+  transition:
+    transform var(--dur-slow) var(--sh-easing),
+    box-shadow var(--dur-slow) var(--sh-easing),
+    border-color var(--dur-slow) var(--sh-easing);
+  animation: shMetricFadeIn 400ms var(--sh-easing) both;
 }
 
-.metric strong {
+.shMetricCard:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--sh-glass-border-strong);
+}
+
+.shMetricCardClickable {
+  cursor: pointer;
+}
+
+.shMetricCardClickable:hover {
+  background: var(--sh-glass-bg-strong);
+}
+
+.shMetricCardBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-xs);
+}
+
+.shMetricCardTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--gap-sm);
+}
+
+.shMetricCardLabel {
+  font-size: var(--sh-fs-sm);
+  font-weight: var(--weight-medium);
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.shMetricCardTrend {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.shMetricCardTrend small {
+  font-size: var(--sh-fs-xs);
+  font-weight: var(--weight-semibold);
+  color: var(--muted);
+}
+
+.shMetricCardTrend[data-trend="up"] small { color: var(--sh-success); }
+.shMetricCardTrend[data-trend="down"] small { color: var(--sh-error); }
+
+.shMetricCardValue {
   display: block;
-  font-size: 38px;
-  line-height: 1;
-  margin: 16px 0 10px;
+  font-size: var(--sh-fs-3xl);
+  font-weight: var(--weight-semibold);
+  line-height: 1.1;
+  color: var(--foreground);
+  letter-spacing: -0.02em;
 }
 
-.metric p {
+.shMetricCardNote {
+  font-size: var(--sh-fs-xs);
   color: var(--faint);
-  margin-bottom: 0;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.shMetricCardChart {
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-end;
+  margin-top: var(--space-2);
+}
+
+.shMetricSparkline {
+  opacity: 0.7;
+  transition: opacity var(--dur-default) var(--sh-easing);
+}
+
+.shMetricCard:hover .shMetricSparkline {
+  opacity: 1;
+}
+
+@keyframes shMetricFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .workspace {
