@@ -34,7 +34,9 @@ const roleCapabilities: Record<Role, Capability[]> = {
     "time.read.assigned",
     "time.approve",
     "document.export",
-    "id_review.read"
+    "id_review.read",
+    "tickets.read",
+    "tickets.create"
   ],
   company: [
     "app.access",
