@@ -2,8 +2,8 @@ import { describe, it, expect } from "vitest";
 import {
   getCandidateNotificationRowsSchema,
   getCandidateNotificationDetailSchema,
-  getNotificationTypeLabel,
 } from "./actions";
+import { getNotificationTypeLabel } from "./notification-labels";
 
 // ---------------------------------------------------------------------------
 // Schema tests for candidate/notifications actions (pure unit — no DB required)
