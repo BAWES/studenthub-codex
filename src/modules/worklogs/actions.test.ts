@@ -5,6 +5,11 @@ import {
   updateWorklogSchema,
   deleteWorklogSchema,
   appealWorklogSchema,
+  getWorklogSchema,
+  getWorklogStatsSchema,
+  getWorkingDatesSchema,
+  getAppealDetailSchema,
+  markAppealUpdateReadSchema,
 } from "./actions";
 
 // ---------------------------------------------------------------------------
@@ -213,6 +218,119 @@ describe("appealWorklogSchema", () => {
     const result = appealWorklogSchema.safeParse({
       reason: "I worked 8 hours on this day but the system only shows 4.",
     });
+    expect(result.success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// getWorklogSchema tests
+// ---------------------------------------------------------------------------
+
+describe("getWorklogSchema", () => {
+  it("accepts a valid worklog UUID", () => {
+    const result = getWorklogSchema.safeParse({ worklogUuid: "wl_abc123" });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects empty UUID", () => {
+    const result = getWorklogSchema.safeParse({ worklogUuid: "" });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects missing UUID", () => {
+    const result = getWorklogSchema.safeParse({});
+    expect(result.success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// getWorklogStatsSchema tests
+// ---------------------------------------------------------------------------
+
+describe("getWorklogStatsSchema", () => {
+  it("accepts a valid date", () => {
+    const result = getWorklogStatsSchema.safeParse({ date: "2026-06-09" });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects invalid date format", () => {
+    const result = getWorklogStatsSchema.safeParse({ date: "09-06-2026" });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects missing date", () => {
+    const result = getWorklogStatsSchema.safeParse({});
+    expect(result.success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// getWorkingDatesSchema tests
+// ---------------------------------------------------------------------------
+
+describe("getWorkingDatesSchema", () => {
+  it("accepts empty params", () => {
+    const result = getWorkingDatesSchema.safeParse({});
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts start and end date", () => {
+    const result = getWorkingDatesSchema.safeParse({
+      startDate: "2026-06-01",
+      endDate: "2026-06-30",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects invalid start date", () => {
+    const result = getWorkingDatesSchema.safeParse({ startDate: "01-06-2026" });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects invalid end date", () => {
+    const result = getWorkingDatesSchema.safeParse({ endDate: "not-a-date" });
+    expect(result.success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// getAppealDetailSchema tests
+// ---------------------------------------------------------------------------
+
+describe("getAppealDetailSchema", () => {
+  it("accepts a valid appeal UUID", () => {
+    const result = getAppealDetailSchema.safeParse({ appealUuid: "appeal_abc123" });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects empty UUID", () => {
+    const result = getAppealDetailSchema.safeParse({ appealUuid: "" });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects missing UUID", () => {
+    const result = getAppealDetailSchema.safeParse({});
+    expect(result.success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// markAppealUpdateReadSchema tests
+// ---------------------------------------------------------------------------
+
+describe("markAppealUpdateReadSchema", () => {
+  it("accepts a valid appeal update UUID", () => {
+    const result = markAppealUpdateReadSchema.safeParse({ appealUpdateUuid: "update_abc123" });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects empty UUID", () => {
+    const result = markAppealUpdateReadSchema.safeParse({ appealUpdateUuid: "" });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects missing UUID", () => {
+    const result = markAppealUpdateReadSchema.safeParse({});
     expect(result.success).toBe(false);
   });
 });
