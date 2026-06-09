@@ -12,6 +12,7 @@ import { WorkspaceMobileNavigation, WorkspaceNavigation } from "./WorkspaceNavig
 import { navForRole } from "./navigation";
 import type { NavItem } from "./navigation";
 import { PageTransition } from "./PageTransition";
+import { RaycastCommandPalette } from "./RaycastCommandPalette";
 
 // ── Command types ─────────────────────────────────────────────
 
@@ -303,65 +304,20 @@ export function WorkspaceOS({
         <WorkspaceMobileNavigation items={navItems} role={session.role} />
       </main>
 
-      {/* ── Command Palette Overlay ───────────────────────── */}
-      {cmdOpen ? (
-        <div className="commandOverlay" role="dialog" aria-modal="true" aria-label="Command menu">
-          <button className="commandScrim" aria-label="Close" type="button" onClick={() => setCmdOpen(false)} />
-          <section className="commandMenu">
-            <div className="commandInputWrap">
-              <span>⌘</span>
-              <input
-                ref={cmdInputRef}
-                autoFocus
-                placeholder="Jump to a view, search records, or run an action..."
-                value={cmdQuery}
-                onChange={(e) => setCmdQuery(e.target.value)}
-              />
-              <kbd>Esc</kbd>
-            </div>
-            <div className="commandList">
-              {grouped.length ? (
-                grouped.map(([section, items]) => (
-                  <div className="commandGroup" key={section}>
-                    <h3>{section}</h3>
-                    {items.map((cmd) => {
-                      const idx = filtered.findIndex((f) => f.id === cmd.id);
-                      return (
-                        <button
-                          className={idx === cmdIndex ? "active" : ""}
-                          key={cmd.id}
-                          type="button"
-                          onMouseEnter={() => setCmdIndex(idx)}
-                          onClick={() => visit(cmd.href)}
-                        >
-                          <span>
-                            <strong>{cmd.title}</strong>
-                            <small>{cmd.subtitle}</small>
-                          </span>
-                          {cmd.shortcut ? <kbd>{cmd.shortcut}</kbd> : null}
-                        </button>
-                      );
-                    })}
-                  </div>
-                ))
-              ) : (
-                <div className="commandEmpty">
-                  <strong>No command found</strong>
-                  <span>Try a view, record name, scope, or shortcut.</span>
-                </div>
-              )}
-            </div>
-            <div className="shortcutGrid">
-              {chords.map((row) => (
-                <div key={row.keys}>
-                  <kbd>{row.keys}</kbd>
-                  <span>{row.label}</span>
-                </div>
-              ))}
-            </div>
-          </section>
-        </div>
-      ) : null}
+      {/* ── Command Palette (Raycast-style) ──────────────────── */}
+      <RaycastCommandPalette
+        open={cmdOpen}
+        query={cmdQuery}
+        onQueryChange={setCmdQuery}
+        index={cmdIndex}
+        onIndexChange={setCmdIndex}
+        grouped={grouped}
+        flatCommands={filtered}
+        onVisit={visit}
+        onClose={() => { setCmdOpen(false); setCmdQuery(""); }}
+        inputRef={cmdInputRef}
+        role={session.role}
+      />
     </WorkspaceOSContext.Provider>
   );
 }
