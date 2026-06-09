@@ -83,12 +83,13 @@ export function SlidePanel({
         side={side}
         showCloseButton={showCloseButton}
         className={className}
+        aria-label={!title && !eyebrow && !description ? "Dialog" : undefined}
       >
         <div className="slidePanel">
           {title || eyebrow || description ? (
             <SheetHeader>
               {eyebrow ? <p className="eyebrow">{eyebrow}</p> : null}
-              {title ? <SheetTitle>{title}</SheetTitle> : null}
+              {title ? <SheetTitle>{title}</SheetTitle> : <SheetTitle className="sr-only">Dialog</SheetTitle>}
               {description ? <SheetDescription>{description}</SheetDescription> : null}
             </SheetHeader>
           ) : null}
