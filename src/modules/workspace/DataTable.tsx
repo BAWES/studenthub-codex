@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import type { Route } from "next";
 import Link from "next/link";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, ChevronRight } from "lucide-react";
 import {
   EMPTY_NO_RECORDS,
   EMPTY_HINT_DEFAULT,
@@ -62,24 +62,24 @@ export type DataTableProps<T extends { id: string | number }> = {
 };
 
 // ---------------------------------------------------------------------------
-// Skeleton component
+// Shimmer skeleton
 // ---------------------------------------------------------------------------
 
-function Skeleton({ className = "" }: { className?: string }) {
+function ShimmerSkeleton({ className = "" }: { className?: string }) {
   return (
     <div
       data-slot="skeleton"
-      className={`skeleton ${className}`}
+      className={`shTableSkeleton ${className}`}
       aria-hidden="true"
     />
   );
 }
 
 // ---------------------------------------------------------------------------
-// Pagination component
+// Glass pagination
 // ---------------------------------------------------------------------------
 
-function Pagination({
+function GlassPagination({
   page,
   totalPages,
   onPageChange,
@@ -89,23 +89,29 @@ function Pagination({
   onPageChange: (page: number) => void;
 }) {
   return (
-    <nav className="pagination" aria-label="Pagination">
+    <nav className="shTablePagination" aria-label="Pagination">
       <button
         type="button"
+        className="shTablePageBtn"
         disabled={page <= 1}
         onClick={() => onPageChange(page - 1)}
         aria-label="Previous page"
       >
+        <ChevronRight className="size-3.5 rotate-180" />
         Previous
       </button>
-      <span>Page {page} of {totalPages}</span>
+      <span className="shTablePageInfo">
+        Page {page} of {totalPages}
+      </span>
       <button
         type="button"
+        className="shTablePageBtn"
         disabled={page >= totalPages}
         onClick={() => onPageChange(page + 1)}
         aria-label="Next page"
       >
         Next
+        <ChevronRight className="size-3.5" />
       </button>
     </nav>
   );
@@ -160,15 +166,15 @@ export function DataTable<T extends { id: string | number }>({
   // ── Loading state ──────────────────────────────────────────
   if (loading) {
     return (
-      <section className="tableSurface">
-        <div className="tableHeader">
+      <section className="shTableGlass">
+        <div className="shTableHeader">
           <div>
             <h2>{title}</h2>
             <p>{description}</p>
           </div>
         </div>
-        <div className="tableScroller">
-          <table aria-label={title}>
+        <div className="shTableScroller">
+          <table className="shTable" aria-label={title}>
             <thead>
               <tr>
                 {visibleColumns.map((column) => (
@@ -182,12 +188,12 @@ export function DataTable<T extends { id: string | number }>({
                 <tr key={rowIdx}>
                   {visibleColumns.map((column) => (
                     <td key={column.key}>
-                      <Skeleton />
+                      <ShimmerSkeleton />
                     </td>
                   ))}
                   {rowHref ? (
                     <td>
-                      <Skeleton />
+                      <ShimmerSkeleton />
                     </td>
                   ) : null}
                 </tr>
@@ -202,15 +208,15 @@ export function DataTable<T extends { id: string | number }>({
   // ── Error state ────────────────────────────────────────────
   if (error) {
     return (
-      <section className="tableSurface">
-        <div className="tableHeader">
+      <section className="shTableGlass">
+        <div className="shTableHeader">
           <div>
             <h2>{title}</h2>
             <p>{description}</p>
           </div>
         </div>
-        <div className="tableScroller">
-          <table aria-label={title}>
+        <div className="shTableScroller">
+          <table className="shTable" aria-label={title}>
             <thead>
               <tr>
                 {visibleColumns.map((column) => (
@@ -220,13 +226,21 @@ export function DataTable<T extends { id: string | number }>({
               </tr>
             </thead>
             <tbody>
-              <tr className="emptyTableRow">
-                <td colSpan={colCount}>
-                  <div className="errorState">
-                    <AlertCircle size={32} className="errorStateIcon" />
-                    <strong>{error}</strong>
+              <tr>
+                <td colSpan={colCount} className="shTableEmptyCell">
+                  <div className="flex flex-col items-center justify-center gap-3 py-12 px-6 text-center">
+                    <div className="size-10 rounded-xl bg-red-500/10 flex items-center justify-center">
+                      <AlertCircle size={20} className="text-red-400" />
+                    </div>
+                    <strong className="text-sm" style={{ color: "var(--ink)" }}>
+                      {error}
+                    </strong>
                     {onRetry ? (
-                      <button type="button" onClick={onRetry}>
+                      <button
+                        type="button"
+                        onClick={onRetry}
+                        className="shTablePageBtn"
+                      >
                         Retry
                       </button>
                     ) : null}
@@ -253,16 +267,16 @@ export function DataTable<T extends { id: string | number }>({
     onPageChange !== undefined;
 
   return (
-    <section className="tableSurface">
-      <div className="tableHeader">
+    <section className="shTableGlass">
+      <div className="shTableHeader">
         <div>
           <h2>{title}</h2>
           <p>{description}</p>
         </div>
         <span>{rowCountLabel}</span>
       </div>
-      <div className="tableScroller">
-        <table aria-label={title}>
+      <div className="shTableScroller">
+        <table className="shTable" aria-label={title}>
           <thead>
             <tr>
               {visibleColumns.map((column) => (
@@ -274,28 +288,41 @@ export function DataTable<T extends { id: string | number }>({
           <tbody>
             {rows.length ? (
               rows.map((row) => (
-                <tr key={row.id}>
+                <tr
+                  key={row.id}
+                  className={`shTableRow${rowHref ? " clickable" : ""}`}
+                >
                   {visibleColumns.map((column) => (
                     <td data-label={column.label} key={column.key}>
                       {column.render(row)}
                     </td>
                   ))}
                   {rowHref ? (
-                    <td className="rowAction" data-label="Action">
-                      <Link href={rowHref(row)} aria-label={getRowLabel ? `Open ${getRowLabel(row)}` : "Open record"}>Open</Link>
+                    <td data-label="Action" className="w-[1%] whitespace-nowrap">
+                      <span className="shTableRowAction">
+                        <Link
+                          href={rowHref(row)}
+                          aria-label={getRowLabel ? `Open ${getRowLabel(row)}` : "Open record"}
+                        >
+                          Open
+                          <ChevronRight className="size-3" />
+                        </Link>
+                      </span>
                     </td>
                   ) : null}
                 </tr>
               ))
             ) : (
-              <tr className="emptyTableRow">
-                <td colSpan={colCount}>
-                  <EmptyState
-                    variant="no-records"
-                    message={emptyMessage ?? EMPTY_NO_RECORDS}
-                    hint={emptyHint ?? EMPTY_HINT_DEFAULT}
-                    action={emptyAction ?? undefined}
-                  />
+              <tr>
+                <td colSpan={colCount} className="shTableEmptyCell">
+                  <div className="py-10 px-6">
+                    <EmptyState
+                      variant="no-records"
+                      message={emptyMessage ?? EMPTY_NO_RECORDS}
+                      hint={emptyHint ?? EMPTY_HINT_DEFAULT}
+                      action={emptyAction ?? undefined}
+                    />
+                  </div>
                 </td>
               </tr>
             )}
@@ -303,7 +330,7 @@ export function DataTable<T extends { id: string | number }>({
         </table>
       </div>
       {hasPagination ? (
-        <Pagination
+        <GlassPagination
           page={page}
           totalPages={totalPages}
           onPageChange={onPageChange}

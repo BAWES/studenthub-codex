@@ -2,10 +2,10 @@
 
 import { useActionState, useEffect, useRef } from "react";
 import { LogIn } from "lucide-react";
-import { chooseAccountAction, loginAction } from "./actions";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { chooseAccountAction, loginAction } from "./actions";
 import type { LoginAccountChoice } from "./types";
 
 export function LoginForm() {
@@ -111,3 +111,4 @@ export function LoginForm() {
     </div>
   );
 }
+
