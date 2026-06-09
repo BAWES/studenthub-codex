@@ -76,7 +76,9 @@ export type Capability =
  | "candidate_id_card.read"
  | "candidate_id_card.write"
  | "holiday.read"
- | "holiday.write";
+ | "holiday.write"
+ | "story.read"
+ | "story.write";
 
 export type SessionUser = {
   role: Role;

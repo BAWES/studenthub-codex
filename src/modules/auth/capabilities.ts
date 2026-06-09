@@ -36,6 +36,8 @@ const roleCapabilities: Record<Role, Capability[]> = {
     "client.read",
     "client.write",
     "setting.write",
+    "story.read",
+    "story.write",
   ],
   staff: [
     "app.access",
@@ -63,6 +65,7 @@ const roleCapabilities: Record<Role, Capability[]> = {
     "tickets.create",
     "staff_expense.read",
     "staff_expense.write",
+    "story.read",
   ],
   company: [
     "app.access",
