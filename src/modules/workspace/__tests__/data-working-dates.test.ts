@@ -1,43 +1,16 @@
 import { describe, it, expect } from "vitest";
+import {
+  workingDateStatusLabel,
+  WORKING_DATE_STATUS_LABELS,
+} from "../data";
+import type {
+  WorkingDateRow,
+  WorkingDateDetail,
+} from "../data";
 
 // ---------------------------------------------------------------------------
-// Working date status label mapping — pure logic test for
-// getCandidateWorkingDateRows and getCandidateWorkingDateDetail in data.ts
+// Pure logic tests for candidate working date functions in data.ts
 // ---------------------------------------------------------------------------
-
-const WORKING_DATE_STATUS_LABELS: Record<number, string> = {
-  0: "Pending",
-  1: "Confirmed",
-  2: "Cancelled",
-  3: "Completed",
-};
-
-function workingDateStatusLabel(status: number | null): string {
-  return status != null ? (WORKING_DATE_STATUS_LABELS[status] ?? `Status ${status}`) : "Unknown";
-}
-
-type WorkingDateRow = {
-  id: string;
-  date: string;
-  store: string;
-  company: string;
-  startTime: string;
-  endTime: string;
-  totalTime: string;
-  status: string;
-};
-
-type WorkingDateDetail = {
-  cwd_uuid: string;
-  date: Date;
-  start_time: Date;
-  end_time: Date | null;
-  total_time: number | null;
-  status: number | null;
-  store: { store_name: string | null; company: { company_name: string | null } } | null;
-  created_at: Date | null;
-  updated_at: Date | null;
-};
 
 describe("workingDateStatusLabel", () => {
   it('returns "Pending" for status 0', () => {

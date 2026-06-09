@@ -2630,13 +2630,13 @@ export async function getCandidateWorkingDateDetail(
   return row;
 }
 
-const WORKING_DATE_STATUS_LABELS: Record<number, string> = {
+export const WORKING_DATE_STATUS_LABELS: Record<number, string> = {
   0: "Pending",
   1: "Confirmed",
   2: "Cancelled",
   3: "Completed",
 };
 
-function workingDateStatusLabel(status: number | null): string {
+export function workingDateStatusLabel(status: number | null): string {
   return status != null ? (WORKING_DATE_STATUS_LABELS[status] ?? `Status ${status}`) : "Unknown";
 }
