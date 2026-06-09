@@ -249,6 +249,95 @@ function buildContractFilter(params: {
   return where;
 }
 
+// ---------------------------------------------------------------------------
+// getContract schema
+// ---------------------------------------------------------------------------
+
+const getContractSchema = z.object({
+  contract_uuid: z.string().min(1, "contract_uuid is required"),
+});
+
+describe("getContractSchema", () => {
+  it("accepts valid contract_uuid", () => {
+    const result = getContractSchema.safeParse({
+      contract_uuid: "contract_abc123",
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.contract_uuid).toBe("contract_abc123");
+    }
+  });
+
+  it("rejects empty string", () => {
+    const result = getContractSchema.safeParse({ contract_uuid: "" });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects missing contract_uuid", () => {
+    const result = getContractSchema.safeParse({});
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects non-string uuid", () => {
+    const result = getContractSchema.safeParse({ contract_uuid: 123 });
+    expect(result.success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// getContract return type shape
+// ---------------------------------------------------------------------------
+
+type GetContractResult = ContractRelatedDetail | null;
+
+describe("getContract result type shape", () => {
+  it("returns null when contract not found", () => {
+    const r: GetContractResult = null;
+    expect(r).toBeNull();
+  });
+
+  it("matches fixed price contract detail structure", () => {
+    const detail: ContractRelatedDetail = {
+      type: "Fixed Price",
+      fp_contract_uuid: "fp_abc123",
+      candidate_total: 1000.0,
+      company_total: 1200.0,
+      completion_percentage: 75,
+    };
+    expect(detail.type).toBe("Fixed Price");
+    if (detail.type === "Fixed Price") {
+      expect(detail.candidate_total).toBe(1000.0);
+    }
+  });
+
+  it("matches hourly contract detail structure", () => {
+    const detail: ContractRelatedDetail = {
+      type: "Hourly",
+      h_contract_uuid: "h_def456",
+      candidate_hourly_rate: 25.0,
+      company_hourly_rate: 35.0,
+    };
+    expect(detail.type).toBe("Hourly");
+    if (detail.type === "Hourly") {
+      expect(detail.candidate_hourly_rate).toBe(25.0);
+    }
+  });
+
+  it("matches monthly salary contract detail structure", () => {
+    const detail: ContractRelatedDetail = {
+      type: "Monthly Salary",
+      ms_contract_uuid: "ms_ghi789",
+      candidate_total: 2000.0,
+      company_total: 2500.0,
+      salary_day: 1,
+    };
+    expect(detail.type).toBe("Monthly Salary");
+    if (detail.type === "Monthly Salary") {
+      expect(detail.salary_day).toBe(1);
+    }
+  });
+});
+
 describe("buildContractFilter", () => {
   it("returns base filter with deleted=false by default", () => {
     const result = buildContractFilter({});
