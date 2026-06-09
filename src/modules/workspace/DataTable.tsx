@@ -56,6 +56,10 @@ export type DataTableProps<T extends { id: string | number }> = {
   pageSize?: number;
   /** Role context for column visibility filtering. */
   roleContext?: RoleContext;
+  /** Optional function that returns a unique label for each row's "Open" link,
+   *  improving accessibility by making each link distinguishable to screen readers.
+   *  Falls back to "Open record" when not provided. */
+  getRowLabel?: (row: T) => string;
 };
 
 // ---------------------------------------------------------------------------
@@ -149,6 +153,7 @@ export function DataTable<T extends { id: string | number }>({
   onPageChange,
   pageSize,
   roleContext,
+  getRowLabel,
 }: DataTableProps<T>) {
   const visibleColumns = getVisibleColumns(columns, roleContext);
   const colCount = visibleColumns.length + (rowHref ? 1 : 0);
