@@ -11347,10 +11347,12 @@ kbd {
   animation: shFadeInUp 600ms var(--sh-easing) forwards;
 }
 
-.shSection:nth-child(1) { animation-delay: 100ms; }
-.shSection:nth-child(2) { animation-delay: 250ms; }
-.shSection:nth-child(3) { animation-delay: 400ms; }
-.shSection:nth-child(4) { animation-delay: 550ms; }
+.shSection:nth-child(3) { animation-delay: 100ms; }
+.shSection:nth-child(4) { animation-delay: 200ms; }
+.shSection:nth-child(5) { animation-delay: 300ms; }
+.shSection:nth-child(6) { animation-delay: 400ms; }
+.shSection:nth-child(7) { animation-delay: 500ms; }
+.shSection:nth-child(8) { animation-delay: 600ms; }
 
 @keyframes shFadeInUp {
   to {
