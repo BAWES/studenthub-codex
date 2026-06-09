@@ -30,8 +30,9 @@ vi.mock("next/link", () => ({
 
 // ── Mock lucide-react icons ───────────────────────────────────
 vi.mock("lucide-react", () => {
-  const icon = (testId: string) => ({ className, ...rest }: Record<string, unknown>) =>
-    <span data-testid={testId} className={className as string} {...rest} />;
+  const icon = (testId: string) => function MockLucideIcon({ className, ...rest }: Record<string, unknown>) {
+    return <span data-testid={testId} className={className as string} {...rest} />;
+  };
   return {
     ArrowUpRight: icon("icon-arrow-up-right"),
     BarChart3: icon("icon-bar-chart-3"),
