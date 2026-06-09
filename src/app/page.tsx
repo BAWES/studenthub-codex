@@ -66,12 +66,20 @@ export default async function Home() {
               Open app
             </Link>
           ) : (
-            <Link
-              href="/login"
-              className="uiButton uiButton_default uiButton_defaultSize"
-            >
-              Sign in
-            </Link>
+            <>
+              <Link
+                href="/signup"
+                className="uiButton uiButton_default uiButton_defaultSize"
+              >
+                Get started
+              </Link>
+              <Link
+                href="/login"
+                className="uiButton uiButton_ghost uiButton_defaultSize"
+              >
+                Sign in
+              </Link>
+            </>
           )}
           <ThemeToggle />
         </div>
@@ -152,8 +160,14 @@ export default async function Home() {
           </p>
           <div className="flex flex-wrap items-center gap-3.5 mt-4 max-sm:flex-col max-sm:items-stretch">
             <Link
-              href="/login"
+              href="/signup"
               className="uiButton uiButton_default uiButton_lg"
+            >
+              Get started
+            </Link>
+            <Link
+              href="/login"
+              className="uiButton uiButton_ghost uiButton_lg"
             >
               Sign in
             </Link>
