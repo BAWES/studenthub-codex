@@ -1,354 +1,270 @@
 import { describe, it, expect } from "vitest";
-import { z } from "zod";
 
 // ---------------------------------------------------------------------------
-// Pure logic: ticket schema validation
-//
-// The ticket server actions use these schemas internally. Testing them
-// separately avoids mocking "use server" dependencies (prisma, session,
-// next/cache).
+// Schemas imported from actions.ts for contract testing
 // ---------------------------------------------------------------------------
 
-const listTicketsSchema = z.object({
-  candidateId: z.coerce.number().int().positive().optional(),
-  staffId: z.coerce.number().int().positive().optional(),
-  ticketStatus: z.coerce.number().int().min(0).max(255).optional(),
-  startDate: z.string().optional(),
-  endDate: z.string().optional(),
-  page: z.coerce.number().int().positive().optional().default(1),
-  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
-});
-
-const getTicketSchema = z.object({
-  ticketUuid: z.string().min(1, "Ticket UUID is required"),
-});
-
-const createTicketSchema = z.object({
-  candidateId: z.coerce.number().int().positive("Candidate ID is required"),
-  staffId: z.coerce.number().int().positive().optional(),
-  ticketDetail: z.string().min(1, "Ticket detail is required"),
-  ticketStatus: z.coerce.number().int().min(0).max(255).optional().default(0),
-});
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-type TicketListItem = {
-  ticket_uuid: string;
-  candidate_id: number | null;
-  staff_id: number | null;
-  ticket_detail: string | null;
-  ticket_status: number | null;
-  ticket_started_at: Date | null;
-  ticket_completed_at: Date | null;
-  created_at: Date | null;
-  updated_at: Date | null;
-};
-
-type TicketDetail = TicketListItem & {
-  response_time: number | null;
-  resolution_time: number | null;
-};
-
-type ListTicketsResult = {
-  tickets: TicketListItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
-
-// ---------------------------------------------------------------------------
-// Filter builder (pure function)
-// ---------------------------------------------------------------------------
-
-type TicketWhereInput = {
-  candidate_id?: number;
-  staff_id?: number;
-  ticket_status?: number;
-  ticket_started_at?: { gte?: Date; lte?: Date };
-};
-
-function buildTicketFilter(params: {
-  candidateId?: number;
-  staffId?: number;
-  ticketStatus?: number;
-  startDate?: string;
-  endDate?: string;
-}): TicketWhereInput {
-  const where: TicketWhereInput = {};
-
-  if (params.candidateId !== undefined) {
-    where.candidate_id = params.candidateId;
-  }
-  if (params.staffId !== undefined) {
-    where.staff_id = params.staffId;
-  }
-  if (params.ticketStatus !== undefined) {
-    where.ticket_status = params.ticketStatus;
-  }
-
-  if (params.startDate || params.endDate) {
-    const dateFilter: { gte?: Date; lte?: Date } = {};
-    if (params.startDate) {
-      dateFilter.gte = new Date(params.startDate);
-    }
-    if (params.endDate) {
-      const end = new Date(params.endDate);
-      end.setHours(23, 59, 59, 999);
-      dateFilter.lte = end;
-    }
-    where.ticket_started_at = dateFilter;
-  }
-
-  return where;
-}
-
-// ---------------------------------------------------------------------------
-// Tests: listTicketsSchema
-// ---------------------------------------------------------------------------
+import {
+  listTicketsSchema,
+  getTicketSchema,
+  createTicketSchema,
+  addCommentSchema,
+  getCommentsSchema,
+} from "./actions";
 
 describe("listTicketsSchema", () => {
-  it("accepts empty params and uses defaults", () => {
+  it("accepts default values when no params provided", () => {
     const result = listTicketsSchema.safeParse({});
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data.page).toBe(1);
       expect(result.data.limit).toBe(20);
+      expect(result.data.candidateId).toBeUndefined();
+      expect(result.data.status).toBeUndefined();
     }
   });
 
-  it("accepts candidateId filter", () => {
-    const result = listTicketsSchema.safeParse({ candidateId: 42 });
+  it("accepts explicit page and limit", () => {
+    const result = listTicketsSchema.safeParse({ page: "3", limit: "50" });
     expect(result.success).toBe(true);
     if (result.success) {
-      expect(result.data.candidateId).toBe(42);
-    }
-  });
-
-  it("accepts staffId filter", () => {
-    const result = listTicketsSchema.safeParse({ staffId: 7 });
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.staffId).toBe(7);
-    }
-  });
-
-  it("accepts ticketStatus filter", () => {
-    const result = listTicketsSchema.safeParse({ ticketStatus: 1 });
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.ticketStatus).toBe(1);
-    }
-  });
-
-  it("accepts startDate filter", () => {
-    const result = listTicketsSchema.safeParse({
-      startDate: "2025-01-01",
-    });
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.startDate).toBe("2025-01-01");
-    }
-  });
-
-  it("accepts pagination params", () => {
-    const result = listTicketsSchema.safeParse({ page: 2, limit: 50 });
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.page).toBe(2);
+      expect(result.data.page).toBe(3);
       expect(result.data.limit).toBe(50);
     }
   });
 
-  it("rejects limit over 100", () => {
-    const result = listTicketsSchema.safeParse({ limit: 999 });
-    expect(result.success).toBe(false);
-  });
-
-  it("rejects negative page", () => {
-    const result = listTicketsSchema.safeParse({ page: -1 });
-    expect(result.success).toBe(false);
-  });
-
-  it("rejects ticketStatus over 255", () => {
-    const result = listTicketsSchema.safeParse({ ticketStatus: 999 });
-    expect(result.success).toBe(false);
-  });
-
-  it("coerces string numbers", () => {
+  it("accepts candidateId filter", () => {
     const result = listTicketsSchema.safeParse({ candidateId: "42" });
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data.candidateId).toBe(42);
     }
   });
-});
 
-// ---------------------------------------------------------------------------
-// Tests: getTicketSchema
-// ---------------------------------------------------------------------------
-
-describe("getTicketSchema", () => {
-  it("accepts a valid ticket UUID", () => {
-    const result = getTicketSchema.safeParse({ ticketUuid: "ticket_abc123" });
+  it("accepts status filter", () => {
+    const result = listTicketsSchema.safeParse({ status: "1" });
     expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.status).toBe(1);
+    }
   });
 
-  it("rejects empty ticketUuid", () => {
+  it("rejects page less than 1", () => {
+    const result = listTicketsSchema.safeParse({ page: "0" });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects negative page", () => {
+    const result = listTicketsSchema.safeParse({ page: "-1" });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects limit greater than 100", () => {
+    const result = listTicketsSchema.safeParse({ limit: "101" });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects limit less than 1", () => {
+    const result = listTicketsSchema.safeParse({ limit: "0" });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects non-numeric page", () => {
+    const result = listTicketsSchema.safeParse({ page: "abc" });
+    expect(result.success).toBe(false);
+  });
+
+  it("coerces string page to number", () => {
+    const result = listTicketsSchema.safeParse({ page: "2" });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.page).toBe(2);
+    }
+  });
+});
+
+describe("getTicketSchema", () => {
+  it("accepts valid UUID string", () => {
+    const result = getTicketSchema.safeParse({
+      ticketUuid: "abc-123-def-456",
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.ticketUuid).toBe("abc-123-def-456");
+    }
+  });
+
+  it("rejects empty UUID string", () => {
     const result = getTicketSchema.safeParse({ ticketUuid: "" });
     expect(result.success).toBe(false);
   });
 
-  it("rejects missing ticketUuid", () => {
+  it("rejects missing UUID", () => {
     const result = getTicketSchema.safeParse({});
     expect(result.success).toBe(false);
   });
 });
 
-// ---------------------------------------------------------------------------
-// Tests: createTicketSchema
-// ---------------------------------------------------------------------------
-
 describe("createTicketSchema", () => {
-  it("accepts valid input with all fields", () => {
+  it("accepts valid detail with optional attachments", () => {
     const result = createTicketSchema.safeParse({
-      candidateId: 42,
-      staffId: 7,
-      ticketDetail: "Need help with account setup",
-      ticketStatus: 0,
+      detail: "My account balance is incorrect",
+      attachments: ["key1", "key2"],
     });
     expect(result.success).toBe(true);
     if (result.success) {
-      expect(result.data.ticketDetail).toBe("Need help with account setup");
-      expect(result.data.ticketStatus).toBe(0);
+      expect(result.data.detail).toBe("My account balance is incorrect");
+      expect(result.data.attachments).toEqual(["key1", "key2"]);
     }
   });
 
-  it("accepts minimal input", () => {
+  it("accepts detail without attachments", () => {
     const result = createTicketSchema.safeParse({
-      candidateId: 42,
-      ticketDetail: "Having an issue with login",
+      detail: "Need help with login",
     });
     expect(result.success).toBe(true);
     if (result.success) {
-      expect(result.data.ticketStatus).toBe(0);
+      expect(result.data.detail).toBe("Need help with login");
+      expect(result.data.attachments).toBeUndefined();
     }
   });
 
-  it("rejects missing candidateId", () => {
-    const result = createTicketSchema.safeParse({
-      ticketDetail: "Some issue",
+  it("rejects empty detail", () => {
+    const result = createTicketSchema.safeParse({ detail: "" });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects missing detail", () => {
+    const result = createTicketSchema.safeParse({});
+    expect(result.success).toBe(false);
+  });
+});
+
+describe("addCommentSchema", () => {
+  it("accepts valid comment with ticketUuid and detail", () => {
+    const result = addCommentSchema.safeParse({
+      ticketUuid: "ticket-123",
+      commentDetail: "Please follow up on this.",
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.ticketUuid).toBe("ticket-123");
+      expect(result.data.commentDetail).toBe("Please follow up on this.");
+    }
+  });
+
+  it("accepts comment with optional attachments", () => {
+    const result = addCommentSchema.safeParse({
+      ticketUuid: "ticket-123",
+      commentDetail: "See attached",
+      attachments: ["file-key-1"],
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.attachments).toEqual(["file-key-1"]);
+    }
+  });
+
+  it("rejects empty ticketUuid", () => {
+    const result = addCommentSchema.safeParse({
+      ticketUuid: "",
+      commentDetail: "Comment",
     });
     expect(result.success).toBe(false);
   });
 
-  it("rejects missing ticketDetail", () => {
-    const result = createTicketSchema.safeParse({
-      candidateId: 42,
+  it("rejects missing ticketUuid", () => {
+    const result = addCommentSchema.safeParse({
+      commentDetail: "Comment",
     });
     expect(result.success).toBe(false);
   });
 
-  it("rejects empty ticketDetail", () => {
-    const result = createTicketSchema.safeParse({
-      candidateId: 42,
-      ticketDetail: "",
+  it("rejects empty commentDetail", () => {
+    const result = addCommentSchema.safeParse({
+      ticketUuid: "ticket-123",
+      commentDetail: "",
     });
     expect(result.success).toBe(false);
   });
 
-  it("rejects negative candidateId", () => {
-    const result = createTicketSchema.safeParse({
-      candidateId: -1,
-      ticketDetail: "Issue",
+  it("rejects missing commentDetail", () => {
+    const result = addCommentSchema.safeParse({
+      ticketUuid: "ticket-123",
     });
     expect(result.success).toBe(false);
   });
 });
 
-// ---------------------------------------------------------------------------
-// Tests: buildTicketFilter (pure function)
-// ---------------------------------------------------------------------------
-
-describe("buildTicketFilter", () => {
-  it("returns empty object with no filters", () => {
-    const result = buildTicketFilter({});
-    expect(result).toEqual({});
-  });
-
-  it("filters by candidateId", () => {
-    const result = buildTicketFilter({ candidateId: 42 });
-    expect(result).toEqual({ candidate_id: 42 });
-  });
-
-  it("filters by staffId", () => {
-    const result = buildTicketFilter({ staffId: 7 });
-    expect(result).toEqual({ staff_id: 7 });
-  });
-
-  it("filters by ticketStatus", () => {
-    const result = buildTicketFilter({ ticketStatus: 1 });
-    expect(result).toEqual({ ticket_status: 1 });
-  });
-
-  it("filters by multiple fields", () => {
-    const result = buildTicketFilter({
-      candidateId: 42,
-      staffId: 7,
-      ticketStatus: 1,
+describe("getCommentsSchema", () => {
+  it("accepts valid ticketUuid", () => {
+    const result = getCommentsSchema.safeParse({
+      ticketUuid: "ticket-456",
     });
-    expect(result).toEqual({
-      candidate_id: 42,
-      staff_id: 7,
-      ticket_status: 1,
-    });
-  });
-
-  it("filters by startDate", () => {
-    const result = buildTicketFilter({ startDate: "2025-01-01" });
-    expect(result).toHaveProperty("ticket_started_at");
-    if (result.ticket_started_at) {
-      expect(result.ticket_started_at.gte).toEqual(new Date("2025-01-01"));
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.ticketUuid).toBe("ticket-456");
     }
   });
 
-  it("filters by endDate and sets end-of-day", () => {
-    const result = buildTicketFilter({ endDate: "2025-01-15" });
-    expect(result).toHaveProperty("ticket_started_at");
-    if (result.ticket_started_at && result.ticket_started_at.lte) {
-      expect(result.ticket_started_at.lte.getHours()).toBe(23);
-      expect(result.ticket_started_at.lte.getMinutes()).toBe(59);
-    }
+  it("rejects empty ticketUuid", () => {
+    const result = getCommentsSchema.safeParse({ ticketUuid: "" });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects missing ticketUuid", () => {
+    const result = getCommentsSchema.safeParse({});
+    expect(result.success).toBe(false);
   });
 });
 
 // ---------------------------------------------------------------------------
-// Tests: Return type shapes
+// Return type shape verification
 // ---------------------------------------------------------------------------
 
-describe("TicketListItem shape", () => {
-  it("defines the expected fields", () => {
-    const mock: TicketListItem = {
-      ticket_uuid: "ticket_abc123",
-      candidate_id: 42,
-      staff_id: 7,
-      ticket_detail: "Help needed with account",
-      ticket_status: 0,
-      ticket_started_at: new Date("2025-01-01"),
-      ticket_completed_at: null,
-      created_at: new Date("2025-01-01"),
-      updated_at: new Date("2025-01-01"),
+type TicketItem = {
+  ticket_uuid: string;
+  candidate_id: number | null;
+  staff_id: number | null;
+  ticket_detail: string | null;
+  ticket_status: number | null;
+  created_at: Date | null;
+  updated_at: Date | null;
+};
+
+type ListTicketsResult = {
+  tickets: TicketItem[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+};
+
+describe("ListTicketsResult type shape", () => {
+  it("conforms to expected structure", () => {
+    const result: ListTicketsResult = {
+      tickets: [
+        {
+          ticket_uuid: "abc-123",
+          candidate_id: 1,
+          staff_id: null,
+          ticket_detail: "Need help with payment",
+          ticket_status: 0,
+          created_at: new Date("2024-01-01"),
+          updated_at: new Date("2024-01-01"),
+        },
+      ],
+      total: 1,
+      page: 1,
+      limit: 20,
+      totalPages: 1,
     };
-    expect(mock.ticket_uuid).toBe("ticket_abc123");
-    expect(mock.candidate_id).toBe(42);
-    expect(mock.ticket_status).toBe(0);
+    expect(result.tickets).toHaveLength(1);
+    expect(result.total).toBe(1);
+    expect(result.totalPages).toBe(1);
   });
-});
 
-describe("ListTicketsResult shape", () => {
-  it("accepts empty result set", () => {
+  it("handles empty ticket list", () => {
     const result: ListTicketsResult = {
       tickets: [],
       total: 0,
@@ -356,7 +272,93 @@ describe("ListTicketsResult shape", () => {
       limit: 20,
       totalPages: 0,
     };
-    expect(result.total).toBe(0);
     expect(result.tickets).toHaveLength(0);
+    expect(result.totalPages).toBe(0);
+  });
+
+  it("includes all required fields", () => {
+    const item: TicketItem = {
+      ticket_uuid: "abc",
+      candidate_id: 42,
+      staff_id: null,
+      ticket_detail: "Issue with login",
+      ticket_status: 1,
+      created_at: new Date("2024-01-01"),
+      updated_at: new Date("2024-01-15"),
+    };
+    expect(item.ticket_detail).toBe("Issue with login");
+    expect(item.ticket_status).toBe(1);
+    expect(item.candidate_id).toBe(42);
+  });
+
+  it("allows nullable timestamps", () => {
+    const item: TicketItem = {
+      ticket_uuid: "abc",
+      candidate_id: null,
+      staff_id: null,
+      ticket_detail: null,
+      ticket_status: null,
+      created_at: null,
+      updated_at: null,
+    };
+    expect(item.created_at).toBeNull();
+    expect(item.updated_at).toBeNull();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// TicketCommentItem return type
+// ---------------------------------------------------------------------------
+
+type TicketCommentItem = {
+  ticket_comment_uuid: string;
+  ticket_uuid: string;
+  candidate_id: number | null;
+  staff_id: number | null;
+  ticket_comment_detail: string | null;
+  created_at: Date | null;
+  updated_at: Date | null;
+};
+
+describe("TicketCommentItem type shape", () => {
+  it("includes all required fields", () => {
+    const comment: TicketCommentItem = {
+      ticket_comment_uuid: "comment-1",
+      ticket_uuid: "ticket-1",
+      candidate_id: 42,
+      staff_id: null,
+      ticket_comment_detail: "Please help!",
+      created_at: new Date("2024-01-01"),
+      updated_at: null,
+    };
+    expect(comment.ticket_comment_detail).toBe("Please help!");
+    expect(comment.candidate_id).toBe(42);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// CreateTicketResult return type
+// ---------------------------------------------------------------------------
+
+type CreateTicketResult = {
+  operation: string;
+  message: string;
+};
+
+describe("CreateTicketResult type shape", () => {
+  it("returns success result", () => {
+    const result: CreateTicketResult = {
+      operation: "success",
+      message: "Ticket created successfully",
+    };
+    expect(result.operation).toBe("success");
+  });
+
+  it("returns error result", () => {
+    const result: CreateTicketResult = {
+      operation: "error",
+      message: "Validation failed",
+    };
+    expect(result.operation).toBe("error");
   });
 });
