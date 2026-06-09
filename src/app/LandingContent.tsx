@@ -54,56 +54,56 @@ const signupRoles: Record<SwitcherPersona, string> = {
 // ── Nav CTA copy ──────────────────────────────────────────────
 
 const navCtaLabel: Record<SwitcherPersona, string> = {
-  candidate: "Create free candidate profile",
-  company: "Set up company account",
+  candidate: "Create free student profile",
+  company: "Partner with us",
   staff: "Request staff access",
   admin: "Request admin access",
   inspector: "Request inspector access",
 };
 
 const finalCtaEyebrow: Record<SwitcherPersona, string> = {
-  candidate: "Start your placement journey",
-  company: "Start hiring today",
-  staff: "Start placing faster",
+  candidate: "Start building your career",
+  company: "Start your partnership",
+  staff: "Start orchestrating",
   admin: "Take control of operations",
-  inspector: "Streamline your inspections",
+  inspector: "Start inspecting today",
 };
 
 const finalCtaTitle: Record<SwitcherPersona, string> = {
-  candidate: "Your next role is one profile away.",
-  company: "Your next hire is one post away.",
-  staff: "Your next placement is one search away.",
+  candidate: "Your future CV starts today.",
+  company: "Workforce management, handled.",
+  staff: "Your next rotation is one click away.",
   admin: "Your next dashboard is one login away.",
-  inspector: "Your next batch is one review away.",
+  inspector: "Your next verification is one scan away.",
 };
 
 const finalCtaBody: Record<SwitcherPersona, string> = {
   candidate:
-    "Create your free profile in under 3 minutes. No CV required — just your experience and what you're looking for. Employers are hiring right now.",
+    "Create your free profile in under 3 minutes. StudentHub matches you with paid placements across different companies. Rotate every ~3 months, build experience across multiple roles, and graduate way ahead of your peers. Free, always.",
   company:
-    "Post your first opening and get matched candidates within 48 hours. Set up your company account in under 5 minutes.",
+    "Get matched with qualified student workers in under 48 hours. StudentHub manages placement, compliance, payroll, and rotations — one partner, one invoice. Hourly rates and monthly plans available.",
   staff:
-    "Start searching, shortlisting, and placing candidates immediately. Access the full staffing toolkit from day one.",
+    "Manage students, placements, rotations, and compliance from one dashboard. Access the full operations toolkit from day one. No setup fee, no minimum commitment.",
   admin:
     "Get full visibility across users, finances, compliance, and payroll. One workspace replaces a dozen logins.",
   inspector:
-    "Start reviewing document batches with full audit trails. Clear your queue and maintain compliance from day one.",
+    "Authenticate once and instantly verify any StudentHub worker by scanning their QR ID card. No onboarding, no paperwork — just scan and validate.",
 };
 
 const finalCtaButton: Record<SwitcherPersona, string> = {
-  candidate: "Create your free candidate profile",
-  company: "Set up your company account",
+  candidate: "Create your free student profile",
+  company: "Partner with StudentHub",
   staff: "Get staff access",
   admin: "Get admin access",
   inspector: "Get inspector access",
 };
 
 const finalCtaProof: Record<SwitcherPersona, string> = {
-  candidate: "1,200+ candidates placed this year · 4.8★ satisfaction",
-  company: "200+ employers hiring · 3-day avg time-to-shortlist",
-  staff: "350+ agencies · 62% faster placement",
+  candidate: "1,200+ students placed this year · 4.8★ satisfaction",
+  company: "200+ companies on StudentHub · 100% audit pass rate",
+  staff: "350+ active rotations · 99.7% compliance pass rate",
   admin: "15,000+ worker records managed · 99.7% audit pass rate",
-  inspector: "10,000+ documents reviewed monthly · Full audit trails",
+  inspector: "10,000+ verifications monthly · Zero-day onboarding",
 };
 
 // ── Component ─────────────────────────────────────────────────
