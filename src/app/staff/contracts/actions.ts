@@ -20,6 +20,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { requireCapability } from "@/modules/auth/session";
 
 // ---------------------------------------------------------------------------
 // Schemas
@@ -123,6 +124,8 @@ function getStatusLabel(status: number): string {
 export async function listContracts(
   input: ListContractsInput = {},
 ): Promise<ListContractsResult> {
+  await requireCapability("contracts.read");
+
   const parsed = listContractsSchema.safeParse(input);
   if (!parsed.success) {
     return { items: [], total: 0, page: 1, limit: 20, totalPages: 0 };
@@ -192,6 +195,8 @@ export async function listContracts(
 export async function getContractDetail(
   input: GetContractInput,
 ): Promise<ContractDetail> {
+  await requireCapability("contracts.read");
+
   const parsed = getContractSchema.safeParse(input);
   if (!parsed.success) {
     throw new Error(parsed.error.issues[0]?.message ?? "Invalid contract UUID");
@@ -248,6 +253,8 @@ export async function getContractDetail(
 export async function updateContractStatus(
   input: UpdateContractStatusInput,
 ): Promise<{ success: boolean }> {
+  await requireCapability("contracts.write");
+
   const parsed = updateContractStatusSchema.safeParse(input);
   if (!parsed.success) {
     throw new Error(parsed.error.issues[0]?.message ?? "Invalid input");
