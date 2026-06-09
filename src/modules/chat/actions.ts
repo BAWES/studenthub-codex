@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { requireRoleCapability } from "@/modules/auth/session";
+import { requireCapability } from "@/modules/auth/session";
 
 // ---------------------------------------------------------------------------
 // Schemas
@@ -16,8 +16,8 @@ const listChatsSchema = z.object({
   staffId: z.number().int().optional(),
 });
 
-const listChatMessagesSchema = z.object({
-  chatUuid: z.string().min(1, "Chat UUID is required"),
+const getChatMessagesSchema = z.object({
+  chatUuid: z.string().min(1),
   lastIndex: z.number().int().positive().optional(),
   limit: z.number().int().min(1).max(100).optional(),
 });
@@ -26,26 +26,31 @@ const listChatMessagesSchema = z.object({
 // Types
 // ---------------------------------------------------------------------------
 
-export type ChatItem = {
+export type ListChatsParams = z.input<typeof listChatsSchema>;
+
+export type GetChatMessagesParams = z.input<typeof getChatMessagesSchema>;
+
+export type ChatListItem = {
   chat_uuid: string;
+  candidate_id: number;
   company_id: number;
   store_id: number;
   staff_id: number | null;
-  created_at: string | null;
+  created_at: Date | null;
 };
 
 export type ChatMessageItem = {
   chat_message_uuid: string;
   chat_uuid: string;
-  from: string | null;
   message: string;
   message_index: number | null;
+  from: string | null;
   status: boolean | null;
-  created_at: string | null;
+  created_at: Date | null;
 };
 
 export type ListChatsResult = {
-  chats: ChatItem[];
+  chats: ChatListItem[];
   total: number;
   page: number;
   limit: number;
@@ -61,15 +66,17 @@ export type ListChatMessagesResult = {
 };
 
 // ---------------------------------------------------------------------------
-// List chats for the current candidate
-// Mirrors legacy CandidateChatController::actionList()
+// Server actions
 // ---------------------------------------------------------------------------
 
+/**
+ * List chats for the current candidate, with optional filters.
+ * Mirrors the legacy Yii2 ChatController::actionList().
+ */
 export async function listChats(
-  params: z.input<typeof listChatsSchema> = {},
+  params: ListChatsParams = {},
 ): Promise<ListChatsResult> {
-  const session = await requireRoleCapability("candidate", "candidate.read.own");
-  const candidateId = Number(session.id);
+  await requireCapability("candidate.read.own");
 
   const parsed = listChatsSchema.safeParse(params);
   if (!parsed.success) {
@@ -78,7 +85,7 @@ export async function listChats(
 
   const { page = 1, limit = 20, companyId, storeId, staffId } = parsed.data;
 
-  const where: Record<string, unknown> = { candidate_id: candidateId };
+  const where: Record<string, unknown> = {};
   if (companyId !== undefined) where.company_id = companyId;
   if (storeId !== undefined) where.store_id = storeId;
   if (staffId !== undefined) where.staff_id = staffId;
@@ -89,22 +96,12 @@ export async function listChats(
       orderBy: { created_at: "desc" },
       skip: (page - 1) * limit,
       take: limit,
-      select: {
-        chat_uuid: true,
-        company_id: true,
-        store_id: true,
-        staff_id: true,
-        created_at: true,
-      },
     }),
     prisma.chat.count({ where: where as any }),
   ]);
 
   return {
-    chats: chats.map((c) => ({
-      ...c,
-      created_at: c.created_at?.toISOString() ?? null,
-    })) as ChatItem[],
+    chats: chats as ChatListItem[],
     total,
     page,
     limit,
@@ -112,32 +109,21 @@ export async function listChats(
   };
 }
 
-// ---------------------------------------------------------------------------
-// List messages for a chat
-// Mirrors legacy CandidateChatController::actionMessages()
-// ---------------------------------------------------------------------------
-
-export async function listChatMessages(
-  params: z.input<typeof listChatMessagesSchema>,
+/**
+ * Get messages for a specific chat, with optional pagination by lastIndex.
+ * Mirrors the legacy Yii2 ChatController::actionMessages().
+ */
+export async function getChatMessages(
+  params: GetChatMessagesParams,
 ): Promise<ListChatMessagesResult> {
-  const session = await requireRoleCapability("candidate", "candidate.read.own");
-  const candidateId = Number(session.id);
+  await requireCapability("candidate.read.own");
 
-  const parsed = listChatMessagesSchema.safeParse(params);
+  const parsed = getChatMessagesSchema.safeParse(params);
   if (!parsed.success) {
     throw new Error(parsed.error.issues[0]?.message ?? "Invalid parameters");
   }
 
   const { chatUuid, lastIndex, limit = 50 } = parsed.data;
-
-  // Verify the chat belongs to this candidate
-  const chat = await prisma.chat.findFirst({
-    where: { chat_uuid: chatUuid, candidate_id: candidateId },
-  });
-
-  if (!chat) {
-    throw new Error("Chat not found");
-  }
 
   const where: Record<string, unknown> = { chat_uuid: chatUuid };
   if (lastIndex !== undefined) {
@@ -149,29 +135,12 @@ export async function listChatMessages(
       where: where as any,
       orderBy: { message_index: "desc" },
       take: limit,
-      select: {
-        chat_message_uuid: true,
-        chat_uuid: true,
-        from: true,
-        message: true,
-        message_index: true,
-        status: true,
-        created_at: true,
-      },
     }),
-    prisma.chat_message.count({
-      where: { chat_uuid: chatUuid } as any,
-    }),
+    prisma.chat_message.count({ where: where as any }),
   ]);
 
-  // Sort messages ascending for display
-  messages.reverse();
-
   return {
-    messages: messages.map((m) => ({
-      ...m,
-      created_at: m.created_at?.toISOString() ?? null,
-    })) as ChatMessageItem[],
+    messages: messages as ChatMessageItem[],
     total,
     page: 1,
     limit,
