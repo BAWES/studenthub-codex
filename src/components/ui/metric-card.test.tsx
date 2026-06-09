@@ -12,8 +12,8 @@ describe("MetricCard", () => {
   });
 
   it("renders formatted large number", () => {
-    render(<MetricCard label="Total revenue" value={1234567} />);
-    expect(screen.getByText("1234567")).toBeInTheDocument();
+    const { container } = render(<MetricCard label="Total revenue" value={1234567} />);
+    expect(container.textContent).toContain("1,234,567");
   });
 
   it("renders string value as-is", () => {

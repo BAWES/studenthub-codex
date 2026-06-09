@@ -56,6 +56,10 @@ const accentColors: Record<string, { dot: string; glow: string; bg: string }> = 
   neutral: { dot: "var(--muted)", glow: "transparent", bg: "transparent" },
 };
 
+function formatValue(v: string | number): string {
+  return typeof v === "number" ? v.toLocaleString() : v;
+}
+
 function normalizeSparkline(data?: number[]): number[] | undefined {
   if (!data || data.length < 2) return data;
   const max = Math.max(...data);
@@ -122,7 +126,7 @@ const MetricCard = React.forwardRef<HTMLDivElement, MetricCardProps>(function Me
       {/* Value */}
       <div className="flex items-baseline gap-2">
         <span className="text-[28px] font-bold leading-none tracking-[-0.02em]" style={{ color: "var(--ink)" }}>
-          {value}
+          {formatValue(value)}
         </span>
         {resolvedSubtitle && (
           <span className="text-xs" style={{ color: "var(--muted)" }}>
