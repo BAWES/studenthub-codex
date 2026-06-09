@@ -1174,6 +1174,7 @@ model department {
   department_name_ar    String?    @db.VarChar(255)
   department_created_at DateTime?  @db.DateTime(0)
   department_updated_at DateTime?  @db.DateTime(0)
+  employee              employee[]
 }
 
 model designation {
@@ -1182,6 +1183,7 @@ model designation {
   designation_name_ar    String?    @db.VarChar(255)
   designation_created_at DateTime?  @db.DateTime(0)
   designation_updated_at DateTime?  @db.DateTime(0)
+  employee               employee[]
 }
 
 model degree {
@@ -2598,6 +2600,43 @@ enum chat_message_from {
 enum invoice_invoice_status {
   paid
   unpaid
+}
+
+model employee {
+  employee_uuid       String     @id @db.Char(60)
+  employee_name       String     @db.VarChar(255)
+  employee_email      String     @db.VarChar(255)
+  employee_phone      String?    @db.VarChar(45)
+  employee_salary     Decimal?   @default(0.000) @db.Decimal(10, 3)
+  employee_status     Int        @default(10) @db.SmallInt
+  employee_created_at DateTime   @db.DateTime(0)
+  employee_updated_at DateTime   @db.DateTime(0)
+  deleted             Int        @default(0) @db.SmallInt
+  designation_uuid    String?    @db.Char(60)
+  department_uuid     String?    @db.Char(60)
+  designation         designation?  @relation(fields: [designation_uuid], references: [designation_uuid], onUpdate: Restrict, map: "fk-employee-designation_uuid")
+  department          department?   @relation(fields: [department_uuid], references: [department_uuid], onUpdate: Restrict, map: "fk-employee-department_uuid")
+  attendance          attendance[]
+
+  @@index([designation_uuid], map: "idx-employee-designation_uuid")
+  @@index([department_uuid], map: "idx-employee-department_uuid")
+}
+
+model attendance {
+  attendance_uuid     String     @id @db.Char(60)
+  employee_uuid       String?    @db.Char(60)
+  date                DateTime   @db.Date
+  clock_in            DateTime?  @db.DateTime(0)
+  clock_out           DateTime?  @db.DateTime(0)
+  total_hours         Decimal?   @db.Decimal(5, 2)
+  status              Int        @db.SmallInt
+  note                String?    @db.VarChar(500)
+  created_at          DateTime   @db.DateTime(0)
+  updated_at          DateTime   @db.DateTime(0)
+  employee            employee?  @relation(fields: [employee_uuid], references: [employee_uuid], onUpdate: Restrict, map: "fk-attendance-employee_uuid")
+
+  @@index([employee_uuid], map: "idx-attendance-employee_uuid")
+  @@index([date], map: "idx-attendance-date")
 }
 
 enum webhook_method {
