@@ -140,7 +140,7 @@ describe("DataTable — empty state", () => {
     );
     expect(screen.getByText("No records found")).toBeInTheDocument();
     expect(
-      screen.getByText("No data is available yet in this view."),
+      screen.getByText("No records are available yet in this view."),
     ).toBeInTheDocument();
   });
 

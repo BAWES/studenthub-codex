@@ -6,6 +6,7 @@ import { FactPanel } from "./DetailPanels";
 import { DetailPageSkeleton } from "./Skeletons";
 import { ActionButton } from "./ActionButton";
 import type { ActionButtonVariant } from "./ActionButton";
+import { EMPTY_NO_RELATED_RECORDS } from "./emptyStates";
 import Link from "next/link";
 import type { Route } from "next";
 
@@ -169,7 +170,7 @@ export function DetailPage({
               </article>
             ))}
             {relatedRecords.rows.length === 0 ? (
-              <p className="emptyState">No related records found.</p>
+              <p className="emptyState">{EMPTY_NO_RELATED_RECORDS}</p>
             ) : null}
           </div>
         </section>

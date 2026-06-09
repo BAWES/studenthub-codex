@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TrendingUp, TrendingDown } from "lucide-react";
+import { EMPTY_NO_RECENT_ACTIVITY } from "./emptyStates";
 
 // ── Types ──────────────────────────────────────────────────
 
@@ -126,7 +127,7 @@ export function DashboardGrid({
                 </div>
               ))}
               {activityFeed.items.length === 0 ? (
-                <p className="emptyState">No recent activity.</p>
+                <p className="emptyState">{EMPTY_NO_RECENT_ACTIVITY}</p>
               ) : null}
             </div>
           </CardContent>
