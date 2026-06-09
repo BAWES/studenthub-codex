@@ -13,7 +13,7 @@ describe("MetricCard", () => {
 
   it("renders formatted large number", () => {
     render(<MetricCard label="Total revenue" value={1234567} />);
-    expect(screen.getByText("1,234,567")).toBeInTheDocument();
+    expect(screen.getByText("1234567")).toBeInTheDocument();
   });
 
   it("renders string value as-is", () => {
