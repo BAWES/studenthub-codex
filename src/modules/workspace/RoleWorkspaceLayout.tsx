@@ -2,8 +2,6 @@ import { requireRoleCapability } from "@/modules/auth/session";
 import { WorkspaceOS } from "@/modules/workspace/WorkspaceOS";
 import type { Role, Capability } from "@/modules/auth/types";
 
-export const dynamic = "force-dynamic";
-
 /**
  * Shared layout for role-scoped workspace routes.
  *
