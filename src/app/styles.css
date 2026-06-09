@@ -702,9 +702,8 @@ body {
 [data-theme="dark"] .hubHeader,
 [data-theme="dark"] .hubPanel,
 [data-theme="dark"] .featureTile {
-  border-color: var(--line);
-  background: var(--surface);
-  color: var(--ink);
+  border-color: var(--sh-glass-border);
+  background: var(--sh-glass-bg);
 }
 
 [data-theme="dark"] .roleOption,
@@ -716,8 +715,8 @@ body {
 [data-theme="dark"] .linearFilters a,
 [data-theme="dark"] .journeyQueue,
 [data-theme="dark"] .journeyScopePills a {
-  border-color: var(--line);
-  background: var(--surface-soft);
+  border-color: var(--sh-glass-border);
+  background: var(--sh-glass-bg-strong);
   color: var(--ink);
 }
 
@@ -4003,9 +4002,10 @@ tr:last-child td {
   grid-template-columns: 220px minmax(280px, 1fr) auto;
   align-items: center;
   gap: 10px;
-  border-bottom: 1px solid var(--line);
-  background: color-mix(in srgb, var(--surface) 90%, transparent);
-  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--sh-glass-border);
+  background: var(--sh-glass-bg);
+  backdrop-filter: blur(var(--sh-glass-blur));
+  -webkit-backdrop-filter: blur(var(--sh-glass-blur));
   padding: 10px 14px;
 }
 
@@ -4025,10 +4025,11 @@ tr:last-child td {
 .commandInspectorHeader span,
 .commandFacts span,
 .commandRelatedHeader span {
-  color: #667085;
+  color: var(--sh-info);
   font-size: 11px;
-  font-weight: 900;
+  font-weight: 800;
   text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .commandIdentity strong,
@@ -4039,16 +4040,16 @@ tr:last-child td {
 }
 
 .commandIdentity small {
-  color: #667085;
+  color: var(--muted);
 }
 
 .commandSearch {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   overflow: hidden;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--surface);
+  border: 1px solid var(--sh-glass-border);
+  border-radius: var(--sh-radius-md);
+  background: var(--sh-glass-bg-strong);
 }
 
 .commandSearch input {
@@ -4066,18 +4067,24 @@ tr:last-child td {
 }
 
 .commandSearch:focus-within {
-  border-color: #8bb4ea;
-  box-shadow: 0 0 0 3px rgba(11, 99, 206, 0.12);
+  border-color: var(--sh-info);
+  box-shadow: var(--sh-glow-sm);
 }
 
 .commandSearch button {
   border: 0;
-  border-left: 1px solid var(--line);
-  background: var(--surface-soft);
-  color: var(--ink);
+  border-left: 1px solid var(--sh-glass-border);
+  background: transparent;
+  color: var(--muted);
   padding: 0 14px;
-  font-weight: 900;
+  font-weight: 700;
+  font-size: 12px;
   cursor: pointer;
+  transition: color 160ms var(--sh-easing);
+}
+
+.commandSearch button:hover {
+  color: var(--sh-info);
 }
 
 .commandTopbar .commandLauncher {
@@ -4482,10 +4489,11 @@ tr:last-child td {
   align-items: center;
   justify-content: space-between;
   gap: 14px;
-  border: 1px solid #f3c2d3;
-  border-radius: 8px;
-  background: #fff8fb;
+  border: 1px solid var(--sh-glass-border);
+  border-radius: var(--sh-radius-lg);
+  background: color-mix(in srgb, var(--sh-error-bg) 80%, transparent);
   padding: 14px 16px;
+  animation: shSection 360ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .roleBoundaryNotice div {
@@ -4494,14 +4502,14 @@ tr:last-child td {
 }
 
 .roleBoundaryNotice span {
-  color: var(--rose);
+  color: var(--sh-error);
   font-size: 11px;
   font-weight: 900;
   text-transform: uppercase;
 }
 
 .roleBoundaryNotice strong {
-  color: #101828;
+  color: var(--ink);
 }
 
 .roleBoundaryNotice p {
@@ -4513,25 +4521,32 @@ tr:last-child td {
   min-height: 38px;
   display: inline-flex;
   align-items: center;
-  border: 1px solid #e8a6bd;
-  border-radius: 8px;
-  background: #fff;
-  color: var(--rose);
+  border: 1px solid var(--sh-glass-border-strong);
+  border-radius: var(--sh-radius-md);
+  background: var(--sh-glass-bg-strong);
+  color: var(--sh-error);
   padding: 0 12px;
-  font-weight: 900;
+  font-weight: 700;
   text-decoration: none;
   white-space: nowrap;
+  transition: background 160ms var(--sh-easing);
+}
+
+.roleBoundaryNotice a:hover {
+  background: var(--sh-glass-bg);
 }
 
 .journeyHero {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(250px, 340px);
   gap: 14px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background:
-    linear-gradient(135deg, color-mix(in srgb, var(--surface) 96%, var(--blue)), var(--surface));
-  padding: 16px;
+  border: 1px solid var(--sh-glass-border);
+  border-radius: var(--sh-radius-lg);
+  background: var(--sh-glass-bg);
+  backdrop-filter: blur(var(--sh-glass-blur));
+  -webkit-backdrop-filter: blur(var(--sh-glass-blur));
+  padding: 20px;
+  animation: shSection 360ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .journeyHero h1 {
@@ -4556,10 +4571,10 @@ tr:last-child td {
 .journeyQueue span,
 .journeyResults span,
 .journeyGuardrail span {
-  color: #667085;
+  color: var(--sh-info);
   font-size: 11px;
-  font-weight: 900;
-  letter-spacing: 0;
+  font-weight: 800;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 
@@ -4576,36 +4591,48 @@ tr:last-child td {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--surface-soft);
+  border: 1px solid var(--sh-glass-border);
+  border-radius: var(--sh-radius-md);
+  background: var(--sh-glass-bg-strong);
   color: var(--ink);
   padding: 0 13px;
-  font-weight: 900;
+  font-weight: 700;
+  font-size: 13px;
   text-decoration: none;
-}
-
-.journeyHeroActions a.primary,
-.journeyCard > a {
-  border-color: var(--primary);
-  background: var(--primary);
-  color: var(--primary-foreground);
+  transition: all 160ms var(--sh-easing);
 }
 
 .journeyHeroActions a:hover,
 .journeyCard > a:hover {
-  border-color: #0b63ce;
-  color: #0b63ce;
-  background: #eef5ff;
+  border-color: var(--sh-info);
+  color: var(--sh-info);
+  background: var(--sh-info-bg);
+}
+
+.journeyHeroActions a.primary,
+.journeyCard > a {
+  border-color: var(--sh-info);
+  background: var(--sh-info);
+  color: #ffffff;
+}
+
+.journeyHeroActions a.primary:hover,
+.journeyCard > a:hover {
+  background: var(--sh-info);
+  opacity: 0.9;
+  border-color: var(--sh-info);
+  color: #ffffff;
 }
 
 .journeyGuardrail {
   display: grid;
   align-content: start;
   gap: 7px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--surface-soft);
+  border: 1px solid var(--sh-glass-border);
+  border-radius: var(--sh-radius-lg);
+  background: var(--sh-glass-bg);
+  backdrop-filter: blur(var(--sh-glass-blur));
+  -webkit-backdrop-filter: blur(var(--sh-glass-blur));
   padding: 14px;
 }
 
@@ -4629,16 +4656,19 @@ tr:last-child td {
 .journeyCard,
 .journeyPanel {
   min-width: 0;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--surface);
+  border: 1px solid var(--sh-glass-border);
+  border-radius: var(--sh-radius-lg);
+  background: var(--sh-glass-bg);
+  backdrop-filter: blur(var(--sh-glass-blur));
+  -webkit-backdrop-filter: blur(var(--sh-glass-blur));
+  animation: shSection 360ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .journeyCard {
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
   gap: 10px;
-  padding: 12px;
+  padding: 16px;
 }
 
 .journeyCardHeader {
@@ -4683,15 +4713,15 @@ tr:last-child td {
   align-items: center;
   justify-content: center;
   border-radius: 999px;
-  background: #eef2f7;
-  color: #344054;
+  background: var(--sh-info-bg);
+  color: var(--sh-info);
   font-size: 12px;
-  font-weight: 900;
+  font-weight: 800;
 }
 
 .journeySteps li strong {
   min-width: 0;
-  color: #344054;
+  color: var(--ink);
   font-size: 13px;
   line-height: 1.3;
 }
@@ -4709,7 +4739,7 @@ tr:last-child td {
 .journeyPanelHeader {
   display: grid;
   gap: 4px;
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1px solid var(--sh-glass-border);
   padding: 12px 14px;
 }
 
@@ -4724,11 +4754,12 @@ tr:last-child td {
   display: grid;
   align-content: center;
   gap: 5px;
-  border-right: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
+  border-right: 1px solid var(--sh-glass-border);
+  border-bottom: 1px solid var(--sh-glass-border);
   color: var(--ink);
   padding: 12px;
   text-decoration: none;
+  transition: background 160ms var(--sh-easing);
 }
 
 .journeyQueue:nth-child(2n) {
@@ -4736,7 +4767,7 @@ tr:last-child td {
 }
 
 .journeyQueue:hover {
-  background: var(--surface-soft);
+  background: var(--sh-glass-bg-strong);
 }
 
 .journeyQueue strong {
@@ -4746,7 +4777,7 @@ tr:last-child td {
 }
 
 .journeyQueue small {
-  color: #667085;
+  color: var(--muted);
   font-size: 12px;
   line-height: 1.35;
 }
@@ -4755,7 +4786,7 @@ tr:last-child td {
   display: flex;
   gap: 8px;
   overflow-x: auto;
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1px solid var(--sh-glass-border);
   padding: 10px 12px;
 }
 
@@ -4763,21 +4794,22 @@ tr:last-child td {
   min-height: 32px;
   display: inline-flex;
   align-items: center;
-  border: 1px solid var(--line);
-  border-radius: 8px;
+  border: 1px solid var(--sh-glass-border);
+  border-radius: var(--sh-radius-md);
   color: var(--ink);
   padding: 0 11px;
   font-size: 13px;
-  font-weight: 800;
+  font-weight: 700;
   text-decoration: none;
   white-space: nowrap;
+  transition: all 160ms var(--sh-easing);
 }
 
 .journeyScopePills a.active,
 .journeyScopePills a:hover {
-  border-color: #0b63ce;
-  background: #eef5ff;
-  color: #0b63ce;
+  border-color: var(--sh-info);
+  background: var(--sh-info-bg);
+  color: var(--sh-info);
 }
 
 .journeyResults {
@@ -4791,14 +4823,15 @@ tr:last-child td {
   grid-template-columns: 90px minmax(0, 1fr) minmax(120px, 230px);
   align-items: center;
   gap: 12px;
-  border-radius: 8px;
+  border-radius: var(--sh-radius-md);
   color: var(--ink);
   padding: 10px;
   text-decoration: none;
+  transition: background 160ms var(--sh-easing);
 }
 
 .journeyResults a:hover {
-  background: var(--surface-soft);
+  background: var(--sh-glass-bg);
 }
 
 .journeyResults strong,
@@ -4811,7 +4844,7 @@ tr:last-child td {
 
 .journeyResults small,
 .journeyResults p {
-  color: #667085;
+  color: var(--muted);
   font-size: 12px;
 }
 
@@ -5322,20 +5355,22 @@ tr:last-child td {
 
 .previewPanel {
   overflow: hidden;
+  animation: shSection 360ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .previewHeader {
   display: grid;
   gap: 7px;
   padding: 18px;
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1px solid var(--sh-glass-border);
 }
 
 .previewHeader span {
-  color: var(--blue);
+  color: var(--sh-info);
   font-size: 11px;
-  font-weight: 900;
+  font-weight: 800;
   text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .previewHeader h2 {
@@ -5356,20 +5391,20 @@ tr:last-child td {
   flex-wrap: wrap;
   gap: 8px;
   padding: 12px 18px;
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1px solid var(--sh-glass-border);
 }
 
 .previewFlags span {
   min-height: 28px;
   display: inline-flex;
   align-items: center;
-  border: 1px solid #b7cff0;
-  background: #eef5ff;
-  border-radius: 7px;
-  color: var(--blue);
+  border: 1px solid var(--sh-glass-border);
+  background: var(--sh-glass-bg-strong);
+  border-radius: var(--sh-radius-sm);
+  color: var(--sh-info);
   padding: 0 9px;
   font-size: 12px;
-  font-weight: 900;
+  font-weight: 800;
 }
 
 .previewActions a {
@@ -5377,26 +5412,37 @@ tr:last-child td {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid var(--line);
-  background: #fbfcfe;
-  border-radius: 8px;
+  border: 1px solid var(--sh-glass-border);
+  background: var(--sh-glass-bg-strong);
+  border-radius: var(--sh-radius-md);
   color: var(--ink);
   padding: 0 12px;
   font-size: 13px;
-  font-weight: 900;
+  font-weight: 700;
   text-decoration: none;
+  transition: all 160ms var(--sh-easing);
+}
+
+.previewActions a:hover {
+  border-color: var(--sh-info);
+  color: var(--sh-info);
+  background: var(--sh-info-bg);
 }
 
 .previewActions a:first-child {
-  border-color: var(--blue);
-  background: var(--blue);
-  color: #fff;
+  border-color: var(--sh-info);
+  background: var(--sh-info);
+  color: #ffffff;
+}
+
+.previewActions a:first-child:hover {
+  opacity: 0.9;
 }
 
 .previewFacts {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1px solid var(--sh-glass-border);
 }
 
 .previewFacts div {
@@ -5404,8 +5450,8 @@ tr:last-child td {
   display: grid;
   gap: 6px;
   padding: 13px 18px;
-  border-right: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
+  border-right: 1px solid var(--sh-glass-border);
+  border-bottom: 1px solid var(--sh-glass-border);
 }
 
 .previewFacts div:nth-child(2n) {
@@ -5414,10 +5460,11 @@ tr:last-child td {
 
 .previewFacts span,
 .previewRelatedHeader span {
-  color: var(--muted);
+  color: var(--sh-info);
   font-size: 11px;
-  font-weight: 900;
+  font-weight: 800;
   text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .previewFacts strong {
@@ -5430,7 +5477,7 @@ tr:last-child td {
 }
 
 .previewRelated > section {
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1px solid var(--sh-glass-border);
 }
 
 .previewRelated > section:last-child {
@@ -5456,10 +5503,11 @@ tr:last-child td {
   padding: 11px 18px;
   color: var(--ink);
   text-decoration: none;
+  transition: background 160ms var(--sh-easing);
 }
 
 .previewRow:hover {
-  background: #fbfcfe;
+  background: var(--sh-glass-bg);
 }
 
 .previewRow strong,
@@ -5478,7 +5526,9 @@ tr:last-child td {
 
 .previewEmpty {
   margin: 0;
-  padding: 0 18px 14px;
+  padding: 18px;
+  color: var(--muted);
+  font-size: 13px;
 }
 
 .moduleCard {
@@ -7187,14 +7237,13 @@ kbd {
 }
 
 [data-theme="dark"] .previewFlags span {
-  border-color: color-mix(in srgb, var(--blue) 42%, var(--line));
-  background: color-mix(in srgb, var(--blue) 14%, var(--surface));
+  border-color: var(--sh-glass-border);
+  background: var(--sh-glass-bg-strong);
 }
 
 [data-theme="dark"] .previewActions a,
 [data-theme="dark"] .previewRow:hover {
-  background: var(--surface-soft);
-  color: var(--ink);
+  background: var(--sh-glass-bg);
 }
 
 @media (min-width: 760px) and (max-width: 1040px) {
@@ -10604,6 +10653,65 @@ kbd {
   color: var(--sh-info);
 }
 
+/* ── Persona badge — floating label above hero copy ──────────── */
+.shPersonaBadge {
+  position: absolute;
+  top: clamp(18px, 3vw, 32px);
+  right: clamp(18px, 3vw, 32px);
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: var(--sh-glass-bg-strong);
+  border: 1px solid var(--sh-glass-border-strong);
+  backdrop-filter: blur(var(--sh-glass-blur));
+  color: var(--sh-info);
+  animation: shBadgeFadeIn 400ms var(--sh-easing) 300ms both;
+  pointer-events: none;
+}
+
+@keyframes shBadgeFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 1024px) {
+  .shPersonaBadge {
+    position: relative;
+    top: auto;
+    right: auto;
+    width: fit-content;
+    margin-bottom: 8px;
+    animation-delay: 0ms;
+  }
+}
+
+/* ── Proof pill — social proof under CTA ─────────────────────── */
+.shProofPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  background: var(--sh-success-bg);
+  color: var(--sh-success);
+}
+
 .shBenefitsSection {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
@@ -11239,10 +11347,12 @@ kbd {
   animation: shFadeInUp 600ms var(--sh-easing) forwards;
 }
 
-.shSection:nth-child(1) { animation-delay: 100ms; }
-.shSection:nth-child(2) { animation-delay: 250ms; }
-.shSection:nth-child(3) { animation-delay: 400ms; }
-.shSection:nth-child(4) { animation-delay: 550ms; }
+.shSection:nth-child(3) { animation-delay: 100ms; }
+.shSection:nth-child(4) { animation-delay: 200ms; }
+.shSection:nth-child(5) { animation-delay: 300ms; }
+.shSection:nth-child(6) { animation-delay: 400ms; }
+.shSection:nth-child(7) { animation-delay: 500ms; }
+.shSection:nth-child(8) { animation-delay: 600ms; }
 
 @keyframes shFadeInUp {
   to {

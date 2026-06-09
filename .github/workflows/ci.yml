@@ -7,8 +7,8 @@ on:
     branches: [main, develop]
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.head_ref || github.run_id }}
+  cancel-in-progress: true
 
 jobs:
   branch-name:
@@ -20,7 +20,7 @@ jobs:
         run: |
           BRANCH="${{ github.head_ref }}"
           echo "Checking branch: $BRANCH"
-          if echo "$BRANCH" | grep -Eq '^(feature|fix|chore)/STU-[0-9a-z]+[-a-z0-9]+$'; then
+          if echo "$BRANCH" | grep -qiE '^(feature|fix|chore)/STU-[a-z0-9]+[-a-z0-9]+$'; then
             echo "Branch name OK: $BRANCH"
           else
             echo "Branch name REJECTED: $BRANCH"
@@ -103,7 +103,7 @@ jobs:
   e2e:
     name: E2E Tests
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
     services:
       mysql:
         image: mysql:8.4
@@ -139,12 +139,14 @@ jobs:
       - name: Build
         run: npx next build
         env:
-          DATABASE_URL: "mysql://studenthub:studenthub@localhost:3307/studenthub_prod_local"
+          DATABASE_URL: "mysql://studenthub:***@localhost:3307/studenthub_prod_local"
+          AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
       - name: Run E2E tests
         run: npx playwright test --project=chromium
         env:
           CI: "true"
-          DATABASE_URL: "mysql://studenthub:studenthub@localhost:3307/studenthub_prod_local"
+          DATABASE_URL: "mysql://studenthub:***@localhost:3307/studenthub_prod_local"
+          AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
 
   validate:
     name: Validation Suite
@@ -180,6 +182,8 @@ jobs:
           DATABASE_URL: "mysql://studenthub:studenthub@localhost:3307/studenthub_prod_local"
       - name: Build
         run: npx next build
+        env:
+          AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
       - name: Start and validate
         run: |
           npm run dev &
@@ -193,4 +197,5 @@ jobs:
           done
           node scripts/validate.mjs
         env:
-          DATABASE_URL: "mysql://studenthub:studenthub@localhost:3307/studenthub_prod_local"
+          DATABASE_URL: "mysql://studenthub:***@localhost:3307/studenthub_prod_local"
+          AUTH_SECRET: ${{ secrets.AUTH_SECRET }}

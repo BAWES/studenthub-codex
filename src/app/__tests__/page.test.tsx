@@ -106,9 +106,9 @@ describe("Landing page (marketing redesign)", () => {
     it("renders Open app link in nav when session exists", () => {
       render(<LandingContent {...sessionProps} />);
       expect(screen.getByText("Open app")).toBeTruthy();
-      // Confirm nav-level "Get started" is gone (but hero CTAs remain)
-      const getStartedLinks = screen.getAllByText("Get started");
-      expect(getStartedLinks.length).toBeGreaterThanOrEqual(1);
+      // Nav-level "Get started" is gone; HeroSection renders persona-specific CTA
+      expect(screen.queryAllByText("Get started").length).toBe(0);
+      expect(screen.getByText("Create your free candidate profile")).toBeTruthy();
     });
 
     it("renders the theme toggle", () => {
@@ -138,7 +138,7 @@ describe("Landing page (marketing redesign)", () => {
 
     it("renders platform goal pills", () => {
       render(<LandingContent {...defaultProps} />);
-      const goals = screen.getByLabelText("StudentHub platform goals");
+      const goals = screen.getByLabelText("Key benefits for candidates");
       expect(goals).toBeTruthy();
     });
   });
@@ -155,8 +155,8 @@ describe("Landing page (marketing redesign)", () => {
 
     it("renders stat icons", () => {
       render(<LandingContent {...defaultProps} />);
-      expect(screen.getByTestId("icon-zap")).toBeTruthy();
-      expect(screen.getByTestId("icon-layers")).toBeTruthy();
+      expect(screen.getAllByTestId("icon-zap").length).toBeGreaterThanOrEqual(1);
+      expect(screen.getAllByTestId("icon-layers").length).toBeGreaterThanOrEqual(1);
     });
   });
 

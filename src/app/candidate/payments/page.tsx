@@ -2,14 +2,14 @@ import type { Route } from "next";
 import { requireRoleCapability } from "@/modules/auth/session";
 import { DataTable } from "@/modules/workspace/DataTable";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
-import { getCandidateTransferRows } from "@/modules/workspace/data";
+import { listCandidatePayments } from "./actions";
 import { InitiateTransferForm } from "@/modules/balances/InitiateTransferForm";
 
 export const dynamic = "force-dynamic";
 
 export default async function CandidatePaymentsPage() {
   const session = await requireRoleCapability("candidate", "candidate.read.own");
-  const rows = await getCandidateTransferRows(Number(session.id));
+  const { items: rows } = await listCandidatePayments();
 
   return (
     <WorkspaceShell session={session} eyebrow="Candidate" title="Payment History" metrics={[]}>
