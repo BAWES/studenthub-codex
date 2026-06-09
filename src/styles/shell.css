@@ -1322,3 +1322,396 @@
   50% { opacity: 0.6; r: 24; }
   100% { opacity: 0.3; r: 22; }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   DASHBOARD — Admin Command Center
+   Glass metric cards, pipeline overview, data lists with entrance
+   animations. Designed for the StudentHub OS aesthetic.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── Section wrapper (stagger entrance) ─────────────────────────── */
+
+.shDashboardSection {
+  animation: shDashboardSectionIn 400ms var(--sh-easing) both;
+}
+
+@keyframes shDashboardSectionIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.shDashboardSection + .shDashboardSection {
+  animation-delay: 120ms;
+}
+
+.shDashboardSection + .shDashboardSection + .shDashboardSection {
+  animation-delay: 240ms;
+}
+
+/* ── Grid layouts ──────────────────────────────────────────────── */
+
+.shDashboardGrid4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+@media (max-width: 1024px) {
+  .shDashboardGrid4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .shDashboardGrid4 {
+    grid-template-columns: 1fr;
+  }
+}
+
+.shDashboardGrid2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+@media (max-width: 1024px) {
+  .shDashboardGrid2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── DataList glass card ───────────────────────────────────────── */
+
+.shDashboardDataList {
+  transition:
+    transform 240ms var(--sh-easing),
+    box-shadow 240ms var(--sh-easing);
+  animation: shDataListIn 400ms var(--sh-easing) both;
+}
+
+@keyframes shDataListIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.shDashboardDataList:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--sh-glow-sm);
+}
+
+.shDataListHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--sh-glass-border);
+  margin-bottom: 8px;
+}
+
+.shDataListEyebrow {
+  display: block;
+  font-size: 10px;
+  font-weight: var(--weight-bold);
+  color: var(--sh-info);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 2px;
+}
+
+.shDataListTitle {
+  margin: 0;
+  font-size: 15px;
+  font-weight: var(--weight-semibold);
+  color: var(--ink);
+  line-height: 1.3;
+}
+
+.shDataListCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: var(--weight-semibold);
+  color: var(--muted);
+  background: var(--sh-glass-bg);
+  border: 1px solid var(--sh-glass-border);
+  flex-shrink: 0;
+}
+
+/* ── DataList rows ─────────────────────────────────────────────── */
+
+.shDataListBody {
+  display: grid;
+  gap: 2px;
+}
+
+.shDataListRow {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 8px;
+  border-radius: var(--sh-radius-sm);
+  text-decoration: none;
+  color: var(--ink);
+  transition:
+    background 180ms var(--sh-easing),
+    transform 120ms var(--sh-easing);
+  animation: shDataListRowIn 300ms var(--sh-easing) both;
+}
+
+@keyframes shDataListRowIn {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.shDataListRow:hover {
+  background: var(--sh-glass-bg-strong);
+  transform: translateX(4px);
+}
+
+.shDataListRowMain {
+  min-width: 0;
+  display: grid;
+  gap: 1px;
+}
+
+.shDataListRowTitle {
+  font-size: 13px;
+  font-weight: var(--weight-medium);
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.shDataListRowSub {
+  font-size: 11px;
+  color: var(--faint);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.shDataListRowMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.shDataListRowMetaRight {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.shDataListRowAmount {
+  font-size: 12px;
+  font-weight: var(--weight-semibold);
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.shDataListRowCount {
+  font-size: 11px;
+  color: var(--sh-info);
+  white-space: nowrap;
+}
+
+.shDataListRowDate {
+  font-size: 11px;
+  color: var(--faint);
+  white-space: nowrap;
+}
+
+.shDataListEmpty {
+  padding: 16px 0;
+}
+
+/* ── Pipeline glass section ────────────────────────────────────── */
+
+.shPipelineHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.shPipelineEyebrow {
+  display: block;
+  font-size: 10px;
+  font-weight: var(--weight-bold);
+  color: var(--sh-info);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 2px;
+}
+
+.shPipelineTitle {
+  margin: 0;
+  font-size: 16px;
+  font-weight: var(--weight-semibold);
+  color: var(--ink);
+  line-height: 1.3;
+}
+
+.shPipelineLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: var(--weight-medium);
+  color: var(--sh-info);
+  text-decoration: none;
+  padding: 4px 8px;
+  border-radius: var(--sh-radius-sm);
+  transition: background 160ms var(--sh-easing);
+  flex-shrink: 0;
+}
+
+.shPipelineLink:hover {
+  background: var(--sh-info-bg);
+}
+
+.shPipelineGrid {
+  display: grid;
+  gap: 12px;
+}
+
+/* Proportional bar */
+.shPipelineBar {
+  display: flex;
+  height: 6px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--sh-glass-bg);
+}
+
+.shPipelineBarSegment {
+  height: 100%;
+  transition: width 400ms var(--sh-easing);
+  min-width: 2px;
+}
+
+/* Status list */
+.shPipelineList {
+  display: grid;
+  gap: 6px;
+}
+
+.shPipelineRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 4px 0;
+}
+
+.shPipelineCount {
+  font-size: 14px;
+  font-weight: var(--weight-semibold);
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.shPipelineEmpty {
+  padding: 12px 0;
+}
+
+/* ── MetricCard sub-elements (camelCase — match metric-card.tsx) ── */
+
+.shMetricCardBody {
+  display: grid;
+  gap: 2px;
+}
+
+.shMetricCardTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.shMetricCardLabel {
+  font-size: 12px;
+  font-weight: var(--weight-medium);
+  color: var(--muted);
+  line-height: 1;
+}
+
+.shMetricCardTrend {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: var(--weight-medium);
+}
+
+.shMetricCardTrend[data-trend="up"] { color: var(--sh-success); }
+.shMetricCardTrend[data-trend="down"] { color: var(--sh-error); }
+.shMetricCardTrend[data-trend="flat"] { color: var(--muted); }
+
+.shMetricCardValue {
+  font-size: 26px;
+  font-weight: var(--weight-semibold);
+  color: var(--ink);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  display: block;
+}
+
+.shMetricCardNote {
+  font-size: 11px;
+  color: var(--faint);
+  margin-top: 2px;
+}
+
+.shMetricCardChart {
+  margin-top: 8px;
+  height: 32px;
+  opacity: 0.6;
+  transition: opacity 160ms var(--sh-easing);
+}
+
+.shMetricCard:hover .shMetricCardChart {
+  opacity: 1;
+}
+
+.shMetricCardClickable {
+  cursor: pointer;
+}
+
+.shMetricSparkline {
+  width: 100%;
+  height: 100%;
+}
+
+/* Entrance animation for MetricCard */
+.shMetricCard {
+  animation: shMetricFadeIn 400ms var(--sh-easing) both;
+}
