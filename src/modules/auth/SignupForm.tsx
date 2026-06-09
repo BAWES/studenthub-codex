@@ -1,7 +1,8 @@
 "use client";
 
 import { useActionState, useEffect, useRef, useState } from "react";
-import { UserRound, Building2, ArrowLeft, UserPlus } from "lucide-react";
+import { UserRound, Building2, ArrowLeft, ArrowRight, UserPlus } from "lucide-react";
+import Link from "next/link";
 import { registerAction, type RegisterState } from "@/modules/auth/registration";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +12,9 @@ import type { Role } from "@/modules/auth/types";
 const initialRegisterState: RegisterState = {};
 
 type SignupStep = "select-role" | "fill-form";
+
+const selfSignupRoles: Role[] = ["candidate", "company"];
+const inviteOnlyRoles: Role[] = ["staff", "admin", "inspector"];
 
 const roleOptions = [
   {
@@ -29,15 +33,33 @@ const roleOptions = [
   },
 ] as const;
 
+const inviteOnlyMessages: Record<string, { title: string; description: string; cta: string }> = {
+  staff: {
+    title: "Staff access requires an invitation",
+    description: "Staff accounts are created by administrators. If you've been invited, check your email for an invitation link or contact your organisation's admin.",
+    cta: "Return to home",
+  },
+  admin: {
+    title: "Admin access requires an invitation",
+    description: "Admin accounts are managed by your organisation. If you've been invited to join as an admin, check your email for the invitation link.",
+    cta: "Return to home",
+  },
+  inspector: {
+    title: "Inspector access requires an invitation",
+    description: "Inspector accounts are created by administrators. If you've been invited, check your email for the invitation link or contact your organisation's admin.",
+    cta: "Return to home",
+  },
+};
+
 export function SignupForm({ defaultRole }: { defaultRole?: Role }) {
   const [state, action, pending] = useActionState(registerAction, initialRegisterState);
+  const isSelfSignup = defaultRole && selfSignupRoles.includes(defaultRole);
+  const isInviteOnly = defaultRole && inviteOnlyRoles.includes(defaultRole);
   const [step, setStep] = useState<SignupStep>(
-    defaultRole && roleOptions.some((r) => r.value === defaultRole)
-      ? "fill-form"
-      : "select-role",
+    isSelfSignup ? "fill-form" : "select-role",
   );
   const [selectedRole, setSelectedRole] = useState<Role | null>(
-    defaultRole && roleOptions.some((r) => r.value === defaultRole) ? defaultRole : null,
+    isSelfSignup ? defaultRole : null,
   );
   const nameRef = useRef<HTMLInputElement>(null);
 
@@ -57,6 +79,36 @@ export function SignupForm({ defaultRole }: { defaultRole?: Role }) {
     setStep("select-role");
     setSelectedRole(null);
   };
+
+  // Invite-only role — show request-access message instead of form
+  if (isInviteOnly && defaultRole && inviteOnlyMessages[defaultRole]) {
+    const msg = inviteOnlyMessages[defaultRole];
+    return (
+      <div className="grid gap-7 p-7 sm:p-9 w-full max-w-[480px] mx-auto text-center">
+        <div className="grid gap-2">
+          <span className="text-[var(--sh-info)] text-[11px] font-black uppercase tracking-[0.04em]">
+            {defaultRole} access
+          </span>
+          <strong className="text-[var(--ink)] text-[22px] leading-[1.15] font-bold tracking-[-0.02em]">
+            {msg.title}
+          </strong>
+          <p className="text-[var(--muted)] text-[14px] leading-relaxed m-0 max-w-[400px] mx-auto">
+            {msg.description}
+          </p>
+        </div>
+        <Link
+          href="/"
+          className="inline-flex items-center justify-center gap-2 min-h-[50px] px-6 rounded-xl text-[15px] font-semibold no-underline transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
+          style={{
+            background: "var(--sh-info)",
+            color: "var(--paper)",
+          }}
+        >
+          {msg.cta} <ArrowRight className="size-4" />
+        </Link>
+      </div>
+    );
+  }
 
   // Role selection step
   if (step === "select-role") {

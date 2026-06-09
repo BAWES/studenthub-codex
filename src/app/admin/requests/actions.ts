@@ -1,0 +1,405 @@
+"use server";
+
+// ---------------------------------------------------------------------------
+// Admin RequestController — server actions
+// ---------------------------------------------------------------------------
+// Ported from Yii2 admin/modules/v1/controllers/RequestController.php
+//
+// Actions:
+//   - listRequests         — paginated list of all requests with filters
+//   - getRequest           — single request detail with applications,
+//                            invitations, and interviews
+//   - updateRequestStatus  — update request status with timestamps
+//
+// Status enum: pending, started, delivered, cancelled, finished_by_recruitment,
+//              re_work
+// ---------------------------------------------------------------------------
+
+import { revalidatePath } from "next/cache";
+import { z } from "zod";
+import { prisma } from "@/lib/prisma";
+import { requireCapability } from "@/modules/auth/session";
+
+// ---------------------------------------------------------------------------
+// Schemas
+// ---------------------------------------------------------------------------
+
+export const listRequestsSchema = z.object({
+  page: z.coerce.number().int().positive().optional().default(1),
+  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
+  companyId: z.coerce.number().int().positive().optional(),
+  status: z
+    .enum([
+      "pending",
+      "started",
+      "delivered",
+      "cancelled",
+      "finished_by_recruitment",
+      "re_work",
+    ])
+    .optional(),
+  q: z.string().optional(),
+});
+
+export const getRequestSchema = z.object({
+  requestUuid: z.string().min(1, "Request UUID is required"),
+});
+
+export const updateRequestStatusSchema = z.object({
+  requestUuid: z.string().min(1, "Request UUID is required"),
+  status: z.enum([
+    "pending",
+    "started",
+    "delivered",
+    "cancelled",
+    "finished_by_recruitment",
+    "re_work",
+  ]),
+  feedback: z.string().max(255).optional(),
+});
+
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
+
+export type ListRequestsInput = z.input<typeof listRequestsSchema>;
+export type GetRequestInput = z.input<typeof getRequestSchema>;
+export type UpdateRequestStatusInput = z.input<typeof updateRequestStatusSchema>;
+
+export type RequestRow = {
+  request_uuid: string;
+  title: string;
+  company_name: string | null;
+  staff_name: string | null;
+  position_type: string;
+  no_of_employees: number | null;
+  status: string;
+  priority: number | null;
+  created_at: string | null;
+  updated_at: string | null;
+};
+
+export type RequestDetail = {
+  request: {
+    request_uuid: string;
+    request_position_title: string | null;
+    request_job_description: string;
+    request_compensation: string;
+    request_status: string | null;
+    request_feedback: string | null;
+    request_priority: number | null;
+    request_started_at: string | null;
+    request_finished_at: string | null;
+    request_created_datetime: string | null;
+    request_updated_datetime: string | null;
+    company: { company_name: string | null; company_email: string | null } | null;
+    staff: { staff_name: string | null; staff_email: string | null } | null;
+  } | null;
+  applications: {
+    application_uuid: string;
+    candidate_name: string | null;
+    status: number | null;
+    created_at: string | null;
+  }[];
+  invitations: {
+    invitation_uuid: string;
+    candidate_name: string | null;
+    status: number | null;
+    created_at: string | null;
+  }[];
+  interviews: {
+    request_interview_uuid: string;
+    candidate_name: string | null;
+    interview_at: string | null;
+    status: number | null;
+  }[];
+  metrics: { label: string; value: string | number; note: string }[];
+};
+
+export type UpdateRequestStatusResult = {
+  operation: "success" | "error";
+  message: string;
+};
+
+// ---------------------------------------------------------------------------
+// listRequests
+// ---------------------------------------------------------------------------
+
+/**
+ * List all requests with pagination, search, and status filtering.
+ */
+export async function listRequests(
+  input: ListRequestsInput = {},
+): Promise<{
+  items: RequestRow[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}> {
+  await requireCapability("request.read.any");
+
+  const parsed = listRequestsSchema.safeParse(input);
+  if (!parsed.success) {
+    return { items: [], total: 0, page: 1, limit: 20, totalPages: 0 };
+  }
+
+  const { page, limit, companyId, status, q } = parsed.data;
+  const skip = (page - 1) * limit;
+
+  const where: Record<string, unknown> = {};
+  if (companyId !== undefined) where.company_id = companyId;
+  if (status !== undefined) where.request_status = status;
+  if (q && q.trim().length > 0) {
+    where.OR = [
+      { request_position_title: { contains: q.trim() } },
+      { request_job_description: { contains: q.trim() } },
+    ];
+  }
+
+  const [requests, total] = await Promise.all([
+    prisma.request.findMany({
+      where: where as any,
+      orderBy: { request_created_datetime: "desc" },
+      skip,
+      take: limit,
+      include: {
+        company: { select: { company_name: true } },
+        staff: { select: { staff_name: true } },
+      },
+    }),
+    prisma.request.count({ where: where as any }),
+  ]);
+
+  return {
+    items: requests.map((r: any): RequestRow => ({
+      request_uuid: r.request_uuid,
+      title: r.request_position_title ?? "Untitled request",
+      company_name: r.company?.company_name ?? null,
+      staff_name: r.staff?.staff_name ?? null,
+      position_type: r.request_position_type?.toString() ?? "—",
+      no_of_employees: r.request_number_of_employees ?? null,
+      status: r.request_status ?? "pending",
+      priority: r.request_priority ?? null,
+      created_at: r.request_created_datetime?.toISOString() ?? null,
+      updated_at: r.request_updated_datetime?.toISOString() ?? null,
+    })),
+    total,
+    page,
+    limit,
+    totalPages: Math.ceil(total / limit),
+  };
+}
+
+// ---------------------------------------------------------------------------
+// getRequest
+// ---------------------------------------------------------------------------
+
+/**
+ * Get a single request with applications, invitations, and interviews.
+ */
+export async function getRequest(
+  requestUuid: string,
+): Promise<RequestDetail> {
+  await requireCapability("request.read.any");
+
+  const parsed = getRequestSchema.safeParse({ requestUuid });
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid request UUID");
+  }
+
+  const request = await prisma.request.findFirst({
+    where: { request_uuid: parsed.data.requestUuid },
+    include: {
+      company: { select: { company_name: true, company_email: true } },
+      staff: { select: { staff_name: true, staff_email: true } },
+      request_application: {
+        include: {
+          candidate: {
+            select: {
+              candidate_first_name: true,
+              candidate_last_name: true,
+            },
+          },
+        },
+        orderBy: { created_at: "desc" },
+      },
+      invitation: {
+        include: {
+          candidate: {
+            select: {
+              candidate_first_name: true,
+              candidate_last_name: true,
+            },
+          },
+        },
+        orderBy: { invitation_created_at: "desc" },
+      },
+      request_interview: {
+        include: {
+          candidate: {
+            select: {
+              candidate_first_name: true,
+              candidate_last_name: true,
+            },
+          },
+        },
+        orderBy: { interview_at: "desc" },
+      },
+    },
+  });
+
+  if (!request) {
+    return {
+      request: null,
+      applications: [],
+      invitations: [],
+      interviews: [],
+      metrics: [],
+    };
+  }
+
+  const r = request as any;
+
+  const applications = (r.request_application ?? []).map((a: any) => ({
+    application_uuid: a.application_uuid,
+    candidate_name: a.candidate
+      ? `${a.candidate.candidate_first_name ?? ""} ${a.candidate.candidate_last_name ?? ""}`.trim()
+      : null,
+    status: a.status ?? null,
+    created_at: a.created_at?.toISOString() ?? null,
+  }));
+
+  const invitations = (r.invitation ?? []).map((inv: any) => ({
+    invitation_uuid: inv.invitation_uuid,
+    candidate_name: inv.candidate
+      ? `${inv.candidate.candidate_first_name ?? ""} ${inv.candidate.candidate_last_name ?? ""}`.trim()
+      : null,
+    status: inv.invitation_status ?? null,
+    created_at: inv.invitation_created_at?.toISOString() ?? null,
+  }));
+
+  const interviews = (r.request_interview ?? []).map((ri: any) => ({
+    request_interview_uuid: ri.request_interview_uuid,
+    candidate_name: ri.candidate
+      ? `${ri.candidate.candidate_first_name ?? ""} ${ri.candidate.candidate_last_name ?? ""}`.trim()
+      : null,
+    interview_at: ri.interview_at?.toISOString() ?? null,
+    status: ri.status ?? null,
+  }));
+
+  const metrics = [
+    { label: "Applications", value: applications.length, note: "Candidates applied" },
+    { label: "Invitations", value: invitations.length, note: "Candidates invited" },
+    { label: "Interviews", value: interviews.length, note: "Scheduled" },
+    { label: "Status", value: r.request_status ?? "pending", note: r.request_priority ? `Priority: ${r.request_priority}` : "" },
+  ];
+
+  return {
+    request: {
+      request_uuid: r.request_uuid,
+      request_position_title: r.request_position_title ?? null,
+      request_job_description: r.request_job_description,
+      request_compensation: r.request_compensation,
+      request_status: r.request_status ?? null,
+      request_feedback: r.request_feedback ?? null,
+      request_priority: r.request_priority ?? null,
+      request_started_at: r.request_started_at?.toISOString() ?? null,
+      request_finished_at: r.request_finished_at?.toISOString() ?? null,
+      request_created_datetime: r.request_created_datetime?.toISOString() ?? null,
+      request_updated_datetime: r.request_updated_datetime?.toISOString() ?? null,
+      company: r.company
+        ? { company_name: r.company.company_name, company_email: r.company.company_email }
+        : null,
+      staff: r.staff
+        ? { staff_name: r.staff.staff_name, staff_email: r.staff.staff_email }
+        : null,
+    },
+    applications,
+    invitations,
+    interviews,
+    metrics,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// updateRequestStatus
+// ---------------------------------------------------------------------------
+
+/**
+ * Update a request's status with appropriate timestamps.
+ * Mirrors the staff updateRequestStatus pattern with admin capability.
+ *
+ * - started       → sets request_started_at
+ * - delivered     → sets request_finished_at + optional feedback
+ * - cancelled     → sets request_cancelled_at
+ * - re_work       → sets request_re_worked_at
+ * - finished_by_recruitment → sets request_finished_at
+ */
+export async function updateRequestStatus(
+  input: UpdateRequestStatusInput,
+): Promise<UpdateRequestStatusResult> {
+  await requireCapability("request.write.any");
+
+  const parsed = updateRequestStatusSchema.safeParse(input);
+  if (!parsed.success) {
+    return {
+      operation: "error",
+      message: parsed.error.issues[0]?.message ?? "Invalid input",
+    };
+  }
+
+  const { requestUuid, status, feedback } = parsed.data;
+
+  // Verify the request exists
+  const existing = await prisma.request.findUnique({
+    where: { request_uuid: requestUuid },
+    select: { request_uuid: true, request_status: true },
+  });
+
+  if (!existing) {
+    return { operation: "error", message: "Request not found" };
+  }
+
+  const now = new Date();
+  const updateData: Record<string, unknown> = {
+    request_status: status,
+    request_updated_datetime: now,
+  };
+
+  // Set appropriate timestamps based on transition
+  if (status === "started") {
+    updateData.request_started_at = now;
+  } else if (status === "delivered") {
+    updateData.request_finished_at = now;
+    updateData.request_delivered_at = now;
+    if (feedback) {
+      updateData.request_feedback = feedback;
+    }
+  } else if (status === "cancelled") {
+    updateData.request_cancelled_at = now;
+  } else if (status === "re_work") {
+    updateData.request_re_worked_at = now;
+  } else if (status === "finished_by_recruitment") {
+    updateData.request_finished_at = now;
+  }
+
+  try {
+    await prisma.request.update({
+      where: { request_uuid: requestUuid },
+      data: updateData as any,
+    });
+
+    revalidatePath("/admin/requests");
+
+    return {
+      operation: "success",
+      message: `Request status updated to "${status}"`,
+    };
+  } catch (err) {
+    return {
+      operation: "error",
+      message: err instanceof Error ? err.message : "Failed to update request status",
+    };
+  }
+}
