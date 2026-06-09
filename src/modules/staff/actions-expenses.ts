@@ -76,6 +76,22 @@ const createExpenseSchema = z.object({
 
 export type CreateExpenseParams = z.input<typeof createExpenseSchema>;
 
+const updateExpenseSchema = z.object({
+  id: z.string().min(1, "Expense UUID is required"),
+  supplier: z.string().optional(),
+  category: z.number().int().optional(),
+  purchaseDate: z.string().optional(),
+  totalAmount: z.number().positive().optional(),
+  currency: z.number().int().optional(),
+  vat: z.number().min(0).optional(),
+  reimbursable: z.boolean().optional(),
+  description: z.string().optional(),
+  file: z.string().optional(),
+  status: z.string().optional(),
+});
+
+export type UpdateExpenseParams = z.input<typeof updateExpenseSchema>;
+
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
@@ -319,4 +335,83 @@ export async function createExpense(
       message: error instanceof Error ? error.message : "Failed to save expense",
     };
   }
+}
+
+/**
+ * Update an existing staff expense record.
+ * Throws if the record is not found.
+ * Mirrors the legacy Yii2 StaffExpensesController::actionUpdate().
+ *
+ * @param params - Object with `id` (expense UUID) and fields to update
+ * @returns The updated expense record
+ */
+export async function updateExpense(
+  params: UpdateExpenseParams,
+): Promise<ExpenseRecord> {
+  await requireCapability("staff_expense.write");
+
+  const parsed = updateExpenseSchema.safeParse(params);
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid update parameters");
+  }
+
+  const { id, ...fields } = parsed.data;
+
+  // Verify the record exists
+  const existing = await prisma.staff_expenses.findFirst({
+    where: { staff_expense_uuid: id },
+  });
+  if (!existing) {
+    throw new Error("Expense not found");
+  }
+
+  // Build update data — only include fields that were explicitly provided
+  const updateData: Record<string, unknown> = {};
+  if (fields.supplier !== undefined) updateData.supplier = fields.supplier;
+  if (fields.category !== undefined) updateData.category = fields.category;
+  if (fields.purchaseDate !== undefined) updateData.purchase_date = new Date(fields.purchaseDate);
+  if (fields.totalAmount !== undefined) updateData.total_amount = fields.totalAmount;
+  if (fields.currency !== undefined) updateData.currency = fields.currency;
+  if (fields.vat !== undefined) updateData.vat = fields.vat;
+  if (fields.reimbursable !== undefined) updateData.reimbursable = fields.reimbursable;
+  if (fields.description !== undefined) updateData.description = fields.description;
+  if (fields.file !== undefined) updateData.file = fields.file;
+  if (fields.status !== undefined) updateData.status = fields.status;
+  updateData.updated_at = new Date();
+
+  const expense = await prisma.staff_expenses.update({
+    where: { staff_expense_uuid: id },
+    data: updateData as any,
+    select: {
+      staff_expense_uuid: true,
+      supplier: true,
+      category: true,
+      purchase_date: true,
+      total_amount: true,
+      currency: true,
+      vat: true,
+      reimbursable: true,
+      description: true,
+      file: true,
+      staff_id: true,
+      status: true,
+      created_at: true,
+    },
+  });
+
+  return {
+    staff_expense_uuid: expense.staff_expense_uuid,
+    supplier: expense.supplier,
+    category: expense.category,
+    purchase_date: expense.purchase_date,
+    total_amount: expense.total_amount ? Number(expense.total_amount) : null,
+    currency: expense.currency,
+    vat: expense.vat ? Number(expense.vat) : null,
+    reimbursable: expense.reimbursable ?? false,
+    description: expense.description,
+    file: expense.file,
+    staff_id: expense.staff_id,
+    status: expense.status,
+    created_at: expense.created_at,
+  };
 }
