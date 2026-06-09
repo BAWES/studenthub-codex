@@ -1,9 +1,9 @@
-export { listBanks, getBank, listBankAccounts, getBankAccount, createBankAccount } from "./actions";
+export { listBanks, getBank, listBankAccounts, getBankAccount, createBank } from "./actions";
 export type {
   BankListItem,
   ListBanksResult,
   ListBanksParams,
   GetBankParams,
-  CreateBankAccountParams,
-  CreateBankAccountResult,
+  CreateBankParams,
+  CreateBankResult,
 } from "./actions";

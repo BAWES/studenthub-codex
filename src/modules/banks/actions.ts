@@ -42,6 +42,26 @@ export type ListBanksResult = {
   totalPages: number;
 };
 
+const createBankSchema = z.object({
+  name: z.string().min(1, "Bank name is required"),
+  ibanCode: z.string().min(1, "IBAN code is required"),
+  swiftCode: z.string().optional(),
+  address: z.string().optional(),
+  transferType: z.string().optional(),
+  codeAbk: z.number().int().optional(),
+});
+
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
+
+export type CreateBankParams = z.input<typeof createBankSchema>;
+
+export type CreateBankResult = {
+  operation: string;
+  message: string;
+};
+
 // ---------------------------------------------------------------------------
 // Server actions
 // ---------------------------------------------------------------------------
@@ -124,36 +144,38 @@ export const listBankAccounts = listBanks;
 export const getBankAccount = getBank;
 
 // ---------------------------------------------------------------------------
-// createBankAccount
+// createBank
 // ---------------------------------------------------------------------------
 
-const createBankAccountSchema = z.object({
-  name: z.string().min(1, "Bank name is required").max(100),
-  swift_code: z.string().max(100).optional(),
-  address: z.string().max(100).optional(),
-  bank_iban_code: z.string().min(1, "IBAN is required").max(64),
-  type: z.string().max(3).optional(),
-  bank_code_abk: z.coerce.number().int().optional(),
+const createBankSchema = z.object({
+  name: z.string().min(1, "Bank name is required"),
+  ibanCode: z.string().min(1, "IBAN code is required"),
+  swiftCode: z.string().optional(),
+  address: z.string().optional(),
+  transferType: z.string().optional(),
+  codeAbk: z.number().int().optional(),
 });
 
-export type CreateBankAccountParams = z.input<typeof createBankAccountSchema>;
+export type CreateBankParams = z.input<typeof createBankSchema>;
 
-export type CreateBankAccountResult = {
-  operation: "success" | "error";
+export type CreateBankResult = {
+  operation: string;
   message: string;
 };
 
 /**
- * Create a bank account.
- * Mirrors the legacy Yii2 Admin BankController::actionCreate().
- * Requires bank.write capability.
+ * Create a new bank record.
+ *
+ * Mirrors the legacy Admin BankController::actionCreate().
+ * - Creates a bank with name, IBAN, swift code, address, transfer type
+ * - Returns { operation, message } on success or error
  */
-export async function createBankAccount(
-  data: CreateBankAccountParams,
-): Promise<CreateBankAccountResult> {
+export async function createBank(
+  params: CreateBankParams,
+): Promise<CreateBankResult> {
   await requireCapability("bank.write");
 
-  const parsed = createBankAccountSchema.safeParse(data);
+  const parsed = createBankSchema.safeParse(params);
   if (!parsed.success) {
     return {
       operation: "error",
@@ -161,18 +183,18 @@ export async function createBankAccount(
     };
   }
 
-  const { name, swift_code, address, bank_iban_code, type, bank_code_abk } =
+  const { name, ibanCode, swiftCode, address, transferType, codeAbk } =
     parsed.data;
 
   try {
     await prisma.bank.create({
       data: {
         bank_name: name,
-        bank_swift_code: swift_code ?? null,
+        bank_iban_code: ibanCode,
+        bank_swift_code: swiftCode ?? null,
         bank_address: address ?? null,
-        bank_iban_code,
-        bank_transfer_type: type ?? null,
-        bank_code_abk: bank_code_abk ?? null,
+        bank_transfer_type: transferType ?? null,
+        bank_code_abk: codeAbk ?? null,
       },
     });
 
@@ -183,7 +205,8 @@ export async function createBankAccount(
   } catch (err) {
     return {
       operation: "error",
-      message: err instanceof Error ? err.message : "Failed to create bank",
+      message:
+        err instanceof Error ? err.message : "Failed to create bank record",
     };
   }
 }
