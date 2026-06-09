@@ -43,12 +43,37 @@ export const createCompanySchema = z.object({
 });
 
 // ---------------------------------------------------------------------------
+// Update Company
+// ---------------------------------------------------------------------------
+
+export const updateCompanySchema = z.object({
+  companyId: z.number({ required_error: "Company ID is required" }).int().positive(),
+  company_name: z.string().min(1, "Company name is required").max(255).optional(),
+  company_common_name_en: z.string().max(255).optional(),
+  company_common_name_ar: z.string().max(255).optional(),
+  company_description_en: z.string().optional(),
+  company_description_ar: z.string().optional(),
+  company_website: z.string().url("Invalid URL").optional(),
+  company_email: z.string().email("Invalid email").max(225).optional(),
+  commercial_licence: z.string().max(255).optional(),
+  country_id: z.number().int().positive().optional(),
+  currency_code: z.string().max(3).optional(),
+  company_hourly_rate: z.number().positive().optional(),
+  company_bonus_commission: z.number().min(0).max(100).optional(),
+  company_followup: z.boolean().optional(),
+  company_approved_to_hire: z.boolean().optional(),
+  company_status_override: z.boolean().optional(),
+  parent_company_id: z.number().int().positive().optional(),
+});
+
+// ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
 export type ListCompaniesInput = z.input<typeof listCompaniesSchema>;
 export type GetCompanyInput = z.input<typeof getCompanySchema>;
 export type CreateCompanyInput = z.input<typeof createCompanySchema>;
+export type UpdateCompanyInput = z.input<typeof updateCompanySchema>;
 
 export type CompanyListItem = {
   company_id: number;

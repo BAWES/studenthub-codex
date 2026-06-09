@@ -7,11 +7,13 @@ import {
   listCompaniesSchema,
   getCompanySchema,
   createCompanySchema,
+  updateCompanySchema,
 } from "./schemas";
 import type {
   ListCompaniesInput,
   GetCompanyInput,
   CreateCompanyInput,
+  UpdateCompanyInput,
   CompanyListItem,
   CompanyDetail,
   ListCompaniesResult,
@@ -214,4 +216,86 @@ export async function createCompany(
 
   revalidatePath("/company/companies");
   return { company_id: company.company_id };
+}
+
+// ---------------------------------------------------------------------------
+// Update Company
+// ---------------------------------------------------------------------------
+
+/**
+ * Update an existing company's details.
+ * Mirrors the legacy updateCompany endpoint.
+ */
+export async function updateCompany(
+  data: UpdateCompanyInput,
+): Promise<{ company_id: number }> {
+  await requireCapability("company.write.linked");
+
+  const parsed = updateCompanySchema.safeParse(data);
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid company data");
+  }
+
+  const { companyId, ...fields } = parsed.data;
+
+  const updateData: Record<string, unknown> = {
+    company_updated_at: new Date(),
+  };
+
+  if (fields.company_name !== undefined) {
+    updateData.company_name = fields.company_name;
+  }
+  if (fields.company_common_name_en !== undefined) {
+    updateData.company_common_name_en = fields.company_common_name_en;
+  }
+  if (fields.company_common_name_ar !== undefined) {
+    updateData.company_common_name_ar = fields.company_common_name_ar;
+  }
+  if (fields.company_description_en !== undefined) {
+    updateData.company_description_en = fields.company_description_en;
+  }
+  if (fields.company_description_ar !== undefined) {
+    updateData.company_description_ar = fields.company_description_ar;
+  }
+  if (fields.company_website !== undefined) {
+    updateData.company_website = fields.company_website;
+  }
+  if (fields.company_email !== undefined) {
+    updateData.company_email = fields.company_email;
+  }
+  if (fields.commercial_licence !== undefined) {
+    updateData.commercial_licence = fields.commercial_licence;
+  }
+  if (fields.country_id !== undefined) {
+    updateData.country_id = fields.country_id;
+  }
+  if (fields.currency_code !== undefined) {
+    updateData.currency_code = fields.currency_code;
+  }
+  if (fields.company_hourly_rate !== undefined) {
+    updateData.company_hourly_rate = fields.company_hourly_rate;
+  }
+  if (fields.company_bonus_commission !== undefined) {
+    updateData.company_bonus_commission = fields.company_bonus_commission;
+  }
+  if (fields.company_followup !== undefined) {
+    updateData.company_followup = fields.company_followup;
+  }
+  if (fields.company_approved_to_hire !== undefined) {
+    updateData.company_approved_to_hire = fields.company_approved_to_hire;
+  }
+  if (fields.company_status_override !== undefined) {
+    updateData.company_status_override = fields.company_status_override;
+  }
+  if (fields.parent_company_id !== undefined) {
+    updateData.parent_company_id = fields.parent_company_id;
+  }
+
+  await prisma.company.update({
+    where: { company_id: companyId },
+    data: updateData as any,
+  });
+
+  revalidatePath("/company/companies");
+  return { company_id: companyId };
 }
