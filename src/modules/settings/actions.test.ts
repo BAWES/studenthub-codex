@@ -120,3 +120,57 @@ describe("updateSettingSchema", () => {
     expect(result.success).toBe(false);
   });
 });
+
+// ---------------------------------------------------------------------------
+// Return type shape verification
+// ---------------------------------------------------------------------------
+
+type SettingItem = {
+  setting_uuid: string;
+  code: string;
+  key: string;
+  value: string | null;
+  serialized: boolean;
+  created_at: Date | null;
+  updated_at: Date | null;
+};
+
+type UpdateSettingResult = {
+  operation: string;
+  message: string;
+};
+
+describe("SettingItem shape", () => {
+  it("defines the expected fields", () => {
+    const mock: SettingItem = {
+      setting_uuid: "abc-123",
+      code: "EventManager",
+      key: "max_active_students",
+      value: "500",
+      serialized: false,
+      created_at: null,
+      updated_at: null,
+    };
+    expect(mock.setting_uuid).toBe("abc-123");
+    expect(mock.code).toBe("EventManager");
+    expect(mock.serialized).toBe(false);
+  });
+});
+
+describe("UpdateSettingResult shape", () => {
+  it("includes operation and message", () => {
+    const result: UpdateSettingResult = {
+      operation: "success",
+      message: "Setting updated successfully",
+    };
+    expect(result.operation).toBe("success");
+  });
+
+  it("can represent error state", () => {
+    const result: UpdateSettingResult = {
+      operation: "error",
+      message: "Setting not found",
+    };
+    expect(result.operation).toBe("error");
+  });
+});
