@@ -162,7 +162,7 @@ export function DataTable<T extends { id: string | number }>({
           </div>
         </div>
         <div className="tableScroller">
-          <table>
+          <table aria-label={title}>
             <thead>
               <tr>
                 {visibleColumns.map((column) => (
@@ -204,7 +204,7 @@ export function DataTable<T extends { id: string | number }>({
           </div>
         </div>
         <div className="tableScroller">
-          <table>
+          <table aria-label={title}>
             <thead>
               <tr>
                 {visibleColumns.map((column) => (
@@ -256,7 +256,7 @@ export function DataTable<T extends { id: string | number }>({
         <span>{rowCountLabel}</span>
       </div>
       <div className="tableScroller">
-        <table>
+        <table aria-label={title}>
           <thead>
             <tr>
               {visibleColumns.map((column) => (
@@ -276,7 +276,7 @@ export function DataTable<T extends { id: string | number }>({
                   ))}
                   {rowHref ? (
                     <td className="rowAction" data-label="Action">
-                      <Link href={rowHref(row)}>Open</Link>
+                      <Link href={rowHref(row)} aria-label={getRowLabel ? `Open ${getRowLabel(row)}` : "Open record"}>Open</Link>
                     </td>
                   ) : null}
                 </tr>
