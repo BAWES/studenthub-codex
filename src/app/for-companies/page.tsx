@@ -5,13 +5,13 @@ import CompanyLandingContent from "./CompanyLandingContent";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "StudentHub for Companies — Hire qualified staff without the runaround",
+  title: "Hire Smarter, Faster | StudentHub for Companies",
   description:
-    "Post openings, review matched candidates, approve timesheets, and receive consolidated invoices. One workspace replaces the email-and-spreadsheet shuffle.",
+    "Post openings and get AI-matched candidates within 48 hours. Approve timesheets in bulk, manage multi-branch hiring, and receive consolidated invoices — all in one workspace.",
   openGraph: {
-    title: "StudentHub for Companies",
+    title: "StudentHub for Companies | Streamline Your Hiring",
     description:
-      "Hire qualified staff without the runaround. AI-matched candidates, consolidated invoicing, and compliance built in.",
+      "Hire qualified staff without the runaround. AI candidate matching, compliance built-in, and automated billing for multi-location employers.",
   },
 };
 
