@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { resolveLegacyIdentities } from "./service";
-import { clearPendingAccounts, clearSession, createPendingAccounts, createSession, getPendingAccounts } from "./session";
+import { clearPendingAccounts, clearSession, createPendingAccounts, createSession, getPendingAccounts, getSession } from "./session";
 import type { LoginState } from "./types";
 
 export async function loginAction(_state: LoginState, formData: FormData): Promise<LoginState> {
@@ -57,6 +57,27 @@ export async function chooseAccountAction(formData: FormData) {
   const { accountKey: _accountKey, label: _label, ...user } = account;
   await createSession(user);
   redirect("/app");
+}
+
+export async function verifySession() {
+  try {
+    const session = await getSession();
+    if (!session) {
+      return { authenticated: false as const, user: null };
+    }
+    return {
+      authenticated: true as const,
+      user: {
+        role: session.role,
+        id: session.id,
+        name: session.name,
+        email: session.email,
+        issuedAt: session.issuedAt,
+      },
+    };
+  } catch {
+    return { authenticated: false as const, user: null };
+  }
 }
 
 export async function logoutAction() {
