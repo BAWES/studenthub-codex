@@ -33,7 +33,7 @@ const addCommentSchema = z.object({
 
 const updateTicketSchema = z.object({
   ticketUuid: z.string().min(1, "Ticket UUID is required"),
-  detail: z.string().min(1, "Ticket detail is required"),
+  detail: z.string().min(1, "Ticket detail is required").max(2000),
 });
 
 const closeTicketSchema = z.object({
@@ -91,9 +91,6 @@ export type AddCommentResult = {
   operation: string;
   message: string;
 };
-
-export type UpdateTicketParams = z.input<typeof updateTicketSchema>;
-export type CloseTicketParams = z.input<typeof closeTicketSchema>;
 
 // ---------------------------------------------------------------------------
 // Exported schemas (for shared validation in tests)
