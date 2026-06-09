@@ -145,3 +145,88 @@ describe("ListBanksResult shape", () => {
     expect(result.banks).toHaveLength(0);
   });
 });
+
+// ---------------------------------------------------------------------------
+// createBankSchema
+// ---------------------------------------------------------------------------
+
+const createBankSchema = z.object({
+  name: z.string().min(1, "Bank name is required"),
+  swiftCode: z.string().optional(),
+  ibanCode: z.string().min(1, "IBAN code is required"),
+  address: z.string().optional(),
+  transferType: z.string().optional(),
+  codeAbk: z.number().int().optional(),
+});
+
+type CreateBankParams = z.input<typeof createBankSchema>;
+
+describe("createBankSchema", () => {
+  it("accepts valid bank data with minimum required fields", () => {
+    const result = createBankSchema.safeParse({
+      name: "National Bank of Kuwait",
+      ibanCode: "KW123456789",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts optional fields", () => {
+    const result = createBankSchema.safeParse({
+      name: "Gulf Bank",
+      swiftCode: "GULBKWKW",
+      ibanCode: "KW987654321",
+      address: "Kuwait City",
+      transferType: "SWIFT",
+      codeAbk: 456,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects empty name", () => {
+    const result = createBankSchema.safeParse({
+      name: "",
+      ibanCode: "KW123456789",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects empty ibanCode", () => {
+    const result = createBankSchema.safeParse({
+      name: "Test Bank",
+      ibanCode: "",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects non-integer codeAbk", () => {
+    const result = createBankSchema.safeParse({
+      name: "Test Bank",
+      ibanCode: "KW123456789",
+      codeAbk: "abc",
+    });
+    expect(result.success).toBe(false);
+  });
+});
+
+type CreateBankResult = {
+  operation: string;
+  message: string;
+};
+
+describe("CreateBankResult shape", () => {
+  it("accepts a success result", () => {
+    const result: CreateBankResult = {
+      operation: "success",
+      message: "Bank created successfully",
+    };
+    expect(result.operation).toBe("success");
+  });
+
+  it("accepts an error result", () => {
+    const result: CreateBankResult = {
+      operation: "error",
+      message: "Failed to create bank",
+    };
+    expect(result.operation).toBe("error");
+  });
+});
