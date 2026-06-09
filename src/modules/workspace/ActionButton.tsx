@@ -93,6 +93,20 @@ export interface ActionButtonProps
   icon?: React.ReactNode;
   /** If true, renders as child element using Radix Slot */
   asChild?: boolean;
+  /**
+   * Required capability for this button to be visible/interactable.
+   * The parent page/server-component should check `hasCapability()` or
+   * `requireCapability()` before rendering — this prop serves as
+   * documentation and allows consumers to conditionally render.
+   *
+   * @example
+   * ```tsx
+   * // In a server component:
+   * const canCreate = hasCapability(session, "request.create");
+   * {canCreate && <ActionButton capability="request.create">New</ActionButton>}
+   * ```
+   */
+  capability?: string;
 }
 
 // ---------------------------------------------------------------------------
