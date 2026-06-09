@@ -2,185 +2,164 @@
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
+import { GlassPanel } from "./glass-panel";
+import { TrendingUp, TrendingDown, Minus, type LucideIcon } from "lucide-react";
 
-/* ------------------------------------------------------------------ */
-/*  MetricCard — glass card with value, label, inline SVG sparkline,  */
-/*  trend indicator, hover lift, staggered entrance animation.         */
-/*  Designed for the StudentHub OS aesthetic — Linear/Arc/Notion.      */
-/* ------------------------------------------------------------------ */
+type TrendDirection = "up" | "down" | "flat";
 
-export type MetricTrend = "up" | "down" | "flat";
-
-export interface MetricCardProps {
-  /** Human-readable label (e.g. "Active Candidates") */
+export interface MetricCardProps extends React.ComponentPropsWithoutRef<"div"> {
+  /** Card label */
   label: string;
-  /** Primary numeric or short-string value */
+  /** Main value to display */
   value: string | number;
-  /** Optional secondary note or context */
-  note?: string;
-  /** Trend direction — shows an arrow + semantic colour */
-  trend?: MetricTrend;
-  /** Optional trend change text (e.g. "+12%", "-3") */
+  /** Optional subtitle below value (new API — replaces `note`) */
+  subtitle?: string;
+  /** Trend direction (shows arrow) */
+  trend?: TrendDirection;
+  /** Trend label text (e.g. "+12% vs last week") */
   trendLabel?: string;
-  /** Small inline sparkline data points (3–12 numbers) */
+  /** Optional sparkline data points (0-1 range). New API — replaces `sparklineData` */
+  sparkline?: number[];
+  /** Icon to show in top-left */
+  icon?: LucideIcon;
+  /** Glow variant (new API — replaces `accent` for glow toggle) */
+  glow?: boolean;
+  /** ── Legacy API (backward compat) ── */
+  /** Legacy: shown as subtitle */
+  note?: string;
+  /** Legacy: color accent (info, success, warning, error) */
+  accent?: "info" | "success" | "warning" | "error" | "neutral";
+  /** Legacy: sparkline data as raw numbers */
   sparklineData?: number[];
-  /** Accent colour for the sparkline stroke & glow */
-  accent?: "primary" | "success" | "warning" | "info";
-  /** Optional click handler */
-  onClick?: () => void;
-  /** Stagger entrance delay offset (ms) — pass index * 60 from parent */
+  /** Legacy: entrance animation delay in ms */
   entranceDelay?: number;
-  className?: string;
 }
 
-const accentMap: Record<string, { stroke: string; glow: string }> = {
-  primary: { stroke: "var(--blue)", glow: "var(--sh-glow-sm)" },
-  success: { stroke: "var(--sh-success)", glow: "var(--sh-success-glow)" },
-  warning: { stroke: "var(--sh-warning)", glow: "var(--sh-warning-glow)" },
-  info: { stroke: "var(--sh-info)", glow: "var(--sh-info-glow)" },
+const trendIcons: Record<TrendDirection, LucideIcon> = {
+  up: TrendingUp,
+  down: TrendingDown,
+  flat: Minus,
 };
 
-function MetricSparkline({ data, accent }: { data: number[]; accent: string }) {
-  const { stroke } = accentMap[accent] ?? accentMap.primary;
-  const width = 120;
-  const height = 32;
-  const padding = 4;
-  const chartW = width - padding * 2;
-  const chartH = height - padding * 2;
+const trendColors: Record<TrendDirection, string> = {
+  up: "var(--sh-success)",
+  down: "var(--sh-error)",
+  flat: "var(--muted)",
+};
 
-  if (!data || data.length < 2) return null;
+const accentColors: Record<string, { dot: string; glow: string; bg: string }> = {
+  info: { dot: "var(--sh-info)", glow: "var(--sh-info-glow)", bg: "var(--sh-info-bg)" },
+  success: { dot: "var(--sh-success)", glow: "var(--sh-success-glow)", bg: "var(--sh-success-bg)" },
+  warning: { dot: "var(--sh-warning)", glow: "var(--sh-warning-glow)", bg: "var(--sh-warning-bg)" },
+  error: { dot: "var(--sh-error)", glow: "var(--sh-error-glow)", bg: "var(--sh-error-bg)" },
+  primary: { dot: "var(--sh-info)", glow: "var(--sh-info-glow)", bg: "var(--sh-info-bg)" },
+  neutral: { dot: "var(--muted)", glow: "transparent", bg: "transparent" },
+};
 
-  const min = Math.min(...data);
+function normalizeSparkline(data?: number[]): number[] | undefined {
+  if (!data || data.length < 2) return data;
   const max = Math.max(...data);
-  const range = max - min || 1;
-
-  const points = data.map((val, i) => {
-    const x = padding + (i / (data.length - 1)) * chartW;
-    const y = padding + chartH - ((val - min) / range) * chartH;
-    return `${x},${y}`;
-  });
-
-  const d = points.map((p, i) => (i === 0 ? `M${p}` : `L${p}`)).join(" ");
-
-  return (
-    <svg
-      width={width}
-      height={height}
-      viewBox={`0 0 ${width} ${height}`}
-      className="shMetricSparkline"
-      aria-hidden="true"
-    >
-      <defs>
-        <linearGradient id={`spark-fill-${accent}`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={stroke} stopOpacity="0.20" />
-          <stop offset="100%" stopColor={stroke} stopOpacity="0" />
-        </linearGradient>
-      </defs>
-      {/* Area fill */}
-      <path
-        d={`${d} L${padding + chartW},${padding + chartH} L${padding},${padding + chartH} Z`}
-        fill={`url(#spark-fill-${accent})`}
-      />
-      {/* Stroke line */}
-      <path
-        d={d}
-        fill="none"
-        stroke={stroke}
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      {/* End dot */}
-      <circle
-        cx={points[points.length - 1].split(",")[0]}
-        cy={points[points.length - 1].split(",")[1]}
-        r="2"
-        fill={stroke}
-      />
-    </svg>
-  );
+  if (max === 0) return data.map(() => 0);
+  return data.map((v) => v / max);
 }
 
-function TrendIcon({ trend, accent }: { trend: MetricTrend; accent: string }) {
-  const { stroke } = accentMap[accent] ?? accentMap.primary;
-  if (trend === "flat") {
-    return (
-      <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true">
-        <line x1="1" y1="6" x2="11" y2="6" stroke={stroke} strokeWidth="1.5" strokeLinecap="round" />
-      </svg>
-    );
-  }
-  const up = trend === "up";
-  return (
-    <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true">
-      <path
-        d={up ? "M6 11V1M6 1l4 4M6 1L2 5" : "M6 1v10M6 11l4-4M6 11l-4-4"}
-        fill="none"
-        stroke={stroke}
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
+/**
+ * MetricCard — glass panel with label, value, optional sparkline, and trend indicator.
+ * Use in dashboards to replace generic shadcn stat cards.
+ * Supports both new API (subtitle, sparkline, icon, glow) and legacy API (note, sparklineData, accent, entranceDelay).
+ */
+const MetricCard = React.forwardRef<HTMLDivElement, MetricCardProps>(function MetricCard(
+  {
+    className,
+    label,
+    value,
+    subtitle,
+    trend = "flat",
+    trendLabel,
+    sparkline,
+    icon: Icon,
+    glow = false,
+    note,
+    accent,
+    sparklineData,
+    entranceDelay,
+    style,
+    ...props
+  },
+  ref,
+) {
+  // Resolve props: new API takes priority, fall back to legacy
+  const resolvedSubtitle = subtitle ?? note;
+  const resolvedSparkline = sparkline ?? normalizeSparkline(sparklineData);
+  const resolvedGlow = glow || (accent && accent !== "neutral");
+  const resolvedAccent = accentColors[accent ?? "info"];
 
-function MetricCard({
-  label,
-  value,
-  note,
-  trend,
-  trendLabel,
-  sparklineData,
-  accent = "primary",
-  onClick,
-  entranceDelay = 0,
-  className,
-}: MetricCardProps) {
+  const TrendIcon = trendIcons[trend];
+  const trendColor = trendColors[trend];
+
   return (
-    <article
-      className={cn(
-        "shMetricCard",
-        onClick && "shMetricCardClickable",
-        className,
-      )}
-      style={{ animationDelay: `${entranceDelay}ms` } as React.CSSProperties}
-      onClick={onClick}
-      role={onClick ? "button" : undefined}
-      tabIndex={onClick ? 0 : undefined}
-      onKeyDown={
-        onClick
-          ? (e: React.KeyboardEvent) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                onClick();
-              }
-            }
-          : undefined
-      }
+    <GlassPanel
+      ref={ref}
+      variant={resolvedGlow ? "elevated" : "subtle"}
+      radius="lg"
+      className={cn("p-4 grid content-start gap-2", className)}
+      style={{
+        ...(entranceDelay !== undefined ? { animationDelay: `${entranceDelay}ms` } : {}),
+        ...style,
+      }}
+      {...props}
     >
-      <div className="shMetricCardBody">
-        <div className="shMetricCardTop">
-          <span className="shMetricCardLabel">{label}</span>
-          {trend && (
-            <span className="shMetricCardTrend" data-trend={trend}>
-              <TrendIcon trend={trend} accent={accent} />
-              {trendLabel && <small>{trendLabel}</small>}
+      {/* Header row: label */}
+      <div className="flex items-center justify-between">
+        <span className="text-[11px] font-black uppercase tracking-wider" style={{ color: "var(--muted)" }}>
+          {label}
+        </span>
+        {Icon && (
+          <Icon className="size-4 shrink-0" style={{ color: "var(--sh-info)" }} aria-hidden="true" />
+        )}
+      </div>
+
+      {/* Value */}
+      <div className="flex items-baseline gap-2">
+        <span className="text-[28px] font-bold leading-none tracking-[-0.02em]" style={{ color: "var(--ink)" }}>
+          {value}
+        </span>
+        {resolvedSubtitle && (
+          <span className="text-xs" style={{ color: "var(--muted)" }}>
+            {resolvedSubtitle}
+          </span>
+        )}
+      </div>
+
+      {/* Trend row */}
+      {(trend !== "flat" || trendLabel) && (
+        <div className="flex items-center gap-1.5 mt-1">
+          <TrendIcon className="size-3.5 shrink-0" style={{ color: trendColor }} />
+          {trendLabel && (
+            <span className="text-[11px] font-semibold" style={{ color: trendColor }}>
+              {trendLabel}
             </span>
           )}
         </div>
-        <strong className="shMetricCardValue">
-          {typeof value === "number" ? value.toLocaleString("en-US") : value}
-        </strong>
-        {note && <p className="shMetricCardNote">{note}</p>}
-      </div>
-      {sparklineData && sparklineData.length >= 2 && (
-        <div className="shMetricCardChart">
-          <MetricSparkline data={sparklineData} accent={accent} />
+      )}
+
+      {/* Sparkline (inline SVG bar chart) */}
+      {resolvedSparkline && resolvedSparkline.length > 1 && (
+        <div className="mt-2 h-[32px] flex items-end gap-[2px]" aria-label="Trend sparkline">
+          {resolvedSparkline.map((point, i) => (
+            <div
+              key={i}
+              className="flex-1 rounded-t-[2px] transition-all duration-200"
+              style={{
+                height: `${Math.max(point * 100, 8)}%`,
+                background: `color-mix(in srgb, var(--sh-info) ${Math.round(point * 60 + 20)}%, transparent)`,
+              }}
+            />
+          ))}
         </div>
       )}
-    </article>
+    </GlassPanel>
   );
-}
+});
 
 export { MetricCard };
