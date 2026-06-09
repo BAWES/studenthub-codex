@@ -1,5 +1,7 @@
 "use server";
 
+import crypto from "node:crypto";
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
@@ -40,6 +42,21 @@ const getInterviewEvaluationSchema = z.object({
 });
 
 export type GetInterviewEvaluationParams = z.input<typeof getInterviewEvaluationSchema>;
+
+const createInterviewEvaluationSchema = z.object({
+  candidateId: z.number().int().positive("Candidate ID is required"),
+  staffId: z.number().int().positive().optional(),
+  requestUuid: z.string().optional(),
+  companyId: z.number().int().positive().optional(),
+});
+
+export type CreateInterviewEvaluationParams = z.input<typeof createInterviewEvaluationSchema>;
+
+export type CreateInterviewEvaluationResult = {
+  interview_evaluation_uuid: string;
+  operation: string;
+  message: string;
+};
 
 // ---------------------------------------------------------------------------
 // Server actions
@@ -138,5 +155,48 @@ export async function getInterviewEvaluation(
     staff_id: evaluation.staff_id,
     candidate_name: evaluation.candidate?.candidate_name ?? null,
     created_at: evaluation.created_at,
+  };
+}
+
+/**
+ * Create a new interview evaluation record.
+ * Maps to the legacy Yii2 InterviewEvaluationController create logic.
+ *
+ * @param params - Object with candidateId (required), staffId, requestUuid, companyId (optional)
+ * @returns The created interview evaluation's UUID and status
+ */
+export async function createInterviewEvaluation(
+  params: CreateInterviewEvaluationParams,
+): Promise<CreateInterviewEvaluationResult> {
+  await requireCapability("candidate.evaluation.write");
+
+  const parsed = createInterviewEvaluationSchema.safeParse(params);
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid create parameters");
+  }
+
+  const { candidateId, staffId, requestUuid, companyId } = parsed.data;
+
+  const interviewEvaluationUuid = `interview_evaluation_${crypto.randomUUID()}`;
+  const now = new Date();
+
+  await prisma.interview_evaluation.create({
+    data: {
+      interview_evaluation_uuid: interviewEvaluationUuid,
+      request_uuid: requestUuid ?? null,
+      company_id: companyId ?? null,
+      candidate_id: candidateId,
+      staff_id: staffId ?? null,
+      created_at: now,
+      updated_at: now,
+    },
+  });
+
+  revalidatePath("/staff/candidates/interview-evaluation");
+
+  return {
+    interview_evaluation_uuid: interviewEvaluationUuid,
+    operation: "success",
+    message: "Interview evaluation created successfully",
   };
 }
