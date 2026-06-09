@@ -10,6 +10,9 @@
 //   - getRequest           — single request detail with applications,
 //                            invitations, and interviews
 //   - updateRequestStatus  — update request status with timestamps
+//   - approveRequest       — approve a pending request (→ started)
+//   - rejectRequest        — reject a request with reason (→ cancelled)
+//   - closeRequest         — close a request with resolution (→ delivered)
 //
 // Status enum: pending, started, delivered, cancelled, finished_by_recruitment,
 //              re_work
@@ -58,6 +61,21 @@ export const updateRequestStatusSchema = z.object({
   feedback: z.string().max(255).optional(),
 });
 
+export const approveRequestSchema = z.object({
+  requestUuid: z.string().min(1, "Request UUID is required"),
+  reason: z.string().min(1, "Reason is required").max(500),
+});
+
+export const rejectRequestSchema = z.object({
+  requestUuid: z.string().min(1, "Request UUID is required"),
+  reason: z.string().min(1, "Reason is required").max(500),
+});
+
+export const closeRequestSchema = z.object({
+  requestUuid: z.string().min(1, "Request UUID is required"),
+  resolution: z.string().min(1, "Resolution is required").max(500),
+});
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -65,6 +83,15 @@ export const updateRequestStatusSchema = z.object({
 export type ListRequestsInput = z.input<typeof listRequestsSchema>;
 export type GetRequestInput = z.input<typeof getRequestSchema>;
 export type UpdateRequestStatusInput = z.input<typeof updateRequestStatusSchema>;
+
+export type ApproveRequestInput = z.input<typeof approveRequestSchema>;
+export type RejectRequestInput = z.input<typeof rejectRequestSchema>;
+export type CloseRequestInput = z.input<typeof closeRequestSchema>;
+
+export type RequestActionResponse = {
+  operation: "success" | "error";
+  message: string;
+};
 
 export type RequestRow = {
   request_uuid: string;
@@ -400,6 +427,196 @@ export async function updateRequestStatus(
     return {
       operation: "error",
       message: err instanceof Error ? err.message : "Failed to update request status",
+    };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// approveRequest
+// ---------------------------------------------------------------------------
+
+/**
+ * Approve a request. Sets status to "started" with a reason.
+ */
+export async function approveRequest(
+  input: ApproveRequestInput,
+): Promise<RequestActionResponse> {
+  await requireCapability("request.write.any");
+
+  const parsed = approveRequestSchema.safeParse(input);
+  if (!parsed.success) {
+    return {
+      operation: "error",
+      message: parsed.error.issues[0]?.message ?? "Invalid input",
+    };
+  }
+
+  const existing = await prisma.request.findUnique({
+    where: { request_uuid: parsed.data.requestUuid },
+    select: { request_uuid: true, request_status: true },
+  });
+
+  if (!existing) {
+    return { operation: "error", message: "Request not found" };
+  }
+
+  if (existing.request_status !== "pending") {
+    return {
+      operation: "error",
+      message: `Request cannot be approved in current status (${existing.request_status}). Expected status: pending.`,
+    };
+  }
+
+  const now = new Date();
+
+  try {
+    await prisma.request.update({
+      where: { request_uuid: parsed.data.requestUuid },
+      data: {
+        request_status: "started",
+        request_started_at: now,
+        request_updated_datetime: now,
+        request_feedback: parsed.data.reason,
+      },
+    });
+
+    revalidatePath("/admin/requests");
+
+    return {
+      operation: "success",
+      message: `Request approved: ${parsed.data.reason}`,
+    };
+  } catch (err) {
+    return {
+      operation: "error",
+      message: err instanceof Error ? err.message : "Failed to approve request",
+    };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// rejectRequest
+// ---------------------------------------------------------------------------
+
+/**
+ * Reject a request. Sets status to "cancelled" with a reason.
+ */
+export async function rejectRequest(
+  input: RejectRequestInput,
+): Promise<RequestActionResponse> {
+  await requireCapability("request.write.any");
+
+  const parsed = rejectRequestSchema.safeParse(input);
+  if (!parsed.success) {
+    return {
+      operation: "error",
+      message: parsed.error.issues[0]?.message ?? "Invalid input",
+    };
+  }
+
+  const existing = await prisma.request.findUnique({
+    where: { request_uuid: parsed.data.requestUuid },
+    select: { request_uuid: true, request_status: true },
+  });
+
+  if (!existing) {
+    return { operation: "error", message: "Request not found" };
+  }
+
+  if (existing.request_status === "delivered" || existing.request_status === "cancelled") {
+    return {
+      operation: "error",
+      message: `Cannot reject a request with status "${existing.request_status}".`,
+    };
+  }
+
+  const now = new Date();
+
+  try {
+    await prisma.request.update({
+      where: { request_uuid: parsed.data.requestUuid },
+      data: {
+        request_status: "cancelled",
+        request_cancelled_at: now,
+        request_updated_datetime: now,
+        request_feedback: parsed.data.reason,
+      },
+    });
+
+    revalidatePath("/admin/requests");
+
+    return {
+      operation: "success",
+      message: `Request rejected: ${parsed.data.reason}`,
+    };
+  } catch (err) {
+    return {
+      operation: "error",
+      message: err instanceof Error ? err.message : "Failed to reject request",
+    };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// closeRequest
+// ---------------------------------------------------------------------------
+
+/**
+ * Close a request. Sets status to "delivered" with a resolution.
+ */
+export async function closeRequest(
+  input: CloseRequestInput,
+): Promise<RequestActionResponse> {
+  await requireCapability("request.write.any");
+
+  const parsed = closeRequestSchema.safeParse(input);
+  if (!parsed.success) {
+    return {
+      operation: "error",
+      message: parsed.error.issues[0]?.message ?? "Invalid input",
+    };
+  }
+
+  const existing = await prisma.request.findUnique({
+    where: { request_uuid: parsed.data.requestUuid },
+    select: { request_uuid: true, request_status: true },
+  });
+
+  if (!existing) {
+    return { operation: "error", message: "Request not found" };
+  }
+
+  if (existing.request_status === "delivered" || existing.request_status === "cancelled") {
+    return {
+      operation: "error",
+      message: `Cannot close a request with status "${existing.request_status}".`,
+    };
+  }
+
+  const now = new Date();
+
+  try {
+    await prisma.request.update({
+      where: { request_uuid: parsed.data.requestUuid },
+      data: {
+        request_status: "delivered",
+        request_finished_at: now,
+        request_delivered_at: now,
+        request_updated_datetime: now,
+        request_feedback: parsed.data.resolution,
+      },
+    });
+
+    revalidatePath("/admin/requests");
+
+    return {
+      operation: "success",
+      message: `Request closed: ${parsed.data.resolution}`,
+    };
+  } catch (err) {
+    return {
+      operation: "error",
+      message: err instanceof Error ? err.message : "Failed to close request",
     };
   }
 }

@@ -22,6 +22,7 @@ export type Capability =
   | "request.read.any"
   | "request.read.assigned"
   | "request.read.linked"
+  | "request.write.any"
   | "request.create"
   | "request.suggest"
   | "request.interview"

@@ -3,6 +3,9 @@ import {
   listRequestsSchema,
   getRequestSchema,
   updateRequestStatusSchema,
+  approveRequestSchema,
+  rejectRequestSchema,
+  closeRequestSchema,
 } from "./actions";
 
 // ---------------------------------------------------------------------------
@@ -144,5 +147,107 @@ describe("updateRequestStatusSchema", () => {
           .success,
       ).toBe(true);
     }
+  });
+});
+
+describe("approveRequestSchema", () => {
+  it("accepts valid UUID and reason", () => {
+    const r = approveRequestSchema.safeParse({
+      requestUuid: "req_uuid_12345",
+      reason: "Request approved by management",
+    });
+    expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data.reason).toBe("Request approved by management");
+    }
+  });
+
+  it("rejects missing UUID", () => {
+    expect(approveRequestSchema.safeParse({ reason: "Approved" }).success).toBe(false);
+  });
+
+  it("rejects missing reason", () => {
+    expect(approveRequestSchema.safeParse({ requestUuid: "abc" }).success).toBe(false);
+  });
+
+  it("rejects empty reason", () => {
+    expect(
+      approveRequestSchema.safeParse({ requestUuid: "abc", reason: "" }).success,
+    ).toBe(false);
+  });
+
+  it("rejects reason over 500 chars", () => {
+    const longReason = "x".repeat(501);
+    expect(
+      approveRequestSchema.safeParse({ requestUuid: "abc", reason: longReason }).success,
+    ).toBe(false);
+  });
+});
+
+describe("rejectRequestSchema", () => {
+  it("accepts valid UUID and reason", () => {
+    const r = rejectRequestSchema.safeParse({
+      requestUuid: "req_uuid_12345",
+      reason: "Request rejected due to budget constraints",
+    });
+    expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data.reason).toBe("Request rejected due to budget constraints");
+    }
+  });
+
+  it("rejects missing UUID", () => {
+    expect(rejectRequestSchema.safeParse({ reason: "Rejected" }).success).toBe(false);
+  });
+
+  it("rejects missing reason", () => {
+    expect(rejectRequestSchema.safeParse({ requestUuid: "abc" }).success).toBe(false);
+  });
+
+  it("rejects empty reason", () => {
+    expect(
+      rejectRequestSchema.safeParse({ requestUuid: "abc", reason: "" }).success,
+    ).toBe(false);
+  });
+
+  it("rejects reason over 500 chars", () => {
+    const longReason = "x".repeat(501);
+    expect(
+      rejectRequestSchema.safeParse({ requestUuid: "abc", reason: longReason }).success,
+    ).toBe(false);
+  });
+});
+
+describe("closeRequestSchema", () => {
+  it("accepts valid UUID and resolution", () => {
+    const r = closeRequestSchema.safeParse({
+      requestUuid: "req_uuid_12345",
+      resolution: "Position filled successfully",
+    });
+    expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data.resolution).toBe("Position filled successfully");
+    }
+  });
+
+  it("rejects missing UUID", () => {
+    expect(closeRequestSchema.safeParse({ resolution: "Filled" }).success).toBe(false);
+  });
+
+  it("rejects missing resolution", () => {
+    expect(closeRequestSchema.safeParse({ requestUuid: "abc" }).success).toBe(false);
+  });
+
+  it("rejects empty resolution", () => {
+    expect(
+      closeRequestSchema.safeParse({ requestUuid: "abc", resolution: "" }).success,
+    ).toBe(false);
+  });
+
+  it("rejects resolution over 500 chars", () => {
+    const longResolution = "x".repeat(501);
+    expect(
+      closeRequestSchema.safeParse({ requestUuid: "abc", resolution: longResolution }).success,
+    ).toBe(false);
   });
 });
