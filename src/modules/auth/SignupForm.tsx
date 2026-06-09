@@ -29,10 +29,16 @@ const roleOptions = [
   },
 ] as const;
 
-export function SignupForm() {
+export function SignupForm({ defaultRole }: { defaultRole?: Role }) {
   const [state, action, pending] = useActionState(registerAction, initialRegisterState);
-  const [step, setStep] = useState<SignupStep>("select-role");
-  const [selectedRole, setSelectedRole] = useState<Role | null>(null);
+  const [step, setStep] = useState<SignupStep>(
+    defaultRole && roleOptions.some((r) => r.value === defaultRole)
+      ? "fill-form"
+      : "select-role",
+  );
+  const [selectedRole, setSelectedRole] = useState<Role | null>(
+    defaultRole && roleOptions.some((r) => r.value === defaultRole) ? defaultRole : null,
+  );
   const nameRef = useRef<HTMLInputElement>(null);
 
   // Auto-focus name field when form appears

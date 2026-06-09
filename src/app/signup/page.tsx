@@ -2,16 +2,28 @@ import { Shield, Sparkles } from "lucide-react";
 import { getSession } from "@/modules/auth/session";
 import { SignupForm } from "@/modules/auth/SignupForm";
 import { redirect } from "next/navigation";
+import type { Role } from "@/modules/auth/types";
 
 export const dynamic = "force-dynamic";
 
-export default async function SignupPage() {
+const VALID_ROLES: Role[] = ["candidate", "company"];
+
+export default async function SignupPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ role?: string }>;
+}) {
   const session = await getSession();
 
   // Already logged in — send to app
   if (session) {
     redirect("/app");
   }
+
+  const params = await searchParams;
+  const defaultRole = VALID_ROLES.includes(params.role as Role)
+    ? (params.role as Role)
+    : undefined;
 
   return (
     <main className="min-h-svh w-full grid place-items-center p-4">
@@ -20,7 +32,7 @@ export default async function SignupPage() {
         <div
           className="rounded-xl border border-[var(--sh-glass-border)] bg-[color-mix(in_srgb,var(--surface)_92%,transparent)] backdrop-blur-xl shadow-[0_18px_50px_rgba(16,24,40,0.08)]"
         >
-          <SignupForm />
+          <SignupForm defaultRole={defaultRole} />
         </div>
 
         <div className="flex items-center justify-center gap-5 mt-5 text-[13px] text-[var(--muted)]">
