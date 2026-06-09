@@ -49,6 +49,10 @@ type Props = {
     profileUrl: string;
     birthDate: string;
     address: string;
+    gender: string;
+    drivingLicense: string;
+    civilExpiry: string;
+    preferredTime: string;
     countryId: number | null;
     universityId: number | null;
     bankId: number | null;
@@ -117,6 +121,8 @@ export function CandidateEditForm({ candidate, countries, universities, banks, s
         <label><span>Email</span><input name="email" type="email" defaultValue={candidate.email} /><FieldError errors={profileState.fieldErrors?.email} /></label>
         <label><span>Phone</span><input name="phone" type="tel" defaultValue={candidate.phone} /><FieldError errors={profileState.fieldErrors?.phone} /></label>
         <label><span>Birth date</span><input name="birthDate" type="date" defaultValue={candidate.birthDate} /><FieldError errors={profileState.fieldErrors?.birthDate} /></label>
+        <label><span>Gender</span><select name="gender" defaultValue={candidate.gender}><option value="">— Not set —</option><option value="1">Male</option><option value="0">Female</option><option value="2">Other</option></select><FieldError errors={profileState.fieldErrors?.gender} /></label>
+        <label><span>Driving license</span><select name="drivingLicense" defaultValue={candidate.drivingLicense}><option value="">— Not set —</option><option value="1">Yes</option><option value="0">No</option></select><FieldError errors={profileState.fieldErrors?.drivingLicense} /></label>
         <h2>Location & education</h2>
         <label><span>Country / Nationality</span><select name="countryId" defaultValue={candidate.countryId ?? ""}><option value="">— Not set —</option>{countries.map((c) => (<option key={c.id} value={c.id}>{c.label}</option>))}</select><FieldError errors={profileState.fieldErrors?.countryId} /></label>
         <label><span>University</span><select name="universityId" defaultValue={candidate.universityId ?? ""}><option value="">— Not set —</option>{universities.map((u) => (<option key={u.id} value={u.id}>{u.label}</option>))}</select><FieldError errors={profileState.fieldErrors?.universityId} /></label>
@@ -127,6 +133,8 @@ export function CandidateEditForm({ candidate, countries, universities, banks, s
         <label><span>IBAN</span><input name="iban" defaultValue={candidate.iban} /><FieldError errors={profileState.fieldErrors?.iban} /></label>
         <h2>Profile details</h2>
         <label><span>Civil ID</span><input name="civilId" defaultValue={candidate.civilId} /><FieldError errors={profileState.fieldErrors?.civilId} /></label>
+        <label><span>Civil ID expiry</span><input name="civilExpiry" type="date" defaultValue={candidate.civilExpiry} /><FieldError errors={profileState.fieldErrors?.civilExpiry} /></label>
+        <label><span>Preferred working time</span><select name="preferredTime" defaultValue={candidate.preferredTime}><option value="">— Not set —</option><option value="morning">Morning</option><option value="afternoon">Afternoon</option><option value="evening">Evening</option><option value="night">Night</option><option value="flexible">Flexible</option></select><FieldError errors={profileState.fieldErrors?.preferredTime} /></label>
         <label><span>Objective / Headline</span><input name="objective" defaultValue={candidate.objective} /><FieldError errors={profileState.fieldErrors?.objective} /></label>
         <label><span>Profile URL</span><input name="profileUrl" type="url" defaultValue={candidate.profileUrl} /><FieldError errors={profileState.fieldErrors?.profileUrl} /></label>
         <label><span>About / Intro</span><textarea name="intro" rows={5} defaultValue={candidate.intro} /><FieldError errors={profileState.fieldErrors?.intro} /></label>

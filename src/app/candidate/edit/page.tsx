@@ -39,6 +39,12 @@ export default async function CandidateEditPage() {
             ? new Date(c.candidate_birth_date).toISOString().slice(0, 10)
             : "",
           address: c?.candidate_address_line1 ?? "",
+          gender: c?.candidate_gender !== null && c?.candidate_gender !== undefined ? String(c.candidate_gender) : "",
+          drivingLicense: c?.candidate_driving_license !== null && c?.candidate_driving_license !== undefined ? (c.candidate_driving_license ? "1" : "0") : "",
+          civilExpiry: c?.candidate_civil_expiry_date
+            ? new Date(c.candidate_civil_expiry_date).toISOString().slice(0, 10)
+            : "",
+          preferredTime: c?.candidate_preferred_time ?? "",
           countryId: c?.country_id ?? null,
           universityId: c?.university_id ?? null,
           bankId: c?.bank_id ?? null,
