@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation";
 import { requireRoleCapability } from "@/modules/auth/session";
-import { DetailSection } from "@/modules/workspace/DetailPanels";
+import { DetailSection, type DetailSectionRow } from "@/modules/workspace/DetailPanels";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
-import { getCandidateTransferDetail } from "@/modules/workspace/data";
+import { getCandidatePaymentDetail } from "../actions";
 
 export const dynamic = "force-dynamic";
 
@@ -13,7 +13,7 @@ export default async function CandidatePaymentDetailPage({
 }) {
   const session = await requireRoleCapability("candidate", "candidate.read.own");
   const { id } = await params;
-  const data = await getCandidateTransferDetail(Number(id), Number(session.id));
+  const data = await getCandidatePaymentDetail({ tcId: Number(id) });
 
   if (!data) {
     notFound();
@@ -64,7 +64,22 @@ export default async function CandidatePaymentDetailPage({
           <p className="detailPanelNote">
             Paid invoices linked to this payment period serve as your receipt.
           </p>
-          <DetailSection type="list" title="Invoices" rows={data.invoices} />
+          <DetailSection
+            type="list"
+            title="Invoices"
+            rows={data.invoices.map((inv) => ({
+              id: inv.id,
+              title: `Invoice #${inv.id}`,
+              subtitle: inv.date
+                ? new Intl.DateTimeFormat("en-US", {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
+                  }).format(inv.date)
+                : "No date",
+              meta: inv.status ?? "Unknown",
+            })) as DetailSectionRow[]}
+          />
         </section>
       )}
     </WorkspaceShell>
