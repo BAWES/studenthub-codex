@@ -6,6 +6,34 @@ import { walletQuery } from "@/lib/wallet-db";
 import { prisma } from "@/lib/prisma";
 
 // ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Resolve a wallet user UUID from a candidate's email.
+ *
+ * The wallet DB maintains a `user` table that maps candidate email addresses
+ * to wallet user UUIDs. The balance_account.account_uuid links to this UUID.
+ *
+ * Mirrors the Yii2 WalletUser::findByEmail() pattern.
+ * Returns null when the email has no wallet mapping or the query fails.
+ */
+export async function resolveWalletAccountUuid(
+  email: string,
+): Promise<string | null> {
+  try {
+    const rows = await walletQuery<Array<{ user_uuid: string }>>(
+      `SELECT user_uuid FROM user WHERE email = ? LIMIT 1`,
+      [email],
+    );
+    return rows.length > 0 ? rows[0].user_uuid : null;
+  } catch (error) {
+    console.error("Wallet UUID resolution failed:", error);
+    return null;
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Schemas
 // ---------------------------------------------------------------------------
 
@@ -80,7 +108,7 @@ const TYPE_PAYABLE_TO_USERS = "PayableToUsers";
 export async function listBalances(
   params: FormData | z.input<typeof listBalancesSchema> = {},
 ): Promise<ListBalancesResult> {
-  await requireCapability("finance.read");
+  const session = await requireCapability("finance.read");
 
   const raw =
     params instanceof FormData
@@ -107,16 +135,26 @@ export async function listBalances(
 
   try {
     // 1. Get the current user's payable account from session
-    // The wallet DB links accounts via account_uuid = user_uuid
-    // We use the authenticated user's UUID from the session
-    // NOTE: In production, the wallet user UUID should match the
-    // account UUID used walletDb. This is a read-only listing.
+    // The wallet DB links accounts via account_uuid = user_uuid.
+    // Resolve the wallet UUID from the session email (Yii2 WalletUser::findByEmail pattern).
+    const walletUuid = await resolveWalletAccountUuid(session.email);
+    if (!walletUuid) {
+      return {
+        account: null,
+        transactions: [],
+        total: 0,
+        page,
+        limit,
+        totalPages: 0,
+      };
+    }
+
     const accounts = await walletQuery<PayableAccount[]>(
       `SELECT balance_account_uuid, account_uuid, balance, type
        FROM balance_account
        WHERE account_uuid = ? AND type = ?
        LIMIT 1`,
-      [], // accountUuid will be resolved from session context
+      [walletUuid, TYPE_USER_PAYABLE],
     );
 
     if (accounts.length === 0) {
@@ -388,12 +426,17 @@ export async function payByWallet(
 
   try {
     // 2. Find the candidate's payable wallet account
+    const walletUuid = await resolveWalletAccountUuid(session.email);
+    if (!walletUuid) {
+      return { success: false, error: "No payable account found for your account." };
+    }
+
     const accounts = await walletQuery<Array<{ balance_account_uuid: string; account_uuid: string; balance: number; type: string }>>(
       `SELECT balance_account_uuid, account_uuid, balance, type
        FROM balance_account
        WHERE account_uuid = ? AND type = ?
        LIMIT 1`,
-      [],
+      [walletUuid, TYPE_USER_PAYABLE],
     );
 
     if (accounts.length === 0) {
