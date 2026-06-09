@@ -63,6 +63,12 @@ const uploadDocumentSchema = z.object({
   }),
 });
 
+const deleteDocumentSchema = z.object({
+  documentType: z.enum(DOCUMENT_TYPES, {
+    errorMap: () => ({ message: "Invalid document type. Must be one of: photo, cv, video, civilFront, civilBack." }),
+  }),
+});
+
 export type ListDocumentsParams = z.input<typeof listDocumentsSchema>;
 export type GetDocumentParams = z.input<typeof getDocumentSchema>;
 export type UploadDocumentParams = z.input<typeof uploadDocumentSchema>;
@@ -148,6 +154,35 @@ describe("uploadDocumentSchema", () => {
       candidateId: 42,
       documentType: "pdf",
     });
+    expect(result.success).toBe(false);
+  });
+});
+
+describe("deleteDocumentSchema", () => {
+  it("accepts a valid document type", () => {
+    const result = deleteDocumentSchema.safeParse({ documentType: "photo" });
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts all document types", () => {
+    for (const dt of DOCUMENT_TYPES) {
+      const result = deleteDocumentSchema.safeParse({ documentType: dt });
+      expect(result.success).toBe(true);
+    }
+  });
+
+  it("rejects invalid document type", () => {
+    const result = deleteDocumentSchema.safeParse({ documentType: "resume" });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects missing document type", () => {
+    const result = deleteDocumentSchema.safeParse({});
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects empty document type", () => {
+    const result = deleteDocumentSchema.safeParse({ documentType: "" });
     expect(result.success).toBe(false);
   });
 });

@@ -124,6 +124,12 @@ export type ListDocumentsParams = z.input<typeof listDocumentsSchema>;
 export type GetDocumentParams = z.input<typeof getDocumentSchema>;
 export type UploadDocumentParams = z.input<typeof uploadDocumentParamsSchema>;
 
+/** Delete result shape for useActionState. */
+export type DeleteDocumentState = {
+  success: boolean;
+  error?: string;
+};
+
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
@@ -294,6 +300,86 @@ export async function uploadCandidateDocument(
     return {
       success: false,
       error: e instanceof Error ? e.message : "Upload failed due to an unknown error.",
+    };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Delete document
+// ---------------------------------------------------------------------------
+
+const deleteDocumentSchema = z.object({
+  documentType: z.enum(DOCUMENT_TYPES, {
+    errorMap: () => ({ message: "Invalid document type. Must be one of: photo, cv, video, civilFront, civilBack." }),
+  }),
+});
+
+export type DeleteDocumentParams = z.input<typeof deleteDocumentSchema>;
+
+/**
+ * Delete a candidate's document by type.
+ * Requires candidate.profile.edit capability.
+ * Derives candidateId from the session (self-service).
+ * Clears the DB field and removes the file from disk if it exists.
+ * Returns DeleteDocumentState for useActionState.
+ */
+export async function deleteCandidateDocument(
+  _prevState: DeleteDocumentState,
+  formData: FormData,
+): Promise<DeleteDocumentState> {
+  const session = await requireCapability("candidate.profile.edit");
+  const candidateId = Number(session.id);
+
+  const rawType = formData.get("documentType");
+  if (!rawType || typeof rawType !== "string" || rawType.trim().length === 0) {
+    return { success: false, error: "documentType is required." };
+  }
+
+  const parseResult = deleteDocumentSchema.safeParse({ documentType: rawType.trim() });
+  if (!parseResult.success) {
+    return { success: false, error: parseResult.error.errors.map((e) => e.message).join("; ") };
+  }
+
+  const { documentType } = parseResult.data;
+  const field = DOCUMENT_FIELD_MAP[documentType];
+
+  try {
+    // Get current file path before clearing
+    const candidate = await prisma.candidate.findUnique({
+      where: { candidate_id: candidateId },
+      select: { [field]: true },
+    });
+
+    if (!candidate) {
+      return { success: false, error: "Candidate not found." };
+    }
+
+    const currentPath = (candidate as Record<string, unknown>)[field] as string | null;
+
+    // Clear the DB field
+    await prisma.candidate.update({
+      where: { candidate_id: candidateId },
+      data: { [field]: null },
+    });
+
+    // Delete the file from disk if it exists and is a local file
+    if (currentPath && currentPath.startsWith("/uploads/")) {
+      const filePath = path.join(process.cwd(), "public", currentPath);
+      try {
+        await fs.unlink(filePath);
+      } catch {
+        // File may already be gone — that's fine
+      }
+    }
+
+    revalidatePath("/candidate");
+    revalidatePath("/candidate/edit");
+
+    return { success: true };
+  } catch (e) {
+    return {
+      success: false,
+      error: e instanceof Error ? e.message : "Delete failed due to an unknown error.",
     };
   }
 }
