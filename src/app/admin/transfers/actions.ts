@@ -371,3 +371,78 @@ export async function rejectTransfer(
     };
   }
 }
+// ---------------------------------------------------------------------------
+// Compatibility aliases — pages still reference old names from before merge
+// ---------------------------------------------------------------------------
+
+type OldTransferRow = {
+  id: number;
+  company: string;
+  period: string;
+  status: string;
+  total: string;
+};
+
+/**
+ * @deprecated Use listTransfers() instead.
+ */
+export async function listAdminTransfers(): Promise<OldTransferRow[]> {
+  const result = await listTransfers({});
+  return result.items.map((row) => ({
+    id: row.transfer_id,
+    company: row.company_name ?? "No company",
+    period: row.period,
+    status: `Status ${row.transfer_status}`,
+    total: row.total ?? "—",
+  }));
+}
+
+/**
+ * @deprecated Use getTransfer() instead.
+ */
+export async function getAdminTransferDetail(transferId: number) {
+  const parsed = getTransferSchema.safeParse({ transferId });
+  if (!parsed.success) {
+    return { transfer: null, candidates: [], invoices: [], metrics: [], fileEntries: [] };
+  }
+  const detail = await getTransfer(parsed.data.transferId);
+  const t = detail.transfer;
+
+  // Reconstruct the old transfer object shape expected by [id]/page.tsx
+  const oldTransfer = t
+    ? {
+        transfer_id: t.transfer_id,
+        total: t.total,
+        company_total: t.company_total,
+        transfer_cost: t.transfer_cost,
+        transfer_status: t.transfer_status,
+        currency_code: t.currency_code,
+        start_date: t.start_date,
+        end_date: t.end_date,
+        payment_received_on: t.payment_received_on,
+        transfer_created_at: t.transfer_created_at,
+        transfer_updated_at: t.transfer_updated_at,
+        company: t.company,
+        staff_transfer_transfer_created_byTostaff: null,
+        staff_transfer_transfer_updated_byTostaff: null,
+      }
+    : null;
+
+  return {
+    transfer: oldTransfer,
+    candidates: detail.candidates.map((c) => ({
+      id: c.tc_id,
+      title: c.candidate_name ?? "Unknown candidate",
+      subtitle: `Amount: ${c.amount ?? "—"} | Paid: ${c.paid ? "Yes" : "No"} | Hours: ${c.hours ?? 0}h`,
+      meta: "",
+    })),
+    invoices: detail.invoices.map((inv) => ({
+      id: inv.invoice_id,
+      title: `Invoice #${inv.invoice_id}`,
+      subtitle: inv.invoice_status ?? "No status",
+      meta: inv.invoice_date ?? "",
+    })),
+    metrics: detail.metrics,
+    fileEntries: [],
+  };
+}
