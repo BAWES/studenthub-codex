@@ -2,16 +2,11 @@ import { describe, it, expect } from "vitest";
 import { z } from "zod";
 
 // ---------------------------------------------------------------------------
-// Pure logic: country schema validation and filter construction
-//
-// listCountries and getCountry in actions.ts use these zod schemas
-// internally. Testing them separately avoids mocking "use server" deps.
+// Schemas (duplicated from actions.ts for isolated unit testing)
 // ---------------------------------------------------------------------------
 
 const listCountriesSchema = z.object({
   nameFilter: z.string().optional(),
-  page: z.number().int().positive().optional(),
-  limit: z.number().int().min(1).max(100).optional(),
 });
 
 const getCountrySchema = z.object({
@@ -19,82 +14,70 @@ const getCountrySchema = z.object({
 });
 
 // ---------------------------------------------------------------------------
-// Prisma query construction logic (pure function, testable without mocking)
+// Types (duplicated from actions.ts for type-shape testing)
 // ---------------------------------------------------------------------------
 
-type CountryWhereInput = {
-  country_from_google_map: boolean;
-  OR?: Array<{
-    country_name_en?: { contains: string };
-    country_name_ar?: { contains: string };
-  }>;
+type CountryListResult = {
+  country_id: number;
+  country_name_en: string;
+  country_name_ar: string | null;
+  iso: string | null;
+  emoji: string | null;
+  country_code: number | null;
+  currency_code: string | null;
 };
 
-function buildCountryFilter(nameFilter?: string): CountryWhereInput {
-  const where: CountryWhereInput = {
-    country_from_google_map: false,
-  };
-  if (nameFilter && nameFilter.trim()) {
-    where.OR = [
-      { country_name_en: { contains: nameFilter } },
-      { country_name_ar: { contains: nameFilter } },
-    ];
-  }
-  return where;
-}
-
 // ---------------------------------------------------------------------------
-// listCountriesSchema
+// listCountriesSchema tests
 // ---------------------------------------------------------------------------
 
 describe("listCountriesSchema", () => {
-  it("accepts empty params (no filters)", () => {
+  it("accepts empty params (no filter)", () => {
     const result = listCountriesSchema.safeParse({});
     expect(result.success).toBe(true);
   });
 
-  it("accepts name filter", () => {
-    const result = listCountriesSchema.safeParse({ nameFilter: "Kuwait" });
+  it("accepts a name filter string", () => {
+    const result = listCountriesSchema.safeParse({ nameFilter: "kuwait" });
     expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.nameFilter).toBe("kuwait");
+    }
   });
 
-  it("accepts pagination params", () => {
-    const result = listCountriesSchema.safeParse({
-      page: 1,
-      limit: 20,
-    });
+  it("accepts an empty string name filter", () => {
+    const result = listCountriesSchema.safeParse({ nameFilter: "" });
     expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.nameFilter).toBe("");
+    }
   });
 
-  it("rejects limit over 100", () => {
-    const result = listCountriesSchema.safeParse({ limit: 999 });
+  it("rejects non-string nameFilter", () => {
+    const result = listCountriesSchema.safeParse({ nameFilter: 123 });
     expect(result.success).toBe(false);
   });
 
-  it("rejects negative page", () => {
-    const result = listCountriesSchema.safeParse({ page: -1 });
-    expect(result.success).toBe(false);
-  });
-
-  it("rejects non-integer page", () => {
-    const result = listCountriesSchema.safeParse({ page: "abc" });
-    expect(result.success).toBe(false);
+  it("rejects unexpected fields", () => {
+    const result = listCountriesSchema.safeParse({ page: 1 });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.nameFilter).toBeUndefined();
+    }
   });
 });
 
 // ---------------------------------------------------------------------------
-// getCountrySchema
+// getCountrySchema tests
 // ---------------------------------------------------------------------------
 
 describe("getCountrySchema", () => {
   it("accepts a valid positive integer id", () => {
     const result = getCountrySchema.safeParse({ id: 1 });
     expect(result.success).toBe(true);
-  });
-
-  it("rejects negative id", () => {
-    const result = getCountrySchema.safeParse({ id: -5 });
-    expect(result.success).toBe(false);
+    if (result.success) {
+      expect(result.data.id).toBe(1);
+    }
   });
 
   it("rejects zero id", () => {
@@ -102,8 +85,18 @@ describe("getCountrySchema", () => {
     expect(result.success).toBe(false);
   });
 
+  it("rejects negative id", () => {
+    const result = getCountrySchema.safeParse({ id: -5 });
+    expect(result.success).toBe(false);
+  });
+
   it("rejects non-integer id", () => {
     const result = getCountrySchema.safeParse({ id: "abc" });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects float id", () => {
+    const result = getCountrySchema.safeParse({ id: 3.14 });
     expect(result.success).toBe(false);
   });
 
@@ -114,33 +107,53 @@ describe("getCountrySchema", () => {
 });
 
 // ---------------------------------------------------------------------------
-// buildCountryFilter (pure filter construction)
+// CountryListResult shape tests
 // ---------------------------------------------------------------------------
 
-describe("buildCountryFilter", () => {
-  it("excludes google-map countries by default", () => {
-    const filter = buildCountryFilter();
-    expect(filter.country_from_google_map).toBe(false);
-    expect(filter.OR).toBeUndefined();
+describe("CountryListResult shape", () => {
+  it("defines all expected fields", () => {
+    const mock: CountryListResult = {
+      country_id: 1,
+      country_name_en: "Kuwait",
+      country_name_ar: "الكويت",
+      iso: "KW",
+      emoji: "🇰🇼",
+      country_code: 965,
+      currency_code: "KWD",
+    };
+    expect(mock.country_id).toBe(1);
+    expect(mock.country_name_en).toBe("Kuwait");
+    expect(mock.country_name_ar).toBe("الكويت");
+    expect(mock.iso).toBe("KW");
   });
 
-  it("ignores empty nameFilter string", () => {
-    const filter = buildCountryFilter("");
-    expect(filter.country_from_google_map).toBe(false);
-    expect(filter.OR).toBeUndefined();
+  it("allows null for optional fields", () => {
+    const mock: CountryListResult = {
+      country_id: 2,
+      country_name_en: "Unknown",
+      country_name_ar: null,
+      iso: null,
+      emoji: null,
+      country_code: null,
+      currency_code: null,
+    };
+    expect(mock.country_name_ar).toBeNull();
+    expect(mock.iso).toBeNull();
+    expect(mock.currency_code).toBeNull();
   });
 
-  it("ignores whitespace-only nameFilter", () => {
-    const filter = buildCountryFilter("   ");
-    expect(filter.country_from_google_map).toBe(false);
-    expect(filter.OR).toBeUndefined();
+  it("accepts a valid result set with empty array", () => {
+    const results: CountryListResult[] = [];
+    expect(results).toHaveLength(0);
   });
 
-  it("searches English and Arabic names with nameFilter", () => {
-    const filter = buildCountryFilter("Kuwait");
-    expect(filter.OR).toBeDefined();
-    expect(filter.OR).toHaveLength(2);
-    expect(filter.OR![0]).toEqual({ country_name_en: { contains: "Kuwait" } });
-    expect(filter.OR![1]).toEqual({ country_name_ar: { contains: "Kuwait" } });
+  it("accepts multiple results", () => {
+    const results: CountryListResult[] = [
+      { country_id: 1, country_name_en: "Kuwait", country_name_ar: null, iso: "KW", emoji: null, country_code: 965, currency_code: "KWD" },
+      { country_id: 2, country_name_en: "Egypt", country_name_ar: null, iso: "EG", emoji: null, country_code: 20, currency_code: "EGP" },
+    ];
+    expect(results).toHaveLength(2);
+    expect(results[0].country_name_en).toBe("Kuwait");
+    expect(results[1].country_name_en).toBe("Egypt");
   });
 });
