@@ -38,6 +38,13 @@ function DefaultFallback({
   error: Error | null;
   onRetry: () => void;
 }) {
+  const retryRef = React.useRef<HTMLButtonElement>(null);
+
+  React.useEffect(() => {
+    // Auto-focus the retry button when error state renders
+    retryRef.current?.focus();
+  }, []);
+
   return (
     <div
       role="alert"
@@ -51,7 +58,7 @@ function DefaultFallback({
         {error?.message || "An unexpected error occurred. Please try again."}
       </p>
       <div className="flex gap-3">
-        <Button onClick={onRetry} variant="secondary">
+        <Button onClick={onRetry} variant="secondary" ref={retryRef}>
           Try again
         </Button>
         <Button

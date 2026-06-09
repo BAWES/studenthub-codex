@@ -95,22 +95,37 @@ export function WorkspaceShell({
     </section>
   );
 
+  const skipLink = (
+    <a
+      href="#main-content"
+      className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded focus:bg-background focus:px-3 focus:py-2 focus:text-sm focus:font-semibold focus:text-foreground focus:shadow-lg focus:outline-none"
+    >
+      Skip to content
+    </a>
+  );
+
   // When embedded in a WorkspaceOS layout, the layout already provides the rail and mobile nav.
   if (embedded) {
     return (
-      <main className="shell shellEmbedded">
-        {stage}
-        <WorkspaceMobileNavigation items={navItems} role={session.role} />
-      </main>
+      <>
+        {skipLink}
+        <main id="main-content" className="shell shellEmbedded">
+          {stage}
+          <WorkspaceMobileNavigation items={navItems} role={session.role} />
+        </main>
+      </>
     );
   }
 
   return (
-    <main className="shell">
-      {rail}
-      {stage}
-      <WorkspaceMobileNavigation items={navItems} role={session.role} />
+    <>
+      {skipLink}
+      <main id="main-content" className="shell">
+        {rail}
+        {stage}
+        <WorkspaceMobileNavigation items={navItems} role={session.role} />
       </main>
+    </>
   );
 }
 
