@@ -86,11 +86,12 @@ function Pagination({
   onPageChange: (page: number) => void;
 }) {
   return (
-    <div className="pagination">
+    <nav className="pagination" aria-label="Pagination">
       <button
         type="button"
         disabled={page <= 1}
         onClick={() => onPageChange(page - 1)}
+        aria-label="Previous page"
       >
         Previous
       </button>
@@ -99,10 +100,11 @@ function Pagination({
         type="button"
         disabled={page >= totalPages}
         onClick={() => onPageChange(page + 1)}
+        aria-label="Next page"
       >
         Next
       </button>
-    </div>
+    </nav>
   );
 }
 
@@ -162,7 +164,7 @@ export function DataTable<T extends { id: string | number }>({
           </div>
         </div>
         <div className="tableScroller">
-          <table aria-label={title}>
+          <table>
             <thead>
               <tr>
                 {visibleColumns.map((column) => (
@@ -204,7 +206,7 @@ export function DataTable<T extends { id: string | number }>({
           </div>
         </div>
         <div className="tableScroller">
-          <table aria-label={title}>
+          <table>
             <thead>
               <tr>
                 {visibleColumns.map((column) => (
@@ -256,7 +258,7 @@ export function DataTable<T extends { id: string | number }>({
         <span>{rowCountLabel}</span>
       </div>
       <div className="tableScroller">
-        <table aria-label={title}>
+        <table>
           <thead>
             <tr>
               {visibleColumns.map((column) => (
