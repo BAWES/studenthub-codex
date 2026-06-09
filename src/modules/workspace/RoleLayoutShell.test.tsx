@@ -180,4 +180,20 @@ describe("RoleLayoutShell", () => {
     const icons = document.querySelectorAll('header svg[aria-hidden="true"]');
     expect(icons.length).toBeGreaterThan(0);
   });
+
+  // ── Skip-to-content link (P0 accessibility) ────────────────────────────
+
+  it("renders a skip-to-content link as the first focusable element", () => {
+    renderShell();
+    const link = screen.getByRole("link", { name: /skip to content/i });
+    expect(link).toBeInTheDocument();
+    expect(link).toHaveAttribute("href", "#main-content");
+  });
+
+  it("main content area has id='main-content' for skip-link target", () => {
+    renderShell();
+    const main = document.getElementById("main-content");
+    expect(main).toBeInTheDocument();
+    expect(main!.tagName.toLowerCase()).toBe("main");
+  });
 });

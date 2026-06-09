@@ -43,8 +43,15 @@ export function RoleLayoutShell({
   const Icon = branding.icon;
 
   return (
-    <div className="flex flex-col gap-4">
-      <header className="flex items-center justify-between border-b pb-3">
+    <>
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded focus:bg-background focus:px-3 focus:py-2 focus:text-sm focus:font-semibold focus:text-foreground focus:shadow-lg focus:outline-none"
+      >
+        Skip to content
+      </a>
+      <div className="flex flex-col gap-4">
+        <header className="flex items-center justify-between border-b pb-3">
         <div className="flex items-center gap-2">
           <span className="text-muted-foreground">
             <Icon size={20} strokeWidth={2} aria-hidden="true" />
@@ -74,7 +81,8 @@ export function RoleLayoutShell({
         <Breadcrumbs />
       </div>
 
-      <main className="flex-1">{children}</main>
+      <main id="main-content" className="flex-1">{children}</main>
     </div>
+    </>
   );
 }
