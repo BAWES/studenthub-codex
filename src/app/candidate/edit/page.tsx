@@ -1,7 +1,7 @@
 import { requireRoleCapability } from "@/modules/auth/session";
 import { CandidateEditForm } from "@/modules/candidates/CandidateEditForm";
 import { getCountryOptions, getUniversityOptions, getBankOptions, getDegreeOptions, getMajorOptions } from "@/modules/candidates/actions";
-import { getCandidateDetail } from "@/modules/workspace/data";
+import { getCandidateProfile } from "@/modules/candidates/actions";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 
 export const dynamic = "force-dynamic";
@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 export default async function CandidateEditPage() {
   const session = await requireRoleCapability("candidate", "candidate.read.own");
   const [data, countries, universities, banks, degrees, majors] = await Promise.all([
-    getCandidateDetail(Number(session.id), "/candidate/invitations"),
+    getCandidateProfile({ candidateId: Number(session.id) }),
     getCountryOptions(),
     getUniversityOptions(),
     getBankOptions(),
