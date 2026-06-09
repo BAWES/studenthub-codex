@@ -42,6 +42,26 @@ export type ListBanksResult = {
   totalPages: number;
 };
 
+const createBankSchema = z.object({
+  name: z.string().min(1, "Bank name is required"),
+  ibanCode: z.string().min(1, "IBAN code is required"),
+  swiftCode: z.string().optional(),
+  address: z.string().optional(),
+  transferType: z.string().optional(),
+  codeAbk: z.number().int().optional(),
+});
+
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
+
+export type CreateBankParams = z.input<typeof createBankSchema>;
+
+export type CreateBankResult = {
+  operation: string;
+  message: string;
+};
+
 // ---------------------------------------------------------------------------
 // Server actions
 // ---------------------------------------------------------------------------
@@ -107,4 +127,56 @@ export async function getBank(
   });
 
   return bank as BankListItem | null;
+}
+
+// ---------------------------------------------------------------------------
+// createBank
+// ---------------------------------------------------------------------------
+
+/**
+ * Create a new bank record.
+ *
+ * Mirrors the legacy Admin BankController::actionCreate().
+ * - Creates a bank with name, IBAN, swift code, address, transfer type
+ * - Returns { operation, message } on success or error
+ */
+export async function createBank(
+  params: CreateBankParams,
+): Promise<CreateBankResult> {
+  await requireCapability("bank.write");
+
+  const parsed = createBankSchema.safeParse(params);
+  if (!parsed.success) {
+    return {
+      operation: "error",
+      message: parsed.error.issues[0]?.message ?? "Invalid bank data",
+    };
+  }
+
+  const { name, ibanCode, swiftCode, address, transferType, codeAbk } =
+    parsed.data;
+
+  try {
+    await prisma.bank.create({
+      data: {
+        bank_name: name,
+        bank_iban_code: ibanCode,
+        bank_swift_code: swiftCode ?? null,
+        bank_address: address ?? null,
+        bank_transfer_type: transferType ?? null,
+        bank_code_abk: codeAbk ?? null,
+      },
+    });
+
+    return {
+      operation: "success",
+      message: "Bank created successfully",
+    };
+  } catch (err) {
+    return {
+      operation: "error",
+      message:
+        err instanceof Error ? err.message : "Failed to create bank record",
+    };
+  }
 }
