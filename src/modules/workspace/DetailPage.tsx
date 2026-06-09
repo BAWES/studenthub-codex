@@ -1,8 +1,13 @@
 "use client";
 
-import type { ReactNode } from "react";
+import type { LucideIcon } from "lucide-react";
+import { ArrowLeftIcon } from "lucide-react";
 import { FactPanel } from "./DetailPanels";
 import { DetailPageSkeleton } from "./Skeletons";
+import { ActionButton } from "./ActionButton";
+import type { ActionButtonVariant } from "./ActionButton";
+import Link from "next/link";
+import type { Route } from "next";
 
 // ── Types ──────────────────────────────────────────────────
 
@@ -19,6 +24,19 @@ export type DetailRelatedRecord = {
   href?: string;
 };
 
+export type DetailPageAction = {
+  /** Button label text. */
+  label: string;
+  /** Click handler. */
+  onClick?: () => void;
+  /** Visual variant. Default: "primary". */
+  variant?: ActionButtonVariant;
+  /** Optional Lucide icon component reference (e.g. Pencil, Trash2). */
+  icon?: LucideIcon;
+  /** Optional capability required to see this action. */
+  requireCapability?: string;
+};
+
 export type DetailPageProps = {
   /** Page title (typically the record name). */
   title: string;
@@ -26,8 +44,10 @@ export type DetailPageProps = {
   eyebrow?: string;
   /** Fact sections to display as panels. */
   factSections: Record<string, DetailFactSection["facts"]>;
-  /** Action buttons rendered in the toolbar (e.g. Edit, Delete). */
-  actions?: ReactNode;
+  /** Standardized action buttons rendered in the toolbar. */
+  actions?: DetailPageAction[];
+  /** Back link href — renders a back arrow. */
+  backHref?: Route;
   /** Related records section configuration. */
   relatedRecords?: {
     title: string;
@@ -37,6 +57,8 @@ export type DetailPageProps = {
   loading?: boolean;
   /** Error message — shows error state when set. */
   error?: string | null;
+  /** Retry callback rendered in the error state. */
+  onRetry?: () => void;
   /** Optional className override. */
   className?: string;
 };
@@ -48,9 +70,11 @@ export function DetailPage({
   eyebrow,
   factSections,
   actions,
+  backHref,
   relatedRecords,
   loading = false,
   error = null,
+  onRetry,
   className,
 }: DetailPageProps) {
   // ── Loading state ────────────────────────────────────────
@@ -69,6 +93,11 @@ export function DetailPage({
         <div className="errorState">
           <strong>Error loading details</strong>
           <span>{error}</span>
+          {onRetry ? (
+            <ActionButton variant="outline" onClick={onRetry}>
+              Retry
+            </ActionButton>
+          ) : null}
         </div>
       </section>
     );
@@ -78,12 +107,35 @@ export function DetailPage({
 
   return (
     <section className={className}>
-      {/* Eyebrow + title */}
+      {/* Back link */}
+      {backHref ? (
+        <nav className="backLink">
+          <Link href={backHref}>
+            <ArrowLeftIcon size={16} aria-hidden="true" />
+            Back
+          </Link>
+        </nav>
+      ) : null}
+
+      {/* Eyebrow + title + action bar */}
       <section className="detailHero">
         {eyebrow ? <p className="eyebrow">{eyebrow}</p> : null}
         <div className="detailHeroRow">
           <h1>{title}</h1>
-          {actions ? <div className="detailActions">{actions}</div> : null}
+          {actions && actions.length > 0 ? (
+            <div className="detailActions">
+              {actions.map((action) => (
+                <ActionButton
+                  key={action.label}
+                  variant={action.variant ?? "primary"}
+                  icon={action.icon ? <action.icon size={16} /> : undefined}
+                  onClick={action.onClick}
+                >
+                  {action.label}
+                </ActionButton>
+              ))}
+            </div>
+          ) : null}
         </div>
       </section>
 
