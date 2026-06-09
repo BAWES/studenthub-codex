@@ -9,8 +9,10 @@
 //   - listCandidates    — paginated list of candidates with search by name/email
 //   - getCandidate      — single candidate detail with associated info
 //   - searchCandidates  — search candidates by name or email with pagination
+//   - createCandidate   — create a new candidate
 // ---------------------------------------------------------------------------
 
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
@@ -38,6 +40,21 @@ export const searchCandidatesSchema = z.object({
   limit: z.coerce.number().int().min(1).max(100).optional().default(20),
 });
 
+export const createCandidateSchema = z.object({
+  candidateName: z.string().min(1, "Candidate name is required").max(255),
+  candidateNameAr: z.string().max(255).optional(),
+  candidateEmail: z.string().min(1, "Email is required").max(255),
+  candidatePhone: z.string().max(20).optional(),
+  candidateGender: z.coerce.number().int().optional(),
+  candidateBirthDate: z.string().optional(),
+  candidateHourlyRate: z.coerce.number().optional(),
+  currencyCode: z.string().max(3).optional(),
+  storeId: z.coerce.number().int().positive().optional(),
+  countryId: z.coerce.number().int().positive().optional(),
+  universityId: z.coerce.number().int().positive().optional(),
+  candidateObjective: z.string().max(255).optional(),
+});
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -45,6 +62,12 @@ export const searchCandidatesSchema = z.object({
 export type ListCandidatesInput = z.input<typeof listCandidatesSchema>;
 export type GetCandidateInput = z.input<typeof getCandidateSchema>;
 export type SearchCandidatesInput = z.input<typeof searchCandidatesSchema>;
+export type CreateCandidateInput = z.input<typeof createCandidateSchema>;
+
+export type CandidateActionResponse = {
+  operation: "success" | "error";
+  message: string;
+};
 
 export type CandidateRow = {
   candidate_id: number;
@@ -298,4 +321,80 @@ export async function searchCandidates(
     limit,
     totalPages: Math.ceil(total / limit),
   };
+}
+
+// ---------------------------------------------------------------------------
+// createCandidate
+// ---------------------------------------------------------------------------
+
+/**
+ * Create a new candidate.
+ * Status defaults to 10 (active). Created/updated timestamps are set to now.
+ */
+export async function createCandidate(
+  input: CreateCandidateInput,
+): Promise<CandidateActionResponse> {
+  await requireCapability("candidate.write");
+
+  const parsed = createCandidateSchema.safeParse(input);
+  if (!parsed.success) {
+    return {
+      operation: "error",
+      message: parsed.error.issues[0]?.message ?? "Invalid input",
+    };
+  }
+
+  const {
+    candidateName,
+    candidateNameAr,
+    candidateEmail,
+    candidatePhone,
+    candidateGender,
+    candidateBirthDate,
+    candidateHourlyRate,
+    currencyCode,
+    storeId,
+    countryId,
+    universityId,
+    candidateObjective,
+  } = parsed.data;
+
+  try {
+    const now = new Date();
+
+    await prisma.candidate.create({
+      data: {
+        candidate_name: candidateName,
+        candidate_name_ar: candidateNameAr ?? candidateName,
+        candidate_email: candidateEmail,
+        candidate_phone: candidatePhone ?? null,
+        candidate_gender: candidateGender ?? null,
+        candidate_birth_date: candidateBirthDate ? new Date(candidateBirthDate) : null,
+        candidate_hourly_rate: candidateHourlyRate ?? null,
+        currency_code: currencyCode ?? null,
+        store_id: storeId ?? null,
+        country_id: countryId ?? null,
+        university_id: universityId ?? null,
+        candidate_objective: candidateObjective ?? null,
+        candidate_status: 10,
+        approved: 0,
+        deleted: 0,
+        candidate_committed: true,
+        candidate_created_at: now,
+        candidate_updated_at: now,
+      },
+    });
+
+    revalidatePath("/admin/candidates");
+
+    return {
+      operation: "success",
+      message: `Candidate "${candidateName}" created successfully`,
+    };
+  } catch (err) {
+    return {
+      operation: "error",
+      message: err instanceof Error ? err.message : "Failed to create candidate",
+    };
+  }
 }

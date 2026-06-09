@@ -3,6 +3,7 @@ import {
   listCandidatesSchema,
   getCandidateSchema,
   searchCandidatesSchema,
+  createCandidateSchema,
 } from "./actions";
 
 // ---------------------------------------------------------------------------
@@ -119,5 +120,79 @@ describe("searchCandidatesSchema", () => {
 
   it("rejects limit over 100", () => {
     expect(searchCandidatesSchema.safeParse({ q: "test", limit: 200 }).success).toBe(false);
+  });
+});
+
+describe("createCandidateSchema", () => {
+  it("accepts minimum required fields", () => {
+    const r = createCandidateSchema.safeParse({
+      candidateName: "John Doe",
+      candidateEmail: "john@example.com",
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts all optional fields", () => {
+    const r = createCandidateSchema.safeParse({
+      candidateName: "John Doe",
+      candidateNameAr: "جون دو",
+      candidateEmail: "john@example.com",
+      candidatePhone: "+965****5678",
+      candidateGender: 1,
+      candidateBirthDate: "1995-06-15",
+      candidateHourlyRate: 3.5,
+      currencyCode: "KWD",
+      storeId: 5,
+      countryId: 62,
+      universityId: 10,
+      candidateObjective: "Looking for part-time",
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects missing name", () => {
+    expect(createCandidateSchema.safeParse({ candidateEmail: "john@example.com" }).success).toBe(false);
+  });
+
+  it("rejects missing email", () => {
+    expect(createCandidateSchema.safeParse({ candidateName: "John" }).success).toBe(false);
+  });
+
+  it("rejects name over 255 chars", () => {
+    expect(
+      createCandidateSchema.safeParse({
+        candidateName: "x".repeat(256),
+        candidateEmail: "john@example.com",
+      }).success,
+    ).toBe(false);
+  });
+
+  it("rejects email over 255 chars", () => {
+    expect(
+      createCandidateSchema.safeParse({
+        candidateName: "John",
+        candidateEmail: "x".repeat(256) + "@example.com",
+      }).success,
+    ).toBe(false);
+  });
+
+  it("rejects phone over 20 chars", () => {
+    expect(
+      createCandidateSchema.safeParse({
+        candidateName: "John",
+        candidateEmail: "john@example.com",
+        candidatePhone: "x".repeat(21),
+      }).success,
+    ).toBe(false);
+  });
+
+  it("rejects candidateObjective over 255 chars", () => {
+    expect(
+      createCandidateSchema.safeParse({
+        candidateName: "John",
+        candidateEmail: "john@example.com",
+        candidateObjective: "x".repeat(256),
+      }).success,
+    ).toBe(false);
   });
 });
