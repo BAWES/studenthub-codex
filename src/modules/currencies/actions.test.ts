@@ -138,3 +138,36 @@ describe("buildCurrencyListFilter", () => {
     expect(result).toEqual({ status: false });
   });
 });
+
+// ---------------------------------------------------------------------------
+// getCurrency schema validation
+// ---------------------------------------------------------------------------
+
+const getCurrencySchema = z.object({
+  id: z.number().int().positive(),
+});
+
+describe("getCurrencySchema", () => {
+  it("accepts a valid currency id", () => {
+    const result = getCurrencySchema.safeParse({ id: 1 });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.id).toBe(1);
+    }
+  });
+
+  it("rejects zero id", () => {
+    const result = getCurrencySchema.safeParse({ id: 0 });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects negative id", () => {
+    const result = getCurrencySchema.safeParse({ id: -1 });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects non-numeric id", () => {
+    const result = getCurrencySchema.safeParse({ id: "abc" });
+    expect(result.success).toBe(false);
+  });
+});
