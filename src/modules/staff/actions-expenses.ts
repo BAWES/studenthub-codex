@@ -48,6 +48,8 @@ const listExpensesSchema = z.object({
   category: z.number().int().optional(),
   supplier: z.string().optional(),
   reimbursable: z.boolean().optional(),
+  dateFrom: z.string().optional(),
+  dateTo: z.string().optional(),
   page: z.number().int().positive().optional(),
   limit: z.number().int().min(1).max(100).optional(),
 });
@@ -101,6 +103,10 @@ type ExpenseWhereInput = {
   category?: number;
   supplier?: { contains: string; mode: "insensitive" };
   reimbursable?: boolean;
+  purchase_date?: {
+    gte?: Date;
+    lte?: Date;
+  };
 };
 
 /**
@@ -111,6 +117,8 @@ function buildExpenseFilter(params: {
   category?: number;
   supplier?: string;
   reimbursable?: boolean;
+  dateFrom?: string;
+  dateTo?: string;
 }): ExpenseWhereInput {
   const where: ExpenseWhereInput = {};
 
@@ -128,6 +136,16 @@ function buildExpenseFilter(params: {
 
   if (params.reimbursable !== undefined) {
     where.reimbursable = params.reimbursable;
+  }
+
+  if (params.dateFrom || params.dateTo) {
+    where.purchase_date = {};
+    if (params.dateFrom) {
+      where.purchase_date.gte = new Date(params.dateFrom);
+    }
+    if (params.dateTo) {
+      where.purchase_date.lte = new Date(params.dateTo);
+    }
   }
 
   return where;
@@ -155,8 +173,8 @@ export async function listExpenses(
     throw new Error(parsed.error.issues[0]?.message ?? "Invalid list parameters");
   }
 
-  const { staffId, category, supplier, reimbursable, page = 1, limit = 20 } = parsed.data;
-  const where = buildExpenseFilter({ staffId, category, supplier, reimbursable });
+  const { staffId, category, supplier, reimbursable, dateFrom, dateTo, page = 1, limit = 20 } = parsed.data;
+  const where = buildExpenseFilter({ staffId, category, supplier, reimbursable, dateFrom, dateTo });
 
   const [rows, total] = await Promise.all([
     prisma.staff_expenses.findMany({
