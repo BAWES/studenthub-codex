@@ -16,11 +16,17 @@ export const listActivityEventsSchema = z.object({
   limit: z.number().int().min(1).max(100).optional(),
 });
 
+export const getActivityEventSchema = z.object({
+  id: z.string().min(1, "Invalid activity event ID"),
+});
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
 export type ListActivityEventsParams = z.input<typeof listActivityEventsSchema>;
+
+export type GetActivityEventParams = z.input<typeof getActivityEventSchema>;
 
 export type ActivityEventItem = {
   activity_uuid: string;
@@ -104,5 +110,50 @@ export async function listActivityEvents(
     page,
     limit,
     totalPages: Math.ceil(total / limit),
+  };
+}
+
+/**
+ * Get a single activity event by UUID. Returns null if not found.
+ * Mirrors the view concept from the legacy Yii2 event system.
+ *
+ * @param params - Object with `id` (activity UUID string)
+ * @returns The activity event record, or null if not found
+ */
+export async function getActivityEvent(
+  params: GetActivityEventParams,
+): Promise<ActivityEventItem | null> {
+  await requireCapability("request.read.any");
+
+  const parsed = getActivityEventSchema.safeParse(params);
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid activity event ID");
+  }
+
+  const { id } = parsed.data;
+
+  const activity = await prisma.request_activity.findFirst({
+    where: { activity_uuid: id },
+    select: {
+      activity_uuid: true,
+      request_uuid: true,
+      activity_detail: true,
+      activity_created_datetime: true,
+      activity_updated_datetime: true,
+      staff: {
+        select: { staff_name: true },
+      },
+    },
+  });
+
+  if (!activity) return null;
+
+  return {
+    activity_uuid: activity.activity_uuid,
+    request_uuid: activity.request_uuid,
+    activity_detail: activity.activity_detail,
+    staff_name: activity.staff?.staff_name ?? null,
+    activity_created_datetime: activity.activity_created_datetime,
+    activity_updated_datetime: activity.activity_updated_datetime,
   };
 }
