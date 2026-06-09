@@ -16,17 +16,28 @@ export default async function SignupPage({
 }: {
   searchParams: Promise<{ role?: string }>;
 }) {
-  const session = await getSession();
+  // Defensive: wrap session check to prevent crash if cookies() fails
+  let session = null;
+  try {
+    session = await getSession();
+  } catch {
+    // Session check failed — continue unauthenticated
+  }
 
   // Already logged in — send to app
   if (session) {
     redirect("/app");
   }
 
-  const params = await searchParams;
-  const defaultRole = VALID_ROLES.includes(params.role as Role)
-    ? (params.role as Role)
-    : undefined;
+  let defaultRole: Role | undefined;
+  try {
+    const params = await searchParams;
+    defaultRole = VALID_ROLES.includes(params.role as Role)
+      ? (params.role as Role)
+      : undefined;
+  } catch {
+    // searchParams unavailable — render without pre-selection
+  }
 
   return (
     <main className="min-h-svh w-full grid place-items-center p-4">
