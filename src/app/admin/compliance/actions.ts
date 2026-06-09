@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
@@ -22,12 +23,42 @@ export const getComplianceRecordSchema = z.object({
   type: z.enum(["company", "id_request", "candidate"]),
 });
 
+export const approveComplianceSchema = z.object({
+  id: z.string().min(1, "Record ID is required"),
+  type: z.enum(["company", "id_request"]),
+});
+
+export const denyComplianceSchema = z.object({
+  id: z.string().min(1, "Record ID is required"),
+  type: z.enum(["company", "id_request"]),
+  reason: z.string().min(1, "Rejection reason is required").max(2000),
+});
+
+export const createComplianceRecordSchema = z.object({
+  type: z.enum(["company"]),
+  company_name: z.string().min(1, "Company name is required").max(255),
+  company_email: z.string().email("Invalid email").max(225).optional(),
+  company_approved_to_hire: z.boolean().optional().default(false),
+});
+
+export const updateComplianceRecordSchema = z.object({
+  id: z.string().min(1, "Record ID is required"),
+  type: z.enum(["company"]),
+  company_approved_to_hire: z.boolean().optional(),
+  company_followup: z.boolean().optional(),
+  company_status_override: z.boolean().optional(),
+});
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
 export type ListComplianceRecordsInput = z.input<typeof listComplianceRecordsSchema>;
 export type GetComplianceRecordInput = z.input<typeof getComplianceRecordSchema>;
+export type ApproveComplianceInput = z.input<typeof approveComplianceSchema>;
+export type DenyComplianceInput = z.input<typeof denyComplianceSchema>;
+export type CreateComplianceRecordInput = z.input<typeof createComplianceRecordSchema>;
+export type UpdateComplianceRecordInput = z.input<typeof updateComplianceRecordSchema>;
 
 export type ComplianceRow = {
   id: string;
@@ -392,4 +423,194 @@ export async function getComplianceSummary(): Promise<ComplianceSummary> {
     unapprovedCandidates,
     incompleteCandidates,
   };
+}
+
+// ---------------------------------------------------------------------------
+// createComplianceRecord
+// ---------------------------------------------------------------------------
+
+/**
+ * Create a new compliance record.
+ * Currently supports creating a company compliance record (sets initial
+ * company compliance status).
+ */
+export async function createComplianceRecord(
+  data: CreateComplianceRecordInput,
+): Promise<{ id: string; type: string }> {
+  await requireCapability("admin.write");
+
+  const parsed = createComplianceRecordSchema.safeParse(data);
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid compliance data");
+  }
+
+  if (parsed.data.type === "company") {
+    const company = await prisma.company.create({
+      data: {
+        company_name: parsed.data.company_name,
+        company_email: parsed.data.company_email ?? null,
+        company_approved_to_hire: parsed.data.company_approved_to_hire,
+        company_created_at: new Date(),
+        company_updated_at: new Date(),
+      },
+    });
+    revalidatePath("/admin/compliance");
+    return { id: `company-${company.company_id}`, type: "company" };
+  }
+
+  throw new Error(`Unsupported compliance type: ${parsed.data.type}`);
+}
+
+// ---------------------------------------------------------------------------
+// updateComplianceRecord
+// ---------------------------------------------------------------------------
+
+/**
+ * Update compliance record fields.
+ * Currently supports company compliance updates.
+ */
+export async function updateComplianceRecord(
+  data: UpdateComplianceRecordInput,
+): Promise<{ id: string; type: string }> {
+  await requireCapability("admin.write");
+
+  const parsed = updateComplianceRecordSchema.safeParse(data);
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid compliance data");
+  }
+
+  const { id, type, ...fields } = parsed.data;
+
+  if (type === "company") {
+    const companyId = Number(id);
+    if (isNaN(companyId)) throw new Error("Invalid company ID");
+
+    const updateData: Record<string, unknown> = {
+      company_updated_at: new Date(),
+    };
+    if (fields.company_approved_to_hire !== undefined) {
+      updateData.company_approved_to_hire = fields.company_approved_to_hire;
+    }
+    if (fields.company_followup !== undefined) {
+      updateData.company_followup = fields.company_followup;
+    }
+    if (fields.company_status_override !== undefined) {
+      updateData.company_status_override = fields.company_status_override;
+    }
+
+    await prisma.company.update({
+      where: { company_id: companyId },
+      data: updateData as any,
+    });
+
+    revalidatePath("/admin/compliance");
+    return { id: `company-${companyId}`, type: "company" };
+  }
+
+  throw new Error(`Unsupported compliance type: ${type}`);
+}
+
+// ---------------------------------------------------------------------------
+// approveComplianceRecord
+// ---------------------------------------------------------------------------
+
+/**
+ * Approve a compliance record.
+ * For companies: sets company_approved_to_hire=true.
+ * For ID requests: sets status to "approved".
+ */
+export async function approveComplianceRecord(
+  data: ApproveComplianceInput,
+): Promise<{ id: string; type: string }> {
+  await requireCapability("admin.write");
+
+  const parsed = approveComplianceSchema.safeParse(data);
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid input");
+  }
+
+  const { id, type } = parsed.data;
+
+  if (type === "company") {
+    const companyId = Number(id);
+    if (isNaN(companyId)) throw new Error("Invalid company ID");
+
+    await prisma.company.update({
+      where: { company_id: companyId },
+      data: {
+        company_approved_to_hire: true,
+        company_updated_at: new Date(),
+      },
+    });
+
+    revalidatePath("/admin/compliance");
+    return { id: `company-${companyId}`, type: "company" };
+  }
+
+  if (type === "id_request") {
+    await prisma.candidate_id_request.update({
+      where: { cir_uuid: id },
+      data: {
+        status: "approved",
+      },
+    });
+
+    revalidatePath("/admin/compliance");
+    return { id, type: "id_request" };
+  }
+
+  throw new Error(`Unsupported compliance type: ${type}`);
+}
+
+// ---------------------------------------------------------------------------
+// denyComplianceRecord
+// ---------------------------------------------------------------------------
+
+/**
+ * Deny a compliance record with a required reason.
+ * For companies: sets company_approved_to_hire=false.
+ * For ID requests: sets status to "rejected" with rejection_reason.
+ */
+export async function denyComplianceRecord(
+  data: DenyComplianceInput,
+): Promise<{ id: string; type: string }> {
+  await requireCapability("admin.write");
+
+  const parsed = denyComplianceSchema.safeParse(data);
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid input");
+  }
+
+  const { id, type, reason } = parsed.data;
+
+  if (type === "company") {
+    const companyId = Number(id);
+    if (isNaN(companyId)) throw new Error("Invalid company ID");
+
+    await prisma.company.update({
+      where: { company_id: companyId },
+      data: {
+        company_approved_to_hire: false,
+        company_updated_at: new Date(),
+      },
+    });
+
+    revalidatePath("/admin/compliance");
+    return { id: `company-${companyId}`, type: "company" };
+  }
+
+  if (type === "id_request") {
+    await prisma.candidate_id_request.update({
+      where: { cir_uuid: id },
+      data: {
+        status: "rejected",
+        rejection_reason: reason,
+      },
+    });
+
+    revalidatePath("/admin/compliance");
+    return { id, type: "id_request" };
+  }
+
+  throw new Error(`Unsupported compliance type: ${type}`);
 }
