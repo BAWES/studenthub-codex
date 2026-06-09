@@ -42,21 +42,21 @@ export default async function LoginPage({
         <div className="shLoginFormWrap">
           <div className="shLoginFormCard">
             <div className="shLoginFormCardHeader shLoginStagger">
-              <strong>Continue to StudentHub</strong>
-              <p>Enter your production credentials to sign in.</p>
+              <strong>Sign in to StudentHub</strong>
+              <p>Enter your email and password to continue.</p>
             </div>
 
             {params.error === "expired" ? (
               <div className="shLoginFormCardBody">
                 <div className="shLoginError">
-                  That verified account choice expired. Sign in again to continue.
+                  Session expired. Sign in again to continue.
                 </div>
               </div>
             ) : null}
             {params.error === "account" ? (
               <div className="shLoginFormCardBody">
                 <div className="shLoginError">
-                  Choose a verified account to continue.
+                  Select a verified account to sign in.
                 </div>
               </div>
             ) : null}

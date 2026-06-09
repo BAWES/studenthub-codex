@@ -15,4 +15,4 @@ export { default as ComparisonTable } from "./ComparisonTable";
 export type { ComparisonTableProps } from "./ComparisonTable";
 
 export { default as PersonaSwitcher } from "./PersonaSwitcher";
-export type { SwitcherPersona } from "./HeroSection";
+export type { SwitcherPersona } from "./PersonaSwitcher";

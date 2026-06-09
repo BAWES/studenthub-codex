@@ -10877,28 +10877,6 @@ kbd {
   margin-top: 12px;
 }
 
-.shLoginBrandPills {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 18px;
-}
-
-.shLoginBrandPill {
-  min-height: 32px;
-  display: inline-flex;
-  align-items: center;
-  padding: 0 12px;
-  border-radius: 999px;
-  font-size: 11px;
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  background: var(--sh-glass-bg);
-  border: 1px solid var(--sh-glass-border);
-  color: var(--sh-info);
-}
-
 /* ── Form side — centered glass card ────────────────────────────────── */
 .shLoginFormSide {
   display: grid;
@@ -11089,10 +11067,6 @@ kbd {
 
   .shLoginBrandTitle {
     font-size: clamp(24px, 6vw, 32px);
-  }
-
-  .shLoginBrandPills {
-    display: none;
   }
 
   .shLoginFormSide {

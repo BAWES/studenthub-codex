@@ -5,12 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { ChevronRight, Sparkles } from "lucide-react";
 import { ThemeToggle } from "@/modules/theme/ThemeToggle";
-import { HeroSection } from "@/components/marketing";
-import { FeatureGrid } from "@/components/marketing";
-import { TestimonialCarousel } from "@/components/marketing";
-import { PricingCard } from "@/components/marketing";
-import { ComparisonTable } from "@/components/marketing";
-import { PersonaSwitcher } from "@/components/marketing";
+import { HeroSection, FeatureGrid, TestimonialCarousel, PricingCard, ComparisonTable, PersonaSwitcher } from "@/components/marketing";
 import type { SwitcherPersona } from "@/components/marketing";
 
 // ── Props ─────────────────────────────────────────────────────
