@@ -10,6 +10,7 @@ import { prisma } from "@/lib/prisma";
 import { requireCapability, requireRoleCapability } from "@/modules/auth/session";
 import { verifyYiiPassword } from "@/modules/auth/password";
 import bcrypt from "bcryptjs";
+import { getCandidateDetail } from "@/modules/workspace/data";
 
 // ---------------------------------------------------------------------------
 // Profile edit
@@ -1273,4 +1274,28 @@ export async function changePassword(
     console.error("changePassword error:", err);
     return { success: false, error: "An unexpected error occurred. Please try again." };
   }
+}
+
+// ---------------------------------------------------------------------------
+// getCandidateProfile
+// ---------------------------------------------------------------------------
+
+export const getCandidateProfileSchema = z.object({
+  candidateId: z.coerce.number().int().positive("Candidate ID is required"),
+});
+
+export type GetCandidateProfileInput = z.input<typeof getCandidateProfileSchema>;
+
+/**
+ * Fetch the full candidate profile detail + metrics.
+ * Delegates to the existing data layer; intended as a server-action wrapper
+ * that pages can import instead of importing from data.ts directly.
+ */
+export async function getCandidateProfile(input: GetCandidateProfileInput) {
+  const parsed = getCandidateProfileSchema.safeParse(input);
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid input");
+  }
+
+  return getCandidateDetail(parsed.data.candidateId, "/candidate/invitations");
 }
