@@ -31,12 +31,12 @@ export default async function LoginPage({
           </h1>
 
           <p className="shLoginBrandBody">
-            Your production credentials know who you are. No guessing
+            Your account credentials know who you are. No guessing
             between admin, staff, candidate, company, or inspector.
           </p>
 
           <div className="shLoginBrandPills">
-            {["Production credentials", "Automatic role detection", "Scoped workspaces"].map(
+            {["Account credentials", "Automatic role detection", "Scoped workspaces"].map(
               (item) => (
                 <span key={item} className="shLoginBrandPill">
                   {item}
@@ -53,7 +53,7 @@ export default async function LoginPage({
           <div className="shLoginFormCard">
             <div className="shLoginFormCardHeader shLoginStagger">
               <strong>Continue to StudentHub</strong>
-              <p>Enter your production credentials to sign in.</p>
+              <p>Sign in with your account credentials.</p>
             </div>
 
             {params.error === "expired" ? (
