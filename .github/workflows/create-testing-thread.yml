@@ -1,0 +1,62 @@
+name: Create Testing Thread on Merge
+
+on:
+  push:
+    branches: [develop]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  create-thread:
+    name: Create Testing Thread
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract PR info from push
+        id: extract
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          COMMIT_MSG="${{ github.event.head_commit.message }}"
+
+          PR_NUMBER=$(echo "$COMMIT_MSG" | grep -oP '#\d+' | head -1 | tr -d '#' || echo "")
+
+          if [ -z "$PR_NUMBER" ]; then
+            echo "not_a_merge=true" >> "$GITHUB_OUTPUT"
+            echo "No PR number found in commit message"
+            exit 0
+          fi
+
+          PR_TITLE=$(gh pr view "$PR_NUMBER" --repo "${{ github.repository }}" --json title --jq '.title' 2>/dev/null || echo "")
+          PR_AUTHOR=$(gh pr view "$PR_NUMBER" --repo "${{ github.repository }}" --json author --jq '.author.login' 2>/dev/null || echo "")
+          PR_URL="${{ github.server_url }}/${{ github.repository }}/pull/$PR_NUMBER"
+
+          echo "pr_number=$PR_NUMBER" >> "$GITHUB_OUTPUT"
+          echo "pr_title=$PR_TITLE" >> "$GITHUB_OUTPUT"
+          echo "pr_author=$PR_AUTHOR" >> "$GITHUB_OUTPUT"
+          echo "pr_url=$PR_URL" >> "$GITHUB_OUTPUT"
+          echo "not_a_merge=false" >> "$GITHUB_OUTPUT"
+
+          echo "Found PR #$PR_NUMBER: $PR_TITLE by $PR_AUTHOR"
+
+      - name: Create Discord forum thread
+        if: steps.extract.outputs.not_a_merge == 'false'
+        env:
+          DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
+          FORUM_CHANNEL_ID: "1513600918678016221"
+          PR_NUM: ${{ steps.extract.outputs.pr_number }}
+          PR_TITLE: ${{ steps.extract.outputs.pr_title }}
+          PR_AUTHOR: ${{ steps.extract.outputs.pr_author }}
+          PR_URL: ${{ steps.extract.outputs.pr_url }}
+        run: |
+          if [ -z "$DISCORD_BOT_TOKEN" ]; then
+            echo "WARNING: DISCORD_BOT_TOKEN secret not configured in repo"
+            echo "Add it at: https://github.com/BAWES/studenthub-codex/settings/secrets/actions"
+            echo "Skipping thread creation (will fall back to polling watchdog)"
+            exit 0
+          fi
+          python3 .github/scripts/create-testing-thread-from-merge.py
