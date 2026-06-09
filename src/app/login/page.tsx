@@ -2,25 +2,39 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getSession } from "@/modules/auth/session";
 import { LoginForm } from "@/modules/auth/LoginForm";
-import { ThemeToggle } from "@/components/ui/ThemeToggle";
+import { ThemeToggle } from "@/modules/theme/ThemeToggle";
 
 export const dynamic = "force-dynamic";
 
 const roles = [
   {
-    icon: () => null,
+    icon: ({ className }: { className?: string }) => (
+      <svg className={className} aria-hidden={true} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+        <circle cx="12" cy="7" r="4" />
+      </svg>
+    ),
     label: "Candidate",
     color: "sh-info",
     desc: "Find work, track hours, get paid",
   },
   {
-    icon: () => null,
+    icon: ({ className }: { className?: string }) => (
+      <svg className={className} aria-hidden={true} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+        <polyline points="9 22 9 12 15 12 15 22" />
+      </svg>
+    ),
     label: "Company",
     color: "sh-success",
     desc: "Hire staff, manage stores, approve timesheets",
   },
   {
-    icon: () => null,
+    icon: ({ className }: { className?: string }) => (
+      <svg className={className} aria-hidden={true} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+      </svg>
+    ),
     label: "Inspector",
     color: "sh-warning",
     desc: "Monitor compliance and audit records",
@@ -79,7 +93,7 @@ export default async function LoginPage({
               {roles.map(({ icon: Icon, label, color, desc }) => (
                 <div key={label} className="shLoginRoleItem">
                   <span className="shLoginRoleIcon" style={{ color: `var(--${color})` }}>
-                    <Icon className="size-5" aria-hidden="true" />
+                    <Icon className="size-5" aria-hidden={true} />
                   </span>
                   <div className="shLoginRoleText">
                     <strong>{label}</strong>
