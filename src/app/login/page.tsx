@@ -42,24 +42,27 @@ export default async function LoginPage({
           </span>
         </div>
 
-        {/* Glass card */}
-        <div className="shGlassElevated shGlassRadiusXl overflow-hidden shLoginCard">
-          {params.error === "expired" ? (
-            <p className="text-[var(--destructive)] font-bold m-0 p-6 pb-0 text-sm">
-              That verified account choice expired. Sign in again to continue.
-            </p>
-          ) : null}
-          {params.error === "account" ? (
-            <p className="text-[var(--destructive)] font-bold m-0 p-6 pb-0 text-sm">
-              Choose a verified account to continue.
-            </p>
-          ) : null}
-          <LoginForm />
-        </div>
+        {/* Error messages */}
+        {params.error === "expired" ? (
+          <p className="text-[var(--destructive)] font-bold m-0 p-4 pb-0 text-sm text-center">
+            That verified account choice expired. Sign in again to continue.
+          </p>
+        ) : null}
+        {params.error === "account" ? (
+          <p className="text-[var(--destructive)] font-bold m-0 p-4 pb-0 text-sm text-center">
+            Choose a verified account to continue.
+          </p>
+        ) : null}
 
-        {/* Footer */}
-        <p className="text-center text-[var(--muted)] text-xs mt-6">
-          One login. One workspace. Every role.
+        {/* Login form */}
+        <LoginForm />
+
+        {/* Sign-up link */}
+        <p className="text-center text-[var(--muted)] text-[13px] pb-7 sm:pb-9 m-0">
+          No account?{" "}
+          <Link href="/signup" className="text-[var(--sh-info)] font-semibold no-underline hover:underline">
+            Sign up
+          </Link>
         </p>
       </section>
     </main>
