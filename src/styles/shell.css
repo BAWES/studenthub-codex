@@ -160,6 +160,7 @@
   opacity: 1;
 }
 
+.workspaceMark {
   justify-content: center;
   gap: 0;
   border: 1px solid var(--sh-glass-border);
@@ -778,6 +779,7 @@
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.04em;
+}
 }
 
 .topbar h1 {
