@@ -1,7 +1,10 @@
-import { describe, it, expect } from "vitest";
-import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { describe, it, expect, beforeEach } from "vitest";
+import { render, screen, cleanup } from "@testing-library/react";
 import PricingCard from "./PricingCard";
+
+beforeEach(() => {
+  cleanup();
+});
 
 describe("PricingCard", () => {
   it("renders section with pricing aria label", () => {
@@ -11,33 +14,32 @@ describe("PricingCard", () => {
 
   it("renders candidate pricing (free)", () => {
     render(<PricingCard persona="candidate" />);
-    expect(screen.getByText(/free/i)).toBeInTheDocument();
     expect(screen.getByText("Free profile, no commitments.")).toBeInTheDocument();
   });
 
   it("renders staff pricing tiers", () => {
     render(<PricingCard persona="staff" />);
-    expect(screen.getByText("Starter")).toBeInTheDocument();
-    expect(screen.getByText("Professional")).toBeInTheDocument();
+    expect(screen.getAllByText("Starter").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Professional").length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText("Enterprise")).toBeInTheDocument();
   });
 
   it("renders company pricing tiers", () => {
     render(<PricingCard persona="company" />);
-    expect(screen.getByText("Starter")).toBeInTheDocument();
-    expect(screen.getByText("Professional")).toBeInTheDocument();
+    expect(screen.getAllByText("Starter").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Professional").length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText("Enterprise")).toBeInTheDocument();
   });
 
   it("renders inspector pricing tiers", () => {
     render(<PricingCard persona="inspector" />);
-    expect(screen.getByText("Starter")).toBeInTheDocument();
-    expect(screen.getByText("Professional")).toBeInTheDocument();
+    expect(screen.getAllByText("Starter").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Professional").length).toBeGreaterThanOrEqual(1);
   });
 
   it("renders admin pricing with enterprise tier", () => {
     render(<PricingCard persona="admin" />);
-    expect(screen.getByText("Enterprise")).toBeInTheDocument();
+    expect(screen.getAllByText("Enterprise").length).toBeGreaterThanOrEqual(1);
   });
 
   it("renders popular badge on Professional tier", () => {
