@@ -4,9 +4,13 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
 
-const listBrandsSchema = z.object({
+export const listBrandsSchema = z.object({
   page: z.number().int().positive().optional(),
   limit: z.number().int().min(1).max(100).optional(),
+});
+
+export const getBrandSchema = z.object({
+  uuid: z.string().min(1, "Brand UUID is required"),
 });
 
 export type ListBrandsParams = z.input<typeof listBrandsSchema>;
@@ -66,4 +70,34 @@ export async function listBrands(
     limit,
     totalPages: Math.ceil(total / limit),
   };
+}
+
+/**
+ * Get a single brand by UUID.
+ * Mirrors the legacy BrandController::actionView().
+ */
+export async function getBrand(
+  uuid: string,
+): Promise<BrandListItem | null> {
+  await requireCapability("candidate.read.own");
+
+  const parsed = getBrandSchema.safeParse({ uuid });
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid brand UUID");
+  }
+
+  const brand = await prisma.brand.findUnique({
+    where: { brand_uuid: parsed.data.uuid },
+    select: {
+      brand_uuid: true,
+      company_id: true,
+      brand_name_en: true,
+      brand_name_ar: true,
+      brand_logo: true,
+    },
+  });
+
+  if (!brand) return null;
+
+  return brand as BrandListItem;
 }

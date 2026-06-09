@@ -1,10 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { z } from "zod";
-
-const listBrandsSchema = z.object({
-  page: z.number().int().positive().optional(),
-  limit: z.number().int().min(1).max(100).optional(),
-});
+import {
+  listBrandsSchema,
+  getBrandSchema,
+  type BrandListItem,
+  type ListBrandsResult,
+} from "./actions";
 
 describe("listBrandsSchema", () => {
   it("accepts empty params", () => {
@@ -26,21 +26,19 @@ describe("listBrandsSchema", () => {
   });
 });
 
-type BrandListItem = {
-  brand_uuid: string;
-  company_id: number | null;
-  brand_name_en: string;
-  brand_name_ar: string;
-  brand_logo: string | null;
-};
+describe("getBrandSchema", () => {
+  it("accepts a valid UUID", () => {
+    expect(getBrandSchema.safeParse({ uuid: "brand_abc123" }).success).toBe(true);
+  });
 
-type ListBrandsResult = {
-  brands: BrandListItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
+  it("rejects empty UUID", () => {
+    expect(getBrandSchema.safeParse({ uuid: "" }).success).toBe(false);
+  });
+
+  it("rejects missing UUID", () => {
+    expect(getBrandSchema.safeParse({}).success).toBe(false);
+  });
+});
 
 describe("BrandListItem shape", () => {
   it("defines expected fields", () => {
