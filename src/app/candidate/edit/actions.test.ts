@@ -3,7 +3,7 @@ import {
   getProfileSchema,
   updatePersonalInfoSchema,
   updateProfileFieldsSchema,
-} from "./actions";
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // getProfileSchema
