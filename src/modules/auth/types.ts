@@ -38,6 +38,8 @@ export type Capability =
   | "time.approve"
   | "finance.read"
   | "finance.mutate"
+  | "document.read"
+  | "document.write"
   | "document.export"
   | "id_review.read"
   | "id_review.mutate"
