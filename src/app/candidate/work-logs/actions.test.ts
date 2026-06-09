@@ -4,7 +4,7 @@ import {
   getWorkLogDetailSchema,
   submitWorkLogSchema,
   updateWorkLogStatusSchema,
-} from "./actions";
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // listWorkLogsSchema
