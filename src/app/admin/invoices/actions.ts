@@ -35,12 +35,32 @@ export const getInvoiceSchema = z.object({
   invoiceId: z.coerce.number().int().positive("Invoice ID is required"),
 });
 
+export const createInvoiceSchema = z.object({
+  transfer_id: z.number().int().positive().optional(),
+  invoice_date: z.string().optional(),
+  invoice_status: z.enum(["paid", "unpaid"]).optional().default("unpaid"),
+});
+
+export const updateInvoiceSchema = z.object({
+  invoiceId: z.coerce.number().int().positive("Invoice ID is required"),
+  transfer_id: z.number().int().positive().optional(),
+  invoice_date: z.string().optional(),
+  invoice_status: z.enum(["paid", "unpaid"]).optional(),
+});
+
+export const deleteInvoiceSchema = z.object({
+  invoiceId: z.coerce.number().int().positive("Invoice ID is required"),
+});
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
 export type ListInvoicesInput = z.input<typeof listInvoicesSchema>;
 export type GetInvoiceInput = z.input<typeof getInvoiceSchema>;
+export type CreateInvoiceInput = z.input<typeof createInvoiceSchema>;
+export type UpdateInvoiceInput = z.input<typeof updateInvoiceSchema>;
+export type DeleteInvoiceInput = z.input<typeof deleteInvoiceSchema>;
 
 export type InvoiceRow = {
   invoice_id: number;
@@ -230,4 +250,100 @@ export async function getInvoice(
     candidate_payouts: candidatePayouts,
     metrics,
   };
+}
+
+// ---------------------------------------------------------------------------
+// createInvoice
+// ---------------------------------------------------------------------------
+
+/**
+ * Create a new invoice record.
+ * Uses finance.write capability.
+ */
+export async function createInvoice(
+  data: CreateInvoiceInput,
+): Promise<{ invoice_id: number }> {
+  await requireCapability("finance.write");
+
+  const parsed = createInvoiceSchema.safeParse(data);
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid invoice data");
+  }
+
+  const invoice = await prisma.invoice.create({
+    data: {
+      transfer_id: parsed.data.transfer_id ?? null,
+      invoice_date: parsed.data.invoice_date ? new Date(parsed.data.invoice_date) : null,
+      invoice_status: parsed.data.invoice_status,
+    },
+  });
+
+  revalidatePath("/admin/invoices");
+  return { invoice_id: invoice.invoice_id };
+}
+
+// ---------------------------------------------------------------------------
+// updateInvoice
+// ---------------------------------------------------------------------------
+
+/**
+ * Update an existing invoice's fields.
+ * All mutation fields are optional — only provided fields are updated.
+ */
+export async function updateInvoice(
+  data: UpdateInvoiceInput,
+): Promise<{ invoice_id: number }> {
+  await requireCapability("finance.write");
+
+  const parsed = updateInvoiceSchema.safeParse(data);
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid invoice data");
+  }
+
+  const { invoiceId, ...fields } = parsed.data;
+
+  const updateData: Record<string, unknown> = {};
+  if (fields.transfer_id !== undefined) {
+    updateData.transfer_id = fields.transfer_id;
+  }
+  if (fields.invoice_date !== undefined) {
+    updateData.invoice_date = new Date(fields.invoice_date);
+  }
+  if (fields.invoice_status !== undefined) {
+    updateData.invoice_status = fields.invoice_status;
+  }
+
+  await prisma.invoice.update({
+    where: { invoice_id: invoiceId },
+    data: updateData as any,
+  });
+
+  revalidatePath("/admin/invoices");
+  return { invoice_id: invoiceId };
+}
+
+// ---------------------------------------------------------------------------
+// deleteInvoice
+// ---------------------------------------------------------------------------
+
+/**
+ * Soft-delete an invoice by setting deleted=1.
+ */
+export async function deleteInvoice(
+  data: DeleteInvoiceInput,
+): Promise<{ invoice_id: number }> {
+  await requireCapability("finance.write");
+
+  const parsed = deleteInvoiceSchema.safeParse(data);
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid invoice ID");
+  }
+
+  await prisma.invoice.update({
+    where: { invoice_id: parsed.data.invoiceId },
+    data: { deleted: 1 },
+  });
+
+  revalidatePath("/admin/invoices");
+  return { invoice_id: parsed.data.invoiceId };
 }

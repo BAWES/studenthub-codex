@@ -2,6 +2,9 @@ import { describe, it, expect } from "vitest";
 import {
   listInvoicesSchema,
   getInvoiceSchema,
+  createInvoiceSchema,
+  updateInvoiceSchema,
+  deleteInvoiceSchema,
 } from "./actions";
 
 // ---------------------------------------------------------------------------
@@ -94,5 +97,102 @@ describe("getInvoiceSchema", () => {
     if (r.success) {
       expect(r.data.invoiceId).toBe(99);
     }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// createInvoiceSchema
+// ---------------------------------------------------------------------------
+
+describe("createInvoiceSchema", () => {
+  it("accepts minimal params (defaults only)", () => {
+    const r = createInvoiceSchema.safeParse({});
+    expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data.invoice_status).toBe("unpaid");
+    }
+  });
+
+  it("accepts all optional fields", () => {
+    const r = createInvoiceSchema.safeParse({
+      transfer_id: 1,
+      invoice_date: "2026-06-10",
+      invoice_status: "paid",
+    });
+    expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data.transfer_id).toBe(1);
+      expect(r.data.invoice_status).toBe("paid");
+    }
+  });
+
+  it("rejects invalid status", () => {
+    const r = createInvoiceSchema.safeParse({ invoice_status: "pending" });
+    expect(r.success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// updateInvoiceSchema
+// ---------------------------------------------------------------------------
+
+describe("updateInvoiceSchema", () => {
+  it("accepts valid invoice ID with partial update", () => {
+    const r = updateInvoiceSchema.safeParse({
+      invoiceId: 1,
+      invoice_status: "paid",
+    });
+    expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data.invoiceId).toBe(1);
+      expect(r.data.invoice_status).toBe("paid");
+    }
+  });
+
+  it("accepts invoice ID only (no mutation fields)", () => {
+    const r = updateInvoiceSchema.safeParse({ invoiceId: 42 });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects missing invoiceId", () => {
+    const r = updateInvoiceSchema.safeParse({});
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects zero invoiceId", () => {
+    const r = updateInvoiceSchema.safeParse({ invoiceId: 0 });
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects invalid status", () => {
+    const r = updateInvoiceSchema.safeParse({
+      invoiceId: 1,
+      invoice_status: "cancelled",
+    });
+    expect(r.success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// deleteInvoiceSchema
+// ---------------------------------------------------------------------------
+
+describe("deleteInvoiceSchema", () => {
+  it("accepts a valid invoice ID", () => {
+    const r = deleteInvoiceSchema.safeParse({ invoiceId: 42 });
+    expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data.invoiceId).toBe(42);
+    }
+  });
+
+  it("rejects missing invoiceId", () => {
+    const r = deleteInvoiceSchema.safeParse({});
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects zero", () => {
+    const r = deleteInvoiceSchema.safeParse({ invoiceId: 0 });
+    expect(r.success).toBe(false);
   });
 });
