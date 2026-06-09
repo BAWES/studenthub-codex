@@ -59,7 +59,8 @@ export type Capability =
   | "expense.write"
   | "staff_leave.read"
   | "staff_leave.write"
-  | "store.read";
+  | "store.read"
+  | "transfer.read";
 
 export type SessionUser = {
   role: Role;
