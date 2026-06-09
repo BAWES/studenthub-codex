@@ -94,6 +94,12 @@ export default async function LoginPage({
               </p>
             ) : null}
             <LoginForm />
+            <p className="text-center text-[var(--muted)] text-[13px] pb-7 sm:pb-9 m-0">
+              No account?{" "}
+              <Link href="/signup" className="text-[var(--sh-info)] font-semibold no-underline hover:underline">
+                Sign up
+              </Link>
+            </p>
           </section>
         </div>
 
