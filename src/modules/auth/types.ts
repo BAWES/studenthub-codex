@@ -12,6 +12,8 @@ export type Capability =
   | "candidate.search"
   | "candidate.approve"
   | "candidate.profile.edit"
+  | "candidate.evaluation.read"
+  | "candidate.evaluation.write"
   | "company.read.any"
   | "company.read.assigned"
   | "company.read.linked"
@@ -49,7 +51,15 @@ export type Capability =
   | "staff.read"
   | "client.read"
   | "client.write"
-  | "admin.system";
+  | "candidate.evaluation.read"
+  | "candidate.evaluation.write"
+  | "admin.system"
+  | "notes.read"
+  | "notes.create"
+  | "notes.update"
+  | "notes.delete"
+  | "suggestion.read"
+  | "suggestion.write";
 
 export type SessionUser = {
   role: Role;
