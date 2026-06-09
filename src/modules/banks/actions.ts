@@ -108,3 +108,82 @@ export async function getBank(
 
   return bank as BankListItem | null;
 }
+
+// ---------------------------------------------------------------------------
+// Alias exports (matching the Yii2 BankController API naming convention)
+// ---------------------------------------------------------------------------
+
+/**
+ * Alias for listBanks — matches the Yii2 BankController::actionList() naming.
+ */
+export const listBankAccounts = listBanks;
+
+/**
+ * Alias for getBank — matches the Yii2 BankController::actionView() naming.
+ */
+export const getBankAccount = getBank;
+
+// ---------------------------------------------------------------------------
+// createBankAccount
+// ---------------------------------------------------------------------------
+
+const createBankAccountSchema = z.object({
+  name: z.string().min(1, "Bank name is required").max(100),
+  swift_code: z.string().max(100).optional(),
+  address: z.string().max(100).optional(),
+  bank_iban_code: z.string().min(1, "IBAN is required").max(64),
+  type: z.string().max(3).optional(),
+  bank_code_abk: z.coerce.number().int().optional(),
+});
+
+export type CreateBankAccountParams = z.input<typeof createBankAccountSchema>;
+
+export type CreateBankAccountResult = {
+  operation: "success" | "error";
+  message: string;
+};
+
+/**
+ * Create a bank account.
+ * Mirrors the legacy Yii2 Admin BankController::actionCreate().
+ * Requires bank.write capability.
+ */
+export async function createBankAccount(
+  data: CreateBankAccountParams,
+): Promise<CreateBankAccountResult> {
+  await requireCapability("bank.write");
+
+  const parsed = createBankAccountSchema.safeParse(data);
+  if (!parsed.success) {
+    return {
+      operation: "error",
+      message: parsed.error.issues[0]?.message ?? "Invalid bank data",
+    };
+  }
+
+  const { name, swift_code, address, bank_iban_code, type, bank_code_abk } =
+    parsed.data;
+
+  try {
+    await prisma.bank.create({
+      data: {
+        bank_name: name,
+        bank_swift_code: swift_code ?? null,
+        bank_address: address ?? null,
+        bank_iban_code,
+        bank_transfer_type: type ?? null,
+        bank_code_abk: bank_code_abk ?? null,
+      },
+    });
+
+    return {
+      operation: "success",
+      message: "Bank created successfully",
+    };
+  } catch (err) {
+    return {
+      operation: "error",
+      message: err instanceof Error ? err.message : "Failed to create bank",
+    };
+  }
+}

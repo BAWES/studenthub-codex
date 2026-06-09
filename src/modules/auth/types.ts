@@ -46,6 +46,7 @@ export type Capability =
   | "discount.read"
   | "discount.write"
   | "bank.read"
+  | "bank.write"
   | "admin.read"
   | "admin.write"
   | "staff.read"
