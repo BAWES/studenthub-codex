@@ -42,6 +42,8 @@ export type Capability =
   | "staff.read"
   | "client.read"
   | "client.write"
+  | "candidate.evaluation.read"
+  | "candidate.evaluation.write"
   | "admin.system"
   | "notes.read"
   | "notes.create"

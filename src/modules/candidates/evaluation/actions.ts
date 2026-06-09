@@ -101,14 +101,20 @@ export async function listQuestionsByDepartment(
 
   const { deptId } = listQuestionsSchema.parse(params);
 
-  const rows = await prisma.$queryRaw<
-    Array<{ ceq_uuid: string; question: string | null }>
-  >`SELECT ce.ceq_uuid, ce.question
-    FROM candidate_eval_dept_ques cedq
-    JOIN candidate_eval_ques ce ON ce.ceq_uuid = cedq.ceq_uuid
-    WHERE cedq.dept_id = ${deptId}`;
+  const rows = await prisma.$queryRawUnsafe<Array<{ ceq_uuid: string | null; question: string | null }>>(
+    `SELECT deq.ceq_uuid, eq.question
+     FROM candidate_eval_dept_ques deq
+     LEFT JOIN candidate_eval_ques eq ON eq.ceq_uuid = deq.ceq_uuid
+     WHERE deq.dept_id = ?`,
+    deptId,
+  );
 
-  return rows;
+  return rows
+    .filter((r) => r.ceq_uuid !== null)
+    .map((r) => ({
+      ceq_uuid: r.ceq_uuid!,
+      question: r.question,
+    }));
 }
 
 /**
@@ -139,13 +145,17 @@ export async function createEvaluation(
     },
   });
 
-  // Insert answers via raw SQL (candidate_evaluation_answer is @@ignore)
+  // Insert answers via raw SQL
   for (const answer of questionAnswers) {
-    await prisma.$executeRaw`
-      INSERT INTO candidate_evaluation_answer
-        (can_eval_uuid, ceq_uuid, question, answer, rating)
-      VALUES (${canEvalUuid}, ${answer.ceqUuid ?? null}, ${answer.question ?? null}, ${answer.answer ?? null}, ${answer.rating ?? null})
-    `;
+    await prisma.$executeRawUnsafe(
+      `INSERT INTO candidate_evaluation_answer (can_eval_uuid, ceq_uuid, question, answer, rating)
+       VALUES (?, ?, ?, ?, ?)`,
+      canEvalUuid,
+      answer.ceqUuid ?? null,
+      answer.question ?? null,
+      answer.answer ?? null,
+      answer.rating ?? null,
+    );
   }
 
   revalidatePath("/staff/candidates/evaluation");
@@ -201,17 +211,15 @@ export async function viewEvaluationReport(
 
   if (!evaluation) return null;
 
-  // Fetch answers via raw SQL (candidate_evaluation_answer is @@ignore)
-  const answers = await prisma.$queryRaw<
-    Array<{
-      ceq_uuid: string | null;
-      question: string | null;
-      answer: string | null;
-      rating: number | null;
-    }>
-  >`SELECT ceq_uuid, question, answer, rating
-    FROM candidate_evaluation_answer
-    WHERE can_eval_uuid = ${evaluationUuid}`;
+  // Fetch answers via raw SQL (candidate_evaluation_answer has no PK, @@ignore'd)
+  const answers = await prisma.$queryRawUnsafe<
+    Array<{ ceq_uuid: string | null; question: string | null; answer: string | null; rating: number | null }>
+  >(
+    `SELECT ceq_uuid, question, answer, rating
+     FROM candidate_evaluation_answer
+     WHERE can_eval_uuid = ?`,
+    evaluationUuid,
+  );
 
   return {
     can_eval_uuid: evaluation.can_eval_uuid,
