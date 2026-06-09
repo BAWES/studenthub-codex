@@ -2,6 +2,14 @@
 import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
 
+// ── Mock next/navigation ────────────────────────────────────────
+const mockReplace = vi.fn();
+const mockSearchParams = new URLSearchParams();
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ replace: mockReplace }),
+  useSearchParams: () => mockSearchParams,
+}));
+
 // ── Mock next/link ────────────────────────────────────────────
 vi.mock("next/link", () => ({
   default: ({
@@ -21,25 +29,38 @@ vi.mock("next/link", () => ({
 }));
 
 // ── Mock lucide-react icons ───────────────────────────────────
-vi.mock("lucide-react", () => ({
-  UserRound: () => <span data-testid="icon-user" />,
-  Briefcase: () => <span data-testid="icon-briefcase" />,
-  Building2: () => <span data-testid="icon-building" />,
-  Shield: () => <span data-testid="icon-shield" />,
-  ClipboardCheck: () => <span data-testid="icon-clipboard" />,
-  Zap: () => <span data-testid="icon-zap" />,
-  Globe: () => <span data-testid="icon-globe" />,
-  BarChart3: () => <span data-testid="icon-bar-chart" />,
-  Layers: () => <span data-testid="icon-layers" />,
-  ChevronRight: () => <span data-testid="icon-chevron-right" />,
-  Command: () => <span data-testid="icon-command" />,
-  Sparkles: () => <span data-testid="icon-sparkles" />,
-  Search: () => <span data-testid="icon-search" />,
-  PanelRightOpen: () => <span data-testid="icon-panel-right" />,
-  ArrowUpRight: () => <span data-testid="icon-arrow-up-right" />,
-  CheckCircle2: () => <span data-testid="icon-check-circle" />,
-  Clock: () => <span data-testid="icon-clock" />,
-}));
+vi.mock("lucide-react", () => {
+  const icon = (testId: string) => ({ className, ...rest }: Record<string, unknown>) =>
+    <span data-testid={testId} className={className as string} {...rest} />;
+  return {
+    ArrowUpRight: icon("icon-arrow-up-right"),
+    BarChart3: icon("icon-bar-chart-3"),
+    Bell: icon("icon-bell"),
+    Building2: icon("icon-building-2"),
+    Check: icon("icon-check"),
+    CheckCircle2: icon("icon-check-circle-2"),
+    ChevronLeft: icon("icon-chevron-left"),
+    ChevronRight: icon("icon-chevron-right"),
+    ClipboardCheck: icon("icon-clipboard-check"),
+    Clock: icon("icon-clock"),
+    CreditCard: icon("icon-credit-card"),
+    FileText: icon("icon-file-text"),
+    Globe: icon("icon-globe"),
+    Layers: icon("icon-layers"),
+    MessageSquare: icon("icon-message-square"),
+    Minus: icon("icon-minus"),
+    Quote: icon("icon-quote"),
+    Search: icon("icon-search"),
+    Shield: icon("icon-shield"),
+    ShieldCheck: icon("icon-shield-check"),
+    Sparkles: icon("icon-sparkles"),
+    Star: icon("icon-star"),
+    UserRound: icon("icon-user-round"),
+    UsersRound: icon("icon-users-round"),
+    X: icon("icon-x"),
+    Zap: icon("icon-zap"),
+  };
+});
 
 // ── Mock ThemeToggle ──────────────────────────────────────────
 vi.mock("@/modules/theme/ThemeToggle", () => ({
@@ -91,23 +112,24 @@ describe("Landing page (marketing redesign)", () => {
   describe("Navigation", () => {
     it("renders the StudentHub brand in the nav", () => {
       render(<LandingContent {...defaultProps} />);
-      const brand = screen.getByText("StudentHub");
-      expect(brand).toBeTruthy();
-      expect(brand.tagName).toBe("STRONG");
+      const brands = screen.getAllByText("StudentHub");
+      expect(brands.length).toBeGreaterThanOrEqual(1);
+      expect(brands[0].tagName).toBe("STRONG");
     });
 
-    it("renders sign in and get started links", () => {
+    it("renders sign in and persona CTA links", () => {
       render(<LandingContent {...defaultProps} />);
-      const getStartedLinks = screen.getAllByText("Get started");
-      expect(getStartedLinks.length).toBeGreaterThanOrEqual(1);
+      const ctaLinks = screen.getAllByText("Create free candidate profile");
+      expect(ctaLinks.length).toBeGreaterThanOrEqual(1);
       const signInLinks = screen.getAllByText("Sign in");
       expect(signInLinks.length).toBeGreaterThanOrEqual(1);
     });
 
     it("renders Open app link in nav when session exists", () => {
       render(<LandingContent {...sessionProps} />);
-      expect(screen.getByText("Open app")).toBeTruthy();
-      // Nav-level "Get started" is gone; HeroSection renders persona-specific CTA
+      const openAppLinks = screen.getAllByText("Open app");
+      expect(openAppLinks.length).toBeGreaterThanOrEqual(1);
+      // Nav-level CTA switches to "Open app", but bottom CTA still shows persona CTA
       expect(screen.queryAllByText("Get started").length).toBe(0);
       expect(screen.getByText("Create your free candidate profile")).toBeTruthy();
     });
@@ -144,38 +166,19 @@ describe("Landing page (marketing redesign)", () => {
     });
   });
 
-  describe("Platform stats bar", () => {
-    it("renders platform statistics", () => {
+  describe("Feature grid", () => {
+    it("renders feature cards with icons", () => {
       render(<LandingContent {...defaultProps} />);
-      const statsSection = screen.getByLabelText("Platform at a glance");
-      expect(statsSection).toBeTruthy();
-      expect(screen.getByText("128+")).toBeTruthy();
-      expect(screen.getByText("5")).toBeTruthy();
-      expect(screen.getByText("35+")).toBeTruthy();
+      const icons = screen.getAllByTestId(/^icon-/);
+      expect(icons.length).toBeGreaterThanOrEqual(5);
     });
 
-    it("renders stat icons", () => {
+    it("renders feature headings per role", () => {
       render(<LandingContent {...defaultProps} />);
-      expect(screen.getAllByTestId("icon-zap").length).toBeGreaterThanOrEqual(1);
-      expect(screen.getAllByTestId("icon-layers").length).toBeGreaterThanOrEqual(1);
-    });
-  });
-
-  describe("Portal grid", () => {
-    it("renders portal role labels", () => {
-      render(<LandingContent {...defaultProps} />);
-      // Page should reference key roles
       const page = document.body.textContent || "";
       expect(page.toLowerCase()).toContain("candidate");
       expect(page.toLowerCase()).toContain("admin");
       expect(page.toLowerCase()).toContain("staff");
-    });
-
-    it("renders role icons for all 5 portals", () => {
-      render(<LandingContent {...defaultProps} />);
-      const icons = screen.getAllByTestId(/^icon-/);
-      // 5 portal icons + 4 stat icons = 9
-      expect(icons.length).toBeGreaterThanOrEqual(5);
     });
   });
 
