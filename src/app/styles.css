@@ -9472,6 +9472,23 @@ kbd {
   to { transform: translateY(20%); }
 }
 
+/* ── Route transition animations ── */
+
+.pageEnter {
+  animation: slideInUp 300ms ease-out, fadeIn 300ms ease-out;
+}
+
+.pageExit {
+  animation: slideOutDown 200ms ease-in, fadeOut 200ms ease-in;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pageEnter,
+  .pageExit {
+    animation: none !important;
+  }
+}
+
 
 .candidateMissingFields {
   grid-column: 1 / -1;
