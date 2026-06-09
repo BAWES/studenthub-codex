@@ -1,9 +1,11 @@
 import type { Route } from "next";
 import Link from "next/link";
+import { Plus } from "lucide-react";
 import { requireRoleCapability } from "@/modules/auth/session";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { DataTable } from "@/modules/workspace/DataTable";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
-import { NewRequestButton } from "@/modules/workspace/NewRequestButton";
 import { getCompanyRequestRows } from "@/modules/workspace/data";
 
 export const dynamic = "force-dynamic";
@@ -42,7 +44,16 @@ export default async function CompanyRequestsPage() {
   return (
     <WorkspaceShell session={session} eyebrow="Company" title="Requests" metrics={[]}>
       <div style={{ marginBottom: "1rem" }}>
-        <NewRequestButton />
+        <Link
+          href="/company/requests/create"
+          className={cn(
+            buttonVariants({ variant: "default" }),
+            "inline-flex items-center gap-2",
+          )}
+        >
+          <Plus className="size-4" />
+          New Request
+        </Link>
       </div>
       <DataTable
         title="Hiring Requests"

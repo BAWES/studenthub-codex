@@ -1,194 +1,118 @@
-// @vitest-environment jsdom
-import { describe, it, expect, afterEach } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { ActionButton } from "./ActionButton";
+import { Plus } from "lucide-react";
 
 afterEach(() => {
   cleanup();
 });
 
 // ---------------------------------------------------------------------------
-// Variants
+// ActionButton — shared action button with variants, icons, loading, and
+// optional capability-based visibility.
 // ---------------------------------------------------------------------------
 
-describe("ActionButton — variant rendering", () => {
-  it("renders primary variant", () => {
-    render(<ActionButton variant="primary">Save</ActionButton>);
-    const btn = screen.getByRole("button", { name: "Save" });
-    expect(btn).toBeInTheDocument();
+describe("ActionButton", () => {
+  it("renders children text", () => {
+    render(<ActionButton>Click me</ActionButton>);
+    expect(screen.getByRole("button", { name: /click me/i })).toBeInTheDocument();
   });
 
-  it("renders secondary variant", () => {
-    render(<ActionButton variant="secondary">Cancel</ActionButton>);
-    const btn = screen.getByRole("button", { name: "Cancel" });
-    expect(btn).toBeInTheDocument();
-  });
-
-  it("renders outline variant", () => {
-    render(<ActionButton variant="outline">Preview</ActionButton>);
-    const btn = screen.getByRole("button", { name: "Preview" });
-    expect(btn).toBeInTheDocument();
-  });
-
-  it("renders ghost variant", () => {
-    render(<ActionButton variant="ghost">Delete</ActionButton>);
-    const btn = screen.getByRole("button", { name: "Delete" });
-    expect(btn).toBeInTheDocument();
-  });
-
-  it("renders danger variant", () => {
-    render(<ActionButton variant="danger">Remove</ActionButton>);
-    const btn = screen.getByRole("button", { name: "Remove" });
-    expect(btn).toBeInTheDocument();
-  });
-
-  it("defaults to primary variant when none given", () => {
-    render(<ActionButton>Submit</ActionButton>);
-    const btn = screen.getByRole("button", { name: "Submit" });
-    expect(btn).toBeInTheDocument();
-  });
-});
-
-// ---------------------------------------------------------------------------
-// Sizes
-// ---------------------------------------------------------------------------
-
-describe("ActionButton — sizes", () => {
-  it("renders sm size", () => {
-    render(<ActionButton size="sm">Small</ActionButton>);
-    const btn = screen.getByRole("button", { name: "Small" });
-    expect(btn).toBeInTheDocument();
-  });
-
-  it("renders md size", () => {
-    render(<ActionButton size="md">Medium</ActionButton>);
-    const btn = screen.getByRole("button", { name: "Medium" });
-    expect(btn).toBeInTheDocument();
-  });
-
-  it("renders lg size", () => {
-    render(<ActionButton size="lg">Large</ActionButton>);
-    const btn = screen.getByRole("button", { name: "Large" });
-    expect(btn).toBeInTheDocument();
-  });
-
-  it("defaults to md size", () => {
+  it("renders with default variant and size", () => {
     render(<ActionButton>Default</ActionButton>);
-    const btn = screen.getByRole("button", { name: "Default" });
+    const btn = screen.getByRole("button", { name: /default/i });
     expect(btn).toBeInTheDocument();
+    expect(btn.className).toContain("uiButton");
   });
-});
 
-// ---------------------------------------------------------------------------
-// Icon support
-// ---------------------------------------------------------------------------
+  it("accepts variant prop", () => {
+    render(<ActionButton variant="danger">Danger</ActionButton>);
+    const btn = screen.getByRole("button", { name: /danger/i });
+    expect(btn.className).toContain("destructive");
+  });
 
-describe("ActionButton — icon support", () => {
-  it("renders a leading icon before the label", () => {
-    render(
-      <ActionButton leadingIcon={<span data-testid="leading-icon">+</span>}>
-        New Request
+  it("accepts size prop", () => {
+    render(<ActionButton size="lg">Large</ActionButton>);
+    const btn = screen.getByRole("button", { name: /large/i });
+    expect(btn.className).toContain("lg");
+  });
+
+  it("renders a leading icon before text", () => {
+    const { container } = render(
+      <ActionButton icon={<Plus data-testid="leading-icon" />} iconPosition="leading">
+        Add
       </ActionButton>,
     );
-    const btn = screen.getByRole("button", { name: /New Request/ });
-    const icon = screen.getByTestId("leading-icon");
-    expect(btn).toContainElement(icon);
+    expect(screen.getByTestId("leading-icon")).toBeInTheDocument();
+    expect(screen.getByText("Add")).toBeInTheDocument();
   });
 
-  it("renders a trailing icon after the label", () => {
-    render(
-      <ActionButton trailingIcon={<span data-testid="trailing-icon">→</span>}>
+  it("renders a trailing icon after text", () => {
+    const { container } = render(
+      <ActionButton icon={<Plus data-testid="trailing-icon" />} iconPosition="trailing">
         Next
       </ActionButton>,
     );
-    const btn = screen.getByRole("button", { name: /Next/ });
-    const icon = screen.getByTestId("trailing-icon");
-    expect(btn).toContainElement(icon);
+    expect(screen.getByTestId("trailing-icon")).toBeInTheDocument();
+    expect(screen.getByText("Next")).toBeInTheDocument();
   });
 
-  it("renders icon-only mode", () => {
+  it("renders icon-only button without text", () => {
     render(
-      <ActionButton
-        icon={<span data-testid="icon-only">⚙</span>}
-        aria-label="Settings"
-      />,
+      <ActionButton icon={<Plus data-testid="icon-only" />} iconPosition="only" aria-label="Add item" />,
     );
-    const btn = screen.getByRole("button", { name: "Settings" });
-    const icon = screen.getByTestId("icon-only");
-    expect(btn).toContainElement(icon);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// Loading state
-// ---------------------------------------------------------------------------
-
-describe("ActionButton — loading state", () => {
-  it("shows a spinner when loading", () => {
-    render(<ActionButton loading>Saving</ActionButton>);
-    const btn = screen.getByRole("button", { name: /Saving/ });
-    expect(btn).toBeDisabled();
-    // Should contain an SVG spinner
-    expect(btn.querySelector("svg")).toBeInTheDocument();
+    expect(screen.getByTestId("icon-only")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /add item/i })).toBeInTheDocument();
   });
 
-  it("is disabled when loading", () => {
+  it("shows loading spinner and disables button when loading", () => {
     render(<ActionButton loading>Save</ActionButton>);
-    const btn = screen.getByRole("button", { name: "Save" });
+    const btn = screen.getByRole("button");
     expect(btn).toBeDisabled();
+    // Loading indicator should render inside the button
+    expect(btn.querySelector(".animate-spin")).toBeInTheDocument();
   });
 
-  it("replaces children text with loading text when provided", () => {
-    render(<ActionButton loading loadingText="Saving...">Save</ActionButton>);
-    expect(screen.getByText("Saving...")).toBeInTheDocument();
+  it("does not render children text while loading (replaced by spinner)", () => {
+    render(<ActionButton loading>Save</ActionButton>);
     expect(screen.queryByText("Save")).not.toBeInTheDocument();
   });
-});
 
-// ---------------------------------------------------------------------------
-// Disabled state
-// ---------------------------------------------------------------------------
-
-describe("ActionButton — disabled state", () => {
-  it("renders disabled button", () => {
-    render(<ActionButton disabled>Submit</ActionButton>);
-    const btn = screen.getByRole("button", { name: "Submit" });
-    expect(btn).toBeDisabled();
+  it("accepts disabled prop", () => {
+    render(<ActionButton disabled>Disabled</ActionButton>);
+    expect(screen.getByRole("button")).toBeDisabled();
   });
-});
 
-// ---------------------------------------------------------------------------
-// className passthrough
-// ---------------------------------------------------------------------------
+  it("fires onClick when clicked", async () => {
+    const handler = vi.fn();
+    render(<ActionButton onClick={handler}>Click</ActionButton>);
+    await userEvent.click(screen.getByRole("button"));
+    expect(handler).toHaveBeenCalledOnce();
+  });
 
-describe("ActionButton — className passthrough", () => {
+  it("does NOT fire onClick when disabled", async () => {
+    const handler = vi.fn();
+    render(<ActionButton disabled onClick={handler}>Click</ActionButton>);
+    await userEvent.click(screen.getByRole("button"));
+    expect(handler).not.toHaveBeenCalled();
+  });
+
+  it("does NOT fire onClick when loading", async () => {
+    const handler = vi.fn();
+    render(<ActionButton loading onClick={handler}>Click</ActionButton>);
+    await userEvent.click(screen.getByRole("button"));
+    expect(handler).not.toHaveBeenCalled();
+  });
+
   it("applies additional className", () => {
-    render(
-      <ActionButton className="custom-class">Styled</ActionButton>,
-    );
-    const btn = screen.getByRole("button", { name: "Styled" });
-    expect(btn.className).toContain("custom-class");
-  });
-});
-
-// ---------------------------------------------------------------------------
-// Accessibility
-// ---------------------------------------------------------------------------
-
-describe("ActionButton — accessibility", () => {
-  it("renders as a button element", () => {
-    render(<ActionButton>Accessible</ActionButton>);
-    const btn = screen.getByRole("button", { name: "Accessible" });
-    expect(btn).toBeInTheDocument();
+    render(<ActionButton className="extra-class">Styled</ActionButton>);
+    const btn = screen.getByRole("button");
+    expect(btn.className).toContain("extra-class");
   });
 
-  it("accepts aria-label on icon-only buttons", () => {
-    render(
-      <ActionButton
-        icon={<span>⚙</span>}
-        aria-label="Settings"
-      />,
-    );
-    expect(screen.getByRole("button", { name: "Settings" })).toBeInTheDocument();
+  it("forwards additional HTML button props", () => {
+    render(<ActionButton data-testid="custom-btn">Custom</ActionButton>);
+    expect(screen.getByTestId("custom-btn")).toBeInTheDocument();
   });
 });

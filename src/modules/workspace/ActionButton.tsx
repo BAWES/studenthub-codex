@@ -1,202 +1,126 @@
 "use client";
 
 import React from "react";
-import { Slot } from "@radix-ui/react-slot";
+import { Button, buttonVariants } from "@/components/ui/button";
+import type { ButtonProps } from "@/components/ui/button";
+import type { LucideIcon } from "lucide-react";
+import { Loader2Icon } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-// ---------------------------------------------------------------------------
-// Variant → Tailwind class maps
-// ---------------------------------------------------------------------------
-
-const variantStyles: Record<string, string> = {
-  primary:
-    "bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800 " +
-    "shadow-sm dark:bg-blue-500 dark:hover:bg-blue-600 dark:active:bg-blue-700",
-  secondary:
-    "bg-gray-100 text-gray-900 hover:bg-gray-200 active:bg-gray-300 " +
-    "dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700 dark:active:bg-gray-600",
-  outline:
-    "border border-gray-300 bg-transparent text-gray-700 hover:bg-gray-50 active:bg-gray-100 " +
-    "dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800 dark:active:bg-gray-700",
-  ghost:
-    "bg-transparent text-gray-700 hover:bg-gray-100 active:bg-gray-200 " +
-    "dark:text-gray-300 dark:hover:bg-gray-800 dark:active:bg-gray-700",
-  danger:
-    "bg-red-600 text-white hover:bg-red-700 active:bg-red-800 " +
-    "shadow-sm dark:bg-red-500 dark:hover:bg-red-600 dark:active:bg-red-700",
-};
-
-const sizeStyles: Record<string, string> = {
-  sm: "h-8 px-3 text-sm gap-1.5",
-  md: "h-10 px-4 text-sm gap-2",
-  lg: "h-12 px-6 text-base gap-2.5",
-};
-
-const iconOnlySizes: Record<string, string> = {
-  sm: "h-8 w-8 p-0",
-  md: "h-10 w-10 p-0",
-  lg: "h-12 w-12 p-0",
-};
-
-// ---------------------------------------------------------------------------
-// Spinner SVG
-// ---------------------------------------------------------------------------
-
-function Spinner({ className }: { className?: string }) {
-  return (
-    <svg
-      className={cn("animate-spin", className)}
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-      aria-hidden="true"
-    >
-      <circle
-        className="opacity-25"
-        cx="12"
-        cy="12"
-        r="10"
-        stroke="currentColor"
-        strokeWidth="4"
-      />
-      <path
-        className="opacity-75"
-        fill="currentColor"
-        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-      />
-    </svg>
-  );
-}
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
-export type ActionButtonVariant = keyof typeof variantStyles;
-export type ActionButtonSize = keyof typeof sizeStyles;
+export type ActionButtonVariant = "primary" | "secondary" | "outline" | "ghost" | "danger";
+export type ActionButtonSize = "sm" | "md" | "lg" | "icon";
+export type IconPosition = "leading" | "trailing" | "only";
 
-export interface ActionButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  /** Visual variant */
+export interface ActionButtonProps extends Omit<ButtonProps, "variant" | "size"> {
+  /** Visual variant — maps to shadcn Button variants. Default: "primary". */
   variant?: ActionButtonVariant;
-  /** Size preset */
+  /** Size — maps to shadcn Button sizes. Default: "md". */
   size?: ActionButtonSize;
-  /** When true, shows a spinner and disables interaction */
-  loading?: boolean;
-  /** Text to show when loading (replaces children) */
-  loadingText?: string;
-  /** Icon rendered before the label */
-  leadingIcon?: React.ReactNode;
-  /** Icon rendered after the label */
-  trailingIcon?: React.ReactNode;
-  /** Icon rendered alone (icon-only mode). Omits children. */
+  /** Optional icon element (lucide-react component instance). */
   icon?: React.ReactNode;
-  /** If true, renders as child element using Radix Slot */
-  asChild?: boolean;
-  /**
-   * Required capability for this button to be visible/interactable.
-   * The parent page/server-component should check `hasCapability()` or
-   * `requireCapability()` before rendering — this prop serves as
-   * documentation and allows consumers to conditionally render.
-   *
-   * @example
-   * ```tsx
-   * // In a server component:
-   * const canCreate = hasCapability(session, "request.create");
-   * {canCreate && <ActionButton capability="request.create">New</ActionButton>}
-   * ```
-   */
-  capability?: string;
+  /** Where to place the icon relative to children text. Default: "leading". */
+  iconPosition?: IconPosition;
+  /** Show loading spinner and disable interaction. */
+  loading?: boolean;
 }
 
 // ---------------------------------------------------------------------------
-// Component
+// Variant mapping: ActionButtonVariant → shadcn Button variant
+// ---------------------------------------------------------------------------
+
+const variantMap: Record<ActionButtonVariant, NonNullable<ButtonProps["variant"]>> = {
+  primary: "default",
+  secondary: "secondary",
+  outline: "outline",
+  ghost: "ghost",
+  danger: "destructive",
+};
+
+// ---------------------------------------------------------------------------
+// Size mapping: ActionButtonSize → shadcn Button size
+// ---------------------------------------------------------------------------
+
+const sizeMap: Record<ActionButtonSize, NonNullable<ButtonProps["size"]>> = {
+  sm: "sm",
+  md: "default",
+  lg: "lg",
+  icon: "icon",
+};
+
+// ---------------------------------------------------------------------------
+// ActionButton
 // ---------------------------------------------------------------------------
 
 /**
- * Shared `<ActionButton>` — a styled button with variants, sizes, icons,
- * loading state, and disabled state.
+ * Shared action button used across workspace pages.
  *
- * Variants: primary (blue), secondary, outline, ghost, danger
- * Sizes: sm (32px), md (40px), lg (48px)
+ * Wraps the shadcn/ui Button with opinionated defaults (primary variant,
+ * no `asChild` surface). Supports icons, loading state, and standard
+ * button props.
  *
- * Consolidates the following inline buttons:
- * - Company +New Request
- * - Admin action buttons
- * - Staff action buttons
+ * For capability-gated visibility, the consumer is expected to check the
+ * user's capabilities from the WorkspaceOSContext session and conditionally
+ * render this button.
+ *
+ * @example
+ * ```tsx
+ * <ActionButton icon={<Plus />} onClick={() => setShowForm(true)}>
+ *   New Request
+ * </ActionButton>
+ *
+ * <ActionButton variant="danger" loading onClick={handleDelete}>
+ *   Delete
+ * </ActionButton>
+ * ```
  */
-export const ActionButton = React.forwardRef<HTMLButtonElement, ActionButtonProps>(
-  (
-    {
-      variant = "primary",
-      size = "md",
-      loading = false,
-      loadingText,
-      leadingIcon,
-      trailingIcon,
-      icon,
-      asChild = false,
-      disabled,
-      className,
-      children,
-      ...props
-    },
-    ref,
-  ) => {
-    const isDisabled = disabled || loading;
-    const Comp = asChild ? Slot : "button";
+export function ActionButton({
+  variant = "primary",
+  size = "md",
+  icon,
+  iconPosition = "leading",
+  loading = false,
+  disabled,
+  className,
+  children,
+  ...props
+}: ActionButtonProps) {
+  const isDisabled = disabled || loading;
 
-    // Icon-only mode: render just the icon in a square button
-    if (icon) {
-      return (
-        <Comp
-          ref={ref}
-          disabled={isDisabled}
-          className={cn(
-            "inline-flex items-center justify-center rounded-lg font-semibold",
-            "transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2",
-            "disabled:pointer-events-none disabled:opacity-50",
-            variantStyles[variant],
-            iconOnlySizes[size],
-            className,
-          )}
-          {...props}
-        >
-          {loading ? <Spinner className="h-4 w-4" /> : icon}
-        </Comp>
-      );
-    }
+  const content = loading ? (
+    <Loader2Icon className="size-4 animate-spin" aria-label="Loading" />
+  ) : (
+    children
+  );
 
-    return (
-      <Comp
-        ref={ref}
-        disabled={isDisabled}
-        className={cn(
-          "inline-flex items-center justify-center rounded-lg font-semibold",
-          "transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2",
-          "disabled:pointer-events-none disabled:opacity-50",
-          "select-none",
-          variantStyles[variant],
-          sizeStyles[size],
-          className,
-        )}
-        {...props}
-      >
-        {loading ? (
-          <>
-            <Spinner className="h-4 w-4" />
-            {loadingText ?? children}
-          </>
-        ) : (
-          <>
-            {leadingIcon}
-            {children}
-            {trailingIcon}
-          </>
-        )}
-      </Comp>
-    );
-  },
-);
+  const iconElement = loading ? null : icon;
 
-ActionButton.displayName = "ActionButton";
+  return (
+    <Button
+      className={cn(className)}
+      variant={variantMap[variant]}
+      size={sizeMap[size]}
+      disabled={isDisabled}
+      {...props}
+    >
+      {iconPosition === "leading" && iconElement ? (
+        <span className="inline-flex items-center gap-2">
+          {iconElement}
+          {content}
+        </span>
+      ) : iconPosition === "trailing" && iconElement ? (
+        <span className="inline-flex items-center gap-2">
+          {content}
+          {iconElement}
+        </span>
+      ) : iconPosition === "only" && iconElement ? (
+        iconElement
+      ) : (
+        content
+      )}
+    </Button>
+  );
+}

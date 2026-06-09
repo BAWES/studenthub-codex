@@ -16,6 +16,15 @@ const getStaffLeaveSchema = z.object({
   leaveUuid: z.string().min(1, "Leave UUID is required"),
 });
 
+const createStaffLeaveSchema = z.object({
+  staffId: z.coerce.number().int().positive().optional(),
+  fromDate: z.string().optional(),
+  toDate: z.string().optional(),
+  note: z.string().optional(),
+  category: z.string().optional(),
+  status: z.coerce.number().int().optional(),
+});
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -38,6 +47,10 @@ type ListStaffLeavesResult = {
   page: number;
   limit: number;
   totalPages: number;
+};
+
+type CreateStaffLeaveResult = {
+  staff_leave_uuid: string;
 };
 
 describe("listStaffLeavesSchema", () => {
@@ -134,5 +147,58 @@ describe("ListStaffLeavesResult shape", () => {
     };
     expect(result.total).toBe(0);
     expect(result.leaves).toHaveLength(0);
+  });
+});
+
+describe("createStaffLeaveSchema", () => {
+  it("accepts minimal data (all optional fields)", () => {
+    const result = createStaffLeaveSchema.safeParse({});
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts staffId only", () => {
+    const result = createStaffLeaveSchema.safeParse({ staffId: 5 });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.staffId).toBe(5);
+    }
+  });
+
+  it("accepts full leave data", () => {
+    const result = createStaffLeaveSchema.safeParse({
+      staffId: 1,
+      fromDate: "2025-06-01",
+      toDate: "2025-06-05",
+      note: "Annual leave",
+      category: "annual",
+      status: 0,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("coerces string values", () => {
+    const result = createStaffLeaveSchema.safeParse({
+      staffId: "3",
+      status: "1",
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.staffId).toBe(3);
+      expect(result.data.status).toBe(1);
+    }
+  });
+
+  it("rejects negative staffId", () => {
+    const result = createStaffLeaveSchema.safeParse({ staffId: -1 });
+    expect(result.success).toBe(false);
+  });
+});
+
+describe("CreateStaffLeaveResult shape", () => {
+  it("defines the expected fields", () => {
+    const result: CreateStaffLeaveResult = {
+      staff_leave_uuid: "sl_new_uuid",
+    };
+    expect(result.staff_leave_uuid).toBe("sl_new_uuid");
   });
 });

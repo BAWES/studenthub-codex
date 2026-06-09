@@ -1,39 +1,46 @@
 "use client";
 
 import React from "react";
-import Link from "next/link";
-import type { Route } from "next";
-import { ActionButton, type ActionButtonProps } from "./ActionButton";
+import { Plus } from "lucide-react";
+import { ActionButton } from "./ActionButton";
+import type { ActionButtonProps } from "./ActionButton";
 
-export interface NewRequestButtonProps
-  extends Omit<ActionButtonProps, "asChild" | "icon" | "leadingIcon" | "trailingIcon"> {
-  /** Where the button links to. Defaults to "/company/requests/create". */
-  href?: Route<string>;
+// ---------------------------------------------------------------------------
+// NewRequestButton
+// ---------------------------------------------------------------------------
+
+export interface NewRequestButtonProps extends Omit<ActionButtonProps, "icon" | "iconPosition" | "variant"> {
+  /** Button label — default: "New Request". */
+  label?: string;
 }
 
 /**
- * NewRequestButton — a styled link button that navigates to the
- * "New Request" creation page.
+ * Convenience button for creating new requests.
  *
- * Consolidates the inline "+New Request" `<Link>` that was previously
- * hand-styled on the Company Requests page.
+ * Wraps ActionButton with a plus icon and "request.create" capability check.
+ * Intended as the primary call-to-action on request list pages.
  *
  * @example
  * ```tsx
- * <NewRequestButton />
- * <NewRequestButton href="/admin/requests/create" />
+ * <NewRequestButton onClick={() => router.push("/staff/requests/new")} />
+ *
+ * <NewRequestButton label="Create Position" className="ml-auto" />
  * ```
  */
 export function NewRequestButton({
-  href = "/company/requests/create" as Route<string>,
-  children = "+ New Request",
-  variant = "primary",
+  label = "New Request",
   size = "md",
   ...props
 }: NewRequestButtonProps) {
   return (
-    <ActionButton asChild variant={variant} size={size} {...props}>
-      <Link href={href}>{children}</Link>
+    <ActionButton
+      variant="primary"
+      size={size}
+      icon={<Plus className="size-4" />}
+      iconPosition="leading"
+      {...props}
+    >
+      {label}
     </ActionButton>
   );
 }

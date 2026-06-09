@@ -1,60 +1,44 @@
-// @vitest-environment jsdom
-import { describe, it, expect, afterEach, vi } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { NewRequestButton } from "./NewRequestButton";
-
-// Mock Next.js Link — renders a standard <a> for testing
-vi.mock("next/link", () => ({
-  default: ({
-    children,
-    href,
-    className,
-    ...props
-  }: {
-    children: React.ReactNode;
-    href: string;
-    className?: string;
-  }) => (
-    <a href={href} className={className} {...props}>
-      {children}
-    </a>
-  ),
-}));
 
 afterEach(() => {
   cleanup();
 });
 
+// ---------------------------------------------------------------------------
+// NewRequestButton — convenience button for creating new requests, wrapping
+// ActionButton with request.create capability check and plus icon.
+// ---------------------------------------------------------------------------
+
 describe("NewRequestButton", () => {
-  it("renders with default label and href", () => {
+  it("renders with default label", () => {
     render(<NewRequestButton />);
-    const link = screen.getByRole("link", { name: "+ New Request" });
-    expect(link).toBeInTheDocument();
-    expect(link).toHaveAttribute("href", "/company/requests/create");
+    expect(screen.getByRole("button")).toBeInTheDocument();
   });
 
-  it("accepts custom href", () => {
-    render(<NewRequestButton href="/company/requests" />);
-    const link = screen.getByRole("link", { name: "+ New Request" });
-    expect(link).toHaveAttribute("href", "/company/requests");
+  it("renders with a custom label when provided", () => {
+    render(<NewRequestButton label="Create Position" />);
+    expect(screen.getByRole("button", { name: /create position/i })).toBeInTheDocument();
   });
 
-  it("accepts custom children", () => {
-    render(<NewRequestButton>Create Request</NewRequestButton>);
-    expect(screen.getByRole("link", { name: "Create Request" })).toBeInTheDocument();
+  it("fires onClick when clicked", async () => {
+    const handler = vi.fn();
+    render(<NewRequestButton onClick={handler} />);
+    await userEvent.click(screen.getByRole("button"));
+    expect(handler).toHaveBeenCalledOnce();
   });
 
-  it("renders with primary variant by default", () => {
-    const { container } = render(<NewRequestButton />);
-    const link = container.querySelector("a");
-    // Primary variant is applied; the exact class may vary with Slot behavior
-    expect(link).toBeInTheDocument();
-    expect(link?.getAttribute("href")).toBe("/company/requests/create");
+  it("applies additional className", () => {
+    render(<NewRequestButton className="my-class" />);
+    expect(screen.getByRole("button").className).toContain("my-class");
   });
 
-  it("applies disabled state", () => {
-    render(<NewRequestButton disabled>New Request</NewRequestButton>);
-    const link = screen.getByRole("link", { name: "New Request" });
-    expect(link).toBeInTheDocument();
+  it("forwards aria-label", () => {
+    render(<NewRequestButton aria-label="Start a new request" />);
+    expect(
+      screen.getByRole("button", { name: /start a new request/i }),
+    ).toBeInTheDocument();
   });
 });
