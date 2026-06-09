@@ -5,13 +5,13 @@ import CandidateLandingContent from "./CandidateLandingContent";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "StudentHub for Candidates — Find your next placement",
+  title: "Find Your Next Placement | StudentHub for Candidates",
   description:
-    "Create a free profile, get matched to open roles, apply in one click, and track every application from a single dashboard. 1,200+ candidates placed this year.",
+    "Create a free profile visible to 60+ employers, get AI-matched to open roles in real time, apply in one tap, and track every application. 1,200+ candidates placed this year.",
   openGraph: {
-    title: "StudentHub for Candidates",
+    title: "StudentHub for Candidates | Start Your Career Journey",
     description:
-      "Find your next placement and get paid — all from one profile. Smart job matching, one-tap applications, timesheets & payments.",
+      "Free profile, smart matching, one-tap applications, timesheets and payments. Discover the role that fits your skills and schedule.",
   },
 };
 

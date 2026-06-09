@@ -5,13 +5,13 @@ import StaffLandingContent from "./StaffLandingContent";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "StudentHub for Staff — Place candidates faster",
+  title: "Supercharge Your Agency | StudentHub for Staffing",
   description:
-    "AI-powered candidate matching, auto-generated compliance docs, and real-time placement tracking. 350+ agencies already placing faster with StudentHub.",
+    "Cut placement admin by 70%. Automated compliance, document verification, multi-client dashboards, and integrated billing for staffing agencies.",
   openGraph: {
-    title: "StudentHub for Staff",
+    title: "StudentHub for Staffing Agencies | Work Smarter",
     description:
-      "Place candidates faster with AI matching, automated paperwork, and compliance tracking — all in one workspace.",
+      "Automate compliance, documents, and scheduling. Place more talent with less effort.",
   },
 };
 
