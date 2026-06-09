@@ -13,6 +13,8 @@ const listExpensesSchema = z.object({
   category: z.number().int().optional(),
   supplier: z.string().optional(),
   reimbursable: z.boolean().optional(),
+  dateFrom: z.string().optional(),
+  dateTo: z.string().optional(),
   page: z.number().int().positive().optional(),
   limit: z.number().int().min(1).max(100).optional(),
 });
@@ -66,6 +68,18 @@ describe("listExpensesSchema", () => {
       expect(result.data.reimbursable).toBe(true);
       expect(result.data.page).toBe(2);
       expect(result.data.limit).toBe(50);
+    }
+  });
+
+  it("accepts date range params", () => {
+    const result = listExpensesSchema.safeParse({
+      dateFrom: "2026-01-01",
+      dateTo: "2026-06-30",
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.dateFrom).toBe("2026-01-01");
+      expect(result.data.dateTo).toBe("2026-06-30");
     }
   });
 
@@ -185,6 +199,10 @@ type ExpenseWhereInput = {
   category?: number;
   supplier?: { contains: string; mode: "insensitive" };
   reimbursable?: boolean;
+  purchase_date?: {
+    gte?: Date;
+    lte?: Date;
+  };
 };
 
 function buildExpenseFilter(params: {
@@ -192,6 +210,8 @@ function buildExpenseFilter(params: {
   category?: number;
   supplier?: string;
   reimbursable?: boolean;
+  dateFrom?: string;
+  dateTo?: string;
 }): ExpenseWhereInput {
   const where: ExpenseWhereInput = {};
 
@@ -209,6 +229,16 @@ function buildExpenseFilter(params: {
 
   if (params.reimbursable !== undefined) {
     where.reimbursable = params.reimbursable;
+  }
+
+  if (params.dateFrom || params.dateTo) {
+    where.purchase_date = {};
+    if (params.dateFrom) {
+      where.purchase_date.gte = new Date(params.dateFrom);
+    }
+    if (params.dateTo) {
+      where.purchase_date.lte = new Date(params.dateTo);
+    }
   }
 
   return where;
@@ -268,6 +298,32 @@ describe("buildExpenseFilter", () => {
       supplier: { contains: "ACME", mode: "insensitive" },
       reimbursable: true,
     });
+  });
+
+  it("adds purchase_date.gte when dateFrom provided", () => {
+    const result = buildExpenseFilter({ dateFrom: "2026-01-01" });
+    expect(result.purchase_date?.gte).toBeInstanceOf(Date);
+    expect(result.purchase_date?.lte).toBeUndefined();
+  });
+
+  it("adds purchase_date.lte when dateTo provided", () => {
+    const result = buildExpenseFilter({ dateTo: "2026-06-30" });
+    expect(result.purchase_date?.lte).toBeInstanceOf(Date);
+    expect(result.purchase_date?.gte).toBeUndefined();
+  });
+
+  it("adds both gte and lte when both dates provided", () => {
+    const result = buildExpenseFilter({
+      dateFrom: "2026-01-01",
+      dateTo: "2026-06-30",
+    });
+    expect(result.purchase_date?.gte).toBeInstanceOf(Date);
+    expect(result.purchase_date?.lte).toBeInstanceOf(Date);
+  });
+
+  it("ignores purchase_date when no date range provided", () => {
+    const result = buildExpenseFilter({});
+    expect(result.purchase_date).toBeUndefined();
   });
 });
 

@@ -2,7 +2,19 @@ import type { Route } from "next";
 import Link from "next/link";
 import type { getCandidateDetail } from "@/modules/workspace/data";
 import { formatDate } from "@/modules/workspace/format";
+import { EmptyState } from "@/modules/workspace/EmptyState";
 import { WorkLogStaffActions } from "./WorkLogStaffActions";
+
+/** Maps numeric candidate_status to a human-readable label. */
+function candidateStatusLabel(status: number | null | undefined, approved: number | null | undefined): string {
+  if (approved === 0) return "Needs review";
+  switch (status) {
+    case 10: return "Active";
+    case 5:  return "Inactive";
+    case 0:  return "Archived";
+    default: return status != null ? `Status ${status}` : "Unknown";
+  }
+}
 
 type CandidateDetailData = Awaited<ReturnType<typeof getCandidateDetail>>;
 
@@ -28,15 +40,14 @@ export function CandidateProfile({
   if (!candidate) {
     return (
       <section className="candidateProfile empty">
-        <strong>No candidate selected</strong>
-        <span>Select a production candidate to view profile, readiness, work history, notes, and documents.</span>
+        <EmptyState variant="no-data" message="No candidate selected" hint="Select a production candidate to view profile, readiness, work history, notes, and documents." />
       </section>
     );
   }
 
   const readiness = buildReadiness(detail);
   const timeline = buildTimeline(detail);
-  const status = candidate.approved === 0 ? "Needs review" : candidate.candidate_status === 10 ? "Active" : `Status ${candidate.candidate_status}`;
+  const status = candidateStatusLabel(candidate.candidate_status, candidate.approved);
   const title = candidate.candidate_name_ar || candidate.candidate_name;
   const profileActions = [...actions, ...legacyProfileActions(detail)];
 
@@ -129,7 +140,7 @@ export function CandidateProfile({
             {[...detail.skills, ...detail.tags].slice(0, compact ? 12 : 28).map((item) => (
               <span key={`${item.title}-${item.id}`}>{item.title}</span>
             ))}
-            {!detail.skills.length && !detail.tags.length ? <small>No imported skills or tags.</small> : null}
+            {!detail.skills.length && !detail.tags.length ? <EmptyState variant="empty" message="No imported skills or tags" hint="Skills and tags will appear here once they are imported from the candidate profile." /> : null}
           </div>
         </section>
 
@@ -264,7 +275,7 @@ function RowsPanel({
             </article>
           )
         )}
-        {!rows.length ? <small>No imported rows visible for this login.</small> : null}
+        {!rows.length ? <EmptyState variant="empty" message="No records yet" hint="Records will appear here once they are imported or linked to this profile." /> : null}
       </div>
     </section>
   );
@@ -299,7 +310,7 @@ function WorkLogStaffPanel({ hours }: { hours: WorkLogRow[] }) {
             <WorkLogStaffActions workLogUuid={String(hour.id)} currentStatus={hour.status} />
           </article>
         ))}
-        {!hours.length ? <small>No work log records for this candidate.</small> : null}
+        {!hours.length ? <EmptyState variant="empty" message="No work log records" hint="Work log records will appear here once the candidate has logged hours." /> : null}
       </div>
     </section>
   );
