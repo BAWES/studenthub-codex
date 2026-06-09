@@ -136,7 +136,7 @@ export function HubContent({
 
       <section className="journeyHome">
         {requiredRole && requiredRole !== session.role ? (
-          <section className="roleBoundaryNotice" aria-label="Role access notice">
+          <section className="roleBoundaryNotice" aria-label="Role access notice" style={{ animationDelay: '0ms' }}>
             <div>
               <span>Access boundary</span>
               <strong>
@@ -151,7 +151,7 @@ export function HubContent({
           </section>
         ) : null}
 
-        <section className="journeyHero">
+        <section className="journeyHero" style={{ animationDelay: '80ms' }}>
           <div>
             <span className="journeyEyebrow">Start here</span>
             <h1>{guide.title}</h1>
@@ -163,7 +163,7 @@ export function HubContent({
               <Link href={hubContext}>Open focused search</Link>
             </div>
           </div>
-          <aside className="journeyGuardrail">
+          <aside className="journeyGuardrail" style={{ animationDelay: '160ms' }}>
             <span>Signed in as {session.role}</span>
             <strong>{session.name}</strong>
             <p>{guide.guardrail}</p>
@@ -171,8 +171,8 @@ export function HubContent({
         </section>
 
         <section className="journeyGrid" aria-label={`${session.role} workflows`}>
-          {guide.journeys.map((journey) => (
-            <article className="journeyCard" key={journey.title}>
+          {guide.journeys.map((journey, i) => (
+            <article className="journeyCard" key={journey.title} style={{ animationDelay: `${200 + i * 80}ms` }}>
               <div className="journeyCardHeader">
                 <span>{journey.kicker}</span>
                 <strong>{journey.title}</strong>
@@ -192,7 +192,7 @@ export function HubContent({
         </section>
 
         <section className="journeyWorkbench" aria-label="Search and live queues">
-          <div className="journeyPanel">
+          <div className="journeyPanel" style={{ animationDelay: '400ms' }}>
             <div className="journeyPanelHeader">
               <span>Live queues</span>
               <strong>What needs attention</strong>
@@ -219,7 +219,7 @@ export function HubContent({
             </div>
           </div>
 
-          <div className="journeyPanel">
+          <div className="journeyPanel" style={{ animationDelay: '480ms' }}>
             <div className="journeyPanelHeader">
               <span>{data.scope}</span>
               <strong>{data.query ? `Search results for ${data.query}` : "Find a record"}</strong>
