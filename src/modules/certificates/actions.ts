@@ -100,7 +100,7 @@ export type ListCertificatesResult = {
 // Exported schemas (for shared validation)
 // ---------------------------------------------------------------------------
 
-export { listCertificatesSchema, createCertificateSchema, updateCertificateSchema, deleteCertificateSchema };
+export { listCertificatesSchema, createCertificateSchema, updateCertificateSchema, deleteCertificateSchema, getCertificateSchema };
 
 // ---------------------------------------------------------------------------
 // listCertificates
