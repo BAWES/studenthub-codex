@@ -53,6 +53,7 @@ export type GetTicketParams = z.input<typeof getTicketSchema>;
 export type CreateTicketParams = z.input<typeof createTicketSchema>;
 export type AddCommentParams = z.input<typeof addCommentSchema>;
 export type GetCommentsParams = z.input<typeof getCommentsSchema>;
+export type UpdateTicketParams = z.input<typeof updateTicketSchema>;
 
 export type TicketItem = {
   ticket_uuid: string;
