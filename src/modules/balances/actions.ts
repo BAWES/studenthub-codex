@@ -80,7 +80,7 @@ const TYPE_PAYABLE_TO_USERS = "PayableToUsers";
 export async function listBalances(
   params: FormData | z.input<typeof listBalancesSchema> = {},
 ): Promise<ListBalancesResult> {
-  await requireCapability("finance.read");
+  const session = await requireCapability("finance.read");
 
   const raw =
     params instanceof FormData
@@ -106,17 +106,51 @@ export async function listBalances(
   const skip = (page - 1) * limit;
 
   try {
-    // 1. Get the current user's payable account from session
-    // The wallet DB links accounts via account_uuid = user_uuid
-    // We use the authenticated user's UUID from the session
-    // NOTE: In production, the wallet user UUID should match the
-    // account UUID used walletDb. This is a read-only listing.
+    // 1. Resolve wallet user UUID from the current user's email
+    // Mirrors Yii2 WalletUser::findByEmail pattern:
+    //   wallet DB has its own user table that maps email -> user_uuid
+    const candidateId = Number(session.id);
+    const candidate = await prisma.candidate.findUnique({
+      where: { candidate_id: candidateId },
+      select: { candidate_email: true },
+    });
+
+    if (!candidate?.candidate_email) {
+      return {
+        account: null,
+        transactions: [],
+        total: 0,
+        page,
+        limit,
+        totalPages: 0,
+      };
+    }
+
+    const walletUsers = await walletQuery<Array<{ user_uuid: string }>>(
+      `SELECT user_uuid FROM user WHERE email = ? LIMIT 1`,
+      [candidate.candidate_email],
+    );
+
+    if (walletUsers.length === 0) {
+      return {
+        account: null,
+        transactions: [],
+        total: 0,
+        page,
+        limit,
+        totalPages: 0,
+      };
+    }
+
+    const userUuid = walletUsers[0].user_uuid;
+
+    // 2. Get the candidate's payable wallet account
     const accounts = await walletQuery<PayableAccount[]>(
       `SELECT balance_account_uuid, account_uuid, balance, type
        FROM balance_account
        WHERE account_uuid = ? AND type = ?
        LIMIT 1`,
-      [], // accountUuid will be resolved from session context
+      [userUuid, TYPE_USER_PAYABLE],
     );
 
     if (accounts.length === 0) {
