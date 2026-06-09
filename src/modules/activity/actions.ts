@@ -1,6 +1,7 @@
 "use server";
 
 import { z } from "zod";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
 
@@ -8,13 +9,13 @@ import { requireCapability } from "@/modules/auth/session";
 // Schemas
 // ---------------------------------------------------------------------------
 
-const listActivitySchema = z.object({
+export const listActivitySchema = z.object({
   requestUuid: z.string().min(1).optional(),
-  page: z.number().int().positive().optional().default(1),
-  limit: z.number().int().min(1).max(100).optional().default(20),
+  page: z.number().int().positive().default(1),
+  limit: z.number().int().min(1).max(100).default(20),
 });
 
-const getActivitySchema = z.object({
+export const getActivitySchema = z.object({
   uuid: z.string().min(1, "Activity UUID is required"),
 });
 
@@ -65,19 +66,19 @@ export async function listActivity(
   const { requestUuid, page, limit } = parsed.data;
   const skip = (page - 1) * limit;
 
-  const where: Record<string, unknown> = {};
+  const where: Prisma.request_activityWhereInput = {};
   if (requestUuid) {
     where.request_uuid = requestUuid;
   }
 
   const [items, total] = await Promise.all([
     prisma.request_activity.findMany({
-      where: where as any,
+      where,
       orderBy: { activity_created_datetime: "desc" },
       skip,
       take: limit,
     }),
-    prisma.request_activity.count({ where: where as any }),
+    prisma.request_activity.count({ where }),
   ]);
 
   return {

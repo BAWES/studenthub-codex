@@ -1,40 +1,12 @@
 import { describe, it, expect } from "vitest";
-import { z } from "zod";
-
-// ---------------------------------------------------------------------------
-// Schemas (duplicated from actions.ts for isolated unit testing)
-// ---------------------------------------------------------------------------
-
-const listActivitySchema = z.object({
-  requestUuid: z.string().min(1).optional(),
-  page: z.number().int().positive().optional().default(1),
-  limit: z.number().int().min(1).max(100).optional().default(20),
-});
-
-const getActivitySchema = z.object({
-  uuid: z.string().min(1, "Activity UUID is required"),
-});
-
-// ---------------------------------------------------------------------------
-// Types (duplicated from actions.ts for type-shape testing)
-// ---------------------------------------------------------------------------
-
-type RequestActivityItem = {
-  activity_uuid: string;
-  request_uuid: string;
-  staff_id: number | null;
-  activity_detail: string;
-  activity_created_datetime: string | null;
-  activity_updated_datetime: string | null;
-};
-
-type ListActivityResult = {
-  activities: RequestActivityItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
+import {
+  listActivitySchema,
+  getActivitySchema,
+} from "./actions";
+import type {
+  RequestActivityItem,
+  ListActivityResult,
+} from "./actions";
 
 // ---------------------------------------------------------------------------
 // listActivitySchema tests

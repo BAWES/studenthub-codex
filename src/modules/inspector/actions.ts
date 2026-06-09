@@ -3,6 +3,7 @@
 import crypto from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
 
@@ -260,8 +261,8 @@ export async function rejectRequest(
 // ---------------------------------------------------------------------------
 
 export const listInspectorsSchema = z.object({
-  page: z.number().int().positive().optional(),
-  limit: z.number().int().min(1).max(100).optional(),
+  page: z.number().int().positive().default(1),
+  limit: z.number().int().min(1).max(100).default(20),
 });
 
 export const getInspectorSchema = z.object({
@@ -304,20 +305,20 @@ export async function listInspectors(
     throw new Error(parsed.error.issues[0]?.message ?? "Invalid list parameters");
   }
 
-  const { page = 1, limit = 20 } = parsed.data;
+  const { page, limit } = parsed.data;
 
-  const where: Record<string, unknown> = {
+  const where: Prisma.inspectorWhereInput = {
     inspector_deleted: 0,
   };
 
   const [inspectors, total] = await Promise.all([
     prisma.inspector.findMany({
-      where: where as any,
+      where,
       orderBy: { inspector_name: "asc" },
       skip: (page - 1) * limit,
       take: limit,
     }),
-    prisma.inspector.count({ where: where as any }),
+    prisma.inspector.count({ where }),
   ]);
 
   return {
