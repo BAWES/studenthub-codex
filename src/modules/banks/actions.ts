@@ -143,26 +143,6 @@ export const listBankAccounts = listBanks;
  */
 export const getBankAccount = getBank;
 
-// ---------------------------------------------------------------------------
-// createBank
-// ---------------------------------------------------------------------------
-
-const createBankSchema = z.object({
-  name: z.string().min(1, "Bank name is required"),
-  ibanCode: z.string().min(1, "IBAN code is required"),
-  swiftCode: z.string().optional(),
-  address: z.string().optional(),
-  transferType: z.string().optional(),
-  codeAbk: z.number().int().optional(),
-});
-
-export type CreateBankParams = z.input<typeof createBankSchema>;
-
-export type CreateBankResult = {
-  operation: string;
-  message: string;
-};
-
 /**
  * Create a new bank record.
  *
