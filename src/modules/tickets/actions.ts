@@ -30,6 +30,15 @@ const addCommentSchema = z.object({
   attachments: z.array(z.string()).optional(),
 });
 
+const updateTicketSchema = z.object({
+  ticketUuid: z.string().min(1, "Ticket UUID is required"),
+  detail: z.string().min(1, "Ticket detail is required"),
+});
+
+const closeTicketSchema = z.object({
+  ticketUuid: z.string().min(1, "Ticket UUID is required"),
+});
+
 const getCommentsSchema = z.object({
   ticketUuid: z.string().min(1, "Ticket UUID is required"),
 });
@@ -92,6 +101,9 @@ export type AddCommentResult = {
   operation: string;
   message: string;
 };
+
+export type UpdateTicketParams = z.input<typeof updateTicketSchema>;
+export type CloseTicketParams = z.input<typeof closeTicketSchema>;
 
 // ---------------------------------------------------------------------------
 // Exported schemas (for shared validation in tests)
@@ -247,6 +259,119 @@ export async function createTicket(
     return {
       operation: "error",
       message: err instanceof Error ? err.message : "Failed to create ticket",
+    };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// updateTicket
+// ---------------------------------------------------------------------------
+
+/**
+ * Update an existing support ticket's detail.
+ * Mirrors the legacy staff TicketController update pattern.
+ * Staff-only action.
+ */
+export async function updateTicket(
+  params: UpdateTicketParams,
+): Promise<CreateTicketResult> {
+  await requireCapability("admin.write");
+
+  const parsed = updateTicketSchema.safeParse(params);
+  if (!parsed.success) {
+    return {
+      operation: "error",
+      message: parsed.error.issues[0]?.message ?? "Invalid ticket data",
+    };
+  }
+
+  const { ticketUuid, detail } = parsed.data;
+
+  const existing = await prisma.ticket.findUnique({
+    where: { ticket_uuid: ticketUuid },
+  });
+
+  if (!existing) {
+    return { operation: "error", message: "Ticket not found" };
+  }
+
+  try {
+    await prisma.ticket.update({
+      where: { ticket_uuid: ticketUuid },
+      data: {
+        ticket_detail: detail,
+        updated_at: new Date(),
+      },
+    });
+
+    return { operation: "success", message: "Ticket updated successfully" };
+  } catch (err) {
+    return {
+      operation: "error",
+      message: err instanceof Error ? err.message : "Failed to update ticket",
+    };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// closeTicket
+// ---------------------------------------------------------------------------
+
+/**
+ * Close a support ticket (set status to completed and record completion time).
+ * Mirrors the staff TicketController close workflow.
+ * Staff-only action.
+ */
+export async function closeTicket(
+  params: GetTicketParams,
+): Promise<CreateTicketResult> {
+  await requireCapability("admin.write");
+
+  const parsed = getTicketSchema.safeParse(params);
+  if (!parsed.success) {
+    return {
+      operation: "error",
+      message: parsed.error.issues[0]?.message ?? "Invalid ticket UUID",
+    };
+  }
+
+  const { ticketUuid } = parsed.data;
+
+  const existing = await prisma.ticket.findUnique({
+    where: { ticket_uuid: ticketUuid },
+  });
+
+  if (!existing) {
+    return { operation: "error", message: "Ticket not found" };
+  }
+
+  if (existing.ticket_status === 2) {
+    return { operation: "error", message: "Ticket is already closed" };
+  }
+
+  const now = new Date();
+  const resolutionTime = existing.ticket_started_at
+    ? Math.round(
+        (now.getTime() - existing.ticket_started_at.getTime()) / 60000,
+      )
+    : null;
+
+  try {
+    await prisma.ticket.update({
+      where: { ticket_uuid: ticketUuid },
+      data: {
+        ticket_status: 2, // STATUS_COMPLETED
+        ticket_completed_at: now,
+        resolution_time: resolutionTime,
+        updated_at: now,
+      },
+    });
+
+    return { operation: "success", message: "Ticket closed successfully" };
+  } catch (err) {
+    return {
+      operation: "error",
+      message: err instanceof Error ? err.message : "Failed to close ticket",
     };
   }
 }
