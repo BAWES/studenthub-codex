@@ -1,6 +1,9 @@
 import type { Route } from "next";
 import Link from "next/link";
+import { Plus } from "lucide-react";
 import { requireRoleCapability } from "@/modules/auth/session";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { DataTable } from "@/modules/workspace/DataTable";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { getCompanyRequestRows } from "@/modules/workspace/data";
@@ -43,19 +46,13 @@ export default async function CompanyRequestsPage() {
       <div style={{ marginBottom: "1rem" }}>
         <Link
           href="/company/requests/create"
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            padding: "0.5rem 1rem",
-            background: "var(--primary, #2563eb)",
-            color: "#fff",
-            borderRadius: "6px",
-            fontWeight: 600,
-            fontSize: "0.875rem",
-            textDecoration: "none",
-          }}
+          className={cn(
+            buttonVariants({ variant: "default" }),
+            "inline-flex items-center gap-2",
+          )}
         >
-          + New Request
+          <Plus className="size-4" />
+          New Request
         </Link>
       </div>
       <DataTable
