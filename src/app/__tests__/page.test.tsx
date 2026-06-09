@@ -158,6 +158,31 @@ describe("Landing page (marketing redesign)", () => {
     expect(footerLinks.length).toBeGreaterThanOrEqual(1);
   });
 
+  // ── Skip-to-content link ───────────────────────────────────
+
+  it("renders a skip-to-content link as the first focusable element", () => {
+    const { container } = render(<LandingContent {...defaultProps} />);
+    const link = screen.getByRole("link", { name: /skip to content/i });
+    expect(link).toBeInTheDocument();
+    // Must be the very first child inside the fragment
+    expect(container.firstChild).toBe(link);
+  });
+
+  it("skip-to-content link targets #main-content", () => {
+    render(<LandingContent {...defaultProps} />);
+    const link = screen.getByRole("link", { name: /skip to content/i });
+    expect(link).toHaveAttribute("href", "#main-content");
+    // Has sr-only + focus:not-sr-only pattern
+    expect(link.className).toContain("sr-only");
+    expect(link.className).toContain("focus:not-sr-only");
+  });
+
+  it("main element has id=main-content for skip-link target", () => {
+    const { container } = render(<LandingContent {...defaultProps} />);
+    const main = container.querySelector("main#main-content");
+    expect(main).toBeInTheDocument();
+  });
+
   it("renders open app links when user is authenticated", () => {
     const session = { user: { role: "admin" } } as any;
     render(<LandingContent {...defaultProps} session={session} />);
