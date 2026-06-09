@@ -24,27 +24,27 @@ export interface CandidateLandingContentProps {
 
 const PAIN_POINTS = [
   {
-    problem: "Hundreds of job boards, zero coherent replies",
+    problem: "Can't get hired without experience, can't get experience without a job",
     solution:
-      "Stop juggling 14 tabs. StudentHub surfaces only the roles that match your skills and experience. No blind applications, no spam from recruiters who never read your CV.",
+      "StudentHub places you in real work positions — no experience required. Every placement builds your CV, and after 3 months you rotate to a new role in a different industry. By graduation, you have a portfolio of diverse work experience, not just one line on your CV.",
   },
   {
-    problem: "Your time is billable — chasing paperwork isn't",
+    problem: "A single job for years gives you a thin CV",
     solution:
-      "Log hours, submit timesheets, and get paid — all in one place. No chasing paper forms, no separate payroll portals, no lost invoices.",
+      "Most students graduate with one part-time job. StudentHub moves you across multiple placements — retail, admin, hospitality, customer service — so you graduate with a stacked CV that proves you can adapt to any environment.",
   },
   {
-    problem: "Your profile should work as hard as you do",
+    problem: "Compliance paperwork is a nightmare",
     solution:
-      "Build a single profile that represents your full work history, certifications, and availability. Update once — every matched employer sees the latest you.",
+      "StudentHub handles all the compliance, payroll, and documentation. Your ID card with QR code verifies your right to work on the spot. Just show up, work your rotation, and build your future.",
   },
 ];
 
 const CANDIDATE_STATS = [
-  { value: "1,200+", label: "candidates placed this year" },
+  { value: "1,200+", label: "active student placements" },
+  { value: "3 mo", label: "per position, then rotated" },
   { value: "92%", label: "match accuracy rate" },
-  { value: "3 min", label: "avg profile setup time" },
-  { value: "4.8★", label: "candidate satisfaction" },
+  { value: "Free", label: "completely free for students" },
 ];
 
 // ── Component ─────────────────────────────────────────────────
@@ -122,14 +122,14 @@ export default function CandidateLandingContent({
 
         <div className="relative z-[2]">
           <p className="text-[var(--sh-info)] text-[11px] font-black uppercase tracking-wider mb-1">
-            The real job-search headache
+            The real work experience problem
           </p>
           <h2 className="shBenefitsTitle mb-8">
             You don&apos;t need another job board.
             <br />
-            You need a way to{" "}
-            <em style={{ color: "var(--sh-info)" }}>stand out</em>{" "}
-            without the noise.
+            You need{" "}
+            <em style={{ color: "var(--sh-info)" }}>real experience</em>{" "}
+            across multiple industries.
           </h2>
 
           <div className="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-5">
@@ -220,18 +220,18 @@ export default function CandidateLandingContent({
 
         <div className="relative z-[2] max-w-[640px] mx-auto">
           <p className="text-[var(--sh-info)] text-[11px] font-black uppercase tracking-wider mb-2">
-            Start your placement journey
+            Start building your career — free
           </p>
           <h2 className="shBenefitsTitle text-center">
-            Your next role is one profile away.
+            Get real work experience that builds your CV.
           </h2>
           <p
             className="max-w-[480px] mx-auto mt-2 mb-6 leading-relaxed"
             style={{ color: "var(--muted)" }}
           >
-            Create your free profile in under 3 minutes. No CV required — just
-            your experience and what you&apos;re looking for. Employers are hiring
-            on StudentHub right now.
+            Registration is completely free. StudentHub places you in real positions
+            across multiple industries — 3 months per rotation. No CV required.
+            By graduation, you&apos;ll have a stacked portfolio of experience.
           </p>
           {isLoggedIn ? (
             <Link
@@ -253,8 +253,8 @@ export default function CandidateLandingContent({
             className="flex items-center justify-center gap-4 mt-4 text-xs"
             style={{ color: "var(--muted)" }}
           >
-            <span>1,200+ candidates placed this year</span>
-            <span>4.8★ candidate satisfaction</span>
+            <span>1,200+ active student placements</span>
+            <span>Completely free for students</span>
           </div>
         </div>
       </section>

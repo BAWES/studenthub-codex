@@ -24,27 +24,27 @@ export interface InspectorLandingContentProps {
 
 const PAIN_POINTS = [
   {
-    problem: "Manual document review that takes days, not hours",
+    problem: "No quick way to validate workers on-site",
     solution:
-      "Batch document processing with automated quality checks. Review 50 submissions in the time it used to take for 5. Flag issues instantly with structured feedback.",
+      "Every worker on StudentHub wears an ID card with a QR code. Scan it on-site to instantly verify right-to-work status, certifications, and placement details. No paperwork, no phone calls — just a scan.",
   },
   {
-    problem: "Lost audit trails when you need them most",
+    problem: "Government inspectors need access without onboarding delays",
     solution:
-      "Every review action is timestamped and immutable. From submission to final decision — complete audit trails that satisfy even the strictest regulators.",
+      "StudentHub gives government inspectors immediate access — no onboarding required. Validate any worker across any company from a single dashboard. On-site, in-office, or remote.",
   },
   {
-    problem: "No visibility into team workload or bottlenecks",
+    problem: "Manual compliance checks across hundreds of workers",
     solution:
-      "Real-time dashboard shows queue depth, reviewer throughput, and aging items. Reassign work dynamically and keep your team's backlog healthy.",
+      "Batch-verify worker documents, track certification expiries, and maintain full audit trails. Every verification action is timestamped and immutable. Audit-ready reports in minutes.",
   },
 ];
 
 const INSPECTOR_STATS = [
-  { value: "10k+", label: "documents reviewed monthly" },
+  { value: "Instant", label: "QR code worker validation" },
+  { value: "Zero", label: "onboarding required for inspectors" },
   { value: "100%", label: "audit trail completeness" },
-  { value: "4.9★", label: "inspector satisfaction" },
-  { value: "60%", label: "faster review cycles" },
+  { value: "99.7%", label: "compliance pass rate" },
 ];
 
 // ── Component ─────────────────────────────────────────────────
@@ -123,14 +123,14 @@ export default function InspectorLandingContent({
 
           <div className="relative z-[2]">
             <p className="text-[var(--sh-info)] text-[11px] font-black uppercase tracking-wider mb-1">
-              The real inspection headache
+              The real compliance challenge
             </p>
             <h2 className="shBenefitsTitle mb-8">
-              You don&apos;t need another tracking spreadsheet.
+              You don&apos;t need more paperwork.
               <br />
-              You need a{" "}
-              <em style={{ color: "var(--sh-info)" }}>streamlined</em>{" "}
-              review pipeline.
+              You need{" "}
+              <em style={{ color: "var(--sh-info)" }}>instant</em>{" "}
+              on-site validation.
             </h2>
 
             <div className="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-5">
@@ -222,18 +222,19 @@ export default function InspectorLandingContent({
 
           <div className="relative z-[2] max-w-[640px] mx-auto">
             <p className="text-[var(--sh-info)] text-[11px] font-black uppercase tracking-wider mb-2">
-              Streamline your inspections
+              Validate workers instantly — on-site or remote
             </p>
             <h2 className="shBenefitsTitle text-center">
-              Your next batch is one review away.
+              Government-level compliance, zero onboarding friction.
             </h2>
             <p
               className="max-w-[480px] mx-auto mt-2 mb-6 leading-relaxed"
               style={{ color: "var(--muted)" }}
             >
-              Start reviewing document batches with full audit trails. Clear
-              your queue and maintain compliance from day one. No setup fee,
-              no minimum commitment.
+              StudentHub gives government inspectors immediate access — no onboarding
+              required. Scan any worker&apos;s QR code ID card to validate right-to-work
+              status, certifications, and placement details on the spot. Audit-ready
+              reports in minutes.
             </p>
             {isLoggedIn ? (
               <Link
@@ -254,8 +255,8 @@ export default function InspectorLandingContent({
               className="flex items-center justify-center gap-4 mt-4 text-xs"
               style={{ color: "var(--muted)" }}
             >
-              <span>10,000+ documents reviewed monthly</span>
-              <span>Full audit trails on every review</span>
+              <span>Instant QR code validation</span>
+              <span>Zero onboarding for inspectors</span>
             </div>
           </div>
         </section>
