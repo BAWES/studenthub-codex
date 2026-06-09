@@ -2602,7 +2602,7 @@ export type WorkingDateDetail = {
   end_time: Date | null;
   total_time: number | null;
   status: number | null;
-  store: { store_name: string | null; company: { company_name: string | null } } | null;
+  store: { store_name: string | null; company: { company_name: string | null } | null } | null;
   created_at: Date | null;
   updated_at: Date | null;
 };
