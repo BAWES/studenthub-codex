@@ -27,23 +27,13 @@ export default async function LoginPage({
 
           <h1 className="shLoginBrandTitle">
             Sign in once.<br />
-            <span className="shLoginBrandHighlight">The right workspace opens.</span>
+            <span className="shLoginBrandHighlight">Every workspace is yours.</span>
           </h1>
 
           <p className="shLoginBrandBody">
-            Your production credentials know who you are. No guessing
-            between admin, staff, candidate, company, or inspector.
+            Candidate, staff, company, admin, or inspector — one account opens
+            the right portal for your role. No switching. No guessing.
           </p>
-
-          <div className="shLoginBrandPills">
-            {["Production credentials", "Automatic role detection", "Scoped workspaces"].map(
-              (item) => (
-                <span key={item} className="shLoginBrandPill">
-                  {item}
-                </span>
-              )
-            )}
-          </div>
         </div>
       </div>
 
