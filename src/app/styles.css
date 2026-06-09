@@ -17,11 +17,15 @@
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
+  --color-overlay: var(--overlay);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
   --radius: var(--radius);
+  --font-size-label: 0.8125rem;
 }
+
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
 :root {
   color-scheme: light;
@@ -55,6 +59,7 @@
   --accent-foreground: #12376c;
   --destructive: #b42318;
   --destructive-foreground: #ffffff;
+  --overlay: rgba(0, 0, 0, 0.5);
   --border: var(--line);
   --input: var(--line);
   --ring: #2563eb;
@@ -93,6 +98,7 @@
   --accent-foreground: #cfe4ff;
   --destructive: #ff8a8a;
   --destructive-foreground: #090d14;
+  --overlay: rgba(0, 0, 0, 0.6);
   --border: var(--line);
   --input: var(--line);
   --ring: #8abfff;
@@ -9403,4 +9409,198 @@ kbd {
 
 .candidateMissingFields li a:hover {
   color: var(--foreground);
+}
+
+/* ── Role Layout Shell ──────────────────────────────── */
+
+.roleLayoutShell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+/* ── Role Header ── */
+.roleHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 22px;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.roleHeaderBranding {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.roleHeaderIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--blue);
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.roleHeaderLabel {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0;
+  white-space: nowrap;
+}
+
+.roleHeaderUser {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.roleHeaderUserInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  text-align: right;
+}
+
+.roleHeaderUserRole {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--blue);
+}
+
+.roleHeaderUserName {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.roleHeaderSignout {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 30px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.roleHeaderSignout:hover {
+  background: var(--surface-soft);
+  color: var(--rose);
+}
+
+/* ── Breadcrumbs ── */
+.breadcrumbs {
+  padding: 0;
+}
+
+.breadcrumbs ol {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.breadcrumbs li {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.8125rem;
+}
+
+.breadcrumbs a {
+  color: var(--muted);
+  text-decoration: none;
+  font-weight: 500;
+  padding: 2px 4px;
+  border-radius: 4px;
+  transition: color 0.15s, background 0.15s;
+}
+
+.breadcrumbs a:hover {
+  color: var(--ink);
+  background: var(--surface-soft);
+}
+
+.breadcrumbs span[aria-current="page"] {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.breadcrumbSep {
+  color: var(--line);
+  flex-shrink: 0;
+}
+
+.roleBreadcrumbs {
+  padding: 8px 22px;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+  flex-shrink: 0;
+}
+
+@media (max-width: 639px) {
+  .breadcrumbs li:not(:last-child) {
+    display: none;
+  }
+}
+
+/* ── Role Content ── */
+.roleContent {
+  flex: 1;
+  padding: 18px 22px;
+  min-width: 0;
+}
+
+@media (max-width: 768px) {
+  .roleHeader {
+    padding: 8px 12px;
+  }
+
+  .roleHeaderUserInfo {
+    display: none;
+  }
+
+  .roleBreadcrumbs {
+    padding: 6px 12px;
+  }
+
+  .roleContent {
+    padding: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .roleHeaderLabel {
+    font-size: 0.875rem;
+  }
+
+  .roleHeader {
+    padding: 6px 10px;
+  }
+
+  .roleContent {
+    padding: 8px;
+  }
 }
