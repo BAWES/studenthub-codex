@@ -17,7 +17,7 @@ const radiusVariants = {
   full: "shGlassRadiusFull",
 } as const;
 
-export interface GlassPanelProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface GlassPanelProps extends React.ComponentPropsWithoutRef<"div"> {
   /** Glass intensity: subtle (default), strong (more opaque), elevated (with glow) */
   variant?: keyof typeof glassVariants;
   /** Border radius */
@@ -26,15 +26,13 @@ export interface GlassPanelProps extends React.HTMLAttributes<HTMLDivElement> {
   noPadding?: boolean;
 }
 
-function GlassPanel({
-  className,
-  variant = "subtle",
-  radius = "lg",
-  noPadding = false,
-  ...props
-}: GlassPanelProps) {
+const GlassPanel = React.forwardRef<HTMLDivElement, GlassPanelProps>(function GlassPanel(
+  { className, variant = "subtle", radius = "lg", noPadding = false, ...props },
+  ref,
+) {
   return (
     <div
+      ref={ref}
       data-slot="glass-panel"
       className={cn(
         "shGlassBase",
@@ -46,6 +44,6 @@ function GlassPanel({
       {...props}
     />
   );
-}
+});
 
 export { GlassPanel, glassVariants };

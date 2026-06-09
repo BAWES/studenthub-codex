@@ -4,6 +4,9 @@ node_modules
 .env
 .env.local
 data/*.sql
+
+.hermes/
+scripts/
 data/*.json
 data/*.log
 !.gitkeep
