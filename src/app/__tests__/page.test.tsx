@@ -39,6 +39,7 @@ vi.mock("lucide-react", () => ({
   ArrowUpRight: () => <span data-testid="icon-arrow-up-right" />,
   CheckCircle2: () => <span data-testid="icon-check-circle" />,
   Clock: () => <span data-testid="icon-clock" />,
+  CreditCard: () => <span data-testid="icon-credit-card" />,
 }));
 
 // ── Mock ThemeToggle ──────────────────────────────────────────
