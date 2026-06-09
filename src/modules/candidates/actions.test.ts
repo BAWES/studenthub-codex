@@ -417,3 +417,183 @@ describe("educationSchema", () => {
     expect(result.success).toBe(false);
   });
 });
+
+// ---------------------------------------------------------------------------
+// changePasswordSchema — validates direct-param password change
+// ---------------------------------------------------------------------------
+
+const changePasswordSchema = z
+  .object({
+    candidateId: z.coerce.number().int().positive("Candidate ID is required."),
+    currentPassword: z
+      .string({ required_error: "Current password is required" })
+      .min(1, "Current password is required"),
+    newPassword: z
+      .string({ required_error: "New password is required" })
+      .min(8, "New password must be at least 8 characters")
+      .regex(/[A-Z]/, "New password must contain at least one uppercase letter")
+      .regex(/[a-z]/, "New password must contain at least one lowercase letter")
+      .regex(/[0-9]/, "New password must contain at least one number"),
+  })
+  .refine((data) => data.currentPassword !== data.newPassword, {
+    message: "New password must be different from current password",
+    path: ["newPassword"],
+  });
+
+describe("changePasswordSchema", () => {
+  it("accepts valid password change", () => {
+    const result = changePasswordSchema.safeParse({
+      candidateId: 1,
+      currentPassword: "oldPass123",
+      newPassword: "NewStr0ngPass",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("coerces string candidateId to number", () => {
+    const result = changePasswordSchema.safeParse({
+      candidateId: "1",
+      currentPassword: "oldPass123",
+      newPassword: "NewStr0ngPass",
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.candidateId).toBe(1);
+    }
+  });
+
+  it("rejects empty current password", () => {
+    const result = changePasswordSchema.safeParse({
+      candidateId: 1,
+      currentPassword: "",
+      newPassword: "NewStr0ngPass",
+    });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues.some((i) => i.path.includes("currentPassword"))).toBe(true);
+    }
+  });
+
+  it("rejects new password shorter than 8 characters", () => {
+    const result = changePasswordSchema.safeParse({
+      candidateId: 1,
+      currentPassword: "oldPass123",
+      newPassword: "Ab1",
+    });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues.some((i) => i.message.includes("at least 8"))).toBe(true);
+    }
+  });
+
+  it("rejects new password without uppercase letter", () => {
+    const result = changePasswordSchema.safeParse({
+      candidateId: 1,
+      currentPassword: "oldPass123",
+      newPassword: "weakpass123",
+    });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues.some((i) => i.message.includes("uppercase"))).toBe(true);
+    }
+  });
+
+  it("rejects new password without lowercase letter", () => {
+    const result = changePasswordSchema.safeParse({
+      candidateId: 1,
+      currentPassword: "oldPass123",
+      newPassword: "UPPERCASE123",
+    });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues.some((i) => i.message.includes("lowercase"))).toBe(true);
+    }
+  });
+
+  it("rejects new password without number", () => {
+    const result = changePasswordSchema.safeParse({
+      candidateId: 1,
+      currentPassword: "oldPass123",
+      newPassword: "UppercaseOnly",
+    });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues.some((i) => i.message.includes("number"))).toBe(true);
+    }
+  });
+
+  it("rejects new password same as current password", () => {
+    const result = changePasswordSchema.safeParse({
+      candidateId: 1,
+      currentPassword: "sameStrongPass1",
+      newPassword: "sameStrongPass1",
+    });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues.some((i) => i.message.includes("different from current"))).toBe(true);
+    }
+  });
+
+  it("rejects empty candidateId", () => {
+    const result = changePasswordSchema.safeParse({
+      candidateId: undefined,
+      currentPassword: "oldPass123",
+      newPassword: "NewStr0ngPass",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects zero candidateId", () => {
+    const result = changePasswordSchema.safeParse({
+      candidateId: 0,
+      currentPassword: "oldPass123",
+      newPassword: "NewStr0ngPass",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects empty object", () => {
+    const result = changePasswordSchema.safeParse({});
+    expect(result.success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// ChangePasswordResult — return shape for the server action
+// ---------------------------------------------------------------------------
+
+type ChangePasswordResult =
+  | { success: true }
+  | { success: false; error: string }
+  | { success: false; fieldErrors: Record<string, string[]> };
+
+describe("ChangePasswordResult shape", () => {
+  it("accepts success state", () => {
+    const result: ChangePasswordResult = { success: true };
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts error state with message", () => {
+    const result: ChangePasswordResult = { success: false, error: "Current password is incorrect." };
+    expect(result.success).toBe(false);
+    expect(result.error).toBe("Current password is incorrect.");
+  });
+
+  it("accepts field-level errors", () => {
+    const result: ChangePasswordResult = {
+      success: false,
+      fieldErrors: {
+        newPassword: ["New password must be at least 8 characters"],
+      },
+    };
+    expect(result.success).toBe(false);
+    expect(result.fieldErrors!.newPassword!.length).toBe(1);
+  });
+
+  it("distinguishes error from fieldErrors", () => {
+    const msgErr: ChangePasswordResult = { success: false, error: "Something went wrong" };
+    const fieldErr: ChangePasswordResult = { success: false, fieldErrors: { currentPassword: ["Required"] } };
+    expect("error" in msgErr).toBe(true);
+    expect("fieldErrors" in fieldErr).toBe(true);
+  });
+});
