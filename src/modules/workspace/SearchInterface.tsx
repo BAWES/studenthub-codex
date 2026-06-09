@@ -1,9 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, X, ChevronDown, ChevronUp, Bookmark } from "lucide-react";
+import { Search, X, ChevronDown, ChevronUp, Bookmark, Loader2, SearchX } from "lucide-react";
 
 // ── Types ──────────────────────────────────────────────────
 
@@ -51,6 +50,10 @@ export type SearchInterfaceProps = {
   resultsCount?: number;
   /** Placeholder text for the search input. */
   placeholder?: string;
+  /** When true, disables inputs and shows a loading spinner. */
+  loading?: boolean;
+  /** Rich empty-state message shown when no results match. Hidden while loading. */
+  emptyResults?: string;
   /** Optional className override. */
   className?: string;
 };
@@ -71,23 +74,31 @@ export function SearchInterface({
   onSavedSearchSelect,
   resultsCount,
   placeholder = "Search...",
+  loading = false,
+  emptyResults,
   className,
 }: SearchInterfaceProps) {
   const [showFilters, setShowFilters] = useState(false);
   const [showSaved, setShowSaved] = useState(true);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
+    if (e.key === "Enter" && !loading) {
       onSearch();
     }
   };
+
+  const showEmptyResults = !loading && emptyResults;
 
   return (
     <section className={className}>
       {/* Search input bar */}
       <div className="searchInterfaceBar">
         <div className="searchInputWrap">
-          <Search size={16} className="searchIcon" aria-hidden="true" />
+          {loading ? (
+            <Loader2 size={16} className="searchIcon animate-spin" aria-label="Loading" />
+          ) : (
+            <Search size={16} className="searchIcon" aria-hidden="true" />
+          )}
           <input
             data-command-search
             type="text"
@@ -97,8 +108,9 @@ export function SearchInterface({
             onKeyDown={handleKeyDown}
             className="searchInput"
             aria-label="Search"
+            disabled={loading}
           />
-          {query ? (
+          {query && !loading ? (
             <button
               type="button"
               className="searchClear"
@@ -117,6 +129,7 @@ export function SearchInterface({
             size="sm"
             onClick={() => setShowFilters(!showFilters)}
             aria-expanded={showFilters}
+            disabled={loading}
           >
             Filters
             {showFilters ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
@@ -130,6 +143,7 @@ export function SearchInterface({
             size="sm"
             onClick={() => setShowSaved(!showSaved)}
             aria-expanded={showSaved}
+            disabled={loading}
           >
             <Bookmark size={14} />
             Saved
@@ -152,6 +166,7 @@ export function SearchInterface({
               className={`quickFilterChip ${activeFilter === chip.id ? "active" : ""}`}
               onClick={() => onFilterChange?.(chip.id)}
               aria-pressed={activeFilter === chip.id}
+              disabled={loading}
             >
               {chip.label}
             </button>
@@ -169,6 +184,7 @@ export function SearchInterface({
                 className="advancedFilterSelect"
                 value={filterValues[filter.key] || ""}
                 onChange={(e) => onFilterChangeAdvanced?.(filter.key, e.target.value)}
+                disabled={loading}
               >
                 <option value="">All</option>
                 {filter.options.map((opt) => (
@@ -193,12 +209,21 @@ export function SearchInterface({
               onClick={() => onSavedSearchSelect?.(saved)}
               role="option"
               aria-selected={saved.query === query}
+              disabled={loading}
             >
               <Bookmark size={14} />
               <span className="savedSearchName">{saved.name}</span>
               <span className="savedSearchQuery">{saved.query}</span>
             </button>
           ))}
+        </div>
+      ) : null}
+
+      {/* Empty results */}
+      {showEmptyResults ? (
+        <div className="searchEmptyResults" role="status">
+          <SearchX size={32} aria-label="No results" />
+          <p className="searchEmptyResultsText">{emptyResults}</p>
         </div>
       ) : null}
     </section>

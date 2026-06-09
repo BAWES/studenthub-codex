@@ -6,6 +6,12 @@ import { SearchInterface } from "./SearchInterface";
 
 afterEach(() => { cleanup(); });
 
+// ── Helpers ────────────────────────────────────────────────
+
+function minimalProps() {
+  return { query: "", onQueryChange: () => {}, onSearch: () => {} };
+}
+
 describe("SearchInterface", () => {
   it("renders the search input", () => {
     render(
@@ -109,5 +115,70 @@ describe("SearchInterface", () => {
       />
     );
     expect(screen.getByText("42 results")).toBeDefined();
+  });
+
+  // ── Loading state (STU-899) ───────────────────────────────
+
+  it("disables search input when loading is true", () => {
+    render(<SearchInterface {...minimalProps()} query="hello" loading />);
+    const input = screen.getByPlaceholderText("Search...") as HTMLInputElement;
+    expect(input.disabled).toBe(true);
+  });
+
+  it("shows spinner icon instead of search icon when loading", () => {
+    render(<SearchInterface {...minimalProps()} loading />);
+    // The spinner should have aria-label="Loading"
+    expect(screen.getByLabelText("Loading")).toBeDefined();
+    // The search icon has aria-hidden — it's not queryable via accessibility.
+    // Verify the input is disabled as proof of loading state.
+    const input = screen.getByPlaceholderText("Search...") as HTMLInputElement;
+    expect(input.disabled).toBe(true);
+  });
+
+  it("disables quick filter chips when loading", () => {
+    const chips = [{ id: "all", label: "All" }, { id: "active", label: "Active" }];
+    render(
+      <SearchInterface
+        {...minimalProps()}
+        loading
+        quickFilters={chips}
+        activeFilter="all"
+        onFilterChange={() => {}}
+      />
+    );
+    // Quick filter chips are <button> elements with quickFilterChip class
+    const chipButtons = screen.getAllByRole("button").filter(
+      (btn) => btn.className.includes("quickFilterChip")
+    );
+    expect(chipButtons).toHaveLength(2);
+    chipButtons.forEach((btn) => {
+      expect((btn as HTMLButtonElement).disabled).toBe(true);
+    });
+  });
+
+  it("does not show empty results when loading is true", () => {
+    render(<SearchInterface {...minimalProps()} loading emptyResults="No matches" />);
+    // The empty results text should NOT appear while loading
+    expect(screen.queryByText("No matches")).toBeNull();
+  });
+
+  // ── Empty results state (STU-899) ─────────────────────────
+
+  it("shows empty results message when provided and not loading", () => {
+    render(<SearchInterface {...minimalProps()} emptyResults="No candidates found" />);
+    expect(screen.getByText("No candidates found")).toBeDefined();
+  });
+
+  it("renders empty results with icon by default", () => {
+    render(<SearchInterface {...minimalProps()} emptyResults="Nothing here" />);
+    expect(screen.getByText("Nothing here")).toBeDefined();
+    // Should have a search icon nearby
+    expect(screen.getByLabelText("No results")).toBeDefined();
+  });
+
+  it("does not show empty results when query is empty and no explicit emptyResults", () => {
+    render(<SearchInterface {...minimalProps()} query="" />);
+    // Default: no empty state shown until there's a query with empty results
+    expect(screen.queryByText(/no/i)).toBeNull();
   });
 });
