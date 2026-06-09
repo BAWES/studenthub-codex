@@ -150,29 +150,8 @@ describe("initTransfer — amount validation", () => {
 });
 
 // ---------------------------------------------------------------------------
-
 // payByWallet schema
 // ---------------------------------------------------------------------------
-
-const payByWalletSchema = z.object({
-  toUuid: z.string().optional(),
-  email: z.string().email("Invalid email").optional(),
-  username: z.string().optional(),
-  amount: z.coerce
-    .number()
-    .positive("Amount must be positive")
-    .finite("Amount must be a finite number"),
-});
-
-const payByWalletFormSchema = z.object({
-  toUuid: z.string().optional(),
-  email: z.string().email("Invalid email").optional(),
-  username: z.string().optional(),
-  amount: z.coerce
-    .number()
-    .positive("Amount must be positive")
-    .finite("Amount must be a finite number"),
-});
 
 describe("payByWallet — input validation", () => {
   it("accepts valid payment by toUuid + amount", () => {
@@ -212,7 +191,7 @@ describe("payByWallet — input validation", () => {
   });
 
   it("accepts amount from form data (string input)", () => {
-    const result = payByWalletFormSchema.safeParse({
+    const result = payByWalletSchema.safeParse({
       toUuid: "abc-123",
       amount: "75.25",
     });
@@ -223,7 +202,6 @@ describe("payByWallet — input validation", () => {
   });
 
   it("rejects zero amount", () => {
-
     const result = payByWalletSchema.safeParse({
       toUuid: "abc-123",
       amount: 0,
@@ -261,7 +239,7 @@ describe("payByWallet — input validation", () => {
   });
 
   it("rejects non-numeric string amount", () => {
-    const result = payByWalletFormSchema.safeParse({
+    const result = payByWalletSchema.safeParse({
       toUuid: "abc-123",
       amount: "xyz",
     });
