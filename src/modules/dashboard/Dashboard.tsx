@@ -1,4 +1,5 @@
 import { getDashboardData } from "@/modules/dashboard/data";
+import { EmptyState } from "@/modules/workspace/EmptyState";
 
 export async function Dashboard() {
   const dashboard = await getDashboardData();
@@ -16,15 +17,8 @@ export async function Dashboard() {
       </section>
 
       <section className="workspace">
-        <div className="focus">
-          <div>
-            <p className="eyebrow">Migration Strategy</p>
-            <h2>Build from the real data model, one clean workflow at a time.</h2>
-            <p>
-              This workspace is reading the local production clone when enabled. Each old portal becomes a
-              role-aware surface inside one product.
-            </p>
-          </div>
+        <div className="statusOverview">
+          <h2>Request Pipeline</h2>
           <div className="statusMix">
             {dashboard.statusMix.map((status) => (
               <div className="statusRow" key={status.label}>
@@ -33,16 +27,6 @@ export async function Dashboard() {
               </div>
             ))}
           </div>
-        </div>
-
-        <div className="rail">
-          <h2>Next Slices</h2>
-          <ol>
-            <li>Candidate list/detail/edit</li>
-            <li>Company and request pipeline</li>
-            <li>Work logs and approvals</li>
-            <li>Transfer and payroll review</li>
-          </ol>
         </div>
       </section>
 
@@ -74,7 +58,7 @@ function DataList({ title, items }: { title: string; items: DataListItem[] }) {
         <span>{items.length}</span>
       </div>
       <div className="rows">
-        {items.map((item) => (
+        {items.length ? items.map((item) => (
           <article className="row" key={item.id}>
             <div className="rowMain">
               <strong>{item.title}</strong>
@@ -87,7 +71,7 @@ function DataList({ title, items }: { title: string; items: DataListItem[] }) {
               {item.date ? <small>{item.date}</small> : null}
             </div>
           </article>
-        ))}
+        )) : <EmptyState variant="no-activity" message="No recent activity" />}
       </div>
     </section>
   );
