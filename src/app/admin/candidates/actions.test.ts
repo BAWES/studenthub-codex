@@ -4,6 +4,8 @@ import {
   getCandidateSchema,
   searchCandidatesSchema,
   createCandidateSchema,
+  updateCandidateSchema,
+  deleteCandidateSchema,
 } from "./actions";
 
 // ---------------------------------------------------------------------------
@@ -124,75 +126,173 @@ describe("searchCandidatesSchema", () => {
 });
 
 describe("createCandidateSchema", () => {
-  it("accepts minimum required fields", () => {
-    const r = createCandidateSchema.safeParse({
-      candidateName: "John Doe",
-      candidateEmail: "john@example.com",
-    });
+  it("accepts valid candidate creation data", () => {
+    const r = createCandidateSchema.safeParse({ name: "Ahmed", email: "ahmed@example.com" });
     expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data.name).toBe("Ahmed");
+      expect(r.data.email).toBe("ahmed@example.com");
+      expect(r.data.nameAr).toBe("");
+      expect(r.data.phone).toBe("");
+    }
+  });
+
+  it("rejects missing name", () => {
+    expect(createCandidateSchema.safeParse({ email: "a@b.com" }).success).toBe(false);
+  });
+
+  it("rejects empty name", () => {
+    expect(createCandidateSchema.safeParse({ name: "", email: "a@b.com" }).success).toBe(false);
+  });
+
+  it("rejects invalid email", () => {
+    expect(createCandidateSchema.safeParse({ name: "Test", email: "not-an-email" }).success).toBe(false);
+  });
+
+  it("rejects missing email", () => {
+    expect(createCandidateSchema.safeParse({ name: "Test" }).success).toBe(false);
+  });
+
+  it("rejects name over 255 chars", () => {
+    expect(createCandidateSchema.safeParse({ name: "x".repeat(256), email: "a@b.com" }).success).toBe(false);
   });
 
   it("accepts all optional fields", () => {
     const r = createCandidateSchema.safeParse({
-      candidateName: "John Doe",
-      candidateNameAr: "جون دو",
-      candidateEmail: "john@example.com",
-      candidatePhone: "+965****5678",
-      candidateGender: 1,
-      candidateBirthDate: "1995-06-15",
-      candidateHourlyRate: 3.5,
-      currencyCode: "KWD",
-      storeId: 5,
-      countryId: 62,
-      universityId: 10,
-      candidateObjective: "Looking for part-time",
+      name: "Ahmed Ali",
+      nameAr: "أحمد علي",
+      email: "ahmed@example.com",
+      phone: "+96512345678",
+      countryId: 1,
+      universityId: 5,
+      bankId: 3,
+      bankAccountName: "Ahmed",
+      iban: "KW123456",
+      civilId: "123456789012",
+      objective: "Looking for work",
+      intro: "Experienced dev",
+      address: "Kuwait City",
+      birthDate: "1990-01-15",
+      gender: 1,
+      hourlyRate: 2.5,
     });
     expect(r.success).toBe(true);
   });
 
-  it("rejects missing name", () => {
-    expect(createCandidateSchema.safeParse({ candidateEmail: "john@example.com" }).success).toBe(false);
+  it("accepts coerce string numbers", () => {
+    const r = createCandidateSchema.safeParse({
+      name: "Test",
+      email: "test@example.com",
+      countryId: "2",
+      hourlyRate: "3.5",
+    });
+    expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data.countryId).toBe(2);
+      expect(r.data.hourlyRate).toBe(3.5);
+    }
   });
 
-  it("rejects missing email", () => {
-    expect(createCandidateSchema.safeParse({ candidateName: "John" }).success).toBe(false);
-  });
-
-  it("rejects name over 255 chars", () => {
+  it("rejects gender out of range", () => {
     expect(
-      createCandidateSchema.safeParse({
-        candidateName: "x".repeat(256),
-        candidateEmail: "john@example.com",
-      }).success,
+      createCandidateSchema.safeParse({ name: "T", email: "a@b.com", gender: 5 }).success,
+    ).toBe(false);
+  });
+});
+
+describe("updateCandidateSchema", () => {
+  it("accepts a valid update with candidateId only", () => {
+    const r = updateCandidateSchema.safeParse({ candidateId: 42 });
+    expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data.candidateId).toBe(42);
+    }
+  });
+
+  it("accepts partial field updates", () => {
+    const r = updateCandidateSchema.safeParse({
+      candidateId: 1,
+      name: "New Name",
+      email: "new@example.com",
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts status update", () => {
+    const r = updateCandidateSchema.safeParse({ candidateId: 1, status: 20 });
+    expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data.status).toBe(20);
+    }
+  });
+
+  it("rejects missing candidateId", () => {
+    expect(updateCandidateSchema.safeParse({ name: "Test" }).success).toBe(false);
+  });
+
+  it("rejects zero candidateId", () => {
+    expect(updateCandidateSchema.safeParse({ candidateId: 0 }).success).toBe(false);
+  });
+
+  it("rejects negative candidateId", () => {
+    expect(updateCandidateSchema.safeParse({ candidateId: -1 }).success).toBe(false);
+  });
+
+  it("accepts nullable fields", () => {
+    const r = updateCandidateSchema.safeParse({
+      candidateId: 1,
+      phone: null,
+      countryId: null,
+      bankId: null,
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects invalid email in update", () => {
+    expect(
+      updateCandidateSchema.safeParse({ candidateId: 1, email: "bad" }).success,
     ).toBe(false);
   });
 
-  it("rejects email over 255 chars", () => {
-    expect(
-      createCandidateSchema.safeParse({
-        candidateName: "John",
-        candidateEmail: "x".repeat(256) + "@example.com",
-      }).success,
-    ).toBe(false);
+  it("coerces candidateId from string", () => {
+    const r = updateCandidateSchema.safeParse({ candidateId: "99" });
+    expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data.candidateId).toBe(99);
+    }
+  });
+});
+
+describe("deleteCandidateSchema", () => {
+  it("accepts a valid candidate ID", () => {
+    const r = deleteCandidateSchema.safeParse({ candidateId: 42 });
+    expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data.candidateId).toBe(42);
+    }
   });
 
-  it("rejects phone over 20 chars", () => {
-    expect(
-      createCandidateSchema.safeParse({
-        candidateName: "John",
-        candidateEmail: "john@example.com",
-        candidatePhone: "x".repeat(21),
-      }).success,
-    ).toBe(false);
+  it("rejects zero candidateId", () => {
+    expect(deleteCandidateSchema.safeParse({ candidateId: 0 }).success).toBe(false);
   });
 
-  it("rejects candidateObjective over 255 chars", () => {
-    expect(
-      createCandidateSchema.safeParse({
-        candidateName: "John",
-        candidateEmail: "john@example.com",
-        candidateObjective: "x".repeat(256),
-      }).success,
-    ).toBe(false);
+  it("rejects negative candidateId", () => {
+    expect(deleteCandidateSchema.safeParse({ candidateId: -1 }).success).toBe(false);
+  });
+
+  it("rejects missing candidateId", () => {
+    expect(deleteCandidateSchema.safeParse({}).success).toBe(false);
+  });
+
+  it("coerces candidateId from string", () => {
+    const r = deleteCandidateSchema.safeParse({ candidateId: "77" });
+    expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data.candidateId).toBe(77);
+    }
+  });
+
+  it("rejects non-numeric candidateId", () => {
+    expect(deleteCandidateSchema.safeParse({ candidateId: "abc" }).success).toBe(false);
   });
 });

@@ -9,6 +9,8 @@
 .next-old*
 .next-old*/
 .next_stale_*
+.next.old*
+.next-stale*
 data/*.json
 data/*.log
 data/*.sql
