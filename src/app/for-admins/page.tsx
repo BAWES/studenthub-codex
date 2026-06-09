@@ -5,13 +5,13 @@ import AdminLandingContent from "./AdminLandingContent";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "StudentHub for Admins — One workspace to run operations",
+  title: "Operational Control at Scale | StudentHub for Admins",
   description:
-    "Consolidate user management, financial oversight, compliance monitoring, and payroll into one dashboard. 15,000+ worker records managed.",
+    "Monitor hiring across departments and agencies from one dashboard. Approval workflows, audit trails, agency scorecards, and custom compliance rules.",
   openGraph: {
-    title: "StudentHub for Admins",
+    title: "StudentHub for Operations | Full Visibility",
     description:
-      "Replace a dozen logins with one workspace. User management, compliance, payroll, and reporting — all in one place.",
+      "Cross-department hiring oversight, compliance automation, and agency performance tracking.",
   },
 };
 

@@ -5,13 +5,13 @@ import InspectorLandingContent from "./InspectorLandingContent";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "StudentHub for Inspectors — Streamline document reviews",
+  title: "Streamline Compliance Audits | StudentHub for Inspectors",
   description:
-    "Batch document processing, full audit trails, and real-time queue management. 10,000+ documents reviewed monthly with 100% audit trail completeness.",
+    "Batch-review 10,000+ documents monthly. Automated exception flagging, one-click reports, and full audit trails. Designed for KSA regulatory compliance.",
   openGraph: {
-    title: "StudentHub for Inspectors",
+    title: "StudentHub for Inspectors | Audit Smarter",
     description:
-      "Review documents faster with batch processing, structured feedback, and immutable audit trails — all from one dashboard.",
+      "Batch document review, exception flagging, and inspection-ready reports in minutes.",
   },
 };
 
