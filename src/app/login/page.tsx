@@ -1,18 +1,30 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { UserRound, Search, Building2, Shield, ClipboardCheck } from "lucide-react";
 import { getSession } from "@/modules/auth/session";
 import { LoginForm } from "@/modules/auth/LoginForm";
-import { ThemeToggle } from "@/modules/theme/ThemeToggle";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
 export const dynamic = "force-dynamic";
 
 const roles = [
-  { icon: UserRound, label: "Students", color: "sh-info", desc: "Profile, jobs, hours, pay" },
-  { icon: Search, label: "Staff", color: "sh-success", desc: "Requests, candidates, CVs, time" },
-  { icon: Building2, label: "Companies", color: "sh-warning", desc: "Requests, candidates, invoices" },
-  { icon: Shield, label: "Admin", color: "sh-error", desc: "Finance, approvals, migration" },
-  { icon: ClipboardCheck, label: "Inspectors", color: "sh-info", desc: "ID review, document queues" }
+  {
+    icon: () => null,
+    label: "Candidate",
+    color: "sh-info",
+    desc: "Find work, track hours, get paid",
+  },
+  {
+    icon: () => null,
+    label: "Company",
+    color: "sh-success",
+    desc: "Hire staff, manage stores, approve timesheets",
+  },
+  {
+    icon: () => null,
+    label: "Inspector",
+    color: "sh-warning",
+    desc: "Monitor compliance and audit records",
+  },
 ];
 
 export default async function LoginPage({
@@ -25,12 +37,12 @@ export default async function LoginPage({
   const params = await searchParams;
 
   return (
-    <main className="min-h-svh relative overflow-hidden bg-[var(--paper)] dark:bg-[#090d14]">
+    <main className="min-h-svh relative grid place-items-center overflow-hidden bg-[var(--paper)] dark:bg-[#090d14]">
       {/* ── Animated gradient background ── */}
       <div className="shLoginGradient" aria-hidden="true" />
 
-      {/* ── Glass navbar ── */}
-      <nav className="relative z-20 mx-auto w-[min(1160px,calc(100%_-_28px))] sticky top-3 shGlassBase shGlassRadiusLg min-h-[56px] flex items-center justify-between gap-3.5 p-2">
+      {/* ── Top nav bar ── */}
+      <nav className="absolute top-3 left-3 right-3 z-20 mx-auto max-w-[1200px] shGlassBase shGlassRadiusLg min-h-[56px] flex items-center justify-between gap-3.5 p-2">
         <Link
           className="inline-flex items-center gap-2.5 text-[var(--ink)] px-2 no-underline"
           href="/"
@@ -94,25 +106,16 @@ export default async function LoginPage({
               </p>
             ) : null}
             <LoginForm />
+            <div className="text-center pb-6">
+              <p className="text-[13px] text-[var(--muted)] m-0">
+                No account?{" "}
+                <a href="/signup" className="text-[var(--sh-info)] font-semibold no-underline hover:underline">
+                  Create one
+                </a>
+              </p>
+            </div>
           </section>
         </div>
-
-        {/* ── Bottom: Role detail cards as glass panels ── */}
-        <section
-          className="mt-10 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5"
-          aria-label="Workspace roles overview"
-        >
-          {roles.map(({ icon: Icon, label, desc }) => (
-            <article
-              key={label}
-              className="shGlassBase shGlassRadiusMd p-3.5 grid gap-1.5"
-            >
-              <Icon className="size-4 text-[var(--sh-info)] shrink-0" aria-hidden="true" />
-              <span className="text-[var(--muted)] text-[11px] font-black uppercase">{label}</span>
-              <strong className="text-[13px]">{desc}</strong>
-            </article>
-          ))}
-        </section>
       </div>
     </main>
   );

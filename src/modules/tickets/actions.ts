@@ -34,6 +34,15 @@ const getCommentsSchema = z.object({
   ticketUuid: z.string().min(1, "Ticket UUID is required"),
 });
 
+const updateTicketSchema = z.object({
+  ticketUuid: z.string().min(1, "Ticket UUID is required"),
+  detail: z.string().min(1, "Ticket detail is required").max(2000),
+});
+
+const closeTicketSchema = z.object({
+  ticketUuid: z.string().min(1, "Ticket UUID is required"),
+});
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -43,6 +52,8 @@ export type GetTicketParams = z.input<typeof getTicketSchema>;
 export type CreateTicketParams = z.input<typeof createTicketSchema>;
 export type AddCommentParams = z.input<typeof addCommentSchema>;
 export type GetCommentsParams = z.input<typeof getCommentsSchema>;
+export type UpdateTicketParams = z.input<typeof updateTicketSchema>;
+export type CloseTicketParams = z.input<typeof closeTicketSchema>;
 
 export type TicketItem = {
   ticket_uuid: string;
@@ -86,7 +97,7 @@ export type AddCommentResult = {
 // Exported schemas (for shared validation in tests)
 // ---------------------------------------------------------------------------
 
-export { listTicketsSchema, getTicketSchema, createTicketSchema, addCommentSchema, getCommentsSchema };
+export { listTicketsSchema, getTicketSchema, createTicketSchema, addCommentSchema, getCommentsSchema, updateTicketSchema, closeTicketSchema };
 
 // ---------------------------------------------------------------------------
 // listTickets
@@ -340,4 +351,96 @@ export async function getComments(
     created_at: c.created_at ?? null,
     updated_at: c.updated_at ?? null,
   }));
+}
+
+// ---------------------------------------------------------------------------
+// updateTicket
+// ---------------------------------------------------------------------------
+
+/**
+ * Update an existing support ticket's detail text.
+ * Mirrors the legacy TicketController::actionUpdate.
+ * Requires candidate.read.own capability.
+ */
+export async function updateTicket(
+  params: UpdateTicketParams,
+): Promise<{ operation: string; message: string }> {
+  await requireCapability("candidate.read.own");
+
+  const parsed = updateTicketSchema.safeParse(params);
+  if (!parsed.success) {
+    return {
+      operation: "error",
+      message: parsed.error.issues[0]?.message ?? "Invalid update data",
+    };
+  }
+
+  const { ticketUuid, detail } = parsed.data;
+
+  try {
+    await prisma.ticket.update({
+      where: { ticket_uuid: ticketUuid },
+      data: {
+        ticket_detail: detail,
+        updated_at: new Date(),
+      },
+    });
+
+    return {
+      operation: "success",
+      message: "Ticket updated successfully",
+    };
+  } catch (err) {
+    return {
+      operation: "error",
+      message: err instanceof Error ? err.message : "Failed to update ticket",
+    };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// closeTicket
+// ---------------------------------------------------------------------------
+
+/**
+ * Close a support ticket by setting its status to 2 (closed).
+ * Mirrors the legacy TicketController::actionClose.
+ * Requires candidate.read.own capability.
+ */
+export async function closeTicket(
+  params: CloseTicketParams,
+): Promise<{ operation: string; message: string }> {
+  await requireCapability("candidate.read.own");
+
+  const parsed = closeTicketSchema.safeParse(params);
+  if (!parsed.success) {
+    return {
+      operation: "error",
+      message: parsed.error.issues[0]?.message ?? "Invalid close parameters",
+    };
+  }
+
+  const { ticketUuid } = parsed.data;
+
+  try {
+    const now = new Date();
+    await prisma.ticket.update({
+      where: { ticket_uuid: ticketUuid },
+      data: {
+        ticket_status: 2, // STATUS_CLOSED
+        ticket_completed_at: now,
+        updated_at: now,
+      },
+    });
+
+    return {
+      operation: "success",
+      message: "Ticket closed successfully",
+    };
+  } catch (err) {
+    return {
+      operation: "error",
+      message: err instanceof Error ? err.message : "Failed to close ticket",
+    };
+  }
 }
