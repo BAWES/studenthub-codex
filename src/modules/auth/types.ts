@@ -38,6 +38,8 @@ export type Capability =
   | "admin.read"
   | "admin.write"
   | "staff.read"
+  | "suggestion.read"
+  | "suggestion.write"
   | "client.read"
   | "client.write"
   | "admin.system";
