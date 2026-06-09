@@ -1,5 +1,4 @@
 export {
-  listCandidateEducation,
   getCandidateEducation,
   createCandidateEducation,
   updateCandidateEducation,
@@ -7,13 +6,10 @@ export {
 } from "./actions";
 
 export type {
-  CandidateEducationItem,
-  CandidateEducationDetail,
-  ListCandidateEducationResult,
+  EducationItem,
   CreateCandidateEducationResult,
   UpdateCandidateEducationResult,
   DeleteCandidateEducationResult,
-  ListCandidateEducationInput,
-  CreateCandidateEducationInput,
-  UpdateCandidateEducationInput,
+  CreateEducationInput,
+  UpdateEducationInput,
 } from "./actions";
