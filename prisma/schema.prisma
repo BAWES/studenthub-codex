@@ -257,6 +257,7 @@ model candidate {
   candidate_link                    candidate_link[]
   candidate_note                    candidate_note[]
   candidate_notification            candidate_notification[]
+  candidate_certification           candidate_certification[]
   candidate_skill                   candidate_skill[]
   candidate_stats                   candidate_stats[]
   candidate_tag                     candidate_tag[]
@@ -555,6 +556,24 @@ model candidate_skill {
   candidate                  candidate? @relation(fields: [candidate_id], references: [candidate_id], onDelete: Cascade, onUpdate: Restrict, map: "fk-candidate_skill-candidate_id")
 
   @@index([candidate_id], map: "fk-candidate_skill-candidate_id")
+}
+
+model candidate_certification {
+  certification_id      Int        @id @default(autoincrement())
+  candidate_id          Int
+  certification_name   String     @db.VarChar(255)
+  issuing_organization String     @db.VarChar(255)
+  issue_date           DateTime?  @db.Date
+  expiry_date          DateTime?  @db.Date
+  credential_id        String?    @db.VarChar(128)
+  credential_url       String?    @db.VarChar(500)
+  description          String?    @db.Text
+  deleted              Int        @default(0) @db.SmallInt
+  created_at           DateTime?  @db.DateTime(0)
+  updated_at           DateTime?  @db.DateTime(0)
+  candidate            candidate  @relation(fields: [candidate_id], references: [candidate_id], onDelete: Cascade, onUpdate: Restrict, map: "fk-candidate_certification-candidate_id")
+
+  @@index([candidate_id], map: "fk-candidate_certification-candidate_id")
 }
 
 model candidate_stats {
