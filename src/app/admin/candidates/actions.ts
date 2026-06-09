@@ -13,7 +13,7 @@ import { revalidatePath } from "next/cache";
 //   - listCandidates    — paginated list of candidates with search by name/email
 //   - getCandidate      — single candidate detail with associated info
 //   - searchCandidates  — search candidates by name or email with pagination
-//   - createCandidate   — create a new candidate with password hash
+//   - createCandidate   — create a new candidate with password hash and auth key
 //   - updateCandidate   — partial update of candidate fields
 //   - deleteCandidate   — soft-delete (set deleted=1)
 // ---------------------------------------------------------------------------
