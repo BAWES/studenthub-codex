@@ -10715,6 +10715,61 @@ kbd {
   opacity: 1;
 }
 
+/* ── OS Landing — Feature card styles ────────────────────────────────── */
+.shCardTitle {
+  display: block;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+
+.shCardBody {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--muted);
+  margin: 0 0 12px;
+}
+
+.shCardStat {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--sh-info);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+/* ── OS Landing — Glow CTA button ───────────────────────────────────── */
+.shGlowButton {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.shGlowButton::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: inherit;
+  background: radial-gradient(
+    400px circle at 50% 50%,
+    color-mix(in srgb, var(--sh-info) 18%, transparent) 0%,
+    transparent 60%
+  );
+  opacity: 0;
+  transition: opacity 400ms var(--sh-easing);
+  z-index: -1;
+  pointer-events: none;
+}
+
+.shGlowButton:hover::before {
+  opacity: 1;
+}
+
 /* ── OS Landing — Enhanced hero gradient (dramatic orbital) ────────── */
 .shHeroGradientDramatic {
   position: absolute;

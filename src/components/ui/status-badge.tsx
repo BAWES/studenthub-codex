@@ -1,75 +1,93 @@
 "use client";
 
 import * as React from "react";
-import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
-const statusBadgeVariants = cva("shStatusBadgeBase", {
-  variants: {
-    status: {
-      success: "shStatusBadge_success",
-      warning: "shStatusBadge_warning",
-      error: "shStatusBadge_error",
-      info: "shStatusBadge_info",
-      neutral: "shStatusBadge_neutral",
-    },
-    size: {
-      sm: "shStatusBadge_sm",
-      md: "shStatusBadge_md",
-      lg: "shStatusBadge_lg",
-    },
-  },
-  defaultVariants: {
-    status: "neutral",
-    size: "md",
-  },
-});
+type StatusLevel = "success" | "warning" | "error" | "info" | "neutral";
 
-export interface StatusBadgeProps
-  extends React.HTMLAttributes<HTMLSpanElement>,
-    VariantProps<typeof statusBadgeVariants> {
-  /** Optional dot indicator */
-  dot?: boolean;
-  /** Optional glow effect (default: true) */
+const statusConfig: Record<StatusLevel, {
+  bg: string;
+  text: string;
+  glow: string;
+  dot: string;
+}> = {
+  success: {
+    bg: "var(--sh-success-bg)",
+    text: "var(--sh-success)",
+    glow: "var(--sh-success-glow)",
+    dot: "var(--sh-success)",
+  },
+  warning: {
+    bg: "var(--sh-warning-bg)",
+    text: "var(--sh-warning)",
+    glow: "var(--sh-warning-glow)",
+    dot: "var(--sh-warning)",
+  },
+  error: {
+    bg: "var(--sh-error-bg)",
+    text: "var(--sh-error)",
+    glow: "var(--sh-error-glow)",
+    dot: "var(--sh-error)",
+  },
+  info: {
+    bg: "var(--sh-info-bg)",
+    text: "var(--sh-info)",
+    glow: "var(--sh-info-glow)",
+    dot: "var(--sh-info)",
+  },
+  neutral: {
+    bg: "var(--sh-glass-bg)",
+    text: "var(--muted)",
+    glow: "transparent",
+    dot: "var(--muted)",
+  },
+};
+
+export interface StatusBadgeProps extends React.ComponentPropsWithoutRef<"span"> {
+  /** Status level that maps to color + glow */
+  status?: StatusLevel;
+  /** Show a small dot indicator before the label */
+  showDot?: boolean;
+  /** Enable subtle glow effect */
   glow?: boolean;
+  /** Small variant (compact) */
+  size?: "sm" | "md";
 }
 
-function StatusBadge({
-  className,
-  status,
-  size,
-  dot = true,
-  glow = true,
-  children,
-  ...props
-}: StatusBadgeProps) {
+const StatusBadge = React.forwardRef<HTMLSpanElement, StatusBadgeProps>(function StatusBadge(
+  { className, status = "neutral", showDot = false, glow = false, size = "md", style, ...props },
+  ref,
+) {
+  const cfg = statusConfig[status];
+
   return (
     <span
+      ref={ref}
       data-slot="status-badge"
       className={cn(
-        statusBadgeVariants({ status, size }),
+        "shStatusBadgeBase",
         glow && "shStatusBadge_glow",
+        size === "sm" ? "text-[10px] px-1.5 py-0.5" : "text-[11px] px-2 py-0.5",
         className,
       )}
+      style={{
+        background: cfg.bg,
+        color: cfg.text,
+        boxShadow: glow ? cfg.glow : undefined,
+        ...style,
+      }}
       {...props}
     >
-      {dot && (
+      {showDot && (
         <span
-          data-slot="status-badge-dot"
-          className={cn(
-            "shStatusBadgeDot",
-            status === "success" && "shStatusDot_success",
-            status === "warning" && "shStatusDot_warning",
-            status === "error" && "shStatusDot_error",
-            status === "info" && "shStatusDot_info",
-            status === "neutral" && "shStatusDot_neutral",
-          )}
+          className="size-1.5 rounded-full shrink-0"
+          style={{ background: cfg.dot }}
           aria-hidden="true"
         />
       )}
-      {children}
+      {props.children}
     </span>
   );
-}
+});
 
-export { StatusBadge, statusBadgeVariants };
+export { StatusBadge, type StatusLevel };
