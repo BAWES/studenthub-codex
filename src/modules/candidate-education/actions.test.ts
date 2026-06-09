@@ -1,5 +1,15 @@
 import { describe, it, expect } from "vitest";
-import { z } from "zod";
+import {
+  listCandidateEducationSchema,
+  createCandidateEducationSchema,
+  updateCandidateEducationSchema,
+} from "./actions";
+import type {
+  CandidateEducationItem,
+  ListCandidateEducationInput,
+  CreateCandidateEducationInput,
+  UpdateCandidateEducationInput,
+} from "./actions";
 
 // ---------------------------------------------------------------------------
 // Pure logic: candidate education schema validation
@@ -7,39 +17,6 @@ import { z } from "zod";
 // The candidate education actions use these schemas internally. Testing them
 // separately avoids mocking "use server" dependencies (prisma, session, etc.).
 // ---------------------------------------------------------------------------
-
-const listCandidateEducationSchema = z.object({
-  page: z.coerce.number().int().positive().optional().default(1),
-  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
-});
-
-const createCandidateEducationSchema = z.object({
-  universityId: z.coerce
-    .number({ required_error: "University is required" })
-    .int()
-    .positive("University is required"),
-  degreeUuid: z.string().optional(),
-  majorUuid: z.string().optional(),
-  graduationYear: z.coerce.number().int().optional(),
-  isCurrentlyStudying: z.coerce
-    .number()
-    .int()
-    .transform((v) => v === 1)
-    .optional(),
-});
-
-const updateCandidateEducationSchema = z.object({
-  educationUuid: z.string().min(1, "Education UUID is required"),
-  universityId: z.coerce.number().int().positive().optional(),
-  degreeUuid: z.string().optional(),
-  majorUuid: z.string().optional(),
-  graduationYear: z.coerce.number().int().optional(),
-  isCurrentlyStudying: z.coerce
-    .number()
-    .int()
-    .transform((v) => v === 1)
-    .optional(),
-});
 
 describe("listCandidateEducationSchema", () => {
   it("accepts empty params (default pagination)", () => {
