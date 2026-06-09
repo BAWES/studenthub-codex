@@ -83,7 +83,7 @@ export type TransferDetail = {
   invoices: {
     id: number;
     date: string;
-    status: number | null;
+    status: string | null;
   }[];
 };
 
@@ -312,7 +312,7 @@ export async function getTransferDetail(
 export async function approveTransfer(
   transferId: number,
 ): Promise<{ success: boolean; error?: string }> {
-  await requireCapability("finance.write");
+  await requireCapability("finance.mutate");
 
   const parsed = approveTransferSchema.safeParse({ transferId });
   if (!parsed.success) {
@@ -350,20 +350,22 @@ export async function approveTransfer(
 
 /**
  * Reject a pending transfer run with a reason.
- * Admin action — requires finance.write capability.
+ * Admin action — requires finance.mutate capability.
+ * Note: reason is validated but not currently persisted
+ * (the note model lacks a transfer_id foreign key).
  */
 export async function rejectTransfer(
   transferId: number,
   reason: string,
 ): Promise<{ success: boolean; error?: string }> {
-  await requireCapability("finance.write");
+  await requireCapability("finance.mutate");
 
   const parsed = rejectTransferSchema.safeParse({ transferId, reason });
   if (!parsed.success) {
     return { success: false, error: parsed.error.issues[0]?.message ?? "Invalid input" };
   }
 
-  const { transferId: id, reason: rejectionReason } = parsed.data;
+  const id = parsed.data.transferId;
 
   const existing = await prisma.transfer.findUnique({
     where: { transfer_id: id },
