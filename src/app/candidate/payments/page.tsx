@@ -3,6 +3,7 @@ import { requireRoleCapability } from "@/modules/auth/session";
 import { DataTable } from "@/modules/workspace/DataTable";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { getCandidateTransferRows } from "@/modules/workspace/data";
+import { InitiateTransferForm } from "@/modules/balances/InitiateTransferForm";
 
 export const dynamic = "force-dynamic";
 
@@ -29,6 +30,7 @@ export default async function CandidatePaymentsPage() {
           { key: "updated", label: "Updated", render: (row) => row.updated },
         ]}
       />
+      <InitiateTransferForm />
     </WorkspaceShell>
   );
 }

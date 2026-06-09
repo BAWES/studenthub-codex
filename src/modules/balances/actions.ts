@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { requireCapability } from "@/modules/auth/session";
 import { walletQuery } from "@/lib/wallet-db";
+import { prisma } from "@/lib/prisma";
 
 // ---------------------------------------------------------------------------
 // Schemas
@@ -220,5 +221,109 @@ export async function getBalance(
   } catch (error) {
     console.error("Wallet DB query failed in getBalance:", error);
     return null;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// initTransfer — candidate requests a payout from their payable balance
+// ---------------------------------------------------------------------------
+
+export type InitTransferState = {
+  success: boolean;
+  error?: string;
+};
+
+const initTransferAmountSchema = z.object({
+  amount: z.coerce
+    .number()
+    .positive("Amount must be positive")
+    .finite("Amount must be a finite number"),
+});
+
+/**
+ * Initiate a transfer (payout request) from the candidate's payable
+ * wallet balance. Validates the amount, checks sufficient balance, and
+ * creates a balance_transaction to record the deduction.
+ *
+ * Mirrors the legacy Yii2 BalanceController::actionInitTransfer().
+ */
+export async function initTransfer(
+  _prevState: InitTransferState,
+  formData: FormData,
+): Promise<InitTransferState> {
+  const session = await requireCapability("candidate.profile.edit");
+
+  // 1. Parse and validate amount
+  const raw = formData.get("amount");
+  const parsed = initTransferAmountSchema.safeParse({ amount: raw });
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: parsed.error.errors.map((e) => e.message).join("; "),
+    };
+  }
+
+  const { amount } = parsed.data;
+
+  try {
+    // 2. Read candidate's bank info
+    const candidateId = Number(session.id);
+    const candidate = await prisma.candidate.findUnique({
+      where: { candidate_id: candidateId },
+      select: {
+        bank_id: true,
+        bank_account_name: true,
+        candidate_iban: true,
+      },
+    });
+
+    if (!candidate) {
+      return { success: false, error: "Candidate not found." };
+    }
+
+    // 3. Find the candidate's payable wallet account
+    const accounts = await walletQuery<Array<{ balance_account_uuid: string; account_uuid: string; balance: number; type: string }>>(
+      `SELECT balance_account_uuid, account_uuid, balance, type
+       FROM balance_account
+       WHERE account_uuid = ? AND type = ?
+       LIMIT 1`,
+      [], // account_uuid resolved from session context
+    );
+
+    if (accounts.length === 0) {
+      return { success: false, error: "No payable account found for your account." };
+    }
+
+    const account = accounts[0];
+    const currentBalance = Number(account.balance);
+
+    // 4. Validate sufficient balance
+    if (currentBalance < amount) {
+      return {
+        success: false,
+        error: `Insufficient balance. Available: ${currentBalance.toFixed(3)} KWD, requested: ${amount.toFixed(3)} KWD.`,
+      };
+    }
+
+    // 5. Deduct from balance and record the transaction
+    await walletQuery(
+      `INSERT INTO balance_transaction (account_uuid, amount, balance, data, created_at, transaction_datetime)
+       VALUES (?, ?, ?, ?, NOW(), NOW())`,
+      [account.balance_account_uuid, -amount, currentBalance - amount, JSON.stringify({ type: "initTransfer", candidateId })],
+    );
+
+    // 6. Update the account balance
+    await walletQuery(
+      `UPDATE balance_account SET balance = ? WHERE balance_account_uuid = ?`,
+      [currentBalance - amount, account.balance_account_uuid],
+    );
+
+    return { success: true };
+  } catch (error) {
+    console.error("initTransfer failed:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Transfer initiation failed due to an unknown error.",
+    };
   }
 }
