@@ -171,6 +171,13 @@ export default async function Home() {
             >
               Sign in
             </Link>
+            <Link
+              href="/signup"
+              className="uiButton uiButton_ghost uiButton_lg"
+              style={{ color: "var(--ink)" }}
+            >
+              Create account
+            </Link>
           </div>
           <div className="flex flex-wrap gap-2 mt-[18px]" aria-label="StudentHub platform goals">
             {["Role-specific workspaces", "Shared search and documents", "Production-data migration path"].map(
