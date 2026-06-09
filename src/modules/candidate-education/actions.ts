@@ -1,59 +1,49 @@
 "use server";
 
+import crypto from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { requireCapability } from "@/modules/auth/session";
-import crypto from "crypto";
-
-// ---------------------------------------------------------------------------
-// Constants
-// ---------------------------------------------------------------------------
-
-const EDUCATION_UUID_PREFIX = "education_";
+import { requireRoleCapability } from "@/modules/auth/session";
 
 // ---------------------------------------------------------------------------
 // Schemas
 // ---------------------------------------------------------------------------
 
-export const listCandidateEducationSchema = z.object({
-  page: z.coerce.number().int().positive().default(1),
-  limit: z.coerce.number().int().min(1).max(100).default(20),
+export const createEducationSchema = z.object({
+  universityId: z.coerce.number().int().positive("University is required."),
+  degreeUuid: z.string().optional().default(""),
+  majorUuid: z.string().optional().default(""),
+  graduationYear: z
+    .union([z.coerce.number().int().min(1950).max(2035), z.literal("")])
+    .optional()
+    .default(""),
+  isCurrentlyStudying: z
+    .union([z.literal("1"), z.literal("0")])
+    .optional()
+    .default("0"),
 });
 
-export const getCandidateEducationSchema = z.object({
+export const updateEducationSchema = z.object({
+  educationUuid: z.string().min(1, "Education UUID is required"),
+  universityId: z.coerce.number().int().positive("University is required."),
+  degreeUuid: z.string().optional().default(""),
+  majorUuid: z.string().optional().default(""),
+  graduationYear: z
+    .union([z.coerce.number().int().min(1950).max(2035), z.literal("")])
+    .optional()
+    .default(""),
+  isCurrentlyStudying: z
+    .union([z.literal("1"), z.literal("0")])
+    .optional()
+    .default("0"),
+});
+
+export const deleteEducationSchema = z.object({
   educationUuid: z.string().min(1, "Education UUID is required"),
 });
 
-export const createCandidateEducationSchema = z.object({
-  universityId: z.coerce
-    .number({ required_error: "University is required" })
-    .int()
-    .positive("University is required"),
-  degreeUuid: z.string().optional(),
-  majorUuid: z.string().optional(),
-  graduationYear: z.coerce.number().int().optional(),
-  isCurrentlyStudying: z.coerce
-    .number()
-    .int()
-    .transform((v) => v === 1)
-    .optional(),
-});
-
-export const updateCandidateEducationSchema = z.object({
-  educationUuid: z.string().min(1, "Education UUID is required"),
-  universityId: z.coerce.number().int().positive().optional(),
-  degreeUuid: z.string().optional(),
-  majorUuid: z.string().optional(),
-  graduationYear: z.coerce.number().int().optional(),
-  isCurrentlyStudying: z.coerce
-    .number()
-    .int()
-    .transform((v) => v === 1)
-    .optional(),
-});
-
-export const deleteCandidateEducationSchema = z.object({
+export const getEducationSchema = z.object({
   educationUuid: z.string().min(1, "Education UUID is required"),
 });
 
@@ -61,319 +51,270 @@ export const deleteCandidateEducationSchema = z.object({
 // Types
 // ---------------------------------------------------------------------------
 
-export type ListCandidateEducationInput = z.input<
-  typeof listCandidateEducationSchema
->;
+export type CreateEducationInput = z.input<typeof createEducationSchema>;
+export type UpdateEducationInput = z.input<typeof updateEducationSchema>;
 
-export type CreateCandidateEducationInput = z.input<
-  typeof createCandidateEducationSchema
->;
-
-export type UpdateCandidateEducationInput = z.input<
-  typeof updateCandidateEducationSchema
->;
-
-export type CandidateEducationItem = {
+export type EducationItem = {
   education_uuid: string;
   candidate_id: number;
   university_id: number;
-  university_name_en: string | null;
-  university_name_ar: string | null;
   degree_uuid: string | null;
-  degree_name_en: string | null;
-  degree_name_ar: string | null;
   major_uuid: string | null;
-  major_name_en: string | null;
-  major_name_ar: string | null;
   graduation_year: number | null;
   is_currently_studying: boolean;
   created_at: Date | null;
   updated_at: Date | null;
+  university?: { name: string; nameAr?: string };
 };
 
-export type CandidateEducationDetail = CandidateEducationItem | null;
+export type CreateCandidateEducationResult =
+  | { success: true; educationUuid: string }
+  | { success: false; error: string };
 
-export type ListCandidateEducationResult = {
-  records: CandidateEducationItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
+export type UpdateCandidateEducationResult =
+  | { success: true }
+  | { success: false; error: string };
 
-export type CreateCandidateEducationResult = {
-  education_uuid: string;
-};
-
-export type UpdateCandidateEducationResult = {
-  education_uuid: string;
-};
-
-export type DeleteCandidateEducationResult = {
-  success: boolean;
-};
+export type DeleteCandidateEducationResult =
+  | { success: true }
+  | { success: false; error: string };
 
 // ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-function generateEducationUuid(): string {
-  return `${EDUCATION_UUID_PREFIX}${crypto.randomUUID()}`;
-}
-
-function mapEducation(
-  row: Record<string, unknown>,
-): CandidateEducationItem {
-  return {
-    education_uuid: row.education_uuid as string,
-    candidate_id: row.candidate_id as number,
-    university_id: row.university_id as number,
-    university_name_en: (row as any).university?.university_name_en ?? null,
-    university_name_ar: (row as any).university?.university_name_ar ?? null,
-    degree_uuid: (row.degree_uuid as string) ?? null,
-    degree_name_en: (row as any).degree?.degree_name_en ?? null,
-    degree_name_ar: (row as any).degree?.degree_name_ar ?? null,
-    major_uuid: (row.major_uuid as string) ?? null,
-    major_name_en: (row as any).major?.major_name_en ?? null,
-    major_name_ar: (row as any).major?.major_name_ar ?? null,
-    graduation_year: (row.graduation_year as number) ?? null,
-    is_currently_studying: Boolean(row.is_currently_studying),
-    created_at: (row.created_at as Date) ?? null,
-    updated_at: (row.updated_at as Date) ?? null,
-  };
-}
-
-// ---------------------------------------------------------------------------
-// listCandidateEducation
+// getCandidateEducation — Get a single education entry
 // ---------------------------------------------------------------------------
 
 /**
- * List education records for the current candidate.
+ * Get a single education entry for the current candidate.
  *
- * Mirrors the legacy Yii2 CandidateEducationController::actionList().
- * Requires capability: candidate.read.own
- */
-export async function listCandidateEducation(
-  params: ListCandidateEducationInput = {},
-): Promise<ListCandidateEducationResult> {
-  const session = await requireCapability("candidate.read.own");
-  const candidateId = Number(session.id);
-
-  const parsed = listCandidateEducationSchema.safeParse(params);
-  if (!parsed.success) {
-    throw new Error(
-      parsed.error.issues[0]?.message ?? "Invalid list parameters",
-    );
-  }
-
-  const { page, limit } = parsed.data;
-  const skip = (page - 1) * limit;
-
-  const where = { candidate_id: candidateId };
-
-  const [rows, total] = await Promise.all([
-    prisma.candidate_education.findMany({
-      where,
-      include: {
-        degree: true,
-        major: true,
-        university: true,
-      },
-      orderBy: { created_at: "desc" },
-      skip,
-      take: limit,
-    }),
-    prisma.candidate_education.count({ where }),
-  ]);
-
-  return {
-    records: rows.map(mapEducation),
-    total,
-    page,
-    limit,
-    totalPages: Math.ceil(total / limit),
-  };
-}
-
-// ---------------------------------------------------------------------------
-// getCandidateEducation
-// ---------------------------------------------------------------------------
-
-/**
- * Get a single education record by UUID for the current candidate.
- *
- * Mirrors the legacy Yii2 CandidateEducationController::actionView().
- * Requires capability: candidate.read.own
+ * Maps to the legacy CandidateEducationController::actionView($id).
  */
 export async function getCandidateEducation(
   educationUuid: string,
-): Promise<CandidateEducationDetail> {
-  const session = await requireCapability("candidate.read.own");
+): Promise<EducationItem | null> {
+  const session = await requireRoleCapability("candidate", "candidate.read.own");
   const candidateId = Number(session.id);
 
-  const parsed = getCandidateEducationSchema.safeParse({ educationUuid });
-  if (!parsed.success) {
-    throw new Error(
-      parsed.error.issues[0]?.message ?? "Invalid education UUID",
-    );
-  }
+  const parsed = getEducationSchema.safeParse({ educationUuid });
+  if (!parsed.success) return null;
 
-  const row = await prisma.candidate_education.findFirst({
+  const education = await prisma.candidate_education.findFirst({
     where: {
       education_uuid: parsed.data.educationUuid,
       candidate_id: candidateId,
     },
     include: {
-      degree: true,
-      major: true,
-      university: true,
+      university: {
+        select: { university_name_en: true, university_name_ar: true },
+      },
     },
   });
 
-  if (!row) return null;
-  return mapEducation(row as unknown as Record<string, unknown>);
+  if (!education) return null;
+
+  return {
+    education_uuid: education.education_uuid,
+    candidate_id: education.candidate_id,
+    university_id: education.university_id,
+    degree_uuid: education.degree_uuid,
+    major_uuid: education.major_uuid,
+    graduation_year: education.graduation_year,
+    is_currently_studying: education.is_currently_studying ?? false,
+    created_at: education.created_at,
+    updated_at: education.updated_at,
+    university: (education as unknown as { university?: { university_name_en: string; university_name_ar: string } }).university
+      ? {
+          name: (education as unknown as { university: { university_name_en: string; university_name_ar: string } }).university.university_name_en,
+          nameAr: (education as unknown as { university: { university_name_en: string; university_name_ar: string } }).university.university_name_ar,
+        }
+      : undefined,
+  };
 }
 
 // ---------------------------------------------------------------------------
-// createCandidateEducation
+// createCandidateEducation — Create education entry
 // ---------------------------------------------------------------------------
 
 /**
- * Create a new candidate education record.
+ * Create a new education entry for the current candidate.
  *
- * Mirrors the legacy Yii2 CandidateEducationController::actionCreate().
- * Requires capability: candidate.profile.edit
+ * Maps to the legacy CandidateEducationController::actionCreate().
  */
 export async function createCandidateEducation(
-  data: CreateCandidateEducationInput,
+  params: FormData | CreateEducationInput,
 ): Promise<CreateCandidateEducationResult> {
-  const session = await requireCapability("candidate.profile.edit");
+  const session = await requireRoleCapability("candidate", "candidate.read.own");
   const candidateId = Number(session.id);
 
-  const parsed = createCandidateEducationSchema.safeParse(data);
+  const raw =
+    params instanceof FormData
+      ? {
+          universityId: params.get("universityId"),
+          degreeUuid: params.get("degreeUuid"),
+          majorUuid: params.get("majorUuid"),
+          graduationYear: params.get("graduationYear"),
+          isCurrentlyStudying: params.get("isCurrentlyStudying"),
+        }
+      : params;
+
+  const parsed = createEducationSchema.safeParse(raw);
   if (!parsed.success) {
-    throw new Error(
-      parsed.error.issues[0]?.message ?? "Invalid education data",
-    );
+    const firstError = parsed.error.issues[0]?.message ?? "Invalid education fields.";
+    return { success: false, error: firstError };
   }
 
-  const { universityId, degreeUuid, majorUuid, graduationYear, isCurrentlyStudying } = parsed.data;
+  const d = parsed.data;
+  const educationUuid = `edu_${crypto.randomUUID()}`;
+  const now = new Date();
 
-  const educationUuid = generateEducationUuid();
+  // Verify university exists
+  const university = await prisma.university.findUnique({
+    where: { university_id: d.universityId },
+    select: { university_id: true },
+  });
+  if (!university) {
+    return { success: false, error: "University not found." };
+  }
 
   await prisma.candidate_education.create({
     data: {
       education_uuid: educationUuid,
       candidate_id: candidateId,
-      university_id: universityId,
-      degree_uuid: degreeUuid ?? null,
-      major_uuid: majorUuid ?? null,
-      graduation_year: graduationYear ?? null,
-      is_currently_studying: isCurrentlyStudying ?? false,
+      university_id: d.universityId,
+      degree_uuid: d.degreeUuid || undefined,
+      major_uuid: d.majorUuid || undefined,
+      graduation_year: d.graduationYear === "" ? null : d.graduationYear,
+      is_currently_studying: d.isCurrentlyStudying === "1",
+      created_at: now,
+      updated_at: now,
     },
   });
 
-  revalidatePath("/candidate/profile");
-  revalidatePath("/app/candidate/edit");
-
-  return { education_uuid: educationUuid };
+  revalidatePath("/candidate");
+  revalidatePath("/candidate/edit");
+  return { success: true, educationUuid };
 }
 
 // ---------------------------------------------------------------------------
-// updateCandidateEducation
+// updateCandidateEducation — Update education entry
 // ---------------------------------------------------------------------------
 
 /**
- * Update an existing candidate education record.
+ * Update an existing education entry for the current candidate.
  *
- * Mirrors the legacy Yii2 CandidateEducationController::actionUpdate().
- * Requires capability: candidate.profile.edit
+ * Maps to the legacy CandidateEducationController::actionUpdate($id).
+ * Uses delete+create in a transaction (matching the existing editCandidateEducation pattern).
  */
 export async function updateCandidateEducation(
-  data: UpdateCandidateEducationInput,
+  params: FormData | UpdateEducationInput,
 ): Promise<UpdateCandidateEducationResult> {
-  const session = await requireCapability("candidate.profile.edit");
+  const session = await requireRoleCapability("candidate", "candidate.read.own");
   const candidateId = Number(session.id);
 
-  const parsed = updateCandidateEducationSchema.safeParse(data);
+  const raw =
+    params instanceof FormData
+      ? {
+          educationUuid: params.get("educationUuid"),
+          universityId: params.get("universityId"),
+          degreeUuid: params.get("degreeUuid"),
+          majorUuid: params.get("majorUuid"),
+          graduationYear: params.get("graduationYear"),
+          isCurrentlyStudying: params.get("isCurrentlyStudying"),
+        }
+      : params;
+
+  const parsed = updateEducationSchema.safeParse(raw);
   if (!parsed.success) {
-    throw new Error(
-      parsed.error.issues[0]?.message ?? "Invalid education data",
-    );
+    const firstError = parsed.error.issues[0]?.message ?? "Invalid education fields.";
+    return { success: false, error: firstError };
   }
 
-  const { educationUuid, universityId, degreeUuid, majorUuid, graduationYear, isCurrentlyStudying } = parsed.data;
+  const d = parsed.data;
 
-  // Verify ownership before update
+  // Verify the education entry exists and belongs to this candidate
   const existing = await prisma.candidate_education.findFirst({
     where: {
-      education_uuid: educationUuid,
+      education_uuid: d.educationUuid,
       candidate_id: candidateId,
     },
+    select: { education_uuid: true },
   });
-
   if (!existing) {
-    throw new Error("Education record not found or access denied.");
+    return { success: false, error: "Education entry not found." };
   }
 
-  await prisma.candidate_education.update({
-    where: { education_uuid: educationUuid },
-    data: {
-      ...(universityId !== undefined && { university_id: universityId }),
-      ...(degreeUuid !== undefined && { degree_uuid: degreeUuid ?? null }),
-      ...(majorUuid !== undefined && { major_uuid: majorUuid ?? null }),
-      ...(graduationYear !== undefined && { graduation_year: graduationYear }),
-      ...(isCurrentlyStudying !== undefined && { is_currently_studying: isCurrentlyStudying }),
-    },
+  // Verify university exists
+  const university = await prisma.university.findUnique({
+    where: { university_id: d.universityId },
+    select: { university_id: true },
   });
+  if (!university) {
+    return { success: false, error: "University not found." };
+  }
 
-  revalidatePath("/candidate/profile");
-  revalidatePath("/app/candidate/edit");
+  const newUuid = `edu_${crypto.randomUUID()}`;
+  const now = new Date();
 
-  return { education_uuid: educationUuid };
+  // Use delete+create in a transaction (matching existing pattern)
+  await prisma.$transaction([
+    prisma.candidate_education.delete({
+      where: { education_uuid: d.educationUuid },
+    }),
+    prisma.candidate_education.create({
+      data: {
+        education_uuid: newUuid,
+        candidate_id: candidateId,
+        university_id: d.universityId,
+        degree_uuid: d.degreeUuid || undefined,
+        major_uuid: d.majorUuid || undefined,
+        graduation_year: d.graduationYear === "" ? null : d.graduationYear,
+        is_currently_studying: d.isCurrentlyStudying === "1",
+        created_at: now,
+        updated_at: now,
+      },
+    }),
+  ]);
+
+  revalidatePath("/candidate");
+  revalidatePath("/candidate/edit");
+  return { success: true };
 }
 
 // ---------------------------------------------------------------------------
-// deleteCandidateEducation
+// deleteCandidateEducation — Delete education entry
 // ---------------------------------------------------------------------------
 
 /**
- * Delete a candidate education record.
+ * Delete an education entry for the current candidate.
  *
- * Mirrors the legacy Yii2 CandidateEducationController::actionDelete().
- * Requires capability: candidate.profile.edit
+ * Maps to the legacy CandidateEducationController::actionDelete($id).
  */
 export async function deleteCandidateEducation(
   educationUuid: string,
 ): Promise<DeleteCandidateEducationResult> {
-  const session = await requireCapability("candidate.profile.edit");
+  const session = await requireRoleCapability("candidate", "candidate.read.own");
   const candidateId = Number(session.id);
 
-  const parsed = deleteCandidateEducationSchema.safeParse({ educationUuid });
+  const parsed = deleteEducationSchema.safeParse({ educationUuid });
   if (!parsed.success) {
-    throw new Error(
-      parsed.error.issues[0]?.message ?? "Invalid education UUID",
-    );
+    return { success: false, error: "Invalid education UUID." };
   }
 
-  // Verify ownership before delete
   const existing = await prisma.candidate_education.findFirst({
     where: {
       education_uuid: parsed.data.educationUuid,
       candidate_id: candidateId,
     },
+    select: { education_uuid: true },
   });
-
   if (!existing) {
-    throw new Error("Education record not found or access denied.");
+    return { success: false, error: "Education entry not found." };
   }
 
   await prisma.candidate_education.delete({
     where: { education_uuid: parsed.data.educationUuid },
   });
 
-  revalidatePath("/candidate/profile");
-  revalidatePath("/app/candidate/edit");
-
+  revalidatePath("/candidate");
+  revalidatePath("/candidate/edit");
   return { success: true };
 }

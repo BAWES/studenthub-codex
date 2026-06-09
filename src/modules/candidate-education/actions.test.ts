@@ -1,87 +1,52 @@
 import { describe, it, expect } from "vitest";
 import {
-  listCandidateEducationSchema,
-  createCandidateEducationSchema,
-  updateCandidateEducationSchema,
+  createEducationSchema,
+  updateEducationSchema,
+  deleteEducationSchema,
+  getEducationSchema,
 } from "./actions";
 import type {
-  CandidateEducationItem,
-  ListCandidateEducationInput,
-  CreateCandidateEducationInput,
-  UpdateCandidateEducationInput,
+  EducationItem,
+  CreateCandidateEducationResult,
+  UpdateCandidateEducationResult,
+  DeleteCandidateEducationResult,
 } from "./actions";
 
 // ---------------------------------------------------------------------------
-// Pure logic: candidate education schema validation
-//
-// The candidate education actions use these schemas internally. Testing them
-// separately avoids mocking "use server" dependencies (prisma, session, etc.).
+// Tests: createEducationSchema
 // ---------------------------------------------------------------------------
 
-describe("listCandidateEducationSchema", () => {
-  it("accepts empty params (default pagination)", () => {
-    const result = listCandidateEducationSchema.safeParse({});
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.page).toBe(1);
-      expect(result.data.limit).toBe(20);
-    }
-  });
-
-  it("accepts explicit pagination values", () => {
-    const result = listCandidateEducationSchema.safeParse({
-      page: "2",
-      limit: "50",
-    });
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.page).toBe(2);
-      expect(result.data.limit).toBe(50);
-    }
-  });
-
-  it("rejects zero page", () => {
-    const result = listCandidateEducationSchema.safeParse({ page: "0" });
-    expect(result.success).toBe(false);
-  });
-
-  it("rejects negative page", () => {
-    const result = listCandidateEducationSchema.safeParse({ page: "-1" });
-    expect(result.success).toBe(false);
-  });
-
-  it("rejects limit over 100", () => {
-    const result = listCandidateEducationSchema.safeParse({ limit: "200" });
-    expect(result.success).toBe(false);
-  });
-
-  it("rejects non-numeric page", () => {
-    const result = listCandidateEducationSchema.safeParse({ page: "abc" });
-    expect(result.success).toBe(false);
-  });
-});
-
-describe("createCandidateEducationSchema", () => {
-  it("accepts valid data with all fields", () => {
-    const result = createCandidateEducationSchema.safeParse({
-      universityId: "1",
-      degreeUuid: "degree-uuid-1",
-      majorUuid: "major-uuid-1",
-      graduationYear: "2020",
+describe("createEducationSchema", () => {
+  it("accepts valid education with all fields", () => {
+    const result = createEducationSchema.safeParse({
+      universityId: 1,
+      degreeUuid: "deg123",
+      majorUuid: "maj456",
+      graduationYear: 2024,
       isCurrentlyStudying: "0",
     });
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data.universityId).toBe(1);
-      expect(result.data.degreeUuid).toBe("degree-uuid-1");
-      expect(result.data.majorUuid).toBe("major-uuid-1");
-      expect(result.data.graduationYear).toBe(2020);
-      expect(result.data.isCurrentlyStudying).toBe(false);
+      expect(result.data.degreeUuid).toBe("deg123");
     }
   });
 
-  it("accepts valid data with only required fields", () => {
-    const result = createCandidateEducationSchema.safeParse({
+  it("fills defaults for optional fields", () => {
+    const result = createEducationSchema.safeParse({
+      universityId: 1,
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.degreeUuid).toBe("");
+      expect(result.data.majorUuid).toBe("");
+      expect(result.data.graduationYear).toBe("");
+      expect(result.data.isCurrentlyStudying).toBe("0");
+    }
+  });
+
+  it("coerces string universityId to number", () => {
+    const result = createEducationSchema.safeParse({
       universityId: "5",
     });
     expect(result.success).toBe(true);
@@ -90,99 +55,166 @@ describe("createCandidateEducationSchema", () => {
     }
   });
 
-  it("rejects missing universityId", () => {
-    const result = createCandidateEducationSchema.safeParse({});
-    expect(result.success).toBe(false);
-  });
-
-  it("rejects non-positive universityId", () => {
-    const result = createCandidateEducationSchema.safeParse({
-      universityId: "0",
+  it("rejects empty universityId", () => {
+    const result = createEducationSchema.safeParse({
+      universityId: undefined,
     });
     expect(result.success).toBe(false);
   });
 
-  it("rejects invalid universityId", () => {
-    const result = createCandidateEducationSchema.safeParse({
-      universityId: "abc",
+  it("rejects zero universityId", () => {
+    const result = createEducationSchema.safeParse({
+      universityId: 0,
     });
     expect(result.success).toBe(false);
   });
 
-  it("transforms isCurrentlyStudying from 1/0 to boolean", () => {
-    const result1 = createCandidateEducationSchema.safeParse({
-      universityId: "1",
+  it("accepts currently studying flag", () => {
+    const result = createEducationSchema.safeParse({
+      universityId: 1,
       isCurrentlyStudying: "1",
     });
-    expect(result1.success).toBe(true);
-    if (result1.success) {
-      expect(result1.data.isCurrentlyStudying).toBe(true);
-    }
-
-    const result0 = createCandidateEducationSchema.safeParse({
-      universityId: "1",
-      isCurrentlyStudying: "0",
-    });
-    expect(result0.success).toBe(true);
-    if (result0.success) {
-      expect(result0.data.isCurrentlyStudying).toBe(false);
-    }
+    expect(result.success).toBe(true);
   });
 
-  it("accepts optional graduationYear", () => {
-    const result = createCandidateEducationSchema.safeParse({
-      universityId: "1",
-      graduationYear: "2024",
+  it("rejects graduation year before 1950", () => {
+    const result = createEducationSchema.safeParse({
+      universityId: 1,
+      graduationYear: 1900,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("accepts empty graduation year", () => {
+    const result = createEducationSchema.safeParse({
+      universityId: 1,
+      graduationYear: "",
     });
     expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.graduationYear).toBe(2024);
-    }
   });
 });
 
-describe("updateCandidateEducationSchema", () => {
-  it("accepts valid update with all fields", () => {
-    const result = updateCandidateEducationSchema.safeParse({
-      educationUuid: "education_abc-123",
-      universityId: "2",
-      degreeUuid: "new-degree-uuid",
-      majorUuid: "new-major-uuid",
-      graduationYear: "2025",
-      isCurrentlyStudying: "1",
+// ---------------------------------------------------------------------------
+// Tests: updateEducationSchema
+// ---------------------------------------------------------------------------
+
+describe("updateEducationSchema", () => {
+  it("accepts valid update input", () => {
+    const result = updateEducationSchema.safeParse({
+      educationUuid: "edu_abc123",
+      universityId: 1,
     });
     expect(result.success).toBe(true);
     if (result.success) {
-      expect(result.data.educationUuid).toBe("education_abc-123");
-      expect(result.data.universityId).toBe(2);
-      expect(result.data.isCurrentlyStudying).toBe(true);
+      expect(result.data.educationUuid).toBe("edu_abc123");
     }
   });
 
-  it("accepts partial update with only UUID", () => {
-    const result = updateCandidateEducationSchema.safeParse({
-      educationUuid: "education_abc-123",
-    });
-    expect(result.success).toBe(true);
-  });
-
   it("rejects empty educationUuid", () => {
-    const result = updateCandidateEducationSchema.safeParse({
+    const result = updateEducationSchema.safeParse({
       educationUuid: "",
+      universityId: 1,
     });
     expect(result.success).toBe(false);
   });
 
   it("rejects missing educationUuid", () => {
-    const result = updateCandidateEducationSchema.safeParse({});
-    expect(result.success).toBe(false);
-  });
-
-  it("rejects non-positive universityId in update", () => {
-    const result = updateCandidateEducationSchema.safeParse({
-      educationUuid: "education_abc-123",
-      universityId: "0",
+    const result = updateEducationSchema.safeParse({
+      universityId: 1,
     });
     expect(result.success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Tests: deleteEducationSchema
+// ---------------------------------------------------------------------------
+
+describe("deleteEducationSchema", () => {
+  it("accepts valid delete input", () => {
+    const result = deleteEducationSchema.safeParse({
+      educationUuid: "edu_abc123",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects empty educationUuid", () => {
+    const result = deleteEducationSchema.safeParse({
+      educationUuid: "",
+    });
+    expect(result.success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Tests: getEducationSchema
+// ---------------------------------------------------------------------------
+
+describe("getEducationSchema", () => {
+  it("accepts valid get input", () => {
+    const result = getEducationSchema.safeParse({
+      educationUuid: "edu_abc123",
+    });
+    expect(result.success).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Type shape tests
+// ---------------------------------------------------------------------------
+
+describe("EducationItem shape", () => {
+  it("has required fields", () => {
+    const item: EducationItem = {
+      education_uuid: "edu_abc",
+      candidate_id: 1,
+      university_id: 5,
+      degree_uuid: "deg_1",
+      major_uuid: "maj_1",
+      graduation_year: 2024,
+      is_currently_studying: false,
+      created_at: new Date(),
+      updated_at: new Date(),
+    };
+    expect(item.education_uuid).toBe("edu_abc");
+    expect(item.candidate_id).toBe(1);
+  });
+
+  it("supports optional university relation", () => {
+    const item: EducationItem = {
+      education_uuid: "edu_abc",
+      candidate_id: 1,
+      university_id: 5,
+      degree_uuid: null,
+      major_uuid: null,
+      graduation_year: null,
+      is_currently_studying: true,
+      created_at: null,
+      updated_at: null,
+      university: { name: "Kuwait University", nameAr: "جامعة الكويت" },
+    };
+    expect(item.university?.name).toBe("Kuwait University");
+  });
+});
+
+describe("Education result types", () => {
+  it("accepts CreateCandidateEducationResult success", () => {
+    const r: CreateCandidateEducationResult = { success: true, educationUuid: "edu_abc" };
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts CreateCandidateEducationResult error", () => {
+    const r: CreateCandidateEducationResult = { success: false, error: "University not found" };
+    expect(r.error).toBe("University not found");
+  });
+
+  it("accepts UpdateCandidateEducationResult success", () => {
+    const r: UpdateCandidateEducationResult = { success: true };
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts DeleteCandidateEducationResult success", () => {
+    const r: DeleteCandidateEducationResult = { success: true };
+    expect(r.success).toBe(true);
   });
 });
