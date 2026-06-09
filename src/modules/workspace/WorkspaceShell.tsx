@@ -4,6 +4,7 @@ import type { SessionUser } from "@/modules/auth/types";
 import type { Route } from "next";
 import { logoutAction } from "@/modules/auth/actions";
 import { ThemeToggle } from "@/modules/theme/ThemeToggle";
+import { LogOut } from "lucide-react";
 import Link from "next/link";
 import { navForRole } from "./navigation";
 import { WorkspaceMobileNavigation, WorkspaceNavigation } from "./WorkspaceNavigation";
@@ -60,10 +61,14 @@ export function WorkspaceShell({
         <strong>StudentHub</strong>
       </Link>
       <WorkspaceNavigation items={navItems} role={session.role} />
+      <div className="workspaceRailDivider" aria-hidden="true" />
       <div className="workspaceRailFooter">
         <ThemeToggle />
         <form action={logoutAction}>
-          <button type="submit" aria-label="Sign out">Sign out</button>
+          <button type="submit" aria-label="Sign out">
+            <LogOut size={18} strokeWidth={1.5} aria-hidden="true" />
+            <span>Sign out</span>
+          </button>
         </form>
       </div>
     </aside>

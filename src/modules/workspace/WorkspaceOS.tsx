@@ -6,6 +6,7 @@ import type { Route } from "next";
 import type { SessionUser } from "@/modules/auth/types";
 import { logoutAction } from "@/modules/auth/actions";
 import { ThemeToggle } from "@/modules/theme/ThemeToggle";
+import { LogOut } from "lucide-react";
 import Link from "next/link";
 import { WorkspaceOSContext } from "./WorkspaceOSContext";
 import { WorkspaceMobileNavigation, WorkspaceNavigation } from "./WorkspaceNavigation";
@@ -284,13 +285,17 @@ export function WorkspaceOS({
             <strong>StudentHub</strong>
           </Link>
           <WorkspaceNavigation items={navItems} role={session.role} />
+          <div className="workspaceRailDivider" aria-hidden="true" />
           <div className="workspaceRailFooter">
             <button className="commandLauncher" type="button" aria-label="Open command menu" onClick={() => { setCmdOpen(true); }}>
               <span>⌘K</span>
             </button>
             <ThemeToggle />
             <form action={logoutAction}>
-              <button type="submit" aria-label="Sign out">Sign out</button>
+              <button type="submit" aria-label="Sign out">
+                <LogOut size={18} strokeWidth={1.5} aria-hidden="true" />
+                <span>Sign out</span>
+              </button>
             </form>
           </div>
         </aside>
