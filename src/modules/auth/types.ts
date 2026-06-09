@@ -72,7 +72,9 @@ export type Capability =
   | "store.write"
   | "transfer.read"
   | "fulltimer.read"
-  | "fulltimer.write";
+  | "fulltimer.write"
+  | "candidate_id_card.read"
+  | "candidate_id_card.write";
 
 export type SessionUser = {
   role: Role;
