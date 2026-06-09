@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { requireRoleCapability } from "@/modules/auth/session";
 import { DetailSection } from "@/modules/workspace/DetailPanels";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
-import { getCandidateNotificationDetail } from "@/modules/workspace/data";
+import { getCandidateNotificationDetail } from "./actions";
 import { formatDate } from "@/modules/workspace/format";
 import { MarkReadButton } from "./MarkReadButton";
 
