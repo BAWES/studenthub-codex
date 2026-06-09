@@ -1,248 +1,299 @@
 "use server";
 
 import crypto from "node:crypto";
-import path from "node:path";
 import fs from "node:fs/promises";
+import path from "node:path";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
 
 // ---------------------------------------------------------------------------
-// Schemas
-// ---------------------------------------------------------------------------
-
-const listCandidateDocumentsSchema = z.object({
-  candidateId: z.coerce.number().int().positive("Candidate ID is required"),
-  company_id: z.number().int().positive().optional(),
-  page: z.number().int().positive().optional(),
-  limit: z.number().int().min(1).max(100).optional(),
-});
-
-const getCandidateDocumentSchema = z.object({
-  file_uuid: z
-    .string({ required_error: "File UUID is required" })
-    .min(1, "File UUID is required"),
-});
-
-const uploadCandidateDocumentSchema = z.object({
-  candidateId: z.coerce.number().int().positive("Candidate ID is required"),
-  company_id: z.number().int().positive("Company ID is required"),
-  file_title: z
-    .string({ required_error: "File title is required" })
-    .min(1, "File title is required")
-    .max(255),
-  file_name: z
-    .string({ required_error: "File name is required" })
-    .min(1, "File name is required")
-    .max(255),
-  file_type: z.string().max(100).optional(),
-  file_size: z.number().int().nonnegative().optional(),
-  file_description: z.string().max(65535).optional(),
-});
-
-// ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
-export type ListCandidateDocumentsInput = z.infer<
-  typeof listCandidateDocumentsSchema
->;
-export type UploadCandidateDocumentInput = z.infer<
-  typeof uploadCandidateDocumentSchema
->;
+export const DOCUMENT_TYPES = [
+  "photo",
+  "cv",
+  "video",
+  "civilFront",
+  "civilBack",
+] as const;
 
+export type DocumentType = (typeof DOCUMENT_TYPES)[number];
+
+/** A single document entry returned from list / get. */
 export type CandidateDocumentItem = {
-  file_uuid: string;
-  company_id: number | null;
-  file_title: string;
-  file_description: string | null;
-  file_name: string | null;
-  file_type: string | null;
-  file_size: number | null;
-  file_s3_path: string | null;
-  file_created_datetime: Date;
+  type: DocumentType;
+  label: string;
+  filePath: string | null;
+  fileUrl: string | null;
 };
 
 export type ListCandidateDocumentsResult = {
-  documents: CandidateDocumentItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
+  items: CandidateDocumentItem[];
+  candidateId: number;
 };
 
-export type UploadCandidateDocumentResult = {
-  file_uuid: string;
-  file_s3_path: string | null;
+/** Upload result shape for useActionState. */
+export type UploadDocumentState = {
+  success: boolean;
+  error?: string;
+  filePath?: string;
 };
 
 // ---------------------------------------------------------------------------
-// Upload directory config
+// Labels for each document type
 // ---------------------------------------------------------------------------
 
-const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads", "documents");
+const DOCUMENT_LABELS: Record<DocumentType, string> = {
+  photo: "Personal Photo",
+  cv: "CV / Resume",
+  video: "Video Profile",
+  civilFront: "Civil ID (Front)",
+  civilBack: "Civil ID (Back)",
+};
+
+/** Maps document type to the DB column on the candidate model. */
+const DOCUMENT_FIELD_MAP: Record<DocumentType, string> = {
+  photo: "candidate_personal_photo",
+  cv: "candidate_resume",
+  video: "candidate_video",
+  civilFront: "candidate_civil_photo_front",
+  civilBack: "candidate_civil_photo_back",
+};
+
+// Upload configuration
+const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads", "candidates");
+
+const ALLOWED_TYPES: Record<string, { mime: string[]; ext: string[]; maxSize: number }> = {
+  photo: {
+    mime: ["image/jpeg", "image/png", "image/webp", "image/gif"],
+    ext: [".jpg", ".jpeg", ".png", ".webp", ".gif"],
+    maxSize: 5 * 1024 * 1024, // 5 MB
+  },
+  cv: {
+    mime: [
+      "application/pdf",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    ],
+    ext: [".pdf", ".doc", ".docx"],
+    maxSize: 10 * 1024 * 1024, // 10 MB
+  },
+  video: {
+    mime: ["video/mp4", "video/webm", "video/ogg", "video/quicktime"],
+    ext: [".mp4", ".webm", ".ogv", ".mov"],
+    maxSize: 50 * 1024 * 1024, // 50 MB
+  },
+  civilFront: {
+    mime: ["image/jpeg", "image/png", "image/webp", "image/gif"],
+    ext: [".jpg", ".jpeg", ".png", ".webp", ".gif"],
+    maxSize: 5 * 1024 * 1024,
+  },
+  civilBack: {
+    mime: ["image/jpeg", "image/png", "image/webp", "image/gif"],
+    ext: [".jpg", ".jpeg", ".png", ".webp", ".gif"],
+    maxSize: 5 * 1024 * 1024,
+  },
+};
 
 // ---------------------------------------------------------------------------
-// Server actions
+// Schemas
+// ---------------------------------------------------------------------------
+
+const listDocumentsSchema = z.object({
+  candidateId: z.coerce.number().int().positive("Candidate ID is required"),
+});
+
+const getDocumentSchema = z.object({
+  candidateId: z.coerce.number().int().positive("Candidate ID is required"),
+  documentType: z.enum(DOCUMENT_TYPES, {
+    errorMap: () => ({ message: "Invalid document type. Must be one of: photo, cv, video, civilFront, civilBack." }),
+  }),
+});
+
+const uploadDocumentParamsSchema = z.object({
+  candidateId: z.coerce.number().int().positive("Candidate ID is required"),
+  documentType: z.enum(DOCUMENT_TYPES, {
+    errorMap: () => ({ message: "Invalid document type" }),
+  }),
+});
+
+export type ListDocumentsParams = z.input<typeof listDocumentsSchema>;
+export type GetDocumentParams = z.input<typeof getDocumentSchema>;
+export type UploadDocumentParams = z.input<typeof uploadDocumentParamsSchema>;
+
+// ---------------------------------------------------------------------------
+// Helpers
 // ---------------------------------------------------------------------------
 
 /**
- * List documents scoped to a candidate's company.
- * Maps to legacy CandidateDocumentController::actionIndex.
- * Requires document.read capability.
+ * Build a CandidateDocumentItem from type + raw file path from DB.
  */
-export async function listCandidateDocuments(
-  params: ListCandidateDocumentsInput,
-): Promise<ListCandidateDocumentsResult> {
-  await requireCapability("document.read");
-
-  const parsed = listCandidateDocumentsSchema.safeParse(params);
-  if (!parsed.success) {
-    throw new Error(
-      parsed.error.issues[0]?.message ?? "Invalid list parameters",
-    );
-  }
-
-  const { candidateId, company_id, page = 1, limit = 20 } = parsed.data;
-
-  const where: Record<string, unknown> = {};
-
-  // If a company_id was explicitly provided, filter by it.
-  // Otherwise find the candidate's primary company via an active invitation.
-  if (company_id !== undefined) {
-    where.company_id = company_id;
-  } else {
-    // Look up the candidate's first active company from invitations
-    const invitation = await prisma.invitation.findFirst({
-      where: {
-        candidate_id: candidateId,
-        invitation_status: { in: [1, 2, 3, 4] }, // active statuses
-      },
-      select: {
-        invitation_created_by_company: true,
-      },
-      orderBy: { invitation_created_at: "desc" },
-    });
-
-    if (invitation?.invitation_created_by_company) {
-      where.company_id = invitation.invitation_created_by_company;
-    }
-  }
-
-  const [documents, total] = await Promise.all([
-    prisma.file.findMany({
-      where: where as any,
-      orderBy: { file_created_datetime: "desc" },
-      skip: (page - 1) * limit,
-      take: limit,
-    }),
-    prisma.file.count({ where: where as any }),
-  ]);
-
+function toDocumentItem(type: DocumentType, filePath: string | null): CandidateDocumentItem {
   return {
-    documents: documents as CandidateDocumentItem[],
-    total,
-    page,
-    limit,
-    totalPages: Math.ceil(total / limit),
+    type,
+    label: DOCUMENT_LABELS[type],
+    filePath,
+    fileUrl: filePath ? filePath : null,
   };
 }
 
-/**
- * Get a single document by file_uuid.
- * Maps to legacy CandidateDocumentController::actionView.
- * Requires document.read capability.
- */
-export async function getCandidateDocument(
-  file_uuid: string,
-): Promise<CandidateDocumentItem | null> {
-  await requireCapability("document.read");
-
-  const parsed = getCandidateDocumentSchema.safeParse({ file_uuid });
-  if (!parsed.success) {
-    throw new Error(
-      parsed.error.issues[0]?.message ?? "Invalid document identifier",
-    );
-  }
-
-  const document = await prisma.file.findUnique({
-    where: { file_uuid: parsed.data.file_uuid },
-  });
-
-  return document as CandidateDocumentItem | null;
-}
+// ---------------------------------------------------------------------------
+// Server Actions
+// ---------------------------------------------------------------------------
 
 /**
- * Upload a document file for a candidate's company and create a file record
- * in the database.
- *
- * Accepts a FormData-compatible payload with the file metadata and the file
- * buffer. The file is saved to public/uploads/documents/ and a `file` record
- * is created in the database.
- * Requires document.write capability.
+ * List all document types and their file paths for a candidate.
+ * Requires candidate.read capability.
+ * Returns an item for each known document type, with null filePath if not uploaded.
  */
-export async function uploadCandidateDocument(
-  data: UploadCandidateDocumentInput & { file_buffer?: Buffer },
-): Promise<UploadCandidateDocumentResult> {
-  await requireCapability("document.write");
+export async function listCandidateDocuments(
+  params: ListDocumentsParams,
+): Promise<ListCandidateDocumentsResult> {
+  await requireCapability("candidate.read");
 
-  const parsed = uploadCandidateDocumentSchema.safeParse(data);
-  if (!parsed.success) {
-    throw new Error(
-      parsed.error.issues[0]?.message ?? "Invalid upload data",
-    );
-  }
+  const { candidateId } = listDocumentsSchema.parse(params);
 
-  const {
-    candidateId,
-    company_id,
-    file_title,
-    file_name,
-    file_type,
-    file_size,
-    file_description,
-  } = parsed.data;
-
-  // Generate a unique file UUID
-  const fileUuid = `file_${crypto.randomUUID()}`;
-
-  // Determine the file extension and storage path
-  const ext = file_name ? path.extname(file_name).toLowerCase() : "";
-  const storageName = `${fileUuid}${ext}`;
-  const relativeDir = path.join("uploads", "documents");
-  const relativePath = path.join(relativeDir, storageName);
-  const fullDir = path.join(process.cwd(), "public", relativeDir);
-  const fullPath = path.join(fullDir, storageName);
-
-  // Save file to disk if a buffer was provided
-  let savedSize: number | null = file_size ?? null;
-  if (data.file_buffer) {
-    await fs.mkdir(fullDir, { recursive: true });
-    await fs.writeFile(fullPath, data.file_buffer);
-    savedSize = data.file_buffer.length;
-  }
-
-  // Create the database record
-  await prisma.file.create({
-    data: {
-      file_uuid: fileUuid,
-      company_id,
-      file_title,
-      file_description: file_description ?? null,
-      file_name,
-      file_type: file_type ?? null,
-      file_size: savedSize,
-      file_s3_path: `/${relativePath}`,
-      file_created_datetime: new Date(),
+  const candidate = await prisma.candidate.findUnique({
+    where: { candidate_id: candidateId },
+    select: {
+      candidate_id: true,
+      candidate_personal_photo: true,
+      candidate_resume: true,
+      candidate_video: true,
+      candidate_civil_photo_front: true,
+      candidate_civil_photo_back: true,
     },
   });
 
-  revalidatePath("/candidate/documents");
-  revalidatePath("/uploads/documents");
+  if (!candidate) {
+    return { items: [], candidateId };
+  }
 
-  return {
-    file_uuid: fileUuid,
-    file_s3_path: `/${relativePath}`,
-  };
+  const items: CandidateDocumentItem[] = DOCUMENT_TYPES.map((type) => {
+    const field = DOCUMENT_FIELD_MAP[type];
+    const filePath = (candidate as Record<string, unknown>)[field] as string | null;
+    return toDocumentItem(type, filePath);
+  });
+
+  return { items, candidateId: candidate.candidate_id };
+}
+
+/**
+ * Get a single document by type for a candidate.
+ * Requires candidate.read capability.
+ * Returns null if the candidate does not exist or the document field is not set.
+ */
+export async function getCandidateDocument(
+  params: GetDocumentParams,
+): Promise<CandidateDocumentItem | null> {
+  await requireCapability("candidate.read");
+
+  const { candidateId, documentType } = getDocumentSchema.parse(params);
+
+  const field = DOCUMENT_FIELD_MAP[documentType];
+
+  const candidate = await prisma.candidate.findUnique({
+    where: { candidate_id: candidateId },
+    select: { [field]: true, candidate_id: false },
+  });
+
+  if (!candidate) return null;
+
+  const filePath = (candidate as Record<string, unknown>)[field] as string | null;
+  return toDocumentItem(documentType, filePath);
+}
+
+/**
+ * Upload a document for a candidate.
+ * Requires candidate.profile.edit capability.
+ * Accepts FormData with file_{type} field matching the document type.
+ * Returns UploadDocumentState for useActionState.
+ */
+export async function uploadCandidateDocument(
+  _prevState: UploadDocumentState,
+  formData: FormData,
+): Promise<UploadDocumentState> {
+  const session = await requireCapability("candidate.profile.edit");
+  const candidateId = Number(session.id);
+
+  // Parse document type from form data
+  let documentType: DocumentType | null = null;
+  let file: File | null = null;
+
+  for (const dt of DOCUMENT_TYPES) {
+    const f = formData.get(`file_${dt}`);
+    if (f instanceof File && f.size > 0) {
+      documentType = dt;
+      file = f;
+      break;
+    }
+  }
+
+  if (!documentType || !file || file.size === 0) {
+    return { success: false, error: "No file provided. Use file_{type} field (e.g. file_photo)." };
+  }
+
+  const parseResult = uploadDocumentParamsSchema.safeParse({ candidateId, documentType });
+  if (!parseResult.success) {
+    return { success: false, error: parseResult.error.errors.map((e) => e.message).join("; ") };
+  }
+
+  const typeConfig = ALLOWED_TYPES[documentType];
+
+  // Validate file extension
+  const ext = path.extname(file.name).toLowerCase();
+  if (!typeConfig.ext.includes(ext)) {
+    return {
+      success: false,
+      error: `File type "${ext}" is not allowed for ${documentType}. Accepted: ${typeConfig.ext.join(", ")}.`,
+    };
+  }
+
+  // Validate MIME type
+  if (file.type && !typeConfig.mime.includes(file.type)) {
+    return { success: false, error: `Invalid MIME type "${file.type}" for ${documentType}.` };
+  }
+
+  // Validate size
+  if (file.size > typeConfig.maxSize) {
+    const sizeMB = typeConfig.maxSize / 1024 / 1024;
+    return {
+      success: false,
+      error: `File is too large. Maximum size for ${documentType} is ${sizeMB} MB.`,
+    };
+  }
+
+  try {
+    // Save file to disk
+    const dir = path.join(UPLOAD_DIR, String(candidateId));
+    await fs.mkdir(dir, { recursive: true });
+
+    const filename = `${documentType}_${crypto.randomUUID()}${ext}`;
+    const filepath = path.join(dir, filename);
+
+    const buffer = Buffer.from(await file.arrayBuffer());
+    await fs.writeFile(filepath, buffer);
+
+    const publicPath = `/uploads/candidates/${candidateId}/${filename}`;
+
+    // Update the correct DB field
+    const field = DOCUMENT_FIELD_MAP[documentType];
+    await prisma.candidate.update({
+      where: { candidate_id: candidateId },
+      data: { [field]: publicPath },
+    });
+
+    revalidatePath("/candidate");
+    revalidatePath("/candidate/edit");
+
+    return { success: true, filePath: publicPath };
+  } catch (e) {
+    return {
+      success: false,
+      error: e instanceof Error ? e.message : "Upload failed due to an unknown error.",
+    };
+  }
 }

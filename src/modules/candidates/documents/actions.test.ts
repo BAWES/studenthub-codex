@@ -2,227 +2,191 @@ import { describe, it, expect } from "vitest";
 import { z } from "zod";
 
 // ---------------------------------------------------------------------------
-// Pure logic: candidate document schema validation
-//
-// listCandidateDocuments, getCandidateDocument, and uploadCandidateDocument
-// in actions.ts use these zod schemas internally. Testing them separately
-// avoids mocking prisma, session, and Next.js server-action infrastructure.
+// Schemas (duplicated from actions.ts for isolated unit testing)
 // ---------------------------------------------------------------------------
 
-const listCandidateDocumentsSchema = z.object({
+const DOCUMENT_TYPES = [
+  "photo",
+  "cv",
+  "video",
+  "civilFront",
+  "civilBack",
+] as const;
+
+const ALLOWED_TYPES: Record<string, { mime: string[]; ext: string[]; maxSize: number }> = {
+  photo: {
+    mime: ["image/jpeg", "image/png", "image/webp", "image/gif"],
+    ext: [".jpg", ".jpeg", ".png", ".webp", ".gif"],
+    maxSize: 5 * 1024 * 1024,
+  },
+  cv: {
+    mime: [
+      "application/pdf",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    ],
+    ext: [".pdf", ".doc", ".docx"],
+    maxSize: 10 * 1024 * 1024,
+  },
+  video: {
+    mime: ["video/mp4", "video/webm", "video/ogg", "video/quicktime"],
+    ext: [".mp4", ".webm", ".ogv", ".mov"],
+    maxSize: 50 * 1024 * 1024,
+  },
+  civilFront: {
+    mime: ["image/jpeg", "image/png", "image/webp", "image/gif"],
+    ext: [".jpg", ".jpeg", ".png", ".webp", ".gif"],
+    maxSize: 5 * 1024 * 1024,
+  },
+  civilBack: {
+    mime: ["image/jpeg", "image/png", "image/webp", "image/gif"],
+    ext: [".jpg", ".jpeg", ".png", ".webp", ".gif"],
+    maxSize: 5 * 1024 * 1024,
+  },
+} as const;
+
+const listDocumentsSchema = z.object({
   candidateId: z.coerce.number().int().positive("Candidate ID is required"),
-  company_id: z.number().int().positive().optional(),
-  page: z.number().int().positive().optional(),
-  limit: z.number().int().min(1).max(100).optional(),
 });
 
-const getCandidateDocumentSchema = z.object({
-  file_uuid: z
-    .string({ required_error: "File UUID is required" })
-    .min(1, "File UUID is required"),
-});
-
-const uploadCandidateDocumentSchema = z.object({
+const getDocumentSchema = z.object({
   candidateId: z.coerce.number().int().positive("Candidate ID is required"),
-  company_id: z.number().int().positive("Company ID is required"),
-  file_title: z
-    .string({ required_error: "File title is required" })
-    .min(1, "File title is required")
-    .max(255),
-  file_name: z
-    .string({ required_error: "File name is required" })
-    .min(1, "File name is required")
-    .max(255),
-  file_type: z.string().max(100).optional(),
-  file_size: z.number().int().nonnegative().optional(),
-  file_description: z.string().max(65535).optional(),
+  documentType: z.enum(DOCUMENT_TYPES, {
+    errorMap: () => ({ message: "Invalid document type" }),
+  }),
 });
 
-type ListCandidateDocumentsInput = z.infer<typeof listCandidateDocumentsSchema>;
-type UploadCandidateDocumentInput = z.infer<typeof uploadCandidateDocumentSchema>;
+const uploadDocumentSchema = z.object({
+  candidateId: z.coerce.number().int().positive("Candidate ID is required"),
+  documentType: z.enum(DOCUMENT_TYPES, {
+    errorMap: () => ({ message: "Invalid document type" }),
+  }),
+});
 
-describe("listCandidateDocumentsSchema", () => {
-  it("accepts candidateId only", () => {
-    const result = listCandidateDocumentsSchema.safeParse({
-      candidateId: 42,
-    });
+export type ListDocumentsParams = z.input<typeof listDocumentsSchema>;
+export type GetDocumentParams = z.input<typeof getDocumentSchema>;
+export type UploadDocumentParams = z.input<typeof uploadDocumentSchema>;
+
+// ---------------------------------------------------------------------------
+// Tests
+// ---------------------------------------------------------------------------
+
+describe("listDocumentsSchema", () => {
+  it("accepts a valid candidate ID", () => {
+    const result = listDocumentsSchema.safeParse({ candidateId: 42 });
     expect(result.success).toBe(true);
   });
 
-  it("accepts candidateId with company_id filter", () => {
-    const result = listCandidateDocumentsSchema.safeParse({
-      candidateId: 42,
-      company_id: 5,
-    });
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.company_id).toBe(5);
-    }
-  });
-
-  it("accepts pagination params", () => {
-    const result = listCandidateDocumentsSchema.safeParse({
-      candidateId: 42,
-      page: 2,
-      limit: 50,
-    });
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.page).toBe(2);
-      expect(result.data.limit).toBe(50);
-    }
-  });
-
-  it("rejects missing candidateId", () => {
-    const result = listCandidateDocumentsSchema.safeParse({});
-    expect(result.success).toBe(false);
-  });
-
-  it("rejects negative company_id", () => {
-    const result = listCandidateDocumentsSchema.safeParse({
-      candidateId: 42,
-      company_id: -1,
-    });
-    expect(result.success).toBe(false);
-  });
-
-  it("rejects limit > 100", () => {
-    const result = listCandidateDocumentsSchema.safeParse({
-      candidateId: 42,
-      limit: 200,
-    });
-    expect(result.success).toBe(false);
-  });
-
-  it("rejects zero page", () => {
-    const result = listCandidateDocumentsSchema.safeParse({
-      candidateId: 42,
-      page: 0,
-    });
-    expect(result.success).toBe(false);
-  });
-
-  it("coerces string candidateId to number", () => {
-    const result = listCandidateDocumentsSchema.safeParse({
-      candidateId: "42",
-    });
+  it("coerces string candidate ID to number", () => {
+    const result = listDocumentsSchema.safeParse({ candidateId: "42" });
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data.candidateId).toBe(42);
     }
   });
-});
 
-describe("getCandidateDocumentSchema", () => {
-  it("accepts a valid UUID", () => {
-    const result = getCandidateDocumentSchema.safeParse({
-      file_uuid: "file_abc123def456",
-    });
-    expect(result.success).toBe(true);
-  });
-
-  it("rejects empty UUID", () => {
-    const result = getCandidateDocumentSchema.safeParse({ file_uuid: "" });
+  it("rejects zero candidate ID", () => {
+    const result = listDocumentsSchema.safeParse({ candidateId: 0 });
     expect(result.success).toBe(false);
-    expect(result.error!.errors[0]?.message).toBe("File UUID is required");
   });
 
-  it("rejects missing file_uuid", () => {
-    const result = getCandidateDocumentSchema.safeParse({});
+  it("rejects negative candidate ID", () => {
+    const result = listDocumentsSchema.safeParse({ candidateId: -1 });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects missing candidate ID", () => {
+    const result = listDocumentsSchema.safeParse({});
     expect(result.success).toBe(false);
   });
 });
 
-describe("uploadCandidateDocumentSchema", () => {
-  it("accepts valid upload data", () => {
-    const result = uploadCandidateDocumentSchema.safeParse({
+describe("getDocumentSchema", () => {
+  it("accepts valid document type and candidate ID", () => {
+    const result = getDocumentSchema.safeParse({
       candidateId: 42,
-      company_id: 1,
-      file_title: "Resume",
-      file_name: "resume.pdf",
-      file_type: "application/pdf",
-      file_size: 10240,
+      documentType: "photo",
     });
     expect(result.success).toBe(true);
   });
 
-  it("accepts upload with optional fields", () => {
-    const result = uploadCandidateDocumentSchema.safeParse({
-      candidateId: 42,
-      company_id: 1,
-      file_title: "Cover Letter",
-      file_name: "cover-letter.docx",
-      file_type:
-        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-      file_size: 20480,
-      file_description: "Candidate cover letter for senior position",
-    });
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.file_description).toBe(
-        "Candidate cover letter for senior position",
-      );
+  it("accepts all document types", () => {
+    for (const dt of DOCUMENT_TYPES) {
+      const result = getDocumentSchema.safeParse({
+        candidateId: 1,
+        documentType: dt,
+      });
+      expect(result.success).toBe(true);
     }
   });
 
-  it("rejects missing candidateId", () => {
-    const result = uploadCandidateDocumentSchema.safeParse({
-      company_id: 1,
-      file_title: "Resume",
-      file_name: "resume.pdf",
+  it("rejects invalid document type", () => {
+    const result = getDocumentSchema.safeParse({
+      candidateId: 42,
+      documentType: "resume",
     });
     expect(result.success).toBe(false);
   });
 
-  it("rejects missing company_id", () => {
-    const result = uploadCandidateDocumentSchema.safeParse({
+  it("rejects missing document type", () => {
+    const result = getDocumentSchema.safeParse({ candidateId: 42 });
+    expect(result.success).toBe(false);
+  });
+});
+
+describe("uploadDocumentSchema", () => {
+  it("accepts valid params", () => {
+    const result = uploadDocumentSchema.safeParse({
       candidateId: 42,
-      file_title: "Resume",
-      file_name: "resume.pdf",
+      documentType: "cv",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects invalid document type for upload", () => {
+    const result = uploadDocumentSchema.safeParse({
+      candidateId: 42,
+      documentType: "pdf",
     });
     expect(result.success).toBe(false);
   });
+});
 
-  it("rejects empty file_title", () => {
-    const result = uploadCandidateDocumentSchema.safeParse({
-      candidateId: 42,
-      company_id: 1,
-      file_title: "",
-      file_name: "resume.pdf",
-    });
-    expect(result.success).toBe(false);
-    expect(result.error!.errors[0]?.message).toBe("File title is required");
+describe("ALLOWED_TYPES config", () => {
+  it("photo allows jpg, png, webp, gif", () => {
+    const cfg = ALLOWED_TYPES.photo;
+    expect(cfg.ext).toContain(".jpg");
+    expect(cfg.ext).toContain(".png");
+    expect(cfg.ext).toContain(".webp");
+    expect(cfg.ext).toContain(".gif");
+    expect(cfg.maxSize).toBe(5 * 1024 * 1024);
   });
 
-  it("rejects file_title over 255 chars", () => {
-    const result = uploadCandidateDocumentSchema.safeParse({
-      candidateId: 42,
-      company_id: 1,
-      file_title: "x".repeat(256),
-      file_name: "resume.pdf",
-    });
-    expect(result.success).toBe(false);
+  it("cv allows pdf, doc, docx up to 10MB", () => {
+    const cfg = ALLOWED_TYPES.cv;
+    expect(cfg.ext).toContain(".pdf");
+    expect(cfg.ext).toContain(".doc");
+    expect(cfg.ext).toContain(".docx");
+    expect(cfg.maxSize).toBe(10 * 1024 * 1024);
   });
 
-  it("rejects empty file_name", () => {
-    const result = uploadCandidateDocumentSchema.safeParse({
-      candidateId: 42,
-      company_id: 1,
-      file_title: "Resume",
-      file_name: "",
-    });
-    expect(result.success).toBe(false);
-    expect(result.error!.errors[0]?.message).toBe("File name is required");
+  it("video allows mp4, webm, ogv, mov up to 50MB", () => {
+    const cfg = ALLOWED_TYPES.video;
+    expect(cfg.ext).toContain(".mp4");
+    expect(cfg.ext).toContain(".webm");
+    expect(cfg.ext).toContain(".ogv");
+    expect(cfg.ext).toContain(".mov");
+    expect(cfg.maxSize).toBe(50 * 1024 * 1024);
   });
 
-  it("rejects negative file_size", () => {
-    const result = uploadCandidateDocumentSchema.safeParse({
-      candidateId: 42,
-      company_id: 1,
-      file_title: "Resume",
-      file_name: "resume.pdf",
-      file_size: -100,
-    });
-    expect(result.success).toBe(false);
+  it("civilFront and civilBack match photo config", () => {
+    expect(ALLOWED_TYPES.civilFront.ext).toEqual(ALLOWED_TYPES.photo.ext);
+    expect(ALLOWED_TYPES.civilBack.ext).toEqual(ALLOWED_TYPES.photo.ext);
+  });
+
+  it("every document type has a config entry", () => {
+    for (const dt of DOCUMENT_TYPES) {
+      expect(ALLOWED_TYPES[dt]).toBeDefined();
+    }
   });
 });
