@@ -189,11 +189,269 @@ const companyRows: ComparisonRow[] = [
   },
 ];
 
+// ── Staff comparison data ────────────────────────────
+
+const staffRows: ComparisonRow[] = [
+  {
+    category: "Candidate Search",
+    feature: "Typo-tolerant search across 60+ employer databases",
+    studenthub: true,
+    alternatives: "✗",
+    emailSpreadsheets: "✗",
+    traditionalAgencies: "Partial",
+  },
+  {
+    category: "Candidate Search",
+    feature: "Fuzzy name matching for transcription errors",
+    studenthub: true,
+    alternatives: "✗",
+    emailSpreadsheets: "✗",
+    traditionalAgencies: "✗",
+  },
+  {
+    category: "CV Management",
+    feature: "Bulk CV export and shortlisting",
+    studenthub: true,
+    alternatives: "Limited",
+    emailSpreadsheets: "✗",
+    traditionalAgencies: "Partial",
+  },
+  {
+    category: "CV Management",
+    feature: "One-click share to employer",
+    studenthub: true,
+    alternatives: "✗",
+    emailSpreadsheets: "✗",
+    traditionalAgencies: "✗",
+  },
+  {
+    category: "Timesheets",
+    feature: "Digital clock-in/clock-out integrated",
+    studenthub: true,
+    alternatives: "Partial",
+    emailSpreadsheets: "✗",
+    traditionalAgencies: "✗",
+  },
+  {
+    category: "Timesheets",
+    feature: "Bulk approval and reconciliation",
+    studenthub: true,
+    alternatives: "✗",
+    emailSpreadsheets: "✗",
+    traditionalAgencies: "Partial",
+  },
+  {
+    category: "Payments",
+    feature: "Automated commission and margin calculation",
+    studenthub: true,
+    alternatives: "✗",
+    emailSpreadsheets: "✗",
+    traditionalAgencies: "✗",
+  },
+  {
+    category: "Payments",
+    feature: "Multi-agency payment reconciliation",
+    studenthub: true,
+    alternatives: "✗",
+    emailSpreadsheets: "✗",
+    traditionalAgencies: "✗",
+  },
+  {
+    category: "Reporting",
+    feature: "Team performance and placement velocity dashboard",
+    studenthub: true,
+    alternatives: "Partial",
+    emailSpreadsheets: "✗",
+    traditionalAgencies: "✗",
+  },
+  {
+    category: "Reporting",
+    feature: "Real-time margin and commission visibility",
+    studenthub: true,
+    alternatives: "✗",
+    emailSpreadsheets: "✗",
+    traditionalAgencies: "✗",
+  },
+];
+
+// ── Admin comparison data ────────────────────────────
+
+const adminRows: ComparisonRow[] = [
+  {
+    category: "User Management",
+    feature: "Role-based access and permission controls",
+    studenthub: true,
+    alternatives: "Partial",
+    emailSpreadsheets: "✗",
+    traditionalAgencies: "✗",
+  },
+  {
+    category: "User Management",
+    feature: "Unified user directory across all roles",
+    studenthub: true,
+    alternatives: "Limited",
+    emailSpreadsheets: "✗",
+    traditionalAgencies: "✗",
+  },
+  {
+    category: "Finance",
+    feature: "Bulk invoicing and consolidated billing",
+    studenthub: true,
+    alternatives: "Partial",
+    emailSpreadsheets: "✗",
+    traditionalAgencies: "✗",
+  },
+  {
+    category: "Finance",
+    feature: "Automated VAT calculations",
+    studenthub: true,
+    alternatives: "✗",
+    emailSpreadsheets: "✗",
+    traditionalAgencies: "✗",
+  },
+  {
+    category: "Compliance",
+    feature: "Auto right-to-work document verification",
+    studenthub: true,
+    alternatives: "Partial",
+    emailSpreadsheets: "✗",
+    traditionalAgencies: "Partial",
+  },
+  {
+    category: "Compliance",
+    feature: "Expiring certification tracking and alerts",
+    studenthub: true,
+    alternatives: "✗",
+    emailSpreadsheets: "✗",
+    traditionalAgencies: "✗",
+  },
+  {
+    category: "Payroll",
+    feature: "Bulk payment run preparation and approval",
+    studenthub: true,
+    alternatives: "Partial",
+    emailSpreadsheets: "✗",
+    traditionalAgencies: "✗",
+  },
+  {
+    category: "Payroll",
+    feature: "Production-data validation tools",
+    studenthub: true,
+    alternatives: "✗",
+    emailSpreadsheets: "✗",
+    traditionalAgencies: "✗",
+  },
+  {
+    category: "Reporting",
+    feature: "System-wide audit logs and export",
+    studenthub: true,
+    alternatives: "Partial",
+    emailSpreadsheets: "✗",
+    traditionalAgencies: "✗",
+  },
+  {
+    category: "Reporting",
+    feature: "Real-time financial and operational dashboards",
+    studenthub: true,
+    alternatives: "Limited",
+    emailSpreadsheets: "✗",
+    traditionalAgencies: "✗",
+  },
+];
+
+// ── Inspector comparison data ────────────────────────
+
+const inspectorRows: ComparisonRow[] = [
+  {
+    category: "Document Review",
+    feature: "Batch civil ID and certification review",
+    studenthub: true,
+    alternatives: "✗",
+    emailSpreadsheets: "✗",
+    traditionalAgencies: "Partial",
+  },
+  {
+    category: "Document Review",
+    feature: "One-click approve/reject with audit trail",
+    studenthub: true,
+    alternatives: "✗",
+    emailSpreadsheets: "✗",
+    traditionalAgencies: "✗",
+  },
+  {
+    category: "Audit",
+    feature: "Full timestamps and reviewer attribution per decision",
+    studenthub: true,
+    alternatives: "✗",
+    emailSpreadsheets: "✗",
+    traditionalAgencies: "✗",
+  },
+  {
+    category: "Audit",
+    feature: "Audit-ready report export for regulators",
+    studenthub: true,
+    alternatives: "Partial",
+    emailSpreadsheets: "✗",
+    traditionalAgencies: "✗",
+  },
+  {
+    category: "Queue Management",
+    feature: "AI-prioritized queue — urgent items first",
+    studenthub: true,
+    alternatives: "✗",
+    emailSpreadsheets: "✗",
+    traditionalAgencies: "✗",
+  },
+  {
+    category: "Queue Management",
+    feature: "Batch-level operations (approve/reject all)",
+    studenthub: true,
+    alternatives: "✗",
+    emailSpreadsheets: "✗",
+    traditionalAgencies: "✗",
+  },
+  {
+    category: "Exemptions",
+    feature: "Dedicated exemption queue separate from standard flow",
+    studenthub: true,
+    alternatives: "✗",
+    emailSpreadsheets: "✗",
+    traditionalAgencies: "✗",
+  },
+  {
+    category: "Exemptions",
+    feature: "Flagged document tracking and resolution workflow",
+    studenthub: true,
+    alternatives: "✗",
+    emailSpreadsheets: "✗",
+    traditionalAgencies: "✗",
+  },
+  {
+    category: "Compliance",
+    feature: "Multi-region document standard support",
+    studenthub: true,
+    alternatives: "✗",
+    emailSpreadsheets: "✗",
+    traditionalAgencies: "✗",
+  },
+  {
+    category: "Compliance",
+    feature: "Approval rate and rejection analytics",
+    studenthub: true,
+    alternatives: "✗",
+    emailSpreadsheets: "✗",
+    traditionalAgencies: "✗",
+  },
+];
+
 // ── Comparison data per persona ─────────────────────────
 
 const personaRows: Record<string, ComparisonRow[]> = {
   candidate: candidateRows,
+  staff: staffRows,
   company: companyRows,
+  admin: adminRows,
+  inspector: inspectorRows,
 };
 
 // ── Grouped rendering ────────────────────────────────────
@@ -236,8 +494,10 @@ export default function ComparisonTable({ persona = "candidate", className }: Co
         </p>
         <h2 className="shBenefitsTitle text-center">
           {persona === "candidate" && "Why candidates choose StudentHub."}
+          {persona === "staff" && "Why staffing agencies choose StudentHub."}
           {persona === "company" && "Why companies choose StudentHub."}
-          {persona !== "candidate" && persona !== "company" && "See how StudentHub compares."}
+          {persona === "admin" && "Why operations teams choose StudentHub."}
+          {persona === "inspector" && "Why inspection teams choose StudentHub."}
         </h2>
       </div>
 
