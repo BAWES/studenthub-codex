@@ -221,7 +221,7 @@ export async function getAdminCompanyDetail(
           company_email: company.company_email,
           company_website: company.company_website,
           company_approved_to_hire: company.company_approved_to_hire,
-          company_hourly_rate: company.company_hourly_rate,
+          company_hourly_rate: company.company_hourly_rate?.toNumber() ?? null,
           currency_code: company.currency_code,
           no_of_active_requests: company.no_of_active_requests,
           company_created_at: company.company_created_at,
