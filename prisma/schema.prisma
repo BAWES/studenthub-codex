@@ -1176,6 +1176,14 @@ model department {
   department_updated_at DateTime?  @db.DateTime(0)
 }
 
+model designation {
+  designation_uuid       String     @id @db.Char(60)
+  designation_name_en    String     @db.VarChar(255)
+  designation_name_ar    String?    @db.VarChar(255)
+  designation_created_at DateTime?  @db.DateTime(0)
+  designation_updated_at DateTime?  @db.DateTime(0)
+}
+
 model degree {
   degree_uuid         String                @id @db.Char(60)
   degree_group_uuid   String?               @db.Char(60)
