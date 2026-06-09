@@ -160,6 +160,7 @@
   opacity: 1;
 }
 
+.workspaceMark {
   justify-content: center;
   gap: 0;
   border: 1px solid var(--sh-glass-border);
