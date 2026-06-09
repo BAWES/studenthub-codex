@@ -1,5 +1,5 @@
 import { requireRoleCapability } from "@/modules/auth/session";
-import { DataTable } from "@/modules/workspace/DataTable";
+import { DataTablePage } from "@/modules/workspace/DataTablePage";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { getCompanyStoresRows, getCompanyMallsAndBrands, getCompanySelectOptions } from "@/modules/company/data";
 import { AddStoreForm } from "@/modules/company/AddStoreForm";
@@ -18,10 +18,12 @@ export default async function CompanyStoresPage() {
   return (
     <WorkspaceShell session={session} eyebrow="Company" title="Stores &amp; Branches" metrics={[]}>
       <AddStoreForm companies={companies} malls={malls} brands={brands} />
-      <DataTable
+      <DataTablePage
         title="Stores"
         description="Store locations linked to companies you manage."
         rows={rows}
+        searchable
+        searchPlaceholder="Search by store, location, mall, brand..."
         columns={[
           { key: "name", label: "Store", render: (row) => <strong>{row.name}</strong> },
           { key: "location", label: "Location", render: (row) => row.location },

@@ -1,6 +1,6 @@
 import type { Route } from "next";
 import { requireRoleCapability } from "@/modules/auth/session";
-import { DataTable } from "@/modules/workspace/DataTable";
+import { DataTablePage } from "@/modules/workspace/DataTablePage";
 import { StatusBadge } from "@/modules/workspace/StatusBadge";
 import { genericStatusVariant } from "@/modules/workspace/status-mapping";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
@@ -14,11 +14,13 @@ export default async function StaffInterviewsPage() {
 
   return (
     <WorkspaceShell session={session} eyebrow="Staff" title="Interviews" metrics={[]}>
-      <DataTable
+      <DataTablePage
         title="Interview Pipeline"
         description="Interviews scheduled and managed by you."
         rows={rows}
         rowHref={(row) => `/staff/interviews/${row.id}` as Route}
+        searchable
+        searchPlaceholder="Search by candidate, request, status..."
         columns={[
           { key: "candidate", label: "Candidate", render: (row) => <strong>{row.candidate}</strong> },
           { key: "request", label: "Request", render: (row) => row.requestTitle },
