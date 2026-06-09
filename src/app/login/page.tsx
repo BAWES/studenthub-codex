@@ -2,25 +2,25 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getSession } from "@/modules/auth/session";
 import { LoginForm } from "@/modules/auth/LoginForm";
-import { ThemeToggle } from "@/components/ui/ThemeToggle";
+import { ThemeToggle } from "@/modules/theme/ThemeToggle";
 
 export const dynamic = "force-dynamic";
 
 const roles = [
   {
-    icon: () => null,
+    icon: (_p: { className?: string; "aria-hidden"?: string }) => null,
     label: "Candidate",
     color: "sh-info",
     desc: "Find work, track hours, get paid",
   },
   {
-    icon: () => null,
+    icon: (_p: { className?: string; "aria-hidden"?: string }) => null,
     label: "Company",
     color: "sh-success",
     desc: "Hire staff, manage stores, approve timesheets",
   },
   {
-    icon: () => null,
+    icon: (_p: { className?: string; "aria-hidden"?: string }) => null,
     label: "Inspector",
     color: "sh-warning",
     desc: "Monitor compliance and audit records",
