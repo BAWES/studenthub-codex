@@ -11726,7 +11726,7 @@ kbd {
 .shProfileMetaText {
   font-size: var(--sh-fs-sm);
   color: var(--faint);
-
+}
 
 /* ── OS DataTable — Linear-inspired glass redesign ──────────────────── */
 @keyframes shShimmerSlide {
