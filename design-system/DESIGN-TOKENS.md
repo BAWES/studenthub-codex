@@ -7,7 +7,7 @@
 |-------|-------------|-------------|-------|
 | ink | --ink | #182230 | Primary text |
 | muted | --muted | #667085 | Secondary text |
-| faint | --faint | #8a95a6 | Placeholder, disabled text |
+| faint | --faint | #6e7784 | Placeholder, disabled text |
 | line | --line | #d6dce7 | Borders, dividers |
 | paper | --paper | #f5f7fa | Page background |
 | surface | --surface | #ffffff | Card, modal, dropdown bg |

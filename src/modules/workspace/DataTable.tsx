@@ -166,9 +166,9 @@ export function DataTable<T extends { id: string | number }>({
             <thead>
               <tr>
                 {visibleColumns.map((column) => (
-                  <th key={column.key}>{column.label}</th>
+                  <th key={column.key} scope="col">{column.label}</th>
                 ))}
-                {rowHref ? <th aria-label="Open record" /> : null}
+                {rowHref ? <th scope="col" aria-label="Open record" /> : null}
               </tr>
             </thead>
             <tbody>
@@ -208,9 +208,9 @@ export function DataTable<T extends { id: string | number }>({
             <thead>
               <tr>
                 {visibleColumns.map((column) => (
-                  <th key={column.key}>{column.label}</th>
+                  <th key={column.key} scope="col">{column.label}</th>
                 ))}
-                {rowHref ? <th aria-label="Open record" /> : null}
+                {rowHref ? <th scope="col" aria-label="Open record" /> : null}
               </tr>
             </thead>
             <tbody>
@@ -260,9 +260,9 @@ export function DataTable<T extends { id: string | number }>({
           <thead>
             <tr>
               {visibleColumns.map((column) => (
-                <th key={column.key}>{column.label}</th>
+                <th key={column.key} scope="col">{column.label}</th>
               ))}
-              {rowHref ? <th aria-label="Open record" /> : null}
+              {rowHref ? <th scope="col" aria-label="Open record" /> : null}
             </tr>
           </thead>
           <tbody>
@@ -276,7 +276,7 @@ export function DataTable<T extends { id: string | number }>({
                   ))}
                   {rowHref ? (
                     <td className="rowAction" data-label="Action">
-                      <Link href={rowHref(row)} aria-label={getRowLabel ? `Open ${getRowLabel(row)}` : "Open record"}>Open</Link>
+                      <Link href={rowHref(row)}>Open</Link>
                     </td>
                   ) : null}
                 </tr>
