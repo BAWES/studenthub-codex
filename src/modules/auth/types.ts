@@ -79,7 +79,9 @@ export type Capability =
  | "holiday.read"
  | "holiday.write"
  | "story.read"
- | "story.write";
+ | "story.write"
+ | "contracts.read"
+ | "contracts.write";
 
 export type SessionUser = {
   role: Role;
