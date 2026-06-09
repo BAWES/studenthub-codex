@@ -15,27 +15,26 @@ import type { NavItem } from "./navigation";
 import { PageTransition } from "./PageTransition";
 import { RaycastCommandPalette } from "./RaycastCommandPalette";
 
-// ── Command types ─────────────────────────────────────────────
+// ── Command item shape ──────────────────────────────────────────────
 
-export type OSCommand = {
+export interface OSCommand {
   id: string;
   title: string;
   subtitle: string;
   section: string;
   href: string;
   shortcut?: string;
-};
+}
 
-const builtinShortcuts = [
-  { keys: "⌘K", label: "Open command menu" },
-  { keys: "/", label: "Focus workspace search" },
-  { keys: "G H", label: "Go to command workspace" },
-  { keys: "Esc", label: "Close menu or clear focus" }
-];
-
-// ── Keyboard shortcut chords per role ──────────────────────────
+// ── Keyboard shortcut chords per role ────────────────────────────────
 
 function roleChords(role: string): { keys: string; label: string }[] {
+  const builtinShortcuts = [
+    { keys: "⌘K", label: "Open command menu" },
+    { keys: "/", label: "Focus workspace search" },
+    { keys: "G H", label: "Go to command workspace" },
+    { keys: "Esc", label: "Close menu or clear focus" }
+  ];
   const base = builtinShortcuts;
   if (role === "admin") {
     return [
@@ -64,7 +63,7 @@ function roleChords(role: string): { keys: string; label: string }[] {
   return base;
 }
 
-// ── Build commands from nav items ──────────────────────────────
+// ── Build commands from nav items ────────────────────────────────────
 
 function buildOSCommands(navItems: NavItem[], role: string): OSCommand[] {
   const chordByHref: Record<string, string> = {};
@@ -117,7 +116,7 @@ function buildOSCommands(navItems: NavItem[], role: string): OSCommand[] {
   return [...nav, ...scopes];
 }
 
-// ── WorkspaceOS Component ──────────────────────────────────────
+// ── WorkspaceOS Component ──────────────────────────────────────────────
 
 export function WorkspaceOS({
   session,
@@ -149,13 +148,16 @@ export function WorkspaceOS({
       .slice(0, 18);
   }, [commands, cmdQuery]);
 
-  const grouped = useMemo(() => {
-    const g = new Map<string, OSCommand[]>();
-    for (const c of filtered) {
-      g.set(c.section, [...(g.get(c.section) ?? []), c]);
+  const grouped = useMemo((): [string, OSCommand[]][] => {
+    const groups = new Map<string, OSCommand[]>();
+    const list = cmdQuery.trim() ? filtered : commands;
+    for (const cmd of list) {
+      const key = cmd.section || "Other";
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key)!.push(cmd);
     }
-    return [...g.entries()];
-  }, [filtered]);
+    return Array.from(groups.entries());
+  }, [commands, filtered, cmdQuery]);
 
   const visit = useCallback(
     (href: string) => {
@@ -172,13 +174,12 @@ export function WorkspaceOS({
       const el = e.target as HTMLElement | null;
       const typing = el?.tagName === "INPUT" || el?.tagName === "TEXTAREA" || el?.isContentEditable === true;
 
-      // Cmd+K or ? → open command palette
+      // Cmd+K → open command palette
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
         setCmdOpen(true);
         setCmdIndex(0);
         setCmdQuery("");
-        window.setTimeout(() => cmdInputRef.current?.focus(), 0);
         return;
       }
       if (!typing && e.key === "?") {
@@ -186,7 +187,6 @@ export function WorkspaceOS({
         setCmdOpen(true);
         setCmdIndex(0);
         setCmdQuery("shortcut");
-        window.setTimeout(() => cmdInputRef.current?.focus(), 0);
         return;
       }
 
