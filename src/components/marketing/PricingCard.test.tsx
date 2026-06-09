@@ -1,8 +1,8 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, afterEach } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
 import PricingCard from "./PricingCard";
 
-beforeEach(() => {
+afterEach(() => {
   cleanup();
 });
 
@@ -19,27 +19,32 @@ describe("PricingCard", () => {
 
   it("renders staff pricing tiers", () => {
     render(<PricingCard persona="staff" />);
-    expect(screen.getAllByText("Starter").length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText("Professional").length).toBeGreaterThanOrEqual(1);
+    const starter = screen.getAllByText("Starter");
+    expect(starter.length).toBeGreaterThanOrEqual(1);
+    const professional = screen.getAllByText("Professional");
+    expect(professional.length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText("Enterprise")).toBeInTheDocument();
   });
 
   it("renders company pricing tiers", () => {
     render(<PricingCard persona="company" />);
-    expect(screen.getAllByText("Starter").length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText("Professional").length).toBeGreaterThanOrEqual(1);
+    const starter = screen.getAllByText("Starter");
+    expect(starter.length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText("Professional")).toBeInTheDocument();
     expect(screen.getByText("Enterprise")).toBeInTheDocument();
   });
 
   it("renders inspector pricing tiers", () => {
     render(<PricingCard persona="inspector" />);
-    expect(screen.getAllByText("Starter").length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText("Professional").length).toBeGreaterThanOrEqual(1);
+    const starter = screen.getAllByText("Starter");
+    expect(starter.length).toBeGreaterThanOrEqual(1);
+    const professional = screen.getAllByText("Professional");
+    expect(professional.length).toBeGreaterThanOrEqual(1);
   });
 
   it("renders admin pricing with enterprise tier", () => {
     render(<PricingCard persona="admin" />);
-    expect(screen.getAllByText("Enterprise").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText("Enterprise")).toBeInTheDocument();
   });
 
   it("renders popular badge on Professional tier", () => {
