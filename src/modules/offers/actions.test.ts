@@ -2,52 +2,231 @@ import { describe, it, expect } from "vitest";
 import { z } from "zod";
 
 // ---------------------------------------------------------------------------
-// Schema definitions matching src/modules/offers/actions.ts
+// Pure logic: offer list schema validation
+//
+// The listOffers action uses this schema internally. Testing it
+// separately avoids mocking "use server" dependencies (prisma, session, etc.).
 // ---------------------------------------------------------------------------
 
+const coerceBool = z
+  .enum(["true", "false", "1", "0"])
+  .transform((v) => v === "true" || v === "1");
+
 const listOffersSchema = z.object({
+  status: coerceBool.optional(),
+  companyId: z.coerce.number().int().positive().optional(),
+  search: z.string().optional(),
   page: z.coerce.number().int().positive().optional().default(1),
   limit: z.coerce.number().int().min(1).max(100).optional().default(20),
-  status: z.coerce.number().int().min(0).max(3).optional(),
-  candidateId: z.coerce.number().int().positive().optional(),
-  companyId: z.coerce.number().int().positive().optional(),
-  requestUuid: z.string().max(60).optional(),
 });
+
+describe("listOffersSchema", () => {
+  it("accepts empty params (default pagination)", () => {
+    const result = listOffersSchema.safeParse({});
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.page).toBe(1);
+      expect(result.data.limit).toBe(20);
+    }
+  });
+
+  it("accepts pagination params", () => {
+    const result = listOffersSchema.safeParse({ page: 2, limit: 10 });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.page).toBe(2);
+      expect(result.data.limit).toBe(10);
+    }
+  });
+
+  it("accepts status filter", () => {
+    const result = listOffersSchema.safeParse({ status: "true" });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.status).toBe(true);
+    }
+  });
+
+  it("accepts false status filter", () => {
+    const result = listOffersSchema.safeParse({ status: "0" });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.status).toBe(false);
+    }
+  });
+
+  it("accepts companyId filter", () => {
+    const result = listOffersSchema.safeParse({ companyId: "42" });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.companyId).toBe(42);
+    }
+  });
+
+  it("accepts search term", () => {
+    const result = listOffersSchema.safeParse({ search: "cashier" });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.search).toBe("cashier");
+    }
+  });
+
+  it("rejects limit over 100", () => {
+    const result = listOffersSchema.safeParse({ limit: 999 });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects negative page", () => {
+    const result = listOffersSchema.safeParse({ page: -1 });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects non-numeric limit", () => {
+    const result = listOffersSchema.safeParse({ limit: "abc" });
+    expect(result.success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// getOffer schema validation
+// ---------------------------------------------------------------------------
 
 const getOfferSchema = z.object({
   offerUuid: z.string().min(1, "Offer UUID is required"),
 });
 
-const createOfferSchema = z.object({
-  requestUuid: z.string().min(1, "Request UUID is required"),
-  candidateId: z.coerce.number().int().positive().optional(),
-  companyId: z.coerce.number().int().positive(),
-  offerAmount: z.coerce.number().positive().optional(),
-  currencyCode: z.string().length(3).optional().default("KWD"),
-  notes: z.string().max(2000).optional(),
-  validUntil: z.string().optional(),
+describe("getOfferSchema", () => {
+  it("accepts a valid UUID string", () => {
+    const result = getOfferSchema.safeParse({ offerUuid: "abc-123" });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects empty UUID", () => {
+    const result = getOfferSchema.safeParse({ offerUuid: "" });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects missing UUID", () => {
+    const result = getOfferSchema.safeParse({});
+    expect(result.success).toBe(false);
+  });
 });
 
 // ---------------------------------------------------------------------------
-// Types (inline for test — mirror the real types)
+// createOffer schema validation
 // ---------------------------------------------------------------------------
 
-type ListOffersInput = z.input<typeof listOffersSchema>;
-type GetOfferInput = z.input<typeof getOfferSchema>;
-type CreateOfferInput = z.input<typeof createOfferSchema>;
+const createOfferSchema = z.object({
+  storyUuid: z.string().min(1, "Story UUID is required"),
+  requestUuid: z.string().min(1, "Request UUID is required"),
+  areaUuid: z.string().optional(),
+  position: z.string().min(1, "Position is required"),
+  positionAr: z.string().optional(),
+  description: z.string().optional(),
+  descriptionAr: z.string().optional(),
+  hoursPerDay: z.number().int().positive().optional(),
+  daysPerWeek: z.boolean().optional(),
+  compensationType: z.string().optional(),
+  compensationAmount: z.string().optional(),
+  compensationDescription: z.string().optional(),
+  compensationDescriptionAr: z.string().optional(),
+  minAge: z.number().int().positive().optional(),
+  maxAge: z.number().int().positive().optional(),
+  gender: z.boolean().optional(),
+  availableFrom: z.string().optional(),
+  availableTo: z.string().optional(),
+});
+
+describe("createOfferSchema", () => {
+  it("accepts a valid offer input (minimum required)", () => {
+    const result = createOfferSchema.safeParse({
+      storyUuid: "story-123",
+      requestUuid: "req-456",
+      position: "Cashier",
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.position).toBe("Cashier");
+    }
+  });
+
+  it("accepts a full offer input", () => {
+    const result = createOfferSchema.safeParse({
+      storyUuid: "story-123",
+      requestUuid: "req-456",
+      areaUuid: "area-789",
+      position: "Sales Associate",
+      positionAr: "مساعد مبيعات",
+      description: "Looking for a sales associate",
+      hoursPerDay: 8,
+      daysPerWeek: true,
+      compensationType: "Monthly Salary",
+      compensationAmount: "300",
+      compensationDescription: "Monthly salary",
+      compensationDescriptionAr: "راتب شهري",
+      minAge: 18,
+      maxAge: 50,
+      gender: false,
+      availableFrom: "2025-01-01",
+      availableTo: "2025-12-31",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects empty position", () => {
+    const result = createOfferSchema.safeParse({
+      storyUuid: "story-123",
+      requestUuid: "req-456",
+      position: "",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects missing required fields", () => {
+    const result = createOfferSchema.safeParse({});
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects negative hoursPerDay", () => {
+    const result = createOfferSchema.safeParse({
+      storyUuid: "story-123",
+      requestUuid: "req-456",
+      position: "Cashier",
+      hoursPerDay: -1,
+    });
+    expect(result.success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Return type shape
+// ---------------------------------------------------------------------------
 
 type OfferListItem = {
-  offer_uuid: string;
+  job_uuid: string;
+  position: string;
+  position_ar: string | null;
+  description: string | null;
+  hours_per_day: number | null;
+  days_per_week: boolean | null;
+  status: boolean | null;
+  area_uuid: string | null;
   request_uuid: string;
-  candidate_id: number | null;
-  company_id: number;
-  offer_amount: number | null;
-  currency_code: string | null;
-  status: number | null;
-  notes: string | null;
-  valid_until: string | null;
-  created_at: string | null;
-  updated_at: string | null;
+  created_at: Date | null;
+  updated_at: Date | null;
+};
+
+type OfferDetail = OfferListItem & {
+  description_ar: string | null;
+  compensation_type: string | null;
+  compensation_amount: string | null;
+  compensation_description: string | null;
+  compensation_description_ar: string | null;
+  min_age: number | null;
+  max_age: number | null;
+  gender: boolean | null;
+  available_from: Date | null;
+  available_to: Date | null;
 };
 
 type ListOffersResult = {
@@ -58,303 +237,150 @@ type ListOffersResult = {
   totalPages: number;
 };
 
-type CreateOfferResult = {
-  success: boolean;
-  message: string;
-  offerUuid?: string;
-};
-
-// ---------------------------------------------------------------------------
-// listOffersSchema tests
-// ---------------------------------------------------------------------------
-
-describe("listOffersSchema", () => {
-  it("accepts empty params with defaults", () => {
-    const result = listOffersSchema.safeParse({});
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.page).toBe(1);
-      expect(result.data.limit).toBe(20);
-    }
-  });
-
-  it("accepts pagination params", () => {
-    const result = listOffersSchema.safeParse({ page: 2, limit: 50 });
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.page).toBe(2);
-      expect(result.data.limit).toBe(50);
-    }
-  });
-
-  it("accepts status filter", () => {
-    const result = listOffersSchema.safeParse({ status: 1 });
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.status).toBe(1);
-    }
-  });
-
-  it("accepts candidateId filter", () => {
-    const result = listOffersSchema.safeParse({ candidateId: 42 });
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.candidateId).toBe(42);
-    }
-  });
-
-  it("accepts companyId filter", () => {
-    const result = listOffersSchema.safeParse({ companyId: 7 });
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.companyId).toBe(7);
-    }
-  });
-
-  it("accepts requestUuid filter", () => {
-    const result = listOffersSchema.safeParse({ requestUuid: "req-123" });
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.requestUuid).toBe("req-123");
-    }
-  });
-
-  it("rejects status out of range", () => {
-    const result = listOffersSchema.safeParse({ status: 99 });
-    expect(result.success).toBe(false);
-  });
-
-  it("rejects limit over 100", () => {
-    const result = listOffersSchema.safeParse({ limit: 999 });
-    expect(result.success).toBe(false);
-  });
-
-  it("coerces string page to number", () => {
-    const result = listOffersSchema.safeParse({ page: "3" });
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.page).toBe(3);
-    }
-  });
-
-  it("rejects negative candidateId", () => {
-    const result = listOffersSchema.safeParse({ candidateId: -1 });
-    expect(result.success).toBe(false);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// getOfferSchema tests
-// ---------------------------------------------------------------------------
-
-describe("getOfferSchema", () => {
-  it("accepts valid offer UUID", () => {
-    const result = getOfferSchema.safeParse({ offerUuid: "off-abc-123" });
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.offerUuid).toBe("off-abc-123");
-    }
-  });
-
-  it("rejects empty offer UUID", () => {
-    const result = getOfferSchema.safeParse({ offerUuid: "" });
-    expect(result.success).toBe(false);
-  });
-
-  it("rejects missing offer UUID", () => {
-    const result = getOfferSchema.safeParse({});
-    expect(result.success).toBe(false);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// createOfferSchema tests
-// ---------------------------------------------------------------------------
-
-describe("createOfferSchema", () => {
-  it("accepts valid create params", () => {
-    const result = createOfferSchema.safeParse({
-      requestUuid: "req-abc-123",
-      companyId: 7,
-      offerAmount: 1500.5,
-      currencyCode: "KWD",
-    });
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.requestUuid).toBe("req-abc-123");
-      expect(result.data.companyId).toBe(7);
-      expect(result.data.offerAmount).toBe(1500.5);
-      expect(result.data.currencyCode).toBe("KWD");
-    }
-  });
-
-  it("applies default currency code", () => {
-    const result = createOfferSchema.safeParse({
-      requestUuid: "req-abc-123",
-      companyId: 7,
-    });
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.currencyCode).toBe("KWD");
-    }
-  });
-
-  it("accepts optional fields", () => {
-    const result = createOfferSchema.safeParse({
-      requestUuid: "req-abc-123",
-      companyId: 7,
-      notes: "Some additional notes about this offer",
-      validUntil: "2026-07-01",
-    });
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.notes).toBe("Some additional notes about this offer");
-      expect(result.data.validUntil).toBe("2026-07-01");
-    }
-  });
-
-  it("rejects missing requestUuid", () => {
-    const result = createOfferSchema.safeParse({ companyId: 7 });
-    expect(result.success).toBe(false);
-  });
-
-  it("rejects missing companyId", () => {
-    const result = createOfferSchema.safeParse({
-      requestUuid: "req-abc-123",
-    });
-    expect(result.success).toBe(false);
-  });
-
-  it("rejects zero offerAmount", () => {
-    const result = createOfferSchema.safeParse({
-      requestUuid: "req-abc-123",
-      companyId: 7,
-      offerAmount: 0,
-    });
-    expect(result.success).toBe(false);
-  });
-
-  it("rejects invalid currency code length", () => {
-    const result = createOfferSchema.safeParse({
-      requestUuid: "req-abc-123",
-      companyId: 7,
-      currencyCode: "KWDX",
-    });
-    expect(result.success).toBe(false);
-  });
-
-  it("coerces string companyId to number", () => {
-    const result = createOfferSchema.safeParse({
-      requestUuid: "req-abc-123",
-      companyId: "7",
-    });
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.companyId).toBe(7);
-    }
-  });
-});
-
-// ---------------------------------------------------------------------------
-// Type shape tests
-// ---------------------------------------------------------------------------
-
 describe("OfferListItem shape", () => {
-  it("defines expected fields", () => {
+  it("defines the expected fields", () => {
     const mock: OfferListItem = {
-      offer_uuid: "off-abc-123",
-      request_uuid: "req-xyz-789",
-      candidate_id: 42,
-      company_id: 7,
-      offer_amount: 1500.0,
-      currency_code: "KWD",
-      status: 0,
-      notes: "Initial offer",
-      valid_until: "2026-07-01",
-      created_at: "2026-06-09T08:00:00.000Z",
-      updated_at: "2026-06-09T08:00:00.000Z",
-    };
-    expect(mock.offer_uuid).toBe("off-abc-123");
-    expect(mock.status).toBe(0);
-    expect(mock.currency_code).toBe("KWD");
-  });
-
-  it("allows null optional fields", () => {
-    const mock: OfferListItem = {
-      offer_uuid: "off-abc-123",
-      request_uuid: "req-xyz-789",
-      candidate_id: null,
-      company_id: 7,
-      offer_amount: null,
-      currency_code: null,
-      status: null,
-      notes: null,
-      valid_until: null,
+      job_uuid: "abc-123",
+      position: "Cashier",
+      position_ar: null,
+      description: "Looking for a cashier",
+      hours_per_day: null,
+      days_per_week: null,
+      status: true,
+      area_uuid: null,
+      request_uuid: "req-456",
       created_at: null,
       updated_at: null,
     };
-    expect(mock.offer_uuid).toBeDefined();
-    expect(mock.candidate_id).toBeNull();
+    expect(mock.job_uuid).toBe("abc-123");
+    expect(mock.position).toBe("Cashier");
+    expect(mock.status).toBe(true);
+    expect(mock.request_uuid).toBe("req-456");
+  });
+});
+
+describe("OfferDetail shape", () => {
+  it("defines the expected fields including compensation", () => {
+    const mock: OfferDetail = {
+      job_uuid: "abc-123",
+      position: "Cashier",
+      position_ar: null,
+      description: "Looking for a cashier",
+      description_ar: null,
+      hours_per_day: 8,
+      days_per_week: true,
+      compensation_type: "Monthly Salary",
+      compensation_amount: "300",
+      compensation_description: "Monthly salary",
+      compensation_description_ar: null,
+      min_age: 18,
+      max_age: 50,
+      gender: false,
+      status: true,
+      area_uuid: null,
+      request_uuid: "req-456",
+      available_from: null,
+      available_to: null,
+      created_at: null,
+      updated_at: null,
+    };
+    expect(mock.compensation_type).toBe("Monthly Salary");
+    expect(mock.min_age).toBe(18);
+    expect(mock.max_age).toBe(50);
   });
 });
 
 describe("ListOffersResult shape", () => {
-  it("accepts empty result", () => {
-    const r: ListOffersResult = {
+  it("accepts a valid result set", () => {
+    const result: ListOffersResult = {
       offers: [],
       total: 0,
       page: 1,
       limit: 20,
       totalPages: 0,
     };
-    expect(r.total).toBe(0);
-    expect(r.offers).toHaveLength(0);
-  });
-
-  it("accepts populated result", () => {
-    const r: ListOffersResult = {
-      offers: [
-        {
-          offer_uuid: "off-1",
-          request_uuid: "req-1",
-          candidate_id: null,
-          company_id: 7,
-          offer_amount: 1500.0,
-          currency_code: "KWD",
-          status: 0,
-          notes: null,
-          valid_until: null,
-          created_at: "2026-06-09T08:00:00.000Z",
-          updated_at: null,
-        },
-      ],
-      total: 1,
-      page: 1,
-      limit: 20,
-      totalPages: 1,
-    };
-    expect(r.offers).toHaveLength(1);
-    expect(r.totalPages).toBe(1);
+    expect(result.total).toBe(0);
+    expect(result.offers).toHaveLength(0);
   });
 });
 
-describe("CreateOfferResult shape", () => {
-  it("accepts success result with UUID", () => {
-    const r: CreateOfferResult = {
-      success: true,
-      message: "Offer created successfully",
-      offerUuid: "off-new-uuid",
-    };
-    expect(r.success).toBe(true);
-    expect(r.offerUuid).toBeDefined();
+// ---------------------------------------------------------------------------
+// Pure function: build offer list query filter
+// ---------------------------------------------------------------------------
+
+type OfferWhereInput = {
+  status?: boolean;
+  deleted_at?: null;
+  request?: { company_id?: number };
+  OR?: Array<Record<string, unknown>>;
+};
+
+function buildOfferListFilter(
+  status?: boolean,
+  companyId?: number,
+  search?: string,
+): OfferWhereInput {
+  const where: Record<string, unknown> = { deleted_at: null };
+
+  if (status !== undefined) {
+    where.status = status;
+  }
+
+  if (companyId !== undefined) {
+    where.request = { company_id: companyId };
+  }
+
+  if (search !== undefined && search.trim().length > 0) {
+    const term = search.trim();
+    where.OR = [
+      { position: { contains: term } },
+      { position_ar: { contains: term } },
+      { description: { contains: term } },
+      { description_ar: { contains: term } },
+    ];
+  }
+
+  return where as OfferWhereInput;
+}
+
+describe("buildOfferListFilter", () => {
+  it("returns base filter with deleted_at: null when no params", () => {
+    const result = buildOfferListFilter();
+    expect(result).toEqual({ deleted_at: null });
   });
 
-  it("accepts error result", () => {
-    const r: CreateOfferResult = {
-      success: false,
-      message: "Company not found",
-    };
-    expect(r.success).toBe(false);
-    expect(r.offerUuid).toBeUndefined();
+  it("filters by active status", () => {
+    const result = buildOfferListFilter(true);
+    expect(result.status).toBe(true);
+    expect(result.deleted_at).toBeNull();
+  });
+
+  it("filters by inactive status", () => {
+    const result = buildOfferListFilter(false);
+    expect(result.status).toBe(false);
+    expect(result.deleted_at).toBeNull();
+  });
+
+  it("filters by companyId via request relation", () => {
+    const result = buildOfferListFilter(undefined, 42);
+    expect(result.request).toEqual({ company_id: 42 });
+  });
+
+  it("adds search OR terms for non-empty search", () => {
+    const result = buildOfferListFilter(undefined, undefined, "cashier");
+    expect(result.OR).toBeDefined();
+    expect(result.OR).toHaveLength(4);
+    expect(result.OR![0]).toEqual({ position: { contains: "cashier" } });
+  });
+
+  it("ignores empty search string", () => {
+    const result = buildOfferListFilter(undefined, undefined, "  ");
+    expect(result.OR).toBeUndefined();
+  });
+
+  it("combines status and companyId filters", () => {
+    const result = buildOfferListFilter(true, 42);
+    expect(result.status).toBe(true);
+    expect(result.request).toEqual({ company_id: 42 });
   });
 });

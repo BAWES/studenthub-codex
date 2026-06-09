@@ -1,52 +1,53 @@
 "use server";
 
 import crypto from "node:crypto";
-import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
 
 // ---------------------------------------------------------------------------
-// Tables
-// ---------------------------------------------------------------------------
-// This module uses the `offer` table which is not in the Prisma schema.
-// All database operations use raw SQL via prisma.$queryRawUnsafe /
-// prisma.$executeRawUnsafe.
-
-// ---------------------------------------------------------------------------
-// Constants
-// ---------------------------------------------------------------------------
-
-const OFFER_STATUS_PENDING = 0;
-const OFFER_STATUS_ACCEPTED = 1;
-const OFFER_STATUS_REJECTED = 2;
-const OFFER_STATUS_CANCELLED = 3;
-
-// ---------------------------------------------------------------------------
 // Schemas
 // ---------------------------------------------------------------------------
 
-const listOffersSchema = z.object({
+/**
+ * Coerce a boolean-like string/enum value to a real boolean.
+ * Handles "true"/"false"/"1"/"0" — mirrors the job/contract action pattern.
+ */
+const coerceBool = z
+  .enum(["true", "false", "1", "0"])
+  .transform((v) => v === "true" || v === "1");
+
+export const listOffersSchema = z.object({
+  status: coerceBool.optional(),
+  companyId: z.coerce.number().int().positive().optional(),
+  search: z.string().optional(),
   page: z.coerce.number().int().positive().optional().default(1),
   limit: z.coerce.number().int().min(1).max(100).optional().default(20),
-  status: z.coerce.number().int().min(0).max(3).optional(),
-  candidateId: z.coerce.number().int().positive().optional(),
-  companyId: z.coerce.number().int().positive().optional(),
-  requestUuid: z.string().max(60).optional(),
 });
 
-const getOfferSchema = z.object({
+export const getOfferSchema = z.object({
   offerUuid: z.string().min(1, "Offer UUID is required"),
 });
 
-const createOfferSchema = z.object({
+export const createOfferSchema = z.object({
+  storyUuid: z.string().min(1, "Story UUID is required"),
   requestUuid: z.string().min(1, "Request UUID is required"),
-  candidateId: z.coerce.number().int().positive().optional(),
-  companyId: z.coerce.number().int().positive(),
-  offerAmount: z.coerce.number().positive().optional(),
-  currencyCode: z.string().length(3).optional().default("KWD"),
-  notes: z.string().max(2000).optional(),
-  validUntil: z.string().optional(),
+  areaUuid: z.string().optional(),
+  position: z.string().min(1, "Position is required"),
+  positionAr: z.string().optional(),
+  description: z.string().optional(),
+  descriptionAr: z.string().optional(),
+  hoursPerDay: z.number().int().positive().optional(),
+  daysPerWeek: z.boolean().optional(),
+  compensationType: z.enum(["FIXED_PRICE", "HOURLY", "MONTHLY_SALARY"]).optional(),
+  compensationAmount: z.string().optional(),
+  compensationDescription: z.string().optional(),
+  compensationDescriptionAr: z.string().optional(),
+  minAge: z.number().int().positive().optional(),
+  maxAge: z.number().int().positive().optional(),
+  gender: z.boolean().optional(),
+  availableFrom: z.string().optional(),
+  availableTo: z.string().optional(),
 });
 
 // ---------------------------------------------------------------------------
@@ -58,17 +59,30 @@ export type GetOfferParams = z.input<typeof getOfferSchema>;
 export type CreateOfferParams = z.input<typeof createOfferSchema>;
 
 export type OfferListItem = {
-  offer_uuid: string;
+  job_uuid: string;
+  position: string;
+  position_ar: string | null;
+  description: string | null;
+  hours_per_day: number | null;
+  days_per_week: boolean | null;
+  status: boolean | null;
+  area_uuid: string | null;
   request_uuid: string;
-  candidate_id: number | null;
-  company_id: number;
-  offer_amount: number | null;
-  currency_code: string | null;
-  status: number | null;
-  notes: string | null;
-  valid_until: string | null;
-  created_at: string | null;
-  updated_at: string | null;
+  created_at: Date | null;
+  updated_at: Date | null;
+};
+
+export type OfferDetail = OfferListItem & {
+  description_ar: string | null;
+  compensation_type: string | null;
+  compensation_amount: string | null;
+  compensation_description: string | null;
+  compensation_description_ar: string | null;
+  min_age: number | null;
+  max_age: number | null;
+  gender: boolean | null;
+  available_from: Date | null;
+  available_to: Date | null;
 };
 
 export type ListOffersResult = {
@@ -79,40 +93,32 @@ export type ListOffersResult = {
   totalPages: number;
 };
 
-export type CreateOfferResult = {
-  success: boolean;
-  message: string;
-  offerUuid?: string;
-};
-
 // ---------------------------------------------------------------------------
 // listOffers
 // ---------------------------------------------------------------------------
 
 /**
- * List offers with optional filters and pagination.
+ * List job offers with optional filters and pagination.
  *
- * Mirrors the pattern from listJobs / listContracts.
- * Supports filtering by status, candidate, company, and request.
- * Uses raw SQL because the offer table is not in the Prisma schema.
- *
- * @param params - Optional filters and pagination
- * @returns Paginated offer list with total count
+ * Maps to the `job` table — each job is an offer published by a company.
+ * - Filters by status (active/inactive), company (via request relation),
+ *   and keyword search on position / description
+ * - Excludes soft-deleted offers (deleted_at IS NULL)
+ * - Paginated with configurable page/limit
  */
 export async function listOffers(
   params: FormData | z.input<typeof listOffersSchema> = {},
 ): Promise<ListOffersResult> {
-  await requireCapability("offer.read");
+  await requireCapability("candidate.read.own");
 
   const raw =
     params instanceof FormData
       ? {
+          status: params.get("status"),
+          companyId: params.get("companyId"),
+          search: params.get("search"),
           page: params.get("page"),
           limit: params.get("limit"),
-          status: params.get("status"),
-          candidateId: params.get("candidateId"),
-          companyId: params.get("companyId"),
-          requestUuid: params.get("requestUuid"),
         }
       : params;
 
@@ -121,65 +127,60 @@ export async function listOffers(
     return { offers: [], total: 0, page: 1, limit: 20, totalPages: 0 };
   }
 
-  const { page, limit, status, candidateId, companyId, requestUuid } =
-    parsed.data;
+  const { status, companyId, search, page, limit } = parsed.data;
   const skip = (page - 1) * limit;
 
-  // Build WHERE clause dynamically
-  const conditions: string[] = [];
-  const values: unknown[] = [];
+  // Build Prisma where clause
+  const where: Record<string, unknown> = { deleted_at: null };
 
   if (status !== undefined) {
-    conditions.push("status = ?");
-    values.push(status);
+    where.status = status;
   }
-  if (candidateId !== undefined) {
-    conditions.push("candidate_id = ?");
-    values.push(candidateId);
-  }
+
   if (companyId !== undefined) {
-    conditions.push("company_id = ?");
-    values.push(companyId);
-  }
-  if (requestUuid !== undefined && requestUuid.trim()) {
-    conditions.push("request_uuid = ?");
-    values.push(requestUuid);
+    where.request = { company_id: companyId };
   }
 
-  const whereClause =
-    conditions.length > 0 ? "WHERE " + conditions.join(" AND ") : "";
+  if (search !== undefined && search.trim().length > 0) {
+    const term = search.trim();
+    where.OR = [
+      { position: { contains: term } },
+      { position_ar: { contains: term } },
+      { description: { contains: term } },
+      { description_ar: { contains: term } },
+    ];
+  }
 
-  try {
-    // Count total
-    const countSql = `SELECT COUNT(*) as cnt FROM offer ${whereClause}`;
-    const countResult = await prisma.$queryRawUnsafe<
-      { cnt: bigint }[]
-    >(countSql, ...values);
-    const total = Number(countResult[0]?.cnt ?? 0);
-
-    // Fetch paginated rows
-    const dataSql = `SELECT * FROM offer ${whereClause} ORDER BY created_at DESC LIMIT ? OFFSET ?`;
-    const rows = await prisma.$queryRawUnsafe<OfferListItem[]>(
-      dataSql,
-      ...values,
-      limit,
+  const [offers, total] = await Promise.all([
+    prisma.job.findMany({
+      where: where as any,
+      orderBy: { created_at: "desc" },
       skip,
-    );
+      take: limit,
+      select: {
+        job_uuid: true,
+        position: true,
+        position_ar: true,
+        description: true,
+        hours_per_day: true,
+        days_per_week: true,
+        status: true,
+        area_uuid: true,
+        request_uuid: true,
+        created_at: true,
+        updated_at: true,
+      },
+    }),
+    prisma.job.count({ where: where as any }),
+  ]);
 
-    return {
-      offers: rows.map((r) => ({
-        ...r,
-        offer_amount: r.offer_amount ? Number(r.offer_amount) : null,
-      })),
-      total,
-      page,
-      limit,
-      totalPages: Math.ceil(total / limit),
-    };
-  } catch (error) {
-    console.error("listOffers error:", error);
-    return { offers: [], total: 0, page: 1, limit: 20, totalPages: 0 };
-  }
+  return {
+    offers: offers as unknown as OfferListItem[],
+    total,
+    page,
+    limit,
+    totalPages: Math.ceil(total / limit),
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -187,17 +188,15 @@ export async function listOffers(
 // ---------------------------------------------------------------------------
 
 /**
- * Get a single offer by UUID.
- * Uses raw SQL because the offer table is not in the Prisma schema.
- * Throws if the offer is not found.
+ * Get a single job offer by UUID.
  *
- * @param params - Object with offerUuid
- * @returns The offer record
+ * Returns full detail including compensation fields and availability dates.
+ * Throws if the offer is not found or has been soft-deleted.
  */
 export async function getOffer(
   params: GetOfferParams,
-): Promise<OfferListItem> {
-  await requireCapability("offer.read");
+): Promise<OfferDetail> {
+  await requireCapability("candidate.read.own");
 
   const parsed = getOfferSchema.safeParse(params);
   if (!parsed.success) {
@@ -206,20 +205,44 @@ export async function getOffer(
 
   const { offerUuid } = parsed.data;
 
-  const rows = await prisma.$queryRawUnsafe<OfferListItem[]>(
-    "SELECT * FROM offer WHERE offer_uuid = ? LIMIT 1",
-    offerUuid,
-  );
+  const offer = await prisma.job.findUnique({
+    where: { job_uuid: offerUuid },
+    include: {
+      request: {
+        select: {
+          company_id: true,
+          request_position_title: true,
+        },
+      },
+    },
+  });
 
-  if (!rows || rows.length === 0) {
+  if (!offer || offer.deleted_at) {
     throw new Error("Offer not found");
   }
 
   return {
-    ...rows[0],
-    offer_amount: rows[0].offer_amount
-      ? Number(rows[0].offer_amount)
-      : null,
+    job_uuid: offer.job_uuid,
+    position: offer.position,
+    position_ar: offer.position_ar ?? null,
+    description: offer.description ?? null,
+    description_ar: offer.description_ar ?? null,
+    hours_per_day: offer.hours_per_day ?? null,
+    days_per_week: offer.days_per_week ?? null,
+    compensation_type: offer.compensation_type ?? null,
+    compensation_amount: offer.compensation_amount ?? null,
+    compensation_description: offer.compensation_description ?? null,
+    compensation_description_ar: offer.compensation_description_ar ?? null,
+    min_age: offer.min_age ?? null,
+    max_age: offer.max_age ?? null,
+    gender: offer.gender ?? null,
+    status: offer.status,
+    area_uuid: offer.area_uuid ?? null,
+    request_uuid: offer.request_uuid,
+    available_from: offer.available_from ?? null,
+    available_to: offer.available_to ?? null,
+    created_at: offer.created_at ?? null,
+    updated_at: offer.updated_at ?? null,
   };
 }
 
@@ -228,97 +251,82 @@ export async function getOffer(
 // ---------------------------------------------------------------------------
 
 /**
- * Create a new offer.
- * Uses raw SQL because the offer table is not in the Prisma schema.
- * Generates a UUID and inserts with the configured status (pending).
+ * Create a new job offer.
  *
- * @param params - Offer creation params
- * @returns Result with success flag, message, and new offer UUID
+ * Maps to inserting into the `job` table. Requires a valid request_uuid
+ * and story_uuid (both must reference existing records).
+ * Returns the created offer detail.
  */
 export async function createOffer(
-  params: FormData | z.input<typeof createOfferSchema>,
-): Promise<CreateOfferResult> {
-  await requireCapability("offer.write");
+  params: CreateOfferParams,
+): Promise<OfferDetail> {
+  await requireCapability("request.write");
 
-  const raw =
-    params instanceof FormData
-      ? {
-          requestUuid: params.get("requestUuid"),
-          candidateId: params.get("candidateId"),
-          companyId: params.get("companyId"),
-          offerAmount: params.get("offerAmount"),
-          currencyCode: params.get("currencyCode"),
-          notes: params.get("notes"),
-          validUntil: params.get("validUntil"),
-        }
-      : params;
-
-  const parsed = createOfferSchema.safeParse(raw);
+  const parsed = createOfferSchema.safeParse(params);
   if (!parsed.success) {
-    return {
-      success: false,
-      message: parsed.error.issues[0]?.message ?? "Invalid input",
-    };
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid input");
   }
 
-  const {
-    requestUuid,
-    candidateId,
-    companyId,
-    offerAmount,
-    currencyCode,
-    notes,
-    validUntil,
-  } = parsed.data;
+  const data = parsed.data;
 
-  const offerUuid = `offer_${crypto.randomUUID()}`;
-  const now = new Date().toISOString().slice(0, 19).replace("T", " ");
+  const offer = await prisma.job.create({
+    data: {
+      job_uuid: crypto.randomUUID(),
+      story_uuid: data.storyUuid,
+      request_uuid: data.requestUuid,
+      area_uuid: data.areaUuid ?? null,
+      position: data.position,
+      position_ar: data.positionAr ?? null,
+      description: data.description ?? null,
+      description_ar: data.descriptionAr ?? null,
+      hours_per_day: data.hoursPerDay ?? null,
+      days_per_week: data.daysPerWeek ?? null,
+      compensation_type: (data.compensationType as any) ?? null,
+      compensation_amount: data.compensationAmount ?? null,
+      compensation_description: data.compensationDescription ?? null,
+      compensation_description_ar: data.compensationDescriptionAr ?? null,
+      min_age: data.minAge ?? null,
+      max_age: data.maxAge ?? null,
+      gender: data.gender ?? null,
+      available_from: data.availableFrom ? new Date(data.availableFrom) : null,
+      available_to: data.availableTo ? new Date(data.availableTo) : null,
+      status: true,
+      created_at: new Date(),
+      updated_at: new Date(),
+      created_by: null,
+      updated_by: null,
+    },
+    include: {
+      request: {
+        select: {
+          company_id: true,
+          request_position_title: true,
+        },
+      },
+    },
+  });
 
-  try {
-    await prisma.$executeRawUnsafe(
-      `INSERT INTO offer (offer_uuid, request_uuid, candidate_id, company_id, 
-        offer_amount, currency_code, status, notes, valid_until, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      offerUuid,
-      requestUuid,
-      candidateId ?? null,
-      companyId,
-      offerAmount ?? null,
-      currencyCode,
-      OFFER_STATUS_PENDING,
-      notes ?? null,
-      validUntil ?? null,
-      now,
-      now,
-    );
-
-    revalidatePath("/staff/requests");
-    revalidatePath("/admin/requests");
-    revalidatePath("/candidate/offers");
-
-    return {
-      success: true,
-      message: "Offer created successfully",
-      offerUuid,
-    };
-  } catch (error) {
-    console.error("createOffer error:", error);
-    return {
-      success: false,
-      message: "Failed to create offer. Please try again.",
-    };
-  }
-}
-
-// ---------------------------------------------------------------------------
-// getValidOfferStatuses (utility)
-// ---------------------------------------------------------------------------
-
-export function getValidOfferStatuses(): Record<string, number> {
   return {
-    pending: OFFER_STATUS_PENDING,
-    accepted: OFFER_STATUS_ACCEPTED,
-    rejected: OFFER_STATUS_REJECTED,
-    cancelled: OFFER_STATUS_CANCELLED,
+    job_uuid: offer.job_uuid,
+    position: offer.position,
+    position_ar: offer.position_ar ?? null,
+    description: offer.description ?? null,
+    description_ar: offer.description_ar ?? null,
+    hours_per_day: offer.hours_per_day ?? null,
+    days_per_week: offer.days_per_week ?? null,
+    compensation_type: offer.compensation_type ?? null,
+    compensation_amount: offer.compensation_amount ?? null,
+    compensation_description: offer.compensation_description ?? null,
+    compensation_description_ar: offer.compensation_description_ar ?? null,
+    min_age: offer.min_age ?? null,
+    max_age: offer.max_age ?? null,
+    gender: offer.gender ?? null,
+    status: offer.status,
+    area_uuid: offer.area_uuid ?? null,
+    request_uuid: offer.request_uuid,
+    available_from: offer.available_from ?? null,
+    available_to: offer.available_to ?? null,
+    created_at: offer.created_at ?? null,
+    updated_at: offer.updated_at ?? null,
   };
 }

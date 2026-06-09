@@ -1,225 +1,192 @@
 "use server";
 
-import crypto from "node:crypto";
-import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
 
 // ---------------------------------------------------------------------------
-// Schemas
-// ---------------------------------------------------------------------------
-
-const listEducationSchema = z.object({
-  candidateId: z.number().int().positive().optional(),
-  page: z.number().int().positive().optional(),
-  limit: z.number().int().min(1).max(100).optional(),
-});
-
-const createEducationSchema = z.object({
-  candidateId: z.number().int().positive(),
-  universityId: z.number().int().positive("University is required"),
-  degreeUuid: z.string().optional(),
-  majorUuid: z.string().optional(),
-  graduationYear: z.number().int().min(1900).max(2100).optional(),
-  isCurrentlyStudying: z.boolean().optional(),
-});
-
-const updateEducationSchema = z.object({
-  educationUuid: z.string().min(1, "Education UUID is required"),
-  universityId: z.number().int().positive().optional(),
-  degreeUuid: z.string().optional(),
-  majorUuid: z.string().optional(),
-  graduationYear: z.number().int().min(1900).max(2100).optional(),
-  isCurrentlyStudying: z.boolean().optional(),
-});
-
-const deleteEducationSchema = z.object({
-  educationUuid: z.string().min(1, "Education UUID is required"),
-});
-
-// ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
-export type ListEducationParams = z.input<typeof listEducationSchema>;
-export type CreateEducationParams = z.input<typeof createEducationSchema>;
-export type UpdateEducationParams = z.input<typeof updateEducationSchema>;
-export type DeleteEducationParams = z.input<typeof deleteEducationSchema>;
-
-export type EducationListItem = {
+export type CandidateEducationItem = {
   education_uuid: string;
   candidate_id: number;
   university_id: number;
+  university_name_en: string | null;
+  university_name_ar: string | null;
   degree_uuid: string | null;
+  degree_name_en: string | null;
+  degree_name_ar: string | null;
   major_uuid: string | null;
+  major_name_en: string | null;
+  major_name_ar: string | null;
   graduation_year: number | null;
-  is_currently_studying: boolean | null;
+  is_currently_studying: boolean;
   created_at: Date | null;
   updated_at: Date | null;
 };
 
-export type ListEducationResult = {
-  items: EducationListItem[];
+export type CandidateEducationDetail = CandidateEducationItem | null;
+
+export type ListCandidateEducationResult = {
+  items: CandidateEducationItem[];
   total: number;
   page: number;
-  limit: number;
-  totalPages: number;
+  pageSize: number;
 };
 
 // ---------------------------------------------------------------------------
-// Server actions
+// Schemas
+// ---------------------------------------------------------------------------
+
+const listCandidateEducationSchema = z.object({
+  candidateId: z.coerce.number().int().positive("Candidate ID is required"),
+  page: z.coerce.number().int().positive().optional().default(1),
+  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
+});
+
+const getCandidateEducationSchema = z.object({
+  educationUuid: z.string().min(1, "Education UUID is required"),
+});
+
+export type ListCandidateEducationParams = z.input<
+  typeof listCandidateEducationSchema
+>;
+export type GetCandidateEducationParams = z.input<
+  typeof getCandidateEducationSchema
+>;
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+/** Map a Prisma candidate_education row to the shared item shape. */
+function toItem(
+  row: PrismaCandidateEducationWithRelations,
+): CandidateEducationItem {
+  return {
+    education_uuid: row.education_uuid,
+    candidate_id: row.candidate_id,
+    university_id: row.university_id,
+    university_name_en: row.university?.university_name_en ?? null,
+    university_name_ar: row.university?.university_name_ar ?? null,
+    degree_uuid: row.degree_uuid,
+    degree_name_en: row.degree?.degree_name_en ?? null,
+    degree_name_ar: row.degree?.degree_name_ar ?? null,
+    major_uuid: row.major_uuid,
+    major_name_en: row.major?.major_name_en ?? null,
+    major_name_ar: row.major?.major_name_ar ?? null,
+    graduation_year: row.graduation_year ?? null,
+    is_currently_studying: row.is_currently_studying ?? false,
+    created_at: row.created_at,
+    updated_at: row.updated_at,
+  };
+}
+
+/** Raw row shape with eagerly loaded relations. */
+type PrismaCandidateEducationWithRelations = Awaited<
+  ReturnType<typeof prisma.candidate_education.findFirst>
+> & {
+  university?: { university_name_en: string | null; university_name_ar: string | null } | null;
+  degree?: { degree_name_en: string | null; degree_name_ar: string | null } | null;
+  major?: { major_name_en: string | null; major_name_ar: string | null } | null;
+};
+
+// ---------------------------------------------------------------------------
+// Server Actions
 // ---------------------------------------------------------------------------
 
 /**
- * List candidate education entries with pagination and optional candidate filter.
+ * List education records for a candidate.
+ * Maps to legacy CandidateEducationController::actionIndex.
+ * Requires candidate.read capability.
  */
-export async function listEducation(
-  params: ListEducationParams = {},
-): Promise<ListEducationResult> {
-  await requireCapability("candidate.read.own");
+export async function listCandidateEducation(
+  params: ListCandidateEducationParams,
+): Promise<ListCandidateEducationResult> {
+  await requireCapability("candidate.read");
 
-  const parsed = listEducationSchema.safeParse(params);
-  if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Invalid list parameters");
-  }
+  const { candidateId, page, limit } =
+    listCandidateEducationSchema.parse(params);
 
-  const { candidateId, page = 1, limit = 20 } = parsed.data;
+  const where = { candidate_id: candidateId };
 
-  const where: { candidate_id?: number } = {};
-  if (candidateId !== undefined) {
-    where.candidate_id = candidateId;
-  }
-
-  const [items, total] = await Promise.all([
+  const [rows, total] = await Promise.all([
     prisma.candidate_education.findMany({
       where,
-      orderBy: { created_at: "desc" },
+      orderBy: [{ created_at: "desc" }, { education_uuid: "desc" }],
       skip: (page - 1) * limit,
       take: limit,
+      include: {
+        university: {
+          select: {
+            university_name_en: true,
+            university_name_ar: true,
+          },
+        },
+        degree: {
+          select: {
+            degree_name_en: true,
+            degree_name_ar: true,
+          },
+        },
+        major: {
+          select: {
+            major_name_en: true,
+            major_name_ar: true,
+          },
+        },
+      },
     }),
     prisma.candidate_education.count({ where }),
   ]);
 
   return {
-    items: items as EducationListItem[],
+    items: rows.map(toItem),
     total,
     page,
-    limit,
-    totalPages: Math.ceil(total / limit),
+    pageSize: limit,
   };
 }
 
 /**
- * Create a new candidate education entry.
+ * Get a single education record by UUID.
+ * Maps to legacy CandidateEducationController::actionView.
+ * Requires candidate.read capability.
+ * Returns null if the record does not exist or belongs to another candidate.
  */
-export async function createEducation(
-  params: CreateEducationParams,
-): Promise<EducationListItem> {
-  await requireCapability("candidate.read.own");
+export async function getCandidateEducation(
+  params: GetCandidateEducationParams,
+): Promise<CandidateEducationDetail> {
+  await requireCapability("candidate.read");
 
-  const parsed = createEducationSchema.safeParse(params);
-  if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Invalid input");
-  }
+  const { educationUuid } = getCandidateEducationSchema.parse(params);
 
-  const {
-    candidateId,
-    universityId,
-    degreeUuid,
-    majorUuid,
-    graduationYear,
-    isCurrentlyStudying,
-  } = parsed.data;
-
-  const now = new Date();
-
-  const item = await prisma.candidate_education.create({
-    data: {
-      education_uuid: crypto.randomUUID(),
-      candidate_id: candidateId,
-      university_id: universityId,
-      degree_uuid: degreeUuid ?? null,
-      major_uuid: majorUuid ?? null,
-      graduation_year: graduationYear ?? null,
-      is_currently_studying: isCurrentlyStudying ?? null,
-      created_at: now,
-      updated_at: now,
+  const row = await prisma.candidate_education.findUnique({
+    where: { education_uuid: educationUuid },
+    include: {
+      university: {
+        select: {
+          university_name_en: true,
+          university_name_ar: true,
+        },
+      },
+      degree: {
+        select: {
+          degree_name_en: true,
+          degree_name_ar: true,
+        },
+      },
+      major: {
+        select: {
+          major_name_en: true,
+          major_name_ar: true,
+        },
+      },
     },
   });
 
-  revalidatePath("/candidate/profile");
-  return item as EducationListItem;
-}
+  if (!row) return null;
 
-/**
- * Update an existing candidate education entry.
- */
-export async function updateEducation(
-  params: UpdateEducationParams,
-): Promise<EducationListItem> {
-  await requireCapability("candidate.read.own");
-
-  const parsed = updateEducationSchema.safeParse(params);
-  if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Invalid input");
-  }
-
-  const { educationUuid, ...fields } = parsed.data;
-
-  // Verify the record exists
-  const existing = await prisma.candidate_education.findUnique({
-    where: { education_uuid: educationUuid },
-  });
-  if (!existing) {
-    throw new Error("Education entry not found");
-  }
-
-  const item = await prisma.candidate_education.update({
-    where: { education_uuid: educationUuid },
-    data: {
-      ...(fields.universityId !== undefined && { university_id: fields.universityId }),
-      ...(fields.degreeUuid !== undefined && { degree_uuid: fields.degreeUuid }),
-      ...(fields.majorUuid !== undefined && { major_uuid: fields.majorUuid }),
-      ...(fields.graduationYear !== undefined && { graduation_year: fields.graduationYear }),
-      ...(fields.isCurrentlyStudying !== undefined && {
-        is_currently_studying: fields.isCurrentlyStudying,
-      }),
-      updated_at: new Date(),
-    },
-  });
-
-  revalidatePath("/candidate/profile");
-  return item as EducationListItem;
-}
-
-/**
- * Delete a candidate education entry.
- */
-export async function deleteEducation(
-  params: DeleteEducationParams,
-): Promise<{ success: boolean }> {
-  await requireCapability("candidate.read.own");
-
-  const parsed = deleteEducationSchema.safeParse(params);
-  if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Invalid input");
-  }
-
-  const { educationUuid } = parsed.data;
-
-  // Verify the record exists
-  const existing = await prisma.candidate_education.findUnique({
-    where: { education_uuid: educationUuid },
-  });
-  if (!existing) {
-    throw new Error("Education entry not found");
-  }
-
-  await prisma.candidate_education.delete({
-    where: { education_uuid: educationUuid },
-  });
-
-  revalidatePath("/candidate/profile");
-  return { success: true };
+  return toItem(row);
 }
