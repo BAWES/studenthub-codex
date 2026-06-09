@@ -2,9 +2,9 @@ import { describe, it, expect } from "vitest";
 import { z } from "zod";
 
 // ---------------------------------------------------------------------------
-// Pure logic: bank list schema validation
+// Pure logic: bank schema validation
 //
-// The listBanks and getBank actions use these schemas internally. Testing them
+// These schemas are used internally by the server actions. Testing them
 // separately avoids mocking "use server" dependencies (prisma, session, etc.).
 // ---------------------------------------------------------------------------
 
@@ -15,6 +15,15 @@ const listBanksSchema = z.object({
 
 const getBankSchema = z.object({
   id: z.number().int().positive(),
+});
+
+const createBankSchema = z.object({
+  name: z.string().min(1, "Bank name is required"),
+  ibanCode: z.string().min(1, "IBAN code is required"),
+  swiftCode: z.string().optional(),
+  address: z.string().optional(),
+  transferType: z.string().optional(),
+  codeAbk: z.number().int().optional(),
 });
 
 describe("listBanksSchema", () => {
@@ -70,97 +79,6 @@ describe("getBankSchema", () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// Pure function: build query filter (exclude soft-deleted banks)
-// ---------------------------------------------------------------------------
-
-type BankWhereInput = {
-  deleted: number;
-};
-
-function buildBankListFilter(): BankWhereInput {
-  return { deleted: 0 };
-}
-
-describe("buildBankListFilter", () => {
-  it("excludes soft-deleted banks", () => {
-    const result = buildBankListFilter();
-    expect(result).toEqual({ deleted: 0 });
-  });
-});
-
-// ---------------------------------------------------------------------------
-// Return type shape
-// ---------------------------------------------------------------------------
-
-type BankListItem = {
-  bank_id: number;
-  bank_name: string | null;
-  bank_iban_code: string;
-  bank_swift_code: string | null;
-  bank_code_abk: number | null;
-  bank_address: string | null;
-  bank_transfer_type: string | null;
-};
-
-type ListBanksResult = {
-  banks: BankListItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
-
-describe("BankListItem shape", () => {
-  it("defines the expected fields", () => {
-    const mock: BankListItem = {
-      bank_id: 1,
-      bank_name: "National Bank of Kuwait",
-      bank_iban_code: "KW123456789",
-      bank_swift_code: "NBOKKWKW",
-      bank_code_abk: 123,
-      bank_address: "Kuwait City",
-      bank_transfer_type: "SWIFT",
-    };
-    expect(mock.bank_id).toBe(1);
-    expect(mock.bank_name).toBe("National Bank of Kuwait");
-    expect(mock.bank_iban_code).toBe("KW123456789");
-    expect(mock.bank_swift_code).toBe("NBOKKWKW");
-    expect(mock.bank_code_abk).toBe(123);
-    expect(mock.bank_address).toBe("Kuwait City");
-    expect(mock.bank_transfer_type).toBe("SWIFT");
-  });
-});
-
-describe("ListBanksResult shape", () => {
-  it("accepts a valid result set", () => {
-    const result: ListBanksResult = {
-      banks: [],
-      total: 0,
-      page: 1,
-      limit: 20,
-      totalPages: 0,
-    };
-    expect(result.total).toBe(0);
-    expect(result.banks).toHaveLength(0);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// createBankSchema
-// ---------------------------------------------------------------------------
-
-const createBankSchema = z.object({
-  name: z.string().min(1, "Bank name is required"),
-  swiftCode: z.string().optional(),
-  ibanCode: z.string().min(1, "IBAN code is required"),
-  address: z.string().optional(),
-  transferType: z.string().optional(),
-  codeAbk: z.number().int().optional(),
-});
-
-type CreateBankParams = z.input<typeof createBankSchema>;
-
 describe("createBankSchema", () => {
   it("accepts valid bank data with minimum required fields", () => {
     const result = createBankSchema.safeParse({
@@ -208,10 +126,86 @@ describe("createBankSchema", () => {
   });
 });
 
+// ---------------------------------------------------------------------------
+// Pure function: build query filter (exclude soft-deleted banks)
+// ---------------------------------------------------------------------------
+
+type BankWhereInput = {
+  deleted: number;
+};
+
+function buildBankListFilter(): BankWhereInput {
+  return { deleted: 0 };
+}
+
+describe("buildBankListFilter", () => {
+  it("excludes soft-deleted banks", () => {
+    const result = buildBankListFilter();
+    expect(result).toEqual({ deleted: 0 });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Return type shape
+// ---------------------------------------------------------------------------
+
+type BankListItem = {
+  bank_id: number;
+  bank_name: string | null;
+  bank_iban_code: string;
+  bank_swift_code: string | null;
+  bank_code_abk: number | null;
+  bank_address: string | null;
+  bank_transfer_type: string | null;
+};
+
+type ListBanksResult = {
+  banks: BankListItem[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+};
+
 type CreateBankResult = {
   operation: string;
   message: string;
 };
+
+describe("BankListItem shape", () => {
+  it("defines the expected fields", () => {
+    const mock: BankListItem = {
+      bank_id: 1,
+      bank_name: "National Bank of Kuwait",
+      bank_iban_code: "KW123456789",
+      bank_swift_code: "NBOKKWKW",
+      bank_code_abk: 123,
+      bank_address: "Kuwait City",
+      bank_transfer_type: "SWIFT",
+    };
+    expect(mock.bank_id).toBe(1);
+    expect(mock.bank_name).toBe("National Bank of Kuwait");
+    expect(mock.bank_iban_code).toBe("KW123456789");
+    expect(mock.bank_swift_code).toBe("NBOKKWKW");
+    expect(mock.bank_code_abk).toBe(123);
+    expect(mock.bank_address).toBe("Kuwait City");
+    expect(mock.bank_transfer_type).toBe("SWIFT");
+  });
+});
+
+describe("ListBanksResult shape", () => {
+  it("accepts a valid result set", () => {
+    const result: ListBanksResult = {
+      banks: [],
+      total: 0,
+      page: 1,
+      limit: 20,
+      totalPages: 0,
+    };
+    expect(result.total).toBe(0);
+    expect(result.banks).toHaveLength(0);
+  });
+});
 
 describe("CreateBankResult shape", () => {
   it("accepts a success result", () => {

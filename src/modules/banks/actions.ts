@@ -130,8 +130,18 @@ export async function getBank(
 }
 
 // ---------------------------------------------------------------------------
-// createBank
+// Alias exports (matching the Yii2 BankController API naming convention)
 // ---------------------------------------------------------------------------
+
+/**
+ * Alias for listBanks — matches the Yii2 BankController::actionList() naming.
+ */
+export const listBankAccounts = listBanks;
+
+/**
+ * Alias for getBank — matches the Yii2 BankController::actionView() naming.
+ */
+export const getBankAccount = getBank;
 
 /**
  * Create a new bank record.
