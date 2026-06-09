@@ -35,6 +35,10 @@ const profileSchema = z.object({
   iban: z.string().optional().default(""),
   birthDate: z.string().optional().default(""),
   address: z.string().optional().default(""),
+  gender: z.string().optional().default(""),
+  drivingLicense: z.string().optional().default(""),
+  civilExpiry: z.string().optional().default(""),
+  preferredTime: z.string().optional().default(""),
 });
 
 describe("profileSchema", () => {
@@ -143,6 +147,68 @@ describe("profileSchema", () => {
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data.nameAr).toBe("");
+    }
+  });
+
+  it("accepts valid gender values", () => {
+    expect(profileSchema.safeParse({ name: "Test", gender: "0" }).success).toBe(true);
+    expect(profileSchema.safeParse({ name: "Test", gender: "1" }).success).toBe(true);
+    expect(profileSchema.safeParse({ name: "Test", gender: "2" }).success).toBe(true);
+  });
+
+  it("accepts any gender value as string", () => {
+    expect(profileSchema.safeParse({ name: "Test", gender: "3" }).success).toBe(true);
+    expect(profileSchema.safeParse({ name: "Test", gender: "male" }).success).toBe(true);
+  });
+
+  it("defaults gender to empty string when omitted", () => {
+    const result = profileSchema.safeParse({ name: "Test" });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.gender).toBe("");
+    }
+  });
+
+  it("accepts drivingLicense as string", () => {
+    expect(profileSchema.safeParse({ name: "Test", drivingLicense: "1" }).success).toBe(true);
+    expect(profileSchema.safeParse({ name: "Test", drivingLicense: "0" }).success).toBe(true);
+    expect(profileSchema.safeParse({ name: "Test", drivingLicense: "yes" }).success).toBe(true);
+  });
+
+  it("defaults drivingLicense to empty string when omitted", () => {
+    const result = profileSchema.safeParse({ name: "Test" });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.drivingLicense).toBe("");
+    }
+  });
+
+  it("accepts valid civilExpiry date string", () => {
+    const result = profileSchema.safeParse({ name: "Test", civilExpiry: "2026-12-31" });
+    expect(result.success).toBe(true);
+  });
+
+  it("defaults civilExpiry to empty string when omitted", () => {
+    const result = profileSchema.safeParse({ name: "Test" });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.civilExpiry).toBe("");
+    }
+  });
+
+  it("accepts preferredTime string value", () => {
+    const result = profileSchema.safeParse({ name: "Test", preferredTime: "morning" });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.preferredTime).toBe("morning");
+    }
+  });
+
+  it("defaults preferredTime to empty string when omitted", () => {
+    const result = profileSchema.safeParse({ name: "Test" });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.preferredTime).toBe("");
     }
   });
 });

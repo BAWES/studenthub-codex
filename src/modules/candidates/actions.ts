@@ -34,6 +34,10 @@ const profileSchema = z.object({
   iban: z.string().optional().default(""),
   birthDate: z.string().optional().default(""),
   address: z.string().optional().default(""),
+  gender: z.string().optional().default(""),
+  drivingLicense: z.string().optional().default(""),
+  civilExpiry: z.string().optional().default(""),
+  preferredTime: z.string().optional().default(""),
 });
 
 export async function updateCandidateProfile(
@@ -59,6 +63,10 @@ export async function updateCandidateProfile(
     iban: (formData.get("iban") ?? "") as string,
     birthDate: (formData.get("birthDate") ?? "") as string,
     address: (formData.get("address") ?? "") as string,
+    gender: (formData.get("gender") ?? "") as string,
+    drivingLicense: (formData.get("drivingLicense") ?? "") as string,
+    civilExpiry: (formData.get("civilExpiry") ?? "") as string,
+    preferredTime: (formData.get("preferredTime") ?? "") as string,
   };
 
   const parsed = profileSchema.safeParse(raw);
@@ -94,6 +102,15 @@ export async function updateCandidateProfile(
             return isFinite(date.getTime()) ? date : undefined;
           })()
         : undefined,
+      candidate_gender: d.gender ? Number(d.gender) : null,
+      candidate_driving_license: d.drivingLicense === "1" ? true : d.drivingLicense === "0" ? false : null,
+      candidate_civil_expiry_date: d.civilExpiry
+        ? (() => {
+            const date = new Date(d.civilExpiry);
+            return isFinite(date.getTime()) ? date : undefined;
+          })()
+        : null,
+      candidate_preferred_time: d.preferredTime || undefined,
     },
   });
 
