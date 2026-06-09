@@ -255,3 +255,157 @@ describe("logoutAction signature", () => {
     expect(hasLogoutSignature).toBe(true);
   });
 });
+
+// ---------------------------------------------------------------------------
+// changePasswordSchema — validates password change form inputs
+// ---------------------------------------------------------------------------
+
+const changePasswordSchema = z
+  .object({
+    currentPassword: z
+      .string({ required_error: "Current password is required" })
+      .min(1, "Current password is required"),
+    newPassword: z
+      .string({ required_error: "New password is required" })
+      .min(5, "New password must be at least 5 characters"),
+    confirmPassword: z
+      .string({ required_error: "Please confirm your new password" })
+      .min(1, "Please confirm your new password"),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  })
+  .refine((data) => data.currentPassword !== data.newPassword, {
+    message: "New password must be different from current password",
+    path: ["newPassword"],
+  });
+
+describe("changePasswordSchema", () => {
+  it("accepts valid password change with matching passwords", () => {
+    const result = changePasswordSchema.safeParse({
+      currentPassword: "oldPass123",
+      newPassword: "newPass456",
+      confirmPassword: "newPass456",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects empty current password", () => {
+    const result = changePasswordSchema.safeParse({
+      currentPassword: "",
+      newPassword: "newPass456",
+      confirmPassword: "newPass456",
+    });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues.some((i) => i.path.includes("currentPassword"))).toBe(true);
+    }
+  });
+
+  it("rejects empty new password", () => {
+    const result = changePasswordSchema.safeParse({
+      currentPassword: "oldPass123",
+      newPassword: "",
+      confirmPassword: "",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects new password shorter than 5 characters", () => {
+    const result = changePasswordSchema.safeParse({
+      currentPassword: "oldPass123",
+      newPassword: "abc",
+      confirmPassword: "abc",
+    });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues.some((i) => i.message.includes("at least 5"))).toBe(true);
+    }
+  });
+
+  it("rejects mismatched confirm password", () => {
+    const result = changePasswordSchema.safeParse({
+      currentPassword: "oldPass123",
+      newPassword: "newPass456",
+      confirmPassword: "differentPass",
+    });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues.some((i) => i.path.includes("confirmPassword"))).toBe(true);
+    }
+  });
+
+  it("rejects new password same as current password", () => {
+    const result = changePasswordSchema.safeParse({
+      currentPassword: "samePassword",
+      newPassword: "samePassword",
+      confirmPassword: "samePassword",
+    });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues.some((i) => i.message.includes("different from current"))).toBe(true);
+    }
+  });
+
+  it("rejects missing currentPassword field", () => {
+    const result = changePasswordSchema.safeParse({
+      newPassword: "newPass456",
+      confirmPassword: "newPass456",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects missing confirmPassword field", () => {
+    const result = changePasswordSchema.safeParse({
+      currentPassword: "oldPass123",
+      newPassword: "newPass456",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects empty object", () => {
+    const result = changePasswordSchema.safeParse({});
+    expect(result.success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// changePasswordActionState — type guard for the server action's return shape
+// ---------------------------------------------------------------------------
+
+type ChangePasswordState = {
+  success?: boolean;
+  error?: string;
+  fieldErrors?: Record<string, string[]>;
+};
+
+describe("ChangePasswordState shape", () => {
+  it("accepts success state", () => {
+    const state: ChangePasswordState = { success: true };
+    expect(state.success).toBe(true);
+    expect(state.error).toBeUndefined();
+  });
+
+  it("accepts error state with message", () => {
+    const state: ChangePasswordState = { error: "Wrong current password" };
+    expect(state.error).toBe("Wrong current password");
+  });
+
+  it("accepts field-level errors", () => {
+    const state: ChangePasswordState = {
+      fieldErrors: {
+        newPassword: ["New password must be at least 5 characters"],
+      },
+    };
+    expect(state.fieldErrors?.newPassword).toBeDefined();
+    expect(state.fieldErrors!.newPassword!.length).toBe(1);
+  });
+
+  it("accepts success with no error", () => {
+    const state: ChangePasswordState = { success: true };
+    expect(state.success).toBe(true);
+    expect(state.error).toBeUndefined();
+    expect(state.fieldErrors).toBeUndefined();
+  });
+});

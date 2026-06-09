@@ -1,8 +1,12 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import bcrypt from "bcryptjs";
+import { prisma } from "@/lib/prisma";
+import { z } from "zod";
 import { resolveLegacyIdentities } from "./service";
 import { clearPendingAccounts, clearSession, createPendingAccounts, createSession, getPendingAccounts, getSession } from "./session";
+import { verifyYiiPassword } from "./password";
 import type { LoginState } from "./types";
 
 export async function loginAction(_state: LoginState, formData: FormData): Promise<LoginState> {
@@ -83,4 +87,102 @@ export async function verifySession() {
 export async function logoutAction() {
   await clearSession();
   redirect("/login");
+}
+
+// ---------------------------------------------------------------------------
+// changePassword — candidate self-service password change
+// ---------------------------------------------------------------------------
+
+export type ChangePasswordState = {
+  success?: boolean;
+  error?: string;
+  fieldErrors?: Record<string, string[]>;
+};
+
+const changePasswordSchema = z
+  .object({
+    currentPassword: z
+      .string({ required_error: "Current password is required" })
+      .min(1, "Current password is required"),
+    newPassword: z
+      .string({ required_error: "New password is required" })
+      .min(5, "New password must be at least 5 characters"),
+    confirmPassword: z
+      .string({ required_error: "Please confirm your new password" })
+      .min(1, "Please confirm your new password"),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  })
+  .refine((data) => data.currentPassword !== data.newPassword, {
+    message: "New password must be different from current password",
+    path: ["newPassword"],
+  });
+
+export async function changePassword(
+  _prevState: ChangePasswordState,
+  formData: FormData
+): Promise<ChangePasswordState> {
+  try {
+    const session = await getSession();
+    if (!session) {
+      return { error: "You must be logged in to change your password." };
+    }
+
+    const parsed = changePasswordSchema.safeParse({
+      currentPassword: formData.get("currentPassword"),
+      newPassword: formData.get("newPassword"),
+      confirmPassword: formData.get("confirmPassword"),
+    });
+
+    if (!parsed.success) {
+      const fieldErrors: Record<string, string[]> = {};
+      for (const issue of parsed.error.issues) {
+        const path = issue.path.join(".");
+        if (!fieldErrors[path]) fieldErrors[path] = [];
+        fieldErrors[path].push(issue.message);
+      }
+      return { fieldErrors };
+    }
+
+    const { currentPassword, newPassword } = parsed.data;
+
+    // Look up the candidate by session ID
+    const candidate = await prisma.candidate.findUnique({
+      where: { candidate_id: Number(session.id) },
+      select: { candidate_id: true, candidate_password_hash: true },
+    });
+
+    if (!candidate) {
+      return { error: "Candidate account not found." };
+    }
+
+    // Verify current password against stored hash
+    const isValid = await verifyYiiPassword(
+      currentPassword,
+      candidate.candidate_password_hash
+    );
+
+    if (!isValid) {
+      return { error: "Current password is incorrect." };
+    }
+
+    // Hash the new password (bcryptjs, $2b$ prefix compatible with Yii's $2y$)
+    const newHash = await bcrypt.hash(newPassword, 10);
+    // Normalize to Yii-compatible $2y$ prefix
+    const yiiHash = newHash.startsWith("$2b$")
+      ? `$2y$${newHash.slice(4)}`
+      : newHash;
+
+    await prisma.candidate.update({
+      where: { candidate_id: candidate.candidate_id },
+      data: { candidate_password_hash: yiiHash },
+    });
+
+    return { success: true };
+  } catch (err) {
+    console.error("changePassword error:", err);
+    return { error: "An unexpected error occurred. Please try again." };
+  }
 }
