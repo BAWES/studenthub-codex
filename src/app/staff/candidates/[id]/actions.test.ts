@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   getCandidateSchema,
   addCandidateNoteSchema,
-} from "./actions";
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // getCandidateSchema

@@ -5,7 +5,6 @@ import { z } from "zod";
 // ---------------------------------------------------------------------------
 
 export const VALID_INTERVIEW_STATUSES = ["0", "1", "2"] as const;
-export type InterviewStatus = (typeof VALID_INTERVIEW_STATUSES)[number];
 
 // ---------------------------------------------------------------------------
 // Schemas

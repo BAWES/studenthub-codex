@@ -3,7 +3,7 @@ import {
   listStaffRequestsSchema,
   getStaffRequestDetailSchema,
   updateRequestStatusSchema,
-} from "./actions";
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // listStaffRequestsSchema

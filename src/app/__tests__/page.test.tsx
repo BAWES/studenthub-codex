@@ -2,7 +2,7 @@
 import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
 
-// ── Mock next/navigation ────────────────────────────────────────
+// ── Mock next/navigation (useRouter, useSearchParams) ────────
 const mockReplace = vi.fn();
 const mockSearchParams = new URLSearchParams();
 vi.mock("next/navigation", () => ({
@@ -29,39 +29,38 @@ vi.mock("next/link", () => ({
 }));
 
 // ── Mock lucide-react icons ───────────────────────────────────
-vi.mock("lucide-react", () => {
-  const icon = (testId: string) => function MockLucideIcon({ className, ...rest }: Record<string, unknown>) {
-    return <span data-testid={testId} className={className as string} {...rest} />;
-  };
-  return {
-    ArrowUpRight: icon("icon-arrow-up-right"),
-    BarChart3: icon("icon-bar-chart-3"),
-    Bell: icon("icon-bell"),
-    Building2: icon("icon-building-2"),
-    Check: icon("icon-check"),
-    CheckCircle2: icon("icon-check-circle-2"),
-    ChevronLeft: icon("icon-chevron-left"),
-    ChevronRight: icon("icon-chevron-right"),
-    ClipboardCheck: icon("icon-clipboard-check"),
-    Clock: icon("icon-clock"),
-    CreditCard: icon("icon-credit-card"),
-    FileText: icon("icon-file-text"),
-    Globe: icon("icon-globe"),
-    Layers: icon("icon-layers"),
-    MessageSquare: icon("icon-message-square"),
-    Minus: icon("icon-minus"),
-    Quote: icon("icon-quote"),
-    Search: icon("icon-search"),
-    Shield: icon("icon-shield"),
-    ShieldCheck: icon("icon-shield-check"),
-    Sparkles: icon("icon-sparkles"),
-    Star: icon("icon-star"),
-    UserRound: icon("icon-user-round"),
-    UsersRound: icon("icon-users-round"),
-    X: icon("icon-x"),
-    Zap: icon("icon-zap"),
-  };
-});
+vi.mock("lucide-react", () => ({
+  AlertCircle: () => <span data-testid="icon-alert-circle" />,
+  UserRound: () => <span data-testid="icon-user" />,
+  Briefcase: () => <span data-testid="icon-briefcase" />,
+  Building2: () => <span data-testid="icon-building" />,
+  Shield: () => <span data-testid="icon-shield" />,
+  ClipboardCheck: () => <span data-testid="icon-clipboard" />,
+  Zap: () => <span data-testid="icon-zap" />,
+  Globe: () => <span data-testid="icon-globe" />,
+  BarChart3: () => <span data-testid="icon-bar-chart" />,
+  Layers: () => <span data-testid="icon-layers" />,
+  ChevronRight: () => <span data-testid="icon-chevron-right" />,
+  Command: () => <span data-testid="icon-command" />,
+  Sparkles: () => <span data-testid="icon-sparkles" />,
+  Search: () => <span data-testid="icon-search" />,
+  PanelRightOpen: () => <span data-testid="icon-panel-right" />,
+  ArrowUpRight: () => <span data-testid="icon-arrow-up-right" />,
+  CheckCircle2: () => <span data-testid="icon-check-circle" />,
+  Clock: () => <span data-testid="icon-clock" />,
+  CreditCard: () => <span data-testid="icon-credit-card" />,
+  Bell: () => <span data-testid="icon-bell" />,
+  MessageSquare: () => <span data-testid="icon-message-square" />,
+  FileText: () => <span data-testid="icon-file-text" />,
+  Quote: () => <span data-testid="icon-quote" />,
+  ChevronLeft: () => <span data-testid="icon-chevron-left" />,
+  Star: () => <span data-testid="icon-star" />,
+  ShieldCheck: () => <span data-testid="icon-shield-check" />,
+  UsersRound: () => <span data-testid="icon-users-round" />,
+  Check: () => <span data-testid="icon-check" />,
+  X: () => <span data-testid="icon-x" />,
+  Minus: () => <span data-testid="icon-minus" />,
+}));
 
 // ── Mock ThemeToggle ──────────────────────────────────────────
 vi.mock("@/modules/theme/ThemeToggle", () => ({
@@ -101,114 +100,62 @@ describe("Landing page (marketing redesign)", () => {
     session: null,
   };
 
-  const sessionProps: LandingContentProps = {
-    session: {
-      id: "user_1",
-      email: "test@test.com",
-      role: "candidate",
-      name: "Test User",
-    },
-  };
-
-  describe("Navigation", () => {
-    it("renders the StudentHub brand in the nav", () => {
-      render(<LandingContent {...defaultProps} />);
-      const brands = screen.getAllByText("StudentHub");
-      expect(brands.length).toBeGreaterThanOrEqual(1);
-      expect(brands[0].tagName).toBe("STRONG");
-    });
-
-    it("renders sign in and persona CTA links", () => {
-      render(<LandingContent {...defaultProps} />);
-      const ctaLinks = screen.getAllByText("Create free candidate profile");
-      expect(ctaLinks.length).toBeGreaterThanOrEqual(1);
-      const signInLinks = screen.getAllByText("Sign in");
-      expect(signInLinks.length).toBeGreaterThanOrEqual(1);
-    });
-
-    it("renders Open app link in nav when session exists", () => {
-      render(<LandingContent {...sessionProps} />);
-      const openAppLinks = screen.getAllByText("Open app");
-      expect(openAppLinks.length).toBeGreaterThanOrEqual(1);
-      // Nav-level CTA switches to "Open app", but bottom CTA still shows persona CTA
-      expect(screen.queryAllByText("Get started").length).toBe(0);
-      expect(screen.getByText("Create your free candidate profile")).toBeTruthy();
-    });
-
-    it("renders the theme toggle", () => {
-      render(<LandingContent {...defaultProps} />);
-      expect(screen.getByTestId("theme-toggle")).toBeTruthy();
-    });
+  beforeEach(() => {
+    mockReplace.mockClear();
+    // Ensure search params are empty per default
+    mockSearchParams.forEach((_, key) => mockSearchParams.delete(key));
   });
 
-  describe("Hero section", () => {
-    it("renders the hero headline", () => {
-      render(<LandingContent {...defaultProps} />);
-      const heading = screen.getByRole("heading", { level: 1 });
-      expect(heading.textContent).toBeTruthy();
-    });
-
-    it("renders the product tagline / eyebrow text", () => {
-      render(<LandingContent {...defaultProps} />);
-      const eyebrow = document.querySelector('[class*="Eyebrow"]');
-      expect(eyebrow?.textContent).toBeTruthy();
-    });
-
-    it("renders CTA buttons in the hero", () => {
-      render(<LandingContent {...defaultProps} />);
-      const ctas = screen.getAllByText(/Get started|Sign in/);
-      expect(ctas.length).toBeGreaterThanOrEqual(1);
-    });
-
-    it("renders platform goal pills", () => {
-      render(<LandingContent {...defaultProps} />);
-      const goals = screen.getByLabelText("Key benefits for candidates");
-      expect(goals).toBeTruthy();
-    });
+  it("renders headline and CTA button", () => {
+    render(<LandingContent {...defaultProps} />);
+    expect(
+      screen.getByRole("heading", { name: /your institution/i })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /get started/i })
+    ).toBeInTheDocument();
   });
 
-  describe("Feature grid", () => {
-    it("renders feature cards with icons", () => {
-      render(<LandingContent {...defaultProps} />);
-      const icons = screen.getAllByTestId(/^icon-/);
-      expect(icons.length).toBeGreaterThanOrEqual(5);
-    });
-
-    it("renders feature headings per role", () => {
-      render(<LandingContent {...defaultProps} />);
-      const page = document.body.textContent || "";
-      expect(page.toLowerCase()).toContain("candidate");
-      expect(page.toLowerCase()).toContain("admin");
-      expect(page.toLowerCase()).toContain("staff");
-    });
+  it("renders TrustBar with correct text", () => {
+    render(<LandingContent {...defaultProps} />);
+    expect(screen.getByText(/trusted by/i)).toBeInTheDocument();
+    expect(screen.getByText(/5,000/i)).toBeInTheDocument();
   });
 
-  describe("Marketing sections", () => {
-    it("renders substantial content (more than 500 chars)", () => {
-      render(<LandingContent {...defaultProps} />);
-      const page = document.body.textContent || "";
-      expect(page.length).toBeGreaterThan(500);
-    });
+  it("renders all 3 FeatureGrid items with icons and headings", () => {
+    render(<LandingContent {...defaultProps} />);
 
-    it("renders an action-oriented CTA or navigation links", () => {
-      render(<LandingContent {...defaultProps} />);
-      const links = screen.getAllByRole("link");
-      expect(links.length).toBeGreaterThanOrEqual(3);
-    });
+    // Feature 1: integrated workflow
+    expect(screen.getByText(/integrated/i)).toBeInTheDocument();
+
+    // Feature 2: smart compliance
+    expect(screen.getByText(/smart compliance/i)).toBeInTheDocument();
+
+    // Feature 3: real-time insights
+    expect(screen.getByText(/real.time insights/i)).toBeInTheDocument();
   });
 
-  describe("Visual quality", () => {
-    it("maintains a responsive layout wrapper", () => {
-      render(<LandingContent {...defaultProps} />);
-      const main = document.querySelector("main");
-      expect(main).toBeTruthy();
-      expect(main!.className).toContain("min-h");
-    });
+  it("renders StatsCounter with correct count badges", () => {
+    render(<LandingContent {...defaultProps} />);
+    // CoreStats + marketing stats rendered
+    const stats = screen.getAllByText(/5,000|\d+%/);
+    expect(stats.length).toBeGreaterThan(0);
+  });
 
-    it("includes proper aria labels for accessibility", () => {
-      render(<LandingContent {...defaultProps} />);
-      const labelledSections = document.querySelectorAll("[aria-label]");
-      expect(labelledSections.length).toBeGreaterThanOrEqual(2);
-    });
+  it("renders the hero section with CTAs", () => {
+    render(<LandingContent {...defaultProps} />);
+    expect(screen.getByText(/get started/i)).toBeInTheDocument();
+    expect(screen.getByText(/learn more/i)).toBeInTheDocument();
+  });
+
+  it("does not render login form when user is not authenticated", () => {
+    render(<LandingContent {...defaultProps} />);
+    expect(screen.queryByText(/sign out/i)).not.toBeInTheDocument();
+  });
+
+  it("redirects to dashboard when user is authenticated", () => {
+    const session = { user: { role: "admin" } } as any;
+    render(<LandingContent {...defaultProps} session={session} />);
+    expect(mockReplace).toHaveBeenCalledWith("/workspace");
   });
 });

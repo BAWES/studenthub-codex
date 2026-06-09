@@ -8,6 +8,7 @@ import {
   listStaffInterviewsSchema,
   getStaffInterviewDetailSchema,
   updateInterviewStatusSchema,
+  type ListStaffInterviewsInput,
   type InterviewRow,
   type InterviewDetail,
   type UpdateInterviewStatusResult,

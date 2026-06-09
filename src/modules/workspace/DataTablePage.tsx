@@ -5,7 +5,6 @@ import type { ReactNode } from "react";
 import type { Route } from "next";
 import { DataTable, type DataTableColumn } from "./DataTable";
 import { DataTableSkeleton } from "./Skeletons";
-import { Button } from "@/components/ui/button";
 import { Search, X } from "lucide-react";
 import {
   EMPTY_NO_RECORDS,
@@ -113,15 +112,24 @@ export function DataTablePage<T extends { id: string | number }>({
   if (error) {
     return (
       <section className={className}>
-        <div className="tableHeader">
-          <div>
-            <h2>{title}</h2>
-            <p>{description}</p>
+        <div className="shTableGlass">
+          <div className="shTableHeader">
+            <div>
+              <h2>{title}</h2>
+              <p>{description}</p>
+            </div>
           </div>
-        </div>
-        <div className="errorState">
-          <strong>Error loading data</strong>
-          <span>{error}</span>
+          <div className="flex flex-col items-center justify-center gap-3 py-16 px-6 text-center">
+            <div className="size-12 rounded-xl bg-red-500/10 flex items-center justify-center">
+              <X size={24} className="text-red-400" />
+            </div>
+            <strong className="text-sm" style={{ color: "var(--ink)" }}>
+              Error loading data
+            </strong>
+            <span className="text-sm" style={{ color: "var(--muted)" }}>
+              {error}
+            </span>
+          </div>
         </div>
       </section>
     );
@@ -129,84 +137,68 @@ export function DataTablePage<T extends { id: string | number }>({
 
   return (
     <section className={className}>
-      {/* Header row */}
-      <div className="tableHeader">
-        <div>
-          <h2>{title}</h2>
-          <p>{description}</p>
-        </div>
-        {actions ? <div className="tableActions">{actions}</div> : null}
-      </div>
-
-      {/* Search / filter bar */}
-      {searchable ? (
-        <div className="searchBar">
-          <div className="searchInputWrap">
-            <Search size={16} className="searchIcon" aria-hidden="true" />
-            <input
-              data-command-search
-              type="text"
-              placeholder={searchPlaceholder}
-              value={searchValue}
-              onChange={(e) => setSearchValue(e.target.value)}
-              className="searchInput"
-            />
-            {searchValue ? (
-              <button
-                type="button"
-                className="searchClear"
-                onClick={() => setSearchValue("")}
-                aria-label="Clear search"
-              >
-                <X size={14} />
-              </button>
-            ) : null}
+      <div className="shTableGlass">
+        {/* Glass header */}
+        <div className="shTableHeader">
+          <div>
+            <h2>{title}</h2>
+            <p>{description}</p>
           </div>
+          {actions ? <div className="flex items-center gap-2">{actions}</div> : null}
         </div>
-      ) : null}
 
-      {/* Table */}
-      {filtered.length > 0 ? (
-        <DataTable
-          title={title}
-          description={description}
-          rows={filtered}
-          columns={columns}
-          rowHref={rowHref}
-        />
-      ) : (
-        <div className="emptyState">
-          <strong>{EMPTY_NO_RECORDS}</strong>
-          <span>
-            {searchValue
-              ? emptyNoResults(searchValue)
-              : EMPTY_HINT_DEFAULT}
-          </span>
-        </div>
-      )}
+        {/* Glass search bar */}
+        {searchable ? (
+          <div className="shTableSearch">
+            <div className="shTableSearchWrap">
+              <Search size={15} className="shTableSearchIcon" aria-hidden="true" />
+              <input
+                data-command-search
+                type="text"
+                placeholder={searchPlaceholder}
+                value={searchValue}
+                onChange={(e) => setSearchValue(e.target.value)}
+                className="shTableSearchInput"
+              />
+              {searchValue ? (
+                <button
+                  type="button"
+                  className="shTableSearchClear"
+                  onClick={() => setSearchValue("")}
+                  aria-label="Clear search"
+                >
+                  <X size={14} />
+                </button>
+              ) : null}
+            </div>
+          </div>
+        ) : null}
 
-      {/* Pagination */}
-      {totalPages && totalPages > 1 ? (
-        <div className="pagination">
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={page <= 1}
-            onClick={() => onPageChange?.(page - 1)}
-          >
-            Previous
-          </Button>
-          <span className="paginationInfo">Page {page} of {totalPages}</span>
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={page >= totalPages}
-            onClick={() => onPageChange?.(page + 1)}
-          >
-            Next
-          </Button>
-        </div>
-      ) : null}
+        {/* Table or filtered empty state */}
+        {filtered.length > 0 ? (
+          <DataTable
+            title={title}
+            description={description}
+            rows={filtered}
+            columns={columns}
+            rowHref={rowHref}
+            totalPages={totalPages}
+            page={page}
+            onPageChange={onPageChange}
+          />
+        ) : (
+          <div className="flex flex-col items-center justify-center gap-2 py-14 px-6 text-center">
+            <strong className="text-sm" style={{ color: "var(--ink)" }}>
+              {EMPTY_NO_RECORDS}
+            </strong>
+            <span className="text-sm" style={{ color: "var(--muted)" }}>
+              {searchValue
+                ? emptyNoResults(searchValue)
+                : EMPTY_HINT_DEFAULT}
+            </span>
+          </div>
+        )}
+      </div>
     </section>
   );
 }
