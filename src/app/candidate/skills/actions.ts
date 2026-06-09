@@ -147,8 +147,9 @@ export async function createCandidateSkill(
 }
 
 /**
- * Update an existing skill record using soft-delete + recreate
- * (matching the project pattern used by education).
+ * Update an existing skill record.
+ * Uses direct update — skills have no child records depending on the ID,
+ * so a soft-delete+recreate pattern would break the redirect to the detail page.
  */
 export async function updateCandidateSkill(
   data: UpdateSkillInput,
@@ -196,23 +197,11 @@ export async function updateCandidateSkill(
     return { success: false, error: "This skill already exists" };
   }
 
-  const now = new Date();
-
-  // Use delete+create in a transaction (matching the project pattern)
-  await prisma.$transaction([
-    prisma.candidate_skill.update({
-      where: { candidate_skill_id: skillId },
-      data: { deleted: 1 },
-    }),
-    prisma.candidate_skill.create({
-      data: {
-        candidate_id: candidateId,
-        skill: parsed.data.skill,
-        deleted: 0,
-        candidate_skill_created_at: now,
-      },
-    }),
-  ]);
+  // Direct update — skills have no child records depending on the ID
+  await prisma.candidate_skill.update({
+    where: { candidate_skill_id: skillId },
+    data: { skill: parsed.data.skill },
+  });
 
   revalidatePath("/candidate/skills");
   return { success: true, skillId };
