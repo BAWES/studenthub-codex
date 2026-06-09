@@ -11,6 +11,7 @@ import { WorkspaceOSContext } from "./WorkspaceOSContext";
 import { WorkspaceMobileNavigation, WorkspaceNavigation } from "./WorkspaceNavigation";
 import { navForRole } from "./navigation";
 import type { NavItem } from "./navigation";
+import { PageTransition } from "./PageTransition";
 
 // ── Command types ─────────────────────────────────────────────
 
@@ -289,7 +290,7 @@ export function WorkspaceOS({
 
         {/* ── Content Stage ───────────────────────────────── */}
         <section className="workspaceStage">
-          {children}
+          <PageTransition>{children}</PageTransition>
         </section>
 
         {/* ── Mobile Tab Bar ──────────────────────────────── */}
