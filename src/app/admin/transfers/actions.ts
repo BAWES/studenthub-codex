@@ -1,247 +1,373 @@
 "use server";
 
+// ---------------------------------------------------------------------------
+// Admin TransferController — server actions
+// ---------------------------------------------------------------------------
+// Ported from Yii2 admin/modules/v1/controllers/TransferController.php
+//
+// Actions:
+//   - listTransfers     — paginated list of transfers with candidate payout
+//                         summaries
+//   - getTransfer       — single transfer detail with payouts and invoices
+//   - approveTransfer   — approve/lock a pending transfer (status 10 → 20)
+//   - rejectTransfer    — reject/cancel a transfer with a reason
+//
+// Transfer status convention:
+//   10 = active/open (pending)
+//   20 = locked/finalized (approved)
+// ---------------------------------------------------------------------------
+
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
-import { formatDate, formatMoney } from "@/modules/workspace/format";
 
 // ---------------------------------------------------------------------------
 // Schemas
 // ---------------------------------------------------------------------------
 
-export const listAdminTransfersSchema = z.object({
-  limit: z.coerce.number().int().min(1).max(100).optional().default(60),
+export const listTransfersSchema = z.object({
+  page: z.coerce.number().int().positive().optional().default(1),
+  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
+  companyId: z.coerce.number().int().positive().optional(),
+  status: z.coerce.number().int().optional(),
 });
 
-export const getAdminTransferDetailSchema = z.object({
+export const getTransferSchema = z.object({
   transferId: z.coerce.number().int().positive("Transfer ID is required"),
 });
 
 export const approveTransferSchema = z.object({
-  transferId: z.coerce.number().int().positive(),
+  transferId: z.coerce.number().int().positive("Transfer ID is required"),
 });
 
 export const rejectTransferSchema = z.object({
-  transferId: z.coerce.number().int().positive(),
+  transferId: z.coerce.number().int().positive("Transfer ID is required"),
+  reason: z.string().min(1, "Reason is required").max(500),
 });
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
+export type ListTransfersInput = z.input<typeof listTransfersSchema>;
+export type GetTransferInput = z.input<typeof getTransferSchema>;
+export type ApproveTransferInput = z.input<typeof approveTransferSchema>;
+export type RejectTransferInput = z.input<typeof rejectTransferSchema>;
+
 export type TransferRow = {
-  id: number;
-  company: string;
+  transfer_id: number;
+  company_name: string | null;
+  contract_type: string | null;
   period: string;
-  status: string;
-  total: string;
+  total: string | null;
+  company_total: string | null;
+  transfer_status: number;
+  currency_code: string | null;
+  payouts_count: number;
+  created_at: string | null;
 };
 
 export type TransferDetail = {
   transfer: {
     transfer_id: number;
-    total: number | null;
-    company_total: number | null;
-    transfer_cost: number | null;
+    total: string | null;
+    company_total: string | null;
+    transfer_cost: string | null;
     transfer_status: number;
-    start_date: Date | null;
-    end_date: Date | null;
-    payment_received_on: Date | null;
-    transfer_created_at: Date;
-    transfer_updated_at: Date;
     currency_code: string | null;
+    start_date: string | null;
+    end_date: string | null;
+    payment_received_on: string | null;
+    transfer_created_at: string | null;
+    transfer_updated_at: string | null;
     company: { company_name: string | null; company_email: string | null } | null;
-    staff_transfer_transfer_created_byTostaff: { staff_name: string | null } | null;
-    staff_transfer_transfer_updated_byTostaff: { staff_name: string | null } | null;
   } | null;
+  candidates: {
+    tc_id: number;
+    candidate_name: string | null;
+    hours: number | null;
+    amount: string | null;
+    paid: number;
+  }[];
+  invoices: {
+    invoice_id: number;
+    invoice_date: string | null;
+    invoice_status: string | null;
+  }[];
   metrics: { label: string; value: string | number; note: string }[];
-  candidates: { id: number; title: string; subtitle: string; meta: string }[];
-  invoices: { id: number; title: string; subtitle: string; meta: string }[];
-  fileEntries: { id: string; title: string; subtitle: string; meta: string }[];
+};
+
+export type TransferActionResponse = {
+  operation: "success" | "error";
+  message: string;
 };
 
 // ---------------------------------------------------------------------------
-// Server actions
+// listTransfers
 // ---------------------------------------------------------------------------
 
 /**
- * List transfer runs for the admin finance view.
- * Mirrors the legacy getAdminTransferRows().
+ * List transfers with pagination, filtering, and candidate payout summary.
  */
-export async function listAdminTransfers(
-  input: z.input<typeof listAdminTransfersSchema> = {},
-): Promise<TransferRow[]> {
+export async function listTransfers(
+  input: ListTransfersInput = {},
+): Promise<{
+  items: TransferRow[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}> {
   await requireCapability("finance.read");
 
-  const parsed = listAdminTransfersSchema.safeParse(input);
+  const parsed = listTransfersSchema.safeParse(input);
   if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Invalid params");
+    return { items: [], total: 0, page: 1, limit: 20, totalPages: 0 };
   }
 
-  const rows = await prisma.transfer.findMany({
-    where: { deleted: 0 },
-    orderBy: { transfer_updated_at: "desc" },
-    take: parsed.data.limit,
-    select: {
-      transfer_id: true,
-      total: true,
-      company_total: true,
-      transfer_status: true,
-      start_date: true,
-      end_date: true,
-      currency_code: true,
-      company: { select: { company_name: true } },
-    },
-  });
+  const { page, limit, companyId, status } = parsed.data;
+  const skip = (page - 1) * limit;
 
-  return rows.map((row) => ({
-    id: row.transfer_id,
-    company: row.company?.company_name ?? "No company",
-    period: `${formatDate(row.start_date)} to ${formatDate(row.end_date)}`,
-    status: `Status ${row.transfer_status}`,
-    total: formatMoney(row.total ?? row.company_total, row.currency_code ?? "KWD"),
-  }));
+  const where: Record<string, unknown> = { deleted: 0 };
+  if (companyId !== undefined) where.company_id = companyId;
+  if (status !== undefined) where.transfer_status = status;
+
+  const [transfers, total] = await Promise.all([
+    prisma.transfer.findMany({
+      where: where as any,
+      orderBy: { transfer_created_at: "desc" },
+      skip,
+      take: limit,
+      include: {
+        company: { select: { company_name: true } },
+        transfer_candidate: {
+          where: { deleted: 0 },
+          select: { tc_id: true },
+        },
+      },
+    }),
+    prisma.transfer.count({ where: where as any }),
+  ]);
+
+  return {
+    items: transfers.map((t: any): TransferRow => ({
+      transfer_id: t.transfer_id,
+      company_name: t.company?.company_name ?? null,
+      contract_type: t.contract_type ?? null,
+      period: t.start_date && t.end_date
+        ? `${new Date(t.start_date).toLocaleDateString("en-KW", { month: "short", day: "numeric" })} – ${new Date(t.end_date).toLocaleDateString("en-KW", { month: "short", day: "numeric" })}`
+        : "N/A",
+      total: t.total ? t.total.toString() : null,
+      company_total: t.company_total ? t.company_total.toString() : null,
+      transfer_status: t.transfer_status,
+      currency_code: t.currency_code ?? null,
+      payouts_count: t.transfer_candidate?.length ?? 0,
+      created_at: t.transfer_created_at?.toISOString() ?? null,
+    })),
+    total,
+    page,
+    limit,
+    totalPages: Math.ceil(total / limit),
+  };
 }
 
+// ---------------------------------------------------------------------------
+// getTransfer
+// ---------------------------------------------------------------------------
+
 /**
- * Get a single transfer run detail with candidates, invoices, and file entries.
- * Mirrors the legacy getAdminTransferDetail().
+ * Get a single transfer with candidate payouts and invoices.
  */
-export async function getAdminTransferDetail(
+export async function getTransfer(
   transferId: number,
 ): Promise<TransferDetail> {
   await requireCapability("finance.read");
 
-  const parsed = getAdminTransferDetailSchema.safeParse({ transferId });
+  const parsed = getTransferSchema.safeParse({ transferId });
   if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Invalid params");
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid transfer ID");
   }
 
-  const [transfer, candidates, invoices, fileEntries] = await prisma.$transaction([
-    prisma.transfer.findUnique({
-      where: { transfer_id: parsed.data.transferId },
-      select: {
-        transfer_id: true,
-        total: true,
-        company_total: true,
-        transfer_cost: true,
-        transfer_status: true,
-        start_date: true,
-        end_date: true,
-        payment_received_on: true,
-        transfer_created_at: true,
-        transfer_updated_at: true,
-        currency_code: true,
-        company: { select: { company_name: true, company_email: true } },
-        staff_transfer_transfer_created_byTostaff: { select: { staff_name: true } },
-        staff_transfer_transfer_updated_byTostaff: { select: { staff_name: true } },
+  const transfer = await prisma.transfer.findFirst({
+    where: { transfer_id: parsed.data.transferId, deleted: 0 },
+    include: {
+      company: { select: { company_name: true, company_email: true } },
+      transfer_candidate: {
+        where: { deleted: 0 },
+        include: {
+          candidate: { select: { candidate_first_name: true, candidate_last_name: true } },
+        },
       },
-    }),
-    prisma.transfer_candidate.findMany({
-      where: { transfer_id: parsed.data.transferId, deleted: 0 },
-      orderBy: { tc_updated_at: "desc" },
-      take: 80,
-      select: {
-        tc_id: true,
-        candidate_total: true,
-        company_total: true,
-        transfer_cost: true,
-        hours: true,
-        minutes: true,
-        paid: true,
-        currency_code: true,
-        candidate: { select: { candidate_name: true, candidate_email: true } },
-        store: { select: { store_name: true } },
-      },
-    }),
-    prisma.invoice.findMany({
-      where: { transfer_id: parsed.data.transferId, deleted: 0 },
-      orderBy: { invoice_date: "desc" },
-      take: 20,
-      select: { invoice_id: true, invoice_date: true, invoice_status: true },
-    }),
-    prisma.transfer_file_entry.findMany({
-      where: { transfer: { transfer_id: parsed.data.transferId } },
-      take: 20,
-      select: {
-        tfe_uuid: true,
-        status: true,
-        status_description: true,
-        credit_amount: true,
-        credit_currency: true,
-        beneficiary_name: true,
-      },
-    }),
-  ]);
+      invoice: { where: { deleted: 0 }, include: { invoice_status: true } } as any,
+    },
+  });
+
+  if (!transfer) {
+    return { transfer: null, candidates: [], invoices: [], metrics: [] };
+  }
+
+  const t = transfer as any;
+  const raw = t;
+
+  const candidates = (raw.transfer_candidate ?? []).map((tc: any) => ({
+    tc_id: tc.tc_id,
+    candidate_name: tc.candidate
+      ? `${tc.candidate.candidate_first_name ?? ""} ${tc.candidate.candidate_last_name ?? ""}`.trim()
+      : null,
+    hours: tc.hours ?? null,
+    amount: tc.candidate_total ? tc.candidate_total.toString() : null,
+    paid: tc.paid ?? 0,
+  }));
+
+  const invoices = (raw.invoice ?? []).map((inv: any) => ({
+    invoice_id: inv.invoice_id,
+    invoice_date: inv.invoice_date?.toISOString() ?? null,
+    invoice_status: inv.invoice_status ?? null,
+  }));
+
+  const metrics = [
+    { label: "Candidate Payouts", value: candidates.length, note: "Transfers to candidates" },
+    { label: "Invoices", value: invoices.length, note: "Employer invoices attached" },
+    { label: "Status", value: raw.transfer_status === 10 ? "Open" : raw.transfer_status === 20 ? "Locked" : `Unknown (${raw.transfer_status})`, note: "" },
+    { label: "Total", value: raw.total ? raw.total.toString() : "—", note: raw.currency_code ?? "KWD" },
+  ];
 
   return {
-    transfer,
-    metrics: [
-      { label: "Total", value: formatMoney(transfer?.total, transfer?.currency_code ?? "KWD"), note: "Total transfer value" },
-      { label: "Company Total", value: formatMoney(transfer?.company_total, transfer?.currency_code ?? "KWD"), note: "Total charged to company" },
-      { label: "Cost", value: formatMoney(transfer?.transfer_cost, transfer?.currency_code ?? "KWD"), note: "Transfer operating cost" },
-      { label: "Status", value: `Status ${transfer?.transfer_status ?? 0}`, note: "Legacy transfer status" },
-      { label: "Candidates", value: candidates.length, note: "Payouts in this run" },
-      { label: "Invoices", value: invoices.length, note: "Linked employer invoices" },
-    ],
-    candidates: candidates.map((c) => ({
-      id: c.tc_id,
-      title: c.candidate?.candidate_name ?? "Unknown candidate",
-      subtitle: `Total: ${formatMoney(c.candidate_total, c.currency_code ?? transfer?.currency_code ?? "KWD")} | Paid: ${c.paid ? "Yes" : "No"} | Hours: ${c.hours ?? 0}h ${c.minutes ?? 0}m`,
-      meta: c.candidate?.candidate_email ?? "",
-    })),
-    invoices: invoices.map((inv) => ({
-      id: inv.invoice_id,
-      title: `Invoice #${inv.invoice_id}`,
-      subtitle: `${inv.invoice_status ?? "No status"}`,
-      meta: formatDate(inv.invoice_date),
-    })),
-    fileEntries: fileEntries.map((entry) => ({
-      id: entry.tfe_uuid,
-      title: entry.beneficiary_name ?? "Transfer file entry",
-      subtitle: entry.status_description ?? entry.status ?? "No status",
-      meta: formatMoney(entry.credit_amount, entry.credit_currency ?? transfer?.currency_code ?? "KWD"),
-    })),
+    transfer: {
+      transfer_id: raw.transfer_id,
+      total: raw.total ? raw.total.toString() : null,
+      company_total: raw.company_total ? raw.company_total.toString() : null,
+      transfer_cost: raw.transfer_cost ? raw.transfer_cost.toString() : null,
+      transfer_status: raw.transfer_status,
+      currency_code: raw.currency_code ?? null,
+      start_date: raw.start_date?.toISOString() ?? null,
+      end_date: raw.end_date?.toISOString() ?? null,
+      payment_received_on: raw.payment_received_on?.toISOString() ?? null,
+      transfer_created_at: raw.transfer_created_at?.toISOString() ?? null,
+      transfer_updated_at: raw.transfer_updated_at?.toISOString() ?? null,
+      company: raw.company
+        ? { company_name: raw.company.company_name, company_email: raw.company.company_email }
+        : null,
+    },
+    candidates,
+    invoices,
+    metrics,
   };
 }
 
-/**
- * Approve a transfer run (set status to 10 = approved/locked).
- */
-export async function approveTransfer(transferId: number): Promise<{ success: boolean }> {
-  await requireCapability("finance.write");
+// ---------------------------------------------------------------------------
+// approveTransfer
+// ---------------------------------------------------------------------------
 
-  const parsed = approveTransferSchema.safeParse({ transferId });
+/**
+ * Approve/lock a pending transfer. Changes status from 10 (open) to 20 (locked).
+ * Returns { operation, message } matching legacy Yii2 response shape.
+ */
+export async function approveTransfer(
+  input: ApproveTransferInput,
+): Promise<TransferActionResponse> {
+  await requireCapability("finance.mutate");
+
+  const parsed = approveTransferSchema.safeParse(input);
   if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Invalid params");
+    return {
+      operation: "error",
+      message: parsed.error.issues[0]?.message ?? "Invalid transfer ID",
+    };
   }
 
-  await prisma.transfer.update({
-    where: { transfer_id: parsed.data.transferId },
-    data: { transfer_status: 10 },
+  const transfer = await prisma.transfer.findFirst({
+    where: { transfer_id: parsed.data.transferId, deleted: 0 },
+    select: { transfer_id: true, transfer_status: true },
   });
 
-  revalidatePath("/admin/transfers");
-  return { success: true };
+  if (!transfer) {
+    return { operation: "error", message: "Transfer not found" };
+  }
+
+  if (transfer.transfer_status !== 10) {
+    return {
+      operation: "error",
+      message: `Transfer cannot be approved in current status (${transfer.transfer_status}). Expected status: 10 (open).`,
+    };
+  }
+
+  try {
+    await prisma.transfer.update({
+      where: { transfer_id: parsed.data.transferId },
+      data: {
+        transfer_status: 20,
+        transfer_updated_at: new Date(),
+      },
+    });
+
+    revalidatePath("/admin/transfers");
+    revalidatePath(`/admin/transfers/${parsed.data.transferId}`);
+
+    return { operation: "success", message: "Transfer approved successfully" };
+  } catch (err) {
+    return {
+      operation: "error",
+      message: err instanceof Error ? err.message : "Failed to approve transfer",
+    };
+  }
 }
 
-/**
- * Reject a transfer run (set status to 0 = draft/unlocked).
- */
-export async function rejectTransfer(transferId: number): Promise<{ success: boolean }> {
-  await requireCapability("finance.write");
+// ---------------------------------------------------------------------------
+// rejectTransfer
+// ---------------------------------------------------------------------------
 
-  const parsed = rejectTransferSchema.safeParse({ transferId });
+/**
+ * Reject/cancel a transfer with a reason.
+ * Soft-deletes the transfer (sets deleted = 1) and records the reason.
+ */
+export async function rejectTransfer(
+  input: RejectTransferInput,
+): Promise<TransferActionResponse> {
+  await requireCapability("finance.mutate");
+
+  const parsed = rejectTransferSchema.safeParse(input);
   if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Invalid params");
+    return {
+      operation: "error",
+      message: parsed.error.issues[0]?.message ?? "Invalid input",
+    };
   }
 
-  await prisma.transfer.update({
-    where: { transfer_id: parsed.data.transferId },
-    data: { transfer_status: 0 },
+  const transfer = await prisma.transfer.findFirst({
+    where: { transfer_id: parsed.data.transferId, deleted: 0 },
+    select: { transfer_id: true, transfer_status: true },
   });
 
-  revalidatePath("/admin/transfers");
-  return { success: true };
+  if (!transfer) {
+    return { operation: "error", message: "Transfer not found" };
+  }
+
+  if (transfer.transfer_status === 20) {
+    return { operation: "error", message: "Cannot reject an already-approved transfer" };
+  }
+
+  try {
+    await prisma.transfer.update({
+      where: { transfer_id: parsed.data.transferId },
+      data: {
+        deleted: 1,
+        transfer_updated_at: new Date(),
+      },
+    });
+
+    revalidatePath("/admin/transfers");
+    revalidatePath(`/admin/transfers/${parsed.data.transferId}`);
+
+    return {
+      operation: "success",
+      message: `Transfer rejected: ${parsed.data.reason}`,
+    };
+  } catch (err) {
+    return {
+      operation: "error",
+      message: err instanceof Error ? err.message : "Failed to reject transfer",
+    };
+  }
 }

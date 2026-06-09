@@ -1,5 +1,23 @@
 import "@testing-library/jest-dom/vitest";
 
+// Mock next/navigation for components using useRouter
+import { vi } from "vitest";
+const mockPush = vi.fn();
+const mockRouter = {
+  push: mockPush,
+  replace: vi.fn(),
+  prefetch: vi.fn(),
+  back: vi.fn(),
+  forward: vi.fn(),
+  refresh: vi.fn(),
+};
+vi.mock("next/navigation", () => ({
+  useRouter: () => mockRouter,
+  usePathname: () => "/",
+  useSearchParams: () => new URLSearchParams(),
+  notFound: vi.fn(),
+}));
+
 // Mock IntersectionObserver for MetricCard entrance animation
 if (typeof globalThis.IntersectionObserver === "undefined") {
   globalThis.IntersectionObserver = class MockIntersectionObserver {
