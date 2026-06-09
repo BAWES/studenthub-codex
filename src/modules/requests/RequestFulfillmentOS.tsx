@@ -13,7 +13,7 @@ import {
   InvitationStatusActions,
   StoryStatusActions
 } from "@/modules/requests/StageActions";
-import type { getRequestDetail } from "@/modules/workspace/data";
+import type { getRequestDetail } from "@/modules/workspace/data/shared";
 
 type RequestDetailData = Awaited<ReturnType<typeof getRequestDetail>>;
 
@@ -114,6 +114,20 @@ export function RequestFulfillmentOS({
                   <span>{candidate.signal}</span>
                   <strong>{candidate.name}</strong>
                   <small>{candidate.email}</small>
+                </div>
+                <div className="matchScoreBadge">
+                  <Badge
+                    variant={
+                      (candidate.matchScore ?? 0) >= 70
+                        ? "success"
+                        : (candidate.matchScore ?? 0) >= 40
+                          ? "default"
+                          : "secondary"
+                    }
+                    title={candidate.matchLabel}
+                  >
+                    {candidate.matchScore ?? "?"}% match
+                  </Badge>
                 </div>
                 <div className="matchReasons">
                   {candidate.reasons.map((reason) => (
