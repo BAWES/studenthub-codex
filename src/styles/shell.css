@@ -1223,3 +1223,78 @@
   line-height: 1;
   white-space: nowrap;
 }
+
+/* ── EmptyState — OS-design empty container ──────────────────────────── */
+.shEmptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: clamp(32px, 6vw, 64px) clamp(16px, 4vw, 32px);
+  text-align: center;
+  opacity: 0;
+  transform: translateY(12px);
+  animation: shEmptyStateIn 400ms var(--sh-easing) forwards;
+}
+
+@keyframes shEmptyStateIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.shEmptyStateIllustration {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 120px;
+  height: 100px;
+  margin-bottom: 4px;
+}
+
+.shEmptyStateSvg {
+  filter: drop-shadow(0 4px 16px rgba(0, 0, 0, 0.06));
+  transition: transform 300ms var(--sh-easing);
+}
+
+.shEmptyState:hover .shEmptyStateSvg {
+  transform: scale(1.04);
+}
+
+.shEmptyStateContent {
+  display: grid;
+  gap: 6px;
+  max-width: 340px;
+}
+
+.shEmptyStateTitle {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--ink);
+}
+
+.shEmptyStateDesc {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.shEmptyStateAction {
+  margin-top: 4px;
+}
+
+/* Pulsing ring animation for loading empty state */
+.shPulseRing {
+  animation: shPulseRingAnim 2s var(--sh-easing) infinite;
+}
+
+@keyframes shPulseRingAnim {
+  0% { opacity: 0.3; r: 22; }
+  50% { opacity: 0.6; r: 24; }
+  100% { opacity: 0.3; r: 22; }
+}
