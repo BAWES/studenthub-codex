@@ -79,11 +79,16 @@ describe("getInterviewEvaluationSchema", () => {
 
 // --- createInterviewEvaluation schema ---
 
+const interviewEvaluationNoteItemSchema = z.object({
+  note: z.string().min(1, "Note text is required"),
+});
+
 const createInterviewEvaluationSchema = z.object({
   candidateId: z.number().int().positive("Candidate ID is required"),
   staffId: z.number().int().positive().optional(),
   requestUuid: z.string().optional(),
   companyId: z.number().int().positive().optional(),
+  interviewEvaluationNotes: z.array(interviewEvaluationNoteItemSchema).optional(),
 });
 
 describe("createInterviewEvaluationSchema", () => {
@@ -153,6 +158,38 @@ describe("createInterviewEvaluationSchema", () => {
 
   it("rejects negative staffId", () => {
     const result = createInterviewEvaluationSchema.safeParse({ candidateId: 42, staffId: -5 });
+    expect(result.success).toBe(false);
+  });
+
+  it("accepts interviewEvaluationNotes as empty array", () => {
+    const result = createInterviewEvaluationSchema.safeParse({ candidateId: 42, interviewEvaluationNotes: [] });
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts interviewEvaluationNotes with valid notes", () => {
+    const result = createInterviewEvaluationSchema.safeParse({
+      candidateId: 42,
+      interviewEvaluationNotes: [{ note: "Great communication skills" }, { note: "Strong technical background" }],
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.interviewEvaluationNotes).toHaveLength(2);
+    }
+  });
+
+  it("rejects note with empty string", () => {
+    const result = createInterviewEvaluationSchema.safeParse({
+      candidateId: 42,
+      interviewEvaluationNotes: [{ note: "" }],
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects note with missing note field", () => {
+    const result = createInterviewEvaluationSchema.safeParse({
+      candidateId: 42,
+      interviewEvaluationNotes: [{}],
+    });
     expect(result.success).toBe(false);
   });
 });
