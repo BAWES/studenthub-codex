@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { listActivityEventsSchema } from "./actions";
+import { listActivityEventsSchema, getActivityEventSchema } from "./actions";
 import type {
   ActivityEventItem,
   ListActivityEventsResult,
@@ -105,5 +105,27 @@ describe("ListActivityEventsResult type", () => {
     expect(result.events).toHaveLength(0);
     expect(result.totalPages).toBe(0);
     expect(result.page).toBe(1);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// getActivityEvent tests
+// ---------------------------------------------------------------------------
+
+describe("getActivityEventSchema", () => {
+  it("rejects empty activity UUID", () => {
+    const r = getActivityEventSchema.safeParse({ id: "" });
+    expect(r.success).toBe(false);
+    if (!r.success) {
+      expect(r.error.issues[0]?.message).toBe("Invalid activity event ID");
+    }
+  });
+
+  it("accepts valid activity UUID", () => {
+    const r = getActivityEventSchema.safeParse({ id: "act_abc123" });
+    expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data.id).toBe("act_abc123");
+    }
   });
 });
