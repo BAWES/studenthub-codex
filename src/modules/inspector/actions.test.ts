@@ -4,6 +4,8 @@ import {
   listRequestsSchema,
   verifyRequestSchema,
   rejectRequestSchema,
+  listInspectorsSchema,
+  getInspectorSchema,
 } from "./actions";
 import type {
   IdRequestListItem,
@@ -11,6 +13,8 @@ import type {
   ListRequestsResult,
   VerifyRequestInput,
   RejectRequestInput,
+  InspectorAccountItem,
+  ListInspectorsResult,
 } from "./actions";
 
 // ---------------------------------------------------------------------------
@@ -213,34 +217,8 @@ describe("RejectRequestInput type", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Inspector account actions (STU-1292)
+// Inspector account actions (STU-1292) — schemas imported from ./actions
 // ---------------------------------------------------------------------------
-
-const listInspectorsSchema = z.object({
-  page: z.number().int().positive().optional(),
-  limit: z.number().int().min(1).max(100).optional(),
-});
-
-const getInspectorSchema = z.object({
-  uuid: z.string().min(1, "Inspector UUID is required"),
-});
-
-type InspectorAccountItem = {
-  inspector_uuid: string;
-  inspector_name: string;
-  inspector_email: string;
-  inspector_status: number;
-  inspector_created_at: Date;
-  inspector_updated_at: Date;
-};
-
-type ListInspectorsResult = {
-  inspectors: InspectorAccountItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
 
 describe("listInspectorsSchema", () => {
   it("accepts empty params (default pagination)", () => {
