@@ -38,6 +38,7 @@ const roleCapabilities: Record<Role, Capability[]> = {
     "setting.write",
     "story.read",
     "story.write",
+    "reports.view",
   ],
   staff: [
     "app.access",
