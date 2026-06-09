@@ -25,6 +25,15 @@ export type Capability =
   | "request.create"
   | "request.suggest"
   | "request.interview"
+  | "request.write"
+  | "notes.read"
+  | "notes.create"
+  | "notes.update"
+  | "notes.delete"
+  | "suggestion.read"
+  | "suggestion.write"
+  | "candidate.evaluation.read"
+  | "candidate.evaluation.write"
   | "time.read.any"
   | "time.read.assigned"
   | "time.read.own"
@@ -52,7 +61,8 @@ export type Capability =
   | "suggestion.read"
   | "suggestion.write"
   | "tickets.read"
-  | "tickets.create";
+  | "tickets.create"
+  | "company.read";
 
 export type SessionUser = {
   role: Role;
