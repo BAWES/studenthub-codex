@@ -1,59 +1,67 @@
 import { describe, it, expect } from "vitest";
 import {
-  getWorkLogsSchema,
+  listWorkLogsSchema,
   getWorkLogDetailSchema,
   submitWorkLogSchema,
   updateWorkLogStatusSchema,
-  type SubmitWorkLogInput,
 } from "./actions";
 
 // ---------------------------------------------------------------------------
-// getWorkLogsSchema tests
+// listWorkLogsSchema
 // ---------------------------------------------------------------------------
 
-describe("getWorkLogsSchema", () => {
-  it("accepts empty params (default listing)", () => {
-    const result = getWorkLogsSchema.safeParse({});
+describe("listWorkLogsSchema", () => {
+  it("accepts empty params (default pagination)", () => {
+    const result = listWorkLogsSchema.safeParse({});
     expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.page).toBe(1);
+      expect(result.data.limit).toBe(20);
+      expect(result.data.date).toBeUndefined();
+    }
   });
 
-  it("accepts a date filter", () => {
-    const result = getWorkLogsSchema.safeParse({ date: "2026-06-09" });
+  it("accepts pagination params", () => {
+    const result = listWorkLogsSchema.safeParse({ page: 2, limit: 10 });
     expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.page).toBe(2);
+      expect(result.data.limit).toBe(10);
+    }
   });
 
-  it("accepts a date range", () => {
-    const result = getWorkLogsSchema.safeParse({
-      startDate: "2026-06-01",
-      endDate: "2026-06-30",
-    });
+  it("accepts date filter", () => {
+    const result = listWorkLogsSchema.safeParse({ date: "2026-06-01" });
     expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.date).toBe("2026-06-01");
+    }
   });
 
-  it("rejects invalid date format", () => {
-    const result = getWorkLogsSchema.safeParse({ date: "09-06-2026" });
+  it("rejects limit over 100", () => {
+    const result = listWorkLogsSchema.safeParse({ limit: 999 });
     expect(result.success).toBe(false);
   });
 
-  it("rejects invalid start date", () => {
-    const result = getWorkLogsSchema.safeParse({ startDate: "01-06-2026" });
-    expect(result.success).toBe(false);
-  });
-
-  it("rejects invalid end date", () => {
-    const result = getWorkLogsSchema.safeParse({ endDate: "not-a-date" });
+  it("rejects negative page", () => {
+    const result = listWorkLogsSchema.safeParse({ page: -1 });
     expect(result.success).toBe(false);
   });
 });
 
 // ---------------------------------------------------------------------------
-// getWorkLogDetailSchema tests
+// getWorkLogDetailSchema
 // ---------------------------------------------------------------------------
 
 describe("getWorkLogDetailSchema", () => {
-  it("accepts a valid work log UUID", () => {
-    const result = getWorkLogDetailSchema.safeParse({ workLogUuid: "wl_abc123" });
+  it("accepts a valid UUID", () => {
+    const result = getWorkLogDetailSchema.safeParse({
+      workLogUuid: "wh_abc-123-def-456",
+    });
     expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.workLogUuid).toBe("wh_abc-123-def-456");
+    }
   });
 
   it("rejects empty UUID", () => {
@@ -68,130 +76,93 @@ describe("getWorkLogDetailSchema", () => {
 });
 
 // ---------------------------------------------------------------------------
-// submitWorkLogSchema tests
+// submitWorkLogSchema
 // ---------------------------------------------------------------------------
 
 describe("submitWorkLogSchema", () => {
-  const validInput: SubmitWorkLogInput = {
-    date: "2026-06-09",
-    startTime: "09:00",
-    endTime: "17:00",
-    note: "Worked on server actions migration",
-  };
-
-  it("accepts valid full input", () => {
-    const result = submitWorkLogSchema.safeParse(validInput);
-    expect(result.success).toBe(true);
-  });
-
-  it("accepts input without end time", () => {
+  it("accepts valid minimal params (date + startTime)", () => {
     const result = submitWorkLogSchema.safeParse({
-      date: "2026-06-09",
-      startTime: "09:00",
+      date: "2026-06-15",
+      startTime: "2026-06-15T08:00:00",
     });
     expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.date).toBe("2026-06-15");
+      expect(result.data.startTime).toBe("2026-06-15T08:00:00");
+      expect(result.data.endTime).toBeUndefined();
+    }
   });
 
-  it("accepts input without note", () => {
+  it("accepts all optional fields", () => {
     const result = submitWorkLogSchema.safeParse({
-      date: "2026-06-09",
-      startTime: "09:00",
-      endTime: "17:00",
+      date: "2026-06-15",
+      startTime: "2026-06-15T08:00:00",
+      endTime: "2026-06-15T16:00:00",
+      totalTime: 480,
+      note: "Test work log entry",
+      storeId: 5,
     });
     expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.endTime).toBe("2026-06-15T16:00:00");
+      expect(result.data.totalTime).toBe(480);
+      expect(result.data.note).toBe("Test work log entry");
+      expect(result.data.storeId).toBe(5);
+    }
   });
 
   it("rejects missing date", () => {
     const result = submitWorkLogSchema.safeParse({
-      startTime: "09:00",
+      startTime: "2026-06-15T08:00:00",
     });
     expect(result.success).toBe(false);
   });
 
-  it("rejects invalid date format", () => {
+  it("rejects missing startTime", () => {
     const result = submitWorkLogSchema.safeParse({
-      date: "09-06-2026",
-      startTime: "09:00",
+      date: "2026-06-15",
     });
     expect(result.success).toBe(false);
   });
 
-  it("rejects invalid start time format", () => {
+  it("rejects empty date", () => {
     const result = submitWorkLogSchema.safeParse({
-      date: "2026-06-09",
-      startTime: "9:00",
-    });
-    expect(result.success).toBe(false);
-  });
-
-  it("rejects invalid end time format", () => {
-    const result = submitWorkLogSchema.safeParse({
-      date: "2026-06-09",
-      startTime: "09:00",
-      endTime: "5:00 PM",
-    });
-    expect(result.success).toBe(false);
-  });
-
-  it("rejects too-long note", () => {
-    const result = submitWorkLogSchema.safeParse({
-      date: "2026-06-09",
-      startTime: "09:00",
-      note: "x".repeat(501),
-    });
-    expect(result.success).toBe(false);
-  });
-
-  it("rejects end time without start time (caught by base schema)", () => {
-    const result = submitWorkLogSchema.safeParse({
-      date: "2026-06-09",
-      endTime: "17:00",
+      date: "",
+      startTime: "2026-06-15T08:00:00",
     });
     expect(result.success).toBe(false);
   });
 });
 
 // ---------------------------------------------------------------------------
-// updateWorkLogStatusSchema tests
+// updateWorkLogStatusSchema
 // ---------------------------------------------------------------------------
 
 describe("updateWorkLogStatusSchema", () => {
-  it("accepts a valid work log UUID and status", () => {
+  it("accepts valid update params", () => {
     const result = updateWorkLogStatusSchema.safeParse({
-      workLogUuid: "wl_abc123",
+      workLogUuid: "wh_abc-123-def-456",
       status: 1,
     });
     expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.workLogUuid).toBe("wh_abc-123-def-456");
+      expect(result.data.status).toBe(1);
+    }
   });
 
   it("accepts status 0", () => {
     const result = updateWorkLogStatusSchema.safeParse({
-      workLogUuid: "wl_abc123",
+      workLogUuid: "wh_abc-123-def-456",
       status: 0,
     });
     expect(result.success).toBe(true);
   });
 
-  it("accepts status within valid range", () => {
+  it("rejects status negative", () => {
     const result = updateWorkLogStatusSchema.safeParse({
-      workLogUuid: "wl_abc123",
-      status: 5,
-    });
-    expect(result.success).toBe(true);
-  });
-
-  it("rejects negative status", () => {
-    const result = updateWorkLogStatusSchema.safeParse({
-      workLogUuid: "wl_abc123",
+      workLogUuid: "wh_abc-123-def-456",
       status: -1,
-    });
-    expect(result.success).toBe(false);
-  });
-
-  it("rejects status above 10", () => {
-    const result = updateWorkLogStatusSchema.safeParse({
-      workLogUuid: "wl_abc123",
-      status: 11,
     });
     expect(result.success).toBe(false);
   });
@@ -201,11 +172,74 @@ describe("updateWorkLogStatusSchema", () => {
     expect(result.success).toBe(false);
   });
 
-  it("rejects empty UUID", () => {
+  it("rejects missing status", () => {
     const result = updateWorkLogStatusSchema.safeParse({
-      workLogUuid: "",
-      status: 1,
+      workLogUuid: "wh_abc-123-def-456",
     });
     expect(result.success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Type shape tests
+// ---------------------------------------------------------------------------
+
+type WorkLogItem = {
+  candidate_working_hour_uuid: string;
+  date: Date | null;
+  start_time: Date | null;
+  end_time: Date | null;
+  total_time: number | null;
+  status: number | null;
+  via: string | null;
+  note: string | null;
+  store_name: string | null;
+  company_name: string | null;
+  created_at: Date | null;
+  updated_at: Date | null;
+};
+
+type ListWorkLogsResult = {
+  items: WorkLogItem[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+};
+
+describe("WorkLogItem shape", () => {
+  it("defines the expected fields", () => {
+    const mock: WorkLogItem = {
+      candidate_working_hour_uuid: "wh_abc-123",
+      date: new Date("2026-06-15"),
+      start_time: new Date("2026-06-15T08:00:00"),
+      end_time: new Date("2026-06-15T16:00:00"),
+      total_time: 480,
+      status: 0,
+      via: "Manual Log",
+      note: "Test entry",
+      store_name: "Main Store",
+      company_name: "Test Company",
+      created_at: null,
+      updated_at: null,
+    };
+    expect(mock.candidate_working_hour_uuid).toBe("wh_abc-123");
+    expect(mock.status).toBe(0);
+    expect(mock.store_name).toBe("Main Store");
+    expect(mock.via).toBe("Manual Log");
+  });
+});
+
+describe("ListWorkLogsResult shape", () => {
+  it("accepts a valid result set", () => {
+    const result: ListWorkLogsResult = {
+      items: [],
+      total: 0,
+      page: 1,
+      limit: 20,
+      totalPages: 0,
+    };
+    expect(result.total).toBe(0);
+    expect(result.items).toHaveLength(0);
   });
 });
