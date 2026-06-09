@@ -20,16 +20,14 @@ export function LoginForm() {
 
   return (
     <div className="grid gap-0">
-      <form action={action} className="grid gap-5 p-7 sm:p-9">
-        <div className="grid gap-1.5">
-          <span className="text-[var(--sh-info)] text-[11px] font-black uppercase tracking-[0.04em]">
-            Secure sign in
-          </span>
-          <strong className="text-[var(--ink)] text-[24px] leading-[1.15] font-bold tracking-[-0.02em]">
-            Continue to StudentHub
+      <form action={action} className="grid gap-5 p-6">
+        {/* ── Minimal header ── */}
+        <div className="grid gap-1">
+          <strong className="text-[var(--ink)] text-[22px] leading-[1.2] font-bold tracking-[-0.02em]">
+            Sign in to StudentHub
           </strong>
           <p className="text-[var(--muted)] text-[14px] leading-relaxed m-0">
-            Use your existing production credentials to access your workspace.
+            Use your production credentials.
           </p>
         </div>
 
@@ -82,18 +80,15 @@ export function LoginForm() {
 
       {accounts.length > 0 ? (
         <section
-          className="grid gap-3 p-7 sm:p-9 pt-0 border-t border-[var(--sh-glass-border)]"
+          className="grid gap-2 p-6 pt-0 border-t border-[var(--sh-glass-border)]"
           aria-label="Verified StudentHub accounts"
         >
-          <div className="grid gap-1.5">
-            <span className="text-[var(--sh-info)] text-[11px] font-black uppercase tracking-[0.04em]">
-              Verified accounts
-            </span>
-            <strong className="text-[var(--ink)] text-[20px] leading-[1.15] font-bold">
-              Choose where to continue
+          <div className="grid gap-0.5">
+            <strong className="text-[var(--ink)] text-[15px] leading-[1.2] font-semibold">
+              Multiple accounts found
             </strong>
-            <p className="text-[var(--muted)] text-[14px] leading-relaxed m-0">
-              Your password matched more than one active account.
+            <p className="text-[var(--muted)] text-[13px] leading-relaxed m-0">
+              Choose where to continue.
             </p>
           </div>
           {accounts.map((account) => (
@@ -102,9 +97,9 @@ export function LoginForm() {
               <Button
                 type="submit"
                 variant="outline"
-                className="w-full min-h-[58px] justify-start h-auto p-3 gap-3 text-left border-[var(--sh-glass-border)] bg-[color-mix(in_srgb,var(--surface)_86%,transparent)] hover:bg-[var(--sh-glass-bg-strong)] hover:border-[var(--sh-glass-border-strong)] transition-all duration-200 cursor-pointer"
+                className="w-full min-h-[48px] justify-start h-auto p-3 gap-3 text-left border-[var(--sh-glass-border)] bg-[color-mix(in_srgb,var(--surface)_86%,transparent)] hover:bg-[var(--sh-glass-bg-strong)] hover:border-[var(--sh-glass-border-strong)] transition-all duration-200 cursor-pointer"
               >
-                <span className="grid gap-1 min-w-0">
+                <span className="grid gap-0.5 min-w-0">
                   <strong className="text-sm">{account.name}</strong>
                   <small className="text-[var(--muted)] text-xs font-normal">{account.email}</small>
                 </span>
