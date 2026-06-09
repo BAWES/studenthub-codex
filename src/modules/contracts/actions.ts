@@ -75,6 +75,98 @@ export type ListContractsResult = {
 export { listContractsSchema };
 
 // ---------------------------------------------------------------------------
+// getContract — Schema
+// ---------------------------------------------------------------------------
+
+const getContractSchema = z.object({
+  contract_uuid: z.string().min(1, "contract_uuid is required"),
+});
+
+export { getContractSchema };
+
+// ---------------------------------------------------------------------------
+// getContract
+// ---------------------------------------------------------------------------
+
+/**
+ * Get a single contract by its UUID, including its detail model.
+ *
+ * Mirrors the legacy Yii2 ContractController::actionView / actionDetail:
+ * - Looks up by contract_uuid
+ * - Excludes soft-deleted contracts
+ * - Includes the relevant detail model (fixed_price_contract, hourly_contract,
+ *   monthly_salary_contract)
+ * - Returns null when not found
+ */
+export async function getContract(
+  params: FormData | { contract_uuid: string },
+): Promise<ContractRelatedDetail | null> {
+  await requireCapability("candidate.read.own");
+
+  const raw =
+    params instanceof FormData
+      ? { contract_uuid: params.get("contract_uuid") }
+      : params;
+
+  const parsed = getContractSchema.safeParse(raw);
+  if (!parsed.success) {
+    return null;
+  }
+
+  const { contract_uuid } = parsed.data;
+
+  const contract = await prisma.contract.findFirst({
+    where: {
+      contract_uuid,
+      deleted: false,
+    },
+    include: {
+      fixed_price_contract: true,
+      hourly_contract: true,
+      monthly_salary_contract: true,
+    },
+  });
+
+  if (!contract) return null;
+
+  const record = contract as any;
+
+  if (record.fixed_price_contract?.length) {
+    const fp = record.fixed_price_contract[0] as any;
+    return {
+      type: "Fixed Price" as const,
+      fp_contract_uuid: fp.fp_contract_uuid,
+      candidate_total: Number(fp.candidate_total),
+      company_total: Number(fp.company_total),
+      completion_percentage: fp.completion_percentage,
+    };
+  }
+
+  if (record.hourly_contract?.length) {
+    const h = record.hourly_contract[0] as any;
+    return {
+      type: "Hourly" as const,
+      h_contract_uuid: h.h_contract_uuid,
+      candidate_hourly_rate: Number(h.candidate_hourly_rate),
+      company_hourly_rate: Number(h.company_hourly_rate),
+    };
+  }
+
+  if (record.monthly_salary_contract?.length) {
+    const ms = record.monthly_salary_contract[0] as any;
+    return {
+      type: "Monthly Salary" as const,
+      ms_contract_uuid: ms.ms_contract_uuid,
+      candidate_total: Number(ms.candidate_total),
+      company_total: Number(ms.company_total),
+      salary_day: ms.salary_day,
+    };
+  }
+
+  return null;
+}
+
+// ---------------------------------------------------------------------------
 // listContracts
 // ---------------------------------------------------------------------------
 
