@@ -6,24 +6,38 @@ import type { Role } from "@/modules/auth/types";
 
 export const dynamic = "force-dynamic";
 
-const VALID_ROLES: Role[] = ["candidate", "company"];
+// All landing page CTAs link to /signup?role=<role>. Candidate and company
+// support self-registration; staff, admin, and inspector roles show a
+// contextual message in SignupForm guiding users to request access.
+const VALID_ROLES: Role[] = ["candidate", "company", "staff", "admin", "inspector"];
 
 export default async function SignupPage({
   searchParams,
 }: {
   searchParams: Promise<{ role?: string }>;
 }) {
-  const session = await getSession();
+  // Defensive: wrap session check to prevent crash if cookies() fails
+  let session = null;
+  try {
+    session = await getSession();
+  } catch {
+    // Session check failed — continue unauthenticated
+  }
 
   // Already logged in — send to app
   if (session) {
     redirect("/app");
   }
 
-  const params = await searchParams;
-  const defaultRole = VALID_ROLES.includes(params.role as Role)
-    ? (params.role as Role)
-    : undefined;
+  let defaultRole: Role | undefined;
+  try {
+    const params = await searchParams;
+    defaultRole = VALID_ROLES.includes(params.role as Role)
+      ? (params.role as Role)
+      : undefined;
+  } catch {
+    // searchParams unavailable — render without pre-selection
+  }
 
   return (
     <main className="min-h-svh w-full grid place-items-center p-4">

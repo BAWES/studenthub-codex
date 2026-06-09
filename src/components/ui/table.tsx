@@ -128,19 +128,38 @@ export interface TableRowProps extends React.ComponentPropsWithoutRef<"tr"> {
 }
 
 const TableRow = React.forwardRef<HTMLTableRowElement, TableRowProps>(
-  function TableRow({ className, index = 0, style, ...props }, ref) {
+  function TableRow({ className, index = 0, style, onClick, onKeyDown, ...props }, ref) {
     const { staggerMs } = React.useContext(TableContext);
+
+    const isInteractive = typeof onClick === "function";
+
+    const handleKeyDown = React.useCallback(
+      (e: React.KeyboardEvent<HTMLTableRowElement>) => {
+        if (onKeyDown) onKeyDown(e);
+        if (e.defaultPrevented) return;
+        if (onClick && (e.key === "Enter" || e.key === " ")) {
+          e.preventDefault();
+          onClick(e as unknown as React.MouseEvent<HTMLTableRowElement>);
+        }
+      },
+      [onClick, onKeyDown],
+    );
 
     return (
       <tr
         ref={ref}
         data-slot="table-row"
+        tabIndex={isInteractive ? 0 : undefined}
+        role={isInteractive ? "button" : undefined}
+        onClick={onClick}
+        onKeyDown={isInteractive ? handleKeyDown : onKeyDown}
         className={cn(
           "border-b border-[var(--sh-glass-border)]",
           "transition-all duration-[200ms] ease-out",
           "hover:bg-[var(--sh-glass-bg)] hover:translate-x-[2px]",
           "data-[state=selected]:bg-[var(--sh-info-bg)]",
           "cursor-default",
+          isInteractive && "cursor-pointer",
           className,
         )}
         style={{

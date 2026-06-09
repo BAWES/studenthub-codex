@@ -181,19 +181,27 @@ describe("RoleLayoutShell", () => {
     expect(icons.length).toBeGreaterThan(0);
   });
 
-  // ── Skip-to-content link (P0 accessibility) ────────────────────────────
+  // ── No duplicate `#main-content` id (P0 a11y — STU-1628) ──────────────
 
-  it("renders a skip-to-content link as the first focusable element", () => {
+  it("does NOT render a skip-to-content link (WorkspaceOS provides it)", () => {
     renderShell();
-    const link = screen.getByRole("link", { name: /skip to content/i });
-    expect(link).toBeInTheDocument();
-    expect(link).toHaveAttribute("href", "#main-content");
+    const links = screen.queryAllByRole("link", { name: /skip to content/i });
+    expect(links.length).toBe(0);
   });
 
-  it("main content area has id='main-content' for skip-link target", () => {
+  it("main element does NOT carry id='main-content' to avoid duplicate with WorkspaceOS", () => {
     renderShell();
     const main = document.getElementById("main-content");
-    expect(main).toBeInTheDocument();
-    expect(main!.tagName.toLowerCase()).toBe("main");
+    expect(main).toBeNull();
+  });
+
+  it("renders children inside a semantically correct main landmark", () => {
+    renderShell({
+      children: <div data-testid="child">Hello</div>,
+    });
+    const mains = document.querySelectorAll("main");
+    expect(mains.length).toBe(1);
+    expect(mains[0]).not.toHaveAttribute("id");
+    expect(screen.getByTestId("child")).toBeInTheDocument();
   });
 });

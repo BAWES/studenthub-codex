@@ -207,9 +207,6 @@ export function DataTable<T>({
               key={rowKey(row)}
               index={idx}
               onClick={onRowClick ? () => onRowClick(row) : undefined}
-              className={cn(
-                onRowClick && "cursor-pointer",
-              )}
               data-testid={`data-table-row-${rowKey(row)}`}
             >
               {columns.map((col, colIdx) => (

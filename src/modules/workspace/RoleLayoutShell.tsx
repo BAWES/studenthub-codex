@@ -37,52 +37,84 @@ export function RoleLayoutShell({
   userEmail: string;
   children: React.ReactNode;
 }) {
-  useWorkspaceOS();
+  const { embedded } = useWorkspaceOS();
 
   const branding = ROLE_BRANDING[role] ?? { label: role, icon: Shield };
   const Icon = branding.icon;
 
-  return (
-    <>
-      <a
-        href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded focus:bg-background focus:px-3 focus:py-2 focus:text-sm focus:font-semibold focus:text-foreground focus:shadow-lg focus:outline-none"
-      >
-        Skip to content
-      </a>
+  if (embedded) {
+    return (
       <div className="flex flex-col gap-4">
         <header className="flex items-center justify-between border-b pb-3">
-        <div className="flex items-center gap-2">
-          <span className="text-muted-foreground">
-            <Icon size={20} strokeWidth={2} aria-hidden="true" />
-          </span>
-          <h2 className="text-lg font-semibold">{branding.label}</h2>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <ThemeToggle />
-          <div className="flex flex-col items-end text-sm">
-            <span className="text-muted-foreground">{userName}</span>
-            <strong>{userEmail}</strong>
+          <div className="flex items-center gap-2">
+            <span className="text-muted-foreground">
+              <Icon size={20} strokeWidth={2} aria-hidden="true" />
+            </span>
+            <h2 className="text-lg font-semibold">{branding.label}</h2>
           </div>
-          <form action={logoutAction}>
-            <button
-              type="submit"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              title="Sign out"
-            >
-              Sign out
-            </button>
-          </form>
+
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
+            <div className="flex flex-col items-end text-sm">
+              <span className="text-muted-foreground">{userName}</span>
+              <strong>{userEmail}</strong>
+            </div>
+            <form action={logoutAction}>
+              <button
+                type="submit"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                title="Sign out"
+              >
+                Sign out
+              </button>
+            </form>
+          </div>
+        </header>
+
+        <div className="px-1">
+          <Breadcrumbs />
         </div>
-      </header>
 
-      <div className="px-1">
-        <Breadcrumbs />
+        <div className="flex-1">{children}</div>
       </div>
+    );
+  }
 
-      <main id="main-content" className="flex-1">{children}</main>
-    </div>
+  return (
+    <>
+      <div className="flex flex-col gap-4">
+        <header className="flex items-center justify-between border-b pb-3">
+          <div className="flex items-center gap-2">
+            <span className="text-muted-foreground">
+              <Icon size={20} strokeWidth={2} aria-hidden="true" />
+            </span>
+            <h2 className="text-lg font-semibold">{branding.label}</h2>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
+            <div className="flex flex-col items-end text-sm">
+              <span className="text-muted-foreground">{userName}</span>
+              <strong>{userEmail}</strong>
+            </div>
+            <form action={logoutAction}>
+              <button
+                type="submit"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                title="Sign out"
+              >
+                Sign out
+              </button>
+            </form>
+          </div>
+        </header>
+
+        <div className="px-1">
+          <Breadcrumbs />
+        </div>
+
+        <main className="flex-1">{children}</main>
+      </div>
     </>
   );
 }

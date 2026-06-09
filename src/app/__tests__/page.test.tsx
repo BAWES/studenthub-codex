@@ -100,6 +100,15 @@ describe("Landing page (marketing redesign)", () => {
     session: null,
   };
 
+  const sessionProps: LandingContentProps = {
+    session: {
+      id: "test-123",
+      email: "test@example.com",
+      role: "candidate",
+      name: "Test User",
+    },
+  };
+
   beforeEach(() => {
     mockReplace.mockClear();
     // Ensure search params are empty per default
@@ -191,5 +200,53 @@ describe("Landing page (marketing redesign)", () => {
     expect(openAppLinks.length).toBeGreaterThanOrEqual(1);
     // No signup CTAs for authenticated users
     expect(screen.queryByText(/create free candidate profile/i)).not.toBeInTheDocument();
+  });
+
+  describe("Glass navigation styling", () => {
+    it("renders nav with shGlassNav class", () => {
+      render(<LandingContent {...defaultProps} />);
+      const nav = document.querySelector("nav");
+      expect(nav?.className).toContain("shGlassNav");
+    });
+
+    it("renders nav inner wrapper with shGlassNavInner class", () => {
+      render(<LandingContent {...defaultProps} />);
+      const nav = document.querySelector("nav");
+      const inner = nav?.querySelector('[class*="shGlassNavInner"]');
+      expect(inner).toBeTruthy();
+    });
+
+    it("renders SH brand mark in nav", () => {
+      render(<LandingContent {...defaultProps} />);
+      const brandMark = screen.getByText("SH");
+      expect(brandMark).toBeTruthy();
+    });
+  });
+
+  describe("Mobile viewport responsiveness", () => {
+    it("renders max-sm responsive width constraints on main container", () => {
+      render(<LandingContent {...defaultProps} />);
+      const main = document.querySelector("main");
+      expect(main?.className).toContain("max-sm");
+    });
+
+    it("renders final CTA section with shHeroGradientDramatic", () => {
+      render(<LandingContent {...defaultProps} />);
+      const gradients = document.querySelectorAll(".shHeroGradientDramatic");
+      // One in HeroSection, one in final CTA
+      expect(gradients.length).toBeGreaterThanOrEqual(2);
+    });
+  });
+
+  describe("Snapshot — landing page full layout", () => {
+    it("renders consistently with unauthenticated state", () => {
+      const { container } = render(<LandingContent {...defaultProps} />);
+      expect(container).toMatchSnapshot();
+    });
+
+    it("renders consistently with authenticated state", () => {
+      const { container } = render(<LandingContent {...sessionProps} />);
+      expect(container).toMatchSnapshot();
+    });
   });
 });
