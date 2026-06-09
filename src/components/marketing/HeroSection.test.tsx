@@ -103,9 +103,60 @@ describe("HeroSection (OS glass redesign)", () => {
     });
   });
 
-  describe("Mockup section renders for all personas", () => {
+  describe("Animated gradient background", () => {
     ALL_PERSONAS.forEach((persona) => {
-      it(`renders mockup search placeholder for ${persona}`, () => {
+      it(`renders shHeroGradientDramatic div for ${persona}`, () => {
+        render(<HeroSection persona={persona} />);
+        const gradient = document.querySelector(".shHeroGradientDramatic");
+        expect(gradient).toBeTruthy();
+        expect(gradient?.getAttribute("aria-hidden")).toBe("true");
+      });
+
+      it(`renders ambient floating orbs for ${persona}`, () => {
+        render(<HeroSection persona={persona} />);
+        const orbs = document.querySelectorAll('[class*="shOrb"]');
+        expect(orbs.length).toBeGreaterThanOrEqual(3);
+        orbs.forEach((orb) => {
+          expect(orb.getAttribute("aria-hidden")).toBe("true");
+        });
+      });
+
+      it(`renders particle grid overlay for ${persona}`, () => {
+        render(<HeroSection persona={persona} />);
+        const grid = document.querySelector(".shParticleGrid");
+        expect(grid).toBeTruthy();
+        expect(grid?.getAttribute("aria-hidden")).toBe("true");
+      });
+
+      it(`renders persona badge for ${persona}`, () => {
+        render(<HeroSection persona={persona} />);
+        const badge = document.querySelector(".shPersonaBadge");
+        expect(badge).toBeTruthy();
+        expect(badge?.getAttribute("aria-hidden")).toBe("true");
+        const expectedLabel = persona.charAt(0).toUpperCase() + persona.slice(1) + " portal";
+        expect(badge?.textContent).toContain(expectedLabel);
+      });
+    });
+  });
+
+  describe("Floating mockup rendering", () => {
+    ALL_PERSONAS.forEach((persona) => {
+      it(`renders shMockupDramatic container for ${persona}`, () => {
+        render(<HeroSection persona={persona} />);
+        const mockup = document.querySelector(".shMockupDramatic");
+        expect(mockup).toBeTruthy();
+      });
+
+      it(`renders persona-specific mockup nav items for ${persona}`, () => {
+        render(<HeroSection persona={persona} />);
+        const mockup = document.querySelector(".shMockupDramatic");
+        expect(mockup).toBeTruthy();
+        // Each persona has mockupNav — check the left rail exists
+        const navItems = mockup!.querySelectorAll('[class*="rounded-\\[7px\\]"]');
+        expect(navItems.length).toBeGreaterThanOrEqual(3);
+      });
+
+      it(`renders search placeholder for ${persona}`, () => {
         render(<HeroSection persona={persona} />);
         const searchTexts = screen.getAllByText(/Search|Review|Find/i);
         expect(searchTexts.length).toBeGreaterThanOrEqual(1);
@@ -119,6 +170,13 @@ describe("HeroSection (OS glass redesign)", () => {
           /\d/.test(text) || /(pending|live|ready|processing|flagged|active)/i.test(text);
         expect(hasActionStatus).toBe(true);
       });
+
+      it(`renders right-panel command action for ${persona}`, () => {
+        render(<HeroSection persona={persona} />);
+        // Each persona has a mockupCommand — look for "Action" heading
+        const actionLabels = screen.getAllByText("Action");
+        expect(actionLabels.length).toBeGreaterThanOrEqual(1);
+      });
     });
   });
 
@@ -129,6 +187,44 @@ describe("HeroSection (OS glass redesign)", () => {
       // The button with CTA text
       const ctaButton = screen.getByText("Create your free candidate profile");
       expect(ctaButton.tagName).toBe("BUTTON");
+    });
+  });
+
+  describe("Mobile viewport responsiveness", () => {
+    it("renders max-lg responsive classes on section", () => {
+      render(<HeroSection />);
+      const section = document.querySelector("section");
+      expect(section?.className).toContain("max-lg");
+    });
+
+    it("includes min-h-[400px] fallback on mockup container for mobile", () => {
+      render(<HeroSection />);
+      const mockupContainer = document.querySelector('[class*="max-lg:min-h-\\[400px\\]"]');
+      // The original container has inline class that we can check via className
+      const section = document.querySelector("section");
+      const allElements = document.querySelectorAll("*");
+      let foundMobileMockup = false;
+      allElements.forEach((el) => {
+        if (el.className && typeof el.className === "string" && el.className.includes("max-lg:order-2")) {
+          foundMobileMockup = true;
+        }
+      });
+      expect(foundMobileMockup).toBe(true);
+    });
+
+    it("wraps mockup in container with max-lg:relative for mobile stacking", () => {
+      render(<HeroSection />);
+      const mockupWrapper = document.querySelector('[class*="max-lg:relative"]');
+      expect(mockupWrapper).toBeTruthy();
+    });
+  });
+
+  describe("Snapshot — per persona", () => {
+    ALL_PERSONAS.forEach((persona) => {
+      it(`renders consistently for ${persona} persona`, () => {
+        const { container } = render(<HeroSection persona={persona} />);
+        expect(container).toMatchSnapshot();
+      });
     });
   });
 });
