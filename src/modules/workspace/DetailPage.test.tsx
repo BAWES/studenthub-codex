@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
-import { describe, it, expect, afterEach } from "vitest";
-import { render, screen, cleanup } from "@testing-library/react";
+import { describe, it, expect, afterEach, vi } from "vitest";
+import { render, screen, cleanup, fireEvent } from "@testing-library/react";
 import { DetailPage } from "./DetailPage";
 
 afterEach(() => { cleanup(); });
@@ -27,7 +27,6 @@ describe("DetailPage", () => {
     render(
       <DetailPage title="Alice Johnson" eyebrow="Candidate" factSections={testFacts} />
     );
-    // Title appears in h1 and may also appear in fact values
     const titles = screen.getAllByText("Alice Johnson");
     expect(titles.length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText("Candidate")).toBeDefined();
@@ -56,16 +55,54 @@ describe("DetailPage", () => {
     expect(screen.getByText("Request #1001")).toBeDefined();
   });
 
-  it("renders action toolbar when provided", () => {
+  it("renders action toolbar with structured actions", () => {
+    const onEdit = vi.fn();
     render(
       <DetailPage
         title="Alice Johnson"
         eyebrow="Candidate"
         factSections={testFacts}
-        actions={<button>Edit</button>}
+        actions={[
+          { label: "Edit", onClick: onEdit },
+          { label: "Delete", variant: "danger", onClick: () => {} },
+        ]}
       />
     );
     expect(screen.getByText("Edit")).toBeDefined();
+    expect(screen.getByText("Delete")).toBeDefined();
+  });
+
+  it("calls onClick when an action button is clicked", () => {
+    const onEdit = vi.fn();
+    render(
+      <DetailPage
+        title="Test"
+        factSections={testFacts}
+        actions={[{ label: "Edit", onClick: onEdit }]}
+      />
+    );
+    fireEvent.click(screen.getByText("Edit"));
+    expect(onEdit).toHaveBeenCalledTimes(1);
+  });
+
+  it("renders back link when backHref is provided", () => {
+    render(
+      <DetailPage
+        title="Test"
+        factSections={testFacts}
+        backHref="/staff/requests"
+      />
+    );
+    const link = screen.getByText("Back");
+    expect(link).toBeDefined();
+    expect(link.closest("a")?.getAttribute("href")).toBe("/staff/requests");
+  });
+
+  it("does not render back link when backHref is omitted", () => {
+    render(
+      <DetailPage title="Test" factSections={testFacts} />
+    );
+    expect(screen.queryByText("Back")).toBeNull();
   });
 
   it("shows loading skeleton when loading is true", () => {
@@ -84,6 +121,21 @@ describe("DetailPage", () => {
       />
     );
     expect(screen.getByText("Record not found")).toBeDefined();
+  });
+
+  it("shows retry button in error state when onRetry is provided", () => {
+    const onRetry = vi.fn();
+    render(
+      <DetailPage
+        title="Error"
+        factSections={{}}
+        error="Failed"
+        onRetry={onRetry}
+      />
+    );
+    expect(screen.getByText("Retry")).toBeDefined();
+    fireEvent.click(screen.getByText("Retry"));
+    expect(onRetry).toHaveBeenCalledTimes(1);
   });
 
   it("shows 'Not set' for null/undefined values", () => {
