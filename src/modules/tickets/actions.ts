@@ -32,7 +32,7 @@ const addCommentSchema = z.object({
 
 const updateTicketSchema = z.object({
   ticketUuid: z.string().min(1, "Ticket UUID is required"),
-  detail: z.string().min(1, "Ticket detail is required"),
+  detail: z.string().min(1, "Ticket detail is required").max(2000),
 });
 
 const closeTicketSchema = z.object({
@@ -40,15 +40,6 @@ const closeTicketSchema = z.object({
 });
 
 const getCommentsSchema = z.object({
-  ticketUuid: z.string().min(1, "Ticket UUID is required"),
-});
-
-const updateTicketSchema = z.object({
-  ticketUuid: z.string().min(1, "Ticket UUID is required"),
-  detail: z.string().min(1, "Ticket detail is required").max(2000),
-});
-
-const closeTicketSchema = z.object({
   ticketUuid: z.string().min(1, "Ticket UUID is required"),
 });
 
@@ -101,9 +92,6 @@ export type AddCommentResult = {
   operation: string;
   message: string;
 };
-
-export type UpdateTicketParams = z.input<typeof updateTicketSchema>;
-export type CloseTicketParams = z.input<typeof closeTicketSchema>;
 
 // ---------------------------------------------------------------------------
 // Exported schemas (for shared validation in tests)
@@ -479,7 +467,7 @@ export async function getComments(
 }
 
 // ---------------------------------------------------------------------------
-// updateTicket
+// updateTicketByCandidate
 // ---------------------------------------------------------------------------
 
 /**
@@ -487,7 +475,7 @@ export async function getComments(
  * Mirrors the legacy TicketController::actionUpdate.
  * Requires candidate.read.own capability.
  */
-export async function updateTicket(
+export async function updateTicketByCandidate(
   params: UpdateTicketParams,
 ): Promise<{ operation: string; message: string }> {
   await requireCapability("candidate.read.own");
@@ -524,7 +512,7 @@ export async function updateTicket(
 }
 
 // ---------------------------------------------------------------------------
-// closeTicket
+// closeTicketByCandidate
 // ---------------------------------------------------------------------------
 
 /**
@@ -532,7 +520,7 @@ export async function updateTicket(
  * Mirrors the legacy TicketController::actionClose.
  * Requires candidate.read.own capability.
  */
-export async function closeTicket(
+export async function closeTicketByCandidate(
   params: CloseTicketParams,
 ): Promise<{ operation: string; message: string }> {
   await requireCapability("candidate.read.own");
