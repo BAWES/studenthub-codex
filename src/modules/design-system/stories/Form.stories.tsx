@@ -105,7 +105,7 @@ export const WithErrors: Story = {
 
       React.useEffect(() => {
         form.trigger();
-        // eslint-disable-next-line react-hooks/exhaustive-deps — intentional: trigger validation only on mount
+        // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional: trigger validation only on mount
       }, []);
 
       return (
