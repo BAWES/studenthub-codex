@@ -2271,23 +2271,120 @@ h2 {
   transform: translateY(-1px);
 }
 
-.metric {
-  min-height: 118px;
-  padding: 18px;
-  border: 1px solid var(--line);
-  background: var(--surface);
+/* ------------------------------------------------------------------ */
+/*  MetricCard — glass card with value, label, sparkline, trend.       */
+/*  Replaces the old bordered .metric block.                           */
+/* ------------------------------------------------------------------ */
+
+.shMetricCard {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 130px;
+  padding: var(--space-4) var(--space-5);
+  background: var(--sh-glass-bg);
+  backdrop-filter: blur(var(--sh-glass-blur));
+  -webkit-backdrop-filter: blur(var(--sh-glass-blur));
+  border: 1px solid var(--sh-glass-border);
+  border-radius: var(--radius-xl);
+  transition:
+    transform var(--dur-slow) var(--sh-easing),
+    box-shadow var(--dur-slow) var(--sh-easing),
+    border-color var(--dur-slow) var(--sh-easing);
+  animation: shMetricFadeIn 400ms var(--sh-easing) both;
 }
 
-.metric strong {
+.shMetricCard:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--sh-glass-border-strong);
+}
+
+.shMetricCardClickable {
+  cursor: pointer;
+}
+
+.shMetricCardClickable:hover {
+  background: var(--sh-glass-bg-strong);
+}
+
+.shMetricCardBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-xs);
+}
+
+.shMetricCardTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--gap-sm);
+}
+
+.shMetricCardLabel {
+  font-size: var(--sh-fs-sm);
+  font-weight: var(--weight-medium);
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.shMetricCardTrend {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.shMetricCardTrend small {
+  font-size: var(--sh-fs-xs);
+  font-weight: var(--weight-semibold);
+  color: var(--muted);
+}
+
+.shMetricCardTrend[data-trend="up"] small { color: var(--sh-success); }
+.shMetricCardTrend[data-trend="down"] small { color: var(--sh-error); }
+
+.shMetricCardValue {
   display: block;
-  font-size: 38px;
-  line-height: 1;
-  margin: 16px 0 10px;
+  font-size: var(--sh-fs-3xl);
+  font-weight: var(--weight-semibold);
+  line-height: 1.1;
+  color: var(--foreground);
+  letter-spacing: -0.02em;
 }
 
-.metric p {
+.shMetricCardNote {
+  font-size: var(--sh-fs-xs);
   color: var(--faint);
-  margin-bottom: 0;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.shMetricCardChart {
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-end;
+  margin-top: var(--space-2);
+}
+
+.shMetricSparkline {
+  opacity: 0.7;
+  transition: opacity var(--dur-default) var(--sh-easing);
+}
+
+.shMetricCard:hover .shMetricSparkline {
+  opacity: 1;
+}
+
+@keyframes shMetricFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .workspace {
@@ -3532,6 +3629,168 @@ tr:last-child td {
 
 .emptyTableRow td {
   padding: 0;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Empty State — StudentHub OS edition (glass, illustration, CTAs)   */
+/* ------------------------------------------------------------------ */
+
+.shEmptyStateOs {
+  display: grid;
+  gap: 10px;
+  justify-items: center;
+  text-align: center;
+  padding: 40px 24px;
+  background: var(--sh-glass-bg);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--sh-glass-border);
+  border-radius: var(--sh-radius-lg);
+  animation: shEmptyEnter 360ms var(--sh-easing) both;
+  transition:
+    background 200ms var(--sh-easing),
+    border-color 200ms var(--sh-easing);
+}
+
+[data-theme="dark"] .shEmptyStateOs {
+  background: var(--sh-glass-bg);
+}
+
+.shEmptyStateOsIllust {
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  margin-bottom: 4px;
+  opacity: 0.85;
+}
+
+.shEmptyStateOsMessage {
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.3;
+  max-width: 380px;
+}
+
+.shEmptyStateOsHint {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.45;
+  margin: 0;
+  max-width: 380px;
+}
+
+.shEmptyStateOsAction {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 8px;
+  min-height: 38px;
+  padding: 0 16px;
+  border: 1px solid var(--sh-glass-border-strong);
+  border-radius: var(--sh-radius-md);
+  background: var(--sh-glass-bg-strong);
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 200ms var(--sh-easing),
+    border-color 200ms var(--sh-easing),
+    transform 200ms var(--sh-easing),
+    box-shadow 200ms var(--sh-easing);
+}
+
+.shEmptyStateOsAction:hover {
+  background: var(--sh-glass-bg-strong);
+  border-color: var(--sh-info);
+  transform: translateY(-1px);
+  box-shadow: var(--sh-glow-sm);
+}
+
+.shEmptyStateOsAction:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.shEmptyStateOsActionIcon {
+  display: inline-flex;
+  color: var(--sh-info);
+}
+
+/* ── Entry animation ────────────────────────────────────────── */
+
+@keyframes shEmptyEnter {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Illustration micro-animations ──────────────────────────── */
+
+.shEmptyIllustration {
+  width: 64px;
+  height: 64px;
+}
+
+.shEmptyIllustAnimateSearch {
+  animation: shEmptyPulse 3s ease-in-out infinite;
+  transform-origin: 44px 42px;
+}
+
+.shEmptyIllustAnimatePen {
+  animation: shEmptyNudge 4s ease-in-out infinite;
+  transform-origin: 44px 46px;
+}
+
+.shEmptyIllustAnimateClock {
+  animation: shEmptySpin 12s linear infinite;
+  transform-origin: 44px 44px;
+}
+
+.shEmptyIllustAnimateError {
+  animation: shEmptyTremor 1.5s ease-in-out infinite;
+}
+
+.shEmptyIllustAnimateX {
+  animation: shEmptyFadeInOut 3s ease-in-out infinite;
+}
+
+.shEmptyIllustAnimateSparkle {
+  animation: shEmptyPulse 2.5s ease-in-out infinite;
+}
+
+@keyframes shEmptyPulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+@keyframes shEmptyNudge {
+  0%, 100% { transform: rotate(-3deg); }
+  50% { transform: rotate(3deg); }
+}
+
+@keyframes shEmptySpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes shEmptyTremor {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-2deg); }
+  50% { transform: rotate(2deg); }
+  75% { transform: rotate(-1deg); }
+}
+
+@keyframes shEmptyFadeInOut {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 0.75; }
 }
 
 .listHeader {
@@ -5314,329 +5573,155 @@ kbd {
   white-space: nowrap;
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   Command Palette — Glass morphism, Raycast-inspired
-   Uses shGlass tokens for dark/light mode consistency.
-   ═══════════════════════════════════════════════════════════════════ */
-
-.shCmdOverlay {
+.commandOverlay {
   position: fixed;
   inset: 0;
   z-index: 80;
   display: grid;
   place-items: start center;
   padding: 9vh 16px 24px;
-  animation: shCmdFadeIn 200ms var(--sh-easing) both;
 }
 
-.shCmdScrim {
+.commandScrim {
   position: absolute;
   inset: 0;
   border: 0;
-  background: var(--overlay);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: rgba(15, 23, 42, 0.28);
+  backdrop-filter: blur(7px);
   cursor: default;
 }
 
-.shCmdMenu {
+.commandMenu {
   position: relative;
-  width: min(680px, 100%);
+  width: min(760px, 100%);
   overflow: hidden;
-  border-radius: var(--sh-radius-lg);
-  background: var(--surface);
-  box-shadow:
-    0 0 0 1px var(--sh-glass-border),
-    0 24px 80px rgba(0, 0, 0, 0.25);
-  animation: shCmdSlideIn 200ms var(--sh-easing) both;
+  border: 1px solid #bfc9d8;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 30px 90px rgba(15, 23, 42, 0.2);
 }
 
-[data-theme="dark"] .shCmdMenu {
-  background: rgba(17, 24, 36, 0.92);
-  backdrop-filter: blur(32px);
-  -webkit-backdrop-filter: blur(32px);
-}
-
-/* ── Input row ─────────────────────────────────────── */
-
-.shCmdInputWrap {
+.commandInputWrap {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: 10px;
   border-bottom: 1px solid var(--line);
-  padding: 14px 16px;
+  padding: 12px 14px;
 }
 
-.shCmdInputIcon {
-  width: 32px;
-  height: 32px;
+.commandInputWrap > span {
+  width: 30px;
+  height: 30px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--sh-radius-sm);
-  color: var(--muted);
-  flex-shrink: 0;
+  border-radius: 8px;
+  background: #eef5ff;
+  color: var(--blue);
+  font-weight: 900;
 }
 
-.shCmdInput {
+.commandInputWrap input {
   min-width: 0;
   border: 0;
   outline: 0;
   background: transparent;
   color: var(--ink);
   font: inherit;
-  font-size: 15px;
-  font-weight: 600;
-}
-
-.shCmdInput::placeholder {
-  color: var(--muted);
-  font-weight: 500;
-}
-
-.shCmdInputEsc {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 32px;
-  height: 24px;
-  border-radius: var(--sh-radius-sm);
-  background: var(--surface-soft);
-  border: 1px solid var(--line);
-  color: var(--muted);
-  font: inherit;
-  font-size: 11px;
-  font-weight: 700;
-  flex-shrink: 0;
-}
-
-[data-theme="dark"] .shCmdInputEsc {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(255, 255, 255, 0.10);
-}
-
-/* ── Results list ──────────────────────────────────── */
-
-.shCmdList {
-  max-height: min(48vh, 480px);
-  overflow-y: auto;
-  padding: 6px 8px 8px;
-}
-
-.shCmdGroup {
-  display: grid;
-  gap: 2px;
-}
-
-.shCmdGroup + .shCmdGroup {
-  margin-top: 4px;
-  padding-top: 4px;
-}
-
-.shCmdGroupLabel {
-  margin: 6px 8px 4px;
-  color: var(--muted);
-  font-size: 11px;
+  font-size: 16px;
   font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
 }
 
-/* ── Command item ──────────────────────────────────── */
+.commandList {
+  max-height: min(52vh, 520px);
+  overflow-y: auto;
+  padding: 8px;
+}
 
-.shCmdItem {
+.commandGroup {
+  display: grid;
+  gap: 3px;
+  margin-bottom: 9px;
+}
+
+.commandGroup h3 {
+  margin: 8px 8px 4px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.commandGroup button {
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
   border: 1px solid transparent;
-  border-radius: var(--sh-radius-sm);
+  border-radius: 8px;
   background: transparent;
   color: var(--ink);
-  padding: 9px 10px;
+  padding: 10px;
   font: inherit;
   text-align: left;
   cursor: pointer;
-  transition:
-    background 120ms var(--sh-easing),
-    border-color 120ms var(--sh-easing),
-    box-shadow 120ms var(--sh-easing);
 }
 
-.shCmdItem:hover {
-  border-color: var(--sh-glass-border);
-  background: var(--sh-glass-bg);
+.commandGroup button.active,
+.commandGroup button:hover {
+  border-color: #c8d8ef;
+  background: #f1f6ff;
 }
 
-.shCmdItemActive {
-  border-color: var(--sh-glass-border-strong) !important;
-  background: var(--sh-glass-bg-strong) !important;
-  box-shadow: var(--sh-glow-sm) !important;
-}
-
-.shCmdItemBody {
+.commandGroup button > span {
   min-width: 0;
   display: grid;
-  gap: 2px;
+  gap: 3px;
 }
 
-.shCmdItemTitle {
+.commandGroup strong,
+.commandGroup small {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--ink);
 }
 
-.shCmdItemSub {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  color: var(--muted);
-  font-size: 11px;
-  font-weight: 500;
-}
-
-/* ── Fuzzy match highlight ─────────────────────────── */
-
-.shCmdMatch {
-  background: transparent;
-  color: var(--sh-info);
-  font-weight: 800;
-}
-
-[data-theme="dark"] .shCmdMatch {
-  color: var(--sh-info);
-}
-
-/* ── Shortcut badge ────────────────────────────────── */
-
-.shCmdShortcut {
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 32px;
-  height: 22px;
-  border-radius: var(--sh-radius-sm);
-  padding: 0 6px;
-  background: var(--surface-soft);
-  border: 1px solid var(--line);
-  color: var(--muted);
-  font: inherit;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-}
-
-[data-theme="dark"] .shCmdShortcut {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(255, 255, 255, 0.10);
-}
-
-/* ── Empty state ───────────────────────────────────── */
-
-.shCmdEmpty {
-  display: grid;
-  place-items: center;
-  gap: 6px;
-  padding: 36px 16px 40px;
-  text-align: center;
-}
-
-.shCmdEmptyIcon {
-  width: 44px;
-  height: 44px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--sh-radius-md);
-  background: var(--sh-glass-bg);
-  color: var(--muted);
-  margin-bottom: 4px;
-}
-
-.shCmdEmptyTitle {
-  color: var(--ink);
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.shCmdEmptyHint {
+.commandGroup small {
   color: var(--muted);
   font-size: 12px;
 }
 
-/* ── Shortcut footer ───────────────────────────────── */
+.commandEmpty {
+  display: grid;
+  gap: 5px;
+  padding: 24px 16px;
+  color: var(--muted);
+}
 
-.shCmdFooter {
+.commandEmpty strong {
+  color: var(--ink);
+}
+
+.shortcutGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 4px;
-  padding: 10px 14px;
+  gap: 1px;
   border-top: 1px solid var(--line);
-  background: var(--surface-soft);
+  background: var(--line);
 }
 
-[data-theme="dark"] .shCmdFooter {
-  background: rgba(255, 255, 255, 0.03);
-}
-
-.shCmdFooterChord {
+.shortcutGrid div {
+  min-width: 0;
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 5px 8px;
-  border-radius: var(--sh-radius-sm);
-}
-
-.shCmdFooterKey {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 30px;
-  height: 20px;
-  border-radius: 4px;
-  padding: 0 5px;
-  background: var(--surface);
-  border: 1px solid var(--line);
+  background: #fbfcfe;
+  padding: 10px 12px;
   color: var(--muted);
-  font: inherit;
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.03em;
-}
-
-[data-theme="dark"] .shCmdFooterKey {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(255, 255, 255, 0.10);
-}
-
-.shCmdFooterLabel {
-  color: var(--muted);
-  font-size: 11px;
-  font-weight: 600;
-}
-
-/* ── Animations ────────────────────────────────────── */
-
-@keyframes shCmdFadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes shCmdSlideIn {
-  from {
-    opacity: 0;
-    transform: scale(0.96) translateY(-8px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
+  font-size: 12px;
+  font-weight: 700;
 }
 
 @media (max-width: 1040px) {
@@ -6279,15 +6364,15 @@ kbd {
     width: 100%;
   }
 
-  .shCmdOverlay {
+  .commandOverlay {
     padding: 10px;
   }
 
-  .shCmdMenu {
+  .commandMenu {
     max-height: calc(100svh - 20px);
   }
 
-  .shCmdFooter {
+  .shortcutGrid {
     grid-template-columns: 1fr;
   }
 
@@ -9119,12 +9204,12 @@ kbd {
     padding: 0 8px;
   }
 
-  .shCmdOverlay .shCmdMenu {
+  .commandOverlay .commandMenu {
     width: calc(100vw - 16px);
     max-width: 360px;
   }
 
-  .shCmdInput {
+  .commandInputWrap input {
     font-size: 14px;
   }
 
@@ -9757,6 +9842,35 @@ kbd {
   animation: skeletonPulse 1.8s ease-in-out infinite;
 }
 
+/* ── Workspace OS Keyboard Shortcut Hints in Command Palette ── */
+
+.shortcutGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4px;
+  padding: 10px 14px;
+  border-top: 1px solid var(--line);
+}
+
+.shortcutGrid div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 8px;
+  border-radius: 6px;
+}
+
+.shortcutGrid kbd {
+  font-family: "SF Mono", "JetBrains Mono", "Fira Code", monospace;
+  font-size: 11px;
+  font-weight: 700;
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 1px 6px;
+}
+
 /* ── Sheet / Slide-in Panel ──────────────────────────────── */
 
 .sheetOverlay {
@@ -10373,438 +10487,594 @@ kbd {
   }
 }
 
+.shBenefitsTitle {
+  margin: 0.35em 0 0.35em;
+  font-size: clamp(22px, 3.4vw, 38px);
+  font-weight: 800;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+
 /* ── Glass hover enhancement for portal cards ───────────────────────── */
 [data-slot="glass-panel"]:hover {
   border-color: var(--sh-glass-border-strong) !important;
 }
 
-/* ════════════════════════════════════════════════════════════════════
-   Login Page — StudentHub OS
-   "Sign in once. We'll open the right workspace."
-   Inspired by Stripe + Linear login — everything is glass, nothing
-   competes with the single CTA.
-   ════════════════════════════════════════════════════════════════════ */
-
-/* Full-viewport login — brand on the left, form on the right */
-.shLoginRoot {
-  min-height: 100svh;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(400px, 520px);
-  background: var(--paper);
-}
-
-@media (max-width: 900px) {
-  .shLoginRoot {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto minmax(0, 1fr);
-  }
-}
-
-/* ── Brand side — animated gradient + visual statement ──────────────── */
-.shLoginBrand {
-  position: relative;
-  display: grid;
-  align-content: center;
-  gap: 16px;
-  padding: clamp(32px, 5vw, 64px);
-  overflow: hidden;
-}
-
+/* ── Login page: full-screen animated gradient ──────────────────────── */
 .shLoginGradient {
-  position: absolute;
+  position: fixed;
   inset: 0;
+  z-index: 0;
   background:
-    radial-gradient(ellipse 90% 70% at 0% 100%, color-mix(in srgb, var(--blue) 20%, transparent) 0%, transparent 70%),
-    radial-gradient(ellipse 80% 60% at 70% 0%, color-mix(in srgb, var(--blue) 14%, transparent) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 50% at 100% 80%, color-mix(in srgb, var(--ring) 10%, transparent) 0%, transparent 60%),
-    var(--sh-glass-bg);
-  animation: shLoginDrift 14s ease-in-out infinite alternate;
+    radial-gradient(ellipse 70% 55% at 0% 100%, color-mix(in srgb, var(--blue) 14%, transparent) 0%, transparent 65%),
+    radial-gradient(ellipse 65% 50% at 80% 0%, color-mix(in srgb, var(--ring) 10%, transparent) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 100% 80%, color-mix(in srgb, var(--blue) 8%, transparent) 0%, transparent 55%),
+    var(--paper);
+  animation: shLoginGradientDrift 15s ease-in-out infinite alternate;
 }
 
-@keyframes shLoginDrift {
+@keyframes shLoginGradientDrift {
   0% {
     background:
-      radial-gradient(ellipse 90% 70% at 0% 100%, color-mix(in srgb, var(--blue) 20%, transparent) 0%, transparent 70%),
-      radial-gradient(ellipse 80% 60% at 70% 0%, color-mix(in srgb, var(--blue) 14%, transparent) 0%, transparent 60%),
-      radial-gradient(ellipse 60% 50% at 100% 80%, color-mix(in srgb, var(--ring) 10%, transparent) 0%, transparent 60%),
-      var(--sh-glass-bg);
+      radial-gradient(ellipse 70% 55% at 0% 100%, color-mix(in srgb, var(--blue) 14%, transparent) 0%, transparent 65%),
+      radial-gradient(ellipse 65% 50% at 80% 0%, color-mix(in srgb, var(--ring) 10%, transparent) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 40% at 100% 80%, color-mix(in srgb, var(--blue) 8%, transparent) 0%, transparent 55%),
+      var(--paper);
   }
   50% {
     background:
-      radial-gradient(ellipse 80% 60% at 20% 90%, color-mix(in srgb, var(--blue) 18%, transparent) 0%, transparent 65%),
-      radial-gradient(ellipse 85% 65% at 60% 10%, color-mix(in srgb, var(--ring) 12%, transparent) 0%, transparent 55%),
-      radial-gradient(ellipse 70% 50% at 90% 70%, color-mix(in srgb, var(--blue) 14%, transparent) 0%, transparent 60%),
-      var(--sh-glass-bg);
+      radial-gradient(ellipse 65% 50% at 20% 90%, color-mix(in srgb, var(--ring) 12%, transparent) 0%, transparent 60%),
+      radial-gradient(ellipse 70% 55% at 70% 10%, color-mix(in srgb, var(--blue) 12%, transparent) 0%, transparent 55%),
+      radial-gradient(ellipse 55% 45% at 90% 70%, color-mix(in srgb, var(--ring) 8%, transparent) 0%, transparent 50%),
+      var(--paper);
   }
   100% {
     background:
-      radial-gradient(ellipse 85% 65% at 15% 85%, color-mix(in srgb, var(--ring) 16%, transparent) 0%, transparent 60%),
-      radial-gradient(ellipse 75% 55% at 80% 15%, color-mix(in srgb, var(--blue) 18%, transparent) 0%, transparent 65%),
-      radial-gradient(ellipse 80% 60% at 45% 100%, color-mix(in srgb, var(--blue) 14%, transparent) 0%, transparent 55%),
-      var(--sh-glass-bg);
+      radial-gradient(ellipse 60% 50% at 10% 80%, color-mix(in srgb, var(--blue) 10%, transparent) 0%, transparent 60%),
+      radial-gradient(ellipse 70% 50% at 80% 20%, color-mix(in srgb, var(--ring) 12%, transparent) 0%, transparent 55%),
+      radial-gradient(ellipse 60% 45% at 50% 100%, color-mix(in srgb, var(--blue) 10%, transparent) 0%, transparent 55%),
+      var(--paper);
   }
 }
 
-.shLoginBrandContent {
-  position: relative;
-  z-index: 1;
-  animation: shLoginBrandFadeIn 600ms var(--sh-easing) both;
+/* ── Login card: fade-in entrance animation ─────────────────────────── */
+.shLoginCard {
+  animation: shLoginCardIn 280ms var(--sh-easing) both;
 }
 
-.shLoginBrandLogo {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 12px;
-}
-
-.shLoginBrandLogo span {
-  width: 44px;
-  height: 44px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 12px;
-  background: var(--ink);
-  color: var(--paper);
-  font-size: 18px;
-  font-weight: 900;
-}
-
-.shLoginBrandLogo strong {
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--ink);
-}
-
-.shLoginBrandTitle {
-  margin: 0;
-  font-size: clamp(40px, 5vw, 72px);
-  line-height: 0.92;
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  color: var(--ink);
-}
-
-.shLoginBrandHighlight {
-  background: linear-gradient(135deg, var(--ink), var(--blue));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.shLoginBrandBody {
-  max-width: 480px;
-  font-size: clamp(15px, 1.4vw, 18px);
-  line-height: 1.5;
-  color: var(--muted);
-  margin-top: 12px;
-}
-
-.shLoginBrandPills {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 18px;
-}
-
-.shLoginBrandPill {
-  min-height: 32px;
-  display: inline-flex;
-  align-items: center;
-  padding: 0 12px;
-  border-radius: 999px;
-  font-size: 11px;
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  background: var(--sh-glass-bg);
-  border: 1px solid var(--sh-glass-border);
-  color: var(--sh-info);
-}
-
-/* ── Form side — centered glass card ────────────────────────────────── */
-.shLoginFormSide {
-  display: grid;
-  align-content: center;
-  padding: 24px;
-  background: var(--surface);
-  border-left: 1px solid var(--sh-glass-border);
-}
-
-@media (max-width: 900px) {
-  .shLoginFormSide {
-    border-left: none;
-    padding: 16px;
-  }
-}
-
-@keyframes shLoginFormIn {
+@keyframes shLoginCardIn {
   from {
     opacity: 0;
-    transform: translateY(12px) scale(0.98);
+    transform: translateY(12px);
   }
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateY(0);
   }
 }
 
-.shLoginFormWrap {
-  width: 100%;
-  max-width: 420px;
-  margin: 0 auto;
+/* ── Dark mode overrides for login pages ────────────────────────────── */
+[data-theme="dark"] .shLoginGradient {
+  background:
+    radial-gradient(ellipse 70% 55% at 0% 100%, color-mix(in srgb, var(--blue) 12%, transparent) 0%, transparent 65%),
+    radial-gradient(ellipse 65% 50% at 80% 0%, color-mix(in srgb, var(--ring) 8%, transparent) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 100% 80%, color-mix(in srgb, var(--blue) 6%, transparent) 0%, transparent 55%),
+    #090d14;
 }
 
-/* ── Staggered entrance ──────────────────────────────────────────────── */
-.shLoginStagger {
-  animation: shLoginFormIn 500ms var(--sh-easing) both;
-}
-.shLoginStagger:nth-child(1) { animation-delay: 80ms; }
-.shLoginStagger:nth-child(2) { animation-delay: 140ms; }
-.shLoginStagger:nth-child(3) { animation-delay: 200ms; }
-.shLoginStagger:nth-child(4) { animation-delay: 260ms; }
-.shLoginStagger:nth-child(5) { animation-delay: 320ms; }
-
-/* ── Glass input overrides for login form ───────────────────────────── */
-.shLoginInput {
-  min-height: 50px !important;
-  padding: 0 14px !important;
-  border-radius: var(--sh-radius-md) !important;
-  border: 1px solid var(--sh-glass-border) !important;
-  background: var(--sh-glass-bg) !important;
-  color: var(--ink) !important;
-  font-size: 15px !important;
-  transition:
-    border-color 200ms var(--sh-easing),
-    box-shadow 200ms var(--sh-easing),
-    background 200ms var(--sh-easing) !important;
-}
-
-.shLoginInput::placeholder {
-  color: var(--muted) !important;
+@keyframes shLoginGradientDriftDark {
+  0% {
+    background:
+      radial-gradient(ellipse 70% 55% at 0% 100%, color-mix(in srgb, var(--blue) 12%, transparent) 0%, transparent 65%),
+      radial-gradient(ellipse 65% 50% at 80% 0%, color-mix(in srgb, var(--ring) 8%, transparent) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 40% at 100% 80%, color-mix(in srgb, var(--blue) 6%, transparent) 0%, transparent 55%),
+      #090d14;
+  }
+  50% {
+    background:
+      radial-gradient(ellipse 65% 50% at 20% 90%, color-mix(in srgb, var(--ring) 10%, transparent) 0%, transparent 60%),
+      radial-gradient(ellipse 70% 55% at 70% 10%, color-mix(in srgb, var(--blue) 10%, transparent) 0%, transparent 55%),
+      radial-gradient(ellipse 55% 45% at 90% 70%, color-mix(in srgb, var(--ring) 6%, transparent) 0%, transparent 50%),
+      #090d14;
+  }
+  100% {
+    background:
+      radial-gradient(ellipse 60% 50% at 10% 80%, color-mix(in srgb, var(--blue) 8%, transparent) 0%, transparent 60%),
+      radial-gradient(ellipse 70% 50% at 80% 20%, color-mix(in srgb, var(--ring) 10%, transparent) 0%, transparent 55%),
+      radial-gradient(ellipse 60% 45% at 50% 100%, color-mix(in srgb, var(--blue) 8%, transparent) 0%, transparent 55%),
+      #090d14;
+  }
 }
 
-.shLoginInput:focus {
-  border-color: var(--sh-info) !important;
-  box-shadow: var(--sh-glow-sm) !important;
-  background: var(--sh-glass-bg-strong) !important;
-  outline: none !important;
+[data-theme="dark"] .shLoginGradient {
+  animation: shLoginGradientDriftDark 15s ease-in-out infinite alternate;
 }
 
-.shLoginInput:hover {
-  border-color: var(--sh-glass-border-strong) !important;
-  background: var(--sh-glass-bg-strong) !important;
-}
-
-/* ── Login CTA ──────────────────────────────────────────────────────── */
-.shLoginCTA {
-  width: 100%;
-  min-height: 52px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  border: none;
-  border-radius: var(--sh-radius-md);
-  background: var(--ink);
-  color: var(--paper);
-  font: inherit;
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-  transition:
-    transform 200ms var(--sh-easing),
-    box-shadow 200ms var(--sh-easing),
-    background 200ms var(--sh-easing);
-}
-
-.shLoginCTA:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 8px 24px color-mix(in srgb, var(--ink) 20%, transparent);
-}
-
-.shLoginCTA:active {
-  transform: translateY(0);
-}
-
-.shLoginCTA:disabled {
+/* ── OS Landing — Floating Orbs & Ambient Particles ────────────────── */
+.shOrb {
+  position: absolute;
+  border-radius: 9999px;
   pointer-events: none;
-  opacity: 0.56;
+  will-change: transform;
+  z-index: 0;
 }
 
-/* ── Brand animation (moves with brand side) ────────────────────────── */
-@keyframes shLoginBrandFadeIn {
-  from {
-    opacity: 0;
-    transform: translateX(-12px);
-  }
+.shOrbA {
+  width: 420px;
+  height: 420px;
+  top: -120px;
+  left: -80px;
+  background: radial-gradient(circle, color-mix(in srgb, var(--blue) 22%, transparent) 0%, transparent 70%);
+  animation: shOrbADrift 20s var(--sh-easing) infinite alternate;
+}
+
+.shOrbB {
+  width: 340px;
+  height: 340px;
+  bottom: -60px;
+  right: -40px;
+  background: radial-gradient(circle, color-mix(in srgb, var(--ring) 16%, transparent) 0%, transparent 70%);
+  animation: shOrbBDrift 25s var(--sh-easing) infinite alternate;
+}
+
+.shOrbC {
+  width: 260px;
+  height: 260px;
+  top: 30%;
+  left: 45%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--sh-info) 12%, transparent) 0%, transparent 70%);
+  animation: shOrbCDrift 18s var(--sh-easing) infinite alternate;
+}
+
+@keyframes shOrbADrift {
+  0% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(60px, 30px) scale(1.08); }
+  66% { transform: translate(20px, 80px) scale(0.95); }
+  100% { transform: translate(80px, -20px) scale(1.04); }
+}
+
+@keyframes shOrbBDrift {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-50px, -40px) scale(1.12); }
+  100% { transform: translate(-20px, 20px) scale(0.96); }
+}
+
+@keyframes shOrbCDrift {
+  0% { transform: translate(0, 0) scale(1); opacity: 0.6; }
+  50% { transform: translate(30px, -50px) scale(1.18); opacity: 0.9; }
+  100% { transform: translate(-40px, 10px) scale(0.92); opacity: 0.5; }
+}
+
+/* ── OS Landing — Particle grid dots ───────────────────────────────── */
+.shParticleGrid {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  opacity: 0.15;
+  mask-image: radial-gradient(ellipse 60% 50% at 50% 50%, black, transparent 70%);
+  -webkit-mask-image: radial-gradient(ellipse 60% 50% at 50% 50%, black, transparent 70%);
+}
+
+/* ── OS Landing — Staggered section entrance ───────────────────────── */
+.shSection {
+  opacity: 0;
+  transform: translateY(24px);
+  animation: shFadeInUp 600ms var(--sh-easing) forwards;
+}
+
+.shSection:nth-child(1) { animation-delay: 100ms; }
+.shSection:nth-child(2) { animation-delay: 250ms; }
+.shSection:nth-child(3) { animation-delay: 400ms; }
+.shSection:nth-child(4) { animation-delay: 550ms; }
+
+@keyframes shFadeInUp {
   to {
     opacity: 1;
-    transform: translateX(0);
+    transform: translateY(0);
   }
 }
 
-/* ── Glass card on form side ──────────────────────────────────────────── */
-.shLoginFormCard {
-  border-radius: var(--sh-radius-xl);
-  background: var(--sh-glass-bg);
-  backdrop-filter: blur(var(--sh-glass-blur));
-  -webkit-backdrop-filter: blur(var(--sh-glass-blur));
-  border: 1px solid var(--sh-glass-border);
-  overflow: hidden;
-  animation: shLoginFormIn 400ms var(--sh-easing) both;
-  animation-delay: 60ms;
+/* ── OS Landing — Staggered card entrance (within a grid) ──────────── */
+.shCard {
+  opacity: 0;
+  transform: translateY(16px);
+  animation: shCardIn 500ms var(--sh-easing) forwards;
 }
 
-.shLoginFormCardHeader {
-  display: grid;
-  gap: 4px;
-  padding: 28px 28px 12px;
-}
-
-.shLoginFormCardHeader strong {
-  font-size: 24px;
-  font-weight: 700;
-  line-height: 1.15;
-  color: var(--ink);
-}
-
-.shLoginFormCardHeader p {
-  margin: 0;
-  font-size: 14px;
-  line-height: 1.45;
-  color: var(--muted);
-}
-
-.shLoginFormCardBody {
-  padding: 0 28px 28px;
-  display: grid;
-  gap: 16px;
-}
-
-/* ── Mobile: brand panel collapses to a compact header ──────────────── */
-@media (max-width: 900px) {
-  .shLoginBrand {
-    padding: 20px 20px 8px;
-    min-height: auto;
-  }
-
-  .shLoginBrandContent {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    flex-wrap: wrap;
-  }
-
-  .shLoginBrandLogo {
-    margin-bottom: 0;
-  }
-
-  .shLoginBrandLogo span {
-    width: 36px;
-    height: 36px;
-    font-size: 14px;
-  }
-
-  .shLoginBrandLogo strong {
-    display: none;
-  }
-
-  .shLoginBrandTitle {
-    font-size: clamp(24px, 6vw, 32px);
-  }
-
-  .shLoginBrandPills {
-    display: none;
-  }
-
-  .shLoginFormSide {
-    padding: 12px;
-  }
-
-  .shLoginFormCardHeader {
-    padding: 20px 20px 8px;
-  }
-
-  .shLoginFormCardHeader strong {
-    font-size: 20px;
-  }
-
-  .shLoginFormCardBody {
-    padding: 0 20px 20px;
+@keyframes shCardIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-/* ── Error state in glass form ──────────────────────────────────────── */
-.shLoginError {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 14px;
-  border-radius: var(--sh-radius-sm);
-  background: var(--sh-error-bg);
-  border: 1px solid color-mix(in srgb, var(--sh-error) 20%, transparent);
-  color: var(--sh-error);
-  font-size: 13px;
-  font-weight: 600;
-  animation: shLoginFormIn 300ms var(--sh-easing) both;
+/* ── OS Landing — Portal card glow-on-hover ────────────────────────── */
+.shPortalCard {
+  position: relative;
+  isolation: isolate;
 }
 
-/* ── Verified account chooser (glass variant) ───────────────────────── */
-.shLoginAccountSection {
-  border-top: 1px solid var(--sh-glass-border);
-  padding: 20px 28px;
-  display: grid;
-  gap: 12px;
+.shPortalCard::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: var(--sh-radius-lg);
+  background: radial-gradient(
+    800px circle at 50% 50%,
+    color-mix(in srgb, var(--sh-info) 8%, transparent) 0%,
+    transparent 60%
+  );
+  opacity: 0;
+  transition: opacity 400ms var(--sh-easing);
+  z-index: -1;
+  pointer-events: none;
 }
 
-.shLoginAccountSection strong {
-  font-size: 18px;
+.shPortalCard:hover::after {
+  opacity: 1;
+}
+
+/* ── OS Landing — Feature card styles ────────────────────────────────── */
+.shCardTitle {
+  display: block;
+  font-size: 15px;
   font-weight: 700;
   line-height: 1.2;
   color: var(--ink);
+  margin-bottom: 6px;
 }
 
-.shLoginAccountSection p {
-  margin: 0;
+.shCardBody {
   font-size: 13px;
-  line-height: 1.45;
+  line-height: 1.5;
   color: var(--muted);
+  margin: 0 0 12px;
 }
 
-.shLoginAccountBtn {
-  width: 100%;
-  min-height: 52px;
+.shCardStat {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--sh-info);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+/* ── OS Landing — Glow CTA button ───────────────────────────────────── */
+.shGlowButton {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.shGlowButton::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: inherit;
+  background: radial-gradient(
+    400px circle at 50% 50%,
+    color-mix(in srgb, var(--sh-info) 18%, transparent) 0%,
+    transparent 60%
+  );
+  opacity: 0;
+  transition: opacity 400ms var(--sh-easing);
+  z-index: -1;
+  pointer-events: none;
+}
+
+.shGlowButton:hover::before {
+  opacity: 1;
+}
+
+/* ── OS Landing — Enhanced hero gradient (dramatic orbital) ────────── */
+.shHeroGradientDramatic {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--sh-radius-xl);
+  background:
+    radial-gradient(ellipse 90% 70% at 0% 100%, color-mix(in srgb, var(--blue) 22%, transparent) 0%, transparent 70%),
+    radial-gradient(ellipse 80% 60% at 70% 0%, color-mix(in srgb, var(--blue) 15%, transparent) 0%, transparent 65%),
+    radial-gradient(ellipse 70% 50% at 100% 80%, color-mix(in srgb, var(--ring) 12%, transparent) 0%, transparent 60%),
+    var(--sh-glass-bg-strong);
+  border: 1px solid var(--sh-glass-border);
+  animation: shGradientOrbit 16s ease-in-out infinite alternate;
+  z-index: 0;
+}
+
+@keyframes shGradientOrbit {
+  0% {
+    background:
+      radial-gradient(ellipse 90% 70% at 0% 100%, color-mix(in srgb, var(--blue) 22%, transparent) 0%, transparent 70%),
+      radial-gradient(ellipse 80% 60% at 70% 0%, color-mix(in srgb, var(--blue) 15%, transparent) 0%, transparent 65%),
+      radial-gradient(ellipse 70% 50% at 100% 80%, color-mix(in srgb, var(--ring) 12%, transparent) 0%, transparent 60%),
+      var(--sh-glass-bg-strong);
+  }
+  33% {
+    background:
+      radial-gradient(ellipse 85% 65% at 20% 80%, color-mix(in srgb, var(--ring) 20%, transparent) 0%, transparent 65%),
+      radial-gradient(ellipse 75% 55% at 60% 20%, color-mix(in srgb, var(--blue) 18%, transparent) 0%, transparent 60%),
+      radial-gradient(ellipse 80% 50% at 90% 60%, color-mix(in srgb, var(--blue) 14%, transparent) 0%, transparent 55%),
+      var(--sh-glass-bg-strong);
+  }
+  66% {
+    background:
+      radial-gradient(ellipse 70% 60% at 30% 70%, color-mix(in srgb, var(--blue) 16%, transparent) 0%, transparent 60%),
+      radial-gradient(ellipse 90% 70% at 80% 30%, color-mix(in srgb, var(--ring) 18%, transparent) 0%, transparent 65%),
+      radial-gradient(ellipse 60% 50% at 10% 90%, color-mix(in srgb, var(--blue) 12%, transparent) 0%, transparent 55%),
+      var(--sh-glass-bg-strong);
+  }
+  100% {
+    background:
+      radial-gradient(ellipse 80% 60% at 10% 90%, color-mix(in srgb, var(--ring) 18%, transparent) 0%, transparent 65%),
+      radial-gradient(ellipse 85% 65% at 50% 10%, color-mix(in srgb, var(--blue) 20%, transparent) 0%, transparent 60%),
+      radial-gradient(ellipse 70% 55% at 90% 70%, color-mix(in srgb, var(--blue) 15%, transparent) 0%, transparent 60%),
+      var(--sh-glass-bg-strong);
+  }
+}
+
+/* ── OS Landing — Glass nav enhancement ────────────────────────────── */
+.shGlassNav {
+  position: sticky;
+  top: 3px;
+  z-index: 20;
+  min-height: 62px;
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 10px 14px;
-  border: 1px solid var(--sh-glass-border);
-  border-radius: var(--sh-radius-md);
-  background: var(--sh-glass-bg);
-  color: var(--ink);
-  cursor: pointer;
-  font: inherit;
-  text-align: left;
+  justify-content: space-between;
+  gap: 14px;
+  border-radius: var(--sh-radius-xl);
+  padding: 2px;
+  background: var(--sh-glass-bg-strong);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  box-shadow: 0 18px 60px rgba(16, 24, 40, 0.08);
   transition:
-    background 180ms var(--sh-easing),
-    border-color 180ms var(--sh-easing);
+    box-shadow 300ms var(--sh-easing),
+    border-color 300ms var(--sh-easing);
 }
 
-.shLoginAccountBtn:hover {
+.shGlassNav:hover {
+  box-shadow: 0 18px 70px rgba(16, 24, 40, 0.12);
+}
+
+.shGlassNavInner {
+  width: 100%;
+  min-height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 0 16px;
+  border-radius: var(--sh-radius-lg);
+  background: var(--sh-glass-bg);
+  border: 1px solid var(--sh-glass-border);
+}
+
+/* ── OS Landing — Enhanced mockup ──────────────────────────────────── */
+.shMockupDramatic {
+  width: min(920px, 76vw);
+  min-height: 540px;
+  display: grid;
+  grid-template-columns: 140px minmax(0, 1fr) 240px;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--sh-glass-bg-strong) 60%, var(--surface-soft) 40%);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--sh-glass-border);
+  box-shadow:
+    0 24px 80px rgba(0, 0, 0, 0.15),
+    0 0 0 1px rgba(255, 255, 255, 0.03);
+  animation: shMockupDramaticFloat 6s var(--sh-easing) infinite alternate;
+}
+
+@keyframes shMockupDramaticFloat {
+  0% {
+    transform: translateY(0);
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.03);
+  }
+  100% {
+    transform: translateY(-10px);
+    box-shadow: 0 36px 110px rgba(0, 0, 0, 0.22), 0 0 0 1px rgba(255, 255, 255, 0.06);
+  }
+}
+
+.shMockupRail {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  padding: 10px;
+  border-radius: 14px;
+  background: var(--sh-glass-bg);
+  border: 1px solid var(--sh-glass-border);
+}
+
+.shMockupRailItem {
+  min-height: 34px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 8px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  transition: all 200ms var(--sh-easing);
+}
+
+.shMockupRailItem.active {
+  background: var(--sh-info-bg);
+  color: var(--sh-info);
+}
+
+.shMockupMain {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+}
+
+.shMockupSearchArea {
+  min-height: 180px;
+  display: grid;
+  align-content: end;
+  gap: 8px;
+  padding: 14px;
+  border-radius: 14px;
+  background: var(--sh-glass-bg-strong);
+  border: 1px solid var(--sh-glass-border);
+}
+
+.shMockupResult {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 10px;
+  border-radius: 8px;
+  transition: background 200ms var(--sh-easing);
+}
+
+.shMockupResult:hover {
+  background: var(--sh-glass-bg);
+}
+
+.shMockupResultDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.shMockupResultName {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.shMockupResultMeta {
+  font-size: 11px;
+  color: var(--muted);
+  margin-left: auto;
+}
+
+.shMockupAside {
+  display: grid;
+  align-content: end;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 14px;
+  background: var(--sh-glass-bg);
+  border: 1px solid var(--sh-glass-border);
+}
+
+.shMockupAsideLabel {
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--sh-info);
+}
+
+.shMockupAsideValue {
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--ink);
+}
+
+.shMockupAsideSmall {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+/* ── OS Landing — Hero text entrance ───────────────────────────────── */
+.shHeroText {
+  opacity: 0;
+  transform: translateY(30px);
+  animation: shHeroTextIn 700ms var(--sh-easing) forwards;
+}
+
+.shHeroText:nth-child(1) { animation-delay: 150ms; }
+.shHeroText:nth-child(2) { animation-delay: 300ms; }
+.shHeroText:nth-child(3) { animation-delay: 450ms; }
+.shHeroText:nth-child(4) { animation-delay: 600ms; }
+.shHeroText:nth-child(5) { animation-delay: 750ms; }
+
+@keyframes shHeroTextIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.shHeroGlowText {
+  background: linear-gradient(135deg, var(--ink) 0%, var(--sh-info) 50%, color-mix(in srgb, var(--ring) 70%, var(--sh-info) 30%) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  background-size: 200% 200%;
+  animation: shGlowTextShift 6s var(--sh-easing) infinite alternate;
+}
+
+@keyframes shGlowTextShift {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
+}
+
+/* ── OS Landing — Enhanced benefits ────────────────────────────────── */
+.shBenefitSection {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: start;
+  gap: clamp(18px, 3vw, 38px);
+  padding: clamp(28px, 4vw, 52px);
+  border-radius: var(--sh-radius-xl);
+  background: var(--sh-glass-bg);
+  border: 1px solid var(--sh-glass-border);
+  box-shadow: 0 18px 60px rgba(16, 24, 40, 0.08);
+}
+
+.shBenefitCard {
+  min-height: 110px;
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  padding: 18px;
+  border-radius: var(--sh-radius-lg);
+  background: var(--sh-glass-bg);
+  border: 1px solid var(--sh-glass-border);
+  transition:
+    background 250ms var(--sh-easing),
+    border-color 250ms var(--sh-easing),
+    transform 250ms var(--sh-easing),
+    box-shadow 250ms var(--sh-easing);
+}
+
+.shBenefitCard:hover {
   background: var(--sh-glass-bg-strong);
   border-color: var(--sh-glass-border-strong);
+  transform: translateY(-2px);
+  box-shadow: var(--sh-glow-sm);
 }
 
-.shLoginAccountBtn strong {
-  font-size: 14px;
-  font-weight: 600;
+@media (max-width: 1024px) {
+  .shBenefitSection {
+    grid-template-columns: 1fr;
+  }
+  .shMockupDramatic {
+    grid-template-columns: 92px minmax(0, 1fr);
+  }
 }
 
-.shLoginAccountBtn small {
-  display: block;
-  font-size: 12px;
-  color: var(--muted);
-  font-weight: 400;
+@media (max-width: 640px) {
+  .shMockupDramatic {
+    grid-template-columns: 1fr;
+    min-height: 380px;
+  }
 }

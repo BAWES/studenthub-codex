@@ -6,24 +6,36 @@ import type { Route } from "next";
 import type { SessionUser } from "@/modules/auth/types";
 import { logoutAction } from "@/modules/auth/actions";
 import { ThemeToggle } from "@/modules/theme/ThemeToggle";
+import { LogOut } from "lucide-react";
 import Link from "next/link";
 import { WorkspaceOSContext } from "./WorkspaceOSContext";
 import { WorkspaceMobileNavigation, WorkspaceNavigation } from "./WorkspaceNavigation";
 import { navForRole } from "./navigation";
 import type { NavItem } from "./navigation";
 import { PageTransition } from "./PageTransition";
-import type { OSCommand } from "@/components/ui/CommandPalette";
-import { CommandPalette } from "@/components/ui/CommandPalette";
+import { RaycastCommandPalette } from "./RaycastCommandPalette";
 
-// ── Keyboard shortcut chords per role ────────────────────────────────
+// ── Command types ─────────────────────────────────────────────
+
+export type OSCommand = {
+  id: string;
+  title: string;
+  subtitle: string;
+  section: string;
+  href: string;
+  shortcut?: string;
+};
+
+const builtinShortcuts = [
+  { keys: "⌘K", label: "Open command menu" },
+  { keys: "/", label: "Focus workspace search" },
+  { keys: "G H", label: "Go to command workspace" },
+  { keys: "Esc", label: "Close menu or clear focus" }
+];
+
+// ── Keyboard shortcut chords per role ──────────────────────────
 
 function roleChords(role: string): { keys: string; label: string }[] {
-  const builtinShortcuts = [
-    { keys: "⌘K", label: "Open command menu" },
-    { keys: "/", label: "Focus workspace search" },
-    { keys: "G H", label: "Go to command workspace" },
-    { keys: "Esc", label: "Close menu or clear focus" }
-  ];
   const base = builtinShortcuts;
   if (role === "admin") {
     return [
@@ -52,7 +64,7 @@ function roleChords(role: string): { keys: string; label: string }[] {
   return base;
 }
 
-// ── Build commands from nav items ────────────────────────────────────
+// ── Build commands from nav items ──────────────────────────────
 
 function buildOSCommands(navItems: NavItem[], role: string): OSCommand[] {
   const chordByHref: Record<string, string> = {};
@@ -105,7 +117,7 @@ function buildOSCommands(navItems: NavItem[], role: string): OSCommand[] {
   return [...nav, ...scopes];
 }
 
-// ── WorkspaceOS Component ──────────────────────────────────────────────
+// ── WorkspaceOS Component ──────────────────────────────────────
 
 export function WorkspaceOS({
   session,
@@ -137,6 +149,14 @@ export function WorkspaceOS({
       .slice(0, 18);
   }, [commands, cmdQuery]);
 
+  const grouped = useMemo(() => {
+    const g = new Map<string, OSCommand[]>();
+    for (const c of filtered) {
+      g.set(c.section, [...(g.get(c.section) ?? []), c]);
+    }
+    return [...g.entries()];
+  }, [filtered]);
+
   const visit = useCallback(
     (href: string) => {
       setCmdOpen(false);
@@ -152,12 +172,13 @@ export function WorkspaceOS({
       const el = e.target as HTMLElement | null;
       const typing = el?.tagName === "INPUT" || el?.tagName === "TEXTAREA" || el?.isContentEditable === true;
 
-      // Cmd+K → open command palette
+      // Cmd+K or ? → open command palette
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
         setCmdOpen(true);
         setCmdIndex(0);
         setCmdQuery("");
+        window.setTimeout(() => cmdInputRef.current?.focus(), 0);
         return;
       }
       if (!typing && e.key === "?") {
@@ -165,6 +186,7 @@ export function WorkspaceOS({
         setCmdOpen(true);
         setCmdIndex(0);
         setCmdQuery("shortcut");
+        window.setTimeout(() => cmdInputRef.current?.focus(), 0);
         return;
       }
 
@@ -263,13 +285,17 @@ export function WorkspaceOS({
             <strong>StudentHub</strong>
           </Link>
           <WorkspaceNavigation items={navItems} role={session.role} />
+          <div className="workspaceRailDivider" aria-hidden="true" />
           <div className="workspaceRailFooter">
             <button className="commandLauncher" type="button" aria-label="Open command menu" onClick={() => { setCmdOpen(true); }}>
               <span>⌘K</span>
             </button>
             <ThemeToggle />
             <form action={logoutAction}>
-              <button type="submit" aria-label="Sign out">Sign out</button>
+              <button type="submit" aria-label="Sign out">
+                <LogOut size={18} strokeWidth={1.5} aria-hidden="true" />
+                <span>Sign out</span>
+              </button>
             </form>
           </div>
         </aside>
@@ -283,19 +309,19 @@ export function WorkspaceOS({
         <WorkspaceMobileNavigation items={navItems} role={session.role} />
       </main>
 
-      {/* ── Command Palette (glass, extracted component) ──── */}
-      <CommandPalette
+      {/* ── Command Palette (Raycast-style) ──────────────────── */}
+      <RaycastCommandPalette
         open={cmdOpen}
         query={cmdQuery}
         onQueryChange={setCmdQuery}
-        selectedIndex={cmdIndex}
-        onSelectIndex={setCmdIndex}
-        onClose={() => { setCmdOpen(false); setCmdQuery(""); }}
+        index={cmdIndex}
+        onIndexChange={setCmdIndex}
+        grouped={grouped}
+        flatCommands={filtered}
         onVisit={visit}
-        commands={commands}
-        filtered={filtered}
-        chords={chords}
+        onClose={() => { setCmdOpen(false); setCmdQuery(""); }}
         inputRef={cmdInputRef}
+        role={session.role}
       />
     </WorkspaceOSContext.Provider>
   );

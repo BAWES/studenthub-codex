@@ -1,11 +1,16 @@
-import type { ReactNode } from "react";
+"use client";
+
+import { type ReactNode } from "react";
 import type { Route } from "next";
 import Link from "next/link";
-import { Inbox, AlertCircle } from "lucide-react";
+import { ArrowRight, AlertCircle, ChevronLeft, ChevronRight } from "lucide-react";
 import {
   EMPTY_NO_RECORDS,
   EMPTY_HINT_DEFAULT,
 } from "./emptyStates";
+import { EmptyState } from "./EmptyState";
+import { GlassPanel } from "@/components/ui/glass-panel";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -61,24 +66,10 @@ export type DataTableProps<T extends { id: string | number }> = {
 };
 
 // ---------------------------------------------------------------------------
-// Skeleton component
+// OS Pagination
 // ---------------------------------------------------------------------------
 
-function Skeleton({ className = "" }: { className?: string }) {
-  return (
-    <div
-      data-slot="skeleton"
-      className={`skeleton ${className}`}
-      aria-hidden="true"
-    />
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Pagination component
-// ---------------------------------------------------------------------------
-
-function Pagination({
+function OsPagination({
   page,
   totalPages,
   onPageChange,
@@ -88,24 +79,32 @@ function Pagination({
   onPageChange: (page: number) => void;
 }) {
   return (
-    <nav className="pagination" aria-label="Pagination">
-      <button
-        type="button"
-        disabled={page <= 1}
-        onClick={() => onPageChange(page - 1)}
-        aria-label="Previous page"
-      >
-        Previous
-      </button>
-      <span>Page {page} of {totalPages}</span>
-      <button
-        type="button"
-        disabled={page >= totalPages}
-        onClick={() => onPageChange(page + 1)}
-        aria-label="Next page"
-      >
-        Next
-      </button>
+    <nav className="shOsTablePagination" aria-label="Pagination">
+      <span className="shOsTablePageInfo">
+        Page {page} of {totalPages}
+      </span>
+      <div className="shOsTablePageButtons">
+        <button
+          type="button"
+          disabled={page <= 1}
+          onClick={() => onPageChange(page - 1)}
+          aria-label="Previous page"
+          className="shOsTablePageBtn"
+        >
+          <ChevronLeft size={14} />
+          <span>Previous</span>
+        </button>
+        <button
+          type="button"
+          disabled={page >= totalPages}
+          onClick={() => onPageChange(page + 1)}
+          aria-label="Next page"
+          className="shOsTablePageBtn"
+        >
+          <span>Next</span>
+          <ChevronRight size={14} />
+        </button>
+      </div>
     </nav>
   );
 }
@@ -114,11 +113,6 @@ function Pagination({
 // Helpers
 // ---------------------------------------------------------------------------
 
-/**
- * Filter columns based on role context. If a column has `visibleRoles` set
- * and `roleContext` is provided, the column is only included when the current
- * role is in the visibleRoles list.
- */
 function getVisibleColumns<T>(
   columns: DataTableColumn<T>[],
   roleContext?: RoleContext,
@@ -159,34 +153,34 @@ export function DataTable<T extends { id: string | number }>({
   // ── Loading state ──────────────────────────────────────────
   if (loading) {
     return (
-      <section className="tableSurface">
-        <div className="tableHeader">
+      <GlassPanel variant="subtle" radius="lg" className="p-0 overflow-hidden">
+        <div className="shOsTableHeader">
           <div>
-            <h2>{title}</h2>
-            <p>{description}</p>
+            <h2 className="shOsTableTitle">{title}</h2>
+            <p className="shOsTableDesc">{description}</p>
           </div>
         </div>
-        <div className="tableScroller">
-          <table aria-label={title}>
+        <div className="shOsTableScroller">
+          <table className="shOsTable" aria-label={title}>
             <thead>
               <tr>
                 {visibleColumns.map((column) => (
-                  <th key={column.key} scope="col">{column.label}</th>
+                  <th key={column.key} scope="col" className="shOsTableTh">{column.label}</th>
                 ))}
-                {rowHref ? <th scope="col" aria-label="Open record" /> : null}
+                {rowHref ? <th scope="col" aria-label="Open record" className="shOsTableTh" /> : null}
               </tr>
             </thead>
             <tbody>
               {Array.from({ length: loadingSkeletonRows }).map((_, rowIdx) => (
-                <tr key={rowIdx}>
+                <tr key={rowIdx} className="shOsTableRow shOsTableRowSkeleton">
                   {visibleColumns.map((column) => (
-                    <td key={column.key}>
-                      <Skeleton />
+                    <td key={column.key} className="shOsTableTd">
+                      <Skeleton variant="glass" rounded="md" className="h-4 w-[60%]" />
                     </td>
                   ))}
                   {rowHref ? (
-                    <td>
-                      <Skeleton />
+                    <td className="shOsTableTd shOsTableTdAction">
+                      <Skeleton variant="glass" rounded="md" className="h-4 w-8" />
                     </td>
                   ) : null}
                 </tr>
@@ -194,38 +188,38 @@ export function DataTable<T extends { id: string | number }>({
             </tbody>
           </table>
         </div>
-      </section>
+      </GlassPanel>
     );
   }
 
   // ── Error state ────────────────────────────────────────────
   if (error) {
     return (
-      <section className="tableSurface">
-        <div className="tableHeader">
+      <GlassPanel variant="subtle" radius="lg" className="p-0 overflow-hidden">
+        <div className="shOsTableHeader">
           <div>
-            <h2>{title}</h2>
-            <p>{description}</p>
+            <h2 className="shOsTableTitle">{title}</h2>
+            <p className="shOsTableDesc">{description}</p>
           </div>
         </div>
-        <div className="tableScroller">
-          <table aria-label={title}>
+        <div className="shOsTableScroller">
+          <table className="shOsTable" aria-label={title}>
             <thead>
               <tr>
                 {visibleColumns.map((column) => (
-                  <th key={column.key} scope="col">{column.label}</th>
+                  <th key={column.key} scope="col" className="shOsTableTh">{column.label}</th>
                 ))}
-                {rowHref ? <th scope="col" aria-label="Open record" /> : null}
+                {rowHref ? <th scope="col" aria-label="Open record" className="shOsTableTh" /> : null}
               </tr>
             </thead>
             <tbody>
-              <tr className="emptyTableRow">
-                <td colSpan={colCount}>
-                  <div className="errorState">
-                    <AlertCircle size={32} className="errorStateIcon" />
-                    <strong>{error}</strong>
+              <tr>
+                <td colSpan={colCount} className="shOsTableTdEmpty">
+                  <div className="shOsTableErrorState">
+                    <AlertCircle size={24} className="shOsTableErrorIcon" />
+                    <strong className="shOsTableErrorText">{error}</strong>
                     {onRetry ? (
-                      <button type="button" onClick={onRetry}>
+                      <button type="button" onClick={onRetry} className="shOsTableErrorBtn">
                         Retry
                       </button>
                     ) : null}
@@ -235,7 +229,7 @@ export function DataTable<T extends { id: string | number }>({
             </tbody>
           </table>
         </div>
-      </section>
+      </GlassPanel>
     );
   }
 
@@ -252,57 +246,60 @@ export function DataTable<T extends { id: string | number }>({
     onPageChange !== undefined;
 
   return (
-    <section className="tableSurface">
-      <div className="tableHeader">
+    <GlassPanel variant="subtle" radius="lg" className="p-0 overflow-hidden shOsTableSurface">
+      <div className="shOsTableHeader">
         <div>
-          <h2>{title}</h2>
-          <p>{description}</p>
+          <h2 className="shOsTableTitle">{title}</h2>
+          <p className="shOsTableDesc">{description}</p>
         </div>
-        <span>{rowCountLabel}</span>
+        <span className="shOsTableCount">{rowCountLabel}</span>
       </div>
-      <div className="tableScroller">
-        <table aria-label={title}>
+      <div className="shOsTableScroller">
+        <table className="shOsTable" aria-label={title}>
           <thead>
             <tr>
               {visibleColumns.map((column) => (
-                <th key={column.key} scope="col">{column.label}</th>
+                <th key={column.key} scope="col" className="shOsTableTh">{column.label}</th>
               ))}
-              {rowHref ? <th scope="col" aria-label="Open record" /> : null}
+              {rowHref ? <th scope="col" aria-label="Open record" className="shOsTableTh shOsTableThAction" /> : null}
             </tr>
           </thead>
           <tbody>
             {rows.length ? (
-              rows.map((row) => (
-                <tr key={row.id}>
+              rows.map((row, idx) => (
+                <tr
+                  key={row.id}
+                  className="shOsTableRow"
+                  style={{ animationDelay: `${idx * 30}ms` }}
+                >
                   {visibleColumns.map((column) => (
-                    <td data-label={column.label} key={column.key}>
+                    <td data-label={column.label} key={column.key} className="shOsTableTd">
                       {column.render(row)}
                     </td>
                   ))}
                   {rowHref ? (
-                    <td className="rowAction" data-label="Action">
-                      <Link href={rowHref(row)} aria-label={getRowLabel ? `Open ${getRowLabel(row)}` : "Open record"}>Open</Link>
+                    <td className="shOsTableTd shOsTableTdAction">
+                      <Link
+                        href={rowHref(row)}
+                        aria-label={getRowLabel ? `Open ${getRowLabel(row)}` : "Open record"}
+                        className="shOsTableRowLink"
+                      >
+                        <span className="shOsTableRowLinkLabel">Open</span>
+                        <ArrowRight size={14} className="shOsTableRowLinkIcon" />
+                      </Link>
                     </td>
                   ) : null}
                 </tr>
               ))
             ) : (
-              <tr className="emptyTableRow">
-                <td colSpan={colCount}>
-                  <div className="emptyState">
-                    <Inbox size={40} className="emptyStateIcon" />
-                    <strong>
-                      {emptyMessage ?? EMPTY_NO_RECORDS}
-                    </strong>
-                    <span>
-                      {emptyHint ?? EMPTY_HINT_DEFAULT}
-                    </span>
-                    {emptyAction ? (
-                      <button type="button" onClick={emptyAction.onClick}>
-                        {emptyAction.label}
-                      </button>
-                    ) : null}
-                  </div>
+              <tr>
+                <td colSpan={colCount} className="shOsTableTdEmpty">
+                  <EmptyState
+                    variant="no-records"
+                    message={emptyMessage ?? EMPTY_NO_RECORDS}
+                    hint={emptyHint ?? EMPTY_HINT_DEFAULT}
+                    action={emptyAction ?? undefined}
+                  />
                 </td>
               </tr>
             )}
@@ -310,12 +307,12 @@ export function DataTable<T extends { id: string | number }>({
         </table>
       </div>
       {hasPagination ? (
-        <Pagination
+        <OsPagination
           page={page}
           totalPages={totalPages}
           onPageChange={onPageChange}
         />
       ) : null}
-    </section>
+    </GlassPanel>
   );
 }

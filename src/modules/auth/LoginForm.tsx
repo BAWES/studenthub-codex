@@ -76,32 +76,35 @@ export function LoginForm() {
         </div>
       </form>
 
-      {accounts.length ? <VerifiedAccountChooser accounts={accounts} /> : null}
-    </div>
-  );
-}
-
-function VerifiedAccountChooser({ accounts }: { accounts: LoginAccountChoice[] }) {
-  return (
-    <div className="shLoginAccountSection">
-      <div className="shLoginStagger grid gap-1">
-        <strong>Verified accounts</strong>
-        <p>Your password matched more than one active account. Choose where to continue.</p>
-      </div>
-      {accounts.map((account) => (
-        <form action={chooseAccountAction} key={account.accountKey}>
-          <input name="accountKey" type="hidden" value={account.accountKey} />
-          <button
-            type="submit"
-            className="shLoginAccountBtn shLoginStagger"
-          >
-            <span className="grid gap-0.5 min-w-0">
-              <strong>{account.name}</strong>
-              <small>{account.email}</small>
-            </span>
-          </button>
-        </form>
-      ))}
+      {accounts.length > 0 ? (
+        <section
+          className="grid gap-2 p-6 pt-0 border-t border-[var(--sh-glass-border)]"
+          aria-label="Verified StudentHub accounts"
+        >
+          <div className="grid gap-0.5">
+            <strong className="text-[var(--ink)] text-[15px] leading-[1.2] font-semibold">
+              Multiple accounts found
+            </strong>
+            <p className="text-[var(--muted)] text-[13px] leading-relaxed m-0">
+              Choose where to continue.
+            </p>
+          </div>
+          {accounts.map((account) => (
+            <form action={chooseAccountAction} key={account.accountKey}>
+              <input name="accountKey" type="hidden" value={account.accountKey} />
+              <button
+                type="submit"
+                className="shLoginAccountBtn shLoginStagger"
+              >
+                <span className="grid gap-0.5 min-w-0">
+                  <strong>{account.name}</strong>
+                  <small>{account.email}</small>
+                </span>
+              </button>
+            </form>
+          ))}
+        </section>
+      ) : null}
     </div>
   );
 }

@@ -1,151 +1,165 @@
 "use client";
 
-import { useRef, useEffect, useState, type ReactNode } from "react";
-import { TrendingUp, TrendingDown, Minus, Sparkles } from "lucide-react";
+import * as React from "react";
+import { cn } from "@/lib/utils";
+import { GlassPanel } from "./glass-panel";
+import { TrendingUp, TrendingDown, Minus, type LucideIcon } from "lucide-react";
 
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
+type TrendDirection = "up" | "down" | "flat";
 
-export type TrendDirection = "up" | "down" | "flat";
-
-export type MetricCardProps = {
-  /** Metric label (e.g. "Active candidates"). */
+export interface MetricCardProps extends React.ComponentPropsWithoutRef<"div"> {
+  /** Card label */
   label: string;
-  /** Primary value. */
-  value: number | string;
-  /** Optional subtitle / note shown below the value. */
+  /** Main value to display */
+  value: string | number;
+  /** Optional subtitle below value (new API — replaces `note`) */
+  subtitle?: string;
+  /** Trend direction (shows arrow) */
+  trend?: TrendDirection;
+  /** Trend label text (e.g. "+12% vs last week") */
+  trendLabel?: string;
+  /** Optional sparkline data points (0-1 range). New API — replaces `sparklineData` */
+  sparkline?: number[];
+  /** Icon to show in top-left */
+  icon?: LucideIcon;
+  /** Glow variant (new API — replaces `accent` for glow toggle) */
+  glow?: boolean;
+  /** ── Legacy API (backward compat) ── */
+  /** Legacy: shown as subtitle */
   note?: string;
-  /** Optional trend indicator. */
-  trend?: {
-    direction: TrendDirection;
-    label: string; // e.g. "+12% this week"
-  };
-  /** Override the trend icon. Defaults to TrendingUp/Down/Minus. */
-  trendIcon?: ReactNode;
-  /** Icon shown left of the label. */
-  icon?: ReactNode;
-  /** Delay before entrance animation (ms). Used for staggered lists. */
-  delay?: number;
-  /** Accent color class for the top border glow. */
-  accent?: "info" | "success" | "warning" | "error" | "none";
-  /** Optional click handler. */
-  onClick?: () => void;
-  href?: string;
+  /** Legacy: color accent (info, success, warning, error) */
+  accent?: "info" | "success" | "warning" | "error" | "neutral" | "primary";
+  /** Legacy: sparkline data as raw numbers */
+  sparklineData?: number[];
+  /** Legacy: entrance animation delay in ms */
+  entranceDelay?: number;
+}
+
+const trendIcons: Record<TrendDirection, LucideIcon> = {
+  up: TrendingUp,
+  down: TrendingDown,
+  flat: Minus,
 };
 
-// ---------------------------------------------------------------------------
-// Trend icon map
-// ---------------------------------------------------------------------------
-
-const TrendIcon: Record<TrendDirection, ReactNode> = {
-  up: <TrendingUp size={14} aria-hidden="true" />,
-  down: <TrendingDown size={14} aria-hidden="true" />,
-  flat: <Minus size={14} aria-hidden="true" />,
+const trendColors: Record<TrendDirection, string> = {
+  up: "var(--sh-success)",
+  down: "var(--sh-error)",
+  flat: "var(--muted)",
 };
 
-const accentVar: Record<string, string> = {
-  info: "var(--sh-info)",
-  success: "var(--sh-success)",
-  warning: "var(--sh-warning)",
-  error: "var(--sh-error)",
+const accentColors: Record<string, { dot: string; glow: string; bg: string }> = {
+  info: { dot: "var(--sh-info)", glow: "var(--sh-info-glow)", bg: "var(--sh-info-bg)" },
+  success: { dot: "var(--sh-success)", glow: "var(--sh-success-glow)", bg: "var(--sh-success-bg)" },
+  warning: { dot: "var(--sh-warning)", glow: "var(--sh-warning-glow)", bg: "var(--sh-warning-bg)" },
+  error: { dot: "var(--sh-error)", glow: "var(--sh-error-glow)", bg: "var(--sh-error-bg)" },
+  primary: { dot: "var(--sh-info)", glow: "var(--sh-info-glow)", bg: "var(--sh-info-bg)" },
+  neutral: { dot: "var(--muted)", glow: "transparent", bg: "transparent" },
 };
 
-// ---------------------------------------------------------------------------
-// Component
-// ---------------------------------------------------------------------------
+function normalizeSparkline(data?: number[]): number[] | undefined {
+  if (!data || data.length < 2) return data;
+  const max = Math.max(...data);
+  if (max === 0) return data.map(() => 0);
+  return data.map((v) => v / max);
+}
 
-export function MetricCard({
-  label,
-  value,
-  note,
-  trend,
-  trendIcon,
-  icon,
-  delay = 0,
-  accent = "info",
-  onClick,
-  href,
-}: MetricCardProps) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
+/**
+ * MetricCard — glass panel with label, value, optional sparkline, and trend indicator.
+ * Use in dashboards to replace generic shadcn stat cards.
+ * Supports both new API (subtitle, sparkline, icon, glow) and legacy API (note, sparklineData, accent, entranceDelay).
+ */
+const MetricCard = React.forwardRef<HTMLDivElement, MetricCardProps>(function MetricCard(
+  {
+    className,
+    label,
+    value,
+    subtitle,
+    trend = "flat",
+    trendLabel,
+    sparkline,
+    icon: Icon,
+    glow = false,
+    note,
+    accent,
+    sparklineData,
+    entranceDelay,
+    style,
+    ...props
+  },
+  ref,
+) {
+  // Resolve props: new API takes priority, fall back to legacy
+  const resolvedSubtitle = subtitle ?? note;
+  const resolvedSparkline = sparkline ?? normalizeSparkline(sparklineData);
+  const resolvedGlow = glow || (accent && accent !== "neutral");
+  const resolvedAccent = accentColors[accent ?? "info"];
 
-  // Entrance animation via IntersectionObserver
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setTimeout(() => setVisible(true), delay);
-          observer.unobserve(el);
-        }
-      },
-      { threshold: 0.1 },
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [delay]);
-
-  const accentColor = accent !== "none" ? accentVar[accent] : undefined;
-
-  const content = (
-    <>
-      {/* Top accent glow */}
-      <span
-        className="metricCardAccent"
-        aria-hidden="true"
-        style={
-          accentColor
-            ? {
-                background: `linear-gradient(90deg, transparent, ${accentColor}, transparent)`,
-                opacity: 0.3,
-              }
-            : undefined
-        }
-      />
-
-      <div className="metricCardBody">
-        {/* Label row */}
-        <div className="metricCardLabelRow">
-          {icon ? <span className="metricCardIcon">{icon}</span> : null}
-          <span className="metricCardLabel">{label}</span>
-        </div>
-
-        {/* Value */}
-        <strong className="metricCardValue">
-          {typeof value === "number" ? value.toLocaleString("en-US") : value}
-        </strong>
-
-        {/* Note + Trend */}
-        {note || trend ? (
-          <div className="metricCardMeta">
-            {note ? <p className="metricCardNote">{note}</p> : null}
-            {trend ? (
-              <span
-                className={`metricCardTrend metricCardTrend--${trend.direction}`}
-              >
-                {trendIcon ?? TrendIcon[trend.direction]}
-                {trend.label}
-              </span>
-            ) : null}
-          </div>
-        ) : null}
-      </div>
-    </>
-  );
-
-  const Tag = href ? "a" : onClick ? "button" : "div";
+  const TrendIcon = trendIcons[trend];
+  const trendColor = trendColors[trend];
 
   return (
-    <Tag
-      className={`metricCard ${visible ? "metricCard--visible" : "metricCard--hidden"} ${onClick || href ? "metricCard--interactive" : ""}`}
-      href={href as any}
-      onClick={onClick}
-      style={{ "--metric-delay": `${delay}ms` } as React.CSSProperties}
-      aria-label={`${label}: ${typeof value === "number" ? value.toLocaleString("en-US") : value}`}
+    <GlassPanel
+      ref={ref}
+      variant={resolvedGlow ? "elevated" : "subtle"}
+      radius="lg"
+      className={cn("p-4 grid content-start gap-2", className)}
+      style={{
+        ...(entranceDelay !== undefined ? { animationDelay: `${entranceDelay}ms` } : {}),
+        ...style,
+      }}
+      {...props}
     >
-      <div ref={ref}>{content}</div>
-    </Tag>
+      {/* Header row: label */}
+      <div className="flex items-center justify-between">
+        <span className="text-[11px] font-black uppercase tracking-wider" style={{ color: "var(--muted)" }}>
+          {label}
+        </span>
+        {Icon && (
+          <Icon className="size-4 shrink-0" style={{ color: "var(--sh-info)" }} aria-hidden="true" />
+        )}
+      </div>
+
+      {/* Value */}
+      <div className="flex items-baseline gap-2">
+        <span className="text-[28px] font-bold leading-none tracking-[-0.02em]" style={{ color: "var(--ink)" }}>
+          {value}
+        </span>
+        {resolvedSubtitle && (
+          <span className="text-xs" style={{ color: "var(--muted)" }}>
+            {resolvedSubtitle}
+          </span>
+        )}
+      </div>
+
+      {/* Trend row */}
+      {(trend !== "flat" || trendLabel) && (
+        <div className="flex items-center gap-1.5 mt-1">
+          <TrendIcon className="size-3.5 shrink-0" style={{ color: trendColor }} />
+          {trendLabel && (
+            <span className="text-[11px] font-semibold" style={{ color: trendColor }}>
+              {trendLabel}
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* Sparkline (inline SVG bar chart) */}
+      {resolvedSparkline && resolvedSparkline.length > 1 && (
+        <div className="mt-2 h-[32px] flex items-end gap-[2px]" aria-label="Trend sparkline">
+          {resolvedSparkline.map((point, i) => (
+            <div
+              key={i}
+              className="flex-1 rounded-t-[2px] transition-all duration-200"
+              style={{
+                height: `${Math.max(point * 100, 8)}%`,
+                background: `color-mix(in srgb, var(--sh-info) ${Math.round(point * 60 + 20)}%, transparent)`,
+              }}
+            />
+          ))}
+        </div>
+      )}
+    </GlassPanel>
   );
-}
+});
+
+export { MetricCard };

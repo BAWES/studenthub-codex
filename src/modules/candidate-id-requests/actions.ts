@@ -1,0 +1,242 @@
+"use server";
+
+import { z } from "zod";
+import { prisma } from "@/lib/prisma";
+import { requireCapability } from "@/modules/auth/session";
+
+// ---------------------------------------------------------------------------
+// CandidateIdRequestController — list/get/regenerate/delete ID requests
+// ---------------------------------------------------------------------------
+// Ported from Yii2 staff/modules/v1/controllers/CandidateIdRequestController.php
+// Actions: listIdRequests, getIdRequest, regenerateIdRequest, deleteIdRequest
+// ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+// Schemas
+// ---------------------------------------------------------------------------
+
+const listIdRequestsSchema = z.object({
+  page: z.coerce.number().int().positive().optional().default(1),
+  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
+});
+
+const getIdRequestSchema = z.object({
+  uuid: z.string().min(1, "ID request UUID is required"),
+});
+
+const regenerateIdRequestSchema = z.object({
+  uuid: z.string().min(1, "ID request UUID is required"),
+});
+
+const deleteIdRequestSchema = z.object({
+  uuid: z.string().min(1, "ID request UUID is required"),
+});
+
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
+
+export type ListIdRequestsParams = z.input<typeof listIdRequestsSchema>;
+export type GetIdRequestParams = z.input<typeof getIdRequestSchema>;
+export type RegenerateIdRequestParams = z.input<typeof regenerateIdRequestSchema>;
+export type DeleteIdRequestParams = z.input<typeof deleteIdRequestSchema>;
+
+export type CandidateIdRequestItem = {
+  cir_uuid: string;
+  candidate_ids: string | null;
+  status: string | null;
+  rejection_reason: string | null;
+  created_at: string | null;
+  updated_at: string | null;
+  created_by: number | null;
+  updated_by: number | null;
+};
+
+export type ListIdRequestsResult = {
+  requests: CandidateIdRequestItem[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+};
+
+export type IdRequestMutationResult = {
+  operation: string;
+  message?: unknown;
+};
+
+// ---------------------------------------------------------------------------
+// Exported schemas (for shared validation in tests)
+// ---------------------------------------------------------------------------
+
+export { listIdRequestsSchema, getIdRequestSchema, regenerateIdRequestSchema, deleteIdRequestSchema };
+
+// ---------------------------------------------------------------------------
+// Server actions
+// ---------------------------------------------------------------------------
+
+/**
+ * List candidate ID requests with pagination.
+ * Mirrors the legacy CandidateIdRequestController::actionList.
+ */
+export async function listIdRequests(
+  params: ListIdRequestsParams = {},
+): Promise<ListIdRequestsResult> {
+  await requireCapability("admin.read");
+
+  const parsed = listIdRequestsSchema.safeParse(params);
+  if (!parsed.success) {
+    throw new Error(
+      parsed.error.issues[0]?.message ?? "Invalid list parameters",
+    );
+  }
+
+  const { page, limit } = parsed.data;
+
+  const [requests, total] = await Promise.all([
+    prisma.candidate_id_request.findMany({
+      orderBy: { created_at: "desc" },
+      skip: (page - 1) * limit,
+      take: limit,
+    }),
+    prisma.candidate_id_request.count(),
+  ]);
+
+  return {
+    requests: requests.map((r) => ({
+      cir_uuid: r.cir_uuid,
+      candidate_ids: r.candidate_ids,
+      status: r.status,
+      rejection_reason: r.rejection_reason,
+      created_at: r.created_at?.toISOString() ?? null,
+      updated_at: r.updated_at?.toISOString() ?? null,
+      created_by: r.created_by,
+      updated_by: r.updated_by,
+    })),
+    total,
+    page,
+    limit,
+    totalPages: Math.ceil(total / limit),
+  };
+}
+
+/**
+ * Get a single candidate ID request by UUID.
+ * Mirrors the legacy CandidateIdRequestController::actionView.
+ */
+export async function getIdRequest(
+  params: GetIdRequestParams,
+): Promise<CandidateIdRequestItem | null> {
+  await requireCapability("admin.read");
+
+  const parsed = getIdRequestSchema.safeParse(params);
+  if (!parsed.success) {
+    throw new Error(
+      parsed.error.issues[0]?.message ?? "Invalid ID request UUID",
+    );
+  }
+
+  const { uuid } = parsed.data;
+
+  const request = await prisma.candidate_id_request.findUnique({
+    where: { cir_uuid: uuid },
+  });
+
+  if (!request) return null;
+
+  return {
+    cir_uuid: request.cir_uuid,
+    candidate_ids: request.candidate_ids,
+    status: request.status,
+    rejection_reason: request.rejection_reason,
+    created_at: request.created_at?.toISOString() ?? null,
+    updated_at: request.updated_at?.toISOString() ?? null,
+    created_by: request.created_by,
+    updated_by: request.updated_by,
+  };
+}
+
+/**
+ * Regenerate a candidate ID request (reset status to pending).
+ * Mirrors the legacy CandidateIdRequestController::actionRegenerate.
+ */
+export async function regenerateIdRequest(
+  params: RegenerateIdRequestParams,
+): Promise<IdRequestMutationResult> {
+  await requireCapability("admin.write");
+
+  const parsed = regenerateIdRequestSchema.safeParse(params);
+  if (!parsed.success) {
+    return {
+      operation: "error",
+      message: parsed.error.issues[0]?.message ?? "Invalid ID request UUID",
+    };
+  }
+
+  const { uuid } = parsed.data;
+
+  const existing = await prisma.candidate_id_request.findUnique({
+    where: { cir_uuid: uuid },
+  });
+
+  if (!existing) {
+    return { operation: "error", message: "ID request not found" };
+  }
+
+  try {
+    await prisma.candidate_id_request.update({
+      where: { cir_uuid: uuid },
+      data: {
+        status: "pending",
+      },
+    });
+
+    return { operation: "success" };
+  } catch (err) {
+    return {
+      operation: "error",
+      message: err instanceof Error ? err.message : "Failed to regenerate ID request",
+    };
+  }
+}
+
+/**
+ * Delete a candidate ID request.
+ * Mirrors the legacy CandidateIdRequestController::actionDelete.
+ */
+export async function deleteIdRequest(
+  params: DeleteIdRequestParams,
+): Promise<IdRequestMutationResult> {
+  await requireCapability("admin.write");
+
+  const parsed = deleteIdRequestSchema.safeParse(params);
+  if (!parsed.success) {
+    return {
+      operation: "error",
+      message: parsed.error.issues[0]?.message ?? "Invalid ID request UUID",
+    };
+  }
+
+  const { uuid } = parsed.data;
+
+  const existing = await prisma.candidate_id_request.findUnique({
+    where: { cir_uuid: uuid },
+  });
+
+  if (!existing) {
+    return { operation: "error", message: "ID request not found" };
+  }
+
+  try {
+    await prisma.candidate_id_request.delete({
+      where: { cir_uuid: uuid },
+    });
+
+    return { operation: "success" };
+  } catch (err) {
+    return {
+      operation: "error",
+      message: err instanceof Error ? err.message : "Failed to delete ID request",
+    };
+  }
+}
