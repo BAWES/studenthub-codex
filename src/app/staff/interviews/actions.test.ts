@@ -3,7 +3,7 @@ import {
   listStaffInterviewsSchema,
   getStaffInterviewDetailSchema,
   updateInterviewStatusSchema,
-} from "./actions";
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // listStaffInterviewsSchema
