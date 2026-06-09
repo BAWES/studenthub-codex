@@ -10,6 +10,8 @@ import {
   createTicketSchema,
   addCommentSchema,
   getCommentsSchema,
+  updateTicketSchema,
+  closeTicketSchema,
 } from "./actions";
 
 describe("listTicketsSchema", () => {
@@ -360,5 +362,64 @@ describe("CreateTicketResult type shape", () => {
       message: "Validation failed",
     };
     expect(result.operation).toBe("error");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// updateTicketSchema tests
+// ---------------------------------------------------------------------------
+
+describe("updateTicketSchema", () => {
+  it("accepts valid ticketUuid and detail", () => {
+    const result = updateTicketSchema.safeParse({
+      ticketUuid: "ticket-123",
+      detail: "Updated issue description",
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.ticketUuid).toBe("ticket-123");
+      expect(result.data.detail).toBe("Updated issue description");
+    }
+  });
+
+  it("rejects empty detail", () => {
+    const result = updateTicketSchema.safeParse({
+      ticketUuid: "ticket-123",
+      detail: "",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects missing ticketUuid", () => {
+    const result = updateTicketSchema.safeParse({
+      detail: "Updated description",
+    });
+    expect(result.success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// closeTicketSchema tests
+// ---------------------------------------------------------------------------
+
+describe("closeTicketSchema", () => {
+  it("accepts valid ticketUuid", () => {
+    const result = closeTicketSchema.safeParse({
+      ticketUuid: "ticket-123",
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.ticketUuid).toBe("ticket-123");
+    }
+  });
+
+  it("rejects empty ticketUuid", () => {
+    const result = closeTicketSchema.safeParse({ ticketUuid: "" });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects missing ticketUuid", () => {
+    const result = closeTicketSchema.safeParse({});
+    expect(result.success).toBe(false);
   });
 });
