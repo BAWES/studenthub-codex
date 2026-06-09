@@ -30,6 +30,7 @@ const roleCapabilities: Record<Role, Capability[]> = {
     "id_review.read",
     "id_review.mutate",
     "admin.system",
+    "admin.mutate",
     "staff.read",
     "staff_expense.read",
     "staff_expense.write",

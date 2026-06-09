@@ -50,6 +50,7 @@ export type Capability =
   | "bank.write"
   | "admin.read"
   | "admin.write"
+  | "admin.mutate"
   | "staff.read"
   | "client.read"
   | "client.write"
