@@ -1,34 +1,11 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getSession } from "@/modules/auth/session";
 import { LoginForm } from "@/modules/auth/LoginForm";
-import { ThemeToggle } from "@/modules/theme/ThemeToggle";
 
 export const dynamic = "force-dynamic";
 
-const roles = [
-  {
-    icon: (_p: { className?: string; "aria-hidden"?: string }) => null,
-    label: "Candidate",
-    color: "sh-info",
-    desc: "Find work, track hours, get paid",
-  },
-  {
-    icon: (_p: { className?: string; "aria-hidden"?: string }) => null,
-    label: "Company",
-    color: "sh-success",
-    desc: "Hire staff, manage stores, approve timesheets",
-  },
-  {
-    icon: (_p: { className?: string; "aria-hidden"?: string }) => null,
-    label: "Inspector",
-    color: "sh-warning",
-    desc: "Monitor compliance and audit records",
-  },
-];
-
 export default async function LoginPage({
-  searchParams
+  searchParams,
 }: {
   searchParams: Promise<{ error?: string }>;
 }) {
@@ -41,81 +18,49 @@ export default async function LoginPage({
       {/* ── Animated gradient background ── */}
       <div className="shLoginGradient" aria-hidden="true" />
 
-      {/* ── Top nav bar ── */}
-      <nav className="absolute top-3 left-3 right-3 z-20 mx-auto max-w-[1200px] shGlassBase shGlassRadiusLg min-h-[56px] flex items-center justify-between gap-3.5 p-2">
-        <Link
-          className="inline-flex items-center gap-2.5 text-[var(--ink)] px-2 no-underline"
-          href="/"
+      {/* ── Floating ambient orbs ── */}
+      <div className="shOrb shOrbA" aria-hidden="true" />
+      <div className="shOrb shOrbB" aria-hidden="true" />
+      <div className="shOrb shOrbC" aria-hidden="true" />
+
+      {/* ── Centered glass login card ── */}
+      <div className="relative z-10 mx-auto w-full max-w-[420px] px-5">
+        <section
+          className="shGlassElevated shGlassRadiusXl overflow-hidden shLoginCard"
+          aria-label="StudentHub sign in"
         >
-          <span className="size-9 inline-flex items-center justify-center rounded-lg bg-[var(--ink)] text-[var(--surface)] font-black text-sm">
-            SH
-          </span>
-          <strong className="text-sm">StudentHub</strong>
-        </Link>
-        <ThemeToggle />
-      </nav>
-
-      {/* ── Main content ── */}
-      <div className="relative z-10 mx-auto w-[min(1160px,calc(100%_-_28px))] pt-[clamp(24px,5vh,64px)] pb-[42px]">
-        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(380px,480px)] gap-8 lg:gap-12 items-start">
-
-          {/* ── Left: Brand panel with floating role icons ── */}
-          <section className="flex flex-col gap-6 pt-2 lg:pt-10">
-            <span className="shHeroEyebrow">
-              One StudentHub login
+          {/* ── Brand mark ── */}
+          <div className="flex justify-center pt-10 pb-2">
+            <span className="size-12 inline-flex items-center justify-center rounded-xl bg-[var(--ink)] text-[var(--paper)] font-black text-lg shadow-lg">
+              SH
             </span>
+          </div>
 
-            <h1 className="shHeroTitle">
-              Sign in once.<br />
-              <span className="shHeroHighlight">We&rsquo;ll open the right workspace.</span>
-            </h1>
-
-            <p className="shHeroBody">
-              Your production credentials decide what you can see and do. One account, one workspace.
+          {params.error === "expired" ? (
+            <p className="text-[var(--destructive)] font-bold m-0 px-6 pt-0 pb-0 text-sm text-center">
+              That verified account choice expired. Sign in again to continue.
             </p>
+          ) : null}
+          {params.error === "account" ? (
+            <p className="text-[var(--destructive)] font-bold m-0 px-6 pt-0 pb-0 text-sm text-center">
+              Choose a verified account to continue.
+            </p>
+          ) : null}
 
-            {/* ── Floating role icons panel ── */}
-            <div className="shLoginRolePanel" aria-label="Workspace roles">
-              {roles.map(({ icon: Icon, label, color, desc }) => (
-                <div key={label} className="shLoginRoleItem">
-                  <span className="shLoginRoleIcon" style={{ color: `var(--${color})` }}>
-                    <Icon className="size-5" aria-hidden="true" />
-                  </span>
-                  <div className="shLoginRoleText">
-                    <strong>{label}</strong>
-                    <span className="text-[var(--muted)] text-[13px]">{desc}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
+          <LoginForm />
 
-          {/* ── Right: Elevated glass login card ── */}
-          <section
-            className="shGlassElevated shGlassRadiusXl overflow-hidden shLoginCard"
-            aria-label="StudentHub sign in"
-          >
-            {params.error === "expired" ? (
-              <p className="text-[var(--destructive)] font-bold m-0 p-4 pb-0 text-sm">
-                That verified account choice expired. Sign in again to continue.
-              </p>
-            ) : null}
-            {params.error === "account" ? (
-              <p className="text-[var(--destructive)] font-bold m-0 p-4 pb-0 text-sm">
-                Choose a verified account to continue.
-              </p>
-            ) : null}
-            <LoginForm />
-            <div className="text-center pb-6">
-              <p className="text-[13px] text-[var(--muted)] m-0">
-                No account?{" "}
-                <a href="/signup" className="text-[var(--sh-info)] font-semibold no-underline hover:underline">
-                  Create one
-                </a>
-              </p>
-            </div>
-          </section>
-        </div>
+          <div className="text-center pb-10">
+            <p className="text-[13px] text-[var(--muted)] m-0">
+              No account?{" "}
+              <a
+                href="/signup"
+                className="text-[var(--sh-info)] font-semibold no-underline hover:underline transition-all duration-200"
+              >
+                Create one
+              </a>
+            </p>
+          </div>
+        </section>
       </div>
     </main>
   );
