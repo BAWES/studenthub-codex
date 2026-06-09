@@ -102,6 +102,21 @@ jobs:
     name: E2E Tests
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: studenthub
+          MYSQL_DATABASE: studenthub_prod_local
+          MYSQL_USER: studenthub
+          MYSQL_PASSWORD: studenthub
+        ports:
+          - 3307:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -111,12 +126,23 @@ jobs:
       - run: npm ci
       - name: Install Playwright browsers
         run: npx playwright install chromium --with-deps
+      - name: Generate Prisma client
+        run: npx prisma generate
+        env:
+          DATABASE_URL: "mysql://studenthub:studenthub@localhost:3307/studenthub_prod_local"
+      - name: Push schema to MySQL
+        run: npx prisma db push --skip-generate
+        env:
+          DATABASE_URL: "mysql://studenthub:studenthub@localhost:3307/studenthub_prod_local"
       - name: Build
         run: npx next build
+        env:
+          DATABASE_URL: "mysql://studenthub:studenthub@localhost:3307/studenthub_prod_local"
       - name: Run E2E tests
         run: npx playwright test --project=chromium
         env:
           CI: "true"
+          DATABASE_URL: "mysql://studenthub:studenthub@localhost:3307/studenthub_prod_local"
 
   validate:
     name: Validation Suite
