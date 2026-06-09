@@ -278,7 +278,7 @@ export function DataTable<T extends { id: string | number }>({
                   ))}
                   {rowHref ? (
                     <td className="rowAction" data-label="Action">
-                      <Link href={rowHref(row)}>Open</Link>
+                      <Link href={rowHref(row)} aria-label={getRowLabel ? `Open ${getRowLabel(row)}` : "Open record"}>Open</Link>
                     </td>
                   ) : null}
                 </tr>
