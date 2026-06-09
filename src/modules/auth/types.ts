@@ -38,6 +38,8 @@ export type Capability =
   | "time.approve"
   | "finance.read"
   | "finance.mutate"
+  | "document.read"
+  | "document.write"
   | "document.export"
   | "id_review.read"
   | "id_review.mutate"
@@ -58,7 +60,9 @@ export type Capability =
   | "expense.read"
   | "expense.write"
   | "staff_leave.read"
-  | "store.read";
+  | "staff_leave.write"
+  | "store.read"
+  | "transfer.read";
 
 export type SessionUser = {
   role: Role;
