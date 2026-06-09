@@ -55,6 +55,10 @@ const deleteCertificateSchema = z.object({
   certificateUuid: z.string().min(1, "Certificate UUID is required"),
 });
 
+const getCertificateSchema = z.object({
+  uuid: z.string().min(1, "Certificate UUID is required"),
+});
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -63,6 +67,7 @@ export type ListCertificatesParams = z.input<typeof listCertificatesSchema>;
 export type CreateCertificateParams = z.input<typeof createCertificateSchema>;
 export type UpdateCertificateParams = z.input<typeof updateCertificateSchema>;
 export type DeleteCertificateParams = z.input<typeof deleteCertificateSchema>;
+export type GetCertificateParams = z.input<typeof getCertificateSchema>;
 
 export type CertificateListItem = {
   certificate_uuid: string;
@@ -366,4 +371,50 @@ export async function deleteCertificate(
 
   revalidatePath("/staff/candidates");
   return { success: true };
+}
+
+// ---------------------------------------------------------------------------
+// getCertificate
+// ---------------------------------------------------------------------------
+
+/**
+ * Get a single candidate certificate by UUID.
+ * Returns null if the certificate is not found or soft-deleted.
+ */
+export async function getCertificate(
+  params: GetCertificateParams,
+): Promise<CertificateListItem | null> {
+  await requireCapability("staff.read");
+
+  const parsed = getCertificateSchema.safeParse(params);
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid certificate UUID");
+  }
+
+  const { uuid } = parsed.data;
+
+  const certificate = await prisma.candidate_certificate.findFirst({
+    where: { certificate_uuid: uuid, is_deleted: false },
+  });
+
+  if (!certificate) return null;
+
+  return {
+    certificate_uuid: certificate.certificate_uuid,
+    certificate_type: certificate.certificate_type ?? null,
+    certificate_title: certificate.certificate_title ?? null,
+    certificate_issuer: certificate.certificate_issuer ?? null,
+    certificate_url: certificate.certificate_url ?? null,
+    candidate_id: certificate.candidate_id,
+    candidate_work_history_id: certificate.candidate_work_history_id ?? null,
+    exam_uuid: certificate.exam_uuid ?? null,
+    store_id: certificate.store_id ?? null,
+    company_id: certificate.company_id ?? null,
+    parent_company_id: certificate.parent_company_id ?? null,
+    start_date: certificate.start_date?.toISOString() ?? null,
+    end_date: certificate.end_date?.toISOString() ?? null,
+    staff_id: certificate.staff_id ?? null,
+    created_at: certificate.created_at ?? null,
+    updated_at: certificate.updated_at ?? null,
+  };
 }

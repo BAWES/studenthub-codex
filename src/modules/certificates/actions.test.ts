@@ -187,6 +187,32 @@ describe("deleteCertificateSchema", () => {
 });
 
 // ---------------------------------------------------------------------------
+// getCertificate tests
+// ---------------------------------------------------------------------------
+
+const getCertificateSchema = z.object({
+  uuid: z.string().min(1, "Certificate UUID is required"),
+});
+
+describe("getCertificateSchema", () => {
+  it("rejects empty UUID", () => {
+    const r = getCertificateSchema.safeParse({ uuid: "" });
+    expect(r.success).toBe(false);
+    if (!r.success) {
+      expect(r.error.issues[0]?.message).toBe("Certificate UUID is required");
+    }
+  });
+
+  it("accepts valid UUID", () => {
+    const r = getCertificateSchema.safeParse({ uuid: "cert_abc123" });
+    expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data.uuid).toBe("cert_abc123");
+    }
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Return type shape
 // ---------------------------------------------------------------------------
 
