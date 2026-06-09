@@ -122,31 +122,80 @@ This replaces:
 
 ---
 
-## 4. FactPanel — Unified Detail Panel
+## 4. DetailSection — Unified Detail Panel
 
-### Current State
-Already shared across all roles via `DetailPanels.tsx`. Consistent.
+### Current State (STU-1032 DONE)
+Consolidated from two separate components (FactPanel + CompactList) into one unified `<DetailSection>` with loading/error/empty states and sensitive data support.
 
-### Enhancement
+### Blueprint
+
 ```tsx
-interface FactPanelProps {
-  title: string
-  facts: Fact[]
-  loading?: boolean
-  error?: Error | null
-}
+import { DetailSection } from "@/modules/workspace/DetailPanels";
 
-interface Fact {
-  label: string
-  value: React.ReactNode | null | undefined
-  sensitive?: boolean  // hides behind "Show" toggle for non-admin roles
-}
+// Fact type (default) — label/value grid
+<DetailSection
+  title="Account"
+  facts={[
+    { label: "Email", value: user.email },
+    { label: "Phone", value: user.phone, sensitive: true },  // hidden behind toggle
+  ]}
+  sensitive                          // enables "Show sensitive" toggle
+/>
+
+// List type — compact row list
+<DetailSection
+  type="list"
+  title="Stores"
+  rows={stores}
+  emptyMessage="No stores added yet."
+/>
+
+// Loading skeleton
+<DetailSection title="Section" loading />
+
+// Error with retry
+<DetailSection
+  title="Section"
+  error={fetchError}
+  onRetry={refetch}
+/>
+
+// Conditionally hidden
+<DetailSection title="Secret" hidden={!isAdmin} />
 ```
 
 ### States
-Loading → Skeleton label-value pairs
-Empty → "No data for this section"
-Error → Section-level error state
+| State | Visual |
+|-------|--------|
+| Loading | `Skeleton` shimmer per type (fact grid or list rows), `aria-busy="true"` |
+| Empty (fact) | "No data for this section." or custom `emptyMessage` |
+| Empty (list) | "No imported records found here yet." or custom `emptyMessage` |
+| Error | Error message (string or Error object) + optional "Try again" button |
+| Sensitive | Values show `•••••` until toggle clicked |
+| Hidden | Returns `null` — completely removed from DOM |
+
+### TypeScript Interface
+
+```tsx
+interface DetailSectionProps {
+  type?: 'fact' | 'list'
+  title: string
+  facts?: DetailSectionFact[]
+  rows?: DetailSectionRow[]
+  loading?: boolean
+  error?: Error | string | null
+  emptyMessage?: string
+  onRetry?: () => void
+  roles?: string[]
+  sensitive?: boolean
+  hidden?: boolean
+}
+```
+
+---
+
+## ~~4. FactPanel — Unified Detail Panel~~
+*Replaced by DetailSection above (STU-1032). FactPanel/CompactList remain as deprecated wrappers for backward compatibility.*
 
 ---
 

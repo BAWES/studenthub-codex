@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { requireRoleCapability } from "@/modules/auth/session";
-import { CompactList, FactPanel } from "@/modules/workspace/DetailPanels";
+import { DetailSection } from "@/modules/workspace/DetailPanels";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { getCandidateInvitationDetail } from "@/modules/workspace/data";
 import { formatDate } from "@/modules/workspace/format";
@@ -27,7 +27,7 @@ export default async function CandidateInvitationDetailPage({ params }: { params
       metrics={data.metrics}
       primary={{ title: "Notes", rows: data.notes }}
     >
-      <FactPanel
+      <DetailSection
         title="Invitation Brief"
         facts={[
           { label: "Company", value: inv.request.company?.company_name },

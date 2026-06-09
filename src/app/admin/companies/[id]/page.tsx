@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { requireRoleCapability } from "@/modules/auth/session";
-import { CompactList, FactPanel } from "@/modules/workspace/DetailPanels";
+import { DetailSection } from "@/modules/workspace/DetailPanels";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { getCompanyDetail } from "@/modules/workspace/data";
 import { formatDate } from "@/modules/workspace/format";
@@ -25,7 +25,7 @@ export default async function AdminCompanyDetailPage({ params }: { params: Promi
       primary={{ title: "Requests", rows: data.requests }}
       secondary={{ title: "Contacts", rows: data.contacts }}
     >
-      <FactPanel
+      <DetailSection
         title="Account"
         facts={[
           { label: "Email", value: data.company.company_email },
@@ -37,8 +37,8 @@ export default async function AdminCompanyDetailPage({ params }: { params: Promi
         ]}
       />
       <section className="detailGrid">
-        <CompactList title="Stores" rows={data.stores} />
-        <CompactList title="Notes" rows={data.notes} />
+        <DetailSection type="list" title="Stores" rows={data.stores} />
+        <DetailSection type="list" title="Notes" rows={data.notes} />
       </section>
     </WorkspaceShell>
   );
