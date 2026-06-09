@@ -864,6 +864,63 @@
   }
 }
 
+/* ── Glass Skeleton — shimmer sweep for StudentHub OS ──────────────── */
+.shSkeletonGlass {
+  position: relative;
+  background: var(--sh-glass-bg);
+  border: 1px solid var(--sh-glass-border);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.shSkeletonGlass::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in srgb, var(--ink) 6%, transparent) 40%,
+    color-mix(in srgb, var(--ink) 8%, transparent) 50%,
+    color-mix(in srgb, var(--ink) 6%, transparent) 60%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shSkeletonShimmer 1.8s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes shSkeletonShimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  50% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(200%);
+  }
+}
+
+/* Dark mode: lighter shimmer for visibility */
+[data-theme="dark"] .shSkeletonGlass::after {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in srgb, var(--ink) 10%, transparent) 40%,
+    color-mix(in srgb, var(--ink) 14%, transparent) 50%,
+    color-mix(in srgb, var(--ink) 10%, transparent) 60%,
+    transparent 100%
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shSkeletonGlass::after {
+    animation: none;
+    opacity: 0.5;
+  }
+}
+
 /* ── Mobile Tab Bar ─────────────────────────────────────────────────── */
 .mobileNav {
   display: none;
