@@ -32,6 +32,8 @@ export type DataTableProps<T extends { id: string | number }> = {
   rows: T[];
   columns: DataTableColumn<T>[];
   rowHref?: (row: T) => Route;
+  /** Optional label function for the action link aria-label. */
+  getRowLabel?: (row: T) => string;
   /** Loading state — shows skeleton rows when true. */
   loading?: boolean;
   /** Number of skeleton rows to show during loading (default: 5). */
@@ -137,6 +139,7 @@ export function DataTable<T extends { id: string | number }>({
   rows,
   columns,
   rowHref,
+  getRowLabel,
   loading = false,
   loadingSkeletonRows = 5,
   emptyMessage,
