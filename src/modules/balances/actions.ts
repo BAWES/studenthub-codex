@@ -80,7 +80,7 @@ const TYPE_PAYABLE_TO_USERS = "PayableToUsers";
 export async function listBalances(
   params: FormData | z.input<typeof listBalancesSchema> = {},
 ): Promise<ListBalancesResult> {
-  await requireCapability("finance.read");
+  const session = await requireCapability("finance.read");
 
   const raw =
     params instanceof FormData
@@ -106,17 +106,51 @@ export async function listBalances(
   const skip = (page - 1) * limit;
 
   try {
-    // 1. Get the current user's payable account from session
-    // The wallet DB links accounts via account_uuid = user_uuid
-    // We use the authenticated user's UUID from the session
-    // NOTE: In production, the wallet user UUID should match the
-    // account UUID used walletDb. This is a read-only listing.
+    // 1. Resolve wallet user UUID from the current user's email
+    // Mirrors Yii2 WalletUser::findByEmail pattern:
+    //   wallet DB has its own user table that maps email -> user_uuid
+    const candidateId = Number(session.id);
+    const candidate = await prisma.candidate.findUnique({
+      where: { candidate_id: candidateId },
+      select: { candidate_email: true },
+    });
+
+    if (!candidate?.candidate_email) {
+      return {
+        account: null,
+        transactions: [],
+        total: 0,
+        page,
+        limit,
+        totalPages: 0,
+      };
+    }
+
+    const walletUsers = await walletQuery<Array<{ user_uuid: string }>>(
+      `SELECT user_uuid FROM user WHERE email = ? LIMIT 1`,
+      [candidate.candidate_email],
+    );
+
+    if (walletUsers.length === 0) {
+      return {
+        account: null,
+        transactions: [],
+        total: 0,
+        page,
+        limit,
+        totalPages: 0,
+      };
+    }
+
+    const userUuid = walletUsers[0].user_uuid;
+
+    // 2. Get the candidate's payable wallet account
     const accounts = await walletQuery<PayableAccount[]>(
       `SELECT balance_account_uuid, account_uuid, balance, type
        FROM balance_account
        WHERE account_uuid = ? AND type = ?
        LIMIT 1`,
-      [], // accountUuid will be resolved from session context
+      [userUuid, TYPE_USER_PAYABLE],
     );
 
     if (accounts.length === 0) {
@@ -266,11 +300,12 @@ export async function initTransfer(
   const { amount } = parsed.data;
 
   try {
-    // 2. Read candidate's bank info
+    // 2. Read candidate's email and bank info
     const candidateId = Number(session.id);
     const candidate = await prisma.candidate.findUnique({
       where: { candidate_id: candidateId },
       select: {
+        candidate_email: true,
         bank_id: true,
         bank_account_name: true,
         candidate_iban: true,
@@ -281,13 +316,25 @@ export async function initTransfer(
       return { success: false, error: "Candidate not found." };
     }
 
-    // 3. Find the candidate's payable wallet account
+    // 3. Look up the wallet user by email (mirrors Yii2 WalletUser::findByEmail)
+    const walletUsers = await walletQuery<Array<{ user_uuid: string }>>(
+      `SELECT user_uuid FROM user WHERE email = ? LIMIT 1`,
+      [candidate.candidate_email],
+    );
+
+    if (walletUsers.length === 0) {
+      return { success: false, error: "No wallet account found for your email." };
+    }
+
+    const walletUser = walletUsers[0];
+
+    // 4. Find the candidate's payable wallet account using the wallet user UUID
     const accounts = await walletQuery<Array<{ balance_account_uuid: string; account_uuid: string; balance: number; type: string }>>(
       `SELECT balance_account_uuid, account_uuid, balance, type
        FROM balance_account
        WHERE account_uuid = ? AND type = ?
        LIMIT 1`,
-      [], // account_uuid resolved from session context
+      [walletUser.user_uuid, TYPE_USER_PAYABLE],
     );
 
     if (accounts.length === 0) {
@@ -297,7 +344,7 @@ export async function initTransfer(
     const account = accounts[0];
     const currentBalance = Number(account.balance);
 
-    // 4. Validate sufficient balance
+    // 5. Validate sufficient balance
     if (currentBalance < amount) {
       return {
         success: false,
@@ -305,14 +352,14 @@ export async function initTransfer(
       };
     }
 
-    // 5. Deduct from balance and record the transaction
+    // 6. Deduct from balance and record the transaction
     await walletQuery(
       `INSERT INTO balance_transaction (account_uuid, amount, balance, data, created_at, transaction_datetime)
        VALUES (?, ?, ?, ?, NOW(), NOW())`,
       [account.balance_account_uuid, -amount, currentBalance - amount, JSON.stringify({ type: "initTransfer", candidateId })],
     );
 
-    // 6. Update the account balance
+    // 7. Update the account balance
     await walletQuery(
       `UPDATE balance_account SET balance = ? WHERE balance_account_uuid = ?`,
       [currentBalance - amount, account.balance_account_uuid],
