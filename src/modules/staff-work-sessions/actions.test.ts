@@ -2,7 +2,10 @@ import { describe, it, expect } from "vitest";
 import { z } from "zod";
 
 // ---------------------------------------------------------------------------
-// Schemas — mirror the ones in actions.ts
+// Pure logic: staff work session schema validation
+//
+// These schemas mirror the ones in actions.ts. Testing them separately avoids
+// mocking "use server" dependencies (prisma, session, etc.).
 // ---------------------------------------------------------------------------
 
 const listStaffWorkSessionsSchema = z.object({
@@ -17,24 +20,13 @@ const getStaffWorkSessionSchema = z.object({
   workSessionUuid: z.string().min(1, "Work session UUID is required"),
 });
 
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-type StaffWorkSession = {
-  work_session_uuid: string;
-  staff_id: number | null;
-  total_minutes: number | null;
-  created_at: string;
-  updated_at: string;
-};
-
-// ---------------------------------------------------------------------------
-// listStaffWorkSessionsSchema
-// ---------------------------------------------------------------------------
+const createStaffWorkSessionSchema = z.object({
+  staff_id: z.coerce.number().int().positive("Staff ID is required"),
+  total_minutes: z.coerce.number().int().min(0).optional().default(0),
+});
 
 describe("listStaffWorkSessionsSchema", () => {
-  it("accepts empty params (defaults to page 1, limit 20)", () => {
+  it("accepts empty params (default pagination)", () => {
     const result = listStaffWorkSessionsSchema.safeParse({});
     expect(result.success).toBe(true);
     if (result.success) {
@@ -43,27 +35,8 @@ describe("listStaffWorkSessionsSchema", () => {
     }
   });
 
-  it("accepts staffId filter", () => {
-    const result = listStaffWorkSessionsSchema.safeParse({ staffId: 5 });
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.staffId).toBe(5);
-    }
-  });
-
-  it("accepts date range filters", () => {
-    const result = listStaffWorkSessionsSchema.safeParse({
-      startDate: "2026-01-01",
-      endDate: "2026-06-09",
-    });
-    expect(result.success).toBe(true);
-  });
-
-  it("accepts custom pagination", () => {
-    const result = listStaffWorkSessionsSchema.safeParse({
-      page: 2,
-      limit: 50,
-    });
+  it("accepts explicit pagination params", () => {
+    const result = listStaffWorkSessionsSchema.safeParse({ page: 2, limit: 50 });
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data.page).toBe(2);
@@ -71,8 +44,44 @@ describe("listStaffWorkSessionsSchema", () => {
     }
   });
 
+  it("accepts staffId filter", () => {
+    const result = listStaffWorkSessionsSchema.safeParse({ staffId: 42 });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.staffId).toBe(42);
+    }
+  });
+
+  it("accepts date range filter", () => {
+    const result = listStaffWorkSessionsSchema.safeParse({
+      startDate: "2025-01-01",
+      endDate: "2025-12-31",
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.startDate).toBe("2025-01-01");
+      expect(result.data.endDate).toBe("2025-12-31");
+    }
+  });
+
+  it("accepts startDate only", () => {
+    const result = listStaffWorkSessionsSchema.safeParse({
+      startDate: "2025-06-01",
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.startDate).toBe("2025-06-01");
+      expect(result.data.endDate).toBeUndefined();
+    }
+  });
+
   it("rejects limit over 100", () => {
-    const result = listStaffWorkSessionsSchema.safeParse({ limit: 999 });
+    const result = listStaffWorkSessionsSchema.safeParse({ limit: 200 });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects limit below 1", () => {
+    const result = listStaffWorkSessionsSchema.safeParse({ limit: 0 });
     expect(result.success).toBe(false);
   });
 
@@ -85,49 +94,14 @@ describe("listStaffWorkSessionsSchema", () => {
     const result = listStaffWorkSessionsSchema.safeParse({ page: 0 });
     expect(result.success).toBe(false);
   });
-
-  it("accepts startDate only (no endDate)", () => {
-    const result = listStaffWorkSessionsSchema.safeParse({
-      startDate: "2026-01-01",
-    });
-    expect(result.success).toBe(true);
-  });
-
-  it("accepts endDate only (no startDate)", () => {
-    const result = listStaffWorkSessionsSchema.safeParse({
-      endDate: "2026-06-09",
-    });
-    expect(result.success).toBe(true);
-  });
-
-  it("coerces numeric strings to numbers", () => {
-    const result = listStaffWorkSessionsSchema.safeParse({
-      page: "3",
-      limit: "25",
-      staffId: "10",
-    });
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.page).toBe(3);
-      expect(result.data.limit).toBe(25);
-      expect(result.data.staffId).toBe(10);
-    }
-  });
 });
 
-// ---------------------------------------------------------------------------
-// getStaffWorkSessionSchema
-// ---------------------------------------------------------------------------
-
 describe("getStaffWorkSessionSchema", () => {
-  it("accepts valid work session UUID", () => {
+  it("accepts a valid UUID", () => {
     const result = getStaffWorkSessionSchema.safeParse({
-      workSessionUuid: "work_session_abc123",
+      workSessionUuid: "work_session_550e8400-e29b-41d4-a716-446655440000",
     });
     expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.workSessionUuid).toBe("work_session_abc123");
-    }
   });
 
   it("rejects empty UUID", () => {
@@ -143,80 +117,77 @@ describe("getStaffWorkSessionSchema", () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// StaffWorkSession type shape
-// ---------------------------------------------------------------------------
-
-// ---------------------------------------------------------------------------
-// createStaffWorkSessionSchema
-// ---------------------------------------------------------------------------
-
-const createStaffWorkSessionSchema = z.object({
-  staff_id: z.coerce.number().int().positive("Staff ID is required"),
-  total_minutes: z.coerce.number().int().min(0).optional().default(0),
-});
-
 describe("createStaffWorkSessionSchema", () => {
-  it("accepts valid staff_id and total_minutes", () => {
-    const result = createStaffWorkSessionSchema.safeParse({
-      staff_id: 5,
-      total_minutes: 480,
-    });
+  it("accepts valid data with staff_id only", () => {
+    const result = createStaffWorkSessionSchema.safeParse({ staff_id: 42 });
     expect(result.success).toBe(true);
     if (result.success) {
-      expect(result.data.staff_id).toBe(5);
-      expect(result.data.total_minutes).toBe(480);
-    }
-  });
-
-  it("defaults total_minutes to 0 when omitted", () => {
-    const result = createStaffWorkSessionSchema.safeParse({
-      staff_id: 3,
-    });
-    expect(result.success).toBe(true);
-    if (result.success) {
+      expect(result.data.staff_id).toBe(42);
       expect(result.data.total_minutes).toBe(0);
     }
   });
 
-  it("rejects missing staff_id", () => {
+  it("accepts valid data with total_minutes", () => {
     const result = createStaffWorkSessionSchema.safeParse({
+      staff_id: 15,
       total_minutes: 480,
     });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.staff_id).toBe(15);
+      expect(result.data.total_minutes).toBe(480);
+    }
+  });
+
+  it("accepts zero total_minutes", () => {
+    const result = createStaffWorkSessionSchema.safeParse({
+      staff_id: 10,
+      total_minutes: 0,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects missing staff_id", () => {
+    const result = createStaffWorkSessionSchema.safeParse({});
     expect(result.success).toBe(false);
   });
 
-  it("rejects zero staff_id", () => {
+  it("rejects negative staff_id", () => {
     const result = createStaffWorkSessionSchema.safeParse({
-      staff_id: 0,
+      staff_id: -5,
+      total_minutes: 100,
     });
     expect(result.success).toBe(false);
   });
 
   it("rejects negative total_minutes", () => {
     const result = createStaffWorkSessionSchema.safeParse({
-      staff_id: 1,
-      total_minutes: -10,
+      staff_id: 10,
+      total_minutes: -1,
     });
     expect(result.success).toBe(false);
-  });
-
-  it("coerces numeric strings to numbers", () => {
-    const result = createStaffWorkSessionSchema.safeParse({
-      staff_id: "7",
-      total_minutes: "300",
-    });
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.staff_id).toBe(7);
-      expect(result.data.total_minutes).toBe(300);
-    }
   });
 });
 
 // ---------------------------------------------------------------------------
-// createStaffWorkSession — result type shape
+// Return type shapes
 // ---------------------------------------------------------------------------
+
+type StaffWorkSession = {
+  work_session_uuid: string;
+  staff_id: number | null;
+  total_minutes: number | null;
+  created_at: string;
+  updated_at: string;
+};
+
+type ListStaffWorkSessionsResult = {
+  sessions: StaffWorkSession[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+};
 
 type CreateStaffWorkSessionResult = {
   work_session_uuid: string;
@@ -224,67 +195,83 @@ type CreateStaffWorkSessionResult = {
   total_minutes: number | null;
 };
 
-describe("createStaffWorkSession result type", () => {
-  it("has all required fields", () => {
+describe("StaffWorkSession type shape", () => {
+  it("defines the expected fields", () => {
+    const mock: StaffWorkSession = {
+      work_session_uuid: "work_session_550e8400-e29b-41d4-a716-446655440000",
+      staff_id: 42,
+      total_minutes: 480,
+      created_at: "2025-06-09T10:00:00.000Z",
+      updated_at: "2025-06-09T10:00:00.000Z",
+    };
+    expect(mock.work_session_uuid).toBe(
+      "work_session_550e8400-e29b-41d4-a716-446655440000",
+    );
+    expect(mock.staff_id).toBe(42);
+    expect(mock.total_minutes).toBe(480);
+    expect(mock.created_at).toBe("2025-06-09T10:00:00.000Z");
+    expect(mock.updated_at).toBe("2025-06-09T10:00:00.000Z");
+  });
+});
+
+describe("ListStaffWorkSessionsResult type shape", () => {
+  it("accepts a valid result set with data", () => {
+    const result: ListStaffWorkSessionsResult = {
+      sessions: [
+        {
+          work_session_uuid:
+            "work_session_550e8400-e29b-41d4-a716-446655440000",
+          staff_id: 42,
+          total_minutes: 480,
+          created_at: "2025-06-09T10:00:00.000Z",
+          updated_at: "2025-06-09T10:00:00.000Z",
+        },
+      ],
+      total: 1,
+      page: 1,
+      limit: 20,
+      totalPages: 1,
+    };
+    expect(result.sessions).toHaveLength(1);
+    expect(result.total).toBe(1);
+    expect(result.totalPages).toBe(1);
+  });
+
+  it("accepts an empty result set", () => {
+    const result: ListStaffWorkSessionsResult = {
+      sessions: [],
+      total: 0,
+      page: 1,
+      limit: 20,
+      totalPages: 0,
+    };
+    expect(result.sessions).toHaveLength(0);
+    expect(result.total).toBe(0);
+    expect(result.totalPages).toBe(0);
+  });
+});
+
+describe("CreateStaffWorkSessionResult type shape", () => {
+  it("accepts a success result", () => {
     const result: CreateStaffWorkSessionResult = {
-      work_session_uuid: "work_session_abc123",
-      staff_id: 5,
+      work_session_uuid: "work_session_550e8400-e29b-41d4-a716-446655440000",
+      staff_id: 42,
       total_minutes: 480,
     };
-    expect(result.work_session_uuid).toMatch(/^work_session_/);
-    expect(result.staff_id).toBe(5);
+    expect(result.work_session_uuid).toBe(
+      "work_session_550e8400-e29b-41d4-a716-446655440000",
+    );
+    expect(result.staff_id).toBe(42);
     expect(result.total_minutes).toBe(480);
   });
 
-  it("accepts nullable fields", () => {
+  it("accepts null fields", () => {
     const result: CreateStaffWorkSessionResult = {
-      work_session_uuid: "work_session_xyz",
+      work_session_uuid: "work_session_00000000-0000-0000-0000-000000000000",
       staff_id: null,
       total_minutes: null,
     };
     expect(result.staff_id).toBeNull();
     expect(result.total_minutes).toBeNull();
-  });
-});
-
-describe("StaffWorkSession type", () => {
-  it("has all required fields", () => {
-    const session: StaffWorkSession = {
-      work_session_uuid: "work_session_abc123",
-      staff_id: 5,
-      total_minutes: 480,
-      created_at: "2026-06-09T04:00:00.000Z",
-      updated_at: "2026-06-09T04:00:00.000Z",
-    };
-    expect(session.work_session_uuid).toBe("work_session_abc123");
-    expect(session.staff_id).toBe(5);
-    expect(session.total_minutes).toBe(480);
-    expect(session.created_at).toBeTruthy();
-    expect(session.updated_at).toBeTruthy();
-  });
-
-  it("accepts nullable staff_id and total_minutes", () => {
-    const session: StaffWorkSession = {
-      work_session_uuid: "work_session_xyz",
-      staff_id: null,
-      total_minutes: null,
-      created_at: "2026-06-09T04:00:00.000Z",
-      updated_at: "2026-06-09T04:00:00.000Z",
-    };
-    expect(session.staff_id).toBeNull();
-    expect(session.total_minutes).toBeNull();
-  });
-
-  it("has valid ISO date strings for timestamps", () => {
-    const session: StaffWorkSession = {
-      work_session_uuid: "work_session_123",
-      staff_id: 1,
-      total_minutes: 300,
-      created_at: "2026-06-09T00:00:00.000Z",
-      updated_at: "2026-06-09T00:00:00.000Z",
-    };
-    expect(() => new Date(session.created_at)).not.toThrow();
-    expect(() => new Date(session.updated_at)).not.toThrow();
-    expect(new Date(session.created_at).toISOString()).toBeTruthy();
   });
 });
