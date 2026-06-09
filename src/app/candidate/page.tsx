@@ -23,6 +23,7 @@ export default async function CandidatePage() {
           { label: "Notifications", href: "/candidate/notifications" },
           { label: "Invitations", href: "/candidate/invitations" },
           { label: "Skills", href: "/candidate/skills" },
+          { label: "Certifications", href: "/candidate/certifications" },
           { label: "Schedule", href: "/candidate/schedule" },
           { label: "Work logs", href: "/candidate/work-logs" },
           { label: "Payments", href: "/candidate/payments" },
