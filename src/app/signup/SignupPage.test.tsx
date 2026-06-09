@@ -30,6 +30,7 @@ vi.mock("lucide-react", () => ({
   UserRound: () => <span data-testid="icon-user-round" />,
   Building2: () => <span data-testid="icon-building" />,
   ArrowLeft: () => <span data-testid="icon-arrow-left" />,
+  ArrowRight: () => <span data-testid="icon-arrow-right" />,
   UserPlus: () => <span data-testid="icon-user-plus" />,
   Sparkles: () => <span data-testid="icon-sparkles" />,
   Shield: () => <span data-testid="icon-shield" />,
@@ -115,11 +116,44 @@ describe("SignupPage role param handling", () => {
       email: "test@example.com",
       role: "candidate",
       name: "Test User",
+      issuedAt: Date.now(),
     });
 
     const SignupPage = (await import("./page")).default;
     render(await SignupPage({ searchParams: Promise.resolve({}) }));
 
     expect(mockRedirect).toHaveBeenCalledWith("/app");
+  });
+
+  describe("invite-only role params (staff, admin, inspector)", () => {
+    it.each(["staff", "admin", "inspector"])(
+      "shows invite-only message when ?role=%s is provided",
+      async (role) => {
+        const SignupPage = (await import("./page")).default;
+        render(await SignupPage({ searchParams: Promise.resolve({ role }) }));
+
+        expect(screen.getByText(/requires an invitation/i)).toBeTruthy();
+        expect(screen.getByText("Return to home")).toBeTruthy();
+        expect(screen.queryByText("Create your StudentHub account")).toBeNull();
+        expect(screen.queryByText("Start your career journey")).toBeNull();
+      },
+    );
+
+    it("shows the correct role label in invite-only message", async () => {
+      const SignupPage = (await import("./page")).default;
+      render(await SignupPage({ searchParams: Promise.resolve({ role: "staff" }) }));
+
+      const matches = screen.getAllByText(/staff access/i);
+      expect(matches.length).toBe(2); // eyebrow + title
+    });
+
+    it("renders a link back to the home page for invite-only roles", async () => {
+      const SignupPage = (await import("./page")).default;
+      const { container } = render(await SignupPage({ searchParams: Promise.resolve({ role: "admin" }) }));
+
+      const homeLink = container.querySelector('a[href="/"]');
+      expect(homeLink).toBeTruthy();
+      expect(homeLink?.textContent).toMatch(/return to home/i);
+    });
   });
 });

@@ -6,7 +6,10 @@ import type { Role } from "@/modules/auth/types";
 
 export const dynamic = "force-dynamic";
 
-const VALID_ROLES: Role[] = ["candidate", "company"];
+// All landing page CTAs link to /signup?role=<role>. Candidate and company
+// support self-registration; staff, admin, and inspector roles show a
+// contextual message in SignupForm guiding users to request access.
+const VALID_ROLES: Role[] = ["candidate", "company", "staff", "admin", "inspector"];
 
 export default async function SignupPage({
   searchParams,
