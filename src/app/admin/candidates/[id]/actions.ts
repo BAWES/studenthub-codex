@@ -52,6 +52,10 @@ export const updateCandidateSchema = z.object({
   candidateObjective: z.string().max(255).optional(),
 });
 
+export const deleteCandidateSchema = z.object({
+  candidateId: z.coerce.number().int().positive("Candidate ID is required"),
+});
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -59,6 +63,8 @@ export const updateCandidateSchema = z.object({
 export type GetCandidateDetailInput = z.input<typeof getCandidateDetailSchema>;
 export type UpdateCandidateStatusInput = z.input<typeof updateCandidateStatusSchema>;
 export type UpdateCandidateInput = z.input<typeof updateCandidateSchema>;
+
+export type DeleteCandidateInput = z.input<typeof deleteCandidateSchema>;
 
 export type CandidateFullDetail = {
   candidate: {
@@ -326,6 +332,59 @@ export async function updateCandidate(
     return {
       operation: "error",
       message: err instanceof Error ? err.message : "Failed to update candidate",
+    };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// deleteCandidate
+// ---------------------------------------------------------------------------
+
+/**
+ * Soft-delete a candidate by setting deleted = 1.
+ * Mirrors the legacy Yii2 CandidateController::actionDelete().
+ */
+export async function deleteCandidate(
+  input: DeleteCandidateInput,
+): Promise<CandidateActionResponse> {
+  await requireCapability("candidate.write");
+
+  const parsed = deleteCandidateSchema.safeParse(input);
+  if (!parsed.success) {
+    return {
+      operation: "error",
+      message: parsed.error.issues[0]?.message ?? "Invalid input",
+    };
+  }
+
+  const { candidateId } = parsed.data;
+
+  const existing = await prisma.candidate.findFirst({
+    where: { candidate_id: candidateId, deleted: 0 },
+    select: { candidate_id: true },
+  });
+
+  if (!existing) {
+    return { operation: "error", message: "Candidate not found" };
+  }
+
+  try {
+    await prisma.candidate.update({
+      where: { candidate_id: candidateId },
+      data: {
+        deleted: 1,
+        candidate_updated_at: new Date(),
+      },
+    });
+
+    revalidatePath("/admin/candidates");
+    revalidatePath(`/admin/candidates/${candidateId}`);
+
+    return { operation: "success", message: "Candidate deleted successfully" };
+  } catch (err) {
+    return {
+      operation: "error",
+      message: err instanceof Error ? err.message : "Failed to delete candidate",
     };
   }
 }

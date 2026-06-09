@@ -3,6 +3,7 @@ import {
   getCandidateDetailSchema,
   updateCandidateStatusSchema,
   updateCandidateSchema,
+  deleteCandidateSchema,
 } from "./actions";
 
 describe("getCandidateDetailSchema", () => {
@@ -72,7 +73,7 @@ describe("updateCandidateSchema", () => {
       candidateName: "John Doe",
       candidateNameAr: "جون دو",
       candidateEmail: "john@example.com",
-      candidatePhone: "+96512345678",
+      candidatePhone: "+965****5678",
       candidateGender: 1,
       candidateBirthDate: "1995-06-15",
       candidateHourlyRate: 3.5,
@@ -93,5 +94,31 @@ describe("updateCandidateSchema", () => {
 
   it("rejects missing candidateId", () => {
     expect(updateCandidateSchema.safeParse({ candidateName: "Test" }).success).toBe(false);
+  });
+});
+
+describe("deleteCandidateSchema", () => {
+  it("accepts a valid candidate ID", () => {
+    const r = deleteCandidateSchema.safeParse({ candidateId: 42 });
+    expect(r.success).toBe(true);
+    if (r.success) expect(r.data.candidateId).toBe(42);
+  });
+
+  it("rejects negative ID", () => {
+    expect(deleteCandidateSchema.safeParse({ candidateId: -1 }).success).toBe(false);
+  });
+
+  it("rejects zero", () => {
+    expect(deleteCandidateSchema.safeParse({ candidateId: 0 }).success).toBe(false);
+  });
+
+  it("rejects non-numeric ID", () => {
+    expect(deleteCandidateSchema.safeParse({ candidateId: "abc" }).success).toBe(false);
+  });
+
+  it("coerces string to number", () => {
+    const r = deleteCandidateSchema.safeParse({ candidateId: "42" });
+    expect(r.success).toBe(true);
+    if (r.success) expect(r.data.candidateId).toBe(42);
   });
 });
