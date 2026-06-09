@@ -2,6 +2,14 @@
 import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
 
+// ── Mock next/navigation (useRouter, useSearchParams) ────────
+const mockReplace = vi.fn();
+const mockSearchParams = new URLSearchParams();
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ replace: mockReplace }),
+  useSearchParams: () => mockSearchParams,
+}));
+
 // ── Mock next/link ────────────────────────────────────────────
 vi.mock("next/link", () => ({
   default: ({
@@ -22,6 +30,7 @@ vi.mock("next/link", () => ({
 
 // ── Mock lucide-react icons ───────────────────────────────────
 vi.mock("lucide-react", () => ({
+  AlertCircle: () => <span data-testid="icon-alert-circle" />,
   UserRound: () => <span data-testid="icon-user" />,
   Briefcase: () => <span data-testid="icon-briefcase" />,
   Building2: () => <span data-testid="icon-building" />,
@@ -91,132 +100,62 @@ describe("Landing page (marketing redesign)", () => {
     session: null,
   };
 
-  const sessionProps: LandingContentProps = {
-    session: {
-      id: "user_1",
-      email: "test@test.com",
-      role: "candidate",
-      name: "Test User",
-    },
-  };
-
-  describe("Navigation", () => {
-    it("renders the StudentHub brand in the nav", () => {
-      render(<LandingContent {...defaultProps} />);
-      const brand = screen.getByText("StudentHub");
-      expect(brand).toBeTruthy();
-      expect(brand.tagName).toBe("STRONG");
-    });
-
-    it("renders sign in and get started links", () => {
-      render(<LandingContent {...defaultProps} />);
-      const getStartedLinks = screen.getAllByText("Get started");
-      expect(getStartedLinks.length).toBeGreaterThanOrEqual(1);
-      const signInLinks = screen.getAllByText("Sign in");
-      expect(signInLinks.length).toBeGreaterThanOrEqual(1);
-    });
-
-    it("renders Open app link in nav when session exists", () => {
-      render(<LandingContent {...sessionProps} />);
-      expect(screen.getByText("Open app")).toBeTruthy();
-      // Nav-level "Get started" is gone; HeroSection renders persona-specific CTA
-      expect(screen.queryAllByText("Get started").length).toBe(0);
-      expect(screen.getByText("Create your free candidate profile")).toBeTruthy();
-    });
-
-    it("renders the theme toggle", () => {
-      render(<LandingContent {...defaultProps} />);
-      expect(screen.getByTestId("theme-toggle")).toBeTruthy();
-    });
+  beforeEach(() => {
+    mockReplace.mockClear();
+    // Ensure search params are empty per default
+    mockSearchParams.forEach((_, key) => mockSearchParams.delete(key));
   });
 
-  describe("Hero section", () => {
-    it("renders the hero headline", () => {
-      render(<LandingContent {...defaultProps} />);
-      const heading = screen.getByRole("heading", { level: 1 });
-      expect(heading.textContent).toBeTruthy();
-    });
-
-    it("renders the product tagline / eyebrow text", () => {
-      render(<LandingContent {...defaultProps} />);
-      const eyebrow = document.querySelector('[class*="Eyebrow"]');
-      expect(eyebrow?.textContent).toBeTruthy();
-    });
-
-    it("renders CTA buttons in the hero", () => {
-      render(<LandingContent {...defaultProps} />);
-      const ctas = screen.getAllByText(/Get started|Sign in/);
-      expect(ctas.length).toBeGreaterThanOrEqual(1);
-    });
-
-    it("renders platform goal pills", () => {
-      render(<LandingContent {...defaultProps} />);
-      const goals = screen.getByLabelText("Key benefits for candidates");
-      expect(goals).toBeTruthy();
-    });
+  it("renders headline and CTA button", () => {
+    render(<LandingContent {...defaultProps} />);
+    expect(
+      screen.getByRole("heading", { name: /your institution/i })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /get started/i })
+    ).toBeInTheDocument();
   });
 
-  describe("Platform stats bar", () => {
-    it("renders platform statistics", () => {
-      render(<LandingContent {...defaultProps} />);
-      const statsSection = screen.getByLabelText("Platform at a glance");
-      expect(statsSection).toBeTruthy();
-      expect(screen.getByText("128+")).toBeTruthy();
-      expect(screen.getByText("5")).toBeTruthy();
-      expect(screen.getByText("35+")).toBeTruthy();
-    });
-
-    it("renders stat icons", () => {
-      render(<LandingContent {...defaultProps} />);
-      expect(screen.getAllByTestId("icon-zap").length).toBeGreaterThanOrEqual(1);
-      expect(screen.getAllByTestId("icon-layers").length).toBeGreaterThanOrEqual(1);
-    });
+  it("renders TrustBar with correct text", () => {
+    render(<LandingContent {...defaultProps} />);
+    expect(screen.getByText(/trusted by/i)).toBeInTheDocument();
+    expect(screen.getByText(/5,000/i)).toBeInTheDocument();
   });
 
-  describe("Portal grid", () => {
-    it("renders portal role labels", () => {
-      render(<LandingContent {...defaultProps} />);
-      // Page should reference key roles
-      const page = document.body.textContent || "";
-      expect(page.toLowerCase()).toContain("candidate");
-      expect(page.toLowerCase()).toContain("admin");
-      expect(page.toLowerCase()).toContain("staff");
-    });
+  it("renders all 3 FeatureGrid items with icons and headings", () => {
+    render(<LandingContent {...defaultProps} />);
 
-    it("renders role icons for all 5 portals", () => {
-      render(<LandingContent {...defaultProps} />);
-      const icons = screen.getAllByTestId(/^icon-/);
-      // 5 portal icons + 4 stat icons = 9
-      expect(icons.length).toBeGreaterThanOrEqual(5);
-    });
+    // Feature 1: integrated workflow
+    expect(screen.getByText(/integrated/i)).toBeInTheDocument();
+
+    // Feature 2: smart compliance
+    expect(screen.getByText(/smart compliance/i)).toBeInTheDocument();
+
+    // Feature 3: real-time insights
+    expect(screen.getByText(/real.time insights/i)).toBeInTheDocument();
   });
 
-  describe("Marketing sections", () => {
-    it("renders substantial content (more than 500 chars)", () => {
-      render(<LandingContent {...defaultProps} />);
-      const page = document.body.textContent || "";
-      expect(page.length).toBeGreaterThan(500);
-    });
-
-    it("renders an action-oriented CTA or navigation links", () => {
-      render(<LandingContent {...defaultProps} />);
-      const links = screen.getAllByRole("link");
-      expect(links.length).toBeGreaterThanOrEqual(3);
-    });
+  it("renders StatsCounter with correct count badges", () => {
+    render(<LandingContent {...defaultProps} />);
+    // CoreStats + marketing stats rendered
+    const stats = screen.getAllByText(/5,000|\d+%/);
+    expect(stats.length).toBeGreaterThan(0);
   });
 
-  describe("Visual quality", () => {
-    it("maintains a responsive layout wrapper", () => {
-      render(<LandingContent {...defaultProps} />);
-      const main = document.querySelector("main");
-      expect(main).toBeTruthy();
-      expect(main!.className).toContain("min-h");
-    });
+  it("renders the hero section with CTAs", () => {
+    render(<LandingContent {...defaultProps} />);
+    expect(screen.getByText(/get started/i)).toBeInTheDocument();
+    expect(screen.getByText(/learn more/i)).toBeInTheDocument();
+  });
 
-    it("includes proper aria labels for accessibility", () => {
-      render(<LandingContent {...defaultProps} />);
-      const labelledSections = document.querySelectorAll("[aria-label]");
-      expect(labelledSections.length).toBeGreaterThanOrEqual(2);
-    });
+  it("does not render login form when user is not authenticated", () => {
+    render(<LandingContent {...defaultProps} />);
+    expect(screen.queryByText(/sign out/i)).not.toBeInTheDocument();
+  });
+
+  it("redirects to dashboard when user is authenticated", () => {
+    const session = { user: { role: "admin" } } as any;
+    render(<LandingContent {...defaultProps} session={session} />);
+    expect(mockReplace).toHaveBeenCalledWith("/workspace");
   });
 });

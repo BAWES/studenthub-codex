@@ -8,7 +8,7 @@ test.describe("M5 Staff Request Fulfillment — Pipeline QA", () => {
   test.beforeEach(async ({ page }) => {
     // Login as staff (skip if already authenticated)
     await page.goto("/app");
-    await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("load");
 
     // If redirected to login, we need to authenticate
     if (page.url().includes("/login")) {
@@ -36,7 +36,7 @@ test.describe("M5 Staff Request Fulfillment — Pipeline QA", () => {
 
   test("1. Staff can view request fulfillment dashboard", async ({ page }) => {
     await page.goto(`/staff/requests/${REQUEST_UUID}`);
-    await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("load");
 
     // Verify the request hero section renders
     await expect(page.locator(".requestHero h2")).toBeVisible();
@@ -59,7 +59,7 @@ test.describe("M5 Staff Request Fulfillment — Pipeline QA", () => {
 
   test("2. Staff can suggest a matched candidate", async ({ page }) => {
     await page.goto(`/staff/requests/${REQUEST_UUID}`);
-    await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("load");
 
     // Find the first match card with a suggestion form
     const matchCard = page.locator(".matchCard").first();
@@ -77,7 +77,7 @@ test.describe("M5 Staff Request Fulfillment — Pipeline QA", () => {
       // (Next.js server action redirect doesn't trigger client navigation in production)
       await page.waitForTimeout(2000);
       await page.reload();
-      await page.waitForLoadState("networkidle");
+      await page.waitForLoadState("load");
 
       // Verify the action was processed — suggestion form should be gone or notice shown
       const formStillVisible = await matchCard
@@ -97,7 +97,7 @@ test.describe("M5 Staff Request Fulfillment — Pipeline QA", () => {
 
   test("3. Staff can invite a matched candidate", async ({ page }) => {
     await page.goto(`/staff/requests/${REQUEST_UUID}`);
-    await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("load");
 
     // Find the first match card
     const matchCard = page.locator(".matchCard").first();
@@ -109,7 +109,7 @@ test.describe("M5 Staff Request Fulfillment — Pipeline QA", () => {
       // Wait for server action to complete, then reload
       await page.waitForTimeout(2000);
       await page.reload();
-      await page.waitForLoadState("networkidle");
+      await page.waitForLoadState("load");
 
       console.log("Invite action processed, page re-rendered correctly");
     } else {
@@ -121,7 +121,7 @@ test.describe("M5 Staff Request Fulfillment — Pipeline QA", () => {
     page,
   }) => {
     await page.goto(`/staff/requests/${REQUEST_UUID}`);
-    await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("load");
 
     // Scroll to the Invitations panel
     await page.locator("#invited").scrollIntoViewIfNeeded();
@@ -165,7 +165,7 @@ test.describe("M5 Staff Request Fulfillment — Pipeline QA", () => {
     page,
   }) => {
     await page.goto(`/staff/requests/${REQUEST_UUID}`);
-    await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("load");
 
     // Scroll to Stories panel
     const storiesPanel = page.locator("text=Stories and updates").locator("..");
@@ -188,7 +188,7 @@ test.describe("M5 Staff Request Fulfillment — Pipeline QA", () => {
 
     // Now try completing a story
     await page.goto(`/staff/requests/${REQUEST_UUID}`);
-    await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("load");
 
     const storyRows = page
       .locator(".storyForm")
@@ -213,7 +213,7 @@ test.describe("M5 Staff Request Fulfillment — Pipeline QA", () => {
     page,
   }) => {
     await page.goto(`/staff/requests/${REQUEST_UUID}`);
-    await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("load");
 
     // Take full page screenshot
     await page.screenshot({
