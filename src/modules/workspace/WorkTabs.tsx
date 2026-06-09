@@ -1,13 +1,21 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef, type ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import type { Route } from "next";
-import { X } from "lucide-react";
+import { X, ChevronLeft, ChevronRight } from "lucide-react";
 
 type WorkTab = {
   path: string;
   label: string;
+};
+
+/** Role-specific visibility rules. Omitted = visible to everyone. */
+type WorkTabVisibility = {
+  /** Only show tabs whose path matches the given role prefix */
+  includeRoles?: string[];
+  /** Hide tabs whose path matches the given role prefix */
+  excludeRoles?: string[];
 };
 
 const STORAGE_KEY = "studenthub-work-tabs";
@@ -54,6 +62,27 @@ function deriveLabel(pathname: string): string | null {
   const moduleName = names[mod] ?? mod;
   const displayId = id.length > 12 ? `${id.slice(0, 12)}...` : id;
   return `${moduleName} ${displayId}`;
+}
+
+/** Extract the role prefix from a path like /admin/candidates/123 -> admin */
+function roleFromPath(path: string): string {
+  const segs = path.split("/").filter(Boolean);
+  return segs[0] ?? "";
+}
+
+/**
+ * Filter tabs by role-scoping rules.
+ * - If a tab's path matches `includeRoles` (or no rules), it's visible.
+ * - Tabs whose path matches `excludeRoles` are hidden.
+ */
+function filterTabsByRole(tabs: WorkTab[], role: string, rules?: WorkTabVisibility): WorkTab[] {
+  if (!rules) return tabs;
+  return tabs.filter((tab) => {
+    const tabRole = roleFromPath(tab.path);
+    if (rules.excludeRoles?.includes(tabRole)) return false;
+    if (rules.includeRoles && !rules.includeRoles.includes(tabRole)) return false;
+    return true;
+  });
 }
 
 export function useWorkTabs() {
@@ -110,42 +139,114 @@ export function useWorkTabs() {
 
 export type WorkTabState = ReturnType<typeof useWorkTabs>;
 
-export function WorkTabs({ state }: { state: WorkTabState }) {
+export function WorkTabs({
+  state,
+  visibility,
+}: {
+  state: WorkTabState;
+  /** Role-scoping rules for which tabs to show. Inferred from the first path's role if omitted. */
+  visibility?: WorkTabVisibility;
+}) {
   const pathname = usePathname();
   const router = useRouter();
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
 
-  if (!state.tabs.length) return null;
+  // Derive the current role from the pathname
+  const currentRole = roleFromPath(pathname);
+
+  // Filter tabs by role-scoping rules
+  const visibleTabs = visibility ? filterTabsByRole(state.tabs, currentRole, visibility) : state.tabs;
+
+  // ── Scroll detection ──────────────────────────────────────────
+  const updateScrollButtons = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) {
+      setCanScrollLeft(false);
+      setCanScrollRight(false);
+      return;
+    }
+    setCanScrollLeft(el.scrollLeft > 4);
+    setCanScrollRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 4);
+  }, []);
+
+  useEffect(() => {
+    updateScrollButtons();
+    const el = scrollRef.current;
+    if (!el) return;
+    el.addEventListener("scroll", updateScrollButtons, { passive: true });
+    const ro = new ResizeObserver(updateScrollButtons);
+    ro.observe(el);
+    return () => {
+      el.removeEventListener("scroll", updateScrollButtons);
+      ro.disconnect();
+    };
+  }, [visibleTabs.length, updateScrollButtons]);
+
+  const scrollBy = (dir: "left" | "right") => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const amount = dir === "left" ? -200 : 200;
+    el.scrollBy({ left: amount, behavior: "smooth" });
+  };
+
+  if (!visibleTabs.length) return null;
 
   return (
     <nav className="workTabs" aria-label="Recently opened records">
-      {state.tabs.map((tab) => {
-        const active = pathname === tab.path;
-        return (
-          <span key={tab.path} className={`workTab ${active ? "active" : ""}`}>
-            <button
-              type="button"
-              onClick={() => router.push(tab.path as Route)}
-              aria-current={active ? "page" : undefined}
-            >
-              {tab.label}
-            </button>
-            <button
-              type="button"
-              className="workTabClose"
-              aria-label={`Close ${tab.label}`}
-              onClick={(e) => {
-                e.stopPropagation();
-                state.closeTab(tab.path);
-              }}
-            >
-              <X size={12} />
-            </button>
-          </span>
-        );
-      })}
-      {state.tabs.length > 1 ? (
-        <button type="button" className="workTabsClear" onClick={state.closeAll} aria-label="Close all tabs">
-          Clear all
+      {canScrollLeft ? (
+        <button
+          type="button"
+          className="workTabsScroll workTabsScrollLeft"
+          aria-label="Scroll tabs left"
+          onClick={() => scrollBy("left")}
+        >
+          <ChevronLeft size={14} />
+        </button>
+      ) : null}
+
+      <div className="workTabsScroller" ref={scrollRef}>
+        {visibleTabs.map((tab) => {
+          const active = pathname === tab.path;
+          return (
+            <span key={tab.path} className={`workTab ${active ? "active" : ""}`}>
+              <button
+                type="button"
+                onClick={() => router.push(tab.path as Route)}
+                aria-current={active ? "page" : undefined}
+              >
+                {tab.label}
+              </button>
+              <button
+                type="button"
+                className="workTabClose"
+                aria-label={`Close ${tab.label}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  state.closeTab(tab.path);
+                }}
+              >
+                <X size={12} />
+              </button>
+            </span>
+          );
+        })}
+        {visibleTabs.length > 1 ? (
+          <button type="button" className="workTabsClear" onClick={state.closeAll} aria-label="Close all tabs">
+            Clear all
+          </button>
+        ) : null}
+      </div>
+
+      {canScrollRight ? (
+        <button
+          type="button"
+          className="workTabsScroll workTabsScrollRight"
+          aria-label="Scroll tabs right"
+          onClick={() => scrollBy("right")}
+        >
+          <ChevronRight size={14} />
         </button>
       ) : null}
     </nav>

@@ -11,6 +11,7 @@ import { WorkspaceOSContext } from "./WorkspaceOSContext";
 import { WorkspaceMobileNavigation, WorkspaceNavigation } from "./WorkspaceNavigation";
 import { navForRole } from "./navigation";
 import type { NavItem } from "./navigation";
+import { useWorkTabs, WorkTabs } from "./WorkTabs";
 
 // ── Command types ─────────────────────────────────────────────
 
@@ -133,6 +134,9 @@ export function WorkspaceOS({
   const [cmdIndex, setCmdIndex] = useState(0);
   const cmdInputRef = useRef<HTMLInputElement | null>(null);
   const seqRef = useRef("");
+
+  // ── Work tab state ────────────────────────────────────────────
+  const workTabs = useWorkTabs();
 
   const commands = useMemo(() => buildOSCommands(navItems, session.role), [navItems, session.role]);
 
@@ -289,6 +293,7 @@ export function WorkspaceOS({
 
         {/* ── Content Stage ───────────────────────────────── */}
         <section className="workspaceStage">
+          <WorkTabs state={workTabs} />
           {children}
         </section>
 
