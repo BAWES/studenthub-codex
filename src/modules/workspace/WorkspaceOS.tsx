@@ -12,28 +12,18 @@ import { WorkspaceMobileNavigation, WorkspaceNavigation } from "./WorkspaceNavig
 import { navForRole } from "./navigation";
 import type { NavItem } from "./navigation";
 import { PageTransition } from "./PageTransition";
+import type { OSCommand } from "@/components/ui/CommandPalette";
+import { CommandPalette } from "@/components/ui/CommandPalette";
 
-// ── Command types ─────────────────────────────────────────────
-
-export type OSCommand = {
-  id: string;
-  title: string;
-  subtitle: string;
-  section: string;
-  href: string;
-  shortcut?: string;
-};
-
-const builtinShortcuts = [
-  { keys: "⌘K", label: "Open command menu" },
-  { keys: "/", label: "Focus workspace search" },
-  { keys: "G H", label: "Go to command workspace" },
-  { keys: "Esc", label: "Close menu or clear focus" }
-];
-
-// ── Keyboard shortcut chords per role ──────────────────────────
+// ── Keyboard shortcut chords per role ────────────────────────────────
 
 function roleChords(role: string): { keys: string; label: string }[] {
+  const builtinShortcuts = [
+    { keys: "⌘K", label: "Open command menu" },
+    { keys: "/", label: "Focus workspace search" },
+    { keys: "G H", label: "Go to command workspace" },
+    { keys: "Esc", label: "Close menu or clear focus" }
+  ];
   const base = builtinShortcuts;
   if (role === "admin") {
     return [
@@ -62,7 +52,7 @@ function roleChords(role: string): { keys: string; label: string }[] {
   return base;
 }
 
-// ── Build commands from nav items ──────────────────────────────
+// ── Build commands from nav items ────────────────────────────────────
 
 function buildOSCommands(navItems: NavItem[], role: string): OSCommand[] {
   const chordByHref: Record<string, string> = {};
@@ -115,7 +105,7 @@ function buildOSCommands(navItems: NavItem[], role: string): OSCommand[] {
   return [...nav, ...scopes];
 }
 
-// ── WorkspaceOS Component ──────────────────────────────────────
+// ── WorkspaceOS Component ──────────────────────────────────────────────
 
 export function WorkspaceOS({
   session,
@@ -147,14 +137,6 @@ export function WorkspaceOS({
       .slice(0, 18);
   }, [commands, cmdQuery]);
 
-  const grouped = useMemo(() => {
-    const g = new Map<string, OSCommand[]>();
-    for (const c of filtered) {
-      g.set(c.section, [...(g.get(c.section) ?? []), c]);
-    }
-    return [...g.entries()];
-  }, [filtered]);
-
   const visit = useCallback(
     (href: string) => {
       setCmdOpen(false);
@@ -170,13 +152,12 @@ export function WorkspaceOS({
       const el = e.target as HTMLElement | null;
       const typing = el?.tagName === "INPUT" || el?.tagName === "TEXTAREA" || el?.isContentEditable === true;
 
-      // Cmd+K or ? → open command palette
+      // Cmd+K → open command palette
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
         setCmdOpen(true);
         setCmdIndex(0);
         setCmdQuery("");
-        window.setTimeout(() => cmdInputRef.current?.focus(), 0);
         return;
       }
       if (!typing && e.key === "?") {
@@ -184,7 +165,6 @@ export function WorkspaceOS({
         setCmdOpen(true);
         setCmdIndex(0);
         setCmdQuery("shortcut");
-        window.setTimeout(() => cmdInputRef.current?.focus(), 0);
         return;
       }
 
@@ -303,65 +283,20 @@ export function WorkspaceOS({
         <WorkspaceMobileNavigation items={navItems} role={session.role} />
       </main>
 
-      {/* ── Command Palette Overlay ───────────────────────── */}
-      {cmdOpen ? (
-        <div className="commandOverlay" role="dialog" aria-modal="true" aria-label="Command menu">
-          <button className="commandScrim" aria-label="Close" type="button" onClick={() => setCmdOpen(false)} />
-          <section className="commandMenu">
-            <div className="commandInputWrap">
-              <span>⌘</span>
-              <input
-                ref={cmdInputRef}
-                autoFocus
-                placeholder="Jump to a view, search records, or run an action..."
-                value={cmdQuery}
-                onChange={(e) => setCmdQuery(e.target.value)}
-              />
-              <kbd>Esc</kbd>
-            </div>
-            <div className="commandList">
-              {grouped.length ? (
-                grouped.map(([section, items]) => (
-                  <div className="commandGroup" key={section}>
-                    <h3>{section}</h3>
-                    {items.map((cmd) => {
-                      const idx = filtered.findIndex((f) => f.id === cmd.id);
-                      return (
-                        <button
-                          className={idx === cmdIndex ? "active" : ""}
-                          key={cmd.id}
-                          type="button"
-                          onMouseEnter={() => setCmdIndex(idx)}
-                          onClick={() => visit(cmd.href)}
-                        >
-                          <span>
-                            <strong>{cmd.title}</strong>
-                            <small>{cmd.subtitle}</small>
-                          </span>
-                          {cmd.shortcut ? <kbd>{cmd.shortcut}</kbd> : null}
-                        </button>
-                      );
-                    })}
-                  </div>
-                ))
-              ) : (
-                <div className="commandEmpty">
-                  <strong>No command found</strong>
-                  <span>Try a view, record name, scope, or shortcut.</span>
-                </div>
-              )}
-            </div>
-            <div className="shortcutGrid">
-              {chords.map((row) => (
-                <div key={row.keys}>
-                  <kbd>{row.keys}</kbd>
-                  <span>{row.label}</span>
-                </div>
-              ))}
-            </div>
-          </section>
-        </div>
-      ) : null}
+      {/* ── Command Palette (glass, extracted component) ──── */}
+      <CommandPalette
+        open={cmdOpen}
+        query={cmdQuery}
+        onQueryChange={setCmdQuery}
+        selectedIndex={cmdIndex}
+        onSelectIndex={setCmdIndex}
+        onClose={() => { setCmdOpen(false); setCmdQuery(""); }}
+        onVisit={visit}
+        commands={commands}
+        filtered={filtered}
+        chords={chords}
+        inputRef={cmdInputRef}
+      />
     </WorkspaceOSContext.Provider>
   );
 }
