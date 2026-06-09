@@ -162,13 +162,13 @@ export function DataTable<T extends { id: string | number }>({
           </div>
         </div>
         <div className="tableScroller">
-          <table>
+          <table aria-label={title}>
             <thead>
               <tr>
                 {visibleColumns.map((column) => (
-                  <th key={column.key}>{column.label}</th>
+                  <th key={column.key} scope="col">{column.label}</th>
                 ))}
-                {rowHref ? <th aria-label="Open record" /> : null}
+                {rowHref ? <th scope="col" aria-label="Open record" /> : null}
               </tr>
             </thead>
             <tbody>
@@ -204,13 +204,13 @@ export function DataTable<T extends { id: string | number }>({
           </div>
         </div>
         <div className="tableScroller">
-          <table>
+          <table aria-label={title}>
             <thead>
               <tr>
                 {visibleColumns.map((column) => (
-                  <th key={column.key}>{column.label}</th>
+                  <th key={column.key} scope="col">{column.label}</th>
                 ))}
-                {rowHref ? <th aria-label="Open record" /> : null}
+                {rowHref ? <th scope="col" aria-label="Open record" /> : null}
               </tr>
             </thead>
             <tbody>
@@ -256,13 +256,13 @@ export function DataTable<T extends { id: string | number }>({
         <span>{rowCountLabel}</span>
       </div>
       <div className="tableScroller">
-        <table>
+        <table aria-label={title}>
           <thead>
             <tr>
               {visibleColumns.map((column) => (
-                <th key={column.key}>{column.label}</th>
+                <th key={column.key} scope="col">{column.label}</th>
               ))}
-              {rowHref ? <th aria-label="Open record" /> : null}
+              {rowHref ? <th scope="col" aria-label="Open record" /> : null}
             </tr>
           </thead>
           <tbody>
