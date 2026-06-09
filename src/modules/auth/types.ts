@@ -40,6 +40,14 @@ export type Capability =
   | "staff.read"
   | "client.read"
   | "client.write"
+  | "candidate.evaluation.read"
+  | "candidate.evaluation.write"
+  | "notes.read"
+  | "notes.create"
+  | "notes.update"
+  | "notes.delete"
+  | "suggestion.read"
+  | "suggestion.write"
   | "admin.system";
 
 export type SessionUser = {
