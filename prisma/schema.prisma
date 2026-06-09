@@ -2255,6 +2255,20 @@ model story_activity {
   @@index([story_uuid], map: "idx-story_activity-story_uuid")
 }
 
+model holiday {
+  holiday_uuid String    @id @db.Char(60)
+  name         String    @db.VarChar(255)
+  date         DateTime  @db.Date
+  is_recurring Boolean   @default(false)
+  description  String?   @db.Text
+  is_deleted   Boolean   @default(false)
+  created_at   DateTime? @db.DateTime(0)
+  updated_at   DateTime? @db.DateTime(0)
+
+  @@index([is_deleted], map: "idx-holiday-is_deleted")
+  @@index([date], map: "idx-holiday-date")
+}
+
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model suggestion {
   suggestion_uuid                         String     @id @db.Char(60)
