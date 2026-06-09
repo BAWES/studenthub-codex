@@ -33,6 +33,7 @@ const mockSession = {
   role: "admin" as const,
   name: "Alice",
   email: "alice@example.com",
+  issuedAt: Date.now(),
   avatar: null,
 };
 
