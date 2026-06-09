@@ -4,6 +4,8 @@ import {
   getCompanyRequestSchema,
   approveCompanyRequestSchema,
   rejectCompanyRequestSchema,
+  createCompanyRequestSchema,
+  updateCompanyRequestSchema,
 } from "./actions";
 
 // ---------------------------------------------------------------------------
@@ -221,5 +223,126 @@ describe("CompanyRequestMutationResult shape", () => {
       message: "Company request not found",
     };
     expect(result.operation).toBe("error");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// createCompanyRequestSchema
+// ---------------------------------------------------------------------------
+
+describe("createCompanyRequestSchema", () => {
+  it("accepts valid create params with required fields only", () => {
+    const result = createCompanyRequestSchema.safeParse({
+      company_name: "Acme Corp",
+      company_email: "admin@acme.com",
+      contact_name: "John Doe",
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.company_name).toBe("Acme Corp");
+      expect(result.data.company_email).toBe("admin@acme.com");
+      expect(result.data.contact_name).toBe("John Doe");
+    }
+  });
+
+  it("accepts all optional fields", () => {
+    const result = createCompanyRequestSchema.safeParse({
+      company_name: "Beta LLC",
+      company_email: "info@beta.com",
+      contact_name: "Jane Smith",
+      contact_position: "HR Manager",
+      phone_number: "+965 5555 1234",
+      requesting_for: "staffing",
+      currency_code: "USD",
+      country_id: 1,
+      contact_receive_email: false,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects missing company_name", () => {
+    const result = createCompanyRequestSchema.safeParse({
+      company_email: "admin@acme.com",
+      contact_name: "John",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects missing company_email", () => {
+    const result = createCompanyRequestSchema.safeParse({
+      company_name: "Acme Corp",
+      contact_name: "John",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects invalid email format", () => {
+    const result = createCompanyRequestSchema.safeParse({
+      company_name: "Acme Corp",
+      company_email: "not-an-email",
+      contact_name: "John",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects empty contact_name", () => {
+    const result = createCompanyRequestSchema.safeParse({
+      company_name: "Acme",
+      company_email: "admin@acme.com",
+      contact_name: "",
+    });
+    expect(result.success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// updateCompanyRequestSchema
+// ---------------------------------------------------------------------------
+
+describe("updateCompanyRequestSchema", () => {
+  it("accepts UUID with partial fields", () => {
+    const result = updateCompanyRequestSchema.safeParse({
+      uuid: "req-uuid-123",
+      company_name: "Acme Corp Updated",
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.uuid).toBe("req-uuid-123");
+      expect(result.data.company_name).toBe("Acme Corp Updated");
+    }
+  });
+
+  it("accepts UUID with multiple update fields", () => {
+    const result = updateCompanyRequestSchema.safeParse({
+      uuid: "req-uuid-456",
+      company_name: "Beta LLC",
+      company_email: "new@beta.com",
+      contact_name: "Jane Updated",
+      status: true,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects empty UUID", () => {
+    const result = updateCompanyRequestSchema.safeParse({
+      uuid: "",
+      company_name: "Test",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects missing UUID", () => {
+    const result = updateCompanyRequestSchema.safeParse({
+      company_name: "Test",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects status as non-boolean", () => {
+    const result = updateCompanyRequestSchema.safeParse({
+      uuid: "uuid-1",
+      status: "yes",
+    });
+    expect(result.success).toBe(false);
   });
 });
