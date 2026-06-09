@@ -11,6 +11,7 @@ import { requireCapability } from "@/modules/auth/session";
 
 const listIdCardsSchema = z.object({
   candidateId: z.number().int().positive().optional(),
+  status: z.number().int().min(0).max(1).optional(),
   page: z.number().int().positive().optional().default(1),
   limit: z.number().int().min(1).max(100).optional().default(20),
 });
@@ -24,8 +25,9 @@ const createIdCardSchema = z.object({
   expiryDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be YYYY-MM-DD format"),
 });
 
-const verifyIdCardSchema = z.object({
+const updateIdCardStatusSchema = z.object({
   id: z.number().int().positive(),
+  status: z.number().int().min(0).max(1),
 });
 
 // ---------------------------------------------------------------------------
@@ -35,7 +37,7 @@ const verifyIdCardSchema = z.object({
 export type ListIdCardsParams = z.input<typeof listIdCardsSchema>;
 export type GetIdCardParams = z.input<typeof getIdCardSchema>;
 export type CreateIdCardParams = z.input<typeof createIdCardSchema>;
-export type VerifyIdCardParams = z.input<typeof verifyIdCardSchema>;
+export type UpdateIdCardStatusParams = z.input<typeof updateIdCardStatusSchema>;
 
 export type IdCardItem = {
   id: number;
@@ -59,6 +61,11 @@ export type CreateIdCardResult = {
   message: string;
 };
 
+export type UpdateIdCardStatusResult = {
+  operation: string;
+  message: string;
+};
+
 // ---------------------------------------------------------------------------
 // Exported schemas
 // ---------------------------------------------------------------------------
@@ -67,7 +74,7 @@ export {
   listIdCardsSchema,
   getIdCardSchema,
   createIdCardSchema,
-  verifyIdCardSchema,
+  updateIdCardStatusSchema,
 };
 
 // ---------------------------------------------------------------------------
@@ -75,8 +82,8 @@ export {
 // ---------------------------------------------------------------------------
 
 /**
- * List candidate ID cards with pagination and optional candidate filter.
- * Excludes soft-deleted ID cards.
+ * List candidate ID cards with pagination and optional filters.
+ * Excludes soft-deleted ID cards by default unless a status filter is provided.
  * Mirrors the legacy Yii2 CandidateIdCardController::actionList().
  */
 export async function listCandidateIdCards(
@@ -89,10 +96,17 @@ export async function listCandidateIdCards(
     return { idCards: [], total: 0, page: 1, limit: 20, totalPages: 0 };
   }
 
-  const { candidateId, page, limit } = parsed.data;
+  const { candidateId, status, page, limit } = parsed.data;
   const skip = (page - 1) * limit;
 
-  const where: Record<string, unknown> = { deleted: 0 };
+  const where: Record<string, unknown> = {};
+  if (status !== undefined) {
+    // Map status to the `deleted` field: 0 = active, 1 = deleted
+    where.deleted = status;
+  } else {
+    // Default: exclude soft-deleted records
+    where.deleted = 0;
+  }
   if (candidateId !== undefined) {
     where.candidate_id = candidateId;
   }
@@ -222,48 +236,66 @@ export async function createCandidateIdCard(
 }
 
 // ---------------------------------------------------------------------------
-// verifyCandidateIdCard
+// updateCandidateIdCardStatus
 // ---------------------------------------------------------------------------
 
 /**
- * Verify a candidate ID card exists and is not soft-deleted.
- * Marks the card as verified by updating its updated_at timestamp.
+ * Update the status (deleted flag) of a candidate ID card.
+ * Status values: 0 = active, 1 = deleted (soft-delete).
  * Requires the "candidate_id_card.write" capability.
+ * Returns { operation, message } on success or error.
  */
-export async function verifyCandidateIdCard(
-  params: VerifyIdCardParams,
-): Promise<{ verified: boolean; message: string }> {
+export async function updateCandidateIdCardStatus(
+  params: UpdateIdCardStatusParams,
+): Promise<UpdateIdCardStatusResult> {
   await requireCapability("candidate_id_card.write");
 
-  const parsed = verifyIdCardSchema.safeParse(params);
+  const parsed = updateIdCardStatusSchema.safeParse(params);
   if (!parsed.success) {
     return {
-      verified: false,
-      message: parsed.error.issues[0]?.message ?? "Invalid ID card ID",
+      operation: "error",
+      message: parsed.error.issues[0]?.message ?? "Invalid ID card status data",
     };
   }
 
-  const { id } = parsed.data;
+  const { id, status } = parsed.data;
 
-  const idCard = await prisma.candidate_id_card.findFirst({
-    where: { id, deleted: 0 },
-  });
+  try {
+    // Verify the ID card exists
+    const idCard = await prisma.candidate_id_card.findFirst({
+      where: { id },
+      select: { id: true },
+    });
 
-  if (!idCard) {
+    if (!idCard) {
+      return {
+        operation: "error",
+        message: "ID card not found",
+      };
+    }
+
+    await prisma.candidate_id_card.update({
+      where: { id },
+      data: {
+        deleted: status,
+        updated_at: new Date(),
+      },
+    });
+
     return {
-      verified: false,
-      message: "ID card not found or has been deleted",
+      operation: "success",
+      message:
+        status === 0
+          ? "ID card restored successfully"
+          : "ID card deleted successfully",
+    };
+  } catch (err) {
+    return {
+      operation: "error",
+      message:
+        err instanceof Error
+          ? err.message
+          : "Failed to update ID card status",
     };
   }
-
-  // Mark as verified by updating the timestamp
-  await prisma.candidate_id_card.update({
-    where: { id },
-    data: { updated_at: new Date() },
-  });
-
-  return {
-    verified: true,
-    message: "ID card verified successfully",
-  };
 }
