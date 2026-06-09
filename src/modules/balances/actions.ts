@@ -381,7 +381,8 @@ export async function initTransfer(
 }
 
 // ---------------------------------------------------------------------------
-// payByWallet — candidate pays from wallet balance (e.g. service fees)
+
+// payByWallet — P2P wallet payment
 // ---------------------------------------------------------------------------
 
 export type PayByWalletState = {
@@ -389,7 +390,11 @@ export type PayByWalletState = {
   error?: string;
 };
 
-export const payByWalletSchema = z.object({
+
+const payByWalletSchema = z.object({
+  toUuid: z.string().optional(),
+  email: z.string().email("Invalid email format").optional(),
+  username: z.string().optional(),
   amount: z.coerce
     .number()
     .positive("Amount must be positive")
@@ -397,10 +402,24 @@ export const payByWalletSchema = z.object({
 });
 
 /**
- * Process a wallet payment for the candidate. Validates sufficient balance,
- * creates a balance_transaction record, and deducts from the account.
+
+ * Pay another user from the candidate's wallet balance.
  *
  * Mirrors the legacy Yii2 BalanceController::actionPayByWallet().
+ * Recipient can be identified by:
+ *   - toUuid (wallet user UUID)
+ *   - email (wallet user email)
+ *   - username (wallet user username)
+ *
+ * Validates:
+ *   - At least one recipient identifier is provided
+ *   - Amount >= 0.001 (minimum transaction threshold)
+ *   - Sender has sufficient balance
+ *
+ * Effects:
+ *   - Deducts amount from sender's balance_account
+ *   - Credits amount to recipient's balance_account
+ *   - Creates balance_transaction records for both sides
  */
 export async function payByWallet(
   _prevState: PayByWalletState,
@@ -408,9 +427,16 @@ export async function payByWallet(
 ): Promise<PayByWalletState> {
   const session = await requireCapability("candidate.profile.edit");
 
-  // 1. Parse and validate amount
-  const raw = formData.get("amount");
-  const parsed = payByWalletSchema.safeParse({ amount: raw });
+
+  // 1. Parse and validate input
+  const raw = {
+    toUuid: (formData.get("toUuid") ?? "") as string,
+    email: (formData.get("email") ?? "") as string,
+    username: (formData.get("username") ?? "") as string,
+    amount: (formData.get("amount") ?? "") as string,
+  };
+
+  const parsed = payByWalletSchema.safeParse(raw);
   if (!parsed.success) {
     return {
       success: false,
@@ -418,26 +444,98 @@ export async function payByWallet(
     };
   }
 
-  const { amount } = parsed.data;
+
+  const { toUuid, email, username, amount } = parsed.data;
+
+  // 2. Validate at least one recipient identifier
+  if (!toUuid && !email && !username) {
+    return {
+      success: false,
+      error: "Recipient identifier required: provide toUuid, email, or username.",
+    };
+  }
+
+  // 3. Validate minimum transaction amount (mirrors Yii2 threshold)
+  if (amount < 0.001) {
+    return {
+      success: false,
+      error: "Amount cannot be less than 0.001 KWD.",
+    };
+  }
 
   try {
-    // 2. Find the candidate's payable wallet account
-    const accounts = await walletQuery<Array<{ balance_account_uuid: string; account_uuid: string; balance: number; type: string }>>(
-      `SELECT balance_account_uuid, account_uuid, balance, type
+    // 4. Find the current user's wallet record by email
+    const candidateId = Number(session.id);
+    const candidate = await prisma.candidate.findUnique({
+      where: { candidate_id: candidateId },
+      select: { candidate_email: true },
+    });
+
+    if (!candidate || !candidate.candidate_email) {
+      return { success: false, error: "Candidate email not found." };
+    }
+
+    type WalletUser = { user_uuid: string; username: string };
+    const senderUsers = await walletQuery<WalletUser[]>(
+      `SELECT user_uuid, username FROM user WHERE email = ? LIMIT 1`,
+      [candidate.candidate_email],
+    );
+
+    if (senderUsers.length === 0) {
+      return { success: false, error: "No wallet account found for your email." };
+    }
+
+    const sender = senderUsers[0];
+
+    // 5. Find the recipient wallet user
+    let recipient: WalletUser | null = null;
+
+    if (toUuid) {
+      const toUsers = await walletQuery<WalletUser[]>(
+        `SELECT user_uuid, username FROM user WHERE user_uuid = ? LIMIT 1`,
+        [toUuid],
+      );
+      if (toUsers.length > 0) recipient = toUsers[0];
+    } else if (email) {
+      const toUsers = await walletQuery<WalletUser[]>(
+        `SELECT user_uuid, username FROM user WHERE email = ? LIMIT 1`,
+        [email],
+      );
+      if (toUsers.length > 0) recipient = toUsers[0];
+    } else if (username) {
+      const toUsers = await walletQuery<WalletUser[]>(
+        `SELECT user_uuid, username FROM user WHERE username = ? LIMIT 1`,
+        [username],
+      );
+      if (toUsers.length > 0) recipient = toUsers[0];
+    }
+
+    if (!recipient) {
+      return { success: false, error: "Recipient not found." };
+    }
+
+    // Prevent self-payment
+    if (recipient.user_uuid === sender.user_uuid) {
+      return { success: false, error: "Cannot pay yourself." };
+    }
+
+    // 6. Find the sender's payable balance account
+    const senderAccounts = await walletQuery<Array<{ balance_account_uuid: string; balance: number }>>(
+      `SELECT balance_account_uuid, balance
        FROM balance_account
        WHERE account_uuid = ? AND type = ?
        LIMIT 1`,
-      [],
+      [sender.user_uuid, TYPE_USER_PAYABLE],
     );
 
-    if (accounts.length === 0) {
-      return { success: false, error: "No payable account found for your account." };
+    if (senderAccounts.length === 0) {
+      return { success: false, error: "No payable account found." };
     }
 
-    const account = accounts[0];
-    const currentBalance = Number(account.balance);
+    const senderAccount = senderAccounts[0];
+    const currentBalance = Number(senderAccount.balance);
 
-    // 3. Validate sufficient balance
+    // 7. Validate sufficient balance
     if (currentBalance < amount) {
       return {
         success: false,
@@ -445,17 +543,58 @@ export async function payByWallet(
       };
     }
 
-    // 4. Deduct from balance and record the transaction
+
+    // 8. Ensure recipient has a payable balance account (create if not exists)
+    await walletQuery(
+      `INSERT IGNORE INTO balance_account (account_uuid, type, balance)
+       VALUES (?, ?, 0)`,
+      [recipient.user_uuid, TYPE_USER_PAYABLE],
+    );
+
+    // 9. Deduct from sender
     await walletQuery(
       `INSERT INTO balance_transaction (account_uuid, amount, balance, data, created_at, transaction_datetime)
        VALUES (?, ?, ?, ?, NOW(), NOW())`,
-      [account.balance_account_uuid, -amount, currentBalance - amount, JSON.stringify({ type: "payByWallet" })],
+      [
+        senderAccount.balance_account_uuid,
+        -amount,
+        currentBalance - amount,
+        JSON.stringify({ type: "payByWallet", data: `Paid to ${recipient.username}`, recipientUuid: recipient.user_uuid }),
+      ],
     );
 
-    // 5. Update the account balance
     await walletQuery(
       `UPDATE balance_account SET balance = ? WHERE balance_account_uuid = ?`,
-      [currentBalance - amount, account.balance_account_uuid],
+      [currentBalance - amount, senderAccount.balance_account_uuid],
+    );
+
+    // 10. Get recipient's current balance before crediting
+    const recipientAccounts = await walletQuery<Array<{ balance_account_uuid: string; balance: number }>>(
+      `SELECT balance_account_uuid, balance
+       FROM balance_account
+       WHERE account_uuid = ? AND type = ?
+       LIMIT 1`,
+      [recipient.user_uuid, TYPE_USER_PAYABLE],
+    );
+
+    const recipientAccount = recipientAccounts[0];
+    const recipientCurrentBalance = Number(recipientAccount.balance);
+
+    // 11. Credit recipient
+    await walletQuery(
+      `INSERT INTO balance_transaction (account_uuid, amount, balance, data, created_at, transaction_datetime)
+       VALUES (?, ?, ?, ?, NOW(), NOW())`,
+      [
+        recipientAccount.balance_account_uuid,
+        amount,
+        recipientCurrentBalance + amount,
+        JSON.stringify({ type: "payByWallet", data: `Received from ${sender.username}`, senderUuid: sender.user_uuid }),
+      ],
+    );
+
+    await walletQuery(
+      `UPDATE balance_account SET balance = ? WHERE balance_account_uuid = ?`,
+      [recipientCurrentBalance + amount, recipientAccount.balance_account_uuid],
     );
 
     return { success: true };
@@ -463,7 +602,8 @@ export async function payByWallet(
     console.error("payByWallet failed:", error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Wallet payment failed due to an unknown error.",
+
+      error: error instanceof Error ? error.message : "Payment failed due to an unknown error.",
     };
   }
 }
