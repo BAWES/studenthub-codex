@@ -97,23 +97,19 @@ export async function listQuestionsByDepartment(
 
   const { deptId } = listQuestionsSchema.parse(params);
 
-  const deptQuestions = await prisma.candidate_eval_dept_ques.findMany({
-    where: { dept_id: deptId },
-    include: {
-      candidate_eval_ques: {
-        select: {
-          ceq_uuid: true,
-          question: true,
-        },
-      },
-    },
-  });
+  const rows = await prisma.$queryRawUnsafe<Array<{ ceq_uuid: string | null; question: string | null }>>(
+    `SELECT deq.ceq_uuid, eq.question
+     FROM candidate_eval_dept_ques deq
+     LEFT JOIN candidate_eval_ques eq ON eq.ceq_uuid = deq.ceq_uuid
+     WHERE deq.dept_id = ?`,
+    deptId,
+  );
 
-  return deptQuestions
-    .filter((dq) => dq.candidate_eval_ques !== null)
-    .map((dq) => ({
-      ceq_uuid: dq.candidate_eval_ques!.ceq_uuid,
-      question: dq.candidate_eval_ques!.question,
+  return rows
+    .filter((r) => r.ceq_uuid !== null)
+    .map((r) => ({
+      ceq_uuid: r.ceq_uuid!,
+      question: r.question,
     }));
 }
 
@@ -145,17 +141,17 @@ export async function createEvaluation(
     },
   });
 
-  // Insert answers
+  // Insert answers via raw SQL
   for (const answer of questionAnswers) {
-    await prisma.candidate_evaluation_answer.create({
-      data: {
-        can_eval_uuid: canEvalUuid,
-        ceq_uuid: answer.ceqUuid ?? null,
-        question: answer.question ?? null,
-        answer: answer.answer ?? null,
-        rating: answer.rating ?? null,
-      },
-    });
+    await prisma.$executeRawUnsafe(
+      `INSERT INTO candidate_evaluation_answer (can_eval_uuid, ceq_uuid, question, answer, rating)
+       VALUES (?, ?, ?, ?, ?)`,
+      canEvalUuid,
+      answer.ceqUuid ?? null,
+      answer.question ?? null,
+      answer.answer ?? null,
+      answer.rating ?? null,
+    );
   }
 
   revalidatePath("/staff/candidates/evaluation");
@@ -207,14 +203,19 @@ export async function viewEvaluationReport(
 
   const evaluation = await prisma.candidate_evaluation.findUnique({
     where: { can_eval_uuid: evaluationUuid },
-    include: {
-      candidate_evaluation_answer: {
-        where: { can_eval_uuid: evaluationUuid },
-      },
-    },
   });
 
   if (!evaluation) return null;
+
+  // Fetch answers via raw SQL (candidate_evaluation_answer has no PK, @@ignore'd)
+  const answers = await prisma.$queryRawUnsafe<
+    Array<{ ceq_uuid: string | null; question: string | null; answer: string | null; rating: number | null }>
+  >(
+    `SELECT ceq_uuid, question, answer, rating
+     FROM candidate_evaluation_answer
+     WHERE can_eval_uuid = ?`,
+    evaluationUuid,
+  );
 
   return {
     can_eval_uuid: evaluation.can_eval_uuid,
@@ -224,7 +225,7 @@ export async function viewEvaluationReport(
     end_date: evaluation.end_date ? evaluation.end_date.toISOString() : null,
     staff_id: evaluation.staff_id,
     created_at: evaluation.created_at,
-    answers: evaluation.candidate_evaluation_answer.map((a) => ({
+    answers: answers.map((a) => ({
       ceq_uuid: a.ceq_uuid,
       question: a.question,
       answer: a.answer,
