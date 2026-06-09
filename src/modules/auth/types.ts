@@ -52,7 +52,13 @@ export type Capability =
   | "admin.system"
   | "tickets.read"
   | "tickets.create"
-  | "company.read";
+  | "company.read"
+  | "offer.read"
+  | "offer.write"
+  | "expense.read"
+  | "expense.write"
+  | "staff_leave.read"
+  | "store.read";
 
 export type SessionUser = {
   role: Role;
