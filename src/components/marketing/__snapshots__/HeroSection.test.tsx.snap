@@ -1,0 +1,1676 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`HeroSection (OS glass redesign) > Snapshot — per persona > renders consistently for admin persona 1`] = `
+<div>
+  <section
+    aria-label="StudentHub for admins — hero"
+    class="shSection relative min-h-[min(780px,calc(100svh_-_96px))] grid grid-cols-1 items-center overflow-hidden rounded-xl p-[clamp(22px,5vw,76px)] max-lg:min-h-auto max-lg:p-7"
+  >
+    <div
+      aria-hidden="true"
+      class="shHeroGradientDramatic"
+    />
+    <div
+      aria-hidden="true"
+      class="shOrb shOrbA"
+    />
+    <div
+      aria-hidden="true"
+      class="shOrb shOrbB"
+    />
+    <div
+      aria-hidden="true"
+      class="shOrb shOrbC"
+    />
+    <div
+      aria-hidden="true"
+      class="shParticleGrid"
+    />
+    <div
+      aria-hidden="true"
+      class="shPersonaBadge"
+    >
+      <span
+        data-testid="icon-sparkles"
+      />
+      Admin
+       portal
+    </div>
+    <div
+      aria-hidden="true"
+      class="absolute inset-0 grid place-items-center place-content-end p-[clamp(20px,4vw,58px)] opacity-[0.92] max-lg:relative max-lg:min-h-[400px] max-lg:order-2 max-lg:p-0 max-lg:pt-[18px]"
+    >
+      <div
+        class="shMockupDramatic"
+      >
+        <div
+          class="grid content-start gap-2 p-2.5 rounded-xl bg-[var(--sh-glass-bg)]"
+        >
+          <span
+            class="min-h-9 flex items-center rounded-[7px] px-2.5 text-xs font-black max-sm:justify-center max-sm:px-1.5"
+            style="background: var(--sh-info-bg); color: var(--sh-info);"
+          >
+            Dashboard
+          </span>
+          <span
+            class="min-h-9 flex items-center rounded-[7px] px-2.5 text-xs font-black max-sm:justify-center max-sm:px-1.5"
+            style="color: var(--muted);"
+          >
+            Finance
+          </span>
+          <span
+            class="min-h-9 flex items-center rounded-[7px] px-2.5 text-xs font-black max-sm:justify-center max-sm:px-1.5"
+            style="color: var(--muted);"
+          >
+            Compliance
+          </span>
+          <span
+            class="min-h-9 flex items-center rounded-[7px] px-2.5 text-xs font-black max-sm:justify-center max-sm:px-1.5"
+            style="color: var(--muted);"
+          >
+            Reports
+          </span>
+        </div>
+        <div
+          class="grid content-start gap-2.5 p-3.5 rounded-xl bg-[var(--sh-glass-bg)]"
+        >
+          <div
+            class="min-h-[40px] flex items-center gap-2 rounded-lg px-3 bg-[var(--sh-glass-bg-strong)]"
+            style="border: 1px solid var(--sh-glass-border);"
+          >
+            <span
+              data-testid="icon-search"
+            />
+            <span
+              class="text-xs text-[var(--muted)]"
+            >
+              Find user, transaction, document...
+            </span>
+            <span
+              class="ml-auto text-[10px] px-1.5 py-0.5 rounded bg-[var(--sh-glass-bg)] text-[var(--muted)] font-mono"
+            >
+              ⌘K
+            </span>
+          </div>
+          <div
+            class="min-h-[190px] grid content-start gap-1.5 rounded-lg p-[14px]"
+            style="background: var(--sh-glass-bg-strong); border: 1px solid var(--sh-glass-border);"
+          >
+            <span
+              class="text-[var(--sh-info)] text-[11px] font-black uppercase tracking-wider"
+            >
+              Command view
+            </span>
+            <strong
+              class="text-[clamp(42px,6vw,76px)] leading-[0.88]"
+              style="color: var(--ink);"
+            >
+              payment run · April 2026
+            </strong>
+            <small
+              style="color: var(--muted);"
+            >
+              £284,500 total · 142 workers · 18 companies
+            </small>
+            <div
+              class="flex gap-2 mt-1.5"
+            >
+              <span
+                class="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-full bg-[var(--sh-info-bg)] text-[var(--sh-info)]"
+              >
+                <span
+                  data-testid="icon-check-circle"
+                />
+                Awaiting approval
+              </span>
+              <span
+                class="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-full bg-[var(--sh-success-bg)] text-[var(--sh-success)]"
+              >
+                <span
+                  data-testid="icon-check-circle"
+                />
+                Audit ready
+              </span>
+            </div>
+          </div>
+          <div
+            class="grid grid-cols-4 gap-2 max-sm:grid-cols-1"
+          >
+            <div
+              class="min-h-[92px] grid content-between rounded-lg p-3 bg-[var(--sh-glass-bg)]"
+              style="border: 1px solid var(--sh-glass-border);"
+            >
+              <span
+                class="text-[var(--sh-info)] text-[10px] font-black uppercase tracking-wider"
+              >
+                Users
+              </span>
+              <strong
+                class="text-lg"
+                style="color: var(--ink);"
+              >
+                1,428 active
+              </strong>
+            </div>
+            <div
+              class="min-h-[92px] grid content-between rounded-lg p-3 bg-[var(--sh-glass-bg)]"
+              style="border: 1px solid var(--sh-glass-border);"
+            >
+              <span
+                class="text-[var(--sh-info)] text-[10px] font-black uppercase tracking-wider"
+              >
+                Finance
+              </span>
+              <strong
+                class="text-lg"
+                style="color: var(--ink);"
+              >
+                £2.1M MTD
+              </strong>
+            </div>
+            <div
+              class="min-h-[92px] grid content-between rounded-lg p-3 bg-[var(--sh-glass-bg)]"
+              style="border: 1px solid var(--sh-glass-border);"
+            >
+              <span
+                class="text-[var(--sh-info)] text-[10px] font-black uppercase tracking-wider"
+              >
+                Compliance
+              </span>
+              <strong
+                class="text-lg"
+                style="color: var(--ink);"
+              >
+                98%
+              </strong>
+            </div>
+            <div
+              class="min-h-[92px] grid content-between rounded-lg p-3 bg-[var(--sh-glass-bg)]"
+              style="border: 1px solid var(--sh-glass-border);"
+            >
+              <span
+                class="text-[var(--sh-info)] text-[10px] font-black uppercase tracking-wider"
+              >
+                Payroll
+              </span>
+              <strong
+                class="text-lg"
+                style="color: var(--ink);"
+              >
+                Processing
+              </strong>
+            </div>
+          </div>
+        </div>
+        <div
+          class="grid content-start gap-2.5 p-3.5 rounded-xl bg-[var(--sh-glass-bg)] max-lg:hidden"
+        >
+          <div
+            class="min-h-[140px] grid content-end gap-2 rounded-lg p-[14px]"
+            style="background: var(--sh-glass-bg-strong); border: 1px solid var(--sh-glass-border);"
+          >
+            <span
+              class="text-[var(--sh-info)] text-[10px] font-black uppercase tracking-wider"
+            >
+              Action
+            </span>
+            <strong
+              class="text-[18px] leading-[1.1]"
+              style="color: var(--ink);"
+            >
+              Approve bulk payment run
+            </strong>
+            <small
+              style="color: var(--muted);"
+            >
+              £284,500 across 142 workers. Review and approve in one action.
+            </small>
+          </div>
+          <div
+            class="min-h-[100px] grid content-between rounded-lg p-[14px]"
+            style="background: var(--sh-glass-bg); border: 1px solid var(--sh-glass-border);"
+          >
+            <span
+              class="text-[var(--sh-info)] text-[10px] font-black uppercase tracking-wider"
+            >
+              Preview
+            </span>
+            <div
+              class="flex items-center gap-2"
+            >
+              <span
+                class="size-6 rounded-full bg-[var(--sh-success-bg)] flex items-center justify-center"
+              >
+                <span
+                  data-testid="icon-check-circle"
+                />
+              </span>
+              <span
+                class="text-xs text-[var(--ink)]"
+              >
+                Ready to process
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="relative z-[2] max-w-[690px] max-lg:max-w-none"
+    >
+      <p
+        class="shHeroEyebrow"
+      >
+        <span
+          data-testid="icon-sparkles"
+        />
+        StudentHub for admins
+      </p>
+      <h1
+        class="shHeroTitle"
+      >
+        Full control across&lt;br /&gt;
+        <span
+          class="shHeroHighlight"
+        >
+          every operation.
+        </span>
+      </h1>
+      <p
+        class="shHeroBody"
+      >
+        Run approvals, manage payroll, oversee compliance, and validate production data — the command layer for system-wide operations without switching tools.
+      </p>
+      <div
+        class="flex flex-wrap items-center gap-3.5 mt-4 max-sm:flex-col max-sm:items-stretch"
+      >
+        <a
+          class="uiButton uiButton_default uiButton_lg shGlowButton"
+          href="/signup?role=admin"
+        >
+          Request admin access
+           
+          <span
+            data-testid="icon-arrow-up-right"
+          />
+        </a>
+        <a
+          class="uiButton uiButton_ghost uiButton_lg"
+          href="/login"
+        >
+          Sign in
+        </a>
+      </div>
+      <div
+        class="flex flex-wrap items-center gap-2 mt-[18px]"
+      >
+        <span
+          class="shProofPill"
+        >
+          Trusted by compliance teams managing 15,000+ worker records
+        </span>
+      </div>
+      <div
+        aria-label="Key benefits for admins"
+        class="flex flex-wrap gap-2 mt-2.5"
+      >
+        <span
+          class="shHeroPill"
+        >
+          Role-based access and audit logs
+        </span>
+        <span
+          class="shHeroPill"
+        >
+          Bulk invoicing and payment runs
+        </span>
+        <span
+          class="shHeroPill"
+        >
+          Production-data validation tools
+        </span>
+      </div>
+    </div>
+  </section>
+</div>
+`;
+
+exports[`HeroSection (OS glass redesign) > Snapshot — per persona > renders consistently for candidate persona 1`] = `
+<div>
+  <section
+    aria-label="StudentHub for candidates — hero"
+    class="shSection relative min-h-[min(780px,calc(100svh_-_96px))] grid grid-cols-1 items-center overflow-hidden rounded-xl p-[clamp(22px,5vw,76px)] max-lg:min-h-auto max-lg:p-7"
+  >
+    <div
+      aria-hidden="true"
+      class="shHeroGradientDramatic"
+    />
+    <div
+      aria-hidden="true"
+      class="shOrb shOrbA"
+    />
+    <div
+      aria-hidden="true"
+      class="shOrb shOrbB"
+    />
+    <div
+      aria-hidden="true"
+      class="shOrb shOrbC"
+    />
+    <div
+      aria-hidden="true"
+      class="shParticleGrid"
+    />
+    <div
+      aria-hidden="true"
+      class="shPersonaBadge"
+    >
+      <span
+        data-testid="icon-sparkles"
+      />
+      Candidate
+       portal
+    </div>
+    <div
+      aria-hidden="true"
+      class="absolute inset-0 grid place-items-center place-content-end p-[clamp(20px,4vw,58px)] opacity-[0.92] max-lg:relative max-lg:min-h-[400px] max-lg:order-2 max-lg:p-0 max-lg:pt-[18px]"
+    >
+      <div
+        class="shMockupDramatic"
+      >
+        <div
+          class="grid content-start gap-2 p-2.5 rounded-xl bg-[var(--sh-glass-bg)]"
+        >
+          <span
+            class="min-h-9 flex items-center rounded-[7px] px-2.5 text-xs font-black max-sm:justify-center max-sm:px-1.5"
+            style="background: var(--sh-info-bg); color: var(--sh-info);"
+          >
+            Search
+          </span>
+          <span
+            class="min-h-9 flex items-center rounded-[7px] px-2.5 text-xs font-black max-sm:justify-center max-sm:px-1.5"
+            style="color: var(--muted);"
+          >
+            Matches
+          </span>
+          <span
+            class="min-h-9 flex items-center rounded-[7px] px-2.5 text-xs font-black max-sm:justify-center max-sm:px-1.5"
+            style="color: var(--muted);"
+          >
+            Applications
+          </span>
+          <span
+            class="min-h-9 flex items-center rounded-[7px] px-2.5 text-xs font-black max-sm:justify-center max-sm:px-1.5"
+            style="color: var(--muted);"
+          >
+            Money
+          </span>
+        </div>
+        <div
+          class="grid content-start gap-2.5 p-3.5 rounded-xl bg-[var(--sh-glass-bg)]"
+        >
+          <div
+            class="min-h-[40px] flex items-center gap-2 rounded-lg px-3 bg-[var(--sh-glass-bg-strong)]"
+            style="border: 1px solid var(--sh-glass-border);"
+          >
+            <span
+              data-testid="icon-search"
+            />
+            <span
+              class="text-xs text-[var(--muted)]"
+            >
+              Search open roles, companies, locations...
+            </span>
+            <span
+              class="ml-auto text-[10px] px-1.5 py-0.5 rounded bg-[var(--sh-glass-bg)] text-[var(--muted)] font-mono"
+            >
+              ⌘K
+            </span>
+          </div>
+          <div
+            class="min-h-[190px] grid content-start gap-1.5 rounded-lg p-[14px]"
+            style="background: var(--sh-glass-bg-strong); border: 1px solid var(--sh-glass-border);"
+          >
+            <span
+              class="text-[var(--sh-info)] text-[11px] font-black uppercase tracking-wider"
+            >
+              Matched roles
+            </span>
+            <strong
+              class="text-[clamp(42px,6vw,76px)] leading-[0.88]"
+              style="color: var(--ink);"
+            >
+              senior care assistant
+            </strong>
+            <small
+              style="color: var(--muted);"
+            >
+              12 matching roles · London · £14-18/hr · starts ASAP
+            </small>
+            <div
+              class="flex gap-2 mt-1.5"
+            >
+              <span
+                class="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-full bg-[var(--sh-success-bg)] text-[var(--sh-success)]"
+              >
+                <span
+                  data-testid="icon-check-circle"
+                />
+                Profile ready
+              </span>
+              <span
+                class="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-full bg-[var(--sh-info-bg)] text-[var(--sh-info)]"
+              >
+                <span
+                  data-testid="icon-check-circle"
+                />
+                3 saved roles
+              </span>
+            </div>
+          </div>
+          <div
+            class="grid grid-cols-4 gap-2 max-sm:grid-cols-1"
+          >
+            <div
+              class="min-h-[92px] grid content-between rounded-lg p-3 bg-[var(--sh-glass-bg)]"
+              style="border: 1px solid var(--sh-glass-border);"
+            >
+              <span
+                class="text-[var(--sh-info)] text-[10px] font-black uppercase tracking-wider"
+              >
+                Profile
+              </span>
+              <strong
+                class="text-lg"
+                style="color: var(--ink);"
+              >
+                92% complete
+              </strong>
+            </div>
+            <div
+              class="min-h-[92px] grid content-between rounded-lg p-3 bg-[var(--sh-glass-bg)]"
+              style="border: 1px solid var(--sh-glass-border);"
+            >
+              <span
+                class="text-[var(--sh-info)] text-[10px] font-black uppercase tracking-wider"
+              >
+                Applications
+              </span>
+              <strong
+                class="text-lg"
+                style="color: var(--ink);"
+              >
+                4 pending
+              </strong>
+            </div>
+            <div
+              class="min-h-[92px] grid content-between rounded-lg p-3 bg-[var(--sh-glass-bg)]"
+              style="border: 1px solid var(--sh-glass-border);"
+            >
+              <span
+                class="text-[var(--sh-info)] text-[10px] font-black uppercase tracking-wider"
+              >
+                Timesheet
+              </span>
+              <strong
+                class="text-lg"
+                style="color: var(--ink);"
+              >
+                This week
+              </strong>
+            </div>
+            <div
+              class="min-h-[92px] grid content-between rounded-lg p-3 bg-[var(--sh-glass-bg)]"
+              style="border: 1px solid var(--sh-glass-border);"
+            >
+              <span
+                class="text-[var(--sh-info)] text-[10px] font-black uppercase tracking-wider"
+              >
+                Payment
+              </span>
+              <strong
+                class="text-lg"
+                style="color: var(--ink);"
+              >
+                £1,240
+              </strong>
+            </div>
+          </div>
+        </div>
+        <div
+          class="grid content-start gap-2.5 p-3.5 rounded-xl bg-[var(--sh-glass-bg)] max-lg:hidden"
+        >
+          <div
+            class="min-h-[140px] grid content-end gap-2 rounded-lg p-[14px]"
+            style="background: var(--sh-glass-bg-strong); border: 1px solid var(--sh-glass-border);"
+          >
+            <span
+              class="text-[var(--sh-info)] text-[10px] font-black uppercase tracking-wider"
+            >
+              Action
+            </span>
+            <strong
+              class="text-[18px] leading-[1.1]"
+              style="color: var(--ink);"
+            >
+              Apply to 3 matching roles
+            </strong>
+            <small
+              style="color: var(--muted);"
+            >
+              Your profile matches these open positions. One click sends your CV.
+            </small>
+          </div>
+          <div
+            class="min-h-[100px] grid content-between rounded-lg p-[14px]"
+            style="background: var(--sh-glass-bg); border: 1px solid var(--sh-glass-border);"
+          >
+            <span
+              class="text-[var(--sh-info)] text-[10px] font-black uppercase tracking-wider"
+            >
+              Preview
+            </span>
+            <div
+              class="flex items-center gap-2"
+            >
+              <span
+                class="size-6 rounded-full bg-[var(--sh-success-bg)] flex items-center justify-center"
+              >
+                <span
+                  data-testid="icon-check-circle"
+                />
+              </span>
+              <span
+                class="text-xs text-[var(--ink)]"
+              >
+                3 matching roles ready to apply
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="relative z-[2] max-w-[690px] max-lg:max-w-none"
+    >
+      <p
+        class="shHeroEyebrow"
+      >
+        <span
+          data-testid="icon-sparkles"
+        />
+        StudentHub for candidates
+      </p>
+      <h1
+        class="shHeroTitle"
+      >
+        Your next placement&lt;br /&gt;
+        <span
+          class="shHeroHighlight"
+        >
+          starts here.
+        </span>
+      </h1>
+      <p
+        class="shHeroBody"
+      >
+        Build a profile that employers actually see. Get matched to the right roles, track every application, log your hours, and get paid — all from one workspace designed for how you work.
+      </p>
+      <div
+        class="flex flex-wrap items-center gap-3.5 mt-4 max-sm:flex-col max-sm:items-stretch"
+      >
+        <a
+          class="uiButton uiButton_default uiButton_lg shGlowButton"
+          href="/signup?role=candidate"
+        >
+          Create your free candidate profile
+           
+          <span
+            data-testid="icon-arrow-up-right"
+          />
+        </a>
+        <a
+          class="uiButton uiButton_ghost uiButton_lg"
+          href="/login"
+        >
+          Sign in
+        </a>
+      </div>
+      <div
+        class="flex flex-wrap items-center gap-2 mt-[18px]"
+      >
+        <span
+          class="shProofPill"
+        >
+          1,200+ candidates placed this year · 4.8★ candidate satisfaction
+        </span>
+      </div>
+      <div
+        aria-label="Key benefits for candidates"
+        class="flex flex-wrap gap-2 mt-2.5"
+      >
+        <span
+          class="shHeroPill"
+        >
+          Profile visibility to 60+ employers
+        </span>
+        <span
+          class="shHeroPill"
+        >
+          One-tap timesheets and payments
+        </span>
+        <span
+          class="shHeroPill"
+        >
+          Real-time application tracking
+        </span>
+      </div>
+    </div>
+  </section>
+</div>
+`;
+
+exports[`HeroSection (OS glass redesign) > Snapshot — per persona > renders consistently for company persona 1`] = `
+<div>
+  <section
+    aria-label="StudentHub for companys — hero"
+    class="shSection relative min-h-[min(780px,calc(100svh_-_96px))] grid grid-cols-1 items-center overflow-hidden rounded-xl p-[clamp(22px,5vw,76px)] max-lg:min-h-auto max-lg:p-7"
+  >
+    <div
+      aria-hidden="true"
+      class="shHeroGradientDramatic"
+    />
+    <div
+      aria-hidden="true"
+      class="shOrb shOrbA"
+    />
+    <div
+      aria-hidden="true"
+      class="shOrb shOrbB"
+    />
+    <div
+      aria-hidden="true"
+      class="shOrb shOrbC"
+    />
+    <div
+      aria-hidden="true"
+      class="shParticleGrid"
+    />
+    <div
+      aria-hidden="true"
+      class="shPersonaBadge"
+    >
+      <span
+        data-testid="icon-sparkles"
+      />
+      Company
+       portal
+    </div>
+    <div
+      aria-hidden="true"
+      class="absolute inset-0 grid place-items-center place-content-end p-[clamp(20px,4vw,58px)] opacity-[0.92] max-lg:relative max-lg:min-h-[400px] max-lg:order-2 max-lg:p-0 max-lg:pt-[18px]"
+    >
+      <div
+        class="shMockupDramatic"
+      >
+        <div
+          class="grid content-start gap-2 p-2.5 rounded-xl bg-[var(--sh-glass-bg)]"
+        >
+          <span
+            class="min-h-9 flex items-center rounded-[7px] px-2.5 text-xs font-black max-sm:justify-center max-sm:px-1.5"
+            style="background: var(--sh-info-bg); color: var(--sh-info);"
+          >
+            Requests
+          </span>
+          <span
+            class="min-h-9 flex items-center rounded-[7px] px-2.5 text-xs font-black max-sm:justify-center max-sm:px-1.5"
+            style="color: var(--muted);"
+          >
+            Candidates
+          </span>
+          <span
+            class="min-h-9 flex items-center rounded-[7px] px-2.5 text-xs font-black max-sm:justify-center max-sm:px-1.5"
+            style="color: var(--muted);"
+          >
+            Stores
+          </span>
+          <span
+            class="min-h-9 flex items-center rounded-[7px] px-2.5 text-xs font-black max-sm:justify-center max-sm:px-1.5"
+            style="color: var(--muted);"
+          >
+            Invoices
+          </span>
+        </div>
+        <div
+          class="grid content-start gap-2.5 p-3.5 rounded-xl bg-[var(--sh-glass-bg)]"
+        >
+          <div
+            class="min-h-[40px] flex items-center gap-2 rounded-lg px-3 bg-[var(--sh-glass-bg-strong)]"
+            style="border: 1px solid var(--sh-glass-border);"
+          >
+            <span
+              data-testid="icon-search"
+            />
+            <span
+              class="text-xs text-[var(--muted)]"
+            >
+              Review candidates, openings, invoices...
+            </span>
+            <span
+              class="ml-auto text-[10px] px-1.5 py-0.5 rounded bg-[var(--sh-glass-bg)] text-[var(--muted)] font-mono"
+            >
+              ⌘K
+            </span>
+          </div>
+          <div
+            class="min-h-[190px] grid content-start gap-1.5 rounded-lg p-[14px]"
+            style="background: var(--sh-glass-bg-strong); border: 1px solid var(--sh-glass-border);"
+          >
+            <span
+              class="text-[var(--sh-info)] text-[11px] font-black uppercase tracking-wider"
+            >
+              Candidate matches
+            </span>
+            <strong
+              class="text-[clamp(42px,6vw,76px)] leading-[0.88]"
+              style="color: var(--ink);"
+            >
+              care assistant · London Bridge
+            </strong>
+            <small
+              style="color: var(--muted);"
+            >
+              4 matched candidates · starts Mon · £14/hr
+            </small>
+            <div
+              class="flex gap-2 mt-1.5"
+            >
+              <span
+                class="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-full bg-[var(--sh-success-bg)] text-[var(--sh-success)]"
+              >
+                <span
+                  data-testid="icon-check-circle"
+                />
+                3 new applicants
+              </span>
+              <span
+                class="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-full bg-[var(--sh-info-bg)] text-[var(--sh-info)]"
+              >
+                <span
+                  data-testid="icon-check-circle"
+                />
+                Interview ready
+              </span>
+            </div>
+          </div>
+          <div
+            class="grid grid-cols-4 gap-2 max-sm:grid-cols-1"
+          >
+            <div
+              class="min-h-[92px] grid content-between rounded-lg p-3 bg-[var(--sh-glass-bg)]"
+              style="border: 1px solid var(--sh-glass-border);"
+            >
+              <span
+                class="text-[var(--sh-info)] text-[10px] font-black uppercase tracking-wider"
+              >
+                Openings
+              </span>
+              <strong
+                class="text-lg"
+                style="color: var(--ink);"
+              >
+                6 active
+              </strong>
+            </div>
+            <div
+              class="min-h-[92px] grid content-between rounded-lg p-3 bg-[var(--sh-glass-bg)]"
+              style="border: 1px solid var(--sh-glass-border);"
+            >
+              <span
+                class="text-[var(--sh-info)] text-[10px] font-black uppercase tracking-wider"
+              >
+                Candidates
+              </span>
+              <strong
+                class="text-lg"
+                style="color: var(--ink);"
+              >
+                12 shortlisted
+              </strong>
+            </div>
+            <div
+              class="min-h-[92px] grid content-between rounded-lg p-3 bg-[var(--sh-glass-bg)]"
+              style="border: 1px solid var(--sh-glass-border);"
+            >
+              <span
+                class="text-[var(--sh-info)] text-[10px] font-black uppercase tracking-wider"
+              >
+                Timesheets
+              </span>
+              <strong
+                class="text-lg"
+                style="color: var(--ink);"
+              >
+                8 pending
+              </strong>
+            </div>
+            <div
+              class="min-h-[92px] grid content-between rounded-lg p-3 bg-[var(--sh-glass-bg)]"
+              style="border: 1px solid var(--sh-glass-border);"
+            >
+              <span
+                class="text-[var(--sh-info)] text-[10px] font-black uppercase tracking-wider"
+              >
+                Invoices
+              </span>
+              <strong
+                class="text-lg"
+                style="color: var(--ink);"
+              >
+                April
+              </strong>
+            </div>
+          </div>
+        </div>
+        <div
+          class="grid content-start gap-2.5 p-3.5 rounded-xl bg-[var(--sh-glass-bg)] max-lg:hidden"
+        >
+          <div
+            class="min-h-[140px] grid content-end gap-2 rounded-lg p-[14px]"
+            style="background: var(--sh-glass-bg-strong); border: 1px solid var(--sh-glass-border);"
+          >
+            <span
+              class="text-[var(--sh-info)] text-[10px] font-black uppercase tracking-wider"
+            >
+              Action
+            </span>
+            <strong
+              class="text-[18px] leading-[1.1]"
+              style="color: var(--ink);"
+            >
+              Review 4 new candidates
+            </strong>
+            <small
+              style="color: var(--muted);"
+            >
+              Candidates matched to your open role. Review profiles and request interviews.
+            </small>
+          </div>
+          <div
+            class="min-h-[100px] grid content-between rounded-lg p-[14px]"
+            style="background: var(--sh-glass-bg); border: 1px solid var(--sh-glass-border);"
+          >
+            <span
+              class="text-[var(--sh-info)] text-[10px] font-black uppercase tracking-wider"
+            >
+              Preview
+            </span>
+            <div
+              class="flex items-center gap-2"
+            >
+              <span
+                class="size-6 rounded-full bg-[var(--sh-success-bg)] flex items-center justify-center"
+              >
+                <span
+                  data-testid="icon-check-circle"
+                />
+              </span>
+              <span
+                class="text-xs text-[var(--ink)]"
+              >
+                4 candidates ready for review
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="relative z-[2] max-w-[690px] max-lg:max-w-none"
+    >
+      <p
+        class="shHeroEyebrow"
+      >
+        <span
+          data-testid="icon-sparkles"
+        />
+        StudentHub for companies
+      </p>
+      <h1
+        class="shHeroTitle"
+      >
+        Hire qualified staff&lt;br /&gt;
+        <span
+          class="shHeroHighlight"
+        >
+          without the runaround.
+        </span>
+      </h1>
+      <p
+        class="shHeroBody"
+      >
+        Post openings, review matched candidates, approve timesheets, and receive consolidated invoices — one workspace replaces the email-and-spreadsheet shuffle.
+      </p>
+      <div
+        class="flex flex-wrap items-center gap-3.5 mt-4 max-sm:flex-col max-sm:items-stretch"
+      >
+        <a
+          class="uiButton uiButton_default uiButton_lg shGlowButton"
+          href="/signup?role=company"
+        >
+          Set up your company account
+           
+          <span
+            data-testid="icon-arrow-up-right"
+          />
+        </a>
+        <a
+          class="uiButton uiButton_ghost uiButton_lg"
+          href="/login"
+        >
+          Sign in
+        </a>
+      </div>
+      <div
+        class="flex flex-wrap items-center gap-2 mt-[18px]"
+      >
+        <span
+          class="shProofPill"
+        >
+          200+ employers hiring on StudentHub · 3-day avg time-to-shortlist
+        </span>
+      </div>
+      <div
+        aria-label="Key benefits for companys"
+        class="flex flex-wrap gap-2 mt-2.5"
+      >
+        <span
+          class="shHeroPill"
+        >
+          AI-matched candidate suggestions
+        </span>
+        <span
+          class="shHeroPill"
+        >
+          Real-time timesheet approvals
+        </span>
+        <span
+          class="shHeroPill"
+        >
+          Consolidated monthly invoicing
+        </span>
+      </div>
+    </div>
+  </section>
+</div>
+`;
+
+exports[`HeroSection (OS glass redesign) > Snapshot — per persona > renders consistently for inspector persona 1`] = `
+<div>
+  <section
+    aria-label="StudentHub for inspectors — hero"
+    class="shSection relative min-h-[min(780px,calc(100svh_-_96px))] grid grid-cols-1 items-center overflow-hidden rounded-xl p-[clamp(22px,5vw,76px)] max-lg:min-h-auto max-lg:p-7"
+  >
+    <div
+      aria-hidden="true"
+      class="shHeroGradientDramatic"
+    />
+    <div
+      aria-hidden="true"
+      class="shOrb shOrbA"
+    />
+    <div
+      aria-hidden="true"
+      class="shOrb shOrbB"
+    />
+    <div
+      aria-hidden="true"
+      class="shOrb shOrbC"
+    />
+    <div
+      aria-hidden="true"
+      class="shParticleGrid"
+    />
+    <div
+      aria-hidden="true"
+      class="shPersonaBadge"
+    >
+      <span
+        data-testid="icon-sparkles"
+      />
+      Inspector
+       portal
+    </div>
+    <div
+      aria-hidden="true"
+      class="absolute inset-0 grid place-items-center place-content-end p-[clamp(20px,4vw,58px)] opacity-[0.92] max-lg:relative max-lg:min-h-[400px] max-lg:order-2 max-lg:p-0 max-lg:pt-[18px]"
+    >
+      <div
+        class="shMockupDramatic"
+      >
+        <div
+          class="grid content-start gap-2 p-2.5 rounded-xl bg-[var(--sh-glass-bg)]"
+        >
+          <span
+            class="min-h-9 flex items-center rounded-[7px] px-2.5 text-xs font-black max-sm:justify-center max-sm:px-1.5"
+            style="background: var(--sh-info-bg); color: var(--sh-info);"
+          >
+            Queue
+          </span>
+          <span
+            class="min-h-9 flex items-center rounded-[7px] px-2.5 text-xs font-black max-sm:justify-center max-sm:px-1.5"
+            style="color: var(--muted);"
+          >
+            Documents
+          </span>
+          <span
+            class="min-h-9 flex items-center rounded-[7px] px-2.5 text-xs font-black max-sm:justify-center max-sm:px-1.5"
+            style="color: var(--muted);"
+          >
+            Audit
+          </span>
+          <span
+            class="min-h-9 flex items-center rounded-[7px] px-2.5 text-xs font-black max-sm:justify-center max-sm:px-1.5"
+            style="color: var(--muted);"
+          >
+            Reports
+          </span>
+        </div>
+        <div
+          class="grid content-start gap-2.5 p-3.5 rounded-xl bg-[var(--sh-glass-bg)]"
+        >
+          <div
+            class="min-h-[40px] flex items-center gap-2 rounded-lg px-3 bg-[var(--sh-glass-bg-strong)]"
+            style="border: 1px solid var(--sh-glass-border);"
+          >
+            <span
+              data-testid="icon-search"
+            />
+            <span
+              class="text-xs text-[var(--muted)]"
+            >
+              Search by ID, batch, status...
+            </span>
+            <span
+              class="ml-auto text-[10px] px-1.5 py-0.5 rounded bg-[var(--sh-glass-bg)] text-[var(--muted)] font-mono"
+            >
+              ⌘K
+            </span>
+          </div>
+          <div
+            class="min-h-[190px] grid content-start gap-1.5 rounded-lg p-[14px]"
+            style="background: var(--sh-glass-bg-strong); border: 1px solid var(--sh-glass-border);"
+          >
+            <span
+              class="text-[var(--sh-info)] text-[11px] font-black uppercase tracking-wider"
+            >
+              Review queue
+            </span>
+            <strong
+              class="text-[clamp(42px,6vw,76px)] leading-[0.88]"
+              style="color: var(--ink);"
+            >
+              civil ID batch · 24-0042
+            </strong>
+            <small
+              style="color: var(--muted);"
+            >
+              38 documents · 12 approved · 3 rejected · 23 pending
+            </small>
+            <div
+              class="flex gap-2 mt-1.5"
+            >
+              <span
+                class="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-full bg-[var(--sh-info-bg)] text-[var(--sh-info)]"
+              >
+                <span
+                  data-testid="icon-check-circle"
+                />
+                23 pending review
+              </span>
+              <span
+                class="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-full bg-[var(--sh-success-bg)] text-[var(--sh-success)]"
+              >
+                <span
+                  data-testid="icon-check-circle"
+                />
+                Audit trail
+              </span>
+            </div>
+          </div>
+          <div
+            class="grid grid-cols-4 gap-2 max-sm:grid-cols-1"
+          >
+            <div
+              class="min-h-[92px] grid content-between rounded-lg p-3 bg-[var(--sh-glass-bg)]"
+              style="border: 1px solid var(--sh-glass-border);"
+            >
+              <span
+                class="text-[var(--sh-info)] text-[10px] font-black uppercase tracking-wider"
+              >
+                Queue
+              </span>
+              <strong
+                class="text-lg"
+                style="color: var(--ink);"
+              >
+                23 pending
+              </strong>
+            </div>
+            <div
+              class="min-h-[92px] grid content-between rounded-lg p-3 bg-[var(--sh-glass-bg)]"
+              style="border: 1px solid var(--sh-glass-border);"
+            >
+              <span
+                class="text-[var(--sh-info)] text-[10px] font-black uppercase tracking-wider"
+              >
+                Today
+              </span>
+              <strong
+                class="text-lg"
+                style="color: var(--ink);"
+              >
+                47 reviewed
+              </strong>
+            </div>
+            <div
+              class="min-h-[92px] grid content-between rounded-lg p-3 bg-[var(--sh-glass-bg)]"
+              style="border: 1px solid var(--sh-glass-border);"
+            >
+              <span
+                class="text-[var(--sh-info)] text-[10px] font-black uppercase tracking-wider"
+              >
+                Exemptions
+              </span>
+              <strong
+                class="text-lg"
+                style="color: var(--ink);"
+              >
+                3 flagged
+              </strong>
+            </div>
+            <div
+              class="min-h-[92px] grid content-between rounded-lg p-3 bg-[var(--sh-glass-bg)]"
+              style="border: 1px solid var(--sh-glass-border);"
+            >
+              <span
+                class="text-[var(--sh-info)] text-[10px] font-black uppercase tracking-wider"
+              >
+                Reports
+              </span>
+              <strong
+                class="text-lg"
+                style="color: var(--ink);"
+              >
+                Weekly
+              </strong>
+            </div>
+          </div>
+        </div>
+        <div
+          class="grid content-start gap-2.5 p-3.5 rounded-xl bg-[var(--sh-glass-bg)] max-lg:hidden"
+        >
+          <div
+            class="min-h-[140px] grid content-end gap-2 rounded-lg p-[14px]"
+            style="background: var(--sh-glass-bg-strong); border: 1px solid var(--sh-glass-border);"
+          >
+            <span
+              class="text-[var(--sh-info)] text-[10px] font-black uppercase tracking-wider"
+            >
+              Action
+            </span>
+            <strong
+              class="text-[18px] leading-[1.1]"
+              style="color: var(--ink);"
+            >
+              Approve batch 24-0042
+            </strong>
+            <small
+              style="color: var(--muted);"
+            >
+              38 documents reviewed. 35 approved, 3 rejected. Sign off to close batch.
+            </small>
+          </div>
+          <div
+            class="min-h-[100px] grid content-between rounded-lg p-[14px]"
+            style="background: var(--sh-glass-bg); border: 1px solid var(--sh-glass-border);"
+          >
+            <span
+              class="text-[var(--sh-info)] text-[10px] font-black uppercase tracking-wider"
+            >
+              Preview
+            </span>
+            <div
+              class="flex items-center gap-2"
+            >
+              <span
+                class="size-6 rounded-full bg-[var(--sh-success-bg)] flex items-center justify-center"
+              >
+                <span
+                  data-testid="icon-check-circle"
+                />
+              </span>
+              <span
+                class="text-xs text-[var(--ink)]"
+              >
+                23 documents pending review
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="relative z-[2] max-w-[690px] max-lg:max-w-none"
+    >
+      <p
+        class="shHeroEyebrow"
+      >
+        <span
+          data-testid="icon-sparkles"
+        />
+        StudentHub for inspectors
+      </p>
+      <h1
+        class="shHeroTitle"
+      >
+        Clear the queue.&lt;br /&gt;
+        <span
+          class="shHeroHighlight"
+        >
+          Stay compliant.
+        </span>
+      </h1>
+      <p
+        class="shHeroBody"
+      >
+        Review civil ID batches, approve or reject document submissions, and maintain audit trails — a dedicated compliance workspace that keeps inspection work separate from placement operations.
+      </p>
+      <div
+        class="flex flex-wrap items-center gap-3.5 mt-4 max-sm:flex-col max-sm:items-stretch"
+      >
+        <a
+          class="uiButton uiButton_default uiButton_lg shGlowButton"
+          href="/signup?role=inspector"
+        >
+          Request inspector access
+           
+          <span
+            data-testid="icon-arrow-up-right"
+          />
+        </a>
+        <a
+          class="uiButton uiButton_ghost uiButton_lg"
+          href="/login"
+        >
+          Sign in
+        </a>
+      </div>
+      <div
+        class="flex flex-wrap items-center gap-2 mt-[18px]"
+      >
+        <span
+          class="shProofPill"
+        >
+          10,000+ documents reviewed monthly · 99.7% audit pass rate
+        </span>
+      </div>
+      <div
+        aria-label="Key benefits for inspectors"
+        class="flex flex-wrap gap-2 mt-2.5"
+      >
+        <span
+          class="shHeroPill"
+        >
+          Batch document review workflow
+        </span>
+        <span
+          class="shHeroPill"
+        >
+          Full audit trail for every decision
+        </span>
+        <span
+          class="shHeroPill"
+        >
+          Separate from placement operations
+        </span>
+      </div>
+    </div>
+  </section>
+</div>
+`;
+
+exports[`HeroSection (OS glass redesign) > Snapshot — per persona > renders consistently for staff persona 1`] = `
+<div>
+  <section
+    aria-label="StudentHub for staff — hero"
+    class="shSection relative min-h-[min(780px,calc(100svh_-_96px))] grid grid-cols-1 items-center overflow-hidden rounded-xl p-[clamp(22px,5vw,76px)] max-lg:min-h-auto max-lg:p-7"
+  >
+    <div
+      aria-hidden="true"
+      class="shHeroGradientDramatic"
+    />
+    <div
+      aria-hidden="true"
+      class="shOrb shOrbA"
+    />
+    <div
+      aria-hidden="true"
+      class="shOrb shOrbB"
+    />
+    <div
+      aria-hidden="true"
+      class="shOrb shOrbC"
+    />
+    <div
+      aria-hidden="true"
+      class="shParticleGrid"
+    />
+    <div
+      aria-hidden="true"
+      class="shPersonaBadge"
+    >
+      <span
+        data-testid="icon-sparkles"
+      />
+      Staff
+       portal
+    </div>
+    <div
+      aria-hidden="true"
+      class="absolute inset-0 grid place-items-center place-content-end p-[clamp(20px,4vw,58px)] opacity-[0.92] max-lg:relative max-lg:min-h-[400px] max-lg:order-2 max-lg:p-0 max-lg:pt-[18px]"
+    >
+      <div
+        class="shMockupDramatic"
+      >
+        <div
+          class="grid content-start gap-2 p-2.5 rounded-xl bg-[var(--sh-glass-bg)]"
+        >
+          <span
+            class="min-h-9 flex items-center rounded-[7px] px-2.5 text-xs font-black max-sm:justify-center max-sm:px-1.5"
+            style="background: var(--sh-info-bg); color: var(--sh-info);"
+          >
+            Search
+          </span>
+          <span
+            class="min-h-9 flex items-center rounded-[7px] px-2.5 text-xs font-black max-sm:justify-center max-sm:px-1.5"
+            style="color: var(--muted);"
+          >
+            Queue
+          </span>
+          <span
+            class="min-h-9 flex items-center rounded-[7px] px-2.5 text-xs font-black max-sm:justify-center max-sm:px-1.5"
+            style="color: var(--muted);"
+          >
+            Shortlists
+          </span>
+          <span
+            class="min-h-9 flex items-center rounded-[7px] px-2.5 text-xs font-black max-sm:justify-center max-sm:px-1.5"
+            style="color: var(--muted);"
+          >
+            Pay
+          </span>
+        </div>
+        <div
+          class="grid content-start gap-2.5 p-3.5 rounded-xl bg-[var(--sh-glass-bg)]"
+        >
+          <div
+            class="min-h-[40px] flex items-center gap-2 rounded-lg px-3 bg-[var(--sh-glass-bg-strong)]"
+            style="border: 1px solid var(--sh-glass-border);"
+          >
+            <span
+              data-testid="icon-search"
+            />
+            <span
+              class="text-xs text-[var(--muted)]"
+            >
+              Search candidates by skill, status, location...
+            </span>
+            <span
+              class="ml-auto text-[10px] px-1.5 py-0.5 rounded bg-[var(--sh-glass-bg)] text-[var(--muted)] font-mono"
+            >
+              ⌘K
+            </span>
+          </div>
+          <div
+            class="min-h-[190px] grid content-start gap-1.5 rounded-lg p-[14px]"
+            style="background: var(--sh-glass-bg-strong); border: 1px solid var(--sh-glass-border);"
+          >
+            <span
+              class="text-[var(--sh-info)] text-[11px] font-black uppercase tracking-wider"
+            >
+              Candidate search
+            </span>
+            <strong
+              class="text-[clamp(42px,6vw,76px)] leading-[0.88]"
+              style="color: var(--ink);"
+            >
+              jaafar moussaoui
+            </strong>
+            <small
+              style="color: var(--muted);"
+            >
+              80 scoped results · FAD · needs review · Lebanon
+            </small>
+            <div
+              class="flex gap-2 mt-1.5"
+            >
+              <span
+                class="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-full bg-[var(--sh-success-bg)] text-[var(--sh-success)]"
+              >
+                <span
+                  data-testid="icon-check-circle"
+                />
+                Profile ready
+              </span>
+              <span
+                class="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-full bg-[var(--sh-info-bg)] text-[var(--sh-info)]"
+              >
+                <span
+                  data-testid="icon-check-circle"
+                />
+                CV export
+              </span>
+            </div>
+          </div>
+          <div
+            class="grid grid-cols-4 gap-2 max-sm:grid-cols-1"
+          >
+            <div
+              class="min-h-[92px] grid content-between rounded-lg p-3 bg-[var(--sh-glass-bg)]"
+              style="border: 1px solid var(--sh-glass-border);"
+            >
+              <span
+                class="text-[var(--sh-info)] text-[10px] font-black uppercase tracking-wider"
+              >
+                Profile
+              </span>
+              <strong
+                class="text-lg"
+                style="color: var(--ink);"
+              >
+                Live
+              </strong>
+            </div>
+            <div
+              class="min-h-[92px] grid content-between rounded-lg p-3 bg-[var(--sh-glass-bg)]"
+              style="border: 1px solid var(--sh-glass-border);"
+            >
+              <span
+                class="text-[var(--sh-info)] text-[10px] font-black uppercase tracking-wider"
+              >
+                CV
+              </span>
+              <strong
+                class="text-lg"
+                style="color: var(--ink);"
+              >
+                PDF
+              </strong>
+            </div>
+            <div
+              class="min-h-[92px] grid content-between rounded-lg p-3 bg-[var(--sh-glass-bg)]"
+              style="border: 1px solid var(--sh-glass-border);"
+            >
+              <span
+                class="text-[var(--sh-info)] text-[10px] font-black uppercase tracking-wider"
+              >
+                Timesheet
+              </span>
+              <strong
+                class="text-lg"
+                style="color: var(--ink);"
+              >
+                Pending
+              </strong>
+            </div>
+            <div
+              class="min-h-[92px] grid content-between rounded-lg p-3 bg-[var(--sh-glass-bg)]"
+              style="border: 1px solid var(--sh-glass-border);"
+            >
+              <span
+                class="text-[var(--sh-info)] text-[10px] font-black uppercase tracking-wider"
+              >
+                Payment
+              </span>
+              <strong
+                class="text-lg"
+                style="color: var(--ink);"
+              >
+                Ready
+              </strong>
+            </div>
+          </div>
+        </div>
+        <div
+          class="grid content-start gap-2.5 p-3.5 rounded-xl bg-[var(--sh-glass-bg)] max-lg:hidden"
+        >
+          <div
+            class="min-h-[140px] grid content-end gap-2 rounded-lg p-[14px]"
+            style="background: var(--sh-glass-bg-strong); border: 1px solid var(--sh-glass-border);"
+          >
+            <span
+              class="text-[var(--sh-info)] text-[10px] font-black uppercase tracking-wider"
+            >
+              Action
+            </span>
+            <strong
+              class="text-[18px] leading-[1.1]"
+              style="color: var(--ink);"
+            >
+              Send CVs to employer
+            </strong>
+            <small
+              style="color: var(--muted);"
+            >
+              Same action layer for staff and admin, scoped by role.
+            </small>
+          </div>
+          <div
+            class="min-h-[100px] grid content-between rounded-lg p-[14px]"
+            style="background: var(--sh-glass-bg); border: 1px solid var(--sh-glass-border);"
+          >
+            <span
+              class="text-[var(--sh-info)] text-[10px] font-black uppercase tracking-wider"
+            >
+              Preview
+            </span>
+            <div
+              class="flex items-center gap-2"
+            >
+              <span
+                class="size-6 rounded-full bg-[var(--sh-success-bg)] flex items-center justify-center"
+              >
+                <span
+                  data-testid="icon-check-circle"
+                />
+              </span>
+              <span
+                class="text-xs text-[var(--ink)]"
+              >
+                Ready to process
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="relative z-[2] max-w-[690px] max-lg:max-w-none"
+    >
+      <p
+        class="shHeroEyebrow"
+      >
+        <span
+          data-testid="icon-sparkles"
+        />
+        StudentHub for staff
+      </p>
+      <h1
+        class="shHeroTitle"
+      >
+        Place people faster.&lt;br /&gt;
+        <span
+          class="shHeroHighlight"
+        >
+          Less paperwork.
+        </span>
+      </h1>
+      <p
+        class="shHeroBody"
+      >
+        Match candidates to open roles in seconds. Send CVs, manage shortlists, track timesheets, and process payments — all from one operating desk built for high-volume placement.
+      </p>
+      <div
+        class="flex flex-wrap items-center gap-3.5 mt-4 max-sm:flex-col max-sm:items-stretch"
+      >
+        <a
+          class="uiButton uiButton_default uiButton_lg shGlowButton"
+          href="/signup?role=staff"
+        >
+          Request staff access
+           
+          <span
+            data-testid="icon-arrow-up-right"
+          />
+        </a>
+        <a
+          class="uiButton uiButton_ghost uiButton_lg"
+          href="/login"
+        >
+          Sign in
+        </a>
+      </div>
+      <div
+        class="flex flex-wrap items-center gap-2 mt-[18px]"
+      >
+        <span
+          class="shProofPill"
+        >
+          350+ staffing agencies use StudentHub · 62% faster placement
+        </span>
+      </div>
+      <div
+        aria-label="Key benefits for staff"
+        class="flex flex-wrap gap-2 mt-2.5"
+      >
+        <span
+          class="shHeroPill"
+        >
+          Typo-tolerant candidate search
+        </span>
+        <span
+          class="shHeroPill"
+        >
+          Bulk CV export and shortlisting
+        </span>
+        <span
+          class="shHeroPill"
+        >
+          Integrated timesheets and payroll
+        </span>
+      </div>
+    </div>
+  </section>
+</div>
+`;
