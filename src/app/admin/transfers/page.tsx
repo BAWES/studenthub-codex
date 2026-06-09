@@ -20,7 +20,7 @@ export default async function AdminTransfersPage() {
       title="Pay candidates and invoice companies from transfer runs."
       metrics={[
         { label: "Runs shown", value: rows.length, note: "Latest imported transfer batches" },
-        { label: "Latest run", value: latest ? `#${latest.transfer_id}` : "None", note: latest?.company_name ?? "No transfer rows found" },
+        { label: "Latest run", value: latest ? `#${latest.id}` : "None", note: latest?.company ?? "No transfer rows found" },
         { label: "Invoice source", value: "Transfers", note: "Candidate payouts and employer totals live here" },
         { label: "Next action", value: "Review", note: "Open a run before exporting PDFs or reconciling pay" }
       ]}
@@ -33,7 +33,7 @@ export default async function AdminTransfersPage() {
             A run is the place to inspect candidate payouts, employer charges, period dates, status, invoice context,
             and PDF exports. The table below is only the index.
           </p>
-          {latest ? <Link href={`/admin/transfers/${latest.transfer_id}` as Route}>Open latest run #{latest.transfer_id}</Link> : null}
+          {latest ? <Link href={`/admin/transfers/${latest.id}` as Route}>Open latest run #{latest.id}</Link> : null}
         </div>
         <div className="financeSteps">
           {[
@@ -54,12 +54,12 @@ export default async function AdminTransfersPage() {
         title="Transfer Runs"
         description="Open a run to review candidate payouts, employer totals, invoices, and supporting PDF actions."
         rows={rows}
-        rowHref={(row) => `/admin/transfers/${row.transfer_id}` as Route}
+        rowHref={(row) => `/admin/transfers/${row.id}` as Route}
         columns={[
-          { key: "id", label: "Transfer", render: (row) => <strong>#{row.transfer_id}</strong> },
-          { key: "company", label: "Company", render: (row) => row.company_name ?? "No company" },
+          { key: "id", label: "Transfer", render: (row) => <strong>#{row.id}</strong> },
+          { key: "company", label: "Company", render: (row) => row.company },
           { key: "period", label: "Period", render: (row) => row.period },
-          { key: "status", label: "Status", render: (row) => `Status ${row.transfer_status}` },
+          { key: "status", label: "Status", render: (row) => row.status },
           { key: "total", label: "Total", render: (row) => row.total ?? "—" }
         ]}
       />
