@@ -108,7 +108,7 @@ function toCompanySettings(r: any): CompanySettings {
 export async function list(): Promise<{
   items: CompanySettings[];
 }> {
-  await requireCapability("company.read");
+  await requireCapability("company.read.assigned");
 
   // TODO: Resolve company from session context once user→company mapping is available.
   // For now, returns all companies the user has access to.
@@ -133,7 +133,7 @@ export async function list(): Promise<{
 export async function get(
   companyId: number,
 ): Promise<CompanySettings | null> {
-  await requireCapability("company.read");
+  await requireCapability("company.read.assigned");
 
   const company = await prisma.company.findFirst({
     where: { company_id: companyId, deleted: 0 },
@@ -154,7 +154,7 @@ export async function update(
   companyId: number,
   input: UpdateCompanySettingsInput,
 ): Promise<CompanySettingsActionResult> {
-  await requireCapability("company.write");
+  await requireCapability("company.write.linked");
 
   const parsed = updateCompanySettingsSchema.safeParse(input);
   if (!parsed.success) {
