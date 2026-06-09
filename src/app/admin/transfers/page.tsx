@@ -3,13 +3,13 @@ import Link from "next/link";
 import { requireRoleCapability } from "@/modules/auth/session";
 import { DataTable } from "@/modules/workspace/DataTable";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
-import { getAdminTransferRows } from "@/modules/workspace/data";
+import { listAdminTransfers } from "./actions";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminTransfersPage() {
   const session = await requireRoleCapability("admin", "finance.read");
-  const rows = await getAdminTransferRows();
+  const rows = await listAdminTransfers();
   const latest = rows[0];
 
   return (
