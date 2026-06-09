@@ -4,6 +4,7 @@ import { requireRoleCapability } from "@/modules/auth/session";
 import { DetailSection } from "@/modules/workspace/DetailPanels";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { getTransfer } from "../actions";
+import { getAdminTransferDetail } from "@/modules/workspace/data";
 import { TransferActionBar } from "@/modules/finance/TransferActionBar";
 import { formatDate, formatMoney } from "@/modules/workspace/format";
 
