@@ -189,6 +189,16 @@
   opacity: 1;
 }
 
+/* ── Sidebar divider between nav and footer ──────────────────────────── */
+.workspaceRailDivider {
+  height: 1px;
+  margin: 2px 10px;
+  background: var(--sh-glass-border);
+  transition:
+    margin 300ms var(--sh-easing),
+    opacity 200ms var(--sh-easing);
+}
+
 /* ── Sidebar Footer ─────────────────────────────────────────────────── */
 .workspaceRailFooter {
   width: 44px;
@@ -236,6 +246,20 @@
   background: var(--sh-glass-bg-strong);
   border-color: var(--sh-glass-border-strong);
   color: var(--ink);
+}
+
+/* Sign-out button icon + text — matches nav item pattern */
+.workspaceRailFooter button svg {
+  flex-shrink: 0;
+}
+
+.workspaceRailFooter button span {
+  opacity: 0;
+  transition: opacity 150ms var(--sh-easing) 50ms;
+}
+
+.workspaceRail:hover .workspaceRailFooter button span {
+  opacity: 1;
 }
 
 /* ── Workspace Stage (content area) ─────────────────────────────────── */
