@@ -59,7 +59,9 @@ export type Capability =
   | "notes.update"
   | "notes.delete"
   | "suggestion.read"
-  | "suggestion.write";
+  | "suggestion.write"
+  | "company.read"
+  | "admin.system";
 
 export type SessionUser = {
   role: Role;
