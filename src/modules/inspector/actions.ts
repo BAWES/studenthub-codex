@@ -254,3 +254,119 @@ export async function rejectRequest(
   revalidatePath("/inspector/requests");
   return { success: true };
 }
+
+// ---------------------------------------------------------------------------
+// Inspector account actions (STU-1292)
+// ---------------------------------------------------------------------------
+
+export const listInspectorsSchema = z.object({
+  page: z.number().int().positive().optional(),
+  limit: z.number().int().min(1).max(100).optional(),
+});
+
+export const getInspectorSchema = z.object({
+  uuid: z.string().min(1, "Inspector UUID is required"),
+});
+
+export type ListInspectorsInput = z.input<typeof listInspectorsSchema>;
+export type GetInspectorInput = z.input<typeof getInspectorSchema>;
+
+export type InspectorAccountItem = {
+  inspector_uuid: string;
+  inspector_name: string;
+  inspector_email: string;
+  inspector_status: number;
+  inspector_created_at: Date;
+  inspector_updated_at: Date;
+};
+
+export type ListInspectorsResult = {
+  inspectors: InspectorAccountItem[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+};
+
+/**
+ * List inspector accounts with pagination.
+ * Excludes soft-deleted inspectors and sensitive fields (password hash,
+ * auth key, reset token, IP address).
+ * Mirrors the legacy Yii2 InspectorController::actionList().
+ */
+export async function listInspectors(
+  params: ListInspectorsInput = {},
+): Promise<ListInspectorsResult> {
+  await requireCapability("app.access");
+
+  const parsed = listInspectorsSchema.safeParse(params);
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid list parameters");
+  }
+
+  const { page = 1, limit = 20 } = parsed.data;
+
+  const where: Record<string, unknown> = {
+    inspector_deleted: 0,
+  };
+
+  const [inspectors, total] = await Promise.all([
+    prisma.inspector.findMany({
+      where: where as any,
+      orderBy: { inspector_name: "asc" },
+      skip: (page - 1) * limit,
+      take: limit,
+    }),
+    prisma.inspector.count({ where: where as any }),
+  ]);
+
+  return {
+    inspectors: inspectors.map((i) => ({
+      inspector_uuid: i.inspector_uuid,
+      inspector_name: i.inspector_name,
+      inspector_email: i.inspector_email,
+      inspector_status: i.inspector_status,
+      inspector_created_at: i.inspector_created_at,
+      inspector_updated_at: i.inspector_updated_at,
+    })),
+    total,
+    page,
+    limit,
+    totalPages: Math.ceil(total / limit),
+  };
+}
+
+/**
+ * Get a single inspector account by UUID.
+ * Mirrors the legacy Yii2 InspectorController::actionView($id).
+ * Excludes sensitive fields (password hash, auth key, reset token, IP).
+ */
+export async function getInspector(
+  params: GetInspectorInput,
+): Promise<InspectorAccountItem> {
+  await requireCapability("app.access");
+
+  const parsed = getInspectorSchema.safeParse(params);
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid parameters");
+  }
+
+  const { uuid } = parsed.data;
+
+  const inspector = await prisma.inspector.findUnique({
+    where: { inspector_uuid: uuid },
+  });
+
+  if (!inspector) {
+    throw new Error("Inspector not found");
+  }
+
+  return {
+    inspector_uuid: inspector.inspector_uuid,
+    inspector_name: inspector.inspector_name,
+    inspector_email: inspector.inspector_email,
+    inspector_status: inspector.inspector_status,
+    inspector_created_at: inspector.inspector_created_at,
+    inspector_updated_at: inspector.inspector_updated_at,
+  };
+}
