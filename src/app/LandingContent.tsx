@@ -1,24 +1,17 @@
 "use client";
 
+import { useEffect, useState, useCallback } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import {
-  UserRound,
-  Briefcase,
-  Building2,
-  Shield,
-  ClipboardCheck,
-  Zap,
-  Globe,
-  BarChart3,
-  Layers,
-  ChevronRight,
-  Sparkles,
-} from "lucide-react";
+import { ChevronRight, Sparkles } from "lucide-react";
 import { ThemeToggle } from "@/modules/theme/ThemeToggle";
-import { GlassPanel } from "@/components/ui/glass-panel";
-import { portalContent } from "@/modules/auth/portalContent";
 import { HeroSection } from "@/components/marketing";
-import type { Role } from "@/modules/auth/types";
+import { FeatureGrid } from "@/components/marketing";
+import { TestimonialCarousel } from "@/components/marketing";
+import { PricingCard } from "@/components/marketing";
+import { ComparisonTable } from "@/components/marketing";
+import { PersonaSwitcher } from "@/components/marketing";
+import type { SwitcherPersona } from "@/components/marketing";
 
 // ── Props ─────────────────────────────────────────────────────
 
@@ -31,72 +24,121 @@ export interface LandingContentProps {
   } | null;
 }
 
-// ── Data ──────────────────────────────────────────────────────
+// ── Valid personas ────────────────────────────────────────────
 
-const benefits = [
-  {
-    title: "Purpose-built portals",
-    body: "Each role gets exactly the right tools — no clutter, no missing features, no one-size-fits-all compromises.",
-  },
-  {
-    title: "Smart candidate search",
-    body: "Typo-tolerant, filter-rich search across countries, skills, and statuses. Saved searches for repeat workflows.",
-  },
-  {
-    title: "End-to-end workflows",
-    body: "From profile readiness to timesheets and payments — every step is connected in one system.",
-  },
-  {
-    title: "Production-grade foundation",
-    body: "Built for real data volumes, real teams, and real compliance — not a prototype.",
-  },
+const VALID_PERSONAS: SwitcherPersona[] = [
+  "candidate",
+  "company",
+  "staff",
+  "admin",
+  "inspector",
 ];
 
-const platformStats = [
-  { number: "128+", label: "Data models", icon: Layers },
-  { number: "5", label: "Role-specific portals", icon: Globe },
-  { number: "35+", label: "Production routes", icon: BarChart3 },
-  { number: "99.9%", label: "Uptime target", icon: Zap },
-];
+function parsePersona(raw: string | null): SwitcherPersona {
+  if (raw && VALID_PERSONAS.includes(raw as SwitcherPersona)) {
+    return raw as SwitcherPersona;
+  }
+  return "candidate";
+}
 
-const portalRoles: Role[] = ["candidate", "staff", "company", "admin", "inspector"];
+// ── Persona → signup role mapping ─────────────────────────────
 
-const portalIcons: Record<Role, React.ComponentType<{ className?: string }>> = {
-  candidate: UserRound,
-  staff: Briefcase,
-  company: Building2,
-  admin: Shield,
-  inspector: ClipboardCheck,
+const signupRoles: Record<SwitcherPersona, string> = {
+  candidate: "candidate",
+  company: "company",
+  staff: "staff",
+  admin: "admin",
+  inspector: "inspector",
 };
 
-// ── Feature card data (simplified, integrated into FeatureGrid) ──
+// ── Nav CTA copy ──────────────────────────────────────────────
 
-const featureCards = [
-  {
-    icon: Zap,
-    title: "Global search",
-    body: "Typo-tolerant search across countries, skills, and statuses. One keystroke finds any candidate.",
-    stat: "0.4s avg response",
-  },
-  {
-    icon: Layers,
-    title: "Purpose-built portals",
-    body: "Each role gets exactly the right tools — no clutter, no missing features, no one-size-fits-all compromises.",
-    stat: "5 role-specific portals",
-  },
-  {
-    icon: Globe,
-    title: "End-to-end workflows",
-    body: "From profile readiness to timesheets and payments — every step is connected in one system.",
-    stat: "Integrated pipelines",
-  },
-];
+const navCtaLabel: Record<SwitcherPersona, string> = {
+  candidate: "Create free candidate profile",
+  company: "Set up company account",
+  staff: "Request staff access",
+  admin: "Request admin access",
+  inspector: "Request inspector access",
+};
+
+const finalCtaEyebrow: Record<SwitcherPersona, string> = {
+  candidate: "Start your placement journey",
+  company: "Start hiring today",
+  staff: "Start placing faster",
+  admin: "Take control of operations",
+  inspector: "Streamline your inspections",
+};
+
+const finalCtaTitle: Record<SwitcherPersona, string> = {
+  candidate: "Your next role is one profile away.",
+  company: "Your next hire is one post away.",
+  staff: "Your next placement is one search away.",
+  admin: "Your next dashboard is one login away.",
+  inspector: "Your next batch is one review away.",
+};
+
+const finalCtaBody: Record<SwitcherPersona, string> = {
+  candidate:
+    "Create your free profile in under 3 minutes. No CV required — just your experience and what you're looking for. Employers are hiring right now.",
+  company:
+    "Post your first opening and get matched candidates within 48 hours. Set up your company account in under 5 minutes.",
+  staff:
+    "Start searching, shortlisting, and placing candidates immediately. Access the full staffing toolkit from day one.",
+  admin:
+    "Get full visibility across users, finances, compliance, and payroll. One workspace replaces a dozen logins.",
+  inspector:
+    "Start reviewing document batches with full audit trails. Clear your queue and maintain compliance from day one.",
+};
+
+const finalCtaButton: Record<SwitcherPersona, string> = {
+  candidate: "Create your free candidate profile",
+  company: "Set up your company account",
+  staff: "Get staff access",
+  admin: "Get admin access",
+  inspector: "Get inspector access",
+};
+
+const finalCtaProof: Record<SwitcherPersona, string> = {
+  candidate: "1,200+ candidates placed this year · 4.8★ satisfaction",
+  company: "200+ employers hiring · 3-day avg time-to-shortlist",
+  staff: "350+ agencies · 62% faster placement",
+  admin: "15,000+ worker records managed · 99.7% audit pass rate",
+  inspector: "10,000+ documents reviewed monthly · Full audit trails",
+};
 
 // ── Component ─────────────────────────────────────────────────
 
 export default function LandingContent({ session }: LandingContentProps) {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const [persona, setPersona] = useState<SwitcherPersona>("candidate");
+
+  // Sync persona from URL on mount and on change
+  useEffect(() => {
+    const raw = searchParams.get("persona");
+    setPersona(parsePersona(raw));
+  }, [searchParams]);
+
+  // When persona changes, update the URL
+  const handlePersonaChange = useCallback(
+    (newPersona: SwitcherPersona) => {
+      const params = new URLSearchParams(searchParams.toString());
+      if (newPersona === "candidate") {
+        params.delete("persona");
+      } else {
+        params.set("persona", newPersona);
+      }
+      const qs = params.toString();
+      router.replace(qs ? `/?${qs}` : "/", { scroll: false });
+    },
+    [router, searchParams],
+  );
+
+  const role = signupRoles[persona];
+  const isLoggedIn = Boolean(session);
+
   return (
-    <main className="min-h-svh w-[min(1320px,calc(100%_-_28px))] mx-auto grid content-start gap-4 pt-[18px] pb-[42px] max-sm:w-[min(calc(100%_-_20px),720px)]">
+    <main className="min-h-svh w-[min(1320px,calc(100%_-_28px))] mx-auto grid content-start gap-6 pt-[18px] pb-[42px] max-sm:w-[min(calc(100%_-_20px),720px)]">
       {/* ── Glass Navigation ── */}
       <nav className="shGlassNav" aria-label="StudentHub public navigation">
         <div className="shGlassNavInner">
@@ -110,7 +152,7 @@ export default function LandingContent({ session }: LandingContentProps) {
             <strong>StudentHub</strong>
           </Link>
           <div className="flex items-center gap-3.5 max-sm:flex-col max-sm:items-stretch">
-            {session ? (
+            {isLoggedIn ? (
               <Link
                 href="/app"
                 className="uiButton uiButton_default uiButton_defaultSize"
@@ -120,10 +162,10 @@ export default function LandingContent({ session }: LandingContentProps) {
             ) : (
               <>
                 <Link
-                  href="/signup?role=candidate"
+                  href={`/signup?role=${role}`}
                   className="uiButton uiButton_default uiButton_defaultSize"
                 >
-                  Get started <Sparkles className="size-3.5" />
+                  {navCtaLabel[persona]} <Sparkles className="size-3.5" />
                 </Link>
                 <Link
                   href="/login"
@@ -138,147 +180,100 @@ export default function LandingContent({ session }: LandingContentProps) {
         </div>
       </nav>
 
-      {/* ── Hero section — Candidate persona ── */}
-      <HeroSection persona="candidate" />
+      {/* ── Persona switcher — pick your role ── */}
+      <PersonaSwitcher active={persona} onChange={handlePersonaChange} />
 
-      {/* ── Platform stats bar ── */}
+      {/* ── Hero section — persona-specific ── */}
+      <HeroSection persona={persona} />
+
+      {/* ── Feature grid — persona-specific ── */}
+      <FeatureGrid persona={persona} />
+
+      {/* ── Social proof — persona-specific testimonials ── */}
+      <TestimonialCarousel persona={persona} />
+
+      {/* ── Comparison table — persona-specific ── */}
+      <ComparisonTable persona={persona} />
+
+      {/* ── Pricing — persona-specific ── */}
+      <PricingCard persona={persona} />
+
+      {/* ── Final CTA section — persona-aware ── */}
       <section
-        className="shSection grid grid-cols-2 sm:grid-cols-4 gap-2.5 p-6 rounded-xl"
+        className="shSection relative overflow-hidden rounded-xl p-[clamp(24px,5vw,60px)] text-center"
         style={{
           background: "var(--sh-glass-bg)",
           border: "1px solid var(--sh-glass-border)",
         }}
-        aria-label="Platform at a glance"
+        aria-label="Get started"
       >
-        {platformStats.map((stat, i) => {
-          const Icon = stat.icon;
-          return (
-            <div
-              key={stat.label}
-              className="shCard flex items-center gap-3 max-sm:flex-col max-sm:text-center"
-              style={{ animationDelay: `${i * 80 + 100}ms` }}
-            >
-              <Icon
-                className="size-8 shrink-0"
-                style={{ color: "var(--sh-info)" }}
-                aria-hidden="true"
-              />
-              <div>
-                <strong className="text-xl block" style={{ color: "var(--ink)" }}>
-                  {stat.number}
-                </strong>
-                <small style={{ color: "var(--muted)" }}>{stat.label}</small>
-              </div>
-            </div>
-          );
-        })}
-      </section>
+        {/* Ambient gradient */}
+        <div className="shHeroGradientDramatic" aria-hidden="true" />
 
-      {/* ── Feature highlights ── */}
-      <section
-        className="shSection grid grid-cols-1 sm:grid-cols-3 gap-2.5"
-        aria-label="Key features"
-      >
-        {featureCards.map((feat, i) => {
-          const Icon = feat.icon;
-          return (
-            <div
-              key={feat.title}
-              className="shCard rounded-xl p-5"
-              style={{
-                background: "var(--sh-glass-bg)",
-                border: "1px solid var(--sh-glass-border)",
-                animationDelay: `${i * 100 + 150}ms`,
-              }}
-            >
-              <Icon className="size-5 mb-3" style={{ color: "var(--sh-info)" }} aria-hidden="true" />
-              <strong className="shCardTitle">{feat.title}</strong>
-              <p className="shCardBody">{feat.body}</p>
-              <span className="shCardStat">{feat.stat}</span>
-            </div>
-          );
-        })}
-      </section>
-
-      {/* ── Portal grid ── */}
-      <section
-        className="shSection grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 max-sm:gap-2"
-        aria-label="StudentHub role portals"
-      >
-        {portalRoles.map((role, i) => {
-          const portal = portalContent[role];
-          const Icon = portalIcons[role];
-          return (
+        <div className="relative z-[2] max-w-[640px] mx-auto">
+          <p className="text-[var(--sh-info)] text-[11px] font-black uppercase tracking-wider mb-2">
+            {finalCtaEyebrow[persona]}
+          </p>
+          <h2 className="shBenefitsTitle text-center">
+            {finalCtaTitle[persona]}
+          </h2>
+          <p
+            className="max-w-[480px] mx-auto mt-2 mb-6 leading-relaxed"
+            style={{ color: "var(--muted)" }}
+          >
+            {finalCtaBody[persona]}
+          </p>
+          {isLoggedIn ? (
             <Link
-              href={portal.href}
-              key={role}
-              className="shPortalCard group no-underline"
+              href="/app"
+              className="uiButton uiButton_default uiButton_lg shGlowButton"
             >
-              <GlassPanel
-                variant="subtle"
-                radius="lg"
-                className="shCard h-full transition-all duration-[280ms] group-hover:-translate-y-0.5 group-hover:shadow-[0_16px_45px_rgba(16,24,40,0.1)] cursor-pointer"
-                style={{ animationDelay: `${i * 80 + 100}ms` }}
-              >
-                <div className="flex flex-col gap-2 p-4">
-                  <Icon
-                    className="size-5 shrink-0 text-[var(--sh-info)]"
-                    aria-hidden="true"
-                  />
-                  <span className="text-[var(--sh-info)] text-[11px] font-black uppercase">
-                    {portal.label}
-                  </span>
-                  <strong className="text-sm" style={{ color: "var(--ink)" }}>
-                    {portal.audience}
-                  </strong>
-                  <small
-                    className="text-xs leading-relaxed"
-                    style={{ color: "var(--muted)" }}
-                  >
-                    {portal.promise}
-                  </small>
-                </div>
-              </GlassPanel>
+              Open app <ChevronRight className="size-4" />
             </Link>
-          );
-        })}
+          ) : (
+            <Link
+              href={`/signup?role=${role}`}
+              className="uiButton uiButton_default uiButton_lg shGlowButton"
+            >
+              {finalCtaButton[persona]} <ChevronRight className="size-4" />
+            </Link>
+          )}
+          <div
+            className="flex items-center justify-center gap-4 mt-4 text-xs"
+            style={{ color: "var(--muted)" }}
+          >
+            {finalCtaProof[persona].split("·").map((part, i) => (
+              <span key={i}>
+                {part.trim()}
+              </span>
+            ))}
+          </div>
+        </div>
       </section>
 
-      {/* ── Benefits ── */}
-      <section
-        className="shSection shBenefitSection"
-        aria-label="Why StudentHub"
+      {/* ── Footer ── */}
+      <footer
+        className="shSection flex items-center justify-between pt-4 pb-2 text-xs"
+        style={{ color: "var(--muted)" }}
       >
-        <div>
-          <p className="text-[var(--sh-info)] text-[11px] font-black uppercase tracking-wider">
-            Why StudentHub
-          </p>
-          <h2 className="shBenefitsTitle">Built for how staffing actually works.</h2>
-          <p className="leading-relaxed" style={{ color: "var(--muted)" }}>
-            Not a generic dashboard. Every feature is shaped by real placement workflows — search,
-            shortlisting, document exchange, timesheets, and payments run in one system.
-          </p>
+        <span>&copy; {new Date().getFullYear()} StudentHub. All rights reserved.</span>
+        <div className="flex items-center gap-4">
+          <Link
+            href="/login"
+            className="hover:text-[var(--ink)] transition-colors no-underline"
+            style={{ color: "inherit" }}
+          >
+            Sign in
+          </Link>
+          <Link
+            href={`/signup?role=${role}`}
+            className="hover:text-[var(--ink)] transition-colors no-underline"
+            style={{ color: "inherit" }}
+          >
+            Sign up as {persona}
+          </Link>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-          {benefits.map((b, i) => (
-            <div
-              key={b.title}
-              className="shCard shBenefitCard"
-              style={{ animationDelay: `${i * 80 + 200}ms` }}
-            >
-              <strong className="text-sm" style={{ color: "var(--ink)" }}>
-                {b.title}
-              </strong>
-              <p
-                className="text-xs leading-relaxed m-0"
-                style={{ color: "var(--muted)" }}
-              >
-                {b.body}
-              </p>
-            </div>
-          ))}
-        </div>
-      </section>
+      </footer>
     </main>
   );
 }
