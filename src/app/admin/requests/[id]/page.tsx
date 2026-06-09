@@ -4,7 +4,7 @@ import { requireRoleCapability } from "@/modules/auth/session";
 import { RequestFulfillmentOS } from "@/modules/requests/RequestFulfillmentOS";
 import { RequestActionBar } from "@/modules/requests/RequestActionBar";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
-import { getRequestDetail } from "@/modules/workspace/data";
+import { getRequestDetail } from "@/modules/workspace/data/shared";
 
 export const dynamic = "force-dynamic";
 
