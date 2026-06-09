@@ -60,8 +60,9 @@ export type Capability =
   | "notes.delete"
   | "suggestion.read"
   | "suggestion.write"
-  | "company.read"
-  | "admin.system";
+  | "tickets.read"
+  | "tickets.create"
+  | "company.read";
 
 export type SessionUser = {
   role: Role;

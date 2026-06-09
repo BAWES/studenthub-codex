@@ -89,6 +89,10 @@ export type ViewReportResult = EvaluationDetail | null;
 /**
  * List evaluation questions by department ID.
  * Maps to legacy GET /staff/v1/candidate-evaluation/list-question-by-dept/{id}
+ *
+ * NOTE: candidate_eval_dept_ques and candidate_evaluation_answer are
+ * @@ignore in Prisma (no valid unique identifier). Use raw SQL for these
+ * tables.
  */
 export async function listQuestionsByDepartment(
   params: ListQuestionsParams,
