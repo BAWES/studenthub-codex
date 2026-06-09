@@ -1,5 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { z } from "zod";
+import { payByWalletSchema } from "./actions";
+import type { PayByWalletState } from "./actions";
 
 // ---------------------------------------------------------------------------
 // Pure logic: balance schema validation
@@ -144,5 +146,90 @@ describe("initTransfer — amount validation", () => {
   it("rejects empty string", () => {
     const result = initTransferFormDataSchema.safeParse({ amount: "" });
     expect(result.success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Schema tests — payByWallet
+// ---------------------------------------------------------------------------
+
+describe("payByWalletSchema", () => {
+  it("accepts a valid positive amount", () => {
+    const r = payByWalletSchema.safeParse({ amount: 10.5 });
+    expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data.amount).toBe(10.5);
+    }
+  });
+
+  it("accepts a whole number amount", () => {
+    const r = payByWalletSchema.safeParse({ amount: 100 });
+    expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data.amount).toBe(100);
+    }
+  });
+
+  it("rejects zero amount", () => {
+    const r = payByWalletSchema.safeParse({ amount: 0 });
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects negative amount", () => {
+    const r = payByWalletSchema.safeParse({ amount: -50 });
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects NaN amount", () => {
+    const r = payByWalletSchema.safeParse({ amount: NaN });
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects Infinity amount", () => {
+    const r = payByWalletSchema.safeParse({ amount: Infinity });
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects non-numeric amount", () => {
+    const r = payByWalletSchema.safeParse({ amount: "abc" });
+    expect(r.success).toBe(false);
+  });
+
+  it("coerces string number to number", () => {
+    const r = payByWalletSchema.safeParse({ amount: "25.50" });
+    expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data.amount).toBe(25.5);
+    }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Type shape tests — PayByWalletState
+// ---------------------------------------------------------------------------
+
+describe("PayByWalletState type", () => {
+  it("has success state shape", () => {
+    const state: PayByWalletState = { success: true };
+    expect(state.success).toBe(true);
+    expect(state.error).toBeUndefined();
+  });
+
+  it("has error state shape", () => {
+    const state: PayByWalletState = {
+      success: false,
+      error: "Insufficient balance.",
+    };
+    expect(state.success).toBe(false);
+    expect(state.error).toBe("Insufficient balance.");
+  });
+
+  it("allows error without success", () => {
+    const state: PayByWalletState = {
+      success: false,
+      error: "Something went wrong.",
+    };
+    expect(state.success).toBe(false);
+    expect(state.error).toBeDefined();
   });
 });
