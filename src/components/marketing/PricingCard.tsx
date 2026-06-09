@@ -28,7 +28,7 @@ export interface PricingCardProps {
 const candidateTiers: PricingTier[] = [
   {
     name: "Free",
-    description: "Get started with a complete candidate profile.",
+    description: "Free profile, no commitments.",
     monthlyPrice: 0,
     annualPrice: 0,
     features: [
@@ -93,7 +93,7 @@ const companyTiers: PricingTier[] = [
     ctaHref: "/signup?role=company",
   },
   {
-    name: "Growth",
+    name: "Professional",
     description: "AI matching and priority placement.",
     monthlyPrice: 599,
     annualPrice: 499,
@@ -107,7 +107,7 @@ const companyTiers: PricingTier[] = [
       "Dedicated account manager",
     ],
     cta: "Scale your hiring",
-    ctaHref: "/signup?role=company&plan=growth",
+    ctaHref: "/signup?role=company&plan=professional",
   },
   {
     name: "Enterprise",
@@ -127,12 +127,96 @@ const companyTiers: PricingTier[] = [
   },
 ];
 
+const staffTiers: PricingTier[] = [
+  {
+    name: "Starter",
+    description: "For small agencies getting started with shift management.",
+    monthlyPrice: 0,
+    annualPrice: 0,
+    features: [
+      "Staff shift scheduling",
+      "Candidate shortlisting",
+      "Basic reporting",
+      "Email support",
+    ],
+    cta: "Start for free",
+    ctaHref: "/signup?role=staff",
+  },
+  {
+    name: "Professional",
+    description: "Advanced tools for growing staffing operations.",
+    monthlyPrice: 49,
+    annualPrice: 39,
+    popular: true,
+    features: [
+      "Everything in Starter",
+      "AI candidate matching",
+      "Priority placement tools",
+      "Multi-agency management",
+      "Advanced analytics",
+      "Priority support",
+    ],
+    cta: "Go Professional",
+    ctaHref: "/signup?role=staff&plan=professional",
+  },
+  {
+    name: "Enterprise",
+    description: "Full platform integration for large agencies.",
+    monthlyPrice: 0,
+    annualPrice: 0,
+    features: [
+      "Everything in Professional",
+      "API access and custom integrations",
+      "Bulk candidate import/export",
+      "Compliance and audit tools",
+      "SLA and dedicated support",
+      "Custom pricing",
+    ],
+    cta: "Contact sales",
+    ctaHref: "/contact",
+  },
+];
+
+const inspectorTiers: PricingTier[] = [
+  {
+    name: "Starter",
+    description: "Essential tools for independent inspectors.",
+    monthlyPrice: 0,
+    annualPrice: 0,
+    features: [
+      "Inspect and verify candidates",
+      "Document review tools",
+      "Basic reporting",
+      "Email support",
+    ],
+    cta: "Start for free",
+    ctaHref: "/signup?role=inspector",
+  },
+  {
+    name: "Professional",
+    description: "Advanced tools for professional inspection firms.",
+    monthlyPrice: 79,
+    annualPrice: 65,
+    popular: true,
+    features: [
+      "Everything in Starter",
+      "Bulk document processing",
+      "AI-assisted verification",
+      "Multi-client management",
+      "Advanced analytics",
+      "Priority support",
+    ],
+    cta: "Go Professional",
+    ctaHref: "/signup?role=inspector&plan=professional",
+  },
+];
+
 const personaTiers: Record<string, PricingTier[]> = {
   candidate: candidateTiers,
-  staff: candidateTiers, // simplified for MVP
+  staff: staffTiers,
   company: companyTiers,
   admin: companyTiers,
-  inspector: candidateTiers,
+  inspector: inspectorTiers,
 };
 
 // ── Component ────────────────────────────────────────────
