@@ -41,6 +41,27 @@ const appealWorklogSchema = z.object({
   reason: z.string().min(10, "Reason must be at least 10 characters").max(1000, "Reason must be 1000 characters or less"),
 });
 
+const getWorklogSchema = z.object({
+  worklogUuid: z.string().min(1, "Work log UUID is required"),
+});
+
+const getWorklogStatsSchema = z.object({
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be YYYY-MM-DD"),
+});
+
+const getWorkingDatesSchema = z.object({
+  startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Start date must be YYYY-MM-DD").optional().or(z.literal("")),
+  endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "End date must be YYYY-MM-DD").optional().or(z.literal("")),
+});
+
+const getAppealDetailSchema = z.object({
+  appealUuid: z.string().min(1, "Appeal UUID is required"),
+});
+
+const markAppealUpdateReadSchema = z.object({
+  appealUpdateUuid: z.string().min(1, "Appeal update UUID is required"),
+});
+
 // ---------------------------------------------------------------------------
 // Response types
 // ---------------------------------------------------------------------------
@@ -341,6 +362,223 @@ export async function appealWorklog(
 }
 
 // ---------------------------------------------------------------------------
+// getWorklog — single worklog by UUID
+// ---------------------------------------------------------------------------
+
+export async function getWorklog(
+  params: z.infer<typeof getWorklogSchema>,
+): Promise<{ worklog: WorklogRow | null; error?: string }> {
+  const session = await requireRoleCapability("candidate", "time.read.own");
+  const candidateId = Number(session.id);
+
+  const parsed = getWorklogSchema.safeParse(params);
+  if (!parsed.success) {
+    return { worklog: null, error: parsed.error.errors[0]?.message ?? "Invalid params." };
+  }
+
+  const row = await prisma.candidate_working_hour.findFirst({
+    where: {
+      candidate_working_hour_uuid: parsed.data.worklogUuid,
+      candidate_id: candidateId,
+    },
+  });
+
+  if (!row) {
+    return { worklog: null, error: "Work log not found." };
+  }
+
+  return {
+    worklog: {
+      uuid: row.candidate_working_hour_uuid,
+      date: row.date ? row.date.toISOString().split("T")[0] : "",
+      startTime: row.start_time ? row.start_time.toISOString() : null,
+      endTime: row.end_time ? row.end_time.toISOString() : null,
+      totalTime: row.total_time,
+      note: row.note,
+      status: row.status ?? 0,
+      via: row.via,
+      storeId: row.store_id,
+    },
+  };
+}
+
+// ---------------------------------------------------------------------------
+// getWorklogStats — aggregated stats per date (checkIn, checkOut, totalTime)
+// ---------------------------------------------------------------------------
+
+export type WorklogStats = {
+  checkIn: string | null;
+  checkOut: string | null;
+  totalTime: number | null;
+  status: number | null;
+};
+
+export async function getWorklogStats(
+  params: z.infer<typeof getWorklogStatsSchema>,
+): Promise<{ stats: WorklogStats | null; error?: string }> {
+  const session = await requireRoleCapability("candidate", "time.read.own");
+  const candidateId = Number(session.id);
+
+  const parsed = getWorklogStatsSchema.safeParse(params);
+  if (!parsed.success) {
+    return { stats: null, error: parsed.error.errors[0]?.message ?? "Invalid params." };
+  }
+
+  const dateObj = new Date(parsed.data.date);
+
+  const [firstSession, lastSession, totalTimeResult] = await Promise.all([
+    prisma.candidate_working_hour.findFirst({
+      where: { date: dateObj, candidate_id: candidateId },
+      orderBy: { created_at: "asc" },
+    }),
+    prisma.candidate_working_hour.findFirst({
+      where: { date: dateObj, candidate_id: candidateId, end_time: { not: null } },
+      orderBy: { created_at: "desc" },
+    }),
+    prisma.candidate_working_hour.aggregate({
+      where: { date: dateObj, candidate_id: candidateId, end_time: { not: null } },
+      _sum: { total_time: true },
+    }),
+  ]);
+
+  return {
+    stats: {
+      checkIn: firstSession?.start_time ? firstSession.start_time.toISOString() : null,
+      checkOut: lastSession?.end_time ? lastSession.end_time.toISOString() : null,
+      totalTime: totalTimeResult._sum.total_time ?? 0,
+      status: lastSession?.status ?? null,
+    },
+  };
+}
+
+// ---------------------------------------------------------------------------
+// getWorkingDates — dates that have worklogs within an optional range
+// ---------------------------------------------------------------------------
+
+export type WorkingDate = {
+  date: string;
+  totalTime: number | null;
+};
+
+export async function getWorkingDates(
+  params: z.infer<typeof getWorkingDatesSchema>,
+): Promise<{ dates: WorkingDate[]; error?: string }> {
+  const session = await requireRoleCapability("candidate", "time.read.own");
+  const candidateId = Number(session.id);
+
+  const parsed = getWorkingDatesSchema.safeParse(params);
+  if (!parsed.success) {
+    return { dates: [], error: parsed.error.errors[0]?.message ?? "Invalid params." };
+  }
+
+  const where: Record<string, unknown> = { candidate_id: candidateId };
+  if (parsed.data.startDate && parsed.data.endDate) {
+    where.date = { gte: new Date(parsed.data.startDate), lte: new Date(parsed.data.endDate) };
+  }
+
+  const rows = await prisma.candidate_working_hour.groupBy({
+    by: ["date"],
+    where: where as any,
+    _sum: { total_time: true },
+    orderBy: { date: "desc" },
+  });
+
+  return {
+    dates: rows.map((r) => ({
+      date: r.date ? r.date.toISOString().split("T")[0] : "",
+      totalTime: r._sum.total_time ?? 0,
+    })),
+  };
+}
+
+// ---------------------------------------------------------------------------
+// getAppealDetail — single appeal by UUID
+// ---------------------------------------------------------------------------
+
+export type AppealDetail = {
+  appealUuid: string;
+  worklogUuid: string;
+  reason: string | null;
+  status: number;
+  createdAt: string;
+};
+
+export async function getAppealDetail(
+  params: z.infer<typeof getAppealDetailSchema>,
+): Promise<{ appeal: AppealDetail | null; error?: string }> {
+  const session = await requireRoleCapability("candidate", "time.read.own");
+  const candidateId = Number(session.id);
+
+  const parsed = getAppealDetailSchema.safeParse(params);
+  if (!parsed.success) {
+    return { appeal: null, error: parsed.error.errors[0]?.message ?? "Invalid params." };
+  }
+
+  const row = await prisma.candidate_working_hour_appeal.findFirst({
+    where: {
+      appeal_uuid: parsed.data.appealUuid,
+      candidate_id: candidateId,
+    },
+  });
+
+  if (!row) {
+    return { appeal: null, error: "Appeal not found." };
+  }
+
+  return {
+    appeal: {
+      appealUuid: row.appeal_uuid,
+      worklogUuid: row.candidate_working_hour_uuid,
+      reason: row.reason ?? null,
+      status: row.status ?? 0,
+      createdAt: row.created_at ? row.created_at.toISOString() : "",
+    },
+  };
+}
+
+// ---------------------------------------------------------------------------
+// markAppealUpdateRead — mark an appeal update as read (is_new -> false)
+// ---------------------------------------------------------------------------
+
+export type MarkAppealUpdateReadState = {
+  success: boolean;
+  error?: string;
+};
+
+export async function markAppealUpdateRead(
+  _prevState: MarkAppealUpdateReadState,
+  formData: FormData,
+): Promise<MarkAppealUpdateReadState> {
+  const session = await requireRoleCapability("candidate", "time.read.own");
+  const candidateId = Number(session.id);
+
+  const parsed = markAppealUpdateReadSchema.safeParse({
+    appealUpdateUuid: formData.get("appealUpdateUuid"),
+  });
+  if (!parsed.success) {
+    return { success: false, error: "Invalid appeal update identifier." };
+  }
+
+  const existing = await prisma.candidate_working_hour_appeal_updates.findFirst({
+    where: {
+      appeal_update_uuid: parsed.data.appealUpdateUuid,
+    },
+    select: { appeal_update_uuid: true },
+  });
+
+  if (!existing) {
+    return { success: false, error: "Appeal update not found." };
+  }
+
+  await prisma.candidate_working_hour_appeal_updates.update({
+    where: { appeal_update_uuid: parsed.data.appealUpdateUuid },
+    data: { is_new: false },
+  });
+
+  return { success: true };
+}
+
+// ---------------------------------------------------------------------------
 // Barrel export
 // ---------------------------------------------------------------------------
 
@@ -350,4 +588,9 @@ export {
   updateWorklogSchema,
   deleteWorklogSchema,
   appealWorklogSchema,
+  getWorklogSchema,
+  getWorklogStatsSchema,
+  getWorkingDatesSchema,
+  getAppealDetailSchema,
+  markAppealUpdateReadSchema,
 };
