@@ -44,6 +44,12 @@ export function RoleLayoutShell({
 
   return (
     <div className="flex flex-col gap-4">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-white focus:text-black focus:rounded focus:ring-2 focus:ring-blue-500"
+      >
+        Skip to content
+      </a>
       <header className="flex items-center justify-between border-b pb-3">
         <div className="flex items-center gap-2">
           <span className="text-muted-foreground">
@@ -74,7 +80,7 @@ export function RoleLayoutShell({
         <Breadcrumbs />
       </div>
 
-      <main className="flex-1">{children}</main>
+      <main id="main-content" className="flex-1">{children}</main>
     </div>
   );
 }
