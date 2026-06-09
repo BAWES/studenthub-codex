@@ -28,51 +28,21 @@ export interface PricingCardProps {
 const candidateTiers: PricingTier[] = [
   {
     name: "Free",
-    description: "Free profile, no commitments.",
+    description: "Completely free for students. No hidden fees, no subscriptions.",
     monthlyPrice: 0,
     annualPrice: 0,
+    popular: true,
     features: [
       "Full candidate profile",
-      "Search and browse open roles",
-      "Apply to unlimited positions",
+      "AI-matched work placements",
+      "3-month rotation positions",
+      "Multiple placements across industries",
+      "Build a stacked CV by graduation",
+      "ID card with QR code for compliance",
       "Email notifications",
-      "Basic application tracking",
     ],
     cta: "Create your free profile",
     ctaHref: "/signup?role=candidate",
-  },
-  {
-    name: "Pro",
-    description: "Stand out and get placed faster.",
-    monthlyPrice: 9,
-    annualPrice: 7,
-    popular: true,
-    features: [
-      "Everything in Free",
-      "Profile boost — appear first in search",
-      "Priority matching with employers",
-      "Advanced application analytics",
-      "CV review and optimization",
-      "Priority support",
-    ],
-    cta: "Go Pro",
-    ctaHref: "/signup?role=candidate&plan=pro",
-  },
-  {
-    name: "Premium",
-    description: "For candidates who want every advantage.",
-    monthlyPrice: 19,
-    annualPrice: 15,
-    features: [
-      "Everything in Pro",
-      "Dedicated placement consultant",
-      "Guaranteed interview within 2 weeks",
-      "Interview coaching and prep",
-      "CV writing service",
-      "Salary negotiation support",
-    ],
-    cta: "Go Premium",
-    ctaHref: "/signup?role=candidate&plan=premium",
   },
 ];
 
@@ -234,7 +204,7 @@ export default function PricingCard({ persona = "candidate", className }: Pricin
         </p>
         <h2 className="shBenefitsTitle text-center">
           {persona === "candidate"
-            ? "Free to start. Upgrade when you're ready."
+            ? "Completely free for students. Always."
             : "Plans that scale with your team."}
         </h2>
         <p
@@ -242,7 +212,7 @@ export default function PricingCard({ persona = "candidate", className }: Pricin
           style={{ color: "var(--muted)" }}
         >
           {persona === "candidate"
-            ? "No upfront cost. No hidden fees. Pay only when you need premium features."
+            ? "Registration is completely free for students. No hidden fees, no subscriptions — ever."
             : "From single openings to enterprise compliance — we have a plan for every stage."}
         </p>
       </div>

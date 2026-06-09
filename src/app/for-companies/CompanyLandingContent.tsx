@@ -24,27 +24,27 @@ export interface CompanyLandingContentProps {
 
 const PAIN_POINTS = [
   {
-    problem: "Sifting through hundreds of applicants who aren't a fit",
+    problem: "Staff sourcing, compliance, and payroll eat your margins",
     solution:
-      "AI matching surfaces only the candidates who meet your requirements. Review 4 qualified profiles, not 400 random CVs.",
+      "StudentHub handles the entire process — sourcing, placement, compliance verification, and payroll. You get pre-vetted student workers on a simple monthly fee or hourly rate. No HR overhead, no recruitment costs.",
   },
   {
-    problem: "Chasing timesheets and invoices across 12 locations",
+    problem: "Workers come and go — you need consistency",
     solution:
-      "Timesheet approvals, consolidated invoicing, and payment processing — all from one dashboard. Month-end close in 3 days.",
+      "StudentHub orchestrates 3-month rotations. When one placement ends, the next student is already matched. Continuity without the management headache. Workers wear ID cards with QR codes for instant compliance verification.",
   },
   {
-    problem: "Compliance risk from expired certifications",
+    problem: "Compliance risk is a business risk",
     solution:
-      "Auto-verify right-to-work documents. Track expiring certs. Maintain audit-ready records without extra headcount.",
+      "Every worker's right-to-work documents, certifications, and ID are verified and tracked through our system. Government inspectors can validate on-site via QR code. Audit-ready from day one, zero extra paperwork for your team.",
   },
 ];
 
 const COMPANY_STATS = [
-  { value: "48h", label: "avg time-to-candidate-match" },
-  { value: "200+", label: "employers hiring on StudentHub" },
-  { value: "99.7%", label: "audit pass rate" },
-  { value: "3d", label: "month-end close" },
+  { value: "48h", label: "avg time to first candidate match" },
+  { value: "200+", label: "companies using StudentHub" },
+  { value: "99.7%", label: "compliance audit pass rate" },
+  { value: "Zero", label: "HR overhead for your team" },
 ];
 
 // ── Component ─────────────────────────────────────────────────
@@ -219,18 +219,18 @@ export default function CompanyLandingContent({
 
         <div className="relative z-[2] max-w-[640px] mx-auto">
           <p className="text-[var(--sh-info)] text-[11px] font-black uppercase tracking-wider mb-2">
-            Start hiring today
+            Let StudentHub handle your workforce
           </p>
           <h2 className="shBenefitsTitle text-center">
-            Your next hire is one post away.
+            Stop managing staff. Start running your business.
           </h2>
           <p
             className="max-w-[480px] mx-auto mt-2 mb-6 leading-relaxed"
             style={{ color: "var(--muted)" }}
           >
-            Post your first opening and get matched candidates within 48 hours.
-            Set up your company account in under 5 minutes. No setup fee, no
-            minimum commitment.
+            StudentHub handles everything — sourcing, placement, compliance, payroll.
+            You get pre-vetted student workers on a simple monthly fee or hourly rate.
+            No recruitment costs, no HR paperwork, no compliance headaches.
           </p>
           {isLoggedIn ? (
             <Link
@@ -251,8 +251,8 @@ export default function CompanyLandingContent({
             className="flex items-center justify-center gap-4 mt-4 text-xs"
             style={{ color: "var(--muted)" }}
           >
-            <span>200+ employers hiring on StudentHub</span>
-            <span>3-day avg time-to-shortlist</span>
+            <span>200+ companies using StudentHub</span>
+            <span>48h avg time to first match</span>
           </div>
         </div>
       </section>
