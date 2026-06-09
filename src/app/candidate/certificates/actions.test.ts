@@ -2,6 +2,9 @@ import { describe, it, expect } from "vitest";
 import {
   listCertificatesSchema,
   getCertificateSchema,
+  createCertificateSchema,
+  updateCertificateSchema,
+  deleteCertificateSchema,
   type CertificateListItem,
   type ListCertificatesResult,
 } from "@/modules/certificates/actions";
@@ -106,5 +109,100 @@ describe("ListCertificatesResult shape", () => {
     };
     expect(result.total).toBe(0);
     expect(result.certificates).toHaveLength(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// createCertificateSchema tests
+// ---------------------------------------------------------------------------
+
+describe("createCertificateSchema", () => {
+  it("rejects empty body (candidateId required)", () => {
+    const result = createCertificateSchema.safeParse({});
+    expect(result.success).toBe(false);
+  });
+
+  it("accepts minimum required fields (candidateId only)", () => {
+    const result = createCertificateSchema.safeParse({ candidateId: 42 });
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts all optional fields", () => {
+    const result = createCertificateSchema.safeParse({
+      certificateType: true,
+      certificateTitle: "IELTS Score Report",
+      certificateIssuer: "British Council",
+      certificateUrl: "https://example.com/cert.pdf",
+      candidateId: 42,
+      candidateWorkHistoryId: 1,
+      examUuid: "exam-abc-123",
+      storeId: 5,
+      companyId: 10,
+      startDate: "2026-01-01",
+      endDate: "2026-12-31",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects non-positive candidateId", () => {
+    expect(createCertificateSchema.safeParse({ candidateId: -1 }).success).toBe(false);
+    expect(createCertificateSchema.safeParse({ candidateId: 0 }).success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// updateCertificateSchema tests
+// ---------------------------------------------------------------------------
+
+describe("updateCertificateSchema", () => {
+  it("rejects empty body (certificateUuid required)", () => {
+    const result = updateCertificateSchema.safeParse({});
+    expect(result.success).toBe(false);
+  });
+
+  it("accepts certificateUuid only (partial update)", () => {
+    const result = updateCertificateSchema.safeParse({ certificateUuid: "some-uuid" });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects empty certificateUuid", () => {
+    expect(updateCertificateSchema.safeParse({ certificateUuid: "" }).success).toBe(false);
+  });
+
+  it("accepts all optional fields", () => {
+    const result = updateCertificateSchema.safeParse({
+      certificateUuid: "abc-123",
+      certificateType: false,
+      certificateTitle: "Updated Title",
+      certificateIssuer: "Updated Issuer",
+      certificateUrl: "https://example.com/updated.pdf",
+      candidateWorkHistoryId: 2,
+      examUuid: "updated-exam",
+      storeId: 6,
+      companyId: 11,
+      parentCompanyId: 3,
+      startDate: "2026-03-01",
+      endDate: "2026-06-30",
+    });
+    expect(result.success).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// deleteCertificateSchema tests
+// ---------------------------------------------------------------------------
+
+describe("deleteCertificateSchema", () => {
+  it("accepts a valid UUID", () => {
+    const result = deleteCertificateSchema.safeParse({ certificateUuid: "abc-123-def-456" });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects empty UUID", () => {
+    expect(deleteCertificateSchema.safeParse({ certificateUuid: "" }).success).toBe(false);
+  });
+
+  it("rejects missing UUID", () => {
+    expect(deleteCertificateSchema.safeParse({}).success).toBe(false);
   });
 });
