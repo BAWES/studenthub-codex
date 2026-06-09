@@ -24,6 +24,8 @@ const roleCapabilities: Record<Role, Capability[]> = {
     "time.approve",
     "finance.read",
     "finance.mutate",
+    "document.read",
+    "document.write",
     "document.export",
     "id_review.read",
     "id_review.mutate",
@@ -51,6 +53,7 @@ const roleCapabilities: Record<Role, Capability[]> = {
     "candidate.evaluation.write",
     "time.read.assigned",
     "time.approve",
+    "document.read",
     "document.export",
     "id_review.read",
     "tickets.read",
@@ -66,6 +69,7 @@ const roleCapabilities: Record<Role, Capability[]> = {
     "time.read.assigned",
     "time.approve",
     "finance.read",
+    "document.read",
     "document.export"
   ],
   candidate: [
