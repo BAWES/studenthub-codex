@@ -1,5 +1,6 @@
 "use server";
 
+import crypto from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
@@ -17,6 +18,12 @@ export const listCandidateNotificationsSchema = z.object({
 
 export const getCandidateNotificationSchema = z.object({
   cnUuid: z.string().min(1, "Notification UUID is required"),
+});
+
+export const createNotificationSchema = z.object({
+  candidateId: z.number().int().positive("Candidate ID is required"),
+  type: z.number().int().min(0).max(255, "Type must be 0–255"),
+  message: z.string().min(1, "Message is required").max(500, "Message too long"),
 });
 
 // ---------------------------------------------------------------------------
@@ -46,6 +53,12 @@ export type ListCandidateNotificationsResult = {
   limit: number;
   totalPages: number;
 };
+
+export type CreateNotificationInput = z.input<typeof createNotificationSchema>;
+
+export type CreateNotificationResult =
+  | { success: true; notificationUuid: string }
+  | { success: false; error: string };
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -164,6 +177,69 @@ export async function getCandidateNotification(
 
   if (!row) return null;
   return toItem(row as PrismaCandidateNotificationRow);
+}
+
+// ---------------------------------------------------------------------------
+// createNotification
+// ---------------------------------------------------------------------------
+
+/**
+ * Create a new notification for a candidate.
+ *
+ * This is an admin/staff action — requires `admin.write` capability.
+ * Generates a UUID, sets is_new=true, and persists to the database.
+ */
+export async function createNotification(
+  params: CreateNotificationInput,
+): Promise<CreateNotificationResult> {
+  try {
+    await requireCapability("admin.write");
+
+    const parsed = createNotificationSchema.safeParse(params);
+    if (!parsed.success) {
+      return {
+        success: false,
+        error: parsed.error.issues[0]?.message ?? "Invalid notification data.",
+      };
+    }
+
+    const { candidateId, type, message } = parsed.data;
+    const now = new Date();
+    const uuid = `notif_${crypto.randomUUID()}`;
+
+    // Verify candidate exists
+    const candidate = await prisma.candidate.findUnique({
+      where: { candidate_id: candidateId },
+      select: { candidate_id: true },
+    });
+
+    if (!candidate) {
+      return { success: false, error: "Candidate not found." };
+    }
+
+    await prisma.candidate_notification.create({
+      data: {
+        cn_uuid: uuid,
+        candidate_id: candidateId,
+        type,
+        message,
+        is_new: true,
+        created_at: now,
+        updated_at: now,
+      },
+    });
+
+    revalidatePath("/candidate/notifications");
+    return { success: true, notificationUuid: uuid };
+  } catch (e) {
+    return {
+      success: false,
+      error:
+        e instanceof Error
+          ? e.message
+          : "Failed to create notification.",
+    };
+  }
 }
 
 // ---------------------------------------------------------------------------

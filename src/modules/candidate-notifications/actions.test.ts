@@ -119,6 +119,110 @@ describe("ListCandidateNotificationsResult shape", () => {
 });
 
 // ---------------------------------------------------------------------------
+// createNotificationSchema tests
+// ---------------------------------------------------------------------------
+
+const createNotificationSchema = z.object({
+  candidateId: z.number().int().positive("Candidate ID is required"),
+  type: z.number().int().min(0).max(255, "Type must be 0–255"),
+  message: z.string().min(1, "Message is required").max(500, "Message too long"),
+});
+
+describe("createNotificationSchema", () => {
+  it("accepts valid notification data", () => {
+    const result = createNotificationSchema.safeParse({
+      candidateId: 42,
+      type: 1,
+      message: "You have a new interview invitation",
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.candidateId).toBe(42);
+      expect(result.data.type).toBe(1);
+      expect(result.data.message).toBe("You have a new interview invitation");
+    }
+  });
+
+  it("rejects missing candidateId", () => {
+    const result = createNotificationSchema.safeParse({
+      type: 1,
+      message: "Test notification",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects missing type", () => {
+    const result = createNotificationSchema.safeParse({
+      candidateId: 42,
+      message: "Test",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects missing message", () => {
+    const result = createNotificationSchema.safeParse({
+      candidateId: 42,
+      type: 1,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects empty message", () => {
+    const result = createNotificationSchema.safeParse({
+      candidateId: 42,
+      type: 1,
+      message: "",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects zero candidateId", () => {
+    const result = createNotificationSchema.safeParse({
+      candidateId: 0,
+      type: 1,
+      message: "Test",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects negative type", () => {
+    const result = createNotificationSchema.safeParse({
+      candidateId: 42,
+      type: -1,
+      message: "Test",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects type over 255", () => {
+    const result = createNotificationSchema.safeParse({
+      candidateId: 42,
+      type: 999,
+      message: "Test",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects message over 500 chars", () => {
+    const result = createNotificationSchema.safeParse({
+      candidateId: 42,
+      type: 1,
+      message: "x".repeat(501),
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("accepts message at exactly 500 chars", () => {
+    const result = createNotificationSchema.safeParse({
+      candidateId: 42,
+      type: 1,
+      message: "x".repeat(500),
+    });
+    expect(result.success).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Mark-read schema tests
 // ---------------------------------------------------------------------------
 

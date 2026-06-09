@@ -4,6 +4,7 @@ import type { SessionUser } from "@/modules/auth/types";
 import type { Route } from "next";
 import { logoutAction } from "@/modules/auth/actions";
 import { ThemeToggle } from "@/modules/theme/ThemeToggle";
+import { LogOut } from "lucide-react";
 import Link from "next/link";
 import { navForRole } from "./navigation";
 import { WorkspaceMobileNavigation, WorkspaceNavigation } from "./WorkspaceNavigation";
@@ -15,6 +16,14 @@ type Metric = {
   label: string;
   value: string | number;
   note: string;
+  /** Trend direction for arrows + colour */
+  trend?: "up" | "down" | "flat";
+  /** Trend change text (e.g. "+12%") */
+  trendLabel?: string;
+  /** Inline sparkline data points (3–12 numbers) */
+  sparklineData?: number[];
+  /** Accent colour for the sparkline & glow */
+  accent?: "primary" | "success" | "warning" | "info";
 };
 
 type Row = {
@@ -52,10 +61,14 @@ export function WorkspaceShell({
         <strong>StudentHub</strong>
       </Link>
       <WorkspaceNavigation items={navItems} role={session.role} />
+      <div className="workspaceRailDivider" aria-hidden="true" />
       <div className="workspaceRailFooter">
         <ThemeToggle />
         <form action={logoutAction}>
-          <button type="submit" aria-label="Sign out">Sign out</button>
+          <button type="submit" aria-label="Sign out">
+            <LogOut size={18} strokeWidth={1.5} aria-hidden="true" />
+            <span>Sign out</span>
+          </button>
         </form>
       </div>
     </aside>
@@ -77,14 +90,17 @@ export function WorkspaceShell({
 
       {metrics.length ? (
         <section className="metrics" aria-label={`${session.role} workspace metrics`}>
-          {metrics.map((metric, idx) => (
+          {metrics.map((metric, i) => (
             <MetricCard
               key={metric.label}
               label={metric.label}
               value={metric.value}
               note={metric.note}
-              delay={idx * 60}
-              accent={idx === 0 ? "info" : "none"}
+              trend={metric.trend}
+              trendLabel={metric.trendLabel}
+              sparklineData={metric.sparklineData}
+              accent={metric.accent}
+              entranceDelay={i * 60}
             />
           ))}
         </section>

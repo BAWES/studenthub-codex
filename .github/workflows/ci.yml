@@ -56,6 +56,8 @@ jobs:
           node-version: 22
           cache: "npm"
       - run: npm ci
+      - name: Generate Prisma client
+        run: npx prisma generate
       - run: npx tsc --noEmit
 
   build:

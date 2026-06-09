@@ -160,6 +160,112 @@
   opacity: 1;
 }
 
+  justify-content: center;
+  gap: 0;
+  border: 1px solid var(--sh-glass-border);
+  border-radius: var(--sh-radius-md);
+  background: var(--ink);
+  color: var(--paper);
+  text-decoration: none;
+  overflow: hidden;
+  transition:
+    width 300ms var(--sh-easing),
+    gap 300ms var(--sh-easing),
+    border-radius 300ms var(--sh-easing),
+    background 200ms var(--sh-easing),
+    border-color 200ms var(--sh-easing);
+}
+
+.workspaceRail:hover .workspaceMark {
+  width: 100%;
+  gap: 10px;
+  padding: 0 10px;
+  justify-content: flex-start;
+}
+
+.workspaceMark span {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 10px;
+  font-weight: var(--weight-bold);
+  line-height: 1;
+}
+
+.workspaceMark strong {
+  font-size: 14px;
+  font-weight: var(--weight-semibold);
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 150ms var(--sh-easing) 50ms;
+}
+
+.workspaceRail:hover .workspaceMark strong {
+  opacity: 1;
+}
+
+/* ── Sidebar Navigation ──────────────────────────────────────────────── */
+.workspaceRailNav {
+  display: grid;
+  align-content: start;
+  gap: 1px;
+  min-width: 0;
+}
+
+.workspaceRailNav a {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  min-height: 34px;
+  padding: 0 0 0 10px;
+  border-radius: var(--sh-radius-sm);
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: var(--weight-medium);
+  overflow: hidden;
+  transition:
+    background 150ms var(--sh-easing),
+    color 150ms var(--sh-easing),
+    gap 300ms var(--sh-easing),
+    padding 300ms var(--sh-easing);
+}
+
+.workspaceRail:hover .workspaceRailNav a {
+  gap: 8px;
+  padding: 0 10px 0 10px;
+}
+
+/* Left-border glow active indicator */
+.workspaceRailNav a::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  translate: 0 -50%;
+  width: 3px;
+  height: 0;
+  border-radius: 0 2px 2px 0;
+  background: var(--sh-info);
+  box-shadow: var(--sh-glow-sm);
+  transition:
+    height 200ms var(--sh-easing),
+    opacity 200ms var(--sh-easing);
+  opacity: 0;
+}
+
+.workspaceRailNav a.active::before {
+  height: 20px;
+  opacity: 1;
+}
+
 .workspaceRailNav a:hover {
   background: var(--sh-glass-bg);
   color: var(--ink);
@@ -185,6 +291,16 @@
 
 .workspaceRail:hover .workspaceRailNav a > strong {
   opacity: 1;
+}
+
+/* ── Sidebar divider between nav and footer ──────────────────────────── */
+.workspaceRailDivider {
+  height: 1px;
+  margin: 2px 10px;
+  background: var(--sh-glass-border);
+  transition:
+    margin 300ms var(--sh-easing),
+    opacity 200ms var(--sh-easing);
 }
 
 /* ── Sidebar Footer ─────────────────────────────────────────────────── */
@@ -236,10 +352,23 @@
   color: var(--ink);
 }
 
+/* Sign-out button icon + text — matches nav item pattern */
+.workspaceRailFooter button svg {
+  flex-shrink: 0;
+}
+
+.workspaceRailFooter button span {
+  opacity: 0;
+  transition: opacity 150ms var(--sh-easing) 50ms;
+}
+
+.workspaceRail:hover .workspaceRailFooter button span {
+  opacity: 1;
+}
+
 /* ── Workspace Stage (content area) ─────────────────────────────────── */
 .workspaceStage {
   min-width: 0;
-  width: 100%;
   overflow-x: hidden;
   display: grid;
   align-content: start;
@@ -261,6 +390,9 @@
   margin-bottom: 4px;
   border-radius: var(--sh-radius-lg);
   background: var(--sh-glass-bg-strong);
+  padding: 0 16px;
+  border-radius: var(--sh-radius-lg);
+  background: var(--sh-glass-bg);
   backdrop-filter: blur(var(--sh-glass-blur));
   -webkit-backdrop-filter: blur(var(--sh-glass-blur));
   border: 1px solid var(--sh-glass-border);
@@ -640,6 +772,627 @@
 
   .shellEmbedded {
     padding-bottom: 64px;
+  font-size: 11px;
+  font-weight: var(--weight-medium);
+  line-height: 1;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.topbar h1 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: var(--weight-semibold);
+  line-height: 1.2;
+  color: var(--ink);
+}
+
+/* ── PageHeader — Consistent Page Title + Actions ──────────────────── */
+.shPageHeader {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 24px;
+  animation: shPageHeaderIn 280ms var(--sh-easing) both;
+}
+
+.shPageHeader_noSpacing {
+  margin-bottom: 0;
+}
+
+/* Breadcrumb trail */
+.shPageHeader-crumbs ol {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.shPageHeader-crumbs li {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 12px;
+  font-weight: var(--weight-medium);
+  line-height: 1;
+  color: var(--muted);
+}
+
+.shPageHeader-crumbLink {
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 160ms var(--sh-easing);
+}
+
+.shPageHeader-crumbLink:hover {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.shPageHeader-crumbText {
+  color: var(--faint);
+}
+
+.shPageHeader-crumbCurrent {
+  color: var(--ink);
+  font-weight: var(--weight-semibold);
+}
+
+.shPageHeader-crumbChevron {
+  color: var(--faint);
+  flex-shrink: 0;
+}
+
+/* Title row — title on left, action on right */
+.shPageHeader-titleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.shPageHeader-titleGroup {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+/* Back button */
+.shPageHeader-back {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--sh-radius-sm);
+  color: var(--muted);
+  background: var(--sh-glass-bg);
+  border: 1px solid var(--sh-glass-border);
+  text-decoration: none;
+  flex-shrink: 0;
+  transition:
+    background 160ms var(--sh-easing),
+    border-color 160ms var(--sh-easing),
+    color 160ms var(--sh-easing);
+}
+
+.shPageHeader-back:hover {
+  background: var(--sh-glass-bg-strong);
+  border-color: var(--sh-glass-border-strong);
+  color: var(--ink);
+}
+
+.shPageHeader-back:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Title */
+.shPageHeader-title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: var(--weight-semibold);
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Primary action slot */
+.shPageHeader-action {
+  flex-shrink: 0;
+}
+
+/* Description */
+.shPageHeader-desc {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--muted);
+  max-width: 560px;
+}
+
+/* ── Entrance animation ────────────────────────────────────────────── */
+@keyframes shPageHeaderIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Account Box ────────────────────────────────────────────────────── */
+.accountBox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
+  padding: 0 12px;
+  border-radius: var(--sh-radius-sm);
+  background: var(--sh-glass-bg);
+  border: 1px solid var(--sh-glass-border);
+  cursor: default;
+  transition:
+    background 180ms var(--sh-easing),
+    border-color 180ms var(--sh-easing);
+}
+
+.accountBox:hover {
+  background: var(--sh-glass-bg-strong);
+  border-color: var(--sh-glass-border-strong);
+}
+
+.accountBox span {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  background: var(--sh-info-bg);
+  color: var(--sh-info);
+  font-size: 11px;
+  font-weight: var(--weight-bold);
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.accountBox strong {
+  font-size: 13px;
+  font-weight: var(--weight-semibold);
+  color: var(--ink);
+  line-height: 1.2;
+}
+
+.accountBox small {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1;
+}
+
+/* ── Metric Cards ───────────────────────────────────────────────────── */
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 10px;
+}
+
+/* ── Data Tables ────────────────────────────────────────────────────── */
+.listTable {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: transparent;
+}
+
+.listTable th {
+  padding: 10px 12px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: var(--weight-semibold);
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid var(--sh-glass-border);
+  white-space: nowrap;
+}
+
+.listTable td {
+  padding: 12px;
+  font-size: 13px;
+  color: var(--ink);
+  border-bottom: 1px solid var(--sh-glass-border);
+  transition: background 180ms var(--sh-easing);
+}
+
+.listTable tr:last-child td {
+  border-bottom: none;
+}
+
+.listTable tr:hover td {
+  background: var(--sh-glass-bg);
+}
+
+.listTable tr {
+  transition: transform 120ms var(--sh-easing);
+}
+
+.listTable tr:hover {
+  transform: translateX(3px);
+}
+
+.listTable tbody a {
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.listTable tbody a:hover {
+  color: var(--sh-info);
+}
+
+/* ── Data List (non-table layout) ───────────────────────────────────── */
+.dataList {
+  display: grid;
+  gap: 1px;
+  background: var(--sh-glass-border);
+  border-radius: var(--sh-radius-lg);
+  overflow: hidden;
+}
+
+.dataListRow {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--paper);
+  text-decoration: none;
+  transition:
+    background 180ms var(--sh-easing),
+    transform 120ms var(--sh-easing);
+}
+
+.dataListRow:hover {
+  background: var(--surface);
+  transform: translateX(4px);
+}
+
+.dataListRowTitle {
+  font-size: 13px;
+  font-weight: var(--weight-medium);
+  color: var(--ink);
+}
+
+.dataListRowSub {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.dataListRowMeta {
+  font-size: 11px;
+  color: var(--faint);
+  text-align: right;
+}
+
+/* ── Lists Section (workspaceShell primary/secondary) ───────────────── */
+.lists {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 14px;
+}
+
+.listBlock {
+  display: grid;
+  gap: 6px;
+}
+
+.listBlock h2 {
+  margin: 0;
+  font-size: 13px;
+  font-weight: var(--weight-semibold);
+  color: var(--ink);
+}
+
+.listBlock p {
+  margin: 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* ── Empty State ────────────────────────────────────────────────────── */
+.emptyState {
+  display: grid;
+  place-items: center;
+  gap: 8px;
+  padding: 32px 24px;
+  text-align: center;
+  border-radius: var(--sh-radius-lg);
+  background: var(--sh-glass-bg);
+  backdrop-filter: blur(var(--sh-glass-blur));
+  -webkit-backdrop-filter: blur(var(--sh-glass-blur));
+  border: 1px solid var(--sh-glass-border);
+  animation: shEmptyIn 360ms var(--sh-easing) both;
+}
+
+.emptyState-icon {
+  color: var(--muted);
+  opacity: 0.6;
+  line-height: 0;
+}
+
+.emptyState-message {
+  font-size: 14px;
+  font-weight: var(--weight-semibold);
+  color: var(--ink);
+}
+
+.emptyState-hint {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* ── Glass Panel Component Styles ───────────────────────────────────── */
+.shGlassBase {
+  background: var(--sh-glass-bg);
+  backdrop-filter: blur(var(--sh-glass-blur));
+  -webkit-backdrop-filter: blur(var(--sh-glass-blur));
+  border: 1px solid var(--sh-glass-border);
+}
+
+.shGlassStrong {
+  background: var(--sh-glass-bg-strong);
+  border-color: var(--sh-glass-border-strong);
+}
+
+.shGlassElevated {
+  background: var(--sh-glass-bg-strong);
+  backdrop-filter: blur(var(--sh-glass-blur));
+  -webkit-backdrop-filter: blur(var(--sh-glass-blur));
+  border: 1px solid var(--sh-glass-border-strong);
+  box-shadow: var(--sh-glow-sm);
+}
+
+.shGlassRadiusSm { border-radius: var(--sh-radius-sm); }
+.shGlassRadiusMd { border-radius: var(--sh-radius-md); }
+.shGlassRadiusLg { border-radius: var(--sh-radius-lg); }
+.shGlassRadiusXl { border-radius: var(--sh-radius-xl); }
+.shGlassRadiusFull { border-radius: 9999px; }
+
+/* ── Status Badge Component ─────────────────────────────────────────── */
+.shStatusBadgeBase {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: var(--weight-semibold);
+  white-space: nowrap;
+  line-height: 1;
+}
+
+.shStatusBadge_sm {
+  font-size: 11px;
+  padding: 2px 7px;
+  border-radius: 9999px;
+}
+
+.shStatusBadge_md {
+  font-size: 12px;
+  padding: 3px 9px;
+  border-radius: 9999px;
+}
+
+.shStatusBadge_lg {
+  font-size: 13px;
+  padding: 4px 11px;
+  border-radius: 9999px;
+}
+
+.shStatusBadge_success {
+  background: var(--sh-success-bg);
+  color: var(--sh-success);
+}
+
+.shStatusBadge_warning {
+  background: var(--sh-warning-bg);
+  color: var(--sh-warning);
+}
+
+.shStatusBadge_error {
+  background: var(--sh-error-bg);
+  color: var(--sh-error);
+}
+
+.shStatusBadge_info {
+  background: var(--sh-info-bg);
+  color: var(--sh-info);
+}
+
+.shStatusBadge_neutral {
+  background: var(--sh-glass-bg);
+  color: var(--muted);
+}
+
+.shStatusBadge_glow {
+  box-shadow: 0 0 0 1px transparent;
+}
+
+.shStatusBadge_success.shStatusBadge_glow { box-shadow: var(--sh-success-glow); }
+.shStatusBadge_warning.shStatusBadge_glow { box-shadow: var(--sh-warning-glow); }
+.shStatusBadge_error.shStatusBadge_glow { box-shadow: var(--sh-error-glow); }
+.shStatusBadge_info.shStatusBadge_glow { box-shadow: var(--sh-info-glow); }
+
+.shStatusBadgeDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.shStatusDot_success,
+.shStatusDot_warning,
+.shStatusDot_error,
+.shStatusDot_info,
+.shStatusDot_neutral {
+  /* inherits currentColor from parent */
+}
+
+/* ── Metric Card ────────────────────────────────────────────────────── */
+.shMetricCard {
+  display: grid;
+  gap: 0;
+  padding: 16px;
+  border-radius: var(--sh-radius-lg);
+  background: var(--sh-glass-bg);
+  backdrop-filter: blur(var(--sh-glass-blur));
+  -webkit-backdrop-filter: blur(var(--sh-glass-blur));
+  border: 1px solid var(--sh-glass-border);
+  transform: translateY(0);
+  transition:
+    transform 240ms var(--sh-easing),
+    box-shadow 240ms var(--sh-easing),
+    border-color 240ms var(--sh-easing),
+    background 240ms var(--sh-easing);
+}
+
+.shMetricCard:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--sh-glow-sm);
+  border-color: var(--sh-glass-border-strong);
+  background: var(--sh-glass-bg-strong);
+}
+
+.shMetricCard_label {
+  font-size: 12px;
+  font-weight: var(--weight-medium);
+  color: var(--muted);
+  line-height: 1;
+}
+
+.shMetricCard_value {
+  font-size: 26px;
+  font-weight: var(--weight-semibold);
+  color: var(--ink);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  margin-top: 6px;
+}
+
+.shMetricCard_note {
+  font-size: 11px;
+  color: var(--faint);
+  margin-top: 2px;
+}
+
+.shMetricCard_trend {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 12px;
+  font-weight: var(--weight-medium);
+}
+
+.shMetricCard_trend_up { color: var(--sh-success); }
+.shMetricCard_trend_down { color: var(--sh-error); }
+.shMetricCard_trend_flat { color: var(--muted); }
+
+/* Sparkline container */
+.shMetricCard_sparkline {
+  margin-top: 10px;
+  height: 24px;
+  opacity: 0.6;
+  transition: opacity 160ms var(--sh-easing);
+}
+
+.shMetricCard:hover .shMetricCard_sparkline {
+  opacity: 1;
+}
+
+/* Metric card entrance animation */
+@keyframes shMetricFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Glass Skeleton — shimmer sweep for StudentHub OS ──────────────── */
+.shSkeletonGlass {
+  position: relative;
+  background: var(--sh-glass-bg);
+  border: 1px solid var(--sh-glass-border);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.shSkeletonGlass::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in srgb, var(--ink) 6%, transparent) 40%,
+    color-mix(in srgb, var(--ink) 8%, transparent) 50%,
+    color-mix(in srgb, var(--ink) 6%, transparent) 60%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shSkeletonShimmer 1.8s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes shSkeletonShimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  50% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(200%);
+  }
+}
+
+/* Dark mode: lighter shimmer for visibility */
+[data-theme="dark"] .shSkeletonGlass::after {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in srgb, var(--ink) 10%, transparent) 40%,
+    color-mix(in srgb, var(--ink) 14%, transparent) 50%,
+    color-mix(in srgb, var(--ink) 10%, transparent) 60%,
+    transparent 100%
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shSkeletonGlass::after {
+    animation: none;
+    opacity: 0.5;
+  }
+}
+
+/* ── Mobile Tab Bar ─────────────────────────────────────────────────── */
+.mobileNav {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .shell {
+    grid-template-columns: 1fr;
   }
 
   .workspaceRail {
@@ -653,8 +1406,25 @@
   }
 
   .mobileTabBar a {
+  .mobileNav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
     display: flex;
-    flex-direction: column;
+    align-items: center;
+    justify-content: space-around;
+    height: 56px;
+    padding: 0 8px;
+    background: var(--sh-glass-bg-strong);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid var(--sh-glass-border);
+  }
+
+  .mobileNav a {
+    display: flex;
     align-items: center;
     gap: 3px;
     min-height: 50px;
@@ -999,4 +1769,880 @@ kbd {
   font-weight: var(--weight-semibold);
   line-height: 1;
   white-space: nowrap;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--sh-radius-sm);
+    color: var(--muted);
+    transition: background 150ms var(--sh-easing), color 150ms var(--sh-easing);
+  }
+
+  .mobileNav a.active {
+    background: var(--sh-info-bg);
+    color: var(--sh-info);
+  }
+
+  .workspaceStage {
+    padding-bottom: 72px;
+  }
+}
+
+/* ── Command Palette Overlay ────────────────────────────────────────── */
+.cmdPaletteOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: start center;
+  padding-top: 12svh;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  animation: cmdOverlayIn 200ms var(--sh-easing) both;
+}
+
+@keyframes cmdOverlayIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.cmdPaletteDialog {
+  width: min(600px, calc(100vw - 32px));
+  background: var(--surface);
+  border: 1px solid var(--sh-glass-border);
+  border-radius: var(--sh-radius-xl);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.20);
+  overflow: hidden;
+  animation: cmdDialogIn 200ms var(--sh-easing) both;
+}
+
+@keyframes cmdDialogIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.cmdPaletteInput {
+  width: 100%;
+  border: none;
+  padding: 14px 16px;
+  font-size: 15px;
+  font-family: inherit;
+  background: transparent;
+  color: var(--ink);
+  outline: none;
+}
+
+.cmdPaletteInput::placeholder {
+  color: var(--muted);
+}
+
+.cmdPaletteGroup {
+  padding: 6px 8px;
+}
+
+.cmdPaletteGroup:not(:last-child) {
+  border-bottom: 1px solid var(--sh-glass-border);
+}
+
+.cmdPaletteGroupLabel {
+  display: block;
+  padding: 6px 8px 4px;
+  font-size: 11px;
+  font-weight: var(--weight-semibold);
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.cmdPaletteItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 8px;
+  border-radius: var(--sh-radius-sm);
+  background: transparent;
+  border: none;
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+  transition: background 100ms var(--sh-easing);
+}
+
+.cmdPaletteItem:hover,
+.cmdPaletteItem[data-highlighted] {
+  background: var(--sh-info-bg);
+}
+
+.cmdPaletteItem svg {
+  width: 16px;
+  height: 16px;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+.cmdPaletteItemDesc {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--faint);
+}
+
+/* ── OS Animations ──────────────────────────────────────────────────── */
+@keyframes shEmptyIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Misc helpers ───────────────────────────────────────────────────── */
+.formPageHeader {
+  display: grid;
+  gap: 4px;
+}
+
+.formPageHeader strong {
+  font-size: 15px;
+  font-weight: var(--weight-semibold);
+  color: var(--ink);
+}
+
+.formPageHeader small {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.detailGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 14px;
+}
+
+/* ── Detail Section ─────────────────────────────────────────────────── */
+.detailSection {
+  display: grid;
+  gap: 0;
+  padding: 16px;
+  border-radius: var(--sh-radius-lg);
+  background: var(--sh-glass-bg);
+  backdrop-filter: blur(var(--sh-glass-blur));
+  -webkit-backdrop-filter: blur(var(--sh-glass-blur));
+  border: 1px solid var(--sh-glass-border);
+}
+
+.detailSection h3 {
+  margin: 0 0 12px;
+  font-size: 13px;
+  font-weight: var(--weight-semibold);
+  color: var(--ink);
+}
+
+.detailFacts {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 3px 16px;
+  font-size: 13px;
+}
+
+.detailFacts > dt {
+  color: var(--muted);
+  font-weight: var(--weight-medium);
+}
+
+.detailFacts > dd {
+  margin: 0;
+  color: var(--ink);
+}
+
+/* ── Feature Grid (Role dashboards) ─────────────────────────────── */
+.featureGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 10px;
+}
+
+.featureCard {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 6px;
+  padding: 18px;
+  border-radius: var(--sh-radius-lg);
+  background: var(--sh-glass-bg);
+  backdrop-filter: blur(var(--sh-glass-blur));
+  -webkit-backdrop-filter: blur(var(--sh-glass-blur));
+  border: 1px solid var(--sh-glass-border);
+  text-decoration: none;
+  transform: translateY(0);
+  overflow: hidden;
+  transition:
+    transform 280ms var(--sh-easing),
+    box-shadow 280ms var(--sh-easing),
+    border-color 240ms var(--sh-easing),
+    background 240ms var(--sh-easing);
+}
+
+/* Accent dot — top-left subtle glow dot */
+.featureCard::before {
+  content: '';
+  position: absolute;
+  top: -48px;
+  right: -32px;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--tile-accent) 14%, transparent) 0%, transparent 70%);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 400ms var(--sh-easing);
+}
+
+.featureCard:hover::before {
+  opacity: 1;
+}
+
+.featureCard:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--sh-glow-sm), 0 8px 30px rgba(0, 0, 0, 0.06);
+  border-color: var(--tile-accent);
+  background: var(--sh-glass-bg-strong);
+}
+
+/* Icon wrap — colored bg + icon */
+.featureCardIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--sh-radius-sm);
+  background: var(--tile-accent-bg);
+  color: var(--tile-accent);
+  margin-bottom: 2px;
+  transition:
+    background 240ms var(--sh-easing),
+    transform 240ms var(--sh-easing);
+}
+
+.featureCard:hover .featureCardIcon {
+  transform: scale(1.05);
+}
+
+.featureCard strong {
+  font-size: 14px;
+  font-weight: var(--weight-semibold);
+  color: var(--ink);
+  line-height: 1.3;
+}
+
+.featureCard small {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Arrow — appears on hover */
+.featureCardArrow {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  color: var(--muted);
+  opacity: 0;
+  transform: translate(-4px, 4px);
+  transition:
+    opacity 240ms var(--sh-easing),
+    transform 240ms var(--sh-easing);
+}
+
+.featureCard:hover .featureCardArrow {
+  opacity: 1;
+  transform: translate(0, 0);
+  color: var(--tile-accent);
+}
+
+/* ── Form page (detail create/edit panels) ──────────────────────────── */
+.formPanel {
+  display: grid;
+  gap: 16px;
+  max-width: 480px;
+}
+
+.formPanel label {
+  font-size: 13px;
+  font-weight: var(--weight-medium);
+  color: var(--ink);
+}
+
+.formPanel input,
+.formPanel select,
+.formPanel textarea {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: var(--sh-radius-sm);
+  border: 1px solid var(--sh-glass-border);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  transition: border-color 160ms var(--sh-easing), box-shadow 160ms var(--sh-easing);
+}
+
+.formPanel input:focus,
+.formPanel select:focus,
+.formPanel textarea:focus {
+  outline: none;
+  border-color: var(--sh-info);
+  box-shadow: var(--sh-glow-sm);
+}
+
+.formPanel button[type="submit"] {
+  justify-self: start;
+}
+
+/* ── Checkbox list ──────────────────────────────────────────────────── */
+.checkboxList {
+  display: grid;
+  gap: 6px;
+}
+
+.checkboxList label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.checkboxList input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--sh-info);
+}
+
+/* ── Dark Mode Overrides ────────────────────────────────────────────── */
+[data-theme="dark"] .shell {
+  background: var(--paper);
+}
+
+[data-theme="dark"] .dataListRow {
+  background: var(--paper);
+}
+
+[data-theme="dark"] .dataListRow:hover {
+  background: var(--surface);
+}
+
+[data-theme="dark"] .cmdPaletteDialog {
+  background: #12141a;
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+[data-theme="dark"] .cmdPaletteGroup:not(:last-child) {
+  border-bottom-color: rgba(255, 255, 255, 0.06);
+}
+
+/* ── Staff-specific metrics ─────────────────────────────────────────── */
+.staffMetrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+/* ── Additional small helpers ───────────────────────────────────────── */
+.tag {
+  display: inline-block;
+  background: var(--sh-glass-bg);
+  color: var(--muted);
+  padding: 0 5px;
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: var(--weight-semibold);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* ── EmptyState — OS-design empty container ──────────────────────────── */
+.shEmptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: clamp(32px, 6vw, 64px) clamp(16px, 4vw, 32px);
+  text-align: center;
+  opacity: 0;
+  transform: translateY(12px);
+  animation: shEmptyStateIn 400ms var(--sh-easing) forwards;
+}
+
+@keyframes shEmptyStateIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.shEmptyStateIllustration {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 120px;
+  height: 100px;
+  margin-bottom: 4px;
+}
+
+.shEmptyStateSvg {
+  filter: drop-shadow(0 4px 16px rgba(0, 0, 0, 0.06));
+  transition: transform 300ms var(--sh-easing);
+}
+
+.shEmptyState:hover .shEmptyStateSvg {
+  transform: scale(1.04);
+}
+
+.shEmptyStateContent {
+  display: grid;
+  gap: 6px;
+  max-width: 340px;
+}
+
+.shEmptyStateTitle {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--ink);
+}
+
+.shEmptyStateDesc {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.shEmptyStateAction {
+  margin-top: 4px;
+}
+
+/* Pulsing ring animation for loading empty state */
+.shPulseRing {
+  animation: shPulseRingAnim 2s var(--sh-easing) infinite;
+}
+
+@keyframes shPulseRingAnim {
+  0% { opacity: 0.3; r: 22; }
+  50% { opacity: 0.6; r: 24; }
+  100% { opacity: 0.3; r: 22; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   DASHBOARD — Admin Command Center
+   Glass metric cards, pipeline overview, data lists with entrance
+   animations. Designed for the StudentHub OS aesthetic.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── Section wrapper (stagger entrance) ─────────────────────────── */
+
+.shDashboardSection {
+  animation: shDashboardSectionIn 400ms var(--sh-easing) both;
+}
+
+@keyframes shDashboardSectionIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.shDashboardSection + .shDashboardSection {
+  animation-delay: 120ms;
+}
+
+.shDashboardSection + .shDashboardSection + .shDashboardSection {
+  animation-delay: 240ms;
+}
+
+/* ── Grid layouts ──────────────────────────────────────────────── */
+
+.shDashboardGrid4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+@media (max-width: 1024px) {
+  .shDashboardGrid4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .shDashboardGrid4 {
+    grid-template-columns: 1fr;
+  }
+}
+
+.shDashboardGrid2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+@media (max-width: 1024px) {
+  .shDashboardGrid2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── DataList glass card ───────────────────────────────────────── */
+
+.shDashboardDataList {
+  transition:
+    transform 240ms var(--sh-easing),
+    box-shadow 240ms var(--sh-easing);
+  animation: shDataListIn 400ms var(--sh-easing) both;
+}
+
+@keyframes shDataListIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.shDashboardDataList:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--sh-glow-sm);
+}
+
+.shDataListHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--sh-glass-border);
+  margin-bottom: 8px;
+}
+
+.shDataListEyebrow {
+  display: block;
+  font-size: 10px;
+  font-weight: var(--weight-bold);
+  color: var(--sh-info);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 2px;
+}
+
+.shDataListTitle {
+  margin: 0;
+  font-size: 15px;
+  font-weight: var(--weight-semibold);
+  color: var(--ink);
+  line-height: 1.3;
+}
+
+.shDataListCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: var(--weight-semibold);
+  color: var(--muted);
+  background: var(--sh-glass-bg);
+  border: 1px solid var(--sh-glass-border);
+  flex-shrink: 0;
+}
+
+/* ── DataList rows ─────────────────────────────────────────────── */
+
+.shDataListBody {
+  display: grid;
+  gap: 2px;
+}
+
+.shDataListRow {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 8px;
+  border-radius: var(--sh-radius-sm);
+  text-decoration: none;
+  color: var(--ink);
+  transition:
+    background 180ms var(--sh-easing),
+    transform 120ms var(--sh-easing);
+  animation: shDataListRowIn 300ms var(--sh-easing) both;
+}
+
+@keyframes shDataListRowIn {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.shDataListRow:hover {
+  background: var(--sh-glass-bg-strong);
+  transform: translateX(4px);
+}
+
+.shDataListRowMain {
+  min-width: 0;
+  display: grid;
+  gap: 1px;
+}
+
+.shDataListRowTitle {
+  font-size: 13px;
+  font-weight: var(--weight-medium);
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.shDataListRowSub {
+  font-size: 11px;
+  color: var(--faint);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.shDataListRowMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.shDataListRowMetaRight {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.shDataListRowAmount {
+  font-size: 12px;
+  font-weight: var(--weight-semibold);
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.shDataListRowCount {
+  font-size: 11px;
+  color: var(--sh-info);
+  white-space: nowrap;
+}
+
+.shDataListRowDate {
+  font-size: 11px;
+  color: var(--faint);
+  white-space: nowrap;
+}
+
+.shDataListEmpty {
+  padding: 16px 0;
+}
+
+/* ── Pipeline glass section ────────────────────────────────────── */
+
+.shPipelineHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.shPipelineEyebrow {
+  display: block;
+  font-size: 10px;
+  font-weight: var(--weight-bold);
+  color: var(--sh-info);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 2px;
+}
+
+.shPipelineTitle {
+  margin: 0;
+  font-size: 16px;
+  font-weight: var(--weight-semibold);
+  color: var(--ink);
+  line-height: 1.3;
+}
+
+.shPipelineLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: var(--weight-medium);
+  color: var(--sh-info);
+  text-decoration: none;
+  padding: 4px 8px;
+  border-radius: var(--sh-radius-sm);
+  transition: background 160ms var(--sh-easing);
+  flex-shrink: 0;
+}
+
+.shPipelineLink:hover {
+  background: var(--sh-info-bg);
+}
+
+.shPipelineGrid {
+  display: grid;
+  gap: 12px;
+}
+
+/* Proportional bar */
+.shPipelineBar {
+  display: flex;
+  height: 6px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--sh-glass-bg);
+}
+
+.shPipelineBarSegment {
+  height: 100%;
+  transition: width 400ms var(--sh-easing);
+  min-width: 2px;
+}
+
+/* Status list */
+.shPipelineList {
+  display: grid;
+  gap: 6px;
+}
+
+.shPipelineRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 4px 0;
+}
+
+.shPipelineCount {
+  font-size: 14px;
+  font-weight: var(--weight-semibold);
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.shPipelineEmpty {
+  padding: 12px 0;
+}
+
+/* ── MetricCard sub-elements (camelCase — match metric-card.tsx) ── */
+
+.shMetricCardBody {
+  display: grid;
+  gap: 2px;
+}
+
+.shMetricCardTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.shMetricCardLabel {
+  font-size: 12px;
+  font-weight: var(--weight-medium);
+  color: var(--muted);
+  line-height: 1;
+}
+
+.shMetricCardTrend {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: var(--weight-medium);
+}
+
+.shMetricCardTrend[data-trend="up"] { color: var(--sh-success); }
+.shMetricCardTrend[data-trend="down"] { color: var(--sh-error); }
+.shMetricCardTrend[data-trend="flat"] { color: var(--muted); }
+
+.shMetricCardValue {
+  font-size: 26px;
+  font-weight: var(--weight-semibold);
+  color: var(--ink);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  display: block;
+}
+
+.shMetricCardNote {
+  font-size: 11px;
+  color: var(--faint);
+  margin-top: 2px;
+}
+
+.shMetricCardChart {
+  margin-top: 8px;
+  height: 32px;
+  opacity: 0.6;
+  transition: opacity 160ms var(--sh-easing);
+}
+
+.shMetricCard:hover .shMetricCardChart {
+  opacity: 1;
+}
+
+.shMetricCardClickable {
+  cursor: pointer;
+}
+
+.shMetricSparkline {
+  width: 100%;
+  height: 100%;
+}
+
+/* Entrance animation for MetricCard */
+.shMetricCard {
+  animation: shMetricFadeIn 400ms var(--sh-easing) both;
 }

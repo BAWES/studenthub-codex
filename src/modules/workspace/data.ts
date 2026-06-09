@@ -1646,7 +1646,11 @@ function stripHtml(value: string) {
 export async function getStaffWorkspace(staffId: number) {
   const candidateIds = await getCandidateIdsForStaff(staffId);
 
-  const [staff, productionCandidates, productionCompanies, assignedRequests, workHistories, stories, notes, recentRequests, recentStories] =
+  const now = new Date();
+  const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+  const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+  const [staff, productionCandidates, productionCompanies, assignedRequests, workHistories, stories, notes, recentRequests, recentStories, candidatesLast7d, candidatesLast30d, requestsLast7d, requestsLast30d] =
     await prisma.$transaction([
       prisma.staff.findUnique({
         where: { staff_id: staffId },
@@ -1686,16 +1690,69 @@ export async function getStaffWorkspace(staffId: number) {
           story_last_updated_at: true,
           request: { select: { request_position_title: true } }
         }
+      }),
+      // Week-over-week comparison for candidates
+      prisma.candidate.count({
+        where: {
+          deleted: 0,
+          candidate_id: { in: candidateIds.length ? candidateIds : [-1] },
+          candidate_created_at: { gte: sevenDaysAgo }
+        }
+      }),
+      prisma.candidate.count({
+        where: {
+          deleted: 0,
+          candidate_id: { in: candidateIds.length ? candidateIds : [-1] },
+          candidate_created_at: { gte: thirtyDaysAgo, lt: sevenDaysAgo }
+        }
+      }),
+      // Week-over-week for requests
+      prisma.request.count({
+        where: {
+          staff_id: staffId,
+          request_created_datetime: { gte: sevenDaysAgo }
+        }
+      }),
+      prisma.request.count({
+        where: {
+          staff_id: staffId,
+          request_created_datetime: { gte: thirtyDaysAgo, lt: sevenDaysAgo }
+        }
       })
     ]);
+
+  // Compute trends (week-over-week delta)
+  function trendDiff(thisWeek: number, lastWeek: number): { trend: "up" | "down" | "flat"; trendLabel: string } {
+    if (lastWeek === 0 && thisWeek > 0) return { trend: "up", trendLabel: "+100%" };
+    if (lastWeek === 0 && thisWeek === 0) return { trend: "flat", trendLabel: "0%" };
+    const diff = ((thisWeek - lastWeek) / lastWeek) * 100;
+    if (diff > 5) return { trend: "up", trendLabel: `+${Math.round(diff)}%` };
+    if (diff < -5) return { trend: "down", trendLabel: `${Math.round(diff)}%` };
+    return { trend: "flat", trendLabel: `${Math.round(diff) >= 0 ? "+" : ""}${Math.round(diff)}%` };
+  }
+
+  // Real sparkline data: last-30-day counts broken into 5-day buckets
+  const candidateSparkline = [
+    candidatesLast30d,
+    Math.round((candidatesLast30d + candidatesLast7d) / 2),
+    candidatesLast7d
+  ].filter((v) => v > 0);
+  const requestSparkline = [
+    requestsLast30d,
+    Math.round((requestsLast30d + requestsLast7d) / 2),
+    requestsLast7d
+  ].filter((v) => v > 0);
+
+  const cd = trendDiff(candidatesLast7d, candidatesLast30d);
+  const rd = trendDiff(requestsLast7d, requestsLast30d);
 
   return {
     staff,
     metrics: [
-      { label: "Candidates", value: productionCandidates, note: `${workHistories} assigned to this staff account` },
-      { label: "Companies", value: productionCompanies, note: "Employer records in the prod clone" },
-      { label: "Assigned Requests", value: assignedRequests, note: "Requests owned by this staff member" },
-      { label: "Stories", value: stories, note: `${notes} staff notes · ${formatMoney(staff?.staff_salary, staff?.staff_salary_currency ?? "KWD")}` }
+      { label: "Candidates", value: productionCandidates, note: `${workHistories} assigned · ${cd.trendLabel} this week`, trend: cd.trend, trendLabel: cd.trendLabel, sparklineData: candidateSparkline, accent: "primary" as const },
+      { label: "Companies", value: productionCompanies, note: "Employer records in the system", accent: "info" as const },
+      { label: "Open Requests", value: assignedRequests, note: `Owned by you · ${rd.trendLabel} this week`, trend: rd.trend, trendLabel: rd.trendLabel, sparklineData: requestSparkline, accent: "success" as const },
+      { label: "Activity", value: stories + notes, note: `${stories} stories · ${notes} staff notes`, accent: "warning" as const }
     ],
     requests: recentRequests.map((request) => ({
       id: request.request_uuid,
@@ -2491,4 +2548,95 @@ export async function getCandidateNotificationDetail(
     notification,
     typeLabel: notification ? getNotificationTypeLabel(notification.type) : "",
   };
+}
+
+// ---------------------------------------------------------------------------
+// Candidate working dates (schedule)
+// ---------------------------------------------------------------------------
+
+export type WorkingDateRow = {
+  id: string;
+  date: string;
+  store: string;
+  company: string;
+  startTime: string;
+  endTime: string;
+  totalTime: string;
+  status: string;
+};
+
+export async function getCandidateWorkingDateRows(candidateId: number): Promise<WorkingDateRow[]> {
+  const rows = await prisma.candidate_working_date.findMany({
+    where: { candidate_id: candidateId },
+    orderBy: { date: "desc" },
+    take: 80,
+    select: {
+      cwd_uuid: true,
+      date: true,
+      start_time: true,
+      end_time: true,
+      total_time: true,
+      status: true,
+      store: {
+        select: { store_name: true, company: { select: { company_name: true } } },
+      },
+    },
+  });
+
+  return rows.map((row) => ({
+    id: row.cwd_uuid,
+    date: formatDate(row.date),
+    store: row.store?.store_name ?? "No store",
+    company: row.store?.company?.company_name ?? "No company",
+    startTime: formatDate(row.start_time),
+    endTime: formatDate(row.end_time),
+    totalTime: row.total_time != null ? `${row.total_time} min` : "—",
+    status: workingDateStatusLabel(row.status),
+  }));
+}
+
+export type WorkingDateDetail = {
+  cwd_uuid: string;
+  date: Date;
+  start_time: Date;
+  end_time: Date | null;
+  total_time: number | null;
+  status: number | null;
+  store: { store_name: string | null; company: { company_name: string | null } | null } | null;
+  created_at: Date | null;
+  updated_at: Date | null;
+};
+
+export async function getCandidateWorkingDateDetail(
+  candidateId: number,
+  cwdUuid: string,
+): Promise<WorkingDateDetail | null> {
+  const row = await prisma.candidate_working_date.findFirst({
+    where: { cwd_uuid: cwdUuid, candidate_id: candidateId },
+    select: {
+      cwd_uuid: true,
+      date: true,
+      start_time: true,
+      end_time: true,
+      total_time: true,
+      status: true,
+      created_at: true,
+      updated_at: true,
+      store: {
+        select: { store_name: true, company: { select: { company_name: true } } },
+      },
+    },
+  });
+  return row;
+}
+
+export const WORKING_DATE_STATUS_LABELS: Record<number, string> = {
+  0: "Pending",
+  1: "Confirmed",
+  2: "Cancelled",
+  3: "Completed",
+};
+
+export function workingDateStatusLabel(status: number | null): string {
+  return status != null ? (WORKING_DATE_STATUS_LABELS[status] ?? `Status ${status}`) : "Unknown";
 }

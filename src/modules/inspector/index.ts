@@ -4,6 +4,8 @@ export {
   getRequest,
   verifyRequest,
   rejectRequest,
+  listInspectors,
+  getInspector,
 } from "./actions";
 export type {
   ListRequestsParams,
@@ -13,4 +15,8 @@ export type {
   IdRequestListItem,
   IdRequestDetail,
   ListRequestsResult,
+  ListInspectorsInput,
+  GetInspectorInput,
+  InspectorAccountItem,
+  ListInspectorsResult,
 } from "./actions";

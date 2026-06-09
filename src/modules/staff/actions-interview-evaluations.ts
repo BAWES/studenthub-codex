@@ -43,11 +43,16 @@ const getInterviewEvaluationSchema = z.object({
 
 export type GetInterviewEvaluationParams = z.input<typeof getInterviewEvaluationSchema>;
 
+const interviewEvaluationNoteItemSchema = z.object({
+  note: z.string().min(1, "Note text is required"),
+});
+
 const createInterviewEvaluationSchema = z.object({
   candidateId: z.number().int().positive("Candidate ID is required"),
   staffId: z.number().int().positive().optional(),
   requestUuid: z.string().optional(),
   companyId: z.number().int().positive().optional(),
+  interviewEvaluationNotes: z.array(interviewEvaluationNoteItemSchema).optional(),
 });
 
 export type CreateInterviewEvaluationParams = z.input<typeof createInterviewEvaluationSchema>;
@@ -101,7 +106,7 @@ export async function listInterviewEvaluations(
   ]);
 
   return {
-    evaluations: evaluations.map((e) => ({
+    evaluations: evaluations.map((e: typeof evaluations[number]) => ({
       interview_evaluation_uuid: e.interview_evaluation_uuid,
       request_uuid: e.request_uuid,
       company_id: e.company_id,
@@ -175,7 +180,7 @@ export async function createInterviewEvaluation(
     throw new Error(parsed.error.issues[0]?.message ?? "Invalid create parameters");
   }
 
-  const { candidateId, staffId, requestUuid, companyId } = parsed.data;
+  const { candidateId, staffId, requestUuid, companyId, interviewEvaluationNotes } = parsed.data;
 
   const interviewEvaluationUuid = `interview_evaluation_${crypto.randomUUID()}`;
   const now = new Date();
@@ -191,6 +196,41 @@ export async function createInterviewEvaluation(
       updated_at: now,
     },
   });
+
+  // Create note version + notes if provided (mirrors legacy Yii2 create flow)
+  if (interviewEvaluationNotes && interviewEvaluationNotes.length > 0) {
+    // Find latest version number for this evaluation
+    const latestVersion = await prisma.interview_evaluation_note_version.findFirst({
+      where: { interview_evaluation_uuid: interviewEvaluationUuid },
+      orderBy: { version: "desc" },
+      select: { version: true },
+    });
+
+    const ienvUuid = `ienv_${crypto.randomUUID()}`;
+    const newVersion = (latestVersion?.version ?? 0) + 1;
+
+    await prisma.interview_evaluation_note_version.create({
+      data: {
+        ienv_uuid: ienvUuid,
+        interview_evaluation_uuid: interviewEvaluationUuid,
+        version: newVersion,
+        staff_id: staffId ?? null,
+        created_at: now,
+        updated_at: now,
+      },
+    });
+
+    // Create individual notes
+    for (const item of interviewEvaluationNotes) {
+      await prisma.interview_evaluation_note.create({
+        data: {
+          ien_uuid: `ien_${crypto.randomUUID()}`,
+          ienv_uuid: ienvUuid,
+          note: item.note,
+        },
+      });
+    }
+  }
 
   revalidatePath("/staff/candidates/interview-evaluation");
 

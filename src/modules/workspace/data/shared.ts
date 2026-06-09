@@ -1,5 +1,25 @@
 import { prisma } from "@/lib/prisma";
 import { formatDate, formatMoney } from "@/modules/workspace/format";
+import { computeMatchScore, matchScoreLabel } from "@/modules/workspace/data/match-score";
+
+/**
+ * Attempt to extract a numeric hourly-equivalent from a compensation string.
+ * Examples: "3,000 KWD/month" -> 3000, "500-800" -> 650 (midpoint).
+ * Returns null if no number can be reliably extracted.
+ */
+function parseCompensationToNumber(compensation: string | null | undefined): number | null {
+  if (!compensation) return null;
+  // Remove currency codes, whitespace, and "per month" / "/month" suffixes
+  const cleaned = compensation.replace(/[a-zA-Z,\s/]+/g, " ").trim();
+  // Extract all numeric values (handles "500-800", "3000", "1,500.50")
+  const numbers = cleaned.match(/\d+(?:\.\d+)?/g);
+  if (!numbers || numbers.length === 0) return null;
+  const parsed = numbers.map(Number).filter((n) => n > 0);
+  if (parsed.length === 0) return null;
+  // Use midpoint for ranges, single value otherwise
+  const total = parsed.reduce((a, b) => a + b, 0);
+  return Math.round(total / parsed.length);
+}
 
 function stripHtml(value: string) {
   return value.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
@@ -159,6 +179,26 @@ export async function getRequestDetail(
         }
       })
     : [];
+  const requestCompensationValue = parseCompensationToNumber(request?.request_compensation);
+  const scoredCandidates = matchedCandidates.map((candidate) => {
+    const matchedSkillNames = candidate.candidate_skill
+      .map((skill) => skill.skill)
+      .filter(Boolean);
+    const matchScore = computeMatchScore({
+      matchedSkillCount: matchedSkillNames.length,
+      totalRequestSkills: requestSkillValues.length,
+      candidateRate: Number(candidate.candidate_hourly_rate) || null,
+      requestCompensation: requestCompensationValue,
+    });
+    return { candidate, matchedSkillNames, matchScore };
+  });
+  // Sort by score descending, then by recent activity
+  scoredCandidates.sort((a, b) => {
+    if (b.matchScore !== a.matchScore) return b.matchScore - a.matchScore;
+    const aTime = a.candidate.candidate_updated_at?.getTime() ?? 0;
+    const bTime = b.candidate.candidate_updated_at?.getTime() ?? 0;
+    return bTime - aTime;
+  });
   const suggestedForEmail = suggestions
     .filter((suggestion) => suggestion.candidate)
     .slice(0, 8)
@@ -192,8 +232,7 @@ export async function getRequestDetail(
       { label: "Suggestions", value: suggestions.length, note: "Recent suggestions shown" },
       { label: "Invitations", value: invitations.length, note: "Recent invitations shown" }
     ],
-    matchedCandidates: matchedCandidates.map((candidate) => {
-      const skillMatches = candidate.candidate_skill.map((skill) => skill.skill).filter(Boolean);
+    matchedCandidates: scoredCandidates.map(({ candidate, matchedSkillNames, matchScore }) => {
       return {
         id: candidate.candidate_id,
         uid: candidate.candidate_uid ?? `#${candidate.candidate_id}`,
@@ -202,9 +241,11 @@ export async function getRequestDetail(
         country: candidate.country?.country_name_en ?? "No country",
         university: candidate.university?.university_name_en ?? "No university",
         rate: formatMoney(candidate.candidate_hourly_rate, candidate.currency_code ?? request?.company?.currency_code ?? "KWD"),
-        signal: skillMatches.length ? `${skillMatches.length} skill match${skillMatches.length === 1 ? "" : "es"}` : "Recently active",
+        signal: matchedSkillNames.length ? `${matchedSkillNames.length} skill match${matchedSkillNames.length === 1 ? "" : "es"}` : "Recently active",
+        matchScore,
+        matchLabel: matchScoreLabel(matchScore),
         reasons: [
-          ...skillMatches.slice(0, 4),
+          ...matchedSkillNames.slice(0, 4),
           candidate.country?.country_name_en ? `Country: ${candidate.country.country_name_en}` : null,
           `Updated ${formatDate(candidate.candidate_updated_at)}`
         ].filter((reason): reason is string => Boolean(reason))

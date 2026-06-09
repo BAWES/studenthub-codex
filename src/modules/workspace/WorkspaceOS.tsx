@@ -6,14 +6,14 @@ import type { Route } from "next";
 import type { SessionUser } from "@/modules/auth/types";
 import { logoutAction } from "@/modules/auth/actions";
 import { ThemeToggle } from "@/modules/theme/ThemeToggle";
+import { LogOut } from "lucide-react";
 import Link from "next/link";
 import { WorkspaceOSContext } from "./WorkspaceOSContext";
 import { WorkspaceMobileNavigation, WorkspaceNavigation } from "./WorkspaceNavigation";
 import { navForRole } from "./navigation";
 import type { NavItem } from "./navigation";
 import { PageTransition } from "./PageTransition";
-import type { OSCommand } from "@/components/ui/CommandPalette";
-import { CommandPalette } from "@/components/ui/CommandPalette";
+import { RaycastCommandPalette } from "./RaycastCommandPalette";
 
 // ── Keyboard shortcut chords per role ────────────────────────────────
 
@@ -136,6 +136,17 @@ export function WorkspaceOS({
       )
       .slice(0, 18);
   }, [commands, cmdQuery]);
+
+  const grouped = useMemo((): [string, OSCommand[]][] => {
+    const groups = new Map<string, OSCommand[]>();
+    const list = cmdQuery.trim() ? filtered : commands;
+    for (const cmd of list) {
+      const key = cmd.section || "Other";
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key)!.push(cmd);
+    }
+    return Array.from(groups.entries());
+  }, [commands, filtered, cmdQuery]);
 
   const visit = useCallback(
     (href: string) => {
@@ -263,13 +274,17 @@ export function WorkspaceOS({
             <strong>StudentHub</strong>
           </Link>
           <WorkspaceNavigation items={navItems} role={session.role} />
+          <div className="workspaceRailDivider" aria-hidden="true" />
           <div className="workspaceRailFooter">
             <button className="commandLauncher" type="button" aria-label="Open command menu" onClick={() => { setCmdOpen(true); }}>
               <span>⌘K</span>
             </button>
             <ThemeToggle />
             <form action={logoutAction}>
-              <button type="submit" aria-label="Sign out">Sign out</button>
+              <button type="submit" aria-label="Sign out">
+                <LogOut size={18} strokeWidth={1.5} aria-hidden="true" />
+                <span>Sign out</span>
+              </button>
             </form>
           </div>
         </aside>
@@ -283,19 +298,19 @@ export function WorkspaceOS({
         <WorkspaceMobileNavigation items={navItems} role={session.role} />
       </main>
 
-      {/* ── Command Palette (glass, extracted component) ──── */}
-      <CommandPalette
+      {/* ── Command Palette (Raycast-style) ──────────────────── */}
+      <RaycastCommandPalette
         open={cmdOpen}
         query={cmdQuery}
         onQueryChange={setCmdQuery}
-        selectedIndex={cmdIndex}
-        onSelectIndex={setCmdIndex}
-        onClose={() => { setCmdOpen(false); setCmdQuery(""); }}
+        index={cmdIndex}
+        onIndexChange={setCmdIndex}
+        grouped={grouped}
+        flatCommands={filtered}
         onVisit={visit}
-        commands={commands}
-        filtered={filtered}
-        chords={chords}
+        onClose={() => { setCmdOpen(false); setCmdQuery(""); }}
         inputRef={cmdInputRef}
+        role={session.role}
       />
     </WorkspaceOSContext.Provider>
   );
