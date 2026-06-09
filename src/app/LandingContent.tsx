@@ -138,7 +138,16 @@ export default function LandingContent({ session }: LandingContentProps) {
   const isLoggedIn = Boolean(session);
 
   return (
-    <main className="min-h-svh w-[min(1320px,calc(100%_-_28px))] mx-auto grid content-start gap-6 pt-[18px] pb-[42px] max-sm:w-[min(calc(100%_-_20px),720px)]">
+    <>
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded focus:bg-background focus:px-3 focus:py-2 focus:text-sm focus:font-semibold focus:text-foreground focus:shadow-lg focus:outline-none"
+      >
+        Skip to content
+      </a>
+      <main
+        id="main-content"
+        className="min-h-svh w-[min(1320px,calc(100%_-_28px))] mx-auto grid content-start gap-6 pt-[18px] pb-[42px] max-sm:w-[min(calc(100%_-_20px),720px)]">
       {/* ── Glass Navigation ── */}
       <nav className="shGlassNav" aria-label="StudentHub public navigation">
         <div className="shGlassNavInner">
@@ -275,5 +284,6 @@ export default function LandingContent({ session }: LandingContentProps) {
         </div>
       </footer>
     </main>
+    </>
   );
 }
