@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { requireRoleCapability } from "@/modules/auth/session";
-import { CompactList, FactPanel } from "@/modules/workspace/DetailPanels";
+import { DetailSection } from "@/modules/workspace/DetailPanels";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { getInspectorIdRequestDetail } from "@/modules/workspace/data";
 import { formatDate } from "@/modules/workspace/format";
@@ -25,7 +25,7 @@ export default async function InspectorIdRequestDetailPage({ params }: { params:
       metrics={data.metrics}
       primary={{ title: "Candidates", rows: data.candidates }}
     >
-      <FactPanel
+      <DetailSection
         title="Batch"
         facts={[
           { label: "Status", value: data.request.status },

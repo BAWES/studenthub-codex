@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { requireRoleCapability } from "@/modules/auth/session";
-import { CompactList, FactPanel } from "@/modules/workspace/DetailPanels";
+import { DetailSection } from "@/modules/workspace/DetailPanels";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { getCandidateWorkLogDetail } from "@/modules/workspace/data";
 import { formatDate } from "@/modules/workspace/format";
@@ -26,7 +26,7 @@ export default async function CandidateWorkLogDetailPage({ params }: { params: P
       primary={{ title: "Appeals", rows: data.appeals }}
       secondary={{ title: "Feedback", rows: data.feedback }}
     >
-      <FactPanel
+      <DetailSection
         title="Shift Record"
         facts={[
           { label: "Company", value: data.workLog.store?.company?.company_name },

@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Route } from "next";
 import { requireRoleCapability } from "@/modules/auth/session";
-import { FactPanel } from "@/modules/workspace/DetailPanels";
+import { DetailSection } from "@/modules/workspace/DetailPanels";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { getStaffInterviewDetail } from "@/modules/workspace/data";
 import { updateInterviewStatusAction } from "@/modules/requests/interview-actions";
@@ -52,7 +52,7 @@ export default async function StaffInterviewDetailPage({
       title={interview.candidate?.candidate_name ?? "Interview Detail"}
       metrics={[]}
     >
-      <FactPanel title="Interview Details" facts={facts} />
+      <DetailSection title="Interview Details" facts={facts} />
 
       <section className="detailPanel">
         <h2>Actions</h2>
