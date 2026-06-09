@@ -8,11 +8,10 @@ import {
   listStaffInterviewsSchema,
   getStaffInterviewDetailSchema,
   updateInterviewStatusSchema,
-} from "./schemas";
-import type {
-  InterviewRow,
-  InterviewDetail,
-  UpdateInterviewStatusResult,
+  type ListStaffInterviewsInput,
+  type InterviewRow,
+  type InterviewDetail,
+  type UpdateInterviewStatusResult,
 } from "./schemas";
 
 // ---------------------------------------------------------------------------

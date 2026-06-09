@@ -3,20 +3,10 @@
 import { getRequestDetail as _getRequestDetail } from "@/modules/workspace/data/shared";
 import { requireRoleCapability } from "@/modules/auth/session";
 import { z } from "zod";
-
-// ---------------------------------------------------------------------------
-// Schema
-// ---------------------------------------------------------------------------
-
-export const getStaffRequestDetailSchema = z.object({
-  requestUuid: z.string().min(1, "Request UUID is required"),
-});
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export type GetStaffRequestDetailInput = z.input<typeof getStaffRequestDetailSchema>;
+import {
+  getStaffRequestDetailSchema,
+  type GetStaffRequestDetailInput,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // getStaffRequestDetail — get full request detail with pipeline data
