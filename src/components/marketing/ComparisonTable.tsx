@@ -19,6 +19,47 @@ export interface ComparisonTableProps {
   className?: string;
 }
 
+// ── Column labels per persona ─────────────────────────────
+
+interface ColumnDef {
+  key: "studenthub" | "alternatives" | "emailSpreadsheets" | "traditionalAgencies";
+  label: string;
+  accent?: boolean;
+}
+
+const personaColumns: Record<string, ColumnDef[]> = {
+  candidate: [
+    { key: "studenthub", label: "StudentHub", accent: true },
+    { key: "alternatives", label: "Generic job boards" },
+    { key: "emailSpreadsheets", label: "Email & spreadsheets" },
+    { key: "traditionalAgencies", label: "Traditional agencies" },
+  ],
+  company: [
+    { key: "studenthub", label: "StudentHub", accent: true },
+    { key: "alternatives", label: "Generic job boards" },
+    { key: "emailSpreadsheets", label: "Email & spreadsheets" },
+    { key: "traditionalAgencies", label: "Traditional agencies" },
+  ],
+  staff: [
+    { key: "studenthub", label: "StudentHub", accent: true },
+    { key: "alternatives", label: "Generic job boards" },
+    { key: "emailSpreadsheets", label: "Email & spreadsheets" },
+    { key: "traditionalAgencies", label: "Traditional agencies" },
+  ],
+  admin: [
+    { key: "studenthub", label: "StudentHub", accent: true },
+    { key: "alternatives", label: "Generic ERPs" },
+    { key: "emailSpreadsheets", label: "Email & spreadsheets" },
+    { key: "traditionalAgencies", label: "Manual processes" },
+  ],
+  inspector: [
+    { key: "studenthub", label: "StudentHub", accent: true },
+    { key: "alternatives", label: "Paper-based systems" },
+    { key: "emailSpreadsheets", label: "Generic document tools" },
+    { key: "traditionalAgencies", label: "Manual review" },
+  ],
+};
+
 // ── Candidate comparison data ────────────────────────────
 
 const candidateRows: ComparisonRow[] = [
@@ -189,11 +230,237 @@ const companyRows: ComparisonRow[] = [
   },
 ];
 
+// ── Staff comparison data ─────────────────────────────────
+
+const staffRows: ComparisonRow[] = [
+  {
+    category: "Sourcing",
+    feature: "Typo-tolerant candidate search",
+    studenthub: true,
+    alternatives: "✗",
+    emailSpreadsheets: "✗",
+    traditionalAgencies: "✗",
+  },
+  {
+    category: "Sourcing",
+    feature: "Search by skill, location, visa status",
+    studenthub: true,
+    alternatives: "Partial",
+    emailSpreadsheets: "✗",
+    traditionalAgencies: "Partial",
+  },
+  {
+    category: "Sourcing",
+    feature: "Bulk CV export",
+    studenthub: true,
+    alternatives: "✗",
+    emailSpreadsheets: "✗",
+    traditionalAgencies: "Partial",
+  },
+  {
+    category: "Shortlisting",
+    feature: "One-click shortlist creation",
+    studenthub: true,
+    alternatives: "✗",
+    emailSpreadsheets: "✗",
+    traditionalAgencies: "✗",
+  },
+  {
+    category: "Shortlisting",
+    feature: "Share shortlists with employers",
+    studenthub: true,
+    alternatives: "Partial",
+    emailSpreadsheets: "✗",
+    traditionalAgencies: "Partial",
+  },
+  {
+    category: "Shortlisting",
+    feature: "Candidate status tracking",
+    studenthub: true,
+    alternatives: "✗",
+    emailSpreadsheets: "✗",
+    traditionalAgencies: "✗",
+  },
+  {
+    category: "Timesheets",
+    feature: "Integrated timesheet pipeline",
+    studenthub: true,
+    alternatives: "✗",
+    emailSpreadsheets: "✗",
+    traditionalAgencies: "Partial",
+  },
+  {
+    category: "Commissions",
+    feature: "Automated commission calculations",
+    studenthub: true,
+    alternatives: "✗",
+    emailSpreadsheets: "✗",
+    traditionalAgencies: "✗",
+  },
+  {
+    category: "Commissions",
+    feature: "Real-time margin visibility",
+    studenthub: true,
+    alternatives: "✗",
+    emailSpreadsheets: "✗",
+    traditionalAgencies: "Partial",
+  },
+];
+
+// ── Admin comparison data ─────────────────────────────────
+
+const adminRows: ComparisonRow[] = [
+  {
+    category: "Users",
+    feature: "Role-based access control",
+    studenthub: true,
+    alternatives: "Partial",
+    emailSpreadsheets: "✗",
+    traditionalAgencies: "✗",
+  },
+  {
+    category: "Users",
+    feature: "Full audit logs",
+    studenthub: true,
+    alternatives: "Partial",
+    emailSpreadsheets: "✗",
+    traditionalAgencies: "✗",
+  },
+  {
+    category: "Finance",
+    feature: "Bulk invoicing workflow",
+    studenthub: true,
+    alternatives: "Partial",
+    emailSpreadsheets: "✗",
+    traditionalAgencies: "✗",
+  },
+  {
+    category: "Finance",
+    feature: "Payment run management",
+    studenthub: true,
+    alternatives: "Partial",
+    emailSpreadsheets: "✗",
+    traditionalAgencies: "✗",
+  },
+  {
+    category: "Finance",
+    feature: "Multi-entity reconciliation",
+    studenthub: true,
+    alternatives: "✗",
+    emailSpreadsheets: "✗",
+    traditionalAgencies: "✗",
+  },
+  {
+    category: "Compliance",
+    feature: "Production data validation",
+    studenthub: true,
+    alternatives: "✗",
+    emailSpreadsheets: "✗",
+    traditionalAgencies: "✗",
+  },
+  {
+    category: "Compliance",
+    feature: "Compliance dashboard",
+    studenthub: true,
+    alternatives: "Partial",
+    emailSpreadsheets: "✗",
+    traditionalAgencies: "✗",
+  },
+  {
+    category: "Reports",
+    feature: "Custom report builder",
+    studenthub: true,
+    alternatives: "Partial",
+    emailSpreadsheets: "✗",
+    traditionalAgencies: "✗",
+  },
+  {
+    category: "Reports",
+    feature: "Scheduled report delivery",
+    studenthub: true,
+    alternatives: "✗",
+    emailSpreadsheets: "✗",
+    traditionalAgencies: "✗",
+  },
+];
+
+// ── Inspector comparison data ─────────────────────────────
+
+const inspectorRows: ComparisonRow[] = [
+  {
+    category: "Review",
+    feature: "Batch document review",
+    studenthub: true,
+    alternatives: "✗",
+    emailSpreadsheets: "Partial",
+    traditionalAgencies: "✗",
+  },
+  {
+    category: "Review",
+    feature: "AI-prioritised queue",
+    studenthub: true,
+    alternatives: "✗",
+    emailSpreadsheets: "✗",
+    traditionalAgencies: "✗",
+  },
+  {
+    category: "Compliance",
+    feature: "Full audit trail per decision",
+    studenthub: true,
+    alternatives: "✗",
+    emailSpreadsheets: "Partial",
+    traditionalAgencies: "✗",
+  },
+  {
+    category: "Compliance",
+    feature: "Auto-approve/reject rules",
+    studenthub: true,
+    alternatives: "✗",
+    emailSpreadsheets: "✗",
+    traditionalAgencies: "✗",
+  },
+  {
+    category: "Exemptions",
+    feature: "Flag management workflow",
+    studenthub: true,
+    alternatives: "✗",
+    emailSpreadsheets: "✗",
+    traditionalAgencies: "✗",
+  },
+  {
+    category: "Exemptions",
+    feature: "Separate exemption queue",
+    studenthub: true,
+    alternatives: "✗",
+    emailSpreadsheets: "✗",
+    traditionalAgencies: "✗",
+  },
+  {
+    category: "Reporting",
+    feature: "Exportable compliance reports",
+    studenthub: true,
+    alternatives: "Partial",
+    emailSpreadsheets: "Partial",
+    traditionalAgencies: "✗",
+  },
+  {
+    category: "Reporting",
+    feature: "Multi-region standards support",
+    studenthub: true,
+    alternatives: "✗",
+    emailSpreadsheets: "✗",
+    traditionalAgencies: "✗",
+  },
+];
+
 // ── Comparison data per persona ─────────────────────────
 
 const personaRows: Record<string, ComparisonRow[]> = {
   candidate: candidateRows,
   company: companyRows,
+  staff: staffRows,
+  admin: adminRows,
+  inspector: inspectorRows,
 };
 
 // ── Grouped rendering ────────────────────────────────────
@@ -219,6 +486,7 @@ function renderCell(value: boolean | string) {
 
 export default function ComparisonTable({ persona = "candidate", className }: ComparisonTableProps) {
   const rows = personaRows[persona] ?? candidateRows;
+  const columns = personaColumns[persona] ?? personaColumns.candidate;
 
   // Group by category
   const categories = rows.reduce<{ category: string; rows: ComparisonRow[] }[]>((acc, row) => {
