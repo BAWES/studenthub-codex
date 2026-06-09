@@ -1,5 +1,6 @@
 "use server";
 
+import crypto from "node:crypto";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
@@ -37,6 +38,32 @@ const rejectCompanyRequestSchema = z.object({
   uuid: z.string().min(1, "Company request UUID is required"),
 });
 
+const createCompanyRequestSchema = z.object({
+  company_name: z.string().min(1, "Company name is required"),
+  company_email: z.string().email("Invalid email format"),
+  contact_name: z.string().min(1, "Contact name is required"),
+  contact_position: z.string().optional(),
+  phone_number: z.string().optional(),
+  requesting_for: z.string().optional(),
+  currency_code: z.string().length(3, "Currency code must be 3 characters").optional(),
+  country_id: z.coerce.number().int().positive().optional(),
+  contact_receive_email: z.boolean().optional(),
+});
+
+const updateCompanyRequestSchema = z.object({
+  uuid: z.string().min(1, "Company request UUID is required"),
+  company_name: z.string().min(1).optional(),
+  company_email: z.string().email("Invalid email format").optional(),
+  contact_name: z.string().min(1).optional(),
+  contact_position: z.string().optional().nullable(),
+  phone_number: z.string().optional().nullable(),
+  requesting_for: z.string().optional().nullable(),
+  currency_code: z.string().length(3).optional(),
+  country_id: z.coerce.number().int().positive().optional().nullable(),
+  contact_receive_email: z.boolean().optional(),
+  status: z.boolean().optional(),
+});
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -45,6 +72,8 @@ export type ListCompanyRequestsParams = z.input<typeof listCompanyRequestsSchema
 export type GetCompanyRequestParams = z.input<typeof getCompanyRequestSchema>;
 export type ApproveCompanyRequestParams = z.input<typeof approveCompanyRequestSchema>;
 export type RejectCompanyRequestParams = z.input<typeof rejectCompanyRequestSchema>;
+export type CreateCompanyRequestParams = z.input<typeof createCompanyRequestSchema>;
+export type UpdateCompanyRequestParams = z.input<typeof updateCompanyRequestSchema>;
 
 export type CompanyRequestItem = {
   company_request_uuid: string;
@@ -82,6 +111,8 @@ export {
   getCompanyRequestSchema,
   approveCompanyRequestSchema,
   rejectCompanyRequestSchema,
+  createCompanyRequestSchema,
+  updateCompanyRequestSchema,
 };
 
 // ---------------------------------------------------------------------------
@@ -270,6 +301,118 @@ export async function rejectCompanyRequest(
     return {
       operation: "error",
       message: err instanceof Error ? err.message : "Failed to reject company request",
+    };
+  }
+}
+
+/**
+ * Create a new company signup request.
+ * Mirrors the legacy CompanyRequestController::actionCreate.
+ * Generates UUID and sets default status to pending (false).
+ */
+export async function createCompanyRequest(
+  params: CreateCompanyRequestParams,
+): Promise<CompanyRequestMutationResult & { company_request_uuid?: string }> {
+  await requireCapability("admin.write");
+
+  const parsed = createCompanyRequestSchema.safeParse(params);
+  if (!parsed.success) {
+    return {
+      operation: "error",
+      message: parsed.error.issues[0]?.message ?? "Invalid company request data",
+    };
+  }
+
+  const {
+    company_name,
+    company_email,
+    contact_name,
+    contact_position,
+    phone_number,
+    requesting_for,
+    currency_code,
+    country_id,
+    contact_receive_email,
+  } = parsed.data;
+
+  try {
+    const created = await prisma.company_request.create({
+      data: {
+        company_request_uuid: crypto.randomUUID(),
+        company_name,
+        company_email,
+        contact_name,
+        contact_position: contact_position ?? null,
+        phone_number: phone_number ?? null,
+        requesting_for: requesting_for ?? null,
+        currency_code: currency_code ?? "KWD",
+        country_id: country_id ?? null,
+        contact_receive_email: contact_receive_email ?? true,
+        status: false,
+        created_at: new Date(),
+        updated_at: new Date(),
+      },
+    });
+
+    return {
+      operation: "success",
+      message: "Company request created",
+      company_request_uuid: created.company_request_uuid,
+    };
+  } catch (err) {
+    return {
+      operation: "error",
+      message: err instanceof Error ? err.message : "Failed to create company request",
+    };
+  }
+}
+
+/**
+ * Update an existing company signup request.
+ * Mirrors the legacy CompanyRequestController::actionUpdate.
+ * Only provided fields are updated.
+ */
+export async function updateCompanyRequest(
+  params: UpdateCompanyRequestParams,
+): Promise<CompanyRequestMutationResult> {
+  await requireCapability("admin.write");
+
+  const parsed = updateCompanyRequestSchema.safeParse(params);
+  if (!parsed.success) {
+    return {
+      operation: "error",
+      message: parsed.error.issues[0]?.message ?? "Invalid update parameters",
+    };
+  }
+
+  const { uuid, ...fields } = parsed.data;
+
+  const existing = await prisma.company_request.findUnique({
+    where: { company_request_uuid: uuid },
+  });
+
+  if (!existing) {
+    return { operation: "error", message: "Company request not found" };
+  }
+
+  try {
+    const updateData: Record<string, unknown> = { updated_at: new Date() };
+    for (const [key, value] of Object.entries(fields)) {
+      if (value !== undefined) {
+        updateData[key] = value;
+      }
+    }
+
+    await prisma.company_request.update({
+      where: { company_request_uuid: uuid },
+      data: updateData as any,
+    });
+
+    return { operation: "success", message: "Company request updated" };
+  } catch (err) {
+    return {
+      operation: "error",
+      message: err instanceof Error ? err.message : "Failed to update company request",
     };
   }
 }
