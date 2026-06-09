@@ -341,3 +341,86 @@ describe("ExpenseListResult shape", () => {
     expect(mock.totalPages).toBe(0);
   });
 });
+
+// ---------------------------------------------------------------------------
+// updateExpenseSchema
+// ---------------------------------------------------------------------------
+
+const updateExpenseSchema = z.object({
+  id: z.string().min(1, "Expense UUID is required"),
+  supplier: z.string().optional(),
+  category: z.number().int().optional(),
+  purchaseDate: z.string().optional(),
+  totalAmount: z.number().positive().optional(),
+  currency: z.number().int().optional(),
+  vat: z.number().min(0).optional(),
+  reimbursable: z.boolean().optional(),
+  description: z.string().optional(),
+  file: z.string().optional(),
+  status: z.string().optional(),
+});
+
+describe("updateExpenseSchema", () => {
+  it("accepts valid update params with all fields", () => {
+    const result = updateExpenseSchema.safeParse({
+      id: "expense_abc123",
+      supplier: "New Supplier",
+      category: 3,
+      purchaseDate: "2026-06-15",
+      totalAmount: 250.00,
+      currency: 1,
+      vat: 12.5,
+      reimbursable: false,
+      description: "Updated office supplies",
+      status: "KWD",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts partial update with only id and one field", () => {
+    const result = updateExpenseSchema.safeParse({
+      id: "expense_abc123",
+      description: "Just updating the description",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects missing id", () => {
+    const result = updateExpenseSchema.safeParse({
+      supplier: "ACME Corp",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects empty id", () => {
+    const result = updateExpenseSchema.safeParse({
+      id: "",
+      supplier: "ACME Corp",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects negative vat", () => {
+    const result = updateExpenseSchema.safeParse({
+      id: "expense_abc",
+      vat: -10,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects negative totalAmount", () => {
+    const result = updateExpenseSchema.safeParse({
+      id: "expense_abc",
+      totalAmount: -100,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects zero totalAmount", () => {
+    const result = updateExpenseSchema.safeParse({
+      id: "expense_abc",
+      totalAmount: 0,
+    });
+    expect(result.success).toBe(false);
+  });
+});
