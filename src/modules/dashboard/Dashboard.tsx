@@ -1,4 +1,5 @@
 import { getDashboardData } from "@/modules/dashboard/data";
+import { EmptyState } from "@/modules/workspace/EmptyState";
 
 export async function Dashboard() {
   const dashboard = await getDashboardData();
@@ -74,7 +75,7 @@ function DataList({ title, items }: { title: string; items: DataListItem[] }) {
         <span>{items.length}</span>
       </div>
       <div className="rows">
-        {items.map((item) => (
+        {items.length ? items.map((item) => (
           <article className="row" key={item.id}>
             <div className="rowMain">
               <strong>{item.title}</strong>
@@ -87,7 +88,7 @@ function DataList({ title, items }: { title: string; items: DataListItem[] }) {
               {item.date ? <small>{item.date}</small> : null}
             </div>
           </article>
-        ))}
+        )) : <EmptyState variant="no-activity" message="No recent activity" />}
       </div>
     </section>
   );

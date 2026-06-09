@@ -1,6 +1,7 @@
 import type { Route } from "next";
 import Link from "next/link";
 import { ArrowRight, BriefcaseBusiness, Clock3, FileText, Search, Users } from "lucide-react";
+import { EmptyState } from "@/modules/workspace/EmptyState";
 import type { getStaffWorkspace } from "@/modules/workspace/data";
 
 type StaffWorkspaceData = Awaited<ReturnType<typeof getStaffWorkspace>>;
@@ -125,7 +126,7 @@ function StaffRows({
           </article>
         )
       )}
-      {!rows.length ? <p>{empty}</p> : null}
+      {!rows.length ? <EmptyState variant="empty" message={empty} /> : null}
     </section>
   );
 }
