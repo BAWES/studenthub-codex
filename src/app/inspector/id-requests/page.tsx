@@ -1,6 +1,6 @@
 import type { Route } from "next";
 import { requireRoleCapability } from "@/modules/auth/session";
-import { DataTable } from "@/modules/workspace/DataTable";
+import { DataTablePage } from "@/modules/workspace/DataTablePage";
 import { StatusBadge } from "@/modules/workspace/StatusBadge";
 import { genericStatusVariant } from "@/modules/workspace/status-mapping";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
@@ -14,11 +14,13 @@ export default async function InspectorIdRequestsPage() {
 
   return (
     <WorkspaceShell session={session} eyebrow="Inspector" title="ID Requests" metrics={[]}>
-      <DataTable
+      <DataTablePage
         title="Civil ID Verification Queue"
         description="Batches from the legacy candidate ID request queue."
         rows={rows}
         rowHref={(row) => `/inspector/id-requests/${row.id}` as Route}
+        searchable
+        searchPlaceholder="Search by request, candidate, created by..."
         columns={[
           { key: "request", label: "Request", render: (row) => <strong>{row.request}</strong> },
           { key: "candidates", label: "Candidates", render: (row) => row.candidates },
