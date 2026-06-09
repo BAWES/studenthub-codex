@@ -94,6 +94,68 @@
   --dur-modal: 300ms;
 
   /* ------------------------------------------------------------------ */
+  /* Design system — StudentHub OS aesthetic                             */
+  /* ------------------------------------------------------------------ */
+
+  /* Glass morphism */
+  --sh-glass-bg: rgba(255, 255, 255, 0.05);
+  --sh-glass-bg-strong: rgba(255, 255, 255, 0.10);
+  --sh-glass-border: rgba(255, 255, 255, 0.10);
+  --sh-glass-border-strong: rgba(255, 255, 255, 0.18);
+  --sh-glass-blur: 20px;
+
+  /* Glow effects */
+  --sh-glow-sm: 0 0 12px rgba(11, 99, 206, 0.20);
+  --sh-glow-md: 0 0 24px rgba(11, 99, 206, 0.30);
+  --sh-glow-lg: 0 0 48px rgba(11, 99, 206, 0.40);
+
+  /* Animation */
+  --sh-easing: cubic-bezier(0.16, 1, 0.3, 1);
+  --sh-easing-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* Status colors (with glow variants) */
+  --sh-success: #24835b;
+  --sh-success-bg: rgba(36, 131, 91, 0.10);
+  --sh-success-glow: 0 0 12px rgba(36, 131, 91, 0.25);
+  --sh-warning: #a66212;
+  --sh-warning-bg: rgba(166, 98, 18, 0.10);
+  --sh-warning-glow: 0 0 12px rgba(166, 98, 18, 0.25);
+  --sh-error: #b42318;
+  --sh-error-bg: rgba(180, 35, 24, 0.10);
+  --sh-error-glow: 0 0 12px rgba(180, 35, 24, 0.25);
+  --sh-info: #0b63ce;
+  --sh-info-bg: rgba(11, 99, 206, 0.10);
+  --sh-info-glow: 0 0 12px rgba(11, 99, 206, 0.25);
+
+  /* OS spacing */
+  --sh-space-xs: 4px;
+  --sh-space-sm: 8px;
+  --sh-space-md: 12px;
+  --sh-space-lg: 16px;
+  --sh-space-xl: 24px;
+  --sh-space-2xl: 32px;
+  --sh-space-3xl: 48px;
+
+  /* OS type scale */
+  --sh-fs-xs: 11px;
+  --sh-fs-sm: 12px;
+  --sh-fs-base: 13px;
+  --sh-fs-md: 14px;
+  --sh-fs-lg: 16px;
+  --sh-fs-xl: 20px;
+  --sh-fs-2xl: 24px;
+  --sh-fs-3xl: 32px;
+
+  /* OS radii */
+  --sh-radius-sm: 6px;
+  --sh-radius-md: 8px;
+  --sh-radius-lg: 12px;
+  --sh-radius-xl: 16px;
+
+  /* Active indicator */
+  --sh-active-width: 3px;
+
+  /* ------------------------------------------------------------------ */
   /* Responsive breakpoints (reference — use in @media queries)          */
   /* ------------------------------------------------------------------ */
   --bp-sm: 640px;
@@ -183,6 +245,27 @@
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.35);
   --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.40);
   --shadow-xl: 0 24px 90px rgba(0, 0, 0, 0.45);
+
+  /* Dark mode — OS design system */
+  --sh-glass-bg: rgba(255, 255, 255, 0.04);
+  --sh-glass-bg-strong: rgba(255, 255, 255, 0.08);
+  --sh-glass-border: rgba(255, 255, 255, 0.06);
+  --sh-glass-border-strong: rgba(255, 255, 255, 0.12);
+  --sh-glow-sm: 0 0 16px rgba(138, 191, 255, 0.18);
+  --sh-glow-md: 0 0 32px rgba(138, 191, 255, 0.25);
+  --sh-glow-lg: 0 0 56px rgba(138, 191, 255, 0.35);
+  --sh-success: #6ed5a0;
+  --sh-success-bg: rgba(110, 213, 160, 0.10);
+  --sh-success-glow: 0 0 14px rgba(110, 213, 160, 0.25);
+  --sh-warning: #e8ae63;
+  --sh-warning-bg: rgba(232, 174, 99, 0.10);
+  --sh-warning-glow: 0 0 14px rgba(232, 174, 99, 0.25);
+  --sh-error: #ff8a8a;
+  --sh-error-bg: rgba(255, 138, 138, 0.10);
+  --sh-error-glow: 0 0 14px rgba(255, 138, 138, 0.25);
+  --sh-info: #8abfff;
+  --sh-info-bg: rgba(138, 191, 255, 0.10);
+  --sh-info-glow: 0 0 14px rgba(138, 191, 255, 0.25);
 }
 
 * {
@@ -365,6 +448,127 @@ body {
   color: var(--muted-foreground);
 }
 
+/* ── Glass Panel — StudentHub OS morphism ──────────────────────────── */
+.shGlassBase {
+  background: var(--sh-glass-bg);
+  backdrop-filter: blur(var(--sh-glass-blur));
+  -webkit-backdrop-filter: blur(var(--sh-glass-blur));
+  border: 1px solid var(--sh-glass-border);
+  transition:
+    background 200ms var(--sh-easing),
+    border-color 200ms var(--sh-easing),
+    box-shadow 200ms var(--sh-easing),
+    transform 200ms var(--sh-easing);
+}
+
+.shGlassStrong {
+  background: var(--sh-glass-bg-strong);
+  border-color: var(--sh-glass-border-strong);
+}
+
+.shGlassElevated {
+  background: var(--sh-glass-bg-strong);
+  border-color: var(--sh-glass-border-strong);
+  box-shadow: var(--sh-glow-sm);
+}
+
+.shGlassRadiusSm { border-radius: var(--sh-radius-sm); }
+.shGlassRadiusMd { border-radius: var(--sh-radius-md); }
+.shGlassRadiusLg { border-radius: var(--sh-radius-lg); }
+.shGlassRadiusXl { border-radius: var(--sh-radius-xl); }
+.shGlassRadiusFull { border-radius: 999px; }
+
+/* ── Status Badge — glowing status indicator ───────────────────────── */
+.shStatusBadgeBase {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  transition:
+    box-shadow 200ms var(--sh-easing),
+    border-color 200ms var(--sh-easing);
+}
+
+.shStatusBadge_glow {
+  box-shadow: var(--sh-glow-sm);
+}
+
+.shStatusBadge_sm {
+  padding: 3px 7px;
+  font-size: var(--sh-fs-xs);
+}
+
+.shStatusBadge_md {
+  padding: 5px 10px;
+  font-size: var(--sh-fs-sm);
+}
+
+.shStatusBadge_lg {
+  padding: 7px 12px;
+  font-size: var(--sh-fs-base);
+}
+
+.shStatusBadge_success {
+  background: var(--sh-success-bg);
+  border-color: color-mix(in srgb, var(--sh-success) 20%, transparent);
+  color: var(--sh-success);
+}
+.shStatusBadge_success.shStatusBadge_glow {
+  box-shadow: var(--sh-success-glow);
+}
+
+.shStatusBadge_warning {
+  background: var(--sh-warning-bg);
+  border-color: color-mix(in srgb, var(--sh-warning) 20%, transparent);
+  color: var(--sh-warning);
+}
+.shStatusBadge_warning.shStatusBadge_glow {
+  box-shadow: var(--sh-warning-glow);
+}
+
+.shStatusBadge_error {
+  background: var(--sh-error-bg);
+  border-color: color-mix(in srgb, var(--sh-error) 20%, transparent);
+  color: var(--sh-error);
+}
+.shStatusBadge_error.shStatusBadge_glow {
+  box-shadow: var(--sh-error-glow);
+}
+
+.shStatusBadge_info {
+  background: var(--sh-info-bg);
+  border-color: color-mix(in srgb, var(--sh-info) 20%, transparent);
+  color: var(--sh-info);
+}
+.shStatusBadge_info.shStatusBadge_glow {
+  box-shadow: var(--sh-info-glow);
+}
+
+.shStatusBadge_neutral {
+  background: var(--secondary);
+  border-color: color-mix(in srgb, var(--faint) 15%, transparent);
+  color: var(--muted-foreground);
+}
+
+/* Status dot */
+.shStatusBadgeDot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.shStatusDot_success { background: var(--sh-success); }
+.shStatusDot_warning { background: var(--sh-warning); }
+.shStatusDot_error { background: var(--sh-error); }
+.shStatusDot_info { background: var(--sh-info); }
+.shStatusDot_neutral { background: var(--faint); }
+
 .uiCard {
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -539,7 +743,6 @@ body {
   color: var(--blue);
 }
 
-[data-theme="dark"] .workspaceMark,
 [data-theme="dark"] .commandBrand,
 [data-theme="dark"] .brandMark {
   background: #e7ecf5;
@@ -554,7 +757,7 @@ body {
 .shell {
   min-height: 100svh;
   display: grid;
-  grid-template-columns: 236px minmax(0, 1fr);
+  grid-template-columns: 216px minmax(0, 1fr);
   background: var(--paper);
 }
 
@@ -572,117 +775,269 @@ body {
   height: 100svh;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
-  justify-items: center;
   gap: 12px;
-  border-right: 1px solid #e2e6ee;
-  background: var(--surface);
-  padding: 14px 12px;
+  padding: 16px 10px;
+  width: 216px;
+  /* Glass morphism — no visible border, depth via shadow */
+  background: var(--sh-glass-bg);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-right: 1px solid var(--sh-glass-border);
+  transition:
+    width 280ms var(--sh-easing),
+    padding 280ms var(--sh-easing),
+    background 280ms var(--sh-easing);
 }
 
-.workspaceMark,
-.workspaceRailNav a {
-  text-decoration: none;
+/* In dark mode, the glass rail sits on a slightly different surface */
+[data-theme="dark"] .workspaceRail {
+  border-right-color: var(--sh-glass-border);
 }
 
+/* ── Workspace brand mark (glass, not solid) ────────────────────────── */
 .workspaceMark {
   width: 100%;
-  min-height: 48px;
+  min-height: 44px;
   display: flex;
   align-items: center;
   gap: 10px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--ink);
-  color: var(--surface);
-  padding: 0 12px;
+  border: 1px solid var(--sh-glass-border-strong);
+  border-radius: var(--sh-radius-md);
+  background: var(--sh-glass-bg-strong);
+  color: var(--ink);
+  padding: 0 10px;
+  text-decoration: none;
+  transition:
+    background 200ms var(--sh-easing),
+    border-color 200ms var(--sh-easing);
+}
+
+.workspaceMark:hover {
+  border-color: var(--sh-glass-border-strong);
+  background: var(--sh-glass-bg-strong);
 }
 
 .workspaceMark span {
-  width: 30px;
-  height: 30px;
+  width: 28px;
+  height: 28px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 7px;
-  background: rgba(255, 255, 255, 0.14);
+  border-radius: 6px;
+  background: var(--ink);
+  color: var(--paper);
+  font-size: 12px;
   font-weight: 900;
 }
 
 .workspaceMark strong {
-  font-size: 15px;
-  font-weight: 900;
+  font-size: 14px;
+  font-weight: 800;
 }
 
+/* ── Navigation rail — glass items with glow indicator ─────────────── */
 .workspaceRailNav {
   width: 100%;
   display: grid;
   align-content: start;
-  gap: 8px;
+  gap: 2px;
 }
 
 .workspaceRailNav a {
   width: 100%;
-  min-height: 42px;
+  min-height: 38px;
   display: flex;
   align-items: center;
+  gap: 10px;
   position: relative;
-  border: 1px solid transparent;
-  border-radius: 8px;
+  text-decoration: none;
   color: var(--muted);
-  padding: 0 12px;
+  padding: 0 10px;
+  border-radius: var(--sh-radius-sm);
+  font-size: 13px;
+  font-weight: 500;
+  transition:
+    color 180ms var(--sh-easing),
+    background 180ms var(--sh-easing);
 }
 
-.workspaceRailNav a:hover,
+.workspaceRailNav a:hover {
+  color: var(--ink);
+  background: var(--sh-glass-bg-strong);
+}
+
 .workspaceRailNav a.active {
-  border-color: #d9dee8;
-  background: var(--surface-soft);
   color: var(--blue);
-  box-shadow: 0 8px 22px rgba(16, 24, 40, 0.08);
+  background: var(--sh-info-bg);
 }
 
-.workspaceRailNav a.active {
-  box-shadow: inset 3px 0 0 var(--blue), 0 8px 22px rgba(16, 24, 40, 0.08);
+/* Glowing left-indicator on active item — the signature OS look */
+.workspaceRailNav a.active::before {
+  content: "";
+  position: absolute;
+  left: -10px;
+  top: 50%;
+  translate: 0 -50%;
+  width: var(--sh-active-width);
+  height: 20px;
+  border-radius: 0 2px 2px 0;
+  background: var(--blue);
+  box-shadow: var(--sh-glow-sm);
+  transition:
+    height 200ms var(--sh-easing),
+    opacity 200ms var(--sh-easing);
+}
+
+.workspaceRailNav a svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+.workspaceRailNav a:hover svg,
+.workspaceRailNav a.active svg {
+  opacity: 1;
 }
 
 .workspaceRailNav a > strong {
-  font-size: 14px;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.3;
 }
 
+/* ── Rail footer ───────────────────────────────────────────────────── */
 .workspaceRailFooter {
   width: 100%;
   display: grid;
-  gap: 8px;
+  gap: 6px;
 }
 
-.workspaceSignout button,
+.workspaceSignout button {
+  width: 100%;
+  min-height: 36px;
+  border: 1px solid var(--sh-glass-border);
+  border-radius: var(--sh-radius-sm);
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    all 180ms var(--sh-easing);
+}
+
+.workspaceSignout button:hover {
+  border-color: color-mix(in srgb, var(--rose) 30%, transparent);
+  background: var(--sh-error-bg);
+  color: var(--sh-error);
+}
+
+/* ── Theme toggle in rail ──────────────────────────────────────────── */
 .themeToggle {
   width: 100%;
-  min-height: 40px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--surface-soft);
-  color: var(--ink);
+  min-height: 36px;
+  border: 1px solid var(--sh-glass-border);
+  border-radius: var(--sh-radius-sm);
+  background: transparent;
+  color: var(--muted);
   font: inherit;
-  font-size: 13px;
-  font-weight: 900;
+  font-size: 12px;
+  font-weight: 600;
   cursor: pointer;
+  transition:
+    all 180ms var(--sh-easing);
 }
 
-.workspaceSignout button:hover,
 .themeToggle:hover {
-  border-color: var(--blue);
-  color: var(--blue);
+  border-color: var(--sh-glass-border-strong);
+  background: var(--sh-glass-bg-strong);
+  color: var(--ink);
 }
 
+/* ── Workspace stage area ───────────────────────────────────────────── */
 .workspaceStage {
   min-width: 0;
-  width: calc(100vw - 236px);
+  width: calc(100vw - 216px);
   overflow-x: hidden;
   display: grid;
   align-content: start;
   gap: 14px;
   padding: 14px;
+  animation: shFadeSlideIn 300ms var(--sh-easing);
 }
+
+/* ── Page transitions ─────────────────────────────────────────────────── */
+@keyframes shFadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes shGlowPulse {
+  0%, 100% { box-shadow: var(--sh-glow-sm); }
+  50% { box-shadow: var(--sh-glow-md); }
+}
+
+/* Apply to content changes within the stage */
+.workspaceStage > section {
+  animation: shFadeIn 240ms var(--sh-easing);
+}
+
+/* ── Glass Metric Card ────────────────────────────────────────────────── */
+.shMetricCard {
+  display: grid;
+  gap: 4px;
+  padding: var(--sh-space-lg);
+  background: var(--sh-glass-bg);
+  border: 1px solid var(--sh-glass-border);
+  border-radius: var(--sh-radius-lg);
+  backdrop-filter: blur(var(--sh-glass-blur));
+  -webkit-backdrop-filter: blur(var(--sh-glass-blur));
+  transition:
+    transform 200ms var(--sh-easing),
+    box-shadow 200ms var(--sh-easing),
+    border-color 200ms var(--sh-easing);
+}
+
+.shMetricCard:hover {
+  transform: translateY(-1px);
+  border-color: var(--sh-glass-border-strong);
+  box-shadow: var(--sh-glow-sm);
+}
+
+.shMetricCard-label {
+  font-size: var(--sh-fs-sm);
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.shMetricCard-value {
+  font-size: var(--sh-fs-2xl);
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.1;
+}
+
+.shMetricCard-trend {
+  font-size: var(--sh-fs-sm);
+  font-weight: 600;
+}
+
+.shMetricCard-trend[data-direction="up"] { color: var(--sh-success); }
+.shMetricCard-trend[data-direction="down"] { color: var(--sh-error); }
+.shMetricCard-trend[data-direction="flat"] { color: var(--muted); }
 
 .workTabs {
   display: flex;
