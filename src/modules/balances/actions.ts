@@ -317,8 +317,13 @@ export async function initTransfer(
     }
 
     // 3. Look up the wallet user by email (mirrors Yii2 WalletUser::findByEmail)
-    const walletUsers = await walletQuery<Array<{ user_uuid: string }>>(
-      `SELECT user_uuid FROM user WHERE email = ? LIMIT 1`,
+    //    The wallet DB has its own user table that maps email → user_uuid.
+    type WalletUser = { user_uuid: string; bank_uuid: string | null; bank_account_name: string | null; iban: string | null };
+    const walletUsers = await walletQuery<WalletUser[]>(
+      `SELECT user_uuid, bank_uuid, bank_account_name, iban
+       FROM user
+       WHERE email = ?
+       LIMIT 1`,
       [candidate.candidate_email],
     );
 
@@ -371,6 +376,94 @@ export async function initTransfer(
     return {
       success: false,
       error: error instanceof Error ? error.message : "Transfer initiation failed due to an unknown error.",
+    };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// payByWallet — candidate pays from wallet balance (e.g. service fees)
+// ---------------------------------------------------------------------------
+
+export type PayByWalletState = {
+  success: boolean;
+  error?: string;
+};
+
+export const payByWalletSchema = z.object({
+  amount: z.coerce
+    .number()
+    .positive("Amount must be positive")
+    .finite("Amount must be a finite number"),
+});
+
+/**
+ * Process a wallet payment for the candidate. Validates sufficient balance,
+ * creates a balance_transaction record, and deducts from the account.
+ *
+ * Mirrors the legacy Yii2 BalanceController::actionPayByWallet().
+ */
+export async function payByWallet(
+  _prevState: PayByWalletState,
+  formData: FormData,
+): Promise<PayByWalletState> {
+  const session = await requireCapability("candidate.profile.edit");
+
+  // 1. Parse and validate amount
+  const raw = formData.get("amount");
+  const parsed = payByWalletSchema.safeParse({ amount: raw });
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: parsed.error.errors.map((e) => e.message).join("; "),
+    };
+  }
+
+  const { amount } = parsed.data;
+
+  try {
+    // 2. Find the candidate's payable wallet account
+    const accounts = await walletQuery<Array<{ balance_account_uuid: string; account_uuid: string; balance: number; type: string }>>(
+      `SELECT balance_account_uuid, account_uuid, balance, type
+       FROM balance_account
+       WHERE account_uuid = ? AND type = ?
+       LIMIT 1`,
+      [],
+    );
+
+    if (accounts.length === 0) {
+      return { success: false, error: "No payable account found for your account." };
+    }
+
+    const account = accounts[0];
+    const currentBalance = Number(account.balance);
+
+    // 3. Validate sufficient balance
+    if (currentBalance < amount) {
+      return {
+        success: false,
+        error: `Insufficient balance. Available: ${currentBalance.toFixed(3)} KWD, requested: ${amount.toFixed(3)} KWD.`,
+      };
+    }
+
+    // 4. Deduct from balance and record the transaction
+    await walletQuery(
+      `INSERT INTO balance_transaction (account_uuid, amount, balance, data, created_at, transaction_datetime)
+       VALUES (?, ?, ?, ?, NOW(), NOW())`,
+      [account.balance_account_uuid, -amount, currentBalance - amount, JSON.stringify({ type: "payByWallet" })],
+    );
+
+    // 5. Update the account balance
+    await walletQuery(
+      `UPDATE balance_account SET balance = ? WHERE balance_account_uuid = ?`,
+      [currentBalance - amount, account.balance_account_uuid],
+    );
+
+    return { success: true };
+  } catch (error) {
+    console.error("payByWallet failed:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Wallet payment failed due to an unknown error.",
     };
   }
 }

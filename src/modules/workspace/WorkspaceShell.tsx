@@ -45,7 +45,7 @@ export function WorkspaceShell({
   const navItems = navForRole(session.role);
 
   const rail = (
-    <aside className="workspaceRail">
+    <aside className="workspaceRail" aria-label="Workspace sidebar">
       <Link className="workspaceMark" href="/app" aria-label="StudentHub app">
         <span>SH</span>
         <strong>StudentHub</strong>
@@ -53,8 +53,8 @@ export function WorkspaceShell({
       <WorkspaceNavigation items={navItems} role={session.role} />
       <div className="workspaceRailFooter">
         <ThemeToggle />
-        <form className="workspaceSignout" action={logoutAction}>
-          <button type="submit">Sign out</button>
+        <form action={logoutAction}>
+          <button type="submit" aria-label="Sign out">Sign out</button>
         </form>
       </div>
     </aside>

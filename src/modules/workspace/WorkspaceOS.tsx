@@ -277,19 +277,19 @@ export function WorkspaceOS({
       </a>
       <main id="main-content" className="shell">
         {/* ── Sidebar Rail ─────────────────────────────────── */}
-        <aside className="workspaceRail">
+        <aside className="workspaceRail" aria-label="Workspace sidebar">
           <Link className="workspaceMark" href="/app" aria-label="StudentHub app">
             <span>SH</span>
             <strong>StudentHub</strong>
           </Link>
           <WorkspaceNavigation items={navItems} role={session.role} />
           <div className="workspaceRailFooter">
-            <button className="commandLauncher" type="button" onClick={() => { setCmdOpen(true); }}>
+            <button className="commandLauncher" type="button" aria-label="Open command menu" onClick={() => { setCmdOpen(true); }}>
               <span>⌘K</span>
             </button>
             <ThemeToggle />
-            <form className="workspaceSignout" action={logoutAction}>
-              <button type="submit">Sign out</button>
+            <form action={logoutAction}>
+              <button type="submit" aria-label="Sign out">Sign out</button>
             </form>
           </div>
         </aside>
