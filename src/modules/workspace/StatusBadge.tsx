@@ -42,6 +42,8 @@ export interface StatusBadgeProps {
   detail?: string;
   /** Additional CSS classes */
   className?: string;
+  /** Enable OS-style glow effect around the badge */
+  glow?: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -62,6 +64,7 @@ export function StatusBadge({
   loading = false,
   showDetails = false,
   detail,
+  glow = false,
   className,
 }: StatusBadgeProps) {
   return (
@@ -72,6 +75,7 @@ export function StatusBadge({
         variantStyles[variant],
         sizeStyles[size],
         loading && "animate-pulse",
+        glow && "sh-glow",
         className,
       )}
     >

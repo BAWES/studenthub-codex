@@ -3,6 +3,8 @@ import Link from "next/link";
 import type { getCandidateDetail } from "@/modules/workspace/data";
 import { formatDate } from "@/modules/workspace/format";
 import { EmptyState } from "@/modules/workspace/EmptyState";
+import { StatusBadge } from "@/modules/workspace/StatusBadge";
+import { GlassPanel } from "@/components/ui/glass-panel";
 import { WorkLogStaffActions } from "./WorkLogStaffActions";
 
 /** Maps numeric candidate_status to a human-readable label. */
@@ -53,20 +55,27 @@ export function CandidateProfile({
 
   return (
     <section className={compact ? "candidateProfile compact" : "candidateProfile"}>
-      <header className="candidateProfileHero">
-        <div className="candidateAvatar" aria-hidden="true">
-          {initials(candidate.candidate_name)}
-        </div>
-        <div className="candidateProfileTitle">
-          <span>{candidate.candidate_uid ?? `#${candidate.candidate_id}`}</span>
-          <h2>{candidate.candidate_name}</h2>
-          {title !== candidate.candidate_name ? <p>{title}</p> : null}
-          <div className="candidateStatusLine">
-            <strong>{status}</strong>
-            <span>{candidate.store?.company?.company_name ?? candidate.country?.country_name_en ?? "No company context"}</span>
+      <GlassPanel variant="subtle" radius="lg" className="!p-0 overflow-hidden">
+        <header className="shProfileHero">
+          <div className="shProfileAvatar" aria-hidden="true">
+            {initials(candidate.candidate_name)}
           </div>
-        </div>
-      </header>
+          <div className="shProfileInfo">
+            <p className="shProfileInfoEyebrow">{candidate.candidate_uid ?? `#${candidate.candidate_id}`}</p>
+            <h2 className="shProfileInfoName">{candidate.candidate_name}</h2>
+            {title !== candidate.candidate_name ? <p className="shProfileInfoSub">{title}</p> : null}
+            <div className="shProfileMetaRow">
+              <StatusBadge
+                variant={status === "Active" ? "success" : status === "Archived" ? "error" : "warning"}
+                size="sm"
+                label={status}
+                glow
+              />
+              <span className="shProfileMetaText">{candidate.store?.company?.company_name ?? candidate.country?.country_name_en ?? "No company context"}</span>
+            </div>
+          </div>
+        </header>
+      </GlassPanel>
 
       <div className="candidateProfileActions" aria-label="Candidate actions">
         {backHref ? <Link href={backHref}>Back to list</Link> : null}
@@ -83,87 +92,123 @@ export function CandidateProfile({
         )}
       </div>
 
-      <section className="candidateReadiness" aria-label="Candidate readiness">
-        <div className="candidateReadinessScore">
-          <span>Readiness</span>
-          <strong>{readiness.score}%</strong>
-          <small>{readiness.summary}</small>
-        </div>
-        <div className="candidateReadinessItems">
-          {readiness.items.map((item) => (
-            <div className={item.done ? "done" : "open"} key={item.label}>
-              <span>{item.done ? "Done" : "Open"}</span>
-              <strong>{item.label}</strong>
-            </div>
-          ))}
-        </div>
-        {readiness.missing?.length ? (
-          <div className="candidateMissingFields">
-            <span>Missing fields</span>
-            <ul>
-              {readiness.missing.map((item) => (
-                <li key={item.label}>
-                  <Link href="/candidate/edit">{item.label}</Link>
-                </li>
-              ))}
-            </ul>
+      <GlassPanel variant="subtle" radius="lg" className="p-5">
+        <section className="candidateReadiness" aria-label="Candidate readiness">
+          <div className="candidateReadinessScore">
+            <span>Readiness</span>
+            <strong>{readiness.score}%</strong>
+            <small>{readiness.summary}</small>
           </div>
-        ) : null}
-      </section>
+          <div className="candidateReadinessItems">
+            {readiness.items.map((item) => (
+              <div className={item.done ? "done" : "open"} key={item.label}>
+                <span>{item.done ? "Done" : "Open"}</span>
+                <strong>{item.label}</strong>
+              </div>
+            ))}
+          </div>
+          {readiness.missing?.length ? (
+            <div className="candidateMissingFields">
+              <span>Missing fields</span>
+              <ul>
+                {readiness.missing.map((item) => (
+                  <li key={item.label}>
+                    <Link href="/candidate/edit">{item.label}</Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+        </section>
+      </GlassPanel>
 
-      <section className="candidateFactGrid" aria-label="Candidate facts">
-        <Fact label="Email" value={candidate.candidate_email} />
-        <Fact label="Phone" value={candidate.candidate_phone ?? "No phone"} />
-        <Fact label="Country" value={candidate.country?.country_name_en ?? "Not set"} />
-        <Fact label="University" value={candidate.university?.university_name_en ?? "Not set"} />
-        <Fact label="Company" value={candidate.store?.company?.company_name ?? "Not assigned"} />
-        <Fact label="Store" value={candidate.store?.store_name ?? "Not assigned"} />
-        <Fact label="Rate" value={detail.metrics[1]?.value ?? "0"} />
-        <Fact label="Revenue" value={detail.stats?.totalRevenue ?? "No revenue stats"} />
-        <Fact label="Civil ID" value={candidate.candidate_civil_id ?? (candidate.candidate_civil_need_verification ? "Needs verification" : "Not set")} />
-        <Fact label="Updated" value={formatDate(candidate.candidate_updated_at)} />
-      </section>
+      <GlassPanel variant="subtle" radius="lg" className="p-5">
+        <section className="candidateFactGrid" aria-label="Candidate facts">
+          <Fact label="Email" value={candidate.candidate_email} />
+          <Fact label="Phone" value={candidate.candidate_phone ?? "No phone"} />
+          <Fact label="Country" value={candidate.country?.country_name_en ?? "Not set"} />
+          <Fact label="University" value={candidate.university?.university_name_en ?? "Not set"} />
+          <Fact label="Company" value={candidate.store?.company?.company_name ?? "Not assigned"} />
+          <Fact label="Store" value={candidate.store?.store_name ?? "Not assigned"} />
+          <Fact label="Rate" value={detail.metrics[1]?.value ?? "0"} />
+          <Fact label="Revenue" value={detail.stats?.totalRevenue ?? "No revenue stats"} />
+          <Fact label="Civil ID" value={candidate.candidate_civil_id ?? (candidate.candidate_civil_need_verification ? "Needs verification" : "Not set")} />
+          <Fact label="Updated" value={formatDate(candidate.candidate_updated_at)} />
+        </section>
+      </GlassPanel>
 
-      <CivilIdPanel candidate={candidate} viewerRole={viewerRole} />
+      <GlassPanel variant="subtle" radius="lg" className="p-0 overflow-hidden">
+        <CivilIdPanel candidate={candidate} viewerRole={viewerRole} />
+      </GlassPanel>
 
       {!compact && candidate.candidate_intro ? (
-        <section className="candidateNarrative">
-          <span>Profile intro</span>
-          <p>{candidate.candidate_intro}</p>
-        </section>
+        <GlassPanel variant="subtle" radius="lg" className="p-5">
+          <section className="candidateNarrative">
+            <span>Profile intro</span>
+            <p>{candidate.candidate_intro}</p>
+          </section>
+        </GlassPanel>
       ) : null}
 
       <section className="candidateProfileColumns">
-        <section className="candidateProfilePanel">
-          <PanelHeader title="Skills and tags" count={detail.skills.length + detail.tags.length} />
-          <div className="candidatePills">
+        <GlassPanel variant="subtle" radius="lg" className="p-0 overflow-hidden h-min">
+          <section className="candidateProfilePanel">
+            <PanelHeader title="Skills and tags" count={detail.skills.length + detail.tags.length} />
+            <div className="candidatePills">
             {[...detail.skills, ...detail.tags].slice(0, compact ? 12 : 28).map((item) => (
               <span key={`${item.title}-${item.id}`}>{item.title}</span>
             ))}
             {!detail.skills.length && !detail.tags.length ? <EmptyState variant="empty" message="No imported skills or tags" hint="Skills and tags will appear here once they are imported from the candidate profile." /> : null}
           </div>
         </section>
+      </GlassPanel>
 
+      <GlassPanel variant="subtle" radius="lg" className="p-0 overflow-hidden h-min">
         <RowsPanel title="Timeline" rows={timeline} limit={compact ? 5 : 12} />
+      </GlassPanel>
       </section>
 
       {!compact ? (
         <section className="candidateProfileColumns">
-          <RowsPanel title="Education" rows={detail.education} />
-          <RowsPanel title="Experience" rows={detail.experiences} />
-          <RowsPanel title="Applications" rows={detail.applications} />
-          <RowsPanel title="Interviews" rows={detail.interviews} />
-          <RowsPanel title="Suggestions" rows={detail.suggestions} />
-          <RowsPanel title="Invitations" rows={detail.invitations} />
-          <RowsPanel title="Work history" rows={detail.histories} />
+          <GlassPanel variant="subtle" radius="lg" className="p-0 overflow-hidden h-min">
+            <RowsPanel title="Education" rows={detail.education} />
+          </GlassPanel>
+          <GlassPanel variant="subtle" radius="lg" className="p-0 overflow-hidden h-min">
+            <RowsPanel title="Experience" rows={detail.experiences} />
+          </GlassPanel>
+          <GlassPanel variant="subtle" radius="lg" className="p-0 overflow-hidden h-min">
+            <RowsPanel title="Applications" rows={detail.applications} />
+          </GlassPanel>
+          <GlassPanel variant="subtle" radius="lg" className="p-0 overflow-hidden h-min">
+            <RowsPanel title="Interviews" rows={detail.interviews} />
+          </GlassPanel>
+          <GlassPanel variant="subtle" radius="lg" className="p-0 overflow-hidden h-min">
+            <RowsPanel title="Suggestions" rows={detail.suggestions} />
+          </GlassPanel>
+          <GlassPanel variant="subtle" radius="lg" className="p-0 overflow-hidden h-min">
+            <RowsPanel title="Invitations" rows={detail.invitations} />
+          </GlassPanel>
+          <GlassPanel variant="subtle" radius="lg" className="p-0 overflow-hidden h-min">
+            <RowsPanel title="Work history" rows={detail.histories} />
+          </GlassPanel>
           {viewerRole === "staff" ? (
-            <WorkLogStaffPanel hours={detail.workHours as any} />
+            <GlassPanel variant="subtle" radius="lg" className="p-0 overflow-hidden h-min">
+              <WorkLogStaffPanel hours={detail.workHours as any} />
+            </GlassPanel>
           ) : (
-            <RowsPanel title="Work logs" rows={detail.workHours} />
+            <GlassPanel variant="subtle" radius="lg" className="p-0 overflow-hidden h-min">
+              <RowsPanel title="Work logs" rows={detail.workHours} />
+            </GlassPanel>
           )}
-          <RowsPanel title="Notes" rows={detail.notes} />
-          <RowsPanel title="Warnings" rows={detail.warnings} />
-          <RowsPanel title="Documents and links" rows={[...detail.idCards, ...detail.certificates, ...detail.links]} />
+          <GlassPanel variant="subtle" radius="lg" className="p-0 overflow-hidden h-min">
+            <RowsPanel title="Notes" rows={detail.notes} />
+          </GlassPanel>
+          <GlassPanel variant="subtle" radius="lg" className="p-0 overflow-hidden h-min">
+            <RowsPanel title="Warnings" rows={detail.warnings} />
+          </GlassPanel>
+          <GlassPanel variant="subtle" radius="lg" className="p-0 overflow-hidden h-min">
+            <RowsPanel title="Documents and links" rows={[...detail.idCards, ...detail.certificates, ...detail.links]} />
+          </GlassPanel>
         </section>
       ) : null}
     </section>
