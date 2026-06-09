@@ -45,12 +45,24 @@ describe("humanize", () => {
     expect(humanize("id")).toBe("Detail");
   });
 
-  it("handles mixed patterns like id-requests", () => {
-    expect(humanize("id-requests")).toBe("Id Requests");
+  it("handles mixed patterns like id-requests (now via custom label map)", () => {
+    expect(humanize("id-requests")).toBe("ID Requests");
   });
 
   it("handles empty input", () => {
     expect(humanize("")).toBe("");
+  });
+
+  it("maps create to New instead of Create", () => {
+    expect(humanize("create")).toBe("New");
+  });
+
+  it("maps work-logs to Work Logs via custom label map", () => {
+    expect(humanize("work-logs")).toBe("Work Logs");
+  });
+
+  it("still auto-generates labels for unknown kebab-case", () => {
+    expect(humanize("some-other-page")).toBe("Some Other Page");
   });
 });
 
@@ -97,7 +109,7 @@ describe("useBreadcrumbs", () => {
     const result = renderHookResult(useBreadcrumbs);
     expect(result).toHaveLength(2);
     expect(result[0]).toEqual({ label: "Inspector", href: "/inspector" });
-    expect(result[1]).toEqual({ label: "Id Requests", href: undefined });
+    expect(result[1]).toEqual({ label: "ID Requests", href: undefined });
   });
 
   it("generates breadcrumb items for /admin (root single segment)", () => {
@@ -118,6 +130,29 @@ describe("useBreadcrumbs", () => {
     const result = renderHookResult(useBreadcrumbs);
     expect(result).toHaveLength(3);
     expect(result[2]).toEqual({ label: "Detail", href: undefined });
+  });
+
+  it("uses custom label for id-requests path", () => {
+    mockPathname = "/inspector/id-requests";
+    const result = renderHookResult(useBreadcrumbs);
+    expect(result).toHaveLength(2);
+    expect(result[0]).toEqual({ label: "Inspector", href: "/inspector" });
+    expect(result[1]).toEqual({ label: "ID Requests", href: undefined });
+  });
+
+  it("uses custom label for work-logs path", () => {
+    mockPathname = "/candidate/work-logs";
+    const result = renderHookResult(useBreadcrumbs);
+    expect(result).toHaveLength(2);
+    expect(result[0]).toEqual({ label: "Candidate", href: "/candidate" });
+    expect(result[1]).toEqual({ label: "Work Logs", href: undefined });
+  });
+
+  it("handles create segment as New", () => {
+    mockPathname = "/company/requests/create";
+    const result = renderHookResult(useBreadcrumbs);
+    expect(result).toHaveLength(3);
+    expect(result[2]).toEqual({ label: "New", href: undefined });
   });
 });
 
