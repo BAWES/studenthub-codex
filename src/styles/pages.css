@@ -919,70 +919,7 @@
 
 
 
-.linearCandidateCard {
-  display: grid;
-  gap: 7px;
-  border: 1px solid #e2e6ee;
-  border-radius: 8px;
-  background: #fff;
-  color: var(--ink);
-  padding: 10px;
-  text-decoration: none;
-}
 
-
-
-.linearCandidateCard:hover,
-.linearCandidateCard.active {
-  border-color: #9dbde8;
-  box-shadow: 0 8px 24px rgba(16, 24, 40, 0.08);
-}
-
-
-
-.linearCandidateCard.active {
-  box-shadow: inset 3px 0 0 var(--blue), 0 8px 24px rgba(16, 24, 40, 0.08);
-}
-
-
-
-.linearCardTop,
-.linearCardFooter,
-.linearCardMeta {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-
-
-.linearCandidateCard strong,
-.linearCandidateCard small,
-.linearCardTop em,
-.linearCardMeta span,
-.linearCardFooter em,
-.linearCardFooter strong {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-
-
-.linearCardTop em,
-.linearCardMeta span,
-.linearCardFooter em,
-.linearCandidateCard small {
-  color: var(--muted);
-  font-size: 12px;
-  font-style: normal;
-}
-
-
-
-.linearMiniPills,
 .linearPills {
   display: flex;
   flex-wrap: wrap;
@@ -991,7 +928,14 @@
 
 
 
-.linearMiniPills span,
+.linearPeek {
+  position: sticky;
+  top: 14px;
+  overflow: hidden;
+}
+
+
+
 .linearPills span {
   min-height: 24px;
   display: inline-flex;

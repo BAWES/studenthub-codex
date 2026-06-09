@@ -1,7 +1,8 @@
 import type { Route } from "next";
 import Link from "next/link";
 import { HubShortcuts, type HubCommand } from "@/modules/hub/HubShortcuts";
-import type { StaffCandidateDirectoryRow, StaffCandidateFilter, getStaffCandidateConsole } from "./data";
+import type { StaffCandidateFilter, getStaffCandidateConsole } from "./data";
+import { CandidateCard } from "@/modules/candidates/CandidateCard";
 
 type StaffCandidateConsoleData = Awaited<ReturnType<typeof getStaffCandidateConsole>>;
 
@@ -94,12 +95,12 @@ export function StaffCandidateConsole({
                 <div className="linearLaneCards">
                   {lane.rows.length ? (
                     lane.rows.map((row) => (
-                      <CandidateQueueCard
-                        filter={filter}
+                      <CandidateCard
+                        data={row}
+                        href={candidateHref(row.id, query, filter)}
                         isSelected={row.id === data.selectedId}
+                        role="staff"
                         key={`${lane.id}-${row.id}`}
-                        query={query}
-                        row={row}
                       />
                     ))
                   ) : (
@@ -200,44 +201,6 @@ export function StaffCandidateConsole({
         </section>
       </section>
     </section>
-  );
-}
-
-function CandidateQueueCard({
-  row,
-  query,
-  filter,
-  isSelected
-}: {
-  row: StaffCandidateDirectoryRow;
-  query: string;
-  filter: StaffCandidateFilter;
-  isSelected: boolean;
-}) {
-  return (
-    <Link className={isSelected ? "linearCandidateCard active" : "linearCandidateCard"} href={candidateHref(row.id, query, filter)}>
-      <div className="linearCardTop">
-        <span>{row.signal}</span>
-        <em>{row.status}</em>
-      </div>
-      <strong>{row.name}</strong>
-      <small>{row.email}</small>
-      <div className="linearCardMeta">
-        <span>{row.company}</span>
-        <span>{row.store}</span>
-      </div>
-      <div className="linearCardFooter">
-        <em>{row.updated}</em>
-        <strong>{row.rate}</strong>
-      </div>
-      {row.flags.length ? (
-        <div className="linearMiniPills">
-          {row.flags.slice(0, 3).map((flag) => (
-            <span key={flag}>{flag}</span>
-          ))}
-        </div>
-      ) : null}
-    </Link>
   );
 }
 
