@@ -129,7 +129,7 @@ export function DetailPage({
                 <ActionButton
                   key={action.label}
                   variant={action.variant ?? "primary"}
-                  icon={action.icon ? <action.icon size={16} /> : undefined}
+                  icon={action.icon ? <span aria-hidden="true"><action.icon size={16} /></span> : undefined}
                   onClick={action.onClick}
                 >
                   {action.label}
