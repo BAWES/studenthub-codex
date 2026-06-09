@@ -20,6 +20,7 @@ export default async function CandidatePage() {
         detail={data}
         actions={[
           { label: "Edit profile", href: "/candidate/edit" },
+          { label: "Notifications", href: "/candidate/notifications" },
           { label: "Invitations", href: "/candidate/invitations" },
           { label: "Work logs", href: "/candidate/work-logs" },
           { label: "Payments", href: "/candidate/payments" },
