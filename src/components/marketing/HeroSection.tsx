@@ -224,7 +224,7 @@ export default function HeroSection({
   return (
     <section
       className="shSection relative min-h-[min(780px,calc(100svh_-_96px))] grid grid-cols-1 items-center overflow-hidden rounded-xl p-[clamp(22px,5vw,76px)] max-lg:min-h-auto max-lg:p-7"
-      aria-label={`StudentHub for ${persona}s — hero`}
+      aria-label={`StudentHub for ${persona === "staff" ? "staff" : `${persona}s`} — hero`}
     >
       {/* Animated gradient background */}
       <div className="shHeroGradientDramatic" aria-hidden="true" />
@@ -441,7 +441,7 @@ export default function HeroSection({
         {/* Feature pills */}
         <div
           className="flex flex-wrap gap-2 mt-2.5"
-          aria-label={`Key benefits for ${persona}s`}
+          aria-label={`Key benefits for ${persona === "staff" ? "staff" : `${persona}s`}`}
         >
           {content.pills.map((pill) => (
             <span key={pill} className="shHeroPill">
