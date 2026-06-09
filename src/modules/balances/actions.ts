@@ -6,6 +6,30 @@ import { walletQuery } from "@/lib/wallet-db";
 import { prisma } from "@/lib/prisma";
 
 // ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Resolve a wallet user UUID from a session email.
+ * Mirrors Yii2 WalletUser::findByEmail().
+ * Returns null when no mapping exists or the query fails.
+ */
+export async function resolveWalletAccountUuid(
+  email: string,
+): Promise<string | null> {
+  try {
+    const rows = await walletQuery<Array<{ user_uuid: string }>>(
+      `SELECT user_uuid FROM user WHERE email = ? LIMIT 1`,
+      [email],
+    );
+    return rows.length > 0 ? rows[0].user_uuid : null;
+  } catch (error) {
+    console.error("Wallet UUID resolution failed:", error);
+    return null;
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Schemas
 // ---------------------------------------------------------------------------
 
@@ -54,13 +78,22 @@ export type ListBalancesResult = {
   totalPages: number;
 };
 
+export type InitTransferState = {
+  success: boolean;
+  error?: string;
+};
+
+export type PayByWalletState = {
+  success: boolean;
+  error?: string;
+};
+
 // ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
 
 /** The balance type for user payable accounts, mirrored from Yii2. */
 const TYPE_USER_PAYABLE = "Payable_for_this_user_uuid";
-const TYPE_PAYABLE_TO_USERS = "PayableToUsers";
 
 // ---------------------------------------------------------------------------
 // listBalances
@@ -80,7 +113,7 @@ const TYPE_PAYABLE_TO_USERS = "PayableToUsers";
 export async function listBalances(
   params: FormData | z.input<typeof listBalancesSchema> = {},
 ): Promise<ListBalancesResult> {
-  await requireCapability("finance.read");
+  const session = await requireCapability("finance.read");
 
   const raw =
     params instanceof FormData
@@ -106,17 +139,28 @@ export async function listBalances(
   const skip = (page - 1) * limit;
 
   try {
-    // 1. Get the current user's payable account from session
-    // The wallet DB links accounts via account_uuid = user_uuid
-    // We use the authenticated user's UUID from the session
-    // NOTE: In production, the wallet user UUID should match the
-    // account UUID used walletDb. This is a read-only listing.
+    // 1. Resolve wallet user UUID from the current user's email
+    // Mirrors Yii2 WalletUser::findByEmail pattern:
+    //   wallet DB has its own user table that maps email -> user_uuid
+    const walletUuid = await resolveWalletAccountUuid(session.email);
+    if (!walletUuid) {
+      return {
+        account: null,
+        transactions: [],
+        total: 0,
+        page,
+        limit,
+        totalPages: 0,
+      };
+    }
+
+    // 2. Get the candidate's payable wallet account
     const accounts = await walletQuery<PayableAccount[]>(
       `SELECT balance_account_uuid, account_uuid, balance, type
        FROM balance_account
        WHERE account_uuid = ? AND type = ?
        LIMIT 1`,
-      [], // accountUuid will be resolved from session context
+      [walletUuid, TYPE_USER_PAYABLE],
     );
 
     if (accounts.length === 0) {
@@ -132,7 +176,7 @@ export async function listBalances(
 
     const account = accounts[0];
 
-    // 2. Count total transactions
+    // 3. Count total transactions
     const countRows = await walletQuery<Array<{ count: number }>>(
       `SELECT COUNT(*) as count
        FROM balance_transaction
@@ -141,7 +185,7 @@ export async function listBalances(
     );
     const total = Number(countRows[0]?.count ?? 0);
 
-    // 3. Fetch paginated transactions
+    // 4. Fetch paginated transactions
     const transactions = await walletQuery<BalanceTransaction[]>(
       `SELECT balance_transaction_uuid, account_uuid, amount, balance,
               data, created_at, transaction_datetime, ? as currency_code
@@ -228,11 +272,6 @@ export async function getBalance(
 // initTransfer — candidate requests a payout from their payable balance
 // ---------------------------------------------------------------------------
 
-export type InitTransferState = {
-  success: boolean;
-  error?: string;
-};
-
 const initTransferAmountSchema = z.object({
   amount: z.coerce
     .number()
@@ -282,30 +321,19 @@ export async function initTransfer(
       return { success: false, error: "Candidate not found." };
     }
 
-    // 3. Look up the wallet user by email (mirrors Yii2 WalletUser::findByEmail)
-    //    The wallet DB has its own user table that maps email → user_uuid.
-    type WalletUser = { user_uuid: string; bank_uuid: string | null; bank_account_name: string | null; iban: string | null };
-    const walletUsers = await walletQuery<WalletUser[]>(
-      `SELECT user_uuid, bank_uuid, bank_account_name, iban
-       FROM user
-       WHERE email = ?
-       LIMIT 1`,
-      [candidate.candidate_email],
-    );
-
-    if (walletUsers.length === 0) {
+    // 3. Resolve the wallet user UUID from the session email
+    const walletUuid = await resolveWalletAccountUuid(candidate.candidate_email);
+    if (!walletUuid) {
       return { success: false, error: "No wallet account found for your email." };
     }
 
-    const walletUser = walletUsers[0];
-
-    // 4. Find the candidate's payable wallet account using the wallet user UUID
+    // 4. Find the candidate's payable wallet account
     const accounts = await walletQuery<Array<{ balance_account_uuid: string; account_uuid: string; balance: number; type: string }>>(
       `SELECT balance_account_uuid, account_uuid, balance, type
        FROM balance_account
        WHERE account_uuid = ? AND type = ?
        LIMIT 1`,
-      [walletUser.user_uuid, TYPE_USER_PAYABLE],
+      [walletUuid, TYPE_USER_PAYABLE],
     );
 
     if (accounts.length === 0) {
@@ -347,15 +375,13 @@ export async function initTransfer(
 }
 
 // ---------------------------------------------------------------------------
-// payByWallet — candidate pays from wallet balance (e.g. service fees)
+// payByWallet — P2P wallet payment
 // ---------------------------------------------------------------------------
 
-export type PayByWalletState = {
-  success: boolean;
-  error?: string;
-};
-
 export const payByWalletSchema = z.object({
+  toUuid: z.string().optional(),
+  email: z.string().email("Invalid email format").optional(),
+  username: z.string().optional(),
   amount: z.coerce
     .number()
     .positive("Amount must be positive")
@@ -363,10 +389,23 @@ export const payByWalletSchema = z.object({
 });
 
 /**
- * Process a wallet payment for the candidate. Validates sufficient balance,
- * creates a balance_transaction record, and deducts from the account.
+ * Pay another user from the candidate's wallet balance.
  *
  * Mirrors the legacy Yii2 BalanceController::actionPayByWallet().
+ * Recipient can be identified by:
+ *   - toUuid (wallet user UUID)
+ *   - email (wallet user email)
+ *   - username (wallet user username)
+ *
+ * Validates:
+ *   - At least one recipient identifier is provided
+ *   - Amount >= 0.001 (minimum transaction threshold)
+ *   - Sender has sufficient balance
+ *
+ * Effects:
+ *   - Deducts amount from sender's balance_account
+ *   - Credits amount to recipient's balance_account
+ *   - Creates balance_transaction records for both sides
  */
 export async function payByWallet(
   _prevState: PayByWalletState,
@@ -374,9 +413,15 @@ export async function payByWallet(
 ): Promise<PayByWalletState> {
   const session = await requireCapability("candidate.profile.edit");
 
-  // 1. Parse and validate amount
-  const raw = formData.get("amount");
-  const parsed = payByWalletSchema.safeParse({ amount: raw });
+  // 1. Parse and validate input
+  const raw = {
+    toUuid: (formData.get("toUuid") ?? "") as string,
+    email: (formData.get("email") ?? "") as string,
+    username: (formData.get("username") ?? "") as string,
+    amount: (formData.get("amount") ?? "") as string,
+  };
+
+  const parsed = payByWalletSchema.safeParse(raw);
   if (!parsed.success) {
     return {
       success: false,
@@ -384,44 +429,139 @@ export async function payByWallet(
     };
   }
 
-  const { amount } = parsed.data;
+  const { toUuid, email, username, amount } = parsed.data;
+
+  // 2. Validate at least one recipient identifier
+  if (!toUuid && !email && !username) {
+    return {
+      success: false,
+      error: "Recipient identifier required: provide toUuid, email, or username.",
+    };
+  }
+
+  // 3. Validate minimum transaction amount (mirrors Yii2 threshold)
+  if (amount < 0.001) {
+    return {
+      success: false,
+      error: "Amount cannot be less than 0.001 KWD.",
+    };
+  }
 
   try {
-    // 2. Find the candidate's payable wallet account
-    const accounts = await walletQuery<Array<{ balance_account_uuid: string; account_uuid: string; balance: number; type: string }>>(
-      `SELECT balance_account_uuid, account_uuid, balance, type
-       FROM balance_account
-       WHERE account_uuid = ? AND type = ?
-       LIMIT 1`,
-      [],
-    );
-
-    if (accounts.length === 0) {
+    // 4. Find the current user's payable wallet account via email
+    const walletUuid = await resolveWalletAccountUuid(session.email);
+    if (!walletUuid) {
       return { success: false, error: "No payable account found for your account." };
     }
 
-    const account = accounts[0];
-    const currentBalance = Number(account.balance);
+    // 5. Get the sender's payable balance account
+    const senderAccounts = await walletQuery<Array<{ balance_account_uuid: string; balance: number; account_uuid: string }>>(
+      `SELECT balance_account_uuid, account_uuid, balance
+       FROM balance_account
+       WHERE account_uuid = ? AND type = ?
+       LIMIT 1`,
+      [walletUuid, TYPE_USER_PAYABLE],
+    );
 
-    // 3. Validate sufficient balance
-    if (currentBalance < amount) {
+    if (senderAccounts.length === 0) {
+      return { success: false, error: "No payable account found." };
+    }
+
+    const senderAccount = senderAccounts[0];
+    const senderBalance = Number(senderAccount.balance);
+
+    // 6. Find the recipient wallet user
+    type WalletUser = { user_uuid: string; username: string };
+    let recipient: WalletUser | null = null;
+
+    if (toUuid) {
+      const toUsers = await walletQuery<WalletUser[]>(
+        `SELECT user_uuid, username FROM user WHERE user_uuid = ? LIMIT 1`,
+        [toUuid],
+      );
+      if (toUsers.length > 0) recipient = toUsers[0];
+    } else if (email) {
+      const toUsers = await walletQuery<WalletUser[]>(
+        `SELECT user_uuid, username FROM user WHERE email = ? LIMIT 1`,
+        [email],
+      );
+      if (toUsers.length > 0) recipient = toUsers[0];
+    } else if (username) {
+      const toUsers = await walletQuery<WalletUser[]>(
+        `SELECT user_uuid, username FROM user WHERE username = ? LIMIT 1`,
+        [username],
+      );
+      if (toUsers.length > 0) recipient = toUsers[0];
+    }
+
+    if (!recipient) {
+      return { success: false, error: "Recipient not found." };
+    }
+
+    // Prevent self-payment
+    if (recipient.user_uuid === walletUuid) {
+      return { success: false, error: "Cannot pay yourself." };
+    }
+
+    // 7. Validate sufficient balance
+    if (senderBalance < amount) {
       return {
         success: false,
-        error: `Insufficient balance. Available: ${currentBalance.toFixed(3)} KWD, requested: ${amount.toFixed(3)} KWD.`,
+        error: `Insufficient balance. Available: ${senderBalance.toFixed(3)} KWD, requested: ${amount.toFixed(3)} KWD.`,
       };
     }
 
-    // 4. Deduct from balance and record the transaction
+    // 8. Ensure recipient has a payable balance account (create if not exists)
+    await walletQuery(
+      `INSERT IGNORE INTO balance_account (account_uuid, type, balance)
+       VALUES (?, ?, 0)`,
+      [recipient.user_uuid, TYPE_USER_PAYABLE],
+    );
+
+    // 9. Deduct from sender
     await walletQuery(
       `INSERT INTO balance_transaction (account_uuid, amount, balance, data, created_at, transaction_datetime)
        VALUES (?, ?, ?, ?, NOW(), NOW())`,
-      [account.balance_account_uuid, -amount, currentBalance - amount, JSON.stringify({ type: "payByWallet" })],
+      [
+        senderAccount.balance_account_uuid,
+        -amount,
+        senderBalance - amount,
+        JSON.stringify({ type: "payByWallet", data: `Paid to ${recipient.username}`, recipientUuid: recipient.user_uuid }),
+      ],
     );
 
-    // 5. Update the account balance
     await walletQuery(
       `UPDATE balance_account SET balance = ? WHERE balance_account_uuid = ?`,
-      [currentBalance - amount, account.balance_account_uuid],
+      [senderBalance - amount, senderAccount.balance_account_uuid],
+    );
+
+    // 10. Get recipient's current balance before crediting
+    const recipientAccountRows = await walletQuery<Array<{ balance_account_uuid: string; balance: number }>>(
+      `SELECT balance_account_uuid, balance
+       FROM balance_account
+       WHERE account_uuid = ? AND type = ?
+       LIMIT 1`,
+      [recipient.user_uuid, TYPE_USER_PAYABLE],
+    );
+
+    const recipientAccount = recipientAccountRows[0];
+    const recipientBalance = Number(recipientAccount.balance);
+
+    // 11. Credit recipient
+    await walletQuery(
+      `INSERT INTO balance_transaction (account_uuid, amount, balance, data, created_at, transaction_datetime)
+       VALUES (?, ?, ?, ?, NOW(), NOW())`,
+      [
+        recipientAccount.balance_account_uuid,
+        amount,
+        recipientBalance + amount,
+        JSON.stringify({ type: "payByWallet", data: `Received from anonymous`, senderUuid: walletUuid }),
+      ],
+    );
+
+    await walletQuery(
+      `UPDATE balance_account SET balance = ? WHERE balance_account_uuid = ?`,
+      [recipientBalance + amount, recipientAccount.balance_account_uuid],
     );
 
     return { success: true };
@@ -429,7 +569,7 @@ export async function payByWallet(
     console.error("payByWallet failed:", error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Wallet payment failed due to an unknown error.",
+      error: error instanceof Error ? error.message : "Payment failed due to an unknown error.",
     };
   }
 }
