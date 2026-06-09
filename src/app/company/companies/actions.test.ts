@@ -3,6 +3,7 @@ import {
   listCompaniesSchema,
   getCompanySchema,
   createCompanySchema,
+  updateCompanySchema,
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
@@ -175,6 +176,99 @@ describe("createCompanySchema", () => {
   it("rejects bonus commission over 100", () => {
     const result = createCompanySchema.safeParse({
       company_name: "Acme Corp",
+      company_bonus_commission: 150,
+    });
+    expect(result.success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// updateCompanySchema
+// ---------------------------------------------------------------------------
+
+describe("updateCompanySchema", () => {
+  it("accepts valid companyId with partial update (name only)", () => {
+    const result = updateCompanySchema.safeParse({
+      companyId: 1,
+      company_name: "Updated Corp",
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.companyId).toBe(1);
+      expect(result.data.company_name).toBe("Updated Corp");
+      expect(result.data.company_email).toBeUndefined();
+    }
+  });
+
+  it("accepts companyId only (no optional fields)", () => {
+    const result = updateCompanySchema.safeParse({ companyId: 42 });
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts all optional fields", () => {
+    const result = updateCompanySchema.safeParse({
+      companyId: 1,
+      company_name: "Acme Corp",
+      company_common_name_en: "Acme",
+      company_common_name_ar: "أكمي",
+      company_description_en: "Updated description",
+      company_website: "https://acme.example.com",
+      company_email: "info@acme.example.com",
+      commercial_licence: "LIC-99999",
+      country_id: 2,
+      currency_code: "USD",
+      company_hourly_rate: 20.0,
+      company_bonus_commission: 3.0,
+      company_followup: false,
+      company_approved_to_hire: false,
+      company_status_override: true,
+      parent_company_id: 5,
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.company_name).toBe("Acme Corp");
+      expect(result.data.company_followup).toBe(false);
+      expect(result.data.parent_company_id).toBe(5);
+    }
+  });
+
+  it("rejects missing companyId", () => {
+    const result = updateCompanySchema.safeParse({});
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects zero companyId", () => {
+    const result = updateCompanySchema.safeParse({ companyId: 0 });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects invalid email", () => {
+    const result = updateCompanySchema.safeParse({
+      companyId: 1,
+      company_email: "not-an-email",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects invalid website URL", () => {
+    const result = updateCompanySchema.safeParse({
+      companyId: 1,
+      company_website: "not-a-url",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects negative hourly rate", () => {
+    const result = updateCompanySchema.safeParse({
+      companyId: 1,
+      company_hourly_rate: -10,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects bonus commission over 100", () => {
+    const result = updateCompanySchema.safeParse({
+      companyId: 1,
       company_bonus_commission: 150,
     });
     expect(result.success).toBe(false);
