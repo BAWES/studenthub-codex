@@ -9404,3 +9404,146 @@ kbd {
 .candidateMissingFields li a:hover {
   color: var(--foreground);
 }
+
+/* ============================================================
+   STUDENTHUB OS — Design System Tokens & Animations
+   ============================================================ */
+
+/* --- Animation keyframes --- */
+
+@keyframes sh-gradient-shift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes sh-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes sh-fade-in-up {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes sh-fade-in-down {
+  from { opacity: 0; transform: translateY(-12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes sh-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-8px); }
+}
+
+@keyframes sh-glow-pulse {
+  0%, 100% { opacity: 0.6; }
+  50%      { opacity: 1; }
+}
+
+@keyframes sh-orb-drift {
+  0%   { transform: translate(0, 0) scale(1); }
+  25%  { transform: translate(60px, -30px) scale(1.08); }
+  50%  { transform: translate(-20px, -60px) scale(0.92); }
+  75%  { transform: translate(-50px, 10px) scale(1.04); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+
+/* --- Animation utility classes --- */
+
+.sh-anim-fade-in {
+  animation: sh-fade-in 0.6s var(--sh-easing, cubic-bezier(0.16, 1, 0.3, 1)) forwards;
+}
+
+.sh-anim-fade-in-up {
+  animation: sh-fade-in-up 0.7s var(--sh-easing, cubic-bezier(0.16, 1, 0.3, 1)) forwards;
+}
+
+.sh-anim-float {
+  animation: sh-float 4s var(--sh-easing, cubic-bezier(0.16, 1, 0.3, 1)) infinite;
+}
+
+/* Stagger delays */
+.sh-delay-1  { animation-delay: 0.1s; }
+.sh-delay-2  { animation-delay: 0.2s; }
+.sh-delay-3  { animation-delay: 0.3s; }
+.sh-delay-4  { animation-delay: 0.4s; }
+.sh-delay-5  { animation-delay: 0.5s; }
+.sh-delay-6  { animation-delay: 0.6s; }
+.sh-delay-7  { animation-delay: 0.7s; }
+
+/* --- Glass Panel --- */
+
+.sh-glass {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(20px) saturate(1.4);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.06),
+    0 1px 2px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s var(--sh-easing, cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+.sh-glass:hover {
+  border-color: rgba(138, 191, 255, 0.2);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.10),
+    0 0 0 1px rgba(138, 191, 255, 0.08);
+  transform: translateY(-2px);
+}
+
+.sh-glass-strong {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(28px) saturate(1.6);
+  -webkit-backdrop-filter: blur(28px) saturate(1.6);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 20px;
+}
+
+/* Light mode overrides for glass */
+[data-theme="light"] .sh-glass {
+  background: rgba(255, 255, 255, 0.72);
+  border-color: rgba(0, 0, 0, 0.06);
+  box-shadow:
+    0 4px 24px rgba(16, 24, 40, 0.06),
+    0 1px 2px rgba(16, 24, 40, 0.03);
+}
+
+[data-theme="light"] .sh-glass:hover {
+  border-color: rgba(11, 99, 206, 0.15);
+  box-shadow:
+    0 8px 32px rgba(16, 24, 40, 0.10),
+    0 0 0 1px rgba(11, 99, 206, 0.06);
+}
+
+[data-theme="light"] .sh-glass-strong {
+  background: rgba(255, 255, 255, 0.88);
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
+/* --- Glow effects --- */
+
+.sh-glow-blue {
+  box-shadow:
+    0 0 40px rgba(138, 191, 255, 0.12),
+    0 0 80px rgba(138, 191, 255, 0.06);
+}
+
+[data-theme="light"] .sh-glow-blue {
+  box-shadow:
+    0 0 40px rgba(11, 99, 206, 0.08),
+    0 0 80px rgba(11, 99, 206, 0.04);
+}
+
+/* --- Orb / decorative blob --- */
+
+.sh-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+  animation: sh-orb-drift 12s var(--sh-easing, cubic-bezier(0.16, 1, 0.3, 1)) infinite;
+}

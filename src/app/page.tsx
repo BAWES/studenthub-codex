@@ -1,30 +1,45 @@
 import Link from "next/link";
 import type { Route } from "next";
-import { UserRound, Briefcase, Building2, Shield, ClipboardCheck } from "lucide-react";
+import {
+  UserRound,
+  Briefcase,
+  Building2,
+  Shield,
+  ClipboardCheck,
+  Search,
+  ListChecks,
+  Workflow,
+  DollarSign,
+  Sparkles,
+  ArrowRight,
+  Command
+} from "lucide-react";
 import { getSession } from "@/modules/auth/session";
 import { portalContent } from "@/modules/auth/portalContent";
 import { ThemeToggle } from "@/modules/theme/ThemeToggle";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 
 export const dynamic = "force-dynamic";
 
 const benefits = [
   {
     title: "Purpose-built portals",
-    body: "Each role gets exactly the right tools — no clutter, no missing features, no one-size-fits-all compromises."
+    body: "Each role gets exactly the right tools — no clutter, no missing features, no one-size-fits-all compromises.",
+    icon: Sparkles
   },
   {
     title: "Smart candidate search",
-    body: "Typo-tolerant, filter-rich search across countries, skills, and statuses. Saved searches for repeat workflows."
+    body: "Typo-tolerant, filter-rich search across countries, skills, and statuses. Saved searches for repeat workflows.",
+    icon: Search
   },
   {
     title: "End-to-end workflows",
-    body: "From profile readiness to timesheets and payments — every step is connected in one system."
+    body: "From profile readiness to timesheets and payments — every step is connected in one system.",
+    icon: Workflow
   },
   {
     title: "Production-grade foundation",
-    body: "Built for real data volumes, real teams, and real compliance — not a prototype."
+    body: "Built for real data volumes, real teams, and real compliance — not a prototype.",
+    icon: ListChecks
   }
 ];
 
@@ -38,174 +53,509 @@ const portalIcons: Record<(typeof portalRoles)[number], React.ComponentType<{ cl
   inspector: ClipboardCheck
 };
 
+const portalColors: Record<(typeof portalRoles)[number], string> = {
+  candidate: "var(--blue)",
+  staff: "var(--green)",
+  company: "var(--amber)",
+  admin: "var(--blue-deep)",
+  inspector: "var(--rose)"
+};
+
+function Orb({ className = "", color = "var(--blue)", size = 400, style = {} }: { className?: string; color?: string; size?: number; style?: React.CSSProperties }) {
+  return (
+    <div
+      className={`sh-orb ${className}`}
+      style={{
+        width: size,
+        height: size,
+        background: `radial-gradient(circle, ${color} 0%, transparent 70%)`,
+        opacity: 0.15,
+        ...style
+      }}
+      aria-hidden="true"
+    />
+  );
+}
+
 export default async function Home() {
   const session = await getSession();
 
   return (
-    <main className="min-h-svh w-[min(1320px,calc(100%_-_28px))] mx-auto grid content-start gap-4 pt-[18px] pb-[42px] max-sm:w-[min(calc(100%_-_20px),720px)]">
-      {/* Nav */}
-      <nav
-        className="sticky top-3 z-20 min-h-[62px] flex items-center justify-between gap-3.5 border border-[color-mix(in_srgb,var(--line)_84%,transparent)] rounded-lg bg-[color-mix(in_srgb,var(--surface)_92%,transparent)] p-2 shadow-[0_18px_50px_rgba(16,24,40,0.08)] max-sm:static max-sm:flex-col max-sm:items-stretch"
-        aria-label="StudentHub public navigation"
-      >
-        <Link
-          className="inline-flex items-center gap-2.5 text-[var(--ink)] px-2 no-underline min-h-11"
-          href="/"
-        >
-          <span className="size-9 inline-flex items-center justify-center rounded-lg bg-[var(--ink)] text-[var(--surface)] font-black">
-            SH
-          </span>
-          <strong>StudentHub</strong>
-        </Link>
-        <div className="flex items-center gap-3.5 max-sm:flex-col max-sm:items-stretch">
-          {session ? (
-            <Button variant="outline" asChild>
-              <Link href="/app">Open app</Link>
-            </Button>
-          ) : (
-            <Button variant="outline" asChild>
-              <Link href="/login">Sign in</Link>
-            </Button>
-          )}
-          <ThemeToggle />
-        </div>
-      </nav>
+    <main className="min-h-svh relative overflow-hidden"
+      style={{
+        background: "var(--paper)",
+      }}
+    >
+      {/* ===== AMBIENT ORBS ===== */}
+      <Orb color="var(--blue)" size={500} className="top-[-120px] left-[-100px]" />
+      <Orb color="var(--green)" size={350} className="top-[40%] right-[-80px]" style={{ animationDelay: "-3s" }} />
+      <Orb color="var(--blue)" size={300} className="bottom-[-60px] left-[20%]" style={{ animationDelay: "-7s" }} />
 
-      {/* Hero */}
-      <section className="relative min-h-[min(760px,calc(100svh_-_96px))] grid grid-cols-1 items-center overflow-hidden border border-[var(--line)] rounded-lg bg-[var(--surface)] p-[clamp(22px,5vw,76px)] max-lg:min-h-auto max-lg:p-7 after:absolute after:inset-0 after:pointer-events-none after:bg-[linear-gradient(90deg,var(--surface)_0%,color-mix(in_srgb,var(--surface)_94%,transparent)_38%,transparent_78%),linear-gradient(180deg,transparent_72%,var(--surface)_100%)] max-lg:after:bg-[linear-gradient(180deg,var(--surface)_0%,color-mix(in_srgb,var(--surface)_94%,transparent)_56%,var(--surface)_100%)]">
-        {/* Decorative stage */}
-        <div
-          className="absolute inset-0 grid place-items-center place-content-end p-[clamp(20px,4vw,58px)] opacity-[0.96] max-lg:relative max-lg:min-h-[360px] max-lg:order-2 max-lg:p-0 max-lg:pt-[18px]"
-          aria-hidden="true"
+      <div className="relative z-[2] w-full max-w-[1320px] mx-auto px-5 sm:px-6 lg:px-8 pb-16">
+
+        {/* ===== GLASS NAV ===== */}
+        <nav
+          className="sh-glass sh-glass-strong sticky top-4 z-30 flex items-center justify-between gap-3 px-4 py-2.5 my-4"
+          aria-label="StudentHub public navigation"
+          style={{ animation: "sh-fade-in-down 0.6s cubic-bezier(0.16,1,0.3,1) both" }}
         >
-          <div className="w-[min(880px,72vw)] min-h-[510px] grid grid-cols-[132px_minmax(0,1fr)_220px] gap-2.5 border border-[var(--line)] rounded-lg bg-[color-mix(in_srgb,var(--surface-soft)_92%,transparent)] p-2.5 shadow-[var(--shadow)] max-lg:w-full max-lg:min-h-[360px] max-lg:grid-cols-[92px_minmax(0,1fr)] max-sm:grid-cols-1">
-            {/* Rail */}
-            <div className="grid content-start gap-2 p-3 border border-[var(--line)] rounded-lg bg-[color-mix(in_srgb,var(--surface)_94%,transparent)] max-sm:grid-cols-4">
-              {["Search", "Queue", "Work", "Money"].map((item, i) => (
-                <span
-                  key={item}
-                  className={
-                    i === 0
-                      ? "min-h-9 flex items-center rounded-[7px] bg-[color-mix(in_srgb,var(--blue)_12%,var(--surface))] text-[var(--blue)] text-xs font-black px-2.5 max-sm:justify-center max-sm:px-1.5"
-                      : "min-h-9 flex items-center rounded-[7px] text-[var(--muted)] text-xs font-black px-2.5 max-sm:justify-center max-sm:px-1.5"
-                  }
-                >
-                  {item}
+          <Link
+            className="inline-flex items-center gap-2.5 no-underline min-h-11 px-1"
+            href="/"
+            style={{ color: "var(--ink)" }}
+          >
+            <span
+              className="size-9 inline-flex items-center justify-center rounded-xl font-black text-sm tracking-tight"
+              style={{
+                background: "linear-gradient(135deg, var(--blue), var(--blue-deep))",
+                color: "#fff",
+                boxShadow: "0 2px 8px rgba(11, 99, 206, 0.3)"
+              }}
+            >
+              SH
+            </span>
+            <strong className="text-base tracking-tight">StudentHub</strong>
+            <span
+              className="text-[10px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-md"
+              style={{
+                background: "color-mix(in srgb, var(--blue) 14%, transparent)",
+                color: "var(--blue)"
+              }}
+            >
+              OS
+            </span>
+          </Link>
+
+          <div className="flex items-center gap-2.5">
+            {/* Cmd+K hint */}
+            <span
+              className="hidden sm:inline-flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg"
+              style={{
+                background: "color-mix(in srgb, var(--surface) 60%, transparent)",
+                color: "var(--muted)",
+                border: "1px solid color-mix(in srgb, var(--line) 50%, transparent)"
+              }}
+            >
+              <Command className="size-3" aria-hidden="true" />
+              <span>Cmd+K</span>
+            </span>
+
+            {session ? (
+              <Link
+                href="/app"
+                className="inline-flex items-center gap-1.5 min-h-9 px-3.5 rounded-xl text-sm font-semibold no-underline transition-all duration-300"
+                style={{
+                  background: "linear-gradient(135deg, var(--blue), var(--blue-deep))",
+                  color: "#fff",
+                  boxShadow: "0 2px 12px color-mix(in srgb, var(--blue) 30%, transparent)"
+                }}
+              >
+                Open app
+                <ArrowRight className="size-3.5" aria-hidden="true" />
+              </Link>
+            ) : (
+              <Link
+                href="/login"
+                className="inline-flex items-center gap-1.5 min-h-9 px-3.5 rounded-xl text-sm font-semibold no-underline transition-all duration-300"
+                style={{
+                  background: "linear-gradient(135deg, var(--blue), var(--blue-deep))",
+                  color: "#fff",
+                  boxShadow: "0 2px 12px color-mix(in srgb, var(--blue) 30%, transparent)"
+                }}
+              >
+                Sign in
+                <ArrowRight className="size-3.5" aria-hidden="true" />
+              </Link>
+            )}
+            <ThemeToggle />
+          </div>
+        </nav>
+
+        {/* ===== HERO SECTION ===== */}
+        <section
+          className="relative overflow-hidden rounded-3xl min-h-[620px] sm:min-h-[700px] flex items-center px-6 sm:px-10 lg:px-16 py-12 sm:py-16 lg:py-20"
+          style={{
+            background: [
+              "linear-gradient(135deg, var(--paper) 0%, color-mix(in srgb, var(--blue) 6%, var(--paper)) 50%, var(--paper) 100%)",
+            ].join(""),
+          }}
+          aria-label="Hero"
+        >
+          {/* Animated gradient overlay */}
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background: [
+                "linear-gradient(135deg,",
+                "color-mix(in srgb, var(--blue) 8%, transparent) 0%,",
+                "color-mix(in srgb, var(--green) 4%, transparent) 30%,",
+                "color-mix(in srgb, var(--blue) 3%, transparent) 60%,",
+                "transparent 100%",
+                ")",
+              ].join(""),
+              backgroundSize: "200% 200%",
+              animation: "sh-gradient-shift 12s cubic-bezier(0.45, 0, 0.55, 1) infinite",
+            }}
+          />
+
+          {/* Decorative grid lines */}
+          <div
+            className="absolute inset-0 pointer-events-none opacity-[0.03]"
+            style={{
+              backgroundImage: [
+                "linear-gradient(90deg, var(--ink) 1px, transparent 1px)",
+                ", linear-gradient(180deg, var(--ink) 1px, transparent 1px)",
+              ].join(""),
+              backgroundSize: "64px 64px",
+            }}
+          />
+
+          {/* Floating UI mockup panel */}
+          <div
+            className="hidden lg:block absolute right-8 top-1/2 -translate-y-1/2 w-[480px]"
+            aria-hidden="true"
+            style={{
+              animation: "sh-fade-in-up 1s 0.3s cubic-bezier(0.16,1,0.3,1) both",
+            }}
+          >
+            <div className="sh-glass sh-glass-strong p-4">
+              {/* Panel header */}
+              <div className="flex items-center gap-2 pb-3 mb-3" style={{ borderBottom: "1px solid color-mix(in srgb, var(--line) 40%, transparent)" }}>
+                <span className="size-2.5 rounded-full" style={{ background: "var(--rose)" }} />
+                <span className="size-2.5 rounded-full" style={{ background: "var(--amber)" }} />
+                <span className="size-2.5 rounded-full" style={{ background: "var(--green)" }} />
+                <span className="ml-2 text-[11px] font-semibold" style={{ color: "var(--muted)" }}>
+                  Dashboard — Staff
                 </span>
-              ))}
-            </div>
-            {/* Main */}
-            <div className="grid content-start gap-2.5 p-3.5 border border-[var(--line)] rounded-lg bg-[color-mix(in_srgb,var(--surface)_94%,transparent)]">
-              <div className="min-h-[170px] grid content-end gap-2 border border-[var(--line)] rounded-lg bg-[var(--surface-soft)] p-[18px]">
-                <span className="text-[var(--blue)] text-[11px] font-black uppercase">Candidate search</span>
-                <strong className="text-[clamp(42px,6vw,76px)] leading-[0.88]">jaafar</strong>
-                <small className="text-[var(--muted)]">80 scoped results · FAD · needs review · Lebanon</small>
               </div>
-              <div className="grid grid-cols-4 gap-2.5 max-sm:grid-cols-1">
+
+              {/* Mock search bar */}
+              <div className="flex items-center gap-2 px-3 py-2 rounded-xl mb-3" style={{ background: "color-mix(in srgb, var(--surface) 50%, transparent)", border: "1px solid color-mix(in srgb, var(--line) 30%, transparent)" }}>
+                <Search className="size-3.5" style={{ color: "var(--muted)" }} />
+                <span className="text-xs" style={{ color: "var(--muted)" }}>Search candidates, requests, companies...</span>
+                <span className="ml-auto text-[10px] px-1.5 py-0.5 rounded" style={{ background: "color-mix(in srgb, var(--line) 30%, transparent)", color: "var(--muted)" }}>⌘K</span>
+              </div>
+
+              {/* Mock data rows */}
+              <div className="grid gap-2">
                 {[
-                  { label: "Profile ready", status: "Live" },
-                  { label: "CV export", status: "PDF" },
-                  { label: "Timesheet", status: "Live" },
-                  { label: "Payment", status: "Live" },
-                ].map((item) => (
+                  { name: "Jaafar Ahmad", role: "Nurse — FAD", status: "Profile ready", statusColor: "var(--green)" },
+                  { name: "Layla Hassan", role: "Lab Tech — MLT", status: "Docs pending", statusColor: "var(--amber)" },
+                  { name: "Omar Khalid", role: "Driver — HSD", status: "In review", statusColor: "var(--blue)" },
+                  { name: "Noor Saad", role: "Engineer — CET", status: "Live", statusColor: "var(--green)" },
+                ].map((item, i) => (
                   <div
-                    key={item.label}
-                    className="min-h-[138px] grid content-between border border-[var(--line)] rounded-lg bg-[var(--surface)] p-3.5 max-sm:min-h-[92px]"
+                    key={item.name}
+                    className="flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-200"
+                    style={{
+                      background: i === 0 ? "color-mix(in srgb, var(--blue) 6%, transparent)" : "transparent",
+                      transition: "background 0.2s ease",
+                    }}
                   >
-                    <span className="text-[var(--blue)] text-[11px] font-black uppercase">{item.label}</span>
-                    <strong className="text-2xl">{item.status}</strong>
+                    <div
+                      className="size-8 rounded-lg flex items-center justify-center text-xs font-bold"
+                      style={{
+                        background: `color-mix(in srgb, ${item.statusColor} 14%, transparent)`,
+                        color: item.statusColor,
+                      }}
+                    >
+                      {item.name.split(" ").map(n => n[0]).join("")}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-semibold truncate" style={{ color: "var(--ink)" }}>{item.name}</div>
+                      <div className="text-[11px]" style={{ color: "var(--muted)" }}>{item.role}</div>
+                    </div>
+                    <span
+                      className="text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md"
+                      style={{
+                        background: `color-mix(in srgb, ${item.statusColor} 14%, transparent)`,
+                        color: item.statusColor,
+                      }}
+                    >
+                      {item.status}
+                    </span>
                   </div>
                 ))}
               </div>
             </div>
-            {/* Aside */}
-            <div className="grid content-end gap-2 p-4 border border-[var(--line)] rounded-lg bg-[color-mix(in_srgb,var(--surface)_94%,transparent)] max-lg:hidden">
-              <span className="text-[var(--blue)] text-[11px] font-black uppercase">Command</span>
-              <strong className="text-[22px] leading-[1.08]">Send CVs to employer</strong>
-              <small className="text-[var(--muted)]">Same action layer for staff and admin, scoped by role.</small>
+
+            {/* Glow behind the mock panel */}
+            <div
+              className="absolute -top-8 -right-8 -bottom-8 -left-8 -z-10 rounded-3xl pointer-events-none"
+              style={{
+                background: "radial-gradient(ellipse at center, color-mix(in srgb, var(--blue) 6%, transparent) 0%, transparent 70%)",
+              }}
+            />
+          </div>
+
+          {/* Hero text */}
+          <div className="relative max-w-[580px] lg:max-w-[520px]">
+            <p
+              className="inline-flex items-center gap-1.5 text-[11px] font-black uppercase tracking-widest mb-2 px-3 py-1 rounded-full"
+              style={{
+                color: "var(--blue)",
+                background: "color-mix(in srgb, var(--blue) 10%, transparent)",
+                animation: "sh-fade-in-up 0.7s 0.1s cubic-bezier(0.16,1,0.3,1) both",
+              }}
+            >
+              <Sparkles className="size-3" aria-hidden="true" />
+              Next-generation StudentHub
+            </p>
+
+            <h1
+              className="mt-0 mb-3 text-[clamp(40px,6vw,80px)] leading-[0.92] tracking-[-0.03em] font-black"
+              style={{
+                color: "var(--ink)",
+                animation: "sh-fade-in-up 0.7s 0.15s cubic-bezier(0.16,1,0.3,1) both",
+              }}
+            >
+              One modern platform,
+              <br />
+              <span
+                style={{
+                  background: "linear-gradient(135deg, var(--blue), var(--green))",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  backgroundClip: "text",
+                }}
+              >
+                purpose-built
+              </span>{" "}
+              portals.
+            </h1>
+
+            <p
+              className="max-w-[560px] text-base sm:text-lg leading-relaxed mb-6"
+              style={{
+                color: "var(--muted)",
+                animation: "sh-fade-in-up 0.7s 0.25s cubic-bezier(0.16,1,0.3,1) both",
+              }}
+            >
+              A Silicon Valley-grade rebuild for candidates, staff, companies, inspectors, and admins.
+              One login opens the right workspace, while shared modules keep search, documents, payments,
+              and reporting unified.
+            </p>
+
+            <div
+              className="flex flex-wrap items-center gap-3 mb-4"
+              style={{
+                animation: "sh-fade-in-up 0.7s 0.35s cubic-bezier(0.16,1,0.3,1) both",
+              }}
+            >
+              {session ? (
+                <Link
+                  href="/app"
+                  className="inline-flex items-center gap-2 min-h-11 px-5 rounded-xl text-sm font-bold no-underline transition-all duration-300 hover:-translate-y-0.5"
+                  style={{
+                    background: "linear-gradient(135deg, var(--blue), var(--blue-deep))",
+                    color: "#fff",
+                    boxShadow: "0 4px 16px color-mix(in srgb, var(--blue) 30%, transparent)",
+                  }}
+                >
+                  Open dashboard
+                  <ArrowRight className="size-4" aria-hidden="true" />
+                </Link>
+              ) : (
+                <Link
+                  href="/login"
+                  className="inline-flex items-center gap-2 min-h-11 px-5 rounded-xl text-sm font-bold no-underline transition-all duration-300 hover:-translate-y-0.5"
+                  style={{
+                    background: "linear-gradient(135deg, var(--blue), var(--blue-deep))",
+                    color: "#fff",
+                    boxShadow: "0 4px 16px color-mix(in srgb, var(--blue) 30%, transparent)",
+                  }}
+                >
+                  Sign in
+                  <ArrowRight className="size-4" aria-hidden="true" />
+                </Link>
+              )}
+
+              <Link
+                href="/login"
+                className="inline-flex items-center gap-1.5 min-h-11 px-4 rounded-xl text-sm font-semibold no-underline transition-all duration-200"
+                style={{
+                  color: "var(--muted)",
+                  border: "1px solid color-mix(in srgb, var(--line) 50%, transparent)",
+                }}
+              >
+                View portals
+              </Link>
+            </div>
+
+            <div
+              className="flex flex-wrap gap-2"
+              style={{
+                animation: "sh-fade-in-up 0.7s 0.45s cubic-bezier(0.16,1,0.3,1) both",
+              }}
+              aria-label="StudentHub platform goals"
+            >
+              {["Role-specific workspaces", "Shared search and documents", "Production-data migration path"].map(
+                (stat) => (
+                  <span
+                    key={stat}
+                    className="inline-flex items-center gap-1 min-h-7 px-2.5 rounded-full text-[10px] font-black uppercase tracking-wider"
+                    style={{
+                      color: "var(--muted)",
+                      background: "color-mix(in srgb, var(--surface) 60%, transparent)",
+                      border: "1px solid color-mix(in srgb, var(--line) 30%, transparent)",
+                    }}
+                  >
+                    {stat}
+                  </span>
+                )
+              )}
             </div>
           </div>
-        </div>
-        {/* Hero copy */}
-        <div className="relative z-[2] max-w-[690px] max-lg:max-w-none">
-          <p className="text-[var(--blue)] text-[11px] font-black uppercase">Next-generation StudentHub</p>
-          <h1 className="mt-0 text-[clamp(44px,6.4vw,92px)] leading-[0.94] max-sm:text-[40px]">
-            One modern platform, purpose-built portals.
-          </h1>
-          <p className="max-w-[620px] text-[clamp(17px,1.7vw,21px)]">
-            A Silicon Valley-grade rebuild for candidates, staff, companies, inspectors, and admins. One login opens the
-            right workspace, while shared modules keep search, documents, payments, and reporting unified.
-          </p>
-          <div className="flex flex-wrap items-center gap-3.5 mt-4 max-sm:flex-col max-sm:items-stretch">
-            <Button size="lg" asChild>
-              <Link href="/login">Sign in</Link>
-            </Button>
+        </section>
+
+        {/* ===== PORTAL GRID ===== */}
+        <section
+          className="mt-6"
+          aria-label="StudentHub portals"
+          style={{
+            animation: "sh-fade-in-up 0.8s 0.5s cubic-bezier(0.16,1,0.3,1) both",
+          }}
+        >
+          <div className="flex items-center gap-2 mb-5">
+            <h2 className="text-lg font-black m-0" style={{ color: "var(--ink)" }}>
+              Choose your portal
+            </h2>
+            <div className="flex-1 h-px" style={{ background: "color-mix(in srgb, var(--line) 30%, transparent)" }} />
           </div>
-          <div className="flex flex-wrap gap-2 mt-[18px]" aria-label="StudentHub platform goals">
-            {["Role-specific workspaces", "Shared search and documents", "Production-data migration path"].map(
-              (stat) => (
-                <span
-                  key={stat}
-                  className="min-h-8 inline-flex items-center border border-[var(--line)] rounded-full bg-[color-mix(in_srgb,var(--surface)_88%,transparent)] px-3 text-[var(--blue)] text-[11px] font-black uppercase"
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+            {portalRoles.map((role, idx) => {
+              const portal = portalContent[role];
+              const Icon = portalIcons[role];
+              const accent = portalColors[role];
+              return (
+                <Link
+                  href={portal.href as Route}
+                  key={role}
+                  className="sh-glass group no-underline flex flex-col gap-2 p-5 min-h-[160px]"
+                  style={{
+                    animation: `sh-fade-in-up 0.6s ${0.5 + idx * 0.08}s cubic-bezier(0.16,1,0.3,1) both`,
+                  }}
                 >
-                  {stat}
-                </span>
-              )
-            )}
+                  <div
+                    className="size-10 rounded-xl flex items-center justify-center transition-all duration-300 group-hover:scale-110"
+                    style={{
+                      background: `color-mix(in srgb, ${accent} 12%, transparent)`,
+                      color: accent,
+                    }}
+                  >
+                    <Icon className="size-5" aria-hidden="true" />
+                  </div>
+
+                  <div className="flex flex-col gap-0.5 flex-1">
+                    <span className="text-[11px] font-black uppercase tracking-wider" style={{ color: accent }}>
+                      {portal.label}
+                    </span>
+                    <strong className="text-sm leading-tight mt-0.5" style={{ color: "var(--ink)" }}>
+                      {portal.audience}
+                    </strong>
+                    <p className="text-xs leading-relaxed mt-1 mb-0" style={{ color: "var(--muted)" }}>
+                      {portal.promise}
+                    </p>
+                  </div>
+
+                  <div
+                    className="flex items-center gap-1 text-xs font-semibold transition-all duration-300"
+                    style={{ color: accent, opacity: 0, transform: "translateX(-4px)", transition: "opacity 0.3s ease, transform 0.3s ease" }}
+                  >
+                    <span className="group-hover:opacity-100 group-hover:translate-x-0" style={{ opacity: "inherit", transform: "inherit" }}>Enter portal</span>
+                    <ArrowRight className="size-3 group-hover:translate-x-0.5 transition-transform duration-300" aria-hidden="true" />
+                  </div>
+                </Link>
+              );
+            })}
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Portal grid */}
-      <section className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 max-sm:gap-2" aria-label="StudentHub portals">
-        {portalRoles.map((role) => {
-          const portal = portalContent[role];
-          const Icon = portalIcons[role];
-          return (
-            <Link
-              href={portal.href as Route}
-              key={role}
-              className="group no-underline transition-[border-color,background,transform,box-shadow] duration-140"
-            >
-              <Card className="h-full group-hover:-translate-y-0.5 group-hover:shadow-[0_16px_45px_rgba(16,24,40,0.1)]">
-                <CardContent className="flex flex-col gap-2 p-4">
-                  <Icon className="size-5 text-[var(--blue)] shrink-0" aria-hidden="true" />
-                  <span className="text-[var(--blue)] text-[11px] font-black uppercase">{portal.label}</span>
-                  <strong className="text-sm">{portal.audience}</strong>
-                  <small className="text-[var(--muted)] text-xs leading-relaxed">{portal.promise}</small>
-                </CardContent>
-              </Card>
-            </Link>
-          );
-        })}
-      </section>
+        {/* ===== BENEFITS SECTION ===== */}
+        <section
+          className="mt-10 rounded-3xl overflow-hidden p-8 sm:p-10 lg:p-14"
+          style={{
+            background: [
+              "linear-gradient(135deg,",
+              "color-mix(in srgb, var(--blue) 4%, var(--paper)) 0%,",
+              "var(--paper) 100%",
+              ")",
+            ].join(""),
+            border: "1px solid color-mix(in srgb, var(--line) 20%, transparent)",
+            animation: "sh-fade-in-up 0.8s 0.7s cubic-bezier(0.16,1,0.3,1) both",
+          }}
+          aria-label="Why StudentHub"
+        >
+          <div className="max-w-3xl mb-8">
+            <p className="inline-flex items-center gap-1.5 text-[11px] font-black uppercase tracking-widest mb-2 px-3 py-1 rounded-full" style={{ color: "var(--blue)", background: "color-mix(in srgb, var(--blue) 10%, transparent)" }}>
+              <Sparkles className="size-3" aria-hidden="true" />
+              Why StudentHub
+            </p>
+            <h2 className="text-[clamp(28px,4vw,42px)] leading-[1.08] tracking-[-0.02em] font-black m-0" style={{ color: "var(--ink)" }}>
+              Built for how staffing{" "}
+              <span style={{
+                background: "linear-gradient(135deg, var(--blue), var(--green))",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+              }}>
+                actually works.
+              </span>
+            </h2>
+            <p className="text-sm sm:text-base leading-relaxed mt-2 max-w-2xl" style={{ color: "var(--muted)" }}>
+              Not a generic dashboard. Every feature is shaped by real placement workflows — search, shortlisting,
+              document exchange, timesheets, and payments run in one system.
+            </p>
+          </div>
 
-      {/* Benefits section */}
-      <section
-        className="grid grid-cols-[1fr] lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] items-center rounded-lg bg-[color-mix(in_srgb,var(--surface)_94%,transparent)] p-[clamp(24px,4vw,48px)] gap-[clamp(18px,3vw,38px)] shadow-[0_18px_60px_rgba(16,24,40,0.08)]"
-        aria-label="Why StudentHub"
-      >
-        <div>
-          <p className="text-[var(--blue)] text-[11px] font-black uppercase">Why StudentHub</p>
-          <h2 className="text-[clamp(28px,4vw,42px)] leading-[1.08] m-0">
-            Built for how staffing actually works.
-          </h2>
-          <p className="text-[var(--muted)] leading-relaxed">
-            Not a generic dashboard. Every feature is shaped by real placement workflows — search, shortlisting,
-            document exchange, timesheets, and payments run in one system.
-          </p>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-          {benefits.map((b) => (
-            <Card key={b.title}>
-              <CardContent className="grid content-start gap-1 p-4">
-                <strong className="text-sm">{b.title}</strong>
-                <p className="text-[var(--muted)] text-xs leading-relaxed m-0">{b.body}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </section>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {benefits.map((b, idx) => {
+              const Icon = b.icon;
+              return (
+                <div
+                  key={b.title}
+                  className="sh-glass p-6 flex gap-4 items-start"
+                  style={{
+                    animation: `sh-fade-in-up 0.6s ${0.8 + idx * 0.1}s cubic-bezier(0.16,1,0.3,1) both`,
+                  }}
+                >
+                  <div
+                    className="size-10 rounded-xl shrink-0 flex items-center justify-center"
+                    style={{
+                      background: "color-mix(in srgb, var(--blue) 10%, transparent)",
+                      color: "var(--blue)",
+                    }}
+                  >
+                    <Icon className="size-5" aria-hidden="true" />
+                  </div>
+                  <div>
+                    <strong className="text-sm block mb-1" style={{ color: "var(--ink)" }}>{b.title}</strong>
+                    <p className="text-xs leading-relaxed m-0" style={{ color: "var(--muted)" }}>{b.body}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* ===== FOOTER ===== */}
+        <footer
+          className="mt-12 flex items-center justify-between pt-6 pb-2"
+          style={{
+            borderTop: "1px solid color-mix(in srgb, var(--line) 20%, transparent)",
+            animation: "sh-fade-in 0.6s 1s cubic-bezier(0.16,1,0.3,1) both",
+          }}
+        >
+          <span className="text-xs" style={{ color: "var(--faint)" }}>
+            &copy; {new Date().getFullYear()} StudentHub OS
+          </span>
+          <span className="text-xs flex items-center gap-1" style={{ color: "var(--faint)" }}>
+            <Command className="size-2.5" aria-hidden="true" />
+            Press <kbd className="px-1 py-0.5 rounded text-[10px] font-mono" style={{ background: "color-mix(in srgb, var(--line) 30%, transparent)" }}>Cmd+K</kbd> to navigate
+          </span>
+        </footer>
+      </div>
     </main>
   );
 }
