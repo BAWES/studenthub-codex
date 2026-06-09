@@ -98,19 +98,25 @@ export function WorkspaceShell({
   // When embedded in a WorkspaceOS layout, the layout already provides the rail and mobile nav.
   if (embedded) {
     return (
-      <main className="shell shellEmbedded">
-        {stage}
-        <WorkspaceMobileNavigation items={navItems} role={session.role} />
-      </main>
+      <>
+        <a href="#main-content" className="skipLink">Skip to content</a>
+        <main id="main-content" className="shell shellEmbedded">
+          {stage}
+          <WorkspaceMobileNavigation items={navItems} role={session.role} />
+        </main>
+      </>
     );
   }
 
   return (
-    <main className="shell">
-      {rail}
-      {stage}
-      <WorkspaceMobileNavigation items={navItems} role={session.role} />
+    <>
+      <a href="#main-content" className="skipLink">Skip to content</a>
+      <main id="main-content" className="shell">
+        {rail}
+        {stage}
+        <WorkspaceMobileNavigation items={navItems} role={session.role} />
       </main>
+    </>
   );
 }
 
