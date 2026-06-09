@@ -1,62 +1,79 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { LogIn } from "lucide-react";
 import { chooseAccountAction, loginAction } from "./actions";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import type { LoginAccountChoice } from "./types";
 
 export function LoginForm() {
   const [state, action, pending] = useActionState(loginAction, {});
   const accounts = state.accounts ?? [];
+  const emailRef = useRef<HTMLInputElement>(null);
+
+  // Auto-focus email field on mount
+  useEffect(() => {
+    emailRef.current?.focus();
+  }, []);
 
   return (
-    <div className="grid gap-[14px]">
-      <form action={action} className="grid gap-[18px] p-[30px]">
-        <div className="grid gap-[7px] pb-2">
-          <span className="text-[var(--blue)] text-xs font-black uppercase">Secure sign in</span>
-          <strong className="text-[28px] leading-[1.1]">Continue to StudentHub</strong>
-          <p className="text-[var(--muted)] leading-relaxed m-0">
-            Use your existing production credentials. StudentHub will detect the right account and permissions after
-            your password is verified.
-          </p>
+    <div>
+      <form action={action}>
+        <div className="shLoginFormCardBody">
+          <div className="shLoginStagger grid gap-2">
+            <label
+              htmlFor="login-email"
+              className="text-xs font-semibold uppercase tracking-wider"
+              style={{ color: "var(--muted)" }}
+            >
+              Email
+            </label>
+            <input
+              ref={emailRef}
+              id="login-email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              defaultValue={state.email ?? ""}
+              placeholder="name@studenthub.app"
+              required
+              className="shLoginInput"
+            />
+          </div>
+
+          <div className="shLoginStagger grid gap-2">
+            <label
+              htmlFor="login-password"
+              className="text-xs font-semibold uppercase tracking-wider"
+              style={{ color: "var(--muted)" }}
+            >
+              Password
+            </label>
+            <input
+              id="login-password"
+              name="password"
+              type="password"
+              autoComplete="current-password"
+              placeholder="Your password"
+              required
+              className="shLoginInput"
+            />
+          </div>
+
+          {state.error ? (
+            <div className="shLoginError">
+              <span>{state.error}</span>
+            </div>
+          ) : null}
+
+          <button
+            type="submit"
+            disabled={pending}
+            className="shLoginCTA shLoginStagger"
+          >
+            <LogIn className="size-4" />
+            {pending ? "Checking credentials..." : "Sign in"}
+          </button>
         </div>
-
-        <div className="grid gap-2">
-          <Label htmlFor="login-email">Email</Label>
-          <Input
-            id="login-email"
-            name="email"
-            type="email"
-            autoComplete="email"
-            defaultValue={state.email ?? ""}
-            placeholder="name@studenthub.app"
-            required
-            className="min-h-[46px]"
-          />
-        </div>
-
-        <div className="grid gap-2">
-          <Label htmlFor="login-password">Password</Label>
-          <Input
-            id="login-password"
-            name="password"
-            type="password"
-            autoComplete="current-password"
-            placeholder="Your password"
-            required
-            className="min-h-[46px]"
-          />
-        </div>
-
-        {state.error ? <p className="text-[var(--destructive)] font-bold m-0">{state.error}</p> : null}
-
-        <Button type="submit" disabled={pending} size="lg" className="min-h-[52px]">
-          <LogIn className="size-4" />
-          {pending ? "Checking credentials..." : "Sign in"}
-        </Button>
       </form>
 
       {accounts.length ? <VerifiedAccountChooser accounts={accounts} /> : null}
@@ -66,27 +83,25 @@ export function LoginForm() {
 
 function VerifiedAccountChooser({ accounts }: { accounts: LoginAccountChoice[] }) {
   return (
-    <section className="grid gap-[14px] p-[30px] pt-0 border-t border-[var(--line)]" aria-label="Verified StudentHub accounts">
-      <div className="grid gap-[7px]">
-        <span className="text-[var(--blue)] text-xs font-black uppercase">Verified accounts</span>
-        <strong className="text-[28px] leading-[1.1]">Choose where to continue</strong>
-        <p className="text-[var(--muted)] leading-relaxed m-0">Your password matched more than one active account. Only verified accounts are shown here.</p>
+    <div className="shLoginAccountSection">
+      <div className="shLoginStagger grid gap-1">
+        <strong>Verified accounts</strong>
+        <p>Your password matched more than one active account. Choose where to continue.</p>
       </div>
       {accounts.map((account) => (
         <form action={chooseAccountAction} key={account.accountKey}>
           <input name="accountKey" type="hidden" value={account.accountKey} />
-          <Button
+          <button
             type="submit"
-            variant="outline"
-            className="w-full min-h-[62px] justify-start h-auto p-3 gap-3 text-left"
+            className="shLoginAccountBtn shLoginStagger"
           >
-            <span className="grid gap-1 min-w-0">
-              <strong className="text-sm">{account.name}</strong>
-              <small className="text-[var(--muted)] text-xs font-normal">{account.email}</small>
+            <span className="grid gap-0.5 min-w-0">
+              <strong>{account.name}</strong>
+              <small>{account.email}</small>
             </span>
-          </Button>
+          </button>
         </form>
       ))}
-    </section>
+    </div>
   );
 }
