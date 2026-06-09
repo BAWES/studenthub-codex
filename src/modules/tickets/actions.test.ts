@@ -10,6 +10,8 @@ import {
   createTicketSchema,
   addCommentSchema,
   getCommentsSchema,
+  updateTicketSchema,
+  closeTicketSchema,
 } from "./actions";
 
 describe("listTicketsSchema", () => {
@@ -214,6 +216,72 @@ describe("getCommentsSchema", () => {
 
   it("rejects missing ticketUuid", () => {
     const result = getCommentsSchema.safeParse({});
+    expect(result.success).toBe(false);
+  });
+});
+
+describe("updateTicketSchema", () => {
+  it("accepts valid ticketUuid and detail", () => {
+    const result = updateTicketSchema.safeParse({
+      ticketUuid: "ticket-uuid-123",
+      detail: "Updated description with more info",
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.ticketUuid).toBe("ticket-uuid-123");
+      expect(result.data.detail).toBe("Updated description with more info");
+    }
+  });
+
+  it("rejects empty ticketUuid", () => {
+    const result = updateTicketSchema.safeParse({
+      ticketUuid: "",
+      detail: "Updated detail",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects missing ticketUuid", () => {
+    const result = updateTicketSchema.safeParse({
+      detail: "Updated detail",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects empty detail", () => {
+    const result = updateTicketSchema.safeParse({
+      ticketUuid: "abc",
+      detail: "",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects missing detail", () => {
+    const result = updateTicketSchema.safeParse({
+      ticketUuid: "abc",
+    });
+    expect(result.success).toBe(false);
+  });
+});
+
+describe("closeTicketSchema", () => {
+  it("accepts valid ticketUuid", () => {
+    const result = closeTicketSchema.safeParse({
+      ticketUuid: "ticket-to-close-456",
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.ticketUuid).toBe("ticket-to-close-456");
+    }
+  });
+
+  it("rejects empty ticketUuid", () => {
+    const result = closeTicketSchema.safeParse({ ticketUuid: "" });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects missing ticketUuid", () => {
+    const result = closeTicketSchema.safeParse({});
     expect(result.success).toBe(false);
   });
 });
