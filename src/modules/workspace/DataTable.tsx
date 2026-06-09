@@ -1,6 +1,10 @@
-import type { ReactNode } from "react";
+"use client";
+
+import type { ReactNode, KeyboardEvent } from "react";
+import { useCallback } from "react";
 import type { Route } from "next";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { AlertCircle, ChevronRight } from "lucide-react";
 import {
   EMPTY_NO_RECORDS,
@@ -161,6 +165,16 @@ export function DataTable<T extends { id: string | number }>({
   roleContext,
 }: DataTableProps<T>) {
   const visibleColumns = getVisibleColumns(columns, roleContext);
+  const router = useRouter();
+  const handleRowKeyDown = useCallback(
+    (e: KeyboardEvent<HTMLTableRowElement>, href: Route) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        router.push(href);
+      }
+    },
+    [router],
+  );
   const colCount = visibleColumns.length + (rowHref ? 1 : 0);
 
   // ── Loading state ──────────────────────────────────────────
@@ -291,6 +305,13 @@ export function DataTable<T extends { id: string | number }>({
                 <tr
                   key={row.id}
                   className={`shTableRow${rowHref ? " clickable" : ""}`}
+                  {...(rowHref
+                    ? {
+                        tabIndex: 0,
+                        role: "link",
+                        onKeyDown: (e) => handleRowKeyDown(e, rowHref(row)),
+                      }
+                    : {})}
                 >
                   {visibleColumns.map((column) => (
                     <td data-label={column.label} key={column.key}>
