@@ -11075,6 +11075,8 @@ kbd {
   font-size: 12px;
   color: var(--muted);
   font-weight: 400;
+}
+
 /* ── Login page: full-screen animated gradient ──────────────────────── */
 .shLoginGradient {
   position: fixed;
