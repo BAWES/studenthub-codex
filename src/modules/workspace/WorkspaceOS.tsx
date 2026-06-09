@@ -15,6 +15,17 @@ import type { NavItem } from "./navigation";
 import { PageTransition } from "./PageTransition";
 import { RaycastCommandPalette } from "./RaycastCommandPalette";
 
+// ── Command item shape ──────────────────────────────────────────────
+
+export interface OSCommand {
+  id: string;
+  title: string;
+  subtitle: string;
+  section: string;
+  href: string;
+  shortcut?: string;
+}
+
 // ── Keyboard shortcut chords per role ────────────────────────────────
 
 function roleChords(role: string): { keys: string; label: string }[] {
