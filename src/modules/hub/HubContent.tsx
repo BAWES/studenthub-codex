@@ -143,7 +143,7 @@ export function HubContent({
                 You are signed in as {session.role}, not {requiredRole}.
               </strong>
               <p>
-                Use the matching account credentials to enter that workspace. This keeps candidate, staff, company, and
+                Use the matching production credentials to enter that workspace. This keeps candidate, staff, company, and
                 admin data separated.
               </p>
             </div>
