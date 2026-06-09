@@ -4,13 +4,14 @@ import { DataTablePage } from "@/modules/workspace/DataTablePage";
 import { StatusBadge } from "@/modules/workspace/StatusBadge";
 import { genericStatusVariant } from "@/modules/workspace/status-mapping";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
-import { getStaffInterviewRows } from "@/modules/workspace/data";
+import { listStaffInterviews } from "./actions";
 
 export const dynamic = "force-dynamic";
 
 export default async function StaffInterviewsPage() {
   const session = await requireRoleCapability("staff", "request.interview");
-  const rows = await getStaffInterviewRows(Number(session.id));
+  const result = await listStaffInterviews({ limit: 60 });
+  const rows = result.items;
 
   return (
     <WorkspaceShell session={session} eyebrow="Staff" title="Interviews" metrics={[]}>
