@@ -82,6 +82,8 @@ export type GetTransferCandidateParams = z.input<
   typeof getTransferCandidateSchema
 >;
 
+export { listTransferCandidatesSchema, getTransferCandidateSchema };
+
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------

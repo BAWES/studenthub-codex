@@ -28,7 +28,7 @@ export interface MetricCardProps extends React.ComponentPropsWithoutRef<"div"> {
   /** Legacy: shown as subtitle */
   note?: string;
   /** Legacy: color accent (info, success, warning, error) */
-  accent?: "info" | "success" | "warning" | "error" | "neutral";
+  accent?: "info" | "success" | "warning" | "error" | "neutral" | "primary";
   /** Legacy: sparkline data as raw numbers */
   sparklineData?: number[];
   /** Legacy: entrance animation delay in ms */

@@ -31,6 +31,13 @@ vi.mock("lucide-react", () => ({
   Globe: () => <span data-testid="icon-globe" />,
   BarChart3: () => <span data-testid="icon-bar-chart" />,
   Layers: () => <span data-testid="icon-layers" />,
+  ChevronRight: () => <span data-testid="icon-chevron-right" />,
+  Command: () => <span data-testid="icon-command" />,
+  Sparkles: () => <span data-testid="icon-sparkles" />,
+  Search: () => <span data-testid="icon-search" />,
+  PanelRightOpen: () => <span data-testid="icon-panel-right" />,
+  ArrowUpRight: () => <span data-testid="icon-arrow-up-right" />,
+  CheckCircle2: () => <span data-testid="icon-check-circle" />,
 }));
 
 // ── Mock ThemeToggle ──────────────────────────────────────────
