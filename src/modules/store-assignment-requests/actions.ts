@@ -173,7 +173,7 @@ export async function getStoreAssignmentRequest(
 export async function createStoreAssignmentRequest(
   params: CreateStoreAssignmentRequestParams,
 ): Promise<{ operation: string; message: string; sar_uuid?: string }> {
-  await requireCapability("store.read");
+  await requireCapability("store.create");
 
   const parsed = createStoreAssignmentRequestSchema.safeParse(params);
   if (!parsed.success) {
