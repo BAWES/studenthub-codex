@@ -1,5 +1,6 @@
 import { getDashboardData } from "@/modules/dashboard/data";
 import { EmptyState } from "@/modules/workspace/EmptyState";
+import { MetricCard } from "@/components/ui/metric-card";
 
 export async function Dashboard() {
   const dashboard = await getDashboardData();
@@ -7,12 +8,15 @@ export async function Dashboard() {
   return (
     <>
       <section className="metrics" aria-label="StudentHub health metrics">
-        {dashboard.metrics.map((metric) => (
-          <article className="metric" key={metric.label}>
-            <span>{metric.label}</span>
-            <strong>{metric.value.toLocaleString("en-US")}</strong>
-            <p>{metric.note}</p>
-          </article>
+        {dashboard.metrics.map((metric, idx) => (
+          <MetricCard
+            key={metric.label}
+            label={metric.label}
+            value={metric.value}
+            note={metric.note}
+            delay={idx * 60}
+            accent="info"
+          />
         ))}
       </section>
 

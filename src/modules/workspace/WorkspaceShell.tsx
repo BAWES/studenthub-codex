@@ -9,6 +9,7 @@ import { navForRole } from "./navigation";
 import { WorkspaceMobileNavigation, WorkspaceNavigation } from "./WorkspaceNavigation";
 import { useWorkspaceOS } from "./WorkspaceOSContext";
 import { EmptyState } from "./EmptyState";
+import { MetricCard } from "@/components/ui/metric-card";
 
 type Metric = {
   label: string;
@@ -76,12 +77,15 @@ export function WorkspaceShell({
 
       {metrics.length ? (
         <section className="metrics" aria-label={`${session.role} workspace metrics`}>
-          {metrics.map((metric) => (
-            <article className="metric" key={metric.label}>
-              <span>{metric.label}</span>
-              <strong>{typeof metric.value === "number" ? metric.value.toLocaleString("en-US") : metric.value}</strong>
-              <p>{metric.note}</p>
-            </article>
+          {metrics.map((metric, idx) => (
+            <MetricCard
+              key={metric.label}
+              label={metric.label}
+              value={metric.value}
+              note={metric.note}
+              delay={idx * 60}
+              accent={idx === 0 ? "info" : "none"}
+            />
           ))}
         </section>
       ) : null}
