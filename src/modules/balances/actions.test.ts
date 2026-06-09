@@ -75,3 +75,74 @@ describe("getBalanceSchema", () => {
     expect(result.success).toBe(false);
   });
 });
+
+// ---------------------------------------------------------------------------
+// initTransfer schema
+// ---------------------------------------------------------------------------
+
+const initTransferSchema = z.object({
+  amount: z.coerce
+    .number()
+    .positive("Amount must be positive")
+    .finite("Amount must be a finite number"),
+});
+
+const initTransferFormDataSchema = z.object({
+  amount: z.coerce
+    .number()
+    .positive("Amount must be positive")
+    .finite("Amount must be a finite number"),
+});
+
+describe("initTransfer — amount validation", () => {
+  it("accepts a valid positive amount", () => {
+    const result = initTransferSchema.safeParse({ amount: 150.5 });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.amount).toBe(150.5);
+    }
+  });
+
+  it("accepts an integer amount from form data (string input)", () => {
+    const result = initTransferFormDataSchema.safeParse({ amount: "500" });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.amount).toBe(500);
+    }
+  });
+
+  it("rejects zero amount", () => {
+    const result = initTransferSchema.safeParse({ amount: 0 });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects negative amount", () => {
+    const result = initTransferSchema.safeParse({ amount: -10 });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects NaN", () => {
+    const result = initTransferSchema.safeParse({ amount: NaN });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects Infinity", () => {
+    const result = initTransferSchema.safeParse({ amount: Infinity });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects empty amount", () => {
+    const result = initTransferSchema.safeParse({});
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects non-numeric string", () => {
+    const result = initTransferFormDataSchema.safeParse({ amount: "abc" });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects empty string", () => {
+    const result = initTransferFormDataSchema.safeParse({ amount: "" });
+    expect(result.success).toBe(false);
+  });
+});
