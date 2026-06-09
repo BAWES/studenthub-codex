@@ -36,7 +36,26 @@ const listSettingsSchema = z.object({
   limit: z.number().int().min(1).max(100).optional(),
 });
 
+const getSettingSchema = z.object({
+  settingUuid: z.string().min(1, "Setting UUID is required"),
+});
+
+export type GetSettingInput = z.input<typeof getSettingSchema>;
+
+const updateSettingSchema = z.object({
+  settingUuid: z.string().min(1, "Setting UUID is required"),
+  value: z.string().nullable(),
+});
+
+export type UpdateSettingInput = z.input<typeof updateSettingSchema>;
+
 export type ListSettingsInput = z.input<typeof listSettingsSchema>;
+
+// ---------------------------------------------------------------------------
+// Exported schemas (for shared validation in tests)
+// ---------------------------------------------------------------------------
+
+export { listSettingsSchema, getSettingSchema, updateSettingSchema };
 
 // ---------------------------------------------------------------------------
 // Server actions
@@ -83,4 +102,101 @@ export async function listSettings(
     limit,
     totalPages: Math.ceil(total / limit),
   };
+}
+
+// ---------------------------------------------------------------------------
+// getSetting
+// ---------------------------------------------------------------------------
+
+/**
+ * Get a single setting by UUID.
+ * Returns null if not found.
+ * Mirrors the legacy SettingController::actionView().
+ */
+export async function getSetting(
+  params: GetSettingInput,
+): Promise<SettingItem | null> {
+  await requireCapability("admin.read");
+
+  const parsed = getSettingSchema.safeParse(params);
+  if (!parsed.success) {
+    throw new Error(
+      parsed.error.issues[0]?.message ?? "Invalid setting UUID",
+    );
+  }
+
+  const { settingUuid } = parsed.data;
+
+  const setting = await prisma.setting.findUnique({
+    where: { setting_uuid: settingUuid },
+  });
+
+  if (!setting) return null;
+
+  return {
+    ...setting,
+    serialized: setting.serialized ?? false,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// updateSetting
+// ---------------------------------------------------------------------------
+
+export type UpdateSettingResult = {
+  operation: string;
+  message: string;
+};
+
+/**
+ * Update a setting's value.
+ * Admin only — requires "setting.write" capability.
+ * Mirrors the legacy SettingController::actionUpdate().
+ */
+export async function updateSetting(
+  params: UpdateSettingInput,
+): Promise<UpdateSettingResult> {
+  await requireCapability("setting.write");
+
+  const parsed = updateSettingSchema.safeParse(params);
+  if (!parsed.success) {
+    return {
+      operation: "error",
+      message: parsed.error.issues[0]?.message ?? "Invalid setting data",
+    };
+  }
+
+  const { settingUuid, value } = parsed.data;
+
+  // Verify the setting exists
+  const existing = await prisma.setting.findUnique({
+    where: { setting_uuid: settingUuid },
+  });
+
+  if (!existing) {
+    return {
+      operation: "error",
+      message: "Setting not found",
+    };
+  }
+
+  try {
+    await prisma.setting.update({
+      where: { setting_uuid: settingUuid },
+      data: {
+        value,
+        updated_at: new Date(),
+      },
+    });
+
+    return {
+      operation: "success",
+      message: "Setting updated successfully",
+    };
+  } catch (err) {
+    return {
+      operation: "error",
+      message: err instanceof Error ? err.message : "Failed to update setting",
+    };
+  }
 }

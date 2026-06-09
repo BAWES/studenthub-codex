@@ -35,6 +35,7 @@ const roleCapabilities: Record<Role, Capability[]> = {
     "staff_expense.write",
     "client.read",
     "client.write",
+    "setting.write",
   ],
   staff: [
     "app.access",

@@ -63,6 +63,7 @@ export type Capability =
   | "staff_leave.read"
   | "staff_leave.write"
   | "staff.salary.read"
+  | "setting.write"
   | "staff.salary.create"
   | "staff_expense.read"
   | "staff_expense.write"

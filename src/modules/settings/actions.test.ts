@@ -4,14 +4,24 @@ import { z } from "zod";
 // ---------------------------------------------------------------------------
 // Pure logic: settings schema validation
 //
-// listSettings in actions.ts uses this zod schema internally.
-// Testing it separately avoids mocking "use server" dependencies.
+// listSettings/getSetting/updateSetting in actions.ts use these zod schemas
+// internally. Testing them separately avoids mocking "use server"
+// dependencies.
 // ---------------------------------------------------------------------------
 
 const listSettingsSchema = z.object({
   code: z.string().optional(),
   page: z.number().int().positive().optional(),
   limit: z.number().int().min(1).max(100).optional(),
+});
+
+const getSettingSchema = z.object({
+  settingUuid: z.string().min(1, "Setting UUID is required"),
+});
+
+const updateSettingSchema = z.object({
+  settingUuid: z.string().min(1, "Setting UUID is required"),
+  value: z.string().nullable(),
 });
 
 // ---------------------------------------------------------------------------
@@ -49,6 +59,64 @@ describe("listSettingsSchema", () => {
 
   it("rejects non-integer page", () => {
     const result = listSettingsSchema.safeParse({ page: "abc" });
+    expect(result.success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// getSettingSchema
+// ---------------------------------------------------------------------------
+
+describe("getSettingSchema", () => {
+  it("accepts a valid setting UUID", () => {
+    const result = getSettingSchema.safeParse({ settingUuid: "setting_abc123" });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects empty UUID", () => {
+    const result = getSettingSchema.safeParse({ settingUuid: "" });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects missing UUID", () => {
+    const result = getSettingSchema.safeParse({});
+    expect(result.success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// updateSettingSchema
+// ---------------------------------------------------------------------------
+
+describe("updateSettingSchema", () => {
+  it("accepts valid UUID and string value", () => {
+    const result = updateSettingSchema.safeParse({
+      settingUuid: "setting_abc123",
+      value: "new value",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts valid UUID and null value", () => {
+    const result = updateSettingSchema.safeParse({
+      settingUuid: "setting_abc123",
+      value: null,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects empty UUID", () => {
+    const result = updateSettingSchema.safeParse({
+      settingUuid: "",
+      value: "test",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects missing UUID", () => {
+    const result = updateSettingSchema.safeParse({
+      value: "test",
+    });
     expect(result.success).toBe(false);
   });
 });
