@@ -106,56 +106,65 @@ describe("Landing page (marketing redesign)", () => {
     mockSearchParams.forEach((_, key) => mockSearchParams.delete(key));
   });
 
-  it("renders headline and CTA button", () => {
+  it("renders the hero section with candidate headline", () => {
     render(<LandingContent {...defaultProps} />);
     expect(
-      screen.getByRole("heading", { name: /your institution/i })
+      screen.getByRole("heading", { name: /your next placement/i })
     ).toBeInTheDocument();
+    // CTA text appears in both nav and hero — use getAllByText
+    const ctaElements = screen.getAllByText(/create (your )?free candidate profile/i);
+    expect(ctaElements.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it("renders navigation with sign up and sign in links for unauthenticated users", () => {
+    render(<LandingContent {...defaultProps} />);
     expect(
-      screen.getByRole("button", { name: /get started/i })
+      screen.getByRole("navigation", { name: /StudentHub public navigation/i })
+    ).toBeInTheDocument();
+    // "Create free candidate profile" appears in nav
+    const navCta = screen.getAllByText(/create free candidate profile/i);
+    expect(navCta.length).toBeGreaterThanOrEqual(1);
+    // "Sign in" appears in nav hero and footer — use getAllByText
+    const signInLinks = screen.getAllByText(/sign in/i);
+    expect(signInLinks.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it("renders the feature grid section", () => {
+    render(<LandingContent {...defaultProps} />);
+    // FeatureGrid has an aria-label "Key features" section
+    const featureSection = screen.getByLabelText("Key features");
+    expect(featureSection).toBeInTheDocument();
+    // Candidate features include "Smart role discovery"
+    expect(screen.getByText(/smart role discovery/i)).toBeInTheDocument();
+  });
+
+  it("renders the testimonial carousel", () => {
+    render(<LandingContent {...defaultProps} />);
+    expect(
+      screen.getByLabelText("Customer testimonials")
     ).toBeInTheDocument();
   });
 
-  it("renders TrustBar with correct text", () => {
+  it("renders the final CTA section with proof text", () => {
     render(<LandingContent {...defaultProps} />);
-    expect(screen.getByText(/trusted by/i)).toBeInTheDocument();
-    expect(screen.getByText(/5,000/i)).toBeInTheDocument();
+    // Candidate proof text mentions candidates placed
+    const proofTexts = screen.getAllByText(/candidates placed this year/i);
+    expect(proofTexts.length).toBeGreaterThanOrEqual(1);
   });
 
-  it("renders all 3 FeatureGrid items with icons and headings", () => {
+  it("renders footer with sign up and sign in links", () => {
     render(<LandingContent {...defaultProps} />);
-
-    // Feature 1: integrated workflow
-    expect(screen.getByText(/integrated/i)).toBeInTheDocument();
-
-    // Feature 2: smart compliance
-    expect(screen.getByText(/smart compliance/i)).toBeInTheDocument();
-
-    // Feature 3: real-time insights
-    expect(screen.getByText(/real.time insights/i)).toBeInTheDocument();
+    const footerLinks = screen.getAllByText(/sign up as candidate/i);
+    expect(footerLinks.length).toBeGreaterThanOrEqual(1);
   });
 
-  it("renders StatsCounter with correct count badges", () => {
-    render(<LandingContent {...defaultProps} />);
-    // CoreStats + marketing stats rendered
-    const stats = screen.getAllByText(/5,000|\d+%/);
-    expect(stats.length).toBeGreaterThan(0);
-  });
-
-  it("renders the hero section with CTAs", () => {
-    render(<LandingContent {...defaultProps} />);
-    expect(screen.getByText(/get started/i)).toBeInTheDocument();
-    expect(screen.getByText(/learn more/i)).toBeInTheDocument();
-  });
-
-  it("does not render login form when user is not authenticated", () => {
-    render(<LandingContent {...defaultProps} />);
-    expect(screen.queryByText(/sign out/i)).not.toBeInTheDocument();
-  });
-
-  it("redirects to dashboard when user is authenticated", () => {
+  it("renders open app links when user is authenticated", () => {
     const session = { user: { role: "admin" } } as any;
     render(<LandingContent {...defaultProps} session={session} />);
-    expect(mockReplace).toHaveBeenCalledWith("/workspace");
+    // Authenticated users see "Open app" links instead of signup CTAs
+    const openAppLinks = screen.getAllByText(/open app/i);
+    expect(openAppLinks.length).toBeGreaterThanOrEqual(1);
+    // No signup CTAs for authenticated users
+    expect(screen.queryByText(/create free candidate profile/i)).not.toBeInTheDocument();
   });
 });
