@@ -2,13 +2,23 @@ import type { Route } from "next";
 import { requireRoleCapability } from "@/modules/auth/session";
 import { DataTable } from "@/modules/workspace/DataTable";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
-import { getAdminRequestRows } from "@/modules/workspace/data";
+import { formatDate } from "@/modules/workspace/format";
+import { listRequests } from "./actions";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminRequestsPage() {
   const session = await requireRoleCapability("admin", "request.read.any");
-  const rows = await getAdminRequestRows();
+  const { items } = await listRequests({ limit: 60 });
+  const rows = items.map((r) => ({
+    id: r.request_uuid,
+    title: r.title,
+    company: r.company_name ?? "No company",
+    owner: r.staff_name ?? "Unassigned",
+    seats: r.no_of_employees ?? 0,
+    status: r.status ?? "No status",
+    updated: formatDate(r.updated_at ? new Date(r.updated_at) : null),
+  }));
 
   return (
     <WorkspaceShell session={session} eyebrow="Admin" title="Requests" metrics={[]}>
