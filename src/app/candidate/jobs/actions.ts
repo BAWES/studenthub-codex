@@ -194,7 +194,7 @@ export async function applyToJob(
   // Check for duplicate application
   const existing = await prisma.job_listing_application.findFirst({
     where: { jobListingId, candidateId },
-    select: { id: true },
+    select: { applicationId: true },
   });
 
   if (existing) throw new Error("You have already applied to this position");
@@ -213,7 +213,7 @@ export async function applyToJob(
 
   return {
     success: true,
-    applicationId: application.id,
+    applicationId: application.applicationId,
     message: "Application submitted successfully",
   };
 }
@@ -252,7 +252,7 @@ export async function listMyApplications(
   ]);
 
   const applications: ApplicationRow[] = dbRows.map((r) => ({
-    applicationId: r.id,
+    applicationId: r.applicationId,
     jobListingId: r.jobListingId,
     jobTitle: r.jobListing.title,
     employerName: r.jobListing.employer.company_name,

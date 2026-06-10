@@ -173,7 +173,7 @@ describe("applyToJob", () => {
     });
     (prisma.job_listing_application.findFirst as Mock).mockResolvedValue(null);
     (prisma.job_listing_application.create as Mock).mockResolvedValue({
-      id: 100,
+      applicationId: 100,
     });
 
     const { applicationId, message } = await applyToJob({
@@ -207,7 +207,7 @@ describe("applyToJob", () => {
       status: "active",
     });
     (prisma.job_listing_application.findFirst as Mock).mockResolvedValue({
-      id: 50,
+      applicationId: 50,
     });
 
     await expect(applyToJob({ jobListingId: 1 })).rejects.toThrow(
@@ -228,7 +228,7 @@ describe("listMyApplications", () => {
   it("returns the candidate's applications", async () => {
     const mockApps = [
       {
-        id: 1,
+        applicationId: 1,
         jobListingId: 10,
         status: "applied",
         coverLetter: "I am interested",
