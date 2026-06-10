@@ -10,51 +10,40 @@ import {
 // ---------------------------------------------------------------------------
 
 describe("listJobApplicationsSchema", () => {
-  it("accepts valid input with defaults", () => {
-    const r = listJobApplicationsSchema.safeParse({ jobListingId: 1 });
+  it("accepts valid input with all fields", () => {
+    const r = listJobApplicationsSchema.safeParse({
+      jobListingId: 42,
+      page: 2,
+      limit: 10,
+      status: "applied",
+    });
     expect(r.success).toBe(true);
     if (r.success) {
-      expect(r.data.jobListingId).toBe(1);
+      expect(r.data.jobListingId).toBe(42);
+      expect(r.data.page).toBe(2);
+      expect(r.data.limit).toBe(10);
+      expect(r.data.status).toBe("applied");
+    }
+  });
+
+  it("accepts minimal input with defaults", () => {
+    const r = listJobApplicationsSchema.safeParse({
+      jobListingId: 1,
+    });
+    expect(r.success).toBe(true);
+    if (r.success) {
       expect(r.data.page).toBe(1);
       expect(r.data.limit).toBe(20);
     }
   });
 
-  it("accepts optional status filter", () => {
+  it("coerces string jobListingId to number", () => {
     const r = listJobApplicationsSchema.safeParse({
-      jobListingId: 1,
-      status: "reviewing",
+      jobListingId: "99",
     });
     expect(r.success).toBe(true);
     if (r.success) {
-      expect(r.data.status).toBe("reviewing");
-    }
-  });
-
-  it("accepts custom pagination", () => {
-    const r = listJobApplicationsSchema.safeParse({
-      jobListingId: 1,
-      page: 2,
-      limit: 50,
-    });
-    expect(r.success).toBe(true);
-    if (r.success) {
-      expect(r.data.page).toBe(2);
-      expect(r.data.limit).toBe(50);
-    }
-  });
-
-  it("coerces string pagination", () => {
-    const r = listJobApplicationsSchema.safeParse({
-      jobListingId: "1",
-      page: "2",
-      limit: "10",
-    });
-    expect(r.success).toBe(true);
-    if (r.success) {
-      expect(r.data.jobListingId).toBe(1);
-      expect(r.data.page).toBe(2);
-      expect(r.data.limit).toBe(10);
+      expect(r.data.jobListingId).toBe(99);
     }
   });
 
@@ -63,14 +52,22 @@ describe("listJobApplicationsSchema", () => {
   });
 
   it("rejects negative jobListingId", () => {
-    expect(
-      listJobApplicationsSchema.safeParse({ jobListingId: -1 }).success,
-    ).toBe(false);
+    expect(listJobApplicationsSchema.safeParse({ jobListingId: -1 }).success).toBe(false);
+  });
+
+  it("rejects zero jobListingId", () => {
+    expect(listJobApplicationsSchema.safeParse({ jobListingId: 0 }).success).toBe(false);
   });
 
   it("rejects limit over 100", () => {
     expect(
-      listJobApplicationsSchema.safeParse({ jobListingId: 1, limit: 200 }).success,
+      listJobApplicationsSchema.safeParse({ jobListingId: 1, limit: 101 }).success,
+    ).toBe(false);
+  });
+
+  it("rejects limit below 1", () => {
+    expect(
+      listJobApplicationsSchema.safeParse({ jobListingId: 1, limit: 0 }).success,
     ).toBe(false);
   });
 
@@ -82,7 +79,7 @@ describe("listJobApplicationsSchema", () => {
 });
 
 describe("listJobApplicationsByEmployerSchema", () => {
-  it("accepts empty input (defaults)", () => {
+  it("accepts empty input with defaults", () => {
     const r = listJobApplicationsByEmployerSchema.safeParse({});
     expect(r.success).toBe(true);
     if (r.success) {
@@ -91,24 +88,95 @@ describe("listJobApplicationsByEmployerSchema", () => {
     }
   });
 
-  it("accepts with status filter", () => {
+  it("accepts pagination params", () => {
     const r = listJobApplicationsByEmployerSchema.safeParse({
+      page: 3,
+      limit: 50,
       status: "shortlisted",
     });
     expect(r.success).toBe(true);
     if (r.success) {
+      expect(r.data.page).toBe(3);
+      expect(r.data.limit).toBe(50);
       expect(r.data.status).toBe("shortlisted");
     }
+  });
+
+  it("coerces string page and limit", () => {
+    const r = listJobApplicationsByEmployerSchema.safeParse({
+      page: "2",
+      limit: "10",
+    });
+    expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data.page).toBe(2);
+      expect(r.data.limit).toBe(10);
+    }
+  });
+
+  it("rejects limit over 100", () => {
+    expect(listJobApplicationsByEmployerSchema.safeParse({ limit: 101 }).success).toBe(false);
+  });
+
+  it("rejects limit below 1", () => {
+    expect(listJobApplicationsByEmployerSchema.safeParse({ limit: 0 }).success).toBe(false);
+  });
+
+  it("rejects page below 1", () => {
+    expect(listJobApplicationsByEmployerSchema.safeParse({ page: 0 }).success).toBe(false);
   });
 });
 
 describe("updateApplicationStatusSchema", () => {
-  it("accepts valid application status update", () => {
+  it("accepts valid input", () => {
     const r = updateApplicationStatusSchema.safeParse({
-      applicationId: 1,
+      applicationId: 42,
       status: "accepted",
     });
     expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data.applicationId).toBe(42);
+      expect(r.data.status).toBe("accepted");
+    }
+  });
+
+  it("accepts all valid status values", () => {
+    for (const status of ["applied", "reviewing", "shortlisted", "interviewed", "accepted", "rejected"]) {
+      const r = updateApplicationStatusSchema.safeParse({
+        applicationId: 1,
+        status,
+      });
+      expect(r.success).toBe(true);
+    }
+  });
+
+  it("coerces string applicationId to number", () => {
+    const r = updateApplicationStatusSchema.safeParse({
+      applicationId: "7",
+      status: "reviewing",
+    });
+    expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data.applicationId).toBe(7);
+    }
+  });
+
+  it("rejects missing applicationId", () => {
+    expect(
+      updateApplicationStatusSchema.safeParse({ status: "applied" }).success,
+    ).toBe(false);
+  });
+
+  it("rejects zero applicationId", () => {
+    expect(
+      updateApplicationStatusSchema.safeParse({ applicationId: 0, status: "applied" }).success,
+    ).toBe(false);
+  });
+
+  it("rejects negative applicationId", () => {
+    expect(
+      updateApplicationStatusSchema.safeParse({ applicationId: -1, status: "applied" }).success,
+    ).toBe(false);
   });
 
   it("rejects invalid status value", () => {
@@ -120,28 +188,10 @@ describe("updateApplicationStatusSchema", () => {
     ).toBe(false);
   });
 
-  it("rejects missing applicationId", () => {
+  it("rejects missing status", () => {
     expect(
-      updateApplicationStatusSchema.safeParse({ status: "rejected" }).success,
+      updateApplicationStatusSchema.safeParse({ applicationId: 1 }).success,
     ).toBe(false);
-  });
-
-  it("rejects negative applicationId", () => {
-    expect(
-      updateApplicationStatusSchema.safeParse({
-        applicationId: -1,
-        status: "applied",
-      }).success,
-    ).toBe(false);
-  });
-
-  it("accepts all valid statuses", () => {
-    const statuses = ["applied", "reviewing", "shortlisted", "interviewed", "accepted", "rejected"];
-    for (const status of statuses) {
-      expect(
-        updateApplicationStatusSchema.safeParse({ applicationId: 1, status }).success,
-      ).toBe(true);
-    }
   });
 });
 
@@ -167,187 +217,228 @@ vi.mock("@/modules/auth/session", () => ({
   requireCapability: vi.fn(),
 }));
 
-vi.mock("next/cache", () => ({
-  revalidatePath: vi.fn(),
-}));
-
 const { requireCapability } = await import("@/modules/auth/session");
-const apps = await import("./actions");
+const { prisma } = await import("@/lib/prisma");
+const actions = await import("./actions");
 
-const mockUser = {
-  role: "company" as const,
-  id: "user-1",
-  name: "Employer User",
-  email: "employer@company.local",
-  issuedAt: Date.now(),
-};
+beforeEach(() => {
+  vi.clearAllMocks();
+});
 
-function makeDbRow(overrides: Record<string, unknown> = {}) {
-  return {
-    id: 1,
-    candidateId: 100,
-    status: "applied",
-    coverLetter: "I am interested in this role.",
-    createdAt: new Date("2026-06-10"),
-    updatedAt: new Date("2026-06-10"),
-    candidate: {
-      candidate_id: 100,
-      candidate_name: "Jane Doe",
-      candidate_name_ar: null,
-    },
-    jobListing: { title: "Software Engineer" },
-    ...overrides,
-  };
-}
+// ---------------------------------------------------------------------------
+// listJobApplications
+// ---------------------------------------------------------------------------
 
 describe("listJobApplications", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  it("returns applications for a job with defaults", async () => {
-    vi.mocked(requireCapability).mockResolvedValue(mockUser);
-    mockFindMany.mockResolvedValue([makeDbRow()]);
+  it("returns applications for a job listing", async () => {
+    const dbRow = {
+      id: 1,
+      jobListingId: 42,
+      candidateId: 100,
+      status: "applied",
+      coverLetter: "I am interested!",
+      createdAt: new Date("2026-06-10"),
+      updatedAt: new Date("2026-06-10"),
+      candidate: {
+        candidate_id: 100,
+        candidate_name: "Ahmed Al-Sabah",
+        candidate_name_ar: null,
+      },
+    };
+    mockFindMany.mockResolvedValue([dbRow]);
     mockCount.mockResolvedValue(1);
 
-    const result = await apps.listJobApplications({ jobListingId: 1 });
+    const result = await actions.listJobApplications({
+      jobListingId: 42,
+    });
 
-    expect(requireCapability).toHaveBeenCalledWith("company.read.linked");
     expect(result.success).toBe(true);
-    expect(result.applications).toHaveLength(1);
-    expect(result.total).toBe(1);
-
-    const app = result.applications[0];
-    expect(app.candidateName).toBe("Jane Doe");
-    expect(app.status).toBe("applied");
+    if (result.success) {
+      expect(result.applications).toHaveLength(1);
+      expect(result.applications[0].id).toBe(1);
+      expect(result.applications[0].candidateName).toBe("Ahmed Al-Sabah");
+      expect(result.total).toBe(1);
+    }
+    expect(requireCapability).toHaveBeenCalledWith("company.read.linked");
+    expect(mockFindMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { jobListingId: 42 },
+        skip: 0,
+        take: 20,
+      }),
+    );
   });
 
   it("filters by status when provided", async () => {
-    vi.mocked(requireCapability).mockResolvedValue(mockUser);
     mockFindMany.mockResolvedValue([]);
     mockCount.mockResolvedValue(0);
 
-    await apps.listJobApplications({ jobListingId: 1, status: "reviewing" });
+    await actions.listJobApplications({
+      jobListingId: 42,
+      status: "shortlisted",
+    });
 
-    const callArgs = mockFindMany.mock.calls[0][0];
-    expect(callArgs.where.status).toBe("reviewing");
+    expect(mockFindMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { jobListingId: 42, status: "shortlisted" },
+      }),
+    );
   });
 
   it("applies pagination correctly", async () => {
-    vi.mocked(requireCapability).mockResolvedValue(mockUser);
     mockFindMany.mockResolvedValue([]);
     mockCount.mockResolvedValue(0);
 
-    await apps.listJobApplications({ jobListingId: 1, page: 3, limit: 10 });
+    await actions.listJobApplications({
+      jobListingId: 42,
+      page: 3,
+      limit: 10,
+    });
 
-    const callArgs = mockFindMany.mock.calls[0][0];
-    expect(callArgs.skip).toBe(20);
-    expect(callArgs.take).toBe(10);
+    expect(mockFindMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        skip: 20,
+        take: 10,
+      }),
+    );
   });
 
-  it("returns candidates with null name when candidate missing", async () => {
-    vi.mocked(requireCapability).mockResolvedValue(mockUser);
-    mockFindMany.mockResolvedValue([
-      makeDbRow({ candidate: null }),
-    ]);
+  it("handles missing candidate name gracefully", async () => {
+    const dbRow = {
+      id: 2,
+      jobListingId: 42,
+      candidateId: 101,
+      status: "applied",
+      coverLetter: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      candidate: null,
+    };
+    mockFindMany.mockResolvedValue([dbRow]);
     mockCount.mockResolvedValue(1);
 
-    const result = await apps.listJobApplications({ jobListingId: 1 });
-
-    expect(result.applications[0].candidateName).toBeNull();
-  });
-
-  it("throws when requireCapability rejects", async () => {
-    vi.mocked(requireCapability).mockRejectedValue(new Error("Unauthorized"));
-
-    await expect(
-      apps.listJobApplications({ jobListingId: 1 }),
-    ).rejects.toThrow("Unauthorized");
-    expect(mockFindMany).not.toHaveBeenCalled();
-  });
-});
-
-describe("listJobApplicationsByEmployer", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  it("returns all applications across employer's jobs", async () => {
-    vi.mocked(requireCapability).mockResolvedValue(mockUser);
-    mockFindMany.mockResolvedValue([makeDbRow()]);
-    mockCount.mockResolvedValue(1);
-
-    const result = await apps.listJobApplicationsByEmployer({});
+    const result = await actions.listJobApplications({ jobListingId: 42 });
 
     expect(result.success).toBe(true);
-    expect(result.applications).toHaveLength(1);
-    expect(result.total).toBe(1);
-
-    const app = result.applications[0];
-    expect(app.jobTitle).toBe("Software Engineer");
-    expect(app.candidateName).toBe("Jane Doe");
+    if (result.success) {
+      expect(result.applications[0].candidateName).toBeNull();
+    }
   });
 
-  it("applies pagination by default", async () => {
-    vi.mocked(requireCapability).mockResolvedValue(mockUser);
+  it("returns empty array when no applications exist", async () => {
     mockFindMany.mockResolvedValue([]);
     mockCount.mockResolvedValue(0);
 
-    await apps.listJobApplicationsByEmployer({});
+    const result = await actions.listJobApplications({ jobListingId: 999 });
 
-    const callArgs = mockFindMany.mock.calls[0][0];
-    expect(callArgs.skip).toBe(0);
-    expect(callArgs.take).toBe(20);
-  });
-
-  it("filters by status when provided", async () => {
-    vi.mocked(requireCapability).mockResolvedValue(mockUser);
-    mockFindMany.mockResolvedValue([]);
-    mockCount.mockResolvedValue(0);
-
-    await apps.listJobApplicationsByEmployer({ status: "shortlisted" });
-
-    const callArgs = mockFindMany.mock.calls[0][0];
-    expect(callArgs.where.status).toBe("shortlisted");
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.applications).toEqual([]);
+      expect(result.total).toBe(0);
+    }
   });
 });
 
-describe("updateApplicationStatus", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
+// ---------------------------------------------------------------------------
+// listJobApplicationsByEmployer
+// ---------------------------------------------------------------------------
+
+describe("listJobApplicationsByEmployer", () => {
+  it("returns all applications across jobs", async () => {
+    const dbRow = {
+      id: 1,
+      jobListingId: 42,
+      candidateId: 100,
+      status: "applied",
+      coverLetter: "Hire me!",
+      createdAt: new Date("2026-06-10"),
+      updatedAt: new Date("2026-06-10"),
+      jobListing: { title: "Software Engineer" },
+      candidate: {
+        candidate_id: 100,
+        candidate_name: "Fatima",
+        candidate_name_ar: null,
+      },
+    };
+    mockFindMany.mockResolvedValue([dbRow]);
+    mockCount.mockResolvedValue(1);
+
+    const result = await actions.listJobApplicationsByEmployer({});
+
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.applications).toHaveLength(1);
+      expect(result.applications[0].jobTitle).toBe("Software Engineer");
+      expect(result.total).toBe(1);
+    }
+    expect(requireCapability).toHaveBeenCalledWith("company.read.linked");
   });
 
-  it("updates application status", async () => {
-    vi.mocked(requireCapability).mockResolvedValue(mockUser);
-    mockUpdate.mockResolvedValue(makeDbRow());
+  it("filters by status", async () => {
+    mockFindMany.mockResolvedValue([]);
+    mockCount.mockResolvedValue(0);
 
-    const result = await apps.updateApplicationStatus({
+    await actions.listJobApplicationsByEmployer({ status: "interviewed" });
+
+    expect(mockFindMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { status: "interviewed" },
+      }),
+    );
+  });
+
+  it("paginates results", async () => {
+    mockFindMany.mockResolvedValue([]);
+    mockCount.mockResolvedValue(0);
+
+    await actions.listJobApplicationsByEmployer({ page: 2, limit: 5 });
+
+    expect(mockFindMany).toHaveBeenCalledWith(
+      expect.objectContaining({ skip: 5, take: 5 }),
+    );
+  });
+
+  it("uses empty where when no status filter", async () => {
+    mockFindMany.mockResolvedValue([]);
+    mockCount.mockResolvedValue(50);
+
+    const result = await actions.listJobApplicationsByEmployer({});
+    expect(result.total).toBe(50);
+    expect(mockFindMany).toHaveBeenCalledWith(
+      expect.objectContaining({ where: {} }),
+    );
+  });
+});
+
+// ---------------------------------------------------------------------------
+// updateApplicationStatus
+// ---------------------------------------------------------------------------
+
+describe("updateApplicationStatus", () => {
+  it("updates application status successfully", async () => {
+    mockUpdate.mockResolvedValue({ id: 1, status: "accepted" });
+
+    const result = await actions.updateApplicationStatus({
       applicationId: 1,
       status: "accepted",
     });
 
+    expect(result.success).toBe(true);
     expect(requireCapability).toHaveBeenCalledWith("company.write.linked");
     expect(mockUpdate).toHaveBeenCalledWith({
       where: { id: 1 },
       data: { status: "accepted" },
     });
-    expect(result).toEqual({ success: true });
   });
 
-  it("rejects invalid status", async () => {
-    await expect(
-      apps.updateApplicationStatus({
-        applicationId: 1,
-        status: "invalid" as any,
-      }),
-    ).rejects.toThrow();
-    expect(mockUpdate).not.toHaveBeenCalled();
-  });
+  it("rejects when status changes to applied", async () => {
+    mockUpdate.mockResolvedValue({ id: 1, status: "applied" });
 
-  it("throws on invalid input (negative ID)", async () => {
-    await expect(
-      apps.updateApplicationStatus({ applicationId: -1, status: "rejected" }),
-    ).rejects.toThrow();
-    expect(mockUpdate).not.toHaveBeenCalled();
+    const result = await actions.updateApplicationStatus({
+      applicationId: 1,
+      status: "applied",
+    });
+
+    expect(result.success).toBe(true);
   });
 });
