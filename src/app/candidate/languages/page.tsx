@@ -1,8 +1,7 @@
 import { requireRoleCapability } from "@/modules/auth/session";
-import { DataTable } from "@/modules/workspace/DataTable";
-import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { formatDate } from "@/modules/workspace/format";
 import { listCandidateLanguages } from "./actions";
+import { CandidateLanguagesTable } from "./candidate-languages-table";
 
 export const dynamic = "force-dynamic";
 
@@ -19,26 +18,5 @@ export default async function CandidateLanguagesPage() {
       : "N/A",
   }));
 
-  return (
-    <WorkspaceShell
-      session={session}
-      eyebrow="Candidate"
-      title="Languages"
-      metrics={[
-        { label: "Total", value: languages.length, note: "Languages on your profile" },
-      ]}
-    >
-      <DataTable
-        title="Languages"
-        description="Languages and proficiency levels associated with your candidate profile."
-        rows={rows}
-        rowHref="/candidate/languages/"
-        columns={[
-          { key: "language", label: "Language", render: (row) => <strong>{row.language}</strong> },
-          { key: "proficiency", label: "Proficiency", render: (row) => row.proficiency },
-          { key: "created_at", label: "Added", render: (row) => row.created_at },
-        ]}
-      />
-    </WorkspaceShell>
-  );
+  return <CandidateLanguagesTable session={session} rows={rows} />;
 }
