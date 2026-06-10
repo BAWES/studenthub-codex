@@ -2,7 +2,9 @@ import { describe, it, expect } from "vitest";
 import {
   listPaymentsSchema,
   getPaymentDetailSchema,
+  createPaymentSchema,
 } from "./schemas";
+import type { PaymentMethod } from "./schemas";
 
 // ---------------------------------------------------------------------------
 // listPaymentsSchema
@@ -238,5 +240,110 @@ describe("GetPaymentDetailResult shape", () => {
     expect(result.transferCandidate.id).toBe(2);
     expect(result.transfer).toBeNull();
     expect(result.invoices).toHaveLength(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// createPaymentSchema
+// ---------------------------------------------------------------------------
+
+describe("createPaymentSchema", () => {
+  it("accepts valid beneficiary params", () => {
+    const result = createPaymentSchema.safeParse({
+      transferBenefName: "John Doe",
+      transferBenefIban: "KW1234567890123456789012345678901234567890",
+      bankId: 1,
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.transferBenefName).toBe("John Doe");
+      expect(result.data.transferBenefIban).toBe("KW1234567890123456789012345678901234567890");
+      expect(result.data.bankId).toBe(1);
+    }
+  });
+
+  it("accepts with optional amount", () => {
+    const result = createPaymentSchema.safeParse({
+      transferBenefName: "Jane Doe",
+      transferBenefIban: "KW1234567890",
+      bankId: 2,
+      amount: 500.0,
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.amount).toBe(500.0);
+    }
+  });
+
+  it("rejects empty beneficiary name", () => {
+    const result = createPaymentSchema.safeParse({
+      transferBenefName: "",
+      transferBenefIban: "KW1234567890",
+      bankId: 1,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects missing bankId", () => {
+    const result = createPaymentSchema.safeParse({
+      transferBenefName: "John Doe",
+      transferBenefIban: "KW1234567890",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects missing IBAN", () => {
+    const result = createPaymentSchema.safeParse({
+      transferBenefName: "John Doe",
+      bankId: 1,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects zero bankId", () => {
+    const result = createPaymentSchema.safeParse({
+      transferBenefName: "John Doe",
+      transferBenefIban: "KW1234567890",
+      bankId: 0,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects negative amount", () => {
+    const result = createPaymentSchema.safeParse({
+      transferBenefName: "John Doe",
+      transferBenefIban: "KW1234567890",
+      bankId: 1,
+      amount: -100,
+    });
+    expect(result.success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// PaymentMethod type shape
+// ---------------------------------------------------------------------------
+
+describe("PaymentMethod shape", () => {
+  it("defines the expected fields", () => {
+    const mock: PaymentMethod = {
+      bankId: 1,
+      bankName: "National Bank of Kuwait",
+      bankAccountName: "John Doe",
+      iban: "KW1234567890",
+    };
+    expect(mock.bankId).toBe(1);
+    expect(mock.bankName).toBe("National Bank of Kuwait");
+    expect(mock.iban).toBe("KW1234567890");
+  });
+
+  it("accepts null fields", () => {
+    const mock: PaymentMethod = {
+      bankId: null,
+      bankName: null,
+      bankAccountName: null,
+      iban: null,
+    };
+    expect(mock.bankId).toBeNull();
   });
 });

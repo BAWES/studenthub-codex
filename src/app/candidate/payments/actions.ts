@@ -7,10 +7,13 @@ import { formatMoney } from "@/modules/workspace/format";
 import {
   listPaymentsSchema,
   getPaymentDetailSchema,
+  createPaymentSchema,
   type ListPaymentsParams,
   type GetPaymentDetailParams,
   type ListPaymentsResult,
   type GetPaymentDetailResult,
+  type CreatePaymentInput,
+  type PaymentMethod,
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
@@ -214,4 +217,95 @@ export async function getCandidatePaymentDetail(
       status: inv.invoice_status ?? null,
     })) ?? [],
   };
+}
+// ---------------------------------------------------------------------------
+// createCandidatePayment
+// ---------------------------------------------------------------------------
+
+/**
+ * Create a transfer_candidate (payment) record with beneficiary details.
+ * The candidate saves their payment info (beneficiary name, IBAN, bank) so
+ * the system can process payouts to this account.
+ *
+ * Mirrors the legacy createPayment functionality.
+ * Requires `candidate.profile.edit` capability.
+ */
+export async function createCandidatePayment(
+  data: CreatePaymentInput,
+): Promise<{ tcId: number }> {
+  const session = await requireCapability("candidate.profile.edit");
+
+  const parsed = createPaymentSchema.safeParse(data);
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid payment data");
+  }
+
+  const { transferBenefName, transferBenefIban, bankId, amount } = parsed.data;
+  const candidateId = Number(session.id);
+  const now = new Date();
+
+  const tc = await prisma.transfer_candidate.create({
+    data: {
+      candidate_id: candidateId,
+      bank_id: bankId,
+      transfer_benef_name: transferBenefName,
+      transfer_benef_iban: transferBenefIban,
+      candidate_total: amount ?? null,
+      company_total: null,
+      transfer_cost: null,
+      hours: 0,
+      minutes: 0,
+      paid: 0,
+      deleted: 0,
+      tc_created_at: now,
+      tc_updated_at: now,
+      currency_code: "KWD",
+    },
+    select: { tc_id: true },
+  });
+
+  return { tcId: tc.tc_id };
+}
+
+// ---------------------------------------------------------------------------
+// getPaymentMethods
+// ---------------------------------------------------------------------------
+
+/**
+ * Get the candidate's configured payment methods (bank accounts on file).
+ * Returns the candidate's linked bank account info including bank name.
+ *
+ * Mirrors the legacy getCandidateBank / payment method lookup.
+ * Requires `candidate.read.own` capability.
+ */
+export async function getPaymentMethods(): Promise<PaymentMethod[]> {
+  const session = await requireCapability("candidate.read.own");
+  const candidateId = Number(session.id);
+
+  const candidate = await prisma.candidate.findUnique({
+    where: { candidate_id: candidateId },
+    select: {
+      bank_id: true,
+      bank_account_name: true,
+      candidate_iban: true,
+      bank: {
+        select: {
+          bank_name: true,
+        },
+      },
+    },
+  });
+
+  if (!candidate || !candidate.bank_id) {
+    return [];
+  }
+
+  return [
+    {
+      bankId: candidate.bank_id,
+      bankName: candidate.bank?.bank_name ?? null,
+      bankAccountName: candidate.bank_account_name ?? null,
+      iban: candidate.candidate_iban ?? null,
+    },
+  ];
 }
