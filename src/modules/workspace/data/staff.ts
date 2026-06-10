@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { formatDate, formatMoney } from "@/modules/workspace/format";
-import { getCandidateIdsForStaff } from "@/modules/workspace/data";
+import { getCandidateIdsForStaff } from "./candidate";
 
 export async function getStaffRequestRows(staffId: number) {
   const rows = await prisma.request.findMany({
