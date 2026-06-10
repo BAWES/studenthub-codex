@@ -1,77 +1,42 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useCallback, useState } from "react";
 import { applyToJob } from "../actions";
-import { useState } from "react";
 
-export function BackButton() {
-  const router = useRouter();
-  return (
-    <button
-      onClick={() => router.push("/candidate/jobs")}
-      className="text-sm text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1"
-    >
-      ← Back to job listings
-    </button>
-  );
-}
+type Props = {
+  jobListingId: number;
+};
 
-export function ApplyButton({
-  jobId,
-  alreadyApplied,
-}: {
-  jobId: number;
-  alreadyApplied: boolean;
-}) {
-  const router = useRouter();
+export function ApplyButton({ jobListingId }: Props) {
   const [applying, setApplying] = useState(false);
-  const [result, setResult] = useState<"idle" | "applied" | "error">(
-    alreadyApplied ? "applied" : "idle",
-  );
-  const [errorMsg, setErrorMsg] = useState("");
+  const [result, setResult] = useState<{ success: boolean; message: string } | null>(null);
 
-  const handleApply = async () => {
-    if (result === "applied") return;
+  const handleApply = useCallback(async () => {
     setApplying(true);
-    setErrorMsg("");
-
+    setResult(null);
     try {
-      const res = await applyToJob({ jobId });
-      if (res.alreadyApplied) {
-        setResult("applied");
-      } else {
-        setResult("applied");
-        router.refresh();
-      }
+      const res = await applyToJob({ jobListingId });
+      setResult({ success: true, message: res.message });
     } catch (e) {
-      setResult("error");
-      setErrorMsg(e instanceof Error ? e.message : "Failed to apply");
+      setResult({ success: false, message: e instanceof Error ? e.message : "Failed to apply" });
     } finally {
       setApplying(false);
     }
-  };
-
-  if (result === "applied") {
-    return (
-      <div className="flex items-center gap-2">
-        <span className="text-sm text-green-600 dark:text-green-400 font-medium">
-          ✓ Application submitted
-        </span>
-      </div>
-    );
-  }
+  }, [jobListingId]);
 
   return (
-    <div className="flex flex-col items-end gap-2">
+    <div>
       <button
         onClick={handleApply}
         disabled={applying}
-        className="px-6 py-2.5 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 disabled:opacity-50 transition-colors"
+        className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-3 text-sm font-medium text-white hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
       >
         {applying ? "Applying..." : "Apply Now"}
       </button>
-      {errorMsg && (
-        <p className="text-xs text-red-500">{errorMsg}</p>
+      {result && (
+        <p className={`mt-2 text-sm ${result.success ? "text-green-500" : "text-red-500"}`}>
+          {result.message}
+        </p>
       )}
     </div>
   );

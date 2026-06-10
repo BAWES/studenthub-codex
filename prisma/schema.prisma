@@ -275,6 +275,7 @@ model candidate {
   interview_evaluation              interview_evaluation[]
   invitation                        invitation[]
   job_interest                      job_interest[]
+  job_listing_application           job_listing_application[]
   note                              note[]
   request_application               request_application[]
   request_interview                 request_interview[]
@@ -1019,7 +1020,8 @@ model job_listing {
   createdAt      DateTime @default(now()) @db.DateTime(0)
   updatedAt      DateTime @updatedAt @db.DateTime(0)
 
-  employer company @relation(fields: [employerId], references: [company_id], onDelete: Cascade, onUpdate: Restrict, map: "fk-job_listing-employer_id")
+  employer     company                      @relation(fields: [employerId], references: [company_id], onDelete: Cascade, onUpdate: Restrict, map: "fk-job_listing-employer_id")
+  applications job_listing_application[]
 
   @@index([employerId], map: "idx-job_listing-employer_id")
   @@index([status], map: "idx-job_listing-status")
@@ -1045,6 +1047,24 @@ model job_listing_application {
   @@index([jobListingId], map: "idx-application-job_listing_id")
   @@index([candidateId], map: "idx-application-candidate_id")
   @@index([status], map: "idx-application-status")
+}
+
+model job_listing_application {
+  id            Int       @id @default(autoincrement())
+  jobListingId  Int
+  candidateId   Int
+  status        String    @default("applied") @db.VarChar(50)
+  coverLetter   String?   @db.Text
+  notes         String?   @db.Text
+  createdAt     DateTime  @default(now()) @db.DateTime(0)
+  updatedAt     DateTime  @updatedAt @db.DateTime(0)
+
+  jobListing job_listing @relation(fields: [jobListingId], references: [jobListingId], onDelete: Cascade, onUpdate: Restrict, map: "fk-job_listing_application-job_listing_id")
+  candidate  candidate   @relation(fields: [candidateId], references: [candidate_id], onDelete: Cascade, onUpdate: Restrict, map: "fk-job_listing_application-candidate_id")
+
+  @@index([jobListingId], map: "idx-job_listing_application-job_listing_id")
+  @@index([candidateId], map: "idx-job_listing_application-candidate_id")
+  @@index([status], map: "idx-job_listing_application-status")
 }
 
 model contact {

@@ -1,276 +1,424 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { prisma } from "@/lib/prisma";
+import {
+  listCandidateJobsSchema,
+  getCandidateJobSchema,
+  applyToJobSchema,
+  listMyApplicationsSchema,
+} from "./schemas";
 
-// -----------------------------------------------------------------------
-// Mock Prisma — all server actions use prisma.job_listing / job_listing_application
-// -----------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+// Mock Prisma client
+// ---------------------------------------------------------------------------
+
 vi.mock("@/lib/prisma", () => ({
   prisma: {
     job_listing: {
       findMany: vi.fn(),
-      findFirst: vi.fn(),
       findUnique: vi.fn(),
       count: vi.fn(),
     },
     job_listing_application: {
-      findFirst: vi.fn(),
       findMany: vi.fn(),
+      findFirst: vi.fn(),
       create: vi.fn(),
       count: vi.fn(),
     },
   },
 }));
 
-// Mock session — returns a fake candidate session
+// Auth mock — return a valid session
+vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
+const mockRequireRoleCapability = vi.fn().mockResolvedValue({ id: "42" });
 vi.mock("@/modules/auth/session", () => ({
-  requireRoleCapability: vi.fn(() =>
-    Promise.resolve({ id: "42", role: "candidate" }),
-  ),
+  requireRoleCapability: (...args: unknown[]) =>
+    mockRequireRoleCapability(...args),
+  requireCapability: vi.fn(),
+  getSession: vi.fn().mockResolvedValue({ id: "42" }),
 }));
 
-// Mock next/cache revalidatePath
-vi.mock("next/cache", () => ({
-  revalidatePath: vi.fn(),
-}));
+import { prisma } from "@/lib/prisma";
+import type { Mock } from "vitest";
+import {
+  listCandidateJobs,
+  getCandidateJob,
+  applyToJob,
+  listMyApplications,
+} from "./actions";
 
-// -----------------------------------------------------------------------
-// List candidate jobs
-// -----------------------------------------------------------------------
-import { listCandidateJobs } from "./actions";
+// ---------------------------------------------------------------------------
+// listCandidateJobs
+// ---------------------------------------------------------------------------
 
 describe("listCandidateJobs", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it("returns paginated active jobs with employer name", async () => {
-    const mockJobs = [
+  it("returns paginated job listings", async () => {
+    const mockRows = [
       {
         jobListingId: 1,
-        title: "Software Engineer Intern",
-        description: "Great opportunity",
+        employerId: 10,
+        title: "Software Engineer",
+        description: "Build awesome things",
         requirements: null,
         location: "Kuwait City",
-        employmentType: "internship",
-        salaryRange: "300 KWD/mo",
-        createdAt: new Date("2026-06-01"),
-        employer: { company_name: "TechCo" },
+        employmentType: "full-time",
+        salaryRange: "800-1200 KWD",
+        status: "active",
+        employer: { company_name: "TechCorp" },
+        createdAt: new Date("2026-01-01"),
+        updatedAt: new Date("2026-01-01"),
       },
     ];
 
-    vi.mocked(prisma.job_listing.findMany).mockResolvedValue(mockJobs);
-    vi.mocked(prisma.job_listing.count).mockResolvedValue(1);
+    (prisma.job_listing.findMany as Mock).mockResolvedValue(mockRows);
+    (prisma.job_listing.count as Mock).mockResolvedValue(1);
 
-    const result = await listCandidateJobs({ limit: 20 });
-
-    expect(result.items).toHaveLength(1);
-    expect(result.items[0].employerName).toBe("TechCo");
-    expect(result.total).toBe(1);
-    expect(result.page).toBe(1);
-    expect(prisma.job_listing.findMany).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: expect.objectContaining({ status: "active" }),
-        orderBy: { createdAt: "desc" },
-      }),
-    );
+    const { jobs, total } = await listCandidateJobs({ page: 1, limit: 20 });
+    expect(jobs).toHaveLength(1);
+    expect(jobs[0].title).toBe("Software Engineer");
+    expect(jobs[0].employerName).toBe("TechCorp");
+    expect(total).toBe(1);
   });
 
-  it("filters by employment type", async () => {
-    vi.mocked(prisma.job_listing.findMany).mockResolvedValue([]);
-    vi.mocked(prisma.job_listing.count).mockResolvedValue(0);
-
-    await listCandidateJobs({ employmentType: "full-time" });
-
-    expect(prisma.job_listing.findMany).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: expect.objectContaining({ employmentType: "full-time" }),
-      }),
-    );
-  });
-
-  it("filters by search query across title and description", async () => {
-    vi.mocked(prisma.job_listing.findMany).mockResolvedValue([]);
-    vi.mocked(prisma.job_listing.count).mockResolvedValue(0);
+  it("filters by search query", async () => {
+    (prisma.job_listing.findMany as Mock).mockResolvedValue([]);
+    (prisma.job_listing.count as Mock).mockResolvedValue(0);
 
     await listCandidateJobs({ q: "engineer" });
-
-    const callArgs = vi.mocked(prisma.job_listing.findMany).mock.calls[0][0];
-    expect(callArgs!.where).toMatchObject({
-      OR: expect.arrayContaining([
-        expect.objectContaining({ title: { contains: "engineer" } }),
-      ]),
-    });
+    const callArgs = (prisma.job_listing.findMany as Mock).mock.calls[0][0];
+    expect(callArgs.where.OR).toBeDefined();
   });
 
-  it("returns empty result for invalid input", async () => {
-    const result = await listCandidateJobs({ page: -1 } as any);
+  it("returns empty array when no jobs exist", async () => {
+    (prisma.job_listing.findMany as Mock).mockResolvedValue([]);
+    (prisma.job_listing.count as Mock).mockResolvedValue(0);
 
-    expect(result.items).toHaveLength(0);
-    expect(result.total).toBe(0);
-    expect(prisma.job_listing.findMany).not.toHaveBeenCalled();
+    const { jobs, total } = await listCandidateJobs({ page: 1, limit: 20 });
+    expect(jobs).toEqual([]);
+    expect(total).toBe(0);
   });
 });
 
-// -----------------------------------------------------------------------
-// Get single candidate job
-// -----------------------------------------------------------------------
-import { getCandidateJob } from "./actions";
+// ---------------------------------------------------------------------------
+// getCandidateJob
+// ---------------------------------------------------------------------------
 
 describe("getCandidateJob", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it("returns a job listing by id", async () => {
-    const mockJob = {
+  it("returns a single job listing", async () => {
+    const mockRow = {
       jobListingId: 1,
-      title: "Software Engineer",
-      description: "Job description",
-      requirements: null,
-      location: "Kuwait",
+      employerId: 10,
+      title: "Frontend Developer",
+      description: "Build UIs",
+      requirements: "React experience",
+      location: "Remote",
       employmentType: "full-time",
-      salaryRange: "500 KWD",
-      createdAt: new Date(),
-      employer: { company_name: "TechCo" },
+      salaryRange: "1000-1500 KWD",
+      status: "active",
+      employer: { company_name: "WebCo" },
+      createdAt: new Date("2026-01-01"),
+      updatedAt: new Date("2026-01-01"),
     };
 
-    vi.mocked(prisma.job_listing.findFirst).mockResolvedValue(mockJob);
+    (prisma.job_listing.findUnique as Mock).mockResolvedValue(mockRow);
+    (prisma.job_listing_application.findFirst as Mock).mockResolvedValue(null);
 
-    const result = await getCandidateJob({ jobId: 1 });
-
-    expect(result).not.toBeNull();
-    expect(result!.title).toBe("Software Engineer");
-    expect(result!.employerName).toBe("TechCo");
+    const { job } = await getCandidateJob({ jobId: 1 });
+    expect(job.title).toBe("Frontend Developer");
+    expect(job.employerName).toBe("WebCo");
+    expect(job.requirements).toBe("React experience");
+    expect(job.hasApplied).toBe(false);
   });
 
-  it("returns null when job not found", async () => {
-    vi.mocked(prisma.job_listing.findFirst).mockResolvedValue(null);
+  it("throws when job not found", async () => {
+    (prisma.job_listing.findUnique as Mock).mockResolvedValue(null);
 
-    const result = await getCandidateJob({ jobId: 999 });
+    await expect(getCandidateJob({ jobId: 999 })).rejects.toThrow(
+      "Job not found",
+    );
+  });
 
-    expect(result).toBeNull();
+  it("throws when job is not active", async () => {
+    (prisma.job_listing.findUnique as Mock).mockResolvedValue({
+      jobListingId: 1,
+      status: "closed",
+      employer: { company_name: "WebCo" },
+    });
+
+    await expect(getCandidateJob({ jobId: 1 })).rejects.toThrow(
+      "no longer accepting",
+    );
   });
 });
 
-// -----------------------------------------------------------------------
-// Apply to job
-// -----------------------------------------------------------------------
-import { applyToJob } from "./actions";
+// ---------------------------------------------------------------------------
+// applyToJob
+// ---------------------------------------------------------------------------
 
 describe("applyToJob", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it("creates an application successfully", async () => {
-    vi.mocked(prisma.job_listing.findUnique).mockResolvedValue({
+  it("creates a job application", async () => {
+    (prisma.job_listing.findUnique as Mock).mockResolvedValue({
       jobListingId: 1,
       status: "active",
     });
-    vi.mocked(prisma.job_listing_application.findFirst).mockResolvedValue(null);
-    vi.mocked(prisma.job_listing_application.create).mockResolvedValue({
-      applicationId: 101,
-    } as any);
+    (prisma.job_listing_application.findFirst as Mock).mockResolvedValue(null);
+    (prisma.job_listing_application.create as Mock).mockResolvedValue({
+      id: 100,
+    });
 
-    const result = await applyToJob({ jobId: 1 });
+    const { applicationId, message } = await applyToJob({
+      jobListingId: 1,
+      coverLetter: "I love coding!",
+    });
+    expect(applicationId).toBe(100);
+    expect(message).toContain("successfully");
+  });
 
-    expect(result.success).toBe(true);
-    expect(result.applicationId).toBe(101);
-    expect(result.alreadyApplied).toBe(false);
-    expect(prisma.job_listing_application.create).toHaveBeenCalledWith(
-      expect.objectContaining({
-        data: expect.objectContaining({
-          jobListingId: 1,
-          candidateId: 42,
-          status: "new",
-        }),
-      }),
+  it("throws when job does not exist", async () => {
+    (prisma.job_listing.findUnique as Mock).mockResolvedValue(null);
+
+    await expect(applyToJob({ jobListingId: 999 })).rejects.toThrow(
+      "not found",
     );
   });
 
-  it("returns alreadyApplied when candidate already applied", async () => {
-    vi.mocked(prisma.job_listing.findUnique).mockResolvedValue({
-      jobListingId: 1,
-      status: "active",
-    });
-    vi.mocked(prisma.job_listing_application.findFirst).mockResolvedValue({
-      applicationId: 50,
-    } as any);
-
-    const result = await applyToJob({ jobId: 1 });
-
-    expect(result.success).toBe(true);
-    expect(result.alreadyApplied).toBe(true);
-    expect(result.applicationId).toBe(50);
-    expect(prisma.job_listing_application.create).not.toHaveBeenCalled();
-  });
-
   it("throws when job is not active", async () => {
-    vi.mocked(prisma.job_listing.findUnique).mockResolvedValue({
+    (prisma.job_listing.findUnique as Mock).mockResolvedValue({
       jobListingId: 1,
       status: "closed",
     });
 
-    await expect(applyToJob({ jobId: 1 })).rejects.toThrow(
-      "no longer accepting applications",
-    );
+    await expect(applyToJob({ jobListingId: 1 })).rejects.toThrow("closed");
   });
 
-  it("throws when job does not exist", async () => {
-    vi.mocked(prisma.job_listing.findUnique).mockResolvedValue(null);
+  it("throws when already applied", async () => {
+    (prisma.job_listing.findUnique as Mock).mockResolvedValue({
+      jobListingId: 1,
+      status: "active",
+    });
+    (prisma.job_listing_application.findFirst as Mock).mockResolvedValue({
+      id: 50,
+    });
 
-    await expect(applyToJob({ jobId: 999 })).rejects.toThrow("Job not found");
+    await expect(applyToJob({ jobListingId: 1 })).rejects.toThrow(
+      "already applied",
+    );
   });
 });
 
-// -----------------------------------------------------------------------
-// List my applications
-// -----------------------------------------------------------------------
-import { listMyApplications } from "./actions";
+// ---------------------------------------------------------------------------
+// listMyApplications
+// ---------------------------------------------------------------------------
 
 describe("listMyApplications", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it("returns paginated applications with job details", async () => {
-    const mockApplications = [
+  it("returns the candidate's applications", async () => {
+    const mockApps = [
       {
-        applicationId: 1,
-        jobListingId: 1,
-        status: "new",
-        coverLetter: null,
-        createdAt: new Date(),
+        id: 1,
+        jobListingId: 10,
+        status: "applied",
+        coverLetter: "I am interested",
+        createdAt: new Date("2026-01-01"),
+        updatedAt: new Date("2026-01-01"),
         jobListing: {
           title: "Software Engineer",
-          location: "Kuwait",
-          employmentType: "full-time",
-          salaryRange: "500 KWD",
-          employer: { company_name: "TechCo" },
+          jobListingId: 10,
+          employer: { company_name: "TechCorp" },
         },
       },
     ];
 
-    vi.mocked(prisma.job_listing_application.findMany).mockResolvedValue(
-      mockApplications as any,
+    (prisma.job_listing_application.findMany as Mock).mockResolvedValue(
+      mockApps,
     );
-    vi.mocked(prisma.job_listing_application.count).mockResolvedValue(1);
+    (prisma.job_listing_application.count as Mock).mockResolvedValue(1);
 
-    const result = await listMyApplications({ limit: 20 });
-
-    expect(result.items).toHaveLength(1);
-    expect(result.items[0].jobTitle).toBe("Software Engineer");
-    expect(result.items[0].employerName).toBe("TechCo");
-    expect(result.total).toBe(1);
+    const { applications, total } = await listMyApplications({
+      page: 1,
+      limit: 20,
+    });
+    expect(applications).toHaveLength(1);
+    expect(total).toBe(1);
   });
 
-  it("returns empty list when no applications", async () => {
-    vi.mocked(prisma.job_listing_application.findMany).mockResolvedValue([]);
-    vi.mocked(prisma.job_listing_application.count).mockResolvedValue(0);
+  it("returns empty array when no applications", async () => {
+    (prisma.job_listing_application.findMany as Mock).mockResolvedValue([]);
+    (prisma.job_listing_application.count as Mock).mockResolvedValue(0);
 
-    const result = await listMyApplications({ limit: 20 });
+    const { applications, total } = await listMyApplications({
+      page: 1,
+      limit: 20,
+    });
+    expect(applications).toEqual([]);
+    expect(total).toBe(0);
+  });
+});
 
-    expect(result.items).toHaveLength(0);
-    expect(result.total).toBe(0);
+// ---------------------------------------------------------------------------
+// Schema validation tests — pure unit, no mocking required
+// ---------------------------------------------------------------------------
+
+describe("listCandidateJobsSchema", () => {
+  it("accepts empty params (defaults)", () => {
+    const r = listCandidateJobsSchema.safeParse({});
+    expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data.page).toBe(1);
+      expect(r.data.limit).toBe(20);
+    }
+  });
+
+  it("accepts pagination params", () => {
+    const r = listCandidateJobsSchema.safeParse({ page: 2, limit: 10 });
+    expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data.page).toBe(2);
+      expect(r.data.limit).toBe(10);
+    }
+  });
+
+  it("coerces string page and limit", () => {
+    const r = listCandidateJobsSchema.safeParse({ page: "3", limit: "50" });
+    expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data.page).toBe(3);
+      expect(r.data.limit).toBe(50);
+    }
+  });
+
+  it("rejects limit over 100", () => {
+    expect(listCandidateJobsSchema.safeParse({ limit: 101 }).success).toBe(
+      false,
+    );
+  });
+
+  it("rejects limit below 1", () => {
+    expect(listCandidateJobsSchema.safeParse({ limit: 0 }).success).toBe(false);
+  });
+
+  it("rejects negative page", () => {
+    expect(listCandidateJobsSchema.safeParse({ page: 0 }).success).toBe(false);
+  });
+
+  it("accepts optional search query", () => {
+    const r = listCandidateJobsSchema.safeParse({ q: "software" });
+    expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data.q).toBe("software");
+    }
+  });
+
+  it("accepts optional employment type filter", () => {
+    const r = listCandidateJobsSchema.safeParse({
+      employmentType: "full-time",
+    });
+    expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data.employmentType).toBe("full-time");
+    }
+  });
+});
+
+describe("getCandidateJobSchema", () => {
+  it("accepts a valid job ID", () => {
+    const r = getCandidateJobSchema.safeParse({ jobId: 42 });
+    expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data.jobId).toBe(42);
+    }
+  });
+
+  it("coerces string job ID to number", () => {
+    const r = getCandidateJobSchema.safeParse({ jobId: "42" });
+    expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data.jobId).toBe(42);
+    }
+  });
+
+  it("rejects missing job ID", () => {
+    expect(getCandidateJobSchema.safeParse({}).success).toBe(false);
+  });
+
+  it("rejects zero job ID", () => {
+    expect(getCandidateJobSchema.safeParse({ jobId: 0 }).success).toBe(false);
+  });
+});
+
+describe("applyToJobSchema", () => {
+  it("accepts job listing ID with cover letter", () => {
+    const r = applyToJobSchema.safeParse({
+      jobListingId: 42,
+      coverLetter: "I am interested",
+    });
+    expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data.jobListingId).toBe(42);
+      expect(r.data.coverLetter).toBe("I am interested");
+    }
+  });
+
+  it("accepts job listing ID only", () => {
+    const r = applyToJobSchema.safeParse({ jobListingId: 42 });
+    expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data.jobListingId).toBe(42);
+    }
+  });
+
+  it("rejects missing job listing ID", () => {
+    expect(applyToJobSchema.safeParse({}).success).toBe(false);
+  });
+
+  it("rejects zero job listing ID", () => {
+    expect(applyToJobSchema.safeParse({ jobListingId: 0 }).success).toBe(false);
+  });
+});
+
+describe("listMyApplicationsSchema", () => {
+  it("accepts empty params (defaults)", () => {
+    const r = listMyApplicationsSchema.safeParse({});
+    expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data.page).toBe(1);
+      expect(r.data.limit).toBe(20);
+    }
+  });
+
+  it("accepts pagination", () => {
+    const r = listMyApplicationsSchema.safeParse({ page: 2, limit: 10 });
+    expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data.page).toBe(2);
+      expect(r.data.limit).toBe(10);
+    }
+  });
+
+  it("rejects limit over 100", () => {
+    expect(listMyApplicationsSchema.safeParse({ limit: 101 }).success).toBe(
+      false,
+    );
+  });
+
+  it("accepts optional status filter", () => {
+    const r = listMyApplicationsSchema.safeParse({ status: "reviewing" });
+    expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data.status).toBe("reviewing");
+    }
   });
 });

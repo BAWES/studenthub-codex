@@ -1,97 +1,91 @@
+import Link from "next/link";
+import { notFound } from "next/navigation";
 import { requireRoleCapability } from "@/modules/auth/session";
 import { getCandidateJob } from "../actions";
-import { checkIfApplied } from "./actions";
-import { ApplyButton, BackButton } from "./ApplyButton";
+import { ApplyButton } from "./ApplyButton";
 
 export const dynamic = "force-dynamic";
 
-interface Props {
+type Props = {
   params: Promise<{ id: string }>;
+};
+
+function formatField(label: string, value: string | null | undefined): string {
+  return value ? `${label}: ${value}` : "";
 }
 
 export default async function CandidateJobDetailPage({ params }: Props) {
+  const session = await requireRoleCapability("candidate", "candidate.read.own");
   const { id } = await params;
-  await requireRoleCapability("candidate", "candidate.read.own");
-  const job = await getCandidateJob({ jobId: Number(id) });
 
-  if (!job) {
-    return (
-      <main className="container mx-auto py-8 max-w-3xl text-center">
-        <div className="text-4xl mb-4">🔍</div>
-        <h1 className="text-2xl font-bold">Job Not Found</h1>
-        <p className="text-muted-foreground mt-2">
-          This job posting may have been removed or is no longer accepting applications.
-        </p>
-        <BackButton />
-      </main>
-    );
+  let result;
+  try {
+    result = await getCandidateJob({ jobId: Number(id) });
+  } catch {
+    notFound();
   }
 
-  const alreadyApplied = await checkIfApplied(job.jobListingId);
+  const { job } = result;
 
   return (
-    <main className="container mx-auto py-8 max-w-3xl">
-      <BackButton />
+    <div className="max-w-3xl mx-auto py-8 px-4">
+      <Link href="/candidate/jobs" className="text-sm text-blue-400 hover:text-blue-300 mb-4 inline-block">
+        &larr; Back to Jobs
+      </Link>
 
-      <div className="mt-4">
-        {/* Header */}
-        <div className="border-b pb-6 mb-6">
-          <h1 className="text-3xl font-bold">{job.title}</h1>
-          <div className="flex flex-wrap gap-2 mt-3 text-sm text-muted-foreground">
-            {job.employerName && (
-              <span className="inline-flex items-center gap-1">🏢 {job.employerName}</span>
-            )}
-            {job.location && (
-              <span className="inline-flex items-center gap-1">📍 {job.location}</span>
-            )}
-            {job.employmentType && (
-              <span className="inline-flex items-center gap-1">💼 {job.employmentType}</span>
-            )}
-            {job.salaryRange && (
-              <span className="inline-flex items-center gap-1 text-green-600 dark:text-green-400 font-medium">
-                💰 {job.salaryRange}
-              </span>
-            )}
-          </div>
-          <p className="mt-2 text-xs text-muted-foreground">
-            Posted {new Date(job.createdAt).toLocaleDateString("en-KW", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}
-          </p>
+      <div className="bg-white/5 border border-white/10 rounded-xl p-6 space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold">{job.title}</h1>
+          <p className="text-muted-foreground text-sm mt-1">{job.employerName}</p>
         </div>
 
-        {/* Description */}
-        <section className="mb-8">
-          <h2 className="text-xl font-semibold mb-3">Description</h2>
-          <div className="prose prose-sm max-w-none text-muted-foreground whitespace-pre-wrap">
-            {job.description}
-          </div>
-        </section>
-
-        {/* Requirements */}
-        {job.requirements && (
-          <section className="mb-8">
-            <h2 className="text-xl font-semibold mb-3">Requirements</h2>
-            <div className="prose prose-sm max-w-none text-muted-foreground whitespace-pre-wrap">
-              {job.requirements}
+        <div className="grid grid-cols-2 gap-4 text-sm">
+          {job.employmentType && (
+            <div>
+              <span className="text-muted-foreground">Type</span>
+              <p className="font-medium">{job.employmentType}</p>
             </div>
-          </section>
+          )}
+          {job.location && (
+            <div>
+              <span className="text-muted-foreground">Location</span>
+              <p className="font-medium">{job.location}</p>
+            </div>
+          )}
+          {job.salaryRange && (
+            <div>
+              <span className="text-muted-foreground">Salary Range</span>
+              <p className="font-medium">{job.salaryRange}</p>
+            </div>
+          )}
+          <div>
+            <span className="text-muted-foreground">Posted</span>
+            <p className="font-medium">{job.createdAt.toISOString().slice(0, 10)}</p>
+          </div>
+        </div>
+
+        <div>
+          <h2 className="text-lg font-semibold mb-2">Description</h2>
+          <p className="text-sm leading-relaxed whitespace-pre-wrap">{job.description}</p>
+        </div>
+
+        {job.requirements && (
+          <div>
+            <h2 className="text-lg font-semibold mb-2">Requirements</h2>
+            <p className="text-sm leading-relaxed whitespace-pre-wrap">{job.requirements}</p>
+          </div>
         )}
 
-        {/* Apply section */}
-        <div className="border-t pt-6 flex items-center justify-between">
-          <div>
-            <p className="text-sm text-muted-foreground">
-              {alreadyApplied
-                ? "You have already applied to this position."
-                : "Ready to apply? Submit your application."}
-            </p>
-          </div>
-          <ApplyButton jobId={job.jobListingId} alreadyApplied={alreadyApplied} />
+        <div className="pt-4 border-t border-white/10">
+          {job.hasApplied ? (
+            <div className="inline-flex items-center gap-2 px-6 py-3 bg-green-600/20 text-green-400 rounded-lg text-sm font-medium">
+              Applied &mdash; {job.applicationStatus}
+            </div>
+          ) : (
+            <ApplyButton jobListingId={job.jobListingId} />
+          )}
         </div>
       </div>
-    </main>
+    </div>
   );
 }
