@@ -1,7 +1,7 @@
 import { requireRoleCapability } from "@/modules/auth/session";
 import { DataTablePage } from "@/modules/workspace/DataTablePage";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
-import { getCompanyStoresRows, getCompanyMallsAndBrands, getCompanySelectOptions } from "@/modules/company/data";
+import { listStoresRows, listMallsAndBrands, listCompanySelectOptions } from "./actions";
 import { AddStoreForm } from "@/modules/company/AddStoreForm";
 import { RemoveStoreButton } from "@/modules/company/RemoveStoreButton";
 
@@ -10,9 +10,9 @@ export const dynamic = "force-dynamic";
 export default async function CompanyStoresPage() {
   const session = await requireRoleCapability("company", "company.read.linked");
   const [rows, { malls, brands }, companies] = await Promise.all([
-    getCompanyStoresRows(session.id),
-    getCompanyMallsAndBrands(session.id),
-    getCompanySelectOptions(session.id)
+    listStoresRows(session.id),
+    listMallsAndBrands(session.id),
+    listCompanySelectOptions(session.id)
   ]);
 
   return (
