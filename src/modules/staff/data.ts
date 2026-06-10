@@ -3,4 +3,4 @@ export {
   getStaffInterviewRows,
   getStaffInterviewDetail,
   getStaffWorkspace,
-} from "@/modules/workspace/data";
+} from "@/modules/workspace/data/staff";

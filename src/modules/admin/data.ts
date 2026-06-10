@@ -3,4 +3,4 @@ export {
   getAdminRequestRows,
   getAdminTransferRows,
   getAdminTransferDetail,
-} from "@/modules/workspace/data";
+} from "@/modules/workspace/data/admin";
