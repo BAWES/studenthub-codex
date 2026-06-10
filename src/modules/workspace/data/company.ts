@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { formatDate, formatMoney } from "@/modules/workspace/format";
-import { getRequestDetail } from "@/modules/workspace/data/shared";
+import { getRequestDetail } from "@/modules/workspace/request-detail-core";
 
 export async function getCompanyDetail(companyId: number) {
   const [company, requests, contacts, stores, notes] = await prisma.$transaction([

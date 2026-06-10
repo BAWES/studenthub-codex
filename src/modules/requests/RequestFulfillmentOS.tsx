@@ -13,7 +13,7 @@ import {
   InvitationStatusActions,
   StoryStatusActions
 } from "@/modules/requests/StageActions";
-import type { getRequestDetail } from "@/modules/workspace/data/shared";
+import type { getRequestDetail } from "@/modules/workspace/request-detail-core";
 
 type RequestDetailData = Awaited<ReturnType<typeof getRequestDetail>>;
 
