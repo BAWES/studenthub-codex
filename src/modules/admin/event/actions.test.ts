@@ -4,12 +4,12 @@ import {
   getEventSchema,
   getEventTimelineSchema,
   listActivityEventsSchema,
-} from "./actions";
+} from "./schemas";
 import type {
   EventItem,
   ListEventsResult,
   TimelineEntry,
-} from "./actions";
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Schema tests — listEvents

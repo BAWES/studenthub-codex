@@ -1,11 +1,14 @@
 export {
   getPresignedUploadUrl,
   getPresignedDownloadUrl,
+} from "./actions";
+
+export {
   getPresignedUploadUrlSchema,
   getPresignedDownloadUrlSchema,
-} from "./actions";
+} from "./schemas";
 
 export type {
   PresignedUploadResult,
   PresignedDownloadResult,
-} from "./actions";
+} from "./schemas";

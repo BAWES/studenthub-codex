@@ -2,11 +2,11 @@ import { describe, it, expect } from "vitest";
 import {
   listActivitySchema,
   getActivitySchema,
-} from "./actions";
+} from "./schemas";
 import type {
   RequestActivityItem,
   ListActivityResult,
-} from "./actions";
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // listActivitySchema tests

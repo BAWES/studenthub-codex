@@ -7,17 +7,20 @@ import { listRequests } from "./actions";
 
 export const dynamic = "force-dynamic";
 
+const ADMIN_REQUEST_LIMIT = 60;
+
 export default async function AdminRequestsPage() {
   const session = await requireRoleCapability("admin", "request.read.any");
-  const { items } = await listRequests({ limit: 60 });
-  const rows = items.map((r) => ({
+  const result = await listRequests({ limit: ADMIN_REQUEST_LIMIT });
+
+  const rows = result.items.map((r) => ({
     id: r.request_uuid,
     title: r.title,
     company: r.company_name ?? "No company",
     owner: r.staff_name ?? "Unassigned",
     seats: r.no_of_employees ?? 0,
-    status: r.status ?? "No status",
-    updated: formatDate(r.updated_at ? new Date(r.updated_at) : null),
+    status: r.status,
+    updated: r.updated_at ? formatDate(new Date(r.updated_at)) : "—",
   }));
 
   return (

@@ -12,4 +12,4 @@ export type {
   DeleteCandidateEducationResult,
   CreateEducationInput,
   UpdateEducationInput,
-} from "./actions";
+} from "./schemas";

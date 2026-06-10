@@ -1,66 +1,18 @@
 "use server";
 
-import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
-
-// ---------------------------------------------------------------------------
-// Schemas
-// ---------------------------------------------------------------------------
-
-const listBanksSchema = z.object({
-  page: z.number().int().positive().optional(),
-  limit: z.number().int().min(1).max(100).optional(),
-});
-
-const getBankSchema = z.object({
-  id: z.number().int().positive(),
-});
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export type ListBanksParams = z.input<typeof listBanksSchema>;
-export type GetBankParams = z.input<typeof getBankSchema>;
-
-export type BankListItem = {
-  bank_id: number;
-  bank_name: string | null;
-  bank_iban_code: string;
-  bank_swift_code: string | null;
-  bank_code_abk: number | null;
-  bank_address: string | null;
-  bank_transfer_type: string | null;
-};
-
-export type ListBanksResult = {
-  banks: BankListItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
-
-const createBankSchema = z.object({
-  name: z.string().min(1, "Bank name is required"),
-  ibanCode: z.string().min(1, "IBAN code is required"),
-  swiftCode: z.string().optional(),
-  address: z.string().optional(),
-  transferType: z.string().optional(),
-  codeAbk: z.number().int().optional(),
-});
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export type CreateBankParams = z.input<typeof createBankSchema>;
-
-export type CreateBankResult = {
-  operation: string;
-  message: string;
-};
+import {
+  listBanksSchema,
+  getBankSchema,
+  createBankSchema,
+  type ListBanksParams,
+  type GetBankParams,
+  type CreateBankParams,
+  type BankListItem,
+  type ListBanksResult,
+  type CreateBankResult,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Server actions

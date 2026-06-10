@@ -2,10 +2,13 @@ export {
   listDiscounts,
   createDiscount,
   listDiscountsByApplicant,
+} from "./actions";
+
+export {
   createDiscountSchema,
   listDiscountsSchema,
   listDiscountsByApplicantSchema,
-} from "./actions";
+} from "./schemas";
 
 export type {
   CreateDiscountInput,
@@ -13,4 +16,4 @@ export type {
   ListDiscountsByApplicantInput,
   DiscountListItem,
   ListDiscountsResult,
-} from "./actions";
+} from "./schemas";

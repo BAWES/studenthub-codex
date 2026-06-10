@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { z } from "zod";
-import { payByWalletSchema } from "./actions";
-import type { PayByWalletState } from "./actions";
+import { payByWalletSchema } from "./schemas";
+import type { PayByWalletState } from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Pure logic: balance schema validation

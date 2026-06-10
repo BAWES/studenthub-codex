@@ -5,7 +5,7 @@ import {
   updateEmailSchema,
   updateBankAccountSchema,
   changePasswordSchema,
-} from "./actions";
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // listCandidateSkillsSchema
