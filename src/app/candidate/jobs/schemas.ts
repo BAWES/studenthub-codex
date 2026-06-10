@@ -63,6 +63,7 @@ export type ApplicationRow = {
 export type ApplyToJobResult = {
   success: boolean;
   applicationId?: number;
+  alreadyApplied?: boolean;
   error?: string;
 };
 
