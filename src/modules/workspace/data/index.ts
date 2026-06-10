@@ -1,4 +1,4 @@
-export { getAdminCompanyRows, getAdminRequestRows, getAdminTransferRows, getAdminTransferDetail, getAdminCandidateRows } from "./admin";
+export { getAdminCompanyRows, getAdminRequestRows, getAdminTransferRows, getAdminTransferDetail, getAdminCandidateRows } from "./admin/index";
 export { getStaffRequestRows, getStaffInterviewRows, getStaffInterviewDetail, getStaffWorkspace } from "./staff";
 export {
   getCandidateDetail,
@@ -28,6 +28,6 @@ export {
   getCompanyAccountDetail,
   getCompanyRequestRows,
   getCompanyRequestDetail,
-} from "./company";
+} from "./company/index";
 export { getInspectorWorkspace, getInspectorIdRequestRows, getInspectorIdRequestDetail } from "./inspector/index";
 export { getRequestDetail } from "../request-detail-core";
