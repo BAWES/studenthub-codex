@@ -4,7 +4,7 @@ import {
   getScheduleItemSchema,
   getScheduleDetailSchema,
   updateScheduleStatusSchema,
-} from "./actions";
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Schema tests for candidate/schedule actions (pure unit — no DB required)
