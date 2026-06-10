@@ -3,8 +3,18 @@ import { requireRoleCapability } from "@/modules/auth/session";
 import { DataTable } from "@/modules/workspace/DataTable";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { formatDate } from "@/modules/workspace/format";
-import { workingDateStatusLabel } from "@/modules/workspace/data";
 import { listSchedule } from "./actions";
+
+const STATUS_LABELS: Record<number, string> = {
+  0: "Pending",
+  1: "Confirmed",
+  2: "Cancelled",
+  3: "Completed",
+};
+
+function statusLabel(status: number | null): string {
+  return status != null ? (STATUS_LABELS[status] ?? `Status ${status}`) : "Unknown";
+}
 
 export const dynamic = "force-dynamic";
 
@@ -23,7 +33,7 @@ export default async function CandidateSchedulePage() {
     startTime: formatDate(item.start_time),
     endTime: formatDate(item.end_time),
     totalTime: item.total_time != null ? `${item.total_time} min` : "—",
-    status: workingDateStatusLabel(item.status),
+    status: statusLabel(item.status),
   }));
 
   return (
