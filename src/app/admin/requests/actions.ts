@@ -244,8 +244,7 @@ export async function getRequest(
         include: {
           candidate: {
             select: {
-              candidate_first_name: true,
-              candidate_last_name: true,
+              candidate_name: true,
             },
           },
         },
@@ -255,8 +254,7 @@ export async function getRequest(
         include: {
           candidate: {
             select: {
-              candidate_first_name: true,
-              candidate_last_name: true,
+              candidate_name: true,
             },
           },
         },
@@ -266,8 +264,7 @@ export async function getRequest(
         include: {
           candidate: {
             select: {
-              candidate_first_name: true,
-              candidate_last_name: true,
+              candidate_name: true,
             },
           },
         },
@@ -291,7 +288,7 @@ export async function getRequest(
   const applications = (r.request_application ?? []).map((a: any) => ({
     application_uuid: a.application_uuid,
     candidate_name: a.candidate
-      ? `${a.candidate.candidate_first_name ?? ""} ${a.candidate.candidate_last_name ?? ""}`.trim()
+      ? a.candidate.candidate_name ?? null
       : null,
     status: a.status ?? null,
     created_at: a.created_at?.toISOString() ?? null,
@@ -300,7 +297,7 @@ export async function getRequest(
   const invitations = (r.invitation ?? []).map((inv: any) => ({
     invitation_uuid: inv.invitation_uuid,
     candidate_name: inv.candidate
-      ? `${inv.candidate.candidate_first_name ?? ""} ${inv.candidate.candidate_last_name ?? ""}`.trim()
+      ? inv.candidate.candidate_name ?? null
       : null,
     status: inv.invitation_status ?? null,
     created_at: inv.invitation_created_at?.toISOString() ?? null,
@@ -309,7 +306,7 @@ export async function getRequest(
   const interviews = (r.request_interview ?? []).map((ri: any) => ({
     request_interview_uuid: ri.request_interview_uuid,
     candidate_name: ri.candidate
-      ? `${ri.candidate.candidate_first_name ?? ""} ${ri.candidate.candidate_last_name ?? ""}`.trim()
+      ? ri.candidate.candidate_name ?? null
       : null,
     interview_at: ri.interview_at?.toISOString() ?? null,
     status: ri.status ?? null,

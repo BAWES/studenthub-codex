@@ -124,9 +124,14 @@ describe("admin/transfers actions", () => {
 
       const result = await getTransferDetail(1);
 
-      expect(result.transfer.transferId).toBe(1);
-      expect(result.transfer.companyName).toBe("Test Corp");
-      expect(result.transfer.status).toBe("Pending");
+      const transfer = result.transfer;
+      expect(transfer).not.toBeNull();
+
+      if (transfer) {
+        expect(transfer.transferId).toBe(1);
+        expect(transfer.companyName).toBe("Test Corp");
+        expect(transfer.status).toBe("Pending");
+      }
       expect(result.metrics).toHaveLength(4);
       expect(result.candidates).toHaveLength(0);
       expect(result.invoices).toHaveLength(0);
