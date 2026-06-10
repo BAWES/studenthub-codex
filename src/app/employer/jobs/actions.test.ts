@@ -257,6 +257,10 @@ vi.mock("@/modules/auth/session", () => ({
   requireCapability: vi.fn(),
 }));
 
+vi.mock("next/cache", () => ({
+  revalidatePath: vi.fn(),
+}));
+
 const { requireCapability } = await import("@/modules/auth/session");
 const { prisma } = await import("@/lib/prisma");
 const jobs = await import("./actions");
