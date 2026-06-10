@@ -14,6 +14,9 @@ import {
   MessageSquare,
   CreditCard,
   ClipboardCheck,
+  CheckCircle,
+  PieChart,
+  GitMerge,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -187,11 +190,50 @@ const inspectorFeatures: Feature[] = [
   },
 ];
 
+const adminFeatures: Feature[] = [
+  {
+    icon: Shield,
+    title: "Role-based access control",
+    body: "Grant granular permissions per user. Full audit trail for every action. SOC2-ready access logging with timestamped records.",
+    stat: "Unlimited roles + custom permission sets",
+  },
+  {
+    icon: FileText,
+    title: "Bulk invoicing & payments",
+    body: "Generate, review, and approve invoices across all branches. Schedule payment runs with consolidated monthly billing.",
+    stat: "85% faster month-end close",
+  },
+  {
+    icon: CheckCircle,
+    title: "Production data validation",
+    body: "Validate candidate profiles, timesheets, and payment data against production rules before processing. Flag anomalies instantly.",
+    stat: "10,000+ records validated daily",
+  },
+  {
+    icon: BarChart3,
+    title: "Compliance dashboard",
+    body: "Real-time view of right-to-work documents, expiring certifications, and audit readiness. Automated renewal notifications.",
+    stat: "99.7% audit pass rate",
+  },
+  {
+    icon: PieChart,
+    title: "Custom report builder",
+    body: "Build and schedule reports on any metric. Export to CSV, PDF, or direct BI tool integration. Shareable dashboards.",
+    stat: "50+ report templates",
+  },
+  {
+    icon: GitMerge,
+    title: "Multi-entity reconciliation",
+    body: "Reconcile payments, invoices, and headcounts across branches and entities. One view for the full picture.",
+    stat: "100% reconciliation accuracy",
+  },
+];
+
 const personaFeatures: Record<FeatureGridPersona, Feature[]> = {
   candidate: candidateFeatures,
   staff: staffFeatures,
   company: companyFeatures,
-  admin: companyFeatures,
+  admin: adminFeatures,
   inspector: inspectorFeatures,
 };
 

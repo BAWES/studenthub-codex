@@ -43,10 +43,11 @@ describe("FeatureGrid", () => {
     expect(screen.getAllByText("Clear the queue. Stay compliant.").length).toBeGreaterThanOrEqual(1);
   });
 
-  it("renders admin with company/company features", () => {
+  it("renders admin features when persona is admin", () => {
     render(<FeatureGrid persona="admin" />);
     expect(screen.getAllByText("Full control across every operation.").length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText("Multi-branch management").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Role-based access control").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Compliance dashboard").length).toBeGreaterThanOrEqual(1);
   });
 
   it("applies custom className", () => {

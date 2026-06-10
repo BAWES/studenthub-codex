@@ -51,6 +51,13 @@ describe("TestimonialCarousel", () => {
     });
   });
 
+  it("renders admin testimonials", async () => {
+    render(<TestimonialCarousel persona="admin" />);
+    await waitFor(() => {
+      expect(screen.getByText(/manage permissions across/)).toBeInTheDocument();
+    });
+  });
+
   it("renders custom testimonials when provided", async () => {
     render(<TestimonialCarousel testimonials={customTestimonials} />);
     await waitFor(() => {

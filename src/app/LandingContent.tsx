@@ -26,6 +26,7 @@ export interface LandingContentProps {
   } | null;
 }
 
+
 // ── Component ─────────────────────────────────────────────────
 
 export default function LandingContent({ session }: LandingContentProps) {
