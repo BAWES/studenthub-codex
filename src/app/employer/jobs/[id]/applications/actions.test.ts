@@ -232,7 +232,7 @@ beforeEach(() => {
 describe("listJobApplications", () => {
   it("returns applications for a job listing", async () => {
     const dbRow = {
-      id: 1,
+      applicationId: 1,
       jobListingId: 42,
       candidateId: 100,
       status: "applied",
@@ -255,7 +255,7 @@ describe("listJobApplications", () => {
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.applications).toHaveLength(1);
-      expect(result.applications[0].id).toBe(1);
+      expect(result.applications[0].applicationId).toBe(1);
       expect(result.applications[0].candidateName).toBe("Ahmed Al-Sabah");
       expect(result.total).toBe(1);
     }
@@ -305,7 +305,7 @@ describe("listJobApplications", () => {
 
   it("handles missing candidate name gracefully", async () => {
     const dbRow = {
-      id: 2,
+      applicationId: 2,
       jobListingId: 42,
       candidateId: 101,
       status: "applied",
@@ -346,7 +346,7 @@ describe("listJobApplications", () => {
 describe("listJobApplicationsByEmployer", () => {
   it("returns all applications across jobs", async () => {
     const dbRow = {
-      id: 1,
+      applicationId: 1,
       jobListingId: 42,
       candidateId: 100,
       status: "applied",
@@ -426,7 +426,7 @@ describe("updateApplicationStatus", () => {
     expect(result.success).toBe(true);
     expect(requireCapability).toHaveBeenCalledWith("company.write.linked");
     expect(mockUpdate).toHaveBeenCalledWith({
-      where: { id: 1 },
+      where: { applicationId: 1 },
       data: { status: "accepted" },
     });
   });
