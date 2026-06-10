@@ -1,4 +1,4 @@
-import { getDashboardData } from "@/modules/dashboard/data";
+import { getDashboardData } from "@/app/admin/dashboard/actions";
 import { EmptyState } from "@/modules/workspace/EmptyState";
 import { MetricCard } from "@/components/ui/metric-card";
 import { GlassPanel } from "@/components/ui/glass-panel";
