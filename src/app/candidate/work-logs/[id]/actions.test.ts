@@ -3,7 +3,7 @@ import {
   getCandidateWorkLogDetailSchema,
   approveWorkLogAppealSchema,
   rejectWorkLogAppealSchema,
-} from "./actions";
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // getCandidateWorkLogDetailSchema
