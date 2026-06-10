@@ -416,7 +416,7 @@ describe("listJobApplicationsByEmployer", () => {
 
 describe("updateApplicationStatus", () => {
   it("updates application status successfully", async () => {
-    mockUpdate.mockResolvedValue({ id: 1, status: "accepted" });
+    mockUpdate.mockResolvedValue({ applicationId: 1, status: "accepted" });
 
     const result = await actions.updateApplicationStatus({
       applicationId: 1,
@@ -432,7 +432,7 @@ describe("updateApplicationStatus", () => {
   });
 
   it("rejects when status changes to applied", async () => {
-    mockUpdate.mockResolvedValue({ id: 1, status: "applied" });
+    mockUpdate.mockResolvedValue({ applicationId: 1, status: "applied" });
 
     const result = await actions.updateApplicationStatus({
       applicationId: 1,
