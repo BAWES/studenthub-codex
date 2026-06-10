@@ -20,6 +20,10 @@ export const getScheduleItemSchema = z.object({
   cwd_uuid: z.string().min(1, "Working date UUID is required"),
 });
 
+export const getScheduleDetailSchema = z.object({
+  cwd_uuid: z.string().min(1, "Working date UUID is required"),
+});
+
 /** Valid working-date statuses for candidate self-service updates. */
 const VALID_SCHEDULE_STATUSES = [0, 1, 2, 3] as const;
 
@@ -55,6 +59,24 @@ export type ScheduleItem = {
 export type ScheduleStatusResult = {
   cwd_uuid: string;
   status: number;
+};
+
+/**
+ * Rich detail type with nested store/company, matching WorkingDateDetail shape.
+ */
+export type ScheduleDetail = {
+  cwd_uuid: string;
+  date: Date;
+  start_time: Date;
+  end_time: Date | null;
+  total_time: number | null;
+  status: number | null;
+  created_at: Date | null;
+  updated_at: Date | null;
+  store: {
+    store_name: string | null;
+    company: { company_name: string | null } | null;
+  } | null;
 };
 
 // ---------------------------------------------------------------------------
@@ -160,6 +182,62 @@ export async function getScheduleItem(
     status: row.status,
     store_name: row.store?.store_name ?? null,
     company_name: row.store?.company?.company_name ?? null,
+  };
+}
+
+/**
+ * Get a single working date detail with full store/company nesting.
+ * Replaces the legacy getCandidateWorkingDateDetail from workspace/data.ts.
+ */
+export async function getScheduleDetail(
+  cwd_uuid: string,
+): Promise<ScheduleDetail | null> {
+  const session = await requireRoleCapability("candidate", "candidate.read.own");
+
+  const parsed = getScheduleDetailSchema.safeParse({ cwd_uuid });
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid schedule detail params");
+  }
+
+  const row = await prisma.candidate_working_date.findFirst({
+    where: {
+      cwd_uuid: parsed.data.cwd_uuid,
+      candidate_id: Number(session.id),
+    },
+    select: {
+      cwd_uuid: true,
+      date: true,
+      start_time: true,
+      end_time: true,
+      total_time: true,
+      status: true,
+      created_at: true,
+      updated_at: true,
+      store: {
+        select: { store_name: true, company: { select: { company_name: true } } },
+      },
+    },
+  });
+
+  if (!row) return null;
+
+  return {
+    cwd_uuid: row.cwd_uuid,
+    date: row.date,
+    start_time: row.start_time,
+    end_time: row.end_time,
+    total_time: row.total_time,
+    status: row.status,
+    created_at: row.created_at,
+    updated_at: row.updated_at,
+    store: row.store
+      ? {
+          store_name: row.store.store_name,
+          company: row.store.company
+            ? { company_name: row.store.company.company_name }
+            : null,
+        }
+      : null,
   };
 }
 
