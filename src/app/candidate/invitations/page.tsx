@@ -1,4 +1,3 @@
-import type { Route } from "next";
 import { requireRoleCapability } from "@/modules/auth/session";
 import { DataTable } from "@/modules/workspace/DataTable";
 import { StatusBadge } from "@/modules/workspace/StatusBadge";
@@ -34,7 +33,7 @@ export default async function CandidateInvitationsPage() {
         title="Invitation History"
         description="Requests and roles sent to your candidate account from the imported production data."
         rows={rows}
-        rowHref={(row) => `/candidate/invitations/${row.id}` as Route}
+        rowHref="/candidate/invitations/"
         columns={[
           { key: "role", label: "Role", render: (row) => <strong>{row.role}</strong> },
           { key: "company", label: "Company", render: (row) => row.company },

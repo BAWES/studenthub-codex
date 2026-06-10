@@ -1,4 +1,3 @@
-import type { Route } from "next";
 import Link from "next/link";
 import { Plus } from "lucide-react";
 import { requireRoleCapability } from "@/modules/auth/session";
@@ -67,7 +66,7 @@ export default async function CompanyRequestsPage() {
           status: r.request_status ?? "pending",
           updated: r.request_updated_datetime ? new Date(r.request_updated_datetime).toLocaleDateString() : "N/A",
         }))}
-        rowHref={(row) => `/company/requests/${row.id}` as Route}
+        rowHref="/company/requests/"
         columns={[
           { key: "title", label: "Request", render: (row) => <strong>{row.title}</strong> },
           { key: "company", label: "Company", render: (row) => row.company },

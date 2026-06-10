@@ -1,4 +1,3 @@
-import type { Route } from "next";
 import { requireRoleCapability } from "@/modules/auth/session";
 import { DataTable } from "@/modules/workspace/DataTable";
 import { StatusBadge } from "@/modules/workspace/StatusBadge";
@@ -18,7 +17,7 @@ export default async function CompanyCompaniesPage() {
         title="Company Accounts"
         description="Company records this contact can access through the imported production relationships."
         rows={rows}
-        rowHref={(row) => `/company/companies/${row.id}` as Route}
+        rowHref="/company/companies/"
         columns={[
           { key: "name", label: "Company", render: (row) => <strong>{row.name}</strong> },
           { key: "email", label: "Email", render: (row) => row.email },

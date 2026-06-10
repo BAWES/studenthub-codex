@@ -1,4 +1,3 @@
-import type { Route } from "next";
 import { requireRoleCapability } from "@/modules/auth/session";
 import { DataTable } from "@/modules/workspace/DataTable";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
@@ -16,7 +15,7 @@ export default async function AdminCompaniesPage() {
         title="Company Accounts"
         description="Companies, ownership, active request counts, and commercial status."
         rows={rows}
-        rowHref={(row) => `/admin/companies/${row.id}` as Route}
+        rowHref="/admin/companies/"
         columns={[
           { key: "name", label: "Company", render: (row) => <strong>{row.name}</strong> },
           { key: "email", label: "Email", render: (row) => row.email },

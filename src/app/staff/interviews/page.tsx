@@ -1,4 +1,3 @@
-import type { Route } from "next";
 import { requireRoleCapability } from "@/modules/auth/session";
 import { DataTablePage } from "@/modules/workspace/DataTablePage";
 import { StatusBadge } from "@/modules/workspace/StatusBadge";
@@ -19,7 +18,7 @@ export default async function StaffInterviewsPage() {
         title="Interview Pipeline"
         description="Interviews scheduled and managed by you."
         rows={rows}
-        rowHref={(row) => `/staff/interviews/${row.id}` as Route}
+        rowHref="/staff/interviews/"
         searchable
         searchPlaceholder="Search by candidate, request, status..."
         columns={[

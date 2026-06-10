@@ -1,4 +1,3 @@
-import type { Route } from "next";
 import { requireRoleCapability } from "@/modules/auth/session";
 import { DataTable } from "@/modules/workspace/DataTable";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
@@ -33,7 +32,7 @@ export default async function CandidateCertificationsPage() {
         title="Certifications"
         description="Professional certifications and credentials associated with your profile."
         rows={rows}
-        rowHref={(row) => `/candidate/certifications/${row.id}` as Route}
+        rowHref="/candidate/certifications/"
         columns={[
           { key: "certification_name", label: "Certification", render: (row) => <strong>{row.certification_name}</strong> },
           { key: "issuing_organization", label: "Issuer", render: (row) => row.issuing_organization },

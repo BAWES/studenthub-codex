@@ -1,4 +1,3 @@
-import type { Route } from "next";
 import { requireRoleCapability } from "@/modules/auth/session";
 import { DataTable } from "@/modules/workspace/DataTable";
 import { StatusBadge } from "@/modules/workspace/StatusBadge";
@@ -32,7 +31,7 @@ export default async function CompanyWorkspacePage() {
             status: c.meta ?? "",
             updated: "",
           }))}
-          rowHref={(row) => `/company/workspace/${row.id}` as Route}
+          rowHref="/company/workspace/"
           columns={[
             { key: "title", label: "Company", render: (row) => <strong>{row.title}</strong> },
             { key: "subtitle", label: "Position", render: (row) => row.subtitle },
@@ -45,7 +44,7 @@ export default async function CompanyWorkspacePage() {
           title="Recent Requests"
           description="Latest hiring requests across your linked companies."
           rows={data.requests}
-          rowHref={(row) => `/company/requests/${row.id}` as Route}
+          rowHref="/company/requests/"
           columns={[
             { key: "title", label: "Position", render: (row) => <strong>{row.title}</strong> },
             { key: "subtitle", label: "Company", render: (row) => row.subtitle },
