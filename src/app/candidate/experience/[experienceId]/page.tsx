@@ -4,7 +4,7 @@ import { requireRoleCapability } from "@/modules/auth/session";
 import { DetailSection } from "@/modules/workspace/DetailPanels";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { formatDate } from "@/modules/workspace/format";
-import { getCandidateExperience, deleteCandidateExperience } from "../actions";
+import { getExperienceEntry, deleteExperienceEntry } from "./actions";
 import { DeleteExperienceButton } from "./DeleteExperienceButton";
 
 export const dynamic = "force-dynamic";
@@ -17,7 +17,7 @@ export default async function CandidateExperienceDetailPage({
   const session = await requireRoleCapability("candidate", "candidate.read.own");
   const { experienceId } = await params;
 
-  const item = await getCandidateExperience(Number(experienceId));
+  const item = await getExperienceEntry(Number(experienceId));
   if (!item) {
     notFound();
   }

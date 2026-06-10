@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react";
 import { ActionButton } from "@/modules/workspace/ActionButton";
-import { deleteCandidateExperience } from "../actions";
+import { deleteExperienceEntry } from "./actions";
 
 type DeleteExperienceButtonProps = {
   experienceId: number;
@@ -15,7 +15,7 @@ export function DeleteExperienceButton({ experienceId }: DeleteExperienceButtonP
   async function handleDelete() {
     if (!confirm("Are you sure you want to delete this experience entry?")) return;
 
-    const result = await deleteCandidateExperience(experienceId);
+    const result = await deleteExperienceEntry(experienceId);
     if (result.success) {
       router.push("/candidate/experience");
       router.refresh();
