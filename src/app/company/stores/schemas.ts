@@ -15,6 +15,30 @@ export const getStoreSchema = z.object({
   store_id: z.number().int().positive("Store ID must be a positive integer"),
 });
 
+/**
+ * Schema for listing stores as DataTable rows.
+ * Mirrors getCompanyStoresRows from @/modules/company/data.
+ */
+export const listStoresRowsSchema = z.object({
+  contactUuid: z.string().min(1, "Contact UUID is required"),
+});
+
+/**
+ * Schema for fetching malls and brands for the AddStoreForm dropdowns.
+ * Mirrors getCompanyMallsAndBrands from @/modules/company/data.
+ */
+export const listMallsAndBrandsSchema = z.object({
+  contactUuid: z.string().min(1, "Contact UUID is required"),
+});
+
+/**
+ * Schema for listing company select options for the AddStoreForm.
+ * Mirrors getCompanySelectOptions from @/modules/company/data.
+ */
+export const listCompanySelectOptionsSchema = z.object({
+  contactUuid: z.string().min(1, "Contact UUID is required"),
+});
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -52,4 +76,30 @@ export type ListStoresResult = {
   page: number;
   limit: number;
   totalPages: number;
+};
+
+/**
+ * A flat display row for the DataTable in company/stores/page.tsx.
+ */
+export type StoreRow = {
+  id: number;
+  name: string;
+  location: string;
+  mallName: string;
+  brandName: string;
+  companyName: string;
+  managerName: string;
+};
+
+export type MallsAndBrandsResult = {
+  malls: { uuid: string; name: string }[];
+  brands: { uuid: string; name: string }[];
+};
+
+/**
+ * A company option for the AddStoreForm dropdown.
+ */
+export type CompanySelectOption = {
+  id: number;
+  name: string;
 };

@@ -6,7 +6,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { DataTable } from "@/modules/workspace/DataTable";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
-import { getCompanyRequestRows } from "@/modules/workspace/data";
+import { listCompanyRequests } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -39,7 +39,7 @@ const statusBadge = (status: string) => {
 
 export default async function CompanyRequestsPage() {
   const session = await requireRoleCapability("company", "request.read.linked");
-  const rows = await getCompanyRequestRows(session.id);
+  const result = await listCompanyRequests();
 
   return (
     <WorkspaceShell session={session} eyebrow="Company" title="Requests" metrics={[]}>
@@ -58,7 +58,15 @@ export default async function CompanyRequestsPage() {
       <DataTable
         title="Hiring Requests"
         description="Requests across the company accounts linked to this contact."
-        rows={rows}
+        rows={result.requests.map((r) => ({
+          id: r.request_uuid,
+          title: r.request_position_title ?? "Untitled request",
+          company: r.company_name ?? "No company",
+          owner: "",
+          seats: r.request_number_of_employees ?? 0,
+          status: r.request_status ?? "pending",
+          updated: r.request_updated_datetime ? new Date(r.request_updated_datetime).toLocaleDateString() : "N/A",
+        }))}
         rowHref={(row) => `/company/requests/${row.id}` as Route}
         columns={[
           { key: "title", label: "Request", render: (row) => <strong>{row.title}</strong> },

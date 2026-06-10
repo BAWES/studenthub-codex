@@ -18,6 +18,7 @@ import type {
   CompanyDetail,
   ListCompaniesResult,
 } from "./schemas";
+import { formatDate, formatMoney } from "@/modules/workspace/format";
 
 // ---------------------------------------------------------------------------
 // List Companies
@@ -97,6 +98,69 @@ export async function listCompanies(
     limit,
     totalPages: Math.ceil(total / limit),
   };
+}
+
+// ---------------------------------------------------------------------------
+// List Companies (contact-scoped)
+// ---------------------------------------------------------------------------
+
+/**
+ * List company account rows scoped to the contact's linked companies.
+ * Returns DataTable-compatible rows matching the legacy getCompanyAccountRows shape.
+ * Called from company/companies page.
+ */
+export async function listCompanyAccountRows(
+  contactUuid: string,
+): Promise<{
+  id: number;
+  name: string;
+  email: string;
+  country: string;
+  requests: number;
+  status: string;
+  rate: string;
+  updated: string;
+}[]> {
+  await requireCapability("company.read.linked");
+
+  // Get company IDs linked to this contact
+  const links = await prisma.company_contact.findMany({
+    where: { contact_uuid: contactUuid, allow_access: true },
+    select: { company_id: true },
+  });
+  const companyIds = links
+    .map((l) => l.company_id)
+    .filter((id): id is number => Boolean(id));
+
+  if (companyIds.length === 0) return [];
+
+  const rows = await prisma.company.findMany({
+    where: { company_id: { in: companyIds }, deleted: 0 },
+    orderBy: { company_updated_at: "desc" },
+    take: 80,
+    select: {
+      company_id: true,
+      company_name: true,
+      company_email: true,
+      no_of_active_requests: true,
+      company_approved_to_hire: true,
+      company_hourly_rate: true,
+      currency_code: true,
+      company_updated_at: true,
+      country: { select: { country_name_en: true } },
+    },
+  });
+
+  return rows.map((row) => ({
+    id: row.company_id,
+    name: row.company_name,
+    email: row.company_email ?? "No email",
+    country: row.country?.country_name_en ?? "No country",
+    requests: row.no_of_active_requests ?? 0,
+    status: row.company_approved_to_hire ? "Approved" : "Not approved",
+    rate: formatMoney(row.company_hourly_rate, row.currency_code ?? "KWD"),
+    updated: formatDate(row.company_updated_at),
+  }));
 }
 
 // ---------------------------------------------------------------------------
