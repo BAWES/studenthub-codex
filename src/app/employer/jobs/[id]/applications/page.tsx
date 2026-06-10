@@ -29,9 +29,8 @@ const statusColors: Record<string, string> = {
 
 export default async function EmployerJobApplicationsPage({ params }: Props) {
   const { id } = await params;
-  const session = await requireRoleCapability("company", "company.write.linked");
+  await requireRoleCapability("company", "company.write.linked");
 
-  // Get the job to verify ownership
   const job = await prisma.job_listing.findUnique({
     where: { jobListingId: Number(id) },
     select: { jobListingId: true, title: true },
@@ -46,15 +45,14 @@ export default async function EmployerJobApplicationsPage({ params }: Props) {
     );
   }
 
-  // Fetch applications for this job
   const applications = await prisma.job_listing_application.findMany({
     where: { jobListingId: Number(id) },
     include: {
       candidate: {
         select: {
           candidate_id: true,
-          full_name: true,
-          email_address: true,
+          candidate_name: true,
+          candidate_email: true,
         },
       },
     },
@@ -68,14 +66,14 @@ export default async function EmployerJobApplicationsPage({ params }: Props) {
           href={`/employer/jobs/${id}` as Route}
           className="text-sm text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1"
         >
-          ← Back to job
+          &larr; Back to job
         </Link>
       </div>
 
       <div className="mb-8">
         <h1 className="text-3xl font-bold">Applications</h1>
         <p className="text-muted-foreground mt-1">
-          {job.title} — {applications.length} application{applications.length !== 1 ? "s" : ""}
+          {job.title} &mdash; {applications.length} application{applications.length !== 1 ? "s" : ""}
         </p>
       </div>
 
@@ -84,7 +82,7 @@ export default async function EmployerJobApplicationsPage({ params }: Props) {
           <div className="text-4xl mb-4">📋</div>
           <h2 className="text-xl font-semibold mb-2">No applications yet</h2>
           <p className="text-muted-foreground">
-            Candidates haven&apos;t applied to this job yet.
+            Candidates have not applied to this job yet.
           </p>
         </div>
       ) : (
@@ -98,7 +96,7 @@ export default async function EmployerJobApplicationsPage({ params }: Props) {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3 mb-1">
                     <h2 className="text-lg font-semibold truncate">
-                      {app.candidate.full_name ?? `Candidate #${app.candidateId}`}
+                      {app.candidate.candidate_name ?? `Candidate #${app.candidateId}`}
                     </h2>
                     <span
                       className={`px-2.5 py-0.5 rounded-full text-xs font-medium shrink-0 ${
@@ -108,9 +106,9 @@ export default async function EmployerJobApplicationsPage({ params }: Props) {
                       {statusLabels[app.status] ?? app.status}
                     </span>
                   </div>
-                  {app.candidate.email_address && (
+                  {app.candidate.candidate_email && (
                     <p className="text-sm text-muted-foreground">
-                      {app.candidate.email_address}
+                      {app.candidate.candidate_email}
                     </p>
                   )}
                   <p className="text-xs text-muted-foreground mt-1">

@@ -61,9 +61,9 @@ export type ApplicationRow = {
 };
 
 export type ApplyToJobResult = {
-  success: true;
-  applicationId: number;
-  alreadyApplied: boolean;
+  success: boolean;
+  applicationId?: number;
+  error?: string;
 };
 
 export type EmployerApplicationRow = {
