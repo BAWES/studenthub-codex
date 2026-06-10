@@ -1,6 +1,6 @@
 import { requireRoleCapability } from "@/modules/auth/session";
 import { StaffHome } from "@/modules/staff/StaffHome";
-import { getStaffWorkspace } from "@/modules/workspace/data";
+import { getStaffWorkspace } from "./actions";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 
 export const dynamic = "force-dynamic";
