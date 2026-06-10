@@ -136,6 +136,45 @@ const companyTestimonials: Testimonial[] = [
   },
 ];
 
+const inspectorTestimonials: Testimonial[] = [
+  {
+    quote:
+      "Batch document review cut our inspection time by 60%. The full audit trail means every decision I make is automatically logged and exportable.",
+    name: "Fatima R.",
+    title: "Senior Compliance Officer",
+    company: "National Inspection Services",
+    avatar: "FR",
+    rating: 5,
+  },
+  {
+    quote:
+      "Queue clearance went from days to hours. I can batch-approve 50 inspection reports in one pass and the system flags anything that needs a second look.",
+    name: "Samuel T.",
+    title: "Lead Inspector",
+    company: "Regulatory Compliance UK",
+    avatar: "ST",
+    rating: 5,
+  },
+  {
+    quote:
+      "The automated compliance alerts caught three expiring certifications last month that would have slipped through our manual process. That alone justified the platform.",
+    name: "Hannah W.",
+    title: "Quality Assurance Manager",
+    company: "Care Standards Authority",
+    avatar: "HW",
+    rating: 5,
+  },
+  {
+    quote:
+      "Export-ready audit trails mean I spend minutes preparing for regulatory reviews instead of digging through spreadsheets for hours.",
+    name: "Michael O.",
+    title: "Compliance Auditor",
+    company: "Health & Safety Executive",
+    avatar: "MO",
+    rating: 4,
+  },
+];
+
 // ── Map ──────────────────────────────────────────────────
 
 const personaTestimonials: Record<TestimonialPersona, Testimonial[]> = {
@@ -143,7 +182,7 @@ const personaTestimonials: Record<TestimonialPersona, Testimonial[]> = {
   staff: staffTestimonials,
   company: companyTestimonials,
   admin: companyTestimonials,
-  inspector: candidateTestimonials,
+  inspector: inspectorTestimonials,
 };
 
 // ── Props ────────────────────────────────────────────────
