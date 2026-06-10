@@ -11,6 +11,7 @@ import { requireCapability, requireRoleCapability } from "@/modules/auth/session
 import { verifyYiiPassword } from "@/modules/auth/password";
 import bcrypt from "bcryptjs";
 import { getCandidateDetail } from "@/modules/workspace/data";
+import { getCandidateProfileSchema, GetCandidateProfileInput } from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Profile edit
@@ -1280,15 +1281,8 @@ export async function changePassword(
 // getCandidateProfile
 // ---------------------------------------------------------------------------
 
-export const getCandidateProfileSchema = z.object({
-  candidateId: z.coerce.number().int().positive("Candidate ID is required"),
-});
-
-export type GetCandidateProfileInput = z.input<typeof getCandidateProfileSchema>;
-
 /**
  * Fetch the full candidate profile detail + metrics.
- * Delegates to the existing data layer; intended as a server-action wrapper
  * that pages can import instead of importing from data.ts directly.
  */
 export async function getCandidateProfile(input: GetCandidateProfileInput) {
