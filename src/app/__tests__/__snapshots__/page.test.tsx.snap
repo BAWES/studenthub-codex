@@ -479,7 +479,8 @@ exports[`Landing page (marketing redesign) > Snapshot — landing page full layo
         <h1
           class="shHeroTitle"
         >
-          Your next placement&lt;br /&gt;
+          Your next placement
+          <br />
           <span
             class="shHeroHighlight"
           >
@@ -2335,7 +2336,8 @@ exports[`Landing page (marketing redesign) > Snapshot — landing page full layo
         <h1
           class="shHeroTitle"
         >
-          Your next placement&lt;br /&gt;
+          Your next placement
+          <br />
           <span
             class="shHeroHighlight"
           >

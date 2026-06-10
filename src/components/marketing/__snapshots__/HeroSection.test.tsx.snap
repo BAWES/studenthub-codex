@@ -269,7 +269,8 @@ exports[`HeroSection (OS glass redesign) > Snapshot — per persona > renders co
       <h1
         class="shHeroTitle"
       >
-        Full control across&lt;br /&gt;
+        Full control across
+        <br />
         <span
           class="shHeroHighlight"
         >
@@ -604,7 +605,8 @@ exports[`HeroSection (OS glass redesign) > Snapshot — per persona > renders co
       <h1
         class="shHeroTitle"
       >
-        Your next placement&lt;br /&gt;
+        Your next placement
+        <br />
         <span
           class="shHeroHighlight"
         >
@@ -939,7 +941,8 @@ exports[`HeroSection (OS glass redesign) > Snapshot — per persona > renders co
       <h1
         class="shHeroTitle"
       >
-        Hire qualified staff&lt;br /&gt;
+        Hire qualified staff
+        <br />
         <span
           class="shHeroHighlight"
         >
@@ -1274,7 +1277,8 @@ exports[`HeroSection (OS glass redesign) > Snapshot — per persona > renders co
       <h1
         class="shHeroTitle"
       >
-        Clear the queue.&lt;br /&gt;
+        Clear the queue.
+        <br />
         <span
           class="shHeroHighlight"
         >
@@ -1609,7 +1613,8 @@ exports[`HeroSection (OS glass redesign) > Snapshot — per persona > renders co
       <h1
         class="shHeroTitle"
       >
-        Place people faster.&lt;br /&gt;
+        Place people faster.
+        <br />
         <span
           class="shHeroHighlight"
         >
