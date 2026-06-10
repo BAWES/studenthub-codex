@@ -2,7 +2,6 @@ import { requireRoleCapability } from "@/modules/auth/session";
 import { listMyApplications } from "../jobs/actions";
 import { MyApplicationsTable } from "./my-applications-table";
 import type { ApplicationRow } from "../jobs/schemas";
-import type { ApplicationRow } from "../jobs/schemas";
 
 export const dynamic = "force-dynamic";
 
