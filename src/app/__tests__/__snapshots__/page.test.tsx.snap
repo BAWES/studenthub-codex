@@ -124,93 +124,6 @@ exports[`Landing page (marketing redesign) > Snapshot — landing page full layo
           Hire and manage teams
         </span>
       </button>
-      <button
-        aria-selected="false"
-        class="relative flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)] text-[var(--muted)] hover:text-[var(--ink)] hover:bg-[var(--sh-glass-bg-strong)]"
-        role="tab"
-      >
-        <span
-          class="relative z-[1] flex items-center gap-2"
-        >
-          <span
-            data-testid="icon-users-round"
-          />
-          <span
-            class="hidden sm:inline"
-          >
-            Staff
-          </span>
-          <span
-            class="sm:hidden"
-          >
-            Sta
-          </span>
-        </span>
-        <span
-          class="absolute -bottom-7 left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] font-medium px-2 py-0.5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none"
-          style="background: var(--sh-glass-bg-strong); border: 1px solid var(--sh-glass-border); color: var(--muted);"
-        >
-          Place people faster
-        </span>
-      </button>
-      <button
-        aria-selected="false"
-        class="relative flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)] text-[var(--muted)] hover:text-[var(--ink)] hover:bg-[var(--sh-glass-bg-strong)]"
-        role="tab"
-      >
-        <span
-          class="relative z-[1] flex items-center gap-2"
-        >
-          <span
-            data-testid="icon-shield-check"
-          />
-          <span
-            class="hidden sm:inline"
-          >
-            Admin
-          </span>
-          <span
-            class="sm:hidden"
-          >
-            Adm
-          </span>
-        </span>
-        <span
-          class="absolute -bottom-7 left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] font-medium px-2 py-0.5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none"
-          style="background: var(--sh-glass-bg-strong); border: 1px solid var(--sh-glass-border); color: var(--muted);"
-        >
-          Compliance & ops
-        </span>
-      </button>
-      <button
-        aria-selected="false"
-        class="relative flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)] text-[var(--muted)] hover:text-[var(--ink)] hover:bg-[var(--sh-glass-bg-strong)]"
-        role="tab"
-      >
-        <span
-          class="relative z-[1] flex items-center gap-2"
-        >
-          <span
-            data-testid="icon-clipboard"
-          />
-          <span
-            class="hidden sm:inline"
-          >
-            Inspector
-          </span>
-          <span
-            class="sm:hidden"
-          >
-            Ins
-          </span>
-        </span>
-        <span
-          class="absolute -bottom-7 left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] font-medium px-2 py-0.5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none"
-          style="background: var(--sh-glass-bg-strong); border: 1px solid var(--sh-glass-border); color: var(--muted);"
-        >
-          Review & certify
-        </span>
-      </button>
     </div>
     <section
       aria-label="StudentHub for candidates — hero"
@@ -1818,32 +1731,57 @@ exports[`Landing page (marketing redesign) > Snapshot — landing page full layo
       </div>
     </section>
     <footer
-      class="shSection flex items-center justify-between pt-4 pb-2 text-xs"
+      class="shSection pt-4 pb-2 text-xs"
       style="color: var(--muted);"
     >
-      <span>
-        © 
-        2026
-         StudentHub. All rights reserved.
-      </span>
       <div
-        class="flex items-center gap-4"
+        class="flex flex-wrap items-center justify-between gap-4"
       >
-        <a
-          class="hover:text-[var(--ink)] transition-colors no-underline"
-          href="/login"
-          style="color: inherit;"
+        <span>
+          © 
+          2026
+           StudentHub. All rights reserved.
+        </span>
+        <div
+          class="flex items-center gap-4"
         >
-          Sign in
-        </a>
-        <a
-          class="hover:text-[var(--ink)] transition-colors no-underline"
-          href="/signup?role=candidate"
-          style="color: inherit;"
-        >
-          Sign up as 
-          candidate
-        </a>
+          <a
+            class="hover:text-[var(--ink)] transition-colors no-underline"
+            href="/for-staff"
+            style="color: inherit;"
+          >
+            For staff
+          </a>
+          <a
+            class="hover:text-[var(--ink)] transition-colors no-underline"
+            href="/for-admins"
+            style="color: inherit;"
+          >
+            For admins
+          </a>
+          <a
+            class="hover:text-[var(--ink)] transition-colors no-underline"
+            href="/for-inspectors"
+            style="color: inherit;"
+          >
+            For inspectors
+          </a>
+          <a
+            class="hover:text-[var(--ink)] transition-colors no-underline"
+            href="/login"
+            style="color: inherit;"
+          >
+            Sign in
+          </a>
+          <a
+            class="hover:text-[var(--ink)] transition-colors no-underline"
+            href="/signup?role=candidate"
+            style="color: inherit;"
+          >
+            Sign up as 
+            candidate
+          </a>
+        </div>
       </div>
     </footer>
   </main>
@@ -1979,93 +1917,6 @@ exports[`Landing page (marketing redesign) > Snapshot — landing page full layo
           style="background: var(--sh-glass-bg-strong); border: 1px solid var(--sh-glass-border); color: var(--muted);"
         >
           Hire and manage teams
-        </span>
-      </button>
-      <button
-        aria-selected="false"
-        class="relative flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)] text-[var(--muted)] hover:text-[var(--ink)] hover:bg-[var(--sh-glass-bg-strong)]"
-        role="tab"
-      >
-        <span
-          class="relative z-[1] flex items-center gap-2"
-        >
-          <span
-            data-testid="icon-users-round"
-          />
-          <span
-            class="hidden sm:inline"
-          >
-            Staff
-          </span>
-          <span
-            class="sm:hidden"
-          >
-            Sta
-          </span>
-        </span>
-        <span
-          class="absolute -bottom-7 left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] font-medium px-2 py-0.5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none"
-          style="background: var(--sh-glass-bg-strong); border: 1px solid var(--sh-glass-border); color: var(--muted);"
-        >
-          Place people faster
-        </span>
-      </button>
-      <button
-        aria-selected="false"
-        class="relative flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)] text-[var(--muted)] hover:text-[var(--ink)] hover:bg-[var(--sh-glass-bg-strong)]"
-        role="tab"
-      >
-        <span
-          class="relative z-[1] flex items-center gap-2"
-        >
-          <span
-            data-testid="icon-shield-check"
-          />
-          <span
-            class="hidden sm:inline"
-          >
-            Admin
-          </span>
-          <span
-            class="sm:hidden"
-          >
-            Adm
-          </span>
-        </span>
-        <span
-          class="absolute -bottom-7 left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] font-medium px-2 py-0.5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none"
-          style="background: var(--sh-glass-bg-strong); border: 1px solid var(--sh-glass-border); color: var(--muted);"
-        >
-          Compliance & ops
-        </span>
-      </button>
-      <button
-        aria-selected="false"
-        class="relative flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)] text-[var(--muted)] hover:text-[var(--ink)] hover:bg-[var(--sh-glass-bg-strong)]"
-        role="tab"
-      >
-        <span
-          class="relative z-[1] flex items-center gap-2"
-        >
-          <span
-            data-testid="icon-clipboard"
-          />
-          <span
-            class="hidden sm:inline"
-          >
-            Inspector
-          </span>
-          <span
-            class="sm:hidden"
-          >
-            Ins
-          </span>
-        </span>
-        <span
-          class="absolute -bottom-7 left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] font-medium px-2 py-0.5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none"
-          style="background: var(--sh-glass-bg-strong); border: 1px solid var(--sh-glass-border); color: var(--muted);"
-        >
-          Review & certify
         </span>
       </button>
     </div>
@@ -3676,32 +3527,57 @@ exports[`Landing page (marketing redesign) > Snapshot — landing page full layo
       </div>
     </section>
     <footer
-      class="shSection flex items-center justify-between pt-4 pb-2 text-xs"
+      class="shSection pt-4 pb-2 text-xs"
       style="color: var(--muted);"
     >
-      <span>
-        © 
-        2026
-         StudentHub. All rights reserved.
-      </span>
       <div
-        class="flex items-center gap-4"
+        class="flex flex-wrap items-center justify-between gap-4"
       >
-        <a
-          class="hover:text-[var(--ink)] transition-colors no-underline"
-          href="/login"
-          style="color: inherit;"
+        <span>
+          © 
+          2026
+           StudentHub. All rights reserved.
+        </span>
+        <div
+          class="flex items-center gap-4"
         >
-          Sign in
-        </a>
-        <a
-          class="hover:text-[var(--ink)] transition-colors no-underline"
-          href="/signup?role=candidate"
-          style="color: inherit;"
-        >
-          Sign up as 
-          candidate
-        </a>
+          <a
+            class="hover:text-[var(--ink)] transition-colors no-underline"
+            href="/for-staff"
+            style="color: inherit;"
+          >
+            For staff
+          </a>
+          <a
+            class="hover:text-[var(--ink)] transition-colors no-underline"
+            href="/for-admins"
+            style="color: inherit;"
+          >
+            For admins
+          </a>
+          <a
+            class="hover:text-[var(--ink)] transition-colors no-underline"
+            href="/for-inspectors"
+            style="color: inherit;"
+          >
+            For inspectors
+          </a>
+          <a
+            class="hover:text-[var(--ink)] transition-colors no-underline"
+            href="/login"
+            style="color: inherit;"
+          >
+            Sign in
+          </a>
+          <a
+            class="hover:text-[var(--ink)] transition-colors no-underline"
+            href="/signup?role=candidate"
+            style="color: inherit;"
+          >
+            Sign up as 
+            candidate
+          </a>
+        </div>
       </div>
     </footer>
   </main>
