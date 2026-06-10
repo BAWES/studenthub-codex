@@ -34,6 +34,7 @@ vi.mock("lucide-react", () => ({
   UserRound: () => <span data-testid="icon-user" />,
   Briefcase: () => <span data-testid="icon-briefcase" />,
   Building2: () => <span data-testid="icon-building" />,
+  GraduationCap: () => <span data-testid="icon-graduation-cap" />,
   Shield: () => <span data-testid="icon-shield" />,
   ClipboardCheck: () => <span data-testid="icon-clipboard" />,
   Zap: () => <span data-testid="icon-zap" />,
@@ -115,14 +116,16 @@ describe("Landing page (marketing redesign)", () => {
     mockSearchParams.forEach((_, key) => mockSearchParams.delete(key));
   });
 
-  it("renders the hero section with candidate headline", () => {
+  it("renders the hero section with marketplace headline", () => {
     render(<LandingContent {...defaultProps} />);
     expect(
-      screen.getByRole("heading", { name: /your next placement/i })
+      screen.getByRole("heading", { name: /connect students/i })
     ).toBeInTheDocument();
-    // CTA text appears in both nav and hero — use getAllByText
-    const ctaElements = screen.getAllByText(/create (your )?free candidate profile/i);
-    expect(ctaElements.length).toBeGreaterThanOrEqual(1);
+    // Dual CTA panes — student and employer CTAs appear
+    const studentCta = screen.getAllByText(/create your free profile/i);
+    expect(studentCta.length).toBeGreaterThanOrEqual(1);
+    const employerCta = screen.getAllByText(/partner with studenthub/i);
+    expect(employerCta.length).toBeGreaterThanOrEqual(1);
   });
 
   it("renders navigation with sign up and sign in links for unauthenticated users", () => {
@@ -156,8 +159,8 @@ describe("Landing page (marketing redesign)", () => {
 
   it("renders the final CTA section with proof text", () => {
     render(<LandingContent {...defaultProps} />);
-    // Candidate proof text mentions candidates placed
-    const proofTexts = screen.getAllByText(/candidates placed this year/i);
+    // Candidate proof text mentions students placed
+    const proofTexts = screen.getAllByText(/students placed this year/i);
     expect(proofTexts.length).toBeGreaterThanOrEqual(1);
   });
 

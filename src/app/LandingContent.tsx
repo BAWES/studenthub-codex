@@ -1,11 +1,18 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { ChevronRight, Sparkles } from "lucide-react";
+import {
+  ChevronRight,
+  Sparkles,
+  GraduationCap,
+  Building2,
+  CheckCircle2,
+  ArrowUpRight,
+  Star,
+} from "lucide-react";
 import { ThemeToggle } from "@/modules/theme/ThemeToggle";
-import { HeroSection } from "@/components/marketing";
 import { FeatureGrid } from "@/components/marketing";
 import { TestimonialCarousel } from "@/components/marketing";
 import { PricingCard } from "@/components/marketing";
@@ -78,6 +85,296 @@ const finalCtaProof: Record<SwitcherPersona, string> = {
   candidate: "1,200+ students placed this year · 4.8★ satisfaction",
   company: "200+ companies on StudentHub · 100% audit pass rate",
 };
+
+// ── Dual-pane marketplace data ────────────────────────────────
+
+const MARKETPLACE_STATS = [
+  { value: "1,200+", label: "students placed this year" },
+  { value: "200+", label: "partner companies" },
+  { value: "48h", label: "avg match time" },
+  { value: "4.8★", label: "satisfaction rating" },
+];
+
+const STUDENT_PANE = {
+  icon: GraduationCap,
+  eyebrow: "For students",
+  headline: "Get paid work experience that builds your future.",
+  highlight: "your future.",
+  body: "Create a free profile, get matched to real job placements across multiple industries, and graduate with a CV that proves you can work. Free, always.",
+  benefits: [
+    "Rotate roles every ~3 months — build diverse experience",
+    "Paid placements at Kuwait&apos;s top employers",
+    "ID cards with QR-code compliance verification",
+  ],
+  cta: "Create your free profile",
+  ctaHref: "/signup?role=candidate",
+  proof: "Completely free for students",
+};
+
+const EMPLOYER_PANE = {
+  icon: Building2,
+  eyebrow: "For employers",
+  headline: "Hire vetted student workers without the HR overhead.",
+  highlight: "without the HR overhead.",
+  body: "Get matched with pre-vetted student workers in under 48 hours. StudentHub manages placement, compliance, payroll, and rotations — one partner, one invoice.",
+  benefits: [
+    "Pre-vetted candidates delivered in 48 hours",
+    "Full compliance, payroll, and rotation management",
+    "One consolidated invoice — hourly or monthly",
+  ],
+  cta: "Partner with StudentHub",
+  ctaHref: "/signup?role=company",
+  proof: "Hourly rates and monthly plans available",
+};
+
+// ── Micro-animation hooks ─────────────────────────────────────
+
+function useFadeInUp(delayMs: number = 0) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    el.style.opacity = "0";
+    el.style.transform = "translateY(16px)";
+    el.style.transition = `opacity 600ms cubic-bezier(0.16, 1, 0.3, 1), transform 600ms cubic-bezier(0.16, 1, 0.3, 1)`;
+
+    const timeout = setTimeout(() => {
+      el.style.opacity = "1";
+      el.style.transform = "translateY(0)";
+    }, delayMs);
+
+    return () => clearTimeout(timeout);
+  }, [delayMs]);
+
+  return ref;
+}
+
+// ── Marketplace Hero ──────────────────────────────────────────
+
+function MarketplaceHero({ onPersonaChange }: { onPersonaChange: (p: SwitcherPersona) => void }) {
+  const titleRef = useFadeInUp(100);
+  const studentRef = useFadeInUp(350);
+  const employerRef = useFadeInUp(500);
+  const statsRef = useFadeInUp(700);
+
+  return (
+    <section
+      className="shSection relative min-h-[min(900px,calc(100svh_-_80px))] grid content-start items-center overflow-hidden rounded-xl p-[clamp(22px,5vw,76px)] max-lg:min-h-auto max-lg:p-7"
+      aria-label="StudentHub — two-sided marketplace for student employment"
+    >
+      {/* Animated gradient background */}
+      <div className="shHeroGradientDramatic" aria-hidden="true" />
+
+      {/* Floating ambient orbs */}
+      <div className="shOrb shOrbA" aria-hidden="true" />
+      <div className="shOrb shOrbB" aria-hidden="true" />
+      <div className="shOrb shOrbC" aria-hidden="true" />
+
+      {/* Particle grid overlay */}
+      <div className="shParticleGrid" aria-hidden="true" />
+
+      {/* ── Unified headline ── */}
+      <div ref={titleRef} className="relative z-[2] max-w-[820px] mx-auto text-center mb-8 max-lg:mb-6">
+        <p className="shHeroEyebrow mx-auto">
+          <Sparkles className="size-3" />
+          Kuwait&apos;s student-employer marketplace
+        </p>
+        <h1 className="shHeroTitle text-center max-sm:text-[clamp(32px,9vw,44px)]">
+          Connect students with
+          <br className="hidden sm:block" />
+          {" "}
+          <span className="shHeroHighlight">real work experience.</span>
+        </h1>
+        <p
+          className="max-w-[620px] mx-auto mt-3 text-[clamp(15px,1.5vw,19px)] leading-relaxed"
+          style={{ color: "var(--muted)" }}
+        >
+          StudentHub connects students with Kuwait-based employers for paid,
+          short-term placements. Build your career. Build your workforce.
+        </p>
+      </div>
+
+      {/* ── Dual CTA panes ── */}
+      <div className="relative z-[2] grid grid-cols-2 gap-5 w-full max-w-[920px] mx-auto max-lg:grid-cols-1 max-lg:max-w-[500px]">
+        {/* Student pane */}
+        <div
+          ref={studentRef}
+          className="group relative rounded-xl p-[clamp(18px,3vw,32px)] transition-all duration-300 hover:-translate-y-[4px]"
+          style={{
+            background: "var(--sh-glass-bg)",
+            border: "1px solid var(--sh-glass-border)",
+          }}
+        >
+          {/* Hover glow */}
+          <div
+            className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+            style={{
+              background:
+                "radial-gradient(600px circle at 50% 50%, var(--sh-info-glow), transparent 70%)",
+            }}
+            aria-hidden="true"
+          />
+
+          <div className="relative z-[1] grid content-start gap-4">
+            {/* Eyebrow */}
+            <div className="inline-flex items-center gap-2 text-[var(--sh-info)] text-[11px] font-black uppercase tracking-wider">
+              <GraduationCap className="size-4" />
+              {STUDENT_PANE.eyebrow}
+            </div>
+
+            {/* Headline */}
+            <h2
+              className="text-[clamp(22px,2.8vw,34px)] font-extrabold leading-[1.08] tracking-tight"
+              style={{ color: "var(--ink)" }}
+            >
+              {STUDENT_PANE.headline}
+            </h2>
+
+            {/* Body */}
+            <p className="text-sm leading-relaxed" style={{ color: "var(--muted)" }}>
+              {STUDENT_PANE.body}
+            </p>
+
+            {/* Benefits */}
+            <ul className="grid gap-2 mt-1">
+              {STUDENT_PANE.benefits.map((benefit) => (
+                <li
+                  key={benefit}
+                  className="flex items-start gap-2 text-xs font-medium leading-snug"
+                  style={{ color: "var(--ink)" }}
+                >
+                  <CheckCircle2 className="size-4 mt-[1px] shrink-0 text-[var(--sh-success)]" />
+                  {benefit}
+                </li>
+              ))}
+            </ul>
+
+            {/* CTA */}
+            <div className="mt-3">
+              <Link
+                href={STUDENT_PANE.ctaHref}
+                className="uiButton uiButton_default uiButton_lg shGlowButton w-full justify-center"
+                onClick={() => onPersonaChange("candidate")}
+              >
+                {STUDENT_PANE.cta} <ArrowUpRight className="size-4" />
+              </Link>
+            </div>
+
+            {/* Proof */}
+            <p className="text-[11px] font-semibold text-center" style={{ color: "var(--sh-success)" }}>
+              {STUDENT_PANE.proof}
+            </p>
+          </div>
+        </div>
+
+        {/* Employer pane */}
+        <div
+          ref={employerRef}
+          className="group relative rounded-xl p-[clamp(18px,3vw,32px)] transition-all duration-300 hover:-translate-y-[4px]"
+          style={{
+            background: "var(--sh-glass-bg)",
+            border: "1px solid var(--sh-glass-border)",
+          }}
+        >
+          {/* Hover glow */}
+          <div
+            className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+            style={{
+              background:
+                "radial-gradient(600px circle at 50% 50%, var(--sh-info-glow), transparent 70%)",
+            }}
+            aria-hidden="true"
+          />
+
+          <div className="relative z-[1] grid content-start gap-4">
+            {/* Eyebrow */}
+            <div className="inline-flex items-center gap-2 text-[var(--sh-info)] text-[11px] font-black uppercase tracking-wider">
+              <Building2 className="size-4" />
+              {EMPLOYER_PANE.eyebrow}
+            </div>
+
+            {/* Headline */}
+            <h2
+              className="text-[clamp(22px,2.8vw,34px)] font-extrabold leading-[1.08] tracking-tight"
+              style={{ color: "var(--ink)" }}
+            >
+              {EMPLOYER_PANE.headline}
+            </h2>
+
+            {/* Body */}
+            <p className="text-sm leading-relaxed" style={{ color: "var(--muted)" }}>
+              {EMPLOYER_PANE.body}
+            </p>
+
+            {/* Benefits */}
+            <ul className="grid gap-2 mt-1">
+              {EMPLOYER_PANE.benefits.map((benefit) => (
+                <li
+                  key={benefit}
+                  className="flex items-start gap-2 text-xs font-medium leading-snug"
+                  style={{ color: "var(--ink)" }}
+                >
+                  <CheckCircle2 className="size-4 mt-[1px] shrink-0 text-[var(--sh-info)]" />
+                  {benefit}
+                </li>
+              ))}
+            </ul>
+
+            {/* CTA */}
+            <div className="mt-3">
+              <Link
+                href={EMPLOYER_PANE.ctaHref}
+                className="uiButton uiButton_default uiButton_lg shGlowButton w-full justify-center"
+                onClick={() => onPersonaChange("company")}
+              >
+                {EMPLOYER_PANE.cta} <ArrowUpRight className="size-4" />
+              </Link>
+            </div>
+
+            {/* Proof */}
+            <p className="text-[11px] font-semibold text-center" style={{ color: "var(--sh-info)" }}>
+              {EMPLOYER_PANE.proof}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Stats bar ── */}
+      <div
+        ref={statsRef}
+        className="relative z-[2] grid grid-cols-4 gap-x-8 gap-y-3 w-full max-w-[720px] mx-auto mt-8 p-5 rounded-xl max-sm:grid-cols-2 max-sm:gap-4"
+        style={{
+          background: "var(--sh-glass-bg-strong)",
+          border: "1px solid var(--sh-glass-border)",
+        }}
+      >
+        {MARKETPLACE_STATS.map((stat) => (
+          <div key={stat.label} className="text-center">
+            <strong
+              className="block text-[clamp(20px,2.5vw,32px)] font-black leading-none"
+              style={{
+                background: "linear-gradient(135deg, var(--ink), var(--blue))",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+              }}
+            >
+              {stat.value}
+            </strong>
+            <span
+              className="block text-[11px] font-semibold mt-1 leading-tight"
+              style={{ color: "var(--muted)" }}
+            >
+              {stat.label}
+            </span>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
 
 // ── Component ─────────────────────────────────────────────────
 
@@ -162,11 +459,11 @@ export default function LandingContent({ session }: LandingContentProps) {
         </div>
       </nav>
 
+      {/* ── Two-sided marketplace hero ── */}
+      <MarketplaceHero onPersonaChange={handlePersonaChange} />
+
       {/* ── Persona switcher — pick your role ── */}
       <PersonaSwitcher active={persona} onChange={handlePersonaChange} />
-
-      {/* ── Hero section — persona-specific ── */}
-      <HeroSection persona={persona} />
 
       {/* ── Feature grid — persona-specific ── */}
       <FeatureGrid persona={persona} />

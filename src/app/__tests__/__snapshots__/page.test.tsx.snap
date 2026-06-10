@@ -51,6 +51,307 @@ exports[`Landing page (marketing redesign) > Snapshot — landing page full layo
         </div>
       </div>
     </nav>
+    <section
+      aria-label="StudentHub — two-sided marketplace for student employment"
+      class="shSection relative min-h-[min(900px,calc(100svh_-_80px))] grid content-start items-center overflow-hidden rounded-xl p-[clamp(22px,5vw,76px)] max-lg:min-h-auto max-lg:p-7"
+    >
+      <div
+        aria-hidden="true"
+        class="shHeroGradientDramatic"
+      />
+      <div
+        aria-hidden="true"
+        class="shOrb shOrbA"
+      />
+      <div
+        aria-hidden="true"
+        class="shOrb shOrbB"
+      />
+      <div
+        aria-hidden="true"
+        class="shOrb shOrbC"
+      />
+      <div
+        aria-hidden="true"
+        class="shParticleGrid"
+      />
+      <div
+        class="relative z-[2] max-w-[820px] mx-auto text-center mb-8 max-lg:mb-6"
+        style="opacity: 0; transform: translateY(16px); transition: opacity 600ms cubic-bezier(0.16, 1, 0.3, 1), transform 600ms cubic-bezier(0.16, 1, 0.3, 1);"
+      >
+        <p
+          class="shHeroEyebrow mx-auto"
+        >
+          <span
+            data-testid="icon-sparkles"
+          />
+          Kuwait's student-employer marketplace
+        </p>
+        <h1
+          class="shHeroTitle text-center max-sm:text-[clamp(32px,9vw,44px)]"
+        >
+          Connect students with
+          <br
+            class="hidden sm:block"
+          />
+           
+          <span
+            class="shHeroHighlight"
+          >
+            real work experience.
+          </span>
+        </h1>
+        <p
+          class="max-w-[620px] mx-auto mt-3 text-[clamp(15px,1.5vw,19px)] leading-relaxed"
+          style="color: var(--muted);"
+        >
+          StudentHub connects students with Kuwait-based employers for paid, short-term placements. Build your career. Build your workforce.
+        </p>
+      </div>
+      <div
+        class="relative z-[2] grid grid-cols-2 gap-5 w-full max-w-[920px] mx-auto max-lg:grid-cols-1 max-lg:max-w-[500px]"
+      >
+        <div
+          class="group relative rounded-xl p-[clamp(18px,3vw,32px)] transition-all duration-300 hover:-translate-y-[4px]"
+          style="background: var(--sh-glass-bg); border: 1px solid var(--sh-glass-border); opacity: 0; transform: translateY(16px); transition: opacity 600ms cubic-bezier(0.16, 1, 0.3, 1), transform 600ms cubic-bezier(0.16, 1, 0.3, 1);"
+        >
+          <div
+            aria-hidden="true"
+            class="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+            style="background: radial-gradient(600px circle at 50% 50%, var(--sh-info-glow), transparent 70%);"
+          />
+          <div
+            class="relative z-[1] grid content-start gap-4"
+          >
+            <div
+              class="inline-flex items-center gap-2 text-[var(--sh-info)] text-[11px] font-black uppercase tracking-wider"
+            >
+              <span
+                data-testid="icon-graduation-cap"
+              />
+              For students
+            </div>
+            <h2
+              class="text-[clamp(22px,2.8vw,34px)] font-extrabold leading-[1.08] tracking-tight"
+              style="color: var(--ink);"
+            >
+              Get paid work experience that builds your future.
+            </h2>
+            <p
+              class="text-sm leading-relaxed"
+              style="color: var(--muted);"
+            >
+              Create a free profile, get matched to real job placements across multiple industries, and graduate with a CV that proves you can work. Free, always.
+            </p>
+            <ul
+              class="grid gap-2 mt-1"
+            >
+              <li
+                class="flex items-start gap-2 text-xs font-medium leading-snug"
+                style="color: var(--ink);"
+              >
+                <span
+                  data-testid="icon-check-circle"
+                />
+                Rotate roles every ~3 months — build diverse experience
+              </li>
+              <li
+                class="flex items-start gap-2 text-xs font-medium leading-snug"
+                style="color: var(--ink);"
+              >
+                <span
+                  data-testid="icon-check-circle"
+                />
+                Paid placements at Kuwait&apos;s top employers
+              </li>
+              <li
+                class="flex items-start gap-2 text-xs font-medium leading-snug"
+                style="color: var(--ink);"
+              >
+                <span
+                  data-testid="icon-check-circle"
+                />
+                ID cards with QR-code compliance verification
+              </li>
+            </ul>
+            <div
+              class="mt-3"
+            >
+              <a
+                class="uiButton uiButton_default uiButton_lg shGlowButton w-full justify-center"
+                href="/signup?role=candidate"
+              >
+                Create your free profile
+                 
+                <span
+                  data-testid="icon-arrow-up-right"
+                />
+              </a>
+            </div>
+            <p
+              class="text-[11px] font-semibold text-center"
+              style="color: var(--sh-success);"
+            >
+              Completely free for students
+            </p>
+          </div>
+        </div>
+        <div
+          class="group relative rounded-xl p-[clamp(18px,3vw,32px)] transition-all duration-300 hover:-translate-y-[4px]"
+          style="background: var(--sh-glass-bg); border: 1px solid var(--sh-glass-border); opacity: 0; transform: translateY(16px); transition: opacity 600ms cubic-bezier(0.16, 1, 0.3, 1), transform 600ms cubic-bezier(0.16, 1, 0.3, 1);"
+        >
+          <div
+            aria-hidden="true"
+            class="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+            style="background: radial-gradient(600px circle at 50% 50%, var(--sh-info-glow), transparent 70%);"
+          />
+          <div
+            class="relative z-[1] grid content-start gap-4"
+          >
+            <div
+              class="inline-flex items-center gap-2 text-[var(--sh-info)] text-[11px] font-black uppercase tracking-wider"
+            >
+              <span
+                data-testid="icon-building"
+              />
+              For employers
+            </div>
+            <h2
+              class="text-[clamp(22px,2.8vw,34px)] font-extrabold leading-[1.08] tracking-tight"
+              style="color: var(--ink);"
+            >
+              Hire vetted student workers without the HR overhead.
+            </h2>
+            <p
+              class="text-sm leading-relaxed"
+              style="color: var(--muted);"
+            >
+              Get matched with pre-vetted student workers in under 48 hours. StudentHub manages placement, compliance, payroll, and rotations — one partner, one invoice.
+            </p>
+            <ul
+              class="grid gap-2 mt-1"
+            >
+              <li
+                class="flex items-start gap-2 text-xs font-medium leading-snug"
+                style="color: var(--ink);"
+              >
+                <span
+                  data-testid="icon-check-circle"
+                />
+                Pre-vetted candidates delivered in 48 hours
+              </li>
+              <li
+                class="flex items-start gap-2 text-xs font-medium leading-snug"
+                style="color: var(--ink);"
+              >
+                <span
+                  data-testid="icon-check-circle"
+                />
+                Full compliance, payroll, and rotation management
+              </li>
+              <li
+                class="flex items-start gap-2 text-xs font-medium leading-snug"
+                style="color: var(--ink);"
+              >
+                <span
+                  data-testid="icon-check-circle"
+                />
+                One consolidated invoice — hourly or monthly
+              </li>
+            </ul>
+            <div
+              class="mt-3"
+            >
+              <a
+                class="uiButton uiButton_default uiButton_lg shGlowButton w-full justify-center"
+                href="/signup?role=company"
+              >
+                Partner with StudentHub
+                 
+                <span
+                  data-testid="icon-arrow-up-right"
+                />
+              </a>
+            </div>
+            <p
+              class="text-[11px] font-semibold text-center"
+              style="color: var(--sh-info);"
+            >
+              Hourly rates and monthly plans available
+            </p>
+          </div>
+        </div>
+      </div>
+      <div
+        class="relative z-[2] grid grid-cols-4 gap-x-8 gap-y-3 w-full max-w-[720px] mx-auto mt-8 p-5 rounded-xl max-sm:grid-cols-2 max-sm:gap-4"
+        style="background: var(--sh-glass-bg-strong); border: 1px solid var(--sh-glass-border); opacity: 0; transform: translateY(16px); transition: opacity 600ms cubic-bezier(0.16, 1, 0.3, 1), transform 600ms cubic-bezier(0.16, 1, 0.3, 1);"
+      >
+        <div
+          class="text-center"
+        >
+          <strong
+            class="block text-[clamp(20px,2.5vw,32px)] font-black leading-none"
+            style="background: linear-gradient(135deg, var(--ink), var(--blue)); background-clip: text; -webkit-text-fill-color: transparent;"
+          >
+            1,200+
+          </strong>
+          <span
+            class="block text-[11px] font-semibold mt-1 leading-tight"
+            style="color: var(--muted);"
+          >
+            students placed this year
+          </span>
+        </div>
+        <div
+          class="text-center"
+        >
+          <strong
+            class="block text-[clamp(20px,2.5vw,32px)] font-black leading-none"
+            style="background: linear-gradient(135deg, var(--ink), var(--blue)); background-clip: text; -webkit-text-fill-color: transparent;"
+          >
+            200+
+          </strong>
+          <span
+            class="block text-[11px] font-semibold mt-1 leading-tight"
+            style="color: var(--muted);"
+          >
+            partner companies
+          </span>
+        </div>
+        <div
+          class="text-center"
+        >
+          <strong
+            class="block text-[clamp(20px,2.5vw,32px)] font-black leading-none"
+            style="background: linear-gradient(135deg, var(--ink), var(--blue)); background-clip: text; -webkit-text-fill-color: transparent;"
+          >
+            48h
+          </strong>
+          <span
+            class="block text-[11px] font-semibold mt-1 leading-tight"
+            style="color: var(--muted);"
+          >
+            avg match time
+          </span>
+        </div>
+        <div
+          class="text-center"
+        >
+          <strong
+            class="block text-[clamp(20px,2.5vw,32px)] font-black leading-none"
+            style="background: linear-gradient(135deg, var(--ink), var(--blue)); background-clip: text; -webkit-text-fill-color: transparent;"
+          >
+            4.8★
+          </strong>
+          <span
+            class="block text-[11px] font-semibold mt-1 leading-tight"
+            style="color: var(--muted);"
+          >
+            satisfaction rating
+          </span>
+        </div>
+      </div>
+    </section>
     <div
       aria-label="Select your role to see tailored information"
       class="flex flex-wrap items-center justify-center gap-1.5 p-1 rounded-2xl w-fit mx-auto"
@@ -125,337 +426,6 @@ exports[`Landing page (marketing redesign) > Snapshot — landing page full layo
         </span>
       </button>
     </div>
-    <section
-      aria-label="StudentHub for candidates — hero"
-      class="shSection relative min-h-[min(780px,calc(100svh_-_96px))] grid grid-cols-1 items-center overflow-hidden rounded-xl p-[clamp(22px,5vw,76px)] max-lg:min-h-auto max-lg:p-7"
-    >
-      <div
-        aria-hidden="true"
-        class="shHeroGradientDramatic"
-      />
-      <div
-        aria-hidden="true"
-        class="shOrb shOrbA"
-      />
-      <div
-        aria-hidden="true"
-        class="shOrb shOrbB"
-      />
-      <div
-        aria-hidden="true"
-        class="shOrb shOrbC"
-      />
-      <div
-        aria-hidden="true"
-        class="shParticleGrid"
-      />
-      <div
-        aria-hidden="true"
-        class="shPersonaBadge"
-      >
-        <span
-          data-testid="icon-sparkles"
-        />
-        Candidate
-         portal
-      </div>
-      <div
-        aria-hidden="true"
-        class="absolute inset-0 grid place-items-center place-content-end p-[clamp(20px,4vw,58px)] opacity-[0.92] max-lg:relative max-lg:min-h-[400px] max-lg:order-2 max-lg:p-0 max-lg:pt-[18px]"
-      >
-        <div
-          class="shMockupDramatic"
-        >
-          <div
-            class="grid content-start gap-2 p-2.5 rounded-xl bg-[var(--sh-glass-bg)]"
-          >
-            <span
-              class="min-h-9 flex items-center rounded-[7px] px-2.5 text-xs font-black max-sm:justify-center max-sm:px-1.5"
-              style="background: var(--sh-info-bg); color: var(--sh-info);"
-            >
-              Search
-            </span>
-            <span
-              class="min-h-9 flex items-center rounded-[7px] px-2.5 text-xs font-black max-sm:justify-center max-sm:px-1.5"
-              style="color: var(--muted);"
-            >
-              Matches
-            </span>
-            <span
-              class="min-h-9 flex items-center rounded-[7px] px-2.5 text-xs font-black max-sm:justify-center max-sm:px-1.5"
-              style="color: var(--muted);"
-            >
-              Applications
-            </span>
-            <span
-              class="min-h-9 flex items-center rounded-[7px] px-2.5 text-xs font-black max-sm:justify-center max-sm:px-1.5"
-              style="color: var(--muted);"
-            >
-              Money
-            </span>
-          </div>
-          <div
-            class="grid content-start gap-2.5 p-3.5 rounded-xl bg-[var(--sh-glass-bg)]"
-          >
-            <div
-              class="min-h-[40px] flex items-center gap-2 rounded-lg px-3 bg-[var(--sh-glass-bg-strong)]"
-              style="border: 1px solid var(--sh-glass-border);"
-            >
-              <span
-                data-testid="icon-search"
-              />
-              <span
-                class="text-xs text-[var(--muted)]"
-              >
-                Search open roles, companies, locations...
-              </span>
-              <span
-                class="ml-auto text-[10px] px-1.5 py-0.5 rounded bg-[var(--sh-glass-bg)] text-[var(--muted)] font-mono"
-              >
-                ⌘K
-              </span>
-            </div>
-            <div
-              class="min-h-[190px] grid content-start gap-1.5 rounded-lg p-[14px]"
-              style="background: var(--sh-glass-bg-strong); border: 1px solid var(--sh-glass-border);"
-            >
-              <span
-                class="text-[var(--sh-info)] text-[11px] font-black uppercase tracking-wider"
-              >
-                Matched roles
-              </span>
-              <strong
-                class="text-[clamp(42px,6vw,76px)] leading-[0.88]"
-                style="color: var(--ink);"
-              >
-                senior care assistant
-              </strong>
-              <small
-                style="color: var(--muted);"
-              >
-                12 matching roles · London · £14-18/hr · starts ASAP
-              </small>
-              <div
-                class="flex gap-2 mt-1.5"
-              >
-                <span
-                  class="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-full bg-[var(--sh-success-bg)] text-[var(--sh-success)]"
-                >
-                  <span
-                    data-testid="icon-check-circle"
-                  />
-                  Profile ready
-                </span>
-                <span
-                  class="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-full bg-[var(--sh-info-bg)] text-[var(--sh-info)]"
-                >
-                  <span
-                    data-testid="icon-check-circle"
-                  />
-                  3 saved roles
-                </span>
-              </div>
-            </div>
-            <div
-              class="grid grid-cols-4 gap-2 max-sm:grid-cols-1"
-            >
-              <div
-                class="min-h-[92px] grid content-between rounded-lg p-3 bg-[var(--sh-glass-bg)]"
-                style="border: 1px solid var(--sh-glass-border);"
-              >
-                <span
-                  class="text-[var(--sh-info)] text-[10px] font-black uppercase tracking-wider"
-                >
-                  Profile
-                </span>
-                <strong
-                  class="text-lg"
-                  style="color: var(--ink);"
-                >
-                  92% complete
-                </strong>
-              </div>
-              <div
-                class="min-h-[92px] grid content-between rounded-lg p-3 bg-[var(--sh-glass-bg)]"
-                style="border: 1px solid var(--sh-glass-border);"
-              >
-                <span
-                  class="text-[var(--sh-info)] text-[10px] font-black uppercase tracking-wider"
-                >
-                  Applications
-                </span>
-                <strong
-                  class="text-lg"
-                  style="color: var(--ink);"
-                >
-                  4 pending
-                </strong>
-              </div>
-              <div
-                class="min-h-[92px] grid content-between rounded-lg p-3 bg-[var(--sh-glass-bg)]"
-                style="border: 1px solid var(--sh-glass-border);"
-              >
-                <span
-                  class="text-[var(--sh-info)] text-[10px] font-black uppercase tracking-wider"
-                >
-                  Timesheet
-                </span>
-                <strong
-                  class="text-lg"
-                  style="color: var(--ink);"
-                >
-                  This week
-                </strong>
-              </div>
-              <div
-                class="min-h-[92px] grid content-between rounded-lg p-3 bg-[var(--sh-glass-bg)]"
-                style="border: 1px solid var(--sh-glass-border);"
-              >
-                <span
-                  class="text-[var(--sh-info)] text-[10px] font-black uppercase tracking-wider"
-                >
-                  Payment
-                </span>
-                <strong
-                  class="text-lg"
-                  style="color: var(--ink);"
-                >
-                  £1,240
-                </strong>
-              </div>
-            </div>
-          </div>
-          <div
-            class="grid content-start gap-2.5 p-3.5 rounded-xl bg-[var(--sh-glass-bg)] max-lg:hidden"
-          >
-            <div
-              class="min-h-[140px] grid content-end gap-2 rounded-lg p-[14px]"
-              style="background: var(--sh-glass-bg-strong); border: 1px solid var(--sh-glass-border);"
-            >
-              <span
-                class="text-[var(--sh-info)] text-[10px] font-black uppercase tracking-wider"
-              >
-                Action
-              </span>
-              <strong
-                class="text-[18px] leading-[1.1]"
-                style="color: var(--ink);"
-              >
-                Apply to 3 matching roles
-              </strong>
-              <small
-                style="color: var(--muted);"
-              >
-                Your profile matches these open positions. One click sends your CV.
-              </small>
-            </div>
-            <div
-              class="min-h-[100px] grid content-between rounded-lg p-[14px]"
-              style="background: var(--sh-glass-bg); border: 1px solid var(--sh-glass-border);"
-            >
-              <span
-                class="text-[var(--sh-info)] text-[10px] font-black uppercase tracking-wider"
-              >
-                Preview
-              </span>
-              <div
-                class="flex items-center gap-2"
-              >
-                <span
-                  class="size-6 rounded-full bg-[var(--sh-success-bg)] flex items-center justify-center"
-                >
-                  <span
-                    data-testid="icon-check-circle"
-                  />
-                </span>
-                <span
-                  class="text-xs text-[var(--ink)]"
-                >
-                  3 matching roles ready to apply
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div
-        class="relative z-[2] max-w-[690px] max-lg:max-w-none"
-      >
-        <p
-          class="shHeroEyebrow"
-        >
-          <span
-            data-testid="icon-sparkles"
-          />
-          StudentHub for candidates
-        </p>
-        <h1
-          class="shHeroTitle"
-        >
-          Your next placement
-          <br />
-          <span
-            class="shHeroHighlight"
-          >
-            starts here.
-          </span>
-        </h1>
-        <p
-          class="shHeroBody"
-        >
-          Build a profile that employers actually see. Get matched to the right roles, track every application, log your hours, and get paid — all from one workspace designed for how you work.
-        </p>
-        <div
-          class="flex flex-wrap items-center gap-3.5 mt-4 max-sm:flex-col max-sm:items-stretch"
-        >
-          <a
-            class="uiButton uiButton_default uiButton_lg shGlowButton"
-            href="/signup?role=candidate"
-          >
-            Create your free candidate profile
-             
-            <span
-              data-testid="icon-arrow-up-right"
-            />
-          </a>
-          <a
-            class="uiButton uiButton_ghost uiButton_lg"
-            href="/login"
-          >
-            Sign in
-          </a>
-        </div>
-        <div
-          class="flex flex-wrap items-center gap-2 mt-[18px]"
-        >
-          <span
-            class="shProofPill"
-          >
-            1,200+ candidates placed this year · 4.8★ candidate satisfaction
-          </span>
-        </div>
-        <div
-          aria-label="Key benefits for candidates"
-          class="flex flex-wrap gap-2 mt-2.5"
-        >
-          <span
-            class="shHeroPill"
-          >
-            Profile visibility to 60+ employers
-          </span>
-          <span
-            class="shHeroPill"
-          >
-            One-tap timesheets and payments
-          </span>
-          <span
-            class="shHeroPill"
-          >
-            Real-time application tracking
-          </span>
-        </div>
-      </div>
-    </section>
     <section
       aria-label="Key features"
       class="shSection"
@@ -1846,6 +1816,307 @@ exports[`Landing page (marketing redesign) > Snapshot — landing page full layo
         </div>
       </div>
     </nav>
+    <section
+      aria-label="StudentHub — two-sided marketplace for student employment"
+      class="shSection relative min-h-[min(900px,calc(100svh_-_80px))] grid content-start items-center overflow-hidden rounded-xl p-[clamp(22px,5vw,76px)] max-lg:min-h-auto max-lg:p-7"
+    >
+      <div
+        aria-hidden="true"
+        class="shHeroGradientDramatic"
+      />
+      <div
+        aria-hidden="true"
+        class="shOrb shOrbA"
+      />
+      <div
+        aria-hidden="true"
+        class="shOrb shOrbB"
+      />
+      <div
+        aria-hidden="true"
+        class="shOrb shOrbC"
+      />
+      <div
+        aria-hidden="true"
+        class="shParticleGrid"
+      />
+      <div
+        class="relative z-[2] max-w-[820px] mx-auto text-center mb-8 max-lg:mb-6"
+        style="opacity: 0; transform: translateY(16px); transition: opacity 600ms cubic-bezier(0.16, 1, 0.3, 1), transform 600ms cubic-bezier(0.16, 1, 0.3, 1);"
+      >
+        <p
+          class="shHeroEyebrow mx-auto"
+        >
+          <span
+            data-testid="icon-sparkles"
+          />
+          Kuwait's student-employer marketplace
+        </p>
+        <h1
+          class="shHeroTitle text-center max-sm:text-[clamp(32px,9vw,44px)]"
+        >
+          Connect students with
+          <br
+            class="hidden sm:block"
+          />
+           
+          <span
+            class="shHeroHighlight"
+          >
+            real work experience.
+          </span>
+        </h1>
+        <p
+          class="max-w-[620px] mx-auto mt-3 text-[clamp(15px,1.5vw,19px)] leading-relaxed"
+          style="color: var(--muted);"
+        >
+          StudentHub connects students with Kuwait-based employers for paid, short-term placements. Build your career. Build your workforce.
+        </p>
+      </div>
+      <div
+        class="relative z-[2] grid grid-cols-2 gap-5 w-full max-w-[920px] mx-auto max-lg:grid-cols-1 max-lg:max-w-[500px]"
+      >
+        <div
+          class="group relative rounded-xl p-[clamp(18px,3vw,32px)] transition-all duration-300 hover:-translate-y-[4px]"
+          style="background: var(--sh-glass-bg); border: 1px solid var(--sh-glass-border); opacity: 0; transform: translateY(16px); transition: opacity 600ms cubic-bezier(0.16, 1, 0.3, 1), transform 600ms cubic-bezier(0.16, 1, 0.3, 1);"
+        >
+          <div
+            aria-hidden="true"
+            class="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+            style="background: radial-gradient(600px circle at 50% 50%, var(--sh-info-glow), transparent 70%);"
+          />
+          <div
+            class="relative z-[1] grid content-start gap-4"
+          >
+            <div
+              class="inline-flex items-center gap-2 text-[var(--sh-info)] text-[11px] font-black uppercase tracking-wider"
+            >
+              <span
+                data-testid="icon-graduation-cap"
+              />
+              For students
+            </div>
+            <h2
+              class="text-[clamp(22px,2.8vw,34px)] font-extrabold leading-[1.08] tracking-tight"
+              style="color: var(--ink);"
+            >
+              Get paid work experience that builds your future.
+            </h2>
+            <p
+              class="text-sm leading-relaxed"
+              style="color: var(--muted);"
+            >
+              Create a free profile, get matched to real job placements across multiple industries, and graduate with a CV that proves you can work. Free, always.
+            </p>
+            <ul
+              class="grid gap-2 mt-1"
+            >
+              <li
+                class="flex items-start gap-2 text-xs font-medium leading-snug"
+                style="color: var(--ink);"
+              >
+                <span
+                  data-testid="icon-check-circle"
+                />
+                Rotate roles every ~3 months — build diverse experience
+              </li>
+              <li
+                class="flex items-start gap-2 text-xs font-medium leading-snug"
+                style="color: var(--ink);"
+              >
+                <span
+                  data-testid="icon-check-circle"
+                />
+                Paid placements at Kuwait&apos;s top employers
+              </li>
+              <li
+                class="flex items-start gap-2 text-xs font-medium leading-snug"
+                style="color: var(--ink);"
+              >
+                <span
+                  data-testid="icon-check-circle"
+                />
+                ID cards with QR-code compliance verification
+              </li>
+            </ul>
+            <div
+              class="mt-3"
+            >
+              <a
+                class="uiButton uiButton_default uiButton_lg shGlowButton w-full justify-center"
+                href="/signup?role=candidate"
+              >
+                Create your free profile
+                 
+                <span
+                  data-testid="icon-arrow-up-right"
+                />
+              </a>
+            </div>
+            <p
+              class="text-[11px] font-semibold text-center"
+              style="color: var(--sh-success);"
+            >
+              Completely free for students
+            </p>
+          </div>
+        </div>
+        <div
+          class="group relative rounded-xl p-[clamp(18px,3vw,32px)] transition-all duration-300 hover:-translate-y-[4px]"
+          style="background: var(--sh-glass-bg); border: 1px solid var(--sh-glass-border); opacity: 0; transform: translateY(16px); transition: opacity 600ms cubic-bezier(0.16, 1, 0.3, 1), transform 600ms cubic-bezier(0.16, 1, 0.3, 1);"
+        >
+          <div
+            aria-hidden="true"
+            class="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+            style="background: radial-gradient(600px circle at 50% 50%, var(--sh-info-glow), transparent 70%);"
+          />
+          <div
+            class="relative z-[1] grid content-start gap-4"
+          >
+            <div
+              class="inline-flex items-center gap-2 text-[var(--sh-info)] text-[11px] font-black uppercase tracking-wider"
+            >
+              <span
+                data-testid="icon-building"
+              />
+              For employers
+            </div>
+            <h2
+              class="text-[clamp(22px,2.8vw,34px)] font-extrabold leading-[1.08] tracking-tight"
+              style="color: var(--ink);"
+            >
+              Hire vetted student workers without the HR overhead.
+            </h2>
+            <p
+              class="text-sm leading-relaxed"
+              style="color: var(--muted);"
+            >
+              Get matched with pre-vetted student workers in under 48 hours. StudentHub manages placement, compliance, payroll, and rotations — one partner, one invoice.
+            </p>
+            <ul
+              class="grid gap-2 mt-1"
+            >
+              <li
+                class="flex items-start gap-2 text-xs font-medium leading-snug"
+                style="color: var(--ink);"
+              >
+                <span
+                  data-testid="icon-check-circle"
+                />
+                Pre-vetted candidates delivered in 48 hours
+              </li>
+              <li
+                class="flex items-start gap-2 text-xs font-medium leading-snug"
+                style="color: var(--ink);"
+              >
+                <span
+                  data-testid="icon-check-circle"
+                />
+                Full compliance, payroll, and rotation management
+              </li>
+              <li
+                class="flex items-start gap-2 text-xs font-medium leading-snug"
+                style="color: var(--ink);"
+              >
+                <span
+                  data-testid="icon-check-circle"
+                />
+                One consolidated invoice — hourly or monthly
+              </li>
+            </ul>
+            <div
+              class="mt-3"
+            >
+              <a
+                class="uiButton uiButton_default uiButton_lg shGlowButton w-full justify-center"
+                href="/signup?role=company"
+              >
+                Partner with StudentHub
+                 
+                <span
+                  data-testid="icon-arrow-up-right"
+                />
+              </a>
+            </div>
+            <p
+              class="text-[11px] font-semibold text-center"
+              style="color: var(--sh-info);"
+            >
+              Hourly rates and monthly plans available
+            </p>
+          </div>
+        </div>
+      </div>
+      <div
+        class="relative z-[2] grid grid-cols-4 gap-x-8 gap-y-3 w-full max-w-[720px] mx-auto mt-8 p-5 rounded-xl max-sm:grid-cols-2 max-sm:gap-4"
+        style="background: var(--sh-glass-bg-strong); border: 1px solid var(--sh-glass-border); opacity: 0; transform: translateY(16px); transition: opacity 600ms cubic-bezier(0.16, 1, 0.3, 1), transform 600ms cubic-bezier(0.16, 1, 0.3, 1);"
+      >
+        <div
+          class="text-center"
+        >
+          <strong
+            class="block text-[clamp(20px,2.5vw,32px)] font-black leading-none"
+            style="background: linear-gradient(135deg, var(--ink), var(--blue)); background-clip: text; -webkit-text-fill-color: transparent;"
+          >
+            1,200+
+          </strong>
+          <span
+            class="block text-[11px] font-semibold mt-1 leading-tight"
+            style="color: var(--muted);"
+          >
+            students placed this year
+          </span>
+        </div>
+        <div
+          class="text-center"
+        >
+          <strong
+            class="block text-[clamp(20px,2.5vw,32px)] font-black leading-none"
+            style="background: linear-gradient(135deg, var(--ink), var(--blue)); background-clip: text; -webkit-text-fill-color: transparent;"
+          >
+            200+
+          </strong>
+          <span
+            class="block text-[11px] font-semibold mt-1 leading-tight"
+            style="color: var(--muted);"
+          >
+            partner companies
+          </span>
+        </div>
+        <div
+          class="text-center"
+        >
+          <strong
+            class="block text-[clamp(20px,2.5vw,32px)] font-black leading-none"
+            style="background: linear-gradient(135deg, var(--ink), var(--blue)); background-clip: text; -webkit-text-fill-color: transparent;"
+          >
+            48h
+          </strong>
+          <span
+            class="block text-[11px] font-semibold mt-1 leading-tight"
+            style="color: var(--muted);"
+          >
+            avg match time
+          </span>
+        </div>
+        <div
+          class="text-center"
+        >
+          <strong
+            class="block text-[clamp(20px,2.5vw,32px)] font-black leading-none"
+            style="background: linear-gradient(135deg, var(--ink), var(--blue)); background-clip: text; -webkit-text-fill-color: transparent;"
+          >
+            4.8★
+          </strong>
+          <span
+            class="block text-[11px] font-semibold mt-1 leading-tight"
+            style="color: var(--muted);"
+          >
+            satisfaction rating
+          </span>
+        </div>
+      </div>
+    </section>
     <div
       aria-label="Select your role to see tailored information"
       class="flex flex-wrap items-center justify-center gap-1.5 p-1 rounded-2xl w-fit mx-auto"
@@ -1920,337 +2191,6 @@ exports[`Landing page (marketing redesign) > Snapshot — landing page full layo
         </span>
       </button>
     </div>
-    <section
-      aria-label="StudentHub for candidates — hero"
-      class="shSection relative min-h-[min(780px,calc(100svh_-_96px))] grid grid-cols-1 items-center overflow-hidden rounded-xl p-[clamp(22px,5vw,76px)] max-lg:min-h-auto max-lg:p-7"
-    >
-      <div
-        aria-hidden="true"
-        class="shHeroGradientDramatic"
-      />
-      <div
-        aria-hidden="true"
-        class="shOrb shOrbA"
-      />
-      <div
-        aria-hidden="true"
-        class="shOrb shOrbB"
-      />
-      <div
-        aria-hidden="true"
-        class="shOrb shOrbC"
-      />
-      <div
-        aria-hidden="true"
-        class="shParticleGrid"
-      />
-      <div
-        aria-hidden="true"
-        class="shPersonaBadge"
-      >
-        <span
-          data-testid="icon-sparkles"
-        />
-        Candidate
-         portal
-      </div>
-      <div
-        aria-hidden="true"
-        class="absolute inset-0 grid place-items-center place-content-end p-[clamp(20px,4vw,58px)] opacity-[0.92] max-lg:relative max-lg:min-h-[400px] max-lg:order-2 max-lg:p-0 max-lg:pt-[18px]"
-      >
-        <div
-          class="shMockupDramatic"
-        >
-          <div
-            class="grid content-start gap-2 p-2.5 rounded-xl bg-[var(--sh-glass-bg)]"
-          >
-            <span
-              class="min-h-9 flex items-center rounded-[7px] px-2.5 text-xs font-black max-sm:justify-center max-sm:px-1.5"
-              style="background: var(--sh-info-bg); color: var(--sh-info);"
-            >
-              Search
-            </span>
-            <span
-              class="min-h-9 flex items-center rounded-[7px] px-2.5 text-xs font-black max-sm:justify-center max-sm:px-1.5"
-              style="color: var(--muted);"
-            >
-              Matches
-            </span>
-            <span
-              class="min-h-9 flex items-center rounded-[7px] px-2.5 text-xs font-black max-sm:justify-center max-sm:px-1.5"
-              style="color: var(--muted);"
-            >
-              Applications
-            </span>
-            <span
-              class="min-h-9 flex items-center rounded-[7px] px-2.5 text-xs font-black max-sm:justify-center max-sm:px-1.5"
-              style="color: var(--muted);"
-            >
-              Money
-            </span>
-          </div>
-          <div
-            class="grid content-start gap-2.5 p-3.5 rounded-xl bg-[var(--sh-glass-bg)]"
-          >
-            <div
-              class="min-h-[40px] flex items-center gap-2 rounded-lg px-3 bg-[var(--sh-glass-bg-strong)]"
-              style="border: 1px solid var(--sh-glass-border);"
-            >
-              <span
-                data-testid="icon-search"
-              />
-              <span
-                class="text-xs text-[var(--muted)]"
-              >
-                Search open roles, companies, locations...
-              </span>
-              <span
-                class="ml-auto text-[10px] px-1.5 py-0.5 rounded bg-[var(--sh-glass-bg)] text-[var(--muted)] font-mono"
-              >
-                ⌘K
-              </span>
-            </div>
-            <div
-              class="min-h-[190px] grid content-start gap-1.5 rounded-lg p-[14px]"
-              style="background: var(--sh-glass-bg-strong); border: 1px solid var(--sh-glass-border);"
-            >
-              <span
-                class="text-[var(--sh-info)] text-[11px] font-black uppercase tracking-wider"
-              >
-                Matched roles
-              </span>
-              <strong
-                class="text-[clamp(42px,6vw,76px)] leading-[0.88]"
-                style="color: var(--ink);"
-              >
-                senior care assistant
-              </strong>
-              <small
-                style="color: var(--muted);"
-              >
-                12 matching roles · London · £14-18/hr · starts ASAP
-              </small>
-              <div
-                class="flex gap-2 mt-1.5"
-              >
-                <span
-                  class="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-full bg-[var(--sh-success-bg)] text-[var(--sh-success)]"
-                >
-                  <span
-                    data-testid="icon-check-circle"
-                  />
-                  Profile ready
-                </span>
-                <span
-                  class="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-full bg-[var(--sh-info-bg)] text-[var(--sh-info)]"
-                >
-                  <span
-                    data-testid="icon-check-circle"
-                  />
-                  3 saved roles
-                </span>
-              </div>
-            </div>
-            <div
-              class="grid grid-cols-4 gap-2 max-sm:grid-cols-1"
-            >
-              <div
-                class="min-h-[92px] grid content-between rounded-lg p-3 bg-[var(--sh-glass-bg)]"
-                style="border: 1px solid var(--sh-glass-border);"
-              >
-                <span
-                  class="text-[var(--sh-info)] text-[10px] font-black uppercase tracking-wider"
-                >
-                  Profile
-                </span>
-                <strong
-                  class="text-lg"
-                  style="color: var(--ink);"
-                >
-                  92% complete
-                </strong>
-              </div>
-              <div
-                class="min-h-[92px] grid content-between rounded-lg p-3 bg-[var(--sh-glass-bg)]"
-                style="border: 1px solid var(--sh-glass-border);"
-              >
-                <span
-                  class="text-[var(--sh-info)] text-[10px] font-black uppercase tracking-wider"
-                >
-                  Applications
-                </span>
-                <strong
-                  class="text-lg"
-                  style="color: var(--ink);"
-                >
-                  4 pending
-                </strong>
-              </div>
-              <div
-                class="min-h-[92px] grid content-between rounded-lg p-3 bg-[var(--sh-glass-bg)]"
-                style="border: 1px solid var(--sh-glass-border);"
-              >
-                <span
-                  class="text-[var(--sh-info)] text-[10px] font-black uppercase tracking-wider"
-                >
-                  Timesheet
-                </span>
-                <strong
-                  class="text-lg"
-                  style="color: var(--ink);"
-                >
-                  This week
-                </strong>
-              </div>
-              <div
-                class="min-h-[92px] grid content-between rounded-lg p-3 bg-[var(--sh-glass-bg)]"
-                style="border: 1px solid var(--sh-glass-border);"
-              >
-                <span
-                  class="text-[var(--sh-info)] text-[10px] font-black uppercase tracking-wider"
-                >
-                  Payment
-                </span>
-                <strong
-                  class="text-lg"
-                  style="color: var(--ink);"
-                >
-                  £1,240
-                </strong>
-              </div>
-            </div>
-          </div>
-          <div
-            class="grid content-start gap-2.5 p-3.5 rounded-xl bg-[var(--sh-glass-bg)] max-lg:hidden"
-          >
-            <div
-              class="min-h-[140px] grid content-end gap-2 rounded-lg p-[14px]"
-              style="background: var(--sh-glass-bg-strong); border: 1px solid var(--sh-glass-border);"
-            >
-              <span
-                class="text-[var(--sh-info)] text-[10px] font-black uppercase tracking-wider"
-              >
-                Action
-              </span>
-              <strong
-                class="text-[18px] leading-[1.1]"
-                style="color: var(--ink);"
-              >
-                Apply to 3 matching roles
-              </strong>
-              <small
-                style="color: var(--muted);"
-              >
-                Your profile matches these open positions. One click sends your CV.
-              </small>
-            </div>
-            <div
-              class="min-h-[100px] grid content-between rounded-lg p-[14px]"
-              style="background: var(--sh-glass-bg); border: 1px solid var(--sh-glass-border);"
-            >
-              <span
-                class="text-[var(--sh-info)] text-[10px] font-black uppercase tracking-wider"
-              >
-                Preview
-              </span>
-              <div
-                class="flex items-center gap-2"
-              >
-                <span
-                  class="size-6 rounded-full bg-[var(--sh-success-bg)] flex items-center justify-center"
-                >
-                  <span
-                    data-testid="icon-check-circle"
-                  />
-                </span>
-                <span
-                  class="text-xs text-[var(--ink)]"
-                >
-                  3 matching roles ready to apply
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div
-        class="relative z-[2] max-w-[690px] max-lg:max-w-none"
-      >
-        <p
-          class="shHeroEyebrow"
-        >
-          <span
-            data-testid="icon-sparkles"
-          />
-          StudentHub for candidates
-        </p>
-        <h1
-          class="shHeroTitle"
-        >
-          Your next placement
-          <br />
-          <span
-            class="shHeroHighlight"
-          >
-            starts here.
-          </span>
-        </h1>
-        <p
-          class="shHeroBody"
-        >
-          Build a profile that employers actually see. Get matched to the right roles, track every application, log your hours, and get paid — all from one workspace designed for how you work.
-        </p>
-        <div
-          class="flex flex-wrap items-center gap-3.5 mt-4 max-sm:flex-col max-sm:items-stretch"
-        >
-          <a
-            class="uiButton uiButton_default uiButton_lg shGlowButton"
-            href="/signup?role=candidate"
-          >
-            Create your free candidate profile
-             
-            <span
-              data-testid="icon-arrow-up-right"
-            />
-          </a>
-          <a
-            class="uiButton uiButton_ghost uiButton_lg"
-            href="/login"
-          >
-            Sign in
-          </a>
-        </div>
-        <div
-          class="flex flex-wrap items-center gap-2 mt-[18px]"
-        >
-          <span
-            class="shProofPill"
-          >
-            1,200+ candidates placed this year · 4.8★ candidate satisfaction
-          </span>
-        </div>
-        <div
-          aria-label="Key benefits for candidates"
-          class="flex flex-wrap gap-2 mt-2.5"
-        >
-          <span
-            class="shHeroPill"
-          >
-            Profile visibility to 60+ employers
-          </span>
-          <span
-            class="shHeroPill"
-          >
-            One-tap timesheets and payments
-          </span>
-          <span
-            class="shHeroPill"
-          >
-            Real-time application tracking
-          </span>
-        </div>
-      </div>
-    </section>
     <section
       aria-label="Key features"
       class="shSection"
