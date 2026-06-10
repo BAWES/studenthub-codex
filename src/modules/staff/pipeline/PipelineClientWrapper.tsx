@@ -2,7 +2,7 @@
 
 import { useCallback, useState, useEffect } from "react";
 import { StaffPipelineDashboard } from "@/modules/staff/pipeline/StaffPipelineDashboard";
-import type { PipelineItem, PipelineMetrics, PipelineStage } from "@/modules/staff/pipeline-data";
+import type { PipelineItem, PipelineMetrics, PipelineStage } from "@/modules/staff/pipeline";
 
 interface PipelineClientWrapperProps {
   initialItems: PipelineItem[];

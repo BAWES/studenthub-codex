@@ -1,7 +1,7 @@
 "use client";
 
 import { GlassPanel } from "@/components/ui/glass-panel";
-import type { PipelineItem, PipelineStage } from "@/modules/staff/pipeline-data";
+import type { PipelineItem, PipelineStage } from "@/modules/staff/pipeline";
 import { pipelineStageColor, pipelineStageLabel } from "./schemas";
 import { useState, useCallback, useRef } from "react";
 import { GripVertical } from "lucide-react";
