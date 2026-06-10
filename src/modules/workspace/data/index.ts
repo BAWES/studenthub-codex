@@ -29,5 +29,5 @@ export {
   getCompanyRequestRows,
   getCompanyRequestDetail,
 } from "./company";
-export { getInspectorWorkspace, getInspectorIdRequestRows, getInspectorIdRequestDetail } from "./inspector";
+export { getInspectorWorkspace, getInspectorIdRequestRows, getInspectorIdRequestDetail } from "./inspector/index";
 export { getRequestDetail } from "../request-detail-core";
