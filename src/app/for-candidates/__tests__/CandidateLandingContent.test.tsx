@@ -33,6 +33,7 @@ vi.mock("lucide-react", () => ({
   Bell: () => <span data-testid="icon-bell" />,
   Building2: () => <span data-testid="icon-building2" />,
   Check: () => <span data-testid="icon-check" />,
+  CheckCircle: () => <span data-testid="icon-check-circle" />,
   CheckCircle2: () => <span data-testid="icon-check-circle" />,
   ChevronLeft: () => <span data-testid="icon-chevron-left" />,
   ChevronRight: () => <span data-testid="icon-chevron-right" />,
@@ -55,6 +56,8 @@ vi.mock("lucide-react", () => ({
   X: () => <span data-testid="icon-x" />,
   Zap: () => <span data-testid="icon-zap" />,
   Briefcase: () => <span data-testid="icon-briefcase" />,
+  PieChart: () => <span data-testid="icon-pie-chart" />,
+  GitMerge: () => <span data-testid="icon-git-merge" />,
   ArrowDown: () => <span data-testid="icon-arrow-down" />,
   GraduationCap: () => <span data-testid="icon-graduation-cap" />,
 }));
