@@ -14,7 +14,6 @@
 // ---------------------------------------------------------------------------
 
 import crypto from "node:crypto";
-import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
@@ -23,6 +22,16 @@ import {
   approveRequest as parentApproveRequest,
   rejectRequest as parentRejectRequest,
 } from "../actions";
+import {
+  getRequestDetailSchema,
+  approveRequestSchema,
+  rejectRequestSchema,
+  addCommentSchema,
+  type ApproveRequestInput,
+  type RejectRequestInput,
+  type AddCommentInput,
+  type AddCommentResponse,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Re-export parent types so consumers have a single import path
@@ -30,41 +39,7 @@ import {
 export type {
   RequestDetail,
   RequestActionResponse,
-} from "../actions";
-
-// ---------------------------------------------------------------------------
-// Schemas
-// ---------------------------------------------------------------------------
-
-export const getRequestDetailSchema = z.object({
-  requestUuid: z.string().min(1, "Request UUID is required"),
-});
-
-export const approveRequestSchema = z.object({
-  requestUuid: z.string().min(1, "Request UUID is required"),
-  reason: z.string().min(1, "Reason is required").max(500),
-});
-
-export const rejectRequestSchema = z.object({
-  requestUuid: z.string().min(1, "Request UUID is required"),
-  reason: z.string().min(1, "Reason is required").max(500),
-});
-
-export const addCommentSchema = z.object({
-  requestUuid: z.string().min(1, "Request UUID is required"),
-  comment: z.string().min(1, "Comment is required").max(2000),
-});
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export type AddCommentInput = z.input<typeof addCommentSchema>;
-
-export type AddCommentResponse = {
-  operation: "success" | "error";
-  message: string;
-};
+} from "../schemas";
 
 // ---------------------------------------------------------------------------
 // getRequestDetail
@@ -76,7 +51,7 @@ export type AddCommentResponse = {
  */
 export async function getRequestDetail(
   requestUuid: string,
-): Promise<import("../actions").RequestDetail> {
+): Promise<import("../schemas").RequestDetail> {
   return parentGetRequest(requestUuid);
 }
 
@@ -88,8 +63,8 @@ export async function getRequestDetail(
  * Approve a pending request. Delegates to the parent `approveRequest` action.
  */
 export async function approveRequest(
-  input: z.input<typeof approveRequestSchema>,
-): Promise<import("../actions").RequestActionResponse> {
+  input: ApproveRequestInput,
+): Promise<import("../schemas").RequestActionResponse> {
   return parentApproveRequest(input);
 }
 
@@ -101,8 +76,8 @@ export async function approveRequest(
  * Reject a request with a reason. Delegates to the parent `rejectRequest` action.
  */
 export async function rejectRequest(
-  input: z.input<typeof rejectRequestSchema>,
-): Promise<import("../actions").RequestActionResponse> {
+  input: RejectRequestInput,
+): Promise<import("../schemas").RequestActionResponse> {
   return parentRejectRequest(input);
 }
 

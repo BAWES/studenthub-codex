@@ -4,7 +4,7 @@ import {
   updateCandidateStatusSchema,
   updateCandidateSchema,
   deleteCandidateSchema,
-} from "./actions";
+} from "./schemas";
 
 describe("getCandidateDetailSchema", () => {
   it("accepts a valid candidate ID", () => {

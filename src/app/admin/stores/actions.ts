@@ -14,70 +14,17 @@
 // ---------------------------------------------------------------------------
 
 import { revalidatePath } from "next/cache";
-import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
-
-// ---------------------------------------------------------------------------
-// Schemas
-// ---------------------------------------------------------------------------
-
-export const listStoresSchema = z.object({
-  page: z.coerce.number().int().positive().optional().default(1),
-  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
-  companyId: z.coerce.number().int().positive().optional(),
-  status: z.enum(["active", "inactive"]).optional(),
-  q: z.string().optional(),
-});
-
-export const getStoreSchema = z.object({
-  storeId: z.coerce.number().int().positive(),
-});
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export type ListStoresInput = z.input<typeof listStoresSchema>;
-export type GetStoreInput = z.input<typeof getStoreSchema>;
-
-export type StoreRow = {
-  store_id: number;
-  store_name: string;
-  store_location: string;
-  store_status: number;
-  store_total_candidates: number | null;
-  company_name: string | null;
-  brand_name: string | null;
-  mall_name: string | null;
-  manager_name: string | null;
-  created_at: string | null;
-  updated_at: string | null;
-};
-
-export type StoreDetail = {
-  store: {
-    store_id: number;
-    store_name: string;
-    store_location: string;
-    store_status: number;
-    store_total_candidates: number | null;
-    store_created_at: string | null;
-    store_updated_at: string | null;
-    company: { company_name: string | null; company_email: string | null } | null;
-    contact: { contact_name: string | null; contact_email: string | null } | null;
-    brand: { brand_name_en: string | null } | null;
-    mall: { mall_name_en: string | null } | null;
-  } | null;
-};
-
-export type ListStoresResult = {
-  items: StoreRow[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
+import {
+  listStoresSchema,
+  getStoreSchema,
+  type ListStoresInput,
+  type GetStoreInput,
+  type StoreRow,
+  type StoreDetail,
+  type ListStoresResult,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // listStores

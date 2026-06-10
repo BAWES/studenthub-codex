@@ -5,7 +5,7 @@ import {
   createInvoiceSchema,
   updateInvoiceSchema,
   deleteInvoiceSchema,
-} from "./actions";
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Schema tests — pure unit tests, no DB required
