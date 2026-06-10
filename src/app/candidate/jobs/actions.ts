@@ -1,5 +1,9 @@
 "use server";
 
+// -----------------------------------------------------------------------
+// Candidate Job Browsing & Applications — server actions
+// -----------------------------------------------------------------------
+
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireRoleCapability } from "@/modules/auth/session";
@@ -9,73 +13,89 @@ import {
   applyToJobSchema,
   listMyApplicationsSchema,
 } from "./schemas";
-import type { CandidateJobRow, ApplicationRow, ApplyToJobResult, GetCandidateJobInput, ApplyToJobInput } from "./schemas";
+import type {
+  ListCandidateJobsInput,
+  GetCandidateJobInput,
+  ApplyToJobInput,
+  ListMyApplicationsInput,
+  CandidateJobRow,
+  ApplicationRow,
+  ApplyToJobResult,
+} from "./schemas";
+import type { Prisma } from "@prisma/client";
 
-// ---------------------------------------------------------------------------
-// Server actions
-// ---------------------------------------------------------------------------
+// -----------------------------------------------------------------------
+// listCandidateJobs — list active job postings for candidates to browse
+// -----------------------------------------------------------------------
 
-/**
- * List active job listings visible to candidates.
- */
 export async function listCandidateJobs(
-  input?: Record<string, unknown>,
-): Promise<CandidateJobRow[]> {
-  const session = await requireRoleCapability("candidate", "candidate.read.own");
+  input: ListCandidateJobsInput = {},
+): Promise<{
+  items: CandidateJobRow[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}> {
+  await requireRoleCapability("candidate", "candidate.read.own");
 
-  const parsed = listCandidateJobsSchema.safeParse(input ?? {});
+  const parsed = listCandidateJobsSchema.safeParse(input);
   if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Invalid input");
+    return { items: [], total: 0, page: 1, limit: 20, totalPages: 0 };
   }
 
-  const { q, employmentType, location, page, limit } = parsed.data;
+  const { page, limit, q, employmentType, location } = parsed.data;
   const skip = (page - 1) * limit;
 
-  const where: Record<string, unknown> = { status: "active" };
+  const where: Prisma.job_listingWhereInput = {
+    status: "active",
+  };
 
-  if (employmentType) {
-    where.employmentType = employmentType;
-  }
-
-  if (location) {
-    where.location = { contains: location };
-  }
-
-  if (q) {
+  if (employmentType) where.employmentType = employmentType;
+  if (location) where.location = { contains: location };
+  if (q && q.trim().length > 0) {
     where.OR = [
-      { title: { contains: q } },
-      { description: { contains: q } },
+      { title: { contains: q.trim() } },
+      { description: { contains: q.trim() } },
     ];
   }
 
-  const rows = await prisma.job_listing.findMany({
-    where: where as Parameters<typeof prisma.job_listing.findMany>[0]["where"],
-    orderBy: [{ createdAt: "desc" }, { jobListingId: "desc" }],
-    skip,
-    take: limit,
-    include: {
-      employer: {
-        select: { company_name: true },
+  const [items, total] = await Promise.all([
+    prisma.job_listing.findMany({
+      where,
+      include: {
+        employer: { select: { company_name: true } },
       },
-    },
-  });
+      skip,
+      take: limit,
+      orderBy: { createdAt: "desc" },
+    }),
+    prisma.job_listing.count({ where: where as never }),
+  ]);
 
-  return rows.map((r) => ({
-    jobListingId: r.jobListingId,
-    title: r.title,
-    description: r.description,
-    requirements: r.requirements,
-    location: r.location,
-    employmentType: r.employmentType,
-    salaryRange: r.salaryRange,
-    employerName: r.employer.company_name,
-    createdAt: r.createdAt,
-  }));
+  return {
+    items: items.map((j) => ({
+      jobListingId: j.jobListingId,
+      title: j.title,
+      description: j.description,
+      requirements: j.requirements,
+      location: j.location,
+      employmentType: j.employmentType,
+      salaryRange: j.salaryRange,
+      employerName: j.employer.company_name,
+      createdAt: j.createdAt,
+    })),
+    total,
+    page,
+    limit,
+    totalPages: Math.ceil(total / limit),
+  };
 }
 
-/**
- * Get a single job listing by ID.
- */
+// -----------------------------------------------------------------------
+// getCandidateJob — fetch a single active job posting for candidates
+// -----------------------------------------------------------------------
+
 export async function getCandidateJob(
   input: GetCandidateJobInput,
 ): Promise<CandidateJobRow | null> {
@@ -86,65 +106,59 @@ export async function getCandidateJob(
     throw new Error(parsed.error.issues[0]?.message ?? "Invalid input");
   }
 
-  const row = await prisma.job_listing.findFirst({
+  const job = await prisma.job_listing.findFirst({
     where: { jobListingId: parsed.data.jobId, status: "active" },
     include: {
-      employer: {
-        select: { company_name: true },
-      },
+      employer: { select: { company_name: true } },
     },
   });
 
-  if (!row) return null;
+  if (!job) return null;
 
   return {
-    jobListingId: row.jobListingId,
-    title: row.title,
-    description: row.description,
-    requirements: row.requirements,
-    location: row.location,
-    employmentType: row.employmentType,
-    salaryRange: row.salaryRange,
-    createdAt: row.createdAt,
-    employerName: row.employer.company_name,
+    jobListingId: job.jobListingId,
+    title: job.title,
+    description: job.description,
+    requirements: job.requirements,
+    location: job.location,
+    employmentType: job.employmentType,
+    salaryRange: job.salaryRange,
+    employerName: job.employer.company_name,
+    createdAt: job.createdAt,
   };
 }
 
-/**
- * Apply to a job listing.
- */
+// -----------------------------------------------------------------------
+// applyToJob — candidate applies to a job listing
+// -----------------------------------------------------------------------
+
 export async function applyToJob(
   input: ApplyToJobInput,
 ): Promise<ApplyToJobResult> {
   const session = await requireRoleCapability("candidate", "candidate.read.own");
-  const candidateId = Number(session.id);
 
   const parsed = applyToJobSchema.safeParse(input);
   if (!parsed.success) {
-    return { success: false, error: parsed.error.issues[0]?.message ?? "Invalid input" };
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid input");
   }
 
+  const candidateId = Number(session.id);
   const { jobId, coverLetter } = parsed.data;
 
-  // Verify job exists and is active
-  const job = await prisma.job_listing.findFirst({
-    where: { jobListingId: jobId, status: "active" },
+  const job = await prisma.job_listing.findUnique({
+    where: { jobListingId: jobId },
+    select: { jobListingId: true, status: true },
   });
 
-  if (!job) {
-    return { success: false, error: "Job listing not found or no longer active" };
-  }
+  if (!job) throw new Error("Job not found");
+  if (job.status !== "active") throw new Error("This job is no longer accepting applications");
 
-  // Check for duplicate application
   const existing = await prisma.job_listing_application.findFirst({
-    where: {
-      jobListingId: jobId,
-      candidateId,
-    },
+    where: { jobListingId: jobId, candidateId },
   });
 
   if (existing) {
-    return { success: false, error: "You have already applied to this job" };
+    return { success: true, applicationId: existing.applicationId, alreadyApplied: true };
   }
 
   const application = await prisma.job_listing_application.create({
@@ -152,63 +166,77 @@ export async function applyToJob(
       jobListingId: jobId,
       candidateId,
       status: "new",
-      coverLetter: coverLetter ?? null,
+      coverLetter,
     },
   });
 
   revalidatePath("/candidate/jobs");
   revalidatePath("/candidate/applications");
 
-  return { success: true, applicationId: application.applicationId };
+  return { success: true, applicationId: application.applicationId, alreadyApplied: false };
 }
 
-/**
- * List applications for the current candidate.
- */
-export async function listMyApplications(
-  input?: Record<string, unknown>,
-): Promise<ApplicationRow[]> {
-  const session = await requireRoleCapability("candidate", "candidate.read.own");
-  const candidateId = Number(session.id);
+// -----------------------------------------------------------------------
+// listMyApplications — list the candidate's job applications
+// -----------------------------------------------------------------------
 
-  const parsed = listMyApplicationsSchema.safeParse(input ?? {});
+export async function listMyApplications(
+  input: ListMyApplicationsInput = {},
+): Promise<{
+  items: ApplicationRow[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}> {
+  const session = await requireRoleCapability("candidate", "candidate.read.own");
+
+  const parsed = listMyApplicationsSchema.safeParse(input);
   if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Invalid input");
+    return { items: [], total: 0, page: 1, limit: 20, totalPages: 0 };
   }
 
+  const candidateId = Number(session.id);
   const { page, limit } = parsed.data;
   const skip = (page - 1) * limit;
 
-  const rows = await prisma.job_listing_application.findMany({
-    where: { candidateId },
-    orderBy: [{ createdAt: "desc" }, { applicationId: "desc" }],
-    skip,
-    take: limit,
-    include: {
-      jobListing: {
-        select: {
-          title: true,
-          location: true,
-          employmentType: true,
-          salaryRange: true,
-          employer: {
-            select: { company_name: true },
+  const [items, total] = await Promise.all([
+    prisma.job_listing_application.findMany({
+      where: { candidateId },
+      include: {
+        jobListing: {
+          select: {
+            title: true,
+            location: true,
+            employmentType: true,
+            salaryRange: true,
+            employer: { select: { company_name: true } },
           },
         },
       },
-    },
-  });
+      skip,
+      take: limit,
+      orderBy: { createdAt: "desc" },
+    }),
+    prisma.job_listing_application.count({ where: { candidateId } }),
+  ]);
 
-  return rows.map((r) => ({
-    id: r.applicationId,
-    jobListingId: r.jobListingId,
-    jobTitle: r.jobListing.title,
-    employerName: r.jobListing.employer.company_name,
-    location: r.jobListing.location,
-    employmentType: r.jobListing.employmentType,
-    salaryRange: r.jobListing.salaryRange,
-    status: r.status,
-    coverLetter: r.coverLetter,
-    appliedAt: r.createdAt,
-  }));
+  return {
+    items: items.map((a) => ({
+      id: a.applicationId,
+      jobListingId: a.jobListingId,
+      jobTitle: a.jobListing.title,
+      employerName: a.jobListing.employer.company_name,
+      location: a.jobListing.location,
+      employmentType: a.jobListing.employmentType,
+      salaryRange: a.jobListing.salaryRange,
+      status: a.status,
+      coverLetter: a.coverLetter,
+      appliedAt: a.createdAt,
+    })),
+    total,
+    page,
+    limit,
+    totalPages: Math.ceil(total / limit),
+  };
 }
