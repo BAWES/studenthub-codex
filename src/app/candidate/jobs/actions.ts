@@ -6,11 +6,13 @@
 // Jobs page: lists active job postings from all employers.
 // Apply: creates a job_listing_application record.
 // My Applications: lists the candidate's applications with status.
+// Uses the matching module to show per-candidate match scores.
 // ---------------------------------------------------------------------------
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireRoleCapability } from "@/modules/auth/session";
+import { matchCandidateToJob } from "@/modules/matching/actions";
 import {
   listCandidateJobsSchema,
   getCandidateJobSchema,
@@ -44,9 +46,10 @@ async function getCandidateId(): Promise<number> {
 export async function listCandidateJobs(
   input: ListCandidateJobsInput = {},
 ): Promise<{ success: true; jobs: CandidateJobRow[]; total: number }> {
-  await requireRoleCapability("candidate", "candidate.read.own");
+  const session = await requireRoleCapability("candidate", "candidate.read.own");
+  const candidateId = Number(session.id);
 
-  const { page, limit, q, employmentType, location } =
+  const { page, limit, q, employmentType, location, sortBy } =
     listCandidateJobsSchema.parse(input);
 
   const where: Record<string, unknown> = { status: "active" };
@@ -72,7 +75,30 @@ export async function listCandidateJobs(
     prisma.job_listing.count({ where: where as any }),
   ]);
 
-  const jobs: CandidateJobRow[] = dbRows.map((r) => ({
+  // Score each job for this candidate using the matching module
+  const scoredJobs = await Promise.all(
+    dbRows.map(async (r) => {
+      let matchScore: number | null = null;
+      try {
+        const result = await matchCandidateToJob({
+          candidateId,
+          jobId: r.jobListingId,
+        });
+        matchScore = result.score.overall;
+      } catch {
+        // If matching fails (e.g. missing data), leave score null
+        matchScore = null;
+      }
+      return { ...r, matchScore };
+    }),
+  );
+
+  // Sort by match score descending when requested
+  if (sortBy === "match") {
+    scoredJobs.sort((a, b) => (b.matchScore ?? 0) - (a.matchScore ?? 0));
+  }
+
+  const jobs: CandidateJobRow[] = scoredJobs.map((r) => ({
     jobListingId: r.jobListingId,
     title: r.title,
     description: r.description,
@@ -81,7 +107,7 @@ export async function listCandidateJobs(
     employmentType: r.employmentType,
     salaryRange: r.salaryRange,
     employerName: r.employer.company_name,
-    matchScore: null,
+    matchScore: r.matchScore,
     createdAt: r.createdAt,
     updatedAt: r.updatedAt,
   }));
@@ -115,6 +141,15 @@ export async function getCandidateJob(
     select: { status: true },
   });
 
+  // Get match score for this candidate-job pair
+  let matchScore: number | null = null;
+  try {
+    const result = await matchCandidateToJob({ candidateId, jobId });
+    matchScore = result.score.overall;
+  } catch {
+    matchScore = null;
+  }
+
   return {
     success: true,
     job: {
@@ -126,7 +161,7 @@ export async function getCandidateJob(
       employmentType: job.employmentType,
       salaryRange: job.salaryRange,
       employerName: job.employer.company_name,
-      matchScore: null,
+      matchScore,
       status: job.status,
       createdAt: job.createdAt,
       updatedAt: job.updatedAt,
