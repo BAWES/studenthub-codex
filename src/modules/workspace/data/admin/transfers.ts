@@ -1,62 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { formatDate, formatMoney } from "@/modules/workspace/format";
 
-export async function getAdminCompanyRows() {
-  const rows = await prisma.company.findMany({
-    where: { deleted: 0 },
-    orderBy: { company_updated_at: "desc" },
-    take: 60,
-    select: {
-      company_id: true,
-      company_name: true,
-      company_email: true,
-      no_of_active_requests: true,
-      company_approved_to_hire: true,
-      company_hourly_rate: true,
-      currency_code: true,
-      company_updated_at: true,
-      staff: { select: { staff_name: true } }
-    }
-  });
-
-  return rows.map((row) => ({
-    id: row.company_id,
-    name: row.company_name,
-    email: row.company_email ?? "No email",
-    owner: row.staff?.staff_name ?? "Unassigned",
-    requests: row.no_of_active_requests ?? 0,
-    status: row.company_approved_to_hire ? "Approved" : "Not approved",
-    rate: formatMoney(row.company_hourly_rate, row.currency_code ?? "KWD"),
-    updated: formatDate(row.company_updated_at)
-  }));
-}
-
-export async function getAdminRequestRows() {
-  const rows = await prisma.request.findMany({
-    orderBy: { request_updated_datetime: "desc" },
-    take: 60,
-    select: {
-      request_uuid: true,
-      request_position_title: true,
-      request_status: true,
-      request_number_of_employees: true,
-      request_updated_datetime: true,
-      company: { select: { company_name: true } },
-      staff: { select: { staff_name: true } }
-    }
-  });
-
-  return rows.map((row) => ({
-    id: row.request_uuid,
-    title: row.request_position_title ?? "Untitled request",
-    company: row.company?.company_name ?? "No company",
-    owner: row.staff?.staff_name ?? "Unassigned",
-    seats: row.request_number_of_employees ?? 0,
-    status: row.request_status ?? "No status",
-    updated: formatDate(row.request_updated_datetime)
-  }));
-}
-
 export async function getAdminTransferRows() {
   const rows = await prisma.transfer.findMany({
     where: { deleted: 0 },
@@ -168,33 +112,4 @@ export async function getAdminTransferDetail(transferId: number) {
       meta: formatMoney(entry.credit_amount, entry.credit_currency ?? transfer?.currency_code ?? "KWD")
     }))
   };
-}
-
-export async function getAdminCandidateRows() {
-  const rows = await prisma.candidate.findMany({
-    where: { deleted: 0 },
-    orderBy: { candidate_updated_at: "desc" },
-    take: 60,
-    select: {
-      candidate_id: true,
-      candidate_name: true,
-      candidate_email: true,
-      candidate_status: true,
-      approved: true,
-      candidate_hourly_rate: true,
-      currency_code: true,
-      candidate_updated_at: true,
-      country: { select: { country_name_en: true } }
-    }
-  });
-
-  return rows.map((row) => ({
-    id: row.candidate_id,
-    name: row.candidate_name,
-    email: row.candidate_email,
-    country: row.country?.country_name_en ?? "No country",
-    status: row.approved === 0 ? "Needs review" : row.candidate_status === 10 ? "Active" : `Status ${row.candidate_status}`,
-    rate: formatMoney(row.candidate_hourly_rate, row.currency_code ?? "KWD"),
-    updated: formatDate(row.candidate_updated_at)
-  }));
 }
