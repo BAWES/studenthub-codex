@@ -10,7 +10,7 @@ import { prisma } from "@/lib/prisma";
 import { requireCapability, requireRoleCapability } from "@/modules/auth/session";
 import { verifyYiiPassword } from "@/modules/auth/password";
 import bcrypt from "bcryptjs";
-import { getCandidateDetail } from "@/modules/workspace/data";
+import { getCandidateDetail } from "@/modules/workspace/data/candidate";
 import { getCandidateProfileSchema, type GetCandidateProfileInput } from "./schemas";
 
 // ---------------------------------------------------------------------------

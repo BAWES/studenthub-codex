@@ -2,7 +2,7 @@ import type { Prisma } from "@prisma/client";
 import type { Route } from "next";
 import { prisma } from "@/lib/prisma";
 import { formatDate, formatMoney } from "@/modules/workspace/format";
-import { getCandidateDetail } from "@/modules/workspace/data";
+import { getCandidateDetail } from "@/modules/workspace/data/candidate";
 
 export type CandidateSearchRole = "admin" | "staff";
 export type CandidateSearchFilter = "all" | "active" | "needs-review" | "incomplete" | "civil-id";

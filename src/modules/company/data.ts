@@ -1,9 +1,11 @@
 // Re-export company workspace data functions for the company portal.
-// Functions remain in workspace/data.ts — this barrel provides the target path
-// for consumers to migrate their imports incrementally.
+// Functions now live in workspace/data/company.ts — this barrel provides
+// a clean import path for consumers.
 export {
+  getCompanyDetail,
   getCompanyWorkspace,
   getCompanyAccountRows,
   getCompanyAccountDetail,
   getCompanyRequestRows,
-} from "../workspace/data";
+  getCompanyRequestDetail,
+} from "@/modules/workspace/data/company";
