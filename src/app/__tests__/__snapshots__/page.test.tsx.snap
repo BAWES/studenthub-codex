@@ -1599,13 +1599,13 @@ exports[`Landing page (marketing redesign) > Snapshot — landing page full layo
         <h2
           class="shBenefitsTitle text-center"
         >
-          Free to start. Upgrade when you're ready.
+          Completely free for students. Always.
         </h2>
         <p
           class="max-w-[520px] mx-auto mt-2 leading-relaxed"
           style="color: var(--muted);"
         >
-          No upfront cost. No hidden fees. Pay only when you need premium features.
+          Registration is completely free for students. No hidden fees, no subscriptions — ever.
         </p>
       </div>
       <div
@@ -1645,8 +1645,17 @@ exports[`Landing page (marketing redesign) > Snapshot — landing page full layo
       >
         <div
           class="relative rounded-xl p-6 transition-all duration-[280ms] flex flex-col hover:-translate-y-1"
-          style="background: var(--sh-glass-bg); border: 1px solid var(--sh-glass-border); box-shadow: 0 2px 8px rgba(0,0,0,0.04);"
+          style="background: linear-gradient(135deg, var(--sh-glass-bg-strong), var(--sh-info-bg)); border: 1.5px solid var(--sh-info); box-shadow: 0 8px 32px rgba(0,0,0,0.08);"
         >
+          <div
+            class="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-black uppercase"
+            style="background: var(--sh-info); color: var(--sh-info-text, white);"
+          >
+            <span
+              data-testid="icon-sparkles"
+            />
+            Most popular
+          </div>
           <strong
             class="text-lg"
             style="color: var(--ink);"
@@ -1657,7 +1666,7 @@ exports[`Landing page (marketing redesign) > Snapshot — landing page full layo
             class="text-xs mt-1 mb-4"
             style="color: var(--muted);"
           >
-            Get started with a complete candidate profile.
+            Completely free for students. No hidden fees, no subscriptions.
           </p>
           <div
             class="mb-5"
@@ -1696,7 +1705,7 @@ exports[`Landing page (marketing redesign) > Snapshot — landing page full layo
               <span
                 data-testid="icon-check"
               />
-              Search and browse open roles
+              AI-matched work placements
             </li>
             <li
               class="flex items-start gap-2 text-sm"
@@ -1705,7 +1714,34 @@ exports[`Landing page (marketing redesign) > Snapshot — landing page full layo
               <span
                 data-testid="icon-check"
               />
-              Apply to unlimited positions
+              3-month rotation positions
+            </li>
+            <li
+              class="flex items-start gap-2 text-sm"
+              style="color: var(--ink);"
+            >
+              <span
+                data-testid="icon-check"
+              />
+              Multiple placements across industries
+            </li>
+            <li
+              class="flex items-start gap-2 text-sm"
+              style="color: var(--ink);"
+            >
+              <span
+                data-testid="icon-check"
+              />
+              Build a stacked CV by graduation
+            </li>
+            <li
+              class="flex items-start gap-2 text-sm"
+              style="color: var(--ink);"
+            >
+              <span
+                data-testid="icon-check"
+              />
+              ID card with QR code for compliance
             </li>
             <li
               class="flex items-start gap-2 text-sm"
@@ -1716,236 +1752,12 @@ exports[`Landing page (marketing redesign) > Snapshot — landing page full layo
               />
               Email notifications
             </li>
-            <li
-              class="flex items-start gap-2 text-sm"
-              style="color: var(--ink);"
-            >
-              <span
-                data-testid="icon-check"
-              />
-              Basic application tracking
-            </li>
-          </ul>
-          <a
-            class="uiButton uiButton_defaultSize w-full justify-center uiButton_ghost"
-            href="/signup?role=candidate"
-          >
-            Create your free profile
-             
-            <span
-              data-testid="icon-arrow-up-right"
-            />
-          </a>
-        </div>
-        <div
-          class="relative rounded-xl p-6 transition-all duration-[280ms] flex flex-col hover:-translate-y-1"
-          style="background: linear-gradient(135deg, var(--sh-glass-bg-strong), var(--sh-info-bg)); border: 1.5px solid var(--sh-info); box-shadow: 0 8px 32px rgba(0,0,0,0.08);"
-        >
-          <div
-            class="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-black uppercase"
-            style="background: var(--sh-info); color: var(--sh-info-text, white);"
-          >
-            <span
-              data-testid="icon-sparkles"
-            />
-            Most popular
-          </div>
-          <strong
-            class="text-lg"
-            style="color: var(--ink);"
-          >
-            Pro
-          </strong>
-          <p
-            class="text-xs mt-1 mb-4"
-            style="color: var(--muted);"
-          >
-            Stand out and get placed faster.
-          </p>
-          <div
-            class="mb-5"
-          >
-            <span
-              class="text-4xl font-black"
-              style="color: var(--ink);"
-            >
-              £
-              9
-            </span>
-            <span
-              class="text-sm ml-1"
-              style="color: var(--muted);"
-            >
-              /
-              month
-            </span>
-          </div>
-          <ul
-            class="grid gap-2 mb-6 flex-1"
-          >
-            <li
-              class="flex items-start gap-2 text-sm"
-              style="color: var(--ink);"
-            >
-              <span
-                data-testid="icon-check"
-              />
-              Everything in Free
-            </li>
-            <li
-              class="flex items-start gap-2 text-sm"
-              style="color: var(--ink);"
-            >
-              <span
-                data-testid="icon-check"
-              />
-              Profile boost — appear first in search
-            </li>
-            <li
-              class="flex items-start gap-2 text-sm"
-              style="color: var(--ink);"
-            >
-              <span
-                data-testid="icon-check"
-              />
-              Priority matching with employers
-            </li>
-            <li
-              class="flex items-start gap-2 text-sm"
-              style="color: var(--ink);"
-            >
-              <span
-                data-testid="icon-check"
-              />
-              Advanced application analytics
-            </li>
-            <li
-              class="flex items-start gap-2 text-sm"
-              style="color: var(--ink);"
-            >
-              <span
-                data-testid="icon-check"
-              />
-              CV review and optimization
-            </li>
-            <li
-              class="flex items-start gap-2 text-sm"
-              style="color: var(--ink);"
-            >
-              <span
-                data-testid="icon-check"
-              />
-              Priority support
-            </li>
           </ul>
           <a
             class="uiButton uiButton_defaultSize w-full justify-center uiButton_default"
-            href="/signup?role=candidate&plan=pro"
+            href="/signup?role=candidate"
           >
-            Go Pro
-             
-            <span
-              data-testid="icon-arrow-up-right"
-            />
-          </a>
-        </div>
-        <div
-          class="relative rounded-xl p-6 transition-all duration-[280ms] flex flex-col hover:-translate-y-1"
-          style="background: var(--sh-glass-bg); border: 1px solid var(--sh-glass-border); box-shadow: 0 2px 8px rgba(0,0,0,0.04);"
-        >
-          <strong
-            class="text-lg"
-            style="color: var(--ink);"
-          >
-            Premium
-          </strong>
-          <p
-            class="text-xs mt-1 mb-4"
-            style="color: var(--muted);"
-          >
-            For candidates who want every advantage.
-          </p>
-          <div
-            class="mb-5"
-          >
-            <span
-              class="text-4xl font-black"
-              style="color: var(--ink);"
-            >
-              £
-              19
-            </span>
-            <span
-              class="text-sm ml-1"
-              style="color: var(--muted);"
-            >
-              /
-              month
-            </span>
-          </div>
-          <ul
-            class="grid gap-2 mb-6 flex-1"
-          >
-            <li
-              class="flex items-start gap-2 text-sm"
-              style="color: var(--ink);"
-            >
-              <span
-                data-testid="icon-check"
-              />
-              Everything in Pro
-            </li>
-            <li
-              class="flex items-start gap-2 text-sm"
-              style="color: var(--ink);"
-            >
-              <span
-                data-testid="icon-check"
-              />
-              Dedicated placement consultant
-            </li>
-            <li
-              class="flex items-start gap-2 text-sm"
-              style="color: var(--ink);"
-            >
-              <span
-                data-testid="icon-check"
-              />
-              Guaranteed interview within 2 weeks
-            </li>
-            <li
-              class="flex items-start gap-2 text-sm"
-              style="color: var(--ink);"
-            >
-              <span
-                data-testid="icon-check"
-              />
-              Interview coaching and prep
-            </li>
-            <li
-              class="flex items-start gap-2 text-sm"
-              style="color: var(--ink);"
-            >
-              <span
-                data-testid="icon-check"
-              />
-              CV writing service
-            </li>
-            <li
-              class="flex items-start gap-2 text-sm"
-              style="color: var(--ink);"
-            >
-              <span
-                data-testid="icon-check"
-              />
-              Salary negotiation support
-            </li>
-          </ul>
-          <a
-            class="uiButton uiButton_defaultSize w-full justify-center uiButton_ghost"
-            href="/signup?role=candidate&plan=premium"
-          >
-            Go Premium
+            Create your free profile
              
             <span
               data-testid="icon-arrow-up-right"
@@ -1969,18 +1781,18 @@ exports[`Landing page (marketing redesign) > Snapshot — landing page full layo
         <p
           class="text-[var(--sh-info)] text-[11px] font-black uppercase tracking-wider mb-2"
         >
-          Start your placement journey
+          Start building your career
         </p>
         <h2
           class="shBenefitsTitle text-center"
         >
-          Your next role is one profile away.
+          Your future CV starts today.
         </h2>
         <p
           class="max-w-[480px] mx-auto mt-2 mb-6 leading-relaxed"
           style="color: var(--muted);"
         >
-          Create your free profile in under 3 minutes. No CV required — just your experience and what you're looking for. Employers are hiring right now.
+          Create your free profile in under 3 minutes. StudentHub matches you with paid placements across different companies. Rotate every ~3 months, build experience across multiple roles, and graduate way ahead of your peers. Free, always.
         </p>
         <a
           class="uiButton uiButton_default uiButton_lg shGlowButton"
@@ -1996,7 +1808,7 @@ exports[`Landing page (marketing redesign) > Snapshot — landing page full layo
           style="color: var(--muted);"
         >
           <span>
-            1,200+ candidates placed this year
+            1,200+ students placed this year
           </span>
           <span>
             4.8★ satisfaction
@@ -2076,7 +1888,7 @@ exports[`Landing page (marketing redesign) > Snapshot — landing page full layo
             class="uiButton uiButton_default uiButton_defaultSize"
             href="/signup?role=candidate"
           >
-            Create free candidate profile
+            Create free student profile
              
             <span
               data-testid="icon-sparkles"
@@ -3643,13 +3455,13 @@ exports[`Landing page (marketing redesign) > Snapshot — landing page full layo
         <h2
           class="shBenefitsTitle text-center"
         >
-          Free to start. Upgrade when you're ready.
+          Completely free for students. Always.
         </h2>
         <p
           class="max-w-[520px] mx-auto mt-2 leading-relaxed"
           style="color: var(--muted);"
         >
-          No upfront cost. No hidden fees. Pay only when you need premium features.
+          Registration is completely free for students. No hidden fees, no subscriptions — ever.
         </p>
       </div>
       <div
@@ -3689,8 +3501,17 @@ exports[`Landing page (marketing redesign) > Snapshot — landing page full layo
       >
         <div
           class="relative rounded-xl p-6 transition-all duration-[280ms] flex flex-col hover:-translate-y-1"
-          style="background: var(--sh-glass-bg); border: 1px solid var(--sh-glass-border); box-shadow: 0 2px 8px rgba(0,0,0,0.04);"
+          style="background: linear-gradient(135deg, var(--sh-glass-bg-strong), var(--sh-info-bg)); border: 1.5px solid var(--sh-info); box-shadow: 0 8px 32px rgba(0,0,0,0.08);"
         >
+          <div
+            class="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-black uppercase"
+            style="background: var(--sh-info); color: var(--sh-info-text, white);"
+          >
+            <span
+              data-testid="icon-sparkles"
+            />
+            Most popular
+          </div>
           <strong
             class="text-lg"
             style="color: var(--ink);"
@@ -3701,7 +3522,7 @@ exports[`Landing page (marketing redesign) > Snapshot — landing page full layo
             class="text-xs mt-1 mb-4"
             style="color: var(--muted);"
           >
-            Get started with a complete candidate profile.
+            Completely free for students. No hidden fees, no subscriptions.
           </p>
           <div
             class="mb-5"
@@ -3740,7 +3561,7 @@ exports[`Landing page (marketing redesign) > Snapshot — landing page full layo
               <span
                 data-testid="icon-check"
               />
-              Search and browse open roles
+              AI-matched work placements
             </li>
             <li
               class="flex items-start gap-2 text-sm"
@@ -3749,7 +3570,34 @@ exports[`Landing page (marketing redesign) > Snapshot — landing page full layo
               <span
                 data-testid="icon-check"
               />
-              Apply to unlimited positions
+              3-month rotation positions
+            </li>
+            <li
+              class="flex items-start gap-2 text-sm"
+              style="color: var(--ink);"
+            >
+              <span
+                data-testid="icon-check"
+              />
+              Multiple placements across industries
+            </li>
+            <li
+              class="flex items-start gap-2 text-sm"
+              style="color: var(--ink);"
+            >
+              <span
+                data-testid="icon-check"
+              />
+              Build a stacked CV by graduation
+            </li>
+            <li
+              class="flex items-start gap-2 text-sm"
+              style="color: var(--ink);"
+            >
+              <span
+                data-testid="icon-check"
+              />
+              ID card with QR code for compliance
             </li>
             <li
               class="flex items-start gap-2 text-sm"
@@ -3760,236 +3608,12 @@ exports[`Landing page (marketing redesign) > Snapshot — landing page full layo
               />
               Email notifications
             </li>
-            <li
-              class="flex items-start gap-2 text-sm"
-              style="color: var(--ink);"
-            >
-              <span
-                data-testid="icon-check"
-              />
-              Basic application tracking
-            </li>
-          </ul>
-          <a
-            class="uiButton uiButton_defaultSize w-full justify-center uiButton_ghost"
-            href="/signup?role=candidate"
-          >
-            Create your free profile
-             
-            <span
-              data-testid="icon-arrow-up-right"
-            />
-          </a>
-        </div>
-        <div
-          class="relative rounded-xl p-6 transition-all duration-[280ms] flex flex-col hover:-translate-y-1"
-          style="background: linear-gradient(135deg, var(--sh-glass-bg-strong), var(--sh-info-bg)); border: 1.5px solid var(--sh-info); box-shadow: 0 8px 32px rgba(0,0,0,0.08);"
-        >
-          <div
-            class="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-black uppercase"
-            style="background: var(--sh-info); color: var(--sh-info-text, white);"
-          >
-            <span
-              data-testid="icon-sparkles"
-            />
-            Most popular
-          </div>
-          <strong
-            class="text-lg"
-            style="color: var(--ink);"
-          >
-            Pro
-          </strong>
-          <p
-            class="text-xs mt-1 mb-4"
-            style="color: var(--muted);"
-          >
-            Stand out and get placed faster.
-          </p>
-          <div
-            class="mb-5"
-          >
-            <span
-              class="text-4xl font-black"
-              style="color: var(--ink);"
-            >
-              £
-              9
-            </span>
-            <span
-              class="text-sm ml-1"
-              style="color: var(--muted);"
-            >
-              /
-              month
-            </span>
-          </div>
-          <ul
-            class="grid gap-2 mb-6 flex-1"
-          >
-            <li
-              class="flex items-start gap-2 text-sm"
-              style="color: var(--ink);"
-            >
-              <span
-                data-testid="icon-check"
-              />
-              Everything in Free
-            </li>
-            <li
-              class="flex items-start gap-2 text-sm"
-              style="color: var(--ink);"
-            >
-              <span
-                data-testid="icon-check"
-              />
-              Profile boost — appear first in search
-            </li>
-            <li
-              class="flex items-start gap-2 text-sm"
-              style="color: var(--ink);"
-            >
-              <span
-                data-testid="icon-check"
-              />
-              Priority matching with employers
-            </li>
-            <li
-              class="flex items-start gap-2 text-sm"
-              style="color: var(--ink);"
-            >
-              <span
-                data-testid="icon-check"
-              />
-              Advanced application analytics
-            </li>
-            <li
-              class="flex items-start gap-2 text-sm"
-              style="color: var(--ink);"
-            >
-              <span
-                data-testid="icon-check"
-              />
-              CV review and optimization
-            </li>
-            <li
-              class="flex items-start gap-2 text-sm"
-              style="color: var(--ink);"
-            >
-              <span
-                data-testid="icon-check"
-              />
-              Priority support
-            </li>
           </ul>
           <a
             class="uiButton uiButton_defaultSize w-full justify-center uiButton_default"
-            href="/signup?role=candidate&plan=pro"
+            href="/signup?role=candidate"
           >
-            Go Pro
-             
-            <span
-              data-testid="icon-arrow-up-right"
-            />
-          </a>
-        </div>
-        <div
-          class="relative rounded-xl p-6 transition-all duration-[280ms] flex flex-col hover:-translate-y-1"
-          style="background: var(--sh-glass-bg); border: 1px solid var(--sh-glass-border); box-shadow: 0 2px 8px rgba(0,0,0,0.04);"
-        >
-          <strong
-            class="text-lg"
-            style="color: var(--ink);"
-          >
-            Premium
-          </strong>
-          <p
-            class="text-xs mt-1 mb-4"
-            style="color: var(--muted);"
-          >
-            For candidates who want every advantage.
-          </p>
-          <div
-            class="mb-5"
-          >
-            <span
-              class="text-4xl font-black"
-              style="color: var(--ink);"
-            >
-              £
-              19
-            </span>
-            <span
-              class="text-sm ml-1"
-              style="color: var(--muted);"
-            >
-              /
-              month
-            </span>
-          </div>
-          <ul
-            class="grid gap-2 mb-6 flex-1"
-          >
-            <li
-              class="flex items-start gap-2 text-sm"
-              style="color: var(--ink);"
-            >
-              <span
-                data-testid="icon-check"
-              />
-              Everything in Pro
-            </li>
-            <li
-              class="flex items-start gap-2 text-sm"
-              style="color: var(--ink);"
-            >
-              <span
-                data-testid="icon-check"
-              />
-              Dedicated placement consultant
-            </li>
-            <li
-              class="flex items-start gap-2 text-sm"
-              style="color: var(--ink);"
-            >
-              <span
-                data-testid="icon-check"
-              />
-              Guaranteed interview within 2 weeks
-            </li>
-            <li
-              class="flex items-start gap-2 text-sm"
-              style="color: var(--ink);"
-            >
-              <span
-                data-testid="icon-check"
-              />
-              Interview coaching and prep
-            </li>
-            <li
-              class="flex items-start gap-2 text-sm"
-              style="color: var(--ink);"
-            >
-              <span
-                data-testid="icon-check"
-              />
-              CV writing service
-            </li>
-            <li
-              class="flex items-start gap-2 text-sm"
-              style="color: var(--ink);"
-            >
-              <span
-                data-testid="icon-check"
-              />
-              Salary negotiation support
-            </li>
-          </ul>
-          <a
-            class="uiButton uiButton_defaultSize w-full justify-center uiButton_ghost"
-            href="/signup?role=candidate&plan=premium"
-          >
-            Go Premium
+            Create your free profile
              
             <span
               data-testid="icon-arrow-up-right"
@@ -4013,24 +3637,24 @@ exports[`Landing page (marketing redesign) > Snapshot — landing page full layo
         <p
           class="text-[var(--sh-info)] text-[11px] font-black uppercase tracking-wider mb-2"
         >
-          Start your placement journey
+          Start building your career
         </p>
         <h2
           class="shBenefitsTitle text-center"
         >
-          Your next role is one profile away.
+          Your future CV starts today.
         </h2>
         <p
           class="max-w-[480px] mx-auto mt-2 mb-6 leading-relaxed"
           style="color: var(--muted);"
         >
-          Create your free profile in under 3 minutes. No CV required — just your experience and what you're looking for. Employers are hiring right now.
+          Create your free profile in under 3 minutes. StudentHub matches you with paid placements across different companies. Rotate every ~3 months, build experience across multiple roles, and graduate way ahead of your peers. Free, always.
         </p>
         <a
           class="uiButton uiButton_default uiButton_lg shGlowButton"
           href="/signup?role=candidate"
         >
-          Create your free candidate profile
+          Create your free student profile
            
           <span
             data-testid="icon-chevron-right"
@@ -4041,7 +3665,7 @@ exports[`Landing page (marketing redesign) > Snapshot — landing page full layo
           style="color: var(--muted);"
         >
           <span>
-            1,200+ candidates placed this year
+            1,200+ students placed this year
           </span>
           <span>
             4.8★ satisfaction

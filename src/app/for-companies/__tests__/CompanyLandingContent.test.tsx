@@ -98,13 +98,13 @@ describe("Company landing page (/for-companies)", () => {
       screen.getByLabelText(/hiring pain points and solutions/i)
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/sifting through hundreds/i)
+      screen.getByText(/staff sourcing, compliance, and payroll eat your margins/i)
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/chasing timesheets and invoices/i)
+      screen.getByText(/workers come and go.*consistency/i)
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/compliance risk from expired/i)
+      screen.getByText(/compliance risk is a business risk/i)
     ).toBeInTheDocument();
   });
 
@@ -132,7 +132,7 @@ describe("Company landing page (/for-companies)", () => {
     render(<CompanyLandingContent {...defaultProps} />);
     const ctaSection = screen.getByLabelText(/get started as a company/i);
     expect(
-      within(ctaSection).getByText(/200\+ employers hiring/i)
+      within(ctaSection).getByText(/200\+ companies using studenthub/i)
     ).toBeInTheDocument();
   });
 

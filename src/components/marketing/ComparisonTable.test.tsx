@@ -1,52 +1,67 @@
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import ComparisonTable from "./ComparisonTable";
 
 describe("ComparisonTable", () => {
-  it("renders section with alternatives label", () => {
+  it("renders section with comparison label", () => {
     render(<ComparisonTable />);
     expect(screen.getByLabelText(/comparison/i)).toBeInTheDocument();
   });
 
-  it("renders candidate comparison with free tier", () => {
+  it("renders candidate comparison with StudentHub header", () => {
     render(<ComparisonTable persona="candidate" />);
-    expect(screen.getByText(/compare alternatives/i)).toBeInTheDocument();
-    expect(screen.getByText("StudentHub")).toBeInTheDocument();
+    // Content may be duplicated in test renderer — use getAllByText
+    const sh = screen.getAllByText("StudentHub");
+    expect(sh.length).toBeGreaterThanOrEqual(1);
+    const jobBoards = screen.getAllByText("Generic job boards");
+    expect(jobBoards.length).toBeGreaterThanOrEqual(1);
+    const emailSheets = screen.getAllByText("Email & spreadsheets");
+    expect(emailSheets.length).toBeGreaterThanOrEqual(1);
+    const traditional = screen.getAllByText("Traditional agencies");
+    expect(traditional.length).toBeGreaterThanOrEqual(1);
   });
 
-  it("renders competitor names for candidate", () => {
+  it("renders candidate-specific heading", () => {
     render(<ComparisonTable persona="candidate" />);
-    expect(screen.getByText("Indeed")).toBeInTheDocument();
-    expect(screen.getByText("LinkedIn")).toBeInTheDocument();
-    expect(screen.getByText("Reed")).toBeInTheDocument();
+    const headings = screen.getAllByText("Why candidates choose StudentHub.");
+    expect(headings.length).toBeGreaterThanOrEqual(1);
   });
 
-  it("renders expandable rows with toggle buttons", async () => {
-    const user = userEvent.setup();
-    render(<ComparisonTable persona="candidate" />);
-    const expandBtns = screen.getAllByRole("button", { name: /expand/i });
-    expect(expandBtns.length).toBeGreaterThan(0);
-
-    // Click expand — content should appear
-    await user.click(expandBtns[0]);
-    // The expanded content will have text
-    expect(screen.getByText(/expand/i)).toBeInTheDocument();
-  });
-
-  it("renders staff comparison with different competitors", () => {
+  it("renders staff-specific heading", () => {
     render(<ComparisonTable persona="staff" />);
-    expect(screen.getByText("Bullhorn")).toBeInTheDocument();
+    const headings = screen.getAllByText("See how StudentHub compares.");
+    expect(headings.length).toBeGreaterThanOrEqual(1);
   });
 
-  it("renders company comparison", () => {
+  it("renders company-specific heading", () => {
     render(<ComparisonTable persona="company" />);
-    expect(screen.getByText("Workable")).toBeInTheDocument();
+    const headings = screen.getAllByText("Why companies choose StudentHub.");
+    expect(headings.length).toBeGreaterThanOrEqual(1);
   });
 
-  it("renders inspector comparison", () => {
+  it("renders inspector-specific heading", () => {
     render(<ComparisonTable persona="inspector" />);
-    expect(screen.getByText("Qualtrax")).toBeInTheDocument();
+    const headings = screen.getAllByText("See how StudentHub compares.");
+    expect(headings.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it("renders admin with company comparison", () => {
+    render(<ComparisonTable persona="admin" />);
+    expect(screen.getByText("Generic ERPs")).toBeInTheDocument();
+    expect(screen.getByText("Manual processes")).toBeInTheDocument();
+  });
+
+  it("renders candidate feature rows with data", () => {
+    render(<ComparisonTable persona="candidate" />);
+    // Category labels may be duplicated — use getAllByText
+    const profiles = screen.getAllByText("Profile");
+    expect(profiles.length).toBeGreaterThanOrEqual(1);
+    const searches = screen.getAllByText("Search");
+    expect(searches.length).toBeGreaterThanOrEqual(1);
+    const payments = screen.getAllByText("Payments");
+    expect(payments.length).toBeGreaterThanOrEqual(1);
+    const documents = screen.getAllByText("Documents");
+    expect(documents.length).toBeGreaterThanOrEqual(1);
   });
 
   it("applies custom className", () => {
