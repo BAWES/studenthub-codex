@@ -232,6 +232,7 @@ beforeEach(() => {
 describe("listJobApplications", () => {
   it("returns applications for a job listing", async () => {
     const dbRow = {
+      id: 1,
       applicationId: 1,
       jobListingId: 42,
       candidateId: 100,
@@ -305,6 +306,7 @@ describe("listJobApplications", () => {
 
   it("handles missing candidate name gracefully", async () => {
     const dbRow = {
+      id: 2,
       applicationId: 2,
       jobListingId: 42,
       candidateId: 101,
@@ -323,6 +325,71 @@ describe("listJobApplications", () => {
     if (result.success) {
       expect(result.applications[0].candidateName).toBeNull();
     }
+  });
+
+  it("falls back to candidate_name_ar when candidate_name is null", async () => {
+    const dbRow = {
+      id: 3,
+      applicationId: 3,
+      jobListingId: 42,
+      candidateId: 102,
+      status: "applied",
+      coverLetter: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      candidate: {
+        candidate_id: 102,
+        candidate_name: null,
+        candidate_name_ar: 'أحمد السابح',
+      },
+    };
+    mockFindMany.mockResolvedValue([dbRow]);
+    mockCount.mockResolvedValue(1);
+
+    const result = await actions.listJobApplications({ jobListingId: 42 });
+
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.applications[0].candidateName).toBe('أحمد السابح');
+    }
+  });
+
+  it("prefers candidate_name over candidate_name_ar when both exist", async () => {
+    const dbRow = {
+      id: 4,
+      applicationId: 4,
+      jobListingId: 42,
+      candidateId: 103,
+      status: "applied",
+      coverLetter: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      candidate: {
+        candidate_id: 103,
+        candidate_name: "Ahmed",
+        candidate_name_ar: 'أحمد',
+      },
+    };
+    mockFindMany.mockResolvedValue([dbRow]);
+    mockCount.mockResolvedValue(1);
+
+    const result = await actions.listJobApplications({ jobListingId: 42 });
+
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.applications[0].candidateName).toBe("Ahmed");
+    }
+  });
+
+  it("orders results by createdAt descending", async () => {
+    mockFindMany.mockResolvedValue([]);
+    mockCount.mockResolvedValue(0);
+
+    await actions.listJobApplications({ jobListingId: 42 });
+
+    expect(mockFindMany).toHaveBeenCalledWith(
+      expect.objectContaining({ orderBy: { createdAt: "desc" } }),
+    );
   });
 
   it("returns empty array when no applications exist", async () => {
@@ -408,6 +475,61 @@ describe("listJobApplicationsByEmployer", () => {
       expect.objectContaining({ where: {} }),
     );
   });
+
+  it("handles null candidate in by-employer results", async () => {
+    const dbRow = {
+      id: 3,
+      applicationId: 3,
+      jobListingId: 42,
+      candidateId: 103,
+      status: "applied",
+      coverLetter: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      jobListing: { title: "Designer" },
+      candidate: null,
+    };
+    mockFindMany.mockResolvedValue([dbRow]);
+    mockCount.mockResolvedValue(1);
+
+    const result = await actions.listJobApplicationsByEmployer({});
+
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.applications).toHaveLength(1);
+      expect(result.applications[0].candidateName).toBeNull();
+      expect(result.applications[0].jobTitle).toBe("Designer");
+    }
+  });
+
+  it("falls back to candidate_name_ar in by-employer results", async () => {
+    const dbRow = {
+      id: 4,
+      applicationId: 4,
+      jobListingId: 43,
+      candidateId: 104,
+      status: "applied",
+      coverLetter: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      jobListing: { title: "Engineer" },
+      candidate: {
+        candidate_id: 104,
+        candidate_name: null,
+        candidate_name_ar: 'فاطمة',
+      },
+    };
+    mockFindMany.mockResolvedValue([dbRow]);
+    mockCount.mockResolvedValue(1);
+
+    const result = await actions.listJobApplicationsByEmployer({});
+
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.applications[0].candidateName).toBe('فاطمة');
+      expect(result.applications[0].jobTitle).toBe("Engineer");
+    }
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -426,12 +548,12 @@ describe("updateApplicationStatus", () => {
     expect(result.success).toBe(true);
     expect(requireCapability).toHaveBeenCalledWith("company.write.linked");
     expect(mockUpdate).toHaveBeenCalledWith({
-      where: { applicationId: 1 },
+      where: { id: 1 },
       data: { status: "accepted" },
     });
   });
 
-  it("rejects when status changes to applied", async () => {
+  it("accepts when status changes to applied", async () => {
     mockUpdate.mockResolvedValue({ applicationId: 1, status: "applied" });
 
     const result = await actions.updateApplicationStatus({
