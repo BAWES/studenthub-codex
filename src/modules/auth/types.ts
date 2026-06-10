@@ -82,7 +82,10 @@ export type Capability =
  | "story.read"
  | "story.write"
  | "contracts.read"
- | "contracts.write";
+ | "contracts.write"
+ | "finance.write"
+ | "company.time.write"
+ | "company.time.read";
 
 export type SessionUser = {
   role: Role;

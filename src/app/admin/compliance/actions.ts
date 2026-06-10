@@ -245,7 +245,7 @@ export async function listComplianceRecords(
 
     const candidates = await prisma.candidate.findMany({
       where: candWhere as any,
-      orderBy: { updated_at: "desc" },
+      orderBy: { candidate_updated_at: "desc" },
       take: type === "candidate" ? limit : 10,
       skip: type === "candidate" ? skip : 0,
       select: {
@@ -254,7 +254,7 @@ export async function listComplianceRecords(
         candidate_email: true,
         approved: true,
         is_incomplete_profile: true,
-        updated_at: true,
+        candidate_updated_at: true,
       },
     });
 
@@ -270,7 +270,7 @@ export async function listComplianceRecords(
         title: c.candidate_name ?? "Unknown candidate",
         subtitle: c.candidate_email ?? "No email",
         status: statusParts.join(", "),
-        updated: formatDate(c.updated_at),
+        updated: formatDate(c.candidate_updated_at),
       });
     }
   }
@@ -331,7 +331,7 @@ export async function getComplianceRecord(
 
     if (!company) return null;
 
-    const idRequests = await prisma.candidate_id_request.findMany({
+    const idRequests = (await prisma.candidate_id_request.findMany({
       where: {
         // No direct link — show recent ones as context
         created_at: { gte: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000) },
@@ -344,7 +344,12 @@ export async function getComplianceRecord(
         rejection_reason: true,
         created_at: true,
       },
-    });
+    })).map((r) => ({
+      id: r.cir_uuid,
+      status: r.status ?? "pending",
+      rejection_reason: r.rejection_reason,
+      created_at: r.created_at,
+    }));
 
     return {
       type: "company",

@@ -197,7 +197,7 @@ export async function getInvoice(
             where: { deleted: 0 },
             include: {
               candidate: {
-                select: { candidate_first_name: true, candidate_last_name: true },
+                select: { candidate_name: true },
               },
             },
           },
@@ -206,7 +206,7 @@ export async function getInvoice(
     },
   });
 
-  if (!invoice || !invoice.transfer) {
+  if (!invoice || !(invoice as any).transfer) {
     return { invoice: null, candidate_payouts: [], metrics: [] };
   }
 
@@ -216,7 +216,7 @@ export async function getInvoice(
   const candidatePayouts = (t.transfer_candidate ?? []).map((tc: any) => ({
     tc_id: tc.tc_id,
     candidate_name: tc.candidate
-      ? `${tc.candidate.candidate_first_name ?? ""} ${tc.candidate.candidate_last_name ?? ""}`.trim()
+      ? tc.candidate.candidate_name ?? null
       : null,
     hours: tc.hours ?? null,
     amount: tc.candidate_total ? tc.candidate_total.toString() : null,
