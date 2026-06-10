@@ -14,6 +14,31 @@ export const getCompanyRequestDetailSchema = z.object({
   uuid: z.string().min(1, "Request UUID is required"),
 });
 
+export const updateRequestStatusSchema = z.object({
+  uuid: z.string().min(1, "Request UUID is required"),
+  status: z.enum(
+    [
+      "pending",
+      "started",
+      "delivered",
+      "cancelled",
+      "finished_by_recruitment",
+      "re_work",
+    ],
+    {
+      errorMap: () => ({
+        message:
+          "Status must be one of: pending, started, delivered, cancelled, finished_by_recruitment, re_work",
+      }),
+    },
+  ),
+  feedback: z.string().max(255).optional(),
+});
+
+export const deleteRequestSchema = z.object({
+  uuid: z.string().min(1, "Request UUID is required"),
+});
+
 export const createCompanyRequestSchema = z.object({
   company_id: z.number({ required_error: "Company ID is required" }).int().positive(),
   position_title: z
@@ -31,6 +56,8 @@ export const createCompanyRequestSchema = z.object({
 
 export type ListCompanyRequestsInput = z.input<typeof listCompanyRequestsSchema>;
 export type CreateCompanyRequestInput = z.input<typeof createCompanyRequestSchema>;
+export type UpdateRequestStatusInput = z.input<typeof updateRequestStatusSchema>;
+export type DeleteRequestInput = z.input<typeof deleteRequestSchema>;
 
 export type CompanyRequestListItem = {
   request_uuid: string;
