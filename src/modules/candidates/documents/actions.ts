@@ -7,20 +7,12 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
+import { DOCUMENT_TYPES } from "./constants";
+import type { DocumentType } from "./constants";
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
-
-export const DOCUMENT_TYPES = [
-  "photo",
-  "cv",
-  "video",
-  "civilFront",
-  "civilBack",
-] as const;
-
-export type DocumentType = (typeof DOCUMENT_TYPES)[number];
 
 /** A single document entry returned from list / get. */
 export type CandidateDocumentItem = {

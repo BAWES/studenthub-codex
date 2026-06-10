@@ -459,4 +459,8 @@ export async function getAdminTransferDetail(
 /**
  * @deprecated Use getTransferDetail() instead.
  */
-export const getTransfer = getTransferDetail;
+export async function getTransfer(
+  transferId: number,
+): Promise<TransferDetail> {
+  return getTransferDetail(transferId);
+}
