@@ -2,13 +2,15 @@ import { describe, it, expect } from "vitest";
 import {
   updateRequestStatusSchema,
   deleteRequestSchema,
+  getCompanyRequestDetailSchema,
 } from "../schemas";
 
 // ---------------------------------------------------------------------------
 // Pure logic: Zod schema validation for company/requests/[id] server actions
 //
-// updateRequestStatusSchema and deleteRequestSchema are validated here
-// without mocking prisma or session infra.
+// updateRequestStatusSchema, deleteRequestSchema, and
+// getCompanyRequestDetailSchema are validated here without mocking prisma or
+// session infra.
 // ---------------------------------------------------------------------------
 
 describe("updateRequestStatusSchema", () => {
@@ -115,6 +117,48 @@ describe("deleteRequestSchema", () => {
 
   it("rejects missing UUID", () => {
     const result = deleteRequestSchema.safeParse({});
+    expect(result.success).toBe(false);
+  });
+});
+
+describe("getCompanyRequestDetailSchema", () => {
+  it("accepts a valid UUID string", () => {
+    const result = getCompanyRequestDetailSchema.safeParse({
+      uuid: "550e8400-e29b-41d4-a716-446655440000",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts a short non-UUID string", () => {
+    const result = getCompanyRequestDetailSchema.safeParse({
+      uuid: "abc-123",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects empty string UUID", () => {
+    const result = getCompanyRequestDetailSchema.safeParse({
+      uuid: "",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects missing UUID", () => {
+    const result = getCompanyRequestDetailSchema.safeParse({});
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects null UUID", () => {
+    const result = getCompanyRequestDetailSchema.safeParse({
+      uuid: null,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects numeric UUID", () => {
+    const result = getCompanyRequestDetailSchema.safeParse({
+      uuid: 12345,
+    });
     expect(result.success).toBe(false);
   });
 });
