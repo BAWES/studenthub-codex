@@ -1,6 +1,5 @@
 export { default as HeroSection } from "./HeroSection";
-export type { HeroSectionProps, Persona } from "./HeroSection";
-export { personaContent } from "./HeroSection";
+export type { HeroSectionProps } from "./HeroSection";
 
 export { default as FeatureGrid } from "./FeatureGrid";
 export type { FeatureGridProps, FeatureGridPersona } from "./FeatureGrid";
@@ -16,3 +15,12 @@ export type { ComparisonTableProps, ComparisonRow } from "./ComparisonTable";
 
 export { default as PersonaSwitcher } from "./PersonaSwitcher";
 export type { PersonaSwitcherProps, SwitcherPersona } from "./PersonaSwitcher";
+
+export { default as HowItWorks } from "./HowItWorks";
+export type { HowItWorksProps } from "./HowItWorks";
+
+export { default as EmployerSection } from "./EmployerSection";
+export type { EmployerSectionProps } from "./EmployerSection";
+
+export { default as StatsSection } from "./StatsSection";
+export type { StatsSectionProps } from "./StatsSection";

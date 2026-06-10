@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { Check, X, Minus } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -545,9 +546,9 @@ export default function ComparisonTable({ persona = "candidate", className }: Co
           {/* Body grouped by category */}
           <tbody>
             {categories.map((cat, ci) => (
-              <>
+              <React.Fragment key={`cat-group-${ci}`}>
                 {/* Category header row */}
-                <tr key={`cat-${ci}`}>
+                <tr>
                   <td
                     colSpan={5}
                     className="p-2 px-3 text-[10px] font-black uppercase tracking-wider"
@@ -601,7 +602,7 @@ export default function ComparisonTable({ persona = "candidate", className }: Co
                     ))}
                   </tr>
                 ))}
-              </>
+              </React.Fragment>
             ))}
           </tbody>
         </table>

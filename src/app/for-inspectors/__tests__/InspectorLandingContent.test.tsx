@@ -54,6 +54,9 @@ vi.mock("lucide-react", () => ({
   UsersRound: () => <span data-testid="icon-users-round" />,
   X: () => <span data-testid="icon-x" />,
   Zap: () => <span data-testid="icon-zap" />,
+  Briefcase: () => <span data-testid="icon-briefcase" />,
+  ArrowDown: () => <span data-testid="icon-arrow-down" />,
+  GraduationCap: () => <span data-testid="icon-graduation-cap" />,
 }));
 
 // ── Mock ThemeToggle ──────────────────────────────────────────
@@ -73,10 +76,10 @@ import type { InspectorLandingContentProps } from "../InspectorLandingContent";
 describe("Inspector landing page (/for-inspectors)", () => {
   const defaultProps: InspectorLandingContentProps = { session: null };
 
-  it("renders the hero section with inspector headline", () => {
+  it("renders the hero section with two-sided marketplace headline", () => {
     render(<InspectorLandingContent {...defaultProps} />);
     expect(
-      screen.getByRole("heading", { level: 1, name: /clear the queue.*stay compliant/i })
+      screen.getByRole("heading", { level: 1, name: /connecting students/i })
     ).toBeInTheDocument();
   });
 
@@ -127,11 +130,11 @@ describe("Inspector landing page (/for-inspectors)", () => {
     ).toBeInTheDocument();
   });
 
-  it("renders the final CTA with inspector proof text", () => {
+  it("renders the final CTA with proof text", () => {
     render(<InspectorLandingContent {...defaultProps} />);
     // Proof text appears in HeroSection
     expect(
-      screen.getByText(/10,000\+ documents reviewed monthly/i)
+      screen.getByText(/1,200\+ candidates placed this year/i)
     ).toBeInTheDocument();
   });
 
