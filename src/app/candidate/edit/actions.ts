@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireRoleCapability } from "@/modules/auth/session";
+import { getCandidateDetail } from "@/modules/workspace/data/candidate";
 import {
   updatePersonalInfoSchema,
   updateProfileFieldsSchema,
@@ -49,6 +50,80 @@ function toProfileData(
     civilPhotoFront: row.candidate_civil_photo_front,
     civilPhotoBack: row.candidate_civil_photo_back,
   };
+}
+
+// ---------------------------------------------------------------------------
+// Data fetching — colocated from @/modules/candidates/actions
+// ---------------------------------------------------------------------------
+
+/**
+ * Fetch the full candidate profile detail for the edit page.
+ * Delegates to the existing data layer; colocated for the edit route.
+ */
+export async function getCandidateProfileEdit(input: { candidateId: number }) {
+  return getCandidateDetail(Number(input.candidateId), "/candidate/invitations");
+}
+
+export async function getCountryOptions() {
+  const rows = await prisma.country.findMany({
+    orderBy: { country_name_en: "asc" },
+    select: { country_id: true, country_name_en: true, country_nationality_name_en: true },
+    take: 250,
+  });
+  return rows.map((r) => ({
+    id: r.country_id,
+    label: `${r.country_name_en}${r.country_nationality_name_en && r.country_nationality_name_en !== r.country_name_en ? ` (${r.country_nationality_name_en})` : ""}`,
+  }));
+}
+
+export async function getUniversityOptions() {
+  const rows = await prisma.university.findMany({
+    where: { deleted: 0 },
+    orderBy: { university_name_en: "asc" },
+    select: { university_id: true, university_name_en: true },
+    take: 250,
+  });
+  return rows.map((r) => ({
+    id: r.university_id,
+    label: r.university_name_en ?? `University #${r.university_id}`,
+  }));
+}
+
+export async function getBankOptions() {
+  const rows = await prisma.bank.findMany({
+    where: { deleted: 0 },
+    orderBy: { bank_name: "asc" },
+    select: { bank_id: true, bank_name: true },
+    take: 100,
+  });
+  return rows.map((r) => ({
+    id: r.bank_id,
+    label: r.bank_name ?? `Bank #${r.bank_id}`,
+  }));
+}
+
+export async function getDegreeOptions() {
+  const rows = await prisma.degree.findMany({
+    orderBy: { degree_name_en: "asc" },
+    select: { degree_uuid: true, degree_name_en: true },
+    take: 250,
+  });
+  return rows.map((r) => ({
+    id: r.degree_uuid,
+    label: r.degree_name_en,
+  }));
+}
+
+export async function getMajorOptions() {
+  const rows = await prisma.major.findMany({
+    orderBy: { major_name_en: "asc" },
+    select: { major_uuid: true, major_name_en: true },
+    take: 250,
+  });
+  return rows.map((r) => ({
+    id: r.major_uuid,
+    label: r.major_name_en,
+  }));
 }
 
 // ---------------------------------------------------------------------------
