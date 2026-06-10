@@ -35,6 +35,24 @@ export const dashboardDataListItemSchema = z.object({
 });
 
 /**
+ * A single PR time-to-merge metric item.
+ */
+export const prMergeMetricSchema = z.object({
+  label: z.string().min(1, "Metric label is required"),
+  value: z.string().min(1, "Value is required"),
+  note: z.string().optional().default(""),
+});
+
+/**
+ * A recent PR row in the merge-time list.
+ */
+export const prMergeItemSchema = z.object({
+  number: z.number().int().positive(),
+  title: z.string().min(1, "Title is required"),
+  hours: z.number().nonnegative(),
+});
+
+/**
  * Full dashboard data payload.
  */
 export const dashboardDataSchema = z.object({
@@ -44,6 +62,8 @@ export const dashboardDataSchema = z.object({
   recentCompanies: z.array(dashboardDataListItemSchema),
   recentRequests: z.array(dashboardDataListItemSchema),
   recentTransfers: z.array(dashboardDataListItemSchema),
+  prMergeMetrics: z.array(prMergeMetricSchema),
+  recentPrMergeTimes: z.array(prMergeItemSchema),
 });
 
 // ---------------------------------------------------------------------------
@@ -53,4 +73,6 @@ export const dashboardDataSchema = z.object({
 export type DashboardMetric = z.input<typeof dashboardMetricSchema>;
 export type DashboardStatusItem = z.input<typeof dashboardStatusItemSchema>;
 export type DashboardDataListItem = z.input<typeof dashboardDataListItemSchema>;
+export type PrMergeMetric = z.input<typeof prMergeMetricSchema>;
+export type PrMergeItem = z.input<typeof prMergeItemSchema>;
 export type DashboardData = z.input<typeof dashboardDataSchema>;
