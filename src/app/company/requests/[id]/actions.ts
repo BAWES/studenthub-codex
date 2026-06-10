@@ -20,18 +20,44 @@ import {
  * Get full request detail including applications, interviews, invitations,
  * matched candidates, and pipeline metrics for the company role.
  *
- * Wraps the shared @/modules/workspace/data/shared getRequestDetail as a
- * route-level server action with company-role auth.
+ * Wraps the shared @/modules/workspace/request-detail-core getRequestDetail as a
+ * route-level server action with company-role auth and scope checking.
+ * Verifies the request belongs to one of the contact's accessible companies.
  * Mirrors the legacy getCompanyRequestDetail from @/modules/workspace/data.
  */
 export async function getCompanyRequestDetail(
   uuid: string,
 ): Promise<Awaited<ReturnType<typeof _getRequestDetail>> | null> {
-  await requireRoleCapability("company", "request.read.linked");
+  const session = await requireRoleCapability("company", "request.read.linked");
 
   const parsed = getCompanyRequestDetailSchema.safeParse({ uuid });
   if (!parsed.success) {
     throw new Error(parsed.error.issues[0]?.message ?? "Invalid request UUID");
+  }
+
+  // ── Scope check: verify contact has access to this request's company ──
+  const contactUuid = session.id;
+
+  const companyLinks = await prisma.company_contact.findMany({
+    where: { contact_uuid: contactUuid, allow_access: true },
+    select: { company_id: true },
+  });
+
+  const accessibleCompanyIds = companyLinks
+    .map((l) => l.company_id)
+    .filter((id): id is number => id !== null);
+
+  if (accessibleCompanyIds.length === 0) {
+    return null;
+  }
+
+  const request = await prisma.request.findUnique({
+    where: { request_uuid: parsed.data.uuid },
+    select: { company_id: true },
+  });
+
+  if (!request || request.company_id === null || !accessibleCompanyIds.includes(request.company_id)) {
+    return null;
   }
 
   return _getRequestDetail(parsed.data.uuid);
