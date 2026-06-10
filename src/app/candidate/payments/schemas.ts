@@ -74,3 +74,33 @@ export type GetPaymentDetailResult = {
   transfer: PaymentDetailTransfer | null;
   invoices: { id: number; date: Date | null; status: string | null }[];
 };
+
+// ---------------------------------------------------------------------------
+// Create Payment
+// ---------------------------------------------------------------------------
+
+export const createPaymentSchema = z.object({
+  transferBenefName: z
+    .string({ required_error: "Beneficiary name is required" })
+    .min(1, "Beneficiary name is required")
+    .max(60),
+  transferBenefIban: z
+    .string({ required_error: "IBAN is required" })
+    .min(1, "IBAN is required")
+    .max(50),
+  bankId: z.number({ required_error: "Bank is required" }).int().positive(),
+  amount: z.number().positive("Amount must be positive").optional(),
+});
+
+export type CreatePaymentInput = z.input<typeof createPaymentSchema>;
+
+// ---------------------------------------------------------------------------
+// Payment Methods
+// ---------------------------------------------------------------------------
+
+export type PaymentMethod = {
+  bankId: number | null;
+  bankName: string | null;
+  bankAccountName: string | null;
+  iban: string | null;
+};
