@@ -10,7 +10,7 @@ export {
   getCandidateTransferRows,
   getCandidateTransferDetail,
   getCandidateIdsForStaff,
-} from "./candidate";
+} from "./candidate/index";
 export {
   getCandidateNotificationRows,
   getCandidateNotificationDetail,
