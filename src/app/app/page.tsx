@@ -1,4 +1,5 @@
 import { requireSession } from "@/modules/auth/session";
+import { WorkspaceOS } from "@/modules/workspace/WorkspaceOS";
 import { getUnifiedHub, parseHubScope } from "@/modules/hub/data";
 import { HubContent } from "@/modules/hub/HubContent";
 import type { HubContentData } from "@/modules/hub/HubContent";
@@ -23,13 +24,15 @@ export default async function AppPage({
   const guide = buildRoleGuide(session.role, data);
 
   return (
-    <HubContent
-      data={data as unknown as HubContentData}
-      guide={guide}
-      commands={commands}
-      session={session}
-      requiredRole={requiredRole}
-    />
+    <WorkspaceOS session={session}>
+      <HubContent
+        data={data as unknown as HubContentData}
+        guide={guide}
+        commands={commands}
+        session={session}
+        requiredRole={requiredRole}
+      />
+    </WorkspaceOS>
   );
 }
 
