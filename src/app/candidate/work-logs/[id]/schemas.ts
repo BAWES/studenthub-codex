@@ -20,6 +20,22 @@ export const rejectWorkLogAppealSchema = z.object({
   reason: z.string().min(1, "Rejection reason is required").max(1000),
 });
 
+/**
+ * Update a work log — validates the UUID, status, and optional note.
+ */
+export const updateWorkLogSchema = z.object({
+  workLogUuid: z.string().min(1, "Work log UUID is required"),
+  status: z.coerce.number().int().min(0, "Status must be 0 or greater"),
+  note: z.string().max(1000).optional(),
+});
+
+/**
+ * Delete a work log entry — validates the UUID.
+ */
+export const deleteWorkLogSchema = z.object({
+  workLogUuid: z.string().min(1, "Work log UUID is required"),
+});
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -27,6 +43,8 @@ export const rejectWorkLogAppealSchema = z.object({
 export type GetCandidateWorkLogDetailInput = z.input<typeof getCandidateWorkLogDetailSchema>;
 export type ApproveWorkLogAppealInput = z.input<typeof approveWorkLogAppealSchema>;
 export type RejectWorkLogAppealInput = z.input<typeof rejectWorkLogAppealSchema>;
+export type UpdateWorkLogInput = z.input<typeof updateWorkLogSchema>;
+export type DeleteWorkLogInput = z.input<typeof deleteWorkLogSchema>;
 
 export type WorkLogAppealDetail = {
   appeal_uuid: string;

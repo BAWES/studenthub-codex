@@ -7,9 +7,13 @@ import {
   getCandidateWorkLogDetailSchema,
   approveWorkLogAppealSchema,
   rejectWorkLogAppealSchema,
+  updateWorkLogSchema,
+  deleteWorkLogSchema,
   type GetCandidateWorkLogDetailInput,
   type ApproveWorkLogAppealInput,
   type RejectWorkLogAppealInput,
+  type UpdateWorkLogInput,
+  type DeleteWorkLogInput,
   type WorkLogAppealDetail,
   type WorkLogDetailForAppeal,
 } from "./schemas";
@@ -152,4 +156,80 @@ export async function rejectWorkLogAppeal(
 
   revalidatePath("/candidate/work-logs");
   return { appeal_uuid: parsed.data.appealUuid };
+}
+
+// ---------------------------------------------------------------------------
+// updateWorkLog — update a work log entry status and optional note
+// ---------------------------------------------------------------------------
+
+/**
+ * Update a work log entry.
+ * Validates the UUID, status, and optional note.
+ * The caller must have candidate.write.own permission.
+ */
+export async function updateWorkLog(
+  data: UpdateWorkLogInput,
+): Promise<{ workLogUuid: string }> {
+  await requireCapability("candidate.write");
+
+  const parsed = updateWorkLogSchema.safeParse(data);
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid input");
+  }
+
+  const existing = await prisma.candidate_working_hour.findUnique({
+    where: { candidate_working_hour_uuid: parsed.data.workLogUuid },
+    select: { candidate_working_hour_uuid: true },
+  });
+
+  if (!existing) {
+    throw new Error("Work log not found");
+  }
+
+  await prisma.candidate_working_hour.update({
+    where: { candidate_working_hour_uuid: parsed.data.workLogUuid },
+    data: {
+      status: parsed.data.status,
+      ...(parsed.data.note !== undefined && { note: parsed.data.note }),
+      updated_at: new Date(),
+    },
+  });
+
+  revalidatePath("/candidate/work-logs");
+  return { workLogUuid: parsed.data.workLogUuid };
+}
+
+// ---------------------------------------------------------------------------
+// deleteWorkLog — soft-delete a work log entry
+// ---------------------------------------------------------------------------
+
+/**
+ * Delete a work log entry by UUID.
+ * The caller must have candidate.write permission.
+ */
+export async function deleteWorkLog(
+  data: DeleteWorkLogInput,
+): Promise<{ workLogUuid: string }> {
+  await requireCapability("candidate.write");
+
+  const parsed = deleteWorkLogSchema.safeParse(data);
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid input");
+  }
+
+  const existing = await prisma.candidate_working_hour.findUnique({
+    where: { candidate_working_hour_uuid: parsed.data.workLogUuid },
+    select: { candidate_working_hour_uuid: true },
+  });
+
+  if (!existing) {
+    throw new Error("Work log not found");
+  }
+
+  await prisma.candidate_working_hour.delete({
+    where: { candidate_working_hour_uuid: parsed.data.workLogUuid },
+  });
+
+  revalidatePath("/candidate/work-logs");
+  return { workLogUuid: parsed.data.workLogUuid };
 }
