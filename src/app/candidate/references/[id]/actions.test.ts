@@ -90,6 +90,8 @@ describe("updateReferenceSchema", () => {
 // Action tests
 // ---------------------------------------------------------------------------
 
+vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
+
 vi.mock("@/modules/auth/session", () => ({
   requireRoleCapability: vi.fn(),
 }));
@@ -196,10 +198,10 @@ describe("updateReferenceEntry", () => {
       referenceUuid: "ref_001",
       name: "John Updated",
       company: "New Corp",
-      position: undefined,
-      phone: undefined,
-      email: undefined,
-      relationship: undefined,
+      position: "",
+      phone: "",
+      email: "",
+      relationship: "",
     });
   });
 
