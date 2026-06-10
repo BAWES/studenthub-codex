@@ -18,6 +18,10 @@ export const getCandidateNotificationDetailSchema = z.object({
   notificationUuid: z.string().min(1, "Notification UUID is required"),
 });
 
+export const dismissNotificationSchema = z.object({
+  notificationUuid: z.string().min(1, "Notification UUID is required"),
+});
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -132,4 +136,58 @@ export async function getCandidateNotificationDetail(
     notification,
     typeLabel: notification ? getNotificationTypeLabel(notification.type) : "",
   };
+}
+
+// ---------------------------------------------------------------------------
+// dismissNotification
+// ---------------------------------------------------------------------------
+
+/**
+ * Dismiss (delete) a notification for the current candidate by UUID.
+ * Self-service — candidateId derived from session.
+ * Requires `candidate.read.own` capability.
+ *
+ * Hard-deletes the notification row since the model has no `deleted` column.
+ */
+export async function dismissNotification(
+  notificationUuid: string,
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const session = await requireRoleCapability("candidate", "candidate.read.own");
+    const candidateId = Number(session.id);
+
+    const parsed = dismissNotificationSchema.safeParse({ notificationUuid });
+    if (!parsed.success) {
+      return {
+        success: false,
+        error: parsed.error.issues[0]?.message ?? "Invalid notification UUID",
+      };
+    }
+
+    // Verify ownership before deletion
+    const notification = await prisma.candidate_notification.findFirst({
+      where: {
+        cn_uuid: parsed.data.notificationUuid,
+        candidate_id: candidateId,
+      },
+    });
+
+    if (!notification) {
+      return { success: false, error: "Notification not found." };
+    }
+
+    await prisma.candidate_notification.delete({
+      where: { cn_uuid: parsed.data.notificationUuid },
+    });
+
+    return { success: true };
+  } catch (e) {
+    return {
+      success: false,
+      error:
+        e instanceof Error
+          ? e.message
+          : "Failed to dismiss notification.",
+    };
+  }
 }

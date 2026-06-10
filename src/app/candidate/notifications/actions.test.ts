@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest";
+import { z } from "zod";
 import {
   getCandidateNotificationRowsSchema,
   getCandidateNotificationDetailSchema,
@@ -58,6 +59,32 @@ describe("getCandidateNotificationDetailSchema", () => {
 
   it("rejects missing UUID", () => {
     expect(getCandidateNotificationDetailSchema.safeParse({}).success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// dismissNotificationSchema
+// ---------------------------------------------------------------------------
+
+const dismissNotificationSchema = z.object({
+  notificationUuid: z.string().min(1, "Notification UUID is required"),
+});
+
+describe("dismissNotificationSchema", () => {
+  it("accepts a valid UUID", () => {
+    expect(
+      dismissNotificationSchema.safeParse({ notificationUuid: "notif_abc-123" }).success,
+    ).toBe(true);
+  });
+
+  it("rejects empty UUID", () => {
+    expect(dismissNotificationSchema.safeParse({ notificationUuid: "" }).success).toBe(
+      false,
+    );
+  });
+
+  it("rejects missing UUID", () => {
+    expect(dismissNotificationSchema.safeParse({}).success).toBe(false);
   });
 });
 
