@@ -1,13 +1,21 @@
 import { z } from "zod";
 
 // ---------------------------------------------------------------------------
-// Schemas for candidate/experience/[id] actions
+// Schemas for candidate/experience/[experienceId] actions
 // ---------------------------------------------------------------------------
 
+/**
+ * Validate a numeric experience ID for get/delete operations.
+ */
 export const getExperienceEntrySchema = z.object({
   experienceId: z.coerce.number().int().positive("Experience ID is required"),
 });
 
+/**
+ * Validate update params — re-uses the parent `updateExperienceSchema` shape
+ * but requires experienceId as the first positional param for the colocated
+ * action signature.
+ */
 export const updateExperienceEntrySchema = z.object({
   experienceId: z.coerce.number().int().positive("Experience ID is required"),
   experience: z
@@ -25,6 +33,9 @@ export const updateExperienceEntrySchema = z.object({
   endYear: z.coerce.number().int().min(1900).max(2100).optional(),
 });
 
+/**
+ * Validate delete params.
+ */
 export const deleteExperienceEntrySchema = z.object({
   experienceId: z.coerce.number().int().positive("Experience ID is required"),
 });
@@ -33,6 +44,12 @@ export const deleteExperienceEntrySchema = z.object({
 // Types
 // ---------------------------------------------------------------------------
 
-export type ExperienceEntryResponse =
-  | { success: true; experienceId: number }
-  | { success: false; error: string };
+export type GetExperienceEntryInput = z.input<typeof getExperienceEntrySchema>;
+export type UpdateExperienceEntryInput = z.input<typeof updateExperienceEntrySchema>;
+export type DeleteExperienceEntryInput = z.input<typeof deleteExperienceEntrySchema>;
+
+export type ExperienceEntryResponse = {
+  success: boolean;
+  data?: unknown;
+  error?: string;
+};
