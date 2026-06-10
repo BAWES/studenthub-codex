@@ -2,7 +2,7 @@
 
 import { requireCapability } from "@/modules/auth/session";
 import { prisma } from "@/lib/prisma";
-import { getCandidateDetail } from "@/modules/workspace/data";
+import { getCandidateDetail } from "@/modules/workspace/data/candidate";
 import { formatDate } from "@/modules/workspace/format";
 
 // ---------------------------------------------------------------------------
