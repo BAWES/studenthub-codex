@@ -10,7 +10,7 @@ import { revalidatePath } from "next/cache";
 // ---------------------------------------------------------------------------
 
 import { prisma } from "@/lib/prisma";
-import { requireCapability } from "@/modules/auth/session";
+import { requireCapability, getSession } from "@/modules/auth/session";
 import {
   listJobsSchema,
   getJobSchema,
@@ -29,6 +29,27 @@ import type {
   UpdateJobResult,
   DeleteJobResult,
 } from "./schemas";
+
+// ---------------------------------------------------------------------------
+// getMyEmployerId
+// ---------------------------------------------------------------------------
+
+/**
+ * Get the logged-in company user's first linked company ID.
+ * Used by the create job form to auto-populate employerId.
+ */
+export async function getMyEmployerId(): Promise<number | null> {
+  await requireCapability("company.read.linked");
+  const session = await getSession();
+  if (!session) return null;
+
+  const link = await prisma.company_contact.findFirst({
+    where: { contact_uuid: session.id },
+    select: { company: { select: { company_id: true } } },
+  });
+
+  return link?.company?.company_id ?? null;
+}
 
 // ---------------------------------------------------------------------------
 // listJobs

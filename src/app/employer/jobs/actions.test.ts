@@ -239,6 +239,7 @@ const mockCount = vi.fn();
 const mockCreate = vi.fn();
 const mockUpdate = vi.fn();
 const mockDelete = vi.fn();
+const mockCompanyContactFindFirst = vi.fn();
 
 vi.mock("@/lib/prisma", () => ({
   prisma: {
@@ -250,18 +251,22 @@ vi.mock("@/lib/prisma", () => ({
       update: mockUpdate,
       delete: mockDelete,
     },
+    company_contact: {
+      findFirst: mockCompanyContactFindFirst,
+    },
   },
 }));
 
 vi.mock("@/modules/auth/session", () => ({
   requireCapability: vi.fn(),
+  getSession: vi.fn(),
 }));
 
 vi.mock("next/cache", () => ({
   revalidatePath: vi.fn(),
 }));
 
-const { requireCapability } = await import("@/modules/auth/session");
+const { requireCapability, getSession } = await import("@/modules/auth/session");
 const { prisma } = await import("@/lib/prisma");
 const jobs = await import("./actions");
 
@@ -539,5 +544,43 @@ describe("deleteJob", () => {
   it("throws on invalid input", async () => {
     await expect(jobs.deleteJob({ jobId: 0 })).rejects.toThrow();
     expect(mockDelete).not.toHaveBeenCalled();
+  });
+});
+
+describe("getMyEmployerId", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("returns employer ID when user has a linked company", async () => {
+    vi.mocked(requireCapability).mockResolvedValue(mockUser);
+    vi.mocked(getSession).mockResolvedValue({ id: "contact-uuid-1" } as any);
+    mockCompanyContactFindFirst.mockResolvedValue({
+      company: { company_id: 42 },
+    });
+
+    const result = await jobs.getMyEmployerId();
+    expect(result).toBe(42);
+    expect(mockCompanyContactFindFirst).toHaveBeenCalledWith({
+      where: { contact_uuid: "contact-uuid-1" },
+      select: { company: { select: { company_id: true } } },
+    });
+  });
+
+  it("returns null when no session", async () => {
+    vi.mocked(requireCapability).mockResolvedValue(mockUser);
+    vi.mocked(getSession).mockResolvedValue(null);
+
+    const result = await jobs.getMyEmployerId();
+    expect(result).toBeNull();
+  });
+
+  it("returns null when user has no linked company", async () => {
+    vi.mocked(requireCapability).mockResolvedValue(mockUser);
+    vi.mocked(getSession).mockResolvedValue({ id: "contact-uuid-2" } as any);
+    mockCompanyContactFindFirst.mockResolvedValue(null);
+
+    const result = await jobs.getMyEmployerId();
+    expect(result).toBeNull();
   });
 });
