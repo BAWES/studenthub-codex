@@ -37,10 +37,18 @@ export type IdRequestDetail = {
   cir_uuid: string;
   status: string | null;
   rejection_reason: string | null;
+  candidate_ids: string | null;
   created_at: Date | null;
   updated_at: Date | null;
   created_by_name: string | null;
   updated_by_name: string | null;
+  metrics: { label: string; value: string | number; note: string }[];
+  candidates: {
+    id: number;
+    title: string;
+    subtitle: string;
+    meta: string;
+  }[];
 };
 
 export type ListIdRequestsResult = {
