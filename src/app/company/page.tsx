@@ -1,5 +1,5 @@
 import { requireRoleCapability } from "@/modules/auth/session";
-import { getCompanyWorkspace } from "@/modules/workspace/data";
+import { getCompanyWorkspace } from "./actions";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 
 export const dynamic = "force-dynamic";

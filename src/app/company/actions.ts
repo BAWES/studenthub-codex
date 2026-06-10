@@ -107,7 +107,8 @@ export async function getStaffWorkspace(
 // Used by the company workspace page and CompanyHome component.
 // ---------------------------------------------------------------------------
 
-export { getCompanyWorkspaceSchema };
+// getCompanyWorkspaceSchema is used internally and re-exported from schemas.ts
+// (cannot re-export from a "use server" file in Next.js 15)
 
 /**
  * Fetch the company workspace dashboard data for a given contact UUID.
