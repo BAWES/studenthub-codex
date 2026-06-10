@@ -3,7 +3,7 @@ import { z } from "zod";
 import {
   getCandidateNotificationRowsSchema,
   getCandidateNotificationDetailSchema,
-} from "./actions";
+} from "./schemas";
 import { getNotificationTypeLabel } from "@/modules/notifications/utils";
 
 // ---------------------------------------------------------------------------

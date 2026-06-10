@@ -8,7 +8,6 @@ export {
 export type {
   CandidateDocumentItem,
   ListCandidateDocumentsResult,
-  DocumentType,
   UploadDocumentState,
   DeleteDocumentState,
   ListDocumentsParams,
@@ -17,4 +16,5 @@ export type {
   DeleteDocumentParams,
 } from "./actions";
 
-export { DOCUMENT_TYPES } from "./actions";
+export { DOCUMENT_TYPES } from "./constants";
+export type { DocumentType } from "./constants";
