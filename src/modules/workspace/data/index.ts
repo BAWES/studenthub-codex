@@ -1,4 +1,4 @@
-export { getAdminCompanyRows, getAdminRequestRows, getAdminTransferRows, getAdminTransferDetail } from "./admin";
+export { getAdminCompanyRows, getAdminRequestRows, getAdminTransferRows, getAdminTransferDetail, getAdminCandidateRows } from "./admin";
 export { getStaffRequestRows, getStaffInterviewRows, getStaffInterviewDetail, getStaffWorkspace } from "./staff";
 export {
   getCandidateDetail,
