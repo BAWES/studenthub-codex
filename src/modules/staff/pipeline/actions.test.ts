@@ -164,6 +164,10 @@ vi.mock("@/modules/auth/session", () => ({
   requireRoleCapability: vi.fn(),
 }));
 
+vi.mock("next/cache", () => ({
+  revalidatePath: vi.fn(),
+}));
+
 import { prisma } from "@/lib/prisma";
 import { requireRoleCapability } from "@/modules/auth/session";
 import type { Mock } from "vitest";
