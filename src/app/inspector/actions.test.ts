@@ -50,7 +50,6 @@ const mockUser = {
   email: "inspector@studenthub.local",
   issuedAt: Date.now(),
 };
-
 // ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
@@ -187,6 +186,7 @@ describe("getInspectorWorkspace", () => {
 
   it("propagates Prisma errors", async () => {
     vi.mocked(requireRoleCapability).mockResolvedValue(mockUser);
+
     mockTransaction.mockRejectedValue(
       new Error("Can't reach database"),
     );
