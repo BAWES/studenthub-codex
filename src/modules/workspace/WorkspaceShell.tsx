@@ -7,7 +7,8 @@ import { ThemeToggle } from "@/modules/theme/ThemeToggle";
 import { LogOut } from "lucide-react";
 import Link from "next/link";
 import { navForRole } from "./navigation";
-import { WorkspaceMobileNavigation, WorkspaceNavigation } from "./WorkspaceNavigation";
+import { WorkspaceNavigation } from "./WorkspaceNavigation";
+import { MobileNavBar } from "@/components/ui/mobile-nav-bar";
 import { useWorkspaceOS } from "./WorkspaceOSContext";
 import { EmptyState } from "./EmptyState";
 import { MetricCard } from "@/components/ui/metric-card";
@@ -128,7 +129,7 @@ export function WorkspaceShell({
     ? (
       <div className="shell shellEmbedded">
         {stage}
-        <WorkspaceMobileNavigation items={navItems} role={session.role} />
+        <MobileNavBar role={session.role} />
       </div>
     )
     : (
@@ -137,7 +138,7 @@ export function WorkspaceShell({
         <main id="main-content" className="shell">
           {rail}
           {stage}
-          <WorkspaceMobileNavigation items={navItems} role={session.role} />
+          <MobileNavBar role={session.role} />
         </main>
       </>
     );
