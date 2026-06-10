@@ -2982,3 +2982,234 @@ kbd {
     transform: rotate(360deg);
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   OS Glass App Header — sticky top navigation
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.shAppHeader {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  height: var(--sh-header-h);
+}
+
+.shAppHeaderGlass {
+  height: 100%;
+  background: var(--sh-header-glass-bg);
+  backdrop-filter: blur(var(--sh-header-blur));
+  -webkit-backdrop-filter: blur(var(--sh-header-blur));
+  border-bottom: 1px solid var(--sh-header-glass-border);
+  box-shadow: var(--shadow-sm);
+  animation: shHeaderSlideIn 400ms var(--sh-easing) both;
+}
+
+.shAppHeaderInner {
+  max-width: var(--sh-content-max, 1280px);
+  margin: 0 auto;
+  padding: 0 var(--space-6);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+  gap: var(--space-4);
+}
+
+/* ── Brand Logo ─── */
+
+.shAppHeaderBrand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  text-decoration: none;
+  color: var(--ink);
+  flex-shrink: 0;
+}
+
+.shAppHeaderBrand strong {
+  font-size: var(--fs-body);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.shAppHeaderLogoIcon {
+  color: var(--blue);
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+/* ── Navigation Tabs ─── */
+
+.shAppHeaderNav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  flex: 1;
+  justify-content: center;
+}
+
+@media (max-width: 768px) {
+  .shAppHeaderNav {
+    display: none;
+  }
+}
+
+.shAppHeaderTab {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  height: var(--sh-header-tab-h);
+  padding: 0 var(--space-3);
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  color: var(--muted);
+  border-radius: var(--radius-md);
+  transition: all var(--dur-fast) var(--sh-easing);
+  position: relative;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.shAppHeaderTab:hover {
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.shAppHeaderTabActive {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.shAppHeaderTabInactive {
+  color: var(--muted);
+}
+
+.shAppHeaderTabActiveIndicator {
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: var(--sh-header-tab-indicator);
+  background: linear-gradient(90deg, var(--blue), #6ed5a0);
+  border-radius: 2px;
+  animation: shTabIn var(--dur-slow) var(--sh-easing) forwards;
+}
+
+@keyframes shTabIn {
+  from {
+    width: 0%;
+    opacity: 0;
+  }
+  to {
+    width: 60%;
+    opacity: 1;
+  }
+}
+
+@keyframes shHeaderSlideIn {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* ── Right Actions ─── */
+
+.shAppHeaderActions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-shrink: 0;
+}
+
+/* ── Notification Bell ─── */
+
+.shBellContainer {
+  position: relative;
+}
+
+.shBellBtn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-lg);
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all var(--dur-fast) var(--sh-easing);
+}
+
+.shBellBtn:hover {
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.shBellDot {
+  position: absolute;
+  top: -2px;
+  right: -4px;
+  min-width: 16px;
+  height: 16px;
+  background: var(--sh-error);
+  color: #fff;
+  font-size: var(--fs-xxs);
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 0 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  animation: shBellPulse 300ms ease-out;
+}
+
+@keyframes shBellPulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* ── User Avatar ─── */
+
+.shAppHeaderAvatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  background: var(--sh-info-bg);
+  color: var(--sh-info);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--sh-easing);
+  padding: 0;
+  overflow: hidden;
+}
+
+.shAppHeaderAvatar:hover,
+.shAppHeaderAvatar[aria-expanded="true"] {
+  border-color: var(--blue);
+}
+
+.shAppHeaderAvatarFallback {
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  line-height: 1;
+}
