@@ -10,6 +10,9 @@ export const listCandidateJobsSchema = z.object({
   q: z.string().optional(),
   employmentType: z.string().optional(),
   location: z.string().optional(),
+  minSalary: z.coerce.number().min(0).optional(),
+  maxSalary: z.coerce.number().min(0).optional(),
+  sortBy: z.enum(["newest", "match"]).default("newest"),
 });
 
 export const getCandidateJobSchema = z.object({
@@ -19,7 +22,6 @@ export const getCandidateJobSchema = z.object({
 export const applyToJobSchema = z.object({
   jobListingId: z.coerce.number().int().positive(),
   coverLetter: z.string().optional(),
-  notes: z.string().optional(),
 });
 
 export const listMyApplicationsSchema = z.object({
@@ -54,6 +56,7 @@ export type CandidateJobRow = {
   employmentType: string | null;
   salaryRange: string | null;
   employerName: string;
+  matchScore: number | null;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -65,7 +68,7 @@ export type CandidateJobDetail = CandidateJobRow & {
 };
 
 export type ApplicationRow = {
-  id: number;
+  applicationId: number;
   jobListingId: number;
   jobTitle: string;
   employerName: string;
@@ -76,7 +79,7 @@ export type ApplicationRow = {
 };
 
 export type JobApplicationRow = {
-  id: number;
+  applicationId: number;
   candidateId: number;
   candidateName: string | null;
   status: string;
