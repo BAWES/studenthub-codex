@@ -19,4 +19,4 @@ export {
   getCompanyRequestDetail,
 } from "./company";
 export { getInspectorWorkspace, getInspectorIdRequestRows, getInspectorIdRequestDetail } from "./inspector";
-export { getRequestDetail } from "./shared";
+export { getRequestDetail } from "../request-detail-core";
