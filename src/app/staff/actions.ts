@@ -8,6 +8,7 @@
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
 import { formatDate, formatMoney } from "@/modules/workspace/format";
+import { getStaffWorkspaceSchema } from "./schemas";
 import type { StaffWorkspaceData } from "./schemas";
 
 /**
@@ -18,6 +19,11 @@ export async function getStaffWorkspace(
   staffId: number,
 ): Promise<StaffWorkspaceData> {
   await requireCapability("request.read.assigned");
+
+  const parsed = getStaffWorkspaceSchema.safeParse({ staffId });
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid staff ID");
+  }
 
   const rows = await prisma.candidate_work_history.findMany({
     where: { staff_id: staffId, candidate_id: { not: null } },

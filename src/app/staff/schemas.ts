@@ -1,6 +1,21 @@
 import { z } from "zod";
 
 // ---------------------------------------------------------------------------
+// Staff workspace — Zod schemas
+// ---------------------------------------------------------------------------
+
+/**
+ * Schema for getStaffWorkspace action.
+ * Validates the staffId parameter — must be a positive integer.
+ */
+export const getStaffWorkspaceSchema = z.object({
+  staffId: z
+    .number({ invalid_type_error: "staffId must be a number" })
+    .int("staffId must be an integer")
+    .positive("staffId must be positive"),
+});
+
+// ---------------------------------------------------------------------------
 // Staff workspace — type definitions
 // Mirrors the return shape of getStaffWorkspace from @/modules/workspace/data
 // ---------------------------------------------------------------------------
