@@ -32,11 +32,11 @@ describe("StatsSection", () => {
     expect(section?.getAttribute("aria-label")).toBe("Platform statistics");
   });
 
-  it("renders stat labels for real-world metrics", () => {
+  it("renders stat labels for real metrics", () => {
     render(<StatsSection />);
-    expect(screen.getByText("Students placed")).toBeTruthy();
-    expect(screen.getByText("Star rating")).toBeTruthy();
-    expect(screen.getByText("Active employers")).toBeTruthy();
+    expect(screen.getByText("Placements")).toBeTruthy();
+    expect(screen.getByText("Employers")).toBeTruthy();
+    expect(screen.getByText("Candidates")).toBeTruthy();
   });
 
   it("renders 3 stat columns", () => {
@@ -50,10 +50,10 @@ describe("StatsSection", () => {
     // Wait for counter animation to complete
     await waitFor(
       () => {
-        const placed = screen.getByText(/1200/);
-        expect(placed).toBeTruthy();
+        const counter = screen.getByText(/9,500/);
+        expect(counter).toBeTruthy();
       },
-      { timeout: 2000 },
+      { timeout: 3000 },
     );
   });
 

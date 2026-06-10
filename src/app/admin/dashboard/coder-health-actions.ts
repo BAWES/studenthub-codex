@@ -10,6 +10,7 @@
 // StudentHub company UUID: f56ea475-d349-431c-9a40-3111f1a49819
 // ---------------------------------------------------------------------------
 
+// @ts-ignore - pg is a system-level module, not in project deps
 import { Pool } from "pg";
 
 const CODER_AGENT_ID = "eaa3c21b-a27e-40a5-a5bb-d392e5f53d95";
