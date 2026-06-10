@@ -14,6 +14,7 @@ vi.mock("lucide-react", () => ({
   UserRound: () => <span data-testid="icon-user-round" />,
   Building2: () => <span data-testid="icon-building" />,
   ArrowLeft: () => <span data-testid="icon-arrow-left" />,
+  ArrowRight: () => <span data-testid="icon-arrow-right" />,
   UserPlus: () => <span data-testid="icon-user-plus" />,
 }));
 
@@ -178,11 +179,17 @@ describe("SignupForm — role param pre-selection", () => {
       ).toBeInTheDocument();
     });
 
-    it("falls back to role selection for 'admin' role (not a signup role)", () => {
+    it("shows invite-only message for 'admin' role (not a self-registration role)", () => {
       render(<SignupForm defaultRole={"admin" as never} />);
 
+      // Should NOT show role selection heading
       expect(
-        screen.getByText(/create your studenthub account/i),
+        screen.queryByText(/create your studenthub account/i),
+      ).not.toBeInTheDocument();
+
+      // Should show the invite-only message for admin
+      expect(
+        screen.getByText(/Admin accounts are managed by your organisation/i),
       ).toBeInTheDocument();
     });
   });

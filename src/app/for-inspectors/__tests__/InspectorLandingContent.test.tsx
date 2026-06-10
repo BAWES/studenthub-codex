@@ -76,7 +76,7 @@ describe("Inspector landing page (/for-inspectors)", () => {
   it("renders the hero section with inspector headline", () => {
     render(<InspectorLandingContent {...defaultProps} />);
     expect(
-      screen.getByRole("heading", { name: /your next batch/i })
+      screen.getByRole("heading", { level: 1, name: /clear the queue.*stay compliant/i })
     ).toBeInTheDocument();
   });
 
@@ -97,20 +97,21 @@ describe("Inspector landing page (/for-inspectors)", () => {
       screen.getByLabelText(/inspector pain points and solutions/i)
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/manual document review that takes days/i)
+      screen.getByText(/No quick way to validate workers on-site/i)
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/lost audit trails when you need them/i)
+      screen.getByText(/Government inspectors need access without onboarding delays/i)
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/no visibility into team workload/i)
+      screen.getByText(/Manual compliance checks across hundreds of workers/i)
     ).toBeInTheDocument();
   });
 
   it("renders the stats strip with inspector metrics", () => {
     render(<InspectorLandingContent {...defaultProps} />);
     expect(screen.getByLabelText(/inspector stats/i)).toBeInTheDocument();
-    expect(screen.getByText("10k+")).toBeInTheDocument();
+    expect(screen.getByText("Instant")).toBeInTheDocument();
+    expect(screen.getByText("Zero")).toBeInTheDocument();
     expect(screen.getByText("100%")).toBeInTheDocument();
   });
 
@@ -128,11 +129,10 @@ describe("Inspector landing page (/for-inspectors)", () => {
 
   it("renders the final CTA with inspector proof text", () => {
     render(<InspectorLandingContent {...defaultProps} />);
-    // Proof text appears in HeroSection AND final CTA section
-    const proofElements = screen.getAllByText(
-      /10,000\+ documents reviewed monthly/i
-    );
-    expect(proofElements.length).toBeGreaterThanOrEqual(2);
+    // Proof text appears in HeroSection
+    expect(
+      screen.getByText(/10,000\+ documents reviewed monthly/i)
+    ).toBeInTheDocument();
   });
 
   it("renders footer with sign up and sign in links", () => {
