@@ -17,9 +17,11 @@ type Row = {
 type Props = {
   session: SessionUser;
   rows: Row[];
+  /** When true, renders skeleton shimmer rows instead of the table. */
+  loading?: boolean;
 };
 
-export function AdminRequestsTable({ session, rows }: Props) {
+export function AdminRequestsTable({ session, rows, loading }: Props) {
   return (
     <WorkspaceShell session={session} eyebrow="Admin" title="Requests" metrics={[]}>
       <DataTable
@@ -27,6 +29,7 @@ export function AdminRequestsTable({ session, rows }: Props) {
         description="Newest operational demand across companies and assigned staff."
         rows={rows}
         rowHref="/admin/requests/"
+        loading={loading}
         columns={[
           { key: "title", label: "Request", render: (row) => <strong>{row.title}</strong> },
           { key: "company", label: "Company", render: (row) => row.company },

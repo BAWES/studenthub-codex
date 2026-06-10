@@ -18,9 +18,11 @@ type Props = {
   session: SessionUser;
   rows: Row[];
   latest: Row | undefined;
+  /** When true, renders skeleton shimmer rows instead of the table. */
+  loading?: boolean;
 };
 
-export function AdminTransfersTable({ session, rows, latest }: Props) {
+export function AdminTransfersTable({ session, rows, latest, loading }: Props) {
   return (
     <WorkspaceShell
       session={session}
@@ -63,6 +65,7 @@ export function AdminTransfersTable({ session, rows, latest }: Props) {
         description="Open a run to review candidate payouts, employer totals, invoices, and supporting PDF actions."
         rows={rows}
         rowHref="/admin/transfers/"
+        loading={loading}
         columns={[
           { key: "id", label: "Transfer", render: (row) => <strong>#{row.id}</strong> },
           { key: "company", label: "Company", render: (row) => row.company },
