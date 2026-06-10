@@ -14,7 +14,10 @@ describe("PricingCard", () => {
 
   it("renders candidate pricing (free)", () => {
     render(<PricingCard persona="candidate" />);
-    expect(screen.getByText("Free profile, no commitments.")).toBeInTheDocument();
+    // Candidate sees "Completely free for students. Always." as h2
+    expect(screen.getByText("Completely free for students. Always.")).toBeInTheDocument();
+    // Free tier name
+    expect(screen.getByText("Free")).toBeInTheDocument();
   });
 
   it("renders staff pricing tiers", () => {

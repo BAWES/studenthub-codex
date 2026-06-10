@@ -121,7 +121,7 @@ describe("Landing page (marketing redesign)", () => {
       screen.getByRole("heading", { name: /your next placement/i })
     ).toBeInTheDocument();
     // CTA text appears in both nav and hero — use getAllByText
-    const ctaElements = screen.getAllByText(/create (your )?free candidate profile/i);
+    const ctaElements = screen.getAllByText(/create (your )?free (student|candidate) profile/i);
     expect(ctaElements.length).toBeGreaterThanOrEqual(1);
   });
 
@@ -130,8 +130,8 @@ describe("Landing page (marketing redesign)", () => {
     expect(
       screen.getByRole("navigation", { name: /StudentHub public navigation/i })
     ).toBeInTheDocument();
-    // "Create free candidate profile" appears in nav
-    const navCta = screen.getAllByText(/create free candidate profile/i);
+    // "Create free student profile" appears in nav (default persona)
+    const navCta = screen.getAllByText(/create free (student )?profile/i);
     expect(navCta.length).toBeGreaterThanOrEqual(1);
     // "Sign in" appears in nav hero and footer — use getAllByText
     const signInLinks = screen.getAllByText(/sign in/i);
@@ -199,7 +199,7 @@ describe("Landing page (marketing redesign)", () => {
     const openAppLinks = screen.getAllByText(/open app/i);
     expect(openAppLinks.length).toBeGreaterThanOrEqual(1);
     // No signup CTAs for authenticated users
-    expect(screen.queryByText(/create free candidate profile/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/create free (student|candidate) profile/i)).not.toBeInTheDocument();
   });
 
   describe("Glass navigation styling", () => {

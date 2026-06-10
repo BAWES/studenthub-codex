@@ -98,22 +98,24 @@ describe("Candidate landing page (/for-candidates)", () => {
       screen.getByLabelText(/candidate pain points and solutions/i)
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/hundreds of job boards/i)
+      screen.getByText(/can't get hired without experience/i)
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/your time is billable/i)
+      screen.getByText(/a single job for years gives you a thin cv/i)
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/your profile should work as hard/i)
+      screen.getByText(/compliance paperwork is a nightmare/i)
     ).toBeInTheDocument();
   });
 
   it("renders the stats strip with candidate metrics", () => {
     render(<CandidateLandingContent {...defaultProps} />);
-    expect(screen.getByLabelText(/candidate stats/i)).toBeInTheDocument();
-    expect(screen.getByText("1,200+")).toBeInTheDocument();
-    expect(screen.getByText("92%")).toBeInTheDocument();
-    expect(screen.getByText("4.8★")).toBeInTheDocument();
+    const statsSection = screen.getByLabelText(/candidate stats/i);
+    expect(statsSection).toBeInTheDocument();
+    expect(statsSection).toHaveTextContent("1,200+");
+    expect(statsSection).toHaveTextContent("92%");
+    expect(statsSection).toHaveTextContent("Free");
+    expect(statsSection).toHaveTextContent("3 mo");
   });
 
   it("renders the feature grid", () => {
@@ -132,7 +134,7 @@ describe("Candidate landing page (/for-candidates)", () => {
     render(<CandidateLandingContent {...defaultProps} />);
     const ctaSection = screen.getByLabelText(/get started as a candidate/i);
     expect(
-      within(ctaSection).getByText(/1,200\+ candidates placed this year/i)
+      within(ctaSection).getByText(/1,200\+ active student placements/i)
     ).toBeInTheDocument();
   });
 

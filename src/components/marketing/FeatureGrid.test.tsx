@@ -11,13 +11,17 @@ describe("FeatureGrid", () => {
 
   it("renders default candidate heading", () => {
     render(<FeatureGrid />);
-    expect(screen.getByText("Your career, powered by one platform.")).toBeInTheDocument();
+    // Content may appear in multiple mount points — use getAllByText
+    const headings = screen.getAllByText("Your career, powered by one platform.");
+    expect(headings.length).toBeGreaterThanOrEqual(1);
   });
 
   it("renders candidate features when persona is candidate", () => {
     render(<FeatureGrid persona="candidate" />);
-    expect(screen.getByText("Smart role discovery")).toBeInTheDocument();
-    expect(screen.getByText("Seamless timesheets & pay")).toBeInTheDocument();
+    const srDiscovery = screen.getAllByText("Smart role discovery");
+    expect(srDiscovery.length).toBeGreaterThanOrEqual(1);
+    const timesheets = screen.getAllByText("Seamless timesheets & pay");
+    expect(timesheets.length).toBeGreaterThanOrEqual(1);
   });
 
   it("renders staff features when persona is staff", () => {
@@ -41,7 +45,8 @@ describe("FeatureGrid", () => {
   it("renders admin with company/company features", () => {
     render(<FeatureGrid persona="admin" />);
     expect(screen.getByText("Full control across every operation.")).toBeInTheDocument();
-    expect(screen.getByText("Multi-branch management")).toBeInTheDocument();
+    const multiBranch = screen.getAllByText("Multi-branch management");
+    expect(multiBranch.length).toBeGreaterThanOrEqual(1);
   });
 
   it("applies custom className", () => {
@@ -51,7 +56,10 @@ describe("FeatureGrid", () => {
 
   it("renders stat badges on features that have them", () => {
     render(<FeatureGrid persona="candidate" />);
-    expect(screen.getByText("60+ employers on the platform")).toBeInTheDocument();
-    expect(screen.getByText("99% on-time payment rate")).toBeInTheDocument();
+    // Text may appear in multiple mount points — use getAllByText
+    const statBadges = screen.getAllByText("60+ employers on the platform");
+    expect(statBadges.length).toBeGreaterThanOrEqual(1);
+    const paymentStats = screen.getAllByText("99% on-time payment rate");
+    expect(paymentStats.length).toBeGreaterThanOrEqual(1);
   });
 });
