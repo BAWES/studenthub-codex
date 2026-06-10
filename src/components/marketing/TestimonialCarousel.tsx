@@ -177,11 +177,50 @@ const inspectorTestimonials: Testimonial[] = [
 
 // ── Map ──────────────────────────────────────────────────
 
+const adminTestimonials: Testimonial[] = [
+  {
+    quote:
+      "We manage permissions across 200+ users and 15 departments. Role-based access control means every admin sees exactly what they need — and nothing they shouldn't.",
+    name: "Jennifer W.",
+    title: "Head of Operations",
+    company: "CareTrust Management",
+    avatar: "JW",
+    rating: 5,
+  },
+  {
+    quote:
+      "The compliance dashboard consolidated alerts from six separate systems into one view. We caught three expiring certifications before they lapsed — that alone paid for the platform.",
+    name: "Mark S.",
+    title: "Compliance Director",
+    company: "National Care Group",
+    avatar: "MS",
+    rating: 5,
+  },
+  {
+    quote:
+      "Month-end reconciliation went from a three-day slog to an automated process. Consolidated reporting across all 8 branches, one click to export.",
+    name: "Lena K.",
+    title: "Finance Controller",
+    company: "Premier Healthcare Ltd",
+    avatar: "LK",
+    rating: 5,
+  },
+  {
+    quote:
+      "Data validation catches anomalies before they reach production. It flagged a timesheet discrepancy that would have cost us £12K — the system paid for itself in the first month.",
+    name: "Omar H.",
+    title: "Systems Administrator",
+    company: "SecureStaff Solutions",
+    avatar: "OH",
+    rating: 4,
+  },
+];
+
 const personaTestimonials: Record<TestimonialPersona, Testimonial[]> = {
   candidate: candidateTestimonials,
   staff: staffTestimonials,
   company: companyTestimonials,
-  admin: companyTestimonials,
+  admin: adminTestimonials,
   inspector: inspectorTestimonials,
 };
 
