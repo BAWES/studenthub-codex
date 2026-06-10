@@ -52,7 +52,7 @@ export async function listJobApplications(
   ]);
 
   const applications: JobApplicationRow[] = dbRows.map((r) => ({
-    id: r.id,
+    applicationId: r.applicationId,
     candidateId: r.candidateId,
     candidateName: r.candidate?.candidate_name ?? r.candidate?.candidate_name_ar ?? null,
     status: r.status,
@@ -99,7 +99,7 @@ export async function listJobApplicationsByEmployer(
   ]);
 
   const applications = dbRows.map((r) => ({
-    id: r.id,
+    applicationId: r.applicationId,
     candidateId: r.candidateId,
     candidateName: r.candidate?.candidate_name ?? r.candidate?.candidate_name_ar ?? null,
     jobTitle: r.jobListing.title,
@@ -124,7 +124,7 @@ export async function updateApplicationStatus(
   const { applicationId, status } = updateApplicationStatusSchema.parse(input);
 
   await prisma.job_listing_application.update({
-    where: { id: applicationId },
+    where: { applicationId },
     data: { status },
   });
 
