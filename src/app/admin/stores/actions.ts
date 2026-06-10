@@ -6,78 +6,35 @@
 // Ported from Yii2 admin/modules/v1/controllers/StoreController.php
 //
 // Actions:
-//   - listStores   — paginated list of all stores with filters (name, status)
-//   - getStore     — single store detail with contact info, company, brand, mall
+//   - listStores     — paginated list of all stores with filters (name, status)
+//   - getStore       — single store detail with contact info, company, brand, mall
+//   - createStore    — create a new store
+//   - updateStore    — update an existing store
+//   - deleteStore    — soft-delete a store
 //
 // Status: store_status is an Int (SmallInt) where 10 = active, 0 = inactive.
 // Filter accepts 'active'/'inactive' strings and converts accordingly.
 // ---------------------------------------------------------------------------
 
 import { revalidatePath } from "next/cache";
-import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
-
-// ---------------------------------------------------------------------------
-// Schemas
-// ---------------------------------------------------------------------------
-
-export const listStoresSchema = z.object({
-  page: z.coerce.number().int().positive().optional().default(1),
-  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
-  companyId: z.coerce.number().int().positive().optional(),
-  status: z.enum(["active", "inactive"]).optional(),
-  q: z.string().optional(),
-});
-
-export const getStoreSchema = z.object({
-  storeId: z.coerce.number().int().positive(),
-});
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export type ListStoresInput = z.input<typeof listStoresSchema>;
-export type GetStoreInput = z.input<typeof getStoreSchema>;
-
-export type StoreRow = {
-  store_id: number;
-  store_name: string;
-  store_location: string;
-  store_status: number;
-  store_total_candidates: number | null;
-  company_name: string | null;
-  brand_name: string | null;
-  mall_name: string | null;
-  manager_name: string | null;
-  created_at: string | null;
-  updated_at: string | null;
-};
-
-export type StoreDetail = {
-  store: {
-    store_id: number;
-    store_name: string;
-    store_location: string;
-    store_status: number;
-    store_total_candidates: number | null;
-    store_created_at: string | null;
-    store_updated_at: string | null;
-    company: { company_name: string | null; company_email: string | null } | null;
-    contact: { contact_name: string | null; contact_email: string | null } | null;
-    brand: { brand_name_en: string | null } | null;
-    mall: { mall_name_en: string | null } | null;
-  } | null;
-};
-
-export type ListStoresResult = {
-  items: StoreRow[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
+import {
+  listStoresSchema,
+  getStoreSchema,
+  createStoreSchema,
+  updateStoreSchema,
+  deleteStoreSchema,
+  type ListStoresInput,
+  type GetStoreInput,
+  type CreateStoreInput,
+  type UpdateStoreInput,
+  type DeleteStoreInput,
+  type ListStoresResult,
+  type StoreRow,
+  type StoreDetail,
+  type StoreActionResult,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // listStores
@@ -205,4 +162,153 @@ export async function getStore(
         : null,
     },
   };
+}
+
+// ---------------------------------------------------------------------------
+// createStore
+// ---------------------------------------------------------------------------
+
+/**
+ * Create a new store with the given fields.
+ * Returns the new store's ID on success.
+ */
+export async function createStore(
+  input: CreateStoreInput,
+): Promise<StoreActionResult> {
+  await requireCapability("admin.read");
+
+  const parsed = createStoreSchema.safeParse(input);
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: parsed.error.issues[0]?.message ?? "Invalid input",
+    };
+  }
+
+  try {
+    const store = await prisma.store.create({
+      data: {
+        store_name: parsed.data.store_name,
+        store_location: parsed.data.store_location || "",
+        company_id: parsed.data.company_id || null,
+        store_status: parsed.data.store_status,
+        store_created_at: new Date(),
+        store_updated_at: new Date(),
+      },
+    });
+
+    revalidatePath("/admin/stores");
+
+    return { success: true, storeId: store.store_id };
+  } catch (e) {
+    return {
+      success: false,
+      error: e instanceof Error ? e.message : "Failed to create store",
+    };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// updateStore
+// ---------------------------------------------------------------------------
+
+/**
+ * Update an existing store's fields. Only provided fields are updated.
+ * Returns an error if the store does not exist.
+ */
+export async function updateStore(
+  input: UpdateStoreInput,
+): Promise<StoreActionResult> {
+  await requireCapability("admin.read");
+
+  const parsed = updateStoreSchema.safeParse(input);
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: parsed.error.issues[0]?.message ?? "Invalid input",
+    };
+  }
+
+  const { storeId, ...fields } = parsed.data;
+
+  const existing = await prisma.store.findUnique({
+    where: { store_id: storeId },
+    select: { store_id: true },
+  });
+
+  if (!existing) {
+    return { success: false, error: "Store not found" };
+  }
+
+  const data: Record<string, unknown> = { store_updated_at: new Date() };
+  if (fields.store_name !== undefined) data.store_name = fields.store_name;
+  if (fields.store_location !== undefined) data.store_location = fields.store_location;
+  if (fields.company_id !== undefined) data.company_id = fields.company_id;
+  if (fields.store_status !== undefined) data.store_status = fields.store_status;
+
+  try {
+    await prisma.store.update({
+      where: { store_id: storeId },
+      data,
+    });
+
+    revalidatePath("/admin/stores");
+
+    return { success: true, storeId };
+  } catch (e) {
+    return {
+      success: false,
+      error: e instanceof Error ? e.message : "Failed to update store",
+    };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// deleteStore
+// ---------------------------------------------------------------------------
+
+/**
+ * Soft-delete a store by setting deleted=1.
+ * Returns an error if the store does not exist.
+ */
+export async function deleteStore(
+  input: DeleteStoreInput,
+): Promise<StoreActionResult> {
+  await requireCapability("admin.read");
+
+  const parsed = deleteStoreSchema.safeParse(input);
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: parsed.error.issues[0]?.message ?? "Invalid input",
+    };
+  }
+
+  const existing = await prisma.store.findUnique({
+    where: { store_id: parsed.data.storeId },
+    select: { store_id: true },
+  });
+
+  if (!existing) {
+    return { success: false, error: "Store not found" };
+  }
+
+  try {
+    await prisma.store.update({
+      where: { store_id: parsed.data.storeId },
+      data: {
+        deleted: 1,
+        store_updated_at: new Date(),
+      },
+    });
+
+    revalidatePath("/admin/stores");
+
+    return { success: true };
+  } catch (e) {
+    return {
+      success: false,
+      error: e instanceof Error ? e.message : "Failed to delete store",
+    };
+  }
 }
