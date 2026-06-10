@@ -1,9 +1,7 @@
-import type { Route } from "next";
 import { requireRoleCapability } from "@/modules/auth/session";
-import { DataTable } from "@/modules/workspace/DataTable";
-import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { formatDate } from "@/modules/workspace/format";
 import { listCandidateExperience } from "./actions";
+import { CandidateExperienceTable } from "./candidate-experience-table";
 
 export const dynamic = "force-dynamic";
 
@@ -26,27 +24,5 @@ export default async function CandidateExperiencePage() {
     created_at: e.created_at ? formatDate(e.created_at) : "N/A",
   }));
 
-  return (
-    <WorkspaceShell
-      session={session}
-      eyebrow="Candidate"
-      title="Experience"
-      metrics={[
-        { label: "Total", value: items.length, note: "Experience entries on your profile" },
-      ]}
-    >
-      <DataTable
-        title="Work Experience"
-        description="Your work history and professional experience."
-        rows={rows}
-        rowHref={(row) => `/candidate/experience/${row.id}` as Route}
-        columns={[
-          { key: "experience", label: "Position", render: (row) => <strong>{row.experience}</strong> },
-          { key: "employer", label: "Employer", render: (row) => row.employer },
-          { key: "period", label: "Period", render: (row) => row.period },
-          { key: "created_at", label: "Added", render: (row) => row.created_at },
-        ]}
-      />
-    </WorkspaceShell>
-  );
+  return <CandidateExperienceTable session={session} rows={rows} />;
 }

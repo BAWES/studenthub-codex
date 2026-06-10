@@ -1,50 +1,72 @@
 import { z } from "zod";
 
 // ---------------------------------------------------------------------------
-// Student Public Profile — Zod validation schemas
+// Schemas — colocated with student public profile server actions
+// ---------------------------------------------------------------------------
+// Uses Prisma `candidate` model (StudentHub's student entity).
+// Public-facing profile data viewable by employers and authenticated users.
 // ---------------------------------------------------------------------------
 
 export const getStudentProfileSchema = z.object({
-  studentId: z.string().min(1, "Student ID is required"),
+  studentId: z.coerce.number().int().positive("Student ID is required"),
 });
 
-export type GetStudentProfileInput = z.infer<typeof getStudentProfileSchema>;
-
 export const updateStudentProfileSchema = z.object({
-  studentId: z.string().min(1),
-  bio: z.string().max(2000).optional(),
-  headline: z.string().max(200).optional(),
-  location: z.string().max(200).optional(),
-  website: z.string().url().optional().or(z.literal("")),
-  linkedIn: z.string().url().optional().or(z.literal("")),
-  github: z.string().url().optional().or(z.literal("")),
+  studentId: z.coerce.number().int().positive(),
+  name: z.string().min(1).max(255).optional(),
+  objective: z.string().max(255).optional(),
+  intro: z.string().optional(),
+  phone: z.string().max(20).optional(),
+  address: z.string().optional(),
+});
+
+export const listSkillsSchema = z.object({
+  studentId: z.coerce.number().int().positive(),
 });
 
 export const addSkillSchema = z.object({
-  studentId: z.string().min(1),
-  skillName: z.string().min(1).max(100),
+  studentId: z.coerce.number().int().positive(),
+  skill: z.string().min(1, "Skill name is required").max(128),
 });
 
 export const removeSkillSchema = z.object({
-  studentId: z.string().min(1),
-  skillName: z.string().min(1).max(100),
+  skillId: z.coerce.number().int().positive(),
+});
+
+export const listExperienceSchema = z.object({
+  studentId: z.coerce.number().int().positive(),
 });
 
 export const addExperienceSchema = z.object({
-  studentId: z.string().min(1),
-  title: z.string().min(1).max(200),
-  company: z.string().min(1).max(200),
-  description: z.string().max(2000).optional(),
-  startDate: z.string().min(1),
-  endDate: z.string().optional(),
-  isCurrent: z.boolean().default(false),
+  studentId: z.coerce.number().int().positive(),
+  experience: z.string().min(1, "Experience title is required").max(128),
+  employer: z.string().max(255).optional(),
+  startYear: z.coerce.number().int().optional(),
+  endYear: z.coerce.number().int().optional(),
 });
 
-export const updateExperienceSchema = addExperienceSchema.extend({
-  experienceId: z.string().min(1),
+export const updateExperienceSchema = z.object({
+  experienceId: z.coerce.number().int().positive(),
+  experience: z.string().min(1).max(128).optional(),
+  employer: z.string().max(255).optional(),
+  startYear: z.coerce.number().int().optional(),
+  endYear: z.coerce.number().int().optional(),
 });
 
 export const removeExperienceSchema = z.object({
-  studentId: z.string().min(1),
-  experienceId: z.string().min(1),
+  experienceId: z.coerce.number().int().positive(),
 });
+
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
+
+export type GetStudentProfileInput = z.input<typeof getStudentProfileSchema>;
+export type UpdateStudentProfileInput = z.input<typeof updateStudentProfileSchema>;
+export type ListSkillsInput = z.input<typeof listSkillsSchema>;
+export type AddSkillInput = z.input<typeof addSkillSchema>;
+export type RemoveSkillInput = z.input<typeof removeSkillSchema>;
+export type ListExperienceInput = z.input<typeof listExperienceSchema>;
+export type AddExperienceInput = z.input<typeof addExperienceSchema>;
+export type UpdateExperienceInput = z.input<typeof updateExperienceSchema>;
+export type RemoveExperienceInput = z.input<typeof removeExperienceSchema>;

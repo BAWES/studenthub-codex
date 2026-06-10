@@ -1,9 +1,6 @@
 import { requireRoleCapability } from "@/modules/auth/session";
-import { DataTablePage } from "@/modules/workspace/DataTablePage";
-import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { listStoresRows, listMallsAndBrands, listCompanySelectOptions } from "./actions";
-import { AddStoreForm } from "@/modules/company/AddStoreForm";
-import { RemoveStoreButton } from "@/modules/company/RemoveStoreButton";
+import { CompanyStoresTable } from "./company-stores-table";
 
 export const dynamic = "force-dynamic";
 
@@ -16,24 +13,6 @@ export default async function CompanyStoresPage() {
   ]);
 
   return (
-    <WorkspaceShell session={session} eyebrow="Company" title="Stores &amp; Branches" metrics={[]}>
-      <AddStoreForm companies={companies} malls={malls} brands={brands} />
-      <DataTablePage
-        title="Stores"
-        description="Store locations linked to companies you manage."
-        rows={rows}
-        searchable
-        searchPlaceholder="Search by store, location, mall, brand..."
-        columns={[
-          { key: "name", label: "Store", render: (row) => <strong>{row.name}</strong> },
-          { key: "location", label: "Location", render: (row) => row.location },
-          { key: "mall", label: "Mall", render: (row) => row.mallName || "—" },
-          { key: "brand", label: "Brand", render: (row) => row.brandName || "—" },
-          { key: "company", label: "Company", render: (row) => row.companyName },
-          { key: "manager", label: "Manager", render: (row) => row.managerName || "—" },
-          { key: "actions", label: "Actions", render: (row) => <RemoveStoreButton storeId={row.id} storeName={row.name} /> }
-        ]}
-      />
-    </WorkspaceShell>
+    <CompanyStoresTable session={session} rows={rows} malls={malls} brands={brands} companies={companies} />
   );
 }

@@ -918,6 +918,7 @@ model company {
   transfer                                                                 transfer[]
   transfer_candidate                                                       transfer_candidate[]
   transfer_cost                                                            transfer_cost[]
+  job_listing                                                              job_listing[]
 
   @@index([parent_company_id], map: "idx-company-parent_company_id")
   @@index([staff_id], map: "idx-company-staff_id")
@@ -999,6 +1000,28 @@ model company_token {
   company                  company   @relation(fields: [company_id], references: [company_id], onDelete: Cascade, onUpdate: Restrict, map: "fk-company_token-company_id")
 
   @@index([company_id], map: "idx-company_token-company_id")
+}
+
+// ---------------------------------------------------------------------------
+// Job listing — employer posts for student recruitment
+// ---------------------------------------------------------------------------
+model job_listing {
+  jobListingId   Int      @id @default(autoincrement())
+  employerId     Int
+  title          String   @db.VarChar(255)
+  description    String   @db.Text
+  requirements   String?  @db.Text
+  location       String?  @db.VarChar(255)
+  employmentType String?  @db.VarChar(50)
+  salaryRange    String?  @db.VarChar(100)
+  status         String?  @default("active") @db.VarChar(20)
+  createdAt      DateTime @default(now()) @db.DateTime(0)
+  updatedAt      DateTime @updatedAt @db.DateTime(0)
+
+  employer company @relation(fields: [employerId], references: [company_id], onDelete: Cascade, onUpdate: Restrict, map: "fk-job_listing-employer_id")
+
+  @@index([employerId], map: "idx-job_listing-employer_id")
+  @@index([status], map: "idx-job_listing-status")
 }
 
 model contact {

@@ -55,6 +55,8 @@ vi.mock("lucide-react", () => ({
   UsersRound: () => <span data-testid="icon-users-round" />,
   X: () => <span data-testid="icon-x" />,
   Zap: () => <span data-testid="icon-zap" />,
+  PieChart: () => <span data-testid="icon-pie-chart" />,
+  GitMerge: () => <span data-testid="icon-git-merge" />,
   Briefcase: () => <span data-testid="icon-briefcase" />,
   PieChart: () => <span data-testid="icon-pie-chart" />,
   GitMerge: () => <span data-testid="icon-git-merge" />,
