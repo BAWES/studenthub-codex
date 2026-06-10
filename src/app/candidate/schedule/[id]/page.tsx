@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { requireRoleCapability } from "@/modules/auth/session";
 import { DetailSection } from "@/modules/workspace/DetailPanels";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
-import { getCandidateWorkingDateDetail } from "@/modules/workspace/data";
+import { getScheduleDetail } from "../actions";
 import { formatDate } from "@/modules/workspace/format";
 
 export const dynamic = "force-dynamic";
@@ -25,7 +25,7 @@ export default async function CandidateScheduleDetailPage({
 }) {
   const session = await requireRoleCapability("candidate", "candidate.read.own");
   const { id } = await params;
-  const data = await getCandidateWorkingDateDetail(Number(session.id), id);
+  const data = await getScheduleDetail(id);
 
   if (!data) {
     notFound();

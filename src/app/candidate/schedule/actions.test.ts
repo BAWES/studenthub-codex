@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   listScheduleSchema,
   getScheduleItemSchema,
+  getScheduleDetailSchema,
   updateScheduleStatusSchema,
 } from "./actions";
 
@@ -123,5 +124,21 @@ describe("updateScheduleStatusSchema", () => {
         status: "1",
       }).success,
     ).toBe(false);
+  });
+});
+
+describe("getScheduleDetailSchema", () => {
+  it("accepts a valid UUID", () => {
+    expect(
+      getScheduleDetailSchema.safeParse({ cwd_uuid: "abc-123-def" }).success,
+    ).toBe(true);
+  });
+
+  it("rejects empty UUID", () => {
+    expect(getScheduleDetailSchema.safeParse({ cwd_uuid: "" }).success).toBe(false);
+  });
+
+  it("rejects missing UUID", () => {
+    expect(getScheduleDetailSchema.safeParse({}).success).toBe(false);
   });
 });
