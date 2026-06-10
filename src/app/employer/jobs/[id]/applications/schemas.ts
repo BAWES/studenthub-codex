@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { APPLICATION_STATUSES } from "@/modules/status-labels";
 
 // ---------------------------------------------------------------------------
 // Schemas — employer job application management
@@ -19,7 +20,7 @@ export const listJobApplicationsByEmployerSchema = z.object({
 
 export const updateApplicationStatusSchema = z.object({
   applicationId: z.coerce.number().int().positive(),
-  status: z.enum(["applied", "reviewing", "shortlisted", "interviewed", "accepted", "rejected"]),
+  status: z.enum(APPLICATION_STATUSES),
 });
 
 // ---------------------------------------------------------------------------

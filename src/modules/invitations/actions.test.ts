@@ -1,13 +1,14 @@
 import { describe, it, expect } from "vitest";
 import { z } from "zod";
+import {
+  INVITATION_STATUS_INVITED,
+  INVITATION_STATUS_ACCEPTED,
+  INVITATION_STATUS_REJECTED,
+} from "@/modules/status-labels";
 
 // ---------------------------------------------------------------------------
 // Schema definitions (extracted from the server action for unit testing)
 // ---------------------------------------------------------------------------
-
-const INVITATION_STATUS_INVITED = 0;
-const INVITATION_STATUS_ACCEPTED = 1;
-const INVITATION_STATUS_REJECTED = 2;
 
 const listInvitationsSchema = z.object({
   status: z.number().int().min(0).max(2).optional(),

@@ -3,11 +3,11 @@
 
 export type PipelineStage = "pending_review" | "interviewing" | "offered" | "hired" | "rejected";
 
-const STATUS_PENDING = 0;   // New / Pending Review
-const STATUS_INTERVIEWING = 1; // Invited / Interviewing
-const STATUS_OFFERED = 2;    // Offered
-const STATUS_HIRED = 3;      // Hired / Placed
-const STATUS_REJECTED = 4;   // Rejected / Cancelled
+export const STATUS_PENDING = 0;   // New / Pending Review
+export const STATUS_INTERVIEWING = 1; // Invited / Interviewing
+export const STATUS_OFFERED = 2;    // Offered
+export const STATUS_HIRED = 3;      // Hired / Placed
+export const STATUS_REJECTED = 4;   // Rejected / Cancelled
 
 export function stageFromInvitationStatus(status: number): PipelineStage {
   switch (status) {

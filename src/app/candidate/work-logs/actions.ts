@@ -16,6 +16,7 @@ import {
   type SubmitWorkLogResult,
   type UpdateWorkLogStatusResult,
 } from "./schemas";
+import { WORK_LOG_STATUS_PENDING } from "@/modules/status-labels";
 
 // ---------------------------------------------------------------------------
 // listWorkLogs — paginated list of work logs for the current candidate
@@ -232,7 +233,7 @@ export async function submitWorkLog(
         end_time: endTime ? new Date(endTime) : null,
         total_time: computedTotalTime ?? null,
         note: note ?? null,
-        status: 0,
+        status: WORK_LOG_STATUS_PENDING,
         via: "Manual Log",
         created_at: now,
         updated_at: now,

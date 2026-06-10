@@ -10,9 +10,11 @@ import { requireRoleCapability } from "@/modules/auth/session";
 // Constants
 // ---------------------------------------------------------------------------
 
-const INVITATION_STATUS_INVITED = 0;
-const INVITATION_STATUS_ACCEPTED = 1;
-const INVITATION_STATUS_REJECTED = 2;
+import {
+  INVITATION_STATUS_INVITED,
+  INVITATION_STATUS_ACCEPTED,
+  INVITATION_STATUS_REJECTED,
+} from "@/modules/status-labels";
 
 const NOTE_TYPE_INVITATION_ACCEPTED = "Invitation Accepted";
 const NOTE_TYPE_INVITATION_REJECTED = "Invitation Rejected";
