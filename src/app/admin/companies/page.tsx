@@ -2,13 +2,13 @@ import type { Route } from "next";
 import { requireRoleCapability } from "@/modules/auth/session";
 import { DataTable } from "@/modules/workspace/DataTable";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
-import { getAdminCompanyRows } from "@/modules/workspace/data";
+import { listAdminCompanies } from "./actions";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminCompaniesPage() {
   const session = await requireRoleCapability("admin", "company.read.any");
-  const rows = await getAdminCompanyRows();
+  const { items: rows } = await listAdminCompanies({ limit: 60 });
 
   return (
     <WorkspaceShell session={session} eyebrow="Admin" title="Companies" metrics={[]}>
