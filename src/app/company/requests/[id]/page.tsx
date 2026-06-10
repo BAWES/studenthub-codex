@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { requireRoleCapability } from "@/modules/auth/session";
 import { DetailSection } from "@/modules/workspace/DetailPanels";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
-import { getCompanyRequestDetail } from "@/modules/workspace/data";
+import { getRequest } from "./actions";
 import { formatDate } from "@/modules/workspace/format";
 
 export const dynamic = "force-dynamic";
@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 export default async function CompanyRequestDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await requireRoleCapability("company", "request.read.linked");
   const { id } = await params;
-  const data = await getCompanyRequestDetail(session.id, id);
+  const data = await getRequest(id);
 
   if (!data?.request) {
     notFound();
