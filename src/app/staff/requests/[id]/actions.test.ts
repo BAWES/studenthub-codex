@@ -62,7 +62,7 @@ const mockDetail = {
   suggestions: [],
   matchedCandidates: [],
   totalMatched: 0,
-};
+} as unknown as Awaited<ReturnType<typeof getRequestDetail>>;
 
 beforeEach(() => {
   vi.clearAllMocks();

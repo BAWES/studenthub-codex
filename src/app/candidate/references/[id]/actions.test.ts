@@ -132,7 +132,8 @@ const mockReference = {
   relationship: "colleague",
   deleted: 0,
   created_at: new Date("2026-06-10"),
-};
+  updated_at: new Date("2026-06-10"),
+} as Awaited<ReturnType<typeof parent.getCandidateReference>>;
 
 beforeEach(() => {
   vi.clearAllMocks();
