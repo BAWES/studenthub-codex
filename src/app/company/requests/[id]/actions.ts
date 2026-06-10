@@ -2,26 +2,44 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { requireCapability } from "@/modules/auth/session";
+import { requireRoleCapability } from "@/modules/auth/session";
+import { getRequestDetail as _getRequestDetail } from "@/modules/workspace/data/shared";
 import {
   updateRequestStatusSchema,
   deleteRequestSchema,
+  getCompanyRequestDetailSchema,
   type UpdateRequestStatusInput,
   type DeleteRequestInput,
 } from "../schemas";
-import type { CompanyRequestDetail } from "../schemas";
-import { getCompanyRequestDetail as _getCompanyRequestDetail } from "../actions";
 
 // ---------------------------------------------------------------------------
-// Re-export detail query from parent (detail page uses the same model)
-// Next.js 15 "use server" forbids bare re-exports — use wrapper function.
+// getCompanyRequestDetail — full request detail with pipeline data
 // ---------------------------------------------------------------------------
 
-export async function getRequest(
+/**
+ * Get full request detail including applications, interviews, invitations,
+ * matched candidates, and pipeline metrics for the company role.
+ *
+ * Wraps the shared @/modules/workspace/data/shared getRequestDetail as a
+ * route-level server action with company-role auth.
+ * Mirrors the legacy getCompanyRequestDetail from @/modules/workspace/data.
+ */
+export async function getCompanyRequestDetail(
   uuid: string,
-): Promise<CompanyRequestDetail | null> {
-  return _getCompanyRequestDetail(uuid);
+): Promise<Awaited<ReturnType<typeof _getRequestDetail>> | null> {
+  await requireRoleCapability("company", "request.read.linked");
+
+  const parsed = getCompanyRequestDetailSchema.safeParse({ uuid });
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid request UUID");
+  }
+
+  return _getRequestDetail(parsed.data.uuid);
 }
+
+export type GetCompanyRequestDetailResult = Awaited<
+  ReturnType<typeof getCompanyRequestDetail>
+>;
 
 // ---------------------------------------------------------------------------
 // updateRequestStatus — update the status of a company request
@@ -35,7 +53,7 @@ export async function getRequest(
 export async function updateRequestStatus(
   params: UpdateRequestStatusInput,
 ): Promise<{ success: true } | { error: string }> {
-  await requireCapability("request.write");
+  await requireRoleCapability("company", "request.write");
 
   const parsed = updateRequestStatusSchema.safeParse(params);
   if (!parsed.success) {
@@ -79,7 +97,7 @@ export async function updateRequestStatus(
 export async function deleteRequest(
   params: DeleteRequestInput,
 ): Promise<{ success: true } | { error: string }> {
-  await requireCapability("request.write");
+  await requireRoleCapability("company", "request.write");
 
   const parsed = deleteRequestSchema.safeParse(params);
   if (!parsed.success) {
