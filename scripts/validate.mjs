@@ -123,7 +123,7 @@ function section(title) {
   section("Prisma Schema");
   const schema = readFileSync(join(ROOT, "prisma/schema.prisma"), "utf8");
   const modelCount = (schema.match(/^model \w+/gm) || []).length;
-  ok(`Prisma schema has 137 models`, modelCount === 137, `Found ${modelCount}`);
+  ok(`Prisma schema has 138 models`, modelCount === 138, `Found ${modelCount}`);
   for (const name of ["candidate", "company", "request", "transfer", "invoice", "staff", "admin", "inspector", "suggestion", "transfer_candidate"]) {
     ok(`Model: ${name}`, schema.includes(`model ${name}`));
   }
