@@ -29,9 +29,6 @@ export interface LandingContentProps {
 const VALID_PERSONAS: SwitcherPersona[] = [
   "candidate",
   "company",
-  "staff",
-  "admin",
-  "inspector",
 ];
 
 function parsePersona(raw: string | null): SwitcherPersona {
@@ -46,9 +43,6 @@ function parsePersona(raw: string | null): SwitcherPersona {
 const signupRoles: Record<SwitcherPersona, string> = {
   candidate: "candidate",
   company: "company",
-  staff: "staff",
-  admin: "admin",
-  inspector: "inspector",
 };
 
 // ── Nav CTA copy ──────────────────────────────────────────────
@@ -56,25 +50,16 @@ const signupRoles: Record<SwitcherPersona, string> = {
 const navCtaLabel: Record<SwitcherPersona, string> = {
   candidate: "Create free student profile",
   company: "Partner with us",
-  staff: "Request staff access",
-  admin: "Request admin access",
-  inspector: "Request inspector access",
 };
 
 const finalCtaEyebrow: Record<SwitcherPersona, string> = {
   candidate: "Start building your career",
   company: "Start your partnership",
-  staff: "Start orchestrating",
-  admin: "Take control of operations",
-  inspector: "Start inspecting today",
 };
 
 const finalCtaTitle: Record<SwitcherPersona, string> = {
   candidate: "Your future CV starts today.",
   company: "Workforce management, handled.",
-  staff: "Your next rotation is one click away.",
-  admin: "Your next dashboard is one login away.",
-  inspector: "Your next verification is one scan away.",
 };
 
 const finalCtaBody: Record<SwitcherPersona, string> = {
@@ -82,28 +67,16 @@ const finalCtaBody: Record<SwitcherPersona, string> = {
     "Create your free profile in under 3 minutes. StudentHub matches you with paid placements across different companies. Rotate every ~3 months, build experience across multiple roles, and graduate way ahead of your peers. Free, always.",
   company:
     "Get matched with qualified student workers in under 48 hours. StudentHub manages placement, compliance, payroll, and rotations — one partner, one invoice. Hourly rates and monthly plans available.",
-  staff:
-    "Manage students, placements, rotations, and compliance from one dashboard. Access the full operations toolkit from day one. No setup fee, no minimum commitment.",
-  admin:
-    "Get full visibility across users, finances, compliance, and payroll. One workspace replaces a dozen logins.",
-  inspector:
-    "Authenticate once and instantly verify any StudentHub worker by scanning their QR ID card. No onboarding, no paperwork — just scan and validate.",
 };
 
 const finalCtaButton: Record<SwitcherPersona, string> = {
   candidate: "Create your free student profile",
   company: "Partner with StudentHub",
-  staff: "Get staff access",
-  admin: "Get admin access",
-  inspector: "Get inspector access",
 };
 
 const finalCtaProof: Record<SwitcherPersona, string> = {
   candidate: "1,200+ students placed this year · 4.8★ satisfaction",
   company: "200+ companies on StudentHub · 100% audit pass rate",
-  staff: "350+ active rotations · 99.7% compliance pass rate",
-  admin: "15,000+ worker records managed · 99.7% audit pass rate",
-  inspector: "10,000+ verifications monthly · Zero-day onboarding",
 };
 
 // ── Component ─────────────────────────────────────────────────
@@ -262,25 +235,48 @@ export default function LandingContent({ session }: LandingContentProps) {
 
       {/* ── Footer ── */}
       <footer
-        className="shSection flex items-center justify-between pt-4 pb-2 text-xs"
+        className="shSection pt-4 pb-2 text-xs"
         style={{ color: "var(--muted)" }}
       >
-        <span>&copy; {new Date().getFullYear()} StudentHub. All rights reserved.</span>
-        <div className="flex items-center gap-4">
-          <Link
-            href="/login"
-            className="hover:text-[var(--ink)] transition-colors no-underline"
-            style={{ color: "inherit" }}
-          >
-            Sign in
-          </Link>
-          <Link
-            href={`/signup?role=${role}`}
-            className="hover:text-[var(--ink)] transition-colors no-underline"
-            style={{ color: "inherit" }}
-          >
-            Sign up as {persona}
-          </Link>
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <span>&copy; {new Date().getFullYear()} StudentHub. All rights reserved.</span>
+          <div className="flex items-center gap-4">
+            <Link
+              href="/for-staff"
+              className="hover:text-[var(--ink)] transition-colors no-underline"
+              style={{ color: "inherit" }}
+            >
+              For staff
+            </Link>
+            <Link
+              href="/for-admins"
+              className="hover:text-[var(--ink)] transition-colors no-underline"
+              style={{ color: "inherit" }}
+            >
+              For admins
+            </Link>
+            <Link
+              href="/for-inspectors"
+              className="hover:text-[var(--ink)] transition-colors no-underline"
+              style={{ color: "inherit" }}
+            >
+              For inspectors
+            </Link>
+            <Link
+              href="/login"
+              className="hover:text-[var(--ink)] transition-colors no-underline"
+              style={{ color: "inherit" }}
+            >
+              Sign in
+            </Link>
+            <Link
+              href={`/signup?role=${role}`}
+              className="hover:text-[var(--ink)] transition-colors no-underline"
+              style={{ color: "inherit" }}
+            >
+              Sign up as {persona}
+            </Link>
+          </div>
         </div>
       </footer>
     </main>

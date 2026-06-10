@@ -1,16 +1,13 @@
 "use client";
 
-import { Sparkles, UserRound, Building2, ShieldCheck, ClipboardCheck, UsersRound } from "lucide-react";
+import { Sparkles, UserRound, Building2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 // ── Types ────────────────────────────────────────────────
 
 export type SwitcherPersona =
   | "candidate"
-  | "company"
-  | "staff"
-  | "admin"
-  | "inspector";
+  | "company";
 
 export interface PersonaSwitcherProps {
   active: SwitcherPersona;
@@ -39,24 +36,6 @@ const personas: PersonaDef[] = [
     label: "Company",
     subtitle: "Hire and manage teams",
     icon: Building2,
-  },
-  {
-    id: "staff",
-    label: "Staff",
-    subtitle: "Place people faster",
-    icon: UsersRound,
-  },
-  {
-    id: "admin",
-    label: "Admin",
-    subtitle: "Compliance & ops",
-    icon: ShieldCheck,
-  },
-  {
-    id: "inspector",
-    label: "Inspector",
-    subtitle: "Review & certify",
-    icon: ClipboardCheck,
   },
 ];
 
