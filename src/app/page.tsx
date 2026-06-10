@@ -5,13 +5,13 @@ import LandingContent from "./LandingContent";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "StudentHub — Unified Platform for Hiring, Compliance & Workforce Management",
+  title: "StudentHub — Connecting Students with the Right Employers",
   description:
-    "Connect candidates, staffing agencies, employers, and compliance teams on one platform. Smart matching, timesheet management, compliance automation, and consolidated billing — purpose-built for modern workforce operations.",
+    "A two-sided marketplace connecting students with employers across Kuwait. Create your free profile, get AI-matched with roles, and get hired — all on one platform.",
   openGraph: {
-    title: "StudentHub | Smarter Hiring, Compliance & Workforce Operations",
+    title: "StudentHub | Find Student Jobs & Hire Talent in Kuwait",
     description:
-      "One platform for candidates, staffing agencies, employers, and compliance. AI matching, timesheets, compliance automation, and unified billing.",
+      "Two-sided marketplace for student talent. Students build careers, employers find vetted candidates — with AI matching, timesheets, and compliance.",
   },
 };
 

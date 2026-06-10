@@ -24,3 +24,6 @@ export type { EmployerSectionProps } from "./EmployerSection";
 
 export { default as StatsSection } from "./StatsSection";
 export type { StatsSectionProps } from "./StatsSection";
+
+export { default as FadeInSection } from "./FadeInSection";
+export type { FadeInSectionProps } from "./FadeInSection";

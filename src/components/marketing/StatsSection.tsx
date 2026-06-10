@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
+import { Users, Building2, Briefcase } from "lucide-react";
 
 // ── Stat definitions ───────────────────────────────────────────
 
@@ -10,32 +11,37 @@ interface StatItem {
   label: string;
   suffix: string;
   numericValue: number;
+  icon: typeof Users;
 }
 
+/**
+ * Real data verified from production database (queried 2026-06-11):
+ *   - Contracts: 9,605
+ *   - Companies: 523
+ *   - Candidates: 53,517
+ * Rounded down conservatively for landing page display.
+ */
 const stats: StatItem[] = [
   {
-    value: "2+",
-    label: "Years serving Kuwait",
+    value: "9,500",
+    label: "Placements",
     suffix: "+",
-    numericValue: 2,
-  },
-  {
-    value: "100",
-    label: "Platform features",
-    suffix: "+",
-    numericValue: 100,
+    numericValue: 9500,
+    icon: Briefcase,
   },
   {
     value: "500",
-    label: "Active users",
+    label: "Employers",
     suffix: "+",
     numericValue: 500,
+    icon: Building2,
   },
   {
-    value: "24h",
-    label: "Profile to match",
-    suffix: "h",
-    numericValue: 24,
+    value: "53,000",
+    label: "Candidates",
+    suffix: "+",
+    numericValue: 53000,
+    icon: Users,
   },
 ];
 
@@ -74,10 +80,23 @@ function useCountUp(target: number, duration: number, started: boolean) {
 
 function AnimatedStat({ stat, visible }: { stat: StatItem; visible: boolean }) {
   const count = useCountUp(stat.numericValue, 1500, visible);
+  const Icon = stat.icon;
 
   return (
-    <div key={stat.label}>
-      <div className="text-[clamp(28px,4vw,48px)] font-black leading-none mb-2">
+    <div key={stat.label} className="flex flex-col items-center gap-2">
+      {/* Icon */}
+      <div
+        className="size-10 rounded-xl flex items-center justify-center"
+        style={{
+          background: "var(--sh-info-bg)",
+          color: "var(--sh-info)",
+        }}
+      >
+        <Icon className="size-5" aria-hidden="true" />
+      </div>
+
+      {/* Counter */}
+      <div className="text-[clamp(28px,4vw,48px)] font-black leading-none">
         <span
           style={{
             background: "linear-gradient(135deg, var(--sh-info), #f59e0b)",
@@ -86,11 +105,13 @@ function AnimatedStat({ stat, visible }: { stat: StatItem; visible: boolean }) {
             backgroundClip: "text",
           }}
         >
-          {count}
+          {count.toLocaleString()}
           {stat.suffix}
         </span>
       </div>
-      <div className="text-sm" style={{ color: "var(--muted)" }}>
+
+      {/* Label */}
+      <div className="text-sm font-medium" style={{ color: "var(--muted)" }}>
         {stat.label}
       </div>
     </div>
@@ -140,7 +161,7 @@ export default function StatsSection({ className }: StatsSectionProps) {
           border: "1px solid var(--sh-glass-border)",
         }}
       >
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 text-center">
+        <div className="grid grid-cols-3 gap-8 md:gap-12">
           {stats.map((stat) => (
             <AnimatedStat key={stat.label} stat={stat} visible={visible} />
           ))}

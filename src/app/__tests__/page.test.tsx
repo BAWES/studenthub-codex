@@ -153,7 +153,7 @@ describe("Landing page (two-sided marketplace redesign)", () => {
     expect(screen.getByText("How it works")).toBeInTheDocument();
     expect(screen.getByText("Create your profile")).toBeInTheDocument();
     expect(screen.getByText("Get matched")).toBeInTheDocument();
-    expect(screen.getByText("Get hired and paid")).toBeInTheDocument();
+    expect(screen.getByText("Get hired")).toBeInTheDocument();
   });
 
   it("renders the stats section", () => {
