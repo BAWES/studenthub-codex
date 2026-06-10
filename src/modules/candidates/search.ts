@@ -545,7 +545,7 @@ function sortFacetOption(a: { label: string; count: number }, b: { label: string
   return b.count - a.count || a.label.localeCompare(b.label);
 }
 
-function topFacet(values: { value: string; label: string }[], activeValue?: string): CandidateSearchFacet["options"] {
+export function topFacet(values: { value: string; label: string }[], activeValue?: string): CandidateSearchFacet["options"] {
   const counts = new Map<string, { label: string; count: number }>();
   for (const item of values) {
     const key = item.value.trim();
@@ -577,7 +577,7 @@ async function resolveSelectedCandidateId({
   return null;
 }
 
-function buildSelectedActions(role: CandidateSearchRole, candidate: Awaited<ReturnType<typeof getCandidateDetail>>["candidate"]) {
+export function buildSelectedActions(role: CandidateSearchRole, candidate: Awaited<ReturnType<typeof getCandidateDetail>>["candidate"]) {
   if (!candidate) return [];
   const base = role === "admin" ? "/admin/candidates" : "/staff/candidates";
   return [
@@ -587,7 +587,7 @@ function buildSelectedActions(role: CandidateSearchRole, candidate: Awaited<Retu
   ].filter((item): item is { label: string; href: string } => Boolean(item));
 }
 
-async function candidateIdsForStaff(staffId: number) {
+export async function candidateIdsForStaff(staffId: number) {
   if (!staffId) return [];
   const rows = await prisma.candidate_work_history.findMany({
     where: { staff_id: staffId, candidate_id: { not: null } },
@@ -603,15 +603,15 @@ function candidateIdScope(candidateIds: number[]): Prisma.candidateWhereInput {
   return candidateIds.length ? { candidate_id: { in: candidateIds } } : { candidate_id: -1 };
 }
 
-function parsePositiveInt(value?: string) {
+export function parsePositiveInt(value?: string) {
   const parsed = Number(value);
   return Number.isInteger(parsed) && parsed > 0 ? parsed : undefined;
 }
 
-function parseEnum<T extends string>(value: string | undefined, allowed: T[]) {
+export function parseEnum<T extends string>(value: string | undefined, allowed: T[]) {
   return allowed.includes(value as T) ? (value as T) : undefined;
 }
 
-function uniqueCandidateIds(ids: number[]) {
+export function uniqueCandidateIds(ids: number[]) {
   return [...new Set(ids.filter((id) => Number.isInteger(id) && id > 0))];
 }

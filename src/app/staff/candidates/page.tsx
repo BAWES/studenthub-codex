@@ -1,6 +1,7 @@
 import { requireRoleCapability } from "@/modules/auth/session";
 import { CandidateSearchOS } from "@/modules/candidates/CandidateSearchOS";
-import { getCandidateSearchWorkspace, parseFilter, parseCandidateId, parseCandidateIds, parseVisibility } from "@/modules/candidates/search";
+import { getCandidateSearchWorkspaceTypesense as getCandidateSearchWorkspace, parseFilter, parseCandidateId, parseCandidateIds } from "@/modules/candidates/search-typesense";
+import { parseVisibility } from "@/modules/candidates/search";
 
 export const dynamic = "force-dynamic";
 
