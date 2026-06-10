@@ -8,9 +8,11 @@ import type { CompanyRow } from "./schemas";
 type Props = {
   session: SessionUser;
   rows: CompanyRow[];
+  /** When true, renders skeleton shimmer rows instead of the table. */
+  loading?: boolean;
 };
 
-export function AdminCompaniesTable({ session, rows }: Props) {
+export function AdminCompaniesTable({ session, rows, loading }: Props) {
   return (
     <WorkspaceShell session={session} eyebrow="Admin" title="Companies" metrics={[]}>
       <DataTable
@@ -18,6 +20,7 @@ export function AdminCompaniesTable({ session, rows }: Props) {
         description="Companies, ownership, active request counts, and commercial status."
         rows={rows}
         rowHref="/admin/companies/"
+        loading={loading}
         columns={[
           { key: "name", label: "Company", render: (row) => <strong>{row.name}</strong> },
           { key: "email", label: "Email", render: (row) => row.email },
