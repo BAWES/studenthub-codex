@@ -4,13 +4,13 @@ import { DataTable } from "@/modules/workspace/DataTable";
 import { StatusBadge } from "@/modules/workspace/StatusBadge";
 import { genericStatusVariant } from "@/modules/workspace/status-mapping";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
-import { getCompanyAccountRows } from "@/modules/workspace/data";
+import { listCompanyAccountRows } from "./actions";
 
 export const dynamic = "force-dynamic";
 
 export default async function CompanyCompaniesPage() {
   const session = await requireRoleCapability("company", "company.read.linked");
-  const rows = await getCompanyAccountRows(session.id);
+  const rows = await listCompanyAccountRows(session.id);
 
   return (
     <WorkspaceShell session={session} eyebrow="Company" title="Linked Companies" metrics={[]}>
