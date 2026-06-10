@@ -1,13 +1,28 @@
 import { requireRoleCapability } from "@/modules/auth/session";
-import { StaffHome } from "@/modules/staff/StaffHome";
-import { getStaffWorkspace } from "./actions";
+import { getStaffWorkspace } from "@/modules/workspace/data";
+import { getPipelineData, getPipelineMetrics } from "@/modules/staff/pipeline-data";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
+import { PipelineClientWrapper } from "@/modules/staff/pipeline/PipelineClientWrapper";
+import { updatePipelineStageAction } from "@/modules/staff/pipeline/actions";
+import type { PipelineStage } from "@/modules/staff/pipeline-data";
 
 export const dynamic = "force-dynamic";
 
+async function updateAction(invitationUuid: string, stage: PipelineStage) {
+  "use server";
+  return updatePipelineStageAction({ invitationUuid, stage });
+}
+
 export default async function StaffPage() {
   const session = await requireRoleCapability("staff", "request.read.assigned");
-  const data = await getStaffWorkspace(Number(session.id));
+  const staffId = Number(session.id);
+
+  const [data, pipelineItems] = await Promise.all([
+    getStaffWorkspace(staffId),
+    getPipelineData(staffId),
+  ]);
+
+  const metrics = await getPipelineMetrics(pipelineItems);
 
   return (
     <WorkspaceShell
@@ -16,7 +31,11 @@ export default async function StaffPage() {
       title={`Welcome back, ${data.staff?.staff_name ?? session.name}.`}
       metrics={data.metrics}
     >
-      <StaffHome data={data} />
+      <PipelineClientWrapper
+        initialItems={pipelineItems}
+        metrics={metrics}
+        updateAction={updateAction}
+      />
     </WorkspaceShell>
   );
 }
