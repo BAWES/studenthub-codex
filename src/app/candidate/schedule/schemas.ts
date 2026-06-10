@@ -7,9 +7,6 @@ import { z } from "zod";
 // functions — Next.js requires this for "use server" files.
 // ---------------------------------------------------------------------------
 
-/** Valid working-date statuses for candidate self-service updates. */
-const VALID_SCHEDULE_STATUSES = [0, 1, 2, 3] as const;
-
 export const listScheduleSchema = z.object({
   page: z.coerce.number().int().min(1).optional().default(1),
   limit: z.coerce.number().int().min(1).max(100).optional().default(20),
@@ -24,6 +21,10 @@ export const getScheduleItemSchema = z.object({
 export const getScheduleDetailSchema = z.object({
   cwd_uuid: z.string().min(1, "Working date UUID is required"),
 });
+
+/** Valid working-date statuses for candidate self-service updates. */
+const VALID_SCHEDULE_STATUSES = [0, 1, 2, 3] as const;
+
 
 export const updateScheduleStatusSchema = z.object({
   cwd_uuid: z.string().min(1, "Working date UUID is required"),

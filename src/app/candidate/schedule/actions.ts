@@ -8,12 +8,13 @@ import {
   getScheduleItemSchema,
   getScheduleDetailSchema,
   updateScheduleStatusSchema,
-  type ListScheduleInput,
-  type GetScheduleItemInput,
-  type UpdateScheduleStatusInput,
-  type ScheduleItem,
-  type ScheduleStatusResult,
-  type ScheduleDetail,
+} from "./schemas";
+import type {
+  ListScheduleInput,
+  ScheduleItem,
+  ScheduleDetail,
+  ScheduleStatusResult,
+  UpdateScheduleStatusInput,
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
