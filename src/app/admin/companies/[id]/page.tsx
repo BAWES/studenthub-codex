@@ -31,7 +31,7 @@ export default async function AdminCompanyDetailPage({ params }: { params: Promi
           { label: "Email", value: data.company.company_email },
           { label: "Common Name", value: data.company.company_common_name_en },
           { label: "Website", value: data.company.company_website },
-          { label: "Country", value: data.company.country?.country_name_en },
+          { label: "Country", value: data.company.country_name_en },
           { label: "Created", value: formatDate(data.company.company_created_at) },
           { label: "Updated", value: formatDate(data.company.company_updated_at) }
         ]}
