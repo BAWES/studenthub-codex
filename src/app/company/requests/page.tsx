@@ -6,7 +6,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { DataTable } from "@/modules/workspace/DataTable";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
-import { getCompanyRequestRows } from "@/modules/workspace/data";
+import { getCompanyRequestRows } from "./actions";
 
 export const dynamic = "force-dynamic";
 

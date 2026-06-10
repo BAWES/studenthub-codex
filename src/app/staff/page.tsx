@@ -1,5 +1,5 @@
 import { requireRoleCapability } from "@/modules/auth/session";
-import { getStaffWorkspace } from "@/modules/workspace/data";
+import { getStaffWorkspace } from "./actions";
 import { getPipelineData, getPipelineMetrics } from "@/modules/staff/pipeline-data";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { PipelineClientWrapper } from "@/modules/staff/pipeline/PipelineClientWrapper";
