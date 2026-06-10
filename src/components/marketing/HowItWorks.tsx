@@ -22,7 +22,7 @@ const steps: Step[] = [
     icon: Search,
     number: 2,
     title: "Get matched",
-    body: "Our AI matches you with relevant openings across 60+ employers. Get alerted the moment a role matches your profile, and apply in one tap.",
+    body: "Our AI matches you with relevant openings across employers on the platform. Get alerted the moment a role matches your profile, and apply in one tap.",
   },
   {
     icon: Briefcase,

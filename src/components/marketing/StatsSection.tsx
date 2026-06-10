@@ -14,28 +14,28 @@ interface StatItem {
 
 const stats: StatItem[] = [
   {
-    value: "1,200+",
-    label: "Candidates placed",
+    value: "2+",
+    label: "Years serving Kuwait",
     suffix: "+",
-    numericValue: 1200,
+    numericValue: 2,
   },
   {
-    value: "4.8",
-    label: "Average rating",
-    suffix: "★",
-    numericValue: 48,
-  },
-  {
-    value: "60+",
-    label: "Active employers",
+    value: "100",
+    label: "Platform features",
     suffix: "+",
-    numericValue: 60,
+    numericValue: 100,
   },
   {
-    value: "48h",
-    label: "Avg time-to-match",
+    value: "500",
+    label: "Active users",
+    suffix: "+",
+    numericValue: 500,
+  },
+  {
+    value: "24h",
+    label: "Profile to match",
     suffix: "h",
-    numericValue: 48,
+    numericValue: 24,
   },
 ];
 
