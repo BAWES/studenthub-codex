@@ -9,6 +9,7 @@ vi.mock("lucide-react", () => ({
   Sparkles: () => <span data-testid="icon-sparkles" />,
   ChevronRight: () => <span data-testid="icon-chevron-right" />,
   Star: () => <span data-testid="icon-star" />,
+  Users: () => <span data-testid="icon-users" />,
 }));
 
 afterEach(() => {
