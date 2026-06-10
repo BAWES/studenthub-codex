@@ -7,6 +7,8 @@ vi.mock("lucide-react", () => ({
   Search: () => <span data-testid="icon-search" />,
   Briefcase: () => <span data-testid="icon-briefcase" />,
   ArrowDown: () => <span data-testid="icon-arrow-down" />,
+  Building2: () => <span data-testid="icon-building" />,
+  Sparkles: () => <span data-testid="icon-sparkles" />,
 }));
 
 afterEach(() => {
@@ -25,20 +27,19 @@ describe("HowItWorks", () => {
   it("renders the main title", () => {
     render(<HowItWorks />);
     expect(
-      screen.getByText("From profile to paycheck in three steps."),
+      screen.getByText("From profile to placement in three steps."),
     ).toBeTruthy();
   });
 
-  it("renders all 3 steps", () => {
+  it("renders all 3 steps for students", () => {
     render(<HowItWorks />);
     expect(screen.getByText("Create your profile")).toBeTruthy();
     expect(screen.getByText("Get matched")).toBeTruthy();
-    expect(screen.getByText("Get hired and paid")).toBeTruthy();
+    expect(screen.getByText("Get hired")).toBeTruthy();
   });
 
   it("renders step numbers 1, 2, 3", () => {
     const { container } = render(<HowItWorks />);
-    // Step numbers rendered in badges
     expect(container.textContent).toContain("1");
     expect(container.textContent).toContain("2");
     expect(container.textContent).toContain("3");
@@ -50,10 +51,17 @@ describe("HowItWorks", () => {
       screen.getByText(/tell us about your skills/i),
     ).toBeTruthy();
     expect(
-      screen.getByText(/AI matches you/i),
+      screen.getByText(/AI matches/i),
     ).toBeTruthy();
     expect(
-      screen.getByText(/track your applications/i),
+      screen.getByText(/one-click apply/i),
+    ).toBeTruthy();
+  });
+
+  it("renders two-sided marketplace description", () => {
+    render(<HowItWorks />);
+    expect(
+      screen.getByText(/both sides of the marketplace/i),
     ).toBeTruthy();
   });
 });

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
+import { Star } from "lucide-react";
 
 // ── Stat definitions ───────────────────────────────────────────
 
@@ -14,28 +15,22 @@ interface StatItem {
 
 const stats: StatItem[] = [
   {
-    value: "2+",
-    label: "Years serving Kuwait",
+    value: "1,200",
+    label: "Students placed",
     suffix: "+",
-    numericValue: 2,
+    numericValue: 1200,
   },
   {
-    value: "100",
-    label: "Platform features",
-    suffix: "+",
-    numericValue: 100,
+    value: "4.8",
+    label: "Star rating",
+    suffix: "",
+    numericValue: 48,
   },
   {
-    value: "500",
-    label: "Active users",
+    value: "60",
+    label: "Active employers",
     suffix: "+",
-    numericValue: 500,
-  },
-  {
-    value: "24h",
-    label: "Profile to match",
-    suffix: "h",
-    numericValue: 24,
+    numericValue: 60,
   },
 ];
 
@@ -74,10 +69,14 @@ function useCountUp(target: number, duration: number, started: boolean) {
 
 function AnimatedStat({ stat, visible }: { stat: StatItem; visible: boolean }) {
   const count = useCountUp(stat.numericValue, 1500, visible);
+  const isRating = stat.label === "Star rating";
+  const displayValue = isRating
+    ? `${(count / 10).toFixed(1)}`
+    : `${count}${stat.suffix}`;
 
   return (
     <div key={stat.label}>
-      <div className="text-[clamp(28px,4vw,48px)] font-black leading-none mb-2">
+      <div className="text-[clamp(28px,4vw,48px)] font-black leading-none mb-1">
         <span
           style={{
             background: "linear-gradient(135deg, var(--sh-info), #f59e0b)",
@@ -86,10 +85,25 @@ function AnimatedStat({ stat, visible }: { stat: StatItem; visible: boolean }) {
             backgroundClip: "text",
           }}
         >
-          {count}
-          {stat.suffix}
+          {displayValue}
         </span>
       </div>
+      {/* Star rating icon */}
+      {isRating && (
+        <div className="flex items-center justify-center gap-1 mb-1">
+          {[1, 2, 3, 4, 5].map((star) => (
+            <Star
+              key={star}
+              className="size-4"
+              style={{
+                color: "#f59e0b",
+                fill: count >= star * 10 ? "#f59e0b" : "transparent",
+              }}
+              aria-hidden="true"
+            />
+          ))}
+        </div>
+      )}
       <div className="text-sm" style={{ color: "var(--muted)" }}>
         {stat.label}
       </div>
@@ -140,7 +154,7 @@ export default function StatsSection({ className }: StatsSectionProps) {
           border: "1px solid var(--sh-glass-border)",
         }}
       >
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 text-center">
+        <div className="grid grid-cols-3 gap-8 md:gap-12 text-center">
           {stats.map((stat) => (
             <AnimatedStat key={stat.label} stat={stat} visible={visible} />
           ))}

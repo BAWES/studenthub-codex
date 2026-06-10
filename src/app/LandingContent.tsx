@@ -136,15 +136,11 @@ export default function LandingContent({ session }: LandingContentProps) {
       {/* ── How It Works — 3-step flow ── */}
       <HowItWorks />
 
-      {/* ── Employer section — company-specific ── */}
-      {persona === "company" && <EmployerSection />}
+      {/* ── Employer section — value props for all audiences ── */}
+      <EmployerSection />
 
       {/* ── Social proof — testimonials ── */}
-      {persona === "company" ? (
-        <TestimonialCarousel persona="company" />
-      ) : (
-        <TestimonialCarousel persona="candidate" />
-      )}
+      <TestimonialCarousel persona={persona} />
 
       {/* ── Comparison table — persona-specific ── */}
       <ComparisonTable persona={persona} />

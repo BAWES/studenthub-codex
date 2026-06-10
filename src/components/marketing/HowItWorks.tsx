@@ -22,13 +22,13 @@ const steps: Step[] = [
     icon: Search,
     number: 2,
     title: "Get matched",
-    body: "Our AI matches you with relevant openings across employers on the platform. Get alerted the moment a role matches your profile, and apply in one tap.",
+    body: "Our AI matches you with relevant openings across employers on the platform. Get alerted the moment a role matches your profile, and apply in one click.",
   },
   {
     icon: Briefcase,
     number: 3,
-    title: "Get hired and paid",
-    body: "Track your applications in real time, log hours from your phone, and get paid on schedule. No chasing, no spreadsheets — just a seamless path from offer to paycheck.",
+    title: "Get hired",
+    body: "One-click apply, real-time application tracking, and direct communication with employers. From profile to placement — all on one platform.",
   },
 ];
 
@@ -48,14 +48,14 @@ export default function HowItWorks({ className }: HowItWorksProps) {
           How it works
         </p>
         <h2 className="shBenefitsTitle text-center">
-          From profile to paycheck in three steps.
+          From profile to placement in three steps.
         </h2>
         <p
           className="max-w-[520px] mx-auto mt-2 leading-relaxed"
           style={{ color: "var(--muted)" }}
         >
           Whether you&apos;re a student looking for work or an employer hiring talent,
-          StudentHub makes the connection seamless.
+          StudentHub serves both sides of the marketplace seamlessly.
         </p>
       </div>
 
