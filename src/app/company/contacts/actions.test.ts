@@ -4,6 +4,7 @@ import {
   getCompanyContactSchema,
   createCompanyContactSchema,
   updateCompanyContactSchema,
+  listCompanyContactsRowsSchema,
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
@@ -162,5 +163,21 @@ describe("updateCompanyContactSchema", () => {
         allow_access: true,
       }).success,
     ).toBe(false);
+  });
+});
+
+describe("listCompanyContactsRowsSchema", () => {
+  it("accepts a valid contact UUID", () => {
+    expect(
+      listCompanyContactsRowsSchema.safeParse({ contactUuid: "abc-123-def" }).success,
+    ).toBe(true);
+  });
+
+  it("rejects empty contact UUID", () => {
+    expect(listCompanyContactsRowsSchema.safeParse({ contactUuid: "" }).success).toBe(false);
+  });
+
+  it("rejects missing contactUuid", () => {
+    expect(listCompanyContactsRowsSchema.safeParse({}).success).toBe(false);
   });
 });

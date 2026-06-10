@@ -16,6 +16,7 @@ import type {
   CompanyContactListItem,
   CompanyContactDetail,
   ListCompanyContactsResult,
+  CompanyContactRow,
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
@@ -231,4 +232,51 @@ export async function updateCompanyContact(
 
   revalidatePath("/company/contacts");
   return { company_contact_uuid: parsed.data.uuid };
+}
+
+// ---------------------------------------------------------------------------
+// DataTable rows — colocated replacement for @/modules/company/data
+// ---------------------------------------------------------------------------
+
+/**
+ * List company contacts as flat DataTable rows for the company/contacts page.
+ * Mirrors getCompanyContactsRows from @/modules/company/data.
+ */
+export async function listCompanyContactsRows(
+  contactUuid: string,
+): Promise<CompanyContactRow[]> {
+  await requireCapability("company.read.linked");
+
+  // Get companies linked to this contact
+  const linked = await prisma.company_contact.findMany({
+    where: { contact_uuid: contactUuid, allow_access: true },
+    select: { company_id: true },
+  });
+
+  const companyIds = linked
+    .filter((l) => l.company_id !== null)
+    .map((l) => l.company_id as number);
+
+  if (companyIds.length === 0) return [];
+
+  const contacts = await prisma.company_contact.findMany({
+    where: { company_id: { in: companyIds } },
+    select: {
+      company_contact_uuid: true,
+      contact_position: true,
+      allow_access: true,
+      contact: { select: { contact_name: true, contact_email: true } },
+      company: { select: { company_name: true } },
+    },
+    orderBy: { updated_at: "desc" },
+  });
+
+  return contacts.map((c) => ({
+    id: c.company_contact_uuid,
+    name: c.contact?.contact_name ?? "—",
+    email: c.contact?.contact_email ?? "—",
+    position: c.contact_position ?? "—",
+    companyName: c.company?.company_name ?? "—",
+    allowAccess: c.allow_access ?? false,
+  }));
 }

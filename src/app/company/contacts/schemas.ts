@@ -69,3 +69,24 @@ export type ListCompanyContactsResult = {
   limit: number;
   totalPages: number;
 };
+
+// ---------------------------------------------------------------------------
+// DataTable row types (colocated replacement for @/modules/company/data)
+// ---------------------------------------------------------------------------
+
+export const listCompanyContactsRowsSchema = z.object({
+  contactUuid: z.string().min(1, "Contact UUID is required"),
+});
+
+/**
+ * A flat display row for the DataTable in company/contacts/page.tsx.
+ * Mirrors the return shape of getCompanyContactsRows from @/modules/company/data.
+ */
+export type CompanyContactRow = {
+  id: string;
+  name: string;
+  email: string;
+  position: string;
+  companyName: string;
+  allowAccess: boolean;
+};
