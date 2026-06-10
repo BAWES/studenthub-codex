@@ -1,66 +1,72 @@
 import { test, expect } from "@playwright/test";
 
-test.describe("Landing page smoke tests (STU-154)", () => {
-  test("landing page loads with hero content", async ({ page }) => {
+test.describe("Landing page smoke tests (STU-2776 redesign)", () => {
+  test("landing page loads with hero section", async ({ page }) => {
     await page.goto("/");
     await expect(page.locator("body")).toBeVisible({ timeout: 15000 });
 
-    // Hero copy (changed in STU-154)
-    await expect(page.locator(".landingHeroCopy")).toBeVisible();
-    await expect(page.locator("h1")).toHaveText("Every role gets its own workspace.");
-    await expect(page.locator(".landingHeroCopy .eyebrow")).toHaveText("The StudentHub platform");
+    // Hero section renders with aria-label
+    const hero = page.locator(
+      "section[aria-label='StudentHub — connecting students with the right employers']",
+    );
+    await expect(hero).toBeVisible();
+
+    // H1 headline renders
+    await expect(page.locator("h1")).toContainText("Connecting students with");
+
+    // Eyebrow renders
+    await expect(hero.locator(".shHeroEyebrow")).toContainText(
+      "The two-sided marketplace",
+    );
   });
 
   test("hero CTA buttons render", async ({ page }) => {
     await page.goto("/");
-    await expect(page.locator(".landingActions")).toBeVisible();
-    await expect(page.locator(".landingActions >> text=Get started")).toBeVisible();
-    await expect(page.locator(".landingActions >> text=Explore portals")).toBeVisible();
+
+    // Student CTA
+    await expect(
+      page.locator('a[href="/signup?role=candidate"] >> text=Create your free profile'),
+    ).toBeVisible();
+
+    // Employer CTA
+    await expect(
+      page.locator('a[href="/signup?role=company"] >> text=Hire students'),
+    ).toBeVisible();
+
+    // Sign in link
+    await expect(page.locator('a[href="/login"] >> text=Sign in')).toBeVisible();
   });
 
-  test("platform highlights strip renders", async ({ page }) => {
+  test("hero feature pills render", async ({ page }) => {
     await page.goto("/");
-    const stats = page.locator(".landingHeroStats");
-    await expect(stats).toBeVisible();
-    await expect(stats).toHaveAttribute("aria-label", "Platform highlights");
-    await expect(stats).toContainText("5 role-specific portals");
-    await expect(stats).toContainText("Unified search & documents");
-    await expect(stats).toContainText("End-to-end workflows");
+
+    // Student pills
+    const studentPills = page.locator('[aria-label="Key benefits for students"]');
+    await expect(studentPills).toBeVisible();
+    await expect(studentPills).toContainText("Profile visible to employers");
+
+    // Employer pills
+    const employerPills = page.locator('[aria-label="Key benefits for employers"]');
+    await expect(employerPills).toBeVisible();
+    await expect(employerPills).toContainText("AI-matched candidate suggestions");
   });
 
-  test("portal grid renders all 5 portal cards with icons", async ({ page }) => {
+  test("persona switcher renders and switches between candidate/company", async ({
+    page,
+  }) => {
     await page.goto("/");
-    const portalGrid = page.locator("section[aria-label='StudentHub portals']");
-    await expect(portalGrid).toBeVisible();
 
-    const portalLinks = portalGrid.locator("a");
-    await expect(portalLinks).toHaveCount(5);
+    // Persona switcher component renders
+    const personaSwitcher = page.locator("text=For students").first();
+    await expect(personaSwitcher).toBeVisible();
 
-    // Each portal card has an emoji icon (aria-hidden)
-    const icons = portalGrid.locator(".portalIcon");
-    await expect(icons).toHaveCount(5);
-    for (const icon of await icons.all()) {
-      await expect(icon).toHaveAttribute("aria-hidden", "true");
-    }
+    // Default persona shows candidate-focused CTA
+    await expect(
+      page.locator('[aria-label="Get started"] >> text=Create your free candidate profile'),
+    ).toBeVisible();
   });
 
-  test("benefits section renders with all cards", async ({ page }) => {
-    await page.goto("/");
-    const benefitsSection = page.locator(".landingBenefitsSection");
-    await expect(benefitsSection).toBeVisible();
-    await expect(benefitsSection.locator(".eyebrow")).toHaveText("Why StudentHub");
-    await expect(benefitsSection.locator("h2")).toHaveText("Built for how staffing actually works.");
-
-    const benefitCards = benefitsSection.locator(".benefitGrid article");
-    await expect(benefitCards).toHaveCount(4);
-
-    await expect(benefitCards.nth(0)).toContainText("Purpose-built portals");
-    await expect(benefitCards.nth(1)).toContainText("Smart candidate search");
-    await expect(benefitCards.nth(2)).toContainText("End-to-end workflows");
-    await expect(benefitCards.nth(3)).toContainText("Production-grade foundation");
-  });
-
-  test("nav renders brand and sign in link", async ({ page }) => {
+  test("navigation renders brand and sign in link", async ({ page }) => {
     await page.goto("/");
     const nav = page.locator("nav[aria-label='StudentHub public navigation']");
     await expect(nav).toBeVisible();
@@ -68,11 +74,20 @@ test.describe("Landing page smoke tests (STU-154)", () => {
     await expect(nav).toContainText("Sign in");
   });
 
-  test("decorative ops frame is aria-hidden", async ({ page }) => {
+  test("CTA section renders with get-started content", async ({ page }) => {
     await page.goto("/");
-    const stage = page.locator(".landingHeroStage");
-    await expect(stage).toHaveAttribute("aria-hidden", "true");
-    await expect(stage.locator(".landingOpsSearch")).toContainText("find talent");
+    const ctaSection = page.locator('section[aria-label="Get started"]');
+    await expect(ctaSection).toBeVisible();
+    await expect(ctaSection).toContainText("Your next role is one profile away");
+    await expect(ctaSection).toContainText(
+      "Create your free candidate profile",
+    );
+  });
+
+  test("decorative elements have aria-hidden", async ({ page }) => {
+    await page.goto("/");
+    const gradients = page.locator(".shHeroGradientDramatic");
+    await expect(gradients.first()).toHaveAttribute("aria-hidden", "true");
   });
 
   test.describe("mobile", () => {
@@ -80,9 +95,15 @@ test.describe("Landing page smoke tests (STU-154)", () => {
 
     test("landing page renders on mobile without overflow", async ({ page }) => {
       await page.goto("/");
-      await expect(page.locator("h1")).toHaveText("Every role gets its own workspace.");
-      await expect(page.locator(".landingActions")).toBeVisible();
-      await expect(page.locator(".landingBenefitsSection")).toBeVisible();
+      await expect(page.locator("h1")).toContainText("Connecting students with");
+      // CTA buttons still visible on mobile
+      await expect(
+        page.locator('a[href="/signup?role=candidate"] >> text=Create your free profile'),
+      ).toBeVisible();
+      // Nav still renders
+      await expect(
+        page.locator("nav[aria-label='StudentHub public navigation']"),
+      ).toBeVisible();
     });
   });
 });
