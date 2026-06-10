@@ -1,6 +1,8 @@
 import { requireRoleCapability } from "@/modules/auth/session";
 import { listMyApplications } from "../jobs/actions";
 import { MyApplicationsTable } from "./my-applications-table";
+import type { ApplicationRow } from "../jobs/schemas";
+import type { ApplicationRow } from "../jobs/schemas";
 
 export const dynamic = "force-dynamic";
 
@@ -8,8 +10,8 @@ export default async function CandidateApplicationsPage() {
   const session = await requireRoleCapability("candidate", "candidate.read.own");
   const result = await listMyApplications({ limit: 100 });
 
-  const rows = result.applications.map((a: { jobTitle: string; employerName: string; status: string; createdAt: Date; id: number }) => ({
-    id: `app-${a.id}`,
+  const rows = result.applications.map((a: ApplicationRow) => ({
+    id: `app-${a.applicationId}`,
     jobTitle: a.jobTitle,
     employerName: a.employerName,
     status: a.status,
