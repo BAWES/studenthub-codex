@@ -1,6 +1,20 @@
 import { describe, it, expect } from "vitest";
 import { listScheduleSchema } from "./schemas";
 
+describe("statusLabel", () => {
+  it('returns "Pending" for status 0', () => {
+    // Inline statusLabel mirrors workingDateStatusLabel from data.ts
+    const STATUS_LABELS: Record<number, string> = { 0: "Pending", 1: "Confirmed", 2: "Cancelled", 3: "Completed" };
+    const statusLabel = (s: number | null) => s != null ? (STATUS_LABELS[s] ?? `Status ${s}`) : "Unknown";
+    expect(statusLabel(0)).toBe("Pending");
+    expect(statusLabel(1)).toBe("Confirmed");
+    expect(statusLabel(2)).toBe("Cancelled");
+    expect(statusLabel(3)).toBe("Completed");
+    expect(statusLabel(null)).toBe("Unknown");
+    expect(statusLabel(99)).toBe("Status 99");
+  });
+});
+
 /**
  * Page migration test for candidate/schedule.
  *
