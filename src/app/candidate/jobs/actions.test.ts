@@ -173,7 +173,7 @@ describe("applyToJob", () => {
     });
     (prisma.job_listing_application.findFirst as Mock).mockResolvedValue(null);
     (prisma.job_listing_application.create as Mock).mockResolvedValue({
-      applicationId: 100,
+      id: 100,
     });
 
     const { applicationId, message } = await applyToJob({
