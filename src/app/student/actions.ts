@@ -289,7 +289,7 @@ export async function listExperience(
     throw new Error(parsed.error.issues[0]?.message ?? "Invalid input");
   }
 
-  const items = await prisma.candidate_experience.findMany({
+  const experience = await prisma.candidate_experience.findMany({
     where: { candidate_id: parsed.data.studentId, deleted: 0 },
     select: {
       candidate_experience_id: true,
@@ -301,7 +301,7 @@ export async function listExperience(
     orderBy: { start_year: "desc" },
   });
 
-  return items.map((e) => ({
+  return experience.map((e) => ({
     id: e.candidate_experience_id,
     title: e.experience,
     employer: e.employer,
@@ -315,7 +315,7 @@ export async function listExperience(
 // ---------------------------------------------------------------------------
 
 /**
- * Add a work experience entry to a student's public profile.
+ * Add a work experience entry to a student's profile.
  * Only the profile owner can add experience.
  */
 export async function addExperience(
@@ -328,22 +328,20 @@ export async function addExperience(
     throw new Error(parsed.error.issues[0]?.message ?? "Invalid input");
   }
 
-  const { studentId, experience, employer, startYear, endYear } = parsed.data;
-
-  const item = await prisma.candidate_experience.create({
+  const exp = await prisma.candidate_experience.create({
     data: {
-      candidate_id: studentId,
-      experience,
-      employer,
-      start_year: startYear,
-      end_year: endYear,
+      candidate_id: parsed.data.studentId,
+      experience: parsed.data.experience,
+      employer: parsed.data.employer,
+      start_year: parsed.data.startYear,
+      end_year: parsed.data.endYear,
     },
     select: { candidate_experience_id: true },
   });
 
-  revalidatePath(`/student/${studentId}`);
+  revalidatePath(`/student/${parsed.data.studentId}`);
 
-  return { success: true, id: item.candidate_experience_id };
+  return { success: true, id: exp.candidate_experience_id };
 }
 
 // ---------------------------------------------------------------------------
@@ -364,17 +362,15 @@ export async function updateExperience(
     throw new Error(parsed.error.issues[0]?.message ?? "Invalid input");
   }
 
-  const { experienceId, experience, employer, startYear, endYear } = parsed.data;
-
   const data: Record<string, unknown> = {};
-  if (experience !== undefined) data.experience = experience;
-  if (employer !== undefined) data.employer = employer;
-  if (startYear !== undefined) data.start_year = startYear;
-  if (endYear !== undefined) data.end_year = endYear;
+  if (parsed.data.experience !== undefined) data.experience = parsed.data.experience;
+  if (parsed.data.employer !== undefined) data.employer = parsed.data.employer;
+  if (parsed.data.startYear !== undefined) data.start_year = parsed.data.startYear;
+  if (parsed.data.endYear !== undefined) data.end_year = parsed.data.endYear;
 
   if (Object.keys(data).length > 0) {
     await prisma.candidate_experience.update({
-      where: { candidate_experience_id: experienceId },
+      where: { candidate_experience_id: parsed.data.experienceId },
       data,
     });
   }
