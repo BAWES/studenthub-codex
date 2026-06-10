@@ -280,6 +280,7 @@ model candidate {
   request_interview                 request_interview[]
   store_assignment_request          store_assignment_request[]
   suggestion                        suggestion[]
+  job_listing_application           job_listing_application[]
   ticket                            ticket[]
   ticket_comment                    ticket_comment[]
   transfer_candidate                transfer_candidate[]
@@ -1022,6 +1023,28 @@ model job_listing {
 
   @@index([employerId], map: "idx-job_listing-employer_id")
   @@index([status], map: "idx-job_listing-status")
+
+  applications job_listing_application[]
+}
+
+// ---------------------------------------------------------------------------
+// Job listing application — candidate applies to a job listing
+// ---------------------------------------------------------------------------
+model job_listing_application {
+  applicationId Int      @id @default(autoincrement())
+  jobListingId  Int
+  candidateId   Int
+  status        String   @default("new") @db.VarChar(20)
+  coverLetter   String?  @db.Text
+  createdAt     DateTime @default(now()) @db.DateTime(0)
+  updatedAt     DateTime @updatedAt @db.DateTime(0)
+
+  jobListing job_listing @relation(fields: [jobListingId], references: [jobListingId], onDelete: Cascade, onUpdate: Restrict, map: "fk-application-job_listing_id")
+  candidate  candidate   @relation(fields: [candidateId], references: [candidate_id], onDelete: Cascade, onUpdate: Restrict, map: "fk-application-candidate_id")
+
+  @@index([jobListingId], map: "idx-application-job_listing_id")
+  @@index([candidateId], map: "idx-application-candidate_id")
+  @@index([status], map: "idx-application-status")
 }
 
 model contact {
