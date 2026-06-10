@@ -108,7 +108,7 @@ export default function StaffLandingContent({
         </nav>
 
         {/* ── Hero — staff-specific ── */}
-        <HeroSection persona="staff" />
+        <HeroSection />
 
         {/* ── Pain-point section — the staffing frustrations ── */}
         <section
