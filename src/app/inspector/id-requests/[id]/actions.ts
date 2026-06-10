@@ -6,13 +6,21 @@ import { requireRoleCapability } from "@/modules/auth/session";
 import {
   updateIdRequestStatusSchema,
   type UpdateIdRequestStatusInput,
+  type GetIdRequestInput,
 } from "../schemas";
+import type { IdRequestDetail } from "../schemas";
+import { getIdRequest as _getIdRequest } from "../actions";
 
 // ---------------------------------------------------------------------------
 // Re-export detail query from parent (detail page uses the same model)
+// Next.js 15 "use server" forbids bare re-exports — use wrapper function.
 // ---------------------------------------------------------------------------
 
-export { getIdRequest } from "../actions";
+export async function getIdRequest(
+  params: GetIdRequestInput,
+): Promise<IdRequestDetail | null> {
+  return _getIdRequest(params);
+}
 
 // ---------------------------------------------------------------------------
 // updateIdRequestStatus — update the status of a candidate ID verification
