@@ -107,7 +107,7 @@ export default function CandidateLandingContent({
       </nav>
 
       {/* ── Hero — candidate-specific ── */}
-      <HeroSection persona="candidate" />
+      <HeroSection />
 
       {/* ── Pain-point section — the real candidate frustrations ── */}
       <section

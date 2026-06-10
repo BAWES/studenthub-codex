@@ -107,7 +107,7 @@ export default function CompanyLandingContent({
       </nav>
 
       {/* ── Hero — company-specific ── */}
-      <HeroSection persona="company" />
+      <HeroSection />
 
       {/* ── Pain-point section — the specific hiring pain points ── */}
       <section
