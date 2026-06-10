@@ -25,6 +25,7 @@ export default async function CandidatePage() {
           { label: "Skills", href: "/candidate/skills" },
           { label: "Certifications", href: "/candidate/certifications" },
           { label: "Schedule", href: "/candidate/schedule" },
+          { label: "Documents", href: "/candidate/documents" },
           { label: "Work logs", href: "/candidate/work-logs" },
           { label: "Payments", href: "/candidate/payments" },
           data.candidate?.candidate_email ? { label: "Email support", href: `mailto:${data.candidate.candidate_email}` } : null
