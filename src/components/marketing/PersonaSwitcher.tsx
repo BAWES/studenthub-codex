@@ -124,14 +124,7 @@ export default function PersonaSwitcher({
         );
       })}
 
-      {/* Internal roles note */}
-      <span
-        className="hidden sm:inline-flex items-center gap-1.5 px-3 py-2.5 text-xs"
-        style={{ color: "var(--muted)" }}
-      >
-        <span className="size-1 rounded-full" style={{ background: "var(--sh-glass-border)" }} />
-        Staff · Admin · Inspector
-      </span>
+
     </div>
   );
 }
