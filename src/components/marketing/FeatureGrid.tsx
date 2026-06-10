@@ -38,7 +38,7 @@ const candidateFeatures: Feature[] = [
   {
     icon: Search,
     title: "Smart role discovery",
-    body: "Typo-tolerant search across countries, skills, and pay rates. Saved searches alert you the moment a matching role opens.",
+    body: "Typo-tolerant search across roles, skills, and pay rates. Saved searches alert you the moment a matching role opens.",
     stat: "60+ employers on the platform",
   },
   {

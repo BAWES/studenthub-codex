@@ -54,7 +54,7 @@ interface HeroContent {
 const heroContent: HeroContent = {
   eyebrow: "The two-sided marketplace for student talent",
   headlineParts: ["Connecting students with", "the right employers"],
-  highlight: "the right employers.",
+  highlight: "the right employers",
   body: "StudentHub is where students build careers and employers find talent. Create a profile that gets seen by 60+ employers, or post openings and get matched with vetted candidates — all in one platform designed for the real world of work.",
   studentCta: "Create your free profile",
   studentCtaHref: "/signup?role=candidate",

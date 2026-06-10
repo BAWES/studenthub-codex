@@ -46,6 +46,7 @@ vi.mock("lucide-react", () => ({
   ClipboardCheck: () => <span data-testid="icon-clipboard" />,
   Zap: () => <span data-testid="icon-zap" />,
   Globe: () => <span data-testid="icon-globe" />,
+  CheckCircle: () => <span data-testid="icon-check-circle" />,
   BarChart3: () => <span data-testid="icon-bar-chart" />,
   Layers: () => <span data-testid="icon-layers" />,
   ChevronRight: () => <span data-testid="icon-chevron-right" />,
@@ -73,6 +74,8 @@ vi.mock("lucide-react", () => ({
   Check: () => <span data-testid="icon-check" />,
   X: () => <span data-testid="icon-x" />,
   Minus: () => <span data-testid="icon-minus" />,
+  PieChart: () => <span data-testid="icon-pie-chart" />,
+  GitMerge: () => <span data-testid="icon-git-merge" />,
 }));
 
 // ── Mock ThemeToggle ──────────────────────────────────────────
