@@ -9,10 +9,19 @@ import {
 } from "../schemas";
 
 // ---------------------------------------------------------------------------
-// Re-export detail query from parent (detail page uses the same model)
+// Wrapper for detail query from parent (detail page uses the same model)
+// Bare re-exports are NOT allowed in "use server" files — Next.js 15 requires
+// wrapping with an async function definition.
 // ---------------------------------------------------------------------------
 
-export { getIdRequest } from "../actions";
+import { getIdRequest as _getIdRequest } from "../actions";
+
+/** @see {@link _getIdRequest} for the implementation — this is a wrapper */
+export async function getIdRequest(
+  ...args: Parameters<typeof _getIdRequest>
+): Promise<Awaited<ReturnType<typeof _getIdRequest>>> {
+  return _getIdRequest(...args);
+}
 
 // ---------------------------------------------------------------------------
 // updateIdRequestStatus — update the status of a candidate ID verification
