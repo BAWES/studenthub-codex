@@ -15,12 +15,21 @@ export const getIdRequestSchema = z.object({
   id: z.string().min(1, "Request ID is required"),
 });
 
+export const updateIdRequestStatusSchema = z.object({
+  id: z.string().min(1, "Request ID is required"),
+  status: z.enum(["pending", "approved", "rejected"], {
+    errorMap: () => ({ message: "Status must be one of: pending, approved, rejected" }),
+  }),
+  rejection_reason: z.string().min(10).max(500).optional(),
+});
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
 export type ListIdRequestsInput = z.input<typeof listIdRequestsSchema>;
 export type GetIdRequestInput = z.input<typeof getIdRequestSchema>;
+export type UpdateIdRequestStatusInput = z.input<typeof updateIdRequestStatusSchema>;
 
 export type IdRequestRow = {
   id: string;
