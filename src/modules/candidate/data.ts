@@ -11,10 +11,14 @@ export {
   getCandidateTransferRows,
   getCandidateTransferDetail,
   getCandidateIdsForStaff,
+} from "@/modules/workspace/data/candidate";
+export {
   getCandidateNotificationRows,
   getCandidateNotificationDetail,
+} from "@/modules/workspace/data/notification";
+export {
   getCandidateWorkingDateRows,
   getCandidateWorkingDateDetail,
   workingDateStatusLabel,
   WORKING_DATE_STATUS_LABELS,
-} from "@/modules/workspace/data/candidate";
+} from "@/modules/workspace/data/working-date";

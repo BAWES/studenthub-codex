@@ -2,11 +2,11 @@ import { describe, it, expect } from "vitest";
 import {
   workingDateStatusLabel,
   WORKING_DATE_STATUS_LABELS,
-} from "../data/candidate";
+} from "../data/working-date";
 import type {
   WorkingDateRow,
   WorkingDateDetail,
-} from "../data/candidate";
+} from "../data/working-date";
 
 // ---------------------------------------------------------------------------
 // Pure logic tests for candidate working date functions in data.ts
