@@ -1,6 +1,6 @@
 import { requireRoleCapability } from "@/modules/auth/session";
 import { CandidateProfile } from "@/modules/candidates/CandidateProfile";
-import { getCandidateProfile } from "@/modules/candidates/actions";
+import { getCandidateProfile } from "./actions";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 
 export const dynamic = "force-dynamic";
