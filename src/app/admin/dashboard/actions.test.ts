@@ -253,6 +253,15 @@ describe("dashboardDataSchema", () => {
           amount: "45,000.000 KWD",
         },
       ],
+      prMergeMetrics: [
+        { label: "Avg time-to-merge", value: "0.2h", note: "Across 50 PRs" },
+        { label: "Median time-to-merge", value: "0.1h", note: "Midpoint of last 50 merged PRs" },
+        { label: "Merged (7d)", value: "50", note: "PRs in last batch" },
+      ],
+      recentPrMergeTimes: [
+        { number: 728, title: "Migrate staff data.ts to colocated server actions", hours: 0.02 },
+        { number: 726, title: "Fix TS errors on develop", hours: 0.15 },
+      ],
     };
 
     const r = dashboardDataSchema.safeParse(payload);
@@ -267,6 +276,8 @@ describe("dashboardDataSchema", () => {
       recentCompanies: [],
       recentRequests: [],
       recentTransfers: [],
+      prMergeMetrics: [],
+      recentPrMergeTimes: [],
     };
 
     const r = dashboardDataSchema.safeParse(payload);
@@ -281,6 +292,8 @@ describe("dashboardDataSchema", () => {
       recentCompanies: [] as DashboardDataListItem[],
       recentRequests: [] as DashboardDataListItem[],
       recentTransfers: [] as DashboardDataListItem[],
+      prMergeMetrics: [],
+      recentPrMergeTimes: [],
     };
     const r = dashboardDataSchema.safeParse(rest);
     expect(r.success).toBe(false);
@@ -330,6 +343,8 @@ describe("dashboardDataSchema", () => {
       recentCompanies: [],
       recentRequests: [],
       recentTransfers: [],
+      prMergeMetrics: [],
+      recentPrMergeTimes: [],
     };
     const r = dashboardDataSchema.safeParse(payload);
     expect(r.success).toBe(true);
@@ -360,6 +375,8 @@ describe("dashboardDataSchema", () => {
       recentCompanies: [],
       recentRequests: [],
       recentTransfers: [],
+      prMergeMetrics: [],
+      recentPrMergeTimes: [],
     });
     expect(r.success).toBe(true);
   });
@@ -374,6 +391,8 @@ describe("dashboardDataSchema", () => {
       recentCompanies: [],
       recentRequests: [],
       recentTransfers: [],
+      prMergeMetrics: [],
+      recentPrMergeTimes: [],
     });
     expect(r.success).toBe(true);
   });

@@ -132,6 +132,83 @@ export async function Dashboard() {
         </GlassPanel>
       </section>
 
+      {/* ── PR Merge Time-to-Merge Metrics ── */}
+      <section
+        className="shDashboardSection"
+        aria-label="PR merge time-to-merge metrics"
+      >
+        <GlassPanel variant="subtle" radius="lg" className="p-5">
+          <div className="shPipelineHeader">
+            <div>
+              <span className="shPipelineEyebrow">Engineering</span>
+              <h2 className="shPipelineTitle">PR Time-to-Merge</h2>
+            </div>
+            <Link
+              href="https://github.com/BAWES/studenthub-codex/pulls"
+              className="shPipelineLink"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Open GitHub
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                <path d="M5 3l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </Link>
+          </div>
+
+          {dashboard.prMergeMetrics.length > 0 ? (
+            <div className="shPipelineGrid">
+              <div className="shDashboardGrid4 shMt2">
+                {dashboard.prMergeMetrics.map((metric, idx) => (
+                  <MetricCard
+                    key={metric.label}
+                    label={metric.label}
+                    value={typeof metric.value === "number" ? metric.value : (metric.value as string)}
+                    note={metric.note}
+                    accent={idx === 3 ? "warning" : idx === 2 ? "success" : "info"}
+                    entranceDelay={idx * 60}
+                  />
+                ))}
+              </div>
+
+              {dashboard.recentPrMergeTimes.length > 0 && (
+                <>
+                  <h3 className="shDataListEyebrow shMt3">Recent merges</h3>
+                  <div className="shDataListBody">
+                    {dashboard.recentPrMergeTimes.map((pr) => {
+                      const fmtHours = pr.hours < 1
+                        ? `${Math.round(pr.hours * 60)}m`
+                        : `${pr.hours.toFixed(1)}h`;
+                      return (
+                        <Link
+                          href={`https://github.com/BAWES/studenthub-codex/pull/${pr.number}` as Route}
+                          key={pr.number}
+                          className="shDataListRow"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <div className="shDataListRowMain">
+                            <strong className="shDataListRowTitle">#{pr.number}</strong>
+                            <span className="shDataListRowSub">{pr.title}</span>
+                          </div>
+                          <div className="shDataListRowMeta">
+                            <span className="shDataListRowDate">{fmtHours}</span>
+                          </div>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
+            </div>
+          ) : (
+            <div className="shPipelineEmpty">
+              <EmptyState variant="idle" message="No PR merge data available" />
+            </div>
+          )}
+        </GlassPanel>
+      </section>
+
       {/* ── Recent Activity ── */}
       <section
         className="shDashboardSection"

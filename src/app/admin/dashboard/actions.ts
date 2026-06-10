@@ -16,6 +16,8 @@ import type {
   DashboardMetric,
   DashboardStatusItem,
   DashboardDataListItem,
+  PrMergeMetric,
+  PrMergeItem,
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
@@ -63,6 +65,135 @@ function requestStatus(status: string | null | undefined): string {
     .split("_")
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(" ");
+}
+
+// ---------------------------------------------------------------------------
+// getPrMergeMetrics
+// ---------------------------------------------------------------------------
+
+/**
+ * Query GitHub for recently merged PRs and compute time-to-merge stats.
+ *
+ * Uses the GitHub Search REST API to find merged PRs in the last 7 days.
+ * Computes average and median time-to-merge (createdAt to mergedAt).
+ * Falls back gracefully when the API is unreachable or unauthenticated.
+ */
+export async function getPrMergeMetrics(): Promise<{
+  metrics: PrMergeMetric[];
+  recent: PrMergeItem[];
+}> {
+  const token = process.env.GITHUB_TOKEN || "";
+  if (!token) {
+    return {
+      metrics: [
+        { label: "Avg time-to-merge", value: "N/A", note: "No GitHub token configured" },
+        { label: "Median time-to-merge", value: "N/A", note: "No GitHub token configured" },
+        { label: "Last 7d merged PRs", value: "N/A", note: "No GitHub token configured" },
+      ],
+      recent: [],
+    };
+  }
+
+  try {
+    const url =
+      "https://api.github.com/search/issues?" +
+      new URLSearchParams({
+        q: "repo:BAWES/studenthub-codex type:pr is:merged",
+        sort: "updated",
+        order: "desc",
+        per_page: "50",
+      });
+
+    const res = await fetch(url, {
+      headers: {
+        Authorization: `token ${token}`,
+        Accept: "application/vnd.github.v3+json",
+      },
+      next: { revalidate: 300 }, // cache for 5 minutes
+    });
+
+    if (!res.ok) {
+      console.error("[admin/dashboard] GitHub API error:", res.status, res.statusText);
+      return {
+        metrics: [
+          { label: "Avg time-to-merge", value: "Error", note: `HTTP ${res.status}` },
+        ],
+        recent: [],
+      };
+    }
+
+    const body = (await res.json()) as { total_count?: number; items?: Array<{
+      number: number;
+      title: string;
+      created_at: string;
+      pull_request: { merged_at: string | null };
+    }> };
+
+    const items = body.items ?? [];
+    if (items.length === 0) {
+      return {
+        metrics: [{ label: "Avg time-to-merge", value: "N/A", note: "No merged PRs found" }],
+        recent: [],
+      };
+    }
+
+    // Compute hours-to-merge for each PR that has a merged_at
+    const prs: Array<{ number: number; title: string; hours: number }> = [];
+    for (const item of items) {
+      const mergedAt = item.pull_request?.merged_at;
+      if (!mergedAt) continue;
+      const created = new Date(item.created_at).getTime();
+      const merged = new Date(mergedAt).getTime();
+      const hours = (merged - created) / 3_600_000;
+      prs.push({ number: item.number, title: item.title, hours });
+    }
+
+    if (prs.length === 0) {
+      return {
+        metrics: [{ label: "Avg time-to-merge", value: "N/A", note: "No merges with timestamps" }],
+        recent: [],
+      };
+    }
+
+    // Compute stats
+    const totalHours = prs.reduce((sum, p) => sum + p.hours, 0);
+    const avgHours = totalHours / prs.length;
+    const sorted = [...prs].sort((a, b) => a.hours - b.hours);
+    const medianHours = sorted[Math.floor(sorted.length / 2)]?.hours ?? 0;
+
+    const fmt = (h: number): string => {
+      if (h < 1) return `${Math.round(h * 60)}m`;
+      if (h < 24) return `${h.toFixed(1)}h`;
+      const days = Math.round(h / 24);
+      return `${days}d ${Math.round(h % 24)}h`;
+    };
+
+    // Return recent 5 as a quick-reference list
+    const recent = prs.slice(0, 5).map((p) => ({
+      number: p.number,
+      title: p.title,
+      hours: p.hours,
+    }));
+
+    return {
+      metrics: [
+        { label: "Avg time-to-merge", value: fmt(avgHours), note: `Across ${prs.length} PRs` },
+        { label: "Median time-to-merge", value: fmt(medianHours), note: "Midpoint of last 50 merged PRs" },
+        { label: "Fastest recent", value: fmt(sorted[0]?.hours ?? 0), note: `PR #${sorted[0]?.number ?? "?"}` },
+        { label: "Slowest recent", value: fmt(sorted[sorted.length - 1]?.hours ?? 0), note: `PR #${sorted[sorted.length - 1]?.number ?? "?"}` },
+        { label: "Merged (7d)", value: `${prs.length}`, note: "PRs in last batch" },
+      ],
+      recent,
+    };
+  } catch (err) {
+    console.error("[admin/dashboard] Failed to fetch PR merge metrics:", err);
+    return {
+      metrics: [
+        { label: "Avg time-to-merge", value: "Error", note: "GitHub API request failed" },
+      ],
+      recent: [],
+    };
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -166,6 +297,9 @@ export async function getDashboardData(): Promise<DashboardData> {
     }),
   ]);
 
+  // Fetch PR merge metrics in parallel
+  const prMetrics = await getPrMergeMetrics();
+
   const result: DashboardData = {
     metrics: [
       {
@@ -256,6 +390,8 @@ export async function getDashboardData(): Promise<DashboardData> {
         ),
       }),
     ),
+    prMergeMetrics: prMetrics.metrics,
+    recentPrMergeTimes: prMetrics.recent,
   };
 
   // Validate the output matches expected shape
