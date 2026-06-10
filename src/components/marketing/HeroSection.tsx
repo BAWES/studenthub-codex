@@ -54,7 +54,7 @@ interface HeroContent {
 const heroContent: HeroContent = {
   eyebrow: "The two-sided marketplace for student talent",
   headlineParts: ["Connecting students with", "the right employers"],
-  highlight: "the right employers.",
+  highlight: "the right employers",
   body: "StudentHub is where students build careers and employers find talent. Create a profile that gets seen by 60+ employers, or post openings and get matched with vetted candidates — all in one platform designed for the real world of work.",
   studentCta: "Create your free profile",
   studentCtaHref: "/signup?role=candidate",
@@ -73,7 +73,7 @@ const heroContent: HeroContent = {
   ],
   mockupSearch: "Search open roles, companies, locations...",
   mockupResultName: "senior care assistant",
-  mockupResultDetail: "12 matching roles · London · £14-18/hr · starts ASAP",
+  mockupResultDetail: "12 matching roles · Kuwait City · KWD 3-5/hr · starts ASAP",
   mockupBadges: [
     { label: "Profile ready", variant: "success" },
     { label: "3 saved roles", variant: "info" },
@@ -82,7 +82,7 @@ const heroContent: HeroContent = {
     { label: "Profile", status: "92% complete" },
     { label: "Applications", status: "4 pending" },
     { label: "Timesheet", status: "This week" },
-    { label: "Payment", status: "£1,240" },
+    { label: "Payment", status: "KWD 420" },
   ],
   mockupCommand: "Apply to 3 matching roles",
   mockupCommandBody: "Your profile matches these open positions. One click sends your CV.",
