@@ -9,18 +9,17 @@ import {
   type UpdateRequestStatusInput,
   type DeleteRequestInput,
 } from "../schemas";
-import type { CompanyRequestDetail } from "../schemas";
-import { getCompanyRequestDetail as _getCompanyRequestDetail } from "../actions";
+import { getRequestDetail } from "@/modules/workspace/data";
 
 // ---------------------------------------------------------------------------
-// Re-export detail query from parent (detail page uses the same model)
+// Re-export detail query — wraps the rich legacy implementation from data.ts
 // Next.js 15 "use server" forbids bare re-exports — use wrapper function.
 // ---------------------------------------------------------------------------
 
 export async function getRequest(
   uuid: string,
-): Promise<CompanyRequestDetail | null> {
-  return _getCompanyRequestDetail(uuid);
+) {
+  return getRequestDetail(uuid);
 }
 
 // ---------------------------------------------------------------------------
