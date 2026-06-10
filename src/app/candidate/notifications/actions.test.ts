@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   getCandidateNotificationRowsSchema,
   getCandidateNotificationDetailSchema,
-} from "./actions";
+} from "./schemas";
 import { getNotificationTypeLabel } from "@/modules/notifications/utils";
 
 // ---------------------------------------------------------------------------

@@ -4,7 +4,7 @@ import {
   getTransferSchema,
   approveTransferSchema,
   rejectTransferSchema,
-} from "./actions";
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Schema tests — pure unit tests, no DB required

@@ -21,30 +21,12 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
-
-// ---------------------------------------------------------------------------
-// Schemas
-// ---------------------------------------------------------------------------
-
-export const listTransfersSchema = z.object({
-  page: z.coerce.number().int().positive().optional().default(1),
-  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
-  companyId: z.coerce.number().int().positive().optional(),
-  status: z.coerce.number().int().optional(),
-});
-
-export const getTransferSchema = z.object({
-  transferId: z.coerce.number().int().positive("Transfer ID is required"),
-});
-
-export const approveTransferSchema = z.object({
-  transferId: z.coerce.number().int().positive("Transfer ID is required"),
-});
-
-export const rejectTransferSchema = z.object({
-  transferId: z.coerce.number().int().positive("Transfer ID is required"),
-  reason: z.string().min(1, "Reason is required").max(500),
-});
+import {
+  listTransfersSchema,
+  getTransferSchema,
+  approveTransferSchema,
+  rejectTransferSchema,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Types

@@ -5,18 +5,10 @@ import { prisma } from "@/lib/prisma";
 import { requireRoleCapability } from "@/modules/auth/session";
 import { formatDate } from "@/modules/workspace/format";
 import { getNotificationTypeLabel } from "@/modules/notifications/utils";
-
-// ---------------------------------------------------------------------------
-// Schemas
-// ---------------------------------------------------------------------------
-
-export const getCandidateNotificationRowsSchema = z.object({
-  limit: z.coerce.number().int().min(1).max(100).optional().default(80),
-});
-
-export const getCandidateNotificationDetailSchema = z.object({
-  notificationUuid: z.string().min(1, "Notification UUID is required"),
-});
+import {
+  getCandidateNotificationRowsSchema,
+  getCandidateNotificationDetailSchema,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Types
