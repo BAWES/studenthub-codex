@@ -50,7 +50,7 @@ interface PersonaContent {
 const personaContent: Record<Persona, PersonaContent> = {
   candidate: {
     eyebrow: "StudentHub for candidates",
-    headline: "Your next placement<br />",
+    headline: "Your next placement",
     highlight: "starts here.",
     body: "Build a profile that employers actually see. Get matched to the right roles, track every application, log your hours, and get paid — all from one workspace designed for how you work.",
     cta: "Create your free candidate profile",
@@ -81,7 +81,7 @@ const personaContent: Record<Persona, PersonaContent> = {
 
   staff: {
     eyebrow: "StudentHub for staff",
-    headline: "Place people faster.<br />",
+    headline: "Place people faster.",
     highlight: "Less paperwork.",
     body: "Match candidates to open roles in seconds. Send CVs, manage shortlists, track timesheets, and process payments — all from one operating desk built for high-volume placement.",
     cta: "Request staff access",
@@ -112,7 +112,7 @@ const personaContent: Record<Persona, PersonaContent> = {
 
   company: {
     eyebrow: "StudentHub for companies",
-    headline: "Hire qualified staff<br />",
+    headline: "Hire qualified staff",
     highlight: "without the runaround.",
     body: "Post openings, review matched candidates, approve timesheets, and receive consolidated invoices — one workspace replaces the email-and-spreadsheet shuffle.",
     cta: "Set up your company account",
@@ -143,7 +143,7 @@ const personaContent: Record<Persona, PersonaContent> = {
 
   admin: {
     eyebrow: "StudentHub for admins",
-    headline: "Full control across<br />",
+    headline: "Full control across",
     highlight: "every operation.",
     body: "Run approvals, manage payroll, oversee compliance, and validate production data — the command layer for system-wide operations without switching tools.",
     cta: "Request admin access",
@@ -174,7 +174,7 @@ const personaContent: Record<Persona, PersonaContent> = {
 
   inspector: {
     eyebrow: "StudentHub for inspectors",
-    headline: "Clear the queue.<br />",
+    headline: "Clear the queue.",
     highlight: "Stay compliant.",
     body: "Review civil ID batches, approve or reject document submissions, and maintain audit trails — a dedicated compliance workspace that keeps inspection work separate from placement operations.",
     cta: "Request inspector access",
@@ -405,6 +405,7 @@ export default function HeroSection({
         </p>
         <h1 className="shHeroTitle">
           {content.headline}
+          <br />
           <span className="shHeroHighlight">{content.highlight}</span>
         </h1>
         <p className="shHeroBody">{content.body}</p>
