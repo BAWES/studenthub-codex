@@ -81,6 +81,7 @@ export async function listCandidateJobs(
     employmentType: r.employmentType,
     salaryRange: r.salaryRange,
     employerName: r.employer.company_name,
+    matchScore: null,
     createdAt: r.createdAt,
     updatedAt: r.updatedAt,
   }));
@@ -125,6 +126,7 @@ export async function getCandidateJob(
       employmentType: job.employmentType,
       salaryRange: job.salaryRange,
       employerName: job.employer.company_name,
+      matchScore: null,
       status: job.status,
       createdAt: job.createdAt,
       updatedAt: job.updatedAt,
@@ -143,7 +145,7 @@ export async function applyToJob(
 ): Promise<{ success: true; applicationId: number; message: string }> {
   const candidateId = await getCandidateId();
 
-  const { jobListingId, coverLetter, notes } = applyToJobSchema.parse(input);
+  const { jobListingId, coverLetter } = applyToJobSchema.parse(input);
 
   // Verify job exists and is active
   const job = await prisma.job_listing.findUnique({
@@ -157,7 +159,7 @@ export async function applyToJob(
   // Check for duplicate application
   const existing = await prisma.job_listing_application.findFirst({
     where: { jobListingId, candidateId },
-    select: { id: true },
+    select: { applicationId: true },
   });
 
   if (existing) throw new Error("You have already applied to this position");
@@ -168,7 +170,6 @@ export async function applyToJob(
       candidateId,
       status: "applied",
       coverLetter: coverLetter ?? null,
-      notes: notes ?? null,
     },
   });
 
@@ -177,7 +178,7 @@ export async function applyToJob(
 
   return {
     success: true,
-    applicationId: application.id,
+    applicationId: application.applicationId,
     message: "Application submitted successfully",
   };
 }
@@ -216,7 +217,7 @@ export async function listMyApplications(
   ]);
 
   const applications: ApplicationRow[] = dbRows.map((r) => ({
-    id: r.id,
+    applicationId: r.applicationId,
     jobListingId: r.jobListingId,
     jobTitle: r.jobListing.title,
     employerName: r.jobListing.employer.company_name,
