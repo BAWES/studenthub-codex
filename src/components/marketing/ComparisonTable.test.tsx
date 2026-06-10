@@ -20,8 +20,9 @@ describe("ComparisonTable", () => {
 
   it("renders feature rows with data", () => {
     render(<ComparisonTable persona="candidate" />);
-    expect(screen.getByText("Smart role discovery")).toBeInTheDocument();
-    expect(screen.getByText("Profile that works for you")).toBeInTheDocument();
+    // Verify specific candidate features are present (may appear in multiple rows)
+    expect(screen.getAllByText("Unified profile visible to all employers").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("AI-matched role suggestions").length).toBeGreaterThanOrEqual(1);
   });
 
   it("applies custom className", () => {
