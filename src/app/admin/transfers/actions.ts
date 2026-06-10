@@ -387,53 +387,111 @@ export async function listAdminTransfers(
 }
 
 /**
- * @deprecated Use getTransferDetail() instead. Maps to old detail shape.
+ * @deprecated Use getTransferDetail() instead. Maps to old detail shape for backward compatibility.
  */
-export async function getAdminTransferDetail(
-  transferId: number,
-): Promise<{
-  transfer: Record<string, unknown> | null;
+type AdminTransferDetailTransfer = {
+  transfer_id: number;
+  total: string | null;
+  company_total: string | null;
+  transfer_cost: string | null;
+  transfer_status: number;
+  currency_code: string | null;
+  start_date: Date | null;
+  end_date: Date | null;
+  payment_received_on: Date | null;
+  transfer_created_at: Date;
+  transfer_updated_at: Date;
+  company: { company_name: string | null; company_email: string | null } | null;
+  staff_transfer_transfer_created_byTostaff: { staff_name: string } | null;
+  staff_transfer_transfer_updated_byTostaff: { staff_name: string } | null;
+};
+
+type AdminTransferDetailResult = {
+  transfer: AdminTransferDetailTransfer | null;
   candidates: { id: number; title: string; subtitle: string; meta: string }[];
   invoices: { id: number; title: string; subtitle: string; meta: string }[];
   metrics: { label: string; value: string | number; note: string }[];
   fileEntries: never[];
-}> {
-  const result = await getTransferDetail(transferId);
+};
+
+export async function getAdminTransferDetail(
+  transferId: number,
+): Promise<AdminTransferDetailResult> {
+  await requireCapability("finance.read");
+
+  const [transfer, candidateRecords, invoiceRecords] = await prisma.$transaction([
+    prisma.transfer.findUnique({
+      where: { transfer_id: transferId },
+      include: {
+        company: { select: { company_name: true, company_email: true } },
+        staff_transfer_transfer_created_byTostaff: { select: { staff_name: true } },
+        staff_transfer_transfer_updated_byTostaff: { select: { staff_name: true } },
+      },
+    }),
+    prisma.transfer_candidate.findMany({
+      where: { transfer_id: transferId, deleted: 0 },
+      include: {
+        candidate: { select: { candidate_name: true } },
+      },
+    }),
+    prisma.invoice.findMany({
+      where: { transfer_id: transferId, deleted: 0 },
+    }),
+  ] as const);
+
+  if (!transfer) {
+    return {
+      transfer: null,
+      candidates: [],
+      invoices: [],
+      metrics: [],
+      fileEntries: [],
+    };
+  }
+
+  const candidates = (candidateRecords ?? []).map((tc) => ({
+    id: tc.tc_id,
+    title: tc.candidate?.candidate_name ?? "Unknown candidate",
+    subtitle: `Amount: ${tc.candidate_total ? tc.candidate_total.toString() : "—"} | Paid: ${tc.paid ? "Yes" : "No"} | Hours: ${tc.hours ?? 0}h`,
+    meta: "",
+  }));
+
+  const invoices = (invoiceRecords ?? []).map((inv) => ({
+    id: inv.invoice_id,
+    title: `Invoice #${inv.invoice_id}`,
+    subtitle: typeof inv.invoice_status === "number" ? `Status ${inv.invoice_status}` : (inv.invoice_status ?? "No status"),
+    meta: inv.invoice_date?.toISOString() ?? "",
+  }));
+
+  const metrics = [
+    { label: "Candidate Payouts", value: candidates.length, note: "Transfers to candidates" },
+    { label: "Invoices", value: invoices.length, note: "Employer invoices attached" },
+    { label: "Status", value: getStatusLabel(transfer.transfer_status), note: "" },
+    { label: "Total", value: transfer.total ? transfer.total.toString() : "—", note: transfer.currency_code ?? "KWD" },
+  ];
 
   return {
-    transfer: result.transfer
-      ? {
-          transfer_id: result.transfer.transferId,
-          total: result.transfer.total,
-          company_total: result.transfer.companyTotal,
-          transfer_cost: result.transfer.transferCost,
-          transfer_status: result.transfer.status,
-          currency_code: result.transfer.currencyCode,
-          start_date: result.transfer.startDate,
-          end_date: result.transfer.endDate,
-          payment_received_on: result.transfer.paymentReceivedOn,
-          transfer_created_at: result.transfer.createdAt,
-          transfer_updated_at: result.transfer.updatedAt,
-          company: result.transfer.companyName
-            ? { company_name: result.transfer.companyName, company_email: result.transfer.companyEmail }
-            : null,
-          staff_transfer_transfer_created_byTostaff: null,
-          staff_transfer_transfer_updated_byTostaff: null,
-        }
-      : null,
-    candidates: result.candidates.map((c) => ({
-      id: c.tcId,
-      title: c.candidateName ?? "Unknown candidate",
-      subtitle: `Amount: ${c.amount ?? "—"} | Paid: ${c.paid ? "Yes" : "No"} | Hours: ${c.hours ?? 0}h`,
-      meta: "",
-    })),
-    invoices: result.invoices.map((inv) => ({
-      id: inv.invoiceId,
-      title: `Invoice #${inv.invoiceId}`,
-      subtitle: inv.invoiceStatus ?? "No status",
-      meta: inv.invoiceDate ?? "",
-    })),
-    metrics: result.metrics,
+    transfer: {
+      transfer_id: transfer.transfer_id,
+      total: transfer.total ? transfer.total.toString() : null,
+      company_total: transfer.company_total ? transfer.company_total.toString() : null,
+      transfer_cost: transfer.transfer_cost ? transfer.transfer_cost.toString() : null,
+      transfer_status: transfer.transfer_status,
+      currency_code: transfer.currency_code,
+      start_date: transfer.start_date,
+      end_date: transfer.end_date,
+      payment_received_on: transfer.payment_received_on,
+      transfer_created_at: transfer.transfer_created_at,
+      transfer_updated_at: transfer.transfer_updated_at,
+      company: transfer.company
+        ? { company_name: transfer.company.company_name, company_email: transfer.company.company_email }
+        : null,
+      staff_transfer_transfer_created_byTostaff: transfer.staff_transfer_transfer_created_byTostaff,
+      staff_transfer_transfer_updated_byTostaff: transfer.staff_transfer_transfer_updated_byTostaff,
+    },
+    candidates,
+    invoices,
+    metrics,
     fileEntries: [],
   };
 }
