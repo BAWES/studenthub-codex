@@ -22,7 +22,7 @@ export {
 export type {
   CompanyDetail,
   CompanyRow,
-} from "../actions";
+} from "../schemas";
 
 import { updateAdminCompanySchema } from "./schemas";
 import type { UpdateAdminCompanyInput, AdminCompanyActionResponse } from "./schemas";
