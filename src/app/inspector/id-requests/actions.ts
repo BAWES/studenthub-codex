@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { requireRoleCapability } from "@/modules/auth/session";
+import { formatDate } from "@/modules/workspace/format";
 import {
   listIdRequestsSchema,
   getIdRequestSchema,
@@ -116,8 +117,17 @@ export async function listIdRequests(
 // getIdRequest — get a single candidate ID verification request by UUID
 // ---------------------------------------------------------------------------
 
+function parseCandidateIds(value: string | null | undefined): number[] {
+  if (!value) return [];
+  return value
+    .split(/[^0-9]+/)
+    .map((item) => Number(item))
+    .filter((item) => Number.isInteger(item) && item > 0);
+}
+
 /**
  * Get detailed information about a single candidate ID verification request.
+ * Includes metrics and matched candidate records.
  * Returns null if not found.
  */
 export async function getIdRequest(
@@ -152,15 +162,48 @@ export async function getIdRequest(
 
   if (!request) return null;
 
+  const candidateIds = parseCandidateIds(request.candidate_ids);
+  const candidates = candidateIds.length
+    ? await prisma.candidate.findMany({
+        where: { candidate_id: { in: candidateIds } },
+        select: {
+          candidate_id: true,
+          candidate_name: true,
+          candidate_email: true,
+          candidate_civil_need_verification: true,
+          candidate_civil_expiry_date: true,
+          candidate_status: true,
+          approved: true,
+        },
+      })
+    : [];
+
   return {
     cir_uuid: request.cir_uuid,
     status: request.status,
     rejection_reason: request.rejection_reason,
+    candidate_ids: request.candidate_ids,
     created_at: request.created_at,
     updated_at: request.updated_at,
     created_by_name:
       request.staff_candidate_id_request_created_byTostaff?.staff_name ?? null,
     updated_by_name:
       request.staff_candidate_id_request_updated_byTostaff?.staff_name ?? null,
+    metrics: [
+      { label: "Status", value: request.status ?? "Missing", note: "Legacy ID request status" },
+      { label: "Candidates", value: candidateIds.length, note: "IDs included in this batch" },
+      { label: "Matched", value: candidates.length, note: "Candidate rows found in prod clone" },
+      {
+        label: "Updated",
+        value: formatDate(request.updated_at),
+        note: request.staff_candidate_id_request_updated_byTostaff?.staff_name ?? "System",
+      },
+    ],
+    candidates: candidates.map((candidate) => ({
+      id: candidate.candidate_id,
+      title: candidate.candidate_name ?? "Unknown",
+      subtitle: candidate.candidate_email ?? "No email",
+      meta: `${candidate.candidate_civil_need_verification ? "Needs verification" : "No flag"} · expires ${formatDate(candidate.candidate_civil_expiry_date)}`,
+    })),
   };
 }

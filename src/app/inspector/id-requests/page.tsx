@@ -4,13 +4,13 @@ import { DataTablePage } from "@/modules/workspace/DataTablePage";
 import { StatusBadge } from "@/modules/workspace/StatusBadge";
 import { genericStatusVariant } from "@/modules/workspace/status-mapping";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
-import { getInspectorIdRequestRows } from "@/modules/workspace/data";
+import { listIdRequests } from "./actions";
 
 export const dynamic = "force-dynamic";
 
 export default async function InspectorIdRequestsPage() {
   const session = await requireRoleCapability("inspector", "id_review.read");
-  const rows = await getInspectorIdRequestRows();
+  const { items: rows } = await listIdRequests({});
 
   return (
     <WorkspaceShell session={session} eyebrow="Inspector" title="ID Requests" metrics={[]}>
