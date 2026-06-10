@@ -28,6 +28,6 @@ export {
   getCompanyAccountDetail,
   getCompanyRequestRows,
   getCompanyRequestDetail,
-} from "./company";
+} from "./company/index";
 export { getInspectorWorkspace, getInspectorIdRequestRows, getInspectorIdRequestDetail } from "./inspector";
 export { getRequestDetail } from "../request-detail-core";
