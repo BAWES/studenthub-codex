@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { GlassPanel } from "@/components/ui/glass-panel";
 import { EmptyState } from "@/modules/workspace/EmptyState";
-import type { getStaffWorkspace } from "@/modules/workspace/data";
+import type { getStaffWorkspace } from "@/app/staff/actions";
 
 type StaffWorkspaceData = Awaited<ReturnType<typeof getStaffWorkspace>>;
 
