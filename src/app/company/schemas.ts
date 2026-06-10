@@ -60,6 +60,37 @@ export type CompanyWorkspaceData = {
   requests: CompanyListItem[];
 };
 
+// ── CompanyHome — extended dashboard types ──────────────────────────────
+
+export type HomeActivityItem = {
+  id: string;
+  type: "request_created" | "request_updated" | "note_added" | "application_received";
+  detail: string;
+  timestamp: Date;
+  relatedEntityId?: string;
+};
+
+export type HomeActiveRequestItem = {
+  id: string;
+  title: string;
+  status: string;
+  candidatesCount: number;
+  createdAt: Date;
+};
+
+export type CompanyHomeData = CompanyWorkspaceData & {
+  /** Active (non-terminal) request count */
+  activeRequestCount: number;
+  /** Pending (submitted, not started) request count */
+  pendingRequestCount: number;
+  /** Total open positions across all active requests */
+  openPositionsCount: number;
+  /** Active requests with candidate counts */
+  activeRequests: HomeActiveRequestItem[];
+  /** Recent activity across linked companies (last 30 actions) */
+  recentActivity: HomeActivityItem[];
+};
+
 export const getCompanyWorkspaceSchema = z.object({
   contactUuid: z.string().min(1, "Contact UUID is required"),
 });
