@@ -5,7 +5,7 @@ import {
   createDepartmentSchema,
   updateDepartmentSchema,
   deleteDepartmentSchema,
-} from "./actions";
+} from "./schemas";
 
 describe("listDepartmentsSchema", () => {
   it("accepts empty params (default pagination)", () => {

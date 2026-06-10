@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   getTransferSchema,
   updateTransferStatusSchema,
-} from "./actions";
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Schema tests — pure unit tests, no DB required

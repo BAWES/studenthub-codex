@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   updateAdminCompanySchema,
-} from "./actions";
+} from "./schemas";
 
 describe("updateAdminCompanySchema", () => {
   it("requires companyId", () => {

@@ -1,52 +1,19 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
-
-// ---------------------------------------------------------------------------
-// Schemas
-// ---------------------------------------------------------------------------
-
-export const listPermissionSectionsSchema = z.object({});
-
-export const getPermissionSectionSchema = z.object({
-  permission_uuid: z.string().min(1, "Permission section UUID is required"),
-});
-
-export const createPermissionSectionSchema = z.object({
-  section_name: z
-    .string({ required_error: "Section name is required" })
-    .min(1, "Section name is required")
-    .max(255),
-});
-
-export const updatePermissionSectionSchema = z.object({
-  permission_uuid: z.string().min(1, "Permission section UUID is required"),
-  section_name: z
-    .string({ required_error: "Section name is required" })
-    .min(1, "Section name is required")
-    .max(255),
-});
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export type CreatePermissionSectionInput = z.input<
-  typeof createPermissionSectionSchema
->;
-
-export type UpdatePermissionSectionInput = z.input<
-  typeof updatePermissionSectionSchema
->;
-
-export type PermissionSectionDetail = {
-  permission_uuid: string;
-  section_name: string | null;
-  created_at: Date;
-};
+import {
+  listPermissionSectionsSchema,
+  getPermissionSectionSchema,
+  createPermissionSectionSchema,
+  updatePermissionSectionSchema,
+} from "./schemas";
+import type {
+  CreatePermissionSectionInput,
+  UpdatePermissionSectionInput,
+  PermissionSectionDetail,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Server actions

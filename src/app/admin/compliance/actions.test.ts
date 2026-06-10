@@ -6,7 +6,7 @@ import {
   updateComplianceRecordSchema,
   approveComplianceSchema,
   denyComplianceSchema,
-} from "./actions";
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // listComplianceRecordsSchema
