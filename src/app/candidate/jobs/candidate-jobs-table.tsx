@@ -5,6 +5,7 @@ import { DataTablePage } from "@/modules/workspace/DataTablePage";
 import { StatusBadge } from "@/modules/workspace/StatusBadge";
 import { genericStatusVariant } from "@/modules/workspace/status-mapping";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
+import { MatchScoreBadge } from "@/components/matching";
 import type { SessionUser } from "@/modules/auth/types";
 
 type JobRow = Record<string, unknown> & {
@@ -15,6 +16,7 @@ type JobRow = Record<string, unknown> & {
   location: string;
   salaryRange: string;
   createdAt: string;
+  matchScore?: number | null;
 };
 
 type Props = {
@@ -49,6 +51,10 @@ export function CandidateJobsTable({ session, rows, total }: Props) {
           { key: "location", label: "Location", render: (row) => row.location ? String(row.location) : "—" },
           { key: "salaryRange", label: "Salary", render: (row) => row.salaryRange ? String(row.salaryRange) : "—" },
           { key: "createdAt", label: "Posted", render: (row) => String(row.createdAt) },
+          { key: "matchScore", label: "Match", render: (row) => {
+            const score = (row as JobRow).matchScore;
+            return <MatchScoreBadge score={score ?? null} showBar={false} />;
+          }, },
         ]}
       />
     </WorkspaceShell>
