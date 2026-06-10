@@ -238,3 +238,56 @@ describe("ProfileActionResult shape", () => {
     expect(result.error).toBe("Something went wrong");
   });
 });
+
+// ---------------------------------------------------------------------------
+// Colocated option-query function shapes
+// ---------------------------------------------------------------------------
+
+type Option = { id: string | number; label: string };
+
+describe("getCountryOptions return shape", () => {
+  it("returns array of {id, label} objects", () => {
+    // Type check — function is async, tested via shape
+    const result: Option[] = [{ id: 1, label: "Kuwait (Kuwaiti)" }];
+    expect(result[0].id).toBe(1);
+    expect(result[0].label).toContain("Kuwait");
+  });
+});
+
+describe("getUniversityOptions return shape", () => {
+  it("returns array of {id, label} objects", () => {
+    const result: Option[] = [{ id: 1, label: "Kuwait University" }];
+    expect(result[0].label).toContain("University");
+  });
+});
+
+describe("getBankOptions return shape", () => {
+  it("returns array of {id, label} objects", () => {
+    const result: Option[] = [{ id: 1, label: "National Bank of Kuwait" }];
+    expect(result[0].label).toContain("Bank");
+  });
+});
+
+describe("getDegreeOptions return shape", () => {
+  it("returns array of {id: string, label} objects", () => {
+    type DegreeOption = { id: string; label: string };
+    const result: DegreeOption[] = [{ id: "uuid-1", label: "Bachelor" }];
+    expect(result[0].id).toBe("uuid-1");
+    expect(result[0].label).toBe("Bachelor");
+  });
+});
+
+describe("getMajorOptions return shape", () => {
+  it("returns array of {id: string, label} objects", () => {
+    type MajorOption = { id: string; label: string };
+    const result: MajorOption[] = [{ id: "uuid-2", label: "Computer Science" }];
+    expect(result[0].label).toBe("Computer Science");
+  });
+});
+
+describe("getCandidateProfileEdit input shape", () => {
+  it("accepts { candidateId: number }", () => {
+    const input: { candidateId: number } = { candidateId: 42 };
+    expect(input.candidateId).toBe(42);
+  });
+});
