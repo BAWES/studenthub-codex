@@ -1,3 +1,6 @@
+// Re-export candidate workspace data functions for the candidate portal.
+// Functions now live in workspace/data/candidate.ts — this barrel provides
+// a clean import path for consumers.
 export {
   getCandidateDetail,
   getCandidateWorkspace,
