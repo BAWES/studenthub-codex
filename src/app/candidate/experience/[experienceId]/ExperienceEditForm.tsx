@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { updateCandidateExperience } from "../actions";
-import type { ExperienceActionResult } from "../actions";
+import { updateExperienceEntry } from "./actions";
+import type { ExperienceActionResult } from "./actions";
 
 type ExperienceEditFormProps = {
   experienceId: number;
@@ -36,13 +36,13 @@ export function ExperienceEditForm({
     setError(null);
     setSubmitting(true);
 
-    const result: ExperienceActionResult = await updateCandidateExperience({
+    const result: ExperienceActionResult = await updateExperienceEntry(
       experienceId,
       experience,
       employer,
-      startYear: startYear ? Number(startYear) : undefined,
-      endYear: endYear ? Number(endYear) : undefined,
-    });
+      startYear ? Number(startYear) : undefined,
+      endYear ? Number(endYear) : undefined,
+    );
 
     setSubmitting(false);
 

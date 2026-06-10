@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { requireRoleCapability } from "@/modules/auth/session";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
-import { getCandidateExperience } from "../../actions";
+import { getExperienceEntry } from "../actions";
 import { ExperienceEditForm } from "../ExperienceEditForm";
 
 export const dynamic = "force-dynamic";
@@ -14,7 +14,7 @@ export default async function CandidateExperienceEditPage({
   const session = await requireRoleCapability("candidate", "candidate.profile.edit");
   const { experienceId } = await params;
 
-  const item = await getCandidateExperience(Number(experienceId));
+  const item = await getExperienceEntry(Number(experienceId));
   if (!item) {
     notFound();
   }
