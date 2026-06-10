@@ -39,6 +39,8 @@ export function navForRole(role: Role): NavItem[] {
     return [
       SHARED_APP,
       { label: "Overview", href: "/candidate", icon: User },
+      { label: "Jobs", href: "/candidate/jobs", icon: ClipboardList },
+      { label: "My Applications", href: "/candidate/applications", icon: FileCheck },
       { label: "Invitations", href: "/candidate/invitations", icon: Mail },
       { label: "Work Logs", href: "/candidate/work-logs", icon: ClipboardList },
       { label: "Payments", href: "/candidate/payments", icon: CreditCard }
