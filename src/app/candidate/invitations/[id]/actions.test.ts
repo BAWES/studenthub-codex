@@ -3,7 +3,7 @@ import {
   getInvitationSchema,
   respondInvitationSchema,
   type RespondInvitationInput,
-} from "./actions";
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // getInvitationSchema

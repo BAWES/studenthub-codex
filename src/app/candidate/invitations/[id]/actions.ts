@@ -11,7 +11,6 @@
 //   - declineInvitation      — decline an invitation with optional reason
 // ---------------------------------------------------------------------------
 
-import { z } from "zod";
 import { requireCapability } from "@/modules/auth/session";
 import { getCandidateInvitationDetail as parentGetDetail } from "../actions";
 import type { GetInvitationDetailResult } from "../schemas";
@@ -20,30 +19,11 @@ import {
   rejectInvitation as moduleReject,
   type InvitationActionResult,
 } from "@/modules/invitations/actions";
-
-// ---------------------------------------------------------------------------
-// Re-export types so consumers have a single import path
-// ---------------------------------------------------------------------------
-export type { GetInvitationDetailResult, InvitationActionResult };
-
-// ---------------------------------------------------------------------------
-// Schemas
-// ---------------------------------------------------------------------------
-
-export const getInvitationSchema = z.object({
-  invitationUuid: z.string().min(1, "Invitation UUID is required"),
-});
-
-export const respondInvitationSchema = z.object({
-  invitationUuid: z.string().min(1, "Invitation UUID is required"),
-  reason: z.string().max(1000, "Reason must be 1000 characters or fewer").optional(),
-});
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export type RespondInvitationInput = z.input<typeof respondInvitationSchema>;
+import {
+  getInvitationSchema,
+  respondInvitationSchema,
+  type RespondInvitationInput,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // getInvitation

@@ -1,57 +1,18 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
-
-// ---------------------------------------------------------------------------
-// Schemas
-// ---------------------------------------------------------------------------
-
-export const getCandidateWorkLogDetailSchema = z.object({
-  workLogUuid: z.string().min(1, "Work log UUID is required"),
-});
-
-export const approveWorkLogAppealSchema = z.object({
-  appealUuid: z.string().min(1, "Appeal UUID is required"),
-});
-
-export const rejectWorkLogAppealSchema = z.object({
-  appealUuid: z.string().min(1, "Appeal UUID is required"),
-  reason: z.string().min(1, "Rejection reason is required").max(1000),
-});
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export type GetCandidateWorkLogDetailInput = z.input<typeof getCandidateWorkLogDetailSchema>;
-export type ApproveWorkLogAppealInput = z.input<typeof approveWorkLogAppealSchema>;
-export type RejectWorkLogAppealInput = z.input<typeof rejectWorkLogAppealSchema>;
-
-export type WorkLogAppealDetail = {
-  appeal_uuid: string;
-  candidate_working_hour_uuid: string;
-  candidate_id: number;
-  reason: string | null;
-  status: number;
-  created_at: Date | null;
-  updated_at: Date | null;
-};
-
-export type WorkLogDetailForAppeal = {
-  candidate_working_hour_uuid: string;
-  date: Date | null;
-  start_time: Date | null;
-  end_time: Date | null;
-  total_time: number | null;
-  status: number | null;
-  via: string | null;
-  note: string | null;
-  store_name: string | null;
-  company_name: string | null;
-};
+import {
+  getCandidateWorkLogDetailSchema,
+  approveWorkLogAppealSchema,
+  rejectWorkLogAppealSchema,
+  type GetCandidateWorkLogDetailInput,
+  type ApproveWorkLogAppealInput,
+  type RejectWorkLogAppealInput,
+  type WorkLogAppealDetail,
+  type WorkLogDetailForAppeal,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // getCandidateWorkLogDetail

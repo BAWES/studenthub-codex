@@ -5,7 +5,7 @@ import {
   createEducationSchema,
   updateEducationSchema,
   deleteEducationSchema,
-} from "./actions";
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Schema tests for candidate/education actions (pure unit — no DB required)
