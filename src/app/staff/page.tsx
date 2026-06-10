@@ -1,10 +1,10 @@
 import { requireRoleCapability } from "@/modules/auth/session";
 import { getStaffWorkspace } from "./actions";
-import { getPipelineData, getPipelineMetrics } from "@/modules/staff/pipeline-data";
+import { getPipelineData, getPipelineMetrics } from "@/modules/staff/pipeline";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { PipelineClientWrapper } from "@/modules/staff/pipeline/PipelineClientWrapper";
 import { updatePipelineStageAction } from "@/modules/staff/pipeline/actions";
-import type { PipelineStage } from "@/modules/staff/pipeline-data";
+import type { PipelineStage } from "@/modules/staff/pipeline";
 
 export const dynamic = "force-dynamic";
 

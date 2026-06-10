@@ -2,7 +2,7 @@
 
 import { GlassPanel } from "@/components/ui/glass-panel";
 import { pipelineStageColor, pipelineStageLabel } from "./schemas";
-import type { PipelineMetrics, PipelineStage } from "@/modules/staff/pipeline-data";
+import type { PipelineMetrics, PipelineStage } from "@/modules/staff/pipeline";
 import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 
 interface StageMetricsRowProps {

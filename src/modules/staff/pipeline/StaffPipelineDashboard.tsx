@@ -1,6 +1,6 @@
 "use client";
 
-import type { PipelineItem, PipelineMetrics, PipelineStage } from "@/modules/staff/pipeline-data";
+import type { PipelineItem, PipelineMetrics, PipelineStage } from "@/modules/staff/pipeline";
 import { StageMetricsRow } from "./StageMetricsRow";
 import { PipelineBoard } from "./PipelineBoard";
 import { GlassPanel } from "@/components/ui/glass-panel";
