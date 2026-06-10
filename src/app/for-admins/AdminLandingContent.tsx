@@ -108,7 +108,7 @@ export default function AdminLandingContent({
         </nav>
 
         {/* ── Hero — admin-specific ── */}
-        <HeroSection persona="admin" />
+        <HeroSection />
 
         {/* ── Pain-point section — the admin frustrations ── */}
         <section

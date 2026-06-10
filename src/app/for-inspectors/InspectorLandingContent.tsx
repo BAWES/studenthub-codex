@@ -108,7 +108,7 @@ export default function InspectorLandingContent({
         </nav>
 
         {/* ── Hero — inspector-specific ── */}
-        <HeroSection persona="inspector" />
+        <HeroSection />
 
         {/* ── Pain-point section — inspector frustrations ── */}
         <section
