@@ -12,17 +12,26 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
 import { formatMoney } from "@/modules/workspace/format";
+import { getAdminCompanyDetail as _getAdminCompanyDetail, toggleCompanyApproval as _toggleCompanyApproval } from "../actions";
+import type { CompanyDetail, CompanyRow } from "../schemas";
 
-// Re-export shared parent actions
-export {
-  getAdminCompanyDetail,
-  toggleCompanyApproval,
-} from "../actions";
+// ---------------------------------------------------------------------------
+// Re-export shared parent actions via wrapper functions
+// Next.js 15 "use server" forbids bare re-exports — use wrapper functions.
+// ---------------------------------------------------------------------------
 
-export type {
-  CompanyDetail,
-  CompanyRow,
-} from "../schemas";
+export async function getAdminCompanyDetail(
+  companyId: number,
+): Promise<CompanyDetail> {
+  return _getAdminCompanyDetail(companyId);
+}
+
+export async function toggleCompanyApproval(
+  companyId: number,
+  approved: boolean,
+): Promise<{ success: boolean; error?: string }> {
+  return _toggleCompanyApproval(companyId, approved);
+}
 
 import { updateAdminCompanySchema } from "./schemas";
 import type { UpdateAdminCompanyInput, AdminCompanyActionResponse } from "./schemas";

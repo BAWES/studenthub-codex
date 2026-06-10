@@ -11,13 +11,6 @@ import {
 } from "./schemas";
 import type { ListTicketsInput, ListTicketsResult, TicketDetail } from "./schemas";
 
-export {
-  listTicketsSchema,
-  getTicketSchema,
-  createTicketSchema,
-  updateTicketStatusSchema,
-};
-
 export async function listTickets(
   input: ListTicketsInput = {},
 ): Promise<ListTicketsResult> {

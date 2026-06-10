@@ -6,8 +6,6 @@ import { requireCapability } from "@/modules/auth/session";
 import { listTagsSchema, getTagSchema, createTagSchema, updateTagSchema, deleteTagSchema } from "./schemas";
 import type { ListTagsInput, ListTagsResult } from "./schemas";
 
-export { listTagsSchema, getTagSchema, createTagSchema, updateTagSchema, deleteTagSchema };
-
 export async function listTags(input: ListTagsInput = {}): Promise<ListTagsResult> {
   await requireCapability("admin.read");
   const parsed = listTagsSchema.safeParse(input);
