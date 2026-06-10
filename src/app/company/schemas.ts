@@ -23,9 +23,9 @@ export type StaffWorkspaceData = {
   staff: {
     staff_name: string;
     staff_email: string;
-    staff_job_title: string;
+    staff_job_title: string | null;
     staff_salary: number | null;
-    staff_salary_currency: string;
+    staff_salary_currency: string | null;
   } | null;
   metrics: StaffMetric[];
   requests: StaffListItem[];

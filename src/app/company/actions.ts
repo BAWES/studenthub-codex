@@ -74,7 +74,12 @@ export async function getStaffWorkspace(
     ]);
 
   return {
-    staff,
+    staff: staff
+      ? {
+          ...staff,
+          staff_salary: staff.staff_salary ? Number(staff.staff_salary) : null,
+        }
+      : null,
     metrics: [
       { label: "Candidates", value: productionCandidates, note: `${workHistories} assigned to this staff account` },
       { label: "Companies", value: productionCompanies, note: "Employer records in the prod clone" },
