@@ -7,6 +7,7 @@ const protectedPaths = [
   "/staff",
   "/candidate",
   "/company",
+  "/employer",
   "/inspector"
 ];
 

@@ -48,6 +48,7 @@ export function navForRole(role: Role): NavItem[] {
     return [
       SHARED_APP,
       { label: "Overview", href: "/company", icon: User },
+      { label: "Job Postings", href: "/employer/jobs", icon: ClipboardList },
       { label: "Requests", href: "/company/requests", icon: FileCheck },
       { label: "Companies", href: "/company/companies", icon: Building2 },
       { label: "Contacts", href: "/company/contacts" as Route, icon: Phone },
