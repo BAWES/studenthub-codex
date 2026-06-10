@@ -6,7 +6,6 @@ import Link from "next/link";
 import { ChevronRight, Sparkles } from "lucide-react";
 import { ThemeToggle } from "@/modules/theme/ThemeToggle";
 import { HeroSection } from "@/components/marketing";
-import { FeatureGrid } from "@/components/marketing";
 import { TestimonialCarousel } from "@/components/marketing";
 import { ComparisonTable } from "@/components/marketing";
 import { HowItWorks } from "@/components/marketing";
@@ -137,12 +136,8 @@ export default function LandingContent({ session }: LandingContentProps) {
       {/* ── How It Works — 3-step flow ── */}
       <HowItWorks />
 
-      {/* ── Feature grid — persona-specific ── */}
-      {persona === "company" ? (
-        <EmployerSection />
-      ) : (
-        <FeatureGrid persona="candidate" />
-      )}
+      {/* ── Employer section — company-specific ── */}
+      {persona === "company" && <EmployerSection />}
 
       {/* ── Social proof — testimonials ── */}
       {persona === "company" ? (

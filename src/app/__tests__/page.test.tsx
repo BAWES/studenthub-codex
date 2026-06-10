@@ -162,11 +162,10 @@ describe("Landing page (two-sided marketplace redesign)", () => {
     expect(stats).toBeInTheDocument();
   });
 
-  it("renders the feature grid section for candidate persona", () => {
+  it("does not render the old feature grid (replaced by HowItWorks)", () => {
     render(<LandingContent {...defaultProps} />);
-    const featureSection = screen.getByLabelText("Key features");
-    expect(featureSection).toBeInTheDocument();
-    expect(screen.getByText(/smart role discovery/i)).toBeInTheDocument();
+    expect(screen.queryByLabelText("Key features")).not.toBeInTheDocument();
+    expect(screen.queryByText(/smart role discovery/i)).not.toBeInTheDocument();
   });
 
   it("renders the testimonial carousel", () => {
