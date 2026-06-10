@@ -2,6 +2,7 @@ import Link from "next/link";
 import { requireRoleCapability } from "@/modules/auth/session";
 import { listCandidateJobs } from "./actions";
 import { CandidateJobsTable } from "./candidate-jobs-table";
+import { MatchingResultsSection } from "@/components/matching";
 
 export const dynamic = "force-dynamic";
 
@@ -17,7 +18,23 @@ export default async function CandidateJobsPage() {
     location: job.location ?? "—",
     salaryRange: job.salaryRange ?? "—",
     createdAt: job.createdAt.toISOString().slice(0, 10),
+    matchScore: job.matchScore,
   }));
+
+  // Top 5 matching jobs for the highlights section
+  const topMatches = result.jobs
+    .filter((j) => j.matchScore !== null)
+    .sort((a, b) => (b.matchScore ?? 0) - (a.matchScore ?? 0))
+    .slice(0, 5)
+    .map((j) => ({
+      jobListingId: j.jobListingId,
+      title: j.title,
+      employerName: j.employerName,
+      location: j.location,
+      employmentType: j.employmentType,
+      salaryRange: j.salaryRange,
+      score: j.matchScore,
+    }));
 
   return (
     <div className="space-y-6">
@@ -29,6 +46,8 @@ export default async function CandidateJobsPage() {
           </p>
         </div>
       </div>
+
+      <MatchingResultsSection jobs={topMatches} />
 
       <CandidateJobsTable session={session} rows={rows} total={result.total} />
     </div>
