@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { getCandidateProfileSchema } from "./actions";
+import { getCandidateProfileSchema } from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Schema tests — pure unit tests, no DB required
