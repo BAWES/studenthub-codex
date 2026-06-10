@@ -408,6 +408,59 @@ describe("listJobApplicationsByEmployer", () => {
       expect.objectContaining({ where: {} }),
     );
   });
+
+  it("handles null candidate in by-employer results", async () => {
+    const dbRow = {
+      id: 3,
+      jobListingId: 42,
+      candidateId: 103,
+      status: "applied",
+      coverLetter: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      jobListing: { title: "Designer" },
+      candidate: null,
+    };
+    mockFindMany.mockResolvedValue([dbRow]);
+    mockCount.mockResolvedValue(1);
+
+    const result = await actions.listJobApplicationsByEmployer({});
+
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.applications).toHaveLength(1);
+      expect(result.applications[0].candidateName).toBeNull();
+      expect(result.applications[0].jobTitle).toBe("Designer");
+    }
+  });
+
+  it("falls back to candidate_name_ar in by-employer results", async () => {
+    const dbRow = {
+      id: 4,
+      jobListingId: 43,
+      candidateId: 104,
+      status: "applied",
+      coverLetter: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      jobListing: { title: "Engineer" },
+      candidate: {
+        candidate_id: 104,
+        candidate_name: null,
+        candidate_name_ar: "فاطمة",
+      },
+    };
+    mockFindMany.mockResolvedValue([dbRow]);
+    mockCount.mockResolvedValue(1);
+
+    const result = await actions.listJobApplicationsByEmployer({});
+
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.applications[0].candidateName).toBe("فاطمة");
+      expect(result.applications[0].jobTitle).toBe("Engineer");
+    }
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -431,7 +484,7 @@ describe("updateApplicationStatus", () => {
     });
   });
 
-  it("rejects when status changes to applied", async () => {
+  it("accepts when status changes to applied", async () => {
     mockUpdate.mockResolvedValue({ id: 1, status: "applied" });
 
     const result = await actions.updateApplicationStatus({
