@@ -32,6 +32,14 @@ const { requireRoleCapability } = await import("@/modules/auth/session");
 const { revalidatePath } = await import("next/cache");
 const actions = await import("./actions");
 
+const mockUser = {
+  role: "candidate" as const,
+  id: "1",
+  name: "Test Candidate",
+  email: "test@candidate.studenthub.local",
+  issuedAt: Date.now(),
+};
+
 // ---------------------------------------------------------------------------
 // Helpers for type safety when constructing mock rows
 // ---------------------------------------------------------------------------
@@ -75,7 +83,7 @@ describe("getProfileSchema (tested via action behaviour)", () => {
   });
 
   it("getProfile succeeds when session and DB return valid data", async () => {
-    vi.mocked(requireRoleCapability).mockResolvedValue({ id: "1" });
+    vi.mocked(requireRoleCapability).mockResolvedValue(mockUser);
     mockFindUnique.mockResolvedValue(makeCandidateRow());
 
     const result = await actions.getProfile();
@@ -85,7 +93,7 @@ describe("getProfileSchema (tested via action behaviour)", () => {
   });
 
   it("getProfile throws when candidate not found", async () => {
-    vi.mocked(requireRoleCapability).mockResolvedValue({ id: "99" });
+    vi.mocked(requireRoleCapability).mockResolvedValue({ ...mockUser, id: "99" });
     mockFindUnique.mockResolvedValue(null);
 
     await expect(actions.getProfile()).rejects.toThrow("Candidate profile not found");
@@ -99,7 +107,7 @@ describe("getProfileSchema (tested via action behaviour)", () => {
   });
 
   it("getProfile maps nullable fields correctly", async () => {
-    vi.mocked(requireRoleCapability).mockResolvedValue({ id: "2" });
+    vi.mocked(requireRoleCapability).mockResolvedValue({ ...mockUser, id: "2" });
     mockFindUnique.mockResolvedValue(
       makeCandidateRow({
         candidate_id: 2,
@@ -137,7 +145,7 @@ describe("updateProfile", () => {
   // -------- Success cases --------
 
   it("returns success when input is valid", async () => {
-    vi.mocked(requireRoleCapability).mockResolvedValue({ id: "1" });
+    vi.mocked(requireRoleCapability).mockResolvedValue(mockUser);
     mockUpdate.mockResolvedValue({ candidate_id: 1 });
 
     const result = await actions.updateProfile({ name: "Updated Name" });
@@ -146,7 +154,7 @@ describe("updateProfile", () => {
   });
 
   it("passes the correct candidate ID to Prisma", async () => {
-    vi.mocked(requireRoleCapability).mockResolvedValue({ id: "5" });
+    vi.mocked(requireRoleCapability).mockResolvedValue({ ...mockUser, id: "5" });
     mockUpdate.mockResolvedValue({ candidate_id: 5 });
 
     await actions.updateProfile({ name: "Charlie" });
@@ -157,7 +165,7 @@ describe("updateProfile", () => {
   });
 
   it("trims whitespace from name", async () => {
-    vi.mocked(requireRoleCapability).mockResolvedValue({ id: "1" });
+    vi.mocked(requireRoleCapability).mockResolvedValue(mockUser);
     mockUpdate.mockResolvedValue({ candidate_id: 1 });
 
     await actions.updateProfile({ name: "  Dave  " });
@@ -167,7 +175,7 @@ describe("updateProfile", () => {
   });
 
   it("passes optional string fields as undefined when empty", async () => {
-    vi.mocked(requireRoleCapability).mockResolvedValue({ id: "1" });
+    vi.mocked(requireRoleCapability).mockResolvedValue(mockUser);
     mockUpdate.mockResolvedValue({ candidate_id: 1 });
 
     await actions.updateProfile({
@@ -185,7 +193,7 @@ describe("updateProfile", () => {
   });
 
   it("passes driving license as boolean when '1' or '0'", async () => {
-    vi.mocked(requireRoleCapability).mockResolvedValue({ id: "1" });
+    vi.mocked(requireRoleCapability).mockResolvedValue(mockUser);
     mockUpdate.mockResolvedValue({ candidate_id: 1 });
 
     await actions.updateProfile({ name: "Test", drivingLicense: "1" });
@@ -193,14 +201,14 @@ describe("updateProfile", () => {
     expect(call1.data.candidate_driving_license).toBe(true);
 
     vi.clearAllMocks();
-    vi.mocked(requireRoleCapability).mockResolvedValue({ id: "1" });
+    vi.mocked(requireRoleCapability).mockResolvedValue(mockUser);
     await actions.updateProfile({ name: "Test", drivingLicense: "0" });
     const call2 = mockUpdate.mock.calls[0][0];
     expect(call2.data.candidate_driving_license).toBe(false);
   });
 
   it("passes driving license as null when empty string", async () => {
-    vi.mocked(requireRoleCapability).mockResolvedValue({ id: "1" });
+    vi.mocked(requireRoleCapability).mockResolvedValue(mockUser);
     mockUpdate.mockResolvedValue({ candidate_id: 1 });
 
     await actions.updateProfile({ name: "Test", drivingLicense: "" });
@@ -209,7 +217,7 @@ describe("updateProfile", () => {
   });
 
   it("passes hourly rate as a number", async () => {
-    vi.mocked(requireRoleCapability).mockResolvedValue({ id: "1" });
+    vi.mocked(requireRoleCapability).mockResolvedValue(mockUser);
     mockUpdate.mockResolvedValue({ candidate_id: 1 });
 
     await actions.updateProfile({ name: "Test", hourlyRate: 25 });
@@ -218,7 +226,7 @@ describe("updateProfile", () => {
   });
 
   it("passes gender as integer", async () => {
-    vi.mocked(requireRoleCapability).mockResolvedValue({ id: "1" });
+    vi.mocked(requireRoleCapability).mockResolvedValue(mockUser);
     mockUpdate.mockResolvedValue({ candidate_id: 1 });
 
     await actions.updateProfile({ name: "Test", gender: 1 });
@@ -227,7 +235,7 @@ describe("updateProfile", () => {
   });
 
   it("passes birthDate as Date when valid string", async () => {
-    vi.mocked(requireRoleCapability).mockResolvedValue({ id: "1" });
+    vi.mocked(requireRoleCapability).mockResolvedValue(mockUser);
     mockUpdate.mockResolvedValue({ candidate_id: 1 });
 
     await actions.updateProfile({ name: "Test", birthDate: "1998-05-15" });
@@ -239,7 +247,7 @@ describe("updateProfile", () => {
   // -------- Validation failure cases --------
 
   it("returns error for missing name", async () => {
-    vi.mocked(requireRoleCapability).mockResolvedValue({ id: "1" });
+    vi.mocked(requireRoleCapability).mockResolvedValue(mockUser);
 
     const result = (await actions.updateProfile(
       {} as Parameters<typeof actions.updateProfile>[0],
@@ -253,7 +261,7 @@ describe("updateProfile", () => {
   });
 
   it("returns error for name exceeding 255 chars", async () => {
-    vi.mocked(requireRoleCapability).mockResolvedValue({ id: "1" });
+    vi.mocked(requireRoleCapability).mockResolvedValue(mockUser);
 
     const result = (await actions.updateProfile({
       name: "A".repeat(256),
@@ -267,7 +275,7 @@ describe("updateProfile", () => {
   });
 
   it("returns error for negative hourly rate", async () => {
-    vi.mocked(requireRoleCapability).mockResolvedValue({ id: "1" });
+    vi.mocked(requireRoleCapability).mockResolvedValue(mockUser);
 
     const result = (await actions.updateProfile({
       name: "Test",
@@ -282,7 +290,7 @@ describe("updateProfile", () => {
   });
 
   it("returns error for hourly rate > 9999", async () => {
-    vi.mocked(requireRoleCapability).mockResolvedValue({ id: "1" });
+    vi.mocked(requireRoleCapability).mockResolvedValue(mockUser);
 
     const result = (await actions.updateProfile({
       name: "Test",
@@ -294,7 +302,7 @@ describe("updateProfile", () => {
   });
 
   it("returns error for invalid gender value (outside 0-2)", async () => {
-    vi.mocked(requireRoleCapability).mockResolvedValue({ id: "1" });
+    vi.mocked(requireRoleCapability).mockResolvedValue(mockUser);
 
     const result = (await actions.updateProfile({
       name: "Test",
@@ -306,7 +314,7 @@ describe("updateProfile", () => {
   });
 
   it("includes fieldErrors in validation failure", async () => {
-    vi.mocked(requireRoleCapability).mockResolvedValue({ id: "1" });
+    vi.mocked(requireRoleCapability).mockResolvedValue(mockUser);
 
     const result = (await actions.updateProfile({
       name: "",
@@ -336,7 +344,7 @@ describe("updateProfile", () => {
   // -------- Prisma failure --------
 
   it("propagates Prisma update errors", async () => {
-    vi.mocked(requireRoleCapability).mockResolvedValue({ id: "1" });
+    vi.mocked(requireRoleCapability).mockResolvedValue(mockUser);
     mockUpdate.mockRejectedValue(new Error("DB connection error"));
 
     await expect(
