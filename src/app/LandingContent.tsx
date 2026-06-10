@@ -181,7 +181,7 @@ export default function LandingContent({ session }: LandingContentProps) {
                 className="text-xs mb-4"
                 style={{ color: "var(--muted)" }}
               >
-                200+ employers hiring · 3-day avg time-to-shortlist
+                Kuwait-based · No agency fees · Get matched in days
               </p>
             </>
           ) : (
@@ -204,7 +204,7 @@ export default function LandingContent({ session }: LandingContentProps) {
                 className="text-xs mb-4"
                 style={{ color: "var(--muted)" }}
               >
-                1,200+ candidates placed this year · 4.8★ satisfaction
+                Free profile creation · Connect with employers across Kuwait
               </p>
             </>
           )}

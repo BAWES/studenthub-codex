@@ -175,10 +175,10 @@ describe("Landing page (two-sided marketplace redesign)", () => {
     ).toBeInTheDocument();
   });
 
-  it("renders the final CTA section with proof text", () => {
+  it("renders the final CTA section with description", () => {
     render(<LandingContent {...defaultProps} />);
-    const proofTexts = screen.getAllByText(/candidates placed this year/i);
-    expect(proofTexts.length).toBeGreaterThanOrEqual(1);
+    const descriptions = screen.getAllByText(/Kuwait/i);
+    expect(descriptions.length).toBeGreaterThanOrEqual(1);
   });
 
   it("renders footer with sign up link", () => {

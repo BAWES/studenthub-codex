@@ -32,10 +32,10 @@ describe("StatsSection", () => {
 
   it("renders stat labels", () => {
     render(<StatsSection />);
-    expect(screen.getByText("Candidates placed")).toBeTruthy();
-    expect(screen.getByText("Average rating")).toBeTruthy();
-    expect(screen.getByText("Active employers")).toBeTruthy();
-    expect(screen.getByText("Avg time-to-match")).toBeTruthy();
+    expect(screen.getByText("Years serving Kuwait")).toBeTruthy();
+    expect(screen.getByText("Platform features")).toBeTruthy();
+    expect(screen.getByText("Active users")).toBeTruthy();
+    expect(screen.getByText("Profile to match")).toBeTruthy();
   });
 
   it("sets up IntersectionObserver", () => {
