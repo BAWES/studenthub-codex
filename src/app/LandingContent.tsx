@@ -12,6 +12,7 @@ import { HowItWorks } from "@/components/marketing";
 import { EmployerSection } from "@/components/marketing";
 import { StatsSection } from "@/components/marketing";
 import { PersonaSwitcher } from "@/components/marketing";
+import { FadeInSection } from "@/components/marketing";
 import type { SwitcherPersona } from "@/components/marketing";
 
 // ── Props ─────────────────────────────────────────────────────
@@ -131,29 +132,38 @@ export default function LandingContent({ session }: LandingContentProps) {
       <HeroSection />
 
       {/* ── Stats — social proof counters ── */}
-      <StatsSection />
+      <FadeInSection asDiv delay={100}>
+        <StatsSection />
+      </FadeInSection>
 
       {/* ── How It Works — 3-step flow ── */}
-      <HowItWorks />
+      <FadeInSection asDiv delay={200}>
+        <HowItWorks />
+      </FadeInSection>
 
       {/* ── Employer section — value props for all audiences ── */}
-      <EmployerSection />
+      <FadeInSection asDiv delay={300}>
+        <EmployerSection />
+      </FadeInSection>
 
       {/* ── Social proof — testimonials ── */}
-      <TestimonialCarousel persona={persona} />
+      <FadeInSection asDiv delay={400}>
+        <TestimonialCarousel persona={persona} />
+      </FadeInSection>
 
       {/* ── Comparison table — persona-specific ── */}
       <ComparisonTable persona={persona} />
 
       {/* ── Final CTA section ── */}
-      <section
-        className="shSection relative overflow-hidden rounded-xl p-[clamp(24px,5vw,60px)] text-center"
-        style={{
-          background: "var(--sh-glass-bg)",
-          border: "1px solid var(--sh-glass-border)",
-        }}
-        aria-label="Get started"
-      >
+      <FadeInSection delay={500}>
+        <section
+          className="relative overflow-hidden rounded-xl p-[clamp(24px,5vw,60px)] text-center"
+          style={{
+            background: "var(--sh-glass-bg)",
+            border: "1px solid var(--sh-glass-border)",
+          }}
+          aria-label="Get started"
+        >
         {/* Ambient gradient */}
         <div className="shHeroGradientDramatic" aria-hidden="true" />
 
@@ -224,11 +234,13 @@ export default function LandingContent({ session }: LandingContentProps) {
           )}
         </div>
       </section>
+      </FadeInSection>
 
       {/* ── Footer with internal role descriptions ── */}
-      <footer
-        className="shSection pt-6 pb-4 text-xs"
-        style={{ color: "var(--muted)" }}
+      <FadeInSection delay={600}>
+        <footer
+          className="shSection pt-6 pb-4 text-xs"
+          style={{ color: "var(--muted)" }}
       >
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
           {/* Brand */}
@@ -325,6 +337,7 @@ export default function LandingContent({ session }: LandingContentProps) {
           </div>
         </div>
       </footer>
+      </FadeInSection>
     </main>
     </>
   );
