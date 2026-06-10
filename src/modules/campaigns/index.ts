@@ -3,4 +3,4 @@ export type {
   ListCampaignsParams,
   CampaignListItem,
   ListCampaignsResult,
-} from "./actions";
+} from "./schemas";

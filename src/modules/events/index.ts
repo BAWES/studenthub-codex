@@ -3,4 +3,4 @@ export type {
   ListActivityEventsParams,
   ActivityEventItem,
   ListActivityEventsResult,
-} from "./actions";
+} from "./schemas";

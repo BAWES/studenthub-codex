@@ -4,7 +4,7 @@ import {
   getBrandSchema,
   type BrandListItem,
   type ListBrandsResult,
-} from "./actions";
+} from "./schemas";
 
 describe("listBrandsSchema", () => {
   it("accepts empty params", () => {

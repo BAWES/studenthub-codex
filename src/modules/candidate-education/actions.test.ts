@@ -4,13 +4,13 @@ import {
   updateEducationSchema,
   deleteEducationSchema,
   getEducationSchema,
-} from "./actions";
+} from "./schemas";
 import type {
   EducationItem,
   CreateCandidateEducationResult,
   UpdateCandidateEducationResult,
   DeleteCandidateEducationResult,
-} from "./actions";
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Tests: createEducationSchema

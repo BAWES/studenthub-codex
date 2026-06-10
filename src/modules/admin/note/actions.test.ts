@@ -4,11 +4,11 @@ import {
   getNoteSchema,
   createNoteSchema,
   updateNoteSchema,
-} from "./actions";
+} from "./schemas";
 import type {
   NoteItem,
   ListNotesResult,
-} from "./actions";
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Schema tests — listNotes

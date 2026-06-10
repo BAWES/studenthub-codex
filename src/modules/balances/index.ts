@@ -1,13 +1,17 @@
 export {
   resolveWalletAccountUuid,
-  listBalancesSchema,
-  getBalanceSchema,
   listBalances,
   getBalance,
   initTransfer,
-  payByWalletSchema,
   payByWallet,
 } from "./actions";
+
+export {
+  listBalancesSchema,
+  getBalanceSchema,
+  payByWalletSchema,
+} from "./schemas";
+
 export type {
   ListBalancesParams,
   GetBalanceParams,
@@ -16,4 +20,4 @@ export type {
   ListBalancesResult,
   InitTransferState,
   PayByWalletState,
-} from "./actions";
+} from "./schemas";

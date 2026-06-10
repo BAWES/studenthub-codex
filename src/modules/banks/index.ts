@@ -6,4 +6,4 @@ export type {
   GetBankParams,
   CreateBankParams,
   CreateBankResult,
-} from "./actions";
+} from "./schemas";

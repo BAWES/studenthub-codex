@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { listCampaignsSchema } from "./actions";
-import type { CampaignListItem, ListCampaignsResult } from "./actions";
+import { listCampaignsSchema } from "./schemas";
+import type { CampaignListItem, ListCampaignsResult } from "./schemas";
 
 describe("listCampaignsSchema", () => {
   it("accepts empty params", () => {

@@ -6,7 +6,7 @@ import {
   updateAppealStatusSchema,
   listAppealUpdatesSchema,
   createAppealUpdateSchema,
-} from "./actions";
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Schema validation tests for work-log appeal server actions
