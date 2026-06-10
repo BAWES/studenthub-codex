@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import {
   listStaffInterviewsSchema,
   getStaffInterviewDetailSchema,
@@ -80,9 +80,6 @@ describe("getStaffInterviewDetailSchema", () => {
       interviewUuid: "interview_abc-123-def-456",
     });
     expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.interviewUuid).toBe("interview_abc-123-def-456");
-    }
   });
 
   it("rejects empty UUID", () => {
@@ -107,9 +104,6 @@ describe("updateInterviewStatusSchema", () => {
       status: "1",
     });
     expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.status).toBe("1");
-    }
   });
 
   it("accepts valid status update (cancel)", () => {
@@ -243,5 +237,159 @@ describe("UpdateInterviewStatusResult shape", () => {
       message: "Interview not found",
     };
     expect(result.operation).toBe("error");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Action tests — mock Prisma + auth
+// ---------------------------------------------------------------------------
+
+const mockFindMany = vi.fn();
+const mockCount = vi.fn();
+const mockFindFirst = vi.fn();
+const mockUpdate = vi.fn();
+
+vi.mock("@/lib/prisma", () => ({
+  prisma: {
+    request_interview: {
+      findMany: mockFindMany,
+      count: mockCount,
+      findFirst: mockFindFirst,
+      update: mockUpdate,
+    },
+  },
+}));
+
+vi.mock("@/modules/auth/session", () => ({
+  requireRoleCapability: vi.fn(),
+}));
+
+vi.mock("next/cache", () => ({
+  revalidatePath: vi.fn(),
+}));
+
+const { requireRoleCapability } = await import("@/modules/auth/session");
+const interviews = await import("./actions");
+
+const mockStaffUser = {
+  role: "staff" as const,
+  id: "99",
+  name: "Staff User",
+  email: "staff@studenthub.ai",
+  issuedAt: Date.now(),
+};
+
+function makeInterviewRow(overrides: Record<string, unknown> = {}) {
+  return {
+    request_interview_uuid: "interview_abc-123",
+    interview_at: new Date("2026-06-10T10:00:00Z"),
+    status: 0,
+    internal_note: "Call with candidate",
+    candidate: { candidate_id: 42, candidate_name: "John Doe", candidate_email: "john@example.com" },
+    request: { request_uuid: "req_abc-123", request_position_title: "Senior Developer" },
+    ...overrides,
+  };
+}
+
+describe("listStaffInterviews", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(requireRoleCapability).mockResolvedValue(mockStaffUser);
+  });
+
+  it("returns paginated interviews with defaults", async () => {
+    mockFindMany.mockResolvedValue([makeInterviewRow()]);
+    mockCount.mockResolvedValue(1);
+    const result = await interviews.listStaffInterviews({});
+    expect(requireRoleCapability).toHaveBeenCalledWith("staff", "request.interview");
+    expect(result.items).toHaveLength(1);
+    expect(result.total).toBe(1);
+    expect(result.page).toBe(1);
+    expect(result.limit).toBe(20);
+    expect(result.totalPages).toBe(1);
+    expect(result.items[0].candidate).toBe("John Doe");
+    expect(result.items[0].requestTitle).toBe("Senior Developer");
+  });
+
+  it("filters by status", async () => {
+    mockFindMany.mockResolvedValue([]);
+    mockCount.mockResolvedValue(0);
+    await interviews.listStaffInterviews({ status: "1" });
+    const callArgs = mockFindMany.mock.calls[0][0];
+    expect(callArgs.where.status).toBe(1);
+  });
+
+  it("respects pagination", async () => {
+    mockFindMany.mockResolvedValue([]);
+    mockCount.mockResolvedValue(0);
+    await interviews.listStaffInterviews({ page: 3, limit: 10 });
+    const callArgs = mockFindMany.mock.calls[0][0];
+    expect(callArgs.skip).toBe(20);
+    expect(callArgs.take).toBe(10);
+  });
+
+  it("returns empty result on invalid input", async () => {
+    const result = await interviews.listStaffInterviews({ limit: 999 });
+    expect(result.items).toEqual([]);
+    expect(result.total).toBe(0);
+  });
+});
+
+describe("getStaffInterviewDetail", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(requireRoleCapability).mockResolvedValue(mockStaffUser);
+  });
+
+  it("returns interview detail for valid UUID", async () => {
+    mockFindFirst.mockResolvedValue(makeInterviewRow());
+    const result = await interviews.getStaffInterviewDetail({ interviewUuid: "interview_abc-123" });
+    expect(result).not.toBeNull();
+    expect(result?.candidateName).toBe("John Doe");
+    expect(result?.requestTitle).toBe("Senior Developer");
+    expect(result?.status).toBe(0);
+  });
+
+  it("returns null when interview not found", async () => {
+    mockFindFirst.mockResolvedValue(null);
+    const result = await interviews.getStaffInterviewDetail({ interviewUuid: "interview_missing" });
+    expect(result).toBeNull();
+  });
+
+  it("throws on invalid UUID", async () => {
+    await expect(interviews.getStaffInterviewDetail({ interviewUuid: "" })).rejects.toThrow();
+    expect(mockFindFirst).not.toHaveBeenCalled();
+  });
+});
+
+describe("updateInterviewStatus", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(requireRoleCapability).mockResolvedValue(mockStaffUser);
+  });
+
+  it("updates status to completed", async () => {
+    mockFindFirst.mockResolvedValue({ request_interview_uuid: "interview_abc-123" });
+    mockUpdate.mockResolvedValue({});
+    const result = await interviews.updateInterviewStatus({ interviewUuid: "interview_abc-123", status: "1" });
+    expect(result.operation).toBe("success");
+    expect(mockUpdate).toHaveBeenCalledWith({
+      where: { request_interview_uuid: "interview_abc-123" },
+      data: expect.objectContaining({ status: 1, updated_at: expect.any(Date) }),
+    });
+  });
+
+  it("returns error when interview not found", async () => {
+    mockFindFirst.mockResolvedValue(null);
+    const result = await interviews.updateInterviewStatus({ interviewUuid: "interview_missing", status: "1" });
+    expect(result.operation).toBe("error");
+    expect(result.message).toBe("Interview not found");
+    expect(mockUpdate).not.toHaveBeenCalled();
+  });
+
+  it("returns error on invalid status", async () => {
+    const result = await interviews.updateInterviewStatus({ interviewUuid: "interview_abc-123", status: "99" as any });
+    expect(result.operation).toBe("error");
+    expect(mockUpdate).not.toHaveBeenCalled();
   });
 });

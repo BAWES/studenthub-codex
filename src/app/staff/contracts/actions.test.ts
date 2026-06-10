@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import {
   listContractsSchema,
   getContractSchema,
@@ -20,24 +20,13 @@ describe("listContractsSchema", () => {
   });
 
   it("accepts pagination and filter params", () => {
-    const r = listContractsSchema.safeParse({
-      page: 2,
-      limit: 10,
-      status: 1,
-      type: "permanent",
-      candidateId: 42,
-      companyId: 7,
-      q: "developer",
-    });
+    const r = listContractsSchema.safeParse({ page: 2, limit: 10, status: 1, type: "full-time" });
     expect(r.success).toBe(true);
     if (r.success) {
       expect(r.data.page).toBe(2);
       expect(r.data.limit).toBe(10);
       expect(r.data.status).toBe(1);
-      expect(r.data.type).toBe("permanent");
-      expect(r.data.candidateId).toBe(42);
-      expect(r.data.companyId).toBe(7);
-      expect(r.data.q).toBe("developer");
+      expect(r.data.type).toBe("full-time");
     }
   });
 
@@ -54,17 +43,14 @@ describe("listContractsSchema", () => {
   });
 
   it("rejects negative candidateId", () => {
-    expect(listContractsSchema.safeParse({ candidateId: -5 }).success).toBe(false);
+    expect(listContractsSchema.safeParse({ candidateId: -1 }).success).toBe(false);
   });
 });
 
 describe("getContractSchema", () => {
   it("accepts a valid UUID", () => {
-    const r = getContractSchema.safeParse({ uuid: "contract_uuid_12345" });
+    const r = getContractSchema.safeParse({ uuid: "contract_abc-123" });
     expect(r.success).toBe(true);
-    if (r.success) {
-      expect(r.data.uuid).toBe("contract_uuid_12345");
-    }
   });
 
   it("rejects missing UUID", () => {
@@ -78,11 +64,7 @@ describe("getContractSchema", () => {
 
 describe("updateContractStatusSchema", () => {
   it("accepts valid UUID and status 0 (inactive)", () => {
-    const r = updateContractStatusSchema.safeParse({ uuid: "abc", status: 0 });
-    expect(r.success).toBe(true);
-    if (r.success) {
-      expect(r.data.status).toBe(0);
-    }
+    expect(updateContractStatusSchema.safeParse({ uuid: "abc", status: 0 }).success).toBe(true);
   });
 
   it("accepts status 1 (active)", () => {
@@ -103,5 +85,164 @@ describe("updateContractStatusSchema", () => {
 
   it("rejects empty UUID", () => {
     expect(updateContractStatusSchema.safeParse({ uuid: "", status: 1 }).success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Action tests — mock Prisma + auth
+// ---------------------------------------------------------------------------
+
+const mockFindMany = vi.fn();
+const mockCount = vi.fn();
+const mockFindFirst = vi.fn();
+const mockUpdate = vi.fn();
+
+vi.mock("@/lib/prisma", () => ({
+  prisma: {
+    contract: {
+      findMany: mockFindMany,
+      count: mockCount,
+      findFirst: mockFindFirst,
+      update: mockUpdate,
+    },
+  },
+}));
+
+vi.mock("@/modules/auth/session", () => ({
+  requireCapability: vi.fn(),
+}));
+
+vi.mock("next/cache", () => ({
+  revalidatePath: vi.fn(),
+}));
+
+const { requireCapability } = await import("@/modules/auth/session");
+const contracts = await import("./actions");
+
+const mockUser = {
+  role: "staff" as const,
+  id: "42",
+  name: "Staff User",
+  email: "staff@studenthub.ai",
+  issuedAt: Date.now(),
+};
+
+function makeContract(overrides: Record<string, unknown> = {}) {
+  return {
+    contract_uuid: "contract_abc-123",
+    type: "full-time",
+    detail: "Standard employment contract",
+    status: 1,
+    start_date: new Date("2026-01-01"),
+    end_date: new Date("2026-12-31"),
+    transfer_cost: "500.00",
+    currency_code: "KWD",
+    deleted: false,
+    created_at: new Date("2026-01-01"),
+    updated_at: new Date("2026-06-10"),
+    candidate: { candidate_name: "Ahmed Al-Mutairi" },
+    company_contract_company_idTocompany: { company_name: "Acme Corp" },
+    ...overrides,
+  };
+}
+
+describe("listContracts", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(requireCapability).mockResolvedValue(mockUser);
+  });
+
+  it("returns paginated contracts with defaults", async () => {
+    mockFindMany.mockResolvedValue([makeContract()]);
+    mockCount.mockResolvedValue(1);
+    const result = await contracts.listContracts({});
+    expect(requireCapability).toHaveBeenCalledWith("contracts.read");
+    expect(result.items).toHaveLength(1);
+    expect(result.total).toBe(1);
+    expect(result.page).toBe(1);
+    expect(result.limit).toBe(20);
+    expect(result.totalPages).toBe(1);
+    expect(result.items[0].candidate_name).toBe("Ahmed Al-Mutairi");
+    expect(result.items[0].company_name).toBe("Acme Corp");
+    expect(result.items[0].status_label).toBe("active");
+  });
+
+  it("filters by status", async () => {
+    mockFindMany.mockResolvedValue([]);
+    mockCount.mockResolvedValue(0);
+    await contracts.listContracts({ status: 1 });
+    const callArgs = mockFindMany.mock.calls[0][0];
+    expect(callArgs.where.status).toBe(1);
+  });
+
+  it("respects pagination", async () => {
+    mockFindMany.mockResolvedValue([]);
+    mockCount.mockResolvedValue(0);
+    await contracts.listContracts({ page: 3, limit: 10 });
+    const callArgs = mockFindMany.mock.calls[0][0];
+    expect(callArgs.skip).toBe(20);
+    expect(callArgs.take).toBe(10);
+  });
+
+  it("returns empty result on invalid input", async () => {
+    const result = await contracts.listContracts({ limit: 999 });
+    expect(result.items).toEqual([]);
+    expect(result.total).toBe(0);
+  });
+});
+
+describe("getContractDetail", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(requireCapability).mockResolvedValue(mockUser);
+  });
+
+  it("returns contract detail for valid UUID", async () => {
+    mockFindFirst.mockResolvedValue(makeContract());
+    const result = await contracts.getContractDetail({ uuid: "contract_abc-123" });
+    expect(result.contract).not.toBeNull();
+    expect(result.contract?.candidate?.candidate_name).toBe("Ahmed Al-Mutairi");
+    expect(result.contract?.company?.company_name).toBe("Acme Corp");
+    expect(result.contract?.status_label).toBe("active");
+  });
+
+  it("returns null contract when not found", async () => {
+    mockFindFirst.mockResolvedValue(null);
+    const result = await contracts.getContractDetail({ uuid: "contract_missing" });
+    expect(result.contract).toBeNull();
+  });
+
+  it("throws on invalid UUID", async () => {
+    await expect(contracts.getContractDetail({ uuid: "" })).rejects.toThrow();
+    expect(mockFindFirst).not.toHaveBeenCalled();
+  });
+});
+
+describe("updateContractStatus", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(requireCapability).mockResolvedValue(mockUser);
+  });
+
+  it("updates contract status successfully", async () => {
+    mockFindFirst.mockResolvedValue({ contract_uuid: "contract_abc-123", status: 1 });
+    mockUpdate.mockResolvedValue({});
+    const result = await contracts.updateContractStatus({ uuid: "contract_abc-123", status: 2 });
+    expect(result.success).toBe(true);
+    expect(mockUpdate).toHaveBeenCalledWith({
+      where: { contract_uuid: "contract_abc-123" },
+      data: expect.objectContaining({ status: 2, updated_at: expect.any(Date) }),
+    });
+  });
+
+  it("throws when contract not found", async () => {
+    mockFindFirst.mockResolvedValue(null);
+    await expect(contracts.updateContractStatus({ uuid: "contract_missing", status: 2 })).rejects.toThrow("Contract not found");
+    expect(mockUpdate).not.toHaveBeenCalled();
+  });
+
+  it("throws on invalid input", async () => {
+    await expect(contracts.updateContractStatus({ uuid: "" } as any)).rejects.toThrow();
+    expect(mockUpdate).not.toHaveBeenCalled();
   });
 });

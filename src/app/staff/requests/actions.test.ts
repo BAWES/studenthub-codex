@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import {
   listStaffRequestsSchema,
   getStaffRequestDetailSchema,
@@ -238,5 +238,155 @@ describe("UpdateRequestStatusResult shape", () => {
       message: "Request not found",
     };
     expect(result.operation).toBe("error");
+  });
+});
+
+
+// ---------------------------------------------------------------------------
+// Action tests — mock Prisma + auth
+// ---------------------------------------------------------------------------
+
+const mockFindMany = vi.fn();
+const mockCount = vi.fn();
+const mockFindFirst = vi.fn();
+const mockUpdate = vi.fn();
+
+vi.mock("@/lib/prisma", () => ({
+  prisma: {
+    request: {
+      findMany: mockFindMany,
+      count: mockCount,
+      findFirst: mockFindFirst,
+      update: mockUpdate,
+    },
+  },
+}));
+
+vi.mock("@/modules/auth/session", () => ({
+  requireRoleCapability: vi.fn(),
+}));
+
+vi.mock("next/cache", () => ({
+  revalidatePath: vi.fn(),
+}));
+
+const { requireRoleCapability } = await import("@/modules/auth/session");
+const requests = await import("./actions");
+
+const mockStaffUser = {
+  role: "staff" as const,
+  id: "99",
+  name: "Staff User",
+  email: "staff@studenthub.ai",
+  issuedAt: Date.now(),
+};
+
+function makeRequestRow(overrides: Record<string, unknown> = {}) {
+  return {
+    request_uuid: "req_abc-123",
+    request_position_title: "Senior Developer",
+    request_status: "started",
+    request_number_of_employees: 2,
+    request_updated_datetime: new Date("2026-06-10T10:00:00Z"),
+    company: { company_name: "Acme Corp" },
+    ...overrides,
+  };
+}
+
+describe("listStaffRequests", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(requireRoleCapability).mockResolvedValue(mockStaffUser);
+  });
+
+  it("returns paginated requests with defaults", async () => {
+    mockFindMany.mockResolvedValue([makeRequestRow()]);
+    mockCount.mockResolvedValue(1);
+
+    const result = await requests.listStaffRequests({});
+
+    expect(requireRoleCapability).toHaveBeenCalledWith("staff", "request.read.assigned");
+    expect(result.items).toHaveLength(1);
+    expect(result.total).toBe(1);
+    expect(result.page).toBe(1);
+    expect(result.limit).toBe(20);
+    expect(result.totalPages).toBe(1);
+    expect(result.items[0].title).toBe("Senior Developer");
+    expect(result.items[0].company).toBe("Acme Corp");
+  });
+
+  it("filters by status", async () => {
+    mockFindMany.mockResolvedValue([]);
+    mockCount.mockResolvedValue(0);
+    await requests.listStaffRequests({ status: "started" });
+    const callArgs = mockFindMany.mock.calls[0][0];
+    expect(callArgs.where.request_status).toBe("started");
+  });
+
+  it("searches by title and company name", async () => {
+    mockFindMany.mockResolvedValue([]);
+    mockCount.mockResolvedValue(0);
+    await requests.listStaffRequests({ q: "developer" });
+    const callArgs = mockFindMany.mock.calls[0][0];
+    expect(callArgs.where.OR).toBeDefined();
+    expect(callArgs.where.OR[0].request_position_title.contains).toBe("developer");
+  });
+
+  it("respects pagination", async () => {
+    mockFindMany.mockResolvedValue([]);
+    mockCount.mockResolvedValue(0);
+    await requests.listStaffRequests({ page: 3, limit: 10 });
+    const callArgs = mockFindMany.mock.calls[0][0];
+    expect(callArgs.skip).toBe(20);
+    expect(callArgs.take).toBe(10);
+  });
+
+  it("returns empty result on invalid input", async () => {
+    const result = await requests.listStaffRequests({ limit: 999 });
+    expect(result.items).toEqual([]);
+    expect(result.total).toBe(0);
+  });
+});
+
+describe("updateRequestStatus", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(requireRoleCapability).mockResolvedValue(mockStaffUser);
+  });
+
+  it("updates status to started for a pending request", async () => {
+    mockFindFirst.mockResolvedValue({ request_uuid: "req_abc-123", request_status: "pending" });
+    mockUpdate.mockResolvedValue({});
+    const result = await requests.updateRequestStatus({ requestUuid: "req_abc-123", status: "started" });
+    expect(result.operation).toBe("success");
+    expect(mockUpdate).toHaveBeenCalledWith({
+      where: { request_uuid: "req_abc-123" },
+      data: expect.objectContaining({ request_status: "started", request_started_at: expect.any(Date) }),
+    });
+  });
+
+  it("updates status to delivered with feedback", async () => {
+    mockFindFirst.mockResolvedValue({ request_uuid: "req_abc-123", request_status: "started" });
+    mockUpdate.mockResolvedValue({});
+    const result = await requests.updateRequestStatus({ requestUuid: "req_abc-123", status: "delivered", feedback: "Candidate accepted offer" });
+    expect(result.operation).toBe("success");
+    const callData = mockUpdate.mock.calls[0][0].data;
+    expect(callData.request_status).toBe("delivered");
+    expect(callData.request_finished_at).toBeDefined();
+    expect(callData.request_feedback).toBe("Candidate accepted offer");
+  });
+
+  it("returns error when request not found", async () => {
+    mockFindFirst.mockResolvedValue(null);
+    const result = await requests.updateRequestStatus({ requestUuid: "req_missing", status: "started" });
+    expect(result.operation).toBe("error");
+    expect(result.message).toBe("Request not found");
+    expect(mockUpdate).not.toHaveBeenCalled();
+  });
+
+  it("returns error on invalid input", async () => {
+    const result = await requests.updateRequestStatus({ requestUuid: "req_abc-123", status: "invalid_status" as "pending" });
+    expect(result.operation).toBe("error");
+    expect(mockUpdate).not.toHaveBeenCalled();
   });
 });
