@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { createCandidateSkill } from "../actions";
-import type { SkillActionResult } from "../actions";
+import { createSkill } from "./actions";
+import type { SkillActionResult } from "./actions";
 
 export function SkillNewForm() {
   const router = useRouter();
@@ -17,7 +17,7 @@ export function SkillNewForm() {
     setError(null);
     setSubmitting(true);
 
-    const result: SkillActionResult = await createCandidateSkill({ skill });
+    const result: SkillActionResult = await createSkill(skill);
 
     setSubmitting(false);
 
