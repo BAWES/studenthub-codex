@@ -112,6 +112,29 @@ describe("WorkspaceShell — skip-to-content link and main-content id", () => {
     expect(main).not.toBeInTheDocument();
   });
 
+  it("wraps content in a <div> not a <main> when embedded (no nested main)", () => {
+    const { container } = render(
+      <WorkspaceOSContext.Provider value={{ embedded: true, session: mockSession }}>
+        <WorkspaceShell
+          session={mockSession}
+          eyebrow="Test"
+          title="Test Page"
+          metrics={[]}
+        >
+          <p>content</p>
+        </WorkspaceShell>
+      </WorkspaceOSContext.Provider>,
+    );
+
+    // The top-level wrapper from WorkspaceShell when embedded should be a <div>,
+    // not a <main>. A <main> nested inside another <main> (WorkspaceOS provides the outer one)
+    // is invalid HTML.
+    const topLevelElement = container.firstElementChild;
+    expect(topLevelElement).not.toBeNull();
+    expect(topLevelElement!.tagName.toLowerCase()).toBe("div");
+    expect(topLevelElement!.className).toContain("shellEmbedded");
+  });
+
   it("does NOT render a skip-to-content link when embedded inside WorkspaceOS", () => {
     render(
       <WorkspaceOSContext.Provider value={{ embedded: true, session: mockSession }}>

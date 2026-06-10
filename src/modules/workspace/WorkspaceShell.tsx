@@ -126,10 +126,10 @@ export function WorkspaceShell({
 
   const mainContent = embedded
     ? (
-      <main className="shell shellEmbedded">
+      <div className="shell shellEmbedded">
         {stage}
         <WorkspaceMobileNavigation items={navItems} role={session.role} />
-      </main>
+      </div>
     )
     : (
       <>
