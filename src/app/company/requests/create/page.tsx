@@ -1,7 +1,7 @@
 import { requireRoleCapability } from "@/modules/auth/session";
 import { CompanyRequestCreateForm } from "@/modules/requests/CompanyRequestCreateForm";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
-import { getCompanyCreateFormCompanies } from "@/modules/workspace/company-data";
+import { getCompanyCreateFormCompanies } from "./actions";
 
 export const dynamic = "force-dynamic";
 

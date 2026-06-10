@@ -39,6 +39,10 @@ export const deleteRequestSchema = z.object({
   uuid: z.string().min(1, "Request UUID is required"),
 });
 
+export const getCompanyCreateFormCompaniesSchema = z.object({
+  contactUuid: z.string().min(1, "Contact UUID is required"),
+});
+
 export const createCompanyRequestSchema = z.object({
   company_id: z.number({ required_error: "Company ID is required" }).int().positive(),
   position_title: z
