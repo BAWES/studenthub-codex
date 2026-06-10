@@ -91,11 +91,11 @@ describe("SignupPage — ?role search param handling", () => {
       expect(form).toHaveAttribute("data-default-role", "");
     });
 
-    it("passes defaultRole undefined for 'admin' role (not a signup role)", async () => {
+    it("passes defaultRole 'admin' for 'admin' role (invite-only role, but still valid)", async () => {
       await renderSignupPage({ role: "admin" });
 
       const form = screen.getByTestId("signup-form");
-      expect(form).toHaveAttribute("data-default-role", "");
+      expect(form).toHaveAttribute("data-default-role", "admin");
     });
   });
 
