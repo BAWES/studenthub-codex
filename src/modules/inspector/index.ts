@@ -19,4 +19,4 @@ export type {
   GetInspectorInput,
   InspectorAccountItem,
   ListInspectorsResult,
-} from "./actions";
+} from "./schemas";

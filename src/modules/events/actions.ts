@@ -1,49 +1,15 @@
 "use server";
 
-import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
-
-// ---------------------------------------------------------------------------
-// Schemas
-// ---------------------------------------------------------------------------
-
-export const listActivityEventsSchema = z.object({
-  requestUuid: z.string().optional(),
-  dateFrom: z.string().optional(),
-  dateTo: z.string().optional(),
-  page: z.number().int().positive().optional(),
-  limit: z.number().int().min(1).max(100).optional(),
-});
-
-export const getActivityEventSchema = z.object({
-  id: z.string().min(1, "Invalid activity event ID"),
-});
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export type ListActivityEventsParams = z.input<typeof listActivityEventsSchema>;
-
-export type GetActivityEventParams = z.input<typeof getActivityEventSchema>;
-
-export type ActivityEventItem = {
-  activity_uuid: string;
-  request_uuid: string;
-  activity_detail: string;
-  staff_name: string | null;
-  activity_created_datetime: Date | null;
-  activity_updated_datetime: Date | null;
-};
-
-export type ListActivityEventsResult = {
-  events: ActivityEventItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
+import {
+  listActivityEventsSchema,
+  getActivityEventSchema,
+  type ListActivityEventsParams,
+  type GetActivityEventParams,
+  type ActivityEventItem,
+  type ListActivityEventsResult,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Server actions

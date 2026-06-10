@@ -6,7 +6,7 @@ import {
   rejectRequestSchema,
   listInspectorsSchema,
   getInspectorSchema,
-} from "./actions";
+} from "./schemas";
 import type {
   IdRequestListItem,
   IdRequestDetail,
@@ -15,7 +15,7 @@ import type {
   RejectRequestInput,
   InspectorAccountItem,
   ListInspectorsResult,
-} from "./actions";
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Schema tests

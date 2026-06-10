@@ -14,7 +14,7 @@ export type {
   GetDocumentParams,
   UploadDocumentParams,
   DeleteDocumentParams,
-} from "./actions";
+} from "./schemas";
 
 export { DOCUMENT_TYPES } from "./constants";
 export type { DocumentType } from "./constants";

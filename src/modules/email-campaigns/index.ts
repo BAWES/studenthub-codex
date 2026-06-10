@@ -3,11 +3,14 @@ export {
   getEmailCampaign,
   createEmailCampaign,
   updateEmailCampaign,
+} from "./actions";
+
+export {
   listEmailCampaignsSchema,
   getEmailCampaignSchema,
   createEmailCampaignSchema,
   updateEmailCampaignSchema,
-} from "./actions";
+} from "./schemas";
 
 export type {
   ListEmailCampaignsParams,
@@ -17,4 +20,4 @@ export type {
   EmailCampaignListItem,
   ListEmailCampaignsResult,
   CreateUpdateResult,
-} from "./actions";
+} from "./schemas";

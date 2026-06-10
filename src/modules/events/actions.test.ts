@@ -1,9 +1,9 @@
 import { describe, it, expect } from "vitest";
-import { listActivityEventsSchema, getActivityEventSchema } from "./actions";
+import { listActivityEventsSchema, getActivityEventSchema } from "./schemas";
 import type {
   ActivityEventItem,
   ListActivityEventsResult,
-} from "./actions";
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Schema tests

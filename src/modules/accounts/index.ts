@@ -5,4 +5,4 @@ export type {
   AccountListItem,
   AccountDetail,
   ListAccountsResult,
-} from "./actions";
+} from "./schemas";

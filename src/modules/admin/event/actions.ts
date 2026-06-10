@@ -1,61 +1,19 @@
 "use server";
 
-import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
-
-// ---------------------------------------------------------------------------
-// Schemas
-// ---------------------------------------------------------------------------
-
-export const listEventsSchema = z.object({
-  requestUuid: z.string().optional(),
-  dateFrom: z.string().optional(),
-  dateTo: z.string().optional(),
-  page: z.number().int().positive().optional(),
-  limit: z.number().int().min(1).max(100).optional(),
-});
-
-export const getEventSchema = z.object({
-  id: z.string().min(1, "Invalid event ID"),
-});
-
-export const getEventTimelineSchema = z.object({
-  requestUuid: z.string().min(1, "Invalid request UUID"),
-});
-
-// Backward-compatible alias for existing consumers
-export const listActivityEventsSchema = listEventsSchema;
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export type ListEventsParams = z.input<typeof listEventsSchema>;
-export type GetEventParams = z.input<typeof getEventSchema>;
-export type GetEventTimelineParams = z.input<typeof getEventTimelineSchema>;
-
-export type EventItem = {
-  activity_uuid: string;
-  request_uuid: string;
-  activity_detail: string;
-  staff_name: string | null;
-  activity_created_datetime: Date | null;
-  activity_updated_datetime: Date | null;
-};
-
-export type ListEventsResult = {
-  events: EventItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
-
-export type TimelineEntry = {
-  date: string;
-  events: EventItem[];
-};
+import {
+  listEventsSchema,
+  getEventSchema,
+  getEventTimelineSchema,
+  listActivityEventsSchema,
+  type ListEventsParams,
+  type GetEventParams,
+  type GetEventTimelineParams,
+  type EventItem,
+  type ListEventsResult,
+  type TimelineEntry,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Server actions

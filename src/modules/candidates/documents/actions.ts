@@ -4,35 +4,24 @@ import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { revalidatePath } from "next/cache";
-import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
 import { DOCUMENT_TYPES } from "./constants";
 import type { DocumentType } from "./constants";
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-/** A single document entry returned from list / get. */
-export type CandidateDocumentItem = {
-  type: DocumentType;
-  label: string;
-  filePath: string | null;
-  fileUrl: string | null;
-};
-
-export type ListCandidateDocumentsResult = {
-  items: CandidateDocumentItem[];
-  candidateId: number;
-};
-
-/** Upload result shape for useActionState. */
-export type UploadDocumentState = {
-  success: boolean;
-  error?: string;
-  filePath?: string;
-};
+import {
+  listDocumentsSchema,
+  getDocumentSchema,
+  uploadDocumentParamsSchema,
+  deleteDocumentSchema,
+  type CandidateDocumentItem,
+  type ListCandidateDocumentsResult,
+  type UploadDocumentState,
+  type DeleteDocumentState,
+  type ListDocumentsParams,
+  type GetDocumentParams,
+  type UploadDocumentParams,
+  type DeleteDocumentParams,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Labels for each document type
@@ -88,38 +77,6 @@ const ALLOWED_TYPES: Record<string, { mime: string[]; ext: string[]; maxSize: nu
     ext: [".jpg", ".jpeg", ".png", ".webp", ".gif"],
     maxSize: 5 * 1024 * 1024,
   },
-};
-
-// ---------------------------------------------------------------------------
-// Schemas
-// ---------------------------------------------------------------------------
-
-const listDocumentsSchema = z.object({
-  candidateId: z.coerce.number().int().positive("Candidate ID is required"),
-});
-
-const getDocumentSchema = z.object({
-  candidateId: z.coerce.number().int().positive("Candidate ID is required"),
-  documentType: z.enum(DOCUMENT_TYPES, {
-    errorMap: () => ({ message: "Invalid document type. Must be one of: photo, cv, video, civilFront, civilBack." }),
-  }),
-});
-
-const uploadDocumentParamsSchema = z.object({
-  candidateId: z.coerce.number().int().positive("Candidate ID is required"),
-  documentType: z.enum(DOCUMENT_TYPES, {
-    errorMap: () => ({ message: "Invalid document type" }),
-  }),
-});
-
-export type ListDocumentsParams = z.input<typeof listDocumentsSchema>;
-export type GetDocumentParams = z.input<typeof getDocumentSchema>;
-export type UploadDocumentParams = z.input<typeof uploadDocumentParamsSchema>;
-
-/** Delete result shape for useActionState. */
-export type DeleteDocumentState = {
-  success: boolean;
-  error?: string;
 };
 
 // ---------------------------------------------------------------------------
@@ -299,14 +256,6 @@ export async function uploadCandidateDocument(
 // ---------------------------------------------------------------------------
 // Delete document
 // ---------------------------------------------------------------------------
-
-const deleteDocumentSchema = z.object({
-  documentType: z.enum(DOCUMENT_TYPES, {
-    errorMap: () => ({ message: "Invalid document type. Must be one of: photo, cv, video, civilFront, civilBack." }),
-  }),
-});
-
-export type DeleteDocumentParams = z.input<typeof deleteDocumentSchema>;
 
 /**
  * Delete a candidate's document by type.

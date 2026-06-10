@@ -4,6 +4,18 @@ import { z } from "zod";
 import { requireCapability } from "@/modules/auth/session";
 import { walletQuery } from "@/lib/wallet-db";
 import { prisma } from "@/lib/prisma";
+import {
+  listBalancesSchema,
+  getBalanceSchema,
+  payByWalletSchema,
+  type ListBalancesParams,
+  type GetBalanceParams,
+  type BalanceTransaction,
+  type PayableAccount,
+  type ListBalancesResult,
+  type InitTransferState,
+  type PayByWalletState,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -28,65 +40,6 @@ export async function resolveWalletAccountUuid(
     return null;
   }
 }
-
-// ---------------------------------------------------------------------------
-// Schemas
-// ---------------------------------------------------------------------------
-
-export const listBalancesSchema = z.object({
-  page: z.coerce.number().int().positive().optional().default(1),
-  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
-});
-
-export const getBalanceSchema = z.object({
-  accountUuid: z.string().min(1, "Account UUID is required"),
-});
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export type ListBalancesParams = z.input<typeof listBalancesSchema>;
-export type GetBalanceParams = z.input<typeof getBalanceSchema>;
-
-/** A single balance transaction row from the wallet database. */
-export type BalanceTransaction = {
-  balance_transaction_uuid: string;
-  account_uuid: string;
-  amount: number;
-  balance: number;
-  data: string | null;
-  created_at: Date | null;
-  transaction_datetime: Date | null;
-  currency_code: string | null;
-};
-
-/** Current user's payable account summary. */
-export type PayableAccount = {
-  balance_account_uuid: string;
-  account_uuid: string;
-  balance: number;
-  type: string;
-};
-
-export type ListBalancesResult = {
-  account: PayableAccount | null;
-  transactions: BalanceTransaction[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
-
-export type InitTransferState = {
-  success: boolean;
-  error?: string;
-};
-
-export type PayByWalletState = {
-  success: boolean;
-  error?: string;
-};
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -377,16 +330,6 @@ export async function initTransfer(
 // ---------------------------------------------------------------------------
 // payByWallet — P2P wallet payment
 // ---------------------------------------------------------------------------
-
-export const payByWalletSchema = z.object({
-  toUuid: z.string().optional(),
-  email: z.string().email("Invalid email format").optional(),
-  username: z.string().optional(),
-  amount: z.coerce
-    .number()
-    .positive("Amount must be positive")
-    .finite("Amount must be a finite number"),
-});
 
 /**
  * Pay another user from the candidate's wallet balance.

@@ -5,6 +5,12 @@ import { z } from "zod";
 import { S3Client, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { requireCapability } from "@/modules/auth/session";
+import {
+  getPresignedUploadUrlSchema,
+  getPresignedDownloadUrlSchema,
+  type PresignedUploadResult,
+  type PresignedDownloadResult,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Environment config
@@ -27,50 +33,6 @@ function getS3Client(): S3Client {
 
 const UPLOAD_URL_EXPIRES_IN = 300; // 5 minutes
 const DOWNLOAD_URL_EXPIRES_IN = 900; // 15 minutes
-
-// ---------------------------------------------------------------------------
-// Zod schemas
-// ---------------------------------------------------------------------------
-
-export const getPresignedUploadUrlSchema = z.object({
-  fileName: z
-    .string({ required_error: "File name is required" })
-    .min(1, "File name is required")
-    .max(255, "File name must be 255 characters or less")
-    .regex(/^[^/\\]+\.\w+$/, "File name must have an extension and no path separators")
-    .refine((v) => !v.includes(".."), "File name must not contain path traversal"),
-  contentType: z
-    .string({ required_error: "Content type is required" })
-    .min(1, "Content type is required"),
-});
-
-export const getPresignedDownloadUrlSchema = z.object({
-  key: z
-    .string({ required_error: "S3 key is required" })
-    .min(1, "S3 key is required")
-    .refine((v) => !v.includes(".."), "Key must not contain path traversal")
-    .refine((v) => v.length > 1 && !/^\/+$/.test(v), "Key must not be only slashes"),
-});
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export type PresignedUploadResult = {
-  uploadUrl: string;
-  key: string;
-  bucket: string;
-  region: string;
-};
-
-export type PresignedDownloadResult = {
-  downloadUrl: string;
-  key: string;
-};
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
 
 function configAvailable(): string | null {
   if (!process.env.AWS_TEMP_BUCKET_REGION) return "AWS_TEMP_BUCKET_REGION is not configured";
