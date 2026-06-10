@@ -8,11 +8,8 @@ import { getNotificationTypeLabel } from "@/modules/notifications/utils";
 import {
   getCandidateNotificationRowsSchema,
   getCandidateNotificationDetailSchema,
+  dismissNotificationSchema,
 } from "./schemas";
-
-export const dismissNotificationSchema = z.object({
-  notificationUuid: z.string().min(1, "Notification UUID is required"),
-});
 
 // ---------------------------------------------------------------------------
 // Types

@@ -8,6 +8,9 @@
 // Actions:
 //   - listStores   — paginated list of all stores with filters (name, status)
 //   - getStore     — single store detail with contact info, company, brand, mall
+//   - createStore  — create a new store
+//   - updateStore  — update an existing store with partial fields
+//   - deleteStore  — soft-delete a store by marking deleted=1
 //
 // Status: store_status is an Int (SmallInt) where 10 = active, 0 = inactive.
 // Filter accepts 'active'/'inactive' strings and converts accordingly.
@@ -19,10 +22,17 @@ import { requireCapability } from "@/modules/auth/session";
 import {
   listStoresSchema,
   getStoreSchema,
+  createStoreSchema,
+  updateStoreSchema,
+  deleteStoreSchema,
   type ListStoresInput,
   type GetStoreInput,
+  type CreateStoreInput,
+  type UpdateStoreInput,
+  type DeleteStoreInput,
   type StoreRow,
   type StoreDetail,
+  type StoreActionResult,
   type ListStoresResult,
 } from "./schemas";
 
@@ -152,4 +162,122 @@ export async function getStore(
         : null,
     },
   };
+}
+
+// ---------------------------------------------------------------------------
+// createStore
+// ---------------------------------------------------------------------------
+
+/**
+ * Create a new store with the given details.
+ */
+export async function createStore(
+  input: CreateStoreInput,
+): Promise<StoreActionResult> {
+  await requireCapability("admin.write");
+
+  const parsed = createStoreSchema.safeParse(input);
+  if (!parsed.success) {
+    return { success: false, error: parsed.error.issues[0]?.message ?? "Invalid input" };
+  }
+
+  try {
+    const { company_id, store_manager_uuid, brand_uuid, mall_uuid, ...rest } = parsed.data;
+    const store = await prisma.store.create({
+      data: {
+        ...rest,
+        store_status: 10,
+        store_created_at: new Date(),
+        store_updated_at: new Date(),
+        ...(company_id !== undefined ? { company_id } : {}),
+        ...(store_manager_uuid !== undefined ? { store_manager_uuid } : {}),
+        ...(brand_uuid !== undefined ? { brand_uuid } : {}),
+        ...(mall_uuid !== undefined ? { mall_uuid } : {}),
+      },
+    });
+
+    revalidatePath("/admin/stores");
+    return { success: true, storeId: store.store_id };
+  } catch (err) {
+    return { success: false, error: err instanceof Error ? err.message : "Failed to create store" };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// updateStore
+// ---------------------------------------------------------------------------
+
+/**
+ * Update an existing store. Only provided fields are updated.
+ */
+export async function updateStore(
+  input: UpdateStoreInput,
+): Promise<StoreActionResult> {
+  await requireCapability("admin.write");
+
+  const parsed = updateStoreSchema.safeParse(input);
+  if (!parsed.success) {
+    return { success: false, error: parsed.error.issues[0]?.message ?? "Invalid input" };
+  }
+
+  const { storeId, ...fields } = parsed.data;
+
+  const existing = await prisma.store.findUnique({ where: { store_id: storeId } });
+  if (!existing) {
+    return { success: false, error: "Store not found" };
+  }
+
+  try {
+    const updateData: Record<string, unknown> = { store_updated_at: new Date() };
+    for (const [key, value] of Object.entries(fields)) {
+      if (value !== undefined) {
+        updateData[key] = value;
+      }
+    }
+
+    await prisma.store.update({
+      where: { store_id: storeId },
+      data: updateData as any,
+    });
+
+    revalidatePath("/admin/stores");
+    return { success: true, storeId };
+  } catch (err) {
+    return { success: false, error: err instanceof Error ? err.message : "Failed to update store" };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// deleteStore
+// ---------------------------------------------------------------------------
+
+/**
+ * Soft-delete a store by marking it as deleted.
+ */
+export async function deleteStore(
+  input: DeleteStoreInput,
+): Promise<StoreActionResult> {
+  await requireCapability("admin.write");
+
+  const parsed = deleteStoreSchema.safeParse(input);
+  if (!parsed.success) {
+    return { success: false, error: parsed.error.issues[0]?.message ?? "Invalid input" };
+  }
+
+  const existing = await prisma.store.findUnique({ where: { store_id: parsed.data.storeId } });
+  if (!existing) {
+    return { success: false, error: "Store not found" };
+  }
+
+  try {
+    await prisma.store.update({
+      where: { store_id: parsed.data.storeId },
+      data: { deleted: 1, store_updated_at: new Date() },
+    });
+
+    revalidatePath("/admin/stores");
+    return { success: true };
+  } catch (err) {
+    return { success: false, error: err instanceof Error ? err.message : "Failed to delete store" };
+  }
 }
