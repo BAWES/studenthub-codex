@@ -14,7 +14,7 @@ function ShimmerBlock({ className = "" }: { className?: string }) {
 /** Full-page skeleton matching the WorkspaceShell layout for route transitions. */
 export function WorkspaceShellSkeleton({ rowCount = 8 }: { rowCount?: number }) {
   return (
-    <main className="shell shellEmbedded">
+    <div className="shell shellEmbedded">
       <section className="workspaceStage">
         {/* Topbar */}
         <section className="topbar">
@@ -71,7 +71,7 @@ export function WorkspaceShellSkeleton({ rowCount = 8 }: { rowCount?: number }) 
           ))}
         </section>
       </section>
-    </main>
+    </div>
   );
 }
 
