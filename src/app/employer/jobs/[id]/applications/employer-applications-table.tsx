@@ -14,7 +14,7 @@ type Props = {
 export function EmployerApplicationsTable({ applications, total, jobTitle }: Props) {
   const rows = applications.map((a) => ({
     ...a,
-    id: `app-${a.id}`,
+    id: `app-${a.applicationId}`,
     createdAtStr: a.createdAt.toISOString().slice(0, 10),
   }));
 
