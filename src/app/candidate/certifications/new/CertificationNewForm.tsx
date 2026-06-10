@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { createCandidateCertification } from "../actions";
-import type { CertificationActionResult } from "../actions";
+import { createCertification } from "./actions";
+import type { CertificationActionResult } from "./actions";
 
 export function CertificationNewForm() {
   const router = useRouter();
@@ -23,7 +23,7 @@ export function CertificationNewForm() {
     setError(null);
     setSubmitting(true);
 
-    const result: CertificationActionResult = await createCandidateCertification({
+    const result: CertificationActionResult = await createCertification({
       certificationName,
       issuingOrganization,
       issueDate: issueDate || undefined,
