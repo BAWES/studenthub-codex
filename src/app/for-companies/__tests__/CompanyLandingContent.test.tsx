@@ -54,6 +54,9 @@ vi.mock("lucide-react", () => ({
   UsersRound: () => <span data-testid="icon-users-round" />,
   X: () => <span data-testid="icon-x" />,
   Zap: () => <span data-testid="icon-zap" />,
+  Briefcase: () => <span data-testid="icon-briefcase" />,
+  ArrowDown: () => <span data-testid="icon-arrow-down" />,
+  GraduationCap: () => <span data-testid="icon-graduation-cap" />,
 }));
 
 // ── Mock ThemeToggle ──────────────────────────────────────────
@@ -73,11 +76,11 @@ import type { CompanyLandingContentProps } from "../CompanyLandingContent";
 describe("Company landing page (/for-companies)", () => {
   const defaultProps: CompanyLandingContentProps = { session: null };
 
-  it("renders the hero section with company headline", () => {
+  it("renders the hero section with two-sided marketplace headline", () => {
     render(<CompanyLandingContent {...defaultProps} />);
-    // HeroSection renders h1 with persona-specific content
+    // HeroSection renders h1 with marketplace messaging
     expect(
-      screen.getByRole("heading", { level: 1, name: /hire qualified staff/i })
+      screen.getByRole("heading", { level: 1, name: /connecting students/i })
     ).toBeInTheDocument();
   });
 

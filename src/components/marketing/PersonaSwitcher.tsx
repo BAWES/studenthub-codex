@@ -1,16 +1,11 @@
 "use client";
 
-import { Sparkles, UserRound, Building2, ShieldCheck, ClipboardCheck, UsersRound } from "lucide-react";
+import { Sparkles, UserRound, Building2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 // ── Types ────────────────────────────────────────────────
 
-export type SwitcherPersona =
-  | "candidate"
-  | "company"
-  | "staff"
-  | "admin"
-  | "inspector";
+export type SwitcherPersona = "candidate" | "company";
 
 export interface PersonaSwitcherProps {
   active: SwitcherPersona;
@@ -39,24 +34,6 @@ const personas: PersonaDef[] = [
     label: "Company",
     subtitle: "Hire and manage teams",
     icon: Building2,
-  },
-  {
-    id: "staff",
-    label: "Staff",
-    subtitle: "Place people faster",
-    icon: UsersRound,
-  },
-  {
-    id: "admin",
-    label: "Admin",
-    subtitle: "Compliance & ops",
-    icon: ShieldCheck,
-  },
-  {
-    id: "inspector",
-    label: "Inspector",
-    subtitle: "Review & certify",
-    icon: ClipboardCheck,
   },
 ];
 
@@ -146,6 +123,15 @@ export default function PersonaSwitcher({
           </button>
         );
       })}
+
+      {/* Internal roles note */}
+      <span
+        className="hidden sm:inline-flex items-center gap-1.5 px-3 py-2.5 text-xs"
+        style={{ color: "var(--muted)" }}
+      >
+        <span className="size-1 rounded-full" style={{ background: "var(--sh-glass-border)" }} />
+        Staff · Admin · Inspector
+      </span>
     </div>
   );
 }

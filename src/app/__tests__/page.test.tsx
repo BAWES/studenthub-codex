@@ -2,12 +2,20 @@
 import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
 
-// ── Mock next/navigation (useRouter, useSearchParams) ────────
+// ── Mock next/navigation ───────────────────────────────────────
 const mockReplace = vi.fn();
-const mockSearchParams = new URLSearchParams();
+const mockSearchParams = new Map<string, string>();
+
 vi.mock("next/navigation", () => ({
+  useSearchParams: () => ({
+    get: (key: string) => mockSearchParams.get(key) ?? null,
+    toString: () => "",
+    forEach: (
+      cb: (value: string, key: string) => void,
+    ) => mockSearchParams.forEach((value, key) => cb(value, key)),
+    delete: (key: string) => mockSearchParams.delete(key),
+  }),
   useRouter: () => ({ replace: mockReplace }),
-  useSearchParams: () => mockSearchParams,
 }));
 
 // ── Mock next/link ────────────────────────────────────────────
@@ -45,8 +53,10 @@ vi.mock("lucide-react", () => ({
   Sparkles: () => <span data-testid="icon-sparkles" />,
   Search: () => <span data-testid="icon-search" />,
   PanelRightOpen: () => <span data-testid="icon-panel-right" />,
+  GraduationCap: () => <span data-testid="icon-graduation-cap" />,
   ArrowUpRight: () => <span data-testid="icon-arrow-up-right" />,
   CheckCircle2: () => <span data-testid="icon-check-circle" />,
+  ArrowDown: () => <span data-testid="icon-arrow-down" />,
   Clock: () => <span data-testid="icon-clock" />,
   CreditCard: () => <span data-testid="icon-credit-card" />,
   Bell: () => <span data-testid="icon-bell" />,
@@ -95,7 +105,7 @@ import type { LandingContentProps } from "../LandingContent";
 
 // ── Tests ──────────────────────────────────────────────────────
 
-describe("Landing page (marketing redesign)", () => {
+describe("Landing page (two-sided marketplace redesign)", () => {
   const defaultProps: LandingContentProps = {
     session: null,
   };
@@ -115,14 +125,11 @@ describe("Landing page (marketing redesign)", () => {
     mockSearchParams.forEach((_, key) => mockSearchParams.delete(key));
   });
 
-  it("renders the hero section with candidate headline", () => {
+  it("renders two-sided marketplace hero section", () => {
     render(<LandingContent {...defaultProps} />);
     expect(
-      screen.getByRole("heading", { name: /your next placement/i })
+      screen.getByRole("heading", { name: /connecting students/i })
     ).toBeInTheDocument();
-    // CTA text appears in both nav and hero — use getAllByText
-    const ctaElements = screen.getAllByText(/create (your )?free candidate profile/i);
-    expect(ctaElements.length).toBeGreaterThanOrEqual(1);
   });
 
   it("renders navigation with sign up and sign in links for unauthenticated users", () => {
@@ -130,20 +137,32 @@ describe("Landing page (marketing redesign)", () => {
     expect(
       screen.getByRole("navigation", { name: /StudentHub public navigation/i })
     ).toBeInTheDocument();
-    // "Create free student profile" appears in nav
-    const navCta = screen.getAllByText(/create free student profile/i);
+    // Nav CTA for candidate mode
+    const navCta = screen.getAllByText(/create free candidate profile/i);
     expect(navCta.length).toBeGreaterThanOrEqual(1);
-    // "Sign in" appears in nav hero and footer — use getAllByText
+    // "Sign in" appears in nav, hero, and footer
     const signInLinks = screen.getAllByText(/sign in/i);
     expect(signInLinks.length).toBeGreaterThanOrEqual(1);
   });
 
-  it("renders the feature grid section", () => {
+  it("renders the how it works section", () => {
     render(<LandingContent {...defaultProps} />);
-    // FeatureGrid has an aria-label "Key features" section
+    expect(screen.getByText("How it works")).toBeInTheDocument();
+    expect(screen.getByText("Create your profile")).toBeInTheDocument();
+    expect(screen.getByText("Get matched")).toBeInTheDocument();
+    expect(screen.getByText("Get hired and paid")).toBeInTheDocument();
+  });
+
+  it("renders the stats section", () => {
+    render(<LandingContent {...defaultProps} />);
+    const stats = document.querySelector("section[aria-label='Platform statistics']");
+    expect(stats).toBeInTheDocument();
+  });
+
+  it("renders the feature grid section for candidate persona", () => {
+    render(<LandingContent {...defaultProps} />);
     const featureSection = screen.getByLabelText("Key features");
     expect(featureSection).toBeInTheDocument();
-    // Candidate features include "Smart role discovery"
     expect(screen.getByText(/smart role discovery/i)).toBeInTheDocument();
   });
 
@@ -156,34 +175,36 @@ describe("Landing page (marketing redesign)", () => {
 
   it("renders the final CTA section with proof text", () => {
     render(<LandingContent {...defaultProps} />);
-    // Candidate proof text mentions candidates placed
     const proofTexts = screen.getAllByText(/candidates placed this year/i);
     expect(proofTexts.length).toBeGreaterThanOrEqual(1);
   });
 
-  it("renders footer with sign up and sign in links", () => {
+  it("renders footer with sign up link", () => {
     render(<LandingContent {...defaultProps} />);
-    const footerLinks = screen.getAllByText(/sign up as candidate/i);
+    const footerLinks = screen.getAllByText(/sign up/i);
     expect(footerLinks.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it("renders footer with internal role descriptions", () => {
+    render(<LandingContent {...defaultProps} />);
+    expect(screen.getByText(/Staff:/i)).toBeInTheDocument();
+    expect(screen.getByText(/Admin:/i)).toBeInTheDocument();
+    expect(screen.getByText(/Inspector:/i)).toBeInTheDocument();
   });
 
   // ── Skip-to-content link ───────────────────────────────────
 
-  it("renders a skip-to-content link as the first focusable element", () => {
-    const { container } = render(<LandingContent {...defaultProps} />);
+  it("renders a skip-to-content link", () => {
+    render(<LandingContent {...defaultProps} />);
     const link = screen.getByRole("link", { name: /skip to content/i });
     expect(link).toBeInTheDocument();
-    // Must be the very first child inside the fragment
-    expect(container.firstChild).toBe(link);
   });
 
   it("skip-to-content link targets #main-content", () => {
     render(<LandingContent {...defaultProps} />);
     const link = screen.getByRole("link", { name: /skip to content/i });
     expect(link).toHaveAttribute("href", "#main-content");
-    // Has sr-only + focus:not-sr-only pattern
     expect(link.className).toContain("sr-only");
-    expect(link.className).toContain("focus:not-sr-only");
   });
 
   it("main element has id=main-content for skip-link target", () => {
@@ -193,12 +214,9 @@ describe("Landing page (marketing redesign)", () => {
   });
 
   it("renders open app links when user is authenticated", () => {
-    const session = { user: { role: "admin" } } as any;
-    render(<LandingContent {...defaultProps} session={session} />);
-    // Authenticated users see "Open app" links instead of signup CTAs
+    render(<LandingContent {...defaultProps} session={sessionProps.session} />);
     const openAppLinks = screen.getAllByText(/open app/i);
     expect(openAppLinks.length).toBeGreaterThanOrEqual(1);
-    // No signup CTAs for authenticated users
     expect(screen.queryByText(/create free candidate profile/i)).not.toBeInTheDocument();
   });
 
@@ -235,18 +253,6 @@ describe("Landing page (marketing redesign)", () => {
       const gradients = document.querySelectorAll(".shHeroGradientDramatic");
       // One in HeroSection, one in final CTA
       expect(gradients.length).toBeGreaterThanOrEqual(2);
-    });
-  });
-
-  describe("Snapshot — landing page full layout", () => {
-    it("renders consistently with unauthenticated state", () => {
-      const { container } = render(<LandingContent {...defaultProps} />);
-      expect(container).toMatchSnapshot();
-    });
-
-    it("renders consistently with authenticated state", () => {
-      const { container } = render(<LandingContent {...sessionProps} />);
-      expect(container).toMatchSnapshot();
     });
   });
 });

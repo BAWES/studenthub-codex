@@ -8,8 +8,10 @@ import { ThemeToggle } from "@/modules/theme/ThemeToggle";
 import { HeroSection } from "@/components/marketing";
 import { FeatureGrid } from "@/components/marketing";
 import { TestimonialCarousel } from "@/components/marketing";
-import { PricingCard } from "@/components/marketing";
 import { ComparisonTable } from "@/components/marketing";
+import { HowItWorks } from "@/components/marketing";
+import { EmployerSection } from "@/components/marketing";
+import { StatsSection } from "@/components/marketing";
 import { PersonaSwitcher } from "@/components/marketing";
 import type { SwitcherPersona } from "@/components/marketing";
 
@@ -24,88 +26,6 @@ export interface LandingContentProps {
   } | null;
 }
 
-// ── Valid personas ────────────────────────────────────────────
-
-const VALID_PERSONAS: SwitcherPersona[] = [
-  "candidate",
-  "company",
-  "staff",
-  "admin",
-  "inspector",
-];
-
-function parsePersona(raw: string | null): SwitcherPersona {
-  if (raw && VALID_PERSONAS.includes(raw as SwitcherPersona)) {
-    return raw as SwitcherPersona;
-  }
-  return "candidate";
-}
-
-// ── Persona → signup role mapping ─────────────────────────────
-
-const signupRoles: Record<SwitcherPersona, string> = {
-  candidate: "candidate",
-  company: "company",
-  staff: "staff",
-  admin: "admin",
-  inspector: "inspector",
-};
-
-// ── Nav CTA copy ──────────────────────────────────────────────
-
-const navCtaLabel: Record<SwitcherPersona, string> = {
-  candidate: "Create free student profile",
-  company: "Partner with us",
-  staff: "Request staff access",
-  admin: "Request admin access",
-  inspector: "Request inspector access",
-};
-
-const finalCtaEyebrow: Record<SwitcherPersona, string> = {
-  candidate: "Start building your career",
-  company: "Start your partnership",
-  staff: "Start orchestrating",
-  admin: "Take control of operations",
-  inspector: "Start inspecting today",
-};
-
-const finalCtaTitle: Record<SwitcherPersona, string> = {
-  candidate: "Your future CV starts today.",
-  company: "Workforce management, handled.",
-  staff: "Your next rotation is one click away.",
-  admin: "Your next dashboard is one login away.",
-  inspector: "Your next verification is one scan away.",
-};
-
-const finalCtaBody: Record<SwitcherPersona, string> = {
-  candidate:
-    "Create your free profile in under 3 minutes. StudentHub matches you with paid placements across different companies. Rotate every ~3 months, build experience across multiple roles, and graduate way ahead of your peers. Free, always.",
-  company:
-    "Get matched with qualified student workers in under 48 hours. StudentHub manages placement, compliance, payroll, and rotations — one partner, one invoice. Hourly rates and monthly plans available.",
-  staff:
-    "Manage students, placements, rotations, and compliance from one dashboard. Access the full operations toolkit from day one. No setup fee, no minimum commitment.",
-  admin:
-    "Get full visibility across users, finances, compliance, and payroll. One workspace replaces a dozen logins.",
-  inspector:
-    "Authenticate once and instantly verify any StudentHub worker by scanning their QR ID card. No onboarding, no paperwork — just scan and validate.",
-};
-
-const finalCtaButton: Record<SwitcherPersona, string> = {
-  candidate: "Create your free student profile",
-  company: "Partner with StudentHub",
-  staff: "Get staff access",
-  admin: "Get admin access",
-  inspector: "Get inspector access",
-};
-
-const finalCtaProof: Record<SwitcherPersona, string> = {
-  candidate: "1,200+ students placed this year · 4.8★ satisfaction",
-  company: "200+ companies on StudentHub · 100% audit pass rate",
-  staff: "350+ active rotations · 99.7% compliance pass rate",
-  admin: "15,000+ worker records managed · 99.7% audit pass rate",
-  inspector: "10,000+ verifications monthly · Zero-day onboarding",
-};
-
 // ── Component ─────────────────────────────────────────────────
 
 export default function LandingContent({ session }: LandingContentProps) {
@@ -113,13 +33,17 @@ export default function LandingContent({ session }: LandingContentProps) {
   const router = useRouter();
   const [persona, setPersona] = useState<SwitcherPersona>("candidate");
 
-  // Sync persona from URL on mount and on change
+  // Sync persona from URL on mount
   useEffect(() => {
     const raw = searchParams.get("persona");
-    setPersona(parsePersona(raw));
+    if (raw === "company") {
+      setPersona("company");
+    } else {
+      setPersona("candidate");
+    }
   }, [searchParams]);
 
-  // When persona changes, update the URL
+  // When persona changes, update URL
   const handlePersonaChange = useCallback(
     (newPersona: SwitcherPersona) => {
       const params = new URLSearchParams(searchParams.toString());
@@ -134,20 +58,23 @@ export default function LandingContent({ session }: LandingContentProps) {
     [router, searchParams],
   );
 
-  const role = signupRoles[persona];
   const isLoggedIn = Boolean(session);
+  const role = persona === "company" ? "company" : "candidate";
 
   return (
     <>
+      {/* ── Skip-to-content link ── */}
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded focus:bg-background focus:px-3 focus:py-2 focus:text-sm focus:font-semibold focus:text-foreground focus:shadow-lg focus:outline-none"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:px-4 focus:py-2 focus:rounded-lg focus:bg-[var(--ink)] focus:text-[var(--paper)] focus:no-underline focus:text-sm focus:font-semibold"
+        style={{ color: "var(--paper)" }}
       >
         Skip to content
       </a>
       <main
+        className="min-h-svh w-[min(1320px,calc(100%_-_28px))] mx-auto grid content-start gap-6 pt-[18px] pb-[42px] max-sm:w-[min(calc(100%_-_20px),720px)]"
         id="main-content"
-        className="min-h-svh w-[min(1320px,calc(100%_-_28px))] mx-auto grid content-start gap-6 pt-[18px] pb-[42px] max-sm:w-[min(calc(100%_-_20px),720px)]">
+      >
       {/* ── Glass Navigation ── */}
       <nav className="shGlassNav" aria-label="StudentHub public navigation">
         <div className="shGlassNavInner">
@@ -174,7 +101,8 @@ export default function LandingContent({ session }: LandingContentProps) {
                   href={`/signup?role=${role}`}
                   className="uiButton uiButton_default uiButton_defaultSize"
                 >
-                  {navCtaLabel[persona]} <Sparkles className="size-3.5" />
+                  {persona === "company" ? "Set up company account" : "Create free candidate profile"}{" "}
+                  <Sparkles className="size-3.5" />
                 </Link>
                 <Link
                   href="/login"
@@ -190,24 +118,42 @@ export default function LandingContent({ session }: LandingContentProps) {
       </nav>
 
       {/* ── Persona switcher — pick your role ── */}
-      <PersonaSwitcher active={persona} onChange={handlePersonaChange} />
+      <div className="flex flex-col items-center gap-1.5">
+        <PersonaSwitcher active={persona} onChange={handlePersonaChange} />
+        <p className="text-[11px]" style={{ color: "var(--muted)" }}>
+          {persona === "candidate"
+            ? "I'm a student looking for work"
+            : "I'm an employer hiring talent"}
+        </p>
+      </div>
 
-      {/* ── Hero section — persona-specific ── */}
-      <HeroSection persona={persona} />
+      {/* ── Hero section — two-sided marketplace ── */}
+      <HeroSection />
+
+      {/* ── Stats — social proof counters ── */}
+      <StatsSection />
+
+      {/* ── How It Works — 3-step flow ── */}
+      <HowItWorks />
 
       {/* ── Feature grid — persona-specific ── */}
-      <FeatureGrid persona={persona} />
+      {persona === "company" ? (
+        <EmployerSection />
+      ) : (
+        <FeatureGrid persona="candidate" />
+      )}
 
-      {/* ── Social proof — persona-specific testimonials ── */}
-      <TestimonialCarousel persona={persona} />
+      {/* ── Social proof — testimonials ── */}
+      {persona === "company" ? (
+        <TestimonialCarousel persona="company" />
+      ) : (
+        <TestimonialCarousel persona="candidate" />
+      )}
 
       {/* ── Comparison table — persona-specific ── */}
       <ComparisonTable persona={persona} />
 
-      {/* ── Pricing — persona-specific ── */}
-      <PricingCard persona={persona} />
-
-      {/* ── Final CTA section — persona-aware ── */}
+      {/* ── Final CTA section ── */}
       <section
         className="shSection relative overflow-hidden rounded-xl p-[clamp(24px,5vw,60px)] text-center"
         style={{
@@ -220,18 +166,52 @@ export default function LandingContent({ session }: LandingContentProps) {
         <div className="shHeroGradientDramatic" aria-hidden="true" />
 
         <div className="relative z-[2] max-w-[640px] mx-auto">
-          <p className="text-[var(--sh-info)] text-[11px] font-black uppercase tracking-wider mb-2">
-            {finalCtaEyebrow[persona]}
-          </p>
-          <h2 className="shBenefitsTitle text-center">
-            {finalCtaTitle[persona]}
-          </h2>
-          <p
-            className="max-w-[480px] mx-auto mt-2 mb-6 leading-relaxed"
-            style={{ color: "var(--muted)" }}
-          >
-            {finalCtaBody[persona]}
-          </p>
+          {persona === "company" ? (
+            <>
+              <p className="text-[var(--sh-info)] text-[11px] font-black uppercase tracking-wider mb-2">
+                Start hiring today
+              </p>
+              <h2 className="shBenefitsTitle text-center">
+                Your next hire is one post away.
+              </h2>
+              <p
+                className="max-w-[480px] mx-auto mt-2 mb-6 leading-relaxed"
+                style={{ color: "var(--muted)" }}
+              >
+                Post your first opening and get matched candidates within 48
+                hours. Set up your company account in under 5 minutes.
+              </p>
+              <p
+                className="text-xs mb-4"
+                style={{ color: "var(--muted)" }}
+              >
+                200+ employers hiring · 3-day avg time-to-shortlist
+              </p>
+            </>
+          ) : (
+            <>
+              <p className="text-[var(--sh-info)] text-[11px] font-black uppercase tracking-wider mb-2">
+                Start your placement journey
+              </p>
+              <h2 className="shBenefitsTitle text-center">
+                Your next role is one profile away.
+              </h2>
+              <p
+                className="max-w-[480px] mx-auto mt-2 mb-6 leading-relaxed"
+                style={{ color: "var(--muted)" }}
+              >
+                Create your free profile in under 3 minutes. No CV required —
+                just your experience and what you&apos;re looking for.
+                Employers are hiring right now.
+              </p>
+              <p
+                className="text-xs mb-4"
+                style={{ color: "var(--muted)" }}
+              >
+                1,200+ candidates placed this year · 4.8★ satisfaction
+              </p>
+            </>
+          )}
           {isLoggedIn ? (
             <Link
               href="/app"
@@ -244,43 +224,113 @@ export default function LandingContent({ session }: LandingContentProps) {
               href={`/signup?role=${role}`}
               className="uiButton uiButton_default uiButton_lg shGlowButton"
             >
-              {finalCtaButton[persona]} <ChevronRight className="size-4" />
+              {persona === "company"
+                ? "Set up your company account"
+                : "Create your free candidate profile"}{" "}
+              <ChevronRight className="size-4" />
             </Link>
           )}
-          <div
-            className="flex items-center justify-center gap-4 mt-4 text-xs"
-            style={{ color: "var(--muted)" }}
-          >
-            {finalCtaProof[persona].split("·").map((part, i) => (
-              <span key={i}>
-                {part.trim()}
-              </span>
-            ))}
-          </div>
         </div>
       </section>
 
-      {/* ── Footer ── */}
+      {/* ── Footer with internal role descriptions ── */}
       <footer
-        className="shSection flex items-center justify-between pt-4 pb-2 text-xs"
+        className="shSection pt-6 pb-4 text-xs"
         style={{ color: "var(--muted)" }}
       >
-        <span>&copy; {new Date().getFullYear()} StudentHub. All rights reserved.</span>
-        <div className="flex items-center gap-4">
-          <Link
-            href="/login"
-            className="hover:text-[var(--ink)] transition-colors no-underline"
-            style={{ color: "inherit" }}
-          >
-            Sign in
-          </Link>
-          <Link
-            href={`/signup?role=${role}`}
-            className="hover:text-[var(--ink)] transition-colors no-underline"
-            style={{ color: "inherit" }}
-          >
-            Sign up as {persona}
-          </Link>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+          {/* Brand */}
+          <div>
+            <strong className="block text-sm mb-2" style={{ color: "var(--ink)" }}>
+              StudentHub
+            </strong>
+            <p className="leading-relaxed">
+              Connecting students with the right employers. A two-sided
+              marketplace for the real world of work.
+            </p>
+          </div>
+
+          {/* Students */}
+          <div>
+            <strong className="block text-sm mb-2" style={{ color: "var(--ink)" }}>
+              For students
+            </strong>
+            <ul className="list-none p-0 m-0 space-y-1">
+              <li>
+                <Link href="/signup?role=candidate" className="hover:text-[var(--ink)] transition-colors no-underline" style={{ color: "inherit" }}>
+                  Create free profile
+                </Link>
+              </li>
+              <li>
+                <Link href="/login" className="hover:text-[var(--ink)] transition-colors no-underline" style={{ color: "inherit" }}>
+                  Sign in
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Employers */}
+          <div>
+            <strong className="block text-sm mb-2" style={{ color: "var(--ink)" }}>
+              For employers
+            </strong>
+            <ul className="list-none p-0 m-0 space-y-1">
+              <li>
+                <Link href="/signup?role=company" className="hover:text-[var(--ink)] transition-colors no-underline" style={{ color: "inherit" }}>
+                  Set up company account
+                </Link>
+              </li>
+              <li>
+                <Link href="/login" className="hover:text-[var(--ink)] transition-colors no-underline" style={{ color: "inherit" }}>
+                  Sign in
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Internal roles */}
+          <div>
+            <strong className="block text-sm mb-2" style={{ color: "var(--ink)" }}>
+              Platform roles
+            </strong>
+            <ul className="list-none p-0 m-0 space-y-1.5">
+              <li className="leading-relaxed">
+                <span className="font-semibold" style={{ color: "var(--ink)" }}>Staff:</span>{" "}
+                Tools for agencies placing candidates faster.
+              </li>
+              <li className="leading-relaxed">
+                <span className="font-semibold" style={{ color: "var(--ink)" }}>Admin:</span>{" "}
+                Compliance and operations management.
+              </li>
+              <li className="leading-relaxed">
+                <span className="font-semibold" style={{ color: "var(--ink)" }}>Inspector:</span>{" "}
+                Review and certification workflows.
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div
+          className="flex items-center justify-between pt-4"
+          style={{ borderTop: "1px solid var(--sh-glass-border)" }}
+        >
+          <span>&copy; {new Date().getFullYear()} StudentHub. All rights reserved.</span>
+          <div className="flex items-center gap-4">
+            <Link
+              href="/login"
+              className="hover:text-[var(--ink)] transition-colors no-underline"
+              style={{ color: "inherit" }}
+            >
+              Sign in
+            </Link>
+            <Link
+              href={`/signup?role=${role}`}
+              className="hover:text-[var(--ink)] transition-colors no-underline"
+              style={{ color: "inherit" }}
+            >
+              Sign up
+            </Link>
+          </div>
         </div>
       </footer>
     </main>
