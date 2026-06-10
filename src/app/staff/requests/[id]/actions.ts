@@ -1,6 +1,6 @@
 "use server";
 
-import { getRequestDetail as _getRequestDetail } from "@/modules/workspace/data/shared";
+import { getRequestDetail as _getRequestDetail } from "@/modules/workspace/request-detail-core";
 import { requireRoleCapability } from "@/modules/auth/session";
 import { z } from "zod";
 import {

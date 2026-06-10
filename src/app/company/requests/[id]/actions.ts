@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireRoleCapability } from "@/modules/auth/session";
-import { getRequestDetail as _getRequestDetail } from "@/modules/workspace/data/shared";
+import { getRequestDetail as _getRequestDetail } from "@/modules/workspace/request-detail-core";
 import {
   updateRequestStatusSchema,
   deleteRequestSchema,
