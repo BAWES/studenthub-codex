@@ -3,7 +3,7 @@ import { requireRoleCapability } from "@/modules/auth/session";
 import { DataTable } from "@/modules/workspace/DataTable";
 import { StatusBadge } from "@/modules/workspace/StatusBadge";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
-import { getCandidateNotificationRows } from "@/modules/workspace/data";
+import { getCandidateNotificationRows } from "./actions";
 
 export const dynamic = "force-dynamic";
 
