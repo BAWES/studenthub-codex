@@ -2,13 +2,29 @@ import type { Route } from "next";
 import { requireRoleCapability } from "@/modules/auth/session";
 import { DataTable } from "@/modules/workspace/DataTable";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
-import { getCandidateWorkingDateRows } from "@/modules/workspace/data";
+import { formatDate } from "@/modules/workspace/format";
+import { workingDateStatusLabel } from "@/modules/workspace/data";
+import { listSchedule } from "./actions";
 
 export const dynamic = "force-dynamic";
 
+const MAX_SCHEDULE_ROWS = 80;
+
 export default async function CandidateSchedulePage() {
   const session = await requireRoleCapability("candidate", "candidate.read.own");
-  const rows = await getCandidateWorkingDateRows(Number(session.id));
+  const items = await listSchedule({ limit: MAX_SCHEDULE_ROWS });
+
+  // Map ScheduleItem → DataTable row shape
+  const rows = items.map((item) => ({
+    id: item.cwd_uuid,
+    date: formatDate(item.date),
+    store: item.store_name ?? "No store",
+    company: item.company_name ?? "No company",
+    startTime: formatDate(item.start_time),
+    endTime: formatDate(item.end_time),
+    totalTime: item.total_time != null ? `${item.total_time} min` : "—",
+    status: workingDateStatusLabel(item.status),
+  }));
 
   return (
     <WorkspaceShell session={session} eyebrow="Candidate" title="Work Schedule" metrics={[]}>
