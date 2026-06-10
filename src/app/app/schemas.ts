@@ -1,10 +1,9 @@
 import { z } from "zod";
+import { HUB_SCOPES } from "./utils";
 
 // ---------------------------------------------------------------------------
 // Hub workspace — Zod schemas
 // ---------------------------------------------------------------------------
-
-const HUB_SCOPES = ["all", "people", "demand", "companies", "money", "compliance"] as const;
 
 /**
  * Schema for getUnifiedHubAction input.
@@ -24,9 +23,3 @@ export const getHubInputSchema = z.object({
 });
 
 export type HubInput = z.input<typeof getHubInputSchema>;
-
-// ---------------------------------------------------------------------------
-// Type — mirrors the return shape from getUnifiedHub
-// ---------------------------------------------------------------------------
-
-export type HubScope = (typeof HUB_SCOPES)[number];
