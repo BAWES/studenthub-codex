@@ -121,6 +121,14 @@ const { requireCapability } = await import("@/modules/auth/session");
 const { prisma } = await import("@/lib/prisma");
 const payments = await import("./actions");
 
+const mockUser = {
+  role: "admin" as const,
+  id: "user-1",
+  name: "Admin User",
+  email: "admin@studenthub.local",
+  issuedAt: Date.now(),
+};
+
 function makeTransaction(overrides: Record<string, unknown> = {}) {
   return {
     bank_transaction_id: "txn-001",
@@ -143,7 +151,7 @@ describe("listPayments", () => {
   });
 
   it("returns paginated payment rows with defaults", async () => {
-    vi.mocked(requireCapability).mockResolvedValue(undefined);
+    vi.mocked(requireCapability).mockResolvedValue(mockUser);
     mockFindMany.mockResolvedValue([makeTransaction()]);
     mockCount.mockResolvedValue(1);
 
@@ -165,7 +173,7 @@ describe("listPayments", () => {
   });
 
   it("respects pagination params", async () => {
-    vi.mocked(requireCapability).mockResolvedValue(undefined);
+    vi.mocked(requireCapability).mockResolvedValue(mockUser);
     mockFindMany.mockResolvedValue([]);
     mockCount.mockResolvedValue(0);
 
@@ -177,7 +185,7 @@ describe("listPayments", () => {
   });
 
   it("filters by status", async () => {
-    vi.mocked(requireCapability).mockResolvedValue(undefined);
+    vi.mocked(requireCapability).mockResolvedValue(mockUser);
     mockFindMany.mockResolvedValue([]);
     mockCount.mockResolvedValue(0);
 
@@ -188,7 +196,7 @@ describe("listPayments", () => {
   });
 
   it("filters by type", async () => {
-    vi.mocked(requireCapability).mockResolvedValue(undefined);
+    vi.mocked(requireCapability).mockResolvedValue(mockUser);
     mockFindMany.mockResolvedValue([]);
     mockCount.mockResolvedValue(0);
 
@@ -199,7 +207,7 @@ describe("listPayments", () => {
   });
 
   it("filters by date range", async () => {
-    vi.mocked(requireCapability).mockResolvedValue(undefined);
+    vi.mocked(requireCapability).mockResolvedValue(mockUser);
     mockFindMany.mockResolvedValue([]);
     mockCount.mockResolvedValue(0);
 
@@ -214,7 +222,7 @@ describe("listPayments", () => {
   });
 
   it("returns empty result when no transactions match", async () => {
-    vi.mocked(requireCapability).mockResolvedValue(undefined);
+    vi.mocked(requireCapability).mockResolvedValue(mockUser);
     mockFindMany.mockResolvedValue([]);
     mockCount.mockResolvedValue(0);
 
@@ -225,7 +233,7 @@ describe("listPayments", () => {
   });
 
   it("returns empty result on invalid input instead of throwing", async () => {
-    vi.mocked(requireCapability).mockResolvedValue(undefined);
+    vi.mocked(requireCapability).mockResolvedValue(mockUser);
 
     const result = await payments.listPayments({
       page: 0,
@@ -247,7 +255,7 @@ describe("listPayments", () => {
   });
 
   it("propagates Prisma errors", async () => {
-    vi.mocked(requireCapability).mockResolvedValue(undefined);
+    vi.mocked(requireCapability).mockResolvedValue(mockUser);
     mockFindMany.mockRejectedValue(new Error("DB timeout"));
 
     await expect(payments.listPayments({})).rejects.toThrow("DB timeout");
@@ -260,7 +268,7 @@ describe("getPayment", () => {
   });
 
   it("returns payment detail with line items and metrics", async () => {
-    vi.mocked(requireCapability).mockResolvedValue(undefined);
+    vi.mocked(requireCapability).mockResolvedValue(mockUser);
     mockFindFirst.mockResolvedValue(
       makeTransaction({
         sub_total: 900.0,
@@ -295,7 +303,7 @@ describe("getPayment", () => {
   });
 
   it("returns null payment and empty arrays when not found", async () => {
-    vi.mocked(requireCapability).mockResolvedValue(undefined);
+    vi.mocked(requireCapability).mockResolvedValue(mockUser);
     mockFindFirst.mockResolvedValue(null);
 
     const result = await payments.getPayment("nonexistent");
@@ -306,7 +314,7 @@ describe("getPayment", () => {
   });
 
   it("throws on invalid payment ID", async () => {
-    vi.mocked(requireCapability).mockResolvedValue(undefined);
+    vi.mocked(requireCapability).mockResolvedValue(mockUser);
 
     await expect(payments.getPayment("")).rejects.toThrow();
     expect(mockFindFirst).not.toHaveBeenCalled();
@@ -322,7 +330,7 @@ describe("getPayment", () => {
   });
 
   it("propagates Prisma errors", async () => {
-    vi.mocked(requireCapability).mockResolvedValue(undefined);
+    vi.mocked(requireCapability).mockResolvedValue(mockUser);
     mockFindFirst.mockRejectedValue(new Error("DB connection error"));
 
     await expect(payments.getPayment("txn-1")).rejects.toThrow(

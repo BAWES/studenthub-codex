@@ -43,6 +43,14 @@ const { requireRoleCapability } = await import("@/modules/auth/session");
 const { prisma } = await import("@/lib/prisma");
 const actions = await import("./actions");
 
+const mockUser = {
+  role: "inspector" as const,
+  id: "insp-1",
+  name: "Test Inspector",
+  email: "inspector@studenthub.local",
+  issuedAt: Date.now(),
+};
+
 // ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
@@ -53,7 +61,7 @@ describe("getInspectorWorkspace", () => {
   });
 
   it("returns inspector workspace data with metrics and requests", async () => {
-    vi.mocked(requireRoleCapability).mockResolvedValue(undefined);
+    vi.mocked(requireRoleCapability).mockResolvedValue(mockUser);
 
     const mockInspector = {
       inspector_name: "Alice",
@@ -126,7 +134,7 @@ describe("getInspectorWorkspace", () => {
   });
 
   it("returns null inspector when no inspector found", async () => {
-    vi.mocked(requireRoleCapability).mockResolvedValue(undefined);
+    vi.mocked(requireRoleCapability).mockResolvedValue(mockUser);
 
     mockTransaction.mockResolvedValue([
       null, // inspector not found
@@ -143,7 +151,7 @@ describe("getInspectorWorkspace", () => {
   });
 
   it("handles empty candidate_ids gracefully", async () => {
-    vi.mocked(requireRoleCapability).mockResolvedValue(undefined);
+    vi.mocked(requireRoleCapability).mockResolvedValue(mockUser);
 
     mockTransaction.mockResolvedValue([
       { inspector_name: "Bob", inspector_email: "bob@test.com" },
@@ -178,7 +186,7 @@ describe("getInspectorWorkspace", () => {
   });
 
   it("propagates Prisma errors", async () => {
-    vi.mocked(requireRoleCapability).mockResolvedValue(undefined);
+    vi.mocked(requireRoleCapability).mockResolvedValue(mockUser);
     mockTransaction.mockRejectedValue(
       new Error("Can't reach database"),
     );
