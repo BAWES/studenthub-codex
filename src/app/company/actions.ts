@@ -10,7 +10,7 @@ import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
 import { formatDate, formatMoney } from "@/modules/workspace/format";
 import { getCompanyWorkspaceSchema } from "./schemas";
-import type { StaffWorkspaceData, CompanyWorkspaceData } from "./schemas";
+import type { StaffWorkspaceData, CompanyWorkspaceData, CompanyHomeData } from "./schemas";
 
 /**
  * Fetch the staff workspace dashboard data for a given staff account.
@@ -190,6 +190,116 @@ export async function getCompanyWorkspace(
       title: request.request_position_title ?? "Untitled request",
       subtitle: request.company?.company_name ?? "No company",
       meta: `${request.request_status ?? "No status"} · ${request.request_number_of_employees ?? 0} seats`,
+    })),
+  };
+}
+
+// ---------------------------------------------------------------------------
+// CompanyHome — extended dashboard data
+// Extends getCompanyWorkspace with active requests, positions, and activity.
+// ---------------------------------------------------------------------------
+
+type NonTerminalStatus = "pending" | "started" | "re_work";
+
+const nonTerminalStatuses: NonTerminalStatus[] = ["pending", "started", "re_work"];
+
+/**
+ * Fetch extended CompanyHome dashboard data, including active requests,
+ * open positions count, and recent activity.
+ */
+export async function getCompanyHomeData(
+  contactUuid: string,
+): Promise<CompanyHomeData> {
+  await requireCapability("company.read");
+
+  const parsed = getCompanyWorkspaceSchema.safeParse({ contactUuid });
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid contact UUID");
+  }
+
+  const base = await getCompanyWorkspace(contactUuid);
+
+  const companyLinks = await prisma.company_contact.findMany({
+    where: { contact_uuid: contactUuid },
+    select: {
+      company: { select: { company_id: true } },
+    },
+  });
+
+  const companyIds = companyLinks
+    .map((link) => link.company?.company_id)
+    .filter((id): id is number => Boolean(id));
+
+  if (!companyIds.length) {
+    return {
+      ...base,
+      activeRequestCount: 0,
+      pendingRequestCount: 0,
+      openPositionsCount: 0,
+      activeRequests: [],
+      recentActivity: [],
+    };
+  }
+
+  const [activeRequests, recentActivity] = await prisma.$transaction([
+    prisma.request.findMany({
+      where: {
+        company_id: { in: companyIds },
+        request_status: { in: nonTerminalStatuses },
+      },
+      orderBy: { request_created_datetime: "desc" },
+      take: 20,
+      select: {
+        request_uuid: true,
+        request_position_title: true,
+        request_status: true,
+        request_number_of_employees: true,
+        request_created_datetime: true,
+        _count: { select: { request_application: true } },
+      },
+    }),
+    prisma.request_activity.findMany({
+      where: {
+        request: { company_id: { in: companyIds } },
+      },
+      orderBy: { activity_created_datetime: "desc" },
+      take: 30,
+      select: {
+        activity_uuid: true,
+        activity_detail: true,
+        activity_created_datetime: true,
+        request_uuid: true,
+      },
+    }),
+  ]);
+
+  const activeRequestCount = activeRequests.length;
+  const pendingRequestCount = activeRequests.filter(
+    (r) => r.request_status === "pending",
+  ).length;
+  const openPositionsCount = activeRequests.reduce(
+    (sum, r) => sum + (r.request_number_of_employees ?? 0),
+    0,
+  );
+
+  return {
+    ...base,
+    activeRequestCount,
+    pendingRequestCount,
+    openPositionsCount,
+    activeRequests: activeRequests.map((r) => ({
+      id: r.request_uuid,
+      title: r.request_position_title ?? "Untitled request",
+      status: r.request_status ?? "pending",
+      candidatesCount: r._count.request_application,
+      createdAt: r.request_created_datetime,
+    })),
+    recentActivity: recentActivity.map((a) => ({
+      id: a.activity_uuid,
+      type: "request_updated" as const,
+      detail: a.activity_detail,
+      timestamp: a.activity_created_datetime,
+      relatedEntityId: a.request_uuid,
     })),
   };
 }
