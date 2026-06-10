@@ -1,4 +1,3 @@
-import type { Route } from "next";
 import { requireRoleCapability } from "@/modules/auth/session";
 import { DataTable } from "@/modules/workspace/DataTable";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
@@ -42,7 +41,7 @@ export default async function CandidateSchedulePage() {
         title="Upcoming & Past Working Dates"
         description="Your assigned working dates, shift times, and status across all stores."
         rows={rows}
-        rowHref={(row) => `/candidate/schedule/${row.id}` as Route}
+        rowHref="/candidate/schedule/"
         columns={[
           { key: "date", label: "Date", render: (row) => <strong>{row.date}</strong> },
           { key: "store", label: "Store", render: (row) => row.store },

@@ -1,4 +1,3 @@
-import type { Route } from "next";
 import { requireRoleCapability } from "@/modules/auth/session";
 import { DataTable } from "@/modules/workspace/DataTable";
 import { StatusBadge } from "@/modules/workspace/StatusBadge";
@@ -29,7 +28,7 @@ export default async function CandidateWorkLogsPage() {
         title="Work Log History"
         description="Imported shifts, timer entries, and status values connected to your candidate account."
         rows={rows}
-        rowHref={(row) => `/candidate/work-logs/${row.id}` as Route}
+        rowHref="/candidate/work-logs/"
         columns={[
           { key: "date", label: "Date", render: (row) => <strong>{row.date}</strong> },
           { key: "store", label: "Store", render: (row) => row.store },

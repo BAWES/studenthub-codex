@@ -1,4 +1,3 @@
-import type { Route } from "next";
 import { requireRoleCapability } from "@/modules/auth/session";
 import { DataTable } from "@/modules/workspace/DataTable";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
@@ -33,7 +32,7 @@ export default async function CandidateLanguagesPage() {
         title="Languages"
         description="Languages and proficiency levels associated with your candidate profile."
         rows={rows}
-        rowHref={(row) => `/candidate/languages/${row.id}` as Route}
+        rowHref="/candidate/languages/"
         columns={[
           { key: "language", label: "Language", render: (row) => <strong>{row.language}</strong> },
           { key: "proficiency", label: "Proficiency", render: (row) => row.proficiency },

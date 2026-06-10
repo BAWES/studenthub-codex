@@ -1,4 +1,3 @@
-import type { Route } from "next";
 import { requireRoleCapability } from "@/modules/auth/session";
 import { DataTable } from "@/modules/workspace/DataTable";
 import { StatusBadge } from "@/modules/workspace/StatusBadge";
@@ -17,7 +16,7 @@ export default async function CandidateNotificationsPage() {
         title="Notification History"
         description="Alerts and updates related to your candidate account."
         rows={rows}
-        rowHref={(row) => `/candidate/notifications/${row.id}` as Route}
+        rowHref="/candidate/notifications/"
         columns={[
           { key: "type", label: "Type", render: (row) => <strong>{row.type}</strong> },
           { key: "message", label: "Message", render: (row) => row.message },

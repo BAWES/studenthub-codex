@@ -1,4 +1,3 @@
-import type { Route } from "next";
 import { requireRoleCapability } from "@/modules/auth/session";
 import { DataTable } from "@/modules/workspace/DataTable";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
@@ -33,7 +32,7 @@ export default async function CandidateReferencesPage() {
         title="References"
         description="Professional references associated with your candidate profile."
         rows={rows}
-        rowHref={(row) => `/candidate/references/${row.id}` as Route}
+        rowHref="/candidate/references/"
         columns={[
           { key: "name", label: "Name", render: (row) => <strong>{row.name}</strong> },
           { key: "company", label: "Company", render: (row) => row.company },

@@ -1,4 +1,3 @@
-import type { Route } from "next";
 import { requireRoleCapability } from "@/modules/auth/session";
 import { DataTablePage } from "@/modules/workspace/DataTablePage";
 import { StatusBadge } from "@/modules/workspace/StatusBadge";
@@ -18,7 +17,7 @@ export default async function InspectorIdRequestsPage() {
         title="Civil ID Verification Queue"
         description="Batches from the legacy candidate ID request queue."
         rows={rows}
-        rowHref={(row) => `/inspector/id-requests/${row.id}` as Route}
+        rowHref="/inspector/id-requests/"
         searchable
         searchPlaceholder="Search by request, candidate, created by..."
         columns={[

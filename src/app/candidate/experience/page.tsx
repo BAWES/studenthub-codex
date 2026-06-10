@@ -1,4 +1,3 @@
-import type { Route } from "next";
 import { requireRoleCapability } from "@/modules/auth/session";
 import { DataTable } from "@/modules/workspace/DataTable";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
@@ -39,7 +38,7 @@ export default async function CandidateExperiencePage() {
         title="Work Experience"
         description="Your work history and professional experience."
         rows={rows}
-        rowHref={(row) => `/candidate/experience/${row.id}` as Route}
+        rowHref="/candidate/experience/"
         columns={[
           { key: "experience", label: "Position", render: (row) => <strong>{row.experience}</strong> },
           { key: "employer", label: "Employer", render: (row) => row.employer },

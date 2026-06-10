@@ -36,7 +36,13 @@ export type DataTableProps<T extends { id: string | number }> = {
   description: string;
   rows: T[];
   columns: DataTableColumn<T>[];
-  rowHref?: (row: T) => Route;
+  /**
+   * URL prefix for clickable rows. The row.id is appended to this prefix to
+   * form the full path (e.g. "/company/companies/" + row.id).
+   * Pass a static string — NOT a function — so it works across Server→Client
+   * Component boundaries.
+   */
+  rowHref?: Route;
   /** Optional label function for the action link aria-label. */
   getRowLabel?: (row: T) => string;
   /** Loading state — shows skeleton rows when true. */
@@ -177,6 +183,16 @@ export function DataTable<T extends { id: string | number }>({
   );
   const colCount = visibleColumns.length + (rowHref ? 1 : 0);
 
+  /** Build the full row URL by appending the row.id to the prefix. */
+  const rowUrl = useCallback(
+    (row: T): Route => {
+      if (!rowHref) return "" as Route;
+      const prefix = rowHref.endsWith("/") ? rowHref : `${rowHref}/`;
+      return `${prefix}${row.id}` as Route;
+    },
+    [rowHref],
+  );
+
   // ── Loading state ──────────────────────────────────────────
   if (loading) {
     return (
@@ -309,7 +325,7 @@ export function DataTable<T extends { id: string | number }>({
                     ? {
                         tabIndex: 0,
                         role: "link",
-                        onKeyDown: (e) => handleRowKeyDown(e, rowHref(row)),
+                        onKeyDown: (e) => handleRowKeyDown(e, rowUrl(row)),
                       }
                     : {})}
                 >
@@ -322,7 +338,7 @@ export function DataTable<T extends { id: string | number }>({
                     <td data-label="Action" className="w-[1%] whitespace-nowrap">
                       <span className="shTableRowAction">
                         <Link
-                          href={rowHref(row)}
+                          href={rowUrl(row)}
                           aria-label={getRowLabel ? `Open ${getRowLabel(row)}` : "Open record"}
                         >
                           Open

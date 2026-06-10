@@ -54,7 +54,7 @@ export default async function AdminTransfersPage() {
         title="Transfer Runs"
         description="Open a run to review candidate payouts, employer totals, invoices, and supporting PDF actions."
         rows={rows}
-        rowHref={(row) => `/admin/transfers/${row.id}` as Route}
+        rowHref="/admin/transfers/"
         columns={[
           { key: "id", label: "Transfer", render: (row) => <strong>#{row.id}</strong> },
           { key: "company", label: "Company", render: (row) => row.company },
