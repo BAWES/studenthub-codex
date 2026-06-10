@@ -4,6 +4,7 @@ import { useWorkspaceOS } from "./WorkspaceOSContext";
 import { ThemeToggle } from "@/modules/theme/ThemeToggle";
 import { logoutAction } from "@/modules/auth/actions";
 import { Breadcrumbs } from "./Breadcrumbs";
+import { AppHeader } from "@/components/layout/AppHeader";
 import type { LucideIcon } from "lucide-react";
 import {
   Shield,
@@ -45,6 +46,7 @@ export function RoleLayoutShell({
   if (embedded) {
     return (
       <div className="flex flex-col gap-4">
+        <AppHeader />
         <header className="flex items-center justify-between border-b pb-3">
           <div className="flex items-center gap-2">
             <span className="text-muted-foreground">
@@ -82,6 +84,7 @@ export function RoleLayoutShell({
 
   return (
     <>
+      <AppHeader />
       <div className="flex flex-col gap-4">
         <header className="flex items-center justify-between border-b pb-3">
           <div className="flex items-center gap-2">
