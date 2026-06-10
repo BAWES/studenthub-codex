@@ -32,7 +32,7 @@ export type ListJobApplicationsByEmployerInput = z.input<typeof listJobApplicati
 export type UpdateApplicationStatusInput = z.input<typeof updateApplicationStatusSchema>;
 
 export type JobApplicationRow = {
-  id: number;
+  applicationId: number;
   candidateId: number;
   candidateName: string | null;
   status: string;
