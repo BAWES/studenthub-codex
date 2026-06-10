@@ -1,4 +1,5 @@
 import { getDashboardData } from "@/app/admin/dashboard/actions";
+import { getCoderHealthData } from "@/app/admin/dashboard/coder-health-actions";
 import { EmptyState } from "@/modules/workspace/EmptyState";
 import { MetricCard } from "@/components/ui/metric-card";
 import { GlassPanel } from "@/components/ui/glass-panel";
@@ -209,6 +210,9 @@ export async function Dashboard() {
         </GlassPanel>
       </section>
 
+      {/* ── Coder Agent Health Metrics ── */}
+      <CoderHealthSection />
+
       {/* ── Recent Activity ── */}
       <section
         className="shDashboardSection"
@@ -331,5 +335,108 @@ function DataList({
         )}
       </div>
     </GlassPanel>
+  );
+}
+
+/* ── Coder Agent Health Section ────────────────────────────────── */
+
+async function CoderHealthSection() {
+  let data;
+  try {
+    data = await getCoderHealthData();
+  } catch {
+    return (
+      <section className="shDashboardSection" aria-label="Coder agent health">
+        <GlassPanel variant="subtle" radius="lg" className="p-5">
+          <div className="shPipelineHeader">
+            <div>
+              <span className="shPipelineEyebrow">Agent</span>
+              <h2 className="shPipelineTitle">Coder Health</h2>
+            </div>
+          </div>
+          <div className="shPipelineEmpty">
+            <EmptyState variant="idle" message="Could not load Coder health data" />
+          </div>
+        </GlassPanel>
+      </section>
+    );
+  }
+
+  return (
+    <section className="shDashboardSection" aria-label="Coder agent health metrics">
+      <GlassPanel variant="subtle" radius="lg" className="p-5">
+        <div className="shPipelineHeader">
+          <div>
+            <span className="shPipelineEyebrow">Agent</span>
+            <h2 className="shPipelineTitle">Coder Health</h2>
+          </div>
+        </div>
+
+        {data.heartbeatMetrics.length > 0 ? (
+          <div className="shDashboardGrid4 shMt2">
+            {data.heartbeatMetrics.map((metric, idx) => (
+              <MetricCard
+                key={metric.label}
+                label={metric.label}
+                value={metric.value}
+                note={metric.note}
+                accent={idx === 0 ? "info" : idx === 1 ? (metric.value.startsWith("8") || metric.value.startsWith("9") || metric.value === "100%" ? "success" : "warning") : "info"}
+                entranceDelay={idx * 60}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="shPipelineEmpty">
+            <EmptyState variant="idle" message="No heartbeat data yet" />
+          </div>
+        )}
+
+        {/* Recent issues */}
+        {data.recentIssues.length > 0 && (
+          <>
+            <h3 className="shDataListEyebrow shMt3">Recent issues</h3>
+            <div className="shDataListBody">
+              {data.recentIssues.slice(0, 6).map((issue, idx) => (
+                <div key={idx} className="shDataListRow">
+                  <div className="shDataListRowMain">
+                    <strong className="shDataListRowTitle">{issue.title}</strong>
+                    <span className="shDataListRowSub">{issue.status}</span>
+                  </div>
+                  <div className="shDataListRowMeta">
+                    <span className="shDataListRowDate">{issue.updatedAt}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+
+        {/* Recent commits */}
+        {data.recentCommits.length > 0 && (
+          <>
+            <h3 className="shDataListEyebrow shMt3">Recent commits</h3>
+            <div className="shDataListBody">
+              {data.recentCommits.map((commit) => (
+                <Link
+                  key={commit.sha}
+                  href={`https://github.com/BAWES/studenthub-codex/commit/${commit.sha}` as Route}
+                  className="shDataListRow"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <div className="shDataListRowMain">
+                    <strong className="shDataListRowTitle">{commit.sha}</strong>
+                    <span className="shDataListRowSub">{commit.message}</span>
+                  </div>
+                  <div className="shDataListRowMeta">
+                    <span className="shDataListRowDate">{commit.date}</span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </>
+        )}
+      </GlassPanel>
+    </section>
   );
 }
