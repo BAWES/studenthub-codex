@@ -1,32 +1,8 @@
 "use server";
 
-import { z } from "zod";
 import { requireCapability } from "@/modules/auth/session";
-
-// ---------------------------------------------------------------------------
-// Schemas
-// ---------------------------------------------------------------------------
-
-export const getAwsConfigSchema = z.object({
-  key: z.string().min(1, "Config key is required"),
-});
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export type AwsConfigEntry = {
-  /** Config key name (e.g. "region", "bucket") */
-  key: string;
-  /** Config value */
-  value: string;
-};
-
-export type AwsConfigResult = {
-  region: string;
-  bucket: string;
-  key: string;
-};
+import { getAwsConfigSchema } from "./schemas";
+import type { AwsConfigEntry, AwsConfigResult } from "./schemas";
 
 /**
  * Known AWS config keys used by the app.

@@ -263,3 +263,148 @@ describe("InterviewEvaluationDetailResult shape", () => {
     expect(result).toBeNull();
   });
 });
+
+// ---------------------------------------------------------------------------
+// updateInterviewEvaluation schema tests
+// ---------------------------------------------------------------------------
+
+const updateInterviewEvaluationSchema = z.object({
+  uuid: z.string().min(1, "Interview evaluation UUID is required"),
+  requestUuid: z.string().optional(),
+  companyId: z.number().int().positive().optional(),
+  staffId: z.number().int().positive().optional(),
+  interviewEvaluationNotes: z.array(interviewEvaluationNoteItemSchema).optional(),
+});
+
+describe("updateInterviewEvaluationSchema", () => {
+  it("accepts valid params with uuid only", () => {
+    const result = updateInterviewEvaluationSchema.safeParse({ uuid: "eval-uuid-1" });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.uuid).toBe("eval-uuid-1");
+    }
+  });
+
+  it("accepts uuid with optional fields", () => {
+    const result = updateInterviewEvaluationSchema.safeParse({
+      uuid: "eval-uuid-1",
+      requestUuid: "req-uuid",
+      companyId: 513,
+      staffId: 10,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects empty uuid", () => {
+    const result = updateInterviewEvaluationSchema.safeParse({ uuid: "" });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects missing uuid", () => {
+    const result = updateInterviewEvaluationSchema.safeParse({});
+    expect(result.success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// deleteInterviewEvaluation schema tests
+// ---------------------------------------------------------------------------
+
+const deleteInterviewEvaluationSchema = z.object({
+  uuid: z.string().min(1, "Interview evaluation UUID is required"),
+});
+
+describe("deleteInterviewEvaluationSchema", () => {
+  it("accepts a valid UUID string", () => {
+    const result = deleteInterviewEvaluationSchema.safeParse({ uuid: "eval-uuid-1" });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects empty UUID string", () => {
+    const result = deleteInterviewEvaluationSchema.safeParse({ uuid: "" });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects missing uuid", () => {
+    const result = deleteInterviewEvaluationSchema.safeParse({});
+    expect(result.success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// getInterviewEvaluationVersions schema tests
+// ---------------------------------------------------------------------------
+
+const getInterviewEvaluationVersionsSchema = z.object({
+  uuid: z.string().min(1, "Interview evaluation UUID is required"),
+});
+
+describe("getInterviewEvaluationVersionsSchema", () => {
+  it("accepts a valid UUID string", () => {
+    const result = getInterviewEvaluationVersionsSchema.safeParse({ uuid: "eval-uuid-1" });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects empty UUID string", () => {
+    const result = getInterviewEvaluationVersionsSchema.safeParse({ uuid: "" });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects missing uuid", () => {
+    const result = getInterviewEvaluationVersionsSchema.safeParse({});
+    expect(result.success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// addInterviewEvaluationNoteVersion schema tests
+// ---------------------------------------------------------------------------
+
+const addInterviewEvaluationNoteVersionSchema = z.object({
+  uuid: z.string().min(1, "Interview evaluation UUID is required"),
+  notes: z.array(interviewEvaluationNoteItemSchema).min(1, "At least one note is required"),
+});
+
+describe("addInterviewEvaluationNoteVersionSchema", () => {
+  it("accepts valid params", () => {
+    const result = addInterviewEvaluationNoteVersionSchema.safeParse({
+      uuid: "eval-uuid-1",
+      notes: [{ note: "Strong communication" }, { note: "Good technical grasp" }],
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.notes).toHaveLength(2);
+    }
+  });
+
+  it("rejects empty notes array", () => {
+    const result = addInterviewEvaluationNoteVersionSchema.safeParse({
+      uuid: "eval-uuid-1",
+      notes: [],
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects missing notes field", () => {
+    const result = addInterviewEvaluationNoteVersionSchema.safeParse({
+      uuid: "eval-uuid-1",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects empty uuid", () => {
+    const result = addInterviewEvaluationNoteVersionSchema.safeParse({
+      uuid: "",
+      notes: [{ note: "Test note" }],
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects note with empty string", () => {
+    const result = addInterviewEvaluationNoteVersionSchema.safeParse({
+      uuid: "eval-uuid-1",
+      notes: [{ note: "" }],
+    });
+    expect(result.success).toBe(false);
+  });
+});

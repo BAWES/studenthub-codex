@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   listAdminCompaniesSchema,
   getAdminCompanySchema,
-} from "./actions";
+} from "./schemas";
 
 describe("listAdminCompaniesSchema", () => {
   it("accepts empty params (default pagination)", () => {

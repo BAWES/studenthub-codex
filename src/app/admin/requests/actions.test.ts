@@ -6,7 +6,7 @@ import {
   approveRequestSchema,
   rejectRequestSchema,
   closeRequestSchema,
-} from "./actions";
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Schema tests — pure unit tests, no DB required

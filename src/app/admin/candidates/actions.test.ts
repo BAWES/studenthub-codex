@@ -6,7 +6,7 @@ import {
   createCandidateSchema,
   updateCandidateSchema,
   deleteCandidateSchema,
-} from "./actions";
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Schema tests — pure unit tests, no DB required
