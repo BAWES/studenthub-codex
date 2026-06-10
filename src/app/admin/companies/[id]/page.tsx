@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { requireRoleCapability } from "@/modules/auth/session";
 import { DetailSection } from "@/modules/workspace/DetailPanels";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
-import { getCompanyDetail } from "@/modules/workspace/data";
+import { getAdminCompanyDetail } from "../actions";
 import { formatDate } from "@/modules/workspace/format";
 
 export const dynamic = "force-dynamic";
@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 export default async function AdminCompanyDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await requireRoleCapability("admin", "company.read.any");
   const { id } = await params;
-  const data = await getCompanyDetail(Number(id));
+  const data = await getAdminCompanyDetail(Number(id));
 
   if (!data.company) {
     notFound();
