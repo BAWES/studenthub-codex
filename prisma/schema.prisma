@@ -257,6 +257,7 @@ model candidate {
   candidate_link                    candidate_link[]
   candidate_note                    candidate_note[]
   candidate_notification            candidate_notification[]
+  candidate_reference               candidate_reference[]
   candidate_certification           candidate_certification[]
   candidate_skill                   candidate_skill[]
   candidate_stats                   candidate_stats[]
@@ -545,6 +546,23 @@ model candidate_notification {
   @@index([staff_id], map: "idx-candidate_notification-staff_id")
   @@index([store_id], map: "idx-candidate_notification-store_id")
   @@index([tc_id], map: "idx-candidate_notification-tc_id")
+}
+
+model candidate_reference {
+  reference_uuid String    @id @db.Char(60)
+  candidate_id   Int
+  name           String    @db.VarChar(255)
+  company        String?   @db.VarChar(255)
+  position       String?   @db.VarChar(255)
+  phone          String?   @db.VarChar(50)
+  email          String?   @db.VarChar(255)
+  relationship   String?   @db.VarChar(255)
+  deleted        Int       @default(0) @db.SmallInt
+  created_at     DateTime? @db.DateTime(0)
+  updated_at     DateTime? @db.DateTime(0)
+  candidate      candidate @relation(fields: [candidate_id], references: [candidate_id], onDelete: Cascade, map: "fk-candidate_reference-candidate_id")
+
+  @@index([candidate_id], map: "idx-candidate_reference-candidate_id")
 }
 
 model candidate_skill {
