@@ -110,10 +110,11 @@ describe("Candidate landing page (/for-candidates)", () => {
 
   it("renders the stats strip with candidate metrics", () => {
     render(<CandidateLandingContent {...defaultProps} />);
-    expect(screen.getByLabelText(/candidate stats/i)).toBeInTheDocument();
-    expect(screen.getByText("1,200+")).toBeInTheDocument();
-    expect(screen.getByText("92%")).toBeInTheDocument();
-    expect(screen.getByText("Free")).toBeInTheDocument();
+    const stats = screen.getByLabelText(/candidate stats/i);
+    expect(stats).toBeInTheDocument();
+    expect(within(stats).getByText("1,200+")).toBeInTheDocument();
+    expect(within(stats).getByText("92%")).toBeInTheDocument();
+    expect(within(stats).getByText("Free")).toBeInTheDocument();
   });
 
   it("renders the feature grid", () => {
