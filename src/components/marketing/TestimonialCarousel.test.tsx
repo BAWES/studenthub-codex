@@ -58,6 +58,13 @@ describe("TestimonialCarousel", () => {
     });
   });
 
+  it("renders inspector testimonials", async () => {
+    render(<TestimonialCarousel persona="inspector" />);
+    await waitFor(() => {
+      expect(screen.getByText(/Batch document review cut our inspection/)).toBeInTheDocument();
+    });
+  });
+
   it("renders custom testimonials when provided", async () => {
     render(<TestimonialCarousel testimonials={customTestimonials} />);
     await waitFor(() => {

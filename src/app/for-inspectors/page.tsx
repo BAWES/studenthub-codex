@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 export const metadata = {
   title: "Streamline Compliance Audits | StudentHub for Inspectors",
   description:
-    "Batch-review 10,000+ documents monthly. Automated exception flagging, one-click reports, and full audit trails. Designed for KSA regulatory compliance.",
+    "Batch-review 10,000+ documents monthly. Automated exception flagging, one-click reports, and full audit trails. Designed for Kuwait regulatory compliance.",
   openGraph: {
     title: "StudentHub for Inspectors | Audit Smarter",
     description:
