@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { formatDate, formatMoney } from "@/modules/workspace/format";
-import { getCandidateIdsForStaff } from "@/modules/workspace/data";
+import { getCandidateIdsForStaff } from "@/modules/workspace/data/staff";
 
 export async function getStaffWorkspace(staffId: number) {
   const candidateIds = await getCandidateIdsForStaff(staffId);
