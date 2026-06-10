@@ -3,6 +3,7 @@ import { z } from "zod";
 import {
   getCandidateNotificationRowsSchema,
   getCandidateNotificationDetailSchema,
+  updateNotificationSchema,
 } from "./schemas";
 import { getNotificationTypeLabel } from "@/modules/notifications/utils";
 
@@ -85,6 +86,38 @@ describe("dismissNotificationSchema", () => {
 
   it("rejects missing UUID", () => {
     expect(dismissNotificationSchema.safeParse({}).success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// updateNotificationSchema
+// ---------------------------------------------------------------------------
+
+describe("updateNotificationSchema", () => {
+  it("accepts a valid UUID with no isNew", () => {
+    expect(
+      updateNotificationSchema.safeParse({ notificationUuid: "notif_abc-123" }).success,
+    ).toBe(true);
+  });
+
+  it("accepts a valid UUID with isNew: false", () => {
+    expect(
+      updateNotificationSchema.safeParse({ notificationUuid: "notif_abc-123", isNew: false }).success,
+    ).toBe(true);
+  });
+
+  it("accepts a valid UUID with isNew: true", () => {
+    expect(
+      updateNotificationSchema.safeParse({ notificationUuid: "notif_abc-123", isNew: true }).success,
+    ).toBe(true);
+  });
+
+  it("rejects empty UUID", () => {
+    expect(updateNotificationSchema.safeParse({ notificationUuid: "" }).success).toBe(false);
+  });
+
+  it("rejects missing UUID", () => {
+    expect(updateNotificationSchema.safeParse({}).success).toBe(false);
   });
 });
 

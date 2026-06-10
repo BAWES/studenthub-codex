@@ -9,6 +9,7 @@ import {
   getCandidateNotificationRowsSchema,
   getCandidateNotificationDetailSchema,
   dismissNotificationSchema,
+  updateNotificationSchema,
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
@@ -177,6 +178,67 @@ export async function dismissNotification(
         e instanceof Error
           ? e.message
           : "Failed to dismiss notification.",
+    };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// updateNotification
+// ---------------------------------------------------------------------------
+
+/**
+ * Update (mark as read/unread) a notification for the current candidate.
+ * Derives candidateId from the session (self-service).
+ * Requires `candidate.read.own` capability.
+ *
+ * Returns `{ success: true }` or `{ success: false, error: string }`.
+ */
+export async function updateNotification(
+  notificationUuid: string,
+  data?: { isNew?: boolean },
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const session = await requireRoleCapability("candidate", "candidate.read.own");
+    const candidateId = Number(session.id);
+
+    const parsed = updateNotificationSchema.safeParse({
+      notificationUuid,
+      isNew: data?.isNew,
+    });
+    if (!parsed.success) {
+      return {
+        success: false,
+        error: parsed.error.issues[0]?.message ?? "Invalid params",
+      };
+    }
+
+    // Verify ownership before updating
+    const notification = await prisma.candidate_notification.findFirst({
+      where: {
+        cn_uuid: parsed.data.notificationUuid,
+        candidate_id: candidateId,
+      },
+    });
+
+    if (!notification) {
+      return { success: false, error: "Notification not found." };
+    }
+
+    await prisma.candidate_notification.update({
+      where: { cn_uuid: parsed.data.notificationUuid },
+      data: {
+        ...(parsed.data.isNew !== undefined ? { is_new: parsed.data.isNew } : {}),
+      },
+    });
+
+    return { success: true };
+  } catch (e) {
+    return {
+      success: false,
+      error:
+        e instanceof Error
+          ? e.message
+          : "Failed to update notification.",
     };
   }
 }

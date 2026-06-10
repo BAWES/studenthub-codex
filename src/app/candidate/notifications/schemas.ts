@@ -18,3 +18,8 @@ export const getCandidateNotificationDetailSchema = z.object({
 export const dismissNotificationSchema = z.object({
   notificationUuid: z.string().min(1, "Notification UUID is required"),
 });
+
+export const updateNotificationSchema = z.object({
+  notificationUuid: z.string().min(1, "Notification UUID is required"),
+  isNew: z.boolean().optional(),
+});
