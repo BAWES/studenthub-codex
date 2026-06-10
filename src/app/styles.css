@@ -156,6 +156,14 @@
   /* Active indicator */
   --sh-active-width: 3px;
 
+  /* App Header (light mode defaults) */
+  --sh-header-h: 64px;
+  --sh-header-glass-bg: rgba(255, 255, 255, 0.78);
+  --sh-header-glass-border: rgba(214, 220, 231, 0.5);
+  --sh-header-blur: 18px;
+  --sh-header-tab-h: 40px;
+  --sh-header-tab-indicator: 3px;
+
   /* ------------------------------------------------------------------ */
   /* Responsive breakpoints (reference — use in @media queries)          */
   /* ------------------------------------------------------------------ */
@@ -267,6 +275,10 @@
   --sh-info: #8abfff;
   --sh-info-bg: rgba(138, 191, 255, 0.10);
   --sh-info-glow: 0 0 14px rgba(138, 191, 255, 0.25);
+
+  /* App Header (dark mode) */
+  --sh-header-glass-bg: rgba(17, 24, 36, 0.72);
+  --sh-header-glass-border: rgba(42, 53, 71, 0.5);
 }
 
 * {
