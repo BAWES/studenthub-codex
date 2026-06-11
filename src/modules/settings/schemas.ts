@@ -40,10 +40,10 @@ export const settingItemSchema = z.object({
 
 export const listSettingsResultSchema = z.object({
   settings: z.array(settingItemSchema),
-  total: z.number(),
-  page: z.number(),
+  total: z.number().int().nonnegative(),
+  page: z.number().int().positive(),
   limit: z.number(),
-  totalPages: z.number(),
+  totalPages: z.number().int().nonnegative(),
 });
 
 export const updateSettingResultSchema = z.object({

@@ -7,30 +7,15 @@ import {
   listAreasSchema,
   getAreaSchema,
   listAreasResultSchema,
+  type AreaItem,
+  type ListAreasResult,
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
-// Types
+// Types (re-exported from schemas for backward compatibility)
 // ---------------------------------------------------------------------------
 
-export type AreaItem = {
-  area_uuid: string;
-  country_id: number;
-  area_name_en: string;
-  area_name_ar: string | null;
-  area_latitude: number | null;
-  area_longitude: number | null;
-};
-
-export type ListAreasResult = {
-  areas: AreaItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
-
-// Re-export input types for backward compatibility
+export type { AreaItem, ListAreasResult };
 export type ListAreasInput = z.input<typeof listAreasSchema>;
 export type GetAreaInput = z.input<typeof getAreaSchema>;
 
