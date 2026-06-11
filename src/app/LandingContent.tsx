@@ -187,7 +187,7 @@ function Hero({ persona }: { persona: Persona }) {
           <Reveal delay={150}>
             <p className="text-base sm:text-lg leading-relaxed mb-8 max-w-[520px]" style={{ color: "var(--muted)" }}>
               {persona === "company"
-                ? "Post openings, get AI-matched candidates, and manage everything from timesheets to payments — all in one platform."
+                ? "Post openings, get AI-assisted candidate matching, and manage everything from timesheets to payments — all in one platform."
                 : "Create a profile seen by 500+ employers. Get AI-matched roles and one-tap payments."}
             </p>
           </Reveal>
@@ -333,13 +333,13 @@ function Stats() {
 function HowItWorks({ persona }: { persona: Persona }) {
   const steps = persona === "company"
     ? [
-        { num: "01", title: "Create your profile", desc: "Set up your company account in minutes. Add your details and tell us what you're looking for.", icon: Building2 },
-        { num: "02", title: "Get matched candidates", desc: "Post a role and our AI instantly matches you with pre-vetted candidates from our network.", icon: Users },
-        { num: "03", title: "Hire and manage", desc: "Review candidates, schedule interviews, manage timesheets and payments — all in one place.", icon: Briefcase },
+        { num: "01", title: "Create your profile", desc: "Tell us what roles you need filled and what you're looking for. Set up your account in minutes.", icon: Building2 },
+        { num: "02", title: "We find and invite candidates", desc: "Our staff recruiters search our network and invite matching candidates to apply — with AI assistance every step of the way.", icon: Users },
+        { num: "03", title: "Hire and manage", desc: "Review shortlisted candidates, schedule interviews, manage timesheets and payments — all in one place.", icon: Briefcase },
       ]
     : [
         { num: "01", title: "Create your profile", desc: "No CV required. Tell us about your experience, skills, and what you're looking for. Takes 3 minutes.", icon: GraduationCap },
-        { num: "02", title: "Get matched with roles", desc: "Our AI finds roles that fit your profile. Review your matches and apply with one click.", icon: Zap },
+        { num: "02", title: "Get invited by our recruiters", desc: "Our staff recruiters review your profile and invite you to relevant opportunities. AI helps match you with the right roles.", icon: Zap },
         { num: "03", title: "Get hired and paid", desc: "Track applications, log timesheets, and receive payments directly through the platform.", icon: CreditCard },
       ];
 
