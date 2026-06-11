@@ -693,6 +693,7 @@ model candidate_work_history {
   @@index([company_id], map: "idx-candidate_work_history-company_id")
   @@index([parent_company_id], map: "idx-candidate_work_history-parent_company_id")
   @@index([staff_id], map: "idx-candidate_work_history-staff_id")
+  @@index([staff_id, candidate_id], map: "idx-candidate_work_history-staff_id-candidate_id")
 }
 
 model candidate_work_log_feedback {
