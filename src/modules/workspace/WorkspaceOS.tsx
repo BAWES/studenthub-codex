@@ -16,6 +16,8 @@ import { PageTransition } from "./PageTransition";
 import { RaycastCommandPalette } from "./RaycastCommandPalette";
 import { TabBar } from "./TabBar";
 import { TabProvider } from "./TabContext";
+import { searchCandidatesForPalette } from "./searchPalette";
+import type { CandidatePaletteResult } from "./searchPalette";
 
 // ── Command item shape ──────────────────────────────────────────────
 
@@ -140,26 +142,61 @@ export function WorkspaceOS({
 
   const commands = useMemo(() => buildOSCommands(navItems, session.role), [navItems, session.role]);
 
+  // ── Candidate search (Typesense, inline in palette) ────────────────
+  const [cmdCandidates, setCmdCandidates] = useState<CandidatePaletteResult[]>([]);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    const q = cmdQuery.trim();
+    if (q.length < 2) {
+      setCmdCandidates([]);
+      return;
+    }
+    debounceRef.current = setTimeout(async () => {
+      const results = await searchCandidatesForPalette(q);
+      setCmdCandidates(results);
+    }, 200);
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [cmdQuery]);
+
+  // Flatten command palette items: nav commands + candidate results
+  const allPaletteItems = useMemo(() => {
+    const items = [...commands];
+    for (const c of cmdCandidates) {
+      items.push({
+        id: `candidate-${c.id}`,
+        title: c.name,
+        subtitle: `${c.email} · ${c.uid}`,
+        section: "Candidates",
+        href: `/${session.role}/candidates/${c.id}`,
+      });
+    }
+    return items;
+  }, [commands, cmdCandidates, session.role]);
+
   const filtered = useMemo(() => {
     const q = cmdQuery.trim().toLowerCase();
-    if (!q) return commands.slice(0, 18);
-    return commands
+    if (!q) return allPaletteItems.slice(0, 18);
+    return allPaletteItems
       .filter((c) =>
         [c.title, c.subtitle, c.section, c.shortcut].filter(Boolean).join(" ").toLowerCase().includes(q)
       )
       .slice(0, 18);
-  }, [commands, cmdQuery]);
+  }, [allPaletteItems, cmdQuery]);
 
   const grouped = useMemo((): [string, OSCommand[]][] => {
     const groups = new Map<string, OSCommand[]>();
-    const list = cmdQuery.trim() ? filtered : commands;
+    const list = cmdQuery.trim() ? filtered : allPaletteItems;
     for (const cmd of list) {
       const key = cmd.section || "Other";
       if (!groups.has(key)) groups.set(key, []);
       groups.get(key)!.push(cmd);
     }
     return Array.from(groups.entries());
-  }, [commands, filtered, cmdQuery]);
+  }, [allPaletteItems, filtered, cmdQuery]);
 
   const visit = useCallback(
     (href: string) => {
