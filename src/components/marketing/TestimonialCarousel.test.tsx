@@ -54,33 +54,12 @@ describe("TestimonialCarousel", () => {
     });
   });
 
-  it("renders staff testimonials", async () => {
-    render(<TestimonialCarousel persona="staff" />);
-    await waitFor(() => {
-      expect(screen.getByText(/We went from paper files/)).toBeInTheDocument();
-    });
-  });
-
   it("renders company testimonials", async () => {
     render(<TestimonialCarousel persona="company" />);
     await waitFor(() => {
       // Company-specific quote — check for the HR manager name which is unique
-      const quotes = screen.getAllByText(/Noura A\./);
+      const quotes = screen.getAllByText(/Noura A\\./);
       expect(quotes.length).toBeGreaterThanOrEqual(1);
-    });
-  });
-
-  it("renders admin testimonials", async () => {
-    render(<TestimonialCarousel persona="admin" />);
-    await waitFor(() => {
-      expect(screen.getByText(/manage permissions across/)).toBeInTheDocument();
-    });
-  });
-
-  it("renders inspector testimonials", async () => {
-    render(<TestimonialCarousel persona="inspector" />);
-    await waitFor(() => {
-      expect(screen.getByText(/Batch document review cut our inspection/)).toBeInTheDocument();
     });
   });
 

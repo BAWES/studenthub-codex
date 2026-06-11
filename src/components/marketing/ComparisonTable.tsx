@@ -8,6 +8,8 @@ import {
   ChevronDown,
   Sparkles,
   Star,
+  GraduationCap,
+  Building2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import FadeInSection from "./FadeInSection";
@@ -24,7 +26,7 @@ export interface ComparisonRow {
 }
 
 export interface ComparisonTableProps {
-  persona?: "candidate" | "staff" | "company" | "admin" | "inspector";
+  persona?: "candidate" | "company";
   className?: string;
 }
 
@@ -36,40 +38,14 @@ interface ColumnDef {
   accent?: boolean;
 }
 
-const personaColumns: Record<string, ColumnDef[]> = {
-  candidate: [
-    { key: "studenthub", label: "StudentHub", accent: true },
-    { key: "alternatives", label: "Generic job boards" },
-    { key: "emailSpreadsheets", label: "Email & spreadsheets" },
-    { key: "traditionalAgencies", label: "Traditional agencies" },
-  ],
-  company: [
-    { key: "studenthub", label: "StudentHub", accent: true },
-    { key: "alternatives", label: "Generic job boards" },
-    { key: "emailSpreadsheets", label: "Email & spreadsheets" },
-    { key: "traditionalAgencies", label: "Traditional agencies" },
-  ],
-  staff: [
-    { key: "studenthub", label: "StudentHub", accent: true },
-    { key: "alternatives", label: "Generic job boards" },
-    { key: "emailSpreadsheets", label: "Email & spreadsheets" },
-    { key: "traditionalAgencies", label: "Traditional agencies" },
-  ],
-  admin: [
-    { key: "studenthub", label: "StudentHub", accent: true },
-    { key: "alternatives", label: "Generic ERPs" },
-    { key: "emailSpreadsheets", label: "Email & spreadsheets" },
-    { key: "traditionalAgencies", label: "Manual processes" },
-  ],
-  inspector: [
-    { key: "studenthub", label: "StudentHub", accent: true },
-    { key: "alternatives", label: "Paper-based systems" },
-    { key: "emailSpreadsheets", label: "Generic document tools" },
-    { key: "traditionalAgencies", label: "Manual review" },
-  ],
-};
+const sharedColumns: ColumnDef[] = [
+  { key: "studenthub", label: "StudentHub", accent: true },
+  { key: "alternatives", label: "Generic job boards" },
+  { key: "emailSpreadsheets", label: "Email & spreadsheets" },
+  { key: "traditionalAgencies", label: "Traditional agencies" },
+];
 
-// ── Data (unchanged) ─────────────────────────────────────
+// ── Data ─────────────────────────────────────────────────
 
 const candidateRows: ComparisonRow[] = [
   { category: "Profile", feature: "Unified profile visible to all employers", studenthub: true, alternatives: "Partial", emailSpreadsheets: false, traditionalAgencies: false },
@@ -97,47 +73,9 @@ const companyRows: ComparisonRow[] = [
   { category: "Analytics", feature: "Cost-per-hire tracking", studenthub: true, alternatives: false, emailSpreadsheets: false, traditionalAgencies: false },
 ];
 
-const staffRows: ComparisonRow[] = [
-  { category: "Sourcing", feature: "Typo-tolerant candidate search", studenthub: true, alternatives: false, emailSpreadsheets: false, traditionalAgencies: false },
-  { category: "Sourcing", feature: "Search by skill, location, visa status", studenthub: true, alternatives: "Partial", emailSpreadsheets: false, traditionalAgencies: "Partial" },
-  { category: "Sourcing", feature: "Bulk CV export", studenthub: true, alternatives: false, emailSpreadsheets: false, traditionalAgencies: "Partial" },
-  { category: "Shortlisting", feature: "One-click shortlist creation", studenthub: true, alternatives: false, emailSpreadsheets: false, traditionalAgencies: false },
-  { category: "Shortlisting", feature: "Share shortlists with employers", studenthub: true, alternatives: "Partial", emailSpreadsheets: false, traditionalAgencies: "Partial" },
-  { category: "Shortlisting", feature: "Candidate status tracking", studenthub: true, alternatives: false, emailSpreadsheets: false, traditionalAgencies: false },
-  { category: "Timesheets", feature: "Integrated timesheet pipeline", studenthub: true, alternatives: false, emailSpreadsheets: false, traditionalAgencies: "Partial" },
-  { category: "Commissions", feature: "Automated commission calculations", studenthub: true, alternatives: false, emailSpreadsheets: false, traditionalAgencies: false },
-  { category: "Commissions", feature: "Real-time margin visibility", studenthub: true, alternatives: false, emailSpreadsheets: false, traditionalAgencies: "Partial" },
-];
-
-const adminRows: ComparisonRow[] = [
-  { category: "Users", feature: "Role-based access control", studenthub: true, alternatives: "Partial", emailSpreadsheets: false, traditionalAgencies: false },
-  { category: "Users", feature: "Full audit logs", studenthub: true, alternatives: "Partial", emailSpreadsheets: false, traditionalAgencies: false },
-  { category: "Finance", feature: "Bulk invoicing workflow", studenthub: true, alternatives: "Partial", emailSpreadsheets: false, traditionalAgencies: false },
-  { category: "Finance", feature: "Payment run management", studenthub: true, alternatives: "Partial", emailSpreadsheets: false, traditionalAgencies: false },
-  { category: "Finance", feature: "Multi-entity reconciliation", studenthub: true, alternatives: false, emailSpreadsheets: false, traditionalAgencies: false },
-  { category: "Compliance", feature: "Production data validation", studenthub: true, alternatives: false, emailSpreadsheets: false, traditionalAgencies: false },
-  { category: "Compliance", feature: "Compliance dashboard", studenthub: true, alternatives: "Partial", emailSpreadsheets: false, traditionalAgencies: false },
-  { category: "Reports", feature: "Custom report builder", studenthub: true, alternatives: "Partial", emailSpreadsheets: false, traditionalAgencies: false },
-  { category: "Reports", feature: "Scheduled report delivery", studenthub: true, alternatives: false, emailSpreadsheets: false, traditionalAgencies: false },
-];
-
-const inspectorRows: ComparisonRow[] = [
-  { category: "Review", feature: "Batch document review", studenthub: true, alternatives: false, emailSpreadsheets: "Partial", traditionalAgencies: false },
-  { category: "Review", feature: "AI-prioritised queue", studenthub: true, alternatives: false, emailSpreadsheets: false, traditionalAgencies: false },
-  { category: "Compliance", feature: "Full audit trail per decision", studenthub: true, alternatives: false, emailSpreadsheets: "Partial", traditionalAgencies: false },
-  { category: "Compliance", feature: "Auto-approve/reject rules", studenthub: true, alternatives: false, emailSpreadsheets: false, traditionalAgencies: false },
-  { category: "Exemptions", feature: "Flag management workflow", studenthub: true, alternatives: false, emailSpreadsheets: false, traditionalAgencies: false },
-  { category: "Exemptions", feature: "Separate exemption queue", studenthub: true, alternatives: false, emailSpreadsheets: false, traditionalAgencies: false },
-  { category: "Reporting", feature: "Exportable compliance reports", studenthub: true, alternatives: "Partial", emailSpreadsheets: "Partial", traditionalAgencies: false },
-  { category: "Reporting", feature: "Multi-region standards support", studenthub: true, alternatives: false, emailSpreadsheets: false, traditionalAgencies: false },
-];
-
 const personaRows: Record<string, ComparisonRow[]> = {
   candidate: candidateRows,
   company: companyRows,
-  staff: staffRows,
-  admin: adminRows,
-  inspector: inspectorRows,
 };
 
 // ── Score calculation ──────────────────────────────────
@@ -173,12 +111,6 @@ const categoryColors: Record<string, string> = {
   Analytics: "#ec4899",
   Shortlisting: "#0b63ce",
   Commissions: "#8b5cf6",
-  Users: "#0b63ce",
-  Finance: "#24835b",
-  Reports: "#8b5cf6",
-  Review: "#0b63ce",
-  Exemptions: "#f59e0b",
-  Reporting: "#ec4899",
 };
 
 // ── Animated score bar ────────────────────────────────
@@ -462,7 +394,7 @@ function MobileScoreBadge({ value }: { value: ScoreValue }) {
 
 export default function ComparisonTable({ persona = "candidate", className }: ComparisonTableProps) {
   const rows = personaRows[persona] ?? candidateRows;
-  const columns = personaColumns[persona] ?? personaColumns.candidate;
+  const columns = sharedColumns;
 
   // Group by category
   const categories = rows.reduce<{ category: string; rows: ComparisonRow[] }[]>((acc, row) => {
@@ -475,9 +407,6 @@ export default function ComparisonTable({ persona = "candidate", className }: Co
   // Score summary
   const totalFeatures = rows.length;
   const shFullScore = rows.filter((r) => getScore(r.studenthub) === "full").length;
-  const altFullScore = rows.filter((r) => getScore(r.alternatives) === "full").length;
-  const emailFullScore = rows.filter((r) => getScore(r.emailSpreadsheets) === "full").length;
-  const agencyFullScore = rows.filter((r) => getScore(r.traditionalAgencies) === "full").length;
 
   const sectionRef = useRef<HTMLElement>(null);
 
@@ -496,27 +425,23 @@ export default function ComparisonTable({ persona = "candidate", className }: Co
           See the difference
         </p>
         <h2 className="shBenefitsTitle text-center">
-          {persona === "candidate" && "Why candidates choose StudentHub."}
-          {persona === "company" && "Why companies choose StudentHub."}
-          {persona !== "candidate" && persona !== "company" && "See how StudentHub compares."}
+          {persona === "candidate"
+            ? "Why candidates choose StudentHub."
+            : "Why companies choose StudentHub."}
         </h2>
         <p
           className="max-w-[480px] mx-auto mt-2 text-sm leading-relaxed"
           style={{ color: "var(--muted)" }}
         >
-          We win on every feature that matters.
           {persona === "candidate"
-            ? " StudentHub gives you tools that job boards and agencies can't match."
-            : " One platform replaces four legacy tools."}
+            ? "StudentHub gives you tools that job boards and agencies can't match."
+            : "One platform replaces four legacy tools."}
         </p>
       </div>
 
       {/* Score summary rings */}
       <div className="flex items-center justify-center gap-6 md:gap-10 mb-8 flex-wrap">
         <ScoreRing value={shFullScore} label="StudentHub" total={totalFeatures} color="#0b63ce" />
-        <ScoreRing value={altFullScore} label="Job boards" total={totalFeatures} color="#667085" />
-        <ScoreRing value={emailFullScore} label="Email & sheets" total={totalFeatures} color="#667085" />
-        <ScoreRing value={agencyFullScore} label="Agencies" total={totalFeatures} color="#667085" />
       </div>
 
       {/* Desktop: card-based category layout */}
@@ -593,7 +518,7 @@ export default function ComparisonTable({ persona = "candidate", className }: Co
       {/* Context note */}
       <div className="text-center mt-6">
         <p className="text-[10px]" style={{ color: "var(--muted)" }}>
-          Based on {totalFeatures} features compared across categories. StudentHub shown in blue.
+          Based on {totalFeatures} features compared. Data updated regularly.
         </p>
       </div>
     </section>

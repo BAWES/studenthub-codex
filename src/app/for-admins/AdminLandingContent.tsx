@@ -201,10 +201,10 @@ export default function AdminLandingContent({
         <FeatureGrid persona="admin" />
 
         {/* ── Social proof — admin testimonials ── */}
-        <TestimonialCarousel persona="admin" />
+        <TestimonialCarousel persona="company" />
 
         {/* ── Comparison — StudentHub vs alternatives ── */}
-        <ComparisonTable persona="admin" />
+        <ComparisonTable persona="company" />
 
         {/* ── Pricing — admin pricing tiers ── */}
         <PricingCard persona="admin" />

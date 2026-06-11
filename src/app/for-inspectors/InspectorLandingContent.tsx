@@ -201,10 +201,10 @@ export default function InspectorLandingContent({
         <FeatureGrid persona="inspector" />
 
         {/* ── Social proof — inspector testimonials ── */}
-        <TestimonialCarousel persona="inspector" />
+        <TestimonialCarousel persona="candidate" />
 
         {/* ── Comparison — StudentHub vs alternatives ── */}
-        <ComparisonTable persona="inspector" />
+        <ComparisonTable persona="candidate" />
 
         {/* ── Pricing — inspector pricing tiers ── */}
         <PricingCard persona="inspector" />

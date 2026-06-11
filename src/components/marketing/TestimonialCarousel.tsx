@@ -15,7 +15,7 @@ export interface Testimonial {
   rating: number;
 }
 
-export type TestimonialPersona = "candidate" | "staff" | "company" | "admin" | "inspector";
+export type TestimonialPersona = "candidate" | "company";
 
 // ── Persona-tuned testimonials ───────────────────────────
 
@@ -54,45 +54,6 @@ const candidateTestimonials: Testimonial[] = [
     title: "Healthcare Worker",
     company: "Placed via StudentHub",
     avatar: "DO",
-    rating: 4,
-  },
-];
-
-const staffTestimonials: Testimonial[] = [
-  {
-    quote:
-      "We went from paper files to digital placement in one week. Typo-tolerant search finds candidates even when names are misspelled — a huge win for our team.",
-    name: "Sarah L.",
-    title: "Operations Manager",
-    company: "MedStaff Agency — Kuwait",
-    avatar: "SL",
-    rating: 5,
-  },
-  {
-    quote:
-      "Bulk CV export and integrated timesheets cut our admin time by 62%. My consultants spend more time placing people and less time pushing paper.",
-    name: "Tom W.",
-    title: "Director",
-    company: "CareConnect Staffing — KW",
-    avatar: "TW",
-    rating: 5,
-  },
-  {
-    quote:
-      "The margin tracking alone paid for itself in the first month. I can see exactly what we're earning on every placement, in real time.",
-    name: "Nadia K.",
-    title: "Finance Manager",
-    company: "Premier Staff Solutions — Kuwait",
-    avatar: "NK",
-    rating: 5,
-  },
-  {
-    quote:
-      "Commission reconciliation used to take me a full day at month end. Now it's automated — I just review and approve.",
-    name: "Carlos M.",
-    title: "Operations Lead",
-    company: "HealthForce Staffing — KW",
-    avatar: "CM",
     rating: 4,
   },
 ];
@@ -136,86 +97,6 @@ const companyTestimonials: Testimonial[] = [
   },
 ];
 
-const inspectorTestimonials: Testimonial[] = [
-  {
-    quote:
-      "Batch document review cut our inspection time by 60%. The full audit trail means every decision I make is automatically logged and exportable.",
-    name: "Fatima R.",
-    title: "Senior Compliance Officer",
-    company: "Kuwait National Inspection Services",
-    avatar: "FR",
-    rating: 5,
-  },
-  {
-    quote:
-      "Queue clearance went from days to hours. I can batch-approve 50 inspection reports in one pass and the system flags anything that needs a second look.",
-    name: "Salem T.",
-    title: "Lead Inspector",
-    company: "Regulatory Compliance Kuwait",
-    avatar: "ST",
-    rating: 5,
-  },
-  {
-    quote:
-      "The automated compliance alerts caught three expiring certifications last month that would have slipped through our manual process. That alone justified the platform.",
-    name: "Hanan W.",
-    title: "Quality Assurance Manager",
-    company: "Kuwait Care Standards Authority",
-    avatar: "HW",
-    rating: 5,
-  },
-  {
-    quote:
-      "Export-ready audit trails mean I spend minutes preparing for regulatory reviews instead of digging through spreadsheets for hours.",
-    name: "Mishaal O.",
-    title: "Compliance Auditor",
-    company: "Health & Safety Authority — Kuwait",
-    avatar: "MO",
-    rating: 4,
-  },
-];
-
-// ── Map ──────────────────────────────────────────────────
-
-const adminTestimonials: Testimonial[] = [
-  {
-    quote:
-      "We manage permissions across 200+ users and 15 departments. Role-based access control means every admin sees exactly what they need — and nothing they shouldn't.",
-    name: "Jennifer W.",
-    title: "Head of Operations",
-    company: "CareTrust Management — Kuwait",
-    avatar: "JW",
-    rating: 5,
-  },
-  {
-    quote:
-      "The compliance dashboard consolidated alerts from six separate systems into one view. We caught three expiring certifications before they lapsed — that alone paid for the platform.",
-    name: "Mark S.",
-    title: "Compliance Director",
-    company: "National Care Group — KW",
-    avatar: "MS",
-    rating: 5,
-  },
-  {
-    quote:
-      "Month-end reconciliation went from a three-day slog to an automated process. Consolidated reporting across all 8 branches, one click to export.",
-    name: "Lena K.",
-    title: "Finance Controller",
-    company: "Premier Healthcare KW",
-    avatar: "LK",
-    rating: 5,
-  },
-  {
-    quote:
-      "Data validation catches anomalies before they reach production. It flagged a timesheet discrepancy that would have cost us 12K KWD — the system paid for itself in the first month.",
-    name: "Omar H.",
-    title: "Systems Administrator",
-    company: "SecureStaff Solutions — Kuwait",
-    avatar: "OH",
-    rating: 4,
-  },
-];
-
 /** Shuffle array using Fisher-Yates */
 function shuffleArray<T>(arr: T[]): T[] {
   const a = [...arr];
@@ -234,10 +115,7 @@ const mixedTestimonials: Testimonial[] = shuffleArray([
 
 const personaTestimonials: Record<TestimonialPersona, Testimonial[]> = {
   candidate: mixedTestimonials,
-  staff: staffTestimonials,
   company: companyTestimonials,
-  admin: adminTestimonials,
-  inspector: inspectorTestimonials,
 };
 
 // ── Props ────────────────────────────────────────────────
@@ -289,18 +167,14 @@ export default function TestimonialCarousel({
     >
       <div className="text-center mb-8 md:mb-10">
         <p className="text-[var(--sh-info)] text-[11px] font-black uppercase tracking-wider mb-2">
-          {persona === "candidate" && "Trusted by candidates and employers"}
-          {persona === "staff" && "Trusted by staffing agencies nationwide"}
-          {persona === "company" && "Trusted by leading employers"}
-          {persona === "admin" && "Trusted by compliance and ops teams"}
-          {persona === "inspector" && "Trusted by inspection teams"}
+          {persona === "company"
+            ? "Trusted by leading employers"
+            : "Trusted by candidates and employers"}
         </p>
         <h2 className="shBenefitsTitle text-center">
-          {persona === "candidate" && "Real stories from real placements."}
-          {persona === "staff" && "Staffing agencies that moved faster."}
-          {persona === "company" && "Employers that found their team."}
-          {persona === "admin" && "Operations that run on StudentHub."}
-          {persona === "inspector" && "Compliance that stands up to scrutiny."}
+          {persona === "company"
+            ? "Employers that found their team."
+            : "Real stories from real placements."}
         </h2>
       </div>
 
