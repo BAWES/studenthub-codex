@@ -13,6 +13,8 @@ interface LandingNavProps {
   onPersonaChange: (p: Persona) => void;
 }
 
+const BLUE = "#0b63ce";
+
 const tabs: { value: Persona; label: string; icon: typeof GraduationCap }[] = [
   { value: "candidate", label: "Students", icon: GraduationCap },
   { value: "company", label: "Companies", icon: Building2 },
@@ -26,8 +28,10 @@ export default function LandingNav({ session, persona, onPersonaChange }: Landin
       <div
         className="border-b"
         style={{
-          backgroundColor: "var(--card)",
-          borderColor: "var(--border)",
+          backgroundColor: "rgba(255,255,255,0.72)",
+          backdropFilter: "blur(18px)",
+          WebkitBackdropFilter: "blur(18px)",
+          borderColor: "rgba(214,220,231,0.5)",
         }}
       >
         <div className="mx-auto max-w-6xl px-6">
@@ -35,7 +39,7 @@ export default function LandingNav({ session, persona, onPersonaChange }: Landin
             <Link href="/" className="flex items-center gap-2.5 no-underline shrink-0">
               <span
                 className="flex h-8 w-8 items-center justify-center rounded-lg text-[11px] font-bold text-white"
-                style={{ backgroundColor: "var(--sh-coral)" }}
+                style={{ backgroundColor: BLUE }}
               >
                 SH
               </span>
@@ -81,7 +85,7 @@ export default function LandingNav({ session, persona, onPersonaChange }: Landin
                 <Link
                   href="/app"
                   className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium no-underline text-white transition-all hover:brightness-110"
-                  style={{ backgroundColor: "var(--sh-coral)" }}
+                  style={{ backgroundColor: BLUE }}
                 >
                   Open app <ArrowRight className="size-3.5" />
                 </Link>
@@ -97,7 +101,7 @@ export default function LandingNav({ session, persona, onPersonaChange }: Landin
                   <Link
                     href={`/signup?role=${persona === "company" ? "company" : "candidate"}`}
                     className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium no-underline text-white transition-all hover:brightness-110"
-                    style={{ backgroundColor: "var(--sh-coral)" }}
+                    style={{ backgroundColor: BLUE }}
                   >
                     {persona === "company" ? "Set up company account" : "Create free profile"}
                     <ArrowRight className="size-3.5" />
@@ -124,9 +128,11 @@ export default function LandingNav({ session, persona, onPersonaChange }: Landin
                   onClick={() => onPersonaChange(tab.value)}
                   className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium border-b-2 transition-all cursor-pointer"
                   style={{
-                    color: active ? "var(--sh-coral)" : "var(--muted)",
-                    borderBottomColor: active ? "var(--sh-coral)" : "transparent",
-                    backgroundColor: active ? "color-mix(in srgb, var(--sh-coral) 8%, transparent)" : "transparent",
+                    color: active ? BLUE : "var(--muted)",
+                    borderBottomColor: active ? BLUE : "transparent",
+                    backgroundColor: active
+                      ? `color-mix(in srgb, ${BLUE} 8%, transparent)`
+                      : "transparent",
                     borderTopLeftRadius: "8px",
                     borderTopRightRadius: "8px",
                     marginBottom: "-1px",
@@ -142,9 +148,24 @@ export default function LandingNav({ session, persona, onPersonaChange }: Landin
 
         {/* Mobile menu */}
         {mobileOpen && (
-          <div className="md:hidden pb-3 space-y-1 px-6" style={{ borderTop: "1px solid var(--border)" }}>
-            <Link href="#how-it-works" className="block px-3 py-2 rounded-md text-sm no-underline" style={{ color: "var(--muted)" }}>How it works</Link>
-            <Link href="#testimonials" className="block px-3 py-2 rounded-md text-sm no-underline" style={{ color: "var(--muted)" }}>Testimonials</Link>
+          <div
+            className="md:hidden pb-3 space-y-1 px-6"
+            style={{ borderTop: "1px solid rgba(214,220,231,0.5)" }}
+          >
+            <Link
+              href="#how-it-works"
+              className="block px-3 py-2 rounded-md text-sm no-underline"
+              style={{ color: "var(--muted)" }}
+            >
+              How it works
+            </Link>
+            <Link
+              href="#testimonials"
+              className="block px-3 py-2 rounded-md text-sm no-underline"
+              style={{ color: "var(--muted)" }}
+            >
+              Testimonials
+            </Link>
           </div>
         )}
       </div>

@@ -7,6 +7,11 @@ import {
   Search, CheckCircle2, Zap, Shield, Clock, Users, Star,
 } from "lucide-react";
 
+const BLUE = "#0b63ce";
+const BLUE_DEEP = "#084b9b";
+const AMBER = "#f59e0b";
+const AMBER_DEEP = "#d97706";
+
 // ── Scroll-reveal with staggered delay ──────────────────────────
 
 function useReveal() {
@@ -52,29 +57,28 @@ export default function LandingHero({ onCtaClick }: LandingHeroProps) {
       aria-label="StudentHub — connecting students with the right employers"
     >
       {/* ── Background layer ── */}
-      {/* Main gradient orb */}
+      {/* Blue gradient orb */}
       <div
         className="absolute inset-0 pointer-events-none"
         aria-hidden="true"
         style={{
-          background: "radial-gradient(ellipse 90% 60% at 30% -10%, color-mix(in srgb, var(--sh-coral) 14%, transparent) 0%, transparent 60%)",
+          background: `radial-gradient(ellipse 90% 60% at 30% -10%, color-mix(in srgb, ${BLUE} 14%, transparent) 0%, transparent 60%)`,
         }}
       />
-      {/* Secondary coral orb */}
+      {/* Secondary blue orb */}
       <div
         className="absolute inset-0 pointer-events-none"
         aria-hidden="true"
         style={{
-          background: "radial-gradient(ellipse 70% 50% at 80% 70%, color-mix(in srgb, var(--sh-coral) 10%, transparent) 0%, transparent 55%)",
+          background: `radial-gradient(ellipse 70% 50% at 80% 70%, color-mix(in srgb, ${BLUE} 10%, transparent) 0%, transparent 55%)`,
         }}
       />
-      {/* Subtle grid pattern */}
+      {/* Subtle dot pattern */}
       <div
         className="absolute inset-0 opacity-[0.025] dark:opacity-[0.06] pointer-events-none"
         aria-hidden="true"
         style={{
-          backgroundImage:
-            "radial-gradient(circle, currentColor 1px, transparent 1px)",
+          backgroundImage: "radial-gradient(circle, currentColor 1px, transparent 1px)",
           backgroundSize: "28px 28px",
           color: "var(--ink)",
         }}
@@ -85,7 +89,7 @@ export default function LandingHero({ onCtaClick }: LandingHeroProps) {
         className="absolute w-[320px] h-[320px] rounded-full pointer-events-none opacity-15 dark:opacity-8 max-lg:hidden"
         aria-hidden="true"
         style={{
-          background: "radial-gradient(circle, var(--sh-coral) 0%, transparent 70%)",
+          background: `radial-gradient(circle, ${BLUE} 0%, transparent 70%)`,
           top: "5%",
           right: "30%",
           filter: "blur(60px)",
@@ -96,7 +100,7 @@ export default function LandingHero({ onCtaClick }: LandingHeroProps) {
         className="absolute w-[240px] h-[240px] rounded-full pointer-events-none opacity-12 dark:opacity-6 max-lg:hidden"
         aria-hidden="true"
         style={{
-          background: "radial-gradient(circle, var(--sh-coral) 0%, transparent 70%)",
+          background: `radial-gradient(circle, ${BLUE} 0%, transparent 70%)`,
           bottom: "5%",
           left: "45%",
           filter: "blur(50px)",
@@ -112,9 +116,9 @@ export default function LandingHero({ onCtaClick }: LandingHeroProps) {
           <div
             className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold mb-5"
             style={{
-              backgroundColor: "color-mix(in srgb, var(--sh-coral) 10%, transparent)",
-              color: "var(--sh-coral)",
-              border: "1px solid color-mix(in srgb, var(--sh-coral) 20%, transparent)",
+              backgroundColor: `color-mix(in srgb, ${BLUE} 10%, transparent)`,
+              color: BLUE,
+              border: `1px solid color-mix(in srgb, ${BLUE} 20%, transparent)`,
             }}
           >
             <Sparkles className="size-3" />
@@ -129,7 +133,7 @@ export default function LandingHero({ onCtaClick }: LandingHeroProps) {
             style={{ color: "var(--ink)" }}
           >
             <span className="block">Connecting students with</span>
-            <span className="block" style={{ color: "var(--sh-coral)" }}>
+            <span className="block" style={{ color: BLUE }}>
               the right employers
             </span>
           </h1>
@@ -154,7 +158,7 @@ export default function LandingHero({ onCtaClick }: LandingHeroProps) {
               <button
                 onClick={onCtaClick}
                 className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg text-sm font-semibold text-white transition-all duration-200 hover:brightness-110 hover:-translate-y-0.5 active:translate-y-0 group"
-                style={{ backgroundColor: "var(--sh-coral)" }}
+                style={{ backgroundColor: BLUE }}
               >
                 <GraduationCap className="size-4" />
                 Create your free profile{" "}
@@ -165,8 +169,8 @@ export default function LandingHero({ onCtaClick }: LandingHeroProps) {
                 href="/signup?role=candidate"
                 className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg text-sm font-semibold text-white transition-all duration-200 hover:brightness-110 hover:-translate-y-0.5 active:translate-y-0 group shadow-lg"
                 style={{
-                  backgroundColor: "var(--sh-coral)",
-                  boxShadow: "var(--sh-coral-glow), 0 4px 14px color-mix(in srgb, var(--sh-coral) 30%, transparent)",
+                  backgroundColor: BLUE,
+                  boxShadow: `0 4px 14px color-mix(in srgb, ${BLUE} 30%, transparent)`,
                 }}
               >
                 <GraduationCap className="size-4" />
@@ -178,8 +182,8 @@ export default function LandingHero({ onCtaClick }: LandingHeroProps) {
               href="/signup?role=company"
               className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 group shadow-lg"
               style={{
-                background: "linear-gradient(135deg, var(--sh-amber), var(--sh-amber-deep))",
-                boxShadow: "var(--sh-amber-glow)",
+                background: `linear-gradient(135deg, ${AMBER}, ${AMBER_DEEP})`,
+                boxShadow: `0 4px 14px color-mix(in srgb, ${AMBER} 35%, transparent)`,
               }}
             >
               <Building2 className="size-4" />
@@ -202,7 +206,7 @@ export default function LandingHero({ onCtaClick }: LandingHeroProps) {
             <span
               className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium"
               style={{
-                backgroundColor: "color-mix(in srgb, var(--success) 10%, transparent)",
+                backgroundColor: `color-mix(in srgb, var(--success) 10%, transparent)`,
                 color: "var(--success)",
               }}
             >
@@ -212,8 +216,8 @@ export default function LandingHero({ onCtaClick }: LandingHeroProps) {
             <span
               className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium"
               style={{
-                backgroundColor: "color-mix(in srgb, var(--sh-coral) 10%, transparent)",
-                color: "var(--sh-coral)",
+                backgroundColor: `color-mix(in srgb, ${BLUE} 10%, transparent)`,
+                color: BLUE,
               }}
             >
               <Shield className="size-3" />
@@ -222,8 +226,8 @@ export default function LandingHero({ onCtaClick }: LandingHeroProps) {
             <span
               className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium"
               style={{
-                backgroundColor: "color-mix(in srgb, var(--sh-coral) 10%, transparent)",
-                color: "var(--sh-coral)",
+                backgroundColor: `color-mix(in srgb, ${AMBER} 10%, transparent)`,
+                color: AMBER,
               }}
             >
               <Star className="size-3" />
@@ -233,33 +237,35 @@ export default function LandingHero({ onCtaClick }: LandingHeroProps) {
         </RevealItem>
       </div>
 
-      {/* ── Right column: Premium mockup ── */}
+      {/* ── Right column: Premium glass mockup ── */}
       <div
         className="relative z-[2] w-full max-lg:mt-8 max-lg:max-w-lg max-lg:mx-auto"
         aria-hidden="true"
       >
         <RevealItem delay={400}>
           <div
-            className="relative rounded-2xl overflow-hidden backdrop-blur-xl"
+            className="relative rounded-2xl overflow-hidden"
             style={{
-              backgroundColor: "color-mix(in srgb, var(--surface) 65%, transparent)",
-              border: "1px solid color-mix(in srgb, var(--border) 50%, transparent)",
+              backgroundColor: "color-mix(in srgb, var(--surface) 55%, transparent)",
+              backdropFilter: "blur(20px)",
+              WebkitBackdropFilter: "blur(20px)",
+              border: "1px solid color-mix(in srgb, var(--border) 40%, transparent)",
               boxShadow: "0 12px 60px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04)",
             }}
           >
             {/* Mockup chrome */}
             <div
               className="flex items-center gap-2 px-4 py-2.5 border-b"
-              style={{ borderColor: "color-mix(in srgb, var(--border) 40%, transparent)" }}
+              style={{ borderColor: "color-mix(in srgb, var(--border) 30%, transparent)" }}
             >
               <div className="flex gap-1.5">
-                <span className="size-2.5 rounded-full" style={{ backgroundColor: "var(--sh-coral)" }} />
-                <span className="size-2.5 rounded-full" style={{ backgroundColor: "#f59e0b" }} />
+                <span className="size-2.5 rounded-full" style={{ backgroundColor: BLUE }} />
+                <span className="size-2.5 rounded-full" style={{ backgroundColor: AMBER }} />
                 <span className="size-2.5 rounded-full" style={{ backgroundColor: "var(--success)" }} />
               </div>
               <div
                 className="flex-1 flex items-center justify-center gap-1.5 px-2.5 py-1 rounded-md text-xs"
-                style={{ backgroundColor: "color-mix(in srgb, var(--paper) 60%, transparent)", color: "var(--muted)" }}
+                style={{ backgroundColor: "color-mix(in srgb, var(--paper) 50%, transparent)", color: "var(--muted)" }}
               >
                 <Search className="size-3" />
                 studenthub.co
@@ -273,15 +279,15 @@ export default function LandingHero({ onCtaClick }: LandingHeroProps) {
               <div
                 className="flex items-center gap-2 px-3.5 py-2 rounded-lg"
                 style={{
-                  backgroundColor: "color-mix(in srgb, var(--surface) 70%, transparent)",
-                  border: "1px solid color-mix(in srgb, var(--border) 40%, transparent)",
+                  backgroundColor: "color-mix(in srgb, var(--surface) 60%, transparent)",
+                  border: "1px solid color-mix(in srgb, var(--border) 30%, transparent)",
                 }}
               >
                 <Search className="size-3.5 shrink-0" style={{ color: "var(--muted)" }} />
                 <span className="text-xs" style={{ color: "var(--muted)" }}>Search open roles, companies...</span>
                 <span
                   className="ml-auto text-[10px] px-1.5 py-0.5 rounded font-mono shrink-0"
-                  style={{ backgroundColor: "color-mix(in srgb, var(--surface) 80%, transparent)", color: "var(--muted)" }}
+                  style={{ backgroundColor: "color-mix(in srgb, var(--surface) 70%, transparent)", color: "var(--muted)" }}
                 >
                   ⌘K
                 </span>
@@ -290,14 +296,18 @@ export default function LandingHero({ onCtaClick }: LandingHeroProps) {
               {/* Persona switch */}
               <div
                 className="flex rounded-lg p-0.5"
-                style={{ backgroundColor: "color-mix(in srgb, var(--paper) 50%, transparent)" }}
+                style={{ backgroundColor: "color-mix(in srgb, var(--paper) 40%, transparent)" }}
               >
-                <div className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-[7px] text-xs font-medium"
-                  style={{ backgroundColor: "color-mix(in srgb, var(--sh-coral) 14%, transparent)", color: "var(--sh-coral)" }}>
+                <div
+                  className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-[7px] text-xs font-medium"
+                  style={{ backgroundColor: `color-mix(in srgb, ${BLUE} 14%, transparent)`, color: BLUE }}
+                >
                   <GraduationCap className="size-3" /> Student
                 </div>
-                <div className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-[7px] text-xs font-medium"
-                  style={{ color: "var(--muted)" }}>
+                <div
+                  className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-[7px] text-xs font-medium"
+                  style={{ color: "var(--muted)" }}
+                >
                   <Building2 className="size-3" /> Employer
                 </div>
               </div>
@@ -306,16 +316,19 @@ export default function LandingHero({ onCtaClick }: LandingHeroProps) {
               <div
                 className="rounded-xl p-4"
                 style={{
-                  backgroundColor: "color-mix(in srgb, var(--surface) 70%, transparent)",
-                  border: "1px solid color-mix(in srgb, var(--border) 30%, transparent)",
+                  backgroundColor: "color-mix(in srgb, var(--surface) 60%, transparent)",
+                  border: "1px solid color-mix(in srgb, var(--border) 25%, transparent)",
                 }}
               >
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "var(--sh-coral)" }}>
+                  <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: BLUE }}>
                     <Sparkles className="size-2.5 inline-block -mt-0.5 mr-1" />
                     Staff-matched for you
                   </span>
-                  <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium" style={{ backgroundColor: "color-mix(in srgb, var(--success) 12%, transparent)", color: "var(--success)" }}>
+                  <span
+                    className="text-[10px] px-1.5 py-0.5 rounded-full font-medium"
+                    style={{ backgroundColor: "color-mix(in srgb, var(--success) 12%, transparent)", color: "var(--success)" }}
+                  >
                     <CheckCircle2 className="size-2.5 inline-block -mt-0.5 mr-0.5" />
                     92% match
                   </span>
@@ -330,15 +343,15 @@ export default function LandingHero({ onCtaClick }: LandingHeroProps) {
                 {/* Quick stats */}
                 <div className="grid grid-cols-4 gap-1.5">
                   {[
-                    { label: "Profile", value: "92%", color: "var(--sh-coral)" },
-                    { label: "Apps", value: "4", color: "var(--sh-coral)" },
-                    { label: "Timesheet", value: "Wk 24", color: "var(--sh-coral)" },
-                    { label: "Pay", value: "KWD 420", color: "var(--sh-coral)" },
+                    { label: "Profile", value: "92%", color: BLUE },
+                    { label: "Apps", value: "4", color: BLUE },
+                    { label: "Timesheet", value: "Wk 24", color: BLUE },
+                    { label: "Pay", value: "KWD 420", color: BLUE },
                   ].map((item) => (
                     <div
                       key={item.label}
                       className="py-2 rounded-lg text-center"
-                      style={{ backgroundColor: "color-mix(in srgb, var(--paper) 40%, transparent)" }}
+                      style={{ backgroundColor: "color-mix(in srgb, var(--paper) 35%, transparent)" }}
                     >
                       <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: item.color }}>
                         {item.label}
@@ -361,9 +374,9 @@ export default function LandingHero({ onCtaClick }: LandingHeroProps) {
                 </span>
                 <span
                   className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-full"
-                  style={{ backgroundColor: "color-mix(in srgb, var(--sh-coral) 10%, transparent)", color: "var(--sh-coral)" }}
+                  style={{ backgroundColor: `color-mix(in srgb, ${BLUE} 10%, transparent)`, color: BLUE }}
                 >
-                  <Clock className="size-2.5" /> Avg match: {"<"}48h
+                  <Clock className="size-2.5" /> Avg match: &lt;48h
                 </span>
               </div>
             </div>
@@ -373,8 +386,8 @@ export default function LandingHero({ onCtaClick }: LandingHeroProps) {
           <div
             className="absolute -bottom-3 -right-3 w-full h-full rounded-2xl -z-[1]"
             style={{
-              backgroundColor: "color-mix(in srgb, var(--sh-coral) 6%, transparent)",
-              border: "1px solid color-mix(in srgb, var(--sh-coral) 10%, transparent)",
+              backgroundColor: `color-mix(in srgb, ${BLUE} 5%, transparent)`,
+              border: `1px solid color-mix(in srgb, ${BLUE} 8%, transparent)`,
             }}
             aria-hidden="true"
           />

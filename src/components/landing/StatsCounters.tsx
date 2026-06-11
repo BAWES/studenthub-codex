@@ -3,6 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 import { FadeInSection } from "@/components/marketing";
 
+const BLUE = "#0b63ce";
+const AMBER = "#f59e0b";
+
+// ── Animated counter ──
+
 interface CounterProps {
   end: number;
   suffix?: string;
@@ -52,14 +57,16 @@ function AnimatedCounter({ end, suffix = "", prefix = "", decimals = 0 }: Counte
   );
 }
 
+// ── Stats data ──
+
 const stats = [
   {
     end: 1200,
     suffix: "+",
     label: "Students placed",
     desc: "Successfully matched with employers across Kuwait",
-    accent: "var(--sh-coral)",
-    gradient: "radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--sh-coral) 12%, transparent), transparent 70%)",
+    accent: BLUE,
+    gradient: `radial-gradient(ellipse at 50% 0%, color-mix(in srgb, ${BLUE} 12%, transparent), transparent 70%)`,
   },
   {
     end: 48,
@@ -67,8 +74,8 @@ const stats = [
     prefix: "<",
     label: "Avg time to match",
     desc: "From profile creation to interview",
-    accent: "var(--sh-amber)",
-    gradient: "radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--sh-amber) 10%, transparent), transparent 70%)",
+    accent: AMBER,
+    gradient: `radial-gradient(ellipse at 50% 0%, color-mix(in srgb, ${AMBER} 10%, transparent), transparent 70%)`,
   },
   {
     end: 500,
@@ -76,7 +83,7 @@ const stats = [
     label: "Active employers",
     desc: "Trusted by companies across every sector in Kuwait",
     accent: "var(--success)",
-    gradient: "radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--success) 10%, transparent), transparent 70%)",
+    gradient: `radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--success) 10%, transparent), transparent 70%)`,
   },
 ];
 
@@ -88,10 +95,13 @@ export default function StatsCounters() {
           {stats.map((stat) => (
             <div
               key={stat.label}
-              className="relative overflow-hidden rounded-xl p-6 sm:p-7 text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+              className="relative overflow-hidden rounded-xl p-6 sm:p-7 text-center transition-all duration-300 hover:-translate-y-1"
               style={{
                 backgroundColor: "color-mix(in srgb, var(--surface) 50%, transparent)",
-                border: "1px solid var(--border)",
+                backdropFilter: "blur(12px)",
+                WebkitBackdropFilter: "blur(12px)",
+                border: "1px solid color-mix(in srgb, var(--border) 50%, transparent)",
+                boxShadow: "0 4px 24px rgba(0,0,0,0.04)",
               }}
             >
               {/* Gradient background accent */}

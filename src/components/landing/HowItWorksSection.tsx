@@ -3,6 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 import { UserPlus, Sparkles, Briefcase, Building2, Search, ClipboardCheck } from "lucide-react";
 
+const BLUE = "#0b63ce";
+const AMBER = "#f59e0b";
+
 // ── Scroll-reveal hook ──
 
 function useReveal() {
@@ -50,10 +53,13 @@ function StepCard({
       }}
     >
       <div
-        className="relative overflow-hidden rounded-xl p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-md"
+        className="relative overflow-hidden rounded-xl p-6 transition-all duration-300 hover:-translate-y-1"
         style={{
           backgroundColor: "color-mix(in srgb, var(--surface) 50%, transparent)",
-          border: "1px solid var(--border)",
+          backdropFilter: "blur(12px)",
+          WebkitBackdropFilter: "blur(12px)",
+          border: "1px solid color-mix(in srgb, var(--border) 40%, transparent)",
+          boxShadow: "0 4px 20px rgba(0,0,0,0.04)",
         }}
       >
         <div
@@ -67,8 +73,8 @@ function StepCard({
             <span
               className="flex h-11 w-11 items-center justify-center rounded-xl transition-transform duration-300"
               style={{
-                backgroundColor: "color-mix(in srgb, var(--surface) 80%, transparent)",
-                border: "1px solid var(--border)",
+                backgroundColor: "color-mix(in srgb, var(--surface) 70%, transparent)",
+                border: "1px solid color-mix(in srgb, var(--border) 40%, transparent)",
                 color,
               }}
             >
@@ -103,18 +109,18 @@ const candidateSteps = [
     title: "Create your profile",
     description:
       "Sign up in under 3 minutes. Add your skills, experience, and preferences. No CV upload required — just fill in what matters.",
-    color: "var(--sh-coral)",
+    color: BLUE,
     gradient:
-      "radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--sh-coral) 10%, transparent), transparent 70%)",
+      `radial-gradient(ellipse at 50% 0%, color-mix(in srgb, ${BLUE} 10%, transparent), transparent 70%)`,
   },
   {
     icon: Sparkles,
     title: "Get matched by recruiters",
     description:
       "Our staff recruiters review your profile and invite you to roles that fit. No need to search — the right opportunities come to you.",
-    color: "var(--sh-amber)",
+    color: AMBER,
     gradient:
-      "radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--sh-amber) 10%, transparent), transparent 70%)",
+      `radial-gradient(ellipse at 50% 0%, color-mix(in srgb, ${AMBER} 10%, transparent), transparent 70%)`,
   },
   {
     icon: Briefcase,
@@ -133,18 +139,18 @@ const employerSteps = [
     title: "Set up your account",
     description:
       "Create your company profile in minutes. Post openings and our staff recruiters start matching you with vetted students.",
-    color: "var(--sh-coral)",
+    color: BLUE,
     gradient:
-      "radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--sh-coral) 10%, transparent), transparent 70%)",
+      `radial-gradient(ellipse at 50% 0%, color-mix(in srgb, ${BLUE} 10%, transparent), transparent 70%)`,
   },
   {
     icon: Search,
     title: "Discover students",
     description:
       "Our recruitment team and matching tools work together to find the best-fit students for your roles.",
-    color: "var(--sh-amber)",
+    color: AMBER,
     gradient:
-      "radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--sh-amber) 10%, transparent), transparent 70%)",
+      `radial-gradient(ellipse at 50% 0%, color-mix(in srgb, ${AMBER} 10%, transparent), transparent 70%)`,
   },
   {
     icon: ClipboardCheck,
@@ -181,9 +187,9 @@ export default function HowItWorksSection({ forEmployer = false }: HowItWorksSec
         <span
           className="inline-block text-[11px] font-bold uppercase tracking-wider mb-2 px-3 py-1 rounded-full"
           style={{
-            color: "var(--sh-coral)",
-            backgroundColor: "color-mix(in srgb, var(--sh-coral) 10%, transparent)",
-            border: "1px solid color-mix(in srgb, var(--sh-coral) 20%, transparent)",
+            color: BLUE,
+            backgroundColor: `color-mix(in srgb, ${BLUE} 10%, transparent)`,
+            border: `1px solid color-mix(in srgb, ${BLUE} 20%, transparent)`,
           }}
         >
           How it works
@@ -206,13 +212,13 @@ export default function HowItWorksSection({ forEmployer = false }: HowItWorksSec
           className="hidden md:block absolute top-[52px] left-[calc(16.66%+24px)] right-[calc(16.66%+24px)] h-px"
           style={{
             background: `linear-gradient(90deg, 
-              color-mix(in srgb, var(--sh-coral) 10%, transparent) 0%, 
-              var(--sh-coral) 15%, 
-              var(--sh-coral) 35%, 
-              color-mix(in srgb, var(--sh-coral) 10%, transparent) 50%,
-              color-mix(in srgb, var(--sh-amber) 10%, transparent) 50%,
-              var(--sh-amber) 65%,
-              var(--sh-amber) 85%,
+              color-mix(in srgb, ${BLUE} 10%, transparent) 0%, 
+              ${BLUE} 15%, 
+              ${BLUE} 35%, 
+              color-mix(in srgb, ${BLUE} 10%, transparent) 50%,
+              color-mix(in srgb, ${AMBER} 10%, transparent) 50%,
+              ${AMBER} 65%,
+              ${AMBER} 85%,
               color-mix(in srgb, var(--success) 10%, transparent) 100%
             )`,
             opacity: 0.2,

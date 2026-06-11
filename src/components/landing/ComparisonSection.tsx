@@ -4,6 +4,8 @@ import { useState } from "react";
 import { FadeInSection } from "@/components/marketing";
 import { Check, X } from "lucide-react";
 
+const BLUE = "#0b63ce";
+
 interface ComparisonRow {
   feature: string;
   studentHub: boolean | string;
@@ -76,9 +78,9 @@ export default function ComparisonSection({ persona }: ComparisonSectionProps) {
           <span
             className="inline-block text-[11px] font-bold uppercase tracking-wider mb-2 px-3 py-1 rounded-full"
             style={{
-              color: "var(--sh-coral)",
-              backgroundColor: "color-mix(in srgb, var(--sh-coral) 10%, transparent)",
-              border: "1px solid color-mix(in srgb, var(--sh-coral) 20%, transparent)",
+              color: BLUE,
+              backgroundColor: `color-mix(in srgb, ${BLUE} 10%, transparent)`,
+              border: `1px solid color-mix(in srgb, ${BLUE} 20%, transparent)`,
             }}
           >
             Comparison
@@ -101,12 +103,12 @@ export default function ComparisonSection({ persona }: ComparisonSectionProps) {
               style={{
                 backgroundColor:
                   active === cat
-                    ? "color-mix(in srgb, var(--sh-coral) 12%, transparent)"
+                    ? `color-mix(in srgb, ${BLUE} 12%, transparent)`
                     : "transparent",
-                color: active === cat ? "var(--sh-coral)" : "var(--muted)",
+                color: active === cat ? BLUE : "var(--muted)",
                 border: `1px solid ${
                   active === cat
-                    ? "color-mix(in srgb, var(--sh-coral) 25%, transparent)"
+                    ? `color-mix(in srgb, ${BLUE} 25%, transparent)`
                     : "var(--border)"
                 }`,
               }}
@@ -118,17 +120,18 @@ export default function ComparisonSection({ persona }: ComparisonSectionProps) {
 
         {/* Table */}
         <div
-          className="overflow-hidden rounded-xl transition-shadow duration-300 hover:shadow-sm"
+          className="overflow-hidden rounded-xl"
           style={{
-            border: "1px solid var(--border)",
+            border: "1px solid color-mix(in srgb, var(--border) 50%, transparent)",
+            boxShadow: "0 4px 20px rgba(0,0,0,0.04)",
           }}
         >
           {/* Header */}
           <div
             className="grid grid-cols-3 gap-0"
             style={{
-              borderBottom: "1px solid var(--border)",
-              backgroundColor: "color-mix(in srgb, var(--surface) 40%, transparent)",
+              borderBottom: "1px solid color-mix(in srgb, var(--border) 50%, transparent)",
+              backgroundColor: "color-mix(in srgb, var(--surface) 35%, transparent)",
             }}
           >
             <div
@@ -139,11 +142,11 @@ export default function ComparisonSection({ persona }: ComparisonSectionProps) {
             </div>
             <div
               className="px-4 py-3 text-xs font-semibold text-center flex items-center justify-center gap-1"
-              style={{ color: "var(--sh-coral)" }}
+              style={{ color: BLUE }}
             >
               <span
                 className="flex h-4 w-4 items-center justify-center rounded text-[8px] font-bold text-white"
-                style={{ backgroundColor: "var(--sh-coral)" }}
+                style={{ backgroundColor: BLUE }}
               >
                 SH
               </span>
@@ -164,7 +167,7 @@ export default function ComparisonSection({ persona }: ComparisonSectionProps) {
               className="grid grid-cols-3 gap-0 transition-colors duration-150 hover:opacity-90"
               style={{
                 borderBottom:
-                  i < data.rows.length - 1 ? "1px solid var(--border)" : "none",
+                  i < data.rows.length - 1 ? "1px solid color-mix(in srgb, var(--border) 50%, transparent)" : "none",
                 backgroundColor:
                   i % 2 === 0
                     ? "color-mix(in srgb, var(--surface) 30%, transparent)"

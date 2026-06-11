@@ -4,6 +4,9 @@ import { useState, useEffect, useCallback } from "react";
 import { FadeInSection } from "@/components/marketing";
 import { Star, Quote, ChevronLeft, ChevronRight } from "lucide-react";
 
+const BLUE = "#0b63ce";
+const AMBER = "#f59e0b";
+
 interface Testimonial {
   name: string;
   role: string;
@@ -56,7 +59,7 @@ function Stars({ rating }: { rating: number }) {
   return (
     <div className="flex gap-0.5">
       {Array.from({ length: rating }).map((_, i) => (
-        <Star key={i} className="size-3.5 fill-current" style={{ color: "#f59e0b" }} />
+        <Star key={i} className="size-3.5 fill-current" style={{ color: AMBER }} />
       ))}
     </div>
   );
@@ -105,9 +108,9 @@ export default function TestimonialsSection({
           <span
             className="inline-block text-[11px] font-bold uppercase tracking-wider mb-2 px-3 py-1 rounded-full"
             style={{
-              color: "var(--sh-coral)",
-              backgroundColor: "color-mix(in srgb, var(--sh-coral) 10%, transparent)",
-              border: "1px solid color-mix(in srgb, var(--sh-coral) 20%, transparent)",
+              color: BLUE,
+              backgroundColor: `color-mix(in srgb, ${BLUE} 10%, transparent)`,
+              border: `1px solid color-mix(in srgb, ${BLUE} 20%, transparent)`,
             }}
           >
             Testimonials
@@ -137,12 +140,12 @@ export default function TestimonialsSection({
               style={{
                 backgroundColor:
                   activeTab === tab.value
-                    ? "color-mix(in srgb, var(--sh-coral) 12%, transparent)"
+                    ? `color-mix(in srgb, ${BLUE} 12%, transparent)`
                     : "transparent",
-                color: activeTab === tab.value ? "var(--sh-coral)" : "var(--muted)",
+                color: activeTab === tab.value ? BLUE : "var(--muted)",
                 border: `1px solid ${
                   activeTab === tab.value
-                    ? "color-mix(in srgb, var(--sh-coral) 25%, transparent)"
+                    ? `color-mix(in srgb, ${BLUE} 25%, transparent)`
                     : "var(--border)"
                 }`,
               }}
@@ -155,16 +158,19 @@ export default function TestimonialsSection({
         {/* Testimonial card */}
         <div className="max-w-2xl mx-auto">
           <div
-            className="relative overflow-hidden rounded-xl p-7 sm:p-9 transition-all duration-300 hover:shadow-md"
+            className="relative overflow-hidden rounded-xl p-7 sm:p-9 transition-all duration-300"
             style={{
               backgroundColor: "color-mix(in srgb, var(--surface) 50%, transparent)",
-              border: "1px solid var(--border)",
+              backdropFilter: "blur(12px)",
+              WebkitBackdropFilter: "blur(12px)",
+              border: "1px solid color-mix(in srgb, var(--border) 40%, transparent)",
+              boxShadow: "0 4px 24px rgba(0,0,0,0.04)",
             }}
           >
             {/* Decorative quote icon */}
             <Quote
               className="absolute top-4 right-4 size-10 opacity-[0.06]"
-              style={{ color: "var(--sh-coral)" }}
+              style={{ color: BLUE }}
               aria-hidden="true"
             />
 
@@ -172,8 +178,7 @@ export default function TestimonialsSection({
             <div
               className="absolute top-0 left-0 bottom-0 w-1 rounded-l-xl"
               style={{
-                backgroundColor:
-                  current.persona === "candidate" ? "var(--sh-coral)" : "var(--sh-coral)",
+                backgroundColor: current.persona === "candidate" ? BLUE : AMBER,
               }}
               aria-hidden="true"
             />
@@ -192,8 +197,7 @@ export default function TestimonialsSection({
                 <span
                   className="flex h-10 w-10 items-center justify-center rounded-full text-xs font-bold text-white shrink-0"
                   style={{
-                    backgroundColor:
-                      current.persona === "candidate" ? "var(--sh-coral)" : "var(--sh-coral)",
+                    backgroundColor: current.persona === "candidate" ? BLUE : AMBER,
                   }}
                 >
                   {current.name
@@ -213,8 +217,8 @@ export default function TestimonialsSection({
                 <span
                   className="ml-auto inline-flex items-center px-2 py-1 rounded-full text-[10px] font-semibold"
                   style={{
-                    backgroundColor: "color-mix(in srgb, var(--sh-coral) 10%, transparent)",
-                    color: "var(--sh-coral)",
+                    backgroundColor: `color-mix(in srgb, ${BLUE} 10%, transparent)`,
+                    color: BLUE,
                   }}
                 >
                   {current.persona === "candidate" ? "Student" : "Employer"}
@@ -246,7 +250,7 @@ export default function TestimonialsSection({
                   style={{
                     width: i === activeIndex ? 20 : 6,
                     backgroundColor:
-                      i === activeIndex ? "var(--sh-coral)" : "var(--border)",
+                      i === activeIndex ? BLUE : "var(--border)",
                   }}
                   aria-label={`Go to testimonial ${i + 1}`}
                 />

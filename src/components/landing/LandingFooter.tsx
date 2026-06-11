@@ -17,7 +17,7 @@ export default function LandingFooter({ persona }: LandingFooterProps) {
             <div className="flex items-center gap-2 mb-3">
               <span
                 className="flex h-7 w-7 items-center justify-center rounded-lg text-[10px] font-bold text-white"
-                style={{ backgroundColor: "var(--sh-coral)" }}
+                style={{ backgroundColor: "#0b63ce" }}
               >
                 SH
               </span>
@@ -106,7 +106,7 @@ export default function LandingFooter({ persona }: LandingFooterProps) {
             <Link
               href={`/signup?role=${role}`}
               className="text-xs no-underline font-medium transition-colors duration-150"
-              style={{ color: "var(--sh-coral)" }}
+              style={{ color: "#0b63ce" }}
             >
               Sign up
             </Link>

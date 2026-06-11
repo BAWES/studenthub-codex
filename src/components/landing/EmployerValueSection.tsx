@@ -4,18 +4,21 @@ import { FadeInSection } from "@/components/marketing";
 import { Users, Zap, Shield, FileText, Building2, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
+const BLUE = "#0b63ce";
+const AMBER = "#f59e0b";
+
 const benefits = [
   {
     icon: Users,
     title: "Access vetted students",
     description: "Every student on StudentHub is verified and actively seeking placement. Skip the screening — start interviewing pre-qualified talent.",
-    color: "var(--sh-coral)",
+    color: BLUE,
   },
   {
     icon: Zap,
     title: "Staff-powered matching",
     description: "Our recruitment team finds the best students based on your requirements. No manual searching through hundreds of profiles.",
-    color: "var(--sh-amber)",
+    color: AMBER,
   },
   {
     icon: Shield,
@@ -33,13 +36,13 @@ const benefits = [
     icon: Building2,
     title: "Dedicated account support",
     description: "Every employer gets a dedicated account manager to help with placements, compliance, and platform support.",
-    color: "var(--sh-coral)",
+    color: BLUE,
   },
   {
     icon: ArrowRight,
     title: "Zero agency fees",
     description: "Post jobs and hire directly through the platform. No recruitment agency markups — pay only the agreed hourly or fixed rate.",
-    color: "var(--sh-coral)",
+    color: BLUE,
   },
 ];
 
@@ -51,9 +54,9 @@ export default function EmployerValueSection() {
           <span
             className="inline-block text-[11px] font-bold uppercase tracking-wider mb-2 px-3 py-1 rounded-full"
             style={{
-              color: "var(--sh-coral)",
-              backgroundColor: "color-mix(in srgb, var(--sh-coral) 10%, transparent)",
-              border: "1px solid color-mix(in srgb, var(--sh-coral) 20%, transparent)",
+              color: BLUE,
+              backgroundColor: `color-mix(in srgb, ${BLUE} 10%, transparent)`,
+              border: `1px solid color-mix(in srgb, ${BLUE} 20%, transparent)`,
             }}
           >
             For employers
@@ -77,7 +80,10 @@ export default function EmployerValueSection() {
               className="relative overflow-hidden rounded-xl p-5 transition-all duration-300 hover:-translate-y-0.5"
               style={{
                 backgroundColor: "color-mix(in srgb, var(--surface) 50%, transparent)",
-                border: "1px solid var(--border)",
+                backdropFilter: "blur(12px)",
+                WebkitBackdropFilter: "blur(12px)",
+                border: "1px solid color-mix(in srgb, var(--border) 40%, transparent)",
+                boxShadow: "0 4px 20px rgba(0,0,0,0.04)",
               }}
             >
               <div
@@ -92,8 +98,8 @@ export default function EmployerValueSection() {
                 <span
                   className="flex h-9 w-9 items-center justify-center rounded-lg mb-3"
                   style={{
-                    backgroundColor: "color-mix(in srgb, var(--surface) 80%, transparent)",
-                    border: "1px solid var(--border)",
+                    backgroundColor: "color-mix(in srgb, var(--surface) 70%, transparent)",
+                    border: "1px solid color-mix(in srgb, var(--border) 40%, transparent)",
                     color: benefit.color,
                   }}
                 >
@@ -113,8 +119,11 @@ export default function EmployerValueSection() {
         <div className="text-center mt-8">
           <Link
             href="/signup?role=company"
-            className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg text-sm font-medium text-white transition-all hover:brightness-110"
-            style={{ backgroundColor: "var(--sh-coral)" }}
+            className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg text-sm font-medium text-white transition-all hover:brightness-110 hover:-translate-y-0.5"
+            style={{
+              background: `linear-gradient(135deg, ${AMBER}, #d97706)`,
+              boxShadow: `0 4px 14px color-mix(in srgb, ${AMBER} 35%, transparent)`,
+            }}
           >
             Start hiring today <ArrowRight className="size-3.5" />
           </Link>
