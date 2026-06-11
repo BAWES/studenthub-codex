@@ -95,9 +95,10 @@ test.describe("Staff critical flows — Request fulfillment pipeline", () => {
 
       // Sidebar nav items for staff role
       await expect(ctx.page.locator('a[href="/staff/candidates"]').first()).toBeVisible({ timeout: 10000 });
-      await expect(ctx.page.locator('a[href="/staff/contracts"]').first()).toBeVisible({ timeout: 5000 });
       await expect(ctx.page.locator('a[href="/staff/interviews"]').first()).toBeVisible({ timeout: 5000 });
       await expect(ctx.page.locator('a[href="/staff/requests"]').first()).toBeVisible({ timeout: 5000 });
+      await expect(ctx.page.locator('a[href="/staff"]').first()).toBeVisible({ timeout: 5000 });
+      await expect(ctx.page.locator('a[href="/app"]').first()).toBeVisible({ timeout: 5000 });
 
       assertNoReactErrors(ctx.errors);
       await ctx.close();
@@ -118,16 +119,16 @@ test.describe("Staff critical flows — Request fulfillment pipeline", () => {
       await ctx.close();
     });
 
-    test("1c. Staff contracts page loads", async () => {
+    test("1c. Staff overview page loads", async () => {
       const ctx = await staffContext();
 
-      await ctx.page.goto("/staff/contracts");
+      await ctx.page.goto("/staff");
       await ctx.page.waitForLoadState("load");
       await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
-      await expect(ctx.page).toHaveURL(/\/staff\/contracts/);
+      await expect(ctx.page).toHaveURL(/\/staff(\/|$)/);
 
-      // DataTable or content renders
-      const dataSection = ctx.page.locator("table, h1, [class*='content']").first();
+      // Content renders
+      const dataSection = ctx.page.locator("h1, [class*='content'], [class*='metrics']").first();
       await expect(dataSection).toBeVisible({ timeout: 10000 });
 
       assertNoReactErrors(ctx.errors);
@@ -159,7 +160,6 @@ test.describe("Staff critical flows — Request fulfillment pipeline", () => {
 
       const navLinks = [
         { url: "/staff/candidates" },
-        { url: "/staff/contracts" },
         { url: "/staff/interviews" },
         { url: "/staff/requests" },
       ];
