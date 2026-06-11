@@ -1,5 +1,6 @@
 import crypto from "node:crypto";
 import { PrismaClient } from "@prisma/client";
+import { getMockFixtures } from "./users";
 
 const prisma = new PrismaClient();
 
@@ -202,6 +203,12 @@ let fixtureCache: Map<string, FixtureUser> | null = null;
 export async function getFixtures(): Promise<Map<string, FixtureUser>> {
   if (fixtureCache) return fixtureCache;
 
+  // USE_MOCK_FIXTURES=true => return mock users (no DB dependency)
+  if (process.env.USE_MOCK_FIXTURES === "true") {
+    fixtureCache = getMockFixtures();
+    return fixtureCache;
+  }
+
   // Try seed fixtures first
   const seedFixtures = await trySeedFixtures();
   if (seedFixtures) {
@@ -337,5 +344,7 @@ export async function getFixtures(): Promise<Map<string, FixtureUser>> {
 }
 
 export async function disconnectPrisma(): Promise<void> {
+  // Skip disconnect when using mock fixtures (no DB was ever connected via this path)
+  if (process.env.USE_MOCK_FIXTURES === "true") return;
   await prisma.$disconnect();
 }
