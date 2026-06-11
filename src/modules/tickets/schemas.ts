@@ -47,3 +47,32 @@ export type TicketActionResult = z.output<typeof ticketActionResultSchema>;
 
 export type CreateTicketResult = TicketActionResult;
 export type AddCommentResult = TicketActionResult;
+
+export const listTicketsSchema = z.object({
+  candidateId: z.coerce.number().int().positive().optional(),
+  status: z.coerce.number().int().optional(),
+  page: z.coerce.number().int().positive().optional().default(1),
+  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
+});
+export const getTicketSchema = z.object({
+  ticketUuid: z.string().min(1, "Ticket UUID is required"),
+});
+export const createTicketSchema = z.object({
+  detail: z.string().min(1, "Ticket detail is required"),
+  attachments: z.array(z.string()).optional(),
+});
+export const addCommentSchema = z.object({
+  ticketUuid: z.string().min(1, "Ticket UUID is required"),
+  commentDetail: z.string().min(1, "Comment detail is required"),
+  attachments: z.array(z.string()).optional(),
+});
+export const getCommentsSchema = z.object({
+  ticketUuid: z.string().min(1, "Ticket UUID is required"),
+});
+export const updateTicketSchema = z.object({
+  ticketUuid: z.string().min(1, "Ticket UUID is required"),
+  detail: z.string().min(1, "Ticket detail is required").max(2000),
+});
+export const closeTicketSchema = z.object({
+  ticketUuid: z.string().min(1, "Ticket UUID is required"),
+});

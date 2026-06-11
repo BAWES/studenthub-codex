@@ -60,11 +60,6 @@ const deleteBlockedIpSchema = z.object({
 // Types
 // ---------------------------------------------------------------------------
 
-export type {
-  BlockedIpListItem,
-  ListBlockedIpsResult,
-  BlockedIpUuidResult,
-} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // listBlockedIps

@@ -24,7 +24,6 @@ import type { WorkLogFeedbackItem, ListWorkLogFeedbackResult } from "./schemas";
 // Exported schemas (for shared validation)
 // ---------------------------------------------------------------------------
 
-export { listWorkLogFeedbackSchema, getWorkLogFeedbackSchema };
 
 // ---------------------------------------------------------------------------
 // listWorkLogFeedback

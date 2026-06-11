@@ -24,3 +24,12 @@ export const listCandidateLinksResultSchema = z.object({
 });
 
 export type ListCandidateLinksResult = z.output<typeof listCandidateLinksResultSchema>;
+
+export const listCandidateLinksSchema = z.object({
+  candidateId: z.coerce.number().int().positive().optional(),
+  page: z.coerce.number().int().positive().optional().default(1),
+  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
+});
+export const getCandidateLinkSchema = z.object({
+  uuid: z.string().min(1, "Candidate link UUID is required"),
+});

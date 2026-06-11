@@ -42,8 +42,6 @@ export type ListCurrenciesParams = z.input<typeof listCurrenciesSchema>;
 export type GetCurrencyParams = z.input<typeof getCurrencySchema>;
 export type CreateCurrencyParams = z.input<typeof createCurrencySchema>;
 
-export type { CurrencyItem, ListCurrenciesResult } from "./schemas";
-
 // ---------------------------------------------------------------------------
 // listCurrencies
 // ---------------------------------------------------------------------------

@@ -51,12 +51,6 @@ export type UpdateIdCardStatusParams = z.input<typeof updateIdCardStatusSchema>;
 // Exported schemas (for shared validation in tests)
 // ---------------------------------------------------------------------------
 
-export {
-  listIdCardsSchema,
-  getIdCardSchema,
-  createIdCardSchema,
-  updateIdCardStatusSchema,
-};
 
 // ---------------------------------------------------------------------------
 // listCandidateIdCards

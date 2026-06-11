@@ -12,7 +12,7 @@ import {
   getCommentsSchema,
   updateTicketSchema,
   closeTicketSchema,
-} from "./actions";
+} from "./schemas";
 
 describe("listTicketsSchema", () => {
   it("accepts default values when no params provided", () => {

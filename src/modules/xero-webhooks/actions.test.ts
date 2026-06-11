@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   listWebhookEventsSchema,
   getWebhookEventSchema,
-} from "./actions";
+} from "./schemas";
 import crypto from "node:crypto";
 
 // ---------------------------------------------------------------------------

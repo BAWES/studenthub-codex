@@ -5,12 +5,20 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
 import {
+  approveCompanyRequestSchema,
   companyRequestItemSchema,
-  listCompanyRequestsResultSchema,
   companyRequestMutationResultSchema,
-  type CompanyRequestItem,
-  type ListCompanyRequestsResult,
-  type CompanyRequestMutationResult,
+  createCompanyRequestSchema,
+  getCompanyRequestSchema,
+  listCompanyRequestsResultSchema,
+  listCompanyRequestsSchema,
+  rejectCompanyRequestSchema,
+  updateCompanyRequestSchema,
+} from "./schemas";
+import type {
+  CompanyRequestItem,
+  CompanyRequestMutationResult,
+  ListCompanyRequestsResult,
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
@@ -25,78 +33,6 @@ import {
 // ---------------------------------------------------------------------------
 
 // ---------------------------------------------------------------------------
-// Schemas
-// ---------------------------------------------------------------------------
-
-const listCompanyRequestsSchema = z.object({
-  status: z.coerce.boolean().optional(),
-  page: z.coerce.number().int().positive().optional().default(1),
-  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
-});
-
-const getCompanyRequestSchema = z.object({
-  uuid: z.string().min(1, "Company request UUID is required"),
-});
-
-const approveCompanyRequestSchema = z.object({
-  uuid: z.string().min(1, "Company request UUID is required"),
-});
-
-const rejectCompanyRequestSchema = z.object({
-  uuid: z.string().min(1, "Company request UUID is required"),
-});
-
-const createCompanyRequestSchema = z.object({
-  company_name: z.string().min(1, "Company name is required"),
-  company_email: z.string().email("Invalid email format"),
-  contact_name: z.string().min(1, "Contact name is required"),
-  contact_position: z.string().optional(),
-  phone_number: z.string().optional(),
-  requesting_for: z.string().optional(),
-  currency_code: z.string().length(3, "Currency code must be 3 characters").optional(),
-  country_id: z.coerce.number().int().positive().optional(),
-  contact_receive_email: z.boolean().optional(),
-});
-
-const updateCompanyRequestSchema = z.object({
-  uuid: z.string().min(1, "Company request UUID is required"),
-  company_name: z.string().min(1).optional(),
-  company_email: z.string().email("Invalid email format").optional(),
-  contact_name: z.string().min(1).optional(),
-  contact_position: z.string().optional().nullable(),
-  phone_number: z.string().optional().nullable(),
-  requesting_for: z.string().optional().nullable(),
-  currency_code: z.string().length(3).optional(),
-  country_id: z.coerce.number().int().positive().optional().nullable(),
-  contact_receive_email: z.boolean().optional(),
-  status: z.boolean().optional(),
-});
-
-// ---------------------------------------------------------------------------
-// Types (input params)
-// ---------------------------------------------------------------------------
-
-export type ListCompanyRequestsParams = z.input<typeof listCompanyRequestsSchema>;
-export type GetCompanyRequestParams = z.input<typeof getCompanyRequestSchema>;
-export type ApproveCompanyRequestParams = z.input<typeof approveCompanyRequestSchema>;
-export type RejectCompanyRequestParams = z.input<typeof rejectCompanyRequestSchema>;
-export type CreateCompanyRequestParams = z.input<typeof createCompanyRequestSchema>;
-export type UpdateCompanyRequestParams = z.input<typeof updateCompanyRequestSchema>;
-
-// ---------------------------------------------------------------------------
-// Exported schemas (for shared validation in tests)
-// ---------------------------------------------------------------------------
-
-export {
-  listCompanyRequestsSchema,
-  getCompanyRequestSchema,
-  approveCompanyRequestSchema,
-  rejectCompanyRequestSchema,
-  createCompanyRequestSchema,
-  updateCompanyRequestSchema,
-};
-
-// ---------------------------------------------------------------------------
 // Server actions
 // ---------------------------------------------------------------------------
 
@@ -106,7 +42,7 @@ export {
  * Defaults to showing only pending requests.
  */
 export async function listCompanyRequests(
-  params: ListCompanyRequestsParams = {},
+  params: z.input<typeof listCompanyRequestsSchema> = {},
 ): Promise<ListCompanyRequestsResult> {
   await requireCapability("admin.read");
 
@@ -173,7 +109,7 @@ export async function listCompanyRequests(
  * Mirrors the legacy CompanyRequestController::actionView.
  */
 export async function getCompanyRequest(
-  params: GetCompanyRequestParams,
+  params: z.input<typeof getCompanyRequestSchema>,
 ): Promise<CompanyRequestItem | null> {
   await requireCapability("admin.read");
 
@@ -223,7 +159,7 @@ export async function getCompanyRequest(
  * Mirrors the legacy CompanyRequestController::actionApprove.
  */
 export async function approveCompanyRequest(
-  params: ApproveCompanyRequestParams,
+  params: z.input<typeof approveCompanyRequestSchema>,
 ): Promise<CompanyRequestMutationResult> {
   await requireCapability("admin.write");
 
@@ -268,7 +204,7 @@ export async function approveCompanyRequest(
  * Mirrors the legacy CompanyRequestController::actionReject.
  */
 export async function rejectCompanyRequest(
-  params: RejectCompanyRequestParams,
+  params: z.input<typeof rejectCompanyRequestSchema>,
 ): Promise<CompanyRequestMutationResult> {
   await requireCapability("admin.write");
 
@@ -314,7 +250,7 @@ export async function rejectCompanyRequest(
  * Generates UUID and sets default status to pending (false).
  */
 export async function createCompanyRequest(
-  params: CreateCompanyRequestParams,
+  params: z.input<typeof createCompanyRequestSchema>,
 ): Promise<CompanyRequestMutationResult & { company_request_uuid?: string }> {
   await requireCapability("admin.write");
 
@@ -376,7 +312,7 @@ export async function createCompanyRequest(
  * Only provided fields are updated.
  */
 export async function updateCompanyRequest(
-  params: UpdateCompanyRequestParams,
+  params: z.input<typeof updateCompanyRequestSchema>,
 ): Promise<CompanyRequestMutationResult> {
   await requireCapability("admin.write");
 

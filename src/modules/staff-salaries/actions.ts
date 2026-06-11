@@ -49,7 +49,6 @@ export type CreateSalaryParams = z.input<typeof createSalarySchema>;
 // Exported schemas (for shared validation in tests)
 // ---------------------------------------------------------------------------
 
-export { listSalariesSchema, getSalarySchema, createSalarySchema };
 
 // ---------------------------------------------------------------------------
 // listStaffSalaries

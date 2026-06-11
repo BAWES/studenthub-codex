@@ -65,12 +65,6 @@ export type UpdateExpenseParams = z.input<typeof updateExpenseSchema>;
 // Exported schemas (for shared validation in tests)
 // ---------------------------------------------------------------------------
 
-export {
-  listExpensesSchema,
-  getExpenseSchema,
-  createExpenseSchema,
-  updateExpenseSchema,
-};
 
 // ---------------------------------------------------------------------------
 // listExpenses

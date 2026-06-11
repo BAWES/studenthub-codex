@@ -18,14 +18,6 @@ import {
 // Re-export schemas for shared validation (backward compatibility)
 // ---------------------------------------------------------------------------
 
-export { listCompaniesSchema, getCompanySchema } from "./schemas";
-export type {
-  ListCompaniesParams,
-  GetCompanyParams,
-  CompanyListItem,
-  ListCompaniesResult,
-  CompanyDetailResult,
-} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Server Actions

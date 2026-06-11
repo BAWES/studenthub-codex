@@ -26,7 +26,6 @@ const listContractsSchema = z.object({
   companyId: z.coerce.number().int().positive().optional(),
 });
 
-export { listContractsSchema };
 
 // ---------------------------------------------------------------------------
 // getContract — Schema
@@ -36,7 +35,6 @@ const getContractSchema = z.object({
   contract_uuid: z.string().min(1, "contract_uuid is required"),
 });
 
-export { getContractSchema };
 
 // ---------------------------------------------------------------------------
 // getContract

@@ -47,7 +47,6 @@ export type UpdateSettingResult = {
 // Exported schemas (for shared validation in tests)
 // ---------------------------------------------------------------------------
 
-export { listSettingsSchema, getSettingSchema, updateSettingSchema, listSettingsResultSchema, updateSettingResultSchema, settingItemSchema };
 
 // ---------------------------------------------------------------------------
 // Server actions

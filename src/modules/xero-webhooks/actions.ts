@@ -20,35 +20,18 @@ import { requireCapability } from "@/modules/auth/session";
 //   XERO_WEBHOOK_KEY — shared secret key for HMAC verification (defaults to legacy value)
 // ---------------------------------------------------------------------------
 
-// ---------------------------------------------------------------------------
-// Schemas
-// ---------------------------------------------------------------------------
-
-const listWebhookEventsSchema = z.object({
-  page: z.coerce.number().int().positive().optional().default(1),
-  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
-});
-
-const getWebhookEventSchema = z.object({
-  id: z.coerce.number().int().positive(),
-});
-
 import {
-  xeroWebhookEventItemSchema,
+  getWebhookEventSchema,
   listWebhookEventsResultSchema,
+  listWebhookEventsSchema,
   processXeroWebhookResponseSchema,
+  xeroWebhookEventItemSchema,
 } from "./schemas";
 import type {
-  XeroWebhookEventItem,
   ListWebhookEventsResult,
   ProcessXeroWebhookResponse,
+  XeroWebhookEventItem,
 } from "./schemas";
-
-// ---------------------------------------------------------------------------
-// Exported schemas
-// ---------------------------------------------------------------------------
-
-export { listWebhookEventsSchema, getWebhookEventSchema };
 
 // ---------------------------------------------------------------------------
 // Helpers
