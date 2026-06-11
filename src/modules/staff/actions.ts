@@ -3,11 +3,15 @@
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
-import { staffListResultSchema, staffGetResultSchema, staffListItemSchema } from "./schemas";
-import type { StaffListItem, StaffListResult, StaffGetResult } from "./schemas";
+
+import {
+  staffListItemSchema,
+  listStaffResultSchema,
+} from "./schemas";
+import type { StaffListItem, StaffListResult } from "./schemas";
 
 // ---------------------------------------------------------------------------
-// Input schemas
+// Schemas
 // ---------------------------------------------------------------------------
 
 const listStaffSchema = z.object({
@@ -112,7 +116,7 @@ export async function listStaff(
     totalPages: Math.ceil(total / limit),
   };
 
-  const outputParsed = staffListResultSchema.safeParse(result);
+  const outputParsed = listStaffResultSchema.safeParse(result);
   if (!outputParsed.success) {
     console.error(
       "[modules/staff] listStaff output validation failed:",
@@ -130,7 +134,7 @@ export async function listStaff(
  * @param params - Object with `id` (positive integer)
  * @returns The staff record, or null if not found
  */
-export async function getStaff(params: GetStaffParams): Promise<StaffGetResult> {
+export async function getStaff(params: GetStaffParams): Promise<StaffListItem | null> {
   await requireCapability("staff.read");
 
   const parsed = getStaffSchema.safeParse(params);
@@ -156,8 +160,8 @@ export async function getStaff(params: GetStaffParams): Promise<StaffGetResult> 
     },
   });
 
-  const outputParsed = staffGetResultSchema.safeParse(staff);
-  if (!outputParsed.success) {
+  const outputParsed = staffListItemSchema.safeParse(staff);
+  if (staff !== null && !outputParsed.success) {
     console.error(
       "[modules/staff] getStaff output validation failed:",
       outputParsed.error.issues,

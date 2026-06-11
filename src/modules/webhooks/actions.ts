@@ -21,10 +21,7 @@ import {
   webhookListItemSchema,
   listWebhooksResultSchema,
 } from "./schemas";
-import type {
-  WebhookListItem,
-  ListWebhooksResult,
-} from "./schemas";
+import type { WebhookListItem, ListWebhooksResult } from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Server actions

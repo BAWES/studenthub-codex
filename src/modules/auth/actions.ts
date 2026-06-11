@@ -9,11 +9,13 @@ import { clearPendingAccounts, clearSession, createPendingAccounts, createSessio
 import { verifyYiiPassword } from "./password";
 import { roleDefaultRoute } from "./types";
 import type { LoginState } from "./types";
+
 import {
   loginStateSchema,
   verifySessionResultSchema,
   changePasswordStateSchema,
 } from "./schemas";
+import type { ChangePasswordState } from "./schemas";
 
 export async function loginAction(_state: LoginState, formData: FormData): Promise<LoginState> {
   const email = formData.get("email");
@@ -128,12 +130,6 @@ export async function logoutAction() {
 // ---------------------------------------------------------------------------
 // changePassword — candidate self-service password change
 // ---------------------------------------------------------------------------
-
-export type ChangePasswordState = {
-  success?: boolean;
-  error?: string;
-  fieldErrors?: Record<string, string[]>;
-};
 
 const changePasswordSchema = z
   .object({

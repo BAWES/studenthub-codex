@@ -5,7 +5,7 @@ import { z } from "zod";
 // ---------------------------------------------------------------------------
 
 export const staffListItemSchema = z.object({
-  staff_id: z.number().int().nonnegative(),
+  staff_id: z.number().int().positive(),
   staff_name: z.string(),
   staff_job_title: z.string().nullable(),
   staff_email: z.string(),
@@ -16,7 +16,7 @@ export const staffListItemSchema = z.object({
 
 export type StaffListItem = z.output<typeof staffListItemSchema>;
 
-export const staffListResultSchema = z.object({
+export const listStaffResultSchema = z.object({
   staff: z.array(staffListItemSchema),
   total: z.number().int().nonnegative(),
   page: z.number().int().positive(),
@@ -24,8 +24,4 @@ export const staffListResultSchema = z.object({
   totalPages: z.number().int().nonnegative(),
 });
 
-export type StaffListResult = z.output<typeof staffListResultSchema>;
-
-export const staffGetResultSchema = staffListItemSchema.nullable();
-
-export type StaffGetResult = z.output<typeof staffGetResultSchema>;
+export type StaffListResult = z.output<typeof listStaffResultSchema>;

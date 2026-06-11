@@ -44,3 +44,6 @@ export const ticketActionResultSchema = z.object({
 });
 
 export type TicketActionResult = z.output<typeof ticketActionResultSchema>;
+
+export type CreateTicketResult = TicketActionResult;
+export type AddCommentResult = TicketActionResult;
