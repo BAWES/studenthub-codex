@@ -17,6 +17,18 @@
 // ---------------------------------------------------------------------------
 
 import { z } from "zod";
+import {
+  jiraIssueSchema,
+  listJiraIssuesResultSchema,
+  jiraUserSchema,
+  listJiraUsersResultSchema,
+} from "./schemas";
+import type {
+  JiraIssue,
+  ListJiraIssuesResult,
+  JiraUser,
+  ListJiraUsersResult,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Schemas
@@ -42,35 +54,14 @@ const listJiraUsersSchema = z.object({
 // ---------------------------------------------------------------------------
 
 export type ListJiraIssuesParams = z.input<typeof listJiraIssuesSchema>;
-
-export type JiraIssue = {
-  id: string;
-  key: string;
-  summary: string | null;
-  status: string | null;
-  assignee: { displayName: string; emailAddress: string | null } | null;
-  created: string | null;
-  updated: string | null;
-};
-
-export type ListJiraIssuesResult = {
-  issues: JiraIssue[];
-  total: number;
-};
-
 export type ListJiraUsersParams = z.input<typeof listJiraUsersSchema>;
 
-export type JiraUser = {
-  displayName: string;
-  emailAddress: string | null;
-  accountId: string;
-  active: boolean;
-  avatarUrls: Record<string, string> | null;
-};
-
-export type ListJiraUsersResult = {
-  users: JiraUser[];
-};
+export type {
+  JiraIssue,
+  ListJiraIssuesResult,
+  JiraUser,
+  ListJiraUsersResult,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Internal helpers
@@ -172,7 +163,7 @@ export async function listJiraIssues(
     maxResults: String(maxResults),
   });
 
-  return {
+  const result: ListJiraIssuesResult = {
     issues: (data.issues ?? []).map((issue) => ({
       id: issue.id,
       key: issue.key,
@@ -189,6 +180,17 @@ export async function listJiraIssues(
     })),
     total: data.total ?? 0,
   };
+
+  // Validate output shape
+  const outputParsed = listJiraIssuesResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/admin/jira] listJiraIssues output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -224,7 +226,7 @@ export async function listJiraUsers(
     accountType?: string;
   }>>("users/search", searchParams);
 
-  return {
+  const result: ListJiraUsersResult = {
     users: (data ?? [])
       .filter(
         (u) =>
@@ -239,4 +241,15 @@ export async function listJiraUsers(
         avatarUrls: u.avatarUrls ?? null,
       })),
   };
+
+  // Validate output shape
+  const outputParsed = listJiraUsersResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/admin/jira] listJiraUsers output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }

@@ -17,6 +17,12 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
 import type { Prisma } from "@prisma/client";
+import {
+  bankItemSchema,
+  listBanksResultSchema,
+  bankOperationResultSchema,
+} from "./schemas";
+import type { BankItem, ListBanksResult, BankOperationResult } from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Schemas
@@ -46,26 +52,9 @@ const createBankSchema = z.object({
 // ---------------------------------------------------------------------------
 
 export type ListBanksParams = z.input<typeof listBanksSchema>;
-
-export type BankItem = {
-  bank_id: number;
-  bank_name: string | null;
-  bank_iban_code: string;
-  bank_swift_code: string | null;
-  bank_code_abk: number | null;
-  bank_address: string | null;
-  bank_transfer_type: string | null;
-};
-
-export type ListBanksResult = {
-  banks: BankItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
-
 export type CreateBankParams = z.input<typeof createBankSchema>;
+
+export type { BankItem, ListBanksResult, BankOperationResult } from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Exported schemas
@@ -125,7 +114,7 @@ export async function listBanks(
     prisma.bank.count({ where }),
   ]);
 
-  return {
+  const result: ListBanksResult = {
     banks: rows.map((row) => ({
       bank_id: row.bank_id,
       bank_name: row.bank_name,
@@ -140,6 +129,17 @@ export async function listBanks(
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  // Validate output shape
+  const outputParsed = listBanksResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/admin/bank] listBanks output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -182,10 +182,21 @@ export async function createBank(
       },
     });
 
-    return {
+    const result: BankOperationResult = {
       operation: "success",
       message: "Bank created successfully",
     };
+
+    // Validate output shape
+    const outputParsed = bankOperationResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/admin/bank] createBank output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
   } catch (error) {
     return {
       operation: "error",

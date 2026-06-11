@@ -5,6 +5,16 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
+import {
+  blockedIpListItemSchema,
+  listBlockedIpsResultSchema,
+  blockedIpUuidResultSchema,
+} from "./schemas";
+import type {
+  BlockedIpListItem,
+  ListBlockedIpsResult,
+  BlockedIpUuidResult,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Schemas
@@ -50,21 +60,11 @@ const deleteBlockedIpSchema = z.object({
 // Types
 // ---------------------------------------------------------------------------
 
-export type BlockedIpListItem = {
-  ip_uuid: string;
-  ip_address: string | null;
-  note: string | null;
-  created_at: string | null;
-  updated_at: string | null;
-};
-
-export type ListBlockedIpsResult = {
-  records: BlockedIpListItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
+export type {
+  BlockedIpListItem,
+  ListBlockedIpsResult,
+  BlockedIpUuidResult,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // listBlockedIps
@@ -104,7 +104,7 @@ export async function listBlockedIps(
     prisma.blocked_ip.count(),
   ]);
 
-  return {
+  const result: ListBlockedIpsResult = {
     records: records.map((r: any): BlockedIpListItem => ({
       ip_uuid: r.ip_uuid,
       ip_address: r.ip_address ?? null,
@@ -117,6 +117,17 @@ export async function listBlockedIps(
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  // Validate output shape
+  const outputParsed = listBlockedIpsResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/admin/blocked-ips] listBlockedIps output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -144,13 +155,24 @@ export async function getBlockedIp(
   if (!record) return null;
 
   const raw = record as any;
-  return {
+  const result: BlockedIpListItem = {
     ip_uuid: raw.ip_uuid,
     ip_address: raw.ip_address ?? null,
     note: raw.note ?? null,
     created_at: raw.created_at?.toISOString() ?? null,
     updated_at: raw.updated_at?.toISOString() ?? null,
   };
+
+  // Validate output shape
+  const outputParsed = blockedIpListItemSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/admin/blocked-ips] getBlockedIp output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -183,7 +205,18 @@ export async function createBlockedIp(
   });
 
   revalidatePath("/admin/ip-blocking");
-  return { ip_uuid: record.ip_uuid };
+  const ipResult: BlockedIpUuidResult = { ip_uuid: record.ip_uuid };
+
+  // Validate output shape
+  const outputParsed = blockedIpUuidResultSchema.safeParse(ipResult);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/admin/blocked-ips] createBlockedIp output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return ipResult;
 }
 
 // ---------------------------------------------------------------------------
@@ -224,7 +257,18 @@ export async function updateBlockedIp(
   });
 
   revalidatePath("/admin/ip-blocking");
-  return { ip_uuid: ipUuid };
+  const updateResult: BlockedIpUuidResult = { ip_uuid: ipUuid };
+
+  // Validate output shape
+  const outputParsed2 = blockedIpUuidResultSchema.safeParse(updateResult);
+  if (!outputParsed2.success) {
+    console.error(
+      "[modules/admin/blocked-ips] updateBlockedIp output validation failed:",
+      outputParsed2.error.issues,
+    );
+  }
+
+  return updateResult;
 }
 
 // ---------------------------------------------------------------------------
@@ -259,5 +303,16 @@ export async function deleteBlockedIp(
   });
 
   revalidatePath("/admin/ip-blocking");
-  return { ip_uuid: parsed.data.ipUuid };
+  const deleteResult: BlockedIpUuidResult = { ip_uuid: parsed.data.ipUuid };
+
+  // Validate output shape
+  const outputParsed3 = blockedIpUuidResultSchema.safeParse(deleteResult);
+  if (!outputParsed3.success) {
+    console.error(
+      "[modules/admin/blocked-ips] deleteBlockedIp output validation failed:",
+      outputParsed3.error.issues,
+    );
+  }
+
+  return deleteResult;
 }
