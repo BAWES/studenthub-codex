@@ -1,5 +1,13 @@
 import { describe, it, expect } from "vitest";
-import { z } from "zod";
+
+import {
+  listOffersSchema,
+  getOfferSchema,
+  createOfferSchema,
+  offerListItemSchema,
+  offerDetailSchema,
+  listOffersResultSchema,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Pure logic: offer list schema validation
@@ -7,18 +15,6 @@ import { z } from "zod";
 // The listOffers action uses this schema internally. Testing it
 // separately avoids mocking "use server" dependencies (prisma, session, etc.).
 // ---------------------------------------------------------------------------
-
-const coerceBool = z
-  .enum(["true", "false", "1", "0"])
-  .transform((v) => v === "true" || v === "1");
-
-const listOffersSchema = z.object({
-  status: coerceBool.optional(),
-  companyId: z.coerce.number().int().positive().optional(),
-  search: z.string().optional(),
-  page: z.coerce.number().int().positive().optional().default(1),
-  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
-});
 
 describe("listOffersSchema", () => {
   it("accepts empty params (default pagination)", () => {
@@ -91,10 +87,6 @@ describe("listOffersSchema", () => {
 // getOffer schema validation
 // ---------------------------------------------------------------------------
 
-const getOfferSchema = z.object({
-  offerUuid: z.string().min(1, "Offer UUID is required"),
-});
-
 describe("getOfferSchema", () => {
   it("accepts a valid UUID string", () => {
     const result = getOfferSchema.safeParse({ offerUuid: "abc-123" });
@@ -115,27 +107,6 @@ describe("getOfferSchema", () => {
 // ---------------------------------------------------------------------------
 // createOffer schema validation
 // ---------------------------------------------------------------------------
-
-const createOfferSchema = z.object({
-  storyUuid: z.string().min(1, "Story UUID is required"),
-  requestUuid: z.string().min(1, "Request UUID is required"),
-  areaUuid: z.string().optional(),
-  position: z.string().min(1, "Position is required"),
-  positionAr: z.string().optional(),
-  description: z.string().optional(),
-  descriptionAr: z.string().optional(),
-  hoursPerDay: z.number().int().positive().optional(),
-  daysPerWeek: z.boolean().optional(),
-  compensationType: z.string().optional(),
-  compensationAmount: z.string().optional(),
-  compensationDescription: z.string().optional(),
-  compensationDescriptionAr: z.string().optional(),
-  minAge: z.number().int().positive().optional(),
-  maxAge: z.number().int().positive().optional(),
-  gender: z.boolean().optional(),
-  availableFrom: z.string().optional(),
-  availableTo: z.string().optional(),
-});
 
 describe("createOfferSchema", () => {
   it("accepts a valid offer input (minimum required)", () => {
@@ -160,7 +131,7 @@ describe("createOfferSchema", () => {
       description: "Looking for a sales associate",
       hoursPerDay: 8,
       daysPerWeek: true,
-      compensationType: "Monthly Salary",
+      compensationType: "MONTHLY_SALARY",
       compensationAmount: "300",
       compensationDescription: "Monthly salary",
       compensationDescriptionAr: "راتب شهري",
@@ -199,47 +170,12 @@ describe("createOfferSchema", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Return type shape
+// Output schema shape tests
 // ---------------------------------------------------------------------------
 
-type OfferListItem = {
-  job_uuid: string;
-  position: string;
-  position_ar: string | null;
-  description: string | null;
-  hours_per_day: number | null;
-  days_per_week: boolean | null;
-  status: boolean | null;
-  area_uuid: string | null;
-  request_uuid: string;
-  created_at: Date | null;
-  updated_at: Date | null;
-};
-
-type OfferDetail = OfferListItem & {
-  description_ar: string | null;
-  compensation_type: string | null;
-  compensation_amount: string | null;
-  compensation_description: string | null;
-  compensation_description_ar: string | null;
-  min_age: number | null;
-  max_age: number | null;
-  gender: boolean | null;
-  available_from: Date | null;
-  available_to: Date | null;
-};
-
-type ListOffersResult = {
-  offers: OfferListItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
-
-describe("OfferListItem shape", () => {
-  it("defines the expected fields", () => {
-    const mock: OfferListItem = {
+describe("offerListItemSchema", () => {
+  it("validates a well-formed offer list item", () => {
+    const item = {
       job_uuid: "abc-123",
       position: "Cashier",
       position_ar: null,
@@ -252,16 +188,32 @@ describe("OfferListItem shape", () => {
       created_at: null,
       updated_at: null,
     };
-    expect(mock.job_uuid).toBe("abc-123");
-    expect(mock.position).toBe("Cashier");
-    expect(mock.status).toBe(true);
-    expect(mock.request_uuid).toBe("req-456");
+    const result = offerListItemSchema.safeParse(item);
+    expect(result.success).toBe(true);
+  });
+
+  it("allows nullable fields", () => {
+    const item = {
+      job_uuid: "abc-123",
+      position: "Cashier",
+      position_ar: null,
+      description: null,
+      hours_per_day: null,
+      days_per_week: null,
+      status: null,
+      area_uuid: null,
+      request_uuid: "req-456",
+      created_at: null,
+      updated_at: null,
+    };
+    const result = offerListItemSchema.safeParse(item);
+    expect(result.success).toBe(true);
   });
 });
 
-describe("OfferDetail shape", () => {
-  it("defines the expected fields including compensation", () => {
-    const mock: OfferDetail = {
+describe("offerDetailSchema", () => {
+  it("validates a well-formed offer detail", () => {
+    const detail = {
       job_uuid: "abc-123",
       position: "Cashier",
       position_ar: null,
@@ -284,23 +236,46 @@ describe("OfferDetail shape", () => {
       created_at: null,
       updated_at: null,
     };
-    expect(mock.compensation_type).toBe("Monthly Salary");
-    expect(mock.min_age).toBe(18);
-    expect(mock.max_age).toBe(50);
+    const result = offerDetailSchema.safeParse(detail);
+    expect(result.success).toBe(true);
   });
 });
 
-describe("ListOffersResult shape", () => {
-  it("accepts a valid result set", () => {
-    const result: ListOffersResult = {
+describe("listOffersResultSchema", () => {
+  it("validates an empty result set", () => {
+    const result = listOffersResultSchema.safeParse({
       offers: [],
       total: 0,
       page: 1,
       limit: 20,
       totalPages: 0,
-    };
-    expect(result.total).toBe(0);
-    expect(result.offers).toHaveLength(0);
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("validates a non-empty result set", () => {
+    const result = listOffersResultSchema.safeParse({
+      offers: [
+        {
+          job_uuid: "abc-123",
+          position: "Cashier",
+          position_ar: null,
+          description: null,
+          hours_per_day: null,
+          days_per_week: null,
+          status: true,
+          area_uuid: null,
+          request_uuid: "req-456",
+          created_at: null,
+          updated_at: null,
+        },
+      ],
+      total: 1,
+      page: 1,
+      limit: 20,
+      totalPages: 1,
+    });
+    expect(result.success).toBe(true);
   });
 });
 
