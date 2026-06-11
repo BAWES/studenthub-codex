@@ -2,7 +2,14 @@ import { describe, it, expect } from "vitest";
 import {
   listBankTransactionsSchema,
   getBankTransactionSchema,
-} from "./actions";
+} from "./schemas";
+
+import {
+  bankTransactionItemSchema,
+  bankTransactionDetailSchema,
+  listBankTransactionsResultSchema,
+  reconciliationStatusSchema,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // listBankTransactionsSchema
@@ -352,5 +359,211 @@ describe("ReconciliationStatus type shape", () => {
       reconciledPercentage: 0,
     };
     expect(status.reconciledPercentage).toBe(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Zod output schema validation
+// ---------------------------------------------------------------------------
+
+describe("bankTransactionItemSchema (output)", () => {
+  it("validates a complete transaction item", () => {
+    const item = {
+      bankTransactionId: "bt-001",
+      contactId: "c-001",
+      contactName: "Acme Corp",
+      reference: "INV-001",
+      status: "AUTHORISED",
+      type: "RECEIVE",
+      total: 1500.0,
+      subTotal: 1400.0,
+      totalTax: 100.0,
+      currencyCode: "KWD",
+      isReconciled: false,
+      hasAttachments: true,
+      date: new Date("2026-06-01"),
+      createdAt: new Date("2026-06-01"),
+      updatedAt: new Date("2026-06-02"),
+    };
+    expect(bankTransactionItemSchema.safeParse(item).success).toBe(true);
+  });
+
+  it("accepts all null fields", () => {
+    const item = {
+      bankTransactionId: "bt-002",
+      contactId: null,
+      contactName: null,
+      reference: null,
+      status: null,
+      type: null,
+      total: null,
+      subTotal: null,
+      totalTax: null,
+      currencyCode: null,
+      isReconciled: null,
+      hasAttachments: null,
+      date: null,
+      createdAt: null,
+      updatedAt: null,
+    };
+    expect(bankTransactionItemSchema.safeParse(item).success).toBe(true);
+  });
+
+  it("rejects missing required bankTransactionId", () => {
+    const item = {
+      contactId: null,
+      contactName: null,
+      reference: null,
+      status: null,
+      type: null,
+      total: null,
+      subTotal: null,
+      totalTax: null,
+      currencyCode: null,
+      isReconciled: null,
+      hasAttachments: null,
+      date: null,
+      createdAt: null,
+      updatedAt: null,
+    };
+    expect(bankTransactionItemSchema.safeParse(item).success).toBe(false);
+  });
+});
+
+describe("bankTransactionDetailSchema (output)", () => {
+  it("validates a complete detail object", () => {
+    const detail = {
+      bankTransactionId: "bt-001",
+      contactId: "c-001",
+      contactName: "Acme Corp",
+      reference: "INV-001",
+      status: "AUTHORISED",
+      type: "RECEIVE",
+      total: 1500.0,
+      subTotal: 1400.0,
+      totalTax: 100.0,
+      currencyCode: "KWD",
+      currencyRate: 1.0,
+      isReconciled: false,
+      hasAttachments: true,
+      lineAmountTypes: "Inclusive",
+      overpaymentId: null,
+      prepaymentId: null,
+      statusAttributeString: "OK",
+      url: "https://xero.com/...",
+      validationErrors: null,
+      date: new Date(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      lineItems: [
+        {
+          lineItemId: "li-001",
+          description: "Consulting services",
+          accountCode: "200",
+          lineAmount: 1400.0,
+          unitAmount: 1400.0,
+          quantity: 1,
+          taxAmount: 100.0,
+          taxType: "OUTPUT",
+        },
+      ],
+    };
+    expect(bankTransactionDetailSchema.safeParse(detail).success).toBe(true);
+  });
+
+  it("allows empty line items array", () => {
+    const detail = {
+      bankTransactionId: "bt-002",
+      contactId: null,
+      contactName: null,
+      reference: null,
+      status: null,
+      type: null,
+      total: null,
+      subTotal: null,
+      totalTax: null,
+      currencyCode: null,
+      currencyRate: null,
+      isReconciled: null,
+      hasAttachments: null,
+      lineAmountTypes: null,
+      overpaymentId: null,
+      prepaymentId: null,
+      statusAttributeString: null,
+      url: null,
+      validationErrors: null,
+      date: null,
+      createdAt: null,
+      updatedAt: null,
+      lineItems: [],
+    };
+    expect(bankTransactionDetailSchema.safeParse(detail).success).toBe(true);
+  });
+});
+
+describe("listBankTransactionsResultSchema (output)", () => {
+  it("validates a paginated result", () => {
+    const data = {
+      transactions: [
+        {
+          bankTransactionId: "bt-001",
+          contactId: null,
+          contactName: null,
+          reference: null,
+          status: null,
+          type: null,
+          total: null,
+          subTotal: null,
+          totalTax: null,
+          currencyCode: null,
+          isReconciled: null,
+          hasAttachments: null,
+          date: null,
+          createdAt: null,
+          updatedAt: null,
+        },
+      ],
+      total: 100,
+      page: 1,
+      limit: 20,
+      totalPages: 5,
+    };
+    expect(listBankTransactionsResultSchema.safeParse(data).success).toBe(true);
+  });
+
+  it("rejects missing totalPages", () => {
+    const data = {
+      transactions: [],
+      total: 0,
+      page: 1,
+      limit: 20,
+    };
+    expect(listBankTransactionsResultSchema.safeParse(data).success).toBe(false);
+  });
+});
+
+describe("reconciliationStatusSchema (output)", () => {
+  it("validates a reconciliation summary", () => {
+    const data = {
+      totalCount: 500,
+      reconciledCount: 350,
+      unreconciledCount: 150,
+      reconciledPercentage: 70,
+    };
+    expect(reconciliationStatusSchema.safeParse(data).success).toBe(true);
+  });
+
+  it("validates zero total", () => {
+    const data = {
+      totalCount: 0,
+      reconciledCount: 0,
+      unreconciledCount: 0,
+      reconciledPercentage: 0,
+    };
+    expect(reconciliationStatusSchema.safeParse(data).success).toBe(true);
+  });
+
+  it("rejects missing fields", () => {
+    expect(reconciliationStatusSchema.safeParse({ totalCount: 500 }).success).toBe(false);
   });
 });
