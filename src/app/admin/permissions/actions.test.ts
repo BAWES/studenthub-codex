@@ -4,6 +4,10 @@ import {
   createPermissionSectionSchema,
   updatePermissionSectionSchema,
   listPermissionSectionsSchema,
+  listPermissionSectionsOutputSchema,
+  getPermissionSectionOutputSchema,
+  createPermissionSectionOutputSchema,
+  updatePermissionSectionOutputSchema,
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
@@ -109,5 +113,105 @@ describe("updatePermissionSectionSchema", () => {
         permission_uuid: "per_sec1234-5678-90ab-cdef-1234567890ab",
       }).success,
     ).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output schema tests
+// ---------------------------------------------------------------------------
+
+describe("listPermissionSectionsOutputSchema", () => {
+  it("validates a valid array of permission sections", () => {
+    const data = [
+      {
+        permission_uuid: "per_sec_uuid_1",
+        section_name: "Finance Management",
+        created_at: new Date("2024-01-01"),
+      },
+      {
+        permission_uuid: "per_sec_uuid_2",
+        section_name: null,
+        created_at: new Date("2024-01-02"),
+      },
+    ];
+    const r = listPermissionSectionsOutputSchema.safeParse(data);
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects items with missing permission_uuid", () => {
+    const data = [
+      {
+        section_name: "Test",
+        created_at: new Date(),
+      },
+    ];
+    const r = listPermissionSectionsOutputSchema.safeParse(data);
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects items with wrong created_at type", () => {
+    const data = [
+      {
+        permission_uuid: "per_sec_test",
+        section_name: "Test",
+        created_at: "2024-01-01",
+      },
+    ];
+    const r = listPermissionSectionsOutputSchema.safeParse(data);
+    expect(r.success).toBe(false);
+  });
+});
+
+describe("getPermissionSectionOutputSchema", () => {
+  it("validates a valid permission section", () => {
+    const data = {
+      permission_uuid: "per_sec_uuid_1",
+      section_name: "Finance Management",
+      created_at: new Date("2024-01-01"),
+    };
+    const r = getPermissionSectionOutputSchema.safeParse(data);
+    expect(r.success).toBe(true);
+  });
+
+  it("validates null for not-found", () => {
+    const r = getPermissionSectionOutputSchema.safeParse(null);
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects missing created_at", () => {
+    const data = {
+      permission_uuid: "per_sec_uuid_1",
+      section_name: "Finance Management",
+    };
+    const r = getPermissionSectionOutputSchema.safeParse(data);
+    expect(r.success).toBe(false);
+  });
+});
+
+describe("createPermissionSectionOutputSchema", () => {
+  it("validates a valid creation result", () => {
+    const r = createPermissionSectionOutputSchema.safeParse({
+      permission_uuid: "per_sec_new_uuid",
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects missing permission_uuid", () => {
+    const r = createPermissionSectionOutputSchema.safeParse({});
+    expect(r.success).toBe(false);
+  });
+});
+
+describe("updatePermissionSectionOutputSchema", () => {
+  it("validates a valid update result", () => {
+    const r = updatePermissionSectionOutputSchema.safeParse({
+      permission_uuid: "per_sec_updated_uuid",
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects missing permission_uuid", () => {
+    const r = updatePermissionSectionOutputSchema.safeParse({});
+    expect(r.success).toBe(false);
   });
 });

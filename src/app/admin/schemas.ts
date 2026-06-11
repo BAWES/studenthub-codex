@@ -60,7 +60,7 @@ export const adminCandidateRowSchema = z.object({
  */
 export const adminMetricSchema = z.object({
   label: z.string().min(1, "Metric label is required"),
-  value: z.string().min(1, "Value is required"),
+  value: z.union([z.string(), z.number()]),
   note: z.string().optional().default(""),
 });
 

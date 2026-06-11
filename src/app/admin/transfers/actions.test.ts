@@ -4,6 +4,10 @@ import {
   getTransferSchema,
   approveTransferSchema,
   rejectTransferSchema,
+  listTransfersResultSchema,
+  transferDetailResultSchema,
+  transferActionResponseSchema,
+  adminTransferDetailResultSchema,
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
@@ -120,5 +124,202 @@ describe("rejectTransferSchema", () => {
 
   it("rejects missing transferId", () => {
     expect(rejectTransferSchema.safeParse({ reason: "No reason" }).success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output schema tests
+// ---------------------------------------------------------------------------
+
+describe("listTransfersResultSchema", () => {
+  it("validates a valid paginated response", () => {
+    const r = listTransfersResultSchema.safeParse({
+      items: [
+        {
+          id: 1,
+          company: "ACME Corp",
+          period: "Jan 1 – Jan 15",
+          status: "Pending",
+          statusCode: 10,
+          total: "5000.000",
+          currencyCode: "KWD",
+          createdAt: "2024-01-01T00:00:00.000Z",
+        },
+      ],
+      total: 1,
+      page: 1,
+      limit: 20,
+      totalPages: 1,
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects negative page", () => {
+    const r = listTransfersResultSchema.safeParse({
+      items: [],
+      total: 0,
+      page: -1,
+      limit: 20,
+      totalPages: 0,
+    });
+    expect(r.success).toBe(false);
+  });
+
+  it("validates empty items array", () => {
+    const r = listTransfersResultSchema.safeParse({
+      items: [],
+      total: 0,
+      page: 1,
+      limit: 20,
+      totalPages: 0,
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects missing items", () => {
+    const r = listTransfersResultSchema.safeParse({
+      total: 0,
+      page: 1,
+      limit: 20,
+      totalPages: 0,
+    });
+    expect(r.success).toBe(false);
+  });
+});
+
+describe("transferDetailResultSchema", () => {
+  it("validates a full transfer detail", () => {
+    const r = transferDetailResultSchema.safeParse({
+      transfer: {
+        transferId: 1,
+        total: "5000.000",
+        companyTotal: "6000.000",
+        transferCost: "1000.000",
+        status: "Pending",
+        statusLabel: "Pending",
+        currencyCode: "KWD",
+        startDate: "2024-01-01T00:00:00.000Z",
+        endDate: "2024-01-15T00:00:00.000Z",
+        paymentReceivedOn: null,
+        createdAt: "2024-01-01T00:00:00.000Z",
+        updatedAt: null,
+        companyName: "ACME Corp",
+        companyEmail: "acme@test.com",
+      },
+      candidates: [
+        {
+          tcId: 1,
+          candidateName: "John Doe",
+          hours: 40,
+          amount: "500.000",
+          paid: 1,
+        },
+      ],
+      invoices: [
+        {
+          invoiceId: 1,
+          invoiceDate: "2024-01-10T00:00:00.000Z",
+          invoiceStatus: "Status 1",
+        },
+      ],
+      metrics: [
+        { label: "Candidate Payouts", value: 1, note: "Transfers to candidates" },
+      ],
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("validates transfer as null", () => {
+    const r = transferDetailResultSchema.safeParse({
+      transfer: null,
+      candidates: [],
+      invoices: [],
+      metrics: [],
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects missing transfer field", () => {
+    const r = transferDetailResultSchema.safeParse({
+      candidates: [],
+      invoices: [],
+      metrics: [],
+    });
+    expect(r.success).toBe(false);
+  });
+});
+
+describe("transferActionResponseSchema", () => {
+  it("validates a success response", () => {
+    const r = transferActionResponseSchema.safeParse({ success: true });
+    expect(r.success).toBe(true);
+  });
+
+  it("validates an error response", () => {
+    const r = transferActionResponseSchema.safeParse({
+      success: false,
+      error: "Transfer not found",
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects missing success field", () => {
+    const r = transferActionResponseSchema.safeParse({});
+    expect(r.success).toBe(false);
+  });
+});
+
+describe("adminTransferDetailResultSchema", () => {
+  it("validates a full admin transfer detail", () => {
+    const r = adminTransferDetailResultSchema.safeParse({
+      transfer: {
+        transfer_id: 1,
+        total: "5000.000",
+        company_total: "6000.000",
+        transfer_cost: "1000.000",
+        transfer_status: 10,
+        currency_code: "KWD",
+        start_date: new Date("2024-01-01"),
+        end_date: new Date("2024-01-15"),
+        payment_received_on: null,
+        transfer_created_at: new Date("2024-01-01"),
+        transfer_updated_at: new Date("2024-01-01"),
+        company: { company_name: "ACME", company_email: "acme@test.com" },
+        staff_transfer_transfer_created_byTostaff: null,
+        staff_transfer_transfer_updated_byTostaff: null,
+      },
+      candidates: [
+        { id: 1, title: "John Doe", subtitle: "Amount: 500", meta: "" },
+      ],
+      invoices: [
+        { id: 1, title: "Invoice #1", subtitle: "Status 1", meta: "2024-01-10" },
+      ],
+      metrics: [
+        { label: "Candidate Payouts", value: 1, note: "Transfers to candidates" },
+      ],
+      fileEntries: [],
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("validates transfer as null", () => {
+    const r = adminTransferDetailResultSchema.safeParse({
+      transfer: null,
+      candidates: [],
+      invoices: [],
+      metrics: [],
+      fileEntries: [],
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects missing fileEntries", () => {
+    const r = adminTransferDetailResultSchema.safeParse({
+      transfer: null,
+      candidates: [],
+      invoices: [],
+      metrics: [],
+    });
+    expect(r.success).toBe(false);
   });
 });

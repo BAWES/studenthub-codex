@@ -40,6 +40,86 @@ export const deleteStoreSchema = z.object({
 });
 
 // ---------------------------------------------------------------------------
+// Output validation schemas
+// ---------------------------------------------------------------------------
+
+/**
+ * Schema for a single store row in the listing.
+ */
+export const storeRowSchema = z.object({
+  store_id: z.number().int().positive(),
+  store_name: z.string().min(1),
+  store_location: z.string().min(1),
+  store_status: z.number().int(),
+  store_total_candidates: z.number().int().nullable(),
+  company_name: z.string().nullable(),
+  brand_name: z.string().nullable(),
+  mall_name: z.string().nullable(),
+  manager_name: z.string().nullable(),
+  created_at: z.string().nullable(),
+  updated_at: z.string().nullable(),
+});
+
+/**
+ * Schema for the store detail response from getStore.
+ */
+export const storeDetailSchema = z.object({
+  store: z
+    .object({
+      store_id: z.number().int().positive(),
+      store_name: z.string().min(1),
+      store_location: z.string().min(1),
+      store_status: z.number().int(),
+      store_total_candidates: z.number().int().nullable(),
+      store_created_at: z.string().nullable(),
+      store_updated_at: z.string().nullable(),
+      company: z
+        .object({
+          company_name: z.string().nullable(),
+          company_email: z.string().nullable(),
+        })
+        .nullable(),
+      contact: z
+        .object({
+          contact_name: z.string().nullable(),
+          contact_email: z.string().nullable(),
+        })
+        .nullable(),
+      brand: z
+        .object({
+          brand_name_en: z.string().nullable(),
+        })
+        .nullable(),
+      mall: z
+        .object({
+          mall_name_en: z.string().nullable(),
+        })
+        .nullable(),
+    })
+    .nullable(),
+});
+
+/**
+ * Schema for the full list response from listStores.
+ */
+export const listStoresResultSchema = z.object({
+  items: z.array(storeRowSchema),
+  total: z.number().int().nonnegative(),
+  page: z.number().int().positive(),
+  limit: z.number().int().positive(),
+  totalPages: z.number().int().nonnegative(),
+});
+
+/**
+ * Schema for store mutation action responses (create, update, delete).
+ */
+export const storeActionResultSchema = z.object({
+  success: z.boolean(),
+  storeId: z.number().int().positive().optional(),
+  error: z.string().optional(),
+});
+
+// ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 

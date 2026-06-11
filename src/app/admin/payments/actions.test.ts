@@ -2,6 +2,9 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import {
   listPaymentsSchema,
   getPaymentSchema,
+  paymentRowSchema,
+  paymentDetailSchema,
+  listPaymentsResultSchema,
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
@@ -336,5 +339,179 @@ describe("getPayment", () => {
     await expect(payments.getPayment("txn-1")).rejects.toThrow(
       "DB connection error",
     );
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output validation schema tests
+// ---------------------------------------------------------------------------
+
+describe("paymentRowSchema", () => {
+  it("accepts a valid payment row", () => {
+    const r = paymentRowSchema.safeParse({
+      bank_transaction_id: "txn-001",
+      reference: "REF-001",
+      status: "ACTIVE",
+      type: "RECEIVE",
+      total: 1000.0,
+      currency_code: "KWD",
+      contact_name: "Test Co",
+      date: "2026-06-10T00:00:00.000Z",
+      is_reconciled: false,
+      line_items_count: 3,
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts nullable fields as null", () => {
+    const r = paymentRowSchema.safeParse({
+      bank_transaction_id: "txn-001",
+      reference: null,
+      status: null,
+      type: null,
+      total: null,
+      currency_code: null,
+      contact_name: null,
+      date: "2026-06-10T00:00:00.000Z",
+      is_reconciled: null,
+      line_items_count: 0,
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects missing bank_transaction_id", () => {
+    const r = paymentRowSchema.safeParse({
+      reference: null,
+      status: null,
+      type: null,
+      total: null,
+      currency_code: null,
+      contact_name: null,
+      date: "2026-06-10T00:00:00.000Z",
+      is_reconciled: null,
+      line_items_count: 0,
+    });
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects negative line_items_count", () => {
+    const r = paymentRowSchema.safeParse({
+      bank_transaction_id: "txn-001",
+      reference: null,
+      status: null,
+      type: null,
+      total: null,
+      currency_code: null,
+      contact_name: null,
+      date: "2026-06-10T00:00:00.000Z",
+      is_reconciled: null,
+      line_items_count: -1,
+    });
+    expect(r.success).toBe(false);
+  });
+});
+
+describe("listPaymentsResultSchema", () => {
+  it("accepts a valid paginated result", () => {
+    const r = listPaymentsResultSchema.safeParse({
+      items: [
+        {
+          bank_transaction_id: "txn-001",
+          reference: "REF-001",
+          status: "ACTIVE",
+          type: "RECEIVE",
+          total: 1000.0,
+          currency_code: "KWD",
+          contact_name: "Test Co",
+          date: "2026-06-10T00:00:00.000Z",
+          is_reconciled: false,
+          line_items_count: 3,
+        },
+      ],
+      total: 1,
+      page: 1,
+      limit: 20,
+      totalPages: 1,
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts empty items array", () => {
+    const r = listPaymentsResultSchema.safeParse({
+      items: [],
+      total: 0,
+      page: 1,
+      limit: 20,
+      totalPages: 0,
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects zero page", () => {
+    const r = listPaymentsResultSchema.safeParse({
+      items: [],
+      total: 0,
+      page: 0,
+      limit: 20,
+      totalPages: 0,
+    });
+    expect(r.success).toBe(false);
+  });
+});
+
+describe("paymentDetailSchema", () => {
+  it("accepts a full payment detail", () => {
+    const r = paymentDetailSchema.safeParse({
+      payment: {
+        bank_transaction_id: "txn-001",
+        reference: "REF-001",
+        status: "ACTIVE",
+        type: "RECEIVE",
+        total: 1000.0,
+        sub_total: 900.0,
+        total_tax: 100.0,
+        currency_rate: 1.0,
+        currency_code: "KWD",
+        line_amount_types: "Exclusive",
+        has_attachments: false,
+        is_reconciled: false,
+        date: "2026-06-10T00:00:00.000Z",
+        created_at: "2026-06-10T10:00:00.000Z",
+        updated_at: "2026-06-10T12:00:00.000Z",
+        contact: { contact_id: "c-1", name: "Test Co" },
+      },
+      line_items: [
+        {
+          line_item_id: "li-1",
+          account_code: "200",
+          description: "Service fee",
+          line_amount: 500.0,
+          quantity: 1,
+          unit_amount: 500.0,
+        },
+      ],
+      metrics: [
+        { label: "Line Items", value: 1, note: "Transaction line entries" },
+        { label: "Total", value: "1000.00", note: "KWD" },
+      ],
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts null payment (not found)", () => {
+    const r = paymentDetailSchema.safeParse({
+      payment: null,
+      line_items: [],
+      metrics: [],
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects missing line_items", () => {
+    const r = paymentDetailSchema.safeParse({
+      payment: null,
+      metrics: [],
+    });
+    expect(r.success).toBe(false);
   });
 });

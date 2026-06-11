@@ -25,6 +25,9 @@ import {
   createStoreSchema,
   updateStoreSchema,
   deleteStoreSchema,
+  listStoresResultSchema,
+  storeDetailSchema,
+  storeActionResultSchema,
   type ListStoresInput,
   type GetStoreInput,
   type CreateStoreInput,
@@ -84,7 +87,7 @@ export async function listStores(
     prisma.store.count({ where: where as any }),
   ]);
 
-  return {
+  const result = {
     items: stores.map((s: any): StoreRow => ({
       store_id: s.store_id,
       store_name: s.store_name,
@@ -103,6 +106,17 @@ export async function listStores(
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  // Validate output shape
+  const outputParsed = listStoresResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[admin/stores] listStores output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -134,12 +148,23 @@ export async function getStore(
   });
 
   if (!store) {
-    return { store: null };
+    const result = { store: null };
+
+    // Validate output shape
+    const outputParsed = storeDetailSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[admin/stores] getStore output validation failed (not found):",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
   }
 
   const s = store as any;
 
-  return {
+  const result = {
     store: {
       store_id: s.store_id,
       store_name: s.store_name,
@@ -162,6 +187,17 @@ export async function getStore(
         : null,
     },
   };
+
+  // Validate output shape
+  const outputParsed = storeDetailSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[admin/stores] getStore output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -178,7 +214,18 @@ export async function createStore(
 
   const parsed = createStoreSchema.safeParse(input);
   if (!parsed.success) {
-    return { success: false, error: parsed.error.issues[0]?.message ?? "Invalid input" };
+    const result = { success: false, error: parsed.error.issues[0]?.message ?? "Invalid input" };
+
+    // Validate output shape
+    const outputParsed = storeActionResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[admin/stores] createStore output validation failed (validation error):",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
   }
 
   try {
@@ -197,9 +244,32 @@ export async function createStore(
     });
 
     revalidatePath("/admin/stores");
-    return { success: true, storeId: store.store_id };
+
+    const result = { success: true, storeId: store.store_id };
+
+    // Validate output shape
+    const outputParsed = storeActionResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[admin/stores] createStore output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
   } catch (err) {
-    return { success: false, error: err instanceof Error ? err.message : "Failed to create store" };
+    const result = { success: false, error: err instanceof Error ? err.message : "Failed to create store" };
+
+    // Validate output shape
+    const outputParsed = storeActionResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[admin/stores] createStore output validation failed (catch):",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
   }
 }
 
@@ -217,14 +287,36 @@ export async function updateStore(
 
   const parsed = updateStoreSchema.safeParse(input);
   if (!parsed.success) {
-    return { success: false, error: parsed.error.issues[0]?.message ?? "Invalid input" };
+    const result = { success: false, error: parsed.error.issues[0]?.message ?? "Invalid input" };
+
+    // Validate output shape
+    const outputParsed = storeActionResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[admin/stores] updateStore output validation failed (validation error):",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
   }
 
   const { storeId, ...fields } = parsed.data;
 
   const existing = await prisma.store.findUnique({ where: { store_id: storeId } });
   if (!existing) {
-    return { success: false, error: "Store not found" };
+    const result = { success: false, error: "Store not found" };
+
+    // Validate output shape
+    const outputParsed = storeActionResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[admin/stores] updateStore output validation failed (not found):",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
   }
 
   try {
@@ -241,9 +333,32 @@ export async function updateStore(
     });
 
     revalidatePath("/admin/stores");
-    return { success: true, storeId };
+
+    const result = { success: true, storeId };
+
+    // Validate output shape
+    const outputParsed = storeActionResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[admin/stores] updateStore output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
   } catch (err) {
-    return { success: false, error: err instanceof Error ? err.message : "Failed to update store" };
+    const result = { success: false, error: err instanceof Error ? err.message : "Failed to update store" };
+
+    // Validate output shape
+    const outputParsed = storeActionResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[admin/stores] updateStore output validation failed (catch):",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
   }
 }
 
@@ -261,12 +376,34 @@ export async function deleteStore(
 
   const parsed = deleteStoreSchema.safeParse(input);
   if (!parsed.success) {
-    return { success: false, error: parsed.error.issues[0]?.message ?? "Invalid input" };
+    const result = { success: false, error: parsed.error.issues[0]?.message ?? "Invalid input" };
+
+    // Validate output shape
+    const outputParsed = storeActionResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[admin/stores] deleteStore output validation failed (validation error):",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
   }
 
   const existing = await prisma.store.findUnique({ where: { store_id: parsed.data.storeId } });
   if (!existing) {
-    return { success: false, error: "Store not found" };
+    const result = { success: false, error: "Store not found" };
+
+    // Validate output shape
+    const outputParsed = storeActionResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[admin/stores] deleteStore output validation failed (not found):",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
   }
 
   try {
@@ -276,8 +413,31 @@ export async function deleteStore(
     });
 
     revalidatePath("/admin/stores");
-    return { success: true };
+
+    const result = { success: true };
+
+    // Validate output shape
+    const outputParsed = storeActionResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[admin/stores] deleteStore output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
   } catch (err) {
-    return { success: false, error: err instanceof Error ? err.message : "Failed to delete store" };
+    const result = { success: false, error: err instanceof Error ? err.message : "Failed to delete store" };
+
+    // Validate output shape
+    const outputParsed = storeActionResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[admin/stores] deleteStore output validation failed (catch):",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
   }
 }

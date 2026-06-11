@@ -5,6 +5,10 @@ import {
   createStoreSchema,
   updateStoreSchema,
   deleteStoreSchema,
+  storeRowSchema,
+  storeDetailSchema,
+  listStoresResultSchema,
+  storeActionResultSchema,
 } from "./schemas";
 import type {
   ListStoresInput,
@@ -475,5 +479,198 @@ describe("deleteStore — runtime", () => {
     const result = await deleteStore({ storeId: 1 });
     expect(result.success).toBe(false);
     expect(result.error).toContain("FK constraint");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output validation schema tests
+// ---------------------------------------------------------------------------
+
+describe("storeRowSchema", () => {
+  it("accepts a valid store row", () => {
+    const r = storeRowSchema.safeParse({
+      store_id: 1,
+      store_name: "Tech Store",
+      store_location: "Floor 1",
+      store_status: 10,
+      store_total_candidates: 5,
+      company_name: "Tech Corp",
+      brand_name: "TechBrand",
+      mall_name: "Mall A",
+      manager_name: "John Doe",
+      created_at: "2026-01-01T00:00:00.000Z",
+      updated_at: "2026-06-01T00:00:00.000Z",
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts nullable fields as null", () => {
+    const r = storeRowSchema.safeParse({
+      store_id: 1,
+      store_name: "Tech Store",
+      store_location: "Floor 1",
+      store_status: 10,
+      store_total_candidates: null,
+      company_name: null,
+      brand_name: null,
+      mall_name: null,
+      manager_name: null,
+      created_at: null,
+      updated_at: null,
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects missing store_name", () => {
+    const r = storeRowSchema.safeParse({
+      store_id: 1,
+      store_location: "Floor 1",
+      store_status: 10,
+      company_name: null,
+      brand_name: null,
+      mall_name: null,
+      manager_name: null,
+      created_at: null,
+      updated_at: null,
+    });
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects empty store_name", () => {
+    const r = storeRowSchema.safeParse({
+      store_id: 1,
+      store_name: "",
+      store_location: "Floor 1",
+      store_status: 10,
+      store_total_candidates: null,
+      company_name: null,
+      brand_name: null,
+      mall_name: null,
+      manager_name: null,
+      created_at: null,
+      updated_at: null,
+    });
+    expect(r.success).toBe(false);
+  });
+});
+
+describe("listStoresResultSchema", () => {
+  it("accepts a valid paginated result", () => {
+    const r = listStoresResultSchema.safeParse({
+      items: [
+        {
+          store_id: 1,
+          store_name: "Tech Store",
+          store_location: "Floor 1",
+          store_status: 10,
+          store_total_candidates: 5,
+          company_name: "Tech Corp",
+          brand_name: "TechBrand",
+          mall_name: "Mall A",
+          manager_name: "John Doe",
+          created_at: "2026-01-01T00:00:00.000Z",
+          updated_at: "2026-06-01T00:00:00.000Z",
+        },
+      ],
+      total: 1,
+      page: 1,
+      limit: 20,
+      totalPages: 1,
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts empty items array", () => {
+    const r = listStoresResultSchema.safeParse({
+      items: [],
+      total: 0,
+      page: 1,
+      limit: 20,
+      totalPages: 0,
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects negative limit", () => {
+    const r = listStoresResultSchema.safeParse({
+      items: [],
+      total: 0,
+      page: 1,
+      limit: -5,
+      totalPages: 0,
+    });
+    expect(r.success).toBe(false);
+  });
+});
+
+describe("storeDetailSchema", () => {
+  it("accepts a full store detail", () => {
+    const r = storeDetailSchema.safeParse({
+      store: {
+        store_id: 1,
+        store_name: "Tech Store",
+        store_location: "Floor 1",
+        store_status: 10,
+        store_total_candidates: 5,
+        store_created_at: "2026-01-01T00:00:00.000Z",
+        store_updated_at: "2026-06-01T00:00:00.000Z",
+        company: { company_name: "Tech Corp", company_email: "info@tech.com" },
+        contact: { contact_name: "John Doe", contact_email: "john@tech.com" },
+        brand: { brand_name_en: "TechBrand" },
+        mall: { mall_name_en: "Mall A" },
+      },
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts null store (not found)", () => {
+    const r = storeDetailSchema.safeParse({ store: null });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects missing store", () => {
+    const r = storeDetailSchema.safeParse({});
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects missing store_name", () => {
+    const r = storeDetailSchema.safeParse({
+      store: {
+        store_id: 1,
+        store_location: "Floor 1",
+        store_status: 10,
+      },
+    });
+    expect(r.success).toBe(false);
+  });
+});
+
+describe("storeActionResultSchema", () => {
+  it("accepts success result with storeId", () => {
+    const r = storeActionResultSchema.safeParse({ success: true, storeId: 1 });
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts success result without storeId", () => {
+    const r = storeActionResultSchema.safeParse({ success: true });
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts error result with message", () => {
+    const r = storeActionResultSchema.safeParse({
+      success: false,
+      error: "Store not found",
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects missing success", () => {
+    const r = storeActionResultSchema.safeParse({ storeId: 1 });
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects non-boolean success", () => {
+    const r = storeActionResultSchema.safeParse({ success: "yes" });
+    expect(r.success).toBe(false);
   });
 });
