@@ -3,6 +3,12 @@
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
+import {
+  listWebhooksResultSchema,
+  webhookGetResultSchema,
+  webhookListItemSchema,
+} from "./schemas";
+import type { WebhookListItem, ListWebhooksResult, WebhookGetResult } from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Schemas
@@ -16,27 +22,6 @@ const listWebhooksSchema = z.object({
 const getWebhookSchema = z.object({
   id: z.coerce.number().int().positive(),
 });
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export type WebhookListItem = {
-  webhook_id: number;
-  event: string;
-  endpoint: string;
-  method: string | null;
-  created_at: string | null;
-  updated_at: string | null;
-};
-
-export type ListWebhooksResult = {
-  webhooks: WebhookListItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
 
 // ---------------------------------------------------------------------------
 // Server actions
@@ -76,7 +61,7 @@ export async function listWebhooks(
     prisma.webhook.count(),
   ]);
 
-  return {
+  const result: ListWebhooksResult = {
     webhooks: webhooks.map((w): WebhookListItem => ({
       webhook_id: w.webhook_id,
       event: w.event,
@@ -90,6 +75,16 @@ export async function listWebhooks(
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  const outputParsed = listWebhooksResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/webhooks] listWebhooks output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -98,7 +93,7 @@ export async function listWebhooks(
  */
 export async function getWebhook(
   id: number,
-): Promise<WebhookListItem | null> {
+): Promise<WebhookGetResult> {
   await requireCapability("admin.read");
 
   const parsed = getWebhookSchema.safeParse({ id });
@@ -112,7 +107,7 @@ export async function getWebhook(
 
   if (!webhook) return null;
 
-  return {
+  const result: WebhookListItem = {
     webhook_id: webhook.webhook_id,
     event: webhook.event,
     endpoint: webhook.endpoint,
@@ -120,4 +115,14 @@ export async function getWebhook(
     created_at: webhook.created_at?.toISOString() ?? null,
     updated_at: webhook.updated_at?.toISOString() ?? null,
   };
+
+  const outputParsed = webhookGetResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/webhooks] getWebhook output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
