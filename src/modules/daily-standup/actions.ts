@@ -1,65 +1,24 @@
 "use server";
 
 import crypto from "node:crypto";
-import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
-
-// ---------------------------------------------------------------------------
-// Schemas
-// ---------------------------------------------------------------------------
-
-const listQuestionsSchema = z.object({
-  page: z.coerce.number().int().positive().optional().default(1),
-  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
-});
-
-const createAbsenceSchema = z.object({
-  from_date: z.string().min(1, "From date is required"),
-  to_date: z.string().min(1, "To date is required"),
-  note: z.string().optional(),
-  type: z.string().min(1, "Type is required"),
-});
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export type DailyStandupQuestionItem = {
-  question_uuid: string;
-  question: string | null;
-};
-
-export type ListQuestionsResult = {
-  questions: DailyStandupQuestionItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
-
-export type WorkSessionItem = {
-  work_session_uuid: string;
-  staff_id: number | null;
-  total_minutes: number | null;
-  created_at: string | null;
-  updated_at: string | null;
-};
-
-export type LeaveItem = {
-  staff_leave_uuid: string;
-  staff_id: number | null;
-  from_date: string | null;
-  to_date: string | null;
-  note: string | null;
-  category: string | null;
-  status: number | null;
-};
-
-export type GetSessionResult = {
-  session: WorkSessionItem | null;
-  leave: LeaveItem | null;
-};
+import {
+  listQuestionsSchema,
+  listQuestionsResultSchema,
+  createAbsenceSchema,
+  createAbsenceResultSchema,
+  getSessionResultSchema,
+} from "./schemas";
+import type {
+  ListQuestionsInput,
+  CreateAbsenceInput,
+  ListQuestionsResult,
+  GetSessionResult,
+  CreateAbsenceResult,
+  WorkSessionItem,
+  LeaveItem,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // listQuestions
@@ -70,7 +29,7 @@ export type GetSessionResult = {
  * Mirrors the legacy DailyStandupController.
  */
 export async function listQuestions(
-  params: FormData | z.input<typeof listQuestionsSchema> = {},
+  params: FormData | ListQuestionsInput = {},
 ): Promise<ListQuestionsResult> {
   await requireCapability("time.read.own");
 
@@ -99,7 +58,7 @@ export async function listQuestions(
     prisma.daily_standup_question.count(),
   ]);
 
-  return {
+  const result = {
     questions: questions.map((q) => ({
       question_uuid: q.question_uuid,
       question: q.question ?? null,
@@ -109,6 +68,15 @@ export async function listQuestions(
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  // Validate output shape
+  const output = listQuestionsResultSchema.safeParse(result);
+  if (!output.success) {
+    console.error("listQuestions output validation failed", output.error.issues);
+    return { questions: [], total: 0, page: 1, limit: 20, totalPages: 0 };
+  }
+
+  return output.data;
 }
 
 // ---------------------------------------------------------------------------
@@ -125,7 +93,16 @@ export async function getSession(): Promise<GetSessionResult> {
   const session = await getActiveSession();
   const leave = await getTodayLeave();
 
-  return { session, leave };
+  const result = { session, leave };
+
+  // Validate output shape
+  const output = getSessionResultSchema.safeParse(result);
+  if (!output.success) {
+    console.error("getSession output validation failed", output.error.issues);
+    return { session: null, leave: null };
+  }
+
+  return output.data;
 }
 
 // ---------------------------------------------------------------------------
@@ -137,8 +114,8 @@ export async function getSession(): Promise<GetSessionResult> {
  * Mirrors the legacy DailyStandupController::actionLeaveRequest().
  */
 export async function createAbsence(
-  data: z.input<typeof createAbsenceSchema>,
-): Promise<{ staff_leave_uuid: string }> {
+  data: CreateAbsenceInput,
+): Promise<CreateAbsenceResult> {
   await requireCapability("staff_leave.write");
 
   const parsed = createAbsenceSchema.safeParse(data);
@@ -160,7 +137,16 @@ export async function createAbsence(
     } as any,
   });
 
-  return { staff_leave_uuid: leave.staff_leave_uuid };
+  const result = { staff_leave_uuid: leave.staff_leave_uuid };
+
+  // Validate output shape
+  const output = createAbsenceResultSchema.safeParse(result);
+  if (!output.success) {
+    console.error("createAbsence output validation failed", output.error.issues);
+    throw new Error("Failed to return valid absence result");
+  }
+
+  return output.data;
 }
 
 // ---------------------------------------------------------------------------

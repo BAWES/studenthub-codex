@@ -1,18 +1,13 @@
 import { describe, it, expect } from "vitest";
-import { z } from "zod";
-
-// ---------------------------------------------------------------------------
-// Pure logic: currency list schema validation
-//
-// The listCurrencies action uses this schema internally. Testing it
-// separately avoids mocking "use server" dependencies (prisma, session, etc.).
-// ---------------------------------------------------------------------------
-
-const listCurrenciesSchema = z.object({
-  page: z.number().int().positive().optional(),
-  limit: z.number().int().min(1).max(100).optional(),
-  status: z.boolean().optional(),
-});
+import {
+  listCurrenciesSchema,
+  getCurrencySchema,
+  currencyItemSchema,
+  currencyDetailSchema,
+  listCurrenciesResultSchema,
+  type CurrencyListItem,
+  type ListCurrenciesResult,
+} from "./schemas";
 
 describe("listCurrenciesSchema", () => {
   it("accepts empty params (no pagination)", () => {
@@ -52,28 +47,6 @@ describe("listCurrenciesSchema", () => {
     expect(result.success).toBe(false);
   });
 });
-
-// ---------------------------------------------------------------------------
-// Return type shape
-// ---------------------------------------------------------------------------
-
-type CurrencyListItem = {
-  currency_id: number;
-  title: string;
-  code: string;
-  currency_symbol: string | null;
-  rate: number | null;
-  sort_order: number | null;
-  status: boolean | null;
-};
-
-type ListCurrenciesResult = {
-  currencies: CurrencyListItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
 
 describe("CurrencyListItem shape", () => {
   it("defines the expected fields", () => {
@@ -139,14 +112,6 @@ describe("buildCurrencyListFilter", () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// getCurrency schema validation
-// ---------------------------------------------------------------------------
-
-const getCurrencySchema = z.object({
-  id: z.number().int().positive(),
-});
-
 describe("getCurrencySchema", () => {
   it("accepts a valid currency id", () => {
     const result = getCurrencySchema.safeParse({ id: 1 });
@@ -169,5 +134,127 @@ describe("getCurrencySchema", () => {
   it("rejects non-numeric id", () => {
     const result = getCurrencySchema.safeParse({ id: "abc" });
     expect(result.success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output schema tests: currencyItemSchema
+// ---------------------------------------------------------------------------
+
+const validCurrencyItem = {
+  currency_id: 1,
+  title: "Kuwaiti Dinar",
+  code: "KWD",
+  currency_symbol: "د.ك",
+  rate: 3.29,
+  sort_order: 1,
+  status: true,
+};
+
+describe("currencyItemSchema", () => {
+  it("accepts a valid currency item", () => {
+    const result = currencyItemSchema.parse(validCurrencyItem);
+    expect(result.currency_id).toBe(1);
+    expect(result.title).toBe("Kuwaiti Dinar");
+    expect(result.code).toBe("KWD");
+  });
+
+  it("accepts nullable fields as null", () => {
+    const result = currencyItemSchema.parse({
+      ...validCurrencyItem,
+      currency_symbol: null,
+      rate: null,
+      sort_order: null,
+      status: null,
+    });
+    expect(result.currency_symbol).toBeNull();
+    expect(result.rate).toBeNull();
+    expect(result.sort_order).toBeNull();
+    expect(result.status).toBeNull();
+  });
+
+  it("rejects missing required string field", () => {
+    const { title, ...rest } = validCurrencyItem;
+    expect(() => currencyItemSchema.parse(rest)).toThrow();
+  });
+
+  it("rejects wrong type for rate field", () => {
+    expect(() =>
+      currencyItemSchema.parse({ ...validCurrencyItem, rate: "not-a-number" }),
+    ).toThrow();
+  });
+
+  it("rejects negative currency_id", () => {
+    expect(() =>
+      currencyItemSchema.parse({ ...validCurrencyItem, currency_id: -1 }),
+    ).toThrow();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output schema tests: currencyDetailSchema
+// ---------------------------------------------------------------------------
+
+describe("currencyDetailSchema", () => {
+  it("accepts a valid currency item", () => {
+    const result = currencyDetailSchema.parse(validCurrencyItem);
+    expect(result).not.toBeNull();
+  });
+
+  it("accepts null", () => {
+    const result = currencyDetailSchema.parse(null);
+    expect(result).toBeNull();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output schema tests: listCurrenciesResultSchema
+// ---------------------------------------------------------------------------
+
+describe("listCurrenciesResultSchema", () => {
+  it("accepts a valid result with currencies", () => {
+    const result = listCurrenciesResultSchema.parse({
+      currencies: [validCurrencyItem],
+      total: 1,
+      page: 1,
+      limit: 20,
+      totalPages: 1,
+    });
+    expect(result.currencies.length).toBe(1);
+  });
+
+  it("accepts an empty list", () => {
+    const result = listCurrenciesResultSchema.parse({
+      currencies: [],
+      total: 0,
+      page: 1,
+      limit: 20,
+      totalPages: 0,
+    });
+    expect(result.currencies.length).toBe(0);
+  });
+
+  it("rejects negative page", () => {
+    expect(() =>
+      listCurrenciesResultSchema.parse({
+        currencies: [],
+        total: 0,
+        page: -1,
+        limit: 20,
+        totalPages: 0,
+      }),
+    ).toThrow();
+  });
+
+  it("rejects negative total", () => {
+    expect(() =>
+      listCurrenciesResultSchema.parse({
+        currencies: [],
+        total: -1,
+        page: 1,
+        limit: 20,
+        totalPages: 0,
+      }),
+    ).toThrow();
   });
 });

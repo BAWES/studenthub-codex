@@ -1,60 +1,16 @@
 import { describe, it, expect } from "vitest";
-import { z } from "zod";
-
-// ---------------------------------------------------------------------------
-// Pure logic: certificate schema validation
-//
-// The listCertificates, createCertificate, updateCertificate, and
-// deleteCertificate actions use these schemas internally. Testing them
-// separately avoids mocking "use server" dependencies (prisma, session,
-// next/cache).
-// ---------------------------------------------------------------------------
-
-const listCertificatesSchema = z.object({
-  candidateId: z.coerce.number().int().positive().optional(),
-  examUuid: z.string().optional(),
-  type: z.coerce.boolean().optional(),
-  storeId: z.coerce.number().int().positive().optional(),
-  companyId: z.coerce.number().int().positive().optional(),
-  page: z.coerce.number().int().optional().default(1),
-  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
-});
-
-const createCertificateSchema = z.object({
-  certificateUuid: z.string().optional(),
-  certificateType: z.boolean().optional(),
-  certificateTitle: z.string().optional(),
-  certificateIssuer: z.string().optional(),
-  certificateUrl: z.string().optional(),
-  candidateId: z.number().int().positive(),
-  candidateWorkHistoryId: z.number().int().positive().optional(),
-  examUuid: z.string().optional(),
-  storeId: z.number().int().positive().optional(),
-  companyId: z.number().int().positive().optional(),
-  parentCompanyId: z.number().int().positive().optional(),
-  startDate: z.string().optional(),
-  endDate: z.string().optional(),
-});
-
-const updateCertificateSchema = z.object({
-  certificateUuid: z.string().min(1, "Certificate UUID is required"),
-  certificateType: z.boolean().optional(),
-  certificateTitle: z.string().optional(),
-  certificateIssuer: z.string().optional(),
-  certificateUrl: z.string().optional(),
-  candidateId: z.number().int().positive().optional(),
-  candidateWorkHistoryId: z.number().int().positive().optional(),
-  examUuid: z.string().optional(),
-  storeId: z.number().int().positive().optional(),
-  companyId: z.number().int().positive().optional(),
-  parentCompanyId: z.number().int().positive().optional(),
-  startDate: z.string().optional(),
-  endDate: z.string().optional(),
-});
-
-const deleteCertificateSchema = z.object({
-  certificateUuid: z.string().min(1, "Certificate UUID is required"),
-});
+import {
+  listCertificatesSchema,
+  createCertificateSchema,
+  updateCertificateSchema,
+  deleteCertificateSchema,
+  getCertificateSchema,
+  certificateListItemSchema,
+  listCertificatesResultSchema,
+  deleteCertificateResultSchema,
+  type CertificateListItem,
+  type ListCertificatesResult,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Schema-only tests (no DB, no "use server" mocking)
@@ -103,12 +59,9 @@ describe("listCertificatesSchema", () => {
     }
   });
 
-  it("accepts page=-1 for unpaginated results", () => {
+  it("rejects negative page", () => {
     const result = listCertificatesSchema.safeParse({ page: -1 });
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.page).toBe(-1);
-    }
+    expect(result.success).toBe(false);
   });
 
   it("rejects limit over 100", () => {
@@ -187,65 +140,12 @@ describe("deleteCertificateSchema", () => {
 });
 
 // ---------------------------------------------------------------------------
-// getCertificate tests
+// Output schema tests
 // ---------------------------------------------------------------------------
 
-const getCertificateSchema = z.object({
-  uuid: z.string().min(1, "Certificate UUID is required"),
-});
-
-describe("getCertificateSchema", () => {
-  it("rejects empty UUID", () => {
-    const r = getCertificateSchema.safeParse({ uuid: "" });
-    expect(r.success).toBe(false);
-    if (!r.success) {
-      expect(r.error.issues[0]?.message).toBe("Certificate UUID is required");
-    }
-  });
-
-  it("accepts valid UUID", () => {
-    const r = getCertificateSchema.safeParse({ uuid: "cert_abc123" });
-    expect(r.success).toBe(true);
-    if (r.success) {
-      expect(r.data.uuid).toBe("cert_abc123");
-    }
-  });
-});
-
-// ---------------------------------------------------------------------------
-// Return type shape
-// ---------------------------------------------------------------------------
-
-type CertificateRelatedDetail = {
-  certificate_uuid: string;
-  certificate_type: boolean | null;
-  certificate_title: string | null;
-  certificate_issuer: string | null;
-  certificate_url: string | null;
-  candidate_id: number;
-  candidate_work_history_id: number | null;
-  exam_uuid: string | null;
-  store_id: number | null;
-  company_id: number | null;
-  parent_company_id: number | null;
-  start_date: string | null;
-  end_date: string | null;
-  staff_id: number | null;
-};
-
-type CertificateListItem = CertificateRelatedDetail;
-
-type ListCertificatesResult = {
-  certificates: CertificateListItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
-
-describe("Certificate type shapes", () => {
-  it("defines a valid CertificateListItem", () => {
-    const cert: CertificateListItem = {
+describe("certificateListItemSchema", () => {
+  it("accepts a valid certificate item", () => {
+    const result = certificateListItemSchema.safeParse({
       certificate_uuid: "cert_abc123",
       certificate_type: true,
       certificate_title: "AWS Certified Developer",
@@ -257,25 +157,54 @@ describe("Certificate type shapes", () => {
       store_id: 1,
       company_id: 5,
       parent_company_id: null,
-      start_date: "2025-01-01",
-      end_date: "2025-12-31",
+      start_date: "2025-01-01T00:00:00.000Z",
+      end_date: "2025-12-31T00:00:00.000Z",
       staff_id: 3,
-    };
-    expect(cert.certificate_uuid).toBe("cert_abc123");
-    expect(cert.certificate_title).toBe("AWS Certified Developer");
-    expect(cert.candidate_id).toBe(42);
+      created_at: new Date("2025-01-01T00:00:00.000Z"),
+      updated_at: new Date("2025-01-01T00:00:00.000Z"),
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects missing required fields", () => {
+    const result = certificateListItemSchema.safeParse({
+      certificate_uuid: "cert_abc123",
+    });
+    expect(result.success).toBe(false);
   });
 });
 
-describe("ListCertificatesResult shape", () => {
+describe("listCertificatesResultSchema", () => {
   it("accepts empty result", () => {
-    const r: ListCertificatesResult = {
+    const result = listCertificatesResultSchema.safeParse({
       certificates: [],
       total: 0,
       page: 1,
       limit: 20,
       totalPages: 0,
-    };
-    expect(r.total).toBe(0);
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects missing totalPages", () => {
+    const result = listCertificatesResultSchema.safeParse({
+      certificates: [],
+      total: 0,
+      page: 1,
+      limit: 20,
+    });
+    expect(result.success).toBe(false);
+  });
+});
+
+describe("deleteCertificateResultSchema", () => {
+  it("accepts success: true", () => {
+    const result = deleteCertificateResultSchema.safeParse({ success: true });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects missing success field", () => {
+    const result = deleteCertificateResultSchema.safeParse({});
+    expect(result.success).toBe(false);
   });
 });

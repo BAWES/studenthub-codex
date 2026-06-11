@@ -1,49 +1,17 @@
 "use server";
 
-import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
-
-// ---------------------------------------------------------------------------
-// Schemas
-// ---------------------------------------------------------------------------
-
-const listCurrenciesSchema = z.object({
-  page: z.number().int().positive().optional(),
-  limit: z.number().int().min(1).max(100).optional(),
-  status: z.boolean().optional(),
-  keyword: z.string().optional(),
-});
-
-const getCurrencySchema = z.object({
-  id: z.number().int().positive(),
-});
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export type ListCurrenciesParams = z.input<typeof listCurrenciesSchema>;
-
-export type GetCurrencyParams = z.input<typeof getCurrencySchema>;
-
-export type CurrencyListItem = {
-  currency_id: number;
-  title: string;
-  code: string;
-  currency_symbol: string | null;
-  rate: number | null;
-  sort_order: number | null;
-  status: boolean | null;
-};
-
-export type ListCurrenciesResult = {
-  currencies: CurrencyListItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
+import {
+  listCurrenciesSchema,
+  getCurrencySchema,
+  listCurrenciesResultSchema,
+  currencyDetailSchema,
+  type ListCurrenciesResult,
+  type ListCurrenciesParams,
+  type GetCurrencyParams,
+  type CurrencyListItem,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Server actions
@@ -86,13 +54,24 @@ export async function listCurrencies(
     prisma.currency.count({ where: where as any }),
   ]);
 
-  return {
+  const result: ListCurrenciesResult = {
     currencies: currencies as CurrencyListItem[],
     total,
     page,
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  // Validate output shape
+  const outputParsed = listCurrenciesResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/currencies] listCurrencies output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -115,5 +94,16 @@ export async function getCurrency(
     where: { currency_id: id },
   });
 
-  return currency as CurrencyListItem | null;
+  const result = currency as CurrencyListItem | null;
+
+  // Validate output shape
+  const outputParsed = currencyDetailSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/currencies] getCurrency output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
