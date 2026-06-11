@@ -1,5 +1,10 @@
 import { describe, it, expect } from "vitest";
 import {
+  candidateIdRequestItemSchema,
+  listIdRequestsResultSchema,
+  idRequestMutationResultSchema,
+} from "./schemas";
+import {
   listIdRequestsSchema,
   getIdRequestSchema,
   regenerateIdRequestSchema,
@@ -140,23 +145,12 @@ describe("deleteIdRequestSchema", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Type shape tests
+// Output schema tests
 // ---------------------------------------------------------------------------
 
-describe("CandidateIdRequestItem type shape", () => {
-  type CandidateIdRequestItem = {
-    cir_uuid: string;
-    candidate_ids: string | null;
-    status: string | null;
-    rejection_reason: string | null;
-    created_at: string | null;
-    updated_at: string | null;
-    created_by: number | null;
-    updated_by: number | null;
-  };
-
-  it("shapes a complete item", () => {
-    const item: CandidateIdRequestItem = {
+describe("candidateIdRequestItemSchema", () => {
+  it("parses a complete item", () => {
+    const result = candidateIdRequestItemSchema.safeParse({
       cir_uuid: "uuid-1",
       candidate_ids: "1,2,3",
       status: "pending",
@@ -165,64 +159,110 @@ describe("CandidateIdRequestItem type shape", () => {
       updated_at: null,
       created_by: 10,
       updated_by: null,
-    };
-    expect(item.cir_uuid).toBe("uuid-1");
-    expect(item.status).toBe("pending");
-    expect(item.rejection_reason).toBeNull();
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.cir_uuid).toBe("uuid-1");
+      expect(result.data.status).toBe("pending");
+    }
+  });
+
+  it("accepts all-null optionals", () => {
+    const result = candidateIdRequestItemSchema.safeParse({
+      cir_uuid: "uuid-2",
+      candidate_ids: null,
+      status: null,
+      rejection_reason: null,
+      created_at: null,
+      updated_at: null,
+      created_by: null,
+      updated_by: null,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects missing cir_uuid", () => {
+    const result = candidateIdRequestItemSchema.safeParse({
+      updated_at: null,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects wrong type for created_at (Date instead of string)", () => {
+    const result = candidateIdRequestItemSchema.safeParse({
+      cir_uuid: "uuid-1",
+      candidate_ids: null,
+      status: null,
+      rejection_reason: null,
+      created_at: new Date(),
+      updated_at: null,
+      created_by: null,
+      updated_by: null,
+    });
+    expect(result.success).toBe(false);
   });
 });
 
-describe("ListIdRequestsResult shape", () => {
-  type ListIdRequestsResult = {
-    requests: unknown[];
-    total: number;
-    page: number;
-    limit: number;
-    totalPages: number;
-  };
-
+describe("listIdRequestsResultSchema", () => {
   it("calculates totalPages from total/limit", () => {
-    // Mirror of Math.ceil(total / limit) in the implementation
-    const total = 25;
-    const limit = 10;
-    const totalPages = Math.ceil(total / limit);
-    const result: ListIdRequestsResult = {
+    const result = listIdRequestsResultSchema.safeParse({
       requests: [],
-      total,
+      total: 25,
       page: 1,
-      limit,
-      totalPages,
-    };
-    expect(result.totalPages).toBe(3);
+      limit: 10,
+      totalPages: 3,
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.totalPages).toBe(3);
+    }
   });
 
   it("handles empty results", () => {
-    const result: ListIdRequestsResult = {
+    const result = listIdRequestsResultSchema.safeParse({
       requests: [],
       total: 0,
       page: 1,
       limit: 20,
       totalPages: 0,
-    };
-    expect(result.totalPages).toBe(0);
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects missing total", () => {
+    const result = listIdRequestsResultSchema.safeParse({
+      requests: [],
+      page: 1,
+      limit: 20,
+      totalPages: 0,
+    });
+    expect(result.success).toBe(false);
   });
 });
 
-describe("IdRequestMutationResult type shape", () => {
-  it("shapes a success result", () => {
-    const result: { operation: string; message?: unknown } = {
+describe("idRequestMutationResultSchema", () => {
+  it("parses success result without message", () => {
+    const result = idRequestMutationResultSchema.safeParse({
       operation: "success",
-    };
-    expect(result.operation).toBe("success");
-    expect(result.message).toBeUndefined();
+    });
+    expect(result.success).toBe(true);
   });
 
-  it("shapes an error result with message", () => {
-    const result: { operation: string; message?: unknown } = {
+  it("parses error result with message", () => {
+    const result = idRequestMutationResultSchema.safeParse({
       operation: "error",
       message: "ID request not found",
-    };
-    expect(result.operation).toBe("error");
-    expect(result.message).toBe("ID request not found");
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects missing operation", () => {
+    const result = idRequestMutationResultSchema.safeParse({});
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects non-string operation", () => {
+    const result = idRequestMutationResultSchema.safeParse({ operation: 42 });
+    expect(result.success).toBe(false);
   });
 });

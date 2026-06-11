@@ -1,8 +1,14 @@
 import { describe, it, expect } from "vitest";
 import { z } from "zod";
+import {
+  idRequestListItemSchema,
+  idRequestDetailSchema,
+  listIdRequestsResultSchema,
+  createIdRequestResultSchema,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
-// Schema definitions matching actions.ts
+// Input schemas (duplicated from actions.ts for isolated unit testing)
 // ---------------------------------------------------------------------------
 
 const listIdRequestsSchema = z.object({
@@ -19,47 +25,6 @@ const createIdRequestSchema = z.object({
   candidateId: z.coerce.number().int().positive("Candidate ID is required"),
   candidateIds: z.string().min(1, "At least one candidate ID is required"),
 });
-
-type ListIdRequestsInput = z.input<typeof listIdRequestsSchema>;
-type GetIdRequestInput = z.input<typeof getIdRequestSchema>;
-type CreateIdRequestInput = z.input<typeof createIdRequestSchema>;
-
-export type IdRequestListItem = {
-  cir_uuid: string;
-  candidate_count: number;
-  status: string | null;
-  rejection_reason: string | null;
-  created_at: Date | null;
-  updated_at: Date | null;
-};
-
-export type IdRequestDetail = {
-  cir_uuid: string;
-  candidate_ids: string | null;
-  status: string | null;
-  rejection_reason: string | null;
-  created_at: Date | null;
-  updated_at: Date | null;
-  created_by_name: string | null;
-  updated_by_name: string | null;
-};
-
-type ListIdRequestsResult = {
-  requests: IdRequestListItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
-
-type CreateIdRequestResult = {
-  cir_uuid: string;
-  status: string;
-};
-
-// ---------------------------------------------------------------------------
-// Schema tests — listIdRequestsSchema
-// ---------------------------------------------------------------------------
 
 describe("listIdRequestsSchema", () => {
   it("requires candidateId", () => {
@@ -109,10 +74,6 @@ describe("listIdRequestsSchema", () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// Schema tests — getIdRequestSchema
-// ---------------------------------------------------------------------------
-
 describe("getIdRequestSchema", () => {
   it("accepts valid UUID", () => {
     const result = getIdRequestSchema.safeParse({
@@ -134,10 +95,6 @@ describe("getIdRequestSchema", () => {
     expect(result.success).toBe(false);
   });
 });
-
-// ---------------------------------------------------------------------------
-// Schema tests — createIdRequestSchema
-// ---------------------------------------------------------------------------
 
 describe("createIdRequestSchema", () => {
   it("requires candidateId and candidateIds", () => {
@@ -167,29 +124,47 @@ describe("createIdRequestSchema", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Type shape tests
+// Output schema tests
 // ---------------------------------------------------------------------------
 
-describe("IdRequestListItem shape", () => {
-  it("defines expected fields", () => {
-    const mock: IdRequestListItem = {
+describe("idRequestListItemSchema", () => {
+  it("parses a valid list item", () => {
+    const result = idRequestListItemSchema.safeParse({
       cir_uuid: "req_001",
       candidate_count: 3,
       status: "pending",
       rejection_reason: null,
       created_at: new Date("2026-01-01"),
       updated_at: new Date("2026-01-02"),
-    };
-    expect(mock.cir_uuid).toBe("req_001");
-    expect(mock.candidate_count).toBe(3);
-    expect(mock.status).toBe("pending");
-    expect(mock.rejection_reason).toBeNull();
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.cir_uuid).toBe("req_001");
+      expect(result.data.candidate_count).toBe(3);
+    }
+  });
+
+  it("accepts nullable fields", () => {
+    const result = idRequestListItemSchema.safeParse({
+      cir_uuid: "req_001",
+      candidate_count: 0,
+      status: null,
+      rejection_reason: null,
+      created_at: null,
+      updated_at: null,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects missing cir_uuid", () => {
+    const result = idRequestListItemSchema.safeParse({ candidate_count: 1 });
+    expect(result.success).toBe(false);
   });
 });
 
-describe("IdRequestDetail shape", () => {
-  it("defines expected fields", () => {
-    const mock: IdRequestDetail = {
+describe("idRequestDetailSchema", () => {
+  it("parses a valid detail object with creator names", () => {
+    const result = idRequestDetailSchema.safeParse({
       cir_uuid: "req_002",
       candidate_ids: "1,2,3",
       status: "verified",
@@ -198,28 +173,43 @@ describe("IdRequestDetail shape", () => {
       updated_at: new Date("2026-02-02"),
       created_by_name: "John Staff",
       updated_by_name: "Jane Staff",
-    };
-    expect(mock.cir_uuid).toBe("req_002");
-    expect(mock.status).toBe("verified");
-    expect(mock.created_by_name).toBe("John Staff");
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.created_by_name).toBe("John Staff");
+    }
+  });
+
+  it("accepts null creator names", () => {
+    const result = idRequestDetailSchema.safeParse({
+      cir_uuid: "req_002",
+      candidate_ids: "1,2,3",
+      status: "pending",
+      rejection_reason: null,
+      created_at: null,
+      updated_at: null,
+      created_by_name: null,
+      updated_by_name: null,
+    });
+    expect(result.success).toBe(true);
   });
 });
 
-describe("ListIdRequestsResult shape", () => {
-  it("accepts empty result", () => {
-    const r: ListIdRequestsResult = {
+describe("listIdRequestsResultSchema", () => {
+  it("parses empty result", () => {
+    const result = listIdRequestsResultSchema.safeParse({
       requests: [],
       total: 0,
       page: 1,
       limit: 20,
       totalPages: 0,
-    };
-    expect(r.total).toBe(0);
-    expect(r.requests).toHaveLength(0);
+    });
+    expect(result.success).toBe(true);
+    expect(result.data?.total).toBe(0);
   });
 
-  it("accepts populated result", () => {
-    const r: ListIdRequestsResult = {
+  it("parses populated result", () => {
+    const result = listIdRequestsResultSchema.safeParse({
       requests: [
         {
           cir_uuid: "req_003",
@@ -234,19 +224,38 @@ describe("ListIdRequestsResult shape", () => {
       page: 1,
       limit: 20,
       totalPages: 1,
-    };
-    expect(r.requests).toHaveLength(1);
-    expect(r.total).toBe(1);
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.requests).toHaveLength(1);
+    }
+  });
+
+  it("rejects missing total", () => {
+    const result = listIdRequestsResultSchema.safeParse({
+      requests: [],
+      page: 1,
+      limit: 20,
+      totalPages: 0,
+    });
+    expect(result.success).toBe(false);
   });
 });
 
-describe("CreateIdRequestResult shape", () => {
-  it("accepts success result", () => {
-    const r: CreateIdRequestResult = {
+describe("createIdRequestResultSchema", () => {
+  it("parses success result", () => {
+    const result = createIdRequestResultSchema.safeParse({
       cir_uuid: "req_new_001",
       status: "pending",
-    };
-    expect(r.cir_uuid).toBe("req_new_001");
-    expect(r.status).toBe("pending");
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.cir_uuid).toBe("req_new_001");
+    }
+  });
+
+  it("rejects missing status", () => {
+    const result = createIdRequestResultSchema.safeParse({ cir_uuid: "abc" });
+    expect(result.success).toBe(false);
   });
 });

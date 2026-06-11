@@ -4,6 +4,12 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
 import { Prisma } from "@prisma/client";
+import {
+  staffStatisticsSchema,
+  staffStatisticValueSchema,
+  type StaffStatistics,
+  type StaffStatisticValue,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Constants (mirroring Yii2 PHP values)
@@ -38,38 +44,6 @@ const getStaffStatisticSchema = z.object({
 
 export type ListStaffStatisticsParams = z.input<typeof listStaffStatisticsSchema>;
 export type GetStaffStatisticParams = z.input<typeof getStaffStatisticSchema>;
-
-export type StaffStatistics = {
-  workLogAppeals: number;
-  totalUnverifiedEmails: number;
-  totalExpiredCards: number;
-  assignedExpiredCivilID: number;
-  idNeedGenerated: number;
-  profileApprovalRequired: number;
-  incompleteAssignedToWork: number;
-  missingBankInfo: number;
-  requireFollowup: number;
-  activeRequests: number;
-  totalRequests: number;
-  totalMinor: number;
-  assignedIdleCandidates: number;
-  companyMoreThen40DaysWithoutPayment: number;
-  last40daysNoRequest: number;
-  companyUnderReview: number;
-  transfersWithNoProfitInProgress: number;
-  transfersWithSameRateInProgress: number;
-  totalStoreAssignmentRequests: number;
-  totalInterviewRequests: number;
-  totalInterviewScheduled: number;
-  totalPendingTickets: number;
-  totalInProgressTickets: number;
-};
-
-export type StaffStatisticValue = {
-  key: string;
-  label: string;
-  value: number;
-};
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -367,7 +341,7 @@ export async function listStaffStatistics(
     }),
   ]);
 
-  return {
+  const result: StaffStatistics = {
     workLogAppeals,
     totalUnverifiedEmails,
     totalExpiredCards,
@@ -392,6 +366,16 @@ export async function listStaffStatistics(
     totalPendingTickets,
     totalInProgressTickets,
   };
+
+  const outputParsed = staffStatisticsSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/staff/statistics] listStaffStatistics output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -419,9 +403,19 @@ export async function getStaffStatistic(
     return null;
   }
 
-  return {
+  const result: StaffStatisticValue = {
     key,
     label: STAT_LABELS[key],
     value: (allStats as Record<string, number>)[key],
   };
+
+  const outputParsed = staffStatisticValueSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/staff/statistics] getStaffStatistic output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
