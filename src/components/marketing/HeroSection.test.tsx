@@ -31,9 +31,6 @@ vi.mock("lucide-react", () => ({
   Zap: () => <span data-testid="icon-zap" />,
   Shield: () => <span data-testid="icon-shield" />,
   Clock: () => <span data-testid="icon-clock" />,
-  Zap: () => <span data-testid="icon-zap" />,
-  Shield: () => <span data-testid="icon-shield" />,
-  Timer: () => <span data-testid="icon-timer" />,
 }));
 
 afterEach(() => {
