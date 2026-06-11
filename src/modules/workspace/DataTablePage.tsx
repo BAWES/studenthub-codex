@@ -6,6 +6,7 @@ import type { Route } from "next";
 import { DataTable, type DataTableColumn } from "./DataTable";
 import { DataTableSkeleton } from "./Skeletons";
 import { Search, X } from "lucide-react";
+import { EmptyState } from "@/components/ui/empty-state";
 import {
   EMPTY_NO_RECORDS,
   EMPTY_HINT_DEFAULT,
@@ -187,15 +188,12 @@ export function DataTablePage<T extends { id: string | number }>({
             onPageChange={onPageChange}
           />
         ) : (
-          <div className="flex flex-col items-center justify-center gap-2 py-14 px-6 text-center">
-            <strong className="text-sm" style={{ color: "var(--ink)" }}>
-              {EMPTY_NO_RECORDS}
-            </strong>
-            <span className="text-sm" style={{ color: "var(--muted)" }}>
-              {searchValue
-                ? emptyNoResults(searchValue)
-                : EMPTY_HINT_DEFAULT}
-            </span>
+          <div className="py-14 px-6">
+            <EmptyState
+              variant={searchValue ? "search" : "empty"}
+              title={searchValue ? `No results for "${searchValue}"` : EMPTY_NO_RECORDS}
+              description={searchValue ? "Try a different search term or clear your filter." : EMPTY_HINT_DEFAULT}
+            />
           </div>
         )}
       </div>
