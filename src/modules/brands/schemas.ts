@@ -11,18 +11,41 @@ export const listBrandsSchema = z.object({
 export const getBrandSchema = z.object({
   uuid: z.string().min(1, "Brand UUID is required"),
 });
+// ---------------------------------------------------------------------------
+// Output validation schemas
+// ---------------------------------------------------------------------------
+
+/**
+ * Schema for a single brand item returned from listBrands / getBrand.
+ */
+export const brandItemSchema = z.object({
+  brand_uuid: z.string(),
+  company_id: z.number().int().nullable(),
+  brand_name_en: z.string(),
+  brand_name_ar: z.string(),
+  brand_logo: z.string().nullable(),
+});
+
+/**
+ * Schema for getBrand result (item or null).
+ */
+export const brandDetailSchema = brandItemSchema.nullable();
+
+/**
+ * Schema for the listBrands response.
+ */
+export const listBrandsResultSchema = z.object({
+  brands: z.array(brandItemSchema),
+  total: z.number().int().nonnegative(),
+  page: z.number().int().positive(),
+  limit: z.number().int().positive(),
+  totalPages: z.number().int().nonnegative(),
+});
+
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
+
 export type ListBrandsParams = z.input<typeof listBrandsSchema>;
-export type BrandListItem = {
-  brand_uuid: string;
-  company_id: number | null;
-  brand_name_en: string;
-  brand_name_ar: string;
-  brand_logo: string | null;
-};
-export type ListBrandsResult = {
-  brands: BrandListItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
+export type BrandListItem = z.output<typeof brandItemSchema>;
+export type ListBrandsResult = z.output<typeof listBrandsResultSchema>;
