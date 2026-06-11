@@ -4,6 +4,13 @@ import {
   updateWorkspaceSchema,
 } from "./schemas";
 
+import {
+  workspaceMetricSchema,
+  workspaceListItemSchema,
+  workspaceOverviewOutputSchema,
+  updateWorkspaceResultSchema,
+} from "../../schemas";
+
 // ---------------------------------------------------------------------------
 // getWorkspaceSchema
 // ---------------------------------------------------------------------------
@@ -141,5 +148,140 @@ describe("UpdateWorkspaceResult shape", () => {
       contactUuid: "abc-123",
     };
     expect(result.contactUuid).toBe("abc-123");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output validation — workspaceMetricSchema
+// ---------------------------------------------------------------------------
+
+describe("workspaceMetricSchema (output validation)", () => {
+  it("accepts a valid metric", () => {
+    const r = workspaceMetricSchema.safeParse({
+      label: "Requests",
+      value: 42,
+      note: "Total hiring requests",
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects negative value", () => {
+    const r = workspaceMetricSchema.safeParse({
+      label: "Requests",
+      value: -1,
+      note: "Negative test",
+    });
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects non-integer value", () => {
+    const r = workspaceMetricSchema.safeParse({
+      label: "Requests",
+      value: 3.14,
+      note: "Float test",
+    });
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects missing label", () => {
+    const r = workspaceMetricSchema.safeParse({
+      value: 5,
+      note: "Missing label",
+    });
+    expect(r.success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output validation — workspaceListItemSchema
+// ---------------------------------------------------------------------------
+
+describe("workspaceListItemSchema (output validation)", () => {
+  it("accepts a valid list item", () => {
+    const r = workspaceListItemSchema.safeParse({
+      id: "uuid-1",
+      title: "Acme Corp",
+      subtitle: "Admin",
+      meta: "Access allowed",
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts item without meta", () => {
+    const r = workspaceListItemSchema.safeParse({
+      id: "uuid-2",
+      title: "Startup Inc",
+      subtitle: "Contact",
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects missing id", () => {
+    const r = workspaceListItemSchema.safeParse({
+      title: "Acme",
+      subtitle: "Admin",
+    });
+    expect(r.success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output validation — workspaceOverviewOutputSchema
+// ---------------------------------------------------------------------------
+
+describe("workspaceOverviewOutputSchema (output validation)", () => {
+  it("accepts a full valid workspace overview", () => {
+    const payload = {
+      contact: { contact_name: "John Doe", contact_email: "john@example.com" },
+      metrics: [
+        { label: "Companies", value: 3, note: "Linked companies" },
+      ],
+      companies: [
+        { id: "cc-uuid-1", title: "Acme Corp", subtitle: "Admin", meta: "Access allowed" },
+      ],
+      requests: [
+        { id: "req-uuid-1", title: "Engineer", subtitle: "Acme Corp", meta: "Active" },
+      ],
+    };
+    const r = workspaceOverviewOutputSchema.safeParse(payload);
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts null contact", () => {
+    const payload = {
+      contact: null,
+      metrics: [],
+      companies: [],
+      requests: [],
+    };
+    const r = workspaceOverviewOutputSchema.safeParse(payload);
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects missing metrics", () => {
+    const r = workspaceOverviewOutputSchema.safeParse({
+      contact: null,
+      companies: [],
+      requests: [],
+    });
+    expect(r.success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output validation — updateWorkspaceResultSchema
+// ---------------------------------------------------------------------------
+
+describe("updateWorkspaceResultSchema (output validation)", () => {
+  it("accepts a valid result", () => {
+    const r = updateWorkspaceResultSchema.safeParse({
+      contactUuid: "abc-123",
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects missing contactUuid", () => {
+    const r = updateWorkspaceResultSchema.safeParse({});
+    expect(r.success).toBe(false);
   });
 });
