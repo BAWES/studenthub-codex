@@ -143,9 +143,17 @@ export async function getCandidateJob(
 
   // Get match score for this candidate-job pair
   let matchScore: number | null = null;
+  let skillScore: number | null = null;
+  let educationScore: number | null = null;
+  let locationScore: number | null = null;
+  let breakdown: string[] = [];
   try {
     const result = await matchCandidateToJob({ candidateId, jobId });
     matchScore = result.score.overall;
+    skillScore = result.score.skillMatch;
+    educationScore = result.score.educationMatch;
+    locationScore = result.score.locationMatch;
+    breakdown = result.score.breakdown;
   } catch {
     matchScore = null;
   }
@@ -162,6 +170,10 @@ export async function getCandidateJob(
       salaryRange: job.salaryRange,
       employerName: job.employer.company_name,
       matchScore,
+      skillScore,
+      educationScore,
+      locationScore,
+      breakdown,
       status: job.status,
       createdAt: job.createdAt,
       updatedAt: job.updatedAt,

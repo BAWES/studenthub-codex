@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { requireRoleCapability } from "@/modules/auth/session";
 import { getCandidateJob } from "../actions";
 import { ApplyButton } from "./ApplyButton";
+import { MatchScoreBadge } from "@/components/matching";
 
 export const dynamic = "force-dynamic";
 
@@ -12,6 +13,12 @@ type Props = {
 
 function formatField(label: string, value: string | null | undefined): string {
   return value ? `${label}: ${value}` : "";
+}
+
+/** Format score breakdown for display — show sub-scores inline. */
+function breakdownLabel(key: string, score: number | null): string {
+  if (score === null) return `${key}: —`;
+  return `${key}: ${score}%`;
 }
 
 export default async function CandidateJobDetailPage({ params }: Props) {
@@ -34,10 +41,35 @@ export default async function CandidateJobDetailPage({ params }: Props) {
       </Link>
 
       <div className="bg-white/5 border border-white/10 rounded-xl p-6 space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold">{job.title}</h1>
-          <p className="text-muted-foreground text-sm mt-1">{job.employerName}</p>
+        {/* Header with match score */}
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0 flex-1">
+            <h1 className="text-2xl font-bold">{job.title}</h1>
+            <p className="text-muted-foreground text-sm mt-1">{job.employerName}</p>
+          </div>
+
+          {/* Match score badge */}
+          {job.matchScore !== null && (
+            <div className="shrink-0">
+              <MatchScoreBadge score={job.matchScore} label="Match" />
+            </div>
+          )}
         </div>
+
+        {/* Score breakdown */}
+        {job.matchScore !== null && (
+          <div className="flex flex-wrap gap-3 text-xs">
+            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-blue-500/10 text-blue-400 font-medium">
+              {breakdownLabel("Skills", job.skillScore)}
+            </span>
+            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-purple-500/10 text-purple-400 font-medium">
+              {breakdownLabel("Education", job.educationScore)}
+            </span>
+            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-amber-500/10 text-amber-400 font-medium">
+              {breakdownLabel("Location", job.locationScore)}
+            </span>
+          </div>
+        )}
 
         <div className="grid grid-cols-2 gap-4 text-sm">
           {job.employmentType && (
