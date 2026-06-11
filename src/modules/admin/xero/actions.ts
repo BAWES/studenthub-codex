@@ -23,91 +23,21 @@ import { requireCapability } from "@/modules/auth/session";
 import type { Prisma } from "@prisma/client";
 
 // ---------------------------------------------------------------------------
-// Schemas
+// Import schemas and types from schemas.ts
 // ---------------------------------------------------------------------------
 
-const listBankTransactionsSchema = z.object({
-  isReconciled: z.coerce.boolean().optional(),
-  dateFrom: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be YYYY-MM-DD format").optional(),
-  dateTo: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be YYYY-MM-DD format").optional(),
-  contactName: z.string().optional(),
-  type: z.string().optional(),
-  status: z.string().optional(),
-  reference: z.string().optional(),
-  sortBy: z.enum(["date", "total", "created_at", "updated_at"]).optional().default("date"),
-  sortDir: z.enum(["asc", "desc"]).optional().default("desc"),
-  page: z.coerce.number().int().positive().optional().default(1),
-  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
-});
-
-const getBankTransactionSchema = z.object({
-  bankTransactionId: z.string().min(1, "Bank transaction ID is required"),
-});
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export type ListBankTransactionsParams = z.input<typeof listBankTransactionsSchema>;
-
-export type BankTransactionItem = {
-  bankTransactionId: string;
-  contactId: string | null;
-  contactName: string | null;
-  reference: string | null;
-  status: string | null;
-  type: string | null;
-  total: number | null;
-  subTotal: number | null;
-  totalTax: number | null;
-  currencyCode: string | null;
-  isReconciled: boolean | null;
-  hasAttachments: boolean | null;
-  date: Date | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
-};
-
-export type BankTransactionDetail = BankTransactionItem & {
-  currencyRate: number | null;
-  lineAmountTypes: string | null;
-  overpaymentId: string | null;
-  prepaymentId: string | null;
-  statusAttributeString: string | null;
-  url: string | null;
-  validationErrors: string | null;
-  lineItems: Array<{
-    lineItemId: string;
-    description: string | null;
-    accountCode: string | null;
-    lineAmount: number | null;
-    unitAmount: number | null;
-    quantity: number | null;
-    taxAmount: number | null;
-    taxType: string | null;
-  }>;
-};
-
-export type ListBankTransactionsResult = {
-  transactions: BankTransactionItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
-
-export type ReconciliationStatus = {
-  totalCount: number;
-  reconciledCount: number;
-  unreconciledCount: number;
-  reconciledPercentage: number;
-};
-
-// ---------------------------------------------------------------------------
-// Exported schemas
-// ---------------------------------------------------------------------------
-
-export { listBankTransactionsSchema, getBankTransactionSchema };
+import {
+  listBankTransactionsSchema,
+  getBankTransactionSchema,
+  listBankTransactionsResultSchema,
+  bankTransactionDetailSchema,
+  reconciliationStatusSchema,
+  type ListBankTransactionsParams,
+  type BankTransactionItem,
+  type BankTransactionDetail,
+  type ListBankTransactionsResult,
+  type ReconciliationStatus,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // listBankTransactions
@@ -205,7 +135,7 @@ export async function listBankTransactions(
     prisma.bank_transaction.count({ where }),
   ]);
 
-  return {
+  const result = {
     transactions: rows.map((row) => ({
       bankTransactionId: row.bank_transaction_id,
       contactId: row.contact_id,
@@ -228,6 +158,17 @@ export async function listBankTransactions(
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  // Validate output shape
+  const outputParsed = listBankTransactionsResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/admin/xero] listBankTransactions output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -258,7 +199,7 @@ export async function getBankTransaction(
     throw new Error(`Bank transaction not found: ${bankTransactionId}`);
   }
 
-  return {
+  const result = {
     bankTransactionId: tx.bank_transaction_id,
     contactId: tx.contact_id,
     contactName: tx.bank_transaction_contact?.name ?? null,
@@ -292,6 +233,17 @@ export async function getBankTransaction(
       taxType: li.tax_type,
     })),
   };
+
+  // Validate output shape
+  const outputParsed = bankTransactionDetailSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/admin/xero] getBankTransaction output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -311,7 +263,7 @@ export async function getReconciliationStatus(): Promise<ReconciliationStatus> {
   });
   const unreconciledCount = totalCount - reconciledCount;
 
-  return {
+  const result = {
     totalCount,
     reconciledCount,
     unreconciledCount,
@@ -319,4 +271,15 @@ export async function getReconciliationStatus(): Promise<ReconciliationStatus> {
       ? Math.round((reconciledCount / totalCount) * 100)
       : 0,
   };
+
+  // Validate output shape
+  const outputParsed = reconciliationStatusSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/admin/xero] getReconciliationStatus output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
