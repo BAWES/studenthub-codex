@@ -20,11 +20,11 @@ jobs:
         run: |
           BRANCH="${{ github.head_ref }}"
           echo "Checking branch: $BRANCH"
-          if echo "$BRANCH" | grep -qiE '^(feature|fix|chore)/STU-[a-z0-9]+[-a-z0-9]+$'; then
+          if echo "$BRANCH" | grep -qiE '^(feature|fix|chore|e2e)/STU-[a-z0-9]+[-a-z0-9]+$'; then
             echo "Branch name OK: $BRANCH"
           else
             echo "Branch name REJECTED: $BRANCH"
-            echo "Expected: feature/STU-N-*, fix/STU-N-*, or chore/STU-N-* (kebab-case)"
+            echo "Expected: feature/STU-N-*, fix/STU-N-*, chore/STU-N-*, or e2e/STU-N-* (kebab-case)"
             exit 1
           fi
 
