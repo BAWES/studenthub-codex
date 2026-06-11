@@ -421,10 +421,6 @@ export function CandidateSearchPage({ session, initialData }: { session: Session
                       background: "var(--card)",
                       borderColor: "var(--border)",
                     }}
-                    onClick={(e) => {
-                      // Allow middle-click / cmd+click for new tab
-                      if (e.button === 1 || e.metaKey || e.ctrlKey) return;
-                    }}
                   >
                     {/* Result header */}
                     <div className="mb-3 flex items-start justify-between gap-3">
