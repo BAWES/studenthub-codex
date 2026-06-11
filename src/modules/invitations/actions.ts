@@ -41,28 +41,16 @@ const respondInvitationSchema = z.object({
 export type RespondInvitationParams = z.input<typeof respondInvitationSchema>;
 
 // ---------------------------------------------------------------------------
-// Types
+// Import output schemas
 // ---------------------------------------------------------------------------
 
-export type InvitationListItem = {
-  invitation_uuid: string;
-  invitation_status: number | null;
-  invitation_created_at: Date | null;
-  invitation_app_seen_at: Date | null;
-  invitation_email_seen_at: Date | null;
-  request: {
-    request_uuid: string;
-    request_position_title: string | null;
-    company: {
-      company_name: string | null;
-    } | null;
-  } | null;
-};
-
-export type InvitationActionResult = {
-  success: boolean;
-  message: string;
-};
+import {
+  invitationListItemSchema,
+  invitationActionResultSchema,
+  listInvitationsResultSchema,
+  type InvitationListItem,
+  type InvitationActionResult,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Server actions
@@ -92,7 +80,18 @@ export async function listInvitations(
   }
 
   if (onlyCount) {
-    return prisma.invitation.count({ where });
+    const count = await prisma.invitation.count({ where });
+
+    // Validate output shape
+    const outputParsed = listInvitationsResultSchema.safeParse(count);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/invitations] listInvitations (count) output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return count;
   }
 
   const invitations = await prisma.invitation.findMany({
@@ -117,6 +116,15 @@ export async function listInvitations(
       },
     },
   });
+
+  // Validate output shape
+  const outputParsed = listInvitationsResultSchema.safeParse(invitations);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/invitations] listInvitations output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
 
   return invitations as unknown as InvitationListItem[];
 }
@@ -145,14 +153,39 @@ export async function acceptInvitation(
   });
 
   if (!invitation) {
-    return { success: false, message: "Invitation not found." };
+    const result: InvitationActionResult = { success: false, message: "Invitation not found." };
+
+    // Validate output shape
+    const outputParsed = invitationActionResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/invitations] acceptInvitation output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
   }
 
   if (invitation.invitation_status !== INVITATION_STATUS_INVITED) {
+    let result: InvitationActionResult;
+
     if (invitation.invitation_status === INVITATION_STATUS_ACCEPTED) {
-      return { success: false, message: "You have already accepted this invitation." };
+      result = { success: false, message: "You have already accepted this invitation." };
+    } else {
+      result = { success: false, message: "You have already rejected this invitation." };
     }
-    return { success: false, message: "You have already rejected this invitation." };
+
+    // Validate output shape
+    const outputParsed = invitationActionResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/invitations] acceptInvitation output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
   }
 
   const now = new Date();
@@ -185,7 +218,18 @@ export async function acceptInvitation(
   revalidatePath("/candidate/invitations");
   revalidatePath(`/candidate/invitations/${invitationUuid}`);
 
-  return { success: true, message: "Invitation accepted successfully." };
+  const result: InvitationActionResult = { success: true, message: "Invitation accepted successfully." };
+
+  // Validate output shape
+  const outputParsed = invitationActionResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/invitations] acceptInvitation output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -212,14 +256,39 @@ export async function rejectInvitation(
   });
 
   if (!invitation) {
-    return { success: false, message: "Invitation not found." };
+    const result: InvitationActionResult = { success: false, message: "Invitation not found." };
+
+    // Validate output shape
+    const outputParsed = invitationActionResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/invitations] rejectInvitation output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
   }
 
   if (invitation.invitation_status !== INVITATION_STATUS_INVITED) {
+    let result: InvitationActionResult;
+
     if (invitation.invitation_status === INVITATION_STATUS_ACCEPTED) {
-      return { success: false, message: "You have already accepted this invitation." };
+      result = { success: false, message: "You have already accepted this invitation." };
+    } else {
+      result = { success: false, message: "You have already rejected this invitation." };
     }
-    return { success: false, message: "You have already rejected this invitation." };
+
+    // Validate output shape
+    const outputParsed = invitationActionResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/invitations] rejectInvitation output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
   }
 
   const now = new Date();
@@ -252,5 +321,16 @@ export async function rejectInvitation(
   revalidatePath("/candidate/invitations");
   revalidatePath(`/candidate/invitations/${invitationUuid}`);
 
-  return { success: true, message: "Invitation rejected successfully." };
+  const result: InvitationActionResult = { success: true, message: "Invitation rejected successfully." };
+
+  // Validate output shape
+  const outputParsed = invitationActionResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/invitations] rejectInvitation output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
