@@ -5,7 +5,7 @@ import { z } from "zod";
 // ---------------------------------------------------------------------------
 
 export const xeroWebhookEventItemSchema = z.object({
-  webhook_id: z.number().int().nonnegative(),
+  webhook_id: z.number().int().positive(),
   event: z.string(),
   created_at: z.string().nullable(),
 });
@@ -20,7 +20,9 @@ export const listWebhookEventsResultSchema = z.object({
   totalPages: z.number().int().nonnegative(),
 });
 
-export type ListWebhookEventsResult = z.output<typeof listWebhookEventsResultSchema>;
+export type ListWebhookEventsResult = z.output<
+  typeof listWebhookEventsResultSchema
+>;
 
 export const processXeroWebhookResponseSchema = z.object({
   operation: z.string(),
@@ -28,8 +30,6 @@ export const processXeroWebhookResponseSchema = z.object({
   processedCount: z.number().int().nonnegative(),
 });
 
-export type ProcessXeroWebhookResponse = z.output<typeof processXeroWebhookResponseSchema>;
-
-export const xeroWebhookGetResultSchema = xeroWebhookEventItemSchema.nullable();
-
-export type XeroWebhookGetResult = z.output<typeof xeroWebhookGetResultSchema>;
+export type ProcessXeroWebhookResponse = z.output<
+  typeof processXeroWebhookResponseSchema
+>;

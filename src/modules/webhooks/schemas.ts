@@ -5,7 +5,7 @@ import { z } from "zod";
 // ---------------------------------------------------------------------------
 
 export const webhookListItemSchema = z.object({
-  webhook_id: z.number().int().nonnegative(),
+  webhook_id: z.number().int().positive(),
   event: z.string(),
   endpoint: z.string(),
   method: z.string().nullable(),
@@ -24,7 +24,3 @@ export const listWebhooksResultSchema = z.object({
 });
 
 export type ListWebhooksResult = z.output<typeof listWebhooksResultSchema>;
-
-export const webhookGetResultSchema = webhookListItemSchema.nullable();
-
-export type WebhookGetResult = z.output<typeof webhookGetResultSchema>;

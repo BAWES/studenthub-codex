@@ -3,12 +3,6 @@
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
-import {
-  listWebhooksResultSchema,
-  webhookGetResultSchema,
-  webhookListItemSchema,
-} from "./schemas";
-import type { WebhookListItem, ListWebhooksResult, WebhookGetResult } from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Schemas
@@ -22,6 +16,15 @@ const listWebhooksSchema = z.object({
 const getWebhookSchema = z.object({
   id: z.coerce.number().int().positive(),
 });
+
+import {
+  webhookListItemSchema,
+  listWebhooksResultSchema,
+} from "./schemas";
+import type {
+  WebhookListItem,
+  ListWebhooksResult,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Server actions
@@ -93,7 +96,7 @@ export async function listWebhooks(
  */
 export async function getWebhook(
   id: number,
-): Promise<WebhookGetResult> {
+): Promise<WebhookListItem | null> {
   await requireCapability("admin.read");
 
   const parsed = getWebhookSchema.safeParse({ id });
@@ -116,7 +119,7 @@ export async function getWebhook(
     updated_at: webhook.updated_at?.toISOString() ?? null,
   };
 
-  const outputParsed = webhookGetResultSchema.safeParse(result);
+  const outputParsed = webhookListItemSchema.safeParse(result);
   if (!outputParsed.success) {
     console.error(
       "[modules/webhooks] getWebhook output validation failed:",

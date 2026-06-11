@@ -4,16 +4,6 @@ import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
-import {
-  listUniversitiesResultSchema,
-  createUniversityResultSchema,
-  universityItemSchema,
-} from "./schemas";
-import type {
-  UniversityItem,
-  ListUniversitiesResult,
-  CreateUniversityResult,
-} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -35,6 +25,17 @@ const listUniversitiesSchema = z.object({
 const createUniversitySchema = z.object({
   name: z.string().min(1, "University name is required").max(100),
 });
+
+import {
+  universityItemSchema,
+  listUniversitiesResultSchema,
+  createUniversityResultSchema,
+} from "./schemas";
+import type {
+  UniversityItem,
+  ListUniversitiesResult,
+  CreateUniversityResult,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Actions
@@ -129,18 +130,18 @@ export async function createUniversity(
 
   const parsed = createUniversitySchema.safeParse(raw);
   if (!parsed.success) {
-    const result1: CreateUniversityResult = {
+    const result: CreateUniversityResult = {
       operation: "error",
       message: parsed.error.issues[0]?.message ?? "Invalid input.",
     };
-    const outputParsed1 = createUniversityResultSchema.safeParse(result1);
-    if (!outputParsed1.success) {
+    const outputParsed = createUniversityResultSchema.safeParse(result);
+    if (!outputParsed.success) {
       console.error(
         "[modules/universities] createUniversity output validation failed:",
-        outputParsed1.error.issues,
+        outputParsed.error.issues,
       );
     }
-    return result1;
+    return result;
   }
 
   const { name } = parsed.data;
@@ -163,11 +164,11 @@ export async function createUniversity(
       operation: "error",
       message: "University already exists",
     };
-    const outputParsed2 = createUniversityResultSchema.safeParse(result);
-    if (!outputParsed2.success) {
+    const outputParsed = createUniversityResultSchema.safeParse(result);
+    if (!outputParsed.success) {
       console.error(
         "[modules/universities] createUniversity output validation failed:",
-        outputParsed2.error.issues,
+        outputParsed.error.issues,
       );
     }
     return result;
@@ -196,14 +197,12 @@ export async function createUniversity(
     message: "University created successfully",
     university,
   };
-
-  const outputParsed2 = createUniversityResultSchema.safeParse(result);
-  if (!outputParsed2.success) {
+  const outputParsed = createUniversityResultSchema.safeParse(result);
+  if (!outputParsed.success) {
     console.error(
       "[modules/universities] createUniversity output validation failed:",
-      outputParsed2.error.issues,
+      outputParsed.error.issues,
     );
   }
-
   return result;
 }
