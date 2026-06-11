@@ -1,5 +1,12 @@
 import { describe, it, expect } from "vitest";
 import { z } from "zod";
+import {
+  employeeItemSchema,
+  employeeDetailSchema,
+  listEmployeesResultSchema,
+  createEmployeeResultSchema,
+  updateEmployeeResultSchema,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Schema definitions (test-time copy for unit isolation)
@@ -285,5 +292,166 @@ describe("ListEmployeesResult type", () => {
     };
     expect(result.employees.length).toBe(1);
     expect(result.totalPages).toBe(1);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output schema tests: employeeItemSchema
+// ---------------------------------------------------------------------------
+
+describe("employeeItemSchema", () => {
+  const validItem = {
+    employee_uuid: "emp-1",
+    employee_name: "John Doe",
+    employee_email: "john@example.com",
+    employee_phone: "+965****0000",
+    employee_salary: 1500,
+    employee_status: 10,
+    employee_created_at: new Date("2026-06-09"),
+    employee_updated_at: new Date("2026-06-09"),
+    designation_uuid: "des-1",
+    department_uuid: "dep-1",
+  };
+
+  it("accepts a valid employee item", () => {
+    const result = employeeItemSchema.parse(validItem);
+    expect(result.employee_uuid).toBe("emp-1");
+  });
+
+  it("accepts nullable fields as null", () => {
+    const result = employeeItemSchema.parse({
+      ...validItem,
+      employee_phone: null,
+      employee_salary: null,
+      designation_uuid: null,
+      department_uuid: null,
+    });
+    expect(result.employee_phone).toBeNull();
+    expect(result.employee_salary).toBeNull();
+  });
+
+  it("rejects missing required string field", () => {
+    const { employee_name, ...rest } = validItem;
+    expect(() => employeeItemSchema.parse(rest)).toThrow();
+  });
+
+  it("rejects wrong type for numeric field", () => {
+    expect(() =>
+      employeeItemSchema.parse({ ...validItem, employee_status: "not-a-number" }),
+    ).toThrow();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output schema tests: employeeDetailSchema
+// ---------------------------------------------------------------------------
+
+describe("employeeDetailSchema", () => {
+  it("accepts a valid employee item", () => {
+    const result = employeeDetailSchema.parse({
+      employee_uuid: "emp-1",
+      employee_name: "John Doe",
+      employee_email: "john@example.com",
+      employee_phone: null,
+      employee_salary: null,
+      employee_status: 10,
+      employee_created_at: new Date(),
+      employee_updated_at: new Date(),
+      designation_uuid: null,
+      department_uuid: null,
+    });
+    expect(result).not.toBeNull();
+  });
+
+  it("accepts null", () => {
+    const result = employeeDetailSchema.parse(null);
+    expect(result).toBeNull();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output schema tests: listEmployeesResultSchema
+// ---------------------------------------------------------------------------
+
+describe("listEmployeesResultSchema", () => {
+  it("accepts a valid result with employees", () => {
+    const result = listEmployeesResultSchema.parse({
+      employees: [
+        {
+          employee_uuid: "emp-1",
+          employee_name: "John",
+          employee_email: "john@example.com",
+          employee_phone: null,
+          employee_salary: null,
+          employee_status: 10,
+          employee_created_at: new Date(),
+          employee_updated_at: new Date(),
+          designation_uuid: null,
+          department_uuid: null,
+        },
+      ],
+      total: 1,
+      page: 1,
+      limit: 20,
+      totalPages: 1,
+    });
+    expect(result.employees.length).toBe(1);
+  });
+
+  it("accepts an empty list", () => {
+    const result = listEmployeesResultSchema.parse({
+      employees: [],
+      total: 0,
+      page: 1,
+      limit: 20,
+      totalPages: 0,
+    });
+    expect(result.employees.length).toBe(0);
+  });
+
+  it("rejects negative page", () => {
+    expect(() =>
+      listEmployeesResultSchema.parse({
+        employees: [],
+        total: 0,
+        page: -1,
+        limit: 20,
+        totalPages: 0,
+      }),
+    ).toThrow();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output schema tests: createEmployeeResultSchema
+// ---------------------------------------------------------------------------
+
+describe("createEmployeeResultSchema", () => {
+  it("accepts a valid result", () => {
+    const result = createEmployeeResultSchema.parse({
+      employee_uuid: "emp-new-1",
+    });
+    expect(result.employee_uuid).toBe("emp-new-1");
+  });
+
+  it("rejects missing uuid", () => {
+    expect(() => createEmployeeResultSchema.parse({})).toThrow();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output schema tests: updateEmployeeResultSchema
+// ---------------------------------------------------------------------------
+
+describe("updateEmployeeResultSchema", () => {
+  it("accepts a valid result", () => {
+    const result = updateEmployeeResultSchema.parse({
+      employee_uuid: "emp-updated-1",
+    });
+    expect(result.employee_uuid).toBe("emp-updated-1");
+  });
+
+  it("rejects missing uuid", () => {
+    expect(() => updateEmployeeResultSchema.parse({})).toThrow();
   });
 });
