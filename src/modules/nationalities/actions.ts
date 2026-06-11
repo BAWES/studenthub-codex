@@ -3,46 +3,16 @@
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export type NationalityItem = {
-  country_id: number;
-  country_nationality_name_en: string;
-  country_nationality_name_ar: string | null;
-  country_name_en: string;
-  country_name_ar: string | null;
-  iso: string | null;
-  emoji: string | null;
-};
-
-export type ListNationalitiesResult = {
-  nationalities: NationalityItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
-
-// ---------------------------------------------------------------------------
-// Schema
-// ---------------------------------------------------------------------------
-
-const listNationalitiesSchema = z.object({
-  nameFilter: z.string().optional(),
-  page: z.number().int().positive().optional(),
-  limit: z.number().int().min(1).max(100).optional(),
-});
-
-export type ListNationalitiesInput = z.input<typeof listNationalitiesSchema>;
-
-const getNationalitySchema = z.object({
-  id: z.number().int().positive(),
-});
-
-export type GetNationalityParams = z.input<typeof getNationalitySchema>;
+import {
+  nationalityItemSchema,
+  listNationalitiesResultSchema,
+  listNationalitiesSchema,
+  getNationalitySchema,
+  type NationalityItem,
+  type ListNationalitiesResult,
+  type ListNationalitiesInput,
+  type GetNationalityParams,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Server actions
@@ -96,13 +66,23 @@ export async function listNationalities(
     prisma.country.count({ where: where as any }),
   ]);
 
-  return {
+  const result: ListNationalitiesResult = {
     nationalities: countries,
     total,
     page,
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  const outputParsed = listNationalitiesResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/nationalities] listNationalities output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -138,5 +118,17 @@ export async function getNationality(
     },
   });
 
-  return country;
+  if (!country) return null;
+
+  const result: NationalityItem = country;
+
+  const outputParsed = nationalityItemSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/nationalities] getNationality output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }

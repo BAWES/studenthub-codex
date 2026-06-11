@@ -6,6 +6,4 @@ export {
 export type {
   DesignationItem,
   ListDesignationsResult,
-  ListDesignationsParams,
-  GetDesignationParams,
-} from "./actions";
+} from "./schemas";

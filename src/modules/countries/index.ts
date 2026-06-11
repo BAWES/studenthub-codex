@@ -4,4 +4,4 @@ export type {
   ListCountriesInput,
   GetCountryInput,
   CountryItem,
-} from "./actions";
+} from "./schemas";
