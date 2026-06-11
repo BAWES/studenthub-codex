@@ -1,11 +1,43 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { z } from "zod";
+import { getNotificationTypeLabel } from "@/modules/notifications/utils";
+
+// ---------------------------------------------------------------------------
+// Mocks — delegate to module actions (these now contain the real logic)
+// ---------------------------------------------------------------------------
+
+const mockModuleGetNotificationRows = vi.fn();
+const mockModuleGetNotificationDetail = vi.fn();
+const mockModuleDismissNotification = vi.fn();
+const mockModuleUpdateNotification = vi.fn();
+
+vi.mock("@/modules/notifications/actions", () => ({
+  getCandidateNotificationRows: mockModuleGetNotificationRows,
+  getCandidateNotificationDetail: mockModuleGetNotificationDetail,
+  dismissNotification: mockModuleDismissNotification,
+  updateNotification: mockModuleUpdateNotification,
+}));
+
+vi.mock("@/modules/auth/session", () => ({
+  requireRoleCapability: vi.fn(),
+}));
+
+// Must import after mocks are set up
+const { requireRoleCapability } = await import("@/modules/auth/session");
+const {
+  getCandidateNotificationRows,
+  getCandidateNotificationDetail,
+  dismissNotification,
+  updateNotification,
+} = await import("./actions");
+
 import {
   getCandidateNotificationRowsSchema,
   getCandidateNotificationDetailSchema,
   updateNotificationSchema,
 } from "./schemas";
-import { getNotificationTypeLabel } from "@/modules/notifications/utils";
+
+const mockUser = { id: 1, role: "candidate" };
 
 // ---------------------------------------------------------------------------
 // Schema tests for candidate/notifications actions (pure unit — no DB required)
@@ -118,6 +150,80 @@ describe("updateNotificationSchema", () => {
 
   it("rejects missing UUID", () => {
     expect(updateNotificationSchema.safeParse({}).success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Action tests — verify delegation to module
+// ---------------------------------------------------------------------------
+
+describe("getCandidateNotificationRows (delegation)", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("delegates to module with session candidateId", async () => {
+    vi.mocked(requireRoleCapability).mockResolvedValue(mockUser as any);
+    mockModuleGetNotificationRows.mockResolvedValue([
+      { id: "n1", type: "Invitation", typeCode: 0, message: "Hello", isNew: "Unread", created: "2026-06-11" },
+    ]);
+
+    const result = await getCandidateNotificationRows();
+
+    expect(mockModuleGetNotificationRows).toHaveBeenCalledWith(1, undefined);
+    expect(result).toHaveLength(1);
+    expect(result[0].type).toBe("Invitation");
+  });
+
+  it("delegates with explicit candidateId and params", async () => {
+    vi.mocked(requireRoleCapability).mockResolvedValue(mockUser as any);
+    mockModuleGetNotificationRows.mockResolvedValue([]);
+
+    await getCandidateNotificationRows(5, { limit: 10 });
+
+    expect(mockModuleGetNotificationRows).toHaveBeenCalledWith(5, { limit: 10 });
+  });
+});
+
+describe("dismissNotification (delegation)", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("delegates to module with session candidateId", async () => {
+    vi.mocked(requireRoleCapability).mockResolvedValue(mockUser as any);
+    mockModuleDismissNotification.mockResolvedValue({ success: true });
+
+    const result = await dismissNotification("notif-abc");
+
+    expect(mockModuleDismissNotification).toHaveBeenCalledWith(1, "notif-abc");
+    expect(result.success).toBe(true);
+  });
+
+  it("returns error when module returns error", async () => {
+    vi.mocked(requireRoleCapability).mockResolvedValue(mockUser as any);
+    mockModuleDismissNotification.mockResolvedValue({ success: false, error: "Notification not found." });
+
+    const result = await dismissNotification("notif-xyz");
+
+    expect(result.success).toBe(false);
+    expect(result.error).toBe("Notification not found.");
+  });
+});
+
+describe("updateNotification (delegation)", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("delegates to module with session candidateId and isNew", async () => {
+    vi.mocked(requireRoleCapability).mockResolvedValue(mockUser as any);
+    mockModuleUpdateNotification.mockResolvedValue({ success: true });
+
+    const result = await updateNotification("notif-abc", { isNew: false });
+
+    expect(mockModuleUpdateNotification).toHaveBeenCalledWith(1, "notif-abc", { isNew: false });
+    expect(result.success).toBe(true);
   });
 });
 

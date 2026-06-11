@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 // ---------------------------------------------------------------------------
-// Schemas
+// Input validation schemas for candidate/chat actions
 // ---------------------------------------------------------------------------
 
 export const listConversationsSchema = z.object({
@@ -19,7 +19,7 @@ export const getConversationMessagesSchema = z.object({
 });
 
 // ---------------------------------------------------------------------------
-// Types
+// Types derived from schemas
 // ---------------------------------------------------------------------------
 
 export type ListConversationsParams = z.input<typeof listConversationsSchema>;
@@ -32,7 +32,7 @@ export type ConversationItem = {
   company_id: number;
   store_id: number;
   staff_id: number | null;
-  created_at: Date | null;
+  created_at: string | null;
 };
 
 export type ConversationMessageItem = {
@@ -42,7 +42,7 @@ export type ConversationMessageItem = {
   message_index: number | null;
   from: string | null;
   status: boolean | null;
-  created_at: Date | null;
+  created_at: string | null;
 };
 
 export type ListConversationsResult = {
