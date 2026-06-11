@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useCallback, type KeyboardEvent } from "react";
-import { GlassPanel } from "@/components/ui/glass-panel";
 import { X } from "lucide-react";
 
 // ---------------------------------------------------------------------------
@@ -89,7 +88,7 @@ export function PaymentDetailDrawer({ payment, lineItems, loading, open, onClose
         role="dialog"
         aria-label="Payment detail"
       >
-        <GlassPanel variant="elevated" radius="sm" className="h-full overflow-y-auto p-6 rounded-none" style={{ borderLeft: "1px solid var(--border)" }}>
+        <div className="h-full overflow-y-auto p-6 rounded-none bg-white border-l border-[var(--border)]">
           <div className="flex items-start justify-between mb-6">
             <div>
               <h2 className="text-xl font-bold" style={{ color: "var(--ink)" }}>
@@ -129,22 +128,22 @@ export function PaymentDetailDrawer({ payment, lineItems, loading, open, onClose
               </span>
 
               {payment.contact && (
-                <GlassPanel variant="subtle" radius="md" className="p-4">
+                <div className="rounded-lg border border-[var(--border)] bg-white p-4">
                   <p className="text-[11px] font-bold uppercase tracking-wider mb-2" style={{ color: "var(--muted)" }}>Contact</p>
                   <p className="text-sm font-medium" style={{ color: "var(--ink)" }}>{payment.contact.name ?? "Unknown"}</p>
                   <p className="text-xs" style={{ color: "var(--muted)" }}>ID: {payment.contact.contact_id}</p>
-                </GlassPanel>
+                </div>
               )}
 
-              <GlassPanel variant="subtle" radius="md" className="p-4 space-y-1">
+              <div className="rounded-lg border border-[var(--border)] bg-white p-4 space-y-1">
                 <p className="text-[11px] font-bold uppercase tracking-wider mb-2" style={{ color: "var(--muted)" }}>Financial Summary</p>
                 <DetailRow label="Total" value={formatAmount(payment.total, payment.currency_code)} />
                 <DetailRow label="Sub-total" value={formatAmount(payment.sub_total, payment.currency_code)} />
                 <DetailRow label="Tax" value={formatAmount(payment.total_tax, payment.currency_code)} />
                 {payment.currency_rate != null && <DetailRow label="Currency Rate" value={String(payment.currency_rate)} />}
-              </GlassPanel>
+              </div>
 
-              <GlassPanel variant="subtle" radius="md" className="p-4 space-y-1">
+              <div className="rounded-lg border border-[var(--border)] bg-white p-4 space-y-1">
                 <p className="text-[11px] font-bold uppercase tracking-wider mb-2" style={{ color: "var(--muted)" }}>Details</p>
                 <DetailRow label="Type" value={payment.type ?? "—"} />
                 <DetailRow label="Date" value={formatDate(payment.date)} />
@@ -153,10 +152,10 @@ export function PaymentDetailDrawer({ payment, lineItems, loading, open, onClose
                 {payment.line_amount_types && <DetailRow label="Line Amount Type" value={payment.line_amount_types} />}
                 <DetailRow label="Attachments" value={payment.has_attachments ? "Yes" : "No"} />
                 <DetailRow label="Reconciled" value={payment.is_reconciled ? "Yes" : "No"} />
-              </GlassPanel>
+              </div>
 
               {lineItems.length > 0 && (
-                <GlassPanel variant="subtle" radius="md" className="p-4">
+                <div className="rounded-lg border border-[var(--border)] bg-white p-4">
                   <p className="text-[11px] font-bold uppercase tracking-wider mb-2" style={{ color: "var(--muted)" }}>Line Items</p>
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
@@ -182,7 +181,7 @@ export function PaymentDetailDrawer({ payment, lineItems, loading, open, onClose
                       </tbody>
                     </table>
                   </div>
-                </GlassPanel>
+                </div>
               )}
 
               <div className="flex justify-end pt-2">
@@ -192,7 +191,7 @@ export function PaymentDetailDrawer({ payment, lineItems, loading, open, onClose
               </div>
             </div>
           )}
-        </GlassPanel>
+        </div>
       </div>
     </>
   );
