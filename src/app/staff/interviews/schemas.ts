@@ -76,3 +76,54 @@ export type UpdateInterviewStatusResult = {
   operation: "success" | "error";
   message: string;
 };
+
+// ---------------------------------------------------------------------------
+// Output validation schemas
+// ---------------------------------------------------------------------------
+
+/** Validates a single interview row returned in list results. */
+export const interviewRowOutputSchema = z.object({
+  id: z.string(),
+  candidate: z.string(),
+  candidateEmail: z.string(),
+  candidateId: z.number().int().nullable(),
+  requestTitle: z.string(),
+  requestUuid: z.string(),
+  scheduledAt: z.string(),
+  status: z.string(),
+  note: z.string(),
+});
+
+/** Validates the listStaffInterviews return shape. */
+export const interviewListOutputSchema = z.object({
+  items: z.array(interviewRowOutputSchema),
+  total: z.number().int().nonnegative(),
+  page: z.number().int().positive(),
+  limit: z.number().int().positive(),
+  totalPages: z.number().int().nonnegative(),
+});
+
+/** Validates a single interview detail object. */
+export const interviewDetailOutputSchema = z.object({
+  interviewUuid: z.string(),
+  candidateName: z.string().nullable(),
+  candidateEmail: z.string().nullable(),
+  candidatePhone: z.string().nullable(),
+  candidateId: z.number().int().nullable(),
+  requestTitle: z.string().nullable(),
+  requestUuid: z.string().nullable(),
+  companyName: z.string().nullable(),
+  scheduledAt: z.date().nullable(),
+  status: z.number().int().nullable(),
+  interviewNote: z.string().nullable(),
+  note: z.string().nullable(),
+  staffName: z.string().nullable(),
+  createdAt: z.date().nullable(),
+  updatedAt: z.date().nullable(),
+});
+
+/** Validates the updateInterviewStatus return shape. */
+export const updateInterviewStatusOutputSchema = z.object({
+  operation: z.enum(["success", "error"]),
+  message: z.string(),
+});

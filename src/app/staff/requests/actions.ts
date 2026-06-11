@@ -8,6 +8,9 @@ import {
   listStaffRequestsSchema,
   getStaffRequestDetailSchema,
   updateRequestStatusSchema,
+  staffRequestListOutputSchema,
+  staffRequestDetailOutputSchema,
+  updateRequestStatusOutputSchema,
   type ListStaffRequestsInput,
   type StaffRequestRow,
   type StaffRequestDetail,
@@ -98,13 +101,24 @@ export async function listStaffRequests(
     updated: formatDate(row.request_updated_datetime),
   }));
 
-  return {
+  const listResult = {
     items,
     total,
     page,
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  // Validate output shape
+  const outputParsed = staffRequestListOutputSchema.safeParse(listResult);
+  if (!outputParsed.success) {
+    console.error(
+      "[staff/requests] listStaffRequests output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return listResult;
 }
 
 // ---------------------------------------------------------------------------
@@ -189,7 +203,7 @@ export async function getStaffRequestDetail(
 
   if (!request) return null;
 
-  return {
+  const detailResult = {
     requestUuid: request.request_uuid,
     positionTitle: request.request_position_title,
     jobDescription: request.request_job_description,
@@ -214,6 +228,17 @@ export async function getStaffRequestDetail(
       appliedAt: app.created_at,
     })),
   };
+
+  // Validate output shape
+  const outputParsed = staffRequestDetailOutputSchema.safeParse(detailResult);
+  if (!outputParsed.success) {
+    console.error(
+      "[staff/requests] getStaffRequestDetail output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return detailResult;
 }
 
 // ---------------------------------------------------------------------------

@@ -151,7 +151,7 @@ export async function getContractDetail(
 
   const c = contract as any;
 
-  return {
+  const detailResult = {
     contract: {
       contract_uuid: c.contract_uuid,
       type: c.type,
@@ -173,6 +173,17 @@ export async function getContractDetail(
         : null,
     },
   };
+
+  // Validate output shape
+  const outputParsed = contractDetailOutputSchema.safeParse(detailResult);
+  if (!outputParsed.success) {
+    console.error(
+      "[staff/contracts] getContractDetail output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return detailResult;
 }
 
 // ---------------------------------------------------------------------------
@@ -216,7 +227,18 @@ export async function updateContractStatus(
     revalidatePath("/staff/contracts");
     revalidatePath(`/staff/contracts/${parsed.data.uuid}`);
 
-    return { success: true };
+    const updateResult = { success: true };
+
+    // Validate output shape
+    const outputParsed = updateContractStatusOutputSchema.safeParse(updateResult);
+    if (!outputParsed.success) {
+      console.error(
+        "[staff/contracts] updateContractStatus output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return updateResult;
   } catch (err) {
     throw new Error(
       err instanceof Error ? err.message : "Failed to update contract status",

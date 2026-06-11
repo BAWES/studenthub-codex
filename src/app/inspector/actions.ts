@@ -7,23 +7,11 @@
 import { prisma } from "@/lib/prisma";
 import { formatDate } from "@/modules/workspace/format";
 import { requireRoleCapability } from "@/modules/auth/session";
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-type IdRequestRow = {
-  id: string;
-  title: string;
-  subtitle: string;
-  meta: string;
-};
-
-type InspectWorkspaceResult = {
-  inspector: { inspector_name: string; inspector_email: string } | null;
-  metrics: { label: string; value: number | string; note: string }[];
-  requests: IdRequestRow[];
-};
+import {
+  getInspectorWorkspaceSchema,
+  inspectorWorkspaceOutputSchema,
+} from "./schemas";
+import type { InspectWorkspaceResult } from "./schemas";
 
 // ---------------------------------------------------------------------------
 // getInspectorWorkspace
@@ -37,6 +25,12 @@ export async function getInspectorWorkspace(
   inspectorUuid: string,
 ): Promise<InspectWorkspaceResult> {
   await requireRoleCapability("inspector", "id_review.read");
+
+  // Input validation
+  const parsed = getInspectorWorkspaceSchema.safeParse({ inspectorUuid });
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid inspector UUID");
+  }
 
   const [inspector, idRequests, idCards, needsVerification, recentIdRequests] =
     await prisma.$transaction([
@@ -61,7 +55,7 @@ export async function getInspectorWorkspace(
       }),
     ]);
 
-  return {
+  const result: InspectWorkspaceResult = {
     inspector,
     metrics: [
       {
@@ -86,4 +80,15 @@ export async function getInspectorWorkspace(
       meta: `${request.status ?? "pending"} · ${formatDate(request.created_at)}`,
     })),
   };
+
+  // Output validation
+  const outputParsed = inspectorWorkspaceOutputSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[inspector] Output validation failed for getInspectorWorkspace:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
