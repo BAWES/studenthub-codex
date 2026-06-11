@@ -5,6 +5,8 @@ import { requireCapability } from "@/modules/auth/session";
 import {
   listJobsSchema,
   getJobSchema,
+  listJobsResultSchema,
+  jobDetailSchema,
   type ListJobsParams,
   type GetJobParams,
   type JobListItem,
@@ -93,13 +95,24 @@ export async function listJobs(
     prisma.job.count({ where: where as any }),
   ]);
 
-  return {
+  const result = {
     jobs: jobs as unknown as JobListItem[],
     total,
     page,
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  // Output validation — log mismatches without throwing
+  const outputParsed = listJobsResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/jobs] listJobs output failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -147,7 +160,7 @@ export async function getJob(
     throw new Error("Job not found");
   }
 
-  return {
+  const result = {
     job_uuid: job.job_uuid,
     position: job.position,
     position_ar: job.position_ar ?? null,
@@ -170,4 +183,15 @@ export async function getJob(
     created_at: job.created_at ?? null,
     updated_at: job.updated_at ?? null,
   };
+
+  // Output validation — log mismatches without throwing
+  const outputParsed = jobDetailSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/jobs] getJob output failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }

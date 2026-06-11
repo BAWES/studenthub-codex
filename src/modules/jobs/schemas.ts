@@ -56,3 +56,42 @@ export type ListJobsResult = {
   limit: number;
   totalPages: number;
 };
+
+// ---------------------------------------------------------------------------
+// Output validation schemas
+// ---------------------------------------------------------------------------
+
+export const jobListItemSchema = z.object({
+  job_uuid: z.string(),
+  position: z.string(),
+  position_ar: z.string().nullable(),
+  description: z.string().nullable(),
+  hours_per_day: z.number().nullable(),
+  days_per_week: z.boolean().nullable(),
+  status: z.boolean().nullable(),
+  area_uuid: z.string().nullable(),
+  request_uuid: z.string(),
+  created_at: z.union([z.date(), z.string()]).nullable(),
+  updated_at: z.union([z.date(), z.string()]).nullable(),
+});
+
+export const jobDetailSchema = jobListItemSchema.extend({
+  description_ar: z.string().nullable(),
+  compensation_type: z.string().nullable(),
+  compensation_amount: z.string().nullable(),
+  compensation_description: z.string().nullable(),
+  compensation_description_ar: z.string().nullable(),
+  min_age: z.number().nullable(),
+  max_age: z.number().nullable(),
+  gender: z.boolean().nullable(),
+  available_from: z.union([z.date(), z.string()]).nullable(),
+  available_to: z.union([z.date(), z.string()]).nullable(),
+});
+
+export const listJobsResultSchema = z.object({
+  jobs: z.array(jobListItemSchema),
+  total: z.number(),
+  page: z.number(),
+  limit: z.number(),
+  totalPages: z.number(),
+});
