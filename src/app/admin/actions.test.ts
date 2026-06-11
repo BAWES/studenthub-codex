@@ -347,3 +347,113 @@ describe("adminTransferDetailSchema", () => {
     ).toBe(false);
   });
 });
+
+// ---------------------------------------------------------------------------
+// Output validation — adminCompanyRowListSchema
+// ---------------------------------------------------------------------------
+
+describe("adminCompanyRowListSchema (output validation)", () => {
+  it("accepts a valid companies array", () => {
+    const r = adminCompanyRowListSchema.safeParse([
+      {
+        id: 1,
+        name: "Test Company",
+        email: "test@co.com",
+        owner: "Owner",
+        requests: 3,
+        status: "Approved",
+        rate: "10.000 KWD",
+        updated: "Jun 10, 2026",
+      },
+    ]);
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts an empty array", () => {
+    const r = adminCompanyRowListSchema.safeParse([]);
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects an array with an invalid row", () => {
+    const r = adminCompanyRowListSchema.safeParse([
+      { id: "not-a-number", name: "Bad" },
+    ]);
+    expect(r.success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output validation — adminRequestRowListSchema
+// ---------------------------------------------------------------------------
+
+describe("adminRequestRowListSchema (output validation)", () => {
+  it("accepts a valid requests array", () => {
+    const r = adminRequestRowListSchema.safeParse([
+      {
+        id: "req-uuid-1",
+        title: "Engineer",
+        company: "Acme",
+        owner: "Sarah",
+        seats: 2,
+        status: "open",
+        updated: "Jun 10, 2026",
+      },
+    ]);
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts an empty array", () => {
+    const r = adminRequestRowListSchema.safeParse([]);
+    expect(r.success).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output validation — adminTransferRowListSchema
+// ---------------------------------------------------------------------------
+
+describe("adminTransferRowListSchema (output validation)", () => {
+  it("accepts a valid transfers array", () => {
+    const r = adminTransferRowListSchema.safeParse([
+      {
+        id: 1,
+        company: "Acme",
+        period: "Jun 1 to Jun 30",
+        status: "Status 5",
+        total: "1.000 KWD",
+      },
+    ]);
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts an empty array", () => {
+    const r = adminTransferRowListSchema.safeParse([]);
+    expect(r.success).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output validation — adminCandidateRowListSchema
+// ---------------------------------------------------------------------------
+
+describe("adminCandidateRowListSchema (output validation)", () => {
+  it("accepts a valid candidates array", () => {
+    const r = adminCandidateRowListSchema.safeParse([
+      {
+        id: 1,
+        name: "Alice Smith",
+        email: "alice@example.com",
+        country: "Kuwait",
+        status: "Active",
+        rate: "5.000 KWD",
+        updated: "Jun 10, 2026",
+      },
+    ]);
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts an empty array", () => {
+    const r = adminCandidateRowListSchema.safeParse([]);
+    expect(r.success).toBe(true);
+  });
+});

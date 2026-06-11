@@ -106,6 +106,30 @@ export const adminTransferDetailSchema = z.object({
 });
 
 // ---------------------------------------------------------------------------
+// Output validation — list schemas (array wrappers)
+// ---------------------------------------------------------------------------
+
+/**
+ * Schema for the full companies array returned by listAdminCompanies.
+ */
+export const adminCompanyRowListSchema = z.array(adminCompanyRowSchema);
+
+/**
+ * Schema for the full requests array returned by listAdminRequests.
+ */
+export const adminRequestRowListSchema = z.array(adminRequestRowSchema);
+
+/**
+ * Schema for the full transfers array returned by listAdminTransfers.
+ */
+export const adminTransferRowListSchema = z.array(adminTransferRowSchema);
+
+/**
+ * Schema for the full candidates array returned by listAdminCandidates.
+ */
+export const adminCandidateRowListSchema = z.array(adminCandidateRowSchema);
+
+// ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
