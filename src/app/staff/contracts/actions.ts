@@ -24,8 +24,9 @@ import {
   listContractsSchema,
   getContractSchema,
   updateContractStatusSchema,
+  contractListOutputSchema,
   contractDetailOutputSchema,
-  updateContractStatusOutputSchema,
+  contractStatusUpdateOutputSchema,
 } from "./schemas";
 import type {
   ListContractsInput,
@@ -101,7 +102,7 @@ export async function listContracts(
     prisma.contract.count({ where: where as any }),
   ]);
 
-  return {
+  const result = {
     items: contracts.map((c: any): ContractRow => ({
       contract_uuid: c.contract_uuid,
       candidate_name: c.candidate?.candidate_name ?? null,
@@ -120,6 +121,17 @@ export async function listContracts(
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  // Validate output shape
+  const outputParsed = contractListOutputSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[staff/contracts] listContracts output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -148,12 +160,20 @@ export async function getContractDetail(
   });
 
   if (!contract) {
-    return { contract: null };
+    const nullResult = { contract: null };
+    const nullParsed = contractDetailOutputSchema.safeParse(nullResult);
+    if (!nullParsed.success) {
+      console.error(
+        "[staff/contracts] getContractDetail output validation failed:",
+        nullParsed.error.issues,
+      );
+    }
+    return nullResult;
   }
 
   const c = contract as any;
 
-  const detailResult = {
+  const result = {
     contract: {
       contract_uuid: c.contract_uuid,
       type: c.type,
@@ -177,7 +197,7 @@ export async function getContractDetail(
   };
 
   // Validate output shape
-  const outputParsed = contractDetailOutputSchema.safeParse(detailResult);
+  const outputParsed = contractDetailOutputSchema.safeParse(result);
   if (!outputParsed.success) {
     console.error(
       "[staff/contracts] getContractDetail output validation failed:",
@@ -185,7 +205,7 @@ export async function getContractDetail(
     );
   }
 
-  return detailResult;
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -229,10 +249,10 @@ export async function updateContractStatus(
     revalidatePath("/staff/contracts");
     revalidatePath(`/staff/contracts/${parsed.data.uuid}`);
 
-    const updateResult = { success: true };
+    const result = { success: true };
 
     // Validate output shape
-    const outputParsed = updateContractStatusOutputSchema.safeParse(updateResult);
+    const outputParsed = contractStatusUpdateOutputSchema.safeParse(result);
     if (!outputParsed.success) {
       console.error(
         "[staff/contracts] updateContractStatus output validation failed:",
@@ -240,7 +260,7 @@ export async function updateContractStatus(
       );
     }
 
-    return updateResult;
+    return result;
   } catch (err) {
     throw new Error(
       err instanceof Error ? err.message : "Failed to update contract status",

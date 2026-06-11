@@ -51,3 +51,46 @@ export type ListCandidatesResult = {
   limit: number;
   totalPages: number;
 };
+
+// ---------------------------------------------------------------------------
+// Output validation schemas
+// ---------------------------------------------------------------------------
+
+/**
+ * Validates a single candidate row returned in list results.
+ */
+export const candidateRowOutputSchema = z.object({
+  id: z.number().int(),
+  name: z.string(),
+  email: z.string(),
+  phone: z.string().nullable(),
+  status: z.number().int(),
+  createdAt: z.string(),
+});
+
+/**
+ * Validates the listCandidates return shape.
+ */
+export const candidateListOutputSchema = z.object({
+  items: z.array(candidateRowOutputSchema),
+  total: z.number().int().nonnegative(),
+  page: z.number().int().positive(),
+  limit: z.number().int().positive(),
+  totalPages: z.number().int().nonnegative(),
+});
+
+/**
+ * Validates a candidate detail object returned by getCandidateById.
+ */
+export const candidateDetailOutputSchema = z.object({
+  id: z.number().int(),
+  name: z.string(),
+  nameAr: z.string(),
+  email: z.string(),
+  phone: z.string().nullable(),
+  gender: z.number().int().nullable(),
+  objective: z.string().nullable(),
+  status: z.number().int(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});

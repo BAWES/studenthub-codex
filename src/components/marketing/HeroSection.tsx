@@ -128,6 +128,9 @@ export default function HeroSection({ onCtaClick }: HeroSectionProps) {
       {/* Animated gradient background */}
       <div className="shHeroGradientDramatic" aria-hidden="true" />
 
+      {/* Ambient glow behind mockup */}
+      <div className="shHeroAmbientGlow" aria-hidden="true" />
+
       {/* Dot pattern overlay */}
       <div
         className="absolute inset-0 opacity-[0.03] dark:opacity-[0.06]"

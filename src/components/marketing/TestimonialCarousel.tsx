@@ -325,7 +325,7 @@ export default function TestimonialCarousel({
         {/* Testimonial card */}
         <div
           key={active}
-          className="shCard rounded-xl p-8 md:p-10 text-center animate-in fade-in slide-in-from-bottom-4 duration-500"
+          className="shCard rounded-xl p-8 md:p-10 text-center animate-in fade-in slide-in-from-bottom-4 duration-500 shCardGlow"
           style={{
             background: "var(--sh-glass-bg)",
             border: "1px solid var(--sh-glass-border)",
