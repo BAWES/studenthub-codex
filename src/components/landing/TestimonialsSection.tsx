@@ -173,7 +173,7 @@ export default function TestimonialsSection({
               className="absolute top-0 left-0 bottom-0 w-1 rounded-l-xl"
               style={{
                 backgroundColor:
-                  current.persona === "candidate" ? "var(--sh-coral)" : "#2563eb",
+                  current.persona === "candidate" ? "var(--sh-coral)" : "var(--sh-coral)",
               }}
               aria-hidden="true"
             />
@@ -193,7 +193,7 @@ export default function TestimonialsSection({
                   className="flex h-10 w-10 items-center justify-center rounded-full text-xs font-bold text-white shrink-0"
                   style={{
                     backgroundColor:
-                      current.persona === "candidate" ? "var(--sh-coral)" : "#2563eb",
+                      current.persona === "candidate" ? "var(--sh-coral)" : "var(--sh-coral)",
                   }}
                 >
                   {current.name
@@ -213,12 +213,8 @@ export default function TestimonialsSection({
                 <span
                   className="ml-auto inline-flex items-center px-2 py-1 rounded-full text-[10px] font-semibold"
                   style={{
-                    backgroundColor:
-                      current.persona === "candidate"
-                        ? "color-mix(in srgb, var(--sh-coral) 10%, transparent)"
-                        : "color-mix(in srgb, #2563eb 10%, transparent)",
-                    color:
-                      current.persona === "candidate" ? "var(--sh-coral)" : "#2563eb",
+                    backgroundColor: "color-mix(in srgb, var(--sh-coral) 10%, transparent)",
+                    color: "var(--sh-coral)",
                   }}
                 >
                   {current.persona === "candidate" ? "Student" : "Employer"}

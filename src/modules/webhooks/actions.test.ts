@@ -1,5 +1,10 @@
 import { describe, it, expect } from "vitest";
 import { z } from "zod";
+import {
+  webhookListItemSchema,
+  listWebhooksResultSchema,
+  webhookGetResultSchema,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Schema validation tests for WebhookController server actions
@@ -101,104 +106,113 @@ describe("getWebhookSchema", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Output schema tests (from ./schemas.ts)
+// Output schema shape validation (using schemas.ts)
 // ---------------------------------------------------------------------------
 
-import {
-  webhookListItemSchema,
-  listWebhooksResultSchema,
-  type WebhookListItem,
-  type ListWebhooksResult,
-} from "./schemas";
-
-describe("webhookListItemSchema (output)", () => {
-  it("validates a complete webhook list item", () => {
-    const mock: WebhookListItem = {
+describe("webhookListItemSchema", () => {
+  it("accepts a valid webhook item", () => {
+    const result = webhookListItemSchema.safeParse({
       webhook_id: 1,
-      event: "test.event",
+      event: "user.created",
       endpoint: "https://example.com/hook",
       method: "POST",
-      created_at: "2024-01-15T00:00:00.000Z",
-      updated_at: "2024-01-15T00:00:00.000Z",
-    };
-    const parsed = webhookListItemSchema.safeParse(mock);
-    expect(parsed.success).toBe(true);
-    if (parsed.success) {
-      expect(parsed.data.webhook_id).toBe(1);
-      expect(parsed.data.event).toBe("test.event");
-    }
+      created_at: "2024-01-01T00:00:00.000Z",
+      updated_at: "2024-06-01T00:00:00.000Z",
+    });
+    expect(result.success).toBe(true);
   });
 
-  it("allows null method and dates", () => {
-    const mock: WebhookListItem = {
+  it("accepts nullable fields", () => {
+    const result = webhookListItemSchema.safeParse({
       webhook_id: 2,
-      event: "minimal.event",
-      endpoint: "",
+      event: "payment.updated",
+      endpoint: "https://example.com/hook2",
       method: null,
       created_at: null,
       updated_at: null,
-    };
-    const parsed = webhookListItemSchema.safeParse(mock);
-    expect(parsed.success).toBe(true);
-    expect(parsed.data?.method).toBeNull();
-    expect(parsed.data?.created_at).toBeNull();
+    });
+    expect(result.success).toBe(true);
   });
 
-  it("rejects missing webhook_id", () => {
-    const parsed = webhookListItemSchema.safeParse({
-      event: "test",
-      endpoint: "",
+  it("rejects missing required fields", () => {
+    const result = webhookListItemSchema.safeParse({
+      webhook_id: 1,
     });
-    expect(parsed.success).toBe(false);
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects wrong types", () => {
+    const result = webhookListItemSchema.safeParse({
+      webhook_id: "abc",
+      event: "test",
+      endpoint: "https://example.com",
+      method: null,
+      created_at: null,
+      updated_at: null,
+    });
+    expect(result.success).toBe(false);
   });
 });
 
-describe("listWebhooksResultSchema (output)", () => {
-  it("validates a complete list result", () => {
-    const mock: ListWebhooksResult = {
+describe("listWebhooksResultSchema", () => {
+  it("accepts empty webhook list", () => {
+    const result = listWebhooksResultSchema.safeParse({
+      webhooks: [],
+      total: 0,
+      page: 1,
+      limit: 20,
+      totalPages: 0,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts populated webhook list", () => {
+    const result = listWebhooksResultSchema.safeParse({
       webhooks: [
         {
           webhook_id: 1,
-          event: "test.event",
+          event: "user.created",
           endpoint: "https://example.com/hook",
           method: "POST",
-          created_at: "2024-01-15T00:00:00.000Z",
-          updated_at: "2024-01-15T00:00:00.000Z",
+          created_at: "2024-01-01T00:00:00.000Z",
+          updated_at: null,
         },
       ],
       total: 1,
       page: 1,
       limit: 20,
       totalPages: 1,
-    };
-    const parsed = listWebhooksResultSchema.safeParse(mock);
-    expect(parsed.success).toBe(true);
-    if (parsed.success) {
-      expect(parsed.data.webhooks).toHaveLength(1);
-      expect(parsed.data.totalPages).toBe(1);
-    }
-  });
-
-  it("validates empty webhooks list with zero totalPages", () => {
-    const mock: ListWebhooksResult = {
-      webhooks: [],
-      total: 0,
-      page: 1,
-      limit: 20,
-      totalPages: 0,
-    };
-    const parsed = listWebhooksResultSchema.safeParse(mock);
-    expect(parsed.success).toBe(true);
+    });
+    expect(result.success).toBe(true);
   });
 
   it("rejects negative totalPages", () => {
-    const parsed = listWebhooksResultSchema.safeParse({
+    const result = listWebhooksResultSchema.safeParse({
       webhooks: [],
       total: 0,
       page: 1,
       limit: 20,
       totalPages: -1,
     });
-    expect(parsed.success).toBe(false);
+    expect(result.success).toBe(false);
+  });
+});
+
+describe("webhookGetResultSchema", () => {
+  it("accepts a valid webhook item", () => {
+    const result = webhookGetResultSchema.safeParse({
+      webhook_id: 1,
+      event: "user.created",
+      endpoint: "https://example.com/hook",
+      method: "POST",
+      created_at: "2024-01-01T00:00:00.000Z",
+      updated_at: null,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts null result (webhook not found)", () => {
+    const result = webhookGetResultSchema.safeParse(null);
+    expect(result.success).toBe(true);
   });
 });

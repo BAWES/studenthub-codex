@@ -69,7 +69,7 @@ export default function LandingFooter({ persona }: LandingFooterProps) {
                 <span className="font-medium" style={{ color: "var(--ink)" }}>
                   Staff:
                 </span>{" "}
-                Tools for agencies placing candidates faster.
+                Tools for agencies placing students faster.
               </p>
               <p className="text-xs leading-relaxed" style={{ color: "var(--muted)" }}>
                 <span className="font-medium" style={{ color: "var(--ink)" }}>

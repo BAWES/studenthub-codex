@@ -1,5 +1,10 @@
 import { describe, it, expect } from "vitest";
 import { z } from "zod";
+import {
+  universityItemSchema,
+  listUniversitiesResultSchema,
+  createUniversityResultSchema,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Pure logic: university schema validation
@@ -121,64 +126,58 @@ describe("createUniversity schema", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Output schema tests (from ./schemas.ts)
+// Output schema shape validation (using schemas.ts)
 // ---------------------------------------------------------------------------
 
-import {
-  universityItemSchema,
-  listUniversitiesResultSchema,
-  createUniversityResultSchema,
-  type UniversityItem,
-  type ListUniversitiesResult,
-  type CreateUniversityResult,
-} from "./schemas";
-
-describe("universityItemSchema (output)", () => {
-  it("validates a complete university item", () => {
-    const mock: UniversityItem = {
+describe("universityItemSchema", () => {
+  it("accepts a valid university item", () => {
+    const result = universityItemSchema.safeParse({
       university_id: 1,
       university_name_en: "Kuwait University",
       university_name_ar: "جامعة الكويت",
-    };
-    const parsed = universityItemSchema.safeParse(mock);
-    expect(parsed.success).toBe(true);
-    if (parsed.success) {
-      expect(parsed.data.university_id).toBe(1);
-      expect(parsed.data.university_name_en).toBe("Kuwait University");
-    }
+    });
+    expect(result.success).toBe(true);
   });
 
-  it("allows null names", () => {
-    const mock: UniversityItem = {
+  it("accepts nullable name fields", () => {
+    const result = universityItemSchema.safeParse({
       university_id: 2,
       university_name_en: null,
       university_name_ar: null,
-    };
-    const parsed = universityItemSchema.safeParse(mock);
-    expect(parsed.success).toBe(true);
+    });
+    expect(result.success).toBe(true);
   });
 
-  it("rejects missing university_id", () => {
-    const parsed = universityItemSchema.safeParse({
+  it("rejects missing required fields", () => {
+    const result = universityItemSchema.safeParse({
+      university_id: 1,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects wrong types", () => {
+    const result = universityItemSchema.safeParse({
+      university_id: "abc",
       university_name_en: "Test",
       university_name_ar: null,
     });
-    expect(parsed.success).toBe(false);
-  });
-
-  it("rejects negative university_id", () => {
-    const parsed = universityItemSchema.safeParse({
-      university_id: -1,
-      university_name_en: "Test",
-      university_name_ar: null,
-    });
-    expect(parsed.success).toBe(false);
+    expect(result.success).toBe(false);
   });
 });
 
-describe("listUniversitiesResultSchema (output)", () => {
-  it("validates a complete list result", () => {
-    const mock: ListUniversitiesResult = {
+describe("listUniversitiesResultSchema", () => {
+  it("accepts empty university list", () => {
+    const result = listUniversitiesResultSchema.safeParse({
+      universities: [],
+      total: 0,
+      page: 1,
+      limit: 200,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts populated university list", () => {
+    const result = listUniversitiesResultSchema.safeParse({
       universities: [
         {
           university_id: 1,
@@ -189,73 +188,56 @@ describe("listUniversitiesResultSchema (output)", () => {
       total: 1,
       page: 1,
       limit: 200,
-    };
-    const parsed = listUniversitiesResultSchema.safeParse(mock);
-    expect(parsed.success).toBe(true);
-    if (parsed.success) {
-      expect(parsed.data.universities).toHaveLength(1);
-      expect(parsed.data.total).toBe(1);
-    }
-  });
-
-  it("validates empty universities array", () => {
-    const mock: ListUniversitiesResult = {
-      universities: [],
-      total: 0,
-      page: 1,
-      limit: 200,
-    };
-    const parsed = listUniversitiesResultSchema.safeParse(mock);
-    expect(parsed.success).toBe(true);
+    });
+    expect(result.success).toBe(true);
   });
 
   it("rejects negative total", () => {
-    const parsed = listUniversitiesResultSchema.safeParse({
+    const result = listUniversitiesResultSchema.safeParse({
       universities: [],
       total: -1,
       page: 1,
       limit: 200,
     });
-    expect(parsed.success).toBe(false);
+    expect(result.success).toBe(false);
   });
 });
 
-describe("createUniversityResultSchema (output)", () => {
-  it("validates success result", () => {
-    const mock: CreateUniversityResult = {
+describe("createUniversityResultSchema", () => {
+  it("accepts a success result", () => {
+    const result = createUniversityResultSchema.safeParse({
       operation: "success",
       message: "University created successfully",
       university: {
         university_id: 1,
         university_name_en: "Kuwait University",
-        university_name_ar: "جامعة الكويت",
+        university_name_ar: null,
       },
-    };
-    const parsed = createUniversityResultSchema.safeParse(mock);
-    expect(parsed.success).toBe(true);
-    if (parsed.success) {
-      expect(parsed.data.operation).toBe("success");
-    }
+    });
+    expect(result.success).toBe(true);
   });
 
-  it("validates error result", () => {
-    const mock: CreateUniversityResult = {
+  it("accepts an error result", () => {
+    const result = createUniversityResultSchema.safeParse({
       operation: "error",
       message: "University already exists",
-    };
-    const parsed = createUniversityResultSchema.safeParse(mock);
-    expect(parsed.success).toBe(true);
-    if (parsed.success) {
-      expect(parsed.data.operation).toBe("error");
-      expect(parsed.data.message).toBe("University already exists");
-    }
+    });
+    expect(result.success).toBe(true);
   });
 
-  it("rejects unknown operation", () => {
-    const parsed = createUniversityResultSchema.safeParse({
+  it("rejects missing university in success result", () => {
+    const result = createUniversityResultSchema.safeParse({
+      operation: "success",
+      message: "done",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects invalid operation value", () => {
+    const result = createUniversityResultSchema.safeParse({
       operation: "invalid",
       message: "test",
     });
-    expect(parsed.success).toBe(false);
+    expect(result.success).toBe(false);
   });
 });

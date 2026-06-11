@@ -1,5 +1,10 @@
 import { describe, it, expect } from "vitest";
 import { z } from "zod";
+import {
+  staffListItemSchema,
+  staffListResultSchema,
+  staffGetResultSchema,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Pure logic: staff action schema validation
@@ -181,32 +186,12 @@ describe("buildStaffFilter", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Return type shape
+// Output schema shape validation (using schemas.ts)
 // ---------------------------------------------------------------------------
 
-type StaffListItem = {
-  staff_id: number;
-  staff_name: string;
-  staff_job_title: string | null;
-  staff_email: string;
-  staff_role: boolean | null;
-  staff_status: number;
-  staff_created_at: Date;
-};
-
-type StaffListResult = {
-  staff: StaffListItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
-
-type StaffGetResult = StaffListItem | null;
-
-describe("StaffListItem shape", () => {
-  it("defines the expected fields", () => {
-    const mock: StaffListItem = {
+describe("staffListItemSchema", () => {
+  it("accepts a valid staff item", () => {
+    const result = staffListItemSchema.safeParse({
       staff_id: 1,
       staff_name: "John Doe",
       staff_job_title: "Manager",
@@ -214,50 +199,106 @@ describe("StaffListItem shape", () => {
       staff_role: true,
       staff_status: 10,
       staff_created_at: new Date("2024-01-01"),
-    };
-    expect(mock.staff_id).toBe(1);
-    expect(mock.staff_name).toBe("John Doe");
-    expect(mock.staff_job_title).toBe("Manager");
-    expect(mock.staff_email).toBe("john@studenthub.com");
-    expect(mock.staff_role).toBe(true);
-    expect(mock.staff_status).toBe(10);
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts nullable fields", () => {
+    const result = staffListItemSchema.safeParse({
+      staff_id: 2,
+      staff_name: "Jane Smith",
+      staff_job_title: null,
+      staff_email: "jane@studenthub.com",
+      staff_role: null,
+      staff_status: 10,
+      staff_created_at: new Date("2024-06-01"),
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects missing required fields", () => {
+    const result = staffListItemSchema.safeParse({
+      staff_id: 1,
+      staff_name: "John",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects wrong types", () => {
+    const result = staffListItemSchema.safeParse({
+      staff_id: "abc",
+      staff_name: "John",
+      staff_job_title: null,
+      staff_email: "john@test.com",
+      staff_role: true,
+      staff_status: 10,
+      staff_created_at: new Date(),
+    });
+    expect(result.success).toBe(false);
   });
 });
 
-describe("StaffListResult shape", () => {
-  it("defines pagination fields", () => {
-    const mock: StaffListResult = {
+describe("staffListResultSchema", () => {
+  it("accepts empty staff list", () => {
+    const result = staffListResultSchema.safeParse({
       staff: [],
       total: 0,
       page: 1,
       limit: 20,
       totalPages: 0,
-    };
-    expect(mock.staff).toEqual([]);
-    expect(mock.total).toBe(0);
-    expect(mock.page).toBe(1);
-    expect(mock.limit).toBe(20);
-    expect(mock.totalPages).toBe(0);
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts populated staff list", () => {
+    const result = staffListResultSchema.safeParse({
+      staff: [
+        {
+          staff_id: 1,
+          staff_name: "John",
+          staff_job_title: "Manager",
+          staff_email: "john@test.com",
+          staff_role: true,
+          staff_status: 10,
+          staff_created_at: new Date(),
+        },
+      ],
+      total: 1,
+      page: 1,
+      limit: 20,
+      totalPages: 1,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects negative totalPages", () => {
+    const result = staffListResultSchema.safeParse({
+      staff: [],
+      total: 0,
+      page: 1,
+      limit: 20,
+      totalPages: -1,
+    });
+    expect(result.success).toBe(false);
   });
 });
 
-describe("StaffGetResult shape", () => {
-  it("can be StaffListItem", () => {
-    const mock: StaffGetResult = {
+describe("staffGetResultSchema", () => {
+  it("accepts a valid staff item", () => {
+    const result = staffGetResultSchema.safeParse({
       staff_id: 1,
-      staff_name: "Jane",
+      staff_name: "John",
       staff_job_title: null,
-      staff_email: "jane@studenthub.com",
-      staff_role: false,
+      staff_email: "john@test.com",
+      staff_role: true,
       staff_status: 10,
-      staff_created_at: new Date("2024-06-01"),
-    };
-    expect(mock).not.toBeNull();
-    expect(mock!.staff_name).toBe("Jane");
+      staff_created_at: new Date(),
+    });
+    expect(result.success).toBe(true);
   });
 
-  it("can be null", () => {
-    const result: StaffGetResult = null;
-    expect(result).toBeNull();
+  it("accepts null result (staff not found)", () => {
+    const result = staffGetResultSchema.safeParse(null);
+    expect(result.success).toBe(true);
   });
 });
