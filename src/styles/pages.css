@@ -10472,3 +10472,102 @@ kbd {
   animation: scaleIn var(--duration-fast) var(--ease-out);
   transform-origin: var(--radix-popover-content-transform-origin);
 }
+
+/* ── Quick Facet Chips ──────────────────────────────────────────────────── */
+
+.candidateFacetChips {
+  display: grid;
+  gap: 8px;
+  padding: 6px 10px 10px;
+}
+
+.candidateFacetChipGroup {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.candidateFacetChipLabel {
+  flex: 0 0 auto;
+  min-width: 52px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  line-height: 28px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.candidateFacetChipList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  min-width: 0;
+}
+
+.candidateFacetChipList a.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 26px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  padding: 0 10px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: all 120ms ease;
+}
+
+.candidateFacetChipList a.chip:hover {
+  border-color: var(--blue);
+  background: color-mix(in srgb, var(--blue) 8%, var(--surface));
+  color: var(--blue);
+}
+
+.candidateFacetChipList a.chip.active {
+  border-color: var(--blue);
+  background: var(--blue);
+  color: var(--surface);
+}
+
+.candidateFacetChipList a.chip strong {
+  font-size: 10px;
+  font-weight: 700;
+  opacity: 0.7;
+}
+
+.candidateFacetChipList a.chip.active strong {
+  opacity: 0.9;
+}
+
+/* Mobile responsive */
+@media (max-width: 640px) {
+  .candidateFacetChips {
+    gap: 6px;
+    padding: 4px 8px 8px;
+  }
+
+  .candidateFacetChipGroup {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .candidateFacetChipLabel {
+    min-width: 0;
+    line-height: 1.3;
+  }
+
+  .candidateFacetChipList {
+    gap: 3px;
+  }
+
+  .candidateFacetChipList a.chip {
+    min-height: 24px;
+    font-size: 11px;
+    padding: 0 8px;
+  }
+}

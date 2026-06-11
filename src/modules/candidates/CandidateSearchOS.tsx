@@ -166,6 +166,7 @@ function CandidateSearchTab({
           </Link>
         ))}
       </nav>
+      <FacetChips basePath={basePath} data={data} params={params} />
       {data.selectedBlocked ? (
         <div className="candidateAccessNotice">
           <strong>Candidate unavailable</strong>
@@ -454,4 +455,53 @@ function buildCandidateSearchCommands(
       href: action.href
     }))
   ];
+}
+
+// ---------------------------------------------------------------------------
+// FacetChips — inline clickable facet chips surfaced above search results
+// ---------------------------------------------------------------------------
+// Shows the most commonly-used facet groups (country, skills, company, university)
+// as clickable chips so users can filter without opening the power filters panel.
+// Each chip toggles the corresponding facet on click.
+// ---------------------------------------------------------------------------
+
+const QUICK_FACET_KEYS = ["country", "skill", "company", "university"];
+
+function FacetChips({
+  basePath,
+  data,
+  params,
+}: {
+  basePath: "/admin/candidates" | "/staff/candidates";
+  data: CandidateSearchData;
+  params: CandidateSearchParams;
+}) {
+  // Show facets that match the quick filter keys and have options
+  const quickFacets = data.facets.filter((f) => QUICK_FACET_KEYS.includes(f.key));
+  if (quickFacets.length === 0) return null;
+
+  return (
+    <section className="candidateFacetChips" aria-label="Quick facet filters">
+      {quickFacets.map((facet) => (
+        <div className="candidateFacetChipGroup" key={facet.key}>
+          <span className="candidateFacetChipLabel">{facet.label}</span>
+          <div className="candidateFacetChipList">
+            {facet.options.slice(0, 6).map((option) => (
+              <Link
+                className={option.active ? "chip active" : "chip"}
+                href={candidateSearchHref(basePath, params, {
+                  [facet.key]: option.active ? "" : option.value,
+                  candidate: "",
+                })}
+                key={option.value}
+              >
+                <span>{option.label}</span>
+                {option.count > 0 ? <strong>{option.count}</strong> : null}
+              </Link>
+            ))}
+          </div>
+        </div>
+      ))}
+    </section>
+  );
 }

@@ -1,5 +1,11 @@
 import { describe, it, expect } from "vitest";
 import { z } from "zod";
+import {
+  requestListItemSchema,
+  listRequestsResultSchema,
+  requestUuidResultSchema,
+  requestDetailSchema,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Pure logic: request schema validation
@@ -333,6 +339,224 @@ describe("updateRequestSchema", () => {
       requestUuid: "req_abc123",
       nationalityId: 0,
     });
+    expect(result.success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output validation: requestListItemSchema
+// ---------------------------------------------------------------------------
+
+describe("requestListItemSchema (output)", () => {
+  const validItem = {
+    request_uuid: "req_abc123",
+    company_id: 1,
+    contact_uuid: "contact_abc",
+    staff_id: 42,
+    request_position_type: 2,
+    request_position_title: "Software Engineer",
+    request_job_description: "Develop software",
+    request_compensation: "Competitive",
+    request_number_of_employees: 3,
+    no_of_employees_per_story: 1,
+    request_location: "Kuwait City",
+    request_additional_info: "Some info",
+    request_status: "pending",
+    request_priority: 1,
+    gender: false,
+    nationality_id: null,
+    request_created_datetime: new Date("2025-01-01"),
+    request_updated_datetime: new Date("2025-01-02"),
+  };
+
+  it("accepts a valid request list item", () => {
+    const result = requestListItemSchema.safeParse(validItem);
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects missing request_uuid", () => {
+    const { request_uuid, ...rest } = validItem;
+    const result = requestListItemSchema.safeParse(rest);
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects wrong type for request_job_description", () => {
+    const result = requestListItemSchema.safeParse({ ...validItem, request_job_description: 123 });
+    expect(result.success).toBe(false);
+  });
+
+  it("accepts nullable fields as null", () => {
+    const result = requestListItemSchema.safeParse({
+      ...validItem,
+      company_id: null,
+      staff_id: null,
+      request_position_title: null,
+      nationality_id: null,
+    });
+    expect(result.success).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output validation: listRequestsResultSchema
+// ---------------------------------------------------------------------------
+
+describe("listRequestsResultSchema (output)", () => {
+  const validDate = new Date("2025-01-01");
+  const validItem = {
+    request_uuid: "req_abc",
+    company_id: null,
+    contact_uuid: null,
+    staff_id: null,
+    request_position_type: null,
+    request_position_title: null,
+    request_job_description: "Job",
+    request_compensation: "Pay",
+    request_number_of_employees: null,
+    no_of_employees_per_story: 1,
+    request_location: null,
+    request_additional_info: null,
+    request_status: null,
+    request_priority: null,
+    gender: false,
+    nationality_id: null,
+    request_created_datetime: validDate,
+    request_updated_datetime: validDate,
+  };
+
+  it("accepts a valid list result with items", () => {
+    const result = listRequestsResultSchema.safeParse({
+      requests: [validItem],
+      total: 1,
+      page: 1,
+      limit: 20,
+      totalPages: 1,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts empty requests array", () => {
+    const result = listRequestsResultSchema.safeParse({
+      requests: [],
+      total: 0,
+      page: 1,
+      limit: 20,
+      totalPages: 0,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects negative total", () => {
+    const result = listRequestsResultSchema.safeParse({
+      requests: [],
+      total: -1,
+      page: 1,
+      limit: 20,
+      totalPages: 0,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects zero page", () => {
+    const result = listRequestsResultSchema.safeParse({
+      requests: [],
+      total: 0,
+      page: 0,
+      limit: 20,
+      totalPages: 0,
+    });
+    expect(result.success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output validation: requestUuidResultSchema
+// ---------------------------------------------------------------------------
+
+describe("requestUuidResultSchema (output)", () => {
+  it("accepts a valid result with request_uuid", () => {
+    const result = requestUuidResultSchema.safeParse({ request_uuid: "req_abc123" });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects missing request_uuid", () => {
+    const result = requestUuidResultSchema.safeParse({});
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects non-string request_uuid", () => {
+    const result = requestUuidResultSchema.safeParse({ request_uuid: 123 });
+    expect(result.success).toBe(false);
+  });
+
+  it("accepts empty string request_uuid", () => {
+    const result = requestUuidResultSchema.safeParse({ request_uuid: "" });
+    expect(result.success).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output validation: requestDetailSchema
+// ---------------------------------------------------------------------------
+
+describe("requestDetailSchema (output)", () => {
+  const validDetail = {
+    request_uuid: "req_abc",
+    company_id: 1,
+    contact_uuid: "contact_abc",
+    staff_id: 42,
+    request_created_by: 10,
+    request_updated_by: 10,
+    request_position_type: 2,
+    request_position_title: "Engineer",
+    request_job_description: "Develop",
+    request_compensation: "Pay",
+    request_number_of_employees: 3,
+    no_of_employees_per_story: 1,
+    request_location: "Kuwait",
+    request_additional_info: null,
+    request_status: "pending",
+    request_feedback: null,
+    request_priority: 1,
+    gender: false,
+    nationality_id: null,
+    our_fees: 500.0,
+    our_fees_unit: "KWD",
+    request_created_datetime: new Date("2025-01-01"),
+    request_updated_datetime: new Date("2025-01-02"),
+  };
+
+  it("accepts a valid request detail", () => {
+    const result = requestDetailSchema.safeParse(validDetail);
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects missing required string field", () => {
+    const { request_job_description, ...rest } = validDetail;
+    const result = requestDetailSchema.safeParse(rest);
+    expect(result.success).toBe(false);
+  });
+
+  it("accepts nullable fields as null", () => {
+    const result = requestDetailSchema.safeParse({
+      ...validDetail,
+      company_id: null,
+      staff_id: null,
+      our_fees: null,
+      our_fees_unit: null,
+      request_feedback: null,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects wrong type for no_of_employees_per_story", () => {
+    const result = requestDetailSchema.safeParse({ ...validDetail, no_of_employees_per_story: "one" });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects missing request_uuid", () => {
+    const { request_uuid, ...rest } = validDetail;
+    const result = requestDetailSchema.safeParse(rest);
     expect(result.success).toBe(false);
   });
 });

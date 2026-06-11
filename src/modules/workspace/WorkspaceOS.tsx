@@ -14,7 +14,8 @@ import { navForRole } from "./navigation";
 import type { NavItem } from "./navigation";
 import { PageTransition } from "./PageTransition";
 import { RaycastCommandPalette } from "./RaycastCommandPalette";
-import { WorkspaceTabs } from "./WorkspaceTabs";
+import { TabBar } from "./TabBar";
+import { TabProvider } from "./TabContext";
 
 // ── Command item shape ──────────────────────────────────────────────
 
@@ -278,6 +279,7 @@ export function WorkspaceOS({
       >
         Skip to content
       </a>
+      <TabProvider role={session.role}>
       <main id="main-content" className="shell">
         {/* ── Sidebar Rail ─────────────────────────────────── */}
         <aside className="workspaceRail" aria-label="Workspace sidebar">
@@ -303,13 +305,14 @@ export function WorkspaceOS({
 
         {/* ── Content Stage ───────────────────────────────── */}
         <section className="workspaceStage">
-          <WorkspaceTabs role={session.role} />
+          <TabBar role={session.role} />
           <PageTransition>{children}</PageTransition>
         </section>
 
         {/* ── Mobile Tab Bar ──────────────────────────────── */}
         <WorkspaceMobileNavigation items={navItems} role={session.role} />
       </main>
+      </TabProvider>
 
       {/* ── Command Palette (Raycast-style) ──────────────────── */}
       <RaycastCommandPalette

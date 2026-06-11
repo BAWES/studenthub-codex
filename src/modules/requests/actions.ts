@@ -7,6 +7,12 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
+import {
+  requestListItemSchema,
+  listRequestsResultSchema,
+  requestUuidResultSchema,
+  requestDetailSchema,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Schemas
@@ -216,7 +222,7 @@ export async function listRequests(
     prisma.request.count({ where: where as any }),
   ]);
 
-  return {
+  const result: ListRequestsResult = {
     requests: requests.map((r: Record<string, unknown>): RequestListItem => {
       const raw = r as any;
       return {
@@ -245,6 +251,17 @@ export async function listRequests(
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  // Validate output shape
+  const parsedOutput = listRequestsResultSchema.safeParse(result);
+  if (!parsedOutput.success) {
+    console.error(
+      "[modules/requests] listRequests output validation failed:",
+      parsedOutput.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -274,7 +291,7 @@ export async function getRequest(
   if (!request) return null;
 
   const raw = request as any;
-  return {
+  const result: RequestDetail = {
     request_uuid: raw.request_uuid,
     company_id: raw.company_id ?? null,
     contact_uuid: raw.contact_uuid ?? null,
@@ -299,6 +316,17 @@ export async function getRequest(
     request_created_datetime: raw.request_created_datetime,
     request_updated_datetime: raw.request_updated_datetime,
   };
+
+  // Validate output shape
+  const parsedOutput = requestDetailSchema.safeParse(result);
+  if (!parsedOutput.success) {
+    console.error(
+      "[modules/requests] getRequest output validation failed:",
+      parsedOutput.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -365,7 +393,19 @@ export async function createRequest(
 
   revalidatePath("/staff/requests");
   revalidatePath("/admin/requests");
-  return { request_uuid: request.request_uuid };
+
+  const result = { request_uuid: request.request_uuid };
+
+  // Validate output shape
+  const parsedOutput = requestUuidResultSchema.safeParse(result);
+  if (!parsedOutput.success) {
+    console.error(
+      "[modules/requests] createRequest output validation failed:",
+      parsedOutput.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -422,7 +462,19 @@ export async function updateRequest(
 
   revalidatePath("/staff/requests");
   revalidatePath("/admin/requests");
-  return { request_uuid: requestUuid };
+
+  const result = { request_uuid: requestUuid };
+
+  // Validate output shape
+  const parsedOutput = requestUuidResultSchema.safeParse(result);
+  if (!parsedOutput.success) {
+    console.error(
+      "[modules/requests] updateRequest output validation failed:",
+      parsedOutput.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------

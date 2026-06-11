@@ -20,16 +20,16 @@ describe("MatchScoreBadge", () => {
   });
 
   it("shows correct label for each tier", () => {
-    const { rerender } = render(<MatchScoreBadge score={95} />);
-    expect(screen.getByText("Excellent")).toBeInTheDocument();
-
-    rerender(<MatchScoreBadge score={75} />);
+    const { rerender } = render(<MatchScoreBadge score={85} />);
     expect(screen.getByText("Strong match")).toBeInTheDocument();
 
     rerender(<MatchScoreBadge score={55} />);
     expect(screen.getByText("Moderate")).toBeInTheDocument();
 
-    rerender(<MatchScoreBadge score={25} />);
+    rerender(<MatchScoreBadge score={35} />);
+    expect(screen.getByText("Low")).toBeInTheDocument();
+
+    rerender(<MatchScoreBadge score={15} />);
     expect(screen.getByText("Weak")).toBeInTheDocument();
   });
 

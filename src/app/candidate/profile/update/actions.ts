@@ -16,38 +16,14 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireRoleCapability } from "@/modules/auth/session";
 import { z } from "zod";
+import {
+  profileDataSchema,
+  profileActionResultSchema,
+} from "./schemas";
+import type { ProfileData, ProfileActionResult } from "./schemas";
 
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export type ProfileData = {
-  candidateId: number;
-  name: string;
-  nameAr: string;
-  email: string;
-  phone: string | null;
-  photoUrl: string | null;
-  objective: string | null;
-  intro: string | null;
-  address: string | null;
-  gender: number | null;
-  birthDate: string | null;
-  drivingLicense: boolean | null;
-  civilId: string | null;
-  hourlyRate: number | null;
-  profileUrl: string | null;
-  preferredTime: string | null;
-  bankAccountName: string | null;
-  iban: string | null;
-  countryId: number | null;
-  universityId: number | null;
-  bankId: number | null;
-};
-
-export type ProfileActionResult =
-  | { success: true }
-  | { success: false; error: string; fieldErrors?: Record<string, string[] | undefined> };
+// Re-export types for consumers that import from ./actions
+export type { ProfileData, ProfileActionResult };
 
 // ---------------------------------------------------------------------------
 // Schemas
@@ -121,7 +97,7 @@ export async function getProfile(): Promise<ProfileData> {
     throw new Error("Candidate profile not found");
   }
 
-  return {
+  const result = {
     candidateId: row.candidate_id,
     name: row.candidate_name,
     nameAr: row.candidate_name_ar ?? "",
@@ -144,6 +120,17 @@ export async function getProfile(): Promise<ProfileData> {
     universityId: row.university_id,
     bankId: row.bank_id,
   };
+
+  // Validate output shape
+  const outputParsed = profileDataSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[app/candidate/profile/update] getProfile output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -198,5 +185,16 @@ export async function updateProfile(
   revalidatePath("/candidate/edit");
   revalidatePath("/candidate/profile");
 
-  return { success: true };
+  const updateResult = { success: true } as const;
+
+  // Validate output shape
+  const outputParsed = profileActionResultSchema.safeParse(updateResult);
+  if (!outputParsed.success) {
+    console.error(
+      "[app/candidate/profile/update] updateProfile output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return updateResult;
 }
