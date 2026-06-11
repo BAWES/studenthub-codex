@@ -1,5 +1,6 @@
 "use server";
 
+import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
 import {
@@ -7,6 +8,9 @@ import {
   getEventSchema,
   getEventTimelineSchema,
   listActivityEventsSchema,
+  eventItemSchema,
+  listEventsResultSchema,
+  timelineEntrySchema,
   type ListEventsParams,
   type GetEventParams,
   type GetEventTimelineParams,
@@ -68,7 +72,7 @@ export async function listEvents(
     prisma.request_activity.count({ where: where as any }),
   ]);
 
-  return {
+  const result = {
     events: activities.map((a) => ({
       activity_uuid: a.activity_uuid,
       request_uuid: a.request_uuid,
@@ -82,6 +86,17 @@ export async function listEvents(
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  // Validate output shape
+  const outputParsed = listEventsResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/admin/event] listEvents output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -116,9 +131,19 @@ export async function getEvent(
     },
   });
 
-  if (!activity) return null;
+  if (!activity) {
+    // Validate output shape (null case)
+    const nullOutputParsed = eventItemSchema.nullable().safeParse(null);
+    if (!nullOutputParsed.success) {
+      console.error(
+        "[modules/admin/event] getEvent output validation failed:",
+        nullOutputParsed.error.issues,
+      );
+    }
+    return null;
+  }
 
-  return {
+  const result = {
     activity_uuid: activity.activity_uuid,
     request_uuid: activity.request_uuid,
     activity_detail: activity.activity_detail,
@@ -126,6 +151,17 @@ export async function getEvent(
     activity_created_datetime: activity.activity_created_datetime,
     activity_updated_datetime: activity.activity_updated_datetime,
   };
+
+  // Validate output shape
+  const outputParsed = eventItemSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/admin/event] getEvent output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -191,6 +227,15 @@ export async function getEventTimeline(
   const timeline: TimelineEntry[] = Array.from(grouped.entries())
     .map(([date, events]) => ({ date, events }))
     .sort((a, b) => b.date.localeCompare(a.date));
+
+  // Validate output shape
+  const outputParsed = z.array(timelineEntrySchema).safeParse(timeline);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/admin/event] getEventTimeline output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
 
   return timeline;
 }

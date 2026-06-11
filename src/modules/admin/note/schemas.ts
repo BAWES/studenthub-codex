@@ -35,24 +35,45 @@ export type ListNotesParams = z.input<typeof listNotesSchema>;
 export type GetNoteParams = z.input<typeof getNoteSchema>;
 export type CreateNoteParams = z.input<typeof createNoteSchema>;
 export type UpdateNoteParams = z.input<typeof updateNoteSchema>;
-export type NoteItem = {
-  note_uuid: string;
-  company_id: number | null;
-  request_uuid: string | null;
-  story_uuid: string | null;
-  note_type: string | null;
-  note_text: string | null;
-  created_by: number | null;
-  updated_by: number | null;
-  note_created_datetime: Date | null;
-  note_updated_datetime: Date | null;
-  staff_created: { staff_name: string } | null;
-  staff_updated: { staff_name: string } | null;
-};
-export type ListNotesResult = {
-  notes: NoteItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
+// ---------------------------------------------------------------------------
+// Output validation schemas
+// ---------------------------------------------------------------------------
+
+export const staffInfoSchema = z.object({
+  staff_name: z.string(),
+});
+
+export const noteItemSchema = z.object({
+  note_uuid: z.string(),
+  company_id: z.number().int().nullable(),
+  request_uuid: z.string().nullable(),
+  story_uuid: z.string().nullable(),
+  note_type: z.string().nullable(),
+  note_text: z.string().nullable(),
+  created_by: z.number().int().nullable(),
+  updated_by: z.number().int().nullable(),
+  note_created_datetime: z.date().nullable(),
+  note_updated_datetime: z.date().nullable(),
+  staff_created: staffInfoSchema.nullable(),
+  staff_updated: staffInfoSchema.nullable(),
+});
+
+export const listNotesResultSchema = z.object({
+  notes: z.array(noteItemSchema),
+  total: z.number().int().nonnegative(),
+  page: z.number().int().positive(),
+  limit: z.number().int().positive(),
+  totalPages: z.number().int().nonnegative(),
+});
+
+export const operationResultSchema = z.object({
+  operation: z.string(),
+  message: z.string(),
+});
+
+// ---------------------------------------------------------------------------
+// Types derived from output schemas
+// ---------------------------------------------------------------------------
+
+export type NoteItem = z.output<typeof noteItemSchema>;
+export type ListNotesResult = z.output<typeof listNotesResultSchema>;

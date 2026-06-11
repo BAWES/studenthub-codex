@@ -21,22 +21,36 @@ export const listActivityEventsSchema = listEventsSchema;
 export type ListEventsParams = z.input<typeof listEventsSchema>;
 export type GetEventParams = z.input<typeof getEventSchema>;
 export type GetEventTimelineParams = z.input<typeof getEventTimelineSchema>;
-export type EventItem = {
-  activity_uuid: string;
-  request_uuid: string;
-  activity_detail: string;
-  staff_name: string | null;
-  activity_created_datetime: Date | null;
-  activity_updated_datetime: Date | null;
-};
-export type ListEventsResult = {
-  events: EventItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
-export type TimelineEntry = {
-  date: string;
-  events: EventItem[];
-};
+// ---------------------------------------------------------------------------
+// Output validation schemas
+// ---------------------------------------------------------------------------
+
+export const eventItemSchema = z.object({
+  activity_uuid: z.string(),
+  request_uuid: z.string(),
+  activity_detail: z.string(),
+  staff_name: z.string().nullable(),
+  activity_created_datetime: z.date().nullable(),
+  activity_updated_datetime: z.date().nullable(),
+});
+
+export const listEventsResultSchema = z.object({
+  events: z.array(eventItemSchema),
+  total: z.number().int().nonnegative(),
+  page: z.number().int().positive(),
+  limit: z.number().int().positive(),
+  totalPages: z.number().int().nonnegative(),
+});
+
+export const timelineEntrySchema = z.object({
+  date: z.string(),
+  events: z.array(eventItemSchema),
+});
+
+// ---------------------------------------------------------------------------
+// Types derived from output schemas
+// ---------------------------------------------------------------------------
+
+export type EventItem = z.output<typeof eventItemSchema>;
+export type ListEventsResult = z.output<typeof listEventsResultSchema>;
+export type TimelineEntry = z.output<typeof timelineEntrySchema>;
