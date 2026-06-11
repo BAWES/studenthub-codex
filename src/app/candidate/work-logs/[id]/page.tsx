@@ -1,11 +1,11 @@
 import { notFound } from "next/navigation";
 import { requireRoleCapability } from "@/modules/auth/session";
-import { prisma } from "@/lib/prisma";
 import { DetailSection } from "@/modules/workspace/DetailPanels";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { formatDate } from "@/modules/workspace/format";
 import { WorkLogAppealForm } from "@/modules/candidates/WorkLogAppealForm";
 import { getWorkLogDetail } from "../actions";
+import { getWorkLogAppeals, getWorkLogFeedback } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -15,18 +15,8 @@ export default async function CandidateWorkLogDetailPage({ params }: { params: P
 
   const [workLog, appeals, feedback] = await Promise.all([
     getWorkLogDetail({ workLogUuid: id }),
-    prisma.candidate_working_hour_appeal.findMany({
-      where: { candidate_working_hour_uuid: id, candidate_id: Number(session.id) },
-      orderBy: { created_at: "desc" },
-      take: 8,
-      select: { appeal_uuid: true, reason: true, status: true, created_at: true },
-    }),
-    prisma.candidate_work_log_feedback.findMany({
-      where: { candidate_working_hour_uuid: id, candidate_id: Number(session.id) },
-      orderBy: { created_at: "desc" },
-      take: 8,
-      select: { cwlf_uuid: true, note: true, reason: true, status: true, rating: true, created_at: true },
-    }),
+    getWorkLogAppeals(id),
+    getWorkLogFeedback(id),
   ]);
 
   if (!workLog) {
