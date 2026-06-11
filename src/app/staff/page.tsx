@@ -2,6 +2,7 @@ import { requireRoleCapability } from "@/modules/auth/session";
 import { getStaffWorkspace } from "./actions";
 import { getPipelineData, getPipelineMetrics } from "@/modules/staff/pipeline";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
+import { ErrorBoundary } from "@/modules/workspace/ErrorBoundary";
 import { PipelineClientWrapper } from "@/modules/staff/pipeline/PipelineClientWrapper";
 import { updatePipelineStageAction } from "@/modules/staff/pipeline/actions";
 import type { PipelineStage } from "@/modules/staff/pipeline";
@@ -25,17 +26,19 @@ export default async function StaffPage() {
   const metrics = await getPipelineMetrics(pipelineItems);
 
   return (
-    <WorkspaceShell
-      session={session}
-      eyebrow="Staff Workspace"
-      title={`Welcome back, ${data.staff?.staff_name ?? session.name}.`}
-      metrics={data.metrics}
-    >
-      <PipelineClientWrapper
-        initialItems={pipelineItems}
-        metrics={metrics}
-        updateAction={updateAction}
-      />
-    </WorkspaceShell>
+    <ErrorBoundary>
+      <WorkspaceShell
+        session={session}
+        eyebrow="Staff Workspace"
+        title={`Welcome back, ${data.staff?.staff_name ?? session.name}.`}
+        metrics={data.metrics}
+      >
+        <PipelineClientWrapper
+          initialItems={pipelineItems}
+          metrics={metrics}
+          updateAction={updateAction}
+        />
+      </WorkspaceShell>
+    </ErrorBoundary>
   );
 }
