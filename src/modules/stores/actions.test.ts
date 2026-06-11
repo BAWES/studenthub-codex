@@ -1,41 +1,11 @@
 import { describe, it, expect } from "vitest";
-import { z } from "zod";
-
-// ---------------------------------------------------------------------------
-// Pure logic: store schema validation
-// ---------------------------------------------------------------------------
-
-const listStoresSchema = z.object({
-  page: z.coerce.number().int().positive().optional().default(1),
-  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
-  companyId: z.coerce.number().int().positive().optional(),
-});
-
-const getStoreSchema = z.object({
-  storeId: z.coerce.number().int().positive(),
-});
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-type StoreListItem = {
-  store_id: number;
-  store_name: string;
-  store_location: string;
-  store_status: number;
-  store_total_candidates: number | null;
-  created_at: string | null;
-  updated_at: string | null;
-};
-
-type ListStoresResult = {
-  stores: StoreListItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
+import {
+  listStoresSchema,
+  getStoreSchema,
+  listStoresResultSchema,
+  storeItemSchema,
+} from "./schemas";
+import type { StoreListItem, ListStoresResult } from "./schemas";
 
 describe("listStoresSchema", () => {
   it("accepts empty params with defaults", () => {
@@ -125,5 +95,119 @@ describe("ListStoresResult shape", () => {
     };
     expect(result.total).toBe(0);
     expect(result.stores).toHaveLength(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output validation — storeItemSchema
+// ---------------------------------------------------------------------------
+
+describe("storeItemSchema", () => {
+  it("accepts a valid store item", () => {
+    const result = storeItemSchema.safeParse({
+      store_id: 1,
+      store_name: "Main Branch",
+      store_location: "Kuwait City",
+      store_status: 10,
+      store_total_candidates: 25,
+      created_at: "2025-01-01T00:00:00.000Z",
+      updated_at: "2025-06-01T00:00:00.000Z",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts null total_candidates", () => {
+    const result = storeItemSchema.safeParse({
+      store_id: 1,
+      store_name: "Main Branch",
+      store_location: "Kuwait City",
+      store_status: 10,
+      store_total_candidates: null,
+      created_at: null,
+      updated_at: null,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects missing store_name", () => {
+    const result = storeItemSchema.safeParse({
+      store_id: 1,
+      store_location: "Kuwait City",
+      store_status: 10,
+      store_total_candidates: null,
+      created_at: null,
+      updated_at: null,
+    });
+    expect(result.success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output validation — listStoresResultSchema
+// ---------------------------------------------------------------------------
+
+describe("listStoresResultSchema", () => {
+  it("accepts valid list result", () => {
+    const result = listStoresResultSchema.safeParse({
+      stores: [
+        {
+          store_id: 1,
+          store_name: "Main Branch",
+          store_location: "Kuwait City",
+          store_status: 10,
+          store_total_candidates: 25,
+          created_at: "2025-01-01T00:00:00.000Z",
+          updated_at: "2025-06-01T00:00:00.000Z",
+        },
+      ],
+      total: 1,
+      page: 1,
+      limit: 20,
+      totalPages: 1,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts empty stores array", () => {
+    const result = listStoresResultSchema.safeParse({
+      stores: [],
+      total: 0,
+      page: 1,
+      limit: 20,
+      totalPages: 0,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts negative total (schema validates type, not business rules)", () => {
+    const result = listStoresResultSchema.safeParse({
+      stores: [],
+      total: -1,
+      page: 1,
+      limit: 20,
+      totalPages: 0,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects non-array stores", () => {
+    const result = listStoresResultSchema.safeParse({
+      stores: "not an array",
+      total: 0,
+      page: 1,
+      limit: 20,
+      totalPages: 0,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects missing total", () => {
+    const result = listStoresResultSchema.safeParse({
+      stores: [],
+      page: 1,
+      limit: 20,
+      totalPages: 0,
+    });
+    expect(result.success).toBe(false);
   });
 });
