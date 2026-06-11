@@ -1,19 +1,22 @@
 import { z } from "zod";
 
 // ---------------------------------------------------------------------------
-// Input schemas
+// Input validation schemas
 // ---------------------------------------------------------------------------
 
-export const listSkillsSchema = z.object({
+export const listCandidateSkillsSchema = z.object({
+  candidateId: z.number().int().positive("Candidate ID is required"),
   page: z.coerce.number().int().min(1).optional().default(1),
   limit: z.coerce.number().int().min(1).max(100).optional().default(20),
 });
 
-export const getSkillSchema = z.object({
+export const getCandidateSkillSchema = z.object({
+  candidateId: z.number().int().positive("Candidate ID is required"),
   skillId: z.coerce.number().int().positive("Skill ID is required"),
 });
 
-export const createSkillSchema = z.object({
+export const createCandidateSkillSchema = z.object({
+  candidateId: z.number().int().positive("Candidate ID is required"),
   skill: z
     .string()
     .min(1, "Skill name is required")
@@ -21,7 +24,8 @@ export const createSkillSchema = z.object({
     .transform((v) => v.trim()),
 });
 
-export const updateSkillSchema = z.object({
+export const updateCandidateSkillSchema = z.object({
+  candidateId: z.number().int().positive("Candidate ID is required"),
   skillId: z.coerce.number().int().positive("Skill ID is required"),
   skill: z
     .string()
@@ -30,42 +34,41 @@ export const updateSkillSchema = z.object({
     .transform((v) => v.trim()),
 });
 
-export const deleteSkillSchema = z.object({
+export const deleteCandidateSkillSchema = z.object({
+  candidateId: z.number().int().positive("Candidate ID is required"),
   skillId: z.coerce.number().int().positive("Skill ID is required"),
 });
 
 // Input types
-export type ListSkillsInput = z.input<typeof listSkillsSchema>;
-export type GetSkillInput = z.input<typeof getSkillSchema>;
-export type CreateSkillInput = z.input<typeof createSkillSchema>;
-export type UpdateSkillInput = z.input<typeof updateSkillSchema>;
-export type DeleteSkillInput = z.input<typeof deleteSkillSchema>;
+export type ListCandidateSkillsParams = z.input<typeof listCandidateSkillsSchema>;
+export type GetCandidateSkillParams = z.input<typeof getCandidateSkillSchema>;
+export type CreateCandidateSkillParams = z.input<typeof createCandidateSkillSchema>;
+export type UpdateCandidateSkillParams = z.input<typeof updateCandidateSkillSchema>;
+export type DeleteCandidateSkillParams = z.input<typeof deleteCandidateSkillSchema>;
 
 // ---------------------------------------------------------------------------
 // Output validation schemas
 // ---------------------------------------------------------------------------
 
-export const skillItemOutputSchema = z.object({
+export const skillItemSchema = z.object({
   candidate_skill_id: z.number().int(),
   skill: z.string(),
   created_at: z.date().nullable(),
 });
 
 export const skillListOutputSchema = z.object({
-  items: z.array(skillItemOutputSchema),
+  items: z.array(skillItemSchema),
   total: z.number().int().nonnegative(),
   page: z.number().int().positive(),
   pageSize: z.number().int().positive(),
 });
 
-export const skillActionResultOutputSchema = z.discriminatedUnion("success", [
+export const skillActionResultSchema = z.discriminatedUnion("success", [
   z.object({ success: z.literal(true), skillId: z.number().int() }),
   z.object({ success: z.literal(false), error: z.string() }),
 ]);
 
 // Output types
-export type SkillItem = z.output<typeof skillItemOutputSchema>;
+export type SkillItem = z.output<typeof skillItemSchema>;
 export type SkillListResult = z.output<typeof skillListOutputSchema>;
-export type SkillActionResult =
-  | { success: true; skillId: number }
-  | { success: false; error: string };
+export type SkillActionResult = z.output<typeof skillActionResultSchema>;
