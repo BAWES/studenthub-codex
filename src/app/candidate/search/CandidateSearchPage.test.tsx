@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import type { CSSProperties, ReactNode } from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
@@ -15,7 +16,7 @@ vi.mock("next/navigation", () => ({
 // Mock next/link as a simple <a> element
 vi.mock("next/link", () => ({
   default: ({ href, children, className, style, ...rest }: Record<string, unknown>) =>
-    <a href={href as string} className={className as string} style={style} {...rest}>{children}</a>,
+    <a href={href as string} className={className as string} style={style as CSSProperties | undefined} {...rest}>{children as ReactNode}</a>,
 }));
 
 // Mock fetch
