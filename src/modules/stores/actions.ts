@@ -1,44 +1,13 @@
 "use server";
 
-import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
-
-// ---------------------------------------------------------------------------
-// Schemas
-// ---------------------------------------------------------------------------
-
-const listStoresSchema = z.object({
-  page: z.coerce.number().int().positive().optional().default(1),
-  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
-  companyId: z.coerce.number().int().positive().optional(),
-});
-
-const getStoreSchema = z.object({
-  storeId: z.coerce.number().int().positive(),
-});
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export type StoreListItem = {
-  store_id: number;
-  store_name: string;
-  store_location: string;
-  store_status: number;
-  store_total_candidates: number | null;
-  created_at: string | null;
-  updated_at: string | null;
-};
-
-export type ListStoresResult = {
-  stores: StoreListItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
+import {
+  listStoresSchema,
+  getStoreSchema,
+  listStoresResultSchema,
+} from "./schemas";
+import type { StoreListItem, ListStoresResult, ListStoresInput } from "./schemas";
 
 // ---------------------------------------------------------------------------
 // listStores
@@ -49,7 +18,7 @@ export type ListStoresResult = {
  * Mirrors the legacy Yii2 StoreController::actionList().
  */
 export async function listStores(
-  params: FormData | z.input<typeof listStoresSchema> = {},
+  params: FormData | ListStoresInput = {},
 ): Promise<ListStoresResult> {
   await requireCapability("store.read");
 
@@ -83,7 +52,7 @@ export async function listStores(
     prisma.store.count({ where: where as any }),
   ]);
 
-  return {
+  const result = {
     stores: stores.map((s: any): StoreListItem => ({
       store_id: s.store_id,
       store_name: s.store_name,
@@ -98,6 +67,17 @@ export async function listStores(
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  // Output validation — log mismatches without throwing
+  const outputParsed = listStoresResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/stores] listStores output failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------

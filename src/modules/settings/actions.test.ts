@@ -61,7 +61,9 @@ describe("listSettingsSchema", () => {
 
 describe("getSettingSchema", () => {
   it("accepts a valid setting UUID", () => {
-    const result = getSettingSchema.safeParse({ settingUuid: "setting_abc123" });
+    const result = getSettingSchema.safeParse({
+      settingUuid: "setting_abc123",
+    });
     expect(result.success).toBe(true);
   });
 
@@ -150,7 +152,7 @@ describe("listSettingsResultSchema", () => {
     expect(result.success).toBe(true);
   });
 
-  it("accepts negative total (schema validates type, not business rules)", () => {
+  it("rejects negative total", () => {
     const result = listSettingsResultSchema.safeParse({
       settings: [],
       total: -1,
@@ -158,7 +160,7 @@ describe("listSettingsResultSchema", () => {
       limit: 20,
       totalPages: 0,
     });
-    expect(result.success).toBe(true);
+    expect(result.success).toBe(false);
   });
 
   it("rejects missing page field", () => {

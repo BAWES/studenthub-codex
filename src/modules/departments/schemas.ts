@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 // ---------------------------------------------------------------------------
-// Input schemas
+// Input validation schemas
 // ---------------------------------------------------------------------------
 
 export const listDepartmentsSchema = z.object({
@@ -31,3 +31,12 @@ export const listDepartmentsResultSchema = z.object({
   limit: z.number().int().positive(),
   totalPages: z.number().int().nonnegative(),
 });
+
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
+
+export type ListDepartmentsParams = z.input<typeof listDepartmentsSchema>;
+export type GetDepartmentParams = z.input<typeof getDepartmentSchema>;
+export type DepartmentItem = z.output<typeof departmentItemSchema>;
+export type ListDepartmentsResult = z.output<typeof listDepartmentsResultSchema>;

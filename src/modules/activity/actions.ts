@@ -6,11 +6,19 @@ import { requireCapability } from "@/modules/auth/session";
 import {
   listActivitySchema,
   getActivitySchema,
+  requestActivityItemSchema,
+  listActivityResultSchema,
   type ListActivityParams,
   type GetActivityParams,
   type RequestActivityItem,
   type ListActivityResult,
 } from "./schemas";
+
+// ---------------------------------------------------------------------------
+// Re-export schemas (for backward compatibility)
+// ---------------------------------------------------------------------------
+
+export { listActivitySchema, getActivitySchema };
 
 // ---------------------------------------------------------------------------
 // Server actions
@@ -50,7 +58,7 @@ export async function listActivity(
     prisma.request_activity.count({ where }),
   ]);
 
-  return {
+  const result = {
     activities: items.map((a) => ({
       activity_uuid: a.activity_uuid,
       request_uuid: a.request_uuid,
@@ -64,6 +72,16 @@ export async function listActivity(
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  const validated = listActivityResultSchema.safeParse(result);
+  if (!validated.success) {
+    console.error(
+      "[modules/activity] listActivity output validation failed:",
+      validated.error,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -90,7 +108,7 @@ export async function getActivity(
     throw new Error("Request activity not found");
   }
 
-  return {
+  const item = {
     activity_uuid: activity.activity_uuid,
     request_uuid: activity.request_uuid,
     staff_id: activity.staff_id ?? null,
@@ -98,4 +116,14 @@ export async function getActivity(
     activity_created_datetime: activity.activity_created_datetime?.toISOString() ?? null,
     activity_updated_datetime: activity.activity_updated_datetime?.toISOString() ?? null,
   };
+
+  const validated = requestActivityItemSchema.safeParse(item);
+  if (!validated.success) {
+    console.error(
+      "[modules/activity] getActivity output validation failed:",
+      validated.error,
+    );
+  }
+
+  return item;
 }

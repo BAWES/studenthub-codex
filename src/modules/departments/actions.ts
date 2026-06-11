@@ -1,35 +1,19 @@
 "use server";
 
-import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
 import {
   listDepartmentsSchema,
   getDepartmentSchema,
+  departmentItemSchema,
   listDepartmentsResultSchema,
 } from "./schemas";
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export type ListDepartmentsParams = z.input<typeof listDepartmentsSchema>;
-
-export type GetDepartmentParams = z.input<typeof getDepartmentSchema>;
-
-export type DepartmentItem = {
-  department_uuid: string;
-  department_name_en: string;
-  department_name_ar: string | null;
-};
-
-export type ListDepartmentsResult = {
-  departments: DepartmentItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
+import type {
+  ListDepartmentsParams,
+  GetDepartmentParams,
+  DepartmentItem,
+  ListDepartmentsResult,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // listDepartments
@@ -41,8 +25,6 @@ export type ListDepartmentsResult = {
  * Mirrors the legacy Yii2 department reference concept used across
  * staff, candidate evaluation, and request modules.
  * - Filters by name (case-insensitive) when nameFilter is provided
- * - Paginated with configurable page/limit
- * - Sorted alphabetically by English name
  */
 export async function listDepartments(
   params: ListDepartmentsParams = {},
@@ -54,14 +36,11 @@ export async function listDepartments(
     throw new Error(parsed.error.issues[0]?.message ?? "Invalid list parameters");
   }
 
-  const { page, limit, nameFilter } = parsed.data;
+  const { nameFilter, page = 1, limit = 20 } = parsed.data;
 
   const where: Record<string, unknown> = {};
   if (nameFilter && nameFilter.trim()) {
-    where.OR = [
-      { department_name_en: { contains: nameFilter, mode: "insensitive" } },
-      { department_name_ar: { contains: nameFilter, mode: "insensitive" } },
-    ];
+    where.department_name_en = { contains: nameFilter };
   }
 
   const [departments, total] = await Promise.all([
@@ -86,6 +65,7 @@ export async function listDepartments(
     totalPages: Math.ceil(total / limit),
   };
 
+  // Output validation — log issues without throwing
   const outputParsed = listDepartmentsResultSchema.safeParse(result);
   if (!outputParsed.success) {
     console.error(
@@ -123,9 +103,20 @@ export async function getDepartment(
 
   if (!department) return null;
 
-  return {
+  const result = {
     department_uuid: department.department_uuid,
     department_name_en: department.department_name_en,
     department_name_ar: department.department_name_ar,
   };
+
+  // Output validation — log issues without throwing
+  const outputParsed = departmentItemSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/departments] getDepartment output failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }

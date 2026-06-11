@@ -6,15 +6,20 @@ import { requireCapability } from "@/modules/auth/session";
 import {
   listAccountsSchema,
   getAccountSchema,
+  listAccountsResultSchema,
+  accountDetailSchema,
+  listCandidateSkillsSchema,
+  updateEmailSchema,
+  updateBankAccountSchema,
+  changePasswordSchema,
+  accountActionResultSchema,
+  updateBankResultSchema,
+  skillListResultSchema,
   type ListAccountsParams,
   type GetAccountParams,
   type AccountListItem,
   type AccountDetail,
   type ListAccountsResult,
-  listCandidateSkillsSchema,
-  updateEmailSchema,
-  updateBankAccountSchema,
-  changePasswordSchema,
   type ListCandidateSkillsParams,
   type UpdateEmailParams,
   type UpdateBankAccountParams,
@@ -23,6 +28,19 @@ import {
   type SkillListResult,
   type AccountActionResult,
   type UpdateBankResult,
+} from "./schemas";
+
+// ---------------------------------------------------------------------------
+// Re-export schemas for shared validation (backward compatibility)
+// ---------------------------------------------------------------------------
+
+export {
+  listAccountsSchema,
+  getAccountSchema,
+  listCandidateSkillsSchema,
+  updateEmailSchema,
+  updateBankAccountSchema,
+  changePasswordSchema,
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
@@ -73,13 +91,24 @@ export async function listAccounts(
     prisma.admin.count({ where: where as any }),
   ]);
 
-  return {
+  const result = {
     accounts: accounts as AccountListItem[],
     total,
     page,
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  // Validate output shape
+  const outputParsed = listAccountsResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/accounts] listAccounts output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -111,7 +140,20 @@ export async function getAccount(
     },
   });
 
-  return account as AccountDetail | null;
+  const result = account as AccountDetail | null;
+
+  // Validate output shape (only if result is not null)
+  if (result !== null) {
+    const outputParsed = accountDetailSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/accounts] getAccount output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -147,13 +189,24 @@ export async function listCandidateSkills(
     },
   });
 
-  return {
+  const result = {
     skills: skills.map((s) => ({
       candidate_skill_id: s.candidate_skill_id,
       skill: s.skill,
       candidate_skill_created_at: s.candidate_skill_created_at ?? null,
     })),
   };
+
+  // Validate output shape
+  const outputParsed = skillListResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/accounts] listCandidateSkills output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -170,13 +223,15 @@ export async function updateEmail(
 
   const parsed = updateEmailSchema.safeParse(params);
   if (!parsed.success) {
-    return {
+    const result: AccountActionResult = {
       operation: "error",
       message: parsed.error.issues[0]?.message ?? "Invalid email",
     };
+    return result;
   }
 
   const { email } = parsed.data;
+  let result: AccountActionResult;
 
   try {
     const candidate = await prisma.candidate.findUnique({
@@ -184,35 +239,44 @@ export async function updateEmail(
     });
 
     if (!candidate) {
-      return { operation: "error", message: "Candidate not found" };
-    }
-
-    if (
+      result = { operation: "error", message: "Candidate not found" };
+    } else if (
       email === candidate.candidate_email ||
       email === candidate.candidate_new_email
     ) {
-      return {
+      result = {
         operation: "error",
         message: "New email address is the same as current email",
       };
+    } else {
+      await prisma.candidate.update({
+        where: { candidate_id: candidateId },
+        data: { candidate_new_email: email },
+      });
+
+      result = {
+        operation: "success",
+        message:
+          "Account info updated successfully. Please check email to verify the new address.",
+      };
     }
-
-    await prisma.candidate.update({
-      where: { candidate_id: candidateId },
-      data: { candidate_new_email: email },
-    });
-
-    return {
-      operation: "success",
-      message:
-        "Account info updated successfully. Please check email to verify the new address.",
-    };
   } catch (err) {
-    return {
+    result = {
       operation: "error",
       message: err instanceof Error ? err.message : "Failed to update email",
     };
   }
+
+  // Validate output shape
+  const outputParsed = accountActionResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/accounts] updateEmail output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -228,13 +292,15 @@ export async function updateBankAccount(
 
   const parsed = updateBankAccountSchema.safeParse(params);
   if (!parsed.success) {
-    return {
+    const result: UpdateBankResult = {
       operation: "error",
       message: parsed.error.issues[0]?.message ?? "Invalid bank details",
     };
+    return result;
   }
 
   const { benefName, iban } = parsed.data;
+  let result: UpdateBankResult;
 
   try {
     const candidate = await prisma.candidate.findUnique({
@@ -242,28 +308,39 @@ export async function updateBankAccount(
     });
 
     if (!candidate) {
-      return { operation: "error", message: "Candidate not found" };
+      result = { operation: "error", message: "Candidate not found" };
+    } else {
+      await prisma.candidate.update({
+        where: { candidate_id: candidateId },
+        data: {
+          bank_account_name: benefName,
+          candidate_iban: iban,
+        },
+      });
+
+      result = {
+        operation: "success",
+        message: "Bank details updated successfully",
+        bankName: benefName,
+      };
     }
-
-    await prisma.candidate.update({
-      where: { candidate_id: candidateId },
-      data: {
-        bank_account_name: benefName,
-        candidate_iban: iban,
-      },
-    });
-
-    return {
-      operation: "success",
-      message: "Bank details updated successfully",
-      bankName: benefName,
-    };
   } catch (err) {
-    return {
+    result = {
       operation: "error",
       message: err instanceof Error ? err.message : "Failed to update bank details",
     };
   }
+
+  // Validate output shape
+  const outputParsed = updateBankResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/accounts] updateBankAccount output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -280,58 +357,69 @@ export async function changePassword(
 
   const parsed = changePasswordSchema.safeParse(params);
   if (!parsed.success) {
-    return {
+    const result: AccountActionResult = {
       operation: "error",
       message: parsed.error.issues[0]?.message ?? "Invalid password data",
     };
+    return result;
   }
 
   const { oldPassword, newPassword } = parsed.data;
+  let result: AccountActionResult;
 
   if (oldPassword === newPassword) {
-    return {
+    result = {
       operation: "error",
       message: "New password cannot be the same as the current password",
     };
+  } else {
+    try {
+      const candidate = await prisma.candidate.findUnique({
+        where: { candidate_id: candidateId },
+      });
+
+      if (!candidate) {
+        result = { operation: "error", message: "Candidate not found" };
+      } else if (!candidate.candidate_password_hash) {
+        result = { operation: "error", message: "No password set for this account" };
+      } else {
+        const valid = await bcrypt.compare(
+          oldPassword,
+          candidate.candidate_password_hash,
+        );
+        if (!valid) {
+          result = { operation: "error", message: "Current password is incorrect" };
+        } else {
+          const newHash = await bcrypt.hash(newPassword, 10);
+
+          await prisma.candidate.update({
+            where: { candidate_id: candidateId },
+            data: { candidate_password_hash: newHash },
+          });
+
+          result = {
+            operation: "success",
+            message: "Password changed successfully",
+          };
+        }
+      }
+    } catch (err) {
+      result = {
+        operation: "error",
+        message:
+          err instanceof Error ? err.message : "Failed to change password",
+      };
+    }
   }
 
-  try {
-    const candidate = await prisma.candidate.findUnique({
-      where: { candidate_id: candidateId },
-    });
-
-    if (!candidate) {
-      return { operation: "error", message: "Candidate not found" };
-    }
-
-    if (!candidate.candidate_password_hash) {
-      return { operation: "error", message: "No password set for this account" };
-    }
-
-    const valid = await bcrypt.compare(
-      oldPassword,
-      candidate.candidate_password_hash,
+  // Validate output shape
+  const outputParsed = accountActionResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/accounts] changePassword output validation failed:",
+      outputParsed.error.issues,
     );
-    if (!valid) {
-      return { operation: "error", message: "Current password is incorrect" };
-    }
-
-    const newHash = await bcrypt.hash(newPassword, 10);
-
-    await prisma.candidate.update({
-      where: { candidate_id: candidateId },
-      data: { candidate_password_hash: newHash },
-    });
-
-    return {
-      operation: "success",
-      message: "Password changed successfully",
-    };
-  } catch (err) {
-    return {
-      operation: "error",
-      message:
-        err instanceof Error ? err.message : "Failed to change password",
-    };
   }
+
+  return result;
 }
