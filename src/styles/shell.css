@@ -377,6 +377,75 @@
   padding: 14px;
 }
 
+/* ── Workspace Tabs — Horizontal section nav ────────────────────────── */
+.workspaceTabs {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  min-height: 40px;
+  padding: 0 4px;
+  border-bottom: 1px solid var(--sh-glass-border);
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.workspaceTabs::-webkit-scrollbar {
+  display: none;
+}
+
+.workspaceTabs a {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border: none;
+  border-radius: var(--sh-radius-sm) var(--sh-radius-sm) 0 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: var(--weight-medium);
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    background 180ms var(--sh-easing),
+    color 180ms var(--sh-easing);
+  cursor: pointer;
+}
+
+.workspaceTabs a:hover {
+  background: var(--sh-glass-bg);
+  color: var(--ink);
+}
+
+.workspaceTabs a.active {
+  color: var(--ink);
+  background: var(--sh-glass-bg-strong);
+}
+
+.workspaceTabs a svg {
+  flex-shrink: 0;
+  opacity: 0.6;
+}
+
+.workspaceTabs a.active svg {
+  opacity: 1;
+  color: var(--sh-info);
+}
+
+/* Active tab bottom indicator — a thin accent line */
+.workspaceTabIndicator {
+  position: absolute;
+  bottom: -1px;
+  left: 12px;
+  right: 12px;
+  height: 2px;
+  border-radius: 1px 1px 0 0;
+  background: var(--sh-info);
+  box-shadow: var(--sh-glow-sm);
+}
+
 /* ── Glass Topbar ───────────────────────────────────────────────────── */
 .topbar {
   position: sticky;

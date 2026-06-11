@@ -77,4 +77,12 @@ describe("WorkspaceOS — skip-to-content link", () => {
     renderOS();
     expect(screen.getByTestId("child-content")).toBeInTheDocument();
   });
+
+  it("renders WorkspaceTabs inside the workspace stage", () => {
+    renderOS();
+    const tablist = screen.queryByRole("tablist");
+    // Tabs should render since the mock nav returns 2 items
+    expect(tablist).toBeInTheDocument();
+    expect(tablist).toHaveAttribute("aria-label", "admin section navigation");
+  });
 });
