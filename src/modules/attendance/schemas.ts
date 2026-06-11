@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 // ---------------------------------------------------------------------------
-// Schemas for src/modules/attendance actions
+// Input validation schemas
 // ---------------------------------------------------------------------------
 
 export const listAttendanceSchema = z.object({
@@ -24,26 +24,57 @@ export const createAttendanceSchema = z.object({
   status: z.number().int().optional().default(10),
   note: z.string().max(500).optional(),
 });
+
+// ---------------------------------------------------------------------------
+// Output validation schemas
+// ---------------------------------------------------------------------------
+
+/**
+ * Schema for a single attendance item returned from listAttendance / getAttendance.
+ */
+export const attendanceItemSchema = z.object({
+  attendance_uuid: z.string(),
+  employee_uuid: z.string().nullable(),
+  date: z.string(),
+  clock_in: z.string().nullable(),
+  clock_out: z.string().nullable(),
+  total_hours: z.number().nullable(),
+  status: z.number().int(),
+  note: z.string().nullable(),
+  created_at: z.string(),
+  updated_at: z.string(),
+});
+
+/**
+ * Schema for getAttendance result (item or null).
+ */
+export const attendanceDetailSchema = attendanceItemSchema.nullable();
+
+/**
+ * Schema for the listAttendance response.
+ */
+export const listAttendanceResultSchema = z.object({
+  items: z.array(attendanceItemSchema),
+  total: z.number().int().nonnegative(),
+  page: z.number().int().positive(),
+  limit: z.number().int().positive(),
+  totalPages: z.number().int().nonnegative(),
+});
+
+/**
+ * Schema for the createAttendance response.
+ */
+export const createAttendanceResultSchema = z.object({
+  attendance_uuid: z.string(),
+});
+
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
+
 export type ListAttendanceParams = z.input<typeof listAttendanceSchema>;
 export type GetAttendanceParams = z.input<typeof getAttendanceSchema>;
 export type CreateAttendanceParams = z.input<typeof createAttendanceSchema>;
-export type AttendanceItem = {
-  attendance_uuid: string;
-  employee_uuid: string | null;
-  date: string;
-  clock_in: string | null;
-  clock_out: string | null;
-  total_hours: number | null;
-  status: number;
-  note: string | null;
-  created_at: string;
-  updated_at: string;
-};
-export type AttendanceDetail = AttendanceItem | null;
-export type ListAttendanceResult = {
-  items: AttendanceItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
+export type AttendanceItem = z.output<typeof attendanceItemSchema>;
+export type AttendanceDetail = z.output<typeof attendanceDetailSchema>;
+export type ListAttendanceResult = z.output<typeof listAttendanceResultSchema>;
