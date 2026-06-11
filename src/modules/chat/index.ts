@@ -7,4 +7,13 @@ export type {
   ChatMessageItem,
   ListChatsResult,
   ListChatMessagesResult,
-} from "./actions";
+} from "./schemas";
+
+export {
+  listChatsSchema,
+  getChatMessagesSchema,
+  chatListItemSchema,
+  chatMessageItemSchema,
+  listChatsResultSchema,
+  listChatMessagesResultSchema,
+} from "./schemas";

@@ -1,15 +1,16 @@
 import { describe, it, expect } from "vitest";
 
-// ---------------------------------------------------------------------------
-// Schemas imported from actions.ts for contract testing
-// ---------------------------------------------------------------------------
-
 import {
   listHolidaysSchema,
   getHolidaySchema,
   createHolidaySchema,
   deleteHolidaySchema,
-} from "./actions";
+  holidayItemSchema,
+  listHolidaysResultSchema,
+  deleteHolidayResultSchema,
+  type HolidayItem,
+  type ListHolidaysResult,
+} from "./schemas";
 
 describe("listHolidaysSchema", () => {
   it("accepts default values when no params provided", () => {
@@ -106,14 +107,14 @@ describe("createHolidaySchema", () => {
       name: "National Day",
       date: "2026-12-02",
       isRecurring: true,
-      description: "UAE National Day holiday",
+      description: "Kuwait National Day holiday",
     });
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data.name).toBe("National Day");
       expect(result.data.date).toBe("2026-12-02");
       expect(result.data.isRecurring).toBe(true);
-      expect(result.data.description).toBe("UAE National Day holiday");
+      expect(result.data.description).toBe("Kuwait National Day holiday");
     }
   });
 
@@ -186,105 +187,111 @@ describe("deleteHolidaySchema", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Return type shape verification
+// Output schema tests: holidayItemSchema
 // ---------------------------------------------------------------------------
 
-type HolidayItem = {
-  holiday_uuid: string;
-  name: string;
-  date: Date | string;
-  is_recurring: boolean;
-  description: string | null;
-  is_deleted: boolean;
-  created_at: Date | null;
-  updated_at: Date | null;
+const validHolidayItem: HolidayItem = {
+  holiday_uuid: "abc-123",
+  name: "National Day",
+  date: "2026-12-02",
+  is_recurring: true,
+  description: "Kuwait National Day",
+  is_deleted: false,
+  created_at: null,
+  updated_at: null,
 };
 
-type ListHolidaysResult = {
-  holidays: HolidayItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
+describe("holidayItemSchema", () => {
+  it("accepts a valid holiday item", () => {
+    const result = holidayItemSchema.parse(validHolidayItem);
+    expect(result.holiday_uuid).toBe("abc-123");
+  });
 
-describe("ListHolidaysResult type shape", () => {
-  it("conforms to expected structure", () => {
-    const result: ListHolidaysResult = {
-      holidays: [
-        {
-          holiday_uuid: "abc-123",
-          name: "National Day",
-          date: "2026-12-02",
-          is_recurring: true,
-          description: "UAE National Day",
-          is_deleted: false,
-          created_at: null,
-          updated_at: null,
-        },
-      ],
+  it("accepts nullable date fields as null", () => {
+    const result = holidayItemSchema.parse({
+      ...validHolidayItem,
+      created_at: null,
+      updated_at: null,
+    });
+    expect(result.created_at).toBeNull();
+    expect(result.updated_at).toBeNull();
+  });
+
+  it("rejects missing required field", () => {
+    const { name, ...rest } = validHolidayItem;
+    expect(() => holidayItemSchema.parse(rest)).toThrow();
+  });
+
+  it("rejects wrong type for boolean field", () => {
+    expect(() =>
+      holidayItemSchema.parse({ ...validHolidayItem, is_recurring: "yes" }),
+    ).toThrow();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output schema tests: listHolidaysResultSchema
+// ---------------------------------------------------------------------------
+
+describe("listHolidaysResultSchema", () => {
+  it("accepts a valid result with holidays", () => {
+    const result = listHolidaysResultSchema.parse({
+      holidays: [validHolidayItem],
       total: 1,
       page: 1,
       limit: 20,
       totalPages: 1,
-    };
-    expect(result.holidays).toHaveLength(1);
-    expect(result.total).toBe(1);
-    expect(result.totalPages).toBe(1);
+    });
+    expect(result.holidays.length).toBe(1);
   });
 
-  it("handles empty holiday list", () => {
-    const result: ListHolidaysResult = {
+  it("accepts an empty list", () => {
+    const result = listHolidaysResultSchema.parse({
       holidays: [],
       total: 0,
       page: 1,
       limit: 20,
       totalPages: 0,
-    };
-    expect(result.holidays).toHaveLength(0);
-    expect(result.totalPages).toBe(0);
+    });
+    expect(result.holidays.length).toBe(0);
+  });
+
+  it("rejects negative page", () => {
+    expect(() =>
+      listHolidaysResultSchema.parse({
+        holidays: [],
+        total: 0,
+        page: -1,
+        limit: 20,
+        totalPages: 0,
+      }),
+    ).toThrow();
+  });
+
+  it("rejects negative total", () => {
+    expect(() =>
+      listHolidaysResultSchema.parse({
+        holidays: [],
+        total: -1,
+        page: 1,
+        limit: 20,
+        totalPages: 0,
+      }),
+    ).toThrow();
   });
 });
 
-describe("getHoliday return type", () => {
-  it("returns HolidayItem or null", () => {
-    const found: HolidayItem = {
-      holiday_uuid: "abc",
-      name: "National Day",
-      date: "2026-12-02",
-      is_recurring: true,
-      description: "UAE National Day",
-      is_deleted: false,
-      created_at: null,
-      updated_at: null,
-    };
-    const notFound: null = null;
+// ---------------------------------------------------------------------------
+// Output schema tests: deleteHolidayResultSchema
+// ---------------------------------------------------------------------------
 
-    expect(found.name).toBe("National Day");
-    expect(notFound).toBeNull();
-  });
-});
-
-describe("createHoliday return type", () => {
-  it("returns HolidayItem", () => {
-    const created: HolidayItem = {
-      holiday_uuid: "new-uuid",
-      name: "New Year",
-      date: "2026-01-01",
-      is_recurring: false,
-      description: null,
-      is_deleted: false,
-      created_at: new Date(),
-      updated_at: new Date(),
-    };
-    expect(created.holiday_uuid).toBe("new-uuid");
-    expect(created.is_deleted).toBe(false);
-  });
-});
-
-describe("deleteHoliday return type", () => {
-  it("returns success object", () => {
-    const result: { success: boolean } = { success: true };
+describe("deleteHolidayResultSchema", () => {
+  it("accepts success result", () => {
+    const result = deleteHolidayResultSchema.parse({ success: true });
     expect(result.success).toBe(true);
+  });
+
+  it("rejects non-boolean success", () => {
+    expect(() => deleteHolidayResultSchema.parse({ success: "yes" })).toThrow();
   });
 });

@@ -1,69 +1,21 @@
 "use server";
 
-import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
-
-// ---------------------------------------------------------------------------
-// Schemas
-// ---------------------------------------------------------------------------
-
-const listChatsSchema = z.object({
-  page: z.number().int().positive().optional(),
-  limit: z.number().int().min(1).max(100).optional(),
-  companyId: z.number().int().optional(),
-  storeId: z.number().int().optional(),
-  staffId: z.number().int().optional(),
-});
-
-const getChatMessagesSchema = z.object({
-  chatUuid: z.string().min(1),
-  lastIndex: z.number().int().positive().optional(),
-  limit: z.number().int().min(1).max(100).optional(),
-});
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export type ListChatsParams = z.input<typeof listChatsSchema>;
-
-export type GetChatMessagesParams = z.input<typeof getChatMessagesSchema>;
-
-export type ChatListItem = {
-  chat_uuid: string;
-  candidate_id: number;
-  company_id: number;
-  store_id: number;
-  staff_id: number | null;
-  created_at: Date | null;
-};
-
-export type ChatMessageItem = {
-  chat_message_uuid: string;
-  chat_uuid: string;
-  message: string;
-  message_index: number | null;
-  from: string | null;
-  status: boolean | null;
-  created_at: Date | null;
-};
-
-export type ListChatsResult = {
-  chats: ChatListItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
-
-export type ListChatMessagesResult = {
-  messages: ChatMessageItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
+import {
+  listChatsSchema,
+  getChatMessagesSchema,
+  chatListItemSchema,
+  chatMessageItemSchema,
+  listChatsResultSchema,
+  listChatMessagesResultSchema,
+  type ListChatsParams,
+  type GetChatMessagesParams,
+  type ChatListItem,
+  type ChatMessageItem,
+  type ListChatsResult,
+  type ListChatMessagesResult,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Server actions
@@ -100,13 +52,31 @@ export async function listChats(
     prisma.chat.count({ where: where as any }),
   ]);
 
-  return {
-    chats: chats as ChatListItem[],
+  const result = {
+    chats: chats.map((c) => ({
+      chat_uuid: c.chat_uuid,
+      candidate_id: c.candidate_id,
+      company_id: c.company_id,
+      store_id: c.store_id,
+      staff_id: c.staff_id ?? null,
+      created_at: c.created_at?.toISOString() ?? null,
+    })),
     total,
     page,
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  // Output validation — log mismatches without throwing
+  const outputParsed = listChatsResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/chat] listChats output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -139,11 +109,30 @@ export async function getChatMessages(
     prisma.chat_message.count({ where: where as any }),
   ]);
 
-  return {
-    messages: messages as ChatMessageItem[],
+  const result = {
+    messages: messages.map((m) => ({
+      chat_message_uuid: m.chat_message_uuid,
+      chat_uuid: m.chat_uuid,
+      message: m.message,
+      message_index: m.message_index ?? null,
+      from: m.from ?? null,
+      status: m.status ?? null,
+      created_at: m.created_at?.toISOString() ?? null,
+    })),
     total,
     page: 1,
     limit,
     totalPages: 1,
   };
+
+  // Output validation — log mismatches without throwing
+  const outputParsed = listChatMessagesResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/chat] getChatMessages output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
