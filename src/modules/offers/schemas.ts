@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 // ---------------------------------------------------------------------------
-// Schemas for src/modules/offers actions
+// Input validation schemas
 // ---------------------------------------------------------------------------
 
 /**
@@ -45,35 +45,59 @@ export const createOfferSchema = z.object({
 export type ListOffersParams = z.input<typeof listOffersSchema>;
 export type GetOfferParams = z.input<typeof getOfferSchema>;
 export type CreateOfferParams = z.input<typeof createOfferSchema>;
-export type OfferListItem = {
-  job_uuid: string;
-  position: string;
-  position_ar: string | null;
-  description: string | null;
-  hours_per_day: number | null;
-  days_per_week: boolean | null;
-  status: boolean | null;
-  area_uuid: string | null;
-  request_uuid: string;
-  created_at: Date | null;
-  updated_at: Date | null;
-};
-export type OfferDetail = OfferListItem & {
-  description_ar: string | null;
-  compensation_type: string | null;
-  compensation_amount: string | null;
-  compensation_description: string | null;
-  compensation_description_ar: string | null;
-  min_age: number | null;
-  max_age: number | null;
-  gender: boolean | null;
-  available_from: Date | null;
-  available_to: Date | null;
-};
-export type ListOffersResult = {
-  offers: OfferListItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
+
+// ---------------------------------------------------------------------------
+// Output validation schemas
+// ---------------------------------------------------------------------------
+
+/**
+ * Schema for a single offer item in the list response.
+ */
+export const offerListItemSchema = z.object({
+  job_uuid: z.string(),
+  position: z.string(),
+  position_ar: z.string().nullable(),
+  description: z.string().nullable(),
+  hours_per_day: z.number().nullable(),
+  days_per_week: z.boolean().nullable(),
+  status: z.boolean().nullable(),
+  area_uuid: z.string().nullable(),
+  request_uuid: z.string(),
+  created_at: z.date().nullable(),
+  updated_at: z.date().nullable(),
+});
+
+/**
+ * Schema for a full offer detail (includes compensation fields).
+ */
+export const offerDetailSchema = offerListItemSchema.extend({
+  description_ar: z.string().nullable(),
+  compensation_type: z.string().nullable(),
+  compensation_amount: z.string().nullable(),
+  compensation_description: z.string().nullable(),
+  compensation_description_ar: z.string().nullable(),
+  min_age: z.number().nullable(),
+  max_age: z.number().nullable(),
+  gender: z.boolean().nullable(),
+  available_from: z.date().nullable(),
+  available_to: z.date().nullable(),
+});
+
+/**
+ * Schema for the listOffers response.
+ */
+export const listOffersResultSchema = z.object({
+  offers: z.array(offerListItemSchema),
+  total: z.number().int().nonnegative(),
+  page: z.number().int().nonnegative(),
+  limit: z.number().int().positive(),
+  totalPages: z.number().int().nonnegative(),
+});
+
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
+
+export type OfferListItem = z.output<typeof offerListItemSchema>;
+export type OfferDetail = z.output<typeof offerDetailSchema>;
+export type ListOffersResult = z.output<typeof listOffersResultSchema>;

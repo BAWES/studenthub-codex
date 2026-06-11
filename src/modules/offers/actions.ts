@@ -7,6 +7,8 @@ import {
   listOffersSchema,
   getOfferSchema,
   createOfferSchema,
+  listOffersResultSchema,
+  offerDetailSchema,
   type ListOffersParams,
   type GetOfferParams,
   type CreateOfferParams,
@@ -96,13 +98,24 @@ export async function listOffers(
     prisma.job.count({ where: where as any }),
   ]);
 
-  return {
+  const result = {
     offers: offers as unknown as OfferListItem[],
     total,
     page,
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  // Validate output shape
+  const outputParsed = listOffersResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/offers] listOffers output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -143,7 +156,7 @@ export async function getOffer(
     throw new Error("Offer not found");
   }
 
-  return {
+  const result = {
     job_uuid: offer.job_uuid,
     position: offer.position,
     position_ar: offer.position_ar ?? null,
@@ -166,6 +179,17 @@ export async function getOffer(
     created_at: offer.created_at ?? null,
     updated_at: offer.updated_at ?? null,
   };
+
+  // Validate output shape
+  const outputParsed = offerDetailSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/offers] getOffer output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -228,7 +252,7 @@ export async function createOffer(
     },
   });
 
-  return {
+  const result = {
     job_uuid: offer.job_uuid,
     position: offer.position,
     position_ar: offer.position_ar ?? null,
@@ -251,4 +275,15 @@ export async function createOffer(
     created_at: offer.created_at ?? null,
     updated_at: offer.updated_at ?? null,
   };
+
+  // Validate output shape
+  const outputParsed = offerDetailSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/offers] createOffer output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
