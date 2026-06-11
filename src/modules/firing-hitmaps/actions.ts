@@ -1,55 +1,17 @@
 "use server";
 
-import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
-
-// ---------------------------------------------------------------------------
-// Schemas
-// ---------------------------------------------------------------------------
-
-const listFiringHitmapsSchema = z.object({
-  companyId: z.coerce.number().int().positive().optional(),
-  year: z.coerce.number().int().positive().optional(),
-  month: z.coerce.number().int().min(1).max(12).optional(),
-  page: z.coerce.number().int().positive().optional().default(1),
-  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
-});
-
-const getFiringHitmapSchema = z.object({
-  uuid: z.string().min(1, "Firing hitmap UUID is required"),
-});
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export type FiringHitmapItem = {
-  fh_uuid: string;
-  company_id: number;
-  firing_month: number;
-  firing_year: number;
-  total: number | null;
-  is_alerted: boolean | null;
-  created_at: string | null;
-  updated_at: string | null;
-};
-
-export type ListFiringHitmapsResult = {
-  hitmaps: FiringHitmapItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
-
-export type GetFiringHitmapResult = {
-  hitmap: FiringHitmapItem | null;
-  error?: string;
-};
-
-// Keep schemas exported for tests
-export { listFiringHitmapsSchema, getFiringHitmapSchema };
+import {
+  listFiringHitmapsSchema,
+  getFiringHitmapSchema,
+  listFiringHitmapsResultSchema,
+  getFiringHitmapResultSchema,
+  type ListFiringHitmapsParams,
+  type GetFiringHitmapParams,
+  type ListFiringHitmapsResult,
+  type GetFiringHitmapResult,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // listFiringHitmaps
@@ -60,7 +22,7 @@ export { listFiringHitmapsSchema, getFiringHitmapSchema };
  * Mirrors the legacy Yii2 FiringHitmapController::actionList().
  */
 export async function listFiringHitmaps(
-  params: z.input<typeof listFiringHitmapsSchema> = {},
+  params: ListFiringHitmapsParams = {},
 ): Promise<ListFiringHitmapsResult> {
   await requireCapability("admin.read");
 
@@ -86,7 +48,7 @@ export async function listFiringHitmaps(
     prisma.firing_hitmap.count({ where: where as any }),
   ]);
 
-  return {
+  const result = {
     hitmaps: rows.map((r) => ({
       fh_uuid: r.fh_uuid,
       company_id: r.company_id,
@@ -102,6 +64,17 @@ export async function listFiringHitmaps(
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  // Validate output shape
+  const outputParsed = listFiringHitmapsResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/firing-hitmaps] listFiringHitmaps output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -113,7 +86,7 @@ export async function listFiringHitmaps(
  * Mirrors the legacy Yii2 FiringHitmapController::actionView($id).
  */
 export async function getFiringHitmap(
-  params: z.input<typeof getFiringHitmapSchema>,
+  params: GetFiringHitmapParams,
 ): Promise<GetFiringHitmapResult> {
   await requireCapability("admin.read");
 
@@ -130,7 +103,7 @@ export async function getFiringHitmap(
     return { hitmap: null, error: "Firing hitmap not found" };
   }
 
-  return {
+  const result = {
     hitmap: {
       fh_uuid: row.fh_uuid,
       company_id: row.company_id,
@@ -142,4 +115,15 @@ export async function getFiringHitmap(
       updated_at: row.updated_at ? row.updated_at.toISOString() : null,
     },
   };
+
+  // Validate output shape
+  const outputParsed = getFiringHitmapResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/firing-hitmaps] getFiringHitmap output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }

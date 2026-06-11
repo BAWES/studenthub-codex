@@ -1,69 +1,40 @@
 "use server";
 
 import crypto from "node:crypto";
-import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export type DegreeGroupItem = {
-  degree_group_uuid: string;
-  degree_group_name_en: string;
-  degree_group_name_ar: string | null;
-  degree_group_sort_order: number | null;
-  skip_major: number | null;
-  degree_group_created_at: Date | null;
-  degree_group_updated_at: Date | null;
-};
-
-export type ListDegreeGroupsResult = {
-  degreeGroups: DegreeGroupItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
-
-// ---------------------------------------------------------------------------
-// Schema
-// ---------------------------------------------------------------------------
-
-const listDegreeGroupsSchema = z.object({
-  nameFilter: z.string().optional(),
-  page: z.number().int().positive().optional(),
-  limit: z.number().int().min(1).max(100).optional(),
-});
-
-const getDegreeGroupSchema = z.object({
-  uuid: z.string().min(1, "UUID is required"),
-});
-
-const createDegreeGroupSchema = z.object({
-  nameEn: z.string().min(1, "English name is required"),
-  nameAr: z.string().optional(),
-  sortOrder: z.number().int().optional(),
-  skipMajor: z.number().int().optional(),
-});
-
-const updateDegreeGroupSchema = z.object({
-  uuid: z.string().min(1, "UUID is required"),
-  nameEn: z.string().min(1, "English name is required").optional(),
-  nameAr: z.string().optional(),
-  sortOrder: z.number().int().optional(),
-  skipMajor: z.number().int().optional(),
-});
-
-export type ListDegreeGroupsInput = z.input<typeof listDegreeGroupsSchema>;
-export type GetDegreeGroupInput = z.input<typeof getDegreeGroupSchema>;
-export type CreateDegreeGroupInput = z.input<typeof createDegreeGroupSchema>;
-export type UpdateDegreeGroupInput = z.input<typeof updateDegreeGroupSchema>;
+import {
+  degreeGroupItemSchema,
+  listDegreeGroupsResultSchema,
+  mutationResultSchema,
+  listDegreeGroupsSchema,
+  getDegreeGroupSchema,
+  createDegreeGroupSchema,
+  updateDegreeGroupSchema,
+  type DegreeGroupItem,
+  type ListDegreeGroupsResult,
+  type ListDegreeGroupsInput,
+  type GetDegreeGroupInput,
+  type CreateDegreeGroupInput,
+  type UpdateDegreeGroupInput,
+  type MutationResult,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Server actions
 // ---------------------------------------------------------------------------
+
+/** Log output validation failures without throwing. */
+function validateMutationResult(result: MutationResult): MutationResult {
+  const parsed = mutationResultSchema.safeParse(result);
+  if (!parsed.success) {
+    console.error(
+      "[modules/degree-groups] mutation output validation failed:",
+      parsed.error.issues,
+    );
+  }
+  return result;
+}
 
 /**
  * List degree groups with optional name search and pagination.
@@ -103,13 +74,23 @@ export async function listDegreeGroups(
     prisma.degree_group.count({ where: where as any }),
   ]);
 
-  return {
+  const result: ListDegreeGroupsResult = {
     degreeGroups,
     total,
     page,
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  const outputParsed = listDegreeGroupsResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/degree-groups] listDegreeGroups output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -136,7 +117,25 @@ export async function getDegreeGroup(
     throw new Error("Degree group not found");
   }
 
-  return group;
+  const result: DegreeGroupItem = {
+    degree_group_uuid: group.degree_group_uuid,
+    degree_group_name_en: group.degree_group_name_en,
+    degree_group_name_ar: group.degree_group_name_ar ?? null,
+    degree_group_sort_order: group.degree_group_sort_order ?? null,
+    skip_major: group.skip_major ?? null,
+    degree_group_created_at: group.degree_group_created_at ?? null,
+    degree_group_updated_at: group.degree_group_updated_at ?? null,
+  };
+
+  const outputParsed = degreeGroupItemSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/degree-groups] getDegreeGroup output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -147,15 +146,16 @@ export async function getDegreeGroup(
  */
 export async function createDegreeGroup(
   params: CreateDegreeGroupInput,
-): Promise<{ operation: string; message: string }> {
+): Promise<MutationResult> {
   await requireCapability("admin.write");
 
   const parsed = createDegreeGroupSchema.safeParse(params);
   if (!parsed.success) {
-    return {
+    const result: MutationResult = {
       operation: "error",
       message: parsed.error.issues[0]?.message ?? "Invalid degree group data",
     };
+    return validateMutationResult(result);
   }
 
   const { nameEn, nameAr, sortOrder, skipMajor } = parsed.data;
@@ -171,16 +171,18 @@ export async function createDegreeGroup(
       },
     });
 
-    return {
+    const result: MutationResult = {
       operation: "success",
       message: "Degree group created successfully",
     };
+    return validateMutationResult(result);
   } catch (err) {
-    return {
+    const result: MutationResult = {
       operation: "error",
       message:
         err instanceof Error ? err.message : "Failed to create degree group",
     };
+    return validateMutationResult(result);
   }
 }
 
@@ -192,15 +194,16 @@ export async function createDegreeGroup(
  */
 export async function updateDegreeGroup(
   params: UpdateDegreeGroupInput,
-): Promise<{ operation: string; message: string }> {
+): Promise<MutationResult> {
   await requireCapability("admin.write");
 
   const parsed = updateDegreeGroupSchema.safeParse(params);
   if (!parsed.success) {
-    return {
+    const result: MutationResult = {
       operation: "error",
       message: parsed.error.issues[0]?.message ?? "Invalid degree group data",
     };
+    return validateMutationResult(result);
   }
 
   const { uuid, nameEn, nameAr, sortOrder, skipMajor } = parsed.data;
@@ -218,15 +221,17 @@ export async function updateDegreeGroup(
       data,
     });
 
-    return {
+    const result: MutationResult = {
       operation: "success",
       message: "Degree group updated successfully",
     };
+    return validateMutationResult(result);
   } catch (err) {
-    return {
+    const result: MutationResult = {
       operation: "error",
       message:
         err instanceof Error ? err.message : "Failed to update degree group",
     };
+    return validateMutationResult(result);
   }
 }
