@@ -183,3 +183,164 @@ describe("ListCandidatesResult shape", () => {
     expect(result.totalPages).toBe(0);
   });
 });
+
+// ---------------------------------------------------------------------------
+// Output schema tests
+// ---------------------------------------------------------------------------
+
+import {
+  candidateRowOutputSchema,
+  candidateListOutputSchema,
+  candidateDetailOutputSchema,
+} from "./schemas";
+
+describe("candidateRowOutputSchema", () => {
+  it("accepts a valid candidate row", () => {
+    const row = {
+      id: 42,
+      name: "John Doe",
+      email: "john@example.com",
+      phone: "+965****1234",
+      status: 10,
+      createdAt: "2025-01-10T00:00:00.000Z",
+    };
+    expect(candidateRowOutputSchema.safeParse(row).success).toBe(true);
+  });
+
+  it("accepts null phone", () => {
+    const row = {
+      id: 42,
+      name: "John Doe",
+      email: "john@example.com",
+      phone: null,
+      status: 10,
+      createdAt: "2025-01-10T00:00:00.000Z",
+    };
+    expect(candidateRowOutputSchema.safeParse(row).success).toBe(true);
+  });
+
+  it("rejects missing required fields", () => {
+    expect(candidateRowOutputSchema.safeParse({}).success).toBe(false);
+  });
+
+  it("rejects non-number id", () => {
+    const row = {
+      id: "abc",
+      name: "John Doe",
+      email: "john@example.com",
+      phone: null,
+      status: 10,
+      createdAt: "2025-01-10T00:00:00.000Z",
+    };
+    expect(candidateRowOutputSchema.safeParse(row).success).toBe(false);
+  });
+});
+
+describe("candidateListOutputSchema", () => {
+  const validItem = {
+    id: 42,
+    name: "John Doe",
+    email: "john@example.com",
+    phone: null,
+    status: 10,
+    createdAt: "2025-01-10T00:00:00.000Z",
+  };
+
+  it("accepts a valid list result", () => {
+    const result = {
+      items: [validItem],
+      total: 1,
+      page: 1,
+      limit: 20,
+      totalPages: 1,
+    };
+    expect(candidateListOutputSchema.safeParse(result).success).toBe(true);
+  });
+
+  it("accepts empty items", () => {
+    const result = {
+      items: [],
+      total: 0,
+      page: 1,
+      limit: 20,
+      totalPages: 0,
+    };
+    expect(candidateListOutputSchema.safeParse(result).success).toBe(true);
+  });
+
+  it("rejects negative total", () => {
+    const result = {
+      items: [],
+      total: -1,
+      page: 1,
+      limit: 20,
+      totalPages: 0,
+    };
+    expect(candidateListOutputSchema.safeParse(result).success).toBe(false);
+  });
+});
+
+describe("candidateDetailOutputSchema", () => {
+  it("accepts a valid candidate detail", () => {
+    const detail = {
+      id: 42,
+      name: "John Doe",
+      nameAr: "جون دو",
+      email: "john@example.com",
+      phone: "+965****1234",
+      gender: 1,
+      objective: "Looking for a software engineering role",
+      status: 10,
+      createdAt: "2025-01-10T00:00:00.000Z",
+      updatedAt: "2025-06-01T12:00:00.000Z",
+    };
+    expect(candidateDetailOutputSchema.safeParse(detail).success).toBe(true);
+  });
+
+  it("accepts nullable fields as null", () => {
+    const detail = {
+      id: 42,
+      name: "John Doe",
+      nameAr: "جون دو",
+      email: "john@example.com",
+      phone: null,
+      gender: null,
+      objective: null,
+      status: 10,
+      createdAt: "2025-01-10T00:00:00.000Z",
+      updatedAt: "2025-06-01T12:00:00.000Z",
+    };
+    expect(candidateDetailOutputSchema.safeParse(detail).success).toBe(true);
+  });
+
+  it("rejects missing updatedAt", () => {
+    const detail = {
+      id: 42,
+      name: "John Doe",
+      nameAr: "جون دو",
+      email: "john@example.com",
+      phone: null,
+      gender: null,
+      objective: null,
+      status: 10,
+      createdAt: "2025-01-10T00:00:00.000Z",
+    };
+    expect(candidateDetailOutputSchema.safeParse(detail).success).toBe(false);
+  });
+
+  it("rejects non-number id", () => {
+    const detail = {
+      id: "abc",
+      name: "John Doe",
+      nameAr: "جون دو",
+      email: "john@example.com",
+      phone: null,
+      gender: null,
+      objective: null,
+      status: 10,
+      createdAt: "2025-01-10T00:00:00.000Z",
+      updatedAt: "2025-06-01T12:00:00.000Z",
+    };
+    expect(candidateDetailOutputSchema.safeParse(detail).success).toBe(false);
+  });
+});
