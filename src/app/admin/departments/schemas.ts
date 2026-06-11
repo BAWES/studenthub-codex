@@ -85,6 +85,49 @@ export const departmentActionResponseSchema = z.object({
 // Types
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// Output validation schemas
+// ---------------------------------------------------------------------------
+
+const departmentRowSchema = z.object({
+  department_uuid: z.string().min(1),
+  department_name_en: z.string().min(1),
+  department_name_ar: z.string().nullable(),
+  employee_count: z.number().int().nonnegative(),
+  created_at: z.string().nullable(),
+  updated_at: z.string().nullable(),
+});
+
+export const departmentListResponseSchema = z.object({
+  departments: z.array(departmentRowSchema),
+  total: z.number().int().nonnegative(),
+  page: z.number().int().positive(),
+  limit: z.number().int().positive(),
+});
+
+export type DepartmentListResponseOutput = z.infer<typeof departmentListResponseSchema>;
+
+export const departmentDetailSchema = z.object({
+  department: z.object({
+    department_uuid: z.string().min(1),
+    department_name_en: z.string().min(1),
+    department_name_ar: z.string().nullable(),
+    department_created_at: z.string().nullable(),
+    department_updated_at: z.string().nullable(),
+  }).nullable(),
+  employee_count: z.number().int().nonnegative(),
+});
+
+export type DepartmentDetailOutput = z.infer<typeof departmentDetailSchema>;
+
+export const departmentActionResponseSchema = z.object({
+  operation: z.enum(["success", "error"]),
+  message: z.string().min(1),
+  data: departmentRowSchema.optional(),
+});
+
+export type DepartmentActionResponseOutput = z.infer<typeof departmentActionResponseSchema>;
+
 export type ListDepartmentsInput = z.input<typeof listDepartmentsSchema>;
 export type GetDepartmentInput = z.input<typeof getDepartmentSchema>;
 export type CreateDepartmentInput = z.input<typeof createDepartmentSchema>;

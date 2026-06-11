@@ -190,6 +190,117 @@ export const closeRequestOutputSchema = z.object({
 // Types
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// Output validation schemas
+// ---------------------------------------------------------------------------
+
+const requestRowSchema = z.object({
+  request_uuid: z.string().min(1),
+  title: z.string().min(1),
+  company_name: z.string().nullable(),
+  staff_name: z.string().nullable(),
+  position_type: z.string().min(1),
+  no_of_employees: z.number().int().nullable(),
+  status: z.string().min(1),
+  priority: z.number().int().nullable(),
+  created_at: z.string().nullable(),
+  updated_at: z.string().nullable(),
+});
+
+export const listRequestsOutputSchema = z.object({
+  items: z.array(requestRowSchema),
+  total: z.number().int().nonnegative(),
+  page: z.number().int().positive(),
+  limit: z.number().int().positive(),
+  totalPages: z.number().int().nonnegative(),
+});
+
+export type ListRequestsOutput = z.infer<typeof listRequestsOutputSchema>;
+
+const requestMetricSchema = z.object({
+  label: z.string().min(1),
+  value: z.union([z.string(), z.number()]),
+  note: z.string().min(1),
+});
+
+const applicationSchema = z.object({
+  application_uuid: z.string().min(1),
+  candidate_name: z.string().nullable(),
+  status: z.number().int().nullable(),
+  created_at: z.string().nullable(),
+});
+
+const invitationSchema = z.object({
+  invitation_uuid: z.string().min(1),
+  candidate_name: z.string().nullable(),
+  status: z.number().int().nullable(),
+  created_at: z.string().nullable(),
+});
+
+const interviewSchema = z.object({
+  request_interview_uuid: z.string().min(1),
+  candidate_name: z.string().nullable(),
+  interview_at: z.string().nullable(),
+  status: z.number().int().nullable(),
+});
+
+const requestCompanySchema = z.object({
+  company_name: z.string().nullable(),
+  company_email: z.string().nullable(),
+});
+
+const requestStaffSchema = z.object({
+  staff_name: z.string().nullable(),
+  staff_email: z.string().nullable(),
+});
+
+const entitySchema = z.object({
+  request_uuid: z.string().min(1),
+  request_position_title: z.string().nullable(),
+  request_job_description: z.string().min(1),
+  request_compensation: z.string().min(1),
+  request_status: z.string().nullable(),
+  request_feedback: z.string().nullable(),
+  request_priority: z.number().int().nullable(),
+  request_started_at: z.string().nullable(),
+  request_finished_at: z.string().nullable(),
+  request_created_datetime: z.string().nullable(),
+  request_updated_datetime: z.string().nullable(),
+  company: requestCompanySchema.nullable(),
+  staff: requestStaffSchema.nullable(),
+});
+
+export const getRequestOutputSchema = z.object({
+  request: entitySchema.nullable(),
+  applications: z.array(applicationSchema),
+  invitations: z.array(invitationSchema),
+  interviews: z.array(interviewSchema),
+  metrics: z.array(requestMetricSchema),
+});
+
+export type GetRequestOutput = z.infer<typeof getRequestOutputSchema>;
+
+const requestActionResponseSchema = z.object({
+  operation: z.enum(["success", "error"]),
+  message: z.string().min(1),
+});
+
+export const updateRequestStatusOutputSchema = requestActionResponseSchema;
+
+export type UpdateRequestStatusOutput = z.infer<typeof updateRequestStatusOutputSchema>;
+
+export const approveRequestOutputSchema = requestActionResponseSchema;
+
+export type ApproveRequestOutput = z.infer<typeof approveRequestOutputSchema>;
+
+export const rejectRequestOutputSchema = requestActionResponseSchema;
+
+export type RejectRequestOutput = z.infer<typeof rejectRequestOutputSchema>;
+
+export const closeRequestOutputSchema = requestActionResponseSchema;
+
+export type CloseRequestOutput = z.infer<typeof closeRequestOutputSchema>;
+
 export type ListRequestsInput = z.input<typeof listRequestsSchema>;
 export type GetRequestInput = z.input<typeof getRequestSchema>;
 export type UpdateRequestStatusInput = z.input<typeof updateRequestStatusSchema>;
