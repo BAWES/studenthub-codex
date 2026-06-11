@@ -5,6 +5,16 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireRoleCapability } from "@/modules/auth/session";
+import {
+  idRequestListItemSchema,
+  idRequestDetailSchema,
+  listIdRequestsResultSchema,
+  createIdRequestResultSchema,
+  type IdRequestListItem,
+  type IdRequestDetail,
+  type ListIdRequestsResult,
+  type CreateIdRequestResult,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Schemas
@@ -32,39 +42,6 @@ const createIdRequestSchema = z.object({
 export type ListIdRequestsParams = z.input<typeof listIdRequestsSchema>;
 export type GetIdRequestParams = z.input<typeof getIdRequestSchema>;
 export type CreateIdRequestParams = z.input<typeof createIdRequestSchema>;
-
-export type IdRequestListItem = {
-  cir_uuid: string;
-  candidate_count: number;
-  status: string | null;
-  rejection_reason: string | null;
-  created_at: Date | null;
-  updated_at: Date | null;
-};
-
-export type IdRequestDetail = {
-  cir_uuid: string;
-  candidate_ids: string | null;
-  status: string | null;
-  rejection_reason: string | null;
-  created_at: Date | null;
-  updated_at: Date | null;
-  created_by_name: string | null;
-  updated_by_name: string | null;
-};
-
-export type ListIdRequestsResult = {
-  requests: IdRequestListItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
-
-export type CreateIdRequestResult = {
-  cir_uuid: string;
-  status: string;
-};
 
 // ---------------------------------------------------------------------------
 // Server Actions
@@ -111,7 +88,7 @@ export async function listIdRequests(
     prisma.candidate_id_request.count({ where: where as any }),
   ]);
 
-  return {
+  const result: ListIdRequestsResult = {
     requests: requests.map((r) => ({
       cir_uuid: r.cir_uuid,
       candidate_count: r.candidate_ids
@@ -127,6 +104,16 @@ export async function listIdRequests(
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  const outputParsed = listIdRequestsResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/candidates/id-requests] listIdRequests output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -167,7 +154,7 @@ export async function getIdRequest(
 
   if (!request) return null;
 
-  return {
+  const detailResult: IdRequestDetail = {
     cir_uuid: request.cir_uuid,
     candidate_ids: request.candidate_ids,
     status: request.status,
@@ -179,6 +166,16 @@ export async function getIdRequest(
     updated_by_name:
       request.staff_candidate_id_request_updated_byTostaff?.staff_name ?? null,
   };
+
+  const outputParsed = idRequestDetailSchema.safeParse(detailResult);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/candidates/id-requests] getIdRequest output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return detailResult;
 }
 
 /**
@@ -215,8 +212,18 @@ export async function createIdRequest(
 
   revalidatePath("/candidate/id-requests");
 
-  return {
+  const createResult: CreateIdRequestResult = {
     cir_uuid: cirUuid,
     status: "pending",
   };
+
+  const outputParsed = createIdRequestResultSchema.safeParse(createResult);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/candidates/id-requests] createIdRequest output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return createResult;
 }

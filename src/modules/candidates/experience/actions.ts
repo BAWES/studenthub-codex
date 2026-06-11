@@ -4,6 +4,13 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
+import {
+  experienceListItemSchema,
+  listExperienceResultSchema,
+  deleteExperienceResultSchema,
+  type ExperienceListItem,
+  type ListExperienceResult,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Schemas
@@ -43,24 +50,6 @@ export type ListExperienceParams = z.input<typeof listExperienceSchema>;
 export type CreateExperienceParams = z.input<typeof createExperienceSchema>;
 export type UpdateExperienceParams = z.input<typeof updateExperienceSchema>;
 export type DeleteExperienceParams = z.input<typeof deleteExperienceSchema>;
-
-export type ExperienceListItem = {
-  candidate_experience_id: number;
-  candidate_id: number | null;
-  experience: string;
-  employer: string | null;
-  start_year: number | null;
-  end_year: number | null;
-  candidate_experience_created_at: Date | null;
-};
-
-export type ListExperienceResult = {
-  items: ExperienceListItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -108,13 +97,23 @@ export async function listExperience(
     prisma.candidate_experience.count({ where }),
   ]);
 
-  return {
+  const result: ListExperienceResult = {
     items: items as ExperienceListItem[],
     total,
     page,
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  const outputParsed = listExperienceResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/candidates/experience] listExperience output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -149,7 +148,17 @@ export async function createExperience(
   });
 
   revalidatePath("/candidate/profile");
-  return item as ExperienceListItem;
+  const experienceItem = item as ExperienceListItem;
+
+  const outputParsed = experienceListItemSchema.safeParse(experienceItem);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/candidates/experience] createExperience output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return experienceItem;
 }
 
 /**
@@ -191,7 +200,17 @@ export async function updateExperience(
   });
 
   revalidatePath("/candidate/profile");
-  return item as ExperienceListItem;
+  const updatedItem = item as ExperienceListItem;
+
+  const outputParsed = experienceListItemSchema.safeParse(updatedItem);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/candidates/experience] updateExperience output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return updatedItem;
 }
 
 /**
@@ -223,5 +242,15 @@ export async function deleteExperience(
   });
 
   revalidatePath("/candidate/profile");
-  return { success: true };
+  const deleteResult = { success: true };
+
+  const outputParsed = deleteExperienceResultSchema.safeParse(deleteResult);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/candidates/experience] deleteExperience output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return deleteResult;
 }

@@ -3,6 +3,14 @@
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
+import {
+  candidateIdRequestItemSchema,
+  listIdRequestsResultSchema,
+  idRequestMutationResultSchema,
+  type CandidateIdRequestItem,
+  type ListIdRequestsResult,
+  type IdRequestMutationResult,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // CandidateIdRequestController — list/get/regenerate/delete ID requests
@@ -41,30 +49,6 @@ export type GetIdRequestParams = z.input<typeof getIdRequestSchema>;
 export type RegenerateIdRequestParams = z.input<typeof regenerateIdRequestSchema>;
 export type DeleteIdRequestParams = z.input<typeof deleteIdRequestSchema>;
 
-export type CandidateIdRequestItem = {
-  cir_uuid: string;
-  candidate_ids: string | null;
-  status: string | null;
-  rejection_reason: string | null;
-  created_at: string | null;
-  updated_at: string | null;
-  created_by: number | null;
-  updated_by: number | null;
-};
-
-export type ListIdRequestsResult = {
-  requests: CandidateIdRequestItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
-
-export type IdRequestMutationResult = {
-  operation: string;
-  message?: unknown;
-};
-
 // ---------------------------------------------------------------------------
 // Exported schemas (for shared validation in tests)
 // ---------------------------------------------------------------------------
@@ -102,7 +86,7 @@ export async function listIdRequests(
     prisma.candidate_id_request.count(),
   ]);
 
-  return {
+  const result: ListIdRequestsResult = {
     requests: requests.map((r) => ({
       cir_uuid: r.cir_uuid,
       candidate_ids: r.candidate_ids,
@@ -118,6 +102,16 @@ export async function listIdRequests(
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  const outputParsed = listIdRequestsResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/candidate-id-requests] listIdRequests output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -144,7 +138,7 @@ export async function getIdRequest(
 
   if (!request) return null;
 
-  return {
+  const itemResult: CandidateIdRequestItem = {
     cir_uuid: request.cir_uuid,
     candidate_ids: request.candidate_ids,
     status: request.status,
@@ -154,6 +148,16 @@ export async function getIdRequest(
     created_by: request.created_by,
     updated_by: request.updated_by,
   };
+
+  const outputParsed = candidateIdRequestItemSchema.safeParse(itemResult);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/candidate-id-requests] getIdRequest output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return itemResult;
 }
 
 /**
@@ -167,10 +171,20 @@ export async function regenerateIdRequest(
 
   const parsed = regenerateIdRequestSchema.safeParse(params);
   if (!parsed.success) {
-    return {
+    const errorResult: IdRequestMutationResult = {
       operation: "error",
       message: parsed.error.issues[0]?.message ?? "Invalid ID request UUID",
     };
+
+    const parsed2 = idRequestMutationResultSchema.safeParse(errorResult);
+    if (!parsed2.success) {
+      console.error(
+        "[modules/candidate-id-requests] regenerateIdRequest output validation failed:",
+        parsed2.error.issues,
+      );
+    }
+
+    return errorResult;
   }
 
   const { uuid } = parsed.data;
@@ -180,7 +194,20 @@ export async function regenerateIdRequest(
   });
 
   if (!existing) {
-    return { operation: "error", message: "ID request not found" };
+    const notFoundResult: IdRequestMutationResult = {
+      operation: "error",
+      message: "ID request not found",
+    };
+
+    const parsed2 = idRequestMutationResultSchema.safeParse(notFoundResult);
+    if (!parsed2.success) {
+      console.error(
+        "[modules/candidate-id-requests] regenerateIdRequest output validation failed:",
+        parsed2.error.issues,
+      );
+    }
+
+    return notFoundResult;
   }
 
   try {
@@ -191,12 +218,32 @@ export async function regenerateIdRequest(
       },
     });
 
-    return { operation: "success" };
+    const successResult: IdRequestMutationResult = { operation: "success" };
+
+    const parsed2 = idRequestMutationResultSchema.safeParse(successResult);
+    if (!parsed2.success) {
+      console.error(
+        "[modules/candidate-id-requests] regenerateIdRequest output validation failed:",
+        parsed2.error.issues,
+      );
+    }
+
+    return successResult;
   } catch (err) {
-    return {
+    const catchResult: IdRequestMutationResult = {
       operation: "error",
       message: err instanceof Error ? err.message : "Failed to regenerate ID request",
     };
+
+    const parsed2 = idRequestMutationResultSchema.safeParse(catchResult);
+    if (!parsed2.success) {
+      console.error(
+        "[modules/candidate-id-requests] regenerateIdRequest output validation failed:",
+        parsed2.error.issues,
+      );
+    }
+
+    return catchResult;
   }
 }
 
@@ -211,10 +258,20 @@ export async function deleteIdRequest(
 
   const parsed = deleteIdRequestSchema.safeParse(params);
   if (!parsed.success) {
-    return {
+    const errorResult: IdRequestMutationResult = {
       operation: "error",
       message: parsed.error.issues[0]?.message ?? "Invalid ID request UUID",
     };
+
+    const parsed2 = idRequestMutationResultSchema.safeParse(errorResult);
+    if (!parsed2.success) {
+      console.error(
+        "[modules/candidate-id-requests] deleteIdRequest output validation failed:",
+        parsed2.error.issues,
+      );
+    }
+
+    return errorResult;
   }
 
   const { uuid } = parsed.data;
@@ -224,7 +281,20 @@ export async function deleteIdRequest(
   });
 
   if (!existing) {
-    return { operation: "error", message: "ID request not found" };
+    const notFoundResult: IdRequestMutationResult = {
+      operation: "error",
+      message: "ID request not found",
+    };
+
+    const parsed2 = idRequestMutationResultSchema.safeParse(notFoundResult);
+    if (!parsed2.success) {
+      console.error(
+        "[modules/candidate-id-requests] deleteIdRequest output validation failed:",
+        parsed2.error.issues,
+      );
+    }
+
+    return notFoundResult;
   }
 
   try {
@@ -232,11 +302,31 @@ export async function deleteIdRequest(
       where: { cir_uuid: uuid },
     });
 
-    return { operation: "success" };
+    const successResult: IdRequestMutationResult = { operation: "success" };
+
+    const parsed2 = idRequestMutationResultSchema.safeParse(successResult);
+    if (!parsed2.success) {
+      console.error(
+        "[modules/candidate-id-requests] deleteIdRequest output validation failed:",
+        parsed2.error.issues,
+      );
+    }
+
+    return successResult;
   } catch (err) {
-    return {
+    const catchResult: IdRequestMutationResult = {
       operation: "error",
       message: err instanceof Error ? err.message : "Failed to delete ID request",
     };
+
+    const parsed2 = idRequestMutationResultSchema.safeParse(catchResult);
+    if (!parsed2.success) {
+      console.error(
+        "[modules/candidate-id-requests] deleteIdRequest output validation failed:",
+        parsed2.error.issues,
+      );
+    }
+
+    return catchResult;
   }
 }

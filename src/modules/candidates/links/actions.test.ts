@@ -1,4 +1,10 @@
 import { describe, it, expect } from "vitest";
+import {
+  candidateLinkItemSchema,
+  listCandidateLinksResultSchema,
+  type CandidateLinkItem,
+  type ListCandidateLinksResult,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Schemas imported from actions.ts for contract testing
@@ -94,29 +100,58 @@ describe("getCandidateLinkSchema", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Return type shape verification
+// Output schema tests
 // ---------------------------------------------------------------------------
 
-type CandidateLinkItem = {
-  cl_uuid: string;
-  candidate_id: number;
-  title: string;
-  url: string;
-  created_at: Date | null;
-  updated_at: Date | null;
-};
+describe("candidateLinkItemSchema", () => {
+  it("parses a valid link item", () => {
+    const result = candidateLinkItemSchema.safeParse({
+      cl_uuid: "abc-123",
+      candidate_id: 1,
+      title: "LinkedIn",
+      url: "https://linkedin.com/in/test",
+      created_at: null,
+      updated_at: null,
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.cl_uuid).toBe("abc-123");
+    }
+  });
 
-type ListCandidateLinksResult = {
-  links: CandidateLinkItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
+  it("accepts Date timestamps", () => {
+    const result = candidateLinkItemSchema.safeParse({
+      cl_uuid: "abc",
+      candidate_id: 42,
+      title: "Portfolio",
+      url: "https://example.com",
+      created_at: new Date("2024-01-01"),
+      updated_at: new Date("2024-01-15"),
+    });
+    expect(result.success).toBe(true);
+  });
 
-describe("ListCandidateLinksResult type shape", () => {
-  it("conforms to expected structure", () => {
-    const result: ListCandidateLinksResult = {
+  it("allows nullable timestamps", () => {
+    const result = candidateLinkItemSchema.safeParse({
+      cl_uuid: "abc",
+      candidate_id: 1,
+      title: "GitHub",
+      url: "https://github.com/test",
+      created_at: null,
+      updated_at: null,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects missing required fields", () => {
+    const result = candidateLinkItemSchema.safeParse({});
+    expect(result.success).toBe(false);
+  });
+});
+
+describe("listCandidateLinksResultSchema", () => {
+  it("parses a valid result with links", () => {
+    const result = listCandidateLinksResultSchema.safeParse({
       links: [
         {
           cl_uuid: "abc-123",
@@ -131,69 +166,32 @@ describe("ListCandidateLinksResult type shape", () => {
       page: 1,
       limit: 20,
       totalPages: 1,
-    };
-    expect(result.links).toHaveLength(1);
-    expect(result.total).toBe(1);
-    expect(result.totalPages).toBe(1);
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.links).toHaveLength(1);
+      expect(result.data.total).toBe(1);
+    }
   });
 
   it("handles empty link list", () => {
-    const result: ListCandidateLinksResult = {
+    const result = listCandidateLinksResultSchema.safeParse({
       links: [],
       total: 0,
       page: 1,
       limit: 20,
       totalPages: 0,
-    };
-    expect(result.links).toHaveLength(0);
-    expect(result.totalPages).toBe(0);
+    });
+    expect(result.success).toBe(true);
   });
 
-  it("includes all required fields", () => {
-    const item: CandidateLinkItem = {
-      cl_uuid: "abc",
-      candidate_id: 42,
-      title: "Portfolio",
-      url: "https://example.com",
-      created_at: new Date("2024-01-01"),
-      updated_at: new Date("2024-01-15"),
-    };
-    expect(item.title).toBe("Portfolio");
-    expect(item.url).toBe("https://example.com");
-    expect(item.candidate_id).toBe(42);
-  });
-
-  it("allows nullable timestamps", () => {
-    const item: CandidateLinkItem = {
-      cl_uuid: "abc",
-      candidate_id: 1,
-      title: "GitHub",
-      url: "https://github.com/test",
-      created_at: null,
-      updated_at: null,
-    };
-    expect(item.created_at).toBeNull();
-    expect(item.updated_at).toBeNull();
-  });
-});
-
-// ---------------------------------------------------------------------------
-// getCandidateLink return type
-// ---------------------------------------------------------------------------
-
-describe("getCandidateLink return type", () => {
-  it("returns CandidateLinkItem or null", () => {
-    const found: CandidateLinkItem = {
-      cl_uuid: "abc",
-      candidate_id: 1,
-      title: "LinkedIn",
-      url: "https://linkedin.com/in/test",
-      created_at: null,
-      updated_at: null,
-    };
-    const notFound: null = null;
-
-    expect(found.cl_uuid).toBe("abc");
-    expect(notFound).toBeNull();
+  it("rejects missing total", () => {
+    const result = listCandidateLinksResultSchema.safeParse({
+      links: [],
+      page: 1,
+      limit: 20,
+      totalPages: 0,
+    });
+    expect(result.success).toBe(false);
   });
 });

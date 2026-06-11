@@ -3,6 +3,12 @@
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
+import {
+  candidateLinkItemSchema,
+  listCandidateLinksResultSchema,
+  type CandidateLinkItem,
+  type ListCandidateLinksResult,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Schemas
@@ -24,23 +30,6 @@ const getCandidateLinkSchema = z.object({
 
 export type ListCandidateLinksParams = z.input<typeof listCandidateLinksSchema>;
 export type GetCandidateLinkParams = z.input<typeof getCandidateLinkSchema>;
-
-export type CandidateLinkItem = {
-  cl_uuid: string;
-  candidate_id: number;
-  title: string;
-  url: string;
-  created_at: Date | null;
-  updated_at: Date | null;
-};
-
-export type ListCandidateLinksResult = {
-  links: CandidateLinkItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
 
 // ---------------------------------------------------------------------------
 // Exported schemas (for shared validation)
@@ -88,7 +77,7 @@ export async function listCandidateLinks(
     prisma.candidate_link.count({ where: where as any }),
   ]);
 
-  return {
+  const result: ListCandidateLinksResult = {
     links: links.map((l) => ({
       cl_uuid: l.cl_uuid,
       candidate_id: l.candidate_id,
@@ -102,6 +91,16 @@ export async function listCandidateLinks(
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  const outputParsed = listCandidateLinksResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/candidates/links] listCandidateLinks output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -132,7 +131,7 @@ export async function getCandidateLink(
 
   if (!link) return null;
 
-  return {
+  const result: CandidateLinkItem = {
     cl_uuid: link.cl_uuid,
     candidate_id: link.candidate_id,
     title: link.title,
@@ -140,4 +139,14 @@ export async function getCandidateLink(
     created_at: link.created_at ?? null,
     updated_at: link.updated_at ?? null,
   };
+
+  const outputParsed = candidateLinkItemSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/candidates/links] getCandidateLink output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
