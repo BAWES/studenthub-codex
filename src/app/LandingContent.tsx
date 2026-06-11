@@ -11,8 +11,6 @@ import {
 } from "lucide-react";
 import { ThemeToggle } from "@/modules/theme/ThemeToggle";
 
-// ── Types ─────────────────────────────────────────────────────
-
 type Persona = "candidate" | "company";
 
 interface LandingContentProps {
@@ -37,43 +35,22 @@ function useReveal(threshold = 0.1) {
   return { ref, visible };
 }
 
-function Reveal({ children, delay = 0, style = {} }: { children: React.ReactNode; delay?: number; style?: React.CSSProperties }) {
+function Reveal({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) {
   const { ref, visible } = useReveal();
   return (
     <div
       ref={ref}
+      className={className}
       style={{
         opacity: visible ? 1 : 0,
         transform: visible ? "translateY(0)" : "translateY(20px)",
         transition: `opacity 600ms cubic-bezier(0.16, 1, 0.3, 1) ${delay}ms, transform 600ms cubic-bezier(0.16, 1, 0.3, 1) ${delay}ms`,
-        ...style,
       }}
     >
       {children}
     </div>
   );
 }
-
-// ── Theme colors ──────────────────────────────────────────────
-
-const theme = {
-  bg: "#0a0a0b",
-  surface: "rgba(255,255,255,0.03)",
-  surfaceHover: "rgba(255,255,255,0.06)",
-  border: "rgba(255,255,255,0.08)",
-  borderLight: "rgba(255,255,255,0.06)",
-  text: "#ffffff",
-  muted: "rgba(255,255,255,0.5)",
-  dim: "rgba(255,255,255,0.3)",
-  accent: "#6366f1",
-  accentLight: "rgba(99,102,241,0.12)",
-  green: "#22c55e",
-  greenLight: "rgba(34,197,94,0.12)",
-  amber: "#f59e0b",
-  pink: "#ec4899",
-  cyan: "#06b6d4",
-  purple: "#a855f7",
-};
 
 // ═══════════════════════════════════════════════════════════════
 // NAVIGATION
@@ -82,56 +59,59 @@ const theme = {
 function Nav({ session, persona }: { session: any; persona: Persona }) {
   const [open, setOpen] = useState(false);
   const role = persona === "company" ? "company" : "candidate";
-  const linkStyle: React.CSSProperties = {
-    padding: "8px 14px", borderRadius: 8, fontSize: 13, textDecoration: "none",
-    color: theme.muted, cursor: "pointer",
-  };
 
   return (
-    <nav style={{
-      position: "sticky", top: 0, zIndex: 50,
-      borderBottom: `1px solid ${theme.borderLight}`,
-      background: "rgba(10,10,11,0.85)",
-      backdropFilter: "blur(20px)",
-      WebkitBackdropFilter: "blur(20px)",
-    }}>
-      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", height: 64 }}>
-          <Link href="/" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
-            <span style={{
-              width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center",
-              borderRadius: 8, fontWeight: 900, fontSize: 13,
-              background: "linear-gradient(135deg, #6366f1, #8b5cf6)", color: "white",
-            }}>SH</span>
-            <span style={{ fontWeight: 700, fontSize: 14, color: theme.text }}>StudentHub</span>
+    <nav className="sticky top-0 z-50 border-b border-white/[0.06] backdrop-blur-xl"
+      style={{ background: "rgba(10,10,11,0.85)" }}>
+      <div className="max-w-[1200px] mx-auto px-6">
+        <div className="flex items-center justify-between h-16">
+          <Link href="/" className="flex items-center gap-2.5 no-underline">
+            <span className="w-9 h-9 flex items-center justify-center rounded-lg font-black text-sm"
+              style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)", color: "white" }}>
+              SH
+            </span>
+            <span className="font-bold text-sm text-white">StudentHub</span>
           </Link>
-          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+
+          <div className="hidden md:flex items-center gap-1">
             {["How it works", "Features", "Testimonials"].map(item => (
-              <Link key={item} href={`#${item.toLowerCase().replace(/\s+/g, "-")}`} style={linkStyle}>{item}</Link>
+              <Link key={item} href={`#${item.toLowerCase().replace(/\s+/g, "-")}`}
+                className="px-3.5 py-2 rounded-lg text-sm text-white/60 hover:text-white no-underline transition-colors">
+                {item}
+              </Link>
             ))}
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+
+          <div className="flex items-center gap-3">
             <ThemeToggle />
             {session ? (
-              <Link href="/app" style={btnPrimary}>Open app <ArrowRight style={{ width: 14, height: 14, marginLeft: 4 }} /></Link>
+              <Link href="/app" className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl text-sm font-semibold no-underline text-white"
+                style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)" }}>
+                Open app <ArrowRight className="size-3.5" />
+              </Link>
             ) : (
               <>
-                <Link href="/login" style={{ padding: "8px 16px", borderRadius: 10, fontSize: 13, textDecoration: "none", color: theme.muted }}>Sign in</Link>
-                <Link href={`/signup?role=${role}`} style={btnPrimary}>
+                <Link href="/login" className="hidden sm:inline-flex px-4 py-2 rounded-xl text-sm text-white/60 no-underline hover:text-white">Sign in</Link>
+                <Link href={`/signup?role=${role}`}
+                  className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl text-sm font-semibold no-underline text-white"
+                  style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)" }}>
                   {persona === "company" ? "Set up company" : "Get started"}
-                  <ArrowRight style={{ width: 14, height: 14, marginLeft: 4 }} />
+                  <ArrowRight className="size-3.5" />
                 </Link>
               </>
             )}
-            <button onClick={() => setOpen(!open)} style={{ display: "none", padding: 8, background: "none", border: "none", color: theme.text, cursor: "pointer" }} className="mobile-menu-toggle">
-              {open ? <X size={20} /> : <Menu size={20} />}
+            <button onClick={() => setOpen(!open)} className="md:hidden p-2 text-white">
+              {open ? <X className="size-5" /> : <Menu className="size-5" />}
             </button>
           </div>
         </div>
         {open && (
-          <div style={{ paddingBottom: 16 }}>
+          <div className="md:hidden pb-4 space-y-1">
             {["How it works", "Features", "Testimonials"].map(item => (
-              <Link key={item} href={`#${item.toLowerCase().replace(/\s+/g, "-")}`} style={{ display: "block", padding: "10px 14px", borderRadius: 8, fontSize: 14, textDecoration: "none", color: theme.muted }}>{item}</Link>
+              <Link key={item} href={`#${item.toLowerCase().replace(/\s+/g, "-")}`}
+                className="block px-3 py-2 rounded-lg text-sm text-white/70 no-underline">
+                {item}
+              </Link>
             ))}
           </div>
         )}
@@ -140,24 +120,13 @@ function Nav({ session, persona }: { session: any; persona: Persona }) {
   );
 }
 
-const btnPrimary: React.CSSProperties = {
-  display: "inline-flex", alignItems: "center", gap: 6,
-  padding: "10px 20px", borderRadius: 10, fontSize: 13, fontWeight: 600,
-  textDecoration: "none",
-  background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
-  color: "white", border: "none", cursor: "pointer",
-};
-
 // ═══════════════════════════════════════════════════════════════
 // PERSONA TOGGLE
 // ═══════════════════════════════════════════════════════════════
 
 function PersonaToggle({ persona, onChange }: { persona: Persona; onChange: (p: Persona) => void }) {
   return (
-    <div style={{
-      display: "flex", gap: 4, padding: 4, borderRadius: 12, width: "fit-content", margin: "0 auto",
-      background: theme.surfaceHover, border: `1px solid ${theme.borderLight}`,
-    }}>
+    <div className="flex gap-1 p-1 rounded-xl w-fit mx-auto bg-white/[0.06] border border-white/[0.08]">
       {[
         { value: "candidate" as Persona, label: "I'm a student", icon: GraduationCap },
         { value: "company" as Persona, label: "I'm an employer", icon: Building2 },
@@ -165,15 +134,14 @@ function PersonaToggle({ persona, onChange }: { persona: Persona; onChange: (p: 
         const active = persona === opt.value;
         return (
           <button key={opt.value} onClick={() => onChange(opt.value)}
+            className={`flex items-center gap-2 px-[18px] py-2 rounded-lg text-sm font-medium border-none cursor-pointer transition-all duration-200 ${
+              active ? "shadow-lg text-white" : "text-white/50"
+            }`}
             style={{
-              display: "flex", alignItems: "center", gap: 8,
-              padding: "8px 18px", borderRadius: 8, fontSize: 13, fontWeight: 500,
-              border: "none", cursor: "pointer", transition: "all 0.2s",
               background: active ? "linear-gradient(135deg, #6366f1, #8b5cf6)" : "transparent",
-              color: active ? "white" : theme.muted,
               boxShadow: active ? "0 4px 12px rgba(99,102,241,0.3)" : "none",
             }}>
-            <opt.icon style={{ width: 16, height: 16 }} />
+            <opt.icon className="size-4" />
             {opt.label}
           </button>
         );
@@ -183,14 +151,12 @@ function PersonaToggle({ persona, onChange }: { persona: Persona; onChange: (p: 
 }
 
 // ═══════════════════════════════════════════════════════════════
-// SECTION
+// SECTION WRAPPER
 // ═══════════════════════════════════════════════════════════════
 
-function Section({ children, id, style = {} }: { children: React.ReactNode; id?: string; style?: React.CSSProperties }) {
+function Section({ children, id, className = "" }: { children: React.ReactNode; id?: string; className?: string }) {
   return (
-    <section id={id} style={{
-      position: "relative", padding: "80px 24px", maxWidth: 1200, margin: "0 auto", ...style,
-    }}>
+    <section id={id} className={`relative py-20 px-6 max-w-[1200px] mx-auto ${className}`}>
       {children}
     </section>
   );
@@ -202,48 +168,32 @@ function Section({ children, id, style = {} }: { children: React.ReactNode; id?:
 
 function Hero({ persona }: { persona: Persona }) {
   return (
-    <Section style={{ paddingTop: 40, paddingBottom: 0 }}>
-      <div style={{ position: "relative" }}>
+    <Section className="pt-10 pb-0">
+      <div className="relative">
         {/* Backdrop glow */}
-        <div style={{
-          position: "absolute", top: "-160px", right: "-160px",
-          width: 600, height: 600, borderRadius: "50%", opacity: 0.12,
-          background: "radial-gradient(circle, rgba(99,102,241,0.25), transparent)",
-          filter: "blur(120px)", pointerEvents: "none", zIndex: 0,
-        }} aria-hidden="true" />
+        <div className="absolute -top-40 -right-40 w-[600px] h-[600px] rounded-full opacity-[0.12] pointer-events-none blur-[120px]"
+          style={{ background: "radial-gradient(circle, rgba(99,102,241,0.25), transparent)" }} aria-hidden="true" />
 
-        <div style={{ position: "relative", zIndex: 1 }}>
+        <div className="relative z-[1]">
           <Reveal>
-            <div style={{
-              display: "inline-flex", alignItems: "center", gap: 8,
-              padding: "6px 14px", borderRadius: 999,
-              background: theme.accentLight,
-              border: `1px solid rgba(99,102,241,0.2)`,
-              color: theme.accent, fontSize: 12, fontWeight: 600, marginBottom: 24,
-            }}>
-              <Sparkles style={{ width: 12, height: 12 }} />
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold mb-6 border"
+              style={{ background: "rgba(99,102,241,0.12)", borderColor: "rgba(99,102,241,0.2)", color: "#6366f1" }}>
+              <Sparkles className="size-3" />
               Two-sided marketplace for student talent
             </div>
           </Reveal>
 
           <Reveal delay={80}>
-            <h1 style={{
-              fontSize: "clamp(36px, 6.5vw, 68px)", fontWeight: 900,
-              lineHeight: 1.05, letterSpacing: "-0.03em",
-              maxWidth: 800, margin: 0, marginBottom: 16,
-            }}>
-              <span style={{ color: theme.text }}>Connecting students with </span>
-              <span style={{
-                background: "linear-gradient(135deg, #6366f1, #8b5cf6, #f59e0b)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
-              }}>the right employers</span>
+            <h1 className="text-[clamp(36px,6.5vw,68px)] font-black leading-[1.05] tracking-[-0.03em] max-w-[800px] mb-4">
+              <span className="text-white">Connecting students with </span>
+              <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-amber-400 bg-clip-text text-transparent">
+                the right employers
+              </span>
             </h1>
           </Reveal>
 
           <Reveal delay={160}>
-            <p style={{ fontSize: 18, lineHeight: 1.7, maxWidth: 560, color: theme.muted, marginBottom: 32 }}>
+            <p className="text-lg leading-relaxed max-w-[560px] text-white/50 mb-8">
               {persona === "company"
                 ? "Post openings, get AI-matched candidates, manage timesheets and payments — all in one platform built for Kuwait."
                 : "Create a profile seen by 500+ employers. Get AI-matched roles, one-tap timesheets, and direct payments."}
@@ -251,158 +201,116 @@ function Hero({ persona }: { persona: Persona }) {
           </Reveal>
 
           <Reveal delay={240}>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginBottom: 20 }}>
+            <div className="flex flex-wrap gap-3 mb-5">
               <Link href={persona === "company" ? "/signup?role=company" : "/signup?role=candidate"}
-                style={{
-                  ...btnPrimary, padding: "14px 28px", fontSize: 15, borderRadius: 12,
-                  boxShadow: "0 4px 24px rgba(99,102,241,0.3)",
-                }}>
+                className="group inline-flex items-center gap-1.5 px-7 py-3.5 rounded-xl text-base font-semibold no-underline text-white transition-all duration-300 hover:scale-[1.02]"
+                style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)", boxShadow: "0 4px 24px rgba(99,102,241,0.3)" }}>
                 {persona === "company" ? "Set up company account" : "Create your free profile"}
-                <ArrowRight style={{ width: 16, height: 16, marginLeft: 4 }} />
+                <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
               </Link>
               <Link href={persona === "company" ? "/signup?role=candidate" : "/signup?role=company"}
-                style={{
-                  display: "inline-flex", alignItems: "center", gap: 6,
-                  padding: "14px 28px", borderRadius: 12, fontSize: 15, fontWeight: 500,
-                  textDecoration: "none", color: theme.muted,
-                  border: `1px solid ${theme.border}`,
-                }}>
+                className="inline-flex items-center gap-1.5 px-7 py-3.5 rounded-xl text-base font-medium no-underline text-white/60 border border-white/[0.08] hover:text-white transition-colors">
                 {persona === "company" ? "I'm a student looking for work" : "I'm an employer hiring talent"}
               </Link>
             </div>
           </Reveal>
 
           <Reveal delay={320}>
-            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 48 }}>
-              <div style={{ display: "flex" }}>
+            <div className="flex items-center gap-3 mb-12">
+              <div className="flex">
                 {[1, 2, 3, 4].map(i => (
-                  <div key={i} style={{
-                    width: 32, height: 32, borderRadius: "50%",
-                    border: `2px solid ${theme.bg}`,
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    fontSize: 10, fontWeight: 700, color: "white", marginLeft: i > 0 ? -8 : 0,
-                    background: `linear-gradient(135deg, hsl(${200 + i * 40}, 70%, 50%), hsl(${200 + i * 40}, 70%, 40%))`,
-                  }}>{["A", "M", "K", "S"][i - 1]}</div>
+                  <div key={i}
+                    className="w-8 h-8 rounded-full border-2 border-[#0a0a0b] flex items-center justify-center text-[10px] font-bold text-white -ml-[8px] first:ml-0"
+                    style={{ background: `linear-gradient(135deg, hsl(${200 + i * 40}, 70%, 50%), hsl(${200 + i * 40}, 70%, 40%))` }}>
+                    {["A", "M", "K", "S"][i - 1]}
+                  </div>
                 ))}
-                <div style={{
-                  width: 32, height: 32, borderRadius: "50%",
-                  border: `2px solid ${theme.bg}`,
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: 10, fontWeight: 700, marginLeft: -8,
-                  background: theme.surfaceHover, color: theme.dim,
-                }}>+</div>
+                <div className="w-8 h-8 rounded-full border-2 border-[#0a0a0b] flex items-center justify-center text-[10px] font-bold -ml-2 bg-white/[0.06] text-white/30">+</div>
               </div>
-              <p style={{ fontSize: 13, color: theme.muted, margin: 0 }}>
-                <span style={{ color: theme.text, fontWeight: 600 }}>10,000+</span> students connected with{" "}
-                <span style={{ color: theme.text, fontWeight: 600 }}>500+</span> employers
+              <p className="text-sm text-white/50">
+                <span className="text-white font-semibold">10,000+</span> students connected with{" "}
+                <span className="text-white font-semibold">500+</span> employers
               </p>
             </div>
           </Reveal>
 
           {/* App mockup */}
           <Reveal delay={400}>
-            <div style={{
-              borderRadius: 16, overflow: "hidden",
-              border: `1px solid ${theme.border}`,
-              background: "linear-gradient(180deg, rgba(255,255,255,0.03), transparent)",
-              boxShadow: "0 20px 80px rgba(0,0,0,0.5)",
-            }}>
-              <div style={{
-                display: "flex", alignItems: "center", gap: 8,
-                padding: "12px 20px",
-                borderBottom: `1px solid ${theme.borderLight}`,
-                background: "rgba(0,0,0,0.3)",
-              }}>
-                <div style={{ display: "flex", gap: 6 }}>
-                  <span style={{ width: 10, height: 10, borderRadius: "50%", background: "rgba(239,68,68,0.5)" }} />
-                  <span style={{ width: 10, height: 10, borderRadius: "50%", background: "rgba(245,158,11,0.5)" }} />
-                  <span style={{ width: 10, height: 10, borderRadius: "50%", background: "rgba(34,197,94,0.5)" }} />
+            <div className="rounded-2xl overflow-hidden border border-white/[0.08] shadow-[0_20px_80px_rgba(0,0,0,0.5)]"
+              style={{ background: "linear-gradient(180deg, rgba(255,255,255,0.03), transparent)" }}>
+              {/* Browser chrome */}
+              <div className="flex items-center gap-2 px-5 py-3 border-b border-white/[0.06] bg-black/30">
+                <div className="flex gap-1.5">
+                  <span className="size-2.5 rounded-full bg-red-500/50" />
+                  <span className="size-2.5 rounded-full bg-amber-500/50" />
+                  <span className="size-2.5 rounded-full bg-green-500/50" />
                 </div>
-                <div style={{
-                  flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-                  padding: "6px 14px", borderRadius: 6, fontSize: 12,
-                  background: "rgba(255,255,255,0.04)", color: theme.dim,
-                }}>
-                  <Search style={{ width: 12, height: 12 }} />
+                <div className="flex-1 flex items-center justify-center gap-2 px-3.5 py-1.5 rounded-md text-xs bg-white/[0.04] text-white/30">
+                  <Search className="size-3" />
                   studenthub.co
                 </div>
               </div>
 
-              <div style={{ padding: "24px 28px" }}>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 280px", gap: 24 }} className="mockup-grid">
+              {/* Mockup body */}
+              <div className="p-6 sm:p-7">
+                <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-6">
+                  {/* Main content */}
                   <div>
-                    <div style={{
-                      display: "flex", alignItems: "center", gap: 12,
-                      padding: "10px 16px", borderRadius: 12, marginBottom: 20,
-                      background: theme.surface, border: `1px solid ${theme.borderLight}`,
-                    }}>
-                      <Search style={{ width: 16, height: 16, color: theme.dim, flexShrink: 0 }} />
-                      <span style={{ color: theme.dim, fontSize: 13 }}>Search open roles, companies, locations...</span>
-                      <span style={{
-                        marginLeft: "auto", fontSize: 10, padding: "4px 8px", borderRadius: 4,
-                        background: "rgba(255,255,255,0.06)", color: theme.dim, fontFamily: "monospace",
-                      }}>⌘K</span>
+                    {/* Search bar */}
+                    <div className="flex items-center gap-3 px-4 py-2.5 rounded-xl mb-5 bg-white/[0.03] border border-white/[0.06]">
+                      <Search className="size-4 shrink-0 text-white/30" />
+                      <span className="text-sm text-white/20">Search open roles, companies, locations...</span>
+                      <span className="ml-auto text-[10px] px-2 py-0.5 rounded font-mono bg-white/[0.06] text-white/30">⌘K</span>
                     </div>
 
-                    <div style={{
-                      borderRadius: 12, padding: 20, marginBottom: 16,
-                      background: theme.surface, border: `1px solid ${theme.borderLight}`,
-                    }}>
-                      <p style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8, color: theme.accent }}>✨ Matched for you</p>
-                      <p style={{ fontSize: "clamp(20px, 2.5vw, 28px)", fontWeight: 900, color: theme.text, margin: 0, marginBottom: 4, lineHeight: 1 }}>senior care assistant</p>
-                      <p style={{ fontSize: 13, color: theme.muted, margin: 0 }}>12 matching roles · Kuwait City · KWD 3-5/hr · Starts ASAP</p>
-                      <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
-                        <span style={{
-                          display: "inline-flex", alignItems: "center", gap: 4,
-                          padding: "4px 10px", borderRadius: 999, fontSize: 10, fontWeight: 600,
-                          background: theme.greenLight, color: theme.green,
-                          border: "1px solid rgba(34,197,94,0.2)",
-                        }}><Check style={{ width: 12, height: 12 }} /> Profile ready</span>
-                        <span style={{
-                          display: "inline-flex", alignItems: "center", gap: 4,
-                          padding: "4px 10px", borderRadius: 999, fontSize: 10, fontWeight: 600,
-                          background: theme.accentLight, color: theme.accent,
-                          border: "1px solid rgba(99,102,241,0.2)",
-                        }}><Star style={{ width: 12, height: 12 }} /> 3 saved roles</span>
+                    {/* Search result */}
+                    <div className="rounded-xl p-5 mb-4 bg-white/[0.03] border border-white/[0.06]">
+                      <p className="text-[10px] font-bold uppercase tracking-[0.1em] mb-2 text-indigo-400">✨ Matched for you</p>
+                      <p className="text-[clamp(20px,2.5vw,28px)] font-black text-white leading-none mb-1">senior care assistant</p>
+                      <p className="text-sm text-white/50">12 matching roles · Kuwait City · KWD 3-5/hr · Starts ASAP</p>
+                      <div className="flex gap-2 mt-3">
+                        <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2.5 py-1 rounded-full border border-green-500/20"
+                          style={{ background: "rgba(34,197,94,0.12)", color: "#22c55e" }}>
+                          <Check className="size-3" /> Profile ready
+                        </span>
+                        <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2.5 py-1 rounded-full border border-indigo-500/20"
+                          style={{ background: "rgba(99,102,241,0.12)", color: "#6366f1" }}>
+                          <Star className="size-3" /> 3 saved roles
+                        </span>
                       </div>
                     </div>
 
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
+                    {/* Quick actions */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                       {[
-                        { label: "Profile", value: "92% complete", color: theme.accent },
-                        { label: "Applications", value: "4 pending", color: theme.green },
-                        { label: "Timesheet", value: "This week", color: theme.amber },
-                        { label: "Payment", value: "KWD 420", color: theme.pink },
+                        { label: "Profile", value: "92% complete", color: "#6366f1" },
+                        { label: "Applications", value: "4 pending", color: "#22c55e" },
+                        { label: "Timesheet", value: "This week", color: "#f59e0b" },
+                        { label: "Payment", value: "KWD 420", color: "#ec4899" },
                       ].map(item => (
-                        <div key={item.label} style={{
-                          borderRadius: 12, padding: 16,
-                          background: theme.surface, border: `1px solid ${theme.borderLight}`,
-                        }}>
-                          <p style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", margin: 0, marginBottom: 4, color: item.color }}>{item.label}</p>
-                          <p style={{ fontSize: 13, fontWeight: 700, color: theme.text, margin: 0 }}>{item.value}</p>
+                        <div key={item.label} className="rounded-xl p-4 bg-white/[0.03] border border-white/[0.06] transition-all hover:-translate-y-0.5">
+                          <p className="text-[10px] font-bold uppercase tracking-[0.1em] mb-1" style={{ color: item.color }}>{item.label}</p>
+                          <p className="text-sm font-bold text-white">{item.value}</p>
                         </div>
                       ))}
                     </div>
                   </div>
 
-                  <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                  {/* Sidebar */}
+                  <div className="flex flex-col gap-3">
                     {[
-                      { icon: Users, label: "Applications", value: "12 new", color: theme.accent },
-                      { icon: Briefcase, label: "Saved jobs", value: "8 matches", color: theme.green },
-                      { icon: BarChart3, label: "Profile views", value: "47 this week", color: theme.amber },
-                      { icon: Fingerprint, label: "Verification", value: "ID pending", color: theme.pink },
+                      { icon: Users, label: "Applications", value: "12 new", color: "#6366f1" },
+                      { icon: Briefcase, label: "Saved jobs", value: "8 matches", color: "#22c55e" },
+                      { icon: BarChart3, label: "Profile views", value: "47 this week", color: "#f59e0b" },
+                      { icon: Fingerprint, label: "Verification", value: "ID pending", color: "#ec4899" },
                     ].map(item => (
-                      <div key={item.label} style={{
-                        display: "flex", alignItems: "center", gap: 12,
-                        padding: 12, borderRadius: 12,
-                        background: theme.surface, border: `1px solid ${theme.borderLight}`,
-                      }}>
-                        <div style={{ width: 36, height: 36, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, background: `${item.color}15` }}>
-                          <item.icon style={{ width: 16, height: 16, color: item.color }} />
+                      <div key={item.label} className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+                        <div className="size-9 rounded-lg flex items-center justify-center shrink-0" style={{ background: `${item.color}15` }}>
+                          <item.icon className="size-4" style={{ color: item.color }} />
                         </div>
-                        <div style={{ minWidth: 0 }}>
-                          <p style={{ fontSize: 12, fontWeight: 500, color: theme.text, margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{item.label}</p>
-                          <p style={{ fontSize: 11, color: theme.muted, margin: 0 }}>{item.value}</p>
+                        <div className="min-w-0">
+                          <p className="text-xs font-medium text-white truncate">{item.label}</p>
+                          <p className="text-[11px] text-white/50">{item.value}</p>
                         </div>
                       </div>
                     ))}
@@ -431,18 +339,13 @@ function Stats() {
   ];
   return (
     <Section>
-      <div style={{
-        display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 1,
-        borderRadius: 16, overflow: "hidden",
-        border: `1px solid ${theme.borderLight}`,
-        background: theme.borderLight,
-      }}>
+      <div className="grid grid-cols-5 gap-px rounded-2xl overflow-hidden border border-white/[0.06]" style={{ background: "rgba(255,255,255,0.06)" }}>
         {stats.map((s, i) => (
-          <Reveal key={s.label} delay={i * 60} style={{ background: theme.bg }}>
-            <div style={{ padding: "32px 16px", textAlign: "center" }}>
-              <s.icon style={{ width: 20, height: 20, margin: "0 auto 8px", color: theme.accent }} />
-              <p style={{ fontSize: "clamp(18px, 1.8vw, 24px)", fontWeight: 900, color: theme.text, margin: 0 }}>{s.value}</p>
-              <p style={{ fontSize: 12, color: theme.muted, margin: "4px 0 0" }}>{s.label}</p>
+          <Reveal key={s.label} delay={i * 60} className="bg-[#0a0a0b]">
+            <div className="py-8 px-4 text-center">
+              <s.icon className="size-5 mx-auto mb-2 text-indigo-400" />
+              <p className="text-[clamp(18px,1.8vw,24px)] font-black text-white">{s.value}</p>
+              <p className="text-xs text-white/50 mt-1">{s.label}</p>
             </div>
           </Reveal>
         ))}
@@ -471,29 +374,22 @@ function HowItWorks({ persona }: { persona: Persona }) {
   return (
     <Section id="how-it-works">
       <Reveal>
-        <div style={{ textAlign: "center", marginBottom: 48 }}>
-          <p style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: theme.accent, marginBottom: 12 }}>How it works</p>
-          <h2 style={{ fontSize: "clamp(24px, 3vw, 36px)", fontWeight: 900, color: theme.text, margin: 0 }}>
+        <div className="text-center mb-12">
+          <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-indigo-400 mb-3">How it works</p>
+          <h2 className="text-[clamp(24px,3vw,36px)] font-black text-white">
             {persona === "company" ? "Hire in three simple steps" : "Get started in three simple steps"}
           </h2>
         </div>
       </Reveal>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 24 }}>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {steps.map((s, i) => (
           <Reveal key={s.step} delay={i * 120}>
-            <div style={{
-              padding: "32px 28px", borderRadius: 16, height: "100%",
-              background: theme.surface, border: `1px solid ${theme.borderLight}`,
-            }}>
-              <p style={{
-                fontSize: 40, fontWeight: 900, marginBottom: 16,
-                background: "linear-gradient(135deg, rgba(99,102,241,0.3), transparent)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
-              }}>{s.step}</p>
-              <h3 style={{ fontSize: 18, fontWeight: 700, color: theme.text, marginBottom: 8 }}>{s.title}</h3>
-              <p style={{ fontSize: 13, lineHeight: 1.6, color: theme.muted, margin: 0 }}>{s.desc}</p>
+            <div className="p-8 rounded-2xl h-full bg-white/[0.03] border border-white/[0.06] transition-all hover:-translate-y-0.5">
+              <p className="text-4xl font-black mb-4 bg-gradient-to-r from-indigo-500/30 to-transparent bg-clip-text text-transparent">
+                {s.step}
+              </p>
+              <h3 className="text-lg font-bold text-white mb-2">{s.title}</h3>
+              <p className="text-sm leading-relaxed text-white/50">{s.desc}</p>
             </div>
           </Reveal>
         ))}
@@ -508,30 +404,30 @@ function HowItWorks({ persona }: { persona: Persona }) {
 
 function Features() {
   const items = [
-    { icon: Zap, title: "AI-powered matching", desc: "Our algorithm matches candidates to roles based on skills, experience, and preferences — not keywords.", color: theme.accent },
-    { icon: Search, title: "Advanced search & filters", desc: "Find exactly what you need with faceted search across skills, location, pay rate, and more.", color: theme.green },
-    { icon: Clock, title: "Integrated timesheets", desc: "Log hours, approve timesheets, and track attendance — all within the platform, no spreadsheets.", color: theme.amber },
-    { icon: Shield, title: "Compliance & verification", desc: "ID verification, document management, and compliance tracking built into every workflow.", color: theme.pink },
-    { icon: BarChart3, title: "Real-time analytics", desc: "Dashboard with live metrics on placements, payments, and pipeline activity for every role.", color: theme.cyan },
-    { icon: Fingerprint, title: "Role-based access", desc: "Staff, admin, inspector, candidate, and employer portals — each with the right tools and permissions.", color: theme.purple },
+    { icon: Zap, title: "AI-powered matching", desc: "Matches candidates to roles based on skills, experience, and preferences — not keywords.", color: "#6366f1" },
+    { icon: Search, title: "Advanced search & filters", desc: "Find what you need with faceted search across skills, location, pay rate, and more.", color: "#22c55e" },
+    { icon: Clock, title: "Integrated timesheets", desc: "Log hours, approve timesheets, and track attendance — no spreadsheets.", color: "#f59e0b" },
+    { icon: Shield, title: "Compliance & verification", desc: "ID verification, document management, and compliance tracking in every workflow.", color: "#ec4899" },
+    { icon: BarChart3, title: "Real-time analytics", desc: "Live metrics on placements, payments, and pipeline activity for every role.", color: "#06b6d4" },
+    { icon: Fingerprint, title: "Role-based portals", desc: "Staff, admin, inspector, candidate, and employer — each with the right tools.", color: "#a855f7" },
   ];
   return (
     <Section id="features">
       <Reveal>
-        <div style={{ textAlign: "center", marginBottom: 48 }}>
-          <p style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: theme.accent, marginBottom: 12 }}>Platform features</p>
-          <h2 style={{ fontSize: "clamp(24px, 3vw, 36px)", fontWeight: 900, color: theme.text, margin: "0 auto", maxWidth: 520 }}>Everything you need to manage student placements</h2>
+        <div className="text-center mb-12">
+          <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-indigo-400 mb-3">Platform features</p>
+          <h2 className="text-[clamp(24px,3vw,36px)] font-black text-white max-w-[520px] mx-auto">Everything you need to manage student placements</h2>
         </div>
       </Reveal>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {items.map((f, i) => (
           <Reveal key={f.title} delay={i * 60}>
-            <div style={{ padding: "28px 24px", borderRadius: 16, height: "100%", background: theme.surface, border: `1px solid ${theme.borderLight}` }}>
-              <div style={{ width: 40, height: 40, borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 16, background: `${f.color}15` }}>
-                <f.icon style={{ width: 20, height: 20, color: f.color }} />
+            <div className="p-7 rounded-2xl h-full bg-white/[0.03] border border-white/[0.06] transition-all hover:-translate-y-0.5">
+              <div className="size-10 rounded-xl flex items-center justify-center mb-4" style={{ background: `${f.color}15` }}>
+                <f.icon className="size-5" style={{ color: f.color }} />
               </div>
-              <h3 style={{ fontSize: 15, fontWeight: 700, color: theme.text, marginBottom: 6 }}>{f.title}</h3>
-              <p style={{ fontSize: 13, lineHeight: 1.6, color: theme.muted, margin: 0 }}>{f.desc}</p>
+              <h3 className="text-base font-bold text-white mb-1.5">{f.title}</h3>
+              <p className="text-sm leading-relaxed text-white/50">{f.desc}</p>
             </div>
           </Reveal>
         ))}
@@ -547,37 +443,38 @@ function Features() {
 function Testimonials({ persona }: { persona: Persona }) {
   const ts = persona === "company"
     ? [
-        { quote: "We've been using StudentHub for 6 months and it's transformed our hiring process. The AI matching saves us hours every week.", author: "Noura Al-Sabah", role: "HR Director, Alshaya Group" },
-        { quote: "The timesheet and payment features alone are worth it. No more chasing spreadsheets. Everything is in one dashboard.", author: "Faisal Al-Ali", role: "Operations Manager, KIPCO" },
+        { quote: "We've been using StudentHub for 6 months. The AI matching saves us hours every week.", author: "Noura Al-Sabah", role: "HR Director" },
+        { quote: "Timesheets and payments alone are worth it. No more chasing spreadsheets.", author: "Faisal Al-Ali", role: "Operations Manager" },
       ]
     : [
-        { quote: "I found my first job within a week of creating my profile. The AI matched me with a role I wouldn't have found on my own.", author: "Amal Al-Mutairi", role: "Student, Kuwait University" },
-        { quote: "The platform made it so easy to track my applications and timesheets. Getting paid directly through the app is a game changer.", author: "Khalid Al-Rashid", role: "Student, GUST" },
+        { quote: "I found my first job within a week. The AI matched me with a role I wouldn't have found on my own.", author: "Amal Al-Mutairi", role: "Student, Kuwait University" },
+        { quote: "Tracking applications and getting paid directly through the app is a game changer.", author: "Khalid Al-Rashid", role: "Student, GUST" },
       ];
 
   return (
     <Section id="testimonials">
       <Reveal>
-        <div style={{ textAlign: "center", marginBottom: 48 }}>
-          <p style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: theme.accent, marginBottom: 12 }}>Testimonials</p>
-          <h2 style={{ fontSize: "clamp(24px, 3vw, 36px)", fontWeight: 900, color: theme.text, margin: 0 }}>Trusted by students and employers</h2>
+        <div className="text-center mb-12">
+          <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-indigo-400 mb-3">Testimonials</p>
+          <h2 className="text-[clamp(24px,3vw,36px)] font-black text-white">Trusted by students and employers</h2>
         </div>
       </Reveal>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 24 }}>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {ts.map((t, i) => (
           <Reveal key={i} delay={i * 120}>
-            <div style={{ padding: "28px 32px", borderRadius: 16, background: theme.surface, border: `1px solid ${theme.borderLight}` }}>
-              <div style={{ display: "flex", gap: 4, marginBottom: 16 }}>
-                {[...Array(5)].map((_, j) => <Star key={j} style={{ width: 16, height: 16, color: theme.amber, fill: theme.amber }} />)}
+            <div className="p-7 sm:p-8 rounded-2xl bg-white/[0.03] border border-white/[0.06]">
+              <div className="flex gap-1 mb-4">
+                {[...Array(5)].map((_, j) => <Star key={j} className="size-4 text-amber-400 fill-amber-400" />)}
               </div>
-              <p style={{ fontSize: 14, lineHeight: 1.7, marginBottom: 20, color: "rgba(255,255,255,0.8)" }}>&ldquo;{t.quote}&rdquo;</p>
-              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <div style={{ width: 40, height: 40, borderRadius: "50%", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 700, color: "white", background: "linear-gradient(135deg, #6366f1, #8b5cf6)" }}>
+              <p className="text-[15px] leading-relaxed mb-5 text-white/80">&ldquo;{t.quote}&rdquo;</p>
+              <div className="flex items-center gap-3">
+                <div className="size-10 rounded-full flex items-center justify-center text-sm font-bold text-white shrink-0"
+                  style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)" }}>
                   {t.author.split(" ").map(s => s[0]).join("")}
                 </div>
                 <div>
-                  <p style={{ fontSize: 13, fontWeight: 600, color: theme.text, margin: 0 }}>{t.author}</p>
-                  <p style={{ fontSize: 12, color: theme.muted, margin: 0 }}>{t.role}</p>
+                  <p className="text-sm font-semibold text-white">{t.author}</p>
+                  <p className="text-xs text-white/50">{t.role}</p>
                 </div>
               </div>
             </div>
@@ -603,38 +500,34 @@ function Comparison() {
     { f: "Mobile-friendly interface", sh: true, ot: true },
     { f: "Free candidate profiles", sh: true, ot: true },
   ];
-  const Cell = (ok: boolean) => (
-    <div style={{ padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-      {ok ? (
-        <div style={{ width: 24, height: 24, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", background: theme.greenLight }}>
-          <Check style={{ width: 14, height: 14, color: theme.green }} />
-        </div>
-      ) : (
-        <span style={{ color: theme.dim, fontSize: 12 }}>—</span>
-      )}
-    </div>
-  );
-
   return (
     <Section>
       <Reveal>
-        <div style={{ textAlign: "center", marginBottom: 48 }}>
-          <p style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: theme.accent, marginBottom: 12 }}>Comparison</p>
-          <h2 style={{ fontSize: "clamp(24px, 3vw, 36px)", fontWeight: 900, color: theme.text, margin: "0 auto", maxWidth: 480 }}>Why StudentHub is different</h2>
+        <div className="text-center mb-12">
+          <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-indigo-400 mb-3">Comparison</p>
+          <h2 className="text-[clamp(24px,3vw,36px)] font-black text-white max-w-[480px] mx-auto">Why StudentHub is different</h2>
         </div>
       </Reveal>
       <Reveal>
-        <div style={{ borderRadius: 16, overflow: "hidden", border: `1px solid ${theme.borderLight}` }}>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 120px 120px", borderBottom: `1px solid ${theme.borderLight}`, background: theme.surfaceHover }}>
-            <div style={{ padding: "16px 20px" }} />
-            <div style={{ padding: "16px 20px", textAlign: "center" }}><span style={{ fontWeight: 700, fontSize: 13, color: theme.text }}>StudentHub</span></div>
-            <div style={{ padding: "16px 20px", textAlign: "center" }}><span style={{ fontSize: 13, color: theme.muted }}>Others</span></div>
+        <div className="rounded-2xl overflow-hidden border border-white/[0.06]">
+          <div className="grid grid-cols-[1fr_120px_120px] border-b border-white/[0.06] bg-white/[0.06]">
+            <div className="p-4 sm:p-5" />
+            <div className="p-4 sm:p-5 text-center"><span className="font-bold text-sm text-white">StudentHub</span></div>
+            <div className="p-4 sm:p-5 text-center"><span className="text-sm text-white/50">Others</span></div>
           </div>
           {rows.map((r, i) => (
-            <div key={r.f} style={{ display: "grid", gridTemplateColumns: "1fr 120px 120px", borderBottom: `1px solid ${theme.borderLight}`, background: i % 2 === 0 ? "transparent" : theme.surface }}>
-              <div style={{ padding: "16px 20px", display: "flex", alignItems: "center" }}><span style={{ fontSize: 13, color: theme.muted }}>{r.f}</span></div>
-              {Cell(r.sh)}
-              {Cell(r.ot)}
+            <div key={r.f} className={`grid grid-cols-[1fr_120px_120px] border-b border-white/[0.04] ${i % 2 === 0 ? "" : "bg-white/[0.03]"}`}>
+              <div className="p-4 sm:p-5 flex items-center"><span className="text-sm text-white/60">{r.f}</span></div>
+              <div className="p-4 sm:p-5 flex items-center justify-center">
+                {r.sh
+                  ? <div className="size-6 rounded-full flex items-center justify-center" style={{ background: "rgba(34,197,94,0.15)" }}><Check className="size-3.5 text-green-500" /></div>
+                  : <span className="text-xs text-white/20">—</span>}
+              </div>
+              <div className="p-4 sm:p-5 flex items-center justify-center">
+                {r.ot
+                  ? <div className="size-6 rounded-full flex items-center justify-center" style={{ background: "rgba(34,197,94,0.15)" }}><Check className="size-3.5 text-green-500" /></div>
+                  : <span className="text-xs text-white/20">—</span>}
+              </div>
             </div>
           ))}
         </div>
@@ -651,38 +544,27 @@ function FinalCTA({ persona }: { persona: Persona }) {
   return (
     <Section>
       <Reveal>
-        <div style={{
-          position: "relative", overflow: "hidden", borderRadius: 16,
-          padding: "64px 48px", textAlign: "center",
-          background: "linear-gradient(135deg, rgba(99,102,241,0.1), rgba(139,92,246,0.05))",
-          border: "1px solid rgba(99,102,241,0.15)",
-        }}>
-          <div style={{
-            position: "absolute", top: "50%", left: "50%",
-            transform: "translate(-50%, -50%)",
-            width: 400, height: 400, borderRadius: "50%", opacity: 0.2,
-            background: "radial-gradient(circle, rgba(99,102,241,0.3), transparent)",
-            filter: "blur(120px)", pointerEvents: "none",
-          }} />
-          <div style={{ position: "relative", zIndex: 10 }}>
-            <p style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: theme.accent, marginBottom: 12 }}>
+        <div className="relative overflow-hidden rounded-2xl py-16 px-8 sm:px-12 text-center border border-indigo-500/15"
+          style={{ background: "linear-gradient(135deg, rgba(99,102,241,0.1), rgba(139,92,246,0.05))" }}>
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full opacity-20 blur-[120px] pointer-events-none"
+            style={{ background: "radial-gradient(circle, rgba(99,102,241,0.3), transparent)" }} />
+          <div className="relative z-10">
+            <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-indigo-400 mb-3">
               {persona === "company" ? "Start hiring today" : "Start your journey"}
             </p>
-            <h2 style={{ fontSize: "clamp(24px, 3vw, 36px)", fontWeight: 900, color: theme.text, margin: "0 auto", maxWidth: 450 }}>
+            <h2 className="text-[clamp(24px,3vw,36px)] font-black text-white max-w-[450px] mx-auto">
               {persona === "company" ? "Your next hire is one post away." : "Your next role is one profile away."}
             </h2>
-            <p style={{ fontSize: 14, lineHeight: 1.6, color: theme.muted, margin: "12px auto 28px", maxWidth: 440 }}>
+            <p className="mt-3 mb-8 max-w-[440px] mx-auto text-sm text-white/50">
               {persona === "company" ? "Set up your company account in under 5 minutes and get matched with vetted candidates." : "Create your free profile in under 3 minutes. No CV required."}
             </p>
             <Link href={persona === "company" ? "/signup?role=company" : "/signup?role=candidate"}
-              style={{
-                ...btnPrimary, padding: "14px 28px", fontSize: 15, borderRadius: 12,
-                boxShadow: "0 4px 24px rgba(99,102,241,0.3)",
-              }}>
+              className="group inline-flex items-center gap-1.5 px-7 py-3.5 rounded-xl text-base font-semibold no-underline text-white transition-all duration-300 hover:scale-[1.02]"
+              style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)", boxShadow: "0 4px 24px rgba(99,102,241,0.3)" }}>
               {persona === "company" ? "Set up company account" : "Create your free profile"}
-              <ArrowRight style={{ width: 16, height: 16, marginLeft: 4 }} />
+              <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
             </Link>
-            <p style={{ fontSize: 11, color: theme.dim, marginTop: 12 }}>
+            <p className="mt-3 text-[11px] text-white/30">
               {persona === "company" ? "No agency fees · AI-matched candidates" : "Free · 3 minutes · No CV needed"}
             </p>
           </div>
@@ -699,15 +581,16 @@ function FinalCTA({ persona }: { persona: Persona }) {
 function Footer({ persona }: { persona: Persona }) {
   const role = persona === "company" ? "company" : "candidate";
   return (
-    <footer style={{ borderTop: `1px solid ${theme.borderLight}` }}>
-      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "48px 24px" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 32 }}>
+    <footer className="border-t border-white/[0.06]">
+      <div className="max-w-[1200px] mx-auto px-6 py-12">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           <div>
-            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
-              <span style={{ width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 8, fontWeight: 900, fontSize: 11, background: "linear-gradient(135deg, #6366f1, #8b5cf6)", color: "white" }}>SH</span>
-              <span style={{ fontWeight: 700, fontSize: 13, color: theme.text }}>StudentHub</span>
+            <div className="flex items-center gap-2.5 mb-3">
+              <span className="size-8 flex items-center justify-center rounded-lg font-black text-[11px] text-white"
+                style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)" }}>SH</span>
+              <span className="font-bold text-sm text-white">StudentHub</span>
             </div>
-            <p style={{ fontSize: 12, lineHeight: 1.6, color: theme.muted, margin: 0 }}>Connecting students with the right employers. Two-sided marketplace for Kuwait.</p>
+            <p className="text-xs leading-relaxed text-white/50">Connecting students with the right employers. Two-sided marketplace for Kuwait.</p>
           </div>
           {[
             { t: "For students", l: ["Create free profile", "Sign in"] },
@@ -715,16 +598,16 @@ function Footer({ persona }: { persona: Persona }) {
             { t: "Platform", l: ["Staff tools", "Admin dashboard", "Inspector portal"] },
           ].map(c => (
             <div key={c.t}>
-              <p style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "rgba(255,255,255,0.4)", marginBottom: 12 }}>{c.t}</p>
-              {c.l.map(l => <p key={l} style={{ fontSize: 12, color: theme.muted, margin: "0 0 8px" }}>{l}</p>)}
+              <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-white/40 mb-3">{c.t}</p>
+              {c.l.map(l => <p key={l} className="text-xs text-white/50 mb-2">{l}</p>)}
             </div>
           ))}
         </div>
-        <div style={{ marginTop: 40, paddingTop: 20, display: "flex", alignItems: "center", justifyContent: "space-between", borderTop: `1px solid ${theme.borderLight}` }}>
-          <p style={{ fontSize: 11, color: theme.dim, margin: 0 }}>&copy; {new Date().getFullYear()} StudentHub. All rights reserved.</p>
-          <div style={{ display: "flex", gap: 16 }}>
-            <Link href="/login" style={{ fontSize: 11, color: theme.dim, textDecoration: "none" }}>Sign in</Link>
-            <Link href={`/signup?role=${role}`} style={{ fontSize: 11, color: theme.muted, textDecoration: "none", fontWeight: 500 }}>Sign up</Link>
+        <div className="mt-10 pt-5 flex items-center justify-between border-t border-white/[0.06]">
+          <p className="text-[11px] text-white/30">&copy; {new Date().getFullYear()} StudentHub. All rights reserved.</p>
+          <div className="flex gap-4">
+            <Link href="/login" className="text-[11px] text-white/30 no-underline hover:text-white/60">Sign in</Link>
+            <Link href={`/signup?role=${role}`} className="text-[11px] text-white/50 no-underline font-medium hover:text-white">Sign up</Link>
           </div>
         </div>
       </div>
@@ -749,16 +632,15 @@ export default function LandingContent({ session }: LandingContentProps) {
     const params = new URLSearchParams(sp.toString());
     if (p === "candidate") params.delete("persona");
     else params.set("persona", p);
-    const qs = params.toString();
-    router.replace(qs ? `/?${qs}` : "/", { scroll: false });
+    router.replace(params.toString() ? `/?${params}` : "/", { scroll: false });
   }, [router, sp]);
 
   return (
-    <div style={{ background: theme.bg, minHeight: "100svh" }}>
-      <a href="#main-content" className="skipLink" style={{ color: theme.text }}>Skip to content</a>
+    <div className="bg-[#0a0a0b] min-h-svh">
+      <a href="#main-content" className="skipLink">Skip to content</a>
       <Nav session={session} persona={persona} />
       <main id="main-content">
-        <div style={{ paddingTop: 24, paddingBottom: 8, display: "flex", justifyContent: "center" }}>
+        <div className="pt-6 pb-2 flex justify-center">
           <PersonaToggle persona={persona} onChange={handlePersonaChange} />
         </div>
         <Hero persona={persona} />
