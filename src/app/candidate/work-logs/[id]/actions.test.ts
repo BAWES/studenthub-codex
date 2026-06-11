@@ -5,6 +5,8 @@ import {
   rejectWorkLogAppealSchema,
   updateWorkLogSchema,
   deleteWorkLogSchema,
+  getWorkLogAppealsSchema,
+  getWorkLogFeedbackSchema,
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
@@ -201,6 +203,54 @@ describe("deleteWorkLogSchema", () => {
 
   it("rejects missing UUID", () => {
     const result = deleteWorkLogSchema.safeParse({});
+    expect(result.success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// getWorkLogAppealsSchema
+// ---------------------------------------------------------------------------
+
+describe("getWorkLogAppealsSchema", () => {
+  it("accepts a valid work log UUID", () => {
+    const result = getWorkLogAppealsSchema.safeParse({ workLogUuid: "wl_test-uuid-12345" });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.workLogUuid).toBe("wl_test-uuid-12345");
+    }
+  });
+
+  it("rejects empty UUID", () => {
+    const result = getWorkLogAppealsSchema.safeParse({ workLogUuid: "" });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects missing UUID", () => {
+    const result = getWorkLogAppealsSchema.safeParse({});
+    expect(result.success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// getWorkLogFeedbackSchema
+// ---------------------------------------------------------------------------
+
+describe("getWorkLogFeedbackSchema", () => {
+  it("accepts a valid work log UUID", () => {
+    const result = getWorkLogFeedbackSchema.safeParse({ workLogUuid: "wl_test-uuid-12345" });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.workLogUuid).toBe("wl_test-uuid-12345");
+    }
+  });
+
+  it("rejects empty UUID", () => {
+    const result = getWorkLogFeedbackSchema.safeParse({ workLogUuid: "" });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects missing UUID", () => {
+    const result = getWorkLogFeedbackSchema.safeParse({});
     expect(result.success).toBe(false);
   });
 });

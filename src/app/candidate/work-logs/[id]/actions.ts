@@ -9,6 +9,8 @@ import {
   rejectWorkLogAppealSchema,
   updateWorkLogSchema,
   deleteWorkLogSchema,
+  getWorkLogAppealsSchema,
+  getWorkLogFeedbackSchema,
   type GetCandidateWorkLogDetailInput,
   type ApproveWorkLogAppealInput,
   type RejectWorkLogAppealInput,
@@ -16,6 +18,8 @@ import {
   type DeleteWorkLogInput,
   type WorkLogAppealDetail,
   type WorkLogDetailForAppeal,
+  type WorkLogAppealRow,
+  type WorkLogFeedbackRow,
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
@@ -232,4 +236,80 @@ export async function deleteWorkLog(
 
   revalidatePath("/candidate/work-logs");
   return { workLogUuid: parsed.data.workLogUuid };
+}
+
+// ---------------------------------------------------------------------------
+// getWorkLogAppeals — fetch appeals for a work log (migrated from page.tsx)
+// ---------------------------------------------------------------------------
+
+/**
+ * Get work log appeals for the current candidate.
+ * The caller must have candidate.read.own capability.
+ * Returns up to 8 most recent appeals.
+ */
+export async function getWorkLogAppeals(
+  workLogUuid: string,
+): Promise<WorkLogAppealRow[]> {
+  const session = await requireCapability("candidate.read.own");
+
+  const parsed = getWorkLogAppealsSchema.safeParse({ workLogUuid });
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid input");
+  }
+
+  const rows = await prisma.candidate_working_hour_appeal.findMany({
+    where: {
+      candidate_working_hour_uuid: parsed.data.workLogUuid,
+      candidate_id: Number(session.id),
+    },
+    orderBy: { created_at: "desc" },
+    take: 8,
+    select: {
+      appeal_uuid: true,
+      reason: true,
+      status: true,
+      created_at: true,
+    },
+  });
+
+  return rows;
+}
+
+// ---------------------------------------------------------------------------
+// getWorkLogFeedback — fetch feedback for a work log (migrated from page.tsx)
+// ---------------------------------------------------------------------------
+
+/**
+ * Get work log feedback for the current candidate.
+ * The caller must have candidate.read.own capability.
+ * Returns up to 8 most recent feedback records.
+ */
+export async function getWorkLogFeedback(
+  workLogUuid: string,
+): Promise<WorkLogFeedbackRow[]> {
+  const session = await requireCapability("candidate.read.own");
+
+  const parsed = getWorkLogFeedbackSchema.safeParse({ workLogUuid });
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid input");
+  }
+
+  const rows = await prisma.candidate_work_log_feedback.findMany({
+    where: {
+      candidate_working_hour_uuid: parsed.data.workLogUuid,
+      candidate_id: Number(session.id),
+    },
+    orderBy: { created_at: "desc" },
+    take: 8,
+    select: {
+      cwlf_uuid: true,
+      note: true,
+      reason: true,
+      status: true,
+      rating: true,
+      created_at: true,
+    },
+  });
+
+  return rows;
 }

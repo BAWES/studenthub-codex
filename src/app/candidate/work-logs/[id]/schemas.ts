@@ -68,3 +68,39 @@ export type WorkLogDetailForAppeal = {
   store_name: string | null;
   company_name: string | null;
 };
+
+// ---------------------------------------------------------------------------
+// Work log appeals (migrated from direct prisma in page.tsx)
+// ---------------------------------------------------------------------------
+
+export const getWorkLogAppealsSchema = z.object({
+  workLogUuid: z.string().min(1, "Work log UUID is required"),
+});
+
+export type GetWorkLogAppealsInput = z.input<typeof getWorkLogAppealsSchema>;
+
+export type WorkLogAppealRow = {
+  appeal_uuid: string;
+  reason: string | null;
+  status: number | null;
+  created_at: Date | null;
+};
+
+// ---------------------------------------------------------------------------
+// Work log feedback (migrated from direct prisma in page.tsx)
+// ---------------------------------------------------------------------------
+
+export const getWorkLogFeedbackSchema = z.object({
+  workLogUuid: z.string().min(1, "Work log UUID is required"),
+});
+
+export type GetWorkLogFeedbackInput = z.input<typeof getWorkLogFeedbackSchema>;
+
+export type WorkLogFeedbackRow = {
+  cwlf_uuid: string;
+  note: string | null;
+  reason: string | null;
+  status: number | null;
+  rating: boolean | null;
+  created_at: Date | null;
+};
