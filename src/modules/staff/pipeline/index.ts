@@ -4,15 +4,18 @@ export {
 } from "./stage";
 
 export {
-  type PipelineItem,
-  type PipelineMetrics,
   getPipelineData,
   getPipelineMetrics,
   updatePipelineStageAction,
-  type UpdatePipelineStageResult,
 } from "./actions";
 
 export {
+  type PipelineItem,
+  type PipelineMetrics,
+  type UpdatePipelineStageResult,
+  pipelineItemSchema,
+  pipelineMetricsSchema,
+  updatePipelineStageResultSchema,
   pipelineStageSchema,
   updatePipelineStageSchema,
   type UpdatePipelineStageInput,
