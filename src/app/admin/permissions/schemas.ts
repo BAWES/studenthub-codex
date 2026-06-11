@@ -26,53 +26,7 @@ export const updatePermissionSectionSchema = z.object({
 });
 
 // ---------------------------------------------------------------------------
-// Output validation schemas
-// ---------------------------------------------------------------------------
-
-/**
- * Schema for a single permission section detail.
- */
-export const permissionSectionDetailSchema = z.object({
-  permission_uuid: z.string(),
-  section_name: z.string().nullable(),
-  created_at: z.date(),
-});
-
-/**
- * Schema for listPermissionSections response.
- * Returns an array of permission section items.
- */
-export const listPermissionSectionsOutputSchema = z.array(
-  permissionSectionDetailSchema,
-);
-
-/**
- * Schema for getPermissionSection response.
- * Returns a single permission section or null.
- */
-export const getPermissionSectionOutputSchema =
-  permissionSectionDetailSchema.nullable();
-
-/**
- * Schema for createPermissionSection response.
- */
-export const createPermissionSectionOutputSchema = z.object({
-  permission_uuid: z.string(),
-});
-
-/**
- * Schema for updatePermissionSection response.
- */
-export const updatePermissionSectionOutputSchema = z.object({
-  permission_uuid: z.string(),
-});
-
-// ---------------------------------------------------------------------------
 // Types
-// ---------------------------------------------------------------------------
-
-// ---------------------------------------------------------------------------
-// Output validation schemas
 // ---------------------------------------------------------------------------
 
 const permissionSectionDetailSchema = z.object({

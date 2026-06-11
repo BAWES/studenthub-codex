@@ -33,62 +33,6 @@ export const deleteDepartmentSchema = z.object({
 // Output validation schemas
 // ---------------------------------------------------------------------------
 
-/**
- * Schema for a department row in the listing.
- */
-export const departmentRowSchema = z.object({
-  department_uuid: z.string().min(1),
-  department_name_en: z.string().min(1),
-  department_name_ar: z.string().nullable(),
-  employee_count: z.number().int().nonnegative(),
-  created_at: z.string().nullable(),
-  updated_at: z.string().nullable(),
-});
-
-/**
- * Schema for the listDepartments response.
- */
-export const departmentListResponseSchema = z.object({
-  items: z.array(departmentRowSchema),
-  total: z.number().int().nonnegative(),
-  page: z.number().int().positive(),
-  limit: z.number().int().positive(),
-  totalPages: z.number().int().nonnegative(),
-});
-
-/**
- * Schema for the department detail response.
- */
-export const departmentDetailSchema = z.object({
-  department: z
-    .object({
-      department_uuid: z.string(),
-      department_name_en: z.string(),
-      department_name_ar: z.string().nullable(),
-      department_created_at: z.string().nullable(),
-      department_updated_at: z.string().nullable(),
-    })
-    .nullable(),
-  employee_count: z.number().int().nonnegative(),
-});
-
-/**
- * Schema for the department mutation response (create/update/delete).
- */
-export const departmentActionResponseSchema = z.object({
-  operation: z.enum(["success", "error"]),
-  message: z.string(),
-  data: departmentRowSchema.optional(),
-});
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-// ---------------------------------------------------------------------------
-// Output validation schemas
-// ---------------------------------------------------------------------------
-
 const departmentRowSchema = z.object({
   department_uuid: z.string().min(1),
   department_name_en: z.string().min(1),
