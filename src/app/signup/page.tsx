@@ -44,7 +44,7 @@ export default async function SignupPage({
       <div className="w-full max-w-[640px]">
         {/* Glass panel container for the form */}
         <div
-          className="rounded-xl border border-[var(--sh-glass-border)] bg-[color-mix(in_srgb,var(--surface)_92%,transparent)] backdrop-blur-xl shadow-[0_18px_50px_rgba(16,24,40,0.08)]"
+          className="rounded-xl border border-[var(--border)] bg-white shadow-[0_18px_50px_rgba(16,24,40,0.08)]"
         >
           <SignupForm defaultRole={defaultRole} />
         </div>

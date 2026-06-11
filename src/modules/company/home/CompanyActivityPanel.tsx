@@ -1,7 +1,6 @@
 "use client";
 
 import type { HomeActivityItem } from "@/app/company/schemas";
-import { GlassPanel } from "@/components/ui/glass-panel";
 import { EmptyState } from "@/modules/workspace/EmptyState";
 import { formatDate } from "@/modules/workspace/format";
 import { Activity, FileText, MessageSquare, UserPlus, RefreshCw } from "lucide-react";
@@ -25,7 +24,7 @@ export function CompanyActivityPanel({
   activities,
 }: CompanyActivityPanelProps) {
   return (
-    <GlassPanel variant="subtle" radius="lg" className="p-5">
+    <div className="rounded-lg border border-[var(--border)] bg-white p-5">
       <div className="flex items-center justify-between mb-4">
         <div>
           <h2 className="text-sm font-black uppercase tracking-wider" style={{ color: "var(--muted)" }}>
@@ -72,6 +71,6 @@ export function CompanyActivityPanel({
           />
         )}
       </div>
-    </GlassPanel>
+    </div>
   );
 }

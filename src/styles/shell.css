@@ -1337,14 +1337,6 @@
   color: var(--muted);
 }
 
-/* ── Glass Panel Component Styles ───────────────────────────────────── */
-.shGlassBase {
-  background: var(--sh-glass-bg);
-  backdrop-filter: blur(var(--sh-glass-blur));
-  -webkit-backdrop-filter: blur(var(--sh-glass-blur));
-  border: 1px solid var(--sh-glass-border);
-}
-
 .shGlassStrong {
   background: var(--sh-glass-bg-strong);
   border-color: var(--sh-glass-border-strong);

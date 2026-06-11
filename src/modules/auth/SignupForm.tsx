@@ -134,12 +134,12 @@ export function SignupForm({ defaultRole }: { defaultRole?: Role }) {
                 key={role.value}
                 type="button"
                 onClick={() => handleRoleSelect(role.value)}
-                className="group text-left w-full min-h-[120px] rounded-xl p-5 cursor-pointer transition-all duration-[280ms] hover:-translate-y-0.5 hover:shadow-[0_16px_45px_rgba(16,24,40,0.1)] border border-[var(--sh-glass-border)] bg-[color-mix(in_srgb,var(--surface)_86%,transparent)] hover:bg-[var(--sh-glass-bg-strong)] hover:border-[var(--sh-glass-border-strong)]"
+                className="group text-left w-full min-h-[120px] rounded-xl p-5 cursor-pointer transition-all duration-[280ms] hover:-translate-y-0.5 hover:shadow-[0_16px_45px_rgba(16,24,40,0.1)] border border-[var(--border)] bg-white hover:bg-[var(--surface)] hover:border-[var(--border)]"
               >
                 <div className="flex items-start gap-4">
                   <div
                     className="shrink-0 size-12 rounded-xl flex items-center justify-center"
-                    style={{ background: "var(--sh-glass-bg-strong)", border: "1px solid var(--sh-glass-border)" }}
+                    style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
                   >
                     <Icon className="size-5 text-[var(--sh-info)]" />
                   </div>
@@ -212,7 +212,7 @@ export function SignupForm({ defaultRole }: { defaultRole?: Role }) {
             autoComplete="name"
             placeholder={selectedRole === "candidate" ? "Your full name" : "Contact name"}
             required
-            className="min-h-[48px] bg-[color-mix(in_srgb,var(--surface)_86%,transparent)] border border-[var(--sh-glass-border)] focus:border-[var(--sh-info)] focus:shadow-[var(--sh-glow-sm)] transition-all duration-200"
+            className="min-h-[48px] bg-white border border-[var(--border)] focus:border-[var(--sh-info)] focus:shadow-[var(--sh-glow-sm)] transition-all duration-200"
           />
           {state.fieldErrors?.name ? (
             <p className="text-[var(--destructive)] font-bold m-0 text-xs">{state.fieldErrors.name[0]}</p>
@@ -230,7 +230,7 @@ export function SignupForm({ defaultRole }: { defaultRole?: Role }) {
             autoComplete="email"
             placeholder="name@example.com"
             required
-            className="min-h-[48px] bg-[color-mix(in_srgb,var(--surface)_86%,transparent)] border border-[var(--sh-glass-border)] focus:border-[var(--sh-info)] focus:shadow-[var(--sh-glow-sm)] transition-all duration-200"
+            className="min-h-[48px] bg-white border border-[var(--border)] focus:border-[var(--sh-info)] focus:shadow-[var(--sh-glow-sm)] transition-all duration-200"
           />
           {state.fieldErrors?.email ? (
             <p className="text-[var(--destructive)] font-bold m-0 text-xs">{state.fieldErrors.email[0]}</p>
@@ -249,7 +249,7 @@ export function SignupForm({ defaultRole }: { defaultRole?: Role }) {
             placeholder="At least 5 characters"
             required
             minLength={5}
-            className="min-h-[48px] bg-[color-mix(in_srgb,var(--surface)_86%,transparent)] border border-[var(--sh-glass-border)] focus:border-[var(--sh-info)] focus:shadow-[var(--sh-glow-sm)] transition-all duration-200"
+            className="min-h-[48px] bg-white border border-[var(--border)] focus:border-[var(--sh-info)] focus:shadow-[var(--sh-glow-sm)] transition-all duration-200"
           />
           {state.fieldErrors?.password ? (
             <p className="text-[var(--destructive)] font-bold m-0 text-xs">{state.fieldErrors.password[0]}</p>
@@ -267,7 +267,7 @@ export function SignupForm({ defaultRole }: { defaultRole?: Role }) {
             autoComplete="new-password"
             placeholder="Re-enter your password"
             required
-            className="min-h-[48px] bg-[color-mix(in_srgb,var(--surface)_86%,transparent)] border border-[var(--sh-glass-border)] focus:border-[var(--sh-info)] focus:shadow-[var(--sh-glow-sm)] transition-all duration-200"
+            className="min-h-[48px] bg-white border border-[var(--border)] focus:border-[var(--sh-info)] focus:shadow-[var(--sh-glow-sm)] transition-all duration-200"
           />
           {state.fieldErrors?.confirmPassword ? (
             <p className="text-[var(--destructive)] font-bold m-0 text-xs">{state.fieldErrors.confirmPassword[0]}</p>

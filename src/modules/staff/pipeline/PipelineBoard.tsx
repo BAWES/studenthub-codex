@@ -1,6 +1,5 @@
 "use client";
 
-import { GlassPanel } from "@/components/ui/glass-panel";
 import type { PipelineItem, PipelineStage } from "@/modules/staff/pipeline";
 import { pipelineStageColor, pipelineStageLabel } from "./schemas";
 import { useState, useCallback, useRef } from "react";
@@ -26,7 +25,7 @@ function PipelineCard({ item, onDragStart, onDragEnd, isDragging }: PipelineCard
       `}
       style={{ WebkitUserSelect: "none", userSelect: "none" } as React.CSSProperties}
     >
-      <GlassPanel variant="subtle" radius="md" className="p-3 space-y-2">
+      <div className="rounded-lg border border-[var(--border)] bg-white p-3 space-y-2">
         <div className="flex items-center gap-2">
           <GripVertical size={14} className="shrink-0" style={{ color: "var(--text-tertiary, var(--muted))" }} />
           <span
@@ -50,7 +49,7 @@ function PipelineCard({ item, onDragStart, onDragEnd, isDragging }: PipelineCard
             {item.companyName}
           </p>
         </div>
-      </GlassPanel>
+      </div>
     </div>
   );
 }
@@ -133,7 +132,7 @@ function PipelineColumn({ stage, items, onDrop, draggedItemId, onDragStart, onDr
         <span
           className="text-[11px] font-semibold px-2 py-0.5 rounded-full min-w-[22px] text-center"
           style={{
-            background: "var(--sh-glass-bg-strong, rgba(255,255,255,0.06))",
+            background: "var(--surface, rgba(255,255,255,0.06))",
             color: "var(--text-tertiary, var(--muted))",
           }}
         >

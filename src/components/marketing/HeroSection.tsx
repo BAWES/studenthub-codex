@@ -107,9 +107,6 @@ export default function HeroSection({ onCtaClick }: HeroSectionProps) {
       className="shSection relative min-h-[min(780px,calc(100svh_-_96px))] grid grid-cols-1 items-center overflow-hidden rounded-xl p-[clamp(22px,5vw,76px)] max-lg:min-h-auto max-lg:p-7"
       aria-label="StudentHub — connecting students with the right employers"
     >
-      {/* Animated gradient background */}
-      <div className="shHeroGradientDramatic" aria-hidden="true" />
-
       {/* Ambient glow behind mockup */}
       <div className="shHeroAmbientGlow" aria-hidden="true" />
 

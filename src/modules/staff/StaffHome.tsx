@@ -9,7 +9,6 @@ import {
   FileText,
   Search,
 } from "lucide-react";
-import { GlassPanel } from "@/components/ui/glass-panel";
 import { EmptyState } from "@/modules/workspace/EmptyState";
 import type { getStaffWorkspace } from "@/app/staff/actions";
 
@@ -72,10 +71,8 @@ export function StaffHome({ data }: { data: StaffWorkspaceData }) {
   return (
     <section className="grid gap-3">
       {/* ── Hero: Welcome + Data Overview ────────────────────── */}
-      <GlassPanel
-        variant="elevated"
-        radius="lg"
-        className="grid grid-cols-[minmax(0,1fr)_minmax(200px,280px)] gap-5 p-5 max-md:grid-cols-1 max-md:gap-4"
+      <div
+        className="rounded-lg border border-[var(--border)] bg-white shadow-sm grid grid-cols-[minmax(0,1fr)_minmax(200px,280px)] gap-5 p-5 max-md:grid-cols-1 max-md:gap-4"
         style={entranceStyle(0)}
       >
         <div className="grid content-center gap-2.5">
@@ -116,10 +113,8 @@ export function StaffHome({ data }: { data: StaffWorkspaceData }) {
             </Link>
           </div>
         </div>
-        <GlassPanel
-          variant="strong"
-          radius="md"
-          className="grid content-center gap-1.5 p-4 text-center max-md:flex max-md:items-center max-md:gap-3 max-md:text-left"
+        <div
+          className="rounded-lg border border-[var(--border)] bg-white grid content-center gap-1.5 p-4 text-center max-md:flex max-md:items-center max-md:gap-3 max-md:text-left"
         >
           <span
             className="text-[11px] font-semibold uppercase tracking-[0.04em]"
@@ -139,8 +134,8 @@ export function StaffHome({ data }: { data: StaffWorkspaceData }) {
           >
             Candidates available to search from the imported database.
           </small>
-        </GlassPanel>
-      </GlassPanel>
+        </div>
+      </div>
 
       {/* ── Workflow cards ───────────────────────────────────── */}
       <section
@@ -156,10 +151,8 @@ export function StaffHome({ data }: { data: StaffWorkspaceData }) {
               className="group no-underline"
               style={entranceStyle(i + 1)}
             >
-              <GlassPanel
-                variant="subtle"
-                radius="lg"
-                className="h-full transition-all duration-[280ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-y-0.5 group-hover:shadow-[0_16px_45px_rgba(16,24,40,0.1)] cursor-pointer"
+              <div
+                className="rounded-lg border border-[var(--border)] bg-white h-full transition-all duration-[280ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-y-0.5 group-hover:shadow-[0_16px_45px_rgba(16,24,40,0.1)] cursor-pointer"
               >
                 <div className="grid gap-2.5 p-4">
                   {/* Icon + metric row */}
@@ -167,8 +160,8 @@ export function StaffHome({ data }: { data: StaffWorkspaceData }) {
                     <div
                       className="size-9 rounded-[10px] inline-flex items-center justify-center text-[var(--sh-info)] transition-colors duration-200"
                       style={{
-                        background: "var(--sh-glass-bg-strong)",
-                        border: "1px solid var(--sh-glass-border)",
+                        background: "var(--surface)",
+                        border: "1px solid var(--border)",
                       }}
                     >
                       <Icon size={16} aria-hidden="true" />
@@ -208,7 +201,7 @@ export function StaffHome({ data }: { data: StaffWorkspaceData }) {
                     />
                   </div>
                 </div>
-              </GlassPanel>
+              </div>
             </Link>
           );
         })}
@@ -252,11 +245,11 @@ function StaffPanel({
   empty: string;
 }) {
   return (
-    <GlassPanel variant="subtle" radius="lg" className="p-0 overflow-hidden">
+    <div className="rounded-lg border border-[var(--border)] bg-white p-0 overflow-hidden">
       {/* Header */}
       <div
         className="flex items-center justify-between gap-2 px-4 pt-3.5 pb-2"
-        style={{ borderBottom: "1px solid var(--sh-glass-border)" }}
+        style={{ borderBottom: "1px solid var(--border)" }}
       >
         <span
           className="text-[11px] font-semibold uppercase tracking-[0.04em]"
@@ -284,7 +277,7 @@ function StaffPanel({
                 href={row.href as Route}
                 key={row.id}
                 className="dataListRow"
-                style={{ borderRadius: 0, borderBottom: "1px solid var(--sh-glass-border)" }}
+                style={{ borderRadius: 0, borderBottom: "1px solid var(--border)" }}
               >
                 <div>
                   <strong className="dataListRowTitle">{row.title}</strong>
@@ -298,7 +291,7 @@ function StaffPanel({
               <article
                 key={row.id}
                 className="dataListRow"
-                style={{ borderRadius: 0, borderBottom: "1px solid var(--sh-glass-border)" }}
+                style={{ borderRadius: 0, borderBottom: "1px solid var(--border)" }}
               >
                 <div>
                   <strong className="dataListRowTitle">{row.title}</strong>
@@ -316,6 +309,6 @@ function StaffPanel({
           </div>
         )}
       </div>
-    </GlassPanel>
+    </div>
   );
 }

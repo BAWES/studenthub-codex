@@ -182,7 +182,7 @@ export default function TestimonialCarousel({
         {/* Navigation arrows */}
         <button
           onClick={prev}
-          className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 size-10 rounded-full flex items-center justify-center bg-[var(--sh-glass-bg-strong)] border border-[var(--sh-glass-border)] text-[var(--muted)] hover:text-[var(--ink)] hover:border-[var(--sh-glass-border-strong)] transition-all duration-200 max-sm:hidden"
+          className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 size-10 rounded-full flex items-center justify-center bg-[var(--surface)] border border-[var(--border)] text-[var(--muted)] hover:text-[var(--ink)] hover:border-[var(--border)] transition-all duration-200 max-sm:hidden"
           aria-label="Previous testimonial"
         >
           <ChevronLeft className="size-4" />
@@ -190,7 +190,7 @@ export default function TestimonialCarousel({
 
         <button
           onClick={next}
-          className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 size-10 rounded-full flex items-center justify-center bg-[var(--sh-glass-bg-strong)] border border-[var(--sh-glass-border)] text-[var(--muted)] hover:text-[var(--ink)] hover:border-[var(--sh-glass-border-strong)] transition-all duration-200 max-sm:hidden"
+          className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 size-10 rounded-full flex items-center justify-center bg-[var(--surface)] border border-[var(--border)] text-[var(--muted)] hover:text-[var(--ink)] hover:border-[var(--border)] transition-all duration-200 max-sm:hidden"
           aria-label="Next testimonial"
         >
           <ChevronRight className="size-4" />
@@ -202,7 +202,7 @@ export default function TestimonialCarousel({
           className="shCard rounded-xl p-8 md:p-10 text-center animate-in fade-in slide-in-from-bottom-4 duration-500 shCardGlow"
           style={{
             background: "var(--sh-glass-bg)",
-            border: "1px solid var(--sh-glass-border)",
+            border: "1px solid var(--border)",
           }}
         >
           <Quote
@@ -222,7 +222,7 @@ export default function TestimonialCarousel({
                 key={i}
                 className="size-4"
                 style={{
-                  color: i < t.rating ? "var(--sh-warning)" : "var(--sh-glass-border-strong)",
+                  color: i < t.rating ? "var(--sh-warning)" : "var(--border)",
                   fill: i < t.rating ? "var(--sh-warning)" : "transparent",
                 }}
               />
@@ -259,7 +259,7 @@ export default function TestimonialCarousel({
               onClick={() => setActive(i)}
               className="size-2 rounded-full transition-all duration-300"
               style={{
-                background: i === active ? "var(--sh-info)" : "var(--sh-glass-border)",
+                background: i === active ? "var(--sh-info)" : "var(--border)",
                 width: i === active ? 24 : 8,
               }}
               aria-label={`Go to testimonial ${i + 1}`}

@@ -1,6 +1,5 @@
 "use client";
 
-import { GlassPanel } from "@/components/ui/glass-panel";
 import { pipelineStageColor, pipelineStageLabel } from "./schemas";
 import type { PipelineMetrics, PipelineStage } from "@/modules/staff/pipeline";
 import { TrendingUp, TrendingDown, Minus } from "lucide-react";
@@ -44,11 +43,9 @@ export function StageMetricsRow({ metrics }: StageMetricsRowProps) {
               : Minus;
 
         return (
-          <GlassPanel
+          <div
             key={stage}
-            variant="subtle"
-            radius="lg"
-            className="relative overflow-hidden transition-all duration-200 hover:-translate-y-0.5"
+            className="rounded-lg border border-[var(--border)] bg-white relative overflow-hidden transition-all duration-200 hover:-translate-y-0.5"
             style={{
               borderLeft: `4px solid ${color}`,
             }}
@@ -89,7 +86,7 @@ export function StageMetricsRow({ metrics }: StageMetricsRowProps) {
                 </span>
               </div>
             </div>
-          </GlassPanel>
+          </div>
         );
       })}
     </div>
