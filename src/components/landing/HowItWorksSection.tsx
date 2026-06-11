@@ -215,7 +215,7 @@ export default function HowItWorksSection({ forEmployer = false }: HowItWorksSec
               var(--sh-amber) 85%,
               color-mix(in srgb, var(--success) 10%, transparent) 100%
             )`,
-            opacity: 0.3,
+            opacity: 0.2,
           }}
           aria-hidden="true"
         />

@@ -107,49 +107,131 @@ describe("getWebhookEventSchema", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Type shape tests
+// Output schema tests (from ./schemas.ts)
 // ---------------------------------------------------------------------------
 
-describe("XeroWebhookEventItem type shape", () => {
-  type XeroWebhookEventItem = {
-    webhook_id: number;
-    event: string;
-    created_at: string | null;
-  };
+import {
+  xeroWebhookEventItemSchema,
+  listWebhookEventsResultSchema,
+  processXeroWebhookResponseSchema,
+  type XeroWebhookEventItem,
+  type ListWebhookEventsResult,
+  type ProcessXeroWebhookResponse,
+} from "./schemas";
 
-  it("shapes a complete event", () => {
-    const event: XeroWebhookEventItem = {
+describe("xeroWebhookEventItemSchema (output)", () => {
+  it("validates a complete event", () => {
+    const mock: XeroWebhookEventItem = {
       webhook_id: 1,
       event: "xero_INVOICE CREATED",
       created_at: "2026-01-01T00:00:00Z",
     };
-    expect(event.webhook_id).toBe(1);
-    expect(event.event).toContain("xero_");
+    const parsed = xeroWebhookEventItemSchema.safeParse(mock);
+    expect(parsed.success).toBe(true);
+    if (parsed.success) {
+      expect(parsed.data.webhook_id).toBe(1);
+      expect(parsed.data.event).toContain("xero_");
+    }
   });
 
   it("allows null created_at", () => {
-    const event: XeroWebhookEventItem = {
+    const mock: XeroWebhookEventItem = {
       webhook_id: 2,
       event: "xero_CONTACT UPDATED",
       created_at: null,
     };
-    expect(event.created_at).toBeNull();
+    const parsed = xeroWebhookEventItemSchema.safeParse(mock);
+    expect(parsed.success).toBe(true);
+    expect(parsed.data?.created_at).toBeNull();
+  });
+
+  it("rejects missing webhook_id", () => {
+    const parsed = xeroWebhookEventItemSchema.safeParse({
+      event: "xero_test",
+    });
+    expect(parsed.success).toBe(false);
   });
 });
 
-describe("ProcessXeroWebhookResponse type shape", () => {
-  it("shapes a success response", () => {
-    const result: {
-      operation: string;
-      message: string;
-      processedCount: number;
-    } = {
+describe("listWebhookEventsResultSchema (output)", () => {
+  it("validates a complete list result", () => {
+    const mock: ListWebhookEventsResult = {
+      events: [
+        {
+          webhook_id: 1,
+          event: "xero_INVOICE CREATED",
+          created_at: "2026-01-01T00:00:00Z",
+        },
+      ],
+      total: 1,
+      page: 1,
+      limit: 20,
+      totalPages: 1,
+    };
+    const parsed = listWebhookEventsResultSchema.safeParse(mock);
+    expect(parsed.success).toBe(true);
+    if (parsed.success) {
+      expect(parsed.data.events).toHaveLength(1);
+      expect(parsed.data.totalPages).toBe(1);
+    }
+  });
+
+  it("validates empty events list", () => {
+    const mock: ListWebhookEventsResult = {
+      events: [],
+      total: 0,
+      page: 1,
+      limit: 20,
+      totalPages: 0,
+    };
+    const parsed = listWebhookEventsResultSchema.safeParse(mock);
+    expect(parsed.success).toBe(true);
+  });
+
+  it("rejects negative totalPages", () => {
+    const parsed = listWebhookEventsResultSchema.safeParse({
+      events: [],
+      total: 0,
+      page: 1,
+      limit: 20,
+      totalPages: -1,
+    });
+    expect(parsed.success).toBe(false);
+  });
+});
+
+describe("processXeroWebhookResponseSchema (output)", () => {
+  it("validates a success response", () => {
+    const mock: ProcessXeroWebhookResponse = {
       operation: "success",
       message: "Processed 3 Xero webhook events",
       processedCount: 3,
     };
-    expect(result.operation).toBe("success");
-    expect(result.processedCount).toBeGreaterThan(0);
+    const parsed = processXeroWebhookResponseSchema.safeParse(mock);
+    expect(parsed.success).toBe(true);
+    if (parsed.success) {
+      expect(parsed.data.processedCount).toBeGreaterThan(0);
+    }
+  });
+
+  it("validates an error response", () => {
+    const mock: ProcessXeroWebhookResponse = {
+      operation: "error",
+      message: "Signature mismatch",
+      processedCount: 0,
+    };
+    const parsed = processXeroWebhookResponseSchema.safeParse(mock);
+    expect(parsed.success).toBe(true);
+    expect(parsed.data?.operation).toBe("error");
+  });
+
+  it("rejects negative processedCount", () => {
+    const parsed = processXeroWebhookResponseSchema.safeParse({
+      operation: "success",
+      message: "done",
+      processedCount: -1,
+    });
+    expect(parsed.success).toBe(false);
   });
 });
 

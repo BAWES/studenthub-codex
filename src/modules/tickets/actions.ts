@@ -4,9 +4,20 @@ import crypto from "node:crypto";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
-
-// ---------------------------------------------------------------------------
-// Schemas
+import {
+  ticketItemSchema,
+  listTicketsResultSchema,
+  ticketCommentItemSchema,
+  ticketActionResultSchema,
+} from "./schemas";
+import type {
+  TicketItem,
+  ListTicketsResult,
+  TicketCommentItem,
+  TicketActionResult,
+  CreateTicketResult,
+  AddCommentResult,
+} from "./schemas";
 // ---------------------------------------------------------------------------
 
 const listTicketsSchema = z.object({
@@ -54,44 +65,6 @@ export type CreateTicketParams = z.input<typeof createTicketSchema>;
 export type AddCommentParams = z.input<typeof addCommentSchema>;
 export type GetCommentsParams = z.input<typeof getCommentsSchema>;
 export type UpdateTicketParams = z.input<typeof updateTicketSchema>;
-
-export type TicketItem = {
-  ticket_uuid: string;
-  candidate_id: number | null;
-  staff_id: number | null;
-  ticket_detail: string | null;
-  ticket_status: number | null;
-  created_at: Date | null;
-  updated_at: Date | null;
-};
-
-export type ListTicketsResult = {
-  tickets: TicketItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
-
-export type TicketCommentItem = {
-  ticket_comment_uuid: string;
-  ticket_uuid: string;
-  candidate_id: number | null;
-  staff_id: number | null;
-  ticket_comment_detail: string | null;
-  created_at: Date | null;
-  updated_at: Date | null;
-};
-
-export type CreateTicketResult = {
-  operation: string;
-  message: string;
-};
-
-export type AddCommentResult = {
-  operation: string;
-  message: string;
-};
 
 // ---------------------------------------------------------------------------
 // Exported schemas (for shared validation in tests)
@@ -144,7 +117,7 @@ export async function listTickets(
     prisma.ticket.count({ where: where as any }),
   ]);
 
-  return {
+  const result = {
     tickets: tickets.map((t) => ({
       ticket_uuid: t.ticket_uuid,
       candidate_id: t.candidate_id,
@@ -159,6 +132,17 @@ export async function listTickets(
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  // Validate output shape
+  const outputParsed = listTicketsResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/tickets] listTickets output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -189,7 +173,7 @@ export async function getTicket(
 
   if (!ticket) return null;
 
-  return {
+  const result = {
     ticket_uuid: ticket.ticket_uuid,
     candidate_id: ticket.candidate_id,
     staff_id: ticket.staff_id,
@@ -198,6 +182,17 @@ export async function getTicket(
     created_at: ticket.created_at ?? null,
     updated_at: ticket.updated_at ?? null,
   };
+
+  // Validate output shape
+  const outputParsed = ticketItemSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/tickets] getTicket output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -239,15 +234,36 @@ export async function createTicket(
       },
     });
 
-    return {
+    const result = {
       operation: "success",
       message: "Ticket created successfully",
     };
+
+    // Validate output shape
+    const outputParsed = ticketActionResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/tickets] createTicket output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
   } catch (err) {
-    return {
+    const result = {
       operation: "error",
       message: err instanceof Error ? err.message : "Failed to create ticket",
     };
+
+    const outputParsed = ticketActionResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/tickets] createTicket output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
   }
 }
 
@@ -280,7 +296,15 @@ export async function updateTicket(
   });
 
   if (!existing) {
-    return { operation: "error", message: "Ticket not found" };
+    const result = { operation: "error", message: "Ticket not found" };
+    const outputParsed = ticketActionResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/tickets] updateTicket output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+    return result;
   }
 
   try {
@@ -292,12 +316,28 @@ export async function updateTicket(
       },
     });
 
-    return { operation: "success", message: "Ticket updated successfully" };
+    const result = { operation: "success", message: "Ticket updated successfully" };
+    const outputParsed = ticketActionResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/tickets] updateTicket output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+    return result;
   } catch (err) {
-    return {
+    const result = {
       operation: "error",
       message: err instanceof Error ? err.message : "Failed to update ticket",
     };
+    const outputParsed = ticketActionResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/tickets] updateTicket output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+    return result;
   }
 }
 
@@ -330,11 +370,27 @@ export async function closeTicket(
   });
 
   if (!existing) {
-    return { operation: "error", message: "Ticket not found" };
+    const result = { operation: "error", message: "Ticket not found" };
+    const outputParsed = ticketActionResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/tickets] closeTicket output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+    return result;
   }
 
   if (existing.ticket_status === 2) {
-    return { operation: "error", message: "Ticket is already closed" };
+    const result = { operation: "error", message: "Ticket is already closed" };
+    const outputParsed = ticketActionResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/tickets] closeTicket output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+    return result;
   }
 
   const now = new Date();
@@ -355,12 +411,28 @@ export async function closeTicket(
       },
     });
 
-    return { operation: "success", message: "Ticket closed successfully" };
+    const result = { operation: "success", message: "Ticket closed successfully" };
+    const outputParsed = ticketActionResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/tickets] closeTicket output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+    return result;
   } catch (err) {
-    return {
+    const result = {
       operation: "error",
       message: err instanceof Error ? err.message : "Failed to close ticket",
     };
+    const outputParsed = ticketActionResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/tickets] closeTicket output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+    return result;
   }
 }
 
@@ -397,10 +469,18 @@ export async function addComment(
   });
 
   if (!ticket) {
-    return {
+    const result = {
       operation: "error",
       message: "Ticket not found",
     };
+    const outputParsed = ticketActionResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/tickets] addComment output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+    return result;
   }
 
   try {
@@ -415,15 +495,31 @@ export async function addComment(
       },
     });
 
-    return {
+    const result = {
       operation: "success",
       message: "Ticket comment added successfully",
     };
+    const outputParsed = ticketActionResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/tickets] addComment output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+    return result;
   } catch (err) {
-    return {
+    const result = {
       operation: "error",
       message: err instanceof Error ? err.message : "Failed to add comment",
     };
+    const outputParsed = ticketActionResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/tickets] addComment output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+    return result;
   }
 }
 
@@ -455,7 +551,7 @@ export async function getComments(
     orderBy: { created_at: "asc" },
   });
 
-  return comments.map((c) => ({
+  const result = comments.map((c) => ({
     ticket_comment_uuid: c.ticket_comment_uuid,
     ticket_uuid: c.ticket_uuid ?? ticketUuid,
     candidate_id: c.candidate_id,
@@ -464,5 +560,16 @@ export async function getComments(
     created_at: c.created_at ?? null,
     updated_at: c.updated_at ?? null,
   }));
+
+  // Validate output shape
+  const outputParsed = z.array(ticketCommentItemSchema).safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/tickets] getComments output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 

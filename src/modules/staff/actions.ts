@@ -4,27 +4,11 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
 
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export type StaffListItem = {
-  staff_id: number;
-  staff_name: string;
-  staff_job_title: string | null;
-  staff_email: string;
-  staff_role: boolean | null;
-  staff_status: number;
-  staff_created_at: Date;
-};
-
-export type StaffListResult = {
-  staff: StaffListItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
+import {
+  staffListItemSchema,
+  listStaffResultSchema,
+} from "./schemas";
+import type { StaffListItem, StaffListResult } from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Schemas
@@ -124,13 +108,23 @@ export async function listStaff(
     prisma.staff.count({ where: where as any }),
   ]);
 
-  return {
+  const result: StaffListResult = {
     staff: staff as StaffListItem[],
     total,
     page,
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  const outputParsed = listStaffResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/staff] listStaff output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -165,6 +159,14 @@ export async function getStaff(params: GetStaffParams): Promise<StaffListItem | 
       staff_created_at: true,
     },
   });
+
+  const outputParsed = staffListItemSchema.safeParse(staff);
+  if (staff !== null && !outputParsed.success) {
+    console.error(
+      "[modules/staff] getStaff output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
 
   return staff;
 }

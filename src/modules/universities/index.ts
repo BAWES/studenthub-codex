@@ -7,4 +7,4 @@ export type {
   UniversityItem,
   ListUniversitiesResult,
   CreateUniversityResult,
-} from "./actions";
+} from "./schemas";

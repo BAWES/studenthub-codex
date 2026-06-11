@@ -587,13 +587,13 @@ function Footer({ persona }: { persona: Persona }) {
 export default function LandingContent({ session }: LandingContentProps) {
   const sp = useSearchParams();
   const router = useRouter();
-  const [persona, setPersona] = useState<Persona>("candidate");
+  const [persona, setPersona] = useState<Persona>("student");
 
-  useEffect(() => { setPersona(sp.get("persona") === "company" ? "company" : "candidate"); }, [sp]);
+  useEffect(() => { setPersona(sp.get("persona") === "company" ? "company" : "student"); }, [sp]);
 
   const handlePersonaChange = useCallback((p: Persona) => {
     const params = new URLSearchParams(sp.toString());
-    if (p === "candidate") params.delete("persona"); else params.set("persona", p);
+    if (p === "student") params.delete("persona"); else params.set("persona", p);
     router.replace(params.toString() ? `/?${params}` : "/", { scroll: false });
   }, [router, sp]);
 
