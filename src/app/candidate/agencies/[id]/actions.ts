@@ -1,8 +1,19 @@
 "use server";
 
+// ---------------------------------------------------------------------------
+// Candidate Agency [id] — server actions for the detail page
+// ---------------------------------------------------------------------------
+// Route-level wrappers that delegate to modules/candidates/agencies for
+// viewing, editing, and deleting a single agency entry.
+// ---------------------------------------------------------------------------
+
 import { revalidatePath } from "next/cache";
-import { prisma } from "@/lib/prisma";
 import { requireRoleCapability } from "@/modules/auth/session";
+import {
+  getAgency as moduleGetAgency,
+  updateAgency as moduleUpdateAgency,
+  deleteAgency as moduleDeleteAgency,
+} from "@/modules/candidates/agencies/actions";
 import {
   getAgencySchema,
   updateAgencySchema,
@@ -12,16 +23,17 @@ import {
 } from "../schemas";
 
 // ---------------------------------------------------------------------------
-// Server actions (single agency operations)
+// getAgency
 // ---------------------------------------------------------------------------
 
 /**
  * Get a single agency (company) by ID.
+ * Delegates to modules/candidates/agencies.
  */
 export async function getAgency(
   companyId: number,
 ): Promise<AgencyItem | null> {
-  const session = await requireRoleCapability("candidate", "candidate.read.own");
+  await requireRoleCapability("candidate", "candidate.read.own");
 
   const parsed = getAgencySchema.safeParse({ companyId });
   if (!parsed.success) {
@@ -30,42 +42,21 @@ export async function getAgency(
     );
   }
 
-  const row = await prisma.company.findFirst({
-    where: {
-      company_id: parsed.data.companyId,
-      deleted: 0,
-    },
-  });
-
-  if (!row) return null;
-
-  return {
-    company_id: row.company_id,
-    company_name: row.company_name,
-    company_common_name_en: row.company_common_name_en,
-    company_common_name_ar: row.company_common_name_ar,
-    company_email: row.company_email,
-    company_website: row.company_website,
-    company_logo: row.company_logo,
-    commercial_licence: row.commercial_licence,
-    total_candidate: row.total_candidate ? Number(row.total_candidate) : null,
-    no_of_active_requests: row.no_of_active_requests,
-    country_id: row.country_id,
-    company_created_at: row.company_created_at,
-    company_updated_at: row.company_updated_at,
-  };
+  return moduleGetAgency({ companyId: parsed.data.companyId });
 }
+
+// ---------------------------------------------------------------------------
+// updateAgency
+// ---------------------------------------------------------------------------
 
 /**
  * Update an existing agency (company).
+ * Delegates to modules/candidates/agencies.
  */
 export async function updateAgency(
   data: Record<string, unknown>,
 ): Promise<AgencyActionResult> {
-  const session = await requireRoleCapability(
-    "candidate",
-    "candidate.profile.edit",
-  );
+  await requireRoleCapability("candidate", "candidate.profile.edit");
 
   const parsed = updateAgencySchema.safeParse(data);
   if (!parsed.success) {
@@ -75,54 +66,30 @@ export async function updateAgency(
     };
   }
 
-  const companyId = parsed.data.companyId;
-
-  const existing = await prisma.company.findFirst({
-    where: { company_id: companyId, deleted: 0 },
-    select: { company_id: true },
-  });
-  if (!existing) {
-    return { success: false, error: "Agency not found" };
-  }
-
-  // Check for duplicate name (excluding this record)
-  const duplicate = await prisma.company.findFirst({
-    where: {
-      company_name: parsed.data.companyName,
-      deleted: 0,
-      company_id: { not: companyId },
-    },
-    select: { company_id: true },
-  });
-  if (duplicate) {
-    return { success: false, error: "An agency with this name already exists" };
-  }
-
-  await prisma.company.update({
-    where: { company_id: companyId },
-    data: {
-      company_name: parsed.data.companyName,
-      company_email: parsed.data.companyEmail || null,
-      company_website: parsed.data.companyWebsite || null,
-      commercial_licence: parsed.data.commercialLicence || null,
-      company_updated_at: new Date(),
-    },
+  const result = await moduleUpdateAgency({
+    companyId: parsed.data.companyId,
+    companyName: parsed.data.companyName,
+    companyEmail: parsed.data.companyEmail,
+    companyWebsite: parsed.data.companyWebsite,
+    commercialLicence: parsed.data.commercialLicence,
   });
 
   revalidatePath("/candidate/agencies");
-  return { success: true, companyId };
+  return result;
 }
 
+// ---------------------------------------------------------------------------
+// deleteAgency
+// ---------------------------------------------------------------------------
+
 /**
- * Delete an agency (company) by ID (soft-delete).
+ * Soft-delete an agency (company) by ID.
+ * Delegates to modules/candidates/agencies.
  */
 export async function deleteAgency(
   companyId: number,
 ): Promise<AgencyActionResult> {
-  const session = await requireRoleCapability(
-    "candidate",
-    "candidate.profile.edit",
-  );
+  await requireRoleCapability("candidate", "candidate.profile.edit");
 
   const parsed = deleteAgencySchema.safeParse({ companyId });
   if (!parsed.success) {
@@ -132,22 +99,8 @@ export async function deleteAgency(
     };
   }
 
-  const existing = await prisma.company.findFirst({
-    where: {
-      company_id: parsed.data.companyId,
-      deleted: 0,
-    },
-    select: { company_id: true },
-  });
-  if (!existing) {
-    return { success: false, error: "Agency not found" };
-  }
-
-  await prisma.company.update({
-    where: { company_id: parsed.data.companyId },
-    data: { deleted: 1, company_updated_at: new Date() },
-  });
+  const result = await moduleDeleteAgency({ companyId: parsed.data.companyId });
 
   revalidatePath("/candidate/agencies");
-  return { success: true, companyId: parsed.data.companyId };
+  return result;
 }

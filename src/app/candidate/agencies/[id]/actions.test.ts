@@ -3,24 +3,21 @@ import {
   getAgencySchema,
   updateAgencySchema,
   deleteAgencySchema,
-  type AgencyItem,
   type AgencyActionResult,
 } from "../schemas";
 
 // ---------------------------------------------------------------------------
-// Mocks — data layer & auth
+// Mocks — delegate to module actions (these now contain the real logic)
 // ---------------------------------------------------------------------------
 
-const mockFindFirst = vi.fn();
-const mockUpdate = vi.fn();
+const mockModuleGetAgency = vi.fn();
+const mockModuleUpdateAgency = vi.fn();
+const mockModuleDeleteAgency = vi.fn();
 
-vi.mock("@/lib/prisma", () => ({
-  prisma: {
-    company: {
-      findFirst: mockFindFirst,
-      update: mockUpdate,
-    },
-  },
+vi.mock("@/modules/candidates/agencies/actions", () => ({
+  getAgency: mockModuleGetAgency,
+  updateAgency: mockModuleUpdateAgency,
+  deleteAgency: mockModuleDeleteAgency,
 }));
 
 vi.mock("@/modules/auth/session", () => ({
@@ -32,33 +29,9 @@ vi.mock("next/cache", () => ({
 }));
 
 // Must import after mocks are set up
-const { prisma } = await import("@/lib/prisma");
 const { requireRoleCapability } = await import("@/modules/auth/session");
 const { revalidatePath } = await import("next/cache");
 const actions = await import("./actions");
-
-// ---------------------------------------------------------------------------
-// Helpers for type safety when constructing mock rows
-// ---------------------------------------------------------------------------
-
-function makeCompanyRow(overrides: Record<string, unknown> = {}) {
-  return {
-    company_id: 1,
-    company_name: "Test Agency",
-    company_common_name_en: null,
-    company_common_name_ar: null,
-    company_email: "agency@example.com",
-    company_website: "https://example.com",
-    company_logo: null,
-    commercial_licence: "LIC-123",
-    total_candidate: null,
-    no_of_active_requests: 0,
-    country_id: null,
-    company_created_at: null,
-    company_updated_at: null,
-    ...overrides,
-  };
-}
 
 // ---------------------------------------------------------------------------
 // Schema tests — pure unit, no mocking required
@@ -181,7 +154,7 @@ describe("deleteAgencySchema", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Action tests — server action logic with mocked Prisma
+// Action tests — delegation verification
 // ---------------------------------------------------------------------------
 
 describe("getAgency action", () => {
@@ -196,22 +169,20 @@ describe("getAgency action", () => {
     });
   });
 
-  it("returns a company when found", async () => {
-    const row = makeCompanyRow({ company_id: 7 });
-    mockFindFirst.mockResolvedValue(row);
+  it("delegates to module getAgency with correct params", async () => {
+    mockModuleGetAgency.mockResolvedValue({
+      company_id: 7,
+      company_name: "Test Agency",
+    });
 
     const result = await actions.getAgency(7);
 
-    expect(mockFindFirst).toHaveBeenCalledWith({
-      where: { company_id: 7, deleted: 0 },
-    });
-    expect(result).not.toBeNull();
-    expect(result!.company_id).toBe(7);
-    expect(result!.company_name).toBe("Test Agency");
+    expect(mockModuleGetAgency).toHaveBeenCalledWith({ companyId: 7 });
+    expect(result).toEqual({ company_id: 7, company_name: "Test Agency" });
   });
 
-  it("returns null when company not found", async () => {
-    mockFindFirst.mockResolvedValue(null);
+  it("returns null when module returns null", async () => {
+    mockModuleGetAgency.mockResolvedValue(null);
 
     const result = await actions.getAgency(999);
     expect(result).toBeNull();
@@ -219,27 +190,11 @@ describe("getAgency action", () => {
 
   it("throws on invalid companyId (non-positive)", async () => {
     await expect(actions.getAgency(0)).rejects.toThrow("Company ID is required");
-    expect(mockFindFirst).not.toHaveBeenCalled();
-  });
-
-  it("converts total_candidate to number when present", async () => {
-    const row = makeCompanyRow({ total_candidate: "42" });
-    mockFindFirst.mockResolvedValue(row);
-
-    const result = await actions.getAgency(7);
-    expect(result!.total_candidate).toBe(42);
-  });
-
-  it("sets total_candidate to null when null in DB", async () => {
-    const row = makeCompanyRow({ total_candidate: null });
-    mockFindFirst.mockResolvedValue(row);
-
-    const result = await actions.getAgency(7);
-    expect(result!.total_candidate).toBeNull();
+    expect(mockModuleGetAgency).not.toHaveBeenCalled();
   });
 
   it("requires candidate.read.own capability", async () => {
-    mockFindFirst.mockResolvedValue(makeCompanyRow());
+    mockModuleGetAgency.mockResolvedValue({ company_id: 7 });
     await actions.getAgency(7);
     expect(requireRoleCapability).toHaveBeenCalledWith(
       "candidate",
@@ -260,10 +215,11 @@ describe("updateAgency action", () => {
     });
   });
 
-  it("updates a company successfully", async () => {
-    mockFindFirst
-      .mockResolvedValueOnce({ company_id: 1 }) // existing check
-      .mockResolvedValueOnce(null); // no duplicate
+  it("delegates to module updateAgency with correct params", async () => {
+    mockModuleUpdateAgency.mockResolvedValue({
+      success: true,
+      companyId: 1,
+    });
 
     const result = (await actions.updateAgency({
       companyId: 1,
@@ -275,39 +231,21 @@ describe("updateAgency action", () => {
     if (result.success) {
       expect(result.companyId).toBe(1);
     }
-    expect(mockUpdate).toHaveBeenCalledWith({
-      where: { company_id: 1 },
-      data: expect.objectContaining({
-        company_name: "Updated Agency",
-        company_email: "new@example.com",
-      }),
+    expect(mockModuleUpdateAgency).toHaveBeenCalledWith({
+      companyId: 1,
+      companyName: "Updated Agency",
+      companyEmail: "new@example.com",
+      companyWebsite: undefined,
+      commercialLicence: undefined,
     });
     expect(revalidatePath).toHaveBeenCalledWith("/candidate/agencies");
   });
 
-  it("accepts empty optional fields (sets null in update)", async () => {
-    mockFindFirst
-      .mockResolvedValueOnce({ company_id: 1 })
-      .mockResolvedValueOnce(null);
-
-    await actions.updateAgency({
-      companyId: 1,
-      companyName: "Minimal Agency",
+  it("returns error when module returns error", async () => {
+    mockModuleUpdateAgency.mockResolvedValue({
+      success: false,
+      error: "Agency not found",
     });
-
-    expect(mockUpdate).toHaveBeenCalledWith({
-      where: { company_id: 1 },
-      data: expect.objectContaining({
-        company_name: "Minimal Agency",
-        company_email: null,
-        company_website: null,
-        commercial_licence: null,
-      }),
-    });
-  });
-
-  it("returns error when company not found", async () => {
-    mockFindFirst.mockResolvedValueOnce(null);
 
     const result = (await actions.updateAgency({
       companyId: 999,
@@ -315,27 +253,9 @@ describe("updateAgency action", () => {
     })) as AgencyActionResult;
 
     expect(result).toEqual({ success: false, error: "Agency not found" });
-    expect(mockUpdate).not.toHaveBeenCalled();
   });
 
-  it("returns error on duplicate name", async () => {
-    mockFindFirst
-      .mockResolvedValueOnce({ company_id: 1 })
-      .mockResolvedValueOnce({ company_id: 2 });
-
-    const result = (await actions.updateAgency({
-      companyId: 1,
-      companyName: "Duplicate Name",
-    })) as AgencyActionResult;
-
-    expect(result).toEqual({
-      success: false,
-      error: "An agency with this name already exists",
-    });
-    expect(mockUpdate).not.toHaveBeenCalled();
-  });
-
-  it("returns error on invalid input", async () => {
+  it("returns error on invalid input without calling module", async () => {
     const result = (await actions.updateAgency({
       companyId: 1,
       companyName: "",
@@ -343,14 +263,11 @@ describe("updateAgency action", () => {
 
     expect(result.success).toBe(false);
     expect(typeof result.error).toBe("string");
-    expect(mockFindFirst).not.toHaveBeenCalled();
-    expect(mockUpdate).not.toHaveBeenCalled();
+    expect(mockModuleUpdateAgency).not.toHaveBeenCalled();
   });
 
   it("requires candidate.profile.edit capability", async () => {
-    mockFindFirst
-      .mockResolvedValueOnce({ company_id: 1 })
-      .mockResolvedValueOnce(null);
+    mockModuleUpdateAgency.mockResolvedValue({ success: true, companyId: 1 });
 
     await actions.updateAgency({
       companyId: 1,
@@ -376,41 +293,39 @@ describe("deleteAgency action", () => {
     });
   });
 
-  it("soft-deletes a company successfully", async () => {
-    mockFindFirst.mockResolvedValue({ company_id: 7 });
+  it("delegates to module deleteAgency with correct params", async () => {
+    mockModuleDeleteAgency.mockResolvedValue({
+      success: true,
+      companyId: 7,
+    });
 
     const result = (await actions.deleteAgency(7)) as AgencyActionResult;
 
     expect(result).toEqual({ success: true, companyId: 7 });
-    expect(mockUpdate).toHaveBeenCalledWith({
-      where: { company_id: 7 },
-      data: expect.objectContaining({ deleted: 1 }),
-    });
+    expect(mockModuleDeleteAgency).toHaveBeenCalledWith({ companyId: 7 });
     expect(revalidatePath).toHaveBeenCalledWith("/candidate/agencies");
   });
 
-  it("returns error when company not found", async () => {
-    mockFindFirst.mockResolvedValue(null);
-
-    const result = (await actions.deleteAgency(999)) as AgencyActionResult;
-
-    expect(result).toEqual({
+  it("returns error when module returns error", async () => {
+    mockModuleDeleteAgency.mockResolvedValue({
       success: false,
       error: "Agency not found",
     });
-    expect(mockUpdate).not.toHaveBeenCalled();
+
+    const result = (await actions.deleteAgency(999)) as AgencyActionResult;
+
+    expect(result).toEqual({ success: false, error: "Agency not found" });
   });
 
-  it("returns error on invalid companyId", async () => {
+  it("returns error on invalid companyId without calling module", async () => {
     const result = (await actions.deleteAgency(0)) as AgencyActionResult;
 
     expect(result.success).toBe(false);
-    expect(mockFindFirst).not.toHaveBeenCalled();
-    expect(mockUpdate).not.toHaveBeenCalled();
+    expect(mockModuleDeleteAgency).not.toHaveBeenCalled();
   });
 
   it("requires candidate.profile.edit capability", async () => {
-    mockFindFirst.mockResolvedValue({ company_id: 1 });
+    mockModuleDeleteAgency.mockResolvedValue({ success: true, companyId: 1 });
 
     await actions.deleteAgency(1);
 
