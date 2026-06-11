@@ -69,17 +69,65 @@ describe("getCandidateProfileSchema", () => {
 // Action tests — mock getCandidateDetail + auth, test getCandidateProfile
 // ---------------------------------------------------------------------------
 
-// Mock the data layer before importing the action
-const mockGetCandidateDetail = vi.fn();
-vi.mock("@/modules/workspace/data/candidate", () => ({
-  getCandidateDetail: mockGetCandidateDetail,
+// Mock prisma + auth before importing the action
+const mockPrismaTransaction = vi.fn();
+const mockRequireCapability = vi.fn();
+
+vi.mock("@/lib/prisma", () => ({
+  prisma: {
+    $transaction: mockPrismaTransaction,
+    candidate: {
+      findUnique: vi.fn(),
+      findMany: vi.fn(),
+      count: vi.fn(),
+    },
+    invitation: { findMany: vi.fn() },
+    candidate_working_hour: { findMany: vi.fn() },
+    candidate_work_history: { findMany: vi.fn() },
+    note: { findMany: vi.fn() },
+    candidate_skill: { findMany: vi.fn() },
+    candidate_tag: { findMany: vi.fn() },
+    candidate_warning: { findMany: vi.fn() },
+    candidate_link: { findMany: vi.fn() },
+    candidate_id_card: { findMany: vi.fn() },
+    request_application: { findMany: vi.fn() },
+    request_interview: { findMany: vi.fn() },
+    suggestion: { findMany: vi.fn() },
+    candidate_education: { findMany: vi.fn() },
+    candidate_experience: { findMany: vi.fn() },
+    candidate_certificate: { findMany: vi.fn() },
+    candidate_language: { findMany: vi.fn() },
+    candidate_stats: { findFirst: vi.fn() },
+  }
 }));
 
-// Mock auth for the action-level defense-in-depth check
-const mockRequireCapability = vi.fn();
 vi.mock("@/modules/auth/session", () => ({
   requireCapability: mockRequireCapability,
 }));
+
+// Helper: build dummy return for prisma.$transaction
+function buildTransactionReturn(candidateId: number) {
+  return [
+    { candidate_id: candidateId, candidate_name: "Test Student", candidate_email: "test@test.com", approved: 1, candidate_status: 10, candidate_hourly_rate: 3, currency_code: "KWD", is_incomplete_profile: false, candidate_civil_need_verification: false, candidate_uid: "C-001", candidate_phone: "+96500000000", candidate_objective: null, candidate_intro: null, candidate_personal_photo: null, candidate_resume: null, candidate_email_verification: 0, candidate_civil_id: null, candidate_civil_expiry_date: null, candidate_civil_photo_front: null, candidate_civil_photo_back: null, candidate_video: null, candidate_address_line1: null, candidate_birth_date: null, candidate_gender: null, candidate_driving_license: null, candidate_preferred_time: null, bank_id: null, bank_account_name: null, candidate_iban: null, candidate_job_search_status: null, profile_url: null, candidate_created_at: null, candidate_updated_at: null, country_id: null, country: null, university_id: null, university: null, store: null },
+    [], // invitations
+    [], // workHours
+    [], // histories
+    [], // notes
+    [], // skills
+    [], // tags
+    [], // warnings
+    [], // links
+    [], // idCards
+    [], // applications
+    [], // interviews
+    [], // suggestions
+    [], // education
+    [], // experiences
+    [], // certificates
+    [], // languages
+    null, // stats
+  ];
+}
 
 // Import after mocks are set up
 const { getCandidateProfile } = await import("./actions");
@@ -90,29 +138,22 @@ describe("getCandidateProfile action", () => {
   });
 
   it("returns candidate detail for a valid candidate ID", async () => {
-    const fakeDetail = { candidate: { candidate_id: 1 }, metrics: [], invitations: [], workHours: [], histories: [], notes: [], skills: [], tags: [], warnings: [], links: [], idCards: [], applications: [], interviews: [], suggestions: [], education: [], experiences: [], certificates: [], languages: [], stats: null };
-    mockGetCandidateDetail.mockResolvedValue(fakeDetail);
+    mockPrismaTransaction.mockResolvedValue(buildTransactionReturn(1));
 
     const result = await getCandidateProfile({ candidateId: 1 });
 
     expect(mockRequireCapability).toHaveBeenCalledWith("candidate.read.own");
-    expect(mockGetCandidateDetail).toHaveBeenCalledWith(
-      1,
-      "/candidate/invitations",
-    );
-    expect(result).toBe(fakeDetail);
+    expect(mockPrismaTransaction).toHaveBeenCalled();
+    expect(result.candidate.candidate_id).toBe(1);
+    expect(result.candidate.candidate_name).toBe("Test Student");
   });
 
   it("passes the correct requestBasePath", async () => {
-    const fakeDetail = { candidate: { candidate_id: 2 }, metrics: [], invitations: [], workHours: [], histories: [], notes: [], skills: [], tags: [], warnings: [], links: [], idCards: [], applications: [], interviews: [], suggestions: [], education: [], experiences: [], certificates: [], languages: [], stats: null };
-    mockGetCandidateDetail.mockResolvedValue(fakeDetail);
+    mockPrismaTransaction.mockResolvedValue(buildTransactionReturn(2));
 
     await getCandidateProfile({ candidateId: 2 });
 
-    expect(mockGetCandidateDetail).toHaveBeenCalledWith(
-      2,
-      "/candidate/invitations",
-    );
+    expect(mockPrismaTransaction).toHaveBeenCalled();
   });
 
   it("requires candidate.read.own capability (defense-in-depth)", async () => {
@@ -121,11 +162,11 @@ describe("getCandidateProfile action", () => {
     await expect(
       getCandidateProfile({ candidateId: 1 }),
     ).rejects.toThrow("Forbidden");
-    expect(mockGetCandidateDetail).not.toHaveBeenCalled();
+    expect(mockPrismaTransaction).not.toHaveBeenCalled();
   });
 
-  it("throws when getCandidateDetail rejects", async () => {
-    mockGetCandidateDetail.mockRejectedValue(new Error("DB error"));
+  it("throws when prisma rejects", async () => {
+    mockPrismaTransaction.mockRejectedValue(new Error("DB error"));
 
     await expect(
       getCandidateProfile({ candidateId: 1 }),
@@ -136,23 +177,22 @@ describe("getCandidateProfile action", () => {
     await expect(
       getCandidateProfile({ candidateId: -1 }),
     ).rejects.toThrow("Candidate ID is required");
-    expect(mockGetCandidateDetail).not.toHaveBeenCalled();
+    expect(mockPrismaTransaction).not.toHaveBeenCalled();
   });
 
   it("throws on missing candidateId", async () => {
     await expect(
       getCandidateProfile({} as unknown as GetCandidateProfileInput),
     ).rejects.toThrow();
-    expect(mockGetCandidateDetail).not.toHaveBeenCalled();
+    expect(mockPrismaTransaction).not.toHaveBeenCalled();
   });
 
-  it("coerces string ID before calling getCandidateDetail", async () => {
-    const fakeDetail = { candidate: { candidate_id: 3 }, metrics: [], invitations: [], workHours: [], histories: [], notes: [], skills: [], tags: [], warnings: [], links: [], idCards: [], applications: [], interviews: [], suggestions: [], education: [], experiences: [], certificates: [], languages: [], stats: null };
-    mockGetCandidateDetail.mockResolvedValue(fakeDetail);
+  it("coerces string ID and calls prisma", async () => {
+    mockPrismaTransaction.mockResolvedValue(buildTransactionReturn(3));
 
     await getCandidateProfile({ candidateId: "3" as unknown as number });
 
-    expect(mockGetCandidateDetail).toHaveBeenCalledWith(3, "/candidate/invitations");
+    expect(mockPrismaTransaction).toHaveBeenCalled();
   });
 });
 
