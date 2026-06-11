@@ -28,10 +28,10 @@ export default function LandingNav({ session, persona, onPersonaChange }: Landin
       <div
         className="border-b"
         style={{
-          backgroundColor: "rgba(255,255,255,0.72)",
+          backgroundColor: "color-mix(in srgb, var(--surface) 72%, transparent)",
           backdropFilter: "blur(18px)",
           WebkitBackdropFilter: "blur(18px)",
-          borderColor: "rgba(214,220,231,0.5)",
+          borderColor: "color-mix(in srgb, var(--border) 50%, transparent)",
         }}
       >
         <div className="mx-auto max-w-6xl px-6">
@@ -150,7 +150,7 @@ export default function LandingNav({ session, persona, onPersonaChange }: Landin
         {mobileOpen && (
           <div
             className="md:hidden pb-3 space-y-1 px-6"
-            style={{ borderTop: "1px solid rgba(214,220,231,0.5)" }}
+            style={{ borderTop: "1px solid color-mix(in srgb, var(--border) 50%, transparent)" }}
           >
             <Link
               href="#how-it-works"
