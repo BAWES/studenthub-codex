@@ -22,13 +22,20 @@ export const getPresignedDownloadUrlSchema = z.object({
     .refine((v) => !v.includes(".."), "Key must not contain path traversal")
     .refine((v) => v.length > 1 && !/^\/+$/.test(v), "Key must not be only slashes"),
 });
-export type PresignedUploadResult = {
-  uploadUrl: string;
-  key: string;
-  bucket: string;
-  region: string;
-};
-export type PresignedDownloadResult = {
-  downloadUrl: string;
-  key: string;
-};
+// ---------------------------------------------------------------------------
+// Output schemas
+// ---------------------------------------------------------------------------
+
+export const presignedUploadResultSchema = z.object({
+  uploadUrl: z.string(),
+  key: z.string(),
+  bucket: z.string(),
+  region: z.string(),
+});
+export type PresignedUploadResult = z.output<typeof presignedUploadResultSchema>;
+
+export const presignedDownloadResultSchema = z.object({
+  downloadUrl: z.string(),
+  key: z.string(),
+});
+export type PresignedDownloadResult = z.output<typeof presignedDownloadResultSchema>;

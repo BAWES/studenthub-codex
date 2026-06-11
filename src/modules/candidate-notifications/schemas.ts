@@ -41,3 +41,51 @@ export type CreateNotificationInput = z.input<typeof createNotificationSchema>;
 export type CreateNotificationResult =
   | { success: true; notificationUuid: string }
   | { success: false; error: string };
+
+// ---------------------------------------------------------------------------
+// Output schemas
+// ---------------------------------------------------------------------------
+
+export const candidateNotificationItemSchema = z.object({
+  cn_uuid: z.string(),
+  type: z.number().int(),
+  message: z.string().nullable(),
+  is_new: z.boolean().nullable(),
+  appeal_uuid: z.string().nullable(),
+  created_at: z.string().nullable(),
+});
+
+export type CandidateNotificationItemSchema = z.output<
+  typeof candidateNotificationItemSchema
+>;
+
+export const listCandidateNotificationsResultSchema = z.object({
+  notifications: z.array(candidateNotificationItemSchema),
+  total: z.number().int().nonnegative(),
+  unreadCount: z.number().int().nonnegative(),
+  page: z.number().int().positive(),
+  limit: z.number().int().min(1).max(100),
+  totalPages: z.number().int().nonnegative(),
+});
+
+export type ListCandidateNotificationsResultSchema = z.output<
+  typeof listCandidateNotificationsResultSchema
+>;
+
+export const createNotificationResultSchema = z.discriminatedUnion("success", [
+  z.object({ success: z.literal(true), notificationUuid: z.string() }),
+  z.object({ success: z.literal(false), error: z.string() }),
+]);
+
+export type CreateNotificationResultSchema = z.output<
+  typeof createNotificationResultSchema
+>;
+
+export const markNotificationReadResultSchema = z.object({
+  success: z.boolean(),
+  error: z.string().optional(),
+});
+
+export type MarkNotificationReadResultSchema = z.output<
+  typeof markNotificationReadResultSchema
+>;

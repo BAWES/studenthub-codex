@@ -15,6 +15,17 @@ import {
   updateAppealStatusSchema,
   listAppealUpdatesSchema,
   createAppealUpdateSchema,
+  appealRowSchema,
+  appealUpdateRowSchema,
+  actionResultSchema,
+  appealsPaginatedResultSchema,
+  appealUpdatesPaginatedResultSchema,
+  listAppealsResultSchema,
+  getAppealResultSchema,
+  createAppealResultSchema,
+  updateAppealStatusResultSchema,
+  listAppealUpdatesResultSchema,
+  createAppealUpdateResultSchema,
   type ListAppealsParams,
   type CreateAppealParams,
   type UpdateAppealStatusParams,
@@ -89,7 +100,12 @@ export async function listAppeals(
       select: { candidate_id: true },
     });
     if (assigned.length === 0) {
-      return { items: [], total: 0, page, limit, totalPages: 0 };
+      const result = { items: [] as AppealRow[], total: 0, page, limit, totalPages: 0 };
+      const outputParsed = appealsPaginatedResultSchema.safeParse(result);
+      if (!outputParsed.success) {
+        console.error("[modules/appeals] listAppeals output validation failed:", outputParsed.error.issues);
+      }
+      return result;
     }
     const candidateIds = assigned.map((a) => a.candidate_id);
     if (where.candidate_id !== undefined) {
@@ -112,7 +128,7 @@ export async function listAppeals(
     }),
   ]);
 
-  return {
+  const result = {
     items: rows.map((r) => ({
       appealUuid: r.appeal_uuid,
       worklogUuid: r.candidate_working_hour_uuid,
@@ -127,6 +143,13 @@ export async function listAppeals(
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  const outputParsed = listAppealsResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error("[modules/appeals] listAppeals output validation failed:", outputParsed.error.issues);
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -170,7 +193,7 @@ export async function getAppeal(
     }
   }
 
-  return {
+  const result = {
     appeal: {
       appealUuid: row.appeal_uuid,
       worklogUuid: row.candidate_working_hour_uuid,
@@ -181,6 +204,13 @@ export async function getAppeal(
       updatedAt: row.updated_at ? row.updated_at.toISOString() : null,
     },
   };
+
+  const outputParsed = getAppealResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error("[modules/appeals] getAppeal output validation failed:", outputParsed.error.issues);
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -238,7 +268,12 @@ export async function createAppeal(
   ]);
 
   revalidatePath("/candidate/work-logs");
-  return { success: true, appealUuid };
+  const result = { success: true as const, appealUuid };
+  const outputParsed = createAppealResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error("[modules/appeals] createAppeal output validation failed:", outputParsed.error.issues);
+  }
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -316,7 +351,12 @@ export async function updateAppealStatus(
 
   revalidatePath("/staff/candidates");
   revalidatePath("/candidate/work-logs");
-  return { success: true };
+  const result = { success: true as const };
+  const outputParsed = updateAppealStatusResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error("[modules/appeals] updateAppealStatus output validation failed:", outputParsed.error.issues);
+  }
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -363,7 +403,7 @@ export async function listAppealUpdates(
     }),
   ]);
 
-  return {
+  const result = {
     items: rows.map((r) => ({
       appealUpdateUuid: r.appeal_update_uuid,
       appealUuid: r.appeal_uuid,
@@ -378,6 +418,13 @@ export async function listAppealUpdates(
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  const outputParsed = listAppealUpdatesResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error("[modules/appeals] listAppealUpdates output validation failed:", outputParsed.error.issues);
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -442,5 +489,10 @@ export async function createAppealUpdate(
 
   revalidatePath("/staff/candidates");
   revalidatePath("/candidate/work-logs");
-  return { success: true, appealUpdateUuid };
+  const result = { success: true as const, appealUpdateUuid };
+  const outputParsed = createAppealUpdateResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error("[modules/appeals] createAppealUpdate output validation failed:", outputParsed.error.issues);
+  }
+  return result;
 }

@@ -12,21 +12,29 @@ export const listCampaignsSchema = z.object({
   utmCampaign: z.string().optional(),
 });
 export type ListCampaignsParams = z.input<typeof listCampaignsSchema>;
-export type CampaignListItem = {
-  utm_uuid: string;
-  utm_source: string | null;
-  utm_medium: string | null;
-  utm_campaign: string | null;
-  utm_content: string | null;
-  utm_term: string | null;
-  no_of_signups: number | null;
-  no_of_clicks: number | null;
-  created_at: Date | null;
-};
-export type ListCampaignsResult = {
-  campaigns: CampaignListItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
+
+// ---------------------------------------------------------------------------
+// Output schemas
+// ---------------------------------------------------------------------------
+
+export const campaignListItemSchema = z.object({
+  utm_uuid: z.string(),
+  utm_source: z.string().nullable(),
+  utm_medium: z.string().nullable(),
+  utm_campaign: z.string().nullable(),
+  utm_content: z.string().nullable(),
+  utm_term: z.string().nullable(),
+  no_of_signups: z.number().nullable(),
+  no_of_clicks: z.number().nullable(),
+  created_at: z.date().nullable(),
+});
+export type CampaignListItem = z.output<typeof campaignListItemSchema>;
+
+export const listCampaignsResultSchema = z.object({
+  campaigns: z.array(campaignListItemSchema),
+  total: z.number().int().nonnegative(),
+  page: z.number().int().positive(),
+  limit: z.number().int().min(1).max(100),
+  totalPages: z.number().int().nonnegative(),
+});
+export type ListCampaignsResult = z.output<typeof listCampaignsResultSchema>;

@@ -61,24 +61,39 @@ export type ListAppealsParams = z.input<typeof listAppealsSchema>;
 export type CreateAppealParams = z.input<typeof createAppealSchema>;
 export type UpdateAppealStatusParams = z.input<typeof updateAppealStatusSchema>;
 export type CreateAppealUpdateParams = z.input<typeof createAppealUpdateSchema>;
-export type AppealRow = {
-  appealUuid: string;
-  worklogUuid: string;
-  candidateId: number;
-  reason: string | null;
-  status: number;
-  createdAt: string;
-  updatedAt: string | null;
-};
-export type AppealUpdateRow = {
-  appealUpdateUuid: string;
-  appealUuid: string;
-  update: string | null;
-  detail: string | null;
-  createdBy: number | null;
-  isNew: boolean | null;
-  createdAt: string;
-};
+
+// ---------------------------------------------------------------------------
+// Output schemas — runtime validation for action return values
+// ---------------------------------------------------------------------------
+
+export const appealRowSchema = z.object({
+  appealUuid: z.string(),
+  worklogUuid: z.string(),
+  candidateId: z.number(),
+  reason: z.string().nullable(),
+  status: z.number(),
+  createdAt: z.string(),
+  updatedAt: z.string().nullable(),
+});
+export type AppealRow = z.output<typeof appealRowSchema>;
+
+export const appealUpdateRowSchema = z.object({
+  appealUpdateUuid: z.string(),
+  appealUuid: z.string(),
+  update: z.string().nullable(),
+  detail: z.string().nullable(),
+  createdBy: z.number().nullable(),
+  isNew: z.boolean().nullable(),
+  createdAt: z.string(),
+});
+export type AppealUpdateRow = z.output<typeof appealUpdateRowSchema>;
+
+export const actionResultSchema = z.object({
+  success: z.boolean(),
+  error: z.string().optional(),
+});
+export type ActionResult = z.output<typeof actionResultSchema>;
+
 export type PaginatedResult<T> = {
   items: T[];
   total: number;
@@ -86,7 +101,52 @@ export type PaginatedResult<T> = {
   limit: number;
   totalPages: number;
 };
-export type ActionResult = {
-  success: boolean;
-  error?: string;
-};
+
+export const appealsPaginatedResultSchema = z.object({
+  items: z.array(appealRowSchema),
+  total: z.number(),
+  page: z.number(),
+  limit: z.number(),
+  totalPages: z.number(),
+});
+export type AppealsPaginatedResult = z.output<typeof appealsPaginatedResultSchema>;
+
+export const appealUpdatesPaginatedResultSchema = z.object({
+  items: z.array(appealUpdateRowSchema),
+  total: z.number(),
+  page: z.number(),
+  limit: z.number(),
+  totalPages: z.number(),
+});
+export type AppealUpdatesPaginatedResult = z.output<typeof appealUpdatesPaginatedResultSchema>;
+
+export const listAppealsResultSchema = z.union([
+  appealsPaginatedResultSchema,
+  z.object({ error: z.string() }),
+]);
+export type ListAppealsResult = z.output<typeof listAppealsResultSchema>;
+
+export const getAppealResultSchema = z.object({
+  appeal: appealRowSchema.nullable(),
+  error: z.string().optional(),
+});
+export type GetAppealResult = z.output<typeof getAppealResultSchema>;
+
+export const createAppealResultSchema = actionResultSchema.extend({
+  appealUuid: z.string().optional(),
+});
+export type CreateAppealResult = z.output<typeof createAppealResultSchema>;
+
+export const updateAppealStatusResultSchema = actionResultSchema;
+export type UpdateAppealStatusResult = z.output<typeof updateAppealStatusResultSchema>;
+
+export const listAppealUpdatesResultSchema = z.union([
+  appealUpdatesPaginatedResultSchema,
+  z.object({ error: z.string() }),
+]);
+export type ListAppealUpdatesResult = z.output<typeof listAppealUpdatesResultSchema>;
+
+export const createAppealUpdateResultSchema = actionResultSchema.extend({
+  appealUpdateUuid: z.string().optional(),
+});
+export type CreateAppealUpdateResult = z.output<typeof createAppealUpdateResultSchema>;
