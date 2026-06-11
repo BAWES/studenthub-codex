@@ -75,7 +75,7 @@ test.describe("Company Core Flows", () => {
     // DataTable renders with expected columns
     await expect(ctx.page.locator("text=Store").first()).toBeVisible();
     await expect(ctx.page.locator("text=Location").first()).toBeVisible();
-    await expect(ctx.page.locator("text=Mall").first()).toBeVisible();
+    await expect(ctx.page.locator("table >> text=Mall").first()).toBeVisible();
 
     assertNoReactErrors(ctx.errors);
     await ctx.close();
