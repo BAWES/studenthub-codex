@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest";
+import { interviewDetailRouteOutputSchema, updateInterviewNotesOutputSchema } from "./schemas";
 import { getInterviewSchema, updateInterviewNotesSchema } from "./schemas";
 
 // ---------------------------------------------------------------------------
@@ -162,5 +163,43 @@ describe("UpdateInterviewNotesResult shape", () => {
       message: "Interview not found",
     };
     expect(result.operation).toBe("error");
+  });
+});
+
+
+// ---------------------------------------------------------------------------
+// Output schema tests
+// ---------------------------------------------------------------------------
+
+describe("interviewDetailRouteOutputSchema", () => {
+  it("accepts a valid route-level interview detail", () => {
+    const result = interviewDetailRouteOutputSchema.safeParse({
+      interviewUuid: "int_abc",
+      candidateName: "John Doe",
+      candidateEmail: "john@example.com",
+      candidatePhone: "+965****5678",
+      candidateId: 42,
+      requestTitle: "Software Engineer",
+      requestUuid: "req_abc",
+      companyName: "Acme Corp",
+      scheduledAt: new Date(),
+      status: 0,
+      interviewNote: "Good candidate",
+      internalNote: "Internal note",
+      staffName: "Staff Member",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+    expect(result.success).toBe(true);
+  });
+});
+
+describe("updateInterviewNotesOutputSchema", () => {
+  it("accepts a success result", () => {
+    const result = updateInterviewNotesOutputSchema.safeParse({
+      operation: "success",
+      message: "Notes updated",
+    });
+    expect(result.success).toBe(true);
   });
 });

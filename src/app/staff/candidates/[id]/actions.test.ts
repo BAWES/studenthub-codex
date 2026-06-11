@@ -213,3 +213,76 @@ describe("AddNoteResult shape", () => {
     expect(result.error).toBe("Access denied");
   });
 });
+
+// ---------------------------------------------------------------------------
+// Output schema tests
+// ---------------------------------------------------------------------------
+
+describe("candidateNoteOutputSchema", () => {
+  it("accepts a valid note", () => {
+    const result = candidateNoteOutputSchema.safeParse({
+      uuid: "note_abc",
+      text: "Followed up",
+      type: "Internal Note",
+      createdBy: 5,
+      createdAt: "2025-06-01T12:00:00.000Z",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects missing uuid", () => {
+    const result = candidateNoteOutputSchema.safeParse({
+      text: "Note",
+      type: "Internal",
+      createdBy: 5,
+      createdAt: "2025-01-01T00:00:00.000Z",
+    });
+    expect(result.success).toBe(false);
+  });
+});
+
+describe("candidateDetailResultOutputSchema", () => {
+  it("accepts a valid detail result with candidate", () => {
+    const result = candidateDetailResultOutputSchema.safeParse({
+      candidate: {
+        id: 42,
+        name: "John Doe",
+        email: "john@example.com",
+        phone: "+965****5678",
+        gender: 1,
+        objective: "Looking",
+        intro: "Hello",
+        photoUrl: "https://example.com/photo.jpg",
+        civilId: "1234567890",
+        hourlyRate: 15,
+        countryId: 1,
+        universityId: 2,
+        birthDate: "1990-01-01T00:00:00.000Z",
+        createdAt: "2025-01-10T00:00:00.000Z",
+        updatedAt: "2025-06-01T12:00:00.000Z",
+      },
+      notes: [],
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts a null candidate result", () => {
+    const result = candidateDetailResultOutputSchema.safeParse({
+      candidate: null,
+      notes: [],
+    });
+    expect(result.success).toBe(true);
+  });
+});
+
+describe("addNoteResultOutputSchema", () => {
+  it("accepts a success result", () => {
+    const result = addNoteResultOutputSchema.safeParse({ success: true });
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts an error result", () => {
+    const result = addNoteResultOutputSchema.safeParse({ success: false, error: "Access denied" });
+    expect(result.success).toBe(true);
+  });
+});
