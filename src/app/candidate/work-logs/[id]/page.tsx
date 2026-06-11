@@ -4,8 +4,7 @@ import { DetailSection } from "@/modules/workspace/DetailPanels";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { formatDate } from "@/modules/workspace/format";
 import { WorkLogAppealForm } from "@/modules/candidates/WorkLogAppealForm";
-import { getWorkLogDetail } from "../actions";
-import { getWorkLogAppeals, getWorkLogFeedback } from "./actions";
+import { getWorkLogAppeals, getWorkLogFeedback, getCandidateWorkLogDetail } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -14,7 +13,7 @@ export default async function CandidateWorkLogDetailPage({ params }: { params: P
   const { id } = await params;
 
   const [workLog, appeals, feedback] = await Promise.all([
-    getWorkLogDetail({ workLogUuid: id }),
+    getCandidateWorkLogDetail(id),
     getWorkLogAppeals(id),
     getWorkLogFeedback(id),
   ]);

@@ -66,6 +66,7 @@ export type WorkLogDetailForAppeal = {
   via: string | null;
   note: string | null;
   store_name: string | null;
+  store_location: string | null;
   company_name: string | null;
 };
 
