@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { toast } from "sonner";
 import type { ProfileState, EducationState, LanguageState } from "@/modules/candidates/actions";
 import {
@@ -13,10 +13,12 @@ import {
   addCandidateCertificate,
   removeCandidateCertificate,
   addCandidateEducation,
+  editCandidateEducation,
   removeCandidateEducation,
   addCandidateLanguage,
   removeCandidateLanguage,
 } from "@/modules/candidates/actions";
+import { formatMoney } from "@/modules/workspace/format";
 
 type Option = { id: number; label: string };
 type UuidOption = { id: string; label: string };
@@ -35,6 +37,12 @@ type EducationEntry = {
   universityLabel: string;
   degreeLabel?: string;
   majorLabel?: string;
+};
+type WorkHistoryEntry = {
+  id: number;
+  title: string;
+  subtitle: string;
+  meta: string;
 };
 
 type Props = {
@@ -74,9 +82,76 @@ type Props = {
   educationEntries: EducationEntry[];
   degrees: UuidOption[];
   majors: UuidOption[];
+  workHistory?: WorkHistoryEntry[];
 };
 
-export function CandidateEditForm({ candidate, countries, universities, banks, skills, experiences, certificates, languages, educationEntries, degrees, majors }: Props) {
+/** Generate the same field markup used in the add-education form, pre-populated for editing. */
+function EducationEditForm({
+  entry,
+  universities,
+  degrees,
+  majors,
+  editEduAction,
+  editEduPending,
+  editEduState,
+  onCancel,
+}: {
+  entry: EducationEntry;
+  universities: Option[];
+  degrees: UuidOption[];
+  majors: UuidOption[];
+  editEduAction: (payload: FormData) => void;
+  editEduPending: boolean;
+  editEduState: EducationState;
+  onCancel: () => void;
+}) {
+  return (
+    <form action={editEduAction} className="eduInlineEdit">
+      <input type="hidden" name="educationUuid" value={entry.id} />
+      <label>
+        <span>University</span>
+        <select name="universityId" required defaultValue={entry.universityId}>
+          <option value="" disabled>— Select university —</option>
+          {universities.map((u) => (<option key={u.id} value={u.id}>{u.label}</option>))}
+        </select>
+      </label>
+      <label>
+        <span>Degree</span>
+        <select name="degreeUuid" defaultValue={entry.degreeUuid ?? ""}>
+          <option value="">— None —</option>
+          {degrees.map((d) => (<option key={d.id} value={d.id}>{d.label}</option>))}
+        </select>
+      </label>
+      <label>
+        <span>Major</span>
+        <select name="majorUuid" defaultValue={entry.majorUuid ?? ""}>
+          <option value="">— None —</option>
+          {majors.map((m) => (<option key={m.id} value={m.id}>{m.label}</option>))}
+        </select>
+      </label>
+      <div className="inlineFields">
+        <label>
+          <span>Graduation year</span>
+          <input name="graduationYear" type="number" min="1950" max="2035" defaultValue={entry.graduationYear ?? ""} />
+        </label>
+        <label className="checkboxLabel">
+          <input name="isCurrentlyStudying" type="checkbox" value="1" defaultChecked={entry.isCurrentlyStudying} />
+          <span>Currently studying</span>
+        </label>
+      </div>
+      {editEduState.error ? <p className="formError">{editEduState.error}</p> : null}
+      <div className="formActions">
+        <button type="submit" disabled={editEduPending}>{editEduPending ? "Saving..." : "Save"}</button>
+        <button type="button" onClick={onCancel} className="cancelButton">Cancel</button>
+      </div>
+    </form>
+  );
+}
+
+export function CandidateEditForm({
+  candidate, countries, universities, banks, skills, experiences, certificates,
+  languages, educationEntries, degrees, majors, workHistory,
+}: Props) {
   const [profileState, profileAction, profilePending] = useActionState(
     updateCandidateProfile,
     { success: false } as ProfileState,
@@ -87,6 +162,7 @@ export function CandidateEditForm({ candidate, countries, universities, banks, s
       toast.success("Profile saved", { description: "Your profile has been updated successfully." });
     }
   }, [profileState]);
+
   const [uploadState, uploadAction, uploadPending] = useActionState(uploadDocument, { error: "" });
   const [, addSkillAction, addSkillPending] = useActionState(addCandidateSkill, { error: "" });
   const [, removeSkillAction, removeSkillPending] = useActionState(removeCandidateSkill, { error: "" });
@@ -96,8 +172,12 @@ export function CandidateEditForm({ candidate, countries, universities, banks, s
   const [, removeCertAction, removeCertPending] = useActionState(removeCandidateCertificate, { error: "" });
   const [addEduState, addEduAction, addEduPending] = useActionState(addCandidateEducation, { success: false } as EducationState);
   const [removeEduState, removeEduAction, removeEduPending] = useActionState(removeCandidateEducation, { success: false } as EducationState);
+  const [editEduState, editEduAction, editEduPending] = useActionState(editCandidateEducation, { success: false } as EducationState);
   const [addLangState, addLangAction, addLangPending] = useActionState(addCandidateLanguage, { success: false } as LanguageState);
   const [removeLangState, removeLangAction, removeLangPending] = useActionState(removeCandidateLanguage, { success: false } as LanguageState);
+
+  // Track which education entry is being edited (by id)
+  const [editingEduId, setEditingEduId] = useState<string | null>(null);
 
   useEffect(() => {
     if (addEduState.success) { toast.success("Education added", { description: "Your education entry has been added." }); }
@@ -105,6 +185,9 @@ export function CandidateEditForm({ candidate, countries, universities, banks, s
   useEffect(() => {
     if (removeEduState.success) { toast.success("Education removed", { description: "The education entry has been removed." }); }
   }, [removeEduState]);
+  useEffect(() => {
+    if (editEduState.success) { setEditingEduId(null); toast.success("Education updated", { description: "Your education entry has been updated." }); }
+  }, [editEduState]);
   useEffect(() => {
     if (addLangState.success) { toast.success("Language added", { description: "Your language has been added." }); }
   }, [addLangState]);
@@ -197,9 +280,41 @@ export function CandidateEditForm({ candidate, countries, universities, banks, s
 
       {languages.map((l) => (<form key={l.id} id={`remove-lang-${l.id}`} action={removeLangAction} hidden><input type="hidden" name="languageId" value={l.id} /></form>))}
 
+      {/* ===== Education section with inline edit ===== */}
       <form action={addEduAction} className="candidateEditForm">
         <h2>Education</h2>
-        {educationEntries.length ? (<ul className="editableList">{educationEntries.map((e) => (<li key={e.id}><span>{e.universityLabel}{e.degreeLabel ? ` · ${e.degreeLabel}` : ""}{e.majorLabel ? ` · ${e.majorLabel}` : ""}{e.graduationYear ? ` (${e.graduationYear})` : ""}{e.isCurrentlyStudying ? " · Currently studying" : ""}</span><button type="submit" form={`remove-edu-${e.id}`} disabled={removeEduPending} className="removeButton">Remove</button></li>))}</ul>) : (<p className="formNotice">No education entries added yet.</p>)}
+        {educationEntries.length ? (
+          <ul className="editableList">
+            {educationEntries.map((e) => (
+              <li key={e.id}>
+                {editingEduId === e.id ? (
+                  <EducationEditForm
+                    entry={e}
+                    universities={universities}
+                    degrees={degrees}
+                    majors={majors}
+                    editEduAction={editEduAction}
+                    editEduPending={editEduPending}
+                    editEduState={editEduState}
+                    onCancel={() => setEditingEduId(null)}
+                  />
+                ) : (
+                  <>
+                    <span>
+                      {e.universityLabel}
+                      {e.degreeLabel ? ` · ${e.degreeLabel}` : ""}
+                      {e.majorLabel ? ` · ${e.majorLabel}` : ""}
+                      {e.graduationYear ? ` (${e.graduationYear})` : ""}
+                      {e.isCurrentlyStudying ? " · Currently studying" : ""}
+                    </span>
+                    <button type="button" onClick={() => setEditingEduId(e.id)} className="editButton">Edit</button>
+                    <button type="submit" form={`remove-edu-${e.id}`} disabled={removeEduPending} className="removeButton">Remove</button>
+                  </>
+                )}
+              </li>
+            ))}
+          </ul>
+        ) : (<p className="formNotice">No education entries added yet.</p>)}
         <label><span>University</span><select name="universityId" required defaultValue=""><option value="" disabled>— Select university —</option>{universities.map((u) => (<option key={u.id} value={u.id}>{u.label}</option>))}</select></label>
         <label><span>Degree</span><select name="degreeUuid" defaultValue=""><option value="">— None —</option>{degrees.map((d) => (<option key={d.id} value={d.id}>{d.label}</option>))}</select></label>
         <label><span>Major</span><select name="majorUuid" defaultValue=""><option value="">— None —</option>{majors.map((m) => (<option key={m.id} value={m.id}>{m.label}</option>))}</select></label>
@@ -209,6 +324,26 @@ export function CandidateEditForm({ candidate, countries, universities, banks, s
       </form>
 
       {educationEntries.map((e) => (<form key={e.id} id={`remove-edu-${e.id}`} action={removeEduAction} hidden><input type="hidden" name="educationUuid" value={e.id} /></form>))}
+
+      {/* ===== Work History section (read-only from contract assignments) ===== */}
+      <div className="candidateEditForm">
+        <h2>Work History</h2>
+        {workHistory && workHistory.length > 0 ? (
+          <ul className="editableList">
+            {workHistory.map((w) => (
+              <li key={w.id}>
+                <span>
+                  {w.title}
+                  {w.subtitle ? ` · ${w.subtitle}` : ""}
+                  {w.meta ? ` — ${w.meta}` : ""}
+                </span>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="formNotice">No work history records found.</p>
+        )}
+      </div>
     </div>
   );
 }

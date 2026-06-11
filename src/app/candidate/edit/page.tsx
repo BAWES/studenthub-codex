@@ -94,6 +94,12 @@ export default async function CandidateEditPage() {
         }))}
         degrees={degrees}
         majors={majors}
+        workHistory={data.histories?.map((h: any) => ({
+          id: h.id,
+          title: h.title,
+          subtitle: h.subtitle,
+          meta: h.meta,
+        }))}
       />
     </WorkspaceShell>
   );
