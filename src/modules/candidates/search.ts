@@ -85,6 +85,13 @@ export function parseCandidateIds(value: string | string[] | undefined, limit = 
     .slice(0, limit);
 }
 
+export function parseSearchPage(value: string | string[] | undefined): number | undefined {
+  const raw = Array.isArray(value) ? value[0] : value;
+  if (!raw) return undefined;
+  const page = Number(raw);
+  return Number.isInteger(page) && page > 0 ? page : undefined;
+}
+
 export function parseVisibility(value: string | string[] | undefined): CandidateSearchVisibility {
   const visibility = Array.isArray(value) ? value[0] : value;
   return visibility === "assigned" ? "assigned" : "all";
@@ -114,6 +121,7 @@ export async function getCandidateSearchWorkspace(params: CandidateSearchParams)
     prisma.candidate.findMany({
       where,
       orderBy: [{ candidate_updated_at: "desc" }, { candidate_id: "desc" }],
+      skip: params.page ? (params.page - 1) * 60 : 0,
       take: 60,
       select: candidateSearchSelect
     }),
@@ -185,6 +193,8 @@ export async function getCandidateSearchWorkspace(params: CandidateSearchParams)
     query,
     filter,
     visibility,
+    page: params.page ?? 1,
+    totalPages: Math.max(1, Math.ceil(matchingCount / 60)),
     assignedCount: staffCandidateIds?.length ?? null,
     matchingCount,
     selectedId,

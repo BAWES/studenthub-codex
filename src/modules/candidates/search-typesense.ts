@@ -16,7 +16,7 @@ import type { CandidateSearchRow, CandidateSearchParams, CandidateSearchFacet, C
 import { candidateIdsForStaff, buildSelectedActions, uniqueCandidateIds } from "./search";
 
 // Re-exported from search.ts for page compatibility
-export { parseFilter, parseCandidateId, parseCandidateIds } from "./search";
+export { parseFilter, parseCandidateId, parseCandidateIds, parseSearchPage } from "./search";
 
 // Exported for testing
 export { buildFlags, buildTypesenseFacets, resolveSelectedCandidateId };
@@ -233,6 +233,8 @@ async function searchTypesense({
     query,
     filter,
     visibility,
+    page: params.page ?? 1,
+    totalPages: Math.max(1, Math.ceil(found / 60)),
     assignedCount: scopedCandidateIds?.length ?? null,
     matchingCount: found,
     selectedId,

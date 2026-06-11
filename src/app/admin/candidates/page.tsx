@@ -1,6 +1,6 @@
 import { requireRoleCapability } from "@/modules/auth/session";
 import { CandidateSearchOS } from "@/modules/candidates/CandidateSearchOS";
-import { getCandidateSearchWorkspaceTypesense as getCandidateSearchWorkspace, parseFilter, parseCandidateId, parseCandidateIds } from "@/modules/candidates/search-typesense";
+import { getCandidateSearchWorkspaceTypesense as getCandidateSearchWorkspace, parseFilter, parseCandidateId, parseCandidateIds, parseSearchPage } from "@/modules/candidates/search-typesense";
 
 export const dynamic = "force-dynamic";
 
@@ -13,6 +13,7 @@ export default async function AdminCandidatesPage({
     candidate?: string;
     tabs?: string;
     selected?: string;
+    page?: string;
     country?: string;
     university?: string;
     company?: string;
@@ -32,6 +33,7 @@ export default async function AdminCandidatesPage({
     candidateId: parseCandidateId(params.candidate),
     tabIds: parseCandidateIds(params.tabs),
     selectedIds: parseCandidateIds(params.selected, 100),
+    page: parseSearchPage(params.page),
     country: params.country,
     university: params.university,
     company: params.company,
