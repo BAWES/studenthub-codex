@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { SessionUser } from "@/modules/auth/types";
 import MatchScoreBadge from "@/components/matching/MatchScoreBadge";
@@ -53,6 +53,21 @@ type SearchResponse = {
 
 const ITEMS_PER_PAGE = 60;
 
+// ─── Debounce hook ────────────────────────────────────────────────────
+
+const DEBOUNCE_MS = 300;
+
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
+  useEffect(() => {
+    const id = window.setTimeout(() => setDebouncedValue(value), delay);
+    return () => window.clearTimeout(id);
+  }, [value, delay]);
+
+  return debouncedValue;
+}
+
 // ─── Skeleton card for loading state ──────────────────────────────────
 
 function SearchResultSkeleton() {
@@ -96,6 +111,7 @@ export function CandidateSearchPage({ session, initialData }: { session: Session
   const router = useRouter();
   const searchParams = useSearchParams();
   const inputRef = useRef<HTMLInputElement>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
   const [query, setQuery] = useState(searchParams.get("q") ?? "");
   const [results, setResults] = useState<SearchResponse | null>(initialData ?? null);
@@ -103,6 +119,10 @@ export function CandidateSearchPage({ session, initialData }: { session: Session
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(Number(searchParams.get("page")) || 1);
   const [activeFacets, setActiveFacets] = useState<Record<string, string>>({});
+
+  // Debounced query for auto-search
+  const debouncedQuery = useDebounce(query, DEBOUNCE_MS);
+  const isTyping = query !== debouncedQuery;
 
   // Parse initial facets from URL
   useEffect(() => {
@@ -115,8 +135,15 @@ export function CandidateSearchPage({ session, initialData }: { session: Session
     setActiveFacets(facets);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Fetch search results
+  // Fetch search results with AbortController for stale request cancellation
   const doSearch = useCallback(async (q: string, p: number, facets: Record<string, string>) => {
+    // Cancel any in-flight request
+    if (abortRef.current) {
+      abortRef.current.abort();
+    }
+    const controller = new AbortController();
+    abortRef.current = controller;
+
     setLoading(true);
     setError(null);
 
@@ -130,27 +157,38 @@ export function CandidateSearchPage({ session, initialData }: { session: Session
         if (val) params.set(key, val);
       }
 
-      const res = await fetch(`/api/candidates/search?${params.toString()}`);
+      const res = await fetch(`/api/candidates/search?${params.toString()}`, {
+        signal: controller.signal,
+      });
       if (!res.ok) {
         const errBody = await res.json().catch(() => ({}));
         throw new Error(errBody.error ?? `Search failed (${res.status})`);
       }
       const data: SearchResponse = await res.json();
-      setResults(data);
+      // Only update if this request wasn't aborted
+      if (!controller.signal.aborted) {
+        setResults(data);
+      }
     } catch (e) {
+      if (e instanceof DOMException && e.name === "AbortError") {
+        return; // Silently ignore aborted requests
+      }
       setError(e instanceof Error ? e.message : String(e));
       setResults(null);
     } finally {
-      setLoading(false);
+      if (!controller.signal.aborted) {
+        setLoading(false);
+      }
     }
   }, []);
 
-  // Initial search
+  // Debounced auto-search: fires on mount and when debouncedQuery settles
   useEffect(() => {
-    doSearch(query, page, activeFacets);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    doSearch(debouncedQuery, 1, activeFacets);
+    updateUrl(debouncedQuery, 1, activeFacets);
+  }, [debouncedQuery]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Handle search form submit
+  // Handle search form submit (manual / Enter key)
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setPage(1);
@@ -180,7 +218,7 @@ export function CandidateSearchPage({ session, initialData }: { session: Session
   };
 
   // Update URL without full navigation
-  const updateUrl = (q: string, p: number, facets: Record<string, string>) => {
+  const updateUrl = useCallback((q: string, p: number, facets: Record<string, string>) => {
     const params = new URLSearchParams();
     if (q) params.set("q", q);
     if (p > 1) params.set("page", String(p));
@@ -189,7 +227,7 @@ export function CandidateSearchPage({ session, initialData }: { session: Session
     }
     const qs = params.toString();
     router.replace(`/candidate/search${qs ? `?${qs}` : ""}`, { scroll: false });
-  };
+  }, [router]);
 
   const totalPages = results ? Math.ceil(results.matchingCount / ITEMS_PER_PAGE) : 0;
 
@@ -319,19 +357,30 @@ export function CandidateSearchPage({ session, initialData }: { session: Session
 
         {/* Results list */}
         <main className="min-h-[400px]">
-          {/* Source indicator */}
+          {/* Source indicator / typing indicator */}
           {results && (
             <div className="mb-4 flex items-center justify-between text-xs">
               <span className="font-semibold" style={{ color: "var(--ink)" }}>
-                {results.matchingCount.toLocaleString()} candidate
-                {results.matchingCount !== 1 ? "s" : ""} found
+                {isTyping ? (
+                  <>
+                    <span className="inline-block align-middle mr-1.5 h-2 w-2 rounded-full bg-[#eb6651] animate-pulse" />
+                    Searching...
+                  </>
+                ) : (
+                  <>
+                    {results.matchingCount.toLocaleString()} candidate
+                    {results.matchingCount !== 1 ? "s" : ""} found
+                  </>
+                )}
               </span>
-              <span
-                className="rounded-md px-2 py-0.5"
-                style={{ color: "var(--muted)", background: "var(--accent)" }}
-              >
-                {results.source.current}
-              </span>
+              {!isTyping && (
+                <span
+                  className="rounded-md px-2 py-0.5"
+                  style={{ color: "var(--muted)", background: "var(--accent)" }}
+                >
+                  {results.source.current}
+                </span>
+              )}
             </div>
           )}
 
@@ -339,7 +388,7 @@ export function CandidateSearchPage({ session, initialData }: { session: Session
           {loading && <SearchResultSkeletons count={5} />}
 
           {/* Empty state */}
-          {!loading && results && results.rows.length === 0 && (
+          {!loading && !isTyping && results && results.rows.length === 0 && (
             <EmptyState
               variant="search"
               title="No candidates found"
@@ -355,7 +404,7 @@ export function CandidateSearchPage({ session, initialData }: { session: Session
           )}
 
           {/* Results */}
-          {!loading && results && results.rows.length > 0 && (
+          {!loading && !isTyping && results && results.rows.length > 0 && (
             <>
               <div className="flex flex-col gap-3">
                 {results.rows.map((row) => (

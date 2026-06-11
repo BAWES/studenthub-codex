@@ -134,6 +134,7 @@ describe("CandidateSearchPage", () => {
     await waitFor(() => {
       expect(mockFetch).toHaveBeenCalledWith(
         expect.stringContaining("/api/candidates/search"),
+        expect.objectContaining({ signal: expect.any(AbortSignal) }),
       );
     });
   });
