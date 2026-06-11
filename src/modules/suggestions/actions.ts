@@ -7,36 +7,13 @@ import { requireCapability } from "@/modules/auth/session";
 import {
   listSuggestionsResultSchema,
   suggestionActionResultSchema,
+  suggestionListItemSchema,
 } from "./schemas";
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export type SuggestionListItem = {
-  suggestion_uuid: string;
-  request_uuid: string;
-  candidate_id: number | null;
-  fulltimer_uuid: string | null;
-  note_uuid: string;
-  story_uuid: string | null;
-  suggestion_status: number;
-  mail_to_company: boolean;
-  suggestion_datetime: Date;
-};
-
-export type SuggestionListResult = {
-  suggestions: SuggestionListItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
-
-export type UpdateSuggestionStatusResult = {
-  operation: "success" | "error";
-  message: string;
-};
+import type {
+  SuggestionListItem,
+  SuggestionListResult,
+  UpdateSuggestionStatusResult,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Schemas

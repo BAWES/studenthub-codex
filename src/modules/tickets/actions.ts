@@ -10,9 +10,14 @@ import {
   ticketCommentItemSchema,
   ticketActionResultSchema,
 } from "./schemas";
-
-// ---------------------------------------------------------------------------
-// Schemas
+import type {
+  TicketItem,
+  ListTicketsResult,
+  TicketCommentItem,
+  TicketActionResult,
+  CreateTicketResult,
+  AddCommentResult,
+} from "./schemas";
 // ---------------------------------------------------------------------------
 
 const listTicketsSchema = z.object({
@@ -60,44 +65,6 @@ export type CreateTicketParams = z.input<typeof createTicketSchema>;
 export type AddCommentParams = z.input<typeof addCommentSchema>;
 export type GetCommentsParams = z.input<typeof getCommentsSchema>;
 export type UpdateTicketParams = z.input<typeof updateTicketSchema>;
-
-export type TicketItem = {
-  ticket_uuid: string;
-  candidate_id: number | null;
-  staff_id: number | null;
-  ticket_detail: string | null;
-  ticket_status: number | null;
-  created_at: Date | null;
-  updated_at: Date | null;
-};
-
-export type ListTicketsResult = {
-  tickets: TicketItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
-
-export type TicketCommentItem = {
-  ticket_comment_uuid: string;
-  ticket_uuid: string;
-  candidate_id: number | null;
-  staff_id: number | null;
-  ticket_comment_detail: string | null;
-  created_at: Date | null;
-  updated_at: Date | null;
-};
-
-export type CreateTicketResult = {
-  operation: string;
-  message: string;
-};
-
-export type AddCommentResult = {
-  operation: string;
-  message: string;
-};
 
 // ---------------------------------------------------------------------------
 // Exported schemas (for shared validation in tests)
