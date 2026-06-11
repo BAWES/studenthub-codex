@@ -1,17 +1,6 @@
 export { getAdminCompanyRows, getAdminRequestRows, getAdminTransferRows, getAdminTransferDetail, getAdminCandidateRows } from "./admin/index";
 export { getStaffRequestRows, getStaffInterviewRows, getStaffInterviewDetail, getStaffWorkspace } from "./staff";
 export {
-  getCandidateDetail,
-  getCandidateWorkspace,
-  getCandidateInvitationRows,
-  getCandidateInvitationDetail,
-  getCandidateWorkLogRows,
-  getCandidateWorkLogDetail,
-  getCandidateTransferRows,
-  getCandidateTransferDetail,
-  getCandidateIdsForStaff,
-} from "./candidate/index";
-export {
   getCandidateNotificationRows,
   getCandidateNotificationDetail,
 } from "./notification";

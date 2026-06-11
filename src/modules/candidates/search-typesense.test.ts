@@ -42,9 +42,9 @@ vi.mock("@/lib/prisma", () => ({
   },
 }));
 
-// Workspace data mock
+// Candidate detail mock
 const mockGetCandidateDetail = vi.hoisted(() => vi.fn());
-vi.mock("@/modules/workspace/data/candidate", () => ({
+vi.mock("@/modules/candidates/candidate-detail", () => ({
   getCandidateDetail: mockGetCandidateDetail,
 }));
 

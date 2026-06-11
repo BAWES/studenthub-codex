@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import { formatDate, formatMoney } from "@/modules/workspace/format";
 
+export type CandidateDetail = Awaited<ReturnType<typeof getCandidateDetail>>;
+
 export async function getCandidateDetail(candidateId: number, requestBasePath = "/staff/requests") {
   const [
     candidate,

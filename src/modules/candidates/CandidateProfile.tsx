@@ -1,6 +1,6 @@
 import type { Route } from "next";
 import Link from "next/link";
-import type { getCandidateDetail } from "@/modules/workspace/data";
+import type { getCandidateDetail } from "@/modules/candidates/candidate-detail";
 import { formatDate } from "@/modules/workspace/format";
 import { EmptyState } from "@/modules/workspace/EmptyState";
 import { StatusBadge } from "@/modules/workspace/StatusBadge";

@@ -71,7 +71,7 @@ describe("getCandidateProfileSchema", () => {
 
 // Mock the data layer before importing the action
 const mockGetCandidateDetail = vi.fn();
-vi.mock("@/modules/workspace/data/candidate", () => ({
+vi.mock("@/modules/candidates/candidate-detail", () => ({
   getCandidateDetail: mockGetCandidateDetail,
 }));
 
