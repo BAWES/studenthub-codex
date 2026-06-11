@@ -4,7 +4,7 @@ import { useActionState, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { DataTable } from "@/modules/workspace/DataTable";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
-import { GlassPanel } from "@/components/ui/glass-panel";
+
 import { StatusBadge } from "@/modules/workspace/StatusBadge";
 import type { SessionUser } from "@/modules/auth/types";
 import type { AttendanceItem } from "@/modules/attendance/schemas";
@@ -55,10 +55,10 @@ export function AdminAttendanceTable({ session, attendance, employees }: Props) 
       ]}
     >
       <section className="mb-6">
-        <GlassPanel variant="subtle" radius="lg" className="p-5">
+        <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
           <h3 className="text-sm font-semibold mb-3" style={{ color: "var(--ink)" }}>Record attendance</h3>
           <CreateAttendanceForm employees={employees} onSuccess={() => router.refresh()} />
-        </GlassPanel>
+        </div>
       </section>
 
       <div className="mb-4 flex items-center gap-3">

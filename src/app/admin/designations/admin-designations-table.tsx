@@ -4,7 +4,7 @@ import { useActionState, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { DataTable } from "@/modules/workspace/DataTable";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
-import { GlassPanel } from "@/components/ui/glass-panel";
+
 import type { SessionUser } from "@/modules/auth/types";
 import type { DesignationRow } from "./schemas";
 import { createDesignation, updateDesignation, deleteDesignation } from "./actions";
@@ -28,10 +28,10 @@ export function AdminDesignationsTable({ session, designations }: Props) {
       ]}
     >
       <section className="mb-6">
-        <GlassPanel variant="subtle" radius="lg" className="p-5">
+        <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
           <h3 className="text-sm font-semibold mb-3" style={{ color: "var(--ink)" }}>Add designation</h3>
           <CreateDesignationForm onSuccess={() => router.refresh()} />
-        </GlassPanel>
+        </div>
       </section>
 
       <DataTable

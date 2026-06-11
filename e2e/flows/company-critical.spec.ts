@@ -1,6 +1,9 @@
 import { test, expect, type BrowserContext, type Page } from "@playwright/test";
 import { getMockFixtures, type FixtureUser } from "../fixtures/users";
 
+// Force USE_MOCK_FIXTURES=true — these tests must never need DB seed data
+process.env.USE_MOCK_FIXTURES = "true";
+
 let company: FixtureUser;
 let candidateUser: FixtureUser;
 let staff: FixtureUser;

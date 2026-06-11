@@ -4,7 +4,7 @@ import { useActionState, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { DataTable } from "@/modules/workspace/DataTable";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
-import { GlassPanel } from "@/components/ui/glass-panel";
+
 import { StatusBadge } from "@/modules/workspace/StatusBadge";
 import type { SessionUser } from "@/modules/auth/types";
 import type { EmployeeRow } from "./schemas";
@@ -44,14 +44,14 @@ export function AdminEmployeesTable({ session, employees, departments, designati
       ]}
     >
       <section className="mb-6">
-        <GlassPanel variant="subtle" radius="lg" className="p-5">
+        <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
           <h3 className="text-sm font-semibold mb-3" style={{ color: "var(--ink)" }}>Add employee</h3>
           <CreateEmployeeForm
             departments={departments}
             designations={designations}
             onSuccess={() => router.refresh()}
           />
-        </GlassPanel>
+        </div>
       </section>
 
       <DataTable
