@@ -158,7 +158,9 @@ export default function LandingContent({ session }: LandingContentProps) {
       </FadeInSection>
 
       {/* ── Comparison table — persona-specific ── */}
-      <ComparisonTable persona={persona} />
+      <FadeInSection asDiv delay={450}>
+        <ComparisonTable persona={persona} />
+      </FadeInSection>
 
       {/* ── Final CTA section ── */}
       <FadeInSection delay={500}>

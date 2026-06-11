@@ -74,6 +74,7 @@ vi.mock("lucide-react", () => ({
   Check: () => <span data-testid="icon-check" />,
   X: () => <span data-testid="icon-x" />,
   Minus: () => <span data-testid="icon-minus" />,
+  Users: () => <span data-testid="icon-users" />,
 }));
 
 // ── Mock ThemeToggle ──────────────────────────────────────────
