@@ -13,6 +13,11 @@ import type {
   UpdateWorkspaceResult,
 } from "./schemas";
 
+import {
+  workspaceOverviewOutputSchema,
+  updateWorkspaceResultSchema,
+} from "../../schemas";
+
 // ---------------------------------------------------------------------------
 // Get Company Workspace
 // ---------------------------------------------------------------------------
@@ -79,7 +84,7 @@ export async function getWorkspace(
     }),
   ]);
 
-  return {
+  const result: WorkspaceData = {
     contact: contact
       ? { contact_name: contact.contact_name, contact_email: contact.contact_email ?? "" }
       : null,
@@ -102,6 +107,17 @@ export async function getWorkspace(
       meta: `${request.request_status ?? "No status"} · ${request.request_number_of_employees ?? 0} seats`,
     })),
   };
+
+  // Validate output shape
+  const validated = workspaceOverviewOutputSchema.safeParse(result);
+  if (!validated.success) {
+    console.error(
+      "[company/workspace] getWorkspace output validation failed:",
+      validated.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -143,5 +159,17 @@ export async function updateWorkspace(
   }
 
   revalidatePath("/company/workspace/[id]", "page");
-  return { contactUuid };
+
+  const result: UpdateWorkspaceResult = { contactUuid };
+
+  // Validate output shape
+  const validated = updateWorkspaceResultSchema.safeParse(result);
+  if (!validated.success) {
+    console.error(
+      "[company/workspace] updateWorkspace output validation failed:",
+      validated.error.issues,
+    );
+  }
+
+  return result;
 }

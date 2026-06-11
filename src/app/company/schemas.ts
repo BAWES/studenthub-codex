@@ -94,3 +94,36 @@ export type CompanyHomeData = CompanyWorkspaceData & {
 export const getCompanyWorkspaceSchema = z.object({
   contactUuid: z.string().min(1, "Contact UUID is required"),
 });
+
+// ---------------------------------------------------------------------------
+// Output validation — mirrors WorkspaceMetric / WorkspaceListItem / result types
+// ---------------------------------------------------------------------------
+
+export const workspaceMetricSchema = z.object({
+  label: z.string(),
+  value: z.number().int().nonnegative(),
+  note: z.string(),
+});
+
+export const workspaceListItemSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  subtitle: z.string(),
+  meta: z.string().optional(),
+});
+
+export const workspaceContactSchema = z.object({
+  contact_name: z.string(),
+  contact_email: z.string(),
+}).nullable();
+
+export const workspaceOverviewOutputSchema = z.object({
+  contact: workspaceContactSchema,
+  metrics: z.array(workspaceMetricSchema),
+  companies: z.array(workspaceListItemSchema),
+  requests: z.array(workspaceListItemSchema),
+});
+
+export const updateWorkspaceResultSchema = z.object({
+  contactUuid: z.string(),
+});
