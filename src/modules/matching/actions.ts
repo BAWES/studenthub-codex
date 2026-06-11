@@ -14,6 +14,9 @@ import {
   matchCandidateToJobSchema,
   listMatchingJobsSchema,
   listMatchingCandidatesSchema,
+  matchCandidateToJobResultSchema,
+  listMatchingJobsResultSchema,
+  listMatchingCandidatesResultSchema,
 } from "./schemas";
 import type {
   MatchCandidateToJobInput,
@@ -236,7 +239,7 @@ export async function matchCandidateToJob(
     ...locScore.details,
   ];
 
-  return {
+  const result: { success: true; score: MatchScore } = {
     success: true,
     score: {
       overall,
@@ -246,6 +249,17 @@ export async function matchCandidateToJob(
       breakdown,
     },
   };
+
+  // Validate output shape
+  const outputParsed = matchCandidateToJobResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/matching] matchCandidateToJob output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -297,7 +311,18 @@ export async function listMatchingJobs(
   const total = scored.length;
   const jobs = scored.slice(0, limit);
 
-  return { success: true, jobs, total };
+  const result: { success: true; jobs: MatchedJobRow[]; total: number } = { success: true, jobs, total };
+
+  // Validate output shape
+  const outputParsed = listMatchingJobsResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/matching] listMatchingJobs output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -429,9 +454,20 @@ export async function listMatchingCandidates(
     }),
   );
 
-  return {
+  const result: { success: true; candidates: MatchedCandidateRow[]; total: number } = {
     success: true,
     candidates: candidatesWithDetails,
     total,
   };
+
+  // Validate output shape
+  const outputParsed = listMatchingCandidatesResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/matching] listMatchingCandidates output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }

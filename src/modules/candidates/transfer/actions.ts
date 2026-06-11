@@ -1,88 +1,18 @@
 "use server";
 
-import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export type TransferCandidateItem = {
-  tc_id: number;
-  transfer_id: number | null;
-  candidate_id: number | null;
-  prev_candidate_id: number | null;
-  store_id: number | null;
-  store_name: string | null;
-  company_id: number | null;
-  company_name: string | null;
-  company_email: string | null;
-  bank_id: number | null;
-  transfer_confirmation_id: string | null;
-  transfer_file_id: number | null;
-  transfer_benef_name: string | null;
-  transfer_benef_iban: string | null;
-  candidate_hourly_rate: number | null;
-  company_hourly_rate: number | null;
-  hours: number | null;
-  minutes: number | null;
-  seconds: number | null;
-  bonus: number | null;
-  bonus_commission: number | null;
-  transfer_cost: number | null;
-  candidate_total: number | null;
-  company_total: number | null;
-  deleted: number;
-  paid: number;
-  is_candidate_notified: boolean | null;
-  currency_code: string | null;
-  contract_uuid: string | null;
-  tc_created_at: Date;
-  tc_updated_at: Date;
-  // Relations
-  candidate?: {
-    candidate_id: number;
-    candidate_name: string | null;
-    candidate_name_ar: string | null;
-  } | null;
-  transfer?: {
-    transfer_id: number;
-    transfer_status: number;
-  } | null;
-};
-
-export type TransferCandidateDetail = TransferCandidateItem | null;
-
-export type ListTransferCandidatesResult = {
-  items: TransferCandidateItem[];
-  total: number;
-};
-
-// ---------------------------------------------------------------------------
-// Schemas
-// ---------------------------------------------------------------------------
-
-const listTransferCandidatesSchema = z.object({
-  tcId: z.string().optional(), // comma-separated tc_ids
-  transferConfirmationId: z.string().optional(),
-  candidateId: z.coerce.number().int().positive().optional(),
-  transferId: z.coerce.number().int().positive().optional(),
-  transferFileId: z.coerce.number().int().positive().optional(),
-});
-
-const getTransferCandidateSchema = z.object({
-  tcId: z.coerce.number().int().positive("Transfer candidate ID is required"),
-});
-
-export type ListTransferCandidatesParams = z.input<
-  typeof listTransferCandidatesSchema
->;
-export type GetTransferCandidateParams = z.input<
-  typeof getTransferCandidateSchema
->;
-
-export { listTransferCandidatesSchema, getTransferCandidateSchema };
+import {
+  listTransferCandidatesSchema,
+  getTransferCandidateSchema,
+  transferCandidateItemSchema,
+  listTransferCandidatesResultSchema,
+  type ListTransferCandidatesParams,
+  type GetTransferCandidateParams,
+  type TransferCandidateItem,
+  type TransferCandidateDetail,
+  type ListTransferCandidatesResult,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -230,10 +160,21 @@ export async function listTransferCandidates(
     prisma.transfer_candidate.count({ where }),
   ]);
 
-  return {
+  const result = {
     items: rows.map(toItem),
     total,
   };
+
+  // Validate output shape
+  const outputParsed = listTransferCandidatesResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/candidates/transfer] listTransferCandidates output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -270,5 +211,16 @@ export async function getTransferCandidate(
 
   if (!row) return null;
 
-  return toItem(row);
+  const result = toItem(row);
+
+  // Validate output shape
+  const outputParsed = transferCandidateItemSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/candidates/transfer] getTransferCandidate output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
