@@ -1,5 +1,31 @@
 # StudentHub Next — Project Conventions
 
+## 📐 Design System (MANDATORY)
+
+Read `DESIGN_SYSTEM.md` in the project root before doing any design or UI work. Key rules:
+
+- **Zendesk coral `#eb6651`** is the primary accent color — use it for CTAs, badges, links
+- **CSS variables only** — never hardcode hex values that should theme-switch. Use `var(--ink)`, `var(--surface)`, `var(--border)`, etc.
+- **Closable tabs** — the workspace UI must support closable, reorderable tabs (like VS Code / Chrome). See DESIGN_SYSTEM.md §4
+- **Smooth animations** — use `--dur-fast` (120ms) to `--dur-modal` (300ms) timing tokens
+- **No bounce** animations in production UI
+- **Landing page is frozen** — do NOT modify `src/app/LandingContent.tsx`
+
+## 🧠 Dosu Knowledge (MANDATORY)
+
+StudentHub has **Dosu MCP** connected for project knowledge. Before designing or implementing:
+
+1. If you lack context about the business model, workflow, or codebase, query Dosu first
+2. Dosu is connected via Hermes native MCP: `mcp_dosu_ask`, `mcp_dosu_init_knowledge`, `mcp_dosu_search_documentation`
+3. The production MySQL DB (53K candidates, 524 companies, 162 staff) is available on port 3307 for validating understanding
+
+## Business Model (Quick Reference)
+
+- **Staff recruiters drive matching** — not a self-serve job board. Staff invite candidates to opportunities (22,789 invitations served)
+- **Contract types**: hourly (with margin), fixed-price, monthly salary, fulltimer
+- **Flow**: Company request → Staff recruit → Invite candidates → Interview → Contract → Timesheets → Invoice → Payment
+- **Roles**: candidate, company, staff, admin, inspector
+
 ## Branch Strategy
 
 - `main` — production-ready releases only. Merged from `develop` via release PRs.
