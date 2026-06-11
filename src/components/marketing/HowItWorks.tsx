@@ -1,6 +1,6 @@
 "use client";
 
-import { UserRound, Search, Briefcase, ArrowDown } from "lucide-react";
+import { UserRound, Search, Briefcase, ArrowRight } from "lucide-react";
 
 // ── Step definitions ──────────────────────────────────────────
 
@@ -9,6 +9,7 @@ interface Step {
   title: string;
   body: string;
   number: number;
+  tag: string;
 }
 
 const steps: Step[] = [
@@ -16,18 +17,21 @@ const steps: Step[] = [
     icon: UserRound,
     number: 1,
     title: "Create your profile",
+    tag: "One-time setup",
     body: "Tell us about your skills, experience, and what you're looking for. One profile makes you visible to every employer on the platform — no need to sign up for multiple agencies.",
   },
   {
     icon: Search,
     number: 2,
     title: "Get matched",
+    tag: "AI-powered",
     body: "Our AI matches you with relevant openings across employers on the platform. Get alerted the moment a role matches your profile, and apply in one click.",
   },
   {
     icon: Briefcase,
     number: 3,
     title: "Get hired",
+    tag: "Fast placement",
     body: "One-click apply, real-time application tracking, and direct communication with employers. From profile to placement — all on one platform.",
   },
 ];
@@ -65,7 +69,7 @@ export default function HowItWorks({ className }: HowItWorksProps) {
           return (
             <div
               key={step.title}
-              className="relative flex flex-col items-center text-center p-6 rounded-xl shCardGlow transition-all duration-[280ms] hover:-translate-y-1"
+              className="relative flex flex-col items-center text-center p-6 rounded-xl shCardGlow transition-all duration-[280ms] hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(16,24,40,0.08)]"
               style={{
                 background: "var(--sh-glass-bg)",
                 border: "1px solid var(--sh-glass-border)",
@@ -73,9 +77,27 @@ export default function HowItWorks({ className }: HowItWorksProps) {
                 animationDelay: `${i * 120}ms`,
               }}
             >
+              {/* Arrow connector (desktop only) */}
+              {i < steps.length - 1 && (
+                <div
+                  className="hidden md:block absolute top-8 -right-3 z-10"
+                  aria-hidden="true"
+                >
+                  <div
+                    className="size-8 rounded-full flex items-center justify-center"
+                    style={{
+                      background: "var(--sh-glass-bg-strong)",
+                      border: "1px solid var(--sh-glass-border)",
+                    }}
+                  >
+                    <ArrowRight className="size-4" style={{ color: "var(--muted)" }} />
+                  </div>
+                </div>
+              )}
+
               {/* Step number badge */}
               <div
-                className="size-10 rounded-full flex items-center justify-center text-sm font-black mb-4"
+                className="size-10 rounded-full flex items-center justify-center text-sm font-black mb-3"
                 style={{
                   background: "var(--sh-info-bg)",
                   color: "var(--sh-info)",
@@ -84,19 +106,21 @@ export default function HowItWorks({ className }: HowItWorksProps) {
                 {step.number}
               </div>
 
-              {/* Arrow connector (desktop only) */}
-              {i < steps.length - 1 && (
-                <div
-                  className="hidden md:block absolute top-5 -right-4 z-10"
-                  aria-hidden="true"
-                >
-                  <ArrowDown className="size-6 -rotate-90" style={{ color: "var(--muted)" }} />
-                </div>
-              )}
+              {/* Tag */}
+              <span
+                className="inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full mb-3"
+                style={{
+                  background: "var(--sh-glass-bg-strong)",
+                  color: "var(--muted)",
+                  border: "1px solid var(--sh-glass-border)",
+                }}
+              >
+                {step.tag}
+              </span>
 
-              {/* Icon */}
+              {/* Icon with glow */}
               <div
-                className="size-12 rounded-xl flex items-center justify-center mb-4"
+                className="size-12 rounded-xl flex items-center justify-center mb-3 transition-all duration-300 group-hover:scale-110"
                 style={{
                   background: "var(--sh-glass-bg-strong)",
                   color: "var(--sh-info)",

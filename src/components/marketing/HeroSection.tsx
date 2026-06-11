@@ -8,46 +8,31 @@ import {
   Sparkles,
   GraduationCap,
   Building2,
+  Zap,
+  Shield,
+  Timer,
 } from "lucide-react";
 
 // ── Two-sided marketplace hero ─────────────────────────────────
 
 interface HeroContent {
-  /** Eyebrow label above the headline */
   eyebrow: string;
-  /** Main H1 headline parts — each is a separate <span> line */
   headlineParts: string[];
-  /** Highlighted span within the last line — rendered with gradient */
   highlight: string;
-  /** Body paragraph */
   body: string;
-  /** Student CTA label */
   studentCta: string;
-  /** Student CTA href */
   studentCtaHref: string;
-  /** Employer CTA label */
   employerCta: string;
-  /** Employer CTA href */
   employerCtaHref: string;
-  /** Social proof line */
   proof: string;
-  /** Feature pills for students */
   studentPills: string[];
-  /** Feature pills for employers */
   employerPills: string[];
-  /** Mockup search placeholder */
   mockupSearch: string;
-  /** Mockup result name */
   mockupResultName: string;
-  /** Mockup result detail */
   mockupResultDetail: string;
-  /** Mockup status badges */
   mockupBadges: { label: string; variant: "success" | "info" }[];
-  /** Mockup action cards */
   mockupActions: { label: string; status: string }[];
-  /** Mockup right panel heading */
   mockupCommand: string;
-  /** Mockup right panel body */
   mockupCommandBody: string;
 }
 
@@ -88,10 +73,17 @@ const heroContent: HeroContent = {
   mockupCommandBody: "Your profile matches these open positions. One click sends your CV.",
 };
 
+// ── Quick stats row ────────────────────────────────────────────
+
+const quickStats = [
+  { icon: Zap, label: "48h avg time-to-match", value: "1,200+" },
+  { icon: Shield, label: "Pre-vetted candidates", value: "99.7%" },
+  { icon: Timer, label: "Years serving Kuwait", value: "Since 2022" },
+];
+
 // ── Props ──────────────────────────────────────────────────────
 
 export interface HeroSectionProps {
-  /** Override CTA handler for custom navigation */
   onCtaClick?: () => void;
 }
 
@@ -162,28 +154,41 @@ export default function HeroSection({ onCtaClick }: HeroSectionProps) {
         className="absolute inset-0 grid place-items-center place-content-end p-[clamp(20px,4vw,58px)] opacity-[0.92] max-lg:relative max-lg:min-h-[400px] max-lg:order-2 max-lg:p-0 max-lg:pt-[18px]"
         aria-hidden="true"
       >
-        <div className="shMockupDramatic">
+        <div
+          className="shMockupDramatic"
+          style={{
+            animation: "shFloat 6s ease-in-out infinite",
+          }}
+        >
           {/* Left rail — navigation */}
           <div className="grid content-start gap-2 p-2.5 rounded-xl bg-[var(--sh-glass-bg)]">
             {["Search", "Matches", "Applications", "Money"].map((item, i) => (
               <span
                 key={item}
-                className="min-h-9 flex items-center rounded-[7px] px-2.5 text-xs font-black max-sm:justify-center max-sm:px-1.5"
-                style={
-                  i === 0
-                    ? {
-                        background: "var(--sh-info-bg)",
-                        color: "var(--sh-info)",
-                      }
-                    : { color: "var(--muted)" }
-                }
+                className="min-h-9 flex items-center rounded-[7px] px-2.5 text-xs font-black max-sm:justify-center max-sm:px-1.5 transition-all duration-200"
+                style={{
+                  background:
+                    i === 0
+                      ? "var(--sh-info-bg)"
+                      : "transparent",
+                  color:
+                    i === 0
+                      ? "var(--sh-info)"
+                      : "var(--muted)",
+                  transform: i === 0 ? "scale(1.02)" : "none",
+                }}
               >
                 {item}
               </span>
             ))}
             <span
-              className="min-h-9 flex items-center rounded-[7px] px-2.5 text-xs font-black max-sm:justify-center max-sm:px-1.5"
-              style={{ color: "var(--muted)", borderTop: "1px solid var(--sh-glass-border)", paddingTop: 12, marginTop: 4 }}
+              className="min-h-9 flex items-center rounded-[7px] px-2.5 text-xs font-black max-sm:justify-center max-sm:px-1.5 transition-all duration-200"
+              style={{
+                color: "var(--muted)",
+                borderTop: "1px solid var(--sh-glass-border)",
+                paddingTop: 12,
+                marginTop: 4,
+              }}
             >
               <Building2 className="size-3 mr-2 shrink-0" />
               Employer
@@ -191,7 +196,7 @@ export default function HeroSection({ onCtaClick }: HeroSectionProps) {
             {["Post Job", "Candidates", "Timesheets", "Invoices"].map((item, i) => (
               <span
                 key={`emp-${item}`}
-                className="min-h-9 flex items-center rounded-[7px] px-2.5 text-xs font-black max-sm:justify-center max-sm:px-1.5"
+                className="min-h-9 flex items-center rounded-[7px] px-2.5 text-xs font-black max-sm:justify-center max-sm:px-1.5 transition-all duration-200 hover:bg-[var(--sh-glass-bg-strong)]"
                 style={{ color: "var(--muted)" }}
               >
                 {item}
@@ -227,7 +232,7 @@ export default function HeroSection({ onCtaClick }: HeroSectionProps) {
                 Matched roles
               </span>
               <strong
-                className="text-[clamp(42px,6vw,76px)] leading-[0.88]"
+                className="text-[clamp(42px,6vw,76px)] leading-[0.88] block"
                 style={{ color: "var(--ink)" }}
               >
                 {content.mockupResultName}
@@ -239,7 +244,7 @@ export default function HeroSection({ onCtaClick }: HeroSectionProps) {
                 {content.mockupBadges.map((badge) => (
                   <span
                     key={badge.label}
-                    className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-full ${
+                    className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-full transition-all duration-200 hover:scale-105 ${
                       badge.variant === "success"
                         ? "bg-[var(--sh-success-bg)] text-[var(--sh-success)]"
                         : "bg-[var(--sh-info-bg)] text-[var(--sh-info)]"
@@ -254,11 +259,14 @@ export default function HeroSection({ onCtaClick }: HeroSectionProps) {
 
             {/* Action cards */}
             <div className="grid grid-cols-4 gap-2 max-sm:grid-cols-1">
-              {content.mockupActions.map((item) => (
+              {content.mockupActions.map((item, i) => (
                 <div
                   key={item.label}
-                  className="min-h-[92px] grid content-between rounded-lg p-3 bg-[var(--sh-glass-bg)]"
-                  style={{ border: "1px solid var(--sh-glass-border)" }}
+                  className="min-h-[92px] grid content-between rounded-lg p-3 bg-[var(--sh-glass-bg)] transition-all duration-200 hover:bg-[var(--sh-glass-bg-strong)] hover:-translate-y-0.5"
+                  style={{
+                    border: "1px solid var(--sh-glass-border)",
+                    animationDelay: `${i * 80}ms`,
+                  }}
                 >
                   <span className="text-[var(--sh-info)] text-[10px] font-black uppercase tracking-wider">
                     {item.label}
@@ -291,7 +299,7 @@ export default function HeroSection({ onCtaClick }: HeroSectionProps) {
               </small>
             </div>
             <div
-              className="min-h-[100px] grid content-between rounded-lg p-[14px]"
+              className="min-h-[100px] grid content-between rounded-lg p-[14px] transition-all duration-200 hover:bg-[var(--sh-glass-bg-strong)]"
               style={{
                 background: "var(--sh-glass-bg)",
                 border: "1px solid var(--sh-glass-border)",
@@ -370,7 +378,7 @@ export default function HeroSection({ onCtaClick }: HeroSectionProps) {
           </span>
           <div className="flex flex-wrap gap-2 mt-1.5" aria-label="Key benefits for students">
             {content.studentPills.map((pill) => (
-              <span key={pill} className="shHeroPill">
+              <span key={pill} className="shHeroPill hover:bg-[var(--sh-glass-bg-strong)] transition-all duration-200">
                 <GraduationCap className="size-3" />
                 {pill}
               </span>
@@ -385,7 +393,7 @@ export default function HeroSection({ onCtaClick }: HeroSectionProps) {
           </span>
           <div className="flex flex-wrap gap-2 mt-1.5" aria-label="Key benefits for employers">
             {content.employerPills.map((pill) => (
-              <span key={pill} className="shHeroPill">
+              <span key={pill} className="shHeroPill hover:bg-[var(--sh-glass-bg-strong)] transition-all duration-200">
                 <Building2 className="size-3" />
                 {pill}
               </span>
