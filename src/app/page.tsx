@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { getSession } from "@/modules/auth/session";
-import LandingContent from "./LandingContent";
+import { LandingPage } from "@/components/landing";
 
 export const dynamic = "force-dynamic";
 
@@ -28,7 +28,7 @@ export default async function Home() {
 
   return (
     <Suspense fallback={<div className="min-h-svh" />}>
-      <LandingContent session={session} />
+      <LandingPage session={session} />
     </Suspense>
   );
 }
