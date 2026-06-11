@@ -106,6 +106,12 @@
   --sh-glass-border-strong: rgba(255, 255, 255, 0.18);
   --sh-glass-blur: 20px;
 
+  /* Zendesk coral — primary accent (per DESIGN_SYSTEM.md) */
+  --sh-coral: #eb6651;
+  --sh-coral-hover: #d45441;
+  --sh-coral-light: #fef1ef;
+  --sh-coral-glow: 0 0 12px rgba(235, 102, 81, 0.25);
+
   /* Glow effects */
   --sh-glow-sm: 0 0 12px rgba(11, 99, 206, 0.20);
   --sh-glow-md: 0 0 24px rgba(11, 99, 206, 0.30);
@@ -264,6 +270,13 @@
   --shadow-xl: 0 24px 90px rgba(0, 0, 0, 0.45);
 
   /* Dark mode — OS design system */
+
+  /* Zendesk coral (dark mode) */
+  --sh-coral: #eb6651;
+  --sh-coral-hover: #d45441;
+  --sh-coral-light: rgba(235, 102, 81, 0.15);
+  --sh-coral-glow: 0 0 16px rgba(235, 102, 81, 0.30);
+
   --sh-glass-bg: rgba(255, 255, 255, 0.04);
   --sh-glass-bg-strong: rgba(255, 255, 255, 0.08);
   --sh-glass-border: rgba(255, 255, 255, 0.06);
@@ -1032,6 +1045,11 @@ body {
 @keyframes shGlowPulse {
   0%, 100% { box-shadow: var(--sh-glow-sm); }
   50% { box-shadow: var(--sh-glow-md); }
+}
+
+@keyframes shFloat {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-12px); }
 }
 
 /* Apply to content changes within the stage */
