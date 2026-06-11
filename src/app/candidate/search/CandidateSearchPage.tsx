@@ -92,13 +92,13 @@ function SearchResultSkeletons({ count = 5 }: { count?: number }) {
 
 // ─── Component ─────────────────────────────────────────────────────────
 
-export function CandidateSearchPage({ session }: { session: SessionUser }) {
+export function CandidateSearchPage({ session, initialData }: { session: SessionUser; initialData?: SearchResponse | null }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const inputRef = useRef<HTMLInputElement>(null);
 
   const [query, setQuery] = useState(searchParams.get("q") ?? "");
-  const [results, setResults] = useState<SearchResponse | null>(null);
+  const [results, setResults] = useState<SearchResponse | null>(initialData ?? null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(Number(searchParams.get("page")) || 1);

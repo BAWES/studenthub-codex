@@ -1,6 +1,8 @@
 import { Suspense } from "react";
 import { requireRoleCapability } from "@/modules/auth/session";
 import { CandidateSearchPage } from "./CandidateSearchPage";
+import { searchCandidates } from "./actions";
+import type { CandidateSearchResult } from "./schemas";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export const dynamic = "force-dynamic";
@@ -35,9 +37,16 @@ function SearchPageFallback() {
 export default async function SearchPage() {
   const session = await requireRoleCapability("candidate", "candidate.read.own");
 
+  let initialData: CandidateSearchResult | null = null;
+  try {
+    initialData = await searchCandidates({ role: "candidate", page: 1 });
+  } catch {
+    // Initial search failed silently — the client component will retry
+  }
+
   return (
     <Suspense fallback={<SearchPageFallback />}>
-      <CandidateSearchPage session={session} />
+      <CandidateSearchPage session={session} initialData={initialData} />
     </Suspense>
   );
 }
