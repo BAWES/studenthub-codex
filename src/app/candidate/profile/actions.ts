@@ -12,19 +12,11 @@
 import { prisma } from "@/lib/prisma";
 import { requireRoleCapability } from "@/modules/auth/session";
 import { getCandidateProfile } from "../actions";
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export type ProfileMetrics = {
-  experienceCount: number;
-  educationCount: number;
-  skillCount: number;
-  certificationCount: number;
-  languageCount: number;
-  applicationCount: number;
-};
+import {
+  profileMetricsSchema,
+  getCandidateProfileDetailResultSchema,
+} from "./schemas";
+import type { ProfileMetrics } from "./schemas";
 
 // ---------------------------------------------------------------------------
 // getCandidateProfileDetail — full profile + metrics
@@ -44,11 +36,22 @@ export async function getCandidateProfileDetail() {
     getProfileMetricsFor(candidateId),
   ]);
 
-  return { detail, metrics };
+  const result = { detail, metrics };
+
+  // Validate output shape
+  const validated = getCandidateProfileDetailResultSchema.safeParse(result);
+  if (!validated.success) {
+    console.error(
+      "[app/candidate/profile] getCandidateProfileDetail output validation failed:",
+      validated.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
-// getProfileMetrics — internal helper
+// getProfileMetricsFor — internal helper
 // ---------------------------------------------------------------------------
 
 async function getProfileMetricsFor(candidateId: number): Promise<ProfileMetrics> {
