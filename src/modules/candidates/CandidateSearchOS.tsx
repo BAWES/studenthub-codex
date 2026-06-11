@@ -138,6 +138,11 @@ function CandidateSearchTab({
         <small>
           {data.rows.length.toLocaleString("en-US")} of {data.matchingCount.toLocaleString("en-US")}
         </small>
+        {data.source?.current ? (
+          <span className="sourceBadge" title={data.source.note}>
+            {data.source.current}
+          </span>
+        ) : null}
       </header>
       <details className="candidatePowerFilters">
         <summary>

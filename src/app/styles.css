@@ -8004,6 +8004,19 @@ kbd {
   white-space: nowrap;
 }
 
+.sourceBadge {
+  font-size: 10px;
+  font-weight: 950;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 3px 7px;
+  border-radius: 4px;
+  background: var(--accent);
+  color: var(--accent-text, #fff);
+  white-space: nowrap;
+  cursor: help;
+}
+
 .candidateTabs {
   min-width: 0;
   display: flex;
