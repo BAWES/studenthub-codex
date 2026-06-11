@@ -23,6 +23,7 @@
     "db:import-sample": "bash scripts/import-sample-db.sh",
     "db:import-prod-local": "bash scripts/import-prod-local-db.sh",
     "search:index-candidates": "node scripts/index-candidates-meilisearch.mjs",
+    "search:index-candidates-typesense": "node scripts/index-candidates-typesense.mjs",
     "db:generate": "prisma generate",
     "db:introspect": "prisma db pull",
     "db:studio": "prisma studio",

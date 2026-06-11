@@ -6,6 +6,7 @@ import { HubShortcuts, type HubCommand } from "@/modules/hub/HubShortcuts";
 import { ThemeToggle } from "@/modules/theme/ThemeToggle";
 import { CandidateProfile } from "./CandidateProfile";
 import { ExportCVsForm } from "./ExportCVsForm";
+import MatchScoreBadge from "@/components/matching/MatchScoreBadge";
 import type {
   CandidateSearchFacet,
   CandidateSearchFilter,
@@ -184,6 +185,7 @@ function CandidateSearchTab({
                   <small>{row.email}</small>
                 </div>
                 <em>{row.status}</em>
+                <MatchScoreBadge score={row.score} label="Score" showBar={false} />
               </div>
               <div className="candidateResultMeta">
                 <span>{row.signal}</span>
