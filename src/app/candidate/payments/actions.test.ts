@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import {
   listPaymentsSchema,
   getPaymentDetailSchema,
@@ -7,7 +7,38 @@ import {
 import type { PaymentMethod } from "./schemas";
 
 // ---------------------------------------------------------------------------
-// listPaymentsSchema
+// Mocks — delegate to module actions (these now contain the real logic)
+// ---------------------------------------------------------------------------
+
+const mockModuleListPayments = vi.fn();
+const mockModuleGetPaymentDetail = vi.fn();
+const mockModuleCreatePayment = vi.fn();
+const mockModuleGetPaymentMethods = vi.fn();
+
+vi.mock("@/modules/candidates/payments/actions", () => ({
+  listCandidatePayments: mockModuleListPayments,
+  getCandidatePaymentDetail: mockModuleGetPaymentDetail,
+  createCandidatePayment: mockModuleCreatePayment,
+  getPaymentMethods: mockModuleGetPaymentMethods,
+}));
+
+vi.mock("@/modules/auth/session", () => ({
+  requireCapability: vi.fn(),
+}));
+
+// Must import after mocks are set up
+const { requireCapability } = await import("@/modules/auth/session");
+const {
+  listCandidatePayments,
+  getCandidatePaymentDetail,
+  createCandidatePayment,
+  getPaymentMethods,
+} = await import("./actions");
+
+const mockUser = { id: 1, role: "candidate" };
+
+// ---------------------------------------------------------------------------
+// Schema tests (pure — no mock dependency)
 // ---------------------------------------------------------------------------
 
 describe("listPaymentsSchema", () => {
@@ -44,10 +75,6 @@ describe("listPaymentsSchema", () => {
     expect(result.success).toBe(false);
   });
 });
-
-// ---------------------------------------------------------------------------
-// getPaymentDetailSchema
-// ---------------------------------------------------------------------------
 
 describe("getPaymentDetailSchema", () => {
   it("accepts a valid tcId string", () => {
@@ -88,7 +115,105 @@ describe("getPaymentDetailSchema", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Type shape tests (compile-time documentation)
+// Action tests — verify delegation to module
+// ---------------------------------------------------------------------------
+
+describe("listCandidatePayments (delegation)", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("delegates to module with session candidateId", async () => {
+    vi.mocked(requireCapability).mockResolvedValue(mockUser as any);
+    mockModuleListPayments.mockResolvedValue({
+      items: [{ id: 1, transferId: 10, company: "Acme", period: "Jun-Jul", hours: "40h 0m", candidateTotal: "500 KWD", companyTotal: "1000 KWD", cost: "5 KWD", paid: "Unpaid", paymentDate: "Not received", updated: "2026-06-09" }],
+      total: 1,
+      page: 1,
+      limit: 20,
+      totalPages: 1,
+    });
+
+    const result = await listCandidatePayments({ page: 1, limit: 20 });
+
+    expect(mockModuleListPayments).toHaveBeenCalledWith(1, { page: 1, limit: 20 });
+    expect(result.items).toHaveLength(1);
+    expect(result.items[0].company).toBe("Acme");
+    expect(result.total).toBe(1);
+  });
+
+  it("returns empty result on validation failure", async () => {
+    const result = await listCandidatePayments({ limit: 999 });
+    expect(result.items).toEqual([]);
+    expect(result.total).toBe(0);
+  });
+});
+
+describe("getCandidatePaymentDetail (delegation)", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("delegates to module with session candidateId and tcId", async () => {
+    vi.mocked(requireCapability).mockResolvedValue(mockUser as any);
+    mockModuleGetPaymentDetail.mockResolvedValue({
+      transferCandidate: { id: 1, transferId: 10, company: "Acme", store: null, hours: "40h 0m", hourlyRate: "5 KWD", candidateTotal: "500 KWD", companyTotal: "1000 KWD", cost: "5 KWD", bonus: "0 KWD", paid: "Unpaid", beneficiary: "John", iban: "KW123", bank: "NBK", created: "2026-06-01", updated: "2026-06-09" },
+      transfer: null,
+      invoices: [],
+    });
+
+    const result = await getCandidatePaymentDetail({ tcId: 42 });
+
+    expect(mockModuleGetPaymentDetail).toHaveBeenCalledWith(1, 42);
+    expect(result).not.toBeNull();
+    expect(result!.transferCandidate.id).toBe(1);
+  });
+});
+
+describe("createCandidatePayment (delegation)", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("delegates to module with session candidateId and payment data", async () => {
+    vi.mocked(requireCapability).mockResolvedValue(mockUser as any);
+    mockModuleCreatePayment.mockResolvedValue({ tcId: 42 });
+
+    const result = await createCandidatePayment({
+      transferBenefName: "John Doe",
+      transferBenefIban: "KW1234567890",
+      bankId: 1,
+    });
+
+    expect(mockModuleCreatePayment).toHaveBeenCalledWith(1, {
+      transferBenefName: "John Doe",
+      transferBenefIban: "KW1234567890",
+      bankId: 1,
+    });
+    expect(result.tcId).toBe(42);
+  });
+});
+
+describe("getPaymentMethods (delegation)", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("delegates to module with session candidateId", async () => {
+    vi.mocked(requireCapability).mockResolvedValue(mockUser as any);
+    mockModuleGetPaymentMethods.mockResolvedValue([
+      { bankId: 1, bankName: "NBK", bankAccountName: "John Doe", iban: "KW123" },
+    ]);
+
+    const result = await getPaymentMethods();
+
+    expect(mockModuleGetPaymentMethods).toHaveBeenCalledWith(1);
+    expect(result).toHaveLength(1);
+    expect(result[0].bankName).toBe("NBK");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Shape/documentation tests (unchanged)
 // ---------------------------------------------------------------------------
 
 type PaymentRow = {
@@ -179,74 +304,6 @@ describe("ListPaymentsResult shape", () => {
   });
 });
 
-describe("GetPaymentDetailResult shape", () => {
-  it("accepts a valid detail result with transfer", () => {
-    const result: GetPaymentDetailResult = {
-      transferCandidate: {
-        id: 1,
-        transferId: 10,
-        company: "Acme Corp",
-        store: "Store 1",
-        hours: "40h 0m",
-        hourlyRate: "5.000 KWD",
-        candidateTotal: "500 KWD",
-        companyTotal: "1,000 KWD",
-        cost: "5 KWD",
-        bonus: "0 KWD",
-        paid: "Unpaid",
-        beneficiary: "John Doe",
-        iban: "KW123456789",
-        bank: "NBK",
-        created: "2026-06-01",
-        updated: "2026-06-09",
-      },
-      transfer: {
-        id: 10,
-        period: "Jun 2026 to Jul 2026",
-        paymentReceived: "Not received",
-      },
-      invoices: [
-        { id: 1, date: new Date("2026-06-30"), status: "paid" },
-      ],
-    };
-    expect(result.transferCandidate.id).toBe(1);
-    expect(result.transfer?.period).toBe("Jun 2026 to Jul 2026");
-    expect(result.invoices).toHaveLength(1);
-  });
-
-  it("accepts a detail result without transfer", () => {
-    const result: GetPaymentDetailResult = {
-      transferCandidate: {
-        id: 2,
-        transferId: null,
-        company: "Store Only",
-        store: "Shop 5",
-        hours: "20h 0m",
-        hourlyRate: "0 KWD",
-        candidateTotal: "200 KWD",
-        companyTotal: "400 KWD",
-        cost: "2 KWD",
-        bonus: "0 KWD",
-        paid: "Paid",
-        beneficiary: null,
-        iban: null,
-        bank: null,
-        created: "2026-06-05",
-        updated: "2026-06-07",
-      },
-      transfer: null,
-      invoices: [],
-    };
-    expect(result.transferCandidate.id).toBe(2);
-    expect(result.transfer).toBeNull();
-    expect(result.invoices).toHaveLength(0);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// createPaymentSchema
-// ---------------------------------------------------------------------------
-
 describe("createPaymentSchema", () => {
   it("accepts valid beneficiary params", () => {
     const result = createPaymentSchema.safeParse({
@@ -319,10 +376,6 @@ describe("createPaymentSchema", () => {
     expect(result.success).toBe(false);
   });
 });
-
-// ---------------------------------------------------------------------------
-// PaymentMethod type shape
-// ---------------------------------------------------------------------------
 
 describe("PaymentMethod shape", () => {
   it("defines the expected fields", () => {

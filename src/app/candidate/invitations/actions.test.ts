@@ -1,4 +1,41 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+
+// ---------------------------------------------------------------------------
+// Mocks — delegate to module actions (these now contain the real logic)
+// ---------------------------------------------------------------------------
+
+const mockModuleListInvitations = vi.fn();
+
+vi.mock("@/modules/invitations/actions", () => ({
+  listInvitations: mockModuleListInvitations,
+}));
+
+vi.mock("@/modules/auth/session", () => ({
+  requireCapability: vi.fn(),
+}));
+
+vi.mock("@/modules/workspace/format", () => ({
+  formatDate: vi.fn((d: Date) => d.toISOString()),
+}));
+
+vi.mock("@/lib/prisma", () => ({
+  prisma: {
+    $transaction: vi.fn(),
+    invitation: {
+      findFirst: vi.fn(),
+    },
+    note: {
+      findMany: vi.fn(),
+    },
+  },
+}));
+
+// Must import after mocks are set up
+const { requireCapability } = await import("@/modules/auth/session");
+const { prisma } = await import("@/lib/prisma");
+const { listCandidateInvitations, getCandidateInvitationDetail } = await import("./actions");
+
+// Import schemas directly (no mock dependency)
 import {
   listInvitationsSchema,
   getInvitationDetailSchema,
@@ -66,6 +103,139 @@ describe("getInvitationDetailSchema", () => {
   it("rejects missing UUID", () => {
     const result = getInvitationDetailSchema.safeParse({});
     expect(result.success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Candidate Invitations server actions
+// ---------------------------------------------------------------------------
+
+const mockListItem = {
+  invitation_uuid: "inv-123",
+  invitation_status: 1,
+  invitation_app_seen_at: new Date("2026-06-01"),
+  invitation_email_seen_at: null,
+  invitation_created_at: new Date("2026-06-01"),
+  request: {
+    request_uuid: "req-123",
+    request_position_title: "Software Engineer",
+    company: {
+      company_name: "Acme Corp",
+    },
+  },
+};
+
+describe("Candidate Invitations actions", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  describe("listCandidateInvitations", () => {
+    it("delegates to module listInvitations and checks auth", async () => {
+      vi.mocked(requireCapability).mockResolvedValue({ id: "1" } as any);
+      mockModuleListInvitations.mockResolvedValue([mockListItem]);
+
+      const result = await listCandidateInvitations({});
+
+      expect(requireCapability).toHaveBeenCalledWith("candidate.read.own");
+      expect(mockModuleListInvitations).toHaveBeenCalledWith({});
+      expect(result.total).toBe(1);
+      expect(result.items).toHaveLength(1);
+    });
+
+    it("maps InvitationListItem shape to InvitationRow shape", async () => {
+      vi.mocked(requireCapability).mockResolvedValue({ id: "1" } as any);
+      mockModuleListInvitations.mockResolvedValue([mockListItem]);
+
+      const result = await listCandidateInvitations({});
+
+      const row = result.items[0];
+      expect(row.invitation_uuid).toBe("inv-123");
+      expect(row.invitation_status).toBe(1);
+      expect(row.invitation_app_seen_at).toEqual(new Date("2026-06-01"));
+      expect(row.invitation_email_seen_at).toBeNull();
+      expect(row.invitation_created_at).toEqual(new Date("2026-06-01"));
+      expect(row.position_title).toBe("Software Engineer");
+      expect(row.compensation).toBeNull();
+      expect(row.company_name).toBe("Acme Corp");
+    });
+
+    it("handles null request and company gracefully", async () => {
+      vi.mocked(requireCapability).mockResolvedValue({ id: "1" } as any);
+      mockModuleListInvitations.mockResolvedValue([
+        {
+          invitation_uuid: "inv-456",
+          invitation_status: null,
+          invitation_app_seen_at: null,
+          invitation_email_seen_at: null,
+          invitation_created_at: null,
+          request: null,
+        },
+      ]);
+
+      const result = await listCandidateInvitations({});
+
+      const row = result.items[0];
+      expect(row.position_title).toBeNull();
+      expect(row.company_name).toBeNull();
+      expect(row.compensation).toBeNull();
+    });
+
+    it("returns paginated results from full list", async () => {
+      vi.mocked(requireCapability).mockResolvedValue({ id: "1" } as any);
+      const manyItems = Array.from({ length: 25 }, (_, i) => ({
+        ...mockListItem,
+        invitation_uuid: `inv-${i + 1}`,
+      }));
+      mockModuleListInvitations.mockResolvedValue(manyItems);
+
+      // Page 1 (first 10 of 25)
+      const page1 = await listCandidateInvitations({ page: 1, limit: 10 });
+      expect(page1.items).toHaveLength(10);
+      expect(page1.total).toBe(25);
+      expect(page1.page).toBe(1);
+      expect(page1.limit).toBe(10);
+      expect(page1.totalPages).toBe(3);
+      expect(page1.items[0].invitation_uuid).toBe("inv-1");
+      expect(page1.items[9].invitation_uuid).toBe("inv-10");
+
+      // Page 3 (last 5 of 25)
+      const page3 = await listCandidateInvitations({ page: 3, limit: 10 });
+      expect(page3.items).toHaveLength(5);
+      expect(page3.items[0].invitation_uuid).toBe("inv-21");
+    });
+
+    it("returns empty result when module returns empty array", async () => {
+      vi.mocked(requireCapability).mockResolvedValue({ id: "1" } as any);
+      mockModuleListInvitations.mockResolvedValue([]);
+
+      const result = await listCandidateInvitations({});
+
+      expect(result.items).toHaveLength(0);
+      expect(result.total).toBe(0);
+      expect(result.totalPages).toBe(0);
+    });
+
+    it("returns empty result when module returns number (onlyCount)", async () => {
+      vi.mocked(requireCapability).mockResolvedValue({ id: "1" } as any);
+      mockModuleListInvitations.mockResolvedValue(5);
+
+      const result = await listCandidateInvitations({});
+
+      expect(result.items).toHaveLength(0);
+      expect(result.total).toBe(0);
+      expect(result.totalPages).toBe(0);
+    });
+
+    it("supports pagination defaults (page=1, limit=20)", async () => {
+      vi.mocked(requireCapability).mockResolvedValue({ id: "1" } as any);
+      mockModuleListInvitations.mockResolvedValue([mockListItem]);
+
+      const result = await listCandidateInvitations({});
+
+      expect(result.page).toBe(1);
+      expect(result.limit).toBe(20);
+    });
   });
 });
 

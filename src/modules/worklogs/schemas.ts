@@ -28,6 +28,13 @@ export const deleteWorklogSchema = z.object({
   worklogUuid: z.string().min(1, "Work log UUID is required"),
 });
 
+export const updateWorklogStatusSchema = z.object({
+  worklogUuid: z.string().min(1, "Work log UUID is required"),
+  status: z.number().int(),
+});
+
+export type UpdateWorklogStatusInput = z.input<typeof updateWorklogStatusSchema>;
+
 export const appealWorklogSchema = z.object({
   worklogUuid: z.string().min(1, "Work log UUID is required"),
   reason: z.string().min(10, "Reason must be at least 10 characters").max(1000, "Reason must be 1000 characters or less"),

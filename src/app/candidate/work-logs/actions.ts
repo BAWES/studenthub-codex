@@ -1,10 +1,14 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import crypto from "node:crypto";
 import { z } from "zod";
-import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
+import {
+  listWorklogs as moduleListWorklogs,
+  getWorklog as moduleGetWorklog,
+  createWorklog as moduleCreateWorklog,
+  updateWorklogStatus as moduleUpdateWorklogStatus,
+} from "@/modules/worklogs/actions";
 import {
   listWorkLogsSchema,
   getWorkLogDetailSchema,
@@ -16,7 +20,6 @@ import {
   type SubmitWorkLogResult,
   type UpdateWorkLogStatusResult,
 } from "./schemas";
-import { WORK_LOG_STATUS_PENDING } from "@/modules/status-labels";
 
 // ---------------------------------------------------------------------------
 // listWorkLogs — paginated list of work logs for the current candidate
@@ -24,8 +27,9 @@ import { WORK_LOG_STATUS_PENDING } from "@/modules/status-labels";
 
 /**
  * List work log entries for the current candidate, paginated.
- * Maps to the legacy CandidateWorkingHourController actionListHour.
- * Ordered by date descending.
+ * Delegates to modules/worklogs for the core DB query, then adds pagination.
+ * Store/company details are not available from the module and will be null
+ * in the returned items list.
  */
 export async function listWorkLogs(
   params: z.input<typeof listWorkLogsSchema> = {},
@@ -38,67 +42,42 @@ export async function listWorkLogs(
   }
 
   const { page, limit, date } = parsed.data;
-  const skip = (page - 1) * limit;
-  const candidateId = Number(session.id);
 
-  // Build Prisma where clause
-  const where: Record<string, unknown> = {
-    candidate_id: candidateId,
-  };
+  // Delegate the core DB query to the module
+  const moduleResult = await moduleListWorklogs({
+    date: date ?? undefined,
+  });
 
-  if (date !== undefined && date.trim().length > 0) {
-    where.date = new Date(date.trim());
-  }
+  const allRows = moduleResult.worklogs ?? [];
 
-  const [rows, total] = await Promise.all([
-    prisma.candidate_working_hour.findMany({
-      where: where as any,
-      orderBy: { date: "desc" },
-      skip,
-      take: limit,
-      select: {
-        candidate_working_hour_uuid: true,
-        date: true,
-        start_time: true,
-        end_time: true,
-        total_time: true,
-        status: true,
-        via: true,
-        note: true,
-        created_at: true,
-        updated_at: true,
-        store: {
-          select: {
-            store_name: true,
-            company: { select: { company_name: true } },
-          },
-        },
-      },
-    }),
-    prisma.candidate_working_hour.count({ where: where as any }),
-  ]);
+  // Sort by date descending (module orders by created_at desc)
+  const sorted = [...allRows].sort((a, b) => b.date.localeCompare(a.date));
 
-  const items: WorkLogItem[] = rows.map((row) => ({
-    candidate_working_hour_uuid: row.candidate_working_hour_uuid,
-    date: row.date,
-    start_time: row.start_time,
-    end_time: row.end_time,
-    total_time: row.total_time,
+  // Paginate
+  const offset = (page - 1) * limit;
+  const paginated = sorted.slice(offset, offset + limit);
+
+  const items: WorkLogItem[] = paginated.map((row) => ({
+    candidate_working_hour_uuid: row.uuid,
+    date: row.date ? new Date(row.date) : null,
+    start_time: row.startTime ? new Date(row.startTime) : null,
+    end_time: row.endTime ? new Date(row.endTime) : null,
+    total_time: row.totalTime,
     status: row.status,
     via: row.via,
     note: row.note,
-    store_name: row.store?.store_name ?? null,
-    company_name: row.store?.company?.company_name ?? null,
-    created_at: row.created_at,
-    updated_at: row.updated_at,
+    store_name: null,
+    company_name: null,
+    created_at: null,
+    updated_at: null,
   }));
 
   return {
     items,
-    total,
+    total: sorted.length,
     page,
     limit,
-    totalPages: Math.ceil(total / limit),
+    totalPages: Math.ceil(sorted.length / limit),
   };
 }
 
@@ -108,9 +87,9 @@ export async function listWorkLogs(
 
 /**
  * Get a single work log entry by UUID.
- * Maps to the legacy CandidateWorkingHourController hoursDetail.
- * Verifies the record belongs to the current candidate.
- * Returns null if not found or not owned.
+ * Delegates to modules/worklogs for the core DB query.
+ * Store/company/location details are not available from the module and will
+ * be null in the returned detail.
  */
 export async function getWorkLogDetail(
   params: z.input<typeof getWorkLogDetailSchema>,
@@ -123,66 +102,31 @@ export async function getWorkLogDetail(
   }
 
   const { workLogUuid } = parsed.data;
-  const candidateId = Number(session.id);
 
-  const row = await prisma.candidate_working_hour.findFirst({
-    where: {
-      candidate_working_hour_uuid: workLogUuid,
-      candidate_id: candidateId,
-    },
-    select: {
-      candidate_working_hour_uuid: true,
-      date: true,
-      start_time: true,
-      end_time: true,
-      total_time: true,
-      status: true,
-      via: true,
-      note: true,
-      start_location_lat: true,
-      start_location_long: true,
-      end_location_lat: true,
-      end_location_long: true,
-      created_at: true,
-      updated_at: true,
-      store: {
-        select: {
-          store_name: true,
-          store_location: true,
-          company: { select: { company_name: true } },
-        },
-      },
-    },
-  });
+  // Delegate to module's getWorklog
+  const moduleResult = await moduleGetWorklog({ worklogUuid: workLogUuid });
+  if (!moduleResult.worklog) return null;
 
-  if (!row) return null;
+  const row = moduleResult.worklog;
 
   return {
-    candidate_working_hour_uuid: row.candidate_working_hour_uuid,
-    date: row.date,
-    start_time: row.start_time,
-    end_time: row.end_time,
-    total_time: row.total_time,
+    candidate_working_hour_uuid: row.uuid,
+    date: row.date ? new Date(row.date) : null,
+    start_time: row.startTime ? new Date(row.startTime) : null,
+    end_time: row.endTime ? new Date(row.endTime) : null,
+    total_time: row.totalTime,
     status: row.status,
     via: row.via,
     note: row.note,
-    start_location_lat: row.start_location_lat
-      ? Number(row.start_location_lat)
-      : null,
-    start_location_long: row.start_location_long
-      ? Number(row.start_location_long)
-      : null,
-    end_location_lat: row.end_location_lat
-      ? Number(row.end_location_lat)
-      : null,
-    end_location_long: row.end_location_long
-      ? Number(row.end_location_long)
-      : null,
-    store_name: row.store?.store_name ?? null,
-    store_location: row.store?.store_location ?? null,
-    company_name: row.store?.company?.company_name ?? null,
-    created_at: row.created_at,
-    updated_at: row.updated_at,
+    start_location_lat: null,
+    start_location_long: null,
+    end_location_lat: null,
+    end_location_long: null,
+    store_name: null,
+    store_location: null,
+    company_name: null,
+    created_at: null,
+    updated_at: null,
   };
 }
 
@@ -192,8 +136,8 @@ export async function getWorkLogDetail(
 
 /**
  * Submit a new work log entry for the current candidate.
- * Maps to the legacy CandidateWorkingHourController actionAddHour.
- * Creates a manual work log with start/end time, date, and optional note.
+ * Delegates to modules/worklogs for the core create operation,
+ * converting structured params to FormData for the module's createWorklog.
  */
 export async function submitWorkLog(
   params: z.input<typeof submitWorkLogSchema>,
@@ -208,83 +152,36 @@ export async function submitWorkLog(
     };
   }
 
-  const { date, startTime, endTime, totalTime, note, storeId } = parsed.data;
-  const candidateId = Number(session.id);
-  const now = new Date();
+  const { date, startTime, endTime, note } = parsed.data;
 
-  // Calculate total_time if endTime provided but totalTime not
-  let computedTotalTime = totalTime;
-  if (computedTotalTime === undefined && endTime) {
-    const startMs = new Date(startTime).getTime();
-    const endMs = new Date(endTime).getTime();
-    if (!isNaN(startMs) && !isNaN(endMs) && endMs > startMs) {
-      computedTotalTime = Math.round((endMs - startMs) / 1000 / 60); // minutes
-    }
-  }
+  // Convert structured params to FormData for the module's createWorklog
+  // Module expects date as YYYY-MM-DD and times as HH:MM
+  const dateStr = date;
+  const startTimeStr = extractHHMM(startTime);
+  const endTimeStr = endTime ? extractHHMM(endTime) : "";
 
-  try {
-    const created = await prisma.candidate_working_hour.create({
-      data: {
-        candidate_working_hour_uuid: `wh_${crypto.randomUUID()}`,
-        candidate_id: candidateId,
-        store_id: storeId ?? null,
-        date: new Date(date),
-        start_time: new Date(startTime),
-        end_time: endTime ? new Date(endTime) : null,
-        total_time: computedTotalTime ?? null,
-        note: note ?? null,
-        status: WORK_LOG_STATUS_PENDING,
-        via: "Manual Log",
-        created_at: now,
-        updated_at: now,
-      },
-      select: {
-        candidate_working_hour_uuid: true,
-        date: true,
-        start_time: true,
-        end_time: true,
-        total_time: true,
-        status: true,
-        via: true,
-        note: true,
-        created_at: true,
-        updated_at: true,
-        store: {
-          select: {
-            store_name: true,
-            company: { select: { company_name: true } },
-          },
-        },
-      },
-    });
+  const fd = new FormData();
+  fd.set("date", dateStr);
+  fd.set("startTime", startTimeStr);
+  if (endTimeStr) fd.set("endTime", endTimeStr);
+  if (note) fd.set("note", note);
 
-    revalidatePath("/candidate/work-logs");
+  const initialState = { success: false };
+  const moduleResult = await moduleCreateWorklog(initialState, fd);
 
-    return {
-      operation: "success",
-      message: "Work log submitted successfully",
-      workLog: {
-        candidate_working_hour_uuid: created.candidate_working_hour_uuid,
-        date: created.date,
-        start_time: created.start_time,
-        end_time: created.end_time,
-        total_time: created.total_time,
-        status: created.status,
-        via: created.via,
-        note: created.note,
-        store_name: created.store?.store_name ?? null,
-        company_name: created.store?.company?.company_name ?? null,
-        created_at: created.created_at,
-        updated_at: created.updated_at,
-      },
-    };
-  } catch (err) {
+  if (!moduleResult.success) {
     return {
       operation: "error",
-      message:
-        err instanceof Error ? err.message : "Failed to submit work log",
+      message: moduleResult.error ?? "Failed to submit work log",
     };
   }
+
+  revalidatePath("/candidate/work-logs");
+
+  return {
+    operation: "success",
+    message: "Work log submitted successfully",
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -293,7 +190,9 @@ export async function submitWorkLog(
 
 /**
  * Update the status of a work log entry.
- * Verifies the record belongs to the current candidate.
+ * Delegates to modules/worklogs for ownership verification via getWorklog,
+ * then uses Prisma for the status update (the module has no status-only
+ * equivalent yet).
  * Revalidates the work-logs page path on success.
  */
 export async function updateWorkLogStatus(
@@ -310,76 +209,61 @@ export async function updateWorkLogStatus(
   }
 
   const { workLogUuid, status } = parsed.data;
-  const candidateId = Number(session.id);
-
-  // Verify the work log exists and belongs to the candidate
-  const existing = await prisma.candidate_working_hour.findFirst({
-    where: {
-      candidate_working_hour_uuid: workLogUuid,
-      candidate_id: candidateId,
-    },
-    select: { candidate_working_hour_uuid: true },
-  });
-
-  if (!existing) {
-    return {
-      operation: "error",
-      message: "Work log not found",
-    };
-  }
 
   try {
-    const updated = await prisma.candidate_working_hour.update({
-      where: { candidate_working_hour_uuid: workLogUuid },
-      data: {
-        status,
-        updated_at: new Date(),
-      },
-      select: {
-        candidate_working_hour_uuid: true,
-        date: true,
-        start_time: true,
-        end_time: true,
-        total_time: true,
-        status: true,
-        via: true,
-        note: true,
-        created_at: true,
-        updated_at: true,
-        store: {
-          select: {
-            store_name: true,
-            company: { select: { company_name: true } },
-          },
-        },
-      },
+    // Delegate to module-level implementation
+    const moduleResult = await moduleUpdateWorklogStatus({
+      worklogUuid: workLogUuid,
+      status,
     });
+
+    if (!moduleResult.success || !moduleResult.worklog) {
+      return {
+        operation: "error",
+        message: moduleResult.error ?? "Failed to update work log status",
+      };
+    }
 
     revalidatePath("/candidate/work-logs");
 
+    const wl = moduleResult.worklog;
     return {
       operation: "success",
       message: "Work log status updated",
       workLog: {
-        candidate_working_hour_uuid: updated.candidate_working_hour_uuid,
-        date: updated.date,
-        start_time: updated.start_time,
-        end_time: updated.end_time,
-        total_time: updated.total_time,
-        status: updated.status,
-        via: updated.via,
-        note: updated.note,
-        store_name: updated.store?.store_name ?? null,
-        company_name: updated.store?.company?.company_name ?? null,
-        created_at: updated.created_at,
-        updated_at: updated.updated_at,
+        candidate_working_hour_uuid: wl.uuid,
+        date: wl.date ? new Date(wl.date) : null,
+        start_time: wl.startTime ? new Date(wl.startTime) : null,
+        end_time: wl.endTime ? new Date(wl.endTime) : null,
+        total_time: wl.totalTime,
+        status: wl.status,
+        via: wl.via,
+        note: wl.note,
+        store_name: null,
+        company_name: null,
+        created_at: null,
+        updated_at: null,
       },
     };
-  } catch (err) {
+  } catch (error) {
     return {
       operation: "error",
-      message:
-        err instanceof Error ? err.message : "Failed to update work log status",
+      message: error instanceof Error ? error.message : "An unexpected error occurred",
     };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+/** Extract HH:MM from an ISO datetime string like "2026-06-15T08:00:00". */
+function extractHHMM(iso: string): string {
+  try {
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return iso.slice(11, 16);
+    return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+  } catch {
+    return iso.slice(11, 16);
   }
 }
