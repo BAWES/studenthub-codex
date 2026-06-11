@@ -1,6 +1,5 @@
 "use server";
 
-import { z } from "zod";
 import crypto from "node:crypto";
 import { prisma } from "@/lib/prisma";
 import { requireRoleCapability, requireCapability } from "@/modules/auth/session";
@@ -13,97 +12,26 @@ import { requireRoleCapability, requireCapability } from "@/modules/auth/session
 //          listAppealUpdates, createAppealUpdate
 // ---------------------------------------------------------------------------
 
-// ---------------------------------------------------------------------------
-// Schemas
-// ---------------------------------------------------------------------------
-
-const listAppealsSchema = z.object({
-  candidate_id: z.coerce.number().int().positive().optional(),
-  status: z.coerce.number().int().min(0).max(4).optional(),
-  date_from: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be YYYY-MM-DD format").optional(),
-  date_to: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be YYYY-MM-DD format").optional(),
-  page: z.coerce.number().int().positive().optional().default(1),
-  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
-});
-
-const getAppealSchema = z.object({
-  uuid: z.string().min(1, "Appeal UUID is required"),
-});
-
-const createAppealSchema = z.object({
-  candidate_working_hour_uuid: z.string().min(1, "Working hour UUID is required"),
-  candidate_id: z.coerce.number().int().positive("Candidate ID is required"),
-  reason: z.string().min(1, "Reason is required"),
-});
-
-const updateAppealStatusSchema = z.object({
-  uuid: z.string().min(1, "Appeal UUID is required"),
-  status: z.coerce.number().int().min(0).max(4, "Status must be between 0 and 4"),
-});
-
-const listAppealUpdatesSchema = z.object({
-  appeal_uuid: z.string().min(1, "Appeal UUID is required"),
-});
-
-const createAppealUpdateSchema = z.object({
-  appeal_uuid: z.string().min(1, "Appeal UUID is required"),
-  update: z.string().min(1, "Update text is required"),
-  detail: z.string().optional().default(""),
-});
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export type ListAppealsParams = z.input<typeof listAppealsSchema>;
-export type GetAppealParams = z.input<typeof getAppealSchema>;
-export type CreateAppealParams = z.input<typeof createAppealSchema>;
-export type UpdateAppealStatusParams = z.input<typeof updateAppealStatusSchema>;
-export type ListAppealUpdatesParams = z.input<typeof listAppealUpdatesSchema>;
-export type CreateAppealUpdateParams = z.input<typeof createAppealUpdateSchema>;
-
-export type AppealItem = {
-  appeal_uuid: string;
-  candidate_working_hour_uuid: string;
-  candidate_id: number;
-  reason: string | null;
-  status: number;
-  created_at: Date | null;
-  updated_at: Date | null;
-};
-
-export type AppealUpdateItem = {
-  appeal_update_uuid: string;
-  appeal_uuid: string;
-  update: string | null;
-  detail: string | null;
-  created_at: Date | null;
-  updated_at: Date | null;
-  created_by: number | null;
-  updated_by: number | null;
-  is_new: boolean | null;
-};
-
-export type ListAppealsResult = {
-  appeals: AppealItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
-
-// ---------------------------------------------------------------------------
-// Exported schemas
-// ---------------------------------------------------------------------------
-
-export {
+import {
   listAppealsSchema,
   getAppealSchema,
   createAppealSchema,
   updateAppealStatusSchema,
   listAppealUpdatesSchema,
   createAppealUpdateSchema,
-};
+  listAppealsResultSchema,
+  appealItemSchema,
+  appealUpdateItemSchema,
+  type ListAppealsParams,
+  type GetAppealParams,
+  type CreateAppealParams,
+  type UpdateAppealStatusParams,
+  type ListAppealUpdatesParams,
+  type CreateAppealUpdateParams,
+  type AppealItem,
+  type AppealUpdateItem,
+  type ListAppealsResult,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // listAppeals
@@ -153,13 +81,24 @@ export async function listAppeals(
     prisma.candidate_working_hour_appeal.count({ where }),
   ]);
 
-  return {
+  const result = {
     appeals: rows,
     total,
     page,
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  // Validate output shape
+  const outputParsed = listAppealsResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/candidate-working-hour-appeals] listAppeals output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -180,6 +119,15 @@ export async function getAppeal(
 
   if (!appeal) {
     throw new Error(`Work-log appeal not found: ${uuid}`);
+  }
+
+  // Validate output shape
+  const outputParsed = appealItemSchema.safeParse(appeal);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/candidate-working-hour-appeals] getAppeal output validation failed:",
+      outputParsed.error.issues,
+    );
   }
 
   return appeal;
@@ -215,6 +163,15 @@ export async function createAppeal(
     },
   });
 
+  // Validate output shape
+  const outputParsed = appealItemSchema.safeParse(appeal);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/candidate-working-hour-appeals] createAppeal output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
   return appeal;
 }
 
@@ -245,6 +202,15 @@ export async function updateAppealStatus(
     },
   });
 
+  // Validate output shape
+  const outputParsed = appealItemSchema.safeParse(appeal);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/candidate-working-hour-appeals] updateAppealStatus output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
   return appeal;
 }
 
@@ -265,6 +231,18 @@ export async function listAppealUpdates(
     where: { appeal_uuid },
     orderBy: { created_at: "desc" },
   });
+
+  // Validate output shape
+  for (const update of updates) {
+    const outputParsed = appealUpdateItemSchema.safeParse(update);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/candidate-working-hour-appeals] listAppealUpdates output validation failed:",
+        outputParsed.error.issues,
+      );
+      break;
+    }
+  }
 
   return updates;
 }
@@ -293,6 +271,15 @@ export async function createAppealUpdate(
       is_new: true,
     },
   });
+
+  // Validate output shape
+  const outputParsed = appealUpdateItemSchema.safeParse(appealUpdate);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/candidate-working-hour-appeals] createAppealUpdate output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
 
   return appealUpdate;
 }

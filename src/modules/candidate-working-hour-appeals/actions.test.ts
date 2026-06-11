@@ -1,6 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { z } from "zod";
 
+import {
+  appealItemSchema,
+  appealUpdateItemSchema,
+  listAppealsResultSchema,
+} from "./schemas";
+
 // Mock Prisma
 vi.mock("@/lib/prisma", () => ({
   prisma: {
@@ -334,5 +340,156 @@ describe("CandidateWorkingHourAppeal - createAppealUpdate", () => {
         is_new: true,
       }),
     });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Zod output schema validation
+// ---------------------------------------------------------------------------
+
+describe("appealItemSchema (output)", () => {
+  it("validates a complete appeal item", () => {
+    const item = {
+      appeal_uuid: "appeal_abc123",
+      candidate_working_hour_uuid: "cwh_uuid_1",
+      candidate_id: 42,
+      reason: "Work hours recorded incorrectly",
+      status: 0,
+      created_at: new Date("2026-06-01T10:00:00Z"),
+      updated_at: new Date("2026-06-01T10:00:00Z"),
+    };
+    expect(appealItemSchema.safeParse(item).success).toBe(true);
+  });
+
+  it("accepts null reason", () => {
+    const item = {
+      appeal_uuid: "appeal_abc123",
+      candidate_working_hour_uuid: "cwh_uuid_1",
+      candidate_id: 42,
+      reason: null,
+      status: 0,
+      created_at: null,
+      updated_at: null,
+    };
+    expect(appealItemSchema.safeParse(item).success).toBe(true);
+  });
+
+  it("rejects missing appeal_uuid", () => {
+    expect(
+      appealItemSchema.safeParse({
+        candidate_working_hour_uuid: "cwh_uuid_1",
+        candidate_id: 42,
+        reason: null,
+        status: 0,
+        created_at: null,
+        updated_at: null,
+      }).success,
+    ).toBe(false);
+  });
+
+  it("rejects wrong type for status", () => {
+    expect(
+      appealItemSchema.safeParse({
+        appeal_uuid: "appeal_abc123",
+        candidate_working_hour_uuid: "cwh_uuid_1",
+        candidate_id: 42,
+        reason: null,
+        status: "pending",
+        created_at: null,
+        updated_at: null,
+      }).success,
+    ).toBe(false);
+  });
+});
+
+describe("appealUpdateItemSchema (output)", () => {
+  it("validates a complete update item", () => {
+    const item = {
+      appeal_update_uuid: "upd_abc123",
+      appeal_uuid: "appeal_abc123",
+      update: "Reviewed by manager",
+      detail: "Status changed to approved after verification",
+      created_at: new Date("2026-06-01T12:00:00Z"),
+      updated_at: new Date("2026-06-01T12:00:00Z"),
+      created_by: 1,
+      updated_by: 1,
+      is_new: false,
+    };
+    expect(appealUpdateItemSchema.safeParse(item).success).toBe(true);
+  });
+
+  it("accepts null update fields", () => {
+    const item = {
+      appeal_update_uuid: "upd_abc123",
+      appeal_uuid: "appeal_abc123",
+      update: null,
+      detail: null,
+      created_at: null,
+      updated_at: null,
+      created_by: null,
+      updated_by: null,
+      is_new: null,
+    };
+    expect(appealUpdateItemSchema.safeParse(item).success).toBe(true);
+  });
+
+  it("rejects missing appeal_update_uuid", () => {
+    expect(
+      appealUpdateItemSchema.safeParse({
+        appeal_uuid: "appeal_abc123",
+        update: null,
+        detail: null,
+        created_at: null,
+        updated_at: null,
+        created_by: null,
+        updated_by: null,
+        is_new: null,
+      }).success,
+    ).toBe(false);
+  });
+});
+
+describe("listAppealsResultSchema (output)", () => {
+  it("validates a paginated result", () => {
+    const data = {
+      appeals: [
+        {
+          appeal_uuid: "appeal_abc123",
+          candidate_working_hour_uuid: "cwh_uuid_1",
+          candidate_id: 42,
+          reason: "Work hours recorded incorrectly",
+          status: 0,
+          created_at: null,
+          updated_at: null,
+        },
+      ],
+      total: 1,
+      page: 1,
+      limit: 20,
+      totalPages: 1,
+    };
+    expect(listAppealsResultSchema.safeParse(data).success).toBe(true);
+  });
+
+  it("handles empty appeals array", () => {
+    const data = {
+      appeals: [],
+      total: 0,
+      page: 1,
+      limit: 20,
+      totalPages: 0,
+    };
+    expect(listAppealsResultSchema.safeParse(data).success).toBe(true);
+  });
+
+  it("rejects missing totalPages", () => {
+    expect(
+      listAppealsResultSchema.safeParse({
+        appeals: [],
+        total: 0,
+        page: 1,
+        limit: 20,
+      }).success,
+    ).toBe(false);
   });
 });
