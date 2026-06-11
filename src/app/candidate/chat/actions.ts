@@ -1,123 +1,87 @@
 "use server";
 
-import { prisma } from "@/lib/prisma";
+// ---------------------------------------------------------------------------
+// Candidate Chat — server actions for /candidate/chat
+// ---------------------------------------------------------------------------
+// Route-level wrappers that delegate to modules/chat for listing conversations
+// and fetching messages for the current candidate.
+// ---------------------------------------------------------------------------
+
 import { requireCapability } from "@/modules/auth/session";
+import {
+  listChats as moduleListChats,
+  getChatMessages as moduleGetChatMessages,
+} from "@/modules/chat/actions";
 import {
   listConversationsSchema,
   getConversationMessagesSchema,
-  type ListConversationsParams,
-  type GetConversationMessagesParams,
-  type ListConversationsResult,
-  type GetConversationMessagesResult,
+} from "./schemas";
+import type {
+  ListConversationsParams,
+  GetConversationMessagesParams,
+  ListConversationsResult,
+  GetConversationMessagesResult,
 } from "./schemas";
 
+// Re-export types for client components
+export type { ConversationItem, ConversationMessageItem, ListConversationsResult, GetConversationMessagesResult } from "./schemas";
+
 // ---------------------------------------------------------------------------
-// listConversations
+// Server actions — delegate to module-level implementations
 // ---------------------------------------------------------------------------
 
 /**
  * List chat conversations accessible to the current candidate.
- * Supports pagination and optional filters (companyId, storeId, staffId).
- *
- * Maps to the legacy ChatController::actionList().
+ * Delegates to modules/chat/listChats with the candidate's session context.
  */
 export async function listConversations(
-  params: FormData | ListConversationsParams = {},
+  params: ListConversationsParams = {},
 ): Promise<ListConversationsResult> {
   await requireCapability("candidate.read.own");
 
-  const raw =
-    params instanceof FormData
-      ? {
-          page: params.get("page"),
-          limit: params.get("limit"),
-          companyId: params.get("companyId"),
-          storeId: params.get("storeId"),
-          staffId: params.get("staffId"),
-        }
-      : params;
+  const { page, limit, companyId, storeId, staffId } = listConversationsSchema.parse(params);
 
-  const parsed = listConversationsSchema.safeParse(raw);
-  if (!parsed.success) {
-    return { conversations: [], total: 0, page: 1, limit: 20, totalPages: 0 };
-  }
-
-  const { page, limit, companyId, storeId, staffId } = parsed.data;
-  const skip = (page - 1) * limit;
-
-  const where: Record<string, unknown> = {};
-  if (companyId !== undefined) where.company_id = companyId;
-  if (storeId !== undefined) where.store_id = storeId;
-  if (staffId !== undefined) where.staff_id = staffId;
-
-  const [chats, total] = await Promise.all([
-    prisma.chat.findMany({
-      where: where as any,
-      orderBy: { created_at: "desc" },
-      skip,
-      take: limit,
-    }),
-    prisma.chat.count({ where: where as any }),
-  ]);
-
-  return {
-    conversations: chats as any[],
-    total,
+  const result = await moduleListChats({
     page,
     limit,
-    totalPages: Math.ceil(total / limit),
+    companyId,
+    storeId,
+    staffId,
+  });
+
+  // Map module shape { chats } → app router shape { conversations }
+  return {
+    conversations: result.chats,
+    total: result.total,
+    page: result.page,
+    limit: result.limit,
+    totalPages: result.totalPages,
   };
 }
 
-// ---------------------------------------------------------------------------
-// getConversationMessages
-// ---------------------------------------------------------------------------
-
 /**
  * Get messages for a specific chat conversation, with cursor-based pagination.
- *
- * Maps to the legacy ChatController::actionMessages().
+ * Delegates to modules/chat/getChatMessages.
  */
 export async function getConversationMessages(
-  params: FormData | GetConversationMessagesParams,
+  params: GetConversationMessagesParams,
 ): Promise<GetConversationMessagesResult> {
   await requireCapability("candidate.read.own");
 
-  const raw =
-    params instanceof FormData
-      ? {
-          chatUuid: params.get("chatUuid"),
-          lastIndex: params.get("lastIndex"),
-          limit: params.get("limit"),
-        }
-      : params;
+  const { chatUuid, lastIndex, limit } = getConversationMessagesSchema.parse(params);
 
-  const parsed = getConversationMessagesSchema.safeParse(raw);
-  if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Invalid parameters");
-  }
-
-  const { chatUuid, lastIndex, limit } = parsed.data;
-
-  const where: Record<string, unknown> = { chat_uuid: chatUuid };
-  if (lastIndex !== undefined) {
-    where.message_index = { lt: lastIndex };
-  }
-
-  const [messages, total] = await Promise.all([
-    prisma.chat_message.findMany({
-      where: where as any,
-      orderBy: { message_index: "desc" },
-      take: limit,
-    }),
-    prisma.chat_message.count({ where: where as any }),
-  ]);
-
-  return {
-    messages: messages as any[],
-    total,
-    page: 1,
+  const result = await moduleGetChatMessages({
+    chatUuid,
+    lastIndex,
     limit,
-    totalPages: 1,
+  });
+
+  // Module returns { messages } — pass through directly
+  return {
+    messages: result.messages,
+    total: result.total,
+    page: result.page,
+    limit: result.limit,
+    totalPages: result.totalPages,
   };
 }
