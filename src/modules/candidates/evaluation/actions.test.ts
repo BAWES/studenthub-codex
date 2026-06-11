@@ -1,72 +1,18 @@
 import { describe, it, expect } from "vitest";
-import { z } from "zod";
-
-// ---------------------------------------------------------------------------
-// Schemas (duplicated from actions.ts for isolated unit testing)
-// ---------------------------------------------------------------------------
-
-const listQuestionsSchema = z.object({
-  deptId: z.number().int().positive("Department ID is required"),
-});
-
-const createEvaluationSchema = z.object({
-  candidateId: z.number().int().positive("Candidate ID is required"),
-  deptId: z.number().int().positive("Department ID is required"),
-  startDate: z.string().optional(),
-  endDate: z.string().optional(),
-  questionAnswers: z
-    .array(
-      z.object({
-        ceqUuid: z.string().optional(),
-        question: z.string().optional(),
-        answer: z.string().optional().nullable(),
-        rating: z.number().int().min(1).max(5).optional(),
-      }),
-    )
-    .min(1, "At least one question answer is required"),
-});
-
-const listReportsSchema = z.object({
-  candidateId: z.number().int().positive("Candidate ID is required"),
-});
-
-const viewReportSchema = z.object({
-  evaluationUuid: z.string().min(1, "Evaluation UUID is required"),
-});
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-type EvalQuestionItem = {
-  ceq_uuid: string;
-  question: string | null;
-};
-
-type EvaluationListItem = {
-  can_eval_uuid: string;
-  candidate_id: number | null;
-  dept_id: number | null;
-  start_date: string | null;
-  end_date: string | null;
-  staff_id: number | null;
-  created_at: Date | null;
-};
-
-type EvaluationDetail = EvaluationListItem & {
-  answers?: Array<{
-    ceq_uuid: string | null;
-    question: string | null;
-    answer: string | null;
-    rating: number | null;
-  }>;
-};
-
-type CreateEvaluationResult = {
-  can_eval_uuid: string;
-  operation: string;
-  message: string;
-};
+import {
+  listQuestionsSchema,
+  createEvaluationSchema,
+  listReportsSchema,
+  viewReportSchema,
+  evalQuestionItemSchema,
+  evaluationListItemSchema,
+  evaluationDetailSchema,
+  evaluationAnswerSchema,
+  createEvaluationResultSchema,
+  type EvalQuestionItem,
+  type EvaluationListItem,
+  type CreateEvaluationResult,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Schema tests
@@ -293,5 +239,166 @@ describe("listQuestions query parameter behavior", () => {
     const result = listQuestionsSchema.safeParse({ deptId: 1.5 });
     // Zod coerce: float is not integer, should fail
     expect(result.success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output validation tests
+// ---------------------------------------------------------------------------
+
+describe("evalQuestionItemSchema (output)", () => {
+  it("validates complete item", () => {
+    const result = evalQuestionItemSchema.safeParse({
+      ceq_uuid: "abc-123",
+      question: "Communication skills",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("validates item with null question", () => {
+    const result = evalQuestionItemSchema.safeParse({
+      ceq_uuid: "abc-123",
+      question: null,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects missing ceq_uuid", () => {
+    const result = evalQuestionItemSchema.safeParse({
+      question: "Test",
+    });
+    expect(result.success).toBe(false);
+  });
+});
+
+describe("createEvaluationResultSchema (output)", () => {
+  it("validates success result", () => {
+    const result = createEvaluationResultSchema.safeParse({
+      can_eval_uuid: "can_eval_abc",
+      operation: "success",
+      message: "Report saved successfully",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects missing fields", () => {
+    const result = createEvaluationResultSchema.safeParse({
+      can_eval_uuid: "abc",
+    });
+    expect(result.success).toBe(false);
+  });
+});
+
+describe("evaluationListItemSchema (output)", () => {
+  it("validates complete item", () => {
+    const result = evaluationListItemSchema.safeParse({
+      can_eval_uuid: "abc",
+      candidate_id: 1,
+      dept_id: 2,
+      start_date: "2026-01-01T00:00:00.000Z",
+      end_date: null,
+      staff_id: null,
+      created_at: new Date("2026-01-01"),
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("validates minimal item with all nulls", () => {
+    const result = evaluationListItemSchema.safeParse({
+      can_eval_uuid: "abc",
+      candidate_id: null,
+      dept_id: null,
+      start_date: null,
+      end_date: null,
+      staff_id: null,
+      created_at: null,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects missing can_eval_uuid", () => {
+    const result = evaluationListItemSchema.safeParse({
+      candidate_id: 1,
+    });
+    expect(result.success).toBe(false);
+  });
+});
+
+describe("evaluationDetailSchema (output)", () => {
+  it("validates detail without answers", () => {
+    const result = evaluationDetailSchema.safeParse({
+      can_eval_uuid: "abc",
+      candidate_id: 1,
+      dept_id: 2,
+      start_date: null,
+      end_date: null,
+      staff_id: null,
+      created_at: new Date(),
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("validates detail with answers", () => {
+    const result = evaluationDetailSchema.safeParse({
+      can_eval_uuid: "abc",
+      candidate_id: 1,
+      dept_id: 2,
+      start_date: null,
+      end_date: null,
+      staff_id: null,
+      created_at: new Date(),
+      answers: [
+        {
+          ceq_uuid: "q1",
+          question: "Communication",
+          answer: "Good",
+          rating: 4,
+        },
+      ],
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("validates detail with null answers fields", () => {
+    const result = evaluationDetailSchema.safeParse({
+      can_eval_uuid: "abc",
+      candidate_id: 1,
+      dept_id: 2,
+      start_date: null,
+      end_date: null,
+      staff_id: null,
+      created_at: new Date(),
+      answers: [
+        {
+          ceq_uuid: null,
+          question: null,
+          answer: null,
+          rating: null,
+        },
+      ],
+    });
+    expect(result.success).toBe(true);
+  });
+});
+
+describe("evaluationAnswerSchema (output)", () => {
+  it("validates complete answer", () => {
+    const result = evaluationAnswerSchema.safeParse({
+      ceq_uuid: "q1",
+      question: "Test",
+      answer: "Yes",
+      rating: 4,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("validates all-null answer", () => {
+    const result = evaluationAnswerSchema.safeParse({
+      ceq_uuid: null,
+      question: null,
+      answer: null,
+      rating: null,
+    });
+    expect(result.success).toBe(true);
   });
 });

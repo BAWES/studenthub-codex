@@ -5,82 +5,24 @@ import { z } from "zod";
 import crypto from "node:crypto";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
-
-// ---------------------------------------------------------------------------
-// Schemas
-// ---------------------------------------------------------------------------
-
-const listQuestionsSchema = z.object({
-  deptId: z.number().int().positive("Department ID is required"),
-});
-
-const createEvaluationSchema = z.object({
-  candidateId: z.number().int().positive("Candidate ID is required"),
-  deptId: z.number().int().positive("Department ID is required"),
-  startDate: z.string().optional(),
-  endDate: z.string().optional(),
-  questionAnswers: z
-    .array(
-      z.object({
-        ceqUuid: z.string().optional(),
-        question: z.string().optional(),
-        answer: z.string().optional().nullable(),
-        rating: z.number().int().min(1).max(5).optional(),
-      }),
-    )
-    .min(1, "At least one question answer is required"),
-});
-
-const listReportsSchema = z.object({
-  candidateId: z.number().int().positive("Candidate ID is required"),
-});
-
-const viewReportSchema = z.object({
-  evaluationUuid: z.string().min(1, "Evaluation UUID is required"),
-});
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export type ListQuestionsParams = z.input<typeof listQuestionsSchema>;
-export type CreateEvaluationParams = z.input<typeof createEvaluationSchema>;
-export type ListReportsParams = z.input<typeof listReportsSchema>;
-export type ViewReportParams = z.input<typeof viewReportSchema>;
-
-export type EvalQuestionItem = {
-  ceq_uuid: string;
-  question: string | null;
-};
-
-export type EvaluationListItem = {
-  can_eval_uuid: string;
-  candidate_id: number | null;
-  dept_id: number | null;
-  start_date: string | null;
-  end_date: string | null;
-  staff_id: number | null;
-  created_at: Date | null;
-};
-
-export type EvaluationDetail = EvaluationListItem & {
-  answers?: Array<{
-    ceq_uuid: string | null;
-    question: string | null;
-    answer: string | null;
-    rating: number | null;
-  }>;
-};
-
-export type CreateEvaluationResult = {
-  can_eval_uuid: string;
-  operation: string;
-  message: string;
-};
-
-export type ListQuestionsResult = EvalQuestionItem[];
-export type ListReportsResult = EvaluationListItem[];
-export type ViewReportResult = EvaluationDetail | null;
+import {
+  listQuestionsSchema,
+  createEvaluationSchema,
+  listReportsSchema,
+  viewReportSchema,
+  evalQuestionItemSchema,
+  evaluationListItemSchema,
+  evaluationDetailSchema,
+  createEvaluationResultSchema,
+  type ListQuestionsInput,
+  type CreateEvaluationInput,
+  type ListReportsInput,
+  type ViewReportInput,
+  type ListQuestionsResult,
+  type CreateEvaluationResult,
+  type ListReportsResult,
+  type ViewReportResult,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Server Actions
@@ -95,7 +37,7 @@ export type ViewReportResult = EvaluationDetail | null;
  * tables.
  */
 export async function listQuestionsByDepartment(
-  params: ListQuestionsParams,
+  params: ListQuestionsInput,
 ): Promise<ListQuestionsResult> {
   await requireCapability("candidate.evaluation.read");
 
@@ -109,12 +51,23 @@ export async function listQuestionsByDepartment(
     deptId,
   );
 
-  return rows
+  const result = rows
     .filter((r) => r.ceq_uuid !== null)
     .map((r) => ({
       ceq_uuid: r.ceq_uuid!,
       question: r.question,
     }));
+
+  // Validate output shape
+  const outputParsed = z.array(evalQuestionItemSchema).safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/candidates/evaluation] listQuestionsByDepartment output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -122,7 +75,7 @@ export async function listQuestionsByDepartment(
  * Maps to legacy POST /staff/v1/candidate-evaluation/create
  */
 export async function createEvaluation(
-  params: CreateEvaluationParams,
+  params: CreateEvaluationInput,
 ): Promise<CreateEvaluationResult> {
   await requireCapability("candidate.evaluation.write");
 
@@ -160,11 +113,22 @@ export async function createEvaluation(
 
   revalidatePath("/staff/candidates/evaluation");
 
-  return {
+  const result = {
     can_eval_uuid: canEvalUuid,
     operation: "success",
     message: "Report saved successfully",
   };
+
+  // Validate output shape
+  const outputParsed = createEvaluationResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/candidates/evaluation] createEvaluation output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -172,7 +136,7 @@ export async function createEvaluation(
  * Maps to legacy GET /staff/v1/candidate-evaluation/list-report/{id}
  */
 export async function listEvaluationReports(
-  params: ListReportsParams,
+  params: ListReportsInput,
 ): Promise<ListReportsResult> {
   await requireCapability("candidate.evaluation.read");
 
@@ -183,7 +147,7 @@ export async function listEvaluationReports(
     orderBy: { created_at: "desc" },
   });
 
-  return evaluations.map((e) => ({
+  const result = evaluations.map((e) => ({
     can_eval_uuid: e.can_eval_uuid,
     candidate_id: e.candidate_id,
     dept_id: e.dept_id,
@@ -192,6 +156,17 @@ export async function listEvaluationReports(
     staff_id: e.staff_id,
     created_at: e.created_at,
   }));
+
+  // Validate output shape
+  const outputParsed = z.array(evaluationListItemSchema).safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/candidates/evaluation] listEvaluationReports output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -199,7 +174,7 @@ export async function listEvaluationReports(
  * Maps to legacy GET /staff/v1/candidate-evaluation/view-report/{id}
  */
 export async function viewEvaluationReport(
-  params: ViewReportParams,
+  params: ViewReportInput,
 ): Promise<ViewReportResult> {
   await requireCapability("candidate.evaluation.read");
 
@@ -221,7 +196,7 @@ export async function viewEvaluationReport(
     evaluationUuid,
   );
 
-  return {
+  const result = {
     can_eval_uuid: evaluation.can_eval_uuid,
     candidate_id: evaluation.candidate_id,
     dept_id: evaluation.dept_id,
@@ -236,4 +211,15 @@ export async function viewEvaluationReport(
       rating: a.rating,
     })),
   };
+
+  // Validate output shape
+  const outputParsed = evaluationDetailSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/candidates/evaluation] viewEvaluationReport output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
