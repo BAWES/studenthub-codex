@@ -18,92 +18,6 @@ export const getPaymentSchema = z.object({
 });
 
 // ---------------------------------------------------------------------------
-// Output validation schemas
-// ---------------------------------------------------------------------------
-
-/**
- * Schema for a single payment row in the listing.
- */
-export const paymentRowSchema = z.object({
-  bank_transaction_id: z.string(),
-  reference: z.string().nullable(),
-  status: z.string().nullable(),
-  type: z.string().nullable(),
-  total: z.number().nullable(),
-  currency_code: z.string().nullable(),
-  contact_name: z.string().nullable(),
-  date: z.string(),
-  is_reconciled: z.boolean().nullable(),
-  line_items_count: z.number().int().nonnegative(),
-});
-
-/**
- * Schema for a line item in payment detail.
- */
-export const paymentLineItemSchema = z.object({
-  line_item_id: z.string(),
-  account_code: z.string().nullable(),
-  description: z.string().nullable(),
-  line_amount: z.number().nullable(),
-  quantity: z.number().nullable(),
-  unit_amount: z.number().nullable(),
-});
-
-/**
- * Schema for the payment detail response from getPayment.
- */
-export const paymentDetailSchema = z.object({
-  payment: z
-    .object({
-      bank_transaction_id: z.string(),
-      reference: z.string().nullable(),
-      status: z.string().nullable(),
-      type: z.string().nullable(),
-      total: z.number().nullable(),
-      sub_total: z.number().nullable(),
-      total_tax: z.number().nullable(),
-      currency_rate: z.number().nullable(),
-      currency_code: z.string().nullable(),
-      line_amount_types: z.string().nullable(),
-      has_attachments: z.boolean().nullable(),
-      is_reconciled: z.boolean().nullable(),
-      date: z.string().nullable(),
-      created_at: z.string().nullable(),
-      updated_at: z.string().nullable(),
-      contact: z
-        .object({
-          contact_id: z.string(),
-          name: z.string().nullable(),
-        })
-        .nullable(),
-    })
-    .nullable(),
-  line_items: z.array(paymentLineItemSchema),
-  metrics: z.array(
-    z.object({
-      label: z.string(),
-      value: z.union([z.string(), z.number()]),
-      note: z.string(),
-    }),
-  ),
-});
-
-/**
- * Schema for the full list response from listPayments.
- */
-export const listPaymentsResultSchema = z.object({
-  items: z.array(paymentRowSchema),
-  total: z.number().int(),
-  page: z.number().int().positive(),
-  limit: z.number().int().positive(),
-  totalPages: z.number().int().nonnegative(),
-});
-
-// Alias to match other module naming conventions
-export const listPaymentsOutputSchema = listPaymentsResultSchema;
-export const getPaymentOutputSchema = paymentDetailSchema;
-
-// ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
@@ -165,3 +79,94 @@ export type PaymentActionResponse = {
   operation: "success" | "error";
   message: string;
 };
+
+// ---------------------------------------------------------------------------
+// Output validation schemas
+// ---------------------------------------------------------------------------
+
+/**
+ * Validates a single payment row returned in list results.
+ */
+export const paymentRowOutputSchema = z.object({
+  bank_transaction_id: z.string(),
+  reference: z.string().nullable(),
+  status: z.string().nullable(),
+  type: z.string().nullable(),
+  total: z.number().nullable(),
+  currency_code: z.string().nullable(),
+  contact_name: z.string().nullable(),
+  date: z.string(),
+  is_reconciled: z.boolean().nullable(),
+  line_items_count: z.number().int().nonnegative(),
+});
+
+/**
+ * Validates the listPayments return shape.
+ */
+export const listPaymentsOutputSchema = z.object({
+  items: z.array(paymentRowOutputSchema),
+  total: z.number().int().nonnegative(),
+  page: z.number().int().positive(),
+  limit: z.number().int().positive(),
+  totalPages: z.number().int().nonnegative(),
+});
+
+/**
+ * Validates a line item entry within a payment detail.
+ */
+export const lineItemOutputSchema = z.object({
+  line_item_id: z.string(),
+  account_code: z.string().nullable(),
+  description: z.string().nullable(),
+  line_amount: z.number().nullable(),
+  quantity: z.number().nullable(),
+  unit_amount: z.number().nullable(),
+});
+
+/**
+ * Validates the nested contact object within payment detail.
+ */
+export const paymentContactOutputSchema = z.object({
+  contact_id: z.string(),
+  name: z.string().nullable(),
+});
+
+/**
+ * Validates the nested payment object within PaymentDetail.
+ */
+export const paymentNestedOutputSchema = z.object({
+  bank_transaction_id: z.string(),
+  reference: z.string().nullable(),
+  status: z.string().nullable(),
+  type: z.string().nullable(),
+  total: z.number().nullable(),
+  sub_total: z.number().nullable(),
+  total_tax: z.number().nullable(),
+  currency_rate: z.number().nullable(),
+  currency_code: z.string().nullable(),
+  line_amount_types: z.string().nullable(),
+  has_attachments: z.boolean().nullable(),
+  is_reconciled: z.boolean().nullable(),
+  date: z.string().nullable(),
+  created_at: z.string().nullable(),
+  updated_at: z.string().nullable(),
+  contact: paymentContactOutputSchema.nullable(),
+});
+
+/**
+ * Reusable metric output schema (shared with invoices).
+ */
+export const metricOutputSchema = z.object({
+  label: z.string(),
+  value: z.union([z.string(), z.number()]),
+  note: z.string(),
+});
+
+/**
+ * Validates the getPayment return shape.
+ */
+export const paymentDetailOutputSchema = z.object({
+  payment: paymentNestedOutputSchema.nullable(),
+  line_items: z.array(lineItemOutputSchema),
+  metrics: z.array(metricOutputSchema),
+});

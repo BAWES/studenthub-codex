@@ -35,87 +35,6 @@ export const deleteInvoiceSchema = z.object({
 });
 
 // ---------------------------------------------------------------------------
-// Output validation schemas
-// ---------------------------------------------------------------------------
-
-/**
- * Schema for a single invoice row in the listing.
- */
-export const invoiceRowSchema = z.object({
-  invoice_id: z.number().int().positive(),
-  transfer_id: z.number().int().positive().nullable(),
-  company_name: z.string().nullable(),
-  invoice_date: z.string().nullable(),
-  invoice_status: z.string().nullable(),
-  total: z.string().nullable(),
-  currency_code: z.string().nullable(),
-});
-
-/**
- * Schema for a candidate payout item in invoice detail.
- */
-const invoiceCandidatePayoutSchema = z.object({
-  tc_id: z.number().int(),
-  candidate_name: z.string().nullable(),
-  hours: z.number().nullable(),
-  amount: z.string().nullable(),
-  paid: z.number().int(),
-});
-
-/**
- * Schema for a metric in the invoice detail.
- */
-const invoiceMetricSchema = z.object({
-  label: z.string(),
-  value: z.union([z.string(), z.number()]),
-  note: z.string(),
-});
-
-/**
- * Schema for the invoice detail response from getInvoice.
- */
-export const invoiceDetailSchema = z.object({
-  invoice: z
-    .object({
-      invoice_id: z.number().int(),
-      transfer_id: z.number().int().nullable(),
-      invoice_date: z.string().nullable(),
-      invoice_status: z.string().nullable(),
-      total: z.string().nullable(),
-      company_total: z.string().nullable(),
-      currency_code: z.string().nullable(),
-      payment_received_on: z.string().nullable(),
-      company: z
-        .object({
-          company_name: z.string().nullable(),
-          company_email: z.string().nullable(),
-        })
-        .nullable(),
-    })
-    .nullable(),
-  candidate_payouts: z.array(invoiceCandidatePayoutSchema),
-  metrics: z.array(invoiceMetricSchema),
-});
-
-/**
- * Schema for the full list response from listInvoices.
- */
-export const listInvoicesResultSchema = z.object({
-  items: z.array(invoiceRowSchema),
-  total: z.number().int().nonnegative(),
-  page: z.number().int().positive(),
-  limit: z.number().int().positive(),
-  totalPages: z.number().int().nonnegative(),
-});
-
-/**
- * Schema for mutation action responses (create, update, delete).
- */
-export const invoiceActionResponseSchema = z.object({
-  invoice_id: z.number().int().positive(),
-});
-
-// ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
@@ -156,3 +75,87 @@ export type InvoiceDetail = {
   }[];
   metrics: { label: string; value: string | number; note: string }[];
 };
+
+// ---------------------------------------------------------------------------
+// Output validation schemas
+// ---------------------------------------------------------------------------
+
+/**
+ * Validates a single invoice row returned in list results.
+ */
+export const invoiceRowOutputSchema = z.object({
+  invoice_id: z.number().int(),
+  transfer_id: z.number().int().nullable(),
+  company_name: z.string().nullable(),
+  invoice_date: z.string().nullable(),
+  invoice_status: z.string().nullable(),
+  total: z.string().nullable(),
+  currency_code: z.string().nullable(),
+});
+
+/**
+ * Validates the listInvoices return shape.
+ */
+export const listInvoicesOutputSchema = z.object({
+  items: z.array(invoiceRowOutputSchema),
+  total: z.number().int().nonnegative(),
+  page: z.number().int().positive(),
+  limit: z.number().int().positive(),
+  totalPages: z.number().int().nonnegative(),
+});
+
+/**
+ * Validates a single candidate payout entry.
+ */
+export const candidatePayoutOutputSchema = z.object({
+  tc_id: z.number().int(),
+  candidate_name: z.string().nullable(),
+  hours: z.number().nullable(),
+  amount: z.string().nullable(),
+  paid: z.number().int(),
+});
+
+/**
+ * Validates a metric entry.
+ */
+export const metricOutputSchema = z.object({
+  label: z.string(),
+  value: z.union([z.string(), z.number()]),
+  note: z.string(),
+});
+
+/**
+ * Validates the nested invoice object within InvoiceDetail.
+ */
+export const invoiceNestedOutputSchema = z.object({
+  invoice_id: z.number().int(),
+  transfer_id: z.number().int().nullable(),
+  invoice_date: z.string().nullable(),
+  invoice_status: z.string().nullable(),
+  total: z.string().nullable(),
+  company_total: z.string().nullable(),
+  currency_code: z.string().nullable(),
+  payment_received_on: z.string().nullable(),
+  company: z
+    .object({
+      company_name: z.string().nullable(),
+      company_email: z.string().nullable(),
+    })
+    .nullable(),
+});
+
+/**
+ * Validates the getInvoice return shape.
+ */
+export const invoiceDetailOutputSchema = z.object({
+  invoice: invoiceNestedOutputSchema.nullable(),
+  candidate_payouts: z.array(candidatePayoutOutputSchema),
+  metrics: z.array(metricOutputSchema),
+});
+
+/**
+ * Validates mutation return shapes (create, update, delete).
+ */
+export const invoiceMutationOutputSchema = z.object({
+  invoice_id: z.number().int(),
+});

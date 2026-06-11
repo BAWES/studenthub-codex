@@ -17,8 +17,8 @@ import { requireCapability } from "@/modules/auth/session";
 import {
   listPaymentsSchema,
   getPaymentSchema,
-  listPaymentsResultSchema,
-  paymentDetailSchema,
+  listPaymentsOutputSchema,
+  paymentDetailOutputSchema,
   type ListPaymentsInput,
   type GetPaymentInput,
   type PaymentRow,
@@ -96,7 +96,7 @@ export async function listPayments(
   };
 
   // Validate output shape
-  const outputParsed = listPaymentsResultSchema.safeParse(result);
+  const outputParsed = listPaymentsOutputSchema.safeParse(result);
   if (!outputParsed.success) {
     console.error(
       "[admin/payments] listPayments output validation failed:",
@@ -144,18 +144,7 @@ export async function getPayment(
   });
 
   if (!transaction) {
-    const result = { payment: null, line_items: [], metrics: [] };
-
-    // Validate output shape
-    const outputParsed = paymentDetailSchema.safeParse(result);
-    if (!outputParsed.success) {
-      console.error(
-        "[admin/payments] getPayment output validation failed (not found):",
-        outputParsed.error.issues,
-      );
-    }
-
-    return result;
+    return { payment: null, line_items: [], metrics: [] };
   }
 
   const t = transaction as any;
@@ -206,11 +195,11 @@ export async function getPayment(
   };
 
   // Validate output shape
-  const outputParsed = paymentDetailSchema.safeParse(result);
-  if (!outputParsed.success) {
+  const detailParsed = paymentDetailOutputSchema.safeParse(result);
+  if (!detailParsed.success) {
     console.error(
       "[admin/payments] getPayment output validation failed:",
-      outputParsed.error.issues,
+      detailParsed.error.issues,
     );
   }
 

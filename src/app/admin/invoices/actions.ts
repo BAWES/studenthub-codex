@@ -22,9 +22,9 @@ import {
   createInvoiceSchema,
   updateInvoiceSchema,
   deleteInvoiceSchema,
-  listInvoicesResultSchema,
-  invoiceDetailSchema,
-  invoiceActionResponseSchema,
+  listInvoicesOutputSchema,
+  invoiceDetailOutputSchema,
+  invoiceMutationOutputSchema,
 } from "./schemas";
 import type {
   ListInvoicesInput,
@@ -111,7 +111,7 @@ export async function listInvoices(
   };
 
   // Validate output shape
-  const outputParsed = listInvoicesResultSchema.safeParse(result);
+  const outputParsed = listInvoicesOutputSchema.safeParse(result);
   if (!outputParsed.success) {
     console.error(
       "[admin/invoices] listInvoices output validation failed:",
@@ -204,11 +204,11 @@ export async function getInvoice(
   };
 
   // Validate output shape
-  const outputParsed = invoiceDetailSchema.safeParse(result);
-  if (!outputParsed.success) {
+  const detailParsed = invoiceDetailOutputSchema.safeParse(result);
+  if (!detailParsed.success) {
     console.error(
       "[admin/invoices] getInvoice output validation failed:",
-      outputParsed.error.issues,
+      detailParsed.error.issues,
     );
   }
 
@@ -242,15 +242,14 @@ export async function createInvoice(
   });
 
   revalidatePath("/admin/invoices");
-
   const result = { invoice_id: invoice.invoice_id };
 
   // Validate output shape
-  const outputParsed = invoiceActionResponseSchema.safeParse(result);
-  if (!outputParsed.success) {
+  const createParsed = invoiceMutationOutputSchema.safeParse(result);
+  if (!createParsed.success) {
     console.error(
       "[admin/invoices] createInvoice output validation failed:",
-      outputParsed.error.issues,
+      createParsed.error.issues,
     );
   }
 
@@ -294,15 +293,14 @@ export async function updateInvoice(
   });
 
   revalidatePath("/admin/invoices");
-
   const result = { invoice_id: invoiceId };
 
   // Validate output shape
-  const outputParsed = invoiceActionResponseSchema.safeParse(result);
-  if (!outputParsed.success) {
+  const updateParsed = invoiceMutationOutputSchema.safeParse(result);
+  if (!updateParsed.success) {
     console.error(
       "[admin/invoices] updateInvoice output validation failed:",
-      outputParsed.error.issues,
+      updateParsed.error.issues,
     );
   }
 
@@ -332,15 +330,14 @@ export async function deleteInvoice(
   });
 
   revalidatePath("/admin/invoices");
-
   const result = { invoice_id: parsed.data.invoiceId };
 
   // Validate output shape
-  const outputParsed = invoiceActionResponseSchema.safeParse(result);
-  if (!outputParsed.success) {
+  const deleteParsed = invoiceMutationOutputSchema.safeParse(result);
+  if (!deleteParsed.success) {
     console.error(
       "[admin/invoices] deleteInvoice output validation failed:",
-      outputParsed.error.issues,
+      deleteParsed.error.issues,
     );
   }
 
