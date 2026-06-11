@@ -101,3 +101,17 @@ test.describe("Public routes", () => {
     }
   });
 });
+
+test.describe("App and hub shells", () => {
+  test.describe.configure({ mode: "parallel" });
+
+  test("app shell loads for anonymous (redirects to login)", async ({ page }) => {
+    await page.goto("/app");
+    await expect(page).toHaveURL(/\/login/);
+  });
+
+  test("hub shell loads for anonymous (redirects to login)", async ({ page }) => {
+    await page.goto("/hub");
+    await expect(page).toHaveURL(/\/login/);
+  });
+});

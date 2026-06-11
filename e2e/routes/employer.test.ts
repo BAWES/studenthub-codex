@@ -1,0 +1,88 @@
+import { test, expect } from "@playwright/test";
+import { getFixtures, disconnectPrisma, type FixtureUser } from "../fixtures/auth";
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
+
+let company: FixtureUser;
+let staff: FixtureUser;
+let candidateUser: FixtureUser;
+let jobId: string;
+
+test.describe("Employer detail routes", () => {
+  test.describe.configure({ mode: "serial" });
+
+  test.beforeAll(async () => {
+    const fixtures = await getFixtures();
+    company = fixtures.get("company")!;
+    staff = fixtures.get("staff")!;
+    candidateUser = fixtures.get("candidate")!;
+
+    // Discover a real job listing ID
+    const job = await prisma.job_listing.findFirst({
+      where: { status: "active" },
+      select: { jobListingId: true },
+    });
+    if (job) jobId = String(job.jobListingId);
+  });
+
+  test.afterAll(async () => {
+    await disconnectPrisma();
+    await prisma.$disconnect();
+  });
+
+  async function assertRouteLoads(route: string, fixtureUser: FixtureUser) {
+    const consoleMessages: string[] = [];
+    const browser = await (await import("@playwright/test")).chromium.launch();
+    const bContext = await browser.newContext();
+    await bContext.addCookies([
+      { name: "studenthub_next_session", value: fixtureUser.cookie, domain: "127.0.0.1", path: "/" },
+    ]);
+    const page = await bContext.newPage();
+    page.on("console", (msg) => {
+      if (msg.type() === "error") consoleMessages.push(msg.text());
+    });
+    await page.goto(route);
+    await expect(page.locator("body")).toBeVisible({ timeout: 15000 });
+
+    const errors = consoleMessages.filter(
+      (m) => m.includes("hydration") || m.includes("serialization") || m.includes("Functions cannot be passed"),
+    );
+    expect(errors).toEqual([]);
+    await bContext.close();
+    await browser.close();
+  }
+
+  async function assertRoleGuard(route: string, wrongRole: FixtureUser) {
+    const browser = await (await import("@playwright/test")).chromium.launch();
+    const bContext = await browser.newContext();
+    await bContext.addCookies([
+      { name: "studenthub_next_session", value: wrongRole.cookie, domain: "127.0.0.1", path: "/" },
+    ]);
+    const page = await bContext.newPage();
+    await page.goto(route);
+    await expect(page).not.toHaveURL(route);
+    await bContext.close();
+    await browser.close();
+  }
+
+  test("employer job detail loads", async () => {
+    test.skip(!jobId, "No job listing record in DB");
+    await assertRouteLoads(`/employer/jobs/${jobId}`, company);
+  });
+
+  test("employer job applications loads", async () => {
+    test.skip(!jobId, "No job listing record in DB");
+    await assertRouteLoads(`/employer/jobs/${jobId}/applications`, company);
+  });
+
+  test("staff cannot access employer job detail", async () => {
+    test.skip(!jobId, "No job listing record in DB");
+    await assertRoleGuard(`/employer/jobs/${jobId}`, staff);
+  });
+
+  test("candidate cannot access employer job detail", async () => {
+    test.skip(!jobId, "No job listing record in DB");
+    await assertRoleGuard(`/employer/jobs/${jobId}`, candidateUser);
+  });
+});
