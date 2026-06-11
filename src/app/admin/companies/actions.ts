@@ -7,6 +7,8 @@ import { formatDate, formatMoney } from "@/modules/workspace/format";
 import {
   listAdminCompaniesSchema,
   getAdminCompanySchema,
+  adminCompanyDetailSchema,
+  adminCompanyToggleResponseSchema,
 } from "./schemas";
 import type {
   ListAdminCompaniesInput,
@@ -215,17 +217,16 @@ export async function getAdminCompanyDetail(
   };
 
   // Validate output shape
-  const parsed = adminCompanyDetailSchema.safeParse(result);
-  if (!parsed.success) {
+  const outputParsed = adminCompanyDetailSchema.safeParse(result);
+  if (!outputParsed.success) {
     console.error(
       "[admin/companies] getAdminCompanyDetail output validation failed:",
-      parsed.error.issues,
+      outputParsed.error.issues,
     );
   }
 
   return result;
 }
-
 /**
  * Toggle company approved-to-hire status.
  * Admin action — requires admin.write capability.
