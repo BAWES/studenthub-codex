@@ -7,7 +7,7 @@ import { describe, it, expect } from "vitest";
 import {
   listDiscountCategoriesSchema,
   getDiscountCategorySchema,
-} from "./schemas";
+} from "./actions";
 
 describe("listDiscountCategoriesSchema", () => {
   it("accepts default values when no params provided", () => {

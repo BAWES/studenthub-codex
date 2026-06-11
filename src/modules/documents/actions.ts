@@ -10,6 +10,9 @@ import {
   listDocumentsSchema,
   getDocumentSchema,
   uploadDocumentSchema,
+  listDocumentsResultSchema,
+  documentDetailSchema,
+  uploadDocumentResultSchema,
   type ListDocumentsInput,
   type UploadDocumentInput,
   type DocumentItem,
@@ -60,13 +63,24 @@ export async function listDocuments(
     prisma.file.count({ where: where as any }),
   ]);
 
-  return {
+  const result = {
     documents: documents as DocumentItem[],
     total,
     page,
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  // Validate output shape
+  const outputParsed = listDocumentsResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/documents] listDocuments output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -88,7 +102,20 @@ export async function getDocument(
     where: { file_uuid: parsed.data.file_uuid },
   });
 
-  return document as DocumentItem | null;
+  if (!document) return null;
+
+  const result = document as DocumentItem;
+
+  // Validate output shape
+  const outputParsed = documentDetailSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/documents] getDocument output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -150,8 +177,19 @@ export async function uploadDocument(
   revalidatePath("/documents");
   revalidatePath("/uploads/documents");
 
-  return {
+  const result = {
     file_uuid: fileUuid,
     file_s3_path: `/${relativePath}`,
   };
+
+  // Validate output shape
+  const outputParsed = uploadDocumentResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/documents] uploadDocument output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }

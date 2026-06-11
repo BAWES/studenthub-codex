@@ -8,6 +8,9 @@ import {
   getEmailCampaignSchema,
   createEmailCampaignSchema,
   updateEmailCampaignSchema,
+  emailCampaignListItemSchema,
+  listEmailCampaignsResultSchema,
+  createUpdateResultSchema,
   type ListEmailCampaignsParams,
   type GetEmailCampaignParams,
   type CreateEmailCampaignParams,
@@ -61,13 +64,24 @@ export async function listEmailCampaigns(
     prisma.email_campaign.count({ where }),
   ]);
 
-  return {
+  const result: ListEmailCampaignsResult = {
     campaigns: campaigns as EmailCampaignListItem[],
     total,
     page,
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  // Validate output shape
+  const outputParsed = listEmailCampaignsResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/email-campaigns] listEmailCampaigns output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -99,7 +113,20 @@ export async function getEmailCampaign(
     },
   });
 
-  return campaign as EmailCampaignListItem | null;
+  const result = campaign as EmailCampaignListItem | null;
+
+  // Validate output shape (only when not null)
+  if (result !== null) {
+    const outputParsed = emailCampaignListItemSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/email-campaigns] getEmailCampaign output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+  }
+
+  return result;
 }
 
 /**
@@ -116,10 +143,21 @@ export async function createEmailCampaign(
 
   const parsed = createEmailCampaignSchema.safeParse(params);
   if (!parsed.success) {
-    return {
+    const result: CreateUpdateResult = {
       operation: "error",
       message: parsed.error.issues[0]?.message ?? "Invalid campaign data",
     };
+
+    // Validate output shape
+    const outputParsed = createUpdateResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/email-campaigns] createEmailCampaign output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
   }
 
   const { subject, message, target, isRecurring, triggerPeriod, triggerDateTime } =
@@ -138,16 +176,38 @@ export async function createEmailCampaign(
       },
     });
 
-    return {
+    const result: CreateUpdateResult = {
       operation: "success",
       message: "Email campaign created successfully",
     };
+
+    // Validate output shape
+    const outputParsed = createUpdateResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/email-campaigns] createEmailCampaign output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
   } catch (err) {
-    return {
+    const result: CreateUpdateResult = {
       operation: "error",
       message:
         err instanceof Error ? err.message : "Failed to create email campaign",
     };
+
+    // Validate output shape
+    const outputParsed = createUpdateResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/email-campaigns] createEmailCampaign output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
   }
 }
 
@@ -164,10 +224,21 @@ export async function updateEmailCampaign(
 
   const parsed = updateEmailCampaignSchema.safeParse(params);
   if (!parsed.success) {
-    return {
+    const result: CreateUpdateResult = {
       operation: "error",
       message: parsed.error.issues[0]?.message ?? "Invalid campaign data",
     };
+
+    // Validate output shape
+    const outputParsed = createUpdateResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/email-campaigns] updateEmailCampaign output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
   }
 
   const {
@@ -197,15 +268,37 @@ export async function updateEmailCampaign(
       data,
     });
 
-    return {
+    const result: CreateUpdateResult = {
       operation: "success",
       message: "Email campaign updated successfully",
     };
+
+    // Validate output shape
+    const outputParsed = createUpdateResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/email-campaigns] updateEmailCampaign output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
   } catch (err) {
-    return {
+    const result: CreateUpdateResult = {
       operation: "error",
       message:
         err instanceof Error ? err.message : "Failed to update email campaign",
     };
+
+    // Validate output shape
+    const outputParsed = createUpdateResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/email-campaigns] updateEmailCampaign output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
   }
 }

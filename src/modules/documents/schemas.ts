@@ -28,27 +28,56 @@ export const uploadDocumentSchema = z.object({
   file_size: z.number().int().nonnegative().optional(),
   file_description: z.string().max(65535).optional(),
 });
-export type ListDocumentsInput = z.infer<typeof listDocumentsSchema>;
-export type UploadDocumentInput = z.infer<typeof uploadDocumentSchema>;
-export type DocumentItem = {
-  file_uuid: string;
-  company_id: number | null;
-  file_title: string;
-  file_description: string | null;
-  file_name: string | null;
-  file_type: string | null;
-  file_size: number | null;
-  file_s3_path: string | null;
-  file_created_datetime: Date;
-};
-export type ListDocumentsResult = {
-  documents: DocumentItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
-export type UploadDocumentResult = {
-  file_uuid: string;
-  file_s3_path: string | null;
-};
+// ---------------------------------------------------------------------------
+// Output validation schemas
+// ---------------------------------------------------------------------------
+
+/**
+ * Schema for a single document item returned from listDocuments / getDocument.
+ */
+export const documentItemSchema = z.object({
+  file_uuid: z.string(),
+  company_id: z.number().int().nullable(),
+  file_title: z.string(),
+  file_description: z.string().nullable(),
+  file_name: z.string().nullable(),
+  file_type: z.string().nullable(),
+  file_size: z.number().int().nullable(),
+  file_s3_path: z.string().nullable(),
+  file_created_datetime: z.date(),
+});
+
+/**
+ * Schema for getDocument result (item or null).
+ */
+export const documentDetailSchema = documentItemSchema.nullable();
+
+/**
+ * Schema for the listDocuments response.
+ */
+export const listDocumentsResultSchema = z.object({
+  documents: z.array(documentItemSchema),
+  total: z.number().int().nonnegative(),
+  page: z.number().int().positive(),
+  limit: z.number().int().positive(),
+  totalPages: z.number().int().nonnegative(),
+});
+
+/**
+ * Schema for the uploadDocument response.
+ */
+export const uploadDocumentResultSchema = z.object({
+  file_uuid: z.string(),
+  file_s3_path: z.string().nullable(),
+});
+
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
+
+export type ListDocumentsInput = z.input<typeof listDocumentsSchema>;
+export type UploadDocumentInput = z.input<typeof uploadDocumentSchema>;
+export type DocumentItem = z.output<typeof documentItemSchema>;
+export type DocumentDetail = z.output<typeof documentDetailSchema>;
+export type ListDocumentsResult = z.output<typeof listDocumentsResultSchema>;
+export type UploadDocumentResult = z.output<typeof uploadDocumentResultSchema>;

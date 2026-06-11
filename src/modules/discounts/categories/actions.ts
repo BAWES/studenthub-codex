@@ -1,16 +1,41 @@
 "use server";
 
+import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
 import {
-  listDiscountCategoriesSchema,
-  getDiscountCategorySchema,
-  type ListDiscountCategoriesParams,
-  type GetDiscountCategoryParams,
+  discountCategoryItemSchema,
+  listDiscountCategoriesResultSchema,
   type DiscountCategoryItem,
   type ListDiscountCategoriesResult,
 } from "./schemas";
 
+// ---------------------------------------------------------------------------
+// Schemas (input)
+// ---------------------------------------------------------------------------
+
+const listDiscountCategoriesSchema = z.object({
+  page: z.coerce.number().int().positive().optional().default(1),
+  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
+  nameFilter: z.string().optional(),
+});
+
+const getDiscountCategorySchema = z.object({
+  categoryId: z.coerce.number().int().positive("Category ID must be a positive integer"),
+});
+
+// ---------------------------------------------------------------------------
+// Types (input)
+// ---------------------------------------------------------------------------
+
+export type ListDiscountCategoriesParams = z.input<typeof listDiscountCategoriesSchema>;
+export type GetDiscountCategoryParams = z.input<typeof getDiscountCategorySchema>;
+
+// ---------------------------------------------------------------------------
+// Exported schemas (for shared validation)
+// ---------------------------------------------------------------------------
+
+export { listDiscountCategoriesSchema, getDiscountCategorySchema };
 
 // ---------------------------------------------------------------------------
 // listDiscountCategories
@@ -56,7 +81,7 @@ export async function listDiscountCategories(
     prisma.discount_category.count({ where: where as any }),
   ]);
 
-  return {
+  const result: ListDiscountCategoriesResult = {
     categories: categories.map((c) => ({
       category_id: c.category_id,
       name_en: c.name_en,
@@ -70,6 +95,16 @@ export async function listDiscountCategories(
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  const outputParsed = listDiscountCategoriesResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/discounts/categories] listDiscountCategories output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -100,7 +135,7 @@ export async function getDiscountCategory(
 
   if (!category) return null;
 
-  return {
+  const result: DiscountCategoryItem = {
     category_id: category.category_id,
     name_en: category.name_en,
     name_ar: category.name_ar ?? null,
@@ -108,4 +143,14 @@ export async function getDiscountCategory(
     created_at: category.created_at ?? null,
     updated_at: category.updated_at ?? null,
   };
+
+  const outputParsed = discountCategoryItemSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/discounts/categories] getDiscountCategory output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }

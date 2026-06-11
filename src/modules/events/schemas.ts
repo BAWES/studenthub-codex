@@ -16,18 +16,30 @@ export const getActivityEventSchema = z.object({
 });
 export type ListActivityEventsParams = z.input<typeof listActivityEventsSchema>;
 export type GetActivityEventParams = z.input<typeof getActivityEventSchema>;
-export type ActivityEventItem = {
-  activity_uuid: string;
-  request_uuid: string;
-  activity_detail: string;
-  staff_name: string | null;
-  activity_created_datetime: Date | null;
-  activity_updated_datetime: Date | null;
-};
-export type ListActivityEventsResult = {
-  events: ActivityEventItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
+// ---------------------------------------------------------------------------
+// Output validation schemas
+// ---------------------------------------------------------------------------
+
+export const activityEventItemSchema = z.object({
+  activity_uuid: z.string(),
+  request_uuid: z.string(),
+  activity_detail: z.string(),
+  staff_name: z.string().nullable(),
+  activity_created_datetime: z.date().nullable(),
+  activity_updated_datetime: z.date().nullable(),
+});
+
+export const listActivityEventsResultSchema = z.object({
+  events: z.array(activityEventItemSchema),
+  total: z.number(),
+  page: z.number(),
+  limit: z.number(),
+  totalPages: z.number(),
+});
+
+// ---------------------------------------------------------------------------
+// Types derived from output schemas
+// ---------------------------------------------------------------------------
+
+export type ActivityEventItem = z.output<typeof activityEventItemSchema>;
+export type ListActivityEventsResult = z.output<typeof listActivityEventsResultSchema>;

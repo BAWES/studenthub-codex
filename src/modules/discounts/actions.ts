@@ -8,11 +8,14 @@ import {
   createDiscountSchema,
   listDiscountsSchema,
   listDiscountsByApplicantSchema,
+  createDiscountResultSchema,
+  listDiscountsResultSchema,
   type CreateDiscountInput,
   type ListDiscountsInput,
   type ListDiscountsByApplicantInput,
   type DiscountListItem,
   type ListDiscountsResult,
+  type CreateDiscountResult,
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
@@ -56,13 +59,23 @@ export async function listDiscounts(
     prisma.discount.count({ where: where as any }),
   ]);
 
-  return {
+  const result = {
     discounts: discounts as DiscountListItem[],
     total,
     page,
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  const validated = listDiscountsResultSchema.safeParse(result);
+  if (!validated.success) {
+    console.error(
+      "[modules/discounts] listDiscounts output validation failed:",
+      validated.error,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -70,7 +83,7 @@ export async function listDiscounts(
  */
 export async function createDiscount(
   data: CreateDiscountInput,
-): Promise<{ discount_uuid: string }> {
+): Promise<CreateDiscountResult> {
   await requireCapability("discount.write");
 
   const parsed = createDiscountSchema.safeParse(data);
@@ -95,7 +108,18 @@ export async function createDiscount(
   });
 
   revalidatePath("/discounts");
-  return { discount_uuid: discountUuid };
+
+  const result: CreateDiscountResult = { discount_uuid: discountUuid };
+
+  const validated = createDiscountResultSchema.safeParse(result);
+  if (!validated.success) {
+    console.error(
+      "[modules/discounts] createDiscount output validation failed:",
+      validated.error,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -122,7 +146,17 @@ export async function listDiscountsByApplicant(
   });
 
   if (!candidate || !candidate.store_id) {
-    return { discounts: [], total: 0, page, limit, totalPages: 0 };
+    const result: ListDiscountsResult = { discounts: [], total: 0, page, limit, totalPages: 0 };
+
+    const validated = listDiscountsResultSchema.safeParse(result);
+    if (!validated.success) {
+      console.error(
+        "[modules/discounts] listDiscountsByApplicant output validation failed:",
+        validated.error,
+      );
+    }
+
+    return result;
   }
 
   const store = await prisma.store.findUnique({
@@ -131,7 +165,17 @@ export async function listDiscountsByApplicant(
   });
 
   if (!store || !store.company_id) {
-    return { discounts: [], total: 0, page, limit, totalPages: 0 };
+    const result: ListDiscountsResult = { discounts: [], total: 0, page, limit, totalPages: 0 };
+
+    const validated = listDiscountsResultSchema.safeParse(result);
+    if (!validated.success) {
+      console.error(
+        "[modules/discounts] listDiscountsByApplicant output validation failed:",
+        validated.error,
+      );
+    }
+
+    return result;
   }
 
   const where: Record<string, unknown> = {
@@ -149,11 +193,21 @@ export async function listDiscountsByApplicant(
     prisma.discount.count({ where: where as any }),
   ]);
 
-  return {
+  const result: ListDiscountsResult = {
     discounts: discounts as DiscountListItem[],
     total,
     page,
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  const validated = listDiscountsResultSchema.safeParse(result);
+  if (!validated.success) {
+    console.error(
+      "[modules/discounts] listDiscountsByApplicant output validation failed:",
+      validated.error,
+    );
+  }
+
+  return result;
 }

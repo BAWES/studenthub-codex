@@ -13,6 +13,10 @@ import {
   getDocumentSchema,
   uploadDocumentParamsSchema,
   deleteDocumentSchema,
+  listCandidateDocumentsResultSchema,
+  getCandidateDocumentResultSchema,
+  uploadDocumentStateResultSchema,
+  deleteDocumentStateResultSchema,
   type CandidateDocumentItem,
   type ListCandidateDocumentsResult,
   type UploadDocumentState,
@@ -124,7 +128,18 @@ export async function listCandidateDocuments(
   });
 
   if (!candidate) {
-    return { items: [], candidateId };
+    const result: ListCandidateDocumentsResult = { items: [], candidateId };
+
+    // Validate output shape
+    const outputParsed = listCandidateDocumentsResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/candidates/documents] listCandidateDocuments output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
   }
 
   const items: CandidateDocumentItem[] = DOCUMENT_TYPES.map((type) => {
@@ -133,7 +148,18 @@ export async function listCandidateDocuments(
     return toDocumentItem(type, filePath);
   });
 
-  return { items, candidateId: candidate.candidate_id };
+  const result: ListCandidateDocumentsResult = { items, candidateId: candidate.candidate_id };
+
+  // Validate output shape
+  const outputParsed = listCandidateDocumentsResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/candidates/documents] listCandidateDocuments output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -155,10 +181,34 @@ export async function getCandidateDocument(
     select: { [field]: true, candidate_id: false },
   });
 
-  if (!candidate) return null;
+  if (!candidate) {
+    const result: CandidateDocumentItem | null = null;
+
+    // Validate output shape
+    const outputParsed = getCandidateDocumentResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/candidates/documents] getCandidateDocument output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
+  }
 
   const filePath = (candidate as Record<string, unknown>)[field] as string | null;
-  return toDocumentItem(documentType, filePath);
+  const result: CandidateDocumentItem = toDocumentItem(documentType, filePath);
+
+  // Validate output shape
+  const outputParsed = getCandidateDocumentResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/candidates/documents] getCandidateDocument output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -188,12 +238,40 @@ export async function uploadCandidateDocument(
   }
 
   if (!documentType || !file || file.size === 0) {
-    return { success: false, error: "No file provided. Use file_{type} field (e.g. file_photo)." };
+    const result: UploadDocumentState = {
+      success: false,
+      error: "No file provided. Use file_{type} field (e.g. file_photo).",
+    };
+
+    // Validate output shape
+    const outputParsed = uploadDocumentStateResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/candidates/documents] uploadCandidateDocument output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
   }
 
   const parseResult = uploadDocumentParamsSchema.safeParse({ candidateId, documentType });
   if (!parseResult.success) {
-    return { success: false, error: parseResult.error.errors.map((e) => e.message).join("; ") };
+    const result: UploadDocumentState = {
+      success: false,
+      error: parseResult.error.errors.map((e) => e.message).join("; "),
+    };
+
+    // Validate output shape
+    const outputParsed = uploadDocumentStateResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/candidates/documents] uploadCandidateDocument output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
   }
 
   const typeConfig = ALLOWED_TYPES[documentType];
@@ -201,24 +279,60 @@ export async function uploadCandidateDocument(
   // Validate file extension
   const ext = path.extname(file.name).toLowerCase();
   if (!typeConfig.ext.includes(ext)) {
-    return {
+    const result: UploadDocumentState = {
       success: false,
       error: `File type "${ext}" is not allowed for ${documentType}. Accepted: ${typeConfig.ext.join(", ")}.`,
     };
+
+    // Validate output shape
+    const outputParsed = uploadDocumentStateResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/candidates/documents] uploadCandidateDocument output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
   }
 
   // Validate MIME type
   if (file.type && !typeConfig.mime.includes(file.type)) {
-    return { success: false, error: `Invalid MIME type "${file.type}" for ${documentType}.` };
+    const result: UploadDocumentState = {
+      success: false,
+      error: `Invalid MIME type "${file.type}" for ${documentType}.`,
+    };
+
+    // Validate output shape
+    const outputParsed = uploadDocumentStateResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/candidates/documents] uploadCandidateDocument output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
   }
 
   // Validate size
   if (file.size > typeConfig.maxSize) {
     const sizeMB = typeConfig.maxSize / 1024 / 1024;
-    return {
+    const result: UploadDocumentState = {
       success: false,
       error: `File is too large. Maximum size for ${documentType} is ${sizeMB} MB.`,
     };
+
+    // Validate output shape
+    const outputParsed = uploadDocumentStateResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/candidates/documents] uploadCandidateDocument output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
   }
 
   try {
@@ -244,12 +358,34 @@ export async function uploadCandidateDocument(
     revalidatePath("/candidate");
     revalidatePath("/candidate/edit");
 
-    return { success: true, filePath: publicPath };
+    const result: UploadDocumentState = { success: true, filePath: publicPath };
+
+    // Validate output shape
+    const outputParsed = uploadDocumentStateResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/candidates/documents] uploadCandidateDocument output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
   } catch (e) {
-    return {
+    const result: UploadDocumentState = {
       success: false,
       error: e instanceof Error ? e.message : "Upload failed due to an unknown error.",
     };
+
+    // Validate output shape
+    const outputParsed = uploadDocumentStateResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/candidates/documents] uploadCandidateDocument output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
   }
 }
 
@@ -273,12 +409,37 @@ export async function deleteCandidateDocument(
 
   const rawType = formData.get("documentType");
   if (!rawType || typeof rawType !== "string" || rawType.trim().length === 0) {
-    return { success: false, error: "documentType is required." };
+    const result: DeleteDocumentState = { success: false, error: "documentType is required." };
+
+    // Validate output shape
+    const outputParsed = deleteDocumentStateResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/candidates/documents] deleteCandidateDocument output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
   }
 
   const parseResult = deleteDocumentSchema.safeParse({ documentType: rawType.trim() });
   if (!parseResult.success) {
-    return { success: false, error: parseResult.error.errors.map((e) => e.message).join("; ") };
+    const result: DeleteDocumentState = {
+      success: false,
+      error: parseResult.error.errors.map((e) => e.message).join("; "),
+    };
+
+    // Validate output shape
+    const outputParsed = deleteDocumentStateResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/candidates/documents] deleteCandidateDocument output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
   }
 
   const { documentType } = parseResult.data;
@@ -292,7 +453,18 @@ export async function deleteCandidateDocument(
     });
 
     if (!candidate) {
-      return { success: false, error: "Candidate not found." };
+      const result: DeleteDocumentState = { success: false, error: "Candidate not found." };
+
+      // Validate output shape
+      const outputParsed = deleteDocumentStateResultSchema.safeParse(result);
+      if (!outputParsed.success) {
+        console.error(
+          "[modules/candidates/documents] deleteCandidateDocument output validation failed:",
+          outputParsed.error.issues,
+        );
+      }
+
+      return result;
     }
 
     const currentPath = (candidate as Record<string, unknown>)[field] as string | null;
@@ -316,11 +488,33 @@ export async function deleteCandidateDocument(
     revalidatePath("/candidate");
     revalidatePath("/candidate/edit");
 
-    return { success: true };
+    const result: DeleteDocumentState = { success: true };
+
+    // Validate output shape
+    const outputParsed = deleteDocumentStateResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/candidates/documents] deleteCandidateDocument output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
   } catch (e) {
-    return {
+    const result: DeleteDocumentState = {
       success: false,
       error: e instanceof Error ? e.message : "Delete failed due to an unknown error.",
     };
+
+    // Validate output shape
+    const outputParsed = deleteDocumentStateResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/candidates/documents] deleteCandidateDocument output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
   }
 }

@@ -12,17 +12,21 @@ import {
   rejectRequestSchema,
   listInspectorsSchema,
   getInspectorSchema,
+  listRequestsResultSchema,
+  getRequestResultSchema,
+  inspectorActionResultSchema,
+  listInspectorsResultSchema,
+  getInspectorResultSchema,
   type ListRequestsParams,
   type GetRequestParams,
   type VerifyRequestInput,
   type RejectRequestInput,
-  type IdRequestListItem,
-  type IdRequestDetail,
   type ListRequestsResult,
   type ListInspectorsInput,
   type GetInspectorInput,
-  type InspectorAccountItem,
   type ListInspectorsResult,
+  type InspectorAccountItem,
+  type IdRequestDetail,
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
@@ -82,7 +86,7 @@ export async function listRequests(
     prisma.candidate_id_request.count({ where: where as any }),
   ]);
 
-  return {
+  const result: ListRequestsResult = {
     requests: requests.map((r) => ({
       cir_uuid: r.cir_uuid,
       candidate_count: r.candidate_ids
@@ -100,6 +104,17 @@ export async function listRequests(
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  // Validate output shape
+  const outputParsed = listRequestsResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/inspector] listRequests output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -135,9 +150,19 @@ export async function getRequest(
     },
   });
 
-  if (!request) return null;
+  if (!request) {
+    // Validate output shape (null case)
+    const outputParsed = getRequestResultSchema.safeParse(null);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/inspector] getRequest output validation failed (null):",
+        outputParsed.error.issues,
+      );
+    }
+    return null;
+  }
 
-  return {
+  const result: IdRequestDetail = {
     cir_uuid: request.cir_uuid,
     status: request.status,
     rejection_reason: request.rejection_reason,
@@ -148,6 +173,17 @@ export async function getRequest(
     updated_by_name:
       request.staff_candidate_id_request_updated_byTostaff?.staff_name ?? null,
   };
+
+  // Validate output shape
+  const outputParsed = getRequestResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/inspector] getRequest output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -178,7 +214,19 @@ export async function verifyRequest(
   });
 
   revalidatePath("/inspector/requests");
-  return { success: true };
+
+  const result = { success: true as const };
+
+  // Validate output shape
+  const outputParsed = inspectorActionResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/inspector] verifyRequest output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -208,7 +256,19 @@ export async function rejectRequest(
   });
 
   revalidatePath("/inspector/requests");
-  return { success: true };
+
+  const result = { success: true as const };
+
+  // Validate output shape
+  const outputParsed = inspectorActionResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/inspector] rejectRequest output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -247,7 +307,7 @@ export async function listInspectors(
     prisma.inspector.count({ where }),
   ]);
 
-  return {
+  const result: ListInspectorsResult = {
     inspectors: inspectors.map((i) => ({
       inspector_uuid: i.inspector_uuid,
       inspector_name: i.inspector_name,
@@ -261,6 +321,17 @@ export async function listInspectors(
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  // Validate output shape
+  const outputParsed = listInspectorsResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/inspector] listInspectors output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -288,7 +359,7 @@ export async function getInspector(
     throw new Error("Inspector not found");
   }
 
-  return {
+  const result: InspectorAccountItem = {
     inspector_uuid: inspector.inspector_uuid,
     inspector_name: inspector.inspector_name,
     inspector_email: inspector.inspector_email,
@@ -296,4 +367,15 @@ export async function getInspector(
     inspector_created_at: inspector.inspector_created_at,
     inspector_updated_at: inspector.inspector_updated_at,
   };
+
+  // Validate output shape
+  const outputParsed = getInspectorResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/inspector] getInspector output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }

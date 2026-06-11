@@ -37,23 +37,50 @@ export const listDiscountsByApplicantSchema = z.object({
 export type CreateDiscountInput = z.infer<typeof createDiscountSchema>;
 export type ListDiscountsInput = z.infer<typeof listDiscountsSchema>;
 export type ListDiscountsByApplicantInput = z.infer<typeof listDiscountsByApplicantSchema>;
-export type DiscountListItem = {
-  discount_uuid: string;
-  category_id: number;
-  company_id: number;
-  store_id: number | null;
-  description_en: string;
-  description_ar: string;
-  how_to_apply_en: string | null;
-  how_to_apply_ar: string | null;
-  image: string | null;
-  valid_until: Date | null;
-  created_at: Date | null;
-};
-export type ListDiscountsResult = {
-  discounts: DiscountListItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
+
+// ---------------------------------------------------------------------------
+// Output validation schemas
+// ---------------------------------------------------------------------------
+
+/**
+ * Schema for a single discount item returned from list operations.
+ */
+export const discountItemSchema = z.object({
+  discount_uuid: z.string(),
+  category_id: z.number().int(),
+  company_id: z.number().int(),
+  store_id: z.number().int().nullable(),
+  description_en: z.string(),
+  description_ar: z.string(),
+  how_to_apply_en: z.string().nullable(),
+  how_to_apply_ar: z.string().nullable(),
+  image: z.string().nullable(),
+  valid_until: z.date().nullable(),
+  created_at: z.date().nullable(),
+});
+
+/**
+ * Schema for the createDiscount response.
+ */
+export const createDiscountResultSchema = z.object({
+  discount_uuid: z.string(),
+});
+
+/**
+ * Schema for the listDiscounts / listDiscountsByApplicant response.
+ */
+export const listDiscountsResultSchema = z.object({
+  discounts: z.array(discountItemSchema),
+  total: z.number().int().nonnegative(),
+  page: z.number().int().positive(),
+  limit: z.number().int().positive(),
+  totalPages: z.number().int().nonnegative(),
+});
+
+// ---------------------------------------------------------------------------
+// Types derived from output schemas
+// ---------------------------------------------------------------------------
+
+export type DiscountListItem = z.output<typeof discountItemSchema>;
+export type ListDiscountsResult = z.output<typeof listDiscountsResultSchema>;
+export type CreateDiscountResult = z.output<typeof createDiscountResultSchema>;
