@@ -28,6 +28,9 @@ import {
   createCandidateSchema,
   updateCandidateSchema,
   deleteCandidateSchema,
+  candidateListOutputSchema,
+  candidateDetailOutputSchema,
+  candidateActionResultOutputSchema,
 } from "./schemas";
 import type {
   ListCandidatesInput,
@@ -58,7 +61,7 @@ export async function listCandidates(
   limit: number;
   totalPages: number;
 }> {
-  await requireCapability("candidate.read");
+  await requireCapability("admin.system");
 
   const parsed = listCandidatesSchema.safeParse(input);
   if (!parsed.success) {
@@ -99,7 +102,7 @@ export async function listCandidates(
     prisma.candidate.count({ where: where as any }),
   ]);
 
-  return {
+  const result = {
     items: candidates.map((c): CandidateRow => ({
       candidate_id: c.candidate_id,
       name: c.candidate_name,
@@ -116,6 +119,17 @@ export async function listCandidates(
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  // Validate output shape
+  const outputParsed = candidateListOutputSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[admin/candidates] listCandidates output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -128,7 +142,7 @@ export async function listCandidates(
 export async function getCandidate(
   candidateId: number,
 ): Promise<CandidateDetail> {
-  await requireCapability("candidate.read");
+  await requireCapability("admin.system");
 
   const parsed = getCandidateSchema.safeParse({ candidateId });
   if (!parsed.success) {
@@ -156,12 +170,20 @@ export async function getCandidate(
   });
 
   if (!candidate) {
-    return { candidate: null, metrics: [] };
+    const nullResult = { candidate: null, metrics: [] };
+    const nullParsed = candidateDetailOutputSchema.safeParse(nullResult);
+    if (!nullParsed.success) {
+      console.error(
+        "[admin/candidates] getCandidate output validation failed:",
+        nullParsed.error.issues,
+      );
+    }
+    return nullResult;
   }
 
   const c = candidate as any;
 
-  return {
+  const result = {
     candidate: {
       candidate_id: c.candidate_id,
       candidate_name: c.candidate_name,
@@ -187,6 +209,17 @@ export async function getCandidate(
       { label: "Created", value: formatDate(c.candidate_created_at), note: "" },
     ],
   };
+
+  // Validate output shape
+  const outputParsed = candidateDetailOutputSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[admin/candidates] getCandidate output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -206,7 +239,7 @@ export async function searchCandidates(
   limit: number;
   totalPages: number;
 }> {
-  await requireCapability("candidate.read");
+  await requireCapability("admin.system");
 
   const parsed = searchCandidatesSchema.safeParse(input);
   if (!parsed.success) {
@@ -245,7 +278,7 @@ export async function searchCandidates(
     prisma.candidate.count({ where: where as any }),
   ]);
 
-  return {
+  const result = {
     items: candidates.map((c): CandidateRow => ({
       candidate_id: c.candidate_id,
       name: c.candidate_name,
@@ -262,6 +295,17 @@ export async function searchCandidates(
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  // Validate output shape
+  const outputParsed = candidateListOutputSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[admin/candidates] searchCandidates output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -275,7 +319,7 @@ export async function searchCandidates(
 export async function createCandidate(
   data: CreateCandidateInput,
 ): Promise<CreateCandidateResult> {
-  await requireCapability("candidate.write");
+  await requireCapability("admin.system");
 
   const parsed = createCandidateSchema.safeParse(data);
   if (!parsed.success) {
@@ -334,7 +378,16 @@ export async function createCandidate(
 
     revalidatePath("/admin/candidates");
 
-    return { success: true, candidateId: candidate.candidate_id };
+    const successResult = { success: true as const, candidateId: candidate.candidate_id };
+    const outputParsed = candidateActionResultOutputSchema.safeParse(successResult);
+    if (!outputParsed.success) {
+      console.error(
+        "[admin/candidates] createCandidate output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return successResult;
   } catch (err) {
     return {
       success: false,
@@ -354,7 +407,7 @@ export async function createCandidate(
 export async function updateCandidate(
   data: UpdateCandidateInput,
 ): Promise<UpdateCandidateResult> {
-  await requireCapability("candidate.write");
+  await requireCapability("admin.system");
 
   const parsed = updateCandidateSchema.safeParse(data);
   if (!parsed.success) {
@@ -417,7 +470,16 @@ export async function updateCandidate(
 
     revalidatePath("/admin/candidates");
 
-    return { success: true, candidateId };
+    const successResult = { success: true as const, candidateId };
+    const outputParsed = candidateActionResultOutputSchema.safeParse(successResult);
+    if (!outputParsed.success) {
+      console.error(
+        "[admin/candidates] updateCandidate output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return successResult;
   } catch (err) {
     return {
       success: false,
@@ -437,7 +499,7 @@ export async function updateCandidate(
 export async function deleteCandidate(
   data: DeleteCandidateInput,
 ): Promise<DeleteCandidateResult> {
-  await requireCapability("candidate.write");
+  await requireCapability("admin.system");
 
   const parsed = deleteCandidateSchema.safeParse(data);
   if (!parsed.success) {
@@ -472,7 +534,16 @@ export async function deleteCandidate(
 
     revalidatePath("/admin/candidates");
 
-    return { success: true, candidateId };
+    const successResult = { success: true as const, candidateId };
+    const outputParsed = candidateActionResultOutputSchema.safeParse(successResult);
+    if (!outputParsed.success) {
+      console.error(
+        "[admin/candidates] deleteCandidate output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return successResult;
   } catch (err) {
     return {
       success: false,

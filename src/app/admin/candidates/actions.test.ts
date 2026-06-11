@@ -6,6 +6,11 @@ import {
   createCandidateSchema,
   updateCandidateSchema,
   deleteCandidateSchema,
+  candidateRowOutputSchema,
+  candidateListOutputSchema,
+  candidateDetailOutputSchema,
+  candidateDetailObjectOutputSchema,
+  candidateActionResultOutputSchema,
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
@@ -294,5 +299,179 @@ describe("deleteCandidateSchema", () => {
 
   it("rejects non-numeric candidateId", () => {
     expect(deleteCandidateSchema.safeParse({ candidateId: "abc" }).success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output schema tests
+// ---------------------------------------------------------------------------
+
+describe("candidateRowOutputSchema", () => {
+  const validRow = {
+    candidate_id: 1,
+    name: "Ahmed Ali",
+    name_ar: "أحمد علي",
+    email: "ahmed@example.com",
+    phone: "+965 1234 5678",
+    status: 10,
+    store_name: "Main Store",
+    created_at: "2024-01-01T00:00:00.000Z",
+    updated_at: "2024-06-01T00:00:00.000Z",
+  };
+
+  it("accepts a valid candidate row", () => {
+    expect(candidateRowOutputSchema.safeParse(validRow).success).toBe(true);
+  });
+
+  it("accepts nullable fields as null", () => {
+    expect(
+      candidateRowOutputSchema.safeParse({
+        ...validRow,
+        phone: null,
+        store_name: null,
+      }).success,
+    ).toBe(true);
+  });
+
+  it("rejects missing candidate_id", () => {
+    const { candidate_id, ...rest } = validRow;
+    expect(candidateRowOutputSchema.safeParse(rest).success).toBe(false);
+  });
+
+  it("rejects wrong type for status", () => {
+    expect(
+      candidateRowOutputSchema.safeParse({ ...validRow, status: "active" }).success,
+    ).toBe(false);
+  });
+});
+
+describe("candidateListOutputSchema", () => {
+  const valid = {
+    items: [
+      {
+        candidate_id: 1,
+        name: "Ahmed",
+        name_ar: "",
+        email: "a@b.com",
+        phone: null,
+        status: 10,
+        store_name: null,
+        created_at: null,
+        updated_at: null,
+      },
+    ],
+    total: 1,
+    page: 1,
+    limit: 20,
+    totalPages: 1,
+  };
+
+  it("accepts a valid list response", () => {
+    expect(candidateListOutputSchema.safeParse(valid).success).toBe(true);
+  });
+
+  it("accepts empty items array", () => {
+    expect(
+      candidateListOutputSchema.safeParse({ ...valid, items: [], total: 0, totalPages: 0 }).success,
+    ).toBe(true);
+  });
+
+  it("rejects negative total", () => {
+    expect(
+      candidateListOutputSchema.safeParse({ ...valid, total: -1 }).success,
+    ).toBe(false);
+  });
+
+  it("rejects missing items", () => {
+    const { items, ...rest } = valid;
+    expect(candidateListOutputSchema.safeParse(rest).success).toBe(false);
+  });
+});
+
+describe("candidateDetailOutputSchema", () => {
+  const validDetail = {
+    candidate: {
+      candidate_id: 1,
+      candidate_name: "Ahmed Ali",
+      candidate_name_ar: "أحمد علي",
+      candidate_email: "ahmed@example.com",
+      candidate_phone: "+965 1234 5678",
+      candidate_status: 10,
+      candidate_gender: 1,
+      candidate_birth_date: "1990-01-15T00:00:00.000Z",
+      candidate_hourly_rate: 2.5,
+      currency_code: "KWD",
+      candidate_created_at: "2024-01-01T00:00:00.000Z",
+      candidate_updated_at: "2024-06-01T00:00:00.000Z",
+      store: { store_name: "Main Store" },
+      country: { country_name_en: "Kuwait" },
+    },
+    metrics: [
+      { label: "Status", value: 10, note: "Active" },
+    ],
+  };
+
+  it("accepts a valid candidate detail", () => {
+    expect(candidateDetailOutputSchema.safeParse(validDetail).success).toBe(true);
+  });
+
+  it("accepts null candidate (not found)", () => {
+    expect(
+      candidateDetailOutputSchema.safeParse({ candidate: null, metrics: [] }).success,
+    ).toBe(true);
+  });
+
+  it("rejects missing candidate object", () => {
+    expect(candidateDetailOutputSchema.safeParse({ metrics: [] }).success).toBe(false);
+  });
+
+  it("rejects wrong metric shape", () => {
+    expect(
+      candidateDetailOutputSchema.safeParse({
+        candidate: null,
+        metrics: [{ bad: "field" }],
+      }).success,
+    ).toBe(false);
+  });
+});
+
+describe("candidateActionResultOutputSchema", () => {
+  it("accepts success result", () => {
+    expect(
+      candidateActionResultOutputSchema.safeParse({
+        success: true as const,
+        candidateId: 42,
+      }).success,
+    ).toBe(true);
+  });
+
+  it("accepts failure result", () => {
+    expect(
+      candidateActionResultOutputSchema.safeParse({
+        success: false as const,
+        error: "Candidate not found",
+      }).success,
+    ).toBe(true);
+  });
+
+  it("rejects success without candidateId", () => {
+    expect(
+      candidateActionResultOutputSchema.safeParse({ success: true }).success,
+    ).toBe(false);
+  });
+
+  it("rejects failure without error", () => {
+    expect(
+      candidateActionResultOutputSchema.safeParse({ success: false }).success,
+    ).toBe(false);
+  });
+
+  it("rejects wrong type for candidateId", () => {
+    expect(
+      candidateActionResultOutputSchema.safeParse({
+        success: true,
+        candidateId: "abc",
+      }).success,
+    ).toBe(false);
   });
 });

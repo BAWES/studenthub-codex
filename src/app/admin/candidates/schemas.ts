@@ -114,3 +114,79 @@ export type CandidateDetail = {
   } | null;
   metrics: { label: string; value: string | number; note: string }[];
 };
+
+// ---------------------------------------------------------------------------
+// Output validation schemas
+// ---------------------------------------------------------------------------
+
+/**
+ * Validates a single candidate row returned in list/search results.
+ */
+export const candidateRowOutputSchema = z.object({
+  candidate_id: z.number().int(),
+  name: z.string(),
+  name_ar: z.string(),
+  email: z.string(),
+  phone: z.string().nullable(),
+  status: z.number().int(),
+  store_name: z.string().nullable(),
+  created_at: z.string().nullable(),
+  updated_at: z.string().nullable(),
+});
+
+/**
+ * Validates the listCandidates / searchCandidates return shape.
+ */
+export const candidateListOutputSchema = z.object({
+  items: z.array(candidateRowOutputSchema),
+  total: z.number().int().nonnegative(),
+  page: z.number().int().positive(),
+  limit: z.number().int().positive(),
+  totalPages: z.number().int().nonnegative(),
+});
+
+/**
+ * Validates a candidate detail object returned by getCandidate.
+ */
+export const candidateDetailObjectOutputSchema = z.object({
+  candidate_id: z.number().int(),
+  candidate_name: z.string(),
+  candidate_name_ar: z.string(),
+  candidate_email: z.string(),
+  candidate_phone: z.string().nullable(),
+  candidate_status: z.number().int(),
+  candidate_gender: z.number().int().nullable(),
+  candidate_birth_date: z.string().nullable(),
+  candidate_hourly_rate: z.number().nullable(),
+  currency_code: z.string().nullable(),
+  candidate_created_at: z.string().nullable(),
+  candidate_updated_at: z.string().nullable(),
+  store: z
+    .object({ store_name: z.string().nullable() })
+    .nullable(),
+  country: z
+    .object({ country_name_en: z.string().nullable() })
+    .nullable(),
+});
+
+/**
+ * Validates the getCandidate return shape.
+ */
+export const candidateDetailOutputSchema = z.object({
+  candidate: candidateDetailObjectOutputSchema.nullable(),
+  metrics: z.array(
+    z.object({
+      label: z.string(),
+      value: z.union([z.string(), z.number()]),
+      note: z.string(),
+    }),
+  ),
+});
+
+/**
+ * Validates mutation result (create/update/delete).
+ */
+export const candidateActionResultOutputSchema = z.discriminatedUnion("success", [
+  z.object({ success: z.literal(true), candidateId: z.number().int() }),
+  z.object({ success: z.literal(false), error: z.string() }),
+]);

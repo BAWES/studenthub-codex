@@ -51,8 +51,52 @@ export const candidateProfileOutputSchema = z.object({
 });
 
 // ---------------------------------------------------------------------------
+// Output validation schemas — validate return shapes from server actions
+// Follows the pattern from admin/dashboard/schemas.ts (dashboardDataSchema)
+// ---------------------------------------------------------------------------
+
+/**
+ * Validates a single education item returned by listCandidateEducation
+ * and getCandidateEducation. Matches the EducationItem type shape.
+ */
+export const educationItemOutputSchema = z.object({
+  education_uuid: z.string(),
+  university_id: z.number().int(),
+  university_name_en: z.string().nullable(),
+  university_name_ar: z.string().nullable(),
+  degree_uuid: z.string().nullable(),
+  degree_name_en: z.string().nullable(),
+  degree_name_ar: z.string().nullable(),
+  major_uuid: z.string().nullable(),
+  major_name_en: z.string().nullable(),
+  major_name_ar: z.string().nullable(),
+  graduation_year: z.number().int().nullable(),
+  is_currently_studying: z.boolean(),
+  created_at: z.date().nullable(),
+  updated_at: z.date().nullable(),
+});
+
+/**
+ * Validates an array of education items (listCandidateEducation return).
+ */
+export const educationListOutputSchema = z.array(educationItemOutputSchema);
+
+/**
+ * Validates the EducationActionResult discriminated union.
+ */
+export const educationActionResultOutputSchema = z.discriminatedUnion("success", [
+  z.object({ success: z.literal(true), educationUuid: z.string() }),
+  z.object({ success: z.literal(false), error: z.string() }),
+]);
+
+// ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
 export type GetCandidateProfileInput = z.input<typeof getCandidateProfileSchema>;
+
 export type CandidateProfileOutput = z.input<typeof candidateProfileOutputSchema>;
+
+export type EducationItemOutput = z.input<typeof educationItemOutputSchema>;
+export type EducationListOutput = z.input<typeof educationListOutputSchema>;
+export type EducationActionResultOutput = z.input<typeof educationActionResultOutputSchema>;
