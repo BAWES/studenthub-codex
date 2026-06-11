@@ -31,6 +31,7 @@ import type {
   MarkAsReadParams,
   DeleteNotificationParams,
 } from "./schemas";
+import { notificationDetailSchema, actionResponseSchema } from "../schemas";
 
 // ---------------------------------------------------------------------------
 // getNotification
@@ -50,7 +51,14 @@ export async function getNotification(
     throw new Error(parsed.error.issues[0]?.message ?? "Invalid notification UUID");
   }
 
-  return parentGetNotificationDetail(Number(session.id), parsed.data.notificationUuid);
+  const result = await parentGetNotificationDetail(Number(session.id), parsed.data.notificationUuid);
+
+  const outputParsed = notificationDetailSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error("[candidate/notifications/id] getNotification output validation failed:", outputParsed.error.issues);
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -77,6 +85,11 @@ export async function markAsRead(
   }
 
   const result = await parentUpdateNotification(parsed.data.notificationUuid, { isNew: false });
+
+  const outputParsed = actionResponseSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error("[candidate/notifications/id] markAsRead output validation failed:", outputParsed.error.issues);
+  }
 
   if (result.success) {
     revalidatePath("/candidate/notifications");
@@ -112,6 +125,11 @@ export async function deleteNotification(
   }
 
   const result = await parentDismissNotification(parsed.data.notificationUuid);
+
+  const outputParsed = actionResponseSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error("[candidate/notifications/id] deleteNotification output validation failed:", outputParsed.error.issues);
+  }
 
   if (result.success) {
     revalidatePath("/candidate/notifications");
