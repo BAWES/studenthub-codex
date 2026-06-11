@@ -65,7 +65,7 @@ describe("TestimonialCarousel", () => {
     render(<TestimonialCarousel persona="company" />);
     await waitFor(() => {
       // Company-specific quote — check for the HR manager name which is unique
-      const quotes = screen.getAllByText(/Emma C\./);
+      const quotes = screen.getAllByText(/Noura A\./);
       expect(quotes.length).toBeGreaterThanOrEqual(1);
     });
   });

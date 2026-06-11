@@ -12,7 +12,6 @@ import { HowItWorks } from "@/components/marketing";
 import { EmployerSection } from "@/components/marketing";
 import { StatsSection } from "@/components/marketing";
 import { PersonaSwitcher } from "@/components/marketing";
-import { FadeInSection } from "@/components/marketing";
 import type { SwitcherPersona } from "@/components/marketing";
 
 // ── Props ─────────────────────────────────────────────────────
@@ -124,6 +123,7 @@ export default function LandingContent({ session }: LandingContentProps) {
 
       {/* ── Persona switcher — pick your role ── */}
       <div className="flex flex-col items-center gap-1.5">
+        <h2 className="sr-only">Choose your perspective</h2>
         <PersonaSwitcher active={persona} onChange={handlePersonaChange} />
         <p className="text-[11px]" style={{ color: "var(--muted)" }}>
           {persona === "candidate"
@@ -133,45 +133,32 @@ export default function LandingContent({ session }: LandingContentProps) {
       </div>
 
       {/* ── Hero section — two-sided marketplace ── */}
-      <FadeInSection asDiv delay={0}>
-        <HeroSection />
-      </FadeInSection>
+      <HeroSection />
 
       {/* ── Stats — social proof counters ── */}
-      <FadeInSection asDiv delay={100}>
-        <StatsSection />
-      </FadeInSection>
+      <StatsSection />
 
       {/* ── How It Works — 3-step flow ── */}
-      <FadeInSection asDiv delay={200}>
-        <HowItWorks />
-      </FadeInSection>
+      <HowItWorks />
 
       {/* ── Employer section — value props for all audiences ── */}
-      <FadeInSection asDiv delay={300}>
-        <EmployerSection />
-      </FadeInSection>
+      <EmployerSection />
 
       {/* ── Social proof — testimonials ── */}
-      <FadeInSection asDiv delay={400}>
-        <TestimonialCarousel persona={persona} />
-      </FadeInSection>
+      <TestimonialCarousel persona={persona} />
 
       {/* ── Comparison table — persona-specific ── */}
-      <FadeInSection asDiv delay={450}>
-        <ComparisonTable persona={persona} />
-      </FadeInSection>
+      <ComparisonTable persona={persona} />
 
       {/* ── Final CTA section ── */}
-      <FadeInSection delay={500}>
-        <section
-          className="relative overflow-hidden rounded-xl p-[clamp(24px,5vw,60px)] text-center"
-          style={{
-            background: "var(--sh-glass-bg)",
-            border: "1px solid var(--sh-glass-border)",
-          }}
-          aria-label="Get started"
-        >
+      <section
+        className="relative overflow-hidden rounded-xl p-[clamp(24px,5vw,60px)] text-center"
+        style={{
+          background: "var(--sh-glass-bg)",
+          border: "1px solid var(--sh-glass-border)",
+        }}
+        aria-label="Get started"
+      >
         {/* Ambient gradient */}
         <div className="shHeroGradientDramatic" aria-hidden="true" />
 
@@ -242,13 +229,11 @@ export default function LandingContent({ session }: LandingContentProps) {
           )}
         </div>
       </section>
-      </FadeInSection>
 
       {/* ── Footer with internal role descriptions ── */}
-      <FadeInSection delay={600}>
-        <footer
-          className="shSection pt-6 pb-4 text-xs"
-          style={{ color: "var(--muted)" }}
+      <footer
+        className="shSection pt-6 pb-4 text-xs"
+        style={{ color: "var(--muted)" }}
       >
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
           {/* Brand */}
@@ -345,7 +330,6 @@ export default function LandingContent({ session }: LandingContentProps) {
           </div>
         </div>
       </footer>
-      </FadeInSection>
     </main>
     </>
   );
