@@ -24,3 +24,7 @@ export const listWebhooksResultSchema = z.object({
 });
 
 export type ListWebhooksResult = z.output<typeof listWebhooksResultSchema>;
+
+export const webhookGetResultSchema = webhookListItemSchema.nullable();
+
+export type WebhookGetResult = z.output<typeof webhookGetResultSchema>;
