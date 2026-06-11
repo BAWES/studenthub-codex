@@ -6,4 +6,4 @@ export {
   appealWorklog,
 } from "./actions";
 
-export type { WorklogState, WorklogRow } from "./actions";
+export type { WorklogState, WorklogRow } from "./schemas";
