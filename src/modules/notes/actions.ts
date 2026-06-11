@@ -4,81 +4,26 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
-
-// ---------------------------------------------------------------------------
-// Schemas
-// ---------------------------------------------------------------------------
-
-const listNotesSchema = z.object({
-  page: z.coerce.number().int().positive().optional().default(1),
-  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
-  companyId: z.coerce.number().int().positive().optional(),
-  staffId: z.coerce.number().int().positive().optional(),
-  requestUuid: z.string().optional(),
-  storyUuid: z.string().optional(),
-  noteType: z.string().optional(),
-  startDate: z.string().optional(),
-  endDate: z.string().optional(),
-  candidateId: z.coerce.number().int().positive().optional(),
-});
-
-const getNoteSchema = z.object({
-  uuid: z.string().min(1, "Note UUID is required"),
-});
-
-const createNoteSchema = z.object({
-  noteText: z.string().min(1, "Note text is required"),
-  companyId: z.coerce.number().int().positive().optional(),
-  candidateId: z.coerce.number().int().positive().optional(),
-  requestUuid: z.string().optional(),
-  storyUuid: z.string().optional(),
-  noteType: z.string().optional().default("Internal Note"),
-});
-
-const updateNoteSchema = z.object({
-  uuid: z.string().min(1, "Note UUID is required"),
-  noteText: z.string().min(1, "Note text is required").optional(),
-  noteType: z.string().optional(),
-});
-
-const deleteNoteSchema = z.object({
-  uuid: z.string().min(1, "Note UUID is required"),
-});
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export type ListNotesParams = z.input<typeof listNotesSchema>;
-export type GetNoteParams = z.input<typeof getNoteSchema>;
-export type CreateNoteParams = z.input<typeof createNoteSchema>;
-export type UpdateNoteParams = z.input<typeof updateNoteSchema>;
-export type DeleteNoteParams = z.input<typeof deleteNoteSchema>;
-
-export type NoteListItem = {
-  note_uuid: string;
-  note_type: string | null;
-  note_text: string | null;
-  company_id: number | null;
-  candidate_id: number | null;
-  created_by: number | null;
-  note_created_datetime: Date | null;
-};
-
-export type NoteDetail = NoteListItem & {
-  note_updated_datetime: Date | null;
-  updated_by: number | null;
-  request_uuid: string | null;
-  story_uuid: string | null;
-};
-
-export type ListNotesResult = {
-  notes: NoteListItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
+import {
+  listNotesSchema,
+  getNoteSchema,
+  createNoteSchema,
+  updateNoteSchema,
+  deleteNoteSchema,
+  listNotesResultSchema,
+  noteDetailNullableSchema,
+  createNoteResultSchema,
+  updateNoteResultSchema,
+  deleteNoteResultSchema,
+  type ListNotesResult,
+  type ListNotesParams,
+  type GetNoteParams,
+  type CreateNoteParams,
+  type UpdateNoteParams,
+  type DeleteNoteParams,
+  type NoteListItem,
+  type NoteDetail,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Server actions
@@ -150,13 +95,24 @@ export async function listNotes(
     prisma.note.count({ where: where as any }),
   ]);
 
-  return {
+  const result: ListNotesResult = {
     notes: notes as NoteListItem[],
     total,
     page,
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  // Validate output shape
+  const outputParsed = listNotesResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/notes] listNotes output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -179,7 +135,18 @@ export async function getNote(
     where: { note_uuid: uuid },
   });
 
-  return note as NoteDetail | null;
+  const result = note as NoteDetail | null;
+
+  // Validate output shape
+  const outputParsed = noteDetailNullableSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/notes] getNote output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -188,15 +155,26 @@ export async function getNote(
  */
 export async function createNote(
   params: CreateNoteParams,
-): Promise<{ operation: string; message: string; note?: NoteDetail }> {
+): Promise<z.infer<typeof createNoteResultSchema>> {
   await requireCapability("notes.create");
 
   const parsed = createNoteSchema.safeParse(params);
   if (!parsed.success) {
-    return {
+    const result = {
       operation: "error",
       message: parsed.error.issues[0]?.message ?? "Invalid create parameters",
     };
+
+    // Validate output shape (error result)
+    const outputParsed = createNoteResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/notes] createNote output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
   }
 
   const { noteText, companyId, candidateId, requestUuid, storyUuid, noteType } =
@@ -218,11 +196,22 @@ export async function createNote(
 
   revalidatePath("/notes");
 
-  return {
+  const result: z.infer<typeof createNoteResultSchema> = {
     operation: "success",
     message: "Note created successfully",
     note: note as NoteDetail,
   };
+
+  // Validate output shape
+  const outputParsed = createNoteResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/notes] createNote output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -231,22 +220,44 @@ export async function createNote(
  */
 export async function updateNote(
   params: UpdateNoteParams,
-): Promise<{ operation: string; message: string; note?: NoteDetail }> {
+): Promise<z.infer<typeof updateNoteResultSchema>> {
   await requireCapability("notes.update");
 
   const parsed = updateNoteSchema.safeParse(params);
   if (!parsed.success) {
-    return {
+    const result = {
       operation: "error",
       message: parsed.error.issues[0]?.message ?? "Invalid update parameters",
     };
+
+    // Validate output shape (error result)
+    const outputParsed = updateNoteResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/notes] updateNote output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
   }
 
   const { uuid, noteText, noteType } = parsed.data;
 
   const existing = await prisma.note.findFirst({ where: { note_uuid: uuid } });
   if (!existing) {
-    return { operation: "error", message: "Note not found" };
+    const result = { operation: "error", message: "Note not found" };
+
+    // Validate output shape (error result)
+    const outputParsed = updateNoteResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/notes] updateNote output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
   }
 
   const data: Record<string, unknown> = {
@@ -262,11 +273,22 @@ export async function updateNote(
 
   revalidatePath("/notes");
 
-  return {
+  const result: z.infer<typeof updateNoteResultSchema> = {
     operation: "success",
     message: "Note successfully updated",
     note: note as NoteDetail,
   };
+
+  // Validate output shape
+  const outputParsed = updateNoteResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/notes] updateNote output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -275,27 +297,60 @@ export async function updateNote(
  */
 export async function deleteNote(
   params: DeleteNoteParams,
-): Promise<{ operation: string; message: string }> {
+): Promise<z.infer<typeof deleteNoteResultSchema>> {
   await requireCapability("notes.delete");
 
   const parsed = deleteNoteSchema.safeParse(params);
   if (!parsed.success) {
-    return {
+    const result = {
       operation: "error",
       message: parsed.error.issues[0]?.message ?? "Invalid delete parameters",
     };
+
+    // Validate output shape (error result)
+    const outputParsed = deleteNoteResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/notes] deleteNote output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
   }
 
   const { uuid } = parsed.data;
 
   const existing = await prisma.note.findFirst({ where: { note_uuid: uuid } });
   if (!existing) {
-    return { operation: "error", message: "Note not found or already deleted" };
+    const result = { operation: "error", message: "Note not found or already deleted" };
+
+    // Validate output shape (error result)
+    const outputParsed = deleteNoteResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/notes] deleteNote output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
   }
 
   await prisma.note.delete({ where: { note_uuid: uuid } });
 
   revalidatePath("/notes");
 
-  return { operation: "success", message: "Note deleted successfully" };
+  const result = { operation: "success", message: "Note deleted successfully" };
+
+  // Validate output shape
+  const outputParsed = deleteNoteResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/notes] deleteNote output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }

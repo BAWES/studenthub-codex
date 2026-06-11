@@ -2,68 +2,24 @@
 
 import crypto from "node:crypto";
 import { revalidatePath } from "next/cache";
-import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
-
-// ---------------------------------------------------------------------------
-// Schemas
-// ---------------------------------------------------------------------------
-
-const listHolidaysSchema = z.object({
-  page: z.coerce.number().int().positive().optional().default(1),
-  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
-  year: z.coerce.number().int().min(2000).max(2100).optional(),
-});
-
-const getHolidaySchema = z.object({
-  uuid: z.string().min(1, "Holiday UUID is required"),
-});
-
-const createHolidaySchema = z.object({
-  name: z.string().min(1, "Holiday name is required"),
-  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be YYYY-MM-DD format"),
-  isRecurring: z.coerce.boolean().optional().default(false),
-  description: z.string().optional(),
-});
-
-const deleteHolidaySchema = z.object({
-  uuid: z.string().min(1, "Holiday UUID is required"),
-});
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export type ListHolidaysParams = z.input<typeof listHolidaysSchema>;
-export type GetHolidayParams = z.input<typeof getHolidaySchema>;
-export type CreateHolidayParams = z.input<typeof createHolidaySchema>;
-export type DeleteHolidayParams = z.input<typeof deleteHolidaySchema>;
-
-export type HolidayItem = {
-  holiday_uuid: string;
-  name: string;
-  date: Date;
-  is_recurring: boolean;
-  description: string | null;
-  is_deleted: boolean;
-  created_at: Date | null;
-  updated_at: Date | null;
-};
-
-export type ListHolidaysResult = {
-  holidays: HolidayItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
-
-// ---------------------------------------------------------------------------
-// Exported schemas (for shared validation)
-// ---------------------------------------------------------------------------
-
-export { listHolidaysSchema, getHolidaySchema, createHolidaySchema, deleteHolidaySchema };
+import {
+  listHolidaysSchema,
+  getHolidaySchema,
+  createHolidaySchema,
+  deleteHolidaySchema,
+  listHolidaysResultSchema,
+  holidayItemSchema,
+  holidayDetailSchema,
+  deleteHolidayResultSchema,
+  type ListHolidaysResult,
+  type ListHolidaysParams,
+  type GetHolidayParams,
+  type CreateHolidayParams,
+  type DeleteHolidayParams,
+  type HolidayItem,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // listHolidays
@@ -111,7 +67,7 @@ export async function listHolidays(
     prisma.holiday.count({ where: where as any }),
   ]);
 
-  return {
+  const result: ListHolidaysResult = {
     holidays: holidays.map((h) => ({
       holiday_uuid: h.holiday_uuid,
       name: h.name,
@@ -127,6 +83,17 @@ export async function listHolidays(
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  // Validate output shape
+  const outputParsed = listHolidaysResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/holidays] listHolidays output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -155,7 +122,7 @@ export async function getHoliday(
 
   if (!holiday) return null;
 
-  return {
+  const result: HolidayItem = {
     holiday_uuid: holiday.holiday_uuid,
     name: holiday.name,
     date: holiday.date,
@@ -165,6 +132,17 @@ export async function getHoliday(
     created_at: holiday.created_at ?? null,
     updated_at: holiday.updated_at ?? null,
   };
+
+  // Validate output shape
+  const outputParsed = holidayDetailSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/holidays] getHoliday output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -206,7 +184,7 @@ export async function createHoliday(
   revalidatePath("/staff/holidays");
   revalidatePath("/admin/holidays");
 
-  return {
+  const result: HolidayItem = {
     holiday_uuid: holiday.holiday_uuid,
     name: holiday.name,
     date: holiday.date,
@@ -216,6 +194,17 @@ export async function createHoliday(
     created_at: holiday.created_at ?? null,
     updated_at: holiday.updated_at ?? null,
   };
+
+  // Validate output shape
+  const outputParsed = holidayItemSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/holidays] createHoliday output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -256,5 +245,16 @@ export async function deleteHoliday(
   revalidatePath("/staff/holidays");
   revalidatePath("/admin/holidays");
 
-  return { success: true };
+  const result = { success: true };
+
+  // Validate output shape
+  const outputParsed = deleteHolidayResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/holidays] deleteHoliday output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }

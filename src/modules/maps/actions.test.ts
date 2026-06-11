@@ -1,49 +1,12 @@
 import { describe, it, expect } from "vitest";
-import { z } from "zod";
-
-// ---------------------------------------------------------------------------
-// Schemas (duplicated from actions.ts for isolated unit testing)
-// ---------------------------------------------------------------------------
-
-const geocodeSchema = z.object({
-  query: z.string().min(1, "Search query is required"),
-  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
-  type: z.enum(["country", "area"]).optional().default("area"),
-});
-
-const reverseGeocodeSchema = z.object({
-  latitude: z.coerce.number().min(-90).max(90, "Latitude must be between -90 and 90"),
-  longitude: z.coerce.number().min(-180).max(180, "Longitude must be between -180 and 180"),
-  radius: z.coerce.number().int().positive().optional().default(10),
-  limit: z.coerce.number().int().min(1).max(100).optional().default(10),
-});
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-type GeocodeResult = {
-  uuid: string;
-  name: string;
-  nameAr: string | null;
-  type: "country" | "area";
-  countryId: number | null;
-  latitude: number | null;
-  longitude: number | null;
-  iso: string | null;
-  emoji: string | null;
-};
-
-type ReverseGeocodeResult = {
-  uuid: string;
-  name: string;
-  nameAr: string | null;
-  type: "area";
-  countryName: string | null;
-  latitude: number;
-  longitude: number;
-  distance: number;
-};
+import {
+  geocodeSchema,
+  reverseGeocodeSchema,
+  geocodeResultSchema,
+  reverseGeocodeResultSchema,
+  type GeocodeResult,
+  type ReverseGeocodeResult,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Pure functions for testable logic
@@ -218,40 +181,136 @@ describe("buildAreaSearch", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Tests: Type shapes
+// Output schema tests: geocodeResultSchema
 // ---------------------------------------------------------------------------
 
-describe("GeocodeResult type shape", () => {
-  it("accepts a valid result", () => {
-    const result: GeocodeResult = {
+const validGeocodeCountryResult = {
+  uuid: "KW",
+  name: "Kuwait",
+  nameAr: "الكويت",
+  type: "country" as const,
+  countryId: 1,
+  latitude: 29.3697,
+  longitude: 47.9783,
+  iso: "KWT",
+  emoji: "🇰🇼",
+};
+
+const validGeocodeAreaResult = {
+  uuid: "area_123",
+  name: "Salmiya",
+  nameAr: "السالمية",
+  type: "area" as const,
+  countryId: 5,
+  latitude: 29.3333,
+  longitude: 48.0667,
+  iso: null,
+  emoji: null,
+};
+
+describe("geocodeResultSchema", () => {
+  it("accepts a valid country result", () => {
+    const result = geocodeResultSchema.parse(validGeocodeCountryResult);
+    expect(result.uuid).toBe("KW");
+    expect(result.type).toBe("country");
+  });
+
+  it("accepts a valid area result", () => {
+    const result = geocodeResultSchema.parse(validGeocodeAreaResult);
+    expect(result.uuid).toBe("area_123");
+    expect(result.type).toBe("area");
+  });
+
+  it("accepts nullable fields as null", () => {
+    const result = geocodeResultSchema.parse({
       uuid: "KW",
       name: "Kuwait",
-      nameAr: "الكويت",
+      nameAr: null,
       type: "country",
-      countryId: 1,
-      latitude: 29.3697,
-      longitude: 47.9783,
-      iso: "KWT",
-      emoji: "🇰🇼",
-    };
-    expect(result.name).toBe("Kuwait");
-    expect(result.type).toBe("country");
+      countryId: null,
+      latitude: null,
+      longitude: null,
+      iso: null,
+      emoji: null,
+    });
+    expect(result.nameAr).toBeNull();
+    expect(result.countryId).toBeNull();
+    expect(result.latitude).toBeNull();
+    expect(result.longitude).toBeNull();
+    expect(result.iso).toBeNull();
+    expect(result.emoji).toBeNull();
+  });
+
+  it("rejects missing required string field", () => {
+    const { uuid, ...rest } = validGeocodeCountryResult;
+    expect(() => geocodeResultSchema.parse(rest)).toThrow();
+  });
+
+  it("rejects invalid type", () => {
+    expect(() =>
+      geocodeResultSchema.parse({ ...validGeocodeCountryResult, type: "invalid" }),
+    ).toThrow();
+  });
+
+  it("rejects wrong type for countryId", () => {
+    expect(() =>
+      geocodeResultSchema.parse({ ...validGeocodeCountryResult, countryId: "not-a-number" }),
+    ).toThrow();
   });
 });
 
-describe("ReverseGeocodeResult type shape", () => {
-  it("accepts a valid result", () => {
-    const result: ReverseGeocodeResult = {
-      uuid: "area_123",
-      name: "Salmiya",
-      nameAr: "السالمية",
-      type: "area",
-      countryName: "Kuwait",
-      latitude: 29.3333,
-      longitude: 48.0667,
-      distance: 2.5,
-    };
-    expect(result.name).toBe("Salmiya");
-    expect(result.distance).toBe(2.5);
+// ---------------------------------------------------------------------------
+// Output schema tests: reverseGeocodeResultSchema
+// ---------------------------------------------------------------------------
+
+const validReverseGeocodeResult = {
+  uuid: "area_456",
+  name: "Salmiya",
+  nameAr: "السالمية",
+  type: "area" as const,
+  countryName: "Kuwait",
+  latitude: 29.3333,
+  longitude: 48.0667,
+  distance: 3.14,
+};
+
+describe("reverseGeocodeResultSchema", () => {
+  it("accepts a valid reverse geocode result", () => {
+    const result = reverseGeocodeResultSchema.parse(validReverseGeocodeResult);
+    expect(result.uuid).toBe("area_456");
+    expect(result.type).toBe("area");
+    expect(result.distance).toBe(3.14);
+  });
+
+  it("accepts nullable nameAr and countryName", () => {
+    const result = reverseGeocodeResultSchema.parse({
+      ...validReverseGeocodeResult,
+      nameAr: null,
+      countryName: null,
+    });
+    expect(result.nameAr).toBeNull();
+    expect(result.countryName).toBeNull();
+  });
+
+  it("rejects missing required uuid", () => {
+    const { uuid, ...rest } = validReverseGeocodeResult;
+    expect(() => reverseGeocodeResultSchema.parse(rest)).toThrow();
+  });
+
+  it("rejects non-numeric distance", () => {
+    expect(() =>
+      reverseGeocodeResultSchema.parse({ ...validReverseGeocodeResult, distance: "not-a-number" }),
+    ).toThrow();
+  });
+
+  it("rejects non-area type", () => {
+    expect(() =>
+      reverseGeocodeResultSchema.parse({ ...validReverseGeocodeResult, type: "country" }),
+    ).toThrow();
+  });
+
+  it("rejects missing latitude", () => {
+    const { latitude, ...rest } = validReverseGeocodeResult;
+    expect(() => reverseGeocodeResultSchema.parse(rest)).toThrow();
   });
 });
