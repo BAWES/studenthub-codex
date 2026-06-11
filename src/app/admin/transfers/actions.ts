@@ -26,6 +26,9 @@ import {
   getTransferSchema,
   approveTransferSchema,
   rejectTransferSchema,
+  listTransfersResultSchema,
+  transferDetailResultSchema,
+  transferActionResponseSchema,
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
@@ -143,7 +146,7 @@ export async function listTransfers(
     prisma.transfer.count({ where: where as any }),
   ]);
 
-  return {
+  const result = {
     items: transfers.map((t: any): TransferRow => ({
       id: t.transfer_id,
       company: t.company?.company_name ?? "No company",
@@ -162,6 +165,14 @@ export async function listTransfers(
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  // Output validation — log mismatches without throwing
+  const listParsed = listTransfersResultSchema.safeParse(result);
+  if (!listParsed.success) {
+    console.error("[admin/transfers] listTransfers output failed:", listParsed.error.issues);
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -226,7 +237,7 @@ export async function getTransferDetail(
     { label: "Total", value: t.total ? t.total.toString() : "—", note: t.currency_code ?? "KWD" },
   ];
 
-  return {
+  const detailResult = {
     transfer: {
       transferId: t.transfer_id,
       total: t.total ? t.total.toString() : null,
@@ -247,6 +258,14 @@ export async function getTransferDetail(
     invoices,
     metrics,
   };
+
+  // Output validation — log mismatches without throwing
+  const detailParsed = transferDetailResultSchema.safeParse(detailResult);
+  if (!detailParsed.success) {
+    console.error("[admin/transfers] getTransferDetail output failed:", detailParsed.error.issues);
+  }
+
+  return detailResult;
 }
 
 // ---------------------------------------------------------------------------
@@ -296,7 +315,15 @@ export async function approveTransfer(
     revalidatePath("/admin/transfers");
     revalidatePath(`/admin/transfers/${parsed.data.transferId}`);
 
-    return { success: true };
+    const approvalResult = { success: true };
+
+    // Output validation — log mismatches without throwing
+    const approveParsed = transferActionResponseSchema.safeParse(approvalResult);
+    if (!approveParsed.success) {
+      console.error("[admin/transfers] approveTransfer output failed:", approveParsed.error.issues);
+    }
+
+    return approvalResult;
   } catch (err) {
     return {
       success: false,
@@ -357,7 +384,15 @@ export async function rejectTransfer(
     revalidatePath("/admin/transfers");
     revalidatePath(`/admin/transfers/${parsed.data.transferId}`);
 
-    return { success: true };
+    const rejectResult = { success: true };
+
+    // Output validation — log mismatches without throwing
+    const rejectParsed = transferActionResponseSchema.safeParse(rejectResult);
+    if (!rejectParsed.success) {
+      console.error("[admin/transfers] rejectTransfer output failed:", rejectParsed.error.issues);
+    }
+
+    return rejectResult;
   } catch (err) {
     return {
       success: false,

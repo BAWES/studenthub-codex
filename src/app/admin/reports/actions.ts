@@ -20,6 +20,10 @@ import {
   listReportsSchema,
   getReportSchema,
   generateReportSchema,
+  reportTypeItemSchema,
+  listReportsResultSchema,
+  singleReportSchema,
+  generateReportResultSchema,
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
@@ -129,13 +133,21 @@ export async function listReports(
   const params = listReportsSchema.parse(input ?? {});
   const filtered = filterReportTypes(params.type);
 
-  return {
+  const result = {
     reports: paginate(filtered, params.page, params.limit),
     total: filtered.length,
     page: params.page,
     limit: params.limit,
     totalPages: Math.ceil(filtered.length / params.limit),
   };
+
+  // Output validation — log mismatches without throwing
+  const outputParsed = listReportsResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error("[admin/reports] listReports output failed:", outputParsed.error.issues);
+  }
+
+  return result;
 }
 
 /**
@@ -264,7 +276,7 @@ export async function getReport(
       });
     }
 
-    return {
+    const reportResult = {
       id: parsed.id,
       type: parsed.type,
       label: "Daily Recruiter Report",
@@ -275,6 +287,14 @@ export async function getReport(
       },
       generatedAt: new Date().toISOString(),
     };
+
+    // Output validation — log mismatches without throwing
+    const recruiterParsed = singleReportSchema.safeParse(reportResult);
+    if (!recruiterParsed.success) {
+      console.error("[admin/reports] getReport (recruiter-daily) output failed:", recruiterParsed.error.issues);
+    }
+
+    return reportResult;
   }
 
   if (parsed.type === "invitation-summary") {
@@ -290,7 +310,7 @@ export async function getReport(
       count: s._count?._all ?? 0,
     }));
 
-    return {
+    const invitationResult = {
       id: parsed.id,
       type: parsed.type,
       label: "Invitation Summary",
@@ -300,6 +320,14 @@ export async function getReport(
       },
       generatedAt: new Date().toISOString(),
     };
+
+    // Output validation — log mismatches without throwing
+    const invParsed = singleReportSchema.safeParse(invitationResult);
+    if (!invParsed.success) {
+      console.error("[admin/reports] getReport (invitation-summary) output failed:", invParsed.error.issues);
+    }
+
+    return invitationResult;
   }
 
   throw new Error(`Unknown report type: ${parsed.type}`);
@@ -333,11 +361,19 @@ export async function generateReport(
         type: "recruiter-daily",
       });
 
-      return {
-        operation: "success",
+      const successResult = {
+        operation: "success" as const,
         message: `Recruiter daily report for ${reportDate} generated (${(report.data as GetRecruiterReportResult).total} staff members)`,
         data: report,
       };
+
+      // Output validation — log mismatches without throwing
+      const genParsed = generateReportResultSchema.safeParse(successResult);
+      if (!genParsed.success) {
+        console.error("[admin/reports] generateReport (recruiter-daily) output failed:", genParsed.error.issues);
+      }
+
+      return successResult;
     }
 
     if (parsed.data.type === "invitation-summary") {
@@ -350,11 +386,19 @@ export async function generateReport(
 
       revalidatePath("/admin/reports");
 
-      return {
-        operation: "success",
+      const invSuccessResult = {
+        operation: "success" as const,
         message: `Invitation summary for ${reportDate} generated`,
         data: report,
       };
+
+      // Output validation — log mismatches without throwing
+      const genInvParsed = generateReportResultSchema.safeParse(invSuccessResult);
+      if (!genInvParsed.success) {
+        console.error("[admin/reports] generateReport (invitation-summary) output failed:", genInvParsed.error.issues);
+      }
+
+      return invSuccessResult;
     }
 
     return {
