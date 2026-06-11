@@ -2,6 +2,9 @@
 
 import Link from "next/link";
 
+const SH_BLUE = "#0b63ce";
+const SH_AMBER = "#f59e0b";
+
 interface LandingFooterProps {
   persona: "candidate" | "company";
 }
@@ -17,7 +20,7 @@ export default function LandingFooter({ persona }: LandingFooterProps) {
             <div className="flex items-center gap-2 mb-3">
               <span
                 className="flex h-7 w-7 items-center justify-center rounded-lg text-[10px] font-bold text-white"
-                style={{ backgroundColor: "var(--sh-coral)" }}
+                style={{ backgroundColor: SH_BLUE }}
               >
                 SH
               </span>
@@ -69,7 +72,7 @@ export default function LandingFooter({ persona }: LandingFooterProps) {
                 <span className="font-medium" style={{ color: "var(--ink)" }}>
                   Staff:
                 </span>{" "}
-                Tools for agencies placing students faster.
+                Tools for agencies placing candidates faster.
               </p>
               <p className="text-xs leading-relaxed" style={{ color: "var(--muted)" }}>
                 <span className="font-medium" style={{ color: "var(--ink)" }}>
@@ -106,7 +109,7 @@ export default function LandingFooter({ persona }: LandingFooterProps) {
             <Link
               href={`/signup?role=${role}`}
               className="text-xs no-underline font-medium transition-colors duration-150"
-              style={{ color: "var(--sh-coral)" }}
+              style={{ color: SH_BLUE }}
             >
               Sign up
             </Link>

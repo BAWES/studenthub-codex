@@ -3,6 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 import { UserPlus, Sparkles, Briefcase, Building2, Search, ClipboardCheck } from "lucide-react";
 
+const SH_BLUE = "#0b63ce";
+const SH_AMBER = "#f59e0b";
+
 // ── Scroll-reveal hook ──
 
 function useReveal() {
@@ -103,18 +106,18 @@ const candidateSteps = [
     title: "Create your profile",
     description:
       "Sign up in under 3 minutes. Add your skills, experience, and preferences. No CV upload required — just fill in what matters.",
-    color: "var(--sh-coral)",
+    color: SH_BLUE,
     gradient:
-      "radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--sh-coral) 10%, transparent), transparent 70%)",
+      `radial-gradient(ellipse at 50% 0%, color-mix(in srgb, ${SH_BLUE} 10%, transparent), transparent 70%)`,
   },
   {
     icon: Sparkles,
     title: "Get matched by recruiters",
     description:
       "Our staff recruiters review your profile and invite you to roles that fit. No need to search — the right opportunities come to you.",
-    color: "var(--sh-amber)",
+    color: SH_AMBER,
     gradient:
-      "radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--sh-amber) 10%, transparent), transparent 70%)",
+      `radial-gradient(ellipse at 50% 0%, color-mix(in srgb, ${SH_AMBER} 10%, transparent), transparent 70%)`,
   },
   {
     icon: Briefcase,
@@ -133,18 +136,18 @@ const employerSteps = [
     title: "Set up your account",
     description:
       "Create your company profile in minutes. Post openings and our staff recruiters start matching you with vetted students.",
-    color: "var(--sh-coral)",
+    color: SH_BLUE,
     gradient:
-      "radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--sh-coral) 10%, transparent), transparent 70%)",
+      `radial-gradient(ellipse at 50% 0%, color-mix(in srgb, ${SH_BLUE} 10%, transparent), transparent 70%)`,
   },
   {
     icon: Search,
     title: "Discover students",
     description:
       "Our recruitment team and matching tools work together to find the best-fit students for your roles.",
-    color: "var(--sh-amber)",
+    color: SH_AMBER,
     gradient:
-      "radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--sh-amber) 10%, transparent), transparent 70%)",
+      `radial-gradient(ellipse at 50% 0%, color-mix(in srgb, ${SH_AMBER} 10%, transparent), transparent 70%)`,
   },
   {
     icon: ClipboardCheck,
@@ -181,9 +184,9 @@ export default function HowItWorksSection({ forEmployer = false }: HowItWorksSec
         <span
           className="inline-block text-[11px] font-bold uppercase tracking-wider mb-2 px-3 py-1 rounded-full"
           style={{
-            color: "var(--sh-coral)",
-            backgroundColor: "color-mix(in srgb, var(--sh-coral) 10%, transparent)",
-            border: "1px solid color-mix(in srgb, var(--sh-coral) 20%, transparent)",
+            color: SH_BLUE,
+            backgroundColor: `color-mix(in srgb, ${SH_BLUE} 10%, transparent)`,
+            border: `1px solid color-mix(in srgb, ${SH_BLUE} 20%, transparent)`,
           }}
         >
           How it works
@@ -206,13 +209,13 @@ export default function HowItWorksSection({ forEmployer = false }: HowItWorksSec
           className="hidden md:block absolute top-[52px] left-[calc(16.66%+24px)] right-[calc(16.66%+24px)] h-px"
           style={{
             background: `linear-gradient(90deg, 
-              color-mix(in srgb, var(--sh-coral) 10%, transparent) 0%, 
-              var(--sh-coral) 15%, 
-              var(--sh-coral) 35%, 
-              color-mix(in srgb, var(--sh-coral) 10%, transparent) 50%,
-              color-mix(in srgb, var(--sh-amber) 10%, transparent) 50%,
-              var(--sh-amber) 65%,
-              var(--sh-amber) 85%,
+              color-mix(in srgb, ${SH_BLUE} 10%, transparent) 0%, 
+              ${SH_BLUE} 15%, 
+              ${SH_BLUE} 35%, 
+              color-mix(in srgb, ${SH_BLUE} 10%, transparent) 50%,
+              color-mix(in srgb, ${SH_AMBER} 10%, transparent) 50%,
+              ${SH_AMBER} 65%,
+              ${SH_AMBER} 85%,
               color-mix(in srgb, var(--success) 10%, transparent) 100%
             )`,
             opacity: 0.2,

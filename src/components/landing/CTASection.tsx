@@ -4,6 +4,9 @@ import { FadeInSection } from "@/components/marketing";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 
+const SH_BLUE = "#0b63ce";
+const SH_AMBER = "#f59e0b";
+
 interface CTASectionProps {
   persona: "candidate" | "company";
 }
@@ -15,7 +18,7 @@ export default function CTASection({ persona }: CTASectionProps) {
         <div
           className="relative overflow-hidden rounded-xl p-8 sm:p-12 text-center"
           style={{
-            border: "1px solid color-mix(in srgb, var(--sh-coral) 20%, transparent)",
+            border: `1px solid color-mix(in srgb, ${SH_BLUE} 20%, transparent)`,
           }}
         >
           {/* Dual gradient background */}
@@ -24,7 +27,7 @@ export default function CTASection({ persona }: CTASectionProps) {
             aria-hidden="true"
             style={{
               background:
-                "radial-gradient(ellipse at 30% 0%, color-mix(in srgb, var(--sh-coral) 14%, transparent), transparent 60%), radial-gradient(ellipse at 70% 100%, color-mix(in srgb, var(--sh-coral) 10%, transparent), transparent 50%)",
+                `radial-gradient(ellipse at 30% 0%, color-mix(in srgb, ${SH_BLUE} 14%, transparent), transparent 60%), radial-gradient(ellipse at 70% 100%, color-mix(in srgb, ${SH_AMBER} 10%, transparent), transparent 50%)`,
             }}
           />
 
@@ -44,9 +47,9 @@ export default function CTASection({ persona }: CTASectionProps) {
             <span
               className="inline-block text-[11px] font-bold uppercase tracking-wider mb-2 px-3 py-1 rounded-full"
               style={{
-                color: "var(--sh-coral)",
-                backgroundColor: "color-mix(in srgb, var(--sh-coral) 10%, transparent)",
-                border: "1px solid color-mix(in srgb, var(--sh-coral) 20%, transparent)",
+                color: SH_BLUE,
+                backgroundColor: `color-mix(in srgb, ${SH_BLUE} 10%, transparent)`,
+                border: `1px solid color-mix(in srgb, ${SH_BLUE} 20%, transparent)`,
               }}
             >
               {persona === "company" ? "Start hiring today" : "Start your journey"}
@@ -75,9 +78,10 @@ export default function CTASection({ persona }: CTASectionProps) {
               }
               className="inline-flex items-center gap-1.5 px-6 py-2.5 rounded-lg text-sm font-semibold text-white transition-all duration-200 hover:brightness-110 hover:-translate-y-0.5 active:translate-y-0"
               style={{
-                backgroundColor: persona === "company" ? "var(--sh-amber)" : "var(--sh-coral)",
-                background: persona === "company" ? "linear-gradient(135deg, var(--sh-amber), var(--sh-amber-deep))" : undefined,
-                boxShadow: persona === "company" ? "var(--sh-amber-glow)" : "0 4px 14px color-mix(in srgb, var(--sh-coral) 30%, transparent)",
+                backgroundColor: persona === "company" ? SH_AMBER : SH_BLUE,
+                boxShadow: persona === "company"
+                  ? "0 4px 14px rgba(245, 158, 11, 0.35)"
+                  : `0 4px 14px color-mix(in srgb, ${SH_BLUE} 30%, transparent)`,
               }}
             >
               {persona === "company" ? "Set up company account" : "Create your free profile"}{" "}
@@ -86,8 +90,8 @@ export default function CTASection({ persona }: CTASectionProps) {
 
             <p className="text-xs mt-3" style={{ color: "var(--muted)" }}>
               {persona === "company"
-                ? "No agency fees \u00b7 Staff-matched \u00b7 Supported by recruiters"
-                : "Free \u00b7 3 minutes \u00b7 No CV required"}
+                ? "No agency fees · Staff-matched · Supported by recruiters"
+                : "Free · 3 minutes · No CV required"}
             </p>
           </div>
         </div>
