@@ -112,9 +112,9 @@ const candidateSteps = [
     title: "Get matched by recruiters",
     description:
       "Our staff recruiters review your profile and invite you to roles that fit. No need to search — the right opportunities come to you.",
-    color: "var(--sh-coral)",
+    color: "var(--sh-amber)",
     gradient:
-      "radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--sh-coral) 10%, transparent), transparent 70%)",
+      "radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--sh-amber) 10%, transparent), transparent 70%)",
   },
   {
     icon: Briefcase,
@@ -142,9 +142,9 @@ const employerSteps = [
     title: "Discover students",
     description:
       "Our recruitment team and matching tools work together to find the best-fit students for your roles.",
-    color: "var(--sh-coral)",
+    color: "var(--sh-amber)",
     gradient:
-      "radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--sh-coral) 10%, transparent), transparent 70%)",
+      "radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--sh-amber) 10%, transparent), transparent 70%)",
   },
   {
     icon: ClipboardCheck,
@@ -207,9 +207,13 @@ export default function HowItWorksSection({ forEmployer = false }: HowItWorksSec
           style={{
             background: `linear-gradient(90deg, 
               color-mix(in srgb, var(--sh-coral) 10%, transparent) 0%, 
-              var(--sh-coral) 25%, 
-              var(--sh-coral) 75%, 
-              color-mix(in srgb, var(--sh-coral) 10%, transparent) 100%
+              var(--sh-coral) 15%, 
+              var(--sh-coral) 35%, 
+              color-mix(in srgb, var(--sh-coral) 10%, transparent) 50%,
+              color-mix(in srgb, var(--sh-amber) 10%, transparent) 50%,
+              var(--sh-amber) 65%,
+              var(--sh-amber) 85%,
+              color-mix(in srgb, var(--success) 10%, transparent) 100%
             )`,
             opacity: 0.2,
           }}

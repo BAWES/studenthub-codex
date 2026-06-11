@@ -68,7 +68,20 @@ export default function LandingPage({ session }: LandingPageProps) {
   );
 
   return (
-    <div style={{ minHeight: "100svh", backgroundColor: "var(--paper)" }}>
+    <div
+      data-theme="light"
+      style={{
+        "--ink": "#182230",
+        "--muted": "#667085",
+        "--paper": "#f5f7fa",
+        "--surface": "#ffffff",
+        "--surface-soft": "#f7f8fa",
+        "--border": "#d6dce7",
+        "--shadow": "0 4px 24px rgba(0,0,0,0.08)",
+        backgroundColor: "#f5f7fa",
+        minHeight: "100svh",
+      } as React.CSSProperties}
+    >
 
       <a href="#main-content" className="skipLink" style={{ color: "var(--ink)" }}>
         Skip to content

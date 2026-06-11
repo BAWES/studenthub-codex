@@ -15,7 +15,7 @@ const benefits = [
     icon: Zap,
     title: "Staff-powered matching",
     description: "Our recruitment team finds the best students based on your requirements. No manual searching through hundreds of profiles.",
-    color: "var(--sh-coral)",
+    color: "var(--sh-amber)",
   },
   {
     icon: Shield,

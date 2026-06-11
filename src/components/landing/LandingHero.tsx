@@ -166,7 +166,7 @@ export default function LandingHero({ onCtaClick }: LandingHeroProps) {
                 className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg text-sm font-semibold text-white transition-all duration-200 hover:brightness-110 hover:-translate-y-0.5 active:translate-y-0 group shadow-lg"
                 style={{
                   backgroundColor: "var(--sh-coral)",
-                  boxShadow: "0 4px 14px color-mix(in srgb, var(--sh-coral) 30%, transparent)",
+                  boxShadow: "var(--sh-coral-glow), 0 4px 14px color-mix(in srgb, var(--sh-coral) 30%, transparent)",
                 }}
               >
                 <GraduationCap className="size-4" />
@@ -176,11 +176,10 @@ export default function LandingHero({ onCtaClick }: LandingHeroProps) {
             )}
             <Link
               href="/signup?role=company"
-              className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 group"
+              className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 group shadow-lg"
               style={{
-                color: "var(--ink)",
-                backgroundColor: "var(--card)",
-                border: "1px solid var(--border)",
+                background: "linear-gradient(135deg, var(--sh-amber), var(--sh-amber-deep))",
+                boxShadow: "var(--sh-amber-glow)",
               }}
             >
               <Building2 className="size-4" />
