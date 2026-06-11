@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { ChevronRight, Sparkles } from "lucide-react";
+import { ChevronRight, Sparkles, GraduationCap, Building2 } from "lucide-react";
 import { ThemeToggle } from "@/modules/theme/ThemeToggle";
 import { FadeInSection } from "@/components/marketing";
 import { HeroSection } from "@/components/marketing";
@@ -87,10 +87,10 @@ export default function LandingContent({ session }: LandingContentProps) {
             className="inline-flex items-center gap-2.5 text-[var(--ink)] px-2 no-underline min-h-11"
             href="/"
           >
-            <span className="size-9 inline-flex items-center justify-center rounded-lg bg-[var(--ink)] text-[var(--paper)] font-black">
+            <span className="size-9 inline-flex items-center justify-center rounded-lg bg-[var(--ink)] text-[var(--paper)] font-black tracking-tight">
               SH
             </span>
-            <strong>StudentHub</strong>
+            <strong className="text-sm tracking-tight">StudentHub</strong>
           </Link>
           <div className="flex items-center gap-3.5 max-sm:flex-col max-sm:items-stretch">
             {isLoggedIn ? (
@@ -106,7 +106,11 @@ export default function LandingContent({ session }: LandingContentProps) {
                   href={`/signup?role=${role}`}
                   className="uiButton uiButton_default uiButton_defaultSize"
                 >
-                  {persona === "company" ? "Set up company account" : "Create free candidate profile"}{" "}
+                  {persona === "company" ? (
+                    <><Building2 className="size-3.5" /> Set up company account</>
+                  ) : (
+                    <><GraduationCap className="size-3.5" /> Create free candidate profile</>
+                  )}
                   <Sparkles className="size-3.5" />
                 </Link>
                 <Link

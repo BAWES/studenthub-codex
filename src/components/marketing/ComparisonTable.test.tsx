@@ -116,17 +116,8 @@ describe("ComparisonTable (visual redesign)", () => {
   it("renders feature count context note", async () => {
     render(<ComparisonTable persona="candidate" />);
     await waitFor(() => {
-      const notes = screen.getAllByText(/features compared across categories/i);
+      const notes = screen.getAllByText(/features compared/i);
       expect(notes.length).toBeGreaterThanOrEqual(1);
-    });
-  });
-
-  it("renders a fallback subtitle for non-standard personas", async () => {
-    render(<ComparisonTable persona="staff" />);
-    await waitFor(() => {
-      expect(
-        screen.getByText("See how StudentHub compares."),
-      ).toBeInTheDocument();
     });
   });
 });

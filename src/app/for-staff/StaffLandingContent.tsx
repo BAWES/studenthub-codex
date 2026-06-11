@@ -201,10 +201,10 @@ export default function StaffLandingContent({
         <FeatureGrid persona="staff" />
 
         {/* ── Social proof — staff testimonials ── */}
-        <TestimonialCarousel persona="staff" />
+        <TestimonialCarousel persona="candidate" />
 
         {/* ── Comparison — StudentHub vs alternatives ── */}
-        <ComparisonTable persona="staff" />
+        <ComparisonTable persona="candidate" />
 
         {/* ── Pricing — staff pricing tiers ── */}
         <PricingCard persona="staff" />
