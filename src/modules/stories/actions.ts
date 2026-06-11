@@ -4,6 +4,16 @@ import crypto from "node:crypto";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
+import {
+  storyListItemSchema,
+  listStoriesResultSchema,
+  assignStoryResultSchema,
+  updateStoryStatusResultSchema,
+  type StoryListItem,
+  type ListStoriesResult,
+  type AssignStoryResult,
+  type UpdateStoryStatusResult,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Schemas
@@ -30,31 +40,6 @@ const updateStoryStatusSchema = z.object({
   storyUuid: z.string().min(1, "Story UUID is required"),
   status: z.coerce.number().int().min(0, "Status must be a non-negative integer"),
 });
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export type StoryListItem = {
-  story_uuid: string;
-  request_uuid: string;
-  suggestion_uuid: string | null;
-  staff_id: number | null;
-  number_of_employees: number | null;
-  story_status: number;
-  is_old: boolean | null;
-  story_time_spent: number | null;
-  story_created_at: string | null;
-  story_last_updated_at: string | null;
-};
-
-export type ListStoriesResult = {
-  stories: StoryListItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -136,13 +121,23 @@ export async function listStories(
     prisma.story.count({ where }),
   ]);
 
-  return {
+  const result: ListStoriesResult = {
     stories: stories.map(mapStory),
     total,
     page,
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  const outputParsed = listStoriesResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/stories] listStories output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -168,7 +163,18 @@ export async function getStory(
   });
 
   if (!story) return null;
-  return mapStory(story);
+
+  const result: StoryListItem = mapStory(story);
+
+  const outputParsed = storyListItemSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/stories] getStory output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -181,7 +187,7 @@ export async function getStory(
  */
 export async function assignStory(
   data: z.input<typeof assignStorySchema>,
-): Promise<{ story_uuid: string; staff_id: number }> {
+): Promise<AssignStoryResult> {
   await requireCapability("story.write");
 
   const parsed = assignStorySchema.safeParse(data);
@@ -199,7 +205,20 @@ export async function assignStory(
     } as any,
   });
 
-  return { story_uuid: story.story_uuid, staff_id: story.staff_id! };
+  const result: AssignStoryResult = {
+    story_uuid: story.story_uuid,
+    staff_id: story.staff_id!,
+  };
+
+  const outputParsed = assignStoryResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/stories] assignStory output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -212,7 +231,7 @@ export async function assignStory(
  */
 export async function updateStoryStatus(
   data: z.input<typeof updateStoryStatusSchema>,
-): Promise<{ story_uuid: string; story_status: number }> {
+): Promise<UpdateStoryStatusResult> {
   await requireCapability("story.write");
 
   const parsed = updateStoryStatusSchema.safeParse(data);
@@ -230,5 +249,18 @@ export async function updateStoryStatus(
     } as any,
   });
 
-  return { story_uuid: story.story_uuid, story_status: story.story_status };
+  const result: UpdateStoryStatusResult = {
+    story_uuid: story.story_uuid,
+    story_status: story.story_status,
+  };
+
+  const outputParsed = updateStoryStatusResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/stories] updateStoryStatus output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
