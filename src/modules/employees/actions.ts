@@ -9,6 +9,10 @@ import {
   getEmployeeSchema,
   createEmployeeSchema,
   updateEmployeeSchema,
+  listEmployeesResultSchema,
+  employeeDetailSchema,
+  createEmployeeResultSchema,
+  updateEmployeeResultSchema,
   type ListEmployeesInput,
   type CreateEmployeeInput,
   type UpdateEmployeeInput,
@@ -76,13 +80,24 @@ export async function listEmployees(
     prisma.employee.count({ where: where as any }),
   ]);
 
-  return {
+  const result = {
     employees: employees as EmployeeItem[],
     total,
     page,
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  // Validate output shape
+  const outputParsed = listEmployeesResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/employees] listEmployees output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -109,7 +124,18 @@ export async function getEmployee(
 
   if (!employee) return null;
 
-  return employee as EmployeeItem;
+  const result = employee as EmployeeItem;
+
+  // Validate output shape
+  const outputParsed = employeeDetailSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/employees] getEmployee output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -154,7 +180,18 @@ export async function createEmployee(
   });
 
   revalidatePath("/employees");
-  return { employee_uuid: employeeUuid };
+  const createResult = { employee_uuid: employeeUuid };
+
+  // Validate output shape
+  const createOutputParsed = createEmployeeResultSchema.safeParse(createResult);
+  if (!createOutputParsed.success) {
+    console.error(
+      "[modules/employees] createEmployee output validation failed:",
+      createOutputParsed.error.issues,
+    );
+  }
+
+  return createResult;
 }
 
 // ---------------------------------------------------------------------------
@@ -205,5 +242,16 @@ export async function updateEmployee(
   });
 
   revalidatePath("/employees");
-  return { employee_uuid: employeeUuid };
+  const updateResult = { employee_uuid: employeeUuid };
+
+  // Validate output shape
+  const updateOutputParsed = updateEmployeeResultSchema.safeParse(updateResult);
+  if (!updateOutputParsed.success) {
+    console.error(
+      "[modules/employees] updateEmployee output validation failed:",
+      updateOutputParsed.error.issues,
+    );
+  }
+
+  return updateResult;
 }

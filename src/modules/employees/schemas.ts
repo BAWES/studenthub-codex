@@ -40,32 +40,65 @@ export const updateEmployeeSchema = z.object({
   designationUuid: z.string().optional(),
   departmentUuid: z.string().optional(),
 });
+// ---------------------------------------------------------------------------
+// Output validation schemas
+// ---------------------------------------------------------------------------
+
+/**
+ * Schema for a single employee item returned from listEmployees / getEmployee.
+ */
+export const employeeItemSchema = z.object({
+  employee_uuid: z.string(),
+  employee_name: z.string(),
+  employee_email: z.string(),
+  employee_phone: z.string().nullable(),
+  employee_salary: z.number().nullable(),
+  employee_status: z.number().int(),
+  employee_created_at: z.date(),
+  employee_updated_at: z.date(),
+  designation_uuid: z.string().nullable(),
+  department_uuid: z.string().nullable(),
+});
+
+/**
+ * Schema for getEmployee result (item or null).
+ */
+export const employeeDetailSchema = employeeItemSchema.nullable();
+
+/**
+ * Schema for the listEmployees response.
+ */
+export const listEmployeesResultSchema = z.object({
+  employees: z.array(employeeItemSchema),
+  total: z.number().int().nonnegative(),
+  page: z.number().int().positive(),
+  limit: z.number().int().positive(),
+  totalPages: z.number().int().nonnegative(),
+});
+
+/**
+ * Schema for the createEmployee response.
+ */
+export const createEmployeeResultSchema = z.object({
+  employee_uuid: z.string(),
+});
+
+/**
+ * Schema for the updateEmployee response.
+ */
+export const updateEmployeeResultSchema = z.object({
+  employee_uuid: z.string(),
+});
+
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
+
 export type ListEmployeesInput = z.input<typeof listEmployeesSchema>;
 export type CreateEmployeeInput = z.input<typeof createEmployeeSchema>;
 export type UpdateEmployeeInput = z.input<typeof updateEmployeeSchema>;
-export type EmployeeItem = {
-  employee_uuid: string;
-  employee_name: string;
-  employee_email: string;
-  employee_phone: string | null;
-  employee_salary: number | null;
-  employee_status: number;
-  employee_created_at: Date;
-  employee_updated_at: Date;
-  designation_uuid: string | null;
-  department_uuid: string | null;
-};
-export type EmployeeDetail = EmployeeItem | null;
-export type ListEmployeesResult = {
-  employees: EmployeeItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
-export type CreateEmployeeResult = {
-  employee_uuid: string;
-};
-export type UpdateEmployeeResult = {
-  employee_uuid: string;
-};
+export type EmployeeItem = z.output<typeof employeeItemSchema>;
+export type EmployeeDetail = z.output<typeof employeeDetailSchema>;
+export type ListEmployeesResult = z.output<typeof listEmployeesResultSchema>;
+export type CreateEmployeeResult = z.output<typeof createEmployeeResultSchema>;
+export type UpdateEmployeeResult = z.output<typeof updateEmployeeResultSchema>;
