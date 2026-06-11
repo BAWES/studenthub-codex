@@ -7,6 +7,10 @@ import {
   getCandidateWorkingHourSchema,
   listWorkLogFeedbackSchema,
   getWorkLogFeedbackSchema,
+  listCandidateWorkingHoursResultSchema,
+  candidateWorkingHourItemSchema,
+  listWorkLogFeedbackResultSchema,
+  workLogFeedbackItemSchema,
   type ListCandidateWorkingHoursParams,
   type GetCandidateWorkingHourParams,
   type CandidateWorkingHourItem,
@@ -111,13 +115,25 @@ export async function listCandidateWorkingHours(
     prisma.candidate_working_hour.count({ where }),
   ]);
 
-  return {
+
+  const result = {
     items: rows.map(toItem),
     total,
     page: parsed.page,
     limit: parsed.limit,
     totalPages: Math.ceil(total / parsed.limit),
   };
+
+  // Validate output shape
+  const outputParsed = listCandidateWorkingHoursResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/candidates/working-hours] listCandidateWorkingHours output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -142,7 +158,17 @@ export async function getCandidateWorkingHour(
 
   if (!row) return null;
 
-  return toItem(row);
+  // Validate output shape
+  const result = toItem(row);
+  const outputParsed = candidateWorkingHourItemSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/candidates/working-hours] getCandidateWorkingHour output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -191,13 +217,24 @@ export async function listWorkLogFeedback(
     prisma.candidate_work_log_feedback.count({ where }),
   ]);
 
-  return {
+  const result = {
     workLogFeedbacks: rows,
     total,
     page,
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  // Validate output shape
+  const outputParsed = listWorkLogFeedbackResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/candidates/working-hours] listWorkLogFeedback output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -222,6 +259,15 @@ export async function getWorkLogFeedback(
 
   if (!feedback) {
     throw new Error(`Work log feedback not found: ${uuid}`);
+  }
+
+  // Validate output shape
+  const outputParsed = workLogFeedbackItemSchema.safeParse(feedback);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/candidates/working-hours] getWorkLogFeedback output validation failed:",
+      outputParsed.error.issues,
+    );
   }
 
   return feedback;

@@ -19,32 +19,7 @@ export type ListCandidateWorkingHoursParams = z.input<
 export type GetCandidateWorkingHourParams = z.input<
   typeof getCandidateWorkingHourSchema
 >;
-export type CandidateWorkingHourItem = {
-  candidate_working_hour_uuid: string;
-  candidate_id: number | null;
-  store_id: number | null;
-  date: string | null;
-  start_time: string | null;
-  end_time: string | null;
-  total_time: number | null;
-  status: number | null;
-  via: string | null;
-  note: string | null;
-  start_location_lat: number | null;
-  start_location_long: number | null;
-  end_location_lat: number | null;
-  end_location_long: number | null;
-  created_at: string | null;
-  updated_at: string | null;
-};
-export type CandidateWorkingHourDetail = CandidateWorkingHourItem | null;
-export type ListCandidateWorkingHoursResult = {
-  items: CandidateWorkingHourItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
+
 export const listWorkLogFeedbackSchema = z.object({
   candidate_id: z.coerce.number().int().positive().optional(),
   status: z.coerce.number().int().min(0).max(2).optional(),
@@ -58,26 +33,68 @@ export const getWorkLogFeedbackSchema = z.object({
 });
 export type ListWorkLogFeedbackParams = z.input<typeof listWorkLogFeedbackSchema>;
 export type GetWorkLogFeedbackParams = z.input<typeof getWorkLogFeedbackSchema>;
-export type WorkLogFeedbackItem = {
-  cwlf_uuid: string;
-  candidate_id: number;
-  store_id: number;
-  company_id: number;
-  date: Date;
-  candidate_working_hour_uuid: string | null;
-  status: number | null;
-  note: string | null;
-  reason: string | null;
-  is_public: boolean | null;
-  rating: boolean | null;
-  created_by: string | null;
-  created_at: Date | null;
-  updated_at: Date | null;
-};
-export type ListWorkLogFeedbackResult = {
-  workLogFeedbacks: WorkLogFeedbackItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
+
+// ---------------------------------------------------------------------------
+// Output schemas — validate response shapes at runtime
+// ---------------------------------------------------------------------------
+
+export const candidateWorkingHourItemSchema = z.object({
+  candidate_working_hour_uuid: z.string(),
+  candidate_id: z.number().nullable(),
+  store_id: z.number().nullable(),
+  date: z.string().nullable(),
+  start_time: z.string().nullable(),
+  end_time: z.string().nullable(),
+  total_time: z.number().nullable(),
+  status: z.number().nullable(),
+  via: z.string().nullable(),
+  note: z.string().nullable(),
+  start_location_lat: z.number().nullable(),
+  start_location_long: z.number().nullable(),
+  end_location_lat: z.number().nullable(),
+  end_location_long: z.number().nullable(),
+  created_at: z.string().nullable(),
+  updated_at: z.string().nullable(),
+});
+
+export type CandidateWorkingHourItem = z.output<typeof candidateWorkingHourItemSchema>;
+export type CandidateWorkingHourDetail = CandidateWorkingHourItem | null;
+
+export const listCandidateWorkingHoursResultSchema = z.object({
+  items: z.array(candidateWorkingHourItemSchema),
+  total: z.number(),
+  page: z.number(),
+  limit: z.number(),
+  totalPages: z.number(),
+});
+
+export type ListCandidateWorkingHoursResult = z.output<typeof listCandidateWorkingHoursResultSchema>;
+
+export const workLogFeedbackItemSchema = z.object({
+  cwlf_uuid: z.string(),
+  candidate_id: z.number(),
+  store_id: z.number(),
+  company_id: z.number(),
+  date: z.date(),
+  candidate_working_hour_uuid: z.string().nullable(),
+  status: z.number().nullable(),
+  note: z.string().nullable(),
+  reason: z.string().nullable(),
+  is_public: z.boolean().nullable(),
+  rating: z.boolean().nullable(),
+  created_by: z.string().nullable(),
+  created_at: z.date().nullable(),
+  updated_at: z.date().nullable(),
+});
+
+export type WorkLogFeedbackItem = z.output<typeof workLogFeedbackItemSchema>;
+
+export const listWorkLogFeedbackResultSchema = z.object({
+  workLogFeedbacks: z.array(workLogFeedbackItemSchema),
+  total: z.number(),
+  page: z.number(),
+  limit: z.number(),
+  totalPages: z.number(),
+});
+
+export type ListWorkLogFeedbackResult = z.output<typeof listWorkLogFeedbackResultSchema>;
