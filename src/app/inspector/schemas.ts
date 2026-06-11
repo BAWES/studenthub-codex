@@ -15,22 +15,13 @@ export const getInspectorWorkspaceSchema = z.object({
 });
 
 // ---------------------------------------------------------------------------
-// Inspector workspace — type definitions
+// Inspector workspace — type definitions (derived from schemas)
 // Mirrors the return shape of getInspectorWorkspace
 // ---------------------------------------------------------------------------
 
-export type IdRequestRow = {
-  id: string;
-  title: string;
-  subtitle: string;
-  meta: string;
-};
+export type IdRequestRow = z.output<typeof inspectorRequestRowSchema>;
 
-export type InspectWorkspaceResult = {
-  inspector: { inspector_name: string; inspector_email: string } | null;
-  metrics: { label: string; value: number | string; note: string }[];
-  requests: IdRequestRow[];
-};
+export type InspectWorkspaceResult = z.output<typeof inspectorWorkspaceOutputSchema>;
 
 // ---------------------------------------------------------------------------
 // Inspector workspace — output validation schemas
