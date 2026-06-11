@@ -66,7 +66,7 @@ describe("getCandidateProfileSchema", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Action tests — mock getCandidateDetail, test getCandidateProfile
+// Action tests — mock getCandidateDetail + auth, test getCandidateProfile
 // ---------------------------------------------------------------------------
 
 // Mock the data layer before importing the action
@@ -75,9 +75,10 @@ vi.mock("@/modules/workspace/data/candidate", () => ({
   getCandidateDetail: mockGetCandidateDetail,
 }));
 
-// Mock the auth session — no role check needed for these unit tests
+// Mock auth for the action-level defense-in-depth check
+const mockRequireCapability = vi.fn();
 vi.mock("@/modules/auth/session", () => ({
-  requireRoleCapability: vi.fn(),
+  requireCapability: mockRequireCapability,
 }));
 
 // Import after mocks are set up
@@ -85,15 +86,16 @@ const { getCandidateProfile } = await import("./actions");
 
 describe("getCandidateProfile action", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.resetAllMocks();
   });
 
   it("returns candidate detail for a valid candidate ID", async () => {
-    const fakeDetail = { candidate: { candidate_id: 1 } };
+    const fakeDetail = { candidate: { candidate_id: 1 }, metrics: [], invitations: [], workHours: [], histories: [], notes: [], skills: [], tags: [], warnings: [], links: [], idCards: [], applications: [], interviews: [], suggestions: [], education: [], experiences: [], certificates: [], languages: [], stats: null };
     mockGetCandidateDetail.mockResolvedValue(fakeDetail);
 
     const result = await getCandidateProfile({ candidateId: 1 });
 
+    expect(mockRequireCapability).toHaveBeenCalledWith("candidate.read.own");
     expect(mockGetCandidateDetail).toHaveBeenCalledWith(
       1,
       "/candidate/invitations",
@@ -102,7 +104,7 @@ describe("getCandidateProfile action", () => {
   });
 
   it("passes the correct requestBasePath", async () => {
-    const fakeDetail = { candidate: { candidate_id: 2 } };
+    const fakeDetail = { candidate: { candidate_id: 2 }, metrics: [], invitations: [], workHours: [], histories: [], notes: [], skills: [], tags: [], warnings: [], links: [], idCards: [], applications: [], interviews: [], suggestions: [], education: [], experiences: [], certificates: [], languages: [], stats: null };
     mockGetCandidateDetail.mockResolvedValue(fakeDetail);
 
     await getCandidateProfile({ candidateId: 2 });
@@ -111,6 +113,15 @@ describe("getCandidateProfile action", () => {
       2,
       "/candidate/invitations",
     );
+  });
+
+  it("requires candidate.read.own capability (defense-in-depth)", async () => {
+    mockRequireCapability.mockRejectedValue(new Error("Forbidden"));
+
+    await expect(
+      getCandidateProfile({ candidateId: 1 }),
+    ).rejects.toThrow("Forbidden");
+    expect(mockGetCandidateDetail).not.toHaveBeenCalled();
   });
 
   it("throws when getCandidateDetail rejects", async () => {
@@ -136,11 +147,76 @@ describe("getCandidateProfile action", () => {
   });
 
   it("coerces string ID before calling getCandidateDetail", async () => {
-    const fakeDetail = { candidate: { candidate_id: 3 } };
+    const fakeDetail = { candidate: { candidate_id: 3 }, metrics: [], invitations: [], workHours: [], histories: [], notes: [], skills: [], tags: [], warnings: [], links: [], idCards: [], applications: [], interviews: [], suggestions: [], education: [], experiences: [], certificates: [], languages: [], stats: null };
     mockGetCandidateDetail.mockResolvedValue(fakeDetail);
 
     await getCandidateProfile({ candidateId: "3" as unknown as number });
 
     expect(mockGetCandidateDetail).toHaveBeenCalledWith(3, "/candidate/invitations");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output validation schema tests
+// ---------------------------------------------------------------------------
+
+import { candidateProfileOutputSchema } from "./schemas";
+
+describe("candidateProfileOutputSchema", () => {
+  it("accepts a valid full output", () => {
+    const valid = {
+      candidate: { candidate_id: 1, candidate_name: "Test" },
+      metrics: [{ label: "Status", value: "Active", note: "Good" }],
+      invitations: [],
+      workHours: [],
+      histories: [],
+      notes: [],
+      skills: [],
+      tags: [],
+      warnings: [],
+      links: [],
+      idCards: [],
+      applications: [],
+      interviews: [],
+      suggestions: [],
+      education: [],
+      experiences: [],
+      certificates: [],
+      languages: [],
+      stats: null,
+    };
+    const r = candidateProfileOutputSchema.safeParse(valid);
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects missing required arrays", () => {
+    const r = candidateProfileOutputSchema.safeParse({ candidate: null });
+    expect(r.success).toBe(false);
+  });
+
+  it("accepts null candidate and stats", () => {
+    const minimal = {
+      candidate: null,
+      metrics: [],
+      invitations: [],
+      workHours: [],
+      histories: [],
+      notes: [],
+      skills: [],
+      tags: [],
+      warnings: [],
+      links: [],
+      idCards: [],
+      applications: [],
+      interviews: [],
+      suggestions: [],
+      education: [],
+      experiences: [],
+      certificates: [],
+      languages: [],
+      stats: null,
+    };
+    const r = candidateProfileOutputSchema.safeParse(minimal);
+    expect(r.success).toBe(true);
   });
 });
