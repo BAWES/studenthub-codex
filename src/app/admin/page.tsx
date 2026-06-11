@@ -6,22 +6,18 @@ import { navForRole } from "@/modules/workspace/navigation";
 
 export const dynamic = "force-dynamic";
 
-import { ErrorBoundary } from "@/modules/workspace/ErrorBoundary";
-
 export default async function AdminPage() {
   const session = await requireRoleCapability("admin", "admin.system");
 
   return (
-    <ErrorBoundary>
-      <WorkspaceShell
-        session={session}
-        eyebrow="Admin Workspace"
-        title="Command center for the whole operation."
-        metrics={[]}
-      >
-        <FeatureGrid items={navForRole("admin").filter((item) => item.href !== "/admin")} />
-        <Dashboard />
-      </WorkspaceShell>
-    </ErrorBoundary>
+    <WorkspaceShell
+      session={session}
+      eyebrow="Admin Workspace"
+      title="Command center for the whole operation."
+      metrics={[]}
+    >
+      <FeatureGrid items={navForRole("admin").filter((item) => item.href !== "/admin")} />
+      <Dashboard />
+    </WorkspaceShell>
   );
 }

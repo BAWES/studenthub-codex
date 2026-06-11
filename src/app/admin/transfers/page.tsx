@@ -1,5 +1,4 @@
 import type { Route } from "next";
-import { ErrorBoundary } from "@/modules/workspace/ErrorBoundary";
 import { requireRoleCapability } from "@/modules/auth/session";
 import { listTransfers } from "./actions";
 import { AdminTransfersTable } from "./admin-transfers-table";
@@ -12,9 +11,5 @@ export default async function AdminTransfersPage() {
   const rows = result.items;
   const latest = rows[0];
 
-  return (
-    <ErrorBoundary>
-      <AdminTransfersTable session={session} rows={rows} latest={latest} />
-    </ErrorBoundary>
-  );
+  return <AdminTransfersTable session={session} rows={rows} latest={latest} />;
 }
