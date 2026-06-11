@@ -1,5 +1,12 @@
 import { describe, it, expect } from "vitest";
 import { z } from "zod";
+import {
+  listSettingsSchema,
+  getSettingSchema,
+  updateSettingSchema,
+  listSettingsResultSchema,
+  updateSettingResultSchema,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Pure logic: settings schema validation
@@ -8,21 +15,6 @@ import { z } from "zod";
 // internally. Testing them separately avoids mocking "use server"
 // dependencies.
 // ---------------------------------------------------------------------------
-
-const listSettingsSchema = z.object({
-  code: z.string().optional(),
-  page: z.number().int().positive().optional(),
-  limit: z.number().int().min(1).max(100).optional(),
-});
-
-const getSettingSchema = z.object({
-  settingUuid: z.string().min(1, "Setting UUID is required"),
-});
-
-const updateSettingSchema = z.object({
-  settingUuid: z.string().min(1, "Setting UUID is required"),
-  value: z.string().nullable(),
-});
 
 // ---------------------------------------------------------------------------
 // listSettingsSchema
@@ -122,55 +114,145 @@ describe("updateSettingSchema", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Return type shape verification
+// Output validation — listSettingsResultSchema
 // ---------------------------------------------------------------------------
 
-type SettingItem = {
-  setting_uuid: string;
-  code: string;
-  key: string;
-  value: string | null;
-  serialized: boolean;
-  created_at: Date | null;
-  updated_at: Date | null;
-};
+describe("listSettingsResultSchema", () => {
+  it("accepts valid listSettings result", () => {
+    const result = listSettingsResultSchema.safeParse({
+      settings: [
+        {
+          setting_uuid: "setting_abc1",
+          code: "EventManager",
+          key: "max_active_students",
+          value: "500",
+          serialized: false,
+          created_at: "2026-06-01T00:00:00.000Z",
+          updated_at: "2026-06-01T00:00:00.000Z",
+        },
+      ],
+      total: 1,
+      page: 1,
+      limit: 20,
+      totalPages: 1,
+    });
+    expect(result.success).toBe(true);
+  });
 
-type UpdateSettingResult = {
-  operation: string;
-  message: string;
-};
+  it("accepts empty settings array", () => {
+    const result = listSettingsResultSchema.safeParse({
+      settings: [],
+      total: 0,
+      page: 1,
+      limit: 20,
+      totalPages: 0,
+    });
+    expect(result.success).toBe(true);
+  });
 
-describe("SettingItem shape", () => {
-  it("defines the expected fields", () => {
-    const mock: SettingItem = {
-      setting_uuid: "abc-123",
-      code: "EventManager",
-      key: "max_active_students",
-      value: "500",
-      serialized: false,
-      created_at: null,
-      updated_at: null,
-    };
-    expect(mock.setting_uuid).toBe("abc-123");
-    expect(mock.code).toBe("EventManager");
-    expect(mock.serialized).toBe(false);
+  it("accepts negative total (schema validates type, not business rules)", () => {
+    const result = listSettingsResultSchema.safeParse({
+      settings: [],
+      total: -1,
+      page: 1,
+      limit: 20,
+      totalPages: 0,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects missing page field", () => {
+    const result = listSettingsResultSchema.safeParse({
+      settings: [],
+      total: 0,
+      limit: 20,
+      totalPages: 0,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects missing serialized field on setting item", () => {
+    const result = listSettingsResultSchema.safeParse({
+      settings: [
+        {
+          setting_uuid: "abc",
+          code: "Test",
+          key: "k",
+          value: null,
+          created_at: null,
+          updated_at: null,
+        },
+      ],
+      total: 1,
+      page: 1,
+      limit: 20,
+      totalPages: 1,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("accepts null dates", () => {
+    const result = listSettingsResultSchema.safeParse({
+      settings: [
+        {
+          setting_uuid: "abc",
+          code: "Test",
+          key: "k",
+          value: null,
+          serialized: false,
+          created_at: null,
+          updated_at: null,
+        },
+      ],
+      total: 1,
+      page: 1,
+      limit: 20,
+      totalPages: 1,
+    });
+    expect(result.success).toBe(true);
   });
 });
 
-describe("UpdateSettingResult shape", () => {
-  it("includes operation and message", () => {
-    const result: UpdateSettingResult = {
+// ---------------------------------------------------------------------------
+// Output validation — updateSettingResultSchema
+// ---------------------------------------------------------------------------
+
+describe("updateSettingResultSchema", () => {
+  it("accepts success result", () => {
+    const result = updateSettingResultSchema.safeParse({
       operation: "success",
       message: "Setting updated successfully",
-    };
-    expect(result.operation).toBe("success");
+    });
+    expect(result.success).toBe(true);
   });
 
-  it("can represent error state", () => {
-    const result: UpdateSettingResult = {
+  it("accepts error result", () => {
+    const result = updateSettingResultSchema.safeParse({
       operation: "error",
       message: "Setting not found",
-    };
-    expect(result.operation).toBe("error");
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects missing operation", () => {
+    const result = updateSettingResultSchema.safeParse({
+      message: "Something",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects missing message", () => {
+    const result = updateSettingResultSchema.safeParse({
+      operation: "success",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("accepts empty message (message is optional text)", () => {
+    const result = updateSettingResultSchema.safeParse({
+      operation: "success",
+      message: "",
+    });
+    expect(result.success).toBe(true);
   });
 });
