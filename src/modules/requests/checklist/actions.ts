@@ -54,8 +54,6 @@ export type CreateChecklistParams = z.input<typeof createChecklistSchema>;
 export type UpdateChecklistParams = z.input<typeof updateChecklistSchema>;
 export type DeleteChecklistParams = z.input<typeof deleteChecklistSchema>;
 
-export type { ChecklistListItem, ListChecklistsResult, DeleteChecklistResult } from "./schemas";
-
 // ---------------------------------------------------------------------------
 // Server actions
 // ---------------------------------------------------------------------------

@@ -33,3 +33,17 @@ export const idRequestMutationResultSchema = z.object({
 });
 
 export type IdRequestMutationResult = z.output<typeof idRequestMutationResultSchema>;
+
+export const listIdRequestsSchema = z.object({
+  page: z.coerce.number().int().positive().optional().default(1),
+  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
+});
+export const getIdRequestSchema = z.object({
+  uuid: z.string().min(1, "ID request UUID is required"),
+});
+export const regenerateIdRequestSchema = z.object({
+  uuid: z.string().min(1, "ID request UUID is required"),
+});
+export const deleteIdRequestSchema = z.object({
+  uuid: z.string().min(1, "ID request UUID is required"),
+});

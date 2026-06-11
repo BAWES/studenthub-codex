@@ -6,23 +6,11 @@ import { requireCapability } from "@/modules/auth/session";
 import {
   candidateLinkItemSchema,
   listCandidateLinksResultSchema,
+  listCandidateLinksSchema,
+  getCandidateLinkSchema,
   type CandidateLinkItem,
   type ListCandidateLinksResult,
 } from "./schemas";
-
-// ---------------------------------------------------------------------------
-// Schemas
-// ---------------------------------------------------------------------------
-
-const listCandidateLinksSchema = z.object({
-  candidateId: z.coerce.number().int().positive().optional(),
-  page: z.coerce.number().int().positive().optional().default(1),
-  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
-});
-
-const getCandidateLinkSchema = z.object({
-  uuid: z.string().min(1, "Candidate link UUID is required"),
-});
 
 // ---------------------------------------------------------------------------
 // Types
@@ -30,12 +18,6 @@ const getCandidateLinkSchema = z.object({
 
 export type ListCandidateLinksParams = z.input<typeof listCandidateLinksSchema>;
 export type GetCandidateLinkParams = z.input<typeof getCandidateLinkSchema>;
-
-// ---------------------------------------------------------------------------
-// Exported schemas (for shared validation)
-// ---------------------------------------------------------------------------
-
-export { listCandidateLinksSchema, getCandidateLinkSchema };
 
 // ---------------------------------------------------------------------------
 // listCandidateLinks

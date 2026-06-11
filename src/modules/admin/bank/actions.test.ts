@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   listBanksSchema,
   createBankSchema,
-} from "./actions";
+} from "./schemas";
 import { bankItemSchema, listBanksResultSchema } from "./schemas";
 import type { BankItem, ListBanksResult } from "./schemas";
 

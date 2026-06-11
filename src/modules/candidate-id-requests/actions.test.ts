@@ -9,7 +9,7 @@ import {
   getIdRequestSchema,
   regenerateIdRequestSchema,
   deleteIdRequestSchema,
-} from "./actions";
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // listIdRequestsSchema

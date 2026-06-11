@@ -56,12 +56,6 @@ const listJiraUsersSchema = z.object({
 export type ListJiraIssuesParams = z.input<typeof listJiraIssuesSchema>;
 export type ListJiraUsersParams = z.input<typeof listJiraUsersSchema>;
 
-export type {
-  JiraIssue,
-  ListJiraIssuesResult,
-  JiraUser,
-  ListJiraUsersResult,
-} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Internal helpers

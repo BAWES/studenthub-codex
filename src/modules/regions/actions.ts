@@ -12,12 +12,11 @@ import {
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
-// Types (re-exported from schemas for backward compatibility)
+// Local types (derived from schemas for use in action signatures)
 // ---------------------------------------------------------------------------
 
-export type { AreaItem, ListAreasResult };
-export type ListAreasInput = z.input<typeof listAreasSchema>;
-export type GetAreaInput = z.input<typeof getAreaSchema>;
+type ListAreasInput = z.input<typeof listAreasSchema>;
+type GetAreaInput = z.input<typeof getAreaSchema>;
 
 // ---------------------------------------------------------------------------
 // Server actions
@@ -123,6 +122,3 @@ export async function getArea(params: GetAreaInput): Promise<AreaItem | null> {
       } as AreaItem)
     : null;
 }
-
-// Re-export schemas for backward compatibility
-export { listAreasSchema, getAreaSchema };

@@ -138,12 +138,6 @@ export type ListRequestsResult = {
 // Exported schemas (for shared validation)
 // ---------------------------------------------------------------------------
 
-export {
-  listRequestsSchema,
-  getRequestSchema,
-  createRequestSchema,
-  updateRequestSchema,
-};
 
 // ---------------------------------------------------------------------------
 // listRequests

@@ -5,11 +5,17 @@ import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
 import {
   candidateIdRequestItemSchema,
-  listIdRequestsResultSchema,
+  deleteIdRequestSchema,
+  getIdRequestSchema,
   idRequestMutationResultSchema,
-  type CandidateIdRequestItem,
-  type ListIdRequestsResult,
-  type IdRequestMutationResult,
+  listIdRequestsResultSchema,
+  listIdRequestsSchema,
+  regenerateIdRequestSchema,
+} from "./schemas";
+import type {
+  CandidateIdRequestItem,
+  IdRequestMutationResult,
+  ListIdRequestsResult,
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
@@ -20,27 +26,6 @@ import {
 // ---------------------------------------------------------------------------
 
 // ---------------------------------------------------------------------------
-// Schemas
-// ---------------------------------------------------------------------------
-
-const listIdRequestsSchema = z.object({
-  page: z.coerce.number().int().positive().optional().default(1),
-  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
-});
-
-const getIdRequestSchema = z.object({
-  uuid: z.string().min(1, "ID request UUID is required"),
-});
-
-const regenerateIdRequestSchema = z.object({
-  uuid: z.string().min(1, "ID request UUID is required"),
-});
-
-const deleteIdRequestSchema = z.object({
-  uuid: z.string().min(1, "ID request UUID is required"),
-});
-
-// ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
@@ -48,12 +33,6 @@ export type ListIdRequestsParams = z.input<typeof listIdRequestsSchema>;
 export type GetIdRequestParams = z.input<typeof getIdRequestSchema>;
 export type RegenerateIdRequestParams = z.input<typeof regenerateIdRequestSchema>;
 export type DeleteIdRequestParams = z.input<typeof deleteIdRequestSchema>;
-
-// ---------------------------------------------------------------------------
-// Exported schemas (for shared validation in tests)
-// ---------------------------------------------------------------------------
-
-export { listIdRequestsSchema, getIdRequestSchema, regenerateIdRequestSchema, deleteIdRequestSchema };
 
 // ---------------------------------------------------------------------------
 // Server actions

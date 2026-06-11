@@ -34,14 +34,6 @@ import {
 // Re-export schemas for shared validation (backward compatibility)
 // ---------------------------------------------------------------------------
 
-export {
-  listAccountsSchema,
-  getAccountSchema,
-  listCandidateSkillsSchema,
-  updateEmailSchema,
-  updateBankAccountSchema,
-  changePasswordSchema,
-} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Server actions

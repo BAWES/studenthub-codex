@@ -44,8 +44,6 @@ export type ListAdminsParams = z.input<typeof listAdminsSchema>;
 export type GetAdminParams = z.input<typeof getAdminSchema>;
 export type CreateAdminParams = z.input<typeof createAdminSchema>;
 
-export type { AdminListItem, AdminDetail, ListAdminsResult } from "./schemas";
-
 // ---------------------------------------------------------------------------
 // Server actions
 // ---------------------------------------------------------------------------

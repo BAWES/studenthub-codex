@@ -18,7 +18,6 @@ import {
 // Re-export schemas (for backward compatibility)
 // ---------------------------------------------------------------------------
 
-export { listActivitySchema, getActivitySchema };
 
 // ---------------------------------------------------------------------------
 // Server actions

@@ -8,4 +8,4 @@ export type {
   ListAreasResult,
   ListAreasInput,
   GetAreaInput,
-} from "./actions";
+} from "./schemas";

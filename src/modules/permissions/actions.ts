@@ -13,10 +13,6 @@ import type { PermissionSectionItem, PermissionUserItem } from "./schemas";
 // Re-export schemas for shared validation (backward compatibility)
 // ---------------------------------------------------------------------------
 
-export {
-  listPermissionSectionsSchema,
-  getUserPermissionsSchema,
-} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // listPermissionSections

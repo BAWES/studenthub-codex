@@ -13,7 +13,7 @@ import {
 import {
   listCandidateLinksSchema,
   getCandidateLinkSchema,
-} from "./actions";
+} from "./schemas";
 
 describe("listCandidateLinksSchema", () => {
   it("accepts default values when no params provided", () => {

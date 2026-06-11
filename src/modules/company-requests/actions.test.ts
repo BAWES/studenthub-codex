@@ -6,7 +6,7 @@ import {
   rejectCompanyRequestSchema,
   createCompanyRequestSchema,
   updateCompanyRequestSchema,
-} from "./actions";
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // listCompanyRequestsSchema

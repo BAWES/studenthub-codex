@@ -19,33 +19,12 @@ import { requireCapability } from "@/modules/auth/session";
 import type { Prisma } from "@prisma/client";
 import {
   bankItemSchema,
-  listBanksResultSchema,
   bankOperationResultSchema,
+  createBankSchema,
+  listBanksResultSchema,
+  listBanksSchema,
 } from "./schemas";
-import type { BankItem, ListBanksResult, BankOperationResult } from "./schemas";
-
-// ---------------------------------------------------------------------------
-// Schemas
-// ---------------------------------------------------------------------------
-
-const listBanksSchema = z.object({
-  sortBy: z
-    .enum(["bank_id", "bank_name", "bank_iban_code", "bank_swift_code"])
-    .optional()
-    .default("bank_name"),
-  sortDir: z.enum(["asc", "desc"]).optional().default("asc"),
-  page: z.coerce.number().int().positive().optional().default(1),
-  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
-});
-
-const createBankSchema = z.object({
-  name: z.string().min(1, "Bank name is required").max(100).optional(),
-  swift_code: z.string().max(100).optional(),
-  address: z.string().max(100).optional(),
-  bank_iban_code: z.string().min(1, "IBAN code is required").max(64),
-  type: z.string().max(3).optional(),
-  bank_code_abk: z.coerce.number().int().optional(),
-});
+import type { BankItem, BankOperationResult, ListBanksResult } from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -54,13 +33,6 @@ const createBankSchema = z.object({
 export type ListBanksParams = z.input<typeof listBanksSchema>;
 export type CreateBankParams = z.input<typeof createBankSchema>;
 
-export type { BankItem, ListBanksResult, BankOperationResult } from "./schemas";
-
-// ---------------------------------------------------------------------------
-// Exported schemas
-// ---------------------------------------------------------------------------
-
-export { listBanksSchema, createBankSchema };
 
 // ---------------------------------------------------------------------------
 // listBanks

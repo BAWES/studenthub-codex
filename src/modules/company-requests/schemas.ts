@@ -36,3 +36,42 @@ export const companyRequestMutationResultSchema = z.object({
 });
 
 export type CompanyRequestMutationResult = z.output<typeof companyRequestMutationResultSchema>;
+
+export const listCompanyRequestsSchema = z.object({
+  status: z.coerce.boolean().optional(),
+  page: z.coerce.number().int().positive().optional().default(1),
+  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
+});
+export const getCompanyRequestSchema = z.object({
+  uuid: z.string().min(1, "Company request UUID is required"),
+});
+export const approveCompanyRequestSchema = z.object({
+  uuid: z.string().min(1, "Company request UUID is required"),
+});
+export const rejectCompanyRequestSchema = z.object({
+  uuid: z.string().min(1, "Company request UUID is required"),
+});
+export const createCompanyRequestSchema = z.object({
+  company_name: z.string().min(1, "Company name is required"),
+  company_email: z.string().email("Invalid email format"),
+  contact_name: z.string().min(1, "Contact name is required"),
+  contact_position: z.string().optional(),
+  phone_number: z.string().optional(),
+  requesting_for: z.string().optional(),
+  currency_code: z.string().length(3, "Currency code must be 3 characters").optional(),
+  country_id: z.coerce.number().int().positive().optional(),
+  contact_receive_email: z.boolean().optional(),
+});
+export const updateCompanyRequestSchema = z.object({
+  uuid: z.string().min(1, "Company request UUID is required"),
+  company_name: z.string().min(1).optional(),
+  company_email: z.string().email("Invalid email format").optional(),
+  contact_name: z.string().min(1).optional(),
+  contact_position: z.string().optional().nullable(),
+  phone_number: z.string().optional().nullable(),
+  requesting_for: z.string().optional().nullable(),
+  currency_code: z.string().length(3).optional(),
+  country_id: z.coerce.number().int().positive().optional().nullable(),
+  contact_receive_email: z.boolean().optional(),
+  status: z.boolean().optional(),
+});
