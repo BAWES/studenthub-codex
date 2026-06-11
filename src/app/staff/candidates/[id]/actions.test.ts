@@ -2,6 +2,9 @@ import { describe, it, expect } from "vitest";
 import {
   getCandidateSchema,
   addCandidateNoteSchema,
+  candidateNoteOutputSchema,
+  candidateDetailResultOutputSchema,
+  addNoteResultOutputSchema,
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
