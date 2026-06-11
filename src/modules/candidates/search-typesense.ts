@@ -18,6 +18,9 @@ import { candidateIdsForStaff, buildSelectedActions, uniqueCandidateIds } from "
 // Re-exported from search.ts for page compatibility
 export { parseFilter, parseCandidateId, parseCandidateIds } from "./search";
 
+// Exported for testing
+export { buildFlags, buildTypesenseFacets, resolveSelectedCandidateId };
+
 // ---------------------------------------------------------------------------
 // Public entry point
 // ---------------------------------------------------------------------------
