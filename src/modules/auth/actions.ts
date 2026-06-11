@@ -9,22 +9,37 @@ import { clearPendingAccounts, clearSession, createPendingAccounts, createSessio
 import { verifyYiiPassword } from "./password";
 import { roleDefaultRoute } from "./types";
 import type { LoginState } from "./types";
+import {
+  loginStateSchema,
+  verifySessionResultSchema,
+  changePasswordStateSchema,
+} from "./schemas";
 
 export async function loginAction(_state: LoginState, formData: FormData): Promise<LoginState> {
   const email = formData.get("email");
   const password = formData.get("password");
 
   if (typeof email !== "string" || typeof password !== "string" || !email.trim() || !password) {
-    return {
+    const result = {
       error: "Enter your email and password.",
       email: typeof email === "string" ? email : ""
     };
+    const outputParsed = loginStateSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error("[modules/auth] loginAction output validation failed:", outputParsed.error.issues);
+    }
+    return result;
   }
 
   const accounts = await resolveLegacyIdentities(email, password);
   if (!accounts.length) {
     await clearPendingAccounts();
-    return { error: "The credentials did not match any active StudentHub account.", email };
+    const result = { error: "The credentials did not match any active StudentHub account.", email };
+    const outputParsed = loginStateSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error("[modules/auth] loginAction output validation failed:", outputParsed.error.issues);
+    }
+    return result;
   }
 
   if (accounts.length === 1) {
@@ -34,7 +49,7 @@ export async function loginAction(_state: LoginState, formData: FormData): Promi
   }
 
   await createPendingAccounts(accounts);
-  return {
+  const result = {
     email,
     accounts: accounts.map((account) => ({
       accountKey: account.accountKey,
@@ -44,6 +59,11 @@ export async function loginAction(_state: LoginState, formData: FormData): Promi
       email: account.email
     }))
   };
+  const outputParsed = loginStateSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error("[modules/auth] loginAction output validation failed:", outputParsed.error.issues);
+  }
+  return result;
 }
 
 export async function chooseAccountAction(formData: FormData) {
@@ -68,9 +88,14 @@ export async function verifySession() {
   try {
     const session = await getSession();
     if (!session) {
-      return { authenticated: false as const, user: null };
+      const result = { authenticated: false as const, user: null };
+      const outputParsed = verifySessionResultSchema.safeParse(result);
+      if (!outputParsed.success) {
+        console.error("[modules/auth] verifySession output validation failed:", outputParsed.error.issues);
+      }
+      return result;
     }
-    return {
+    const result = {
       authenticated: true as const,
       user: {
         role: session.role,
@@ -80,8 +105,18 @@ export async function verifySession() {
         issuedAt: session.issuedAt,
       },
     };
+    const outputParsed = verifySessionResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error("[modules/auth] verifySession output validation failed:", outputParsed.error.issues);
+    }
+    return result;
   } catch {
-    return { authenticated: false as const, user: null };
+    const result = { authenticated: false as const, user: null };
+    const outputParsed = verifySessionResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error("[modules/auth] verifySession output validation failed:", outputParsed.error.issues);
+    }
+    return result;
   }
 }
 
@@ -125,10 +160,18 @@ export async function changePassword(
   _prevState: ChangePasswordState,
   formData: FormData
 ): Promise<ChangePasswordState> {
+  function validateAndReturn(state: ChangePasswordState): ChangePasswordState {
+    const outputParsed = changePasswordStateSchema.safeParse(state);
+    if (!outputParsed.success) {
+      console.error("[modules/auth] changePassword output validation failed:", outputParsed.error.issues);
+    }
+    return state;
+  }
+
   try {
     const session = await getSession();
     if (!session) {
-      return { error: "You must be logged in to change your password." };
+      return validateAndReturn({ error: "You must be logged in to change your password." });
     }
 
     const parsed = changePasswordSchema.safeParse({
@@ -144,7 +187,7 @@ export async function changePassword(
         if (!fieldErrors[path]) fieldErrors[path] = [];
         fieldErrors[path].push(issue.message);
       }
-      return { fieldErrors };
+      return validateAndReturn({ fieldErrors });
     }
 
     const { currentPassword, newPassword } = parsed.data;
@@ -156,7 +199,7 @@ export async function changePassword(
     });
 
     if (!candidate) {
-      return { error: "Candidate account not found." };
+      return validateAndReturn({ error: "Candidate account not found." });
     }
 
     // Verify current password against stored hash
@@ -166,7 +209,7 @@ export async function changePassword(
     );
 
     if (!isValid) {
-      return { error: "Current password is incorrect." };
+      return validateAndReturn({ error: "Current password is incorrect." });
     }
 
     // Hash the new password (bcryptjs, $2b$ prefix compatible with Yii's $2y$)
@@ -181,9 +224,9 @@ export async function changePassword(
       data: { candidate_password_hash: yiiHash },
     });
 
-    return { success: true };
+    return validateAndReturn({ success: true });
   } catch (err) {
     console.error("changePassword error:", err);
-    return { error: "An unexpected error occurred. Please try again." };
+    return validateAndReturn({ error: "An unexpected error occurred. Please try again." });
   }
 }

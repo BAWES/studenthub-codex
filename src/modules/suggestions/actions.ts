@@ -4,6 +4,10 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
+import {
+  listSuggestionsResultSchema,
+  suggestionActionResultSchema,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -130,13 +134,24 @@ export async function listSuggestions(
     prisma.suggestion.count({ where: where as any }),
   ]);
 
-  return {
+  const result = {
     suggestions: suggestions as SuggestionListItem[],
     total,
     page,
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  // Validate output shape
+  const outputParsed = listSuggestionsResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/suggestions] listSuggestions output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -154,10 +169,18 @@ export async function updateSuggestionStatus(
 
   const parsed = updateSuggestionStatusSchema.safeParse(params);
   if (!parsed.success) {
-    return {
+    const result: UpdateSuggestionStatusResult = {
       operation: "error",
       message: parsed.error.issues[0]?.message ?? "Invalid parameters",
     };
+    const outputParsed = suggestionActionResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/suggestions] updateSuggestionStatus output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+    return result;
   }
 
   const { suggestionUuid, status } = parsed.data;
@@ -168,10 +191,18 @@ export async function updateSuggestionStatus(
   });
 
   if (!existing) {
-    return {
+    const result: UpdateSuggestionStatusResult = {
       operation: "error",
       message: "Invalid Suggestion",
     };
+    const outputParsed = suggestionActionResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/suggestions] updateSuggestionStatus output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+    return result;
   }
 
   await prisma.suggestion.update({
@@ -182,8 +213,16 @@ export async function updateSuggestionStatus(
   revalidatePath("/admin/requests");
   revalidatePath("/staff/requests");
 
-  return {
+  const result: UpdateSuggestionStatusResult = {
     operation: "success",
     message: "Suggestion status updated successfully",
   };
+  const outputParsed = suggestionActionResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/suggestions] updateSuggestionStatus output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+  return result;
 }
