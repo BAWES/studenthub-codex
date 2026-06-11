@@ -21,32 +21,51 @@ export const updateCompanySettingsSchema = z.object({
 });
 
 // ---------------------------------------------------------------------------
-// Types
+// Output validation schemas
+// ---------------------------------------------------------------------------
+
+export const companySettingsOutputSchema = z.object({
+  company_id: z.number().int(),
+  company_name: z.string().nullable(),
+  company_common_name_en: z.string().nullable(),
+  company_common_name_ar: z.string().nullable(),
+  company_description_en: z.string().nullable(),
+  company_description_ar: z.string().nullable(),
+  company_website: z.string().nullable(),
+  company_email: z.string().nullable(),
+  company_logo: z.string().nullable(),
+  commercial_licence: z.string().nullable(),
+  company_hourly_rate: z.number().nullable(),
+  company_bonus_commission: z.number().nullable(),
+  company_followup: z.boolean().nullable(),
+  company_followup_interval_weeks: z.number().int().nullable(),
+  company_approved_to_hire: z.boolean().nullable(),
+  currency_code: z.string().nullable(),
+});
+
+export const companySettingsListOutputSchema = z.object({
+  items: z.array(companySettingsOutputSchema),
+});
+
+export const companySettingsActionResultOutputSchema = z.discriminatedUnion("operation", [
+  z.object({
+    operation: z.literal("success"),
+    message: z.string(),
+    data: companySettingsOutputSchema.optional(),
+  }),
+  z.object({
+    operation: z.literal("error"),
+    message: z.string(),
+    data: companySettingsOutputSchema.optional(),
+  }),
+]);
+
+// ---------------------------------------------------------------------------
+// Types (derived from schemas where possible, manual for async result shapes)
 // ---------------------------------------------------------------------------
 
 export type UpdateCompanySettingsInput = z.input<typeof updateCompanySettingsSchema>;
 
-export type CompanySettings = {
-  company_id: number;
-  company_name: string | null;
-  company_common_name_en: string | null;
-  company_common_name_ar: string | null;
-  company_description_en: string | null;
-  company_description_ar: string | null;
-  company_website: string | null;
-  company_email: string | null;
-  company_logo: string | null;
-  commercial_licence: string | null;
-  company_hourly_rate: number | null;
-  company_bonus_commission: number | null;
-  company_followup: boolean | null;
-  company_followup_interval_weeks: number | null;
-  company_approved_to_hire: boolean | null;
-  currency_code: string | null;
-};
+export type CompanySettings = z.output<typeof companySettingsOutputSchema>;
 
-export type CompanySettingsActionResult = {
-  operation: "success" | "error";
-  message: string;
-  data?: CompanySettings;
-};
+export type CompanySettingsActionResult = z.output<typeof companySettingsActionResultOutputSchema>;

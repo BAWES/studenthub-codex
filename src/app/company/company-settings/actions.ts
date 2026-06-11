@@ -17,6 +17,9 @@ import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
 import {
   updateCompanySettingsSchema,
+  companySettingsOutputSchema,
+  companySettingsListOutputSchema,
+  companySettingsActionResultOutputSchema,
 } from "./schemas";
 import type {
   UpdateCompanySettingsInput,
@@ -74,9 +77,18 @@ export async function list(): Promise<{
     take: 100,
   });
 
-  return {
-    items: companies.map(toCompanySettings),
-  };
+  const items = companies.map(toCompanySettings);
+
+  // Validate output shape
+  const outputParsed = companySettingsListOutputSchema.safeParse({ items });
+  if (!outputParsed.success) {
+    console.error(
+      "[company-settings] list output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return { items };
 }
 
 // ---------------------------------------------------------------------------
@@ -95,7 +107,20 @@ export async function get(
     where: { company_id: companyId, deleted: 0 },
   });
 
-  return company ? toCompanySettings(company) : null;
+  const result = company ? toCompanySettings(company) : null;
+
+  // Validate output shape
+  if (result !== null) {
+    const outputParsed = companySettingsOutputSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[company-settings] get output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -159,11 +184,24 @@ export async function update(
 
     revalidatePath("/company/company-settings");
 
-    return {
+    const updatedSettings = toCompanySettings(updated);
+
+    const result: CompanySettingsActionResult = {
       operation: "success",
       message: "Company settings updated successfully",
-      data: toCompanySettings(updated),
+      data: updatedSettings,
     };
+
+    // Validate output shape
+    const outputParsed = companySettingsActionResultOutputSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[company-settings] update output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
   } catch (err) {
     return {
       operation: "error",
