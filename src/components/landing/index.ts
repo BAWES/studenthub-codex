@@ -1,1 +1,10 @@
 export { default as LandingPage } from "./LandingPage";
+export { default as LandingNav } from "./LandingNav";
+export { default as LandingHero } from "./LandingHero";
+export { default as StatsCounters } from "./StatsCounters";
+export { default as HowItWorksSection } from "./HowItWorksSection";
+export { default as EmployerValueSection } from "./EmployerValueSection";
+export { default as TestimonialsSection } from "./TestimonialsSection";
+export { default as ComparisonSection } from "./ComparisonSection";
+export { default as CTASection } from "./CTASection";
+export { default as LandingFooter } from "./LandingFooter";
