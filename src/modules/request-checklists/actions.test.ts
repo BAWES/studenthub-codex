@@ -1,60 +1,16 @@
 import { describe, it, expect } from "vitest";
-import { z } from "zod";
 
-// ---------------------------------------------------------------------------
-// Schemas (duplicated from actions.ts for isolated unit testing)
-// ---------------------------------------------------------------------------
-
-const listRequestChecklistsSchema = z.object({
-  page: z.number().int().positive().optional(),
-  limit: z.number().int().min(1).max(100).optional(),
-  search: z.string().max(255).optional(),
-});
-
-const createRequestChecklistSchema = z.object({
-  statusName: z.string().min(1, "Status name is required").max(100),
-  statusNameAr: z.string().max(100).optional(),
-  isRequire: z.boolean().optional(),
-  sortOrder: z.number().int().min(0).optional(),
-});
-
-const updateRequestChecklistSchema = z.object({
-  requestChecklistUuid: z.string().min(1, "Request checklist UUID is required"),
-  statusName: z.string().min(1).max(100).optional(),
-  statusNameAr: z.string().max(100).optional(),
-  isRequire: z.boolean().optional(),
-  sortOrder: z.number().int().min(0).optional(),
-});
-
-const deleteRequestChecklistSchema = z.object({
-  requestChecklistUuid: z.string().min(1, "Request checklist UUID is required"),
-});
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-type RequestChecklistItem = {
-  request_checklist_uuid: string;
-  status_name: string;
-  status_name_ar: string | null;
-  is_require: boolean | null;
-  sort_order: number | null;
-  created_at: Date | null;
-  updated_at: Date | null;
-};
-
-type ListRequestChecklistsResult = {
-  items: RequestChecklistItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
-
-// ---------------------------------------------------------------------------
-// Tests
-// ---------------------------------------------------------------------------
+import {
+  listRequestChecklistsSchema,
+  createRequestChecklistSchema,
+  updateRequestChecklistSchema,
+  deleteRequestChecklistSchema,
+  requestChecklistItemSchema,
+  listRequestChecklistsResultSchema,
+  deleteRequestChecklistResultSchema,
+  type RequestChecklistItem,
+  type ListRequestChecklistsResult,
+} from "./schemas";
 
 describe("listRequestChecklistsSchema", () => {
   it("accepts empty params", () => {
@@ -177,32 +133,85 @@ describe("deleteRequestChecklistSchema", () => {
   });
 });
 
-describe("RequestChecklistItem type shape", () => {
-  it("accepts a valid request checklist object", () => {
-    const mock: RequestChecklistItem = {
-      request_checklist_uuid: "request_checklis_abc-123",
-      status_name: "Approved",
-      status_name_ar: "موافقة",
-      is_require: true,
-      sort_order: 1,
-      created_at: new Date(),
-      updated_at: new Date(),
-    };
-    expect(mock.request_checklist_uuid).toBe("request_checklis_abc-123");
-    expect(mock.status_name).toBe("Approved");
+// ---------------------------------------------------------------------------
+// Output schema tests: requestChecklistItemSchema
+// ---------------------------------------------------------------------------
+
+const validRequestChecklistItem: RequestChecklistItem = {
+  request_checklist_uuid: "request_checklis_abc-123",
+  status_name: "Approved",
+  status_name_ar: "موافقة",
+  is_require: true,
+  sort_order: 1,
+  created_at: null,
+  updated_at: null,
+};
+
+describe("requestChecklistItemSchema", () => {
+  it("accepts a valid request checklist item", () => {
+    const result = requestChecklistItemSchema.parse(validRequestChecklistItem);
+    expect(result.request_checklist_uuid).toBe("request_checklis_abc-123");
+  });
+
+  it("rejects missing required field", () => {
+    const { status_name, ...rest } = validRequestChecklistItem;
+    expect(() => requestChecklistItemSchema.parse(rest)).toThrow();
+  });
+
+  it("rejects wrong type for is_require", () => {
+    expect(() =>
+      requestChecklistItemSchema.parse({ ...validRequestChecklistItem, is_require: "yes" }),
+    ).toThrow();
   });
 });
 
-describe("ListRequestChecklistsResult type shape", () => {
-  it("accepts an empty result set", () => {
-    const result: ListRequestChecklistsResult = {
+// ---------------------------------------------------------------------------
+// Output schema tests: listRequestChecklistsResultSchema
+// ---------------------------------------------------------------------------
+
+describe("listRequestChecklistsResultSchema", () => {
+  it("accepts a valid result", () => {
+    const result = listRequestChecklistsResultSchema.parse({
+      items: [validRequestChecklistItem],
+      total: 1,
+      page: 1,
+      limit: 20,
+      totalPages: 1,
+    });
+    expect(result.items).toHaveLength(1);
+  });
+
+  it("accepts an empty list", () => {
+    const result = listRequestChecklistsResultSchema.parse({
       items: [],
       total: 0,
       page: 1,
       limit: 20,
       totalPages: 0,
-    };
-    expect(result.total).toBe(0);
+    });
     expect(result.items).toHaveLength(0);
+  });
+
+  it("rejects negative total", () => {
+    expect(() =>
+      listRequestChecklistsResultSchema.parse({
+        items: [],
+        total: -1,
+        page: 1,
+        limit: 20,
+        totalPages: 0,
+      }),
+    ).toThrow();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output schema tests: deleteRequestChecklistResultSchema
+// ---------------------------------------------------------------------------
+
+describe("deleteRequestChecklistResultSchema", () => {
+  it("accepts success result", () => {
+    const result = deleteRequestChecklistResultSchema.parse({ success: true });
+    expect(result.success).toBe(true);
   });
 });

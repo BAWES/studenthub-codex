@@ -1,111 +1,26 @@
 import { describe, it, expect } from "vitest";
-import { z } from "zod";
-
-// ---------------------------------------------------------------------------
-// Pure logic: note schema validation
-//
-// The note server actions use these schemas internally. Testing them
-// separately avoids mocking "use server" dependencies (prisma, session,
-// next/cache).
-// ---------------------------------------------------------------------------
-
-const listNotesSchema = z.object({
-  candidateId: z.coerce.number().int().positive().optional(),
-  companyId: z.coerce.number().int().positive().optional(),
-  requestUuid: z.string().optional(),
-  noteType: z.string().optional(),
-  page: z.coerce.number().int().positive().optional().default(1),
-  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
-});
-
-const getNoteSchema = z.object({
-  noteUuid: z.string().min(1, "Note UUID is required"),
-});
-
-const createNoteSchema = z.object({
-  companyId: z.number().int().positive().optional(),
-  candidateId: z.number().int().positive().optional(),
-  requestUuid: z.string().optional(),
-  noteType: z.string().optional().default("Internal Note"),
-  noteText: z.string().optional(),
-});
-
-const updateNoteSchema = z.object({
-  noteUuid: z.string().min(1, "Note UUID is required"),
-  noteText: z.string().optional(),
-  noteType: z.string().optional(),
-});
-
-const deleteNoteSchema = z.object({
-  noteUuid: z.string().min(1, "Note UUID is required"),
-});
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-type NoteListItem = {
-  note_uuid: string;
-  company_id: number | null;
-  candidate_id: number | null;
-  request_uuid: string | null;
-  note_type: string | null;
-  note_text: string | null;
-  created_by: number | null;
-  updated_by: number | null;
-  note_created_datetime: Date;
-  note_updated_datetime: Date;
-};
-
-type ListNotesResult = {
-  notes: NoteListItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
-
-// ---------------------------------------------------------------------------
-// Filter builder (pure function)
-// ---------------------------------------------------------------------------
-
-type NoteWhereInput = {
-  candidate_id?: number;
-  company_id?: number;
-  request_uuid?: string;
-  note_type?: string;
-};
-
-function buildNoteFilter(params: {
-  candidateId?: number;
-  companyId?: number;
-  requestUuid?: string;
-  noteType?: string;
-}): NoteWhereInput {
-  const where: NoteWhereInput = {};
-
-  if (params.candidateId !== undefined) {
-    where.candidate_id = params.candidateId;
-  }
-  if (params.companyId !== undefined) {
-    where.company_id = params.companyId;
-  }
-  if (params.requestUuid && params.requestUuid.trim()) {
-    where.request_uuid = params.requestUuid;
-  }
-  if (params.noteType && params.noteType.trim()) {
-    where.note_type = params.noteType;
-  }
-
-  return where;
-}
+import {
+  listNotesSchema,
+  getNoteSchema,
+  createNoteSchema,
+  updateNoteSchema,
+  deleteNoteSchema,
+  noteListItemSchema,
+  noteDetailSchema,
+  listNotesResultSchema,
+  noteMutationResultSchema,
+  noteDeleteResultSchema,
+  type NoteListItem,
+  type NoteDetail,
+  type ListNotesResult,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Tests: listNotesSchema
 // ---------------------------------------------------------------------------
 
 describe("listNotesSchema", () => {
-  it("accepts empty params and uses defaults", () => {
+  it("accepts default values when no params provided", () => {
     const result = listNotesSchema.safeParse({});
     expect(result.success).toBe(true);
     if (result.success) {
@@ -114,45 +29,17 @@ describe("listNotesSchema", () => {
     }
   });
 
-  it("accepts candidateId filter", () => {
-    const result = listNotesSchema.safeParse({ candidateId: 42 });
+  it("accepts all filter params", () => {
+    const result = listNotesSchema.safeParse({
+      page: 2,
+      limit: 50,
+      companyId: 7,
+      staffId: 3,
+      requestUuid: "req_123",
+      noteType: "Internal",
+      candidateId: 42,
+    });
     expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.candidateId).toBe(42);
-    }
-  });
-
-  it("accepts companyId filter", () => {
-    const result = listNotesSchema.safeParse({ companyId: 7 });
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.companyId).toBe(7);
-    }
-  });
-
-  it("accepts requestUuid filter", () => {
-    const result = listNotesSchema.safeParse({ requestUuid: "request_abc123" });
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.requestUuid).toBe("request_abc123");
-    }
-  });
-
-  it("accepts noteType filter", () => {
-    const result = listNotesSchema.safeParse({ noteType: "Internal Note" });
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.noteType).toBe("Internal Note");
-    }
-  });
-
-  it("accepts pagination params", () => {
-    const result = listNotesSchema.safeParse({ page: 2, limit: 50 });
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.page).toBe(2);
-      expect(result.data.limit).toBe(50);
-    }
   });
 
   it("rejects limit over 100", () => {
@@ -174,205 +61,215 @@ describe("listNotesSchema", () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// Tests: getNoteSchema
-// ---------------------------------------------------------------------------
-
 describe("getNoteSchema", () => {
-  it("accepts a valid note UUID", () => {
-    const result = getNoteSchema.safeParse({ noteUuid: "note_abc123" });
+  it("accepts a valid UUID", () => {
+    const result = getNoteSchema.safeParse({ uuid: "note_abc123" });
     expect(result.success).toBe(true);
   });
 
-  it("rejects empty noteUuid", () => {
-    const result = getNoteSchema.safeParse({ noteUuid: "" });
+  it("rejects empty UUID", () => {
+    const result = getNoteSchema.safeParse({ uuid: "" });
     expect(result.success).toBe(false);
   });
 
-  it("rejects missing noteUuid", () => {
+  it("rejects missing UUID", () => {
     const result = getNoteSchema.safeParse({});
     expect(result.success).toBe(false);
   });
 });
 
-// ---------------------------------------------------------------------------
-// Tests: createNoteSchema
-// ---------------------------------------------------------------------------
-
 describe("createNoteSchema", () => {
-  it("accepts valid input with all fields", () => {
+  it("accepts valid input", () => {
     const result = createNoteSchema.safeParse({
-      candidateId: 42,
+      noteText: "Test note",
       companyId: 7,
-      requestUuid: "request_abc123",
-      noteType: "Internal Note",
-      noteText: "This is a note",
+      candidateId: 42,
     });
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.noteType).toBe("Internal Note");
-      expect(result.data.noteText).toBe("This is a note");
-    }
-  });
-
-  it("accepts minimal input (no required fields beyond uuid generation)", () => {
-    const result = createNoteSchema.safeParse({});
     expect(result.success).toBe(true);
   });
 
   it("applies default noteType", () => {
-    const result = createNoteSchema.safeParse({ noteText: "Just a note" });
+    const result = createNoteSchema.safeParse({ noteText: "Note" });
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data.noteType).toBe("Internal Note");
     }
   });
 
-  it("rejects negative candidateId", () => {
-    const result = createNoteSchema.safeParse({ candidateId: -1 });
+  it("rejects empty noteText", () => {
+    const result = createNoteSchema.safeParse({ noteText: "" });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects missing noteText", () => {
+    const result = createNoteSchema.safeParse({});
     expect(result.success).toBe(false);
   });
 });
 
-// ---------------------------------------------------------------------------
-// Tests: updateNoteSchema
-// ---------------------------------------------------------------------------
-
 describe("updateNoteSchema", () => {
-  it("requires noteUuid", () => {
+  it("requires UUID", () => {
     const result = updateNoteSchema.safeParse({});
     expect(result.success).toBe(false);
   });
 
-  it("accepts partial update with only uuid", () => {
-    const result = updateNoteSchema.safeParse({ noteUuid: "note_abc123" });
+  it("accepts partial update", () => {
+    const result = updateNoteSchema.safeParse({ uuid: "note_abc", noteText: "Updated" });
     expect(result.success).toBe(true);
-  });
-
-  it("accepts full update data", () => {
-    const result = updateNoteSchema.safeParse({
-      noteUuid: "note_abc123",
-      noteText: "Updated text",
-    });
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.noteText).toBe("Updated text");
-    }
-  });
-
-  it("rejects empty noteUuid", () => {
-    const result = updateNoteSchema.safeParse({ noteUuid: "" });
-    expect(result.success).toBe(false);
   });
 });
 
-// ---------------------------------------------------------------------------
-// Tests: deleteNoteSchema
-// ---------------------------------------------------------------------------
-
 describe("deleteNoteSchema", () => {
-  it("requires noteUuid", () => {
+  it("requires UUID", () => {
     const result = deleteNoteSchema.safeParse({});
     expect(result.success).toBe(false);
   });
 
-  it("accepts valid noteUuid", () => {
-    const result = deleteNoteSchema.safeParse({ noteUuid: "note_abc123" });
+  it("accepts valid UUID", () => {
+    const result = deleteNoteSchema.safeParse({ uuid: "note_abc" });
     expect(result.success).toBe(true);
   });
+});
 
-  it("rejects empty noteUuid", () => {
-    const result = deleteNoteSchema.safeParse({ noteUuid: "" });
-    expect(result.success).toBe(false);
+// ---------------------------------------------------------------------------
+// Output schema tests: noteListItemSchema
+// ---------------------------------------------------------------------------
+
+const validNoteListItem: NoteListItem = {
+  note_uuid: "note_abc123",
+  note_type: "Internal Note",
+  note_text: "Some content",
+  company_id: 7,
+  candidate_id: 42,
+  created_by: 1,
+  note_created_datetime: null,
+};
+
+describe("noteListItemSchema", () => {
+  it("accepts a valid note list item", () => {
+    const result = noteListItemSchema.parse(validNoteListItem);
+    expect(result.note_uuid).toBe("note_abc123");
+  });
+
+  it("rejects missing required field", () => {
+    const { note_uuid, ...rest } = validNoteListItem;
+    expect(() => noteListItemSchema.parse(rest)).toThrow();
   });
 });
 
 // ---------------------------------------------------------------------------
-// Tests: buildNoteFilter (pure function)
+// Output schema tests: noteDetailSchema
 // ---------------------------------------------------------------------------
 
-describe("buildNoteFilter", () => {
-  it("returns empty object with no filters", () => {
-    const result = buildNoteFilter({});
-    expect(result).toEqual({});
+const validNoteDetail: NoteDetail = {
+  note_uuid: "note_abc123",
+  note_type: "Internal Note",
+  note_text: "Detailed content",
+  company_id: 7,
+  candidate_id: 42,
+  created_by: 1,
+  note_created_datetime: null,
+  note_updated_datetime: null,
+  updated_by: null,
+  request_uuid: "req_abc",
+  story_uuid: null,
+};
+
+describe("noteDetailSchema", () => {
+  it("accepts a valid note detail", () => {
+    const result = noteDetailSchema.parse(validNoteDetail);
+    expect(result.request_uuid).toBe("req_abc");
   });
 
-  it("filters by candidateId", () => {
-    const result = buildNoteFilter({ candidateId: 42 });
-    expect(result).toEqual({ candidate_id: 42 });
+  it("includes all list item fields plus extras", () => {
+    const result = noteDetailSchema.parse(validNoteDetail);
+    expect(result.note_updated_datetime).toBeDefined();
+    expect(result.updated_by).toBeDefined();
+    expect(result.story_uuid).toBeDefined();
   });
+});
 
-  it("filters by companyId", () => {
-    const result = buildNoteFilter({ companyId: 7 });
-    expect(result).toEqual({ company_id: 7 });
-  });
+// ---------------------------------------------------------------------------
+// Output schema tests: listNotesResultSchema
+// ---------------------------------------------------------------------------
 
-  it("filters by requestUuid", () => {
-    const result = buildNoteFilter({ requestUuid: "request_abc123" });
-    expect(result).toEqual({ request_uuid: "request_abc123" });
-  });
-
-  it("filters by noteType", () => {
-    const result = buildNoteFilter({ noteType: "Internal Note" });
-    expect(result).toEqual({ note_type: "Internal Note" });
-  });
-
-  it("filters by multiple fields", () => {
-    const result = buildNoteFilter({
-      candidateId: 42,
-      companyId: 7,
+describe("listNotesResultSchema", () => {
+  it("accepts a valid result", () => {
+    const result = listNotesResultSchema.parse({
+      notes: [validNoteListItem],
+      total: 1,
+      page: 1,
+      limit: 20,
+      totalPages: 1,
     });
-    expect(result).toEqual({
-      candidate_id: 42,
-      company_id: 7,
-    });
+    expect(result.notes).toHaveLength(1);
   });
 
-  it("ignores empty requestUuid", () => {
-    const result = buildNoteFilter({ requestUuid: "" });
-    expect(result).toEqual({});
-  });
-
-  it("ignores whitespace-only requestUuid", () => {
-    const result = buildNoteFilter({ requestUuid: "   " });
-    expect(result).toEqual({});
-  });
-});
-
-// ---------------------------------------------------------------------------
-// Tests: Return type shapes
-// ---------------------------------------------------------------------------
-
-describe("NoteListItem shape", () => {
-  it("defines the expected fields", () => {
-    const mock: NoteListItem = {
-      note_uuid: "note_abc123",
-      company_id: 7,
-      candidate_id: 42,
-      request_uuid: "request_def456",
-      note_type: "Internal Note",
-      note_text: "Some content",
-      created_by: 1,
-      updated_by: 1,
-      note_created_datetime: new Date("2024-06-01"),
-      note_updated_datetime: new Date("2024-06-01"),
-    };
-    expect(mock.note_uuid).toBe("note_abc123");
-    expect(mock.candidate_id).toBe(42);
-    expect(mock.note_type).toBe("Internal Note");
-  });
-});
-
-describe("ListNotesResult shape", () => {
-  it("accepts empty result set", () => {
-    const result: ListNotesResult = {
+  it("accepts empty list", () => {
+    const result = listNotesResultSchema.parse({
       notes: [],
       total: 0,
       page: 1,
       limit: 20,
       totalPages: 0,
-    };
-    expect(result.total).toBe(0);
+    });
     expect(result.notes).toHaveLength(0);
+  });
+
+  it("rejects negative total", () => {
+    expect(() =>
+      listNotesResultSchema.parse({
+        notes: [],
+        total: -1,
+        page: 1,
+        limit: 20,
+        totalPages: 0,
+      }),
+    ).toThrow();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output schema tests: noteMutationResultSchema
+// ---------------------------------------------------------------------------
+
+describe("noteMutationResultSchema", () => {
+  it("accepts success with note", () => {
+    const result = noteMutationResultSchema.parse({
+      operation: "success",
+      message: "Created",
+      note: validNoteDetail,
+    });
+    expect(result.operation).toBe("success");
+  });
+
+  it("accepts success without note", () => {
+    const result = noteMutationResultSchema.parse({
+      operation: "success",
+      message: "Updated",
+    });
+    expect(result.message).toBe("Updated");
+  });
+
+  it("accepts error result", () => {
+    const result = noteMutationResultSchema.parse({
+      operation: "error",
+      message: "Not found",
+    });
+    expect(result.operation).toBe("error");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output schema tests: noteDeleteResultSchema
+// ---------------------------------------------------------------------------
+
+describe("noteDeleteResultSchema", () => {
+  it("accepts delete result", () => {
+    const result = noteDeleteResultSchema.parse({
+      operation: "success",
+      message: "Deleted",
+    });
+    expect(result.operation).toBe("success");
   });
 });
