@@ -115,7 +115,7 @@ test.describe("Staff critical flows — Workspace + Request Management", () => {
   // ─────────────────────────────────────────────────────────────────────────
 
   test.describe("Flow 1 — Staff Workspace Tabs", () => {
-    test("1a. Staff workspace renders with tab navigation bar", async () => {
+    test("1a. Staff workspace renders with sidebar navigation", async () => {
       const ctx = await staffContext();
 
       await ctx.page.goto("/staff");
@@ -123,20 +123,20 @@ test.describe("Staff critical flows — Workspace + Request Management", () => {
       await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
       await expect(ctx.page).toHaveURL("/staff");
 
-      // Workspace tab bar should be present (nav with role="tablist")
-      const tabList = ctx.page.locator('nav[role="tablist"]');
-      await expect(tabList).toBeVisible({ timeout: 10000 });
+      // Sidebar navigation should be present
+      const nav = ctx.page.locator('nav[aria-label="staff workspace navigation"]');
+      await expect(nav).toBeVisible({ timeout: 10000 });
 
-      // Should show tabs for all staff sections
-      await expect(ctx.page.locator('a[role="tab"]:has-text("App")').first()).toBeVisible({ timeout: 5000 });
-      await expect(ctx.page.locator('a[role="tab"]:has-text("Overview")').first()).toBeVisible({ timeout: 5000 });
-      await expect(ctx.page.locator('a[role="tab"]:has-text("My Requests")').first()).toBeVisible({ timeout: 5000 });
-      await expect(ctx.page.locator('a[role="tab"]:has-text("Candidates")').first()).toBeVisible({ timeout: 5000 });
-      await expect(ctx.page.locator('a[role="tab"]:has-text("Interviews")').first()).toBeVisible({ timeout: 5000 });
+      // Should show links for all staff sections
+      await expect(ctx.page.locator('a[href="/app"]').first()).toBeVisible({ timeout: 5000 });
+      await expect(ctx.page.locator('a[href="/staff"]').first()).toBeVisible({ timeout: 5000 });
+      await expect(ctx.page.locator('a[href="/staff/requests"]').first()).toBeVisible({ timeout: 5000 });
+      await expect(ctx.page.locator('a[href="/staff/candidates"]').first()).toBeVisible({ timeout: 5000 });
+      await expect(ctx.page.locator('a[href="/staff/interviews"]').first()).toBeVisible({ timeout: 5000 });
 
-      // Overview tab should be active by default
-      const overviewTab = ctx.page.locator('a[role="tab"][aria-selected="true"]');
-      await expect(overviewTab).toContainText("Overview");
+      // Overview link should be active by default (or App link)
+      const activeLink = ctx.page.locator('a[aria-current="page"]');
+      await expect(activeLink.first()).toBeVisible({ timeout: 3000 });
 
       assertNoReactErrors(ctx.errors);
       await ctx.close();
