@@ -9,6 +9,7 @@ import {
   updateSettingSchema,
   listSettingsResultSchema,
   updateSettingResultSchema,
+  settingItemSchema,
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
@@ -46,7 +47,7 @@ export type UpdateSettingResult = {
 // Exported schemas (for shared validation in tests)
 // ---------------------------------------------------------------------------
 
-export { listSettingsSchema, getSettingSchema, updateSettingSchema, listSettingsResultSchema, updateSettingResultSchema };
+export { listSettingsSchema, getSettingSchema, updateSettingSchema, listSettingsResultSchema, updateSettingResultSchema, settingItemSchema };
 
 // ---------------------------------------------------------------------------
 // Server actions
@@ -135,10 +136,21 @@ export async function getSetting(
 
   if (!setting) return null;
 
-  return {
+  const result = {
     ...setting,
     serialized: setting.serialized ?? false,
   };
+
+  // Output validation — log mismatches without throwing
+  const outputParsed = settingItemSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/settings] getSetting output failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -157,10 +169,21 @@ export async function updateSetting(
 
   const parsed = updateSettingSchema.safeParse(params);
   if (!parsed.success) {
-    return {
+    const result = {
       operation: "error",
       message: parsed.error.issues[0]?.message ?? "Invalid setting data",
     };
+
+    // Output validation — log mismatches without throwing
+    const outputParsed = updateSettingResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/settings] updateSetting validation output failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
   }
 
   const { settingUuid, value } = parsed.data;
@@ -171,10 +194,21 @@ export async function updateSetting(
   });
 
   if (!existing) {
-    return {
+    const result = {
       operation: "error",
       message: "Setting not found",
     };
+
+    // Output validation — log mismatches without throwing
+    const outputParsed = updateSettingResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/settings] updateSetting not-found output failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
   }
 
   try {
@@ -202,9 +236,20 @@ export async function updateSetting(
 
     return result;
   } catch (err) {
-    return {
+    const result = {
       operation: "error",
       message: err instanceof Error ? err.message : "Failed to update setting",
     };
+
+    // Output validation — log mismatches without throwing
+    const outputParsed = updateSettingResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/settings] updateSetting catch output failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
   }
 }
