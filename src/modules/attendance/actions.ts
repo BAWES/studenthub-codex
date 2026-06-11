@@ -7,6 +7,9 @@ import {
   listAttendanceSchema,
   getAttendanceSchema,
   createAttendanceSchema,
+  listAttendanceResultSchema,
+  attendanceDetailSchema,
+  createAttendanceResultSchema,
   type ListAttendanceParams,
   type GetAttendanceParams,
   type CreateAttendanceParams,
@@ -111,13 +114,24 @@ export async function listAttendance(
     prisma.attendance.count({ where: where as any }),
   ]);
 
-  return {
+  const result = {
     items: rows.map(toItem),
     total,
     page,
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  // Validate output shape
+  const outputParsed = listAttendanceResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/attendance] listAttendance output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -144,8 +158,33 @@ export async function getAttendance(
     where: { attendance_uuid: parsed.data.uuid },
   });
 
-  if (!row) return null;
-  return toItem(row as PrismaAttendanceRow);
+  if (!row) {
+    const nullResult = null;
+
+    // Validate output shape
+    const nullOutput = attendanceDetailSchema.safeParse(nullResult);
+    if (!nullOutput.success) {
+      console.error(
+        "[modules/attendance] getAttendance output validation failed:",
+        nullOutput.error.issues,
+      );
+    }
+
+    return nullResult;
+  }
+
+  const itemResult = toItem(row as PrismaAttendanceRow);
+
+  // Validate output shape
+  const itemOutput = attendanceDetailSchema.safeParse(itemResult);
+  if (!itemOutput.success) {
+    console.error(
+      "[modules/attendance] getAttendance output validation failed:",
+      itemOutput.error.issues,
+    );
+  }
+
+  return itemResult;
 }
 
 // ---------------------------------------------------------------------------
@@ -184,5 +223,33 @@ export async function createAttendance(
   });
 
   revalidatePath("/attendance");
-  return { attendance_uuid: attendance.attendance_uuid };
+
+  const createResult = { attendance_uuid: attendance.attendance_uuid };
+
+  // Validate output shape
+  const outputParsed = createAttendanceResultSchema.safeParse(createResult);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/attendance] createAttendance output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return createResult;
 }
+
+// Re-export schemas and types for backward compatibility
+export {
+  listAttendanceSchema,
+  getAttendanceSchema,
+  createAttendanceSchema,
+  listAttendanceResultSchema,
+  attendanceDetailSchema,
+  createAttendanceResultSchema,
+  type ListAttendanceParams,
+  type GetAttendanceParams,
+  type CreateAttendanceParams,
+  type AttendanceItem,
+  type AttendanceDetail,
+  type ListAttendanceResult,
+} from "./schemas";

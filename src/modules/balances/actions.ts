@@ -7,7 +7,12 @@ import { prisma } from "@/lib/prisma";
 import {
   listBalancesSchema,
   getBalanceSchema,
+  initTransferAmountSchema,
   payByWalletSchema,
+  listBalancesResultSchema,
+  getBalanceResultSchema,
+  initTransferStateSchema,
+  payByWalletStateSchema,
   type ListBalancesParams,
   type GetBalanceParams,
   type BalanceTransaction,
@@ -149,7 +154,7 @@ export async function listBalances(
       ["KWD", account.balance_account_uuid, limit, skip],
     );
 
-    return {
+    const result = {
       account,
       transactions: transactions.map((t) => ({
         ...t,
@@ -161,10 +166,21 @@ export async function listBalances(
       limit,
       totalPages: Math.ceil(total / limit),
     };
+
+    // Validate output shape
+    const listBalancesOutput = listBalancesResultSchema.safeParse(result);
+    if (!listBalancesOutput.success) {
+      console.error(
+        "[modules/balances] listBalances output validation failed:",
+        listBalancesOutput.error.issues,
+      );
+    }
+
+    return result;
   } catch (error) {
     // Wallet database might not be configured
     console.error("Wallet DB query failed in listBalances:", error);
-    return {
+    const errorResult = {
       account: null,
       transactions: [],
       total: 0,
@@ -172,6 +188,17 @@ export async function listBalances(
       limit,
       totalPages: 0,
     };
+
+    // Validate output shape
+    const listBalancesErrorOutput = listBalancesResultSchema.safeParse(errorResult);
+    if (!listBalancesErrorOutput.success) {
+      console.error(
+        "[modules/balances] listBalances error output validation failed:",
+        listBalancesErrorOutput.error.issues,
+      );
+    }
+
+    return errorResult;
   }
 }
 
@@ -207,30 +234,56 @@ export async function getBalance(
     );
 
     if (rows.length === 0) {
-      return null;
+      const nullBalResult: null = null;
+
+      // Validate output shape
+      const getBalOutput = getBalanceResultSchema.safeParse(nullBalResult);
+      if (!getBalOutput.success) {
+        console.error(
+          "[modules/balances] getBalance output validation failed:",
+          getBalOutput.error.issues,
+        );
+      }
+
+      return nullBalResult;
     }
 
-    return {
+    const balResult = {
       balance: Number(rows[0].balance),
       accountUuid: rows[0].account_uuid,
       type: rows[0].type,
     };
+
+    // Validate output shape
+    const getBalOutput = getBalanceResultSchema.safeParse(balResult);
+    if (!getBalOutput.success) {
+      console.error(
+        "[modules/balances] getBalance output validation failed:",
+        getBalOutput.error.issues,
+      );
+    }
+
+    return balResult;
   } catch (error) {
     console.error("Wallet DB query failed in getBalance:", error);
-    return null;
+    const catchBalResult: null = null;
+
+    // Validate output shape
+    const catchBalOutput = getBalanceResultSchema.safeParse(catchBalResult);
+    if (!catchBalOutput.success) {
+      console.error(
+        "[modules/balances] getBalance output validation failed:",
+        catchBalOutput.error.issues,
+      );
+    }
+
+    return catchBalResult;
   }
 }
 
 // ---------------------------------------------------------------------------
 // initTransfer — candidate requests a payout from their payable balance
 // ---------------------------------------------------------------------------
-
-const initTransferAmountSchema = z.object({
-  amount: z.coerce
-    .number()
-    .positive("Amount must be positive")
-    .finite("Amount must be a finite number"),
-});
 
 /**
  * Initiate a transfer (payout request) from the candidate's payable
@@ -249,10 +302,21 @@ export async function initTransfer(
   const raw = formData.get("amount");
   const parsed = initTransferAmountSchema.safeParse({ amount: raw });
   if (!parsed.success) {
-    return {
+    const validationError: InitTransferState = {
       success: false,
       error: parsed.error.errors.map((e) => e.message).join("; "),
     };
+
+    // Validate output shape
+    const initValOutput = initTransferStateSchema.safeParse(validationError);
+    if (!initValOutput.success) {
+      console.error(
+        "[modules/balances] initTransfer output validation failed:",
+        initValOutput.error.issues,
+      );
+    }
+
+    return validationError;
   }
 
   const { amount } = parsed.data;
@@ -271,13 +335,35 @@ export async function initTransfer(
     });
 
     if (!candidate) {
-      return { success: false, error: "Candidate not found." };
+      const noCandidateResult: InitTransferState = { success: false, error: "Candidate not found." };
+
+      // Validate output shape
+      const initNoCandOutput = initTransferStateSchema.safeParse(noCandidateResult);
+      if (!initNoCandOutput.success) {
+        console.error(
+          "[modules/balances] initTransfer output validation failed:",
+          initNoCandOutput.error.issues,
+        );
+      }
+
+      return noCandidateResult;
     }
 
     // 3. Resolve the wallet user UUID from the session email
     const walletUuid = await resolveWalletAccountUuid(candidate.candidate_email);
     if (!walletUuid) {
-      return { success: false, error: "No wallet account found for your email." };
+      const noWalletResult: InitTransferState = { success: false, error: "No wallet account found for your email." };
+
+      // Validate output shape
+      const initNoWalletOutput = initTransferStateSchema.safeParse(noWalletResult);
+      if (!initNoWalletOutput.success) {
+        console.error(
+          "[modules/balances] initTransfer output validation failed:",
+          initNoWalletOutput.error.issues,
+        );
+      }
+
+      return noWalletResult;
     }
 
     // 4. Find the candidate's payable wallet account
@@ -290,7 +376,18 @@ export async function initTransfer(
     );
 
     if (accounts.length === 0) {
-      return { success: false, error: "No payable account found for your account." };
+      const noPayableResult: InitTransferState = { success: false, error: "No payable account found for your account." };
+
+      // Validate output shape
+      const initNoPayableOutput = initTransferStateSchema.safeParse(noPayableResult);
+      if (!initNoPayableOutput.success) {
+        console.error(
+          "[modules/balances] initTransfer output validation failed:",
+          initNoPayableOutput.error.issues,
+        );
+      }
+
+      return noPayableResult;
     }
 
     const account = accounts[0];
@@ -298,10 +395,21 @@ export async function initTransfer(
 
     // 5. Validate sufficient balance
     if (currentBalance < amount) {
-      return {
+      const insufficientResult: InitTransferState = {
         success: false,
         error: `Insufficient balance. Available: ${currentBalance.toFixed(3)} KWD, requested: ${amount.toFixed(3)} KWD.`,
       };
+
+      // Validate output shape
+      const initInsufficientOutput = initTransferStateSchema.safeParse(insufficientResult);
+      if (!initInsufficientOutput.success) {
+        console.error(
+          "[modules/balances] initTransfer output validation failed:",
+          initInsufficientOutput.error.issues,
+        );
+      }
+
+      return insufficientResult;
     }
 
     // 6. Deduct from balance and record the transaction
@@ -317,13 +425,35 @@ export async function initTransfer(
       [currentBalance - amount, account.balance_account_uuid],
     );
 
-    return { success: true };
+    const successResult: InitTransferState = { success: true };
+
+    // Validate output shape
+    const initSuccessOutput = initTransferStateSchema.safeParse(successResult);
+    if (!initSuccessOutput.success) {
+      console.error(
+        "[modules/balances] initTransfer output validation failed:",
+        initSuccessOutput.error.issues,
+      );
+    }
+
+    return successResult;
   } catch (error) {
     console.error("initTransfer failed:", error);
-    return {
+    const catchResult: InitTransferState = {
       success: false,
       error: error instanceof Error ? error.message : "Transfer initiation failed due to an unknown error.",
     };
+
+    // Validate output shape
+    const initCatchOutput = initTransferStateSchema.safeParse(catchResult);
+    if (!initCatchOutput.success) {
+      console.error(
+        "[modules/balances] initTransfer output validation failed:",
+        initCatchOutput.error.issues,
+      );
+    }
+
+    return catchResult;
   }
 }
 
@@ -366,35 +496,79 @@ export async function payByWallet(
 
   const parsed = payByWalletSchema.safeParse(raw);
   if (!parsed.success) {
-    return {
+    const parseError: PayByWalletState = {
       success: false,
       error: parsed.error.errors.map((e) => e.message).join("; "),
     };
+
+    // Validate output shape
+    const payByParseOutput = payByWalletStateSchema.safeParse(parseError);
+    if (!payByParseOutput.success) {
+      console.error(
+        "[modules/balances] payByWallet output validation failed:",
+        payByParseOutput.error.issues,
+      );
+    }
+
+    return parseError;
   }
 
   const { toUuid, email, username, amount } = parsed.data;
 
   // 2. Validate at least one recipient identifier
   if (!toUuid && !email && !username) {
-    return {
+    const noRecipientResult: PayByWalletState = {
       success: false,
       error: "Recipient identifier required: provide toUuid, email, or username.",
     };
+
+    // Validate output shape
+    const payByNoRecOutput = payByWalletStateSchema.safeParse(noRecipientResult);
+    if (!payByNoRecOutput.success) {
+      console.error(
+        "[modules/balances] payByWallet output validation failed:",
+        payByNoRecOutput.error.issues,
+      );
+    }
+
+    return noRecipientResult;
   }
 
   // 3. Validate minimum transaction amount (mirrors Yii2 threshold)
   if (amount < 0.001) {
-    return {
+    const minAmountResult: PayByWalletState = {
       success: false,
       error: "Amount cannot be less than 0.001 KWD.",
     };
+
+    // Validate output shape
+    const payByMinAmountOutput = payByWalletStateSchema.safeParse(minAmountResult);
+    if (!payByMinAmountOutput.success) {
+      console.error(
+        "[modules/balances] payByWallet output validation failed:",
+        payByMinAmountOutput.error.issues,
+      );
+    }
+
+    return minAmountResult;
   }
 
   try {
     // 4. Find the current user's payable wallet account via email
     const walletUuid = await resolveWalletAccountUuid(session.email);
     if (!walletUuid) {
-      return { success: false, error: "No payable account found for your account." };
+      const noWalletResult2: PayByWalletState = { success: false, error: "No payable account found for your account." };
+
+      // Validate output shape
+      const payByNoWalletOutput = payByWalletStateSchema.safeParse(noWalletResult2);
+      if (!payByNoWalletOutput.success) {
+        console.error(
+          "[modules/balances] payByWallet output validation failed:",
+          payByNoWalletOutput.error.issues,
+        );
+      }
+
+      return noWalletResult2;
     }
 
     // 5. Get the sender's payable balance account
@@ -407,7 +581,18 @@ export async function payByWallet(
     );
 
     if (senderAccounts.length === 0) {
-      return { success: false, error: "No payable account found." };
+      const noSenderResult: PayByWalletState = { success: false, error: "No payable account found." };
+
+      // Validate output shape
+      const payByNoSenderOutput = payByWalletStateSchema.safeParse(noSenderResult);
+      if (!payByNoSenderOutput.success) {
+        console.error(
+          "[modules/balances] payByWallet output validation failed:",
+          payByNoSenderOutput.error.issues,
+        );
+      }
+
+      return noSenderResult;
     }
 
     const senderAccount = senderAccounts[0];
@@ -438,20 +623,53 @@ export async function payByWallet(
     }
 
     if (!recipient) {
-      return { success: false, error: "Recipient not found." };
+      const noRecipResult: PayByWalletState = { success: false, error: "Recipient not found." };
+
+      // Validate output shape
+      const payByNoRecipOutput = payByWalletStateSchema.safeParse(noRecipResult);
+      if (!payByNoRecipOutput.success) {
+        console.error(
+          "[modules/balances] payByWallet output validation failed:",
+          payByNoRecipOutput.error.issues,
+        );
+      }
+
+      return noRecipResult;
     }
 
     // Prevent self-payment
     if (recipient.user_uuid === walletUuid) {
-      return { success: false, error: "Cannot pay yourself." };
+      const selfPayResult: PayByWalletState = { success: false, error: "Cannot pay yourself." };
+
+      // Validate output shape
+      const payBySelfPayOutput = payByWalletStateSchema.safeParse(selfPayResult);
+      if (!payBySelfPayOutput.success) {
+        console.error(
+          "[modules/balances] payByWallet output validation failed:",
+          payBySelfPayOutput.error.issues,
+        );
+      }
+
+      return selfPayResult;
     }
 
     // 7. Validate sufficient balance
     if (senderBalance < amount) {
-      return {
+      const insufficientBalResult: PayByWalletState = {
         success: false,
         error: `Insufficient balance. Available: ${senderBalance.toFixed(3)} KWD, requested: ${amount.toFixed(3)} KWD.`,
       };
+
+      // Validate output shape
+      const payByInsufficientOutput = payByWalletStateSchema.safeParse(insufficientBalResult);
+      if (!payByInsufficientOutput.success) {
+        console.error(
+          "[modules/balances] payByWallet output validation failed:",
+          payByInsufficientOutput.error.issues,
+        );
+      }
+
+      return insufficientBalResult;
     }
 
     // 8. Ensure recipient has a payable balance account (create if not exists)
@@ -507,12 +725,53 @@ export async function payByWallet(
       [recipientBalance + amount, recipientAccount.balance_account_uuid],
     );
 
-    return { success: true };
+    const successResult2: PayByWalletState = { success: true };
+
+    // Validate output shape
+    const payBySuccessOutput = payByWalletStateSchema.safeParse(successResult2);
+    if (!payBySuccessOutput.success) {
+      console.error(
+        "[modules/balances] payByWallet output validation failed:",
+        payBySuccessOutput.error.issues,
+      );
+    }
+
+    return successResult2;
   } catch (error) {
     console.error("payByWallet failed:", error);
-    return {
+    const catchResult2: PayByWalletState = {
       success: false,
       error: error instanceof Error ? error.message : "Payment failed due to an unknown error.",
     };
+
+    // Validate output shape
+    const payByCatchOutput = payByWalletStateSchema.safeParse(catchResult2);
+    if (!payByCatchOutput.success) {
+      console.error(
+        "[modules/balances] payByWallet output validation failed:",
+        payByCatchOutput.error.issues,
+      );
+    }
+
+    return catchResult2;
   }
 }
+
+// Re-export schemas and types for backward compatibility
+export {
+  listBalancesSchema,
+  getBalanceSchema,
+  initTransferAmountSchema,
+  payByWalletSchema,
+  listBalancesResultSchema,
+  getBalanceResultSchema,
+  initTransferStateSchema,
+  payByWalletStateSchema,
+  type ListBalancesParams,
+  type GetBalanceParams,
+  type BalanceTransaction,
+  type PayableAccount,
+  type ListBalancesResult,
+  type InitTransferState,
+  type PayByWalletState,
+} from "./schemas";
