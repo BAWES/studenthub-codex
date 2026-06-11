@@ -29,25 +29,25 @@ describe("listStaffInterviewsSchema", () => {
   });
 
   it("accepts status filter (0=scheduled, 1=completed, 2=cancelled)", () => {
-    const result = listStaffInterviewsSchema.safeParse({ status: "0" });
+    const result = listStaffInterviewsSchema.safeParse({ status: 0 });
     expect(result.success).toBe(true);
     if (result.success) {
-      expect(result.data.status).toBe("0");
+      expect(result.data.status).toBe(0);
     }
   });
 
   it("accepts completed status filter", () => {
-    const result = listStaffInterviewsSchema.safeParse({ status: "1" });
+    const result = listStaffInterviewsSchema.safeParse({ status: 1 });
     expect(result.success).toBe(true);
   });
 
   it("accepts cancelled status filter", () => {
-    const result = listStaffInterviewsSchema.safeParse({ status: "2" });
+    const result = listStaffInterviewsSchema.safeParse({ status: 2 });
     expect(result.success).toBe(true);
   });
 
   it("rejects invalid status filter", () => {
-    const result = listStaffInterviewsSchema.safeParse({ status: "99" });
+    const result = listStaffInterviewsSchema.safeParse({ status: 99 });
     expect(result.success).toBe(false);
   });
 
@@ -101,7 +101,7 @@ describe("updateInterviewStatusSchema", () => {
   it("accepts valid status update (complete)", () => {
     const result = updateInterviewStatusSchema.safeParse({
       interviewUuid: "interview_abc-123",
-      status: "1",
+      status: 1,
     });
     expect(result.success).toBe(true);
   });
@@ -109,7 +109,7 @@ describe("updateInterviewStatusSchema", () => {
   it("accepts valid status update (cancel)", () => {
     const result = updateInterviewStatusSchema.safeParse({
       interviewUuid: "interview_abc-123",
-      status: "2",
+      status: 2,
     });
     expect(result.success).toBe(true);
   });
@@ -117,7 +117,7 @@ describe("updateInterviewStatusSchema", () => {
   it("accepts valid status update (reset to scheduled)", () => {
     const result = updateInterviewStatusSchema.safeParse({
       interviewUuid: "interview_abc-123",
-      status: "0",
+      status: 0,
     });
     expect(result.success).toBe(true);
   });
@@ -125,7 +125,7 @@ describe("updateInterviewStatusSchema", () => {
   it("rejects invalid status", () => {
     const result = updateInterviewStatusSchema.safeParse({
       interviewUuid: "interview_abc-123",
-      status: "99",
+      status: 99,
     });
     expect(result.success).toBe(false);
   });
@@ -133,13 +133,13 @@ describe("updateInterviewStatusSchema", () => {
   it("rejects non-numeric status", () => {
     const result = updateInterviewStatusSchema.safeParse({
       interviewUuid: "interview_abc-123",
-      status: "cancelled",
+      status: "cancelled" as any,
     });
     expect(result.success).toBe(false);
   });
 
   it("rejects missing UUID", () => {
-    const result = updateInterviewStatusSchema.safeParse({ status: "1" });
+    const result = updateInterviewStatusSchema.safeParse({ status: 1 });
     expect(result.success).toBe(false);
   });
 
@@ -153,7 +153,7 @@ describe("updateInterviewStatusSchema", () => {
   it("rejects empty UUID", () => {
     const result = updateInterviewStatusSchema.safeParse({
       interviewUuid: "",
-      status: "1",
+      status: 1,
     });
     expect(result.success).toBe(false);
   });
@@ -261,15 +261,10 @@ vi.mock("@/lib/prisma", () => ({
 }));
 
 vi.mock("@/modules/auth/session", () => ({
-  requireRoleCapability: vi.fn(),
-  requireCapability: vi.fn().mockResolvedValue({ role: "staff", id: "99" }),
+  requireCapability: vi.fn(),
 }));
 
-vi.mock("next/cache", () => ({
-  revalidatePath: vi.fn(),
-}));
-
-const { requireRoleCapability } = await import("@/modules/auth/session");
+const { requireCapability } = await import("@/modules/auth/session");
 const interviews = await import("./actions");
 
 const mockStaffUser = {
@@ -299,14 +294,14 @@ function makeInterviewRow(overrides: Record<string, unknown> = {}) {
 describe("listStaffInterviews", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(requireRoleCapability).mockResolvedValue(mockStaffUser);
+    vi.mocked(requireCapability).mockResolvedValue(mockStaffUser);
   });
 
   it("returns paginated interviews with defaults", async () => {
     mockFindMany.mockResolvedValue([makeInterviewRow()]);
     mockCount.mockResolvedValue(1);
     const result = await interviews.listStaffInterviews({});
-    expect(requireRoleCapability).toHaveBeenCalledWith("staff", "request.interview");
+    expect(requireCapability).toHaveBeenCalledWith("staff_leave.read");
     expect(result.items).toHaveLength(1);
     expect(result.total).toBe(1);
     expect(result.page).toBe(1);
@@ -343,7 +338,7 @@ describe("listStaffInterviews", () => {
 describe("getStaffInterviewDetail", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(requireRoleCapability).mockResolvedValue(mockStaffUser);
+    vi.mocked(requireCapability).mockResolvedValue(mockStaffUser);
   });
 
   it("returns interview detail for valid UUID", async () => {
@@ -370,7 +365,7 @@ describe("getStaffInterviewDetail", () => {
 describe("updateInterviewStatus", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(requireRoleCapability).mockResolvedValue(mockStaffUser);
+    vi.mocked(requireCapability).mockResolvedValue(mockStaffUser);
   });
 
   it("updates status to completed", async () => {
