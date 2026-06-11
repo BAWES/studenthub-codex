@@ -7,6 +7,9 @@ import {
   getNoteSchema,
   createNoteSchema,
   updateNoteSchema,
+  noteItemSchema,
+  listNotesResultSchema,
+  operationResultSchema,
   type ListNotesParams,
   type GetNoteParams,
   type CreateNoteParams,
@@ -114,13 +117,24 @@ export async function listNotes(
     prisma.note.count({ where: where as any }),
   ]);
 
-  return {
+  const result = {
     notes: notes.map(mapNote),
     total,
     page,
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  // Validate output shape
+  const outputParsed = listNotesResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/admin/note] listNotes output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -144,9 +158,30 @@ export async function getNote(
     select: noteSelect,
   });
 
-  if (!note) return null;
+  if (!note) {
+    // Validate output shape (null case)
+    const nullOutputParsed = noteItemSchema.nullable().safeParse(null);
+    if (!nullOutputParsed.success) {
+      console.error(
+        "[modules/admin/note] getNote output validation failed:",
+        nullOutputParsed.error.issues,
+      );
+    }
+    return null;
+  }
 
-  return mapNote(note);
+  const result = mapNote(note);
+
+  // Validate output shape
+  const outputParsed = noteItemSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/admin/note] getNote output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -160,10 +195,19 @@ export async function createNote(
 
   const parsed = createNoteSchema.safeParse(params);
   if (!parsed.success) {
-    return {
+    const errorResult = {
       operation: "error",
       message: parsed.error.issues[0]?.message ?? "Invalid create parameters",
     };
+    // Validate output shape
+    const outputParsed = operationResultSchema.safeParse(errorResult);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/admin/note] createNote output validation failed (input error):",
+        outputParsed.error.issues,
+      );
+    }
+    return errorResult;
   }
 
   const { noteText, companyId, requestUuid, storyUuid, noteType, candidateId } =
@@ -184,15 +228,33 @@ export async function createNote(
       },
     });
 
-    return {
+    const successResult = {
       operation: "success",
       message: "Note created successfully",
     };
+    // Validate output shape
+    const outputParsed = operationResultSchema.safeParse(successResult);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/admin/note] createNote output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+    return successResult;
   } catch (error) {
-    return {
+    const errorResult = {
       operation: "error",
       message: "We've faced a problem creating the Note, please contact us for assistance.",
     };
+    // Validate output shape
+    const outputParsed = operationResultSchema.safeParse(errorResult);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/admin/note] createNote output validation failed (catch):",
+        outputParsed.error.issues,
+      );
+    }
+    return errorResult;
   }
 }
 
@@ -207,10 +269,19 @@ export async function updateNote(
 
   const parsed = updateNoteSchema.safeParse(params);
   if (!parsed.success) {
-    return {
+    const errorResult = {
       operation: "error",
       message: parsed.error.issues[0]?.message ?? "Invalid update parameters",
     };
+    // Validate output shape
+    const outputParsed = operationResultSchema.safeParse(errorResult);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/admin/note] updateNote output validation failed (input error):",
+        outputParsed.error.issues,
+      );
+    }
+    return errorResult;
   }
 
   const { id, noteText, companyId } = parsed.data;
@@ -220,10 +291,19 @@ export async function updateNote(
   });
 
   if (!existing) {
-    return {
+    const notFoundResult = {
       operation: "error",
       message: "Note not found",
     };
+    // Validate output shape
+    const outputParsed = operationResultSchema.safeParse(notFoundResult);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/admin/note] updateNote output validation failed (not found):",
+        outputParsed.error.issues,
+      );
+    }
+    return notFoundResult;
   }
 
   try {
@@ -236,14 +316,32 @@ export async function updateNote(
       },
     });
 
-    return {
+    const successResult = {
       operation: "success",
       message: "Note successfully updated",
     };
+    // Validate output shape
+    const outputParsed = operationResultSchema.safeParse(successResult);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/admin/note] updateNote output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+    return successResult;
   } catch (error) {
-    return {
+    const errorResult = {
       operation: "error",
       message: "We've faced a problem updating the Note, please contact us for assistance.",
     };
+    // Validate output shape
+    const outputParsed = operationResultSchema.safeParse(errorResult);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/admin/note] updateNote output validation failed (catch):",
+        outputParsed.error.issues,
+      );
+    }
+    return errorResult;
   }
 }
