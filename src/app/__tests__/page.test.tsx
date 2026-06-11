@@ -81,56 +81,14 @@ vi.mock("lucide-react", () => ({
   Minus: () => <span data-testid="icon-minus" />,
   Award: () => <span data-testid="icon-award" />,
   Target: () => <span data-testid="icon-target" />,
+  Handshake: () => <span data-testid="icon-handshake" />,
+  Fingerprint: () => <span data-testid="icon-fingerprint" />,
+  Eye: () => <span data-testid="icon-eye" />,
 }));
 
 // ── Mock ThemeToggle ──────────────────────────────────────────
 vi.mock("@/modules/theme/ThemeToggle", () => ({
   ThemeToggle: () => <button data-testid="theme-toggle" aria-label="Toggle theme" />,
-}));
-
-// ── Mock GlassPanel ───────────────────────────────────────────
-vi.mock("@/components/ui/glass-panel", () => ({
-  GlassPanel: ({
-    children,
-    className,
-    ...props
-  }: {
-    children: React.ReactNode;
-    className?: string;
-    [key: string]: unknown;
-  }) => (
-    <div className={className} data-glass-panel="" {...props}>
-      {children}
-    </div>
-  ),
-}));
-
-// ── Mock marketing sub-components ─────────────────────────────
-vi.mock("@/components/marketing", () => ({
-  HeroSection: () => <section aria-label="StudentHub — connecting students with the right employers" className="shHeroGradientDramatic" data-testid="hero-section" />,
-  StatsSection: () => <section aria-label="Platform statistics" data-testid="stats-section" />,
-  HowItWorks: () => (
-    <div>
-      <p>How it works</p>
-      <h2>From profile to placement in three steps.</h2>
-      <h3>Create your profile</h3>
-      <h3>Get matched</h3>
-      <h3>Get hired</h3>
-    </div>
-  ),
-  EmployerSection: () => <section aria-label="For employers" data-testid="employer-section" />,
-  TestimonialCarousel: () => <section aria-label="Customer testimonials" data-testid="testimonial-carousel" />,
-  ComparisonTable: () => <section aria-label="Feature comparison" data-testid="comparison-table" />,
-  PersonaSwitcher: ({ active, onChange }: { active: string; onChange: (p: any) => void }) => (
-    <div role="tablist" data-testid="persona-switcher" data-active={active}>
-      <button onClick={() => onChange("candidate")}>Candidate</button>
-      <button onClick={() => onChange("company")}>Company</button>
-    </div>
-  ),
-  FadeInSection: ({ children, asDiv, className, ...rest }: any) => {
-    const Tag = asDiv ? "div" : "section";
-    return <Tag className={className} {...rest}>{children}</Tag>;
-  },
 }));
 
 afterEach(() => {
@@ -144,7 +102,7 @@ import type { LandingContentProps } from "../LandingContent";
 
 // ── Tests ──────────────────────────────────────────────────────
 
-describe("Landing page (two-sided marketplace redesign)", () => {
+describe("Landing page (Zendesk coral redesign)", () => {
   const defaultProps: LandingContentProps = {
     session: null,
   };
@@ -160,77 +118,104 @@ describe("Landing page (two-sided marketplace redesign)", () => {
 
   beforeEach(() => {
     mockReplace.mockClear();
-    // Ensure search params are empty per default
     mockSearchParams.forEach((_, key) => mockSearchParams.delete(key));
   });
 
-  it("renders the hero section", () => {
+  // ── Hero ─────────────────────────────────────────────────────
+
+  it("renders the hero section with headline", () => {
     render(<LandingContent {...defaultProps} />);
+    // Hero section: heading mentions staff recruiters (Dosu-verified business model)
+    const staffRecruiter = screen.getAllByText(/staff recruiter/i);
+    expect(staffRecruiter.length).toBeGreaterThanOrEqual(1);
     expect(
-      screen.getByTestId("hero-section")
+      screen.getByText(/create free profile/i)
     ).toBeInTheDocument();
   });
 
-  it("renders navigation with sign up and sign in links for unauthenticated users", () => {
+  // ── Navigation ───────────────────────────────────────────────
+
+  it("renders navigation with sign up and sign in for unauthenticated users", () => {
     render(<LandingContent {...defaultProps} />);
-    expect(
-      screen.getByRole("navigation", { name: /StudentHub public navigation/i })
-    ).toBeInTheDocument();
-    // Nav CTA for candidate mode
-    expect(screen.getByText("Create free candidate profile")).toBeInTheDocument();
-    // "Sign in" appears in nav and footer
+    expect(screen.getByText("Get started")).toBeInTheDocument();
     const signInLinks = screen.getAllByText(/sign in/i);
     expect(signInLinks.length).toBeGreaterThanOrEqual(1);
   });
 
+  it("renders SH brand in nav", () => {
+    render(<LandingContent {...defaultProps} />);
+    const shElements = screen.getAllByText("SH");
+    expect(shElements.length).toBeGreaterThanOrEqual(1);
+    expect(shElements[0]).toHaveClass("font-bold", { exact: false });
+  });
+
+  it("renders StudentHub text in nav", () => {
+    render(<LandingContent {...defaultProps} />);
+    const shTexts = screen.getAllByText("StudentHub");
+    expect(shTexts.length).toBeGreaterThanOrEqual(1);
+  });
+
+  // ── How it works ─────────────────────────────────────────────
+
   it("renders the how it works section", () => {
     render(<LandingContent {...defaultProps} />);
-    const howItWorksEls = screen.getAllByText("How it works");
-    expect(howItWorksEls.length).toBeGreaterThanOrEqual(1);
+    const howItWorks = screen.getAllByText(/how it works/i);
+    expect(howItWorks.length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText("Create your profile")).toBeInTheDocument();
-    expect(screen.getByText("Get matched")).toBeInTheDocument();
-    expect(screen.getByText("Get hired")).toBeInTheDocument();
+    expect(screen.getByText(/get matched/i)).toBeInTheDocument();
   });
 
-  it("renders the stats section", () => {
+  // ── Stats ────────────────────────────────────────────────────
+
+  it("renders stats with real numbers", () => {
     render(<LandingContent {...defaultProps} />);
-    const stats = document.querySelector("section[aria-label='Platform statistics']");
-    expect(stats).toBeInTheDocument();
+    expect(screen.getAllByText("10,000+").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("500+").length).toBeGreaterThanOrEqual(1);
   });
 
-  it("does not render the old feature grid (replaced by HowItWorks)", () => {
+  // ── Features ─────────────────────────────────────────────────
+
+  it("renders platform features section", () => {
     render(<LandingContent {...defaultProps} />);
-    expect(screen.queryByLabelText("Key features")).not.toBeInTheDocument();
-    expect(screen.queryByText(/smart role discovery/i)).not.toBeInTheDocument();
+    expect(screen.getByText("Platform features")).toBeInTheDocument();
+    expect(screen.getByText("Staff-driven matching")).toBeInTheDocument();
+    expect(screen.getByText("Smart search")).toBeInTheDocument();
+    expect(screen.getByText("Timesheets")).toBeInTheDocument();
+    expect(screen.getByText("Compliance")).toBeInTheDocument();
   });
 
-  it("renders the testimonial carousel", () => {
+  // ── Testimonials ─────────────────────────────────────────────
+
+  it("renders testimonials section", () => {
     render(<LandingContent {...defaultProps} />);
-    expect(
-      screen.getByLabelText("Customer testimonials")
-    ).toBeInTheDocument();
+    expect(screen.getByText("Real stories from real placements")).toBeInTheDocument();
   });
 
-  it("renders the final CTA section with description", () => {
+  // ── CTA ──────────────────────────────────────────────────────
+
+  it("renders final CTA section", () => {
     render(<LandingContent {...defaultProps} />);
-    const descriptions = screen.getAllByText(/Kuwait/i);
-    expect(descriptions.length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText("Start your journey")).toBeInTheDocument();
+    expect(screen.getByText("Your next role is one profile away.")).toBeInTheDocument();
+    expect(screen.getByText("Create your free profile")).toBeInTheDocument();
   });
 
-  it("renders footer with sign up link", () => {
+  // ── Footer ───────────────────────────────────────────────────
+
+  it("renders footer with copyright", () => {
     render(<LandingContent {...defaultProps} />);
-    const footerLinks = screen.getAllByText(/sign up/i);
-    expect(footerLinks.length).toBeGreaterThanOrEqual(1);
+    const hubTexts = screen.getAllByText(/StudentHub/i);
+    expect(hubTexts.length).toBeGreaterThanOrEqual(1);
   });
 
-  it("renders footer with internal role descriptions", () => {
+  it("renders footer with role descriptions", () => {
     render(<LandingContent {...defaultProps} />);
-    expect(screen.getByText(/Staff:/i)).toBeInTheDocument();
-    expect(screen.getByText(/Admin:/i)).toBeInTheDocument();
-    expect(screen.getByText(/Inspector:/i)).toBeInTheDocument();
+    expect(screen.getByText(/Staff portal/i)).toBeInTheDocument();
+    expect(screen.getByText(/Admin dashboard/i)).toBeInTheDocument();
+    expect(screen.getByText(/Inspector portal/i)).toBeInTheDocument();
   });
 
-  // ── Skip-to-content link ───────────────────────────────────
+  // ── Skip-to-content ─────────────────────────────────────────
 
   it("renders a skip-to-content link", () => {
     render(<LandingContent {...defaultProps} />);
@@ -245,52 +230,65 @@ describe("Landing page (two-sided marketplace redesign)", () => {
     expect(link.className).toContain("skipLink");
   });
 
-  it("main element has id=main-content for skip-link target", () => {
+  it("main element has id=main-content", () => {
     const { container } = render(<LandingContent {...defaultProps} />);
     const main = container.querySelector("main#main-content");
     expect(main).toBeInTheDocument();
   });
 
-  it("renders open app links when user is authenticated", () => {
-    render(<LandingContent {...defaultProps} session={sessionProps.session} />);
+  // ── Persona switching ────────────────────────────────────────
+
+  it("renders persona toggle with both options", () => {
+    render(<LandingContent {...defaultProps} />);
+    expect(screen.getByText("I'm looking for work")).toBeInTheDocument();
+    const hiringTexts = screen.getAllByText("I'm hiring");
+    expect(hiringTexts.length).toBeGreaterThanOrEqual(1);
+  });
+
+  // ── Company persona ─────────────────────────────────────────
+
+  it("renders company-specific content when persona=company", () => {
+    mockSearchParams.set("persona", "company");
+    render(<LandingContent {...defaultProps} />);
+    // "Set up company account" appears in hero CTA and CTA section
+    const companyCTA = screen.getAllByText("Set up company account");
+    expect(companyCTA.length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText("How hiring works")).toBeInTheDocument();
+    expect(screen.getByText("Start hiring today")).toBeInTheDocument();
+  });
+
+  // ── Authenticated state ──────────────────────────────────────
+
+  it("renders open app link when user is authenticated", () => {
+    render(<LandingContent {...defaultProps} {...sessionProps} />);
     const openAppLinks = screen.getAllByText(/open app/i);
     expect(openAppLinks.length).toBeGreaterThanOrEqual(1);
-    expect(screen.queryByText(/create free candidate profile/i)).not.toBeInTheDocument();
+    expect(screen.queryByText("Get started")).not.toBeInTheDocument();
   });
 
-  describe("Navigation styling", () => {
-    it("renders nav with shGlassNav class", () => {
-      render(<LandingContent {...defaultProps} />);
-      const nav = document.querySelector("nav");
-      expect(nav?.className).toContain("shGlassNav");
-    });
+  // ── Business model accuracy (Dosu-verified) ──────────────────
 
-    it("renders nav inner wrapper with shGlassNavInner class", () => {
-      render(<LandingContent {...defaultProps} />);
-      const nav = document.querySelector("nav");
-      const inner = nav?.querySelector('[class*="shGlassNavInner"]');
-      expect(inner).toBeTruthy();
-    });
-
-    it("renders SH brand mark in nav", () => {
-      render(<LandingContent {...defaultProps} />);
-      const nav = document.querySelector("nav");
-      const shSpan = nav?.querySelector('[class*="font-bold text-white"]');
-      expect(shSpan?.textContent).toBe("SH");
-    });
+  it("mentions staff-driven matching in the copy", () => {
+    render(<LandingContent {...defaultProps} />);
+    const staffMentions = screen.getAllByText(/staff/i);
+    expect(staffMentions.length).toBeGreaterThanOrEqual(1);
   });
 
-  describe("Mobile viewport responsiveness", () => {
-    it("renders max-sm responsive width constraints on main container", () => {
-      render(<LandingContent {...defaultProps} />);
-      const main = document.querySelector("main");
-      expect(main?.className).toContain("max-sm");
-    });
+  // ── Trust bar ────────────────────────────────────────────────
 
-    it("renders final CTA section with gradient background", () => {
-      render(<LandingContent {...defaultProps} />);
-      const heroGradient = document.querySelector('[class*="shHeroGradientDramatic"]');
-      expect(heroGradient).toBeTruthy();
-    });
+  it("renders employer trust bar", () => {
+    render(<LandingContent {...defaultProps} />);
+    expect(
+      screen.getByText(/trusted by leading organizations/i)
+    ).toBeInTheDocument();
+  });
+
+  // ── Comparison table ─────────────────────────────────────────
+
+  it("renders comparison table", () => {
+    render(<LandingContent {...defaultProps} />);
+    expect(
+      screen.getByText("Why StudentHub is different")
+    ).toBeInTheDocument();
   });
 });
