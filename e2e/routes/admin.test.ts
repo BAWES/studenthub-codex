@@ -32,7 +32,7 @@ test.describe("Admin routes", () => {
       if (msg.type() === "error") consoleMessages.push(msg.text());
     });
     await page.goto(route);
-    await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("load");
     await expect(page.locator("body")).toBeVisible({ timeout: 15000 });
 
     const errors = consoleMessages.filter(
@@ -93,7 +93,7 @@ test.describe("Admin routes", () => {
     ]);
     const page = await bContext.newPage();
     await page.goto("/admin");
-    await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("load");
     await expect(page).not.toHaveURL("/admin");
     await bContext.close();
     await browser.close();
@@ -112,7 +112,7 @@ test.describe("Admin routes", () => {
     ]);
     const page = await bContext.newPage();
     await page.goto("/admin");
-    await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("load");
     await expect(page).not.toHaveURL("/admin");
     await bContext.close();
     await browser.close();

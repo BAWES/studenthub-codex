@@ -32,7 +32,7 @@ test.describe("Company routes", () => {
       if (msg.type() === "error") consoleMessages.push(msg.text());
     });
     await page.goto(route);
-    await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("load");
     await expect(page.locator("body")).toBeVisible({ timeout: 15000 });
 
     const errors = consoleMessages.filter(
@@ -89,7 +89,7 @@ test.describe("Company routes", () => {
     ]);
     const page = await bContext.newPage();
     await page.goto("/company");
-    await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("load");
     await expect(page).not.toHaveURL("/company");
     await bContext.close();
     await browser.close();
@@ -108,7 +108,7 @@ test.describe("Company routes", () => {
     ]);
     const page = await bContext.newPage();
     await page.goto("/company");
-    await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("load");
     await expect(page).not.toHaveURL("/company");
     await bContext.close();
     await browser.close();

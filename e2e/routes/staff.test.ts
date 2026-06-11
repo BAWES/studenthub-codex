@@ -32,7 +32,7 @@ test.describe("Staff routes", () => {
       if (msg.type() === "error") consoleMessages.push(msg.text());
     });
     await page.goto(route);
-    await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("load");
     await expect(page.locator("body")).toBeVisible({ timeout: 15000 });
 
     const errors = consoleMessages.filter(
@@ -77,7 +77,7 @@ test.describe("Staff routes", () => {
     ]);
     const page = await bContext.newPage();
     await page.goto("/staff");
-    await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("load");
     await expect(page).not.toHaveURL("/staff");
     await bContext.close();
     await browser.close();
@@ -96,7 +96,7 @@ test.describe("Staff routes", () => {
     ]);
     const page = await bContext.newPage();
     await page.goto("/staff");
-    await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("load");
     await expect(page).not.toHaveURL("/staff");
     await bContext.close();
     await browser.close();
