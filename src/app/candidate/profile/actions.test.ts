@@ -1,20 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 // ---------------------------------------------------------------------------
-// Mocks — data layer & auth
+// Mocks
 // ---------------------------------------------------------------------------
 
-const mockCount = vi.fn();
+const mockMetrics = vi.fn();
 
-vi.mock("@/lib/prisma", () => ({
-  prisma: {
-    candidate_experience: { count: mockCount },
-    candidate_education: { count: mockCount },
-    candidate_skill: { count: mockCount },
-    candidate_certification: { count: mockCount },
-    candidate_language: { count: mockCount },
-    job_listing_application: { count: mockCount },
-  },
+vi.mock("@/modules/candidates/profile/actions", () => ({
+  getCandidateProfileMetrics: mockMetrics,
 }));
 
 vi.mock("@/modules/auth/session", () => ({
@@ -23,10 +16,6 @@ vi.mock("@/modules/auth/session", () => ({
 
 vi.mock("../actions", () => ({
   getCandidateProfile: vi.fn(),
-}));
-
-vi.mock("next/cache", () => ({
-  revalidatePath: vi.fn(),
 }));
 
 // Must import after mocks are set up
@@ -58,61 +47,82 @@ const mockDetail: any = {
     candidate_address_line1: null,
     candidate_gender: null,
     candidate_preferred_time: null,
+    bank_account_name: null,
+    candidate_iban: null,
+    country_id: 1,
+    university_id: null,
+    bank_id: null,
   },
-  invitations: [],
-  workHours: [],
-  histories: [],
-  notes: [],
-  stats: null,
-  hasApplied: false,
+  roleActions: [],
 };
+
+const mockMetricsResult = {
+  experienceCount: 3,
+  educationCount: 2,
+  skillCount: 5,
+  certificationCount: 1,
+  languageCount: 2,
+  applicationCount: 0,
+};
+
+// ---------------------------------------------------------------------------
+// Tests
+// ---------------------------------------------------------------------------
 
 describe("Candidate Profile actions", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    (requireRoleCapability as ReturnType<typeof vi.fn>).mockResolvedValue(
+      mockUser,
+    );
+    (getCandidateProfile as ReturnType<typeof vi.fn>).mockResolvedValue(
+      mockDetail,
+    );
+    mockMetrics.mockResolvedValue(mockMetricsResult);
   });
 
   describe("getCandidateProfileDetail", () => {
     it("returns profile detail and metrics for authenticated candidate", async () => {
-      vi.mocked(requireRoleCapability).mockResolvedValue(mockUser as any);
-      vi.mocked(getCandidateProfile).mockResolvedValue(mockDetail);
-      mockCount.mockResolvedValue(3);
-
       const result = await getCandidateProfileDetail();
 
-      expect(result.detail).toEqual(mockDetail);
-      expect(result.metrics.experienceCount).toBe(3);
-      expect(result.metrics.educationCount).toBe(3);
-      expect(result.metrics.skillCount).toBe(3);
-      expect(result.metrics.certificationCount).toBe(3);
-      expect(result.metrics.languageCount).toBe(3);
-      expect(result.metrics.applicationCount).toBe(3);
-      expect(requireRoleCapability).toHaveBeenCalledWith("candidate", "candidate.read.own");
+      expect(result.detail).toBe(mockDetail);
+      expect(result.metrics).toEqual(mockMetricsResult);
     });
 
     it("uses the authenticated user's id for profile lookups", async () => {
-      vi.mocked(requireRoleCapability).mockResolvedValue(mockUser as any);
-      vi.mocked(getCandidateProfile).mockResolvedValue(mockDetail);
-      mockCount.mockResolvedValue(0);
-
       await getCandidateProfileDetail();
 
-      expect(getCandidateProfile).toHaveBeenCalledWith({ candidateId: 1 });
+      expect(getCandidateProfile).toHaveBeenCalledWith({
+        candidateId: Number(mockUser.id),
+      });
+      expect(mockMetrics).toHaveBeenCalledWith({
+        candidateId: Number(mockUser.id),
+      });
     });
 
     it("returns zero-count metrics when there are no related records", async () => {
-      vi.mocked(requireRoleCapability).mockResolvedValue(mockUser as any);
-      vi.mocked(getCandidateProfile).mockResolvedValue(mockDetail);
-      mockCount.mockResolvedValue(0);
+      mockMetrics.mockResolvedValue({
+        experienceCount: 0,
+        educationCount: 0,
+        skillCount: 0,
+        certificationCount: 0,
+        languageCount: 0,
+        applicationCount: 0,
+      });
 
       const result = await getCandidateProfileDetail();
 
       expect(result.metrics.experienceCount).toBe(0);
       expect(result.metrics.educationCount).toBe(0);
       expect(result.metrics.skillCount).toBe(0);
-      expect(result.metrics.certificationCount).toBe(0);
-      expect(result.metrics.languageCount).toBe(0);
-      expect(result.metrics.applicationCount).toBe(0);
+    });
+
+    it("requires candidate.read.own capability", async () => {
+      await getCandidateProfileDetail();
+      expect(requireRoleCapability).toHaveBeenCalledWith(
+        "candidate",
+        "candidate.read.own",
+      );
     });
   });
 });
