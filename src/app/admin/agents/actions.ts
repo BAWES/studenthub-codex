@@ -7,7 +7,6 @@
 // agent heartbeat runs, issue completion statistics, and status.
 // ---------------------------------------------------------------------------
 
-// @ts-ignore - pg is a system-level module, not in project deps
 import { Pool } from "pg";
 
 const COMPANY_ID = "f56ea475-d349-431c-9a40-3111f1a49819";
