@@ -107,8 +107,7 @@ afterEach(() => {
 });
 
 // ── Import component ──────────────────────────────────────────
-import LandingContent from "../LandingContent";
-import type { LandingContentProps } from "../LandingContent";
+import LandingContent, { type LandingContentProps } from "../LandingContent";
 
 // ── Tests ──────────────────────────────────────────────────────
 
