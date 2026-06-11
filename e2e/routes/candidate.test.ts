@@ -32,7 +32,7 @@ test.describe("Candidate routes", () => {
       if (msg.type() === "error") consoleMessages.push(msg.text());
     });
     await page.goto(route);
-    await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("load");
     await expect(page.locator("body")).toBeVisible({ timeout: 15000 });
 
     const errors = consoleMessages.filter(
@@ -129,7 +129,7 @@ test.describe("Candidate routes", () => {
     ]);
     const page = await bContext.newPage();
     await page.goto("/candidate");
-    await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("load");
     await expect(page).not.toHaveURL("/candidate");
     await bContext.close();
     await browser.close();
@@ -148,7 +148,7 @@ test.describe("Candidate routes", () => {
     ]);
     const page = await bContext.newPage();
     await page.goto("/candidate");
-    await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("load");
     await expect(page).not.toHaveURL("/candidate");
     await bContext.close();
     await browser.close();
