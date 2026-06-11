@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
-import { getWorkspaceDataSchema } from "./schemas";
+import { getWorkspaceDataSchema, workspaceOverviewDataSchema } from "./schemas";
 import type {
   GetWorkspaceDataInput,
   WorkspaceOverviewData,
@@ -77,7 +77,7 @@ export async function getCompanyWorkspace(
     }),
   ]);
 
-  return {
+  const result: WorkspaceOverviewData = {
     contact: contact
       ? { contact_name: contact.contact_name, contact_email: contact.contact_email ?? "" }
       : null,
@@ -100,6 +100,17 @@ export async function getCompanyWorkspace(
       meta: `${request.request_status ?? "No status"} · ${request.request_number_of_employees ?? 0} seats`,
     })),
   };
+
+  // Output validation — log mismatches without throwing
+  const outputCheck = workspaceOverviewDataSchema.safeParse(result);
+  if (!outputCheck.success) {
+    console.error(
+      "[getCompanyWorkspace] Output validation failed:",
+      JSON.stringify(outputCheck.error.issues),
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
