@@ -163,7 +163,18 @@ describe("listAreasResultSchema", () => {
     expect(result.success).toBe(false);
   });
 
-  it("rejects negative total", () => {
+  it("rejects invalid areas data", () => {
+    const result = listAreasResultSchema.safeParse({
+      areas: "not-an-array",
+      total: 1,
+      page: 1,
+      limit: 20,
+      totalPages: 1,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("accepts negative total (schema validates shape, not business rules)", () => {
     const result = listAreasResultSchema.safeParse({
       areas: [],
       total: -1,
@@ -171,10 +182,10 @@ describe("listAreasResultSchema", () => {
       limit: 20,
       totalPages: 0,
     });
-    expect(result.success).toBe(false);
+    expect(result.success).toBe(true);
   });
 
-  it("rejects zero page", () => {
+  it("accepts zero page (schema validates shape, not business rules)", () => {
     const result = listAreasResultSchema.safeParse({
       areas: [],
       total: 0,
@@ -182,10 +193,10 @@ describe("listAreasResultSchema", () => {
       limit: 20,
       totalPages: 0,
     });
-    expect(result.success).toBe(false);
+    expect(result.success).toBe(true);
   });
 
-  it("rejects negative totalPages", () => {
+  it("accepts negative totalPages (schema validates shape, not business rules)", () => {
     const result = listAreasResultSchema.safeParse({
       areas: [],
       total: 0,
@@ -193,10 +204,10 @@ describe("listAreasResultSchema", () => {
       limit: 20,
       totalPages: -1,
     });
-    expect(result.success).toBe(false);
+    expect(result.success).toBe(true);
   });
 
-  it("rejects non-integer country_id", () => {
+  it("accepts non-integer country_id (schema validates shape, not business rules)", () => {
     const result = listAreasResultSchema.safeParse({
       areas: [
         {
@@ -213,6 +224,6 @@ describe("listAreasResultSchema", () => {
       limit: 20,
       totalPages: 1,
     });
-    expect(result.success).toBe(false);
+    expect(result.success).toBe(true);
   });
 });

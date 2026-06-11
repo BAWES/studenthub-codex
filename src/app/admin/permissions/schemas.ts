@@ -26,50 +26,34 @@ export const updatePermissionSectionSchema = z.object({
 });
 
 // ---------------------------------------------------------------------------
-// Output validation schemas
+// Types
 // ---------------------------------------------------------------------------
 
-/**
- * Schema for a single permission section detail.
- */
-export const permissionSectionDetailSchema = z.object({
-  permission_uuid: z.string(),
+const permissionSectionDetailSchema = z.object({
+  permission_uuid: z.string().min(1),
   section_name: z.string().nullable(),
   created_at: z.date(),
 });
 
-/**
- * Schema for listPermissionSections response.
- * Returns an array of permission section items.
- */
-export const listPermissionSectionsOutputSchema = z.array(
-  permissionSectionDetailSchema,
-);
+export const listPermissionSectionsOutputSchema = z.array(permissionSectionDetailSchema);
 
-/**
- * Schema for getPermissionSection response.
- * Returns a single permission section or null.
- */
-export const getPermissionSectionOutputSchema =
-  permissionSectionDetailSchema.nullable();
+export type ListPermissionSectionsOutput = z.infer<typeof listPermissionSectionsOutputSchema>;
 
-/**
- * Schema for createPermissionSection response.
- */
-export const createPermissionSectionOutputSchema = z.object({
-  permission_uuid: z.string(),
+export const getPermissionSectionOutputSchema = permissionSectionDetailSchema.nullable();
+
+export type GetPermissionSectionOutput = z.infer<typeof getPermissionSectionOutputSchema>;
+
+const permissionUuidSchema = z.object({
+  permission_uuid: z.string().min(1),
 });
 
-/**
- * Schema for updatePermissionSection response.
- */
-export const updatePermissionSectionOutputSchema = z.object({
-  permission_uuid: z.string(),
-});
+export const createPermissionSectionOutputSchema = permissionUuidSchema;
 
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
+export type CreatePermissionSectionOutput = z.infer<typeof createPermissionSectionOutputSchema>;
+
+export const updatePermissionSectionOutputSchema = permissionUuidSchema;
+
+export type UpdatePermissionSectionOutput = z.infer<typeof updatePermissionSectionOutputSchema>;
 
 export type CreatePermissionSectionInput = z.input<
   typeof createPermissionSectionSchema

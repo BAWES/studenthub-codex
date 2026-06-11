@@ -3,6 +3,13 @@
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
+import {
+  listSettingsSchema,
+  getSettingSchema,
+  updateSettingSchema,
+  listSettingsResultSchema,
+  updateSettingResultSchema,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -26,36 +33,15 @@ export type ListSettingsResult = {
   totalPages: number;
 };
 
-// ---------------------------------------------------------------------------
-// Schema
-// ---------------------------------------------------------------------------
-
-const listSettingsSchema = z.object({
-  code: z.string().optional(),
-  page: z.number().int().positive().optional(),
-  limit: z.number().int().min(1).max(100).optional(),
-});
-
-const getSettingSchema = z.object({
-  settingUuid: z.string().min(1, "Setting UUID is required"),
-});
-
 export type GetSettingInput = z.input<typeof getSettingSchema>;
-
-const updateSettingSchema = z.object({
-  settingUuid: z.string().min(1, "Setting UUID is required"),
-  value: z.string().nullable(),
-});
-
 export type UpdateSettingInput = z.input<typeof updateSettingSchema>;
-
 export type ListSettingsInput = z.input<typeof listSettingsSchema>;
 
 // ---------------------------------------------------------------------------
 // Exported schemas (for shared validation in tests)
 // ---------------------------------------------------------------------------
 
-export { listSettingsSchema, getSettingSchema, updateSettingSchema };
+export { listSettingsSchema, getSettingSchema, updateSettingSchema, listSettingsResultSchema, updateSettingResultSchema };
 
 // ---------------------------------------------------------------------------
 // Server actions
@@ -92,7 +78,7 @@ export async function listSettings(
     prisma.setting.count({ where: where as any }),
   ]);
 
-  return {
+  const result = {
     settings: settings.map((s) => ({
       ...s,
       serialized: s.serialized ?? false,
@@ -102,6 +88,17 @@ export async function listSettings(
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  // Output validation — log mismatches without throwing
+  const outputParsed = listSettingsResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/settings] listSettings output failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -189,10 +186,21 @@ export async function updateSetting(
       },
     });
 
-    return {
+    const result = {
       operation: "success",
       message: "Setting updated successfully",
     };
+
+    // Output validation — log mismatches without throwing
+    const outputParsed = updateSettingResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/settings] updateSetting output failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
   } catch (err) {
     return {
       operation: "error",
