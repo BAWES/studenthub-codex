@@ -1,64 +1,31 @@
 "use server";
 
-import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
+import {
+  listCompaniesSchema,
+  getCompanySchema,
+  listCompaniesResultSchema,
+  companyDetailResultSchema,
+  type ListCompaniesParams,
+  type GetCompanyParams,
+  type CompanyListItem,
+  type ListCompaniesResult,
+  type CompanyDetailResult,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
-// Types
+// Re-export schemas for shared validation (backward compatibility)
 // ---------------------------------------------------------------------------
 
-export type CompanyListItem = {
-  company_id: number;
-  company_name: string;
-  company_common_name_en: string | null;
-  company_common_name_ar: string | null;
-  company_email: string | null;
-  company_website: string | null;
-  company_logo: string | null;
-  commission: number | null;
-  total_candidate: number | null;
-  no_of_active_requests: number | null;
-  followup: boolean | null;
-  currency_code: string | null;
-  /** Present only in getCompany detail response */
-  company_description_en?: string | null;
-  company_description_ar?: string | null;
-  commercial_licence?: string | null;
-  company_hourly_rate?: number | null;
-  company_bonus_commission?: number | null;
-  parent_company_id?: number | null;
-  staff_id?: number | null;
-};
-
-export type CompanyDetailResult = CompanyListItem | null;
-
-export type ListCompaniesResult = {
-  items: CompanyListItem[];
-  total: number;
-  page: number;
-  pageSize: number;
-};
-
-// ---------------------------------------------------------------------------
-// Schemas
-// ---------------------------------------------------------------------------
-
-const listCompaniesSchema = z.object({
-  nameFilter: z.string().optional(),
-  status: z
-    .union([z.literal("active"), z.literal("inactive"), z.literal("")])
-    .optional(),
-  page: z.number().int().min(1).optional().default(1),
-  pageSize: z.number().int().min(1).max(100).optional().default(20),
-});
-
-const getCompanySchema = z.object({
-  companyId: z.number().int().positive("Company ID is required"),
-});
-
-export type ListCompaniesParams = z.input<typeof listCompaniesSchema>;
-export type GetCompanyParams = z.input<typeof getCompanySchema>;
+export { listCompaniesSchema, getCompanySchema } from "./schemas";
+export type {
+  ListCompaniesParams,
+  GetCompanyParams,
+  CompanyListItem,
+  ListCompaniesResult,
+  CompanyDetailResult,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Server Actions
@@ -119,7 +86,7 @@ export async function listCompanies(
     prisma.company.count({ where }),
   ]);
 
-  return {
+  const result = {
     items: companies.map((c) => ({
       company_id: c.company_id,
       company_name: c.company_name,
@@ -140,6 +107,17 @@ export async function listCompanies(
     page,
     pageSize,
   };
+
+  // Validate output shape
+  const outputParsed = listCompaniesResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/company] listCompanies output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -179,7 +157,7 @@ export async function getCompany(
 
   if (!company) return null;
 
-  return {
+  const result = {
     company_id: company.company_id,
     company_name: company.company_name,
     company_common_name_en: company.company_common_name_en,
@@ -205,4 +183,15 @@ export async function getCompany(
     parent_company_id: company.parent_company_id,
     staff_id: company.staff_id,
   };
+
+  // Validate output shape
+  const outputParsed = companyDetailResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/company] getCompany output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
