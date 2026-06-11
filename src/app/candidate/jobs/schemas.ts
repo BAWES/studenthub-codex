@@ -65,6 +65,10 @@ export type CandidateJobDetail = CandidateJobRow & {
   status: string | null;
   hasApplied: boolean;
   applicationStatus: string | null;
+  skillScore: number | null;
+  educationScore: number | null;
+  locationScore: number | null;
+  breakdown: string[];
 };
 
 export type ApplicationRow = {
