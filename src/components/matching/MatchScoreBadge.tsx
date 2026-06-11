@@ -2,10 +2,10 @@
 // MatchScoreBadge — color-coded match percentage indicator
 // ---------------------------------------------------------------------------
 // Shows a numeric score with a visual bar and color that reflects quality:
-//   90–100  → green (excellent)
-//   70–89   → teal  (strong)
-//   50–69   → amber (moderate)
-//    0–49   → red   (weak)
+//   75+     → gold  (strong)
+//   50–74   → green (moderate)
+//   25–49   → blue  (low)
+//    0–24   → gray  (weak)
 //   null    → gray  (not scored)
 // ---------------------------------------------------------------------------
 
@@ -19,25 +19,25 @@ type Props = {
 
 function scoreColor(score: number | null): string {
   if (score === null) return "var(--muted)";
-  if (score >= 90) return "#16a34a"; // green-600
-  if (score >= 70) return "#0d9488"; // teal-600
-  if (score >= 50) return "#d97706"; // amber-600
-  return "#dc2626"; // red-600
+  if (score >= 75) return "#eab308"; // gold-500 (yellow-500)
+  if (score >= 50) return "#16a34a"; // green-600
+  if (score >= 25) return "#2563eb"; // blue-600
+  return "var(--muted)"; // gray — weak
 }
 
 function scoreBgColor(score: number | null): string {
-  if (score === null) return "var(--muted)";
-  if (score >= 90) return "#dcfce7"; // green-50
-  if (score >= 70) return "#ccfbf1"; // teal-50
-  if (score >= 50) return "#fef3c7"; // amber-50
-  return "#fee2e2"; // red-50
+  if (score === null) return "transparent";
+  if (score >= 75) return "#fef9c3"; // gold-100
+  if (score >= 50) return "#dcfce7"; // green-50
+  if (score >= 25) return "#dbeafe"; // blue-50
+  return "transparent";
 }
 
 function scoreLabel(score: number | null): string {
   if (score === null) return "Not scored";
-  if (score >= 90) return "Excellent";
-  if (score >= 70) return "Strong match";
+  if (score >= 75) return "Strong match";
   if (score >= 50) return "Moderate";
+  if (score >= 25) return "Low";
   return "Weak";
 }
 
