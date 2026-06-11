@@ -89,3 +89,74 @@ export type ListInvitationsResult = {
   limit: number;
   totalPages: number;
 };
+
+// ---------------------------------------------------------------------------
+// Output validation schemas
+// ---------------------------------------------------------------------------
+
+export const requestListItemSchema = z.object({
+  request_uuid: z.string(),
+  company_id: z.number().int().nullable(),
+  contact_uuid: z.string().nullable(),
+  staff_id: z.number().int().nullable(),
+  request_position_type: z.number().int().nullable(),
+  request_position_title: z.string().nullable(),
+  request_job_description: z.string(),
+  request_compensation: z.string(),
+  request_number_of_employees: z.number().int().nullable(),
+  no_of_employees_per_story: z.number().int(),
+  request_location: z.string().nullable(),
+  request_additional_info: z.string().nullable(),
+  request_status: z.string().nullable(),
+  request_priority: z.number().int().nullable(),
+  gender: z.boolean(),
+  nationality_id: z.number().int().nullable(),
+  request_created_datetime: z.date(),
+  request_updated_datetime: z.date(),
+});
+
+export type RequestListItemOutput = z.output<typeof requestListItemSchema>;
+
+export const listRequestsResultSchema = z.object({
+  requests: z.array(requestListItemSchema),
+  total: z.number().int().nonnegative(),
+  page: z.number().int().positive(),
+  limit: z.number().int().positive(),
+  totalPages: z.number().int().nonnegative(),
+});
+
+export type ListRequestsResultOutput = z.output<typeof listRequestsResultSchema>;
+
+export const requestUuidResultSchema = z.object({
+  request_uuid: z.string(),
+});
+
+export type RequestUuidResultOutput = z.output<typeof requestUuidResultSchema>;
+
+export const requestDetailSchema = z.object({
+  request_uuid: z.string(),
+  company_id: z.number().int().nullable(),
+  contact_uuid: z.string().nullable(),
+  staff_id: z.number().int().nullable(),
+  request_created_by: z.number().int().nullable(),
+  request_updated_by: z.number().int().nullable(),
+  request_position_type: z.number().int().nullable(),
+  request_position_title: z.string().nullable(),
+  request_job_description: z.string(),
+  request_compensation: z.string(),
+  request_number_of_employees: z.number().int().nullable(),
+  no_of_employees_per_story: z.number().int(),
+  request_location: z.string().nullable(),
+  request_additional_info: z.string().nullable(),
+  request_status: z.string().nullable(),
+  request_feedback: z.string().nullable(),
+  request_priority: z.number().int().nullable(),
+  gender: z.boolean(),
+  nationality_id: z.number().int().nullable(),
+  our_fees: z.number().nullable(),
+  our_fees_unit: z.string().nullable(),
+  request_created_datetime: z.date(),
+  request_updated_datetime: z.date(),
+});
+
+export type RequestDetailOutput = z.output<typeof requestDetailSchema>;
