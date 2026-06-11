@@ -1,4 +1,4 @@
-import { test, expect, type BrowserContext, type Page } from "@playwright/test";
+import { test, expect, type Browser, type BrowserContext, type Page } from "@playwright/test";
 import { getFixtures, disconnectPrisma, type FixtureUser } from "./fixtures/auth";
 
 let company: FixtureUser;
@@ -23,13 +23,12 @@ test.describe("Employer job posting flow", () => {
    * Create an authenticated browser context for the company user.
    * Returns { context, page, errors } — caller must close context.
    */
-  async function companyContext(): Promise<{
+  async function companyContext(browser: Browser): Promise<{
     context: BrowserContext;
     page: Page;
     errors: string[];
     close: () => Promise<void>;
   }> {
-    const browser = await (await import("@playwright/test")).chromium.launch();
     const context = await browser.newContext();
     await context.addCookies([
       {
@@ -50,7 +49,6 @@ test.describe("Employer job posting flow", () => {
       errors,
       close: async () => {
         await context.close();
-        await browser.close();
       },
     };
   }
@@ -58,8 +56,8 @@ test.describe("Employer job posting flow", () => {
   /** Navigate with a cookie context for any role. */
   async function roleContext(
     role: FixtureUser,
+    browser: Browser,
   ): Promise<{ context: BrowserContext; page: Page; close: () => Promise<void> }> {
-    const browser = await (await import("@playwright/test")).chromium.launch();
     const context = await browser.newContext();
     await context.addCookies([
       {
@@ -75,7 +73,6 @@ test.describe("Employer job posting flow", () => {
       page,
       close: async () => {
         await context.close();
-        await browser.close();
       },
     };
   }
@@ -95,8 +92,8 @@ test.describe("Employer job posting flow", () => {
   // 1. Jobs list page (/employer/jobs)
   // ──────────────────────────────────────────────
 
-  test("1. Jobs list page renders with heading and metrics", async () => {
-    const ctx = await companyContext();
+  test("1. Jobs list page renders with heading and metrics", async ({ browser }) => {
+    const ctx = await companyContext(browser);
 
     await ctx.page.goto("/employer/jobs");
     await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
@@ -120,8 +117,8 @@ test.describe("Employer job posting flow", () => {
     await ctx.close();
   });
 
-  test("2. '+ New Job Posting' link navigates to /employer/jobs/new", async () => {
-    const ctx = await companyContext();
+  test("2. '+ New Job Posting' link navigates to /employer/jobs/new", async ({ browser }) => {
+    const ctx = await companyContext(browser);
 
     await ctx.page.goto("/employer/jobs");
     await ctx.page.waitForLoadState("load");
@@ -133,8 +130,8 @@ test.describe("Employer job posting flow", () => {
     await ctx.close();
   });
 
-  test("3. Staff user cannot access /employer/jobs", async () => {
-    const ctx = await roleContext(staff);
+  test("3. Staff user cannot access /employer/jobs", async ({ browser }) => {
+    const ctx = await roleContext(staff, browser);
 
     await ctx.page.goto("/employer/jobs");
 
@@ -147,8 +144,8 @@ test.describe("Employer job posting flow", () => {
   // 2. New job page (/employer/jobs/new)
   // ──────────────────────────────────────────────
 
-  test("4. New job form renders all fields", async () => {
-    const ctx = await companyContext();
+  test("4. New job form renders all fields", async ({ browser }) => {
+    const ctx = await companyContext(browser);
 
     await ctx.page.goto("/employer/jobs/new");
     await ctx.page.waitForLoadState("load");
@@ -174,8 +171,8 @@ test.describe("Employer job posting flow", () => {
     await ctx.close();
   });
 
-  test("5. New job form has correct field types and placeholders", async () => {
-    const ctx = await companyContext();
+  test("5. New job form has correct field types and placeholders", async ({ browser }) => {
+    const ctx = await companyContext(browser);
 
     await ctx.page.goto("/employer/jobs/new");
     await ctx.page.waitForLoadState("load");
@@ -213,8 +210,8 @@ test.describe("Employer job posting flow", () => {
   // 3. Console error / hydration check
   // ──────────────────────────────────────────────
 
-  test("6. All employer pages load without hydration or serialization errors", async () => {
-    const ctx = await companyContext();
+  test("6. All employer pages load without hydration or serialization errors", async ({ browser }) => {
+    const ctx = await companyContext(browser);
 
     const pages = ["/employer/jobs", "/employer/jobs/new"];
     for (const route of pages) {
@@ -232,8 +229,8 @@ test.describe("Employer job posting flow", () => {
   // 4. Navigation guard
   // ──────────────────────────────────────────────
 
-  test("7. Candidate user cannot access employer pages", async () => {
-    const ctx = await roleContext(candidateUser);
+  test("7. Candidate user cannot access employer pages", async ({ browser }) => {
+    const ctx = await roleContext(candidateUser, browser);
 
     await ctx.page.goto("/employer/jobs");
 

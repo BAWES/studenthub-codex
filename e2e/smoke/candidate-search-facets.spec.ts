@@ -31,6 +31,20 @@ test.describe("Candidate search facet filters", () => {
     return { context, page };
   }
 
+  async function staffPage(browser: import("@playwright/test").Browser) {
+    const context = await browser.newContext();
+    await context.addCookies([
+      {
+        name: "studenthub_next_session",
+        value: staffCookie,
+        domain: "127.0.0.1",
+        path: "/",
+      },
+    ]);
+    const page = await context.newPage();
+    return { context, page };
+  }
+
   test("facets are visible on admin candidate search page", async ({
     browser,
   }) => {
@@ -199,16 +213,10 @@ test.describe("Candidate search facet filters", () => {
       'text="No candidates match this search."',
     );
 
-    // One of these should be visible
-    try {
-      await expect(emptyState.or(noResultsText)).toBeVisible({
-        timeout: 15000,
-      });
-    } catch {
-      // Fallback: if the page loaded, mark as pass
-      // (on large prod data, even improbable queries may match)
-      await expect(page.locator("body")).toBeVisible({ timeout: 5000 });
-    }
+    // Verify empty state or no-results text is shown
+    await expect(emptyState.or(noResultsText)).toBeVisible({
+      timeout: 15000,
+    });
 
     await context.close();
   });
@@ -216,7 +224,7 @@ test.describe("Candidate search facet filters", () => {
   test("staff can filter candidates by assigned view then filter further", async ({
     browser,
   }) => {
-    const { context, page } = await adminPage(browser);
+    const { context, page } = await staffPage(browser);
     await page.goto("/staff/candidates");
 
     await expect(

@@ -174,7 +174,8 @@ for (const [role, routes] of Object.entries(ROUTE_MAP)) {
           // Other roles should be redirected away
           const currentUrl = ctx.page.url();
           const hasWrongUrl = currentUrl.includes(route);
-          // NOTE: Some cross-role redirects may go to login or the user's own hub
+          // Other roles should NOT be able to access this route
+          expect(hasWrongUrl).toBe(false);
           // The important thing is that they DON'T see the target content
           await ctx.close();
         }

@@ -102,10 +102,7 @@ test.describe("Admin critical flows - Payments / Compliance / Transfers / Agents
         // Fallback: check for any metric label text
         await expect(
           ctx.page.locator("text=Total Transactions").or(ctx.page.locator("text=This Month")).first(),
-        ).toBeVisible({ timeout: 5000 }).catch(() => {
-          // Metrics may load async — acceptable if they appear eventually
-          console.log("Payment metric cards not immediately visible (async load)");
-        });
+        ).toBeVisible({ timeout: 5000 });
       }
 
       // Data table or empty state renders
@@ -133,15 +130,13 @@ test.describe("Admin critical flows - Payments / Compliance / Transfers / Agents
         // Click the first payment row
         await rows.first().click();
 
-        // Wait briefly for the drawer / detail panel to appear
-        await ctx.page.waitForTimeout(1500);
-
-        // Verify some detail content appeared (drawer panel or detail section)
+        // Define the detail content locator and wait for drawer / detail panel to appear
         const detailContent = ctx.page
           .locator('[role="dialog"], [data-testid="payment-detail"], .payment-detail, [class*="drawer"], [class*="Drawer"]')
           .first();
+        await expect(detailContent).toBeVisible({ timeout: 10000 });
 
-        const detailVisible = await detailContent.isVisible().catch(() => false);
+        const detailVisible = await detailContent.isVisible();
         if (detailVisible) {
           console.log("Payment detail drawer opened successfully");
         } else {
@@ -233,7 +228,7 @@ test.describe("Admin critical flows - Payments / Compliance / Transfers / Agents
       const companyTab = ctx.page.locator('button:has-text("Companies")');
       if (await companyTab.isVisible().catch(() => false)) {
         await companyTab.click();
-        await ctx.page.waitForTimeout(1000);
+        await expect(ctx.page.locator("body")).toBeVisible({ timeout: 5000 });
       }
 
       // Try to click a compliance row to open the detail panel
@@ -242,7 +237,6 @@ test.describe("Admin critical flows - Payments / Compliance / Transfers / Agents
 
       if (rowCount > 0) {
         await rows.first().click();
-        await ctx.page.waitForTimeout(1500);
 
         // Verify some detail content appeared in the right panel
         const detailPanel = ctx.page
@@ -293,7 +287,6 @@ test.describe("Admin critical flows - Payments / Compliance / Transfers / Agents
         } else {
           // Click and see where we land
           await firstLink.click();
-          await ctx.page.waitForTimeout(1500);
         }
 
         await ctx.page.waitForLoadState("load");
