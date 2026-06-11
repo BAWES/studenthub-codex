@@ -38,7 +38,7 @@ export type LanguageItem = {
   candidate_language_id: number;
   language: string;
   proficiency: string;
-  candidate_language_created_at: Date;
+  candidate_language_created_at: Date | null;
 };
 
 export type LanguageDetailResponse<T = LanguageItem> =

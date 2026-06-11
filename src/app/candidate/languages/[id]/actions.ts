@@ -3,7 +3,8 @@
 // ---------------------------------------------------------------------------
 // Candidate Language [id] — server actions for the detail page
 // ---------------------------------------------------------------------------
-// Self-contained actions using Prisma directly with Zod validation.
+// Route-level wrappers that delegate to modules/candidates/languages for
+// viewing, editing, and deleting a single language entry.
 //
 // Actions:
 //   - getLanguage    — fetch a single language entry by ID
@@ -11,9 +12,12 @@
 //   - deleteLanguage — soft-delete a language entry
 // ---------------------------------------------------------------------------
 
-import { revalidatePath } from "next/cache";
-import { prisma } from "@/lib/prisma";
 import { requireRoleCapability } from "@/modules/auth/session";
+import {
+  getLanguage as moduleGetLanguage,
+  updateLanguage as moduleUpdateLanguage,
+  deleteLanguage as moduleDeleteLanguage,
+} from "@/modules/candidates/languages/actions";
 import {
   getLanguageSchema,
   updateLanguageSchema,
@@ -32,6 +36,7 @@ import type {
 /**
  * Get a single language entry by ID.
  * Only the owning candidate can view their own languages.
+ * Delegates to modules/candidates/languages.
  */
 export async function getLanguage(
   languageId: number,
@@ -44,15 +49,7 @@ export async function getLanguage(
     throw new Error(parsed.error.issues[0]?.message ?? "Invalid language ID");
   }
 
-  const row = await prisma.candidate_language.findFirst({
-    where: {
-      candidate_language_id: parsed.data.languageId,
-      candidate_id: candidateId,
-      deleted: 0,
-    },
-  });
-
-  return row;
+  return moduleGetLanguage({ candidateId, languageId: parsed.data.languageId });
 }
 
 // ---------------------------------------------------------------------------
@@ -62,6 +59,7 @@ export async function getLanguage(
 /**
  * Update a language entry (language name + proficiency).
  * Verifies ownership before mutating.
+ * Delegates to modules/candidates/languages.
  */
 export async function updateLanguage(
   input: UpdateLanguageInput,
@@ -77,32 +75,12 @@ export async function updateLanguage(
     };
   }
 
-  // Verify ownership
-  const existing = await prisma.candidate_language.findFirst({
-    where: {
-      candidate_language_id: parsed.data.languageId,
-      candidate_id: candidateId,
-      deleted: 0,
-    },
-    select: { candidate_language_id: true },
+  return moduleUpdateLanguage({
+    candidateId,
+    languageId: parsed.data.languageId,
+    language: parsed.data.language,
+    proficiency: parsed.data.proficiency,
   });
-
-  if (!existing) {
-    return { data: null, error: "Language entry not found or access denied" };
-  }
-
-  const updated = await prisma.candidate_language.update({
-    where: { candidate_language_id: parsed.data.languageId },
-    data: {
-      language: parsed.data.language,
-      proficiency: parsed.data.proficiency,
-    },
-  });
-
-  revalidatePath("/candidate/languages");
-  revalidatePath(`/candidate/languages/${parsed.data.languageId}`);
-
-  return { data: updated as unknown as LanguageItem, error: null };
 }
 
 // ---------------------------------------------------------------------------
@@ -112,6 +90,7 @@ export async function updateLanguage(
 /**
  * Soft-delete a language entry by setting deleted = 1.
  * Only the owning candidate can delete their own entries.
+ * Delegates to modules/candidates/languages.
  */
 export async function deleteLanguage(
   languageId: number,
@@ -123,30 +102,12 @@ export async function deleteLanguage(
   if (!parsed.success) {
     return {
       data: null,
-      error: parsed.error.issues[0]?.message ?? "Invalid input",
+      error: "Invalid language ID",
     };
   }
 
-  // Verify ownership
-  const existing = await prisma.candidate_language.findFirst({
-    where: {
-      candidate_language_id: parsed.data.languageId,
-      candidate_id: candidateId,
-      deleted: 0,
-    },
-    select: { candidate_language_id: true },
+  return moduleDeleteLanguage({
+    candidateId,
+    languageId: parsed.data.languageId,
   });
-
-  if (!existing) {
-    return { data: null, error: "Language entry not found or access denied" };
-  }
-
-  await prisma.candidate_language.update({
-    where: { candidate_language_id: parsed.data.languageId },
-    data: { deleted: 1 },
-  });
-
-  revalidatePath("/candidate/languages");
-
-  return { data: null, error: null };
 }

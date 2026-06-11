@@ -1,8 +1,18 @@
 "use server";
 
+// ---------------------------------------------------------------------------
+// Candidate Languages — server actions for the list/create page
+// ---------------------------------------------------------------------------
+// Provides language listing and creation for the /candidate/languages page.
+// Delegates all data access to modules/candidates/languages.
+// ---------------------------------------------------------------------------
+
 import { revalidatePath } from "next/cache";
-import { prisma } from "@/lib/prisma";
 import { requireRoleCapability } from "@/modules/auth/session";
+import {
+  listLanguages as moduleListLanguages,
+  createLanguage as moduleCreateLanguage,
+} from "@/modules/candidates/languages/actions";
 import {
   listLanguagesSchema,
   createLanguageSchema,
@@ -18,28 +28,12 @@ import type {
 export type { LanguageActionResult, LanguageItem };
 
 // ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-/** Map a Prisma candidate_language row to the API shape. */
-function toItem(
-  row: Awaited<ReturnType<typeof prisma.candidate_language.findFirst>>,
-): LanguageItem | null {
-  if (!row) return null;
-  return {
-    candidate_language_id: row.candidate_language_id,
-    language: row.language,
-    proficiency: row.proficiency,
-    candidate_language_created_at: row.candidate_language_created_at,
-  };
-}
-
-// ---------------------------------------------------------------------------
-// Server actions
+// Server actions — delegate to module-level implementations
 // ---------------------------------------------------------------------------
 
 /**
  * List language records for the current candidate (paginated).
+ * Delegates to modules/candidates/languages with the session's candidate ID.
  */
 export async function listCandidateLanguages(
   input: ListLanguagesInput = {},
@@ -54,23 +48,17 @@ export async function listCandidateLanguages(
   }
 
   const { page, limit } = parsed.data;
-  const skip = (page - 1) * limit;
 
-  const rows = await prisma.candidate_language.findMany({
-    where: {
-      candidate_id: Number(session.id),
-      deleted: 0,
-    },
-    orderBy: [{ candidate_language_created_at: "desc" }, { candidate_language_id: "desc" }],
-    skip,
-    take: limit,
+  return moduleListLanguages({
+    candidateId: Number(session.id),
+    page,
+    limit,
   });
-
-  return rows.map((r) => toItem(r)!);
 }
 
 /**
  * Create a new language record for the current candidate.
+ * Delegates to modules/candidates/languages with the session's candidate ID.
  */
 export async function createCandidateLanguage(
   data: CreateLanguageInput,
@@ -90,15 +78,13 @@ export async function createCandidateLanguage(
 
   const { language, proficiency } = parsed.data;
 
-  const created = await prisma.candidate_language.create({
-    data: {
-      candidate_id: Number(session.id),
-      language,
-      proficiency,
-    },
+  const result = await moduleCreateLanguage({
+    candidateId: Number(session.id),
+    language,
+    proficiency,
   });
 
   revalidatePath("/candidate/languages");
 
-  return { success: true, languageId: created.candidate_language_id };
+  return result;
 }

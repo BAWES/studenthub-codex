@@ -1,23 +1,15 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 // ---------------------------------------------------------------------------
-// Mocks — data layer & auth
+// Mocks — delegate to module actions (these now contain the real logic)
 // ---------------------------------------------------------------------------
 
-const mockFindMany = vi.fn();
-const mockCount = vi.fn();
-const mockFindFirst = vi.fn();
-const mockUpdate = vi.fn();
+const mockModuleListApplications = vi.fn();
+const mockModuleUpdateApplicationStatus = vi.fn();
 
-vi.mock("@/lib/prisma", () => ({
-  prisma: {
-    job_listing_application: {
-      findMany: mockFindMany,
-      count: mockCount,
-      findFirst: mockFindFirst,
-      update: mockUpdate,
-    },
-  },
+vi.mock("@/modules/candidates/applications/actions", () => ({
+  listApplications: mockModuleListApplications,
+  updateApplicationStatus: mockModuleUpdateApplicationStatus,
 }));
 
 vi.mock("@/modules/auth/session", () => ({
@@ -30,6 +22,7 @@ vi.mock("next/cache", () => ({
 
 // Must import after mocks are set up
 const { requireRoleCapability } = await import("@/modules/auth/session");
+const { revalidatePath } = await import("next/cache");
 const { listMyApplications, withdrawApplication } = await import("./actions");
 
 // Import schemas directly (no mock dependency)
@@ -53,47 +46,84 @@ describe("Candidate Applications actions", () => {
   });
 
   describe("listMyApplications", () => {
-    it("returns applications for authenticated candidate", async () => {
+    it("delegates to module listApplications with session candidateId", async () => {
       vi.mocked(requireRoleCapability).mockResolvedValue(mockUser as any);
-      mockFindMany.mockResolvedValue([
-        {
-          applicationId: 1,
-          jobListingId: 10,
-          status: "applied",
-          coverLetter: null,
-          createdAt: new Date("2026-06-01"),
-          updatedAt: new Date("2026-06-01"),
-          jobListing: {
-            title: "Software Engineer",
-            employer: { company_name: "Tech Corp" },
+      mockModuleListApplications.mockResolvedValue({
+        items: [
+          {
+            applicationId: 1,
+            jobListingId: 10,
+            jobTitle: "Software Engineer",
+            employerName: "Tech Corp",
+            status: "applied",
+            coverLetter: null,
+            createdAt: new Date("2026-06-01"),
+            updatedAt: new Date("2026-06-01"),
           },
-        },
-      ]);
-      mockCount.mockResolvedValue(1);
+        ],
+        total: 1,
+        page: 1,
+        pageSize: 20,
+      });
 
       const result = await listMyApplications({});
 
+      expect(mockModuleListApplications).toHaveBeenCalledWith({
+        candidateId: 1,
+        page: 1,
+        limit: 20,
+        status: undefined,
+      });
       expect(result.total).toBe(1);
       expect(result.applications[0].jobTitle).toBe("Software Engineer");
       expect(result.applications[0].employerName).toBe("Tech Corp");
       expect(requireRoleCapability).toHaveBeenCalledWith("candidate", "candidate.read.own");
     });
 
+    it("maps module shape { items, pageSize } → app router shape { applications, limit }", async () => {
+      vi.mocked(requireRoleCapability).mockResolvedValue(mockUser as any);
+      mockModuleListApplications.mockResolvedValue({
+        items: [
+          {
+            applicationId: 1,
+            jobListingId: 10,
+            jobTitle: "Engineer",
+            employerName: "Corp",
+            status: "applied",
+            coverLetter: null,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+        ],
+        total: 1,
+        page: 2,
+        pageSize: 10,
+      });
+
+      const result = await listMyApplications({ page: 2, limit: 10 });
+
+      expect(result.page).toBe(2);
+      expect(result.limit).toBe(10);
+      expect(result.applications).toHaveLength(1);
+    });
+
     it("filters by status when provided", async () => {
       vi.mocked(requireRoleCapability).mockResolvedValue(mockUser as any);
-      mockFindMany.mockResolvedValue([]);
-      mockCount.mockResolvedValue(0);
+      mockModuleListApplications.mockResolvedValue({ items: [], total: 0, page: 1, pageSize: 20 });
 
       await listMyApplications({ status: "withdrawn" });
 
-      const whereArg = mockFindMany.mock.calls[0][0]?.where;
-      expect(whereArg).toBeDefined();
+      expect(mockModuleListApplications).toHaveBeenCalledWith({
+        candidateId: 1,
+        page: 1,
+        limit: 20,
+        status: "withdrawn",
+      });
     });
 
-    it("returns empty list when no applications exist", async () => {
+    it("returns empty list when module returns empty", async () => {
       vi.mocked(requireRoleCapability).mockResolvedValue(mockUser as any);
-      mockFindMany.mockResolvedValue([]);
-      mockCount.mockResolvedValue(0);
+      mockModuleListApplications.mockResolvedValue({ items: [], total: 0, page: 1, pageSize: 20 });
 
       const result = await listMyApplications({});
 
@@ -103,8 +133,7 @@ describe("Candidate Applications actions", () => {
 
     it("supports pagination", async () => {
       vi.mocked(requireRoleCapability).mockResolvedValue(mockUser as any);
-      mockFindMany.mockResolvedValue([]);
-      mockCount.mockResolvedValue(0);
+      mockModuleListApplications.mockResolvedValue({ items: [], total: 0, page: 2, pageSize: 10 });
 
       const result = await listMyApplications({ page: 2, limit: 10 });
 
@@ -114,24 +143,29 @@ describe("Candidate Applications actions", () => {
   });
 
   describe("withdrawApplication", () => {
-    it("withdraws the application when owned by candidate", async () => {
+    it("delegates to module updateApplicationStatus with status=withdrawn", async () => {
       vi.mocked(requireRoleCapability).mockResolvedValue(mockUser as any);
-      mockFindFirst.mockResolvedValue({ applicationId: 1, candidateId: 1 });
+      mockModuleUpdateApplicationStatus.mockResolvedValue({
+        success: true,
+        applicationId: 1,
+      });
 
       const result = await withdrawApplication(1);
 
       expect(result.success).toBe(true);
-      expect(mockUpdate).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: { applicationId: 1 },
-          data: { status: "withdrawn" },
-        }),
-      );
+      expect(mockModuleUpdateApplicationStatus).toHaveBeenCalledWith({
+        applicationId: 1,
+        status: "withdrawn",
+      });
+      expect(revalidatePath).toHaveBeenCalledWith("/candidate/applications");
     });
 
-    it("returns error when application not found", async () => {
+    it("returns error when module returns failure", async () => {
       vi.mocked(requireRoleCapability).mockResolvedValue(mockUser as any);
-      mockFindFirst.mockResolvedValue(null);
+      mockModuleUpdateApplicationStatus.mockResolvedValue({
+        success: false,
+        error: "Application not found",
+      });
 
       const result = await withdrawApplication(999);
 
