@@ -62,7 +62,7 @@ export default function ComparisonSection({ persona }: ComparisonSectionProps) {
   const data = categories[active];
   const title =
     persona === "candidate"
-      ? "Why candidates choose StudentHub."
+      ? "Why students choose StudentHub."
       : "Why employers choose StudentHub.";
   const competitor = persona === "candidate" ? "Traditional job boards" : "Agencies & job boards";
 

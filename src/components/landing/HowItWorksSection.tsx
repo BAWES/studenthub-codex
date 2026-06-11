@@ -109,12 +109,12 @@ const candidateSteps = [
   },
   {
     icon: Sparkles,
-    title: "Get AI-matched",
+    title: "Get matched by recruiters",
     description:
-      "Our matching engine finds roles that fit your profile. Employers discover you through smart filters and staff-curated recommendations.",
-    color: "#2563eb",
+      "Our staff recruiters review your profile and invite you to roles that fit. No need to search — the right opportunities come to you.",
+    color: "var(--sh-coral)",
     gradient:
-      "radial-gradient(ellipse at 50% 0%, color-mix(in srgb, #2563eb 10%, transparent), transparent 70%)",
+      "radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--sh-coral) 10%, transparent), transparent 70%)",
   },
   {
     icon: Briefcase,
@@ -132,25 +132,25 @@ const employerSteps = [
     icon: Building2,
     title: "Set up your account",
     description:
-      "Create your company profile in minutes. Post openings and our staff recruiters start matching you with vetted candidates.",
+      "Create your company profile in minutes. Post openings and our staff recruiters start matching you with vetted students.",
     color: "var(--sh-coral)",
     gradient:
       "radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--sh-coral) 10%, transparent), transparent 70%)",
   },
   {
     icon: Search,
-    title: "Discover candidates",
+    title: "Discover students",
     description:
-      "Our AI matching engine and recruitment team work together to find the best-fit candidates for your roles.",
-    color: "#2563eb",
+      "Our recruitment team and matching tools work together to find the best-fit students for your roles.",
+    color: "var(--sh-coral)",
     gradient:
-      "radial-gradient(ellipse at 50% 0%, color-mix(in srgb, #2563eb 10%, transparent), transparent 70%)",
+      "radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--sh-coral) 10%, transparent), transparent 70%)",
   },
   {
     icon: ClipboardCheck,
     title: "Hire and manage",
     description:
-      "Review candidates, manage timesheets, approve transfers, and track compliance — all in one dashboard.",
+      "Review students, manage timesheets, approve transfers, and track compliance — all in one dashboard.",
     color: "var(--success)",
     gradient:
       "radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--success) 10%, transparent), transparent 70%)",
@@ -167,7 +167,7 @@ export default function HowItWorksSection({ forEmployer = false }: HowItWorksSec
     ? "From posting to placement in three steps."
     : "From profile to placement in three steps.";
   const body = forEmployer
-    ? "Post openings, review AI-matched candidates, and manage your team — all on one platform."
+    ? "Post openings, review matched students, and manage your team — all on one platform."
     : "Create a profile that works for you. Our system handles the rest.";
 
   return (
@@ -207,15 +207,11 @@ export default function HowItWorksSection({ forEmployer = false }: HowItWorksSec
           style={{
             background: `linear-gradient(90deg, 
               color-mix(in srgb, var(--sh-coral) 10%, transparent) 0%, 
-              var(--sh-coral) 15%, 
-              var(--sh-coral) 35%, 
-              color-mix(in srgb, var(--sh-coral) 10%, transparent) 50%,
-              color-mix(in srgb, #2563eb 10%, transparent) 50%,
-              #2563eb 65%,
-              #2563eb 85%,
-              color-mix(in srgb, var(--success) 10%, transparent) 100%
+              var(--sh-coral) 25%, 
+              var(--sh-coral) 75%, 
+              color-mix(in srgb, var(--sh-coral) 10%, transparent) 100%
             )`,
-            opacity: 0.3,
+            opacity: 0.2,
           }}
           aria-hidden="true"
         />

@@ -24,7 +24,7 @@ export default function CTASection({ persona }: CTASectionProps) {
             aria-hidden="true"
             style={{
               background:
-                "radial-gradient(ellipse at 30% 0%, color-mix(in srgb, var(--sh-coral) 14%, transparent), transparent 60%), radial-gradient(ellipse at 70% 100%, color-mix(in srgb, #2563eb 10%, transparent), transparent 50%)",
+                "radial-gradient(ellipse at 30% 0%, color-mix(in srgb, var(--sh-coral) 14%, transparent), transparent 60%), radial-gradient(ellipse at 70% 100%, color-mix(in srgb, var(--sh-coral) 10%, transparent), transparent 50%)",
             }}
           />
 
@@ -63,7 +63,7 @@ export default function CTASection({ persona }: CTASectionProps) {
 
             <p className="text-sm mb-6 max-w-md mx-auto" style={{ color: "var(--muted)" }}>
               {persona === "company"
-                ? "Set up in under 5 minutes and get matched with vetted candidates by our recruitment team."
+                ? "Set up in under 5 minutes and get matched with vetted students by our recruitment team."
                 : "Create your free profile in 3 minutes. No CV required. Our staff recruiters do the matching."}
             </p>
 
@@ -85,7 +85,7 @@ export default function CTASection({ persona }: CTASectionProps) {
 
             <p className="text-xs mt-3" style={{ color: "var(--muted)" }}>
               {persona === "company"
-                ? "No agency fees \u00b7 AI-matched candidates \u00b7 Staff-supported"
+                ? "No agency fees \u00b7 Staff-matched \u00b7 Supported by recruiters"
                 : "Free \u00b7 3 minutes \u00b7 No CV required"}
             </p>
           </div>

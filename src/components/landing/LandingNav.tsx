@@ -4,7 +4,6 @@ import { useState, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { GraduationCap, Building2, Menu, X, ArrowRight } from "lucide-react";
-import { ThemeToggle } from "@/modules/theme/ThemeToggle";
 
 export type Persona = "candidate" | "company";
 
@@ -15,8 +14,8 @@ interface LandingNavProps {
 }
 
 const tabs: { value: Persona; label: string; icon: typeof GraduationCap }[] = [
-  { value: "candidate", label: "Candidate", icon: GraduationCap },
-  { value: "company", label: "Company", icon: Building2 },
+  { value: "candidate", label: "Students", icon: GraduationCap },
+  { value: "company", label: "Companies", icon: Building2 },
 ];
 
 export default function LandingNav({ session, persona, onPersonaChange }: LandingNavProps) {
@@ -25,9 +24,9 @@ export default function LandingNav({ session, persona, onPersonaChange }: Landin
   return (
     <nav className="sticky top-0 z-50" aria-label="StudentHub public navigation">
       <div
-        className="border-b backdrop-blur-xl"
+        className="border-b"
         style={{
-          backgroundColor: "color-mix(in srgb, var(--surface) 78%, transparent)",
+          backgroundColor: "var(--card)",
           borderColor: "var(--border)",
         }}
       >
@@ -78,7 +77,6 @@ export default function LandingNav({ session, persona, onPersonaChange }: Landin
             </div>
 
             <div className="flex items-center gap-3 ml-auto">
-              <ThemeToggle />
               {session ? (
                 <Link
                   href="/app"
