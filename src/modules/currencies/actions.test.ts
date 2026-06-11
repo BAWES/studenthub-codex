@@ -1,18 +1,16 @@
 import { describe, it, expect } from "vitest";
-import { z } from "zod";
+
+import {
+  listCurrenciesSchema,
+  listCurrenciesOutputSchema,
+  getCurrencySchema,
+  getCurrencyOutputSchema,
+  currencyListItemSchema,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
-// Pure logic: currency list schema validation
-//
-// The listCurrencies action uses this schema internally. Testing it
-// separately avoids mocking "use server" dependencies (prisma, session, etc.).
+// Input schema: listCurrenciesSchema
 // ---------------------------------------------------------------------------
-
-const listCurrenciesSchema = z.object({
-  page: z.number().int().positive().optional(),
-  limit: z.number().int().min(1).max(100).optional(),
-  status: z.boolean().optional(),
-});
 
 describe("listCurrenciesSchema", () => {
   it("accepts empty params (no pagination)", () => {
@@ -54,30 +52,41 @@ describe("listCurrenciesSchema", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Return type shape
+// Input schema: getCurrencySchema
 // ---------------------------------------------------------------------------
 
-type CurrencyListItem = {
-  currency_id: number;
-  title: string;
-  code: string;
-  currency_symbol: string | null;
-  rate: number | null;
-  sort_order: number | null;
-  status: boolean | null;
-};
+describe("getCurrencySchema", () => {
+  it("accepts a valid currency id", () => {
+    const result = getCurrencySchema.safeParse({ id: 1 });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.id).toBe(1);
+    }
+  });
 
-type ListCurrenciesResult = {
-  currencies: CurrencyListItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
+  it("rejects zero id", () => {
+    const result = getCurrencySchema.safeParse({ id: 0 });
+    expect(result.success).toBe(false);
+  });
 
-describe("CurrencyListItem shape", () => {
-  it("defines the expected fields", () => {
-    const mock: CurrencyListItem = {
+  it("rejects negative id", () => {
+    const result = getCurrencySchema.safeParse({ id: -1 });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects non-numeric id", () => {
+    const result = getCurrencySchema.safeParse({ id: "abc" });
+    expect(result.success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output schema: currencyListItemSchema
+// ---------------------------------------------------------------------------
+
+describe("currencyListItemSchema", () => {
+  it("accepts a valid currency item", () => {
+    const result = currencyListItemSchema.safeParse({
       currency_id: 1,
       title: "Kuwaiti Dinar",
       code: "KWD",
@@ -85,28 +94,130 @@ describe("CurrencyListItem shape", () => {
       rate: 3.29,
       sort_order: 1,
       status: true,
-    };
-    expect(mock.currency_id).toBe(1);
-    expect(mock.title).toBe("Kuwaiti Dinar");
-    expect(mock.code).toBe("KWD");
-    expect(mock.currency_symbol).toBe("د.ك");
-    expect(mock.rate).toBe(3.29);
-    expect(mock.sort_order).toBe(1);
-    expect(mock.status).toBe(true);
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts nullable fields", () => {
+    const result = currencyListItemSchema.safeParse({
+      currency_id: 2,
+      title: "US Dollar",
+      code: "USD",
+      currency_symbol: null,
+      rate: null,
+      sort_order: null,
+      status: null,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects missing title", () => {
+    const result = currencyListItemSchema.safeParse({
+      currency_id: 1,
+      code: "KWD",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects wrong type for currency_id", () => {
+    const result = currencyListItemSchema.safeParse({
+      currency_id: "abc",
+      title: "KWD",
+      code: "KWD",
+      currency_symbol: null,
+      rate: null,
+      sort_order: null,
+      status: null,
+    });
+    expect(result.success).toBe(false);
   });
 });
 
-describe("ListCurrenciesResult shape", () => {
-  it("accepts a valid result set", () => {
-    const result: ListCurrenciesResult = {
+// ---------------------------------------------------------------------------
+// Output schema: listCurrenciesOutputSchema
+// ---------------------------------------------------------------------------
+
+describe("listCurrenciesOutputSchema", () => {
+  it("accepts a valid result with currencies", () => {
+    const result = listCurrenciesOutputSchema.safeParse({
+      currencies: [
+        {
+          currency_id: 1,
+          title: "KWD",
+          code: "KWD",
+          currency_symbol: "د.ك",
+          rate: 3.29,
+          sort_order: 1,
+          status: true,
+        },
+      ],
+      total: 1,
+      page: 1,
+      limit: 20,
+      totalPages: 1,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts a valid empty result", () => {
+    const result = listCurrenciesOutputSchema.safeParse({
       currencies: [],
       total: 0,
       page: 1,
       limit: 20,
       totalPages: 0,
-    };
-    expect(result.total).toBe(0);
-    expect(result.currencies).toHaveLength(0);
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects missing currencies field", () => {
+    const result = listCurrenciesOutputSchema.safeParse({
+      total: 0,
+      page: 1,
+      limit: 20,
+      totalPages: 0,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects non-array currencies", () => {
+    const result = listCurrenciesOutputSchema.safeParse({
+      currencies: "not-an-array",
+      total: 0,
+      page: 1,
+      limit: 20,
+      totalPages: 0,
+    });
+    expect(result.success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output schema: getCurrencyOutputSchema (nullable CurrencyListItem)
+// ---------------------------------------------------------------------------
+
+describe("getCurrencyOutputSchema", () => {
+  it("accepts a valid currency item", () => {
+    const result = getCurrencyOutputSchema.safeParse({
+      currency_id: 1,
+      title: "KWD",
+      code: "KWD",
+      currency_symbol: null,
+      rate: null,
+      sort_order: null,
+      status: true,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts null (currency not found)", () => {
+    const result = getCurrencyOutputSchema.safeParse(null);
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects undefined", () => {
+    const result = getCurrencyOutputSchema.safeParse(undefined);
+    expect(result.success).toBe(false);
   });
 });
 
@@ -136,38 +247,5 @@ describe("buildCurrencyListFilter", () => {
   it("filters by inactive status", () => {
     const result = buildCurrencyListFilter(false);
     expect(result).toEqual({ status: false });
-  });
-});
-
-// ---------------------------------------------------------------------------
-// getCurrency schema validation
-// ---------------------------------------------------------------------------
-
-const getCurrencySchema = z.object({
-  id: z.number().int().positive(),
-});
-
-describe("getCurrencySchema", () => {
-  it("accepts a valid currency id", () => {
-    const result = getCurrencySchema.safeParse({ id: 1 });
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.id).toBe(1);
-    }
-  });
-
-  it("rejects zero id", () => {
-    const result = getCurrencySchema.safeParse({ id: 0 });
-    expect(result.success).toBe(false);
-  });
-
-  it("rejects negative id", () => {
-    const result = getCurrencySchema.safeParse({ id: -1 });
-    expect(result.success).toBe(false);
-  });
-
-  it("rejects non-numeric id", () => {
-    const result = getCurrencySchema.safeParse({ id: "abc" });
-    expect(result.success).toBe(false);
   });
 });

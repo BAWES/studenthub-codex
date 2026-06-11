@@ -5,4 +5,4 @@ export type {
   GetCurrencyParams,
   CurrencyListItem,
   ListCurrenciesResult,
-} from "./actions";
+} from "./schemas";

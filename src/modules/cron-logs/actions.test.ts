@@ -1,6 +1,13 @@
 import { describe, it, expect } from "vitest";
-import { listCronLogsSchema, getCronLogSchema } from "./actions";
-import type { CronLogItem, ListCronLogsResult } from "./actions";
+import {
+  listCronLogsSchema,
+  getCronLogSchema,
+  cronLogItemSchema,
+  listCronLogsResultSchema,
+  getCronLogResultSchema,
+  type CronLogItem,
+  type ListCronLogsResult,
+} from "./schemas";
 
 describe("listCronLogsSchema", () => {
   it("accepts empty params", () => {
@@ -57,6 +64,101 @@ describe("getCronLogSchema", () => {
 
   it("rejects string id", () => {
     expect(getCronLogSchema.safeParse({ id: "abc" }).success).toBe(false);
+  });
+});
+
+describe("cronLogItemSchema (output)", () => {
+  it("accepts a valid cron log item", () => {
+    const r = cronLogItemSchema.safeParse({
+      id: 1,
+      task: "daily-summary",
+      last_ran_at: new Date("2026-06-08T10:00:00.000Z"),
+      last_output: "Completed successfully",
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts null values for optional fields", () => {
+    const r = cronLogItemSchema.safeParse({
+      id: 2,
+      task: "cleanup",
+      last_ran_at: null,
+      last_output: null,
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects missing id", () => {
+    expect(
+      cronLogItemSchema.safeParse({
+        task: "test",
+        last_ran_at: null,
+        last_output: null,
+      }).success,
+    ).toBe(false);
+  });
+});
+
+describe("listCronLogsResultSchema (output)", () => {
+  it("accepts a valid result shape", () => {
+    const r = listCronLogsResultSchema.safeParse({
+      cronLogs: [],
+      total: 0,
+      page: 1,
+      limit: 20,
+      totalPages: 0,
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects negative total", () => {
+    expect(
+      listCronLogsResultSchema.safeParse({
+        cronLogs: [],
+        total: -1,
+        page: 1,
+        limit: 20,
+        totalPages: 0,
+      }).success,
+    ).toBe(false);
+  });
+
+  it("rejects non-positive page", () => {
+    expect(
+      listCronLogsResultSchema.safeParse({
+        cronLogs: [],
+        total: 0,
+        page: 0,
+        limit: 20,
+        totalPages: 0,
+      }).success,
+    ).toBe(false);
+  });
+});
+
+describe("getCronLogResultSchema (output)", () => {
+  it("accepts a valid cron log item", () => {
+    const r = getCronLogResultSchema.safeParse({
+      id: 1,
+      task: "daily-summary",
+      last_ran_at: new Date("2026-06-08T10:00:00.000Z"),
+      last_output: "Completed successfully",
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts null (not found)", () => {
+    expect(getCronLogResultSchema.safeParse(null).success).toBe(true);
+  });
+
+  it("rejects missing required fields", () => {
+    expect(
+      getCronLogResultSchema.safeParse({
+        task: "orphan",
+        last_ran_at: null,
+        last_output: null,
+      }).success,
+    ).toBe(false);
   });
 });
 

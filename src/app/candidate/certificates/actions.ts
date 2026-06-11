@@ -14,7 +14,7 @@ import {
 import {
   type ListCertificatesResult,
   type CertificateListItem,
-} from "@/modules/certificates/actions";
+} from "@/modules/certificates/schemas";
 
 // ---------------------------------------------------------------------------
 // Types

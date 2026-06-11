@@ -5,61 +5,22 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
 
-// ---------------------------------------------------------------------------
-// Schemas
-// ---------------------------------------------------------------------------
-
-const listQuestionsSchema = z.object({
-  page: z.coerce.number().int().positive().optional().default(1),
-  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
-});
-
-const createAbsenceSchema = z.object({
-  from_date: z.string().min(1, "From date is required"),
-  to_date: z.string().min(1, "To date is required"),
-  note: z.string().optional(),
-  type: z.string().min(1, "Type is required"),
-});
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export type DailyStandupQuestionItem = {
-  question_uuid: string;
-  question: string | null;
-};
-
-export type ListQuestionsResult = {
-  questions: DailyStandupQuestionItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
-
-export type WorkSessionItem = {
-  work_session_uuid: string;
-  staff_id: number | null;
-  total_minutes: number | null;
-  created_at: string | null;
-  updated_at: string | null;
-};
-
-export type LeaveItem = {
-  staff_leave_uuid: string;
-  staff_id: number | null;
-  from_date: string | null;
-  to_date: string | null;
-  note: string | null;
-  category: string | null;
-  status: number | null;
-};
-
-export type GetSessionResult = {
-  session: WorkSessionItem | null;
-  leave: LeaveItem | null;
-};
+import {
+  listQuestionsSchema,
+  createAbsenceSchema,
+  dailyStandupQuestionItemSchema,
+  listQuestionsResultSchema,
+  workSessionItemSchema,
+  leaveItemSchema,
+  getSessionResultSchema,
+  createAbsenceResultSchema,
+  type DailyStandupQuestionItem,
+  type ListQuestionsResult,
+  type WorkSessionItem,
+  type LeaveItem,
+  type GetSessionResult,
+  type CreateAbsenceResult,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // listQuestions
@@ -99,7 +60,7 @@ export async function listQuestions(
     prisma.daily_standup_question.count(),
   ]);
 
-  return {
+  const result: ListQuestionsResult = {
     questions: questions.map((q) => ({
       question_uuid: q.question_uuid,
       question: q.question ?? null,
@@ -109,6 +70,16 @@ export async function listQuestions(
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  const outputParsed = listQuestionsResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/daily-standup] listQuestions output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -125,7 +96,17 @@ export async function getSession(): Promise<GetSessionResult> {
   const session = await getActiveSession();
   const leave = await getTodayLeave();
 
-  return { session, leave };
+  const result: GetSessionResult = { session, leave };
+
+  const outputParsed = getSessionResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/daily-standup] getSession output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -138,7 +119,7 @@ export async function getSession(): Promise<GetSessionResult> {
  */
 export async function createAbsence(
   data: z.input<typeof createAbsenceSchema>,
-): Promise<{ staff_leave_uuid: string }> {
+): Promise<CreateAbsenceResult> {
   await requireCapability("staff_leave.write");
 
   const parsed = createAbsenceSchema.safeParse(data);
@@ -160,7 +141,19 @@ export async function createAbsence(
     } as any,
   });
 
-  return { staff_leave_uuid: leave.staff_leave_uuid };
+  const result: CreateAbsenceResult = {
+    staff_leave_uuid: leave.staff_leave_uuid,
+  };
+
+  const outputParsed = createAbsenceResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/daily-standup] createAbsence output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------

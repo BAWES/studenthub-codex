@@ -4,63 +4,22 @@ import crypto from "node:crypto";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
-
-// ---------------------------------------------------------------------------
-// Schemas
-// ---------------------------------------------------------------------------
-
-const listCandidateLinksSchema = z.object({
-  candidateId: z.coerce.number().int().positive("Candidate ID must be a positive integer"),
-  page: z.coerce.number().int().positive().optional().default(1),
-  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
-});
-
-const getCandidateLinkSchema = z.object({
-  clUuid: z.string().min(1, "Link UUID is required"),
-});
-
-const createCandidateLinkSchema = z.object({
-  candidateId: z.coerce.number().int().positive("Candidate ID must be a positive integer"),
-  title: z.string().min(1, "Title is required").max(255),
-  url: z.string().min(1, "URL is required").max(255),
-});
-
-const updateCandidateLinkSchema = z.object({
-  clUuid: z.string().min(1, "Link UUID is required"),
-  title: z.string().min(1, "Title is required").max(255),
-  url: z.string().min(1, "URL is required").max(255),
-});
-
-const deleteCandidateLinkSchema = z.object({
-  clUuid: z.string().min(1, "Link UUID is required"),
-});
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export type ListCandidateLinksParams = z.input<typeof listCandidateLinksSchema>;
-export type GetCandidateLinkParams = z.input<typeof getCandidateLinkSchema>;
-export type CreateCandidateLinkParams = z.input<typeof createCandidateLinkSchema>;
-export type UpdateCandidateLinkParams = z.input<typeof updateCandidateLinkSchema>;
-export type DeleteCandidateLinkParams = z.input<typeof deleteCandidateLinkSchema>;
-
-export type CandidateLinkItem = {
-  cl_uuid: string;
-  candidate_id: number;
-  title: string;
-  url: string;
-  created_at: Date | null;
-  updated_at: Date | null;
-};
-
-export type ListCandidateLinksResult = {
-  links: CandidateLinkItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
+import {
+  candidateLinkItemSchema,
+  listCandidateLinksResultSchema,
+  listCandidateLinksSchema,
+  getCandidateLinkSchema,
+  createCandidateLinkSchema,
+  updateCandidateLinkSchema,
+  deleteCandidateLinkSchema,
+  type CandidateLinkItem,
+  type ListCandidateLinksResult,
+  type ListCandidateLinksParams,
+  type GetCandidateLinkParams,
+  type CreateCandidateLinkParams,
+  type UpdateCandidateLinkParams,
+  type DeleteCandidateLinkParams,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // listCandidateLinks
@@ -116,13 +75,23 @@ export async function listCandidateLinks(
     prisma.candidate_link.count({ where }),
   ]);
 
-  return {
+  const result: ListCandidateLinksResult = {
     links: links as CandidateLinkItem[],
     total,
     page,
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  const outputParsed = listCandidateLinksResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/candidate-links] listCandidateLinks output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -161,7 +130,17 @@ export async function getCandidateLink(params: GetCandidateLinkParams): Promise<
     throw new Error(`Candidate link with UUID ${clUuid} not found`);
   }
 
-  return link as CandidateLinkItem;
+  const result = link as CandidateLinkItem;
+
+  const outputParsed = candidateLinkItemSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/candidate-links] getCandidateLink output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -206,7 +185,17 @@ export async function createCandidateLink(params: CreateCandidateLinkParams): Pr
     },
   });
 
-  return link as CandidateLinkItem;
+  const result = link as CandidateLinkItem;
+
+  const outputParsed = candidateLinkItemSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/candidate-links] createCandidateLink output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -256,7 +245,17 @@ export async function updateCandidateLink(params: UpdateCandidateLinkParams): Pr
     },
   });
 
-  return updated as CandidateLinkItem;
+  const result = updated as CandidateLinkItem;
+
+  const outputParsed = candidateLinkItemSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/candidate-links] updateCandidateLink output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------

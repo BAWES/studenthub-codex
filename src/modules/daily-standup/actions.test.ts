@@ -1,66 +1,24 @@
 import { describe, it, expect } from "vitest";
-import { z } from "zod";
+
+import {
+  listQuestionsSchema,
+  createAbsenceSchema,
+  dailyStandupQuestionItemSchema,
+  listQuestionsResultSchema,
+  workSessionItemSchema,
+  leaveItemSchema,
+  getSessionResultSchema,
+  createAbsenceResultSchema,
+  type DailyStandupQuestionItem,
+  type ListQuestionsResult,
+  type WorkSessionItem,
+  type LeaveItem,
+  type GetSessionResult,
+  type CreateAbsenceResult,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
-// Schemas (duplicated from actions.ts for pure-unit testing)
-// ---------------------------------------------------------------------------
-
-const listQuestionsSchema = z.object({
-  page: z.coerce.number().int().positive().optional().default(1),
-  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
-});
-
-const getSessionSchema = z.object({});
-
-const createAbsenceSchema = z.object({
-  from_date: z.string().min(1, "From date is required"),
-  to_date: z.string().min(1, "To date is required"),
-  note: z.string().optional(),
-  type: z.string().min(1, "Type is required"),
-});
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-type DailyStandupQuestionItem = {
-  question_uuid: string;
-  question: string | null;
-};
-
-type ListQuestionsResult = {
-  questions: DailyStandupQuestionItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
-
-type WorkSessionItem = {
-  work_session_uuid: string;
-  staff_id: number | null;
-  total_minutes: number | null;
-  created_at: string | null;
-  updated_at: string | null;
-};
-
-type LeaveItem = {
-  staff_leave_uuid: string;
-  staff_id: number | null;
-  from_date: string | null;
-  to_date: string | null;
-  note: string | null;
-  category: string | null;
-  status: number | null;
-};
-
-type GetSessionResult = {
-  session: WorkSessionItem | null;
-  leave: LeaveItem | null;
-};
-
-// ---------------------------------------------------------------------------
-// Tests
+// Tests: input schemas
 // ---------------------------------------------------------------------------
 
 describe("listQuestionsSchema", () => {
@@ -159,52 +117,163 @@ describe("createAbsenceSchema", () => {
   });
 });
 
-describe("DailyStandupQuestionItem shape", () => {
-  it("defines the expected fields", () => {
-    const mock: DailyStandupQuestionItem = {
+// ---------------------------------------------------------------------------
+// Tests: output schemas
+// ---------------------------------------------------------------------------
+
+describe("dailyStandupQuestionItemSchema", () => {
+  it("accepts a valid question item", () => {
+    const result = dailyStandupQuestionItemSchema.safeParse({
       question_uuid: "q_abc123",
       question: "What did you work on yesterday?",
-    };
-    expect(mock.question_uuid).toBe("q_abc123");
-    expect(mock.question).toBe("What did you work on yesterday?");
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts null question", () => {
+    const result = dailyStandupQuestionItemSchema.safeParse({
+      question_uuid: "q_abc123",
+      question: null,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects missing question_uuid", () => {
+    const result = dailyStandupQuestionItemSchema.safeParse({
+      question: "test",
+    });
+    expect(result.success).toBe(false);
   });
 });
 
-describe("ListQuestionsResult shape", () => {
+describe("listQuestionsResultSchema", () => {
   it("accepts an empty result set", () => {
-    const result: ListQuestionsResult = {
+    const result = listQuestionsResultSchema.safeParse({
       questions: [],
       total: 0,
       page: 1,
       limit: 20,
       totalPages: 0,
-    };
-    expect(result.total).toBe(0);
-    expect(result.questions).toHaveLength(0);
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts a populated result set", () => {
+    const result = listQuestionsResultSchema.safeParse({
+      questions: [
+        { question_uuid: "q_1", question: "Yesterday?" },
+        { question_uuid: "q_2", question: "Today?" },
+      ],
+      total: 2,
+      page: 1,
+      limit: 20,
+      totalPages: 1,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects missing fields", () => {
+    const result = listQuestionsResultSchema.safeParse({
+      questions: [],
+      total: 0,
+    });
+    expect(result.success).toBe(false);
   });
 });
 
-describe("WorkSessionItem shape", () => {
-  it("defines the expected fields", () => {
-    const mock: WorkSessionItem = {
+describe("workSessionItemSchema", () => {
+  it("accepts a valid work session item", () => {
+    const result = workSessionItemSchema.safeParse({
       work_session_uuid: "ws_abc123",
       staff_id: 1,
       total_minutes: null,
       created_at: "2026-06-09T06:00:00.000Z",
       updated_at: "2026-06-09T06:00:00.000Z",
-    };
-    expect(mock.work_session_uuid).toBe("ws_abc123");
-    expect(mock.staff_id).toBe(1);
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects missing work_session_uuid", () => {
+    const result = workSessionItemSchema.safeParse({
+      staff_id: 1,
+      total_minutes: null,
+      created_at: null,
+      updated_at: null,
+    });
+    expect(result.success).toBe(false);
   });
 });
 
-describe("GetSessionResult shape", () => {
+describe("leaveItemSchema", () => {
+  it("accepts a valid leave item", () => {
+    const result = leaveItemSchema.safeParse({
+      staff_leave_uuid: "lv_abc123",
+      staff_id: 1,
+      from_date: "2026-06-09T06:00:00.000Z",
+      to_date: "2026-06-10T06:00:00.000Z",
+      note: "Doctor appointment",
+      category: "sick",
+      status: 0,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts null fields", () => {
+    const result = leaveItemSchema.safeParse({
+      staff_leave_uuid: "lv_abc123",
+      staff_id: null,
+      from_date: null,
+      to_date: null,
+      note: null,
+      category: null,
+      status: null,
+    });
+    expect(result.success).toBe(true);
+  });
+});
+
+describe("getSessionResultSchema", () => {
   it("accepts null session and leave", () => {
-    const result: GetSessionResult = {
+    const result = getSessionResultSchema.safeParse({
       session: null,
       leave: null,
-    };
-    expect(result.session).toBeNull();
-    expect(result.leave).toBeNull();
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts populated session and null leave", () => {
+    const result = getSessionResultSchema.safeParse({
+      session: {
+        work_session_uuid: "ws_abc",
+        staff_id: 1,
+        total_minutes: null,
+        created_at: "2026-06-09T06:00:00.000Z",
+        updated_at: "2026-06-09T06:00:00.000Z",
+      },
+      leave: null,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects session with missing fields", () => {
+    const result = getSessionResultSchema.safeParse({
+      session: { work_session_uuid: "ws_abc" },
+      leave: null,
+    });
+    expect(result.success).toBe(false);
+  });
+});
+
+describe("createAbsenceResultSchema", () => {
+  it("accepts a valid createAbsence result", () => {
+    const result = createAbsenceResultSchema.safeParse({
+      staff_leave_uuid: "lv_abc123",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects missing staff_leave_uuid", () => {
+    const result = createAbsenceResultSchema.safeParse({});
+    expect(result.success).toBe(false);
   });
 });

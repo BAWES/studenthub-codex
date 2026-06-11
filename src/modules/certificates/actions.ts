@@ -7,100 +7,26 @@ import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
 
 // ---------------------------------------------------------------------------
-// Schemas
+// Schemas & Types
 // ---------------------------------------------------------------------------
 
-const listCertificatesSchema = z.object({
-  candidateId: z.coerce.number().int().positive().optional(),
-  examUuid: z.string().optional(),
-  type: z.coerce.boolean().optional(),
-  storeId: z.coerce.number().int().positive().optional(),
-  companyId: z.coerce.number().int().positive().optional(),
-  page: z.coerce.number().int().positive().optional().default(1),
-  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
-});
-
-const createCertificateSchema = z.object({
-  certificateType: z.boolean().optional(),
-  certificateTitle: z.string().optional(),
-  certificateIssuer: z.string().optional(),
-  certificateUrl: z.string().optional(),
-  candidateId: z.number().int().positive(),
-  candidateWorkHistoryId: z.number().int().positive().optional(),
-  examUuid: z.string().optional(),
-  storeId: z.number().int().positive().optional(),
-  companyId: z.number().int().positive().optional(),
-  parentCompanyId: z.number().int().positive().optional(),
-  startDate: z.string().optional(),
-  endDate: z.string().optional(),
-});
-
-const updateCertificateSchema = z.object({
-  certificateUuid: z.string().min(1, "Certificate UUID is required"),
-  certificateType: z.boolean().optional(),
-  certificateTitle: z.string().optional(),
-  certificateIssuer: z.string().optional(),
-  certificateUrl: z.string().optional(),
-  candidateId: z.number().int().positive().optional(),
-  candidateWorkHistoryId: z.number().int().positive().optional(),
-  examUuid: z.string().optional(),
-  storeId: z.number().int().positive().optional(),
-  companyId: z.number().int().positive().optional(),
-  parentCompanyId: z.number().int().positive().optional(),
-  startDate: z.string().optional(),
-  endDate: z.string().optional(),
-});
-
-const deleteCertificateSchema = z.object({
-  certificateUuid: z.string().min(1, "Certificate UUID is required"),
-});
-
-const getCertificateSchema = z.object({
-  uuid: z.string().min(1, "Certificate UUID is required"),
-});
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export type ListCertificatesParams = z.input<typeof listCertificatesSchema>;
-export type CreateCertificateParams = z.input<typeof createCertificateSchema>;
-export type UpdateCertificateParams = z.input<typeof updateCertificateSchema>;
-export type DeleteCertificateParams = z.input<typeof deleteCertificateSchema>;
-export type GetCertificateParams = z.input<typeof getCertificateSchema>;
-
-export type CertificateListItem = {
-  certificate_uuid: string;
-  certificate_type: boolean | null;
-  certificate_title: string | null;
-  certificate_issuer: string | null;
-  certificate_url: string | null;
-  candidate_id: number;
-  candidate_work_history_id: number | null;
-  exam_uuid: string | null;
-  store_id: number | null;
-  company_id: number | null;
-  parent_company_id: number | null;
-  start_date: string | null;
-  end_date: string | null;
-  staff_id: number | null;
-  created_at: Date | null;
-  updated_at: Date | null;
-};
-
-export type ListCertificatesResult = {
-  certificates: CertificateListItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
-
-// ---------------------------------------------------------------------------
-// Exported schemas (for shared validation)
-// ---------------------------------------------------------------------------
-
-export { listCertificatesSchema, createCertificateSchema, updateCertificateSchema, deleteCertificateSchema, getCertificateSchema };
+import {
+  listCertificatesSchema,
+  createCertificateSchema,
+  updateCertificateSchema,
+  deleteCertificateSchema,
+  getCertificateSchema,
+  certificateListItemSchema,
+  listCertificatesResultSchema,
+  certificateActionSuccessSchema,
+  type ListCertificatesParams,
+  type CreateCertificateParams,
+  type UpdateCertificateParams,
+  type DeleteCertificateParams,
+  type GetCertificateParams,
+  type CertificateListItem,
+  type ListCertificatesResult,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // listCertificates
@@ -170,7 +96,7 @@ export async function listCertificates(
     prisma.candidate_certificate.count({ where: where as any }),
   ]);
 
-  return {
+  const result: ListCertificatesResult = {
     certificates: certificates.map(
       (c: Record<string, unknown>): CertificateListItem => {
         const raw = c as any;
@@ -199,6 +125,17 @@ export async function listCertificates(
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  // Validate output shape
+  const outputParsed = listCertificatesResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/certificates] listCertificates output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -260,7 +197,19 @@ export async function createCertificate(
   });
 
   revalidatePath("/staff/candidates");
-  return certificate as unknown as CertificateListItem;
+
+  const result = certificate as unknown as CertificateListItem;
+
+  // Validate output shape
+  const outputParsed = certificateListItemSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/certificates] createCertificate output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -331,7 +280,19 @@ export async function updateCertificate(
   });
 
   revalidatePath("/staff/candidates");
-  return certificate as unknown as CertificateListItem;
+
+  const result = certificate as unknown as CertificateListItem;
+
+  // Validate output shape
+  const outputParsed = certificateListItemSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/certificates] updateCertificate output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -346,7 +307,7 @@ export async function updateCertificate(
  */
 export async function deleteCertificate(
   params: DeleteCertificateParams,
-): Promise<{ success: boolean }> {
+): Promise<z.output<typeof certificateActionSuccessSchema>> {
   await requireCapability("staff.read");
 
   const parsed = deleteCertificateSchema.safeParse(params);
@@ -370,7 +331,19 @@ export async function deleteCertificate(
   });
 
   revalidatePath("/staff/candidates");
-  return { success: true };
+
+  const result = { success: true };
+
+  // Validate output shape
+  const outputParsed = certificateActionSuccessSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/certificates] deleteCertificate output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -399,7 +372,7 @@ export async function getCertificate(
 
   if (!certificate) return null;
 
-  return {
+  const result: CertificateListItem = {
     certificate_uuid: certificate.certificate_uuid,
     certificate_type: certificate.certificate_type ?? null,
     certificate_title: certificate.certificate_title ?? null,
@@ -417,4 +390,15 @@ export async function getCertificate(
     created_at: certificate.created_at ?? null,
     updated_at: certificate.updated_at ?? null,
   };
+
+  // Validate output shape
+  const outputParsed = certificateListItemSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/certificates] getCertificate output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
