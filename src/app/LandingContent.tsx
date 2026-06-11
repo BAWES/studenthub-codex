@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { ChevronRight, Sparkles } from "lucide-react";
 import { ThemeToggle } from "@/modules/theme/ThemeToggle";
+import { FadeInSection } from "@/components/marketing";
 import { HeroSection } from "@/components/marketing";
 import { TestimonialCarousel } from "@/components/marketing";
 import { ComparisonTable } from "@/components/marketing";
@@ -135,30 +136,41 @@ export default function LandingContent({ session }: LandingContentProps) {
       {/* ── Hero section — two-sided marketplace ── */}
       <HeroSection />
 
-      {/* ── Stats — social proof counters ── */}
-      <StatsSection />
+      {/* ── Stats — social proof counters (scroll-animated) ── */}
+      <FadeInSection delay={100} asDiv>
+        <StatsSection />
+      </FadeInSection>
 
-      {/* ── How It Works — 3-step flow ── */}
-      <HowItWorks />
+      {/* ── How It Works — 3-step flow (scroll-animated) ── */}
+      <FadeInSection delay={200} asDiv>
+        <HowItWorks />
+      </FadeInSection>
 
-      {/* ── Employer section — value props for all audiences ── */}
-      <EmployerSection />
+      {/* ── Employer section — value props for all audiences (scroll-animated) ── */}
+      <FadeInSection delay={300} asDiv>
+        <EmployerSection />
+      </FadeInSection>
 
-      {/* ── Social proof — testimonials ── */}
-      <TestimonialCarousel persona={persona} />
+      {/* ── Social proof — testimonials (scroll-animated) ── */}
+      <FadeInSection delay={400} asDiv>
+        <TestimonialCarousel persona={persona} />
+      </FadeInSection>
 
-      {/* ── Comparison table — persona-specific ── */}
-      <ComparisonTable persona={persona} />
+      {/* ── Comparison table — persona-specific (scroll-animated) ── */}
+      <FadeInSection delay={500} asDiv>
+        <ComparisonTable persona={persona} />
+      </FadeInSection>
 
-      {/* ── Final CTA section ── */}
-      <section
-        className="relative overflow-hidden rounded-xl p-[clamp(24px,5vw,60px)] text-center"
-        style={{
-          background: "var(--sh-glass-bg)",
-          border: "1px solid var(--sh-glass-border)",
-        }}
-        aria-label="Get started"
-      >
+      {/* ── Final CTA section (scroll-animated) ── */}
+      <FadeInSection delay={600} asDiv>
+        <section
+          className="relative overflow-hidden rounded-xl p-[clamp(24px,5vw,60px)] text-center"
+          style={{
+            background: "var(--sh-glass-bg)",
+            border: "1px solid var(--sh-glass-border)",
+          }}
+          aria-label="Get started"
+        >
         {/* Ambient gradient */}
         <div className="shHeroGradientDramatic" aria-hidden="true" />
 
@@ -229,6 +241,7 @@ export default function LandingContent({ session }: LandingContentProps) {
           )}
         </div>
       </section>
+      </FadeInSection>
 
       {/* ── Footer with internal role descriptions ── */}
       <footer

@@ -11393,29 +11393,103 @@ kbd {
   -webkit-mask-image: radial-gradient(ellipse 60% 50% at 50% 50%, black, transparent 70%);
 }
 
-/* ── OS Landing — Staggered section entrance ───────────────────────── */
+/* ── OS Landing — Section layout container ──────────────────── */
 .shSection {
+  /* Sections animate in on scroll via FadeInSection wrapper */
+  margin-bottom: clamp(8px, 1.5vw, 20px);
+}
+
+/* ── OS Landing — Hero section wrapper ──────────────────────── */
+.shSection:first-of-type {
+  margin-top: 0;
+}
+
+/* ── OS Landing — Smooth theme transitions ─────────────────── */
+/* Only body/html get smooth dark/light theme crossfade */
+html {
+  transition: background-color var(--dur-slow) ease, color-scheme var(--dur-slow) ease;
+}
+body {
+  transition: background-color var(--dur-slow) ease, color var(--dur-slow) ease;
+}
+
+/* ── OS Landing — Premium hero ambient glow behind mockup ──── */
+.shHeroAmbientGlow {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.shHeroAmbientGlow::before {
+  content: '';
+  position: absolute;
+  width: 60%;
+  height: 60%;
+  top: 30%;
+  left: 50%;
+  transform: translate(-50%, -30%);
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--blue) 20%, transparent) 0%,
+    color-mix(in srgb, var(--ring) 10%, transparent) 40%,
+    transparent 70%
+  );
+  filter: blur(80px);
+  opacity: 0.6;
+  animation: shAmbientPulse 8s ease-in-out infinite alternate;
+}
+
+@keyframes shAmbientPulse {
+  0% { opacity: 0.4; transform: translate(-50%, -30%) scale(1); }
+  100% { opacity: 0.8; transform: translate(-50%, -30%) scale(1.12); }
+}
+
+/* ── OS Landing — Premium card hover glow ─────────────────── */
+.shCardGlow {
+  position: relative;
+  isolation: isolate;
+  transition: transform 280ms cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 280ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.shCardGlow::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: radial-gradient(
+    600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    color-mix(in srgb, var(--sh-info) 10%, transparent) 0%,
+    transparent 60%
+  );
   opacity: 0;
-  transform: translateY(24px);
-  animation: shFadeInUp 600ms var(--sh-easing) forwards;
+  transition: opacity 400ms cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: -1;
+  pointer-events: none;
 }
 
-.shSection:nth-child(3) { animation-delay: 60ms; }
-.shSection:nth-child(4) { animation-delay: 120ms; }
-.shSection:nth-child(5) { animation-delay: 180ms; }
-.shSection:nth-child(6) { animation-delay: 240ms; }
-.shSection:nth-child(7) { animation-delay: 300ms; }
-.shSection:nth-child(8) { animation-delay: 360ms; }
-.shSection:nth-child(9) { animation-delay: 420ms; }
-.shSection:nth-child(10) { animation-delay: 480ms; }
-
-@keyframes shFadeInUp {
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.shCardGlow:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 48px rgba(16, 24, 40, 0.12);
 }
 
+.shCardGlow:hover::before {
+  opacity: 1;
+}
+
+/* ── OS Landing — Mockup hover enhancement ────────────────── */
+.shMockupDramatic {
+  transition: box-shadow 600ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.shMockupDramatic:hover {
+  box-shadow:
+    0 32px 100px rgba(0, 0, 0, 0.2),
+    0 0 0 1px color-mix(in srgb, var(--sh-info) 15%, transparent),
+    0 0 60px color-mix(in srgb, var(--sh-info) 8%, transparent);
+}
 /* ── OS Landing — Staggered card entrance (within a grid) ──────────── */
 .shCard {
   opacity: 0;
