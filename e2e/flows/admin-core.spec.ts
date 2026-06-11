@@ -105,8 +105,8 @@ test.describe("Admin critical flows - Payments / Compliance / Transfers / Agents
         ).toBeVisible({ timeout: 5000 });
       }
 
-      // Data table or empty state renders
-      const table = ctx.page.locator("table").or(ctx.page.locator("text=No records found"));
+      // Data table or empty state renders — component uses CSS Grid layout (not <table>)
+      const table = ctx.page.locator("text=Reference").or(ctx.page.locator("text=No payments yet"));
       await expect(table.first()).toBeVisible({ timeout: 10000 });
 
       assertNoReactErrors(ctx.errors);
