@@ -1,4 +1,3 @@
-export { default as InspectorLayout } from "./InspectorLayout";
 export {
   listRequests,
   getRequest,
