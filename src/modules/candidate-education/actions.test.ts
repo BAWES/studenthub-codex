@@ -4,16 +4,14 @@ import {
   updateEducationSchema,
   deleteEducationSchema,
   getEducationSchema,
-} from "./schemas";
-import type {
-  EducationItem,
-  CreateCandidateEducationResult,
-  UpdateCandidateEducationResult,
-  DeleteCandidateEducationResult,
+  educationItemSchema,
+  createCandidateEducationResultSchema,
+  updateCandidateEducationResultSchema,
+  deleteCandidateEducationResultSchema,
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
-// Tests: createEducationSchema
+// Tests: input schemas
 // ---------------------------------------------------------------------------
 
 describe("createEducationSchema", () => {
@@ -160,12 +158,12 @@ describe("getEducationSchema", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Type shape tests
+// Tests: output schema validation
 // ---------------------------------------------------------------------------
 
-describe("EducationItem shape", () => {
-  it("has required fields", () => {
-    const item: EducationItem = {
+describe("educationItemSchema", () => {
+  it("validates a complete education item with university", () => {
+    const item = {
       education_uuid: "edu_abc",
       candidate_id: 1,
       university_id: 5,
@@ -175,46 +173,99 @@ describe("EducationItem shape", () => {
       is_currently_studying: false,
       created_at: new Date(),
       updated_at: new Date(),
+      university: { name: "Kuwait University", nameAr: "جامعة الكويت" },
     };
-    expect(item.education_uuid).toBe("edu_abc");
-    expect(item.candidate_id).toBe(1);
+    const result = educationItemSchema.safeParse(item);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.education_uuid).toBe("edu_abc");
+      expect(result.data.university?.name).toBe("Kuwait University");
+    }
   });
 
-  it("supports optional university relation", () => {
-    const item: EducationItem = {
-      education_uuid: "edu_abc",
-      candidate_id: 1,
-      university_id: 5,
+  it("validates an education item without university", () => {
+    const item = {
+      education_uuid: "edu_xyz",
+      candidate_id: 2,
+      university_id: 10,
       degree_uuid: null,
       major_uuid: null,
       graduation_year: null,
       is_currently_studying: true,
       created_at: null,
       updated_at: null,
-      university: { name: "Kuwait University", nameAr: "جامعة الكويت" },
     };
-    expect(item.university?.name).toBe("Kuwait University");
+    const result = educationItemSchema.safeParse(item);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.university).toBeUndefined();
+      expect(result.data.is_currently_studying).toBe(true);
+    }
+  });
+
+  it("rejects missing required fields", () => {
+    const result = educationItemSchema.safeParse({
+      education_uuid: "edu_abc",
+    });
+    expect(result.success).toBe(false);
   });
 });
 
-describe("Education result types", () => {
-  it("accepts CreateCandidateEducationResult success", () => {
-    const r: CreateCandidateEducationResult = { success: true, educationUuid: "edu_abc" };
-    expect(r.success).toBe(true);
+describe("createCandidateEducationResultSchema", () => {
+  it("validates success result", () => {
+    const result = createCandidateEducationResultSchema.safeParse({
+      success: true,
+      educationUuid: "edu_abc",
+    });
+    expect(result.success).toBe(true);
   });
 
-  it("accepts CreateCandidateEducationResult error", () => {
-    const r: CreateCandidateEducationResult = { success: false, error: "University not found" };
-    expect(r.error).toBe("University not found");
+  it("validates error result", () => {
+    const result = createCandidateEducationResultSchema.safeParse({
+      success: false,
+      error: "University not found.",
+    });
+    expect(result.success).toBe(true);
   });
 
-  it("accepts UpdateCandidateEducationResult success", () => {
-    const r: UpdateCandidateEducationResult = { success: true };
-    expect(r.success).toBe(true);
+  it("rejects success without educationUuid", () => {
+    const result = createCandidateEducationResultSchema.safeParse({
+      success: true,
+    });
+    expect(result.success).toBe(false);
+  });
+});
+
+describe("updateCandidateEducationResultSchema", () => {
+  it("validates success result", () => {
+    const result = updateCandidateEducationResultSchema.safeParse({
+      success: true,
+    });
+    expect(result.success).toBe(true);
   });
 
-  it("accepts DeleteCandidateEducationResult success", () => {
-    const r: DeleteCandidateEducationResult = { success: true };
-    expect(r.success).toBe(true);
+  it("validates error result", () => {
+    const result = updateCandidateEducationResultSchema.safeParse({
+      success: false,
+      error: "Not found.",
+    });
+    expect(result.success).toBe(true);
+  });
+});
+
+describe("deleteCandidateEducationResultSchema", () => {
+  it("validates success result", () => {
+    const result = deleteCandidateEducationResultSchema.safeParse({
+      success: true,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("validates error result", () => {
+    const result = deleteCandidateEducationResultSchema.safeParse({
+      success: false,
+      error: "Delete failed.",
+    });
+    expect(result.success).toBe(true);
   });
 });

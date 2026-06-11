@@ -8,6 +8,10 @@ import {
   listCandidateNotificationsSchema,
   getCandidateNotificationSchema,
   createNotificationSchema,
+  listCandidateNotificationsResultSchema,
+  candidateNotificationItemSchema,
+  createNotificationResultSchema,
+  markNotificationReadResultSchema,
   type ListCandidateNotificationsInput,
   type CandidateNotificationItem,
   type CandidateNotificationDetail,
@@ -90,7 +94,7 @@ export async function listCandidateNotifications(
     where: { candidate_id: candidateId, is_new: true } as any,
   });
 
-  return {
+  const result = {
     notifications: rows.map(toItem),
     total,
     unreadCount,
@@ -98,6 +102,16 @@ export async function listCandidateNotifications(
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  const outputParsed = listCandidateNotificationsResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/candidate-notifications] listCandidateNotifications output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -131,8 +145,27 @@ export async function getCandidateNotification(
     } as any,
   });
 
-  if (!row) return null;
-  return toItem(row as PrismaCandidateNotificationRow);
+  if (!row) {
+    const outputParsed = candidateNotificationItemSchema.safeParse(null);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/candidate-notifications] getCandidateNotification output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+    return null;
+  }
+  const item = toItem(row as PrismaCandidateNotificationRow);
+
+  const outputParsed = candidateNotificationItemSchema.safeParse(item);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/candidate-notifications] getCandidateNotification output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return item;
 }
 
 // ---------------------------------------------------------------------------
@@ -186,15 +219,38 @@ export async function createNotification(
     });
 
     revalidatePath("/candidate/notifications");
-    return { success: true, notificationUuid: uuid };
+    const result: CreateNotificationResult = {
+      success: true,
+      notificationUuid: uuid,
+    };
+
+    const outputParsed = createNotificationResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/candidate-notifications] createNotification output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
   } catch (e) {
-    return {
+    const result: CreateNotificationResult = {
       success: false,
       error:
         e instanceof Error
           ? e.message
           : "Failed to create notification.",
     };
+
+    const outputParsed = createNotificationResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/candidate-notifications] createNotification output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
   }
 }
 
@@ -224,7 +280,17 @@ export async function markNotificationRead(
     });
 
     if (!notification) {
-      return { success: false, error: "Notification not found." };
+      const result = { success: false as const, error: "Notification not found." };
+
+      const outputParsed = markNotificationReadResultSchema.safeParse(result);
+      if (!outputParsed.success) {
+        console.error(
+          "[modules/candidate-notifications] markNotificationRead output validation failed:",
+          outputParsed.error.issues,
+        );
+      }
+
+      return result;
     }
 
     await prisma.candidate_notification.update({
@@ -233,14 +299,34 @@ export async function markNotificationRead(
     });
 
     revalidatePath("/candidate/notifications");
-    return { success: true };
+    const result = { success: true as const };
+
+    const outputParsed = markNotificationReadResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/candidate-notifications] markNotificationRead output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
   } catch (e) {
-    return {
-      success: false,
+    const result = {
+      success: false as const,
       error:
         e instanceof Error
           ? e.message
           : "Failed to mark notification as read.",
     };
+
+    const outputParsed = markNotificationReadResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/candidate-notifications] markNotificationRead output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
   }
 }

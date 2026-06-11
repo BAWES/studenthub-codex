@@ -8,6 +8,8 @@ import { requireCapability } from "@/modules/auth/session";
 import {
   getPresignedUploadUrlSchema,
   getPresignedDownloadUrlSchema,
+  presignedUploadResultSchema,
+  presignedDownloadResultSchema,
   type PresignedUploadResult,
   type PresignedDownloadResult,
 } from "./schemas";
@@ -86,12 +88,22 @@ export async function getPresignedUploadUrl(
       expiresIn: UPLOAD_URL_EXPIRES_IN,
     });
 
-    return {
+    const result = {
       uploadUrl,
       key,
       bucket: process.env.AWS_TEMP_BUCKET_NAME ?? "",
       region: process.env.AWS_TEMP_BUCKET_REGION ?? "",
     };
+
+    const outputParsed = presignedUploadResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/aws] getPresignedUploadUrl output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
   } catch (err) {
     const message = err instanceof Error ? err.message : "Failed to generate presigned upload URL";
     return { error: message };
@@ -135,10 +147,20 @@ export async function getPresignedDownloadUrl(
       expiresIn: DOWNLOAD_URL_EXPIRES_IN,
     });
 
-    return {
+    const result = {
       downloadUrl,
       key,
     };
+
+    const outputParsed = presignedDownloadResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/aws] getPresignedDownloadUrl output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
   } catch (err) {
     const message =
       err instanceof Error ? err.message : "Failed to generate presigned download URL";

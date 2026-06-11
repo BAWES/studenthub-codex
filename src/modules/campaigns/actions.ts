@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
 import {
   listCampaignsSchema,
+  campaignListItemSchema,
+  listCampaignsResultSchema,
   type ListCampaignsParams,
   type CampaignListItem,
   type ListCampaignsResult,
@@ -56,11 +58,21 @@ export async function listCampaigns(
     prisma.campaign.count({ where }),
   ]);
 
-  return {
+  const result: ListCampaignsResult = {
     campaigns: campaigns as CampaignListItem[],
     total,
     page,
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  const outputParsed = listCampaignsResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/campaigns] listCampaigns output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
