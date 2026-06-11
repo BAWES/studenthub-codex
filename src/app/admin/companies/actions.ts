@@ -7,6 +7,8 @@ import { formatDate, formatMoney } from "@/modules/workspace/format";
 import {
   listAdminCompaniesSchema,
   getAdminCompanySchema,
+  adminCompanyDetailSchema,
+  adminCompanyToggleResponseSchema,
 } from "./schemas";
 import type {
   ListAdminCompaniesInput,
@@ -215,11 +217,11 @@ export async function getAdminCompanyDetail(
   };
 
   // Validate output shape
-  const parsed = adminCompanyDetailSchema.safeParse(result);
-  if (!parsed.success) {
+  const detailParsed = adminCompanyDetailSchema.safeParse(result);
+  if (!detailParsed.success) {
     console.error(
       "[admin/companies] getAdminCompanyDetail output validation failed:",
-      parsed.error.issues,
+      detailParsed.error.issues,
     );
   }
 

@@ -16,6 +16,106 @@ export const getAdminCompanySchema = z.object({
 });
 
 // ---------------------------------------------------------------------------
+// Output validation — adminCompanyRowSchema
+// ---------------------------------------------------------------------------
+
+export const adminCompanyRowSchema = z.object({
+  id: z.number().int().positive(),
+  name: z.string().min(1, "Name is required"),
+  email: z.string().default("No email"),
+  owner: z.string().default("Unassigned"),
+  requests: z.number().int().default(0),
+  status: z.string(),
+  rate: z.string(),
+  updated: z.string(),
+});
+
+// ---------------------------------------------------------------------------
+// Output validation — adminCompanyDetailSchema
+// ---------------------------------------------------------------------------
+
+const companyDetailCompanySchema = z.object({
+  company_id: z.number(),
+  company_name: z.string(),
+  company_common_name_en: z.string().nullable(),
+  company_email: z.string().nullable(),
+  company_website: z.string().nullable(),
+  company_approved_to_hire: z.boolean().nullable(),
+  company_hourly_rate: z.number().nullable(),
+  currency_code: z.string().nullable(),
+  no_of_active_requests: z.number().nullable(),
+  company_created_at: z.date().nullable(),
+  company_updated_at: z.date().nullable(),
+  staff_name: z.string().nullable(),
+  staff_email: z.string().nullable(),
+  country_name_en: z.string().nullable(),
+});
+
+const companyDetailListItemSchema = z.object({
+  id: z.union([z.string(), z.number()]),
+  title: z.string().default("Untitled request"),
+  subtitle: z.string().default(""),
+  meta: z.string().default(""),
+});
+
+const companyDetailContactItemSchema = z.object({
+  id: z.string(),
+  title: z.string().default("Contact"),
+  subtitle: z.string().default(""),
+  meta: z.string().default(""),
+});
+
+const companyDetailStoreItemSchema = z.object({
+  id: z.number(),
+  title: z.string(),
+  subtitle: z.string().default(""),
+  meta: z.string().default(""),
+});
+
+const companyDetailNoteItemSchema = z.object({
+  id: z.string(),
+  title: z.string().default(""),
+  subtitle: z.string().default("Empty note"),
+  meta: z.string().default(""),
+});
+
+const companyDetailMetricSchema = z.object({
+  label: z.string(),
+  value: z.union([z.string(), z.number()]),
+  note: z.string(),
+});
+
+export const adminCompanyDetailSchema = z.object({
+  company: companyDetailCompanySchema.nullable(),
+  metrics: z.array(companyDetailMetricSchema),
+  requests: z.array(companyDetailListItemSchema),
+  contacts: z.array(companyDetailContactItemSchema),
+  stores: z.array(companyDetailStoreItemSchema),
+  notes: z.array(companyDetailNoteItemSchema),
+});
+
+// ---------------------------------------------------------------------------
+// Output validation — adminCompanyListResponseSchema
+// ---------------------------------------------------------------------------
+
+export const adminCompanyListResponseSchema = z.object({
+  items: z.array(adminCompanyRowSchema),
+  total: z.number().int(),
+  page: z.number().int(),
+  limit: z.number().int(),
+  totalPages: z.number().int().nonnegative(),
+});
+
+// ---------------------------------------------------------------------------
+// Output validation — adminCompanyToggleResponseSchema
+// ---------------------------------------------------------------------------
+
+export const adminCompanyToggleResponseSchema = z.object({
+  success: z.boolean(),
+  error: z.string().optional(),
+});
+
+// ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
