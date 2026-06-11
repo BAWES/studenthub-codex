@@ -196,3 +196,259 @@ describe("deleteInvoiceSchema", () => {
     expect(r.success).toBe(false);
   });
 });
+
+// ---------------------------------------------------------------------------
+// Output schema tests
+// ---------------------------------------------------------------------------
+
+import {
+  invoiceRowOutputSchema,
+  listInvoicesOutputSchema,
+  candidatePayoutOutputSchema,
+  metricOutputSchema,
+  invoiceNestedOutputSchema,
+  invoiceDetailOutputSchema,
+  invoiceMutationOutputSchema,
+} from "./schemas";
+
+describe("invoiceRowOutputSchema", () => {
+  it("accepts a valid invoice row", () => {
+    const row = {
+      invoice_id: 101,
+      transfer_id: 5,
+      company_name: "Acme Corp",
+      invoice_date: "2026-06-01T00:00:00.000Z",
+      invoice_status: "paid",
+      total: "5000.00",
+      currency_code: "KWD",
+    };
+    expect(invoiceRowOutputSchema.safeParse(row).success).toBe(true);
+  });
+
+  it("accepts nullable fields as null", () => {
+    const row = {
+      invoice_id: 101,
+      transfer_id: null,
+      company_name: null,
+      invoice_date: null,
+      invoice_status: null,
+      total: null,
+      currency_code: null,
+    };
+    expect(invoiceRowOutputSchema.safeParse(row).success).toBe(true);
+  });
+
+  it("rejects missing required fields", () => {
+    expect(invoiceRowOutputSchema.safeParse({}).success).toBe(false);
+  });
+
+  it("rejects non-number invoice_id", () => {
+    const row = {
+      invoice_id: "abc",
+      transfer_id: null,
+      company_name: null,
+      invoice_date: null,
+      invoice_status: null,
+      total: null,
+      currency_code: null,
+    };
+    expect(invoiceRowOutputSchema.safeParse(row).success).toBe(false);
+  });
+});
+
+describe("listInvoicesOutputSchema", () => {
+  const validItem = {
+    invoice_id: 101,
+    transfer_id: null,
+    company_name: null,
+    invoice_date: null,
+    invoice_status: null,
+    total: null,
+    currency_code: null,
+  };
+
+  it("accepts a valid list result", () => {
+    const result = {
+      items: [validItem],
+      total: 1,
+      page: 1,
+      limit: 20,
+      totalPages: 1,
+    };
+    expect(listInvoicesOutputSchema.safeParse(result).success).toBe(true);
+  });
+
+  it("accepts empty items", () => {
+    const result = {
+      items: [],
+      total: 0,
+      page: 1,
+      limit: 20,
+      totalPages: 0,
+    };
+    expect(listInvoicesOutputSchema.safeParse(result).success).toBe(true);
+  });
+
+  it("rejects negative total", () => {
+    const result = {
+      items: [],
+      total: -1,
+      page: 1,
+      limit: 20,
+      totalPages: 0,
+    };
+    expect(listInvoicesOutputSchema.safeParse(result).success).toBe(false);
+  });
+
+  it("rejects negative page", () => {
+    const result = {
+      items: [],
+      total: 0,
+      page: -1,
+      limit: 20,
+      totalPages: 0,
+    };
+    expect(listInvoicesOutputSchema.safeParse(result).success).toBe(false);
+  });
+});
+
+describe("candidatePayoutOutputSchema", () => {
+  it("accepts a valid payout entry", () => {
+    const payout = {
+      tc_id: 42,
+      candidate_name: "Ahmed Al-Mutairi",
+      hours: 120,
+      amount: "2400.00",
+      paid: 0,
+    };
+    expect(candidatePayoutOutputSchema.safeParse(payout).success).toBe(true);
+  });
+
+  it("accepts null candidate_name and hours", () => {
+    const payout = {
+      tc_id: 42,
+      candidate_name: null,
+      hours: null,
+      amount: null,
+      paid: 0,
+    };
+    expect(candidatePayoutOutputSchema.safeParse(payout).success).toBe(true);
+  });
+
+  it("rejects missing tc_id", () => {
+    const payout = {
+      candidate_name: null,
+      hours: null,
+      amount: null,
+      paid: 0,
+    };
+    expect(candidatePayoutOutputSchema.safeParse(payout).success).toBe(false);
+  });
+});
+
+describe("metricOutputSchema", () => {
+  it("accepts string value", () => {
+    const m = { label: "Status", value: "paid", note: "" };
+    expect(metricOutputSchema.safeParse(m).success).toBe(true);
+  });
+
+  it("accepts number value", () => {
+    const m = { label: "Count", value: 42, note: "Line items" };
+    expect(metricOutputSchema.safeParse(m).success).toBe(true);
+  });
+
+  it("rejects missing label", () => {
+    expect(metricOutputSchema.safeParse({ value: "x", note: "" }).success).toBe(false);
+  });
+});
+
+describe("invoiceNestedOutputSchema", () => {
+  it("accepts a valid nested invoice with company", () => {
+    const inv = {
+      invoice_id: 1,
+      transfer_id: 5,
+      invoice_date: "2026-06-01T00:00:00.000Z",
+      invoice_status: "paid",
+      total: "5000.00",
+      company_total: "4500.00",
+      currency_code: "KWD",
+      payment_received_on: "2026-06-10T00:00:00.000Z",
+      company: { company_name: "Acme Corp", company_email: "billing@acme.com" },
+    };
+    expect(invoiceNestedOutputSchema.safeParse(inv).success).toBe(true);
+  });
+
+  it("accepts null company", () => {
+    const inv = {
+      invoice_id: 1,
+      transfer_id: null,
+      invoice_date: null,
+      invoice_status: null,
+      total: null,
+      company_total: null,
+      currency_code: null,
+      payment_received_on: null,
+      company: null,
+    };
+    expect(invoiceNestedOutputSchema.safeParse(inv).success).toBe(true);
+  });
+
+  it("rejects missing invoice_id", () => {
+    const inv = {
+      transfer_id: null,
+      invoice_date: null,
+      invoice_status: null,
+      total: null,
+      company_total: null,
+      currency_code: null,
+      payment_received_on: null,
+      company: null,
+    };
+    expect(invoiceNestedOutputSchema.safeParse(inv).success).toBe(false);
+  });
+});
+
+describe("invoiceDetailOutputSchema", () => {
+  it("accepts a valid detail result", () => {
+    const result = {
+      invoice: {
+        invoice_id: 1,
+        transfer_id: null,
+        invoice_date: null,
+        invoice_status: null,
+        total: null,
+        company_total: null,
+        currency_code: null,
+        payment_received_on: null,
+        company: null,
+      },
+      candidate_payouts: [],
+      metrics: [],
+    };
+    expect(invoiceDetailOutputSchema.safeParse(result).success).toBe(true);
+  });
+
+  it("accepts null invoice (not found)", () => {
+    const result = { invoice: null, candidate_payouts: [], metrics: [] };
+    expect(invoiceDetailOutputSchema.safeParse(result).success).toBe(true);
+  });
+
+  it("rejects missing metrics", () => {
+    const result = { invoice: null, candidate_payouts: [] };
+    expect(invoiceDetailOutputSchema.safeParse(result).success).toBe(false);
+  });
+});
+
+describe("invoiceMutationOutputSchema", () => {
+  it("accepts a valid mutation result", () => {
+    expect(invoiceMutationOutputSchema.safeParse({ invoice_id: 42 }).success).toBe(true);
+  });
+
+  it("rejects missing invoice_id", () => {
+    expect(invoiceMutationOutputSchema.safeParse({}).success).toBe(false);
+  });
+
+  it("rejects non-number invoice_id", () => {
+    expect(invoiceMutationOutputSchema.safeParse({ invoice_id: "abc" }).success).toBe(false);
+  });
+});
