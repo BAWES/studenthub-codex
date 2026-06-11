@@ -172,8 +172,10 @@ for (const [role, routes] of Object.entries(ROUTE_MAP)) {
           await ctx.page.goto(route);
           await ctx.page.waitForLoadState("load");
           // Other roles should be redirected away
-          const currentUrl = ctx.page.url();
-          const hasWrongUrl = currentUrl.includes(route);
+          const currentUrl = new URL(ctx.page.url());
+          // Use pathname to avoid false matches from redirect query params
+          // (e.g., /login?redirect=/admin/candidates should NOT count as accessing /admin/candidates)
+          const hasWrongUrl = currentUrl.pathname === route || currentUrl.pathname.startsWith(route + "/");
           // Other roles should NOT be able to access this route
           expect(hasWrongUrl).toBe(false);
           // The important thing is that they DON'T see the target content
