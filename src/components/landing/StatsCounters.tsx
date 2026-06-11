@@ -67,8 +67,8 @@ const stats = [
     prefix: "<",
     label: "Avg time to match",
     desc: "From profile creation to interview",
-    accent: "var(--sh-coral)",
-    gradient: "radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--sh-coral) 10%, transparent), transparent 70%)",
+    accent: "var(--sh-amber)",
+    gradient: "radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--sh-amber) 10%, transparent), transparent 70%)",
   },
   {
     end: 500,

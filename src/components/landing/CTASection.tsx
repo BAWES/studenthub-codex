@@ -75,8 +75,9 @@ export default function CTASection({ persona }: CTASectionProps) {
               }
               className="inline-flex items-center gap-1.5 px-6 py-2.5 rounded-lg text-sm font-semibold text-white transition-all duration-200 hover:brightness-110 hover:-translate-y-0.5 active:translate-y-0"
               style={{
-                backgroundColor: "var(--sh-coral)",
-                boxShadow: "0 4px 14px color-mix(in srgb, var(--sh-coral) 30%, transparent)",
+                backgroundColor: persona === "company" ? "var(--sh-amber)" : "var(--sh-coral)",
+                background: persona === "company" ? "linear-gradient(135deg, var(--sh-amber), var(--sh-amber-deep))" : undefined,
+                boxShadow: persona === "company" ? "var(--sh-amber-glow)" : "0 4px 14px color-mix(in srgb, var(--sh-coral) 30%, transparent)",
               }}
             >
               {persona === "company" ? "Set up company account" : "Create your free profile"}{" "}
