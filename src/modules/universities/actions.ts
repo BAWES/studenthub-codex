@@ -4,6 +4,16 @@ import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
+import {
+  listUniversitiesResultSchema,
+  createUniversityResultSchema,
+  universityItemSchema,
+} from "./schemas";
+import type {
+  UniversityItem,
+  ListUniversitiesResult,
+  CreateUniversityResult,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -25,27 +35,6 @@ const listUniversitiesSchema = z.object({
 const createUniversitySchema = z.object({
   name: z.string().min(1, "University name is required").max(100),
 });
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export type UniversityItem = {
-  university_id: number;
-  university_name_en: string | null;
-  university_name_ar: string | null;
-};
-
-export type ListUniversitiesResult = {
-  universities: UniversityItem[];
-  total: number;
-  page: number;
-  limit: number;
-};
-
-export type CreateUniversityResult =
-  | { operation: "success"; message: string; university: UniversityItem }
-  | { operation: "error"; message: string };
 
 // ---------------------------------------------------------------------------
 // Actions
@@ -108,7 +97,17 @@ export async function listUniversities(
     prisma.university.count({ where }),
   ]);
 
-  return { universities, total, page, limit };
+  const result: ListUniversitiesResult = { universities, total, page, limit };
+
+  const outputParsed = listUniversitiesResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/universities] listUniversities output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -130,10 +129,18 @@ export async function createUniversity(
 
   const parsed = createUniversitySchema.safeParse(raw);
   if (!parsed.success) {
-    return {
+    const result1: CreateUniversityResult = {
       operation: "error",
       message: parsed.error.issues[0]?.message ?? "Invalid input.",
     };
+    const outputParsed1 = createUniversityResultSchema.safeParse(result1);
+    if (!outputParsed1.success) {
+      console.error(
+        "[modules/universities] createUniversity output validation failed:",
+        outputParsed1.error.issues,
+      );
+    }
+    return result1;
   }
 
   const { name } = parsed.data;
@@ -152,10 +159,18 @@ export async function createUniversity(
   });
 
   if (existing) {
-    return {
+    const result: CreateUniversityResult = {
       operation: "error",
       message: "University already exists",
     };
+    const outputParsed2 = createUniversityResultSchema.safeParse(result);
+    if (!outputParsed2.success) {
+      console.error(
+        "[modules/universities] createUniversity output validation failed:",
+        outputParsed2.error.issues,
+      );
+    }
+    return result;
   }
 
   const university = await prisma.university.create({
@@ -176,9 +191,19 @@ export async function createUniversity(
   revalidatePath("/candidate/edit");
   revalidatePath("/staff/universities");
 
-  return {
+  const result: CreateUniversityResult = {
     operation: "success",
     message: "University created successfully",
     university,
   };
+
+  const outputParsed2 = createUniversityResultSchema.safeParse(result);
+  if (!outputParsed2.success) {
+    console.error(
+      "[modules/universities] createUniversity output validation failed:",
+      outputParsed2.error.issues,
+    );
+  }
+
+  return result;
 }
