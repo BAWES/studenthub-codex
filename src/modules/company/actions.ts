@@ -4,6 +4,14 @@ import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireCapability, requireRoleCapability } from "@/modules/auth/session";
+import {
+  adminCompanyItemSchema,
+  adminListCompaniesResultSchema,
+  adminCompanyDetailResultSchema,
+  companyActionResultSchema,
+  type AdminListCompaniesResult,
+  type AdminCompanyDetailResult,
+} from "./schemas";
 
 const addContactSchema = z.object({
   companyId: z
@@ -78,7 +86,12 @@ export async function addCompanyContact(_prevState: { error: string }, formData:
   });
 
   revalidatePath("/company/contacts");
-  return { error: "" };
+  const result = { error: "" };
+  const outputParsed = companyActionResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error("addCompanyContact output validation failed:", outputParsed.error);
+  }
+  return result;
 }
 
 export async function removeCompanyContact(_prevState: { error: string }, formData: FormData) {
@@ -94,7 +107,12 @@ export async function removeCompanyContact(_prevState: { error: string }, formDa
   });
 
   revalidatePath("/company/contacts");
-  return { error: "" };
+  const result = { error: "" };
+  const outputParsed = companyActionResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error("removeCompanyContact output validation failed:", outputParsed.error);
+  }
+  return result;
 }
 
 const addStoreSchema = z.object({
@@ -136,7 +154,12 @@ export async function addCompanyStore(_prevState: { error: string }, formData: F
   });
 
   revalidatePath("/company/stores");
-  return { error: "" };
+  const result = { error: "" };
+  const outputParsed = companyActionResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error("addCompanyStore output validation failed:", outputParsed.error);
+  }
+  return result;
 }
 
 export async function removeCompanyStore(_prevState: { error: string }, formData: FormData) {
@@ -154,45 +177,18 @@ export async function removeCompanyStore(_prevState: { error: string }, formData
   });
 
   revalidatePath("/company/stores");
-  return { error: "" };
+  const result = { error: "" };
+  const outputParsed = companyActionResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error("removeCompanyStore output validation failed:", outputParsed.error);
+  }
+  return result;
 }
 
 // ---------------------------------------------------------------------------
 // Company list/get — admin-level server actions
 // Mirrors Yii2 admin CompanyController::actionList and actionView.
 // ---------------------------------------------------------------------------
-
-export type CompanyItem = {
-  company_id: number;
-  company_name: string;
-  company_common_name_en: string | null;
-  company_common_name_ar: string | null;
-  company_email: string | null;
-  company_website: string | null;
-  company_logo: string | null;
-  commercial_licence: string | null;
-  company_hourly_rate: number | null;
-  company_bonus_commission: number | null;
-  company_approved_to_hire: boolean;
-  company_status_override: boolean;
-  company_followup: boolean | null;
-  total_candidate: bigint | null;
-  no_of_active_requests: number | null;
-  country_id: number | null;
-  currency_code: string | null;
-  parent_company_id: number | null;
-  staff_id: number | null;
-  company_created_at: Date;
-  company_updated_at: Date;
-};
-
-export type ListCompaniesResult = {
-  companies: CompanyItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
 
 const listCompaniesSchema = z.object({
   page: z.coerce.number().int().positive().optional().default(1),
@@ -217,7 +213,7 @@ export type GetCompanyInput = z.input<typeof getCompanySchema>;
  */
 export async function listCompanies(
   params: ListCompaniesInput = {},
-): Promise<ListCompaniesResult> {
+): Promise<AdminListCompaniesResult> {
   await requireCapability("company.read.any");
 
   const parsed = listCompaniesSchema.safeParse(params);
@@ -260,7 +256,7 @@ export async function listCompanies(
     prisma.company.count({ where: where as any }),
   ]);
 
-  const companies: CompanyItem[] = rawCompanies.map((c) => ({
+  const companies = rawCompanies.map((c) => ({
     company_id: c.company_id,
     company_name: c.company_name,
     company_common_name_en: c.company_common_name_en,
@@ -284,13 +280,21 @@ export async function listCompanies(
     company_updated_at: c.company_updated_at,
   }));
 
-  return {
+  const result = {
     companies,
     total,
     page,
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  const outputParsed = adminListCompaniesResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error("listCompanies output validation failed:", outputParsed.error);
+    throw new Error("Invalid response shape from listCompanies");
+  }
+
+  return outputParsed.data;
 }
 
 /**
@@ -298,7 +302,7 @@ export async function listCompanies(
  * Mirrors admin CompanyController::actionView.
  * Requires company.read.any capability.
  */
-export async function getCompany(params: GetCompanyInput): Promise<CompanyItem | null> {
+export async function getCompany(params: GetCompanyInput): Promise<AdminCompanyDetailResult> {
   await requireCapability("company.read.any");
 
   const parsed = getCompanySchema.safeParse(params);
@@ -314,7 +318,7 @@ export async function getCompany(params: GetCompanyInput): Promise<CompanyItem |
 
   if (!c) return null;
 
-  return {
+  const result = {
     company_id: c.company_id,
     company_name: c.company_name,
     company_common_name_en: c.company_common_name_en,
@@ -337,4 +341,12 @@ export async function getCompany(params: GetCompanyInput): Promise<CompanyItem |
     company_created_at: c.company_created_at,
     company_updated_at: c.company_updated_at,
   };
+
+  const outputParsed = adminCompanyDetailResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error("getCompany output validation failed:", outputParsed.error);
+    throw new Error("Invalid response shape from getCompany");
+  }
+
+  return outputParsed.data;
 }
