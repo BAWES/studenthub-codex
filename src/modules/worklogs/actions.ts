@@ -4,91 +4,45 @@ import crypto from "node:crypto";
 import type { Route } from "next";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { requireCapability, requireRoleCapability } from "@/modules/auth/session";
-
-// ---------------------------------------------------------------------------
-// Zod schemas (shared with test file — duplicated for server action use)
-// ---------------------------------------------------------------------------
-
-const createWorklogSchema = z.object({
-  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be YYYY-MM-DD"),
-  startTime: z.string().regex(/^\d{2}:\d{2}$/, "Start time must be HH:MM"),
-  endTime: z.string().regex(/^\d{2}:\d{2}$/, "End time must be HH:MM").optional().or(z.literal("")),
-  note: z.string().max(500, "Note must be 500 characters or less").optional().or(z.literal("")),
-});
-
-const listWorklogsSchema = z.object({
-  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be YYYY-MM-DD").optional().or(z.literal("")),
-  startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Start date must be YYYY-MM-DD").optional().or(z.literal("")),
-  endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "End date must be YYYY-MM-DD").optional().or(z.literal("")),
-});
-
-const updateWorklogSchema = z.object({
-  worklogUuid: z.string().min(1, "Work log UUID is required"),
-  startTime: z.string().regex(/^\d{2}:\d{2}$/, "Start time must be HH:MM").optional(),
-  endTime: z.string().regex(/^\d{2}:\d{2}$/, "End time must be HH:MM").optional(),
-  note: z.string().max(500, "Note must be 500 characters or less").optional(),
-});
-
-const deleteWorklogSchema = z.object({
-  worklogUuid: z.string().min(1, "Work log UUID is required"),
-});
-
-const appealWorklogSchema = z.object({
-  worklogUuid: z.string().min(1, "Work log UUID is required"),
-  reason: z.string().min(10, "Reason must be at least 10 characters").max(1000, "Reason must be 1000 characters or less"),
-});
-
-const getWorklogSchema = z.object({
-  worklogUuid: z.string().min(1, "Work log UUID is required"),
-});
-
-const getWorklogStatsSchema = z.object({
-  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be YYYY-MM-DD"),
-});
-
-const getWorkingDatesSchema = z.object({
-  startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Start date must be YYYY-MM-DD").optional().or(z.literal("")),
-  endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "End date must be YYYY-MM-DD").optional().or(z.literal("")),
-});
-
-const getAppealDetailSchema = z.object({
-  appealUuid: z.string().min(1, "Appeal UUID is required"),
-});
-
-const markAppealUpdateReadSchema = z.object({
-  appealUpdateUuid: z.string().min(1, "Appeal update UUID is required"),
-});
-
-// ---------------------------------------------------------------------------
-// Response types
-// ---------------------------------------------------------------------------
-
-export type WorklogState = {
-  success: boolean;
-  error?: string;
-};
-
-export type WorklogRow = {
-  uuid: string;
-  date: string;
-  startTime: string | null;
-  endTime: string | null;
-  totalTime: number | null;
-  note: string | null;
-  status: number;
-  via: string | null;
-  storeId: number | null;
-};
+import { requireRoleCapability } from "@/modules/auth/session";
+import {
+  createWorklogSchema,
+  listWorklogsSchema,
+  updateWorklogSchema,
+  deleteWorklogSchema,
+  appealWorklogSchema,
+  getWorklogSchema,
+  getWorklogStatsSchema,
+  getWorkingDatesSchema,
+  getAppealDetailSchema,
+  markAppealUpdateReadSchema,
+  listWorklogsResultSchema,
+  getWorklogResultSchema,
+  getWorklogStatsResultSchema,
+  getWorkingDatesResultSchema,
+  getAppealDetailResultSchema,
+} from "./schemas";
+import type {
+  ListWorklogsInput,
+  GetWorklogInput,
+  GetWorklogStatsInput,
+  GetWorkingDatesInput,
+  GetAppealDetailInput,
+  WorklogRow,
+  WorklogStats,
+  WorkingDate,
+  AppealDetail,
+  WorklogState,
+  MarkAppealUpdateReadState,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // listWorklogs
 // ---------------------------------------------------------------------------
 
 export async function listWorklogs(
-  params: z.infer<typeof listWorklogsSchema>,
+  params: ListWorklogsInput,
 ): Promise<{ worklogs: WorklogRow[]; error?: string }> {
   const session = await requireRoleCapability("candidate", "time.read.own");
   const candidateId = Number(session.id);
@@ -117,7 +71,7 @@ export async function listWorklogs(
     take: 200,
   });
 
-  return {
+  const result = {
     worklogs: rows.map((r) => ({
       uuid: r.candidate_working_hour_uuid,
       date: r.date ? r.date.toISOString().split("T")[0] : "",
@@ -130,6 +84,17 @@ export async function listWorklogs(
       storeId: r.store_id,
     })),
   };
+
+  // Output validation — log mismatches without throwing
+  const outputParsed = listWorklogsResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/worklogs] listWorklogs output failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -366,7 +331,7 @@ export async function appealWorklog(
 // ---------------------------------------------------------------------------
 
 export async function getWorklog(
-  params: z.infer<typeof getWorklogSchema>,
+  params: GetWorklogInput,
 ): Promise<{ worklog: WorklogRow | null; error?: string }> {
   const session = await requireRoleCapability("candidate", "time.read.own");
   const candidateId = Number(session.id);
@@ -387,7 +352,7 @@ export async function getWorklog(
     return { worklog: null, error: "Work log not found." };
   }
 
-  return {
+  const result = {
     worklog: {
       uuid: row.candidate_working_hour_uuid,
       date: row.date ? row.date.toISOString().split("T")[0] : "",
@@ -400,21 +365,25 @@ export async function getWorklog(
       storeId: row.store_id,
     },
   };
+
+  // Output validation — log mismatches without throwing
+  const outputParsed = getWorklogResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/worklogs] getWorklog output failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
 // getWorklogStats — aggregated stats per date (checkIn, checkOut, totalTime)
 // ---------------------------------------------------------------------------
 
-export type WorklogStats = {
-  checkIn: string | null;
-  checkOut: string | null;
-  totalTime: number | null;
-  status: number | null;
-};
-
 export async function getWorklogStats(
-  params: z.infer<typeof getWorklogStatsSchema>,
+  params: GetWorklogStatsInput,
 ): Promise<{ stats: WorklogStats | null; error?: string }> {
   const session = await requireRoleCapability("candidate", "time.read.own");
   const candidateId = Number(session.id);
@@ -441,7 +410,7 @@ export async function getWorklogStats(
     }),
   ]);
 
-  return {
+  const result = {
     stats: {
       checkIn: firstSession?.start_time ? firstSession.start_time.toISOString() : null,
       checkOut: lastSession?.end_time ? lastSession.end_time.toISOString() : null,
@@ -449,19 +418,25 @@ export async function getWorklogStats(
       status: lastSession?.status ?? null,
     },
   };
+
+  // Output validation — log mismatches without throwing
+  const outputParsed = getWorklogStatsResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/worklogs] getWorklogStats output failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
 // getWorkingDates — dates that have worklogs within an optional range
 // ---------------------------------------------------------------------------
 
-export type WorkingDate = {
-  date: string;
-  totalTime: number | null;
-};
-
 export async function getWorkingDates(
-  params: z.infer<typeof getWorkingDatesSchema>,
+  params: GetWorkingDatesInput,
 ): Promise<{ dates: WorkingDate[]; error?: string }> {
   const session = await requireRoleCapability("candidate", "time.read.own");
   const candidateId = Number(session.id);
@@ -483,28 +458,31 @@ export async function getWorkingDates(
     orderBy: { date: "desc" },
   });
 
-  return {
+  const result = {
     dates: rows.map((r) => ({
       date: r.date ? r.date.toISOString().split("T")[0] : "",
       totalTime: r._sum.total_time ?? 0,
     })),
   };
+
+  // Output validation — log mismatches without throwing
+  const outputParsed = getWorkingDatesResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/worklogs] getWorkingDates output failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
 // getAppealDetail — single appeal by UUID
 // ---------------------------------------------------------------------------
 
-export type AppealDetail = {
-  appealUuid: string;
-  worklogUuid: string;
-  reason: string | null;
-  status: number;
-  createdAt: string;
-};
-
 export async function getAppealDetail(
-  params: z.infer<typeof getAppealDetailSchema>,
+  params: GetAppealDetailInput,
 ): Promise<{ appeal: AppealDetail | null; error?: string }> {
   const session = await requireRoleCapability("candidate", "time.read.own");
   const candidateId = Number(session.id);
@@ -525,7 +503,7 @@ export async function getAppealDetail(
     return { appeal: null, error: "Appeal not found." };
   }
 
-  return {
+  const result = {
     appeal: {
       appealUuid: row.appeal_uuid,
       worklogUuid: row.candidate_working_hour_uuid,
@@ -534,16 +512,22 @@ export async function getAppealDetail(
       createdAt: row.created_at ? row.created_at.toISOString() : "",
     },
   };
+
+  // Output validation — log mismatches without throwing
+  const outputParsed = getAppealDetailResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/worklogs] getAppealDetail output failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
 // markAppealUpdateRead — mark an appeal update as read (is_new -> false)
 // ---------------------------------------------------------------------------
-
-export type MarkAppealUpdateReadState = {
-  success: boolean;
-  error?: string;
-};
 
 export async function markAppealUpdateRead(
   _prevState: MarkAppealUpdateReadState,
@@ -577,20 +561,3 @@ export async function markAppealUpdateRead(
 
   return { success: true };
 }
-
-// ---------------------------------------------------------------------------
-// Barrel export
-// ---------------------------------------------------------------------------
-
-export {
-  createWorklogSchema,
-  listWorklogsSchema,
-  updateWorklogSchema,
-  deleteWorklogSchema,
-  appealWorklogSchema,
-  getWorklogSchema,
-  getWorklogStatsSchema,
-  getWorkingDatesSchema,
-  getAppealDetailSchema,
-  markAppealUpdateReadSchema,
-};
