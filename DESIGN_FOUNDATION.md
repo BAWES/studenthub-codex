@@ -6,31 +6,35 @@
 
 | Element | Value | Hex |
 |---------|-------|-----|
-| **Primary accent** | Zendesk Coral | `#eb6651` |
-| Hover | Darker coral | `#d45441` |
-| Light bg | Coral tint | `#fef1ef` |
-| Success | Green | `#228e6c` |
-| Text | Ink (near-black) | `#182230` |
-| Body | Page bg | `#f5f7fa` |
-| Cards | White | `#ffffff` |
-| Borders | Subtle grey | `#d6dce7` |
+| **Primary accent** | Blue | `#0b63ce` |
+| Hover | Darker blue | `#084b9b` |
+| **Secondary CTA** | Amber | `#f59e0b` |
+| Secondary hover | Darker amber | `#d97706` |
+| Success | Green | `#24835b` |
+| Text | Ink (near-black) | `#182230` (light) / `#e7ecf5` (dark) |
+| Body bg | Paper | `#f5f7fa` (light) / `#090d14` (dark) |
+| Cards | Surface | `#ffffff` (light) / `#111824` (dark) |
+| Borders | Subtle grey | `#d6dce7` (light) / `#2a3547` (dark) |
+
+## ✅ Landing Page Design
+
+- **Primary accent**: Blue (#0b63ce) — trust-signalling, used for CTAs, badges, links
+- **Secondary CTAs**: Amber/gold (#f59e0b) gradient — employer-facing actions
+- **Glass effects**: `backdrop-filter: blur()` on nav, stat cards, step cards, testimonial cards, CTA sections
+- **Dark mode**: Supported — page respects system preference and localStorage theme
+- **Hero**: "Connecting students with the right employers" — blue emphasis on "the right employers"
+- **Dual CTAs**: "Create your free profile" (students, blue) + "Hire students" (employers, amber)
+- **Scroll-reveal animations**: Staggered fade+slide-up on all sections
+- **Staff recruiters**: Accurately reflected as the primary matching mechanism
+- **Persona switching**: Student/Company tabs change all section content
+- **CSS variables only**: No hardcoded theme colors — uses var(--ink), var(--surface), var(--border), etc.
+- **Components**: `src/components/landing/` — modular, per-section components
 
 ## 🚫 Forbidden on Landing Page
 
-- Glass/blur effects (`backdrop-blur`, `shGlass`, `var(--sh-glass-bg)`)
-- Dark mode / theme toggle
-- Blue or purple primary gradients
-- "AI matches" as primary value prop
-- "Candidate" terminology (use "student")
-
-## ✅ Required on Landing Page
-
-- Coral #eb6651 buttons, links, badges
-- Clean white cards with `border: 1px solid var(--border)`
-- Always light mode (`data-theme="light"` + hardcoded light CSS vars)
-- "Staff recruiters match you" hero copy
-- "Get matched by our staff" How It Works
-- Two-sided persona: "I'm looking for work" / "I'm hiring"
+- Generic "AI matches" as primary value prop — staff recruiters drive matching, AI assists
+- "Candidate" terminology for public-facing content (use "student")
+- Zendesk Coral (#eb6651) palette — landing page uses blue primary (internal dashboards may differ)
 
 ## 📋 Business Facts (Dosu-Verified)
 
@@ -52,5 +56,5 @@ Every agent has access to `mcp_dosu_*` tools. Before writing marketing copy, lan
 ## 🔗 Key Files
 
 - `DESIGN_SYSTEM.md` — Full design tokens, components, animations
-- `src/app/LandingContent.tsx` — Landing page (reference implementation)
-- `~/.hermes/hr/lessons.md` — All agent lessons and failure patterns
+- `src/app/LandingContent.tsx` — Legacy landing (FROZEN — do not modify)
+- `src/components/landing/` — Active landing page components
