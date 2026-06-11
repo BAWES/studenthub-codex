@@ -53,6 +53,7 @@ vi.mock("lucide-react", () => ({
   Star: () => <span data-testid="icon-star" />,
   UserRound: () => <span data-testid="icon-user-round" />,
   UsersRound: () => <span data-testid="icon-users-round" />,
+  Users: () => <span data-testid="icon-users" />,
   X: () => <span data-testid="icon-x" />,
   Zap: () => <span data-testid="icon-zap" />,
   PieChart: () => <span data-testid="icon-pie-chart" />,

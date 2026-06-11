@@ -70,6 +70,7 @@ vi.mock("lucide-react", () => ({
   GitMerge: () => <span data-testid="icon-git-merge" />,
   ShieldCheck: () => <span data-testid="icon-shield-check" />,
   UsersRound: () => <span data-testid="icon-users-round" />,
+  Users: () => <span data-testid="icon-users" />,
   Check: () => <span data-testid="icon-check" />,
   X: () => <span data-testid="icon-x" />,
   Minus: () => <span data-testid="icon-minus" />,
