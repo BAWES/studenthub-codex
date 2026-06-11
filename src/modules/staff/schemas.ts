@@ -26,6 +26,10 @@ export const listStaffResultSchema = z.object({
 
 export type StaffListResult = z.output<typeof listStaffResultSchema>;
 
+/** Alias expected by tests — same schema as listStaffResultSchema */
+export const staffListResultSchema = listStaffResultSchema;
+
+/** Nullable staff item result for getStaff (returns null when not found) */
 export const staffGetResultSchema = staffListItemSchema.nullable();
 
 export type StaffGetResult = z.output<typeof staffGetResultSchema>;

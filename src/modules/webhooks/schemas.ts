@@ -25,6 +25,7 @@ export const listWebhooksResultSchema = z.object({
 
 export type ListWebhooksResult = z.output<typeof listWebhooksResultSchema>;
 
+/** Nullable webhook item result for getWebhook (returns null when not found) */
 export const webhookGetResultSchema = webhookListItemSchema.nullable();
 
 export type WebhookGetResult = z.output<typeof webhookGetResultSchema>;
