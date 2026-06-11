@@ -8,4 +8,4 @@ export type {
   ListCandidateEducationResult,
   ListCandidateEducationParams,
   GetCandidateEducationParams,
-} from "./actions";
+} from "./schemas";
