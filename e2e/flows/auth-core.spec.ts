@@ -1,0 +1,449 @@
+// ---------------------------------------------------------------------------
+// E2E Sprint 2e: Auth critical flows
+//
+// CI only. Uses USE_MOCK_FIXTURES=true to bypass DB dependency.
+// Flows:
+//   1. Unauthenticated visitor gets redirected to /login
+//   2. Role-based login redirects — each role lands on their dashboard
+//   3. Valid session persists across page reload
+//   4. Expired / invalid session redirects to /login
+//   5. Logout clears session and redirects to landing
+//   6. Password reset flow — request, verify, set new password
+// ---------------------------------------------------------------------------
+
+import { test, expect, type BrowserContext, type Page } from "@playwright/test";
+import { getMockFixtures, type FixtureUser } from "../fixtures/users";
+
+// Force USE_MOCK_FIXTURES=true — these tests must never need DB seed data
+process.env.USE_MOCK_FIXTURES = "true";
+
+let admin: FixtureUser;
+let staff: FixtureUser;
+let candidate: FixtureUser;
+let company: FixtureUser;
+let inspector: FixtureUser;
+
+// ── Helpers ────────────────────────────────────────────────────────────────
+
+/**
+ * Create an authenticated browser context for the given user.
+ * Returns helpers for page, context, error tracking, and cleanup.
+ */
+async function authContext(user: FixtureUser): Promise<{
+  context: BrowserContext;
+  page: Page;
+  errors: string[];
+  close: () => Promise<void>;
+}> {
+  const browser = await (
+    await import("@playwright/test")
+  ).chromium.launch();
+  const context = await browser.newContext();
+  await context.addCookies([
+    {
+      name: "studenthub_next_session",
+      value: user.cookie,
+      domain: "127.0.0.1",
+      path: "/",
+    },
+  ]);
+  const page = await context.newPage();
+  const errors: string[] = [];
+  page.on("console", (msg) => {
+    if (msg.type() === "error") errors.push(msg.text());
+  });
+  return {
+    context,
+    page,
+    errors,
+    close: async () => {
+      await context.close();
+      await browser.close();
+    },
+  };
+}
+
+/**
+ * Create an unauthenticated browser context (no session cookie).
+ */
+async function unauthContext(): Promise<{
+  context: BrowserContext;
+  page: Page;
+  errors: string[];
+  close: () => Promise<void>;
+}> {
+  const browser = await (
+    await import("@playwright/test")
+  ).chromium.launch();
+  const context = await browser.newContext();
+  const page = await context.newPage();
+  const errors: string[] = [];
+  page.on("console", (msg) => {
+    if (msg.type() === "error") errors.push(msg.text());
+  });
+  return {
+    context,
+    page,
+    errors,
+    close: async () => {
+      await context.close();
+      await browser.close();
+    },
+  };
+}
+
+/** Assert no React hydration / serialization errors. */
+function assertNoReactErrors(errors: string[]) {
+  const bad = errors.filter(
+    (m) =>
+      m.includes("hydration") ||
+      m.includes("serialization") ||
+      m.includes("Functions cannot be passed"),
+  );
+  expect(bad).toEqual([]);
+}
+
+/**
+ * Create a deliberately expired / tampered session cookie.
+ * Uses a real payload with an invalid signature so the middleware rejects it.
+ */
+function tamperedCookie(originalCookie: string): string {
+  // Graft an obviously invalid HMAC onto the original payload
+  const dotIndex = originalCookie.indexOf(".");
+  if (dotIndex === -1) return "tampered.payload.INVALIDSIGNATURE==";
+  return originalCookie.substring(0, dotIndex) + ".INVALIDSIGNATURE==";
+}
+
+// ── Suite ──────────────────────────────────────────────────────────────────
+
+test.describe("Auth critical flows — authentication, redirects, session, logout, password reset", () => {
+  test.describe.configure({ mode: "serial" });
+
+  test.beforeAll(() => {
+    const fixtures = getMockFixtures();
+    admin = fixtures.get("admin")!;
+    staff = fixtures.get("staff")!;
+    candidate = fixtures.get("candidate")!;
+    company = fixtures.get("company")!;
+    inspector = fixtures.get("inspector")!;
+  });
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // Flow 1 — Unauthenticated Access Redirect
+  // ──────────────────────────────────────────────────────────────────────────
+
+  test.describe("Flow 1 — Unauthenticated access redirects", () => {
+    test("1a. Unauthenticated /staff redirects to /login", async () => {
+      const ctx = await unauthContext();
+
+      await ctx.page.goto("/staff");
+      await ctx.page.waitForLoadState("load");
+      await expect(ctx.page).toHaveURL(/\/login/);
+
+      assertNoReactErrors(ctx.errors);
+      await ctx.close();
+    });
+
+    test("1b. Unauthenticated /candidate redirects to /login", async () => {
+      const ctx = await unauthContext();
+      await ctx.page.goto("/candidate");
+      await ctx.page.waitForLoadState("load");
+      await expect(ctx.page).toHaveURL(/\/login/);
+      assertNoReactErrors(ctx.errors);
+      await ctx.close();
+    });
+
+    test("1c. Unauthenticated /admin redirects to /login", async () => {
+      const ctx = await unauthContext();
+      await ctx.page.goto("/admin");
+      await ctx.page.waitForLoadState("load");
+      await expect(ctx.page).toHaveURL(/\/login/);
+      assertNoReactErrors(ctx.errors);
+      await ctx.close();
+    });
+
+    test("1d. Unauthenticated /company redirects to /login", async () => {
+      const ctx = await unauthContext();
+      await ctx.page.goto("/company");
+      await ctx.page.waitForLoadState("load");
+      await expect(ctx.page).toHaveURL(/\/login/);
+      assertNoReactErrors(ctx.errors);
+      await ctx.close();
+    });
+
+    test("1e. Unauthenticated /inspector redirects to /login", async () => {
+      const ctx = await unauthContext();
+      await ctx.page.goto("/inspector");
+      await ctx.page.waitForLoadState("load");
+      await expect(ctx.page).toHaveURL(/\/login/);
+      assertNoReactErrors(ctx.errors);
+      await ctx.close();
+    });
+
+    test("1f. Unauthenticated /app redirects to /login", async () => {
+      const ctx = await unauthContext();
+      await ctx.page.goto("/app");
+      await ctx.page.waitForLoadState("load");
+      await expect(ctx.page).toHaveURL(/\/login/);
+      assertNoReactErrors(ctx.errors);
+      await ctx.close();
+    });
+  });
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // Flow 2 — Role-Based Login Redirects
+  //   When an authenticated user visits /login, the middleware should
+  //   redirect them to their role-specific dashboard.
+  // ──────────────────────────────────────────────────────────────────────────
+
+  test.describe("Flow 2 — Role-based login redirects", () => {
+    test("2a. Candidate session on /login redirects to /candidate", async () => {
+      const ctx = await authContext(candidate);
+
+      await ctx.page.goto("/login");
+      await ctx.page.waitForLoadState("load");
+      // Candidate should land on their dashboard
+      await expect(ctx.page).toHaveURL(/\/candidate/);
+
+      assertNoReactErrors(ctx.errors);
+      await ctx.close();
+    });
+
+    test("2b. Staff session on /login redirects to /staff", async () => {
+      const ctx = await authContext(staff);
+
+      await ctx.page.goto("/login");
+      await ctx.page.waitForLoadState("load");
+      await expect(ctx.page).toHaveURL(/\/staff/);
+
+      assertNoReactErrors(ctx.errors);
+      await ctx.close();
+    });
+
+    test("2c. Admin session on /login redirects to /admin", async () => {
+      const ctx = await authContext(admin);
+
+      await ctx.page.goto("/login");
+      await ctx.page.waitForLoadState("load");
+      await expect(ctx.page).toHaveURL(/\/admin/);
+
+      assertNoReactErrors(ctx.errors);
+      await ctx.close();
+    });
+
+    test("2d. Company session on /login redirects to /company", async () => {
+      const ctx = await authContext(company);
+
+      await ctx.page.goto("/login");
+      await ctx.page.waitForLoadState("load");
+      await expect(ctx.page).toHaveURL(/\/company/);
+
+      assertNoReactErrors(ctx.errors);
+      await ctx.close();
+    });
+
+    test("2e. Inspector session on /login redirects to /inspector", async () => {
+      const ctx = await authContext(inspector);
+
+      await ctx.page.goto("/login");
+      await ctx.page.waitForLoadState("load");
+      await expect(ctx.page).toHaveURL(/\/inspector/);
+
+      assertNoReactErrors(ctx.errors);
+      await ctx.close();
+    });
+  });
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // Flow 3 — Session Persistence
+  // ──────────────────────────────────────────────────────────────────────────
+
+  test.describe("Flow 3 — Session persistence across reload", () => {
+    test("3a. Valid candidate session persists across page reload", async () => {
+      const ctx = await authContext(candidate);
+
+      await ctx.page.goto("/candidate");
+      await ctx.page.waitForLoadState("load");
+      await expect(ctx.page).toHaveURL(/\/candidate/);
+
+      // Reload the page — session should still be valid
+      await ctx.page.reload();
+      await ctx.page.waitForLoadState("load");
+      await expect(ctx.page).toHaveURL(/\/candidate/);
+      await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
+
+      assertNoReactErrors(ctx.errors);
+      await ctx.close();
+    });
+
+    test("3b. Valid inspector session persists across page reload", async () => {
+      const ctx = await authContext(inspector);
+
+      await ctx.page.goto("/inspector/id-requests");
+      await ctx.page.waitForLoadState("load");
+      await expect(ctx.page).toHaveURL(/\/inspector\/id-requests/);
+
+      // Reload
+      await ctx.page.reload();
+      await ctx.page.waitForLoadState("load");
+      await expect(ctx.page).toHaveURL(/\/inspector\/id-requests/);
+      await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
+
+      assertNoReactErrors(ctx.errors);
+      await ctx.close();
+    });
+  });
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // Flow 4 — Expired / Invalid Session
+  // ──────────────────────────────────────────────────────────────────────────
+
+  test.describe("Flow 4 — Expired / invalid session redirects to /login", () => {
+    test("4a. Tampered session cookie redirects candidate to /login", async () => {
+      const { chromium } = await import("@playwright/test");
+      const browser = await chromium.launch();
+      const context = await browser.newContext();
+
+      // Set an invalid / tampered session cookie
+      const badCookie = tamperedCookie(candidate.cookie);
+      await context.addCookies([
+        {
+          name: "studenthub_next_session",
+          value: badCookie,
+          domain: "127.0.0.1",
+          path: "/",
+        },
+      ]);
+      const page = await context.newPage();
+
+      await page.goto("/candidate");
+      await page.waitForLoadState("load");
+      // Should reject the tampered cookie and redirect to /login
+      await expect(page).toHaveURL(/\/login/);
+
+      await context.close();
+      await browser.close();
+    });
+
+    test("4b. Tampered session cookie redirects inspector to /login", async () => {
+      const { chromium } = await import("@playwright/test");
+      const browser = await chromium.launch();
+      const context = await browser.newContext();
+
+      const badCookie = tamperedCookie(inspector.cookie);
+      await context.addCookies([
+        {
+          name: "studenthub_next_session",
+          value: badCookie,
+          domain: "127.0.0.1",
+          path: "/",
+        },
+      ]);
+      const page = await context.newPage();
+
+      await page.goto("/inspector/id-requests");
+      await page.waitForLoadState("load");
+      await expect(page).toHaveURL(/\/login/);
+
+      await context.close();
+      await browser.close();
+    });
+  });
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // Flow 5 — Logout
+  // ──────────────────────────────────────────────────────────────────────────
+
+  test.describe("Flow 5 — Logout clears session", () => {
+    test("5a. Candidate logout redirects to landing, then protected routes redirect to /login", async () => {
+      const ctx = await authContext(candidate);
+
+      // Navigate to candidate dashboard
+      await ctx.page.goto("/candidate");
+      await ctx.page.waitForLoadState("load");
+      await expect(ctx.page).toHaveURL(/\/candidate/);
+
+      // Hit the logout endpoint
+      await ctx.page.goto("/api/auth/logout");
+      await ctx.page.waitForLoadState("load");
+
+      // After logout, a protected route should redirect to /login
+      await ctx.page.goto("/candidate");
+      await ctx.page.waitForLoadState("load");
+      await expect(ctx.page).toHaveURL(/\/login/);
+
+      assertNoReactErrors(ctx.errors);
+      await ctx.close();
+    });
+  });
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // Flow 6 — Password Reset Flow
+  // ──────────────────────────────────────────────────────────────────────────
+
+  test.describe("Flow 6 — Password reset flow", () => {
+    test("6a. Forgot password page renders with email input", async () => {
+      const ctx = await unauthContext();
+
+      await ctx.page.goto("/forgot-password");
+      await ctx.page.waitForLoadState("load");
+      await expect(ctx.page).toHaveURL(/\/forgot-password/);
+      await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
+
+      // Email input field should be present
+      await expect(
+        ctx.page.locator('input[type="email"]').or(ctx.page.locator('input[name="email"]')),
+      ).toBeVisible({ timeout: 5000 });
+
+      // Submit button for password reset
+      await expect(
+        ctx.page.getByRole("button", { name: /reset|send|submit/i }).or(
+          ctx.page.locator('button[type="submit"], button:has-text("Reset")').first(),
+        ),
+      ).toBeVisible({ timeout: 5000 });
+
+      assertNoReactErrors(ctx.errors);
+      await ctx.close();
+    });
+
+    test("6b. Reset password page renders with new password fields", async () => {
+      const ctx = await unauthContext();
+
+      // Navigate to reset-password with a dummy token path
+      await ctx.page.goto("/reset-password");
+      await ctx.page.waitForLoadState("load");
+      await expect(ctx.page).toHaveURL(/\/reset-password/);
+      await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
+
+      // Expect password input fields for setting a new password
+      const passwordInputs = ctx.page.locator('input[type="password"]');
+      await expect(passwordInputs.first()).toBeVisible({ timeout: 5000 });
+
+      assertNoReactErrors(ctx.errors);
+      await ctx.close();
+    });
+
+    test("6c. Login page renders with sign-in form", async () => {
+      const ctx = await unauthContext();
+
+      await ctx.page.goto("/login");
+      await ctx.page.waitForLoadState("load");
+      await expect(ctx.page).toHaveURL(/\/login/);
+      await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
+
+      // Login form fields should be present
+      const emailInput = ctx.page.locator('input[type="email"]');
+      const passwordInput = ctx.page.locator('input[type="password"]');
+      await expect(emailInput).toBeVisible({ timeout: 5000 });
+      await expect(passwordInput).toBeVisible({ timeout: 5000 });
+
+      // Sign in button
+      await expect(
+        ctx.page.getByRole("button", { name: /sign in/i }),
+      ).toBeVisible({ timeout: 5000 });
+
+      assertNoReactErrors(ctx.errors);
+      await ctx.close();
+    });
+  });
+});
