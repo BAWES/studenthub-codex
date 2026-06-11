@@ -12,6 +12,7 @@ const {
   mockModuleListWorklogs,
   mockModuleGetWorklog,
   mockModuleCreateWorklog,
+  mockModuleUpdateWorklogStatus,
   mockPrismaUpdate,
   mockRevalidatePath,
 } = vi.hoisted(() => ({
@@ -19,6 +20,7 @@ const {
   mockModuleListWorklogs: vi.fn(),
   mockModuleGetWorklog: vi.fn(),
   mockModuleCreateWorklog: vi.fn(),
+  mockModuleUpdateWorklogStatus: vi.fn(),
   mockPrismaUpdate: vi.fn(),
   mockRevalidatePath: vi.fn(),
 }));
@@ -33,6 +35,7 @@ vi.mock("@/modules/worklogs/actions", () => ({
   listWorklogs: mockModuleListWorklogs,
   getWorklog: mockModuleGetWorklog,
   createWorklog: mockModuleCreateWorklog,
+  updateWorklogStatus: mockModuleUpdateWorklogStatus,
 }));
 
 // ── Mock Prisma (still needed for updateWorkLogStatus) ─────────────────
@@ -407,43 +410,25 @@ describe("updateWorkLogStatus — delegation", () => {
     mockRequireCapability.mockResolvedValue(SESSION);
   });
 
-  it("delegates ownership check to module getWorklog and updates via Prisma", async () => {
-    mockModuleGetWorklog.mockResolvedValue({ worklog: MODULE_WORKLOG });
-    const prismaResult = {
-      candidate_working_hour_uuid: WORKLOG_UUID,
-      date: new Date(DATE_STR),
-      start_time: new Date("2026-06-15T08:00:00"),
-      end_time: new Date("2026-06-15T16:00:00"),
-      total_time: 480,
-      status: 2,
-      via: "Manual Log",
-      note: "Test work log",
-      created_at: null,
-      updated_at: null,
-      store: null,
-    };
-    mockPrismaUpdate.mockResolvedValue(prismaResult);
+  it("delegates ownership check to module updateWorklogStatus", async () => {
+    mockModuleUpdateWorklogStatus.mockResolvedValue({
+      success: true,
+      worklog: { ...MODULE_WORKLOG, status: 2 },
+    });
 
     const result = await updateWorkLogStatus({
       workLogUuid: WORKLOG_UUID,
       status: 2,
     });
 
-    // Verify delegation to module for ownership check
+    // Verify delegation to module
     expect(mockRequireCapability).toHaveBeenCalledWith(
       "candidate.profile.edit",
     );
-    expect(mockModuleGetWorklog).toHaveBeenCalledWith({
+    expect(mockModuleUpdateWorklogStatus).toHaveBeenCalledWith({
       worklogUuid: WORKLOG_UUID,
+      status: 2,
     });
-
-    // Verify Prisma update was called (match on where + data subset)
-    expect(mockPrismaUpdate).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: { candidate_working_hour_uuid: WORKLOG_UUID },
-        data: expect.objectContaining({ status: 2 }),
-      }),
-    );
 
     expect(result.operation).toBe("success");
     expect(result.message).toBe("Work log status updated");
@@ -451,8 +436,11 @@ describe("updateWorkLogStatus — delegation", () => {
     expect(mockRevalidatePath).toHaveBeenCalledWith("/candidate/work-logs");
   });
 
-  it("returns error when module getWorklog returns null (not found)", async () => {
-    mockModuleGetWorklog.mockResolvedValue({ worklog: null });
+  it("returns error when module updateWorklogStatus returns not found", async () => {
+    mockModuleUpdateWorklogStatus.mockResolvedValue({
+      success: false,
+      error: "Work log not found.",
+    });
 
     const result = await updateWorkLogStatus({
       workLogUuid: WORKLOG_UUID,
@@ -460,8 +448,8 @@ describe("updateWorkLogStatus — delegation", () => {
     });
 
     expect(result.operation).toBe("error");
-    expect(result.message).toBe("Work log not found");
-    expect(mockPrismaUpdate).not.toHaveBeenCalled();
+    expect(result.message).toBe("Work log not found.");
+    expect(mockRevalidatePath).not.toHaveBeenCalled();
   });
 
   it("returns error on invalid input", async () => {
@@ -475,9 +463,8 @@ describe("updateWorkLogStatus — delegation", () => {
     expect(mockPrismaUpdate).not.toHaveBeenCalled();
   });
 
-  it("returns error when Prisma update throws", async () => {
-    mockModuleGetWorklog.mockResolvedValue({ worklog: MODULE_WORKLOG });
-    mockPrismaUpdate.mockRejectedValue(new Error("DB error"));
+  it("returns error when module updateWorklogStatus throws", async () => {
+    mockModuleUpdateWorklogStatus.mockRejectedValue(new Error("DB error"));
 
     const result = await updateWorkLogStatus({
       workLogUuid: WORKLOG_UUID,
@@ -486,5 +473,6 @@ describe("updateWorkLogStatus — delegation", () => {
 
     expect(result.operation).toBe("error");
     expect(result.message).toBe("DB error");
+    expect(mockRevalidatePath).not.toHaveBeenCalled();
   });
 });

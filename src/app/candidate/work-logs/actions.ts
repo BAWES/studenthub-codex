@@ -2,12 +2,12 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
 import {
   listWorklogs as moduleListWorklogs,
   getWorklog as moduleGetWorklog,
   createWorklog as moduleCreateWorklog,
+  updateWorklogStatus as moduleUpdateWorklogStatus,
 } from "@/modules/worklogs/actions";
 import {
   listWorkLogsSchema,
@@ -210,67 +210,45 @@ export async function updateWorkLogStatus(
 
   const { workLogUuid, status } = parsed.data;
 
-  // Delegate ownership verification to module's getWorklog
-  const moduleResult = await moduleGetWorklog({ worklogUuid: workLogUuid });
-  if (!moduleResult.worklog) {
-    return {
-      operation: "error",
-      message: "Work log not found",
-    };
-  }
-
   try {
-    const updated = await prisma.candidate_working_hour.update({
-      where: { candidate_working_hour_uuid: workLogUuid },
-      data: {
-        status,
-        updated_at: new Date(),
-      },
-      select: {
-        candidate_working_hour_uuid: true,
-        date: true,
-        start_time: true,
-        end_time: true,
-        total_time: true,
-        status: true,
-        via: true,
-        note: true,
-        created_at: true,
-        updated_at: true,
-        store: {
-          select: {
-            store_name: true,
-            company: { select: { company_name: true } },
-          },
-        },
-      },
+    // Delegate to module-level implementation
+    const moduleResult = await moduleUpdateWorklogStatus({
+      worklogUuid: workLogUuid,
+      status,
     });
+
+    if (!moduleResult.success || !moduleResult.worklog) {
+      return {
+        operation: "error",
+        message: moduleResult.error ?? "Failed to update work log status",
+      };
+    }
 
     revalidatePath("/candidate/work-logs");
 
+    const wl = moduleResult.worklog;
     return {
       operation: "success",
       message: "Work log status updated",
       workLog: {
-        candidate_working_hour_uuid: updated.candidate_working_hour_uuid,
-        date: updated.date,
-        start_time: updated.start_time,
-        end_time: updated.end_time,
-        total_time: updated.total_time,
-        status: updated.status,
-        via: updated.via,
-        note: updated.note,
-        store_name: updated.store?.store_name ?? null,
-        company_name: updated.store?.company?.company_name ?? null,
-        created_at: updated.created_at,
-        updated_at: updated.updated_at,
+        candidate_working_hour_uuid: wl.uuid,
+        date: wl.date ? new Date(wl.date) : null,
+        start_time: wl.startTime ? new Date(wl.startTime) : null,
+        end_time: wl.endTime ? new Date(wl.endTime) : null,
+        total_time: wl.totalTime,
+        status: wl.status,
+        via: wl.via,
+        note: wl.note,
+        store_name: null,
+        company_name: null,
+        created_at: null,
+        updated_at: null,
       },
     };
-  } catch (err) {
+  } catch (error) {
     return {
       operation: "error",
-      message:
-        err instanceof Error ? err.message : "Failed to update work log status",
+      message: error instanceof Error ? error.message : "An unexpected error occurred",
     };
   }
 }

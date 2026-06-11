@@ -17,6 +17,7 @@ import {
   getWorkingDatesSchema,
   getAppealDetailSchema,
   markAppealUpdateReadSchema,
+  updateWorklogStatusSchema,
   listWorklogsResultSchema,
   getWorklogResultSchema,
   getWorklogStatsResultSchema,
@@ -29,6 +30,7 @@ import type {
   GetWorklogStatsInput,
   GetWorkingDatesInput,
   GetAppealDetailInput,
+  UpdateWorklogStatusInput,
   WorklogRow,
   WorklogStats,
   WorkingDate,
@@ -266,6 +268,68 @@ export async function deleteWorklog(
 
   revalidatePath("/candidate/work-logs");
   return { success: true };
+}
+
+// ---------------------------------------------------------------------------
+// updateWorklogStatus — update only the status of a worklog
+// ---------------------------------------------------------------------------
+
+export async function updateWorklogStatus(
+  params: UpdateWorklogStatusInput,
+): Promise<{ success: boolean; error?: string; worklog?: WorklogRow }> {
+  const session = await requireRoleCapability("candidate", "time.read.own");
+  const candidateId = Number(session.id);
+
+  const parsed = updateWorklogStatusSchema.safeParse(params);
+  if (!parsed.success) {
+    return { success: false, error: parsed.error.errors[0]?.message ?? "Invalid input." };
+  }
+
+  const existing = await prisma.candidate_working_hour.findFirst({
+    where: {
+      candidate_working_hour_uuid: parsed.data.worklogUuid,
+      candidate_id: candidateId,
+    },
+    select: { candidate_working_hour_uuid: true },
+  });
+
+  if (!existing) {
+    return { success: false, error: "Work log not found." };
+  }
+
+  const updated = await prisma.candidate_working_hour.update({
+    where: { candidate_working_hour_uuid: parsed.data.worklogUuid },
+    data: {
+      status: parsed.data.status,
+      updated_at: new Date(),
+    },
+    select: {
+      candidate_working_hour_uuid: true,
+      date: true,
+      start_time: true,
+      end_time: true,
+      total_time: true,
+      status: true,
+      via: true,
+      note: true,
+      created_at: true,
+      updated_at: true,
+    },
+  });
+
+  const worklog: WorklogRow = {
+    uuid: updated.candidate_working_hour_uuid,
+    date: updated.date ? updated.date.toISOString().split("T")[0] : "",
+    startTime: updated.start_time ? updated.start_time.toISOString() : null,
+    endTime: updated.end_time ? updated.end_time.toISOString() : null,
+    totalTime: updated.total_time,
+    note: updated.note,
+    status: updated.status ?? 0,
+    via: updated.via,
+    storeId: null,
+  };
+
+  return { success: true, worklog };
 }
 
 // ---------------------------------------------------------------------------
