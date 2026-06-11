@@ -4,6 +4,14 @@ import crypto from "node:crypto";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
+import {
+  idCardItemSchema,
+  listIdCardsResultSchema,
+  idCardActionResultSchema,
+  type IdCardItem,
+  type ListIdCardsResult,
+  type IdCardActionResult,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Schemas
@@ -31,7 +39,7 @@ const updateIdCardStatusSchema = z.object({
 });
 
 // ---------------------------------------------------------------------------
-// Types
+// Types (input params)
 // ---------------------------------------------------------------------------
 
 export type ListIdCardsParams = z.input<typeof listIdCardsSchema>;
@@ -39,35 +47,8 @@ export type GetIdCardParams = z.input<typeof getIdCardSchema>;
 export type CreateIdCardParams = z.input<typeof createIdCardSchema>;
 export type UpdateIdCardStatusParams = z.input<typeof updateIdCardStatusSchema>;
 
-export type IdCardItem = {
-  id: number;
-  candidate_id: number | null;
-  expiry_date: Date | null;
-  deleted: number;
-  created_at: Date | null;
-  updated_at: Date | null;
-};
-
-export type ListIdCardsResult = {
-  idCards: IdCardItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
-
-export type CreateIdCardResult = {
-  operation: string;
-  message: string;
-};
-
-export type UpdateIdCardStatusResult = {
-  operation: string;
-  message: string;
-};
-
 // ---------------------------------------------------------------------------
-// Exported schemas
+// Exported schemas (for shared validation in tests)
 // ---------------------------------------------------------------------------
 
 export {
@@ -121,7 +102,7 @@ export async function listCandidateIdCards(
     prisma.candidate_id_card.count({ where: where as any }),
   ]);
 
-  return {
+  const result = {
     idCards: idCards.map((c) => ({
       id: c.id,
       candidate_id: c.candidate_id,
@@ -135,6 +116,17 @@ export async function listCandidateIdCards(
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  // Validate output shape
+  const outputParsed = listIdCardsResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/candidate-id-cards] listCandidateIdCards output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -164,7 +156,7 @@ export async function getCandidateIdCard(
 
   if (!idCard) return null;
 
-  return {
+  const result = {
     id: idCard.id,
     candidate_id: idCard.candidate_id,
     expiry_date: idCard.expiry_date,
@@ -172,6 +164,17 @@ export async function getCandidateIdCard(
     created_at: idCard.created_at,
     updated_at: idCard.updated_at,
   };
+
+  // Validate output shape
+  const outputParsed = idCardItemSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/candidate-id-cards] getCandidateIdCard output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -185,7 +188,7 @@ export async function getCandidateIdCard(
  */
 export async function createCandidateIdCard(
   params: CreateIdCardParams,
-): Promise<CreateIdCardResult> {
+): Promise<IdCardActionResult> {
   await requireCapability("candidate_id_card.write");
 
   const parsed = createIdCardSchema.safeParse(params);
@@ -247,7 +250,7 @@ export async function createCandidateIdCard(
  */
 export async function updateCandidateIdCardStatus(
   params: UpdateIdCardStatusParams,
-): Promise<UpdateIdCardStatusResult> {
+): Promise<IdCardActionResult> {
   await requireCapability("candidate_id_card.write");
 
   const parsed = updateIdCardStatusSchema.safeParse(params);

@@ -4,6 +4,14 @@ import crypto from "node:crypto";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
+import {
+  staffSalaryItemSchema,
+  listStaffSalariesResultSchema,
+  salaryActionResultSchema,
+  type StaffSalaryItem,
+  type ListStaffSalariesResult,
+  type SalaryActionResult,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Schemas
@@ -30,39 +38,15 @@ const createSalarySchema = z.object({
 });
 
 // ---------------------------------------------------------------------------
-// Types
+// Types (input params)
 // ---------------------------------------------------------------------------
 
 export type ListSalariesParams = z.input<typeof listSalariesSchema>;
 export type GetSalaryParams = z.input<typeof getSalarySchema>;
 export type CreateSalaryParams = z.input<typeof createSalarySchema>;
 
-export type StaffSalaryItem = {
-  staff_salary_uuid: string;
-  staff_id: number | null;
-  salary: number | null;
-  salary_currency: string | null;
-  comment: string | null;
-  salary_date: Date | null;
-  created_at: Date | null;
-  updated_at: Date | null;
-};
-
-export type ListStaffSalariesResult = {
-  salaries: StaffSalaryItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
-
-export type CreateSalaryResult = {
-  operation: string;
-  message: string;
-};
-
 // ---------------------------------------------------------------------------
-// Exported schemas
+// Exported schemas (for shared validation in tests)
 // ---------------------------------------------------------------------------
 
 export { listSalariesSchema, getSalarySchema, createSalarySchema };
@@ -124,7 +108,7 @@ export async function listStaffSalaries(
     prisma.staff_salary.count({ where: where as any }),
   ]);
 
-  return {
+  const result = {
     salaries: salaries.map((s) => ({
       staff_salary_uuid: s.staff_salary_uuid,
       staff_id: s.staff_id,
@@ -140,6 +124,17 @@ export async function listStaffSalaries(
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  // Validate output shape
+  const outputParsed = listStaffSalariesResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/staff-salaries] listStaffSalaries output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -169,7 +164,7 @@ export async function getStaffSalary(
 
   if (!salary) return null;
 
-  return {
+  const result = {
     staff_salary_uuid: salary.staff_salary_uuid,
     staff_id: salary.staff_id,
     salary: salary.salary ? Number(salary.salary) : null,
@@ -179,6 +174,17 @@ export async function getStaffSalary(
     created_at: salary.created_at,
     updated_at: salary.updated_at,
   };
+
+  // Validate output shape
+  const outputParsed = staffSalaryItemSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/staff-salaries] getStaffSalary output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -192,7 +198,7 @@ export async function getStaffSalary(
  */
 export async function createStaffSalary(
   params: CreateSalaryParams,
-): Promise<CreateSalaryResult> {
+): Promise<SalaryActionResult> {
   await requireCapability("staff.salary.create");
 
   const parsed = createSalarySchema.safeParse(params);
