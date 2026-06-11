@@ -6,7 +6,7 @@ vi.mock("lucide-react", () => ({
   UserRound: () => <span data-testid="icon-user" />,
   Search: () => <span data-testid="icon-search" />,
   Briefcase: () => <span data-testid="icon-briefcase" />,
-  ArrowDown: () => <span data-testid="icon-arrow-down" />,
+  ArrowRight: () => <span data-testid="icon-arrow-right" />,
   Building2: () => <span data-testid="icon-building" />,
   Sparkles: () => <span data-testid="icon-sparkles" />,
 }));

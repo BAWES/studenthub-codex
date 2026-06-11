@@ -7,6 +7,13 @@ afterEach(() => {
   vi.clearAllMocks();
 });
 
+vi.mock("lucide-react", () => ({
+  Star: () => <span data-testid="icon-star" />,
+  Users: () => <span data-testid="icon-users" />,
+  Building2: () => <span data-testid="icon-building" />,
+  Briefcase: () => <span data-testid="icon-briefcase" />,
+}));
+
 import StatsSection from "./StatsSection";
 
 // Mock IntersectionObserver that triggers immediately
@@ -37,11 +44,12 @@ describe("StatsSection", () => {
     expect(screen.getByText("Placements")).toBeTruthy();
     expect(screen.getByText("Employers")).toBeTruthy();
     expect(screen.getByText("Candidates")).toBeTruthy();
+    expect(screen.getByText("Platform rating")).toBeTruthy();
   });
 
-  it("renders 3 stat columns", () => {
+  it("renders 4 stat columns", () => {
     const { container } = render(<StatsSection />);
-    const grid = container.querySelector(".grid-cols-3");
+    const grid = container.querySelector('[class*="md:grid-cols-4"]');
     expect(grid).toBeTruthy();
   });
 

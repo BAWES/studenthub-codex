@@ -9,6 +9,7 @@ vi.mock("lucide-react", () => ({
   BarChart3: () => <span data-testid="icon-bar-chart" />,
   Clock: () => <span data-testid="icon-clock" />,
   CreditCard: () => <span data-testid="icon-credit-card" />,
+  Sparkles: () => <span data-testid="icon-sparkles" />,
 }));
 
 afterEach(() => {
