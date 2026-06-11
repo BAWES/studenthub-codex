@@ -72,7 +72,7 @@ export const languageActionResultSchema = z.discriminatedUnion("success", [
   z.object({ success: z.literal(false), error: z.string() }),
 ]);
 
-export const languageDetailResponseSchema = z.discriminatedUnion("data", [
+export const languageDetailResponseSchema = z.union([
   z.object({ data: languageItemSchema, error: z.null() }),
   z.object({ data: z.null(), error: z.string().nullable() }),
 ]);

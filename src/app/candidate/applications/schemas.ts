@@ -23,8 +23,8 @@ export const applicationItemSchema = z.object({
   employerName: z.string(),
   status: z.string(),
   coverLetter: z.string().nullable(),
-  createdAt: z.date(),
-  updatedAt: z.date(),
+  createdAt: z.coerce.date().nullable(),
+  updatedAt: z.coerce.date().nullable(),
 });
 
 export type ApplicationItem = z.output<typeof applicationItemSchema>;

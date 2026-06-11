@@ -13,7 +13,7 @@ export default async function CandidateApplicationsPage() {
     jobTitle: a.jobTitle,
     employerName: a.employerName,
     status: a.status,
-    createdAt: a.createdAt.toISOString().slice(0, 10),
+    createdAt: a.createdAt?.toISOString().slice(0, 10) ?? "",
   }));
 
   return (
