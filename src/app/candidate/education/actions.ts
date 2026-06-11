@@ -18,6 +18,11 @@ import {
   type EducationItem,
   type EducationActionResult,
 } from "./schemas";
+import {
+  educationItemOutputSchema,
+  educationListOutputSchema,
+  educationActionResultOutputSchema,
+} from "@/app/candidate/schemas";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -95,7 +100,18 @@ export async function listCandidateEducation(
     include: educationIncludes,
   });
 
-  return rows.map((r) => toItem(r)!);
+  const result = rows.map((r) => toItem(r)!);
+
+  // Validate output shape
+  const outputParsed = educationListOutputSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[candidate/education] listCandidateEducation output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -123,7 +139,18 @@ export async function getCandidateEducation(
     include: educationIncludes,
   });
 
-  return toItem(row);
+  const result = toItem(row);
+
+  // Validate output shape
+  const outputParsed = educationItemOutputSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[candidate/education] getCandidateEducation output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -174,7 +201,20 @@ export async function createCandidateEducation(
   });
 
   revalidatePath("/candidate/education");
-  return { success: true, educationUuid };
+
+  // Validate output shape
+  const outputParsed = educationActionResultOutputSchema.safeParse({
+    success: true,
+    educationUuid,
+  });
+  if (!outputParsed.success) {
+    console.error(
+      "[candidate/education] createCandidateEducation output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return { success: true, educationUuid } as const;
 }
 
 /**
@@ -244,6 +284,19 @@ export async function updateCandidateEducation(
   ]);
 
   revalidatePath("/candidate/education");
+
+  // Validate output shape
+  const outputParsed = educationActionResultOutputSchema.safeParse({
+    success: true,
+    educationUuid: newUuid,
+  });
+  if (!outputParsed.success) {
+    console.error(
+      "[candidate/education] updateCandidateEducation output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
   return { success: true, educationUuid: newUuid };
 }
 
@@ -284,5 +337,18 @@ export async function deleteCandidateEducation(
   });
 
   revalidatePath("/candidate/education");
+
+  // Validate output shape
+  const outputParsed = educationActionResultOutputSchema.safeParse({
+    success: true,
+    educationUuid: parsed.data.educationUuid,
+  });
+  if (!outputParsed.success) {
+    console.error(
+      "[candidate/education] deleteCandidateEducation output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
   return { success: true, educationUuid: parsed.data.educationUuid };
 }

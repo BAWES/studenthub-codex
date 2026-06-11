@@ -6,6 +6,11 @@ import {
   updateEducationSchema,
   deleteEducationSchema,
 } from "./schemas";
+import {
+  educationItemOutputSchema,
+  educationListOutputSchema,
+  educationActionResultOutputSchema,
+} from "@/app/candidate/schemas";
 
 // ---------------------------------------------------------------------------
 // Schema tests for candidate/education actions (pure unit — no DB required)
@@ -162,5 +167,136 @@ describe("deleteEducationSchema", () => {
 
   it("rejects missing UUID", () => {
     expect(deleteEducationSchema.safeParse({}).success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output schema tests
+// ---------------------------------------------------------------------------
+
+describe("educationItemOutputSchema", () => {
+  const validItem = {
+    education_uuid: "edu_abc123",
+    university_id: 5,
+    university_name_en: "Kuwait University",
+    university_name_ar: "جامعة الكويت",
+    degree_uuid: "deg_001",
+    degree_name_en: "Bachelor's",
+    degree_name_ar: "بكالوريوس",
+    major_uuid: "maj_001",
+    major_name_en: "Computer Science",
+    major_name_ar: "علوم الحاسوب",
+    graduation_year: 2024,
+    is_currently_studying: false,
+    created_at: new Date("2024-01-01"),
+    updated_at: new Date("2024-06-01"),
+  };
+
+  it("accepts a valid education item", () => {
+    const r = educationItemOutputSchema.safeParse(validItem);
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts nullable fields as null", () => {
+    const r = educationItemOutputSchema.safeParse({
+      ...validItem,
+      university_name_en: null,
+      degree_name_ar: null,
+      major_name_en: null,
+      graduation_year: null,
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects missing education_uuid", () => {
+    const { education_uuid, ...without } = validItem;
+    expect(educationItemOutputSchema.safeParse(without).success).toBe(false);
+  });
+
+  it("rejects wrong type for university_id", () => {
+    expect(
+      educationItemOutputSchema.safeParse({ ...validItem, university_id: "abc" })
+        .success,
+    ).toBe(false);
+  });
+
+  it("rejects wrong type for is_currently_studying", () => {
+    expect(
+      educationItemOutputSchema.safeParse({
+        ...validItem,
+        is_currently_studying: "yes",
+      }).success,
+    ).toBe(false);
+  });
+});
+
+describe("educationListOutputSchema", () => {
+  it("accepts an array of valid items", () => {
+    const r = educationListOutputSchema.safeParse([
+      {
+        education_uuid: "edu_001",
+        university_id: 1,
+        university_name_en: "KU",
+        university_name_ar: null,
+        degree_uuid: null,
+        degree_name_en: null,
+        degree_name_ar: null,
+        major_uuid: null,
+        major_name_en: null,
+        major_name_ar: null,
+        graduation_year: null,
+        is_currently_studying: true,
+        created_at: new Date(),
+        updated_at: new Date(),
+      },
+    ]);
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts empty array", () => {
+    expect(educationListOutputSchema.safeParse([]).success).toBe(true);
+  });
+
+  it("rejects non-array", () => {
+    expect(educationListOutputSchema.safeParse(null).success).toBe(false);
+  });
+});
+
+describe("educationActionResultOutputSchema", () => {
+  it("accepts success result", () => {
+    const r = educationActionResultOutputSchema.safeParse({
+      success: true as const,
+      educationUuid: "edu_abc",
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts failure result", () => {
+    const r = educationActionResultOutputSchema.safeParse({
+      success: false as const,
+      error: "University not found",
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects success without educationUuid", () => {
+    expect(
+      educationActionResultOutputSchema.safeParse({ success: true }).success,
+    ).toBe(false);
+  });
+
+  it("rejects invalid success value", () => {
+    expect(
+      educationActionResultOutputSchema.safeParse({
+        success: true,
+        educationUuid: 123,
+      }).success,
+    ).toBe(false);
+  });
+
+  it("rejects failure without error", () => {
+    expect(
+      educationActionResultOutputSchema.safeParse({ success: false }).success,
+    ).toBe(false);
   });
 });
