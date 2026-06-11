@@ -285,8 +285,12 @@ function makeInterviewRow(overrides: Record<string, unknown> = {}) {
     interview_at: new Date("2026-06-10T10:00:00Z"),
     status: 0,
     internal_note: "Call with candidate",
-    candidate: { candidate_id: 42, candidate_name: "John Doe", candidate_email: "john@example.com" },
-    request: { request_uuid: "req_abc-123", request_position_title: "Senior Developer" },
+    interview_note: "Follow up on interview",
+    created_at: new Date("2026-06-08T09:00:00Z"),
+    updated_at: new Date("2026-06-09T14:00:00Z"),
+    candidate: { candidate_id: 42, candidate_name: "John Doe", candidate_email: "john@example.com", candidate_phone: "+96550000000" },
+    request: { request_uuid: "req_abc-123", request_position_title: "Senior Developer", company: { company_name: "Test Corp" } },
+    staff: { staff_name: "Staff User" },
     ...overrides,
   };
 }
