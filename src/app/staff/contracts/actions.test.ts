@@ -246,3 +246,228 @@ describe("updateContractStatus", () => {
     expect(mockUpdate).not.toHaveBeenCalled();
   });
 });
+
+// ---------------------------------------------------------------------------
+// Output schema tests
+// ---------------------------------------------------------------------------
+
+import {
+  contractRowOutputSchema,
+  contractListOutputSchema,
+  contractDetailObjectOutputSchema,
+  contractDetailOutputSchema,
+  contractStatusUpdateOutputSchema,
+} from "./schemas";
+
+describe("contractRowOutputSchema", () => {
+  it("accepts a valid contract row", () => {
+    const row = {
+      contract_uuid: "contract_abc-123",
+      candidate_name: "Ahmed Al-Mutairi",
+      company_name: "Acme Corp",
+      type: "full-time",
+      status: 1,
+      status_label: "active",
+      start_date: "2026-01-01T00:00:00.000Z",
+      end_date: "2026-12-31T00:00:00.000Z",
+      transfer_cost: "500.00",
+      currency_code: "KWD",
+      created_at: "2026-01-01T00:00:00.000Z",
+    };
+    expect(contractRowOutputSchema.safeParse(row).success).toBe(true);
+  });
+
+  it("accepts nullable fields as null", () => {
+    const row = {
+      contract_uuid: "contract_abc-123",
+      candidate_name: null,
+      company_name: null,
+      type: "full-time",
+      status: 1,
+      status_label: "active",
+      start_date: null,
+      end_date: null,
+      transfer_cost: null,
+      currency_code: null,
+      created_at: null,
+    };
+    expect(contractRowOutputSchema.safeParse(row).success).toBe(true);
+  });
+
+  it("rejects missing required fields", () => {
+    expect(contractRowOutputSchema.safeParse({}).success).toBe(false);
+  });
+
+  it("rejects non-string contract_uuid", () => {
+    const row = {
+      contract_uuid: 123,
+      candidate_name: null,
+      company_name: null,
+      type: "full-time",
+      status: 1,
+      status_label: "active",
+      start_date: null,
+      end_date: null,
+      transfer_cost: null,
+      currency_code: null,
+      created_at: null,
+    };
+    expect(contractRowOutputSchema.safeParse(row).success).toBe(false);
+  });
+});
+
+describe("contractListOutputSchema", () => {
+  const validItem = {
+    contract_uuid: "contract_abc-123",
+    candidate_name: null,
+    company_name: null,
+    type: "full-time",
+    status: 1,
+    status_label: "active",
+    start_date: null,
+    end_date: null,
+    transfer_cost: null,
+    currency_code: null,
+    created_at: null,
+  };
+
+  it("accepts a valid list result", () => {
+    const result = {
+      items: [validItem],
+      total: 1,
+      page: 1,
+      limit: 20,
+      totalPages: 1,
+    };
+    expect(contractListOutputSchema.safeParse(result).success).toBe(true);
+  });
+
+  it("accepts empty items", () => {
+    const result = {
+      items: [],
+      total: 0,
+      page: 1,
+      limit: 20,
+      totalPages: 0,
+    };
+    expect(contractListOutputSchema.safeParse(result).success).toBe(true);
+  });
+
+  it("rejects negative total", () => {
+    const result = {
+      items: [],
+      total: -1,
+      page: 1,
+      limit: 20,
+      totalPages: 0,
+    };
+    expect(contractListOutputSchema.safeParse(result).success).toBe(false);
+  });
+});
+
+describe("contractDetailObjectOutputSchema", () => {
+  it("accepts a valid contract detail object", () => {
+    const detail = {
+      contract_uuid: "contract_abc-123",
+      type: "full-time",
+      detail: "Standard employment contract",
+      status: 1,
+      status_label: "active",
+      start_date: "2026-01-01T00:00:00.000Z",
+      end_date: "2026-12-31T00:00:00.000Z",
+      transfer_cost: "500.00",
+      currency_code: "KWD",
+      auto_generate: false,
+      created_at: "2026-01-01T00:00:00.000Z",
+      updated_at: "2026-06-10T00:00:00.000Z",
+      candidate: { candidate_name: "Ahmed Al-Mutairi" },
+      company: { company_name: "Acme Corp" },
+    };
+    expect(contractDetailObjectOutputSchema.safeParse(detail).success).toBe(true);
+  });
+
+  it("accepts nullable nested objects as null", () => {
+    const detail = {
+      contract_uuid: "contract_abc-123",
+      type: "full-time",
+      detail: null,
+      status: 1,
+      status_label: "active",
+      start_date: null,
+      end_date: null,
+      transfer_cost: null,
+      currency_code: null,
+      auto_generate: false,
+      created_at: null,
+      updated_at: null,
+      candidate: null,
+      company: null,
+    };
+    expect(contractDetailObjectOutputSchema.safeParse(detail).success).toBe(true);
+  });
+
+  it("rejects missing auto_generate", () => {
+    const detail = {
+      contract_uuid: "contract_abc-123",
+      type: "full-time",
+      detail: null,
+      status: 1,
+      status_label: "active",
+      start_date: null,
+      end_date: null,
+      transfer_cost: null,
+      currency_code: null,
+      created_at: null,
+      updated_at: null,
+      candidate: null,
+      company: null,
+    };
+    expect(contractDetailObjectOutputSchema.safeParse(detail).success).toBe(false);
+  });
+});
+
+describe("contractDetailOutputSchema", () => {
+  it("accepts a valid contract detail result", () => {
+    const result = {
+      contract: {
+        contract_uuid: "contract_abc-123",
+        type: "full-time",
+        detail: null,
+        status: 1,
+        status_label: "active",
+        start_date: null,
+        end_date: null,
+        transfer_cost: null,
+        currency_code: null,
+        auto_generate: false,
+        created_at: null,
+        updated_at: null,
+        candidate: null,
+        company: null,
+      },
+    };
+    expect(contractDetailOutputSchema.safeParse(result).success).toBe(true);
+  });
+
+  it("accepts null contract (not found)", () => {
+    expect(contractDetailOutputSchema.safeParse({ contract: null }).success).toBe(true);
+  });
+});
+
+describe("contractStatusUpdateOutputSchema", () => {
+  it("accepts success: true", () => {
+    expect(contractStatusUpdateOutputSchema.safeParse({ success: true }).success).toBe(true);
+  });
+
+  it("accepts success: false", () => {
+    expect(contractStatusUpdateOutputSchema.safeParse({ success: false }).success).toBe(true);
+  });
+
+  it("rejects missing success", () => {
+    expect(contractStatusUpdateOutputSchema.safeParse({}).success).toBe(false);
+  });
+
+  it("rejects non-boolean success", () => {
+    expect(contractStatusUpdateOutputSchema.safeParse({ success: "yes" }).success).toBe(false);
+  });
+});

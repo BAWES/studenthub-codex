@@ -76,3 +76,73 @@ export type ContractActionResponse = {
   operation: "success" | "error";
   message: string;
 };
+
+// ---------------------------------------------------------------------------
+// Output validation schemas
+// ---------------------------------------------------------------------------
+
+/**
+ * Validates a single contract row returned in list results.
+ */
+export const contractRowOutputSchema = z.object({
+  contract_uuid: z.string(),
+  candidate_name: z.string().nullable(),
+  company_name: z.string().nullable(),
+  type: z.string(),
+  status: z.number().int(),
+  status_label: z.string(),
+  start_date: z.string().nullable(),
+  end_date: z.string().nullable(),
+  transfer_cost: z.string().nullable(),
+  currency_code: z.string().nullable(),
+  created_at: z.string().nullable(),
+});
+
+/**
+ * Validates the listContracts return shape.
+ */
+export const contractListOutputSchema = z.object({
+  items: z.array(contractRowOutputSchema),
+  total: z.number().int().nonnegative(),
+  page: z.number().int().positive(),
+  limit: z.number().int().positive(),
+  totalPages: z.number().int().nonnegative(),
+});
+
+/**
+ * Validates a contract detail object returned by getContractDetail.
+ */
+export const contractDetailObjectOutputSchema = z.object({
+  contract_uuid: z.string(),
+  type: z.string(),
+  detail: z.string().nullable(),
+  status: z.number().int(),
+  status_label: z.string(),
+  start_date: z.string().nullable(),
+  end_date: z.string().nullable(),
+  transfer_cost: z.string().nullable(),
+  currency_code: z.string().nullable(),
+  auto_generate: z.boolean(),
+  created_at: z.string().nullable(),
+  updated_at: z.string().nullable(),
+  candidate: z
+    .object({ candidate_name: z.string().nullable() })
+    .nullable(),
+  company: z
+    .object({ company_name: z.string().nullable() })
+    .nullable(),
+});
+
+/**
+ * Validates the getContractDetail return shape.
+ */
+export const contractDetailOutputSchema = z.object({
+  contract: contractDetailObjectOutputSchema.nullable(),
+});
+
+/**
+ * Validates mutation result (updateContractStatus).
+ */
+export const contractStatusUpdateOutputSchema = z.object({
+  success: z.boolean(),
+});
