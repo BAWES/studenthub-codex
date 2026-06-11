@@ -4,6 +4,9 @@ import { useState } from "react";
 import { FadeInSection } from "@/components/marketing";
 import { Check, X } from "lucide-react";
 
+const SH_BLUE = "#0b63ce";
+const SH_AMBER = "#f59e0b";
+
 interface ComparisonRow {
   feature: string;
   studentHub: boolean | string;
@@ -76,9 +79,9 @@ export default function ComparisonSection({ persona }: ComparisonSectionProps) {
           <span
             className="inline-block text-[11px] font-bold uppercase tracking-wider mb-2 px-3 py-1 rounded-full"
             style={{
-              color: "var(--sh-coral)",
-              backgroundColor: "color-mix(in srgb, var(--sh-coral) 10%, transparent)",
-              border: "1px solid color-mix(in srgb, var(--sh-coral) 20%, transparent)",
+              color: SH_BLUE,
+              backgroundColor: `color-mix(in srgb, ${SH_BLUE} 10%, transparent)`,
+              border: `1px solid color-mix(in srgb, ${SH_BLUE} 20%, transparent)`,
             }}
           >
             Comparison
@@ -101,12 +104,12 @@ export default function ComparisonSection({ persona }: ComparisonSectionProps) {
               style={{
                 backgroundColor:
                   active === cat
-                    ? "color-mix(in srgb, var(--sh-coral) 12%, transparent)"
+                    ? `color-mix(in srgb, ${SH_BLUE} 12%, transparent)`
                     : "transparent",
-                color: active === cat ? "var(--sh-coral)" : "var(--muted)",
+                color: active === cat ? SH_BLUE : "var(--muted)",
                 border: `1px solid ${
                   active === cat
-                    ? "color-mix(in srgb, var(--sh-coral) 25%, transparent)"
+                    ? `color-mix(in srgb, ${SH_BLUE} 25%, transparent)`
                     : "var(--border)"
                 }`,
               }}
@@ -139,11 +142,11 @@ export default function ComparisonSection({ persona }: ComparisonSectionProps) {
             </div>
             <div
               className="px-4 py-3 text-xs font-semibold text-center flex items-center justify-center gap-1"
-              style={{ color: "var(--sh-coral)" }}
+              style={{ color: SH_BLUE }}
             >
               <span
                 className="flex h-4 w-4 items-center justify-center rounded text-[8px] font-bold text-white"
-                style={{ backgroundColor: "var(--sh-coral)" }}
+                style={{ backgroundColor: SH_BLUE }}
               >
                 SH
               </span>

@@ -4,18 +4,21 @@ import { FadeInSection } from "@/components/marketing";
 import { Users, Zap, Shield, FileText, Building2, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
+const SH_BLUE = "#0b63ce";
+const SH_AMBER = "#f59e0b";
+
 const benefits = [
   {
     icon: Users,
     title: "Access vetted students",
     description: "Every student on StudentHub is verified and actively seeking placement. Skip the screening — start interviewing pre-qualified talent.",
-    color: "var(--sh-coral)",
+    color: SH_BLUE,
   },
   {
     icon: Zap,
     title: "Staff-powered matching",
     description: "Our recruitment team finds the best students based on your requirements. No manual searching through hundreds of profiles.",
-    color: "var(--sh-amber)",
+    color: SH_AMBER,
   },
   {
     icon: Shield,
@@ -27,19 +30,19 @@ const benefits = [
     icon: FileText,
     title: "Consolidated invoicing",
     description: "All your hires in one monthly invoice. No chasing individual contractors or managing multiple payment schedules.",
-    color: "var(--warning)",
+    color: SH_BLUE,
   },
   {
     icon: Building2,
     title: "Dedicated account support",
     description: "Every employer gets a dedicated account manager to help with placements, compliance, and platform support.",
-    color: "var(--sh-coral)",
+    color: SH_AMBER,
   },
   {
     icon: ArrowRight,
     title: "Zero agency fees",
     description: "Post jobs and hire directly through the platform. No recruitment agency markups — pay only the agreed hourly or fixed rate.",
-    color: "var(--sh-coral)",
+    color: SH_BLUE,
   },
 ];
 
@@ -51,9 +54,9 @@ export default function EmployerValueSection() {
           <span
             className="inline-block text-[11px] font-bold uppercase tracking-wider mb-2 px-3 py-1 rounded-full"
             style={{
-              color: "var(--sh-coral)",
-              backgroundColor: "color-mix(in srgb, var(--sh-coral) 10%, transparent)",
-              border: "1px solid color-mix(in srgb, var(--sh-coral) 20%, transparent)",
+              color: SH_BLUE,
+              backgroundColor: `color-mix(in srgb, ${SH_BLUE} 10%, transparent)`,
+              border: `1px solid color-mix(in srgb, ${SH_BLUE} 20%, transparent)`,
             }}
           >
             For employers
@@ -113,8 +116,11 @@ export default function EmployerValueSection() {
         <div className="text-center mt-8">
           <Link
             href="/signup?role=company"
-            className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg text-sm font-medium text-white transition-all hover:brightness-110"
-            style={{ backgroundColor: "var(--sh-coral)" }}
+            className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg text-sm font-semibold text-white transition-all hover:brightness-110 hover:-translate-y-0.5"
+            style={{
+              backgroundColor: SH_AMBER,
+              boxShadow: "0 4px 14px rgba(245, 158, 11, 0.35)",
+            }}
           >
             Start hiring today <ArrowRight className="size-3.5" />
           </Link>

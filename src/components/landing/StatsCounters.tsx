@@ -3,6 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 import { FadeInSection } from "@/components/marketing";
 
+const SH_BLUE = "#0b63ce";
+const SH_AMBER = "#f59e0b";
+
 interface CounterProps {
   end: number;
   suffix?: string;
@@ -58,8 +61,8 @@ const stats = [
     suffix: "+",
     label: "Students placed",
     desc: "Successfully matched with employers across Kuwait",
-    accent: "var(--sh-coral)",
-    gradient: "radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--sh-coral) 12%, transparent), transparent 70%)",
+    accent: SH_BLUE,
+    gradient: `radial-gradient(ellipse at 50% 0%, color-mix(in srgb, ${SH_BLUE} 12%, transparent), transparent 70%)`,
   },
   {
     end: 48,
@@ -67,8 +70,8 @@ const stats = [
     prefix: "<",
     label: "Avg time to match",
     desc: "From profile creation to interview",
-    accent: "var(--sh-amber)",
-    gradient: "radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--sh-amber) 10%, transparent), transparent 70%)",
+    accent: SH_AMBER,
+    gradient: `radial-gradient(ellipse at 50% 0%, color-mix(in srgb, ${SH_AMBER} 10%, transparent), transparent 70%)`,
   },
   {
     end: 500,
