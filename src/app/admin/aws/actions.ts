@@ -1,7 +1,14 @@
 "use server";
 
+// ---------------------------------------------------------------------------
+// Admin — AWS Config Server Actions
+// ---------------------------------------------------------------------------
+// Mirrors the legacy AwsController::actionIndex() and actionConfig().
+// Each action validates its output through a Zod schema for type safety.
+// ---------------------------------------------------------------------------
+
 import { requireCapability } from "@/modules/auth/session";
-import { getAwsConfigSchema } from "./schemas";
+import { getAwsConfigSchema, awsConfigEntryListSchema, awsConfigResultSchema } from "./schemas";
 import type { AwsConfigEntry, AwsConfigResult } from "./schemas";
 
 /**
@@ -28,7 +35,7 @@ export async function listAwsConfigs(): Promise<AwsConfigEntry[]> {
 
   const now = new Date().toISOString();
 
-  return AWS_CONFIG_KEYS.map((key) => {
+  const result = AWS_CONFIG_KEYS.map((key) => {
     const envName = key
       .toUpperCase()
       .replace(/^AWS_/, "AWS_")
@@ -51,6 +58,14 @@ export async function listAwsConfigs(): Promise<AwsConfigEntry[]> {
         : value,
     };
   });
+
+  // Validate output shape — log mismatches without throwing
+  const listParsed = awsConfigEntryListSchema.safeParse(result);
+  if (!listParsed.success) {
+    console.error("[admin/aws] listAwsConfigs output validation failed:", listParsed.error.issues);
+  }
+
+  return result;
 }
 
 /**
@@ -60,9 +75,17 @@ export async function listAwsConfigs(): Promise<AwsConfigEntry[]> {
 export async function getAwsConfig(): Promise<AwsConfigResult> {
   await requireCapability("admin.system");
 
-  return {
+  const result: AwsConfigResult = {
     region: process.env.AWS_REGION ?? process.env.AWS_DEFAULT_REGION ?? "",
     bucket: process.env.AWS_S3_BUCKET ?? process.env.AWS_BUCKET ?? "",
     key: process.env.AWS_ACCESS_KEY_ID ?? "",
   };
+
+  // Validate output shape — log mismatches without throwing
+  const parsed = awsConfigResultSchema.safeParse(result);
+  if (!parsed.success) {
+    console.error("[admin/aws] getAwsConfig output validation failed:", parsed.error.issues);
+  }
+
+  return result;
 }
