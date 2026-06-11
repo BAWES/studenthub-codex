@@ -9,6 +9,7 @@
 // ---------------------------------------------------------------------------
 
 import { signSession, type FixtureUser } from "./auth";
+export type { FixtureUser };
 
 // ── Mock User Definitions ─────────────────────────────────────────────────
 
