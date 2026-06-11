@@ -8,6 +8,10 @@ import {
   getPermissionSectionSchema,
   createPermissionSectionSchema,
   updatePermissionSectionSchema,
+  listPermissionSectionsOutputSchema,
+  getPermissionSectionOutputSchema,
+  createPermissionSectionOutputSchema,
+  updatePermissionSectionOutputSchema,
 } from "./schemas";
 import type {
   CreatePermissionSectionInput,
@@ -33,7 +37,15 @@ export async function listPermissionSections(): Promise<
     orderBy: { section_name: "asc" },
   });
 
-  return sections as PermissionSectionDetail[];
+  const result = sections as PermissionSectionDetail[];
+
+  // Validate output shape
+  const outputParsed = listPermissionSectionsOutputSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error("[admin/permissions] listPermissionSections output failed:", outputParsed.error.issues);
+  }
+
+  return result;
 }
 
 /**
@@ -56,9 +68,27 @@ export async function getPermissionSection(
     where: { permission_uuid: parsed.data.permission_uuid },
   });
 
-  if (!section) return null;
+  if (!section) {
+    const result = null;
 
-  return section as PermissionSectionDetail;
+    // Validate output shape
+    const outputParsed = getPermissionSectionOutputSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error("[admin/permissions] getPermissionSection (not found) output failed:", outputParsed.error.issues);
+    }
+
+    return result;
+  }
+
+  const result = section as PermissionSectionDetail;
+
+  // Validate output shape
+  const outputParsed = getPermissionSectionOutputSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error("[admin/permissions] getPermissionSection output failed:", outputParsed.error.issues);
+  }
+
+  return result;
 }
 
 /**
@@ -86,7 +116,16 @@ export async function createPermissionSection(
   });
 
   revalidatePath("/admin/permissions");
-  return { permission_uuid: section.permission_uuid };
+
+  const result = { permission_uuid: section.permission_uuid };
+
+  // Validate output shape
+  const outputParsed = createPermissionSectionOutputSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error("[admin/permissions] createPermissionSection output failed:", outputParsed.error.issues);
+  }
+
+  return result;
 }
 
 /**
@@ -121,5 +160,14 @@ export async function updatePermissionSection(
   });
 
   revalidatePath("/admin/permissions");
-  return { permission_uuid: parsed.data.permission_uuid };
+
+  const result = { permission_uuid: parsed.data.permission_uuid };
+
+  // Validate output shape
+  const outputParsed = updatePermissionSectionOutputSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error("[admin/permissions] updatePermissionSection output failed:", outputParsed.error.issues);
+  }
+
+  return result;
 }

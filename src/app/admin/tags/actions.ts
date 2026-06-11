@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
-import { listTagsSchema, getTagSchema, createTagSchema, updateTagSchema, deleteTagSchema } from "./schemas";
+import { listTagsSchema, getTagSchema, createTagSchema, updateTagSchema, deleteTagSchema, listTagsResultSchema, getTagResultSchema, tagActionResponseSchema } from "./schemas";
 import type { ListTagsInput, ListTagsResult } from "./schemas";
 
 export async function listTags(input: ListTagsInput = {}): Promise<ListTagsResult> {
@@ -17,7 +17,15 @@ export async function listTags(input: ListTagsInput = {}): Promise<ListTagsResul
     prisma.tag.count(),
   ]);
   const tags = rows.map((row) => ({ tag_id: row.tag_id, tag: row.tag, created_at: row.created_at, updated_at: row.updated_at }));
-  return { tags, total, page, limit, totalPages: Math.ceil(total / limit) };
+  const result = { tags, total, page, limit, totalPages: Math.ceil(total / limit) };
+
+  // Validate output shape
+  const outputParsed = listTagsResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error("[admin/tags] listTags output failed:", outputParsed.error.issues);
+  }
+
+  return result;
 }
 
 export async function getTag(tagId: number): Promise<{ tag: { tag_id: number; tag: string; created_at: Date | null; updated_at: Date | null } | null }> {
@@ -25,8 +33,26 @@ export async function getTag(tagId: number): Promise<{ tag: { tag_id: number; ta
   const parsed = getTagSchema.safeParse({ tagId });
   if (!parsed.success) throw new Error(parsed.error.issues[0]?.message ?? "Invalid tag ID");
   const row = await prisma.tag.findUnique({ where: { tag_id: parsed.data.tagId } });
-  if (!row) return { tag: null };
-  return { tag: { tag_id: row.tag_id, tag: row.tag, created_at: row.created_at, updated_at: row.updated_at } };
+  if (!row) {
+    const result = { tag: null };
+
+    // Validate output shape
+    const outputParsed = getTagResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error("[admin/tags] getTag output failed:", outputParsed.error.issues);
+    }
+
+    return result;
+  }
+  const result = { tag: { tag_id: row.tag_id, tag: row.tag, created_at: row.created_at, updated_at: row.updated_at } };
+
+  // Validate output shape
+  const outputParsed = getTagResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error("[admin/tags] getTag output failed:", outputParsed.error.issues);
+  }
+
+  return result;
 }
 
 export async function createTag(name: string): Promise<{ operation: string; message: string }> {
@@ -36,9 +62,25 @@ export async function createTag(name: string): Promise<{ operation: string; mess
   try {
     await prisma.tag.create({ data: { tag: parsed.data.tag } });
     revalidatePath("/admin/tags");
-    return { operation: "success", message: "Tag created successfully" };
+    const result = { operation: "success", message: "Tag created successfully" };
+
+    // Validate output shape
+    const outputParsed = tagActionResponseSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error("[admin/tags] createTag output failed:", outputParsed.error.issues);
+    }
+
+    return result;
   } catch (_e) {
-    return { operation: "error", message: "We've faced a problem creating the tag, please contact us for assistance." };
+    const result = { operation: "error", message: "We've faced a problem creating the tag, please contact us for assistance." };
+
+    // Validate output shape
+    const outputParsed = tagActionResponseSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error("[admin/tags] createTag output failed:", outputParsed.error.issues);
+    }
+
+    return result;
   }
 }
 
@@ -51,9 +93,25 @@ export async function updateTag(tagId: number, name: string): Promise<{ operatio
     if (!existing) return { operation: "error", message: "Tag not found" };
     await prisma.tag.update({ where: { tag_id: parsed.data.tagId }, data: { tag: parsed.data.tag } });
     revalidatePath("/admin/tags");
-    return { operation: "success", message: "Tag successfully updated" };
+    const result = { operation: "success", message: "Tag successfully updated" };
+
+    // Validate output shape
+    const outputParsed = tagActionResponseSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error("[admin/tags] updateTag output failed:", outputParsed.error.issues);
+    }
+
+    return result;
   } catch (_e) {
-    return { operation: "error", message: "We've faced a problem updating the tag, please contact us for assistance." };
+    const result = { operation: "error", message: "We've faced a problem updating the tag, please contact us for assistance." };
+
+    // Validate output shape
+    const outputParsed = tagActionResponseSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error("[admin/tags] updateTag output failed:", outputParsed.error.issues);
+    }
+
+    return result;
   }
 }
 
@@ -66,8 +124,24 @@ export async function deleteTag(tagId: number): Promise<{ operation: string; mes
     if (!existing) return { operation: "error", message: "Tag not found" };
     await prisma.tag.delete({ where: { tag_id: parsed.data.tagId } });
     revalidatePath("/admin/tags");
-    return { operation: "success", message: "Tag deleted successfully" };
+    const result = { operation: "success", message: "Tag deleted successfully" };
+
+    // Validate output shape
+    const outputParsed = tagActionResponseSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error("[admin/tags] deleteTag output failed:", outputParsed.error.issues);
+    }
+
+    return result;
   } catch (_e) {
-    return { operation: "error", message: "We've faced a problem deleting the tag, please contact us for assistance." };
+    const result = { operation: "error", message: "We've faced a problem deleting the tag, please contact us for assistance." };
+
+    // Validate output shape
+    const outputParsed = tagActionResponseSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error("[admin/tags] deleteTag output failed:", outputParsed.error.issues);
+    }
+
+    return result;
   }
 }

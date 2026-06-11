@@ -22,6 +22,46 @@ export const deleteTagSchema = z.object({
   tagId: z.coerce.number().int().positive("Tag ID is required"),
 });
 
+// ---------------------------------------------------------------------------
+// Output validation schemas
+// ---------------------------------------------------------------------------
+
+/**
+ * Schema for a single tag item.
+ */
+export const tagItemSchema = z.object({
+  tag_id: z.number().int().positive(),
+  tag: z.string().min(1),
+  created_at: z.date().nullable(),
+  updated_at: z.date().nullable(),
+});
+
+/**
+ * Schema for the listTags response.
+ */
+export const listTagsResultSchema = z.object({
+  tags: z.array(tagItemSchema),
+  total: z.number().int().nonnegative(),
+  page: z.number().int().positive(),
+  limit: z.number().int().positive(),
+  totalPages: z.number().int().nonnegative(),
+});
+
+/**
+ * Schema for the getTag response.
+ */
+export const getTagResultSchema = z.object({
+  tag: tagItemSchema.nullable(),
+});
+
+/**
+ * Schema for tag action responses (create / update / delete).
+ */
+export const tagActionResponseSchema = z.object({
+  operation: z.string().min(1),
+  message: z.string().min(1),
+});
+
 export type ListTagsInput = z.input<typeof listTagsSchema>;
 export type GetTagInput = z.input<typeof getTagSchema>;
 export type CreateTagInput = z.input<typeof createTagSchema>;

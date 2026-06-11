@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { listTagsSchema, getTagSchema, createTagSchema, updateTagSchema, deleteTagSchema } from "./schemas";
+import { listTagsSchema, getTagSchema, createTagSchema, updateTagSchema, deleteTagSchema, tagItemSchema, listTagsResultSchema, getTagResultSchema, tagActionResponseSchema } from "./schemas";
 import type { TagItem, ListTagsResult } from "./schemas";
 
 describe("listTagsSchema", () => {
@@ -39,4 +39,184 @@ describe("TagItem type", () => {
 
 describe("ListTagsResult", () => {
   it("has correct shape", () => { const r: ListTagsResult = { tags: [], total: 0, page: 1, limit: 50, totalPages: 0 }; expect(r.tags).toHaveLength(0); expect(r.totalPages).toBe(0); });
+});
+
+// ---------------------------------------------------------------------------
+// Output validation — tagItemSchema
+// ---------------------------------------------------------------------------
+
+describe("tagItemSchema (output validation)", () => {
+  it("accepts a valid tag item", () => {
+    const r = tagItemSchema.safeParse({
+      tag_id: 1,
+      tag: "urgent",
+      created_at: new Date("2026-01-01"),
+      updated_at: null,
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts tag with both dates null", () => {
+    const r = tagItemSchema.safeParse({
+      tag_id: 2,
+      tag: "follow-up",
+      created_at: null,
+      updated_at: null,
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects missing tag_id", () => {
+    expect(
+      tagItemSchema.safeParse({
+        tag: "urgent",
+        created_at: null,
+        updated_at: null,
+      }).success,
+    ).toBe(false);
+  });
+
+  it("rejects negative tag_id", () => {
+    expect(
+      tagItemSchema.safeParse({
+        tag_id: -1,
+        tag: "urgent",
+        created_at: null,
+        updated_at: null,
+      }).success,
+    ).toBe(false);
+  });
+
+  it("rejects empty tag string", () => {
+    expect(
+      tagItemSchema.safeParse({
+        tag_id: 1,
+        tag: "",
+        created_at: null,
+        updated_at: null,
+      }).success,
+    ).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output validation — listTagsResultSchema
+// ---------------------------------------------------------------------------
+
+describe("listTagsResultSchema (output validation)", () => {
+  const validResponse = {
+    tags: [
+      { tag_id: 1, tag: "urgent", created_at: new Date(), updated_at: null },
+    ],
+    total: 1,
+    page: 1,
+    limit: 50,
+    totalPages: 1,
+  };
+
+  it("accepts a valid list tags response", () => {
+    const r = listTagsResultSchema.safeParse(validResponse);
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts empty tags array", () => {
+    const r = listTagsResultSchema.safeParse({
+      ...validResponse,
+      tags: [],
+      total: 0,
+      totalPages: 0,
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects missing total", () => {
+    expect(
+      listTagsResultSchema.safeParse({
+        tags: [],
+        page: 1,
+        limit: 50,
+        totalPages: 0,
+      }).success,
+    ).toBe(false);
+  });
+
+  it("rejects negative totalPages", () => {
+    expect(
+      listTagsResultSchema.safeParse({
+        ...validResponse,
+        totalPages: -1,
+      }).success,
+    ).toBe(false);
+  });
+
+  it("rejects invalid tag in tags array", () => {
+    const r = listTagsResultSchema.safeParse({
+      ...validResponse,
+      tags: [{ tag_id: "not-a-number", tag: "bad" }],
+    });
+    expect(r.success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output validation — getTagResultSchema
+// ---------------------------------------------------------------------------
+
+describe("getTagResultSchema (output validation)", () => {
+  it("accepts a valid tag result", () => {
+    const r = getTagResultSchema.safeParse({
+      tag: { tag_id: 1, tag: "urgent", created_at: new Date(), updated_at: null },
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts null tag (not found)", () => {
+    const r = getTagResultSchema.safeParse({ tag: null });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects missing tag field", () => {
+    expect(getTagResultSchema.safeParse({}).success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output validation — tagActionResponseSchema
+// ---------------------------------------------------------------------------
+
+describe("tagActionResponseSchema (output validation)", () => {
+  it("accepts success response", () => {
+    const r = tagActionResponseSchema.safeParse({
+      operation: "success",
+      message: "Tag created successfully",
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts error response", () => {
+    const r = tagActionResponseSchema.safeParse({
+      operation: "error",
+      message: "Tag not found",
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects missing operation", () => {
+    expect(
+      tagActionResponseSchema.safeParse({ message: "Msg" }).success,
+    ).toBe(false);
+  });
+
+  it("rejects empty operation", () => {
+    expect(
+      tagActionResponseSchema.safeParse({ operation: "", message: "Msg" }).success,
+    ).toBe(false);
+  });
+
+  it("rejects empty message", () => {
+    expect(
+      tagActionResponseSchema.safeParse({ operation: "success", message: "" })
+      .success,
+    ).toBe(false);
+  });
 });
