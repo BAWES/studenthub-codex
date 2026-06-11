@@ -1,58 +1,19 @@
 "use server";
 
-import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
-
-// ---------------------------------------------------------------------------
-// Schemas
-// ---------------------------------------------------------------------------
-
-const listReportsSchema = z.object({
-  type: z.string().optional(),
-  date: z.string().optional(),
-  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
-});
-
-const getRecruiterReportSchema = z.object({
-  date: z.string().optional(),
-  staffEmail: z.string().email().optional(),
-});
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export type ReportTypeItem = {
-  type: string;
-  label: string;
-  description: string;
-};
-
-export type RecruiterStaffReport = {
-  staffEmail: string;
-  staffName: string;
-  totalAssigned: number;
-  totalRequests: number;
-  totalNotes: number;
-  totalStories: number;
-  totalAcceptedInvitations: number;
-  totalRejectedInvitations: number;
-  totalSuggestions: number;
-  totalInvitations: number;
-  totalCompletedStories: number;
-};
-
-export type ListReportsResult = {
-  reports: ReportTypeItem[];
-  total: number;
-};
-
-export type GetRecruiterReportResult = {
-  date: string;
-  reports: RecruiterStaffReport[];
-  total: number;
-};
+import {
+  listReportsSchema,
+  getRecruiterReportSchema,
+  listReportsResultSchema,
+  getRecruiterReportResultSchema,
+} from "./schemas";
+import type {
+  ListReportsResult,
+  GetRecruiterReportResult,
+  ReportTypeItem,
+  RecruiterStaffReport,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Available report types (pure data)
@@ -85,19 +46,7 @@ function filterReportTypes(filter?: string): ReportTypeItem[] {
 }
 
 function buildDailyRecruiterReport(
-  staffRows: {
-    staffEmail: string;
-    staffName: string;
-    totalAssigned: number;
-    totalRequests: number;
-    totalNotes: number;
-    totalStories: number;
-    totalAcceptedInvitations: number;
-    totalRejectedInvitations: number;
-    totalSuggestions: number;
-    totalInvitations: number;
-    totalCompletedStories: number;
-  }[],
+  staffRows: RecruiterStaffReport[],
 ): RecruiterStaffReport[] {
   return staffRows.map((r) => ({
     staffEmail: r.staffEmail,
@@ -123,17 +72,28 @@ function buildDailyRecruiterReport(
  * Optionally filter by report type name (e.g. "recruiter" for recruiter reports).
  */
 export async function listReports(
-  input?: z.input<typeof listReportsSchema>,
+  input?: Record<string, unknown>,
 ): Promise<ListReportsResult> {
   await requireCapability("admin.read");
 
   const params = listReportsSchema.parse(input ?? {});
   const filtered = filterReportTypes(params.type);
 
-  return {
+  const result: ListReportsResult = {
     reports: filtered.slice(0, params.limit),
     total: filtered.length,
   };
+
+  // Validate output shape
+  const outputParsed = listReportsResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/reports] listReports output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -142,7 +102,7 @@ export async function listReports(
  * Optionally filter by specific staff email.
  */
 export async function getRecruiterReport(
-  input?: z.input<typeof getRecruiterReportSchema>,
+  input?: Record<string, unknown>,
 ): Promise<GetRecruiterReportResult> {
   await requireCapability("admin.read");
 
@@ -175,35 +135,30 @@ export async function getRecruiterReport(
 
     const [totalAssigned, totalRequests, totalNotes, totalStories, acceptedInvitations, rejectedInvitations, totalSuggestions, totalInvitations, completedStories] =
       await Promise.all([
-        // totalAssigned: requests assigned to this staff today
         prisma.request.count({
           where: {
             staff_id: staffId,
             request_assigned_at: { gte: dayStart, lte: dayEnd },
           },
         }),
-        // totalRequests: requests created by this staff today
         prisma.request.count({
           where: {
             request_created_by: staffId,
             request_created_datetime: { gte: dayStart, lte: dayEnd },
           },
         }),
-        // totalNotes: notes created by this staff today
         prisma.note.count({
           where: {
             created_by: staffId,
             note_created_datetime: { gte: dayStart, lte: dayEnd },
           },
         }),
-        // totalStories: stories created by this staff today
         prisma.story.count({
           where: {
             staff_id: staffId,
             story_created_at: { gte: dayStart, lte: dayEnd },
           },
         }),
-        // totalAcceptedInvitations: invitations accepted (status=1) created today
         prisma.invitation.count({
           where: {
             invitation_created_by_staff: staffId,
@@ -211,7 +166,6 @@ export async function getRecruiterReport(
             invitation_created_at: { gte: dayStart, lte: dayEnd },
           },
         }),
-        // totalRejectedInvitations: invitations rejected (status=2) created today
         prisma.invitation.count({
           where: {
             invitation_created_by_staff: staffId,
@@ -219,21 +173,18 @@ export async function getRecruiterReport(
             invitation_created_at: { gte: dayStart, lte: dayEnd },
           },
         }),
-        // totalSuggestions: candidate notes created by this staff today
         prisma.candidate_note.count({
           where: {
             created_by: staffId,
             note_created_datetime: { gte: dayStart, lte: dayEnd },
           },
         }),
-        // totalInvitations: all invitations created today
         prisma.invitation.count({
           where: {
             invitation_created_by_staff: staffId,
             invitation_created_at: { gte: dayStart, lte: dayEnd },
           },
         }),
-        // totalCompletedStories: stories with status completed (2) today
         prisma.story.count({
           where: {
             staff_id: staffId,
@@ -262,9 +213,20 @@ export async function getRecruiterReport(
     );
   }
 
-  return {
+  const result: GetRecruiterReportResult = {
     date: reportDate,
     reports,
     total: reports.length,
   };
+
+  // Validate output shape
+  const outputParsed = getRecruiterReportResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/reports] getRecruiterReport output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
