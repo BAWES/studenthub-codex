@@ -321,4 +321,33 @@ test.describe("Company Critical Flows", () => {
     console.log(`Console errors across ${pages.length} company pages: ${ctx.errors.length}`);
     await ctx.close();
   });
+
+  // ──────────────────────────────────────────────
+  // Flow 5 — New Job Posting
+  // ──────────────────────────────────────────────
+
+  test("Flow 5a — New Job Posting page loads with form", async () => {
+    const ctx = await authContext(company);
+
+    await ctx.page.goto("/employer/jobs/new");
+    await ctx.page.waitForLoadState("load");
+    await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
+    await expect(ctx.page).toHaveURL(/\/employer\/jobs\/new/);
+
+    // Title/heading renders
+    await expect(ctx.page.locator("text=New Job Posting").first()).toBeVisible({ timeout: 10000 });
+
+    assertNoReactErrors(ctx.errors);
+    await ctx.close();
+  });
+
+  test("Flow 5b — Candidate cannot access new job posting page", async () => {
+    const ctx = await roleContext(candidateUser);
+
+    await ctx.page.goto("/employer/jobs/new");
+    await ctx.page.waitForLoadState("load");
+
+    await expect(ctx.page).not.toHaveURL("/employer/jobs/new");
+    await ctx.close();
+  });
 });
