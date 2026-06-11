@@ -43,7 +43,7 @@ describe("HeroSection (two-sided marketplace redesign)", () => {
     it("renders eyebrow text", () => {
       render(<HeroSection />);
       expect(
-        screen.getByText("The two-sided marketplace for student talent"),
+        screen.getByText("Two-sided marketplace for student talent"),
       ).toBeTruthy();
     });
 
@@ -57,7 +57,7 @@ describe("HeroSection (two-sided marketplace redesign)", () => {
     it("renders body paragraph about two-sided marketplace", () => {
       render(<HeroSection />);
       expect(
-        screen.getByText(/StudentHub is where students build careers/i),
+        screen.getByText(/StudentHub is the platform where students build careers/i),
       ).toBeTruthy();
     });
 
