@@ -1,10 +1,21 @@
 import { describe, it, expect } from "vitest";
+import {
+  designationItemSchema,
+  listDesignationsResultSchema,
+  listDesignationsSchema,
+  getDesignationSchema,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
-// Schemas imported from actions.ts for contract testing
+// Schema validation tests for Designation server actions
+//
+// Tests avoid mocking "use server" dependencies (prisma, session) by
+// testing Zod schemas — the pure validation layer — in isolation.
 // ---------------------------------------------------------------------------
 
-import { listDesignationsSchema, getDesignationSchema } from "./actions";
+// ---------------------------------------------------------------------------
+// listDesignationsSchema tests
+// ---------------------------------------------------------------------------
 
 describe("listDesignationsSchema", () => {
   it("accepts default values when no params provided", () => {
@@ -68,6 +79,10 @@ describe("listDesignationsSchema", () => {
   });
 });
 
+// ---------------------------------------------------------------------------
+// getDesignationSchema tests
+// ---------------------------------------------------------------------------
+
 describe("getDesignationSchema", () => {
   it("accepts valid UUID string", () => {
     const result = getDesignationSchema.safeParse({
@@ -91,26 +106,69 @@ describe("getDesignationSchema", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Return type shape verification
+// Output schema tests
 // ---------------------------------------------------------------------------
 
-type DesignationItem = {
-  designation_uuid: string;
-  designation_name_en: string;
-  designation_name_ar: string | null;
-};
+describe("designationItemSchema", () => {
+  it("accepts a valid designation item", () => {
+    const result = designationItemSchema.safeParse({
+      designation_uuid: "abc-123",
+      designation_name_en: "Manager",
+      designation_name_ar: null,
+    });
+    expect(result.success).toBe(true);
+  });
 
-type ListDesignationsResult = {
-  designations: DesignationItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
+  it("accepts Arabic name as string", () => {
+    const result = designationItemSchema.safeParse({
+      designation_uuid: "abc-123",
+      designation_name_en: "Manager",
+      designation_name_ar: "مدير",
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.designation_name_ar).toBe("مدير");
+    }
+  });
 
-describe("ListDesignationsResult type shape", () => {
-  it("conforms to expected structure", () => {
-    const result: ListDesignationsResult = {
+  it("rejects missing designation_uuid", () => {
+    const result = designationItemSchema.safeParse({
+      designation_name_en: "Manager",
+      designation_name_ar: null,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects missing designation_name_en", () => {
+    const result = designationItemSchema.safeParse({
+      designation_uuid: "abc-123",
+      designation_name_ar: null,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects empty uuid", () => {
+    const result = designationItemSchema.safeParse({
+      designation_uuid: "",
+      designation_name_en: "Manager",
+      designation_name_ar: null,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects empty name_en", () => {
+    const result = designationItemSchema.safeParse({
+      designation_uuid: "abc-123",
+      designation_name_en: "",
+      designation_name_ar: null,
+    });
+    expect(result.success).toBe(false);
+  });
+});
+
+describe("listDesignationsResultSchema", () => {
+  it("accepts a valid list result", () => {
+    const result = listDesignationsResultSchema.safeParse({
       designations: [
         {
           designation_uuid: "abc-123",
@@ -122,57 +180,50 @@ describe("ListDesignationsResult type shape", () => {
       page: 1,
       limit: 20,
       totalPages: 1,
-    };
-    expect(result.designations).toHaveLength(1);
-    expect(result.total).toBe(1);
-    expect(result.totalPages).toBe(1);
+    });
+    expect(result.success).toBe(true);
   });
 
-  it("handles empty designation list", () => {
-    const result: ListDesignationsResult = {
+  it("accepts empty designation list", () => {
+    const result = listDesignationsResultSchema.safeParse({
       designations: [],
       total: 0,
       page: 1,
       limit: 20,
       totalPages: 0,
-    };
-    expect(result.designations).toHaveLength(0);
-    expect(result.totalPages).toBe(0);
+    });
+    expect(result.success).toBe(true);
   });
 
-  it("supports Arabic name being null", () => {
-    const item: DesignationItem = {
-      designation_uuid: "abc",
-      designation_name_en: "Manager",
-      designation_name_ar: null,
-    };
-    expect(item.designation_name_ar).toBeNull();
+  it("rejects negative total", () => {
+    const result = listDesignationsResultSchema.safeParse({
+      designations: [],
+      total: -1,
+      page: 1,
+      limit: 20,
+      totalPages: 0,
+    });
+    expect(result.success).toBe(false);
   });
 
-  it("supports Arabic name being a string", () => {
-    const item: DesignationItem = {
-      designation_uuid: "abc",
-      designation_name_en: "Manager",
-      designation_name_ar: "مدير",
-    };
-    expect(item.designation_name_ar).toBe("مدير");
+  it("rejects missing designations field", () => {
+    const result = listDesignationsResultSchema.safeParse({
+      total: 0,
+      page: 1,
+      limit: 20,
+      totalPages: 0,
+    });
+    expect(result.success).toBe(false);
   });
-});
 
-// ---------------------------------------------------------------------------
-// getDesignation return type
-// ---------------------------------------------------------------------------
-
-describe("getDesignation return type", () => {
-  it("returns DesignationItem or null", () => {
-    const found: DesignationItem = {
-      designation_uuid: "abc",
-      designation_name_en: "Manager",
-      designation_name_ar: null,
-    };
-    const notFound: null = null;
-
-    expect(found.designation_uuid).toBe("abc");
-    expect(notFound).toBeNull();
+  it("rejects negative page", () => {
+    const result = listDesignationsResultSchema.safeParse({
+      designations: [],
+      total: 0,
+      page: -1,
+      limit: 20,
+      totalPages: 0,
+    });
+    expect(result.success).toBe(false);
   });
 });
