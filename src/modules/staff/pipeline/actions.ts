@@ -1,37 +1,21 @@
 "use server";
 
+import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireRoleCapability } from "@/modules/auth/session";
 import { updatePipelineStageSchema, type UpdatePipelineStageInput } from "./schemas";
 
+import {
+  pipelineItemSchema,
+  pipelineMetricsSchema,
+  updatePipelineStageResultSchema,
+  type PipelineItem,
+  type PipelineMetrics,
+  type UpdatePipelineStageResult,
+} from "./schemas";
+
 import { type PipelineStage, stageFromInvitationStatus } from "./stage";
-
-// ── Types ────────────────────────────────────────────────────────────
-
-export interface PipelineItem {
-  id: string;
-  requestUuid: string;
-  candidateName: string;
-  candidateId: number | null;
-  positionTitle: string;
-  companyName: string;
-  stage: PipelineStage;
-  updatedAt: Date;
-  priority: "high" | "normal" | "low";
-  /** Invitation status from the DB */
-  invitationStatus: number;
-}
-
-export interface PipelineMetrics {
-  pendingReview: number;
-  interviewing: number;
-  offered: number;
-  hired: number;
-  rejected: number;
-  total: number;
-  trends: Record<PipelineStage, { direction: "up" | "down" | "flat"; label: string }>;
-}
 
 // ── Data fetching ────────────────────────────────────────────────────
 
@@ -77,13 +61,21 @@ export async function getPipelineData(staffId: number) {
     invitationStatus: inv.invitation_status ?? 0,
   }));
 
+  const outputParsed = z.array(pipelineItemSchema).safeParse(items);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/staff/pipeline] getPipelineData output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
   return items;
 }
 
 export async function getPipelineMetrics(items: PipelineItem[]): Promise<PipelineMetrics> {
   const byStage = (stage: PipelineStage) => items.filter((i) => i.stage === stage).length;
 
-  return {
+  const result: PipelineMetrics = {
     pendingReview: byStage("pending_review"),
     interviewing: byStage("interviewing"),
     offered: byStage("offered"),
@@ -98,21 +90,25 @@ export async function getPipelineMetrics(items: PipelineItem[]): Promise<Pipelin
       rejected: { direction: "flat", label: "0%" },
     },
   };
+
+  const outputParsed = pipelineMetricsSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/staff/pipeline] getPipelineMetrics output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
-const STATUS_MAP: Record<PipelineStage, number> = {
+const STATUS_MAP: Record<string, number> = {
   pending_review: 0,
   interviewing: 1,
   offered: 2,
   hired: 3,
   rejected: 4,
 };
-
-export interface UpdatePipelineStageResult {
-  success: boolean;
-  error?: string;
-  newStage?: PipelineStage;
-}
 
 export async function updatePipelineStageAction(
   input: UpdatePipelineStageInput,
@@ -121,7 +117,15 @@ export async function updatePipelineStageAction(
     const session = await requireRoleCapability("staff", "request.read.assigned");
     const parsed = updatePipelineStageSchema.safeParse(input);
     if (!parsed.success) {
-      return { success: false, error: "Invalid input: " + parsed.error.issues[0]?.message };
+      const result: UpdatePipelineStageResult = { success: false, error: "Invalid input: " + parsed.error.issues[0]?.message };
+      const outputParsed = updatePipelineStageResultSchema.safeParse(result);
+      if (!outputParsed.success) {
+        console.error(
+          "[modules/staff/pipeline] updatePipelineStageAction output validation failed:",
+          outputParsed.error.issues,
+        );
+      }
+      return result;
     }
 
     const { invitationUuid, stage } = parsed.data;
@@ -137,11 +141,28 @@ export async function updatePipelineStageAction(
     });
 
     revalidatePath("/staff");
-    return { success: true, newStage: stage };
+
+    const result: UpdatePipelineStageResult = { success: true, newStage: stage };
+    const outputParsed2 = updatePipelineStageResultSchema.safeParse(result);
+    if (!outputParsed2.success) {
+      console.error(
+        "[modules/staff/pipeline] updatePipelineStageAction output validation failed:",
+        outputParsed2.error.issues,
+      );
+    }
+    return result;
   } catch (error) {
-    return {
+    const result: UpdatePipelineStageResult = {
       success: false,
       error: error instanceof Error ? error.message : "Failed to update pipeline stage",
     };
+    const outputParsed = updatePipelineStageResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/staff/pipeline] updatePipelineStageAction output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+    return result;
   }
 }

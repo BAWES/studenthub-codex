@@ -5,6 +5,8 @@ import { requireCapability } from "@/modules/auth/session";
 import {
   listActivityEventsSchema,
   getActivityEventSchema,
+  activityEventItemSchema,
+  listActivityEventsResultSchema,
   type ListActivityEventsParams,
   type GetActivityEventParams,
   type ActivityEventItem,
@@ -63,7 +65,7 @@ export async function listActivityEvents(
     prisma.request_activity.count({ where: where as any }),
   ]);
 
-  return {
+  const result = {
     events: activities.map((a) => ({
       activity_uuid: a.activity_uuid,
       request_uuid: a.request_uuid,
@@ -77,6 +79,17 @@ export async function listActivityEvents(
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  // Validate output shape
+  const outputParsed = listActivityEventsResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/events] listActivityEvents output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -114,7 +127,7 @@ export async function getActivityEvent(
 
   if (!activity) return null;
 
-  return {
+  const item = {
     activity_uuid: activity.activity_uuid,
     request_uuid: activity.request_uuid,
     activity_detail: activity.activity_detail,
@@ -122,4 +135,15 @@ export async function getActivityEvent(
     activity_created_datetime: activity.activity_created_datetime,
     activity_updated_datetime: activity.activity_updated_datetime,
   };
+
+  // Validate output shape
+  const outputParsed = activityEventItemSchema.safeParse(item);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/events] getActivityEvent output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return item;
 }

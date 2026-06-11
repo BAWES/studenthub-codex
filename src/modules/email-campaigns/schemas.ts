@@ -36,23 +36,33 @@ export type ListEmailCampaignsParams = z.input<typeof listEmailCampaignsSchema>;
 export type GetEmailCampaignParams = z.input<typeof getEmailCampaignSchema>;
 export type CreateEmailCampaignParams = z.input<typeof createEmailCampaignSchema>;
 export type UpdateEmailCampaignParams = z.input<typeof updateEmailCampaignSchema>;
-export type EmailCampaignListItem = {
-  campaign_uuid: string;
-  subject: string | null;
-  message: string | null;
-  progress: number | null;
-  target: string | null;
-  status: boolean | null;
-  created_at: Date | null;
-};
-export type ListEmailCampaignsResult = {
-  campaigns: EmailCampaignListItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
-export type CreateUpdateResult = {
-  operation: string;
-  message: string;
-};
+// ---------------------------------------------------------------------------
+// Output validation schemas
+// ---------------------------------------------------------------------------
+
+export const emailCampaignListItemSchema = z.object({
+  campaign_uuid: z.string(),
+  subject: z.string().nullable(),
+  message: z.string().nullable(),
+  progress: z.number().nullable(),
+  target: z.string().nullable(),
+  status: z.boolean().nullable(),
+  created_at: z.date().nullable(),
+});
+
+export const listEmailCampaignsResultSchema = z.object({
+  campaigns: z.array(emailCampaignListItemSchema),
+  total: z.number(),
+  page: z.number(),
+  limit: z.number(),
+  totalPages: z.number(),
+});
+
+export const createUpdateResultSchema = z.object({
+  operation: z.string(),
+  message: z.string(),
+});
+
+export type EmailCampaignListItem = z.output<typeof emailCampaignListItemSchema>;
+export type ListEmailCampaignsResult = z.output<typeof listEmailCampaignsResultSchema>;
+export type CreateUpdateResult = z.output<typeof createUpdateResultSchema>;

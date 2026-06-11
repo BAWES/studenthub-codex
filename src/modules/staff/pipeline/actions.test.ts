@@ -4,7 +4,7 @@ import {
   getPipelineMetrics,
   updatePipelineStageAction,
 } from "./actions";
-import type { PipelineItem } from "./actions";
+import type { PipelineItem } from "./schemas";
 import { stageFromInvitationStatus } from "./stage";
 
 // ---------------------------------------------------------------------------

@@ -79,3 +79,33 @@ export type ListDocumentsParams = z.input<typeof listDocumentsSchema>;
 export type GetDocumentParams = z.input<typeof getDocumentSchema>;
 export type UploadDocumentParams = z.input<typeof uploadDocumentParamsSchema>;
 export type DeleteDocumentParams = z.input<typeof deleteDocumentSchema>;
+
+// ---------------------------------------------------------------------------
+// Zod output validation schemas
+// ---------------------------------------------------------------------------
+
+export const candidateDocumentItemResultSchema = z.object({
+  type: z.enum(DOCUMENT_TYPES),
+  label: z.string(),
+  filePath: z.string().nullable(),
+  fileUrl: z.string().nullable(),
+});
+
+export const listCandidateDocumentsResultSchema = z.object({
+  items: z.array(candidateDocumentItemResultSchema),
+  candidateId: z.number().int(),
+});
+
+export const getCandidateDocumentResultSchema =
+  candidateDocumentItemResultSchema.nullable();
+
+export const uploadDocumentStateResultSchema = z.object({
+  success: z.boolean(),
+  error: z.string().optional(),
+  filePath: z.string().optional(),
+});
+
+export const deleteDocumentStateResultSchema = z.object({
+  success: z.boolean(),
+  error: z.string().optional(),
+});
