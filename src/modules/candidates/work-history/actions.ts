@@ -3,56 +3,17 @@
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export type CandidateWorkHistoryItem = {
-  id: number;
-  candidate_id: number | null;
-  contract_uuid: string | null;
-  store_id: number | null;
-  company_id: number | null;
-  parent_company_id: number | null;
-  staff_id: number | null;
-  start_date: string | null;
-  end_date: string | null;
-  candidate_hourly_rate: number | null;
-  company_hourly_rate: number | null;
-  transfer_cost: number | null;
-  deleted: boolean;
-};
-
-export type CandidateWorkHistoryDetail = CandidateWorkHistoryItem | null;
-
-export type ListCandidateWorkHistoryResult = {
-  items: CandidateWorkHistoryItem[];
-  total: number;
-  page: number;
-  pageSize: number;
-};
-
-// ---------------------------------------------------------------------------
-// Schemas
-// ---------------------------------------------------------------------------
-
-const listCandidateWorkHistorySchema = z.object({
-  candidateId: z.coerce.number().int().positive("Candidate ID is required"),
-  page: z.coerce.number().int().positive().optional().default(1),
-  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
-});
-
-const getCandidateWorkHistorySchema = z.object({
-  id: z.coerce.number().int().positive("Work history ID is required"),
-});
-
-export type ListCandidateWorkHistoryParams = z.input<
-  typeof listCandidateWorkHistorySchema
->;
-export type GetCandidateWorkHistoryParams = z.input<
-  typeof getCandidateWorkHistorySchema
->;
+import {
+  listCandidateWorkHistorySchema,
+  getCandidateWorkHistorySchema,
+  candidateWorkHistoryItemSchema,
+  listCandidateWorkHistoryResultSchema,
+  type ListCandidateWorkHistoryInput,
+  type GetCandidateWorkHistoryInput,
+  type CandidateWorkHistoryItem,
+  type ListCandidateWorkHistoryResult,
+  type CandidateWorkHistoryDetail,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -98,7 +59,7 @@ type PrismaCandidateWorkHistoryRow = NonNullable<
  * Requires candidate.read capability.
  */
 export async function listCandidateWorkHistory(
-  params: ListCandidateWorkHistoryParams,
+  params: ListCandidateWorkHistoryInput,
 ): Promise<ListCandidateWorkHistoryResult> {
   await requireCapability("candidate.read");
 
@@ -120,12 +81,23 @@ export async function listCandidateWorkHistory(
     prisma.candidate_work_history.count({ where }),
   ]);
 
-  return {
+  const result = {
     items: rows.map(toItem),
     total,
     page,
     pageSize: limit,
   };
+
+  // Validate output shape
+  const outputParsed = listCandidateWorkHistoryResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/candidates/work-history] listCandidateWorkHistory output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -135,7 +107,7 @@ export async function listCandidateWorkHistory(
  * Returns null if the record does not exist.
  */
 export async function getCandidateWorkHistory(
-  params: GetCandidateWorkHistoryParams,
+  params: GetCandidateWorkHistoryInput,
 ): Promise<CandidateWorkHistoryDetail> {
   await requireCapability("candidate.read");
 
@@ -147,5 +119,16 @@ export async function getCandidateWorkHistory(
 
   if (!row) return null;
 
-  return toItem(row);
+  const item = toItem(row);
+
+  // Validate output shape
+  const outputParsed = candidateWorkHistoryItemSchema.safeParse(item);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/candidates/work-history] getCandidateWorkHistory output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return item;
 }
