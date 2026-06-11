@@ -3,7 +3,7 @@ import type { Mock } from "vitest";
 import {
   listTransferCandidatesSchema,
   getTransferCandidateSchema,
-} from "./actions";
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Mock prisma before importing the module under test
@@ -473,7 +473,7 @@ import type {
   TransferCandidateItem,
   TransferCandidateDetail,
   ListTransferCandidatesResult,
-} from "./actions";
+} from "./schemas";
 
 describe("TransferCandidateItem shape", () => {
   it("defines expected fields", () => {
