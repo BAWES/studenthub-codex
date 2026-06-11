@@ -5,6 +5,12 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
+import {
+  checklistItemSchema,
+  listChecklistsResultSchema,
+  deleteChecklistResultSchema,
+} from "./schemas";
+import type { ChecklistListItem, ListChecklistsResult, DeleteChecklistResult } from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Schemas
@@ -48,23 +54,7 @@ export type CreateChecklistParams = z.input<typeof createChecklistSchema>;
 export type UpdateChecklistParams = z.input<typeof updateChecklistSchema>;
 export type DeleteChecklistParams = z.input<typeof deleteChecklistSchema>;
 
-export type ChecklistListItem = {
-  request_checklist_uuid: string;
-  status_name: string;
-  status_name_ar: string | null;
-  is_require: boolean | null;
-  sort_order: number | null;
-  created_at: Date | null;
-  updated_at: Date | null;
-};
-
-export type ListChecklistsResult = {
-  items: ChecklistListItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
+export type { ChecklistListItem, ListChecklistsResult, DeleteChecklistResult } from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Server actions
@@ -95,13 +85,24 @@ export async function listChecklists(
     prisma.request_checklist.count(),
   ]);
 
-  return {
+  const result: ListChecklistsResult = {
     items: items as ChecklistListItem[],
     total,
     page,
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  // Validate output shape
+  const outputParsed = listChecklistsResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/requests/checklist] listChecklists output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -124,7 +125,20 @@ export async function getChecklist(
     where: { request_checklist_uuid: uuid },
   });
 
-  return item as ChecklistListItem | null;
+  const result = item as ChecklistListItem | null;
+
+  // Validate output shape (only when not null)
+  if (result !== null) {
+    const outputParsed = checklistItemSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/requests/checklist] getChecklist output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+  }
+
+  return result;
 }
 
 /**
@@ -154,7 +168,19 @@ export async function createChecklist(
   });
 
   revalidatePath("/admin/requests");
-  return item as ChecklistListItem;
+
+  const createResult = item as ChecklistListItem;
+
+  // Validate output shape
+  const createOutputParsed = checklistItemSchema.safeParse(createResult);
+  if (!createOutputParsed.success) {
+    console.error(
+      "[modules/requests/checklist] createChecklist output validation failed:",
+      createOutputParsed.error.issues,
+    );
+  }
+
+  return createResult;
 }
 
 /**
@@ -192,7 +218,19 @@ export async function updateChecklist(
   });
 
   revalidatePath("/admin/requests");
-  return item as ChecklistListItem;
+
+  const updateResult = item as ChecklistListItem;
+
+  // Validate output shape
+  const updateOutputParsed = checklistItemSchema.safeParse(updateResult);
+  if (!updateOutputParsed.success) {
+    console.error(
+      "[modules/requests/checklist] updateChecklist output validation failed:",
+      updateOutputParsed.error.issues,
+    );
+  }
+
+  return updateResult;
 }
 
 /**
@@ -224,5 +262,17 @@ export async function deleteChecklist(
   });
 
   revalidatePath("/admin/requests");
-  return { success: true };
+
+  const deleteResult: DeleteChecklistResult = { success: true };
+
+  // Validate output shape
+  const deleteOutputParsed = deleteChecklistResultSchema.safeParse(deleteResult);
+  if (!deleteOutputParsed.success) {
+    console.error(
+      "[modules/requests/checklist] deleteChecklist output validation failed:",
+      deleteOutputParsed.error.issues,
+    );
+  }
+
+  return deleteResult;
 }
