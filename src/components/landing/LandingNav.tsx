@@ -4,7 +4,6 @@ import { useState, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { GraduationCap, Building2, Menu, X, ArrowRight } from "lucide-react";
-import { ThemeToggle } from "@/modules/theme/ThemeToggle";
 
 export type Persona = "candidate" | "company";
 
@@ -78,7 +77,6 @@ export default function LandingNav({ session, persona, onPersonaChange }: Landin
             </div>
 
             <div className="flex items-center gap-2 ml-auto">
-              <ThemeToggle />
               {session ? (
                 <Link
                   href="/app"
