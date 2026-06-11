@@ -9,16 +9,16 @@ import {
   getHolidaySchema,
   createHolidaySchema,
   deleteHolidaySchema,
-  listHolidaysResultSchema,
   holidayItemSchema,
-  holidayDetailSchema,
+  listHolidaysResultSchema,
   deleteHolidayResultSchema,
-  type ListHolidaysResult,
   type ListHolidaysParams,
   type GetHolidayParams,
   type CreateHolidayParams,
   type DeleteHolidayParams,
   type HolidayItem,
+  type ListHolidaysResult,
+  type DeleteHolidayResult,
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
@@ -67,16 +67,16 @@ export async function listHolidays(
     prisma.holiday.count({ where: where as any }),
   ]);
 
-  const result: ListHolidaysResult = {
+  const result = {
     holidays: holidays.map((h) => ({
       holiday_uuid: h.holiday_uuid,
       name: h.name,
-      date: h.date,
+      date: h.date.toISOString(),
       is_recurring: h.is_recurring,
       description: h.description ?? null,
       is_deleted: h.is_deleted,
-      created_at: h.created_at ?? null,
-      updated_at: h.updated_at ?? null,
+      created_at: h.created_at?.toISOString() ?? null,
+      updated_at: h.updated_at?.toISOString() ?? null,
     })),
     total,
     page,
@@ -84,7 +84,7 @@ export async function listHolidays(
     totalPages: Math.ceil(total / limit),
   };
 
-  // Validate output shape
+  // Output validation — log mismatches without throwing
   const outputParsed = listHolidaysResultSchema.safeParse(result);
   if (!outputParsed.success) {
     console.error(
@@ -122,19 +122,19 @@ export async function getHoliday(
 
   if (!holiday) return null;
 
-  const result: HolidayItem = {
+  const result = {
     holiday_uuid: holiday.holiday_uuid,
     name: holiday.name,
-    date: holiday.date,
+    date: holiday.date.toISOString(),
     is_recurring: holiday.is_recurring,
     description: holiday.description ?? null,
     is_deleted: holiday.is_deleted,
-    created_at: holiday.created_at ?? null,
-    updated_at: holiday.updated_at ?? null,
+    created_at: holiday.created_at?.toISOString() ?? null,
+    updated_at: holiday.updated_at?.toISOString() ?? null,
   };
 
-  // Validate output shape
-  const outputParsed = holidayDetailSchema.safeParse(result);
+  // Output validation — log mismatches without throwing
+  const outputParsed = holidayItemSchema.safeParse(result);
   if (!outputParsed.success) {
     console.error(
       "[modules/holidays] getHoliday output validation failed:",
@@ -184,18 +184,18 @@ export async function createHoliday(
   revalidatePath("/staff/holidays");
   revalidatePath("/admin/holidays");
 
-  const result: HolidayItem = {
+  const result = {
     holiday_uuid: holiday.holiday_uuid,
     name: holiday.name,
-    date: holiday.date,
+    date: holiday.date.toISOString(),
     is_recurring: holiday.is_recurring,
     description: holiday.description ?? null,
     is_deleted: holiday.is_deleted,
-    created_at: holiday.created_at ?? null,
-    updated_at: holiday.updated_at ?? null,
+    created_at: holiday.created_at?.toISOString() ?? null,
+    updated_at: holiday.updated_at?.toISOString() ?? null,
   };
 
-  // Validate output shape
+  // Output validation — log mismatches without throwing
   const outputParsed = holidayItemSchema.safeParse(result);
   if (!outputParsed.success) {
     console.error(
@@ -219,7 +219,7 @@ export async function createHoliday(
  */
 export async function deleteHoliday(
   params: DeleteHolidayParams,
-): Promise<{ success: boolean }> {
+): Promise<DeleteHolidayResult> {
   await requireCapability("holiday.write");
 
   const parsed = deleteHolidaySchema.safeParse(params);
@@ -245,16 +245,5 @@ export async function deleteHoliday(
   revalidatePath("/staff/holidays");
   revalidatePath("/admin/holidays");
 
-  const result = { success: true };
-
-  // Validate output shape
-  const outputParsed = deleteHolidayResultSchema.safeParse(result);
-  if (!outputParsed.success) {
-    console.error(
-      "[modules/holidays] deleteHoliday output validation failed:",
-      outputParsed.error.issues,
-    );
-  }
-
-  return result;
+  return { success: true };
 }

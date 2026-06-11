@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 // ---------------------------------------------------------------------------
-// Input schemas (moved from actions.ts)
+// Input validation schemas
 // ---------------------------------------------------------------------------
 
 export const listNotesSchema = z.object({
@@ -44,6 +44,9 @@ export const deleteNoteSchema = z.object({
 // Output validation schemas
 // ---------------------------------------------------------------------------
 
+/**
+ * Schema for a single note list item.
+ */
 export const noteListItemSchema = z.object({
   note_uuid: z.string(),
   note_type: z.string().nullable(),
@@ -51,18 +54,22 @@ export const noteListItemSchema = z.object({
   company_id: z.number().int().nullable(),
   candidate_id: z.number().int().nullable(),
   created_by: z.number().int().nullable(),
-  note_created_datetime: z.date().nullable(),
+  note_created_datetime: z.string().nullable(),
 });
 
+/**
+ * Schema for a note detail (includes extra fields beyond list item).
+ */
 export const noteDetailSchema = noteListItemSchema.extend({
-  note_updated_datetime: z.date().nullable(),
+  note_updated_datetime: z.string().nullable(),
   updated_by: z.number().int().nullable(),
   request_uuid: z.string().nullable(),
   story_uuid: z.string().nullable(),
 });
 
-export const noteDetailNullableSchema = noteDetailSchema.nullable();
-
+/**
+ * Schema for the listNotes response.
+ */
 export const listNotesResultSchema = z.object({
   notes: z.array(noteListItemSchema),
   total: z.number().int().nonnegative(),
@@ -71,23 +78,30 @@ export const listNotesResultSchema = z.object({
   totalPages: z.number().int().nonnegative(),
 });
 
-export const operationResultSchema = z.object({
+/**
+ * Schema for the getNote result (detail or null).
+ */
+export const noteDetailOrNullSchema = noteDetailSchema.nullable();
+
+/**
+ * Schema for mutation responses (create, update).
+ */
+export const noteMutationResultSchema = z.object({
+  operation: z.string(),
+  message: z.string(),
+  note: noteDetailSchema.optional(),
+});
+
+/**
+ * Schema for delete response.
+ */
+export const noteDeleteResultSchema = z.object({
   operation: z.string(),
   message: z.string(),
 });
 
-export const createNoteResultSchema = operationResultSchema.extend({
-  note: noteDetailSchema.optional(),
-});
-
-export const updateNoteResultSchema = operationResultSchema.extend({
-  note: noteDetailSchema.optional(),
-});
-
-export const deleteNoteResultSchema = operationResultSchema;
-
 // ---------------------------------------------------------------------------
-// Types (derived from schemas where possible)
+// Types derived from schemas
 // ---------------------------------------------------------------------------
 
 export type ListNotesParams = z.input<typeof listNotesSchema>;
@@ -99,3 +113,6 @@ export type DeleteNoteParams = z.input<typeof deleteNoteSchema>;
 export type NoteListItem = z.output<typeof noteListItemSchema>;
 export type NoteDetail = z.output<typeof noteDetailSchema>;
 export type ListNotesResult = z.output<typeof listNotesResultSchema>;
+export type NoteDetailOrNull = z.output<typeof noteDetailOrNullSchema>;
+export type NoteMutationResult = z.output<typeof noteMutationResultSchema>;
+export type NoteDeleteResult = z.output<typeof noteDeleteResultSchema>;

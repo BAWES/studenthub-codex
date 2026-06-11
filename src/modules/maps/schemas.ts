@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 // ---------------------------------------------------------------------------
-// Input schemas (moved from actions.ts)
+// Input validation schemas
 // ---------------------------------------------------------------------------
 
 export const geocodeSchema = z.object({
@@ -27,7 +27,10 @@ export const reverseGeocodeSchema = z.object({
 // Output validation schemas
 // ---------------------------------------------------------------------------
 
-export const geocodeResultSchema = z.object({
+/**
+ * Schema for a single geocode result item.
+ */
+export const geocodeResultItemSchema = z.object({
   uuid: z.string(),
   name: z.string(),
   nameAr: z.string().nullable(),
@@ -39,7 +42,15 @@ export const geocodeResultSchema = z.object({
   emoji: z.string().nullable(),
 });
 
-export const reverseGeocodeResultSchema = z.object({
+/**
+ * Schema for the geocode response (array of results).
+ */
+export const geocodeResultSchema = z.array(geocodeResultItemSchema);
+
+/**
+ * Schema for a single reverse-geocode result item.
+ */
+export const reverseGeocodeResultItemSchema = z.object({
   uuid: z.string(),
   name: z.string(),
   nameAr: z.string().nullable(),
@@ -50,11 +61,17 @@ export const reverseGeocodeResultSchema = z.object({
   distance: z.number(),
 });
 
+/**
+ * Schema for the reverseGeocode response (array of results).
+ */
+export const reverseGeocodeResultSchema = z.array(reverseGeocodeResultItemSchema);
+
 // ---------------------------------------------------------------------------
-// Types (derived from schemas)
+// Types derived from schemas
 // ---------------------------------------------------------------------------
 
-export type GeocodeResult = z.output<typeof geocodeResultSchema>;
-export type ReverseGeocodeResult = z.output<typeof reverseGeocodeResultSchema>;
 export type GeocodeParams = z.input<typeof geocodeSchema>;
 export type ReverseGeocodeParams = z.input<typeof reverseGeocodeSchema>;
+
+export type GeocodeResult = z.output<typeof geocodeResultItemSchema>;
+export type ReverseGeocodeResult = z.output<typeof reverseGeocodeResultItemSchema>;

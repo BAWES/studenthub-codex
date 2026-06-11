@@ -4,15 +4,13 @@ import crypto from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
-
 import {
   listRequestChecklistsSchema,
   createRequestChecklistSchema,
   updateRequestChecklistSchema,
   deleteRequestChecklistSchema,
-  listRequestChecklistsResultSchema,
   requestChecklistItemSchema,
-  requestChecklistItemNullableSchema,
+  listRequestChecklistsResultSchema,
   deleteRequestChecklistResultSchema,
   type ListRequestChecklistsParams,
   type CreateRequestChecklistParams,
@@ -20,6 +18,7 @@ import {
   type DeleteRequestChecklistParams,
   type RequestChecklistItem,
   type ListRequestChecklistsResult,
+  type RequestChecklistDetail,
   type DeleteRequestChecklistResult,
 } from "./schemas";
 
@@ -58,14 +57,22 @@ export async function listRequestChecklists(
   ]);
 
   const result = {
-    items: items as RequestChecklistItem[],
+    items: items.map((i) => ({
+      request_checklist_uuid: i.request_checklist_uuid,
+      status_name: i.status_name,
+      status_name_ar: i.status_name_ar ?? null,
+      is_require: i.is_require ?? null,
+      sort_order: i.sort_order ?? null,
+      created_at: i.created_at?.toISOString() ?? null,
+      updated_at: i.updated_at?.toISOString() ?? null,
+    })),
     total,
     page,
     limit,
     totalPages: Math.ceil(total / limit),
   };
 
-  // Validate output shape
+  // Output validation — log mismatches without throwing
   const outputParsed = listRequestChecklistsResultSchema.safeParse(result);
   if (!outputParsed.success) {
     console.error(
@@ -82,7 +89,7 @@ export async function listRequestChecklists(
  */
 export async function getRequestChecklist(
   requestChecklistUuid: string,
-): Promise<RequestChecklistItem | null> {
+): Promise<RequestChecklistDetail> {
   await requireCapability("admin.read");
 
   if (!requestChecklistUuid) {
@@ -93,8 +100,20 @@ export async function getRequestChecklist(
     where: { request_checklist_uuid: requestChecklistUuid },
   });
 
-  // Validate output shape
-  const outputParsed = requestChecklistItemNullableSchema.safeParse(item);
+  if (!item) return null;
+
+  const result: RequestChecklistItem = {
+    request_checklist_uuid: item.request_checklist_uuid,
+    status_name: item.status_name,
+    status_name_ar: item.status_name_ar ?? null,
+    is_require: item.is_require ?? null,
+    sort_order: item.sort_order ?? null,
+    created_at: item.created_at?.toISOString() ?? null,
+    updated_at: item.updated_at?.toISOString() ?? null,
+  };
+
+  // Output validation — log mismatches without throwing
+  const outputParsed = requestChecklistItemSchema.safeParse(result);
   if (!outputParsed.success) {
     console.error(
       "[modules/request-checklists] getRequestChecklist output validation failed:",
@@ -102,7 +121,7 @@ export async function getRequestChecklist(
     );
   }
 
-  return item as RequestChecklistItem | null;
+  return result;
 }
 
 /**
@@ -135,8 +154,18 @@ export async function createRequestChecklist(
 
   revalidatePath("/admin/requests");
 
-  // Validate output shape
-  const outputParsed = requestChecklistItemSchema.safeParse(item);
+  const result: RequestChecklistItem = {
+    request_checklist_uuid: item.request_checklist_uuid,
+    status_name: item.status_name,
+    status_name_ar: item.status_name_ar ?? null,
+    is_require: item.is_require ?? null,
+    sort_order: item.sort_order ?? null,
+    created_at: item.created_at?.toISOString() ?? null,
+    updated_at: item.updated_at?.toISOString() ?? null,
+  };
+
+  // Output validation — log mismatches without throwing
+  const outputParsed = requestChecklistItemSchema.safeParse(result);
   if (!outputParsed.success) {
     console.error(
       "[modules/request-checklists] createRequestChecklist output validation failed:",
@@ -144,7 +173,7 @@ export async function createRequestChecklist(
     );
   }
 
-  return item as RequestChecklistItem;
+  return result;
 }
 
 /**
@@ -183,8 +212,18 @@ export async function updateRequestChecklist(
 
   revalidatePath("/admin/requests");
 
-  // Validate output shape
-  const outputParsed = requestChecklistItemSchema.safeParse(item);
+  const result: RequestChecklistItem = {
+    request_checklist_uuid: item.request_checklist_uuid,
+    status_name: item.status_name,
+    status_name_ar: item.status_name_ar ?? null,
+    is_require: item.is_require ?? null,
+    sort_order: item.sort_order ?? null,
+    created_at: item.created_at?.toISOString() ?? null,
+    updated_at: item.updated_at?.toISOString() ?? null,
+  };
+
+  // Output validation — log mismatches without throwing
+  const outputParsed = requestChecklistItemSchema.safeParse(result);
   if (!outputParsed.success) {
     console.error(
       "[modules/request-checklists] updateRequestChecklist output validation failed:",
@@ -192,7 +231,7 @@ export async function updateRequestChecklist(
     );
   }
 
-  return item as RequestChecklistItem;
+  return result;
 }
 
 /**
@@ -200,7 +239,7 @@ export async function updateRequestChecklist(
  */
 export async function deleteRequestChecklist(
   params: DeleteRequestChecklistParams,
-): Promise<{ success: boolean }> {
+): Promise<DeleteRequestChecklistResult> {
   await requireCapability("admin.write");
 
   const parsed = deleteRequestChecklistSchema.safeParse(params);
@@ -223,17 +262,6 @@ export async function deleteRequestChecklist(
   });
 
   revalidatePath("/admin/requests");
-
-  // Validate output shape
-  const outputParsed = deleteRequestChecklistResultSchema.safeParse({
-    success: true,
-  });
-  if (!outputParsed.success) {
-    console.error(
-      "[modules/request-checklists] deleteRequestChecklist output validation failed:",
-      outputParsed.error.issues,
-    );
-  }
 
   return { success: true };
 }

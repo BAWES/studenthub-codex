@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 // ---------------------------------------------------------------------------
-// Input schemas (moved from actions.ts)
+// Input validation schemas
 // ---------------------------------------------------------------------------
 
 export const listHolidaysSchema = z.object({
@@ -30,17 +30,17 @@ export const deleteHolidaySchema = z.object({
 // ---------------------------------------------------------------------------
 
 /**
- * Schema for a single holiday item returned from listHolidays / getHoliday.
+ * Schema for a single holiday item returned from listHolidays / getHoliday / createHoliday.
  */
 export const holidayItemSchema = z.object({
   holiday_uuid: z.string(),
   name: z.string(),
-  date: z.date(),
+  date: z.string(),
   is_recurring: z.boolean(),
   description: z.string().nullable(),
   is_deleted: z.boolean(),
-  created_at: z.date().nullable(),
-  updated_at: z.date().nullable(),
+  created_at: z.string().nullable(),
+  updated_at: z.string().nullable(),
 });
 
 /**
@@ -67,13 +67,15 @@ export const deleteHolidayResultSchema = z.object({
 });
 
 // ---------------------------------------------------------------------------
-// Types (derived from schemas)
+// Types derived from schemas
 // ---------------------------------------------------------------------------
 
-export type HolidayItem = z.output<typeof holidayItemSchema>;
-export type ListHolidaysResult = z.output<typeof listHolidaysResultSchema>;
-export type DeleteHolidayResult = z.output<typeof deleteHolidayResultSchema>;
 export type ListHolidaysParams = z.input<typeof listHolidaysSchema>;
 export type GetHolidayParams = z.input<typeof getHolidaySchema>;
 export type CreateHolidayParams = z.input<typeof createHolidaySchema>;
 export type DeleteHolidayParams = z.input<typeof deleteHolidaySchema>;
+
+export type HolidayItem = z.output<typeof holidayItemSchema>;
+export type HolidayDetail = z.output<typeof holidayDetailSchema>;
+export type ListHolidaysResult = z.output<typeof listHolidaysResultSchema>;
+export type DeleteHolidayResult = z.output<typeof deleteHolidayResultSchema>;

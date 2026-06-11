@@ -8,10 +8,10 @@ import {
   reverseGeocodeSchema,
   geocodeResultSchema,
   reverseGeocodeResultSchema,
-  type GeocodeResult,
-  type ReverseGeocodeResult,
   type GeocodeParams,
   type ReverseGeocodeParams,
+  type GeocodeResult,
+  type ReverseGeocodeResult,
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
@@ -115,18 +115,18 @@ export async function geocode(
       orderBy: { country_name_en: "asc" },
     });
 
-    const results = countries.map((c) => toGeocodeResult(c, "country"));
+    const result = countries.map((c) => toGeocodeResult(c, "country"));
 
-    // Validate output shape
-    const outputParsed = z.array(geocodeResultSchema).safeParse(results);
+    // Output validation — log mismatches without throwing
+    const outputParsed = geocodeResultSchema.safeParse(result);
     if (!outputParsed.success) {
       console.error(
-        "[modules/maps] geocode (country) output validation failed:",
+        "[modules/maps] geocode output validation failed:",
         outputParsed.error.issues,
       );
     }
 
-    return results;
+    return result;
   }
 
   // Search areas
@@ -141,18 +141,18 @@ export async function geocode(
     orderBy: { area_name_en: "asc" },
   });
 
-  const results = areas.map((a) => toGeocodeResult(a, "area"));
+  const result = areas.map((a) => toGeocodeResult(a, "area"));
 
-  // Validate output shape
-  const outputParsed = z.array(geocodeResultSchema).safeParse(results);
+  // Output validation — log mismatches without throwing
+  const outputParsed = geocodeResultSchema.safeParse(result);
   if (!outputParsed.success) {
     console.error(
-      "[modules/maps] geocode (area) output validation failed:",
+      "[modules/maps] geocode output validation failed:",
       outputParsed.error.issues,
     );
   }
 
-  return results;
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -224,10 +224,10 @@ export async function reverseGeocode(
   }
 
   // Sort by distance ascending, limit results
-  const results = nearby.sort((a, b) => a.distance - b.distance).slice(0, limit);
+  const result = nearby.sort((a, b) => a.distance - b.distance).slice(0, limit);
 
-  // Validate output shape
-  const outputParsed = z.array(reverseGeocodeResultSchema).safeParse(results);
+  // Output validation — log mismatches without throwing
+  const outputParsed = reverseGeocodeResultSchema.safeParse(result);
   if (!outputParsed.success) {
     console.error(
       "[modules/maps] reverseGeocode output validation failed:",
@@ -235,5 +235,5 @@ export async function reverseGeocode(
     );
   }
 
-  return results;
+  return result;
 }

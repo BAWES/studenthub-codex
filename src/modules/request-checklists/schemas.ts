@@ -34,7 +34,7 @@ export const deleteRequestChecklistSchema = z.object({
 // ---------------------------------------------------------------------------
 
 /**
- * Schema for a single request checklist item returned from list / get / create / update.
+ * Schema for a single request checklist item.
  */
 export const requestChecklistItemSchema = z.object({
   request_checklist_uuid: z.string(),
@@ -42,15 +42,9 @@ export const requestChecklistItemSchema = z.object({
   status_name_ar: z.string().nullable(),
   is_require: z.boolean().nullable(),
   sort_order: z.number().int().nullable(),
-  created_at: z.date().nullable(),
-  updated_at: z.date().nullable(),
+  created_at: z.string().nullable(),
+  updated_at: z.string().nullable(),
 });
-
-/**
- * Schema for getRequestChecklist result (item or null).
- */
-export const requestChecklistItemNullableSchema =
-  requestChecklistItemSchema.nullable();
 
 /**
  * Schema for the listRequestChecklists response.
@@ -64,7 +58,12 @@ export const listRequestChecklistsResultSchema = z.object({
 });
 
 /**
- * Schema for the deleteRequestChecklist response.
+ * Schema for getRequestChecklist result (item or null).
+ */
+export const requestChecklistDetailSchema = requestChecklistItemSchema.nullable();
+
+/**
+ * Schema for delete response.
  */
 export const deleteRequestChecklistResultSchema = z.object({
   success: z.boolean(),
@@ -74,28 +73,12 @@ export const deleteRequestChecklistResultSchema = z.object({
 // Types derived from schemas
 // ---------------------------------------------------------------------------
 
-export type ListRequestChecklistsParams = z.input<
-  typeof listRequestChecklistsSchema
->;
-export type CreateRequestChecklistParams = z.input<
-  typeof createRequestChecklistSchema
->;
-export type UpdateRequestChecklistParams = z.input<
-  typeof updateRequestChecklistSchema
->;
-export type DeleteRequestChecklistParams = z.input<
-  typeof deleteRequestChecklistSchema
->;
+export type ListRequestChecklistsParams = z.input<typeof listRequestChecklistsSchema>;
+export type CreateRequestChecklistParams = z.input<typeof createRequestChecklistSchema>;
+export type UpdateRequestChecklistParams = z.input<typeof updateRequestChecklistSchema>;
+export type DeleteRequestChecklistParams = z.input<typeof deleteRequestChecklistSchema>;
 
-export type RequestChecklistItem = z.output<
-  typeof requestChecklistItemSchema
->;
-export type RequestChecklistItemNullable = z.output<
-  typeof requestChecklistItemNullableSchema
->;
-export type ListRequestChecklistsResult = z.output<
-  typeof listRequestChecklistsResultSchema
->;
-export type DeleteRequestChecklistResult = z.output<
-  typeof deleteRequestChecklistResultSchema
->;
+export type RequestChecklistItem = z.output<typeof requestChecklistItemSchema>;
+export type ListRequestChecklistsResult = z.output<typeof listRequestChecklistsResultSchema>;
+export type RequestChecklistDetail = z.output<typeof requestChecklistDetailSchema>;
+export type DeleteRequestChecklistResult = z.output<typeof deleteRequestChecklistResultSchema>;

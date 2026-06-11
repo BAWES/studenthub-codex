@@ -5,30 +5,16 @@ import { requireCapability } from "@/modules/auth/session";
 import {
   listChatsSchema,
   getChatMessagesSchema,
+  chatListItemSchema,
+  chatMessageItemSchema,
   listChatsResultSchema,
   listChatMessagesResultSchema,
-} from "./schemas";
-
-import type {
-  ListChatsParams,
-  GetChatMessagesParams,
-  ChatListItem,
-  ChatMessageItem,
-  ListChatsResult,
-  ListChatMessagesResult,
-} from "./schemas";
-
-// ---------------------------------------------------------------------------
-// Types (re-exported from schemas)
-// ---------------------------------------------------------------------------
-
-export type {
-  ListChatsParams,
-  GetChatMessagesParams,
-  ChatListItem,
-  ChatMessageItem,
-  ListChatsResult,
-  ListChatMessagesResult,
+  type ListChatsParams,
+  type GetChatMessagesParams,
+  type ChatListItem,
+  type ChatMessageItem,
+  type ListChatsResult,
+  type ListChatMessagesResult,
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
@@ -67,17 +53,26 @@ export async function listChats(
   ]);
 
   const result = {
-    chats: chats as ChatListItem[],
+    chats: chats.map((c) => ({
+      chat_uuid: c.chat_uuid,
+      candidate_id: c.candidate_id,
+      company_id: c.company_id,
+      store_id: c.store_id,
+      staff_id: c.staff_id ?? null,
+      created_at: c.created_at?.toISOString() ?? null,
+    })),
     total,
     page,
     limit,
     totalPages: Math.ceil(total / limit),
   };
 
+  // Output validation — log mismatches without throwing
   const outputParsed = listChatsResultSchema.safeParse(result);
   if (!outputParsed.success) {
-    throw new Error(
-      `Output validation failed for listChats: ${outputParsed.error.issues[0]?.message ?? "Unknown error"}`,
+    console.error(
+      "[modules/chat] listChats output validation failed:",
+      outputParsed.error.issues,
     );
   }
 
@@ -115,17 +110,27 @@ export async function getChatMessages(
   ]);
 
   const result = {
-    messages: messages as ChatMessageItem[],
+    messages: messages.map((m) => ({
+      chat_message_uuid: m.chat_message_uuid,
+      chat_uuid: m.chat_uuid,
+      message: m.message,
+      message_index: m.message_index ?? null,
+      from: m.from ?? null,
+      status: m.status ?? null,
+      created_at: m.created_at?.toISOString() ?? null,
+    })),
     total,
     page: 1,
     limit,
     totalPages: 1,
   };
 
+  // Output validation — log mismatches without throwing
   const outputParsed = listChatMessagesResultSchema.safeParse(result);
   if (!outputParsed.success) {
-    throw new Error(
-      `Output validation failed for getChatMessages: ${outputParsed.error.issues[0]?.message ?? "Unknown error"}`,
+    console.error(
+      "[modules/chat] getChatMessages output validation failed:",
+      outputParsed.error.issues,
     );
   }
 
