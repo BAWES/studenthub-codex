@@ -79,24 +79,27 @@ function useCountUp(target: number, duration: number, started: boolean) {
 // ── Individual animated stat item component ────────────────────
 
 function AnimatedStat({ stat, visible }: { stat: StatItem; visible: boolean }) {
-  const count = useCountUp(stat.numericValue, 1500, visible);
+  const count = useCountUp(stat.numericValue, 1800, visible);
   const Icon = stat.icon;
 
   return (
     <div key={stat.label} className="flex flex-col items-center gap-2">
       {/* Icon */}
       <div
-        className="size-10 rounded-xl flex items-center justify-center"
+        className="size-12 rounded-xl flex items-center justify-center"
         style={{
           background: "var(--sh-info-bg)",
           color: "var(--sh-info)",
         }}
       >
-        <Icon className="size-5" aria-hidden="true" />
+        <Icon className="size-6" aria-hidden="true" />
       </div>
 
-      {/* Counter */}
-      <div className="text-[clamp(28px,4vw,48px)] font-black leading-none">
+      {/* Counter — hidden until visible so 0+ never flashes */}
+      <div
+        className="text-[clamp(28px,4vw,48px)] font-black leading-none"
+        style={{ opacity: visible ? 1 : 0, transition: "opacity 300ms ease" }}
+      >
         <span
           style={{
             background: "linear-gradient(135deg, var(--sh-info), #f59e0b)",
@@ -105,8 +108,7 @@ function AnimatedStat({ stat, visible }: { stat: StatItem; visible: boolean }) {
             backgroundClip: "text",
           }}
         >
-          {count.toLocaleString()}
-          {stat.suffix}
+          {visible ? `${count.toLocaleString()}${stat.suffix}` : "—"}
         </span>
       </div>
 
