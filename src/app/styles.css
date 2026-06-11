@@ -29,6 +29,7 @@
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
 :root {
+  scroll-behavior: smooth;
   color-scheme: light;
   /* ------------------------------------------------------------------ */
   /* Typography scale                                                    */
@@ -11399,12 +11400,14 @@ kbd {
   animation: shFadeInUp 600ms var(--sh-easing) forwards;
 }
 
-.shSection:nth-child(3) { animation-delay: 100ms; }
-.shSection:nth-child(4) { animation-delay: 200ms; }
-.shSection:nth-child(5) { animation-delay: 300ms; }
-.shSection:nth-child(6) { animation-delay: 400ms; }
-.shSection:nth-child(7) { animation-delay: 500ms; }
-.shSection:nth-child(8) { animation-delay: 600ms; }
+.shSection:nth-child(3) { animation-delay: 60ms; }
+.shSection:nth-child(4) { animation-delay: 120ms; }
+.shSection:nth-child(5) { animation-delay: 180ms; }
+.shSection:nth-child(6) { animation-delay: 240ms; }
+.shSection:nth-child(7) { animation-delay: 300ms; }
+.shSection:nth-child(8) { animation-delay: 360ms; }
+.shSection:nth-child(9) { animation-delay: 420ms; }
+.shSection:nth-child(10) { animation-delay: 480ms; }
 
 @keyframes shFadeInUp {
   to {
@@ -11431,6 +11434,12 @@ kbd {
 .shPortalCard {
   position: relative;
   isolation: isolate;
+  transition: transform 280ms var(--sh-easing), box-shadow 280ms var(--sh-easing);
+}
+
+.shPortalCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(16, 24, 40, 0.12);
 }
 
 .shPortalCard::after {
