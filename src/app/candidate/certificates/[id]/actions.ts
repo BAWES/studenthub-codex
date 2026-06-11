@@ -1,21 +1,20 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { prisma } from "@/lib/prisma";
 import { requireRoleCapability } from "@/modules/auth/session";
 import {
-  getCertificateSchema,
-  updateCertificateSchema,
-  deleteCertificateSchema,
-  type GetCertificateInput,
-  type UpdateCertificateInput,
-  type DeleteCertificateInput,
-} from "./schemas";
-import {
-  getCertificate as parentGetCertificate,
-  updateCertificate as parentUpdateCertificate,
-  deleteCertificate as parentDeleteCertificate,
-} from "../actions";
+  getCertificate as moduleGetCertificate,
+  updateCertificate as moduleUpdateCertificate,
+  deleteCertificate as moduleDeleteCertificate,
+} from "@/modules/candidates/certificates";
+import type {
+  CertificateItem,
+  CertificateActionResult,
+  DeleteCertificateResult,
+  GetCertificateInput,
+  UpdateCertificateInput,
+  DeleteCertificateInput,
+} from "@/modules/candidates/certificates";
 
 // ---------------------------------------------------------------------------
 // getCertificate
@@ -23,17 +22,15 @@ import {
 
 /**
  * Get a single certificate by UUID for the [id] route.
- * Delegates to the parent-level getCertificate action.
+ * Delegates to the module-level getCertificate action.
  */
 export async function getCertificate(
   input: GetCertificateInput,
-): Promise<ReturnType<typeof parentGetCertificate>> {
-  const parsed = getCertificateSchema.safeParse(input);
-  if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Invalid input");
-  }
+): Promise<CertificateItem | null> {
+  const session = await requireRoleCapability("candidate", "candidate.read.own");
+  const candidateId = Number(session.id);
 
-  return parentGetCertificate(parsed.data.uuid);
+  return moduleGetCertificate(candidateId, input);
 }
 
 // ---------------------------------------------------------------------------
@@ -42,27 +39,21 @@ export async function getCertificate(
 
 /**
  * Update a single certificate by UUID for the [id] route.
- * Delegates to the parent-level updateCertificate action.
+ * Delegates to the module-level updateCertificate action.
  */
 export async function updateCertificate(
   input: UpdateCertificateInput,
-): Promise<ReturnType<typeof parentUpdateCertificate>> {
-  await requireRoleCapability("candidate", "candidate.read.own");
+): Promise<CertificateActionResult> {
+  const session = await requireRoleCapability("candidate", "candidate.read.own");
+  const candidateId = Number(session.id);
 
-  const parsed = updateCertificateSchema.safeParse(input);
-  if (!parsed.success) {
-    return {
-      operation: "error",
-      message: parsed.error.issues[0]?.message ?? "Invalid input",
-    };
+  const result = await moduleUpdateCertificate(candidateId, input);
+
+  if (result.operation === "success") {
+    revalidatePath("/candidate/certificates");
   }
 
-  const { certificateUuid, ...fields } = parsed.data;
-
-  return parentUpdateCertificate({
-    certificateUuid,
-    ...fields,
-  });
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -71,20 +62,19 @@ export async function updateCertificate(
 
 /**
  * Soft-delete a single certificate by UUID for the [id] route.
- * Delegates to the parent-level deleteCertificate action.
+ * Delegates to the module-level deleteCertificate action.
  */
 export async function deleteCertificate(
   input: DeleteCertificateInput,
-): Promise<ReturnType<typeof parentDeleteCertificate>> {
-  await requireRoleCapability("candidate", "candidate.read.own");
+): Promise<DeleteCertificateResult> {
+  const session = await requireRoleCapability("candidate", "candidate.read.own");
+  const candidateId = Number(session.id);
 
-  const parsed = deleteCertificateSchema.safeParse(input);
-  if (!parsed.success) {
-    return {
-      operation: "error",
-      message: parsed.error.issues[0]?.message ?? "Invalid input",
-    };
+  const result = await moduleDeleteCertificate(candidateId, input);
+
+  if (result.operation === "success") {
+    revalidatePath("/candidate/certificates");
   }
 
-  return parentDeleteCertificate(parsed.data.certificateUuid);
+  return result;
 }
