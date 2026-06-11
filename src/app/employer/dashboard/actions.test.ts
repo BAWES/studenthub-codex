@@ -1,74 +1,54 @@
 import { describe, it, expect } from "vitest";
+import {
+  employerDashboardMetricSchema,
+  recentApplicationSchema,
+  jobStatusBreakdownSchema,
+  employerDashboardDataSchema,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
-// Type shape tests for employer/dashboard server actions
-// These types are plain TypeScript interfaces (no Zod schemas), so tests
-// validate the expected shape at the type level.
+// Tests — employerDashboardMetricSchema
 // ---------------------------------------------------------------------------
 
-type EmployerDashboardMetric = {
-  label: string;
-  value: number;
-  note: string;
-};
-
-type RecentApplication = {
-  applicationId: number;
-  candidateId: number;
-  candidateName: string | null;
-  jobTitle: string;
-  jobListingId: number;
-  status: string;
-  createdAt: Date;
-};
-
-type JobStatusBreakdown = {
-  status: string;
-  count: number;
-};
-
-type EmployerDashboardData = {
-  metrics: EmployerDashboardMetric[];
-  recentApplications: RecentApplication[];
-  jobStatusBreakdown: JobStatusBreakdown[];
-  totalJobs: number;
-  totalApplications: number;
-};
-
-// ---------------------------------------------------------------------------
-// Tests — EmployerDashboardMetric
-// ---------------------------------------------------------------------------
-
-describe("EmployerDashboardMetric", () => {
+describe("employerDashboardMetricSchema", () => {
   it("accepts a valid dashboard metric", () => {
-    const metric: EmployerDashboardMetric = {
+    const result = employerDashboardMetricSchema.safeParse({
       label: "Active Job Listings",
       value: 12,
       note: "15 total job postings",
-    };
-    expect(metric.label).toBe("Active Job Listings");
-    expect(metric.value).toBe(12);
-    expect(metric.note).toContain("total job postings");
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.label).toBe("Active Job Listings");
+      expect(result.data.value).toBe(12);
+    }
   });
 
-  it("rejects missing fields at type level (compiler check)", () => {
-    // This is a compile-time check — all fields are required
-    const valid: EmployerDashboardMetric = {
+  it("rejects missing label", () => {
+    const result = employerDashboardMetricSchema.safeParse({
+      value: 5,
+      note: "test",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects non-numeric value", () => {
+    const result = employerDashboardMetricSchema.safeParse({
       label: "Test",
-      value: 0,
+      value: "not-a-number",
       note: "",
-    };
-    expect(valid).toBeDefined();
+    });
+    expect(result.success).toBe(false);
   });
 });
 
 // ---------------------------------------------------------------------------
-// Tests — RecentApplication
+// Tests — recentApplicationSchema
 // ---------------------------------------------------------------------------
 
-describe("RecentApplication", () => {
-  it("accepts a valid recent application object", () => {
-    const app: RecentApplication = {
+describe("recentApplicationSchema", () => {
+  it("accepts a valid recent application with candidate name", () => {
+    const result = recentApplicationSchema.safeParse({
       applicationId: 1,
       candidateId: 42,
       candidateName: "Ahmed Al-Mutairi",
@@ -76,15 +56,12 @@ describe("RecentApplication", () => {
       jobListingId: 101,
       status: "pending",
       createdAt: new Date("2026-01-15"),
-    };
-    expect(app.applicationId).toBe(1);
-    expect(app.candidateName).toBe("Ahmed Al-Mutairi");
-    expect(app.jobTitle).toContain("Intern");
-    expect(app.status).toBe("pending");
+    });
+    expect(result.success).toBe(true);
   });
 
   it("accepts null candidateName", () => {
-    const app: RecentApplication = {
+    const result = recentApplicationSchema.safeParse({
       applicationId: 2,
       candidateId: 99,
       candidateName: null,
@@ -92,18 +69,47 @@ describe("RecentApplication", () => {
       jobListingId: 102,
       status: "reviewed",
       createdAt: new Date(),
-    };
-    expect(app.candidateName).toBeNull();
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects missing required fields", () => {
+    const result = recentApplicationSchema.safeParse({
+      applicationId: 1,
+    });
+    expect(result.success).toBe(false);
   });
 });
 
 // ---------------------------------------------------------------------------
-// Tests — EmployerDashboardData (full response shape)
+// Tests — jobStatusBreakdownSchema
 // ---------------------------------------------------------------------------
 
-describe("EmployerDashboardData", () => {
+describe("jobStatusBreakdownSchema", () => {
+  it("accepts a valid job status breakdown entry", () => {
+    const result = jobStatusBreakdownSchema.safeParse({
+      status: "active",
+      count: 5,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects non-numeric count", () => {
+    const result = jobStatusBreakdownSchema.safeParse({
+      status: "draft",
+      count: "five",
+    });
+    expect(result.success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Tests — employerDashboardDataSchema (full response shape)
+// ---------------------------------------------------------------------------
+
+describe("employerDashboardDataSchema", () => {
   it("accepts a populated dashboard response", () => {
-    const data: EmployerDashboardData = {
+    const result = employerDashboardDataSchema.safeParse({
       metrics: [
         { label: "Active Jobs", value: 5, note: "10 total" },
         { label: "Applications", value: 120, note: "15 in 30d" },
@@ -126,27 +132,50 @@ describe("EmployerDashboardData", () => {
       ],
       totalJobs: 10,
       totalApplications: 120,
-    };
-
-    expect(data.metrics).toHaveLength(2);
-    expect(data.metrics[0].label).toBe("Active Jobs");
-    expect(data.recentApplications).toHaveLength(1);
-    expect(data.jobStatusBreakdown).toHaveLength(3);
-    expect(data.totalJobs).toBe(10);
-    expect(data.totalApplications).toBe(120);
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.metrics).toHaveLength(2);
+      expect(result.data.recentApplications).toHaveLength(1);
+      expect(result.data.jobStatusBreakdown).toHaveLength(3);
+      expect(result.data.totalJobs).toBe(10);
+      expect(result.data.totalApplications).toBe(120);
+    }
   });
 
   it("accepts empty dashboard response (no data)", () => {
-    const data: EmployerDashboardData = {
+    const result = employerDashboardDataSchema.safeParse({
       metrics: [],
       recentApplications: [],
       jobStatusBreakdown: [],
       totalJobs: 0,
       totalApplications: 0,
-    };
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.metrics).toHaveLength(0);
+      expect(result.data.totalJobs).toBe(0);
+    }
+  });
 
-    expect(data.metrics).toHaveLength(0);
-    expect(data.recentApplications).toHaveLength(0);
-    expect(data.totalJobs).toBe(0);
+  it("rejects missing totalJobs field", () => {
+    const result = employerDashboardDataSchema.safeParse({
+      metrics: [],
+      recentApplications: [],
+      jobStatusBreakdown: [],
+      totalApplications: 0,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects non-array metrics", () => {
+    const result = employerDashboardDataSchema.safeParse({
+      metrics: "not-an-array",
+      recentApplications: [],
+      jobStatusBreakdown: [],
+      totalJobs: 0,
+      totalApplications: 0,
+    });
+    expect(result.success).toBe(false);
   });
 });

@@ -1,34 +1,55 @@
+import { z } from "zod";
+
 // ---------------------------------------------------------------------------
-// Employer Dashboard — type definitions
-// Provides stats summary, recent applications, and job listing counts
-// for the employer/company role dashboard view.
+// Output validation schemas
 // ---------------------------------------------------------------------------
 
-export type EmployerDashboardMetric = {
-  label: string;
-  value: number;
-  note: string;
-};
+/**
+ * Schema for a single employer dashboard metric.
+ */
+export const employerDashboardMetricSchema = z.object({
+  label: z.string(),
+  value: z.number(),
+  note: z.string(),
+});
 
-export type RecentApplication = {
-  applicationId: number;
-  candidateId: number;
-  candidateName: string | null;
-  jobTitle: string;
-  jobListingId: number;
-  status: string;
-  createdAt: Date;
-};
+/**
+ * Schema for a recent application entry on the dashboard.
+ */
+export const recentApplicationSchema = z.object({
+  applicationId: z.number(),
+  candidateId: z.number(),
+  candidateName: z.string().nullable(),
+  jobTitle: z.string(),
+  jobListingId: z.number(),
+  status: z.string(),
+  createdAt: z.date(),
+});
 
-export type JobStatusBreakdown = {
-  status: string;
-  count: number;
-};
+/**
+ * Schema for a job status breakdown entry.
+ */
+export const jobStatusBreakdownSchema = z.object({
+  status: z.string(),
+  count: z.number(),
+});
 
-export type EmployerDashboardData = {
-  metrics: EmployerDashboardMetric[];
-  recentApplications: RecentApplication[];
-  jobStatusBreakdown: JobStatusBreakdown[];
-  totalJobs: number;
-  totalApplications: number;
-};
+/**
+ * Schema for the full employer dashboard data response.
+ */
+export const employerDashboardDataSchema = z.object({
+  metrics: z.array(employerDashboardMetricSchema),
+  recentApplications: z.array(recentApplicationSchema),
+  jobStatusBreakdown: z.array(jobStatusBreakdownSchema),
+  totalJobs: z.number(),
+  totalApplications: z.number(),
+});
+
+// ---------------------------------------------------------------------------
+// Type definitions (for backward compatibility with existing code)
+// ---------------------------------------------------------------------------
+
+export type EmployerDashboardMetric = z.output<typeof employerDashboardMetricSchema>;
+export type RecentApplication = z.output<typeof recentApplicationSchema>;
+export type JobStatusBreakdown = z.output<typeof jobStatusBreakdownSchema>;
+export type EmployerDashboardData = z.output<typeof employerDashboardDataSchema>;
