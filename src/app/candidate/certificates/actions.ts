@@ -10,11 +10,11 @@ import {
   createCertificateSchema,
   updateCertificateSchema,
   deleteCertificateSchema,
-} from "./schemas";
+} from "@/modules/certificates/schemas";
 import {
   type ListCertificatesResult,
   type CertificateListItem,
-} from "@/modules/certificates/actions";
+} from "@/modules/certificates/schemas";
 
 // ---------------------------------------------------------------------------
 // Types
