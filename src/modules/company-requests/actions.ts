@@ -4,6 +4,14 @@ import crypto from "node:crypto";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
+import {
+  companyRequestItemSchema,
+  listCompanyRequestsResultSchema,
+  companyRequestMutationResultSchema,
+  type CompanyRequestItem,
+  type ListCompanyRequestsResult,
+  type CompanyRequestMutationResult,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // CompanyRequestController — Admin/staff management of company signup requests
@@ -65,7 +73,7 @@ const updateCompanyRequestSchema = z.object({
 });
 
 // ---------------------------------------------------------------------------
-// Types
+// Types (input params)
 // ---------------------------------------------------------------------------
 
 export type ListCompanyRequestsParams = z.input<typeof listCompanyRequestsSchema>;
@@ -74,33 +82,6 @@ export type ApproveCompanyRequestParams = z.input<typeof approveCompanyRequestSc
 export type RejectCompanyRequestParams = z.input<typeof rejectCompanyRequestSchema>;
 export type CreateCompanyRequestParams = z.input<typeof createCompanyRequestSchema>;
 export type UpdateCompanyRequestParams = z.input<typeof updateCompanyRequestSchema>;
-
-export type CompanyRequestItem = {
-  company_request_uuid: string;
-  company_name: string;
-  company_email: string;
-  contact_name: string;
-  contact_position: string | null;
-  phone_number: string | null;
-  requesting_for: string | null;
-  status: boolean | null;
-  currency_code: string | null;
-  created_at: string | null;
-  updated_at: string | null;
-};
-
-export type ListCompanyRequestsResult = {
-  requests: CompanyRequestItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
-
-export type CompanyRequestMutationResult = {
-  operation: string;
-  message?: string;
-};
 
 // ---------------------------------------------------------------------------
 // Exported schemas (for shared validation in tests)
@@ -155,7 +136,7 @@ export async function listCompanyRequests(
     prisma.company_request.count({ where: where as any }),
   ]);
 
-  return {
+  const result = {
     requests: requests.map((r) => ({
       company_request_uuid: r.company_request_uuid,
       company_name: r.company_name,
@@ -174,6 +155,17 @@ export async function listCompanyRequests(
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  // Validate output shape
+  const outputParsed = listCompanyRequestsResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/company-requests] listCompanyRequests output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -200,7 +192,7 @@ export async function getCompanyRequest(
 
   if (!request) return null;
 
-  return {
+  const result = {
     company_request_uuid: request.company_request_uuid,
     company_name: request.company_name,
     company_email: request.company_email,
@@ -213,6 +205,17 @@ export async function getCompanyRequest(
     created_at: request.created_at?.toISOString() ?? null,
     updated_at: request.updated_at?.toISOString() ?? null,
   };
+
+  // Validate output shape
+  const outputParsed = companyRequestItemSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/company-requests] getCompanyRequest output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
