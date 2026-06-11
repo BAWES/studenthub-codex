@@ -8,6 +8,7 @@ import { getMockFixtures, type FixtureUser } from "../fixtures/users";
 const ROUTE_MAP: Record<string, string[]> = {
   admin: [
     "/admin",
+    "/admin/agents",
     "/admin/candidates",
     "/admin/companies",
     "/admin/compliance",
@@ -19,7 +20,6 @@ const ROUTE_MAP: Record<string, string[]> = {
     "/staff",
     "/staff/candidates",
     "/staff/interviews",
-    "/staff/contracts",
     "/staff/requests",
   ],
   candidate: [
@@ -34,8 +34,10 @@ const ROUTE_MAP: Record<string, string[]> = {
     "/candidate/languages",
     "/candidate/notifications",
     "/candidate/payments",
+    "/candidate/profile",
     "/candidate/references",
     "/candidate/schedule",
+    "/candidate/search",
     "/candidate/skills",
     "/candidate/work-logs",
   ],

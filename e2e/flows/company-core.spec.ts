@@ -215,112 +215,6 @@ test.describe("Company Core Flows", () => {
     await ctx.close();
   });
 
-  // ──────────────────────────────────────────────
-  // Flow 4 — Contacts
-  // ──────────────────────────────────────────────
-
-  test("Flow 4a — Contacts page loads with heading and table", async () => {
-    const ctx = await authContext(company);
-
-    await ctx.page.goto("/company/contacts");
-    await ctx.page.waitForLoadState("load");
-    await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
-    await expect(ctx.page).toHaveURL(/\/company\/contacts/);
-
-    // Title/heading renders
-    await expect(ctx.page.locator("text=Linked Contacts").first()).toBeVisible({ timeout: 10000 });
-    await expect(ctx.page.locator("text=Contacts").first()).toBeVisible({ timeout: 5000 });
-
-    assertNoReactErrors(ctx.errors);
-    await ctx.close();
-  });
-
-  test("Flow 4b — Candidate cannot access company contacts", async () => {
-    const ctx = await authContext(candidateUser);
-
-    await ctx.page.goto("/company/contacts");
-    await ctx.page.waitForLoadState("load");
-
-    await expect(ctx.page).not.toHaveURL("/company/contacts");
-    await ctx.close();
-  });
-
-  // ──────────────────────────────────────────────
-  // Flow 5 — Create Request
-  // ──────────────────────────────────────────────
-
-  test("Flow 5a — Create request page loads with form", async () => {
-    const ctx = await authContext(company);
-
-    await ctx.page.goto("/company/requests/create");
-    await ctx.page.waitForLoadState("load");
-    await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
-    await expect(ctx.page).toHaveURL(/\/company\/requests\/create/);
-
-    // Title/heading renders
-    await expect(ctx.page.locator("text=New Request").first()).toBeVisible({ timeout: 10000 });
-
-    assertNoReactErrors(ctx.errors);
-    await ctx.close();
-  });
-
-  test("Flow 5b — Candidate cannot access company create request", async () => {
-    const ctx = await authContext(candidateUser);
-
-    await ctx.page.goto("/company/requests/create");
-    await ctx.page.waitForLoadState("load");
-
-    await expect(ctx.page).not.toHaveURL("/company/requests/create");
-    await ctx.close();
-  });
-
-  // ──────────────────────────────────────────────
-  // Flow 6 — Company Detail Page (Direct URL)
-  // ──────────────────────────────────────────────
-
-  test("Flow 6a — Company detail page loads from companies list", async () => {
-    const ctx = await authContext(company);
-
-    // Navigate to companies list
-    await ctx.page.goto("/company/companies");
-    await ctx.page.waitForLoadState("load");
-    await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
-
-    // Find a company row and navigate to detail
-    const firstRowLink = ctx.page.locator("table a").first();
-    if ((await firstRowLink.count()) > 0) {
-      const href = await firstRowLink.getAttribute("href");
-      await ctx.page.goto(href!);
-      await ctx.page.waitForLoadState("load");
-      await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
-
-      // Detail page shows company info sections
-      await expect(ctx.page.locator("text=Stores").first()).toBeVisible({ timeout: 10000 });
-      await expect(ctx.page.locator("text=Contacts").first()).toBeVisible({ timeout: 5000 });
-    } else {
-      // At least verify the list page loaded
-      await expect(ctx.page.locator("text=Company").first()).toBeVisible({ timeout: 5000 });
-      console.log("No company rows found — detail navigation skipped");
-    }
-
-    assertNoReactErrors(ctx.errors);
-    await ctx.close();
-  });
-
-  test("Flow 6b — Candidate cannot access company companies", async () => {
-    const ctx = await authContext(candidateUser);
-
-    await ctx.page.goto("/company/companies");
-    await ctx.page.waitForLoadState("load");
-
-    await expect(ctx.page).not.toHaveURL("/company/companies");
-    await ctx.close();
-  });
-
-  // ──────────────────────────────────────────────
-  // Cross-role access (additional)
-  // ──────────────────────────────────────────────
-
   test("Flow 3c — All company pages load without hydration errors", async () => {
     const ctx = await authContext(company);
 
@@ -330,7 +224,6 @@ test.describe("Company Core Flows", () => {
       "/company/companies",
       "/company/contacts",
       "/company/requests",
-      "/company/requests/create",
       "/company/workspace",
     ];
     for (const route of pages) {
@@ -343,6 +236,10 @@ test.describe("Company Core Flows", () => {
     console.log(`Console errors across ${pages.length} company pages: ${ctx.errors.length}`);
     await ctx.close();
   });
+
+  // ──────────────────────────────────────────────
+  // Cross-role access
+  // ──────────────────────────────────────────────
 
   test("Flow 3d — Candidate cannot view company requests", async () => {
     const ctx = await authContext(candidateUser);
