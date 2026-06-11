@@ -9,6 +9,7 @@
 import { prisma } from "@/lib/prisma";
 import { requireCapability, getSession } from "@/modules/auth/session";
 import type { EmployerDashboardData, RecentApplication, JobStatusBreakdown } from "./schemas";
+import { employerDashboardDataOutputSchema } from "./schemas";
 
 // ---------------------------------------------------------------------------
 // getEmployerDashboardData
@@ -23,13 +24,24 @@ export async function getEmployerDashboardData(): Promise<EmployerDashboardData>
 
   const session = await getSession();
   if (!session) {
-    return {
+    const emptyResult: EmployerDashboardData = {
       metrics: [],
       recentApplications: [],
       jobStatusBreakdown: [],
       totalJobs: 0,
       totalApplications: 0,
     };
+
+    // Validate output shape
+    const outputParsed = employerDashboardDataOutputSchema.safeParse(emptyResult);
+    if (!outputParsed.success) {
+      console.error(
+        "[app/employer/dashboard] getEmployerDashboardData output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return emptyResult;
   }
 
   // Get the employer's company ID from their contact link
@@ -40,13 +52,24 @@ export async function getEmployerDashboardData(): Promise<EmployerDashboardData>
 
   const employerId = contactLink?.company?.company_id;
   if (!employerId) {
-    return {
+    const emptyResult: EmployerDashboardData = {
       metrics: [],
       recentApplications: [],
       jobStatusBreakdown: [],
       totalJobs: 0,
       totalApplications: 0,
     };
+
+    // Validate output shape
+    const outputParsed = employerDashboardDataOutputSchema.safeParse(emptyResult);
+    if (!outputParsed.success) {
+      console.error(
+        "[app/employer/dashboard] getEmployerDashboardData output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return emptyResult;
   }
 
   // Run all queries in parallel for performance
@@ -124,7 +147,7 @@ export async function getEmployerDashboardData(): Promise<EmployerDashboardData>
     createdAt: r.createdAt,
   }));
 
-  return {
+  const result: EmployerDashboardData = {
     metrics: [
       {
         label: "Active Job Listings",
@@ -147,4 +170,15 @@ export async function getEmployerDashboardData(): Promise<EmployerDashboardData>
     totalJobs,
     totalApplications,
   };
+
+  // Validate output shape
+  const outputParsed = employerDashboardDataOutputSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[app/employer/dashboard] getEmployerDashboardData output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
