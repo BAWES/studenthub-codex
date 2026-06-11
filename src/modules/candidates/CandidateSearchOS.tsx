@@ -22,6 +22,7 @@ type CandidateSearchParamKey =
   | "candidate"
   | "tabs"
   | "selected"
+  | "page"
   | "country"
   | "university"
   | "company"
@@ -211,6 +212,8 @@ function CandidateSearchTab({
             <strong>No candidates match this search.</strong>
             <span>Remove a facet or search a different name, email, phone, skill, or candidate ID.</span>
           </div>
+        ) : data.totalPages && data.totalPages > 1 ? (
+          <CandidatePagination basePath={basePath} params={params} page={data.page ?? 1} totalPages={data.totalPages} />
         ) : null}
       </div>
     </section>
@@ -304,7 +307,7 @@ function ActiveSearchContext({
     data.filter !== "all" ? { key: "filter" as const, label: candidateFilterLinks.find((item) => item.value === data.filter)?.label ?? data.filter } : null,
     data.role === "staff" && data.visibility === "assigned" ? { key: "view" as const, label: `Assigned: ${data.assignedCount ?? 0}` } : null,
     ...activeFacets
-  ].filter((item): item is { key: Exclude<CandidateSearchParamKey, "candidate" | "tabs" | "selected">; label: string } => Boolean(item));
+  ].filter((item): item is { key: Exclude<CandidateSearchParamKey, "candidate" | "tabs" | "selected" | "page">; label: string } => Boolean(item));
 
   return (
     <section className="candidateSearchContext" aria-label="Candidate search context">
@@ -392,6 +395,7 @@ function candidateSearchHref(
     candidate: params.candidateId ? String(params.candidateId) : "",
     tabs: existingTabs,
     selected: (params.selectedIds ?? []).join(","),
+    page: params.page && params.page > 1 ? String(params.page) : "",
     country: params.country ?? "",
     university: params.university ?? "",
     company: params.company ?? "",
@@ -517,5 +521,43 @@ function FacetChips({
         </Link>
       ) : null}
     </section>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// CandidatePagination — prev/next page controls for search results
+// ---------------------------------------------------------------------------
+
+function CandidatePagination({
+  basePath,
+  params,
+  page,
+  totalPages,
+}: {
+  basePath: "/admin/candidates" | "/staff/candidates";
+  params: CandidateSearchParams;
+  page: number;
+  totalPages: number;
+}) {
+  return (
+    <nav className="candidatePagination" aria-label="Candidate search pagination">
+      <div>
+        <span>Page</span>
+        <strong>{page.toLocaleString("en-US")}</strong>
+        <span>of {totalPages.toLocaleString("en-US")}</span>
+      </div>
+      <div>
+        {page > 1 ? (
+          <Link href={candidateSearchHref(basePath, params, { page: String(page - 1) })}>
+            ← Previous
+          </Link>
+        ) : null}
+        {page < totalPages ? (
+          <Link href={candidateSearchHref(basePath, params, { page: String(page + 1) })}>
+            Next →
+          </Link>
+        ) : null}
+      </div>
+    </nav>
   );
 }

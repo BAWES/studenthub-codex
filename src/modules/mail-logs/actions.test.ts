@@ -1,25 +1,20 @@
 import { describe, it, expect } from "vitest";
-import { z } from "zod";
+import {
+  listMailLogsSchema,
+  getMailLogSchema,
+  mailLogListItemSchema,
+  listMailLogsResultSchema,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
-// Schema tests for MailLogController server actions
+// Schema validation tests for MailLogController server actions
 //
-// Schemas are not exported from actions.ts — these mirror the validation rules
-// to test the pure validation layer in isolation.
+// Tests avoid mocking "use server" dependencies (prisma, session) by
+// testing Zod schemas — the pure validation layer — in isolation.
 // ---------------------------------------------------------------------------
 
-const listMailLogsSchema = z.object({
-  page: z.coerce.number().int().positive().optional().default(1),
-  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
-  search: z.string().max(255).optional(),
-});
-
-const getMailLogSchema = z.object({
-  mailUuid: z.string().min(1, "Mail UUID is required"),
-});
-
 // ---------------------------------------------------------------------------
-// listMailLogsSchema tests
+// listMailLogsSchema tests (input)
 // ---------------------------------------------------------------------------
 
 describe("listMailLogsSchema", () => {
@@ -93,7 +88,7 @@ describe("listMailLogsSchema", () => {
 });
 
 // ---------------------------------------------------------------------------
-// getMailLogSchema tests
+// getMailLogSchema tests (input)
 // ---------------------------------------------------------------------------
 
 describe("getMailLogSchema", () => {
@@ -113,5 +108,152 @@ describe("getMailLogSchema", () => {
 
   it("rejects missing mail UUID", () => {
     expect(getMailLogSchema.safeParse({}).success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output schema tests
+// ---------------------------------------------------------------------------
+
+describe("mailLogListItemSchema", () => {
+  it("accepts a valid mail log list item with all fields", () => {
+    const result = mailLogListItemSchema.safeParse({
+      mail_uuid: "mail_abc123",
+      from: "sender@example.com",
+      to: "recipient@example.com",
+      subject: "Test Subject",
+      app: "admin",
+      created_at: "2024-01-01T00:00:00.000Z",
+      updated_at: "2024-01-02T00:00:00.000Z",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts nullable fields as null", () => {
+    const result = mailLogListItemSchema.safeParse({
+      mail_uuid: "mail_def456",
+      from: null,
+      to: null,
+      subject: null,
+      app: null,
+      created_at: null,
+      updated_at: null,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects missing mail_uuid", () => {
+    const result = mailLogListItemSchema.safeParse({
+      from: null,
+      to: null,
+      subject: null,
+      app: null,
+      created_at: null,
+      updated_at: null,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects wrong type for mail_uuid", () => {
+    const result = mailLogListItemSchema.safeParse({
+      mail_uuid: 123,
+      from: null,
+      to: null,
+      subject: null,
+      app: null,
+      created_at: null,
+      updated_at: null,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects number for created_at (must be string or null)", () => {
+    const result = mailLogListItemSchema.safeParse({
+      mail_uuid: "mail_xyz",
+      from: null,
+      to: null,
+      subject: null,
+      app: null,
+      created_at: 12345,
+      updated_at: null,
+    });
+    expect(result.success).toBe(false);
+  });
+});
+
+describe("listMailLogsResultSchema", () => {
+  it("accepts a valid list result with records", () => {
+    const result = listMailLogsResultSchema.safeParse({
+      records: [
+        {
+          mail_uuid: "mail_001",
+          from: "a@b.com",
+          to: "c@d.com",
+          subject: "Hello",
+          app: "admin",
+          created_at: "2024-01-01T00:00:00.000Z",
+          updated_at: "2024-01-01T00:00:00.000Z",
+        },
+      ],
+      total: 1,
+      page: 1,
+      limit: 20,
+      totalPages: 1,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts empty records array", () => {
+    const result = listMailLogsResultSchema.safeParse({
+      records: [],
+      total: 0,
+      page: 1,
+      limit: 20,
+      totalPages: 0,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects missing total field", () => {
+    const result = listMailLogsResultSchema.safeParse({
+      records: [],
+      page: 1,
+      limit: 20,
+      totalPages: 0,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects negative page", () => {
+    const result = listMailLogsResultSchema.safeParse({
+      records: [],
+      total: 0,
+      page: -1,
+      limit: 20,
+      totalPages: 0,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects limit over 100", () => {
+    const result = listMailLogsResultSchema.safeParse({
+      records: [],
+      total: 0,
+      page: 1,
+      limit: 200,
+      totalPages: 0,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects negative total", () => {
+    const result = listMailLogsResultSchema.safeParse({
+      records: [],
+      total: -1,
+      page: 1,
+      limit: 20,
+      totalPages: 0,
+    });
+    expect(result.success).toBe(false);
   });
 });

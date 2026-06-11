@@ -1,81 +1,18 @@
 import { describe, it, expect } from "vitest";
-import { z } from "zod";
-
-// ---------------------------------------------------------------------------
-// Schemas (duplicated from actions.ts for isolated unit testing)
-// ---------------------------------------------------------------------------
-
-const listFulltimersSchema = z.object({
-  page: z.coerce.number().int().positive().optional().default(1),
-  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
-  search: z.string().optional(),
-  nationalityId: z.coerce.number().int().positive().optional(),
-  employed: z.enum(["true", "false"]).optional(),
-});
-
-const getFulltimerSchema = z.object({
-  fulltimerUuid: z.string().min(1, "Fulltimer UUID is required"),
-});
-
-const createFulltimerSchema = z.object({
-  name: z.string().min(1, "Name is required").max(255),
-  email: z.string().email("Valid email is required"),
-  phone: z.string().max(255).optional(),
-  nationalityId: z.coerce.number().int().positive().optional(),
-  countryId: z.coerce.number().int().positive().optional(),
-  universityId: z.coerce.number().int().positive().optional(),
-  employed: z.boolean().optional(),
-  gender: z.boolean().optional(),
-  birthDate: z.string().optional(),
-  drivingLicense: z.boolean().optional(),
-  currentSalary: z.string().max(100).optional(),
-  expectedSalary: z.string().max(100).optional(),
-  currencyCode: z.string().length(3).optional().default("KWD"),
-});
-
-const updateFulltimerSchema = z.object({
-  fulltimerUuid: z.string().min(1, "Fulltimer UUID is required"),
-  name: z.string().min(1).max(255).optional(),
-  phone: z.string().max(255).optional(),
-  nationalityId: z.coerce.number().int().positive().optional(),
-  countryId: z.coerce.number().int().positive().optional(),
-  universityId: z.coerce.number().int().positive().optional(),
-  employed: z.boolean().optional(),
-  gender: z.boolean().optional(),
-  birthDate: z.string().optional(),
-  drivingLicense: z.boolean().optional(),
-  currentSalary: z.string().max(100).optional(),
-  expectedSalary: z.string().max(100).optional(),
-  currencyCode: z.string().length(3).optional(),
-});
-
-const deleteFulltimerSchema = z.object({
-  fulltimerUuid: z.string().min(1, "Fulltimer UUID is required"),
-});
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-type FulltimerListItem = {
-  fulltimer_uuid: string;
-  fulltimer_name: string;
-  fulltimer_email: string;
-  fulltimer_phone: string | null;
-  fulltimer_employed: boolean | null;
-  nationality_id: number | null;
-  country_id: number | null;
-  university_id: number | null;
-  fulltimer_created_datetime: string | null;
-};
-
-type ListFulltimersResult = {
-  fulltimers: FulltimerListItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
+import {
+  listFulltimersSchema,
+  getFulltimerSchema,
+  createFulltimerSchema,
+  updateFulltimerSchema,
+  deleteFulltimerSchema,
+  fulltimerItemSchema,
+  fulltimerDetailSchema,
+  fulltimerDetailOrNullSchema,
+  listFulltimersResultSchema,
+  type FulltimerListItem,
+  type FulltimerDetail,
+  type ListFulltimersResult,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Pure functions for testable logic
@@ -315,37 +252,193 @@ describe("validateFulltimerEmail", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Tests: Type shapes
+// Output schema tests: fulltimerItemSchema
 // ---------------------------------------------------------------------------
 
-describe("FulltimerListItem type shape", () => {
-  it("accepts a valid fulltimer object", () => {
-    const mock: FulltimerListItem = {
-      fulltimer_uuid: "ft_abc123",
-      fulltimer_name: "Ahmed Ali",
-      fulltimer_email: "ahmed@example.com",
-      fulltimer_phone: "+965 99999999",
-      fulltimer_employed: true,
-      nationality_id: 1,
+const validFulltimerItem = {
+  fulltimer_uuid: "ft_abc123",
+  fulltimer_name: "Ahmed Ali",
+  fulltimer_email: "ahmed@example.com",
+  fulltimer_phone: "+965 99999999",
+  fulltimer_employed: true,
+  nationality_id: 1,
+  country_id: null,
+  university_id: null,
+  fulltimer_created_datetime: "2025-06-01T10:00:00.000Z",
+};
+
+describe("fulltimerItemSchema", () => {
+  it("accepts a valid fulltimer list item", () => {
+    const result = fulltimerItemSchema.parse(validFulltimerItem);
+    expect(result.fulltimer_uuid).toBe("ft_abc123");
+    expect(result.fulltimer_name).toBe("Ahmed Ali");
+  });
+
+  it("accepts nullable fields as null", () => {
+    const result = fulltimerItemSchema.parse({
+      ...validFulltimerItem,
+      fulltimer_phone: null,
+      fulltimer_employed: null,
+      nationality_id: null,
       country_id: null,
       university_id: null,
-      fulltimer_created_datetime: new Date().toISOString(),
-    };
-    expect(mock.fulltimer_name).toBe("Ahmed Ali");
-    expect(mock.fulltimer_email).toBe("ahmed@example.com");
+      fulltimer_created_datetime: null,
+    });
+    expect(result.fulltimer_phone).toBeNull();
+    expect(result.fulltimer_employed).toBeNull();
+    expect(result.nationality_id).toBeNull();
+  });
+
+  it("rejects missing required string field", () => {
+    const { fulltimer_name, ...rest } = validFulltimerItem;
+    expect(() => fulltimerItemSchema.parse(rest)).toThrow();
+  });
+
+  it("rejects wrong type for a field", () => {
+    expect(() =>
+      fulltimerItemSchema.parse({ ...validFulltimerItem, fulltimer_uuid: 123 }),
+    ).toThrow();
   });
 });
 
-describe("ListFulltimersResult type shape", () => {
-  it("accepts an empty result set", () => {
-    const result: ListFulltimersResult = {
+// ---------------------------------------------------------------------------
+// Output schema tests: fulltimerDetailSchema
+// ---------------------------------------------------------------------------
+
+const validFulltimerDetail = {
+  fulltimer_uuid: "ft_abc123",
+  fulltimer_name: "Ahmed Ali",
+  fulltimer_email: "ahmed@example.com",
+  fulltimer_phone: "+965 99999999",
+  fulltimer_employed: true,
+  fulltimer_gender: false,
+  fulltimer_birth_date: "1990-01-15T00:00:00.000Z",
+  fulltimer_driving_license: true,
+  nationality_id: 1,
+  country_id: null,
+  university_id: null,
+  fulltimer_area_uuid: null,
+  fulltimer_current_salary: "500",
+  fulltimer_expected_salary: "800",
+  fulltimer_pdf_cv: null,
+  currency_code: "KWD",
+  fulltimer_created_datetime: "2025-06-01T10:00:00.000Z",
+  fulltimer_updated_datetime: "2025-06-01T10:00:00.000Z",
+};
+
+describe("fulltimerDetailSchema", () => {
+  it("accepts a valid fulltimer detail object", () => {
+    const result = fulltimerDetailSchema.parse(validFulltimerDetail);
+    expect(result.fulltimer_uuid).toBe("ft_abc123");
+    expect(result.fulltimer_name).toBe("Ahmed Ali");
+    expect(result.currency_code).toBe("KWD");
+  });
+
+  it("accepts nullable fields as null", () => {
+    const result = fulltimerDetailSchema.parse({
+      ...validFulltimerDetail,
+      fulltimer_phone: null,
+      fulltimer_gender: null,
+      fulltimer_birth_date: null,
+      fulltimer_driving_license: null,
+      nationality_id: null,
+      fulltimer_area_uuid: null,
+      fulltimer_current_salary: null,
+      fulltimer_expected_salary: null,
+      currency_code: null,
+    });
+    expect(result.fulltimer_phone).toBeNull();
+    expect(result.fulltimer_gender).toBeNull();
+    expect(result.currency_code).toBeNull();
+  });
+
+  it("rejects missing required field", () => {
+    const { fulltimer_uuid, ...rest } = validFulltimerDetail;
+    expect(() => fulltimerDetailSchema.parse(rest)).toThrow();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output schema tests: fulltimerDetailOrNullSchema
+// ---------------------------------------------------------------------------
+
+describe("fulltimerDetailOrNullSchema", () => {
+  it("accepts a valid detail object", () => {
+    const result = fulltimerDetailOrNullSchema.parse(validFulltimerDetail);
+    expect(result).not.toBeNull();
+  });
+
+  it("accepts null", () => {
+    const result = fulltimerDetailOrNullSchema.parse(null);
+    expect(result).toBeNull();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output schema tests: listFulltimersResultSchema
+// ---------------------------------------------------------------------------
+
+describe("listFulltimersResultSchema", () => {
+  it("accepts a valid result with fulltimers", () => {
+    const result = listFulltimersResultSchema.parse({
+      fulltimers: [validFulltimerItem],
+      total: 1,
+      page: 1,
+      limit: 20,
+      totalPages: 1,
+    });
+    expect(result.fulltimers.length).toBe(1);
+    expect(result.total).toBe(1);
+    expect(result.page).toBe(1);
+    expect(result.limit).toBe(20);
+    expect(result.totalPages).toBe(1);
+  });
+
+  it("accepts an empty list", () => {
+    const result = listFulltimersResultSchema.parse({
       fulltimers: [],
       total: 0,
       page: 1,
       limit: 20,
       totalPages: 0,
-    };
+    });
+    expect(result.fulltimers.length).toBe(0);
     expect(result.total).toBe(0);
-    expect(result.fulltimers).toHaveLength(0);
+  });
+
+  it("rejects negative page", () => {
+    expect(() =>
+      listFulltimersResultSchema.parse({
+        fulltimers: [],
+        total: 0,
+        page: -1,
+        limit: 20,
+        totalPages: 0,
+      }),
+    ).toThrow();
+  });
+
+  it("rejects negative total", () => {
+    expect(() =>
+      listFulltimersResultSchema.parse({
+        fulltimers: [],
+        total: -1,
+        page: 1,
+        limit: 20,
+        totalPages: 0,
+      }),
+    ).toThrow();
+  });
+
+  it("rejects string where number expected", () => {
+    expect(() =>
+      listFulltimersResultSchema.parse({
+        fulltimers: [],
+        total: "zero",
+        page: 1,
+        limit: 20,
+        totalPages: 0,
+      }),
+    ).toThrow();
   });
 });

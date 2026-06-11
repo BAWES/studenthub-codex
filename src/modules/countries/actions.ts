@@ -3,48 +3,16 @@
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export type CountryItem = {
-  country_id: number;
-  country_name_en: string;
-  country_name_ar: string | null;
-  country_nationality_name_en: string;
-  country_nationality_name_ar: string | null;
-  country_from_google_map: boolean | null;
-  iso: string | null;
-  emoji: string | null;
-  country_code: number | null;
-  currency_code: string | null;
-};
-
-export type ListCountriesResult = {
-  countries: CountryItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
-
-// ---------------------------------------------------------------------------
-// Schema
-// ---------------------------------------------------------------------------
-
-const listCountriesSchema = z.object({
-  nameFilter: z.string().optional(),
-  page: z.number().int().positive().optional(),
-  limit: z.number().int().min(1).max(100).optional(),
-});
-
-const getCountrySchema = z.object({
-  id: z.number().int().positive(),
-});
-
-export type ListCountriesInput = z.input<typeof listCountriesSchema>;
-export type GetCountryInput = z.input<typeof getCountrySchema>;
+import {
+  countryItemSchema,
+  listCountriesResultSchema,
+  listCountriesSchema,
+  getCountrySchema,
+  type CountryItem,
+  type ListCountriesResult,
+  type ListCountriesInput,
+  type GetCountryInput,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Server actions
@@ -88,7 +56,7 @@ export async function listCountries(
     prisma.country.count({ where: where as any }),
   ]);
 
-  return {
+  const result: ListCountriesResult = {
     countries: countries.map((c) => ({
       country_id: c.country_id,
       country_name_en: c.country_name_en,
@@ -106,6 +74,16 @@ export async function listCountries(
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  const outputParsed = listCountriesResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/countries] listCountries output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -132,7 +110,7 @@ export async function getCountry(
     throw new Error("Country not found");
   }
 
-  return {
+  const result: CountryItem = {
     country_id: country.country_id,
     country_name_en: country.country_name_en,
     country_name_ar: country.country_name_ar ?? null,
@@ -144,4 +122,14 @@ export async function getCountry(
     country_code: country.country_code ?? null,
     currency_code: country.currency_code ?? null,
   };
+
+  const outputParsed = countryItemSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/countries] getCountry output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }

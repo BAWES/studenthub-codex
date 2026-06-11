@@ -3,41 +3,14 @@
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export type DegreeItem = {
-  degree_uuid: string;
-  degree_group_uuid: string | null;
-  degree_name_en: string;
-  degree_name_ar: string | null;
-  degree_sort_order: number | null;
-  degree_created_at: Date | null;
-  degree_updated_at: Date | null;
-};
-
-export type ListDegreesResult = {
-  degrees: DegreeItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
-
-// ---------------------------------------------------------------------------
-// Schema
-// ---------------------------------------------------------------------------
-
-const listDegreesSchema = z.object({
-  nameFilter: z.string().optional(),
-  degreeGroupUuid: z.string().optional(),
-  page: z.number().int().positive().optional(),
-  limit: z.number().int().min(1).max(100).optional(),
-});
-
-export type ListDegreesInput = z.input<typeof listDegreesSchema>;
+import {
+  degreeItemSchema,
+  listDegreesResultSchema,
+  listDegreesSchema,
+  type DegreeItem,
+  type ListDegreesResult,
+  type ListDegreesInput,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Server actions
@@ -58,7 +31,7 @@ export async function listDegrees(
     throw new Error(parsed.error.issues[0]?.message ?? "Invalid list parameters");
   }
 
-  const { nameFilter, degreeGroupUuid, page = 1, limit = 20 } = parsed.data;
+  const { nameFilter, degreeGroupUuid, page, limit } = parsed.data;
 
   const where: Record<string, unknown> = {};
   if (nameFilter && nameFilter.trim()) {
@@ -81,11 +54,29 @@ export async function listDegrees(
     prisma.degree.count({ where: where as any }),
   ]);
 
-  return {
-    degrees,
+  const result: ListDegreesResult = {
+    degrees: degrees.map((d) => ({
+      degree_uuid: d.degree_uuid,
+      degree_group_uuid: d.degree_group_uuid,
+      degree_name_en: d.degree_name_en,
+      degree_name_ar: d.degree_name_ar,
+      degree_sort_order: d.degree_sort_order,
+      degree_created_at: d.degree_created_at,
+      degree_updated_at: d.degree_updated_at,
+    })),
     total,
     page,
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  const outputParsed = listDegreesResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/degrees] listDegrees output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }

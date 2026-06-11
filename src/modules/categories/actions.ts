@@ -4,64 +4,16 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
-
-// ---------------------------------------------------------------------------
-// Schemas
-// ---------------------------------------------------------------------------
-
-const listCategoriesSchema = z.object({
-  page: z.coerce.number().int().positive().optional().default(1),
-  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
-});
-
-const getCategorySchema = z.object({
-  categoryId: z.coerce.number().int().positive(),
-});
-
-const createCategorySchema = z.object({
-  nameEn: z.string().min(1, "English name is required"),
-  nameAr: z.string().optional(),
-  image: z.string().optional(),
-});
-
-const updateCategorySchema = z.object({
-  categoryId: z.coerce.number().int().positive(),
-  nameEn: z.string().optional(),
-  nameAr: z.string().optional(),
-  image: z.string().optional(),
-});
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export type CategoryListItem = {
-  category_id: number;
-  name_en: string;
-  name_ar: string | null;
-  image: string | null;
-  created_at: Date | null;
-  updated_at: Date | null;
-};
-
-export type ListCategoriesResult = {
-  categories: CategoryListItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
-
-// ---------------------------------------------------------------------------
-// Exported schemas (for shared validation)
-// ---------------------------------------------------------------------------
-
-export {
+import {
+  categoryListItemSchema,
+  listCategoriesResultSchema,
   listCategoriesSchema,
   getCategorySchema,
   createCategorySchema,
   updateCategorySchema,
-};
+  type CategoryListItem,
+  type ListCategoriesResult,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // listCategories
@@ -102,7 +54,7 @@ export async function listCategories(
     prisma.discount_category.count(),
   ]);
 
-  return {
+  const result: ListCategoriesResult = {
     categories: categories.map((c: any): CategoryListItem => ({
       category_id: c.category_id,
       name_en: c.name_en,
@@ -116,6 +68,16 @@ export async function listCategories(
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  const outputParsed = listCategoriesResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/categories] listCategories output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -143,7 +105,7 @@ export async function getCategory(
   if (!category) return null;
 
   const raw = category as any;
-  return {
+  const result: CategoryListItem = {
     category_id: raw.category_id,
     name_en: raw.name_en,
     name_ar: raw.name_ar ?? null,
@@ -151,6 +113,16 @@ export async function getCategory(
     created_at: raw.created_at ?? null,
     updated_at: raw.updated_at ?? null,
   };
+
+  const outputParsed = categoryListItemSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/categories] getCategory output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -184,7 +156,20 @@ export async function createCategory(
 
   revalidatePath("/admin/discounts");
   revalidatePath("/staff/discounts");
-  return { category_id: category.category_id };
+
+  const result = { category_id: category.category_id };
+
+  const outputParsed = z
+    .object({ category_id: z.number() })
+    .safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/categories] createCategory output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -228,5 +213,18 @@ export async function updateCategory(
 
   revalidatePath("/admin/discounts");
   revalidatePath("/staff/discounts");
-  return { category_id: categoryId };
+
+  const result = { category_id: categoryId };
+
+  const outputParsed = z
+    .object({ category_id: z.number() })
+    .safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/categories] updateCategory output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }

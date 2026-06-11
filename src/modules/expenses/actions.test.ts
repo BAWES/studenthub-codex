@@ -1,49 +1,14 @@
 import { describe, it, expect } from "vitest";
-import { z } from "zod";
-
-// ---------------------------------------------------------------------------
-// Pure logic: expense schema validation
-// ---------------------------------------------------------------------------
-
-const listExpensesSchema = z.object({
-  page: z.coerce.number().int().positive().optional().default(1),
-  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
-});
-
-const getExpenseSchema = z.object({
-  expenseUuid: z.string().min(1, "Expense UUID is required"),
-});
-
-const createExpenseSchema = z.object({
-  title: z.string().min(1, "Title is required"),
-  type: z.string().min(1, "Type is required"),
-  detail: z.string().optional(),
-  amount: z.coerce.number().positive().optional(),
-  transactionDatetime: z.string().optional(),
-});
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-type ExpenseListItem = {
-  expense_uuid: string;
-  title: string;
-  type: string;
-  detail: string | null;
-  amount: number | null;
-  transaction_datetime: string | null;
-  created_at: string | null;
-  updated_at: string | null;
-};
-
-type ListExpensesResult = {
-  expenses: ExpenseListItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
+import {
+  listExpensesSchema,
+  getExpenseSchema,
+  createExpenseSchema,
+  expenseItemSchema,
+  expenseDetailSchema,
+  listExpensesResultSchema,
+  type ExpenseListItem,
+  type ListExpensesResult,
+} from "./schemas";
 
 describe("listExpensesSchema", () => {
   it("accepts empty params with defaults", () => {
@@ -171,5 +136,108 @@ describe("ListExpensesResult shape", () => {
     };
     expect(result.total).toBe(0);
     expect(result.expenses).toHaveLength(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output schema tests: expenseItemSchema
+// ---------------------------------------------------------------------------
+
+const validExpenseItem = {
+  expense_uuid: "exp_abc123",
+  title: "Office supplies",
+  type: "operational",
+  detail: "Paper and pens",
+  amount: 50.5,
+  transaction_datetime: "2025-06-01T10:00:00.000Z",
+  created_at: "2025-06-01T10:00:00.000Z",
+  updated_at: "2025-06-01T10:00:00.000Z",
+};
+
+describe("expenseItemSchema", () => {
+  it("accepts a valid expense item", () => {
+    const result = expenseItemSchema.parse(validExpenseItem);
+    expect(result.expense_uuid).toBe("exp_abc123");
+  });
+
+  it("accepts nullable fields as null", () => {
+    const result = expenseItemSchema.parse({
+      ...validExpenseItem,
+      detail: null,
+      amount: null,
+      transaction_datetime: null,
+      created_at: null,
+      updated_at: null,
+    });
+    expect(result.detail).toBeNull();
+    expect(result.amount).toBeNull();
+    expect(result.transaction_datetime).toBeNull();
+  });
+
+  it("rejects missing required string field", () => {
+    const { title, ...rest } = validExpenseItem;
+    expect(() => expenseItemSchema.parse(rest)).toThrow();
+  });
+
+  it("rejects wrong type for amount field", () => {
+    expect(() =>
+      expenseItemSchema.parse({ ...validExpenseItem, amount: "not-a-number" }),
+    ).toThrow();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output schema tests: expenseDetailSchema
+// ---------------------------------------------------------------------------
+
+describe("expenseDetailSchema", () => {
+  it("accepts a valid expense item", () => {
+    const result = expenseDetailSchema.parse(validExpenseItem);
+    expect(result).not.toBeNull();
+  });
+
+  it("accepts null", () => {
+    const result = expenseDetailSchema.parse(null);
+    expect(result).toBeNull();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output schema tests: listExpensesResultSchema
+// ---------------------------------------------------------------------------
+
+describe("listExpensesResultSchema", () => {
+  it("accepts a valid result with expenses", () => {
+    const result = listExpensesResultSchema.parse({
+      expenses: [validExpenseItem],
+      total: 1,
+      page: 1,
+      limit: 20,
+      totalPages: 1,
+    });
+    expect(result.expenses.length).toBe(1);
+  });
+
+  it("accepts an empty list", () => {
+    const result = listExpensesResultSchema.parse({
+      expenses: [],
+      total: 0,
+      page: 1,
+      limit: 20,
+      totalPages: 0,
+    });
+    expect(result.expenses.length).toBe(0);
+  });
+
+  it("rejects negative page", () => {
+    expect(() =>
+      listExpensesResultSchema.parse({
+        expenses: [],
+        total: 0,
+        page: -1,
+        limit: 20,
+        totalPages: 0,
+      }),
+    ).toThrow();
   });
 });

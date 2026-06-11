@@ -3,48 +3,14 @@
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
-
-// ---------------------------------------------------------------------------
-// Schemas
-// ---------------------------------------------------------------------------
-
-const listDesignationsSchema = z.object({
-  page: z.coerce.number().int().positive().optional().default(1),
-  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
-  nameFilter: z.string().optional(),
-});
-
-const getDesignationSchema = z.object({
-  uuid: z.string().min(1, "Designation UUID is required"),
-});
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export type ListDesignationsParams = z.input<typeof listDesignationsSchema>;
-
-export type GetDesignationParams = z.input<typeof getDesignationSchema>;
-
-export type DesignationItem = {
-  designation_uuid: string;
-  designation_name_en: string;
-  designation_name_ar: string | null;
-};
-
-export type ListDesignationsResult = {
-  designations: DesignationItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
-
-// ---------------------------------------------------------------------------
-// Exported schemas (for shared validation)
-// ---------------------------------------------------------------------------
-
-export { listDesignationsSchema, getDesignationSchema };
+import {
+  designationItemSchema,
+  listDesignationsResultSchema,
+  listDesignationsSchema,
+  getDesignationSchema,
+  type DesignationItem,
+  type ListDesignationsResult,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // listDesignations
@@ -60,7 +26,7 @@ export { listDesignationsSchema, getDesignationSchema };
  * - Sorted alphabetically by English name
  */
 export async function listDesignations(
-  params: ListDesignationsParams = {},
+  params: z.input<typeof listDesignationsSchema> = {},
 ): Promise<ListDesignationsResult> {
   await requireCapability("admin.read");
 
@@ -89,7 +55,7 @@ export async function listDesignations(
     prisma.designation.count({ where: where as any }),
   ]);
 
-  return {
+  const result: ListDesignationsResult = {
     designations: designations.map((d) => ({
       designation_uuid: d.designation_uuid,
       designation_name_en: d.designation_name_en,
@@ -100,6 +66,16 @@ export async function listDesignations(
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  const outputParsed = listDesignationsResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/designations] listDesignations output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -111,7 +87,7 @@ export async function listDesignations(
  * Returns null if not found.
  */
 export async function getDesignation(
-  params: GetDesignationParams,
+  params: z.input<typeof getDesignationSchema>,
 ): Promise<DesignationItem | null> {
   await requireCapability("admin.read");
 
@@ -128,9 +104,19 @@ export async function getDesignation(
 
   if (!designation) return null;
 
-  return {
+  const result: DesignationItem = {
     designation_uuid: designation.designation_uuid,
     designation_name_en: designation.designation_name_en,
     designation_name_ar: designation.designation_name_ar,
   };
+
+  const outputParsed = designationItemSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/designations] getDesignation output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }

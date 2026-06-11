@@ -1,50 +1,17 @@
 "use server";
 
-import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
-
-// ---------------------------------------------------------------------------
-// Schemas
-// ---------------------------------------------------------------------------
-
-const listCronLogsSchema = z.object({
-  task: z.string().optional(),
-  page: z.number().int().positive().optional(),
-  limit: z.number().int().min(1).max(100).optional(),
-});
-
-const getCronLogSchema = z.object({
-  id: z.number().int().positive(),
-});
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export type CronLogItem = {
-  id: number;
-  task: string;
-  last_ran_at: Date | null;
-  last_output: string | null;
-};
-
-export type ListCronLogsInput = z.input<typeof listCronLogsSchema>;
-export type GetCronLogInput = z.input<typeof getCronLogSchema>;
-
-export type ListCronLogsResult = {
-  cronLogs: CronLogItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
-
-// ---------------------------------------------------------------------------
-// Exported schemas (for shared validation in tests)
-// ---------------------------------------------------------------------------
-
-export { listCronLogsSchema, getCronLogSchema };
+import {
+  listCronLogsSchema,
+  getCronLogSchema,
+  listCronLogsResultSchema,
+  cronLogItemSchema,
+  type ListCronLogsInput,
+  type GetCronLogInput,
+  type ListCronLogsResult,
+  type CronLogItem,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Server actions
@@ -82,13 +49,24 @@ export async function listCronLogs(
     prisma.cron_log.count({ where: where as any }),
   ]);
 
-  return {
+  const result = {
     cronLogs: cronLogs as CronLogItem[],
     total,
     page,
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  // Validate output shape
+  const outputParsed = listCronLogsResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/cron-logs] listCronLogs output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -109,5 +87,16 @@ export async function getCronLog(
     where: { id: parsed.data.id },
   });
 
-  return cronLog as CronLogItem | null;
+  const result = cronLog as CronLogItem | null;
+
+  // Validate output shape
+  const outputParsed = cronLogItemSchema.nullable().safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/cron-logs] getCronLog output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }

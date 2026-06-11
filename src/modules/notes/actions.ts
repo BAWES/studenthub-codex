@@ -1,84 +1,32 @@
 "use server";
 
+import crypto from "node:crypto";
 import { revalidatePath } from "next/cache";
-import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
-
-// ---------------------------------------------------------------------------
-// Schemas
-// ---------------------------------------------------------------------------
-
-const listNotesSchema = z.object({
-  page: z.coerce.number().int().positive().optional().default(1),
-  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
-  companyId: z.coerce.number().int().positive().optional(),
-  staffId: z.coerce.number().int().positive().optional(),
-  requestUuid: z.string().optional(),
-  storyUuid: z.string().optional(),
-  noteType: z.string().optional(),
-  startDate: z.string().optional(),
-  endDate: z.string().optional(),
-  candidateId: z.coerce.number().int().positive().optional(),
-});
-
-const getNoteSchema = z.object({
-  uuid: z.string().min(1, "Note UUID is required"),
-});
-
-const createNoteSchema = z.object({
-  noteText: z.string().min(1, "Note text is required"),
-  companyId: z.coerce.number().int().positive().optional(),
-  candidateId: z.coerce.number().int().positive().optional(),
-  requestUuid: z.string().optional(),
-  storyUuid: z.string().optional(),
-  noteType: z.string().optional().default("Internal Note"),
-});
-
-const updateNoteSchema = z.object({
-  uuid: z.string().min(1, "Note UUID is required"),
-  noteText: z.string().min(1, "Note text is required").optional(),
-  noteType: z.string().optional(),
-});
-
-const deleteNoteSchema = z.object({
-  uuid: z.string().min(1, "Note UUID is required"),
-});
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export type ListNotesParams = z.input<typeof listNotesSchema>;
-export type GetNoteParams = z.input<typeof getNoteSchema>;
-export type CreateNoteParams = z.input<typeof createNoteSchema>;
-export type UpdateNoteParams = z.input<typeof updateNoteSchema>;
-export type DeleteNoteParams = z.input<typeof deleteNoteSchema>;
-
-export type NoteListItem = {
-  note_uuid: string;
-  note_type: string | null;
-  note_text: string | null;
-  company_id: number | null;
-  candidate_id: number | null;
-  created_by: number | null;
-  note_created_datetime: Date | null;
-};
-
-export type NoteDetail = NoteListItem & {
-  note_updated_datetime: Date | null;
-  updated_by: number | null;
-  request_uuid: string | null;
-  story_uuid: string | null;
-};
-
-export type ListNotesResult = {
-  notes: NoteListItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
+import {
+  listNotesSchema,
+  getNoteSchema,
+  createNoteSchema,
+  updateNoteSchema,
+  deleteNoteSchema,
+  noteListItemSchema,
+  noteDetailSchema,
+  listNotesResultSchema,
+  noteMutationResultSchema,
+  noteDeleteResultSchema,
+  type ListNotesParams,
+  type GetNoteParams,
+  type CreateNoteParams,
+  type UpdateNoteParams,
+  type DeleteNoteParams,
+  type NoteListItem,
+  type NoteDetail,
+  type ListNotesResult,
+  type NoteDetailOrNull,
+  type NoteMutationResult,
+  type NoteDeleteResult,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Server actions
@@ -150,13 +98,32 @@ export async function listNotes(
     prisma.note.count({ where: where as any }),
   ]);
 
-  return {
-    notes: notes as NoteListItem[],
+  const result = {
+    notes: notes.map((n) => ({
+      note_uuid: n.note_uuid,
+      note_type: n.note_type ?? null,
+      note_text: n.note_text ?? null,
+      company_id: n.company_id ?? null,
+      candidate_id: n.candidate_id ?? null,
+      created_by: n.created_by ?? null,
+      note_created_datetime: n.note_created_datetime?.toISOString() ?? null,
+    })),
     total,
     page,
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  // Output validation — log mismatches without throwing
+  const outputParsed = listNotesResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/notes] listNotes output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -165,7 +132,7 @@ export async function listNotes(
  */
 export async function getNote(
   params: GetNoteParams,
-): Promise<NoteDetail | null> {
+): Promise<NoteDetailOrNull> {
   await requireCapability("notes.read");
 
   const parsed = getNoteSchema.safeParse(params);
@@ -179,7 +146,32 @@ export async function getNote(
     where: { note_uuid: uuid },
   });
 
-  return note as NoteDetail | null;
+  if (!note) return null;
+
+  const result: NoteDetail = {
+    note_uuid: note.note_uuid,
+    note_type: note.note_type ?? null,
+    note_text: note.note_text ?? null,
+    company_id: note.company_id ?? null,
+    candidate_id: note.candidate_id ?? null,
+    created_by: note.created_by ?? null,
+    note_created_datetime: note.note_created_datetime?.toISOString() ?? null,
+    note_updated_datetime: note.note_updated_datetime?.toISOString() ?? null,
+    updated_by: note.updated_by ?? null,
+    request_uuid: note.request_uuid ?? null,
+    story_uuid: note.story_uuid ?? null,
+  };
+
+  // Output validation — log mismatches without throwing
+  const outputParsed = noteDetailSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/notes] getNote output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -188,7 +180,7 @@ export async function getNote(
  */
 export async function createNote(
   params: CreateNoteParams,
-): Promise<{ operation: string; message: string; note?: NoteDetail }> {
+): Promise<NoteMutationResult> {
   await requireCapability("notes.create");
 
   const parsed = createNoteSchema.safeParse(params);
@@ -218,11 +210,34 @@ export async function createNote(
 
   revalidatePath("/notes");
 
-  return {
+  const result: NoteMutationResult = {
     operation: "success",
     message: "Note created successfully",
-    note: note as NoteDetail,
+    note: {
+      note_uuid: note.note_uuid,
+      note_type: note.note_type ?? null,
+      note_text: note.note_text ?? null,
+      company_id: note.company_id ?? null,
+      candidate_id: note.candidate_id ?? null,
+      created_by: note.created_by ?? null,
+      note_created_datetime: note.note_created_datetime?.toISOString() ?? null,
+      note_updated_datetime: note.note_updated_datetime?.toISOString() ?? null,
+      updated_by: note.updated_by ?? null,
+      request_uuid: note.request_uuid ?? null,
+      story_uuid: note.story_uuid ?? null,
+    },
   };
+
+  // Output validation — log mismatches without throwing
+  const outputParsed = noteMutationResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/notes] createNote output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -231,7 +246,7 @@ export async function createNote(
  */
 export async function updateNote(
   params: UpdateNoteParams,
-): Promise<{ operation: string; message: string; note?: NoteDetail }> {
+): Promise<NoteMutationResult> {
   await requireCapability("notes.update");
 
   const parsed = updateNoteSchema.safeParse(params);
@@ -262,11 +277,34 @@ export async function updateNote(
 
   revalidatePath("/notes");
 
-  return {
+  const result: NoteMutationResult = {
     operation: "success",
     message: "Note successfully updated",
-    note: note as NoteDetail,
+    note: {
+      note_uuid: note.note_uuid,
+      note_type: note.note_type ?? null,
+      note_text: note.note_text ?? null,
+      company_id: note.company_id ?? null,
+      candidate_id: note.candidate_id ?? null,
+      created_by: note.created_by ?? null,
+      note_created_datetime: note.note_created_datetime?.toISOString() ?? null,
+      note_updated_datetime: note.note_updated_datetime?.toISOString() ?? null,
+      updated_by: note.updated_by ?? null,
+      request_uuid: note.request_uuid ?? null,
+      story_uuid: note.story_uuid ?? null,
+    },
   };
+
+  // Output validation — log mismatches without throwing
+  const outputParsed = noteMutationResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/notes] updateNote output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -275,7 +313,7 @@ export async function updateNote(
  */
 export async function deleteNote(
   params: DeleteNoteParams,
-): Promise<{ operation: string; message: string }> {
+): Promise<NoteDeleteResult> {
   await requireCapability("notes.delete");
 
   const parsed = deleteNoteSchema.safeParse(params);

@@ -3,42 +3,14 @@
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
-
-// ---------------------------------------------------------------------------
-// Schemas
-// ---------------------------------------------------------------------------
-
-const listMailLogsSchema = z.object({
-  page: z.coerce.number().int().positive().optional().default(1),
-  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
-  search: z.string().max(255).optional(),
-});
-
-const getMailLogSchema = z.object({
-  mailUuid: z.string().min(1, "Mail UUID is required"),
-});
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export type MailLogListItem = {
-  mail_uuid: string;
-  from: string | null;
-  to: string | null;
-  subject: string | null;
-  app: string | null;
-  created_at: string | null;
-  updated_at: string | null;
-};
-
-export type ListMailLogsResult = {
-  records: MailLogListItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
+import {
+  listMailLogsSchema,
+  getMailLogSchema,
+  listMailLogsResultSchema,
+  mailLogListItemSchema,
+  type MailLogListItem,
+  type ListMailLogsResult,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // listMailLogs
@@ -90,7 +62,7 @@ export async function listMailLogs(
     prisma.mail_log.count({ where: where as any }),
   ]);
 
-  return {
+  const result: ListMailLogsResult = {
     records: records.map((r): MailLogListItem => ({
       mail_uuid: r.mail_uuid,
       from: r.from ?? null,
@@ -105,6 +77,16 @@ export async function listMailLogs(
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  const outputParsed = listMailLogsResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/mail-logs] listMailLogs output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -132,7 +114,7 @@ export async function getMailLog(
 
   if (!record) return null;
 
-  return {
+  const result: MailLogListItem = {
     mail_uuid: record.mail_uuid,
     from: record.from ?? null,
     to: record.to ?? null,
@@ -141,4 +123,14 @@ export async function getMailLog(
     created_at: record.created_at?.toISOString() ?? null,
     updated_at: record.updated_at?.toISOString() ?? null,
   };
+
+  const outputParsed = mailLogListItemSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/mail-logs] getMailLog output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }

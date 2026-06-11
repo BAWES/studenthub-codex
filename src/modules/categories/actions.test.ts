@@ -1,10 +1,12 @@
 import { describe, it, expect } from "vitest";
 import {
+  categoryListItemSchema,
+  listCategoriesResultSchema,
   listCategoriesSchema,
   getCategorySchema,
   createCategorySchema,
   updateCategorySchema,
-} from "./actions";
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Schema validation tests for DiscountCategoryController server actions
@@ -243,5 +245,115 @@ describe("updateCategorySchema", () => {
     if (result.success) {
       expect(result.data.image).toBe("https://cdn.example.com/img.png");
     }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output schema tests
+// ---------------------------------------------------------------------------
+
+describe("categoryListItemSchema", () => {
+  it("accepts a valid category list item", () => {
+    const result = categoryListItemSchema.safeParse({
+      category_id: 1,
+      name_en: "Scholarships",
+      name_ar: "المنح الدراسية",
+      image: "https://cdn.example.com/img.png",
+      created_at: new Date("2024-01-01"),
+      updated_at: new Date("2024-01-02"),
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts nullable fields as null", () => {
+    const result = categoryListItemSchema.safeParse({
+      category_id: 2,
+      name_en: "Discounts",
+      name_ar: null,
+      image: null,
+      created_at: null,
+      updated_at: null,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects missing category_id", () => {
+    const result = categoryListItemSchema.safeParse({
+      name_en: "Test",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects missing name_en", () => {
+    const result = categoryListItemSchema.safeParse({
+      category_id: 1,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects wrong type for category_id", () => {
+    const result = categoryListItemSchema.safeParse({
+      category_id: "abc",
+      name_en: "Test",
+      name_ar: null,
+      image: null,
+      created_at: null,
+      updated_at: null,
+    });
+    expect(result.success).toBe(false);
+  });
+});
+
+describe("listCategoriesResultSchema", () => {
+  it("accepts a valid list result", () => {
+    const result = listCategoriesResultSchema.safeParse({
+      categories: [
+        {
+          category_id: 1,
+          name_en: "Scholarships",
+          name_ar: null,
+          image: null,
+          created_at: null,
+          updated_at: null,
+        },
+      ],
+      total: 1,
+      page: 1,
+      limit: 20,
+      totalPages: 1,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts empty categories array", () => {
+    const result = listCategoriesResultSchema.safeParse({
+      categories: [],
+      total: 0,
+      page: 1,
+      limit: 20,
+      totalPages: 0,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects missing total field", () => {
+    const result = listCategoriesResultSchema.safeParse({
+      categories: [],
+      page: 1,
+      limit: 20,
+      totalPages: 0,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects negative page", () => {
+    const result = listCategoriesResultSchema.safeParse({
+      categories: [],
+      total: 0,
+      page: -1,
+      limit: 20,
+      totalPages: 0,
+    });
+    expect(result.success).toBe(false);
   });
 });

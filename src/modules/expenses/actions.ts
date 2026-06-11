@@ -1,53 +1,19 @@
 "use server";
 
 import crypto from "node:crypto";
-import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
-
-// ---------------------------------------------------------------------------
-// Schemas
-// ---------------------------------------------------------------------------
-
-const listExpensesSchema = z.object({
-  page: z.coerce.number().int().positive().optional().default(1),
-  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
-});
-
-const getExpenseSchema = z.object({
-  expenseUuid: z.string().min(1, "Expense UUID is required"),
-});
-
-const createExpenseSchema = z.object({
-  title: z.string().min(1, "Title is required"),
-  type: z.string().min(1, "Type is required"),
-  detail: z.string().optional(),
-  amount: z.coerce.number().positive("Amount must be positive").optional(),
-  transactionDatetime: z.string().optional(),
-});
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export type ExpenseListItem = {
-  expense_uuid: string;
-  title: string;
-  type: string;
-  detail: string | null;
-  amount: number | null;
-  transaction_datetime: string | null;
-  created_at: string | null;
-  updated_at: string | null;
-};
-
-export type ListExpensesResult = {
-  expenses: ExpenseListItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
+import {
+  listExpensesSchema,
+  getExpenseSchema,
+  createExpenseSchema,
+  listExpensesResultSchema,
+  expenseDetailSchema,
+  type ExpenseListItem,
+  type ListExpensesResult,
+  type ListExpensesParams,
+  type CreateExpenseParams,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // listExpenses
@@ -58,7 +24,7 @@ export type ListExpensesResult = {
  * Mirrors the legacy Yii2 Admin ExpenseController::actionList().
  */
 export async function listExpenses(
-  params: FormData | z.input<typeof listExpensesSchema> = {},
+  params: FormData | ListExpensesParams = {},
 ): Promise<ListExpensesResult> {
   await requireCapability("expense.read");
 
@@ -87,7 +53,7 @@ export async function listExpenses(
     prisma.expense.count(),
   ]);
 
-  return {
+  const result = {
     expenses: expenses.map((e: any): ExpenseListItem => ({
       expense_uuid: e.expense_uuid,
       title: e.title,
@@ -103,6 +69,17 @@ export async function listExpenses(
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  // Validate output shape
+  const outputParsed = listExpensesResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/expenses] listExpenses output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -130,7 +107,7 @@ export async function getExpense(
   if (!expense) return null;
 
   const raw = expense as any;
-  return {
+  const result = {
     expense_uuid: raw.expense_uuid,
     title: raw.title,
     type: raw.type,
@@ -140,6 +117,17 @@ export async function getExpense(
     created_at: raw.created_at?.toISOString() ?? null,
     updated_at: raw.updated_at?.toISOString() ?? null,
   };
+
+  // Validate output shape
+  const outputParsed = expenseDetailSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/expenses] getExpense output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -152,7 +140,7 @@ export async function getExpense(
  * Mirrors the legacy Yii2 Admin ExpenseController::actionCreate().
  */
 export async function createExpense(
-  data: z.input<typeof createExpenseSchema>,
+  data: CreateExpenseParams,
 ): Promise<{ expense_uuid: string }> {
   await requireCapability("expense.write");
 

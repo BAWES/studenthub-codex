@@ -7,7 +7,7 @@ import {
   deleteCertificateSchema,
   type CertificateListItem,
   type ListCertificatesResult,
-} from "@/modules/certificates/actions";
+} from "@/modules/certificates/schemas";
 
 // ---------------------------------------------------------------------------
 // Schema tests for candidate/certificates actions (pure unit — no DB required)

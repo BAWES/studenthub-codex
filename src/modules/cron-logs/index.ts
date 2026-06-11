@@ -1,12 +1,16 @@
 export {
   listCronLogs,
   getCronLog,
+} from "./actions";
+export {
   listCronLogsSchema,
   getCronLogSchema,
-} from "./actions";
+  cronLogItemSchema,
+  listCronLogsResultSchema,
+} from "./schemas";
 export type {
   CronLogItem,
   ListCronLogsInput,
   GetCronLogInput,
   ListCronLogsResult,
-} from "./actions";
+} from "./schemas";

@@ -1,15 +1,19 @@
 import { describe, it, expect } from "vitest";
-import { z } from "zod";
+import {
+  listCandidateLinksSchema,
+  getCandidateLinkSchema,
+  createCandidateLinkSchema,
+  updateCandidateLinkSchema,
+  deleteCandidateLinkSchema,
+  candidateLinkItemSchema,
+  listCandidateLinksResultSchema,
+  type CandidateLinkItem,
+  type ListCandidateLinksResult,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // listCandidateLinks schema validation
 // ---------------------------------------------------------------------------
-
-const listCandidateLinksSchema = z.object({
-  candidateId: z.coerce.number().int().positive("Candidate ID must be a positive integer"),
-  page: z.coerce.number().int().positive().optional().default(1),
-  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
-});
 
 describe("listCandidateLinksSchema", () => {
   it("accepts candidate ID with default pagination", () => {
@@ -59,10 +63,6 @@ describe("listCandidateLinksSchema", () => {
 // getCandidateLink schema validation
 // ---------------------------------------------------------------------------
 
-const getCandidateLinkSchema = z.object({
-  clUuid: z.string().min(1, "Link UUID is required"),
-});
-
 describe("getCandidateLinkSchema", () => {
   it("accepts a valid UUID string", () => {
     const result = getCandidateLinkSchema.safeParse({ clUuid: "abc-123-def" });
@@ -86,12 +86,6 @@ describe("getCandidateLinkSchema", () => {
 // ---------------------------------------------------------------------------
 // createCandidateLink schema validation
 // ---------------------------------------------------------------------------
-
-const createCandidateLinkSchema = z.object({
-  candidateId: z.coerce.number().int().positive("Candidate ID must be a positive integer"),
-  title: z.string().min(1, "Title is required").max(255),
-  url: z.string().min(1, "URL is required").max(255),
-});
 
 describe("createCandidateLinkSchema", () => {
   it("accepts valid link data", () => {
@@ -153,12 +147,6 @@ describe("createCandidateLinkSchema", () => {
 // updateCandidateLink schema validation
 // ---------------------------------------------------------------------------
 
-const updateCandidateLinkSchema = z.object({
-  clUuid: z.string().min(1, "Link UUID is required"),
-  title: z.string().min(1, "Title is required").max(255),
-  url: z.string().min(1, "URL is required").max(255),
-});
-
 describe("updateCandidateLinkSchema", () => {
   it("accepts valid update params", () => {
     const result = updateCandidateLinkSchema.safeParse({
@@ -193,10 +181,6 @@ describe("updateCandidateLinkSchema", () => {
 // deleteCandidateLink schema validation
 // ---------------------------------------------------------------------------
 
-const deleteCandidateLinkSchema = z.object({
-  clUuid: z.string().min(1, "Link UUID is required"),
-});
-
 describe("deleteCandidateLinkSchema", () => {
   it("accepts a valid UUID", () => {
     const result = deleteCandidateLinkSchema.safeParse({ clUuid: "uuid-to-delete" });
@@ -215,53 +199,95 @@ describe("deleteCandidateLinkSchema", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Type shape tests
+// Output schema tests: candidateLinkItemSchema
 // ---------------------------------------------------------------------------
 
-type CandidateLinkItem = {
-  cl_uuid: string;
-  candidate_id: number;
-  title: string;
-  url: string;
-  created_at: Date | null;
-  updated_at: Date | null;
+const validCandidateLinkItem: CandidateLinkItem = {
+  cl_uuid: "abc-123-def",
+  candidate_id: 1,
+  title: "Portfolio",
+  url: "https://example.com",
+  created_at: null,
+  updated_at: null,
 };
 
-type ListCandidateLinksResult = {
-  links: CandidateLinkItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
+describe("candidateLinkItemSchema", () => {
+  it("accepts a valid candidate link item", () => {
+    const result = candidateLinkItemSchema.parse(validCandidateLinkItem);
+    expect(result.cl_uuid).toBe("abc-123-def");
+  });
 
-describe("CandidateLinkItem shape", () => {
-  it("defines the expected fields", () => {
-    const mock: CandidateLinkItem = {
-      cl_uuid: "abc-123",
-      candidate_id: 1,
-      title: "Portfolio",
-      url: "https://example.com",
+  it("accepts nullable date fields as null", () => {
+    const result = candidateLinkItemSchema.parse({
+      ...validCandidateLinkItem,
       created_at: null,
       updated_at: null,
-    };
-    expect(mock.cl_uuid).toBe("abc-123");
-    expect(mock.title).toBe("Portfolio");
-    expect(mock.url).toBe("https://example.com");
+    });
+    expect(result.created_at).toBeNull();
+    expect(result.updated_at).toBeNull();
+  });
+
+  it("rejects missing required string field", () => {
+    const { title, ...rest } = validCandidateLinkItem;
+    expect(() => candidateLinkItemSchema.parse(rest)).toThrow();
+  });
+
+  it("rejects wrong type for candidate_id", () => {
+    expect(() =>
+      candidateLinkItemSchema.parse({ ...validCandidateLinkItem, candidate_id: "not-a-number" }),
+    ).toThrow();
   });
 });
 
-describe("ListCandidateLinksResult shape", () => {
-  it("accepts a valid result set", () => {
-    const result: ListCandidateLinksResult = {
+// ---------------------------------------------------------------------------
+// Output schema tests: listCandidateLinksResultSchema
+// ---------------------------------------------------------------------------
+
+describe("listCandidateLinksResultSchema", () => {
+  it("accepts a valid result with links", () => {
+    const result = listCandidateLinksResultSchema.parse({
+      links: [validCandidateLinkItem],
+      total: 1,
+      page: 1,
+      limit: 20,
+      totalPages: 1,
+    });
+    expect(result.links.length).toBe(1);
+  });
+
+  it("accepts an empty list", () => {
+    const result = listCandidateLinksResultSchema.parse({
       links: [],
       total: 0,
       page: 1,
       limit: 20,
       totalPages: 0,
-    };
-    expect(result.total).toBe(0);
-    expect(result.links).toHaveLength(0);
+    });
+    expect(result.links.length).toBe(0);
+  });
+
+  it("rejects negative page", () => {
+    expect(() =>
+      listCandidateLinksResultSchema.parse({
+        links: [],
+        total: 0,
+        page: -1,
+        limit: 20,
+        totalPages: 0,
+      }),
+    ).toThrow();
+  });
+
+  it("rejects negative total", () => {
+    expect(() =>
+      listCandidateLinksResultSchema.parse({
+        links: [],
+        total: -1,
+        page: 1,
+        limit: 20,
+        totalPages: 0,
+      }),
+    ).toThrow();
   });
 });
 

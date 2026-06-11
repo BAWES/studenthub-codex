@@ -1,6 +1,12 @@
 import { describe, it, expect } from "vitest";
-import { listCronLogsSchema, getCronLogSchema } from "./actions";
-import type { CronLogItem, ListCronLogsResult } from "./actions";
+import {
+  listCronLogsSchema,
+  getCronLogSchema,
+  cronLogItemSchema,
+  listCronLogsResultSchema,
+  type CronLogItem,
+  type ListCronLogsResult,
+} from "./schemas";
 
 describe("listCronLogsSchema", () => {
   it("accepts empty params", () => {
@@ -97,5 +103,85 @@ describe("ListCronLogsResult type", () => {
     expect(result.cronLogs).toHaveLength(0);
     expect(result.totalPages).toBe(0);
     expect(result.page).toBe(1);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output schema tests: cronLogItemSchema
+// ---------------------------------------------------------------------------
+
+const validCronLogItem = {
+  id: 1,
+  task: "daily-summary",
+  last_ran_at: new Date("2026-06-08T10:00:00.000Z"),
+  last_output: "Completed successfully",
+};
+
+describe("cronLogItemSchema", () => {
+  it("accepts a valid cron log item", () => {
+    const result = cronLogItemSchema.parse(validCronLogItem);
+    expect(result.id).toBe(1);
+    expect(result.task).toBe("daily-summary");
+  });
+
+  it("accepts nullable fields as null", () => {
+    const result = cronLogItemSchema.parse({
+      ...validCronLogItem,
+      last_ran_at: null,
+      last_output: null,
+    });
+    expect(result.last_ran_at).toBeNull();
+    expect(result.last_output).toBeNull();
+  });
+
+  it("rejects missing required id field", () => {
+    const { id, ...rest } = validCronLogItem;
+    expect(() => cronLogItemSchema.parse(rest)).toThrow();
+  });
+
+  it("rejects wrong type for id field", () => {
+    expect(() =>
+      cronLogItemSchema.parse({ ...validCronLogItem, id: "not-a-number" }),
+    ).toThrow();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output schema tests: listCronLogsResultSchema
+// ---------------------------------------------------------------------------
+
+describe("listCronLogsResultSchema", () => {
+  it("accepts a valid result with cron logs", () => {
+    const result = listCronLogsResultSchema.parse({
+      cronLogs: [validCronLogItem],
+      total: 1,
+      page: 1,
+      limit: 20,
+      totalPages: 1,
+    });
+    expect(result.cronLogs.length).toBe(1);
+  });
+
+  it("accepts an empty list", () => {
+    const result = listCronLogsResultSchema.parse({
+      cronLogs: [],
+      total: 0,
+      page: 1,
+      limit: 20,
+      totalPages: 0,
+    });
+    expect(result.cronLogs.length).toBe(0);
+  });
+
+  it("rejects negative page", () => {
+    expect(() =>
+      listCronLogsResultSchema.parse({
+        cronLogs: [],
+        total: 0,
+        page: -1,
+        limit: 20,
+        totalPages: 0,
+      }),
+    ).toThrow();
   });
 });

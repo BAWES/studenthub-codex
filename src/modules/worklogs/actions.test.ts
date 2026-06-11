@@ -10,7 +10,7 @@ import {
   getWorkingDatesSchema,
   getAppealDetailSchema,
   markAppealUpdateReadSchema,
-} from "./actions";
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Pure logic: schema validation for worklog server actions
