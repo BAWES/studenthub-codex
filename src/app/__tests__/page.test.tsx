@@ -50,6 +50,7 @@ vi.mock("lucide-react", () => ({
   BarChart3: () => <span data-testid="icon-bar-chart" />,
   Layers: () => <span data-testid="icon-layers" />,
   ChevronRight: () => <span data-testid="icon-chevron-right" />,
+  ChevronDown: () => <span data-testid="icon-chevron-down" />,
   Command: () => <span data-testid="icon-command" />,
   Sparkles: () => <span data-testid="icon-sparkles" />,
   Search: () => <span data-testid="icon-search" />,

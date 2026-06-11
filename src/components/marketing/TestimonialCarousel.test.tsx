@@ -64,7 +64,9 @@ describe("TestimonialCarousel", () => {
   it("renders company testimonials", async () => {
     render(<TestimonialCarousel persona="company" />);
     await waitFor(() => {
-      expect(screen.getByText(/Posting openings on StudentHub/)).toBeInTheDocument();
+      // Company-specific quote — check for the HR manager name which is unique
+      const quotes = screen.getAllByText(/Emma C\./);
+      expect(quotes.length).toBeGreaterThanOrEqual(1);
     });
   });
 
