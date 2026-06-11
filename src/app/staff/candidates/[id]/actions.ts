@@ -82,7 +82,7 @@ export async function getCandidate(
     return d instanceof Date && isFinite(d.getTime()) ? d.toISOString() : null;
   };
 
-  return {
+  const result: CandidateDetailResult = {
     candidate: {
       id: candidate.candidate_id,
       name: candidate.candidate_name,
@@ -106,24 +106,26 @@ export async function getCandidate(
       uuid: n.note_uuid,
       text: n.note_text ?? "",
       type: n.note_type ?? "Internal Note",
-      })),
-      };
+      createdBy: n.created_by ?? null,
+      createdAt: isoDate(n.note_created_datetime) ?? "",
+    })),
+  };
 
-      // Validate output shape
-      const outputParsed = candidateDetailResultOutputSchema.safeParse(result);
-      if (!outputParsed.success) {
-      console.error(
-        "[staff/candidates/[id]] getCandidate output validation failed:",
-        outputParsed.error.issues,
-      );
-      }
+  // Validate output shape
+  const outputParsed = candidateDetailResultOutputSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[staff/candidates/[id]] getCandidate output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
 
-      return result;
-      }
+  return result;
+}
 
-      // ---------------------------------------------------------------------------
-      // addNote — add a note to a candidate (staff-side)
-      // ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+// addNote — add a note to a candidate (staff-side)
+// ---------------------------------------------------------------------------
 
 /**
  * Add a note to a candidate record from the staff detail view.

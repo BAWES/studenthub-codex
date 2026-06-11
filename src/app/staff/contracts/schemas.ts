@@ -76,3 +76,32 @@ export type ContractActionResponse = {
   operation: "success" | "error";
   message: string;
 };
+
+// ---------------------------------------------------------------------------
+// Output validation schemas
+// ---------------------------------------------------------------------------
+
+/** Validates the contract detail output shape. */
+export const contractDetailOutputSchema = z.object({
+  contract: z.object({
+    contract_uuid: z.string(),
+    type: z.string(),
+    detail: z.string().nullable(),
+    status: z.number().int(),
+    status_label: z.string(),
+    start_date: z.string().nullable(),
+    end_date: z.string().nullable(),
+    transfer_cost: z.string().nullable(),
+    currency_code: z.string().nullable(),
+    auto_generate: z.boolean(),
+    created_at: z.string().nullable(),
+    updated_at: z.string().nullable(),
+    candidate: z.object({ candidate_name: z.string().nullable() }).nullable(),
+    company: z.object({ company_name: z.string().nullable() }).nullable(),
+  }).nullable(),
+});
+
+/** Validates the updateContractStatus success response. */
+export const updateContractStatusOutputSchema = z.object({
+  success: z.literal(true),
+});

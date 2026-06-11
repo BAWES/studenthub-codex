@@ -24,6 +24,8 @@ import {
   listContractsSchema,
   getContractSchema,
   updateContractStatusSchema,
+  contractDetailOutputSchema,
+  updateContractStatusOutputSchema,
 } from "./schemas";
 import type {
   ListContractsInput,
