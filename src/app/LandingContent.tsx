@@ -1,353 +1,684 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { ChevronRight, Sparkles, GraduationCap, Building2 } from "lucide-react";
+import {
+  ArrowRight, Sparkles, GraduationCap, Building2, Search, Check,
+  Star, Users, Briefcase, BarChart3, Fingerprint, Menu, X,
+  Clock, Zap, Shield, ChevronRight, Eye, CreditCard, Target, Award
+} from "lucide-react";
 import { ThemeToggle } from "@/modules/theme/ThemeToggle";
-import { FadeInSection } from "@/components/marketing";
-import { HeroSection } from "@/components/marketing";
-import { TestimonialCarousel } from "@/components/marketing";
-import { ComparisonTable } from "@/components/marketing";
-import { HowItWorks } from "@/components/marketing";
-import { EmployerSection } from "@/components/marketing";
-import { StatsSection } from "@/components/marketing";
-import { PersonaSwitcher } from "@/components/marketing";
-import type { SwitcherPersona } from "@/components/marketing";
 
-// ── Props ─────────────────────────────────────────────────────
+type Persona = "candidate" | "company";
 
-export interface LandingContentProps {
-  session: {
-    id: string;
-    email: string;
-    role: string;
-    name: string;
-  } | null;
+interface LandingContentProps {
+  session: { id: string; email: string; role: string; name: string } | null;
 }
 
+// ── Scroll reveal ─────────────────────────────────────────────
 
-// ── Component ─────────────────────────────────────────────────
-
-export default function LandingContent({ session }: LandingContentProps) {
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const [persona, setPersona] = useState<SwitcherPersona>("candidate");
-
-  // Sync persona from URL on mount
+function useReveal() {
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
   useEffect(() => {
-    const raw = searchParams.get("persona");
-    if (raw === "company") {
-      setPersona("company");
-    } else {
-      setPersona("candidate");
-    }
-  }, [searchParams]);
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([e]) => { if (e.isIntersecting) { setVisible(true); obs.disconnect(); } },
+      { threshold: 0.1 }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+  return { ref, visible };
+}
 
-  // When persona changes, update URL
-  const handlePersonaChange = useCallback(
-    (newPersona: SwitcherPersona) => {
-      const params = new URLSearchParams(searchParams.toString());
-      if (newPersona === "candidate") {
-        params.delete("persona");
-      } else {
-        params.set("persona", newPersona);
-      }
-      const qs = params.toString();
-      router.replace(qs ? `/?${qs}` : "/", { scroll: false });
-    },
-    [router, searchParams],
+function Reveal({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) {
+  const { ref, visible } = useReveal();
+  return (
+    <div
+      ref={ref}
+      className={className}
+      style={{
+        opacity: visible ? 1 : 0,
+        transform: visible ? "translateY(0)" : "translateY(16px)",
+        transition: `opacity 500ms ease-out ${delay}ms, transform 500ms ease-out ${delay}ms`,
+      }}
+    >
+      {children}
+    </div>
   );
+}
 
-  const isLoggedIn = Boolean(session);
-  const role = persona === "company" ? "company" : "candidate";
+// ── Zendesk-inspired palette ──────────────────────────────────
+
+const zd = {
+  accent: "#eb6651",
+  accentLight: "#fef1ef",
+  accentDark: "#d45441",
+  teal: "#2d4d4a",
+  blue: "#1f73b7",
+  green: "#228e6c",
+};
+
+// ═══════════════════════════════════════════════════════════════
+// NAV — with persona tabs for Candidate / Company
+// ═══════════════════════════════════════════════════════════════
+
+function Nav({ session, persona }: { session: any; persona: Persona }) {
+  const [open, setOpen] = useState(false);
+  const router = useRouter();
+  const sp = useSearchParams();
+
+  const setPersona = useCallback((p: Persona) => {
+    const params = new URLSearchParams(sp.toString());
+    if (p === "candidate") params.delete("persona"); else params.set("persona", p);
+    router.replace(params.toString() ? `/?${params}` : "/", { scroll: false });
+  }, [router, sp]);
+
+  const tabs = [
+    { value: "candidate" as Persona, label: "For candidates", icon: GraduationCap },
+    { value: "company" as Persona, label: "For employers", icon: Building2 },
+  ];
 
   return (
-    <>
-      {/* ── Skip-to-content link ── */}
-      <a
-        href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:px-4 focus:py-2 focus:rounded-lg focus:bg-[var(--ink)] focus:text-[var(--paper)] focus:no-underline focus:text-sm focus:font-semibold"
-        style={{ color: "var(--paper)" }}
-      >
-        Skip to content
-      </a>
-      <main
-        className="min-h-svh w-[min(1320px,calc(100%_-_28px))] mx-auto grid content-start gap-6 pt-[18px] pb-[42px] max-sm:w-[min(calc(100%_-_20px),720px)]"
-        id="main-content"
-      >
-      {/* ── Glass Navigation ── */}
-      <nav
-        className="shGlassNav sticky top-3 z-50 backdrop-blur-xl"
-        style={{ animation: "navSlideIn 0.6s var(--sh-easing)" }}
-        aria-label="StudentHub public navigation"
-      >
-        <div className="shGlassNavInner">
-          <Link
-            className="inline-flex items-center gap-2.5 text-[var(--ink)] px-2 no-underline min-h-11"
-            href="/"
-          >
-            <span className="size-9 inline-flex items-center justify-center rounded-lg bg-[var(--ink)] text-[var(--paper)] font-black tracking-tight">
-              SH
-            </span>
-            <strong className="text-sm tracking-tight">StudentHub</strong>
+    <nav className="sticky top-0 z-50 border-b dark:border-white/[0.08] backdrop-blur-md"
+      style={{ backgroundColor: "var(--surface)", borderColor: "var(--border)" }}>
+      <div className="max-w-6xl mx-auto px-6">
+        <div className="flex items-center justify-between h-14">
+          <Link href="/" className="flex items-center gap-2.5 no-underline shrink-0">
+            <span className="w-8 h-8 flex items-center justify-center rounded-md text-[11px] font-bold text-white"
+              style={{ backgroundColor: zd.accent }}>SH</span>
+            <span className="font-semibold text-sm" style={{ color: "var(--ink)" }}>StudentHub</span>
           </Link>
-          <div className="flex items-center gap-3.5 max-sm:flex-col max-sm:items-stretch">
-            {isLoggedIn ? (
-              <Link
-                href="/app"
-                className="uiButton uiButton_default uiButton_defaultSize"
-              >
-                Open app <ChevronRight className="size-3.5" />
+          <div className="hidden md:flex items-center gap-1 ml-8">
+            {["How it works", "Features", "Testimonials"].map(item => (
+              <Link key={item} href={`#${item.toLowerCase().replace(/\s+/g, "-")}`}
+                className="px-3 py-1.5 rounded-md text-sm no-underline hover:no-underline transition-colors"
+                style={{ color: "var(--muted)" }}
+                onMouseOver={e => e.currentTarget.style.color = "var(--ink)"}
+                onMouseOut={e => e.currentTarget.style.color = "var(--muted)"}>
+                {item}
+              </Link>
+            ))}
+          </div>
+          <div className="flex items-center gap-3 ml-auto">
+            <ThemeToggle />
+            {session ? (
+              <Link href="/app" className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium no-underline text-white transition-all hover:brightness-110"
+                style={{ backgroundColor: zd.accent }}>
+                Open app <ArrowRight className="size-3.5" />
               </Link>
             ) : (
               <>
-                <Link
-                  href={`/signup?role=${role}`}
-                  className="uiButton uiButton_default uiButton_defaultSize"
-                >
-                  {persona === "company" ? (
-                    <><Building2 className="size-3.5" /> Set up company account</>
-                  ) : (
-                    <><GraduationCap className="size-3.5" /> Create free candidate profile</>
-                  )}
-                  <Sparkles className="size-3.5" />
-                </Link>
-                <Link
-                  href="/login"
-                  className="uiButton uiButton_ghost uiButton_defaultSize"
-                >
-                  Sign in
+                <Link href="/login" className="hidden sm:inline-flex px-3 py-2 rounded-lg text-sm no-underline" style={{ color: "var(--muted)" }}>Sign in</Link>
+                <Link href={`/signup?role=${persona === "company" ? "company" : "candidate"}`}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium no-underline text-white transition-all hover:brightness-110"
+                  style={{ backgroundColor: zd.accent }}>
+                  {persona === "company" ? "Set up account" : "Get started"}
+                  <ArrowRight className="size-3.5" />
                 </Link>
               </>
             )}
-            <ThemeToggle />
+            <button onClick={() => setOpen(!open)} className="md:hidden p-1.5 rounded-md" style={{ color: "var(--ink)" }}>
+              {open ? <X className="size-5" /> : <Menu className="size-5" />}
+            </button>
           </div>
         </div>
-      </nav>
 
-      {/* ── Persona switcher — pick your role ── */}
-      <div className="flex flex-col items-center gap-1.5">
-        <h2 className="sr-only">Choose your perspective</h2>
-        <PersonaSwitcher active={persona} onChange={handlePersonaChange} />
-        <p className="text-[11px]" style={{ color: "var(--muted)" }}>
-          {persona === "candidate"
-            ? "I'm a student looking for work"
-            : "I'm an employer hiring talent"}
-        </p>
+        {/* Persona tabs row */}
+        <div className="flex items-center gap-0 -mb-px">
+          {tabs.map(tab => {
+            const active = persona === tab.value;
+            return (
+              <button key={tab.value} onClick={() => setPersona(tab.value)}
+                className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium border-b-2 transition-all cursor-pointer"
+                style={{
+                  color: active ? zd.accent : "var(--muted)",
+                  borderBottomColor: active ? zd.accent : "transparent",
+                  backgroundColor: active ? zd.accentLight : "transparent",
+                  borderTopLeftRadius: "8px",
+                  borderTopRightRadius: "8px",
+                  marginBottom: "-1px",
+                }}>
+                <tab.icon className="size-3.5" />
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
+
+        {open && (
+          <div className="md:hidden pb-3 space-y-1">
+            {["How it works", "Features", "Testimonials"].map(item => (
+              <Link key={item} href={`#${item.toLowerCase().replace(/\s+/g, "-")}`} className="block px-3 py-2 rounded-md text-sm no-underline" style={{ color: "var(--muted)" }}>{item}</Link>
+            ))}
+          </div>
+        )}
       </div>
-
-      {/* ── Hero section — two-sided marketplace ── */}
-      <HeroSection />
-
-      {/* ── Stats — social proof counters (scroll-animated) ── */}
-      <FadeInSection delay={100} asDiv>
-        <StatsSection />
-      </FadeInSection>
-
-      {/* ── How It Works — 3-step flow (scroll-animated) ── */}
-      <FadeInSection delay={200} asDiv>
-        <HowItWorks />
-      </FadeInSection>
-
-      {/* ── Employer section — value props for all audiences (scroll-animated) ── */}
-      <FadeInSection delay={300} asDiv>
-        <EmployerSection />
-      </FadeInSection>
-
-      {/* ── Social proof — testimonials (scroll-animated) ── */}
-      <FadeInSection delay={400} asDiv>
-        <TestimonialCarousel persona={persona} />
-      </FadeInSection>
-
-      {/* ── Comparison table — persona-specific (scroll-animated) ── */}
-      <FadeInSection delay={500} asDiv>
-        <ComparisonTable persona={persona} />
-      </FadeInSection>
-
-      {/* ── Final CTA section (scroll-animated) ── */}
-      <FadeInSection delay={600} asDiv>
-        <section
-          className="relative overflow-hidden rounded-xl p-[clamp(24px,5vw,60px)] text-center"
-          style={{
-            background: "var(--sh-glass-bg)",
-            border: "1px solid var(--sh-glass-border)",
-          }}
-          aria-label="Get started"
-        >
-        {/* Ambient gradient */}
-        <div className="shHeroGradientDramatic" aria-hidden="true" />
-
-        <div className="relative z-[2] max-w-[640px] mx-auto">
-          {persona === "company" ? (
-            <>
-              <p className="text-[var(--sh-info)] text-[11px] font-black uppercase tracking-wider mb-2">
-                Start hiring today
-              </p>
-              <h2 className="shBenefitsTitle text-center">
-                Your next hire is one post away.
-              </h2>
-              <p
-                className="max-w-[480px] mx-auto mt-2 mb-6 leading-relaxed"
-                style={{ color: "var(--muted)" }}
-              >
-                Post your first opening and get matched candidates within 48
-                hours. Set up your company account in under 5 minutes.
-              </p>
-              <p
-                className="text-xs mb-4"
-                style={{ color: "var(--muted)" }}
-              >
-                Kuwait-based · No agency fees · Get matched in days
-              </p>
-            </>
-          ) : (
-            <>
-              <p className="text-[var(--sh-info)] text-[11px] font-black uppercase tracking-wider mb-2">
-                Start your placement journey
-              </p>
-              <h2 className="shBenefitsTitle text-center">
-                Your next role is one profile away.
-              </h2>
-              <p
-                className="max-w-[480px] mx-auto mt-2 mb-6 leading-relaxed"
-                style={{ color: "var(--muted)" }}
-              >
-                Create your free profile in under 3 minutes. No CV required —
-                just your experience and what you&apos;re looking for.
-                Employers are hiring right now.
-              </p>
-              <p
-                className="text-xs mb-4"
-                style={{ color: "var(--muted)" }}
-              >
-                Free profile creation · Connect with employers across Kuwait
-              </p>
-            </>
-          )}
-          {isLoggedIn ? (
-            <Link
-              href="/app"
-              className="uiButton uiButton_amber uiButton_lg shGlowButton"
-            >
-              Open app <ChevronRight className="size-4" />
-            </Link>
-          ) : (
-            <Link
-              href={`/signup?role=${role}`}
-              className="uiButton uiButton_amber uiButton_lg shGlowButton"
-            >
-              {persona === "company"
-                ? "Set up your company account"
-                : "Create your free candidate profile"}{" "}
-              <ChevronRight className="size-4" />
-            </Link>
-          )}
-        </div>
-      </section>
-      </FadeInSection>
-
-      {/* ── Footer with internal role descriptions ── */}
-      <footer
-        className="shSection pt-6 pb-4 text-xs"
-        style={{ color: "var(--muted)" }}
-      >
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-          {/* Brand */}
-          <div>
-            <strong className="block text-sm mb-2" style={{ color: "var(--ink)" }}>
-              StudentHub
-            </strong>
-            <p className="leading-relaxed">
-              Connecting students with the right employers. A two-sided
-              marketplace for the real world of work.
-            </p>
-          </div>
-
-          {/* Students */}
-          <div>
-            <strong className="block text-sm mb-2" style={{ color: "var(--ink)" }}>
-              For students
-            </strong>
-            <ul className="list-none p-0 m-0 space-y-1">
-              <li>
-                <Link href="/signup?role=candidate" className="hover:text-[var(--ink)] transition-colors no-underline" style={{ color: "inherit" }}>
-                  Create free profile
-                </Link>
-              </li>
-              <li>
-                <Link href="/login" className="hover:text-[var(--ink)] transition-colors no-underline" style={{ color: "inherit" }}>
-                  Sign in
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Employers */}
-          <div>
-            <strong className="block text-sm mb-2" style={{ color: "var(--ink)" }}>
-              For employers
-            </strong>
-            <ul className="list-none p-0 m-0 space-y-1">
-              <li>
-                <Link href="/signup?role=company" className="hover:text-[var(--ink)] transition-colors no-underline" style={{ color: "inherit" }}>
-                  Set up company account
-                </Link>
-              </li>
-              <li>
-                <Link href="/login" className="hover:text-[var(--ink)] transition-colors no-underline" style={{ color: "inherit" }}>
-                  Sign in
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Internal roles */}
-          <div>
-            <strong className="block text-sm mb-2" style={{ color: "var(--ink)" }}>
-              Platform roles
-            </strong>
-            <ul className="list-none p-0 m-0 space-y-1.5">
-              <li className="leading-relaxed">
-                <span className="font-semibold" style={{ color: "var(--ink)" }}>Staff:</span>{" "}
-                Tools for agencies placing candidates faster.
-              </li>
-              <li className="leading-relaxed">
-                <span className="font-semibold" style={{ color: "var(--ink)" }}>Admin:</span>{" "}
-                Compliance and operations management.
-              </li>
-              <li className="leading-relaxed">
-                <span className="font-semibold" style={{ color: "var(--ink)" }}>Inspector:</span>{" "}
-                Review and certification workflows.
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <div
-          className="flex items-center justify-between pt-4"
-          style={{ borderTop: "1px solid var(--sh-glass-border)" }}
-        >
-          <span>&copy; {new Date().getFullYear()} StudentHub. All rights reserved.</span>
-          <div className="flex items-center gap-4">
-            <Link
-              href="/login"
-              className="hover:text-[var(--ink)] transition-colors no-underline"
-              style={{ color: "inherit" }}
-            >
-              Sign in
-            </Link>
-            <Link
-              href={`/signup?role=${role}`}
-              className="hover:text-[var(--ink)] transition-colors no-underline"
-              style={{ color: "inherit" }}
-            >
-              Sign up
-            </Link>
-          </div>
-        </div>
-      </footer>
-    </main>
-    </>
+    </nav>
   );
 }
+
+// ═══════════════════════════════════════════════════════════════
+// HERO — two-sided marketplace messaging with dual CTAs
+// ═══════════════════════════════════════════════════════════════
+
+function Hero({ persona }: { persona: Persona }) {
+  return (
+    <section className="pt-12 sm:pt-16 pb-0 px-6 max-w-6xl mx-auto">
+      <div className="flex flex-col lg:flex-row items-center gap-10 lg:gap-16">
+        <div className="flex-1 min-w-0">
+          <Reveal>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium mb-6"
+              style={{ backgroundColor: zd.accentLight, color: zd.accent }}>
+              <Sparkles className="size-3" />
+              Two-sided marketplace for student talent
+            </div>
+          </Reveal>
+          <Reveal delay={80}>
+            <h1 className="text-[clamp(34px,4.8vw,54px)] font-bold leading-[1.08] tracking-tight mb-4 max-w-[640px]"
+              style={{ color: "var(--ink)" }}>
+              Connecting students with{" "}
+              <span style={{ color: zd.accent }}>the right employers</span>
+            </h1>
+          </Reveal>
+          <Reveal delay={150}>
+            <p className="text-base sm:text-lg leading-relaxed mb-8 max-w-[520px]" style={{ color: "var(--muted)" }}>
+              {persona === "company"
+                ? "Post openings, get AI-matched candidates, and manage everything from timesheets to payments — all in one platform."
+                : "Create a profile seen by 500+ employers. Get AI-matched roles and one-tap payments."}
+            </p>
+          </Reveal>
+          <Reveal delay={220}>
+            <div className="flex flex-wrap gap-3">
+              <Link href={persona === "company" ? "/signup?role=company" : "/signup?role=candidate"}
+                className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg text-sm font-medium no-underline text-white transition-all hover:brightness-110"
+                style={{ backgroundColor: zd.accent }}>
+                {persona === "company" ? "Set up company account" : "Create free profile"}
+                <ArrowRight className="size-3.5" />
+              </Link>
+              <Link href={persona === "company" ? "/signup?role=candidate" : "/signup?role=company"}
+                className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg text-sm font-medium no-underline border transition-colors"
+                style={{ borderColor: "var(--border)", color: "var(--muted)" }}>
+                {persona === "company" ? "I'm a student" : "I'm hiring"}
+              </Link>
+            </div>
+          </Reveal>
+          <Reveal delay={290}>
+            <div className="flex items-center gap-3 mt-6 text-sm" style={{ color: "var(--muted)" }}>
+              <div className="flex -space-x-2">
+                {["A", "M", "K", "S"].map((l, i) => (
+                  <div key={l} className="w-8 h-8 rounded-full border-2 flex items-center justify-center text-[10px] font-bold text-white"
+                    style={{
+                      borderColor: "var(--surface)",
+                      background: `linear-gradient(135deg, hsl(${200 + i * 40}, 45%, 50%), hsl(${200 + i * 40}, 45%, 40%))`,
+                    }}>{l}</div>
+                ))}
+                <div className="w-8 h-8 rounded-full border-2 flex items-center justify-center text-[10px] font-bold"
+                  style={{ borderColor: "var(--surface)", backgroundColor: "var(--surface-soft)", color: "var(--muted)" }}>+</div>
+              </div>
+              <span><strong style={{ color: "var(--ink)" }}>10,000+</strong> students · <strong style={{ color: "var(--ink)" }}>500+</strong> employers</span>
+            </div>
+          </Reveal>
+        </div>
+
+        {/* Mockup card */}
+        <Reveal delay={150}>
+          <div className="w-full max-w-[500px] shrink-0 rounded-xl overflow-hidden shadow-lg border"
+            style={{
+              backgroundColor: "var(--surface)",
+              borderColor: "var(--border)",
+              boxShadow: "var(--shadow)",
+            }}>
+            <div className="flex items-center gap-2 px-4 py-2.5 border-b" style={{ borderColor: "var(--border)", backgroundColor: "var(--surface-soft)" }}>
+              <div className="flex gap-1.5"><span className="size-2.5 rounded-full" style={{ backgroundColor: zd.accent }} /><span className="size-2.5 rounded-full bg-yellow-400" /><span className="size-2.5 rounded-full bg-green-500" /></div>
+              <div className="flex-1 flex items-center justify-center gap-2 px-2.5 py-1 rounded text-xs" style={{ backgroundColor: "var(--paper)", color: "var(--muted)" }}>
+                <Search className="size-3" /> studenthub.co
+              </div>
+            </div>
+            <div className="p-5">
+              <div className="flex items-center gap-2.5 px-3.5 py-2 rounded-lg mb-4" style={{ backgroundColor: "var(--paper)" }}>
+                <Search className="size-3.5" style={{ color: "var(--muted)" }} />
+                <span className="text-xs" style={{ color: "var(--muted)" }}>Search roles, companies, locations…</span>
+                <span className="ml-auto text-[10px] px-1.5 py-0.5 rounded font-mono" style={{ backgroundColor: "var(--surface)", color: "var(--muted)" }}>⌘K</span>
+              </div>
+              <div className="p-4 rounded-lg mb-3" style={{ backgroundColor: "var(--paper)" }}>
+                <p className="text-[10px] font-semibold uppercase tracking-wider mb-1" style={{ color: zd.accent }}>✨ Matched for you</p>
+                <p className="text-xl font-bold leading-none mb-0.5" style={{ color: "var(--ink)" }}>senior care assistant</p>
+                <p className="text-xs" style={{ color: "var(--muted)" }}>12 matching roles · KWD 3-5/hr</p>
+                <div className="flex gap-2 mt-2.5">
+                  <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full text-white" style={{ backgroundColor: zd.green }}>
+                    <Check className="size-2.5" /> Profile ready
+                  </span>
+                  <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full" style={{ backgroundColor: zd.accentLight, color: zd.accent }}>
+                    <Star className="size-2.5" /> 3 saved
+                  </span>
+                </div>
+              </div>
+              <div className="grid grid-cols-4 gap-2">
+                {[
+                  { label: "Profile", value: "92%", color: zd.accent },
+                  { label: "Apps", value: "4 pend", color: zd.green },
+                  { label: "Time", value: "This wk", color: "#f59e0b" },
+                  { label: "Pay", value: "KWD 420", color: "#ec4899" },
+                ].map(item => (
+                  <div key={item.label} className="p-2.5 rounded-lg text-center" style={{ backgroundColor: "var(--paper)" }}>
+                    <p className="text-[10px] font-semibold uppercase tracking-wide" style={{ color: item.color }}>{item.label}</p>
+                    <p className="text-xs font-bold mt-0.5" style={{ color: "var(--ink)" }}>{item.value}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TRUST BAR
+// ═══════════════════════════════════════════════════════════════
+
+function TrustBar() {
+  return (
+    <section className="py-12 sm:py-16 px-6 max-w-6xl mx-auto">
+      <Reveal>
+        <p className="text-center text-xs font-medium mb-6" style={{ color: "var(--muted)" }}>Trusted by leading organizations across Kuwait</p>
+        <div className="flex flex-wrap items-center justify-center gap-8 gap-y-4 opacity-40">
+          {["Alshaya", "KIPCO", "NBK", "Zain", "Kuwait Airways", "GUST"].map(name => (
+            <span key={name} className="text-sm font-semibold" style={{ color: "var(--ink)" }}>{name}</span>
+          ))}
+        </div>
+      </Reveal>
+    </section>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// STATS — updated to 1,200+ placed · 4.8★ · 60+ employers
+// ═══════════════════════════════════════════════════════════════
+
+function Stats() {
+  const items = [
+    { value: "1,200+", label: "Students placed", icon: Award },
+    { value: "4.8", label: "Average rating", icon: Star },
+    { value: "60+", label: "Employer partners", icon: Building2 },
+    { value: "96%", label: "Match satisfaction", icon: Target },
+  ];
+  return (
+    <section className="py-12 px-6 max-w-6xl mx-auto">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-px rounded-xl overflow-hidden border"
+        style={{ borderColor: "var(--border)", backgroundColor: "var(--border)" }}>
+        {items.map((item, i) => (
+          <Reveal key={item.label} delay={i * 80}>
+            <div style={{ backgroundColor: "var(--surface)" }} className="py-8 px-4 text-center">
+              <item.icon className="size-5 mx-auto mb-2" style={{ color: zd.accent }} />
+              <p className="text-2xl font-bold" style={{ color: "var(--ink)" }}>{item.value}</p>
+              <p className="text-xs mt-1" style={{ color: "var(--muted)" }}>{item.label}</p>
+            </div>
+          </Reveal>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// HOW IT WORKS
+// ═══════════════════════════════════════════════════════════════
+
+function HowItWorks({ persona }: { persona: Persona }) {
+  const steps = persona === "company"
+    ? [
+        { num: "01", title: "Create your profile", desc: "Set up your company account in minutes. Add your details and tell us what you're looking for.", icon: Building2 },
+        { num: "02", title: "Get matched candidates", desc: "Post a role and our AI instantly matches you with pre-vetted candidates from our network.", icon: Users },
+        { num: "03", title: "Hire and manage", desc: "Review candidates, schedule interviews, manage timesheets and payments — all in one place.", icon: Briefcase },
+      ]
+    : [
+        { num: "01", title: "Create your profile", desc: "No CV required. Tell us about your experience, skills, and what you're looking for. Takes 3 minutes.", icon: GraduationCap },
+        { num: "02", title: "Get matched with roles", desc: "Our AI finds roles that fit your profile. Review your matches and apply with one click.", icon: Zap },
+        { num: "03", title: "Get hired and paid", desc: "Track applications, log timesheets, and receive payments directly through the platform.", icon: CreditCard },
+      ];
+
+  return (
+    <section id="how-it-works" className="py-16 sm:py-20 px-6 max-w-6xl mx-auto">
+      <Reveal>
+        <h2 className="text-xl sm:text-2xl font-bold text-center mb-2" style={{ color: "var(--ink)" }}>
+          {persona === "company" ? "How hiring works" : "How it works"}
+        </h2>
+        <p className="text-sm text-center mb-10" style={{ color: "var(--muted)" }}>
+          {persona === "company" ? "Three steps to find your next hire" : "Three steps to find your next role"}
+        </p>
+      </Reveal>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {steps.map((s, i) => (
+          <Reveal key={s.num} delay={i * 100}>
+            <div className="p-6 rounded-xl border transition-shadow hover:shadow-md"
+              style={{ backgroundColor: "var(--surface)", borderColor: "var(--border)" }}>
+              <div className="flex items-center gap-3 mb-3">
+                <span className="text-lg font-bold" style={{ color: zd.accent }}>{s.num}</span>
+                <s.icon className="size-4" style={{ color: "var(--muted)" }} />
+              </div>
+              <h3 className="text-sm font-semibold mb-1.5" style={{ color: "var(--ink)" }}>{s.title}</h3>
+              <p className="text-xs leading-relaxed" style={{ color: "var(--muted)" }}>{s.desc}</p>
+            </div>
+          </Reveal>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// FEATURES
+// ═══════════════════════════════════════════════════════════════
+
+function Features() {
+  const items = [
+    { icon: Zap, title: "AI matching", desc: "Matches candidates to roles based on actual skills and experience, not just keywords." },
+    { icon: Search, title: "Smart search", desc: "Find candidates or roles with faceted search across skills, location, and pay rate." },
+    { icon: Clock, title: "Timesheets", desc: "Log hours, approve timesheets, and track attendance — all within the platform." },
+    { icon: Shield, title: "Compliance", desc: "ID verification, document management, and compliance tracking built in." },
+    { icon: Eye, title: "Analytics", desc: "Live dashboard with metrics on placements, payments, and pipeline activity." },
+    { icon: Fingerprint, title: "Role portals", desc: "Dedicated views for staff, admin, inspector, candidate, and employer roles." },
+  ];
+
+  return (
+    <section id="features" className="py-16 sm:py-20 px-6 max-w-6xl mx-auto">
+      <Reveal>
+        <h2 className="text-xl sm:text-2xl font-bold text-center mb-2" style={{ color: "var(--ink)" }}>Platform features</h2>
+        <p className="text-sm text-center mb-10" style={{ color: "var(--muted)" }}>Everything you need to manage student placements</p>
+      </Reveal>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        {items.map((f, i) => (
+          <Reveal key={f.title} delay={i * 60}>
+            <div className="p-5 rounded-xl border transition-shadow hover:shadow-md"
+              style={{ backgroundColor: "var(--surface)", borderColor: "var(--border)" }}>
+              <f.icon className="size-5 mb-3" style={{ color: zd.accent }} />
+              <h3 className="text-sm font-semibold mb-1" style={{ color: "var(--ink)" }}>{f.title}</h3>
+              <p className="text-xs leading-relaxed" style={{ color: "var(--muted)" }}>{f.desc}</p>
+            </div>
+          </Reveal>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// FOR EMPLOYERS — dedicated employer value section
+// ═══════════════════════════════════════════════════════════════
+
+function ForEmployers() {
+  const items = [
+    { icon: Users, title: "Access vetted students", desc: "Every candidate is ID-verified with a complete profile. No unqualified applicants wasting your time." },
+    { icon: Zap, title: "AI-powered matching", desc: "Our engine matches your openings to the most relevant candidates based on skills, experience, and availability." },
+    { icon: Clock, title: "Streamlined operations", desc: "Post roles, review candidates, approve timesheets, and process payments — all from one dashboard." },
+    { icon: Shield, title: "Built-in compliance", desc: "Stay compliant with Kuwait labor regulations. Automated ID verification, contract management, and audit trails." },
+  ];
+
+  return (
+    <section id="for-employers" className="py-16 sm:py-20 px-6 max-w-6xl mx-auto"
+      style={{ backgroundColor: "var(--paper)" }}>
+      <div className="max-w-6xl mx-auto">
+        <Reveal>
+          <h2 className="text-xl sm:text-2xl font-bold text-center mb-2" style={{ color: "var(--ink)" }}>Built for employers</h2>
+          <p className="text-sm text-center mb-10 max-w-2xl mx-auto" style={{ color: "var(--muted)" }}>
+            Whether you&apos;re a small business or a large enterprise, StudentHub gives you the tools to find and manage student talent.
+          </p>
+        </Reveal>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {items.map((item, i) => (
+            <Reveal key={item.title} delay={i * 80}>
+              <div className="p-6 rounded-xl border transition-shadow hover:shadow-md"
+                style={{ backgroundColor: "var(--surface)", borderColor: "var(--border)" }}>
+                <div className="flex items-center gap-3 mb-3">
+                  <span className="w-9 h-9 flex items-center justify-center rounded-lg" style={{ backgroundColor: zd.accentLight }}>
+                    <item.icon className="size-4" style={{ color: zd.accent }} />
+                  </span>
+                  <h3 className="text-sm font-semibold" style={{ color: "var(--ink)" }}>{item.title}</h3>
+                </div>
+                <p className="text-xs leading-relaxed" style={{ color: "var(--muted)" }}>{item.desc}</p>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TESTIMONIALS — showing both student AND employer voices
+// ═══════════════════════════════════════════════════════════════
+
+function Testimonials() {
+  const list = [
+    { quote: "Found my first job within a week. The AI matched me with a role I'd never have found.", author: "Amal Al-Mutairi", role: "Student, Kuwait University", type: "student" },
+    { quote: "Getting paid through the app is a game changer. No more chasing payments.", author: "Khalid Al-Rashid", role: "Student, GUST", type: "student" },
+    { quote: "StudentHub transformed our hiring. The AI matching saves us hours every week.", author: "Noura Al-Sabah", role: "HR Director", type: "employer" },
+    { quote: "Timesheets and payments alone are worth it. Everything in one dashboard.", author: "Faisal Al-Ali", role: "Operations Manager", type: "employer" },
+  ];
+
+  return (
+    <section id="testimonials" className="py-16 sm:py-20 px-6 max-w-6xl mx-auto">
+      <Reveal>
+        <h2 className="text-xl sm:text-2xl font-bold text-center mb-2" style={{ color: "var(--ink)" }}>Trusted by students and employers</h2>
+        <p className="text-sm text-center mb-10" style={{ color: "var(--muted)" }}>Hear from people who use StudentHub every day</p>
+      </Reveal>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {list.map((t, i) => (
+          <Reveal key={i} delay={i * 80}>
+            <div className="p-6 rounded-xl border" style={{ backgroundColor: "var(--surface)", borderColor: "var(--border)" }}>
+              <div className="flex items-center gap-2 mb-3">
+                <div className="flex gap-0.5">
+                  {[...Array(5)].map((_, j) => <Star key={j} className="size-3.5" style={{ color: "#f59e0b", fill: "#f59e0b" }} />)}
+                </div>
+                <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full"
+                  style={{
+                    backgroundColor: t.type === "employer" ? zd.accentLight : "var(--surface-soft)",
+                    color: t.type === "employer" ? zd.accent : "var(--muted)",
+                  }}>
+                  {t.type === "employer" ? "Employer" : "Student"}
+                </span>
+              </div>
+              <p className="text-sm leading-relaxed mb-4" style={{ color: "var(--muted)" }}>&ldquo;{t.quote}&rdquo;</p>
+              <div className="flex items-center gap-2.5">
+                <div className="size-9 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0" style={{ backgroundColor: zd.accent }}>
+                  {t.author.split(" ").map(s => s[0]).join("")}
+                </div>
+                <div>
+                  <p className="text-sm font-medium" style={{ color: "var(--ink)" }}>{t.author}</p>
+                  <p className="text-xs" style={{ color: "var(--muted)" }}>{t.role}</p>
+                </div>
+              </div>
+            </div>
+          </Reveal>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// COMPARISON
+// ═══════════════════════════════════════════════════════════════
+
+function Comparison() {
+  const rows: [string, boolean, boolean][] = [
+    ["AI-matched suggestions", true, false],
+    ["One-tap timesheets", true, false],
+    ["Consolidated invoicing", true, false],
+    ["ID verification", true, false],
+    ["Analytics dashboard", true, false],
+    ["Role-based portals", true, false],
+    ["Mobile-friendly", true, true],
+    ["Free profiles", true, true],
+  ];
+  return (
+    <section className="py-16 sm:py-20 px-6 max-w-3xl mx-auto">
+      <Reveal>
+        <h2 className="text-xl sm:text-2xl font-bold text-center mb-2" style={{ color: "var(--ink)" }}>Why StudentHub is different</h2>
+        <p className="text-sm text-center mb-10" style={{ color: "var(--muted)" }}>See how we compare to traditional job platforms</p>
+      </Reveal>
+      <Reveal>
+        <div className="rounded-xl overflow-hidden border" style={{ borderColor: "var(--border)" }}>
+          <div className="grid grid-cols-[1fr_100px_100px] border-b" style={{ borderColor: "var(--border)", backgroundColor: "var(--surface-soft)" }}>
+            <div className="p-3.5 px-4" />
+            <div className="p-3.5 px-4 text-center text-sm font-semibold" style={{ color: "var(--ink)" }}>StudentHub</div>
+            <div className="p-3.5 px-4 text-center text-sm" style={{ color: "var(--muted)" }}>Others</div>
+          </div>
+          {rows.map(([feature, sh, ot], i) => (
+            <div key={String(feature)} className="grid grid-cols-[1fr_100px_100px] border-b last:border-b-0"
+              style={{ borderColor: "var(--border)", backgroundColor: i % 2 === 0 ? "var(--surface)" : "var(--surface-soft)" }}>
+              <div className="p-3.5 px-4 flex items-center text-sm" style={{ color: "var(--muted)" }}>{String(feature)}</div>
+              <div className="p-3.5 px-4 flex items-center justify-center">
+                {sh ? <Check className="size-4" style={{ color: zd.green }} /> : <span className="text-xs" style={{ color: "var(--muted)" }}>—</span>}
+              </div>
+              <div className="p-3.5 px-4 flex items-center justify-center">
+                {ot ? <Check className="size-4" style={{ color: zd.green }} /> : <span className="text-xs" style={{ color: "var(--muted)" }}>—</span>}
+              </div>
+            </div>
+          ))}
+        </div>
+      </Reveal>
+    </section>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CTA
+// ═══════════════════════════════════════════════════════════════
+
+function CTA({ persona }: { persona: Persona }) {
+  return (
+    <section className="py-16 sm:py-20 px-6 max-w-6xl mx-auto">
+      <Reveal>
+        <div className="relative overflow-hidden rounded-xl p-10 sm:p-12 text-center border"
+          style={{ backgroundColor: "var(--surface)", borderColor: "var(--border)" }}>
+          <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: zd.accent }}>
+            {persona === "company" ? "Start hiring today" : "Start your journey"}
+          </p>
+          <h2 className="text-xl sm:text-2xl font-bold mb-2" style={{ color: "var(--ink)" }}>
+            {persona === "company" ? "Your next hire is one post away." : "Your next role is one profile away."}
+          </h2>
+          <p className="text-sm mb-6" style={{ color: "var(--muted)" }}>
+            {persona === "company"
+              ? "Set up in under 5 minutes and get matched with vetted candidates."
+              : "Create your free profile in 3 minutes. No CV required."}
+          </p>
+          <Link href={persona === "company" ? "/signup?role=company" : "/signup?role=candidate"}
+            className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg text-sm font-medium no-underline text-white transition-all hover:brightness-110"
+            style={{ backgroundColor: zd.accent }}>
+            {persona === "company" ? "Set up company account" : "Create your free profile"} <ChevronRight className="size-3.5" />
+          </Link>
+          <p className="text-xs mt-3" style={{ color: "var(--muted)" }}>
+            {persona === "company" ? "No agency fees · AI-matched" : "Free · 3 minutes"}
+          </p>
+        </div>
+      </Reveal>
+    </section>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// FOOTER — with internal role descriptions for Staff/Admin/Inspector
+// ═══════════════════════════════════════════════════════════════
+
+function Footer({ persona }: { persona: Persona }) {
+  const role = persona === "company" ? "company" : "candidate";
+  return (
+    <footer className="border-t" style={{ borderColor: "var(--border)" }}>
+      <div className="max-w-6xl mx-auto px-6 py-10">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <span className="w-7 h-7 flex items-center justify-center rounded text-[10px] font-bold text-white" style={{ backgroundColor: zd.accent }}>SH</span>
+              <span className="text-sm font-semibold" style={{ color: "var(--ink)" }}>StudentHub</span>
+            </div>
+            <p className="text-xs leading-relaxed" style={{ color: "var(--muted)" }}>Connecting students with the right employers. Kuwait&apos;s platform for student placement.</p>
+          </div>
+          {[
+            { t: "For students", links: ["Create profile", "Sign in"] },
+            { t: "For employers", links: ["Set up account", "Sign in"] },
+            {
+              t: "Internal roles",
+              descs: [
+                "Staff: Tools for agencies placing candidates faster.",
+                "Admin: Compliance and operations management.",
+                "Inspector: Review and certification workflows.",
+              ],
+            },
+          ].map(c => {
+            const cAny = c as any;
+            if (cAny.descs) {
+              return (
+                <div key={cAny.t}>
+                  <p className="text-xs font-semibold mb-3" style={{ color: "var(--muted)" }}>{cAny.t}</p>
+                  {cAny.descs.map((d: string) => (
+                    <p key={d} className="text-xs mb-2 leading-relaxed" style={{ color: "var(--muted)" }}>{d}</p>
+                  ))}
+                </div>
+              );
+            }
+            return (
+              <div key={cAny.t}>
+                <p className="text-xs font-semibold mb-3" style={{ color: "var(--muted)" }}>{cAny.t}</p>
+                {cAny.links.map((l: string) => <p key={l} className="text-xs mb-2" style={{ color: "var(--muted)" }}>{l}</p>)}
+              </div>
+            );
+          })}
+        </div>
+        <div className="mt-8 pt-5 flex items-center justify-between border-t" style={{ borderColor: "var(--border)" }}>
+          <p className="text-xs" style={{ color: "var(--muted)" }}>&copy; {new Date().getFullYear()} StudentHub</p>
+          <div className="flex gap-4">
+            <Link href="/login" className="text-xs no-underline" style={{ color: "var(--muted)" }}>Sign in</Link>
+            <Link href={`/signup?role=${role}`} className="text-xs no-underline font-medium" style={{ color: "var(--muted)" }}>Sign up</Link>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PAGE
+// ═══════════════════════════════════════════════════════════════
+
+export default function LandingContent({ session }: LandingContentProps) {
+  const sp = useSearchParams();
+  const router = useRouter();
+  const [persona, setPersona] = useState<Persona>("candidate");
+
+  useEffect(() => { setPersona(sp.get("persona") === "company" ? "company" : "candidate"); }, [sp]);
+
+  const handlePersonaChange = useCallback((p: Persona) => {
+    const params = new URLSearchParams(sp.toString());
+    if (p === "candidate") params.delete("persona"); else params.set("persona", p);
+    router.replace(params.toString() ? `/?${params}` : "/", { scroll: false });
+  }, [router, sp]);
+
+  return (
+    <div style={{ backgroundColor: "var(--paper)", minHeight: "100svh" }}>
+      <a href="#main-content" className="skipLink" style={{ color: "var(--ink)" }}>Skip to content</a>
+      <Nav session={session} persona={persona} />
+      <main id="main-content">
+        <Hero persona={persona} />
+        <TrustBar />
+        <Stats />
+        <HowItWorks persona={persona} />
+        <Features />
+        <ForEmployers />
+        <Testimonials />
+        <Comparison />
+        <CTA persona={persona} />
+      </main>
+      <Footer persona={persona} />
+    </div>
+  );
+}
+
+export type { LandingContentProps };
