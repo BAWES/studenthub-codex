@@ -61,7 +61,9 @@ describe("listSettingsSchema", () => {
 
 describe("getSettingSchema", () => {
   it("accepts a valid setting UUID", () => {
-    const result = getSettingSchema.safeParse({ settingUuid: "setting_abc123" });
+    const result = getSettingSchema.safeParse({
+      settingUuid: "setting_abc123",
+    });
     expect(result.success).toBe(true);
   });
 
