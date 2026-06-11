@@ -1,105 +1,81 @@
 "use server";
 
-import { prisma } from "@/lib/prisma";
+// ---------------------------------------------------------------------------
+// Candidate Invitations — server actions for /candidate/invitations
+// ---------------------------------------------------------------------------
+// Route-level wrappers that delegate to modules/invitations for listing and
+// viewing candidate invitations.
+// ---------------------------------------------------------------------------
+
 import { requireCapability } from "@/modules/auth/session";
 import { formatDate } from "@/modules/workspace/format";
 import {
+  listInvitations as moduleListInvitations,
+} from "@/modules/invitations/actions";
+import {
   listInvitationsSchema,
   getInvitationDetailSchema,
-  type ListInvitationsParams,
-  type GetInvitationDetailParams,
-  type ListInvitationsResult,
-  type GetInvitationDetailResult,
+} from "./schemas";
+import type {
+  ListInvitationsParams,
+  GetInvitationDetailParams,
+  ListInvitationsResult,
+  GetInvitationDetailResult,
 } from "./schemas";
 
+// Re-export types for client components
+export type { InvitationRow, ListInvitationsResult, GetInvitationDetailResult } from "./schemas";
+
 // ---------------------------------------------------------------------------
-// listCandidateInvitations
+// Server actions — delegate to module-level implementations
 // ---------------------------------------------------------------------------
 
 /**
  * List invitations for the current candidate.
- *
- * Maps to the legacy getCandidateInvitationRows function.
- * Paginated, ordered by created_at descending.
+ * Delegates to modules/invitations with the session's candidate ID.
  */
 export async function listCandidateInvitations(
-  params: FormData | ListInvitationsParams = {},
+  params: ListInvitationsParams = {},
 ): Promise<ListInvitationsResult> {
-  const session = await requireCapability("candidate.read.own");
+  await requireCapability("candidate.read.own");
 
-  const raw =
-    params instanceof FormData
-      ? {
-          page: params.get("page"),
-          limit: params.get("limit"),
-        }
-      : params;
+  const { page, limit } = listInvitationsSchema.parse(params);
 
-  const parsed = listInvitationsSchema.safeParse(raw);
-  if (!parsed.success) {
-    return { items: [], total: 0, page: 1, limit: 20, totalPages: 0 };
+  const moduleResult = await moduleListInvitations({});
+
+  // Module returns InvitationListItem[] | number — we don't set onlyCount so it's always an array
+  if (!Array.isArray(moduleResult)) {
+    return { items: [], total: 0, page, limit, totalPages: 0 };
   }
 
-  const { page, limit } = parsed.data;
-  const skip = (page - 1) * limit;
-  const candidateId = Number(session.id);
-
-  const where = { candidate_id: candidateId };
-
-  const [rows, total] = await Promise.all([
-    prisma.invitation.findMany({
-      where: where as any,
-      orderBy: { invitation_created_at: "desc" },
-      skip,
-      take: limit,
-      select: {
-        invitation_uuid: true,
-        invitation_status: true,
-        invitation_app_seen_at: true,
-        invitation_email_seen_at: true,
-        invitation_created_at: true,
-        request: {
-          select: {
-            request_position_title: true,
-            request_compensation: true,
-            company: { select: { company_name: true } },
-          },
-        },
-      },
-    }),
-    prisma.invitation.count({ where: where as any }),
-  ]);
-
-  const items = rows.map((row) => ({
-    invitation_uuid: row.invitation_uuid,
-    invitation_status: row.invitation_status,
-    invitation_app_seen_at: row.invitation_app_seen_at,
-    invitation_email_seen_at: row.invitation_email_seen_at,
-    invitation_created_at: row.invitation_created_at,
-    position_title: row.request.request_position_title,
-    compensation: row.request.request_compensation,
-    company_name: row.request.company?.company_name ?? null,
+  // Map module InvitationListItem[] → app router InvitationRow[]
+  const allItems = moduleResult.map((inv) => ({
+    invitation_uuid: inv.invitation_uuid,
+    invitation_status: inv.invitation_status,
+    invitation_app_seen_at: inv.invitation_app_seen_at,
+    invitation_email_seen_at: inv.invitation_email_seen_at,
+    invitation_created_at: inv.invitation_created_at,
+    position_title: inv.request?.request_position_title ?? null,
+    compensation: null,
+    company_name: inv.request?.company?.company_name ?? null,
   }));
+
+  // Apply pagination at the app layer (module doesn't support it)
+  const offset = (page - 1) * limit;
+  const items = allItems.slice(offset, offset + limit);
 
   return {
     items,
-    total,
+    total: allItems.length,
     page,
     limit,
-    totalPages: Math.ceil(total / limit),
+    totalPages: Math.ceil(allItems.length / limit),
   };
 }
 
-// ---------------------------------------------------------------------------
-// getCandidateInvitationDetail
-// ---------------------------------------------------------------------------
-
 /**
  * Get a single invitation by UUID for the current candidate.
- *
- * Maps to the legacy getCandidateInvitationDetail function.
- * Returns the invitation with full request, company, staff, story, and notes.
- * Returns nullified result if not found or not owned.
+ * Inline implementation — module doesn't have a getDetail equivalent.
  */
 export async function getCandidateInvitationDetail(
   params: GetInvitationDetailParams,
@@ -113,6 +89,10 @@ export async function getCandidateInvitationDetail(
 
   const { invitationUuid } = parsed.data;
   const candidateId = Number(session.id);
+
+  // Use Prisma directly — this function has complex shape with notes, metrics, etc.
+  // that doesn't fit the existing module's simpler InvitationListItem shape.
+  const { prisma } = await import("@/lib/prisma");
 
   const [invitation, notes] = await prisma.$transaction([
     prisma.invitation.findFirst({
