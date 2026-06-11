@@ -15,9 +15,9 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireRoleCapability } from "@/modules/auth/session";
 import {
-  getCandidateEducation as parentGetCandidateEducation,
-  updateCandidateEducation as parentUpdateCandidateEducation,
-  deleteCandidateEducation as parentDeleteCandidateEducation,
+  getCandidateEducationAction as parentGetCandidateEducation,
+  updateCandidateEducationAction as parentUpdateCandidateEducation,
+  deleteCandidateEducationAction as parentDeleteCandidateEducation,
 } from "../actions";
 
 // Re-export parent types so consumers have a single import path

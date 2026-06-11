@@ -2,8 +2,12 @@ import { describe, it, expect } from "vitest";
 import {
   listCandidateEducationSchema,
   getCandidateEducationSchema,
+  createCandidateEducationSchema,
+  updateCandidateEducationSchema,
+  deleteCandidateEducationSchema,
   candidateEducationItemSchema,
   listCandidateEducationResultSchema,
+  candidateEducationActionResultSchema,
 } from "./schemas";
 import type {
   CandidateEducationItem,
@@ -220,6 +224,165 @@ describe("listCandidateEducationResultSchema", () => {
       total: 0,
       page: 0,
       pageSize: 20,
+    });
+    expect(result.success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Create/Update/Delete input schema tests
+// ---------------------------------------------------------------------------
+
+describe("createCandidateEducationSchema", () => {
+  it("accepts valid create params with candidateId", () => {
+    const result = createCandidateEducationSchema.safeParse({
+      candidateId: 42,
+      universityId: 5,
+      degreeUuid: "deg_001",
+      majorUuid: "maj_001",
+      graduationYear: 2024,
+      isCurrentlyStudying: false,
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.candidateId).toBe(42);
+      expect(result.data.universityId).toBe(5);
+      expect(result.data.isCurrentlyStudying).toBe(false);
+    }
+  });
+
+  it("rejects missing candidateId", () => {
+    const result = createCandidateEducationSchema.safeParse({ universityId: 1 });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects zero candidateId", () => {
+    const result = createCandidateEducationSchema.safeParse({
+      candidateId: 0,
+      universityId: 1,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects missing universityId", () => {
+    const result = createCandidateEducationSchema.safeParse({ candidateId: 1 });
+    expect(result.success).toBe(false);
+  });
+
+  it("accepts minimal params (candidateId + universityId only)", () => {
+    const result = createCandidateEducationSchema.safeParse({
+      candidateId: 1,
+      universityId: 1,
+    });
+    expect(result.success).toBe(true);
+  });
+});
+
+describe("updateCandidateEducationSchema", () => {
+  it("accepts valid update params", () => {
+    const result = updateCandidateEducationSchema.safeParse({
+      candidateId: 42,
+      educationUuid: "edu_abc",
+      universityId: 10,
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.candidateId).toBe(42);
+      expect(result.data.educationUuid).toBe("edu_abc");
+      expect(result.data.universityId).toBe(10);
+    }
+  });
+
+  it("rejects missing candidateId", () => {
+    const result = updateCandidateEducationSchema.safeParse({
+      educationUuid: "edu_abc",
+      universityId: 1,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects missing educationUuid", () => {
+    const result = updateCandidateEducationSchema.safeParse({
+      candidateId: 1,
+      universityId: 1,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects missing universityId", () => {
+    const result = updateCandidateEducationSchema.safeParse({
+      candidateId: 1,
+      educationUuid: "edu_abc",
+    });
+    expect(result.success).toBe(false);
+  });
+});
+
+describe("deleteCandidateEducationSchema", () => {
+  it("accepts valid delete params", () => {
+    const result = deleteCandidateEducationSchema.safeParse({
+      candidateId: 42,
+      educationUuid: "edu_xyz",
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.candidateId).toBe(42);
+      expect(result.data.educationUuid).toBe("edu_xyz");
+    }
+  });
+
+  it("rejects missing candidateId", () => {
+    const result = deleteCandidateEducationSchema.safeParse({
+      educationUuid: "edu_xyz",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects empty UUID", () => {
+    const result = deleteCandidateEducationSchema.safeParse({
+      candidateId: 1,
+      educationUuid: "",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects missing UUID", () => {
+    const result = deleteCandidateEducationSchema.safeParse({ candidateId: 1 });
+    expect(result.success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Action result output schema tests
+// ---------------------------------------------------------------------------
+
+describe("candidateEducationActionResultSchema", () => {
+  it("accepts success result", () => {
+    const result = candidateEducationActionResultSchema.safeParse({
+      success: true as const,
+      educationUuid: "edu_abc",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts failure result", () => {
+    const result = candidateEducationActionResultSchema.safeParse({
+      success: false as const,
+      error: "University not found",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects success without educationUuid", () => {
+    const result = candidateEducationActionResultSchema.safeParse({
+      success: true,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects failure without error", () => {
+    const result = candidateEducationActionResultSchema.safeParse({
+      success: false,
     });
     expect(result.success).toBe(false);
   });
