@@ -416,7 +416,10 @@ function toggleCandidateId(ids: number[], id: number) {
   return ids.includes(id) ? ids.filter((item) => item !== id) : [...ids, id];
 }
 
-function candidateInitials(name: string) {
+// Exported for testing
+export { FacetChips, QUICK_FACET_KEYS };
+
+export function candidateInitials(name: string) {
   return name
     .split(/\s+/)
     .filter(Boolean)
@@ -477,8 +480,13 @@ function FacetChips({
   params: CandidateSearchParams;
 }) {
   // Show facets that match the quick filter keys and have options
-  const quickFacets = data.facets.filter((f) => QUICK_FACET_KEYS.includes(f.key));
+  const quickFacets = data.facets.filter((f) => QUICK_FACET_KEYS.includes(f.key) && f.options.length > 0);
   if (quickFacets.length === 0) return null;
+
+  const activeCount = quickFacets.reduce(
+    (count, facet) => count + facet.options.filter((o) => o.active).length,
+    0,
+  );
 
   return (
     <section className="candidateFacetChips" aria-label="Quick facet filters">
@@ -497,11 +505,17 @@ function FacetChips({
               >
                 <span>{option.label}</span>
                 {option.count > 0 ? <strong>{option.count}</strong> : null}
+                {option.active ? <span className="chip-remove" aria-label={`Remove ${option.label} filter`}>✕</span> : null}
               </Link>
             ))}
           </div>
         </div>
       ))}
+      {activeCount > 1 ? (
+        <Link className="chip-clear-all" href={basePath}>
+          Clear all
+        </Link>
+      ) : null}
     </section>
   );
 }
