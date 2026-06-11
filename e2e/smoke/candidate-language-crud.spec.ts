@@ -75,16 +75,11 @@ test.describe("Candidate language CRUD", () => {
     await page.goto("/candidate/edit");
 
     // Either "No languages added yet." or the editable list exists
-    const hasAnyLanguages = await page
-      .locator(".editableList li")
-      .count()
-      .then((c) => c > 0);
-    const hasEmptyNotice = await page
-      .locator('text="No languages added yet."')
-      .isVisible()
-      .catch(() => false);
-
-    expect(hasAnyLanguages || hasEmptyNotice).toBe(true);
+    await expect(async () => {
+      const count = await page.locator(".editableList li").count();
+      const emptyVisible = await page.locator('text="No languages added yet."').isVisible();
+      expect(count > 0 || emptyVisible).toBe(true);
+    }).toPass({ timeout: 10000 });
 
     await context.close();
   });
@@ -167,16 +162,15 @@ test.describe("Candidate language CRUD", () => {
     ).toBeVisible({ timeout: 10000 });
 
     // The item should be gone (or the empty notice appears)
-    const gone = await page
-      .locator(".editableList li", { hasText: "E2E Test Lang" })
-      .isHidden()
-      .catch(() => true);
-    const emptyNotice = await page
-      .locator('text="No languages added yet."')
-      .isVisible()
-      .catch(() => false);
-
-    expect(gone || emptyNotice).toBe(true);
+    await expect(async () => {
+      const itemGone = await page
+        .locator(".editableList li", { hasText: "E2E Test Lang" })
+        .isHidden();
+      const emptyVisible = await page
+        .locator('text="No languages added yet."')
+        .isVisible();
+      expect(itemGone || emptyVisible).toBe(true);
+    }).toPass({ timeout: 10000 });
 
     await context.close();
   });
