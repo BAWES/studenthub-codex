@@ -9,6 +9,13 @@ const mockSearchParams = new URLSearchParams();
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ replace: mockReplace, push: vi.fn() }),
   useSearchParams: () => mockSearchParams,
+  usePathname: () => "/staff/candidates",
+}));
+
+// Mock next/link as a simple <a> element
+vi.mock("next/link", () => ({
+  default: ({ href, children, className, style, ...rest }: Record<string, unknown>) =>
+    <a href={href as string} className={className as string} style={style} {...rest}>{children}</a>,
 }));
 
 // Mock fetch
