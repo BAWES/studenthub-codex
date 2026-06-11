@@ -4,6 +4,14 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
+import {
+  storeAssignmentRequestItemSchema,
+  listStoreAssignmentRequestsResultSchema,
+  createStoreAssignmentRequestResultSchema,
+  type StoreAssignmentRequestItem,
+  type ListStoreAssignmentRequestsResult,
+  type CreateStoreAssignmentRequestResult,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Schemas
@@ -29,7 +37,7 @@ const createStoreAssignmentRequestSchema = z.object({
 });
 
 // ---------------------------------------------------------------------------
-// Types
+// Types (input params)
 // ---------------------------------------------------------------------------
 
 export type ListStoreAssignmentRequestsParams = z.input<
@@ -41,25 +49,6 @@ export type GetStoreAssignmentRequestParams = z.input<
 export type CreateStoreAssignmentRequestParams = z.input<
   typeof createStoreAssignmentRequestSchema
 >;
-
-export type StoreAssignmentRequestItem = {
-  sar_uuid: string;
-  candidate_id: number | null;
-  store_id: number | null;
-  currency_code: string | null;
-  status: number | null;
-  created_at: string | null;
-  updated_at: string | null;
-};
-
-export type ListStoreAssignmentRequestsResult = {
-  items: StoreAssignmentRequestItem[];
-  total: number;
-  page: number;
-  pageSize: number;
-};
-
-export type StoreAssignmentRequestDetail = StoreAssignmentRequestItem | null;
 
 // ---------------------------------------------------------------------------
 // Exported schemas (for shared validation)
@@ -130,12 +119,23 @@ export async function listStoreAssignmentRequests(
     prisma.store_assignment_request.count({ where: where as any }),
   ]);
 
-  return {
+  const result = {
     items: rows.map(toItem),
     total,
     page,
     pageSize: limit,
   };
+
+  // Validate output shape
+  const outputParsed = listStoreAssignmentRequestsResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/store-assignment-requests] listStoreAssignmentRequests output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -146,7 +146,7 @@ export async function listStoreAssignmentRequests(
  */
 export async function getStoreAssignmentRequest(
   params: GetStoreAssignmentRequestParams,
-): Promise<StoreAssignmentRequestDetail> {
+): Promise<StoreAssignmentRequestItem | null> {
   await requireCapability("store.read");
 
   const parsed = getStoreAssignmentRequestSchema.safeParse(params);
@@ -162,7 +162,18 @@ export async function getStoreAssignmentRequest(
 
   if (!row) return null;
 
-  return toItem(row);
+  const result = toItem(row);
+
+  // Validate output shape
+  const outputParsed = storeAssignmentRequestItemSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/store-assignment-requests] getStoreAssignmentRequest output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -172,7 +183,7 @@ export async function getStoreAssignmentRequest(
  */
 export async function createStoreAssignmentRequest(
   params: CreateStoreAssignmentRequestParams,
-): Promise<{ operation: string; message: string; sar_uuid?: string }> {
+): Promise<CreateStoreAssignmentRequestResult> {
   await requireCapability("store.create");
 
   const parsed = createStoreAssignmentRequestSchema.safeParse(params);

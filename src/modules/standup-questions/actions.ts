@@ -3,6 +3,14 @@
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
+import {
+  standupQuestionItemSchema,
+  listStandupQuestionsResultSchema,
+  mutateResultSchema,
+  type StandupQuestionItem,
+  type ListStandupQuestionsResult,
+  type MutateResult,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Schemas
@@ -27,33 +35,13 @@ const updateStandupQuestionSchema = z.object({
 });
 
 // ---------------------------------------------------------------------------
-// Types
+// Types (input params)
 // ---------------------------------------------------------------------------
 
 export type ListStandupQuestionsParams = z.input<typeof listStandupQuestionsSchema>;
 export type GetStandupQuestionParams = z.input<typeof getStandupQuestionSchema>;
 export type CreateStandupQuestionParams = z.input<typeof createStandupQuestionSchema>;
 export type UpdateStandupQuestionParams = z.input<typeof updateStandupQuestionSchema>;
-
-export type StandupQuestionItem = {
-  question_uuid: string;
-  question: string | null;
-  created_at: Date;
-  updated_at: Date;
-};
-
-export type ListStandupQuestionsResult = {
-  standupQuestions: StandupQuestionItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
-
-export type MutateResult = {
-  operation: string;
-  message: string;
-};
 
 // ---------------------------------------------------------------------------
 // Server actions
@@ -84,13 +72,24 @@ export async function listStandupQuestions(
     prisma.daily_standup_question.count(),
   ]);
 
-  return {
+  const result = {
     standupQuestions: standupQuestions as StandupQuestionItem[],
     total,
     page,
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  // Validate output shape
+  const outputParsed = listStandupQuestionsResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/standup-questions] listStandupQuestions output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -117,7 +116,18 @@ export async function getStandupQuestion(
     throw new Error("Standup question not found");
   }
 
-  return question as StandupQuestionItem;
+  const result = question as StandupQuestionItem;
+
+  // Validate output shape
+  const outputParsed = standupQuestionItemSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/standup-questions] getStandupQuestion output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
