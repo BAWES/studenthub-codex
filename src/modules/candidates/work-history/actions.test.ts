@@ -1,42 +1,11 @@
 import { describe, it, expect } from "vitest";
-import { z } from "zod";
-
-// ---------------------------------------------------------------------------
-// Schema definitions matching actions.ts  (test-time copy for unit isolation)
-// ---------------------------------------------------------------------------
-
-const listCandidateWorkHistorySchema = z.object({
-  candidateId: z.coerce.number().int().positive("Candidate ID is required"),
-  page: z.coerce.number().int().positive().optional().default(1),
-  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
-});
-
-const getCandidateWorkHistorySchema = z.object({
-  id: z.coerce.number().int().positive("Work history ID is required"),
-});
-
-type ListCandidateWorkHistoryInput = z.input<
-  typeof listCandidateWorkHistorySchema
->;
-type GetCandidateWorkHistoryInput = z.input<
-  typeof getCandidateWorkHistorySchema
->;
-
-export type CandidateWorkHistoryItem = {
-  id: number;
-  candidate_id: number | null;
-  contract_uuid: string | null;
-  store_id: number | null;
-  company_id: number | null;
-  parent_company_id: number | null;
-  staff_id: number | null;
-  start_date: string | null;
-  end_date: string | null;
-  candidate_hourly_rate: number | null;
-  company_hourly_rate: number | null;
-  transfer_cost: number | null;
-  deleted: boolean;
-};
+import {
+  listCandidateWorkHistorySchema,
+  getCandidateWorkHistorySchema,
+  candidateWorkHistoryItemSchema,
+  listCandidateWorkHistoryResultSchema,
+  type CandidateWorkHistoryItem,
+} from "./schemas";
 
 type ListCandidateWorkHistoryResult = {
   items: CandidateWorkHistoryItem[];
@@ -214,5 +183,105 @@ describe("ListCandidateWorkHistoryResult shape", () => {
     };
     expect(r.items).toHaveLength(1);
     expect(r.total).toBe(1);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output validation tests
+// ---------------------------------------------------------------------------
+
+describe("candidateWorkHistoryItemSchema (output)", () => {
+  it("validates a complete item", () => {
+    const result = candidateWorkHistoryItemSchema.safeParse({
+      id: 1,
+      candidate_id: 42,
+      contract_uuid: "contract_abc",
+      store_id: 5,
+      company_id: 10,
+      parent_company_id: null,
+      staff_id: null,
+      start_date: "2024-01-15T00:00:00.000Z",
+      end_date: null,
+      candidate_hourly_rate: 25.5,
+      company_hourly_rate: 40.0,
+      transfer_cost: null,
+      deleted: false,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("validates minimal item (all nullable null)", () => {
+    const result = candidateWorkHistoryItemSchema.safeParse({
+      id: 1,
+      candidate_id: null,
+      contract_uuid: null,
+      store_id: null,
+      company_id: null,
+      parent_company_id: null,
+      staff_id: null,
+      start_date: null,
+      end_date: null,
+      candidate_hourly_rate: null,
+      company_hourly_rate: null,
+      transfer_cost: null,
+      deleted: false,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects missing id", () => {
+    const result = candidateWorkHistoryItemSchema.safeParse({
+      candidate_id: 1,
+      deleted: false,
+    });
+    expect(result.success).toBe(false);
+  });
+});
+
+describe("listCandidateWorkHistoryResultSchema (output)", () => {
+  it("validates empty result", () => {
+    const result = listCandidateWorkHistoryResultSchema.safeParse({
+      items: [],
+      total: 0,
+      page: 1,
+      pageSize: 20,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("validates populated result", () => {
+    const result = listCandidateWorkHistoryResultSchema.safeParse({
+      items: [
+        {
+          id: 1,
+          candidate_id: 1,
+          contract_uuid: null,
+          store_id: null,
+          company_id: null,
+          parent_company_id: null,
+          staff_id: null,
+          start_date: "2023-06-01T00:00:00.000Z",
+          end_date: null,
+          candidate_hourly_rate: null,
+          company_hourly_rate: null,
+          transfer_cost: null,
+          deleted: false,
+        },
+      ],
+      total: 1,
+      page: 1,
+      pageSize: 20,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects negative page", () => {
+    const result = listCandidateWorkHistoryResultSchema.safeParse({
+      items: [],
+      total: 0,
+      page: -1,
+      pageSize: 20,
+    });
+    expect(result.success).toBe(false);
   });
 });
