@@ -75,6 +75,47 @@ export const dashboardDataSchema = z.object({
 });
 
 // ---------------------------------------------------------------------------
+// Coder Health — schemas for admin dashboard Coder agent health section
+// ---------------------------------------------------------------------------
+
+/**
+ * A single Coder health metric card.
+ */
+export const coderHealthMetricSchema = z.object({
+  label: z.string().min(1, "Metric label is required"),
+  value: z.string().min(1, "Metric value is required"),
+  note: z.string(),
+});
+
+/**
+ * A single commit row in the Coder health section.
+ */
+export const coderHealthCommitSchema = z.object({
+  sha: z.string().min(1, "Commit SHA is required"),
+  message: z.string().min(1, "Commit message is required"),
+  date: z.string().min(1, "Commit date is required"),
+});
+
+/**
+ * A recent issue displayed in the Coder health section.
+ */
+export const coderHealthIssueItemSchema = z.object({
+  title: z.string().min(1, "Issue title is required"),
+  status: z.string().min(1, "Issue status is required"),
+  updatedAt: z.string(),
+});
+
+/**
+ * Full Coder health data payload from getCoderHealthData.
+ */
+export const coderHealthDataSchema = z.object({
+  heartbeatMetrics: z.array(coderHealthMetricSchema),
+  recentIssues: z.array(coderHealthIssueItemSchema),
+  recentCommits: z.array(coderHealthCommitSchema),
+  lastHeartbeat: z.string().nullable(),
+});
+
+// ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
@@ -84,3 +125,6 @@ export type DashboardDataListItem = z.input<typeof dashboardDataListItemSchema>;
 export type PrMergeMetric = z.input<typeof prMergeMetricSchema>;
 export type PrMergeItem = z.input<typeof prMergeItemSchema>;
 export type DashboardData = z.input<typeof dashboardDataSchema>;
+export type CoderHealthData = z.input<typeof coderHealthDataSchema>;
+export type CoderHealthMetric = z.input<typeof coderHealthMetricSchema>;
+export type CoderHealthCommit = z.input<typeof coderHealthCommitSchema>;

@@ -18,6 +18,12 @@ import type {
   NotificationRow,
   NotificationDetail,
 } from "@/modules/notifications/actions";
+import {
+  notificationRowArraySchema,
+  notificationDetailSchema,
+  dismissResultSchema,
+  updateResultSchema,
+} from "./schemas";
 
 // Re-export types for client components
 export type { NotificationRow, NotificationDetail };
@@ -38,7 +44,14 @@ export async function getCandidateNotificationRows(
   const session = await requireRoleCapability("candidate", "candidate.read.own");
   const cid = candidateId ?? Number(session.id);
 
-  return moduleGetNotificationRows(cid, params);
+  const result = await moduleGetNotificationRows(cid, params);
+
+  const parsed = notificationRowArraySchema.safeParse(result);
+  if (!parsed.success) {
+    console.error("[candidate/notifications] getCandidateNotificationRows output validation failed:", parsed.error.issues);
+  }
+
+  return result;
 }
 
 /**
@@ -53,7 +66,14 @@ export async function getCandidateNotificationDetail(
   const session = await requireRoleCapability("candidate", "candidate.read.own");
   const cid = candidateId ?? Number(session.id);
 
-  return moduleGetNotificationDetail(cid, notificationUuid);
+  const result = await moduleGetNotificationDetail(cid, notificationUuid);
+
+  const parsed = notificationDetailSchema.safeParse(result);
+  if (!parsed.success) {
+    console.error("[candidate/notifications] getCandidateNotificationDetail output validation failed:", parsed.error.issues);
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -71,7 +91,14 @@ export async function dismissNotification(
     const session = await requireRoleCapability("candidate", "candidate.read.own");
     const candidateId = Number(session.id);
 
-    return moduleDismissNotification(candidateId, notificationUuid);
+    const result = await moduleDismissNotification(candidateId, notificationUuid);
+
+    const parsed = dismissResultSchema.safeParse(result);
+    if (!parsed.success) {
+      console.error("[candidate/notifications] dismissNotification output validation failed:", parsed.error.issues);
+    }
+
+    return result;
   } catch (e) {
     return {
       success: false,
@@ -82,10 +109,6 @@ export async function dismissNotification(
     };
   }
 }
-
-// ---------------------------------------------------------------------------
-// updateNotification
-// ---------------------------------------------------------------------------
 
 /**
  * Update (mark as read/unread) a notification for the current candidate.
@@ -99,7 +122,14 @@ export async function updateNotification(
     const session = await requireRoleCapability("candidate", "candidate.read.own");
     const candidateId = Number(session.id);
 
-    return moduleUpdateNotification(candidateId, notificationUuid, data);
+    const result = await moduleUpdateNotification(candidateId, notificationUuid, data);
+
+    const parsed = updateResultSchema.safeParse(result);
+    if (!parsed.success) {
+      console.error("[candidate/notifications] updateNotification output validation failed:", parsed.error.issues);
+    }
+
+    return result;
   } catch (e) {
     return {
       success: false,

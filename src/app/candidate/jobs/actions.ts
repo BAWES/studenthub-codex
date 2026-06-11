@@ -18,6 +18,10 @@ import {
   getCandidateJobSchema,
   applyToJobSchema,
   listMyApplicationsSchema,
+  listCandidateJobsResultSchema,
+  getCandidateJobResultSchema,
+  applyToJobResultSchema,
+  listMyApplicationsResultSchema,
 } from "./schemas";
 import type {
   ListCandidateJobsInput,
@@ -112,7 +116,17 @@ export async function listCandidateJobs(
     updatedAt: r.updatedAt,
   }));
 
-  return { success: true, jobs, total };
+  const result = { success: true as const, jobs, total };
+
+  const validated = listCandidateJobsResultSchema.safeParse(result);
+  if (!validated.success) {
+    console.error(
+      "[candidate/jobs] listCandidateJobs output validation failed:",
+      validated.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -158,8 +172,8 @@ export async function getCandidateJob(
     matchScore = null;
   }
 
-  return {
-    success: true,
+  const result = {
+    success: true as const,
     job: {
       jobListingId: job.jobListingId,
       title: job.title,
@@ -181,6 +195,16 @@ export async function getCandidateJob(
       applicationStatus: existing?.status ?? null,
     },
   };
+
+  const validated = getCandidateJobResultSchema.safeParse(result);
+  if (!validated.success) {
+    console.error(
+      "[candidate/jobs] getCandidateJob output validation failed:",
+      validated.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -223,11 +247,21 @@ export async function applyToJob(
   revalidatePath("/candidate/jobs");
   revalidatePath("/candidate/applications");
 
-  return {
-    success: true,
+  const result = {
+    success: true as const,
     applicationId: application.id,
     message: "Application submitted successfully",
   };
+
+  const validated = applyToJobResultSchema.safeParse(result);
+  if (!validated.success) {
+    console.error(
+      "[candidate/jobs] applyToJob output validation failed:",
+      validated.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -274,5 +308,15 @@ export async function listMyApplications(
     updatedAt: r.updatedAt,
   }));
 
-  return { success: true, applications, total };
+  const result = { success: true as const, applications, total };
+
+  const validated = listMyApplicationsResultSchema.safeParse(result);
+  if (!validated.success) {
+    console.error(
+      "[candidate/jobs] listMyApplications output validation failed:",
+      validated.error.issues,
+    );
+  }
+
+  return result;
 }
