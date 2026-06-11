@@ -77,7 +77,11 @@ export default function LandingContent({ session }: LandingContentProps) {
         id="main-content"
       >
       {/* ── Glass Navigation ── */}
-      <nav className="shGlassNav" aria-label="StudentHub public navigation">
+      <nav
+        className="shGlassNav sticky top-3 z-50 backdrop-blur-xl"
+        style={{ animation: "navSlideIn 0.6s var(--sh-easing)" }}
+        aria-label="StudentHub public navigation"
+      >
         <div className="shGlassNavInner">
           <Link
             className="inline-flex items-center gap-2.5 text-[var(--ink)] px-2 no-underline min-h-11"
@@ -129,7 +133,9 @@ export default function LandingContent({ session }: LandingContentProps) {
       </div>
 
       {/* ── Hero section — two-sided marketplace ── */}
-      <HeroSection />
+      <FadeInSection asDiv delay={0}>
+        <HeroSection />
+      </FadeInSection>
 
       {/* ── Stats — social proof counters ── */}
       <FadeInSection asDiv delay={100}>

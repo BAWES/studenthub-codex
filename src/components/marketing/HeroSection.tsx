@@ -331,6 +331,12 @@ export default function HeroSection({ onCtaClick }: HeroSectionProps) {
           <Link
             href={content.employerCtaHref}
             className="uiButton uiButton_secondary uiButton_lg"
+            style={{
+              background: "linear-gradient(135deg, #f59e0b, #d97706)",
+              color: "#fff",
+              border: "none",
+              boxShadow: "0 4px 14px rgba(245, 158, 11, 0.35)",
+            }}
           >
             <Building2 className="size-4" />
             {content.employerCta} <ArrowUpRight className="size-4" />
