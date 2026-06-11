@@ -38,6 +38,11 @@ export type GetSettingInput = z.input<typeof getSettingSchema>;
 export type UpdateSettingInput = z.input<typeof updateSettingSchema>;
 export type ListSettingsInput = z.input<typeof listSettingsSchema>;
 
+export type UpdateSettingResult = {
+  operation: string;
+  message: string;
+};
+
 // ---------------------------------------------------------------------------
 // Exported schemas (for shared validation in tests)
 // ---------------------------------------------------------------------------
@@ -151,11 +156,6 @@ export async function getSetting(
 // ---------------------------------------------------------------------------
 // updateSetting
 // ---------------------------------------------------------------------------
-
-export type UpdateSettingResult = {
-  operation: string;
-  message: string;
-};
 
 /**
  * Update a setting's value.

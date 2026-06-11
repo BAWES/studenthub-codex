@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 // ---------------------------------------------------------------------------
-// Input schemas (previously private in actions.ts)
+// Input schemas (moved from actions.ts)
 // ---------------------------------------------------------------------------
 
 export const listAreasSchema = z.object({
@@ -11,12 +11,12 @@ export const listAreasSchema = z.object({
   limit: z.number().int().min(1).max(100).optional(),
 });
 
+export type ListAreasInput = z.input<typeof listAreasSchema>;
+
 export const getAreaSchema = z.object({
   areaUuid: z.string().min(1),
 });
 
-// Input types
-export type ListAreasInput = z.input<typeof listAreasSchema>;
 export type GetAreaInput = z.input<typeof getAreaSchema>;
 
 // ---------------------------------------------------------------------------
@@ -32,14 +32,14 @@ export const areaItemSchema = z.object({
   area_longitude: z.number().nullable(),
 });
 
+export type AreaItem = z.infer<typeof areaItemSchema>;
+
 export const listAreasResultSchema = z.object({
   areas: z.array(areaItemSchema),
   total: z.number().int().nonnegative(),
   page: z.number().int().positive(),
-  limit: z.number(),
+  limit: z.number().int().positive(),
   totalPages: z.number().int().nonnegative(),
 });
 
-// Output types
-export type AreaItem = z.output<typeof areaItemSchema>;
-export type ListAreasResult = z.output<typeof listAreasResultSchema>;
+export type ListAreasResult = z.infer<typeof listAreasResultSchema>;
