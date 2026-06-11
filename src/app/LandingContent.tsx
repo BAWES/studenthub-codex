@@ -225,14 +225,14 @@ export default function LandingContent({ session }: LandingContentProps) {
           {isLoggedIn ? (
             <Link
               href="/app"
-              className="uiButton uiButton_default uiButton_lg shGlowButton"
+              className="uiButton uiButton_amber uiButton_lg shGlowButton"
             >
               Open app <ChevronRight className="size-4" />
             </Link>
           ) : (
             <Link
               href={`/signup?role=${role}`}
-              className="uiButton uiButton_default uiButton_lg shGlowButton"
+              className="uiButton uiButton_amber uiButton_lg shGlowButton"
             >
               {persona === "company"
                 ? "Set up your company account"

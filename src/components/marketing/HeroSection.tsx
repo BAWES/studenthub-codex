@@ -52,15 +52,15 @@ interface HeroContent {
 }
 
 const heroContent: HeroContent = {
-  eyebrow: "The two-sided marketplace for student talent",
+  eyebrow: "Two-sided marketplace for student talent",
   headlineParts: ["Connecting students with", "the right employers"],
   highlight: "the right employers",
-  body: "StudentHub is where students build careers and employers find talent. Create a profile that gets seen by 60+ employers, or post openings and get matched with vetted candidates — all in one platform designed for the real world of work.",
+  body: "StudentHub is the platform where students build careers and employers discover vetted talent. Create a profile that gets seen by 500+ employers, or post openings and get AI-matched candidates — all in one platform, built for Kuwait.",
   studentCta: "Create your free profile",
   studentCtaHref: "/signup?role=candidate",
   employerCta: "Hire students",
   employerCtaHref: "/signup?role=company",
-  proof: "Connecting students with employers across Kuwait · No agency fees · Kuwait-based platform",
+  proof: "Connecting students with 500+ employers across Kuwait · No agency fees",
   studentPills: [
     "Profile visible to employers across Kuwait",
     "One-tap timesheets and payments",
@@ -342,20 +342,7 @@ export default function HeroSection({ onCtaClick }: HeroSectionProps) {
           )}
           <Link
             href={content.employerCtaHref}
-            className="uiButton uiButton_lg group"
-            style={{
-              background: "linear-gradient(135deg, #f59e0b, #d97706)",
-              color: "#fff",
-              border: "none",
-              boxShadow: "0 4px 14px rgba(245, 158, 11, 0.35)",
-              transition: "box-shadow 0.2s ease, transform 0.2s ease",
-            }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 28px rgba(245, 158, 11, 0.5)";
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLElement).style.boxShadow = "0 4px 14px rgba(245, 158, 11, 0.35)";
-            }}
+            className="uiButton uiButton_amber uiButton_lg group"
           >
             <Building2 className="size-4" />
             {content.employerCta} <ArrowUpRight className="size-4 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />

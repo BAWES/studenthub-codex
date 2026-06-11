@@ -165,7 +165,12 @@ export default function StatsSection({ className }: StatsSectionProps) {
       >
         <div className="grid grid-cols-3 gap-8 md:gap-12">
           {stats.map((stat) => (
-            <AnimatedStat key={stat.label} stat={stat} visible={visible} />
+            <div key={stat.label} style={{
+              animation: `shCardIn 500ms cubic-bezier(0.16, 1, 0.3, 1) both`,
+              animationDelay: `${stats.indexOf(stat) * 150}ms`,
+            }}>
+              <AnimatedStat stat={stat} visible={visible} />
+            </div>
           ))}
         </div>
       </div>
