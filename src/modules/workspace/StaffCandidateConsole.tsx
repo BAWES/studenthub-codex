@@ -1,7 +1,7 @@
 import type { Route } from "next";
 import Link from "next/link";
 import { HubShortcuts, type HubCommand } from "@/modules/hub/HubShortcuts";
-import { getStaffCandidateConsole, type StaffCandidateFilter } from "./data/staff";
+import { getStaffCandidateConsole, type StaffCandidateFilter } from "./staff-console-data";
 import { CandidateCard } from "@/modules/candidates/CandidateCard";
 
 type StaffCandidateConsoleData = Awaited<ReturnType<typeof getStaffCandidateConsole>>;
