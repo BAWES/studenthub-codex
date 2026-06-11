@@ -2,7 +2,6 @@ import { getDashboardData } from "@/app/admin/dashboard/actions";
 import { getCoderHealthData } from "@/app/admin/dashboard/coder-health-actions";
 import { EmptyState } from "@/modules/workspace/EmptyState";
 import { MetricCard } from "@/components/ui/metric-card";
-import { GlassPanel } from "@/components/ui/glass-panel";
 import { StatusBadge } from "@/modules/workspace/StatusBadge";
 import Link from "next/link";
 import type { Route } from "next";
@@ -71,7 +70,7 @@ export async function Dashboard() {
         className="shDashboardSection"
         aria-label="Request pipeline status"
       >
-        <GlassPanel variant="subtle" radius="lg" className="p-5">
+        <div className="rounded-lg border border-[var(--border)] bg-white p-5">
           <div className="shPipelineHeader">
             <div>
               <span className="shPipelineEyebrow">Pipeline</span>
@@ -130,7 +129,7 @@ export async function Dashboard() {
               <EmptyState variant="idle" message="No requests in pipeline" />
             </div>
           )}
-        </GlassPanel>
+        </div>
       </section>
 
       {/* ── PR Merge Time-to-Merge Metrics ── */}
@@ -138,7 +137,7 @@ export async function Dashboard() {
         className="shDashboardSection"
         aria-label="PR merge time-to-merge metrics"
       >
-        <GlassPanel variant="subtle" radius="lg" className="p-5">
+        <div className="rounded-lg border border-[var(--border)] bg-white p-5">
           <div className="shPipelineHeader">
             <div>
               <span className="shPipelineEyebrow">Engineering</span>
@@ -207,7 +206,7 @@ export async function Dashboard() {
               <EmptyState variant="idle" message="No PR merge data available" />
             </div>
           )}
-        </GlassPanel>
+        </div>
       </section>
 
       {/* ── Coder Agent Health Metrics ── */}
@@ -281,10 +280,8 @@ function DataList({
   entranceDelay?: number;
 }) {
   return (
-    <GlassPanel
-      variant="subtle"
-      radius="lg"
-      className="shDashboardDataList"
+    <div
+      className="rounded-lg border border-[var(--border)] bg-white shDashboardDataList"
       style={{ animationDelay: `${entranceDelay}ms` } as React.CSSProperties}
     >
       <div className="shDataListHeader">
@@ -334,7 +331,7 @@ function DataList({
           </div>
         )}
       </div>
-    </GlassPanel>
+    </div>
   );
 }
 
@@ -347,7 +344,7 @@ async function CoderHealthSection() {
   } catch {
     return (
       <section className="shDashboardSection" aria-label="Coder agent health">
-        <GlassPanel variant="subtle" radius="lg" className="p-5">
+        <div className="rounded-lg border border-[var(--border)] bg-white p-5">
           <div className="shPipelineHeader">
             <div>
               <span className="shPipelineEyebrow">Agent</span>
@@ -357,14 +354,14 @@ async function CoderHealthSection() {
           <div className="shPipelineEmpty">
             <EmptyState variant="idle" message="Could not load Coder health data" />
           </div>
-        </GlassPanel>
+        </div>
       </section>
     );
   }
 
   return (
     <section className="shDashboardSection" aria-label="Coder agent health metrics">
-      <GlassPanel variant="subtle" radius="lg" className="p-5">
+      <div className="rounded-lg border border-[var(--border)] bg-white p-5">
         <div className="shPipelineHeader">
           <div>
             <span className="shPipelineEyebrow">Agent</span>
@@ -436,7 +433,7 @@ async function CoderHealthSection() {
             </div>
           </>
         )}
-      </GlassPanel>
+      </div>
     </section>
   );
 }

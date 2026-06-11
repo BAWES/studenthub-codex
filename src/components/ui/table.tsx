@@ -74,7 +74,7 @@ const TableHeader = React.forwardRef<HTMLTableSectionElement, React.ComponentPro
         data-slot="table-header"
         className={cn(
           "sticky top-0 z-10",
-          "backdrop-blur-xl bg-[color-mix(in_srgb,var(--surface)_85%,transparent)]",
+          "bg-[var(--surface)]",
           "after:absolute after:inset-x-0 after:bottom-0 after:h-px after:bg-[var(--sh-glass-border)]",
           className,
         )}

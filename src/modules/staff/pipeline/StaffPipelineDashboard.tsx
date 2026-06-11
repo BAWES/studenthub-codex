@@ -4,7 +4,6 @@ import type { PipelineItem, PipelineMetrics, PipelineStage } from "@/modules/sta
 import { StageMetricsRow } from "./StageMetricsRow";
 import { PipelineBoard } from "./PipelineBoard";
 import { PipelineDataTable } from "./PipelineDataTable";
-import { GlassPanel } from "@/components/ui/glass-panel";
 import { useState } from "react";
 
 export interface StaffPipelineDashboardProps {
@@ -46,10 +45,8 @@ export function StaffPipelineDashboard({
     <section className="space-y-4">
       {/* Error banner */}
       {error && (
-        <GlassPanel
-          variant="strong"
-          radius="md"
-          className="p-3"
+        <div
+          className="rounded-lg border border-[var(--border)] bg-white p-3"
           style={{
             borderLeft: "4px solid var(--rose-500, #f43f5e)",
             background: "var(--rose-50, rgba(244,63,94,0.08))",
@@ -58,7 +55,7 @@ export function StaffPipelineDashboard({
           <span className="text-[13px] font-medium" style={{ color: "var(--rose-500, #f43f5e)" }}>
             {error}
           </span>
-        </GlassPanel>
+        </div>
       )}
 
       {/* Pipeline stage metrics */}
@@ -72,7 +69,7 @@ export function StaffPipelineDashboard({
           className="text-[12px] font-semibold px-3 py-1.5 rounded-lg transition-colors"
           style={{
             background: viewMode === "board"
-              ? "var(--sh-glass-bg-strong, rgba(255,255,255,0.08))"
+              ? "var(--surface, rgba(255,255,255,0.08))"
               : "transparent",
             color: viewMode === "board"
               ? "var(--text-primary, var(--ink))"
@@ -91,7 +88,7 @@ export function StaffPipelineDashboard({
           className="text-[12px] font-semibold px-3 py-1.5 rounded-lg transition-colors"
           style={{
             background: viewMode === "table"
-              ? "var(--sh-glass-bg-strong, rgba(255,255,255,0.08))"
+              ? "var(--surface, rgba(255,255,255,0.08))"
               : "transparent",
             color: viewMode === "table"
               ? "var(--text-primary, var(--ink))"
@@ -108,7 +105,7 @@ export function StaffPipelineDashboard({
 
       {/* Pipeline content */}
       {viewMode === "board" ? (
-        <GlassPanel variant="subtle" radius="lg" noPadding>
+        <div className="rounded-lg border border-[var(--border)] bg-white">
           <div className="p-4">
             <div className="flex items-center justify-between mb-3">
               <h3
@@ -126,7 +123,7 @@ export function StaffPipelineDashboard({
             </div>
             <PipelineBoard items={items} onStageChange={handleStageChange} />
           </div>
-        </GlassPanel>
+        </div>
       ) : (
         <PipelineDataTable
           items={items}

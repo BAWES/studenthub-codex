@@ -1,6 +1,5 @@
 "use client";
 
-import { GlassPanel } from "@/components/ui/glass-panel";
 import { Building2, Plus } from "lucide-react";
 import Link from "next/link";
 
@@ -20,7 +19,7 @@ export function CompanyRoleHeader({
   linkedCompanyCount,
 }: CompanyRoleHeaderProps) {
   return (
-    <GlassPanel variant="subtle" radius="lg" className="p-5 flex items-center justify-between gap-4">
+    <div className="rounded-lg border border-[var(--border)] bg-white p-5 flex items-center justify-between gap-4">
       <div className="flex items-center gap-4">
         <div
           className="flex size-12 shrink-0 items-center justify-center rounded-xl"
@@ -47,6 +46,6 @@ export function CompanyRoleHeader({
         <Plus className="size-4" aria-hidden="true" />
         Create Request
       </Link>
-    </GlassPanel>
+    </div>
   );
 }

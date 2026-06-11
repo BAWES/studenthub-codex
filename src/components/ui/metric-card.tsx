@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import { GlassPanel } from "./glass-panel";
 import { TrendingUp, TrendingDown, Minus, type LucideIcon } from "lucide-react";
 
 type TrendDirection = "up" | "down" | "flat";
@@ -102,11 +101,9 @@ const MetricCard = React.forwardRef<HTMLDivElement, MetricCardProps>(function Me
   const trendColor = trendColors[trend];
 
   return (
-    <GlassPanel
+    <div
       ref={ref}
-      variant={resolvedGlow ? "elevated" : "subtle"}
-      radius="lg"
-      className={cn("p-4 grid content-start gap-2", className)}
+      className={cn("rounded-lg border border-[var(--border)] bg-white p-4 grid content-start gap-2", className)}
       style={{
         ...(entranceDelay !== undefined ? { animationDelay: `${entranceDelay}ms` } : {}),
         ...style,
@@ -162,7 +159,7 @@ const MetricCard = React.forwardRef<HTMLDivElement, MetricCardProps>(function Me
           ))}
         </div>
       )}
-    </GlassPanel>
+    </div>
   );
 });
 

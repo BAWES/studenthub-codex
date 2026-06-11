@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Search } from "lucide-react";
-import { GlassPanel } from "@/components/ui/glass-panel";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -172,11 +171,11 @@ export function ComplianceList({
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-4">
       {/* ── Left pane: list ───────────────────────────────────── */}
-      <GlassPanel variant="subtle" radius="lg" className="p-0 overflow-hidden">
+      <div className="rounded-lg border border-[var(--border)] bg-white p-0 overflow-hidden">
         {/* Toolbar: filter tabs + search */}
         <div
           className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 border-b"
-          style={{ borderColor: "var(--sh-glass-border)" }}
+          style={{ borderColor: "var(--border)" }}
         >
           {/* Type filter tabs */}
           <div className="flex gap-1 flex-wrap">
@@ -186,10 +185,10 @@ export function ComplianceList({
                 onClick={() => handleTypeChange(tab.key)}
                 className="px-3 py-1.5 text-xs font-semibold rounded-full transition-all duration-150"
                 style={{
-                  background: typeFilter === tab.key ? "var(--sh-glass-bg)" : "transparent",
+                  background: typeFilter === tab.key ? "var(--surface)" : "transparent",
                   color: typeFilter === tab.key ? "var(--ink)" : "var(--muted)",
                   border: `1px solid ${
-                    typeFilter === tab.key ? "var(--sh-glass-border)" : "transparent"
+                    typeFilter === tab.key ? "var(--border)" : "transparent"
                   }`,
                 }}
               >
@@ -232,7 +231,7 @@ export function ComplianceList({
             skeletonRows={6}
           />
         </div>
-      </GlassPanel>
+      </div>
 
       {/* ── Right pane: detail panel ──────────────────────────── */}
       <ComplianceDetailPanel

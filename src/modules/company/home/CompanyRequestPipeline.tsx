@@ -1,7 +1,6 @@
 "use client";
 
 import type { HomeActiveRequestItem } from "@/app/company/schemas";
-import { GlassPanel } from "@/components/ui/glass-panel";
 import { EmptyState } from "@/modules/workspace/EmptyState";
 import { StatusBadge, type StatusBadgeVariant } from "@/modules/workspace/StatusBadge";
 import { formatDate } from "@/modules/workspace/format";
@@ -33,7 +32,7 @@ export function CompanyRequestPipeline({
   activeRequests,
 }: CompanyRequestPipelineProps) {
   return (
-    <GlassPanel variant="subtle" radius="lg" className="p-5">
+    <div className="rounded-lg border border-[var(--border)] bg-white p-5">
       <div className="flex items-center justify-between mb-4">
         <div>
           <h2 className="text-sm font-black uppercase tracking-wider" style={{ color: "var(--muted)" }}>
@@ -88,6 +87,6 @@ export function CompanyRequestPipeline({
           />
         )}
       </div>
-    </GlassPanel>
+    </div>
   );
 }

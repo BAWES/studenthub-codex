@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { GlassPanel } from "@/components/ui/glass-panel";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,13 +35,13 @@ export function ComplianceDetailPanel({
   // Guard: no selection
   if (!selectedRow) {
     return (
-      <GlassPanel variant="subtle" radius="lg" className="p-6">
+      <div className="rounded-lg border border-[var(--border)] bg-white p-6">
         <EmptyState
           variant="idle"
           title="No record selected"
           description="Click a compliance record to view its details and take action."
         />
-      </GlassPanel>
+      </div>
     );
   }
 
@@ -116,7 +115,7 @@ export function ComplianceDetailPanel({
             <div
               key={i}
               className="p-2 rounded"
-              style={{ background: "var(--sh-glass-bg)" }}
+              style={{ background: "var(--surface)" }}
             >
               <div
                 className="text-[10px] font-semibold uppercase tracking-wider"
@@ -150,7 +149,7 @@ export function ComplianceDetailPanel({
                 <div
                   key={req.id}
                   className="flex items-center justify-between p-1.5 rounded text-xs"
-                  style={{ background: "var(--sh-glass-bg)" }}
+                  style={{ background: "var(--surface)" }}
                 >
                   <span style={{ color: "var(--muted)" }}>{req.id.slice(0, 12)}…</span>
                   <StatusBadge
@@ -196,7 +195,7 @@ export function ComplianceDetailPanel({
             <div
               key={i}
               className="p-2 rounded"
-              style={{ background: "var(--sh-glass-bg)" }}
+              style={{ background: "var(--surface)" }}
             >
               <div
                 className="text-[10px] font-semibold uppercase tracking-wider"
@@ -252,7 +251,7 @@ export function ComplianceDetailPanel({
   const isActionable = row.type === "company" || row.type === "id_request";
 
   return (
-    <GlassPanel variant="subtle" radius="lg" className="p-4 flex flex-col gap-4">
+    <div className="rounded-lg border border-[var(--border)] bg-white p-4 flex flex-col gap-4">
       {/* Header */}
       <div className="flex items-center justify-between">
         <h3 className="text-xs font-bold uppercase tracking-wider" style={{ color: "var(--muted)" }}>
@@ -276,7 +275,7 @@ export function ComplianceDetailPanel({
           {detailData.type === "id_request" && renderIdRequestDetail(detailData as IdRequestComplianceDetail)}
 
           {/* Divider */}
-          <hr style={{ borderColor: "var(--sh-glass-border)" }} />
+          <hr style={{ borderColor: "var(--border)" }} />
 
           {/* Actions */}
           {isActionable && (
@@ -360,6 +359,6 @@ export function ComplianceDetailPanel({
           Failed to load record details.
         </p>
       )}
-    </GlassPanel>
+    </div>
   );
 }

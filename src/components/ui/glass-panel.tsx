@@ -3,6 +3,10 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 
+/**
+ * @deprecated Board directive — use plain div with rounded-lg border border-[var(--border)] bg-white
+ */
+
 const glassVariants = {
   subtle: "",                // default
   strong: "shGlassStrong",

@@ -4,7 +4,6 @@ import type { getCandidateDetail } from "@/modules/candidates/candidate-detail";
 import { formatDate } from "@/modules/workspace/format";
 import { EmptyState } from "@/modules/workspace/EmptyState";
 import { StatusBadge } from "@/modules/workspace/StatusBadge";
-import { GlassPanel } from "@/components/ui/glass-panel";
 import { WorkLogStaffActions } from "./WorkLogStaffActions";
 
 /** Maps numeric candidate_status to a human-readable label. */
@@ -55,7 +54,7 @@ export function CandidateProfile({
 
   return (
     <section className={compact ? "candidateProfile compact" : "candidateProfile"}>
-      <GlassPanel variant="subtle" radius="lg" className="!p-0 overflow-hidden">
+      <div className="rounded-lg border border-[var(--border)] bg-white overflow-hidden">
         <header className="shProfileHero">
           <div className="shProfileAvatar" aria-hidden="true">
             {initials(candidate.candidate_name)}
@@ -75,7 +74,7 @@ export function CandidateProfile({
             </div>
           </div>
         </header>
-      </GlassPanel>
+      </div>
 
       <div className="candidateProfileActions" aria-label="Candidate actions">
         {backHref ? <Link href={backHref}>Back to list</Link> : null}
@@ -92,7 +91,7 @@ export function CandidateProfile({
         )}
       </div>
 
-      <GlassPanel variant="subtle" radius="lg" className="p-5">
+      <div className="rounded-lg border border-[var(--border)] bg-white p-5">
         <section className="candidateReadiness" aria-label="Candidate readiness">
           <div className="candidateReadinessScore">
             <span>Readiness</span>
@@ -120,9 +119,9 @@ export function CandidateProfile({
             </div>
           ) : null}
         </section>
-      </GlassPanel>
+      </div>
 
-      <GlassPanel variant="subtle" radius="lg" className="p-5">
+      <div className="rounded-lg border border-[var(--border)] bg-white p-5">
         <section className="candidateFactGrid" aria-label="Candidate facts">
           <Fact label="Email" value={candidate.candidate_email} />
           <Fact label="Phone" value={candidate.candidate_phone ?? "No phone"} />
@@ -135,23 +134,23 @@ export function CandidateProfile({
           <Fact label="Civil ID" value={candidate.candidate_civil_id ?? (candidate.candidate_civil_need_verification ? "Needs verification" : "Not set")} />
           <Fact label="Updated" value={formatDate(candidate.candidate_updated_at)} />
         </section>
-      </GlassPanel>
+      </div>
 
-      <GlassPanel variant="subtle" radius="lg" className="p-0 overflow-hidden">
+      <div className="rounded-lg border border-[var(--border)] bg-white overflow-hidden">
         <CivilIdPanel candidate={candidate} viewerRole={viewerRole} />
-      </GlassPanel>
+      </div>
 
       {!compact && candidate.candidate_intro ? (
-        <GlassPanel variant="subtle" radius="lg" className="p-5">
+        <div className="rounded-lg border border-[var(--border)] bg-white p-5">
           <section className="candidateNarrative">
             <span>Profile intro</span>
             <p>{candidate.candidate_intro}</p>
           </section>
-        </GlassPanel>
+        </div>
       ) : null}
 
       <section className="candidateProfileColumns">
-        <GlassPanel variant="subtle" radius="lg" className="p-0 overflow-hidden h-min">
+        <div className="rounded-lg border border-[var(--border)] bg-white overflow-hidden h-min">
           <section className="candidateProfilePanel">
             <PanelHeader title="Skills and tags" count={detail.skills.length + detail.tags.length} />
             <div className="candidatePills">
@@ -161,54 +160,54 @@ export function CandidateProfile({
             {!detail.skills.length && !detail.tags.length ? <EmptyState variant="empty" message="No imported skills or tags" hint="Skills and tags will appear here once they are imported from the candidate profile." /> : null}
           </div>
         </section>
-      </GlassPanel>
+      </div>
 
-      <GlassPanel variant="subtle" radius="lg" className="p-0 overflow-hidden h-min">
+      <div className="rounded-lg border border-[var(--border)] bg-white overflow-hidden h-min">
         <RowsPanel title="Timeline" rows={timeline} limit={compact ? 5 : 12} />
-      </GlassPanel>
+      </div>
       </section>
 
       {!compact ? (
         <section className="candidateProfileColumns">
-          <GlassPanel variant="subtle" radius="lg" className="p-0 overflow-hidden h-min">
+          <div className="rounded-lg border border-[var(--border)] bg-white overflow-hidden h-min">
             <RowsPanel title="Education" rows={detail.education} />
-          </GlassPanel>
-          <GlassPanel variant="subtle" radius="lg" className="p-0 overflow-hidden h-min">
+          </div>
+          <div className="rounded-lg border border-[var(--border)] bg-white overflow-hidden h-min">
             <RowsPanel title="Experience" rows={detail.experiences} />
-          </GlassPanel>
-          <GlassPanel variant="subtle" radius="lg" className="p-0 overflow-hidden h-min">
+          </div>
+          <div className="rounded-lg border border-[var(--border)] bg-white overflow-hidden h-min">
             <RowsPanel title="Applications" rows={detail.applications} />
-          </GlassPanel>
-          <GlassPanel variant="subtle" radius="lg" className="p-0 overflow-hidden h-min">
+          </div>
+          <div className="rounded-lg border border-[var(--border)] bg-white overflow-hidden h-min">
             <RowsPanel title="Interviews" rows={detail.interviews} />
-          </GlassPanel>
-          <GlassPanel variant="subtle" radius="lg" className="p-0 overflow-hidden h-min">
+          </div>
+          <div className="rounded-lg border border-[var(--border)] bg-white overflow-hidden h-min">
             <RowsPanel title="Suggestions" rows={detail.suggestions} />
-          </GlassPanel>
-          <GlassPanel variant="subtle" radius="lg" className="p-0 overflow-hidden h-min">
+          </div>
+          <div className="rounded-lg border border-[var(--border)] bg-white overflow-hidden h-min">
             <RowsPanel title="Invitations" rows={detail.invitations} />
-          </GlassPanel>
-          <GlassPanel variant="subtle" radius="lg" className="p-0 overflow-hidden h-min">
+          </div>
+          <div className="rounded-lg border border-[var(--border)] bg-white overflow-hidden h-min">
             <RowsPanel title="Work history" rows={detail.histories} />
-          </GlassPanel>
+          </div>
           {viewerRole === "staff" ? (
-            <GlassPanel variant="subtle" radius="lg" className="p-0 overflow-hidden h-min">
+            <div className="rounded-lg border border-[var(--border)] bg-white overflow-hidden h-min">
               <WorkLogStaffPanel hours={detail.workHours as any} />
-            </GlassPanel>
+            </div>
           ) : (
-            <GlassPanel variant="subtle" radius="lg" className="p-0 overflow-hidden h-min">
+            <div className="rounded-lg border border-[var(--border)] bg-white overflow-hidden h-min">
               <RowsPanel title="Work logs" rows={detail.workHours} />
-            </GlassPanel>
+            </div>
           )}
-          <GlassPanel variant="subtle" radius="lg" className="p-0 overflow-hidden h-min">
+          <div className="rounded-lg border border-[var(--border)] bg-white overflow-hidden h-min">
             <RowsPanel title="Notes" rows={detail.notes} />
-          </GlassPanel>
-          <GlassPanel variant="subtle" radius="lg" className="p-0 overflow-hidden h-min">
+          </div>
+          <div className="rounded-lg border border-[var(--border)] bg-white overflow-hidden h-min">
             <RowsPanel title="Warnings" rows={detail.warnings} />
-          </GlassPanel>
-          <GlassPanel variant="subtle" radius="lg" className="p-0 overflow-hidden h-min">
+          </div>
+          <div className="rounded-lg border border-[var(--border)] bg-white overflow-hidden h-min">
             <RowsPanel title="Documents and links" rows={[...detail.idCards, ...detail.certificates, ...detail.links]} />
-          </GlassPanel>
+          </div>
         </section>
       ) : null}
     </section>

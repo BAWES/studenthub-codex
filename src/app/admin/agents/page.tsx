@@ -1,6 +1,5 @@
 import { requireRoleCapability } from "@/modules/auth/session";
 import { getAllAgentsHealth, type AgentHealthData } from "./actions";
-import { GlassPanel } from "@/components/ui/glass-panel";
 import { MetricCard } from "@/components/ui/metric-card";
 import { StatusBadge } from "@/modules/workspace/StatusBadge";
 import { EmptyState } from "@/modules/workspace/EmptyState";
@@ -32,7 +31,7 @@ function successAccent(rate: string): "success" | "warning" | "error" | "info" {
 
 function AgentCard({ agent, index }: { agent: AgentHealthData; index: number }) {
   return (
-    <GlassPanel variant="subtle" radius="lg" className="p-5">
+    <div className="rounded-lg border border-[var(--border)] bg-white p-5">
       {/* Agent header */}
       <div className="flex items-center justify-between mb-4">
         <div>
@@ -76,7 +75,7 @@ function AgentCard({ agent, index }: { agent: AgentHealthData; index: number }) 
           );
         })}
       </div>
-    </GlassPanel>
+    </div>
   );
 }
 
@@ -104,7 +103,7 @@ export default async function AdminAgentsPage() {
     >
       {error ? (
         <section className="shDashboardSection" aria-label="Agent health error">
-          <GlassPanel variant="subtle" radius="lg" className="p-5">
+          <div className="rounded-lg border border-[var(--border)] bg-white p-5">
             <div className="shPipelineHeader">
               <div>
                 <span className="shPipelineEyebrow">Error</span>
@@ -114,11 +113,11 @@ export default async function AdminAgentsPage() {
             <div className="shPipelineEmpty">
               <EmptyState variant="error" message={error} />
             </div>
-          </GlassPanel>
+          </div>
         </section>
       ) : agents.length === 0 ? (
         <section className="shDashboardSection" aria-label="No agents found">
-          <GlassPanel variant="subtle" radius="lg" className="p-5">
+          <div className="rounded-lg border border-[var(--border)] bg-white p-5">
             <div className="shPipelineHeader">
               <div>
                 <span className="shPipelineEyebrow">Agents</span>
@@ -128,7 +127,7 @@ export default async function AdminAgentsPage() {
             <div className="shPipelineEmpty">
               <EmptyState variant="idle" message="No agents with running/idle/error status found" />
             </div>
-          </GlassPanel>
+          </div>
         </section>
       ) : (
         // Agent cards in responsive grid
