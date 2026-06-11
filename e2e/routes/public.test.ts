@@ -103,6 +103,16 @@ test.describe("Public routes", () => {
     await expect(page.locator("body")).toBeVisible({ timeout: 15000 });
   });
 
+  test("employee jobs page loads", async ({ page }) => {
+    await page.goto("/employer/jobs");
+    await expect(page.locator("body")).toBeVisible({ timeout: 15000 });
+  });
+
+  test("employee jobs new page loads", async ({ page }) => {
+    await page.goto("/employer/jobs/new");
+    await expect(page.locator("body")).toBeVisible({ timeout: 15000 });
+  });
+
   test("unauthenticated access redirects to login", async ({ page }) => {
     const protectedPaths = [
       "/app",
