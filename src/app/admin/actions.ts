@@ -25,6 +25,10 @@ import {
   adminTransferRowSchema,
   adminCandidateRowSchema,
   adminTransferDetailSchema,
+  adminCompanyRowListSchema,
+  adminRequestRowListSchema,
+  adminTransferRowListSchema,
+  adminCandidateRowListSchema,
 } from "./schemas";
 import type {
   AdminCompanyRow,
@@ -45,7 +49,18 @@ import type {
 export async function listAdminCompanies(): Promise<AdminCompanyRow[]> {
   await requireCapability("company.read.any");
   const rows = await getAdminCompanyRows();
-  return rows.map((row) => adminCompanyRowSchema.parse(row));
+  const result = rows.map((row) => adminCompanyRowSchema.parse(row));
+
+  // Validate output shape
+  const outputParsed = adminCompanyRowListSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[admin] listAdminCompanies output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -59,7 +74,18 @@ export async function listAdminCompanies(): Promise<AdminCompanyRow[]> {
 export async function listAdminRequests(): Promise<AdminRequestRow[]> {
   await requireCapability("request.read.any");
   const rows = await getAdminRequestRows();
-  return rows.map((row) => adminRequestRowSchema.parse(row));
+  const result = rows.map((row) => adminRequestRowSchema.parse(row));
+
+  // Validate output shape
+  const outputParsed = adminRequestRowListSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[admin] listAdminRequests output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -73,7 +99,18 @@ export async function listAdminRequests(): Promise<AdminRequestRow[]> {
 export async function listAdminTransfers(): Promise<AdminTransferRow[]> {
   await requireCapability("transfer.read");
   const rows = await getAdminTransferRows();
-  return rows.map((row) => adminTransferRowSchema.parse(row));
+  const result = rows.map((row) => adminTransferRowSchema.parse(row));
+
+  // Validate output shape
+  const outputParsed = adminTransferRowListSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[admin] listAdminTransfers output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -87,7 +124,18 @@ export async function listAdminTransfers(): Promise<AdminTransferRow[]> {
 export async function listAdminCandidates(): Promise<AdminCandidateRow[]> {
   await requireCapability("candidate.read.any");
   const rows = await getAdminCandidateRows();
-  return rows.map((row) => adminCandidateRowSchema.parse(row));
+  const result = rows.map((row) => adminCandidateRowSchema.parse(row));
+
+  // Validate output shape
+  const outputParsed = adminCandidateRowListSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[admin] listAdminCandidates output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -103,5 +151,16 @@ export async function getTransferDetail(
 ): Promise<AdminTransferDetail> {
   await requireCapability("transfer.read");
   const detail = await getAdminTransferDetail(transferId);
-  return adminTransferDetailSchema.parse(detail);
+  const result = adminTransferDetailSchema.parse(detail);
+
+  // Validate output shape
+  const outputParsed = adminTransferDetailSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[admin] getTransferDetail output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
