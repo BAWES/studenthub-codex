@@ -1,41 +1,15 @@
 "use server";
 
-import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export type MajorItem = {
-  major_uuid: string;
-  major_name_en: string;
-  major_name_ar: string;
-  data_source: number | null;
-  major_created_at: Date | null;
-  major_updated_at: Date | null;
-};
-
-export type ListMajorsResult = {
-  majors: MajorItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
-
-// ---------------------------------------------------------------------------
-// Schema
-// ---------------------------------------------------------------------------
-
-const listMajorsSchema = z.object({
-  nameFilter: z.string().optional(),
-  page: z.number().int().positive().optional(),
-  limit: z.number().int().min(1).max(100).optional(),
-});
-
-export type ListMajorsInput = z.input<typeof listMajorsSchema>;
+import {
+  listMajorsSchema,
+  majorItemSchema,
+  listMajorsResultSchema,
+  type ListMajorsInput,
+  type MajorItem,
+  type ListMajorsResult,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Server actions
@@ -75,11 +49,22 @@ export async function listMajors(
     prisma.major.count({ where: where as any }),
   ]);
 
-  return {
-    majors,
+  const result = {
+    majors: majors as MajorItem[],
     total,
     page,
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  // Validate output shape
+  const outputParsed = listMajorsResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/majors] listMajors output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
