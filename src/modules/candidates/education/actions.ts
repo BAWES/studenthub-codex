@@ -1,60 +1,31 @@
 "use server";
 
-import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
+import {
+  listCandidateEducationSchema,
+  getCandidateEducationSchema,
+  candidateEducationItemSchema,
+  listCandidateEducationResultSchema,
+  type ListCandidateEducationParams,
+  type GetCandidateEducationParams,
+  type CandidateEducationItem,
+  type CandidateEducationDetail,
+  type ListCandidateEducationResult,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
-// Types
+// Re-exports for backward compatibility
 // ---------------------------------------------------------------------------
 
-export type CandidateEducationItem = {
-  education_uuid: string;
-  candidate_id: number;
-  university_id: number;
-  university_name_en: string | null;
-  university_name_ar: string | null;
-  degree_uuid: string | null;
-  degree_name_en: string | null;
-  degree_name_ar: string | null;
-  major_uuid: string | null;
-  major_name_en: string | null;
-  major_name_ar: string | null;
-  graduation_year: number | null;
-  is_currently_studying: boolean;
-  created_at: Date | null;
-  updated_at: Date | null;
+export { listCandidateEducationSchema, getCandidateEducationSchema };
+export type {
+  ListCandidateEducationParams,
+  GetCandidateEducationParams,
+  CandidateEducationItem,
+  CandidateEducationDetail,
+  ListCandidateEducationResult,
 };
-
-export type CandidateEducationDetail = CandidateEducationItem | null;
-
-export type ListCandidateEducationResult = {
-  items: CandidateEducationItem[];
-  total: number;
-  page: number;
-  pageSize: number;
-};
-
-// ---------------------------------------------------------------------------
-// Schemas
-// ---------------------------------------------------------------------------
-
-const listCandidateEducationSchema = z.object({
-  candidateId: z.coerce.number().int().positive("Candidate ID is required"),
-  page: z.coerce.number().int().positive().optional().default(1),
-  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
-});
-
-const getCandidateEducationSchema = z.object({
-  educationUuid: z.string().min(1, "Education UUID is required"),
-});
-
-export type ListCandidateEducationParams = z.input<
-  typeof listCandidateEducationSchema
->;
-export type GetCandidateEducationParams = z.input<
-  typeof getCandidateEducationSchema
->;
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -141,12 +112,23 @@ export async function listCandidateEducation(
     prisma.candidate_education.count({ where }),
   ]);
 
-  return {
+  const result = {
     items: rows.map(toItem),
     total,
     page,
     pageSize: limit,
   };
+
+  // Output validation — log mismatches without throwing
+  const outputParsed = listCandidateEducationResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/candidates/education] listCandidateEducation output failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -188,5 +170,16 @@ export async function getCandidateEducation(
 
   if (!row) return null;
 
-  return toItem(row);
+  const result = toItem(row);
+
+  // Output validation — log mismatches without throwing
+  const outputParsed = candidateEducationItemSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/candidates/education] getCandidateEducation output failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
