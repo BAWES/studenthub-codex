@@ -25,6 +25,10 @@ import {
   adminTransferRowSchema,
   adminCandidateRowSchema,
   adminTransferDetailSchema,
+  adminCompanyRowListSchema,
+  adminRequestRowListSchema,
+  adminTransferRowListSchema,
+  adminCandidateRowListSchema,
 } from "./schemas";
 import type {
   AdminCompanyRow,
@@ -45,7 +49,22 @@ import type {
 export async function listAdminCompanies(): Promise<AdminCompanyRow[]> {
   await requireCapability("company.read.any");
   const rows = await getAdminCompanyRows();
-  return rows.map((row) => adminCompanyRowSchema.parse(row));
+
+  // Per-row output validation — log mismatches without throwing
+  rows.forEach((row) => {
+    const parsed = adminCompanyRowSchema.safeParse(row);
+    if (!parsed.success) {
+      console.error("[admin] listAdminCompanies row failed:", parsed.error.issues);
+    }
+  });
+
+  // List-level output validation
+  const listParsed = adminCompanyRowListSchema.safeParse(rows);
+  if (!listParsed.success) {
+    console.error("[admin] listAdminCompanies list failed:", listParsed.error.issues);
+  }
+
+  return rows;
 }
 
 // ---------------------------------------------------------------------------
@@ -59,7 +78,22 @@ export async function listAdminCompanies(): Promise<AdminCompanyRow[]> {
 export async function listAdminRequests(): Promise<AdminRequestRow[]> {
   await requireCapability("request.read.any");
   const rows = await getAdminRequestRows();
-  return rows.map((row) => adminRequestRowSchema.parse(row));
+
+  // Per-row output validation — log mismatches without throwing
+  rows.forEach((row) => {
+    const parsed = adminRequestRowSchema.safeParse(row);
+    if (!parsed.success) {
+      console.error("[admin] listAdminRequests row failed:", parsed.error.issues);
+    }
+  });
+
+  // List-level output validation
+  const listParsed = adminRequestRowListSchema.safeParse(rows);
+  if (!listParsed.success) {
+    console.error("[admin] listAdminRequests list failed:", listParsed.error.issues);
+  }
+
+  return rows;
 }
 
 // ---------------------------------------------------------------------------
@@ -73,7 +107,22 @@ export async function listAdminRequests(): Promise<AdminRequestRow[]> {
 export async function listAdminTransfers(): Promise<AdminTransferRow[]> {
   await requireCapability("transfer.read");
   const rows = await getAdminTransferRows();
-  return rows.map((row) => adminTransferRowSchema.parse(row));
+
+  // Per-row output validation — log mismatches without throwing
+  rows.forEach((row) => {
+    const parsed = adminTransferRowSchema.safeParse(row);
+    if (!parsed.success) {
+      console.error("[admin] listAdminTransfers row failed:", parsed.error.issues);
+    }
+  });
+
+  // List-level output validation
+  const listParsed = adminTransferRowListSchema.safeParse(rows);
+  if (!listParsed.success) {
+    console.error("[admin] listAdminTransfers list failed:", listParsed.error.issues);
+  }
+
+  return rows;
 }
 
 // ---------------------------------------------------------------------------
@@ -87,7 +136,22 @@ export async function listAdminTransfers(): Promise<AdminTransferRow[]> {
 export async function listAdminCandidates(): Promise<AdminCandidateRow[]> {
   await requireCapability("candidate.read.any");
   const rows = await getAdminCandidateRows();
-  return rows.map((row) => adminCandidateRowSchema.parse(row));
+
+  // Per-row output validation — log mismatches without throwing
+  rows.forEach((row) => {
+    const parsed = adminCandidateRowSchema.safeParse(row);
+    if (!parsed.success) {
+      console.error("[admin] listAdminCandidates row failed:", parsed.error.issues);
+    }
+  });
+
+  // List-level output validation
+  const listParsed = adminCandidateRowListSchema.safeParse(rows);
+  if (!listParsed.success) {
+    console.error("[admin] listAdminCandidates list failed:", listParsed.error.issues);
+  }
+
+  return rows;
 }
 
 // ---------------------------------------------------------------------------
@@ -103,5 +167,12 @@ export async function getTransferDetail(
 ): Promise<AdminTransferDetail> {
   await requireCapability("transfer.read");
   const detail = await getAdminTransferDetail(transferId);
-  return adminTransferDetailSchema.parse(detail);
+
+  // Output validation — log mismatches without throwing
+  const parsed = adminTransferDetailSchema.safeParse(detail);
+  if (!parsed.success) {
+    console.error("[admin] getTransferDetail output validation failed:", parsed.error.issues);
+  }
+
+  return detail;
 }

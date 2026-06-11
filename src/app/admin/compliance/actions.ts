@@ -11,6 +11,11 @@ import {
   denyComplianceSchema,
   createComplianceRecordSchema,
   updateComplianceRecordSchema,
+  listComplianceRecordsResponseSchema,
+  companyComplianceDetailSchema,
+  idRequestComplianceDetailSchema,
+  complianceSummarySchema,
+  complianceMutationResponseSchema,
   type ListComplianceRecordsInput,
   type GetComplianceRecordInput,
   type ApproveComplianceInput,
@@ -376,7 +381,15 @@ export async function createComplianceRecord(
       },
     });
     revalidatePath("/admin/compliance");
-    return { id: `company-${company.company_id}`, type: "company" };
+    const createResult = { id: `company-${company.company_id}`, type: "company" as const };
+
+    // Validate output shape
+    const outputParsed = complianceMutationResponseSchema.safeParse(createResult);
+    if (!outputParsed.success) {
+      console.error("[admin/compliance] createComplianceRecord output failed:", outputParsed.error.issues);
+    }
+
+    return createResult;
   }
 
   throw new Error(`Unsupported compliance type: ${parsed.data.type}`);
@@ -425,7 +438,15 @@ export async function updateComplianceRecord(
     });
 
     revalidatePath("/admin/compliance");
-    return { id: `company-${companyId}`, type: "company" };
+    const updateResult = { id: `company-${companyId}`, type: "company" as const };
+
+    // Validate output shape
+    const outputParsed = complianceMutationResponseSchema.safeParse(updateResult);
+    if (!outputParsed.success) {
+      console.error("[admin/compliance] updateComplianceRecord output failed:", outputParsed.error.issues);
+    }
+
+    return updateResult;
   }
 
   throw new Error(`Unsupported compliance type: ${type}`);
@@ -465,7 +486,15 @@ export async function approveComplianceRecord(
     });
 
     revalidatePath("/admin/compliance");
-    return { id: `company-${companyId}`, type: "company" };
+    const approveCompanyResult = { id: `company-${companyId}`, type: "company" as const };
+
+    // Validate output shape
+    const outputParsed = complianceMutationResponseSchema.safeParse(approveCompanyResult);
+    if (!outputParsed.success) {
+      console.error("[admin/compliance] approveComplianceRecord (company) output failed:", outputParsed.error.issues);
+    }
+
+    return approveCompanyResult;
   }
 
   if (type === "id_request") {
@@ -477,7 +506,15 @@ export async function approveComplianceRecord(
     });
 
     revalidatePath("/admin/compliance");
-    return { id, type: "id_request" };
+    const approveIdRequestResult = { id, type: "id_request" as const };
+
+    // Validate output shape
+    const outputParsed2 = complianceMutationResponseSchema.safeParse(approveIdRequestResult);
+    if (!outputParsed2.success) {
+      console.error("[admin/compliance] approveComplianceRecord (id_request) output failed:", outputParsed2.error.issues);
+    }
+
+    return approveIdRequestResult;
   }
 
   throw new Error(`Unsupported compliance type: ${type}`);
@@ -517,7 +554,15 @@ export async function denyComplianceRecord(
     });
 
     revalidatePath("/admin/compliance");
-    return { id: `company-${companyId}`, type: "company" };
+    const denyCompanyResult = { id: `company-${companyId}`, type: "company" as const };
+
+    // Validate output shape
+    const outputParsed = complianceMutationResponseSchema.safeParse(denyCompanyResult);
+    if (!outputParsed.success) {
+      console.error("[admin/compliance] denyComplianceRecord (company) output failed:", outputParsed.error.issues);
+    }
+
+    return denyCompanyResult;
   }
 
   if (type === "id_request") {
@@ -530,7 +575,15 @@ export async function denyComplianceRecord(
     });
 
     revalidatePath("/admin/compliance");
-    return { id, type: "id_request" };
+    const denyIdRequestResult = { id, type: "id_request" as const };
+
+    // Validate output shape
+    const outputParsed2 = complianceMutationResponseSchema.safeParse(denyIdRequestResult);
+    if (!outputParsed2.success) {
+      console.error("[admin/compliance] denyComplianceRecord (id_request) output failed:", outputParsed2.error.issues);
+    }
+
+    return denyIdRequestResult;
   }
 
   throw new Error(`Unsupported compliance type: ${type}`);

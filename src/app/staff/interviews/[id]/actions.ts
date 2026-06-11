@@ -8,6 +8,8 @@ import { getStaffInterviewDetail } from "../actions";
 import {
   getInterviewSchema,
   updateInterviewNotesSchema,
+  interviewDetailRouteOutputSchema,
+  updateInterviewNotesOutputSchema,
   type GetInterviewInput,
   type UpdateInterviewNotesInput,
   type InterviewDetail,
@@ -41,7 +43,7 @@ export async function getInterview(
   if (!detail) return null;
 
   // Map the parent's 'note' field to the [id] route's 'internalNote' expected type
-  return {
+  const detailResult = {
     interviewUuid: detail.interviewUuid,
     candidateName: detail.candidateName,
     candidateEmail: detail.candidateEmail,
@@ -58,6 +60,17 @@ export async function getInterview(
     createdAt: detail.createdAt,
     updatedAt: detail.updatedAt,
   };
+
+  // Validate output shape
+  const outputParsed = interviewDetailRouteOutputSchema.safeParse(detailResult);
+  if (!outputParsed.success) {
+    console.error(
+      "[staff/interviews/[id]] getInterview output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return detailResult;
 }
 
 // ---------------------------------------------------------------------------
@@ -122,10 +135,21 @@ export async function updateInterviewNotes(
 
     revalidatePath(`/staff/interviews/${interviewUuid}`);
 
-    return {
-      operation: "success",
+    const updateResult = {
+      operation: "success" as const,
       message: "Interview notes updated successfully",
     };
+
+    // Validate output shape
+    const outputParsed = updateInterviewNotesOutputSchema.safeParse(updateResult);
+    if (!outputParsed.success) {
+      console.error(
+        "[staff/interviews/[id]] updateInterviewNotes output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return updateResult;
   } catch (err) {
     return {
       operation: "error",

@@ -21,6 +21,67 @@ export const updateTicketStatusSchema = z.object({
   status: z.coerce.number().int().min(0, "Status must be >= 0"),
 });
 
+// ---------------------------------------------------------------------------
+// Output validation schemas
+// ---------------------------------------------------------------------------
+
+/**
+ * Schema for a single ticket list item.
+ */
+export const ticketItemSchema = z.object({
+  ticket_uuid: z.string().min(1),
+  ticket_detail: z.string().nullable(),
+  ticket_status: z.number().int().nullable(),
+  created_at: z.date().nullable(),
+  candidate_name: z.string().nullable(),
+  staff_name: z.string().nullable(),
+});
+
+/**
+ * Schema for the listTickets response.
+ */
+export const listTicketsResultSchema = z.object({
+  tickets: z.array(ticketItemSchema),
+  total: z.number().int().nonnegative(),
+  page: z.number().int().positive(),
+  limit: z.number().int().positive(),
+  totalPages: z.number().int().nonnegative(),
+});
+
+/**
+ * Schema for a full ticket detail.
+ */
+export const ticketDetailSchema = z.object({
+  ticket_uuid: z.string().min(1),
+  candidate_id: z.number().int().nullable(),
+  staff_id: z.number().int().nullable(),
+  ticket_detail: z.string().nullable(),
+  ticket_status: z.number().int().nullable(),
+  ticket_started_at: z.date().nullable(),
+  ticket_completed_at: z.date().nullable(),
+  response_time: z.number().int().nullable(),
+  resolution_time: z.number().int().nullable(),
+  created_at: z.date().nullable(),
+  updated_at: z.date().nullable(),
+  candidate_name: z.string().nullable(),
+  staff_name: z.string().nullable(),
+});
+
+/**
+ * Schema for the getTicket response.
+ */
+export const getTicketResultSchema = z.object({
+  ticket: ticketDetailSchema.nullable(),
+});
+
+/**
+ * Schema for ticket action responses (create / update status).
+ */
+export const ticketActionResponseSchema = z.object({
+  operation: z.string().min(1),
+  message: z.string().min(1),
+});
+
 export type ListTicketsInput = z.input<typeof listTicketsSchema>;
 export type GetTicketInput = z.input<typeof getTicketSchema>;
 export type CreateTicketInput = z.input<typeof createTicketSchema>;

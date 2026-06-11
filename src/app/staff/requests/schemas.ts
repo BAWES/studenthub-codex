@@ -92,3 +92,72 @@ export type UpdateRequestStatusResult = {
   operation: "success" | "error";
   message: string;
 };
+
+// ---------------------------------------------------------------------------
+// Output validation schemas
+// ---------------------------------------------------------------------------
+
+/** Validates a single staff request row returned in list results. */
+export const staffRequestRowOutputSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  company: z.string(),
+  seats: z.number().int(),
+  status: z.string(),
+  updated: z.string(),
+});
+
+/** Validates the listStaffRequests return shape. */
+export const staffRequestListOutputSchema = z.object({
+  items: z.array(staffRequestRowOutputSchema),
+  total: z.number().int().nonnegative(),
+  page: z.number().int().positive(),
+  limit: z.number().int().positive(),
+  totalPages: z.number().int().nonnegative(),
+});
+
+/** Validates the candidate application object inside request detail. */
+export const requestCandidateOutputSchema = z.object({
+  uuid: z.string(),
+  name: z.string().nullable(),
+  email: z.string().nullable(),
+  applicationStatus: z.number().int().nullable(),
+  appliedAt: z.date().nullable(),
+});
+
+/** Validates a staff request detail object. */
+export const staffRequestDetailOutputSchema = z.object({
+  requestUuid: z.string(),
+  positionTitle: z.string().nullable(),
+  jobDescription: z.string(),
+  compensation: z.string(),
+  seats: z.number().int(),
+  location: z.string().nullable(),
+  status: z.string().nullable(),
+  priority: z.number().int().nullable(),
+  assignedAt: z.date().nullable(),
+  startedAt: z.date().nullable(),
+  finishedAt: z.date().nullable(),
+  updatedAt: z.date(),
+  createdAt: z.date(),
+  company: z.object({
+    company_id: z.number().int(),
+    company_name: z.string().nullable(),
+    company_email: z.string().nullable(),
+  }).nullable(),
+  contact: z.object({
+    contact_name: z.string().nullable(),
+    contact_email: z.string().nullable(),
+  }).nullable(),
+  staff: z.object({
+    staff_name: z.string().nullable(),
+    staff_email: z.string().nullable(),
+  }).nullable(),
+  candidates: z.array(requestCandidateOutputSchema),
+});
+
+/** Validates the updateRequestStatus return shape. */
+export const updateRequestStatusOutputSchema = z.object({
+  operation: z.enum(["success", "error"]),
+  message: z.string(),
+});

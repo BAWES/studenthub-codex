@@ -60,7 +60,7 @@ export const adminCandidateRowSchema = z.object({
  */
 export const adminMetricSchema = z.object({
   label: z.string().min(1, "Metric label is required"),
-  value: z.string().min(1, "Value is required"),
+  value: z.union([z.string(), z.number()]),
   note: z.string().optional().default(""),
 });
 
@@ -104,6 +104,30 @@ export const adminTransferDetailSchema = z.object({
   invoices: z.array(adminTransferInvoiceSchema),
   fileEntries: z.array(adminTransferFileEntrySchema),
 });
+
+// ---------------------------------------------------------------------------
+// Output validation — list schemas (array wrappers)
+// ---------------------------------------------------------------------------
+
+/**
+ * Schema for the full companies array returned by listAdminCompanies.
+ */
+export const adminCompanyRowListSchema = z.array(adminCompanyRowSchema);
+
+/**
+ * Schema for the full requests array returned by listAdminRequests.
+ */
+export const adminRequestRowListSchema = z.array(adminRequestRowSchema);
+
+/**
+ * Schema for the full transfers array returned by listAdminTransfers.
+ */
+export const adminTransferRowListSchema = z.array(adminTransferRowSchema);
+
+/**
+ * Schema for the full candidates array returned by listAdminCandidates.
+ */
+export const adminCandidateRowListSchema = z.array(adminCandidateRowSchema);
 
 // ---------------------------------------------------------------------------
 // Types

@@ -8,7 +8,7 @@
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
 import { formatDate, formatMoney } from "@/modules/workspace/format";
-import { getStaffWorkspaceSchema } from "./schemas";
+import { getStaffWorkspaceSchema, staffWorkspaceOutputSchema } from "./schemas";
 import type { StaffWorkspaceData } from "./schemas";
 
 /**
@@ -77,7 +77,7 @@ export async function getStaffWorkspace(
       }),
     ]);
 
-  return {
+  const result: StaffWorkspaceData = {
     staff: staff
       ? {
           ...staff,
@@ -103,4 +103,15 @@ export async function getStaffWorkspace(
       meta: formatDate(story.story_last_updated_at),
     })),
   };
+
+  // Validate output shape
+  const validated = staffWorkspaceOutputSchema.safeParse(result);
+  if (!validated.success) {
+    console.error(
+      "[staff] getStaffWorkspace output validation failed:",
+      validated.error.issues,
+    );
+  }
+
+  return result;
 }

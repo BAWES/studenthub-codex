@@ -8,6 +8,11 @@ import {
   getTicketSchema,
   createTicketSchema,
   updateTicketStatusSchema,
+  ticketItemSchema,
+  listTicketsResultSchema,
+  getTicketResultSchema,
+  ticketDetailSchema,
+  ticketActionResponseSchema,
 } from "./schemas";
 import type { ListTicketsInput, ListTicketsResult, TicketDetail } from "./schemas";
 
@@ -47,7 +52,15 @@ export async function listTickets(
     candidate_name: row.candidate?.candidate_name ?? null,
     staff_name: row.staff?.staff_name ?? null,
   }));
-  return { tickets, total, page, limit, totalPages: Math.ceil(total / limit) };
+  const result = { tickets, total, page, limit, totalPages: Math.ceil(total / limit) };
+
+  // Validate output shape
+  const outputParsed = listTicketsResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error("[admin/tickets] listTickets output failed:", outputParsed.error.issues);
+  }
+
+  return result;
 }
 
 export async function getTicket(
@@ -116,8 +129,24 @@ export async function updateTicketStatus(
       data: { ticket_status: parsed.data.status },
     });
     revalidatePath("/admin/tickets");
-    return { operation: "success", message: "Ticket status updated successfully" };
+    const result = { operation: "success", message: "Ticket status updated successfully" };
+
+    // Validate output shape
+    const outputParsed = ticketActionResponseSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error("[admin/tickets] updateTicketStatus output failed:", outputParsed.error.issues);
+    }
+
+    return result;
   } catch (_e) {
-    return { operation: "error", message: "We've faced a problem updating the ticket, please contact us for assistance." };
+    const result = { operation: "error", message: "We've faced a problem updating the ticket, please contact us for assistance." };
+
+    // Validate output shape
+    const outputParsed = ticketActionResponseSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error("[admin/tickets] updateTicketStatus output failed:", outputParsed.error.issues);
+    }
+
+    return result;
   }
 }

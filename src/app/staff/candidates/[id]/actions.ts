@@ -8,6 +8,8 @@ import { requireCapability } from "@/modules/auth/session";
 import {
   getCandidateSchema,
   addCandidateNoteSchema,
+  candidateDetailResultOutputSchema,
+  addNoteResultOutputSchema,
   type GetCandidateInput,
   type AddCandidateNoteInput,
   type CandidateDetail,
@@ -80,7 +82,7 @@ export async function getCandidate(
     return d instanceof Date && isFinite(d.getTime()) ? d.toISOString() : null;
   };
 
-  return {
+  const result: CandidateDetailResult = {
     candidate: {
       id: candidate.candidate_id,
       name: candidate.candidate_name,
@@ -108,6 +110,17 @@ export async function getCandidate(
       createdAt: isoDate(n.note_created_datetime) ?? "",
     })),
   };
+
+  // Validate output shape
+  const outputParsed = candidateDetailResultOutputSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[staff/candidates/[id]] getCandidate output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------

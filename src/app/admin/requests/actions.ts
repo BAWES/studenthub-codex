@@ -28,6 +28,12 @@ import {
   approveRequestSchema,
   rejectRequestSchema,
   closeRequestSchema,
+  listRequestsOutputSchema,
+  getRequestOutputSchema,
+  updateRequestStatusOutputSchema,
+  approveRequestOutputSchema,
+  rejectRequestOutputSchema,
+  closeRequestOutputSchema,
   type ListRequestsInput,
   type GetRequestInput,
   type UpdateRequestStatusInput,
@@ -90,7 +96,7 @@ export async function listRequests(
     prisma.request.count({ where: where as any }),
   ]);
 
-  return {
+  const result = {
     items: requests.map((r: any): RequestRow => ({
       request_uuid: r.request_uuid,
       title: r.request_position_title ?? "Untitled request",
@@ -108,6 +114,14 @@ export async function listRequests(
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  // Validate output shape
+  const outputParsed = listRequestsOutputSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error("[admin/requests] listRequests output failed:", outputParsed.error.issues);
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -166,13 +180,21 @@ export async function getRequest(
   });
 
   if (!request) {
-    return {
+    const result = {
       request: null,
       applications: [],
       invitations: [],
       interviews: [],
       metrics: [],
     };
+
+    // Validate output shape
+    const outputParsed = getRequestOutputSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error("[admin/requests] getRequest (not found) output failed:", outputParsed.error.issues);
+    }
+
+    return result;
   }
 
   const r = request as any;
@@ -211,7 +233,7 @@ export async function getRequest(
     { label: "Status", value: r.request_status ?? "pending", note: r.request_priority ? `Priority: ${r.request_priority}` : "" },
   ];
 
-  return {
+  const result = {
     request: {
       request_uuid: r.request_uuid,
       request_position_title: r.request_position_title ?? null,
@@ -236,6 +258,14 @@ export async function getRequest(
     interviews,
     metrics,
   };
+
+  // Validate output shape
+  const outputParsed = getRequestOutputSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error("[admin/requests] getRequest output failed:", outputParsed.error.issues);
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -259,10 +289,18 @@ export async function updateRequestStatus(
 
   const parsed = updateRequestStatusSchema.safeParse(input);
   if (!parsed.success) {
-    return {
+    const result: UpdateRequestStatusResult = {
       operation: "error",
       message: parsed.error.issues[0]?.message ?? "Invalid input",
     };
+
+    // Validate output shape
+    const outputParsed = updateRequestStatusOutputSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error("[admin/requests] updateRequestStatus output failed:", outputParsed.error.issues);
+    }
+
+    return result;
   }
 
   const { requestUuid, status, feedback } = parsed.data;
@@ -274,7 +312,15 @@ export async function updateRequestStatus(
   });
 
   if (!existing) {
-    return { operation: "error", message: "Request not found" };
+    const result: UpdateRequestStatusResult = { operation: "error", message: "Request not found" };
+
+    // Validate output shape
+    const outputParsed = updateRequestStatusOutputSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error("[admin/requests] updateRequestStatus output failed:", outputParsed.error.issues);
+    }
+
+    return result;
   }
 
   const now = new Date();
@@ -308,15 +354,31 @@ export async function updateRequestStatus(
 
     revalidatePath("/admin/requests");
 
-    return {
+    const result: UpdateRequestStatusResult = {
       operation: "success",
       message: `Request status updated to "${status}"`,
     };
+
+    // Validate output shape
+    const outputParsed = updateRequestStatusOutputSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error("[admin/requests] updateRequestStatus output failed:", outputParsed.error.issues);
+    }
+
+    return result;
   } catch (err) {
-    return {
+    const result: UpdateRequestStatusResult = {
       operation: "error",
       message: err instanceof Error ? err.message : "Failed to update request status",
     };
+
+    // Validate output shape
+    const outputParsed = updateRequestStatusOutputSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error("[admin/requests] updateRequestStatus output failed:", outputParsed.error.issues);
+    }
+
+    return result;
   }
 }
 
@@ -334,10 +396,18 @@ export async function approveRequest(
 
   const parsed = approveRequestSchema.safeParse(input);
   if (!parsed.success) {
-    return {
+    const result: RequestActionResponse = {
       operation: "error",
       message: parsed.error.issues[0]?.message ?? "Invalid input",
     };
+
+    // Validate output shape
+    const outputParsed = approveRequestOutputSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error("[admin/requests] approveRequest output failed:", outputParsed.error.issues);
+    }
+
+    return result;
   }
 
   const existing = await prisma.request.findUnique({
@@ -346,14 +416,30 @@ export async function approveRequest(
   });
 
   if (!existing) {
-    return { operation: "error", message: "Request not found" };
+    const result: RequestActionResponse = { operation: "error", message: "Request not found" };
+
+    // Validate output shape
+    const outputParsed = approveRequestOutputSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error("[admin/requests] approveRequest output failed:", outputParsed.error.issues);
+    }
+
+    return result;
   }
 
   if (existing.request_status !== "pending") {
-    return {
+    const result: RequestActionResponse = {
       operation: "error",
       message: `Request cannot be approved in current status (${existing.request_status}). Expected status: pending.`,
     };
+
+    // Validate output shape
+    const outputParsed = approveRequestOutputSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error("[admin/requests] approveRequest output failed:", outputParsed.error.issues);
+    }
+
+    return result;
   }
 
   const now = new Date();
@@ -371,15 +457,31 @@ export async function approveRequest(
 
     revalidatePath("/admin/requests");
 
-    return {
+    const result: RequestActionResponse = {
       operation: "success",
       message: `Request approved: ${parsed.data.reason}`,
     };
+
+    // Validate output shape
+    const outputParsed = approveRequestOutputSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error("[admin/requests] approveRequest output failed:", outputParsed.error.issues);
+    }
+
+    return result;
   } catch (err) {
-    return {
+    const result: RequestActionResponse = {
       operation: "error",
       message: err instanceof Error ? err.message : "Failed to approve request",
     };
+
+    // Validate output shape
+    const outputParsed = approveRequestOutputSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error("[admin/requests] approveRequest output failed:", outputParsed.error.issues);
+    }
+
+    return result;
   }
 }
 
@@ -397,10 +499,18 @@ export async function rejectRequest(
 
   const parsed = rejectRequestSchema.safeParse(input);
   if (!parsed.success) {
-    return {
+    const result: RequestActionResponse = {
       operation: "error",
       message: parsed.error.issues[0]?.message ?? "Invalid input",
     };
+
+    // Validate output shape
+    const outputParsed = rejectRequestOutputSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error("[admin/requests] rejectRequest output failed:", outputParsed.error.issues);
+    }
+
+    return result;
   }
 
   const existing = await prisma.request.findUnique({
@@ -409,14 +519,30 @@ export async function rejectRequest(
   });
 
   if (!existing) {
-    return { operation: "error", message: "Request not found" };
+    const result: RequestActionResponse = { operation: "error", message: "Request not found" };
+
+    // Validate output shape
+    const outputParsed = rejectRequestOutputSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error("[admin/requests] rejectRequest output failed:", outputParsed.error.issues);
+    }
+
+    return result;
   }
 
   if (existing.request_status === "delivered" || existing.request_status === "cancelled") {
-    return {
+    const result: RequestActionResponse = {
       operation: "error",
       message: `Cannot reject a request with status "${existing.request_status}".`,
     };
+
+    // Validate output shape
+    const outputParsed = rejectRequestOutputSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error("[admin/requests] rejectRequest output failed:", outputParsed.error.issues);
+    }
+
+    return result;
   }
 
   const now = new Date();
@@ -434,15 +560,31 @@ export async function rejectRequest(
 
     revalidatePath("/admin/requests");
 
-    return {
+    const result: RequestActionResponse = {
       operation: "success",
       message: `Request rejected: ${parsed.data.reason}`,
     };
+
+    // Validate output shape
+    const outputParsed = rejectRequestOutputSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error("[admin/requests] rejectRequest output failed:", outputParsed.error.issues);
+    }
+
+    return result;
   } catch (err) {
-    return {
+    const result: RequestActionResponse = {
       operation: "error",
       message: err instanceof Error ? err.message : "Failed to reject request",
     };
+
+    // Validate output shape
+    const outputParsed = rejectRequestOutputSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error("[admin/requests] rejectRequest output failed:", outputParsed.error.issues);
+    }
+
+    return result;
   }
 }
 
@@ -460,10 +602,18 @@ export async function closeRequest(
 
   const parsed = closeRequestSchema.safeParse(input);
   if (!parsed.success) {
-    return {
+    const result: RequestActionResponse = {
       operation: "error",
       message: parsed.error.issues[0]?.message ?? "Invalid input",
     };
+
+    // Validate output shape
+    const outputParsed = closeRequestOutputSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error("[admin/requests] closeRequest output failed:", outputParsed.error.issues);
+    }
+
+    return result;
   }
 
   const existing = await prisma.request.findUnique({
@@ -472,14 +622,30 @@ export async function closeRequest(
   });
 
   if (!existing) {
-    return { operation: "error", message: "Request not found" };
+    const result: RequestActionResponse = { operation: "error", message: "Request not found" };
+
+    // Validate output shape
+    const outputParsed = closeRequestOutputSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error("[admin/requests] closeRequest output failed:", outputParsed.error.issues);
+    }
+
+    return result;
   }
 
   if (existing.request_status === "delivered" || existing.request_status === "cancelled") {
-    return {
+    const result: RequestActionResponse = {
       operation: "error",
       message: `Cannot close a request with status "${existing.request_status}".`,
     };
+
+    // Validate output shape
+    const outputParsed = closeRequestOutputSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error("[admin/requests] closeRequest output failed:", outputParsed.error.issues);
+    }
+
+    return result;
   }
 
   const now = new Date();
@@ -498,14 +664,30 @@ export async function closeRequest(
 
     revalidatePath("/admin/requests");
 
-    return {
+    const result: RequestActionResponse = {
       operation: "success",
       message: `Request closed: ${parsed.data.resolution}`,
     };
+
+    // Validate output shape
+    const outputParsed = closeRequestOutputSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error("[admin/requests] closeRequest output failed:", outputParsed.error.issues);
+    }
+
+    return result;
   } catch (err) {
-    return {
+    const result: RequestActionResponse = {
       operation: "error",
       message: err instanceof Error ? err.message : "Failed to close request",
     };
+
+    // Validate output shape
+    const outputParsed = closeRequestOutputSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error("[admin/requests] closeRequest output failed:", outputParsed.error.issues);
+    }
+
+    return result;
   }
 }

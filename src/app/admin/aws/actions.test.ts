@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { getAwsConfigSchema } from "./schemas";
+import { getAwsConfigSchema, awsConfigEntrySchema, awsConfigEntryListSchema, awsConfigResultSchema } from "./schemas";
 import type { AwsConfigEntry, AwsConfigResult } from "./schemas";
 
 // ── Hoisted mock functions ──────────────────────────────────
@@ -51,8 +51,8 @@ describe("AwsConfigEntry type", () => {
   });
 
   it("supports masked secret value", () => {
-    const entry: AwsConfigEntry = { key: "aws_secret_access_key", value: "••••••••xyza" };
-    expect(entry.value).toContain("••••••••");
+    const entry: AwsConfigEntry = { key: "aws_secret_access_key", value: "\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022xyza" };
+    expect(entry.value).toContain("\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022");
   });
 });
 
@@ -72,7 +72,7 @@ describe("AwsConfigResult type", () => {
   });
 });
 
-describe("listAwsConfigs — runtime", () => {
+describe("listAwsConfigs \u2014 runtime", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockRequireCapability.mockResolvedValue(undefined);
@@ -99,7 +99,7 @@ describe("listAwsConfigs — runtime", () => {
     vi.stubEnv("AWS_TEMP_SECRET_ACCESS_KEY", "supersecret1234");
     const result = await listAwsConfigs();
     const secretKey = result.find((e) => e.key === "aws_temp_secret_access_key");
-    expect(secretKey?.value).toBe("••••••••1234");
+    expect(secretKey?.value).toBe("\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u20221234");
     expect(secretKey?.value).not.toContain("supersecret");
     vi.unstubAllEnvs();
   });
@@ -116,7 +116,7 @@ describe("listAwsConfigs — runtime", () => {
   });
 });
 
-describe("getAwsConfig — runtime", () => {
+describe("getAwsConfig \u2014 runtime", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockRequireCapability.mockResolvedValue(undefined);
@@ -158,5 +158,74 @@ describe("getAwsConfig — runtime", () => {
   it("propagates auth errors", async () => {
     mockRequireCapability.mockRejectedValue(new Error("Redirect"));
     await expect(getAwsConfig()).rejects.toThrow("Redirect");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output schema validation tests (Zod safeParse)
+// ---------------------------------------------------------------------------
+
+describe("awsConfigEntrySchema (output validation)", () => {
+  it("accepts valid config entry", () => {
+    const r = awsConfigEntrySchema.safeParse({ key: "aws_region", value: "us-east-1" });
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts empty value for unset config", () => {
+    const r = awsConfigEntrySchema.safeParse({ key: "aws_region", value: "" });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects missing key", () => {
+    const r = awsConfigEntrySchema.safeParse({ value: "us-east-1" });
+    expect(r.success).toBe(false);
+  });
+});
+
+describe("awsConfigEntryListSchema (output validation)", () => {
+  it("accepts array of config entries", () => {
+    const r = awsConfigEntryListSchema.safeParse([
+      { key: "aws_region", value: "us-east-1" },
+      { key: "aws_bucket", value: "my-bucket" },
+    ]);
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts empty array", () => {
+    const r = awsConfigEntryListSchema.safeParse([]);
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects array with invalid entry", () => {
+    const r = awsConfigEntryListSchema.safeParse([
+      { key: "", value: "us-east-1" },
+    ]);
+    expect(r.success).toBe(false);
+  });
+});
+
+describe("awsConfigResultSchema (output validation)", () => {
+  it("accepts valid config result", () => {
+    const r = awsConfigResultSchema.safeParse({
+      region: "us-east-1",
+      bucket: "my-bucket",
+      key: "AKIA123456",
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts empty strings for unset config", () => {
+    const r = awsConfigResultSchema.safeParse({ region: "", bucket: "", key: "" });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects non-string values", () => {
+    const r = awsConfigResultSchema.safeParse({ region: 123, bucket: "", key: "" });
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects missing region field", () => {
+    const r = awsConfigResultSchema.safeParse({ bucket: "", key: "" });
+    expect(r.success).toBe(false);
   });
 });

@@ -6,6 +6,12 @@ import {
   approveRequestSchema,
   rejectRequestSchema,
   closeRequestSchema,
+  listRequestsOutputSchema,
+  getRequestOutputSchema,
+  updateRequestStatusOutputSchema,
+  approveRequestOutputSchema,
+  rejectRequestOutputSchema,
+  closeRequestOutputSchema,
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
@@ -249,5 +255,216 @@ describe("closeRequestSchema", () => {
     expect(
       closeRequestSchema.safeParse({ requestUuid: "abc", resolution: longResolution }).success,
     ).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output schema tests
+// ---------------------------------------------------------------------------
+
+describe("listRequestsOutputSchema", () => {
+  it("validates a valid paginated response", () => {
+    const r = listRequestsOutputSchema.safeParse({
+      items: [
+        {
+          request_uuid: "req_uuid_1",
+          title: "Developer needed",
+          company_name: "ACME Corp",
+          staff_name: null,
+          position_type: "full_time",
+          no_of_employees: 2,
+          status: "pending",
+          priority: 1,
+          created_at: "2024-01-01T00:00:00.000Z",
+          updated_at: null,
+        },
+      ],
+      total: 1,
+      page: 1,
+      limit: 20,
+      totalPages: 1,
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects negative total", () => {
+    const r = listRequestsOutputSchema.safeParse({
+      items: [],
+      total: -1,
+      page: 1,
+      limit: 20,
+      totalPages: 0,
+    });
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects missing items field", () => {
+    const r = listRequestsOutputSchema.safeParse({
+      total: 0,
+      page: 1,
+      limit: 20,
+      totalPages: 0,
+    });
+    expect(r.success).toBe(false);
+  });
+
+  it("validates empty items array", () => {
+    const r = listRequestsOutputSchema.safeParse({
+      items: [],
+      total: 0,
+      page: 1,
+      limit: 20,
+      totalPages: 0,
+    });
+    expect(r.success).toBe(true);
+  });
+});
+
+describe("getRequestOutputSchema", () => {
+  it("validates a full request detail", () => {
+    const r = getRequestOutputSchema.safeParse({
+      request: {
+        request_uuid: "req_uuid_1",
+        request_position_title: "Developer",
+        request_job_description: "Full stack dev",
+        request_compensation: "1500 KWD",
+        request_status: "pending",
+        request_feedback: null,
+        request_priority: 1,
+        request_started_at: null,
+        request_finished_at: null,
+        request_created_datetime: "2024-01-01T00:00:00.000Z",
+        request_updated_datetime: null,
+        company: { company_name: "ACME", company_email: "acme@test.com" },
+        staff: null,
+      },
+      applications: [
+        {
+          application_uuid: "app_uuid_1",
+          candidate_name: "John Doe",
+          status: 1,
+          created_at: "2024-01-02T00:00:00.000Z",
+        },
+      ],
+      invitations: [],
+      interviews: [],
+      metrics: [
+        { label: "Applications", value: 1, note: "Candidates applied" },
+      ],
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("validates null request for not-found", () => {
+    const r = getRequestOutputSchema.safeParse({
+      request: null,
+      applications: [],
+      invitations: [],
+      interviews: [],
+      metrics: [],
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects missing request field", () => {
+    const r = getRequestOutputSchema.safeParse({
+      applications: [],
+      invitations: [],
+      interviews: [],
+      metrics: [],
+    });
+    expect(r.success).toBe(false);
+  });
+});
+
+describe("updateRequestStatusOutputSchema", () => {
+  it("validates a success response", () => {
+    const r = updateRequestStatusOutputSchema.safeParse({
+      operation: "success",
+      message: "Request updated",
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("validates an error response", () => {
+    const r = updateRequestStatusOutputSchema.safeParse({
+      operation: "error",
+      message: "Request not found",
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects invalid operation value", () => {
+    const r = updateRequestStatusOutputSchema.safeParse({
+      operation: "invalid",
+      message: "test",
+    });
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects missing message", () => {
+    const r = updateRequestStatusOutputSchema.safeParse({
+      operation: "success",
+    });
+    expect(r.success).toBe(false);
+  });
+});
+
+describe("approveRequestOutputSchema", () => {
+  it("validates a success response", () => {
+    const r = approveRequestOutputSchema.safeParse({
+      operation: "success",
+      message: "Request approved",
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("validates an error response", () => {
+    const r = approveRequestOutputSchema.safeParse({
+      operation: "error",
+      message: "Request not found",
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects invalid operation", () => {
+    const r = approveRequestOutputSchema.safeParse({
+      operation: "unknown",
+      message: "test",
+    });
+    expect(r.success).toBe(false);
+  });
+});
+
+describe("rejectRequestOutputSchema", () => {
+  it("validates a success response", () => {
+    const r = rejectRequestOutputSchema.safeParse({
+      operation: "success",
+      message: "Request rejected",
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects missing operation", () => {
+    const r = rejectRequestOutputSchema.safeParse({ message: "test" });
+    expect(r.success).toBe(false);
+  });
+});
+
+describe("closeRequestOutputSchema", () => {
+  it("validates a success response", () => {
+    const r = closeRequestOutputSchema.safeParse({
+      operation: "success",
+      message: "Request closed",
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("validates an error response", () => {
+    const r = closeRequestOutputSchema.safeParse({
+      operation: "error",
+      message: "Already closed",
+    });
+    expect(r.success).toBe(true);
   });
 });

@@ -46,3 +46,32 @@ export type UpdateInterviewNotesResult = {
   operation: "success" | "error";
   message: string;
 };
+
+// ---------------------------------------------------------------------------
+// Output validation schemas
+// ---------------------------------------------------------------------------
+
+/** Validates a route-level interview detail object. */
+export const interviewDetailRouteOutputSchema = z.object({
+  interviewUuid: z.string(),
+  candidateName: z.string().nullable(),
+  candidateEmail: z.string().nullable(),
+  candidatePhone: z.string().nullable(),
+  candidateId: z.number().int().nullable(),
+  requestTitle: z.string().nullable(),
+  requestUuid: z.string().nullable(),
+  companyName: z.string().nullable(),
+  scheduledAt: z.date().nullable(),
+  status: z.number().int().nullable(),
+  interviewNote: z.string().nullable(),
+  internalNote: z.string().nullable(),
+  staffName: z.string().nullable(),
+  createdAt: z.date().nullable(),
+  updatedAt: z.date().nullable(),
+});
+
+/** Validates the updateInterviewNotes return shape. */
+export const updateInterviewNotesOutputSchema = z.object({
+  operation: z.enum(["success", "error"]),
+  message: z.string(),
+});

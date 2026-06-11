@@ -24,6 +24,9 @@ import {
   createDepartmentSchema,
   updateDepartmentSchema,
   deleteDepartmentSchema,
+  departmentListResponseSchema,
+  departmentDetailSchema,
+  departmentActionResponseSchema,
   type ListDepartmentsInput,
   type GetDepartmentInput,
   type CreateDepartmentInput,
@@ -81,7 +84,7 @@ export async function listDepartments(
     prisma.department.count({ where: where as any }),
   ]);
 
-  return {
+  const result = {
     items: departments.map((d): DepartmentRow => ({
       department_uuid: d.department_uuid,
       department_name_en: d.department_name_en,
@@ -95,6 +98,14 @@ export async function listDepartments(
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  // Validate output shape
+  const outputParsed = departmentListResponseSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error("[admin/departments] listDepartments output failed:", outputParsed.error.issues);
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -122,10 +133,18 @@ export async function getDepartment(
   });
 
   if (!department) {
-    return { department: null, employee_count: 0 };
+    const notFoundResult = { department: null, employee_count: 0 };
+
+    // Validate output shape
+    const outputParsed = departmentDetailSchema.safeParse(notFoundResult);
+    if (!outputParsed.success) {
+      console.error("[admin/departments] getDepartment (not found) output failed:", outputParsed.error.issues);
+    }
+
+    return notFoundResult;
   }
 
-  return {
+  const successResult = {
     department: {
       department_uuid: department.department_uuid,
       department_name_en: department.department_name_en,
@@ -135,6 +154,14 @@ export async function getDepartment(
     },
     employee_count: department._count?.employee ?? 0,
   };
+
+  // Validate output shape
+  const outputParsed2 = departmentDetailSchema.safeParse(successResult);
+  if (!outputParsed2.success) {
+    console.error("[admin/departments] getDepartment output failed:", outputParsed2.error.issues);
+  }
+
+  return successResult;
 }
 
 // ---------------------------------------------------------------------------
@@ -175,7 +202,7 @@ export async function createDepartment(
 
     revalidatePath("/admin/departments");
 
-    return {
+    const successResult: DepartmentActionResponse = {
       operation: "success",
       message: `Department "${department.department_name_en}" created`,
       data: {
@@ -187,11 +214,27 @@ export async function createDepartment(
         updated_at: department.department_updated_at?.toISOString() ?? null,
       },
     };
+
+    // Validate output shape
+    const outputParsed = departmentActionResponseSchema.safeParse(successResult);
+    if (!outputParsed.success) {
+      console.error("[admin/departments] createDepartment output failed:", outputParsed.error.issues);
+    }
+
+    return successResult;
   } catch (err) {
-    return {
+    const errorResult: DepartmentActionResponse = {
       operation: "error",
       message: err instanceof Error ? err.message : "Failed to create department",
     };
+
+    // Validate output shape
+    const outputParsed = departmentActionResponseSchema.safeParse(errorResult);
+    if (!outputParsed.success) {
+      console.error("[admin/departments] createDepartment (error) output failed:", outputParsed.error.issues);
+    }
+
+    return errorResult;
   }
 }
 
@@ -221,7 +264,15 @@ export async function updateDepartment(
   });
 
   if (!existing) {
-    return { operation: "error", message: "Department not found" };
+    const notFoundResult: DepartmentActionResponse = { operation: "error", message: "Department not found" };
+
+    // Validate output shape
+    const outputParsed = departmentActionResponseSchema.safeParse(notFoundResult);
+    if (!outputParsed.success) {
+      console.error("[admin/departments] updateDepartment (not found) output failed:", outputParsed.error.issues);
+    }
+
+    return notFoundResult;
   }
 
   const updateData: Record<string, unknown> = {
@@ -243,7 +294,7 @@ export async function updateDepartment(
     revalidatePath("/admin/departments");
     revalidatePath(`/admin/departments/${parsed.data.departmentUuid}`);
 
-    return {
+    const successResult: DepartmentActionResponse = {
       operation: "success",
       message: `Department "${department.department_name_en}" updated`,
       data: {
@@ -255,11 +306,27 @@ export async function updateDepartment(
         updated_at: department.department_updated_at?.toISOString() ?? null,
       },
     };
+
+    // Validate output shape
+    const outputParsed2 = departmentActionResponseSchema.safeParse(successResult);
+    if (!outputParsed2.success) {
+      console.error("[admin/departments] updateDepartment output failed:", outputParsed2.error.issues);
+    }
+
+    return successResult;
   } catch (err) {
-    return {
+    const errorResult: DepartmentActionResponse = {
       operation: "error",
       message: err instanceof Error ? err.message : "Failed to update department",
     };
+
+    // Validate output shape
+    const outputParsed3 = departmentActionResponseSchema.safeParse(errorResult);
+    if (!outputParsed3.success) {
+      console.error("[admin/departments] updateDepartment (error) output failed:", outputParsed3.error.issues);
+    }
+
+    return errorResult;
   }
 }
 
@@ -277,10 +344,18 @@ export async function deleteDepartment(
 
   const parsed = deleteDepartmentSchema.safeParse(input);
   if (!parsed.success) {
-    return {
+    const errorResult: DepartmentActionResponse = {
       operation: "error",
       message: parsed.error.issues[0]?.message ?? "Invalid input",
     };
+
+    // Validate output shape
+    const outputParsed = departmentActionResponseSchema.safeParse(errorResult);
+    if (!outputParsed.success) {
+      console.error("[admin/departments] deleteDepartment (input error) output failed:", outputParsed.error.issues);
+    }
+
+    return errorResult;
   }
 
   const existing = await prisma.department.findUnique({
@@ -291,14 +366,30 @@ export async function deleteDepartment(
   });
 
   if (!existing) {
-    return { operation: "error", message: "Department not found" };
+    const notFoundResult: DepartmentActionResponse = { operation: "error", message: "Department not found" };
+
+    // Validate output shape
+    const outputParsed = departmentActionResponseSchema.safeParse(notFoundResult);
+    if (!outputParsed.success) {
+      console.error("[admin/departments] deleteDepartment (not found) output failed:", outputParsed.error.issues);
+    }
+
+    return notFoundResult;
   }
 
   if ((existing._count?.employee ?? 0) > 0) {
-    return {
+    const hasEmployeesResult: DepartmentActionResponse = {
       operation: "error",
       message: `Cannot delete department with ${existing._count.employee} employee(s) assigned. Reassign or remove employees first.`,
     };
+
+    // Validate output shape
+    const outputParsed = departmentActionResponseSchema.safeParse(hasEmployeesResult);
+    if (!outputParsed.success) {
+      console.error("[admin/departments] deleteDepartment (has employees) output failed:", outputParsed.error.issues);
+    }
+
+    return hasEmployeesResult;
   }
 
   try {
@@ -308,11 +399,27 @@ export async function deleteDepartment(
 
     revalidatePath("/admin/departments");
 
-    return { operation: "success", message: "Department deleted" };
+    const successResult: DepartmentActionResponse = { operation: "success", message: "Department deleted" };
+
+    // Validate output shape
+    const outputParsed = departmentActionResponseSchema.safeParse(successResult);
+    if (!outputParsed.success) {
+      console.error("[admin/departments] deleteDepartment output failed:", outputParsed.error.issues);
+    }
+
+    return successResult;
   } catch (err) {
-    return {
+    const errorResult: DepartmentActionResponse = {
       operation: "error",
       message: err instanceof Error ? err.message : "Failed to delete department",
     };
+
+    // Validate output shape
+    const outputParsed = departmentActionResponseSchema.safeParse(errorResult);
+    if (!outputParsed.success) {
+      console.error("[admin/departments] deleteDepartment (error) output failed:", outputParsed.error.issues);
+    }
+
+    return errorResult;
   }
 }

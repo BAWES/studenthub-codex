@@ -8,6 +8,9 @@ import {
   listStaffInterviewsSchema,
   getStaffInterviewDetailSchema,
   updateInterviewStatusSchema,
+  interviewListOutputSchema,
+  interviewDetailOutputSchema,
+  updateInterviewStatusOutputSchema,
   type ListStaffInterviewsInput,
   type InterviewRow,
   type InterviewDetail,
@@ -117,13 +120,24 @@ export async function listStaffInterviews(
     note: row.internal_note ?? "",
   }));
 
-  return {
+  const listResult = {
     items,
     total,
     page,
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  // Validate output shape
+  const outputParsed = interviewListOutputSchema.safeParse(listResult);
+  if (!outputParsed.success) {
+    console.error(
+      "[staff/interviews] listStaffInterviews output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return listResult;
 }
 
 // ---------------------------------------------------------------------------
@@ -186,7 +200,7 @@ export async function getStaffInterviewDetail(
 
   if (!interview) return null;
 
-  return {
+  const detailResult = {
     interviewUuid: interview.request_interview_uuid,
     candidateName: interview.candidate?.candidate_name ?? null,
     candidateEmail: interview.candidate?.candidate_email ?? null,
@@ -203,6 +217,17 @@ export async function getStaffInterviewDetail(
     createdAt: interview.created_at,
     updatedAt: interview.updated_at,
   };
+
+  // Validate output shape
+  const outputParsed = interviewDetailOutputSchema.safeParse(detailResult);
+  if (!outputParsed.success) {
+    console.error(
+      "[staff/interviews] getStaffInterviewDetail output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return detailResult;
 }
 
 // ---------------------------------------------------------------------------
@@ -258,12 +283,23 @@ export async function updateInterviewStatus(
 
     revalidatePath("/staff/interviews");
 
-    return {
-      operation: "success",
+    const updateResult = {
+      operation: "success" as const,
       message: `Interview status updated to "${
         newStatus === 0 ? "Scheduled" : newStatus === 1 ? "Completed" : "Cancelled"
       }"`,
     };
+
+    // Validate output shape
+    const outputParsed = updateInterviewStatusOutputSchema.safeParse(updateResult);
+    if (!outputParsed.success) {
+      console.error(
+        "[staff/interviews] updateInterviewStatus output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return updateResult;
   } catch (err) {
     return {
       operation: "error",

@@ -11,6 +11,57 @@ export const getWorkspaceDataSchema = z.object({
 });
 
 // ---------------------------------------------------------------------------
+// Output validation schemas
+// ---------------------------------------------------------------------------
+
+/**
+ * Validates a single workspace metric row.
+ */
+export const workspaceMetricSchema = z.object({
+  label: z.string().min(1),
+  value: z.number().int().nonnegative(),
+  note: z.string(),
+});
+
+/**
+ * Validates a company item in the workspace overview.
+ */
+export const workspaceCompanyItemSchema = z.object({
+  id: z.union([z.string(), z.number()]),
+  title: z.string().min(1),
+  subtitle: z.string(),
+  meta: z.string().optional(),
+});
+
+/**
+ * Validates a request item in the workspace overview.
+ */
+export const workspaceRequestItemSchema = z.object({
+  id: z.string(),
+  title: z.string().min(1),
+  subtitle: z.string(),
+  meta: z.string().optional(),
+});
+
+/**
+ * Validates the contact object inside workspace response.
+ */
+export const workspaceContactSchema = z.object({
+  contact_name: z.string(),
+  contact_email: z.string(),
+});
+
+/**
+ * Validates the full getCompanyWorkspace return shape.
+ */
+export const workspaceOverviewDataSchema = z.object({
+  contact: workspaceContactSchema.nullable(),
+  metrics: z.array(workspaceMetricSchema).length(4),
+  companies: z.array(workspaceCompanyItemSchema),
+  requests: z.array(workspaceRequestItemSchema),
+});
+
+// ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
