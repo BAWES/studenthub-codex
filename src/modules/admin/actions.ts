@@ -5,6 +5,15 @@ import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
+import {
+  adminListItemSchema,
+  adminDetailSchema,
+  listAdminsResultSchema,
+  createAdminResultSchema,
+  type AdminListItem,
+  type AdminDetail,
+  type ListAdminsResult,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Schemas
@@ -35,26 +44,7 @@ export type ListAdminsParams = z.input<typeof listAdminsSchema>;
 export type GetAdminParams = z.input<typeof getAdminSchema>;
 export type CreateAdminParams = z.input<typeof createAdminSchema>;
 
-export type AdminListItem = {
-  admin_id: number;
-  admin_name: string;
-  admin_email: string;
-  admin_status: number;
-  admin_created_at: Date;
-};
-
-export type AdminDetail = AdminListItem & {
-  admin_updated_at: Date;
-  admin_limited_access: number | null;
-};
-
-export type ListAdminsResult = {
-  admins: AdminListItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
+export type { AdminListItem, AdminDetail, ListAdminsResult } from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Server actions
@@ -102,13 +92,24 @@ export async function listAdmins(
     prisma.admin.count({ where: where as any }),
   ]);
 
-  return {
+  const result = {
     admins: admins as AdminListItem[],
     total,
     page,
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  // Validate output shape
+  const outputParsed = listAdminsResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/admin] listAdmins output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -142,7 +143,30 @@ export async function getAdmin(
     },
   });
 
-  return admin as AdminDetail | null;
+  if (!admin) {
+    // Validate output shape (null case)
+    const nullOutputParsed = adminDetailSchema.nullable().safeParse(null);
+    if (!nullOutputParsed.success) {
+      console.error(
+        "[modules/admin] getAdmin output validation failed (null):",
+        nullOutputParsed.error.issues,
+      );
+    }
+    return null;
+  }
+
+  const result = admin as AdminDetail;
+
+  // Validate output shape
+  const outputParsed = adminDetailSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/admin] getAdmin output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -191,5 +215,16 @@ export async function createAdmin(
     });
   }
 
-  return { admin_id: admin.admin_id };
+  const result = { admin_id: admin.admin_id };
+
+  // Validate output shape
+  const outputParsed = createAdminResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/admin] createAdmin output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
