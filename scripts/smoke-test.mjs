@@ -439,7 +439,7 @@ async function main() {
   });
 
   await expectStatus("/", 200);
-  await expectBodyIncludes("/", 200, "Every role gets its own workspace.");
+  await expectBodyIncludes("/", 200, "Connecting students with the right employers");
   await expectBodyIncludes("/", 200, "Why StudentHub");
   await expectBodyIncludes("/", 200, "Get started");
   await expectStatus("/login", 200);
