@@ -1,7 +1,14 @@
 "use client";
 
-import React from "react";
-import { Check, X, Minus } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
+import {
+  Check,
+  X,
+  Minus,
+  ChevronDown,
+  Sparkles,
+  Star,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import FadeInSection from "./FadeInSection";
 
@@ -62,400 +69,68 @@ const personaColumns: Record<string, ColumnDef[]> = {
   ],
 };
 
-// ── Candidate comparison data ────────────────────────────
+// ── Data (unchanged) ─────────────────────────────────────
 
 const candidateRows: ComparisonRow[] = [
-  {
-    category: "Profile",
-    feature: "Unified profile visible to all employers",
-    studenthub: true,
-    alternatives: "Partial",
-    emailSpreadsheets: false,
-    traditionalAgencies: false,
-  },
-  {
-    category: "Profile",
-    feature: "Profile readiness score",
-    studenthub: true,
-    alternatives: false,
-    emailSpreadsheets: false,
-    traditionalAgencies: false,
-  },
-  {
-    category: "Search",
-    feature: "Typo-tolerant search",
-    studenthub: true,
-    alternatives: false,
-    emailSpreadsheets: false,
-    traditionalAgencies: false,
-  },
-  {
-    category: "Search",
-    feature: "Filter by location, skill, pay rate",
-    studenthub: true,
-    alternatives: "Partial",
-    emailSpreadsheets: false,
-    traditionalAgencies: "Partial",
-  },
-  {
-    category: "Matching",
-    feature: "AI-matched role suggestions",
-    studenthub: true,
-    alternatives: "Partial",
-    emailSpreadsheets: false,
-    traditionalAgencies: false,
-  },
-  {
-    category: "Matching",
-    feature: "Real-time application tracking",
-    studenthub: true,
-    alternatives: false,
-    emailSpreadsheets: false,
-    traditionalAgencies: false,
-  },
-  {
-    category: "Payments",
-    feature: "Integrated timesheets",
-    studenthub: true,
-    alternatives: false,
-    emailSpreadsheets: false,
-    traditionalAgencies: "Partial",
-  },
-  {
-    category: "Payments",
-    feature: "Direct payment tracking",
-    studenthub: true,
-    alternatives: false,
-    emailSpreadsheets: false,
-    traditionalAgencies: "Partial",
-  },
-  {
-    category: "Documents",
-    feature: "Digital document upload and management",
-    studenthub: true,
-    alternatives: "Partial",
-    emailSpreadsheets: false,
-    traditionalAgencies: "Partial",
-  },
-  {
-    category: "Documents",
-    feature: "Compliance document tracking",
-    studenthub: true,
-    alternatives: false,
-    emailSpreadsheets: false,
-    traditionalAgencies: "Partial",
-  },
+  { category: "Profile", feature: "Unified profile visible to all employers", studenthub: true, alternatives: "Partial", emailSpreadsheets: false, traditionalAgencies: false },
+  { category: "Profile", feature: "Profile readiness score", studenthub: true, alternatives: false, emailSpreadsheets: false, traditionalAgencies: false },
+  { category: "Search", feature: "Typo-tolerant search", studenthub: true, alternatives: false, emailSpreadsheets: false, traditionalAgencies: false },
+  { category: "Search", feature: "Filter by location, skill, pay rate", studenthub: true, alternatives: "Partial", emailSpreadsheets: false, traditionalAgencies: "Partial" },
+  { category: "Matching", feature: "AI-matched role suggestions", studenthub: true, alternatives: "Partial", emailSpreadsheets: false, traditionalAgencies: false },
+  { category: "Matching", feature: "Real-time application tracking", studenthub: true, alternatives: false, emailSpreadsheets: false, traditionalAgencies: false },
+  { category: "Payments", feature: "Integrated timesheets", studenthub: true, alternatives: false, emailSpreadsheets: false, traditionalAgencies: "Partial" },
+  { category: "Payments", feature: "Direct payment tracking", studenthub: true, alternatives: false, emailSpreadsheets: false, traditionalAgencies: "Partial" },
+  { category: "Documents", feature: "Digital document upload and management", studenthub: true, alternatives: "Partial", emailSpreadsheets: false, traditionalAgencies: "Partial" },
+  { category: "Documents", feature: "Compliance document tracking", studenthub: true, alternatives: false, emailSpreadsheets: false, traditionalAgencies: "Partial" },
 ];
-
-// ── Company comparison data ────────────────────────────
 
 const companyRows: ComparisonRow[] = [
-  {
-    category: "Sourcing",
-    feature: "AI-matched candidate suggestions",
-    studenthub: true,
-    alternatives: "Partial",
-    emailSpreadsheets: false,
-    traditionalAgencies: "Partial",
-  },
-  {
-    category: "Sourcing",
-    feature: "Post to multiple branches at once",
-    studenthub: true,
-    alternatives: false,
-    emailSpreadsheets: false,
-    traditionalAgencies: "Partial",
-  },
-  {
-    category: "Compliance",
-    feature: "Auto right-to-work verification",
-    studenthub: true,
-    alternatives: false,
-    emailSpreadsheets: false,
-    traditionalAgencies: "Partial",
-  },
-  {
-    category: "Compliance",
-    feature: "Expiring certification tracking",
-    studenthub: true,
-    alternatives: false,
-    emailSpreadsheets: false,
-    traditionalAgencies: false,
-  },
-  {
-    category: "Timesheets",
-    feature: "Digital clock-in/clock-out",
-    studenthub: true,
-    alternatives: "Partial",
-    emailSpreadsheets: false,
-    traditionalAgencies: false,
-  },
-  {
-    category: "Timesheets",
-    feature: "Bulk approval workflow",
-    studenthub: true,
-    alternatives: false,
-    emailSpreadsheets: false,
-    traditionalAgencies: "Partial",
-  },
-  {
-    category: "Billing",
-    feature: "Consolidated per-branch invoices",
-    studenthub: true,
-    alternatives: false,
-    emailSpreadsheets: false,
-    traditionalAgencies: "Partial",
-  },
-  {
-    category: "Billing",
-    feature: "Automated VAT calculations",
-    studenthub: true,
-    alternatives: false,
-    emailSpreadsheets: false,
-    traditionalAgencies: false,
-  },
-  {
-    category: "Analytics",
-    feature: "Time-to-hire dashboard",
-    studenthub: true,
-    alternatives: "Partial",
-    emailSpreadsheets: false,
-    traditionalAgencies: false,
-  },
-  {
-    category: "Analytics",
-    feature: "Cost-per-hire tracking",
-    studenthub: true,
-    alternatives: false,
-    emailSpreadsheets: false,
-    traditionalAgencies: false,
-  },
+  { category: "Sourcing", feature: "AI-matched candidate suggestions", studenthub: true, alternatives: "Partial", emailSpreadsheets: false, traditionalAgencies: "Partial" },
+  { category: "Sourcing", feature: "Post to multiple branches at once", studenthub: true, alternatives: false, emailSpreadsheets: false, traditionalAgencies: "Partial" },
+  { category: "Compliance", feature: "Auto right-to-work verification", studenthub: true, alternatives: false, emailSpreadsheets: false, traditionalAgencies: "Partial" },
+  { category: "Compliance", feature: "Expiring certification tracking", studenthub: true, alternatives: false, emailSpreadsheets: false, traditionalAgencies: false },
+  { category: "Timesheets", feature: "Digital clock-in/clock-out", studenthub: true, alternatives: "Partial", emailSpreadsheets: false, traditionalAgencies: false },
+  { category: "Timesheets", feature: "Bulk approval workflow", studenthub: true, alternatives: false, emailSpreadsheets: false, traditionalAgencies: "Partial" },
+  { category: "Billing", feature: "Consolidated per-branch invoices", studenthub: true, alternatives: false, emailSpreadsheets: false, traditionalAgencies: "Partial" },
+  { category: "Billing", feature: "Automated VAT calculations", studenthub: true, alternatives: false, emailSpreadsheets: false, traditionalAgencies: false },
+  { category: "Analytics", feature: "Time-to-hire dashboard", studenthub: true, alternatives: "Partial", emailSpreadsheets: false, traditionalAgencies: false },
+  { category: "Analytics", feature: "Cost-per-hire tracking", studenthub: true, alternatives: false, emailSpreadsheets: false, traditionalAgencies: false },
 ];
-
-// ── Staff comparison data ─────────────────────────────────
 
 const staffRows: ComparisonRow[] = [
-  {
-    category: "Sourcing",
-    feature: "Typo-tolerant candidate search",
-    studenthub: true,
-    alternatives: false,
-    emailSpreadsheets: false,
-    traditionalAgencies: false,
-  },
-  {
-    category: "Sourcing",
-    feature: "Search by skill, location, visa status",
-    studenthub: true,
-    alternatives: "Partial",
-    emailSpreadsheets: false,
-    traditionalAgencies: "Partial",
-  },
-  {
-    category: "Sourcing",
-    feature: "Bulk CV export",
-    studenthub: true,
-    alternatives: false,
-    emailSpreadsheets: false,
-    traditionalAgencies: "Partial",
-  },
-  {
-    category: "Shortlisting",
-    feature: "One-click shortlist creation",
-    studenthub: true,
-    alternatives: false,
-    emailSpreadsheets: false,
-    traditionalAgencies: false,
-  },
-  {
-    category: "Shortlisting",
-    feature: "Share shortlists with employers",
-    studenthub: true,
-    alternatives: "Partial",
-    emailSpreadsheets: false,
-    traditionalAgencies: "Partial",
-  },
-  {
-    category: "Shortlisting",
-    feature: "Candidate status tracking",
-    studenthub: true,
-    alternatives: false,
-    emailSpreadsheets: false,
-    traditionalAgencies: false,
-  },
-  {
-    category: "Timesheets",
-    feature: "Integrated timesheet pipeline",
-    studenthub: true,
-    alternatives: false,
-    emailSpreadsheets: false,
-    traditionalAgencies: "Partial",
-  },
-  {
-    category: "Commissions",
-    feature: "Automated commission calculations",
-    studenthub: true,
-    alternatives: false,
-    emailSpreadsheets: false,
-    traditionalAgencies: false,
-  },
-  {
-    category: "Commissions",
-    feature: "Real-time margin visibility",
-    studenthub: true,
-    alternatives: false,
-    emailSpreadsheets: false,
-    traditionalAgencies: "Partial",
-  },
+  { category: "Sourcing", feature: "Typo-tolerant candidate search", studenthub: true, alternatives: false, emailSpreadsheets: false, traditionalAgencies: false },
+  { category: "Sourcing", feature: "Search by skill, location, visa status", studenthub: true, alternatives: "Partial", emailSpreadsheets: false, traditionalAgencies: "Partial" },
+  { category: "Sourcing", feature: "Bulk CV export", studenthub: true, alternatives: false, emailSpreadsheets: false, traditionalAgencies: "Partial" },
+  { category: "Shortlisting", feature: "One-click shortlist creation", studenthub: true, alternatives: false, emailSpreadsheets: false, traditionalAgencies: false },
+  { category: "Shortlisting", feature: "Share shortlists with employers", studenthub: true, alternatives: "Partial", emailSpreadsheets: false, traditionalAgencies: "Partial" },
+  { category: "Shortlisting", feature: "Candidate status tracking", studenthub: true, alternatives: false, emailSpreadsheets: false, traditionalAgencies: false },
+  { category: "Timesheets", feature: "Integrated timesheet pipeline", studenthub: true, alternatives: false, emailSpreadsheets: false, traditionalAgencies: "Partial" },
+  { category: "Commissions", feature: "Automated commission calculations", studenthub: true, alternatives: false, emailSpreadsheets: false, traditionalAgencies: false },
+  { category: "Commissions", feature: "Real-time margin visibility", studenthub: true, alternatives: false, emailSpreadsheets: false, traditionalAgencies: "Partial" },
 ];
-
-// ── Admin comparison data ─────────────────────────────────
 
 const adminRows: ComparisonRow[] = [
-  {
-    category: "Users",
-    feature: "Role-based access control",
-    studenthub: true,
-    alternatives: "Partial",
-    emailSpreadsheets: false,
-    traditionalAgencies: false,
-  },
-  {
-    category: "Users",
-    feature: "Full audit logs",
-    studenthub: true,
-    alternatives: "Partial",
-    emailSpreadsheets: false,
-    traditionalAgencies: false,
-  },
-  {
-    category: "Finance",
-    feature: "Bulk invoicing workflow",
-    studenthub: true,
-    alternatives: "Partial",
-    emailSpreadsheets: false,
-    traditionalAgencies: false,
-  },
-  {
-    category: "Finance",
-    feature: "Payment run management",
-    studenthub: true,
-    alternatives: "Partial",
-    emailSpreadsheets: false,
-    traditionalAgencies: false,
-  },
-  {
-    category: "Finance",
-    feature: "Multi-entity reconciliation",
-    studenthub: true,
-    alternatives: false,
-    emailSpreadsheets: false,
-    traditionalAgencies: false,
-  },
-  {
-    category: "Compliance",
-    feature: "Production data validation",
-    studenthub: true,
-    alternatives: false,
-    emailSpreadsheets: false,
-    traditionalAgencies: false,
-  },
-  {
-    category: "Compliance",
-    feature: "Compliance dashboard",
-    studenthub: true,
-    alternatives: "Partial",
-    emailSpreadsheets: false,
-    traditionalAgencies: false,
-  },
-  {
-    category: "Reports",
-    feature: "Custom report builder",
-    studenthub: true,
-    alternatives: "Partial",
-    emailSpreadsheets: false,
-    traditionalAgencies: false,
-  },
-  {
-    category: "Reports",
-    feature: "Scheduled report delivery",
-    studenthub: true,
-    alternatives: false,
-    emailSpreadsheets: false,
-    traditionalAgencies: false,
-  },
+  { category: "Users", feature: "Role-based access control", studenthub: true, alternatives: "Partial", emailSpreadsheets: false, traditionalAgencies: false },
+  { category: "Users", feature: "Full audit logs", studenthub: true, alternatives: "Partial", emailSpreadsheets: false, traditionalAgencies: false },
+  { category: "Finance", feature: "Bulk invoicing workflow", studenthub: true, alternatives: "Partial", emailSpreadsheets: false, traditionalAgencies: false },
+  { category: "Finance", feature: "Payment run management", studenthub: true, alternatives: "Partial", emailSpreadsheets: false, traditionalAgencies: false },
+  { category: "Finance", feature: "Multi-entity reconciliation", studenthub: true, alternatives: false, emailSpreadsheets: false, traditionalAgencies: false },
+  { category: "Compliance", feature: "Production data validation", studenthub: true, alternatives: false, emailSpreadsheets: false, traditionalAgencies: false },
+  { category: "Compliance", feature: "Compliance dashboard", studenthub: true, alternatives: "Partial", emailSpreadsheets: false, traditionalAgencies: false },
+  { category: "Reports", feature: "Custom report builder", studenthub: true, alternatives: "Partial", emailSpreadsheets: false, traditionalAgencies: false },
+  { category: "Reports", feature: "Scheduled report delivery", studenthub: true, alternatives: false, emailSpreadsheets: false, traditionalAgencies: false },
 ];
-
-// ── Inspector comparison data ─────────────────────────────
 
 const inspectorRows: ComparisonRow[] = [
-  {
-    category: "Review",
-    feature: "Batch document review",
-    studenthub: true,
-    alternatives: false,
-    emailSpreadsheets: "Partial",
-    traditionalAgencies: false,
-  },
-  {
-    category: "Review",
-    feature: "AI-prioritised queue",
-    studenthub: true,
-    alternatives: false,
-    emailSpreadsheets: false,
-    traditionalAgencies: false,
-  },
-  {
-    category: "Compliance",
-    feature: "Full audit trail per decision",
-    studenthub: true,
-    alternatives: false,
-    emailSpreadsheets: "Partial",
-    traditionalAgencies: false,
-  },
-  {
-    category: "Compliance",
-    feature: "Auto-approve/reject rules",
-    studenthub: true,
-    alternatives: false,
-    emailSpreadsheets: false,
-    traditionalAgencies: false,
-  },
-  {
-    category: "Exemptions",
-    feature: "Flag management workflow",
-    studenthub: true,
-    alternatives: false,
-    emailSpreadsheets: false,
-    traditionalAgencies: false,
-  },
-  {
-    category: "Exemptions",
-    feature: "Separate exemption queue",
-    studenthub: true,
-    alternatives: false,
-    emailSpreadsheets: false,
-    traditionalAgencies: false,
-  },
-  {
-    category: "Reporting",
-    feature: "Exportable compliance reports",
-    studenthub: true,
-    alternatives: "Partial",
-    emailSpreadsheets: "Partial",
-    traditionalAgencies: false,
-  },
-  {
-    category: "Reporting",
-    feature: "Multi-region standards support",
-    studenthub: true,
-    alternatives: false,
-    emailSpreadsheets: false,
-    traditionalAgencies: false,
-  },
+  { category: "Review", feature: "Batch document review", studenthub: true, alternatives: false, emailSpreadsheets: "Partial", traditionalAgencies: false },
+  { category: "Review", feature: "AI-prioritised queue", studenthub: true, alternatives: false, emailSpreadsheets: false, traditionalAgencies: false },
+  { category: "Compliance", feature: "Full audit trail per decision", studenthub: true, alternatives: false, emailSpreadsheets: "Partial", traditionalAgencies: false },
+  { category: "Compliance", feature: "Auto-approve/reject rules", studenthub: true, alternatives: false, emailSpreadsheets: false, traditionalAgencies: false },
+  { category: "Exemptions", feature: "Flag management workflow", studenthub: true, alternatives: false, emailSpreadsheets: false, traditionalAgencies: false },
+  { category: "Exemptions", feature: "Separate exemption queue", studenthub: true, alternatives: false, emailSpreadsheets: false, traditionalAgencies: false },
+  { category: "Reporting", feature: "Exportable compliance reports", studenthub: true, alternatives: "Partial", emailSpreadsheets: "Partial", traditionalAgencies: false },
+  { category: "Reporting", feature: "Multi-region standards support", studenthub: true, alternatives: false, emailSpreadsheets: false, traditionalAgencies: false },
 ];
-
-// ── Comparison data per persona ─────────────────────────
 
 const personaRows: Record<string, ComparisonRow[]> = {
   candidate: candidateRows,
@@ -483,80 +158,305 @@ function getScorePercent(value: ScoreValue): number {
   return 0;
 }
 
-// ── Render helpers ────────────────────────────────────
+// ── Category pill colors ─────────────────────────────
 
-function ScoreBar({ value }: { value: ScoreValue }) {
+const categoryColors: Record<string, string> = {
+  Profile: "#0b63ce",
+  Search: "#24835b",
+  Matching: "#8b5cf6",
+  Payments: "#f59e0b",
+  Documents: "#ec4899",
+  Sourcing: "#0b63ce",
+  Compliance: "#24835b",
+  Timesheets: "#8b5cf6",
+  Billing: "#f59e0b",
+  Analytics: "#ec4899",
+  Shortlisting: "#0b63ce",
+  Commissions: "#8b5cf6",
+  Users: "#0b63ce",
+  Finance: "#24835b",
+  Reports: "#8b5cf6",
+  Review: "#0b63ce",
+  Exemptions: "#f59e0b",
+  Reporting: "#ec4899",
+};
+
+// ── Animated score bar ────────────────────────────────
+
+function AnimatedScoreBar({
+  value,
+  delay,
+}: {
+  value: ScoreValue;
+  delay: number;
+}) {
   const percent = getScorePercent(value);
   const score = getScore(value);
+  const [animated, setAnimated] = useState(false);
+
+  useEffect(() => {
+    const t = setTimeout(() => setAnimated(true), delay);
+    return () => clearTimeout(t);
+  }, [delay]);
+
   const barColor =
     score === "full"
-      ? "var(--sh-success)"
+      ? "linear-gradient(90deg, #24835b, #2ecc71)"
       : score === "partial"
-        ? "var(--sh-warning)"
-        : "var(--sh-glass-border-strong)";
+        ? "linear-gradient(90deg, #f59e0b, #fbbf24)"
+        : "linear-gradient(90deg, #d6dce7, #e2e8f0)";
 
   return (
     <div className="flex items-center gap-2">
-      <div className="w-full h-1.5 rounded-full overflow-hidden" style={{ background: "var(--sh-glass-bg)" }}>
+      <div className="w-full h-2 rounded-full overflow-hidden bg-[var(--sh-glass-bg)]">
         <div
-          className="h-full rounded-full transition-all duration-700"
+          className="h-full rounded-full transition-all duration-1000 ease-out"
           style={{
-            width: `${percent}%`,
+            width: animated ? `${percent}%` : "0%",
             background: barColor,
-            boxShadow: percent > 0 ? `0 0 6px ${barColor}` : "none",
+            boxShadow:
+              score === "full"
+                ? "0 0 8px rgba(36, 131, 91, 0.4)"
+                : score === "partial"
+                  ? "0 0 8px rgba(245, 158, 11, 0.4)"
+                  : "none",
           }}
         />
       </div>
-      {score === "full" && <Check className="size-3.5 shrink-0" style={{ color: "var(--sh-success)" }} />}
-      {score === "partial" && <Minus className="size-3.5 shrink-0" style={{ color: "var(--sh-warning)" }} />}
-      {score === "none" && <X className="size-3.5 shrink-0" style={{ color: "var(--muted)" }} />}
+      <span className="shrink-0 text-[10px] font-bold w-4 text-center">
+        {score === "full" && (
+          <Check className="size-3.5 inline" style={{ color: "var(--sh-success)" }} />
+        )}
+        {score === "partial" && (
+          <Minus className="size-3.5 inline" style={{ color: "var(--sh-warning)" }} />
+        )}
+        {score === "none" && (
+          <X className="size-3.5 inline" style={{ color: "var(--muted)" }} />
+        )}
+      </span>
     </div>
   );
 }
 
-function ScoreIcon({ value }: { value: ScoreValue }) {
+// ── Score ring component ──────────────────────────────
+
+function ScoreRing({
+  value,
+  label,
+  total,
+  color,
+}: {
+  value: number;
+  label: string;
+  total: number;
+  color: string;
+}) {
+  const pct = Math.round((value / total) * 100);
+  const circumference = 2 * Math.PI * 36;
+  const [animated, setAnimated] = useState(false);
+
+  useEffect(() => {
+    const t = setTimeout(() => setAnimated(true), 300);
+    return () => clearTimeout(t);
+  }, []);
+
+  return (
+    <div className="flex flex-col items-center gap-1.5">
+      <div className="relative size-20">
+        <svg className="size-full -rotate-90" viewBox="0 0 80 80">
+          <circle
+            cx="40"
+            cy="40"
+            r="36"
+            fill="none"
+            stroke="var(--sh-glass-border)"
+            strokeWidth="5"
+          />
+          <circle
+            cx="40"
+            cy="40"
+            r="36"
+            fill="none"
+            stroke={color}
+            strokeWidth="5"
+            strokeLinecap="round"
+            strokeDasharray={circumference}
+            strokeDashoffset={animated ? circumference * (1 - pct / 100) : circumference}
+            className="transition-all duration-1500 ease-out"
+            style={{ transition: "stroke-dashoffset 1.5s cubic-bezier(0.16, 1, 0.3, 1)" }}
+          />
+        </svg>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <span
+            className="text-lg font-black"
+            style={{ color }}
+          >
+            {animated ? `${pct}%` : "0%"}
+          </span>
+        </div>
+      </div>
+      <span className="text-[10px] font-semibold text-center leading-tight" style={{ color: "var(--muted)" }}>
+        {label}
+      </span>
+    </div>
+  );
+}
+
+// ── Feature card (desktop) ────────────────────────────
+
+function FeatureCard({
+  feature,
+  columns,
+  scores,
+  index,
+}: {
+  feature: string;
+  columns: ColumnDef[];
+  scores: Record<string, ScoreValue>;
+  index: number;
+}) {
+  return (
+    <div
+      className="group flex items-stretch rounded-lg overflow-hidden transition-all duration-200 hover:-translate-y-0.5"
+      style={{
+        background: "var(--sh-glass-bg)",
+        border: "1px solid var(--sh-glass-border)",
+        animation: `shCardIn 500ms cubic-bezier(0.16, 1, 0.3, 1) both`,
+        animationDelay: `${index * 60}ms`,
+      }}
+    >
+      {/* Feature name */}
+      <div
+        className="flex-1 min-w-0 p-3 flex items-center"
+        style={{ borderRight: "1px solid var(--sh-glass-border)" }}
+      >
+        <span className="text-xs font-medium truncate" style={{ color: "var(--ink)" }}>
+          {feature}
+        </span>
+      </div>
+
+      {/* Scores */}
+      {columns.map((col) => (
+        <div
+          key={col.key}
+          className="w-[140px] shrink-0 p-3 flex items-center"
+          style={{
+            background: col.accent
+              ? "linear-gradient(180deg, color-mix(in srgb, var(--sh-info-bg) 40%, transparent), transparent)"
+              : "transparent",
+            borderRight: "1px solid var(--sh-glass-border)",
+          }}
+        >
+          <AnimatedScoreBar value={scores[col.key]} delay={index * 60 + 200} />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ── Category section card ─────────────────────────────
+
+function CategoryCard({
+  category,
+  rows,
+  columns,
+  ci,
+}: {
+  category: string;
+  rows: ComparisonRow[];
+  columns: ColumnDef[];
+  ci: number;
+}) {
+  const [expanded, setExpanded] = useState(true);
+  const catColor = categoryColors[category] ?? "var(--muted)";
+
+  return (
+    <div
+      className="rounded-xl overflow-hidden transition-all duration-300"
+      style={{
+        background: "var(--sh-glass-bg-strong)",
+        border: "1px solid var(--sh-glass-border)",
+        animation: `shCardIn 500ms cubic-bezier(0.16, 1, 0.3, 1) both`,
+        animationDelay: `${ci * 100}ms`,
+      }}
+    >
+      {/* Category header */}
+      <button
+        onClick={() => setExpanded(!expanded)}
+        className="w-full flex items-center justify-between p-3 transition-colors hover:brightness-110"
+        style={{
+          borderBottom: expanded ? "1px solid var(--sh-glass-border)" : "none",
+        }}
+      >
+        <div className="flex items-center gap-2">
+          <div className="size-2 rounded-full" style={{ background: catColor }} />
+          <span className="text-[11px] font-black uppercase tracking-wider" style={{ color: catColor }}>
+            {category}
+          </span>
+        </div>
+        <ChevronDown
+          className="size-3.5 transition-transform duration-200"
+          style={{
+            color: "var(--muted)",
+            transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
+          }}
+        />
+      </button>
+
+      {/* Feature rows */}
+      <div
+        className="transition-all duration-300 overflow-hidden"
+        style={{
+          maxHeight: expanded ? `${rows.length * 60}px` : "0px",
+          opacity: expanded ? 1 : 0,
+        }}
+      >
+        <div className="grid gap-1.5 p-2">
+          {rows.map((row, ri) => {
+            const scores: Record<string, ScoreValue> = {
+              studenthub: row.studenthub,
+              alternatives: row.alternatives,
+              emailSpreadsheets: row.emailSpreadsheets,
+              traditionalAgencies: row.traditionalAgencies,
+            };
+            return (
+              <FeatureCard
+                key={ri}
+                feature={row.feature}
+                columns={columns}
+                scores={scores}
+                index={ri}
+              />
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Mobile card ───────────────────────────────────────
+
+function MobileScoreBadge({ value }: { value: ScoreValue }) {
   const score = getScore(value);
   if (score === "full")
     return (
-      <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[var(--sh-success-bg)]" style={{ color: "var(--sh-success)" }}>
-        <Check className="size-3" /> Yes
+      <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[var(--sh-success-bg)]" style={{ color: "var(--sh-success)" }}>
+        <Check className="size-2.5" /> Yes
       </span>
     );
   if (score === "partial")
     return (
-      <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[var(--sh-warning-bg)]" style={{ color: "var(--sh-warning)" }}>
-        <Minus className="size-3" /> Limited
+      <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[var(--sh-warning-bg)]" style={{ color: "var(--sh-warning)" }}>
+        <Minus className="size-2.5" /> Limited
       </span>
     );
   return (
-    <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full" style={{ background: "var(--sh-glass-bg)", color: "var(--muted)" }}>
-      <X className="size-3" /> No
+    <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full" style={{ background: "var(--sh-glass-bg)", color: "var(--muted)" }}>
+      <X className="size-2.5" /> No
     </span>
   );
 }
-
-// ── Category pill colors ─────────────────────────────
-
-const categoryColors: Record<string, string> = {
-  Profile: "var(--sh-info)",
-  Search: "var(--sh-success)",
-  Matching: "#8b5cf6",
-  Payments: "#f59e0b",
-  Documents: "#ec4899",
-  Sourcing: "var(--sh-info)",
-  Compliance: "var(--sh-success)",
-  Timesheets: "#8b5cf6",
-  Billing: "#f59e0b",
-  Analytics: "#ec4899",
-  Shortlisting: "var(--sh-info)",
-  Commissions: "#8b5cf6",
-  Users: "var(--sh-info)",
-  Finance: "var(--sh-success)",
-  Reports: "#8b5cf6",
-  Review: "var(--sh-info)",
-  Exemptions: "#f59e0b",
-  Reporting: "#ec4899",
-};
 
 // ── Component ────────────────────────────────────────────
 
@@ -572,22 +472,27 @@ export default function ComparisonTable({ persona = "candidate", className }: Co
     return acc;
   }, []);
 
-  // ── Score summary row — show StudentHub's total advantage ──
+  // Score summary
   const totalFeatures = rows.length;
   const shFullScore = rows.filter((r) => getScore(r.studenthub) === "full").length;
-  const shPercent = Math.round((shFullScore / totalFeatures) * 100);
+  const altFullScore = rows.filter((r) => getScore(r.alternatives) === "full").length;
+  const emailFullScore = rows.filter((r) => getScore(r.emailSpreadsheets) === "full").length;
+  const agencyFullScore = rows.filter((r) => getScore(r.traditionalAgencies) === "full").length;
+
+  const sectionRef = useRef<HTMLElement>(null);
 
   return (
-    <FadeInSection
+    <section
+      ref={sectionRef}
       className={cn("shSection", className)}
       aria-label="Feature comparison"
-      delay={100}
     >
       <div className="text-center mb-8 md:mb-10">
         <p
-          className="text-[11px] font-black uppercase tracking-wider mb-2"
+          className="text-[11px] font-black uppercase tracking-wider mb-2 flex items-center justify-center gap-1.5"
           style={{ color: "var(--sh-info)" }}
         >
+          <Sparkles className="size-3" />
           See the difference
         </p>
         <h2 className="shBenefitsTitle text-center">
@@ -595,122 +500,39 @@ export default function ComparisonTable({ persona = "candidate", className }: Co
           {persona === "company" && "Why companies choose StudentHub."}
           {persona !== "candidate" && persona !== "company" && "See how StudentHub compares."}
         </h2>
-
-        {/* Score summary badge */}
-        <div className="flex items-center justify-center gap-2 mt-4">
-          <span className="text-xs font-semibold px-3 py-1.5 rounded-full" style={{ background: "var(--sh-info-bg)", color: "var(--sh-info)" }}>
-            StudentHub wins on {shFullScore}/{totalFeatures} features
-          </span>
-        </div>
+        <p
+          className="max-w-[480px] mx-auto mt-2 text-sm leading-relaxed"
+          style={{ color: "var(--muted)" }}
+        >
+          We win on every feature that matters.
+          {persona === "candidate"
+            ? " StudentHub gives you tools that job boards and agencies can't match."
+            : " One platform replaces four legacy tools."}
+        </p>
       </div>
 
-      {/* Desktop: visual table */}
-      <div className="hidden md:block overflow-hidden rounded-xl border" style={{ borderColor: "var(--sh-glass-border)" }}>
-        <table className="w-full text-sm" style={{ borderCollapse: "separate", borderSpacing: 0 }}>
-          {/* Header */}
-          <thead>
-            <tr>
-              <th
-                className="text-left p-3 text-xs font-black uppercase tracking-wider min-w-[220px]"
-                style={{
-                  background: "var(--sh-glass-bg-strong)",
-                  color: "var(--ink)",
-                  borderBottom: "1px solid var(--sh-glass-border)",
-                }}
-              >
-                Feature
-              </th>
-              {columns.map((col) => (
-                <th
-                  key={col.key}
-                  className="text-center p-3 text-xs font-black uppercase tracking-wider min-w-[130px]"
-                  style={{
-                    background: col.accent
-                      ? "linear-gradient(180deg, var(--sh-info-bg), var(--sh-glass-bg-strong))"
-                      : "var(--sh-glass-bg-strong)",
-                    color: col.accent ? "var(--sh-info)" : "var(--muted)",
-                    borderBottom: "1px solid var(--sh-glass-border)",
-                  }}
-                >
-                  <span className="flex items-center justify-center gap-1.5">
-                    {col.label}
-                    {col.accent && (
-                      <span className="size-1.5 rounded-full bg-[var(--sh-info)]" />
-                    )}
-                  </span>
-                </th>
-              ))}
-            </tr>
-          </thead>
-
-          {/* Body grouped by category */}
-          <tbody>
-            {categories.map((cat, ci) => (
-              <React.Fragment key={`cat-group-${ci}`}>
-                {/* Category header row */}
-                <tr>
-                  <td
-                    colSpan={5}
-                    className="p-2 px-3 font-black tracking-wider"
-                    style={{
-                      background: "var(--sh-glass-bg)",
-                      color: categoryColors[cat.category] ?? "var(--muted)",
-                      borderBottom: "1px solid var(--sh-glass-border)",
-                      fontSize: 11,
-                      textTransform: "uppercase",
-                      letterSpacing: "0.05em",
-                    }}
-                  >
-                    {cat.category}
-                  </td>
-                </tr>
-                {cat.rows.map((row, ri) => (
-                  <tr
-                    key={`${ci}-${ri}`}
-                    className="transition-colors duration-150"
-                    style={{ background: "transparent" }}
-                    onMouseEnter={(e) => {
-                      (e.currentTarget as HTMLElement).style.background = "var(--sh-glass-bg)";
-                    }}
-                    onMouseLeave={(e) => {
-                      (e.currentTarget as HTMLElement).style.background = "transparent";
-                    }}
-                  >
-                    <td
-                      className="p-3 text-sm font-medium"
-                      style={{
-                        background: "var(--paper)",
-                        color: "var(--ink)",
-                        borderBottom: "1px solid var(--sh-glass-border)",
-                      }}
-                    >
-                      {row.feature}
-                    </td>
-                    {columns.map((col) => (
-                      <td
-                        key={col.key}
-                        className="p-3"
-                        style={{
-                          borderBottom: "1px solid var(--sh-glass-border)",
-                          background: col.accent
-                            ? "color-mix(in srgb, var(--sh-info-bg) 30%, transparent)"
-                            : "transparent",
-                        }}
-                      >
-                        <div className="flex items-center justify-center px-2">
-                          <ScoreBar value={row[col.key]} />
-                        </div>
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </React.Fragment>
-            ))}
-          </tbody>
-        </table>
+      {/* Score summary rings */}
+      <div className="flex items-center justify-center gap-6 md:gap-10 mb-8 flex-wrap">
+        <ScoreRing value={shFullScore} label="StudentHub" total={totalFeatures} color="#0b63ce" />
+        <ScoreRing value={altFullScore} label="Job boards" total={totalFeatures} color="#667085" />
+        <ScoreRing value={emailFullScore} label="Email & sheets" total={totalFeatures} color="#667085" />
+        <ScoreRing value={agencyFullScore} label="Agencies" total={totalFeatures} color="#667085" />
       </div>
 
-      {/* Mobile: card-based layout */}
+      {/* Desktop: card-based category layout */}
+      <div className="hidden md:grid gap-4 max-w-[960px] mx-auto">
+        {categories.map((cat, ci) => (
+          <CategoryCard
+            key={`cat-card-${ci}`}
+            category={cat.category}
+            rows={cat.rows}
+            columns={columns}
+            ci={ci}
+          />
+        ))}
+      </div>
+
+      {/* Mobile: compact list */}
       <div className="md:hidden grid gap-4">
         {categories.map((cat, ci) => (
           <FadeInSection
@@ -732,7 +554,7 @@ export default function ComparisonTable({ persona = "candidate", className }: Co
               {cat.category}
             </div>
 
-            {/* Feature cards list */}
+            {/* Feature rows */}
             {cat.rows.map((row, ri) => (
               <div
                 key={`${ci}-${ri}`}
@@ -758,7 +580,7 @@ export default function ComparisonTable({ persona = "candidate", className }: Co
                       >
                         {col.label}
                       </span>
-                      <ScoreIcon value={row[col.key]} />
+                      <MobileScoreBadge value={row[col.key]} />
                     </div>
                   ))}
                 </div>
@@ -767,6 +589,13 @@ export default function ComparisonTable({ persona = "candidate", className }: Co
           </FadeInSection>
         ))}
       </div>
-    </FadeInSection>
+
+      {/* Context note */}
+      <div className="text-center mt-6">
+        <p className="text-[10px]" style={{ color: "var(--muted)" }}>
+          Based on {totalFeatures} features compared across categories. StudentHub shown in blue.
+        </p>
+      </div>
+    </section>
   );
 }

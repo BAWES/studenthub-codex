@@ -12,7 +12,15 @@ export const metadata = {
     title: "StudentHub | Find Student Jobs & Hire Talent in Kuwait",
     description:
       "Two-sided marketplace for student talent. Students build careers, employers find vetted candidates — with AI matching, timesheets, and compliance.",
+    type: "website",
   },
+  keywords: [
+    "student jobs Kuwait",
+    "hire students Kuwait",
+    "student placement",
+    "Kuwait jobs for students",
+    "employer student hiring",
+  ],
 };
 
 export default async function Home() {
