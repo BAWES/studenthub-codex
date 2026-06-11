@@ -17,6 +17,8 @@ import { requireCapability } from "@/modules/auth/session";
 import {
   listPaymentsSchema,
   getPaymentSchema,
+  listPaymentsOutputSchema,
+  paymentDetailOutputSchema,
   type ListPaymentsInput,
   type GetPaymentInput,
   type PaymentRow,
@@ -74,7 +76,7 @@ export async function listPayments(
     prisma.bank_transaction.count({ where: where as any }),
   ]);
 
-  return {
+  const result = {
     items: transactions.map((t: any): PaymentRow => ({
       bank_transaction_id: t.bank_transaction_id,
       reference: t.reference ?? null,
@@ -92,6 +94,17 @@ export async function listPayments(
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  // Validate output shape
+  const outputParsed = listPaymentsOutputSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[admin/payments] listPayments output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -153,7 +166,7 @@ export async function getPayment(
     { label: "Reconciled", value: t.is_reconciled ? "Yes" : "No", note: "" },
   ];
 
-  return {
+  const result = {
     payment: {
       bank_transaction_id: t.bank_transaction_id,
       reference: t.reference ?? null,
@@ -180,4 +193,15 @@ export async function getPayment(
     line_items,
     metrics,
   };
+
+  // Validate output shape
+  const detailParsed = paymentDetailOutputSchema.safeParse(result);
+  if (!detailParsed.success) {
+    console.error(
+      "[admin/payments] getPayment output validation failed:",
+      detailParsed.error.issues,
+    );
+  }
+
+  return result;
 }

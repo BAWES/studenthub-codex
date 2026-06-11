@@ -22,6 +22,9 @@ import {
   createInvoiceSchema,
   updateInvoiceSchema,
   deleteInvoiceSchema,
+  listInvoicesOutputSchema,
+  invoiceDetailOutputSchema,
+  invoiceMutationOutputSchema,
 } from "./schemas";
 import type {
   ListInvoicesInput,
@@ -91,7 +94,7 @@ export async function listInvoices(
     prisma.invoice.count({ where: where as any }),
   ]);
 
-  return {
+  const result = {
     items: invoices.map((inv: any): InvoiceRow => ({
       invoice_id: inv.invoice_id,
       transfer_id: inv.transfer_id,
@@ -106,6 +109,17 @@ export async function listInvoices(
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  // Validate output shape
+  const outputParsed = listInvoicesOutputSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[admin/invoices] listInvoices output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -171,7 +185,7 @@ export async function getInvoice(
     { label: "Status", value: inv.invoice_status ?? "unpaid", note: "" },
   ];
 
-  return {
+  const result = {
     invoice: {
       invoice_id: inv.invoice_id,
       transfer_id: inv.transfer_id,
@@ -188,6 +202,17 @@ export async function getInvoice(
     candidate_payouts: candidatePayouts,
     metrics,
   };
+
+  // Validate output shape
+  const detailParsed = invoiceDetailOutputSchema.safeParse(result);
+  if (!detailParsed.success) {
+    console.error(
+      "[admin/invoices] getInvoice output validation failed:",
+      detailParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -217,7 +242,18 @@ export async function createInvoice(
   });
 
   revalidatePath("/admin/invoices");
-  return { invoice_id: invoice.invoice_id };
+  const result = { invoice_id: invoice.invoice_id };
+
+  // Validate output shape
+  const createParsed = invoiceMutationOutputSchema.safeParse(result);
+  if (!createParsed.success) {
+    console.error(
+      "[admin/invoices] createInvoice output validation failed:",
+      createParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -257,7 +293,18 @@ export async function updateInvoice(
   });
 
   revalidatePath("/admin/invoices");
-  return { invoice_id: invoiceId };
+  const result = { invoice_id: invoiceId };
+
+  // Validate output shape
+  const updateParsed = invoiceMutationOutputSchema.safeParse(result);
+  if (!updateParsed.success) {
+    console.error(
+      "[admin/invoices] updateInvoice output validation failed:",
+      updateParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -283,5 +330,16 @@ export async function deleteInvoice(
   });
 
   revalidatePath("/admin/invoices");
-  return { invoice_id: parsed.data.invoiceId };
+  const result = { invoice_id: parsed.data.invoiceId };
+
+  // Validate output shape
+  const deleteParsed = invoiceMutationOutputSchema.safeParse(result);
+  if (!deleteParsed.success) {
+    console.error(
+      "[admin/invoices] deleteInvoice output validation failed:",
+      deleteParsed.error.issues,
+    );
+  }
+
+  return result;
 }
