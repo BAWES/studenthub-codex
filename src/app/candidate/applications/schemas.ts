@@ -1,7 +1,19 @@
 import { z } from "zod";
 
 // ---------------------------------------------------------------------------
-// Output validation schemas for candidate/applications actions
+// Input validation schemas for candidate/applications actions
+// ---------------------------------------------------------------------------
+
+export const listApplicationsSchema = z.object({
+  page: z.coerce.number().int().positive().optional().default(1),
+  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
+  status: z.string().optional(),
+});
+
+export type ListApplicationsInput = z.input<typeof listApplicationsSchema>;
+
+// ---------------------------------------------------------------------------
+// Output validation schemas
 // ---------------------------------------------------------------------------
 
 export const applicationItemSchema = z.object({

@@ -3,42 +3,36 @@
 // ---------------------------------------------------------------------------
 // Candidate Applications — server actions for /candidate/applications
 // ---------------------------------------------------------------------------
+// Route-level wrappers that delegate to modules/candidates/applications for
+// listing and withdrawing job applications.
+// ---------------------------------------------------------------------------
 
 import { revalidatePath } from "next/cache";
-import { prisma } from "@/lib/prisma";
 import { requireRoleCapability } from "@/modules/auth/session";
-import { z } from "zod";
-
-// ---------------------------------------------------------------------------
-// Imports — output schemas from schemas.ts for runtime validation
-// ---------------------------------------------------------------------------
-
 import {
-  listApplicationsResultSchema,
-  withdrawApplicationResultSchema,
-  type ApplicationItem,
-  type ListApplicationsResult,
-  type WithdrawApplicationResult,
+  listApplications as moduleListApplications,
+  updateApplicationStatus as moduleUpdateApplicationStatus,
+} from "@/modules/candidates/applications/actions";
+import {
+  listApplicationsSchema,
+} from "./schemas";
+import type {
+  ListApplicationsInput,
+  ApplicationItem,
+  ListApplicationsResult,
+  WithdrawApplicationResult,
 } from "./schemas";
 
-// ---------------------------------------------------------------------------
-// Schemas
-// ---------------------------------------------------------------------------
-
-const listApplicationsSchema = z.object({
-  page: z.coerce.number().int().positive().optional().default(1),
-  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
-  status: z.string().optional(),
-});
-
-export type ListApplicationsInput = z.input<typeof listApplicationsSchema>;
+// Re-export types for client components
+export type { ApplicationItem, ListApplicationsResult, WithdrawApplicationResult };
 
 // ---------------------------------------------------------------------------
-// listMyApplications
+// Server actions — delegate to module-level implementations
 // ---------------------------------------------------------------------------
 
 /**
- * List the current candidate's job applications.
+ * List the current candidate's job applications (paginated).
+ * Delegates to modules/candidates/applications with the session's candidate ID.
  */
 export async function listMyApplications(
   input: ListApplicationsInput = {},
@@ -47,67 +41,26 @@ export async function listMyApplications(
   const candidateId = Number(session.id);
 
   const { page, limit, status } = listApplicationsSchema.parse(input);
-  const skip = (page - 1) * limit;
 
-  const where: Record<string, unknown> = {
-    candidateId: candidateId,
-  };
-  if (status) {
-    where.status = status;
-  }
-
-  const [rows, total] = await Promise.all([
-    prisma.job_listing_application.findMany({
-      where: where as any,
-      include: {
-        jobListing: {
-          select: {
-            title: true,
-            employer: { select: { company_name: true } },
-          },
-        },
-      },
-      orderBy: { createdAt: "desc" },
-      skip,
-      take: limit,
-    }),
-    prisma.job_listing_application.count({ where: where as any }),
-  ]);
-
-  const result = {
-    applications: rows.map((r) => ({
-      applicationId: (r as any).applicationId ?? (r as any).id,
-      jobListingId: (r as any).jobListingId ?? (r as any).job_listing_id,
-      jobTitle: (r as any).jobListing?.title ?? "Unknown",
-      employerName: (r as any).jobListing?.employer?.company_name ?? "Unknown",
-      status: (r as any).status ?? "applied",
-      coverLetter: (r as any).coverLetter ?? null,
-      createdAt: (r as any).createdAt ?? (r as any).created_at ?? new Date(),
-      updatedAt: (r as any).updatedAt ?? (r as any).updated_at ?? new Date(),
-    })),
-    total,
+  const result = await moduleListApplications({
+    candidateId,
     page,
     limit,
+    status,
+  });
+
+  // Map module shape { items, pageSize } → app router shape { applications, limit }
+  return {
+    applications: result.items,
+    total: result.total,
+    page: result.page,
+    limit,
   };
-
-  // Validate output shape
-  const outputParsed = listApplicationsResultSchema.safeParse(result);
-  if (!outputParsed.success) {
-    console.error(
-      "[candidate/applications] listMyApplications output validation failed:",
-      outputParsed.error.issues,
-    );
-  }
-
-  return result;
 }
-
-// ---------------------------------------------------------------------------
-// withdrawApplication
-// ---------------------------------------------------------------------------
 
 /**
  * Withdraw a job application (set status to 'withdrawn').
+ * Delegates to modules/candidates/applications.
  */
 export async function withdrawApplication(
   applicationId: number,
@@ -115,38 +68,18 @@ export async function withdrawApplication(
   const session = await requireRoleCapability("candidate", "candidate.read.own");
   const candidateId = Number(session.id);
 
-  // Verify ownership
-  const application = await prisma.job_listing_application.findFirst({
-    where: { applicationId, candidateId } as any,
+  // The module's updateApplicationStatus verifies ownership via applicationId
+  const result = await moduleUpdateApplicationStatus({
+    applicationId,
+    status: "withdrawn" as const,
   });
 
-  if (!application) {
-    const response = { success: false, error: "Application not found" as const };
-    const outputParsed = withdrawApplicationResultSchema.safeParse(response);
-    if (!outputParsed.success) {
-      console.error(
-        "[candidate/applications] withdrawApplication output validation failed:",
-        outputParsed.error.issues,
-      );
-    }
-    return response;
+  if (!result.success) {
+    return { success: false, error: result.error ?? "Application not found" };
   }
-
-  await prisma.job_listing_application.update({
-    where: { applicationId } as any,
-    data: { status: "withdrawn" } as any,
-  });
 
   revalidatePath("/candidate/applications");
   revalidatePath("/candidate/jobs");
 
-  const response = { success: true };
-  const outputParsed = withdrawApplicationResultSchema.safeParse(response);
-  if (!outputParsed.success) {
-    console.error(
-      "[candidate/applications] withdrawApplication output validation failed:",
-      outputParsed.error.issues,
-    );
-  }
-  return response;
+  return { success: true };
 }
