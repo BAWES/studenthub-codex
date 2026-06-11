@@ -8,7 +8,6 @@
 // ---------------------------------------------------------------------------
 
 import { requireCapability } from "@/modules/auth/session";
-import { formatDate } from "@/modules/workspace/format";
 import {
   listInvitations as moduleListInvitations,
   getInvitationDetail as moduleGetInvitationDetail,
