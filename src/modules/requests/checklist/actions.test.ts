@@ -1,5 +1,10 @@
 import { describe, it, expect } from "vitest";
 import { z } from "zod";
+import {
+  checklistItemSchema,
+  listChecklistsResultSchema,
+  deleteChecklistResultSchema,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Schemas (duplicated from actions.ts for isolated unit testing)
@@ -275,5 +280,113 @@ describe("ListChecklistsResult type shape", () => {
     };
     expect(result.total).toBe(0);
     expect(result.items).toHaveLength(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output schema tests
+// ---------------------------------------------------------------------------
+
+describe("checklistItemSchema", () => {
+  it("parses a valid checklist item", () => {
+    const r = checklistItemSchema.safeParse({
+      request_checklist_uuid: "a".repeat(60),
+      status_name: "Pending Review",
+      status_name_ar: "قيد المراجعة",
+      is_require: true,
+      sort_order: 1,
+      created_at: new Date(),
+      updated_at: new Date(),
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts null values for nullable fields", () => {
+    const r = checklistItemSchema.safeParse({
+      request_checklist_uuid: "b".repeat(60),
+      status_name: "Approved",
+      status_name_ar: null,
+      is_require: null,
+      sort_order: null,
+      created_at: null,
+      updated_at: null,
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects missing request_checklist_uuid", () => {
+    const r = checklistItemSchema.safeParse({
+      status_name: "Test",
+    });
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects missing status_name", () => {
+    const r = checklistItemSchema.safeParse({
+      request_checklist_uuid: "c".repeat(60),
+    });
+    expect(r.success).toBe(false);
+  });
+});
+
+describe("listChecklistsResultSchema", () => {
+  it("parses a valid paginated result", () => {
+    const r = listChecklistsResultSchema.safeParse({
+      items: [
+        {
+          request_checklist_uuid: "a".repeat(60),
+          status_name: "Pending",
+          status_name_ar: null,
+          is_require: null,
+          sort_order: 1,
+          created_at: new Date(),
+          updated_at: new Date(),
+        },
+      ],
+      total: 1,
+      page: 1,
+      limit: 20,
+      totalPages: 1,
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects negative total", () => {
+    const r = listChecklistsResultSchema.safeParse({
+      items: [],
+      total: -1,
+      page: 1,
+      limit: 20,
+      totalPages: 0,
+    });
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects zero page", () => {
+    const r = listChecklistsResultSchema.safeParse({
+      items: [],
+      total: 0,
+      page: 0,
+      limit: 20,
+      totalPages: 0,
+    });
+    expect(r.success).toBe(false);
+  });
+});
+
+describe("deleteChecklistResultSchema", () => {
+  it("parses a valid delete result", () => {
+    const r = deleteChecklistResultSchema.safeParse({ success: true });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects missing success field", () => {
+    const r = deleteChecklistResultSchema.safeParse({});
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects non-boolean success", () => {
+    const r = deleteChecklistResultSchema.safeParse({ success: "yes" });
+    expect(r.success).toBe(false);
   });
 });
