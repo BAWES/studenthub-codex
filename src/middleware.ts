@@ -19,17 +19,26 @@ function decodeSession(value: string | undefined): { role: string } | null {
   }
 }
 
-const protectedPaths = [
-  "/app",
-  "/admin",
-  "/staff",
-  "/candidate",
-  "/company",
-  "/employer",
-  "/inspector"
-];
+// ── Role-to-path mapping for cross-role guard ──
+// Paths that are role-specific (prefix → allowed user role)
+const rolePaths: Record<string, string> = {
+  "/admin": "admin",
+  "/staff": "staff",
+  "/candidate": "candidate",
+  "/company": "company",
+  "/employer": "company",
+  "/inspector": "inspector",
+};
 
-const publicPaths = ["/login", "/signup", "/", "/games", "/for", "/forgot-password", "/reset-password"];
+const publicPaths = [
+  "/login",
+  "/signup",
+  "/",
+  "/games",
+  "/for",
+  "/forgot-password",
+  "/reset-password",
+];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -58,9 +67,30 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
+  // ── Cross-role guard ──
+  // After confirming the user is authenticated, decode the session role
+  // and verify they aren't accessing another role's route prefix.
+  const session = decodeSession(sessionCookie?.value);
+
+  // Check if the current path matches a role-specific prefix
+  for (const [prefix, allowedRole] of Object.entries(rolePaths)) {
+    if (pathname === prefix || pathname.startsWith(`${prefix}/`)) {
+      // User is on a role-specific path — verify their role matches
+      if (session && session.role !== allowedRole) {
+        const loginUrl = new URL("/login", request.url);
+        // Redirect to their correct default route
+        loginUrl.searchParams.set(
+          "redirect",
+          roleDefaultRoute(session.role as any)
+        );
+        return NextResponse.redirect(loginUrl);
+      }
+      break; // Found a match, no need to check further prefixes
+    }
+  }
+
   // Route authenticated users from / to their role-specific workspace
   if (pathname === "/") {
-    const session = decodeSession(sessionCookie?.value);
     if (session && session.role) {
       return NextResponse.redirect(new URL(roleDefaultRoute(session.role as any), request.url));
     }
