@@ -33,29 +33,16 @@ const getWebhookEventSchema = z.object({
   id: z.coerce.number().int().positive(),
 });
 
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export type XeroWebhookEventItem = {
-  webhook_id: number;
-  event: string;
-  created_at: string | null;
-};
-
-export type ListWebhookEventsResult = {
-  events: XeroWebhookEventItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
-
-export type ProcessXeroWebhookResponse = {
-  operation: string;
-  message: string;
-  processedCount: number;
-};
+import {
+  xeroWebhookEventItemSchema,
+  listWebhookEventsResultSchema,
+  processXeroWebhookResponseSchema,
+} from "./schemas";
+import type {
+  XeroWebhookEventItem,
+  ListWebhookEventsResult,
+  ProcessXeroWebhookResponse,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Exported schemas
@@ -113,7 +100,7 @@ export async function listXeroWebhookEvents(
     }),
   ]);
 
-  return {
+  const result: ListWebhookEventsResult = {
     events: events.map((e) => ({
       webhook_id: e.webhook_id,
       event: e.event,
@@ -124,6 +111,16 @@ export async function listXeroWebhookEvents(
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  const outputParsed = listWebhookEventsResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/xero-webhooks] listXeroWebhookEvents output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -149,11 +146,21 @@ export async function getXeroWebhookEvent(
 
   if (!event) return null;
 
-  return {
+  const result: XeroWebhookEventItem = {
     webhook_id: event.webhook_id,
     event: event.event,
     created_at: event.created_at?.toISOString() ?? null,
   };
+
+  const outputParsed = xeroWebhookEventItemSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/xero-webhooks] getXeroWebhookEvent output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -178,20 +185,36 @@ export async function processXeroWebhook(
   // Verify HMAC signature
   if (rawBody && signature) {
     if (!verifySignature(rawBody, signature, webhookKey)) {
-      return {
+      const result: ProcessXeroWebhookResponse = {
         operation: "error",
         message: "Signature mismatch",
         processedCount: 0,
       };
+      const outputParsed = processXeroWebhookResponseSchema.safeParse(result);
+      if (!outputParsed.success) {
+        console.error(
+          "[modules/xero-webhooks] processXeroWebhook output validation failed:",
+          outputParsed.error.issues,
+        );
+      }
+      return result;
     }
   }
 
   if (!Array.isArray(events) || events.length === 0) {
-    return {
+    const result: ProcessXeroWebhookResponse = {
       operation: "error",
       message: "No events provided",
       processedCount: 0,
     };
+    const outputParsed = processXeroWebhookResponseSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/xero-webhooks] processXeroWebhook output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+    return result;
   }
 
   let processedCount = 0;
@@ -219,9 +242,17 @@ export async function processXeroWebhook(
     }
   }
 
-  return {
+  const result: ProcessXeroWebhookResponse = {
     operation: "success",
     message: `Processed ${processedCount} Xero webhook events`,
     processedCount,
   };
+  const outputParsed = processXeroWebhookResponseSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/xero-webhooks] processXeroWebhook output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+  return result;
 }

@@ -119,3 +119,143 @@ describe("createUniversity schema", () => {
     }
   });
 });
+
+// ---------------------------------------------------------------------------
+// Output schema tests (from ./schemas.ts)
+// ---------------------------------------------------------------------------
+
+import {
+  universityItemSchema,
+  listUniversitiesResultSchema,
+  createUniversityResultSchema,
+  type UniversityItem,
+  type ListUniversitiesResult,
+  type CreateUniversityResult,
+} from "./schemas";
+
+describe("universityItemSchema (output)", () => {
+  it("validates a complete university item", () => {
+    const mock: UniversityItem = {
+      university_id: 1,
+      university_name_en: "Kuwait University",
+      university_name_ar: "جامعة الكويت",
+    };
+    const parsed = universityItemSchema.safeParse(mock);
+    expect(parsed.success).toBe(true);
+    if (parsed.success) {
+      expect(parsed.data.university_id).toBe(1);
+      expect(parsed.data.university_name_en).toBe("Kuwait University");
+    }
+  });
+
+  it("allows null names", () => {
+    const mock: UniversityItem = {
+      university_id: 2,
+      university_name_en: null,
+      university_name_ar: null,
+    };
+    const parsed = universityItemSchema.safeParse(mock);
+    expect(parsed.success).toBe(true);
+  });
+
+  it("rejects missing university_id", () => {
+    const parsed = universityItemSchema.safeParse({
+      university_name_en: "Test",
+      university_name_ar: null,
+    });
+    expect(parsed.success).toBe(false);
+  });
+
+  it("rejects negative university_id", () => {
+    const parsed = universityItemSchema.safeParse({
+      university_id: -1,
+      university_name_en: "Test",
+      university_name_ar: null,
+    });
+    expect(parsed.success).toBe(false);
+  });
+});
+
+describe("listUniversitiesResultSchema (output)", () => {
+  it("validates a complete list result", () => {
+    const mock: ListUniversitiesResult = {
+      universities: [
+        {
+          university_id: 1,
+          university_name_en: "Kuwait University",
+          university_name_ar: "جامعة الكويت",
+        },
+      ],
+      total: 1,
+      page: 1,
+      limit: 200,
+    };
+    const parsed = listUniversitiesResultSchema.safeParse(mock);
+    expect(parsed.success).toBe(true);
+    if (parsed.success) {
+      expect(parsed.data.universities).toHaveLength(1);
+      expect(parsed.data.total).toBe(1);
+    }
+  });
+
+  it("validates empty universities array", () => {
+    const mock: ListUniversitiesResult = {
+      universities: [],
+      total: 0,
+      page: 1,
+      limit: 200,
+    };
+    const parsed = listUniversitiesResultSchema.safeParse(mock);
+    expect(parsed.success).toBe(true);
+  });
+
+  it("rejects negative total", () => {
+    const parsed = listUniversitiesResultSchema.safeParse({
+      universities: [],
+      total: -1,
+      page: 1,
+      limit: 200,
+    });
+    expect(parsed.success).toBe(false);
+  });
+});
+
+describe("createUniversityResultSchema (output)", () => {
+  it("validates success result", () => {
+    const mock: CreateUniversityResult = {
+      operation: "success",
+      message: "University created successfully",
+      university: {
+        university_id: 1,
+        university_name_en: "Kuwait University",
+        university_name_ar: "جامعة الكويت",
+      },
+    };
+    const parsed = createUniversityResultSchema.safeParse(mock);
+    expect(parsed.success).toBe(true);
+    if (parsed.success) {
+      expect(parsed.data.operation).toBe("success");
+    }
+  });
+
+  it("validates error result", () => {
+    const mock: CreateUniversityResult = {
+      operation: "error",
+      message: "University already exists",
+    };
+    const parsed = createUniversityResultSchema.safeParse(mock);
+    expect(parsed.success).toBe(true);
+    if (parsed.success) {
+      expect(parsed.data.operation).toBe("error");
+      expect(parsed.data.message).toBe("University already exists");
+    }
+  });
+
+  it("rejects unknown operation", () => {
+    const parsed = createUniversityResultSchema.safeParse({
+      operation: "invalid",
+      message: "test",
+    });
+    expect(parsed.success).toBe(false);
+  });
+});
