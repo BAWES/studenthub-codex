@@ -8,6 +8,9 @@ import {
   getClientSchema,
   createClientSchema,
   updateClientSchema,
+  listClientsResultSchema,
+  getClientResultSchema,
+  clientMutationResultSchema,
   type ListClientsInput,
   type CreateClientInput,
   type UpdateClientInput,
@@ -81,13 +84,24 @@ export async function listClients(
     prisma.company.count({ where: where as any }),
   ]);
 
-  return {
+  const result: ListClientsResult = {
     clients: clients as ClientListItem[],
     total,
     page,
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  // Validate output shape
+  const outputParsed = listClientsResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/clients] listClients output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -111,7 +125,18 @@ export async function getClient(
     },
   });
 
-  return client as ClientDetail | null;
+  const result = client as ClientDetail | null;
+
+  // Validate output shape
+  const outputParsed = getClientResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/clients] getClient output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -147,8 +172,19 @@ export async function createClient(
     } as any,
   });
 
+  const result = { company_id: client.company_id };
+
+  // Validate output shape
+  const outputParsed = clientMutationResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/clients] createClient output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
   revalidatePath("/clients");
-  return { company_id: client.company_id };
+  return result;
 }
 
 /**
@@ -188,6 +224,17 @@ export async function updateClient(
     data: updateData as any,
   });
 
+  const result = { company_id: id };
+
+  // Validate output shape
+  const outputParsed = clientMutationResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/clients] updateClient output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
   revalidatePath("/clients");
-  return { company_id: id };
+  return result;
 }
