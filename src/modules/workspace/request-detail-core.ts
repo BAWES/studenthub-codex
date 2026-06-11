@@ -1,6 +1,57 @@
 import { prisma } from "@/lib/prisma";
 import { formatDate, formatMoney } from "@/modules/workspace/format";
-import { computeMatchScore, matchScoreLabel } from "@/modules/workspace/data/match-score";
+
+// ---------------------------------------------------------------------------
+// Match score helpers (inlined from workspace/data/match-score)
+// ---------------------------------------------------------------------------
+
+/**
+ * Compute a match score (0-100) for a candidate against a job request.
+ */
+function computeMatchScore(params: {
+  matchedSkillCount: number;
+  totalRequestSkills: number;
+  candidateRate?: number | null;
+  requestCompensation?: number | null;
+}): number {
+  const { matchedSkillCount, totalRequestSkills, candidateRate, requestCompensation } = params;
+
+  const skillScore =
+    totalRequestSkills > 0
+      ? Math.min(matchedSkillCount, totalRequestSkills) / totalRequestSkills
+      : null;
+
+  let rateScore: number | null = null;
+  if (
+    candidateRate != null &&
+    candidateRate > 0 &&
+    requestCompensation != null &&
+    requestCompensation > 0
+  ) {
+    const diff = Math.abs(candidateRate - requestCompensation);
+    const proximity = Math.max(0, 1 - diff / requestCompensation);
+    rateScore = proximity;
+  }
+
+  let total: number;
+  if (skillScore === null) {
+    total = 0.5;
+  } else if (rateScore === null) {
+    total = skillScore;
+  } else {
+    total = skillScore * 0.6 + rateScore * 0.4;
+  }
+
+  return Math.round(Math.max(0, Math.min(1, total)) * 100);
+}
+
+function matchScoreLabel(score: number): string {
+  if (score >= 90) return "Excellent match";
+  if (score >= 70) return "Strong match";
+  if (score >= 50) return "Good match";
+  if (score >= 30) return "Partial match";
+  return "Low match";
+}
 
 // ---------------------------------------------------------------------------
 // request-detail-core.ts

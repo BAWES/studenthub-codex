@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { formatDate, formatMoney } from "@/modules/workspace/format";
-import { getCandidateDetail } from "@/modules/workspace/data/candidate";
+import { getCandidateDetail } from "@/modules/candidates/candidate-detail";
 
 // ---------------------------------------------------------------------------
 // Staff candidate functions — extracted from workspace/data.ts

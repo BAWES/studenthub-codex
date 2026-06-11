@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireRoleCapability } from "@/modules/auth/session";
-import { getCandidateDetail } from "@/modules/workspace/data/candidate";
+import { getCandidateDetail } from "@/modules/candidates/candidate-detail";
 import {
   updatePersonalInfoSchema,
   updateProfileFieldsSchema,

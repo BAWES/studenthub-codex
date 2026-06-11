@@ -10,7 +10,7 @@
 
 import { getTypesenseClient, CANDIDATES_COLLECTION, type CandidateDocument } from "@/lib/typesense";
 import { prisma } from "@/lib/prisma";
-import { getCandidateDetail } from "@/modules/workspace/data/candidate";
+import { getCandidateDetail } from "@/modules/candidates/candidate-detail";
 import { formatDate, formatMoney } from "@/modules/workspace/format";
 import type { CandidateSearchRow, CandidateSearchParams, CandidateSearchFacet, CandidateSearchFilter } from "./search";
 import { candidateIdsForStaff, buildSelectedActions, uniqueCandidateIds } from "./search";
