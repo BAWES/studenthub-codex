@@ -53,6 +53,14 @@ export const prMergeItemSchema = z.object({
 });
 
 /**
+ * Result shape from getPrMergeMetrics.
+ */
+export const prMergeMetricsResultSchema = z.object({
+  metrics: z.array(prMergeMetricSchema),
+  recent: z.array(prMergeItemSchema),
+});
+
+/**
  * Full dashboard data payload.
  */
 export const dashboardDataSchema = z.object({

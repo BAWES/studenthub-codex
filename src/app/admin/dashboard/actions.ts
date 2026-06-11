@@ -10,7 +10,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
-import { dashboardDataSchema } from "./schemas";
+import { dashboardDataSchema, prMergeMetricsResultSchema } from "./schemas";
 import type {
   DashboardData,
   DashboardMetric,
@@ -175,7 +175,8 @@ export async function getPrMergeMetrics(): Promise<{
       hours: p.hours,
     }));
 
-    return {
+    // Validate output
+    const result = {
       metrics: [
         { label: "Avg time-to-merge", value: fmt(avgHours), note: `Across ${prs.length} PRs` },
         { label: "Median time-to-merge", value: fmt(medianHours), note: "Midpoint of last 50 merged PRs" },
@@ -185,6 +186,12 @@ export async function getPrMergeMetrics(): Promise<{
       ],
       recent,
     };
+    const parsed = prMergeMetricsResultSchema.safeParse(result);
+    if (!parsed.success) {
+      console.error("[admin/dashboard] getPrMergeMetrics output validation failed:", parsed.error.format());
+    }
+
+    return result;
   } catch (err) {
     console.error("[admin/dashboard] Failed to fetch PR merge metrics:", err);
     return {
