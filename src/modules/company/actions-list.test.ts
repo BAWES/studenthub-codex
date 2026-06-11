@@ -1,41 +1,11 @@
 import { describe, it, expect } from "vitest";
-import { z } from "zod";
 
-// ---------------------------------------------------------------------------
-// Schemas (duplicated from actions-list.ts for isolated unit testing)
-// ---------------------------------------------------------------------------
-
-const listCompaniesSchema = z.object({
-  nameFilter: z.string().optional(),
-  status: z
-    .union([z.literal("active"), z.literal("inactive"), z.literal("")])
-    .optional(),
-  page: z.number().int().min(1).optional().default(1),
-  pageSize: z.number().int().min(1).max(100).optional().default(20),
-});
-
-const getCompanySchema = z.object({
-  companyId: z.number().int().positive("Company ID is required"),
-});
-
-const listCompaniesResultItemSchema = z.object({
-  company_id: z.number(),
-  company_name: z.string(),
-  company_common_name_en: z.string().nullable(),
-  company_common_name_ar: z.string().nullable(),
-  company_email: z.string().nullable(),
-  company_website: z.string().nullable(),
-  company_logo: z.string().nullable(),
-  commission: z.number().nullable(),
-  total_candidate: z.number().nullable(),
-  no_of_active_requests: z.number().nullable(),
-  followup: z.boolean().nullable(),
-  currency_code: z.string().nullable(),
-});
+import { listCompaniesSchema, getCompanySchema, companyListItemSchema } from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Schema tests
 // ---------------------------------------------------------------------------
+
 
 describe("listCompanies schema", () => {
   it("accepts empty params", () => {
@@ -100,7 +70,7 @@ describe("getCompany schema", () => {
   });
 });
 
-describe("listCompaniesResultItem shape", () => {
+describe("companyListItemSchema", () => {
   it("validates a well-formed company result", () => {
     const item = {
       company_id: 1,
@@ -116,7 +86,7 @@ describe("listCompaniesResultItem shape", () => {
       followup: true,
       currency_code: "KWD",
     };
-    const result = listCompaniesResultItemSchema.safeParse(item);
+    const result = companyListItemSchema.safeParse(item);
     expect(result.success).toBe(true);
   });
 
@@ -135,7 +105,7 @@ describe("listCompaniesResultItem shape", () => {
       followup: null,
       currency_code: null,
     };
-    const result = listCompaniesResultItemSchema.safeParse(item);
+    const result = companyListItemSchema.safeParse(item);
     expect(result.success).toBe(true);
   });
 });
