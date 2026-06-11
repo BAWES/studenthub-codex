@@ -1,34 +1,34 @@
 import { test, expect } from "@playwright/test";
-import { getFixtures, disconnectPrisma, type FixtureUser } from "../fixtures/auth";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { getMockFixtures, type FixtureUser } from "../fixtures/users";
 
 let company: FixtureUser;
 let staff: FixtureUser;
 let candidateUser: FixtureUser;
-let jobId: string;
+let jobId: string | null = null;
 
 test.describe("Employer detail routes", () => {
   test.describe.configure({ mode: "serial" });
 
   test.beforeAll(async () => {
-    const fixtures = await getFixtures();
+    const fixtures = getMockFixtures();
     company = fixtures.get("company")!;
     staff = fixtures.get("staff")!;
     candidateUser = fixtures.get("candidate")!;
 
-    // Discover a real job listing ID
-    const job = await prisma.job_listing.findFirst({
-      where: { status: "active" },
-      select: { jobListingId: true },
-    });
-    if (job) jobId = String(job.jobListingId);
-  });
-
-  test.afterAll(async () => {
-    await disconnectPrisma();
-    await prisma.$disconnect();
+    // Try to discover a job listing from the seed DB (used in CI).
+    // No DB dependency for auth — only for the dynamic job ID.
+    try {
+      const { PrismaClient } = await import("@prisma/client");
+      const prisma = new PrismaClient();
+      const job = await prisma.job_listing.findFirst({
+        where: { status: "active" },
+        select: { jobListingId: true },
+      });
+      if (job) jobId = String(job.jobListingId);
+      await prisma.$disconnect();
+    } catch {
+      // No DB available — tests requiring jobId will skip gracefully
+    }
   });
 
   async function assertRouteLoads(route: string, fixtureUser: FixtureUser) {
