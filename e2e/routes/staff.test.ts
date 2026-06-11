@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { getFixtures, disconnectPrisma, type FixtureUser } from "../fixtures/auth";
+import { getMockFixtures, type FixtureUser } from "../fixtures/users";
 
 let staff: FixtureUser;
 let admin: FixtureUser;
@@ -8,15 +8,11 @@ let candidateUser: FixtureUser;
 test.describe("Staff routes", () => {
   test.describe.configure({ mode: "serial" });
 
-  test.beforeAll(async () => {
-    const fixtures = await getFixtures();
+  test.beforeAll(() => {
+    const fixtures = getMockFixtures();
     staff = fixtures.get("staff")!;
     admin = fixtures.get("admin")!;
     candidateUser = fixtures.get("candidate")!;
-  });
-
-  test.afterAll(async () => {
-    await disconnectPrisma();
   });
 
   async function assertRouteLoads(route: string) {
