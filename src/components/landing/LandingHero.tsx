@@ -60,12 +60,12 @@ export default function LandingHero({ onCtaClick }: LandingHeroProps) {
           background: "radial-gradient(ellipse 90% 60% at 30% -10%, color-mix(in srgb, var(--sh-coral) 14%, transparent) 0%, transparent 60%)",
         }}
       />
-      {/* Secondary blue orb */}
+      {/* Secondary coral orb */}
       <div
         className="absolute inset-0 pointer-events-none"
         aria-hidden="true"
         style={{
-          background: "radial-gradient(ellipse 70% 50% at 80% 70%, color-mix(in srgb, #2563eb 10%, transparent) 0%, transparent 55%)",
+          background: "radial-gradient(ellipse 70% 50% at 80% 70%, color-mix(in srgb, var(--sh-coral) 10%, transparent) 0%, transparent 55%)",
         }}
       />
       {/* Subtle grid pattern */}
@@ -96,7 +96,7 @@ export default function LandingHero({ onCtaClick }: LandingHeroProps) {
         className="absolute w-[240px] h-[240px] rounded-full pointer-events-none opacity-12 dark:opacity-6 max-lg:hidden"
         aria-hidden="true"
         style={{
-          background: "radial-gradient(circle, #2563eb 0%, transparent 70%)",
+          background: "radial-gradient(circle, var(--sh-coral) 0%, transparent 70%)",
           bottom: "5%",
           left: "45%",
           filter: "blur(50px)",
@@ -142,8 +142,8 @@ export default function LandingHero({ onCtaClick }: LandingHeroProps) {
             style={{ color: "var(--muted)" }}
           >
             StudentHub is Kuwait&apos;s two-sided marketplace where students build careers
-            and employers discover vetted talent. Create a profile seen by 500+ employers,
-            or post openings and get AI-matched candidates — all in one place.
+            and employers discover vetted talent. Our staff recruiters match you with the
+            right opportunities — all in one place.
           </p>
         </RevealItem>
 
@@ -179,9 +179,8 @@ export default function LandingHero({ onCtaClick }: LandingHeroProps) {
               className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 group"
               style={{
                 color: "var(--ink)",
-                backgroundColor: "color-mix(in srgb, var(--surface) 80%, transparent)",
+                backgroundColor: "var(--card)",
                 border: "1px solid var(--border)",
-                backdropFilter: "blur(8px)",
               }}
             >
               <Building2 className="size-4" />
@@ -224,8 +223,8 @@ export default function LandingHero({ onCtaClick }: LandingHeroProps) {
             <span
               className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium"
               style={{
-                backgroundColor: "color-mix(in srgb, #2563eb 10%, transparent)",
-                color: "#2563eb",
+                backgroundColor: "color-mix(in srgb, var(--sh-coral) 10%, transparent)",
+                color: "var(--sh-coral)",
               }}
             >
               <Star className="size-3" />
@@ -333,9 +332,9 @@ export default function LandingHero({ onCtaClick }: LandingHeroProps) {
                 <div className="grid grid-cols-4 gap-1.5">
                   {[
                     { label: "Profile", value: "92%", color: "var(--sh-coral)" },
-                    { label: "Apps", value: "4", color: "var(--success)" },
-                    { label: "Timesheet", value: "Wk 24", color: "#2563eb" },
-                    { label: "Pay", value: "KWD 420", color: "#f59e0b" },
+                    { label: "Apps", value: "4", color: "var(--sh-coral)" },
+                    { label: "Timesheet", value: "Wk 24", color: "var(--sh-coral)" },
+                    { label: "Pay", value: "KWD 420", color: "var(--sh-coral)" },
                   ].map((item) => (
                     <div
                       key={item.label}
