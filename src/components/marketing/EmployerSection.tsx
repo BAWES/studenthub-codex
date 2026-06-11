@@ -91,7 +91,7 @@ export default function EmployerSection({ className }: EmployerSectionProps) {
           return (
             <div
               key={feat.title}
-              className="group shCard rounded-xl p-5 transition-all duration-[280ms] hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(16,24,40,0.1)]"
+              className="group shCard rounded-xl p-5 shCardGlow transition-all duration-[280ms] hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(16,24,40,0.1)]"
               style={{
                 background: "var(--sh-glass-bg)",
                 border: "1px solid var(--sh-glass-border)",

@@ -65,7 +65,7 @@ export default function HowItWorks({ className }: HowItWorksProps) {
           return (
             <div
               key={step.title}
-              className="relative flex flex-col items-center text-center p-6 rounded-xl transition-all duration-[280ms] hover:-translate-y-1"
+              className="relative flex flex-col items-center text-center p-6 rounded-xl shCardGlow transition-all duration-[280ms] hover:-translate-y-1"
               style={{
                 background: "var(--sh-glass-bg)",
                 border: "1px solid var(--sh-glass-border)",
