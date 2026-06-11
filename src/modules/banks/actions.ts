@@ -6,6 +6,9 @@ import {
   listBanksSchema,
   getBankSchema,
   createBankSchema,
+  listBanksResultSchema,
+  getBankResultSchema,
+  createBankResultSchema,
   type ListBanksParams,
   type GetBankParams,
   type CreateBankParams,
@@ -46,13 +49,24 @@ export async function listBanks(
     prisma.bank.count({ where }),
   ]);
 
-  return {
+  const result: ListBanksResult = {
     banks: banks as BankListItem[],
     total,
     page,
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  // Validate output shape
+  const outputParsed = listBanksResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/banks] listBanks output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -78,7 +92,18 @@ export async function getBank(
     },
   });
 
-  return bank as BankListItem | null;
+  const result = bank as BankListItem | null;
+
+  // Validate output shape
+  const outputParsed = getBankResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/banks] getBank output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -130,15 +155,37 @@ export async function createBank(
       },
     });
 
-    return {
+    const result: CreateBankResult = {
       operation: "success",
       message: "Bank created successfully",
     };
+
+    // Validate output shape
+    const outputParsed = createBankResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/banks] createBank output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
   } catch (err) {
-    return {
+    const result: CreateBankResult = {
       operation: "error",
       message:
         err instanceof Error ? err.message : "Failed to create bank record",
     };
+
+    // Validate output shape
+    const outputParsed = createBankResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/banks] createBank output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
   }
 }

@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 // ---------------------------------------------------------------------------
-// Schemas for src/modules/banks actions
+// Input validation schemas
 // ---------------------------------------------------------------------------
 
 export const listBanksSchema = z.object({
@@ -22,27 +22,55 @@ export const createBankSchema = z.object({
   codeAbk: z.number().int().optional(),
 });
 
+// ---------------------------------------------------------------------------
+// Output validation schemas
+// ---------------------------------------------------------------------------
+
+/**
+ * Schema for a single bank item in the list response.
+ */
+export const bankListItemSchema = z.object({
+  bank_id: z.number().int(),
+  bank_name: z.string().nullable(),
+  bank_iban_code: z.string(),
+  bank_swift_code: z.string().nullable(),
+  bank_code_abk: z.number().int().nullable(),
+  bank_address: z.string().nullable(),
+  bank_transfer_type: z.string().nullable(),
+});
+
+/**
+ * Schema for the listBanks response.
+ */
+export const listBanksResultSchema = z.object({
+  banks: z.array(bankListItemSchema),
+  total: z.number().int().nonnegative(),
+  page: z.number().int().nonnegative(),
+  limit: z.number().int().nonnegative(),
+  totalPages: z.number().int().nonnegative(),
+});
+
+/**
+ * Schema for the getBank response — a single bank item or null.
+ */
+export const getBankResultSchema = bankListItemSchema.nullable();
+
+/**
+ * Schema for the createBank response.
+ */
+export const createBankResultSchema = z.object({
+  operation: z.string(),
+  message: z.string(),
+});
+
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
+
 export type ListBanksParams = z.input<typeof listBanksSchema>;
 export type GetBankParams = z.input<typeof getBankSchema>;
 export type CreateBankParams = z.input<typeof createBankSchema>;
 
-export type BankListItem = {
-  bank_id: number;
-  bank_name: string | null;
-  bank_iban_code: string;
-  bank_swift_code: string | null;
-  bank_code_abk: number | null;
-  bank_address: string | null;
-  bank_transfer_type: string | null;
-};
-export type ListBanksResult = {
-  banks: BankListItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
-export type CreateBankResult = {
-  operation: string;
-  message: string;
-};
+export type BankListItem = z.output<typeof bankListItemSchema>;
+export type ListBanksResult = z.output<typeof listBanksResultSchema>;
+export type CreateBankResult = z.output<typeof createBankResultSchema>;
