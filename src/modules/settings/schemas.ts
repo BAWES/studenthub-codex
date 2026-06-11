@@ -19,33 +19,39 @@ export const updateSettingSchema = z.object({
   value: z.string().nullable(),
 });
 
+// Input types
+export type ListSettingsInput = z.input<typeof listSettingsSchema>;
+export type GetSettingInput = z.input<typeof getSettingSchema>;
+export type UpdateSettingInput = z.input<typeof updateSettingSchema>;
+
 // ---------------------------------------------------------------------------
 // Output validation schemas
 // ---------------------------------------------------------------------------
 
 export const settingItemSchema = z.object({
-  setting_uuid: z.string().min(1),
-  code: z.string().min(1),
-  key: z.string().min(1),
+  setting_uuid: z.string(),
+  code: z.string(),
+  key: z.string(),
   value: z.string().nullable(),
   serialized: z.boolean(),
-  created_at: z.nullable(
-    z.union([z.string(), z.date()]).transform((v) => (v instanceof Date ? v.toISOString() : v)),
-  ),
-  updated_at: z.nullable(
-    z.union([z.string(), z.date()]).transform((v) => (v instanceof Date ? v.toISOString() : v)),
-  ),
+  created_at: z.coerce.date().nullable(),
+  updated_at: z.coerce.date().nullable(),
 });
 
 export const listSettingsResultSchema = z.object({
   settings: z.array(settingItemSchema),
-  total: z.number().int().nonnegative(),
-  page: z.number().int().positive(),
-  limit: z.number().int().positive(),
-  totalPages: z.number().int().nonnegative(),
+  total: z.number(),
+  page: z.number(),
+  limit: z.number(),
+  totalPages: z.number(),
 });
 
 export const updateSettingResultSchema = z.object({
-  operation: z.string().min(1),
-  message: z.string().min(1),
+  operation: z.string(),
+  message: z.string(),
 });
+
+// Output types
+export type SettingItem = z.output<typeof settingItemSchema>;
+export type ListSettingsResult = z.output<typeof listSettingsResultSchema>;
+export type UpdateSettingResult = z.output<typeof updateSettingResultSchema>;

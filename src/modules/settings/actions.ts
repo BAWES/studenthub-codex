@@ -34,9 +34,7 @@ export type ListSettingsResult = {
 };
 
 export type GetSettingInput = z.input<typeof getSettingSchema>;
-
 export type UpdateSettingInput = z.input<typeof updateSettingSchema>;
-
 export type ListSettingsInput = z.input<typeof listSettingsSchema>;
 
 export type UpdateSettingResult = {
@@ -48,7 +46,7 @@ export type UpdateSettingResult = {
 // Exported schemas (for shared validation in tests)
 // ---------------------------------------------------------------------------
 
-export { listSettingsSchema, getSettingSchema, updateSettingSchema };
+export { listSettingsSchema, getSettingSchema, updateSettingSchema, listSettingsResultSchema, updateSettingResultSchema };
 
 // ---------------------------------------------------------------------------
 // Server actions

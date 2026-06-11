@@ -1,55 +1,22 @@
 "use server";
 
-import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
+import {
+  getUserPermissionsSchema,
+  permissionSectionListResponseSchema,
+  permissionUserListResponseSchema,
+} from "./schemas";
+import type { PermissionSectionItem, PermissionUserItem } from "./schemas";
 
 // ---------------------------------------------------------------------------
-// Schemas
-// ---------------------------------------------------------------------------
-
-const listPermissionSectionsSchema = z.object({});
-
-const getUserPermissionsSchema = z.object({
-  type: z.enum(["staff", "admin"]),
-  id: z.coerce.number().int().positive(),
-});
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export type PermissionSubSectionItem = {
-  permission_sub_section_uuid: string;
-  sub_section_name: string | null;
-  sub_section_slug: string | null;
-};
-
-export type PermissionSectionItem = {
-  permission_uuid: string;
-  section_name: string | null;
-  subSections: PermissionSubSectionItem[];
-};
-
-export type PermissionUserItem = {
-  permission_user_uuid: string;
-  admin_id: number | null;
-  staff_id: number | null;
-  permission_sub_section_uuid: string | null;
-  sub_section_name: string | null;
-  sub_section_slug: string | null;
-  section_name: string | null;
-  companies: string[];
-};
-
-// ---------------------------------------------------------------------------
-// Exported schemas (for shared validation)
+// Re-export schemas for shared validation (backward compatibility)
 // ---------------------------------------------------------------------------
 
 export {
   listPermissionSectionsSchema,
   getUserPermissionsSchema,
-};
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // listPermissionSections
@@ -79,17 +46,28 @@ export async function listPermissionSections(): Promise<PermissionSectionItem[]>
     orderBy: { section_name: "asc" },
   });
 
-  return sections.map((s: any): PermissionSectionItem => ({
+  const result: PermissionSectionItem[] = sections.map((s: any) => ({
     permission_uuid: s.permission_uuid,
     section_name: s.section_name,
     subSections: (s.permission_sub_section || []).map(
-      (sub: any): PermissionSubSectionItem => ({
+      (sub: any): PermissionSectionItem["subSections"][number] => ({
         permission_sub_section_uuid: sub.permission_sub_section_uuid,
         sub_section_name: sub.sub_section_name,
         sub_section_slug: sub.sub_section_slug,
       }),
     ),
   }));
+
+  // Validate output shape
+  const outputParsed = permissionSectionListResponseSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/permissions] listPermissionSections output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -132,7 +110,7 @@ export async function getUserPermissions(
     orderBy: { created_at: "desc" },
   });
 
-  return permissions.map((p: any): PermissionUserItem => {
+  const result: PermissionUserItem[] = permissions.map((p: any) => {
     const subSection = p.permission_sub_section;
     const sectionName = subSection?.permission_section?.section_name ?? null;
     let companies: string[] = [];
@@ -156,4 +134,15 @@ export async function getUserPermissions(
       companies,
     };
   });
+
+  // Validate output shape
+  const outputParsed = permissionUserListResponseSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/permissions] getUserPermissions output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }

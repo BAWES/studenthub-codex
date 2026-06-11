@@ -47,9 +47,6 @@ export const updateComplianceRecordSchema = z.object({
 // Output validation schemas
 // ---------------------------------------------------------------------------
 
-/**
- * Schema for a single compliance row in the listing.
- */
 export const complianceRowSchema = z.object({
   id: z.string().min(1),
   type: z.enum(["company", "id_request", "candidate"]),
@@ -59,9 +56,8 @@ export const complianceRowSchema = z.object({
   updated: z.string().min(1),
 });
 
-/**
- * Schema for the compliance summary.
- */
+export type ComplianceRowOutput = z.infer<typeof complianceRowSchema>;
+
 export const complianceSummarySchema = z.object({
   totalCompanies: z.number().int().nonnegative(),
   unapprovedCompanies: z.number().int().nonnegative(),
@@ -70,68 +66,57 @@ export const complianceSummarySchema = z.object({
   incompleteCandidates: z.number().int().nonnegative(),
 });
 
-/**
- * Schema for a metric item used in compliance detail views.
- */
-export const complianceMetricSchema = z.object({
-  label: z.string(),
+export type ComplianceSummaryOutput = z.infer<typeof complianceSummarySchema>;
+
+const complianceMetricSchema = z.object({
+  label: z.string().min(1),
   value: z.union([z.string(), z.number()]),
-  note: z.string(),
+  note: z.string().min(1),
 });
 
-/**
- * Schema for an ID request item in company compliance detail.
- */
-export const complianceIdRequestItemSchema = z.object({
-  id: z.string(),
-  status: z.string(),
+const idRequestRecordSchema = z.object({
+  id: z.string().min(1),
+  status: z.string().min(1),
   rejection_reason: z.string().nullable(),
   created_at: z.date().nullable(),
 });
 
-/**
- * Schema for company compliance detail.
- */
 export const companyComplianceDetailSchema = z.object({
   type: z.literal("company"),
-  company: z
-    .object({
-      company_id: z.number(),
-      company_name: z.string(),
-      company_email: z.string().nullable(),
-      company_approved_to_hire: z.boolean().nullable(),
-      company_created_at: z.date().nullable(),
-      company_updated_at: z.date().nullable(),
-      staff_name: z.string().nullable(),
-      country_name_en: z.string().nullable(),
-      no_of_active_requests: z.number().nullable(),
-    })
-    .nullable(),
+  company: z.object({
+    company_id: z.number().int(),
+    company_name: z.string().min(1),
+    company_email: z.string().nullable(),
+    company_approved_to_hire: z.boolean().nullable(),
+    company_created_at: z.date().nullable(),
+    company_updated_at: z.date().nullable(),
+    staff_name: z.string().nullable(),
+    country_name_en: z.string().nullable(),
+    no_of_active_requests: z.number().int().nullable(),
+  }).nullable(),
   metrics: z.array(complianceMetricSchema),
-  idRequests: z.array(complianceIdRequestItemSchema),
+  idRequests: z.array(idRequestRecordSchema),
 });
 
-/**
- * Schema for ID request compliance detail.
- */
+export type CompanyComplianceDetailOutput = z.infer<typeof companyComplianceDetailSchema>;
+
+const idRequestRecordLightSchema = z.object({
+  cir_uuid: z.string().min(1),
+  candidate_ids: z.string().nullable(),
+  status: z.string().nullable(),
+  rejection_reason: z.string().nullable(),
+  created_at: z.date().nullable(),
+  updated_at: z.date().nullable(),
+});
+
 export const idRequestComplianceDetailSchema = z.object({
   type: z.literal("id_request"),
-  record: z
-    .object({
-      cir_uuid: z.string(),
-      candidate_ids: z.string().nullable(),
-      status: z.string().nullable(),
-      rejection_reason: z.string().nullable(),
-      created_at: z.date().nullable(),
-      updated_at: z.date().nullable(),
-    })
-    .nullable(),
+  record: idRequestRecordLightSchema.nullable(),
   metrics: z.array(complianceMetricSchema),
 });
 
-/**
- * Schema for the listComplianceRecords response.
- */
+export type IdRequestComplianceDetailOutput = z.infer<typeof idRequestComplianceDetailSchema>;
+
 export const listComplianceRecordsResponseSchema = z.object({
   items: z.array(complianceRowSchema),
   total: z.number().int().nonnegative(),
@@ -141,17 +126,14 @@ export const listComplianceRecordsResponseSchema = z.object({
   summary: complianceSummarySchema,
 });
 
-/**
- * Schema for create/update/approve/deny mutation responses.
- */
+export type ListComplianceRecordsResponseOutput = z.infer<typeof listComplianceRecordsResponseSchema>;
+
 export const complianceMutationResponseSchema = z.object({
-  id: z.string(),
-  type: z.string(),
+  id: z.string().min(1),
+  type: z.enum(["company", "id_request"]),
 });
 
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
+export type ComplianceMutationResponseOutput = z.infer<typeof complianceMutationResponseSchema>;
 
 export type ListComplianceRecordsInput = z.input<typeof listComplianceRecordsSchema>;
 export type GetComplianceRecordInput = z.input<typeof getComplianceRecordSchema>;

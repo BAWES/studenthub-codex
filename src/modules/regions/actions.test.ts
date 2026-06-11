@@ -1,20 +1,14 @@
 import { describe, it, expect } from "vitest";
 import { z } from "zod";
+import {
+  listAreasSchema,
+  getAreaSchema,
+  listAreasResultSchema,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Pure logic: schema validation tests (no DB dependency)
 // ---------------------------------------------------------------------------
-
-const listAreasSchema = z.object({
-  nameFilter: z.string().optional(),
-  countryId: z.number().int().positive().optional(),
-  page: z.number().int().positive().optional(),
-  limit: z.number().int().min(1).max(100).optional(),
-});
-
-const getAreaSchema = z.object({
-  areaUuid: z.string().min(1),
-});
 
 describe("listAreasSchema", () => {
   it("accepts empty params", () => {
@@ -89,6 +83,136 @@ describe("getAreaSchema", () => {
 
   it("rejects non-string", () => {
     const result = getAreaSchema.safeParse({ areaUuid: 123 });
+    expect(result.success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output validation: listAreasResultSchema
+// ---------------------------------------------------------------------------
+
+describe("listAreasResultSchema", () => {
+  it("accepts a valid result with one area", () => {
+    const result = listAreasResultSchema.safeParse({
+      areas: [
+        {
+          area_uuid: "550e8400-e29b-41d4-a716-446655440000",
+          country_id: 1,
+          area_name_en: "Kuwait City",
+          area_name_ar: "مدينة الكويت",
+          area_latitude: 29.3759,
+          area_longitude: 47.9774,
+        },
+      ],
+      total: 1,
+      page: 1,
+      limit: 20,
+      totalPages: 1,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts a result with nullable fields", () => {
+    const result = listAreasResultSchema.safeParse({
+      areas: [
+        {
+          area_uuid: "550e8400-e29b-41d4-a716-446655440000",
+          country_id: 1,
+          area_name_en: "Test Area",
+          area_name_ar: null,
+          area_latitude: null,
+          area_longitude: null,
+        },
+      ],
+      total: 1,
+      page: 1,
+      limit: 20,
+      totalPages: 1,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts an empty areas array", () => {
+    const result = listAreasResultSchema.safeParse({
+      areas: [],
+      total: 0,
+      page: 1,
+      limit: 20,
+      totalPages: 0,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects missing fields in area item", () => {
+    const result = listAreasResultSchema.safeParse({
+      areas: [
+        {
+          area_uuid: "550e8400-e29b-41d4-a716-446655440000",
+          // country_id missing
+          area_name_en: "Kuwait City",
+          area_name_ar: null,
+          area_latitude: null,
+          area_longitude: null,
+        },
+      ],
+      total: 1,
+      page: 1,
+      limit: 20,
+      totalPages: 1,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects negative total", () => {
+    const result = listAreasResultSchema.safeParse({
+      areas: [],
+      total: -1,
+      page: 1,
+      limit: 20,
+      totalPages: 0,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects zero page", () => {
+    const result = listAreasResultSchema.safeParse({
+      areas: [],
+      total: 0,
+      page: 0,
+      limit: 20,
+      totalPages: 0,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects negative totalPages", () => {
+    const result = listAreasResultSchema.safeParse({
+      areas: [],
+      total: 0,
+      page: 1,
+      limit: 20,
+      totalPages: -1,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects non-integer country_id", () => {
+    const result = listAreasResultSchema.safeParse({
+      areas: [
+        {
+          area_uuid: "550e8400-e29b-41d4-a716-446655440000",
+          country_id: 1.5,
+          area_name_en: "Test",
+          area_name_ar: null,
+          area_latitude: null,
+          area_longitude: null,
+        },
+      ],
+      total: 1,
+      page: 1,
+      limit: 20,
+      totalPages: 1,
+    });
     expect(result.success).toBe(false);
   });
 });

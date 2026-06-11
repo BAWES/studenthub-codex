@@ -57,25 +57,19 @@ export const closeRequestSchema = z.object({
 // Output validation schemas
 // ---------------------------------------------------------------------------
 
-/**
- * Schema for a single request row in a list.
- */
 const requestRowSchema = z.object({
-  request_uuid: z.string(),
-  title: z.string(),
+  request_uuid: z.string().min(1),
+  title: z.string().min(1),
   company_name: z.string().nullable(),
   staff_name: z.string().nullable(),
-  position_type: z.string(),
+  position_type: z.string().min(1),
   no_of_employees: z.number().int().nullable(),
-  status: z.string(),
+  status: z.string().min(1),
   priority: z.number().int().nullable(),
   created_at: z.string().nullable(),
   updated_at: z.string().nullable(),
 });
 
-/**
- * Schema for listRequests response.
- */
 export const listRequestsOutputSchema = z.object({
   items: z.array(requestRowSchema),
   total: z.number().int().nonnegative(),
@@ -84,111 +78,91 @@ export const listRequestsOutputSchema = z.object({
   totalPages: z.number().int().nonnegative(),
 });
 
-const requestCompanySchema = z
-  .object({
-    company_name: z.string().nullable(),
-    company_email: z.string().nullable(),
-  })
-  .nullable();
+export type ListRequestsOutput = z.infer<typeof listRequestsOutputSchema>;
 
-const requestStaffSchema = z
-  .object({
-    staff_name: z.string().nullable(),
-    staff_email: z.string().nullable(),
-  })
-  .nullable();
+const requestMetricSchema = z.object({
+  label: z.string().min(1),
+  value: z.union([z.string(), z.number()]),
+  note: z.string().min(1),
+});
 
-const requestDetailRequestSchema = z
-  .object({
-    request_uuid: z.string(),
-    request_position_title: z.string().nullable(),
-    request_job_description: z.string(),
-    request_compensation: z.string(),
-    request_status: z.string().nullable(),
-    request_feedback: z.string().nullable(),
-    request_priority: z.number().int().nullable(),
-    request_started_at: z.string().nullable(),
-    request_finished_at: z.string().nullable(),
-    request_created_datetime: z.string().nullable(),
-    request_updated_datetime: z.string().nullable(),
-    company: requestCompanySchema,
-    staff: requestStaffSchema,
-  })
-  .nullable();
-
-const getRequestApplicationSchema = z.object({
-  application_uuid: z.string(),
+const applicationSchema = z.object({
+  application_uuid: z.string().min(1),
   candidate_name: z.string().nullable(),
   status: z.number().int().nullable(),
   created_at: z.string().nullable(),
 });
 
-const getRequestInvitationSchema = z.object({
-  invitation_uuid: z.string(),
+const invitationSchema = z.object({
+  invitation_uuid: z.string().min(1),
   candidate_name: z.string().nullable(),
   status: z.number().int().nullable(),
   created_at: z.string().nullable(),
 });
 
-const getRequestInterviewSchema = z.object({
-  request_interview_uuid: z.string(),
+const interviewSchema = z.object({
+  request_interview_uuid: z.string().min(1),
   candidate_name: z.string().nullable(),
   interview_at: z.string().nullable(),
   status: z.number().int().nullable(),
 });
 
-const getRequestMetricSchema = z.object({
-  label: z.string(),
-  value: z.union([z.string(), z.number()]),
-  note: z.string(),
+const requestCompanySchema = z.object({
+  company_name: z.string().nullable(),
+  company_email: z.string().nullable(),
 });
 
-/**
- * Schema for getRequest response — full detail with applications etc.
- */
+const requestStaffSchema = z.object({
+  staff_name: z.string().nullable(),
+  staff_email: z.string().nullable(),
+});
+
+const entitySchema = z.object({
+  request_uuid: z.string().min(1),
+  request_position_title: z.string().nullable(),
+  request_job_description: z.string().min(1),
+  request_compensation: z.string().min(1),
+  request_status: z.string().nullable(),
+  request_feedback: z.string().nullable(),
+  request_priority: z.number().int().nullable(),
+  request_started_at: z.string().nullable(),
+  request_finished_at: z.string().nullable(),
+  request_created_datetime: z.string().nullable(),
+  request_updated_datetime: z.string().nullable(),
+  company: requestCompanySchema.nullable(),
+  staff: requestStaffSchema.nullable(),
+});
+
 export const getRequestOutputSchema = z.object({
-  request: requestDetailRequestSchema,
-  applications: z.array(getRequestApplicationSchema),
-  invitations: z.array(getRequestInvitationSchema),
-  interviews: z.array(getRequestInterviewSchema),
-  metrics: z.array(getRequestMetricSchema),
+  request: entitySchema.nullable(),
+  applications: z.array(applicationSchema),
+  invitations: z.array(invitationSchema),
+  interviews: z.array(interviewSchema),
+  metrics: z.array(requestMetricSchema),
 });
 
-/**
- * Schema for updateRequestStatus response.
- */
-export const updateRequestStatusOutputSchema = z.object({
+export type GetRequestOutput = z.infer<typeof getRequestOutputSchema>;
+
+const requestActionResponseSchema = z.object({
   operation: z.enum(["success", "error"]),
-  message: z.string(),
+  message: z.string().min(1),
 });
 
-/**
- * Schema for approveRequest response.
- */
-export const approveRequestOutputSchema = z.object({
-  operation: z.enum(["success", "error"]),
-  message: z.string(),
-});
+export const updateRequestStatusOutputSchema = requestActionResponseSchema;
 
-/**
- * Schema for rejectRequest response.
- */
-export const rejectRequestOutputSchema = z.object({
-  operation: z.enum(["success", "error"]),
-  message: z.string(),
-});
+export type UpdateRequestStatusOutput = z.infer<typeof updateRequestStatusOutputSchema>;
 
-/**
- * Schema for closeRequest response.
- */
-export const closeRequestOutputSchema = z.object({
-  operation: z.enum(["success", "error"]),
-  message: z.string(),
-});
+export const approveRequestOutputSchema = requestActionResponseSchema;
 
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
+export type ApproveRequestOutput = z.infer<typeof approveRequestOutputSchema>;
+
+export const rejectRequestOutputSchema = requestActionResponseSchema;
+
+export type RejectRequestOutput = z.infer<typeof rejectRequestOutputSchema>;
+
+export const closeRequestOutputSchema = requestActionResponseSchema;
+
+export type CloseRequestOutput = z.infer<typeof closeRequestOutputSchema>;
 
 export type ListRequestsInput = z.input<typeof listRequestsSchema>;
 export type GetRequestInput = z.input<typeof getRequestSchema>;

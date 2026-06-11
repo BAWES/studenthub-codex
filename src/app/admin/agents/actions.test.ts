@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import type { Mock } from "vitest";
 import { agentHealthMetricSchema, agentHealthDataSchema, agentsHealthDataSchema } from "./schemas";
 import type { AgentHealthMetric, AgentHealthData, AgentsHealthData } from "./schemas";
 
