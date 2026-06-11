@@ -14,6 +14,7 @@ import { navForRole } from "./navigation";
 import type { NavItem } from "./navigation";
 import { PageTransition } from "./PageTransition";
 import { RaycastCommandPalette } from "./RaycastCommandPalette";
+import { WorkspaceTabs } from "./WorkspaceTabs";
 
 // ── Command item shape ──────────────────────────────────────────────
 
@@ -302,6 +303,7 @@ export function WorkspaceOS({
 
         {/* ── Content Stage ───────────────────────────────── */}
         <section className="workspaceStage">
+          <WorkspaceTabs role={session.role} />
           <PageTransition>{children}</PageTransition>
         </section>
 
