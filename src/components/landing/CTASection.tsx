@@ -1,7 +1,7 @@
 "use client";
 
 import { FadeInSection } from "@/components/marketing";
-import { ChevronRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 
 interface CTASectionProps {
@@ -13,22 +13,34 @@ export default function CTASection({ persona }: CTASectionProps) {
     <section className="py-12 sm:py-16 px-6 max-w-6xl mx-auto max-sm:px-4">
       <FadeInSection asDiv>
         <div
-          className="relative overflow-hidden rounded-xl p-8 sm:p-10 text-center"
+          className="relative overflow-hidden rounded-xl p-8 sm:p-12 text-center"
           style={{
-            backgroundColor: "color-mix(in srgb, var(--surface) 50%, transparent)",
-            border: "1px solid var(--border)",
+            border: "1px solid color-mix(in srgb, var(--sh-coral) 20%, transparent)",
           }}
         >
-          {/* Gradient background */}
+          {/* Dual gradient background */}
           <div
             className="absolute inset-0 pointer-events-none"
             aria-hidden="true"
             style={{
-              background: `radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--sh-coral) 10%, transparent), transparent 70%)`,
+              background:
+                "radial-gradient(ellipse at 30% 0%, color-mix(in srgb, var(--sh-coral) 14%, transparent), transparent 60%), radial-gradient(ellipse at 70% 100%, color-mix(in srgb, #2563eb 10%, transparent), transparent 50%)",
             }}
           />
 
-          <div className="relative z-[1]">
+          {/* Subtle dot pattern */}
+          <div
+            className="absolute inset-0 opacity-[0.02] pointer-events-none"
+            aria-hidden="true"
+            style={{
+              backgroundImage:
+                "radial-gradient(circle, currentColor 1px, transparent 1px)",
+              backgroundSize: "20px 20px",
+              color: "var(--ink)",
+            }}
+          />
+
+          <div className="relative z-[1] max-w-xl mx-auto">
             <span
               className="inline-block text-[11px] font-bold uppercase tracking-wider mb-2 px-3 py-1 rounded-full"
               style={{
@@ -41,7 +53,7 @@ export default function CTASection({ persona }: CTASectionProps) {
             </span>
 
             <h2
-              className="text-[clamp(20px,2.5vw,28px)] font-bold mt-3 mb-2"
+              className="text-[clamp(22px,2.8vw,30px)] font-bold mt-3 mb-2 leading-tight"
               style={{ color: "var(--ink)" }}
             >
               {persona === "company"
@@ -51,21 +63,30 @@ export default function CTASection({ persona }: CTASectionProps) {
 
             <p className="text-sm mb-6 max-w-md mx-auto" style={{ color: "var(--muted)" }}>
               {persona === "company"
-                ? "Set up in under 5 minutes and get matched with vetted candidates."
-                : "Create your free profile in 3 minutes. No CV required."}
+                ? "Set up in under 5 minutes and get matched with vetted candidates by our recruitment team."
+                : "Create your free profile in 3 minutes. No CV required. Our staff recruiters do the matching."}
             </p>
 
             <Link
-              href={persona === "company" ? "/signup?role=company" : "/signup?role=candidate"}
-              className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg text-sm font-medium text-white transition-all hover:brightness-110"
-              style={{ backgroundColor: "var(--sh-coral)" }}
+              href={
+                persona === "company"
+                  ? "/signup?role=company"
+                  : "/signup?role=candidate"
+              }
+              className="inline-flex items-center gap-1.5 px-6 py-2.5 rounded-lg text-sm font-semibold text-white transition-all duration-200 hover:brightness-110 hover:-translate-y-0.5 active:translate-y-0"
+              style={{
+                backgroundColor: "var(--sh-coral)",
+                boxShadow: "0 4px 14px color-mix(in srgb, var(--sh-coral) 30%, transparent)",
+              }}
             >
               {persona === "company" ? "Set up company account" : "Create your free profile"}{" "}
-              <ChevronRight className="size-3.5" />
+              <ArrowRight className="size-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
             </Link>
 
             <p className="text-xs mt-3" style={{ color: "var(--muted)" }}>
-              {persona === "company" ? "No agency fees · AI-matched" : "Free · 3 minutes"}
+              {persona === "company"
+                ? "No agency fees \u00b7 AI-matched candidates \u00b7 Staff-supported"
+                : "Free \u00b7 3 minutes \u00b7 No CV required"}
             </p>
           </div>
         </div>

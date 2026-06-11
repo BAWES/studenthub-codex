@@ -26,7 +26,8 @@ export default function LandingFooter({ persona }: LandingFooterProps) {
               </span>
             </div>
             <p className="text-xs leading-relaxed" style={{ color: "var(--muted)" }}>
-              Connecting students with the right employers. Kuwait&apos;s platform for student placement.
+              Connecting students with the right employers. Kuwait&apos;s platform for student
+              placement.
             </p>
           </div>
 
@@ -65,15 +66,21 @@ export default function LandingFooter({ persona }: LandingFooterProps) {
             </p>
             <div className="space-y-2.5">
               <p className="text-xs leading-relaxed" style={{ color: "var(--muted)" }}>
-                <span className="font-medium" style={{ color: "var(--ink)" }}>Staff:</span>{" "}
+                <span className="font-medium" style={{ color: "var(--ink)" }}>
+                  Staff:
+                </span>{" "}
                 Tools for agencies placing candidates faster.
               </p>
               <p className="text-xs leading-relaxed" style={{ color: "var(--muted)" }}>
-                <span className="font-medium" style={{ color: "var(--ink)" }}>Admin:</span>{" "}
+                <span className="font-medium" style={{ color: "var(--ink)" }}>
+                  Admin:
+                </span>{" "}
                 Compliance and operations management.
               </p>
               <p className="text-xs leading-relaxed" style={{ color: "var(--muted)" }}>
-                <span className="font-medium" style={{ color: "var(--ink)" }}>Inspector:</span>{" "}
+                <span className="font-medium" style={{ color: "var(--ink)" }}>
+                  Inspector:
+                </span>{" "}
                 Review and certification workflows.
               </p>
             </div>
@@ -89,12 +96,16 @@ export default function LandingFooter({ persona }: LandingFooterProps) {
             &copy; {new Date().getFullYear()} StudentHub
           </p>
           <div className="flex gap-4">
-            <Link href="/login" className="text-xs no-underline" style={{ color: "var(--muted)" }}>
+            <Link
+              href="/login"
+              className="text-xs no-underline transition-colors duration-150 hover:opacity-80"
+              style={{ color: "var(--muted)" }}
+            >
               Sign in
             </Link>
             <Link
               href={`/signup?role=${role}`}
-              className="text-xs no-underline font-medium"
+              className="text-xs no-underline font-medium transition-colors duration-150"
               style={{ color: "var(--sh-coral)" }}
             >
               Sign up

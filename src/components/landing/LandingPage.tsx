@@ -30,7 +30,11 @@ function TrustBar() {
         </p>
         <div className="flex flex-wrap items-center justify-center gap-8 gap-y-4 opacity-40">
           {["Alshaya", "KIPCO", "NBK", "Zain", "Kuwait Airways", "GUST"].map((name) => (
-            <span key={name} className="text-sm font-semibold" style={{ color: "var(--ink)" }}>
+            <span
+              key={name}
+              className="text-sm font-semibold tracking-tight"
+              style={{ color: "var(--ink)" }}
+            >
               {name}
             </span>
           ))}
@@ -65,12 +69,28 @@ export default function LandingPage({ session }: LandingPageProps) {
 
   return (
     <div style={{ backgroundColor: "var(--paper)", minHeight: "100svh" }}>
+      {/* Decorative full-page grid pattern */}
+      <div
+        className="fixed inset-0 pointer-events-none opacity-[0.015] dark:opacity-[0.03]"
+        aria-hidden="true"
+        style={{
+          backgroundImage:
+            "radial-gradient(circle, currentColor 0.5px, transparent 0.5px)",
+          backgroundSize: "32px 32px",
+          color: "var(--ink)",
+        }}
+      />
+
       <a href="#main-content" className="skipLink" style={{ color: "var(--ink)" }}>
         Skip to content
       </a>
-      <LandingNav session={session} persona={persona} onPersonaChange={handlePersonaChange} />
+      <LandingNav
+        session={session}
+        persona={persona}
+        onPersonaChange={handlePersonaChange}
+      />
 
-      <main id="main-content">
+      <main id="main-content" className="relative">
         <LandingHero />
 
         <TrustBar />

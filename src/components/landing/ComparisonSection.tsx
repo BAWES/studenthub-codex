@@ -60,13 +60,17 @@ export default function ComparisonSection({ persona }: ComparisonSectionProps) {
 
   const catOrder: Category[] = ["profile", "matching", "payments", "documents"];
   const data = categories[active];
-  const title = persona === "candidate"
-    ? "Why candidates choose StudentHub."
-    : "Why employers choose StudentHub.";
+  const title =
+    persona === "candidate"
+      ? "Why candidates choose StudentHub."
+      : "Why employers choose StudentHub.";
   const competitor = persona === "candidate" ? "Traditional job boards" : "Agencies & job boards";
 
   return (
-    <section className="py-12 sm:py-16 px-6 max-w-6xl mx-auto max-sm:px-4" aria-label="Feature comparison">
+    <section
+      className="py-12 sm:py-16 px-6 max-w-6xl mx-auto max-sm:px-4"
+      aria-label="Feature comparison"
+    >
       <FadeInSection asDiv>
         <div className="text-center mb-8 sm:mb-10">
           <span
@@ -93,13 +97,18 @@ export default function ComparisonSection({ persona }: ComparisonSectionProps) {
             <button
               key={cat}
               onClick={() => setActive(cat)}
-              className="px-4 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer"
+              className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-150 cursor-pointer"
               style={{
-                backgroundColor: active === cat
-                  ? "color-mix(in srgb, var(--sh-coral) 12%, transparent)"
-                  : "transparent",
+                backgroundColor:
+                  active === cat
+                    ? "color-mix(in srgb, var(--sh-coral) 12%, transparent)"
+                    : "transparent",
                 color: active === cat ? "var(--sh-coral)" : "var(--muted)",
-                border: `1px solid ${active === cat ? "color-mix(in srgb, var(--sh-coral) 25%, transparent)" : "var(--border)"}`,
+                border: `1px solid ${
+                  active === cat
+                    ? "color-mix(in srgb, var(--sh-coral) 25%, transparent)"
+                    : "var(--border)"
+                }`,
               }}
             >
               {categories[cat].label}
@@ -109,7 +118,7 @@ export default function ComparisonSection({ persona }: ComparisonSectionProps) {
 
         {/* Table */}
         <div
-          className="overflow-hidden rounded-xl"
+          className="overflow-hidden rounded-xl transition-shadow duration-300 hover:shadow-sm"
           style={{
             border: "1px solid var(--border)",
           }}
@@ -122,13 +131,28 @@ export default function ComparisonSection({ persona }: ComparisonSectionProps) {
               backgroundColor: "color-mix(in srgb, var(--surface) 40%, transparent)",
             }}
           >
-            <div className="px-4 py-3 text-xs font-semibold" style={{ color: "var(--muted)" }}>
+            <div
+              className="px-4 py-3 text-xs font-semibold flex items-center"
+              style={{ color: "var(--muted)" }}
+            >
               Feature
             </div>
-            <div className="px-4 py-3 text-xs font-semibold text-center" style={{ color: "var(--sh-coral)" }}>
+            <div
+              className="px-4 py-3 text-xs font-semibold text-center flex items-center justify-center gap-1"
+              style={{ color: "var(--sh-coral)" }}
+            >
+              <span
+                className="flex h-4 w-4 items-center justify-center rounded text-[8px] font-bold text-white"
+                style={{ backgroundColor: "var(--sh-coral)" }}
+              >
+                SH
+              </span>
               StudentHub
             </div>
-            <div className="px-4 py-3 text-xs font-semibold text-center" style={{ color: "var(--muted)" }}>
+            <div
+              className="px-4 py-3 text-xs font-semibold text-center flex items-center justify-center"
+              style={{ color: "var(--muted)" }}
+            >
               {competitor}
             </div>
           </div>
@@ -137,32 +161,56 @@ export default function ComparisonSection({ persona }: ComparisonSectionProps) {
           {data.rows.map((row, i) => (
             <div
               key={row.feature}
-              className="grid grid-cols-3 gap-0 transition-colors"
+              className="grid grid-cols-3 gap-0 transition-colors duration-150 hover:opacity-90"
               style={{
-                borderBottom: i < data.rows.length - 1 ? "1px solid var(--border)" : "none",
-                backgroundColor: i % 2 === 0 ? "color-mix(in srgb, var(--surface) 30%, transparent)" : "transparent",
+                borderBottom:
+                  i < data.rows.length - 1 ? "1px solid var(--border)" : "none",
+                backgroundColor:
+                  i % 2 === 0
+                    ? "color-mix(in srgb, var(--surface) 30%, transparent)"
+                    : "transparent",
               }}
             >
-              <div className="px-4 py-3 text-sm flex items-center" style={{ color: "var(--ink)" }}>
+              <div
+                className="px-4 py-3 text-sm flex items-center"
+                style={{ color: "var(--ink)" }}
+              >
                 {row.feature}
               </div>
-              <div className="px-4 py-3 text-sm text-center flex items-center justify-center" style={{ color: "var(--success)" }}>
+              <div className="px-4 py-3 text-sm text-center flex items-center justify-center">
                 {typeof row.studentHub === "boolean" ? (
-                  row.studentHub ? <Check className="size-4" /> : <X className="size-4" style={{ color: "var(--error)" }} />
+                  row.studentHub ? (
+                    <Check className="size-4" style={{ color: "var(--success)" }} />
+                  ) : (
+                    <X className="size-4" style={{ color: "var(--error)" }} />
+                  )
                 ) : (
-                  <span className="text-xs" style={{ color: "var(--muted)" }}>{row.studentHub}</span>
+                  <span className="text-xs" style={{ color: "var(--muted)" }}>
+                    {row.studentHub}
+                  </span>
                 )}
               </div>
               <div className="px-4 py-3 text-sm text-center flex items-center justify-center">
                 {typeof row.traditional === "boolean" ? (
-                  row.traditional ? <Check className="size-4" style={{ color: "var(--success)" }} /> : <X className="size-4" style={{ color: "var(--error)" }} />
+                  row.traditional ? (
+                    <Check className="size-4" style={{ color: "var(--success)" }} />
+                  ) : (
+                    <X className="size-4" style={{ color: "var(--error)" }} />
+                  )
                 ) : (
-                  <span className="text-xs" style={{ color: "var(--muted)" }}>{row.traditional}</span>
+                  <span className="text-xs" style={{ color: "var(--muted)" }}>
+                    {row.traditional}
+                  </span>
                 )}
               </div>
             </div>
           ))}
         </div>
+
+        {/* Foot note */}
+        <p className="text-xs text-center mt-4" style={{ color: "var(--muted)" }}>
+          StudentHub is purpose-built for student placement in Kuwait — not a generic job board.
+        </p>
       </FadeInSection>
     </section>
   );

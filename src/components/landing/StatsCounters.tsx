@@ -23,7 +23,7 @@ function AnimatedCounter({ end, suffix = "", prefix = "", decimals = 0 }: Counte
       ([entry]) => {
         if (entry.isIntersecting && !counted.current) {
           counted.current = true;
-          const duration = 2000;
+          const duration = 2200;
           const steps = 60;
           const increment = end / steps;
           let current = 0;
@@ -53,44 +53,75 @@ function AnimatedCounter({ end, suffix = "", prefix = "", decimals = 0 }: Counte
 }
 
 const stats = [
-  { end: 1200, suffix: "+", label: "Students placed", desc: "Successfully matched with employers" },
-  { end: 48, suffix: "h", prefix: "<", label: "Avg time to match", desc: "From profile to interview" },
-  { end: 500, suffix: "+", label: "Active employers", desc: "Across every sector in Kuwait" },
+  {
+    end: 1200,
+    suffix: "+",
+    label: "Students placed",
+    desc: "Successfully matched with employers across Kuwait",
+    accent: "var(--sh-coral)",
+    gradient: "radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--sh-coral) 12%, transparent), transparent 70%)",
+  },
+  {
+    end: 48,
+    suffix: "h",
+    prefix: "<",
+    label: "Avg time to match",
+    desc: "From profile creation to interview",
+    accent: "#2563eb",
+    gradient: "radial-gradient(ellipse at 50% 0%, color-mix(in srgb, #2563eb 10%, transparent), transparent 70%)",
+  },
+  {
+    end: 500,
+    suffix: "+",
+    label: "Active employers",
+    desc: "Trusted by companies across every sector in Kuwait",
+    accent: "var(--success)",
+    gradient: "radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--success) 10%, transparent), transparent 70%)",
+  },
 ];
 
 export default function StatsCounters() {
   return (
     <section className="py-12 sm:py-16 px-6 max-w-6xl mx-auto max-sm:px-4" aria-label="Platform statistics">
       <FadeInSection asDiv>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {stats.map((stat) => (
             <div
               key={stat.label}
-              className="relative overflow-hidden rounded-xl p-6 sm:p-7 text-center transition-all duration-300 hover:-translate-y-0.5"
+              className="relative overflow-hidden rounded-xl p-6 sm:p-7 text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
               style={{
                 backgroundColor: "color-mix(in srgb, var(--surface) 50%, transparent)",
                 border: "1px solid var(--border)",
               }}
             >
+              {/* Gradient background accent */}
               <div
-                className="absolute inset-0 pointer-events-none opacity-30"
+                className="absolute inset-0 pointer-events-none opacity-40"
                 aria-hidden="true"
-                style={{
-                  background: `radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--sh-coral) 8%, transparent), transparent 70%)`,
-                }}
+                style={{ background: stat.gradient }}
               />
-              <span
-                className="block text-[clamp(32px,4vw,48px)] font-bold leading-none mb-1"
-                style={{ color: "var(--sh-coral)" }}
-              >
-                <AnimatedCounter end={stat.end} suffix={stat.suffix} prefix={stat.prefix || ""} />
-              </span>
-              <span className="block text-sm font-semibold mb-0.5" style={{ color: "var(--ink)" }}>
-                {stat.label}
-              </span>
-              <span className="block text-xs" style={{ color: "var(--muted)" }}>
-                {stat.desc}
-              </span>
+
+              {/* Accent top bar */}
+              <div
+                className="absolute top-0 left-4 right-4 h-0.5 rounded-full"
+                style={{ backgroundColor: stat.accent }}
+                aria-hidden="true"
+              />
+
+              <div className="relative z-[1]">
+                <span
+                  className="block text-[clamp(36px,4.5vw,52px)] font-bold leading-none mb-1.5"
+                  style={{ color: stat.accent }}
+                >
+                  <AnimatedCounter end={stat.end} suffix={stat.suffix} prefix={stat.prefix || ""} />
+                </span>
+                <span className="block text-sm font-semibold mb-0.5" style={{ color: "var(--ink)" }}>
+                  {stat.label}
+                </span>
+                <span className="block text-xs leading-relaxed" style={{ color: "var(--muted)" }}>
+                  {stat.desc}
+                </span>
+              </div>
             </div>
           ))}
         </div>
