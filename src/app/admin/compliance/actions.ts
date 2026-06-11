@@ -11,6 +11,7 @@ import {
   denyComplianceSchema,
   createComplianceRecordSchema,
   updateComplianceRecordSchema,
+  complianceMutationResponseSchema,
   type ListComplianceRecordsInput,
   type GetComplianceRecordInput,
   type ApproveComplianceInput,

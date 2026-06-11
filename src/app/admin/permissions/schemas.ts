@@ -29,6 +29,36 @@ export const updatePermissionSectionSchema = z.object({
 // Types
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// Output validation schemas
+// ---------------------------------------------------------------------------
+
+const permissionSectionDetailSchema = z.object({
+  permission_uuid: z.string().min(1),
+  section_name: z.string().nullable(),
+  created_at: z.date(),
+});
+
+export const listPermissionSectionsOutputSchema = z.array(permissionSectionDetailSchema);
+
+export type ListPermissionSectionsOutput = z.infer<typeof listPermissionSectionsOutputSchema>;
+
+export const getPermissionSectionOutputSchema = permissionSectionDetailSchema.nullable();
+
+export type GetPermissionSectionOutput = z.infer<typeof getPermissionSectionOutputSchema>;
+
+const permissionUuidSchema = z.object({
+  permission_uuid: z.string().min(1),
+});
+
+export const createPermissionSectionOutputSchema = permissionUuidSchema;
+
+export type CreatePermissionSectionOutput = z.infer<typeof createPermissionSectionOutputSchema>;
+
+export const updatePermissionSectionOutputSchema = permissionUuidSchema;
+
+export type UpdatePermissionSectionOutput = z.infer<typeof updatePermissionSectionOutputSchema>;
+
 export type CreatePermissionSectionInput = z.input<
   typeof createPermissionSectionSchema
 >;
