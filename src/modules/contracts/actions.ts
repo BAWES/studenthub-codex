@@ -3,6 +3,13 @@
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
+import {
+  contractDetailSchema,
+  listContractsResultSchema,
+  type ContractRelatedDetail,
+  type ContractListItem,
+  type ListContractsResult,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Schemas
@@ -18,59 +25,6 @@ const listContractsSchema = z.object({
   candidateId: z.coerce.number().int().positive().optional(),
   companyId: z.coerce.number().int().positive().optional(),
 });
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export type ContractRelatedDetail =
-  | {
-      type: "Fixed Price";
-      fp_contract_uuid: string;
-      candidate_total: number;
-      company_total: number;
-      completion_percentage: number | null;
-    }
-  | {
-      type: "Hourly";
-      h_contract_uuid: string;
-      candidate_hourly_rate: number;
-      company_hourly_rate: number;
-    }
-  | {
-      type: "Monthly Salary";
-      ms_contract_uuid: string;
-      candidate_total: number;
-      company_total: number;
-      salary_day: number | null;
-    };
-
-export type ContractListItem = {
-  contract_uuid: string;
-  candidate_id: number | null;
-  company_id: number;
-  type: string;
-  detail: string | null;
-  start_date: string | null;
-  end_date: string | null;
-  transfer_cost: number | null;
-  currency_code: string | null;
-  status: number;
-  created_at: string | null;
-  detailModel: ContractRelatedDetail | null;
-};
-
-export type ListContractsResult = {
-  contracts: ContractListItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
-
-// ---------------------------------------------------------------------------
-// Exported schemas (for shared validation)
-// ---------------------------------------------------------------------------
 
 export { listContractsSchema };
 
@@ -127,34 +81,45 @@ export async function getContract(
     },
   });
 
-  if (!contract) return null;
+  if (!contract) {
+    const nullResult: ContractRelatedDetail | null = null;
+
+    // Validate output shape
+    const outputParsed = contractDetailSchema.safeParse(nullResult);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/contracts] getContract output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return nullResult;
+  }
 
   const record = contract as any;
 
+  let result: ContractRelatedDetail | null = null;
+
   if (record.fixed_price_contract?.length) {
     const fp = record.fixed_price_contract[0] as any;
-    return {
+    result = {
       type: "Fixed Price" as const,
       fp_contract_uuid: fp.fp_contract_uuid,
       candidate_total: Number(fp.candidate_total),
       company_total: Number(fp.company_total),
       completion_percentage: fp.completion_percentage,
     };
-  }
-
-  if (record.hourly_contract?.length) {
+  } else if (record.hourly_contract?.length) {
     const h = record.hourly_contract[0] as any;
-    return {
+    result = {
       type: "Hourly" as const,
       h_contract_uuid: h.h_contract_uuid,
       candidate_hourly_rate: Number(h.candidate_hourly_rate),
       company_hourly_rate: Number(h.company_hourly_rate),
     };
-  }
-
-  if (record.monthly_salary_contract?.length) {
+  } else if (record.monthly_salary_contract?.length) {
     const ms = record.monthly_salary_contract[0] as any;
-    return {
+    result = {
       type: "Monthly Salary" as const,
       ms_contract_uuid: ms.ms_contract_uuid,
       candidate_total: Number(ms.candidate_total),
@@ -163,7 +128,16 @@ export async function getContract(
     };
   }
 
-  return null;
+  // Validate output shape
+  const outputParsed = contractDetailSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/contracts] getContract output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -241,7 +215,7 @@ export async function listContracts(
     prisma.contract.count({ where: where as any }),
   ]);
 
-  return {
+  const result: ListContractsResult = {
     contracts: contracts.map((c: Record<string, unknown>): ContractListItem => {
       let detailModel: ContractRelatedDetail | null = null;
       const raw = c as any;
@@ -294,4 +268,15 @@ export async function listContracts(
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  // Validate output shape
+  const outputParsed = listContractsResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/contracts] listContracts output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
