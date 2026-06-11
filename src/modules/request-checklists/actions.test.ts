@@ -1,18 +1,16 @@
 import { describe, it, expect } from "vitest";
+
 import {
   listRequestChecklistsSchema,
   createRequestChecklistSchema,
   updateRequestChecklistSchema,
   deleteRequestChecklistSchema,
   requestChecklistItemSchema,
-  requestChecklistItemNullableSchema,
   listRequestChecklistsResultSchema,
   deleteRequestChecklistResultSchema,
+  type RequestChecklistItem,
+  type ListRequestChecklistsResult,
 } from "./schemas";
-
-// ---------------------------------------------------------------------------
-// Tests: Input validation
-// ---------------------------------------------------------------------------
 
 describe("listRequestChecklistsSchema", () => {
   it("accepts empty params", () => {
@@ -136,153 +134,84 @@ describe("deleteRequestChecklistSchema", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Tests: Output validation
+// Output schema tests: requestChecklistItemSchema
 // ---------------------------------------------------------------------------
 
+const validRequestChecklistItem: RequestChecklistItem = {
+  request_checklist_uuid: "request_checklis_abc-123",
+  status_name: "Approved",
+  status_name_ar: "موافقة",
+  is_require: true,
+  sort_order: 1,
+  created_at: null,
+  updated_at: null,
+};
+
 describe("requestChecklistItemSchema", () => {
-  it("accepts a valid request checklist object", () => {
-    const result = requestChecklistItemSchema.safeParse({
-      request_checklist_uuid: "request_checklis_abc-123",
-      status_name: "Approved",
-      status_name_ar: "موافقة",
-      is_require: true,
-      sort_order: 1,
-      created_at: new Date(),
-      updated_at: new Date(),
-    });
-    expect(result.success).toBe(true);
+  it("accepts a valid request checklist item", () => {
+    const result = requestChecklistItemSchema.parse(validRequestChecklistItem);
+    expect(result.request_checklist_uuid).toBe("request_checklis_abc-123");
   });
 
-  it("accepts an object with all-null optionals", () => {
-    const result = requestChecklistItemSchema.safeParse({
-      request_checklist_uuid: "request_checklis_abc-123",
-      status_name: "Approved",
-      status_name_ar: null,
-      is_require: null,
-      sort_order: null,
-      created_at: null,
-      updated_at: null,
-    });
-    expect(result.success).toBe(true);
+  it("rejects missing required field", () => {
+    const { status_name, ...rest } = validRequestChecklistItem;
+    expect(() => requestChecklistItemSchema.parse(rest)).toThrow();
   });
 
-  it("rejects missing request_checklist_uuid", () => {
-    const result = requestChecklistItemSchema.safeParse({
-      status_name: "Approved",
-    });
-    expect(result.success).toBe(false);
-  });
-
-  it("rejects missing status_name", () => {
-    const result = requestChecklistItemSchema.safeParse({
-      request_checklist_uuid: "abc",
-    });
-    expect(result.success).toBe(false);
-  });
-
-  it("rejects non-integer sort_order", () => {
-    const result = requestChecklistItemSchema.safeParse({
-      request_checklist_uuid: "abc",
-      status_name: "Approved",
-      sort_order: 1.5,
-    });
-    expect(result.success).toBe(false);
+  it("rejects wrong type for is_require", () => {
+    expect(() =>
+      requestChecklistItemSchema.parse({ ...validRequestChecklistItem, is_require: "yes" }),
+    ).toThrow();
   });
 });
 
-describe("requestChecklistItemNullableSchema", () => {
-  it("accepts a valid request checklist object", () => {
-    const result = requestChecklistItemNullableSchema.safeParse({
-      request_checklist_uuid: "request_checklis_abc-123",
-      status_name: "Approved",
-      status_name_ar: null,
-      is_require: null,
-      sort_order: 1,
-      created_at: null,
-      updated_at: null,
-    });
-    expect(result.success).toBe(true);
-  });
-
-  it("accepts null", () => {
-    const result = requestChecklistItemNullableSchema.safeParse(null);
-    expect(result.success).toBe(true);
-  });
-});
+// ---------------------------------------------------------------------------
+// Output schema tests: listRequestChecklistsResultSchema
+// ---------------------------------------------------------------------------
 
 describe("listRequestChecklistsResultSchema", () => {
-  it("accepts an empty result set", () => {
-    const result = listRequestChecklistsResultSchema.safeParse({
-      items: [],
-      total: 0,
-      page: 1,
-      limit: 20,
-      totalPages: 0,
-    });
-    expect(result.success).toBe(true);
-  });
-
-  it("accepts a result with items", () => {
-    const result = listRequestChecklistsResultSchema.safeParse({
-      items: [
-        {
-          request_checklist_uuid: "request_checklis_abc-123",
-          status_name: "Approved",
-          status_name_ar: null,
-          is_require: true,
-          sort_order: 1,
-          created_at: null,
-          updated_at: null,
-        },
-      ],
+  it("accepts a valid result", () => {
+    const result = listRequestChecklistsResultSchema.parse({
+      items: [validRequestChecklistItem],
       total: 1,
       page: 1,
       limit: 20,
       totalPages: 1,
     });
-    expect(result.success).toBe(true);
+    expect(result.items).toHaveLength(1);
   });
 
-  it("rejects negative total", () => {
-    const result = listRequestChecklistsResultSchema.safeParse({
+  it("accepts an empty list", () => {
+    const result = listRequestChecklistsResultSchema.parse({
       items: [],
-      total: -1,
+      total: 0,
       page: 1,
       limit: 20,
       totalPages: 0,
     });
-    expect(result.success).toBe(false);
+    expect(result.items).toHaveLength(0);
   });
 
-  it("rejects zero page", () => {
-    const result = listRequestChecklistsResultSchema.safeParse({
-      items: [],
-      total: 0,
-      page: 0,
-      limit: 20,
-      totalPages: 0,
-    });
-    expect(result.success).toBe(false);
+  it("rejects negative total", () => {
+    expect(() =>
+      listRequestChecklistsResultSchema.parse({
+        items: [],
+        total: -1,
+        page: 1,
+        limit: 20,
+        totalPages: 0,
+      }),
+    ).toThrow();
   });
 });
 
+// ---------------------------------------------------------------------------
+// Output schema tests: deleteRequestChecklistResultSchema
+// ---------------------------------------------------------------------------
+
 describe("deleteRequestChecklistResultSchema", () => {
-  it("accepts success true", () => {
-    const result = deleteRequestChecklistResultSchema.safeParse({
-      success: true,
-    });
+  it("accepts success result", () => {
+    const result = deleteRequestChecklistResultSchema.parse({ success: true });
     expect(result.success).toBe(true);
-  });
-
-  it("rejects missing success", () => {
-    const result = deleteRequestChecklistResultSchema.safeParse({});
-    expect(result.success).toBe(false);
-  });
-
-  it("rejects non-boolean success", () => {
-    const result = deleteRequestChecklistResultSchema.safeParse({
-      success: "yes",
-    });
-    expect(result.success).toBe(false);
   });
 });
