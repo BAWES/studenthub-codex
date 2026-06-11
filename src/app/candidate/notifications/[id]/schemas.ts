@@ -23,3 +23,21 @@ export type DeleteNotificationParams = z.input<typeof deleteNotificationSchema>;
 export type ActionResponse =
   | { success: true }
   | { success: false; error: string };
+
+// ---------------------------------------------------------------------------
+// Output validation schemas
+// ---------------------------------------------------------------------------
+
+export const successResponseSchema = z.object({
+  success: z.literal(true),
+});
+
+export const errorResponseSchema = z.object({
+  success: z.literal(false),
+  error: z.string(),
+});
+
+export const actionResponseSchema = z.discriminatedUnion("success", [
+  successResponseSchema,
+  errorResponseSchema,
+]);
