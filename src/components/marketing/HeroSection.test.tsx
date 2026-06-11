@@ -30,6 +30,9 @@ vi.mock("lucide-react", () => ({
   Building2: () => <span data-testid="icon-building" />,
   Zap: () => <span data-testid="icon-zap" />,
   Shield: () => <span data-testid="icon-shield" />,
+  Clock: () => <span data-testid="icon-clock" />,
+  Zap: () => <span data-testid="icon-zap" />,
+  Shield: () => <span data-testid="icon-shield" />,
   Timer: () => <span data-testid="icon-timer" />,
 }));
 

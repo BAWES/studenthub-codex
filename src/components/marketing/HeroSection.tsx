@@ -1,17 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import {
-  ArrowUpRight,
-  CheckCircle2,
-  Search,
-  Sparkles,
-  GraduationCap,
-  Building2,
-  Zap,
-  Shield,
-  Timer,
-} from "lucide-react";
+import { ArrowUpRight, CheckCircle2, Search, Sparkles, GraduationCap, Building2, Zap, Shield, Clock } from "lucide-react";
 
 // ── Two-sided marketplace hero ─────────────────────────────────
 
@@ -78,7 +68,7 @@ const heroContent: HeroContent = {
 const quickStats = [
   { icon: Zap, label: "48h avg time-to-match", value: "1,200+" },
   { icon: Shield, label: "Pre-vetted candidates", value: "99.7%" },
-  { icon: Timer, label: "Years serving Kuwait", value: "Since 2022" },
+  { icon: Clock, label: "Years serving Kuwait", value: "Since 2022" },
 ];
 
 // ── Props ──────────────────────────────────────────────────────
