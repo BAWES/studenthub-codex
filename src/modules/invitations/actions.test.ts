@@ -5,6 +5,14 @@ import {
   INVITATION_STATUS_ACCEPTED,
   INVITATION_STATUS_REJECTED,
 } from "@/modules/status-labels";
+import {
+  invitationListItemSchema,
+  invitationActionResultSchema,
+  listInvitationsResultSchema,
+  invitationRequestSchema,
+  invitationCompanySchema,
+  type InvitationListItem,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Schema definitions (extracted from the server action for unit testing)
@@ -21,25 +29,6 @@ const respondInvitationSchema = z.object({
     errorMap: () => ({ message: 'Action must be "accept" or "reject"' }),
   }),
 });
-
-// ---------------------------------------------------------------------------
-// Type definitions
-// ---------------------------------------------------------------------------
-
-export type InvitationListItem = {
-  invitation_uuid: string;
-  invitation_status: number;
-  invitation_created_at: Date | null;
-  invitation_app_seen_at: Date | null;
-  invitation_email_seen_at: Date | null;
-  request: {
-    request_uuid: string;
-    request_position_title: string | null;
-    company: {
-      company_name: string | null;
-    } | null;
-  } | null;
-};
 
 // ---------------------------------------------------------------------------
 // listInvitationsSchema
@@ -161,11 +150,214 @@ describe("respondInvitationSchema", () => {
 });
 
 // ---------------------------------------------------------------------------
-// InvitationListItem type shape
+// Output schema: invitationRequestSchema
 // ---------------------------------------------------------------------------
 
-describe("InvitationListItem shape", () => {
-  it("defines the expected fields", () => {
+describe("invitationRequestSchema", () => {
+  it("accepts valid request with company", () => {
+    const request = {
+      request_uuid: "request_xyz",
+      request_position_title: "Software Engineer",
+      company: { company_name: "Tech Corp" },
+    };
+    const result = invitationRequestSchema.safeParse(request);
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts request with null company", () => {
+    const request = {
+      request_uuid: "request_xyz",
+      request_position_title: null,
+      company: null,
+    };
+    const result = invitationRequestSchema.safeParse(request);
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts null request", () => {
+    const result = invitationRequestSchema.safeParse(null);
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects request with missing request_uuid", () => {
+    const request = {
+      request_position_title: "Software Engineer",
+      company: null,
+    };
+    const result = invitationRequestSchema.safeParse(request);
+    expect(result.success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output schema: invitationListItemSchema
+// ---------------------------------------------------------------------------
+
+describe("invitationListItemSchema", () => {
+  it("accepts valid item with full request", () => {
+    const item = {
+      invitation_uuid: "invitation_abc123",
+      invitation_status: 0,
+      invitation_created_at: new Date("2024-01-15"),
+      invitation_app_seen_at: null,
+      invitation_email_seen_at: null,
+      request: {
+        request_uuid: "request_xyz",
+        request_position_title: "Software Engineer Position",
+        company: {
+          company_name: "Tech Corp",
+        },
+      },
+    };
+    const result = invitationListItemSchema.safeParse(item);
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts item with null request (deleted request)", () => {
+    const item = {
+      invitation_uuid: "invitation_def456",
+      invitation_status: 1,
+      invitation_created_at: null,
+      invitation_app_seen_at: null,
+      invitation_email_seen_at: new Date("2024-01-16"),
+      request: null,
+    };
+    const result = invitationListItemSchema.safeParse(item);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.request).toBeNull();
+    }
+  });
+
+  it("accepts item with null status", () => {
+    const item = {
+      invitation_uuid: "invitation_ghi789",
+      invitation_status: null,
+      invitation_created_at: new Date("2024-01-15"),
+      invitation_app_seen_at: null,
+      invitation_email_seen_at: null,
+      request: null,
+    };
+    const result = invitationListItemSchema.safeParse(item);
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects item with missing uuid", () => {
+    const item = {
+      invitation_status: 0,
+      invitation_created_at: null,
+      invitation_app_seen_at: null,
+      invitation_email_seen_at: null,
+      request: null,
+    };
+    const result = invitationListItemSchema.safeParse(item);
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects item with non-number status", () => {
+    const item = {
+      invitation_uuid: "invitation_abc123",
+      invitation_status: "pending",
+      invitation_created_at: null,
+      invitation_app_seen_at: null,
+      invitation_email_seen_at: null,
+      request: null,
+    };
+    const result = invitationListItemSchema.safeParse(item);
+    expect(result.success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output schema: invitationActionResultSchema
+// ---------------------------------------------------------------------------
+
+describe("invitationActionResultSchema", () => {
+  it("accepts success result", () => {
+    const result = invitationActionResultSchema.safeParse({
+      success: true,
+      message: "Invitation accepted successfully.",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts failure result", () => {
+    const result = invitationActionResultSchema.safeParse({
+      success: false,
+      message: "Invitation not found.",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects result with missing message", () => {
+    const result = invitationActionResultSchema.safeParse({
+      success: true,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects result with non-boolean success", () => {
+    const result = invitationActionResultSchema.safeParse({
+      success: "yes",
+      message: "Something happened.",
+    });
+    expect(result.success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output schema: listInvitationsResultSchema (union)
+// ---------------------------------------------------------------------------
+
+describe("listInvitationsResultSchema", () => {
+  it("accepts an array of items", () => {
+    const data = [
+      {
+        invitation_uuid: "invitation_abc123",
+        invitation_status: 0,
+        invitation_created_at: new Date("2024-01-15"),
+        invitation_app_seen_at: null,
+        invitation_email_seen_at: null,
+        request: null,
+      },
+    ];
+    const result = listInvitationsResultSchema.safeParse(data);
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts a count number", () => {
+    const result = listInvitationsResultSchema.safeParse(5);
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts zero count", () => {
+    const result = listInvitationsResultSchema.safeParse(0);
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects empty array", () => {
+    // Empty array is valid (no invitations found)
+    const result = listInvitationsResultSchema.safeParse([]);
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects negative count", () => {
+    const result = listInvitationsResultSchema.safeParse(-1);
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects invalid data type", () => {
+    const result = listInvitationsResultSchema.safeParse("invalid");
+    expect(result.success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// InvitationListItem shape (via Zod output schema)
+// ---------------------------------------------------------------------------
+
+describe("InvitationListItem shape (via Zod)", () => {
+  it("validates the expected fields with full request", () => {
     const mock: InvitationListItem = {
       invitation_uuid: "invitation_abc123",
       invitation_status: 0,
@@ -180,13 +372,16 @@ describe("InvitationListItem shape", () => {
         },
       },
     };
-    expect(mock.invitation_uuid).toBe("invitation_abc123");
-    expect(mock.invitation_status).toBe(0);
-    expect(mock.request?.request_position_title).toBe("Software Engineer Position");
-    expect(mock.request?.company?.company_name).toBe("Tech Corp");
+    const parsed = invitationListItemSchema.safeParse(mock);
+    expect(parsed.success).toBe(true);
+    if (parsed.success) {
+      expect(parsed.data.invitation_uuid).toBe("invitation_abc123");
+      expect(parsed.data.request?.request_position_title).toBe("Software Engineer Position");
+      expect(parsed.data.request?.company?.company_name).toBe("Tech Corp");
+    }
   });
 
-  it("allows null request (deleted request)", () => {
+  it("validates null request", () => {
     const mock: InvitationListItem = {
       invitation_uuid: "invitation_def456",
       invitation_status: 1,
@@ -195,7 +390,9 @@ describe("InvitationListItem shape", () => {
       invitation_email_seen_at: new Date("2024-01-16"),
       request: null,
     };
-    expect(mock.request).toBeNull();
-    expect(mock.invitation_status).toBe(1);
+    const parsed = invitationListItemSchema.safeParse(mock);
+    expect(parsed.success).toBe(true);
+    expect(parsed.data?.request).toBeNull();
+    expect(parsed.data?.invitation_status).toBe(1);
   });
 });

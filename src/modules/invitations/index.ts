@@ -6,6 +6,8 @@ export {
 export type {
   InvitationListItem,
   InvitationActionResult,
+} from "./schemas";
+export type {
   ListInvitationsParams,
   RespondInvitationParams,
 } from "./actions";
