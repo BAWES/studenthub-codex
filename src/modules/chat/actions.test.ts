@@ -1,17 +1,16 @@
 import { describe, it, expect } from "vitest";
-import { z } from "zod";
+import {
+  listChatsSchema,
+  getChatMessagesSchema,
+  chatListItemSchema,
+  chatMessageItemSchema,
+  listChatsResultSchema,
+  listChatMessagesResultSchema,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
-// Schema tests
+// Input schema tests
 // ---------------------------------------------------------------------------
-
-const listChatsSchema = z.object({
-  page: z.number().int().positive().optional(),
-  limit: z.number().int().min(1).max(100).optional(),
-  companyId: z.number().int().optional(),
-  storeId: z.number().int().optional(),
-  staffId: z.number().int().optional(),
-});
 
 describe("listChatsSchema", () => {
   it("accepts empty params", () => {
@@ -46,20 +45,14 @@ describe("listChatsSchema", () => {
   });
 });
 
-const listChatMessagesSchema = z.object({
-  chatUuid: z.string().min(1, "Chat UUID is required"),
-  lastIndex: z.number().int().positive().optional(),
-  limit: z.number().int().min(1).max(100).optional(),
-});
-
-describe("listChatMessagesSchema", () => {
+describe("getChatMessagesSchema", () => {
   it("accepts only chatUuid", () => {
-    const r = listChatMessagesSchema.safeParse({ chatUuid: "chat_abc" });
+    const r = getChatMessagesSchema.safeParse({ chatUuid: "chat_abc" });
     expect(r.success).toBe(true);
   });
 
   it("accepts lastIndex pagination", () => {
-    const r = listChatMessagesSchema.safeParse({ chatUuid: "chat_abc", lastIndex: 50 });
+    const r = getChatMessagesSchema.safeParse({ chatUuid: "chat_abc", lastIndex: 50 });
     expect(r.success).toBe(true);
     if (r.success) {
       expect(r.data.lastIndex).toBe(50);
@@ -67,60 +60,195 @@ describe("listChatMessagesSchema", () => {
   });
 
   it("rejects empty chatUuid", () => {
-    expect(listChatMessagesSchema.safeParse({ chatUuid: "" }).success).toBe(false);
+    expect(getChatMessagesSchema.safeParse({ chatUuid: "" }).success).toBe(false);
   });
 
   it("rejects missing chatUuid", () => {
-    expect(listChatMessagesSchema.safeParse({}).success).toBe(false);
+    expect(getChatMessagesSchema.safeParse({}).success).toBe(false);
   });
 });
 
 // ---------------------------------------------------------------------------
-// Type shape tests
+// Output schema tests — chatListItemSchema
 // ---------------------------------------------------------------------------
 
-type ChatItem = {
-  chat_uuid: string;
-  company_id: number;
-  store_id: number;
-  staff_id: number | null;
-  created_at: string | null;
-};
-
-type ChatMessageItem = {
-  chat_message_uuid: string;
-  chat_uuid: string;
-  from: string | null;
-  message: string;
-  message_index: number | null;
-  status: boolean | null;
-  created_at: string | null;
-};
-
-type ListChatsResult = {
-  chats: ChatItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
-
-type ListChatMessagesResult = {
-  messages: ChatMessageItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
-
-describe("ChatItem shape", () => {
-  it("defines expected fields", () => {
-    const mock: ChatItem = {
+describe("chatListItemSchema", () => {
+  it("accepts a valid chat list item", () => {
+    const r = chatListItemSchema.safeParse({
       chat_uuid: "chat_abc123",
+      candidate_id: 1,
+      company_id: 2,
+      store_id: 3,
+      staff_id: 5,
+      created_at: new Date("2026-06-09T00:00:00.000Z"),
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts nullable staff_id and created_at", () => {
+    const r = chatListItemSchema.safeParse({
+      chat_uuid: "chat_def456",
+      candidate_id: 2,
+      company_id: 3,
+      store_id: 4,
+      staff_id: null,
+      created_at: null,
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects missing required fields", () => {
+    expect(chatListItemSchema.safeParse({ chat_uuid: "chat_abc" }).success).toBe(false);
+  });
+
+  it("rejects string where number expected", () => {
+    const r = chatListItemSchema.safeParse({
+      chat_uuid: "chat_abc",
+      candidate_id: "not-a-number",
+      company_id: 2,
+      store_id: 3,
+      staff_id: null,
+      created_at: null,
+    });
+    expect(r.success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output schema tests — chatMessageItemSchema
+// ---------------------------------------------------------------------------
+
+describe("chatMessageItemSchema", () => {
+  it("accepts a valid chat message item", () => {
+    const r = chatMessageItemSchema.safeParse({
+      chat_message_uuid: "msg_abc123",
+      chat_uuid: "chat_abc123",
+      message: "Hello, I have a question",
+      message_index: 1,
+      from: "candidate",
+      status: false,
+      created_at: new Date("2026-06-09T00:00:00.000Z"),
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts nullable fields", () => {
+    const r = chatMessageItemSchema.safeParse({
+      chat_message_uuid: "msg_def456",
+      chat_uuid: "chat_abc123",
+      message: "Test message",
+      message_index: null,
+      from: null,
+      status: null,
+      created_at: null,
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects missing chat_uuid", () => {
+    const r = chatMessageItemSchema.safeParse({
+      chat_message_uuid: "msg_abc",
+    });
+    expect(r.success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output schema tests — listChatsResultSchema
+// ---------------------------------------------------------------------------
+
+describe("listChatsResultSchema", () => {
+  it("accepts a valid empty result", () => {
+    const r = listChatsResultSchema.safeParse({
+      chats: [],
+      total: 0,
+      page: 1,
+      limit: 20,
+      totalPages: 0,
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts a result with items", () => {
+    const r = listChatsResultSchema.safeParse({
+      chats: [
+        {
+          chat_uuid: "chat_abc",
+          candidate_id: 1,
+          company_id: 2,
+          store_id: 3,
+          staff_id: null,
+          created_at: new Date(),
+        },
+      ],
+      total: 1,
+      page: 1,
+      limit: 20,
+      totalPages: 1,
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects non-integer total", () => {
+    const r = listChatsResultSchema.safeParse({
+      chats: [],
+      total: 0.5,
+      page: 1,
+      limit: 20,
+      totalPages: 0,
+    });
+    expect(r.success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output schema tests — listChatMessagesResultSchema
+// ---------------------------------------------------------------------------
+
+describe("listChatMessagesResultSchema", () => {
+  it("accepts a valid empty result", () => {
+    const r = listChatMessagesResultSchema.safeParse({
+      messages: [],
+      total: 0,
+      page: 1,
+      limit: 20,
+      totalPages: 0,
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects negative page", () => {
+    const r = listChatMessagesResultSchema.safeParse({
+      messages: [],
+      total: 0,
+      page: -1,
+      limit: 20,
+      totalPages: 0,
+    });
+    expect(r.success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Type shape tests (using Zod-inferred types)
+// ---------------------------------------------------------------------------
+
+import type {
+  ChatListItem,
+  ChatMessageItem,
+  ListChatsResult,
+  ListChatMessagesResult,
+} from "./schemas";
+
+describe("ChatListItem shape", () => {
+  it("defines expected fields", () => {
+    const mock: ChatListItem = {
+      chat_uuid: "chat_abc123",
+      candidate_id: 1,
       company_id: 1,
       store_id: 3,
       staff_id: 5,
-      created_at: "2026-06-09T00:00:00.000Z",
+      created_at: new Date("2026-06-09T00:00:00.000Z"),
     };
     expect(mock.chat_uuid).toBe("chat_abc123");
   });
@@ -135,7 +263,7 @@ describe("ChatMessageItem shape", () => {
       message: "Hello, I have a question",
       message_index: 1,
       status: false,
-      created_at: "2026-06-09T00:00:00.000Z",
+      created_at: new Date("2026-06-09T00:00:00.000Z"),
     };
     expect(mock.message).toBe("Hello, I have a question");
   });

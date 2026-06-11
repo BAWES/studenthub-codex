@@ -1,59 +1,17 @@
 import { describe, it, expect } from "vitest";
-import { z } from "zod";
+import {
+  listRequestChecklistsSchema,
+  createRequestChecklistSchema,
+  updateRequestChecklistSchema,
+  deleteRequestChecklistSchema,
+  requestChecklistItemSchema,
+  requestChecklistItemNullableSchema,
+  listRequestChecklistsResultSchema,
+  deleteRequestChecklistResultSchema,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
-// Schemas (duplicated from actions.ts for isolated unit testing)
-// ---------------------------------------------------------------------------
-
-const listRequestChecklistsSchema = z.object({
-  page: z.number().int().positive().optional(),
-  limit: z.number().int().min(1).max(100).optional(),
-  search: z.string().max(255).optional(),
-});
-
-const createRequestChecklistSchema = z.object({
-  statusName: z.string().min(1, "Status name is required").max(100),
-  statusNameAr: z.string().max(100).optional(),
-  isRequire: z.boolean().optional(),
-  sortOrder: z.number().int().min(0).optional(),
-});
-
-const updateRequestChecklistSchema = z.object({
-  requestChecklistUuid: z.string().min(1, "Request checklist UUID is required"),
-  statusName: z.string().min(1).max(100).optional(),
-  statusNameAr: z.string().max(100).optional(),
-  isRequire: z.boolean().optional(),
-  sortOrder: z.number().int().min(0).optional(),
-});
-
-const deleteRequestChecklistSchema = z.object({
-  requestChecklistUuid: z.string().min(1, "Request checklist UUID is required"),
-});
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-type RequestChecklistItem = {
-  request_checklist_uuid: string;
-  status_name: string;
-  status_name_ar: string | null;
-  is_require: boolean | null;
-  sort_order: number | null;
-  created_at: Date | null;
-  updated_at: Date | null;
-};
-
-type ListRequestChecklistsResult = {
-  items: RequestChecklistItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
-
-// ---------------------------------------------------------------------------
-// Tests
+// Tests: Input validation
 // ---------------------------------------------------------------------------
 
 describe("listRequestChecklistsSchema", () => {
@@ -177,9 +135,13 @@ describe("deleteRequestChecklistSchema", () => {
   });
 });
 
-describe("RequestChecklistItem type shape", () => {
+// ---------------------------------------------------------------------------
+// Tests: Output validation
+// ---------------------------------------------------------------------------
+
+describe("requestChecklistItemSchema", () => {
   it("accepts a valid request checklist object", () => {
-    const mock: RequestChecklistItem = {
+    const result = requestChecklistItemSchema.safeParse({
       request_checklist_uuid: "request_checklis_abc-123",
       status_name: "Approved",
       status_name_ar: "موافقة",
@@ -187,22 +149,140 @@ describe("RequestChecklistItem type shape", () => {
       sort_order: 1,
       created_at: new Date(),
       updated_at: new Date(),
-    };
-    expect(mock.request_checklist_uuid).toBe("request_checklis_abc-123");
-    expect(mock.status_name).toBe("Approved");
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts an object with all-null optionals", () => {
+    const result = requestChecklistItemSchema.safeParse({
+      request_checklist_uuid: "request_checklis_abc-123",
+      status_name: "Approved",
+      status_name_ar: null,
+      is_require: null,
+      sort_order: null,
+      created_at: null,
+      updated_at: null,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects missing request_checklist_uuid", () => {
+    const result = requestChecklistItemSchema.safeParse({
+      status_name: "Approved",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects missing status_name", () => {
+    const result = requestChecklistItemSchema.safeParse({
+      request_checklist_uuid: "abc",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects non-integer sort_order", () => {
+    const result = requestChecklistItemSchema.safeParse({
+      request_checklist_uuid: "abc",
+      status_name: "Approved",
+      sort_order: 1.5,
+    });
+    expect(result.success).toBe(false);
   });
 });
 
-describe("ListRequestChecklistsResult type shape", () => {
+describe("requestChecklistItemNullableSchema", () => {
+  it("accepts a valid request checklist object", () => {
+    const result = requestChecklistItemNullableSchema.safeParse({
+      request_checklist_uuid: "request_checklis_abc-123",
+      status_name: "Approved",
+      status_name_ar: null,
+      is_require: null,
+      sort_order: 1,
+      created_at: null,
+      updated_at: null,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts null", () => {
+    const result = requestChecklistItemNullableSchema.safeParse(null);
+    expect(result.success).toBe(true);
+  });
+});
+
+describe("listRequestChecklistsResultSchema", () => {
   it("accepts an empty result set", () => {
-    const result: ListRequestChecklistsResult = {
+    const result = listRequestChecklistsResultSchema.safeParse({
       items: [],
       total: 0,
       page: 1,
       limit: 20,
       totalPages: 0,
-    };
-    expect(result.total).toBe(0);
-    expect(result.items).toHaveLength(0);
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts a result with items", () => {
+    const result = listRequestChecklistsResultSchema.safeParse({
+      items: [
+        {
+          request_checklist_uuid: "request_checklis_abc-123",
+          status_name: "Approved",
+          status_name_ar: null,
+          is_require: true,
+          sort_order: 1,
+          created_at: null,
+          updated_at: null,
+        },
+      ],
+      total: 1,
+      page: 1,
+      limit: 20,
+      totalPages: 1,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects negative total", () => {
+    const result = listRequestChecklistsResultSchema.safeParse({
+      items: [],
+      total: -1,
+      page: 1,
+      limit: 20,
+      totalPages: 0,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects zero page", () => {
+    const result = listRequestChecklistsResultSchema.safeParse({
+      items: [],
+      total: 0,
+      page: 0,
+      limit: 20,
+      totalPages: 0,
+    });
+    expect(result.success).toBe(false);
+  });
+});
+
+describe("deleteRequestChecklistResultSchema", () => {
+  it("accepts success true", () => {
+    const result = deleteRequestChecklistResultSchema.safeParse({
+      success: true,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects missing success", () => {
+    const result = deleteRequestChecklistResultSchema.safeParse({});
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects non-boolean success", () => {
+    const result = deleteRequestChecklistResultSchema.safeParse({
+      success: "yes",
+    });
+    expect(result.success).toBe(false);
   });
 });

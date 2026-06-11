@@ -2,65 +2,26 @@
 
 import crypto from "node:crypto";
 import { revalidatePath } from "next/cache";
-import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
 
-// ---------------------------------------------------------------------------
-// Schemas
-// ---------------------------------------------------------------------------
-
-const listRequestChecklistsSchema = z.object({
-  page: z.number().int().positive().optional(),
-  limit: z.number().int().min(1).max(100).optional(),
-  search: z.string().max(255).optional(),
-});
-
-const createRequestChecklistSchema = z.object({
-  statusName: z.string().min(1, "Status name is required").max(100),
-  statusNameAr: z.string().max(100).optional(),
-  isRequire: z.boolean().optional(),
-  sortOrder: z.number().int().min(0).optional(),
-});
-
-const updateRequestChecklistSchema = z.object({
-  requestChecklistUuid: z.string().min(1, "Request checklist UUID is required"),
-  statusName: z.string().min(1).max(100).optional(),
-  statusNameAr: z.string().max(100).optional(),
-  isRequire: z.boolean().optional(),
-  sortOrder: z.number().int().min(0).optional(),
-});
-
-const deleteRequestChecklistSchema = z.object({
-  requestChecklistUuid: z.string().min(1, "Request checklist UUID is required"),
-});
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export type ListRequestChecklistsParams = z.input<typeof listRequestChecklistsSchema>;
-export type CreateRequestChecklistParams = z.input<typeof createRequestChecklistSchema>;
-export type UpdateRequestChecklistParams = z.input<typeof updateRequestChecklistSchema>;
-export type DeleteRequestChecklistParams = z.input<typeof deleteRequestChecklistSchema>;
-
-export type RequestChecklistItem = {
-  request_checklist_uuid: string;
-  status_name: string;
-  status_name_ar: string | null;
-  is_require: boolean | null;
-  sort_order: number | null;
-  created_at: Date | null;
-  updated_at: Date | null;
-};
-
-export type ListRequestChecklistsResult = {
-  items: RequestChecklistItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
+import {
+  listRequestChecklistsSchema,
+  createRequestChecklistSchema,
+  updateRequestChecklistSchema,
+  deleteRequestChecklistSchema,
+  listRequestChecklistsResultSchema,
+  requestChecklistItemSchema,
+  requestChecklistItemNullableSchema,
+  deleteRequestChecklistResultSchema,
+  type ListRequestChecklistsParams,
+  type CreateRequestChecklistParams,
+  type UpdateRequestChecklistParams,
+  type DeleteRequestChecklistParams,
+  type RequestChecklistItem,
+  type ListRequestChecklistsResult,
+  type DeleteRequestChecklistResult,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Server actions
@@ -96,13 +57,24 @@ export async function listRequestChecklists(
     prisma.request_checklist.count({ where }),
   ]);
 
-  return {
+  const result = {
     items: items as RequestChecklistItem[],
     total,
     page,
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  // Validate output shape
+  const outputParsed = listRequestChecklistsResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/request-checklists] listRequestChecklists output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -120,6 +92,15 @@ export async function getRequestChecklist(
   const item = await prisma.request_checklist.findUnique({
     where: { request_checklist_uuid: requestChecklistUuid },
   });
+
+  // Validate output shape
+  const outputParsed = requestChecklistItemNullableSchema.safeParse(item);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/request-checklists] getRequestChecklist output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
 
   return item as RequestChecklistItem | null;
 }
@@ -153,6 +134,16 @@ export async function createRequestChecklist(
   });
 
   revalidatePath("/admin/requests");
+
+  // Validate output shape
+  const outputParsed = requestChecklistItemSchema.safeParse(item);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/request-checklists] createRequestChecklist output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
   return item as RequestChecklistItem;
 }
 
@@ -191,6 +182,16 @@ export async function updateRequestChecklist(
   });
 
   revalidatePath("/admin/requests");
+
+  // Validate output shape
+  const outputParsed = requestChecklistItemSchema.safeParse(item);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/request-checklists] updateRequestChecklist output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
   return item as RequestChecklistItem;
 }
 
@@ -222,5 +223,17 @@ export async function deleteRequestChecklist(
   });
 
   revalidatePath("/admin/requests");
+
+  // Validate output shape
+  const outputParsed = deleteRequestChecklistResultSchema.safeParse({
+    success: true,
+  });
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/request-checklists] deleteRequestChecklist output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
   return { success: true };
 }
