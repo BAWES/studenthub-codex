@@ -16,18 +16,6 @@ import type {
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
-// Re-exports for backward compatibility
-// ---------------------------------------------------------------------------
-
-export { listDepartmentsSchema, getDepartmentSchema };
-export type {
-  ListDepartmentsParams,
-  GetDepartmentParams,
-  DepartmentItem,
-  ListDepartmentsResult,
-};
-
-// ---------------------------------------------------------------------------
 // listDepartments
 // ---------------------------------------------------------------------------
 
@@ -37,8 +25,6 @@ export type {
  * Mirrors the legacy Yii2 department reference concept used across
  * staff, candidate evaluation, and request modules.
  * - Filters by name (case-insensitive) when nameFilter is provided
- * - Paginated with configurable page/limit
- * - Sorted alphabetically by English name
  */
 export async function listDepartments(
   params: ListDepartmentsParams = {},
@@ -50,14 +36,11 @@ export async function listDepartments(
     throw new Error(parsed.error.issues[0]?.message ?? "Invalid list parameters");
   }
 
-  const { page, limit, nameFilter } = parsed.data;
+  const { nameFilter, page = 1, limit = 20 } = parsed.data;
 
   const where: Record<string, unknown> = {};
   if (nameFilter && nameFilter.trim()) {
-    where.OR = [
-      { department_name_en: { contains: nameFilter, mode: "insensitive" } },
-      { department_name_ar: { contains: nameFilter, mode: "insensitive" } },
-    ];
+    where.department_name_en = { contains: nameFilter };
   }
 
   const [departments, total] = await Promise.all([

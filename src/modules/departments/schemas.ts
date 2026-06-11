@@ -28,7 +28,7 @@ export const listDepartmentsResultSchema = z.object({
   departments: z.array(departmentItemSchema),
   total: z.number().int().nonnegative(),
   page: z.number().int().positive(),
-  limit: z.number(),
+  limit: z.number().int().positive(),
   totalPages: z.number().int().nonnegative(),
 });
 
