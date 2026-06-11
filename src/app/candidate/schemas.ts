@@ -54,5 +54,26 @@ export const candidateProfileOutputSchema = z.object({
 // Types
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// Experience output validation — matches ExperienceItem / ExperienceActionResult
+// ---------------------------------------------------------------------------
+
+export const experienceItemSchema = z.object({
+  candidate_experience_id: z.number().int().positive(),
+  candidate_id: z.number().int().nullable(),
+  experience: z.string().min(1),
+  employer: z.string().nullable(),
+  start_year: z.number().int().nullable(),
+  end_year: z.number().int().nullable(),
+  created_at: z.date().nullable(),
+});
+
+export const experienceActionResultSchema = z.discriminatedUnion("success", [
+  z.object({ success: z.literal(true), experienceId: z.number().int().positive() }),
+  z.object({ success: z.literal(false), error: z.string() }),
+]);
+
+export const experienceListOutputSchema = z.array(experienceItemSchema);
+
 export type GetCandidateProfileInput = z.input<typeof getCandidateProfileSchema>;
 export type CandidateProfileOutput = z.input<typeof candidateProfileOutputSchema>;

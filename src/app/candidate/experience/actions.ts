@@ -18,6 +18,12 @@ import {
   deleteExperienceSchema,
 } from "./schemas";
 
+import {
+  experienceItemSchema,
+  experienceActionResultSchema,
+  experienceListOutputSchema,
+} from "../schemas";
+
 // Re-export types for client components
 export type { ExperienceActionResult, ExperienceItem };
 
@@ -93,7 +99,18 @@ export async function listCandidateExperience(
     take: limit,
   });
 
-  return rows.map((r) => toItem(r)!);
+  const items = rows.map((r) => toItem(r)!);
+
+  // Validate output shape
+  const validatedList = experienceListOutputSchema.safeParse(items);
+  if (!validatedList.success) {
+    console.error(
+      "[candidate/experience] listCandidateExperience output validation failed:",
+      validatedList.error.issues,
+    );
+  }
+
+  return items;
 }
 
 /**
@@ -119,7 +136,18 @@ export async function getCandidateExperience(
     },
   });
 
-  return toItem(row);
+  const item = toItem(row);
+
+  // Validate output shape
+  const validatedItem = experienceItemSchema.nullable().safeParse(item);
+  if (!validatedItem.success) {
+    console.error(
+      "[candidate/experience] getCandidateExperience output validation failed:",
+      validatedItem.error.issues,
+    );
+  }
+
+  return item;
 }
 
 /**
@@ -135,10 +163,11 @@ export async function createCandidateExperience(
 
   const parsed = createExperienceSchema.safeParse(data);
   if (!parsed.success) {
-    return {
+    const errorResult: ExperienceActionResult = {
       success: false,
       error: parsed.error.issues[0]?.message ?? "Invalid experience data",
     };
+    return errorResult;
   }
 
   const dateError = validateDateRange(
@@ -146,7 +175,18 @@ export async function createCandidateExperience(
     parsed.data.endYear,
   );
   if (dateError) {
-    return { success: false, error: dateError };
+    const errorResult: ExperienceActionResult = { success: false, error: dateError };
+
+    // Validate output shape
+    const validatedActionResult = experienceActionResultSchema.safeParse(errorResult);
+    if (!validatedActionResult.success) {
+      console.error(
+        "[candidate/experience] createCandidateExperience output validation failed:",
+        validatedActionResult.error.issues,
+      );
+    }
+
+    return errorResult;
   }
 
   const now = new Date();
@@ -164,7 +204,19 @@ export async function createCandidateExperience(
   });
 
   revalidatePath("/candidate/experience");
-  return { success: true, experienceId: row.candidate_experience_id };
+
+  const successResult: ExperienceActionResult = { success: true, experienceId: row.candidate_experience_id };
+
+  // Validate output shape
+  const validatedActionResult = experienceActionResultSchema.safeParse(successResult);
+  if (!validatedActionResult.success) {
+    console.error(
+      "[candidate/experience] createCandidateExperience output validation failed:",
+      validatedActionResult.error.issues,
+    );
+  }
+
+  return successResult;
 }
 
 /**
@@ -181,10 +233,11 @@ export async function updateCandidateExperience(
 
   const parsed = updateExperienceSchema.safeParse(data);
   if (!parsed.success) {
-    return {
+    const errorResult: ExperienceActionResult = {
       success: false,
       error: parsed.error.issues[0]?.message ?? "Invalid experience data",
     };
+    return errorResult;
   }
 
   const dateError = validateDateRange(
@@ -192,7 +245,18 @@ export async function updateCandidateExperience(
     parsed.data.endYear,
   );
   if (dateError) {
-    return { success: false, error: dateError };
+    const errorResult: ExperienceActionResult = { success: false, error: dateError };
+
+    // Validate output shape
+    const validatedResult = experienceActionResultSchema.safeParse(errorResult);
+    if (!validatedResult.success) {
+      console.error(
+        "[candidate/experience] updateCandidateExperience output validation failed:",
+        validatedResult.error.issues,
+      );
+    }
+
+    return errorResult;
   }
 
   const candidateId = Number(session.id);
@@ -208,10 +272,21 @@ export async function updateCandidateExperience(
     select: { candidate_experience_id: true },
   });
   if (!existing) {
-    return {
+    const errorResult: ExperienceActionResult = {
       success: false,
       error: "Experience record not found or access denied",
     };
+
+    // Validate output shape
+    const validatedActionResult = experienceActionResultSchema.safeParse(errorResult);
+    if (!validatedActionResult.success) {
+      console.error(
+        "[candidate/experience] updateCandidateExperience output validation failed:",
+        validatedActionResult.error.issues,
+      );
+    }
+
+    return errorResult;
   }
 
   await prisma.candidate_experience.update({
@@ -225,7 +300,19 @@ export async function updateCandidateExperience(
   });
 
   revalidatePath("/candidate/experience");
-  return { success: true, experienceId };
+
+  const successResult: ExperienceActionResult = { success: true, experienceId };
+
+  // Validate output shape
+  const validatedActionResult = experienceActionResultSchema.safeParse(successResult);
+  if (!validatedActionResult.success) {
+    console.error(
+      "[candidate/experience] updateCandidateExperience output validation failed:",
+      validatedActionResult.error.issues,
+    );
+  }
+
+  return successResult;
 }
 
 /**
@@ -241,10 +328,11 @@ export async function deleteCandidateExperience(
 
   const parsed = deleteExperienceSchema.safeParse({ experienceId });
   if (!parsed.success) {
-    return {
+    const errorResult: ExperienceActionResult = {
       success: false,
       error: "Invalid experience ID",
     };
+    return errorResult;
   }
 
   const existing = await prisma.candidate_experience.findFirst({
@@ -256,10 +344,21 @@ export async function deleteCandidateExperience(
     select: { candidate_experience_id: true },
   });
   if (!existing) {
-    return {
+    const errorResult: ExperienceActionResult = {
       success: false,
       error: "Experience record not found or access denied",
     };
+
+    // Validate output shape
+    const validatedResult = experienceActionResultSchema.safeParse(errorResult);
+    if (!validatedResult.success) {
+      console.error(
+        "[candidate/experience] deleteCandidateExperience output validation failed:",
+        validatedResult.error.issues,
+      );
+    }
+
+    return errorResult;
   }
 
   // Soft-delete
@@ -269,5 +368,17 @@ export async function deleteCandidateExperience(
   });
 
   revalidatePath("/candidate/experience");
-  return { success: true, experienceId: parsed.data.experienceId };
+
+  const successResult: ExperienceActionResult = { success: true, experienceId: parsed.data.experienceId };
+
+  // Validate output shape
+  const validatedResult = experienceActionResultSchema.safeParse(successResult);
+  if (!validatedResult.success) {
+    console.error(
+      "[candidate/experience] deleteCandidateExperience output validation failed:",
+      validatedResult.error.issues,
+    );
+  }
+
+  return successResult;
 }
