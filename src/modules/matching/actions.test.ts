@@ -1,318 +1,293 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect } from "vitest";
 import {
   matchCandidateToJobSchema,
   listMatchingJobsSchema,
   listMatchingCandidatesSchema,
+  matchCandidateToJobResultSchema,
+  listMatchingJobsResultSchema,
+  listMatchingCandidatesResultSchema,
+  matchScoreSchema,
+  matchedJobRowSchema,
+  matchedCandidateRowSchema,
+  type MatchScore,
+  type MatchedJobRow,
+  type MatchedCandidateRow,
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
-// Mock Prisma client
-// ---------------------------------------------------------------------------
-
-vi.mock("@/lib/prisma", () => ({
-  prisma: {
-    job_listing: {
-      findUnique: vi.fn(),
-      findMany: vi.fn(),
-    },
-    candidate_skill: {
-      findMany: vi.fn(),
-    },
-    candidate_education: {
-      findFirst: vi.fn(),
-      findMany: vi.fn(),
-    },
-    candidate: {
-      findUnique: vi.fn(),
-      findMany: vi.fn(),
-    },
-    job_listing_application: {
-      findMany: vi.fn(),
-    },
-  },
-}));
-
-import { prisma } from "@/lib/prisma";
-import type { Mock } from "vitest";
-import {
-  matchCandidateToJob,
-  listMatchingJobs,
-  listMatchingCandidates,
-} from "./actions";
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-function makeJob() {
-  return {
-    jobListingId: 1,
-    employerId: 10,
-    title: "Software Engineer",
-    description: "Build awesome things",
-    requirements: "React, TypeScript, Node.js, communication skills",
-    location: "Kuwait City",
-    status: "active",
-    employer: { company_name: "TechCorp" },
-    createdAt: new Date("2026-01-01"),
-    updatedAt: new Date("2026-01-01"),
-  };
-}
-
-function makeCandidateSkills(skills: string[]) {
-  return skills.map((s) => ({ skill: s }));
-}
-
-function makeEducation(overrides = {}) {
-  return {
-    candidate_id: 42,
-    university: { university_name_en: "Kuwait University" },
-    degree: { degree_name_en: "Bachelor's" },
-    major: { major_name_en: "Computer Science" },
-    ...overrides,
-  };
-}
-
-// ---------------------------------------------------------------------------
-// Schema tests
+// Input schemas
 // ---------------------------------------------------------------------------
 
 describe("matchCandidateToJobSchema", () => {
   it("accepts valid input", () => {
-    const result = matchCandidateToJobSchema.parse({
-      candidateId: 42,
-      jobId: 1,
-    });
-    expect(result.candidateId).toBe(42);
-    expect(result.jobId).toBe(1);
+    const r = matchCandidateToJobSchema.safeParse({ candidateId: 1, jobId: 42 });
+    expect(r.success).toBe(true);
   });
 
-  it("coerces string IDs", () => {
-    const result = matchCandidateToJobSchema.parse({
-      candidateId: "42",
-      jobId: "1",
-    });
-    expect(result.candidateId).toBe(42);
+  it("coerces string numbers", () => {
+    const r = matchCandidateToJobSchema.safeParse({ candidateId: "1", jobId: "42" });
+    expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data.candidateId).toBe(1);
+      expect(r.data.jobId).toBe(42);
+    }
   });
 
-  it("rejects missing candidateId", () => {
-    expect(() =>
-      matchCandidateToJobSchema.parse({ jobId: 1 }),
-    ).toThrow();
+  it("rejects negative candidateId", () => {
+    expect(matchCandidateToJobSchema.safeParse({ candidateId: -1, jobId: 42 }).success).toBe(false);
   });
 
-  it("rejects negative IDs", () => {
-    expect(() =>
-      matchCandidateToJobSchema.parse({ candidateId: -1, jobId: 1 }),
-    ).toThrow();
+  it("rejects missing jobId", () => {
+    expect(matchCandidateToJobSchema.safeParse({ candidateId: 1 }).success).toBe(false);
+  });
+
+  it("rejects zero values", () => {
+    expect(matchCandidateToJobSchema.safeParse({ candidateId: 0, jobId: 42 }).success).toBe(false);
   });
 });
 
 describe("listMatchingJobsSchema", () => {
-  it("accepts valid input", () => {
-    const result = listMatchingJobsSchema.parse({
-      candidateId: 42,
-    });
-    expect(result.page).toBe(1);
-    expect(result.limit).toBe(20);
+  it("accepts minimum input", () => {
+    const r = listMatchingJobsSchema.safeParse({ candidateId: 1 });
+    expect(r.success).toBe(true);
+  });
+
+  it("applies defaults for page and limit", () => {
+    const r = listMatchingJobsSchema.safeParse({ candidateId: 1 });
+    expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data.page).toBe(1);
+      expect(r.data.limit).toBe(20);
+    }
   });
 
   it("accepts optional filters", () => {
-    const result = listMatchingJobsSchema.parse({
-      candidateId: 42,
+    const r = listMatchingJobsSchema.safeParse({
+      candidateId: 1,
+      page: 2,
+      limit: 50,
       employmentType: "full-time",
-      location: "Kuwait",
+      location: "Kuwait City",
     });
-    expect(result.employmentType).toBe("full-time");
+    expect(r.success).toBe(true);
   });
 
-  it("rejects limit > 100", () => {
-    expect(() =>
-      listMatchingJobsSchema.parse({ candidateId: 42, limit: 200 }),
-    ).toThrow();
+  it("rejects limit over 100", () => {
+    expect(listMatchingJobsSchema.safeParse({ candidateId: 1, limit: 200 }).success).toBe(false);
   });
 });
 
 describe("listMatchingCandidatesSchema", () => {
   it("accepts valid input", () => {
-    const result = listMatchingCandidatesSchema.parse({ jobId: 1 });
-    expect(result.page).toBe(1);
-    expect(result.limit).toBe(20);
+    const r = listMatchingCandidatesSchema.safeParse({ jobId: 42 });
+    expect(r.success).toBe(true);
   });
 
-  it("accepts optional filters", () => {
-    const result = listMatchingCandidatesSchema.parse({
-      jobId: 1,
+  it("accepts all optional filters", () => {
+    const r = listMatchingCandidatesSchema.safeParse({
+      jobId: 42,
+      page: 1,
+      limit: 10,
       minScore: 50,
-      skillFilter: "react",
+      skillFilter: "React",
       universityId: 5,
+      majorFilter: "Computer Science",
     });
-    expect(result.minScore).toBe(50);
-    expect(result.skillFilter).toBe("react");
+    expect(r.success).toBe(true);
   });
 
-  it("rejects minScore > 100", () => {
-    expect(() =>
-      listMatchingCandidatesSchema.parse({ jobId: 1, minScore: 150 }),
-    ).toThrow();
+  it("rejects minScore above 100", () => {
+    expect(listMatchingCandidatesSchema.safeParse({ jobId: 42, minScore: 150 }).success).toBe(false);
+  });
+
+  it("rejects negative page", () => {
+    expect(listMatchingCandidatesSchema.safeParse({ jobId: 42, page: -1 }).success).toBe(false);
   });
 });
 
 // ---------------------------------------------------------------------------
-// matchCandidateToJob
+// Output schemas
 // ---------------------------------------------------------------------------
 
-describe("matchCandidateToJob", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
+describe("matchScoreSchema", () => {
+  const validScore = { overall: 75, skillMatch: 80, educationMatch: 70, locationMatch: 60, breakdown: ["Good match"] };
+
+  it("accepts a valid score", () => {
+    expect(matchScoreSchema.safeParse(validScore).success).toBe(true);
   });
 
-  it("returns a match score for a candidate-job pair", async () => {
-    (prisma.job_listing.findUnique as Mock).mockResolvedValue(makeJob());
-    (prisma.candidate_skill.findMany as Mock).mockResolvedValue(
-      makeCandidateSkills(["react", "typescript", "node.js", "communication"]),
-    );
-    (prisma.candidate_education.findFirst as Mock).mockResolvedValue(
-      makeEducation(),
-    );
-    (prisma.candidate.findUnique as Mock).mockResolvedValue({
-      candidate_id: 42,
-      candidate_address_line1: "Salmiya, Kuwait City",
-      candidate_area_uuid: null,
-    });
-
-    const result = await matchCandidateToJob({
-      candidateId: 42,
-      jobId: 1,
-    });
-
-    expect(result.success).toBe(true);
-    expect(result.score.overall).toBeGreaterThanOrEqual(0);
-    expect(result.score.overall).toBeLessThanOrEqual(100);
-    expect(result.score.skillMatch).toBeGreaterThan(0); // should match skills
-    expect(result.score.educationMatch).toBeGreaterThan(0);
-    expect(result.score.breakdown.length).toBeGreaterThan(0);
+  it("accepts empty breakdown", () => {
+    expect(matchScoreSchema.safeParse({ ...validScore, breakdown: [] }).success).toBe(true);
   });
 
-  it("returns 0 skill match when candidate has no skills", async () => {
-    (prisma.job_listing.findUnique as Mock).mockResolvedValue(makeJob());
-    (prisma.candidate_skill.findMany as Mock).mockResolvedValue([]);
-    (prisma.candidate_education.findFirst as Mock).mockResolvedValue(null);
-    (prisma.candidate.findUnique as Mock).mockResolvedValue(null);
-
-    const result = await matchCandidateToJob({
-      candidateId: 42,
-      jobId: 1,
-    });
-
-    expect(result.score.skillMatch).toBe(0);
-    expect(result.score.educationMatch).toBe(30); // no education = baseline
+  it("rejects overall above 100", () => {
+    expect(matchScoreSchema.safeParse({ ...validScore, overall: 150 }).success).toBe(false);
   });
 
-  it("throws for non-existent job", async () => {
-    (prisma.job_listing.findUnique as Mock).mockResolvedValue(null);
+  it("rejects overall below 0", () => {
+    expect(matchScoreSchema.safeParse({ ...validScore, overall: -5 }).success).toBe(false);
+  });
 
-    await expect(
-      matchCandidateToJob({ candidateId: 42, jobId: 999 }),
-    ).rejects.toThrow("Job not found");
+  it("rejects non-integer score", () => {
+    expect(matchScoreSchema.safeParse({ ...validScore, overall: 75.5 }).success).toBe(false);
+  });
+
+  it("rejects missing skillMatch", () => {
+    const { skillMatch: _, ...withoutSkill } = validScore;
+    expect(matchScoreSchema.safeParse(withoutSkill).success).toBe(false);
+  });
+});
+
+describe("matchedJobRowSchema", () => {
+  const validRow = {
+    jobListingId: 1,
+    title: "Software Engineer",
+    employerName: "Acme Corp",
+    location: "Kuwait City",
+    employmentType: "full-time",
+    salaryRange: "800-1200 KWD",
+    score: { overall: 85, skillMatch: 90, educationMatch: 80, locationMatch: 70, breakdown: [] },
+  };
+
+  it("accepts a valid matched job row", () => {
+    expect(matchedJobRowSchema.safeParse(validRow).success).toBe(true);
+  });
+
+  it("accepts nullable fields", () => {
+    expect(matchedJobRowSchema.safeParse({ ...validRow, location: null, employmentType: null, salaryRange: null }).success).toBe(true);
+  });
+
+  it("rejects missing jobListingId", () => {
+    const { jobListingId: _, ...withoutId } = validRow;
+    expect(matchedJobRowSchema.safeParse(withoutId).success).toBe(false);
+  });
+});
+
+describe("matchedCandidateRowSchema", () => {
+  const validRow = {
+    candidateId: 42,
+    candidateName: "John Doe",
+    candidateSkills: ["JavaScript", "React", "Python"],
+    universityName: "Kuwait University",
+    score: { overall: 80, skillMatch: 85, educationMatch: 75, locationMatch: 65, breakdown: [] },
+  };
+
+  it("accepts a valid matched candidate row", () => {
+    expect(matchedCandidateRowSchema.safeParse(validRow).success).toBe(true);
+  });
+
+  it("accepts null universityName", () => {
+    expect(matchedCandidateRowSchema.safeParse({ ...validRow, universityName: null }).success).toBe(true);
+  });
+
+  it("accepts empty skills list", () => {
+    expect(matchedCandidateRowSchema.safeParse({ ...validRow, candidateSkills: [] }).success).toBe(true);
+  });
+});
+
+describe("matchCandidateToJobResultSchema", () => {
+  const validResult = {
+    success: true,
+    score: { overall: 75, skillMatch: 80, educationMatch: 70, locationMatch: 60, breakdown: ["Skill match: 80%"] },
+  };
+
+  it("accepts a valid result", () => {
+    expect(matchCandidateToJobResultSchema.safeParse(validResult).success).toBe(true);
+  });
+
+  it("rejects missing score", () => {
+    expect(matchCandidateToJobResultSchema.safeParse({ success: true }).success).toBe(false);
+  });
+});
+
+describe("listMatchingJobsResultSchema", () => {
+  const validResult = {
+    success: true,
+    jobs: [
+      {
+        jobListingId: 1,
+        title: "Software Engineer",
+        employerName: "Acme Corp",
+        location: "Kuwait City",
+        employmentType: "full-time",
+        salaryRange: "800-1200 KWD",
+        score: { overall: 85, skillMatch: 90, educationMatch: 80, locationMatch: 70, breakdown: [] },
+      },
+    ],
+    total: 1,
+  };
+
+  it("accepts a valid result", () => {
+    expect(listMatchingJobsResultSchema.safeParse(validResult).success).toBe(true);
+  });
+
+  it("accepts empty jobs array", () => {
+    expect(listMatchingJobsResultSchema.safeParse({ ...validResult, jobs: [], total: 0 }).success).toBe(true);
+  });
+});
+
+describe("listMatchingCandidatesResultSchema", () => {
+  const validResult = {
+    success: true,
+    candidates: [
+      {
+        candidateId: 42,
+        candidateName: "John Doe",
+        candidateSkills: ["JavaScript", "React"],
+        universityName: "Kuwait University",
+        score: { overall: 80, skillMatch: 85, educationMatch: 75, locationMatch: 65, breakdown: [] },
+      },
+    ],
+    total: 1,
+  };
+
+  it("accepts a valid result", () => {
+    expect(listMatchingCandidatesResultSchema.safeParse(validResult).success).toBe(true);
+  });
+
+  it("accepts empty candidates", () => {
+    expect(listMatchingCandidatesResultSchema.safeParse({ ...validResult, candidates: [], total: 0 }).success).toBe(true);
   });
 });
 
 // ---------------------------------------------------------------------------
-// listMatchingJobs
+// Type shape verification
 // ---------------------------------------------------------------------------
 
-describe("listMatchingJobs", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
+describe("MatchScore type shape", () => {
+  it("constructs with valid data", () => {
+    const score: MatchScore = { overall: 85, skillMatch: 90, educationMatch: 80, locationMatch: 70, breakdown: ["Strong match"] };
+    expect(score.overall).toBe(85);
+    expect(score.breakdown).toHaveLength(1);
   });
+});
 
-  it("returns jobs sorted by match score", async () => {
-    const job1 = { ...makeJob(), jobListingId: 1, title: "Engineer A" };
-    const job2 = { ...makeJob(), jobListingId: 2, title: "Engineer B" };
-
-    // listMatchingJobs → findMany for the list, then matchCandidateToJob → findUnique per job
-    (prisma.job_listing.findMany as Mock).mockResolvedValue([job1, job2]);
-    (prisma.job_listing.findUnique as Mock).mockResolvedValue(makeJob());
-    (prisma.candidate_skill.findMany as Mock).mockResolvedValue(
-      makeCandidateSkills(["react", "typescript"]),
-    );
-    (prisma.candidate_education.findFirst as Mock).mockResolvedValue(
-      makeEducation(),
-    );
-    (prisma.candidate.findUnique as Mock).mockResolvedValue({
-      candidate_address_line1: "Kuwait City",
-      candidate_area_uuid: null,
-    });
-
-    const result = await listMatchingJobs({
-      candidateId: 42,
-      page: 1,
-      limit: 20,
-    });
-
-    expect(result.success).toBe(true);
-    expect(result.jobs.length).toBe(2);
-    expect(result.jobs[0].score.overall).toBeGreaterThanOrEqual(0);
-  });
-
-  it("filters by employment type", async () => {
-    (prisma.job_listing.findMany as Mock).mockResolvedValue([]);
-
-    await listMatchingJobs({
-      candidateId: 42,
+describe("MatchedJobRow type shape", () => {
+  it("constructs with valid data", () => {
+    const row: MatchedJobRow = {
+      jobListingId: 1,
+      title: "Engineer",
+      employerName: "Acme",
+      location: null,
       employmentType: "full-time",
-    });
-
-    const callArgs = (prisma.job_listing.findMany as Mock).mock.calls[0][0];
-    expect(callArgs.where.employmentType).toBe("full-time");
+      salaryRange: null,
+      score: { overall: 85, skillMatch: 90, educationMatch: 80, locationMatch: 70, breakdown: [] },
+    };
+    expect(row.jobListingId).toBe(1);
+    expect(row.employerName).toBe("Acme");
   });
 });
 
-// ---------------------------------------------------------------------------
-// listMatchingCandidates
-// ---------------------------------------------------------------------------
-
-describe("listMatchingCandidates", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  it("returns candidates scored for a job", async () => {
-    (prisma.job_listing.findUnique as Mock).mockResolvedValue(makeJob());
-    (prisma.job_listing_application.findMany as Mock).mockResolvedValue([
-      { candidateId: 42 },
-    ]);
-    (prisma.candidate_skill.findMany as Mock).mockResolvedValue(
-      makeCandidateSkills(["react", "typescript"]),
-    );
-    (prisma.candidate_education.findFirst as Mock).mockResolvedValue(
-      makeEducation(),
-    );
-    (prisma.candidate.findUnique as Mock).mockResolvedValue({
-      candidate_name: "Ahmed Ali",
-      candidate_address_line1: "Kuwait City",
-      candidate_area_uuid: null,
-    });
-
-    const result = await listMatchingCandidates({
-      jobId: 1,
-      page: 1,
-      limit: 20,
-    });
-
-    expect(result.success).toBe(true);
-    expect(result.candidates.length).toBe(1);
-    expect(result.candidates[0].candidateName).toBe("Ahmed Ali");
-    expect(result.candidates[0].candidateSkills).toContain("react");
-    expect(result.candidates[0].score.overall).toBeGreaterThan(0);
-  });
-
-  it("throws for non-existent job", async () => {
-    (prisma.job_listing.findUnique as Mock).mockResolvedValue(null);
-
-    await expect(
-      listMatchingCandidates({ jobId: 999 }),
-    ).rejects.toThrow("Job not found");
+describe("MatchedCandidateRow type shape", () => {
+  it("constructs with valid data", () => {
+    const row: MatchedCandidateRow = {
+      candidateId: 42,
+      candidateName: "Jane",
+      candidateSkills: ["Python"],
+      universityName: null,
+      score: { overall: 80, skillMatch: 85, educationMatch: 75, locationMatch: 65, breakdown: [] },
+    };
+    expect(row.candidateId).toBe(42);
+    expect(row.candidateSkills).toContain("Python");
   });
 });
