@@ -1,6 +1,12 @@
 import { describe, it, expect } from "vitest";
 import { z } from "zod";
 
+import {
+  experienceItemSchema,
+  experienceActionResultSchema,
+  experienceListOutputSchema,
+} from "../schemas";
+
 // ---------------------------------------------------------------------------
 // Schemas (duplicated for isolated unit testing)
 // ---------------------------------------------------------------------------
@@ -331,5 +337,159 @@ describe("ExperienceActionResult type shape", () => {
     };
     expect(result.success).toBe(false);
     expect(result.error).toBe("Experience not found");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output validation schema tests
+// ---------------------------------------------------------------------------
+
+describe("experienceItemSchema (output validation)", () => {
+  it("accepts a valid experience item", () => {
+    const valid = {
+      candidate_experience_id: 1,
+      candidate_id: 42,
+      experience: "Software Engineer",
+      employer: "Acme Corp",
+      start_year: 2020,
+      end_year: 2024,
+      created_at: new Date("2024-01-01"),
+    };
+    const r = experienceItemSchema.safeParse(valid);
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts nullable fields", () => {
+    const item = {
+      candidate_experience_id: 1,
+      candidate_id: null,
+      experience: "Intern",
+      employer: null,
+      start_year: null,
+      end_year: null,
+      created_at: null,
+    };
+    const r = experienceItemSchema.safeParse(item);
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects missing required fields", () => {
+    const r = experienceItemSchema.safeParse({});
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects non-positive id", () => {
+    const r = experienceItemSchema.safeParse({
+      candidate_experience_id: 0,
+      candidate_id: null,
+      experience: "Test",
+      employer: null,
+      start_year: null,
+      end_year: null,
+      created_at: null,
+    });
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects empty experience string", () => {
+    const r = experienceItemSchema.safeParse({
+      candidate_experience_id: 1,
+      candidate_id: null,
+      experience: "",
+      employer: null,
+      start_year: null,
+      end_year: null,
+      created_at: null,
+    });
+    expect(r.success).toBe(false);
+  });
+});
+
+describe("experienceActionResultSchema (output validation)", () => {
+  it("accepts a successful result", () => {
+    const r = experienceActionResultSchema.safeParse({
+      success: true,
+      experienceId: 42,
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts a failure result", () => {
+    const r = experienceActionResultSchema.safeParse({
+      success: false,
+      error: "Something went wrong",
+    });
+    expect(r.success).toBe(true);
+    // Use type assertion because Zod's safeParse discriminated union
+    // narrows r.data to the success variant when success=true
+    const data = r.data as { success: false; error: string };
+    expect(data.error).toBe("Something went wrong");
+  });
+
+  it("rejects a result missing error on failure", () => {
+    const r = experienceActionResultSchema.safeParse({
+      success: false,
+    });
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects a result with negative experienceId", () => {
+    const r = experienceActionResultSchema.safeParse({
+      success: true,
+      experienceId: -1,
+    });
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects a result with non-integer experienceId", () => {
+    const r = experienceActionResultSchema.safeParse({
+      success: true,
+      experienceId: 42.5,
+    });
+    expect(r.success).toBe(false);
+  });
+});
+
+describe("experienceListOutputSchema (output validation)", () => {
+  it("accepts an empty list", () => {
+    const r = experienceListOutputSchema.safeParse([]);
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts a list of valid items", () => {
+    const items = [
+      {
+        candidate_experience_id: 1,
+        candidate_id: 42,
+        experience: "Software Engineer",
+        employer: "Acme Corp",
+        start_year: 2020,
+        end_year: 2024,
+        created_at: new Date("2024-01-01"),
+      },
+      {
+        candidate_experience_id: 2,
+        candidate_id: 42,
+        experience: "Junior Developer",
+        employer: "Startup Inc",
+        start_year: 2018,
+        end_year: 2020,
+        created_at: new Date("2023-06-15"),
+      },
+    ];
+    const r = experienceListOutputSchema.safeParse(items);
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects items with missing fields", () => {
+    const r = experienceListOutputSchema.safeParse([
+      { candidate_experience_id: 1 },
+    ]);
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects non-array input", () => {
+    const r = experienceListOutputSchema.safeParse(null);
+    expect(r.success).toBe(false);
   });
 });
