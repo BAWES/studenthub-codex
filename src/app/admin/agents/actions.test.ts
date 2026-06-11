@@ -42,7 +42,7 @@ describe("getAllAgentsHealth", () => {
 
   it("returns health data for a single healthy agent", async () => {
     mockClient.query
-      .mockResolvedValueOnce({ rows: [{ id: "eaa3c21b-a27e-40a5-a5bb-d392e5f53d95", name: "Coder", status: "running", role: "software_engineer" }] })
+      .mockResolvedValueOnce({ rows: [{ id: "550e8400-e29b-41d4-a716-446655440001", name: "Coder", status: "running", role: "software_engineer" }] })
       .mockResolvedValueOnce({ rows: [{ total: 10, succeeded: 8, failed: 2 }] })
       .mockResolvedValueOnce({ rows: [{ started_at: new Date().toISOString(), status: "succeeded" }] })
       .mockResolvedValueOnce({ rows: [{ count: 5 }] })
@@ -62,7 +62,7 @@ describe("getAllAgentsHealth", () => {
 
   it("handles edge case: zero runs", async () => {
     mockClient.query
-      .mockResolvedValueOnce({ rows: [{ id: "b92c6482-09a8-426e-9b7f-39ff420e44eb", name: "Zero", status: "idle", role: "test" }] })
+      .mockResolvedValueOnce({ rows: [{ id: "550e8400-e29b-41d4-a716-446655440004", name: "Zero", status: "idle", role: "test" }] })
       .mockResolvedValueOnce({ rows: [] })
       .mockResolvedValueOnce({ rows: [] })
       .mockResolvedValueOnce({ rows: [{ count: 0 }] })
@@ -136,7 +136,7 @@ describe("agentHealthDataSchema (output validation)", () => {
 
   it("rejects negative issuesDone", () => {
     const r = agentHealthDataSchema.safeParse({
-      id: "eaa3c21b-a27e-40a5-a5bb-d392e5f53d95",
+      id: "550e8400-e29b-41d4-a716-446655440003",
       name: "Neg",
       status: "error",
       role: "test",
@@ -150,7 +150,7 @@ describe("agentHealthDataSchema (output validation)", () => {
 
   it("rejects empty name", () => {
     const r = agentHealthDataSchema.safeParse({
-      id: "b92c6482-09a8-426e-9b7f-39ff420e44eb",
+      id: "550e8400-e29b-41d4-a716-446655440005",
       name: "",
       status: "running",
       role: "test",
@@ -171,7 +171,7 @@ describe("agentsHealthDataSchema (output validation)", () => {
 
   it("rejects invalid agent inside array", () => {
     const r = agentsHealthDataSchema.safeParse({
-      agents: [{ id: "5e14dbe7-c490-466e-80a3-cda503559a66", name: "", status: "running", role: "test", heartbeatMetrics: [], lastHeartbeat: null, issuesDone: 0, issuesInProgress: 0 }],
+      agents: [{ id: "550e8400-e29b-41d4-a716-446655440001", name: "", status: "running", role: "test", heartbeatMetrics: [], lastHeartbeat: null, issuesDone: 0, issuesInProgress: 0 }],
     });
     expect(r.success).toBe(false);
   });
