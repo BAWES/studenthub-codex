@@ -8,4 +8,4 @@ export type {
   ListTransferCandidatesResult,
   ListTransferCandidatesParams,
   GetTransferCandidateParams,
-} from "./actions";
+} from "./schemas";
