@@ -443,7 +443,7 @@ async function main() {
   await expectBodyIncludes("/", 200, "Why candidates choose StudentHub");
   await expectBodyIncludes("/", 200, "Get started");
   await expectStatus("/login", 200);
-  await expectBodyIncludes("/login", 200, "One StudentHub login");
+  await expectBodyIncludes("/login", 200, "Continue to StudentHub");
   // App Router redirect() renders 200 with meta-refresh, not 307
   await expectStatus("/login/admin", 200);
   await expectStatus("/login/candidate", 200);
