@@ -28,7 +28,7 @@ const testimonials: Testimonial[] = [
     role: "HR Director",
     company: "Alshaya Group",
     quote:
-      "We've hired 12 students through StudentHub this year. The AI matching saves us hours of screening, and the compliance handling means we never miss a step.",
+      "We've hired 12 students through StudentHub this year. The staff matching saves us hours of screening, and the compliance handling means we never miss a step.",
     persona: "company",
     rating: 5,
   },

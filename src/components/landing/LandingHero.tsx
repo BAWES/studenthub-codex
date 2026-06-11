@@ -313,7 +313,7 @@ export default function LandingHero({ onCtaClick }: LandingHeroProps) {
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "var(--sh-coral)" }}>
                     <Sparkles className="size-2.5 inline-block -mt-0.5 mr-1" />
-                    AI-matched for you
+                    Staff-matched for you
                   </span>
                   <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium" style={{ backgroundColor: "color-mix(in srgb, var(--success) 12%, transparent)", color: "var(--success)" }}>
                     <CheckCircle2 className="size-2.5 inline-block -mt-0.5 mr-0.5" />

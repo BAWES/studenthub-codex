@@ -18,14 +18,14 @@ const categories: Record<Category, { label: string; rows: ComparisonRow[] }> = {
     rows: [
       { feature: "Free student profile", studentHub: true, traditional: false },
       { feature: "Visible to 500+ employers", studentHub: true, traditional: false },
-      { feature: "AI skill recommendations", studentHub: true, traditional: "Manual only" },
-      { feature: "One-click applications", studentHub: true, traditional: false },
+      { feature: "Staff skill matching", studentHub: true, traditional: "Manual only" },
+      { feature: "One-click apply with staff support", studentHub: true, traditional: false },
     ],
   },
   matching: {
     label: "Matching",
     rows: [
-      { feature: "AI-powered matching", studentHub: true, traditional: false },
+      { feature: "Recruiter-powered matching", studentHub: true, traditional: false },
       { feature: "Real-time role alerts", studentHub: true, traditional: false },
       { feature: "Employer discovery", studentHub: true, traditional: "Apply only" },
       { feature: "Profile completeness score", studentHub: true, traditional: false },
