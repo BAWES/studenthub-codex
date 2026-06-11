@@ -8,14 +8,14 @@ const benefits = [
   {
     icon: Users,
     title: "Access vetted students",
-    description: "Every candidate on StudentHub is verified and actively seeking placement. Skip the screening — start interviewing pre-qualified talent.",
+    description: "Every student on StudentHub is verified and actively seeking placement. Skip the screening — start interviewing pre-qualified talent.",
     color: "var(--sh-coral)",
   },
   {
     icon: Zap,
-    title: "AI-powered matching",
-    description: "Our smart engine recommends the best candidates based on your requirements. No manual searching through hundreds of profiles.",
-    color: "#2563eb",
+    title: "Staff-powered matching",
+    description: "Our recruitment team finds the best students based on your requirements. No manual searching through hundreds of profiles.",
+    color: "var(--sh-coral)",
   },
   {
     icon: Shield,
@@ -39,7 +39,7 @@ const benefits = [
     icon: ArrowRight,
     title: "Zero agency fees",
     description: "Post jobs and hire directly through the platform. No recruitment agency markups — pay only the agreed hourly or fixed rate.",
-    color: "#2563eb",
+    color: "var(--sh-coral)",
   },
 ];
 

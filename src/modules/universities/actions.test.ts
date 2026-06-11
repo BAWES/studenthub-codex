@@ -1,5 +1,10 @@
 import { describe, it, expect } from "vitest";
 import { z } from "zod";
+import {
+  universityItemSchema,
+  listUniversitiesResultSchema,
+  createUniversityResultSchema,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Pure logic: university schema validation
@@ -117,5 +122,122 @@ describe("createUniversity schema", () => {
     if (result.success) {
       expect(result.data.name).toBe("جامعة الكويت");
     }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output schema shape validation (using schemas.ts)
+// ---------------------------------------------------------------------------
+
+describe("universityItemSchema", () => {
+  it("accepts a valid university item", () => {
+    const result = universityItemSchema.safeParse({
+      university_id: 1,
+      university_name_en: "Kuwait University",
+      university_name_ar: "جامعة الكويت",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts nullable name fields", () => {
+    const result = universityItemSchema.safeParse({
+      university_id: 2,
+      university_name_en: null,
+      university_name_ar: null,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects missing required fields", () => {
+    const result = universityItemSchema.safeParse({
+      university_id: 1,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects wrong types", () => {
+    const result = universityItemSchema.safeParse({
+      university_id: "abc",
+      university_name_en: "Test",
+      university_name_ar: null,
+    });
+    expect(result.success).toBe(false);
+  });
+});
+
+describe("listUniversitiesResultSchema", () => {
+  it("accepts empty university list", () => {
+    const result = listUniversitiesResultSchema.safeParse({
+      universities: [],
+      total: 0,
+      page: 1,
+      limit: 200,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts populated university list", () => {
+    const result = listUniversitiesResultSchema.safeParse({
+      universities: [
+        {
+          university_id: 1,
+          university_name_en: "Kuwait University",
+          university_name_ar: "جامعة الكويت",
+        },
+      ],
+      total: 1,
+      page: 1,
+      limit: 200,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects negative total", () => {
+    const result = listUniversitiesResultSchema.safeParse({
+      universities: [],
+      total: -1,
+      page: 1,
+      limit: 200,
+    });
+    expect(result.success).toBe(false);
+  });
+});
+
+describe("createUniversityResultSchema", () => {
+  it("accepts a success result", () => {
+    const result = createUniversityResultSchema.safeParse({
+      operation: "success",
+      message: "University created successfully",
+      university: {
+        university_id: 1,
+        university_name_en: "Kuwait University",
+        university_name_ar: null,
+      },
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts an error result", () => {
+    const result = createUniversityResultSchema.safeParse({
+      operation: "error",
+      message: "University already exists",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects missing university in success result", () => {
+    const result = createUniversityResultSchema.safeParse({
+      operation: "success",
+      message: "done",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects invalid operation value", () => {
+    const result = createUniversityResultSchema.safeParse({
+      operation: "invalid",
+      message: "test",
+    });
+    expect(result.success).toBe(false);
   });
 });

@@ -68,18 +68,7 @@ export default function LandingPage({ session }: LandingPageProps) {
   );
 
   return (
-    <div style={{ backgroundColor: "var(--paper)", minHeight: "100svh" }}>
-      {/* Decorative full-page grid pattern */}
-      <div
-        className="fixed inset-0 pointer-events-none opacity-[0.015] dark:opacity-[0.03]"
-        aria-hidden="true"
-        style={{
-          backgroundImage:
-            "radial-gradient(circle, currentColor 0.5px, transparent 0.5px)",
-          backgroundSize: "32px 32px",
-          color: "var(--ink)",
-        }}
-      />
+    <div style={{ minHeight: "100svh", backgroundColor: "var(--paper)" }}>
 
       <a href="#main-content" className="skipLink" style={{ color: "var(--ink)" }}>
         Skip to content
