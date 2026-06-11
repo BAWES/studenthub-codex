@@ -6,6 +6,8 @@ import { requireRoleCapability } from "@/modules/auth/session";
 import {
   listCandidatesSchema,
   getCandidateByIdSchema,
+  candidateListOutputSchema,
+  candidateDetailOutputSchema,
   type ListCandidatesInput,
   type GetCandidateByIdInput,
   type CandidateRow,
@@ -80,13 +82,24 @@ export async function listCandidates(
     createdAt: row.candidate_created_at.toISOString(),
   }));
 
-  return {
+  const result = {
     items,
     total,
     page,
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  // Validate output shape
+  const outputParsed = candidateListOutputSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[staff/candidates] listCandidates output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -125,9 +138,19 @@ export async function getCandidateById(
     },
   });
 
-  if (!row) return null;
+  if (!row) {
+    const nullResult = null;
+    const nullParsed = candidateDetailOutputSchema.safeParse(nullResult);
+    if (!nullParsed.success) {
+      console.error(
+        "[staff/candidates] getCandidateById output validation failed (null):",
+        nullParsed.error.issues,
+      );
+    }
+    return nullResult;
+  }
 
-  return {
+  const result = {
     id: row.candidate_id,
     name: row.candidate_name,
     nameAr: row.candidate_name_ar,
@@ -139,4 +162,15 @@ export async function getCandidateById(
     createdAt: row.candidate_created_at.toISOString(),
     updatedAt: row.candidate_updated_at.toISOString(),
   };
+
+  // Validate output shape
+  const outputParsed = candidateDetailOutputSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[staff/candidates] getCandidateById output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
