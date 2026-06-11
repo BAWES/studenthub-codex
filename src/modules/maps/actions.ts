@@ -3,56 +3,16 @@
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
-
-// ---------------------------------------------------------------------------
-// Schemas
-// ---------------------------------------------------------------------------
-
-const geocodeSchema = z.object({
-  query: z.string().min(1, "Search query is required"),
-  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
-  type: z.enum(["country", "area"]).optional().default("area"),
-});
-
-const reverseGeocodeSchema = z.object({
-  latitude: z.coerce
-    .number()
-    .min(-90, "Latitude must be between -90 and 90")
-    .max(90, "Latitude must be between -90 and 90"),
-  longitude: z.coerce
-    .number()
-    .min(-180, "Longitude must be between -180 and 180")
-    .max(180, "Longitude must be between -180 and 180"),
-  radius: z.coerce.number().int().positive().optional().default(10),
-  limit: z.coerce.number().int().min(1).max(100).optional().default(10),
-});
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export type GeocodeResult = {
-  uuid: string;
-  name: string;
-  nameAr: string | null;
-  type: "country" | "area";
-  countryId: number | null;
-  latitude: number | null;
-  longitude: number | null;
-  iso: string | null;
-  emoji: string | null;
-};
-
-export type ReverseGeocodeResult = {
-  uuid: string;
-  name: string;
-  nameAr: string | null;
-  type: "area";
-  countryName: string | null;
-  latitude: number;
-  longitude: number;
-  distance: number;
-};
+import {
+  geocodeSchema,
+  reverseGeocodeSchema,
+  geocodeResultSchema,
+  reverseGeocodeResultSchema,
+  type GeocodeParams,
+  type ReverseGeocodeParams,
+  type GeocodeResult,
+  type ReverseGeocodeResult,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -122,7 +82,7 @@ function toGeocodeResult(
  * Mirrors legacy Yii2 GoogleMapController::actionGeocode().
  */
 export async function geocode(
-  params: FormData | z.input<typeof geocodeSchema>,
+  params: FormData | GeocodeParams,
 ): Promise<GeocodeResult[]> {
   await requireCapability("candidate.search");
 
@@ -155,7 +115,18 @@ export async function geocode(
       orderBy: { country_name_en: "asc" },
     });
 
-    return countries.map((c) => toGeocodeResult(c, "country"));
+    const result = countries.map((c) => toGeocodeResult(c, "country"));
+
+    // Output validation — log mismatches without throwing
+    const outputParsed = geocodeResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/maps] geocode output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
   }
 
   // Search areas
@@ -170,7 +141,18 @@ export async function geocode(
     orderBy: { area_name_en: "asc" },
   });
 
-  return areas.map((a) => toGeocodeResult(a, "area"));
+  const result = areas.map((a) => toGeocodeResult(a, "area"));
+
+  // Output validation — log mismatches without throwing
+  const outputParsed = geocodeResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/maps] geocode output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -183,7 +165,7 @@ export async function geocode(
  * Mirrors legacy Yii2 GoogleMapController::actionReverseGeocode().
  */
 export async function reverseGeocode(
-  params: FormData | z.input<typeof reverseGeocodeSchema>,
+  params: FormData | ReverseGeocodeParams,
 ): Promise<ReverseGeocodeResult[]> {
   await requireCapability("candidate.search");
 
@@ -242,5 +224,16 @@ export async function reverseGeocode(
   }
 
   // Sort by distance ascending, limit results
-  return nearby.sort((a, b) => a.distance - b.distance).slice(0, limit);
+  const result = nearby.sort((a, b) => a.distance - b.distance).slice(0, limit);
+
+  // Output validation — log mismatches without throwing
+  const outputParsed = reverseGeocodeResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/maps] reverseGeocode output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
