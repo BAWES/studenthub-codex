@@ -4,6 +4,12 @@ import crypto from "node:crypto";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
+import {
+  tagItemSchema,
+  listTagsResultSchema,
+  type TagItem,
+  type ListTagsResult,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Schemas
@@ -33,7 +39,7 @@ const deleteTagSchema = z.object({
 });
 
 // ---------------------------------------------------------------------------
-// Types
+// Types (input params)
 // ---------------------------------------------------------------------------
 
 export type ListTagsParams = z.input<typeof listTagsSchema>;
@@ -41,21 +47,6 @@ export type GetTagParams = z.input<typeof getTagSchema>;
 export type CreateTagParams = z.input<typeof createTagSchema>;
 export type UpdateTagParams = z.input<typeof updateTagSchema>;
 export type DeleteTagParams = z.input<typeof deleteTagSchema>;
-
-export type TagItem = {
-  tag_id: number;
-  tag: string;
-  created_at: Date | null;
-  updated_at: Date | null;
-};
-
-export type ListTagsResult = {
-  tags: TagItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
 
 // ---------------------------------------------------------------------------
 // listTags
@@ -114,13 +105,24 @@ export async function listTags(
     prisma.tag.count({ where: where as any }),
   ]);
 
-  return {
+  const result = {
     tags: tags as TagItem[],
     total,
     page,
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  // Validate output shape
+  const outputParsed = listTagsResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/tags] listTags output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -157,7 +159,18 @@ export async function getTag(params: GetTagParams): Promise<TagItem> {
     throw new Error(`Tag with ID ${tagId} not found`);
   }
 
-  return tag as TagItem;
+  const result = tag as TagItem;
+
+  // Validate output shape
+  const outputParsed = tagItemSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/tags] getTag output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -196,7 +209,18 @@ export async function createTag(params: CreateTagParams): Promise<TagItem> {
     },
   });
 
-  return tag as TagItem;
+  const result = tag as TagItem;
+
+  // Validate output shape
+  const outputParsed = tagItemSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/tags] createTag output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -243,7 +267,18 @@ export async function updateTag(params: UpdateTagParams): Promise<TagItem> {
     },
   });
 
-  return updated as TagItem;
+  const result = updated as TagItem;
+
+  // Validate output shape
+  const outputParsed = tagItemSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/tags] updateTag output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------

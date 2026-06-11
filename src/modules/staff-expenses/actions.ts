@@ -4,6 +4,14 @@ import crypto from "node:crypto";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
+import {
+  staffExpenseItemSchema,
+  listExpensesResultSchema,
+  expenseActionResultSchema,
+  type StaffExpenseItem,
+  type ListExpensesResult,
+  type ExpenseActionResult,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Schemas
@@ -46,44 +54,15 @@ const updateExpenseSchema = z.object({
 });
 
 // ---------------------------------------------------------------------------
-// Types
+// Types (input params)
 // ---------------------------------------------------------------------------
 
 export type ListExpensesParams = z.input<typeof listExpensesSchema>;
 export type CreateExpenseParams = z.input<typeof createExpenseSchema>;
 export type UpdateExpenseParams = z.input<typeof updateExpenseSchema>;
 
-export type StaffExpenseItem = {
-  staff_expense_uuid: string;
-  supplier: string | null;
-  category: number | null;
-  purchase_date: Date | null;
-  total_amount: number | null;
-  currency: number | null;
-  vat: number | null;
-  reimbursable: boolean;
-  description: string | null;
-  file: string | null;
-  staff_id: number | null;
-  created_at: Date | null;
-  updated_at: Date | null;
-};
-
-export type ListExpensesResult = {
-  expenses: StaffExpenseItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
-
-export type ExpenseActionResult = {
-  operation: "success" | "error";
-  message: string;
-};
-
 // ---------------------------------------------------------------------------
-// Exported schemas
+// Exported schemas (for shared validation in tests)
 // ---------------------------------------------------------------------------
 
 export {
@@ -136,7 +115,7 @@ export async function listExpenses(
     prisma.staff_expenses.count({ where: where as any }),
   ]);
 
-  return {
+  const result = {
     expenses: expenses.map((e) => ({
       staff_expense_uuid: e.staff_expense_uuid,
       supplier: e.supplier,
@@ -157,6 +136,17 @@ export async function listExpenses(
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  // Validate output shape
+  const outputParsed = listExpensesResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/staff-expenses] listExpenses output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -186,7 +176,7 @@ export async function getExpense(
 
   if (!expense) return null;
 
-  return {
+  const result = {
     staff_expense_uuid: expense.staff_expense_uuid,
     supplier: expense.supplier,
     category: expense.category,
@@ -201,6 +191,17 @@ export async function getExpense(
     created_at: expense.created_at,
     updated_at: expense.updated_at,
   };
+
+  // Validate output shape
+  const outputParsed = staffExpenseItemSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/staff-expenses] getExpense output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
