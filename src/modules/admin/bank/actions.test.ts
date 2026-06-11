@@ -3,10 +3,8 @@ import {
   listBanksSchema,
   createBankSchema,
 } from "./actions";
-import type {
-  BankItem,
-  ListBanksResult,
-} from "./actions";
+import { bankItemSchema, listBanksResultSchema } from "./schemas";
+import type { BankItem, ListBanksResult } from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Schema tests — listBanks

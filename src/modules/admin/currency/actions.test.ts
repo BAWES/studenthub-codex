@@ -1,5 +1,10 @@
 import { describe, it, expect } from "vitest";
 import { z } from "zod";
+import {
+  currencyItemSchema,
+  listCurrenciesResultSchema,
+  createCurrencyResultSchema,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // listCurrencies schema validation
@@ -298,5 +303,99 @@ describe("ListCurrenciesResult shape", () => {
     };
     expect(result.currencies).toHaveLength(1);
     expect(result.totalPages).toBe(1);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output schema tests
+// ---------------------------------------------------------------------------
+
+describe("currencyItemSchema", () => {
+  it("parses a valid currency item", () => {
+    const r = currencyItemSchema.safeParse({
+      currency_id: 1,
+      title: "Kuwaiti Dinar",
+      code: "KWD",
+      currency_symbol: "KD",
+      rate: 0.31,
+      decimal_place: true,
+      sort_order: 1,
+      status: true,
+      datetime: new Date(),
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts null nullable fields", () => {
+    const r = currencyItemSchema.safeParse({
+      currency_id: 2,
+      title: "US Dollar",
+      code: "USD",
+      currency_symbol: null,
+      rate: null,
+      decimal_place: null,
+      sort_order: null,
+      status: null,
+      datetime: null,
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects missing title", () => {
+    const r = currencyItemSchema.safeParse({
+      currency_id: 1,
+      code: "USD",
+    });
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects non-integer currency_id", () => {
+    const r = currencyItemSchema.safeParse({
+      currency_id: 1.5,
+      title: "Test",
+      code: "TST",
+    });
+    expect(r.success).toBe(false);
+  });
+});
+
+describe("listCurrenciesResultSchema", () => {
+  it("parses a valid paginated result", () => {
+    const r = listCurrenciesResultSchema.safeParse({
+      currencies: [],
+      total: 0,
+      page: 1,
+      limit: 20,
+      totalPages: 0,
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects negative total", () => {
+    const r = listCurrenciesResultSchema.safeParse({
+      currencies: [],
+      total: -1,
+      page: 1,
+      limit: 20,
+      totalPages: 0,
+    });
+    expect(r.success).toBe(false);
+  });
+});
+
+describe("createCurrencyResultSchema", () => {
+  it("parses a valid result", () => {
+    const r = createCurrencyResultSchema.safeParse({ currency_id: 1 });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects zero currency_id", () => {
+    const r = createCurrencyResultSchema.safeParse({ currency_id: 0 });
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects missing currency_id", () => {
+    const r = createCurrencyResultSchema.safeParse({});
+    expect(r.success).toBe(false);
   });
 });

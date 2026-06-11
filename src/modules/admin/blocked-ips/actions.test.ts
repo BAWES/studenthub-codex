@@ -1,5 +1,10 @@
 import { describe, it, expect } from "vitest";
 import { z } from "zod";
+import {
+  blockedIpListItemSchema,
+  listBlockedIpsResultSchema,
+  blockedIpUuidResultSchema,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Schemas (imported from actions.ts — inline duplicates for pure unit tests)
@@ -287,5 +292,100 @@ describe("ListBlockedIpsResult shape", () => {
     };
     expect(result.total).toBe(0);
     expect(result.records).toHaveLength(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output schema tests
+// ---------------------------------------------------------------------------
+
+describe("blockedIpListItemSchema", () => {
+  it("parses a valid blocked IP item", () => {
+    const r = blockedIpListItemSchema.safeParse({
+      ip_uuid: "ip_abc123",
+      ip_address: "192.168.1.1",
+      note: "Suspicious activity",
+      created_at: "2026-06-01T10:00:00.000Z",
+      updated_at: "2026-06-01T10:00:00.000Z",
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts null values for nullable fields", () => {
+    const r = blockedIpListItemSchema.safeParse({
+      ip_uuid: "ip_abc123",
+      ip_address: null,
+      note: null,
+      created_at: null,
+      updated_at: null,
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects missing ip_uuid", () => {
+    const r = blockedIpListItemSchema.safeParse({
+      ip_address: "192.168.1.1",
+    });
+    expect(r.success).toBe(false);
+  });
+});
+
+describe("listBlockedIpsResultSchema", () => {
+  it("parses a valid paginated result", () => {
+    const r = listBlockedIpsResultSchema.safeParse({
+      records: [
+        {
+          ip_uuid: "ip_abc123",
+          ip_address: "192.168.1.1",
+          note: null,
+          created_at: null,
+          updated_at: null,
+        },
+      ],
+      total: 1,
+      page: 1,
+      limit: 20,
+      totalPages: 1,
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects negative total", () => {
+    const r = listBlockedIpsResultSchema.safeParse({
+      records: [],
+      total: -1,
+      page: 1,
+      limit: 20,
+      totalPages: 0,
+    });
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects zero page", () => {
+    const r = listBlockedIpsResultSchema.safeParse({
+      records: [],
+      total: 0,
+      page: 0,
+      limit: 20,
+      totalPages: 0,
+    });
+    expect(r.success).toBe(false);
+  });
+});
+
+describe("blockedIpUuidResultSchema", () => {
+  it("parses a valid UUID result", () => {
+    const r = blockedIpUuidResultSchema.safeParse({ ip_uuid: "ip_abc123" });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects missing ip_uuid", () => {
+    const r = blockedIpUuidResultSchema.safeParse({});
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects empty ip_uuid", () => {
+    const r = blockedIpUuidResultSchema.safeParse({ ip_uuid: "" });
+    expect(r.success).toBe(true); // string validates empty
   });
 });

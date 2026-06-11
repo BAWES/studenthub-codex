@@ -1,5 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { z } from "zod";
+import {
+  jiraIssueSchema,
+  listJiraIssuesResultSchema,
+  jiraUserSchema,
+  listJiraUsersResultSchema,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Schema definitions (mirroring actions.ts for test isolation)
@@ -383,5 +389,135 @@ describe("Jira user filtering", () => {
       { active: false },
     ]);
     expect(result).toHaveLength(2); // active atlassian + active no accountType
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output schema tests
+// ---------------------------------------------------------------------------
+
+describe("jiraIssueSchema", () => {
+  it("parses a valid Jira issue", () => {
+    const r = jiraIssueSchema.safeParse({
+      id: "10001",
+      key: "PROJ-42",
+      summary: "Fix login bug",
+      status: "In Progress",
+      assignee: {
+        displayName: "John Doe",
+        emailAddress: "john@example.com",
+      },
+      created: "2026-01-15T10:00:00Z",
+      updated: "2026-02-20T14:30:00Z",
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("allows null assignee", () => {
+    const r = jiraIssueSchema.safeParse({
+      id: "10002",
+      key: "PROJ-43",
+      summary: null,
+      status: null,
+      assignee: null,
+      created: null,
+      updated: null,
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects missing id", () => {
+    const r = jiraIssueSchema.safeParse({ key: "PROJ-42" });
+    expect(r.success).toBe(false);
+  });
+});
+
+describe("listJiraIssuesResultSchema", () => {
+  it("parses a valid result with issues", () => {
+    const r = listJiraIssuesResultSchema.safeParse({
+      issues: [
+        {
+          id: "1",
+          key: "KEY-1",
+          summary: "Test",
+          status: "Open",
+          assignee: null,
+          created: null,
+          updated: null,
+        },
+      ],
+      total: 1,
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("parses an empty result", () => {
+    const r = listJiraIssuesResultSchema.safeParse({
+      issues: [],
+      total: 0,
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects negative total", () => {
+    const r = listJiraIssuesResultSchema.safeParse({
+      issues: [],
+      total: -1,
+    });
+    expect(r.success).toBe(false);
+  });
+});
+
+describe("jiraUserSchema", () => {
+  it("parses a valid Jira user", () => {
+    const r = jiraUserSchema.safeParse({
+      displayName: "Alice Smith",
+      emailAddress: "alice@example.com",
+      accountId: "abc123def456",
+      active: true,
+      avatarUrls: { "48x48": "https://avatar.example.com/48" },
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("allows null avatarUrls", () => {
+    const r = jiraUserSchema.safeParse({
+      displayName: "Bob",
+      emailAddress: null,
+      accountId: "xyz789",
+      active: false,
+      avatarUrls: null,
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects missing displayName", () => {
+    const r = jiraUserSchema.safeParse({
+      accountId: "abc123",
+      active: true,
+    });
+    expect(r.success).toBe(false);
+  });
+});
+
+describe("listJiraUsersResultSchema", () => {
+  it("parses a valid user list", () => {
+    const r = listJiraUsersResultSchema.safeParse({
+      users: [
+        {
+          displayName: "User 1",
+          emailAddress: "u1@example.com",
+          accountId: "id1",
+          active: true,
+          avatarUrls: null,
+        },
+      ],
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("parses an empty user list", () => {
+    const r = listJiraUsersResultSchema.safeParse({ users: [] });
+    expect(r.success).toBe(true);
   });
 });
