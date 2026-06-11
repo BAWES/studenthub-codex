@@ -1,50 +1,31 @@
 "use server";
 
-import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
+import {
+  listDepartmentsSchema,
+  getDepartmentSchema,
+  departmentItemSchema,
+  listDepartmentsResultSchema,
+} from "./schemas";
+import type {
+  ListDepartmentsParams,
+  GetDepartmentParams,
+  DepartmentItem,
+  ListDepartmentsResult,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
-// Schemas
-// ---------------------------------------------------------------------------
-
-const listDepartmentsSchema = z.object({
-  page: z.coerce.number().int().positive().optional().default(1),
-  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
-  nameFilter: z.string().optional(),
-});
-
-const getDepartmentSchema = z.object({
-  uuid: z.string().min(1, "Department UUID is required"),
-});
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export type ListDepartmentsParams = z.input<typeof listDepartmentsSchema>;
-
-export type GetDepartmentParams = z.input<typeof getDepartmentSchema>;
-
-export type DepartmentItem = {
-  department_uuid: string;
-  department_name_en: string;
-  department_name_ar: string | null;
-};
-
-export type ListDepartmentsResult = {
-  departments: DepartmentItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
-
-// ---------------------------------------------------------------------------
-// Exported schemas (for shared validation)
+// Re-exports for backward compatibility
 // ---------------------------------------------------------------------------
 
 export { listDepartmentsSchema, getDepartmentSchema };
+export type {
+  ListDepartmentsParams,
+  GetDepartmentParams,
+  DepartmentItem,
+  ListDepartmentsResult,
+};
 
 // ---------------------------------------------------------------------------
 // listDepartments
@@ -89,7 +70,7 @@ export async function listDepartments(
     prisma.department.count({ where: where as any }),
   ]);
 
-  return {
+  const result = {
     departments: departments.map((d) => ({
       department_uuid: d.department_uuid,
       department_name_en: d.department_name_en,
@@ -100,6 +81,17 @@ export async function listDepartments(
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  // Output validation — log issues without throwing
+  const outputParsed = listDepartmentsResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/departments] listDepartments output failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -128,9 +120,20 @@ export async function getDepartment(
 
   if (!department) return null;
 
-  return {
+  const result = {
     department_uuid: department.department_uuid,
     department_name_en: department.department_name_en,
     department_name_ar: department.department_name_ar,
   };
+
+  // Output validation — log issues without throwing
+  const outputParsed = departmentItemSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/departments] getDepartment output failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }

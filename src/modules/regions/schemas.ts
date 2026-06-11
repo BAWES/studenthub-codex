@@ -25,7 +25,7 @@ export type GetAreaInput = z.input<typeof getAreaSchema>;
 
 export const areaItemSchema = z.object({
   area_uuid: z.string(),
-  country_id: z.number(),
+  country_id: z.number().int(),
   area_name_en: z.string(),
   area_name_ar: z.string().nullable(),
   area_latitude: z.number().nullable(),
@@ -34,10 +34,10 @@ export const areaItemSchema = z.object({
 
 export const listAreasResultSchema = z.object({
   areas: z.array(areaItemSchema),
-  total: z.number(),
-  page: z.number(),
+  total: z.number().int().nonnegative(),
+  page: z.number().int().positive(),
   limit: z.number(),
-  totalPages: z.number(),
+  totalPages: z.number().int().nonnegative(),
 });
 
 // Output types
