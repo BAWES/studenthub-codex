@@ -125,7 +125,7 @@ async function searchTypesense({
         max_facet_values: 25,
         sort_by: "candidate_updated_at:desc",
         per_page: 60,
-        page: 1,
+        page: params.page ?? 1,
       },
       {},
     );
