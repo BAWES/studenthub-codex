@@ -11,11 +11,15 @@ import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
 import { formatDate } from "@/modules/workspace/format";
 import { getNotificationTypeLabel } from "./utils";
+import { z } from "zod";
 import {
   getCandidateNotificationRowsSchema,
   getCandidateNotificationDetailSchema,
   dismissNotificationSchema,
   updateNotificationSchema,
+  notificationRowSchema,
+  notificationDetailSchema,
+  notificationActionResultSchema,
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
@@ -78,7 +82,7 @@ export async function getCandidateNotificationRows(
     },
   });
 
-  return rows.map((row) => ({
+  const result = rows.map((row) => ({
     id: row.cn_uuid,
     type: getNotificationTypeLabel(row.type),
     typeCode: row.type,
@@ -86,6 +90,14 @@ export async function getCandidateNotificationRows(
     isNew: row.is_new ? "Unread" : "Read",
     created: formatDate(row.created_at),
   }));
+
+  const outputParsed = z.array(notificationRowSchema).safeParse(result);
+  if (!outputParsed.success) {
+    throw new Error(
+      `Output validation failed for notification rows: ${outputParsed.error.message}`,
+    );
+  }
+  return outputParsed.data;
 }
 
 /**
@@ -117,10 +129,18 @@ export async function getCandidateNotificationDetail(
     },
   });
 
-  return {
+  const result = {
     notification,
     typeLabel: notification ? getNotificationTypeLabel(notification.type) : "",
   };
+
+  const outputParsed = notificationDetailSchema.safeParse(result);
+  if (!outputParsed.success) {
+    throw new Error(
+      `Output validation failed for notification detail: ${outputParsed.error.message}`,
+    );
+  }
+  return outputParsed.data;
 }
 
 /**
@@ -156,7 +176,13 @@ export async function dismissNotification(
       where: { cn_uuid: parsed.data.notificationUuid },
     });
 
-    return { success: true };
+    const outputParsed = notificationActionResultSchema.safeParse({ success: true });
+    if (!outputParsed.success) {
+      throw new Error(
+        `Output validation failed for dismissNotification: ${outputParsed.error.message}`,
+      );
+    }
+    return outputParsed.data;
   } catch (e) {
     return {
       success: false,
@@ -208,7 +234,13 @@ export async function updateNotification(
       },
     });
 
-    return { success: true };
+    const outputParsed = notificationActionResultSchema.safeParse({ success: true });
+    if (!outputParsed.success) {
+      throw new Error(
+        `Output validation failed for updateNotification: ${outputParsed.error.message}`,
+      );
+    }
+    return outputParsed.data;
   } catch (e) {
     return {
       success: false,
