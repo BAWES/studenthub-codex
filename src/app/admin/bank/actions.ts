@@ -26,6 +26,10 @@ import {
   createBankSchema,
   updateBankSchema,
   deleteBankSchema,
+  bankRowOutputSchema,
+  listBanksOutputSchema,
+  bankDetailOutputSchema,
+  bankMutationOutputSchema,
   type ListBanksInput,
   type GetBankInput,
   type CreateBankInput,
@@ -86,7 +90,7 @@ export async function listBanks(
     prisma.bank.count({ where: where as any }),
   ]);
 
-  return {
+  const result = {
     items: banks.map((b): BankRow => ({
       bank_id: b.bank_id,
       bank_name: b.bank_name,
@@ -103,6 +107,17 @@ export async function listBanks(
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  // Validate output shape
+  const outputParsed = listBanksOutputSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[admin/bank] listBanks output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -133,7 +148,7 @@ export async function getBank(
     return { bank: null as any, candidate_count: 0 };
   }
 
-  return {
+  const result = {
     bank: {
       bank_id: bank.bank_id,
       bank_name: bank.bank_name,
@@ -145,6 +160,17 @@ export async function getBank(
     },
     candidate_count: bank._count?.candidate ?? 0,
   };
+
+  // Validate output shape
+  const outputParsed = bankDetailOutputSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[admin/bank] getBank output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -181,8 +207,8 @@ export async function createBank(
 
     revalidatePath("/admin/bank");
 
-    return {
-      operation: "success",
+    const result = {
+      operation: "success" as const,
       message: `Bank "${bank.bank_name ?? bank.bank_iban_code}" created`,
       data: {
         bank_id: bank.bank_id,
@@ -194,6 +220,17 @@ export async function createBank(
         bank_transfer_type: bank.bank_transfer_type,
       },
     };
+
+    // Validate output shape
+    const outputParsed = bankMutationOutputSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[admin/bank] createBank output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
   } catch (err) {
     return {
       operation: "error",
@@ -248,8 +285,8 @@ export async function updateBank(
     revalidatePath("/admin/bank");
     revalidatePath(`/admin/bank/${parsed.data.bankId}`);
 
-    return {
-      operation: "success",
+    const result = {
+      operation: "success" as const,
       message: `Bank "${bank.bank_name ?? bank.bank_iban_code}" updated`,
       data: {
         bank_id: bank.bank_id,
@@ -261,6 +298,17 @@ export async function updateBank(
         bank_transfer_type: bank.bank_transfer_type,
       },
     };
+
+    // Validate output shape
+    const outputParsed = bankMutationOutputSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[admin/bank] updateBank output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
   } catch (err) {
     return {
       operation: "error",
@@ -315,7 +363,18 @@ export async function deleteBank(
 
     revalidatePath("/admin/bank");
 
-    return { operation: "success", message: "Bank deleted successfully" };
+    const result = { operation: "success" as const, message: "Bank deleted successfully" };
+
+    // Validate output shape
+    const outputParsed = bankMutationOutputSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[admin/bank] deleteBank output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
   } catch (err) {
     return {
       operation: "error",
