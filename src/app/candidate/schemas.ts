@@ -14,7 +14,7 @@ export const getCandidateProfileSchema = z.object({
 
 export const candidateProfileMetricSchema = z.object({
   label: z.string(),
-  value: z.string(),
+  value: z.union([z.string(), z.number()]),
   note: z.string(),
 });
 
