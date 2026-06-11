@@ -756,22 +756,3 @@ export async function payByWallet(
     return catchResult2;
   }
 }
-
-// Re-export schemas and types for backward compatibility
-export {
-  listBalancesSchema,
-  getBalanceSchema,
-  initTransferAmountSchema,
-  payByWalletSchema,
-  listBalancesResultSchema,
-  getBalanceResultSchema,
-  initTransferStateSchema,
-  payByWalletStateSchema,
-  type ListBalancesParams,
-  type GetBalanceParams,
-  type BalanceTransaction,
-  type PayableAccount,
-  type ListBalancesResult,
-  type InitTransferState,
-  type PayByWalletState,
-} from "./schemas";

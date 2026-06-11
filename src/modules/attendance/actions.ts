@@ -237,19 +237,3 @@ export async function createAttendance(
 
   return createResult;
 }
-
-// Re-export schemas and types for backward compatibility
-export {
-  listAttendanceSchema,
-  getAttendanceSchema,
-  createAttendanceSchema,
-  listAttendanceResultSchema,
-  attendanceDetailSchema,
-  createAttendanceResultSchema,
-  type ListAttendanceParams,
-  type GetAttendanceParams,
-  type CreateAttendanceParams,
-  type AttendanceItem,
-  type AttendanceDetail,
-  type ListAttendanceResult,
-} from "./schemas";
