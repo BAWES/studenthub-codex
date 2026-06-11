@@ -3,20 +3,11 @@
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
-
-// ---------------------------------------------------------------------------
-// Schemas
-// ---------------------------------------------------------------------------
-
-const listDepartmentsSchema = z.object({
-  page: z.coerce.number().int().positive().optional().default(1),
-  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
-  nameFilter: z.string().optional(),
-});
-
-const getDepartmentSchema = z.object({
-  uuid: z.string().min(1, "Department UUID is required"),
-});
+import {
+  listDepartmentsSchema,
+  getDepartmentSchema,
+  listDepartmentsResultSchema,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -39,12 +30,6 @@ export type ListDepartmentsResult = {
   limit: number;
   totalPages: number;
 };
-
-// ---------------------------------------------------------------------------
-// Exported schemas (for shared validation)
-// ---------------------------------------------------------------------------
-
-export { listDepartmentsSchema, getDepartmentSchema };
 
 // ---------------------------------------------------------------------------
 // listDepartments
@@ -89,7 +74,7 @@ export async function listDepartments(
     prisma.department.count({ where: where as any }),
   ]);
 
-  return {
+  const result = {
     departments: departments.map((d) => ({
       department_uuid: d.department_uuid,
       department_name_en: d.department_name_en,
@@ -100,6 +85,16 @@ export async function listDepartments(
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  const outputParsed = listDepartmentsResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/departments] listDepartments output failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------

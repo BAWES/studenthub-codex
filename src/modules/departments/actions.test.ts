@@ -1,10 +1,15 @@
 import { describe, it, expect } from "vitest";
 
 // ---------------------------------------------------------------------------
-// Schemas imported from actions.ts for contract testing
+// Schemas imported from schemas.ts for contract testing
 // ---------------------------------------------------------------------------
 
-import { listDepartmentsSchema, getDepartmentSchema } from "./actions";
+import {
+  listDepartmentsSchema,
+  getDepartmentSchema,
+  departmentItemSchema,
+  listDepartmentsResultSchema,
+} from "./schemas";
 
 describe("listDepartmentsSchema", () => {
   it("accepts default values when no params provided", () => {
@@ -86,6 +91,146 @@ describe("getDepartmentSchema", () => {
 
   it("rejects missing UUID", () => {
     const result = getDepartmentSchema.safeParse({});
+    expect(result.success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output validation: departmentItemSchema
+// ---------------------------------------------------------------------------
+
+describe("departmentItemSchema", () => {
+  it("validates a full department item with Arabic name", () => {
+    const result = departmentItemSchema.safeParse({
+      department_uuid: "dept-123",
+      department_name_en: "Information Technology",
+      department_name_ar: "تقنية المعلومات",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("validates a department item with null Arabic name", () => {
+    const result = departmentItemSchema.safeParse({
+      department_uuid: "dept-456",
+      department_name_en: "Human Resources",
+      department_name_ar: null,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects missing department_uuid", () => {
+    const result = departmentItemSchema.safeParse({
+      department_name_en: "IT",
+      department_name_ar: null,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects non-string department_uuid", () => {
+    const result = departmentItemSchema.safeParse({
+      department_uuid: 123,
+      department_name_en: "IT",
+      department_name_ar: null,
+    });
+    expect(result.success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output validation: listDepartmentsResultSchema
+// ---------------------------------------------------------------------------
+
+describe("listDepartmentsResultSchema", () => {
+  it("validates a complete list result", () => {
+    const result = listDepartmentsResultSchema.safeParse({
+      departments: [
+        {
+          department_uuid: "dept-123",
+          department_name_en: "IT",
+          department_name_ar: null,
+        },
+      ],
+      total: 1,
+      page: 1,
+      limit: 20,
+      totalPages: 1,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("validates an empty department list", () => {
+    const result = listDepartmentsResultSchema.safeParse({
+      departments: [],
+      total: 0,
+      page: 1,
+      limit: 20,
+      totalPages: 0,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects negative total", () => {
+    const result = listDepartmentsResultSchema.safeParse({
+      departments: [],
+      total: -1,
+      page: 1,
+      limit: 20,
+      totalPages: 0,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects zero page", () => {
+    const result = listDepartmentsResultSchema.safeParse({
+      departments: [],
+      total: 0,
+      page: 0,
+      limit: 20,
+      totalPages: 0,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects zero limit", () => {
+    const result = listDepartmentsResultSchema.safeParse({
+      departments: [],
+      total: 0,
+      page: 1,
+      limit: 0,
+      totalPages: 0,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects negative totalPages", () => {
+    const result = listDepartmentsResultSchema.safeParse({
+      departments: [],
+      total: 0,
+      page: 1,
+      limit: 20,
+      totalPages: -1,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects missing departments array", () => {
+    const result = listDepartmentsResultSchema.safeParse({
+      total: 0,
+      page: 1,
+      limit: 20,
+      totalPages: 0,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects non-array departments", () => {
+    const result = listDepartmentsResultSchema.safeParse({
+      departments: "not-an-array",
+      total: 0,
+      page: 1,
+      limit: 20,
+      totalPages: 0,
+    });
     expect(result.success).toBe(false);
   });
 });
