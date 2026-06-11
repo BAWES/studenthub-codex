@@ -118,7 +118,7 @@ export default function LandingHero({ onCtaClick }: LandingHeroProps) {
             }}
           >
             <Sparkles className="size-3" />
-            Two-sided marketplace
+            Staff-driven matching
           </div>
         </RevealItem>
 
@@ -141,7 +141,7 @@ export default function LandingHero({ onCtaClick }: LandingHeroProps) {
             className="text-[clamp(14px,1.2vw,17px)] leading-relaxed max-w-[520px] mb-6"
             style={{ color: "var(--muted)" }}
           >
-            StudentHub is Kuwait&apos;s two-sided marketplace where students build careers
+            StudentHub is Kuwait&apos;s staff-driven placement platform where students build careers
             and employers discover vetted talent. Our staff recruiters match you with the
             right opportunities — all in one place.
           </p>
@@ -176,10 +176,10 @@ export default function LandingHero({ onCtaClick }: LandingHeroProps) {
             )}
             <Link
               href="/signup?role=company"
-              className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 group shadow-lg"
+              className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg text-sm font-semibold text-white transition-all duration-200 hover:brightness-110 hover:-translate-y-0.5 active:translate-y-0 group shadow-lg"
               style={{
-                background: "linear-gradient(135deg, var(--sh-amber), var(--sh-amber-deep))",
-                boxShadow: "var(--sh-amber-glow)",
+                backgroundColor: "var(--sh-coral)",
+                boxShadow: "var(--sh-coral-glow), 0 4px 14px color-mix(in srgb, var(--sh-coral) 30%, transparent)",
               }}
             >
               <Building2 className="size-4" />
@@ -240,7 +240,7 @@ export default function LandingHero({ onCtaClick }: LandingHeroProps) {
       >
         <RevealItem delay={400}>
           <div
-            className="relative rounded-2xl overflow-hidden backdrop-blur-xl"
+            className="relative rounded-2xl overflow-hidden"
             style={{
               backgroundColor: "color-mix(in srgb, var(--surface) 65%, transparent)",
               border: "1px solid color-mix(in srgb, var(--border) 50%, transparent)",
