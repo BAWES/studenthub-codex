@@ -4,7 +4,7 @@
 // Candidate Experience [experienceId] — server actions for the detail page
 // ---------------------------------------------------------------------------
 // Convenience wrappers that validate input and delegate to the parent
-// list-level actions with ownership checks.
+// list-level actions with ownership checks via the module-level layer.
 //
 // Actions:
 //   - getExperienceEntry      — fetch single experience entry by ID
@@ -13,7 +13,6 @@
 // ---------------------------------------------------------------------------
 
 import { revalidatePath } from "next/cache";
-import { prisma } from "@/lib/prisma";
 import { requireRoleCapability } from "@/modules/auth/session";
 import {
   getCandidateExperience as parentGetCandidateExperience,
@@ -59,8 +58,8 @@ export async function getExperienceEntry(
 
 /**
  * Update an experience entry.
- * Verifies ownership before updating. Delegates to parent
- * `updateCandidateExperience`.
+ * Delegates to parent `updateCandidateExperience` which handles
+ * ownership verification via the module-level layer.
  */
 export async function updateExperienceEntry(
   experienceId: number,
@@ -69,7 +68,7 @@ export async function updateExperienceEntry(
   startYear?: number,
   endYear?: number,
 ): Promise<ExperienceActionResult> {
-  const session = await requireRoleCapability("candidate", "candidate.profile.edit");
+  await requireRoleCapability("candidate", "candidate.profile.edit");
 
   const parsed = updateExperienceEntrySchema.safeParse({
     experienceId,
@@ -85,29 +84,7 @@ export async function updateExperienceEntry(
     };
   }
 
-  // Verify the entry exists and belongs to the candidate before mutating
-  const existing = await prisma.candidate_experience.findFirst({
-    where: {
-      candidate_experience_id: parsed.data.experienceId,
-      candidate_id: Number(session.id),
-      deleted: 0,
-    },
-    select: { candidate_experience_id: true },
-  });
-
-  if (!existing) {
-    return { success: false, error: "Experience entry not found or access denied" };
-  }
-
-  // Validate date range
-  if (
-    parsed.data.startYear !== undefined &&
-    parsed.data.endYear !== undefined &&
-    parsed.data.endYear < parsed.data.startYear
-  ) {
-    return { success: false, error: "End year cannot be before start year" };
-  }
-
+  // Delegate to the parent action (owns ownership verification via module-level)
   const result = await parentUpdateCandidateExperience({
     experienceId: parsed.data.experienceId,
     experience: parsed.data.experience,
@@ -128,13 +105,14 @@ export async function updateExperienceEntry(
 
 /**
  * Delete an experience entry (soft-delete).
- * Only the owning candidate can delete their own experience entries.
+ * Delegates to parent `deleteCandidateExperience` which handles
+ * ownership verification via the module-level layer.
  * Returns `{ success: true, experienceId }` on success.
  */
 export async function deleteExperienceEntry(
   experienceId: number,
 ): Promise<ExperienceActionResult> {
-  const session = await requireRoleCapability("candidate", "candidate.profile.edit");
+  await requireRoleCapability("candidate", "candidate.profile.edit");
 
   const parsed = deleteExperienceEntrySchema.safeParse({ experienceId });
   if (!parsed.success) {
@@ -144,26 +122,10 @@ export async function deleteExperienceEntry(
     };
   }
 
-  // Verify ownership before deleting
-  const existing = await prisma.candidate_experience.findFirst({
-    where: {
-      candidate_experience_id: parsed.data.experienceId,
-      candidate_id: Number(session.id),
-      deleted: 0,
-    },
-    select: { candidate_experience_id: true },
-  });
-
-  if (!existing) {
-    return { success: false, error: "Experience entry not found or access denied" };
-  }
-
-  await prisma.candidate_experience.update({
-    where: { candidate_experience_id: parsed.data.experienceId },
-    data: { deleted: 1 },
-  });
+  // Delegate to the parent action (owns ownership verification via module-level)
+  const result = await parentDeleteCandidateExperience(parsed.data.experienceId);
 
   revalidatePath("/candidate/experience");
 
-  return { success: true, experienceId: parsed.data.experienceId };
+  return result;
 }

@@ -29,3 +29,17 @@ export type ListExperienceResult = z.output<typeof listExperienceResultSchema>;
 export const deleteExperienceResultSchema = z.object({
   success: z.boolean(),
 });
+
+/** Discriminated union for create/update/delete action results. */
+export const experienceActionResultSchema = z.discriminatedUnion("success", [
+  z.object({
+    success: z.literal(true),
+    experienceId: z.number().int().positive(),
+  }),
+  z.object({
+    success: z.literal(false),
+    error: z.string(),
+  }),
+]);
+
+export type ExperienceActionResult = z.output<typeof experienceActionResultSchema>;
