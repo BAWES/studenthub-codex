@@ -5,6 +5,8 @@ import { requireCapability } from "@/modules/auth/session";
 import {
   listBrandsSchema,
   getBrandSchema,
+  listBrandsResultSchema,
+  brandDetailSchema,
   type ListBrandsParams,
   type BrandListItem,
   type ListBrandsResult,
@@ -42,13 +44,24 @@ export async function listBrands(
     prisma.brand.count(),
   ]);
 
-  return {
+  const result = {
     brands: brands as BrandListItem[],
     total,
     page,
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  // Validate output shape
+  const outputParsed = listBrandsResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/brands] listBrands output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -78,5 +91,16 @@ export async function getBrand(
 
   if (!brand) return null;
 
-  return brand as BrandListItem;
+  const result = brand as BrandListItem;
+
+  // Validate output shape
+  const outputParsed = brandDetailSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/brands] getBrand output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
