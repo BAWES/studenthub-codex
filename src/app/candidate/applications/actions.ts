@@ -10,26 +10,16 @@ import { requireRoleCapability } from "@/modules/auth/session";
 import { z } from "zod";
 
 // ---------------------------------------------------------------------------
-// Types
+// Imports — output schemas from schemas.ts for runtime validation
 // ---------------------------------------------------------------------------
 
-export type ApplicationItem = {
-  applicationId: number;
-  jobListingId: number;
-  jobTitle: string;
-  employerName: string;
-  status: string;
-  coverLetter: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-};
-
-export type ListApplicationsResult = {
-  applications: ApplicationItem[];
-  total: number;
-  page: number;
-  limit: number;
-};
+import {
+  listApplicationsResultSchema,
+  withdrawApplicationResultSchema,
+  type ApplicationItem,
+  type ListApplicationsResult,
+  type WithdrawApplicationResult,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Schemas
@@ -84,7 +74,7 @@ export async function listMyApplications(
     prisma.job_listing_application.count({ where: where as any }),
   ]);
 
-  return {
+  const result = {
     applications: rows.map((r) => ({
       applicationId: (r as any).applicationId ?? (r as any).id,
       jobListingId: (r as any).jobListingId ?? (r as any).job_listing_id,
@@ -99,6 +89,17 @@ export async function listMyApplications(
     page,
     limit,
   };
+
+  // Validate output shape
+  const outputParsed = listApplicationsResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[candidate/applications] listMyApplications output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -110,7 +111,7 @@ export async function listMyApplications(
  */
 export async function withdrawApplication(
   applicationId: number,
-): Promise<{ success: boolean; error?: string }> {
+): Promise<WithdrawApplicationResult> {
   const session = await requireRoleCapability("candidate", "candidate.read.own");
   const candidateId = Number(session.id);
 
@@ -120,7 +121,15 @@ export async function withdrawApplication(
   });
 
   if (!application) {
-    return { success: false, error: "Application not found" };
+    const response = { success: false, error: "Application not found" as const };
+    const outputParsed = withdrawApplicationResultSchema.safeParse(response);
+    if (!outputParsed.success) {
+      console.error(
+        "[candidate/applications] withdrawApplication output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+    return response;
   }
 
   await prisma.job_listing_application.update({
@@ -131,5 +140,13 @@ export async function withdrawApplication(
   revalidatePath("/candidate/applications");
   revalidatePath("/candidate/jobs");
 
-  return { success: true };
+  const response = { success: true };
+  const outputParsed = withdrawApplicationResultSchema.safeParse(response);
+  if (!outputParsed.success) {
+    console.error(
+      "[candidate/applications] withdrawApplication output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+  return response;
 }
