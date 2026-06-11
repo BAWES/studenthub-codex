@@ -1,8 +1,13 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { prisma } from "@/lib/prisma";
 import { requireRoleCapability } from "@/modules/auth/session";
+import {
+  listExperience as moduleListExperience,
+  createExperience as moduleCreateExperience,
+  updateExperience as moduleUpdateExperience,
+  deleteExperience as moduleDeleteExperience,
+} from "@/modules/candidates/experience/actions";
 import type {
   ListExperienceInput,
   CreateExperienceInput,
@@ -28,46 +33,12 @@ import {
 export type { ExperienceActionResult, ExperienceItem };
 
 // ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-/** Map a Prisma candidate_experience row to the API shape. */
-function toItem(
-  row: Awaited<ReturnType<typeof prisma.candidate_experience.findFirst>>,
-): ExperienceItem | null {
-  if (!row) return null;
-  return {
-    candidate_experience_id: row.candidate_experience_id,
-    candidate_id: row.candidate_id,
-    experience: row.experience,
-    employer: row.employer,
-    start_year: row.start_year,
-    end_year: row.end_year,
-    created_at: row.candidate_experience_created_at,
-  };
-}
-
-/** Validate that end year is not before start year. */
-function validateDateRange(
-  startYear?: number,
-  endYear?: number,
-): string | null {
-  if (
-    startYear !== undefined &&
-    endYear !== undefined &&
-    endYear < startYear
-  ) {
-    return "End year cannot be before start year";
-  }
-  return null;
-}
-
-// ---------------------------------------------------------------------------
-// Server actions
+// Server actions — delegate to module-level implementations
 // ---------------------------------------------------------------------------
 
 /**
  * List experience records for the current candidate (non-deleted, newest first).
+ * Delegates to modules/candidates/experience with the session's candidate ID.
  */
 export async function listCandidateExperience(
   input: ListExperienceInput = {},
@@ -82,24 +53,23 @@ export async function listCandidateExperience(
   }
 
   const { page, limit } = parsed.data;
-  const skip = (page - 1) * limit;
-
   const candidateId = Number(session.id);
 
-  const rows = await prisma.candidate_experience.findMany({
-    where: {
-      candidate_id: candidateId,
-      deleted: 0,
-    },
-    orderBy: [
-      { candidate_experience_created_at: "desc" },
-      { candidate_experience_id: "desc" },
-    ],
-    skip,
-    take: limit,
+  const result = await moduleListExperience({
+    candidateId,
+    page,
+    limit,
   });
 
-  const items = rows.map((r) => toItem(r)!);
+  const items: ExperienceItem[] = result.items.map((i) => ({
+    candidate_experience_id: i.candidate_experience_id,
+    candidate_id: i.candidate_id,
+    experience: i.experience,
+    employer: i.employer,
+    start_year: i.start_year,
+    end_year: i.end_year,
+    created_at: i.candidate_experience_created_at,
+  }));
 
   // Validate output shape
   const validatedList = experienceListOutputSchema.safeParse(items);
@@ -114,13 +84,13 @@ export async function listCandidateExperience(
 }
 
 /**
- * Get a single experience record by ID.
- * Only returns records belonging to the current candidate.
+ * Get a single experience record by ID, scoped to the current candidate.
+ * Delegates to module-level listExperience with candidateId filter.
  */
 export async function getCandidateExperience(
   experienceId: number,
 ): Promise<ExperienceItem | null> {
-  await requireRoleCapability("candidate", "candidate.read.own");
+  const session = await requireRoleCapability("candidate", "candidate.read.own");
 
   const parsed = getExperienceSchema.safeParse({ experienceId });
   if (!parsed.success) {
@@ -129,17 +99,28 @@ export async function getCandidateExperience(
     );
   }
 
-  const row = await prisma.candidate_experience.findFirst({
-    where: {
-      candidate_experience_id: parsed.data.experienceId,
-      deleted: 0,
-    },
+  const result = await moduleListExperience({
+    candidateId: Number(session.id),
   });
 
-  const item = toItem(row);
+  const item = result.items.find(
+    (i) => i.candidate_experience_id === parsed.data.experienceId,
+  );
+
+  const experienceItem: ExperienceItem | null = item
+    ? {
+        candidate_experience_id: item.candidate_experience_id,
+        candidate_id: item.candidate_id,
+        experience: item.experience,
+        employer: item.employer,
+        start_year: item.start_year,
+        end_year: item.end_year,
+        created_at: item.candidate_experience_created_at,
+      }
+    : null;
 
   // Validate output shape
-  const validatedItem = experienceItemSchema.nullable().safeParse(item);
+  const validatedItem = experienceItemSchema.nullable().safeParse(experienceItem);
   if (!validatedItem.success) {
     console.error(
       "[candidate/experience] getCandidateExperience output validation failed:",
@@ -147,11 +128,12 @@ export async function getCandidateExperience(
     );
   }
 
-  return item;
+  return experienceItem;
 }
 
 /**
  * Create a new experience record for the current candidate.
+ * Delegates to modules/candidates/experience with the session's candidate ID.
  */
 export async function createCandidateExperience(
   data: CreateExperienceInput,
@@ -180,45 +162,19 @@ export async function createCandidateExperience(
     return errorResult;
   }
 
-  const dateError = validateDateRange(
-    parsed.data.startYear,
-    parsed.data.endYear,
-  );
-  if (dateError) {
-    const errorResult: ExperienceActionResult = { success: false, error: dateError };
-
-    // Validate output shape
-    const validatedActionResult = experienceActionResultSchema.safeParse(errorResult);
-    if (!validatedActionResult.success) {
-      console.error(
-        "[candidate/experience] createCandidateExperience output validation failed:",
-        validatedActionResult.error.issues,
-      );
-    }
-
-    return errorResult;
-  }
-
-  const now = new Date();
-
-  const row = await prisma.candidate_experience.create({
-    data: {
-      candidate_id: Number(session.id),
-      experience: parsed.data.experience,
-      employer: parsed.data.employer || null,
-      start_year: parsed.data.startYear ?? null,
-      end_year: parsed.data.endYear ?? null,
-      deleted: 0,
-      candidate_experience_created_at: now,
-    },
+  // Delegate to module-level
+  const result = await moduleCreateExperience({
+    candidateId: Number(session.id),
+    experience: parsed.data.experience,
+    employer: parsed.data.employer || undefined,
+    startYear: parsed.data.startYear,
+    endYear: parsed.data.endYear,
   });
 
   revalidatePath("/candidate/experience");
 
-  const successResult: ExperienceActionResult = { success: true, experienceId: row.candidate_experience_id };
-
   // Validate output shape
-  const validatedActionResult = experienceActionResultSchema.safeParse(successResult);
+  const validatedActionResult = experienceActionResultSchema.safeParse(result);
   if (!validatedActionResult.success) {
     console.error(
       "[candidate/experience] createCandidateExperience output validation failed:",
@@ -226,12 +182,12 @@ export async function createCandidateExperience(
     );
   }
 
-  return successResult;
+  return result;
 }
 
 /**
  * Update an existing experience record.
- * Verifies ownership before updating.
+ * Delegates to modules/candidates/experience with ownership verification.
  */
 export async function updateCandidateExperience(
   data: UpdateExperienceInput,
@@ -248,7 +204,6 @@ export async function updateCandidateExperience(
       error: parsed.error.issues[0]?.message ?? "Invalid experience data",
     };
 
-    // Validate output shape
     const validatedResult = experienceActionResultSchema.safeParse(errorResult);
     if (!validatedResult.success) {
       console.error(
@@ -260,83 +215,32 @@ export async function updateCandidateExperience(
     return errorResult;
   }
 
-  const dateError = validateDateRange(
-    parsed.data.startYear,
-    parsed.data.endYear,
-  );
-  if (dateError) {
-    const errorResult: ExperienceActionResult = { success: false, error: dateError };
-
-    // Validate output shape
-    const validatedResult = experienceActionResultSchema.safeParse(errorResult);
-    if (!validatedResult.success) {
-      console.error(
-        "[candidate/experience] updateCandidateExperience output validation failed:",
-        validatedResult.error.issues,
-      );
-    }
-
-    return errorResult;
-  }
-
-  const candidateId = Number(session.id);
-  const experienceId = parsed.data.experienceId;
-
-  // Verify ownership
-  const existing = await prisma.candidate_experience.findFirst({
-    where: {
-      candidate_experience_id: experienceId,
-      candidate_id: candidateId,
-      deleted: 0,
-    },
-    select: { candidate_experience_id: true },
-  });
-  if (!existing) {
-    const errorResult: ExperienceActionResult = {
-      success: false,
-      error: "Experience record not found or access denied",
-    };
-
-    // Validate output shape
-    const validatedActionResult = experienceActionResultSchema.safeParse(errorResult);
-    if (!validatedActionResult.success) {
-      console.error(
-        "[candidate/experience] updateCandidateExperience output validation failed:",
-        validatedActionResult.error.issues,
-      );
-    }
-
-    return errorResult;
-  }
-
-  await prisma.candidate_experience.update({
-    where: { candidate_experience_id: experienceId },
-    data: {
-      experience: parsed.data.experience,
-      employer: parsed.data.employer || null,
-      start_year: parsed.data.startYear ?? null,
-      end_year: parsed.data.endYear ?? null,
-    },
+  // Delegate to module-level (owns ownership check + output validation)
+  const result = await moduleUpdateExperience({
+    candidateId: Number(session.id),
+    id: parsed.data.experienceId,
+    experience: parsed.data.experience,
+    employer: parsed.data.employer || undefined,
+    startYear: parsed.data.startYear,
+    endYear: parsed.data.endYear,
   });
 
   revalidatePath("/candidate/experience");
 
-  const successResult: ExperienceActionResult = { success: true, experienceId };
-
-  // Validate output shape
-  const validatedActionResult = experienceActionResultSchema.safeParse(successResult);
-  if (!validatedActionResult.success) {
+  const validatedResult = experienceActionResultSchema.safeParse(result);
+  if (!validatedResult.success) {
     console.error(
       "[candidate/experience] updateCandidateExperience output validation failed:",
-      validatedActionResult.error.issues,
+      validatedResult.error.issues,
     );
   }
 
-  return successResult;
+  return result;
 }
 
 /**
  * Delete an experience record (soft-delete using the `deleted` flag).
+ * Delegates to modules/candidates/experience with ownership verification.
  */
 export async function deleteCandidateExperience(
   experienceId: number,
@@ -353,7 +257,6 @@ export async function deleteCandidateExperience(
       error: "Invalid experience ID",
     };
 
-    // Validate output shape
     const validatedResult = experienceActionResultSchema.safeParse(errorResult);
     if (!validatedResult.success) {
       console.error(
@@ -365,44 +268,15 @@ export async function deleteCandidateExperience(
     return errorResult;
   }
 
-  const existing = await prisma.candidate_experience.findFirst({
-    where: {
-      candidate_experience_id: parsed.data.experienceId,
-      candidate_id: Number(session.id),
-      deleted: 0,
-    },
-    select: { candidate_experience_id: true },
-  });
-  if (!existing) {
-    const errorResult: ExperienceActionResult = {
-      success: false,
-      error: "Experience record not found or access denied",
-    };
-
-    // Validate output shape
-    const validatedResult = experienceActionResultSchema.safeParse(errorResult);
-    if (!validatedResult.success) {
-      console.error(
-        "[candidate/experience] deleteCandidateExperience output validation failed:",
-        validatedResult.error.issues,
-      );
-    }
-
-    return errorResult;
-  }
-
-  // Soft-delete
-  await prisma.candidate_experience.update({
-    where: { candidate_experience_id: parsed.data.experienceId },
-    data: { deleted: 1 },
+  // Delegate to module-level (owns ownership check + output validation)
+  const result = await moduleDeleteExperience({
+    candidateId: Number(session.id),
+    id: parsed.data.experienceId,
   });
 
   revalidatePath("/candidate/experience");
 
-  const successResult: ExperienceActionResult = { success: true, experienceId: parsed.data.experienceId };
-
-  // Validate output shape
-  const validatedResult = experienceActionResultSchema.safeParse(successResult);
+  const validatedResult = experienceActionResultSchema.safeParse(result);
   if (!validatedResult.success) {
     console.error(
       "[candidate/experience] deleteCandidateExperience output validation failed:",
@@ -410,5 +284,5 @@ export async function deleteCandidateExperience(
     );
   }
 
-  return successResult;
+  return result;
 }
