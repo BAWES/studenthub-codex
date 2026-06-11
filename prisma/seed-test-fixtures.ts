@@ -324,6 +324,49 @@ async function seed() {
     console.log(`    Created inspector uuid=${FIXED_UUIDS.inspectorUuid}`);
   }
 
+  // ── Job Listing ──
+  console.log("  Creating job listing for E2E tests...");
+  const seedCompany = await prisma.company.findFirstOrThrow({
+    where: { company_email: USERS.company.email },
+  });
+
+  const existingJobListing = await prisma.job_listing.findFirst({
+    where: { employerId: seedCompany.company_id, title: "E2E Test - Retail Associate" },
+  });
+
+  if (existingJobListing) {
+    await prisma.job_listing.update({
+      where: { jobListingId: existingJobListing.jobListingId },
+      data: {
+        title: "E2E Test - Retail Associate",
+        description: "E2E test job listing for automated testing. Not a real position.",
+        requirements: "Must pass E2E tests",
+        location: "Kuwait City",
+        employmentType: "Full-time",
+        salaryRange: "300-500 KWD/month",
+        status: "active",
+        updatedAt: new Date(),
+      },
+    });
+    console.log(`    Updated job listing id=${existingJobListing.jobListingId}`);
+  } else {
+    const jobListing = await prisma.job_listing.create({
+      data: {
+        employerId: seedCompany.company_id,
+        title: "E2E Test - Retail Associate",
+        description: "E2E test job listing for automated testing. Not a real position.",
+        requirements: "Must pass E2E tests",
+        location: "Kuwait City",
+        employmentType: "Full-time",
+        salaryRange: "300-500 KWD/month",
+        status: "active",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    });
+    console.log(`    Created job listing id=${jobListing.jobListingId}`);
+  }
+
   console.log("\n✅ Seed complete!");
   console.log(`Test password for all users: ${TEST_PASSWORD}`);
   console.log(
