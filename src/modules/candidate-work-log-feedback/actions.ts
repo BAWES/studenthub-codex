@@ -3,6 +3,15 @@
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
+import {
+  listWorkLogFeedbackSchema,
+  getWorkLogFeedbackSchema,
+  workLogFeedbackItemSchema,
+  listWorkLogFeedbackResultSchema,
+  type ListWorkLogFeedbackParams,
+  type GetWorkLogFeedbackParams,
+} from "./schemas";
+import type { WorkLogFeedbackItem, ListWorkLogFeedbackResult } from "./schemas";
 
 // ---------------------------------------------------------------------------
 // CandidateWorkLogFeedbackController — feedback on candidate work logs
@@ -10,55 +19,6 @@ import { requireCapability } from "@/modules/auth/session";
 // Ported from Yii2 company/modules/v1/controllers/CandidateWorkLogFeedbackController.php
 // Actions: listWorkLogFeedback, getWorkLogFeedback
 // ---------------------------------------------------------------------------
-
-// ---------------------------------------------------------------------------
-// Schemas
-// ---------------------------------------------------------------------------
-
-const listWorkLogFeedbackSchema = z.object({
-  candidate_id: z.coerce.number().int().positive().optional(),
-  status: z.coerce.number().int().min(0).max(2).optional(),
-  date_from: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be YYYY-MM-DD format").optional(),
-  date_to: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be YYYY-MM-DD format").optional(),
-  page: z.coerce.number().int().positive().optional().default(1),
-  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
-});
-
-const getWorkLogFeedbackSchema = z.object({
-  uuid: z.string().min(1, "Work log feedback UUID is required"),
-});
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export type ListWorkLogFeedbackParams = z.input<typeof listWorkLogFeedbackSchema>;
-export type GetWorkLogFeedbackParams = z.input<typeof getWorkLogFeedbackSchema>;
-
-export type WorkLogFeedbackItem = {
-  cwlf_uuid: string;
-  candidate_id: number;
-  store_id: number;
-  company_id: number;
-  date: Date;
-  candidate_working_hour_uuid: string | null;
-  status: number | null;
-  note: string | null;
-  reason: string | null;
-  is_public: boolean | null;
-  rating: boolean | null;
-  created_by: string | null;
-  created_at: Date | null;
-  updated_at: Date | null;
-};
-
-export type ListWorkLogFeedbackResult = {
-  workLogFeedbacks: WorkLogFeedbackItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
 
 // ---------------------------------------------------------------------------
 // Exported schemas (for shared validation)
@@ -116,13 +76,24 @@ export async function listWorkLogFeedback(
     prisma.candidate_work_log_feedback.count({ where }),
   ]);
 
-  return {
+  const result = {
     workLogFeedbacks: rows,
     total,
     page,
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  // Validate output shape
+  const outputParsed = listWorkLogFeedbackResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/candidate-work-log-feedback] listWorkLogFeedback output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -145,6 +116,15 @@ export async function getWorkLogFeedback(
 
   if (!feedback) {
     throw new Error(`Work log feedback not found: ${uuid}`);
+  }
+
+  // Validate output shape
+  const outputParsed = workLogFeedbackItemSchema.safeParse(feedback);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/candidate-work-log-feedback] getWorkLogFeedback output validation failed:",
+      outputParsed.error.issues,
+    );
   }
 
   return feedback;
