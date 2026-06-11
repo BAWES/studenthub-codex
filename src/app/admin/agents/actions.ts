@@ -8,6 +8,14 @@
 // ---------------------------------------------------------------------------
 
 import { Pool } from "pg";
+import {
+  agentHealthMetricSchema,
+  agentHealthDataSchema,
+  agentsHealthDataSchema,
+  type AgentHealthMetric,
+  type AgentHealthData,
+  type AgentsHealthData,
+} from "./schemas";
 
 const COMPANY_ID = "f56ea475-d349-431c-9a40-3111f1a49819";
 
@@ -20,29 +28,6 @@ const pool = new Pool({
   max: 2,
   idleTimeoutMillis: 5000,
 });
-
-/* ── Types ───────────────────────────────────────────────────────────── */
-
-export interface AgentHealthMetric {
-  label: string;
-  value: string;
-  note: string;
-}
-
-export interface AgentHealthData {
-  id: string;
-  name: string;
-  status: string;
-  role: string;
-  heartbeatMetrics: AgentHealthMetric[];
-  lastHeartbeat: string | null;
-  issuesDone: number;
-  issuesInProgress: number;
-}
-
-export interface AgentsHealthData {
-  agents: AgentHealthData[];
-}
 
 /* ── Queries ─────────────────────────────────────────────────────────── */
 
@@ -178,8 +163,19 @@ export async function getAllAgentsHealth(): Promise<AgentsHealthData> {
       });
     }
 
-    return { agents };
+    const result = { agents };
+
+    // Output validation — log mismatches without throwing
+    const agentsParsed = agentsHealthDataSchema.safeParse(result);
+    if (!agentsParsed.success) {
+      console.error("[admin/agents] getAllAgentsHealth output failed:", agentsParsed.error.issues);
+    }
+
+    return result;
   } finally {
     client.release();
   }
 }
+
+// Re-export types for backward compatibility (page.tsx imports from ./actions)
+export type { AgentHealthData, AgentHealthMetric, AgentsHealthData } from "./schemas";
