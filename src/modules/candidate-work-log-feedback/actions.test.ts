@@ -199,3 +199,117 @@ describe("CandidateWorkLogFeedback - getWorkLogFeedback", () => {
     await expect(mod.getWorkLogFeedback({ uuid: "" })).rejects.toThrow();
   });
 });
+
+// ---------------------------------------------------------------------------
+// Zod schema tests
+// ---------------------------------------------------------------------------
+
+const schemas = await import("./schemas");
+
+describe("CandidateWorkLogFeedback - output schemas", () => {
+  describe("workLogFeedbackItemSchema", () => {
+    const validItem = {
+      cwlf_uuid: "cwlf_abc123",
+      candidate_id: 42,
+      store_id: 1,
+      company_id: 2,
+      date: new Date("2026-06-01"),
+      candidate_working_hour_uuid: "cwh_uuid_1",
+      status: 1,
+      note: "Good work",
+      reason: null,
+      is_public: true,
+      rating: null,
+      created_by: "contact_uuid_1",
+      created_at: new Date("2026-06-01T10:00:00Z"),
+      updated_at: new Date("2026-06-01T10:00:00Z"),
+    };
+
+    it("parses a valid work log feedback item", () => {
+      const result = schemas.workLogFeedbackItemSchema.safeParse(validItem);
+      expect(result.success).toBe(true);
+    });
+
+    it("accepts nullable fields as null", () => {
+      const item = {
+        ...validItem,
+        candidate_working_hour_uuid: null,
+        status: null,
+        note: null,
+        reason: null,
+        is_public: null,
+        rating: null,
+        created_by: null,
+        created_at: null,
+        updated_at: null,
+      };
+      const result = schemas.workLogFeedbackItemSchema.safeParse(item);
+      expect(result.success).toBe(true);
+    });
+
+    it("rejects missing required field cwlf_uuid", () => {
+      const { cwlf_uuid, ...incomplete } = validItem;
+      const result = schemas.workLogFeedbackItemSchema.safeParse(incomplete);
+      expect(result.success).toBe(false);
+    });
+
+    it("rejects string instead of number for candidate_id", () => {
+      const result = schemas.workLogFeedbackItemSchema.safeParse({
+        ...validItem,
+        candidate_id: "not-a-number",
+      });
+      expect(result.success).toBe(false);
+    });
+  });
+
+  describe("listWorkLogFeedbackResultSchema", () => {
+    const validResult = {
+      workLogFeedbacks: [
+        {
+          cwlf_uuid: "cwlf_abc123",
+          candidate_id: 42,
+          store_id: 1,
+          company_id: 2,
+          date: new Date("2026-06-01"),
+          candidate_working_hour_uuid: null,
+          status: 1,
+          note: "Good work",
+          reason: null,
+          is_public: true,
+          rating: null,
+          created_by: null,
+          created_at: new Date("2026-06-01T10:00:00Z"),
+          updated_at: new Date("2026-06-01T10:00:00Z"),
+        },
+      ],
+      total: 1,
+      page: 1,
+      limit: 20,
+      totalPages: 1,
+    };
+
+    it("parses a valid list result", () => {
+      const result = schemas.listWorkLogFeedbackResultSchema.safeParse(validResult);
+      expect(result.success).toBe(true);
+    });
+
+    it("parses empty array result", () => {
+      const result = schemas.listWorkLogFeedbackResultSchema.safeParse({
+        workLogFeedbacks: [],
+        total: 0,
+        page: 1,
+        limit: 20,
+        totalPages: 0,
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it("rejects negative total", () => {
+      const result = schemas.listWorkLogFeedbackResultSchema.safeParse({
+        ...validResult,
+        total: -1,
+      });
+      expect(result.success).toBe(false);
+    });
+  });
+});
