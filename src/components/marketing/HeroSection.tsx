@@ -128,6 +128,18 @@ export default function HeroSection({ onCtaClick }: HeroSectionProps) {
       {/* Animated gradient background */}
       <div className="shHeroGradientDramatic" aria-hidden="true" />
 
+      {/* Dot pattern overlay */}
+      <div
+        className="absolute inset-0 opacity-[0.03] dark:opacity-[0.06]"
+        aria-hidden="true"
+        style={{
+          backgroundImage:
+            "radial-gradient(circle, currentColor 1px, transparent 1px)",
+          backgroundSize: "24px 24px",
+          color: "var(--ink)",
+        }}
+      />
+
       {/* Floating ambient orbs */}
       <div className="shOrb shOrbA" aria-hidden="true" />
       <div className="shOrb shOrbB" aria-hidden="true" />
@@ -314,32 +326,39 @@ export default function HeroSection({ onCtaClick }: HeroSectionProps) {
           {onCtaClick ? (
             <button
               onClick={onCtaClick}
-              className="uiButton uiButton_default uiButton_lg shGlowButton"
+              className="uiButton uiButton_default uiButton_lg shGlowButton group"
             >
               <GraduationCap className="size-4" />
-              {content.studentCta} <ArrowUpRight className="size-4" />
+              {content.studentCta} <ArrowUpRight className="size-4 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
             </button>
           ) : (
             <Link
               href={content.studentCtaHref}
-              className="uiButton uiButton_default uiButton_lg shGlowButton"
+              className="uiButton uiButton_default uiButton_lg shGlowButton group"
             >
               <GraduationCap className="size-4" />
-              {content.studentCta} <ArrowUpRight className="size-4" />
+              {content.studentCta} <ArrowUpRight className="size-4 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
             </Link>
           )}
           <Link
             href={content.employerCtaHref}
-            className="uiButton uiButton_secondary uiButton_lg"
+            className="uiButton uiButton_lg group"
             style={{
               background: "linear-gradient(135deg, #f59e0b, #d97706)",
               color: "#fff",
               border: "none",
               boxShadow: "0 4px 14px rgba(245, 158, 11, 0.35)",
+              transition: "box-shadow 0.2s ease, transform 0.2s ease",
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 28px rgba(245, 158, 11, 0.5)";
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLElement).style.boxShadow = "0 4px 14px rgba(245, 158, 11, 0.35)";
             }}
           >
             <Building2 className="size-4" />
-            {content.employerCta} <ArrowUpRight className="size-4" />
+            {content.employerCta} <ArrowUpRight className="size-4 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
           </Link>
           <Link
             href="/login"

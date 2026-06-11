@@ -1,5 +1,18 @@
-import { describe, it, expect } from "vitest";
+// @vitest-environment jsdom
+import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
+
+vi.mock("lucide-react", () => ({
+  Quote: () => <span data-testid="icon-quote" />,
+  ChevronLeft: () => <span data-testid="icon-chevron-left" />,
+  ChevronRight: () => <span data-testid="icon-chevron-right" />,
+  Star: () => <span data-testid="icon-star" />,
+}));
+
+afterEach(() => {
+  vi.clearAllMocks();
+});
+
 import TestimonialCarousel from "./TestimonialCarousel";
 
 const customTestimonials = [
@@ -29,11 +42,15 @@ describe("TestimonialCarousel", () => {
     });
   });
 
-  it("renders with default candidate testimonials", async () => {
+  it("renders with default candidate testimonials (mixed)", async () => {
     render(<TestimonialCarousel persona="candidate" />);
+    // Candidate persona now shows mixed employer + candidate testimonials (shuffled)
+    // Check that any testimonial quote is rendered with proper formatting
     await waitFor(() => {
-      const quotes = screen.getAllByText(/StudentHub matched me/);
-      expect(quotes.length).toBeGreaterThanOrEqual(1);
+      // The quote text is rendered inside an element with the blockquote tag
+      const quoteEl = document.querySelector("blockquote");
+      expect(quoteEl).toBeTruthy();
+      expect(quoteEl?.textContent?.length).toBeGreaterThan(20);
     });
   });
 
@@ -47,7 +64,9 @@ describe("TestimonialCarousel", () => {
   it("renders company testimonials", async () => {
     render(<TestimonialCarousel persona="company" />);
     await waitFor(() => {
-      expect(screen.getByText(/Posting openings on StudentHub/)).toBeInTheDocument();
+      // Company-specific quote — check for the HR manager name which is unique
+      const quotes = screen.getAllByText(/Emma C\./);
+      expect(quotes.length).toBeGreaterThanOrEqual(1);
     });
   });
 
@@ -102,7 +121,8 @@ describe("TestimonialCarousel", () => {
 
   it("renders star ratings", () => {
     render(<TestimonialCarousel testimonials={customTestimonials} />);
-    const stars = document.querySelectorAll('[aria-hidden="true"]');
-    expect(stars.length).toBeGreaterThan(0);
+    // The star rating container has an aria-label like "5 out of 5 stars"
+    const starLabels = screen.getAllByLabelText(/out of 5 stars/);
+    expect(starLabels.length).toBeGreaterThanOrEqual(1);
   });
 });

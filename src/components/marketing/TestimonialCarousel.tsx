@@ -216,8 +216,24 @@ const adminTestimonials: Testimonial[] = [
   },
 ];
 
+/** Shuffle array using Fisher-Yates */
+function shuffleArray<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+/** Mixed testimonials — employer + candidate perspectives together */
+const mixedTestimonials: Testimonial[] = shuffleArray([
+  ...candidateTestimonials,
+  ...companyTestimonials,
+]);
+
 const personaTestimonials: Record<TestimonialPersona, Testimonial[]> = {
-  candidate: candidateTestimonials,
+  candidate: mixedTestimonials,
   staff: staffTestimonials,
   company: companyTestimonials,
   admin: adminTestimonials,
