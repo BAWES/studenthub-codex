@@ -110,9 +110,13 @@ jobs:
       - run: npx vitest run
 
   e2e:
-    name: E2E Tests
+    name: E2E Tests (${{ matrix.shard }}/${{ strategy.job-total }})
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
     services:
       mysql:
         image: mysql:8.4
@@ -160,7 +164,7 @@ jobs:
           DATABASE_URL: "mysql://studenthub:***@localhost:3307/studenthub_prod_local"
           AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
       - name: Run E2E tests
-        run: npx playwright test --project=chromium
+        run: npx playwright test --project=chromium --shard=${{ matrix.shard }}/${{ strategy.job-total }}
         env:
           CI: "true"
           DATABASE_URL: "mysql://studenthub:***@localhost:3307/studenthub_prod_local"
