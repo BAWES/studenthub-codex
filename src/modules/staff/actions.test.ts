@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { z } from "zod";
 import {
   staffListItemSchema,
-  staffListResultSchema,
+  listStaffResultSchema,
   staffGetResultSchema,
 } from "./schemas";
 
@@ -238,9 +238,9 @@ describe("staffListItemSchema", () => {
   });
 });
 
-describe("staffListResultSchema", () => {
+describe("listStaffResultSchema", () => {
   it("accepts empty staff list", () => {
-    const result = staffListResultSchema.safeParse({
+    const result = listStaffResultSchema.safeParse({
       staff: [],
       total: 0,
       page: 1,
@@ -251,7 +251,7 @@ describe("staffListResultSchema", () => {
   });
 
   it("accepts populated staff list", () => {
-    const result = staffListResultSchema.safeParse({
+    const result = listStaffResultSchema.safeParse({
       staff: [
         {
           staff_id: 1,
@@ -272,7 +272,7 @@ describe("staffListResultSchema", () => {
   });
 
   it("rejects negative totalPages", () => {
-    const result = staffListResultSchema.safeParse({
+    const result = listStaffResultSchema.safeParse({
       staff: [],
       total: 0,
       page: 1,

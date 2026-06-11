@@ -25,3 +25,7 @@ export const listStaffResultSchema = z.object({
 });
 
 export type StaffListResult = z.output<typeof listStaffResultSchema>;
+
+export const staffGetResultSchema = staffListItemSchema.nullable();
+
+export type StaffGetResult = z.output<typeof staffGetResultSchema>;
