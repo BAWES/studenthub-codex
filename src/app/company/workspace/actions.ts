@@ -9,6 +9,10 @@ import type {
   WorkspaceOverviewData,
 } from "./schemas";
 
+import {
+  workspaceOverviewOutputSchema,
+} from "../schemas";
+
 // ---------------------------------------------------------------------------
 // Get Company Workspace Overview
 // ---------------------------------------------------------------------------
@@ -77,7 +81,7 @@ export async function getCompanyWorkspace(
     }),
   ]);
 
-  return {
+  const result: WorkspaceOverviewData = {
     contact: contact
       ? { contact_name: contact.contact_name, contact_email: contact.contact_email ?? "" }
       : null,
@@ -100,6 +104,17 @@ export async function getCompanyWorkspace(
       meta: `${request.request_status ?? "No status"} · ${request.request_number_of_employees ?? 0} seats`,
     })),
   };
+
+  // Validate output shape
+  const validated = workspaceOverviewOutputSchema.safeParse(result);
+  if (!validated.success) {
+    console.error(
+      "[company/workspace] getCompanyWorkspace output validation failed:",
+      validated.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
