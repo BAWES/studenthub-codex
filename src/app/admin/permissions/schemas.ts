@@ -84,27 +84,3 @@ export type PermissionSectionDetail = {
   section_name: string | null;
   created_at: Date;
 };
-
-// ---------------------------------------------------------------------------
-// Output validation schemas
-// ---------------------------------------------------------------------------
-
-export const listPermissionSectionsOutputSchema = z.array(z.object({
-  permission_uuid: z.string(),
-  section_name: z.string().nullable(),
-  created_at: z.date(),
-}));
-
-export const getPermissionSectionOutputSchema = z.object({
-  permission_uuid: z.string(),
-  section_name: z.string().nullable(),
-  created_at: z.date(),
-}).nullable();
-
-export const createPermissionSectionOutputSchema = z.object({
-  permission_uuid: z.string(),
-});
-
-export const updatePermissionSectionOutputSchema = z.object({
-  permission_uuid: z.string(),
-});
