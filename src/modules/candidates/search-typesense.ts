@@ -120,6 +120,7 @@ async function searchTypesense({
       {
         q: searchQuery,
         query_by: "candidate_name,candidate_name_ar,candidate_email,candidate_phone,candidate_uid,skills,tags",
+        query_by_weights: "4,1,1,1,1,2,3",
         filter_by: filterBy,
         facet_by: "country_name,university_name,company_name,skills,candidate_gender",
         max_facet_values: 25,
