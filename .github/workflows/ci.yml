@@ -129,9 +129,7 @@ jobs:
           - 3307:3306
         options: >-
           --health-cmd="mysqladmin ping -h localhost"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
+          --health-interval=10s --health-timeout=5s --health-retries=5
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -144,11 +142,11 @@ jobs:
       - name: Generate Prisma client
         run: npx prisma generate
         env:
-          DATABASE_URL: "mysql://studenthub:***@localhost:3307/studenthub_prod_local"
+          DATABASE_URL: "mysql://studenthub:***@localhost:3307/studenthub_prod_local?auth_plugin=mysql_native_password"
       - name: Push schema to MySQL
         run: npx prisma db push --skip-generate
         env:
-          DATABASE_URL: "mysql://studenthub:***@localhost:3307/studenthub_prod_local"
+          DATABASE_URL: "mysql://studenthub:***@localhost:3307/studenthub_prod_local?auth_plugin=mysql_native_password"
       - name: Cache Next.js build
         uses: actions/cache@v4
         id: next-cache-e2e
@@ -161,13 +159,13 @@ jobs:
       - name: Build
         run: npx next build
         env:
-          DATABASE_URL: "mysql://studenthub:***@localhost:3307/studenthub_prod_local"
+          DATABASE_URL: "mysql://studenthub:***@localhost:3307/studenthub_prod_local?auth_plugin=mysql_native_password"
           AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
       - name: Run E2E tests
         run: npx playwright test --project=chromium --shard=${{ matrix.shard }}/${{ strategy.job-total }}
         env:
           CI: "true"
-          DATABASE_URL: "mysql://studenthub:***@localhost:3307/studenthub_prod_local"
+          DATABASE_URL: "mysql://studenthub:***@localhost:3307/studenthub_prod_local?auth_plugin=mysql_native_password"
           AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
 
   validate:
@@ -186,9 +184,7 @@ jobs:
           - 3307:3306
         options: >-
           --health-cmd="mysqladmin ping -h localhost"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
+          --health-interval=10s --health-timeout=5s --health-retries=5
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -201,7 +197,7 @@ jobs:
       - name: Push schema to MySQL
         run: npx prisma db push --skip-generate
         env:
-          DATABASE_URL: "mysql://studenthub:***@localhost:3307/studenthub_prod_local"
+          DATABASE_URL: "mysql://studenthub:***@localhost:3307/studenthub_prod_local?auth_plugin=mysql_native_password"
       - name: Build
         run: npx next build
         env:
@@ -219,5 +215,5 @@ jobs:
           done
           node scripts/validate.mjs
         env:
-          DATABASE_URL: "mysql://studenthub:***@localhost:3307/studenthub_prod_local"
+          DATABASE_URL: "mysql://studenthub:***@localhost:3307/studenthub_prod_local?auth_plugin=mysql_native_password"
           AUTH_SECRET: ${{ secrets.AUTH_SECRET }}

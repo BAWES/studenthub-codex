@@ -85,6 +85,34 @@ test.describe("Public routes", () => {
     await expect(page.locator("body")).toBeVisible({ timeout: 15000 });
   });
 
+  test("hub page loads", async ({ page }) => {
+    const consoleMessages: string[] = [];
+    page.on("console", (msg) => {
+      if (msg.type() === "error") consoleMessages.push(msg.text());
+    });
+    await page.goto("/hub");
+    await expect(page.locator("body")).toBeVisible({ timeout: 15000 });
+    const errors = consoleMessages.filter(
+      (m) => m.includes("hydration") || m.includes("serialization") || m.includes("Functions cannot be passed"),
+    );
+    expect(errors).toEqual([]);
+  });
+
+  test("student page loads", async ({ page }) => {
+    await page.goto("/student");
+    await expect(page.locator("body")).toBeVisible({ timeout: 15000 });
+  });
+
+  test("employee jobs page loads", async ({ page }) => {
+    await page.goto("/employer/jobs");
+    await expect(page.locator("body")).toBeVisible({ timeout: 15000 });
+  });
+
+  test("employee jobs new page loads", async ({ page }) => {
+    await page.goto("/employer/jobs/new");
+    await expect(page.locator("body")).toBeVisible({ timeout: 15000 });
+  });
+
   test("unauthenticated access redirects to login", async ({ page }) => {
     const protectedPaths = [
       "/app",

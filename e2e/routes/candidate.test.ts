@@ -98,6 +98,22 @@ test.describe("Candidate routes", () => {
     await assertRouteLoads("/candidate/work-logs");
   });
 
+  test("candidate applications loads", async () => {
+    await assertRouteLoads("/candidate/applications");
+  });
+
+  test("candidate jobs loads", async () => {
+    await assertRouteLoads("/candidate/jobs");
+  });
+
+  test("candidate profile loads", async () => {
+    await assertRouteLoads("/candidate/profile");
+  });
+
+  test("candidate search loads", async () => {
+    await assertRouteLoads("/candidate/search");
+  });
+
   // ── Role guards ──
 
   test("admin cannot access candidate portal", async () => {
