@@ -19,6 +19,7 @@ export type CandidateSearchParams = {
   candidateId?: number;
   tabIds?: number[];
   selectedIds?: number[];
+  page?: number;
   country?: string;
   university?: string;
   company?: string;
