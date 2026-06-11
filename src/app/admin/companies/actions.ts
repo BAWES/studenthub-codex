@@ -163,7 +163,7 @@ export async function getAdminCompanyDetail(
     }),
   ]);
 
-  return {
+  const result = {
     company: company
       ? {
           company_id: company.company_id,
@@ -213,6 +213,17 @@ export async function getAdminCompanyDetail(
       meta: formatDate(note.note_created_datetime),
     })),
   };
+
+  // Validate output shape
+  const parsed = adminCompanyDetailSchema.safeParse(result);
+  if (!parsed.success) {
+    console.error(
+      "[admin/companies] getAdminCompanyDetail output validation failed:",
+      parsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -246,5 +257,17 @@ export async function toggleCompanyApproval(
 
   revalidatePath("/admin/companies");
   revalidatePath(`/admin/companies/${parsed.data.companyId}`);
-  return { success: true };
+
+  const response = { success: true };
+
+  // Validate output shape
+  const outputParsed = adminCompanyToggleResponseSchema.safeParse(response);
+  if (!outputParsed.success) {
+    console.error(
+      "[admin/companies] toggleCompanyApproval output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return response;
 }

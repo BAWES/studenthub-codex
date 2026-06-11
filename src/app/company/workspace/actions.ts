@@ -3,11 +3,15 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
-import { getWorkspaceDataSchema, workspaceOverviewDataSchema } from "./schemas";
+import { getWorkspaceDataSchema } from "./schemas";
 import type {
   GetWorkspaceDataInput,
   WorkspaceOverviewData,
 } from "./schemas";
+
+import {
+  workspaceOverviewOutputSchema,
+} from "../schemas";
 
 // ---------------------------------------------------------------------------
 // Get Company Workspace Overview
@@ -101,12 +105,12 @@ export async function getCompanyWorkspace(
     })),
   };
 
-  // Output validation — log mismatches without throwing
-  const outputCheck = workspaceOverviewDataSchema.safeParse(result);
-  if (!outputCheck.success) {
+  // Validate output shape
+  const validated = workspaceOverviewOutputSchema.safeParse(result);
+  if (!validated.success) {
     console.error(
-      "[getCompanyWorkspace] Output validation failed:",
-      JSON.stringify(outputCheck.error.issues),
+      "[company/workspace] getCompanyWorkspace output validation failed:",
+      validated.error.issues,
     );
   }
 
