@@ -1,17 +1,17 @@
 import { Suspense } from "react";
 import { getSession } from "@/modules/auth/session";
-import LandingContent from "./LandingContent";
+import { LandingPage } from "@/components/landing";
 
 export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "StudentHub — Connecting Students with the Right Employers",
   description:
-    "A two-sided marketplace connecting students with employers across Kuwait. Create your free profile, get AI-matched with roles, and get hired — all on one platform.",
+    "Kuwait's platform for student placement. Our staff recruiters match students with employers — AI assists every step of the way.",
   openGraph: {
     title: "StudentHub | Find Student Jobs & Hire Talent in Kuwait",
     description:
-      "Two-sided marketplace for student talent. Students build careers, employers find vetted candidates — with AI matching, timesheets, and compliance.",
+      "Staff-driven student placement in Kuwait. Recruiters match candidates to roles. Timesheets, payments, and compliance in one platform.",
     type: "website",
   },
   keywords: [
@@ -28,7 +28,7 @@ export default async function Home() {
 
   return (
     <Suspense fallback={<div className="min-h-svh" />}>
-      <LandingContent session={session} />
+      <LandingPage session={session} />
     </Suspense>
   );
 }

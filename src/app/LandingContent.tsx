@@ -9,9 +9,8 @@ import {
   Clock, Zap, Shield, ChevronRight, Eye, CreditCard, UsersRound,
   Handshake, ClipboardCheck, FileCheck
 } from "lucide-react";
-import { ThemeToggle } from "@/modules/theme/ThemeToggle";
 
-type Persona = "candidate" | "company";
+type Persona = "student" | "company";
 
 interface LandingContentProps {
   session: { id: string; email: string; role: string; name: string } | null;
@@ -72,7 +71,7 @@ function Nav({ session, persona }: { session: any; persona: Persona }) {
   const [open, setOpen] = useState(false);
 
   return (
-    <nav className="sticky top-0 z-50 border-b dark:border-white/[0.08] backdrop-blur-md"
+    <nav className="sticky top-0 z-50 border-b"
       style={{ backgroundColor: "var(--surface)", borderColor: "var(--border)" }}>
       <div className="max-w-6xl mx-auto px-6">
         <div className="flex items-center justify-between h-14">
@@ -93,7 +92,6 @@ function Nav({ session, persona }: { session: any; persona: Persona }) {
             ))}
           </div>
           <div className="flex items-center gap-3 ml-auto">
-            <ThemeToggle />
             {session ? (
               <Link href="/app" className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium no-underline text-white transition-all hover:brightness-110"
                 style={{ backgroundColor: zd.accent }}>
@@ -133,7 +131,7 @@ function Nav({ session, persona }: { session: any; persona: Persona }) {
 
 function PersonaToggle({ persona, onChange }: { persona: Persona; onChange: (p: Persona) => void }) {
   const opts = [
-    { value: "candidate" as Persona, label: "I'm looking for work", icon: GraduationCap },
+    { value: "student" as Persona, label: "I'm looking for work", icon: GraduationCap },
     { value: "company" as Persona, label: "I'm hiring", icon: Building2 },
   ];
   return (
@@ -184,7 +182,7 @@ function Hero({ persona }: { persona: Persona }) {
           <Reveal delay={150}>
             <p className="text-base sm:text-lg leading-relaxed mb-8 max-w-[520px]" style={{ color: "var(--muted)" }}>
               {persona === "company"
-                ? "Post openings and get matched with pre-vetted candidates by our recruitment team. Manage timesheets, approvals, and payments — all in one platform."
+                ? "Post openings and get matched with pre-vetted students by our recruitment team. Manage timesheets, approvals, and payments — all in one platform."
                 : "Create a profile seen by 500+ employers. Our staff recruiters match you with roles that fit your skills and schedule. AI assists every step of the way."}
             </p>
           </Reveal>
@@ -337,8 +335,8 @@ function HowItWorks({ persona }: { persona: Persona }) {
   const steps = persona === "company"
     ? [
         { num: "01", title: "Set up your account", desc: "Create your company profile in minutes. Our staff verifies your details and activates your account.", icon: Building2 },
-        { num: "02", title: "Get matched candidates", desc: "Post a role and our recruitment team finds pre-vetted candidates from our network. AI assists with matching.", icon: UsersRound },
-        { num: "03", title: "Hire and manage", desc: "Review candidates, manage timesheets, approve transfers, and track compliance — all in one dashboard.", icon: ClipboardCheck },
+        { num: "02", title: "Get matched students", desc: "Post a role and our recruitment team finds pre-vetted students from our network. AI assists with matching.", icon: UsersRound },
+        { num: "03", title: "Hire and manage", desc: "Review students, manage timesheets, approve transfers, and track compliance — all in one dashboard.", icon: ClipboardCheck },
       ]
     : [
         { num: "01", title: "Create your profile", desc: "No CV required. Tell us about your experience, skills, and preferences. Our staff recruiters review your profile. Takes 3 minutes.", icon: GraduationCap },
@@ -381,12 +379,12 @@ function HowItWorks({ persona }: { persona: Persona }) {
 
 function Features() {
   const items = [
-    { icon: UsersRound, title: "Staff-driven matching", desc: "Our recruitment team personally reviews and matches candidates to roles. AI assists by finding the best-fit opportunities based on skills and experience." },
-    { icon: Search, title: "Smart search", desc: "Find candidates or roles with faceted search across skills, location, and pay rate." },
+    { icon: UsersRound, title: "Staff-driven matching", desc: "Our recruitment team personally reviews and matches students to roles. AI assists by finding the best-fit opportunities based on skills and experience." },
+    { icon: Search, title: "Smart search", desc: "Find students or roles with faceted search across skills, location, and pay rate." },
     { icon: Clock, title: "Timesheets", desc: "Log hours, approve timesheets, and track attendance — all within the platform." },
     { icon: Shield, title: "Compliance", desc: "ID verification, right-to-work checks, document management, and certification tracking built in." },
     { icon: BarChart3, title: "Reports & analytics", desc: "Live dashboard with metrics on placements, payments, pipeline activity, and compliance status." },
-    { icon: Fingerprint, title: "Role-based portals", desc: "Dedicated views for staff, admin, inspector, candidate, and employer — each tailored to their workflow." },
+    { icon: Fingerprint, title: "Role-based portals", desc: "Dedicated views for staff, admin, inspector, student, and employer — each tailored to their workflow." },
   ];
 
   return (
@@ -418,7 +416,7 @@ function Features() {
 function Testimonials({ persona }: { persona: Persona }) {
   const list = persona === "company"
     ? [
-        { quote: "The staff recruitment team found us candidates we would never have discovered on our own. The matching is thoughtful and relevant — not just keyword spam.",
+        { quote: "The staff recruitment team found us students we would never have discovered on our own. The matching is thoughtful and relevant — not just keyword spamming.",
           author: "Noura Al-Sabah", role: "HR Director, Kuwait City Medical Group" },
         { quote: "Timesheets and payments in one dashboard. Our HR team saves 10 hours a week on admin alone.",
           author: "Faisal Al-Ali", role: "Operations Manager, Premier Healthcare" },
@@ -467,7 +465,7 @@ function Testimonials({ persona }: { persona: Persona }) {
 
 function Comparison() {
   const rows: [string, boolean, boolean][] = [
-    ["Staff-driven candidate matching", true, false],
+    ["Staff-driven student matching", true, false],
     ["AI-assisted role suggestions", true, false],
     ["Integrated timesheets", true, false],
     ["Consolidated invoicing", true, false],
@@ -600,7 +598,20 @@ export default function LandingContent({ session }: LandingContentProps) {
   }, [router, sp]);
 
   return (
-    <div style={{ backgroundColor: "var(--paper)", minHeight: "100svh" }}>
+    <div
+      data-theme="light"
+      style={{
+        "--ink": "#182230",
+        "--muted": "#667085",
+        "--paper": "#f5f7fa",
+        "--surface": "#ffffff",
+        "--surface-soft": "#f7f8fa",
+        "--border": "#d6dce7",
+        "--shadow": "0 4px 24px rgba(0,0,0,0.08)",
+        backgroundColor: "#f5f7fa",
+        minHeight: "100svh",
+      } as React.CSSProperties}
+    >
       <a href="#main-content" className="skipLink" style={{ color: "var(--ink)" }}>Skip to content</a>
       <Nav session={session} persona={persona} />
       <main id="main-content">
