@@ -4,103 +4,21 @@ import crypto from "node:crypto";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
-
-// ---------------------------------------------------------------------------
-// Schemas
-// ---------------------------------------------------------------------------
-
-const listFulltimersSchema = z.object({
-  page: z.coerce.number().int().positive().optional().default(1),
-  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
-  search: z.string().optional(),
-  nationalityId: z.coerce.number().int().positive().optional(),
-  employed: z.enum(["true", "false"]).optional(),
-});
-
-const getFulltimerSchema = z.object({
-  fulltimerUuid: z.string().min(1, "Fulltimer UUID is required"),
-});
-
-const createFulltimerSchema = z.object({
-  name: z.string().min(1, "Name is required").max(255),
-  email: z.string().email("Valid email is required"),
-  phone: z.string().max(255).optional(),
-  nationalityId: z.coerce.number().int().positive().optional(),
-  countryId: z.coerce.number().int().positive().optional(),
-  universityId: z.coerce.number().int().positive().optional(),
-  employed: z.boolean().optional(),
-  gender: z.boolean().optional(),
-  birthDate: z.string().optional(),
-  drivingLicense: z.boolean().optional(),
-  currentSalary: z.string().max(100).optional(),
-  expectedSalary: z.string().max(100).optional(),
-  currencyCode: z.string().length(3).optional().default("KWD"),
-});
-
-const updateFulltimerSchema = z.object({
-  fulltimerUuid: z.string().min(1, "Fulltimer UUID is required"),
-  name: z.string().min(1).max(255).optional(),
-  phone: z.string().max(255).optional(),
-  nationalityId: z.coerce.number().int().positive().optional(),
-  countryId: z.coerce.number().int().positive().optional(),
-  universityId: z.coerce.number().int().positive().optional(),
-  employed: z.boolean().optional(),
-  gender: z.boolean().optional(),
-  birthDate: z.string().optional(),
-  drivingLicense: z.boolean().optional(),
-  currentSalary: z.string().max(100).optional(),
-  expectedSalary: z.string().max(100).optional(),
-  currencyCode: z.string().length(3).optional(),
-});
-
-const deleteFulltimerSchema = z.object({
-  fulltimerUuid: z.string().min(1, "Fulltimer UUID is required"),
-});
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export type FulltimerListItem = {
-  fulltimer_uuid: string;
-  fulltimer_name: string;
-  fulltimer_email: string;
-  fulltimer_phone: string | null;
-  fulltimer_employed: boolean | null;
-  nationality_id: number | null;
-  country_id: number | null;
-  university_id: number | null;
-  fulltimer_created_datetime: string | null;
-};
-
-export type FulltimerDetail = {
-  fulltimer_uuid: string;
-  fulltimer_name: string;
-  fulltimer_email: string;
-  fulltimer_phone: string | null;
-  fulltimer_employed: boolean | null;
-  fulltimer_gender: boolean | null;
-  fulltimer_birth_date: string | null;
-  fulltimer_driving_license: boolean | null;
-  nationality_id: number | null;
-  country_id: number | null;
-  university_id: number | null;
-  fulltimer_area_uuid: string | null;
-  fulltimer_current_salary: string | null;
-  fulltimer_expected_salary: string | null;
-  fulltimer_pdf_cv: string | null;
-  currency_code: string | null;
-  fulltimer_created_datetime: string | null;
-  fulltimer_updated_datetime: string | null;
-};
-
-export type ListFulltimersResult = {
-  fulltimers: FulltimerListItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
+import {
+  listFulltimersSchema,
+  getFulltimerSchema,
+  createFulltimerSchema,
+  updateFulltimerSchema,
+  deleteFulltimerSchema,
+  listFulltimersResultSchema,
+  fulltimerDetailOrNullSchema,
+  type FulltimerListItem,
+  type FulltimerDetail,
+  type ListFulltimersResult,
+  type ListFulltimersInput,
+  type CreateFulltimerInput,
+  type UpdateFulltimerInput,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -176,7 +94,7 @@ function buildWhereFilters(params: {
  * Mirrors legacy Yii2 FulltimerController::actionIndex().
  */
 export async function listFulltimers(
-  params: FormData | z.input<typeof listFulltimersSchema> = {},
+  params: FormData | ListFulltimersInput = {},
 ): Promise<ListFulltimersResult> {
   await requireCapability("fulltimer.read");
 
@@ -210,13 +128,24 @@ export async function listFulltimers(
     prisma.fulltimer.count({ where }),
   ]);
 
-  return {
+  const result = {
     fulltimers: fulltimers.map(mapListItem),
     total,
     page,
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  // Validate output shape
+  const outputParsed = listFulltimersResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/fulltimers] listFulltimers output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -242,7 +171,19 @@ export async function getFulltimer(
   });
 
   if (!fulltimer) return null;
-  return mapDetail(fulltimer);
+
+  const result = mapDetail(fulltimer);
+
+  // Validate output shape
+  const outputParsed = fulltimerDetailOrNullSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/fulltimers] getFulltimer output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -255,7 +196,7 @@ export async function getFulltimer(
  * Mirrors legacy Yii2 FulltimerController::actionCreate().
  */
 export async function createFulltimer(
-  data: z.input<typeof createFulltimerSchema>,
+  data: CreateFulltimerInput,
 ): Promise<{ fulltimer_uuid: string }> {
   await requireCapability("fulltimer.write");
 
@@ -305,7 +246,7 @@ export async function createFulltimer(
  * Only provided fields are updated.
  */
 export async function updateFulltimer(
-  data: z.input<typeof updateFulltimerSchema>,
+  data: UpdateFulltimerInput,
 ): Promise<{ fulltimer_uuid: string }> {
   await requireCapability("fulltimer.write");
 
