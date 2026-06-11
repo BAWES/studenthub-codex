@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback } from "react";
-import { GlassPanel } from "@/components/ui/glass-panel";
 
 // ---------------------------------------------------------------------------
 // PaymentFilters
@@ -43,7 +42,7 @@ export function PaymentFilters({
 
   return (
     <>
-      <GlassPanel variant="subtle" radius="md" className="p-4 mb-6">
+      <div className="rounded-lg border border-[var(--border)] bg-white p-4 mb-6">
         <div className="flex flex-wrap items-end gap-4">
           <div className="flex flex-col gap-1">
             <label htmlFor="payment-status" className="text-[11px] font-bold uppercase tracking-wider" style={{ color: "var(--muted)" }}>
@@ -122,7 +121,7 @@ export function PaymentFilters({
             </button>
           </div>
         </div>
-      </GlassPanel>
+      </div>
 
       {emptyResult && (
         <div className="flex flex-col items-center justify-center py-16 gap-4" role="status">

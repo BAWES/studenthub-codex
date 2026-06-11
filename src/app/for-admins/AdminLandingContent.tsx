@@ -67,8 +67,8 @@ export default function AdminLandingContent({
         className="min-h-svh w-[min(1320px,calc(100%_-_28px))] mx-auto grid content-start gap-6 pt-[18px] pb-[42px] max-sm:w-[min(calc(100%_-_20px),720px)]"
       >
         {/* ── Glass Navigation ── */}
-        <nav className="shGlassNav" aria-label="StudentHub public navigation">
-          <div className="shGlassNavInner">
+        <nav className="sticky top-[3px] z-20 min-h-[62px] flex items-center justify-between gap-[14px] rounded-xl p-[2px] bg-white shadow-md border border-[var(--border)]" aria-label="StudentHub public navigation">
+          <div className="w-full min-h-[58px] flex items-center justify-between gap-[14px] px-1">
             <Link
               className="inline-flex items-center gap-2.5 text-[var(--ink)] px-2 no-underline min-h-11"
               href="/"
@@ -119,7 +119,7 @@ export default function AdminLandingContent({
           }}
           aria-label="Admin pain points and solutions"
         >
-          <div className="shHeroGradientDramatic" aria-hidden="true" />
+          <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-[#fef1ef] via-white to-[var(--paper)] z-0" aria-hidden="true" />
 
           <div className="relative z-[2]">
             <p className="text-[var(--sh-info)] text-[11px] font-black uppercase tracking-wider mb-1">
@@ -218,7 +218,7 @@ export default function AdminLandingContent({
           }}
           aria-label="Get started as admin"
         >
-          <div className="shHeroGradientDramatic" aria-hidden="true" />
+          <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-[#fef1ef] via-white to-[var(--paper)] z-0" aria-hidden="true" />
 
           <div className="relative z-[2] max-w-[640px] mx-auto">
             <p className="text-[var(--sh-info)] text-[11px] font-black uppercase tracking-wider mb-2">

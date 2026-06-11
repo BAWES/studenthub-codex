@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useMemo, useCallback, type KeyboardEvent } from "react";
-import { GlassPanel } from "@/components/ui/glass-panel";
 import type { PaymentRow } from "./schemas";
 
 // ---------------------------------------------------------------------------
@@ -138,7 +137,7 @@ export function PaymentDataTable({
 
   if (error && !loading) {
     return (
-      <GlassPanel variant="subtle" radius="md" className="p-8" role="alert">
+      <div className="rounded-lg border border-[var(--border)] bg-white p-8" role="alert">
         <div className="flex flex-col items-center gap-4 text-center">
           <span className="text-3xl" aria-hidden="true">⚠️</span>
           <div>
@@ -149,12 +148,12 @@ export function PaymentDataTable({
             Retry
           </button>
         </div>
-      </GlassPanel>
+      </div>
     );
   }
 
   return (
-    <GlassPanel variant="subtle" radius="md" className="overflow-hidden">
+    <div className="rounded-lg border border-[var(--border)] bg-white overflow-hidden">
       <div
         className="grid gap-0 text-[11px] font-bold uppercase tracking-wider px-4 py-3"
         style={{
@@ -243,6 +242,6 @@ export function PaymentDataTable({
           </div>
         </div>
       )}
-    </GlassPanel>
+    </div>
   );
 }
