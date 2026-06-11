@@ -128,6 +128,13 @@
   --sh-info-bg: rgba(11, 99, 206, 0.10);
   --sh-info-glow: 0 0 12px rgba(11, 99, 206, 0.25);
 
+  /* Amber/accent CTA */
+  --sh-amber: #f59e0b;
+  --sh-amber-deep: #d97706;
+  --sh-amber-glow: 0 4px 14px rgba(245, 158, 11, 0.35);
+  --sh-amber-glow-hover: 0 8px 28px rgba(245, 158, 11, 0.50);
+  --sh-amber-bg: rgba(245, 158, 11, 0.10);
+
   /* OS spacing */
   --sh-space-xs: 4px;
   --sh-space-sm: 8px;
@@ -276,6 +283,13 @@
   --sh-info-bg: rgba(138, 191, 255, 0.10);
   --sh-info-glow: 0 0 14px rgba(138, 191, 255, 0.25);
 
+  /* Amber/accent CTA (dark mode) */
+  --sh-amber: #fbbf24;
+  --sh-amber-deep: #f59e0b;
+  --sh-amber-glow: 0 4px 14px rgba(251, 191, 36, 0.30);
+  --sh-amber-glow-hover: 0 8px 28px rgba(251, 191, 36, 0.45);
+  --sh-amber-bg: rgba(251, 191, 36, 0.12);
+
   /* App Header (dark mode) */
   --sh-header-glass-bg: rgba(17, 24, 36, 0.72);
   --sh-header-glass-border: rgba(42, 53, 71, 0.5);
@@ -419,6 +433,19 @@ body {
   width: 40px;
   height: 40px;
   padding: 0;
+}
+
+/* ── Amber CTA — accent button for employers/highlight actions ── */
+.uiButton_amber {
+  background: linear-gradient(135deg, var(--sh-amber), var(--sh-amber-deep));
+  color: #fff;
+  border: none;
+  box-shadow: var(--sh-amber-glow);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+.uiButton_amber:hover {
+  box-shadow: var(--sh-amber-glow-hover);
+  transform: translateY(-1px);
 }
 
 .uiBadge {

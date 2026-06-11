@@ -95,6 +95,8 @@ export default function EmployerSection({ className }: EmployerSectionProps) {
               style={{
                 background: "var(--sh-glass-bg)",
                 border: "1px solid var(--sh-glass-border)",
+                animation: `shCardIn 500ms cubic-bezier(0.16, 1, 0.3, 1) both`,
+                animationDelay: `${i * 80}ms`,
               }}
             >
               {/* Icon with glow */}
