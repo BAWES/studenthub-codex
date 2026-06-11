@@ -1,8 +1,14 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { prisma } from "@/lib/prisma";
 import { requireRoleCapability } from "@/modules/auth/session";
+import {
+  listCandidateSkills as moduleListSkills,
+  getCandidateSkill as moduleGetSkill,
+  createCandidateSkill as moduleCreateSkill,
+  updateCandidateSkill as moduleUpdateSkill,
+  deleteCandidateSkill as moduleDeleteSkill,
+} from "@/modules/candidates/skills/actions";
 import type {
   ListSkillsInput,
   CreateSkillInput,
@@ -16,33 +22,21 @@ import {
   createSkillSchema,
   updateSkillSchema,
   deleteSkillSchema,
+  skillItemOutputSchema,
+  skillListOutputSchema,
+  skillActionResultOutputSchema,
 } from "./schemas";
 
 // Re-export types for client components
 export type { SkillActionResult, SkillItem };
 
 // ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-/** Map a Prisma candidate_skill row to the API shape. */
-function toItem(
-  row: Awaited<ReturnType<typeof prisma.candidate_skill.findFirst>>,
-): SkillItem | null {
-  if (!row) return null;
-  return {
-    candidate_skill_id: row.candidate_skill_id,
-    skill: row.skill,
-    created_at: row.candidate_skill_created_at,
-  };
-}
-
-// ---------------------------------------------------------------------------
-// Server actions
+// Server actions — delegate to module-level implementations
 // ---------------------------------------------------------------------------
 
 /**
  * List skill records for the current candidate (paginated).
+ * Delegates to modules/candidates/skills with the session's candidate ID.
  */
 export async function listCandidateSkills(
   input: ListSkillsInput = {},
@@ -56,25 +50,27 @@ export async function listCandidateSkills(
     );
   }
 
-  const { page, limit } = parsed.data;
-  const skip = (page - 1) * limit;
-
-  const rows = await prisma.candidate_skill.findMany({
-    where: {
-      candidate_id: Number(session.id),
-      deleted: 0,
-    },
-    orderBy: [{ candidate_skill_created_at: "desc" }, { candidate_skill_id: "desc" }],
-    skip,
-    take: limit,
+  const result = await moduleListSkills({
+    candidateId: Number(session.id),
+    page: parsed.data.page,
+    limit: parsed.data.limit,
   });
 
-  return rows.map((r) => toItem(r)!);
+  // Validate output shape
+  const outputParsed = skillListOutputSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[candidate/skills] listCandidateSkills output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result.items;
 }
 
 /**
  * Get a single skill record by ID.
- * Only returns records belonging to the current candidate.
+ * Delegates to modules/candidates/skills.
  */
 export async function getCandidateSkill(
   skillId: number,
@@ -88,19 +84,28 @@ export async function getCandidateSkill(
     );
   }
 
-  const row = await prisma.candidate_skill.findFirst({
-    where: {
-      candidate_skill_id: parsed.data.skillId,
-      candidate_id: Number(session.id),
-      deleted: 0,
-    },
+  const result = await moduleGetSkill({
+    candidateId: Number(session.id),
+    skillId: parsed.data.skillId,
   });
 
-  return toItem(row);
+  // Validate output shape
+  if (result) {
+    const outputParsed = skillItemOutputSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[candidate/skills] getCandidateSkill output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+  }
+
+  return result;
 }
 
 /**
  * Create a new skill record for the current candidate.
+ * Delegates to modules/candidates/skills with the session's candidate ID.
  */
 export async function createCandidateSkill(
   data: CreateSkillInput,
@@ -118,38 +123,28 @@ export async function createCandidateSkill(
     };
   }
 
-  // Prevent duplicate skill names for the same candidate
-  const existing = await prisma.candidate_skill.findFirst({
-    where: {
-      candidate_id: Number(session.id),
-      skill: parsed.data.skill,
-      deleted: 0,
-    },
-    select: { candidate_skill_id: true },
-  });
-  if (existing) {
-    return { success: false, error: "This skill already exists" };
-  }
-
-  const now = new Date();
-
-  const row = await prisma.candidate_skill.create({
-    data: {
-      candidate_id: Number(session.id),
-      skill: parsed.data.skill,
-      deleted: 0,
-      candidate_skill_created_at: now,
-    },
+  const result = await moduleCreateSkill({
+    candidateId: Number(session.id),
+    skill: parsed.data.skill,
   });
 
   revalidatePath("/candidate/skills");
-  return { success: true, skillId: row.candidate_skill_id };
+
+  // Validate output shape
+  const outputParsed = skillActionResultOutputSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[candidate/skills] createCandidateSkill output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
  * Update an existing skill record.
- * Uses direct update — skills have no child records depending on the ID,
- * so a soft-delete+recreate pattern would break the redirect to the detail page.
+ * Delegates to modules/candidates/skills with ownership verification.
  */
 export async function updateCandidateSkill(
   data: UpdateSkillInput,
@@ -167,48 +162,30 @@ export async function updateCandidateSkill(
     };
   }
 
-  const candidateId = Number(session.id);
-  const skillId = parsed.data.skillId;
-
-  // Verify ownership
-  const existing = await prisma.candidate_skill.findFirst({
-    where: {
-      candidate_skill_id: skillId,
-      candidate_id: candidateId,
-      deleted: 0,
-    },
-    select: { candidate_skill_id: true },
-  });
-  if (!existing) {
-    return { success: false, error: "Skill not found or access denied" };
-  }
-
-  // Check for duplicate skill name (excluding this record)
-  const duplicate = await prisma.candidate_skill.findFirst({
-    where: {
-      candidate_id: candidateId,
-      skill: parsed.data.skill,
-      deleted: 0,
-      candidate_skill_id: { not: skillId },
-    },
-    select: { candidate_skill_id: true },
-  });
-  if (duplicate) {
-    return { success: false, error: "This skill already exists" };
-  }
-
-  // Direct update — skills have no child records depending on the ID
-  await prisma.candidate_skill.update({
-    where: { candidate_skill_id: skillId },
-    data: { skill: parsed.data.skill },
+  const result = await moduleUpdateSkill({
+    candidateId: Number(session.id),
+    skillId: parsed.data.skillId,
+    skill: parsed.data.skill,
   });
 
   revalidatePath("/candidate/skills");
-  return { success: true, skillId };
+  revalidatePath(`/candidate/skills/${parsed.data.skillId}`);
+
+  // Validate output shape
+  const outputParsed = skillActionResultOutputSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[candidate/skills] updateCandidateSkill output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
  * Delete a skill record by ID (soft-delete using the `deleted` flag).
+ * Delegates to modules/candidates/skills with ownership verification.
  */
 export async function deleteCandidateSkill(
   skillId: number,
@@ -226,24 +203,21 @@ export async function deleteCandidateSkill(
     };
   }
 
-  const existing = await prisma.candidate_skill.findFirst({
-    where: {
-      candidate_skill_id: parsed.data.skillId,
-      candidate_id: Number(session.id),
-      deleted: 0,
-    },
-    select: { candidate_skill_id: true },
-  });
-  if (!existing) {
-    return { success: false, error: "Skill not found or access denied" };
-  }
-
-  // Soft-delete: set deleted flag
-  await prisma.candidate_skill.update({
-    where: { candidate_skill_id: parsed.data.skillId },
-    data: { deleted: 1 },
+  const result = await moduleDeleteSkill({
+    candidateId: Number(session.id),
+    skillId: parsed.data.skillId,
   });
 
   revalidatePath("/candidate/skills");
-  return { success: true, skillId: parsed.data.skillId };
+
+  // Validate output shape
+  const outputParsed = skillActionResultOutputSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[candidate/skills] deleteCandidateSkill output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
