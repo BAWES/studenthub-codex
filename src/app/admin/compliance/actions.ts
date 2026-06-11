@@ -26,6 +26,7 @@ import {
   type ComplianceSummary,
   type CompanyComplianceDetail,
   type IdRequestComplianceDetail,
+  complianceMutationResponseSchema,
 } from "./schemas";
 
 // ---------------------------------------------------------------------------

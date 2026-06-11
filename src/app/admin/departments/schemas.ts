@@ -116,3 +116,46 @@ export type DepartmentActionResponse = {
   message: string;
   data?: DepartmentRow;
 };
+
+// ---------------------------------------------------------------------------
+// Output validation schemas
+// ---------------------------------------------------------------------------
+
+export const departmentListResponseSchema = z.object({
+  items: z.array(z.object({
+    department_uuid: z.string(),
+    department_name_en: z.string(),
+    department_name_ar: z.string().nullable(),
+    employee_count: z.number().int().min(0),
+    created_at: z.string().nullable(),
+    updated_at: z.string().nullable(),
+  })),
+  total: z.number().int().min(0),
+  page: z.number().int().min(1),
+  limit: z.number().int().min(1),
+  totalPages: z.number().int().min(0),
+});
+
+export const departmentDetailSchema = z.object({
+  department: z.object({
+    department_uuid: z.string(),
+    department_name_en: z.string(),
+    department_name_ar: z.string().nullable(),
+    department_created_at: z.string().nullable(),
+    department_updated_at: z.string().nullable(),
+  }).nullable(),
+  employee_count: z.number().int().min(0),
+});
+
+export const departmentActionResponseSchema = z.object({
+  operation: z.enum(["success", "error"]),
+  message: z.string(),
+  data: z.object({
+    department_uuid: z.string(),
+    department_name_en: z.string(),
+    department_name_ar: z.string().nullable(),
+    employee_count: z.number().int().min(0),
+    created_at: z.string().nullable(),
+    updated_at: z.string().nullable(),
+  }).optional(),
+});

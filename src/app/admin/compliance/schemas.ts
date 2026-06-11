@@ -206,3 +206,81 @@ export type IdRequestComplianceDetail = {
   } | null;
   metrics: { label: string; value: string | number; note: string }[];
 };
+
+// ---------------------------------------------------------------------------
+// Output validation schemas
+// ---------------------------------------------------------------------------
+
+export const complianceRowSchema = z.object({
+  id: z.string(),
+  type: z.enum(["company", "id_request", "candidate"]),
+  title: z.string(),
+  subtitle: z.string(),
+  status: z.string(),
+  updated: z.string(),
+});
+
+export const complianceSummarySchema = z.object({
+  totalCompanies: z.number().int().min(0),
+  unapprovedCompanies: z.number().int().min(0),
+  pendingIdRequests: z.number().int().min(0),
+  unapprovedCandidates: z.number().int().min(0),
+  incompleteCandidates: z.number().int().min(0),
+});
+
+const complianceMetricSchema = z.object({
+  label: z.string(),
+  value: z.union([z.string(), z.number()]),
+  note: z.string(),
+});
+
+const idRequestRecordSchema = z.object({
+  id: z.string(),
+  status: z.string(),
+  rejection_reason: z.string().nullable(),
+  created_at: z.date().nullable(),
+});
+
+export const companyComplianceDetailSchema = z.object({
+  type: z.literal("company"),
+  company: z.object({
+    company_id: z.number(),
+    company_name: z.string(),
+    company_email: z.string().nullable(),
+    company_approved_to_hire: z.boolean().nullable(),
+    company_created_at: z.date().nullable(),
+    company_updated_at: z.date().nullable(),
+    staff_name: z.string().nullable(),
+    country_name_en: z.string().nullable(),
+    no_of_active_requests: z.number().nullable(),
+  }).nullable(),
+  metrics: z.array(complianceMetricSchema),
+  idRequests: z.array(idRequestRecordSchema),
+});
+
+export const idRequestComplianceDetailSchema = z.object({
+  type: z.literal("id_request"),
+  record: z.object({
+    cir_uuid: z.string(),
+    candidate_ids: z.string().nullable(),
+    status: z.string().nullable(),
+    rejection_reason: z.string().nullable(),
+    created_at: z.date().nullable(),
+    updated_at: z.date().nullable(),
+  }).nullable(),
+  metrics: z.array(complianceMetricSchema),
+});
+
+export const listComplianceRecordsResponseSchema = z.object({
+  items: z.array(complianceRowSchema),
+  total: z.number().int().min(0),
+  page: z.number().int().min(1),
+  limit: z.number().int().min(1),
+  totalPages: z.number().int().min(0),
+  summary: complianceSummarySchema,
+});
+
+export const complianceMutationResponseSchema = z.object({
+  id: z.string(),
+  type: z.string(),
+});
