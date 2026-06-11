@@ -60,3 +60,50 @@ export type MatchedCandidateRow = {
   universityName: string | null;
   score: MatchScore;
 };
+
+// ---------------------------------------------------------------------------
+// Output validation schemas
+// ---------------------------------------------------------------------------
+
+export const matchScoreSchema = z.object({
+  overall: z.number().int().min(0).max(100),
+  skillMatch: z.number().int().min(0).max(100),
+  educationMatch: z.number().int().min(0).max(100),
+  locationMatch: z.number().int().min(0).max(100),
+  breakdown: z.array(z.string()),
+});
+
+export const matchedJobRowSchema = z.object({
+  jobListingId: z.number().int().positive(),
+  title: z.string(),
+  employerName: z.string(),
+  location: z.string().nullable(),
+  employmentType: z.string().nullable(),
+  salaryRange: z.string().nullable(),
+  score: matchScoreSchema,
+});
+
+export const matchedCandidateRowSchema = z.object({
+  candidateId: z.number().int().positive(),
+  candidateName: z.string(),
+  candidateSkills: z.array(z.string()),
+  universityName: z.string().nullable(),
+  score: matchScoreSchema,
+});
+
+export const matchCandidateToJobResultSchema = z.object({
+  success: z.boolean(),
+  score: matchScoreSchema,
+});
+
+export const listMatchingJobsResultSchema = z.object({
+  success: z.boolean(),
+  jobs: z.array(matchedJobRowSchema),
+  total: z.number().int().nonnegative(),
+});
+
+export const listMatchingCandidatesResultSchema = z.object({
+  success: z.boolean(),
+  candidates: z.array(matchedCandidateRowSchema),
+  total: z.number().int().nonnegative(),
+});
