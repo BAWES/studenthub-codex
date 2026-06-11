@@ -59,6 +59,7 @@ export async function getCandidateWorkLogDetail(
       store: {
         select: {
           store_name: true,
+          store_location: true,
           company: { select: { company_name: true } },
         },
       },
@@ -77,6 +78,7 @@ export async function getCandidateWorkLogDetail(
     via: row.via,
     note: row.note,
     store_name: row.store?.store_name ?? null,
+    store_location: row.store?.store_location ?? null,
     company_name: row.store?.company?.company_name ?? null,
   };
 }
