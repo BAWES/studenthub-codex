@@ -3,11 +3,6 @@
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
-import {
-  listAreasSchema,
-  getAreaSchema,
-  listAreasResultSchema,
-} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -30,8 +25,23 @@ export type ListAreasResult = {
   totalPages: number;
 };
 
-// Re-export input types for backward compatibility
+// ---------------------------------------------------------------------------
+// Schema
+// ---------------------------------------------------------------------------
+
+const listAreasSchema = z.object({
+  nameFilter: z.string().optional(),
+  countryId: z.number().int().positive().optional(),
+  page: z.number().int().positive().optional(),
+  limit: z.number().int().min(1).max(100).optional(),
+});
+
 export type ListAreasInput = z.input<typeof listAreasSchema>;
+
+const getAreaSchema = z.object({
+  areaUuid: z.string().min(1),
+});
+
 export type GetAreaInput = z.input<typeof getAreaSchema>;
 
 // ---------------------------------------------------------------------------
@@ -85,24 +95,13 @@ export async function listAreas(
     area_longitude: a.area_longitude ? Number(a.area_longitude) : null,
   }));
 
-  const result = {
+  return {
     areas,
     total,
     page,
     limit,
     totalPages: Math.ceil(total / limit),
   };
-
-  // Output validation — log issues without throwing
-  const outputParsed = listAreasResultSchema.safeParse(result);
-  if (!outputParsed.success) {
-    console.error(
-      "[modules/regions] listAreas output failed:",
-      outputParsed.error.issues,
-    );
-  }
-
-  return result;
 }
 
 /**
@@ -138,6 +137,3 @@ export async function getArea(params: GetAreaInput): Promise<AreaItem | null> {
       } as AreaItem)
     : null;
 }
-
-// Re-export schemas for backward compatibility
-export { listAreasSchema, getAreaSchema };
