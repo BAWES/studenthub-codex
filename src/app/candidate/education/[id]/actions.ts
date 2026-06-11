@@ -12,7 +12,6 @@
 // ---------------------------------------------------------------------------
 
 import { revalidatePath } from "next/cache";
-import { prisma } from "@/lib/prisma";
 import { requireRoleCapability } from "@/modules/auth/session";
 import {
   getCandidateEducationAction as parentGetCandidateEducation,
@@ -42,7 +41,7 @@ import type { EducationEntryResponse } from "./schemas";
 export async function getEducationEntry(
   educationUuid: string,
 ): Promise<EducationItem | null> {
-  const session = await requireRoleCapability("candidate", "candidate.read.own");
+  await requireRoleCapability("candidate", "candidate.read.own");
 
   const parsed = getEducationEntrySchema.safeParse({ educationUuid });
   if (!parsed.success) {
@@ -60,6 +59,7 @@ export async function getEducationEntry(
  * Update an existing education entry.
  *
  * - Delegates to parent `updateCandidateEducation` for the update (delete+create in transaction).
+ *   Ownership verification is handled by the module-level action.
  * - Returns `{ success: true }` on success, `{ success: false, error }` on failure.
  */
 export async function updateEducationEntry(
@@ -70,7 +70,7 @@ export async function updateEducationEntry(
   graduationYear?: number,
   isCurrentlyStudying?: boolean,
 ): Promise<EducationEntryResponse> {
-  const session = await requireRoleCapability("candidate", "candidate.profile.edit");
+  await requireRoleCapability("candidate", "candidate.profile.edit");
 
   const parsed = updateEducationEntrySchema.safeParse({
     educationUuid,
@@ -87,24 +87,22 @@ export async function updateEducationEntry(
     };
   }
 
-  // Verify the entry exists and belongs to the candidate before mutating
-  const existing = await prisma.candidate_education.findFirst({
-    where: {
-      education_uuid: parsed.data.educationUuid,
-      candidate_id: Number(session.id),
-    },
-    select: { education_uuid: true },
+  // Delegate to the parent action (owns ownership verification + output validation)
+  const result = await parentUpdateCandidateEducation({
+    educationUuid: parsed.data.educationUuid,
+    universityId: parsed.data.universityId,
+    degreeUuid: parsed.data.degreeUuid,
+    majorUuid: parsed.data.majorUuid,
+    graduationYear: parsed.data.graduationYear,
+    isCurrentlyStudying: parsed.data.isCurrentlyStudying,
   });
-
-  if (!existing) {
-    return { success: false, error: "Education entry not found or access denied" };
-  }
-
-  // Delegate the update to the parent action
-  await parentUpdateCandidateEducation(parsed.data);
 
   revalidatePath("/candidate/education");
   revalidatePath(`/candidate/education/${parsed.data.educationUuid}`);
+
+  if (!result.success) {
+    return { success: false, error: result.error };
+  }
 
   return { success: true };
 }
@@ -115,13 +113,13 @@ export async function updateEducationEntry(
 
 /**
  * Delete an education entry by UUID.
- * Only the owning candidate can delete their own education entries.
+ * Delegates to parent action (which verifies ownership).
  * Returns `{ success: true }` on success, `{ success: false, error }` on error.
  */
 export async function deleteEducationEntry(
   educationUuid: string,
 ): Promise<EducationEntryResponse> {
-  const session = await requireRoleCapability("candidate", "candidate.profile.edit");
+  await requireRoleCapability("candidate", "candidate.profile.edit");
 
   const parsed = deleteEducationEntrySchema.safeParse({ educationUuid });
   if (!parsed.success) {
@@ -131,22 +129,14 @@ export async function deleteEducationEntry(
     };
   }
 
-  // Verify ownership before deleting
-  const existing = await prisma.candidate_education.findFirst({
-    where: {
-      education_uuid: parsed.data.educationUuid,
-      candidate_id: Number(session.id),
-    },
-    select: { education_uuid: true },
-  });
-
-  if (!existing) {
-    return { success: false, error: "Education entry not found or access denied" };
-  }
-
-  await parentDeleteCandidateEducation(parsed.data.educationUuid);
+  // Delegate to the parent action (owns ownership verification + output validation)
+  const result = await parentDeleteCandidateEducation(parsed.data.educationUuid);
 
   revalidatePath("/candidate/education");
+
+  if (!result.success) {
+    return { success: false, error: result.error };
+  }
 
   return { success: true };
 }
