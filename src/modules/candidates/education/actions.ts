@@ -15,19 +15,6 @@ import {
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
-// Re-exports for backward compatibility
-// ---------------------------------------------------------------------------
-
-export { listCandidateEducationSchema, getCandidateEducationSchema };
-export type {
-  ListCandidateEducationParams,
-  GetCandidateEducationParams,
-  CandidateEducationItem,
-  CandidateEducationDetail,
-  ListCandidateEducationResult,
-};
-
-// ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
