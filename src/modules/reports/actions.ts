@@ -3,25 +3,18 @@
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
-
-// ---------------------------------------------------------------------------
-// Schemas
-// ---------------------------------------------------------------------------
-
-const listReportsSchema = z.object({
-  type: z.string().optional(),
-  date: z.string().optional(),
-  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
-});
-
-const getRecruiterReportSchema = z.object({
-  date: z.string().optional(),
-  staffEmail: z.string().email().optional(),
-});
+import {
+  listReportsSchema,
+  getRecruiterReportSchema,
+  listReportsResultSchema,
+  getRecruiterReportResultSchema,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
+
+export type ListReportsInput = z.input<typeof listReportsSchema>;
 
 export type ReportTypeItem = {
   type: string;
@@ -47,6 +40,8 @@ export type ListReportsResult = {
   reports: ReportTypeItem[];
   total: number;
 };
+
+export type GetRecruiterReportInput = z.input<typeof getRecruiterReportSchema>;
 
 export type GetRecruiterReportResult = {
   date: string;
@@ -123,17 +118,28 @@ function buildDailyRecruiterReport(
  * Optionally filter by report type name (e.g. "recruiter" for recruiter reports).
  */
 export async function listReports(
-  input?: z.input<typeof listReportsSchema>,
+  input?: ListReportsInput,
 ): Promise<ListReportsResult> {
   await requireCapability("admin.read");
 
   const params = listReportsSchema.parse(input ?? {});
   const filtered = filterReportTypes(params.type);
 
-  return {
+  const result = {
     reports: filtered.slice(0, params.limit),
     total: filtered.length,
   };
+
+  // Output validation — log mismatches without throwing
+  const outputParsed = listReportsResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/reports] listReports output failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -142,7 +148,7 @@ export async function listReports(
  * Optionally filter by specific staff email.
  */
 export async function getRecruiterReport(
-  input?: z.input<typeof getRecruiterReportSchema>,
+  input?: GetRecruiterReportInput,
 ): Promise<GetRecruiterReportResult> {
   await requireCapability("admin.read");
 
@@ -262,9 +268,20 @@ export async function getRecruiterReport(
     );
   }
 
-  return {
+  const result = {
     date: reportDate,
     reports,
     total: reports.length,
   };
+
+  // Output validation — log mismatches without throwing
+  const outputParsed = getRecruiterReportResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/reports] getRecruiterReport output failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
