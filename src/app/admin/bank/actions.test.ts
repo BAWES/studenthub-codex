@@ -143,3 +143,241 @@ describe("admin/bank — schemas", () => {
     });
   });
 });
+
+// ---------------------------------------------------------------------------
+// Output schema tests
+// ---------------------------------------------------------------------------
+
+import {
+  bankRowOutputSchema,
+  listBanksOutputSchema,
+  bankObjectOutputSchema,
+  bankDetailOutputSchema,
+  bankMutationOutputSchema,
+} from "./schemas";
+
+describe("bankRowOutputSchema", () => {
+  it("accepts a valid bank row", () => {
+    const row = {
+      bank_id: 1,
+      bank_name: "National Bank of Kuwait",
+      bank_iban_code: "KW00NBK0000000000000000000000",
+      bank_swift_code: "NBKKWKWK",
+      bank_code_abk: 123,
+      bank_address: "Kuwait City",
+      bank_transfer_type: "STD",
+      candidate_count: 5,
+      created_at: null,
+    };
+    expect(bankRowOutputSchema.safeParse(row).success).toBe(true);
+  });
+
+  it("accepts nullable fields as null", () => {
+    const row = {
+      bank_id: 1,
+      bank_name: null,
+      bank_iban_code: "KW00NBK0000000000000000000000",
+      bank_swift_code: null,
+      bank_code_abk: null,
+      bank_address: null,
+      bank_transfer_type: null,
+      candidate_count: 0,
+      created_at: null,
+    };
+    expect(bankRowOutputSchema.safeParse(row).success).toBe(true);
+  });
+
+  it("rejects missing required fields", () => {
+    expect(bankRowOutputSchema.safeParse({}).success).toBe(false);
+  });
+
+  it("rejects non-number bank_id", () => {
+    const row = {
+      bank_id: "abc",
+      bank_name: null,
+      bank_iban_code: "KW00NBK0000000000000000000000",
+      bank_swift_code: null,
+      bank_code_abk: null,
+      bank_address: null,
+      bank_transfer_type: null,
+      candidate_count: 0,
+      created_at: null,
+    };
+    expect(bankRowOutputSchema.safeParse(row).success).toBe(false);
+  });
+
+  it("rejects negative candidate_count", () => {
+    const row = {
+      bank_id: 1,
+      bank_name: null,
+      bank_iban_code: "KW00NBK0000000000000000000000",
+      bank_swift_code: null,
+      bank_code_abk: null,
+      bank_address: null,
+      bank_transfer_type: null,
+      candidate_count: -1,
+      created_at: null,
+    };
+    expect(bankRowOutputSchema.safeParse(row).success).toBe(false);
+  });
+});
+
+describe("listBanksOutputSchema", () => {
+  const validItem = {
+    bank_id: 1,
+    bank_name: null,
+    bank_iban_code: "KW00NBK0000000000000000000000",
+    bank_swift_code: null,
+    bank_code_abk: null,
+    bank_address: null,
+    bank_transfer_type: null,
+    candidate_count: 0,
+    created_at: null,
+  };
+
+  it("accepts a valid list result", () => {
+    const result = {
+      items: [validItem],
+      total: 1,
+      page: 1,
+      limit: 20,
+      totalPages: 1,
+    };
+    expect(listBanksOutputSchema.safeParse(result).success).toBe(true);
+  });
+
+  it("accepts empty items", () => {
+    const result = {
+      items: [],
+      total: 0,
+      page: 1,
+      limit: 20,
+      totalPages: 0,
+    };
+    expect(listBanksOutputSchema.safeParse(result).success).toBe(true);
+  });
+
+  it("rejects negative total", () => {
+    const result = {
+      items: [],
+      total: -1,
+      page: 1,
+      limit: 20,
+      totalPages: 0,
+    };
+    expect(listBanksOutputSchema.safeParse(result).success).toBe(false);
+  });
+
+  it("rejects negative page", () => {
+    const result = {
+      items: [],
+      total: 0,
+      page: -1,
+      limit: 20,
+      totalPages: 0,
+    };
+    expect(listBanksOutputSchema.safeParse(result).success).toBe(false);
+  });
+});
+
+describe("bankObjectOutputSchema", () => {
+  it("accepts a valid bank object", () => {
+    const obj = {
+      bank_id: 1,
+      bank_name: "NBK",
+      bank_iban_code: "KW00NBK0000000000000000000000",
+      bank_swift_code: "NBKKWKWK",
+      bank_code_abk: 123,
+      bank_address: "Kuwait City",
+      bank_transfer_type: "STD",
+    };
+    expect(bankObjectOutputSchema.safeParse(obj).success).toBe(true);
+  });
+
+  it("accepts all-null optional fields", () => {
+    const obj = {
+      bank_id: 1,
+      bank_name: null,
+      bank_iban_code: "KW00NBK0000000000000000000000",
+      bank_swift_code: null,
+      bank_code_abk: null,
+      bank_address: null,
+      bank_transfer_type: null,
+    };
+    expect(bankObjectOutputSchema.safeParse(obj).success).toBe(true);
+  });
+
+  it("rejects missing bank_id", () => {
+    const obj = {
+      bank_iban_code: "KW00NBK0000000000000000000000",
+    };
+    expect(bankObjectOutputSchema.safeParse(obj).success).toBe(false);
+  });
+});
+
+describe("bankDetailOutputSchema", () => {
+  it("accepts a valid detail result", () => {
+    const result = {
+      bank: {
+        bank_id: 1,
+        bank_name: null,
+        bank_iban_code: "KW00NBK0000000000000000000000",
+        bank_swift_code: null,
+        bank_code_abk: null,
+        bank_address: null,
+        bank_transfer_type: null,
+      },
+      candidate_count: 5,
+    };
+    expect(bankDetailOutputSchema.safeParse(result).success).toBe(true);
+  });
+
+  it("accepts null bank (not found)", () => {
+    const result = { bank: null, candidate_count: 0 };
+    expect(bankDetailOutputSchema.safeParse(result).success).toBe(true);
+  });
+
+  it("rejects missing candidate_count", () => {
+    const result = { bank: null };
+    expect(bankDetailOutputSchema.safeParse(result).success).toBe(false);
+  });
+});
+
+describe("bankMutationOutputSchema", () => {
+  it("accepts a success response with data", () => {
+    const resp = {
+      operation: "success",
+      message: "Bank created",
+      data: {
+        bank_id: 1,
+        bank_name: "NBK",
+        bank_iban_code: "KW00NBK0000000000000000000000",
+        bank_swift_code: null,
+        bank_code_abk: null,
+        bank_address: null,
+        bank_transfer_type: null,
+      },
+    };
+    expect(bankMutationOutputSchema.safeParse(resp).success).toBe(true);
+  });
+
+  it("accepts a success response without data", () => {
+    const resp = { operation: "success", message: "Bank deleted" };
+    expect(bankMutationOutputSchema.safeParse(resp).success).toBe(true);
+  });
+
+  it("accepts an error response", () => {
+    const resp = { operation: "error", message: "Bank not found" };
+    expect(bankMutationOutputSchema.safeParse(resp).success).toBe(true);
+  });
+
+  it("rejects missing message", () => {
+    const resp = { operation: "success" };
+    expect(bankMutationOutputSchema.safeParse(resp).success).toBe(false);
+  });
+
+  it("rejects invalid operation", () => {
+    const resp = { operation: "unknown", message: "test" };
+    expect(bankMutationOutputSchema.safeParse(resp).success).toBe(false);
+  });
+});
