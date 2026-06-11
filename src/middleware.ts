@@ -1,5 +1,23 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { roleDefaultRoute } from "@/modules/auth/types";
+
+// ── Session cookie decoding (duplicated from session.ts for edge compatibility) ──
+
+function decodeSession(value: string | undefined): { role: string } | null {
+  if (!value) return null;
+  const parts = value.split(".");
+  if (parts.length !== 2) return null;
+  try {
+    const parsed = JSON.parse(
+      Buffer.from(parts[0], "base64url").toString("utf8")
+    ) as { role: string };
+    if (!parsed.role) return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
 
 const protectedPaths = [
   "/app",
@@ -38,6 +56,14 @@ export function middleware(request: NextRequest) {
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("redirect", pathname);
     return NextResponse.redirect(loginUrl);
+  }
+
+  // Route authenticated users from / to their role-specific workspace
+  if (pathname === "/") {
+    const session = decodeSession(sessionCookie?.value);
+    if (session && session.role) {
+      return NextResponse.redirect(new URL(roleDefaultRoute(session.role as any), request.url));
+    }
   }
 
   // Add security headers for authenticated routes

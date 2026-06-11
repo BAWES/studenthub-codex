@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { getSession } from "@/modules/auth/session";
+import { roleDefaultRoute } from "@/modules/auth/types";
 import { LoginForm } from "@/modules/auth/LoginForm";
 
 export const dynamic = "force-dynamic";
@@ -10,7 +11,7 @@ export default async function LoginPage({
   searchParams: Promise<{ error?: string }>;
 }) {
   const session = await getSession();
-  if (session) redirect("/app");
+  if (session) redirect(roleDefaultRoute(session.role));
   const params = await searchParams;
 
   return (

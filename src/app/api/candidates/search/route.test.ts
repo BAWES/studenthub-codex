@@ -1,102 +1,71 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import type { Mock } from "vitest";
+import { NextRequest } from "next/server";
 
 // =============================================================================
-// Mock @/lib/typesense before importing route
+// Mock the underlying search module before importing the route handler
 // =============================================================================
 
-const mockHealthRetrieve = vi.hoisted(() => vi.fn());
-const mockSearchDocuments = vi.hoisted(() => vi.fn());
+const mockGetCandidateSearchWorkspaceTypesense = vi.hoisted(() => vi.fn());
 
-const mockGetTypesenseClient = vi.hoisted(() =>
-  vi.fn(() => ({
-    health: { retrieve: mockHealthRetrieve },
-    collections: () => ({
-      documents: () => ({ search: mockSearchDocuments }),
-    }),
-  })),
-);
-
-vi.mock("@/lib/typesense", () => ({
-  getTypesenseClient: mockGetTypesenseClient,
-  CANDIDATES_COLLECTION: "candidates",
+vi.mock("@/modules/candidates/search-typesense", () => ({
+  getCandidateSearchWorkspaceTypesense: mockGetCandidateSearchWorkspaceTypesense,
 }));
 
 // =============================================================================
-// Import route handler
+// Import module under test — the API route handler
 // =============================================================================
 
-import { GET } from "./route";
-import { NextRequest } from "next/server";
+const { GET } = await import("./route");
 
 // =============================================================================
 // Fixtures
 // =============================================================================
 
-function makeCandidateDoc(overrides: Record<string, unknown> = {}) {
-  return {
-    candidate_id: 42,
-    candidate_name: "Ahmed Al-Mutairi",
-    candidate_name_ar: "أحمد المطيري",
-    candidate_email: "ahmed@example.com",
-    candidate_phone: "+965 5555 1234",
-    candidate_uid: "C-001",
-    country_id: 1,
-    country_name: "Kuwait",
-    university_id: 5,
-    university_name: "Kuwait University",
-    company_id: 0,
-    company_name: "",
-    store_name: "",
-    store_id: 0,
-    skills: ["JavaScript", "React", "Node.js"],
-    tags: ["top-performer"],
-    candidate_gender: 1,
-    candidate_status: 10,
-    approved: 1,
-    is_incomplete_profile: false,
-    candidate_civil_need_verification: false,
-    has_resume: true,
-    candidate_hourly_rate: 5.5,
-    currency_code: "KWD",
-    candidate_updated_at: 1700000000,
-    ...overrides,
-  };
-}
-
-function makeSearchHit(overrides: Record<string, unknown> = {}) {
-  return {
-    document: makeCandidateDoc(overrides),
-    text_match: 100,
-    text_match_info: {
-      best_field_score: "100",
-      best_field_weight: 10,
-      fields_matched: 2,
-      score: "1.0",
-      tokens_matched: 2,
+const defaultWorkspaceResult = {
+  role: "admin" as const,
+  query: "test",
+  filter: "all" as const,
+  source: { current: "Typesense", target: "Typesense", note: "Powered by Typesense search engine on port 8108." },
+  rows: [
+    {
+      id: 42,
+      uid: "C-001",
+      name: "Test Candidate",
+      email: "test@example.com",
+      phone: "+965 5555 1234",
+      status: "Active",
+      signal: "Ready",
+      country: "Kuwait",
+      university: "KU",
+      company: "No company",
+      store: "No store",
+      rate: "5.500 KWD",
+      updated: "Jun 10, 2026",
+      flags: [],
+      skills: ["JavaScript", "React"],
+      score: 6,
     },
-  };
-}
+  ],
+  metrics: [
+    { label: "Candidates", value: 100, note: "Visible to this login" },
+    { label: "Active", value: 50, note: "Approved and active" },
+    { label: "Needs review", value: 5, note: "Approval queue" },
+    { label: "Incomplete", value: 3, note: "Profile cleanup" },
+    { label: "Civil ID", value: 2, note: "Document review" },
+  ],
+  facets: [],
+  matchingCount: 1,
+  selected: null,
+  selectedActions: [],
+  openTabs: [],
+  selectedId: null,
+  selectedBlocked: false,
+  assignedCount: null,
+  params: {},
+};
 
-function makeTypesenseSearchResult(
-  hits = [makeSearchHit()],
-  found = 1,
-  facetCounts: Array<Record<string, unknown>> = [],
-) {
-  return {
-    hits,
-    found,
-    facet_counts: facetCounts,
-    search_time_ms: 15,
-  };
-}
-
-// =============================================================================
-// Helpers
-// =============================================================================
-
-function makeRequest(searchParams: Record<string, string> = {}): NextRequest {
-  const params = new URLSearchParams(searchParams).toString();
-  const url = `http://localhost:3000/api/candidates/search${params ? `?${params}` : ""}`;
+function mockRequest(url: string): NextRequest {
   return new NextRequest(url);
 }
 
@@ -107,535 +76,241 @@ function makeRequest(searchParams: Record<string, string> = {}): NextRequest {
 describe("GET /api/candidates/search", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockHealthRetrieve.mockResolvedValue({ ok: true });
-    mockSearchDocuments.mockResolvedValue(makeTypesenseSearchResult());
+    mockGetCandidateSearchWorkspaceTypesense.mockResolvedValue(defaultWorkspaceResult);
   });
 
-  // -------------------------------------------------------------------------
-  // Happy path
-  // -------------------------------------------------------------------------
+  // ---- Happy path ----
 
   it("returns 200 with search results for a valid query", async () => {
-    const request = makeRequest({ q: "Ahmed" });
-    const response = await GET(request);
+    const response = await GET(mockRequest("http://localhost:3000/api/candidates/search?q=test"));
     const body = await response.json();
 
     expect(response.status).toBe(200);
-    expect(body).toHaveProperty("hits");
-    expect(body).toHaveProperty("found");
-    expect(body).toHaveProperty("page");
-    expect(body).toHaveProperty("per_page");
-    expect(body).toHaveProperty("total_pages");
-    expect(body).toHaveProperty("facet_counts");
-    expect(body).toHaveProperty("search_time_ms");
-    expect(body.hits).toHaveLength(1);
-    expect(body.found).toBe(1);
-  });
+    expect(body).toHaveProperty("rows");
+    expect(body.rows).toHaveLength(1);
+    expect(body.rows[0].name).toBe("Test Candidate");
+    expect(body.matchingCount).toBe(1);
 
-  it("forwards the query to Typesense with correct query_by", async () => {
-    const request = makeRequest({ q: "Ahmed" });
-    await GET(request);
-
-    const args = mockSearchDocuments.mock.calls[0][0];
-    expect(args.q).toBe("Ahmed");
-    expect(args.query_by).toBe(
-      "candidate_name,candidate_name_ar,candidate_email,candidate_phone,candidate_uid,skills,tags",
+    // Verify the underlying function was called with expected params
+    expect(mockGetCandidateSearchWorkspaceTypesense).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: "test",
+        role: "admin",
+      }),
     );
   });
 
-  it("maps Typesense hits to the correct response shape", async () => {
-    const request = makeRequest({ q: "Ahmed" });
-    const response = await GET(request);
-    const body = await response.json();
-    const hit = body.hits[0];
-
-    expect(hit.candidate_id).toBe(42);
-    expect(hit.candidate_name).toBe("Ahmed Al-Mutairi");
-    expect(hit.candidate_name_ar).toBe("أحمد المطيري");
-    expect(hit.candidate_email).toBe("ahmed@example.com");
-    expect(hit.candidate_phone).toBe("+965 5555 1234");
-    expect(hit.candidate_uid).toBe("C-001");
-    expect(hit.country_id).toBe(1);
-    expect(hit.country_name).toBe("Kuwait");
-    expect(hit.university_id).toBe(5);
-    expect(hit.university_name).toBe("Kuwait University");
-    expect(hit.company_id).toBe(0);
-    expect(hit.company_name).toBe("");
-    expect(hit.store_name).toBe("");
-    expect(hit.store_id).toBe(0);
-    expect(hit.skills).toEqual(["JavaScript", "React", "Node.js"]);
-    expect(hit.tags).toEqual(["top-performer"]);
-    expect(hit.candidate_gender).toBe(1);
-    expect(hit.candidate_status).toBe(10);
-    expect(hit.approved).toBe(1);
-    expect(hit.is_incomplete_profile).toBe(false);
-    expect(hit.candidate_civil_need_verification).toBe(false);
-    expect(hit.has_resume).toBe(true);
-    expect(hit.candidate_hourly_rate).toBe(5.5);
-    expect(hit.currency_code).toBe("KWD");
-    expect(hit.text_match_info).toBeDefined();
-    expect(hit.text_match_info.score).toBe("1.0");
-  });
-
-  // -------------------------------------------------------------------------
-  // Empty query / match_all
-  // -------------------------------------------------------------------------
-
-  it("uses '*' as query when q is empty (match_all)", async () => {
-    const request = makeRequest({ q: "" });
-    await GET(request);
-
-    const args = mockSearchDocuments.mock.calls[0][0];
-    expect(args.q).toBe("*");
-  });
-
-  it("uses '*' as query when q parameter is omitted", async () => {
-    const request = makeRequest({});
-    await GET(request);
-
-    const args = mockSearchDocuments.mock.calls[0][0];
-    expect(args.q).toBe("*");
-  });
-
-  it("uses '*' when q is only whitespace", async () => {
-    const request = makeRequest({ q: "   " });
-    await GET(request);
-
-    const args = mockSearchDocuments.mock.calls[0][0];
-    expect(args.q).toBe("*");
-  });
-
-  // -------------------------------------------------------------------------
-  // Filter params
-  // -------------------------------------------------------------------------
-
-  it("passes filter_by for active filter", async () => {
-    const request = makeRequest({ filter: "active" });
-    await GET(request);
-
-    const args = mockSearchDocuments.mock.calls[0][0];
-    expect(args.filter_by).toContain("candidate_status: 10");
-    expect(args.filter_by).toContain("approved: != 0");
-  });
-
-  it("passes filter_by for needs-review filter", async () => {
-    const request = makeRequest({ filter: "needs-review" });
-    await GET(request);
-
-    const args = mockSearchDocuments.mock.calls[0][0];
-    expect(args.filter_by).toBe("approved: 0");
-  });
-
-  it("passes filter_by for incomplete filter", async () => {
-    const request = makeRequest({ filter: "incomplete" });
-    await GET(request);
-
-    const args = mockSearchDocuments.mock.calls[0][0];
-    expect(args.filter_by).toBe("is_incomplete_profile: true");
-  });
-
-  it("passes filter_by for civil-id filter", async () => {
-    const request = makeRequest({ filter: "civil-id" });
-    await GET(request);
-
-    const args = mockSearchDocuments.mock.calls[0][0];
-    expect(args.filter_by).toBe("candidate_civil_need_verification: true");
-  });
-
-  it("combines country_id filter correctly", async () => {
-    const request = makeRequest({ country_id: "1" });
-    await GET(request);
-
-    const args = mockSearchDocuments.mock.calls[0][0];
-    expect(args.filter_by).toBe("country_id: 1");
-  });
-
-  it("combines university_id filter correctly", async () => {
-    const request = makeRequest({ university_id: "5" });
-    await GET(request);
-
-    const args = mockSearchDocuments.mock.calls[0][0];
-    expect(args.filter_by).toBe("university_id: 5");
-  });
-
-  it("combines company_id filter correctly", async () => {
-    const request = makeRequest({ company_id: "3" });
-    await GET(request);
-
-    const args = mockSearchDocuments.mock.calls[0][0];
-    expect(args.filter_by).toBe("company_id: 3");
-  });
-
-  it("combines skill filter correctly", async () => {
-    const request = makeRequest({ skill: "JavaScript" });
-    await GET(request);
-
-    const args = mockSearchDocuments.mock.calls[0][0];
-    expect(args.filter_by).toBe("skills: [JavaScript]");
-  });
-
-  it("combines gender filter correctly", async () => {
-    const request = makeRequest({ gender: "1" });
-    await GET(request);
-
-    const args = mockSearchDocuments.mock.calls[0][0];
-    expect(args.filter_by).toBe("candidate_gender: 1");
-  });
-
-  it("combines profile filters correctly", async () => {
-    const completeReq = makeRequest({ profile: "complete" });
-    await GET(completeReq);
-    expect(mockSearchDocuments.mock.calls[0][0].filter_by).toBe(
-      "is_incomplete_profile: false",
-    );
-
-    vi.clearAllMocks();
-    mockHealthRetrieve.mockResolvedValue({ ok: true });
-    mockSearchDocuments.mockResolvedValue(makeTypesenseSearchResult());
-    const incompleteReq = makeRequest({ profile: "incomplete" });
-    await GET(incompleteReq);
-    expect(mockSearchDocuments.mock.calls[0][0].filter_by).toBe(
-      "is_incomplete_profile: true",
-    );
-  });
-
-  it("combines assignment filters correctly", async () => {
-    const assignedReq = makeRequest({ assignment: "assigned" });
-    await GET(assignedReq);
-    expect(mockSearchDocuments.mock.calls[0][0].filter_by).toBe(
-      "store_id: != 0",
-    );
-
-    vi.clearAllMocks();
-    mockHealthRetrieve.mockResolvedValue({ ok: true });
-    mockSearchDocuments.mockResolvedValue(makeTypesenseSearchResult());
-    const unassignedReq = makeRequest({ assignment: "unassigned" });
-    await GET(unassignedReq);
-    expect(mockSearchDocuments.mock.calls[0][0].filter_by).toBe("store_id: 0");
-  });
-
-  it("combines document filters correctly", async () => {
-    const resumeReq = makeRequest({ document: "resume" });
-    await GET(resumeReq);
-    expect(mockSearchDocuments.mock.calls[0][0].filter_by).toBe(
-      "has_resume: true",
-    );
-
-    vi.clearAllMocks();
-    mockHealthRetrieve.mockResolvedValue({ ok: true });
-    mockSearchDocuments.mockResolvedValue(makeTypesenseSearchResult());
-    const noResumeReq = makeRequest({ document: "no-resume" });
-    await GET(noResumeReq);
-    expect(mockSearchDocuments.mock.calls[0][0].filter_by).toBe(
-      "has_resume: false",
-    );
-
-    vi.clearAllMocks();
-    mockHealthRetrieve.mockResolvedValue({ ok: true });
-    mockSearchDocuments.mockResolvedValue(makeTypesenseSearchResult());
-    const civilIdReq = makeRequest({ document: "civil-id" });
-    await GET(civilIdReq);
-    expect(mockSearchDocuments.mock.calls[0][0].filter_by).toBe(
-      "candidate_civil_need_verification: true",
-    );
-  });
-
-  it("combines multiple filter params with AND", async () => {
-    const request = makeRequest({
-      country_id: "1",
-      gender: "2",
-      profile: "complete",
-    });
-    await GET(request);
-
-    const args = mockSearchDocuments.mock.calls[0][0];
-    expect(args.filter_by).toContain("country_id: 1");
-    expect(args.filter_by).toContain("candidate_gender: 2");
-    expect(args.filter_by).toContain("is_incomplete_profile: false");
-    const parts = args.filter_by.split(" && ");
-    expect(parts).toHaveLength(3);
-  });
-
-  it("omits filter_by when no filters are given", async () => {
-    const request = makeRequest({ q: "test" });
-    await GET(request);
-
-    const args = mockSearchDocuments.mock.calls[0][0];
-    expect(args.filter_by).toBeUndefined();
-  });
-
-  // -------------------------------------------------------------------------
-  // Pagination
-  // -------------------------------------------------------------------------
-
-  it("defaults page to 1 and per_page to 60", async () => {
-    const request = makeRequest({ q: "test" });
-    await GET(request);
-
-    const args = mockSearchDocuments.mock.calls[0][0];
-    expect(args.page).toBe(1);
-    expect(args.per_page).toBe(60);
-  });
-
-  it("accepts explicit page parameter", async () => {
-    const request = makeRequest({ q: "test", page: "3" });
-    await GET(request);
-
-    const args = mockSearchDocuments.mock.calls[0][0];
-    expect(args.page).toBe(3);
-  });
-
-  it("accepts explicit per_page parameter", async () => {
-    const request = makeRequest({ q: "test", per_page: "25" });
-    await GET(request);
-
-    const args = mockSearchDocuments.mock.calls[0][0];
-    expect(args.per_page).toBe(25);
-  });
-
-  it("coerces string page numbers to integers", async () => {
-    const request = makeRequest({ q: "test", page: "2" });
-    await GET(request);
-
-    const args = mockSearchDocuments.mock.calls[0][0];
-    expect(args.page).toBe(2);
-  });
-
-  it("calculates correct total_pages", async () => {
-    mockSearchDocuments.mockResolvedValue(
-      makeTypesenseSearchResult([makeSearchHit()], 100),
-    );
-    const request = makeRequest({ per_page: "25" });
-    const response = await GET(request);
+  it("returns 200 with match_all when no query param provided", async () => {
+    const response = await GET(mockRequest("http://localhost:3000/api/candidates/search"));
     const body = await response.json();
 
-    expect(body.total_pages).toBe(4); // ceil(100/25)
+    expect(response.status).toBe(200);
+    expect(mockGetCandidateSearchWorkspaceTypesense).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: "",
+      }),
+    );
   });
 
-  // -------------------------------------------------------------------------
-  // Sort
-  // -------------------------------------------------------------------------
-
-  it("defaults sort_by to candidate_updated_at:desc", async () => {
-    const request = makeRequest({ q: "test" });
-    await GET(request);
-
-    const args = mockSearchDocuments.mock.calls[0][0];
-    expect(args.sort_by).toBe("candidate_updated_at:desc");
-  });
-
-  it("accepts candidate_name:asc sort", async () => {
-    const request = makeRequest({ q: "test", sort_by: "candidate_name:asc" });
-    await GET(request);
-
-    const args = mockSearchDocuments.mock.calls[0][0];
-    expect(args.sort_by).toBe("candidate_name:asc");
-  });
-
-  // -------------------------------------------------------------------------
-  // Error handling
-  // -------------------------------------------------------------------------
-
-  it("returns 400 for invalid parameters", async () => {
-    const request = makeRequest({ page: "invalid" });
-    const response = await GET(request);
+  it("returns 200 with empty query string", async () => {
+    const response = await GET(mockRequest("http://localhost:3000/api/candidates/search?q="));
     const body = await response.json();
 
-    expect(response.status).toBe(400);
-    expect(body.error).toBe("Invalid search parameters");
-    expect(body.details).toBeDefined();
+    expect(response.status).toBe(200);
+    expect(mockGetCandidateSearchWorkspaceTypesense).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: "",
+      }),
+    );
   });
 
-  it("returns 400 for page less than 1", async () => {
-    const request = makeRequest({ page: "0" });
-    const response = await GET(request);
-    expect(response.status).toBe(400);
+  // ---- Filter params ----
+
+  it("passes filter param to search function", async () => {
+    await GET(mockRequest("http://localhost:3000/api/candidates/search?q=test&filter=active"));
+
+    expect(mockGetCandidateSearchWorkspaceTypesense).toHaveBeenCalledWith(
+      expect.objectContaining({ filter: "active" }),
+    );
   });
 
-  it("returns 400 for per_page greater than 250", async () => {
-    const request = makeRequest({ per_page: "300" });
-    const response = await GET(request);
-    expect(response.status).toBe(400);
+  it("passes country and university filter params", async () => {
+    await GET(mockRequest("http://localhost:3000/api/candidates/search?q=test&country=1&university=2"));
+
+    expect(mockGetCandidateSearchWorkspaceTypesense).toHaveBeenCalledWith(
+      expect.objectContaining({ country: "1", university: "2" }),
+    );
   });
 
-  it("returns 400 for invalid gender value", async () => {
-    const request = makeRequest({ gender: "5" });
-    const response = await GET(request);
-    expect(response.status).toBe(400);
+  it("passes all facet filter params", async () => {
+    const url =
+      "http://localhost:3000/api/candidates/search?q=test&filter=active&country=1&university=2&company=3&skill=JavaScript&gender=1&profile=complete&assignment=assigned&document=resume";
+
+    await GET(mockRequest(url));
+
+    expect(mockGetCandidateSearchWorkspaceTypesense).toHaveBeenCalledWith(
+      expect.objectContaining({
+        filter: "active",
+        country: "1",
+        university: "2",
+        company: "3",
+        skill: "JavaScript",
+        gender: "1",
+        profile: "complete",
+        assignment: "assigned",
+        document: "resume",
+      }),
+    );
   });
 
-  it("returns 400 for q exceeding 500 characters", async () => {
-    const request = makeRequest({ q: "a".repeat(501) });
-    const response = await GET(request);
-    expect(response.status).toBe(400);
+  it("defaults filter to 'all' when not provided", async () => {
+    await GET(mockRequest("http://localhost:3000/api/candidates/search?q=test"));
+
+    expect(mockGetCandidateSearchWorkspaceTypesense).toHaveBeenCalledWith(
+      expect.objectContaining({ filter: "all" }),
+    );
   });
 
-  it("returns 503 when Typesense health check fails", async () => {
-    mockHealthRetrieve.mockResolvedValue({ ok: false });
-    const request = makeRequest({ q: "test" });
-    const response = await GET(request);
+  // ---- Pagination ----
+
+  it("passes page param to search function", async () => {
+    await GET(mockRequest("http://localhost:3000/api/candidates/search?q=test&page=2"));
+
+    expect(mockGetCandidateSearchWorkspaceTypesense).toHaveBeenCalledWith(
+      expect.objectContaining({ page: 2 }),
+    );
+  });
+
+  it("defaults page to 1 when not provided", async () => {
+    await GET(mockRequest("http://localhost:3000/api/candidates/search?q=test"));
+
+    expect(mockGetCandidateSearchWorkspaceTypesense).toHaveBeenCalledWith(
+      expect.objectContaining({ page: 1 }),
+    );
+  });
+
+  it("accepts page as string and coerces to number", async () => {
+    await GET(mockRequest("http://localhost:3000/api/candidates/search?q=test&page=3"));
+
+    expect(mockGetCandidateSearchWorkspaceTypesense).toHaveBeenCalledWith(
+      expect.objectContaining({ page: 3 }),
+    );
+  });
+
+  // ---- Search response shape ----
+
+  it("returns complete workspace response shape", async () => {
+    const response = await GET(mockRequest("http://localhost:3000/api/candidates/search?q=test"));
     const body = await response.json();
 
-    expect(response.status).toBe(503);
-    expect(body.error).toBe("Search service is not available");
+    expect(response.status).toBe(200);
+    expect(body).toHaveProperty("rows");
+    expect(body).toHaveProperty("metrics");
+    expect(body).toHaveProperty("facets");
+    expect(body).toHaveProperty("source");
+    expect(body).toHaveProperty("matchingCount");
+    expect(body).toHaveProperty("selected");
+    expect(body).toHaveProperty("selectedActions");
+    expect(body).toHaveProperty("openTabs");
+    expect(body).toHaveProperty("selectedId");
+    expect(body).toHaveProperty("selectedBlocked");
+    expect(body).toHaveProperty("assignedCount");
+    expect(body).toHaveProperty("params");
   });
 
-  it("returns 503 when Typesense health check throws", async () => {
-    mockHealthRetrieve.mockRejectedValue(new Error("Connection refused"));
-    const request = makeRequest({ q: "test" });
-    const response = await GET(request);
-    const body = await response.json();
-
-    expect(response.status).toBe(503);
-    expect(body.error).toBe("Search service is not available");
+  it("returns JSON content-type header", async () => {
+    const response = await GET(mockRequest("http://localhost:3000/api/candidates/search?q=test"));
+    expect(response.headers.get("content-type")).toBe("application/json");
   });
 
-  it("returns 500 when Typesense search fails with Error", async () => {
-    mockSearchDocuments.mockRejectedValue(new Error("Search timeout"));
-    const request = makeRequest({ q: "test" });
-    const response = await GET(request);
+  // ---- Error handling ----
+
+  it("returns 500 when underlying search function rejects", async () => {
+    mockGetCandidateSearchWorkspaceTypesense.mockRejectedValue(new Error("Typesense connection refused"));
+
+    const response = await GET(mockRequest("http://localhost:3000/api/candidates/search?q=test"));
     const body = await response.json();
 
     expect(response.status).toBe(500);
-    expect(body.error).toBe("Search request failed");
+    expect(body).toHaveProperty("error");
+    expect(body.error).toContain("Typesense");
   });
 
-  it("returns 500 when Typesense search fails with a non-Error rejection", async () => {
-    mockSearchDocuments.mockRejectedValue("Raw string error");
-    const request = makeRequest({ q: "test" });
-    const response = await GET(request);
+  it("returns a generic error message for unknown errors", async () => {
+    mockGetCandidateSearchWorkspaceTypesense.mockRejectedValue(new Error("Something went wrong"));
+
+    const response = await GET(mockRequest("http://localhost:3000/api/candidates/search?q=test"));
     const body = await response.json();
 
     expect(response.status).toBe(500);
-    expect(body.error).toBe("Search request failed");
+    expect(body).toHaveProperty("error");
   });
 
-  // -------------------------------------------------------------------------
-  // Response headers
-  // -------------------------------------------------------------------------
+  it("handles non-Error rejections gracefully", async () => {
+    mockGetCandidateSearchWorkspaceTypesense.mockRejectedValue("string error");
 
-  it("sets X-Total-Count header", async () => {
-    mockSearchDocuments.mockResolvedValue(
-      makeTypesenseSearchResult([makeSearchHit()], 42),
-    );
-    const request = makeRequest({ q: "test" });
-    const response = await GET(request);
-
-    expect(response.headers.get("X-Total-Count")).toBe("42");
-  });
-
-  it("sets X-Total-Pages header", async () => {
-    mockSearchDocuments.mockResolvedValue(
-      makeTypesenseSearchResult([makeSearchHit()], 60),
-    );
-    const request = makeRequest({ per_page: "10" });
-    const response = await GET(request);
-
-    expect(response.headers.get("X-Total-Pages")).toBe("6");
-  });
-
-  it("sets X-Page and X-Per-Page headers", async () => {
-    const request = makeRequest({ page: "2", per_page: "20" });
-    const response = await GET(request);
-
-    expect(response.headers.get("X-Page")).toBe("2");
-    expect(response.headers.get("X-Per-Page")).toBe("20");
-  });
-
-  it("sets Cache-Control header", async () => {
-    const request = makeRequest({ q: "test" });
-    const response = await GET(request);
-
-    expect(response.headers.get("Cache-Control")).toBe(
-      "public, max-age=60, stale-while-revalidate=120",
-    );
-  });
-
-  it("returns JSON content type", async () => {
-    const request = makeRequest({ q: "test" });
-    const response = await GET(request);
-
-    expect(response.headers.get("Content-Type")).toContain("application/json");
-  });
-
-  // -------------------------------------------------------------------------
-  // Response shape and edge cases
-  // -------------------------------------------------------------------------
-
-  it("returns empty hits array when Typesense returns no results", async () => {
-    mockSearchDocuments.mockResolvedValue(
-      makeTypesenseSearchResult([], 0),
-    );
-    const request = makeRequest({ q: "nonexistent" });
-    const response = await GET(request);
+    const response = await GET(mockRequest("http://localhost:3000/api/candidates/search?q=test"));
     const body = await response.json();
 
-    expect(body.hits).toEqual([]);
-    expect(body.found).toBe(0);
-    expect(body.total_pages).toBe(0);
+    expect(response.status).toBe(500);
+    expect(body).toHaveProperty("error");
   });
 
-  it("handles null/undefined hits gracefully", async () => {
-    mockSearchDocuments.mockResolvedValue({
-      found: 0,
-      facet_counts: [],
-      search_time_ms: 0,
+  it("returns empty rows array when no matches found", async () => {
+    mockGetCandidateSearchWorkspaceTypesense.mockResolvedValue({
+      ...defaultWorkspaceResult,
+      rows: [],
+      matchingCount: 0,
     });
-    const request = makeRequest({ q: "test" });
-    const response = await GET(request);
+
+    const response = await GET(mockRequest("http://localhost:3000/api/candidates/search?q=nonexistent"));
     const body = await response.json();
 
-    expect(body.hits).toEqual([]);
-    expect(body.found).toBe(0);
+    expect(response.status).toBe(200);
+    expect(body.rows).toHaveLength(0);
+    expect(body.matchingCount).toBe(0);
   });
 
-  it("maps facet_counts correctly", async () => {
-    mockSearchDocuments.mockResolvedValue(
-      makeTypesenseSearchResult([makeSearchHit()], 1, [
-        {
-          field_name: "country_name",
-          counts: [
-            { value: "Kuwait", count: 50, highlighted: "Kuwait" },
-            { value: "Saudi Arabia", count: 30, highlighted: "Saudi Arabia" },
-          ],
-        },
-      ]),
-    );
-    const request = makeRequest({ q: "test" });
-    const response = await GET(request);
+  // ---- Search result field integrity ----
+
+  it("each row has all required fields", async () => {
+    const response = await GET(mockRequest("http://localhost:3000/api/candidates/search?q=test"));
     const body = await response.json();
 
-    expect(body.facet_counts).toHaveLength(1);
-    expect(body.facet_counts[0].field_name).toBe("country_name");
-    expect(body.facet_counts[0].counts).toHaveLength(2);
-    expect(body.facet_counts[0].counts[0].value).toBe("Kuwait");
-    expect(body.facet_counts[0].counts[0].count).toBe(50);
+    for (const row of body.rows) {
+      expect(row).toHaveProperty("id");
+      expect(row).toHaveProperty("uid");
+      expect(row).toHaveProperty("name");
+      expect(row).toHaveProperty("email");
+      expect(row).toHaveProperty("phone");
+      expect(row).toHaveProperty("status");
+      expect(row).toHaveProperty("signal");
+      expect(row).toHaveProperty("country");
+      expect(row).toHaveProperty("university");
+      expect(row).toHaveProperty("company");
+      expect(row).toHaveProperty("rate");
+      expect(row).toHaveProperty("updated");
+      expect(row).toHaveProperty("flags");
+      expect(row).toHaveProperty("skills");
+      expect(row).toHaveProperty("score");
+    }
   });
 
-  it("handles facet counts with null/undefined highlighted", async () => {
-    mockSearchDocuments.mockResolvedValue(
-      makeTypesenseSearchResult([makeSearchHit()], 1, [
-        {
-          field_name: "skills",
-          counts: [{ value: "JavaScript", count: 10, highlighted: null }],
-        },
-      ]),
-    );
-    const request = makeRequest({ q: "test" });
-    const response = await GET(request);
-    const body = await response.json();
+  // ---- Staff role params ----
 
-    expect(body.facet_counts[0].counts[0].highlighted).toBe("JavaScript");
+  it("passes role and staffId when provided", async () => {
+    await GET(mockRequest("http://localhost:3000/api/candidates/search?q=test&role=staff&staffId=5"));
+
+    expect(mockGetCandidateSearchWorkspaceTypesense).toHaveBeenCalledWith(
+      expect.objectContaining({ role: "staff", staffId: 5 }),
+    );
   });
 
-  it("forwards the correct facet_by to Typesense", async () => {
-    const request = makeRequest({ q: "test" });
-    await GET(request);
+  it("defaults role to admin when not provided", async () => {
+    await GET(mockRequest("http://localhost:3000/api/candidates/search?q=test"));
 
-    const args = mockSearchDocuments.mock.calls[0][0];
-    expect(args.facet_by).toBe(
-      "country_name,university_name,company_name,skills,candidate_gender",
+    expect(mockGetCandidateSearchWorkspaceTypesense).toHaveBeenCalledWith(
+      expect.objectContaining({ role: "admin" }),
     );
-    expect(args.max_facet_values).toBe(25);
   });
 });

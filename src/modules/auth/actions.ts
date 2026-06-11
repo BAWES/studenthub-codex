@@ -7,6 +7,7 @@ import { z } from "zod";
 import { resolveLegacyIdentities } from "./service";
 import { clearPendingAccounts, clearSession, createPendingAccounts, createSession, getPendingAccounts, getSession } from "./session";
 import { verifyYiiPassword } from "./password";
+import { roleDefaultRoute } from "./types";
 import type { LoginState } from "./types";
 
 export async function loginAction(_state: LoginState, formData: FormData): Promise<LoginState> {
@@ -29,7 +30,7 @@ export async function loginAction(_state: LoginState, formData: FormData): Promi
   if (accounts.length === 1) {
     const { accountKey: _accountKey, label: _label, ...user } = accounts[0];
     await createSession(user);
-    redirect("/app");
+    redirect(roleDefaultRoute(user.role));
   }
 
   await createPendingAccounts(accounts);
@@ -60,7 +61,7 @@ export async function chooseAccountAction(formData: FormData) {
 
   const { accountKey: _accountKey, label: _label, ...user } = account;
   await createSession(user);
-  redirect("/app");
+  redirect(roleDefaultRoute(user.role));
 }
 
 export async function verifySession() {
