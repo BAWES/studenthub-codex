@@ -5,6 +5,14 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
+import {
+  staffLeaveListItemSchema,
+  listStaffLeavesResultSchema,
+  createStaffLeaveResultSchema,
+  type StaffLeaveListItem,
+  type ListStaffLeavesResult,
+  type CreateStaffLeaveResult,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Schemas
@@ -29,34 +37,6 @@ const createStaffLeaveSchema = z.object({
   category: z.string().optional(),
   status: z.coerce.number().int().optional(),
 });
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export type StaffLeaveListItem = {
-  staff_leave_uuid: string;
-  staff_id: number | null;
-  from_date: string | null;
-  to_date: string | null;
-  note: string | null;
-  category: string | null;
-  status: number | null;
-  created_at: string | null;
-  updated_at: string | null;
-};
-
-export type ListStaffLeavesResult = {
-  leaves: StaffLeaveListItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
-
-export type CreateStaffLeaveResult = {
-  staff_leave_uuid: string;
-};
 
 // ---------------------------------------------------------------------------
 // listStaffLeaves
@@ -103,7 +83,7 @@ export async function listStaffLeaves(
     prisma.staff_leave.count({ where: where as any }),
   ]);
 
-  return {
+  const result = {
     leaves: leaves.map((l: any): StaffLeaveListItem => ({
       staff_leave_uuid: l.staff_leave_uuid,
       staff_id: l.staff_id ?? null,
@@ -120,6 +100,17 @@ export async function listStaffLeaves(
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  // Validate output shape
+  const outputParsed = listStaffLeavesResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/staff-leaves] listStaffLeaves output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -149,7 +140,7 @@ export async function getStaffLeave(
   if (!leave) return null;
 
   const raw = leave as any;
-  return {
+  const item = {
     staff_leave_uuid: raw.staff_leave_uuid,
     staff_id: raw.staff_id ?? null,
     from_date: raw.from_date?.toISOString() ?? null,
@@ -160,6 +151,17 @@ export async function getStaffLeave(
     created_at: raw.created_at?.toISOString() ?? null,
     updated_at: raw.updated_at?.toISOString() ?? null,
   };
+
+  // Validate output shape
+  const outputParsed = staffLeaveListItemSchema.safeParse(item);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/staff-leaves] getStaffLeave output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return item;
 }
 
 // ---------------------------------------------------------------------------
@@ -197,5 +199,16 @@ export async function createStaffLeave(
 
   revalidatePath("/staff-leaves");
 
-  return { staff_leave_uuid: leave.staff_leave_uuid };
+  const result = { staff_leave_uuid: leave.staff_leave_uuid };
+
+  // Validate output shape
+  const outputParsed = createStaffLeaveResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/staff-leaves] createStaffLeave output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }

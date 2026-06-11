@@ -3,6 +3,12 @@
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
+import {
+  transferListItemSchema,
+  listTransfersResultSchema,
+  type TransferListItem,
+  type ListTransfersResult,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Schemas
@@ -19,33 +25,6 @@ const listTransfersSchema = z.object({
 const getTransferSchema = z.object({
   transferId: z.coerce.number().int().positive(),
 });
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export type TransferListItem = {
-  transfer_id: number;
-  company_id: number | null;
-  contract_uuid: string | null;
-  contract_type: string | null;
-  total: string | null;
-  company_total: string | null;
-  transfer_status: number;
-  currency_code: string | null;
-  start_date: string | null;
-  end_date: string | null;
-  created_at: string | null;
-  updated_at: string | null;
-};
-
-export type ListTransfersResult = {
-  transfers: TransferListItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
 
 // ---------------------------------------------------------------------------
 // listTransfers
@@ -94,7 +73,7 @@ export async function listTransfers(
     prisma.transfer.count({ where: where as any }),
   ]);
 
-  return {
+  const result = {
     transfers: transfers.map((t: any): TransferListItem => ({
       transfer_id: t.transfer_id,
       company_id: t.company_id ?? null,
@@ -114,6 +93,17 @@ export async function listTransfers(
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  // Validate output shape
+  const outputParsed = listTransfersResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/transfers] listTransfers output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -144,7 +134,7 @@ export async function getTransfer(
   if (!transfer) return null;
 
   const raw = transfer as any;
-  return {
+  const item = {
     transfer_id: raw.transfer_id,
     company_id: raw.company_id ?? null,
     contract_uuid: raw.contract_uuid ?? null,
@@ -158,4 +148,15 @@ export async function getTransfer(
     created_at: raw.transfer_created_at?.toISOString() ?? null,
     updated_at: raw.transfer_updated_at?.toISOString() ?? null,
   };
+
+  // Validate output shape
+  const outputParsed = transferListItemSchema.safeParse(item);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/transfers] getTransfer output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return item;
 }

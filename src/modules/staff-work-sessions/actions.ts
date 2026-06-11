@@ -3,6 +3,16 @@
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
+import {
+  listStaffWorkSessionsResultSchema,
+  staffWorkSessionSchema,
+  createStaffWorkSessionResultSchema,
+} from "./schemas";
+import type {
+  StaffWorkSession,
+  ListStaffWorkSessionsResult,
+  CreateStaffWorkSessionResult,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Schemas
@@ -19,26 +29,6 @@ const listStaffWorkSessionsSchema = z.object({
 const getStaffWorkSessionSchema = z.object({
   workSessionUuid: z.string().min(1, "Work session UUID is required"),
 });
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export type StaffWorkSession = {
-  work_session_uuid: string;
-  staff_id: number | null;
-  total_minutes: number | null;
-  created_at: string;
-  updated_at: string;
-};
-
-export type ListStaffWorkSessionsResult = {
-  sessions: StaffWorkSession[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
 
 // ---------------------------------------------------------------------------
 // listStaffWorkSessions
@@ -107,7 +97,7 @@ export async function listStaffWorkSessions(
     prisma.staff_work_session.count({ where: where as any }),
   ]);
 
-  return {
+  const result: ListStaffWorkSessionsResult = {
     sessions: sessions.map((s) => ({
       work_session_uuid: s.work_session_uuid,
       staff_id: s.staff_id,
@@ -120,6 +110,16 @@ export async function listStaffWorkSessions(
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  const outputParsed = listStaffWorkSessionsResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/staff-work-sessions] listStaffWorkSessions output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -159,13 +159,23 @@ export async function getStaffWorkSession(
 
   if (!session) return null;
 
-  return {
+  const result: StaffWorkSession = {
     work_session_uuid: session.work_session_uuid,
     staff_id: session.staff_id,
     total_minutes: session.total_minutes,
     created_at: session.created_at.toISOString(),
     updated_at: session.updated_at.toISOString(),
   };
+
+  const outputParsed = staffWorkSessionSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/staff-work-sessions] getStaffWorkSession output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -176,12 +186,6 @@ const createStaffWorkSessionSchema = z.object({
   staff_id: z.coerce.number().int().positive("Staff ID is required"),
   total_minutes: z.coerce.number().int().min(0).optional().default(0),
 });
-
-export type CreateStaffWorkSessionResult = {
-  work_session_uuid: string;
-  staff_id: number | null;
-  total_minutes: number | null;
-};
 
 /**
  * Create a new staff work session.
