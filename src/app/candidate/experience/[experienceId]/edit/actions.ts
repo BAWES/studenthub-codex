@@ -11,6 +11,7 @@
 import { revalidatePath } from "next/cache";
 import type { ExperienceActionResult } from "../../schemas";
 import { updateExperienceEntry as parentUpdateExperienceEntry } from "../actions";
+import { experienceActionResultOutputSchema } from "../../schemas";
 
 /** Re-export types for client components */
 export type { ExperienceActionResult };
@@ -36,6 +37,15 @@ export async function updateExperienceEntry(
 
   if (result.success) {
     revalidatePath(`/candidate/experience/${experienceId}`);
+  }
+
+  // Validate output shape
+  const outputParsed = experienceActionResultOutputSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[candidate/experience/[id]/edit] updateExperienceEntry output validation failed:",
+      outputParsed.error.issues,
+    );
   }
 
   return result;
