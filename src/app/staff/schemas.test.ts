@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   staffMetricSchema,
-  staffListItemSchema,
+  staffWorkspaceListItemSchema,
   staffObjectOutputSchema,
   staffWorkspaceOutputSchema,
 } from "./schemas";
@@ -51,7 +51,7 @@ describe("staffMetricSchema", () => {
   });
 });
 
-describe("staffListItemSchema", () => {
+describe("staffWorkspaceListItemSchema", () => {
   const validItem = {
     id: "req_abc123",
     title: "Software Engineer Request",
@@ -61,18 +61,18 @@ describe("staffListItemSchema", () => {
   };
 
   it("accepts a valid list item with all fields", () => {
-    expect(staffListItemSchema.safeParse(validItem).success).toBe(true);
+    expect(staffWorkspaceListItemSchema.safeParse(validItem).success).toBe(true);
   });
 
   it("accepts numeric id", () => {
     expect(
-      staffListItemSchema.safeParse({ ...validItem, id: 42 }).success,
+      staffWorkspaceListItemSchema.safeParse({ ...validItem, id: 42 }).success,
     ).toBe(true);
   });
 
   it("accepts missing meta and href", () => {
     expect(
-      staffListItemSchema.safeParse({
+      staffWorkspaceListItemSchema.safeParse({
         id: "req_1",
         title: "Request",
         subtitle: "Company",
@@ -82,18 +82,18 @@ describe("staffListItemSchema", () => {
 
   it("rejects missing title", () => {
     const { title: _, ...rest } = validItem;
-    expect(staffListItemSchema.safeParse(rest).success).toBe(false);
+    expect(staffWorkspaceListItemSchema.safeParse(rest).success).toBe(false);
   });
 
   it("rejects empty title", () => {
     expect(
-      staffListItemSchema.safeParse({ ...validItem, title: "" }).success,
+      staffWorkspaceListItemSchema.safeParse({ ...validItem, title: "" }).success,
     ).toBe(false);
   });
 
   it("rejects missing subtitle", () => {
     const { subtitle: _, ...rest } = validItem;
-    expect(staffListItemSchema.safeParse(rest).success).toBe(false);
+    expect(staffWorkspaceListItemSchema.safeParse(rest).success).toBe(false);
   });
 });
 

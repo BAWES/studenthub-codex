@@ -20,24 +20,21 @@ describe("listBanksSchema", () => {
     const r = listBanksSchema.safeParse({
       page: 2,
       limit: 50,
-      sortBy: "bank_name",
-      sortDir: "asc",
+      q: "test",
     });
     expect(r.success).toBe(true);
     if (r.success) {
       expect(r.data.page).toBe(2);
       expect(r.data.limit).toBe(50);
-      expect(r.data.sortBy).toBe("bank_name");
-      expect(r.data.sortDir).toBe("asc");
+      expect(r.data.q).toBe("test");
     }
   });
 
-  it("accepts default sort values", () => {
-    const r = listBanksSchema.safeParse({});
+  it("accepts empty search query", () => {
+    const r = listBanksSchema.safeParse({ q: "" });
     expect(r.success).toBe(true);
     if (r.success) {
-      expect(r.data.sortBy).toBe("bank_name");
-      expect(r.data.sortDir).toBe("asc");
+      expect(r.data.q).toBe("");
     }
   });
 
@@ -49,12 +46,12 @@ describe("listBanksSchema", () => {
     expect(listBanksSchema.safeParse({ page: -1 }).success).toBe(false);
   });
 
-  it("rejects invalid sortBy field", () => {
-    expect(listBanksSchema.safeParse({ sortBy: "invalid_field" }).success).toBe(false);
-  });
-
-  it("rejects invalid sortDir", () => {
-    expect(listBanksSchema.safeParse({ sortDir: "sideways" }).success).toBe(false);
+  it("coerces string page number", () => {
+    const r = listBanksSchema.safeParse({ page: "3" });
+    expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data.page).toBe(3);
+    }
   });
 });
 
@@ -65,47 +62,59 @@ describe("listBanksSchema", () => {
 describe("createBankSchema", () => {
   it("accepts valid create params with all fields", () => {
     const r = createBankSchema.safeParse({
-      name: "National Bank of Kuwait",
-      swift_code: "NBOKKWKW",
-      address: "Kuwait City, Abdullah Al-Mubarak St",
-      bank_iban_code: "KW123456789012345678901",
-      type: "LOC",
-      bank_code_abk: 1234,
+      bankName: "National Bank of Kuwait",
+      bankIbanCode: "KW123456789012345678901",
+      bankSwiftCode: "NBOKKWKW",
+      bankCodeAbk: 1234,
+      bankAddress: "Kuwait City, Abdullah Al-Mubarak St",
+      bankTransferType: "LOC",
     });
     expect(r.success).toBe(true);
     if (r.success) {
-      expect(r.data.name).toBe("National Bank of Kuwait");
-      expect(r.data.swift_code).toBe("NBOKKWKW");
-      expect(r.data.bank_iban_code).toBe("KW123456789012345678901");
-      expect(r.data.bank_code_abk).toBe(1234);
+      expect(r.data.bankName).toBe("National Bank of Kuwait");
+      expect(r.data.bankSwiftCode).toBe("NBOKKWKW");
+      expect(r.data.bankIbanCode).toBe("KW123456789012345678901");
+      expect(r.data.bankCodeAbk).toBe(1234);
     }
   });
 
-  it("accepts minimal params (bank_iban_code only required field)", () => {
+  it("accepts minimal params (bankName and bankIbanCode required)", () => {
     const r = createBankSchema.safeParse({
-      name: "Gulf Bank",
-      bank_iban_code: "KW987654321098765432109",
+      bankName: "Gulf Bank",
+      bankIbanCode: "KW987654321098765432109",
     });
     expect(r.success).toBe(true);
     if (r.success) {
-      expect(r.data.name).toBe("Gulf Bank");
-      expect(r.data.bank_iban_code).toBe("KW987654321098765432109");
+      expect(r.data.bankName).toBe("Gulf Bank");
+      expect(r.data.bankIbanCode).toBe("KW987654321098765432109");
     }
   });
 
-  it("rejects missing bank_iban_code", () => {
+  it("rejects missing bankIbanCode", () => {
     const r = createBankSchema.safeParse({
-      name: "Test Bank",
+      bankName: "Test Bank",
     });
     expect(r.success).toBe(false);
   });
 
-  it("rejects empty name", () => {
+  it("rejects empty bankName", () => {
     const r = createBankSchema.safeParse({
-      name: "",
-      bank_iban_code: "KW000000000000000000000",
+      bankName: "",
+      bankIbanCode: "KW000000000000000000000",
     });
     expect(r.success).toBe(false);
+  });
+
+  it("accepts null optional fields", () => {
+    const r = createBankSchema.safeParse({
+      bankName: "Test Bank",
+      bankIbanCode: "KW111111111111111111111",
+      bankSwiftCode: null,
+      bankCodeAbk: null,
+      bankAddress: null,
+      bankTransferType: null,
+    });
+    expect(r.success).toBe(true);
   });
 });
 

@@ -4,18 +4,16 @@ import { z } from "zod";
 // Constants
 // ---------------------------------------------------------------------------
 
-export const VALID_INTERVIEW_STATUSES = [0, 1, 2] as const;
+export const VALID_INTERVIEW_STATUSES = ["0", "1", "2"] as const;
 
 // ---------------------------------------------------------------------------
 // Input schemas
 // ---------------------------------------------------------------------------
 
 export const listStaffInterviewsSchema = z.object({
-  page: z.number().int().positive().optional().default(1),
-  limit: z.number().int().min(1).max(100).optional().default(20),
-  status: z.number().int().refine((v) => [0, 1, 2].includes(v), {
-    message: "Status must be 0 (scheduled), 1 (completed), or 2 (cancelled)",
-  }).optional(),
+  page: z.coerce.number().int().positive().optional().default(1),
+  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
+  status: z.enum(VALID_INTERVIEW_STATUSES).optional(),
   q: z.string().optional(),
 });
 
@@ -31,8 +29,10 @@ export type GetStaffInterviewDetailInput = z.input<
 
 export const updateInterviewStatusSchema = z.object({
   interviewUuid: z.string().min(1, "Interview UUID is required"),
-  status: z.number().int().refine((v) => [0, 1, 2].includes(v), {
-    message: "Status must be 0 (scheduled), 1 (completed), or 2 (cancelled)",
+  status: z.enum(VALID_INTERVIEW_STATUSES, {
+    errorMap: () => ({
+      message: `Status must be one of: ${VALID_INTERVIEW_STATUSES.join(", ")}`,
+    }),
   }),
 });
 

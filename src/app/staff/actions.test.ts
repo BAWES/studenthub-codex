@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { getStaffWorkspaceSchema, staffMetricSchema, staffListItemSchema, staffObjectOutputSchema, staffWorkspaceOutputSchema } from "./schemas";
+import { getStaffWorkspaceSchema, staffMetricSchema, staffWorkspaceListItemSchema, staffObjectOutputSchema, staffWorkspaceOutputSchema } from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Schema tests — pure unit tests, no DB required
@@ -136,9 +136,9 @@ describe("staffMetricSchema (output validation)", () => {
   });
 });
 
-describe("staffListItemSchema (output validation)", () => {
+describe("staffWorkspaceListItemSchema (output validation)", () => {
   it("accepts a valid list item with minimal fields", () => {
-    const r = staffListItemSchema.safeParse({
+    const r = staffWorkspaceListItemSchema.safeParse({
       id: "req_1",
       title: "Software Engineer",
       subtitle: "Acme Corp",
@@ -147,7 +147,7 @@ describe("staffListItemSchema (output validation)", () => {
   });
 
   it("accepts a list item with all optional fields", () => {
-    const r = staffListItemSchema.safeParse({
+    const r = staffWorkspaceListItemSchema.safeParse({
       id: 42,
       title: "Test",
       subtitle: "Sub",
@@ -158,17 +158,17 @@ describe("staffListItemSchema (output validation)", () => {
   });
 
   it("rejects missing id", () => {
-    const r = staffListItemSchema.safeParse({ title: "Test", subtitle: "Sub" });
+    const r = staffWorkspaceListItemSchema.safeParse({ title: "Test", subtitle: "Sub" });
     expect(r.success).toBe(false);
   });
 
   it("rejects empty title", () => {
-    const r = staffListItemSchema.safeParse({ id: 1, title: "", subtitle: "Sub" });
+    const r = staffWorkspaceListItemSchema.safeParse({ id: 1, title: "", subtitle: "Sub" });
     expect(r.success).toBe(false);
   });
 
   it("rejects missing subtitle", () => {
-    const r = staffListItemSchema.safeParse({ id: 1, title: "Test" });
+    const r = staffWorkspaceListItemSchema.safeParse({ id: 1, title: "Test" });
     expect(r.success).toBe(false);
   });
 });

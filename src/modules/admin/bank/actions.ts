@@ -7,24 +7,35 @@
 //
 // Actions:
 //   - listBanks   — paginated list of active (non-deleted) banks
+//   - getBank     — single bank detail with candidate count
 //   - createBank  — create a new bank record
+//   - updateBank  — update a bank's fields (partial)
+//   - deleteBank  — soft-delete a bank
 //
-// The Yii2 controller also had view/update/delete — those are not part of this
-// port scope. The legacy controller returns {operation, message} for mutations.
+// The Yii2 controller returned {operation, message} for mutations.
 // ---------------------------------------------------------------------------
 
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
-import type { Prisma } from "@prisma/client";
 import {
-  bankItemSchema,
-  bankOperationResultSchema,
+  bankDetailOutputSchema,
+  bankMutationOutputSchema,
+  listBanksOutputSchema,
   createBankSchema,
-  listBanksResultSchema,
+  deleteBankSchema,
+  getBankSchema,
   listBanksSchema,
+  updateBankSchema,
+  type BankActionResponse,
+  type BankDetail,
+  type BankRow,
+  type CreateBankInput,
+  type DeleteBankInput,
+  type ListBanksInput,
+  type UpdateBankInput,
 } from "./schemas";
-import type { BankItem, BankOperationResult, ListBanksResult } from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -33,68 +44,67 @@ import type { BankItem, BankOperationResult, ListBanksResult } from "./schemas";
 export type ListBanksParams = z.input<typeof listBanksSchema>;
 export type CreateBankParams = z.input<typeof createBankSchema>;
 
-
 // ---------------------------------------------------------------------------
 // listBanks
 // ---------------------------------------------------------------------------
 
 /**
- * List active (non-deleted) banks with pagination and sorting.
- *
- * Mirrors the legacy AdminBankController::actionList() which returned all
- * banks via ActiveDataProvider. The Next.js port filters to `deleted = 0`
- * and supports configurable sort/pagination.
+ * List banks with pagination and optional text search across name, IBAN, SWIFT.
  */
 export async function listBanks(
-  params: ListBanksParams = {},
-): Promise<ListBanksResult> {
+  input: ListBanksInput = {},
+): Promise<{
+  items: BankRow[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}> {
   await requireCapability("admin.read");
 
-  const parsed = listBanksSchema.safeParse(params);
+  const parsed = listBanksSchema.safeParse(input);
   if (!parsed.success) {
-    throw new Error(
-      parsed.error.issues[0]?.message ?? "Invalid list parameters",
-    );
+    return { items: [], total: 0, page: 1, limit: 20, totalPages: 0 };
   }
 
-  const { sortBy, sortDir, page, limit } = parsed.data;
-
-  const where: Prisma.bankWhereInput = {
-    deleted: 0,
-  };
-
-  const orderByFieldMap: Record<string, string> = {
-    bank_id: "bank_id",
-    bank_name: "bank_name",
-    bank_iban_code: "bank_iban_code",
-    bank_swift_code: "bank_swift_code",
-  };
-
-  const orderBy = {
-    [orderByFieldMap[sortBy] || "bank_name"]: sortDir,
-  };
-
+  const { page, limit, q } = parsed.data;
   const skip = (page - 1) * limit;
 
-  const [rows, total] = await Promise.all([
+  const where: Record<string, unknown> = {
+    deleted: 0,
+  };
+  if (q && q.trim().length > 0) {
+    where.OR = [
+      { bank_name: { contains: q.trim() } },
+      { bank_iban_code: { contains: q.trim() } },
+      { bank_swift_code: { contains: q.trim() } },
+    ];
+  }
+
+  const [banks, total] = await Promise.all([
     prisma.bank.findMany({
-      where,
+      where: where as any,
+      orderBy: { bank_id: "asc" },
       skip,
       take: limit,
-      orderBy,
+      include: {
+        _count: { select: { candidate: true } },
+      },
     }),
-    prisma.bank.count({ where }),
+    prisma.bank.count({ where: where as any }),
   ]);
 
-  const result: ListBanksResult = {
-    banks: rows.map((row) => ({
-      bank_id: row.bank_id,
-      bank_name: row.bank_name,
-      bank_iban_code: row.bank_iban_code,
-      bank_swift_code: row.bank_swift_code,
-      bank_code_abk: row.bank_code_abk,
-      bank_address: row.bank_address,
-      bank_transfer_type: row.bank_transfer_type,
+  const result = {
+    items: banks.map((b): BankRow => ({
+      bank_id: b.bank_id,
+      bank_name: b.bank_name,
+      bank_iban_code: b.bank_iban_code,
+      bank_swift_code: b.bank_swift_code,
+      bank_code_abk: b.bank_code_abk,
+      bank_address: b.bank_address,
+      bank_transfer_type: b.bank_transfer_type,
+      candidate_count: b._count?.candidate ?? 0,
+      created_at: null,
     })),
     total,
     page,
@@ -103,10 +113,63 @@ export async function listBanks(
   };
 
   // Validate output shape
-  const outputParsed = listBanksResultSchema.safeParse(result);
+  const outputParsed = listBanksOutputSchema.safeParse(result);
   if (!outputParsed.success) {
     console.error(
       "[modules/admin/bank] listBanks output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
+}
+
+// ---------------------------------------------------------------------------
+// getBank
+// ---------------------------------------------------------------------------
+
+/**
+ * Get a single bank by ID with candidate count.
+ */
+export async function getBank(
+  bankId: number,
+): Promise<BankDetail> {
+  await requireCapability("admin.read");
+
+  const parsed = getBankSchema.safeParse({ bankId });
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid bank ID");
+  }
+
+  const bank = await prisma.bank.findFirst({
+    where: { bank_id: parsed.data.bankId, deleted: 0 },
+    include: {
+      _count: { select: { candidate: true } },
+    },
+  });
+
+  if (!bank) {
+    return { bank: null as any, candidate_count: 0 };
+  }
+
+  const result = {
+    bank: {
+      bank_id: bank.bank_id,
+      bank_name: bank.bank_name,
+      bank_iban_code: bank.bank_iban_code,
+      bank_swift_code: bank.bank_swift_code,
+      bank_code_abk: bank.bank_code_abk,
+      bank_address: bank.bank_address,
+      bank_transfer_type: bank.bank_transfer_type,
+    },
+    candidate_count: bank._count?.candidate ?? 0,
+  };
+
+  // Validate output shape
+  const outputParsed = bankDetailOutputSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/admin/bank] getBank output validation failed:",
       outputParsed.error.issues,
     );
   }
@@ -119,48 +182,51 @@ export async function listBanks(
 // ---------------------------------------------------------------------------
 
 /**
- * Create a new bank record.
- *
- * Mirrors the legacy AdminBankController::actionCreate() which accepted
- * name, swift_code, address, bank_iban_code, type, bank_code_abk.
- * Returns {operation, message} matching the Yii2 response shape.
+ * Create a new bank account entry.
  */
 export async function createBank(
-  params: CreateBankParams,
-): Promise<{ operation: string; message: string }> {
+  input: CreateBankInput,
+): Promise<BankActionResponse> {
   await requireCapability("admin.write");
 
-  const parsed = createBankSchema.safeParse(params);
+  const parsed = createBankSchema.safeParse(input);
   if (!parsed.success) {
     return {
       operation: "error",
-      message:
-        parsed.error.issues[0]?.message ?? "Invalid create parameters",
+      message: parsed.error.issues[0]?.message ?? "Invalid input",
     };
   }
 
-  const { name, swift_code, address, bank_iban_code, type, bank_code_abk } =
-    parsed.data;
-
   try {
-    await prisma.bank.create({
+    const bank = await prisma.bank.create({
       data: {
-        bank_name: name ?? null,
-        bank_swift_code: swift_code ?? null,
-        bank_address: address ?? null,
-        bank_iban_code,
-        bank_transfer_type: type ?? null,
-        bank_code_abk: bank_code_abk ?? null,
+        bank_name: parsed.data.bankName,
+        bank_iban_code: parsed.data.bankIbanCode,
+        bank_swift_code: parsed.data.bankSwiftCode ?? null,
+        bank_code_abk: parsed.data.bankCodeAbk ?? null,
+        bank_address: parsed.data.bankAddress ?? null,
+        bank_transfer_type: parsed.data.bankTransferType ?? null,
       },
     });
 
-    const result: BankOperationResult = {
+    revalidatePath("/admin/bank");
+
+    const result: BankActionResponse = {
       operation: "success",
-      message: "Bank created successfully",
+      message: `Bank "${bank.bank_name ?? bank.bank_iban_code}" created`,
+      data: {
+        bank_id: bank.bank_id,
+        bank_name: bank.bank_name,
+        bank_iban_code: bank.bank_iban_code,
+        bank_swift_code: bank.bank_swift_code,
+        bank_code_abk: bank.bank_code_abk,
+        bank_address: bank.bank_address,
+        bank_transfer_type: bank.bank_transfer_type,
+      },
     };
 
     // Validate output shape
-    const outputParsed = bankOperationResultSchema.safeParse(result);
+    const outputParsed = bankMutationOutputSchema.safeParse(result);
     if (!outputParsed.success) {
       console.error(
         "[modules/admin/bank] createBank output validation failed:",
@@ -169,11 +235,154 @@ export async function createBank(
     }
 
     return result;
-  } catch (error) {
+  } catch (err) {
     return {
       operation: "error",
-      message:
-        "We've faced a problem creating the bank, please contact us for assistance.",
+      message: err instanceof Error ? err.message : "Failed to create bank",
+    };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// updateBank
+// ---------------------------------------------------------------------------
+
+/**
+ * Update a bank's fields. Only provided fields are modified.
+ */
+export async function updateBank(
+  input: UpdateBankInput,
+): Promise<BankActionResponse> {
+  await requireCapability("admin.write");
+
+  const parsed = updateBankSchema.safeParse(input);
+  if (!parsed.success) {
+    return {
+      operation: "error",
+      message: parsed.error.issues[0]?.message ?? "Invalid input",
+    };
+  }
+
+  const existing = await prisma.bank.findFirst({
+    where: { bank_id: parsed.data.bankId, deleted: 0 },
+    select: { bank_id: true, bank_name: true },
+  });
+
+  if (!existing) {
+    return { operation: "error", message: "Bank not found" };
+  }
+
+  const updateData: Record<string, unknown> = {};
+  if (parsed.data.bankName !== undefined) updateData.bank_name = parsed.data.bankName;
+  if (parsed.data.bankIbanCode !== undefined) updateData.bank_iban_code = parsed.data.bankIbanCode;
+  if (parsed.data.bankSwiftCode !== undefined) updateData.bank_swift_code = parsed.data.bankSwiftCode;
+  if (parsed.data.bankCodeAbk !== undefined) updateData.bank_code_abk = parsed.data.bankCodeAbk;
+  if (parsed.data.bankAddress !== undefined) updateData.bank_address = parsed.data.bankAddress;
+  if (parsed.data.bankTransferType !== undefined) updateData.bank_transfer_type = parsed.data.bankTransferType;
+
+  try {
+    const bank = await prisma.bank.update({
+      where: { bank_id: parsed.data.bankId },
+      data: updateData as any,
+    });
+
+    revalidatePath("/admin/bank");
+    revalidatePath(`/admin/bank/${parsed.data.bankId}`);
+
+    const result: BankActionResponse = {
+      operation: "success",
+      message: `Bank "${bank.bank_name ?? bank.bank_iban_code}" updated`,
+      data: {
+        bank_id: bank.bank_id,
+        bank_name: bank.bank_name,
+        bank_iban_code: bank.bank_iban_code,
+        bank_swift_code: bank.bank_swift_code,
+        bank_code_abk: bank.bank_code_abk,
+        bank_address: bank.bank_address,
+        bank_transfer_type: bank.bank_transfer_type,
+      },
+    };
+
+    // Validate output shape
+    const outputParsed = bankMutationOutputSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/admin/bank] updateBank output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
+  } catch (err) {
+    return {
+      operation: "error",
+      message: err instanceof Error ? err.message : "Failed to update bank",
+    };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// deleteBank
+// ---------------------------------------------------------------------------
+
+/**
+ * Soft-delete a bank. Refuses if candidates are still assigned.
+ */
+export async function deleteBank(
+  input: DeleteBankInput,
+): Promise<BankActionResponse> {
+  await requireCapability("admin.write");
+
+  const parsed = deleteBankSchema.safeParse(input);
+  if (!parsed.success) {
+    return {
+      operation: "error",
+      message: parsed.error.issues[0]?.message ?? "Invalid input",
+    };
+  }
+
+  const existing = await prisma.bank.findFirst({
+    where: { bank_id: parsed.data.bankId, deleted: 0 },
+    include: {
+      _count: { select: { candidate: true } },
+    },
+  });
+
+  if (!existing) {
+    return { operation: "error", message: "Bank not found or already deleted" };
+  }
+
+  if ((existing._count?.candidate ?? 0) > 0) {
+    return {
+      operation: "error",
+      message: `Bank already assigned to ${existing._count.candidate} candidate(s)`,
+    };
+  }
+
+  try {
+    await prisma.bank.update({
+      where: { bank_id: parsed.data.bankId },
+      data: { deleted: 1 },
+    });
+
+    revalidatePath("/admin/bank");
+
+    const result: BankActionResponse = { operation: "success", message: "Bank deleted successfully" };
+
+    // Validate output shape
+    const outputParsed = bankMutationOutputSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/admin/bank] deleteBank output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
+  } catch (err) {
+    return {
+      operation: "error",
+      message: err instanceof Error ? err.message : "Failed to delete bank",
     };
   }
 }
