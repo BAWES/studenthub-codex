@@ -38,6 +38,89 @@ export const listJobApplicationsSchema = z.object({
 });
 
 // ---------------------------------------------------------------------------
+// Output validation — Zod schemas for server action return types
+// ---------------------------------------------------------------------------
+
+/**
+ * A single job listing row in the candidate browse view.
+ */
+export const candidateJobRowSchema = z.object({
+  jobListingId: z.number().int().positive(),
+  title: z.string().min(1, "Job title is required"),
+  description: z.string().min(1, "Job description is required"),
+  requirements: z.string().nullable(),
+  location: z.string().nullable(),
+  employmentType: z.string().nullable(),
+  salaryRange: z.string().nullable(),
+  employerName: z.string().min(1, "Employer name is required"),
+  matchScore: z.number().nullable(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+/**
+ * Full job detail including match breakdown and application status.
+ */
+export const candidateJobDetailSchema = candidateJobRowSchema.extend({
+  status: z.string().nullable(),
+  hasApplied: z.boolean(),
+  applicationStatus: z.string().nullable(),
+  skillScore: z.number().nullable(),
+  educationScore: z.number().nullable(),
+  locationScore: z.number().nullable(),
+  breakdown: z.array(z.string()),
+});
+
+/**
+ * A single application row in the candidate's application list.
+ */
+export const applicationRowSchema = z.object({
+  applicationId: z.number().int().positive(),
+  jobListingId: z.number().int().positive(),
+  jobTitle: z.string().min(1, "Job title is required"),
+  employerName: z.string().min(1, "Employer name is required"),
+  status: z.string().min(1, "Status is required"),
+  coverLetter: z.string().nullable(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+/**
+ * Paginated list result schema (listCandidateJobs).
+ */
+export const listCandidateJobsResultSchema = z.object({
+  success: z.literal(true),
+  jobs: z.array(candidateJobRowSchema),
+  total: z.number().int().nonnegative(),
+});
+
+/**
+ * Single job detail result schema (getCandidateJob).
+ */
+export const getCandidateJobResultSchema = z.object({
+  success: z.literal(true),
+  job: candidateJobDetailSchema,
+});
+
+/**
+ * Apply result schema (applyToJob).
+ */
+export const applyToJobResultSchema = z.object({
+  success: z.literal(true),
+  applicationId: z.number().int().positive(),
+  message: z.string(),
+});
+
+/**
+ * My applications list result schema (listMyApplications).
+ */
+export const listMyApplicationsResultSchema = z.object({
+  success: z.literal(true),
+  applications: z.array(applicationRowSchema),
+  total: z.number().int().nonnegative(),
+});
+
+// ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 

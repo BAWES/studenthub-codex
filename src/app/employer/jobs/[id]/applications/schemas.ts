@@ -40,3 +40,49 @@ export type JobApplicationRow = {
   createdAt: Date;
   updatedAt: Date;
 };
+
+// ---------------------------------------------------------------------------
+// Output validation schemas
+// ---------------------------------------------------------------------------
+
+/** Validates a single job application row returned in list results. */
+export const jobApplicationRowOutputSchema = z.object({
+  applicationId: z.number().int(),
+  candidateId: z.number().int(),
+  candidateName: z.string().nullable(),
+  status: z.string(),
+  coverLetter: z.string().nullable(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+/** Validates the listJobApplications return shape. */
+export const jobApplicationListOutputSchema = z.object({
+  success: z.literal(true),
+  applications: z.array(jobApplicationRowOutputSchema),
+  total: z.number().int().nonnegative(),
+});
+
+/** Validates a single job application row with job title (employer view). */
+export const jobApplicationWithJobRowOutputSchema = z.object({
+  applicationId: z.number().int(),
+  candidateId: z.number().int(),
+  candidateName: z.string().nullable(),
+  status: z.string(),
+  coverLetter: z.string().nullable(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+  jobTitle: z.string(),
+});
+
+/** Validates the listJobApplicationsByEmployer return shape. */
+export const jobApplicationListByEmployerOutputSchema = z.object({
+  success: z.literal(true),
+  applications: z.array(jobApplicationWithJobRowOutputSchema),
+  total: z.number().int().nonnegative(),
+});
+
+/** Validates the updateApplicationStatus return shape. */
+export const updateApplicationStatusOutputSchema = z.object({
+  success: z.literal(true),
+});

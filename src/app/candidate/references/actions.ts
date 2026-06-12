@@ -10,6 +10,9 @@ import {
   createReferenceSchema,
   updateReferenceSchema,
   deleteReferenceSchema,
+  referenceItemOutputSchema,
+  referenceListOutputSchema,
+  referenceActionResultOutputSchema,
   type ListReferenceInput,
   type GetReferenceInput,
   type CreateReferenceInput,
@@ -79,7 +82,18 @@ export async function listCandidateReferences(
     take: limit,
   });
 
-  return rows.map((r) => toItem(r)!);
+  const items = rows.map((r) => toItem(r)!);
+
+  // Validate output shape
+  const outputParsed = referenceListOutputSchema.safeParse(items);
+  if (!outputParsed.success) {
+    console.error(
+      "[candidate/references] list output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return items;
 }
 
 /**
@@ -105,7 +119,20 @@ export async function getCandidateReference(
     },
   });
 
-  return toItem(row);
+  const result = toItem(row);
+
+  // Validate output shape
+  if (result !== null) {
+    const outputParsed = referenceItemOutputSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[candidate/references] get output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+  }
+
+  return result;
 }
 
 /**
@@ -147,7 +174,17 @@ export async function createCandidateReference(
   });
 
   revalidatePath("/candidate/references");
-  return { success: true, referenceUuid };
+
+  // Validate output shape
+  const createResult = { success: true, referenceUuid } as const;
+  const createOutputParsed = referenceActionResultOutputSchema.safeParse(createResult);
+  if (!createOutputParsed.success) {
+    console.error(
+      "[candidate/references] create output validation failed:",
+      createOutputParsed.error.issues,
+    );
+  }
+  return createResult;
 }
 
 /**
@@ -203,7 +240,17 @@ export async function updateCandidateReference(
   });
 
   revalidatePath("/candidate/references");
-  return { success: true, referenceUuid };
+
+  // Validate output shape
+  const updateResult = { success: true, referenceUuid } as const;
+  const updateOutputParsed = referenceActionResultOutputSchema.safeParse(updateResult);
+  if (!updateOutputParsed.success) {
+    console.error(
+      "[candidate/references] update output validation failed:",
+      updateOutputParsed.error.issues,
+    );
+  }
+  return updateResult;
 }
 
 /**
@@ -247,5 +294,15 @@ export async function deleteCandidateReference(
   });
 
   revalidatePath("/candidate/references");
-  return { success: true, referenceUuid: parsed.data.referenceUuid };
+
+  // Validate output shape
+  const deleteResult = { success: true, referenceUuid: parsed.data.referenceUuid } as const;
+  const deleteOutputParsed = referenceActionResultOutputSchema.safeParse(deleteResult);
+  if (!deleteOutputParsed.success) {
+    console.error(
+      "[candidate/references] delete output validation failed:",
+      deleteOutputParsed.error.issues,
+    );
+  }
+  return deleteResult;
 }

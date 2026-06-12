@@ -16,6 +16,8 @@ import {
 import {
   listLanguagesSchema,
   createLanguageSchema,
+  languageItemOutputSchema,
+  languageActionResultOutputSchema,
 } from "./schemas";
 import type {
   ListLanguagesInput,
@@ -49,11 +51,22 @@ export async function listCandidateLanguages(
 
   const { page, limit } = parsed.data;
 
-  return moduleListLanguages({
+  const result = await moduleListLanguages({
     candidateId: Number(session.id),
     page,
     limit,
   });
+
+  // Validate output shape
+  const outputParsed = languageItemOutputSchema.array().safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[candidate/languages] listCandidateLanguages output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -85,6 +98,15 @@ export async function createCandidateLanguage(
   });
 
   revalidatePath("/candidate/languages");
+
+  // Validate output shape
+  const outputParsed = languageActionResultOutputSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[candidate/languages] createCandidateLanguage output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
 
   return result;
 }

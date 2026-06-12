@@ -19,6 +19,45 @@ export const getConversationMessagesSchema = z.object({
 });
 
 // ---------------------------------------------------------------------------
+// Output validation — Zod schemas for server action return types
+// ---------------------------------------------------------------------------
+
+export const conversationItemOutputSchema = z.object({
+  chat_uuid: z.string(),
+  candidate_id: z.number().int(),
+  company_id: z.number().int(),
+  store_id: z.number().int(),
+  staff_id: z.number().int().nullable(),
+  created_at: z.string().nullable(),
+});
+
+export const conversationMessageItemOutputSchema = z.object({
+  chat_message_uuid: z.string(),
+  chat_uuid: z.string(),
+  message: z.string(),
+  message_index: z.number().int().nullable(),
+  from: z.string().nullable(),
+  status: z.boolean().nullable(),
+  created_at: z.string().nullable(),
+});
+
+export const listConversationsResultOutputSchema = z.object({
+  conversations: z.array(conversationItemOutputSchema),
+  total: z.number().nonnegative(),
+  page: z.number(),
+  limit: z.number(),
+  totalPages: z.number(),
+});
+
+export const getConversationMessagesResultOutputSchema = z.object({
+  messages: z.array(conversationMessageItemOutputSchema),
+  total: z.number().nonnegative(),
+  page: z.number(),
+  limit: z.number(),
+  totalPages: z.number(),
+});
+
+// ---------------------------------------------------------------------------
 // Types derived from schemas
 // ---------------------------------------------------------------------------
 

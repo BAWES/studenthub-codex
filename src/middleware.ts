@@ -4,16 +4,16 @@ import { roleDefaultRoute } from "@/modules/auth/types";
 
 // ── Session cookie decoding (duplicated from session.ts for edge compatibility) ──
 
-function decodeSession(value: string | undefined): { role: string } | null {
+function decodeSession(value: string | undefined): { role: string; roles?: string[] } | null {
   if (!value) return null;
   const parts = value.split(".");
   if (parts.length !== 2) return null;
   try {
     const parsed = JSON.parse(
       Buffer.from(parts[0], "base64url").toString("utf8")
-    ) as { role: string };
+    ) as { role: string; roles?: string[] };
     if (!parsed.role) return null;
-    return parsed;
+    return { role: parsed.role, roles: parsed.roles };
   } catch {
     return null;
   }
@@ -75,15 +75,18 @@ export function middleware(request: NextRequest) {
   // Check if the current path matches a role-specific prefix
   for (const [prefix, allowedRole] of Object.entries(rolePaths)) {
     if (pathname === prefix || pathname.startsWith(`${prefix}/`)) {
-      // User is on a role-specific path — verify their role matches
-      if (session && session.role !== allowedRole) {
-        const loginUrl = new URL("/login", request.url);
-        // Redirect to their correct default route
-        loginUrl.searchParams.set(
-          "redirect",
-          roleDefaultRoute(session.role as any)
-        );
-        return NextResponse.redirect(loginUrl);
+      // User is on a role-specific path — verify they have this role
+      if (session) {
+        const userRoles = session.roles ?? [session.role];
+        if (!userRoles.includes(allowedRole)) {
+          const loginUrl = new URL("/login", request.url);
+          // Redirect to their correct default route
+          loginUrl.searchParams.set(
+            "redirect",
+            roleDefaultRoute(session.role as any)
+          );
+          return NextResponse.redirect(loginUrl);
+        }
       }
       break; // Found a match, no need to check further prefixes
     }

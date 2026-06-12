@@ -49,6 +49,8 @@ const ROUTE_MAP: Record<string, string[]> = {
     "/company/requests/create",
     "/company/stores",
     "/company/workspace",
+    "/employer",
+    "/employer/jobs",
   ],
   inspector: [
     "/inspector",

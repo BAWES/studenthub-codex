@@ -81,6 +81,39 @@ export const deleteCertificationSchema = z.object({
 });
 
 // ---------------------------------------------------------------------------
+// Output validation schemas
+// ---------------------------------------------------------------------------
+
+export const certificationItemOutputSchema = z.object({
+  certification_id: z.number().int(),
+  certification_name: z.string(),
+  issuing_organization: z.string(),
+  issue_date: z.date().nullable(),
+  expiry_date: z.date().nullable(),
+  credential_id: z.string().nullable(),
+  credential_url: z.string().nullable(),
+  description: z.string().nullable(),
+  created_at: z.date().nullable(),
+  updated_at: z.date().nullable(),
+});
+
+export const certificationListOutputSchema = z.array(certificationItemOutputSchema);
+
+export const certificationActionResultOutputSchema = z.discriminatedUnion(
+  "success",
+  [
+    z.object({
+      success: z.literal(true),
+      certificationId: z.number().int(),
+    }),
+    z.object({ success: z.literal(false), error: z.string() }),
+  ],
+);
+
+// Output types
+export type CertificationItem = z.output<typeof certificationItemOutputSchema>;
+
+// ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
@@ -89,19 +122,6 @@ export type GetCertificationInput = z.input<typeof getCertificationSchema>;
 export type CreateCertificationInput = z.input<typeof createCertificationSchema>;
 export type UpdateCertificationInput = z.input<typeof updateCertificationSchema>;
 export type DeleteCertificationInput = z.input<typeof deleteCertificationSchema>;
-
-export type CertificationItem = {
-  certification_id: number;
-  certification_name: string;
-  issuing_organization: string;
-  issue_date: Date | null;
-  expiry_date: Date | null;
-  credential_id: string | null;
-  credential_url: string | null;
-  description: string | null;
-  created_at: Date | null;
-  updated_at: Date | null;
-};
 
 export type CertificationActionResult =
   | { success: true; certificationId: number }

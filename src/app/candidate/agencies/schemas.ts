@@ -42,6 +42,56 @@ export const deleteAgencySchema = z.object({
 });
 
 // ---------------------------------------------------------------------------
+// Output validation — Zod schemas for server action return types
+// ---------------------------------------------------------------------------
+
+/**
+ * Matches the AgencyItem type shape.
+ */
+export const agencyItemOutputSchema = z.object({
+  company_id: z.number().int(),
+  company_name: z.string(),
+  company_common_name_en: z.string().nullable(),
+  company_common_name_ar: z.string().nullable(),
+  company_email: z.string().nullable(),
+  company_website: z.string().nullable(),
+  company_logo: z.string().nullable(),
+  commercial_licence: z.string().nullable(),
+  total_candidate: z.number().int().nullable(),
+  no_of_active_requests: z.number().int().nullable(),
+  country_id: z.number().int().nullable(),
+  company_created_at: z.date().nullable(),
+  company_updated_at: z.date().nullable(),
+});
+
+/**
+ * Matches the AgencyActionResult discriminated union.
+ */
+export const agencyActionResultOutputSchema = z.discriminatedUnion("success", [
+  z.object({ success: z.literal(true), companyId: z.number().int() }),
+  z.object({ success: z.literal(false), error: z.string() }),
+]);
+
+/**
+ * Paginated agencies list output.
+ */
+export const listAgenciesOutputSchema = z.object({
+  items: z.array(agencyItemOutputSchema),
+  total: z.number().nonnegative(),
+  page: z.number(),
+  limit: z.number(),
+  totalPages: z.number(),
+});
+
+/**
+ * Slim list result as returned by the route-level listAgencies action.
+ */
+export const listAgenciesResultOutputSchema = z.object({
+  items: z.array(agencyItemOutputSchema),
+  total: z.number().nonnegative(),
+});
+
+// ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 

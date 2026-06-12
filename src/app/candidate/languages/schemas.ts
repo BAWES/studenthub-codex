@@ -23,18 +23,30 @@ export const createLanguageSchema = z.object({
 });
 
 // ---------------------------------------------------------------------------
+// Output validation schemas
+// ---------------------------------------------------------------------------
+
+export const languageItemOutputSchema = z.object({
+  candidate_language_id: z.number().int(),
+  language: z.string(),
+  proficiency: z.string(),
+  candidate_language_created_at: z.date().nullable(),
+});
+
+export const languageActionResultOutputSchema = z.discriminatedUnion("success", [
+  z.object({ success: z.literal(true), languageId: z.number().int() }),
+  z.object({ success: z.literal(false), error: z.string() }),
+]);
+
+// Output types
+export type LanguageItem = z.output<typeof languageItemOutputSchema>;
+
+// ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
 export type ListLanguagesInput = z.input<typeof listLanguagesSchema>;
 export type CreateLanguageInput = z.input<typeof createLanguageSchema>;
-
-export type LanguageItem = {
-  candidate_language_id: number;
-  language: string;
-  proficiency: string;
-  candidate_language_created_at: Date | null;
-};
 
 export type LanguageActionResult =
   | { success: true; languageId: number }

@@ -7,6 +7,7 @@
 // listing, viewing, creating payments, and fetching payment methods.
 // ---------------------------------------------------------------------------
 
+import { z } from "zod";
 import { requireCapability } from "@/modules/auth/session";
 import {
   listCandidatePayments as moduleListPayments,
@@ -18,6 +19,10 @@ import {
   listPaymentsSchema,
   getPaymentDetailSchema,
   createPaymentSchema,
+  listPaymentsResultOutputSchema,
+  getPaymentDetailResultOutputSchema,
+  paymentMethodOutputSchema,
+  createPaymentResultOutputSchema,
 } from "./schemas";
 import type {
   ListPaymentsParams,
@@ -54,7 +59,18 @@ export async function listCandidatePayments(
     return { items: [], total: 0, page: 1, limit: 20, totalPages: 0 };
   }
 
-  return moduleListPayments(Number(session.id), parsed.data);
+  const result = await moduleListPayments(Number(session.id), parsed.data);
+
+  // Validate output shape
+  const listOutputParsed = listPaymentsResultOutputSchema.safeParse(result);
+  if (!listOutputParsed.success) {
+    console.error(
+      "[candidate/payments] listCandidatePayments output validation failed:",
+      listOutputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -71,7 +87,18 @@ export async function getCandidatePaymentDetail(
     throw new Error(parsed.error.issues[0]?.message ?? "Invalid input");
   }
 
-  return moduleGetPaymentDetail(Number(session.id), parsed.data.tcId);
+  const result = await moduleGetPaymentDetail(Number(session.id), parsed.data.tcId);
+
+  // Validate output shape (result can be null)
+  const detailOutputParsed = getPaymentDetailResultOutputSchema.nullable().safeParse(result);
+  if (!detailOutputParsed.success) {
+    console.error(
+      "[candidate/payments] getCandidatePaymentDetail output validation failed:",
+      detailOutputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -88,7 +115,18 @@ export async function createCandidatePayment(
     throw new Error(parsed.error.issues[0]?.message ?? "Invalid payment data");
   }
 
-  return moduleCreatePayment(Number(session.id), parsed.data as { transferBenefName: string; transferBenefIban: string; bankId: number; amount?: number });
+  const result = await moduleCreatePayment(Number(session.id), parsed.data as { transferBenefName: string; transferBenefIban: string; bankId: number; amount?: number });
+
+  // Validate output shape
+  const createOutputParsed = createPaymentResultOutputSchema.safeParse(result);
+  if (!createOutputParsed.success) {
+    console.error(
+      "[candidate/payments] createCandidatePayment output validation failed:",
+      createOutputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -98,5 +136,16 @@ export async function createCandidatePayment(
 export async function getPaymentMethods(): Promise<PaymentMethod[]> {
   const session = await requireCapability("candidate.read.own");
 
-  return moduleGetPaymentMethods(Number(session.id));
+  const result = await moduleGetPaymentMethods(Number(session.id));
+
+  // Validate output shape
+  const methodsOutputParsed = z.array(paymentMethodOutputSchema).safeParse(result);
+  if (!methodsOutputParsed.success) {
+    console.error(
+      "[candidate/payments] getPaymentMethods output validation failed:",
+      methodsOutputParsed.error.issues,
+    );
+  }
+
+  return result;
 }

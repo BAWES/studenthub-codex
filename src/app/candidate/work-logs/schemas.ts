@@ -29,6 +29,83 @@ export const updateWorkLogStatusSchema = z.object({
 });
 
 // ---------------------------------------------------------------------------
+// Output validation — Zod schemas for server action return types
+// ---------------------------------------------------------------------------
+
+/**
+ * A single work log item returned by listWorkLogs and getWorkLogDetail.
+ * Matches the WorkLogItem type shape with coerced nullable dates.
+ */
+export const workLogItemOutputSchema = z.object({
+  candidate_working_hour_uuid: z.string(),
+  date: z.date().nullable(),
+  start_time: z.date().nullable(),
+  end_time: z.date().nullable(),
+  total_time: z.number().nullable(),
+  status: z.number().nullable(),
+  via: z.string().nullable(),
+  note: z.string().nullable(),
+  store_name: z.string().nullable(),
+  company_name: z.string().nullable(),
+  created_at: z.date().nullable(),
+  updated_at: z.date().nullable(),
+});
+
+/**
+ * A single work log detail (WorkLogItem + location fields).
+ */
+export const workLogDetailOutputSchema = workLogItemOutputSchema.extend({
+  start_location_lat: z.number().nullable(),
+  start_location_long: z.number().nullable(),
+  end_location_lat: z.number().nullable(),
+  end_location_long: z.number().nullable(),
+  store_location: z.string().nullable(),
+});
+
+/**
+ * Paginated list result (listWorkLogs return).
+ */
+export const listWorkLogsResultOutputSchema = z.object({
+  items: z.array(workLogItemOutputSchema),
+  total: z.number().nonnegative(),
+  page: z.number(),
+  limit: z.number(),
+  totalPages: z.number(),
+});
+
+/**
+ * Submit work log result — discriminated union.
+ */
+export const submitWorkLogResultOutputSchema = z.discriminatedUnion("operation", [
+  z.object({
+    operation: z.literal("success"),
+    message: z.string(),
+    workLog: workLogItemOutputSchema.optional(),
+  }),
+  z.object({
+    operation: z.literal("error"),
+    message: z.string(),
+    workLog: workLogItemOutputSchema.optional(),
+  }),
+]);
+
+/**
+ * Update work log status result — discriminated union.
+ */
+export const updateWorkLogStatusResultOutputSchema = z.discriminatedUnion("operation", [
+  z.object({
+    operation: z.literal("success"),
+    message: z.string(),
+    workLog: workLogItemOutputSchema.optional(),
+  }),
+  z.object({
+    operation: z.literal("error"),
+    message: z.string(),
+    workLog: workLogItemOutputSchema.optional(),
+  }),
+]);
+
+// ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 

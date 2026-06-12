@@ -15,6 +15,8 @@ import {
 import {
   listConversationsSchema,
   getConversationMessagesSchema,
+  listConversationsResultOutputSchema,
+  getConversationMessagesResultOutputSchema,
 } from "./schemas";
 import type {
   ListConversationsParams,
@@ -39,7 +41,12 @@ export async function listConversations(
 ): Promise<ListConversationsResult> {
   await requireCapability("candidate.read.own");
 
-  const { page, limit, companyId, storeId, staffId } = listConversationsSchema.parse(params);
+  const parsed = listConversationsSchema.safeParse(params);
+  if (!parsed.success) {
+    return { conversations: [], total: 0, page: 1, limit: 20, totalPages: 0 };
+  }
+
+  const { page, limit, companyId, storeId, staffId } = parsed.data;
 
   const result = await moduleListChats({
     page,
@@ -50,13 +57,24 @@ export async function listConversations(
   });
 
   // Map module shape { chats } → app router shape { conversations }
-  return {
+  const listResult = {
     conversations: result.chats,
     total: result.total,
     page: result.page,
     limit: result.limit,
     totalPages: result.totalPages,
   };
+
+  // Validate output shape
+  const listOutputParsed = listConversationsResultOutputSchema.safeParse(listResult);
+  if (!listOutputParsed.success) {
+    console.error(
+      "[candidate/chat] listConversations output validation failed:",
+      listOutputParsed.error.issues,
+    );
+  }
+
+  return listResult;
 }
 
 /**
@@ -68,7 +86,12 @@ export async function getConversationMessages(
 ): Promise<GetConversationMessagesResult> {
   await requireCapability("candidate.read.own");
 
-  const { chatUuid, lastIndex, limit } = getConversationMessagesSchema.parse(params);
+  const parsed = getConversationMessagesSchema.safeParse(params);
+  if (!parsed.success) {
+    return { messages: [], total: 0, page: 1, limit: 50, totalPages: 0 };
+  }
+
+  const { chatUuid, lastIndex, limit } = parsed.data;
 
   const result = await moduleGetChatMessages({
     chatUuid,
@@ -77,11 +100,22 @@ export async function getConversationMessages(
   });
 
   // Module returns { messages } — pass through directly
-  return {
+  const messagesResult = {
     messages: result.messages,
     total: result.total,
     page: result.page,
     limit: result.limit,
     totalPages: result.totalPages,
   };
+
+  // Validate output shape
+  const messagesOutputParsed = getConversationMessagesResultOutputSchema.safeParse(messagesResult);
+  if (!messagesOutputParsed.success) {
+    console.error(
+      "[candidate/chat] getConversationMessages output validation failed:",
+      messagesOutputParsed.error.issues,
+    );
+  }
+
+  return messagesResult;
 }

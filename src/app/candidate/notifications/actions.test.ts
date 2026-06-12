@@ -35,6 +35,11 @@ import {
   getCandidateNotificationRowsSchema,
   getCandidateNotificationDetailSchema,
   updateNotificationSchema,
+  notificationRowSchema,
+  notificationRowArraySchema,
+  notificationDetailSchema,
+  dismissResultSchema,
+  updateResultSchema,
 } from "./schemas";
 
 const mockUser = { id: 1, role: "candidate" };
@@ -150,6 +155,96 @@ describe("updateNotificationSchema", () => {
 
   it("rejects missing UUID", () => {
     expect(updateNotificationSchema.safeParse({}).success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output schema tests
+// ---------------------------------------------------------------------------
+
+describe("notificationRowSchema (output validation)", () => {
+  it("accepts a valid notification row", () => {
+    const r = notificationRowSchema.safeParse({
+      id: "notif_abc",
+      type: "Invitation",
+      typeCode: 0,
+      message: "You have a new invitation",
+      isNew: "Unread",
+      created: "2026-06-12",
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects missing required fields", () => {
+    const r = notificationRowSchema.safeParse({ id: "notif_abc" });
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects wrong type for typeCode", () => {
+    const r = notificationRowSchema.safeParse({
+      id: "notif_abc",
+      type: "Invitation",
+      typeCode: "not-a-number",
+      message: "Hello",
+      isNew: "Unread",
+      created: "2026-06-12",
+    });
+    expect(r.success).toBe(false);
+  });
+});
+
+describe("notificationRowArraySchema (output validation)", () => {
+  it("accepts an array of valid notification rows", () => {
+    const r = notificationRowArraySchema.safeParse([
+      { id: "n1", type: "Invitation", typeCode: 0, message: "Hello", isNew: "Unread", created: "2026-06-12" },
+      { id: "n2", type: "Assignment", typeCode: 1, message: "New assignment", isNew: "Read", created: "2026-06-11" },
+    ]);
+    expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data).toHaveLength(2);
+    }
+  });
+
+  it("accepts an empty array", () => {
+    expect(notificationRowArraySchema.safeParse([]).success).toBe(true);
+  });
+
+  it("rejects array with invalid items", () => {
+    const r = notificationRowArraySchema.safeParse([
+      { id: "n1", type: "Invitation", typeCode: 0, message: "Hello", isNew: "Unread", created: "2026-06-12" },
+      { id: "n2", type: "Assignment", typeCode: "invalid", message: "Bad", isNew: "Read", created: "2026-06-11" },
+    ]);
+    expect(r.success).toBe(false);
+  });
+});
+
+describe("dismissResultSchema (output validation)", () => {
+  it("accepts a success result", () => {
+    expect(dismissResultSchema.safeParse({ success: true }).success).toBe(true);
+  });
+
+  it("accepts a failure result with error", () => {
+    const r = dismissResultSchema.safeParse({ success: false, error: "Not found" });
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts a failure result without error", () => {
+    expect(dismissResultSchema.safeParse({ success: false }).success).toBe(true);
+  });
+
+  it("rejects missing success", () => {
+    expect(dismissResultSchema.safeParse({}).success).toBe(false);
+  });
+});
+
+describe("updateResultSchema (output validation)", () => {
+  it("accepts a success result", () => {
+    expect(updateResultSchema.safeParse({ success: true }).success).toBe(true);
+  });
+
+  it("accepts a failure result with error", () => {
+    const r = updateResultSchema.safeParse({ success: false, error: "Not found" });
+    expect(r.success).toBe(true);
   });
 });
 

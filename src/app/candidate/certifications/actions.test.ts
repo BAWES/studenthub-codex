@@ -327,6 +327,7 @@ describe("CertificationActionResult shape", () => {
 const mockRows = [
   {
     certification_id: 1,
+    candidate_id: 42,
     certification_name: "AWS Certified",
     issuing_organization: "Amazon",
     issue_date: new Date("2024-01-15"),
@@ -340,6 +341,7 @@ const mockRows = [
   },
   {
     certification_id: 2,
+    candidate_id: 42,
     certification_name: "Google Cloud",
     issuing_organization: "Google",
     issue_date: null,
@@ -522,8 +524,8 @@ describe("updateCandidateCertification", () => {
     const session = await mockSession();
 
     vi.mocked(session).mockResolvedValue({ id: "42" });
-    vi.mocked(mockFindFirst).mockResolvedValue({ certification_id: 1 });
-    vi.mocked(mockUpdate).mockResolvedValue({ certification_id: 1, ...mockRows[0] });
+    vi.mocked(mockFindFirst).mockResolvedValue({ certification_id: 1 } as any);
+    vi.mocked(mockUpdate).mockResolvedValue(mockRows[0] as any);
 
     const { updateCandidateCertification } = await import("./actions");
     const result = await updateCandidateCertification({
@@ -579,7 +581,7 @@ describe("deleteCandidateCertification", () => {
     const session = await mockSession();
 
     vi.mocked(session).mockResolvedValue({ id: "42" });
-    vi.mocked(mockFindFirst).mockResolvedValue({ certification_id: 1 });
+    vi.mocked(mockFindFirst).mockResolvedValue({ certification_id: 1 } as any);
 
     const { deleteCandidateCertification } = await import("./actions");
     const result = await deleteCandidateCertification(1);

@@ -14,6 +14,11 @@ import {
   getWorkLogDetailSchema,
   submitWorkLogSchema,
   updateWorkLogStatusSchema,
+  workLogItemOutputSchema,
+  workLogDetailOutputSchema,
+  listWorkLogsResultOutputSchema,
+  submitWorkLogResultOutputSchema,
+  updateWorkLogStatusResultOutputSchema,
   type WorkLogItem,
   type WorkLogDetail,
   type ListWorkLogsResult,
@@ -72,13 +77,24 @@ export async function listWorkLogs(
     updated_at: null,
   }));
 
-  return {
+  const result = {
     items,
     total: sorted.length,
     page,
     limit,
     totalPages: Math.ceil(sorted.length / limit),
   };
+
+  // Validate output shape
+  const outputParsed = listWorkLogsResultOutputSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[candidate/work-logs] listWorkLogs output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -109,7 +125,7 @@ export async function getWorkLogDetail(
 
   const row = moduleResult.worklog;
 
-  return {
+  const result = {
     candidate_working_hour_uuid: row.uuid,
     date: row.date ? new Date(row.date) : null,
     start_time: row.startTime ? new Date(row.startTime) : null,
@@ -128,6 +144,17 @@ export async function getWorkLogDetail(
     created_at: null,
     updated_at: null,
   };
+
+  // Validate output shape
+  const outputParsed = workLogDetailOutputSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[candidate/work-logs] getWorkLogDetail output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -178,10 +205,21 @@ export async function submitWorkLog(
 
   revalidatePath("/candidate/work-logs");
 
-  return {
-    operation: "success",
+  const submitResult = {
+    operation: "success" as const,
     message: "Work log submitted successfully",
   };
+
+  // Validate output shape
+  const outputParsed = submitWorkLogResultOutputSchema.safeParse(submitResult);
+  if (!outputParsed.success) {
+    console.error(
+      "[candidate/work-logs] submitWorkLog output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return submitResult;
 }
 
 // ---------------------------------------------------------------------------
@@ -227,8 +265,8 @@ export async function updateWorkLogStatus(
     revalidatePath("/candidate/work-logs");
 
     const wl = moduleResult.worklog;
-    return {
-      operation: "success",
+    const statusResult = {
+      operation: "success" as const,
       message: "Work log status updated",
       workLog: {
         candidate_working_hour_uuid: wl.uuid,
@@ -245,6 +283,17 @@ export async function updateWorkLogStatus(
         updated_at: null,
       },
     };
+
+    // Validate output shape
+    const outputParsed = updateWorkLogStatusResultOutputSchema.safeParse(statusResult);
+    if (!outputParsed.success) {
+      console.error(
+        "[candidate/work-logs] updateWorkLogStatus output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return statusResult;
   } catch (error) {
     return {
       operation: "error",

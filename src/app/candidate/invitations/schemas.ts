@@ -68,3 +68,69 @@ export type GetInvitationDetailResult = {
   metrics: { label: string; value: string | number; note: string }[];
   notes: { id: string; title: string; subtitle: string; meta: string }[];
 };
+
+// ---------------------------------------------------------------------------
+// Output validation schemas
+// ---------------------------------------------------------------------------
+
+export const invitationRowOutputSchema = z.object({
+  invitation_uuid: z.string(),
+  invitation_status: z.number().int().nullable(),
+  invitation_app_seen_at: z.date().nullable(),
+  invitation_email_seen_at: z.date().nullable(),
+  invitation_created_at: z.date().nullable(),
+  position_title: z.string().nullable(),
+  compensation: z.string().nullable(),
+  company_name: z.string().nullable(),
+});
+
+export const listInvitationsResultOutputSchema = z.object({
+  items: z.array(invitationRowOutputSchema),
+  total: z.number().int(),
+  page: z.number().int(),
+  limit: z.number().int(),
+  totalPages: z.number().int(),
+});
+
+const invitationDetailRequestSchema = z.object({
+  request_uuid: z.string(),
+  request_position_title: z.string().nullable(),
+  request_job_description: z.string().nullable(),
+  request_compensation: z.string().nullable(),
+  request_location: z.string().nullable(),
+  request_number_of_employees: z.number().int().nullable(),
+  request_status: z.string().nullable(),
+  company_name: z.string().nullable(),
+  company_email: z.string().nullable(),
+  staff_name: z.string().nullable(),
+  staff_email: z.string().nullable(),
+});
+
+const invitationDetailInvitationSchema = z.object({
+  invitation_uuid: z.string(),
+  invitation_status: z.number().int().nullable(),
+  invitation_app_seen_at: z.date().nullable(),
+  invitation_email_seen_at: z.date().nullable(),
+  invitation_seen_via: z.string().nullable(),
+  invitation_created_at: z.date().nullable(),
+  invitation_updated_at: z.date().nullable(),
+  request: invitationDetailRequestSchema,
+  story_uuid: z.string().nullable(),
+  story_status: z.number().int().nullable(),
+  story_last_updated_at: z.date().nullable(),
+}).nullable();
+
+export const getInvitationDetailResultOutputSchema = z.object({
+  invitation: invitationDetailInvitationSchema,
+  metrics: z.array(z.object({
+    label: z.string(),
+    value: z.union([z.string(), z.number()]),
+    note: z.string(),
+  })),
+  notes: z.array(z.object({
+    id: z.string(),
+    title: z.string(),
+    subtitle: z.string(),
+    meta: z.string(),
+  })),
+});

@@ -14,6 +14,7 @@
 // ---------------------------------------------------------------------------
 
 import crypto from "node:crypto";
+import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireRoleCapability } from "@/modules/auth/session";
@@ -21,16 +22,19 @@ import { getRequestDetail as _getRequestDetail } from "@/modules/workspace/reque
 import {
   approveRequest as parentApproveRequest,
   rejectRequest as parentRejectRequest,
-} from "../actions";
+} from "@/modules/admin/requests/actions";
 import {
   getRequestDetailSchema,
   approveRequestSchema,
   rejectRequestSchema,
   addCommentSchema,
-  type ApproveRequestInput,
-  type RejectRequestInput,
-  type AddCommentInput,
-  type AddCommentResponse,
+  addCommentResultSchema,
+  requestExistenceSchema,
+} from "./schemas";
+import type {
+  ApproveRequestInput,
+  RejectRequestInput,
+  AddCommentInput,
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
@@ -123,15 +127,15 @@ export async function rejectRequest(
  */
 export async function addComment(
   input: AddCommentInput,
-): Promise<AddCommentResponse> {
+): Promise<z.infer<typeof addCommentResultSchema>> {
   await requireRoleCapability("admin", "request.write.any");
 
   const parsed = addCommentSchema.safeParse(input);
   if (!parsed.success) {
-    return {
-      operation: "error",
+    return addCommentResultSchema.parse({
+      operation: "error" as const,
       message: parsed.error.issues[0]?.message ?? "Invalid input",
-    };
+    });
   }
 
   const { requestUuid, comment } = parsed.data;
@@ -142,8 +146,12 @@ export async function addComment(
     select: { request_uuid: true },
   });
 
-  if (!existing) {
-    return { operation: "error", message: "Request not found" };
+  const parsedExisting = requestExistenceSchema.safeParse(existing);
+  if (!parsedExisting.success || !parsedExisting.data) {
+    return addCommentResultSchema.parse({
+      operation: "error" as const,
+      message: "Request not found",
+    });
   }
 
   const now = new Date();
@@ -162,14 +170,14 @@ export async function addComment(
 
     revalidatePath(`/admin/requests/${requestUuid}`);
 
-    return {
-      operation: "success",
+    return addCommentResultSchema.parse({
+      operation: "success" as const,
       message: "Comment added successfully",
-    };
+    });
   } catch (err) {
-    return {
-      operation: "error",
+    return addCommentResultSchema.parse({
+      operation: "error" as const,
       message: err instanceof Error ? err.message : "Failed to add comment",
-    };
+    });
   }
 }

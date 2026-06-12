@@ -73,3 +73,22 @@ export type ExperienceItem = {
 export type ExperienceActionResult =
   | { success: true; experienceId: number }
   | { success: false; error: string };
+
+// ---------------------------------------------------------------------------
+// Output validation schemas
+// ---------------------------------------------------------------------------
+
+export const experienceItemOutputSchema: z.ZodType<ExperienceItem> = z.object({
+  candidate_experience_id: z.number(),
+  candidate_id: z.number().nullable(),
+  experience: z.string(),
+  employer: z.string().nullable(),
+  start_year: z.number().nullable(),
+  end_year: z.number().nullable(),
+  created_at: z.date().nullable(),
+});
+
+export const experienceActionResultOutputSchema: z.ZodType<ExperienceActionResult> = z.discriminatedUnion("success", [
+  z.object({ success: z.literal(true), experienceId: z.number() }),
+  z.object({ success: z.literal(false), error: z.string() }),
+]);

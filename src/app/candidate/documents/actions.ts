@@ -27,7 +27,7 @@ import type {
   DeleteDocumentState,
 } from "@/modules/candidates/documents";
 
-import { listDocumentsSchema, getDocumentSchema } from "./schemas";
+import { listDocumentsSchema, getDocumentSchema, listDocumentsOutputSchema, getDocumentOutputSchema, uploadDocumentOutputSchema, deleteDocumentOutputSchema } from "./schemas";
 import type { ListDocumentsParams, GetDocumentParams } from "./schemas";
 
 // ---------------------------------------------------------------------------
@@ -49,7 +49,18 @@ export async function listDocuments(
   }
 
   const candidateId = Number(session.id);
-  return listCandidateDocuments({ candidateId });
+  const result = await listCandidateDocuments({ candidateId });
+
+  // Validate output shape
+  const listOutputParsed = listDocumentsOutputSchema.safeParse(result);
+  if (!listOutputParsed.success) {
+    console.error(
+      "[candidate/documents] listDocuments output validation failed:",
+      listOutputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -71,7 +82,18 @@ export async function getDocument(
   }
 
   const candidateId = Number(session.id);
-  return getCandidateDocument({ candidateId, documentType: parsed.data.documentType });
+  const result = await getCandidateDocument({ candidateId, documentType: parsed.data.documentType });
+
+  // Validate output shape
+  const getOutputParsed = getDocumentOutputSchema.safeParse(result);
+  if (!getOutputParsed.success) {
+    console.error(
+      "[candidate/documents] getDocument output validation failed:",
+      getOutputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -90,7 +112,18 @@ export async function uploadDocument(
   formData: FormData,
 ): Promise<UploadDocumentState> {
   await requireRoleCapability("candidate", "candidate.profile.edit");
-  return uploadCandidateDocument(prevState, formData);
+  const result = await uploadCandidateDocument(prevState, formData);
+
+  // Validate output shape
+  const uploadOutputParsed = uploadDocumentOutputSchema.safeParse(result);
+  if (!uploadOutputParsed.success) {
+    console.error(
+      "[candidate/documents] uploadDocument output validation failed:",
+      uploadOutputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -106,5 +139,16 @@ export async function deleteDocument(
   formData: FormData,
 ): Promise<DeleteDocumentState> {
   await requireRoleCapability("candidate", "candidate.profile.edit");
-  return deleteCandidateDocument(prevState, formData);
+  const result = await deleteCandidateDocument(prevState, formData);
+
+  // Validate output shape
+  const deleteOutputParsed = deleteDocumentOutputSchema.safeParse(result);
+  if (!deleteOutputParsed.success) {
+    console.error(
+      "[candidate/documents] deleteDocument output validation failed:",
+      deleteOutputParsed.error.issues,
+    );
+  }
+
+  return result;
 }

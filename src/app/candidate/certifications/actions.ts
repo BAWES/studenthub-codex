@@ -16,6 +16,9 @@ import {
   createCertificationSchema,
   updateCertificationSchema,
   deleteCertificationSchema,
+  certificationItemOutputSchema,
+  certificationListOutputSchema,
+  certificationActionResultOutputSchema,
 } from "./schemas";
 
 // Re-export types for client components
@@ -76,7 +79,18 @@ export async function listCandidateCertifications(
     take: limit,
   });
 
-  return rows.map((r) => toItem(r)!);
+  const result = rows.map((r) => toItem(r)!);
+
+  // Validate output shape
+  const outputParsed = certificationListOutputSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[candidate/certifications] listCandidateCertifications output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -103,7 +117,20 @@ export async function getCandidateCertification(
     },
   });
 
-  return toItem(row);
+  const result = toItem(row);
+
+  // Validate output shape
+  if (result !== null) {
+    const outputParsed = certificationItemOutputSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[candidate/certifications] getCandidateCertification output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+  }
+
+  return result;
 }
 
 /**
@@ -144,7 +171,19 @@ export async function createCandidateCertification(
   });
 
   revalidatePath("/candidate/certifications");
-  return { success: true, certificationId: row.certification_id };
+
+  const actionResult = { success: true as const, certificationId: row.certification_id };
+
+  // Validate output shape
+  const outputParsed = certificationActionResultOutputSchema.safeParse(actionResult);
+  if (!outputParsed.success) {
+    console.error(
+      "[candidate/certifications] createCandidateCertification output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return actionResult;
 }
 
 /**
@@ -199,7 +238,19 @@ export async function updateCandidateCertification(
   });
 
   revalidatePath("/candidate/certifications");
-  return { success: true, certificationId };
+
+  const actionResult = { success: true as const, certificationId };
+
+  // Validate output shape
+  const outputParsed = certificationActionResultOutputSchema.safeParse(actionResult);
+  if (!outputParsed.success) {
+    console.error(
+      "[candidate/certifications] updateCandidateCertification output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return actionResult;
 }
 
 /**
@@ -240,5 +291,17 @@ export async function deleteCandidateCertification(
   });
 
   revalidatePath("/candidate/certifications");
-  return { success: true, certificationId: parsed.data.certificationId };
+
+  const actionResult = { success: true as const, certificationId: parsed.data.certificationId };
+
+  // Validate output shape
+  const outputParsed = certificationActionResultOutputSchema.safeParse(actionResult);
+  if (!outputParsed.success) {
+    console.error(
+      "[candidate/certifications] deleteCandidateCertification output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return actionResult;
 }

@@ -12,6 +12,12 @@
 
 // @ts-ignore - pg is a system-level module, not in project deps
 import { Pool } from "pg";
+import {
+  coderHealthDataSchema,
+  coderHealthMetricSchema,
+  coderHealthCommitSchema,
+} from "./schemas";
+import type { CoderHealthData, CoderHealthMetric, CoderHealthCommit } from "./schemas";
 
 const CODER_AGENT_ID = "eaa3c21b-a27e-40a5-a5bb-d392e5f53d95";
 const COMPANY_ID = "f56ea475-d349-431c-9a40-3111f1a49819";
@@ -25,25 +31,6 @@ const pool = new Pool({
   max: 2,
   idleTimeoutMillis: 5000,
 });
-
-export type CoderHealthMetric = {
-  label: string;
-  value: string;
-  note: string;
-};
-
-export type CoderHealthCommit = {
-  sha: string;
-  message: string;
-  date: string;
-};
-
-export type CoderHealthData = {
-  heartbeatMetrics: CoderHealthMetric[];
-  recentIssues: Array<{ title: string; status: string; updatedAt: string }>;
-  recentCommits: CoderHealthCommit[];
-  lastHeartbeat: string | null;
-};
 
 /**
  * Fetch Coder agent health metrics from the Paperclip DB and GitHub.
@@ -208,12 +195,22 @@ export async function getCoderHealthData(): Promise<CoderHealthData> {
       })),
     ];
 
-    return {
+    // Validate output shape
+    const result: CoderHealthData = {
       heartbeatMetrics,
       recentIssues,
       recentCommits,
       lastHeartbeat,
     };
+    const validated = coderHealthDataSchema.safeParse(result);
+    if (!validated.success) {
+      console.error(
+        "[coder-health] getCoderHealthData output validation failed:",
+        validated.error.issues,
+      );
+    }
+
+    return result;
   } finally {
     client.release();
   }

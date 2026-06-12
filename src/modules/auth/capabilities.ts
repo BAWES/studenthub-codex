@@ -96,11 +96,18 @@ export function capabilitiesForRole(role: Role) {
 }
 
 export function enrichSessionUser(user: SessionUser): SessionUser {
+  // When user has multiple roles, merge capabilities from all roles
+  const mergedCapabilities = user.roles && user.roles.length > 1
+    ? [...new Set(user.roles.flatMap(r => capabilitiesForRole(r)))]
+    : undefined;
+
   return {
     ...user,
     accountKey: user.accountKey ?? `${user.role}:${user.id}`,
     legacyType: user.legacyType ?? user.role,
-    capabilities: user.capabilities?.length ? user.capabilities : capabilitiesForRole(user.role)
+    capabilities: user.capabilities?.length
+      ? user.capabilities
+      : (mergedCapabilities ?? capabilitiesForRole(user.role))
   };
 }
 

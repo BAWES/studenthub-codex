@@ -7,6 +7,9 @@ import { getCandidateDetail } from "@/modules/candidates/candidate-detail";
 import {
   updatePersonalInfoSchema,
   updateProfileFieldsSchema,
+  profileEditDataNullableOutputSchema,
+  profileActionResultOutputSchema,
+  optionsItemOutputSchema,
   type UpdatePersonalInfoInput,
   type UpdateProfileFieldsInput,
   type CandidateProfileEditData,
@@ -142,7 +145,18 @@ export async function getCandidateProfileForEdit(): Promise<CandidateProfileEdit
     where: { candidate_id: candidateId },
   });
 
-  return toProfileData(row);
+  const profileData = toProfileData(row);
+
+  // Validate output shape
+  const outputParsed = profileEditDataNullableOutputSchema.safeParse(profileData);
+  if (!outputParsed.success) {
+    console.error(
+      "[candidate/edit] getCandidateProfileForEdit output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return profileData;
 }
 
 /**
@@ -184,7 +198,18 @@ export async function updateCandidatePersonalInfo(
   revalidatePath("/candidate/edit");
   revalidatePath("/candidate");
 
-  return { success: true };
+  const personalInfoResult = { success: true as const };
+
+  // Validate output shape
+  const personalInfoOutputParsed = profileActionResultOutputSchema.safeParse(personalInfoResult);
+  if (!personalInfoOutputParsed.success) {
+    console.error(
+      "[candidate/edit] updateCandidatePersonalInfo output validation failed:",
+      personalInfoOutputParsed.error.issues,
+    );
+  }
+
+  return personalInfoResult;
 }
 
 /**
@@ -236,5 +261,16 @@ export async function updateCandidateProfileFields(
   revalidatePath("/candidate/edit");
   revalidatePath("/candidate");
 
-  return { success: true };
+  const profileFieldsResult = { success: true as const };
+
+  // Validate output shape
+  const profileFieldsOutputParsed = profileActionResultOutputSchema.safeParse(profileFieldsResult);
+  if (!profileFieldsOutputParsed.success) {
+    console.error(
+      "[candidate/edit] updateCandidateProfileFields output validation failed:",
+      profileFieldsOutputParsed.error.issues,
+    );
+  }
+
+  return profileFieldsResult;
 }
