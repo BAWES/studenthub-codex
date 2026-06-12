@@ -1,18 +1,11 @@
-import { z } from "zod";
-
 // ---------------------------------------------------------------------------
-// Output validation schemas
+// Inspector ID Request Detail — Schemas (page-level re-exports)
+// ---------------------------------------------------------------------------
+// All schema definitions live in src/modules/inspector/id-requests/[id]/schemas.ts.
+// This barrel re-exports so page consumers keep their current import paths.
 // ---------------------------------------------------------------------------
 
-/**
- * Result schema for mutation actions that return either success or error.
- * Used by updateIdRequestStatus.
- */
-export const inspectorIdRequestActionResultSchema = z.union([
-  z.object({ success: z.literal(true) }),
-  z.object({ error: z.string() }),
-]);
-
-export type InspectorIdRequestActionResult = z.output<
-  typeof inspectorIdRequestActionResultSchema
->;
+export {
+  inspectorIdRequestActionResultSchema,
+  type InspectorIdRequestActionResult,
+} from "@/modules/inspector/id-requests/[id]/schemas";
