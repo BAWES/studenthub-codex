@@ -29,25 +29,25 @@ describe("listStaffInterviewsSchema", () => {
   });
 
   it("accepts status filter (0=scheduled, 1=completed, 2=cancelled)", () => {
-    const result = listStaffInterviewsSchema.safeParse({ status: 0 });
+    const result = listStaffInterviewsSchema.safeParse({ status: "0" });
     expect(result.success).toBe(true);
     if (result.success) {
-      expect(result.data.status).toBe(0);
+      expect(result.data.status).toBe("0");
     }
   });
 
   it("accepts completed status filter", () => {
-    const result = listStaffInterviewsSchema.safeParse({ status: 1 });
+    const result = listStaffInterviewsSchema.safeParse({ status: "1" });
     expect(result.success).toBe(true);
   });
 
   it("accepts cancelled status filter", () => {
-    const result = listStaffInterviewsSchema.safeParse({ status: 2 });
+    const result = listStaffInterviewsSchema.safeParse({ status: "2" });
     expect(result.success).toBe(true);
   });
 
   it("rejects invalid status filter", () => {
-    const result = listStaffInterviewsSchema.safeParse({ status: 99 });
+    const result = listStaffInterviewsSchema.safeParse({ status: "99" });
     expect(result.success).toBe(false);
   });
 
@@ -101,7 +101,7 @@ describe("updateInterviewStatusSchema", () => {
   it("accepts valid status update (complete)", () => {
     const result = updateInterviewStatusSchema.safeParse({
       interviewUuid: "interview_abc-123",
-      status: 1,
+      status: "1",
     });
     expect(result.success).toBe(true);
   });
@@ -109,7 +109,7 @@ describe("updateInterviewStatusSchema", () => {
   it("accepts valid status update (cancel)", () => {
     const result = updateInterviewStatusSchema.safeParse({
       interviewUuid: "interview_abc-123",
-      status: 2,
+      status: "2",
     });
     expect(result.success).toBe(true);
   });
@@ -117,7 +117,7 @@ describe("updateInterviewStatusSchema", () => {
   it("accepts valid status update (reset to scheduled)", () => {
     const result = updateInterviewStatusSchema.safeParse({
       interviewUuid: "interview_abc-123",
-      status: 0,
+      status: "0",
     });
     expect(result.success).toBe(true);
   });
@@ -262,9 +262,14 @@ vi.mock("@/lib/prisma", () => ({
 
 vi.mock("@/modules/auth/session", () => ({
   requireCapability: vi.fn(),
+  requireRoleCapability: vi.fn(),
 }));
 
-const { requireCapability } = await import("@/modules/auth/session");
+vi.mock("next/cache", () => ({
+  revalidatePath: vi.fn(),
+}));
+
+const { requireCapability, requireRoleCapability } = await import("@/modules/auth/session");
 const interviews = await import("./actions");
 
 const mockStaffUser = {
@@ -314,7 +319,7 @@ describe("listStaffInterviews", () => {
   it("filters by status", async () => {
     mockFindMany.mockResolvedValue([]);
     mockCount.mockResolvedValue(0);
-    await interviews.listStaffInterviews({ status: 1 });
+    await interviews.listStaffInterviews({ status: "1" });
     const callArgs = mockFindMany.mock.calls[0][0];
     expect(callArgs.where.status).toBe(1);
   });
@@ -366,12 +371,13 @@ describe("updateInterviewStatus", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(requireCapability).mockResolvedValue(mockStaffUser);
+    vi.mocked(requireRoleCapability).mockResolvedValue(mockStaffUser);
   });
 
   it("updates status to completed", async () => {
     mockFindFirst.mockResolvedValue({ request_interview_uuid: "interview_abc-123" });
     mockUpdate.mockResolvedValue({});
-    const result = await interviews.updateInterviewStatus({ interviewUuid: "interview_abc-123", status: 1 });
+    const result = await interviews.updateInterviewStatus({ interviewUuid: "interview_abc-123", status: "1" });
     expect(result.operation).toBe("success");
     expect(mockUpdate).toHaveBeenCalledWith({
       where: { request_interview_uuid: "interview_abc-123" },
@@ -381,14 +387,14 @@ describe("updateInterviewStatus", () => {
 
   it("returns error when interview not found", async () => {
     mockFindFirst.mockResolvedValue(null);
-    const result = await interviews.updateInterviewStatus({ interviewUuid: "interview_missing", status: 1 });
+    const result = await interviews.updateInterviewStatus({ interviewUuid: "interview_missing", status: "1" });
     expect(result.operation).toBe("error");
     expect(result.message).toBe("Interview not found");
     expect(mockUpdate).not.toHaveBeenCalled();
   });
 
   it("returns error on invalid status", async () => {
-    const result = await interviews.updateInterviewStatus({ interviewUuid: "interview_abc-123", status: 99 });
+    const result = await interviews.updateInterviewStatus({ interviewUuid: "interview_abc-123", status: "99" as any });
     expect(result.operation).toBe("error");
     expect(mockUpdate).not.toHaveBeenCalled();
   });
