@@ -8,6 +8,8 @@ import {
   getCertificationSchema,
   updateCertificationSchema,
   deleteCertificationSchema,
+  certificationItemOutputSchema,
+  certificationActionResultOutputSchema,
   type CertificationItem,
   type CertificationActionResult,
 } from "../schemas";
@@ -67,7 +69,20 @@ export async function getCertification(
     },
   });
 
-  return toItem(row);
+  const result = toItem(row);
+
+  // Validate output shape
+  if (result !== null) {
+    const outputParsed = certificationItemOutputSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[candidate/certifications/[id]] getCertification output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -127,7 +142,19 @@ export async function updateCertification(
   });
 
   revalidatePath("/candidate/certifications");
-  return { success: true, certificationId };
+
+  const actionResult = { success: true as const, certificationId };
+
+  // Validate output shape
+  const outputParsed = certificationActionResultOutputSchema.safeParse(actionResult);
+  if (!outputParsed.success) {
+    console.error(
+      "[candidate/certifications/[id]] updateCertification output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return actionResult;
 }
 
 // ---------------------------------------------------------------------------
@@ -173,5 +200,17 @@ export async function deleteCertification(
   });
 
   revalidatePath("/candidate/certifications");
-  return { success: true, certificationId: parsed.data.certificationId };
+
+  const actionResult = { success: true as const, certificationId: parsed.data.certificationId };
+
+  // Validate output shape
+  const outputParsed = certificationActionResultOutputSchema.safeParse(actionResult);
+  if (!outputParsed.success) {
+    console.error(
+      "[candidate/certifications/[id]] deleteCertification output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return actionResult;
 }

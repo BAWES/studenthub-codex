@@ -40,6 +40,8 @@ export const createCertificationSchema = z.object({
     .transform((v) => v?.trim() || undefined),
 });
 
+export { certificationActionResultOutputSchema } from "../schemas";
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
