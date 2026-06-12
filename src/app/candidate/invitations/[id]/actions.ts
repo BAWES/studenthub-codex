@@ -13,6 +13,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireRoleCapability } from "@/modules/auth/session";
 import {
@@ -25,11 +26,12 @@ import {
   getInvitationSchema,
   acceptInvitationSchema,
   declineInvitationSchema,
+  invitationExistenceSchema,
+  invitationActionResultSchema,
 } from "./schemas";
 import type {
   AcceptInvitationInput,
   DeclineInvitationInput,
-  InvitationActionResponse,
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
@@ -82,16 +84,16 @@ export async function getInvitation(
  */
 export async function acceptInvitation(
   input: AcceptInvitationInput,
-): Promise<InvitationActionResponse> {
+): Promise<z.infer<typeof invitationActionResultSchema>> {
   const session = await requireRoleCapability("candidate", "candidate.read.own");
   const candidateId = Number(session.id);
 
   const parsed = acceptInvitationSchema.safeParse(input);
   if (!parsed.success) {
-    return {
-      success: false,
+    return invitationActionResultSchema.parse({
+      success: false as const,
       error: parsed.error.issues[0]?.message ?? "Invalid input",
-    };
+    });
   }
 
   const { invitationUuid } = parsed.data;
@@ -101,16 +103,28 @@ export async function acceptInvitation(
     select: { invitation_uuid: true, invitation_status: true },
   });
 
-  if (!invitation) {
-    return { success: false, error: "Invitation not found" };
+  const existenceCheck = invitationExistenceSchema.safeParse(invitation);
+  if (!existenceCheck.success || existenceCheck.data === null) {
+    return invitationActionResultSchema.parse({
+      success: false as const,
+      error: "Invitation not found",
+    });
   }
 
-  if (invitation.invitation_status === INVITATION_STATUS_ACCEPTED) {
-    return { success: false, error: "Invitation has already been accepted" };
+  const inv = existenceCheck.data;
+
+  if (inv.invitation_status === INVITATION_STATUS_ACCEPTED) {
+    return invitationActionResultSchema.parse({
+      success: false as const,
+      error: "Invitation has already been accepted",
+    });
   }
 
-  if (invitation.invitation_status === INVITATION_STATUS_REJECTED) {
-    return { success: false, error: "Invitation has already been rejected" };
+  if (inv.invitation_status === INVITATION_STATUS_REJECTED) {
+    return invitationActionResultSchema.parse({
+      success: false as const,
+      error: "Invitation has already been rejected",
+    });
   }
 
   await prisma.invitation.update({
@@ -125,7 +139,7 @@ export async function acceptInvitation(
   revalidatePath("/candidate/invitations");
   revalidatePath(`/candidate/invitations/${invitationUuid}`);
 
-  return { success: true };
+  return invitationActionResultSchema.parse({ success: true as const });
 }
 
 // ---------------------------------------------------------------------------
@@ -140,16 +154,16 @@ export async function acceptInvitation(
  */
 export async function declineInvitation(
   input: DeclineInvitationInput,
-): Promise<InvitationActionResponse> {
+): Promise<z.infer<typeof invitationActionResultSchema>> {
   const session = await requireRoleCapability("candidate", "candidate.read.own");
   const candidateId = Number(session.id);
 
   const parsed = declineInvitationSchema.safeParse(input);
   if (!parsed.success) {
-    return {
-      success: false,
+    return invitationActionResultSchema.parse({
+      success: false as const,
       error: parsed.error.issues[0]?.message ?? "Invalid input",
-    };
+    });
   }
 
   const { invitationUuid } = parsed.data;
@@ -159,16 +173,28 @@ export async function declineInvitation(
     select: { invitation_uuid: true, invitation_status: true },
   });
 
-  if (!invitation) {
-    return { success: false, error: "Invitation not found" };
+  const existenceCheck = invitationExistenceSchema.safeParse(invitation);
+  if (!existenceCheck.success || existenceCheck.data === null) {
+    return invitationActionResultSchema.parse({
+      success: false as const,
+      error: "Invitation not found",
+    });
   }
 
-  if (invitation.invitation_status === INVITATION_STATUS_REJECTED) {
-    return { success: false, error: "Invitation has already been rejected" };
+  const inv = existenceCheck.data;
+
+  if (inv.invitation_status === INVITATION_STATUS_REJECTED) {
+    return invitationActionResultSchema.parse({
+      success: false as const,
+      error: "Invitation has already been rejected",
+    });
   }
 
-  if (invitation.invitation_status === INVITATION_STATUS_ACCEPTED) {
-    return { success: false, error: "Cannot decline an accepted invitation" };
+  if (inv.invitation_status === INVITATION_STATUS_ACCEPTED) {
+    return invitationActionResultSchema.parse({
+      success: false as const,
+      error: "Cannot decline an accepted invitation",
+    });
   }
 
   await prisma.invitation.update({
@@ -183,5 +209,5 @@ export async function declineInvitation(
   revalidatePath("/candidate/invitations");
   revalidatePath(`/candidate/invitations/${invitationUuid}`);
 
-  return { success: true };
+  return invitationActionResultSchema.parse({ success: true as const });
 }

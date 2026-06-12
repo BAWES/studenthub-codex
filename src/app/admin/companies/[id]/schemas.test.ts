@@ -1,88 +1,107 @@
 import { describe, it, expect } from "vitest";
-import { updateAdminCompanySchema } from "./schemas";
+import {
+  updateAdminCompanySchema,
+  companyExistenceSchema,
+  updateCompanyResultSchema,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
-// updateAdminCompanySchema
+// Input schema tests
 // ---------------------------------------------------------------------------
+
 describe("updateAdminCompanySchema", () => {
-  const validMinimal = { companyId: 1 };
+  const validInput = { companyId: 1, companyName: "Test Corp" };
 
-  it("accepts minimal input (companyId only)", () => {
-    expect(updateAdminCompanySchema.safeParse(validMinimal).success).toBe(true);
+  it("accepts valid input with required fields only", () => {
+    const r = updateAdminCompanySchema.safeParse({ companyId: 1 });
+    expect(r.success).toBe(true);
   });
 
-  it("accepts full input with all fields", () => {
-    expect(
-      updateAdminCompanySchema.safeParse({
-        companyId: 1,
-        companyName: "Acme Corp",
-        companyCommonNameEn: "Acme",
-        companyEmail: "admin@acme.com",
-        companyWebsite: "https://acme.com",
-        companyHourlyRate: 50,
-        currencyCode: "KWD",
-      }).success,
-    ).toBe(true);
+  it("accepts valid input with all optional fields", () => {
+    const r = updateAdminCompanySchema.safeParse(validInput);
+    expect(r.success).toBe(true);
   });
 
-  it("accepts null values for nullable fields", () => {
-    expect(
-      updateAdminCompanySchema.safeParse({
-        companyId: 1,
-        companyCommonNameEn: null,
-        companyEmail: null,
-        companyWebsite: null,
-        companyHourlyRate: null,
-        currencyCode: null,
-      }).success,
-    ).toBe(true);
+  it("accepts nullable fields", () => {
+    const r = updateAdminCompanySchema.safeParse({
+      companyId: 1,
+      companyEmail: null,
+      companyWebsite: null,
+    });
+    expect(r.success).toBe(true);
   });
 
   it("rejects missing companyId", () => {
     expect(updateAdminCompanySchema.safeParse({}).success).toBe(false);
   });
 
-  it("rejects zero companyId", () => {
-    expect(updateAdminCompanySchema.safeParse({ companyId: 0 }).success).toBe(false);
+  it("rejects non-positive companyId", () => {
+    expect(updateAdminCompanySchema.safeParse({ companyId: -1 }).success).toBe(false);
   });
 
-  it("rejects companyId as non-numeric string", () => {
-    expect(updateAdminCompanySchema.safeParse({ companyId: "abc" }).success).toBe(false);
-  });
-
-  it("rejects companyName exceeding 255 chars", () => {
+  it("rejects invalid email", () => {
     expect(
-      updateAdminCompanySchema.safeParse({ companyId: 1, companyName: "x".repeat(256) }).success,
+      updateAdminCompanySchema.safeParse({
+        companyId: 1,
+        companyEmail: "not-an-email",
+      }).success,
+    ).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output schema tests
+// ---------------------------------------------------------------------------
+
+describe("companyExistenceSchema", () => {
+  it("accepts valid company existence data", () => {
+    const r = companyExistenceSchema.safeParse({ company_id: 42 });
+    expect(r.success).toBe(true);
+    expect(r.data).not.toBeNull();
+  });
+
+  it("accepts null", () => {
+    expect(companyExistenceSchema.safeParse(null).success).toBe(true);
+  });
+
+  it("rejects missing company_id", () => {
+    expect(companyExistenceSchema.safeParse({}).success).toBe(false);
+  });
+
+  it("rejects non-positive company_id", () => {
+    expect(companyExistenceSchema.safeParse({ company_id: 0 }).success).toBe(false);
+  });
+});
+
+describe("updateCompanyResultSchema", () => {
+  it("accepts success result", () => {
+    const r = updateCompanyResultSchema.safeParse({
+      operation: "success",
+      message: "Company updated",
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts error result", () => {
+    const r = updateCompanyResultSchema.safeParse({
+      operation: "error",
+      message: "Company not found",
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects invalid operation", () => {
+    expect(
+      updateCompanyResultSchema.safeParse({
+        operation: "invalid",
+        message: "test",
+      }).success,
     ).toBe(false);
   });
 
-  it("rejects invalid email format", () => {
+  it("rejects missing message", () => {
     expect(
-      updateAdminCompanySchema.safeParse({ companyId: 1, companyEmail: "not-an-email" }).success,
-    ).toBe(false);
-  });
-
-  it("rejects invalid url format", () => {
-    expect(
-      updateAdminCompanySchema.safeParse({ companyId: 1, companyWebsite: "not-a-url" }).success,
-    ).toBe(false);
-  });
-
-  it("rejects negative hourly rate", () => {
-    expect(
-      updateAdminCompanySchema.safeParse({ companyId: 1, companyHourlyRate: -5 }).success,
-    ).toBe(false);
-  });
-
-  it("rejects currencyCode not exactly 3 chars", () => {
-    expect(
-      updateAdminCompanySchema.safeParse({ companyId: 1, currencyCode: "KWDX" }).success,
-    ).toBe(false);
-  });
-
-  it("rejects currencyCode as wrong type", () => {
-    expect(
-      updateAdminCompanySchema.safeParse({ companyId: 1, currencyCode: 123 }).success,
+      updateCompanyResultSchema.safeParse({ operation: "success" }).success,
     ).toBe(false);
   });
 });

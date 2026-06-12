@@ -9,7 +9,12 @@
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
 import { formatDate, formatMoney } from "@/modules/workspace/format";
-import { getCompanyWorkspaceSchema } from "./schemas";
+import {
+  getCompanyWorkspaceSchema,
+  staffWorkspaceOutputSchema,
+  workspaceOverviewOutputSchema,
+  companyHomeOutputSchema,
+} from "./schemas";
 import type { StaffWorkspaceData, CompanyWorkspaceData, CompanyHomeData } from "./schemas";
 
 /**
@@ -73,7 +78,7 @@ export async function getStaffWorkspace(
       }),
     ]);
 
-  return {
+  return staffWorkspaceOutputSchema.parse({
     staff: staff
       ? {
           ...staff,
@@ -98,7 +103,7 @@ export async function getStaffWorkspace(
       subtitle: `Status ${story.story_status}`,
       meta: formatDate(story.story_last_updated_at),
     })),
-  };
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -171,7 +176,7 @@ export async function getCompanyWorkspace(
     }),
   ]);
 
-  return {
+  return workspaceOverviewOutputSchema.parse({
     contact: contact ? { contact_name: contact.contact_name, contact_email: contact.contact_email ?? "" } : null,
     metrics: [
       { label: "Companies", value: companyIds.length, note: "Companies linked to this contact" },
@@ -191,7 +196,7 @@ export async function getCompanyWorkspace(
       subtitle: request.company?.company_name ?? "No company",
       meta: `${request.request_status ?? "No status"} · ${request.request_number_of_employees ?? 0} seats`,
     })),
-  };
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -282,7 +287,7 @@ export async function getCompanyHomeData(
     0,
   );
 
-  return {
+  return companyHomeOutputSchema.parse({
     ...base,
     activeRequestCount,
     pendingRequestCount,
@@ -301,5 +306,5 @@ export async function getCompanyHomeData(
       timestamp: a.activity_created_datetime,
       relatedEntityId: a.request_uuid,
     })),
-  };
+  });
 }

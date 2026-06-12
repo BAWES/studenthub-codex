@@ -127,3 +127,75 @@ export type ListCompaniesResult = {
   limit: number;
   totalPages: number;
 };
+
+// ---------------------------------------------------------------------------
+// Output validation schemas
+// ---------------------------------------------------------------------------
+
+export const companyListItemSchema = z.object({
+  company_id: z.number().int(),
+  company_name: z.string(),
+  company_email: z.string().nullable(),
+  company_website: z.string().nullable(),
+  country_name: z.string().nullable(),
+  country_id: z.number().nullable(),
+  no_of_active_requests: z.number().nullable(),
+  total_candidate: z.union([z.bigint(), z.number()]).nullable(),
+  company_updated_at: z.date(),
+  currency_code: z.string().nullable(),
+  commercial_licence: z.string().nullable(),
+});
+
+export const listCompaniesResultSchema = z.object({
+  companies: z.array(companyListItemSchema),
+  total: z.number(),
+  page: z.number(),
+  limit: z.number(),
+  totalPages: z.number(),
+});
+
+export const companyDetailSchema = z.object({
+  company_id: z.number().int(),
+  parent_company_id: z.number().nullable(),
+  company_name: z.string(),
+  company_common_name_en: z.string().nullable(),
+  company_common_name_ar: z.string().nullable(),
+  company_description_en: z.string().nullable(),
+  company_description_ar: z.string().nullable(),
+  company_website: z.string().nullable(),
+  company_email: z.string().nullable(),
+  company_logo: z.string().nullable(),
+  commercial_licence: z.string().nullable(),
+  company_hourly_rate: z.number().nullable(),
+  company_bonus_commission: z.number().nullable(),
+  company_followup: z.boolean().nullable(),
+  total_candidate: z.union([z.bigint(), z.number()]).nullable(),
+  no_of_active_requests: z.number().nullable(),
+  is_request_updates_in_30_days: z.boolean().nullable(),
+  company_approved_to_hire: z.boolean().nullable(),
+  company_status_override: z.boolean().nullable(),
+  company_created_at: z.date(),
+  company_updated_at: z.date(),
+  last_request_datetime: z.date().nullable(),
+  last_payment_datetime: z.date().nullable(),
+  country_id: z.number().nullable(),
+  currency_code: z.string().nullable(),
+  country_name: z.string().nullable(),
+  parent_company_name: z.string().nullable(),
+  staff_name: z.string().nullable(),
+});
+
+export const companyCreateResultSchema = z.object({
+  company_id: z.number().int(),
+});
+
+export const companyAccountRowSchema = z.object({
+  id: z.number().int(),
+  name: z.string(),
+  email: z.string(),
+  country: z.string(),
+  requests: z.number(),
+  status: z.string(),
+  rate: z.string(),
+  updated: z.string(),
+});

@@ -15,6 +15,21 @@ export const updateAdminCompanySchema = z.object({
 });
 
 // ---------------------------------------------------------------------------
+// Output validation schemas
+// ---------------------------------------------------------------------------
+
+/** Schema for the company existence check result. */
+export const companyExistenceSchema = z
+  .object({ company_id: z.number().int().positive() })
+  .nullable();
+
+/** Schema for the updateAdminCompany response. */
+export const updateCompanyResultSchema = z.discriminatedUnion("operation", [
+  z.object({ operation: z.literal("success"), message: z.string() }),
+  z.object({ operation: z.literal("error"), message: z.string() }),
+]);
+
+// ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
