@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
 import {
@@ -8,6 +9,12 @@ import {
   getCompanySchema,
   createCompanySchema,
   updateCompanySchema,
+} from "./schemas";
+import {
+  listCompaniesResultSchema,
+  companyDetailSchema,
+  companyCreateResultSchema,
+  companyAccountRowSchema,
 } from "./schemas";
 import type {
   ListCompaniesInput,
@@ -91,13 +98,13 @@ export async function listCompanies(
     commercial_licence: c.commercial_licence,
   }));
 
-  return {
+  return listCompaniesResultSchema.parse({
     companies,
     total,
     page,
     limit,
     totalPages: Math.ceil(total / limit),
-  };
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -151,7 +158,7 @@ export async function listCompanyAccountRows(
     },
   });
 
-  return rows.map((row) => ({
+  return z.array(companyAccountRowSchema).parse(rows.map((row) => ({
     id: row.company_id,
     name: row.company_name,
     email: row.company_email ?? "No email",
@@ -160,7 +167,7 @@ export async function listCompanyAccountRows(
     status: row.company_approved_to_hire ? "Approved" : "Not approved",
     rate: formatMoney(row.company_hourly_rate, row.currency_code ?? "KWD"),
     updated: formatDate(row.company_updated_at),
-  }));
+  })));
 }
 
 // ---------------------------------------------------------------------------
@@ -205,7 +212,7 @@ export async function getCompany(
 
   if (!raw) return null;
 
-  return {
+  return companyDetailSchema.parse({
     company_id: raw.company_id,
     parent_company_id: raw.parent_company_id,
     company_name: raw.company_name,
@@ -238,7 +245,7 @@ export async function getCompany(
     country_name: raw.country?.country_name_en ?? null,
     parent_company_name: raw.company?.company_name ?? null,
     staff_name: raw.staff?.staff_name ?? null,
-  };
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -279,7 +286,7 @@ export async function createCompany(
   });
 
   revalidatePath("/company/companies");
-  return { company_id: company.company_id };
+  return companyCreateResultSchema.parse({ company_id: company.company_id });
 }
 
 // ---------------------------------------------------------------------------
@@ -361,5 +368,5 @@ export async function updateCompany(
   });
 
   revalidatePath("/company/companies");
-  return { company_id: companyId };
+  return companyCreateResultSchema.parse({ company_id: companyId });
 }

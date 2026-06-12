@@ -34,6 +34,30 @@ export const updateScheduleEntrySchema = z.object({
 });
 
 // ---------------------------------------------------------------------------
+// Output validation schemas
+// ---------------------------------------------------------------------------
+
+/**
+ * Validate the shape of an existing schedule entry record.
+ * Accepts null (entry not found) or a valid record shape.
+ */
+export const scheduleEntryExistenceSchema = z
+  .object({
+    cwd_uuid: z.string().min(1),
+    status: z.number().int().optional(),
+  })
+  .nullable();
+
+/**
+ * Discriminated union for action results — enforces that every return
+ * from an action is either `{ success: true }` or `{ success: false, error: string }`.
+ */
+export const scheduleEntryActionResultSchema = z.discriminatedUnion("success", [
+  z.object({ success: z.literal(true) }),
+  z.object({ success: z.literal(false), error: z.string() }),
+]);
+
+// ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
@@ -41,8 +65,4 @@ export type GetScheduleEntryInput = z.input<typeof getScheduleEntrySchema>;
 export type UpdateScheduleEntryInput = z.input<typeof updateScheduleEntrySchema>;
 export type DeleteScheduleEntryInput = z.input<typeof deleteScheduleEntrySchema>;
 
-export type ScheduleEntryResponse = {
-  success: boolean;
-  data?: unknown;
-  error?: string;
-};
+export type ScheduleEntryResponse = z.infer<typeof scheduleEntryActionResultSchema>;

@@ -8,6 +8,7 @@
 // detail-page-specific mutations.
 // ---------------------------------------------------------------------------
 
+import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
@@ -33,8 +34,8 @@ export async function toggleCompanyApproval(
   return _toggleCompanyApproval(companyId, approved);
 }
 
-import { updateAdminCompanySchema } from "./schemas";
-import type { UpdateAdminCompanyInput, AdminCompanyActionResponse } from "./schemas";
+import { updateAdminCompanySchema, updateCompanyResultSchema, companyExistenceSchema } from "./schemas";
+import type { UpdateAdminCompanyInput } from "./schemas";
 
 // ---------------------------------------------------------------------------
 // updateAdminCompany
@@ -47,15 +48,15 @@ import type { UpdateAdminCompanyInput, AdminCompanyActionResponse } from "./sche
  */
 export async function updateAdminCompany(
   input: UpdateAdminCompanyInput,
-): Promise<AdminCompanyActionResponse> {
+): Promise<z.infer<typeof updateCompanyResultSchema>> {
   await requireCapability("admin.write");
 
   const parsed = updateAdminCompanySchema.safeParse(input);
   if (!parsed.success) {
-    return {
-      operation: "error",
+    return updateCompanyResultSchema.parse({
+      operation: "error" as const,
       message: parsed.error.issues[0]?.message ?? "Invalid input",
-    };
+    });
   }
 
   const existing = await prisma.company.findUnique({
@@ -63,8 +64,12 @@ export async function updateAdminCompany(
     select: { company_id: true },
   });
 
-  if (!existing) {
-    return { operation: "error", message: "Company not found" };
+  const parsedExisting = companyExistenceSchema.safeParse(existing);
+  if (!parsedExisting.success || !parsedExisting.data) {
+    return updateCompanyResultSchema.parse({
+      operation: "error" as const,
+      message: "Company not found",
+    });
   }
 
   const updateData: Record<string, unknown> = {
@@ -87,11 +92,14 @@ export async function updateAdminCompany(
     revalidatePath("/admin/companies");
     revalidatePath(`/admin/companies/${parsed.data.companyId}`);
 
-    return { operation: "success", message: "Company updated" };
+    return updateCompanyResultSchema.parse({
+      operation: "success" as const,
+      message: "Company updated",
+    });
   } catch (err) {
-    return {
-      operation: "error",
+    return updateCompanyResultSchema.parse({
+      operation: "error" as const,
       message: err instanceof Error ? err.message : "Failed to update company",
-    };
+    });
   }
 }

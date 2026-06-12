@@ -28,3 +28,19 @@ export type InvitationActionResponse = {
   success: boolean;
   error?: string;
 };
+
+// ---------------------------------------------------------------------------
+// Output validation schemas
+// ---------------------------------------------------------------------------
+
+export const invitationExistenceSchema = z
+  .object({
+    invitation_uuid: z.string().min(1),
+    invitation_status: z.number().int(),
+  })
+  .nullable();
+
+export const invitationActionResultSchema = z.discriminatedUnion("success", [
+  z.object({ success: z.literal(true) }),
+  z.object({ success: z.literal(false), error: z.string() }),
+]);

@@ -18,12 +18,14 @@ import {
   createCandidatePayment as parentCreatePayment,
 } from "../actions";
 
+import { z } from "zod";
 import {
   getPaymentSchema,
   deletePaymentSchema,
+  paymentActionResultSchema,
+  paymentExistenceSchema,
 } from "./schemas";
 import type {
-  ActionResponse,
   GetPaymentParams,
   DeletePaymentParams,
 } from "./schemas";
@@ -64,16 +66,16 @@ export async function getPayment(
  */
 export async function deletePayment(
   tcId: number,
-): Promise<ActionResponse> {
+): Promise<z.infer<typeof paymentActionResultSchema>> {
   try {
     const session = await requireRoleCapability("candidate", "candidate.profile.edit");
 
     const parsed = deletePaymentSchema.safeParse({ tcId });
     if (!parsed.success) {
-      return {
-        success: false,
+      return paymentActionResultSchema.parse({
+        success: false as const,
         error: parsed.error.issues[0]?.message ?? "Invalid payment ID",
-      };
+      });
     }
 
     const candidateId = Number(session.id);
@@ -88,8 +90,12 @@ export async function deletePayment(
       select: { tc_id: true },
     });
 
-    if (!existing) {
-      return { success: false, error: "Payment not found or access denied" };
+    const existenceResult = paymentExistenceSchema.safeParse(existing);
+    if (!existenceResult.success) {
+      return paymentActionResultSchema.parse({
+        success: false as const,
+        error: "Payment not found or access denied",
+      });
     }
 
     // Soft delete: set deleted flag
@@ -100,14 +106,16 @@ export async function deletePayment(
 
     revalidatePath("/candidate/payments");
 
-    return { success: true };
+    return paymentActionResultSchema.parse({
+      success: true as const,
+    });
   } catch (e) {
-    return {
-      success: false,
+    return paymentActionResultSchema.parse({
+      success: false as const,
       error:
         e instanceof Error
           ? e.message
           : "Failed to delete payment.",
-    };
+    });
   }
 }

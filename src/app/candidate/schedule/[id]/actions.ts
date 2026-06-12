@@ -23,12 +23,14 @@ import {
 import type { ScheduleDetail, ScheduleItem, ScheduleStatusResult } from "../schemas";
 export type { ScheduleDetail, ScheduleItem, ScheduleStatusResult };
 
+import { z } from "zod";
 import {
   getScheduleEntrySchema,
   updateScheduleEntrySchema,
   deleteScheduleEntrySchema,
+  scheduleEntryActionResultSchema,
+  scheduleEntryExistenceSchema,
 } from "./schemas";
-import type { ScheduleEntryResponse } from "./schemas";
 
 // ---------------------------------------------------------------------------
 // getScheduleEntry
@@ -68,15 +70,15 @@ export async function updateScheduleEntry(
   cwd_uuid: string,
   status: number,
   reason?: string,
-): Promise<ScheduleEntryResponse> {
+): Promise<z.infer<typeof scheduleEntryActionResultSchema>> {
   const session = await requireRoleCapability("candidate", "candidate.profile.edit");
 
   const parsed = updateScheduleEntrySchema.safeParse({ cwd_uuid, status, reason });
   if (!parsed.success) {
-    return {
-      success: false,
+    return scheduleEntryActionResultSchema.parse({
+      success: false as const,
       error: parsed.error.issues[0]?.message ?? "Invalid input",
-    };
+    });
   }
 
   // Verify the entry exists and belongs to the candidate before mutating
@@ -88,8 +90,12 @@ export async function updateScheduleEntry(
     select: { cwd_uuid: true, status: true },
   });
 
-  if (!existing) {
-    return { success: false, error: "Schedule entry not found or access denied" };
+  const existenceCheck = scheduleEntryExistenceSchema.safeParse(existing);
+  if (!existenceCheck.success || !existenceCheck.data) {
+    return scheduleEntryActionResultSchema.parse({
+      success: false as const,
+      error: "Schedule entry not found or access denied",
+    });
   }
 
   // Delegate the status update to the parent action
@@ -101,7 +107,7 @@ export async function updateScheduleEntry(
   revalidatePath("/candidate/schedule");
   revalidatePath(`/candidate/schedule/${parsed.data.cwd_uuid}`);
 
-  return { success: true };
+  return scheduleEntryActionResultSchema.parse({ success: true as const });
 }
 
 // ---------------------------------------------------------------------------
@@ -115,15 +121,15 @@ export async function updateScheduleEntry(
  */
 export async function deleteScheduleEntry(
   cwd_uuid: string,
-): Promise<ScheduleEntryResponse> {
+): Promise<z.infer<typeof scheduleEntryActionResultSchema>> {
   const session = await requireRoleCapability("candidate", "candidate.profile.edit");
 
   const parsed = deleteScheduleEntrySchema.safeParse({ cwd_uuid });
   if (!parsed.success) {
-    return {
-      success: false,
+    return scheduleEntryActionResultSchema.parse({
+      success: false as const,
       error: parsed.error.issues[0]?.message ?? "Invalid input",
-    };
+    });
   }
 
   // Verify ownership before deleting
@@ -135,8 +141,12 @@ export async function deleteScheduleEntry(
     select: { cwd_uuid: true },
   });
 
-  if (!existing) {
-    return { success: false, error: "Schedule entry not found or access denied" };
+  const existenceCheck = scheduleEntryExistenceSchema.safeParse(existing);
+  if (!existenceCheck.success || !existenceCheck.data) {
+    return scheduleEntryActionResultSchema.parse({
+      success: false as const,
+      error: "Schedule entry not found or access denied",
+    });
   }
 
   await prisma.candidate_working_date.delete({
@@ -145,5 +155,5 @@ export async function deleteScheduleEntry(
 
   revalidatePath("/candidate/schedule");
 
-  return { success: true };
+  return scheduleEntryActionResultSchema.parse({ success: true as const });
 }

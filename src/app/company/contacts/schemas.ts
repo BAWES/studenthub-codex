@@ -90,3 +90,51 @@ export type CompanyContactRow = {
   companyName: string;
   allowAccess: boolean;
 };
+
+// ---------------------------------------------------------------------------
+// Output validation schemas
+// ---------------------------------------------------------------------------
+
+export const companyContactListItemSchema = z.object({
+  company_contact_uuid: z.string(),
+  company_id: z.number().nullable(),
+  contact_position: z.string().nullable(),
+  allow_access: z.boolean().nullable(),
+  contact_name: z.string().nullable(),
+  contact_email: z.string().nullable(),
+  company_name: z.string().nullable(),
+});
+
+export const listCompanyContactsResultSchema = z.object({
+  contacts: z.array(companyContactListItemSchema),
+  total: z.number(),
+  page: z.number(),
+  limit: z.number(),
+  totalPages: z.number(),
+});
+
+export const companyContactDetailSchema = z.object({
+  company_contact_uuid: z.string(),
+  contact_uuid: z.string().nullable(),
+  company_id: z.number().nullable(),
+  contact_position: z.string().nullable(),
+  allow_access: z.boolean().nullable(),
+  created_at: z.date(),
+  updated_at: z.date(),
+  contact_name: z.string().nullable(),
+  contact_email: z.string().nullable(),
+  company_name: z.string().nullable(),
+}).nullable();
+
+export const companyContactUuidResultSchema = z.object({
+  company_contact_uuid: z.string(),
+});
+
+export const companyContactRowSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  email: z.string(),
+  position: z.string(),
+  companyName: z.string(),
+  allowAccess: z.boolean(),
+});

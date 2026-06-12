@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
 import {
@@ -8,6 +9,12 @@ import {
   getCompanyContactSchema,
   createCompanyContactSchema,
   updateCompanyContactSchema,
+} from "./schemas";
+import {
+  listCompanyContactsResultSchema,
+  companyContactDetailSchema,
+  companyContactUuidResultSchema,
+  companyContactRowSchema,
 } from "./schemas";
 import type {
   ListCompanyContactsInput,
@@ -81,13 +88,13 @@ export async function listCompanyContacts(
     company_name: c.company?.company_name ?? null,
   }));
 
-  return {
+  return listCompanyContactsResultSchema.parse({
     contacts,
     total,
     page,
     limit,
     totalPages: Math.ceil(total / limit),
-  };
+  });
 }
 
 /**
@@ -123,7 +130,7 @@ export async function getCompanyContact(
 
   if (!raw) return null;
 
-  return {
+  return companyContactDetailSchema.parse({
     company_contact_uuid: raw.company_contact_uuid,
     contact_uuid: raw.contact_uuid,
     company_id: raw.company_id,
@@ -134,7 +141,7 @@ export async function getCompanyContact(
     contact_name: raw.contact?.contact_name ?? null,
     contact_email: raw.contact?.contact_email ?? null,
     company_name: raw.company?.company_name ?? null,
-  };
+  });
 }
 
 /**
@@ -201,7 +208,7 @@ export async function createCompanyContact(
   });
 
   revalidatePath("/company/contacts");
-  return { company_contact_uuid: companyContact.company_contact_uuid };
+  return companyContactUuidResultSchema.parse({ company_contact_uuid: companyContact.company_contact_uuid });
 }
 
 /**
@@ -231,7 +238,7 @@ export async function updateCompanyContact(
   });
 
   revalidatePath("/company/contacts");
-  return { company_contact_uuid: parsed.data.uuid };
+  return companyContactUuidResultSchema.parse({ company_contact_uuid: parsed.data.uuid });
 }
 
 // ---------------------------------------------------------------------------
@@ -271,12 +278,12 @@ export async function listCompanyContactsRows(
     orderBy: { updated_at: "desc" },
   });
 
-  return contacts.map((c) => ({
+  return z.array(companyContactRowSchema).parse(contacts.map((c) => ({
     id: c.company_contact_uuid,
     name: c.contact?.contact_name ?? "—",
     email: c.contact?.contact_email ?? "—",
     position: c.contact_position ?? "—",
     companyName: c.company?.company_name ?? "—",
     allowAccess: c.allow_access ?? false,
-  }));
+  })));
 }

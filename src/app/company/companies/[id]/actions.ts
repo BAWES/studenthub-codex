@@ -1,11 +1,14 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
 import {
   getCompanyDetailSchema,
   updateCompanySchema,
+  companyDetailResultSchema,
+  companyAccountDetailOutputSchema,
 } from "./schemas";
 import type {
   CompanyDetailResult,
@@ -41,20 +44,13 @@ async function companyIdsForContact(contactUuid: string): Promise<number[]> {
 export async function getCompanyAccountDetail(
   contactUuid: string,
   companyId: number,
-): Promise<{
-  company: any;
-  metrics: { label: string; value: string | number; note: string }[];
-  requests: { id: string; title: string; subtitle: string; meta: string }[];
-  contacts: { id: string; title: string; subtitle: string; meta: string }[];
-  stores: { id: number; title: string; subtitle: string; meta: string }[];
-  notes: { id: string; title: string; subtitle: string; meta: string }[];
-} | null> {
+): Promise<z.infer<typeof companyAccountDetailOutputSchema> | null> {
   await requireCapability("company.read.linked");
 
   // Scope to contact's linked companies
   const companyIds = await companyIdsForContact(contactUuid);
   if (!companyIds.includes(companyId)) {
-    return null;
+    return null as any;
   }
 
   const [company, requests, contacts, stores, notes] = await prisma.$transaction([
@@ -111,7 +107,7 @@ export async function getCompanyAccountDetail(
     }),
   ]);
 
-  return {
+  return companyAccountDetailOutputSchema.parse({
     company: company as any,
     metrics: [
       { label: "Active Requests", value: company?.no_of_active_requests ?? requests.length, note: "Legacy active request count" },
@@ -143,7 +139,7 @@ export async function getCompanyAccountDetail(
       subtitle: note.note_text?.slice(0, 180) ?? "Empty note",
       meta: formatDate(note.note_created_datetime),
     })),
-  };
+  }) as any;
 }
 
 // ---------------------------------------------------------------------------
@@ -189,7 +185,7 @@ export async function getCompanyDetail(
 
   if (!raw) return null;
 
-  return {
+  return companyDetailResultSchema.parse({
     company_id: raw.company_id,
     parent_company_id: raw.parent_company_id,
     company_name: raw.company_name,
@@ -222,7 +218,7 @@ export async function getCompanyDetail(
     country_name: raw.country?.country_name_en ?? null,
     parent_company_name: raw.company?.company_name ?? null,
     staff_name: raw.staff?.staff_name ?? null,
-  };
+  });
 }
 
 // ---------------------------------------------------------------------------
