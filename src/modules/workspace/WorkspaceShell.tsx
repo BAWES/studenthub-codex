@@ -12,6 +12,7 @@ import { MobileNavBar } from "@/components/ui/mobile-nav-bar";
 import { useWorkspaceOS } from "./WorkspaceOSContext";
 import { EmptyState } from "./EmptyState";
 import { MetricCard } from "@/components/ui/metric-card";
+import { RoleSwitcher } from "./RoleSwitcher";
 
 type Metric = {
   label: string;
@@ -64,6 +65,10 @@ export function WorkspaceShell({
       <WorkspaceNavigation items={navItems} role={session.role} />
       <div className="workspaceRailDivider" aria-hidden="true" />
       <div className="workspaceRailFooter">
+        <RoleSwitcher
+          currentRole={session.role}
+          availableRoles={(session.roles ?? [session.role]) as any}
+        />
         <ThemeToggle />
         <form action={logoutAction}>
           <button type="submit" aria-label="Sign out">

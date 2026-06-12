@@ -978,6 +978,74 @@ body {
   color: var(--sh-error);
 }
 
+/* ── Role Switcher ────────────────────────────────────────────────────── */
+.roleSwitcher {
+  position: relative;
+  width: 100%;
+}
+
+.roleSwitcherCurrent {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  min-height: 32px;
+  padding: 4px 10px;
+  border: 1px solid var(--sh-glass-border);
+  border-radius: var(--sh-radius-sm);
+  background: transparent;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: default;
+}
+
+.roleSwitcher:hover .roleSwitcherDropdown {
+  display: flex;
+}
+
+.roleSwitcherDropdown {
+  display: none;
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  right: 0;
+  margin-bottom: 4px;
+  flex-direction: column;
+  gap: 2px;
+  background: var(--surface);
+  border: 1px solid var(--sh-glass-border);
+  border-radius: var(--sh-radius-sm);
+  overflow: hidden;
+  z-index: 50;
+}
+
+.roleSwitcherOption {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  min-height: 32px;
+  padding: 4px 10px;
+  border: none;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 120ms var(--sh-easing);
+}
+
+.roleSwitcherOption:hover {
+  background: color-mix(in srgb, var(--coral) 10%, transparent);
+  color: var(--coral);
+}
+
+.roleSwitcherOption:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 /* ── Theme toggle in rail ──────────────────────────────────────────── */
 .themeToggle {
   width: 100%;

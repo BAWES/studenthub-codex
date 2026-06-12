@@ -14,6 +14,7 @@ import {
   loginStateSchema,
   verifySessionResultSchema,
   changePasswordStateSchema,
+  switchRoleSchema,
 } from "./schemas";
 import type { ChangePasswordState } from "./schemas";
 
@@ -82,7 +83,9 @@ export async function chooseAccountAction(formData: FormData) {
   }
 
   const { accountKey: _accountKey, label: _label, ...user } = account;
-  await createSession(user);
+  // Include all pending roles so the session knows the user can switch
+  const allRoles = accounts.map((a) => a.role);
+  await createSession({ ...user, roles: allRoles.length > 1 ? allRoles : undefined });
   redirect(roleDefaultRoute(user.role));
 }
 
@@ -101,6 +104,7 @@ export async function verifySession() {
       authenticated: true as const,
       user: {
         role: session.role,
+        roles: session.roles,
         id: session.id,
         name: session.name,
         email: session.email,
@@ -125,6 +129,37 @@ export async function verifySession() {
 export async function logoutAction() {
   await clearSession();
   redirect("/login");
+}
+
+/**
+ * Switch the active role for a multi-role user without re-login.
+ * The user must have the target role in their `roles` array.
+ * Updates the session cookie with the new active role and redirects.
+ */
+export async function switchRoleAction(formData: FormData) {
+  const targetRole = formData.get("targetRole");
+  const parsed = switchRoleSchema.safeParse({ targetRole });
+  if (!parsed.success) {
+    redirect("/login?error=invalid-role");
+  }
+
+  const session = await getSession();
+  if (!session) {
+    redirect("/login");
+  }
+
+  const userRoles = session.roles ?? [session.role];
+  if (!userRoles.includes(parsed.data.targetRole)) {
+    redirect("/login?error=role-denied");
+  }
+
+  const { issuedAt: _issuedAt, ...sessionData } = session;
+  await createSession({
+    ...sessionData,
+    role: parsed.data.targetRole,
+    roles: userRoles,
+  });
+  redirect(roleDefaultRoute(parsed.data.targetRole));
 }
 
 // ---------------------------------------------------------------------------
