@@ -15,6 +15,8 @@ import {
 } from "@/modules/candidates/applications/actions";
 import {
   listApplicationsSchema,
+  listApplicationsResultSchema,
+  withdrawApplicationResultSchema,
 } from "./schemas";
 import type {
   ListApplicationsInput,
@@ -50,12 +52,23 @@ export async function listMyApplications(
   });
 
   // Map module shape { items, pageSize } → app router shape { applications, limit }
-  return {
+  const mapped = {
     applications: result.items,
     total: result.total,
     page: result.page,
     limit,
   };
+
+  // Validate output shape
+  const outputParsed = listApplicationsResultSchema.safeParse(mapped);
+  if (!outputParsed.success) {
+    console.error(
+      "[candidate/applications] listMyApplications output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return mapped;
 }
 
 /**
@@ -75,11 +88,28 @@ export async function withdrawApplication(
   });
 
   if (!result.success) {
-    return { success: false, error: result.error ?? "Application not found" };
+    const failResult = { success: false as const, error: result.error ?? "Application not found" };
+    const failParsed = withdrawApplicationResultSchema.safeParse(failResult);
+    if (!failParsed.success) {
+      console.error(
+        "[candidate/applications] withdrawApplication output validation failed:",
+        failParsed.error.issues,
+      );
+    }
+    return failResult;
   }
 
   revalidatePath("/candidate/applications");
   revalidatePath("/candidate/jobs");
 
-  return { success: true };
+  const successResult = { success: true as const };
+  const successParsed = withdrawApplicationResultSchema.safeParse(successResult);
+  if (!successParsed.success) {
+    console.error(
+      "[candidate/applications] withdrawApplication output validation failed:",
+      successParsed.error.issues,
+    );
+  }
+
+  return successResult;
 }

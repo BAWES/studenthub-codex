@@ -15,6 +15,12 @@ import type {
   CertificateActionResult,
   DeleteCertificateResult,
 } from "@/modules/candidates/certificates";
+import {
+  listCertificatesResultSchema,
+  certificateDetailOutputSchema,
+  certificateActionResultSchema,
+  deleteCertificateResultSchema,
+} from "./schemas";
 
 // Re-export types for consumers
 export type { CertificateItem, ListCertificatesResult, CertificateActionResult, DeleteCertificateResult };
@@ -31,7 +37,18 @@ export async function listCertificates(
 ): Promise<ListCertificatesResult> {
   const session = await requireRoleCapability("candidate", "candidate.read.own");
   const candidateId = Number(session.id);
-  return moduleListCertificates(candidateId, params);
+  const result = await moduleListCertificates(candidateId, params);
+
+  // Validate output shape
+  const outputParsed = listCertificatesResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[candidate/certificates] listCertificates output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -40,7 +57,18 @@ export async function listCertificates(
 export async function getCertificate(uuid: string): Promise<CertificateItem | null> {
   const session = await requireRoleCapability("candidate", "candidate.read.own");
   const candidateId = Number(session.id);
-  return moduleGetCertificate(candidateId, { uuid });
+  const result = await moduleGetCertificate(candidateId, { uuid });
+
+  // Validate output shape
+  const outputParsed = certificateDetailOutputSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[candidate/certificates] getCertificate output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -65,6 +93,15 @@ export async function createCertificate(
   const candidateId = Number(session.id);
 
   const result = await moduleCreateCertificate(candidateId, input);
+
+  // Validate output shape
+  const outputParsed = certificateActionResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[candidate/certificates] createCertificate output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
 
   if (result.operation === "success") {
     revalidatePath("/candidate/certificates");
@@ -97,6 +134,15 @@ export async function updateCertificate(
 
   const result = await moduleUpdateCertificate(candidateId, input);
 
+  // Validate output shape
+  const outputParsed = certificateActionResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[candidate/certificates] updateCertificate output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
   if (result.operation === "success") {
     revalidatePath("/candidate/certificates");
   }
@@ -114,6 +160,15 @@ export async function deleteCertificate(
   const candidateId = Number(session.id);
 
   const result = await moduleDeleteCertificate(candidateId, { certificateUuid });
+
+  // Validate output shape
+  const outputParsed = deleteCertificateResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[candidate/certificates] deleteCertificate output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
 
   if (result.operation === "success") {
     revalidatePath("/candidate/certificates");
