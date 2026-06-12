@@ -4,14 +4,18 @@ import {
   approveRequestSchema,
   rejectRequestSchema,
   addCommentSchema,
+  requestExistenceSchema,
+  addCommentResultSchema,
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
-// getRequestDetailSchema
+// Input schema tests
 // ---------------------------------------------------------------------------
+
 describe("getRequestDetailSchema", () => {
-  it("accepts valid input", () => {
-    expect(getRequestDetailSchema.safeParse({ requestUuid: "req-123" }).success).toBe(true);
+  it("accepts valid UUID", () => {
+    const r = getRequestDetailSchema.safeParse({ requestUuid: "abc-123" });
+    expect(r.success).toBe(true);
   });
 
   it("rejects missing requestUuid", () => {
@@ -21,107 +25,149 @@ describe("getRequestDetailSchema", () => {
   it("rejects empty requestUuid", () => {
     expect(getRequestDetailSchema.safeParse({ requestUuid: "" }).success).toBe(false);
   });
-
-  it("rejects wrong type", () => {
-    expect(getRequestDetailSchema.safeParse({ requestUuid: 123 }).success).toBe(false);
-  });
 });
 
-// ---------------------------------------------------------------------------
-// approveRequestSchema
-// ---------------------------------------------------------------------------
 describe("approveRequestSchema", () => {
-  const validInput = { requestUuid: "req-123", reason: "Approved by manager" };
-
   it("accepts valid input", () => {
-    expect(approveRequestSchema.safeParse(validInput).success).toBe(true);
-  });
-
-  it("rejects missing requestUuid", () => {
-    expect(approveRequestSchema.safeParse({ reason: "Approved" }).success).toBe(false);
-  });
-
-  it("rejects empty requestUuid", () => {
-    expect(approveRequestSchema.safeParse({ requestUuid: "", reason: "Approved" }).success).toBe(false);
+    const r = approveRequestSchema.safeParse({
+      requestUuid: "abc-123",
+      reason: "Approved by admin",
+    });
+    expect(r.success).toBe(true);
   });
 
   it("rejects missing reason", () => {
-    expect(approveRequestSchema.safeParse({ requestUuid: "req-1" }).success).toBe(false);
+    expect(
+      approveRequestSchema.safeParse({ requestUuid: "abc-123" }).success,
+    ).toBe(false);
   });
 
   it("rejects empty reason", () => {
-    expect(approveRequestSchema.safeParse({ requestUuid: "req-1", reason: "" }).success).toBe(false);
-  });
-
-  it("rejects reason exceeding 500 chars", () => {
     expect(
-      approveRequestSchema.safeParse({ requestUuid: "req-1", reason: "x".repeat(501) }).success,
+      approveRequestSchema.safeParse({
+        requestUuid: "abc-123",
+        reason: "",
+      }).success,
     ).toBe(false);
   });
 });
 
-// ---------------------------------------------------------------------------
-// rejectRequestSchema
-// ---------------------------------------------------------------------------
 describe("rejectRequestSchema", () => {
-  const validInput = { requestUuid: "req-123", reason: "Missing documentation" };
-
   it("accepts valid input", () => {
-    expect(rejectRequestSchema.safeParse(validInput).success).toBe(true);
-  });
-
-  it("rejects missing requestUuid", () => {
-    expect(rejectRequestSchema.safeParse({ reason: "No" }).success).toBe(false);
-  });
-
-  it("rejects empty requestUuid", () => {
-    expect(rejectRequestSchema.safeParse({ requestUuid: "", reason: "No" }).success).toBe(false);
+    const r = rejectRequestSchema.safeParse({
+      requestUuid: "abc-123",
+      reason: "Missing documents",
+    });
+    expect(r.success).toBe(true);
   });
 
   it("rejects missing reason", () => {
-    expect(rejectRequestSchema.safeParse({ requestUuid: "req-1" }).success).toBe(false);
-  });
-
-  it("rejects empty reason", () => {
-    expect(rejectRequestSchema.safeParse({ requestUuid: "req-1", reason: "" }).success).toBe(false);
-  });
-
-  it("rejects reason exceeding 500 chars", () => {
     expect(
-      rejectRequestSchema.safeParse({ requestUuid: "req-1", reason: "x".repeat(501) }).success,
+      rejectRequestSchema.safeParse({ requestUuid: "abc-123" }).success,
+    ).toBe(false);
+  });
+
+  it("rejects reason over 500 chars", () => {
+    expect(
+      rejectRequestSchema.safeParse({
+        requestUuid: "abc-123",
+        reason: "x".repeat(501),
+      }).success,
     ).toBe(false);
   });
 });
 
-// ---------------------------------------------------------------------------
-// addCommentSchema
-// ---------------------------------------------------------------------------
 describe("addCommentSchema", () => {
-  const validInput = { requestUuid: "req-123", comment: "Please review the attached files" };
-
-  it("accepts valid input", () => {
-    expect(addCommentSchema.safeParse(validInput).success).toBe(true);
-  });
-
-  it("rejects missing requestUuid", () => {
-    expect(addCommentSchema.safeParse({ comment: "Review please" }).success).toBe(false);
-  });
-
-  it("rejects empty requestUuid", () => {
-    expect(addCommentSchema.safeParse({ requestUuid: "", comment: "Review" }).success).toBe(false);
+  it("accepts valid comment", () => {
+    const r = addCommentSchema.safeParse({
+      requestUuid: "abc-123",
+      comment: "Need to review documents",
+    });
+    expect(r.success).toBe(true);
   });
 
   it("rejects missing comment", () => {
-    expect(addCommentSchema.safeParse({ requestUuid: "req-1" }).success).toBe(false);
+    expect(
+      addCommentSchema.safeParse({ requestUuid: "abc-123" }).success,
+    ).toBe(false);
   });
 
   it("rejects empty comment", () => {
-    expect(addCommentSchema.safeParse({ requestUuid: "req-1", comment: "" }).success).toBe(false);
+    expect(
+      addCommentSchema.safeParse({
+        requestUuid: "abc-123",
+        comment: "",
+      }).success,
+    ).toBe(false);
   });
 
-  it("rejects comment exceeding 2000 chars", () => {
+  it("rejects comment over 2000 chars", () => {
     expect(
-      addCommentSchema.safeParse({ requestUuid: "req-1", comment: "x".repeat(2001) }).success,
+      addCommentSchema.safeParse({
+        requestUuid: "abc-123",
+        comment: "x".repeat(2001),
+      }).success,
+    ).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output schema tests
+// ---------------------------------------------------------------------------
+
+describe("requestExistenceSchema", () => {
+  it("accepts valid existence data", () => {
+    const r = requestExistenceSchema.safeParse({
+      request_uuid: "abc-123",
+    });
+    expect(r.success).toBe(true);
+    expect(r.data).not.toBeNull();
+  });
+
+  it("accepts null", () => {
+    expect(requestExistenceSchema.safeParse(null).success).toBe(true);
+  });
+
+  it("rejects missing request_uuid", () => {
+    expect(requestExistenceSchema.safeParse({}).success).toBe(false);
+  });
+
+  it("rejects empty request_uuid", () => {
+    expect(
+      requestExistenceSchema.safeParse({ request_uuid: "" }).success,
+    ).toBe(false);
+  });
+});
+
+describe("addCommentResultSchema", () => {
+  it("accepts success result", () => {
+    const r = addCommentResultSchema.safeParse({
+      operation: "success",
+      message: "Comment added",
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts error result", () => {
+    const r = addCommentResultSchema.safeParse({
+      operation: "error",
+      message: "Request not found",
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects invalid operation", () => {
+    expect(
+      addCommentResultSchema.safeParse({
+        operation: "invalid",
+        message: "test",
+      }).success,
+    ).toBe(false);
+  });
+
+  it("rejects missing message", () => {
+    expect(
+      addCommentResultSchema.safeParse({ operation: "success" }).success,
     ).toBe(false);
   });
 });

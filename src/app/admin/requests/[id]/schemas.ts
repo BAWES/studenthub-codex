@@ -24,6 +24,23 @@ export const addCommentSchema = z.object({
 });
 
 // ---------------------------------------------------------------------------
+// Output validation schemas
+// ---------------------------------------------------------------------------
+
+/** Schema for the request existence check result. */
+export const requestExistenceSchema = z
+  .object({
+    request_uuid: z.string().min(1),
+  })
+  .nullable();
+
+/** Schema for the addComment response. */
+export const addCommentResultSchema = z.discriminatedUnion("operation", [
+  z.object({ operation: z.literal("success"), message: z.string() }),
+  z.object({ operation: z.literal("error"), message: z.string() }),
+]);
+
+// ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 

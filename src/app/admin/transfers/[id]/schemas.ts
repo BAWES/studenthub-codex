@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 // ---------------------------------------------------------------------------
-// Schemas for admin/transfers/[id] actions
+// Input schemas
 // ---------------------------------------------------------------------------
 
 export const getTransferSchema = z.object({
@@ -24,12 +24,25 @@ export const updateTransferStatusSchema = z.object({
 });
 
 // ---------------------------------------------------------------------------
-// Types
+// Input types
 // ---------------------------------------------------------------------------
 
 export type UpdateTransferStatusInput = z.input<typeof updateTransferStatusSchema>;
 
-export type UpdateTransferStatusResponse = {
-  success: boolean;
-  error?: string;
-};
+// ---------------------------------------------------------------------------
+// Output validation schemas
+// ---------------------------------------------------------------------------
+
+/** Schema for the transfer existence check result. */
+export const transferExistenceSchema = z
+  .object({
+    transfer_id: z.number().int().positive(),
+    transfer_status: z.string().min(1),
+  })
+  .nullable();
+
+/** Schema for the update transfer status response. */
+export const transferStatusUpdateResultSchema = z.discriminatedUnion("success", [
+  z.object({ success: z.literal(true) }),
+  z.object({ success: z.literal(false), error: z.string() }),
+]);
