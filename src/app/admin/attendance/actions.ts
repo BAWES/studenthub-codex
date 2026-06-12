@@ -1,7 +1,9 @@
-"use server";
-
 // ---------------------------------------------------------------------------
-// Barrel re-export — delegates to module-level implementation
+// Admin — Attendance Server Actions (page-level re-exports)
+// ---------------------------------------------------------------------------
+// All business logic lives in src/modules/admin/attendance/actions.ts (which
+// has "use server"). This barrel re-exports so page consumers keep their
+// current import paths without duplicating the "use server" directive.
 // ---------------------------------------------------------------------------
 
 export {
