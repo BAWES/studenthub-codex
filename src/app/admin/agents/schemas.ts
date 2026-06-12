@@ -1,12 +1,8 @@
 // ---------------------------------------------------------------------------
 // Barrel re-export — delegates to module-level implementation
 // ---------------------------------------------------------------------------
+// All Zod schemas and types live in src/modules/admin/agents/schemas.ts.
+// This barrel re-exports so page consumers keep their current import paths.
+// ---------------------------------------------------------------------------
 
-export {
-  agentHealthMetricSchema,
-  agentHealthDataSchema,
-  agentsHealthDataSchema,
-  type AgentHealthMetric,
-  type AgentHealthData,
-  type AgentsHealthData,
-} from "@/modules/admin/agents/schemas";
+export * from "@/modules/admin/agents/schemas";
