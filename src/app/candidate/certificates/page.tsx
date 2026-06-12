@@ -1,6 +1,7 @@
 import { requireRoleCapability } from "@/modules/auth/session";
 import { listCertificates } from "./actions";
 import { CandidateCertificatesTable } from "./candidate-certificates-table";
+import type { CertificateItem } from "./schemas";
 
 export const dynamic = "force-dynamic";
 
@@ -23,7 +24,7 @@ export default async function CandidateCertificatesPage() {
   const session = await requireRoleCapability("candidate", "candidate.read.own");
   const result = await listCertificates({});
 
-  const rows = result.certificates.map((c: { certificate_uuid?: string; certificate_title?: string | null; certificate_issuer?: string | null; start_date?: string | null; end_date?: string | null; created_at?: string }) => ({
+  const rows = result.certificates.map((c: CertificateItem) => ({
     id: c.certificate_uuid,
     title: c.certificate_title ?? "—",
     issuer: c.certificate_issuer ?? "—",
