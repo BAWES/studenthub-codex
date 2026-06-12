@@ -15,8 +15,8 @@ vi.mock("next/navigation", () => ({
 
 // Mock next/link as a simple <a> element
 vi.mock("next/link", () => ({
-  default: ({ href, children, className, style, ...rest }: Record<string, unknown>) =>
-    <a href={href as string} className={className as string} style={style as CSSProperties | undefined} {...rest}>{children as ReactNode}</a>,
+  default: ({ href, children, className, style }: { href?: string; children?: React.ReactNode; className?: string; style?: React.CSSProperties }) =>
+    <a href={href} className={className} style={style}>{children}</a>,
 }));
 
 // Mock fetch
