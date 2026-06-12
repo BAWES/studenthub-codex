@@ -413,7 +413,7 @@ describe("listJobApplications", () => {
 describe("listJobApplicationsByEmployer", () => {
   it("returns all applications across jobs", async () => {
     const dbRow = {
-      applicationId: 1,
+      id: 1,
       jobListingId: 42,
       candidateId: 100,
       status: "applied",
@@ -479,7 +479,6 @@ describe("listJobApplicationsByEmployer", () => {
   it("handles null candidate in by-employer results", async () => {
     const dbRow = {
       id: 3,
-      applicationId: 3,
       jobListingId: 42,
       candidateId: 103,
       status: "applied",

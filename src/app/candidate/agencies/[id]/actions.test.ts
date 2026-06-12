@@ -173,12 +173,37 @@ describe("getAgency action", () => {
     mockModuleGetAgency.mockResolvedValue({
       company_id: 7,
       company_name: "Test Agency",
+      company_common_name_en: "Test Agency EN",
+      company_common_name_ar: null,
+      company_email: "agency@test.com",
+      company_website: null,
+      company_logo: null,
+      commercial_licence: null,
+      total_candidate: null,
+      no_of_active_requests: null,
+      country_id: null,
+      company_created_at: new Date("2026-01-01"),
+      company_updated_at: new Date("2026-01-01"),
     });
 
     const result = await actions.getAgency(7);
 
     expect(mockModuleGetAgency).toHaveBeenCalledWith({ companyId: 7 });
-    expect(result).toEqual({ company_id: 7, company_name: "Test Agency" });
+    expect(result).toEqual({
+      company_id: 7,
+      company_name: "Test Agency",
+      company_common_name_en: "Test Agency EN",
+      company_common_name_ar: null,
+      company_email: "agency@test.com",
+      company_website: null,
+      company_logo: null,
+      commercial_licence: null,
+      total_candidate: null,
+      no_of_active_requests: null,
+      country_id: null,
+      company_created_at: new Date("2026-01-01"),
+      company_updated_at: new Date("2026-01-01"),
+    });
   });
 
   it("returns null when module returns null", async () => {
@@ -194,7 +219,21 @@ describe("getAgency action", () => {
   });
 
   it("requires candidate.read.own capability", async () => {
-    mockModuleGetAgency.mockResolvedValue({ company_id: 7 });
+    mockModuleGetAgency.mockResolvedValue({
+      company_id: 7,
+      company_name: "Test Agency",
+      company_common_name_en: null,
+      company_common_name_ar: null,
+      company_email: null,
+      company_website: null,
+      company_logo: null,
+      commercial_licence: null,
+      total_candidate: null,
+      no_of_active_requests: null,
+      country_id: null,
+      company_created_at: new Date("2026-01-01"),
+      company_updated_at: new Date("2026-01-01"),
+    });
     await actions.getAgency(7);
     expect(requireRoleCapability).toHaveBeenCalledWith(
       "candidate",
