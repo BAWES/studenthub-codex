@@ -56,8 +56,8 @@ test.describe("Candidate search facet filters", () => {
       page.getByRole("region", { name: "Candidate search and filters" }),
     ).toBeVisible({ timeout: 15000 });
 
-    // Open the filters dropdown
-    await page.getByText("Filters").click();
+    // Open the filters dropdown — use exact match to avoid matching "Open power filters"
+    await page.getByText("Filters", { exact: true }).first().click();
 
     // Verify facet groups render
     // At minimum we should see country, university, or skill facets
@@ -84,7 +84,7 @@ test.describe("Candidate search facet filters", () => {
     await expect(
       page.getByRole("region", { name: "Candidate search and filters" }),
     ).toBeVisible({ timeout: 15000 });
-    await page.getByText("Filters").click();
+    await page.getByText("Filters", { exact: true }).first().click();
 
     // Find the country facet group and click its first option
     const countryGroup = page.locator("section.candidateFacetGroup").filter({
@@ -138,7 +138,7 @@ test.describe("Candidate search facet filters", () => {
     await expect(
       page.getByRole("region", { name: "Candidate search and filters" }),
     ).toBeVisible({ timeout: 15000 });
-    await page.getByText("Filters").click();
+    await page.getByText("Filters", { exact: true }).first().click();
 
     // Apply a facet filter
     const group = page.locator("section.candidateFacetGroup").first();
@@ -174,7 +174,7 @@ test.describe("Candidate search facet filters", () => {
     await expect(
       page.getByRole("region", { name: "Candidate search and filters" }),
     ).toBeVisible({ timeout: 15000 });
-    await page.getByText("Filters").click();
+    await page.getByText("Filters", { exact: true }).first().click();
 
     // Apply a facet filter
     const group = page.locator("section.candidateFacetGroup").first();
