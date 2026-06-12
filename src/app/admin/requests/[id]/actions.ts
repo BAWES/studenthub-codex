@@ -21,7 +21,7 @@ import { getRequestDetail as _getRequestDetail } from "@/modules/workspace/reque
 import {
   approveRequest as parentApproveRequest,
   rejectRequest as parentRejectRequest,
-} from "../actions";
+} from "@/modules/admin/requests/actions";
 import {
   getRequestDetailSchema,
   approveRequestSchema,
