@@ -23,7 +23,7 @@ export default async function CandidateCertificatesPage() {
   const session = await requireRoleCapability("candidate", "candidate.read.own");
   const result = await listCertificates({});
 
-  const rows = result.certificates.map((c) => ({
+  const rows = result.certificates.map((c: { certificate_uuid?: string; certificate_title?: string | null; certificate_issuer?: string | null; start_date?: string | null; end_date?: string | null; created_at?: string }) => ({
     id: c.certificate_uuid,
     title: c.certificate_title ?? "—",
     issuer: c.certificate_issuer ?? "—",

@@ -11,6 +11,11 @@ import {
   deleteWorkLogSchema,
   getWorkLogAppealsSchema,
   getWorkLogFeedbackSchema,
+  workLogDetailForAppealOutputSchema,
+  workLogAppealRowOutputSchema,
+  workLogFeedbackRowOutputSchema,
+  workLogActionOutputSchema,
+  workLogUpdateOutputSchema,
   type GetCandidateWorkLogDetailInput,
   type ApproveWorkLogAppealInput,
   type RejectWorkLogAppealInput,
@@ -68,7 +73,7 @@ export async function getCandidateWorkLogDetail(
 
   if (!row) return null;
 
-  return {
+  const result = {
     candidate_working_hour_uuid: row.candidate_working_hour_uuid,
     date: row.date,
     start_time: row.start_time,
@@ -81,6 +86,17 @@ export async function getCandidateWorkLogDetail(
     store_location: row.store?.store_location ?? null,
     company_name: row.store?.company?.company_name ?? null,
   };
+
+  // Validate output shape
+  const outputParsed = workLogDetailForAppealOutputSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[candidate/work-logs/[id]] getCandidateWorkLogDetail output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -120,7 +136,18 @@ export async function approveWorkLogAppeal(
   });
 
   revalidatePath("/candidate/work-logs");
-  return { appeal_uuid: parsed.data.appealUuid };
+  const appealResult = { appeal_uuid: parsed.data.appealUuid };
+
+  // Validate output shape
+  const approveOutputParsed = workLogActionOutputSchema.safeParse(appealResult);
+  if (!approveOutputParsed.success) {
+    console.error(
+      "[candidate/work-logs/[id]] approveWorkLogAppeal output validation failed:",
+      approveOutputParsed.error.issues,
+    );
+  }
+
+  return appealResult;
 }
 
 // ---------------------------------------------------------------------------
@@ -161,7 +188,18 @@ export async function rejectWorkLogAppeal(
   });
 
   revalidatePath("/candidate/work-logs");
-  return { appeal_uuid: parsed.data.appealUuid };
+  const rejectResult = { appeal_uuid: parsed.data.appealUuid };
+
+  // Validate output shape
+  const rejectOutputParsed = workLogActionOutputSchema.safeParse(rejectResult);
+  if (!rejectOutputParsed.success) {
+    console.error(
+      "[candidate/work-logs/[id]] rejectWorkLogAppeal output validation failed:",
+      rejectOutputParsed.error.issues,
+    );
+  }
+
+  return rejectResult;
 }
 
 // ---------------------------------------------------------------------------
@@ -202,7 +240,18 @@ export async function updateWorkLog(
   });
 
   revalidatePath("/candidate/work-logs");
-  return { workLogUuid: parsed.data.workLogUuid };
+  const updateResult = { workLogUuid: parsed.data.workLogUuid };
+
+  // Validate output shape
+  const updateOutputParsed = workLogUpdateOutputSchema.safeParse(updateResult);
+  if (!updateOutputParsed.success) {
+    console.error(
+      "[candidate/work-logs/[id]] updateWorkLog output validation failed:",
+      updateOutputParsed.error.issues,
+    );
+  }
+
+  return updateResult;
 }
 
 // ---------------------------------------------------------------------------

@@ -104,3 +104,77 @@ export type PaymentMethod = {
   bankAccountName: string | null;
   iban: string | null;
 };
+
+// ---------------------------------------------------------------------------
+// Output validation schemas
+// ---------------------------------------------------------------------------
+
+export const paymentRowOutputSchema = z.object({
+  id: z.number(),
+  transferId: z.number().nullable(),
+  company: z.string(),
+  period: z.string(),
+  hours: z.string(),
+  candidateTotal: z.string(),
+  companyTotal: z.string(),
+  cost: z.string(),
+  paid: z.string(),
+  paymentDate: z.string(),
+  updated: z.string(),
+});
+
+export const listPaymentsResultOutputSchema = z.object({
+  items: z.array(paymentRowOutputSchema),
+  total: z.number(),
+  page: z.number(),
+  limit: z.number(),
+  totalPages: z.number(),
+});
+
+export const paymentDetailTransferOutputSchema = z.object({
+  id: z.number().nullable(),
+  period: z.string(),
+  paymentReceived: z.string(),
+});
+
+export const paymentDetailOutputSchema = z.object({
+  id: z.number(),
+  transferId: z.number().nullable(),
+  company: z.string(),
+  store: z.string().nullable(),
+  hours: z.string(),
+  hourlyRate: z.string(),
+  candidateTotal: z.string(),
+  companyTotal: z.string(),
+  cost: z.string(),
+  bonus: z.string(),
+  paid: z.string(),
+  beneficiary: z.string().nullable(),
+  iban: z.string().nullable(),
+  bank: z.string().nullable(),
+  created: z.string(),
+  updated: z.string(),
+});
+
+const paymentInvoiceOutputSchema = z.object({
+  id: z.number(),
+  date: z.date().nullable(),
+  status: z.string().nullable(),
+});
+
+export const getPaymentDetailResultOutputSchema = z.object({
+  transferCandidate: paymentDetailOutputSchema,
+  transfer: paymentDetailTransferOutputSchema.nullable(),
+  invoices: z.array(paymentInvoiceOutputSchema),
+});
+
+export const paymentMethodOutputSchema = z.object({
+  bankId: z.number().nullable(),
+  bankName: z.string().nullable(),
+  bankAccountName: z.string().nullable(),
+  iban: z.string().nullable(),
+});
+
+export const createPaymentResultOutputSchema = z.object({
+  tcId: z.number(),
+});

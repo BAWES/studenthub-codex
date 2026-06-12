@@ -10,6 +10,9 @@ import {
   createBusinessDevelopmentSchema,
   updateBusinessDevelopmentSchema,
   deleteBusinessDevelopmentSchema,
+  listBusinessDevelopmentResultOutputSchema,
+  businessDevelopmentItemOutputSchema,
+  businessDevelopmentActionResultOutputSchema,
   type ListBusinessDevelopmentParams,
   type CreateBusinessDevelopmentParams,
   type UpdateBusinessDevelopmentParams,
@@ -50,6 +53,21 @@ function toItem(
     created_at: r.created_at?.toISOString() ?? null,
     updated_at: r.updated_at?.toISOString() ?? null,
   };
+}
+
+/** Validate a BusinessDevelopmentActionResult with safeParse. */
+function validateActionResult(
+  result: BusinessDevelopmentActionResult,
+  context: string,
+): BusinessDevelopmentActionResult {
+  const parsed = businessDevelopmentActionResultOutputSchema.safeParse(result);
+  if (!parsed.success) {
+    console.error(
+      `[candidate/business-development] ${context} output validation failed:`,
+      parsed.error.issues,
+    );
+  }
+  return result;
 }
 
 /** Reusable include for company_request relations. */
@@ -112,13 +130,24 @@ export async function listBusinessDevelopment(
 
   const items = rows.map((r) => toItem(r)!);
 
-  return {
+  const result = {
     items,
     total,
     page,
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  // Validate output shape
+  const listOutputParsed = listBusinessDevelopmentResultOutputSchema.safeParse(result);
+  if (!listOutputParsed.success) {
+    console.error(
+      "[candidate/business-development] listBusinessDevelopment output validation failed:",
+      listOutputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -150,7 +179,18 @@ export async function getBusinessDevelopment(
     include: requestIncludes,
   });
 
-  return toItem(row);
+  const result = toItem(row);
+
+  // Validate output shape
+  const getOutputParsed = businessDevelopmentItemOutputSchema.nullable().safeParse(result);
+  if (!getOutputParsed.success) {
+    console.error(
+      "[candidate/business-development] getBusinessDevelopment output validation failed:",
+      getOutputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -167,10 +207,10 @@ export async function createBusinessDevelopment(
 
   const parsed = createBusinessDevelopmentSchema.safeParse(data);
   if (!parsed.success) {
-    return {
+    return validateActionResult({
       success: false,
       error: parsed.error.issues[0]?.message ?? "Invalid input",
-    };
+    }, "createBusinessDevelopment");
   }
 
   const candidateEmail = (session as any).email ?? "";
@@ -214,12 +254,15 @@ export async function createBusinessDevelopment(
 
     revalidatePath("/candidate/business-development");
 
-    return { success: true, uuid: row.company_request_uuid };
+    return validateActionResult(
+      { success: true, uuid: row.company_request_uuid },
+      "createBusinessDevelopment",
+    );
   } catch (err) {
-    return {
+    return validateActionResult({
       success: false,
       error: err instanceof Error ? err.message : "Failed to create record",
-    };
+    }, "createBusinessDevelopment");
   }
 }
 
@@ -237,10 +280,10 @@ export async function updateBusinessDevelopment(
 
   const parsed = updateBusinessDevelopmentSchema.safeParse(data);
   if (!parsed.success) {
-    return {
+    return validateActionResult({
       success: false,
       error: parsed.error.issues[0]?.message ?? "Invalid input",
-    };
+    }, "updateBusinessDevelopment");
   }
 
   const candidateEmail = (session as any).email ?? "";
@@ -257,7 +300,10 @@ export async function updateBusinessDevelopment(
     });
 
     if (!existing) {
-      return { success: false, error: "Record not found or access denied" };
+      return validateActionResult(
+        { success: false, error: "Record not found or access denied" },
+        "updateBusinessDevelopment",
+      );
     }
 
     const { uuid, ...updates } = parsed.data;
@@ -295,12 +341,15 @@ export async function updateBusinessDevelopment(
 
     revalidatePath("/candidate/business-development");
 
-    return { success: true, uuid };
+    return validateActionResult(
+      { success: true, uuid },
+      "updateBusinessDevelopment",
+    );
   } catch (err) {
-    return {
+    return validateActionResult({
       success: false,
       error: err instanceof Error ? err.message : "Failed to update record",
-    };
+    }, "updateBusinessDevelopment");
   }
 }
 
@@ -319,10 +368,10 @@ export async function deleteBusinessDevelopment(
 
   const parsed = deleteBusinessDevelopmentSchema.safeParse(data);
   if (!parsed.success) {
-    return {
+    return validateActionResult({
       success: false,
       error: parsed.error.issues[0]?.message ?? "Invalid UUID",
-    };
+    }, "deleteBusinessDevelopment");
   }
 
   const candidateEmail = (session as any).email ?? "";
@@ -339,7 +388,10 @@ export async function deleteBusinessDevelopment(
     });
 
     if (!existing) {
-      return { success: false, error: "Record not found or access denied" };
+      return validateActionResult(
+        { success: false, error: "Record not found or access denied" },
+        "deleteBusinessDevelopment",
+      );
     }
 
     await prisma.company_request.update({
@@ -352,11 +404,14 @@ export async function deleteBusinessDevelopment(
 
     revalidatePath("/candidate/business-development");
 
-    return { success: true, uuid: parsed.data.uuid };
+    return validateActionResult(
+      { success: true, uuid: parsed.data.uuid },
+      "deleteBusinessDevelopment",
+    );
   } catch (err) {
-    return {
+    return validateActionResult({
       success: false,
       error: err instanceof Error ? err.message : "Failed to delete record",
-    };
+    }, "deleteBusinessDevelopment");
   }
 }

@@ -15,6 +15,8 @@ import {
 import {
   listInvitationsSchema,
   getInvitationDetailSchema,
+  listInvitationsResultOutputSchema,
+  getInvitationDetailResultOutputSchema,
 } from "./schemas";
 import type {
   ListInvitationsParams,
@@ -64,13 +66,24 @@ export async function listCandidateInvitations(
   const offset = (page - 1) * limit;
   const items = allItems.slice(offset, offset + limit);
 
-  return {
+  const result = {
     items,
     total: allItems.length,
     page,
     limit,
     totalPages: Math.ceil(allItems.length / limit),
   };
+
+  // Validate output shape
+  const outputParsed = listInvitationsResultOutputSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[candidate/invitations] listCandidateInvitations output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -91,5 +104,16 @@ export async function getCandidateInvitationDetail(
   const candidateId = Number(session.id);
 
   // Delegate to module-level implementation
-  return moduleGetInvitationDetail(invitationUuid, candidateId);
+  const result = await moduleGetInvitationDetail(invitationUuid, candidateId);
+
+  // Validate output shape
+  const outputParsed = getInvitationDetailResultOutputSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[candidate/invitations] getCandidateInvitationDetail output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }

@@ -105,3 +105,45 @@ export type WorkLogFeedbackRow = {
   rating: boolean | null;
   created_at: Date | null;
 };
+
+// ---------------------------------------------------------------------------
+// Output validation schemas
+// ---------------------------------------------------------------------------
+
+export const workLogDetailForAppealOutputSchema = z.object({
+  candidate_working_hour_uuid: z.string(),
+  date: z.date().nullable(),
+  start_time: z.date().nullable(),
+  end_time: z.date().nullable(),
+  total_time: z.number().nullable(),
+  status: z.number().nullable(),
+  via: z.string().nullable(),
+  note: z.string().nullable(),
+  store_name: z.string().nullable(),
+  store_location: z.string().nullable(),
+  company_name: z.string().nullable(),
+});
+
+export const workLogAppealRowOutputSchema = z.object({
+  appeal_uuid: z.string(),
+  reason: z.string().nullable(),
+  status: z.number().nullable(),
+  created_at: z.date().nullable(),
+});
+
+export const workLogFeedbackRowOutputSchema = z.object({
+  cwlf_uuid: z.string(),
+  note: z.string().nullable(),
+  reason: z.string().nullable(),
+  status: z.number().nullable(),
+  rating: z.boolean().nullable(),
+  created_at: z.date().nullable(),
+});
+
+export const workLogActionOutputSchema = z.object({
+  appeal_uuid: z.string(),
+});
+
+export const workLogUpdateOutputSchema = z.object({
+  workLogUuid: z.string(),
+});

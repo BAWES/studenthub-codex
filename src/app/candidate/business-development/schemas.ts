@@ -90,3 +90,37 @@ export type ListBusinessDevelopmentResult = {
 export type BusinessDevelopmentActionResult =
   | { success: true; uuid: string }
   | { success: false; error: string };
+
+// ---------------------------------------------------------------------------
+// Output validation schemas
+// ---------------------------------------------------------------------------
+
+export const businessDevelopmentItemOutputSchema = z.object({
+  company_request_uuid: z.string(),
+  company_name: z.string(),
+  company_email: z.string(),
+  contact_name: z.string(),
+  contact_position: z.string().nullable(),
+  phone_number: z.string().nullable(),
+  requesting_for: z.string().nullable(),
+  status: z.boolean().nullable(),
+  country_id: z.number().int().nullable(),
+  currency_code: z.string().nullable(),
+  country_name_en: z.string().nullable(),
+  country_name_ar: z.string().nullable(),
+  created_at: z.string().nullable(),
+  updated_at: z.string().nullable(),
+});
+
+export const listBusinessDevelopmentResultOutputSchema = z.object({
+  items: z.array(businessDevelopmentItemOutputSchema),
+  total: z.number().int(),
+  page: z.number().int(),
+  limit: z.number().int(),
+  totalPages: z.number().int(),
+});
+
+export const businessDevelopmentActionResultOutputSchema = z.discriminatedUnion("success", [
+  z.object({ success: z.literal(true), uuid: z.string() }),
+  z.object({ success: z.literal(false), error: z.string() }),
+]);
