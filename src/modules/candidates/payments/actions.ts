@@ -14,11 +14,18 @@ import {
   listPaymentsSchema,
   getPaymentDetailSchema,
   createPaymentSchema,
+  listPaymentsResultSchema,
+  getPaymentDetailResultSchema,
+  createPaymentResultSchema,
+  paymentMethodSchema,
 } from "./schemas";
 import type {
   ListPaymentsResult,
   GetPaymentDetailResult,
   PaymentMethod,
+  PaymentRow,
+  PaymentDetail,
+  PaymentDetailTransfer,
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
@@ -95,13 +102,24 @@ export async function listCandidatePayments(
     };
   });
 
-  return {
+  const result: ListPaymentsResult = {
     items,
     total,
     page,
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  // Validate output shape
+  const outputParsed = listPaymentsResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/candidates/payments] listCandidatePayments output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -162,7 +180,7 @@ export async function getCandidatePaymentDetail(
   const t = tc.transfer;
   const currency = tc.currency_code ?? t?.currency_code ?? "KWD";
 
-  return {
+  const result: GetPaymentDetailResult = {
     transferCandidate: {
       id: tc.tc_id,
       transferId: tc.transfer_id,
@@ -198,6 +216,17 @@ export async function getCandidatePaymentDetail(
       status: inv.invoice_status ?? null,
     })) ?? [],
   };
+
+  // Validate output shape
+  const outputParsed = getPaymentDetailResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/candidates/payments] getCandidatePaymentDetail output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -235,7 +264,18 @@ export async function createCandidatePayment(
     select: { tc_id: true },
   });
 
-  return { tcId: tc.tc_id };
+  const result = { tcId: tc.tc_id };
+
+  // Validate output shape
+  const outputParsed = createPaymentResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/candidates/payments] createCandidatePayment output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -262,7 +302,7 @@ export async function getPaymentMethods(
     return [];
   }
 
-  return [
+  const result: PaymentMethod[] = [
     {
       bankId: candidate.bank_id,
       bankName: candidate.bank?.bank_name ?? null,
@@ -270,4 +310,15 @@ export async function getPaymentMethods(
       iban: candidate.candidate_iban ?? null,
     },
   ];
+
+  // Validate output shape
+  const outputParsed = paymentMethodSchema.array().safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/candidates/payments] getPaymentMethods output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
