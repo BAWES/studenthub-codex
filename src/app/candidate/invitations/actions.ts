@@ -41,7 +41,12 @@ export async function listCandidateInvitations(
 ): Promise<ListInvitationsResult> {
   await requireCapability("candidate.read.own");
 
-  const { page, limit } = listInvitationsSchema.parse(params);
+  const parsed = listInvitationsSchema.safeParse(params);
+  if (!parsed.success) {
+    return { items: [], total: 0, page: 1, limit: 20, totalPages: 0 };
+  }
+
+  const { page, limit } = parsed.data;
 
   const moduleResult = await moduleListInvitations({});
 

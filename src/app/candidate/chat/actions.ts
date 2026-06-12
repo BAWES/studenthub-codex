@@ -41,7 +41,12 @@ export async function listConversations(
 ): Promise<ListConversationsResult> {
   await requireCapability("candidate.read.own");
 
-  const { page, limit, companyId, storeId, staffId } = listConversationsSchema.parse(params);
+  const parsed = listConversationsSchema.safeParse(params);
+  if (!parsed.success) {
+    return { conversations: [], total: 0, page: 1, limit: 20, totalPages: 0 };
+  }
+
+  const { page, limit, companyId, storeId, staffId } = parsed.data;
 
   const result = await moduleListChats({
     page,
@@ -81,7 +86,12 @@ export async function getConversationMessages(
 ): Promise<GetConversationMessagesResult> {
   await requireCapability("candidate.read.own");
 
-  const { chatUuid, lastIndex, limit } = getConversationMessagesSchema.parse(params);
+  const parsed = getConversationMessagesSchema.safeParse(params);
+  if (!parsed.success) {
+    return { messages: [], total: 0, page: 1, limit: 50, totalPages: 0 };
+  }
+
+  const { chatUuid, lastIndex, limit } = parsed.data;
 
   const result = await moduleGetChatMessages({
     chatUuid,
