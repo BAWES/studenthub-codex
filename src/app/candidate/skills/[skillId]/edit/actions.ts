@@ -11,6 +11,7 @@
 import { revalidatePath } from "next/cache";
 import type { SkillActionResult } from "../actions";
 import { updateSkill as parentUpdateSkill } from "../actions";
+import { skillActionResultOutputSchema } from "../../schemas";
 
 /** Re-export types for client components */
 export type { SkillActionResult };
@@ -24,6 +25,15 @@ export async function updateSkill(
   skill: string,
 ): Promise<SkillActionResult> {
   const result = await parentUpdateSkill(skillId, skill);
+
+  // Validate output shape
+  const outputParsed = skillActionResultOutputSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[candidate/skills/[id]/edit] updateSkill output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
 
   if (result.success) {
     revalidatePath(`/candidate/skills/${skillId}`);

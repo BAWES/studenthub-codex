@@ -18,6 +18,7 @@ import {
 import type { ExperienceActionResult } from "../schemas";
 import { createExperienceSchema } from "../schemas";
 import type { CreateExperienceInput } from "../schemas";
+import { experienceActionResultOutputSchema } from "../schemas";
 
 // Re-export types for convenience
 export type { ExperienceActionResult, CreateExperienceInput };
@@ -53,5 +54,16 @@ export async function createExperience(
     return { success: false, error: "End year cannot be before start year" };
   }
 
-  return parentCreateCandidateExperience(parsed.data);
+  const result = await parentCreateCandidateExperience(parsed.data);
+
+  // Validate output shape
+  const outputParsed = experienceActionResultOutputSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[candidate/experience/new] createExperience output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
