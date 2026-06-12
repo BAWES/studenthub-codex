@@ -89,6 +89,7 @@ export type Capability =
 
 export type SessionUser = {
   role: Role;
+  roles?: Role[];
   id: string;
   name: string;
   email: string;
