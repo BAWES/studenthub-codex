@@ -228,7 +228,7 @@ describe("listMyApplications", () => {
   it("returns the candidate's applications", async () => {
     const mockApps = [
       {
-        applicationId: 1,
+        id: 1,
         jobListingId: 10,
         status: "applied",
         coverLetter: "I am interested",
