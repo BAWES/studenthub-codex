@@ -22,6 +22,9 @@ import {
   getBankOptionsResultSchema,
   getDegreeOptionsResultSchema,
   getMajorOptionsResultSchema,
+  educationStateResultSchema,
+  candidateActionErrorResultSchema,
+  changePasswordResultSchema,
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
@@ -707,7 +710,12 @@ export async function addCandidateExperience(_prevState: { error: string }, form
 
   revalidatePath("/candidate");
   revalidatePath("/candidate/edit");
-  return { error: "" };
+  const result = { error: "" };
+  const outputParsed = candidateActionErrorResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error("[modules/candidates] addCandidateExperience output validation failed:", outputParsed.error.issues);
+  }
+  return result;
 }
 
 export async function removeCandidateExperience(_prevState: { error: string }, formData: FormData) {
@@ -731,7 +739,12 @@ export async function removeCandidateExperience(_prevState: { error: string }, f
 
   revalidatePath("/candidate");
   revalidatePath("/candidate/edit");
-  return { error: "" };
+  const result = { error: "" };
+  const outputParsed = candidateActionErrorResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error("[modules/candidates] removeCandidateExperience output validation failed:", outputParsed.error.issues);
+  }
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -769,7 +782,12 @@ export async function addCandidateCertificate(_prevState: { error: string }, for
   });
   revalidatePath("/candidate");
   revalidatePath("/candidate/edit");
-  return { error: "" };
+  const result = { error: "" };
+  const outputParsed = candidateActionErrorResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error("[modules/candidates] addCandidateCertificate output validation failed:", outputParsed.error.issues);
+  }
+  return result;
 }
 
 export async function removeCandidateCertificate(_prevState: { error: string }, formData: FormData) {
@@ -788,7 +806,12 @@ export async function removeCandidateCertificate(_prevState: { error: string }, 
   });
   revalidatePath("/candidate");
   revalidatePath("/candidate/edit");
-  return { error: "" };
+  const result = { error: "" };
+  const outputParsed = candidateActionErrorResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error("[modules/candidates] removeCandidateCertificate output validation failed:", outputParsed.error.issues);
+  }
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -869,7 +892,12 @@ export async function addCandidateEducation(
 
   revalidatePath("/candidate");
   revalidatePath("/candidate/edit");
-  return { success: true };
+  const eduResult: EducationState = { success: true };
+  const outputParsed = educationStateResultSchema.safeParse(eduResult);
+  if (!outputParsed.success) {
+    console.error("[modules/candidates] addCandidateEducation output validation failed:", outputParsed.error.issues);
+  }
+  return eduResult;
 }
 
 export async function editCandidateEducation(
@@ -916,7 +944,12 @@ export async function editCandidateEducation(
 
   revalidatePath("/candidate");
   revalidatePath("/candidate/edit");
-  return { success: true };
+  const editResult: EducationState = { success: true };
+  const outputParsed = educationStateResultSchema.safeParse(editResult);
+  if (!outputParsed.success) {
+    console.error("[modules/candidates] editCandidateEducation output validation failed:", outputParsed.error.issues);
+  }
+  return editResult;
 }
 
 export async function removeCandidateEducation(
@@ -941,7 +974,12 @@ export async function removeCandidateEducation(
 
   revalidatePath("/candidate");
   revalidatePath("/candidate/edit");
-  return { success: true };
+  const result: EducationState = { success: true };
+  const outputParsed = educationStateResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error("[modules/candidates] removeCandidateEducation output validation failed:", outputParsed.error.issues);
+  }
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -1411,6 +1449,7 @@ export async function changePassword(
   currentPassword: string,
   newPassword: string,
 ): Promise<ChangePasswordResult> {
+  let result: ChangePasswordResult;
   try {
     const parsed = changePasswordSchema.safeParse({
       candidateId,
@@ -1425,41 +1464,44 @@ export async function changePassword(
         if (!fieldErrors[path]) fieldErrors[path] = [];
         fieldErrors[path].push(issue.message);
       }
-      return { success: false, fieldErrors };
+      result = { success: false, fieldErrors };
+    } else {
+      const { candidateId: cid, currentPassword: current, newPassword: newPw } = parsed.data;
+
+      const candidate = await prisma.candidate.findUnique({
+        where: { candidate_id: cid },
+        select: { candidate_id: true, candidate_password_hash: true },
+      });
+
+      if (!candidate) {
+        result = { success: false, error: "Candidate account not found." };
+      } else {
+        const isValid = await verifyYiiPassword(current, candidate.candidate_password_hash);
+        if (!isValid) {
+          result = { success: false, error: "Current password is incorrect." };
+        } else {
+          const newHash = await bcrypt.hash(newPw, 10);
+          const yiiHash = newHash.startsWith("$2b$") ? `$2y$${newHash.slice(4)}` : newHash;
+
+          await prisma.candidate.update({
+            where: { candidate_id: candidate.candidate_id },
+            data: { candidate_password_hash: yiiHash },
+          });
+
+          result = { success: true };
+        }
+      }
     }
-
-    const { candidateId: cid, currentPassword: current, newPassword: newPw } = parsed.data;
-
-    // Look up the candidate
-    const candidate = await prisma.candidate.findUnique({
-      where: { candidate_id: cid },
-      select: { candidate_id: true, candidate_password_hash: true },
-    });
-
-    if (!candidate) {
-      return { success: false, error: "Candidate account not found." };
-    }
-
-    // Verify current password against stored hash
-    const isValid = await verifyYiiPassword(current, candidate.candidate_password_hash);
-    if (!isValid) {
-      return { success: false, error: "Current password is incorrect." };
-    }
-
-    // Hash the new password (bcryptjs, $2b$ prefix compatible with Yii's $2y$)
-    const newHash = await bcrypt.hash(newPw, 10);
-    const yiiHash = newHash.startsWith("$2b$") ? `$2y$${newHash.slice(4)}` : newHash;
-
-    await prisma.candidate.update({
-      where: { candidate_id: candidate.candidate_id },
-      data: { candidate_password_hash: yiiHash },
-    });
-
-    return { success: true };
   } catch (err) {
     console.error("changePassword error:", err);
-    return { success: false, error: "An unexpected error occurred. Please try again." };
+    result = { success: false, error: "An unexpected error occurred. Please try again." };
   }
+
+  const outputParsed = changePasswordResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error("[modules/candidates] changePassword output validation failed:", outputParsed.error.issues);
+  }
+  return result;
 }
 
 // ---------------------------------------------------------------------------
