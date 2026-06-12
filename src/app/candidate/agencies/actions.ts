@@ -16,6 +16,8 @@ import {
 import {
   listAgenciesSchema,
   createAgencySchema,
+  listAgenciesResultOutputSchema,
+  agencyActionResultOutputSchema,
 } from "./schemas";
 import type {
   ListAgenciesInput,
@@ -50,7 +52,18 @@ export async function listAgencies(
   const { page, limit, search } = parsed.data;
   const result = await moduleListAgencies({ page, limit, search });
 
-  return { items: result.items, total: result.total };
+  const listResult = { items: result.items, total: result.total };
+
+  // Validate output shape
+  const listOutputParsed = listAgenciesResultOutputSchema.safeParse(listResult);
+  if (!listOutputParsed.success) {
+    console.error(
+      "[candidate/agencies] listAgencies output validation failed:",
+      listOutputParsed.error.issues,
+    );
+  }
+
+  return listResult;
 }
 
 /**
@@ -78,5 +91,15 @@ export async function createAgency(
   });
 
   revalidatePath("/candidate/agencies");
+
+  // Validate output shape
+  const createOutputParsed = agencyActionResultOutputSchema.safeParse(result);
+  if (!createOutputParsed.success) {
+    console.error(
+      "[candidate/agencies] createAgency output validation failed:",
+      createOutputParsed.error.issues,
+    );
+  }
+
   return result;
 }

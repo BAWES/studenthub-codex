@@ -10,6 +10,7 @@ import {
   type WorkLogItem,
   type SubmitWorkLogResult,
 } from "../schemas";
+import { createWorkLogResultOutputSchema } from "./schemas";
 
 // ---------------------------------------------------------------------------
 // createWorkLog — create a new work log entry for the current candidate
@@ -86,8 +87,8 @@ export async function createWorkLog(
 
     revalidatePath("/candidate/work-logs");
 
-    return {
-      operation: "success",
+    const successResult = {
+      operation: "success" as const,
       message: "Work log created successfully",
       workLog: {
         candidate_working_hour_uuid: created.candidate_working_hour_uuid,
@@ -104,11 +105,33 @@ export async function createWorkLog(
         updated_at: created.updated_at,
       },
     };
+
+    // Validate output shape
+    const outputParsed = createWorkLogResultOutputSchema.safeParse(successResult);
+    if (!outputParsed.success) {
+      console.error(
+        "[candidate/work-logs/create] createWorkLog output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return successResult;
   } catch (err) {
-    return {
-      operation: "error",
+    const errorResult = {
+      operation: "error" as const,
       message:
         err instanceof Error ? err.message : "Failed to create work log",
     };
+
+    // Validate output shape
+    const errorOutputParsed = createWorkLogResultOutputSchema.safeParse(errorResult);
+    if (!errorOutputParsed.success) {
+      console.error(
+        "[candidate/work-logs/create] createWorkLog error output validation failed:",
+        errorOutputParsed.error.issues,
+      );
+    }
+
+    return errorResult;
   }
 }

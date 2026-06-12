@@ -15,6 +15,8 @@ import {
 import {
   listConversationsSchema,
   getConversationMessagesSchema,
+  listConversationsResultOutputSchema,
+  getConversationMessagesResultOutputSchema,
 } from "./schemas";
 import type {
   ListConversationsParams,
@@ -50,13 +52,24 @@ export async function listConversations(
   });
 
   // Map module shape { chats } → app router shape { conversations }
-  return {
+  const listResult = {
     conversations: result.chats,
     total: result.total,
     page: result.page,
     limit: result.limit,
     totalPages: result.totalPages,
   };
+
+  // Validate output shape
+  const listOutputParsed = listConversationsResultOutputSchema.safeParse(listResult);
+  if (!listOutputParsed.success) {
+    console.error(
+      "[candidate/chat] listConversations output validation failed:",
+      listOutputParsed.error.issues,
+    );
+  }
+
+  return listResult;
 }
 
 /**
@@ -77,11 +90,22 @@ export async function getConversationMessages(
   });
 
   // Module returns { messages } — pass through directly
-  return {
+  const messagesResult = {
     messages: result.messages,
     total: result.total,
     page: result.page,
     limit: result.limit,
     totalPages: result.totalPages,
   };
+
+  // Validate output shape
+  const messagesOutputParsed = getConversationMessagesResultOutputSchema.safeParse(messagesResult);
+  if (!messagesOutputParsed.success) {
+    console.error(
+      "[candidate/chat] getConversationMessages output validation failed:",
+      messagesOutputParsed.error.issues,
+    );
+  }
+
+  return messagesResult;
 }

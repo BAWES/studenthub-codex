@@ -53,6 +53,63 @@ export const updateProfileFieldsSchema = z.object({
 });
 
 // ---------------------------------------------------------------------------
+// Output validation — Zod schemas for server action return types
+// ---------------------------------------------------------------------------
+
+/**
+ * Matches the CandidateProfileEditData type.
+ */
+export const profileEditDataOutputSchema = z.object({
+  candidateName: z.string(),
+  candidateNameAr: z.string(),
+  candidateEmail: z.string(),
+  candidatePhone: z.string().nullable(),
+  candidateObjective: z.string().nullable(),
+  candidateIntro: z.string().nullable(),
+  candidateCivilId: z.string().nullable(),
+  profileUrl: z.string().nullable(),
+  candidateBirthDate: z.date().nullable(),
+  candidateAddressLine1: z.string().nullable(),
+  candidateGender: z.number().int().nullable(),
+  candidateDrivingLicense: z.boolean().nullable(),
+  candidateCivilExpiryDate: z.date().nullable(),
+  candidatePreferredTime: z.string().nullable(),
+  countryId: z.number().int().nullable(),
+  universityId: z.number().int().nullable(),
+  bankId: z.number().int().nullable(),
+  bankAccountName: z.string().nullable(),
+  candidateIban: z.string().nullable(),
+  candidatePersonalPhoto: z.string().nullable(),
+  candidateResume: z.string().nullable(),
+  candidateVideo: z.string().nullable(),
+  civilPhotoFront: z.string().nullable(),
+  civilPhotoBack: z.string().nullable(),
+});
+
+/**
+ * Matches the ProfileActionResult discriminated union.
+ */
+export const profileActionResultOutputSchema = z.discriminatedUnion("success", [
+  z.object({ success: z.literal(true) }),
+  z.object({
+    success: z.literal(false),
+    error: z.string(),
+    fieldErrors: z.record(z.array(z.string())).optional(),
+  }),
+]);
+
+/**
+ * Matches the label-value option items returned by getXOptions helpers.
+ */
+export const optionsItemOutputSchema = z.object({
+  id: z.union([z.number().int(), z.string()]),
+  label: z.string(),
+});
+
+export const profileEditDataNullableOutputSchema =
+  profileEditDataOutputSchema.nullable();
+
+// ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
