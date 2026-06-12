@@ -10,6 +10,7 @@
 //   - updateTransferStatus — approve or reject a transfer with optional reason
 // ---------------------------------------------------------------------------
 
+import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
@@ -25,8 +26,8 @@ export type {
   TransferActionResponse,
 } from "../actions";
 
-import { getTransferSchema, updateTransferStatusSchema } from "./schemas";
-import type { UpdateTransferStatusInput, UpdateTransferStatusResponse } from "./schemas";
+import { getTransferSchema, updateTransferStatusSchema, transferStatusUpdateResultSchema, transferExistenceSchema } from "./schemas";
+import type { UpdateTransferStatusInput } from "./schemas";
 
 // ---------------------------------------------------------------------------
 // getTransfer
@@ -63,7 +64,7 @@ export async function getTransfer(
  */
 export async function updateTransferStatus(
   input: UpdateTransferStatusInput,
-): Promise<UpdateTransferStatusResponse> {
+): Promise<z.infer<typeof transferStatusUpdateResultSchema>> {
   await requireCapability("finance.mutate");
 
   const parsed = updateTransferStatusSchema.safeParse(input);
@@ -82,25 +83,34 @@ export async function updateTransferStatus(
     select: { transfer_id: true, transfer_status: true },
   });
 
-  if (!transfer) {
+  const parsedTransfer = transferExistenceSchema.safeParse(transfer);
+  if (!parsedTransfer.success || !parsedTransfer.data) {
     return { success: false, error: "Transfer not found" };
   }
 
   if (action === "approve") {
     const result = await parentApproveTransfer(transferId);
-    if (!result.success) {
-      return result;
+    const parsedResult = transferStatusUpdateResultSchema.safeParse(result);
+    if (!parsedResult.success) {
+      return { success: false, error: "Failed to approve transfer" };
+    }
+    if (!parsedResult.data.success) {
+      return parsedResult.data;
     }
   } else {
     // action === "reject"
     const result = await parentRejectTransfer(transferId, reason);
-    if (!result.success) {
-      return result;
+    const parsedResult = transferStatusUpdateResultSchema.safeParse(result);
+    if (!parsedResult.success) {
+      return { success: false, error: "Failed to reject transfer" };
+    }
+    if (!parsedResult.data.success) {
+      return parsedResult.data;
     }
   }
 
   revalidatePath("/admin/transfers");
   revalidatePath(`/admin/transfers/${transferId}`);
 
-  return { success: true };
+  return transferStatusUpdateResultSchema.parse({ success: true });
 }
