@@ -88,7 +88,7 @@ test.describe("WorkspaceOS tab system isolation", () => {
 
     if (await adminCandidateLink.isVisible()) {
       await adminCandidateLink.click();
-      await ctx.page.waitForTimeout(1000);
+      await ctx.page.waitForLoadState("load");
 
       // Should have at least 2 tabs now (default + candidates)
       const tabs = ctx.page.locator('[role="tab"]').or(ctx.page.locator("[data-tab-id]"));
@@ -110,7 +110,7 @@ test.describe("WorkspaceOS tab system isolation", () => {
     const navLinks = ctx.page.locator("a").first();
     if (await navLinks.isVisible()) {
       await navLinks.click();
-      await ctx.page.waitForTimeout(1000);
+      await ctx.page.waitForLoadState("load");
     }
 
     // Check for close buttons on tabs

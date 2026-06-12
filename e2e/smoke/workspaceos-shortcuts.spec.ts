@@ -64,14 +64,13 @@ function assertNoReactErrors(errors: string[]) {
 /** Open the command palette by pressing Cmd+K, wait for it to appear. */
 async function openCommandPalette(page: any) {
   await page.keyboard.press("Meta+k");
-  // Wait a tick for the palette to render
-  await page.waitForTimeout(500);
+  // Let the palette render — caller waits for palette selector to be visible
 }
 
 /** Close the command palette by pressing Escape. */
 async function closeCommandPalette(page: any) {
   await page.keyboard.press("Escape");
-  await page.waitForTimeout(300);
+  // Caller waits for palette selector to not be visible
 }
 
 // ── Suite ───────────────────────────────────────────────────────────────────
@@ -168,9 +167,9 @@ test.describe("WorkspaceOS — command palette & keyboard shortcuts", () => {
 
       // Press G then R — "go to requests"
       await ctx.page.keyboard.press("g");
-      await ctx.page.waitForTimeout(200);
+      await ctx.page.waitForTimeout(100);
       await ctx.page.keyboard.press("r");
-      await ctx.page.waitForTimeout(1000);
+      await ctx.page.waitForURL("**/staff/requests*", { timeout: 5000 });
 
       // Should be on /staff/requests or the page is loading it
       const currentUrl = ctx.page.url();
@@ -190,9 +189,9 @@ test.describe("WorkspaceOS — command palette & keyboard shortcuts", () => {
 
       // Press G then C — "go to companies"
       await ctx.page.keyboard.press("g");
-      await ctx.page.waitForTimeout(200);
+      await ctx.page.waitForTimeout(100);
       await ctx.page.keyboard.press("c");
-      await ctx.page.waitForTimeout(1000);
+      await ctx.page.waitForURL("**/company/companies*", { timeout: 5000 });
 
       const currentUrl = ctx.page.url();
       console.log(`G+C navigation URL: ${currentUrl}`);
@@ -210,9 +209,9 @@ test.describe("WorkspaceOS — command palette & keyboard shortcuts", () => {
 
       // Press G then H — "go to hub" (staying on candidate hub)
       await ctx.page.keyboard.press("g");
-      await ctx.page.waitForTimeout(200);
+      await ctx.page.waitForTimeout(100);
       await ctx.page.keyboard.press("h");
-      await ctx.page.waitForTimeout(1000);
+      await ctx.page.waitForURL("**/candidate*", { timeout: 5000 });
 
       // Should still be on candidate hub
       const currentUrl = ctx.page.url();
