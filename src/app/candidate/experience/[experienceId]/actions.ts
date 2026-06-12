@@ -30,6 +30,10 @@ import {
   deleteExperienceEntrySchema,
 } from "./schemas";
 import type { ExperienceEntryResponse } from "./schemas";
+import {
+  experienceItemOutputSchema,
+  experienceActionResultOutputSchema,
+} from "../schemas";
 
 // ---------------------------------------------------------------------------
 // getExperienceEntry
@@ -49,7 +53,18 @@ export async function getExperienceEntry(
     throw new Error(parsed.error.issues[0]?.message ?? "Invalid experience entry params");
   }
 
-  return parentGetCandidateExperience(parsed.data.experienceId);
+  const result = await parentGetCandidateExperience(parsed.data.experienceId);
+
+  // Validate output shape
+  const outputParsed = experienceItemOutputSchema.nullable().safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[candidate/experience/[experienceId]] getExperienceEntry output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -96,6 +111,15 @@ export async function updateExperienceEntry(
   revalidatePath("/candidate/experience");
   revalidatePath(`/candidate/experience/${parsed.data.experienceId}`);
 
+  // Validate output shape
+  const updateOutputParsed = experienceActionResultOutputSchema.safeParse(result);
+  if (!updateOutputParsed.success) {
+    console.error(
+      "[candidate/experience/[experienceId]] updateExperienceEntry output validation failed:",
+      updateOutputParsed.error.issues,
+    );
+  }
+
   return result;
 }
 
@@ -126,6 +150,15 @@ export async function deleteExperienceEntry(
   const result = await parentDeleteCandidateExperience(parsed.data.experienceId);
 
   revalidatePath("/candidate/experience");
+
+  // Validate output shape
+  const deleteOutputParsed = experienceActionResultOutputSchema.safeParse(result);
+  if (!deleteOutputParsed.success) {
+    console.error(
+      "[candidate/experience/[experienceId]] deleteExperienceEntry output validation failed:",
+      deleteOutputParsed.error.issues,
+    );
+  }
 
   return result;
 }

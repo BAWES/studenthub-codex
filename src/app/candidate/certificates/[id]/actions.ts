@@ -15,6 +15,16 @@ import type {
   UpdateCertificateInput,
   DeleteCertificateInput,
 } from "@/modules/candidates/certificates";
+import {
+  certificateDetailOutputSchema,
+  certificateActionResultSchema,
+  deleteCertificateResultSchema,
+} from "../schemas";
+import {
+  getCertificateSchema,
+  updateCertificateSchema,
+  deleteCertificateSchema,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // getCertificate
@@ -30,7 +40,25 @@ export async function getCertificate(
   const session = await requireRoleCapability("candidate", "candidate.read.own");
   const candidateId = Number(session.id);
 
-  return moduleGetCertificate(candidateId, input);
+  const parsed = getCertificateSchema.safeParse(input);
+  if (!parsed.success) {
+    throw new Error(
+      parsed.error.issues[0]?.message ?? "Invalid certificate input",
+    );
+  }
+
+  const result = await moduleGetCertificate(candidateId, parsed.data);
+
+  // Validate output shape
+  const outputParsed = certificateDetailOutputSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[candidate/certificates/[id]] getCertificate output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -47,7 +75,24 @@ export async function updateCertificate(
   const session = await requireRoleCapability("candidate", "candidate.read.own");
   const candidateId = Number(session.id);
 
-  const result = await moduleUpdateCertificate(candidateId, input);
+  const parsed = updateCertificateSchema.safeParse(input);
+  if (!parsed.success) {
+    return {
+      operation: "error" as const,
+      message: parsed.error.issues[0]?.message ?? "Invalid certificate data",
+    };
+  }
+
+  const result = await moduleUpdateCertificate(candidateId, parsed.data);
+
+  // Validate output shape
+  const outputParsed = certificateActionResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[candidate/certificates/[id]] updateCertificate output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
 
   if (result.operation === "success") {
     revalidatePath("/candidate/certificates");
@@ -70,7 +115,24 @@ export async function deleteCertificate(
   const session = await requireRoleCapability("candidate", "candidate.read.own");
   const candidateId = Number(session.id);
 
-  const result = await moduleDeleteCertificate(candidateId, input);
+  const parsed = deleteCertificateSchema.safeParse(input);
+  if (!parsed.success) {
+    return {
+      operation: "error" as const,
+      message: parsed.error.issues[0]?.message ?? "Invalid certificate UUID",
+    };
+  }
+
+  const result = await moduleDeleteCertificate(candidateId, parsed.data);
+
+  // Validate output shape
+  const outputParsed = deleteCertificateResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[candidate/certificates/[id]] deleteCertificate output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
 
   if (result.operation === "success") {
     revalidatePath("/candidate/certificates");

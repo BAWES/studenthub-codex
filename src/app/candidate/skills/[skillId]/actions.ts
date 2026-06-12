@@ -27,6 +27,10 @@ export type {
 } from "../actions";
 
 import { getSkillSchema, updateSkillSchema, deleteSkillSchema } from "./schemas";
+import {
+  skillItemOutputSchema,
+  skillActionResultOutputSchema,
+} from "../schemas";
 
 // ---------------------------------------------------------------------------
 // getSkill
@@ -47,7 +51,18 @@ export async function getSkill(
     throw new Error(parsed.error.issues[0]?.message ?? "Invalid skill ID");
   }
 
-  return parentGetSkill(parsed.data.skillId);
+  const result = await parentGetSkill(parsed.data.skillId);
+
+  // Validate output shape
+  const outputParsed = skillItemOutputSchema.nullable().safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[candidate/skills/[skillId]] getSkill output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -78,6 +93,15 @@ export async function updateSkill(
     skillId: parsed.data.skillId,
     skill: parsed.data.skill,
   });
+
+  // Validate output shape
+  const updateOutputParsed = skillActionResultOutputSchema.safeParse(result);
+  if (!updateOutputParsed.success) {
+    console.error(
+      "[candidate/skills/[skillId]] updateSkill output validation failed:",
+      updateOutputParsed.error.issues,
+    );
+  }
 
   if (result.success) {
     revalidatePath("/candidate/skills");
@@ -111,6 +135,15 @@ export async function deleteSkill(
   }
 
   const result = await parentDeleteSkill(parsed.data.skillId);
+
+  // Validate output shape
+  const deleteOutputParsed = skillActionResultOutputSchema.safeParse(result);
+  if (!deleteOutputParsed.success) {
+    console.error(
+      "[candidate/skills/[skillId]] deleteSkill output validation failed:",
+      deleteOutputParsed.error.issues,
+    );
+  }
 
   if (result.success) {
     revalidatePath("/candidate/skills");
