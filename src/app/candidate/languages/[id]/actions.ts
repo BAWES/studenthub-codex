@@ -22,6 +22,8 @@ import {
   getLanguageSchema,
   updateLanguageSchema,
   deleteLanguageSchema,
+  languageItemOutputSchema,
+  languageDetailResponseOutputSchema,
 } from "./schemas";
 import type {
   LanguageDetailResponse,
@@ -49,7 +51,20 @@ export async function getLanguage(
     throw new Error(parsed.error.issues[0]?.message ?? "Invalid language ID");
   }
 
-  return moduleGetLanguage({ candidateId, languageId: parsed.data.languageId });
+  const result = await moduleGetLanguage({ candidateId, languageId: parsed.data.languageId });
+
+  // Validate output shape
+  if (result !== null) {
+    const outputParsed = languageItemOutputSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[candidate/languages/[id]] getLanguage output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -75,12 +90,23 @@ export async function updateLanguage(
     };
   }
 
-  return moduleUpdateLanguage({
+  const result = await moduleUpdateLanguage({
     candidateId,
     languageId: parsed.data.languageId,
     language: parsed.data.language,
     proficiency: parsed.data.proficiency,
   });
+
+  // Validate output shape
+  const outputParsed = languageDetailResponseOutputSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[candidate/languages/[id]] updateLanguage output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -106,8 +132,19 @@ export async function deleteLanguage(
     };
   }
 
-  return moduleDeleteLanguage({
+  const result = await moduleDeleteLanguage({
     candidateId,
     languageId: parsed.data.languageId,
   });
+
+  // Validate output shape
+  const outputParsed = languageDetailResponseOutputSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[candidate/languages/[id]] deleteLanguage output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }

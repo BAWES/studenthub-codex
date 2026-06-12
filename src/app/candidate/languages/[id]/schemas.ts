@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { languageItemOutputSchema } from "../schemas";
+
 // ---------------------------------------------------------------------------
 // Schemas for candidate/languages/[id] actions
 // ---------------------------------------------------------------------------
@@ -25,6 +27,24 @@ export const updateLanguageSchema = z.object({
 export const deleteLanguageSchema = z.object({
   languageId: z.coerce.number().int().positive("Language ID is required"),
 });
+
+// ---------------------------------------------------------------------------
+// Output validation schemas
+// ---------------------------------------------------------------------------
+
+// Re-export parent output schema for consumer convenience
+export { languageItemOutputSchema };
+
+export const languageDetailResponseOutputSchema = z.union([
+  z.object({
+    data: languageItemOutputSchema,
+    error: z.null(),
+  }),
+  z.object({
+    data: z.null(),
+    error: z.string().nullable(),
+  }),
+]);
 
 // ---------------------------------------------------------------------------
 // Types

@@ -9,9 +9,10 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireRoleCapability } from "@/modules/auth/session";
 import { createCertificationSchema } from "./schemas";
-import type {
-  CreateCertificationInput,
-  CertificationActionResult,
+import {
+  certificationActionResultOutputSchema,
+  type CreateCertificationInput,
+  type CertificationActionResult,
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
@@ -61,7 +62,19 @@ export async function createCertification(
   });
 
   revalidatePath("/candidate/certifications");
-  return { success: true, certificationId: row.certification_id };
+
+  const actionResult = { success: true as const, certificationId: row.certification_id };
+
+  // Validate output shape
+  const outputParsed = certificationActionResultOutputSchema.safeParse(actionResult);
+  if (!outputParsed.success) {
+    console.error(
+      "[candidate/certifications/new] createCertification output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return actionResult;
 }
 
 // Re-export types for client components
