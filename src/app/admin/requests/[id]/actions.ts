@@ -38,12 +38,9 @@ import type {
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
-// Re-export parent types so consumers have a single import path
+// Consumers import the types directly from ../schemas — see DESIGN.md.
+// Type exports inside "use server" files are not allowed by Next.js 15.x.
 // ---------------------------------------------------------------------------
-export type {
-  RequestDetail,
-  RequestActionResponse,
-} from "../schemas";
 
 // ---------------------------------------------------------------------------
 // getRequestDetail
