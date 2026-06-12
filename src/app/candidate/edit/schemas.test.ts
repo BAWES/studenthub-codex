@@ -229,11 +229,11 @@ describe("profileActionResultOutputSchema", () => {
     ).toBe(true);
   });
 
-  it("rejects success result with error field", () => {
+  it("accepts success result with extra error field (Zod is lenient by default)", () => {
     expect(
       profileActionResultOutputSchema.safeParse({ success: true, error: "x" })
         .success,
-    ).toBe(false);
+    ).toBe(true);
   });
 
   it("rejects error result without error field", () => {

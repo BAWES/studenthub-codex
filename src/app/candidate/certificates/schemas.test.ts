@@ -54,24 +54,20 @@ describe("listCertificatesSchema", () => {
 });
 
 describe("getCertificateSchema", () => {
-  it("accepts valid certificate ID", () => {
-    const r = getCertificateSchema.safeParse({ certificateId: 42 });
+  it("accepts valid certificate UUID", () => {
+    const r = getCertificateSchema.safeParse({ uuid: "abc-123" });
     expect(r.success).toBe(true);
     if (r.success) {
-      expect(r.data.certificateId).toBe(42);
+      expect(r.data.uuid).toBe("abc-123");
     }
   });
 
-  it("coerces string ID", () => {
-    const r = getCertificateSchema.safeParse({ certificateId: "42" });
-    expect(r.success).toBe(true);
-    if (r.success) {
-      expect(r.data.certificateId).toBe(42);
-    }
-  });
-
-  it("rejects missing certificateId", () => {
+  it("rejects missing uuid", () => {
     expect(getCertificateSchema.safeParse({}).success).toBe(false);
+  });
+
+  it("rejects empty uuid", () => {
+    expect(getCertificateSchema.safeParse({ uuid: "" }).success).toBe(false);
   });
 });
 
@@ -87,22 +83,8 @@ describe("createCertificateSchema", () => {
     expect(r.success).toBe(true);
   });
 
-  it("rejects missing certificateTitle", () => {
-    expect(
-      createCertificateSchema.safeParse({
-        certificateType: true,
-        certificateIssuer: "Amazon",
-      }).success,
-    ).toBe(false);
-  });
-
-  it("rejects empty certificateTitle", () => {
-    expect(
-      createCertificateSchema.safeParse({
-        ...validInput,
-        certificateTitle: "",
-      }).success,
-    ).toBe(false);
+  it("accepts empty input (all fields optional)", () => {
+    expect(createCertificateSchema.safeParse({}).success).toBe(true);
   });
 
   it("rejects non-boolean certificateType", () => {
@@ -113,11 +95,20 @@ describe("createCertificateSchema", () => {
       }).success,
     ).toBe(false);
   });
+
+  it("rejects non-string certificateTitle", () => {
+    expect(
+      createCertificateSchema.safeParse({
+        ...validInput,
+        certificateTitle: 42,
+      }).success,
+    ).toBe(false);
+  });
 });
 
 describe("updateCertificateSchema", () => {
   const validInput = {
-    certificateId: 1,
+    certificateUuid: "abc-123",
     certificateType: true,
     certificateTitle: "Updated Cert",
     certificateIssuer: "Updated Issuer",
@@ -128,7 +119,7 @@ describe("updateCertificateSchema", () => {
     expect(r.success).toBe(true);
   });
 
-  it("rejects missing certificateId", () => {
+  it("rejects missing certificateUuid", () => {
     expect(
       updateCertificateSchema.safeParse({
         certificateTitle: "Test",
@@ -136,31 +127,31 @@ describe("updateCertificateSchema", () => {
     ).toBe(false);
   });
 
-  it("rejects empty certificateTitle", () => {
+  it("rejects empty certificateUuid", () => {
     expect(
       updateCertificateSchema.safeParse({
         ...validInput,
-        certificateTitle: "",
+        certificateUuid: "",
       }).success,
     ).toBe(false);
   });
 });
 
 describe("deleteCertificateSchema", () => {
-  it("accepts valid certificate ID", () => {
+  it("accepts valid certificate UUID", () => {
     expect(
-      deleteCertificateSchema.safeParse({ certificateId: 42 }).success,
+      deleteCertificateSchema.safeParse({ certificateUuid: "abc-123" }).success,
     ).toBe(true);
   });
 
-  it("coerces string ID", () => {
-    expect(
-      deleteCertificateSchema.safeParse({ certificateId: "42" }).success,
-    ).toBe(true);
-  });
-
-  it("rejects missing certificateId", () => {
+  it("rejects missing certificateUuid", () => {
     expect(deleteCertificateSchema.safeParse({}).success).toBe(false);
+  });
+
+  it("rejects empty certificateUuid", () => {
+    expect(
+      deleteCertificateSchema.safeParse({ certificateUuid: "" }).success,
+    ).toBe(false);
   });
 });
 
@@ -172,15 +163,22 @@ describe("certificateItemSchema", () => {
   it("accepts valid item", () => {
     expect(
       certificateItemSchema.safeParse({
-        certificateId: 1,
-        certificateType: true,
-        certificateTitle: "AWS",
-        certificateIssuer: "Amazon",
-        certificateUrl: null,
-        startDate: null,
-        endDate: null,
-        createdAt: null,
-        updatedAt: null,
+        certificate_uuid: "uuid-1",
+        certificate_type: true,
+        certificate_title: "AWS",
+        certificate_issuer: "Amazon",
+        certificate_url: null,
+        candidate_id: 1,
+        candidate_work_history_id: null,
+        exam_uuid: null,
+        store_id: null,
+        company_id: null,
+        parent_company_id: null,
+        start_date: null,
+        end_date: null,
+        staff_id: null,
+        created_at: null,
+        updated_at: null,
       }).success,
     ).toBe(true);
   });
@@ -190,15 +188,22 @@ describe("certificateDetailOutputSchema", () => {
   it("accepts valid certificate item", () => {
     expect(
       certificateDetailOutputSchema.safeParse({
-        certificateId: 1,
-        certificateType: true,
-        certificateTitle: "AWS",
-        certificateIssuer: "Amazon",
-        certificateUrl: null,
-        startDate: null,
-        endDate: null,
-        createdAt: null,
-        updatedAt: null,
+        certificate_uuid: "uuid-2",
+        certificate_type: false,
+        certificate_title: "AWS",
+        certificate_issuer: null,
+        certificate_url: "https://cert.example.com",
+        candidate_id: 42,
+        candidate_work_history_id: null,
+        exam_uuid: null,
+        store_id: null,
+        company_id: null,
+        parent_company_id: null,
+        start_date: null,
+        end_date: null,
+        staff_id: null,
+        created_at: null,
+        updated_at: null,
       }).success,
     ).toBe(true);
   });
@@ -210,7 +215,7 @@ describe("certificateDetailOutputSchema", () => {
   it("rejects missing required field", () => {
     expect(
       certificateDetailOutputSchema.safeParse({
-        certificateId: 1,
+        certificate_uuid: "uuid-3",
       }).success,
     ).toBe(false);
   });
