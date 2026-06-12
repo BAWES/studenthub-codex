@@ -20,11 +20,11 @@ process.env.USE_MOCK_FIXTURES = "true";
  */
 const COMPANY_ROUTES = [
   "/company",             // Dashboard / Hub
-  "/company/companies",    // Companies / Candidates
-  "/company/contacts",     // Company contacts / Profile
-  "/company/requests",     // Job requests / Postings
-  "/company/stores",       // Store management
-  "/company/workspace",    // Workspace overview
+  "/company/companies",   // Companies / Candidates
+  "/company/contacts",    // Company contacts / Profile
+  "/company/requests",    // Job requests / Postings
+  "/company/stores",      // Store management
+  "/company/workspace",   // Workspace overview
 ];
 
 async function authContext(user: FixtureUser) {
@@ -58,7 +58,9 @@ test.describe("3-click audit — company workspace", () => {
 
   test.beforeAll(() => {
     const fixtures = getMockFixtures();
-    user = fixtures.get("company")!;
+    const company = fixtures.get("company");
+    expect(company).toBeDefined();
+    user = company!;
   });
 
   // Test each company route is reachable via sidebar click from /company hub
@@ -67,16 +69,17 @@ test.describe("3-click audit — company workspace", () => {
       // Hub page itself — verify it loads directly (0 clicks from login)
       test("/company hub loads directly (0 clicks)", async () => {
         const ctx = await authContext(user);
+        // Attach console listener BEFORE navigation to catch hydration errors
+        const errors: string[] = [];
+        ctx.page.on("console", (msg) => {
+          if (msg.type() === "error") errors.push(msg.text());
+        });
         await ctx.page.goto("/company");
         await ctx.page.waitForLoadState("load");
         await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
         await expect(ctx.page).toHaveURL("/company");
 
-        // No hydration errors
-        const errors: string[] = [];
-        ctx.page.on("console", (msg) => {
-          if (msg.type() === "error") errors.push(msg.text());
-        });
+        // No hydration/serialization errors
         const bad = errors.filter(
           (m) =>
             m.includes("hydration") ||
@@ -90,6 +93,12 @@ test.describe("3-click audit — company workspace", () => {
       // Non-hub route — verify reachable via sidebar link (1 click from hub)
       test(`${route} reachable via sidebar link (≤1 click from hub)`, async () => {
         const ctx = await authContext(user);
+
+        // Attach console listener BEFORE navigation
+        const errors: string[] = [];
+        ctx.page.on("console", (msg) => {
+          if (msg.type() === "error") errors.push(msg.text());
+        });
 
         // Start at the company hub
         await ctx.page.goto("/company");
@@ -105,15 +114,25 @@ test.describe("3-click audit — company workspace", () => {
           await ctx.page.waitForLoadState("load");
           await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
 
-          // Target route loaded (may have been redirected if auth gated)
+          // Stricter URL assertion: match pathname exactly or as ancestor
           const currentUrl = ctx.page.url();
-          expect(currentUrl.includes(route)).toBe(true);
+          const pathname = new URL(currentUrl).pathname;
+          expect(pathname === route || pathname.startsWith(route + "/")).toBe(true);
         } else {
           // No direct sidebar link — try direct navigation
           await ctx.page.goto(route);
           await ctx.page.waitForLoadState("load");
           await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
         }
+
+        // Check hydration errors after navigation
+        const bad = errors.filter(
+          (m) =>
+            m.includes("hydration") ||
+            m.includes("serialization") ||
+            m.includes("Functions cannot be passed"),
+        );
+        expect(bad).toEqual([]);
 
         await ctx.close();
       });
@@ -127,11 +146,11 @@ test.describe("3-click audit — company workspace", () => {
 
     const testRoutes = COMPANY_ROUTES.filter((r) => r !== "/company").slice(0, 3);
     for (const otherRole of otherRoles) {
-      const otherUser = fixtures.get(otherRole)!;
-      if (!otherUser) continue;
+      const otherUser = fixtures.get(otherRole);
+      expect(otherUser).toBeDefined();
 
       for (const route of testRoutes) {
-        const ctx = await authContext(otherUser);
+        const ctx = await authContext(otherUser!);
         await ctx.page.goto(route);
         await ctx.page.waitForLoadState("load");
 
