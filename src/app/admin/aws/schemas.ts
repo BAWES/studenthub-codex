@@ -1,42 +1,8 @@
-import { z } from "zod";
-
 // ---------------------------------------------------------------------------
-// Schemas for admin/aws actions
+// Barrel re-export — delegates to module-level implementation
 // ---------------------------------------------------------------------------
-
-export const getAwsConfigSchema = z.object({
-  key: z.string().min(1, "Config key is required"),
-});
-
-// ---------------------------------------------------------------------------
-// Output validation schemas
+// All Zod schemas and types live in src/modules/admin/aws/schemas.ts.
+// This barrel re-exports so page consumers keep their current import paths.
 // ---------------------------------------------------------------------------
 
-/**
- * Schema for a single AWS config entry.
- */
-export const awsConfigEntrySchema = z.object({
-  key: z.string().min(1, "Config key is required"),
-  value: z.string(),
-});
-
-/**
- * Schema for the full list returned by listAwsConfigs.
- */
-export const awsConfigEntryListSchema = z.array(awsConfigEntrySchema);
-
-/**
- * Schema for the result returned by getAwsConfig.
- */
-export const awsConfigResultSchema = z.object({
-  region: z.string(),
-  bucket: z.string(),
-  key: z.string(),
-});
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export type AwsConfigEntry = z.input<typeof awsConfigEntrySchema>;
-export type AwsConfigResult = z.input<typeof awsConfigResultSchema>;
+export * from "@/modules/admin/aws/schemas";
