@@ -1,7 +1,9 @@
-export {
-  listBanks,
-  getBank,
-  createBank,
-  updateBank,
-  deleteBank,
-} from "@/modules/admin/bank/actions";
+// ---------------------------------------------------------------------------
+// Barrel re-export — delegates to module-level implementation
+// ---------------------------------------------------------------------------
+// All business logic lives in src/modules/admin/bank/actions.ts (which
+// has "use server"). This barrel re-exports so page consumers keep their
+// current import paths without duplicating the "use server" directive.
+// ---------------------------------------------------------------------------
+
+export * from "@/modules/admin/bank/actions";

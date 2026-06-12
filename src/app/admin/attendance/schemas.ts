@@ -1,10 +1,8 @@
 // ---------------------------------------------------------------------------
 // Barrel re-export — delegates to module-level implementation
 // ---------------------------------------------------------------------------
+// All Zod schemas and types live in src/modules/admin/attendance/schemas.ts.
+// This barrel re-exports so page consumers keep their current import paths.
+// ---------------------------------------------------------------------------
 
-export {
-  employeeOptionSchema,
-  listEmployeeOptionsResultSchema,
-  type EmployeeOption,
-  type ListEmployeeOptionsResult,
-} from "@/modules/admin/attendance/schemas";
+export * from "@/modules/admin/attendance/schemas";

@@ -1,28 +1,8 @@
 // ---------------------------------------------------------------------------
-// Admin — Departments Schemas (page-level re-exports)
+// Barrel re-export — delegates to module-level implementation
 // ---------------------------------------------------------------------------
-// All schema definitions live in src/modules/admin/departments/schemas.ts.
+// All Zod schemas and types live in src/modules/admin/departments/schemas.ts.
 // This barrel re-exports so page consumers keep their current import paths.
 // ---------------------------------------------------------------------------
 
-export {
-  listDepartmentsSchema,
-  getDepartmentSchema,
-  createDepartmentSchema,
-  updateDepartmentSchema,
-  deleteDepartmentSchema,
-  departmentListResponseSchema,
-  departmentDetailSchema,
-  departmentActionResponseSchema,
-  type ListDepartmentsInput,
-  type GetDepartmentInput,
-  type CreateDepartmentInput,
-  type UpdateDepartmentInput,
-  type DeleteDepartmentInput,
-  type DepartmentRow,
-  type DepartmentDetail,
-  type DepartmentActionResponse,
-  type DepartmentListResponseOutput,
-  type DepartmentDetailOutput,
-  type DepartmentActionResponseOutput,
-} from "@/modules/admin/departments/schemas";
+export * from "@/modules/admin/departments/schemas";

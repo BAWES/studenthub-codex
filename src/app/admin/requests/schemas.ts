@@ -1,31 +1,8 @@
 // ---------------------------------------------------------------------------
-// Admin Request schemas — re-exported from module layer
+// Barrel re-export — delegates to module-level implementation
+// ---------------------------------------------------------------------------
+// All Zod schemas and types live in src/modules/admin/requests/schemas.ts.
+// This barrel re-exports so page consumers keep their current import paths.
 // ---------------------------------------------------------------------------
 
-export {
-  listRequestsSchema,
-  getRequestSchema,
-  updateRequestStatusSchema,
-  approveRequestSchema,
-  rejectRequestSchema,
-  closeRequestSchema,
-  listRequestsOutputSchema,
-  getRequestOutputSchema,
-  updateRequestStatusOutputSchema,
-  approveRequestOutputSchema,
-  rejectRequestOutputSchema,
-  closeRequestOutputSchema,
-} from "@/modules/admin/requests/schemas";
-
-export type {
-  ListRequestsInput,
-  GetRequestInput,
-  UpdateRequestStatusInput,
-  ApproveRequestInput,
-  RejectRequestInput,
-  CloseRequestInput,
-  RequestActionResponse,
-  RequestRow,
-  RequestDetail,
-  UpdateRequestStatusResult,
-} from "@/modules/admin/requests/schemas";
+export * from "@/modules/admin/requests/schemas";
