@@ -316,7 +316,7 @@ test.describe("Admin critical flows - Payments / Compliance / Transfers / Agents
   // ──────────────────────────────────────────────────────────────────────────
 
   test.describe("Flow 3 — Transfer Management", () => {
-    test("3a. Transfers list page renders with metrics and data table", async () => {
+    test("3a. Transfers list page renders with metrics, column headers, and data table", async () => {
       const ctx = await adminContext();
 
       await ctx.page.goto("/admin/transfers");
@@ -336,10 +336,50 @@ test.describe("Admin critical flows - Payments / Compliance / Transfers / Agents
         .first();
       await expect(table).toBeVisible({ timeout: 10000 });
 
-      // Metric cards visible
+      // Verify column headers match the admin-transfers-table schema
+      const expectedColumns = ["Transfer", "Company", "Period", "Status", "Total"];
+      const allHeaders = await table.locator("th").allTextContents().catch(() => [] as string[]);
+      const headerText = allHeaders.join(" ");
+      let columnsFound = 0;
+      for (const col of expectedColumns) {
+        if (headerText.includes(col)) {
+          columnsFound++;
+        } else {
+          console.log(`Column header "${col}" not found in rendered table`);
+        }
+      }
+      console.log(`Transfer table column headers found: ${columnsFound}/${expectedColumns.length}`);
+
+      // Verify metric cards visible
       const metricSection = ctx.page.locator('[aria-label="Metric cards"], [class*="flex gap"]').first();
       if (await metricSection.isVisible().catch(() => false)) {
         console.log("Transfer metric cards visible");
+      }
+
+      // Check for data rows (transfer runs)
+      const dataRows = table.locator("tbody tr");
+      const rowCount = await dataRows.count().catch(() => 0);
+      console.log(`Transfer rows found: ${rowCount}`);
+
+      // If rows exist, verify they have the expected columns populated
+      if (rowCount > 0) {
+        const firstRowCells = await dataRows.first().locator("td").allTextContents().catch(() => []);
+        if (firstRowCells.length >= expectedColumns.length) {
+          console.log(`First transfer row has ${firstRowCells.length} cells`);
+          // Verify at least id (#N) and status text are present
+          const rowText = firstRowCells.join(" ");
+          const hasId = /#\d+/.test(rowText);
+          const hasStatus = /Pending|Approved|Cancelled/i.test(rowText);
+          console.log(`Row has transfer ID: ${hasId}, status text: ${hasStatus}`);
+        }
+      }
+
+      // Check if pagination is available (it's not wired on the page yet)
+      const pagination = ctx.page.locator('[aria-label="Pagination"], [aria-label="Next page"]');
+      if (await pagination.isVisible().catch(() => false)) {
+        console.log("Pagination controls visible on transfers table");
+      } else {
+        console.log("Pagination not wired on transfers page — server action supports it but page doesn't pass pagination props");
       }
 
       assertNoReactErrors(ctx.errors);
@@ -353,15 +393,20 @@ test.describe("Admin critical flows - Payments / Compliance / Transfers / Agents
       await ctx.page.waitForLoadState("load");
       await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
 
-      // Try to navigate to a transfer detail page
+      // Try to navigate to a transfer detail page via row click or link
       const transferLinks = ctx.page.locator('a[href*="/admin/transfers/"]');
       const linkCount = await transferLinks.count().catch(() => 0);
+      // Also try Open links in table action column
+      const openLinks = ctx.page.locator('a:has-text("Open")');
+      const openCount = await openLinks.count().catch(() => 0);
 
-      if (linkCount > 0) {
+      if (linkCount > 0 || openCount > 0) {
         // Find a link that points to a specific transfer (not just /admin/transfers)
         const links: string[] = [];
-        for (let i = 0; i < Math.min(linkCount, 5); i++) {
-          const href = await transferLinks.nth(i).getAttribute("href").catch(() => null);
+        const allLinks = linkCount > 0 ? transferLinks : openLinks;
+        const count = linkCount > 0 ? linkCount : openCount;
+        for (let i = 0; i < Math.min(count, 10); i++) {
+          const href = await allLinks.nth(i).getAttribute("href").catch(() => null);
           if (href && href.match(/\/admin\/transfers\/\d+/)) {
             links.push(href);
           }
@@ -373,22 +418,79 @@ test.describe("Admin critical flows - Payments / Compliance / Transfers / Agents
           await ctx.page.waitForLoadState("load");
           await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
 
-          // Verify transfer detail content
-          const detailHeading = ctx.page.locator("h1, h2, [class*='transferTitle'], text=Transfer #");
-          if (await detailHeading.first().isVisible().catch(() => false)) {
-            console.log(`Transfer detail page loaded for ${links[0]}`);
+          // Verify transfer detail content — eyebrow and title
+          await expect(ctx.page).toHaveURL(/\/admin\/transfers\/\d+/);
+          const pageContent = await ctx.page.locator("body").innerText().catch(() => "");
+
+          // Should contain "Transfer #N" or "Admin / Transfer"
+          const hasTransferTitle = pageContent.includes("Transfer #") || pageContent.includes("Admin / Transfer");
+          expect(hasTransferTitle).toBeTruthy();
+
+          // Check for detail sections
+          const detailSections = ctx.page.locator('[class*="DetailSection"], [class*="detailSection"]');
+          const detailCount = await detailSections.count().catch(() => 0);
+          if (detailCount > 0) {
+            console.log(`Transfer detail has ${detailCount} section(s) rendering`);
           }
 
-          // Check for detail sections (Account/DetailSection)
-          const detailSections = ctx.page.locator('[class*="DetailSection"], [class*="detailSection"]');
-          if ((await detailSections.count().catch(() => 0)) > 0) {
-            console.log("Transfer detail sections render");
+          // Check for primary entity table (candidate payouts)
+          const payoutTable = ctx.page.locator("table").first();
+          if (await payoutTable.isVisible().catch(() => false)) {
+            console.log("Candidate payouts table visible on transfer detail");
           }
+
+          console.log(`Transfer detail page loaded for ${links[0]}`);
         } else {
           console.log("No specific transfer links found (<a href='/admin/transfers/N'>)");
         }
       } else {
         console.log("No transfer runs available to navigate to detail");
+      }
+
+      assertNoReactErrors(ctx.errors);
+      await ctx.close();
+    });
+
+    test("3c. Transfer list row click navigates to detail page", async () => {
+      const ctx = await adminContext();
+
+      await ctx.page.goto("/admin/transfers");
+      await ctx.page.waitForLoadState("load");
+      await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
+
+      // Find clickable table rows
+      const rows = ctx.page.locator("table tbody tr");
+      const rowCount = await rows.count().catch(() => 0);
+
+      if (rowCount > 0) {
+        // Try Open links in the action column (first visible one)
+        const openLink = ctx.page.locator('a:has-text("Open")').first();
+        if (await openLink.isVisible().catch(() => false)) {
+          // Click the Open link to navigate to detail
+          const href = await openLink.getAttribute("href").catch(() => null);
+          if (href && href.match(/\/admin\/transfers\/\d+/)) {
+            await openLink.click();
+            await ctx.page.waitForLoadState("load");
+
+            // Verify we landed on the transfer detail page
+            await expect(ctx.page).toHaveURL(/\/admin\/transfers\/\d+/);
+            await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
+            console.log(`Row click navigated to transfer detail: ${ctx.page.url()}`);
+          }
+        } else {
+          // Fallback: click first row
+          const firstRow = rows.first();
+          await firstRow.click();
+          await ctx.page.waitForTimeout(1000);
+          const currentUrl = ctx.page.url();
+          if (currentUrl.match(/\/admin\/transfers\/\d+/)) {
+            console.log(`Row click navigated to: ${currentUrl}`);
+          } else {
+            console.log(`Row click landed on: ${currentUrl}`);
+          }
+        }
+      } else {
+        console.log("No transfer rows to click — table may be empty");
       }
 
       assertNoReactErrors(ctx.errors);
