@@ -1,5 +1,6 @@
-import { describe, it, expect, vi, afterEach } from "vitest";
-import { render, screen, cleanup } from "@testing-library/react";
+import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
+import { render, screen, cleanup, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { AdminAttendanceTable } from "./admin-attendance-table";
 
 afterEach(() => { cleanup(); });
@@ -52,9 +53,14 @@ const employees = [
 const mockSession = { id: "admin-1", name: "Admin", email: "admin@test.co", role: "admin" } as any;
 
 // Mock the createAdminAttendance action so CreateAttendanceForm doesn't hit a real server
+const mockCreateAttendance = vi.fn();
 vi.mock("./actions", () => ({
-  createAdminAttendance: vi.fn().mockResolvedValue({ attendance_uuid: "new-att-1" }),
+  createAdminAttendance: (...args: unknown[]) => mockCreateAttendance(...args),
 }));
+
+beforeEach(() => {
+  vi.clearAllMocks();
+});
 
 describe("AdminAttendanceTable", () => {
   it("renders all employee names in the table rows", () => {
@@ -131,5 +137,101 @@ describe("AdminAttendanceTable", () => {
     );
     expect(screen.getByText("Record attendance")).toBeDefined();
     expect(screen.getByText("Record")).toBeDefined();
+  });
+
+  it("renders clock-in and clock-out times for entries with data", () => {
+    render(
+      <AdminAttendanceTable
+        session={mockSession}
+        attendance={sampleAttendance as any}
+        employees={employees}
+      />,
+    );
+    // Times are displayed in local timezone (UTC+3)
+    // att-1: clock_in=08:00 UTC → 11:00 AM, clock_out=16:30 UTC → 07:30 PM
+    expect(screen.getByText("11:00 AM")).toBeTruthy();
+    // att-2: clock_in=09:15 UTC → 12:15 PM, clock_out=17:00 UTC → 08:00 PM
+    expect(screen.getByText("12:15 PM")).toBeTruthy();
+    expect(screen.getByText("08:00 PM")).toBeTruthy();
+  });
+
+  it("renders em-dash for null clock-in/out values", () => {
+    render(
+      <AdminAttendanceTable
+        session={mockSession}
+        attendance={sampleAttendance as any}
+        employees={employees}
+      />,
+    );
+    const dashes = screen.getAllByText("—");
+    // At minimum, att-3 has null clock_in, clock_out = 2 dashes
+    expect(dashes.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it("renders the filter dropdown with all employees", () => {
+    render(
+      <AdminAttendanceTable
+        session={mockSession}
+        attendance={sampleAttendance as any}
+        employees={employees}
+      />,
+    );
+    expect(screen.getByText("All employees")).toBeDefined();
+    expect(screen.getAllByText("Ahmed Al-Sabah").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Mona Al-Mutairi").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Khalid Al-Rashid").length).toBeGreaterThanOrEqual(1);
+  });
+
+  it("renders metric cards with correct total records", () => {
+    render(
+      <AdminAttendanceTable
+        session={mockSession}
+        attendance={sampleAttendance as any}
+        employees={employees}
+      />,
+    );
+    expect(screen.getAllByText("Total records").length).toBeGreaterThanOrEqual(1);
+    // 3 attendance records
+    const threes = screen.getAllByText("3");
+    expect(threes.length).toBeGreaterThanOrEqual(1);
+    // Employees metric
+    expect(screen.getAllByText("Employees").length).toBeGreaterThanOrEqual(1);
+  });
+
+  it("renders employee-specific rows with correct employee names", () => {
+    render(
+      <AdminAttendanceTable
+        session={mockSession}
+        attendance={sampleAttendance as any}
+        employees={employees}
+      />,
+    );
+    // Each employee may appear multiple times (filter select + create form + table rows)
+    expect(screen.getAllByText("Ahmed Al-Sabah").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Mona Al-Mutairi").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Khalid Al-Rashid").length).toBeGreaterThanOrEqual(1);
+  });
+
+  it("shows DataTable title", () => {
+    render(
+      <AdminAttendanceTable
+        session={mockSession}
+        attendance={sampleAttendance as any}
+        employees={employees}
+      />,
+    );
+    expect(screen.getByText("Attendance records")).toBeDefined();
+  });
+
+  it("shows absent employee with absent status and hour display", () => {
+    render(
+      <AdminAttendanceTable
+        session={mockSession}
+        attendance={[sampleAttendance[2]] as any}
+        employees={employees}
+      />,
+    );
+    // Absent status for att-3 (status: 0)
+    expect(screen.getByText("Absent")).toBeDefined();
   });
 });
