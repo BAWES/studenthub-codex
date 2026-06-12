@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCandidateSearchWorkspaceTypesense } from "@/modules/candidates/search-typesense";
 import type { CandidateSearchRole, CandidateSearchFilter } from "@/modules/candidates/search";
+import { searchCandidatesQuerySchema } from "./schemas";
 
 export const dynamic = "force-dynamic";
 
@@ -25,29 +26,39 @@ export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = request.nextUrl;
+    const rawParams = Object.fromEntries(searchParams.entries());
 
-    const query = searchParams.get("q") ?? "";
-    const filter = (searchParams.get("filter") ?? "all") as CandidateSearchFilter;
-    const role = (searchParams.get("role") ?? "admin") as CandidateSearchRole;
-    const staffId = searchParams.get("staffId") ? Number(searchParams.get("staffId")) : undefined;
-    const page = searchParams.get("page") ? Number(searchParams.get("page")) : 1;
+    // Validate query params via Zod
+    const parsed = searchCandidatesQuerySchema.safeParse(rawParams);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Invalid query parameters", details: parsed.error.issues },
+        { status: 400 },
+      );
+    }
 
-    // Facet filters
-    const country = searchParams.get("country") ?? undefined;
-    const university = searchParams.get("university") ?? undefined;
-    const company = searchParams.get("company") ?? undefined;
-    const skill = searchParams.get("skill") ?? undefined;
-    const gender = searchParams.get("gender") ?? undefined;
-    const profile = searchParams.get("profile") ?? undefined;
-    const assignment = searchParams.get("assignment") ?? undefined;
-    const document = searchParams.get("document") ?? undefined;
-    const visibility = (searchParams.get("visibility") ?? undefined) as "all" | "assigned" | undefined;
+    const {
+      q: query,
+      filter,
+      role,
+      staffId,
+      page,
+      country,
+      university,
+      company,
+      skill,
+      gender,
+      profile,
+      assignment,
+      document,
+      visibility,
+    } = parsed.data;
 
     const result = await getCandidateSearchWorkspaceTypesense({
-      role,
+      role: role as CandidateSearchRole,
       ...(staffId !== undefined && { staffId }),
       query,
-      filter,
+      filter: filter as CandidateSearchFilter,
       ...(visibility !== undefined && { visibility }),
       ...(country !== undefined && { country }),
       ...(university !== undefined && { university }),
