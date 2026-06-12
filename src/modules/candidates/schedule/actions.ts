@@ -14,6 +14,9 @@ import {
   getScheduleItemSchema,
   getScheduleDetailSchema,
   updateScheduleStatusSchema,
+  scheduleItemSchema,
+  scheduleStatusResultSchema,
+  scheduleDetailSchema,
 } from "./schemas";
 import type {
   ListScheduleInput,
@@ -70,7 +73,7 @@ export async function listSchedule(
     },
   });
 
-  return rows.map((row) => ({
+  const items = rows.map((row) => ({
     cwd_uuid: row.cwd_uuid,
     date: row.date,
     start_time: row.start_time,
@@ -80,6 +83,17 @@ export async function listSchedule(
     store_name: row.store?.store_name ?? null,
     company_name: row.store?.company?.company_name ?? null,
   }));
+
+  // Validate output shape
+  const outputParsed = scheduleItemSchema.array().safeParse(items);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/candidates/schedule] listSchedule output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return items;
 }
 
 /**
@@ -115,7 +129,7 @@ export async function getScheduleItem(
 
   if (!row) return null;
 
-  return {
+  const result: ScheduleItem = {
     cwd_uuid: row.cwd_uuid,
     date: row.date,
     start_time: row.start_time,
@@ -125,6 +139,17 @@ export async function getScheduleItem(
     store_name: row.store?.store_name ?? null,
     company_name: row.store?.company?.company_name ?? null,
   };
+
+  // Validate output shape
+  const outputParsed = scheduleItemSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/candidates/schedule] getScheduleItem output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -161,7 +186,16 @@ export async function getScheduleDetail(
 
   if (!row) return null;
 
-  return {
+  const storeObj = row.store
+    ? {
+        store_name: row.store.store_name,
+        company: row.store.company
+          ? { company_name: row.store.company.company_name }
+          : null,
+      }
+    : null;
+
+  const result: ScheduleDetail = {
     cwd_uuid: row.cwd_uuid,
     date: row.date,
     start_time: row.start_time,
@@ -170,15 +204,19 @@ export async function getScheduleDetail(
     status: row.status,
     created_at: row.created_at,
     updated_at: row.updated_at,
-    store: row.store
-      ? {
-          store_name: row.store.store_name,
-          company: row.store.company
-            ? { company_name: row.store.company.company_name }
-            : null,
-        }
-      : null,
+    store: storeObj,
   };
+
+  // Validate output shape
+  const outputParsed = scheduleDetailSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/candidates/schedule] getScheduleDetail output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -214,5 +252,16 @@ export async function updateScheduleStatus(
   });
 
   revalidatePath("/candidate/schedule");
-  return { cwd_uuid: updated.cwd_uuid, status: updated.status ?? 0 };
+  const result: ScheduleStatusResult = { cwd_uuid: updated.cwd_uuid, status: updated.status ?? 0 };
+
+  // Validate output shape
+  const outputParsed = scheduleStatusResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/candidates/schedule] updateScheduleStatus output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }

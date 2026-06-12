@@ -1,5 +1,10 @@
 import { describe, it, expect } from "vitest";
 import { z } from "zod";
+import {
+  jobListItemSchema,
+  jobDetailSchema,
+  listJobsResultSchema,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Schema validation for jobs server actions in actions.ts
@@ -161,5 +166,348 @@ describe("getJobSchema", () => {
   it("accepts a short UUID", () => {
     const result = getJobSchema.safeParse({ jobUuid: "a" });
     expect(result.success).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output schema tests — jobListItemSchema
+// ---------------------------------------------------------------------------
+
+describe("jobListItemSchema", () => {
+  it("accepts a full job list item", () => {
+    const item = {
+      job_uuid: "abc-123",
+      position: "Software Engineer",
+      position_ar: "مهندس برمجيات",
+      description: "Build cool stuff",
+      hours_per_day: 8,
+      days_per_week: true,
+      status: true,
+      area_uuid: "area-1",
+      request_uuid: "req-1",
+      created_at: new Date("2024-01-01"),
+      updated_at: new Date("2024-06-01"),
+    };
+    const result = jobListItemSchema.safeParse(item);
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts a minimal item with nulls", () => {
+    const item = {
+      job_uuid: "abc-123",
+      position: "Intern",
+      position_ar: null,
+      description: null,
+      hours_per_day: null,
+      days_per_week: null,
+      status: null,
+      area_uuid: null,
+      request_uuid: "req-1",
+      created_at: null,
+      updated_at: null,
+    };
+    const result = jobListItemSchema.safeParse(item);
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts string dates for created_at/updated_at", () => {
+    const item = {
+      job_uuid: "abc-123",
+      position: "Designer",
+      position_ar: null,
+      description: null,
+      hours_per_day: null,
+      days_per_week: null,
+      status: true,
+      area_uuid: null,
+      request_uuid: "req-2",
+      created_at: "2024-01-15T00:00:00.000Z",
+      updated_at: "2024-06-15T00:00:00.000Z",
+    };
+    const result = jobListItemSchema.safeParse(item);
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects missing required fields", () => {
+    const result = jobListItemSchema.safeParse({});
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects wrong type for position", () => {
+    const item = {
+      job_uuid: "abc-123",
+      position: 42,
+      position_ar: null,
+      description: null,
+      hours_per_day: null,
+      days_per_week: null,
+      status: false,
+      area_uuid: null,
+      request_uuid: "req-1",
+      created_at: null,
+      updated_at: null,
+    };
+    const result = jobListItemSchema.safeParse(item);
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects wrong type for days_per_week (number instead of boolean)", () => {
+    const item = {
+      job_uuid: "abc-123",
+      position: "Tester",
+      position_ar: null,
+      description: null,
+      hours_per_day: 6,
+      days_per_week: 5,
+      status: true,
+      area_uuid: null,
+      request_uuid: "req-1",
+      created_at: null,
+      updated_at: null,
+    };
+    const result = jobListItemSchema.safeParse(item);
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects missing job_uuid", () => {
+    const item = {
+      position: "Engineer",
+      position_ar: null,
+      description: null,
+      hours_per_day: null,
+      days_per_week: null,
+      status: null,
+      area_uuid: null,
+      request_uuid: "req-1",
+      created_at: null,
+      updated_at: null,
+    };
+    const result = jobListItemSchema.safeParse(item);
+    expect(result.success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output schema tests — listJobsResultSchema
+// ---------------------------------------------------------------------------
+
+describe("listJobsResultSchema", () => {
+  it("accepts an empty result", () => {
+    const result = listJobsResultSchema.safeParse({
+      jobs: [],
+      total: 0,
+      page: 1,
+      limit: 20,
+      totalPages: 0,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts a full paginated result", () => {
+    const result = listJobsResultSchema.safeParse({
+      jobs: [
+        {
+          job_uuid: "abc-123",
+          position: "Developer",
+          position_ar: null,
+          description: "Write code",
+          hours_per_day: 8,
+          days_per_week: true,
+          status: true,
+          area_uuid: "area-1",
+          request_uuid: "req-1",
+          created_at: new Date("2024-01-01"),
+          updated_at: new Date("2024-06-01"),
+        },
+      ],
+      total: 1,
+      page: 1,
+      limit: 20,
+      totalPages: 1,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects missing total", () => {
+    const result = listJobsResultSchema.safeParse({
+      jobs: [],
+      page: 1,
+      limit: 20,
+      totalPages: 0,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects jobs as non-array", () => {
+    const result = listJobsResultSchema.safeParse({
+      jobs: "not-an-array",
+      total: 0,
+      page: 1,
+      limit: 20,
+      totalPages: 0,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects string instead of number for total", () => {
+    const result = listJobsResultSchema.safeParse({
+      jobs: [],
+      total: "zero",
+      page: 1,
+      limit: 20,
+      totalPages: 0,
+    });
+    expect(result.success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output schema tests — jobDetailSchema (extends jobListItemSchema)
+// ---------------------------------------------------------------------------
+
+describe("jobDetailSchema", () => {
+  it("accepts a full job detail", () => {
+    const item = {
+      job_uuid: "abc-123",
+      position: "Senior Engineer",
+      position_ar: "مهندس أول",
+      description: "Leads team",
+      description_ar: "يقود الفريق",
+      hours_per_day: 8,
+      days_per_week: true,
+      status: true,
+      area_uuid: "area-1",
+      request_uuid: "req-1",
+      compensation_type: "monthly",
+      compensation_amount: "1500.000",
+      compensation_description: "Monthly salary",
+      compensation_description_ar: "الراتب الشهري",
+      min_age: 21,
+      max_age: 45,
+      gender: false,
+      available_from: new Date("2024-07-01"),
+      available_to: new Date("2024-12-31"),
+      created_at: new Date("2024-01-01"),
+      updated_at: new Date("2024-06-01"),
+    };
+    const result = jobDetailSchema.safeParse(item);
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts minimal job detail with nulls", () => {
+    const item = {
+      job_uuid: "abc-123",
+      position: "Intern",
+      position_ar: null,
+      description: null,
+      description_ar: null,
+      hours_per_day: null,
+      days_per_week: null,
+      status: null,
+      area_uuid: null,
+      request_uuid: "req-1",
+      compensation_type: null,
+      compensation_amount: null,
+      compensation_description: null,
+      compensation_description_ar: null,
+      min_age: null,
+      max_age: null,
+      gender: null,
+      available_from: null,
+      available_to: null,
+      created_at: null,
+      updated_at: null,
+    };
+    const result = jobDetailSchema.safeParse(item);
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts string dates for date fields", () => {
+    const item = {
+      job_uuid: "abc-123",
+      position: "Designer",
+      position_ar: null,
+      description: null,
+      description_ar: null,
+      hours_per_day: null,
+      days_per_week: null,
+      status: true,
+      area_uuid: null,
+      request_uuid: "req-2",
+      compensation_type: null,
+      compensation_amount: null,
+      compensation_description: null,
+      compensation_description_ar: null,
+      min_age: null,
+      max_age: null,
+      gender: null,
+      available_from: "2024-07-01T00:00:00.000Z",
+      available_to: "2024-12-31T00:00:00.000Z",
+      created_at: "2024-01-15T00:00:00.000Z",
+      updated_at: "2024-06-15T00:00:00.000Z",
+    };
+    const result = jobDetailSchema.safeParse(item);
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects missing required fields", () => {
+    const result = jobDetailSchema.safeParse({});
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects wrong type for compensation_type (number)", () => {
+    const item = {
+      job_uuid: "abc-123",
+      position: "Analyst",
+      position_ar: null,
+      description: null,
+      description_ar: null,
+      hours_per_day: null,
+      days_per_week: null,
+      status: null,
+      area_uuid: null,
+      request_uuid: "req-1",
+      compensation_type: 123,
+      compensation_amount: null,
+      compensation_description: null,
+      compensation_description_ar: null,
+      min_age: null,
+      max_age: null,
+      gender: null,
+      available_from: null,
+      available_to: null,
+      created_at: null,
+      updated_at: null,
+    };
+    const result = jobDetailSchema.safeParse(item);
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects wrong type for min_age (string)", () => {
+    const item = {
+      job_uuid: "abc-123",
+      position: "Clerk",
+      position_ar: null,
+      description: null,
+      description_ar: null,
+      hours_per_day: null,
+      days_per_week: null,
+      status: null,
+      area_uuid: null,
+      request_uuid: "req-1",
+      compensation_type: null,
+      compensation_amount: null,
+      compensation_description: null,
+      compensation_description_ar: null,
+      min_age: "not-a-number",
+      max_age: null,
+      gender: null,
+      available_from: null,
+      available_to: null,
+      created_at: null,
+      updated_at: null,
+    };
+    const result = jobDetailSchema.safeParse(item);
+    expect(result.success).toBe(false);
   });
 });

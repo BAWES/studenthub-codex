@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { SuggestForm, InviteForm } from "@/modules/requests/MatchActions";
+import { ScheduleInterviewForm } from "@/modules/requests/ScheduleInterviewForm";
 import { createStoryAction } from "@/modules/requests/story-actions";
 import {
   ApplicationStatusActions,
@@ -233,6 +234,15 @@ export function RequestFulfillmentOS({
             <CardDescription>{data.interviews.length} shown</CardDescription>
           </CardHeader>
           <CardContent>
+            <div className="mb-3">
+              <ScheduleInterviewForm
+                requestUuid={requestUuid}
+                matchedCandidates={data.matchedCandidates.map((c) => ({
+                  id: c.id,
+                  name: c.name,
+                }))}
+              />
+            </div>
             <RequestRows
               rows={data.interviews}
               actions={(row) => (

@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState, useMemo } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import Link from "next/link";
 import type { SessionUser } from "@/modules/auth/types";
 import MatchScoreBadge from "@/components/matching/MatchScoreBadge";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -110,6 +111,7 @@ function SearchResultSkeletons({ count = 5 }: { count?: number }) {
 export function CandidateSearchPage({ session, initialData }: { session: SessionUser; initialData?: SearchResponse | null }) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const pathname = usePathname();
   const inputRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
 
@@ -119,6 +121,9 @@ export function CandidateSearchPage({ session, initialData }: { session: Session
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(Number(searchParams.get("page")) || 1);
   const [activeFacets, setActiveFacets] = useState<Record<string, string>>({});
+
+  // Determine profile link prefix from pathname
+  const candidateProfilePrefix = pathname.startsWith("/admin") ? "/admin/candidates" : "/staff/candidates";
 
   // Debounced query for auto-search
   const debouncedQuery = useDebounce(query, DEBOUNCE_MS);
@@ -408,12 +413,17 @@ export function CandidateSearchPage({ session, initialData }: { session: Session
             <>
               <div className="flex flex-col gap-3">
                 {results.rows.map((row) => (
-                  <div
+                  <Link
                     key={row.id}
-                    className="rounded-xl border p-4 transition-shadow duration-150 hover:shadow-sm"
+                    href={`${candidateProfilePrefix}/${row.id}`}
+                    className="block rounded-xl border p-4 transition-all duration-150 hover:shadow-md hover:-translate-y-px"
                     style={{
                       background: "var(--card)",
                       borderColor: "var(--border)",
+                    }}
+                    onClick={(e) => {
+                      // Allow middle-click / cmd+click for new tab
+                      if (e.button === 1 || e.metaKey || e.ctrlKey) return;
                     }}
                   >
                     {/* Result header */}
@@ -515,7 +525,7 @@ export function CandidateSearchPage({ session, initialData }: { session: Session
                         ))}
                       </div>
                     )}
-                  </div>
+                  </Link>
                 ))}
               </div>
 

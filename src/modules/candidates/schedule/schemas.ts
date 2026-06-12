@@ -33,43 +33,58 @@ export const updateScheduleStatusSchema = z.object({
 });
 
 // ---------------------------------------------------------------------------
-// Types
+// Input types
 // ---------------------------------------------------------------------------
 
 export type ListScheduleInput = z.input<typeof listScheduleSchema>;
 export type GetScheduleItemInput = z.input<typeof getScheduleItemSchema>;
 export type UpdateScheduleStatusInput = z.input<typeof updateScheduleStatusSchema>;
 
-export type ScheduleItem = {
-  cwd_uuid: string;
-  date: Date;
-  start_time: Date;
-  end_time: Date | null;
-  total_time: number | null;
-  status: number | null;
-  store_name: string | null;
-  company_name: string | null;
-};
+// ---------------------------------------------------------------------------
+// Output validation schemas
+// ---------------------------------------------------------------------------
 
-export type ScheduleStatusResult = {
-  cwd_uuid: string;
-  status: number;
-};
+export const scheduleItemSchema = z.object({
+  cwd_uuid: z.string(),
+  date: z.date(),
+  start_time: z.date(),
+  end_time: z.date().nullable(),
+  total_time: z.number().int().nullable(),
+  status: z.number().int().nullable(),
+  store_name: z.string().nullable(),
+  company_name: z.string().nullable(),
+});
 
-/**
- * Rich detail type with nested store/company, matching WorkingDateDetail shape.
- */
-export type ScheduleDetail = {
-  cwd_uuid: string;
-  date: Date;
-  start_time: Date;
-  end_time: Date | null;
-  total_time: number | null;
-  status: number | null;
-  created_at: Date | null;
-  updated_at: Date | null;
-  store: {
-    store_name: string | null;
-    company: { company_name: string | null } | null;
-  } | null;
-};
+export const scheduleStatusResultSchema = z.object({
+  cwd_uuid: z.string(),
+  status: z.number().int(),
+});
+
+export const scheduleDetailStoreCompanySchema = z.object({
+  company_name: z.string().nullable(),
+});
+
+export const scheduleDetailStoreSchema = z.object({
+  store_name: z.string().nullable(),
+  company: scheduleDetailStoreCompanySchema.nullable(),
+});
+
+export const scheduleDetailSchema = z.object({
+  cwd_uuid: z.string(),
+  date: z.date(),
+  start_time: z.date(),
+  end_time: z.date().nullable(),
+  total_time: z.number().int().nullable(),
+  status: z.number().int().nullable(),
+  created_at: z.date().nullable(),
+  updated_at: z.date().nullable(),
+  store: scheduleDetailStoreSchema.nullable(),
+});
+
+// ---------------------------------------------------------------------------
+// Output types
+// ---------------------------------------------------------------------------
+
+export type ScheduleItem = z.output<typeof scheduleItemSchema>;
+export type ScheduleStatusResult = z.output<typeof scheduleStatusResultSchema>;
+export type ScheduleDetail = z.output<typeof scheduleDetailSchema>;
