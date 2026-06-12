@@ -79,7 +79,7 @@ export async function requireSession() {
 
 export async function requireRole(role: Role) {
   const session = await requireSession();
-  if (session.role !== role) redirect(`/app?required=${role}`);
+  if (session.role !== role && !session.roles?.some((r) => r.role === role)) redirect(`/app?required=${role}`);
   return session;
 }
 

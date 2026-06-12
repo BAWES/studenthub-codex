@@ -41,6 +41,8 @@ export type SessionUser = {
   accountKey?: string;
   legacyType?: Role;
   capabilities?: Capability[];
+  /** All roles this user has access to (multi-role support) */
+  roles?: Array<{ role: Role; id: string }>;
 };
 
 export type LoginAccountChoice = {

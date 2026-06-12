@@ -2,8 +2,8 @@
 
 import { redirect } from "next/navigation";
 import { resolveLegacyIdentities } from "./service";
-import { clearPendingAccounts, clearSession, createPendingAccounts, createSession, getPendingAccounts } from "./session";
-import type { LoginState } from "./types";
+import { clearPendingAccounts, clearSession, createPendingAccounts, createSession, getPendingAccounts, requireSession } from "./session";
+import type { LoginState, Role } from "./types";
 
 export async function loginAction(_state: LoginState, formData: FormData): Promise<LoginState> {
   const email = formData.get("email");
@@ -24,7 +24,7 @@ export async function loginAction(_state: LoginState, formData: FormData): Promi
 
   if (accounts.length === 1) {
     const { accountKey: _accountKey, label: _label, ...user } = accounts[0];
-    await createSession(user);
+    await createSession({ ...user, roles: [{ role: user.role as Role, id: user.id }] });
     redirect("/app");
   }
 
@@ -55,11 +55,27 @@ export async function chooseAccountAction(formData: FormData) {
   }
 
   const { accountKey: _accountKey, label: _label, ...user } = account;
-  await createSession(user);
+  const roles = accounts.map((a) => ({ role: a.role as Role, id: a.id }));
+  await createSession({ ...user, roles });
   redirect("/app");
 }
 
 export async function logoutAction() {
   await clearSession();
   redirect("/login");
+}
+
+export async function switchRoleAction(targetRole: Role) {
+  const session = await requireSession();
+  const account = (session.roles ?? []).find((r: { role: Role; id: string }) => r.role === targetRole);
+  if (!account) throw new Error("Unauthorized role switch");
+
+  await createSession({
+    role: targetRole,
+    id: account.id,
+    name: session.name,
+    email: session.email,
+    roles: session.roles
+  });
+  redirect("/app");
 }
