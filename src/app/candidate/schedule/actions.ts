@@ -19,6 +19,9 @@ import {
   getScheduleItemSchema,
   getScheduleDetailSchema,
   updateScheduleStatusSchema,
+  scheduleItemOutputSchema,
+  scheduleDetailOutputSchema,
+  scheduleStatusResultOutputSchema,
 } from "./schemas";
 import type {
   ListScheduleInput,
@@ -61,7 +64,30 @@ export async function getScheduleItem(
 ): Promise<ScheduleItem | null> {
   const session = await requireRoleCapability("candidate", "candidate.read.own");
 
-  return moduleGetScheduleItem(Number(session.id), cwd_uuid);
+  const parsed = getScheduleItemSchema.safeParse({ cwd_uuid });
+  if (!parsed.success) {
+    throw new Error(
+      parsed.error.issues[0]?.message ?? "Invalid working date UUID",
+    );
+  }
+
+  const result = await moduleGetScheduleItem(
+    Number(session.id),
+    parsed.data.cwd_uuid,
+  );
+
+  // Validate output shape
+  if (result) {
+    const outputParsed = scheduleItemOutputSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[candidate/schedule] getScheduleItem output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+  }
+
+  return result;
 }
 
 /**
@@ -73,7 +99,30 @@ export async function getScheduleDetail(
 ): Promise<ScheduleDetail | null> {
   const session = await requireRoleCapability("candidate", "candidate.read.own");
 
-  return moduleGetScheduleDetail(Number(session.id), cwd_uuid);
+  const parsed = getScheduleDetailSchema.safeParse({ cwd_uuid });
+  if (!parsed.success) {
+    throw new Error(
+      parsed.error.issues[0]?.message ?? "Invalid working date UUID",
+    );
+  }
+
+  const result = await moduleGetScheduleDetail(
+    Number(session.id),
+    parsed.data.cwd_uuid,
+  );
+
+  // Validate output shape
+  if (result) {
+    const outputParsed = scheduleDetailOutputSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[candidate/schedule] getScheduleDetail output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+  }
+
+  return result;
 }
 
 /**
@@ -86,5 +135,26 @@ export async function updateScheduleStatus(
 ): Promise<ScheduleStatusResult> {
   const session = await requireRoleCapability("candidate", "candidate.profile.edit");
 
-  return moduleUpdateScheduleStatus(Number(session.id), data);
+  const parsed = updateScheduleStatusSchema.safeParse(data);
+  if (!parsed.success) {
+    throw new Error(
+      parsed.error.issues[0]?.message ?? "Invalid schedule status data",
+    );
+  }
+
+  const result = await moduleUpdateScheduleStatus(
+    Number(session.id),
+    parsed.data,
+  );
+
+  // Validate output shape
+  const outputParsed = scheduleStatusResultOutputSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[candidate/schedule] updateScheduleStatus output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
