@@ -53,10 +53,9 @@ test.describe("3-click audit — candidate workspace", () => {
     if (route.path === "/candidate") {
       test(`candidate ${route.name} hub loads directly (0 clicks)`, async () => {
         const ctx = await authContext(candidate);
-        await ctx.page.goto(route.path);
-        await ctx.page.waitForLoadState("load");
+        await ctx.page.goto(route.path, { waitUntil: "networkidle" });
         await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
-        await expect(ctx.page).toHaveURL(route.path);
+        await expect(ctx.page).toHaveURL(route.path, { timeout: 15000 });
         assertNoReactErrors(ctx.errors);
         await ctx.close();
       });

@@ -64,10 +64,9 @@ test.describe("3-click audit — Company", () => {
     if (route === "/company") {
       test(`${route} hub loads directly (0 clicks)`, async () => {
         const ctx = await authContext(company);
-        await ctx.page.goto(route);
-        await ctx.page.waitForLoadState("load");
+        await ctx.page.goto(route, { waitUntil: "networkidle" });
         await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
-        await expect(ctx.page).toHaveURL(route);
+        await expect(ctx.page).toHaveURL(route, { timeout: 15000 });
 
         const errors: string[] = [];
         ctx.page.on("console", (msg) => {
@@ -97,12 +96,11 @@ test.describe("3-click audit — Company", () => {
         if ((await sidebarLink.count()) > 0) {
           // Direct sidebar link — 1 click
           await sidebarLink.first().click();
-          await ctx.page.waitForLoadState("load");
-          await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
 
-          // Target route loaded (may have been redirected if auth gated)
-          const currentUrl = ctx.page.url();
-          expect(currentUrl.includes(route)).toBe(true);
+          // Client-side navigation (Next.js <Link>) does not fire a "load" event.
+          // Wait for the URL to change or a navigation to complete instead.
+          await ctx.page.waitForURL((url) => url.pathname.includes(route), { timeout: 15000 });
+          await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
         } else {
           // No direct sidebar link — direct navigation is still valid
           await ctx.page.goto(route);

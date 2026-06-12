@@ -58,10 +58,9 @@ test.describe("3-click audit — inspector workspace", () => {
   // ── Hub page itself (0 clicks from login) ──
   test("/inspector hub loads directly (0 clicks)", async () => {
     const ctx = await authContext(user);
-    await ctx.page.goto("/inspector");
-    await ctx.page.waitForLoadState("load");
+    await ctx.page.goto("/inspector", { waitUntil: "networkidle" });
     await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
-    await expect(ctx.page).toHaveURL("/inspector");
+    await expect(ctx.page).toHaveURL("/inspector", { timeout: 15000 });
     await ctx.close();
   });
 
