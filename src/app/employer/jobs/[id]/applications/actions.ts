@@ -8,6 +8,9 @@ import {
   ListJobApplicationsByEmployerInput,
   UpdateApplicationStatusInput,
   JobApplicationRow,
+  jobApplicationListOutputSchema,
+  jobApplicationListByEmployerOutputSchema,
+  updateApplicationStatusOutputSchema,
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
@@ -53,7 +56,18 @@ export async function listJobApplications(
     updatedAt: r.updatedAt,
   }));
 
-  return { success: true, applications, total };
+  const result = { success: true as const, applications, total };
+
+  // Validate output shape
+  const outputParsed = jobApplicationListOutputSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[employer/jobs/applications] listJobApplications output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -101,7 +115,18 @@ export async function listJobApplicationsByEmployer(
     updatedAt: r.updatedAt,
   }));
 
-  return { success: true, applications, total };
+  const result = { success: true as const, applications, total };
+
+  // Validate output shape
+  const outputParsed = jobApplicationListByEmployerOutputSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[employer/jobs/applications] listJobApplicationsByEmployer output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -120,5 +145,16 @@ export async function updateApplicationStatus(
     data: { status },
   });
 
-  return { success: true };
+  const result = { success: true as const };
+
+  // Validate output shape
+  const outputParsed = updateApplicationStatusOutputSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[employer/jobs/applications] updateApplicationStatus output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
