@@ -10,6 +10,7 @@ import {
 } from "../schemas";
 import type { IdRequestDetail } from "../schemas";
 import { getIdRequest as _getIdRequest } from "../actions";
+import { inspectorIdRequestActionResultSchema } from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Re-export detail query from parent (detail page uses the same model)
@@ -39,7 +40,17 @@ export async function updateIdRequestStatus(
 
   const parsed = updateIdRequestStatusSchema.safeParse(params);
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
+    const result = {
+      error: parsed.error.issues[0]?.message ?? "Invalid input",
+    };
+    const outputParsed = inspectorIdRequestActionResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[app/inspector/id-requests/[id]] updateIdRequestStatus output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+    return result;
   }
 
   const { id, status, rejection_reason } = parsed.data;
@@ -50,20 +61,44 @@ export async function updateIdRequestStatus(
   });
 
   if (!existing) {
-    return { error: "ID request not found." };
+    const result = { error: "ID request not found." };
+    const outputParsed = inspectorIdRequestActionResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[app/inspector/id-requests/[id]] updateIdRequestStatus output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+    return result;
   }
 
   if (existing.status !== "pending") {
-    return {
+    const result = {
       error: `Cannot update a request with status "${existing.status}". Only 'pending' requests can be updated.`,
     };
+    const outputParsed = inspectorIdRequestActionResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[app/inspector/id-requests/[id]] updateIdRequestStatus output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+    return result;
   }
 
   if (status === "rejected" && !rejection_reason) {
-    return {
+    const result = {
       error:
         "Rejection reason is required when rejecting an ID verification request.",
     };
+    const outputParsed = inspectorIdRequestActionResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[app/inspector/id-requests/[id]] updateIdRequestStatus output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+    return result;
   }
 
   await prisma.candidate_id_request.update({
@@ -78,5 +113,13 @@ export async function updateIdRequestStatus(
   revalidatePath(`/inspector/id-requests/${id}`);
   revalidatePath("/inspector/id-requests");
 
-  return { success: true };
+  const result = { success: true } as const;
+  const outputParsed = inspectorIdRequestActionResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[app/inspector/id-requests/[id]] updateIdRequestStatus output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+  return result;
 }
