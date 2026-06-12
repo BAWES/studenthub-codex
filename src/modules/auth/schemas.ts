@@ -32,6 +32,7 @@ export const verifySessionAuthenticatedSchema = z.object({
   authenticated: z.literal(true),
   user: z.object({
     role: z.string(),
+    roles: z.array(z.string()).optional(),
     id: z.string(),
     name: z.string(),
     email: z.string(),
@@ -48,3 +49,10 @@ export const verifySessionResultSchema = z.discriminatedUnion("authenticated", [
   verifySessionAuthenticatedSchema,
   verifySessionUnauthenticatedSchema,
 ]);
+
+/**
+ * Schema for the switchRole form action.
+ */
+export const switchRoleSchema = z.object({
+  targetRole: z.enum(["admin", "staff", "company", "candidate", "inspector"]),
+});
