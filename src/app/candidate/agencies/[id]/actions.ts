@@ -21,6 +21,10 @@ import {
   type AgencyItem,
   type AgencyActionResult,
 } from "../schemas";
+import {
+  agencyDetailOutputSchema,
+  agencyActionResultOutputSchema,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // getAgency
@@ -42,7 +46,18 @@ export async function getAgency(
     );
   }
 
-  return moduleGetAgency({ companyId: parsed.data.companyId });
+  const result = await moduleGetAgency({ companyId: parsed.data.companyId });
+
+  // Validate output shape
+  const outputParsed = agencyDetailOutputSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[candidate/agencies/[id]] getAgency output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -75,6 +90,16 @@ export async function updateAgency(
   });
 
   revalidatePath("/candidate/agencies");
+
+  // Validate output shape
+  const updateOutputParsed = agencyActionResultOutputSchema.safeParse(result);
+  if (!updateOutputParsed.success) {
+    console.error(
+      "[candidate/agencies/[id]] updateAgency output validation failed:",
+      updateOutputParsed.error.issues,
+    );
+  }
+
   return result;
 }
 
@@ -102,5 +127,15 @@ export async function deleteAgency(
   const result = await moduleDeleteAgency({ companyId: parsed.data.companyId });
 
   revalidatePath("/candidate/agencies");
+
+  // Validate output shape
+  const deleteOutputParsed = agencyActionResultOutputSchema.safeParse(result);
+  if (!deleteOutputParsed.success) {
+    console.error(
+      "[candidate/agencies/[id]] deleteAgency output validation failed:",
+      deleteOutputParsed.error.issues,
+    );
+  }
+
   return result;
 }

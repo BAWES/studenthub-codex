@@ -18,6 +18,18 @@ export const getDocumentSchema = z.object({
 });
 
 // ---------------------------------------------------------------------------
+// Output validation — re-exports from module-level schemas
+// ---------------------------------------------------------------------------
+
+export {
+  candidateDocumentItemResultSchema as documentItemOutputSchema,
+  listCandidateDocumentsResultSchema as listDocumentsOutputSchema,
+  getCandidateDocumentResultSchema as getDocumentOutputSchema,
+  uploadDocumentStateResultSchema as uploadDocumentOutputSchema,
+  deleteDocumentStateResultSchema as deleteDocumentOutputSchema,
+} from "@/modules/candidates/documents/schemas";
+
+// ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
