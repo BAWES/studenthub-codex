@@ -4,6 +4,10 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
 import type { request_request_status } from "@prisma/client";
+import {
+  candidateDashboardStatsSchema,
+  type CandidateDashboardStats,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Constants (mirroring Yii2 PHP values)
@@ -32,18 +36,6 @@ const candidateIdSchema = z.object({
 // ---------------------------------------------------------------------------
 
 export type GetCandidateDashboardStatsParams = z.input<typeof candidateIdSchema>;
-
-export type CandidateDashboardStats = {
-  totalHours: number;
-  totalMinutes: number;
-  totalSeconds: number;
-  totalPaid: number;
-  totalBonus: number;
-  totalEarning: number;
-  totalInterviewScheduled: number;
-  candidateName: string | null;
-  candidateEmail: string | null;
-};
 
 // ---------------------------------------------------------------------------
 // Server actions
@@ -146,7 +138,7 @@ export async function getCandidateDashboardStats(
 
   const totalEarning = totalPaid + totalBonus;
 
-  return {
+  const result: CandidateDashboardStats = {
     totalHours,
     totalMinutes,
     totalSeconds,
@@ -157,4 +149,15 @@ export async function getCandidateDashboardStats(
     candidateName: candidate?.candidate_name ?? null,
     candidateEmail: candidate?.candidate_email ?? null,
   };
+
+  // Validate output shape
+  const outputParsed = candidateDashboardStatsSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/candidate/statistics] getCandidateDashboardStats output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
