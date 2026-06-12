@@ -77,7 +77,7 @@ test.describe("M5 Staff Request Fulfillment — Pipeline QA", () => {
   test("1. Staff can view request fulfillment dashboard", async () => {
     const { page, errors, close } = await staffContext();
     await page.goto("/staff/requests");
-    await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("load");
 
     assertNoReactErrors(errors);
 
@@ -90,7 +90,7 @@ test.describe("M5 Staff Request Fulfillment — Pipeline QA", () => {
   test("2. Staff request dashboard — all panels render without errors", async () => {
     const { page, errors, close } = await staffContext();
     await page.goto("/staff/requests");
-    await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("load");
 
     // Check no React error overlays
     const errorOverlay = page.locator("nextjs-portal");
@@ -104,7 +104,7 @@ test.describe("M5 Staff Request Fulfillment — Pipeline QA", () => {
   test("3. Staff hub loads with sidebar navigation", async () => {
     const { page, errors, close } = await staffContext();
     await page.goto("/staff");
-    await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("load");
 
     assertNoReactErrors(errors);
 

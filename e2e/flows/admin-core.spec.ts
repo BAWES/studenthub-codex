@@ -481,7 +481,7 @@ test.describe("Admin critical flows - Payments / Compliance / Transfers / Agents
           // Fallback: click first row
           const firstRow = rows.first();
           await firstRow.click();
-          await ctx.page.waitForTimeout(1000);
+          await ctx.page.waitForLoadState("load");
           const currentUrl = ctx.page.url();
           if (currentUrl.match(/\/admin\/transfers\/\d+/)) {
             console.log(`Row click navigated to: ${currentUrl}`);
