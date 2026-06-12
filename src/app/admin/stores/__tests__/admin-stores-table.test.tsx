@@ -261,4 +261,10 @@ describe("AdminStoresTable", () => {
     expect(mockDeleteStore).not.toHaveBeenCalled();
     confirmSpy.mockRestore();
   });
+
+  it("renders empty state when stores array is empty and not loading", () => {
+    render(<AdminStoresTable session={mockSession} stores={[]} />);
+    const emptyTexts = screen.getAllByText(/no.*record/i);
+    expect(emptyTexts.length).toBeGreaterThanOrEqual(1);
+  });
 });
