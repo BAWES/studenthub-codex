@@ -27,68 +27,93 @@ export const createPaymentSchema = z.object({
 });
 
 // ---------------------------------------------------------------------------
-// Types
+// Input types
 // ---------------------------------------------------------------------------
 
 export type ListPaymentsParams = z.input<typeof listPaymentsSchema>;
 export type CreatePaymentInput = z.input<typeof createPaymentSchema>;
 
-export type PaymentRow = {
-  id: number;
-  transferId: number | null;
-  company: string;
-  period: string;
-  hours: string;
-  candidateTotal: string;
-  companyTotal: string;
-  cost: string;
-  paid: string;
-  paymentDate: string;
-  updated: string;
-};
+// ---------------------------------------------------------------------------
+// Output validation schemas
+// ---------------------------------------------------------------------------
 
-export type ListPaymentsResult = {
-  items: PaymentRow[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
+export const paymentRowSchema = z.object({
+  id: z.number().int(),
+  transferId: z.number().int().nullable(),
+  company: z.string(),
+  period: z.string(),
+  hours: z.string(),
+  candidateTotal: z.string(),
+  companyTotal: z.string(),
+  cost: z.string(),
+  paid: z.string(),
+  paymentDate: z.string(),
+  updated: z.string(),
+});
 
-export type PaymentDetailTransfer = {
-  id: number | null;
-  period: string;
-  paymentReceived: string;
-};
+export const listPaymentsResultSchema = z.object({
+  items: z.array(paymentRowSchema),
+  total: z.number(),
+  page: z.number(),
+  limit: z.number(),
+  totalPages: z.number(),
+});
 
-export type PaymentDetail = {
-  id: number;
-  transferId: number | null;
-  company: string;
-  store: string | null;
-  hours: string;
-  hourlyRate: string;
-  candidateTotal: string;
-  companyTotal: string;
-  cost: string;
-  bonus: string;
-  paid: string;
-  beneficiary: string | null;
-  iban: string | null;
-  bank: string | null;
-  created: string;
-  updated: string;
-};
+export const paymentDetailTransferSchema = z.object({
+  id: z.number().int().nullable(),
+  period: z.string(),
+  paymentReceived: z.string(),
+});
 
-export type GetPaymentDetailResult = {
-  transferCandidate: PaymentDetail;
-  transfer: PaymentDetailTransfer | null;
-  invoices: { id: number; date: Date | null; status: string | null }[];
-};
+export const paymentDetailSchema = z.object({
+  id: z.number().int(),
+  transferId: z.number().int().nullable(),
+  company: z.string(),
+  store: z.string().nullable(),
+  hours: z.string(),
+  hourlyRate: z.string(),
+  candidateTotal: z.string(),
+  companyTotal: z.string(),
+  cost: z.string(),
+  bonus: z.string(),
+  paid: z.string(),
+  beneficiary: z.string().nullable(),
+  iban: z.string().nullable(),
+  bank: z.string().nullable(),
+  created: z.string(),
+  updated: z.string(),
+});
 
-export type PaymentMethod = {
-  bankId: number | null;
-  bankName: string | null;
-  bankAccountName: string | null;
-  iban: string | null;
-};
+export const paymentDetailInvoiceSchema = z.object({
+  id: z.number().int(),
+  date: z.date().nullable(),
+  status: z.string().nullable(),
+});
+
+export const getPaymentDetailResultSchema = z.object({
+  transferCandidate: paymentDetailSchema,
+  transfer: paymentDetailTransferSchema.nullable(),
+  invoices: z.array(paymentDetailInvoiceSchema),
+});
+
+export const paymentMethodSchema = z.object({
+  bankId: z.number().int().nullable(),
+  bankName: z.string().nullable(),
+  bankAccountName: z.string().nullable(),
+  iban: z.string().nullable(),
+});
+
+export const createPaymentResultSchema = z.object({
+  tcId: z.number().int(),
+});
+
+// ---------------------------------------------------------------------------
+// Output types
+// ---------------------------------------------------------------------------
+
+export type PaymentRow = z.output<typeof paymentRowSchema>;
+export type ListPaymentsResult = z.output<typeof listPaymentsResultSchema>;
+export type PaymentDetailTransfer = z.output<typeof paymentDetailTransferSchema>;
+export type PaymentDetail = z.output<typeof paymentDetailSchema>;
+export type GetPaymentDetailResult = z.output<typeof getPaymentDetailResultSchema>;
+export type PaymentMethod = z.output<typeof paymentMethodSchema>;

@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import type { CSSProperties, ReactNode } from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
@@ -9,6 +10,13 @@ const mockSearchParams = new URLSearchParams();
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ replace: mockReplace, push: vi.fn() }),
   useSearchParams: () => mockSearchParams,
+  usePathname: () => "/staff/candidates",
+}));
+
+// Mock next/link as a simple <a> element
+vi.mock("next/link", () => ({
+  default: ({ href, children, className, style }: { href?: string; children?: React.ReactNode; className?: string; style?: React.CSSProperties }) =>
+    <a href={href} className={className} style={style}>{children}</a>,
 }));
 
 // Mock fetch
@@ -134,6 +142,7 @@ describe("CandidateSearchPage", () => {
     await waitFor(() => {
       expect(mockFetch).toHaveBeenCalledWith(
         expect.stringContaining("/api/candidates/search"),
+        expect.objectContaining({ signal: expect.any(AbortSignal) }),
       );
     });
   });
