@@ -127,3 +127,79 @@ export const workspaceOverviewOutputSchema = z.object({
 export const updateWorkspaceResultSchema = z.object({
   contactUuid: z.string(),
 });
+
+// ---------------------------------------------------------------------------
+// Output validation — staff workspace
+// ---------------------------------------------------------------------------
+
+export const staffWorkspaceStaffSchema = z
+  .object({
+    staff_name: z.string(),
+    staff_email: z.string(),
+    staff_job_title: z.string().nullable(),
+    staff_salary: z.number().nullable(),
+    staff_salary_currency: z.string().nullable(),
+  })
+  .nullable();
+
+export const staffListItemSchema = z.object({
+  id: z.union([z.string(), z.number()]),
+  title: z.string(),
+  subtitle: z.string(),
+  meta: z.string().optional(),
+  href: z.string().optional(),
+});
+
+export const staffWorkspaceOutputSchema = z.object({
+  staff: staffWorkspaceStaffSchema,
+  metrics: z.array(workspaceMetricSchema),
+  requests: z.array(staffListItemSchema),
+  stories: z.array(staffListItemSchema),
+});
+
+// ---------------------------------------------------------------------------
+// Output validation — company home
+// ---------------------------------------------------------------------------
+
+export const homeActivityItemSchema = z.object({
+  id: z.string(),
+  type: z.enum(["request_created", "request_updated", "note_added", "application_received"]),
+  detail: z.string(),
+  timestamp: z.date(),
+  relatedEntityId: z.string().optional(),
+});
+
+export const homeActiveRequestItemSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  status: z.string(),
+  candidatesCount: z.number(),
+  createdAt: z.date(),
+});
+
+export const companyHomeOutputSchema = workspaceOverviewOutputSchema.extend({
+  activeRequestCount: z.number().int().nonnegative(),
+  pendingRequestCount: z.number().int().nonnegative(),
+  openPositionsCount: z.number().int().nonnegative(),
+  activeRequests: z.array(homeActiveRequestItemSchema),
+  recentActivity: z.array(homeActivityItemSchema),
+});
+
+// ---------------------------------------------------------------------------
+// Existence check and action result schemas
+// Used by company/requests/[id] which imports from ../schemas
+// ---------------------------------------------------------------------------
+
+export const entityExistenceSchema = z
+  .object({ request_uuid: z.string().min(1) })
+  .nullable();
+
+export const actionResultSchema = z.discriminatedUnion("success", [
+  z.object({ success: z.literal(true) }),
+  z.object({ success: z.literal(false), error: z.string() }),
+]);
+
+export const requestStatusUpdateResultSchema = z.union([
+  z.object({ success: z.literal(true) }),
+  z.object({ error: z.string() }),
+]);

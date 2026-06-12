@@ -87,3 +87,71 @@ export type CompanyDetailResult = {
 export type UpdateCompanyResult = {
   company_id: number;
 };
+
+// ---------------------------------------------------------------------------
+// Output validation schemas
+// ---------------------------------------------------------------------------
+
+export const companyDetailResultSchema = z.object({
+  company_id: z.number().int(),
+  parent_company_id: z.number().nullable(),
+  company_name: z.string(),
+  company_common_name_en: z.string().nullable(),
+  company_common_name_ar: z.string().nullable(),
+  company_description_en: z.string().nullable(),
+  company_description_ar: z.string().nullable(),
+  company_website: z.string().nullable(),
+  company_email: z.string().nullable(),
+  company_logo: z.string().nullable(),
+  commercial_licence: z.string().nullable(),
+  company_hourly_rate: z.number().nullable(),
+  company_bonus_commission: z.number().nullable(),
+  company_followup: z.boolean().nullable(),
+  total_candidate: z.union([z.bigint(), z.number()]).nullable(),
+  no_of_active_requests: z.number().nullable(),
+  is_request_updates_in_30_days: z.boolean().nullable(),
+  company_approved_to_hire: z.boolean().nullable(),
+  company_status_override: z.boolean().nullable(),
+  company_created_at: z.date(),
+  company_updated_at: z.date(),
+  last_request_datetime: z.date().nullable(),
+  last_payment_datetime: z.date().nullable(),
+  country_id: z.number().nullable(),
+  currency_code: z.string().nullable(),
+  country_name: z.string().nullable(),
+  parent_company_name: z.string().nullable(),
+  staff_name: z.string().nullable(),
+});
+
+export const companyAccountDetailOutputSchema = z.object({
+  company: z.any().nullable(),
+  metrics: z.array(z.object({
+    label: z.string(),
+    value: z.union([z.string(), z.number()]),
+    note: z.string(),
+  })),
+  requests: z.array(z.object({
+    id: z.string(),
+    title: z.string(),
+    subtitle: z.string(),
+    meta: z.string(),
+  })),
+  contacts: z.array(z.object({
+    id: z.string(),
+    title: z.string(),
+    subtitle: z.string(),
+    meta: z.string(),
+  })),
+  stores: z.array(z.object({
+    id: z.number().int(),
+    title: z.string(),
+    subtitle: z.string(),
+    meta: z.string(),
+  })),
+  notes: z.array(z.object({
+    id: z.string(),
+    title: z.string(),
+    subtitle: z.string(),
+    meta: z.string(),
+  })),
+}).nullable();
