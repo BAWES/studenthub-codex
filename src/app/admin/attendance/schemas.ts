@@ -1,22 +1,10 @@
-import { z } from "zod";
-
 // ---------------------------------------------------------------------------
-// Output schemas
+// Barrel re-export — delegates to module-level implementation
 // ---------------------------------------------------------------------------
 
-/**
- * Schema for a single employee option returned by getEmployeeOptions.
- */
-export const employeeOptionSchema = z.object({
-  uuid: z.string(),
-  name: z.string(),
-});
-
-export type EmployeeOption = z.output<typeof employeeOptionSchema>;
-
-/**
- * Schema for the list of employee options returned by getEmployeeOptions.
- */
-export const listEmployeeOptionsResultSchema = z.array(employeeOptionSchema);
-
-export type ListEmployeeOptionsResult = z.output<typeof listEmployeeOptionsResultSchema>;
+export {
+  employeeOptionSchema,
+  listEmployeeOptionsResultSchema,
+  type EmployeeOption,
+  type ListEmployeeOptionsResult,
+} from "@/modules/admin/attendance/schemas";
