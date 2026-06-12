@@ -4,6 +4,7 @@ import type { SessionUser } from "@/modules/auth/types";
 import type { Route } from "next";
 import { logoutAction } from "@/modules/auth/actions";
 import { ThemeToggle } from "@/modules/theme/ThemeToggle";
+import { RoleSwitcher } from "./RoleSwitcher";
 import Link from "next/link";
 import { navForRole } from "./navigation";
 import { WorkspaceMobileNavigation, WorkspaceNavigation } from "./WorkspaceNavigation";
@@ -51,6 +52,7 @@ export function WorkspaceShell({
       </Link>
       <WorkspaceNavigation items={navItems} role={session.role} />
       <div className="workspaceRailFooter">
+        <RoleSwitcher session={session} />
         <ThemeToggle />
         <form className="workspaceSignout" action={logoutAction}>
           <button type="submit">Sign out</button>

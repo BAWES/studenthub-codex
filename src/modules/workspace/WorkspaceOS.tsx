@@ -6,6 +6,7 @@ import type { Route } from "next";
 import type { SessionUser } from "@/modules/auth/types";
 import { logoutAction } from "@/modules/auth/actions";
 import { ThemeToggle } from "@/modules/theme/ThemeToggle";
+import { RoleSwitcher } from "./RoleSwitcher";
 import Link from "next/link";
 import { WorkspaceOSContext } from "./WorkspaceOSContext";
 import { WorkspaceMobileNavigation, WorkspaceNavigation } from "./WorkspaceNavigation";
@@ -277,6 +278,7 @@ export function WorkspaceOS({
           </Link>
           <WorkspaceNavigation items={navItems} role={session.role} />
           <div className="workspaceRailFooter">
+            <RoleSwitcher session={session} />
             <button className="commandLauncher" type="button" onClick={() => { setCmdOpen(true); }}>
               <span>⌘K</span>
             </button>
