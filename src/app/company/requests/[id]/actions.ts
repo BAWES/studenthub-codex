@@ -11,6 +11,7 @@ import {
   type UpdateRequestStatusInput,
   type DeleteRequestInput,
 } from "../schemas";
+import { companyRequestActionResultSchema } from "./schemas";
 
 // ---------------------------------------------------------------------------
 // getCompanyRequestDetail — full request detail with pipeline data
@@ -83,7 +84,15 @@ export async function updateRequestStatus(
 
   const parsed = updateRequestStatusSchema.safeParse(params);
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
+    const result = { error: parsed.error.issues[0]?.message ?? "Invalid input" };
+    const outputParsed = companyRequestActionResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[app/company/requests/[id]] updateRequestStatus output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+    return result;
   }
 
   const { uuid, status, feedback } = parsed.data;
@@ -94,7 +103,15 @@ export async function updateRequestStatus(
   });
 
   if (!existing) {
-    return { error: "Request not found." };
+    const result = { error: "Request not found." };
+    const outputParsed = companyRequestActionResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[app/company/requests/[id]] updateRequestStatus output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+    return result;
   }
 
   await prisma.request.update({
@@ -109,7 +126,15 @@ export async function updateRequestStatus(
   revalidatePath(`/company/requests/${uuid}`);
   revalidatePath("/company/requests");
 
-  return { success: true };
+  const result = { success: true } as const;
+  const outputParsed = companyRequestActionResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[app/company/requests/[id]] updateRequestStatus output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -127,7 +152,15 @@ export async function deleteRequest(
 
   const parsed = deleteRequestSchema.safeParse(params);
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
+    const result = { error: parsed.error.issues[0]?.message ?? "Invalid input" };
+    const outputParsed = companyRequestActionResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[app/company/requests/[id]] deleteRequest output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+    return result;
   }
 
   const { uuid } = parsed.data;
@@ -138,11 +171,27 @@ export async function deleteRequest(
   });
 
   if (!existing) {
-    return { error: "Request not found." };
+    const result = { error: "Request not found." };
+    const outputParsed = companyRequestActionResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[app/company/requests/[id]] deleteRequest output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+    return result;
   }
 
   if (existing.request_status === "cancelled") {
-    return { error: "Request is already cancelled." };
+    const result = { error: "Request is already cancelled." };
+    const outputParsed = companyRequestActionResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[app/company/requests/[id]] deleteRequest output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+    return result;
   }
 
   await prisma.request.update({
@@ -156,5 +205,13 @@ export async function deleteRequest(
 
   revalidatePath("/company/requests");
 
-  return { success: true };
+  const result = { success: true } as const;
+  const outputParsed = companyRequestActionResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[app/company/requests/[id]] deleteRequest output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+  return result;
 }
