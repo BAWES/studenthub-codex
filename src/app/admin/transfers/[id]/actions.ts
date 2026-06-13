@@ -7,3 +7,4 @@
 // ---------------------------------------------------------------------------
 
 export * from "@/modules/admin/transfers/[id]/actions";
+export { getAdminTransferDetail } from "@/modules/admin/transfers/actions";
