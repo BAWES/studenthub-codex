@@ -125,3 +125,25 @@ export const updateInterviewStatusOutputSchema = z.object({
   operation: z.enum(["success", "error"]),
   message: z.string(),
 });
+
+// ---------------------------------------------------------------------------
+// updateInterviewNotes
+// ---------------------------------------------------------------------------
+
+export const updateInterviewNotesSchema = z.object({
+  interviewUuid: z.string().min(1, "Interview UUID is required"),
+  internalNote: z.string().optional(),
+  interviewNote: z.string().optional(),
+});
+
+export type UpdateInterviewNotesInput = z.input<typeof updateInterviewNotesSchema>;
+
+export type UpdateInterviewNotesResult = {
+  operation: "success" | "error";
+  message: string;
+};
+
+export const updateInterviewNotesOutputSchema = z.object({
+  operation: z.enum(["success", "error"]),
+  message: z.string(),
+});
