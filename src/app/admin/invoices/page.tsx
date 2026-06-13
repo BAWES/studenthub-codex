@@ -1,6 +1,6 @@
 import { requireRoleCapability } from "@/modules/auth/session";
 import { listInvoices } from "./actions";
-import AdminInvoicesPage from "./admin-invoices-page";
+import { AdminInvoicesPage } from "./_components";
 
 export const dynamic = "force-dynamic";
 

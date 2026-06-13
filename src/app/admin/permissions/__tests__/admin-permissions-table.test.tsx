@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { AdminPermissionsTable } from "../admin-permissions-table";
+import { AdminPermissionsTable } from "../_components";
 import type { PermissionSectionDetail } from "../schemas";
 
 // Mock next/navigation

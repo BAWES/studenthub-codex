@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
 import { render, screen, waitFor, cleanup } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { AdminReportsPageClient } from "../admin-reports-page-client";
+import { AdminReportsPageClient } from "../_components";
 
 // Mock server actions
 const mockGenerateReport = vi.fn();

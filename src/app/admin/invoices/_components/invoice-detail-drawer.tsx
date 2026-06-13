@@ -1,6 +1,6 @@
 "use client";
 
-import type { InvoiceDetail } from "./schemas";
+import type { InvoiceDetail } from "../schemas";
 
 // ---------------------------------------------------------------------------
 // InvoiceDetailDrawer

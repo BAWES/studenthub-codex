@@ -1,5 +1,5 @@
 import { requireRoleCapability } from "@/modules/auth/session";
-import AdminPaymentsPage from "./admin-payments-page";
+import { AdminPaymentsPage } from "./_components";
 
 export const dynamic = "force-dynamic";
 

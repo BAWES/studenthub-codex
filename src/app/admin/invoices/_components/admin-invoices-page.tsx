@@ -7,8 +7,8 @@ import { InvoiceMetricCards } from "./invoice-metric-cards";
 import { InvoiceFilters, type InvoiceFilterValues } from "./invoice-filters";
 import { InvoiceDataTable } from "./invoice-data-table";
 import { InvoiceDetailDrawer } from "./invoice-detail-drawer";
-import { listInvoices, getInvoice } from "./actions";
-import type { InvoiceRow, InvoiceDetail } from "./schemas";
+import { listInvoices, getInvoice } from "../actions";
+import type { InvoiceRow, InvoiceDetail } from "../schemas";
 
 // ---------------------------------------------------------------------------
 // AdminInvoicesPage

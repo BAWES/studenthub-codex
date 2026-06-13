@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, fireEvent, cleanup } from "@testing-library/react";
-import { PaymentDataTable } from "../payment-data-table";
+import { PaymentDataTable } from "../_components";
 
 afterEach(() => { cleanup(); });
 

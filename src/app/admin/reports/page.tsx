@@ -1,6 +1,6 @@
 import { requireRoleCapability } from "@/modules/auth/session";
 import { listReports } from "./actions";
-import { AdminReportsPageClient } from "./admin-reports-page-client";
+import { AdminReportsPageClient } from "./_components";
 
 export const dynamic = "force-dynamic";
 
