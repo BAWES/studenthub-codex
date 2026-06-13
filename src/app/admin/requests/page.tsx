@@ -1,7 +1,7 @@
 import { requireRoleCapability } from "@/modules/auth/session";
 import { formatDate } from "@/modules/workspace/format";
 import { listRequests } from "./actions";
-import { AdminRequestsTable } from "./admin-requests-table";
+import { AdminRequestsTable } from "./_components";
 
 export const dynamic = "force-dynamic";
 

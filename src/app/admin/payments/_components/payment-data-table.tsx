@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useCallback, type KeyboardEvent } from "react";
-import type { PaymentRow } from "./schemas";
+import type { PaymentRow } from "../schemas";
 
 // ---------------------------------------------------------------------------
 // PaymentDataTable

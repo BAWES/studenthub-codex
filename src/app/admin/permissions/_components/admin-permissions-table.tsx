@@ -6,11 +6,11 @@ import { DataTable } from "@/modules/workspace/DataTable";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 
 import type { SessionUser } from "@/modules/auth/types";
-import type { PermissionSectionDetail } from "./schemas";
+import type { PermissionSectionDetail } from "../schemas";
 import {
   createPermissionSection,
   updatePermissionSection,
-} from "./actions";
+} from "../actions";
 
 type Props = {
   session: SessionUser;

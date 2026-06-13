@@ -7,8 +7,8 @@ import { PaymentMetricCards } from "./payment-metric-cards";
 import { PaymentFilters, type PaymentFilterValues } from "./payment-filters";
 import { PaymentDataTable } from "./payment-data-table";
 import { PaymentDetailDrawer } from "./payment-detail-drawer";
-import { listPayments, getPayment } from "./actions";
-import type { PaymentRow } from "./schemas";
+import { listPayments, getPayment } from "../actions";
+import type { PaymentRow } from "../schemas";
 
 // ---------------------------------------------------------------------------
 // AdminPaymentsPage

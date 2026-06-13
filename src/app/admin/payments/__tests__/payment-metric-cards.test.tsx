@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
-import { PaymentMetricCards } from "../payment-metric-cards";
+import { PaymentMetricCards } from "../_components";
 
 vi.mock("@/components/ui/metric-card", () => ({
   MetricCard: vi.fn(({ label, value, subtitle }: any) => (

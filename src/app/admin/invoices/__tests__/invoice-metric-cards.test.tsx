@@ -1,6 +1,6 @@
 import { describe, it, expect, afterEach } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
-import { InvoiceMetricCards } from "../invoice-metric-cards";
+import { InvoiceMetricCards } from "../_components";
 
 afterEach(() => cleanup());
 
