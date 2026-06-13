@@ -1,6 +1,5 @@
 // ---------------------------------------------------------------------------
-// Candidate Certifications — colocated server actions
-// Delegates to module-level actions in @/modules/candidate/certifications/actions
+// Candidate Certifications — barrel exports
 // ---------------------------------------------------------------------------
 
 export {
@@ -9,9 +8,9 @@ export {
   createCandidateCertification,
   updateCandidateCertification,
   deleteCandidateCertification,
-} from "@/modules/candidate/certifications/actions";
+} from "./actions";
 
 export type {
   CertificationActionResult,
   CertificationItem,
-} from "@/modules/candidate/certifications";
+} from "@/app/candidate/certifications/schemas";
