@@ -27,6 +27,9 @@ import type {
   PaymentDetail,
   PaymentDetailTransfer,
 } from "./schemas";
+import { revalidatePath } from "next/cache";
+import { requireCapability, requireRoleCapability } from "@/modules/auth/session";
+import { z } from "zod";
 
 // ---------------------------------------------------------------------------
 // Server actions
@@ -321,4 +324,272 @@ export async function getPaymentMethods(
   }
 
   return result;
+}
+
+// ============================================================================
+// Route-level wrappers (barrel re-export pattern)
+// These define their own input schemas inline and handle session/auth.
+// ============================================================================
+
+// ---------------------------------------------------------------------------
+// Inline schemas for route-level wrappers
+// ---------------------------------------------------------------------------
+
+const listPaymentsActionSchema = z.object({
+  page: z.coerce.number().int().positive().optional().default(1),
+  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
+});
+
+const getPaymentDetailActionSchema = z.object({
+  tcId: z.coerce.number().int().positive("Payment ID must be a positive integer"),
+});
+
+const createPaymentActionSchema = z.object({
+  transferBenefName: z
+    .string({ required_error: "Beneficiary name is required" })
+    .min(1, "Beneficiary name is required")
+    .max(60),
+  transferBenefIban: z
+    .string({ required_error: "IBAN is required" })
+    .min(1, "IBAN is required")
+    .max(50),
+  bankId: z.number({ required_error: "Bank is required" }).int().positive(),
+  amount: z.number().positive("Amount must be positive").optional(),
+});
+
+const getPaymentActionSchema = z.object({
+  tcId: z.coerce.number().int().positive("Payment ID must be a positive integer"),
+});
+
+const deletePaymentActionSchema = z.object({
+  tcId: z.coerce.number().int().positive("Payment ID must be a positive integer"),
+});
+
+// ---------------------------------------------------------------------------
+// listCandidatePaymentsAction
+// ---------------------------------------------------------------------------
+
+/**
+ * List payment/transfer records for the current candidate.
+ * Route-level wrapper that handles session and delegates to listCandidatePayments.
+ */
+export async function listCandidatePaymentsAction(
+  params: FormData | { page?: number; limit?: number } = {},
+): Promise<ListPaymentsResult> {
+  const session = await requireCapability("candidate.read.own");
+
+  const raw =
+    params instanceof FormData
+      ? { page: params.get("page"), limit: params.get("limit") }
+      : params;
+
+  const parsed = listPaymentsActionSchema.safeParse(raw);
+  if (!parsed.success) {
+    return { items: [], total: 0, page: 1, limit: 20, totalPages: 0 };
+  }
+
+  const result = await listCandidatePayments(Number(session.id), parsed.data);
+
+  // Validate output shape
+  const listOutputParsed = listPaymentsResultSchema.safeParse(result);
+  if (!listOutputParsed.success) {
+    console.error(
+      "[modules/candidates/payments] listCandidatePaymentsAction output validation failed:",
+      listOutputParsed.error.issues,
+    );
+  }
+
+  return result;
+}
+
+// ---------------------------------------------------------------------------
+// getCandidatePaymentDetailAction
+// ---------------------------------------------------------------------------
+
+/**
+ * Get a single payment/transfer detail for the current candidate.
+ * Route-level wrapper that handles session and delegates to getCandidatePaymentDetail.
+ */
+export async function getCandidatePaymentDetailAction(
+  params: { tcId: string | number },
+): Promise<GetPaymentDetailResult | null> {
+  const session = await requireCapability("candidate.read.own");
+
+  const parsed = getPaymentDetailActionSchema.safeParse(params);
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid input");
+  }
+
+  const result = await getCandidatePaymentDetail(Number(session.id), parsed.data.tcId);
+
+  // Validate output shape (result can be null)
+  const detailOutputParsed = getPaymentDetailResultSchema.nullable().safeParse(result);
+  if (!detailOutputParsed.success) {
+    console.error(
+      "[modules/candidates/payments] getCandidatePaymentDetailAction output validation failed:",
+      detailOutputParsed.error.issues,
+    );
+  }
+
+  return result;
+}
+
+// ---------------------------------------------------------------------------
+// createCandidatePaymentAction
+// ---------------------------------------------------------------------------
+
+/**
+ * Create a transfer_candidate (payment) record with beneficiary details.
+ * Route-level wrapper that handles session and delegates to createCandidatePayment.
+ */
+export async function createCandidatePaymentAction(
+  data: { transferBenefName: string; transferBenefIban: string; bankId: number; amount?: number },
+): Promise<{ tcId: number }> {
+  const session = await requireCapability("candidate.profile.edit");
+
+  const parsed = createPaymentActionSchema.safeParse(data);
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid payment data");
+  }
+
+  const result = await createCandidatePayment(
+    Number(session.id),
+    parsed.data as { transferBenefName: string; transferBenefIban: string; bankId: number; amount?: number },
+  );
+
+  // Validate output shape
+  const createOutputParsed = createPaymentResultSchema.safeParse(result);
+  if (!createOutputParsed.success) {
+    console.error(
+      "[modules/candidates/payments] createCandidatePaymentAction output validation failed:",
+      createOutputParsed.error.issues,
+    );
+  }
+
+  return result;
+}
+
+// ---------------------------------------------------------------------------
+// getPaymentMethodsAction
+// ---------------------------------------------------------------------------
+
+/**
+ * Get the candidate's configured payment methods (bank accounts on file).
+ * Route-level wrapper that handles session and delegates to getPaymentMethods.
+ */
+export async function getPaymentMethodsAction(): Promise<PaymentMethod[]> {
+  const session = await requireCapability("candidate.read.own");
+
+  const result = await getPaymentMethods(Number(session.id));
+
+  // Validate output shape
+  const methodsOutputParsed = paymentMethodSchema.array().safeParse(result);
+  if (!methodsOutputParsed.success) {
+    console.error(
+      "[modules/candidates/payments] getPaymentMethodsAction output validation failed:",
+      methodsOutputParsed.error.issues,
+    );
+  }
+
+  return result;
+}
+
+// ---------------------------------------------------------------------------
+// getPaymentAction
+// ---------------------------------------------------------------------------
+
+/**
+ * Get a single payment detail with full info (transfer, company, invoices).
+ * Route-level wrapper for the [id] page that handles session and delegates
+ * to getCandidatePaymentDetail.
+ */
+export async function getPaymentAction(
+  tcId: number,
+): Promise<GetPaymentDetailResult | null> {
+  const session = await requireRoleCapability("candidate", "candidate.read.own");
+
+  const parsed = getPaymentActionSchema.safeParse({ tcId });
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid payment ID");
+  }
+
+  return getCandidatePaymentDetail(Number(session.id), parsed.data.tcId);
+}
+
+// ---------------------------------------------------------------------------
+// deletePaymentAction
+// ---------------------------------------------------------------------------
+
+/**
+ * Soft-delete a payment record by tc_id.
+ * Only the owning candidate can delete their own payment records.
+ *
+ * Uses soft delete (sets deleted=1) following the existing pattern in
+ * the list actions (where deleted=0 filters out soft-deleted rows).
+ *
+ * Returns `{ success: true }` on success, `{ success: false, error }` on error.
+ */
+export async function deletePaymentAction(
+  tcId: number,
+): Promise<{ success: true } | { success: false; error: string }> {
+  const paymentActionResultSchema = z.discriminatedUnion("success", [
+    z.object({ success: z.literal(true) }),
+    z.object({ success: z.literal(false), error: z.string() }),
+  ]);
+
+  try {
+    const session = await requireRoleCapability("candidate", "candidate.profile.edit");
+
+    const parsed = deletePaymentActionSchema.safeParse({ tcId });
+    if (!parsed.success) {
+      return paymentActionResultSchema.parse({
+        success: false as const,
+        error: parsed.error.issues[0]?.message ?? "Invalid payment ID",
+      });
+    }
+
+    const candidateId = Number(session.id);
+
+    // Verify ownership before soft-deleting
+    const existing = await prisma.transfer_candidate.findFirst({
+      where: {
+        tc_id: parsed.data.tcId,
+        candidate_id: candidateId,
+        deleted: 0,
+      },
+      select: { tc_id: true },
+    });
+
+    const paymentExistenceSchema = z
+      .object({ tc_id: z.number().int().positive() })
+      .nullable();
+
+    const existenceResult = paymentExistenceSchema.safeParse(existing);
+    if (!existenceResult.success) {
+      return paymentActionResultSchema.parse({
+        success: false as const,
+        error: "Payment not found or access denied",
+      });
+    }
+
+    // Soft delete: set deleted flag
+    await prisma.transfer_candidate.update({
+      where: { tc_id: parsed.data.tcId },
+      data: { deleted: 1 },
+    });
+
+    revalidatePath("/candidate/payments");
+
+    return paymentActionResultSchema.parse({
+      success: true as const,
+    });
+  } catch (e) {
+    return paymentActionResultSchema.parse({
+      success: false as const,
+      error:
+        e instanceof Error
+          ? e.message
+          : "Failed to delete payment.",
+    });
+  }
 }

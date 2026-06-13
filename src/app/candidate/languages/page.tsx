@@ -1,7 +1,7 @@
 import { requireRoleCapability } from "@/modules/auth/session";
 import { formatDate } from "@/modules/workspace/format";
 import { listCandidateLanguages } from "./actions";
-import { CandidateLanguagesTable } from "./candidate-languages-table";
+import { CandidateLanguagesTable } from "./_components";
 
 export const dynamic = "force-dynamic";
 

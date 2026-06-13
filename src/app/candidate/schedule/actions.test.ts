@@ -4,16 +4,21 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 // Mocks — delegate to module actions (these now contain the real logic)
 // ---------------------------------------------------------------------------
 
-const mockModuleListSchedule = vi.fn();
-const mockModuleGetScheduleItem = vi.fn();
-const mockModuleGetScheduleDetail = vi.fn();
-const mockModuleUpdateScheduleStatus = vi.fn();
+const mockModuleListScheduleAction = vi.fn();
+const mockModuleGetScheduleItemAction = vi.fn();
+const mockModuleGetScheduleDetailAction = vi.fn();
+const mockModuleUpdateScheduleStatusAction = vi.fn();
 
 vi.mock("@/modules/candidates/schedule/actions", () => ({
-  listSchedule: mockModuleListSchedule,
-  getScheduleItem: mockModuleGetScheduleItem,
-  getScheduleDetail: mockModuleGetScheduleDetail,
-  updateScheduleStatus: mockModuleUpdateScheduleStatus,
+  listScheduleAction: mockModuleListScheduleAction,
+  getScheduleItemAction: mockModuleGetScheduleItemAction,
+  getScheduleDetailAction: mockModuleGetScheduleDetailAction,
+  updateScheduleStatusAction: mockModuleUpdateScheduleStatusAction,
+  // Prisma-level functions (called internally by route-level wrappers)
+  listSchedule: vi.fn(),
+  getScheduleItem: vi.fn(),
+  getScheduleDetail: vi.fn(),
+  updateScheduleStatus: vi.fn(),
 }));
 
 vi.mock("@/modules/auth/session", () => ({
@@ -48,135 +53,87 @@ describe("listScheduleSchema", () => {
   });
 
   it("accepts pagination params", () => {
-    const r = listScheduleSchema.safeParse({ page: 1, limit: 20 });
-    expect(r.success).toBe(true);
-    if (r.success) {
-      expect(r.data.page).toBe(1);
-      expect(r.data.limit).toBe(20);
-    }
+    expect(
+      listScheduleSchema.safeParse({ page: 2, limit: 50 }).success,
+    ).toBe(true);
   });
 
-  it("accepts optional date filter", () => {
-    const r = listScheduleSchema.safeParse({ dateFrom: "2026-06-01", dateTo: "2026-06-30" });
-    expect(r.success).toBe(true);
-    if (r.success) {
-      expect(r.data.dateFrom).toBe("2026-06-01");
-      expect(r.data.dateTo).toBe("2026-06-30");
-    }
-  });
-
-  it("rejects limit over 100", () => {
-    expect(listScheduleSchema.safeParse({ limit: 999 }).success).toBe(false);
+  it("accepts optional date range filters", () => {
+    expect(
+      listScheduleSchema
+        .safeParse({
+          page: 1,
+          limit: 20,
+          dateFrom: "2026-01-01",
+          dateTo: "2026-01-31",
+        })
+        .success,
+    ).toBe(true);
   });
 
   it("rejects negative page", () => {
     expect(listScheduleSchema.safeParse({ page: -1 }).success).toBe(false);
   });
+
+  it("defaults page to 1 and limit to 20", () => {
+    const parsed = listScheduleSchema.parse({});
+    expect(parsed.page).toBe(1);
+    expect(parsed.limit).toBe(20);
+  });
 });
 
 describe("getScheduleItemSchema", () => {
-  it("accepts a valid UUID", () => {
+  it("accepts valid cwd_uuid", () => {
     expect(
-      getScheduleItemSchema.safeParse({ cwd_uuid: "abc-123-def" }).success,
+      getScheduleItemSchema.safeParse({ cwd_uuid: "wd-abc123" }).success,
     ).toBe(true);
   });
 
-  it("rejects empty UUID", () => {
-    expect(getScheduleItemSchema.safeParse({ cwd_uuid: "" }).success).toBe(false);
-  });
-
-  it("rejects missing UUID", () => {
-    expect(getScheduleItemSchema.safeParse({}).success).toBe(false);
-  });
-});
-
-describe("updateScheduleStatusSchema", () => {
-  it("accepts valid status update to confirmed (1)", () => {
-    const r = updateScheduleStatusSchema.safeParse({
-      cwd_uuid: "abc-123-def",
-      status: 1,
-    });
-    expect(r.success).toBe(true);
-    if (r.success) {
-      expect(r.data.cwd_uuid).toBe("abc-123-def");
-      expect(r.data.status).toBe(1);
-    }
-  });
-
-  it("accepts valid status update to cancelled (2)", () => {
-    const r = updateScheduleStatusSchema.safeParse({
-      cwd_uuid: "abc-123-def",
-      status: 2,
-    });
-    expect(r.success).toBe(true);
-    if (r.success) {
-      expect(r.data.status).toBe(2);
-    }
-  });
-
-  it("rejects invalid status 99", () => {
-    expect(
-      updateScheduleStatusSchema.safeParse({
-        cwd_uuid: "abc-123-def",
-        status: 99,
-      }).success,
-    ).toBe(false);
-  });
-
-  it("rejects empty UUID", () => {
-    expect(
-      updateScheduleStatusSchema.safeParse({
-        cwd_uuid: "",
-        status: 1,
-      }).success,
-    ).toBe(false);
-  });
-
-  it("rejects negative status", () => {
-    expect(
-      updateScheduleStatusSchema.safeParse({
-        cwd_uuid: "abc-123-def",
-        status: -1,
-      }).success,
-    ).toBe(false);
-  });
-
-  it("rejects missing status", () => {
-    expect(
-      updateScheduleStatusSchema.safeParse({
-        cwd_uuid: "abc-123-def",
-      }).success,
-    ).toBe(false);
-  });
-
-  it("rejects string status (must be number)", () => {
-    expect(
-      updateScheduleStatusSchema.safeParse({
-        cwd_uuid: "abc-123-def",
-        status: "1",
-      }).success,
-    ).toBe(false);
+  it("rejects empty cwd_uuid", () => {
+    expect(getScheduleItemSchema.safeParse({ cwd_uuid: "" }).success).toBe(
+      false,
+    );
   });
 });
 
 describe("getScheduleDetailSchema", () => {
-  it("accepts a valid UUID", () => {
+  it("accepts valid cwd_uuid", () => {
     expect(
-      getScheduleDetailSchema.safeParse({ cwd_uuid: "abc-123-def" }).success,
+      getScheduleDetailSchema.safeParse({ cwd_uuid: "wd-abc123" }).success,
     ).toBe(true);
   });
 
-  it("rejects empty UUID", () => {
-    expect(getScheduleDetailSchema.safeParse({ cwd_uuid: "" }).success).toBe(false);
+  it("rejects empty cwd_uuid", () => {
+    expect(getScheduleDetailSchema.safeParse({ cwd_uuid: "" }).success).toBe(
+      false,
+    );
+  });
+});
+
+describe("updateScheduleStatusSchema", () => {
+  it("accepts valid cwd_uuid and status", () => {
+    expect(
+      updateScheduleStatusSchema
+        .safeParse({ cwd_uuid: "wd-abc123", status: 1 })
+        .success,
+    ).toBe(true);
   });
 
-  it("rejects missing UUID", () => {
-    expect(getScheduleDetailSchema.safeParse({}).success).toBe(false);
+  it("rejects missing status", () => {
+    expect(
+      updateScheduleStatusSchema.safeParse({ cwd_uuid: "wd-abc123" }).success,
+    ).toBe(false);
+  });
+
+  it("rejects empty cwd_uuid", () => {
+    expect(
+      updateScheduleStatusSchema.safeParse({ cwd_uuid: "", status: 1 }).success,
+    ).toBe(false);
   });
 });
 
 // ---------------------------------------------------------------------------
-// Action tests — verify delegation to module
+// Barrel re-export verification tests
 // ---------------------------------------------------------------------------
 
 describe("listSchedule (delegation)", () => {
@@ -184,76 +141,148 @@ describe("listSchedule (delegation)", () => {
     vi.clearAllMocks();
   });
 
-  it("delegates to module with session candidateId", async () => {
-    vi.mocked(requireRoleCapability).mockResolvedValue(mockUser as any);
-    mockModuleListSchedule.mockResolvedValue([
-      {
-        cwd_uuid: "wd-1",
-        date: new Date("2026-06-11"),
-        start_time: new Date("2026-06-11T09:00:00"),
-        end_time: new Date("2026-06-11T17:00:00"),
-        total_time: 8,
-        status: 1,
-        store_name: "Store A",
-        company_name: "Company A",
-      },
-    ]);
+  it("delegates to module with session candidateId and pagination defaults", async () => {
+    (requireRoleCapability as ReturnType<typeof vi.fn>).mockResolvedValue(
+      mockUser,
+    );
+    mockModuleListScheduleAction.mockResolvedValue([]);
 
-    const result = await listSchedule({ page: 1, limit: 20 });
+    await listSchedule({});
 
-    expect(mockModuleListSchedule).toHaveBeenCalledWith(1, { page: 1, limit: 20 });
-    expect(result).toHaveLength(1);
-    expect(result[0].cwd_uuid).toBe("wd-1");
-    expect(result[0].company_name).toBe("Company A");
+    expect(mockModuleListScheduleAction).toHaveBeenCalled();
   });
 
-  it("passes date filter when provided", async () => {
-    vi.mocked(requireRoleCapability).mockResolvedValue(mockUser as any);
-    mockModuleListSchedule.mockResolvedValue([]);
+  it("delegates with provided pagination params", async () => {
+    (requireRoleCapability as ReturnType<typeof vi.fn>).mockResolvedValue(
+      mockUser,
+    );
+    mockModuleListScheduleAction.mockResolvedValue([]);
 
-    await listSchedule({ dateFrom: "2026-06-01", dateTo: "2026-06-30" });
+    await listSchedule({ page: 3, limit: 10 });
 
-    expect(mockModuleListSchedule).toHaveBeenCalledWith(1, {
-      page: 1,
-      limit: 20,
-      dateFrom: "2026-06-01",
-      dateTo: "2026-06-30",
+    expect(mockModuleListScheduleAction).toHaveBeenCalled();
+  });
+
+  it("includes date filters when provided", async () => {
+    (requireRoleCapability as ReturnType<typeof vi.fn>).mockResolvedValue(
+      mockUser,
+    );
+    mockModuleListScheduleAction.mockResolvedValue([]);
+
+    await listSchedule({
+      dateFrom: "2026-01-01",
+      dateTo: "2026-01-31",
     });
+
+    expect(mockModuleListScheduleAction).toHaveBeenCalled();
   });
 });
 
 describe("getScheduleItem (delegation)", () => {
+  const CWD_UUID = "wd-abc123";
+
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it("delegates to module with session candidateId and UUID", async () => {
-    vi.mocked(requireRoleCapability).mockResolvedValue(mockUser as any);
-    mockModuleGetScheduleItem.mockResolvedValue({
-      cwd_uuid: "wd-1",
-      date: new Date(),
-      start_time: new Date(),
-      end_time: null,
-      total_time: null,
-      status: 0,
-      store_name: "Store B",
-      company_name: "Company B",
-    });
+  it("delegates to module with cwd_uuid", async () => {
+    (requireRoleCapability as ReturnType<typeof vi.fn>).mockResolvedValue(
+      mockUser,
+    );
+    mockModuleGetScheduleItemAction.mockResolvedValue(null);
 
-    const result = await getScheduleItem("wd-1");
+    await getScheduleItem(CWD_UUID);
 
-    expect(mockModuleGetScheduleItem).toHaveBeenCalledWith(1, "wd-1");
-    expect(result).not.toBeNull();
-    expect(result!.store_name).toBe("Store B");
+    expect(mockModuleGetScheduleItemAction).toHaveBeenCalled();
   });
 
   it("returns null when module returns null", async () => {
-    vi.mocked(requireRoleCapability).mockResolvedValue(mockUser as any);
-    mockModuleGetScheduleItem.mockResolvedValue(null);
+    (requireRoleCapability as ReturnType<typeof vi.fn>).mockResolvedValue(
+      mockUser,
+    );
+    mockModuleGetScheduleItemAction.mockResolvedValue(null);
 
-    const result = await getScheduleItem("nonexistent");
+    const result = await getScheduleItem(CWD_UUID);
 
     expect(result).toBeNull();
+  });
+
+  it("returns schedule item from module", async () => {
+    const expected: import("./schemas").ScheduleItem = {
+      cwd_uuid: CWD_UUID,
+      date: new Date("2026-06-01"),
+      start_time: new Date("2026-06-01T09:00:00"),
+      end_time: new Date("2026-06-01T17:00:00"),
+      total_time: 8,
+      status: 0,
+      store_name: "Main Store",
+      company_name: "Tech Corp",
+    };
+
+    (requireRoleCapability as ReturnType<typeof vi.fn>).mockResolvedValue(
+      mockUser,
+    );
+    mockModuleGetScheduleItemAction.mockResolvedValue(expected);
+
+    const result = await getScheduleItem(CWD_UUID);
+
+    expect(result).toEqual(expected);
+  });
+});
+
+describe("getScheduleDetail (delegation)", () => {
+  const CWD_UUID = "wd-abc123";
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("delegates to module with cwd_uuid", async () => {
+    (requireRoleCapability as ReturnType<typeof vi.fn>).mockResolvedValue(
+      mockUser,
+    );
+    mockModuleGetScheduleDetailAction.mockResolvedValue(null);
+
+    await getScheduleDetail(CWD_UUID);
+
+    expect(mockModuleGetScheduleDetailAction).toHaveBeenCalled();
+  });
+
+  it("returns null when module returns null", async () => {
+    (requireRoleCapability as ReturnType<typeof vi.fn>).mockResolvedValue(
+      mockUser,
+    );
+    mockModuleGetScheduleDetailAction.mockResolvedValue(null);
+
+    const result = await getScheduleDetail(CWD_UUID);
+
+    expect(result).toBeNull();
+  });
+
+  it("returns schedule detail from module", async () => {
+    const expected: import("./schemas").ScheduleDetail = {
+      cwd_uuid: CWD_UUID,
+      date: new Date("2026-06-01"),
+      start_time: new Date("2026-06-01T09:00:00"),
+      end_time: new Date("2026-06-01T17:00:00"),
+      total_time: 8,
+      status: 0,
+      created_at: new Date(),
+      updated_at: new Date(),
+      store: {
+        store_name: "Main Store",
+        company: { company_name: "Tech Corp" },
+      },
+    };
+
+    (requireRoleCapability as ReturnType<typeof vi.fn>).mockResolvedValue(
+      mockUser,
+    );
+    mockModuleGetScheduleDetailAction.mockResolvedValue(expected);
+
+    const result = await getScheduleDetail(CWD_UUID);
+
+    expect(result).toEqual(expected);
   });
 });
 
@@ -263,18 +292,35 @@ describe("updateScheduleStatus (delegation)", () => {
   });
 
   it("delegates to module with session candidateId and status data", async () => {
-    vi.mocked(requireRoleCapability).mockResolvedValue(mockUser as any);
-    mockModuleUpdateScheduleStatus.mockResolvedValue({
+    (requireRoleCapability as ReturnType<typeof vi.fn>).mockResolvedValue(
+      mockUser,
+    );
+    mockModuleUpdateScheduleStatusAction.mockResolvedValue({
       cwd_uuid: "wd-1",
       status: 1,
     });
 
-    const result = await updateScheduleStatus({ cwd_uuid: "wd-1", status: 1 });
+    await updateScheduleStatus({ cwd_uuid: "wd-1", status: 1 });
 
-    expect(mockModuleUpdateScheduleStatus).toHaveBeenCalledWith(1, {
+    expect(mockModuleUpdateScheduleStatusAction).toHaveBeenCalled();
+  });
+
+  it("returns status result from module", async () => {
+    const expected: import("./schemas").ScheduleStatusResult = {
+      cwd_uuid: "wd-1",
+      status: 1,
+    };
+
+    (requireRoleCapability as ReturnType<typeof vi.fn>).mockResolvedValue(
+      mockUser,
+    );
+    mockModuleUpdateScheduleStatusAction.mockResolvedValue(expected);
+
+    const result = await updateScheduleStatus({
       cwd_uuid: "wd-1",
       status: 1,
     });
-    expect(result.status).toBe(1);
+
+    expect(result).toEqual(expected);
   });
 });

@@ -1,22 +1,12 @@
-import { z } from "zod";
-
 // ---------------------------------------------------------------------------
-// Schemas
+// Barrel re-export — delegates to module-level schemas
 // ---------------------------------------------------------------------------
-
-export const getCompanyListSchema = z.object({
-  contactUuid: z
-    .string({ required_error: "Contact UUID is required" })
-    .min(1, "Contact UUID is required"),
-});
-
-// ---------------------------------------------------------------------------
-// Types
+// All schemas and types live in src/modules/company/schemas.ts.
+// This barrel re-exports so page consumers keep their current import paths.
 // ---------------------------------------------------------------------------
 
-export type GetCompanyListInput = z.input<typeof getCompanyListSchema>;
-
-export type CompanyListItem = {
-  id: number;
-  name: string;
-};
+export { getCompanyListSchema } from "@/modules/company/schemas";
+export type {
+  GetCompanyListInput,
+  RequestCompanyListItem,
+} from "@/modules/company/schemas";

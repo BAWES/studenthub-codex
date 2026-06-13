@@ -52,6 +52,9 @@ export interface TabContextValue {
 
 const STORAGE_KEY = "sh-workspace-tabs";
 
+/** Maximum unpinned tabs per role before oldest is auto-closed. */
+const MAX_TABS = 12;
+
 // ─── Helpers ────────────────────────────────────────────────────────────
 
 function loadTabs(): TabEntry[] {
@@ -166,6 +169,22 @@ export function TabProvider({
           (t) => t.href === href && t.role === role,
         );
         if (existing) return prev; // Already open
+
+        // ── Enforce max unpinned tabs per role ─────────────────
+        const roleUnpinned = prev.filter(
+          (t) => t.role === role && !t.pinned,
+        );
+        let next = prev;
+        if (roleUnpinned.length >= MAX_TABS) {
+          // Remove the oldest unpinned tab for this role
+          const oldestIdx = prev.findIndex(
+            (t) => t.role === role && !t.pinned,
+          );
+          if (oldestIdx !== -1) {
+            next = prev.filter((_, i) => i !== oldestIdx);
+          }
+        }
+
         const entry: TabEntry = {
           id: href,
           label,
@@ -174,7 +193,7 @@ export function TabProvider({
           pinned: false,
           role,
         };
-        return [...prev, entry];
+        return [...next, entry];
       });
     },
     [role],

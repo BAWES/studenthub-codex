@@ -319,7 +319,7 @@ describe("listStaffInterviews", () => {
   it("filters by status", async () => {
     mockFindMany.mockResolvedValue([]);
     mockCount.mockResolvedValue(0);
-    await interviews.listStaffInterviews({ status: 1 });
+    await interviews.listStaffInterviews({ status: "1" });
     const callArgs = mockFindMany.mock.calls[0][0];
     expect(callArgs.where.status).toBe(1);
   });
@@ -376,7 +376,7 @@ describe("updateInterviewStatus", () => {
   it("updates status to completed", async () => {
     mockFindFirst.mockResolvedValue({ request_interview_uuid: "interview_abc-123" });
     mockUpdate.mockResolvedValue({});
-    const result = await interviews.updateInterviewStatus({ interviewUuid: "interview_abc-123", status: 1 });
+    const result = await interviews.updateInterviewStatus({ interviewUuid: "interview_abc-123", status: "1" });
     expect(result.operation).toBe("success");
     expect(mockUpdate).toHaveBeenCalledWith({
       where: { request_interview_uuid: "interview_abc-123" },
@@ -386,14 +386,14 @@ describe("updateInterviewStatus", () => {
 
   it("returns error when interview not found", async () => {
     mockFindFirst.mockResolvedValue(null);
-    const result = await interviews.updateInterviewStatus({ interviewUuid: "interview_missing", status: 1 });
+    const result = await interviews.updateInterviewStatus({ interviewUuid: "interview_missing", status: "1" });
     expect(result.operation).toBe("error");
     expect(result.message).toBe("Interview not found");
     expect(mockUpdate).not.toHaveBeenCalled();
   });
 
   it("returns error on invalid status", async () => {
-    const result = await interviews.updateInterviewStatus({ interviewUuid: "interview_abc-123", status: 99 });
+    const result = await interviews.updateInterviewStatus({ interviewUuid: "interview_abc-123", status: "99" as any });
     expect(result.operation).toBe("error");
     expect(mockUpdate).not.toHaveBeenCalled();
   });

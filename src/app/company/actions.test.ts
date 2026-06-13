@@ -4,7 +4,7 @@
 
 import { describe, it, expect } from "vitest";
 import { getCompanyWorkspaceSchema } from "./schemas";
-import type { CompanyMetric, CompanyListItem, CompanyWorkspaceData } from "./schemas";
+import type { CompanyMetric, CompanyWorkspaceData, WorkspaceListItem } from "./schemas";
 
 describe("getCompanyWorkspaceSchema", () => {
   it("accepts a valid contact UUID", () => {
@@ -34,15 +34,15 @@ describe("CompanyMetric type", () => {
   });
 });
 
-describe("CompanyListItem type", () => {
+describe("WorkspaceListItem type", () => {
   it("has required shape", () => {
-    const item: CompanyListItem = { id: "uuid-1", title: "Acme Corp", subtitle: "Owner" };
+    const item: WorkspaceListItem = { id: "uuid-1", title: "Acme Corp", subtitle: "Owner" };
     expect(item.id).toBe("uuid-1");
     expect(item.subtitle).toBe("Owner");
   });
 
   it("accepts optional meta", () => {
-    const item: CompanyListItem = { id: "uuid-2", title: "Beta Inc", subtitle: "Manager", meta: "Access allowed" };
+    const item: WorkspaceListItem = { id: "uuid-2", title: "Beta Inc", subtitle: "Manager", meta: "Access allowed" };
     expect(item.meta).toBe("Access allowed");
   });
 });

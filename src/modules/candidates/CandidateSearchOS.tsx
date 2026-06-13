@@ -6,6 +6,8 @@ import { HubShortcuts, type HubCommand } from "@/modules/hub/HubShortcuts";
 import { ThemeToggle } from "@/modules/theme/ThemeToggle";
 import { CandidateProfile } from "./CandidateProfile";
 import { ExportCVsForm } from "./ExportCVsForm";
+import { SearchStatusPill } from "./SearchStatusPill";
+import { SearchFormWrapper } from "./SearchFormWrapper";
 import MatchScoreBadge from "@/components/matching/MatchScoreBadge";
 import type {
   CandidateSearchFacet,
@@ -58,7 +60,7 @@ export function CandidateSearchOS({
           <span>SH</span>
           <strong>Candidates</strong>
         </Link>
-        <form className="candidateDeskSearch" id="candidate-search">
+        <SearchFormWrapper>
           <input
             data-command-search
             id="candidate-query"
@@ -72,7 +74,7 @@ export function CandidateSearchOS({
           {selectedIds.length ? <input name="selected" type="hidden" value={selectedIds.join(",")} /> : null}
           <HiddenFacetInputs data={data} />
           <button type="submit">Search</button>
-        </form>
+        </SearchFormWrapper>
         <div className="candidateDeskTools">
           <HubShortcuts commands={commands} />
           <ThemeToggle />
@@ -136,8 +138,9 @@ function CandidateSearchTab({
           <span>Search tab</span>
           <strong>{data.query ? `Results for ${data.query}` : "Candidate search"}</strong>
         </div>
+        <SearchStatusPill resultsCount={data.rows.length} query={data.query} />
         <small>
-          {data.rows.length.toLocaleString("en-US")} of {data.matchingCount.toLocaleString("en-US")}
+          {data.matchingCount.toLocaleString("en-US")} total
         </small>
         {data.source?.current ? (
           <span className="sourceBadge" title={data.source.note}>

@@ -8,6 +8,26 @@ import {
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
+// Barrel re-export test — verify module-level actions resolve correctly
+// ---------------------------------------------------------------------------
+
+describe("barrel exports", () => {
+  it("exports all candidate skill actions", async () => {
+    const mod = await import("./actions");
+    expect(mod).toHaveProperty("listCandidateSkills");
+    expect(mod).toHaveProperty("getCandidateSkill");
+    expect(mod).toHaveProperty("createCandidateSkill");
+    expect(mod).toHaveProperty("updateCandidateSkill");
+    expect(mod).toHaveProperty("deleteCandidateSkill");
+    expect(typeof mod.listCandidateSkills).toBe("function");
+    expect(typeof mod.getCandidateSkill).toBe("function");
+    expect(typeof mod.createCandidateSkill).toBe("function");
+    expect(typeof mod.updateCandidateSkill).toBe("function");
+    expect(typeof mod.deleteCandidateSkill).toBe("function");
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Schema tests for candidate/skills actions (pure unit — no DB required)
 // ---------------------------------------------------------------------------
 

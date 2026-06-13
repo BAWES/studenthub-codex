@@ -106,10 +106,9 @@ for (const [role, routes] of Object.entries(ROUTE_MAP)) {
         // Hub page itself — verify it loads directly (0 clicks from login)
         test(`${route} hub loads directly (0 clicks)`, async () => {
           const ctx = await authContext(user);
-          await ctx.page.goto(route);
-          await ctx.page.waitForLoadState("load");
+          await ctx.page.goto(route, { waitUntil: "networkidle" });
           await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
-          await expect(ctx.page).toHaveURL(route);
+          await expect(ctx.page).toHaveURL(route, { timeout: 15000 });
           // No hydration errors
           const errors: string[] = [];
           ctx.page.on("console", (msg) => {

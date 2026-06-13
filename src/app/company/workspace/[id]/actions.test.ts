@@ -235,6 +235,9 @@ describe("workspaceOverviewOutputSchema (output validation)", () => {
       contact: { contact_name: "John Doe", contact_email: "john@example.com" },
       metrics: [
         { label: "Companies", value: 3, note: "Linked companies" },
+        { label: "Requests", value: 5, note: "Active requests" },
+        { label: "Stores", value: 2, note: "Active stores" },
+        { label: "Notes", value: 1, note: "Internal notes" },
       ],
       companies: [
         { id: "cc-uuid-1", title: "Acme Corp", subtitle: "Admin", meta: "Access allowed" },
@@ -250,7 +253,12 @@ describe("workspaceOverviewOutputSchema (output validation)", () => {
   it("accepts null contact", () => {
     const payload = {
       contact: null,
-      metrics: [],
+      metrics: [
+        { label: "Companies", value: 0, note: "None" },
+        { label: "Requests", value: 0, note: "None" },
+        { label: "Stores", value: 0, note: "None" },
+        { label: "Notes", value: 0, note: "None" },
+      ],
       companies: [],
       requests: [],
     };

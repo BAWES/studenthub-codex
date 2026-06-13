@@ -20,16 +20,10 @@ import type {
 // ---------------------------------------------------------------------------
 
 describe("listCandidateReferencesSchema", () => {
-  it("requires candidateId", () => {
+  it("accepts empty params (defaults)", () => {
     const result = listCandidateReferencesSchema.safeParse({});
-    expect(result.success).toBe(false);
-  });
-
-  it("accepts candidateId with defaults", () => {
-    const result = listCandidateReferencesSchema.safeParse({ candidateId: 42 });
     expect(result.success).toBe(true);
     if (result.success) {
-      expect(result.data.candidateId).toBe(42);
       expect(result.data.page).toBe(1);
       expect(result.data.limit).toBe(20);
     }
@@ -37,7 +31,6 @@ describe("listCandidateReferencesSchema", () => {
 
   it("accepts pagination params", () => {
     const result = listCandidateReferencesSchema.safeParse({
-      candidateId: 10,
       page: 2,
       limit: 50,
     });
@@ -50,7 +43,6 @@ describe("listCandidateReferencesSchema", () => {
 
   it("rejects limit over 100", () => {
     const result = listCandidateReferencesSchema.safeParse({
-      candidateId: 1,
       limit: 999,
     });
     expect(result.success).toBe(false);
@@ -58,24 +50,8 @@ describe("listCandidateReferencesSchema", () => {
 
   it("rejects negative page", () => {
     const result = listCandidateReferencesSchema.safeParse({
-      candidateId: 1,
       page: -1,
     });
-    expect(result.success).toBe(false);
-  });
-
-  it("coerces string candidateId to number", () => {
-    const result = listCandidateReferencesSchema.safeParse({
-      candidateId: "15",
-    });
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.candidateId).toBe(15);
-    }
-  });
-
-  it("rejects zero candidateId", () => {
-    const result = listCandidateReferencesSchema.safeParse({ candidateId: 0 });
     expect(result.success).toBe(false);
   });
 });
@@ -105,21 +81,18 @@ describe("getCandidateReferenceSchema", () => {
 });
 
 describe("createCandidateReferenceSchema", () => {
-  it("accepts valid create input", () => {
+  it("accepts valid create input (name only)", () => {
     const result = createCandidateReferenceSchema.safeParse({
-      candidateId: 42,
       name: "John Doe",
     });
     expect(result.success).toBe(true);
     if (result.success) {
-      expect(result.data.candidateId).toBe(42);
       expect(result.data.name).toBe("John Doe");
     }
   });
 
   it("accepts create input with all optional fields", () => {
     const result = createCandidateReferenceSchema.safeParse({
-      candidateId: 42,
       name: "Jane Smith",
       company: "Acme Corp",
       position: "Manager",
@@ -139,7 +112,6 @@ describe("createCandidateReferenceSchema", () => {
 
   it("rejects empty name", () => {
     const result = createCandidateReferenceSchema.safeParse({
-      candidateId: 42,
       name: "",
     });
     expect(result.success).toBe(false);
@@ -147,7 +119,6 @@ describe("createCandidateReferenceSchema", () => {
 
   it("trims whitespace from name", () => {
     const result = createCandidateReferenceSchema.safeParse({
-      candidateId: 42,
       name: "  John Doe  ",
     });
     expect(result.success).toBe(true);
@@ -158,7 +129,6 @@ describe("createCandidateReferenceSchema", () => {
 
   it("rejects invalid email format", () => {
     const result = createCandidateReferenceSchema.safeParse({
-      candidateId: 42,
       name: "John Doe",
       email: "not-an-email",
     });
@@ -167,7 +137,6 @@ describe("createCandidateReferenceSchema", () => {
 
   it("accepts empty email as default", () => {
     const result = createCandidateReferenceSchema.safeParse({
-      candidateId: 42,
       name: "John Doe",
       email: "",
     });
@@ -178,13 +147,11 @@ describe("createCandidateReferenceSchema", () => {
 describe("updateCandidateReferenceSchema", () => {
   it("accepts valid update input", () => {
     const result = updateCandidateReferenceSchema.safeParse({
-      candidateId: 42,
       referenceUuid: "ref_abc-123",
       name: "Updated Name",
     });
     expect(result.success).toBe(true);
     if (result.success) {
-      expect(result.data.candidateId).toBe(42);
       expect(result.data.referenceUuid).toBe("ref_abc-123");
       expect(result.data.name).toBe("Updated Name");
     }
@@ -192,7 +159,6 @@ describe("updateCandidateReferenceSchema", () => {
 
   it("rejects missing referenceUuid", () => {
     const result = updateCandidateReferenceSchema.safeParse({
-      candidateId: 42,
       name: "Test",
     });
     expect(result.success).toBe(false);
@@ -200,7 +166,6 @@ describe("updateCandidateReferenceSchema", () => {
 
   it("rejects empty name", () => {
     const result = updateCandidateReferenceSchema.safeParse({
-      candidateId: 42,
       referenceUuid: "ref_abc",
       name: "",
     });
@@ -209,7 +174,6 @@ describe("updateCandidateReferenceSchema", () => {
 
   it("rejects invalid email in update", () => {
     const result = updateCandidateReferenceSchema.safeParse({
-      candidateId: 42,
       referenceUuid: "ref_abc",
       name: "John Doe",
       email: "bad-email",
@@ -221,22 +185,18 @@ describe("updateCandidateReferenceSchema", () => {
 describe("deleteCandidateReferenceSchema", () => {
   it("accepts valid delete input", () => {
     const result = deleteCandidateReferenceSchema.safeParse({
-      candidateId: 42,
       referenceUuid: "ref_abc-123",
     });
     expect(result.success).toBe(true);
   });
 
   it("rejects missing referenceUuid", () => {
-    const result = deleteCandidateReferenceSchema.safeParse({
-      candidateId: 42,
-    });
+    const result = deleteCandidateReferenceSchema.safeParse({});
     expect(result.success).toBe(false);
   });
 
   it("rejects empty referenceUuid", () => {
     const result = deleteCandidateReferenceSchema.safeParse({
-      candidateId: 42,
       referenceUuid: "",
     });
     expect(result.success).toBe(false);

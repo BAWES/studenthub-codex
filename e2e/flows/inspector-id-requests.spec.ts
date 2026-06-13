@@ -274,7 +274,7 @@ test.describe("Inspector ID requests flow", () => {
       if (await backBtn.isVisible().catch(() => false)) {
         await backBtn.click().catch(() => {});
         // Wait for navigation to complete
-        await ctx.page.waitForTimeout(2000);
+        await ctx.page.waitForLoadState("load");
         const afterBack = ctx.page.url();
         console.log(`After clicking back, URL: ${afterBack}`);
       }

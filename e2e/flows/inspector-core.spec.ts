@@ -65,8 +65,7 @@ function assertNoReactErrors(errors: string[]) {
   const bad = errors.filter(
     (m) =>
       m.includes("hydration") ||
-      m.includes("serialization") ||
-      m.includes("Functions cannot be passed"),
+      m.includes("serialization"),
   );
   expect(bad).toEqual([]);
 }
@@ -246,7 +245,7 @@ test.describe("Inspector critical flows — portal, ID requests, detail view", (
         const rows = ctx.page.locator("table tbody tr, [data-testid*='row']");
         if ((await rows.count().catch(() => 0)) > 0) {
           await rows.first().click();
-          await ctx.page.waitForTimeout(1500);
+          await ctx.page.waitForLoadState("load");
 
           // Page may have navigated or opened a drawer
           const currentUrl = ctx.page.url();

@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import type { SkillActionResult } from "../actions";
+import type { SkillActionResult } from "@/modules/candidates/skills/schemas";
 
 // ── Hoisted mock functions ──────────────────────────────────
-const { mockRevalidatePath, mockParentUpdateSkill } = vi.hoisted(() => ({
+const { mockRevalidatePath, mockModuleUpdateSkill } = vi.hoisted(() => ({
   mockRevalidatePath: vi.fn(),
-  mockParentUpdateSkill: vi.fn(),
+  mockModuleUpdateSkill: vi.fn(),
 }));
 
 // ── Mock next/cache ─────────────────────────────────────────
@@ -12,9 +12,9 @@ vi.mock("next/cache", () => ({
   revalidatePath: mockRevalidatePath,
 }));
 
-// ── Mock parent action ──────────────────────────────────────
-vi.mock("../actions", () => ({
-  updateSkill: mockParentUpdateSkill,
+// ── Mock module-level action ─────────────────────────────────
+vi.mock("@/modules/candidates/skills/actions", () => ({
+  updateCandidateSkill: mockModuleUpdateSkill,
 }));
 
 import { updateSkill } from "./actions";
@@ -23,13 +23,8 @@ import { updateSkill } from "./actions";
 // Unit test coverage for candidate/skills/[skillId]/edit actions
 // (STU-3280)
 //
-// The edit action is a thin wrapper that delegates to the parent updateSkill
-// and re-validates the skills detail page path on success.
-// This test validates:
-//   - Delegation to parent action with correct params
-//   - Path re-validation on success
-//   - No re-validation on failure
-//   - Proper result forwarding
+// The edit action is a thin wrapper that delegates to the module-level
+// updateCandidateSkill and re-validates the skills detail page path on success.
 // ---------------------------------------------------------------------------
 
 describe("SkillActionResult shape", () => {
@@ -52,7 +47,7 @@ describe("SkillActionResult shape", () => {
   });
 });
 
-describe("updateSkill \u2014 edit wrapper", () => {
+describe("updateSkill — edit wrapper", () => {
   const SKILL_ID = 42;
   const SKILL = "TypeScript";
 
@@ -60,19 +55,22 @@ describe("updateSkill \u2014 edit wrapper", () => {
     vi.clearAllMocks();
   });
 
-  it("delegates to parent updateSkill with all params", async () => {
-    mockParentUpdateSkill.mockResolvedValue({
+  it("delegates to module-level updateCandidateSkill with object params", async () => {
+    mockModuleUpdateSkill.mockResolvedValue({
       success: true,
       skillId: SKILL_ID,
     });
 
     await updateSkill(SKILL_ID, SKILL);
 
-    expect(mockParentUpdateSkill).toHaveBeenCalledWith(SKILL_ID, SKILL);
+    expect(mockModuleUpdateSkill).toHaveBeenCalledWith({
+      skillId: SKILL_ID,
+      skill: SKILL,
+    });
   });
 
   it("re-validates the skill path when update succeeds", async () => {
-    mockParentUpdateSkill.mockResolvedValue({
+    mockModuleUpdateSkill.mockResolvedValue({
       success: true,
       skillId: SKILL_ID,
     });
@@ -85,7 +83,7 @@ describe("updateSkill \u2014 edit wrapper", () => {
   });
 
   it("does NOT re-validate when update fails", async () => {
-    mockParentUpdateSkill.mockResolvedValue({
+    mockModuleUpdateSkill.mockResolvedValue({
       success: false,
       error: "Not found",
     });
@@ -97,7 +95,7 @@ describe("updateSkill \u2014 edit wrapper", () => {
 
   it("returns the parent result directly on success", async () => {
     const expected = { success: true, skillId: SKILL_ID };
-    mockParentUpdateSkill.mockResolvedValue(expected);
+    mockModuleUpdateSkill.mockResolvedValue(expected);
 
     const result = await updateSkill(SKILL_ID, SKILL);
 
@@ -106,7 +104,7 @@ describe("updateSkill \u2014 edit wrapper", () => {
 
   it("returns the parent error result on failure", async () => {
     const expected = { success: false, error: "Permission denied" };
-    mockParentUpdateSkill.mockResolvedValue(expected);
+    mockModuleUpdateSkill.mockResolvedValue(expected);
 
     const result = await updateSkill(SKILL_ID, SKILL);
 
@@ -114,13 +112,13 @@ describe("updateSkill \u2014 edit wrapper", () => {
   });
 
   it("propagates exceptions from parent", async () => {
-    mockParentUpdateSkill.mockRejectedValue(new Error("Database error"));
+    mockModuleUpdateSkill.mockRejectedValue(new Error("Database error"));
 
     await expect(updateSkill(SKILL_ID, SKILL)).rejects.toThrow("Database error");
   });
 
   it("does not re-validate when parent throws", async () => {
-    mockParentUpdateSkill.mockRejectedValue(new Error("Database error"));
+    mockModuleUpdateSkill.mockRejectedValue(new Error("Database error"));
 
     await expect(updateSkill(SKILL_ID, SKILL)).rejects.toThrow();
     expect(mockRevalidatePath).not.toHaveBeenCalled();

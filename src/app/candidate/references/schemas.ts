@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 // ---------------------------------------------------------------------------
-// Schemas for candidate/references actions
+// Input validation schemas
 // ---------------------------------------------------------------------------
 
 export const listReferenceSchema = z.object({
@@ -97,45 +97,6 @@ export const deleteReferenceSchema = z.object({
 });
 
 // ---------------------------------------------------------------------------
-// Output validation — Zod schemas for server action return types
-// ---------------------------------------------------------------------------
-
-/**
- * A single reference record returned from the API.
- */
-export const referenceItemOutputSchema = z.object({
-  reference_uuid: z.string().min(1, "Reference UUID is required"),
-  candidate_id: z.number().int().nullable(),
-  name: z.string().min(1, "Reference name is required"),
-  company: z.string().nullable(),
-  position: z.string().nullable(),
-  phone: z.string().nullable(),
-  email: z.string().nullable(),
-  relationship: z.string().nullable(),
-  created_at: z.date().nullable(),
-  updated_at: z.date().nullable(),
-});
-
-/**
- * List result — array of reference items.
- */
-export const referenceListOutputSchema = z.array(referenceItemOutputSchema);
-
-/**
- * Action result — success returns the UUID, failure returns an error message.
- */
-export const referenceActionResultOutputSchema = z.discriminatedUnion("success", [
-  z.object({
-    success: z.literal(true),
-    referenceUuid: z.string().min(1, "Reference UUID is required"),
-  }),
-  z.object({
-    success: z.literal(false),
-    error: z.string().min(1, "Error message is required"),
-  }),
-]);
-
-// ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
@@ -145,6 +106,19 @@ export type CreateReferenceInput = z.input<typeof createReferenceSchema>;
 export type UpdateReferenceInput = z.input<typeof updateReferenceSchema>;
 export type DeleteReferenceInput = z.input<typeof deleteReferenceSchema>;
 
-export type ReferenceItem = z.output<typeof referenceItemOutputSchema>;
+// Re-export types from module
+export type {
+  ReferenceItem,
+  ReferenceActionResult,
+} from "@/modules/references/schemas";
 
-export type ReferenceActionResult = z.output<typeof referenceActionResultOutputSchema>;
+// Re-export output schemas from module with original names for compatibility
+import {
+  referenceItemSchema as _refItemSchema,
+  referenceListSchema as _refListSchema,
+  referenceActionResultSchema as _refActionResultSchema,
+} from "@/modules/references/schemas";
+
+export const referenceItemOutputSchema = _refItemSchema;
+export const referenceListOutputSchema = _refListSchema;
+export const referenceActionResultOutputSchema = _refActionResultSchema;

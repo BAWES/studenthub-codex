@@ -1,11 +1,12 @@
 "use client";
 
-import { useCallback, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import {
   X,
   Pin,
   PinOff,
   GripVertical,
+  Plus,
   User,
   Users,
   Building2,
@@ -23,6 +24,7 @@ import {
 } from "lucide-react";
 import { useTabs, type TabEntry } from "./TabContext";
 import type { Role } from "@/modules/auth/types";
+import { navForRole } from "./navigation";
 
 // ─── Icon map ────────────────────────────────────────────────────────────
 
@@ -76,11 +78,33 @@ function DotIcon({ size = 12, strokeWidth = 2 }: { size?: number; strokeWidth?: 
  * Uses TabContext for state management with localStorage persistence.
  */
 export function TabBar({ role }: { role: Role }) {
-  const { tabs, activeTabId, closeTab, pinTab, setActive, moveTab } = useTabs();
+  const { tabs, activeTabId, closeTab, pinTab, setActive, moveTab, openTab } = useTabs();
 
   // ── Drag-to-reorder state ───────────────────────────────────────
   const [dragOverIdx, setDragOverIdx] = useState<number | null>(null);
   const dragFromIdx = useRef<number | null>(null);
+
+  // ── "+" tab creation menu state ─────────────────────────────────
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    if (!menuOpen) return;
+    function handleClick(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    }
+    // Delay to avoid the trigger click itself being captured
+    const id = setTimeout(() => document.addEventListener("click", handleClick), 0);
+    return () => {
+      clearTimeout(id);
+      document.removeEventListener("click", handleClick);
+    };
+  }, [menuOpen]);
+
+  const navItems = navForRole(role);
 
   const handleDragStart = useCallback(
     (_e: React.DragEvent, idx: number) => {
@@ -140,6 +164,38 @@ export function TabBar({ role }: { role: Role }) {
           isDragOver={dragOverIdx === idx}
         />
       ))}
+
+      {/* "+" tab creation button */}
+      <div className="workspaceTabAddWrapper" ref={menuRef}>
+        <button
+          className={`workspaceTabAdd ${menuOpen ? "active" : ""}`}
+          type="button"
+          aria-label="Open new tab"
+          title="Open new tab"
+          onClick={() => setMenuOpen((prev) => !prev)}
+        >
+          <Plus size={14} strokeWidth={2.5} />
+        </button>
+
+        {menuOpen && (
+          <div className="workspaceTabMenu" role="menu">
+            {navItems.map((item) => (
+              <button
+                key={item.href}
+                className="workspaceTabMenuItem"
+                role="menuitem"
+                type="button"
+                onClick={() => {
+                  openTab(item.href, item.label);
+                  setMenuOpen(false);
+                }}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
     </nav>
   );
 }

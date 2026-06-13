@@ -1,6 +1,6 @@
 import { requireRoleCapability } from "@/modules/auth/session";
 import { listCertificates } from "./actions";
-import { CandidateCertificatesTable } from "./candidate-certificates-table";
+import { CandidateCertificatesTable } from "./_components";
 import type { CertificateItem } from "./schemas";
 
 export const dynamic = "force-dynamic";

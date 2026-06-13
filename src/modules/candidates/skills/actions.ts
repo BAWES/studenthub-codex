@@ -1,7 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { requireCapability } from "@/modules/auth/session";
+import { requireRoleCapability } from "@/modules/auth/session";
 import {
   listCandidateSkillsSchema,
   getCandidateSkillSchema,
@@ -56,14 +56,15 @@ function logOutputError(source: string, error: unknown): void {
 export async function listCandidateSkills(
   params: ListCandidateSkillsParams,
 ): Promise<SkillListResult> {
-  await requireCapability("candidate.read");
+  const session = await requireRoleCapability("candidate", "candidate.read.own");
+  const candidateId = Number(session.id);
 
   const parsed = listCandidateSkillsSchema.safeParse(params);
   if (!parsed.success) {
     return { items: [], total: 0, page: 1, pageSize: 20 };
   }
 
-  const { candidateId, page, limit } = parsed.data;
+  const { page, limit } = parsed.data;
   const skip = (page - 1) * limit;
   const where = { candidate_id: candidateId, deleted: 0 };
 
@@ -104,12 +105,13 @@ export async function listCandidateSkills(
 export async function getCandidateSkill(
   params: GetCandidateSkillParams,
 ): Promise<SkillItem | null> {
-  await requireCapability("candidate.read");
+  const session = await requireRoleCapability("candidate", "candidate.read.own");
+  const candidateId = Number(session.id);
 
   const parsed = getCandidateSkillSchema.safeParse(params);
   if (!parsed.success) return null;
 
-  const { candidateId, skillId } = parsed.data;
+  const { skillId } = parsed.data;
 
   const row = await prisma.candidate_skill.findFirst({
     where: {
@@ -139,7 +141,8 @@ export async function getCandidateSkill(
 export async function createCandidateSkill(
   params: CreateCandidateSkillParams,
 ): Promise<SkillActionResult> {
-  await requireCapability("candidate.profile.edit");
+  const session = await requireRoleCapability("candidate", "candidate.profile.edit");
+  const candidateId = Number(session.id);
 
   const parsed = createCandidateSkillSchema.safeParse(params);
   if (!parsed.success) {
@@ -149,7 +152,7 @@ export async function createCandidateSkill(
     };
   }
 
-  const { candidateId, skill } = parsed.data;
+  const { skill } = parsed.data;
 
   // Prevent duplicate skill names for the same candidate
   const existing = await prisma.candidate_skill.findFirst({
@@ -196,7 +199,8 @@ export async function createCandidateSkill(
 export async function updateCandidateSkill(
   params: UpdateCandidateSkillParams,
 ): Promise<SkillActionResult> {
-  await requireCapability("candidate.profile.edit");
+  const session = await requireRoleCapability("candidate", "candidate.profile.edit");
+  const candidateId = Number(session.id);
 
   const parsed = updateCandidateSkillSchema.safeParse(params);
   if (!parsed.success) {
@@ -206,7 +210,7 @@ export async function updateCandidateSkill(
     };
   }
 
-  const { candidateId, skillId, skill } = parsed.data;
+  const { skillId, skill } = parsed.data;
 
   // Verify ownership
   const existing = await prisma.candidate_skill.findFirst({
@@ -259,7 +263,8 @@ export async function updateCandidateSkill(
 export async function deleteCandidateSkill(
   params: DeleteCandidateSkillParams,
 ): Promise<SkillActionResult> {
-  await requireCapability("candidate.profile.edit");
+  const session = await requireRoleCapability("candidate", "candidate.profile.edit");
+  const candidateId = Number(session.id);
 
   const parsed = deleteCandidateSkillSchema.safeParse(params);
   if (!parsed.success) {
@@ -269,7 +274,7 @@ export async function deleteCandidateSkill(
     };
   }
 
-  const { candidateId, skillId } = parsed.data;
+  const { skillId } = parsed.data;
 
   // Verify ownership
   const existing = await prisma.candidate_skill.findFirst({

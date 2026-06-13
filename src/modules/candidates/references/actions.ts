@@ -2,7 +2,7 @@
 
 import crypto from "node:crypto";
 import { prisma } from "@/lib/prisma";
-import { requireCapability } from "@/modules/auth/session";
+import { requireRoleCapability } from "@/modules/auth/session";
 import {
   listCandidateReferencesSchema,
   createCandidateReferenceSchema,
@@ -53,16 +53,15 @@ function logOutputError(source: string, error: unknown): void {
 // ---------------------------------------------------------------------------
 
 /**
- * List reference records for a candidate.
- * Requires candidate.read capability.
+ * List reference records for the current candidate (newest first).
  */
 export async function listCandidateReferences(
-  params: ListCandidateReferencesParams,
+  params: ListCandidateReferencesParams = {},
 ): Promise<ListCandidateReferencesResult> {
-  await requireCapability("candidate.read");
+  const session = await requireRoleCapability("candidate", "candidate.read.own");
+  const candidateId = Number(session.id);
 
-  const { candidateId, page, limit } =
-    listCandidateReferencesSchema.parse(params);
+  const { page, limit } = listCandidateReferencesSchema.parse(params);
 
   const where = {
     candidate_id: candidateId,
@@ -100,17 +99,18 @@ export async function listCandidateReferences(
 
 /**
  * Get a single reference record by UUID.
- * Requires candidate.read capability.
- * Returns null if the record does not exist.
+ * Returns null if the record does not exist or does not belong to the candidate.
  */
 export async function getCandidateReference(
   referenceUuid: string,
 ): Promise<CandidateReferenceItem | null> {
-  await requireCapability("candidate.read");
+  const session = await requireRoleCapability("candidate", "candidate.read.own");
+  const candidateId = Number(session.id);
 
   const row = await prisma.candidate_reference.findFirst({
     where: {
       reference_uuid: referenceUuid,
+      candidate_id: candidateId,
       deleted: 0,
     },
   });
@@ -127,15 +127,13 @@ export async function getCandidateReference(
 }
 
 /**
- * Create a new reference record for a candidate.
- * Accepts candidateId as a parameter so callers (app-level actions, admin, etc.)
- * can supply the appropriate ID.
- * Requires candidate.profile.edit capability.
+ * Create a new reference record for the current candidate.
  */
 export async function createCandidateReference(
   params: CreateCandidateReferenceParams,
 ): Promise<CandidateReferenceActionResult> {
-  await requireCapability("candidate.profile.edit");
+  const session = await requireRoleCapability("candidate", "candidate.profile.edit");
+  const candidateId = Number(session.id);
 
   const parsed = createCandidateReferenceSchema.safeParse(params);
   if (!parsed.success) {
@@ -151,7 +149,7 @@ export async function createCandidateReference(
   await prisma.candidate_reference.create({
     data: {
       reference_uuid: referenceUuid,
-      candidate_id: parsed.data.candidateId,
+      candidate_id: candidateId,
       name: parsed.data.name,
       company: parsed.data.company || null,
       position: parsed.data.position || null,
@@ -177,13 +175,13 @@ export async function createCandidateReference(
 
 /**
  * Update an existing reference record.
- * Accepts candidateId for ownership verification.
- * Requires candidate.profile.edit capability.
+ * Verifies ownership before updating.
  */
 export async function updateCandidateReference(
   params: UpdateCandidateReferenceParams,
 ): Promise<CandidateReferenceActionResult> {
-  await requireCapability("candidate.profile.edit");
+  const session = await requireRoleCapability("candidate", "candidate.profile.edit");
+  const candidateId = Number(session.id);
 
   const parsed = updateCandidateReferenceSchema.safeParse(params);
   if (!parsed.success) {
@@ -197,7 +195,7 @@ export async function updateCandidateReference(
   const existing = await prisma.candidate_reference.findFirst({
     where: {
       reference_uuid: parsed.data.referenceUuid,
-      candidate_id: parsed.data.candidateId,
+      candidate_id: candidateId,
       deleted: 0,
     },
     select: { reference_uuid: true },
@@ -238,13 +236,12 @@ export async function updateCandidateReference(
 
 /**
  * Delete a reference record (soft-delete using the `deleted` flag).
- * Accepts candidateId for ownership verification.
- * Requires candidate.profile.edit capability.
  */
 export async function deleteCandidateReference(
   params: DeleteCandidateReferenceParams,
 ): Promise<CandidateReferenceActionResult> {
-  await requireCapability("candidate.profile.edit");
+  const session = await requireRoleCapability("candidate", "candidate.profile.edit");
+  const candidateId = Number(session.id);
 
   const parsed = deleteCandidateReferenceSchema.safeParse(params);
   if (!parsed.success) {
@@ -258,7 +255,7 @@ export async function deleteCandidateReference(
   const existing = await prisma.candidate_reference.findFirst({
     where: {
       reference_uuid: parsed.data.referenceUuid,
-      candidate_id: parsed.data.candidateId,
+      candidate_id: candidateId,
       deleted: 0,
     },
     select: { reference_uuid: true },

@@ -1,43 +1,8 @@
-import { z } from "zod";
-
 // ---------------------------------------------------------------------------
-// Output validation schemas — Agents Health
+// Barrel re-export — delegates to module-level implementation
 // ---------------------------------------------------------------------------
-
-/**
- * Schema for a single agent health metric entry.
- */
-export const agentHealthMetricSchema = z.object({
-  label: z.string().min(1),
-  value: z.string().min(1),
-  note: z.string(),
-});
-
-/**
- * Schema for a single agent's health data.
- */
-export const agentHealthDataSchema = z.object({
-  id: z.string().uuid(),
-  name: z.string().min(1),
-  status: z.string().min(1),
-  role: z.string().min(1),
-  heartbeatMetrics: z.array(agentHealthMetricSchema),
-  lastHeartbeat: z.string().nullable(),
-  issuesDone: z.number().int().nonnegative(),
-  issuesInProgress: z.number().int().nonnegative(),
-});
-
-/**
- * Schema for the top-level getAllAgentsHealth response.
- */
-export const agentsHealthDataSchema = z.object({
-  agents: z.array(agentHealthDataSchema),
-});
-
-// ---------------------------------------------------------------------------
-// Exported types
+// All Zod schemas and types live in src/modules/admin/agents/schemas.ts.
+// This barrel re-exports so page consumers keep their current import paths.
 // ---------------------------------------------------------------------------
 
-export type AgentHealthMetric = z.infer<typeof agentHealthMetricSchema>;
-export type AgentHealthData = z.infer<typeof agentHealthDataSchema>;
-export type AgentsHealthData = z.infer<typeof agentsHealthDataSchema>;
+export * from "@/modules/admin/agents/schemas";

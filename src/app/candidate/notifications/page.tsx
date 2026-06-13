@@ -1,6 +1,6 @@
 import { requireRoleCapability } from "@/modules/auth/session";
 import { getCandidateNotificationRows } from "./actions";
-import { CandidateNotificationsTable } from "./candidate-notifications-table";
+import { CandidateNotificationsTable } from "./_components";
 
 export const dynamic = "force-dynamic";
 

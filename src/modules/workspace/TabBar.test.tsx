@@ -16,6 +16,20 @@ vi.mock("next/navigation", () => ({
   usePathname: () => mockPathname,
 }));
 
+vi.mock("./navigation", () => ({
+  navForRole: (role: string) => {
+    if (role === "admin") {
+      return [
+        { label: "Overview", href: "/admin", icon: () => <svg data-testid="icon-overview" /> },
+        { label: "Candidates", href: "/admin/candidates", icon: () => <svg data-testid="icon-candidates" /> },
+        { label: "Requests", href: "/admin/requests", icon: () => <svg data-testid="icon-requests" /> },
+        { label: "Companies", href: "/admin/companies", icon: () => <svg data-testid="icon-companies" /> },
+      ];
+    }
+    return [];
+  },
+}));
+
 function mockPath(value: string) {
   mockPathname = value;
 }
@@ -23,6 +37,13 @@ function mockPath(value: string) {
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
+
+/** Opens many tabs with sequential hrefs (used by MultiTabConsumer). */
+function openMany(openTab: (href: string, label: string, icon?: string | null) => void, baseHref: string, count: number) {
+  for (let i = 0; i < count; i++) {
+    openTab(`${baseHref}/${i}`, `Tab ${i + 1}`, null);
+  }
+}
 
 /** A consumer that opens/closes/pins a single tab. Uses unique testId suffix. */
 function TabConsumer({ label, href, id }: { label: string; href: string; id: string }) {
@@ -65,6 +86,33 @@ function getTab(label: string) {
 
 function getTabElements() {
   return screen.queryAllByRole("tab");
+}
+
+/** Helper: renders a TabProvider with a button that fills tab slots. */
+function TabFiller({ baseHref, count }: { baseHref: string; count: number }) {
+  const { openTab } = useTabs();
+  return (
+    <button
+      data-testid="tab-filler"
+      onClick={() => openMany(openTab, baseHref, count)}
+    >
+      Fill {count}
+    </button>
+  );
+}
+
+function renderWithFiller(
+  role: "admin" | "staff" | "candidate",
+  count: number,
+  initialPath = "/admin",
+) {
+  mockPath(initialPath);
+  return render(
+    <TabProvider role={role}>
+      <TabBar role={role} />
+      <TabFiller baseHref={`/${role}/tabs`} count={count} />
+    </TabProvider>,
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -249,5 +297,157 @@ describe("TabBar — drag reorder", () => {
     renderWithProvider("admin");
     const overview = getTab("Overview");
     expect(overview).toHaveAttribute("draggable", "false");
+  });
+});
+
+describe("TabContext — tab limit (max 12)", () => {
+  it("allows up to 12 tabs", () => {
+    renderWithFiller("admin", 12);
+    fireEvent.click(screen.getByTestId("tab-filler"));
+    // 12 tabs + home = 13 total (home is pinned, always present)
+    expect(getTabElements().length).toBe(13);
+    expect(screen.getByRole("tab", { name: /^Tab 1$/i })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: /^Tab 12$/i })).toBeInTheDocument();
+  });
+
+  it("removes the oldest unpinned tab when opening the 13th", () => {
+    renderWithFiller("admin", 13);
+    fireEvent.click(screen.getByTestId("tab-filler"));
+    // 12 tabs + home = 13 total
+    expect(getTabElements().length).toBe(13);
+    // Tab 1 should be evicted (oldest unpinned)
+    expect(screen.queryByRole("tab", { name: /^Tab 1$/i })).not.toBeInTheDocument();
+    // Tab 2 through Tab 13 should be present
+    expect(screen.getByRole("tab", { name: /^Tab 2$/i })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: /^Tab 13$/i })).toBeInTheDocument();
+  });
+
+  it("does not evict pinned tabs", () => {
+    function PinThenFill() {
+      const { openTab, pinTab } = useTabs();
+      return (
+        <button
+          data-testid="pin-and-fill"
+          onClick={() => {
+            openTab("/admin/pinned-1", "Pinned 1", null);
+            pinTab("/admin/pinned-1");
+            openMany(openTab, "/admin/tabs", 13);
+          }}
+        >
+          Pin+fill
+        </button>
+      );
+    }
+    mockPath("/admin");
+    render(
+      <TabProvider role="admin">
+        <TabBar role="admin" />
+        <PinThenFill />
+      </TabProvider>,
+    );
+    fireEvent.click(screen.getByTestId("pin-and-fill"));
+    // 1 home + 1 pinned + 12 unpinned (one evicted) = 14
+    expect(getTabElements().length).toBe(14);
+    // Pinned tab survives (aria-label includes "(pinned)" suffix)
+    expect(screen.getByRole("tab", { name: /Pinned 1/i })).toBeInTheDocument();
+    // Tab 1 (oldest unpinned) is evicted
+    expect(screen.queryByRole("tab", { name: /^Tab 1$/i })).not.toBeInTheDocument();
+    // Tab 13 was still added
+    expect(screen.getByRole("tab", { name: /^Tab 13$/i })).toBeInTheDocument();
+  });
+
+  it("home tab is always preserved", () => {
+    renderWithFiller("admin", 14);
+    fireEvent.click(screen.getByTestId("tab-filler"));
+    // 12 tabs + home = 13 — two evicted
+    expect(getTabElements().length).toBe(13);
+    expect(getTab("Overview")).toBeInTheDocument();
+    // Tab 1 and Tab 2 evicted (oldest)
+    expect(screen.queryByRole("tab", { name: /^Tab 1$/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("tab", { name: /^Tab 2$/i })).not.toBeInTheDocument();
+    // The last tabs survive
+    expect(screen.getByRole("tab", { name: /^Tab 14$/i })).toBeInTheDocument();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// TabBar "+" button menu (STU-4142)
+// ---------------------------------------------------------------------------
+
+describe('TabBar "+" button — tab creation menu', () => {
+  it('shows the "+" button with aria-label "Open new tab"', () => {
+    renderWithProvider("admin");
+    const addBtn = screen.getByLabelText("Open new tab");
+    expect(addBtn).toBeInTheDocument();
+  });
+
+  it("opens a dropdown menu on click", () => {
+    renderWithProvider("admin");
+    const addBtn = screen.getByLabelText("Open new tab");
+    fireEvent.click(addBtn);
+
+    // Menu should now be visible with role="menu"
+    const menu = document.querySelector(".workspaceTabMenu");
+    expect(menu).toBeInTheDocument();
+    expect(menu).toHaveAttribute("role", "menu");
+  });
+
+  it("displays nav items inside the menu", () => {
+    renderWithProvider("admin");
+    fireEvent.click(screen.getByLabelText("Open new tab"));
+
+    // Menu items should include the mock nav items
+    const menuItems = document.querySelectorAll(".workspaceTabMenuItem");
+    expect(menuItems.length).toBeGreaterThan(0);
+    expect(screen.getByRole("menuitem", { name: "Candidates" })).toBeInTheDocument();
+    expect(screen.getByRole("menuitem", { name: "Requests" })).toBeInTheDocument();
+    expect(screen.getByRole("menuitem", { name: "Companies" })).toBeInTheDocument();
+  });
+
+  it("creates a new tab when a menu item is clicked", () => {
+    renderWithProvider("admin");
+    expect(getTab("Candidates")).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByLabelText("Open new tab"));
+    fireEvent.click(screen.getByRole("menuitem", { name: "Candidates" }));
+
+    expect(getTab("Candidates")).toBeInTheDocument();
+  });
+
+  it("closes the menu after a menu item is clicked", () => {
+    renderWithProvider("admin");
+    fireEvent.click(screen.getByLabelText("Open new tab"));
+    expect(document.querySelector(".workspaceTabMenu")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("menuitem", { name: "Candidates" }));
+
+    expect(document.querySelector(".workspaceTabMenu")).not.toBeInTheDocument();
+  });
+
+  it("toggles the menu on repeated clicks", () => {
+    renderWithProvider("admin");
+    const addBtn = screen.getByLabelText("Open new tab");
+
+    fireEvent.click(addBtn);
+    expect(document.querySelector(".workspaceTabMenu")).toBeInTheDocument();
+
+    fireEvent.click(addBtn);
+    expect(document.querySelector(".workspaceTabMenu")).not.toBeInTheDocument();
+
+    fireEvent.click(addBtn);
+    expect(document.querySelector(".workspaceTabMenu")).toBeInTheDocument();
+  });
+
+  it("applies active class to the '+' button when menu is open", () => {
+    renderWithProvider("admin");
+    const addBtn = screen.getByLabelText("Open new tab");
+
+    expect(addBtn.className).not.toContain("active");
+
+    fireEvent.click(addBtn);
+    expect(addBtn.className).toContain("active");
+
+    fireEvent.click(addBtn);
+    expect(addBtn.className).not.toContain("active");
   });
 });

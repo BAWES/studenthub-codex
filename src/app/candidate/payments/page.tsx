@@ -1,6 +1,6 @@
 import { requireRoleCapability } from "@/modules/auth/session";
 import { listCandidatePayments } from "./actions";
-import { CandidatePaymentsTable } from "./candidate-payments-table";
+import { CandidatePaymentsTable } from "./_components";
 
 export const dynamic = "force-dynamic";
 

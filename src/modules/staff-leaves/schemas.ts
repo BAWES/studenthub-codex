@@ -7,6 +7,7 @@ import { z } from "zod";
 export const staffLeaveListItemSchema = z.object({
   staff_leave_uuid: z.string(),
   staff_id: z.number().nullable(),
+  staff_name: z.string().nullable(),
   from_date: z.string().nullable(),
   to_date: z.string().nullable(),
   note: z.string().nullable(),

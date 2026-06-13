@@ -2,7 +2,8 @@
 
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { requireCapability } from "@/modules/auth/session";
+import { revalidatePath } from "next/cache";
+import { requireCapability, requireRoleCapability } from "@/modules/auth/session";
 import {
   listStaffInterviewsSchema,
   getStaffInterviewDetailSchema,
@@ -56,6 +57,7 @@ export async function listStaffInterviews(
   params: ListStaffInterviewsInput = {},
 ): Promise<{ items: InterviewRow[]; total: number; page: number; limit: number; totalPages: number }> {
   await requireCapability("staff_leave.read");
+  await requireRoleCapability("staff", "request.interview");
 
   const parsed = listStaffInterviewsSchema.safeParse(params);
   if (!parsed.success) {
@@ -70,7 +72,7 @@ export async function listStaffInterviews(
   const where: Record<string, unknown> = {};
 
   if (status !== undefined) {
-    where.status = status;
+    where.status = Number(status);
   }
 
   if (q !== undefined && q.trim().length > 0) {
@@ -154,6 +156,7 @@ export async function getStaffInterviewDetail(
   params: z.input<typeof getStaffInterviewDetailSchema>,
 ): Promise<InterviewDetail | null> {
   await requireCapability("staff_leave.read");
+  await requireRoleCapability("staff", "request.interview");
 
   const parsed = getStaffInterviewDetailSchema.safeParse(params);
   if (!parsed.success) {
@@ -242,6 +245,7 @@ export async function updateInterviewStatus(
   params: z.input<typeof updateInterviewStatusSchema>,
 ): Promise<UpdateInterviewStatusResult> {
   await requireCapability("staff_leave.read");
+  await requireRoleCapability("staff", "request.interview");
 
   const parsed = updateInterviewStatusSchema.safeParse(params);
   if (!parsed.success) {
@@ -293,6 +297,8 @@ export async function updateInterviewStatus(
         outputParsed.error.issues,
       );
     }
+
+    revalidatePath("/staff/interviews");
 
     return updateResult;
   } catch (err) {

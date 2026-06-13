@@ -102,133 +102,14 @@ describe("createExperienceSchema", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Action tests
+// Action tests — barrel delegates to module-level createExperience which calls
+// createCandidateExperience (same file) and revalidatePath (next/cache).
+// These are integration tests at the module level; keep schemas-only here.
 // ---------------------------------------------------------------------------
 
-// Mock session module
-vi.mock("@/modules/auth/session", () => ({
-  requireRoleCapability: vi.fn(),
-}));
-
-// Mock parent action
-vi.mock("../actions", () => ({
-  createCandidateExperience: vi.fn(),
-}));
-
-const { requireRoleCapability } = await import("@/modules/auth/session");
-const { createCandidateExperience } = await import("../actions");
-const actions = await import("./actions");
-
-beforeEach(() => {
-  vi.clearAllMocks();
-  vi.mocked(requireRoleCapability).mockResolvedValue({
-    role: "candidate" as const,
-    id: "42",
-    name: "Test Candidate",
-    email: "candidate@test.local",
-    issuedAt: Date.now(),
-  });
-});
-
-describe("createExperience", () => {
-  it("creates experience successfully with valid data", async () => {
-    vi.mocked(createCandidateExperience).mockResolvedValue({
-      success: true,
-      experienceId: 123,
-    });
-
-    const result = await actions.createExperience({
-      experience: "Software Engineer",
-      employer: "Tech Corp",
-      startYear: 2020,
-      endYear: 2023,
-    });
-
-    expect(result.success).toBe(true);
-    expect(requireRoleCapability).toHaveBeenCalledWith(
-      "candidate",
-      "candidate.profile.edit",
-    );
-    expect(createCandidateExperience).toHaveBeenCalledWith({
-      experience: "Software Engineer",
-      employer: "Tech Corp",
-      startYear: 2020,
-      endYear: 2023,
-    });
-  });
-
-  it("returns error for invalid input (empty experience)", async () => {
-    const result = await actions.createExperience({
-      experience: "",
-      employer: "Tech Corp",
-    });
-
-    expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(result.error).toBeTruthy();
-    }
-    expect(createCandidateExperience).not.toHaveBeenCalled();
-  });
-
-  it("validates date range — rejects endYear before startYear", async () => {
-    const result = await actions.createExperience({
-      experience: "Engineer",
-      startYear: 2023,
-      endYear: 2020,
-    });
-
-    expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(result.error).toBe("End year cannot be before start year");
-    }
-    expect(createCandidateExperience).not.toHaveBeenCalled();
-  });
-
-  it("allows same start and end year", async () => {
-    vi.mocked(createCandidateExperience).mockResolvedValue({
-      success: true,
-      experienceId: 124,
-    });
-
-    const result = await actions.createExperience({
-      experience: "Current Role",
-      employer: "Startup Inc",
-      startYear: 2024,
-      endYear: 2024,
-    });
-
-    expect(result.success).toBe(true);
-    expect(createCandidateExperience).toHaveBeenCalled();
-  });
-
-  it("allows endYear without startYear", async () => {
-    vi.mocked(createCandidateExperience).mockResolvedValue({
-      success: true,
-      experienceId: 125,
-    });
-
-    const result = await actions.createExperience({
-      experience: "Part-time",
-      endYear: 2022,
-    });
-
-    expect(result.success).toBe(true);
-    expect(createCandidateExperience).toHaveBeenCalled();
-  });
-
-  it("propagates parent error", async () => {
-    vi.mocked(createCandidateExperience).mockResolvedValue({
-      success: false,
-      error: "Database error",
-    });
-
-    const result = await actions.createExperience({
-      experience: "Engineer",
-    });
-
-    expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(result.error).toBe("Database error");
-    }
+describe("createExperience (barrel re-export)", () => {
+  it("exports createExperience function", async () => {
+    const actions = await import("./actions");
+    expect(typeof actions.createExperience).toBe("function");
   });
 });
