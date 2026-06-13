@@ -37,15 +37,14 @@ import {
   notificationDetailSchema,
   dismissResultSchema,
   updateResultSchema,
-  type NotificationRow,
 } from "@/app/candidate/notifications/schemas";
+import type { NotificationRow, NotificationDetail } from "@/modules/notifications/actions";
 import {
   getCandidateNotificationRows,
   getCandidateNotificationDetail,
   dismissNotification,
   updateNotification,
 } from "./actions";
-import type { NotificationDetail } from "@/modules/notifications/actions";
 
 // ===========================================================================
 // Output schema validation — type shapes
