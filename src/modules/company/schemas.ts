@@ -39,7 +39,7 @@ export type CompanyMetric = {
 
 /** Workspace list item type (used by CompanyWorkspaceData for companies & requests). */
 export type WorkspaceListItem = {
-  id: string;
+  id: string | number;
   title: string;
   subtitle: string;
   meta?: string;
@@ -93,14 +93,14 @@ export const getCompanyWorkspaceSchema = z.object({
 });
 
 export const workspaceMetricSchema = z.object({
-  label: z.string(),
+  label: z.string().min(1, "Metric label is required"),
   value: z.number().int().nonnegative(),
   note: z.string(),
 });
 
 export const workspaceListItemSchema = z.object({
-  id: z.string(),
-  title: z.string(),
+  id: z.union([z.string(), z.number()]),
+  title: z.string().min(1, "Title is required"),
   subtitle: z.string(),
   meta: z.string().optional(),
 });
@@ -114,7 +114,7 @@ export const workspaceContactSchema = z
 
 export const workspaceOverviewOutputSchema = z.object({
   contact: workspaceContactSchema,
-  metrics: z.array(workspaceMetricSchema),
+  metrics: z.array(workspaceMetricSchema).length(4),
   companies: z.array(workspaceListItemSchema),
   requests: z.array(workspaceListItemSchema),
 });
@@ -331,3 +331,458 @@ export type AdminCompanyItem = z.output<typeof adminCompanyItemSchema>;
 export type AdminListCompaniesResult = z.output<typeof adminListCompaniesResultSchema>;
 export type AdminCompanyDetailResult = z.output<typeof adminCompanyDetailResultSchema>;
 export type CompanyActionResult = z.output<typeof companyActionResultSchema>;
+
+// ---------------------------------------------------------------------------
+// Company Contacts — input schemas
+// ---------------------------------------------------------------------------
+
+export const listCompanyContactsSchema = z.object({
+  company_id: z.number().int().positive().optional(),
+  page: z.number().int().positive().optional(),
+  limit: z.number().int().min(1).max(100).optional(),
+});
+
+export const getCompanyContactSchema = z.object({
+  uuid: z.string().min(1, "Company contact UUID is required"),
+});
+
+export const createCompanyContactSchema = z.object({
+  company_id: z.number({ required_error: "Company ID is required" }).int().positive(),
+  contact_name: z
+    .string({ required_error: "Contact name is required" })
+    .min(1, "Contact name is required")
+    .max(255),
+  contact_email: z.string().email("Invalid email").max(255).optional(),
+  contact_position: z.string().max(100).optional(),
+  allow_access: z.boolean().optional().default(false),
+});
+
+export const updateCompanyContactSchema = z.object({
+  uuid: z.string().min(1, "Company contact UUID is required"),
+  contact_position: z.string().max(100).optional(),
+  allow_access: z.boolean().optional(),
+});
+
+export const listCompanyContactsRowsSchema = z.object({
+  contactUuid: z.string().min(1, "Contact UUID is required"),
+});
+
+// ---------------------------------------------------------------------------
+// Company Contacts — output validation schemas
+// ---------------------------------------------------------------------------
+
+export const companyContactListItemSchema = z.object({
+  company_contact_uuid: z.string(),
+  company_id: z.number().nullable(),
+  contact_position: z.string().nullable(),
+  allow_access: z.boolean().nullable(),
+  contact_name: z.string().nullable(),
+  contact_email: z.string().nullable(),
+  company_name: z.string().nullable(),
+});
+
+export const listCompanyContactsResultSchema = z.object({
+  contacts: z.array(companyContactListItemSchema),
+  total: z.number(),
+  page: z.number(),
+  limit: z.number(),
+  totalPages: z.number(),
+});
+
+export const companyContactDetailSchema = z
+  .object({
+    company_contact_uuid: z.string(),
+    contact_uuid: z.string().nullable(),
+    company_id: z.number().nullable(),
+    contact_position: z.string().nullable(),
+    allow_access: z.boolean().nullable(),
+    created_at: z.date(),
+    updated_at: z.date(),
+    contact_name: z.string().nullable(),
+    contact_email: z.string().nullable(),
+    company_name: z.string().nullable(),
+  })
+  .nullable();
+
+export const companyContactUuidResultSchema = z.object({
+  company_contact_uuid: z.string(),
+});
+
+export const companyContactRowSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  email: z.string(),
+  position: z.string(),
+  companyName: z.string(),
+  allowAccess: z.boolean(),
+});
+
+// ---------------------------------------------------------------------------
+// Company Contacts — types
+// ---------------------------------------------------------------------------
+
+export type ListCompanyContactsInput = z.input<typeof listCompanyContactsSchema>;
+export type CreateCompanyContactInput = z.input<typeof createCompanyContactSchema>;
+export type UpdateCompanyContactInput = z.input<typeof updateCompanyContactSchema>;
+
+export type CompanyContactListItem = {
+  company_contact_uuid: string;
+  company_id: number | null;
+  contact_position: string | null;
+  allow_access: boolean | null;
+  contact_name: string | null;
+  contact_email: string | null;
+  company_name: string | null;
+};
+
+export type CompanyContactDetail = {
+  company_contact_uuid: string;
+  contact_uuid: string | null;
+  company_id: number | null;
+  contact_position: string | null;
+  allow_access: boolean | null;
+  created_at: Date;
+  updated_at: Date;
+  contact_name: string | null;
+  contact_email: string | null;
+  company_name: string | null;
+};
+
+export type ListCompanyContactsResult = {
+  contacts: CompanyContactListItem[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+};
+
+export type CompanyContactRow = {
+  id: string;
+  name: string;
+  email: string;
+  position: string;
+  companyName: string;
+  allowAccess: boolean;
+};
+
+// ---------------------------------------------------------------------------
+// Workspace aliases — backward compatibility with app-level exports
+// ---------------------------------------------------------------------------
+
+export type WorkspaceDataMetric = CompanyMetric;
+export type WorkspaceDataCompany = WorkspaceListItem;
+export type WorkspaceDataRequest = WorkspaceListItem;
+export type GetWorkspaceDataInput = z.input<typeof getCompanyWorkspaceSchema>;
+export type WorkspaceOverviewData = CompanyWorkspaceData;
+
+// ---------------------------------------------------------------------------
+// Company Notes — input schemas
+// ---------------------------------------------------------------------------
+
+export const listCompanyNotesSchema = z.object({
+  company_id: z.number().int().positive().optional(),
+  page: z.number().int().positive().optional(),
+  limit: z.number().int().min(1).max(100).optional(),
+});
+
+export const getCompanyNoteSchema = z.object({
+  noteUuid: z.string().min(1, "Note UUID is required"),
+});
+
+export const createCompanyNoteSchema = z.object({
+  company_id: z.number({ required_error: "Company ID is required" }).int().positive(),
+  note_text: z.string({ required_error: "Note text is required" }).min(1).max(10000),
+  note_type: z.string().max(100).optional(),
+  created_by: z.number().int().positive().optional(),
+});
+
+export const updateCompanyNoteSchema = z.object({
+  noteUuid: z.string().min(1, "Note UUID is required"),
+  note_text: z.string().min(1).max(10000).optional(),
+  note_type: z.string().max(100).optional(),
+  updated_by: z.number().int().positive().optional(),
+});
+
+export const deleteCompanyNoteSchema = z.object({
+  noteUuid: z.string().min(1, "Note UUID is required"),
+});
+
+// ---------------------------------------------------------------------------
+// Company Notes — [id] sub-page input schemas
+// ---------------------------------------------------------------------------
+
+export const getNoteEntrySchema = z.object({
+  noteUuid: z.string().min(1, "Note UUID is required"),
+});
+
+export const deleteNoteEntrySchema = z.object({
+  noteUuid: z.string().min(1, "Note UUID is required"),
+});
+
+export const updateNoteEntrySchema = z.object({
+  noteUuid: z.string().min(1, "Note UUID is required"),
+  noteText: z.string().min(1, "Note text is required"),
+  companyId: z.number().int().positive("Company ID is required"),
+});
+
+// ---------------------------------------------------------------------------
+// Company Notes — types
+// ---------------------------------------------------------------------------
+
+export type ListCompanyNotesInput = z.input<typeof listCompanyNotesSchema>;
+export type CreateCompanyNoteInput = z.input<typeof createCompanyNoteSchema>;
+export type UpdateCompanyNoteInput = z.input<typeof updateCompanyNoteSchema>;
+
+export type CompanyNoteListItem = {
+  note_uuid: string;
+  note_text: string | null;
+  note_type: string | null;
+  company_id: number | null;
+  created_by: number | null;
+  created_at: string | null;
+  updated_at: string | null;
+  company_name: string | null;
+};
+
+export type CompanyNoteDetail = {
+  note_uuid: string;
+  company_id: number | null;
+  note_text: string | null;
+  note_type: string | null;
+  created_by: number | null;
+  updated_by: number | null;
+  created_at: string | null;
+  updated_at: string | null;
+  company_name: string | null;
+};
+
+export type ListCompanyNotesResult = {
+  notes: CompanyNoteListItem[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+};
+
+export type GetNoteEntryInput = z.input<typeof getNoteEntrySchema>;
+export type UpdateNoteEntryInput = z.input<typeof updateNoteEntrySchema>;
+export type DeleteNoteEntryInput = z.input<typeof deleteNoteEntrySchema>;
+
+export type NoteEntryResponse = {
+  success: boolean;
+  data?: unknown;
+  error?: string;
+};
+
+// ---------------------------------------------------------------------------
+// Company Stores — input schemas
+// ---------------------------------------------------------------------------
+
+export const listStoresSchema = z.object({
+  page: z.number().int().positive().optional(),
+  limit: z.number().int().min(1).max(100).optional(),
+  company_id: z.number().int().positive().optional(),
+  store_status: z.number().int().optional(),
+});
+
+export const getStoreSchema = z.object({
+  store_id: z.number().int().positive("Store ID must be a positive integer"),
+});
+
+export const listStoresRowsSchema = z.object({
+  contactUuid: z.string().min(1, "Contact UUID is required"),
+});
+
+export const listMallsAndBrandsSchema = z.object({
+  contactUuid: z.string().min(1, "Contact UUID is required"),
+});
+
+export const listCompanySelectOptionsSchema = z.object({
+  contactUuid: z.string().min(1, "Contact UUID is required"),
+});
+
+// ---------------------------------------------------------------------------
+// Company Stores — types
+// ---------------------------------------------------------------------------
+
+export type ListStoresInput = z.input<typeof listStoresSchema>;
+
+export type StoreListItem = {
+  store_id: number;
+  store_name: string;
+  store_location: string;
+  mall_name: string | null;
+  brand_name: string | null;
+  manager_name: string | null;
+  store_status: "active" | "inactive";
+};
+
+export type StoreDetail = {
+  store_id: number;
+  store_name: string;
+  store_location: string;
+  store_status: "active" | "inactive";
+  company_id: number | null;
+  company_name: string | null;
+  mall_name: string | null;
+  brand_name: string | null;
+  manager_name: string | null;
+  manager_email: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type ListStoresResult = {
+  stores: StoreListItem[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+};
+
+export type StoreRow = {
+  id: number;
+  name: string;
+  location: string;
+  mallName: string;
+  brandName: string;
+  companyName: string;
+  managerName: string;
+};
+
+export type MallsAndBrandsResult = {
+  malls: { uuid: string; name: string }[];
+  brands: { uuid: string; name: string }[];
+};
+
+export type CompanySelectOption = {
+  id: number;
+  name: string;
+};
+
+// ---------------------------------------------------------------------------
+// Company Requests — input schemas
+// ---------------------------------------------------------------------------
+
+export const listCompanyRequestsSchema = z.object({
+  company_id: z.number().int().positive().optional(),
+  page: z.number().int().positive().optional(),
+  limit: z.number().int().min(1).max(100).optional(),
+});
+
+export const getCompanyRequestDetailSchema = z.object({
+  uuid: z.string().min(1, "Request UUID is required"),
+});
+
+export const updateRequestStatusSchema = z.object({
+  uuid: z.string().min(1, "Request UUID is required"),
+  status: z.enum(
+    [
+      "pending",
+      "started",
+      "delivered",
+      "cancelled",
+      "finished_by_recruitment",
+      "re_work",
+    ],
+    {
+      errorMap: () => ({
+        message:
+          "Status must be one of: pending, started, delivered, cancelled, finished_by_recruitment, re_work",
+      }),
+    },
+  ),
+  feedback: z.string().max(255).optional(),
+});
+
+export const deleteRequestSchema = z.object({
+  uuid: z.string().min(1, "Request UUID is required"),
+});
+
+export const createCompanyRequestSchema = z.object({
+  company_id: z.number({ required_error: "Company ID is required" }).int().positive(),
+  position_title: z
+    .string({ required_error: "Position title is required" })
+    .min(1, "Position title is required")
+    .max(255),
+  compensation: z.string().max(255).optional(),
+  number_of_employees: z.number().int().min(1).max(1000).optional(),
+  location: z.string().max(255).optional(),
+});
+
+export const getCompanyListSchema = z.object({
+  contactUuid: z
+    .string({ required_error: "Contact UUID is required" })
+    .min(1, "Contact UUID is required"),
+});
+
+// ---------------------------------------------------------------------------
+// Company Requests — output validation schemas
+// ---------------------------------------------------------------------------
+
+export const companyRequestActionResultSchema = z.union([
+  z.object({ success: z.literal(true) }),
+  z.object({ error: z.string() }),
+]);
+
+// ---------------------------------------------------------------------------
+// Company Requests — types
+// ---------------------------------------------------------------------------
+
+export type ListCompanyRequestsInput = z.input<typeof listCompanyRequestsSchema>;
+export type CreateCompanyRequestInput = z.input<typeof createCompanyRequestSchema>;
+export type UpdateRequestStatusInput = z.input<typeof updateRequestStatusSchema>;
+export type DeleteRequestInput = z.input<typeof deleteRequestSchema>;
+export type GetCompanyListInput = z.input<typeof getCompanyListSchema>;
+
+export type CompanyRequestListItem = {
+  request_uuid: string;
+  company_id: number | null;
+  request_position_title: string | null;
+  request_compensation: string | null;
+  request_number_of_employees: number | null;
+  request_location: string | null;
+  request_status: string | null;
+  request_created_datetime: Date;
+  request_updated_datetime: Date;
+  company_name: string | null;
+};
+
+export type CompanyRequestDetail = {
+  request_uuid: string;
+  company_id: number | null;
+  contact_uuid: string | null;
+  staff_id: number | null;
+  request_position_title: string | null;
+  request_job_description: string;
+  request_compensation: string;
+  request_number_of_employees: number | null;
+  request_location: string | null;
+  request_additional_info: string | null;
+  request_status: string | null;
+  request_feedback: string | null;
+  request_created_datetime: Date;
+  request_updated_datetime: Date;
+  company_name: string | null;
+};
+
+export type ListCompanyRequestsResult = {
+  requests: CompanyRequestListItem[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+};
+
+export type CompanyRequestActionResult = z.output<
+  typeof companyRequestActionResultSchema
+>;
+
+export type RequestCompanyListItem = {
+  id: number;
+  name: string;
+};
+
+// Note: CompanyListItem is defined above as z.output<typeof companyListItemSchema>
+// for the admin/list companies module. The request create page uses
+// RequestCompanyListItem instead.

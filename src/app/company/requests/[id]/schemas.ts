@@ -1,18 +1,9 @@
-import { z } from "zod";
-
 // ---------------------------------------------------------------------------
-// Output validation schemas
+// Barrel re-export — delegates to module-level schemas
+// ---------------------------------------------------------------------------
+// All schemas and types live in src/modules/company/schemas.ts.
+// This barrel re-exports so page consumers keep their current import paths.
 // ---------------------------------------------------------------------------
 
-/**
- * Result schema for mutation actions that return either success or error.
- * Used by updateRequestStatus and deleteRequest.
- */
-export const companyRequestActionResultSchema = z.union([
-  z.object({ success: z.literal(true) }),
-  z.object({ error: z.string() }),
-]);
-
-export type CompanyRequestActionResult = z.output<
-  typeof companyRequestActionResultSchema
->;
+export { companyRequestActionResultSchema } from "@/modules/company/schemas";
+export type { CompanyRequestActionResult } from "@/modules/company/schemas";

@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 
 export default async function CompanyWorkspacePage() {
   const session = await requireRoleCapability("company", "company.read.linked");
-  const data = await getCompanyWorkspace({ contactUuid: session.id });
+  const data = await getCompanyWorkspace(session.id);
 
   return (
     <CompanyWorkspaceTable
