@@ -1,7 +1,7 @@
 import { requireRoleCapability } from "@/modules/auth/session";
 import { formatDate } from "@/modules/workspace/format";
 import { listCandidateCertifications } from "./actions";
-import { CandidateCertificationsTable } from "./candidate-certifications-table";
+import { CandidateCertificationsTable } from "./_components";
 
 export const dynamic = "force-dynamic";
 
