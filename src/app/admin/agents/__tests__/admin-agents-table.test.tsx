@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
-import { AdminAgentsTable } from "../admin-agents-table";
+import { AdminAgentsTable } from "../_components";
 import type { AgentHealthData } from "../schemas";
 
 // Mock next/navigation

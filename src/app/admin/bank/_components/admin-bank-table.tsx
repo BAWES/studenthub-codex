@@ -6,8 +6,8 @@ import { DataTable } from "@/modules/workspace/DataTable";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 
 import type { SessionUser } from "@/modules/auth/types";
-import type { BankRow } from "./schemas";
-import { createBank, updateBank, deleteBank } from "./actions";
+import type { BankRow } from "../schemas";
+import { createBank, updateBank, deleteBank } from "../actions";
 
 type Props = {
   session: SessionUser;

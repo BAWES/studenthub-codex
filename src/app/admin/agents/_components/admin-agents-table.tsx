@@ -4,7 +4,7 @@ import { MetricCard } from "@/components/ui/metric-card";
 import { StatusBadge } from "@/modules/workspace/StatusBadge";
 import { EmptyState } from "@/modules/workspace/EmptyState";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
-import type { AgentHealthData } from "./schemas";
+import type { AgentHealthData } from "../schemas";
 
 /* ── Status badge variant for agent status ─────────────────────────── */
 

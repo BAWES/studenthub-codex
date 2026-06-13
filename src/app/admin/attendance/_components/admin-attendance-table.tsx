@@ -8,7 +8,7 @@ import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { StatusBadge } from "@/modules/workspace/StatusBadge";
 import type { SessionUser } from "@/modules/auth/types";
 import type { AttendanceItem } from "@/modules/attendance/schemas";
-import { createAdminAttendance } from "./actions";
+import { createAdminAttendance } from "../actions";
 
 type Props = {
   session: SessionUser;
