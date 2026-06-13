@@ -1326,6 +1326,18 @@ export async function deleteNoteEntry(
 }
 
 // ---------------------------------------------------------------------------
+// Company Workspace — cache helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Revalidate the company workspace page cache.
+ * Called after mutations that affect workspace data.
+ */
+export async function revalidateWorkspace() {
+  revalidatePath("/company/workspace", "page");
+}
+
+// ---------------------------------------------------------------------------
 // Company Stores — server actions
 // ---------------------------------------------------------------------------
 

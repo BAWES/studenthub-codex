@@ -139,13 +139,13 @@ describe("workspaceListItemSchema", () => {
     expect(workspaceListItemSchema.safeParse(rest).success).toBe(false);
   });
 
-  it("rejects number for id (must be string)", () => {
+  it("accepts number for id", () => {
     expect(
       workspaceListItemSchema.safeParse({
         ...validItem,
         id: 123,
       }).success,
-    ).toBe(false);
+    ).toBe(true);
   });
 });
 
@@ -199,7 +199,15 @@ describe("workspaceOverviewOutputSchema", () => {
 
   it("accepts valid overview with all fields", () => {
     expect(
-      workspaceOverviewOutputSchema.safeParse(validOverview).success,
+      workspaceOverviewOutputSchema.safeParse({
+        ...validOverview,
+        metrics: [
+          ...validOverview.metrics,
+          { label: "Requests", value: 3, note: "Active" },
+          { label: "Stores", value: 7, note: "Open" },
+          { label: "Notes", value: 2, note: "Total" },
+        ],
+      }).success,
     ).toBe(true);
   });
 
@@ -208,6 +216,12 @@ describe("workspaceOverviewOutputSchema", () => {
       workspaceOverviewOutputSchema.safeParse({
         ...validOverview,
         contact: null,
+        metrics: [
+          ...validOverview.metrics,
+          { label: "Requests", value: 3, note: "Active" },
+          { label: "Stores", value: 7, note: "Open" },
+          { label: "Notes", value: 2, note: "Total" },
+        ],
       }).success,
     ).toBe(true);
   });
@@ -216,7 +230,12 @@ describe("workspaceOverviewOutputSchema", () => {
     expect(
       workspaceOverviewOutputSchema.safeParse({
         ...validOverview,
-        metrics: [],
+        metrics: [
+          { label: "A", value: 0, note: "" },
+          { label: "B", value: 0, note: "" },
+          { label: "C", value: 0, note: "" },
+          { label: "D", value: 0, note: "" },
+        ],
         companies: [],
         requests: [],
       }).success,

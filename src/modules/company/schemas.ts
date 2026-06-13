@@ -39,7 +39,7 @@ export type CompanyMetric = {
 
 /** Workspace list item type (used by CompanyWorkspaceData for companies & requests). */
 export type WorkspaceListItem = {
-  id: string;
+  id: string | number;
   title: string;
   subtitle: string;
   meta?: string;
@@ -93,14 +93,14 @@ export const getCompanyWorkspaceSchema = z.object({
 });
 
 export const workspaceMetricSchema = z.object({
-  label: z.string(),
+  label: z.string().min(1, "Metric label is required"),
   value: z.number().int().nonnegative(),
   note: z.string(),
 });
 
 export const workspaceListItemSchema = z.object({
-  id: z.string(),
-  title: z.string(),
+  id: z.union([z.string(), z.number()]),
+  title: z.string().min(1, "Title is required"),
   subtitle: z.string(),
   meta: z.string().optional(),
 });
@@ -114,7 +114,7 @@ export const workspaceContactSchema = z
 
 export const workspaceOverviewOutputSchema = z.object({
   contact: workspaceContactSchema,
-  metrics: z.array(workspaceMetricSchema),
+  metrics: z.array(workspaceMetricSchema).length(4),
   companies: z.array(workspaceListItemSchema),
   requests: z.array(workspaceListItemSchema),
 });
@@ -464,6 +464,16 @@ export type CompanyContactRow = {
   companyName: string;
   allowAccess: boolean;
 };
+
+// ---------------------------------------------------------------------------
+// Workspace aliases — backward compatibility with app-level exports
+// ---------------------------------------------------------------------------
+
+export type WorkspaceDataMetric = CompanyMetric;
+export type WorkspaceDataCompany = WorkspaceListItem;
+export type WorkspaceDataRequest = WorkspaceListItem;
+export type GetWorkspaceDataInput = z.input<typeof getCompanyWorkspaceSchema>;
+export type WorkspaceOverviewData = CompanyWorkspaceData;
 
 // ---------------------------------------------------------------------------
 // Company Notes — input schemas
