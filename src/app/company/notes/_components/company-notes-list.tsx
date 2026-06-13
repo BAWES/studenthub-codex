@@ -2,8 +2,8 @@
 
 import { useCallback, useOptimistic, useRef, startTransition, useState } from "react";
 import { useRouter } from "next/navigation";
-import { createCompanyNote, updateCompanyNote, deleteCompanyNote } from "./actions";
-import type { CompanyNoteListItem } from "./schemas";
+import { createCompanyNote, updateCompanyNote, deleteCompanyNote } from "../actions";
+import type { CompanyNoteListItem } from "../schemas";
 
 export function CompanyNotesList({
   notes: initialNotes,

@@ -2,7 +2,7 @@ import { requireRoleCapability } from "@/modules/auth/session";
 import { listCompanyNotes } from "./actions";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { ErrorBoundary } from "@/modules/workspace/ErrorBoundary";
-import { CompanyNotesList } from "./company-notes-list";
+import { CompanyNotesList } from "./_components";
 
 export const dynamic = "force-dynamic";
 
