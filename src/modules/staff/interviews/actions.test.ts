@@ -399,3 +399,109 @@ describe("updateInterviewStatus", () => {
     expect(mockUpdate).not.toHaveBeenCalled();
   });
 });
+
+// ---------------------------------------------------------------------------
+// updateInterviewNotes
+// ---------------------------------------------------------------------------
+
+describe("updateInterviewNotes", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(requireCapability).mockResolvedValue(mockStaffUser);
+    vi.mocked(requireRoleCapability).mockResolvedValue(mockStaffUser);
+  });
+
+  it("updates internal note only", async () => {
+    mockFindFirst.mockResolvedValue({ request_interview_uuid: "interview_abc-123" });
+    mockUpdate.mockResolvedValue({});
+    const result = await interviews.updateInterviewNotes({
+      interviewUuid: "interview_abc-123",
+      internalNote: "New internal note",
+    });
+    expect(result.operation).toBe("success");
+    expect(mockUpdate).toHaveBeenCalledWith({
+      where: { request_interview_uuid: "interview_abc-123" },
+      data: expect.objectContaining({
+        internal_note: "New internal note",
+        updated_at: expect.any(Date),
+      }),
+    });
+  });
+
+  it("updates interview note only", async () => {
+    mockFindFirst.mockResolvedValue({ request_interview_uuid: "interview_abc-123" });
+    mockUpdate.mockResolvedValue({});
+    const result = await interviews.updateInterviewNotes({
+      interviewUuid: "interview_abc-123",
+      interviewNote: "New interview summary",
+    });
+    expect(result.operation).toBe("success");
+    expect(mockUpdate).toHaveBeenCalledWith({
+      where: { request_interview_uuid: "interview_abc-123" },
+      data: expect.objectContaining({
+        interview_note: "New interview summary",
+        updated_at: expect.any(Date),
+      }),
+    });
+  });
+
+  it("updates both notes simultaneously", async () => {
+    mockFindFirst.mockResolvedValue({ request_interview_uuid: "interview_abc-123" });
+    mockUpdate.mockResolvedValue({});
+    const result = await interviews.updateInterviewNotes({
+      interviewUuid: "interview_abc-123",
+      internalNote: "Internal update",
+      interviewNote: "Interview update",
+    });
+    expect(result.operation).toBe("success");
+    expect(mockUpdate).toHaveBeenCalledWith({
+      where: { request_interview_uuid: "interview_abc-123" },
+      data: expect.objectContaining({
+        internal_note: "Internal update",
+        interview_note: "Interview update",
+        updated_at: expect.any(Date),
+      }),
+    });
+  });
+
+  it("returns error when interview not found", async () => {
+    mockFindFirst.mockResolvedValue(null);
+    const result = await interviews.updateInterviewNotes({
+      interviewUuid: "interview_missing",
+      internalNote: "Note",
+    });
+    expect(result.operation).toBe("error");
+    expect(result.message).toBe("Interview not found");
+    expect(mockUpdate).not.toHaveBeenCalled();
+  });
+
+  it("requires capability and role capability", async () => {
+    mockFindFirst.mockResolvedValue(null);
+    await interviews.updateInterviewNotes({
+      interviewUuid: "interview_check_perm",
+      internalNote: "Test",
+    });
+    expect(requireCapability).toHaveBeenCalledWith("staff_leave.read");
+    expect(requireRoleCapability).toHaveBeenCalledWith("staff", "request.interview");
+  });
+
+  it("returns error on schema validation failure", async () => {
+    const result = await interviews.updateInterviewNotes({
+      interviewUuid: "",
+      internalNote: "Note",
+    });
+    expect(result.operation).toBe("error");
+    expect(mockFindFirst).not.toHaveBeenCalled();
+  });
+
+  it("handles Prisma update error gracefully", async () => {
+    mockFindFirst.mockResolvedValue({ request_interview_uuid: "interview_abc-123" });
+    mockUpdate.mockRejectedValue(new Error("DB error"));
+    const result = await interviews.updateInterviewNotes({
+      interviewUuid: "interview_abc-123",
+      internalNote: "Will fail",
+    });
+    expect(result.operation).toBe("error");
+    expect(result.message).toContain("DB error");
+  });
+});

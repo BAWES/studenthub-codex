@@ -1,19 +1,12 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { prisma } from "@/lib/prisma";
 import { requireRoleCapability } from "@/modules/auth/session";
-import { getStaffInterviewDetail } from "../actions";
+import { getStaffInterviewDetail } from "@/modules/staff/interviews/actions";
 import {
   getInterviewSchema,
-  updateInterviewNotesSchema,
   interviewDetailRouteOutputSchema,
-  updateInterviewNotesOutputSchema,
-  type GetInterviewInput,
-  type UpdateInterviewNotesInput,
   type InterviewDetail,
-  type UpdateInterviewNotesResult,
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
@@ -22,8 +15,9 @@ import {
 
 /**
  * Get detailed information about a staff interview by UUID.
- * Wraps the parent-level getStaffInterviewDetail as a route-level server action.
- * Returns null if the interview is not found or not owned by the current staff.
+ * Wraps the module-level getStaffInterviewDetail as a route-level server action,
+ * mapping internal field names for the route's expected shape.
+ * Returns null if the interview is not found.
  */
 export async function getInterview(
   params: z.input<typeof getInterviewSchema>,
@@ -37,12 +31,12 @@ export async function getInterview(
 
   const { interviewUuid } = parsed.data;
 
-  // Delegate to the parent action which handles auth + ownership check
+  // Delegate to the module action which handles auth + data fetching
   const detail = await getStaffInterviewDetail({ interviewUuid });
 
   if (!detail) return null;
 
-  // Map the parent's 'note' field to the [id] route's 'internalNote' expected type
+  // Map the module's 'note' field to the [id] route's 'internalNote' expected type
   const detailResult = {
     interviewUuid: detail.interviewUuid,
     candidateName: detail.candidateName,
@@ -74,86 +68,7 @@ export async function getInterview(
 }
 
 // ---------------------------------------------------------------------------
-// updateInterviewNotes — update internal note and/or interview note
+// updateInterviewNotes — re-exported from module (now delegates to module)
 // ---------------------------------------------------------------------------
 
-/**
- * Update the internal note and/or interview note for a staff interview.
- * Verifies the interview belongs to the current staff member.
- * Revalidates the detail view path on success.
- */
-export async function updateInterviewNotes(
-  params: z.input<typeof updateInterviewNotesSchema>,
-): Promise<UpdateInterviewNotesResult> {
-  const session = await requireRoleCapability("staff", "request.interview");
-
-  const parsed = updateInterviewNotesSchema.safeParse(params);
-  if (!parsed.success) {
-    return {
-      operation: "error",
-      message: parsed.error.issues[0]?.message ?? "Invalid input",
-    };
-  }
-
-  const { interviewUuid, internalNote, interviewNote } = parsed.data;
-  const staffId = Number(session.id);
-
-  // Verify the interview exists and belongs to this staff member
-  const existing = await prisma.request_interview.findFirst({
-    where: {
-      request_interview_uuid: interviewUuid,
-      staff_id: staffId,
-    },
-    select: { request_interview_uuid: true },
-  });
-
-  if (!existing) {
-    return {
-      operation: "error",
-      message: "Interview not found",
-    };
-  }
-
-  // Build update data — only include fields that were provided
-  const updateData: Record<string, unknown> = {
-    updated_at: new Date(),
-  };
-
-  if (internalNote !== undefined) {
-    updateData.internal_note = internalNote;
-  }
-
-  if (interviewNote !== undefined) {
-    updateData.interview_note = interviewNote;
-  }
-
-  try {
-    await prisma.request_interview.update({
-      where: { request_interview_uuid: interviewUuid },
-      data: updateData,
-    });
-
-    revalidatePath(`/staff/interviews/${interviewUuid}`);
-
-    const updateResult = {
-      operation: "success" as const,
-      message: "Interview notes updated successfully",
-    };
-
-    // Validate output shape
-    const outputParsed = updateInterviewNotesOutputSchema.safeParse(updateResult);
-    if (!outputParsed.success) {
-      console.error(
-        "[staff/interviews/[id]] updateInterviewNotes output validation failed:",
-        outputParsed.error.issues,
-      );
-    }
-
-    return updateResult;
-  } catch (err) {
-    return {
-      operation: "error",
-      message: err instanceof Error ? err.message : "Failed to update interview notes",
-    };
-  }
-}
+export { updateInterviewNotes } from "@/modules/staff/interviews/actions";
