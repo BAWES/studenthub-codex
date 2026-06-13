@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import {
   listInvoicesSchema,
   getInvoiceSchema,
@@ -450,5 +450,438 @@ describe("invoiceMutationOutputSchema", () => {
 
   it("rejects non-number invoice_id", () => {
     expect(invoiceMutationOutputSchema.safeParse({ invoice_id: "abc" }).success).toBe(false);
+  });
+});
+
+// ── Runtime tests with mocked Prisma ─────────────────────────
+// ── Hoisted mock functions ──────────────────────────────────
+const {
+  mockRequireCapabilityInv,
+  mockRevalidatePathInv,
+  mockFindManyInv,
+  mockCountInv,
+  mockFindFirstInv,
+  mockCreateInv,
+  mockUpdateInv,
+} = vi.hoisted(() => ({
+  mockRequireCapabilityInv: vi.fn(),
+  mockRevalidatePathInv: vi.fn(),
+  mockFindManyInv: vi.fn(),
+  mockCountInv: vi.fn(),
+  mockFindFirstInv: vi.fn(),
+  mockCreateInv: vi.fn(),
+  mockUpdateInv: vi.fn(),
+}));
+
+// ── Mock session module ─────────────────────────────────────
+vi.mock("@/modules/auth/session", () => ({
+  requireCapability: mockRequireCapabilityInv,
+}));
+
+// ── Mock next/cache ─────────────────────────────────────────
+vi.mock("next/cache", () => ({
+  revalidatePath: mockRevalidatePathInv,
+}));
+
+// ── Mock Prisma ─────────────────────────────────────────────
+vi.mock("@/lib/prisma", () => ({
+  prisma: {
+    invoice: {
+      findMany: mockFindManyInv,
+      count: mockCountInv,
+      findFirst: mockFindFirstInv,
+      create: mockCreateInv,
+      update: mockUpdateInv,
+    },
+  },
+}));
+
+import {
+  listInvoices,
+  getInvoice,
+  createInvoice,
+  updateInvoice,
+  deleteInvoice,
+} from "./actions";
+
+// ---------------------------------------------------------------------------
+// listInvoices — runtime
+// ---------------------------------------------------------------------------
+
+describe("listInvoices — runtime", () => {
+  const MOCK_INVOICES = [
+    {
+      invoice_id: 1,
+      transfer_id: 100,
+      invoice_date: new Date("2026-06-01"),
+      invoice_status: "paid",
+      transfer: {
+        transfer_id: 100,
+        total: 5000,
+        currency_code: "KWD",
+        company: { company_name: "Acme Corp" },
+      },
+    },
+    {
+      invoice_id: 2,
+      transfer_id: null,
+      invoice_date: null,
+      invoice_status: null,
+      transfer: null,
+    },
+  ];
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockRequireCapabilityInv.mockResolvedValue(undefined);
+    mockFindManyInv.mockResolvedValue(MOCK_INVOICES);
+    mockCountInv.mockResolvedValue(2);
+  });
+
+  it("returns paginated invoice list with items and totals", async () => {
+    const result = await listInvoices({});
+    expect(result.items).toHaveLength(2);
+    expect(result.total).toBe(2);
+    expect(result.page).toBe(1);
+    expect(result.limit).toBe(20);
+    expect(result.totalPages).toBe(1);
+  });
+
+  it("calls requireCapability with finance.read", async () => {
+    await listInvoices({});
+    expect(mockRequireCapabilityInv).toHaveBeenCalledWith("finance.read");
+  });
+
+  it("queries Prisma with default pagination (skip=0, take=20)", async () => {
+    await listInvoices({});
+    expect(mockFindManyInv).toHaveBeenCalledWith(
+      expect.objectContaining({ skip: 0, take: 20 }),
+    );
+  });
+
+  it("applies status filter when provided", async () => {
+    await listInvoices({ status: "paid" });
+    expect(mockFindManyInv).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({ invoice_status: "paid" }),
+      }),
+    );
+  });
+
+  it("applies dateFrom filter as gte date", async () => {
+    await listInvoices({ dateFrom: "2026-01-01" });
+    const call = mockFindManyInv.mock.calls[0][0];
+    expect(call.where).toBeDefined();
+    expect(call.where.invoice_date).toBeDefined();
+    expect(call.where.invoice_date.gte).toBeInstanceOf(Date);
+  });
+
+  it("applies dateTo filter as lte date", async () => {
+    await listInvoices({ dateTo: "2026-06-30" });
+    const call = mockFindManyInv.mock.calls[0][0];
+    expect(call.where.invoice_date).toBeDefined();
+    expect(call.where.invoice_date.lte).toBeInstanceOf(Date);
+  });
+
+  it("applies companyId filter via transfer.company_id", async () => {
+    await listInvoices({ companyId: 5 });
+    expect(mockFindManyInv).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          transfer: { company_id: 5 },
+        }),
+      }),
+    );
+  });
+
+  it("maps invoice to InvoiceRow format with company name", async () => {
+    const result = await listInvoices({});
+    expect(result.items[0].company_name).toBe("Acme Corp");
+    expect(result.items[0].invoice_status).toBe("paid");
+    expect(result.items[0].total).toBe("5000");
+  });
+
+  it("handles invoices with null transfer gracefully", async () => {
+    const result = await listInvoices({});
+    expect(result.items[1].company_name).toBeNull();
+    expect(result.items[1].total).toBeNull();
+  });
+
+  it("computes totalPages correctly", async () => {
+    mockFindManyInv.mockResolvedValue(MOCK_INVOICES.slice(0, 1));
+    mockCountInv.mockResolvedValue(25);
+    const result = await listInvoices({ limit: 10 });
+    expect(result.totalPages).toBe(3);
+  });
+
+  it("returns empty result on invalid input", async () => {
+    const result = await listInvoices({ page: -1, limit: 20 });
+    expect(result.items).toEqual([]);
+    expect(result.total).toBe(0);
+    expect(result.totalPages).toBe(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// getInvoice — runtime
+// ---------------------------------------------------------------------------
+
+describe("getInvoice — runtime", () => {
+  const MOCK_INVOICE = {
+    invoice_id: 1,
+    transfer_id: 100,
+    invoice_date: new Date("2026-06-01"),
+    invoice_status: "paid",
+    transfer: {
+      transfer_id: 100,
+      total: 5000,
+      company_total: 4500,
+      currency_code: "KWD",
+      payment_received_on: new Date("2026-06-10"),
+      company: {
+        company_name: "Acme Corp",
+        company_email: "billing@acme.com",
+      },
+      transfer_candidate: [
+        {
+          tc_id: 1,
+          hours: 120,
+          candidate_total: "2400",
+          paid: 0,
+          candidate: { candidate_name: "Ahmed" },
+        },
+      ],
+    },
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockRequireCapabilityInv.mockResolvedValue(undefined);
+    mockFindFirstInv.mockResolvedValue(MOCK_INVOICE);
+  });
+
+  it("returns full invoice detail with company and candidate payouts", async () => {
+    const result = await getInvoice(1);
+    expect(result.invoice).not.toBeNull();
+    expect(result.invoice!.invoice_id).toBe(1);
+    expect(result.invoice!.company!.company_name).toBe("Acme Corp");
+    expect(result.candidate_payouts).toHaveLength(1);
+    expect(result.candidate_payouts[0].candidate_name).toBe("Ahmed");
+    expect(result.candidate_payouts[0].amount).toBe("2400");
+  });
+
+  it("calls requireCapability with finance.read", async () => {
+    await getInvoice(1);
+    expect(mockRequireCapabilityInv).toHaveBeenCalledWith("finance.read");
+  });
+
+  it("queries Prisma with deleted: 0 filter", async () => {
+    await getInvoice(1);
+    expect(mockFindFirstInv).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({ invoice_id: 1, deleted: 0 }),
+      }),
+    );
+  });
+
+  it("returns metrics array with status, count, and total", async () => {
+    const result = await getInvoice(1);
+    expect(result.metrics).toBeDefined();
+    expect(result.metrics.length).toBeGreaterThanOrEqual(3);
+    const totalMetric = result.metrics.find((m) => m.label === "Total");
+    expect(totalMetric).toBeDefined();
+    expect(totalMetric!.value).toBe("5000");
+  });
+
+  it("returns null invoice with empty arrays when not found", async () => {
+    mockFindFirstInv.mockResolvedValue(null);
+    const result = await getInvoice(999);
+    expect(result.invoice).toBeNull();
+    expect(result.candidate_payouts).toEqual([]);
+    expect(result.metrics).toEqual([]);
+  });
+
+  it("throws on invalid input (zero ID)", async () => {
+    await expect(getInvoice(0)).rejects.toThrow();
+  });
+
+  it("throws on invalid input (negative ID)", async () => {
+    await expect(getInvoice(-1)).rejects.toThrow();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// createInvoice — runtime
+// ---------------------------------------------------------------------------
+
+describe("createInvoice — runtime", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockRequireCapabilityInv.mockResolvedValue(undefined);
+    mockCreateInv.mockResolvedValue({ invoice_id: 1 });
+  });
+
+  it("creates invoice and returns invoice_id", async () => {
+    const result = await createInvoice({ invoice_status: "unpaid" });
+    expect(result.invoice_id).toBe(1);
+  });
+
+  it("calls requireCapability with finance.write", async () => {
+    await createInvoice({ invoice_status: "unpaid" });
+    expect(mockRequireCapabilityInv).toHaveBeenCalledWith("finance.write");
+  });
+
+  it("passes transfer_id and invoice_date to Prisma create", async () => {
+    await createInvoice({
+      transfer_id: 50,
+      invoice_date: "2026-06-15",
+      invoice_status: "paid",
+    });
+    expect(mockCreateInv).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          transfer_id: 50,
+          invoice_status: "paid",
+        }),
+      }),
+    );
+  });
+
+  it("converts invoice_date string to Date for Prisma", async () => {
+    await createInvoice({
+      invoice_date: "2026-06-15",
+      invoice_status: "unpaid",
+    });
+    const call = mockCreateInv.mock.calls[0][0];
+    expect(call.data.invoice_date).toBeInstanceOf(Date);
+  });
+
+  it("re-validates /admin/invoices on success", async () => {
+    await createInvoice({ invoice_status: "unpaid" });
+    expect(mockRevalidatePathInv).toHaveBeenCalledWith("/admin/invoices");
+  });
+
+  it("defaults invoice_status to unpaid", async () => {
+    await createInvoice({});
+    expect(mockCreateInv).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ invoice_status: "unpaid" }),
+      }),
+    );
+  });
+
+  it("throws on validation failure (invalid status)", async () => {
+    await expect(
+      createInvoice({ invoice_status: "pending" as any }),
+    ).rejects.toThrow();
+  });
+
+  it("throws on Prisma exception", async () => {
+    mockCreateInv.mockRejectedValue(new Error("Duplicate entry"));
+    await expect(
+      createInvoice({ invoice_status: "unpaid" }),
+    ).rejects.toThrow("Duplicate entry");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// updateInvoice — runtime
+// ---------------------------------------------------------------------------
+
+describe("updateInvoice — runtime", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockRequireCapabilityInv.mockResolvedValue(undefined);
+    mockUpdateInv.mockResolvedValue({ invoice_id: 1 });
+  });
+
+  it("updates invoice and returns invoice_id", async () => {
+    const result = await updateInvoice({
+      invoiceId: 1,
+      invoice_status: "paid",
+    });
+    expect(result.invoice_id).toBe(1);
+  });
+
+  it("calls requireCapability with finance.write", async () => {
+    await updateInvoice({ invoiceId: 1, invoice_status: "paid" });
+    expect(mockRequireCapabilityInv).toHaveBeenCalledWith("finance.write");
+  });
+
+  it("only includes provided fields in update data", async () => {
+    await updateInvoice({ invoiceId: 1, invoice_status: "paid" });
+    const call = mockUpdateInv.mock.calls[0][0];
+    expect(call.data.invoice_status).toBe("paid");
+    expect(call.data.transfer_id).toBeUndefined();
+    expect(call.data.invoice_date).toBeUndefined();
+  });
+
+  it("converts invoice_date string to Date when provided", async () => {
+    await updateInvoice({
+      invoiceId: 1,
+      invoice_date: "2026-06-20",
+    });
+    const call = mockUpdateInv.mock.calls[0][0];
+    expect(call.data.invoice_date).toBeInstanceOf(Date);
+  });
+
+  it("re-validates /admin/invoices on success", async () => {
+    await updateInvoice({ invoiceId: 1, invoice_status: "paid" });
+    expect(mockRevalidatePathInv).toHaveBeenCalledWith("/admin/invoices");
+  });
+
+  it("throws on validation failure (missing invoiceId)", async () => {
+    await expect(updateInvoice({} as any)).rejects.toThrow();
+  });
+
+  it("throws on Prisma exception", async () => {
+    mockUpdateInv.mockRejectedValue(new Error("FK constraint"));
+    await expect(
+      updateInvoice({ invoiceId: 1, invoice_status: "paid" }),
+    ).rejects.toThrow("FK constraint");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// deleteInvoice — runtime
+// ---------------------------------------------------------------------------
+
+describe("deleteInvoice — runtime", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockRequireCapabilityInv.mockResolvedValue(undefined);
+    mockUpdateInv.mockResolvedValue({ invoice_id: 1 });
+  });
+
+  it("soft-deletes invoice and returns invoice_id", async () => {
+    const result = await deleteInvoice({ invoiceId: 1 });
+    expect(result.invoice_id).toBe(1);
+  });
+
+  it("calls requireCapability with finance.write", async () => {
+    await deleteInvoice({ invoiceId: 1 });
+    expect(mockRequireCapabilityInv).toHaveBeenCalledWith("finance.write");
+  });
+
+  it("marks as deleted=1", async () => {
+    await deleteInvoice({ invoiceId: 1 });
+    expect(mockUpdateInv).toHaveBeenCalledWith({
+      where: { invoice_id: 1 },
+      data: { deleted: 1 },
+    });
+  });
+
+  it("re-validates /admin/invoices on success", async () => {
+    await deleteInvoice({ invoiceId: 1 });
+    expect(mockRevalidatePathInv).toHaveBeenCalledWith("/admin/invoices");
+  });
+
+  it("throws on validation failure (zero ID)", async () => {
+    await expect(deleteInvoice({ invoiceId: 0 })).rejects.toThrow();
+  });
+
+  it("throws on Prisma exception", async () => {
+    mockUpdateInv.mockRejectedValue(new Error("DB error"));
+    await expect(deleteInvoice({ invoiceId: 1 })).rejects.toThrow("DB error");
   });
 });
