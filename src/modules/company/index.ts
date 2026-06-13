@@ -6,6 +6,16 @@ export {
   updateCompanyContact,
   listCompanyContactsRows,
 } from "./actions";
+export {
+  listCompanyNotes,
+  getCompanyNote,
+  createCompanyNote,
+  updateCompanyNote,
+  deleteCompanyNote,
+  getNoteEntry,
+  updateNoteEntry,
+  deleteNoteEntry,
+} from "./actions";
 export { listCompanies, getCompany } from "./actions-list";
 export type {
   CompanyListItem,
@@ -24,4 +34,14 @@ export type {
   CompanyContactDetail,
   ListCompanyContactsResult,
   CompanyContactRow,
+  ListCompanyNotesInput,
+  CreateCompanyNoteInput,
+  UpdateCompanyNoteInput,
+  CompanyNoteListItem,
+  CompanyNoteDetail,
+  ListCompanyNotesResult,
+  GetNoteEntryInput,
+  UpdateNoteEntryInput,
+  DeleteNoteEntryInput,
+  NoteEntryResponse,
 } from "./schemas";
