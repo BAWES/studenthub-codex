@@ -369,6 +369,11 @@ export async function updateExperienceEntry(
     revalidatePath(`/candidate/experience/${experienceId}`);
   }
 
+  // Validate output shape
+  const validated = experienceActionResultOutputSchema.safeParse(result);
+  if (!validated.success) {
+    logOutputError("updateExperienceEntry", validated.error.issues);
+  }
   return result;
 }
 

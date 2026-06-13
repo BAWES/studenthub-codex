@@ -2,10 +2,10 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { ExperienceActionResult } from "../../schemas";
 
 // ── Hoisted mock functions ──────────────────────────────────
-const { mockRevalidatePath, mockParentUpdateExperienceEntry } = vi.hoisted(
+const { mockRevalidatePath, mockUpdateExperienceEntry } = vi.hoisted(
   () => ({
     mockRevalidatePath: vi.fn(),
-    mockParentUpdateExperienceEntry: vi.fn(),
+    mockUpdateExperienceEntry: vi.fn(),
   }),
 );
 
@@ -14,9 +14,9 @@ vi.mock("next/cache", () => ({
   revalidatePath: mockRevalidatePath,
 }));
 
-// ── Mock parent action ──────────────────────────────────────
-vi.mock("../actions", () => ({
-  updateExperienceEntry: mockParentUpdateExperienceEntry,
+// ── Mock module-level action ────────────────────────────────
+vi.mock("@/modules/candidate/experience/actions", () => ({
+  updateExperienceEntry: mockUpdateExperienceEntry,
 }));
 
 import { updateExperienceEntry } from "./actions";
@@ -25,9 +25,8 @@ import { updateExperienceEntry } from "./actions";
 // Unit test coverage for candidate/experience/[experienceId]/edit actions
 // (STU-3277)
 //
-// The edit action is a thin wrapper that delegates to the parent
-// updateExperienceEntry action and re-validates the experience page
-// on success.
+// The edit route is now a barrel re-export of the module-level
+// updateExperienceEntry. These tests verify the re-export contract.
 // ---------------------------------------------------------------------------
 
 describe("ExperienceActionResult shape", () => {
@@ -50,7 +49,7 @@ describe("ExperienceActionResult shape", () => {
   });
 });
 
-describe("updateExperienceEntry \u2014 edit wrapper", () => {
+describe("updateExperienceEntry — edit route barrel", () => {
   const EXPERIENCE_ID = 42;
   const EXPERIENCE = "Software Engineer";
   const EMPLOYER = "Tech Corp";
@@ -61,8 +60,8 @@ describe("updateExperienceEntry \u2014 edit wrapper", () => {
     vi.clearAllMocks();
   });
 
-  it("delegates to parent updateExperienceEntry with all params", async () => {
-    mockParentUpdateExperienceEntry.mockResolvedValue({
+  it("delegates to module-level updateExperienceEntry with all params", async () => {
+    mockUpdateExperienceEntry.mockResolvedValue({
       success: true,
       experienceId: EXPERIENCE_ID,
     });
@@ -75,7 +74,7 @@ describe("updateExperienceEntry \u2014 edit wrapper", () => {
       END_YEAR,
     );
 
-    expect(mockParentUpdateExperienceEntry).toHaveBeenCalledWith(
+    expect(mockUpdateExperienceEntry).toHaveBeenCalledWith(
       EXPERIENCE_ID,
       EXPERIENCE,
       EMPLOYER,
@@ -84,83 +83,45 @@ describe("updateExperienceEntry \u2014 edit wrapper", () => {
     );
   });
 
-  it("delegates to parent with minimal params (experienceId + experience only)", async () => {
-    mockParentUpdateExperienceEntry.mockResolvedValue({
+  it("delegates to module-level with minimal params (experienceId + experience only)", async () => {
+    mockUpdateExperienceEntry.mockResolvedValue({
       success: true,
       experienceId: EXPERIENCE_ID,
     });
 
     await updateExperienceEntry(EXPERIENCE_ID, EXPERIENCE);
 
-    expect(mockParentUpdateExperienceEntry).toHaveBeenCalledWith(
+    expect(mockUpdateExperienceEntry).toHaveBeenCalledWith(
       EXPERIENCE_ID,
       EXPERIENCE,
-      undefined,
-      undefined,
-      undefined,
     );
   });
 
-  it("re-validates the experience path when update succeeds", async () => {
-    mockParentUpdateExperienceEntry.mockResolvedValue({
-      success: true,
-      experienceId: EXPERIENCE_ID,
-    });
-
-    await updateExperienceEntry(EXPERIENCE_ID, EXPERIENCE);
-
-    expect(mockRevalidatePath).toHaveBeenCalledWith(
-      `/candidate/experience/${EXPERIENCE_ID}`,
-    );
-  });
-
-  it("does NOT re-validate when update fails", async () => {
-    mockParentUpdateExperienceEntry.mockResolvedValue({
-      success: false,
-      error: "Not found",
-    });
-
-    await updateExperienceEntry(EXPERIENCE_ID, EXPERIENCE);
-
-    expect(mockRevalidatePath).not.toHaveBeenCalled();
-  });
-
-  it("returns the parent result directly on success", async () => {
+  it("returns the module-level result directly on success", async () => {
     const expected = { success: true, experienceId: EXPERIENCE_ID };
-    mockParentUpdateExperienceEntry.mockResolvedValue(expected);
+    mockUpdateExperienceEntry.mockResolvedValue(expected);
 
     const result = await updateExperienceEntry(EXPERIENCE_ID, EXPERIENCE);
 
     expect(result).toEqual(expected);
   });
 
-  it("returns the parent error result on failure", async () => {
+  it("returns the module-level error result on failure", async () => {
     const expected = { success: false, error: "Permission denied" };
-    mockParentUpdateExperienceEntry.mockResolvedValue(expected);
+    mockUpdateExperienceEntry.mockResolvedValue(expected);
 
     const result = await updateExperienceEntry(EXPERIENCE_ID, EXPERIENCE);
 
     expect(result).toEqual(expected);
   });
 
-  it("propagates exceptions from parent", async () => {
-    mockParentUpdateExperienceEntry.mockRejectedValue(
+  it("propagates exceptions from module-level", async () => {
+    mockUpdateExperienceEntry.mockRejectedValue(
       new Error("Database error"),
     );
 
     await expect(
       updateExperienceEntry(EXPERIENCE_ID, EXPERIENCE),
     ).rejects.toThrow("Database error");
-  });
-
-  it("does not re-validate when parent throws", async () => {
-    mockParentUpdateExperienceEntry.mockRejectedValue(
-      new Error("Database error"),
-    );
-
-    await expect(
-      updateExperienceEntry(EXPERIENCE_ID, EXPERIENCE),
-    ).rejects.toThrow();
-    expect(mockRevalidatePath).not.toHaveBeenCalled();
   });
 });
