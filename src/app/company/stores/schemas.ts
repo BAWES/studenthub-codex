@@ -1,24 +1,8 @@
 // ---------------------------------------------------------------------------
-// Barrel re-export — delegates to module-level schemas
+// Barrel re-export — delegates to module-level implementation
 // ---------------------------------------------------------------------------
-// All schemas and types live in src/modules/company/schemas.ts.
-// This barrel re-exports so page consumers keep their current import paths.
+// All schema definitions live in src/modules/company/stores/schemas.ts.
+// This barrel re-export so page consumers keep their current import paths.
 // ---------------------------------------------------------------------------
 
-export {
-  listStoresSchema,
-  getStoreSchema,
-  listStoresRowsSchema,
-  listMallsAndBrandsSchema,
-  listCompanySelectOptionsSchema,
-} from "@/modules/company/schemas";
-
-export type {
-  ListStoresInput,
-  StoreListItem,
-  StoreDetail,
-  ListStoresResult,
-  StoreRow,
-  MallsAndBrandsResult,
-  CompanySelectOption,
-} from "@/modules/company/schemas";
+export * from "@/modules/company/stores/schemas";
