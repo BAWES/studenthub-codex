@@ -5,7 +5,6 @@ import { z } from "zod";
 // ---------------------------------------------------------------------------
 
 export const listCandidateReferencesSchema = z.object({
-  candidateId: z.coerce.number().int().positive("Candidate ID is required"),
   page: z.coerce.number().int().positive().optional().default(1),
   limit: z.coerce.number().int().min(1).max(100).optional().default(20),
 });
@@ -15,7 +14,6 @@ export const getCandidateReferenceSchema = z.object({
 });
 
 export const createCandidateReferenceSchema = z.object({
-  candidateId: z.number().int().positive("Candidate ID is required"),
   name: z
     .string()
     .min(1, "Reference name is required")
@@ -55,7 +53,6 @@ export const createCandidateReferenceSchema = z.object({
 });
 
 export const updateCandidateReferenceSchema = z.object({
-  candidateId: z.number().int().positive("Candidate ID is required"),
   referenceUuid: z.string().min(1, "Reference UUID is required"),
   name: z
     .string()
@@ -96,7 +93,6 @@ export const updateCandidateReferenceSchema = z.object({
 });
 
 export const deleteCandidateReferenceSchema = z.object({
-  candidateId: z.number().int().positive("Candidate ID is required"),
   referenceUuid: z.string().min(1, "Reference UUID is required"),
 });
 
@@ -130,7 +126,7 @@ export const listCandidateReferencesResultSchema = z.object({
   pageSize: z.number().int().positive(),
 });
 
-/** Validates the ReferenceActionResult discriminated union. */
+/** Validates the CandidateReferenceActionResult discriminated union. */
 export const candidateReferenceActionResultSchema = z.discriminatedUnion("success", [
   z.object({ success: z.literal(true), referenceUuid: z.string() }),
   z.object({ success: z.literal(false), error: z.string() }),
