@@ -9,7 +9,7 @@ import {
   workspaceListItemSchema,
   workspaceOverviewOutputSchema,
   updateWorkspaceResultSchema,
-} from "../../schemas";
+} from "@/modules/company/schemas";
 
 // ---------------------------------------------------------------------------
 // getWorkspaceSchema
