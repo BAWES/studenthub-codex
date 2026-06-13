@@ -5,7 +5,7 @@ import type { SessionUser } from "@/modules/auth/types";
 import type {
   ConversationItem,
   ConversationMessageItem,
-} from "./actions";
+} from "../actions";
 
 type Props = {
   session: SessionUser;
@@ -59,7 +59,7 @@ export function CandidateChatClient({ session, conversations }: Props) {
     setError(null);
 
     try {
-      const { getConversationMessages } = await import("./actions");
+      const { getConversationMessages } = await import("../actions");
       const result = await getConversationMessages({
         chatUuid: conv.chat_uuid,
         limit: 100,
