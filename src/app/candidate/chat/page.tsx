@@ -1,6 +1,6 @@
 import { requireRoleCapability } from "@/modules/auth/session";
 import { listConversations } from "./actions";
-import { CandidateChatClient } from "./candidate-chat";
+import { CandidateChatClient } from "./_components";
 
 export const dynamic = "force-dynamic";
 
