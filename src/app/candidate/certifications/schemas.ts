@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 // ---------------------------------------------------------------------------
-// Schemas
+// Input validation schemas
 // ---------------------------------------------------------------------------
 
 export const listCertificationsSchema = z.object({
@@ -81,39 +81,6 @@ export const deleteCertificationSchema = z.object({
 });
 
 // ---------------------------------------------------------------------------
-// Output validation schemas
-// ---------------------------------------------------------------------------
-
-export const certificationItemOutputSchema = z.object({
-  certification_id: z.number().int(),
-  certification_name: z.string(),
-  issuing_organization: z.string(),
-  issue_date: z.date().nullable(),
-  expiry_date: z.date().nullable(),
-  credential_id: z.string().nullable(),
-  credential_url: z.string().nullable(),
-  description: z.string().nullable(),
-  created_at: z.date().nullable(),
-  updated_at: z.date().nullable(),
-});
-
-export const certificationListOutputSchema = z.array(certificationItemOutputSchema);
-
-export const certificationActionResultOutputSchema = z.discriminatedUnion(
-  "success",
-  [
-    z.object({
-      success: z.literal(true),
-      certificationId: z.number().int(),
-    }),
-    z.object({ success: z.literal(false), error: z.string() }),
-  ],
-);
-
-// Output types
-export type CertificationItem = z.output<typeof certificationItemOutputSchema>;
-
-// ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
@@ -123,6 +90,19 @@ export type CreateCertificationInput = z.input<typeof createCertificationSchema>
 export type UpdateCertificationInput = z.input<typeof updateCertificationSchema>;
 export type DeleteCertificationInput = z.input<typeof deleteCertificationSchema>;
 
-export type CertificationActionResult =
-  | { success: true; certificationId: number }
-  | { success: false; error: string };
+// Re-export types from module
+export type {
+  CertificationItem,
+  CertificationActionResult,
+} from "@/modules/certifications/schemas";
+
+// Re-export output schemas from module with original names for compatibility
+import {
+  certificationItemSchema as _certItemSchema,
+  certificationListSchema as _certListSchema,
+  certificationActionResultSchema as _certActionResultSchema,
+} from "@/modules/certifications/schemas";
+
+export const certificationItemOutputSchema = _certItemSchema;
+export const certificationListOutputSchema = _certListSchema;
+export const certificationActionResultOutputSchema = _certActionResultSchema;

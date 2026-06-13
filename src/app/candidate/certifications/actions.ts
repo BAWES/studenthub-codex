@@ -1,15 +1,14 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { prisma } from "@/lib/prisma";
 import { requireRoleCapability } from "@/modules/auth/session";
-import type {
-  ListCertificationsInput,
-  CreateCertificationInput,
-  UpdateCertificationInput,
-  CertificationActionResult,
-  CertificationItem,
-} from "./schemas";
+import {
+  listCandidateCertifications as moduleListCertifications,
+  getCandidateCertification as moduleGetCertification,
+  createCandidateCertification as moduleCreateCertification,
+  updateCandidateCertification as moduleUpdateCertification,
+  deleteCandidateCertification as moduleDeleteCertification,
+} from "@/modules/certifications/actions";
 import {
   listCertificationsSchema,
   getCertificationSchema,
@@ -20,35 +19,19 @@ import {
   certificationListOutputSchema,
   certificationActionResultOutputSchema,
 } from "./schemas";
+import type {
+  ListCertificationsInput,
+  CreateCertificationInput,
+  UpdateCertificationInput,
+  CertificationActionResult,
+  CertificationItem,
+} from "./schemas";
 
 // Re-export types for client components
 export type { CertificationActionResult, CertificationItem };
 
 // ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-/** Map a Prisma candidate_certification row to the API shape. */
-function toItem(
-  row: Awaited<ReturnType<typeof prisma.candidate_certification.findFirst>>,
-): CertificationItem | null {
-  if (!row) return null;
-  return {
-    certification_id: row.certification_id,
-    certification_name: row.certification_name,
-    issuing_organization: row.issuing_organization,
-    issue_date: row.issue_date,
-    expiry_date: row.expiry_date,
-    credential_id: row.credential_id,
-    credential_url: row.credential_url,
-    description: row.description,
-    created_at: row.created_at,
-    updated_at: row.updated_at,
-  };
-}
-
-// ---------------------------------------------------------------------------
-// Server actions
+// Delegating Server Actions
 // ---------------------------------------------------------------------------
 
 /**
@@ -66,20 +49,7 @@ export async function listCandidateCertifications(
     );
   }
 
-  const { page, limit } = parsed.data;
-  const skip = (page - 1) * limit;
-
-  const rows = await prisma.candidate_certification.findMany({
-    where: {
-      candidate_id: Number(session.id),
-      deleted: 0,
-    },
-    orderBy: [{ created_at: "desc" }, { certification_id: "desc" }],
-    skip,
-    take: limit,
-  });
-
-  const result = rows.map((r) => toItem(r)!);
+  const result = await moduleListCertifications(Number(session.id), parsed.data);
 
   // Validate output shape
   const outputParsed = certificationListOutputSchema.safeParse(result);
@@ -109,15 +79,7 @@ export async function getCandidateCertification(
     );
   }
 
-  const row = await prisma.candidate_certification.findFirst({
-    where: {
-      certification_id: parsed.data.certificationId,
-      candidate_id: Number(session.id),
-      deleted: 0,
-    },
-  });
-
-  const result = toItem(row);
+  const result = await moduleGetCertification(Number(session.id), parsed.data.certificationId);
 
   // Validate output shape
   if (result !== null) {
@@ -139,10 +101,7 @@ export async function getCandidateCertification(
 export async function createCandidateCertification(
   data: CreateCertificationInput,
 ): Promise<CertificationActionResult> {
-  const session = await requireRoleCapability(
-    "candidate",
-    "candidate.profile.edit",
-  );
+  const session = await requireRoleCapability("candidate", "candidate.profile.edit");
 
   const parsed = createCertificationSchema.safeParse(data);
   if (!parsed.success) {
@@ -152,30 +111,10 @@ export async function createCandidateCertification(
     };
   }
 
-  const now = new Date();
-
-  const row = await prisma.candidate_certification.create({
-    data: {
-      candidate_id: Number(session.id),
-      certification_name: parsed.data.certificationName,
-      issuing_organization: parsed.data.issuingOrganization,
-      issue_date: parsed.data.issueDate ? new Date(parsed.data.issueDate) : null,
-      expiry_date: parsed.data.expiryDate ? new Date(parsed.data.expiryDate) : null,
-      credential_id: parsed.data.credentialId ?? null,
-      credential_url: parsed.data.credentialUrl || null,
-      description: parsed.data.description ?? null,
-      deleted: 0,
-      created_at: now,
-      updated_at: now,
-    },
-  });
-
-  revalidatePath("/candidate/certifications");
-
-  const actionResult = { success: true as const, certificationId: row.certification_id };
+  const result = await moduleCreateCertification(Number(session.id), parsed.data);
 
   // Validate output shape
-  const outputParsed = certificationActionResultOutputSchema.safeParse(actionResult);
+  const outputParsed = certificationActionResultOutputSchema.safeParse(result);
   if (!outputParsed.success) {
     console.error(
       "[candidate/certifications] createCandidateCertification output validation failed:",
@@ -183,20 +122,20 @@ export async function createCandidateCertification(
     );
   }
 
-  return actionResult;
+  if (result.success) {
+    revalidatePath("/candidate/certifications");
+  }
+
+  return result;
 }
 
 /**
  * Update an existing certification record.
- * Uses direct update — certifications have no child records depending on the ID.
  */
 export async function updateCandidateCertification(
   data: UpdateCertificationInput,
 ): Promise<CertificationActionResult> {
-  const session = await requireRoleCapability(
-    "candidate",
-    "candidate.profile.edit",
-  );
+  const session = await requireRoleCapability("candidate", "candidate.profile.edit");
 
   const parsed = updateCertificationSchema.safeParse(data);
   if (!parsed.success) {
@@ -206,43 +145,10 @@ export async function updateCandidateCertification(
     };
   }
 
-  const candidateId = Number(session.id);
-  const certificationId = parsed.data.certificationId;
-
-  // Verify ownership
-  const existing = await prisma.candidate_certification.findFirst({
-    where: {
-      certification_id: certificationId,
-      candidate_id: candidateId,
-      deleted: 0,
-    },
-    select: { certification_id: true },
-  });
-  if (!existing) {
-    return { success: false, error: "Certification not found or access denied" };
-  }
-
-  // Direct update
-  await prisma.candidate_certification.update({
-    where: { certification_id: certificationId },
-    data: {
-      certification_name: parsed.data.certificationName,
-      issuing_organization: parsed.data.issuingOrganization,
-      issue_date: parsed.data.issueDate ? new Date(parsed.data.issueDate) : null,
-      expiry_date: parsed.data.expiryDate ? new Date(parsed.data.expiryDate) : null,
-      credential_id: parsed.data.credentialId ?? null,
-      credential_url: parsed.data.credentialUrl || null,
-      description: parsed.data.description ?? null,
-      updated_at: new Date(),
-    },
-  });
-
-  revalidatePath("/candidate/certifications");
-
-  const actionResult = { success: true as const, certificationId };
+  const result = await moduleUpdateCertification(Number(session.id), parsed.data);
 
   // Validate output shape
-  const outputParsed = certificationActionResultOutputSchema.safeParse(actionResult);
+  const outputParsed = certificationActionResultOutputSchema.safeParse(result);
   if (!outputParsed.success) {
     console.error(
       "[candidate/certifications] updateCandidateCertification output validation failed:",
@@ -250,7 +156,11 @@ export async function updateCandidateCertification(
     );
   }
 
-  return actionResult;
+  if (result.success) {
+    revalidatePath("/candidate/certifications");
+  }
+
+  return result;
 }
 
 /**
@@ -259,43 +169,17 @@ export async function updateCandidateCertification(
 export async function deleteCandidateCertification(
   certificationId: number,
 ): Promise<CertificationActionResult> {
-  const session = await requireRoleCapability(
-    "candidate",
-    "candidate.profile.edit",
-  );
+  const session = await requireRoleCapability("candidate", "candidate.profile.edit");
 
   const parsed = deleteCertificationSchema.safeParse({ certificationId });
   if (!parsed.success) {
-    return {
-      success: false,
-      error: "Invalid certification ID",
-    };
+    return { success: false, error: "Invalid certification ID" };
   }
 
-  const existing = await prisma.candidate_certification.findFirst({
-    where: {
-      certification_id: parsed.data.certificationId,
-      candidate_id: Number(session.id),
-      deleted: 0,
-    },
-    select: { certification_id: true },
-  });
-  if (!existing) {
-    return { success: false, error: "Certification not found or access denied" };
-  }
-
-  // Soft-delete
-  await prisma.candidate_certification.update({
-    where: { certification_id: parsed.data.certificationId },
-    data: { deleted: 1 },
-  });
-
-  revalidatePath("/candidate/certifications");
-
-  const actionResult = { success: true as const, certificationId: parsed.data.certificationId };
+  const result = await moduleDeleteCertification(Number(session.id), parsed.data.certificationId);
 
   // Validate output shape
-  const outputParsed = certificationActionResultOutputSchema.safeParse(actionResult);
+  const outputParsed = certificationActionResultOutputSchema.safeParse(result);
   if (!outputParsed.success) {
     console.error(
       "[candidate/certifications] deleteCandidateCertification output validation failed:",
@@ -303,5 +187,9 @@ export async function deleteCandidateCertification(
     );
   }
 
-  return actionResult;
+  if (result.success) {
+    revalidatePath("/candidate/certifications");
+  }
+
+  return result;
 }

@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 // ---------------------------------------------------------------------------
-// Schemas
+// Input validation schemas
 // ---------------------------------------------------------------------------
 
 export const listBusinessDevelopmentSchema = z.object({
@@ -46,81 +46,26 @@ export const deleteBusinessDevelopmentSchema = z.object({
 // Types
 // ---------------------------------------------------------------------------
 
-export type ListBusinessDevelopmentParams = z.input<
-  typeof listBusinessDevelopmentSchema
->;
-export type GetBusinessDevelopmentParams = z.input<
-  typeof getBusinessDevelopmentSchema
->;
-export type CreateBusinessDevelopmentParams = z.input<
-  typeof createBusinessDevelopmentSchema
->;
-export type UpdateBusinessDevelopmentParams = z.input<
-  typeof updateBusinessDevelopmentSchema
->;
-export type DeleteBusinessDevelopmentParams = z.input<
-  typeof deleteBusinessDevelopmentSchema
->;
+export type ListBusinessDevelopmentParams = z.input<typeof listBusinessDevelopmentSchema>;
+export type GetBusinessDevelopmentParams = z.input<typeof getBusinessDevelopmentSchema>;
+export type CreateBusinessDevelopmentParams = z.input<typeof createBusinessDevelopmentSchema>;
+export type UpdateBusinessDevelopmentParams = z.input<typeof updateBusinessDevelopmentSchema>;
+export type DeleteBusinessDevelopmentParams = z.input<typeof deleteBusinessDevelopmentSchema>;
 
-export type BusinessDevelopmentItem = {
-  company_request_uuid: string;
-  company_name: string;
-  company_email: string;
-  contact_name: string;
-  contact_position: string | null;
-  phone_number: string | null;
-  requesting_for: string | null;
-  status: boolean | null;
-  country_id: number | null;
-  currency_code: string | null;
-  country_name_en: string | null;
-  country_name_ar: string | null;
-  created_at: string | null;
-  updated_at: string | null;
-};
+// Re-export types from module
+export type {
+  BusinessDevelopmentItem,
+  ListBusinessDevelopmentsResult,
+  BusinessDevelopmentActionResult,
+} from "@/modules/business-development/schemas";
 
-export type ListBusinessDevelopmentResult = {
-  items: BusinessDevelopmentItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
+// Re-export output schemas from module with original names for compatibility
+import {
+  businessDevelopmentItemSchema as _bizItemSchema,
+  listBusinessDevelopmentsResultSchema as _bizListResultSchema,
+  businessDevelopmentActionResultSchema as _bizActionResultSchema,
+} from "@/modules/business-development/schemas";
 
-export type BusinessDevelopmentActionResult =
-  | { success: true; uuid: string }
-  | { success: false; error: string };
-
-// ---------------------------------------------------------------------------
-// Output validation schemas
-// ---------------------------------------------------------------------------
-
-export const businessDevelopmentItemOutputSchema = z.object({
-  company_request_uuid: z.string(),
-  company_name: z.string(),
-  company_email: z.string(),
-  contact_name: z.string(),
-  contact_position: z.string().nullable(),
-  phone_number: z.string().nullable(),
-  requesting_for: z.string().nullable(),
-  status: z.boolean().nullable(),
-  country_id: z.number().int().nullable(),
-  currency_code: z.string().nullable(),
-  country_name_en: z.string().nullable(),
-  country_name_ar: z.string().nullable(),
-  created_at: z.string().nullable(),
-  updated_at: z.string().nullable(),
-});
-
-export const listBusinessDevelopmentResultOutputSchema = z.object({
-  items: z.array(businessDevelopmentItemOutputSchema),
-  total: z.number().int(),
-  page: z.number().int(),
-  limit: z.number().int(),
-  totalPages: z.number().int(),
-});
-
-export const businessDevelopmentActionResultOutputSchema = z.discriminatedUnion("success", [
-  z.object({ success: z.literal(true), uuid: z.string() }),
-  z.object({ success: z.literal(false), error: z.string() }),
-]);
+export const businessDevelopmentItemOutputSchema = _bizItemSchema;
+export const listBusinessDevelopmentResultOutputSchema = _bizListResultSchema;
+export const businessDevelopmentActionResultOutputSchema = _bizActionResultSchema;
