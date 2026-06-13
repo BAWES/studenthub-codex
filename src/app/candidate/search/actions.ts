@@ -1,44 +1,9 @@
-"use server";
-
 // ---------------------------------------------------------------------------
-// Candidate Search — server action for the candidate search page
+// Barrel re-export — delegates to module-level implementation
 // ---------------------------------------------------------------------------
-
-import { getCandidateSearchWorkspaceTypesense } from "@/modules/candidates/search-typesense";
-import { searchCandidatesSchema, candidateSearchResultSchema } from "./schemas";
-import type { CandidateSearchResult } from "./schemas";
-
-// ---------------------------------------------------------------------------
-// searchCandidates
+// All business logic lives in src/modules/candidate/search/actions.ts (which
+// has "use server"). This barrel re-exports so page consumers keep their
+// current import paths without duplicating the "use server" directive.
 // ---------------------------------------------------------------------------
 
-/**
- * Search candidates via Typesense. Returns paginated search results with
- * candidate cards, facet data, metrics, and open-tab state.
- *
- * Wraps getCandidateSearchWorkspaceTypesense with Zod input + output validation.
- */
-export async function searchCandidates(
-  params: Record<string, unknown>,
-): Promise<CandidateSearchResult> {
-  // Input validation
-  const parsed = searchCandidatesSchema.safeParse(params);
-  if (!parsed.success) {
-    throw new Error(
-      parsed.error.issues[0]?.message ?? "Invalid search parameters",
-    );
-  }
-
-  const result = await getCandidateSearchWorkspaceTypesense(parsed.data as any);
-
-  // Output validation
-  const outputParsed = candidateSearchResultSchema.safeParse(result);
-  if (!outputParsed.success) {
-    console.error(
-      "[candidate/search] searchCandidates output validation failed:",
-      outputParsed.error.issues,
-    );
-  }
-
-  return result;
-}
+export * from "@/modules/candidate/search/actions";
