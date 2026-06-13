@@ -22,7 +22,7 @@ import {
 // Prisma row type (internal)
 // ---------------------------------------------------------------------------
 
-type PrismaAttendanceRow = {
+export type PrismaAttendanceRow = {
   attendance_uuid: string;
   employee_uuid: string | null;
   date: Date;
@@ -40,7 +40,7 @@ type PrismaAttendanceRow = {
 // ---------------------------------------------------------------------------
 
 /** Map a Prisma attendance row to the shared item shape. */
-function toItem(row: PrismaAttendanceRow): AttendanceItem {
+export function toItem(row: PrismaAttendanceRow): AttendanceItem {
   return {
     attendance_uuid: row.attendance_uuid,
     employee_uuid: row.employee_uuid ?? null,
@@ -56,7 +56,7 @@ function toItem(row: PrismaAttendanceRow): AttendanceItem {
 }
 
 /** Build Prisma where clause for listAttendance filters. */
-function buildAttendanceWhere(params: {
+export function buildAttendanceWhere(params: {
   employee_uuid?: string;
   date_from?: string;
   date_to?: string;
