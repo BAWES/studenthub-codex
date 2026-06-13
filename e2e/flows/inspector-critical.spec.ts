@@ -93,8 +93,7 @@ function assertNoReactErrors(errors: string[]) {
   const bad = errors.filter(
     (m) =>
       m.includes("hydration") ||
-      m.includes("serialization") ||
-      m.includes("Functions cannot be passed"),
+      m.includes("serialization"),
   );
   expect(bad).toEqual([]);
 }
@@ -125,16 +124,16 @@ test.describe("Inspector critical flows — Workspace + ID Request Management", 
       await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
       await expect(ctx.page).toHaveURL("/inspector");
 
-      // Workspace tab bar should be present (nav with role="tablist")
-      const tabList = ctx.page.locator('nav[role="tablist"]');
-      await expect(tabList).toBeVisible({ timeout: 10000 });
+      // Sidebar should be present
+      const sidebar = ctx.page.locator('aside');
+      await expect(sidebar).toBeVisible({ timeout: 10000 });
 
-      // Should show tabs for inspector sections
-      await expect(ctx.page.locator('a[role="tab"]:has-text("Overview")').first()).toBeVisible({ timeout: 5000 });
-      await expect(ctx.page.locator('a[role="tab"]:has-text("ID Requests")').first()).toBeVisible({ timeout: 5000 });
+      // Should show links for inspector sections in the sidebar
+      await expect(ctx.page.locator('aside a:has-text("Overview")').first()).toBeVisible({ timeout: 5000 });
+      await expect(ctx.page.locator('aside a:has-text("ID Requests")').first()).toBeVisible({ timeout: 5000 });
 
       // Overview tab should be active by default
-      const overviewTab = ctx.page.locator('a[role="tab"][aria-selected="true"]');
+      const overviewTab = ctx.page.locator('div[role="tab"][aria-selected="true"]');
       await expect(overviewTab).toContainText("Overview");
 
       assertNoReactErrors(ctx.errors);

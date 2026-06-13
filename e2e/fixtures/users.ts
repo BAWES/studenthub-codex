@@ -30,34 +30,34 @@ export interface MockUser {
 export const MOCK_USERS: MockUser[] = [
   {
     role: "admin",
-    id: "9001",
+    id: "29",
     name: "Test Admin",
-    email: "fixture-admin@test.studenthub.ai",
+    email: "admin@test.studenthub.ai",
   },
   {
     role: "staff",
-    id: "8001",
+    id: "168",
     name: "Test Staff",
-    email: "fixture-staff@test.studenthub.ai",
+    email: "staff@test.studenthub.ai",
   },
   {
     role: "candidate",
-    id: "7001",
+    id: "53519",
     name: "Test Candidate",
-    email: "fixture-candidate@test.studenthub.ai",
+    email: "candidate@test.studenthub.ai",
     passwordHash: "$2a$10$mock_hash_for_testing_only",
   },
   {
     role: "company",
-    id: "company-0001-0001-0001-000000000001",
+    id: "00000000-0000-0000-0000-000000000002",
     name: "Test Company User",
-    email: "fixture-company@test.studenthub.ai",
+    email: "company@test.studenthub.ai",
   },
   {
     role: "inspector",
-    id: "inspector-0001-0001-0001-000000000001",
+    id: "00000000-0000-0000-0000-000000000004",
     name: "Test Inspector",
-    email: "fixture-inspector@test.studenthub.ai",
+    email: "inspector@test.studenthub.ai",
   },
 ];
 

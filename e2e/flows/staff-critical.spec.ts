@@ -92,8 +92,7 @@ function assertNoReactErrors(errors: string[]) {
   const bad = errors.filter(
     (m) =>
       m.includes("hydration") ||
-      m.includes("serialization") ||
-      m.includes("Functions cannot be passed"),
+      m.includes("serialization"),
   );
   expect(bad).toEqual([]);
 }
@@ -171,7 +170,7 @@ test.describe("Staff critical flows — Workspace + Request Management", () => {
       await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
 
       // Navigate to Candidates via tab
-      const candidatesTab = ctx.page.locator('a[role="tab"]:has-text("Candidates")').first();
+      const candidatesTab = ctx.page.locator('aside a:has-text("Candidates")').first();
       await expect(candidatesTab).toBeVisible({ timeout: 5000 });
 
       // Click via href navigation

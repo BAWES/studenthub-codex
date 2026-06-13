@@ -1,3 +1,4 @@
+"use client";
 import type { Route } from "next";
 import type { Role } from "@/modules/auth/types";
 import type { LucideIcon } from "lucide-react";
