@@ -104,6 +104,7 @@ export function CandidateSearchOS({
               facetGroups={facetGroups}
               params={params}
               selectedIds={selectedIds}
+              source={data.source}
             />
           )}
         </section>
@@ -118,7 +119,8 @@ function CandidateSearchTab({
   data,
   facetGroups,
   params,
-  selectedIds
+  selectedIds,
+  source
 }: {
   activeFacetCount: number;
   basePath: "/admin/candidates" | "/staff/candidates";
@@ -126,6 +128,7 @@ function CandidateSearchTab({
   facetGroups: CandidateSearchFacet[];
   params: CandidateSearchParams;
   selectedIds: number[];
+  source: CandidateSearchData["source"];
 }) {
   return (
     <section className="candidateSearchPanel" aria-label="Candidate search and filters">
@@ -134,9 +137,14 @@ function CandidateSearchTab({
           <span>Search tab</span>
           <strong>{data.query ? `Results for ${data.query}` : "Candidate search"}</strong>
         </div>
-        <small>
-          {data.rows.length.toLocaleString("en-US")} of {data.matchingCount.toLocaleString("en-US")}
-        </small>
+        <div className="candidateSearchMeta">
+          <small>
+            {data.rows.length.toLocaleString("en-US")} of {data.matchingCount.toLocaleString("en-US")}
+          </small>
+          <span className={`candidateSearchSource ${source.current === "Live MySQL" ? "source-mysql" : "source-typesense"}`}>
+            {source.current}
+          </span>
+        </div>
       </header>
       <details className="candidatePowerFilters">
         <summary>
