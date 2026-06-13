@@ -1,5 +1,5 @@
-// Colocated server actions — candidate edit profile
-// Delegates to module-level actions in @/modules/candidate/edit/actions
+// ---------------------------------------------------------------------------
+// Candidate Edit Profile — barrel exports
 // ---------------------------------------------------------------------------
 
 export {
@@ -12,9 +12,9 @@ export {
   getCandidateProfileForEdit,
   updateCandidatePersonalInfo,
   updateCandidateProfileFields,
-} from "@/modules/candidate/edit/actions";
+} from "./actions";
 
 export type {
   CandidateProfileEditData,
   ProfileActionResult,
-} from "@/modules/candidate/edit";
+} from "@/app/candidate/edit/schemas";
