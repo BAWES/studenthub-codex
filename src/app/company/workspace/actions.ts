@@ -1,9 +1,10 @@
 // ---------------------------------------------------------------------------
 // Barrel re-export — delegates to module-level implementation
 // ---------------------------------------------------------------------------
-// All business logic lives in src/modules/company/actions.ts (which
-// has "use server"). This barrel re-exports so page consumers keep their
-// current import paths without duplicating the "use server" directive.
+// All business logic now lives in src/modules/company/workspace/ (module-level
+// Prisma wrappers with no auth/validation/revalidation). The page-level
+// server actions live in src/app/company/workspace/[id]/actions.ts.
+// This barrel re-exports so page consumers keep their current import paths.
 // ---------------------------------------------------------------------------
 
-export { getCompanyWorkspace, revalidateWorkspace } from "@/modules/company/actions";
+export { getWorkspace as getCompanyWorkspace } from "./[id]/actions";

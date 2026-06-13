@@ -67,6 +67,11 @@ import type {
 import type { NoteItem } from "@/modules/admin/note/schemas";
 export type { NoteItem };
 import { getRequestDetail as _getRequestDetail } from "@/modules/workspace/request-detail-core";
+import {
+  findContactByUuid,
+  getCompanyLinksForWorkspace,
+  getWorkspaceStatsTx,
+} from "@/modules/company/workspace/actions";
 
 import {
   listStoresSchema,
@@ -544,98 +549,8 @@ export async function getStaffWorkspace(
 }
 
 // ---------------------------------------------------------------------------
-// Company workspace — server action
-// Mirrors the legacy getCompanyWorkspace() from @/modules/workspace/data.
-// Used by the company workspace page and CompanyHome component.
-// ---------------------------------------------------------------------------
-
-/**
- * Fetch the company workspace dashboard data for a given contact UUID.
- * Returns contact info, aggregate metrics, linked companies, and recent requests.
- */
-export async function getCompanyWorkspace(
-  contactUuid: string,
-): Promise<CompanyWorkspaceData> {
-  await requireCapability("company.read");
-
-  const parsed = getCompanyWorkspaceSchema.safeParse({ contactUuid });
-  if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Invalid contact UUID");
-  }
-
-  const contact = await prisma.contact.findUnique({
-    where: { contact_uuid: contactUuid },
-    select: { contact_name: true, contact_email: true },
-  });
-
-  const companyLinks = await prisma.company_contact.findMany({
-    where: { contact_uuid: contactUuid },
-    take: 20,
-    select: {
-      company_contact_uuid: true,
-      contact_position: true,
-      allow_access: true,
-      company: {
-        select: {
-          company_id: true,
-          company_name: true,
-          company_email: true,
-          no_of_active_requests: true,
-          company_approved_to_hire: true,
-        },
-      },
-    },
-  });
-
-  const companyIds = companyLinks
-    .map((link) => link.company?.company_id)
-    .filter((id): id is number => Boolean(id));
-
-  const [requests, stores, notes, recentRequests] = await prisma.$transaction([
-    prisma.request.count({ where: { company_id: { in: companyIds } } }),
-    prisma.store.count({ where: { company_id: { in: companyIds }, deleted: 0 } }),
-    prisma.note.count({ where: { company_id: { in: companyIds } } }),
-    prisma.request.findMany({
-      where: { company_id: { in: companyIds } },
-      orderBy: { request_created_datetime: "desc" },
-      take: 6,
-      select: {
-        request_uuid: true,
-        request_position_title: true,
-        request_status: true,
-        request_number_of_employees: true,
-        request_created_datetime: true,
-        company: { select: { company_name: true } },
-      },
-    }),
-  ]);
-
-  return workspaceOverviewOutputSchema.parse({
-    contact: contact ? { contact_name: contact.contact_name, contact_email: contact.contact_email ?? "" } : null,
-    metrics: [
-      { label: "Companies", value: companyIds.length, note: "Companies linked to this contact" },
-      { label: "Requests", value: requests, note: "Hiring requests across linked companies" },
-      { label: "Stores", value: stores, note: "Active stores in the account" },
-      { label: "Notes", value: notes, note: "Internal/customer notes connected to account" },
-    ],
-    companies: companyLinks.map((link) => ({
-      id: link.company_contact_uuid,
-      title: link.company?.company_name ?? "Unknown company",
-      subtitle: link.contact_position ?? "Contact",
-      meta: link.allow_access ? "Access allowed" : "Access disabled",
-    })),
-    requests: recentRequests.map((request) => ({
-      id: request.request_uuid,
-      title: request.request_position_title ?? "Untitled request",
-      subtitle: request.company?.company_name ?? "No company",
-      meta: `${request.request_status ?? "No status"} · ${request.request_number_of_employees ?? 0} seats`,
-    })),
-  });
-}
-
-// ---------------------------------------------------------------------------
 // CompanyHome — extended dashboard data
-// Extends getCompanyWorkspace with active requests, positions, and activity.
+// Provides active requests, positions, and activity for the company dashboard.
 // ---------------------------------------------------------------------------
 
 /**
@@ -652,18 +567,41 @@ export async function getCompanyHomeData(
     throw new Error(parsed.error.issues[0]?.message ?? "Invalid contact UUID");
   }
 
-  const base = await getCompanyWorkspace(contactUuid);
-
-  const companyLinks = await prisma.company_contact.findMany({
-    where: { contact_uuid: contactUuid },
-    select: {
-      company: { select: { company_id: true } },
-    },
-  });
+  // Build base workspace data using module-level raw wrappers
+  const contact = await findContactByUuid(contactUuid);
+  const companyLinks = await getCompanyLinksForWorkspace(contactUuid);
 
   const companyIds = companyLinks
     .map((link) => link.company?.company_id)
     .filter((id): id is number => Boolean(id));
+
+  const [requests, stores, notes, recentRequests] = companyIds.length > 0
+    ? await getWorkspaceStatsTx(companyIds)
+    : [0, 0, 0, []] as const;
+
+  const base = {
+    contact: contact
+      ? { contact_name: contact.contact_name, contact_email: contact.contact_email ?? "" }
+      : null,
+    metrics: [
+      { label: "Companies", value: companyIds.length, note: "Companies linked to this contact" },
+      { label: "Requests", value: requests as number, note: "Hiring requests across linked companies" },
+      { label: "Stores", value: stores as number, note: "Active stores in the account" },
+      { label: "Notes", value: notes as number, note: "Internal/customer notes connected to account" },
+    ],
+    companies: companyLinks.map((link) => ({
+      id: link.company_contact_uuid,
+      title: link.company?.company_name ?? "Unknown company",
+      subtitle: link.contact_position ?? "Contact",
+      meta: link.allow_access ? "Access allowed" : "Access disabled",
+    })),
+    requests: (recentRequests as any[]).map((request: any) => ({
+      id: request.request_uuid,
+      title: request.request_position_title ?? "Untitled request",
+      subtitle: request.company?.company_name ?? "No company",
+      meta: `${request.request_status ?? "No status"} · ${request.request_number_of_employees ?? 0} seats`,
+    })),
+  };
 
   if (!companyIds.length) {
     return {
@@ -2066,53 +2004,4 @@ export async function getCompanyList(
       id: link.company!.company_id,
       name: link.company!.company_name,
     }));
-}
-
-// ---------------------------------------------------------------------------
-// Contact Profile Update — migrated from app/company/workspace/[id]/actions.ts
-// ---------------------------------------------------------------------------
-
-const updateContactProfileSchema = z.object({
-  contactUuid: z.string().min(1, "Contact UUID is required"),
-  contact_name: z.string().min(1, "Name is required").max(255).optional(),
-  contact_email: z.string().email("Invalid email").max(225).optional(),
-});
-
-export type UpdateContactProfileInput = z.input<typeof updateContactProfileSchema>;
-
-/**
- * Update a contact's profile (name and/or email).
- * Mirrors the updateWorkspace action from app/company/workspace/[id]/actions.ts.
- */
-export async function updateContactProfile(
-  data: UpdateContactProfileInput,
-): Promise<{ contactUuid: string }> {
-  await requireCapability("company.write.linked");
-
-  const parsed = updateContactProfileSchema.safeParse(data);
-  if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Invalid contact data");
-  }
-
-  const { contactUuid, ...fields } = parsed.data;
-
-  const updateData: Record<string, unknown> = {};
-
-  if (fields.contact_name !== undefined) {
-    updateData.contact_name = fields.contact_name;
-  }
-  if (fields.contact_email !== undefined) {
-    updateData.contact_email = fields.contact_email;
-  }
-
-  // Only update if there's actually something to update
-  if (Object.keys(updateData).length > 0) {
-    updateData.contact_updated_at = new Date();
-    await prisma.contact.update({
-      where: { contact_uuid: contactUuid },
-      data: updateData as any,
-    });
-  }
-
-  return { contactUuid };
 }
