@@ -2,7 +2,7 @@ import type { Route } from "next";
 import { ErrorBoundary } from "@/modules/workspace/ErrorBoundary";
 import { requireRoleCapability } from "@/modules/auth/session";
 import { listTransfers } from "./actions";
-import { AdminTransfersTable } from "./admin-transfers-table";
+import { AdminTransfersTable } from "./_components";
 
 export const dynamic = "force-dynamic";
 

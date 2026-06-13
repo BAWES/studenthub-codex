@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
-import { AdminUserRequestsTable } from "./admin-user-requests-table";
+import { AdminUserRequestsTable } from "./_components";
 
 afterEach(() => { cleanup(); });
 
