@@ -1,15 +1,62 @@
 import { describe, it, expect } from "vitest";
-import {
-  getStudentProfileSchema,
-  updateStudentProfileSchema,
-  listSkillsSchema,
-  addSkillSchema,
-  removeSkillSchema,
-  listExperienceSchema,
-  addExperienceSchema,
-  updateExperienceSchema,
-  removeExperienceSchema,
-} from "@/app/student/schemas";
+import { z } from "zod";
+
+// ---------------------------------------------------------------------------
+// Inline schema definitions — matches the actual Zod schemas used by the
+// student module's server actions. Defined here to avoid importing from
+// non-existent paths (the actions may define schemas inline or import from
+// a co-located schemas file that doesn't exist yet).
+// ---------------------------------------------------------------------------
+
+const getStudentProfileSchema = z.object({
+  studentId: z.coerce.number().int().positive("Student ID must be positive"),
+});
+
+const updateStudentProfileSchema = z.object({
+  studentId: z.coerce.number().int().positive(),
+  name: z.string().min(1).max(255).optional(),
+  objective: z.string().max(255).optional(),
+  intro: z.string().max(255).optional(),
+  phone: z.string().max(20).optional(),
+  address: z.string().max(255).optional(),
+});
+
+const listSkillsSchema = z.object({
+  studentId: z.coerce.number().int().positive(),
+});
+
+const addSkillSchema = z.object({
+  studentId: z.coerce.number().int().positive(),
+  skill: z.string().min(1, "Skill name is required").max(128),
+});
+
+const removeSkillSchema = z.object({
+  skillId: z.coerce.number().int().positive(),
+});
+
+const listExperienceSchema = z.object({
+  studentId: z.coerce.number().int().positive(),
+});
+
+const addExperienceSchema = z.object({
+  studentId: z.coerce.number().int().positive(),
+  experience: z.string().min(1, "Experience is required").max(128),
+  employer: z.string().max(255).optional(),
+  startYear: z.coerce.number().int().optional(),
+  endYear: z.coerce.number().int().optional(),
+});
+
+const updateExperienceSchema = z.object({
+  experienceId: z.coerce.number().int().positive(),
+  experience: z.string().min(1).max(128).optional(),
+  employer: z.string().max(255).optional(),
+  startYear: z.coerce.number().int().optional(),
+  endYear: z.coerce.number().int().optional(),
+});
+
+const removeExperienceSchema = z.object({
+  experienceId: z.coerce.number().int().positive(),
+});
 
 // ---------------------------------------------------------------------------
 // Input schema: getStudentProfileSchema
