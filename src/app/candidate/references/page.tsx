@@ -7,9 +7,9 @@ export const dynamic = "force-dynamic";
 
 export default async function CandidateReferencesPage() {
   const session = await requireRoleCapability("candidate", "candidate.read.own");
-  const references = await listCandidateReferences({});
+  const result = await listCandidateReferences({});
 
-  const rows = references.map((r) => ({
+  const rows = result.items.map((r) => ({
     id: r.reference_uuid,
     name: r.name,
     company: r.company ?? "—",
