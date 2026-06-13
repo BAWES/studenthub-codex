@@ -4,7 +4,7 @@ import { requireRoleCapability } from "@/modules/auth/session";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { listCompanyRequests } from "./actions";
-import { CompanyRequestsTable } from "./company-requests-table";
+import { CompanyRequestsTable } from "./_components";
 
 export const dynamic = "force-dynamic";
 

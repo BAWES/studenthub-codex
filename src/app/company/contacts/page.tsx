@@ -1,7 +1,7 @@
 import { requireRoleCapability } from "@/modules/auth/session";
 import { listCompanyContactsRows } from "./actions";
 import { listCompanySelectOptions } from "@/app/company/stores/actions";
-import { CompanyContactsTable } from "./company-contacts-table";
+import { CompanyContactsTable } from "./_components";
 
 export const dynamic = "force-dynamic";
 
