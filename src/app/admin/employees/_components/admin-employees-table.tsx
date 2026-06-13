@@ -7,8 +7,8 @@ import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 
 import { StatusBadge } from "@/modules/workspace/StatusBadge";
 import type { SessionUser } from "@/modules/auth/types";
-import type { EmployeeRow } from "./schemas";
-import { createAdminEmployee, deleteAdminEmployee } from "./actions";
+import type { EmployeeRow } from "../schemas";
+import { createAdminEmployee, deleteAdminEmployee } from "../actions";
 
 type Props = {
   session: SessionUser;

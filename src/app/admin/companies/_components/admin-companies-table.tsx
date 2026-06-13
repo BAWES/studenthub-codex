@@ -3,7 +3,7 @@
 import { DataTable } from "@/modules/workspace/DataTable";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import type { SessionUser } from "@/modules/auth/types";
-import type { CompanyRow } from "./schemas";
+import type { CompanyRow } from "../schemas";
 
 type Props = {
   session: SessionUser;
