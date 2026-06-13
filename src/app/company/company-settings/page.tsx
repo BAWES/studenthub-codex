@@ -2,7 +2,7 @@ import { requireRoleCapability } from "@/modules/auth/session";
 import { list } from "./actions";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { ErrorBoundary } from "@/modules/workspace/ErrorBoundary";
-import { CompanySettingsForm } from "./company-settings-form";
+import { CompanySettingsForm } from "./_components";
 
 export const dynamic = "force-dynamic";
 
