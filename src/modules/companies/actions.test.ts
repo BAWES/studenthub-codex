@@ -9,6 +9,7 @@ import {
   companyDetailSchema,
   companyCreateResultSchema,
   companyAccountRowSchema,
+  companyAccountDetailOutputSchema,
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
@@ -595,5 +596,77 @@ describe("companyAccountRowSchema", () => {
         updated: "2025-01-01",
       }).success,
     ).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output schema: companyAccountDetailOutputSchema
+// ---------------------------------------------------------------------------
+
+describe("companyAccountDetailOutputSchema", () => {
+  it("accepts a full account detail output", () => {
+    const r = companyAccountDetailOutputSchema.safeParse({
+      company: { company_id: 1, company_name: "Acme Corp" },
+      metrics: [
+        { label: "Requests", value: "12", note: "Active requests" },
+        { label: "Rate", value: 15.5, note: "Avg hourly rate" },
+      ],
+      requests: [
+        { id: "req-1", title: "Software Engineer", subtitle: "Pending", meta: "KWD" },
+      ],
+      contacts: [
+        { id: "contact-1", title: "John Doe", subtitle: "Manager", meta: "john@acme.com" },
+      ],
+      stores: [
+        { id: 1, title: "Main Branch", subtitle: "Kuwait City", meta: "Active" },
+      ],
+      notes: [
+        { id: "note-1", title: "Follow-up needed", subtitle: "Yesterday", meta: "Urgent" },
+      ],
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts null (no detail data)", () => {
+    const r = companyAccountDetailOutputSchema.safeParse(null);
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts empty arrays", () => {
+    const r = companyAccountDetailOutputSchema.safeParse({
+      company: null,
+      metrics: [],
+      requests: [],
+      contacts: [],
+      stores: [],
+      notes: [],
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts numeric and string metric values", () => {
+    const r = companyAccountDetailOutputSchema.safeParse({
+      company: null,
+      metrics: [
+        { label: "Count", value: 42, note: "Numeric" },
+        { label: "Rate", value: "15.500 KWD", note: "String value" },
+      ],
+      requests: [],
+      contacts: [],
+      stores: [],
+      notes: [],
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects missing metrics", () => {
+    const r = companyAccountDetailOutputSchema.safeParse({
+      company: null,
+      requests: [],
+      contacts: [],
+      stores: [],
+      notes: [],
+    });
+    expect(r.success).toBe(false);
   });
 });
