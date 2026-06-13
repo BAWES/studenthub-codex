@@ -27,8 +27,8 @@ vi.mock("./searchPalette", () => ({
 // The navigation data is used to build the command palette and sidebar
 vi.mock("./navigation", () => ({
   navForRole: () => [
-    { label: "Dashboard", href: "/admin", icon: "LayoutDashboard" },
-    { label: "Candidates", href: "/admin/candidates", icon: "Users" },
+    { label: "Dashboard", href: "/admin", icon: () => <svg data-testid="icon-dashboard" /> },
+    { label: "Candidates", href: "/admin/candidates", icon: () => <svg data-testid="icon-users" /> },
   ],
 }));
 
