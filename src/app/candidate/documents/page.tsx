@@ -5,7 +5,7 @@ import {
   deleteCandidateDocument,
 } from "@/modules/candidates/documents";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
-import { DocumentsClient } from "./DocumentsClient";
+import { DocumentsClient } from "./_components";
 
 export const dynamic = "force-dynamic";
 
