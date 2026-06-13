@@ -2067,3 +2067,52 @@ export async function getCompanyList(
       name: link.company!.company_name,
     }));
 }
+
+// ---------------------------------------------------------------------------
+// Contact Profile Update — migrated from app/company/workspace/[id]/actions.ts
+// ---------------------------------------------------------------------------
+
+const updateContactProfileSchema = z.object({
+  contactUuid: z.string().min(1, "Contact UUID is required"),
+  contact_name: z.string().min(1, "Name is required").max(255).optional(),
+  contact_email: z.string().email("Invalid email").max(225).optional(),
+});
+
+export type UpdateContactProfileInput = z.input<typeof updateContactProfileSchema>;
+
+/**
+ * Update a contact's profile (name and/or email).
+ * Mirrors the updateWorkspace action from app/company/workspace/[id]/actions.ts.
+ */
+export async function updateContactProfile(
+  data: UpdateContactProfileInput,
+): Promise<{ contactUuid: string }> {
+  await requireCapability("company.write.linked");
+
+  const parsed = updateContactProfileSchema.safeParse(data);
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid contact data");
+  }
+
+  const { contactUuid, ...fields } = parsed.data;
+
+  const updateData: Record<string, unknown> = {};
+
+  if (fields.contact_name !== undefined) {
+    updateData.contact_name = fields.contact_name;
+  }
+  if (fields.contact_email !== undefined) {
+    updateData.contact_email = fields.contact_email;
+  }
+
+  // Only update if there's actually something to update
+  if (Object.keys(updateData).length > 0) {
+    updateData.contact_updated_at = new Date();
+    await prisma.contact.update({
+      where: { contact_uuid: contactUuid },
+      data: updateData as any,
+    });
+  }
+
+  return { contactUuid };
+}

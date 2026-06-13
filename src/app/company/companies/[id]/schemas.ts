@@ -123,35 +123,5 @@ export const companyDetailResultSchema = z.object({
   staff_name: z.string().nullable(),
 });
 
-export const companyAccountDetailOutputSchema = z.object({
-  company: z.any().nullable(),
-  metrics: z.array(z.object({
-    label: z.string(),
-    value: z.union([z.string(), z.number()]),
-    note: z.string(),
-  })),
-  requests: z.array(z.object({
-    id: z.string(),
-    title: z.string(),
-    subtitle: z.string(),
-    meta: z.string(),
-  })),
-  contacts: z.array(z.object({
-    id: z.string(),
-    title: z.string(),
-    subtitle: z.string(),
-    meta: z.string(),
-  })),
-  stores: z.array(z.object({
-    id: z.number().int(),
-    title: z.string(),
-    subtitle: z.string(),
-    meta: z.string(),
-  })),
-  notes: z.array(z.object({
-    id: z.string(),
-    title: z.string(),
-    subtitle: z.string(),
-    meta: z.string(),
-  })),
-}).nullable();
+// Re-export companyAccountDetailOutputSchema from module
+export { companyAccountDetailOutputSchema } from "@/modules/companies/schemas";

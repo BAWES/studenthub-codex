@@ -3,19 +3,15 @@
 // ---------------------------------------------------------------------------
 // Candidate Invitation [id] — server actions for the detail page
 // ---------------------------------------------------------------------------
-// Convenience wrappers that delegate to the parent list-level actions.
+// Convenience wrappers that delegate to module-level actions.
 //
 // Actions:
 //   - getInvitation          — single invitation detail (delegates to parent)
-//   - acceptInvitation       — accept an invitation
+//   - acceptInvitation       — accept an invitation (delegates to module)
 //   - declineInvitation      — decline an invitation with optional reason
 // ---------------------------------------------------------------------------
 
-import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { z } from "zod";
-import { prisma } from "@/lib/prisma";
-import { requireRoleCapability } from "@/modules/auth/session";
 import {
   getCandidateInvitationDetail as parentGetInvitationDetail,
 } from "../actions";
@@ -26,13 +22,19 @@ import {
   getInvitationSchema,
   acceptInvitationSchema,
   declineInvitationSchema,
-  invitationExistenceSchema,
   invitationActionResultSchema,
 } from "./schemas";
 import type {
   AcceptInvitationInput,
   DeclineInvitationInput,
+  InvitationActionResponse,
 } from "./schemas";
+
+// Module-level implementations (handles Prisma queries, status checks, notes)
+import {
+  acceptInvitation as moduleAcceptInvitation,
+  rejectInvitation as moduleRejectInvitation,
+} from "@/modules/invitations/actions";
 
 // ---------------------------------------------------------------------------
 // Re-export schemas types so consumers have a single import path
@@ -45,13 +47,6 @@ export type {
   DeclineInvitationInput,
   InvitationActionResponse,
 } from "./schemas";
-
-// ---------------------------------------------------------------------------
-// Constants — mirror @/modules/candidates/actions
-// ---------------------------------------------------------------------------
-
-const INVITATION_STATUS_ACCEPTED = 1;
-const INVITATION_STATUS_REJECTED = 2;
 
 // ---------------------------------------------------------------------------
 // getInvitation
@@ -77,17 +72,14 @@ export async function getInvitation(
 // ---------------------------------------------------------------------------
 
 /**
- * Accept an invitation. Updates the invitation status to accepted (1).
- * The invitation must belong to the current candidate.
+ * Accept an invitation. Delegates to the module-level acceptInvitation which
+ * handles Prisma queries, status checks, and note creation.
  *
  * Returns `{ success: boolean, error?: string }`.
  */
 export async function acceptInvitation(
   input: AcceptInvitationInput,
-): Promise<z.infer<typeof invitationActionResultSchema>> {
-  const session = await requireRoleCapability("candidate", "candidate.read.own");
-  const candidateId = Number(session.id);
-
+): Promise<InvitationActionResponse> {
   const parsed = acceptInvitationSchema.safeParse(input);
   if (!parsed.success) {
     return invitationActionResultSchema.parse({
@@ -96,50 +88,26 @@ export async function acceptInvitation(
     });
   }
 
-  const { invitationUuid } = parsed.data;
-
-  const invitation = await prisma.invitation.findFirst({
-    where: { invitation_uuid: invitationUuid, candidate_id: candidateId },
-    select: { invitation_uuid: true, invitation_status: true },
+  const moduleResult = await moduleAcceptInvitation({
+    invitationUuid: parsed.data.invitationUuid,
+    action: "accept",
   });
 
-  const existenceCheck = invitationExistenceSchema.safeParse(invitation);
-  if (!existenceCheck.success || existenceCheck.data === null) {
-    return invitationActionResultSchema.parse({
-      success: false as const,
-      error: "Invitation not found",
-    });
+  // Map the module's { success, message } shape to this route's { success, error } shape
+  const result: InvitationActionResponse = moduleResult.success
+    ? { success: true }
+    : { success: false, error: moduleResult.message ?? "Failed to accept invitation" };
+
+  // Validate output shape
+  const outputParsed = invitationActionResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[candidate/invitations/[id]] acceptInvitation output validation failed:",
+      outputParsed.error.issues,
+    );
   }
 
-  const inv = existenceCheck.data;
-
-  if (inv.invitation_status === INVITATION_STATUS_ACCEPTED) {
-    return invitationActionResultSchema.parse({
-      success: false as const,
-      error: "Invitation has already been accepted",
-    });
-  }
-
-  if (inv.invitation_status === INVITATION_STATUS_REJECTED) {
-    return invitationActionResultSchema.parse({
-      success: false as const,
-      error: "Invitation has already been rejected",
-    });
-  }
-
-  await prisma.invitation.update({
-    where: { invitation_uuid: invitationUuid },
-    data: {
-      invitation_status: INVITATION_STATUS_ACCEPTED,
-      invitation_app_seen_at: new Date(),
-      invitation_updated_at: new Date(),
-    },
-  });
-
-  revalidatePath("/candidate/invitations");
-  revalidatePath(`/candidate/invitations/${invitationUuid}`);
-
-  return invitationActionResultSchema.parse({ success: true as const });
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -147,17 +115,14 @@ export async function acceptInvitation(
 // ---------------------------------------------------------------------------
 
 /**
- * Decline an invitation with an optional reason. Updates the invitation
- * status to rejected (2). The invitation must belong to the current candidate.
+ * Decline an invitation with an optional reason. Delegates to the module-level
+ * rejectInvitation which handles Prisma queries, status checks, and note creation.
  *
  * Returns `{ success: boolean, error?: string }`.
  */
 export async function declineInvitation(
   input: DeclineInvitationInput,
-): Promise<z.infer<typeof invitationActionResultSchema>> {
-  const session = await requireRoleCapability("candidate", "candidate.read.own");
-  const candidateId = Number(session.id);
-
+): Promise<InvitationActionResponse> {
   const parsed = declineInvitationSchema.safeParse(input);
   if (!parsed.success) {
     return invitationActionResultSchema.parse({
@@ -166,48 +131,25 @@ export async function declineInvitation(
     });
   }
 
-  const { invitationUuid } = parsed.data;
-
-  const invitation = await prisma.invitation.findFirst({
-    where: { invitation_uuid: invitationUuid, candidate_id: candidateId },
-    select: { invitation_uuid: true, invitation_status: true },
+  const moduleResult = await moduleRejectInvitation({
+    invitationUuid: parsed.data.invitationUuid,
+    action: "reject",
+    reason: parsed.data.reason,
   });
 
-  const existenceCheck = invitationExistenceSchema.safeParse(invitation);
-  if (!existenceCheck.success || existenceCheck.data === null) {
-    return invitationActionResultSchema.parse({
-      success: false as const,
-      error: "Invitation not found",
-    });
+  // Map the module's { success, message } shape to this route's { success, error } shape
+  const result: InvitationActionResponse = moduleResult.success
+    ? { success: true }
+    : { success: false, error: moduleResult.message ?? "Failed to decline invitation" };
+
+  // Validate output shape
+  const outputParsed = invitationActionResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[candidate/invitations/[id]] declineInvitation output validation failed:",
+      outputParsed.error.issues,
+    );
   }
 
-  const inv = existenceCheck.data;
-
-  if (inv.invitation_status === INVITATION_STATUS_REJECTED) {
-    return invitationActionResultSchema.parse({
-      success: false as const,
-      error: "Invitation has already been rejected",
-    });
-  }
-
-  if (inv.invitation_status === INVITATION_STATUS_ACCEPTED) {
-    return invitationActionResultSchema.parse({
-      success: false as const,
-      error: "Cannot decline an accepted invitation",
-    });
-  }
-
-  await prisma.invitation.update({
-    where: { invitation_uuid: invitationUuid },
-    data: {
-      invitation_status: INVITATION_STATUS_REJECTED,
-      invitation_app_seen_at: new Date(),
-      invitation_updated_at: new Date(),
-    },
-  });
-
-  revalidatePath("/candidate/invitations");
-  revalidatePath(`/candidate/invitations/${invitationUuid}`);
-
-  return invitationActionResultSchema.parse({ success: true as const });
+  return result;
 }

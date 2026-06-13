@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
 import {
   getCandidateWorkLogDetailSchema,
@@ -27,6 +26,17 @@ import {
   type WorkLogFeedbackRow,
 } from "./schemas";
 
+// Module-level implementations (handle Prisma queries)
+import {
+  getWorkLogDetailWithStore as moduleGetWorkLogDetail,
+  approveWorkLogAppeal as moduleApproveWorkLogAppeal,
+  rejectWorkLogAppeal as moduleRejectWorkLogAppeal,
+  updateWorkLogEntry as moduleUpdateWorkLogEntry,
+  deleteWorkLogEntry as moduleDeleteWorkLogEntry,
+  getWorkLogAppeals as moduleGetWorkLogAppeals,
+  getWorkLogFeedback as moduleGetWorkLogFeedback,
+} from "@/modules/candidate/work-logs/actions";
+
 // ---------------------------------------------------------------------------
 // getCandidateWorkLogDetail
 // ---------------------------------------------------------------------------
@@ -34,6 +44,7 @@ import {
 /**
  * Get a single work log by UUID with full detail for the [id] route.
  * Verifies the record belongs to the current candidate.
+ * Delegates Prisma queries through the module layer.
  */
 export async function getCandidateWorkLogDetail(
   workLogUuid: string,
@@ -45,31 +56,7 @@ export async function getCandidateWorkLogDetail(
     throw new Error(parsed.error.issues[0]?.message ?? "Invalid input");
   }
 
-  const candidateId = Number(session.id);
-
-  const row = await prisma.candidate_working_hour.findFirst({
-    where: {
-      candidate_working_hour_uuid: parsed.data.workLogUuid,
-      candidate_id: candidateId,
-    },
-    select: {
-      candidate_working_hour_uuid: true,
-      date: true,
-      start_time: true,
-      end_time: true,
-      total_time: true,
-      status: true,
-      via: true,
-      note: true,
-      store: {
-        select: {
-          store_name: true,
-          store_location: true,
-          company: { select: { company_name: true } },
-        },
-      },
-    },
-  });
+  const row = await moduleGetWorkLogDetail(parsed.data.workLogUuid);
 
   if (!row) return null;
 
@@ -107,6 +94,7 @@ export async function getCandidateWorkLogDetail(
  * Approve a work log appeal.
  * Updates the appeal status to approved (1).
  * The caller must have company-time.write permission.
+ * Delegates Prisma queries through the module layer.
  */
 export async function approveWorkLogAppeal(
   data: ApproveWorkLogAppealInput,
@@ -118,28 +106,12 @@ export async function approveWorkLogAppeal(
     throw new Error(parsed.error.issues[0]?.message ?? "Invalid input");
   }
 
-  const existing = await prisma.candidate_working_hour_appeal.findUnique({
-    where: { appeal_uuid: parsed.data.appealUuid },
-    select: { appeal_uuid: true, status: true },
-  });
-
-  if (!existing) {
-    throw new Error("Appeal not found");
-  }
-
-  await prisma.candidate_working_hour_appeal.update({
-    where: { appeal_uuid: parsed.data.appealUuid },
-    data: {
-      status: 1, // approved
-      updated_at: new Date(),
-    },
-  });
+  const result = await moduleApproveWorkLogAppeal(parsed.data.appealUuid);
 
   revalidatePath("/candidate/work-logs");
-  const appealResult = { appeal_uuid: parsed.data.appealUuid };
 
   // Validate output shape
-  const approveOutputParsed = workLogActionOutputSchema.safeParse(appealResult);
+  const approveOutputParsed = workLogActionOutputSchema.safeParse(result);
   if (!approveOutputParsed.success) {
     console.error(
       "[candidate/work-logs/[id]] approveWorkLogAppeal output validation failed:",
@@ -147,7 +119,7 @@ export async function approveWorkLogAppeal(
     );
   }
 
-  return appealResult;
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -158,6 +130,7 @@ export async function approveWorkLogAppeal(
  * Reject a work log appeal with a required reason.
  * Updates the appeal status to rejected (2).
  * The caller must have company-time.write permission.
+ * Delegates Prisma queries through the module layer.
  */
 export async function rejectWorkLogAppeal(
   data: RejectWorkLogAppealInput,
@@ -169,29 +142,12 @@ export async function rejectWorkLogAppeal(
     throw new Error(parsed.error.issues[0]?.message ?? "Invalid input");
   }
 
-  const existing = await prisma.candidate_working_hour_appeal.findUnique({
-    where: { appeal_uuid: parsed.data.appealUuid },
-    select: { appeal_uuid: true, status: true },
-  });
-
-  if (!existing) {
-    throw new Error("Appeal not found");
-  }
-
-  await prisma.candidate_working_hour_appeal.update({
-    where: { appeal_uuid: parsed.data.appealUuid },
-    data: {
-      status: 2, // rejected
-      reason: parsed.data.reason,
-      updated_at: new Date(),
-    },
-  });
+  const result = await moduleRejectWorkLogAppeal(parsed.data.appealUuid, parsed.data.reason);
 
   revalidatePath("/candidate/work-logs");
-  const rejectResult = { appeal_uuid: parsed.data.appealUuid };
 
   // Validate output shape
-  const rejectOutputParsed = workLogActionOutputSchema.safeParse(rejectResult);
+  const rejectOutputParsed = workLogActionOutputSchema.safeParse(result);
   if (!rejectOutputParsed.success) {
     console.error(
       "[candidate/work-logs/[id]] rejectWorkLogAppeal output validation failed:",
@@ -199,7 +155,7 @@ export async function rejectWorkLogAppeal(
     );
   }
 
-  return rejectResult;
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -210,6 +166,7 @@ export async function rejectWorkLogAppeal(
  * Update a work log entry.
  * Validates the UUID, status, and optional note.
  * The caller must have candidate.write.own permission.
+ * Delegates Prisma queries through the module layer.
  */
 export async function updateWorkLog(
   data: UpdateWorkLogInput,
@@ -221,29 +178,15 @@ export async function updateWorkLog(
     throw new Error(parsed.error.issues[0]?.message ?? "Invalid input");
   }
 
-  const existing = await prisma.candidate_working_hour.findUnique({
-    where: { candidate_working_hour_uuid: parsed.data.workLogUuid },
-    select: { candidate_working_hour_uuid: true },
-  });
-
-  if (!existing) {
-    throw new Error("Work log not found");
-  }
-
-  await prisma.candidate_working_hour.update({
-    where: { candidate_working_hour_uuid: parsed.data.workLogUuid },
-    data: {
-      status: parsed.data.status,
-      ...(parsed.data.note !== undefined && { note: parsed.data.note }),
-      updated_at: new Date(),
-    },
+  const result = await moduleUpdateWorkLogEntry(parsed.data.workLogUuid, {
+    status: parsed.data.status,
+    note: parsed.data.note,
   });
 
   revalidatePath("/candidate/work-logs");
-  const updateResult = { workLogUuid: parsed.data.workLogUuid };
 
   // Validate output shape
-  const updateOutputParsed = workLogUpdateOutputSchema.safeParse(updateResult);
+  const updateOutputParsed = workLogUpdateOutputSchema.safeParse(result);
   if (!updateOutputParsed.success) {
     console.error(
       "[candidate/work-logs/[id]] updateWorkLog output validation failed:",
@@ -251,7 +194,7 @@ export async function updateWorkLog(
     );
   }
 
-  return updateResult;
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -261,6 +204,7 @@ export async function updateWorkLog(
 /**
  * Delete a work log entry by UUID.
  * The caller must have candidate.write permission.
+ * Delegates Prisma queries through the module layer.
  */
 export async function deleteWorkLog(
   data: DeleteWorkLogInput,
@@ -272,21 +216,10 @@ export async function deleteWorkLog(
     throw new Error(parsed.error.issues[0]?.message ?? "Invalid input");
   }
 
-  const existing = await prisma.candidate_working_hour.findUnique({
-    where: { candidate_working_hour_uuid: parsed.data.workLogUuid },
-    select: { candidate_working_hour_uuid: true },
-  });
-
-  if (!existing) {
-    throw new Error("Work log not found");
-  }
-
-  await prisma.candidate_working_hour.delete({
-    where: { candidate_working_hour_uuid: parsed.data.workLogUuid },
-  });
+  const result = await moduleDeleteWorkLogEntry(parsed.data.workLogUuid);
 
   revalidatePath("/candidate/work-logs");
-  return { workLogUuid: parsed.data.workLogUuid };
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -297,31 +230,19 @@ export async function deleteWorkLog(
  * Get work log appeals for the current candidate.
  * The caller must have candidate.read.own capability.
  * Returns up to 8 most recent appeals.
+ * Delegates Prisma queries through the module layer.
  */
 export async function getWorkLogAppeals(
   workLogUuid: string,
 ): Promise<WorkLogAppealRow[]> {
-  const session = await requireCapability("candidate.read.own");
+  await requireCapability("candidate.read.own");
 
   const parsed = getWorkLogAppealsSchema.safeParse({ workLogUuid });
   if (!parsed.success) {
     throw new Error(parsed.error.issues[0]?.message ?? "Invalid input");
   }
 
-  const rows = await prisma.candidate_working_hour_appeal.findMany({
-    where: {
-      candidate_working_hour_uuid: parsed.data.workLogUuid,
-      candidate_id: Number(session.id),
-    },
-    orderBy: { created_at: "desc" },
-    take: 8,
-    select: {
-      appeal_uuid: true,
-      reason: true,
-      status: true,
-      created_at: true,
-    },
-  });
+  const rows = await moduleGetWorkLogAppeals(parsed.data.workLogUuid);
 
   return rows;
 }
@@ -334,33 +255,19 @@ export async function getWorkLogAppeals(
  * Get work log feedback for the current candidate.
  * The caller must have candidate.read.own capability.
  * Returns up to 8 most recent feedback records.
+ * Delegates Prisma queries through the module layer.
  */
 export async function getWorkLogFeedback(
   workLogUuid: string,
 ): Promise<WorkLogFeedbackRow[]> {
-  const session = await requireCapability("candidate.read.own");
+  await requireCapability("candidate.read.own");
 
   const parsed = getWorkLogFeedbackSchema.safeParse({ workLogUuid });
   if (!parsed.success) {
     throw new Error(parsed.error.issues[0]?.message ?? "Invalid input");
   }
 
-  const rows = await prisma.candidate_work_log_feedback.findMany({
-    where: {
-      candidate_working_hour_uuid: parsed.data.workLogUuid,
-      candidate_id: Number(session.id),
-    },
-    orderBy: { created_at: "desc" },
-    take: 8,
-    select: {
-      cwlf_uuid: true,
-      note: true,
-      reason: true,
-      status: true,
-      rating: true,
-      created_at: true,
-    },
-  });
+  const rows = await moduleGetWorkLogFeedback(parsed.data.workLogUuid);
 
   return rows;
 }
