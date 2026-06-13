@@ -1,6 +1,6 @@
 import { requireRoleCapability } from "@/modules/auth/session";
 import { getDashboardData } from "./actions";
-import { AdminDashboardClient } from "./admin-dashboard-client";
+import { AdminDashboardClient } from "./_components";
 
 export const dynamic = "force-dynamic";
 

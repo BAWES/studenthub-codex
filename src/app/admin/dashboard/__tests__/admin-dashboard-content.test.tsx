@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
-import { AdminDashboardContent } from "../admin-dashboard-content";
+import { AdminDashboardContent } from "../_components";
 
 // Mock next/navigation
 vi.mock("next/navigation", () => ({
