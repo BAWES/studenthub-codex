@@ -1,9 +1,27 @@
-export { listSettings, getSetting, updateSetting } from "./actions";
+// ---------------------------------------------------------------------------
+// Settings — barrel exports
+// ---------------------------------------------------------------------------
+
+export {
+  listSettings,
+  getSetting,
+  updateSetting
+} from "./actions";
+
 export type {
-  SettingItem,
-  ListSettingsResult,
-  UpdateSettingResult,
   ListSettingsInput,
   GetSettingInput,
   UpdateSettingInput,
+  SettingItem,
+  ListSettingsResult,
+  UpdateSettingResult
+} from "./schemas";
+
+export {
+  listSettingsSchema,
+  getSettingSchema,
+  updateSettingSchema,
+  settingItemSchema,
+  listSettingsResultSchema,
+  updateSettingResultSchema
 } from "./schemas";
