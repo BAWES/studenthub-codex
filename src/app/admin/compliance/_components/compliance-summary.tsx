@@ -4,7 +4,7 @@ import { MetricCard } from "@/components/ui/metric-card";
 import {
   Building2, FileCheck, Users, UserCheck, AlertTriangle,
 } from "lucide-react";
-import type { ComplianceSummary } from "./schemas";
+import type { ComplianceSummary } from "../schemas";
 
 /**
  * ComplianceSummaryRow — 5 metric cards showing top-level compliance stats.

@@ -1,6 +1,6 @@
 import { requireRoleCapability } from "@/modules/auth/session";
 import { listDesignations } from "./actions";
-import { AdminDesignationsTable } from "./admin-designations-table";
+import { AdminDesignationsTable } from "./_components";
 
 export const dynamic = "force-dynamic";
 

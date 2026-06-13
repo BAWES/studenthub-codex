@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, cleanup, waitFor } from "@testing-library/react";
-import { ComplianceList } from "./compliance-list";
+import { ComplianceList } from "./_components";
 
 afterEach(() => { cleanup(); });
 

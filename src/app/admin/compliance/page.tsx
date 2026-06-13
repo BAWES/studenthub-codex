@@ -1,8 +1,7 @@
 import { requireRoleCapability } from "@/modules/auth/session";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { getComplianceSummary } from "./actions";
-import { ComplianceSummaryRow } from "./compliance-summary";
-import { ComplianceList } from "./compliance-list";
+import { ComplianceSummaryRow, ComplianceList } from "./_components";
 import type { ComplianceSummary } from "./schemas";
 
 export const dynamic = "force-dynamic";

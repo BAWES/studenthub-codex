@@ -1,6 +1,6 @@
 import { requireRoleCapability } from "@/modules/auth/session";
 import { listAwsConfigs, getAwsConfig } from "./actions";
-import { AdminAwsTable } from "./admin-aws-table";
+import { AdminAwsTable } from "./_components";
 
 export const dynamic = "force-dynamic";
 

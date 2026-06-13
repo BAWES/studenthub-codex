@@ -12,10 +12,10 @@ import type {
   ComplianceRow,
   CompanyComplianceDetail,
   IdRequestComplianceDetail,
-} from "./schemas";
+} from "../schemas";
 import { ComplianceDetailPanel } from "./compliance-detail-panel";
 
-import { listComplianceRecords } from "./actions";
+import { listComplianceRecords } from "../actions";
 
 // ── Type filter tabs ──────────────────────────────────────────────
 
@@ -104,7 +104,7 @@ export function ComplianceList({
     setDetailData(null);
     try {
       const id = row.id.replace(/^(company|candidate)-/, "");
-      const mod = await import("./actions");
+      const mod = await import("../actions");
       const result = await mod.getComplianceRecord({ id, type: row.type });
       setDetailData(result);
     } catch {

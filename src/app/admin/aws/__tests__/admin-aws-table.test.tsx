@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
-import { AdminAwsTable } from "../admin-aws-table";
+import { AdminAwsTable } from "../_components";
 
 // Mock next/navigation
 vi.mock("next/navigation", () => ({

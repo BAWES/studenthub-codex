@@ -2,7 +2,7 @@
 
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import type { SessionUser } from "@/modules/auth/types";
-import type { AwsConfigEntry, AwsConfigResult } from "./schemas";
+import type { AwsConfigEntry, AwsConfigResult } from "../schemas";
 
 type Props = {
   session: SessionUser;

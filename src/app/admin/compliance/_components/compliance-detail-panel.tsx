@@ -6,12 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
-import { approveComplianceRecord, denyComplianceRecord } from "./actions";
+import { approveComplianceRecord, denyComplianceRecord } from "../actions";
 import type {
   ComplianceRow,
   CompanyComplianceDetail,
   IdRequestComplianceDetail,
-} from "./schemas";
+} from "../schemas";
 
 // ── Detail Panel ───────────────────────────────────────────────────
 
