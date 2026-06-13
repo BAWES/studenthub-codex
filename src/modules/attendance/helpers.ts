@@ -1,8 +1,8 @@
 // ---------------------------------------------------------------------------
-// Attendance — helpers (non-server-action utilities)
+// Internal helpers for the attendance module (no "use server" — sync helpers)
 // ---------------------------------------------------------------------------
 
-import type { AttendanceItem, AttendanceDetail } from "./schemas";
+import type { AttendanceItem } from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Prisma row type (internal)
