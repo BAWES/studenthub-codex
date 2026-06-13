@@ -77,3 +77,56 @@ export type UpdateJobResult = {
 export type DeleteJobResult = {
   success: true;
 };
+
+// ---------------------------------------------------------------------------
+// Output schemas
+// ---------------------------------------------------------------------------
+
+export const jobRowSchema = z.object({
+  jobListingId: z.number().int(),
+  employerId: z.number().int(),
+  title: z.string(),
+  description: z.string(),
+  requirements: z.string().nullable(),
+  location: z.string().nullable(),
+  employmentType: z.string().nullable(),
+  salaryRange: z.string().nullable(),
+  status: z.string().nullable(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type JobRowOutput = z.output<typeof jobRowSchema>;
+
+export const listJobsResultSchema = z.object({
+  items: z.array(jobRowSchema),
+  total: z.number().int().nonnegative(),
+  page: z.number().int().positive(),
+  limit: z.number().int().positive(),
+  totalPages: z.number().int().nonnegative(),
+});
+
+export type ListJobsResult = z.output<typeof listJobsResultSchema>;
+
+export const getJobResultSchema = z.union([jobRowSchema, z.null()]);
+
+export type GetJobResult = z.output<typeof getJobResultSchema>;
+
+export const createJobResultSchema = z.object({
+  success: z.literal(true),
+  jobListingId: z.number().int().positive(),
+});
+
+export type CreateJobResultOutput = z.output<typeof createJobResultSchema>;
+
+export const updateJobResultSchema = z.object({
+  success: z.literal(true),
+});
+
+export type UpdateJobResultOutput = z.output<typeof updateJobResultSchema>;
+
+export const deleteJobResultSchema = z.object({
+  success: z.literal(true),
+});
+
+export type DeleteJobResultOutput = z.output<typeof deleteJobResultSchema>;
