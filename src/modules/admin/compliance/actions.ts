@@ -196,7 +196,7 @@ export async function listComplianceRecords(
     }
   }
 
-  return {
+  const listResult = {
     items,
     total: items.length,
     page,
@@ -210,6 +210,17 @@ export async function listComplianceRecords(
       incompleteCandidates,
     },
   };
+
+  // Validate output shape
+  const outputParsed = listComplianceRecordsResponseSchema.safeParse(listResult);
+  if (!outputParsed.success) {
+    console.error(
+      "[admin/compliance] listComplianceRecords output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return listResult;
 }
 
 // ---------------------------------------------------------------------------
@@ -272,8 +283,8 @@ export async function getComplianceRecord(
       created_at: r.created_at,
     }));
 
-    return {
-      type: "company",
+    const companyResult = {
+      type: "company" as const,
       company: {
         company_id: company.company_id,
         company_name: company.company_name,
@@ -292,6 +303,17 @@ export async function getComplianceRecord(
       ],
       idRequests,
     };
+
+    // Validate output shape
+    const companyOutputParsed = companyComplianceDetailSchema.safeParse(companyResult);
+    if (!companyOutputParsed.success) {
+      console.error(
+        "[admin/compliance] getComplianceRecord (company) output validation failed:",
+        companyOutputParsed.error.issues,
+      );
+    }
+
+    return companyResult;
   }
 
   if (type === "id_request") {
@@ -301,8 +323,8 @@ export async function getComplianceRecord(
 
     if (!record) return null;
 
-    return {
-      type: "id_request",
+    const idRequestResult = {
+      type: "id_request" as const,
       record: {
         cir_uuid: record.cir_uuid,
         candidate_ids: record.candidate_ids,
@@ -317,6 +339,17 @@ export async function getComplianceRecord(
         { label: "Created", value: formatDate(record.created_at), note: "Request creation date" },
       ],
     };
+
+    // Validate output shape
+    const idRequestOutputParsed = idRequestComplianceDetailSchema.safeParse(idRequestResult);
+    if (!idRequestOutputParsed.success) {
+      console.error(
+        "[admin/compliance] getComplianceRecord (id_request) output validation failed:",
+        idRequestOutputParsed.error.issues,
+      );
+    }
+
+    return idRequestResult;
   }
 
   return null;
@@ -342,13 +375,24 @@ export async function getComplianceSummary(): Promise<ComplianceSummary> {
       prisma.candidate.count({ where: { deleted: 0, is_incomplete_profile: true } }),
     ]);
 
-  return {
+  const summaryResult = {
     totalCompanies,
     unapprovedCompanies,
     pendingIdRequests,
     unapprovedCandidates,
     incompleteCandidates,
   };
+
+  // Validate output shape
+  const outputParsed = complianceSummarySchema.safeParse(summaryResult);
+  if (!outputParsed.success) {
+    console.error(
+      "[admin/compliance] getComplianceSummary output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return summaryResult;
 }
 
 // ---------------------------------------------------------------------------
