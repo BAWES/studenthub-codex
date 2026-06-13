@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
+import type { Prisma } from "@prisma/client";
 import {
   listDepartmentsSchema,
   getDepartmentSchema,
@@ -40,19 +41,19 @@ export async function listDepartments(
 
   const { nameFilter, page = 1, limit = 20 } = parsed.data;
 
-  const where: Record<string, unknown> = {};
+  const where: Prisma.departmentWhereInput = {};
   if (nameFilter && nameFilter.trim()) {
-    where.department_name_en = { contains: nameFilter };
+    where.department_name_en = { contains: nameFilter.trim() };
   }
 
   const [departments, total] = await Promise.all([
     prisma.department.findMany({
-      where: where as any,
+      where,
       orderBy: { department_name_en: "asc" },
       skip: (page - 1) * limit,
       take: limit,
     }),
-    prisma.department.count({ where: where as any }),
+    prisma.department.count({ where }),
   ]);
 
   const result = {
@@ -175,7 +176,7 @@ export async function updateDepartment(
   const { departmentUuid, departmentNameEn, departmentNameAr } = parsed.data;
 
   // Build update data — only include provided fields
-  const updateData: Record<string, unknown> = {
+  const updateData: Prisma.departmentUpdateInput = {
     department_updated_at: new Date(),
   };
   if (departmentNameEn !== undefined) {
@@ -187,7 +188,7 @@ export async function updateDepartment(
 
   await prisma.department.update({
     where: { department_uuid: departmentUuid },
-    data: updateData as any,
+    data: updateData,
   });
 
   return { success: true };

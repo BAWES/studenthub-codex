@@ -20,6 +20,7 @@ const DEPARTMENT_NAME_MAX = 255;
 export const createDepartmentSchema = z.object({
   departmentNameEn: z
     .string()
+    .trim()
     .min(1, "English name is required")
     .max(DEPARTMENT_NAME_MAX, `English name must be at most ${DEPARTMENT_NAME_MAX} characters`),
   departmentNameAr: z
@@ -33,6 +34,7 @@ export const updateDepartmentSchema = z.object({
   departmentUuid: z.string().min(1, "Department UUID is required"),
   departmentNameEn: z
     .string()
+    .trim()
     .min(1, "English name cannot be empty")
     .max(DEPARTMENT_NAME_MAX, `English name must be at most ${DEPARTMENT_NAME_MAX} characters`)
     .optional(),

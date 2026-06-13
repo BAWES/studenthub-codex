@@ -183,6 +183,10 @@ describe("createDepartmentSchema", () => {
     ).toBe(false);
   });
 
+  it("rejects whitespace-only English name", () => {
+    expect(createDepartmentSchema.safeParse({ departmentNameEn: "   " }).success).toBe(false);
+  });
+
   it("rejects Arabic name over 255 chars", () => {
     expect(
       createDepartmentSchema.safeParse({
@@ -222,6 +226,15 @@ describe("updateDepartmentSchema", () => {
       updateDepartmentSchema.safeParse({
         departmentUuid: "dept-001",
         departmentNameEn: "",
+      }).success,
+    ).toBe(false);
+  });
+
+  it("rejects whitespace-only English name when provided", () => {
+    expect(
+      updateDepartmentSchema.safeParse({
+        departmentUuid: "dept-001",
+        departmentNameEn: "   ",
       }).success,
     ).toBe(false);
   });
