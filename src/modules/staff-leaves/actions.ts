@@ -79,6 +79,7 @@ export async function listStaffLeaves(
       orderBy: { created_at: "desc" },
       skip,
       take: limit,
+      include: { staff: true },
     }),
     prisma.staff_leave.count({ where: where as any }),
   ]);
@@ -87,6 +88,10 @@ export async function listStaffLeaves(
     leaves: leaves.map((l: any): StaffLeaveListItem => ({
       staff_leave_uuid: l.staff_leave_uuid,
       staff_id: l.staff_id ?? null,
+      staff_name:
+        l.staff?.first_name
+          ? `${l.staff.first_name ?? ""} ${l.staff.last_name ?? ""}`.trim() || null
+          : null,
       from_date: l.from_date?.toISOString() ?? null,
       to_date: l.to_date?.toISOString() ?? null,
       note: l.note ?? null,
@@ -135,6 +140,7 @@ export async function getStaffLeave(
 
   const leave = await prisma.staff_leave.findFirst({
     where: { staff_leave_uuid: parsed.data.leaveUuid },
+    include: { staff: true },
   });
 
   if (!leave) return null;
@@ -143,6 +149,10 @@ export async function getStaffLeave(
   const item = {
     staff_leave_uuid: raw.staff_leave_uuid,
     staff_id: raw.staff_id ?? null,
+    staff_name:
+      raw.staff?.first_name
+        ? `${raw.staff.first_name ?? ""} ${raw.staff.last_name ?? ""}`.trim() || null
+        : null,
     from_date: raw.from_date?.toISOString() ?? null,
     to_date: raw.to_date?.toISOString() ?? null,
     note: raw.note ?? null,

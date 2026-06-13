@@ -11,8 +11,8 @@ import {
 } from "./schemas";
 
 describe("listCandidateSkillsSchema", () => {
-  it("accepts candidateId with defaults", () => {
-    const r = listCandidateSkillsSchema.safeParse({ candidateId: 1 });
+  it("accepts empty params with defaults", () => {
+    const r = listCandidateSkillsSchema.safeParse({});
     expect(r.success).toBe(true);
     if (r.success) {
       expect(r.data.page).toBe(1);
@@ -20,41 +20,37 @@ describe("listCandidateSkillsSchema", () => {
     }
   });
 
-  it("rejects negative candidateId", () => {
-    expect(listCandidateSkillsSchema.safeParse({ candidateId: -1 }).success).toBe(false);
-  });
-
   it("rejects limit over 100", () => {
-    expect(listCandidateSkillsSchema.safeParse({ candidateId: 1, limit: 999 }).success).toBe(false);
+    expect(listCandidateSkillsSchema.safeParse({ limit: 999 }).success).toBe(false);
   });
 });
 
 describe("getCandidateSkillSchema", () => {
-  it("accepts valid candidateId and skillId", () => {
-    const r = getCandidateSkillSchema.safeParse({ candidateId: 1, skillId: 5 });
+  it("accepts valid skillId", () => {
+    const r = getCandidateSkillSchema.safeParse({ skillId: 5 });
     expect(r.success).toBe(true);
   });
 
-  it("rejects missing candidateId", () => {
-    expect(getCandidateSkillSchema.safeParse({ skillId: 5 }).success).toBe(false);
+  it("rejects missing skillId", () => {
+    expect(getCandidateSkillSchema.safeParse({}).success).toBe(false);
   });
 });
 
 describe("createCandidateSkillSchema", () => {
   it("accepts valid input", () => {
-    const r = createCandidateSkillSchema.safeParse({ candidateId: 1, skill: "React" });
+    const r = createCandidateSkillSchema.safeParse({ skill: "React" });
     expect(r.success).toBe(true);
     if (r.success) expect(r.data.skill).toBe("React");
   });
 
   it("rejects empty skill", () => {
-    expect(createCandidateSkillSchema.safeParse({ candidateId: 1, skill: "" }).success).toBe(false);
+    expect(createCandidateSkillSchema.safeParse({ skill: "" }).success).toBe(false);
   });
 });
 
 describe("updateCandidateSkillSchema", () => {
   it("accepts valid update", () => {
-    const r = updateCandidateSkillSchema.safeParse({ candidateId: 1, skillId: 5, skill: "React Native" });
+    const r = updateCandidateSkillSchema.safeParse({ skillId: 5, skill: "React Native" });
     expect(r.success).toBe(true);
     if (r.success) expect(r.data.skill).toBe("React Native");
   });
@@ -62,7 +58,7 @@ describe("updateCandidateSkillSchema", () => {
 
 describe("deleteCandidateSkillSchema", () => {
   it("accepts valid input", () => {
-    expect(deleteCandidateSkillSchema.safeParse({ candidateId: 1, skillId: 5 }).success).toBe(true);
+    expect(deleteCandidateSkillSchema.safeParse({ skillId: 5 }).success).toBe(true);
   });
 });
 

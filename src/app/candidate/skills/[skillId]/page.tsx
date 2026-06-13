@@ -17,7 +17,7 @@ export default async function CandidateSkillDetailPage({
   const session = await requireRoleCapability("candidate", "candidate.read.own");
   const { skillId } = await params;
 
-  const skill = await getCandidateSkill(Number(skillId));
+  const skill = await getCandidateSkill({ skillId: Number(skillId) });
   if (!skill) {
     notFound();
   }

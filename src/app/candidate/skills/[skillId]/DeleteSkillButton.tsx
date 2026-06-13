@@ -15,7 +15,7 @@ export function DeleteSkillButton({ skillId }: DeleteSkillButtonProps) {
   async function handleDelete() {
     if (!confirm("Are you sure you want to delete this skill?")) return;
 
-    const result = await deleteCandidateSkill(skillId);
+    const result = await deleteCandidateSkill({ skillId });
     if (result.success) {
       router.push("/candidate/skills");
       router.refresh();

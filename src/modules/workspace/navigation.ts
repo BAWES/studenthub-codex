@@ -39,7 +39,9 @@ export function navForRole(role: Role): NavItem[] {
       { label: "Overview", href: "/staff", icon: User },
       { label: "My Requests", href: "/staff/requests", icon: FileCheck },
       { label: "Candidates", href: "/staff/candidates", icon: Users },
-      { label: "Interviews", href: "/staff/interviews" as Route, icon: Calendar }
+      { label: "Interviews", href: "/staff/interviews" as Route, icon: Calendar },
+      { label: "Contracts", href: "/staff/contracts" as Route, icon: FileCheck },
+      { label: "Leaves", href: "/staff/leaves" as Route, icon: Calendar },
     ];
   }
   if (role === "candidate") {

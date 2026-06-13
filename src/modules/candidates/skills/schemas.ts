@@ -5,18 +5,15 @@ import { z } from "zod";
 // ---------------------------------------------------------------------------
 
 export const listCandidateSkillsSchema = z.object({
-  candidateId: z.number().int().positive("Candidate ID is required"),
   page: z.coerce.number().int().min(1).optional().default(1),
   limit: z.coerce.number().int().min(1).max(100).optional().default(20),
 });
 
 export const getCandidateSkillSchema = z.object({
-  candidateId: z.number().int().positive("Candidate ID is required"),
   skillId: z.coerce.number().int().positive("Skill ID is required"),
 });
 
 export const createCandidateSkillSchema = z.object({
-  candidateId: z.number().int().positive("Candidate ID is required"),
   skill: z
     .string()
     .min(1, "Skill name is required")
@@ -25,7 +22,6 @@ export const createCandidateSkillSchema = z.object({
 });
 
 export const updateCandidateSkillSchema = z.object({
-  candidateId: z.number().int().positive("Candidate ID is required"),
   skillId: z.coerce.number().int().positive("Skill ID is required"),
   skill: z
     .string()
@@ -35,7 +31,6 @@ export const updateCandidateSkillSchema = z.object({
 });
 
 export const deleteCandidateSkillSchema = z.object({
-  candidateId: z.number().int().positive("Candidate ID is required"),
   skillId: z.coerce.number().int().positive("Skill ID is required"),
 });
 

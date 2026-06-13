@@ -32,6 +32,7 @@ const createStaffLeaveSchema = z.object({
 type StaffLeaveListItem = {
   staff_leave_uuid: string;
   staff_id: number | null;
+  staff_name: string | null;
   from_date: string | null;
   to_date: string | null;
   note: string | null;
@@ -121,6 +122,7 @@ describe("StaffLeaveListItem shape", () => {
     const mock: StaffLeaveListItem = {
       staff_leave_uuid: "sl_abc123",
       staff_id: 1,
+      staff_name: "John Doe",
       from_date: "2025-06-01",
       to_date: "2025-06-05",
       note: "Annual leave",
