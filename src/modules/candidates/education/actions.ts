@@ -2,8 +2,9 @@
 
 import crypto from "node:crypto";
 import { revalidatePath } from "next/cache";
+import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { requireCapability } from "@/modules/auth/session";
+import { requireCapability, requireRoleCapability } from "@/modules/auth/session";
 import {
   listCandidateEducationSchema,
   getCandidateEducationSchema,
@@ -337,3 +338,303 @@ export async function deleteCandidateEducation(
 
   return result;
 }
+
+// ---------------------------------------------------------------------------
+// Route-level wrappers (for /candidate/education route)
+// ---------------------------------------------------------------------------
+
+/** Input schema for listCandidateEducationAction — no candidateId (extracted from session). */
+const listCandidateEducationActionSchema = z.object({
+  page: z.coerce.number().int().positive().optional().default(1),
+  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
+});
+
+type ListCandidateEducationActionInput = z.input<typeof listCandidateEducationActionSchema>;
+
+/** Input schema for createCandidateEducationAction — no candidateId (extracted from session). */
+const createCandidateEducationActionSchema = z.object({
+  universityId: z.coerce.number().int().positive("University is required"),
+  degreeUuid: z.string().optional().default(""),
+  majorUuid: z.string().optional().default(""),
+  graduationYear: z.coerce.number().int().min(1950).max(2035).optional(),
+  isCurrentlyStudying: z
+    .union([z.literal("1"), z.literal("0"), z.boolean()])
+    .optional()
+    .transform((v) => {
+      if (v === "1" || v === true) return true;
+      if (v === "0" || v === false) return false;
+      return false;
+    }),
+});
+
+type CreateCandidateEducationActionInput = z.input<typeof createCandidateEducationActionSchema>;
+
+/** Input schema for updateCandidateEducationAction. */
+const updateCandidateEducationActionSchema = z.object({
+  educationUuid: z.string().min(1, "Education UUID is required"),
+  universityId: z.coerce.number().int().positive("University is required"),
+  degreeUuid: z.string().optional().default(""),
+  majorUuid: z.string().optional().default(""),
+  graduationYear: z.coerce.number().int().min(1950).max(2035).optional(),
+  isCurrentlyStudying: z
+    .union([z.literal("1"), z.literal("0"), z.boolean()])
+    .optional()
+    .transform((v) => {
+      if (v === "1" || v === true) return true;
+      if (v === "0" || v === false) return false;
+      return false;
+    }),
+});
+
+type UpdateCandidateEducationActionInput = z.input<typeof updateCandidateEducationActionSchema>;
+
+/**
+ * List education records for the current candidate (paginated).
+ * Extracts candidateId from session and delegates to listCandidateEducation.
+ */
+export async function listCandidateEducationAction(
+  input: ListCandidateEducationActionInput = {},
+): Promise<CandidateEducationItem[]> {
+  const session = await requireRoleCapability("candidate", "candidate.read.own");
+
+  const { page, limit } = listCandidateEducationActionSchema.parse(input);
+
+  const result = await listCandidateEducation({
+    candidateId: Number(session.id),
+    page,
+    limit,
+  });
+
+  // Validate output shape
+  const outputParsed = listCandidateEducationResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    logOutputError("listCandidateEducationAction", outputParsed.error.issues);
+  }
+
+  return result.items;
+}
+
+/**
+ * Get a single education record by UUID.
+ * Extracts session and delegates to getCandidateEducation.
+ */
+export async function getCandidateEducationAction(
+  educationUuid: string,
+): Promise<CandidateEducationItem | null> {
+  await requireRoleCapability("candidate", "candidate.read.own");
+
+  const result = await getCandidateEducation({ educationUuid });
+
+  // Validate output shape
+  const outputParsed = candidateEducationItemSchema.nullable().safeParse(result);
+  if (!outputParsed.success) {
+    logOutputError("getCandidateEducationAction", outputParsed.error.issues);
+  }
+
+  return result;
+}
+
+/**
+ * Create a new education record for the current candidate.
+ * Extracts candidateId from session and delegates to createCandidateEducation.
+ */
+export async function createCandidateEducationAction(
+  data: CreateCandidateEducationActionInput,
+): Promise<CandidateEducationActionResult> {
+  const session = await requireRoleCapability("candidate", "candidate.profile.edit");
+
+  const parsed = createCandidateEducationActionSchema.safeParse(data);
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: parsed.error.issues[0]?.message ?? "Invalid education data",
+    };
+  }
+
+  const { universityId, degreeUuid, majorUuid, graduationYear, isCurrentlyStudying } = parsed.data;
+
+  const result = await createCandidateEducation({
+    candidateId: Number(session.id),
+    universityId,
+    degreeUuid,
+    majorUuid,
+    graduationYear,
+    isCurrentlyStudying,
+  });
+
+  revalidatePath("/candidate/education");
+
+  return result;
+}
+
+/**
+ * Update an existing education record.
+ * Extracts candidateId from session and delegates to updateCandidateEducation.
+ */
+export async function updateCandidateEducationAction(
+  data: UpdateCandidateEducationActionInput,
+): Promise<CandidateEducationActionResult> {
+  const session = await requireRoleCapability("candidate", "candidate.profile.edit");
+
+  const parsed = updateCandidateEducationActionSchema.safeParse(data);
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: parsed.error.issues[0]?.message ?? "Invalid education data",
+    };
+  }
+
+  const { educationUuid, universityId, degreeUuid, majorUuid, graduationYear, isCurrentlyStudying } = parsed.data;
+
+  const result = await updateCandidateEducation({
+    candidateId: Number(session.id),
+    educationUuid,
+    universityId,
+    degreeUuid,
+    majorUuid,
+    graduationYear,
+    isCurrentlyStudying,
+  });
+
+  revalidatePath("/candidate/education");
+
+  return result;
+}
+
+/**
+ * Delete an education record by UUID.
+ * Extracts candidateId from session and delegates to deleteCandidateEducation.
+ */
+export async function deleteCandidateEducationAction(
+  educationUuid: string,
+): Promise<CandidateEducationActionResult> {
+  const session = await requireRoleCapability("candidate", "candidate.profile.edit");
+
+  const result = await deleteCandidateEducation({
+    candidateId: Number(session.id),
+    educationUuid,
+  });
+
+  revalidatePath("/candidate/education");
+
+  return result;
+}
+
+// ---------------------------------------------------------------------------
+// [id] route wrappers (for /candidate/education/[id])
+// ---------------------------------------------------------------------------
+
+/** Input schema for getEducationEntry. */
+const getEducationEntrySchema = z.object({
+  educationUuid: z.string().min(1, "Education UUID is required"),
+});
+
+/** Input schema for updateEducationEntry. */
+const updateEducationEntrySchema = z.object({
+  educationUuid: z.string().min(1, "Education UUID is required"),
+  universityId: z.coerce.number().int().positive("University is required"),
+  degreeUuid: z.string().optional().default(""),
+  majorUuid: z.string().optional().default(""),
+  graduationYear: z.coerce.number().int().min(1950).max(2035).optional(),
+  isCurrentlyStudying: z
+    .union([z.literal("1"), z.literal("0"), z.boolean()])
+    .optional()
+    .transform((v) => {
+      if (v === "1" || v === true) return true;
+      if (v === "0" || v === false) return false;
+      return false;
+    }),
+});
+
+type EducationEntryResponse = {
+  success: boolean;
+  error?: string;
+};
+
+/**
+ * Get a single education entry by UUID.
+ * Delegates to getCandidateEducationAction.
+ */
+export async function getEducationEntry(
+  educationUuid: string,
+): Promise<CandidateEducationItem | null> {
+  const parsed = getEducationEntrySchema.safeParse({ educationUuid });
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid education entry params");
+  }
+
+  return getCandidateEducationAction(parsed.data.educationUuid);
+}
+
+/**
+ * Update an existing education entry.
+ * Delegates to updateCandidateEducationAction.
+ */
+export async function updateEducationEntry(
+  educationUuid: string,
+  universityId: number,
+  degreeUuid?: string,
+  majorUuid?: string,
+  graduationYear?: number,
+  isCurrentlyStudying?: boolean,
+): Promise<EducationEntryResponse> {
+  const parsed = updateEducationEntrySchema.safeParse({
+    educationUuid,
+    universityId,
+    degreeUuid,
+    majorUuid,
+    graduationYear,
+    isCurrentlyStudying,
+  });
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: parsed.error.issues[0]?.message ?? "Invalid input",
+    };
+  }
+
+  const result = await updateCandidateEducationAction({
+    educationUuid: parsed.data.educationUuid,
+    universityId: parsed.data.universityId,
+    degreeUuid: parsed.data.degreeUuid,
+    majorUuid: parsed.data.majorUuid,
+    graduationYear: parsed.data.graduationYear,
+    isCurrentlyStudying: parsed.data.isCurrentlyStudying,
+  });
+
+  revalidatePath("/candidate/education");
+  revalidatePath(`/candidate/education/${parsed.data.educationUuid}`);
+
+  if (!result.success) {
+    return { success: false, error: result.error };
+  }
+
+  return { success: true };
+}
+
+/**
+ * Delete an education entry by UUID.
+ * Delegates to deleteCandidateEducationAction.
+ */
+export async function deleteEducationEntry(
+  educationUuid: string,
+): Promise<EducationEntryResponse> {
+  const parsed = getEducationEntrySchema.safeParse({ educationUuid });
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: parsed.error.issues[0]?.message ?? "Invalid input",
+    };
+  }
+
+  const result = await deleteCandidateEducationAction(parsed.data.educationUuid);
+
+  revalidatePath("/candidate/education");
+
+  if (!result.success) {
+    return { success: false, error: result.error };
+  }
+
+  return { success: true };
+}
+
