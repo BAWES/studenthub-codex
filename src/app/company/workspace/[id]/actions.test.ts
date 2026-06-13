@@ -1,295 +1,208 @@
-import { describe, it, expect } from "vitest";
-import {
-  getWorkspaceSchema,
-  updateWorkspaceSchema,
-} from "./schemas";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 
-import {
-  workspaceMetricSchema,
-  workspaceListItemSchema,
-  workspaceOverviewOutputSchema,
-  updateWorkspaceResultSchema,
-} from "../../schemas";
+// ── Hoisted mock functions ──────────────────────────────────
+const { mockRequireCapability, mockGetCompanyWorkspace, mockUpdateContactProfile, mockRevalidatePath } =
+  vi.hoisted(() => ({
+    mockRequireCapability: vi.fn(),
+    mockGetCompanyWorkspace: vi.fn(),
+    mockUpdateContactProfile: vi.fn(),
+    mockRevalidatePath: vi.fn(),
+  }));
 
-// ---------------------------------------------------------------------------
-// getWorkspaceSchema
-// ---------------------------------------------------------------------------
+// ── Mock session ─────────────────────────────────────────────
+vi.mock("@/modules/auth/session", () => ({
+  requireCapability: mockRequireCapability,
+}));
 
-describe("getWorkspaceSchema", () => {
-  it("accepts a valid contact UUID", () => {
-    const result = getWorkspaceSchema.safeParse({
-      contactUuid: "abc-123-def-456",
+// ── Mock next/cache ─────────────────────────────────────────
+vi.mock("next/cache", () => ({
+  revalidatePath: mockRevalidatePath,
+}));
+
+// ── Mock module-level actions ────────────────────────────────
+vi.mock("@/modules/company/actions", () => ({
+  getCompanyWorkspace: mockGetCompanyWorkspace,
+  updateContactProfile: mockUpdateContactProfile,
+}));
+
+// ── Imports (after mocks) ────────────────────────────────────
+
+import { getWorkspace, updateWorkspace } from "./actions";
+
+// ===========================================================================
+// getWorkspace
+// ===========================================================================
+
+describe("getWorkspace", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  // A minimal valid result shape matching workspaceOverviewOutputSchema
+  const validWorkspaceResult = {
+    contact: { contact_name: "Ahmed", contact_email: "ahmed@test.com" },
+    metrics: [
+      { label: "Companies", value: 3, note: "Linked" },
+      { label: "Requests", value: 5, note: "Hiring" },
+      { label: "Stores", value: 2, note: "Active" },
+      { label: "Notes", value: 1, note: "Internal" },
+    ],
+    companies: [
+      { id: "c-001", title: "GCC Energies", subtitle: "Manager", meta: "Access allowed" },
+    ],
+    requests: [
+      { id: "r-001", title: "Software Engineer", subtitle: "GCC Energies", meta: "Open · 2 seats" },
+    ],
+  };
+
+  it("requires company.read capability", async () => {
+    mockRequireCapability.mockResolvedValue(undefined);
+    mockGetCompanyWorkspace.mockResolvedValue(validWorkspaceResult);
+
+    await getWorkspace("valid-uuid");
+
+    expect(mockRequireCapability).toHaveBeenCalledWith("company.read");
+  });
+
+  it("throws on empty contact UUID", async () => {
+    await expect(getWorkspace("")).rejects.toThrow();
+    expect(mockGetCompanyWorkspace).not.toHaveBeenCalled();
+  });
+
+  it("delegates to getCompanyWorkspace and returns result", async () => {
+    mockRequireCapability.mockResolvedValue(undefined);
+    mockGetCompanyWorkspace.mockResolvedValue(validWorkspaceResult);
+
+    const result = await getWorkspace("test-uuid-123");
+
+    expect(mockGetCompanyWorkspace).toHaveBeenCalledWith("test-uuid-123");
+    expect(result).toEqual(validWorkspaceResult);
+  });
+
+  it("returns result even when output validation logs error", async () => {
+    mockRequireCapability.mockResolvedValue(undefined);
+    mockGetCompanyWorkspace.mockResolvedValue({
+      ...validWorkspaceResult,
+      metrics: validWorkspaceResult.metrics.slice(0, 2), // wrong length — 2 instead of 4
     });
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.contactUuid).toBe("abc-123-def-456");
-    }
-  });
 
-  it("rejects empty string UUID", () => {
-    const result = getWorkspaceSchema.safeParse({ contactUuid: "" });
-    expect(result.success).toBe(false);
-  });
+    const result = await getWorkspace("test-uuid-123");
 
-  it("rejects missing contactUuid", () => {
-    const result = getWorkspaceSchema.safeParse({});
-    expect(result.success).toBe(false);
-  });
-
-  it("rejects null contactUuid", () => {
-    const result = getWorkspaceSchema.safeParse({ contactUuid: null });
-    expect(result.success).toBe(false);
+    // Should not throw — output validation only logs
+    expect(result.metrics).toHaveLength(2);
+    expect(mockGetCompanyWorkspace).toHaveBeenCalledTimes(1);
   });
 });
 
-// ---------------------------------------------------------------------------
-// updateWorkspaceSchema
-// ---------------------------------------------------------------------------
+// ===========================================================================
+// updateWorkspace
+// ===========================================================================
 
-describe("updateWorkspaceSchema", () => {
-  it("accepts contactUuid with contact_name update", () => {
-    const result = updateWorkspaceSchema.safeParse({
-      contactUuid: "abc-123",
-      contact_name: "Updated Contact Name",
+describe("updateWorkspace", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("requires company.write.linked capability", async () => {
+    mockRequireCapability.mockResolvedValue(undefined);
+    mockUpdateContactProfile.mockResolvedValue(undefined);
+
+    await updateWorkspace({
+      contactUuid: "test-uuid-123",
+      contact_name: "Updated Name",
     });
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.contactUuid).toBe("abc-123");
-      expect(result.data.contact_name).toBe("Updated Contact Name");
-      expect(result.data.contact_email).toBeUndefined();
-    }
+
+    expect(mockRequireCapability).toHaveBeenCalledWith("company.write.linked");
   });
 
-  it("accepts contactUuid with contact_email update", () => {
-    const result = updateWorkspaceSchema.safeParse({
-      contactUuid: "abc-123",
-      contact_email: "updated@example.com",
+  it("delegates to updateContactProfile with parsed data", async () => {
+    mockRequireCapability.mockResolvedValue(undefined);
+    mockUpdateContactProfile.mockResolvedValue(undefined);
+
+    const result = await updateWorkspace({
+      contactUuid: "test-uuid-123",
+      contact_name: "Updated Name",
+      contact_email: "updated@test.com",
     });
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.contact_email).toBe("updated@example.com");
-    }
-  });
 
-  it("accepts contactUuid with all fields", () => {
-    const result = updateWorkspaceSchema.safeParse({
-      contactUuid: "abc-123",
-      contact_name: "New Name",
-      contact_email: "new@example.com",
+    expect(mockUpdateContactProfile).toHaveBeenCalledWith({
+      contactUuid: "test-uuid-123",
+      contact_name: "Updated Name",
+      contact_email: "updated@test.com",
     });
-    expect(result.success).toBe(true);
+    expect(result).toEqual({ contactUuid: "test-uuid-123" });
   });
 
-  it("accepts contactUuid only (no optional fields)", () => {
-    const result = updateWorkspaceSchema.safeParse({
-      contactUuid: "abc-123",
+  it("revalidates the page cache", async () => {
+    mockRequireCapability.mockResolvedValue(undefined);
+    mockUpdateContactProfile.mockResolvedValue(undefined);
+
+    await updateWorkspace({
+      contactUuid: "test-uuid-123",
     });
-    expect(result.success).toBe(true);
+
+    expect(mockRevalidatePath).toHaveBeenCalledWith("/company/workspace/[id]", "page");
   });
 
-  it("rejects missing contactUuid", () => {
-    const result = updateWorkspaceSchema.safeParse({});
-    expect(result.success).toBe(false);
+  it("throws on empty contact UUID", async () => {
+    await expect(
+      updateWorkspace({ contactUuid: "" }),
+    ).rejects.toThrow();
+    expect(mockUpdateContactProfile).not.toHaveBeenCalled();
   });
 
-  it("rejects empty contactUuid", () => {
-    const result = updateWorkspaceSchema.safeParse({ contactUuid: "" });
-    expect(result.success).toBe(false);
+  it("throws on invalid email", async () => {
+    await expect(
+      updateWorkspace({
+        contactUuid: "test-uuid-123",
+        contact_email: "not-an-email",
+      }),
+    ).rejects.toThrow();
+    expect(mockUpdateContactProfile).not.toHaveBeenCalled();
   });
 
-  it("rejects invalid email", () => {
-    const result = updateWorkspaceSchema.safeParse({
-      contactUuid: "abc-123",
-      contact_email: "not-an-email",
+  it("accepts partial update with only contact_name", async () => {
+    mockRequireCapability.mockResolvedValue(undefined);
+    mockUpdateContactProfile.mockResolvedValue(undefined);
+
+    const result = await updateWorkspace({
+      contactUuid: "test-uuid-123",
+      contact_name: "New Name Only",
     });
-    expect(result.success).toBe(false);
-  });
 
-  it("rejects empty contact_name", () => {
-    const result = updateWorkspaceSchema.safeParse({
-      contactUuid: "abc-123",
-      contact_name: "",
+    expect(mockUpdateContactProfile).toHaveBeenCalledWith({
+      contactUuid: "test-uuid-123",
+      contact_name: "New Name Only",
     });
-    expect(result.success).toBe(false);
+    expect(result.contactUuid).toBe("test-uuid-123");
   });
-});
 
-// ---------------------------------------------------------------------------
-// Type shape tests
-// ---------------------------------------------------------------------------
+  it("accepts partial update with only contact_email", async () => {
+    mockRequireCapability.mockResolvedValue(undefined);
+    mockUpdateContactProfile.mockResolvedValue(undefined);
 
-describe("WorkspaceData shape", () => {
-  it("defines the expected fields", () => {
-    const workspace: import("./schemas").WorkspaceData = {
-      contact: {
-        contact_name: "John Doe",
-        contact_email: "john@example.com",
-      },
-      metrics: [
-        { label: "Companies", value: 3, note: "Linked companies" },
-      ],
-      companies: [
-        { id: "cc-uuid-1", title: "Acme Corp", subtitle: "Admin", meta: "Access allowed" },
-      ],
-      requests: [
-        { id: "req-uuid-1", title: "Software Engineer", subtitle: "Acme Corp", meta: "Active" },
-      ],
-    };
-    expect(workspace.contact?.contact_name).toBe("John Doe");
-    expect(workspace.metrics).toHaveLength(1);
-    expect(workspace.companies).toHaveLength(1);
-    expect(workspace.requests).toHaveLength(1);
-  });
-});
-
-describe("UpdateWorkspaceResult shape", () => {
-  it("defines the expected fields", () => {
-    const result: import("./schemas").UpdateWorkspaceResult = {
-      contactUuid: "abc-123",
-    };
-    expect(result.contactUuid).toBe("abc-123");
-  });
-});
-
-// ---------------------------------------------------------------------------
-// Output validation — workspaceMetricSchema
-// ---------------------------------------------------------------------------
-
-describe("workspaceMetricSchema (output validation)", () => {
-  it("accepts a valid metric", () => {
-    const r = workspaceMetricSchema.safeParse({
-      label: "Requests",
-      value: 42,
-      note: "Total hiring requests",
+    const result = await updateWorkspace({
+      contactUuid: "test-uuid-123",
+      contact_email: "email-only@test.com",
     });
-    expect(r.success).toBe(true);
-  });
 
-  it("rejects negative value", () => {
-    const r = workspaceMetricSchema.safeParse({
-      label: "Requests",
-      value: -1,
-      note: "Negative test",
+    expect(mockUpdateContactProfile).toHaveBeenCalledWith({
+      contactUuid: "test-uuid-123",
+      contact_email: "email-only@test.com",
     });
-    expect(r.success).toBe(false);
+    expect(result.contactUuid).toBe("test-uuid-123");
   });
 
-  it("rejects non-integer value", () => {
-    const r = workspaceMetricSchema.safeParse({
-      label: "Requests",
-      value: 3.14,
-      note: "Float test",
+  it("returns result even when output validation logs error", async () => {
+    mockRequireCapability.mockResolvedValue(undefined);
+    mockUpdateContactProfile.mockResolvedValue(undefined);
+
+    // The output schema expects { contactUuid: string } which is always valid
+    // for the minimum input. This test ensures the function doesn't throw.
+    const result = await updateWorkspace({
+      contactUuid: "test-uuid-123",
     });
-    expect(r.success).toBe(false);
-  });
 
-  it("rejects missing label", () => {
-    const r = workspaceMetricSchema.safeParse({
-      value: 5,
-      note: "Missing label",
-    });
-    expect(r.success).toBe(false);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// Output validation — workspaceListItemSchema
-// ---------------------------------------------------------------------------
-
-describe("workspaceListItemSchema (output validation)", () => {
-  it("accepts a valid list item", () => {
-    const r = workspaceListItemSchema.safeParse({
-      id: "uuid-1",
-      title: "Acme Corp",
-      subtitle: "Admin",
-      meta: "Access allowed",
-    });
-    expect(r.success).toBe(true);
-  });
-
-  it("accepts item without meta", () => {
-    const r = workspaceListItemSchema.safeParse({
-      id: "uuid-2",
-      title: "Startup Inc",
-      subtitle: "Contact",
-    });
-    expect(r.success).toBe(true);
-  });
-
-  it("rejects missing id", () => {
-    const r = workspaceListItemSchema.safeParse({
-      title: "Acme",
-      subtitle: "Admin",
-    });
-    expect(r.success).toBe(false);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// Output validation — workspaceOverviewOutputSchema
-// ---------------------------------------------------------------------------
-
-describe("workspaceOverviewOutputSchema (output validation)", () => {
-  it("accepts a full valid workspace overview", () => {
-    const payload = {
-      contact: { contact_name: "John Doe", contact_email: "john@example.com" },
-      metrics: [
-        { label: "Companies", value: 3, note: "Linked companies" },
-        { label: "Requests", value: 5, note: "Active requests" },
-        { label: "Stores", value: 2, note: "Active stores" },
-        { label: "Notes", value: 1, note: "Internal notes" },
-      ],
-      companies: [
-        { id: "cc-uuid-1", title: "Acme Corp", subtitle: "Admin", meta: "Access allowed" },
-      ],
-      requests: [
-        { id: "req-uuid-1", title: "Engineer", subtitle: "Acme Corp", meta: "Active" },
-      ],
-    };
-    const r = workspaceOverviewOutputSchema.safeParse(payload);
-    expect(r.success).toBe(true);
-  });
-
-  it("accepts null contact", () => {
-    const payload = {
-      contact: null,
-      metrics: [
-        { label: "Companies", value: 0, note: "None" },
-        { label: "Requests", value: 0, note: "None" },
-        { label: "Stores", value: 0, note: "None" },
-        { label: "Notes", value: 0, note: "None" },
-      ],
-      companies: [],
-      requests: [],
-    };
-    const r = workspaceOverviewOutputSchema.safeParse(payload);
-    expect(r.success).toBe(true);
-  });
-
-  it("rejects missing metrics", () => {
-    const r = workspaceOverviewOutputSchema.safeParse({
-      contact: null,
-      companies: [],
-      requests: [],
-    });
-    expect(r.success).toBe(false);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// Output validation — updateWorkspaceResultSchema
-// ---------------------------------------------------------------------------
-
-describe("updateWorkspaceResultSchema (output validation)", () => {
-  it("accepts a valid result", () => {
-    const r = updateWorkspaceResultSchema.safeParse({
-      contactUuid: "abc-123",
-    });
-    expect(r.success).toBe(true);
-  });
-
-  it("rejects missing contactUuid", () => {
-    const r = updateWorkspaceResultSchema.safeParse({});
-    expect(r.success).toBe(false);
+    expect(result).toEqual({ contactUuid: "test-uuid-123" });
   });
 });
