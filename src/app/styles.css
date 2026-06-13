@@ -12536,3 +12536,17 @@ tr:hover .shTableRowAction,
     padding: 0 8px;
   }
 }
+
+/* ── Candidate Search Status Indicator ───────────────────────────── */
+/* Loading bar animation — 30s shrink from full-width to 20%         */
+@keyframes search-progress {
+  0%   { width: 100%; }
+  30%  { width: 70%; }
+  60%  { width: 50%; }
+  100% { width: 20%; }
+}
+
+/* Spinner used by SearchStatusPill */
+@keyframes search-spin {
+  to { transform: rotate(360deg); }
+}
