@@ -769,7 +769,7 @@ describe("updateCandidate — runtime", () => {
   });
 
   it("re-validates /admin/candidates on success", async () => {
-    await updateCandidate({ candidateId: 1, candidate_name: "New" });
+    await updateCandidate({ candidateId: 1, name: "New" });
     expect(mockRevalidatePathCan).toHaveBeenCalledWith("/admin/candidates");
   });
 });
