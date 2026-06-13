@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireCapability } from "@/modules/auth/session";
+import { prisma } from "@/lib/prisma";
 import {
   listWorklogs as moduleListWorklogs,
   getWorklog as moduleGetWorklog,
@@ -25,6 +26,313 @@ import {
   type SubmitWorkLogResult,
   type UpdateWorkLogStatusResult,
 } from "@/app/candidate/work-logs/schemas";
+
+// ---------------------------------------------------------------------------
+// listWorkLogs — paginated list of work logs for the current candidate
+// ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+// Direct Prisma-based actions
+// ---------------------------------------------------------------------------
+
+/**
+ * Get a single work log by UUID for the current candidate.
+ * Queries prisma.candidate_working_hour directly with store/company relations.
+ */
+export async function getWorkLogDetailWithStore(
+  workLogUuid: string,
+): Promise<{
+  candidate_working_hour_uuid: string;
+  candidate_id: number | null;
+  store_id: number | null;
+  date: Date | null;
+  start_time: Date | null;
+  end_time: Date | null;
+  total_time: number | null;
+  status: number | null;
+  note: string | null;
+  via: string | null;
+  created_at: Date | null;
+  updated_at: Date | null;
+  store: {
+    store_id: number;
+    store_name: string;
+    store_location: string | null;
+    company: {
+      company_id: number;
+      company_name: string;
+    } | null;
+  } | null;
+} | null> {
+  const session = await requireCapability("candidate.read.own");
+  const candidateId = Number(session.id);
+
+  const uuidSchema = z.string().min(1, "workLogUuid is required");
+  const parsed = uuidSchema.safeParse(workLogUuid);
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid workLogUuid");
+  }
+
+  const record = await prisma.candidate_working_hour.findFirst({
+    where: {
+      candidate_working_hour_uuid: parsed.data,
+      candidate_id: candidateId,
+    },
+    include: {
+      store: {
+        include: {
+          company: true,
+        },
+      },
+    },
+  });
+
+  if (!record) return null;
+
+  return {
+    candidate_working_hour_uuid: record.candidate_working_hour_uuid,
+    candidate_id: record.candidate_id,
+    store_id: record.store_id,
+    date: record.date,
+    start_time: record.start_time,
+    end_time: record.end_time,
+    total_time: record.total_time,
+    status: record.status,
+    note: record.note,
+    via: record.via,
+    created_at: record.created_at,
+    updated_at: record.updated_at,
+    store: record.store
+      ? {
+          store_id: record.store.store_id,
+          store_name: record.store.store_name,
+          store_location: record.store.store_location ?? null,
+          company: record.store.company
+            ? {
+                company_id: record.store.company.company_id,
+                company_name: record.store.company.company_name,
+              }
+            : null,
+        }
+      : null,
+  };
+}
+
+/**
+ * Approve a work log appeal by UUID.
+ * Uses company.time.write capability.
+ */
+export async function approveWorkLogAppeal(
+  appealUuid: string,
+): Promise<{ appeal_uuid: string }> {
+  await requireCapability("company.time.write");
+
+  const uuidSchema = z.string().min(1, "appealUuid is required");
+  const parsed = uuidSchema.safeParse(appealUuid);
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid appealUuid");
+  }
+
+  const existing = await prisma.candidate_working_hour_appeal.findUnique({
+    where: { appeal_uuid: parsed.data },
+  });
+
+  if (!existing) {
+    throw new Error("Appeal not found");
+  }
+
+  await prisma.candidate_working_hour_appeal.update({
+    where: { appeal_uuid: parsed.data },
+    data: { status: 1 },
+  });
+
+  return { appeal_uuid: parsed.data };
+}
+
+/**
+ * Reject a work log appeal with a reason.
+ * Uses company.time.write capability.
+ */
+export async function rejectWorkLogAppeal(
+  appealUuid: string,
+  reason: string,
+): Promise<{ appeal_uuid: string }> {
+  await requireCapability("company.time.write");
+
+  const paramsSchema = z.object({
+    appealUuid: z.string().min(1, "appealUuid is required"),
+    reason: z.string().min(1, "reason is required"),
+  });
+
+  const parsed = paramsSchema.safeParse({ appealUuid, reason });
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid input");
+  }
+
+  const existing = await prisma.candidate_working_hour_appeal.findUnique({
+    where: { appeal_uuid: parsed.data.appealUuid },
+  });
+
+  if (!existing) {
+    throw new Error("Appeal not found");
+  }
+
+  await prisma.candidate_working_hour_appeal.update({
+    where: { appeal_uuid: parsed.data.appealUuid },
+    data: { status: 2, reason: parsed.data.reason },
+  });
+
+  return { appeal_uuid: parsed.data.appealUuid };
+}
+
+/**
+ * Update a work log entry's status and/or note.
+ * Uses candidate.write capability.
+ */
+export async function updateWorkLogEntry(
+  workLogUuid: string,
+  data: { status?: number; note?: string },
+): Promise<{ workLogUuid: string }> {
+  await requireCapability("candidate.write");
+
+  const paramsSchema = z.object({
+    workLogUuid: z.string().min(1, "workLogUuid is required"),
+    status: z.number().int().optional(),
+    note: z.string().optional(),
+  });
+
+  const parsed = paramsSchema.safeParse({ workLogUuid, ...data });
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid input");
+  }
+
+  const { workLogUuid: uuid, status, note } = parsed.data;
+
+  const existing = await prisma.candidate_working_hour.findUnique({
+    where: { candidate_working_hour_uuid: uuid },
+  });
+
+  if (!existing) {
+    throw new Error("Work log entry not found");
+  }
+
+  await prisma.candidate_working_hour.update({
+    where: { candidate_working_hour_uuid: uuid },
+    data: {
+      ...(status !== undefined ? { status } : {}),
+      ...(note !== undefined ? { note } : {}),
+    },
+  });
+
+  return { workLogUuid: uuid };
+}
+
+/**
+ * Soft-delete a work log entry by UUID.
+ * Uses candidate.write capability.
+ */
+export async function deleteWorkLogEntry(
+  workLogUuid: string,
+): Promise<{ workLogUuid: string }> {
+  await requireCapability("candidate.write");
+
+  const uuidSchema = z.string().min(1, "workLogUuid is required");
+  const parsed = uuidSchema.safeParse(workLogUuid);
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid workLogUuid");
+  }
+
+  const existing = await prisma.candidate_working_hour.findUnique({
+    where: { candidate_working_hour_uuid: parsed.data },
+  });
+
+  if (!existing) {
+    throw new Error("Work log entry not found");
+  }
+
+  await prisma.candidate_working_hour.delete({
+    where: { candidate_working_hour_uuid: parsed.data },
+  });
+
+  return { workLogUuid: parsed.data };
+}
+
+/**
+ * Get up to 8 work log appeals for a given work log UUID.
+ * Uses candidate.read.own capability.
+ */
+export async function getWorkLogAppeals(
+  workLogUuid: string,
+): Promise<Array<{ appeal_uuid: string; reason: string | null; status: number; created_at: Date | null }>> {
+  const session = await requireCapability("candidate.read.own");
+  const candidateId = Number(session.id);
+
+  const uuidSchema = z.string().min(1, "workLogUuid is required");
+  const parsed = uuidSchema.safeParse(workLogUuid);
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid workLogUuid");
+  }
+
+  const appeals = await prisma.candidate_working_hour_appeal.findMany({
+    where: {
+      candidate_working_hour_uuid: parsed.data,
+      candidate_id: candidateId,
+    },
+    orderBy: { created_at: "desc" },
+    take: 8,
+  });
+
+  return appeals.map((a) => ({
+    appeal_uuid: a.appeal_uuid,
+    reason: a.reason,
+    status: a.status,
+    created_at: a.created_at,
+  }));
+}
+
+/**
+ * Get up to 8 work log feedback records for a given work log UUID.
+ * Uses candidate.read.own capability.
+ */
+export async function getWorkLogFeedback(
+  workLogUuid: string,
+): Promise<
+  Array<{
+    cwlf_uuid: string;
+    note: string | null;
+    reason: string | null;
+    status: number | null;
+    rating: boolean | null;
+    created_at: Date | null;
+  }>
+> {
+  const session = await requireCapability("candidate.read.own");
+  const candidateId = Number(session.id);
+
+  const uuidSchema = z.string().min(1, "workLogUuid is required");
+  const parsed = uuidSchema.safeParse(workLogUuid);
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid workLogUuid");
+  }
+
+  const feedback = await prisma.candidate_work_log_feedback.findMany({
+    where: {
+      candidate_working_hour_uuid: parsed.data,
+      candidate_id: candidateId,
+    },
+    orderBy: { created_at: "desc" },
+    take: 8,
+  });
+
+  return feedback.map((f) => ({
+    cwlf_uuid: f.cwlf_uuid,
+    note: f.note,
+    reason: f.reason,
+    status: f.status,
+    rating: f.rating,
+    created_at: f.created_at,
+  }));
+}
 
 // ---------------------------------------------------------------------------
 // listWorkLogs — paginated list of work logs for the current candidate
