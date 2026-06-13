@@ -9,9 +9,9 @@
 // ---------------------------------------------------------------------------
 
 import { revalidatePath } from "next/cache";
-import type { SkillActionResult } from "../actions";
+import type { SkillActionResult } from "./schemas";
 import { updateSkill as parentUpdateSkill } from "../actions";
-import { skillActionResultOutputSchema } from "../../schemas";
+import { skillActionResultOutputSchema } from "./schemas";
 
 /** Re-export types for client components */
 export type { SkillActionResult };

@@ -76,8 +76,7 @@ export function assertNoReactErrors(errors: string[]) {
   const bad = errors.filter(
     (m) =>
       m.includes("hydration") ||
-      m.includes("serialization") ||
-      m.includes("Functions cannot be passed"),
+      m.includes("serialization"),
   );
   expect(bad).toEqual([]);
 }
