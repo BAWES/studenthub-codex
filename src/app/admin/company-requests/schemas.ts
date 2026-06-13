@@ -6,6 +6,7 @@ export {
   listCompanyRequestsSchema,
   getCompanyRequestSchema,
   updateCompanyRequestStatusSchema,
+  companyRequestRowSchema,
   listCompanyRequestsOutputSchema,
   getCompanyRequestOutputSchema,
   updateCompanyRequestStatusOutputSchema,
