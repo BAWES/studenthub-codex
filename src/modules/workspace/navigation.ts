@@ -52,6 +52,7 @@ export function navForRole(role: Role): NavItem[] {
       { label: "My Applications", href: "/candidate/applications", icon: FileCheck },
       { label: "Invitations", href: "/candidate/invitations", icon: Mail },
       { label: "Work Logs", href: "/candidate/work-logs", icon: ClipboardList },
+      { label: "Chat", href: "/candidate/chat", icon: Mail },
       { label: "Payments", href: "/candidate/payments", icon: CreditCard }
     ];
   }
