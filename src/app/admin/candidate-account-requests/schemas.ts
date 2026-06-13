@@ -6,6 +6,7 @@ export {
   listCandidateIdRequestsSchema,
   getCandidateIdRequestSchema,
   updateCandidateIdRequestStatusSchema,
+  candidateIdRequestRowSchema,
   listCandidateIdRequestsOutputSchema,
   getCandidateIdRequestOutputSchema,
   updateCandidateIdRequestStatusOutputSchema,

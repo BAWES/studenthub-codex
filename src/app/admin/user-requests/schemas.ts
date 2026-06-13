@@ -6,6 +6,7 @@ export {
   listStoreAssignmentRequestsSchema,
   getStoreAssignmentRequestSchema,
   updateStoreAssignmentRequestStatusSchema,
+  storeAssignmentRequestRowSchema,
   listStoreAssignmentRequestsOutputSchema,
   getStoreAssignmentRequestOutputSchema,
   updateStoreAssignmentRequestStatusOutputSchema,
