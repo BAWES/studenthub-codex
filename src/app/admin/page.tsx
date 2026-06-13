@@ -1,7 +1,6 @@
 import { requireRoleCapability } from "@/modules/auth/session";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
-import { FeatureGrid } from "@/modules/workspace/FeatureGrid";
-import { navForRole } from "@/modules/workspace/navigation";
+import { AdminFeatureGrid } from "@/modules/workspace/AdminFeatureGrid";
 import { ErrorBoundary } from "@/modules/workspace/ErrorBoundary";
 import { EmptyState } from "@/modules/workspace/EmptyState";
 import { MetricCard } from "@/components/ui/metric-card";
@@ -38,7 +37,7 @@ export default async function AdminPage() {
         title="Command center for the whole operation."
         metrics={[]}
       >
-        <FeatureGrid items={navForRole("admin").filter((item) => item.href !== "/admin")} />
+        <AdminFeatureGrid />
 
         {/* ── Glass metric cards with sparklines ── */}
         <section
