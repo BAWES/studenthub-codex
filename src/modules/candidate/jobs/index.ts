@@ -1,5 +1,5 @@
-// Colocated server actions — candidate job browsing & applications
-// Delegates to module-level actions in @/modules/candidate/jobs/actions
+// ---------------------------------------------------------------------------
+// Candidate Jobs — barrel exports
 // ---------------------------------------------------------------------------
 
 export {
@@ -7,10 +7,10 @@ export {
   getCandidateJob,
   applyToJob,
   listMyApplications,
-} from "@/modules/candidate/jobs/actions";
+} from "./actions";
 
 export type {
   CandidateJobRow,
   CandidateJobDetail,
   ApplicationRow,
-} from "@/modules/candidate/jobs";
+} from "@/app/candidate/jobs/schemas";
