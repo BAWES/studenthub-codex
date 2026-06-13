@@ -9,9 +9,9 @@
 // ---------------------------------------------------------------------------
 
 import { revalidatePath } from "next/cache";
-import type { ExperienceActionResult } from "../../schemas";
+import type { ExperienceActionResult } from "./schemas";
 import { updateExperienceEntry as parentUpdateExperienceEntry } from "../actions";
-import { experienceActionResultOutputSchema } from "../../schemas";
+import { experienceActionResultOutputSchema } from "./schemas";
 
 /** Re-export types for client components */
 export type { ExperienceActionResult };
