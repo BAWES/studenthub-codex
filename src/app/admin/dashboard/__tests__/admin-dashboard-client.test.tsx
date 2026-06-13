@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
-import { AdminDashboardClient } from "../admin-dashboard-client";
+import { AdminDashboardClient } from "../_components";
 import type { DashboardData } from "../schemas";
 
 // Mock next/navigation
