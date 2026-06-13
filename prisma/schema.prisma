@@ -150,6 +150,14 @@ model blocked_ip {
   updated_at DateTime? @db.DateTime(0)
 }
 
+model department {
+  department_uuid       String     @id @db.Char(60)
+  department_name_en    String     @db.VarChar(255)
+  department_name_ar    String?    @db.VarChar(255)
+  department_created_at DateTime?  @db.DateTime(0)
+  department_updated_at DateTime?  @db.DateTime(0)
+}
+
 model brand {
   brand_uuid             String   @id @db.Char(60)
   company_id             Int?
