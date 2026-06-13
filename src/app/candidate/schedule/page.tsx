@@ -1,7 +1,7 @@
 import { requireRoleCapability } from "@/modules/auth/session";
 import { formatDate } from "@/modules/workspace/format";
 import { listSchedule } from "./actions";
-import { CandidateScheduleTable } from "./candidate-schedule-table";
+import { CandidateScheduleTable } from "./_components";
 
 const STATUS_LABELS: Record<number, string> = {
   0: "Pending",
