@@ -8,7 +8,7 @@ import { EmptyState } from "@/modules/workspace/EmptyState";
 import Link from "next/link";
 import type { Route } from "next";
 import type { SessionUser } from "@/modules/auth/types";
-import type { DashboardData } from "./schemas";
+import type { DashboardData } from "../schemas";
 
 type Props = {
   session: SessionUser;
