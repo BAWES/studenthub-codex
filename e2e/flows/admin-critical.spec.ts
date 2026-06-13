@@ -7,10 +7,10 @@
 //   2. Admin Section Navigation — navigate between workspace sections
 //   3. Admin Management Views — candidates, companies, compliance, payments, transfers, agents
 //   4. Cross-role Guard — candidate/company/staff cannot access admin routes
-//   5. Console Error Check — all admin critical pages load without errors
+//   5. Console Error Check — all admin critical pages networkidle without errors
 // ---------------------------------------------------------------------------
 
-import { test, expect, type BrowserContext, type Page } from "@playwright/test";
+import { test, expect, type BrowserContext, type Page, type Browser } from "@playwright/test";
 import { getMockFixtures, type FixtureUser } from "../fixtures/users";
 
 // Force USE_MOCK_FIXTURES=true — these tests must never need DB seed data
@@ -20,6 +20,19 @@ let admin: FixtureUser;
 let candidateUser: FixtureUser;
 let companyUser: FixtureUser;
 let staffUser: FixtureUser;
+
+let browser: Browser;
+
+// ── Shared browser instance ──────────────────────────────────────────────
+
+test.beforeAll(async () => {
+  const { chromium } = await import("@playwright/test");
+  browser = await chromium.launch();
+});
+
+test.afterAll(async () => {
+  await browser.close();
+});
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 
@@ -32,9 +45,6 @@ async function adminContext(): Promise<{
   errors: string[];
   close: () => Promise<void>;
 }> {
-  const browser = await (
-    await import("@playwright/test")
-  ).chromium.launch();
   const context = await browser.newContext();
   await context.addCookies([
     {
@@ -55,7 +65,6 @@ async function adminContext(): Promise<{
     errors,
     close: async () => {
       await context.close();
-      await browser.close();
     },
   };
 }
@@ -66,8 +75,6 @@ async function adminContext(): Promise<{
 async function roleContext(
   role: FixtureUser,
 ): Promise<{ context: BrowserContext; page: Page; close: () => Promise<void> }> {
-  const { chromium } = await import("@playwright/test");
-  const browser = await chromium.launch();
   const context = await browser.newContext();
   await context.addCookies([
     {
@@ -83,7 +90,6 @@ async function roleContext(
     page,
     close: async () => {
       await context.close();
-      await browser.close();
     },
   };
 }
@@ -120,7 +126,7 @@ test.describe("Admin critical flows — Workspace + Management Views", () => {
       const ctx = await adminContext();
 
       await ctx.page.goto("/admin");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.waitForLoadState("networkidle");
       await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
       await expect(ctx.page).toHaveURL("/admin");
 
@@ -144,7 +150,7 @@ test.describe("Admin critical flows — Workspace + Management Views", () => {
       const ctx = await adminContext();
 
       await ctx.page.goto("/admin");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.waitForLoadState("networkidle");
       await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
       await expect(ctx.page).toHaveURL("/admin");
 
@@ -165,12 +171,12 @@ test.describe("Admin critical flows — Workspace + Management Views", () => {
       const ctx = await adminContext();
 
       await ctx.page.goto("/admin");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.waitForLoadState("networkidle");
       await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
 
       // Navigate to Candidates via URL
       await ctx.page.goto("/admin/candidates");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.waitForLoadState("networkidle");
       await expect(ctx.page).toHaveURL(/\/admin\/candidates/);
 
       // Candidates page renders
@@ -184,7 +190,7 @@ test.describe("Admin critical flows — Workspace + Management Views", () => {
       const ctx = await adminContext();
 
       await ctx.page.goto("/admin/companies");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.waitForLoadState("networkidle");
       await expect(ctx.page).toHaveURL(/\/admin\/companies/);
       await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
 
@@ -196,7 +202,7 @@ test.describe("Admin critical flows — Workspace + Management Views", () => {
       const ctx = await adminContext();
 
       await ctx.page.goto("/admin/requests");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.waitForLoadState("networkidle");
       await expect(ctx.page).toHaveURL(/\/admin\/requests/);
       await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
 
@@ -208,7 +214,7 @@ test.describe("Admin critical flows — Workspace + Management Views", () => {
       const ctx = await adminContext();
 
       await ctx.page.goto("/admin/transfers");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.waitForLoadState("networkidle");
       await expect(ctx.page).toHaveURL(/\/admin\/transfers/);
       await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
 
@@ -220,7 +226,7 @@ test.describe("Admin critical flows — Workspace + Management Views", () => {
       const ctx = await adminContext();
 
       await ctx.page.goto("/admin/compliance");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.waitForLoadState("networkidle");
       await expect(ctx.page).toHaveURL(/\/admin\/compliance/);
       await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
 
@@ -232,7 +238,7 @@ test.describe("Admin critical flows — Workspace + Management Views", () => {
       const ctx = await adminContext();
 
       await ctx.page.goto("/admin/payments");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.waitForLoadState("networkidle");
       await expect(ctx.page).toHaveURL(/\/admin\/payments/);
       await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
 
@@ -244,7 +250,7 @@ test.describe("Admin critical flows — Workspace + Management Views", () => {
       const ctx = await adminContext();
 
       await ctx.page.goto("/admin/agents");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.waitForLoadState("networkidle");
       await expect(ctx.page).toHaveURL(/\/admin\/agents/);
       await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
 
@@ -252,11 +258,11 @@ test.describe("Admin critical flows — Workspace + Management Views", () => {
       await ctx.close();
     });
 
-    test("2h. Admin candidates page loads with DataTable", async () => {
+    test("2h. Admin candidates page networkidles with DataTable", async () => {
       const ctx = await adminContext();
 
       await ctx.page.goto("/admin/candidates");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.waitForLoadState("networkidle");
       await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
       await expect(ctx.page).toHaveURL(/\/admin\/candidates/);
 
@@ -267,11 +273,11 @@ test.describe("Admin critical flows — Workspace + Management Views", () => {
       await ctx.close();
     });
 
-    test("2i. Admin companies page loads with DataTable", async () => {
+    test("2i. Admin companies page networkidles with DataTable", async () => {
       const ctx = await adminContext();
 
       await ctx.page.goto("/admin/companies");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.waitForLoadState("networkidle");
       await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
       await expect(ctx.page).toHaveURL(/\/admin\/companies/);
 
@@ -288,11 +294,11 @@ test.describe("Admin critical flows — Workspace + Management Views", () => {
   // ─────────────────────────────────────────────────────────────────────────
 
   test.describe("Flow 3 — Admin Detail Views", () => {
-    test("3a. Admin candidate detail page loads", async () => {
+    test("3a. Admin candidate detail page networkidles", async () => {
       const ctx = await adminContext();
 
       await ctx.page.goto("/admin/candidates");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.waitForLoadState("networkidle");
       await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
 
       // Find a candidate link and navigate to detail
@@ -303,9 +309,9 @@ test.describe("Admin critical flows — Workspace + Management Views", () => {
         const href = await detailLinks.first().getAttribute("href").catch(() => null);
         if (href) {
           await ctx.page.goto(href);
-          await ctx.page.waitForLoadState("load");
+          await ctx.page.waitForLoadState("networkidle");
           await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
-          console.log(`Admin candidate detail loaded: ${href}`);
+          console.log(`Admin candidate detail networkidleed: ${href}`);
         }
       } else {
         console.log("No candidate detail links available — checking page rendered");
@@ -316,11 +322,11 @@ test.describe("Admin critical flows — Workspace + Management Views", () => {
       await ctx.close();
     });
 
-    test("3b. Admin company detail page loads", async () => {
+    test("3b. Admin company detail page networkidles", async () => {
       const ctx = await adminContext();
 
       await ctx.page.goto("/admin/companies");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.waitForLoadState("networkidle");
       await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
 
       const detailLinks = ctx.page.locator('a[href*="/admin/companies/"]');
@@ -330,7 +336,7 @@ test.describe("Admin critical flows — Workspace + Management Views", () => {
         const href = await detailLinks.first().getAttribute("href").catch(() => null);
         if (href) {
           await ctx.page.goto(href);
-          await ctx.page.waitForLoadState("load");
+          await ctx.page.waitForLoadState("networkidle");
           await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
         }
       } else {
@@ -341,11 +347,11 @@ test.describe("Admin critical flows — Workspace + Management Views", () => {
       await ctx.close();
     });
 
-    test("3c. Admin request detail page loads", async () => {
+    test("3c. Admin request detail page networkidles", async () => {
       const ctx = await adminContext();
 
       await ctx.page.goto("/admin/requests");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.waitForLoadState("networkidle");
       await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
 
       const detailLinks = ctx.page.locator('a[href*="/admin/requests/"]');
@@ -355,7 +361,7 @@ test.describe("Admin critical flows — Workspace + Management Views", () => {
         const href = await detailLinks.first().getAttribute("href").catch(() => null);
         if (href) {
           await ctx.page.goto(href);
-          await ctx.page.waitForLoadState("load");
+          await ctx.page.waitForLoadState("networkidle");
           await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
         }
       } else {
@@ -366,11 +372,11 @@ test.describe("Admin critical flows — Workspace + Management Views", () => {
       await ctx.close();
     });
 
-    test("3d. Admin transfer detail page loads", async () => {
+    test("3d. Admin transfer detail page networkidles", async () => {
       const ctx = await adminContext();
 
       await ctx.page.goto("/admin/transfers");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.waitForLoadState("networkidle");
       await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
 
       const detailLinks = ctx.page.locator('a[href*="/admin/transfers/"]');
@@ -380,7 +386,7 @@ test.describe("Admin critical flows — Workspace + Management Views", () => {
         const href = await detailLinks.first().getAttribute("href").catch(() => null);
         if (href) {
           await ctx.page.goto(href);
-          await ctx.page.waitForLoadState("load");
+          await ctx.page.waitForLoadState("networkidle");
           await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
         }
       } else {
@@ -401,10 +407,10 @@ test.describe("Admin critical flows — Workspace + Management Views", () => {
       const ctx = await roleContext(candidateUser);
 
       await ctx.page.goto("/admin");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.waitForLoadState("networkidle");
 
       // Candidate should be redirected away from /admin
-      await expect(ctx.page).not.toHaveURL("/admin");
+      await ctx.page.waitForURL((url) => !url.pathname.startsWith("/admin"), { timeout: 15000 });
       await ctx.close();
     });
 
@@ -412,9 +418,9 @@ test.describe("Admin critical flows — Workspace + Management Views", () => {
       const ctx = await roleContext(candidateUser);
 
       await ctx.page.goto("/admin/candidates");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.waitForLoadState("networkidle");
 
-      await expect(ctx.page).not.toHaveURL("/admin/candidates");
+      await ctx.page.waitForURL((url) => !url.pathname.startsWith("/admin"), { timeout: 15000 });
       await ctx.close();
     });
 
@@ -422,9 +428,9 @@ test.describe("Admin critical flows — Workspace + Management Views", () => {
       const ctx = await roleContext(candidateUser);
 
       await ctx.page.goto("/admin/companies");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.waitForLoadState("networkidle");
 
-      await expect(ctx.page).not.toHaveURL("/admin/companies");
+      await ctx.page.waitForURL((url) => !url.pathname.startsWith("/admin"), { timeout: 15000 });
       await ctx.close();
     });
 
@@ -432,9 +438,9 @@ test.describe("Admin critical flows — Workspace + Management Views", () => {
       const ctx = await roleContext(candidateUser);
 
       await ctx.page.goto("/admin/requests");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.waitForLoadState("networkidle");
 
-      await expect(ctx.page).not.toHaveURL("/admin/requests");
+      await ctx.page.waitForURL((url) => !url.pathname.startsWith("/admin"), { timeout: 15000 });
       await ctx.close();
     });
 
@@ -442,9 +448,9 @@ test.describe("Admin critical flows — Workspace + Management Views", () => {
       const ctx = await roleContext(companyUser);
 
       await ctx.page.goto("/admin");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.waitForLoadState("networkidle");
 
-      await expect(ctx.page).not.toHaveURL("/admin");
+      await ctx.page.waitForURL((url) => !url.pathname.startsWith("/admin"), { timeout: 15000 });
       await ctx.close();
     });
 
@@ -452,9 +458,9 @@ test.describe("Admin critical flows — Workspace + Management Views", () => {
       const ctx = await roleContext(companyUser);
 
       await ctx.page.goto("/admin/candidates");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.waitForLoadState("networkidle");
 
-      await expect(ctx.page).not.toHaveURL("/admin/candidates");
+      await ctx.page.waitForURL((url) => !url.pathname.startsWith("/admin"), { timeout: 15000 });
       await ctx.close();
     });
 
@@ -462,9 +468,9 @@ test.describe("Admin critical flows — Workspace + Management Views", () => {
       const ctx = await roleContext(companyUser);
 
       await ctx.page.goto("/admin/companies");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.waitForLoadState("networkidle");
 
-      await expect(ctx.page).not.toHaveURL("/admin/companies");
+      await ctx.page.waitForURL((url) => !url.pathname.startsWith("/admin"), { timeout: 15000 });
       await ctx.close();
     });
 
@@ -472,9 +478,9 @@ test.describe("Admin critical flows — Workspace + Management Views", () => {
       const ctx = await roleContext(companyUser);
 
       await ctx.page.goto("/admin/requests");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.waitForLoadState("networkidle");
 
-      await expect(ctx.page).not.toHaveURL("/admin/requests");
+      await ctx.page.waitForURL((url) => !url.pathname.startsWith("/admin"), { timeout: 15000 });
       await ctx.close();
     });
 
@@ -482,9 +488,9 @@ test.describe("Admin critical flows — Workspace + Management Views", () => {
       const ctx = await roleContext(staffUser);
 
       await ctx.page.goto("/admin");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.waitForLoadState("networkidle");
 
-      await expect(ctx.page).not.toHaveURL("/admin");
+      await ctx.page.waitForURL((url) => !url.pathname.startsWith("/admin"), { timeout: 15000 });
       await ctx.close();
     });
 
@@ -492,9 +498,9 @@ test.describe("Admin critical flows — Workspace + Management Views", () => {
       const ctx = await roleContext(staffUser);
 
       await ctx.page.goto("/admin/candidates");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.waitForLoadState("networkidle");
 
-      await expect(ctx.page).not.toHaveURL("/admin/candidates");
+      await ctx.page.waitForURL((url) => !url.pathname.startsWith("/admin"), { timeout: 15000 });
       await ctx.close();
     });
 
@@ -502,9 +508,9 @@ test.describe("Admin critical flows — Workspace + Management Views", () => {
       const ctx = await roleContext(staffUser);
 
       await ctx.page.goto("/admin/companies");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.waitForLoadState("networkidle");
 
-      await expect(ctx.page).not.toHaveURL("/admin/companies");
+      await ctx.page.waitForURL((url) => !url.pathname.startsWith("/admin"), { timeout: 15000 });
       await ctx.close();
     });
 
@@ -512,9 +518,9 @@ test.describe("Admin critical flows — Workspace + Management Views", () => {
       const ctx = await roleContext(staffUser);
 
       await ctx.page.goto("/admin/requests");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.waitForLoadState("networkidle");
 
-      await expect(ctx.page).not.toHaveURL("/admin/requests");
+      await ctx.page.waitForURL((url) => !url.pathname.startsWith("/admin"), { timeout: 15000 });
       await ctx.close();
     });
   });
@@ -524,7 +530,7 @@ test.describe("Admin critical flows — Workspace + Management Views", () => {
   // ─────────────────────────────────────────────────────────────────────────
 
   test.describe("Flow 5 — Console Error Check", () => {
-    test("5a. All admin critical pages load without hydration or serialization errors", async () => {
+    test("5a. All admin critical pages networkidle without hydration or serialization errors", async () => {
       const ctx = await adminContext();
 
       const pages = [
@@ -539,7 +545,7 @@ test.describe("Admin critical flows — Workspace + Management Views", () => {
       ];
       for (const route of pages) {
         await ctx.page.goto(route);
-        await ctx.page.waitForLoadState("load");
+        await ctx.page.waitForLoadState("networkidle");
         await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
       }
 

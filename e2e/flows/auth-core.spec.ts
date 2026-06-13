@@ -11,7 +11,7 @@
 //   6. Password reset flow — request, verify, set new password
 // ---------------------------------------------------------------------------
 
-import { test, expect, type BrowserContext, type Page } from "@playwright/test";
+import { test, expect, type BrowserContext, type Page, type Browser } from "@playwright/test";
 import { getMockFixtures, type FixtureUser } from "../fixtures/users";
 
 // Force USE_MOCK_FIXTURES=true — these tests must never need DB seed data
@@ -23,11 +23,24 @@ let candidate: FixtureUser;
 let company: FixtureUser;
 let inspector: FixtureUser;
 
+let browser: Browser;
+
+// ── Shared browser instance ──────────────────────────────────────────────
+
+test.beforeAll(async () => {
+  const { chromium } = await import("@playwright/test");
+  browser = await chromium.launch();
+});
+
+test.afterAll(async () => {
+  await browser.close();
+});
+
 // ── Helpers ────────────────────────────────────────────────────────────────
 
 /**
  * Create an authenticated browser context for the given user.
- * Returns helpers for page, context, error tracking, and cleanup.
+ * Uses the shared `browser` instance.
  */
 async function authContext(user: FixtureUser): Promise<{
   context: BrowserContext;
@@ -35,9 +48,6 @@ async function authContext(user: FixtureUser): Promise<{
   errors: string[];
   close: () => Promise<void>;
 }> {
-  const browser = await (
-    await import("@playwright/test")
-  ).chromium.launch();
   const context = await browser.newContext();
   await context.addCookies([
     {
@@ -58,13 +68,13 @@ async function authContext(user: FixtureUser): Promise<{
     errors,
     close: async () => {
       await context.close();
-      await browser.close();
     },
   };
 }
 
 /**
  * Create an unauthenticated browser context (no session cookie).
+ * Uses the shared `browser` instance.
  */
 async function unauthContext(): Promise<{
   context: BrowserContext;
@@ -72,9 +82,6 @@ async function unauthContext(): Promise<{
   errors: string[];
   close: () => Promise<void>;
 }> {
-  const browser = await (
-    await import("@playwright/test")
-  ).chromium.launch();
   const context = await browser.newContext();
   const page = await context.newPage();
   const errors: string[] = [];
@@ -87,7 +94,6 @@ async function unauthContext(): Promise<{
     errors,
     close: async () => {
       await context.close();
-      await browser.close();
     },
   };
 }
@@ -300,8 +306,6 @@ test.describe("Auth critical flows — authentication, redirects, session, logou
 
   test.describe("Flow 4 — Expired / invalid session redirects to /login", () => {
     test("4a. Tampered session cookie redirects candidate to /login", async () => {
-      const { chromium } = await import("@playwright/test");
-      const browser = await chromium.launch();
       const context = await browser.newContext();
 
       // Set an invalid / tampered session cookie
@@ -317,17 +321,14 @@ test.describe("Auth critical flows — authentication, redirects, session, logou
       const page = await context.newPage();
 
       await page.goto("/candidate");
-      await page.waitForLoadState("load");
+      await page.waitForLoadState("networkidle");
       // Should reject the tampered cookie and redirect to /login
       await expect(page).toHaveURL(/\/login/);
 
       await context.close();
-      await browser.close();
     });
 
     test("4b. Tampered session cookie redirects inspector to /login", async () => {
-      const { chromium } = await import("@playwright/test");
-      const browser = await chromium.launch();
       const context = await browser.newContext();
 
       const badCookie = tamperedCookie(inspector.cookie);
@@ -342,11 +343,10 @@ test.describe("Auth critical flows — authentication, redirects, session, logou
       const page = await context.newPage();
 
       await page.goto("/inspector/id-requests");
-      await page.waitForLoadState("load");
+      await page.waitForLoadState("networkidle");
       await expect(page).toHaveURL(/\/login/);
 
       await context.close();
-      await browser.close();
     });
   });
 
