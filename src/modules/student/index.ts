@@ -1,6 +1,5 @@
 // ---------------------------------------------------------------------------
-// Colocated server actions — student public profile
-// Delegates to module-level actions in @/modules/student/actions
+// Student — barrel exports
 // ---------------------------------------------------------------------------
 
 export {
@@ -13,10 +12,10 @@ export {
   addExperience,
   updateExperience,
   removeExperience,
-} from "@/modules/student/actions";
+} from "./actions";
 
 export type {
   StudentProfile,
   SkillItem,
   ExperienceItem,
-} from "@/modules/student/actions";
+} from "./actions";
