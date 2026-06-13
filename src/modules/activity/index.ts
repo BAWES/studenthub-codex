@@ -1,20 +1,22 @@
 // ---------------------------------------------------------------------------
-// Designations — barrel exports
+// Activity — barrel exports
 // ---------------------------------------------------------------------------
 
 export {
-  listDesignations,
-  getDesignation
+  listActivity,
+  getActivity
 } from "./actions";
 
 export type {
-  DesignationItem,
-  ListDesignationsResult
+  ListActivityParams,
+  GetActivityParams,
+  RequestActivityItem,
+  ListActivityResult
 } from "./schemas";
 
 export {
-  designationItemSchema,
-  listDesignationsResultSchema,
-  listDesignationsSchema,
-  getDesignationSchema
+  listActivitySchema,
+  getActivitySchema,
+  requestActivityItemSchema,
+  listActivityResultSchema
 } from "./schemas";

@@ -1,9 +1,28 @@
-export { listBanks, getBank, listBankAccounts, getBankAccount, createBank } from "./actions";
+// ---------------------------------------------------------------------------
+// Banks — barrel exports
+// ---------------------------------------------------------------------------
+
+export {
+  listBanks,
+  getBank,
+  createBank
+} from "./actions";
+
 export type {
-  BankListItem,
-  ListBanksResult,
   ListBanksParams,
   GetBankParams,
   CreateBankParams,
-  CreateBankResult,
+  BankListItem,
+  ListBanksResult,
+  CreateBankResult
+} from "./schemas";
+
+export {
+  listBanksSchema,
+  getBankSchema,
+  createBankSchema,
+  bankListItemSchema,
+  listBanksResultSchema,
+  getBankResultSchema,
+  createBankResultSchema
 } from "./schemas";

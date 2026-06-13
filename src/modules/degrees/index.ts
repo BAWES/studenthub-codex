@@ -1,9 +1,19 @@
+// ---------------------------------------------------------------------------
+// Degrees — barrel exports
+// ---------------------------------------------------------------------------
+
 export {
-  listDegrees,
+  listDegrees
 } from "./actions";
 
 export type {
   DegreeItem,
   ListDegreesResult,
-  ListDegreesInput,
+  ListDegreesInput
+} from "./schemas";
+
+export {
+  degreeItemSchema,
+  listDegreesResultSchema,
+  listDegreesSchema
 } from "./schemas";

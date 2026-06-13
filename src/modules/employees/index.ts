@@ -1,9 +1,14 @@
+// ---------------------------------------------------------------------------
+// Employees — barrel exports
+// ---------------------------------------------------------------------------
+
 export {
   listEmployees,
   getEmployee,
   createEmployee,
-  updateEmployee,
+  updateEmployee
 } from "./actions";
+
 export type {
   ListEmployeesInput,
   CreateEmployeeInput,
@@ -12,5 +17,17 @@ export type {
   EmployeeDetail,
   ListEmployeesResult,
   CreateEmployeeResult,
-  UpdateEmployeeResult,
+  UpdateEmployeeResult
+} from "./schemas";
+
+export {
+  listEmployeesSchema,
+  getEmployeeSchema,
+  createEmployeeSchema,
+  updateEmployeeSchema,
+  employeeItemSchema,
+  employeeDetailSchema,
+  listEmployeesResultSchema,
+  createEmployeeResultSchema,
+  updateEmployeeResultSchema
 } from "./schemas";
