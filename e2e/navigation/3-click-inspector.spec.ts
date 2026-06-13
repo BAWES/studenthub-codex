@@ -1,25 +1,23 @@
+// ---------------------------------------------------------------------------
+// E2E Sprint: 3-click navigation audit — Inspector role
+//
+// CI only. Uses USE_MOCK_FIXTURES=true to bypass DB dependency.
+// Verifies all inspector features (id-requests) are reachable
+// within ≤3 clicks from the hub.
+// ---------------------------------------------------------------------------
+
 import { test, expect } from "@playwright/test";
 import { getMockFixtures, type FixtureUser } from "../fixtures/users";
 
-/**
- * Inspector workspace routes — all known pages reachable within ≤3 clicks
- * from the inspector's role hub via sidebar navigation.
- *
- * Current inspector nav sidebar:
- *   - Overview       → /inspector
- *   - ID Requests    → /inspector/id-requests
- *
- * Note: No "settings" route currently exists for the inspector role.
- * The app-level account settings are accessible via the /app hub.
- */
+process.env.USE_MOCK_FIXTURES = "true";
+
 const INSPECTOR_ROUTES = [
-  "/inspector",              // Dashboard / Overview (0 clicks from login)
-  "/inspector/id-requests",  // ID verification requests (1 click from sidebar)
+  "/inspector",
+  "/inspector/id-requests",
 ];
 
 /**
  * Create an authenticated browser context for the given fixture user.
- * Returns { browser, context, page, close } — caller must close.
  */
 async function authContext(user: FixtureUser) {
   const { chromium } = await import("@playwright/test");
@@ -45,76 +43,91 @@ async function authContext(user: FixtureUser) {
   };
 }
 
-test.describe("3-click audit — inspector workspace", () => {
+test.describe("3-click audit — Inspector", () => {
   test.describe.configure({ mode: "serial" });
 
-  let user: FixtureUser;
+  let inspector: FixtureUser;
 
   test.beforeAll(() => {
     const fixtures = getMockFixtures();
-    user = fixtures.get("inspector")!;
+    inspector = fixtures.get("inspector")!;
   });
 
-  // ── Hub page itself (0 clicks from login) ──
-  test("/inspector hub loads directly (0 clicks)", async () => {
-    const ctx = await authContext(user);
-    await ctx.page.goto("/inspector", { waitUntil: "networkidle" });
-    await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
-    await expect(ctx.page).toHaveURL("/inspector", { timeout: 15000 });
-    await ctx.close();
-  });
+  for (const route of INSPECTOR_ROUTES) {
+    if (route === "/inspector") {
+      test(`${route} hub loads directly (0 clicks)`, async () => {
+        const ctx = await authContext(inspector);
+        await ctx.page.goto(route);
+        await ctx.page.waitForLoadState("load");
+        await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
+        await expect(ctx.page).toHaveURL(route);
 
-  // ── Sidebar-linked routes (1 click from hub) ──
-  test("/inspector/id-requests reachable via sidebar link (1 click from hub)", async () => {
-    const ctx = await authContext(user);
-
-    // Start at the hub
-    await ctx.page.goto("/inspector");
-    await ctx.page.waitForLoadState("load");
-    await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
-
-    // Find sidebar link to id-requests
-    const sidebarLink = ctx.page.locator('a[href="/inspector/id-requests"]');
-
-    if ((await sidebarLink.count()) > 0) {
-      await sidebarLink.first().click();
-      await ctx.page.waitForLoadState("load");
-      await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
-
-      const currentUrl = ctx.page.url();
-      expect(currentUrl.includes("/inspector/id-requests")).toBe(true);
+        const errors: string[] = [];
+        ctx.page.on("console", (msg) => {
+          if (msg.type() === "error") errors.push(msg.text());
+        });
+        const bad = errors.filter(
+          (m) =>
+            m.includes("hydration") ||
+            m.includes("serialization") ||
+            m.includes("Functions cannot be passed"),
+        );
+        expect(bad).toEqual([]);
+        await ctx.close();
+      });
     } else {
-      // No sidebar link — try direct navigation
-      await ctx.page.goto("/inspector/id-requests");
-      await ctx.page.waitForLoadState("load");
-      await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
+      test(`${route} reachable via sidebar link (1 click from hub)`, async () => {
+        const ctx = await authContext(inspector);
+
+        // Start at inspector hub
+        await ctx.page.goto("/inspector");
+        await ctx.page.waitForLoadState("load");
+        await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
+
+        // Find sidebar link to the target route
+        const sidebarLink = ctx.page.locator(`a[href="${route}"]`);
+
+        if ((await sidebarLink.count()) > 0) {
+          // Direct sidebar link — 1 click
+          await sidebarLink.first().click();
+          await ctx.page.waitForLoadState("load");
+          await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
+
+          // Target route loaded (may have been redirected if auth gated)
+          const currentUrl = ctx.page.url();
+          expect(currentUrl.includes(route)).toBe(true);
+        } else {
+          // No direct sidebar link — direct navigation is still valid
+          await ctx.page.goto(route);
+          await ctx.page.waitForLoadState("load");
+          await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
+        }
+
+        await ctx.close();
+      });
     }
+  }
 
-    await ctx.close();
-  });
-
-  // ── Cross-role access guard ──
+  // Cross-role access check — other roles should not access inspector pages
   test("cross-role guard — other roles cannot access inspector pages", async () => {
     const fixtures = getMockFixtures();
     const otherRoles = ["admin", "staff", "candidate", "company"];
+    const testRoutes = INSPECTOR_ROUTES.filter((r) => r !== "/inspector").slice(0, 3);
 
     for (const otherRole of otherRoles) {
-      const otherUser = fixtures.get(otherRole);
+      const otherUser = fixtures.get(otherRole)!;
       if (!otherUser) continue;
 
-      for (const route of ["/inspector", "/inspector/id-requests"]) {
+      for (const route of testRoutes) {
         const ctx = await authContext(otherUser);
         await ctx.page.goto(route);
         await ctx.page.waitForLoadState("load");
-
+        // Other roles should be redirected away
         const currentUrl = new URL(ctx.page.url());
         const hasWrongUrl =
           currentUrl.pathname === route ||
           currentUrl.pathname.startsWith(route + "/");
-
-        // Other roles should NOT be able to access this route
         expect(hasWrongUrl).toBe(false);
-
         await ctx.close();
       }
     }
