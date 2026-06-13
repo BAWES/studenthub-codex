@@ -19,8 +19,8 @@ vi.mock("@/modules/auth/actions", () => ({
 
 vi.mock("./navigation", () => ({
   navForRole: () => [
-    { label: "Dashboard", href: "/admin", icon: "LayoutDashboard" },
-    { label: "Candidates", href: "/admin/candidates", icon: "Users" },
+    { label: "Dashboard", href: "/admin", icon: () => <svg data-testid="icon-dashboard" /> },
+    { label: "Candidates", href: "/admin/candidates", icon: () => <svg data-testid="icon-users" /> },
   ],
 }));
 
