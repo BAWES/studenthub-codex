@@ -1,7 +1,6 @@
-"use server";
-
 // ---------------------------------------------------------------------------
 // Barrel re-export — routes through the module-level wrappers
+// (No "use server" — the module-level actions already have it.)
 // ---------------------------------------------------------------------------
 
 export {
