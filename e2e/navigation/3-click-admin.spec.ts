@@ -95,7 +95,9 @@ test.describe("3-click audit — Admin", () => {
         if ((await sidebarLink.count()) > 0) {
           // Direct sidebar link — 1 click
           await sidebarLink.first().click();
-          await ctx.page.waitForLoadState("load");
+          // Client-side navigation (Next.js <Link>) does not fire a "load" event.
+          // Wait for the URL to change instead.
+          await ctx.page.waitForURL(`**${route}**`, { timeout: 15000 });
           await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
 
           // Target route loaded (may have been redirected if auth gated)
