@@ -16,6 +16,20 @@ vi.mock("next/navigation", () => ({
   usePathname: () => mockPathname,
 }));
 
+vi.mock("./navigation", () => ({
+  navForRole: (role: string) => {
+    if (role === "admin") {
+      return [
+        { label: "Overview", href: "/admin", icon: () => <svg data-testid="icon-overview" /> },
+        { label: "Candidates", href: "/admin/candidates", icon: () => <svg data-testid="icon-candidates" /> },
+        { label: "Requests", href: "/admin/requests", icon: () => <svg data-testid="icon-requests" /> },
+        { label: "Companies", href: "/admin/companies", icon: () => <svg data-testid="icon-companies" /> },
+      ];
+    }
+    return [];
+  },
+}));
+
 function mockPath(value: string) {
   mockPathname = value;
 }
@@ -353,5 +367,87 @@ describe("TabContext — tab limit (max 12)", () => {
     expect(screen.queryByRole("tab", { name: /^Tab 2$/i })).not.toBeInTheDocument();
     // The last tabs survive
     expect(screen.getByRole("tab", { name: /^Tab 14$/i })).toBeInTheDocument();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// TabBar "+" button menu (STU-4142)
+// ---------------------------------------------------------------------------
+
+describe('TabBar "+" button — tab creation menu', () => {
+  it('shows the "+" button with aria-label "Open new tab"', () => {
+    renderWithProvider("admin");
+    const addBtn = screen.getByLabelText("Open new tab");
+    expect(addBtn).toBeInTheDocument();
+  });
+
+  it("opens a dropdown menu on click", () => {
+    renderWithProvider("admin");
+    const addBtn = screen.getByLabelText("Open new tab");
+    fireEvent.click(addBtn);
+
+    // Menu should now be visible with role="menu"
+    const menu = document.querySelector(".workspaceTabMenu");
+    expect(menu).toBeInTheDocument();
+    expect(menu).toHaveAttribute("role", "menu");
+  });
+
+  it("displays nav items inside the menu", () => {
+    renderWithProvider("admin");
+    fireEvent.click(screen.getByLabelText("Open new tab"));
+
+    // Menu items should include the mock nav items
+    const menuItems = document.querySelectorAll(".workspaceTabMenuItem");
+    expect(menuItems.length).toBeGreaterThan(0);
+    expect(screen.getByRole("menuitem", { name: "Candidates" })).toBeInTheDocument();
+    expect(screen.getByRole("menuitem", { name: "Requests" })).toBeInTheDocument();
+    expect(screen.getByRole("menuitem", { name: "Companies" })).toBeInTheDocument();
+  });
+
+  it("creates a new tab when a menu item is clicked", () => {
+    renderWithProvider("admin");
+    expect(getTab("Candidates")).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByLabelText("Open new tab"));
+    fireEvent.click(screen.getByRole("menuitem", { name: "Candidates" }));
+
+    expect(getTab("Candidates")).toBeInTheDocument();
+  });
+
+  it("closes the menu after a menu item is clicked", () => {
+    renderWithProvider("admin");
+    fireEvent.click(screen.getByLabelText("Open new tab"));
+    expect(document.querySelector(".workspaceTabMenu")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("menuitem", { name: "Candidates" }));
+
+    expect(document.querySelector(".workspaceTabMenu")).not.toBeInTheDocument();
+  });
+
+  it("toggles the menu on repeated clicks", () => {
+    renderWithProvider("admin");
+    const addBtn = screen.getByLabelText("Open new tab");
+
+    fireEvent.click(addBtn);
+    expect(document.querySelector(".workspaceTabMenu")).toBeInTheDocument();
+
+    fireEvent.click(addBtn);
+    expect(document.querySelector(".workspaceTabMenu")).not.toBeInTheDocument();
+
+    fireEvent.click(addBtn);
+    expect(document.querySelector(".workspaceTabMenu")).toBeInTheDocument();
+  });
+
+  it("applies active class to the '+' button when menu is open", () => {
+    renderWithProvider("admin");
+    const addBtn = screen.getByLabelText("Open new tab");
+
+    expect(addBtn.className).not.toContain("active");
+
+    fireEvent.click(addBtn);
+    expect(addBtn.className).toContain("active");
+
+    fireEvent.click(addBtn);
+    expect(addBtn.className).not.toContain("active");
   });
 });
