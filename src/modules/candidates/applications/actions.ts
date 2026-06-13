@@ -1,8 +1,9 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { requireCapability } from "@/modules/auth/session";
+import { requireCapability, requireRoleCapability } from "@/modules/auth/session";
 import {
   listApplicationsSchema,
   getApplicationSchema,
@@ -303,4 +304,112 @@ export async function deleteApplication(
   }
 
   return result;
+}
+
+// ---------------------------------------------------------------------------
+// Candidate-specific wrappers (for /candidate/applications route)
+// ---------------------------------------------------------------------------
+
+/** Input schema for listMyApplications — no candidateId (extracted from session). */
+const listMyApplicationsInputSchema = z.object({
+  page: z.coerce.number().int().positive().optional().default(1),
+  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
+  status: z.string().optional(),
+});
+
+export type ListMyApplicationsInput = z.input<typeof listMyApplicationsInputSchema>;
+
+/** Output shape for listMyApplications — maps module's { items } to { applications }. */
+const listMyApplicationsOutputSchema = z.object({
+  applications: z.array(applicationItemSchema),
+  total: z.number().int().nonnegative(),
+  page: z.number().int().positive(),
+  limit: z.number().int().positive(),
+});
+
+type ListMyApplicationsOutput = z.output<typeof listMyApplicationsOutputSchema>;
+
+/** Withdraw result schema — simple success/fail. */
+const withdrawApplicationOutputSchema = z.object({
+  success: z.boolean(),
+  error: z.string().optional(),
+});
+
+type WithdrawApplicationOutput = z.output<typeof withdrawApplicationOutputSchema>;
+
+/**
+ * List the current user's applications — extracts candidateId from session.
+ * Delegates to listApplications with the session's candidate ID.
+ */
+export async function listMyApplications(
+  input: ListMyApplicationsInput = {},
+): Promise<ListMyApplicationsOutput> {
+  const session = await requireRoleCapability("candidate", "candidate.read.own");
+  const candidateId = Number(session.id);
+
+  const { page, limit, status } = listMyApplicationsInputSchema.parse(input);
+
+  const result = await listApplications({ candidateId, page, limit, status });
+
+  const mapped: ListMyApplicationsOutput = {
+    applications: result.items,
+    total: result.total,
+    page: result.page,
+    limit,
+  };
+
+  // Validate output shape
+  const outputParsed = listMyApplicationsOutputSchema.safeParse(mapped);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/candidates/applications] listMyApplications output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return mapped;
+}
+
+/**
+ * Withdraw a job application — delegates to updateApplicationStatus.
+ */
+export async function withdrawApplication(
+  applicationId: number,
+): Promise<WithdrawApplicationOutput> {
+  const session = await requireRoleCapability("candidate", "candidate.read.own");
+  const candidateId = Number(session.id);
+
+  const result = await updateApplicationStatus({
+    applicationId,
+    status: "withdrawn" as const,
+  });
+
+  if (!result.success) {
+    const failResult: WithdrawApplicationOutput = {
+      success: false,
+      error: result.error ?? "Application not found",
+    };
+    const failParsed = withdrawApplicationOutputSchema.safeParse(failResult);
+    if (!failParsed.success) {
+      console.error(
+        "[modules/candidates/applications] withdrawApplication output validation failed:",
+        failParsed.error.issues,
+      );
+    }
+    return failResult;
+  }
+
+  revalidatePath("/candidate/applications");
+  revalidatePath("/candidate/jobs");
+
+  const successResult: WithdrawApplicationOutput = { success: true };
+  const successParsed = withdrawApplicationOutputSchema.safeParse(successResult);
+  if (!successParsed.success) {
+    console.error(
+      "[modules/candidates/applications] withdrawApplication output validation failed:",
+      successParsed.error.issues,
+    );
+  }
+
+  return successResult;
 }
