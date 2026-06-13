@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { requireRoleCapability } from "@/modules/auth/session";
 import { listCandidateJobs } from "./actions";
-import { CandidateJobsTable } from "./candidate-jobs-table";
+import { CandidateJobsTable } from "./_components";
 import { MatchingResultsSection } from "@/components/matching";
 
 export const dynamic = "force-dynamic";
