@@ -1,4 +1,14 @@
-export { listDegreeGroups, getDegreeGroup, createDegreeGroup, updateDegreeGroup } from "./actions";
+// ---------------------------------------------------------------------------
+// Degree-groups — barrel exports
+// ---------------------------------------------------------------------------
+
+export {
+  listDegreeGroups,
+  getDegreeGroup,
+  createDegreeGroup,
+  updateDegreeGroup
+} from "./actions";
+
 export type {
   DegreeGroupItem,
   ListDegreeGroupsResult,
@@ -6,5 +16,15 @@ export type {
   ListDegreeGroupsInput,
   GetDegreeGroupInput,
   CreateDegreeGroupInput,
-  UpdateDegreeGroupInput,
+  UpdateDegreeGroupInput
+} from "./schemas";
+
+export {
+  degreeGroupItemSchema,
+  listDegreeGroupsResultSchema,
+  mutationResultSchema,
+  listDegreeGroupsSchema,
+  getDegreeGroupSchema,
+  createDegreeGroupSchema,
+  updateDegreeGroupSchema
 } from "./schemas";

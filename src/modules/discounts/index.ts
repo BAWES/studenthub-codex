@@ -1,14 +1,12 @@
+// ---------------------------------------------------------------------------
+// Discounts — barrel exports
+// ---------------------------------------------------------------------------
+
 export {
   listDiscounts,
   createDiscount,
-  listDiscountsByApplicant,
+  listDiscountsByApplicant
 } from "./actions";
-
-export {
-  createDiscountSchema,
-  listDiscountsSchema,
-  listDiscountsByApplicantSchema,
-} from "./schemas";
 
 export type {
   CreateDiscountInput,
@@ -16,4 +14,14 @@ export type {
   ListDiscountsByApplicantInput,
   DiscountListItem,
   ListDiscountsResult,
+  CreateDiscountResult
+} from "./schemas";
+
+export {
+  createDiscountSchema,
+  listDiscountsSchema,
+  listDiscountsByApplicantSchema,
+  discountItemSchema,
+  createDiscountResultSchema,
+  listDiscountsResultSchema
 } from "./schemas";

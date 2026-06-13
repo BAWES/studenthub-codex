@@ -1,4 +1,11 @@
-export { listChats, getChatMessages } from "./actions";
+// ---------------------------------------------------------------------------
+// Chat — barrel exports
+// ---------------------------------------------------------------------------
+
+export {
+  listChats,
+  getChatMessages
+} from "./actions";
 
 export type {
   ListChatsParams,
@@ -6,7 +13,7 @@ export type {
   ChatListItem,
   ChatMessageItem,
   ListChatsResult,
-  ListChatMessagesResult,
+  ListChatMessagesResult
 } from "./schemas";
 
 export {
@@ -15,5 +22,5 @@ export {
   chatListItemSchema,
   chatMessageItemSchema,
   listChatsResultSchema,
-  listChatMessagesResultSchema,
+  listChatMessagesResultSchema
 } from "./schemas";

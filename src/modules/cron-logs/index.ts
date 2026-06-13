@@ -1,16 +1,24 @@
+// ---------------------------------------------------------------------------
+// Cron-logs — barrel exports
+// ---------------------------------------------------------------------------
+
 export {
   listCronLogs,
-  getCronLog,
+  getCronLog
 } from "./actions";
+
+export type {
+  ListCronLogsInput,
+  GetCronLogInput,
+  CronLogItem,
+  ListCronLogsResult,
+  GetCronLogResult
+} from "./schemas";
+
 export {
   listCronLogsSchema,
   getCronLogSchema,
   cronLogItemSchema,
   listCronLogsResultSchema,
-} from "./schemas";
-export type {
-  CronLogItem,
-  ListCronLogsInput,
-  GetCronLogInput,
-  ListCronLogsResult,
+  getCronLogResultSchema
 } from "./schemas";
