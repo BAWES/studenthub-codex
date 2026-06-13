@@ -7,7 +7,8 @@ export const dynamic = "force-dynamic";
 
 export default async function CandidateSkillsPage() {
   const session = await requireRoleCapability("candidate", "candidate.read.own");
-  const skills = await listCandidateSkills({});
+  const result = await listCandidateSkills({});
+  const skills = result.items;
 
   const rows = skills.map((s) => ({
     id: s.candidate_skill_id,

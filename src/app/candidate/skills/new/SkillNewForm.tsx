@@ -17,7 +17,7 @@ export function SkillNewForm() {
     setError(null);
     setSubmitting(true);
 
-    const result: SkillActionResult = await createSkill(skill);
+    const result: SkillActionResult = await createSkill({ skill });
 
     setSubmitting(false);
 
