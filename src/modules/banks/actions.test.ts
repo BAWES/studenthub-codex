@@ -1,5 +1,11 @@
 import { describe, it, expect } from "vitest";
 import { z } from "zod";
+import {
+  bankListItemSchema,
+  listBanksResultSchema,
+  getBankResultSchema,
+  createBankResultSchema,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Pure logic: bank schema validation
@@ -222,5 +228,196 @@ describe("CreateBankResult shape", () => {
       message: "Failed to create bank",
     };
     expect(result.operation).toBe("error");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output schema tests: bankListItemSchema
+// ---------------------------------------------------------------------------
+
+const validBankItem = {
+  bank_id: 1,
+  bank_name: "National Bank of Kuwait",
+  bank_iban_code: "KW123456789",
+  bank_swift_code: "NBOKKWKW",
+  bank_code_abk: 123,
+  bank_address: "Kuwait City",
+  bank_transfer_type: "SWIFT",
+};
+
+describe("bankListItemSchema", () => {
+  it("accepts a valid bank item", () => {
+    const result = bankListItemSchema.safeParse(validBankItem);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.bank_id).toBe(1);
+      expect(result.data.bank_name).toBe("National Bank of Kuwait");
+    }
+  });
+
+  it("accepts nullable fields as null", () => {
+    const result = bankListItemSchema.safeParse({
+      ...validBankItem,
+      bank_name: null,
+      bank_swift_code: null,
+      bank_code_abk: null,
+      bank_address: null,
+      bank_transfer_type: null,
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.bank_name).toBeNull();
+      expect(result.data.bank_swift_code).toBeNull();
+      expect(result.data.bank_code_abk).toBeNull();
+      expect(result.data.bank_address).toBeNull();
+      expect(result.data.bank_transfer_type).toBeNull();
+    }
+  });
+
+  it("rejects missing required field", () => {
+    const { bank_id, ...rest } = validBankItem;
+    const result = bankListItemSchema.safeParse(rest);
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects wrong type for bank_id", () => {
+    const result = bankListItemSchema.safeParse({
+      ...validBankItem,
+      bank_id: "not-a-number",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects missing bank_iban_code", () => {
+    const { bank_iban_code, ...rest } = validBankItem;
+    const result = bankListItemSchema.safeParse(rest);
+    expect(result.success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output schema tests: listBanksResultSchema
+// ---------------------------------------------------------------------------
+
+describe("listBanksResultSchema", () => {
+  it("accepts a valid result with banks", () => {
+    const result = listBanksResultSchema.safeParse({
+      banks: [validBankItem],
+      total: 1,
+      page: 1,
+      limit: 20,
+      totalPages: 1,
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.banks).toHaveLength(1);
+    }
+  });
+
+  it("accepts an empty list", () => {
+    const result = listBanksResultSchema.safeParse({
+      banks: [],
+      total: 0,
+      page: 0,
+      limit: 20,
+      totalPages: 0,
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.banks).toHaveLength(0);
+    }
+  });
+
+  it("rejects negative total", () => {
+    const result = listBanksResultSchema.safeParse({
+      banks: [],
+      total: -1,
+      page: 0,
+      limit: 20,
+      totalPages: 0,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects negative page", () => {
+    const result = listBanksResultSchema.safeParse({
+      banks: [],
+      total: 0,
+      page: -1,
+      limit: 20,
+      totalPages: 0,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects missing banks array", () => {
+    const result = listBanksResultSchema.safeParse({
+      total: 0,
+      page: 0,
+      limit: 20,
+      totalPages: 0,
+    });
+    expect(result.success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output schema tests: getBankResultSchema
+// ---------------------------------------------------------------------------
+
+describe("getBankResultSchema", () => {
+  it("accepts a valid bank item", () => {
+    const result = getBankResultSchema.safeParse(validBankItem);
+    expect(result.success).toBe(true);
+    expect(result.data).not.toBeNull();
+  });
+
+  it("accepts null (bank not found)", () => {
+    const result = getBankResultSchema.safeParse(null);
+    expect(result.success).toBe(true);
+    expect(result.data).toBeNull();
+  });
+
+  it("rejects missing required fields", () => {
+    const result = getBankResultSchema.safeParse({
+      bank_id: 1,
+    });
+    expect(result.success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output schema tests: createBankResultSchema
+// ---------------------------------------------------------------------------
+
+describe("createBankResultSchema", () => {
+  it("accepts a success result", () => {
+    const result = createBankResultSchema.safeParse({
+      operation: "success",
+      message: "Bank created successfully",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts an error result", () => {
+    const result = createBankResultSchema.safeParse({
+      operation: "error",
+      message: "Failed to create bank",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects missing operation", () => {
+    const result = createBankResultSchema.safeParse({
+      message: "Bank created",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects missing message", () => {
+    const result = createBankResultSchema.safeParse({
+      operation: "success",
+    });
+    expect(result.success).toBe(false);
   });
 });
