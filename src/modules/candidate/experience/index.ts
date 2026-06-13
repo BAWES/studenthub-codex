@@ -1,6 +1,5 @@
 // ---------------------------------------------------------------------------
-// Candidate Experience — colocated server actions
-// Delegates to module-level actions in @/modules/candidate/experience/actions
+// Candidate Experience — barrel exports
 // ---------------------------------------------------------------------------
 
 export {
@@ -9,9 +8,9 @@ export {
   createCandidateExperience,
   updateCandidateExperience,
   deleteCandidateExperience,
-} from "@/modules/candidate/experience/actions";
+} from "./actions";
 
 export type {
   ExperienceActionResult,
   ExperienceItem,
-} from "@/modules/candidate/experience";
+} from "@/app/candidate/experience/schemas";
