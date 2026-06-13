@@ -20,7 +20,7 @@ export function NavTabs({ role }: NavTabsProps) {
   // Filter out the shared "App" tab for the header nav — it's not needed
   // in the top-level header since the brand logo serves as the home link.
   // Also filter to only show primary tabs (max 6).
-  const primaryTabs = items.filter((item) => item.label !== "App").slice(0, 6);
+  const primaryTabs = items.filter((item) => item.label !== "App").slice(0, 7);
 
   return (
     <nav className="shAppHeaderNav" aria-label={`${role} navigation`}>
