@@ -1,69 +1,9 @@
-"use server";
-
 // ---------------------------------------------------------------------------
-// Candidate Experience New — server action for the create page
+// Candidate Experience New — barrel re-export
 // ---------------------------------------------------------------------------
-// Route-specific wrapper that validates input and delegates to the parent
-// list-level action.
-//
-// Actions:
-//   - createExperience  — create a new experience record (via parent)
+// Re-exports from the module-level actions. The module file already includes
+// the "use server" directive.
 // ---------------------------------------------------------------------------
 
-import { revalidatePath } from "next/cache";
-import { requireRoleCapability } from "@/modules/auth/session";
-import {
-  createCandidateExperience as parentCreateCandidateExperience,
-} from "../actions";
-import type { ExperienceActionResult } from "../schemas";
-import { createExperienceSchema } from "../schemas";
-import type { CreateExperienceInput } from "../schemas";
-import { experienceActionResultOutputSchema } from "../schemas";
-
-// Re-export types for convenience
-export type { ExperienceActionResult, CreateExperienceInput };
-
-// ---------------------------------------------------------------------------
-// createExperience
-// ---------------------------------------------------------------------------
-
-/**
- * Create a new experience record for the current candidate.
- * Validates input, checks date range, then delegates to the parent
- * `createCandidateExperience` action.
- */
-export async function createExperience(
-  data: CreateExperienceInput,
-): Promise<ExperienceActionResult> {
-  await requireRoleCapability("candidate", "candidate.profile.edit");
-
-  const parsed = createExperienceSchema.safeParse(data);
-  if (!parsed.success) {
-    return {
-      success: false,
-      error: parsed.error.issues[0]?.message ?? "Invalid experience data",
-    };
-  }
-
-  // Validate date range client-side is not enough — verify server-side too
-  if (
-    parsed.data.startYear !== undefined &&
-    parsed.data.endYear !== undefined &&
-    parsed.data.endYear < parsed.data.startYear
-  ) {
-    return { success: false, error: "End year cannot be before start year" };
-  }
-
-  const result = await parentCreateCandidateExperience(parsed.data);
-
-  // Validate output shape
-  const outputParsed = experienceActionResultOutputSchema.safeParse(result);
-  if (!outputParsed.success) {
-    console.error(
-      "[candidate/experience/new] createExperience output validation failed:",
-      outputParsed.error.issues,
-    );
-  }
-
-  return result;
-}
+export { createExperience } from "@/modules/candidate/experience/actions";
+export type { ExperienceActionResult } from "@/modules/candidate/experience";

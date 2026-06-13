@@ -8,6 +8,10 @@ export {
   createCandidateCertification,
   updateCandidateCertification,
   deleteCandidateCertification,
+  getCertification,
+  updateCertification,
+  deleteCertification,
+  createCertification,
 } from "./actions";
 
 export type {
