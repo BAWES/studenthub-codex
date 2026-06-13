@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
 import { render, screen, cleanup, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { AdminAttendanceTable } from "./admin-attendance-table";
+import { AdminAttendanceTable } from "./_components";
 
 afterEach(() => { cleanup(); });
 

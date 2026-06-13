@@ -1,6 +1,6 @@
 import { requireRoleCapability } from "@/modules/auth/session";
 import { listAdminAttendance, getEmployeeOptions } from "./actions";
-import { AdminAttendanceTable } from "./admin-attendance-table";
+import { AdminAttendanceTable } from "./_components";
 
 export const dynamic = "force-dynamic";
 

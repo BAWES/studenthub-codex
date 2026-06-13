@@ -1,6 +1,6 @@
 import { requireRoleCapability } from "@/modules/auth/session";
 import { getAllAgentsHealth } from "./actions";
-import { AdminAgentsTable } from "./admin-agents-table";
+import { AdminAgentsTable } from "./_components";
 
 export const dynamic = "force-dynamic";
 

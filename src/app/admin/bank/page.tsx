@@ -1,6 +1,6 @@
 import { requireRoleCapability } from "@/modules/auth/session";
 import { listBanks } from "./actions";
-import { AdminBankTable } from "./admin-bank-table";
+import { AdminBankTable } from "./_components";
 
 export const dynamic = "force-dynamic";
 
