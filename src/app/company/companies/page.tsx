@@ -1,6 +1,6 @@
 import { requireRoleCapability } from "@/modules/auth/session";
 import { listCompanyAccountRows } from "./actions";
-import { CompanyCompaniesTable } from "./company-companies-table";
+import { CompanyCompaniesTable } from "./_components";
 
 export const dynamic = "force-dynamic";
 

@@ -2,8 +2,8 @@
 
 import { useCallback, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { update } from "./actions";
-import type { CompanySettings, UpdateCompanySettingsInput } from "./schemas";
+import { update } from "../actions";
+import type { CompanySettings, UpdateCompanySettingsInput } from "../schemas";
 
 export function CompanySettingsForm({
   companyId,
