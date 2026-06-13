@@ -1,8 +1,7 @@
-"use server";
-
 // ---------------------------------------------------------------------------
 // Candidate Schedule — colocated server actions
 // Delegates to module-level actions in @/modules/candidates/schedule/actions
+// (No "use server" — the module-level actions already have it.)
 // ---------------------------------------------------------------------------
 
 export {
