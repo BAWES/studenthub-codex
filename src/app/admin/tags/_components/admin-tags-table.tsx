@@ -6,8 +6,8 @@ import { DataTable } from "@/modules/workspace/DataTable";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 
 import type { SessionUser } from "@/modules/auth/types";
-import type { TagItem } from "./schemas";
-import { createTag, updateTag, deleteTag } from "./actions";
+import type { TagItem } from "../schemas";
+import { createTag, updateTag, deleteTag } from "../actions";
 
 type Props = {
   session: SessionUser;

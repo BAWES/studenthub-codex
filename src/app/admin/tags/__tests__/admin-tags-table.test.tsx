@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
 import { render, screen, waitFor, cleanup } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { AdminTagsTable } from "../admin-tags-table";
+import { AdminTagsTable } from "../_components";
 
 // Mock next/navigation
 const mockRefresh = vi.fn();
