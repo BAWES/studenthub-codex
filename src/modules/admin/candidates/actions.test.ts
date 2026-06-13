@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import {
   listCandidatesSchema,
   getCandidateSchema,
@@ -12,6 +12,50 @@ import {
   candidateDetailObjectOutputSchema,
   candidateActionResultOutputSchema,
 } from "./schemas";
+
+// ── Hoisted mock functions ──────────────────────────────────
+const {
+  mockRequireCapabilityCan,
+  mockRevalidatePathCan,
+  mockFindManyCan,
+  mockCountCan,
+  mockFindFirstCan,
+  mockCreateCan,
+  mockUpdateCan,
+} = vi.hoisted(() => ({
+  mockRequireCapabilityCan: vi.fn(),
+  mockRevalidatePathCan: vi.fn(),
+  mockFindManyCan: vi.fn(),
+  mockCountCan: vi.fn(),
+  mockFindFirstCan: vi.fn(),
+  mockCreateCan: vi.fn(),
+  mockUpdateCan: vi.fn(),
+}));
+
+// ── Mock session ────────────────────────────────────────────
+vi.mock("@/modules/auth/session", () => ({
+  requireCapability: mockRequireCapabilityCan,
+}));
+
+// ── Mock next/cache ─────────────────────────────────────────
+vi.mock("next/cache", () => ({
+  revalidatePath: mockRevalidatePathCan,
+}));
+
+// ── Mock Prisma ─────────────────────────────────────────────
+vi.mock("@/lib/prisma", () => ({
+  prisma: {
+    candidate: {
+      findMany: mockFindManyCan,
+      count: mockCountCan,
+      findFirst: mockFindFirstCan,
+      create: mockCreateCan,
+      update: mockUpdateCan,
+    },
+  },
+}));
+
+import { listCandidates, getCandidate, searchCandidates, createCandidate, updateCandidate, deleteCandidate } from "./actions";
 
 // ---------------------------------------------------------------------------
 // Schema tests — pure unit tests, no DB required
@@ -473,5 +517,295 @@ describe("candidateActionResultOutputSchema", () => {
         candidateId: "abc",
       }).success,
     ).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Runtime tests with mocked Prisma
+// ---------------------------------------------------------------------------
+
+describe("listCandidates — runtime", () => {
+  const MOCK_CANDIDATES = [
+    {
+      candidate_id: 1,
+      candidate_name: "Ahmed Al-Sabah",
+      candidate_name_ar: null,
+      candidate_email: "ahmed@example.com",
+      candidate_phone: null,
+      candidate_status: 10,
+      candidate_created_at: new Date("2026-06-01"),
+      candidate_updated_at: new Date("2026-06-10"),
+      store: { store_name: "Main Store" },
+    },
+  ];
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockRequireCapabilityCan.mockResolvedValue(undefined);
+    mockFindManyCan.mockResolvedValue(MOCK_CANDIDATES);
+    mockCountCan.mockResolvedValue(1);
+  });
+
+  it("returns paginated candidate list", async () => {
+    const result = await listCandidates({});
+    expect(result.items).toHaveLength(1);
+    expect(result.total).toBe(1);
+    expect(result.page).toBe(1);
+  });
+
+  it("calls requireCapability with admin.system", async () => {
+    await listCandidates({});
+    expect(mockRequireCapabilityCan).toHaveBeenCalledWith("admin.system");
+  });
+
+  it("applies status filter", async () => {
+    await listCandidates({ status: 10 });
+    expect(mockFindManyCan).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({ candidate_status: 10 }),
+      }),
+    );
+  });
+
+  it("applies search query filter", async () => {
+    await listCandidates({ q: "Ahmed" });
+    expect(mockFindManyCan).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          OR: expect.arrayContaining([
+            expect.objectContaining({ candidate_name: { contains: "Ahmed" } }),
+          ]),
+        }),
+      }),
+    );
+  });
+
+  it("applies storeId filter", async () => {
+    await listCandidates({ storeId: 5 });
+    expect(mockFindManyCan).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({ store_id: 5 }),
+      }),
+    );
+  });
+
+  it("maps candidate to CandidateRow format", async () => {
+    const result = await listCandidates({});
+    const item = result.items[0];
+    expect(item.name).toBe("Ahmed Al-Sabah");
+    expect(item.email).toBe("ahmed@example.com");
+    expect(item.store_name).toBe("Main Store");
+  });
+
+  it("returns empty result on invalid input", async () => {
+    const result = await listCandidates({ page: -1 });
+    expect(result.items).toEqual([]);
+    expect(result.total).toBe(0);
+  });
+});
+
+describe("getCandidate — runtime", () => {
+  const MOCK_CANDIDATE = {
+    candidate_id: 1,
+    candidate_name: "Ahmed Al-Sabah",
+    candidate_email: "ahmed@example.com",
+    candidate_phone: "50000000",
+    candidate_status: 10,
+    candidate_created_at: new Date("2026-06-01"),
+    candidate_updated_at: new Date("2026-06-10"),
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockRequireCapabilityCan.mockResolvedValue(undefined);
+    mockFindFirstCan.mockResolvedValue(MOCK_CANDIDATE);
+  });
+
+  it("returns candidate detail when found", async () => {
+    const result = await getCandidate(1);
+    expect(result.candidate).not.toBeNull();
+    expect(result.candidate!.candidate_id).toBe(1);
+  });
+
+  it("calls requireCapability with admin.system", async () => {
+    await getCandidate(1);
+    expect(mockRequireCapabilityCan).toHaveBeenCalledWith("admin.system");
+  });
+
+  it("queries with deleted:0 filter", async () => {
+    await getCandidate(1);
+    expect(mockFindFirstCan).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({ candidate_id: 1, deleted: 0 }),
+      }),
+    );
+  });
+
+  it("returns null candidate when not found", async () => {
+    mockFindFirstCan.mockResolvedValue(null);
+    const result = await getCandidate(999);
+    expect(result.candidate).toBeNull();
+  });
+
+  it("throws on invalid input (zero ID)", async () => {
+    await expect(getCandidate(0)).rejects.toThrow();
+  });
+});
+
+describe("searchCandidates — runtime", () => {
+  const MOCK_RESULTS = [
+    {
+      candidate_id: 1,
+      candidate_name: "Ahmed Al-Sabah",
+      candidate_name_ar: null,
+      candidate_email: "ahmed@example.com",
+      candidate_phone: null,
+      candidate_status: 10,
+      candidate_created_at: new Date("2026-06-01"),
+      candidate_updated_at: new Date("2026-06-10"),
+      store: null,
+    },
+  ];
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockRequireCapabilityCan.mockResolvedValue(undefined);
+    mockFindManyCan.mockResolvedValue(MOCK_RESULTS);
+    mockCountCan.mockResolvedValue(1);
+  });
+
+  it("returns matching candidates", async () => {
+    const result = await searchCandidates({ q: "Ahmed" });
+    expect(result.items).toHaveLength(1);
+    expect(result.items[0].name).toBe("Ahmed Al-Sabah");
+  });
+
+  it("calls requireCapability with admin.system", async () => {
+    await searchCandidates({ q: "test" });
+    expect(mockRequireCapabilityCan).toHaveBeenCalledWith("admin.system");
+  });
+
+  it("returns empty result on invalid input", async () => {
+    const result = await searchCandidates({ q: "" } as any);
+    expect(result.items).toEqual([]);
+  });
+});
+
+describe("createCandidate — runtime", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockRequireCapabilityCan.mockResolvedValue(undefined);
+    mockCreateCan.mockResolvedValue({ candidate_id: 1 });
+  });
+
+  it("creates candidate and returns success with candidateId", async () => {
+    const result = await createCandidate({
+      name: "New Candidate",
+      email: "new@example.com",
+    });
+    expect(result.success).toBe(true);
+    expect((result as any).candidateId).toBe(1);
+  });
+
+  it("calls requireCapability with admin.system", async () => {
+    await createCandidate({
+      name: "Test",
+      email: "test@test.com",
+    });
+    expect(mockRequireCapabilityCan).toHaveBeenCalledWith("admin.system");
+  });
+
+  it("re-validates /admin/candidates on success", async () => {
+    await createCandidate({
+      name: "Test",
+      email: "test@test.com",
+    });
+    expect(mockRevalidatePathCan).toHaveBeenCalledWith("/admin/candidates");
+  });
+
+  it("returns error on validation failure", async () => {
+    const result = await createCandidate({} as any);
+    expect(result.success).toBe(false);
+    expect((result as any).error).toBeDefined();
+  });
+});
+
+describe("updateCandidate — runtime", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockRequireCapabilityCan.mockResolvedValue(undefined);
+    mockFindFirstCan.mockResolvedValue({ candidate_id: 1 });
+    mockUpdateCan.mockResolvedValue({ candidate_id: 1 });
+  });
+
+  it("updates candidate and returns success", async () => {
+    const result = await updateCandidate({
+      candidateId: 1,
+      name: "Updated Name",
+    });
+    expect(result.success).toBe(true);
+    expect((result as any).candidateId).toBe(1);
+  });
+
+  it("calls requireCapability with admin.system", async () => {
+    await updateCandidate({ candidateId: 1, name: "New" });
+    expect(mockRequireCapabilityCan).toHaveBeenCalledWith("admin.system");
+  });
+
+  it("checks candidate exists before update", async () => {
+    await updateCandidate({ candidateId: 1 });
+    expect(mockFindFirstCan).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({ candidate_id: 1 }),
+      }),
+    );
+  });
+
+  it("returns error when candidate not found", async () => {
+    mockFindFirstCan.mockResolvedValue(null);
+    const result = await updateCandidate({ candidateId: 999 });
+    expect(result.success).toBe(false);
+    expect((result as any).error).toContain("not found");
+  });
+
+  it("re-validates /admin/candidates on success", async () => {
+    await updateCandidate({ candidateId: 1, name: "New" });
+    expect(mockRevalidatePathCan).toHaveBeenCalledWith("/admin/candidates");
+  });
+});
+
+describe("deleteCandidate — runtime", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockRequireCapabilityCan.mockResolvedValue(undefined);
+    mockFindFirstCan.mockResolvedValue({ candidate_id: 1 });
+    mockUpdateCan.mockResolvedValue({ candidate_id: 1 });
+  });
+
+  it("soft-deletes candidate and returns success", async () => {
+    const result = await deleteCandidate({ candidateId: 1 });
+    expect(result.success).toBe(true);
+  });
+
+  it("calls requireCapability with admin.system", async () => {
+    await deleteCandidate({ candidateId: 1 });
+    expect(mockRequireCapabilityCan).toHaveBeenCalledWith("admin.system");
+  });
+
+  it("marks as deleted=1", async () => {
+    await deleteCandidate({ candidateId: 1 });
+    expect(mockUpdateCan).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { candidate_id: 1 },
+        data: expect.objectContaining({ deleted: 1 }),
+      }),
+    );
+  });
+
+  it("returns error when candidate not found", async () => {
+    mockFindFirstCan.mockResolvedValue(null);
+    const result = await deleteCandidate({ candidateId: 999 });
+    expect(result.success).toBe(false);
+    expect((result as any).error).toContain("not found");
   });
 });

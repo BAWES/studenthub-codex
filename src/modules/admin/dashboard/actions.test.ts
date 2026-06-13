@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import {
   dashboardDataSchema,
   type DashboardData,
@@ -465,5 +465,342 @@ describe("Dashboard types", () => {
       count: 5,
     };
     expect(full.count).toBe(5);
+  });
+});
+
+// ── Runtime tests for dashboard actions ────────────────────
+// ── Hoisted mock functions ──────────────────────────────────
+const {
+  mockRequireCapabilityDash,
+  mockTransact,
+  mockFindManyCandidates,
+  mockFindManyCompanies,
+  mockFindManyRequests,
+  mockFindManyTransfers,
+  mockCountCandidates,
+  mockCountCompanies,
+  mockCountRequests,
+  mockCountTransfers,
+  mockGroupByRequestStatus,
+  mockFetch,
+} = vi.hoisted(() => ({
+  mockRequireCapabilityDash: vi.fn(),
+  mockTransact: vi.fn(),
+  mockFindManyCandidates: vi.fn(),
+  mockFindManyCompanies: vi.fn(),
+  mockFindManyRequests: vi.fn(),
+  mockFindManyTransfers: vi.fn(),
+  mockCountCandidates: vi.fn(),
+  mockCountCompanies: vi.fn(),
+  mockCountRequests: vi.fn(),
+  mockCountTransfers: vi.fn(),
+  mockGroupByRequestStatus: vi.fn(),
+  mockFetch: vi.fn(),
+}));
+
+// ── Mock session ────────────────────────────────────────────
+vi.mock("@/modules/auth/session", () => ({
+  requireCapability: mockRequireCapabilityDash,
+}));
+
+// ── Mock Prisma ─────────────────────────────────────────────
+vi.mock("@/lib/prisma", () => ({
+  prisma: {
+    $transaction: mockTransact,
+    candidate: {
+      count: mockCountCandidates,
+      findMany: mockFindManyCandidates,
+    },
+    company: {
+      count: mockCountCompanies,
+      findMany: mockFindManyCompanies,
+    },
+    request: {
+      count: mockCountRequests,
+      findMany: mockFindManyRequests,
+      groupBy: mockGroupByRequestStatus,
+    },
+    transfer: {
+      count: mockCountTransfers,
+      findMany: mockFindManyTransfers,
+    },
+  },
+}));
+
+// ── Mock global fetch ───────────────────────────────────────
+vi.stubGlobal("fetch", mockFetch);
+
+import { getDashboardData, getPrMergeMetrics } from "./actions";
+
+// ---------------------------------------------------------------------------
+// getPrMergeMetrics — runtime
+// ---------------------------------------------------------------------------
+
+describe("getPrMergeMetrics — runtime", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("returns N/A when no GITHUB_TOKEN is set", async () => {
+    const orig = process.env.GITHUB_TOKEN;
+    delete process.env.GITHUB_TOKEN;
+    const result = await getPrMergeMetrics();
+    expect(result.metrics[0].value).toBe("N/A");
+    expect(result.metrics[0].note).toContain("No GitHub token");
+    expect(result.recent).toEqual([]);
+    process.env.GITHUB_TOKEN = orig;
+  });
+
+  it("returns N/A for empty token", async () => {
+    const orig = process.env.GITHUB_TOKEN;
+    process.env.GITHUB_TOKEN = "";
+    const result = await getPrMergeMetrics();
+    expect(result.metrics[0].value).toBe("N/A");
+    process.env.GITHUB_TOKEN = orig;
+  });
+
+  it("returns error on non-ok HTTP response", async () => {
+    const orig = process.env.GITHUB_TOKEN;
+    process.env.GITHUB_TOKEN = "fake-token";
+    mockFetch.mockResolvedValue({
+      ok: false,
+      status: 403,
+      statusText: "Forbidden",
+      json: vi.fn(),
+    });
+    const result = await getPrMergeMetrics();
+    expect(result.metrics[0].value).toBe("Error");
+    expect(result.metrics[0].note).toContain("403");
+    process.env.GITHUB_TOKEN = orig;
+  });
+
+  it("returns N/A when no merged PRs found", async () => {
+    const orig = process.env.GITHUB_TOKEN;
+    process.env.GITHUB_TOKEN = "fake-token";
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: vi.fn().mockResolvedValue({ total_count: 0, items: [] }),
+    });
+    const result = await getPrMergeMetrics();
+    expect(result.metrics[0].value).toBe("N/A");
+    expect(result.metrics[0].note).toContain("No merged PRs");
+    process.env.GITHUB_TOKEN = orig;
+  });
+
+  it("computes metrics from merged PRs", async () => {
+    const orig = process.env.GITHUB_TOKEN;
+    process.env.GITHUB_TOKEN = "fake-token";
+
+    const now = Date.now();
+    const oneHourAgo = new Date(now - 3_600_000).toISOString(); // ~1h ago
+    const twoHoursAgo = new Date(now - 7_200_000).toISOString(); // ~2h ago
+    const mergedAgo = (ms: number) => new Date(now - ms).toISOString();
+
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: vi.fn().mockResolvedValue({
+        total_count: 2,
+        items: [
+          {
+            number: 100,
+            title: "Fix bug",
+            created_at: mergedAgo(7_200_000),
+            pull_request: { merged_at: mergedAgo(3_600_000) },
+          },
+          {
+            number: 101,
+            title: "Add feature",
+            created_at: mergedAgo(14_400_000),
+            pull_request: { merged_at: mergedAgo(3_600_000) },
+          },
+        ],
+      }),
+    });
+
+    const result = await getPrMergeMetrics();
+    expect(result.metrics.length).toBeGreaterThanOrEqual(3);
+    expect(result.recent).toHaveLength(2);
+    expect(result.recent[0].number).toBe(100);
+    expect(result.recent[0].title).toBe("Fix bug");
+    expect(result.metrics.some((m) => m.label === "Merged (7d)")).toBe(true);
+    process.env.GITHUB_TOKEN = orig;
+  });
+
+  it("handles fetch exception gracefully", async () => {
+    const orig = process.env.GITHUB_TOKEN;
+    process.env.GITHUB_TOKEN = "fake-token";
+    mockFetch.mockRejectedValue(new Error("Network error"));
+    const result = await getPrMergeMetrics();
+    expect(result.metrics[0].value).toBe("Error");
+    expect(result.metrics[0].note).toContain("GitHub API request failed");
+    process.env.GITHUB_TOKEN = orig;
+  });
+});
+
+// ---------------------------------------------------------------------------
+// getDashboardData — runtime
+// ---------------------------------------------------------------------------
+
+describe("getDashboardData — runtime", () => {
+  const MOCK_DATE = new Date("2026-06-13T12:00:00Z");
+
+  const mockTransactionResult = () => [
+    53000, // candidateCount
+    524, // companyCount
+    1200, // requestCount
+    4200, // transferCount
+    5000, // openCandidateCount
+    162, // activeCompanyCount
+    // recentCandidates
+    [
+      {
+        candidate_id: 1,
+        candidate_name: "Ahmed Al-Sabah",
+        candidate_email: "ahmed@example.com",
+        candidate_status: 10,
+        approved: 1,
+        deleted: 0,
+        candidate_created_at: MOCK_DATE,
+        currency_code: "KWD",
+        candidate_hourly_rate: 12_500,
+      },
+    ],
+    // recentCompanies
+    [
+      {
+        company_id: 100,
+        company_name: "KIPCO",
+        company_email: "info@kipco.com",
+        no_of_active_requests: 3,
+        company_approved_to_hire: true,
+        company_created_at: MOCK_DATE,
+        currency_code: "KWD",
+        company_hourly_rate: 15_000,
+      },
+    ],
+    // recentRequests
+    [
+      {
+        request_uuid: "req-1",
+        request_position_title: "Software Engineer",
+        request_status: "started",
+        request_number_of_employees: 2,
+        request_created_datetime: MOCK_DATE,
+        company: { company_name: "KIPCO" },
+      },
+    ],
+    // recentTransfers
+    [
+      {
+        transfer_id: 500,
+        total: 45000,
+        company_total: 40000,
+        transfer_status: 5,
+        start_date: MOCK_DATE,
+        end_date: MOCK_DATE,
+        currency_code: "KWD",
+        company: { company_name: "KIPCO" },
+      },
+    ],
+    // requestStatusGroups
+    [
+      { request_status: "started", _count: { _all: 300 } },
+      { request_status: "pending", _count: { _all: 400 } },
+      { request_status: "delivered", _count: { _all: 500 } },
+    ],
+  ];
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockRequireCapabilityDash.mockResolvedValue(undefined);
+
+    // Mock $transaction to return the full result array
+    mockTransact.mockImplementation(
+      async (queries: any[]) => mockTransactionResult(),
+    );
+
+    // Mock fetch (for getPrMergeMetrics called internally)
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: vi.fn().mockResolvedValue({ total_count: 0, items: [] }),
+    });
+  });
+
+  it("calls requireCapability with admin.system", async () => {
+    await getDashboardData();
+    expect(mockRequireCapabilityDash).toHaveBeenCalledWith("admin.system");
+  });
+
+  it("returns four top-level metric cards", async () => {
+    const result = await getDashboardData();
+    expect(result.metrics).toHaveLength(4);
+    const labels = result.metrics.map((m) => m.label);
+    expect(labels).toContain("Candidates");
+    expect(labels).toContain("Companies");
+    expect(labels).toContain("Requests");
+    expect(labels).toContain("Transfers");
+  });
+
+  it("returns correct metric values from prisma counts", async () => {
+    const result = await getDashboardData();
+    const candidates = result.metrics.find((m) => m.label === "Candidates");
+    expect(candidates!.value).toBe(53000);
+    const companies = result.metrics.find((m) => m.label === "Companies");
+    expect(companies!.value).toBe(524);
+  });
+
+  it("includes statusMix breakdown sorted by count descending", async () => {
+    const result = await getDashboardData();
+    expect(result.statusMix.length).toBeGreaterThanOrEqual(1);
+    // Should be sorted descending
+    for (let i = 1; i < result.statusMix.length; i++) {
+      expect(result.statusMix[i - 1].value).toBeGreaterThanOrEqual(
+        result.statusMix[i].value,
+      );
+    }
+  });
+
+  it("maps recentCandidates to DashboardDataListItem format", async () => {
+    const result = await getDashboardData();
+    expect(result.recentCandidates).toHaveLength(1);
+    expect(result.recentCandidates[0].title).toBe("Ahmed Al-Sabah");
+    expect(result.recentCandidates[0].subtitle).toBe("ahmed@example.com");
+    expect(result.recentCandidates[0].meta).toBe("Active");
+    expect(result.recentCandidates[0].amount).toContain("KWD");
+  });
+
+  it("maps recentCompanies with count and approval status", async () => {
+    const result = await getDashboardData();
+    expect(result.recentCompanies).toHaveLength(1);
+    expect(result.recentCompanies[0].title).toBe("KIPCO");
+    expect(result.recentCompanies[0].meta).toBe("Approved");
+    expect(result.recentCompanies[0].count).toBe(3);
+  });
+
+  it("maps recentRequests with company name and status", async () => {
+    const result = await getDashboardData();
+    expect(result.recentRequests).toHaveLength(1);
+    expect(result.recentRequests[0].title).toBe("Software Engineer");
+    expect(result.recentRequests[0].subtitle).toBe("KIPCO");
+    expect(result.recentRequests[0].meta).toBe("Started");
+  });
+
+  it("maps recentTransfers with amount and period", async () => {
+    const result = await getDashboardData();
+    expect(result.recentTransfers).toHaveLength(1);
+    expect(result.recentTransfers[0].id).toBe(500);
+    expect(result.recentTransfers[0].amount).toContain("KWD");
+  });
+
+  it("includes prMergeMetrics in the response", async () => {
+    const result = await getDashboardData();
+    expect(result.prMergeMetrics).toBeDefined();
+    expect(Array.isArray(result.prMergeMetrics)).toBe(true);
+  });
+
+  it("validates output schema (dashboardDataSchema)", async () => {
+    const result = await getDashboardData();
+    const parsed = dashboardDataSchema.safeParse(result);
+    expect(parsed.success).toBe(true);
   });
 });
