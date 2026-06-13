@@ -1,9 +1,14 @@
 "use server";
 
-import crypto from "node:crypto";
 import { revalidatePath } from "next/cache";
-import { prisma } from "@/lib/prisma";
 import { requireRoleCapability } from "@/modules/auth/session";
+import {
+  listCandidateReferences as moduleListReferences,
+  getCandidateReference as moduleGetReference,
+  createCandidateReference as moduleCreateReference,
+  updateCandidateReference as moduleUpdateReference,
+  deleteCandidateReference as moduleDeleteReference,
+} from "@/modules/references/actions";
 import {
   listReferenceSchema,
   getReferenceSchema,
@@ -14,39 +19,17 @@ import {
   referenceListOutputSchema,
   referenceActionResultOutputSchema,
   type ListReferenceInput,
-  type GetReferenceInput,
   type CreateReferenceInput,
   type UpdateReferenceInput,
-  type DeleteReferenceInput,
   type ReferenceItem,
   type ReferenceActionResult,
 } from "./schemas";
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-/** Map a Prisma candidate_reference row to the API shape. */
-function toItem(
-  row: Awaited<ReturnType<typeof prisma.candidate_reference.findFirst>>,
-): ReferenceItem | null {
-  if (!row) return null;
-  return {
-    reference_uuid: row.reference_uuid,
-    candidate_id: row.candidate_id,
-    name: row.name,
-    company: row.company,
-    position: row.position,
-    phone: row.phone,
-    email: row.email,
-    relationship: row.relationship,
-    created_at: row.created_at,
-    updated_at: row.updated_at,
-  };
-}
+// Re-export types for client components
+export type { ReferenceItem, ReferenceActionResult };
 
 // ---------------------------------------------------------------------------
-// Server actions
+// Delegating Server Actions
 // ---------------------------------------------------------------------------
 
 /**
@@ -64,28 +47,10 @@ export async function listCandidateReferences(
     );
   }
 
-  const { page, limit } = parsed.data;
-  const skip = (page - 1) * limit;
-
-  const candidateId = Number(session.id);
-
-  const rows = await prisma.candidate_reference.findMany({
-    where: {
-      candidate_id: candidateId,
-      deleted: 0,
-    },
-    orderBy: [
-      { created_at: "desc" },
-      { reference_uuid: "desc" },
-    ],
-    skip,
-    take: limit,
-  });
-
-  const items = rows.map((r) => toItem(r)!);
+  const result = await moduleListReferences(Number(session.id), parsed.data);
 
   // Validate output shape
-  const outputParsed = referenceListOutputSchema.safeParse(items);
+  const outputParsed = referenceListOutputSchema.safeParse(result);
   if (!outputParsed.success) {
     console.error(
       "[candidate/references] list output validation failed:",
@@ -93,7 +58,7 @@ export async function listCandidateReferences(
     );
   }
 
-  return items;
+  return result;
 }
 
 /**
@@ -112,14 +77,7 @@ export async function getCandidateReference(
     );
   }
 
-  const row = await prisma.candidate_reference.findFirst({
-    where: {
-      reference_uuid: parsed.data.referenceUuid,
-      deleted: 0,
-    },
-  });
-
-  const result = toItem(row);
+  const result = await moduleGetReference(parsed.data.referenceUuid);
 
   // Validate output shape
   if (result !== null) {
@@ -141,10 +99,7 @@ export async function getCandidateReference(
 export async function createCandidateReference(
   data: CreateReferenceInput,
 ): Promise<ReferenceActionResult> {
-  const session = await requireRoleCapability(
-    "candidate",
-    "candidate.profile.edit",
-  );
+  const session = await requireRoleCapability("candidate", "candidate.profile.edit");
 
   const parsed = createReferenceSchema.safeParse(data);
   if (!parsed.success) {
@@ -154,37 +109,22 @@ export async function createCandidateReference(
     };
   }
 
-  const now = new Date();
-  const referenceUuid = `ref_${crypto.randomUUID()}`;
-
-  await prisma.candidate_reference.create({
-    data: {
-      reference_uuid: referenceUuid,
-      candidate_id: Number(session.id),
-      name: parsed.data.name,
-      company: parsed.data.company || null,
-      position: parsed.data.position || null,
-      phone: parsed.data.phone || null,
-      email: parsed.data.email || null,
-      relationship: parsed.data.relationship || null,
-      deleted: 0,
-      created_at: now,
-      updated_at: now,
-    },
-  });
-
-  revalidatePath("/candidate/references");
+  const result = await moduleCreateReference(Number(session.id), parsed.data);
 
   // Validate output shape
-  const createResult = { success: true, referenceUuid } as const;
-  const createOutputParsed = referenceActionResultOutputSchema.safeParse(createResult);
-  if (!createOutputParsed.success) {
+  const outputParsed = referenceActionResultOutputSchema.safeParse(result);
+  if (!outputParsed.success) {
     console.error(
       "[candidate/references] create output validation failed:",
-      createOutputParsed.error.issues,
+      outputParsed.error.issues,
     );
   }
-  return createResult;
+
+  if (result.success) {
+    revalidatePath("/candidate/references");
+  }
+
+  return result;
 }
 
 /**
@@ -194,10 +134,7 @@ export async function createCandidateReference(
 export async function updateCandidateReference(
   data: UpdateReferenceInput,
 ): Promise<ReferenceActionResult> {
-  const session = await requireRoleCapability(
-    "candidate",
-    "candidate.profile.edit",
-  );
+  const session = await requireRoleCapability("candidate", "candidate.profile.edit");
 
   const parsed = updateReferenceSchema.safeParse(data);
   if (!parsed.success) {
@@ -207,50 +144,22 @@ export async function updateCandidateReference(
     };
   }
 
-  const candidateId = Number(session.id);
-  const referenceUuid = parsed.data.referenceUuid;
-
-  // Verify ownership
-  const existing = await prisma.candidate_reference.findFirst({
-    where: {
-      reference_uuid: referenceUuid,
-      candidate_id: candidateId,
-      deleted: 0,
-    },
-    select: { reference_uuid: true },
-  });
-  if (!existing) {
-    return {
-      success: false,
-      error: "Reference record not found or access denied",
-    };
-  }
-
-  await prisma.candidate_reference.update({
-    where: { reference_uuid: referenceUuid },
-    data: {
-      name: parsed.data.name,
-      company: parsed.data.company || null,
-      position: parsed.data.position || null,
-      phone: parsed.data.phone || null,
-      email: parsed.data.email || null,
-      relationship: parsed.data.relationship || null,
-      updated_at: new Date(),
-    },
-  });
-
-  revalidatePath("/candidate/references");
+  const result = await moduleUpdateReference(Number(session.id), parsed.data);
 
   // Validate output shape
-  const updateResult = { success: true, referenceUuid } as const;
-  const updateOutputParsed = referenceActionResultOutputSchema.safeParse(updateResult);
-  if (!updateOutputParsed.success) {
+  const outputParsed = referenceActionResultOutputSchema.safeParse(result);
+  if (!outputParsed.success) {
     console.error(
       "[candidate/references] update output validation failed:",
-      updateOutputParsed.error.issues,
+      outputParsed.error.issues,
     );
   }
-  return updateResult;
+
+  if (result.success) {
+    revalidatePath("/candidate/references");
+  }
+
+  return result;
 }
 
 /**
@@ -259,50 +168,27 @@ export async function updateCandidateReference(
 export async function deleteCandidateReference(
   referenceUuid: string,
 ): Promise<ReferenceActionResult> {
-  const session = await requireRoleCapability(
-    "candidate",
-    "candidate.profile.edit",
-  );
+  const session = await requireRoleCapability("candidate", "candidate.profile.edit");
 
   const parsed = deleteReferenceSchema.safeParse({ referenceUuid });
   if (!parsed.success) {
-    return {
-      success: false,
-      error: "Invalid reference UUID",
-    };
+    return { success: false, error: "Invalid reference UUID" };
   }
 
-  const existing = await prisma.candidate_reference.findFirst({
-    where: {
-      reference_uuid: parsed.data.referenceUuid,
-      candidate_id: Number(session.id),
-      deleted: 0,
-    },
-    select: { reference_uuid: true },
-  });
-  if (!existing) {
-    return {
-      success: false,
-      error: "Reference record not found or access denied",
-    };
-  }
-
-  // Soft-delete
-  await prisma.candidate_reference.update({
-    where: { reference_uuid: parsed.data.referenceUuid },
-    data: { deleted: 1 },
-  });
-
-  revalidatePath("/candidate/references");
+  const result = await moduleDeleteReference(parsed.data.referenceUuid, Number(session.id));
 
   // Validate output shape
-  const deleteResult = { success: true, referenceUuid: parsed.data.referenceUuid } as const;
-  const deleteOutputParsed = referenceActionResultOutputSchema.safeParse(deleteResult);
-  if (!deleteOutputParsed.success) {
+  const outputParsed = referenceActionResultOutputSchema.safeParse(result);
+  if (!outputParsed.success) {
     console.error(
       "[candidate/references] delete output validation failed:",
-      deleteOutputParsed.error.issues,
+      outputParsed.error.issues,
     );
   }
-  return deleteResult;
+
+  if (result.success) {
+    revalidatePath("/candidate/references");
+  }
+
+  return result;
 }

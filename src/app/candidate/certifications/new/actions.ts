@@ -6,10 +6,10 @@
 // ---------------------------------------------------------------------------
 
 import { revalidatePath } from "next/cache";
-import { prisma } from "@/lib/prisma";
 import { requireRoleCapability } from "@/modules/auth/session";
-import { createCertificationSchema } from "./schemas";
+import { createCandidateCertification as moduleCreateCertification } from "@/modules/certifications/actions";
 import {
+  createCertificationSchema,
   certificationActionResultOutputSchema,
   type CreateCertificationInput,
   type CertificationActionResult,
@@ -21,15 +21,12 @@ import {
 
 /**
  * Create a new certification record for the current candidate.
- * Colocated route-level action that wraps the shared parent logic.
+ * Colocated route-level action that delegates to the module.
  */
 export async function createCertification(
   data: CreateCertificationInput,
 ): Promise<CertificationActionResult> {
-  const session = await requireRoleCapability(
-    "candidate",
-    "candidate.profile.edit",
-  );
+  const session = await requireRoleCapability("candidate", "candidate.profile.edit");
 
   const parsed = createCertificationSchema.safeParse(data);
   if (!parsed.success) {
@@ -39,34 +36,10 @@ export async function createCertification(
     };
   }
 
-  const now = new Date();
-
-  const row = await prisma.candidate_certification.create({
-    data: {
-      candidate_id: Number(session.id),
-      certification_name: parsed.data.certificationName,
-      issuing_organization: parsed.data.issuingOrganization,
-      issue_date: parsed.data.issueDate
-        ? new Date(parsed.data.issueDate)
-        : null,
-      expiry_date: parsed.data.expiryDate
-        ? new Date(parsed.data.expiryDate)
-        : null,
-      credential_id: parsed.data.credentialId ?? null,
-      credential_url: parsed.data.credentialUrl || null,
-      description: parsed.data.description ?? null,
-      deleted: 0,
-      created_at: now,
-      updated_at: now,
-    },
-  });
-
-  revalidatePath("/candidate/certifications");
-
-  const actionResult = { success: true as const, certificationId: row.certification_id };
+  const result = await moduleCreateCertification(Number(session.id), parsed.data);
 
   // Validate output shape
-  const outputParsed = certificationActionResultOutputSchema.safeParse(actionResult);
+  const outputParsed = certificationActionResultOutputSchema.safeParse(result);
   if (!outputParsed.success) {
     console.error(
       "[candidate/certifications/new] createCertification output validation failed:",
@@ -74,7 +47,11 @@ export async function createCertification(
     );
   }
 
-  return actionResult;
+  if (result.success) {
+    revalidatePath("/candidate/certifications");
+  }
+
+  return result;
 }
 
 // Re-export types for client components
