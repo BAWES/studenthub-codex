@@ -1,6 +1,5 @@
 // ---------------------------------------------------------------------------
-// Colocated server actions — company/contacts
-// Delegates to module-level actions in @/modules/contacts/actions
+// Contacts — barrel exports
 // ---------------------------------------------------------------------------
 
 export {
@@ -9,4 +8,4 @@ export {
   createCompanyContact,
   updateCompanyContact,
   listCompanyContactsRows,
-} from "@/modules/contacts/actions";
+} from "./actions";
