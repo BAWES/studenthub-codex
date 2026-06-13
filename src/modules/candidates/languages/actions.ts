@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { requireCapability } from "@/modules/auth/session";
+import { requireCapability, requireRoleCapability } from "@/modules/auth/session";
 import {
   listLanguagesSchema,
   getLanguageSchema,
@@ -273,6 +273,209 @@ export async function deleteLanguage(
   const outputParsed = languageDetailResponseSchema.safeParse(result);
   if (!outputParsed.success) {
     logOutputError("deleteLanguage", outputParsed.error.issues);
+  }
+
+  return result;
+}
+
+// ---------------------------------------------------------------------------
+// Route-level wrappers (for /candidate/languages route)
+// ---------------------------------------------------------------------------
+
+/** Input schema for listCandidateLanguages — no candidateId (extracted from session). */
+const listCandidateLanguagesSchema = z.object({
+  page: z.coerce.number().int().positive().optional().default(1),
+  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
+});
+
+type ListCandidateLanguagesInput = z.input<typeof listCandidateLanguagesSchema>;
+
+/** Input schema for createCandidateLanguage — no candidateId (extracted from session). */
+const createCandidateLanguageSchema = z.object({
+  language: z
+    .string()
+    .min(1, "Language name is required")
+    .max(128, "Language name must be 128 characters or fewer")
+    .transform((v) => v.trim()),
+  proficiency: z
+    .string()
+    .min(1, "Proficiency level is required")
+    .max(32, "Proficiency must be 32 characters or fewer")
+    .transform((v) => v.trim()),
+});
+
+type CreateCandidateLanguageInput = z.input<typeof createCandidateLanguageSchema>;
+
+/**
+ * List language records for the current candidate (paginated).
+ * Extracts candidateId from session and delegates to listLanguages.
+ */
+export async function listCandidateLanguages(
+  input: ListCandidateLanguagesInput = {},
+): Promise<LanguageItem[]> {
+  const session = await requireRoleCapability("candidate", "candidate.read.own");
+
+  const { page, limit } = listCandidateLanguagesSchema.parse(input);
+
+  const result = await listLanguages({
+    candidateId: Number(session.id),
+    page,
+    limit,
+  });
+
+  // Validate output shape
+  const arrSchema = z.array(languageItemSchema);
+  const outputParsed = arrSchema.safeParse(result);
+  if (!outputParsed.success) {
+    logOutputError("listCandidateLanguages", outputParsed.error.issues);
+  }
+
+  return result;
+}
+
+/**
+ * Create a new language record for the current candidate.
+ * Extracts candidateId from session and delegates to createLanguage.
+ */
+export async function createCandidateLanguage(
+  data: CreateCandidateLanguageInput,
+): Promise<LanguageActionResult> {
+  const session = await requireRoleCapability("candidate", "candidate.profile.edit");
+
+  const parsed = createCandidateLanguageSchema.safeParse(data);
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: parsed.error.issues[0]?.message ?? "Invalid input",
+    };
+  }
+
+  const { language, proficiency } = parsed.data;
+
+  const result = await createLanguage({
+    candidateId: Number(session.id),
+    language,
+    proficiency,
+  });
+
+  revalidatePath("/candidate/languages");
+
+  return result;
+}
+
+// ---------------------------------------------------------------------------
+// [id] route wrappers (for /candidate/languages/[id])
+// ---------------------------------------------------------------------------
+
+/** Input schema for getLanguageEntry. */
+const getLanguageEntrySchema = z.object({
+  languageId: z.coerce.number().int().positive("Language ID is required"),
+});
+
+/** Input schema for updateLanguageEntry. */
+const updateLanguageEntrySchema = z.object({
+  languageId: z.coerce.number().int().positive("Language ID is required"),
+  language: z
+    .string()
+    .min(1, "Language is required")
+    .max(128, "Language must be 128 characters or fewer")
+    .transform((v) => v.trim()),
+  proficiency: z.string().min(1, "Proficiency level is required"),
+});
+
+type UpdateLanguageEntryInput = z.input<typeof updateLanguageEntrySchema>;
+
+type LanguageEntryResponse =
+  | { data: LanguageItem; error: null }
+  | { data: null; error: string | null };
+
+/**
+ * Get a single language entry by ID.
+ * Extracts candidateId from session and delegates to getLanguage.
+ */
+export async function getLanguageEntry(
+  languageId: number,
+): Promise<LanguageItem | null> {
+  const session = await requireRoleCapability("candidate", "candidate.read.own");
+
+  const parsed = getLanguageEntrySchema.safeParse({ languageId });
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid language ID");
+  }
+
+  const result = await getLanguage({
+    candidateId: Number(session.id),
+    languageId: parsed.data.languageId,
+  });
+
+  // Validate output shape
+  const outputParsed = languageItemSchema.nullable().safeParse(result);
+  if (!outputParsed.success) {
+    logOutputError("getLanguageEntry", outputParsed.error.issues);
+  }
+
+  return result;
+}
+
+/**
+ * Update a language entry.
+ * Extracts candidateId from session and delegates to updateLanguage.
+ */
+export async function updateLanguageEntry(
+  input: UpdateLanguageEntryInput,
+): Promise<LanguageEntryResponse> {
+  const session = await requireRoleCapability("candidate", "candidate.profile.edit");
+
+  const parsed = updateLanguageEntrySchema.safeParse(input);
+  if (!parsed.success) {
+    return {
+      data: null,
+      error: parsed.error.issues[0]?.message ?? "Invalid input",
+    };
+  }
+
+  const result = await updateLanguage({
+    candidateId: Number(session.id),
+    languageId: parsed.data.languageId,
+    language: parsed.data.language,
+    proficiency: parsed.data.proficiency,
+  });
+
+  // Validate output shape
+  const outputParsed = languageDetailResponseSchema.safeParse(result);
+  if (!outputParsed.success) {
+    logOutputError("updateLanguageEntry", outputParsed.error.issues);
+  }
+
+  return result;
+}
+
+/**
+ * Delete a language entry by ID.
+ * Extracts candidateId from session and delegates to deleteLanguage.
+ */
+export async function deleteLanguageEntry(
+  languageId: number,
+): Promise<LanguageEntryResponse> {
+  const session = await requireRoleCapability("candidate", "candidate.profile.edit");
+
+  const parsed = getLanguageEntrySchema.safeParse({ languageId });
+  if (!parsed.success) {
+    return {
+      data: null,
+      error: "Invalid language ID",
+    };
+  }
+
+  const result = await deleteLanguage({
+    candidateId: Number(session.id),
+    languageId: parsed.data.languageId,
+  });
+
+  // Validate output shape
+  const outputParsed = languageDetailResponseSchema.safeParse(result);
+  if (!outputParsed.success) {
+    logOutputError("deleteLanguageEntry", outputParsed.error.issues);
   }
 
   return result;

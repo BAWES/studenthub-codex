@@ -1,112 +1,14 @@
-"use server";
-
 // ---------------------------------------------------------------------------
-// Candidate Languages — server actions for the list/create page
-// ---------------------------------------------------------------------------
-// Provides language listing and creation for the /candidate/languages page.
-// Delegates all data access to modules/candidates/languages.
+// Candidate Languages — colocated server actions
+// Delegates to module-level actions in @/modules/candidates/languages/actions
 // ---------------------------------------------------------------------------
 
-import { revalidatePath } from "next/cache";
-import { requireRoleCapability } from "@/modules/auth/session";
-import {
-  listLanguages as moduleListLanguages,
-  createLanguage as moduleCreateLanguage,
+export {
+  listCandidateLanguages,
+  createCandidateLanguage,
 } from "@/modules/candidates/languages/actions";
-import {
-  listLanguagesSchema,
-  createLanguageSchema,
-  languageItemOutputSchema,
-  languageActionResultOutputSchema,
-} from "./schemas";
-import type {
-  ListLanguagesInput,
-  CreateLanguageInput,
+
+export type {
   LanguageItem,
   LanguageActionResult,
-} from "./schemas";
-
-// Re-export types for client components
-export type { LanguageActionResult, LanguageItem };
-
-// ---------------------------------------------------------------------------
-// Server actions — delegate to module-level implementations
-// ---------------------------------------------------------------------------
-
-/**
- * List language records for the current candidate (paginated).
- * Delegates to modules/candidates/languages with the session's candidate ID.
- */
-export async function listCandidateLanguages(
-  input: ListLanguagesInput = {},
-): Promise<LanguageItem[]> {
-  const session = await requireRoleCapability("candidate", "candidate.read.own");
-
-  const parsed = listLanguagesSchema.safeParse(input);
-  if (!parsed.success) {
-    throw new Error(
-      parsed.error.issues[0]?.message ?? "Invalid languages list params",
-    );
-  }
-
-  const { page, limit } = parsed.data;
-
-  const result = await moduleListLanguages({
-    candidateId: Number(session.id),
-    page,
-    limit,
-  });
-
-  // Validate output shape
-  const outputParsed = languageItemOutputSchema.array().safeParse(result);
-  if (!outputParsed.success) {
-    console.error(
-      "[candidate/languages] listCandidateLanguages output validation failed:",
-      outputParsed.error.issues,
-    );
-  }
-
-  return result;
-}
-
-/**
- * Create a new language record for the current candidate.
- * Delegates to modules/candidates/languages with the session's candidate ID.
- */
-export async function createCandidateLanguage(
-  data: CreateLanguageInput,
-): Promise<LanguageActionResult> {
-  const session = await requireRoleCapability(
-    "candidate",
-    "candidate.profile.edit",
-  );
-
-  const parsed = createLanguageSchema.safeParse(data);
-  if (!parsed.success) {
-    return {
-      success: false,
-      error: parsed.error.issues[0]?.message ?? "Invalid input",
-    };
-  }
-
-  const { language, proficiency } = parsed.data;
-
-  const result = await moduleCreateLanguage({
-    candidateId: Number(session.id),
-    language,
-    proficiency,
-  });
-
-  revalidatePath("/candidate/languages");
-
-  // Validate output shape
-  const outputParsed = languageActionResultOutputSchema.safeParse(result);
-  if (!outputParsed.success) {
-    console.error(
-      "[candidate/languages] createCandidateLanguage output validation failed:",
-      outputParsed.error.issues,
-    );
-  }
-
-  return result;
-}
+} from "@/modules/candidates/languages/schemas";
