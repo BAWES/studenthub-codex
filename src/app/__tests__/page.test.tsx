@@ -131,10 +131,12 @@ describe("Landing page (blue+amber redesign)", () => {
 
   it("renders the hero section with headline", () => {
     render(<LandingPage {...defaultProps} />);
-    const connectingTexts = screen.getAllByText(/connecting students with/i);
-    expect(connectingTexts.length).toBeGreaterThanOrEqual(1);
-    const ctaTexts = screen.getAllByText(/create your free profile/i);
-    expect(ctaTexts.length).toBeGreaterThanOrEqual(1);
+    expect(
+      screen.getByText(/connecting students with/i)
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/create your free profile/i)
+    ).toBeInTheDocument();
   });
 
   // ── Navigation ───────────────────────────────────────────────
@@ -162,10 +164,8 @@ describe("Landing page (blue+amber redesign)", () => {
 
   it("renders persona tabs with Students and Companies", () => {
     render(<LandingPage {...defaultProps} />);
-    const studentsTexts = screen.getAllByText("Students");
-    expect(studentsTexts.length).toBeGreaterThanOrEqual(1);
-    const companiesTexts = screen.getAllByText("Companies");
-    expect(companiesTexts.length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText("Students")).toBeInTheDocument();
+    expect(screen.getByText("Companies")).toBeInTheDocument();
   });
 
   // ── How it works ─────────────────────────────────────────────
@@ -203,8 +203,7 @@ describe("Landing page (blue+amber redesign)", () => {
     expect(
       screen.getByText("Your next role is one profile away.")
     ).toBeInTheDocument();
-    const ctaTexts = screen.getAllByText("Create your free profile");
-    expect(ctaTexts.length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText("Create your free profile")).toBeInTheDocument();
   });
 
   // ── Footer ───────────────────────────────────────────────────
