@@ -571,6 +571,83 @@
   box-shadow: var(--sh-glow-sm);
 }
 
+/* ── "+" tab creation button ────────────────────────────────────── */
+
+.workspaceTabAddWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.workspaceTabAdd {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: none;
+  border-radius: var(--sh-radius-sm);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition:
+    background 180ms var(--sh-easing),
+    color 180ms var(--sh-easing);
+  margin-left: 2px;
+}
+
+.workspaceTabAdd:hover,
+.workspaceTabAdd.active {
+  background: var(--sh-glass-bg);
+  color: var(--ink);
+}
+
+/* ── Tab creation dropdown menu ─────────────────────────────────── */
+
+.workspaceTabMenu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 50;
+  min-width: 180px;
+  padding: 4px;
+  background: var(--sh-glass-bg-strong);
+  backdrop-filter: blur(var(--sh-glass-blur));
+  -webkit-backdrop-filter: blur(var(--sh-glass-blur));
+  border: 1px solid var(--sh-glass-border);
+  border-radius: var(--sh-radius-md);
+  box-shadow: var(--sh-shadow-lg, 0 8px 24px rgba(0, 0, 0, 0.12));
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.workspaceTabMenuItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 7px 10px;
+  border: none;
+  border-radius: var(--sh-radius-sm);
+  background: transparent;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: var(--weight-medium);
+  text-align: left;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 120ms var(--sh-easing);
+}
+
+.workspaceTabMenuItem:hover {
+  background: var(--sh-glass-bg);
+  color: var(--ink);
+}
+
 /* ── Glass Topbar ───────────────────────────────────────────────────── */
 .topbar {
   position: sticky;
