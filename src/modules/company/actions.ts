@@ -66,6 +66,7 @@ import type {
 } from "./schemas";
 import type { NoteItem } from "@/modules/admin/note/schemas";
 export type { NoteItem };
+import { getRequestDetail as _getRequestDetail } from "@/modules/workspace/request-detail-core";
 
 import {
   listStoresSchema,
@@ -82,6 +83,27 @@ import type {
   StoreRow,
   MallsAndBrandsResult,
   CompanySelectOption,
+} from "./schemas";
+import {
+  listCompanyRequestsSchema,
+  getCompanyRequestDetailSchema,
+  createCompanyRequestSchema,
+  updateRequestStatusSchema,
+  deleteRequestSchema,
+  getCompanyListSchema,
+  companyRequestActionResultSchema,
+} from "./schemas";
+import type {
+  ListCompanyRequestsInput,
+  CreateCompanyRequestInput,
+  UpdateRequestStatusInput,
+  DeleteRequestInput,
+  GetCompanyListInput,
+  CompanyRequestListItem,
+  CompanyRequestDetail,
+  ListCompanyRequestsResult,
+  CompanyRequestActionResult,
+  RequestCompanyListItem,
 } from "./schemas";
 
 const addContactSchema = z.object({
@@ -1599,4 +1621,449 @@ export async function listCompanySelectOptions(
     .filter((l) => l.company_id !== null && l.company !== null)
     .map((l) => ({ id: l.company_id as number, name: l.company!.company_name }))
     .sort((a, b) => a.name.localeCompare(b.name));
+}
+
+// ---------------------------------------------------------------------------
+// Company Requests — server actions
+// ---------------------------------------------------------------------------
+
+/**
+ * List company requests with optional company filter and pagination.
+ * Mirrors the legacy RequestController::actionList().
+ */
+export async function listCompanyRequests(
+  params: ListCompanyRequestsInput = {},
+): Promise<ListCompanyRequestsResult> {
+  await requireCapability("request.read.linked");
+
+  const parsed = listCompanyRequestsSchema.safeParse(params);
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid list parameters");
+  }
+
+  const { company_id, page = 1, limit = 20 } = parsed.data;
+
+  const where: Record<string, unknown> = {};
+  if (company_id !== undefined) {
+    where.company_id = company_id;
+  }
+
+  const [requests, total] = await Promise.all([
+    prisma.request.findMany({
+      where,
+      select: {
+        request_uuid: true,
+        company_id: true,
+        request_position_title: true,
+        request_compensation: true,
+        request_number_of_employees: true,
+        request_location: true,
+        request_status: true,
+        request_created_datetime: true,
+        request_updated_datetime: true,
+        company: { select: { company_name: true } },
+      },
+      orderBy: { request_created_datetime: "desc" },
+      skip: (page - 1) * limit,
+      take: limit,
+    }),
+    prisma.request.count({ where }),
+  ]);
+
+  return {
+    requests: requests.map((r) => ({
+      request_uuid: r.request_uuid,
+      company_id: r.company_id,
+      request_position_title: r.request_position_title,
+      request_compensation: r.request_compensation,
+      request_number_of_employees: r.request_number_of_employees,
+      request_location: r.request_location,
+      request_status: r.request_status,
+      request_created_datetime: r.request_created_datetime,
+      request_updated_datetime: r.request_updated_datetime,
+      company_name: r.company?.company_name ?? null,
+    })),
+    total,
+    page,
+    limit,
+    totalPages: Math.ceil(total / limit),
+  };
+}
+
+/**
+ * Get a single company request by UUID.
+ * Mirrors the legacy RequestController::actionDetail().
+ */
+export async function getCompanyRequestDetail(
+  uuid: string,
+): Promise<CompanyRequestDetail | null> {
+  await requireCapability("request.read.linked");
+
+  const parsed = getCompanyRequestDetailSchema.safeParse({ uuid });
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid request UUID");
+  }
+
+  const request = await prisma.request.findUnique({
+    where: { request_uuid: uuid },
+    select: {
+      request_uuid: true,
+      company_id: true,
+      contact_uuid: true,
+      staff_id: true,
+      request_position_title: true,
+      request_job_description: true,
+      request_compensation: true,
+      request_number_of_employees: true,
+      request_location: true,
+      request_additional_info: true,
+      request_status: true,
+      request_feedback: true,
+      request_created_datetime: true,
+      request_updated_datetime: true,
+      company: { select: { company_name: true } },
+    },
+  });
+
+  if (!request) return null;
+
+  return {
+    request_uuid: request.request_uuid,
+    company_id: request.company_id,
+    contact_uuid: request.contact_uuid,
+    staff_id: request.staff_id,
+    request_position_title: request.request_position_title,
+    request_job_description: request.request_job_description,
+    request_compensation: request.request_compensation,
+    request_number_of_employees: request.request_number_of_employees,
+    request_location: request.request_location,
+    request_additional_info: request.request_additional_info,
+    request_status: request.request_status,
+    request_feedback: request.request_feedback,
+    request_created_datetime: request.request_created_datetime,
+    request_updated_datetime: request.request_updated_datetime,
+    company_name: request.company?.company_name ?? null,
+  };
+}
+
+/**
+ * Create a new company request.
+ * Mirrors the legacy RequestController::actionCreate().
+ */
+export async function createCompanyRequest(
+  data: CreateCompanyRequestInput,
+): Promise<{ request_uuid: string }> {
+  await requireCapability("request.create");
+
+  const parsed = createCompanyRequestSchema.safeParse(data);
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid request data");
+  }
+
+  const { company_id, position_title, compensation, number_of_employees, location } =
+    parsed.data;
+
+  const request = await prisma.request.create({
+    data: {
+      request_uuid: crypto.randomUUID(),
+      company_id,
+      request_position_title: position_title,
+      request_compensation: compensation ?? "",
+      request_number_of_employees: number_of_employees ?? null,
+      request_location: location ?? null,
+      request_job_description: "",
+      request_status: "pending",
+      request_created_datetime: new Date(),
+      request_updated_datetime: new Date(),
+    },
+    select: { request_uuid: true },
+  });
+
+  revalidatePath("/company/requests");
+  return { request_uuid: request.request_uuid };
+}
+
+// ---------------------------------------------------------------------------
+// Row helpers for DataTable pages — replaces imports from @/modules/workspace/data
+// ---------------------------------------------------------------------------
+
+type CompanyRequestRow = {
+  id: string;
+  title: string;
+  company: string;
+  owner: string;
+  seats: number;
+  status: string;
+  updated: string;
+};
+
+/**
+ * List company request rows for the DataTable on the company/requests page.
+ * Mirrors the legacy getCompanyRequestRows() from @/modules/workspace/data/company.ts.
+ */
+export async function getCompanyRequestRows(contactUuid: string): Promise<CompanyRequestRow[]> {
+  await requireCapability("request.read.linked");
+
+  const companyLinks = await prisma.company_contact.findMany({
+    where: { contact_uuid: contactUuid, allow_access: true },
+    select: { company_id: true },
+  });
+  const companyIds = companyLinks.map((l) => l.company_id).filter((id): id is number => Boolean(id));
+  if (companyIds.length === 0) return [];
+
+  const rows = await prisma.request.findMany({
+    where: { company_id: { in: companyIds } },
+    orderBy: { request_updated_datetime: "desc" },
+    take: 80,
+    select: {
+      request_uuid: true,
+      request_position_title: true,
+      request_status: true,
+      request_number_of_employees: true,
+      request_updated_datetime: true,
+      company: { select: { company_name: true } },
+      staff: { select: { staff_name: true } },
+    },
+  });
+
+  return rows.map((row) => ({
+    id: row.request_uuid,
+    title: row.request_position_title ?? "Untitled request",
+    company: row.company?.company_name ?? "No company",
+    owner: row.staff?.staff_name ?? "Unassigned",
+    seats: row.request_number_of_employees ?? 0,
+    status: row.request_status ?? "No status",
+    updated: row.request_updated_datetime.toISOString().slice(0, 10).replace(/-/g, "/"),
+  }));
+}
+
+// ---------------------------------------------------------------------------
+// Company Requests — [id] sub-page server actions
+// ---------------------------------------------------------------------------
+
+/**
+ * Get full request detail including applications, interviews, invitations,
+ * matched candidates, and pipeline metrics for the company role.
+ *
+ * Wraps the shared @/modules/workspace/request-detail-core getRequestDetail as a
+ * route-level server action with company-role auth and scope checking.
+ */
+export async function getCompanyRequestDetailWithScope(
+  uuid: string,
+): Promise<Awaited<ReturnType<typeof _getRequestDetail>> | null> {
+  const session = await requireRoleCapability("company", "request.read.linked");
+
+  const parsed = getCompanyRequestDetailSchema.safeParse({ uuid });
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid request UUID");
+  }
+
+  // Scope check: verify contact has access to this request's company
+  const contactUuid = session.id;
+
+  const companyLinks = await prisma.company_contact.findMany({
+    where: { contact_uuid: contactUuid, allow_access: true },
+    select: { company_id: true },
+  });
+
+  const accessibleCompanyIds = companyLinks
+    .map((l) => l.company_id)
+    .filter((id): id is number => id !== null);
+
+  if (accessibleCompanyIds.length === 0) {
+    return null;
+  }
+
+  const request = await prisma.request.findUnique({
+    where: { request_uuid: parsed.data.uuid },
+    select: { company_id: true },
+  });
+
+  if (!request || request.company_id === null || !accessibleCompanyIds.includes(request.company_id)) {
+    return null;
+  }
+
+  return _getRequestDetail(parsed.data.uuid);
+}
+
+export type GetCompanyRequestDetailResult = Awaited<
+  ReturnType<typeof getCompanyRequestDetailWithScope>
+>;
+
+/**
+ * Update the status of a company request with optional feedback.
+ */
+export async function updateRequestStatus(
+  params: UpdateRequestStatusInput,
+): Promise<{ success: true } | { error: string }> {
+  await requireRoleCapability("company", "request.write");
+
+  const parsed = updateRequestStatusSchema.safeParse(params);
+  if (!parsed.success) {
+    const result = { error: parsed.error.issues[0]?.message ?? "Invalid input" };
+    const outputParsed = companyRequestActionResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[app/company/requests/[id]] updateRequestStatus output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+    return result;
+  }
+
+  const { uuid, status, feedback } = parsed.data;
+
+  const existing = await prisma.request.findUnique({
+    where: { request_uuid: uuid },
+    select: { request_uuid: true, request_status: true },
+  });
+
+  if (!existing) {
+    const result = { error: "Request not found." };
+    const outputParsed = companyRequestActionResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[app/company/requests/[id]] updateRequestStatus output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+    return result;
+  }
+
+  await prisma.request.update({
+    where: { request_uuid: uuid },
+    data: {
+      request_status: status,
+      ...(feedback !== undefined ? { request_feedback: feedback } : {}),
+      request_updated_datetime: new Date(),
+    },
+  });
+
+  revalidatePath(`/company/requests/${uuid}`);
+  revalidatePath("/company/requests");
+
+  const result = { success: true } as const;
+  const outputParsed = companyRequestActionResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[app/company/requests/[id]] updateRequestStatus output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+  return result;
+}
+
+/**
+ * Cancel (soft-delete) a company request by setting status to "cancelled".
+ */
+export async function deleteRequest(
+  params: DeleteRequestInput,
+): Promise<{ success: true } | { error: string }> {
+  await requireRoleCapability("company", "request.write");
+
+  const parsed = deleteRequestSchema.safeParse(params);
+  if (!parsed.success) {
+    const result = { error: parsed.error.issues[0]?.message ?? "Invalid input" };
+    const outputParsed = companyRequestActionResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[app/company/requests/[id]] deleteRequest output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+    return result;
+  }
+
+  const { uuid } = parsed.data;
+
+  const existing = await prisma.request.findUnique({
+    where: { request_uuid: uuid },
+    select: { request_uuid: true, request_status: true },
+  });
+
+  if (!existing) {
+    const result = { error: "Request not found." };
+    const outputParsed = companyRequestActionResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[app/company/requests/[id]] deleteRequest output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+    return result;
+  }
+
+  if (existing.request_status === "cancelled") {
+    const result = { error: "Request is already cancelled." };
+    const outputParsed = companyRequestActionResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[app/company/requests/[id]] deleteRequest output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+    return result;
+  }
+
+  await prisma.request.update({
+    where: { request_uuid: uuid },
+    data: {
+      request_status: "cancelled",
+      request_cancelled_at: new Date(),
+      request_updated_datetime: new Date(),
+    },
+  });
+
+  revalidatePath("/company/requests");
+
+  const result = { success: true } as const;
+  const outputParsed = companyRequestActionResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[app/company/requests/[id]] deleteRequest output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+  return result;
+}
+
+// ---------------------------------------------------------------------------
+// Company Requests — Create sub-page server actions
+// ---------------------------------------------------------------------------
+
+/**
+ * Get a list of companies accessible by the current contact for the
+ * request creation form dropdown.
+ */
+export async function getCompanyList(
+  contactUuid: string,
+): Promise<RequestCompanyListItem[]> {
+  await requireCapability("request.create");
+
+  const parsed = getCompanyListSchema.safeParse({ contactUuid });
+  if (!parsed.success) {
+    throw new Error(
+      parsed.error.issues[0]?.message ?? "Invalid contact UUID",
+    );
+  }
+
+  const links = await prisma.company_contact.findMany({
+    where: {
+      contact_uuid: parsed.data.contactUuid,
+      allow_access: true,
+    },
+    select: {
+      company: {
+        select: { company_id: true, company_name: true },
+      },
+    },
+    take: 50,
+  });
+
+  return links
+    .filter((link) => link.company)
+    .map((link) => ({
+      id: link.company!.company_id,
+      name: link.company!.company_name,
+    }));
 }
