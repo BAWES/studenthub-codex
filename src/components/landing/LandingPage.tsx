@@ -72,15 +72,7 @@ export default function LandingPage({ session }: LandingPageProps) {
 
   return (
     <div
-      data-theme="light"
       style={{
-        "--ink": "#182230",
-        "--muted": "#667085",
-        "--paper": "#f5f7fa",
-        "--surface": "#ffffff",
-        "--surface-soft": "#f7f8fa",
-        "--border": "#d6dce7",
-        "--shadow": "0 4px 24px rgba(0,0,0,0.08)",
         "--sh-coral": SH_BLUE,
         "--sh-amber": SH_AMBER,
         "--sh-blue": SH_BLUE,
@@ -88,7 +80,9 @@ export default function LandingPage({ session }: LandingPageProps) {
         "--sh-coral-hover": "#0a56b0",
         "--sh-coral-glow": `0 0 12px rgba(11, 99, 206, 0.25)`,
         "--sh-amber-glow": "0 4px 14px rgba(245, 158, 11, 0.35)",
-        backgroundColor: "#f5f7fa",
+        "--success": "var(--green)",
+        "--error": "var(--destructive)",
+        backgroundColor: "var(--paper)",
         minHeight: "100svh",
       } as React.CSSProperties}
     >

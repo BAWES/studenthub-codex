@@ -14,7 +14,7 @@ interface CounterProps {
 }
 
 function AnimatedCounter({ end, suffix = "", prefix = "", decimals = 0 }: CounterProps) {
-  const [count, setCount] = useState(end);
+  const [count, setCount] = useState(0);
   const ref = useRef<HTMLSpanElement>(null);
   const counted = useRef(false);
 
