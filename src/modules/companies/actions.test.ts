@@ -1,4 +1,47 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+
+// ---------------------------------------------------------------------------
+// Mocks
+// ---------------------------------------------------------------------------
+
+vi.mock("@/lib/prisma", () => ({
+  prisma: {
+    company: {
+      findMany: vi.fn(),
+      findUnique: vi.fn(),
+      count: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+    },
+    company_contact: {
+      findMany: vi.fn(),
+    },
+    request: {
+      findMany: vi.fn(),
+    },
+    store: {
+      findMany: vi.fn(),
+    },
+    note: {
+      findMany: vi.fn(),
+    },
+    $transaction: vi.fn(),
+  },
+}));
+
+vi.mock("@/modules/auth/session", () => ({
+  requireCapability: vi.fn(),
+}));
+
+vi.mock("@/modules/workspace/format", () => ({
+  formatDate: vi.fn((d: unknown) => d instanceof Date ? d.toISOString().slice(0, 10) : String(d ?? "")),
+  formatMoney: vi.fn((_v: unknown, c = "KWD") => `15.500 ${c}`),
+}));
+
+vi.mock("next/cache", () => ({
+  revalidatePath: vi.fn(),
+}));
+
 import {
   listCompaniesSchema,
   getCompanySchema,
@@ -11,6 +54,9 @@ import {
   companyAccountRowSchema,
   companyAccountDetailOutputSchema,
 } from "./schemas";
+
+const { prisma } = await import("@/lib/prisma");
+const actions = await import("./actions");
 
 // ---------------------------------------------------------------------------
 // Input schema: listCompaniesSchema
@@ -668,5 +714,453 @@ describe("companyAccountDetailOutputSchema", () => {
       notes: [],
     });
     expect(r.success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Server Action: listCompanies
+// ---------------------------------------------------------------------------
+
+describe("listCompanies", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("returns paginated list with default params", async () => {
+    const mockCompanies = [
+      {
+        company_id: 1,
+        company_name: "Acme Corp",
+        company_email: "info@acme.com",
+        company_website: "https://acme.com",
+        country_id: 1,
+        no_of_active_requests: 3,
+        total_candidate: 42,
+        company_updated_at: new Date("2026-06-01"),
+        currency_code: "KWD",
+        commercial_licence: "LIC-001",
+        country: { country_name_en: "Kuwait" },
+      },
+    ];
+
+    vi.mocked(prisma.company.findMany).mockResolvedValue(mockCompanies as any);
+    vi.mocked(prisma.company.count).mockResolvedValue(1);
+
+    const result = await actions.listCompanies({});
+
+    expect(result.companies).toHaveLength(1);
+    expect(result.companies[0].company_name).toBe("Acme Corp");
+    expect(result.total).toBe(1);
+    expect(result.page).toBe(1);
+    expect(result.limit).toBe(20);
+    expect(result.totalPages).toBe(1);
+    expect(prisma.company.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        skip: 0,
+        take: 20,
+        orderBy: { company_updated_at: "desc" },
+      }),
+    );
+  });
+
+  it("filters by search term", async () => {
+    vi.mocked(prisma.company.findMany).mockResolvedValue([]);
+    vi.mocked(prisma.company.count).mockResolvedValue(0);
+
+    await actions.listCompanies({ search: "Kuwait" });
+
+    expect(prisma.company.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          OR: [
+            { company_name: { contains: "Kuwait" } },
+            { company_common_name_en: { contains: "Kuwait" } },
+            { company_email: { contains: "Kuwait" } },
+          ],
+        }),
+      }),
+    );
+  });
+
+  it("filters by country_id", async () => {
+    vi.mocked(prisma.company.findMany).mockResolvedValue([]);
+    vi.mocked(prisma.company.count).mockResolvedValue(0);
+
+    await actions.listCompanies({ country_id: 1 });
+
+    expect(prisma.company.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({ country_id: 1 }),
+      }),
+    );
+  });
+
+  it("filters by currency_code", async () => {
+    vi.mocked(prisma.company.findMany).mockResolvedValue([]);
+    vi.mocked(prisma.company.count).mockResolvedValue(0);
+
+    await actions.listCompanies({ currency_code: "KWD" });
+
+    expect(prisma.company.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({ currency_code: "KWD" }),
+      }),
+    );
+  });
+
+  it("validates that deleted: 0 is always in where clause", async () => {
+    vi.mocked(prisma.company.findMany).mockResolvedValue([]);
+    vi.mocked(prisma.company.count).mockResolvedValue(0);
+
+    await actions.listCompanies({});
+
+    expect(prisma.company.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({ deleted: 0 }),
+      }),
+    );
+  });
+
+  it("respects custom pagination", async () => {
+    vi.mocked(prisma.company.findMany).mockResolvedValue([]);
+    vi.mocked(prisma.company.count).mockResolvedValue(0);
+
+    const result = await actions.listCompanies({ page: 3, limit: 10 });
+
+    expect(result.page).toBe(3);
+    expect(result.limit).toBe(10);
+    expect(prisma.company.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({ skip: 20, take: 10 }),
+    );
+  });
+
+  it("throws on invalid schema params", async () => {
+    await expect(actions.listCompanies({ page: -1 })).rejects.toThrow();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Server Action: getCompany
+// ---------------------------------------------------------------------------
+
+describe("getCompany", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("returns company detail when found", async () => {
+    const mockCompany = {
+      company_id: 1,
+      parent_company_id: null,
+      company_name: "Acme Corp",
+      company_common_name_en: "Acme",
+      company_common_name_ar: null,
+      company_description_en: "A company",
+      company_description_ar: null,
+      company_website: "https://acme.com",
+      company_email: "info@acme.com",
+      company_logo: null,
+      commercial_licence: "LIC-001",
+      company_hourly_rate: 15.5,
+      company_bonus_commission: 10,
+      company_followup: null,
+      total_candidate: 42,
+      no_of_active_requests: 3,
+      is_request_updates_in_30_days: true,
+      company_approved_to_hire: true,
+      company_status_override: false,
+      company_created_at: new Date("2025-01-01"),
+      company_updated_at: new Date("2026-06-01"),
+      last_request_datetime: new Date("2026-05-01"),
+      last_payment_datetime: null,
+      country_id: 1,
+      currency_code: "KWD",
+      country: { country_name_en: "Kuwait" },
+      company: null,
+      staff: { staff_name: "John" },
+    };
+
+    vi.mocked(prisma.company.findUnique).mockResolvedValue(mockCompany as any);
+
+    const result = await actions.getCompany(1);
+
+    expect(result).not.toBeNull();
+    expect(result!.company_name).toBe("Acme Corp");
+    expect(result!.country_name).toBe("Kuwait");
+    expect(result!.staff_name).toBe("John");
+    expect(prisma.company.findUnique).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { company_id: 1 },
+      }),
+    );
+  });
+
+  it("returns null when company not found", async () => {
+    vi.mocked(prisma.company.findUnique).mockResolvedValue(null);
+
+    const result = await actions.getCompany(999);
+    expect(result).toBeNull();
+  });
+
+  it("throws on invalid company ID", async () => {
+    await expect(actions.getCompany(0)).rejects.toThrow();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Server Action: createCompany
+// ---------------------------------------------------------------------------
+
+describe("createCompany", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("creates a company with minimal data", async () => {
+    vi.mocked(prisma.company.create).mockResolvedValue({ company_id: 42 } as any);
+
+    const result = await actions.createCompany({ company_name: "New Co" });
+
+    expect(result.company_id).toBe(42);
+    expect(prisma.company.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          company_name: "New Co",
+          currency_code: "KWD",
+        }),
+      }),
+    );
+  });
+
+  it("creates a company with all optional fields", async () => {
+    vi.mocked(prisma.company.create).mockResolvedValue({ company_id: 99 } as any);
+
+    const result = await actions.createCompany({
+      company_name: "Full Co",
+      company_common_name_en: "FC",
+      company_common_name_ar: "شركة",
+      company_description_en: "A full company",
+      company_description_ar: "شركة كاملة",
+      company_website: "https://fullco.com",
+      company_email: "info@fullco.com",
+      commercial_licence: "LIC-999",
+      country_id: 2,
+      currency_code: "USD",
+      company_hourly_rate: 20,
+      company_bonus_commission: 5,
+    });
+
+    expect(result.company_id).toBe(99);
+    expect(prisma.company.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          company_name: "Full Co",
+          country_id: 2,
+          currency_code: "USD",
+          company_hourly_rate: 20,
+        }),
+      }),
+    );
+  });
+
+  it("throws on missing company_name", async () => {
+    await expect(actions.createCompany({} as any)).rejects.toThrow();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Server Action: updateCompany
+// ---------------------------------------------------------------------------
+
+describe("updateCompany", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("updates a company with partial fields", async () => {
+    vi.mocked(prisma.company.update).mockResolvedValue({ company_id: 1 } as any);
+
+    const result = await actions.updateCompany({
+      companyId: 1,
+      company_name: "Updated Name",
+      company_hourly_rate: 25,
+    });
+
+    expect(result.company_id).toBe(1);
+    expect(prisma.company.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { company_id: 1 },
+        data: expect.objectContaining({
+          company_name: "Updated Name",
+          company_hourly_rate: 25,
+        }),
+      }),
+    );
+  });
+
+  it("updates boolean fields correctly", async () => {
+    vi.mocked(prisma.company.update).mockResolvedValue({ company_id: 1 } as any);
+
+    await actions.updateCompany({
+      companyId: 1,
+      company_approved_to_hire: true,
+      company_followup: false,
+    });
+
+    expect(prisma.company.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { company_id: 1 },
+        data: expect.objectContaining({
+          company_approved_to_hire: true,
+          company_followup: false,
+        }),
+      }),
+    );
+  });
+
+  it("throws on missing companyId", async () => {
+    await expect(actions.updateCompany({} as any)).rejects.toThrow();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Server Action: listCompanyAccountRows
+// ---------------------------------------------------------------------------
+
+describe("listCompanyAccountRows", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("returns company rows scoped to contact's linked companies", async () => {
+    vi.mocked(prisma.company_contact.findMany).mockResolvedValue([
+      { company_id: 1, allow_access: true },
+      { company_id: 2, allow_access: true },
+    ] as any);
+
+    vi.mocked(prisma.company.findMany).mockResolvedValue([
+      {
+        company_id: 1,
+        company_name: "Acme Corp",
+        company_email: "info@acme.com",
+        no_of_active_requests: 3,
+        company_approved_to_hire: true,
+        company_hourly_rate: 15.5,
+        currency_code: "KWD",
+        company_updated_at: new Date("2026-06-01"),
+        country: { country_name_en: "Kuwait" },
+      },
+    ] as any);
+
+    const result = await actions.listCompanyAccountRows("contact-uuid-abc");
+
+    expect(result).toHaveLength(1);
+    expect(result[0].name).toBe("Acme Corp");
+    expect(result[0].status).toBe("Approved");
+    expect(result[0].rate).toBe("15.500 KWD");
+    expect(prisma.company_contact.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { contact_uuid: "contact-uuid-abc", allow_access: true },
+      }),
+    );
+  });
+
+  it("returns empty array when contact has no linked companies", async () => {
+    vi.mocked(prisma.company_contact.findMany).mockResolvedValue([]);
+
+    const result = await actions.listCompanyAccountRows("uuid-no-links");
+    expect(result).toEqual([]);
+  });
+
+  it("creates rows using companyAccountRowSchema", async () => {
+    vi.mocked(prisma.company_contact.findMany).mockResolvedValue([
+      { company_id: 1, allow_access: true },
+    ] as any);
+
+    vi.mocked(prisma.company.findMany).mockResolvedValue([
+      {
+        company_id: 1,
+        company_name: "Test Co",
+        company_email: null,
+        no_of_active_requests: 0,
+        company_approved_to_hire: false,
+        company_hourly_rate: null,
+        currency_code: null,
+        company_updated_at: new Date("2026-01-01"),
+        country: { country_name_en: null },
+      },
+    ] as any);
+
+    const result = await actions.listCompanyAccountRows("uuid");
+
+    expect(result[0].email).toBe("No email");
+    expect(result[0].country).toBe("No country");
+    expect(result[0].status).toBe("Not approved");
+    expect(result[0].rate).toBe("15.500 KWD");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Server Action: getCompanyAccountDetail
+// ---------------------------------------------------------------------------
+
+describe("getCompanyAccountDetail", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("returns full company account detail", async () => {
+    vi.mocked(prisma.company_contact.findMany).mockResolvedValue([
+      { company_id: 1, allow_access: true },
+    ] as any);
+
+    const mockCompany = {
+      company_id: 1,
+      company_name: "Acme Corp",
+      company_common_name_en: "Acme",
+      company_email: "info@acme.com",
+      company_website: "https://acme.com",
+      company_approved_to_hire: true,
+      company_hourly_rate: 15.5,
+      currency_code: "KWD",
+      no_of_active_requests: 3,
+      company_created_at: new Date("2025-01-01"),
+      company_updated_at: new Date("2026-06-01"),
+      staff: { staff_name: "John", staff_email: "john@co.com" },
+      country: { country_name_en: "Kuwait" },
+    };
+
+    vi.mocked(prisma.$transaction).mockResolvedValue([
+      mockCompany,
+      [],
+      [],
+      [],
+      [],
+    ] as any);
+
+    const result = await actions.getCompanyAccountDetail("contact-uuid", 1);
+
+    expect(result).not.toBeNull();
+    expect(result!.company).toEqual(mockCompany);
+    expect(result!.metrics).toHaveLength(4);
+    expect(result!.requests).toHaveLength(0);
+  });
+
+  it("returns null when company not linked to contact", async () => {
+    vi.mocked(prisma.company_contact.findMany).mockResolvedValue([
+      { company_id: 2, allow_access: true },
+    ] as any);
+
+    const result = await actions.getCompanyAccountDetail("contact-uuid", 1);
+    expect(result).toBeNull();
+  });
+
+  it("returns null when company not linked to contact (even invalid ID)", async () => {
+    vi.mocked(prisma.company_contact.findMany).mockResolvedValue([
+      { company_id: 2, allow_access: true },
+    ] as any);
+
+    const result = await actions.getCompanyAccountDetail("contact-uuid", -1);
+    expect(result).toBeNull();
   });
 });
