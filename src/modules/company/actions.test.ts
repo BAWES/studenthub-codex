@@ -5,6 +5,21 @@ import {
   adminListCompaniesResultSchema,
   adminCompanyDetailResultSchema,
   companyActionResultSchema,
+  getCompanyWorkspaceSchema,
+  workspaceMetricSchema,
+  workspaceListItemSchema,
+  workspaceContactSchema,
+  workspaceOverviewOutputSchema,
+  updateWorkspaceResultSchema,
+  staffWorkspaceStaffSchema,
+  staffListItemSchema,
+  staffWorkspaceOutputSchema,
+  homeActivityItemSchema,
+  homeActiveRequestItemSchema,
+  companyHomeOutputSchema,
+  entityExistenceSchema,
+  actionResultSchema,
+  requestStatusUpdateResultSchema,
   type AdminCompanyItem,
   type AdminListCompaniesResult,
 } from "./schemas";
@@ -460,6 +475,569 @@ describe("AdminCompanyItem type shape", () => {
     expect(mock.company_id).toBe(1);
     expect(mock.company_name).toBe("Test Corp");
     expect(mock.currency_code).toBe("KWD");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Workspace schemas
+// ---------------------------------------------------------------------------
+
+describe("getCompanyWorkspaceSchema", () => {
+  it("accepts a valid contact UUID", () => {
+    const r = getCompanyWorkspaceSchema.safeParse({
+      contactUuid: "123e4567-e89b-12d3-a456-426614174000",
+    });
+    expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data.contactUuid).toBe("123e4567-e89b-12d3-a456-426614174000");
+    }
+  });
+
+  it("rejects empty contact UUID", () => {
+    const r = getCompanyWorkspaceSchema.safeParse({ contactUuid: "" });
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects missing contactUuid", () => {
+    const r = getCompanyWorkspaceSchema.safeParse({});
+    expect(r.success).toBe(false);
+  });
+});
+
+describe("workspaceMetricSchema", () => {
+  it("accepts a valid metric", () => {
+    const r = workspaceMetricSchema.safeParse({
+      label: "Active Requests",
+      value: 12,
+      note: "Total active requests this month",
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts zero value", () => {
+    const r = workspaceMetricSchema.safeParse({
+      label: "Empty",
+      value: 0,
+      note: "No items",
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects negative value", () => {
+    const r = workspaceMetricSchema.safeParse({
+      label: "Negative",
+      value: -5,
+      note: "",
+    });
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects non-integer value", () => {
+    const r = workspaceMetricSchema.safeParse({
+      label: "Float",
+      value: 3.14,
+      note: "",
+    });
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects empty label", () => {
+    const r = workspaceMetricSchema.safeParse({
+      label: "",
+      value: 1,
+      note: "",
+    });
+    expect(r.success).toBe(false);
+  });
+});
+
+describe("workspaceListItemSchema", () => {
+  it("accepts a valid item with string id", () => {
+    const r = workspaceListItemSchema.safeParse({
+      id: "550e8400-e29b-41d4-a716-446655440000",
+      title: "Acme Corp",
+      subtitle: "Active",
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts a valid item with number id", () => {
+    const r = workspaceListItemSchema.safeParse({
+      id: 42,
+      title: "Acme Corp",
+      subtitle: "Active",
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts optional meta field", () => {
+    const r = workspaceListItemSchema.safeParse({
+      id: 1,
+      title: "Test",
+      subtitle: "Sub",
+      meta: "KWD",
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects empty title", () => {
+    const r = workspaceListItemSchema.safeParse({
+      id: 1,
+      title: "",
+      subtitle: "Sub",
+    });
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects missing subtitle", () => {
+    const r = workspaceListItemSchema.safeParse({
+      id: 1,
+      title: "Test",
+    });
+    expect(r.success).toBe(false);
+  });
+});
+
+describe("workspaceContactSchema", () => {
+  it("accepts a valid contact object", () => {
+    const r = workspaceContactSchema.safeParse({
+      contact_name: "John Doe",
+      contact_email: "john@example.com",
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts null", () => {
+    const r = workspaceContactSchema.safeParse(null);
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects missing contact_name", () => {
+    const r = workspaceContactSchema.safeParse({ contact_email: "a@b.com" });
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects missing contact_email", () => {
+    const r = workspaceContactSchema.safeParse({ contact_name: "John" });
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects missing contact_name (empty string passes — no .min() guard)", () => {
+    // z.string() allows ""; this test is informational
+    const r = workspaceContactSchema.safeParse({
+      contact_name: "",
+      contact_email: "a@b.com",
+    });
+    expect(r.success).toBe(true);
+  });
+});
+
+describe("workspaceOverviewOutputSchema", () => {
+  const validMetric = (overrides?: Partial<{ label: string; value: number; note: string }>) => ({
+    label: "Metric",
+    value: 5,
+    note: "A note",
+    ...overrides,
+  });
+
+  it("accepts a full workspace overview", () => {
+    const r = workspaceOverviewOutputSchema.safeParse({
+      contact: { contact_name: "John", contact_email: "john@example.com" },
+      metrics: [validMetric(), validMetric(), validMetric(), validMetric()],
+      companies: [{ id: 1, title: "Acme", subtitle: "Sub" }],
+      requests: [{ id: "uuid-1", title: "Req", subtitle: "Sub" }],
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects wrong metrics count (less than 4)", () => {
+    const r = workspaceOverviewOutputSchema.safeParse({
+      contact: null,
+      metrics: [validMetric(), validMetric(), validMetric()],
+      companies: [],
+      requests: [],
+    });
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects wrong metrics count (more than 4)", () => {
+    const r = workspaceOverviewOutputSchema.safeParse({
+      contact: null,
+      metrics: [
+        validMetric(),
+        validMetric(),
+        validMetric(),
+        validMetric(),
+        validMetric(),
+      ],
+      companies: [],
+      requests: [],
+    });
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects missing contact", () => {
+    const r = workspaceOverviewOutputSchema.safeParse({
+      metrics: [validMetric(), validMetric(), validMetric(), validMetric()],
+      companies: [],
+      requests: [],
+    });
+    expect(r.success).toBe(false);
+  });
+});
+
+describe("updateWorkspaceResultSchema", () => {
+  it("accepts a valid contact UUID", () => {
+    const r = updateWorkspaceResultSchema.safeParse({
+      contactUuid: "some-uuid",
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects missing contactUuid", () => {
+    const r = updateWorkspaceResultSchema.safeParse({});
+    expect(r.success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Staff workspace schemas
+// ---------------------------------------------------------------------------
+
+describe("staffWorkspaceStaffSchema", () => {
+  it("accepts a valid staff object", () => {
+    const r = staffWorkspaceStaffSchema.safeParse({
+      staff_name: "Alice",
+      staff_email: "alice@example.com",
+      staff_job_title: "Manager",
+      staff_salary: 1500,
+      staff_salary_currency: "KWD",
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts nullable fields as null", () => {
+    const r = staffWorkspaceStaffSchema.safeParse({
+      staff_name: "Bob",
+      staff_email: "bob@example.com",
+      staff_job_title: null,
+      staff_salary: null,
+      staff_salary_currency: null,
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts null (no staff data)", () => {
+    const r = staffWorkspaceStaffSchema.safeParse(null);
+    expect(r.success).toBe(true);
+  });
+});
+
+describe("staffListItemSchema", () => {
+  it("accepts a valid staff list item", () => {
+    const r = staffListItemSchema.safeParse({
+      id: "uuid-1",
+      title: "Request #1",
+      subtitle: "Kuwait City",
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts optional meta and href", () => {
+    const r = staffListItemSchema.safeParse({
+      id: 42,
+      title: "Story",
+      subtitle: "New",
+      meta: "2026-06-13",
+      href: "/staff/stories/42",
+    });
+    expect(r.success).toBe(true);
+  });
+});
+
+describe("staffWorkspaceOutputSchema", () => {
+  it("accepts a full staff workspace output", () => {
+    const r = staffWorkspaceOutputSchema.safeParse({
+      staff: {
+        staff_name: "Alice",
+        staff_email: "alice@example.com",
+        staff_job_title: "Manager",
+        staff_salary: null,
+        staff_salary_currency: null,
+      },
+      metrics: [
+        { label: "Candidates", value: 42, note: "Active" },
+      ],
+      requests: [{ id: 1, title: "Req", subtitle: "Pending" }],
+      stories: [{ id: 2, title: "Story", subtitle: "New" }],
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts empty arrays", () => {
+    const r = staffWorkspaceOutputSchema.safeParse({
+      staff: null,
+      metrics: [],
+      requests: [],
+      stories: [],
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects missing metrics", () => {
+    const r = staffWorkspaceOutputSchema.safeParse({
+      staff: null,
+      requests: [],
+      stories: [],
+    });
+    expect(r.success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Company home schemas
+// ---------------------------------------------------------------------------
+
+describe("homeActivityItemSchema", () => {
+  it("accepts a valid activity item", () => {
+    const r = homeActivityItemSchema.safeParse({
+      id: "act-1",
+      type: "request_created",
+      detail: "New request for Software Engineer",
+      timestamp: new Date(),
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts all valid types", () => {
+    const types = [
+      "request_created",
+      "request_updated",
+      "note_added",
+      "application_received",
+    ] as const;
+    for (const t of types) {
+      const r = homeActivityItemSchema.safeParse({
+        id: "act-1",
+        type: t,
+        detail: "Detail",
+        timestamp: new Date(),
+      });
+      expect(r.success).toBe(true);
+    }
+  });
+
+  it("rejects invalid type", () => {
+    const r = homeActivityItemSchema.safeParse({
+      id: "act-1",
+      type: "invalid_type",
+      detail: "Detail",
+      timestamp: new Date(),
+    });
+    expect(r.success).toBe(false);
+  });
+
+  it("accepts optional relatedEntityId", () => {
+    const r = homeActivityItemSchema.safeParse({
+      id: "act-1",
+      type: "request_created",
+      detail: "Detail",
+      timestamp: new Date(),
+      relatedEntityId: "req-uuid-1",
+    });
+    expect(r.success).toBe(true);
+  });
+});
+
+describe("homeActiveRequestItemSchema", () => {
+  it("accepts a valid active request item", () => {
+    const r = homeActiveRequestItemSchema.safeParse({
+      id: "req-uuid-1",
+      title: "Software Engineer",
+      status: "pending",
+      candidatesCount: 5,
+      createdAt: new Date(),
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts zero candidates", () => {
+    const r = homeActiveRequestItemSchema.safeParse({
+      id: "req-uuid-2",
+      title: "Designer",
+      status: "started",
+      candidatesCount: 0,
+      createdAt: new Date(),
+    });
+    expect(r.success).toBe(true);
+  });
+});
+
+describe("companyHomeOutputSchema", () => {
+  const validMetric = () => ({
+    label: "Metric",
+    value: 5,
+    note: "Note",
+  });
+
+  it("accepts a full company home output", () => {
+    const r = companyHomeOutputSchema.safeParse({
+      contact: { contact_name: "John", contact_email: "john@example.com" },
+      metrics: [validMetric(), validMetric(), validMetric(), validMetric()],
+      companies: [{ id: 1, title: "Acme", subtitle: "Active" }],
+      requests: [{ id: "uuid-1", title: "Req", subtitle: "Pending" }],
+      activeRequestCount: 3,
+      pendingRequestCount: 1,
+      openPositionsCount: 10,
+      activeRequests: [
+        {
+          id: "req-1",
+          title: "Engineer",
+          status: "pending",
+          candidatesCount: 5,
+          createdAt: new Date(),
+        },
+      ],
+      recentActivity: [
+        {
+          id: "act-1",
+          type: "request_created",
+          detail: "New request",
+          timestamp: new Date(),
+        },
+      ],
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects negative activeRequestCount", () => {
+    const r = companyHomeOutputSchema.safeParse({
+      contact: null,
+      metrics: [validMetric(), validMetric(), validMetric(), validMetric()],
+      companies: [],
+      requests: [],
+      activeRequestCount: -1,
+      pendingRequestCount: 0,
+      openPositionsCount: 0,
+      activeRequests: [],
+      recentActivity: [],
+    });
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects negative pendingRequestCount", () => {
+    const r = companyHomeOutputSchema.safeParse({
+      contact: null,
+      metrics: [validMetric(), validMetric(), validMetric(), validMetric()],
+      companies: [],
+      requests: [],
+      activeRequestCount: 0,
+      pendingRequestCount: -1,
+      openPositionsCount: 0,
+      activeRequests: [],
+      recentActivity: [],
+    });
+    expect(r.success).toBe(false);
+  });
+
+  it("accepts empty arrays for activity and requests", () => {
+    const r = companyHomeOutputSchema.safeParse({
+      contact: null,
+      metrics: [validMetric(), validMetric(), validMetric(), validMetric()],
+      companies: [],
+      requests: [],
+      activeRequestCount: 0,
+      pendingRequestCount: 0,
+      openPositionsCount: 0,
+      activeRequests: [],
+      recentActivity: [],
+    });
+    expect(r.success).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Utility schemas
+// ---------------------------------------------------------------------------
+
+describe("entityExistenceSchema", () => {
+  it("accepts a valid request UUID", () => {
+    const r = entityExistenceSchema.safeParse({
+      request_uuid: "some-uuid",
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts null (entity not found)", () => {
+    const r = entityExistenceSchema.safeParse(null);
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects empty request_uuid", () => {
+    const r = entityExistenceSchema.safeParse({ request_uuid: "" });
+    expect(r.success).toBe(false);
+  });
+});
+
+describe("actionResultSchema", () => {
+  it("accepts success result", () => {
+    const r = actionResultSchema.safeParse({ success: true });
+    expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data.success).toBe(true);
+    }
+  });
+
+  it("accepts failure result with error", () => {
+    const r = actionResultSchema.safeParse({
+      success: false,
+      error: "Something went wrong",
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts success even with extra fields (Zod discriminated union ignores extras)", () => {
+    // Zod's discriminated union tries the matching branch first;
+    // extra fields like `error` are silently ignored.
+    const r = actionResultSchema.safeParse({
+      success: true,
+      error: "Should not have error",
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects failure without error", () => {
+    const r = actionResultSchema.safeParse({ success: false });
+    expect(r.success).toBe(false);
+  });
+});
+
+describe("requestStatusUpdateResultSchema", () => {
+  it("accepts success result", () => {
+    const r = requestStatusUpdateResultSchema.safeParse({ success: true });
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts error result", () => {
+    const r = requestStatusUpdateResultSchema.safeParse({
+      error: "Cannot update",
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts success even with extra error field (Zod union ignores extras)", () => {
+    // Zod's union tries each branch; the first branch matches { success: true },
+    // extra `error` field is silently ignored.
+    const r = requestStatusUpdateResultSchema.safeParse({
+      success: true,
+      error: "Conflicting",
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects neither success nor error", () => {
+    const r = requestStatusUpdateResultSchema.safeParse({});
+    expect(r.success).toBe(false);
   });
 });
 
