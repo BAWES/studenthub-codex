@@ -28,6 +28,9 @@ export function navForRole(role: Role): NavItem[] {
       { label: "Employees", href: "/admin/employees", icon: Users },
       { label: "Attendance", href: "/admin/attendance", icon: Clock },
       { label: "Designations", href: "/admin/designations", icon: Briefcase },
+      { label: "Candidate Requests", href: "/admin/candidate-account-requests", icon: User },
+      { label: "Company Requests", href: "/admin/company-requests", icon: Building2 },
+      { label: "User Requests", href: "/admin/user-requests", icon: Mail },
     ];
   }
   if (role === "staff") {
