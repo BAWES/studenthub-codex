@@ -320,3 +320,98 @@ export async function deleteCandidateExperience(
 
   return result;
 }
+
+// ---------------------------------------------------------------------------
+// getExperienceEntry — [experienceId] route wrapper
+// ---------------------------------------------------------------------------
+
+/**
+ * Get a single experience entry by ID (for the [experienceId] route).
+ * Delegates to getCandidateExperience for session/auth/logic.
+ */
+export async function getExperienceEntry(
+  experienceId: number,
+): Promise<ExperienceItem | null> {
+  const result = await getCandidateExperience(experienceId);
+
+  const validatedItem = experienceItemOutputSchema.nullable().safeParse(result);
+  if (!validatedItem.success) {
+    logOutputError("getExperienceEntry", validatedItem.error.issues);
+  }
+
+  return result;
+}
+
+// ---------------------------------------------------------------------------
+// updateExperienceEntry — [experienceId] route wrapper
+// ---------------------------------------------------------------------------
+
+/**
+ * Update an experience entry (for the [experienceId] edit route).
+ * Takes positional params and delegates to updateCandidateExperience.
+ */
+export async function updateExperienceEntry(
+  experienceId: number,
+  experience: string,
+  employer?: string,
+  startYear?: number,
+  endYear?: number,
+): Promise<ExperienceActionResult> {
+  const result = await updateCandidateExperience({
+    experienceId,
+    experience,
+    employer,
+    startYear,
+    endYear,
+  });
+
+  if (result.success) {
+    revalidatePath(`/candidate/experience/${experienceId}`);
+  }
+
+  return result;
+}
+
+// ---------------------------------------------------------------------------
+// deleteExperienceEntry — [experienceId] route wrapper
+// ---------------------------------------------------------------------------
+
+/**
+ * Delete an experience entry (for the [experienceId] route).
+ * Delegates to deleteCandidateExperience.
+ */
+export async function deleteExperienceEntry(
+  experienceId: number,
+): Promise<ExperienceActionResult> {
+  return deleteCandidateExperience(experienceId);
+}
+
+// ---------------------------------------------------------------------------
+// createExperience — new route wrapper
+// ---------------------------------------------------------------------------
+
+/**
+ * Create a new experience record (for the new route).
+ * Delegates to createCandidateExperience.
+ */
+export async function createExperience(
+  data: CreateExperienceInput,
+): Promise<ExperienceActionResult> {
+  const parsed = createExperienceSchema.safeParse(data);
+  if (!parsed.success) {
+    const errorResult: ExperienceActionResult = {
+      success: false,
+      error: parsed.error.issues[0]?.message ?? "Invalid experience data",
+    };
+    const validated = experienceActionResultOutputSchema.safeParse(errorResult);
+    if (!validated.success) logOutputError("createExperience", validated.error.issues);
+    return errorResult;
+  }
+
+  const dateError = validateDateRange(parsed.data.startYear, parsed.data.endYear);
+  if (dateError) {
+    return { success: false, error: dateError };
+  }
+
+  return createCandidateExperience(parsed.data);
+}

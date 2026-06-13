@@ -293,3 +293,66 @@ export async function deleteCandidateCertification(
 
   return result;
 }
+
+// ---------------------------------------------------------------------------
+// getCertification — [certificationId] route wrapper
+// ---------------------------------------------------------------------------
+
+/**
+ * Get a single certification record by ID (for the [certificationId] route).
+ * Delegates to getCandidateCertification.
+ */
+export async function getCertification(
+  certificationId: number,
+): Promise<CertificationItem | null> {
+  return getCandidateCertification(certificationId);
+}
+
+// ---------------------------------------------------------------------------
+// updateCertification — [certificationId] route wrapper
+// ---------------------------------------------------------------------------
+
+/**
+ * Update a certification record (for the [certificationId] edit route).
+ * Delegates to updateCandidateCertification.
+ */
+export async function updateCertification(
+  data: UpdateCertificationInput,
+): Promise<CertificationActionResult> {
+  const session = await requireRoleCapability("candidate", "candidate.profile.edit");
+  const result = await updateCandidateCertification(data);
+
+  if (result.success) {
+    revalidatePath("/candidate/certifications");
+  }
+
+  return result;
+}
+
+// ---------------------------------------------------------------------------
+// deleteCertification — [certificationId] route wrapper
+// ---------------------------------------------------------------------------
+
+/**
+ * Delete a certification record by ID (for the [certificationId] route).
+ * Delegates to deleteCandidateCertification.
+ */
+export async function deleteCertification(
+  certificationId: number,
+): Promise<CertificationActionResult> {
+  return deleteCandidateCertification(certificationId);
+}
+
+// ---------------------------------------------------------------------------
+// createCertification — new route wrapper
+// ---------------------------------------------------------------------------
+
+/**
+ * Create a new certification record (for the new route).
+ * Delegates to createCandidateCertification.
+ */
+export async function createCertification(
+  data: CreateCertificationInput,
+): Promise<CertificationActionResult> {
+  return createCandidateCertification(data);
+}
