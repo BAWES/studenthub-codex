@@ -1,6 +1,6 @@
 "use client";
 
-export default function PaymentDetailError({
+export default function AgentDetailError({
   error,
   reset,
 }: {
@@ -16,7 +16,7 @@ export default function PaymentDetailError({
             Something went wrong
           </h2>
           <p className="text-sm max-w-md text-center" style={{ color: "var(--muted)" }}>
-            {error.message ?? "An unexpected error occurred while loading the payment details."}
+            {error.message ?? "An unexpected error occurred while loading the agent details."}
           </p>
           <button
             onClick={reset}

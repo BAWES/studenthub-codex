@@ -1,6 +1,6 @@
 import { DetailPageSkeleton } from "@/modules/workspace/Skeletons";
 
-export default function PaymentDetailLoading() {
+export default function TagDetailLoading() {
   return (
     <div className="shell shellEmbedded">
       <section className="workspaceStage">
