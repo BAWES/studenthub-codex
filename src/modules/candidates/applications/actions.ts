@@ -371,6 +371,34 @@ export async function listMyApplications(
 }
 
 /**
+ * Get the current user's single application by ID.
+ * Extracts candidateId from session and filters by ownership.
+ */
+export async function getMyApplication(
+  applicationId: number,
+): Promise<ApplicationItem | null> {
+  const session = await requireRoleCapability("candidate", "candidate.read.own");
+  const candidateId = Number(session.id);
+
+  const row = await prisma.job_listing_application.findFirst({
+    where: { id: applicationId, candidateId },
+    include: applicationIncludes,
+  });
+
+  if (!row) return null;
+
+  const result = toItem(row as RawApplicationRow);
+
+  // Output validation
+  const outputParsed = applicationItemSchema.safeParse(result);
+  if (!outputParsed.success) {
+    logOutputError("getMyApplication", outputParsed.error.issues);
+  }
+
+  return result;
+}
+
+/**
  * Withdraw a job application — delegates to updateApplicationStatus.
  */
 export async function withdrawApplication(

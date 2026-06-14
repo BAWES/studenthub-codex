@@ -5,5 +5,6 @@
 
 export {
   listMyApplications,
+  getMyApplication,
   withdrawApplication,
 } from "@/modules/candidates/applications/actions";
