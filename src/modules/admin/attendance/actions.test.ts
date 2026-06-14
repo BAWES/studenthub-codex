@@ -9,14 +9,18 @@ const {
   mockRequireCapabilityAtt,
   mockRevalidatePathAtt,
   mockFindManyEmp,
+  mockFindUniqueEmp,
   mockListAttendance,
   mockCreateAttendance,
+  mockGetAttendance,
 } = vi.hoisted(() => ({
   mockRequireCapabilityAtt: vi.fn(),
   mockRevalidatePathAtt: vi.fn(),
   mockFindManyEmp: vi.fn(),
+  mockFindUniqueEmp: vi.fn(),
   mockListAttendance: vi.fn(),
   mockCreateAttendance: vi.fn(),
+  mockGetAttendance: vi.fn(),
 }));
 
 // ── Mock session ────────────────────────────────────────────
@@ -32,7 +36,10 @@ vi.mock("next/cache", () => ({
 // ── Mock Prisma ─────────────────────────────────────────────
 vi.mock("@/lib/prisma", () => ({
   prisma: {
-    employee: { findMany: mockFindManyEmp },
+    employee: {
+      findMany: mockFindManyEmp,
+      findUnique: mockFindUniqueEmp,
+    },
   },
 }));
 
@@ -40,9 +47,10 @@ vi.mock("@/lib/prisma", () => ({
 vi.mock("@/modules/attendance/actions", () => ({
   listAttendance: mockListAttendance,
   createAttendance: mockCreateAttendance,
+  getAttendance: mockGetAttendance,
 }));
 
-import { listAdminAttendance, createAdminAttendance, getEmployeeOptions } from "./actions";
+import { listAdminAttendance, createAdminAttendance, getEmployeeOptions, getAdminAttendance } from "./actions";
 
 describe("employeeOptionSchema (output validation)", () => {
   it("accepts a valid employee option", () => {
@@ -240,5 +248,79 @@ describe("createAdminAttendance — runtime", () => {
   it("re-validates /admin/attendance on success", async () => {
     await createAdminAttendance(VALID_INPUT);
     expect(mockRevalidatePathAtt).toHaveBeenCalledWith("/admin/attendance");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// getAdminAttendance — runtime
+// ---------------------------------------------------------------------------
+
+describe("getAdminAttendance — runtime", () => {
+  const MOCK_UUID = "attendance-uuid-123";
+  const MOCK_ATTENDANCE = {
+    id: 1,
+    employee_uuid: "emp-uuid-1",
+    date: "2026-06-15",
+    clock_in: "09:00",
+    clock_out: "17:00",
+    total_hours: 8,
+    status: 1,
+    note: "On time",
+    created_at: "2026-06-15T08:00:00.000Z",
+    updated_at: "2026-06-15T08:00:00.000Z",
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockRequireCapabilityAtt.mockResolvedValue(undefined);
+  });
+
+  it("returns attendance and employee name", async () => {
+    mockGetAttendance.mockResolvedValue(MOCK_ATTENDANCE);
+    mockFindUniqueEmp.mockResolvedValue(
+      { employee_uuid: "emp-uuid-1", employee_name: "Ahmed Al-Mutawa" },
+    );
+
+    const result = await getAdminAttendance(MOCK_UUID);
+    expect(result.attendance).toEqual(MOCK_ATTENDANCE);
+    expect(result.employee_name).toBe("Ahmed Al-Mutawa");
+  });
+
+  it("calls requireCapability with admin.read", async () => {
+    mockGetAttendance.mockResolvedValue(null);
+
+    await getAdminAttendance(MOCK_UUID);
+    expect(mockRequireCapabilityAtt).toHaveBeenCalledWith("admin.read");
+  });
+
+  it("returns null attendance when getAttendance returns null", async () => {
+    mockGetAttendance.mockResolvedValue(null);
+
+    const result = await getAdminAttendance(MOCK_UUID);
+    expect(result.attendance).toBeNull();
+    expect(result.employee_name).toBeNull();
+  });
+
+  it("returns null employee_name when attendance has no employee_uuid", async () => {
+    mockGetAttendance.mockResolvedValue({ ...MOCK_ATTENDANCE, employee_uuid: "" });
+
+    const result = await getAdminAttendance(MOCK_UUID);
+    expect(result.attendance).toBeDefined();
+    expect(result.employee_name).toBeNull();
+  });
+
+  it("returns null employee_name when employee not found", async () => {
+    mockGetAttendance.mockResolvedValue(MOCK_ATTENDANCE);
+    mockFindUniqueEmp.mockResolvedValue(null);
+
+    const result = await getAdminAttendance(MOCK_UUID);
+    expect(result.employee_name).toBeNull();
+  });
+
+  it("calls getAttendance with the provided UUID", async () => {
+    mockGetAttendance.mockResolvedValue(null);
+
+    await getAdminAttendance(MOCK_UUID);
+    expect(mockGetAttendance).toHaveBeenCalledWith({ uuid: MOCK_UUID });
   });
 });
