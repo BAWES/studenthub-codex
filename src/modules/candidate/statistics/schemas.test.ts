@@ -34,9 +34,9 @@ describe("candidateDashboardStatsSchema", () => {
 
   it("accepts all-zero values", () => {
     const zero = validStats();
-    for (const key of Object.keys(zero)) {
-      if (typeof (zero as Record<string, unknown>)[key] === "number") {
-        (zero as Record<string, number>)[key] = 0;
+    for (const key of Object.keys(zero) as Array<keyof typeof zero>) {
+      if (typeof zero[key] === "number") {
+        (zero as any)[key] = 0;
       }
     }
     const r = candidateDashboardStatsSchema.safeParse(zero);
