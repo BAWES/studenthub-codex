@@ -30,6 +30,16 @@ describe("candidateDashboardStatsSchema", () => {
     expect(r.success).toBe(true);
   });
 
+  it("accepts all-zero values", () => {
+    const zero = validStats();
+    for (const key of Object.keys(zero) as Array<keyof typeof zero>) {
+      if (typeof zero[key] === "number") {
+        (zero as any)[key] = 0;
+      }
+    }
+    const r = candidateDashboardStatsSchema.safeParse(zero);
+    expect(r.success).toBe(true);
+  });
   it("rejects negative totalHours", () => {
     expect(
       candidateDashboardStatsSchema.safeParse({ ...valid, totalHours: -1 }).success
