@@ -7,7 +7,6 @@ export {
   listCompanyContactsRows,
 } from "./actions";
 export {
-  getCompanyWorkspace,
   getCompanyHomeData,
   getStaffWorkspace,
   revalidateWorkspace,
