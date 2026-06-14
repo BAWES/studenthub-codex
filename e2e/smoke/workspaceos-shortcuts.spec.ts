@@ -61,6 +61,20 @@ function assertNoReactErrors(errors: string[]) {
   expect(bad).toEqual([]);
 }
 
+/** Focus the page body so keyboard events reach the global handler. */
+async function focusPage(page: any) {
+  await page.locator("body").click({ position: { x: 10, y: 10 } });
+  await page.waitForTimeout(100);
+}
+
+/** Navigate and wait for full idle/networking settle. */
+async function nav(page: any, url: string) {
+  await page.goto(url);
+  await page.waitForLoadState("networkidle");
+  await page.locator("body").waitFor({ state: "visible", timeout: 15000 });
+  await focusPage(page);
+}
+
 /** Open the command palette by pressing Cmd+K, wait for it to appear. */
 async function openCommandPalette(page: any) {
   await page.keyboard.press("Meta+k");
@@ -71,6 +85,16 @@ async function openCommandPalette(page: any) {
 async function closeCommandPalette(page: any) {
   await page.keyboard.press("Escape");
   // Caller waits for palette selector to not be visible
+}
+
+/** Press a two-key chord (G then letter) and wait for URL to contain substring. */
+async function gChord(page: any, letter: string, expectedUrl: string) {
+  await focusPage(page);
+  await page.keyboard.press("g");
+  await page.waitForTimeout(300); // Allow the G-chord timeout window
+  await page.keyboard.press(letter);
+  await page.waitForURL(`**${expectedUrl}*`, { timeout: 8000 });
+  expect(page.url()).toContain(expectedUrl);
 }
 
 // ── Suite ───────────────────────────────────────────────────────────────────
@@ -94,9 +118,7 @@ test.describe("WorkspaceOS — command palette & keyboard shortcuts", () => {
     test("1a. Cmd+K opens the command palette on admin page", async () => {
       const ctx = await authContext(admin);
 
-      await ctx.page.goto("/admin");
-      await ctx.page.waitForLoadState("load");
-      await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
+      await nav(ctx.page, "/admin");
 
       // Press Cmd+K to open palette
       await openCommandPalette(ctx.page);
@@ -114,9 +136,7 @@ test.describe("WorkspaceOS — command palette & keyboard shortcuts", () => {
     test("1b. Escape closes the command palette", async () => {
       const ctx = await authContext(admin);
 
-      await ctx.page.goto("/admin");
-      await ctx.page.waitForLoadState("load");
-      await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
+      await nav(ctx.page, "/admin");
 
       // Open palette
       await openCommandPalette(ctx.page);
@@ -138,9 +158,7 @@ test.describe("WorkspaceOS — command palette & keyboard shortcuts", () => {
     test("1c. Cmd+K works on staff page", async () => {
       const ctx = await authContext(staff);
 
-      await ctx.page.goto("/staff");
-      await ctx.page.waitForLoadState("load");
-      await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
+      await nav(ctx.page, "/staff");
 
       await openCommandPalette(ctx.page);
 
@@ -161,21 +179,10 @@ test.describe("WorkspaceOS — command palette & keyboard shortcuts", () => {
     test("2a. G then R navigates staff to /staff/requests", async () => {
       const ctx = await authContext(staff);
 
-      await ctx.page.goto("/staff");
-      await ctx.page.waitForLoadState("load");
-      await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
+      await nav(ctx.page, "/staff");
 
       // Press G then R — "go to requests"
-      await ctx.page.keyboard.press("g");
-      await ctx.page.waitForTimeout(100);
-      await ctx.page.keyboard.press("r");
-      await ctx.page.waitForURL("**/staff/requests*", { timeout: 5000 });
-
-      // Should be on /staff/requests or the page is loading it
-      const currentUrl = ctx.page.url();
-      console.log(`G+R navigation URL: ${currentUrl}`);
-      // We expect the URL to contain /staff/requests
-      expect(currentUrl.includes("/staff/requests")).toBe(true);
+      await gChord(ctx.page, "r", "/staff/requests");
 
       await ctx.close();
     });
@@ -183,40 +190,21 @@ test.describe("WorkspaceOS — command palette & keyboard shortcuts", () => {
     test("2b. G then C navigates company user to /company/companies", async () => {
       const ctx = await authContext(company);
 
-      await ctx.page.goto("/company");
-      await ctx.page.waitForLoadState("load");
-      await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
+      await nav(ctx.page, "/company");
 
       // Press G then C — "go to companies"
-      await ctx.page.keyboard.press("g");
-      await ctx.page.waitForTimeout(100);
-      await ctx.page.keyboard.press("c");
-      await ctx.page.waitForURL("**/company/companies*", { timeout: 5000 });
-
-      const currentUrl = ctx.page.url();
-      console.log(`G+C navigation URL: ${currentUrl}`);
-      expect(currentUrl.includes("/company/companies")).toBe(true);
+      await gChord(ctx.page, "c", "/company/companies");
 
       await ctx.close();
     });
 
-    test("2c. G then O navigates to candidate hub", async () => {
+    test("2c. G then H stays on candidate hub", async () => {
       const ctx = await authContext(candidate);
 
-      await ctx.page.goto("/candidate");
-      await ctx.page.waitForLoadState("load");
-      await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
+      await nav(ctx.page, "/candidate");
 
       // Press G then H — "go to hub" (staying on candidate hub)
-      await ctx.page.keyboard.press("g");
-      await ctx.page.waitForTimeout(100);
-      await ctx.page.keyboard.press("h");
-      await ctx.page.waitForURL("**/candidate*", { timeout: 5000 });
-
-      // Should still be on candidate hub
-      const currentUrl = ctx.page.url();
-      console.log(`G+H navigation URL: ${currentUrl}`);
-      expect(currentUrl.includes("/candidate")).toBe(true);
+      await gChord(ctx.page, "h", "/candidate");
 
       await ctx.close();
     });
