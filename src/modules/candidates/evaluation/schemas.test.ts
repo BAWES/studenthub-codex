@@ -8,154 +8,202 @@ import {
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
-// evalQuestionItemSchema
+// Output schema validation tests — candidates/evaluation
 // ---------------------------------------------------------------------------
 
 describe("evalQuestionItemSchema", () => {
-  const validItem = () => ({
-    ceq_uuid: "q-001",
-    question: "Rate communication skills",
-  });
+  const validItem = {
+    ceq_uuid: "ceq-001",
+    question: "How was the candidate's communication?",
+  };
 
   it("accepts a valid question item", () => {
-    const r = evalQuestionItemSchema.safeParse(validItem());
-    expect(r.success).toBe(true);
+    expect(evalQuestionItemSchema.safeParse(validItem).success).toBe(true);
   });
 
-  it("accepts nullable question", () => {
-    const r = evalQuestionItemSchema.safeParse({ ...validItem(), question: null });
-    expect(r.success).toBe(true);
+  it("accepts null for question", () => {
+    expect(
+      evalQuestionItemSchema.safeParse({
+        ...validItem,
+        question: null,
+      }).success,
+    ).toBe(true);
   });
 
   it("rejects missing ceq_uuid", () => {
-    const { ceq_uuid: _, ...rest } = validItem();
+    const { ceq_uuid: _, ...rest } = validItem;
     expect(evalQuestionItemSchema.safeParse(rest).success).toBe(false);
   });
-});
 
-// ---------------------------------------------------------------------------
-// evaluationListItemSchema
-// ---------------------------------------------------------------------------
+  it("rejects wrong type for ceq_uuid", () => {
+    expect(
+      evalQuestionItemSchema.safeParse({
+        ...validItem,
+        ceq_uuid: 123,
+      }).success,
+    ).toBe(false);
+  });
+});
 
 describe("evaluationListItemSchema", () => {
-  const validItem = () => ({
+  const validItem = {
     can_eval_uuid: "eval-001",
-    candidate_id: 123,
-    dept_id: 456,
-    start_date: "2026-01-01",
-    end_date: "2026-06-01",
-    staff_id: 789,
-    created_at: new Date("2026-01-01"),
+    candidate_id: 42,
+    dept_id: 5,
+    start_date: "2026-06-01",
+    end_date: "2026-06-30",
+    staff_id: 99,
+    created_at: new Date("2026-06-14T10:00:00"),
+  };
+
+  it("accepts a valid list item", () => {
+    expect(evaluationListItemSchema.safeParse(validItem).success).toBe(true);
   });
 
-  it("accepts a valid evaluation list item", () => {
-    const r = evaluationListItemSchema.safeParse(validItem());
-    expect(r.success).toBe(true);
-  });
-
-  it("accepts nullable fields as null", () => {
-    const r = evaluationListItemSchema.safeParse({
-      ...validItem(),
-      candidate_id: null,
-      dept_id: null,
-      start_date: null,
-      end_date: null,
-      staff_id: null,
-      created_at: null,
-    });
-    expect(r.success).toBe(true);
+  it("accepts null for nullable fields", () => {
+    expect(
+      evaluationListItemSchema.safeParse({
+        ...validItem,
+        candidate_id: null,
+        dept_id: null,
+        start_date: null,
+        end_date: null,
+        staff_id: null,
+        created_at: null,
+      }).success,
+    ).toBe(true);
   });
 
   it("rejects missing can_eval_uuid", () => {
-    const { can_eval_uuid: _, ...rest } = validItem();
+    const { can_eval_uuid: _, ...rest } = validItem;
     expect(evaluationListItemSchema.safeParse(rest).success).toBe(false);
   });
-});
 
-// ---------------------------------------------------------------------------
-// evaluationAnswerSchema
-// ---------------------------------------------------------------------------
+  it("rejects wrong type for candidate_id", () => {
+    expect(
+      evaluationListItemSchema.safeParse({
+        ...validItem,
+        candidate_id: "42",
+      }).success,
+    ).toBe(false);
+  });
+
+  it("rejects string for created_at (not coerced)", () => {
+    expect(
+      evaluationListItemSchema.safeParse({
+        ...validItem,
+        created_at: "2026-06-14T10:00:00",
+      }).success,
+    ).toBe(false);
+  });
+});
 
 describe("evaluationAnswerSchema", () => {
-  const validItem = () => ({
-    ceq_uuid: "q-001",
-    question: "Skill rating",
-    answer: "Good",
-    rating: 4,
-  });
+  const validAnswer = {
+    ceq_uuid: "ceq-001",
+    question: "How was communication?",
+    answer: "Excellent",
+    rating: 5,
+  };
 
   it("accepts a valid answer", () => {
-    const r = evaluationAnswerSchema.safeParse(validItem());
-    expect(r.success).toBe(true);
+    expect(evaluationAnswerSchema.safeParse(validAnswer).success).toBe(true);
   });
 
-  it("accepts all-null fields", () => {
-    const r = evaluationAnswerSchema.safeParse({
-      ceq_uuid: null, question: null, answer: null, rating: null,
-    });
-    expect(r.success).toBe(true);
+  it("accepts null for all nullable fields", () => {
+    expect(
+      evaluationAnswerSchema.safeParse({
+        ceq_uuid: null,
+        question: null,
+        answer: null,
+        rating: null,
+      }).success,
+    ).toBe(true);
   });
 
-  it("rejects non-integer rating", () => {
-    const r = evaluationAnswerSchema.safeParse({ ...validItem(), rating: "high" });
-    expect(r.success).toBe(false);
+  it("rejects wrong type for rating", () => {
+    expect(
+      evaluationAnswerSchema.safeParse({
+        ...validAnswer,
+        rating: "5",
+      }).success,
+    ).toBe(false);
   });
 });
-
-// ---------------------------------------------------------------------------
-// evaluationDetailSchema (extended)
-// ---------------------------------------------------------------------------
 
 describe("evaluationDetailSchema", () => {
-  it("accepts detail with answers", () => {
-    const r = evaluationDetailSchema.safeParse({
-      can_eval_uuid: "eval-001",
-      candidate_id: 123,
-      dept_id: 456,
-      start_date: null,
-      end_date: null,
-      staff_id: null,
-      created_at: new Date(),
-      answers: [{ ceq_uuid: "q-1", question: "Q", answer: "A", rating: 5 }],
-    });
-    expect(r.success).toBe(true);
+  const validDetail = {
+    can_eval_uuid: "eval-001",
+    candidate_id: 42,
+    dept_id: 5,
+    start_date: "2026-06-01",
+    end_date: null,
+    staff_id: null,
+    created_at: null,
+    answers: [
+      {
+        ceq_uuid: "ceq-001",
+        question: "How was communication?",
+        answer: "Excellent",
+        rating: 5,
+      },
+    ],
+  };
+
+  it("accepts a valid detail with answers", () => {
+    expect(evaluationDetailSchema.safeParse(validDetail).success).toBe(true);
   });
 
-  it("accepts detail without answers", () => {
-    const r = evaluationDetailSchema.safeParse({
-      can_eval_uuid: "eval-001",
-      candidate_id: null,
-      dept_id: null,
-      start_date: null,
-      end_date: null,
-      staff_id: null,
-      created_at: null,
-    });
-    expect(r.success).toBe(true);
+  it("accepts a detail without answers", () => {
+    expect(
+      evaluationDetailSchema.safeParse({
+        ...validDetail,
+        answers: undefined,
+      }).success,
+    ).toBe(true);
+  });
+
+  it("accepts empty answers array", () => {
+    expect(
+      evaluationDetailSchema.safeParse({
+        ...validDetail,
+        answers: [],
+      }).success,
+    ).toBe(true);
+  });
+
+  it("rejects invalid answer in answers array", () => {
+    expect(
+      evaluationDetailSchema.safeParse({
+        ...validDetail,
+        answers: [{ ceq_uuid: 123 }],
+      }).success,
+    ).toBe(false);
   });
 });
 
-// ---------------------------------------------------------------------------
-// createEvaluationResultSchema
-// ---------------------------------------------------------------------------
-
 describe("createEvaluationResultSchema", () => {
-  it("accepts valid result", () => {
-    const r = createEvaluationResultSchema.safeParse({
-      can_eval_uuid: "eval-new",
-      operation: "created",
-      message: "Evaluation created",
-    });
-    expect(r.success).toBe(true);
+  const validResult = {
+    can_eval_uuid: "eval-001",
+    operation: "created",
+    message: "Evaluation created successfully",
+  };
+
+  it("accepts a valid result", () => {
+    expect(createEvaluationResultSchema.safeParse(validResult).success).toBe(true);
   });
 
   it("rejects missing can_eval_uuid", () => {
-    const r = createEvaluationResultSchema.safeParse({ operation: "created", message: "OK" });
-    expect(r.success).toBe(false);
+    const { can_eval_uuid: _, ...rest } = validResult;
+    expect(createEvaluationResultSchema.safeParse(rest).success).toBe(false);
   });
 
-  it("rejects missing operation", () => {
-    const r = createEvaluationResultSchema.safeParse({ can_eval_uuid: "e-1", message: "OK" });
-    expect(r.success).toBe(false);
+  it("rejects wrong type for operation", () => {
+    expect(
+      createEvaluationResultSchema.safeParse({
+        ...validResult,
+        operation: 123,
+      }).success,
+    ).toBe(false);
   });
 });
