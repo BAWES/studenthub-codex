@@ -533,6 +533,41 @@ export type ListCompanyNotesInput = z.input<typeof listCompanyNotesSchema>;
 export type CreateCompanyNoteInput = z.input<typeof createCompanyNoteSchema>;
 export type UpdateCompanyNoteInput = z.input<typeof updateCompanyNoteSchema>;
 
+// ---------------------------------------------------------------------------
+// Company Notes — output validation schemas
+// ---------------------------------------------------------------------------
+
+export const companyNoteListItemSchema = z.object({
+  note_uuid: z.string(),
+  note_text: z.string().nullable(),
+  note_type: z.string().nullable(),
+  company_id: z.number().int().nullable(),
+  created_by: z.number().int().nullable(),
+  created_at: z.string().nullable(),
+  updated_at: z.string().nullable(),
+  company_name: z.string().nullable(),
+});
+
+export const companyNoteDetailSchema = z.object({
+  note_uuid: z.string(),
+  company_id: z.number().int().nullable(),
+  note_text: z.string().nullable(),
+  note_type: z.string().nullable(),
+  created_by: z.number().int().nullable(),
+  updated_by: z.number().int().nullable(),
+  created_at: z.string().nullable(),
+  updated_at: z.string().nullable(),
+  company_name: z.string().nullable(),
+});
+
+export const listCompanyNotesResultSchema = z.object({
+  notes: z.array(companyNoteListItemSchema),
+  total: z.number(),
+  page: z.number(),
+  limit: z.number(),
+  totalPages: z.number(),
+});
+
 export type CompanyNoteListItem = {
   note_uuid: string;
   note_text: string | null;
@@ -724,6 +759,49 @@ export const companyRequestActionResultSchema = z.union([
   z.object({ success: z.literal(true) }),
   z.object({ error: z.string() }),
 ]);
+
+// ---------------------------------------------------------------------------
+// Company Requests — output validation schemas
+// ---------------------------------------------------------------------------
+
+export const companyRequestListItemSchema = z.object({
+  request_uuid: z.string(),
+  company_id: z.number().int().nullable(),
+  request_position_title: z.string().nullable(),
+  request_compensation: z.string().nullable(),
+  request_number_of_employees: z.number().int().nullable(),
+  request_location: z.string().nullable(),
+  request_status: z.string().nullable(),
+  request_created_datetime: z.date(),
+  request_updated_datetime: z.date(),
+  company_name: z.string().nullable(),
+});
+
+export const companyRequestDetailSchema = z.object({
+  request_uuid: z.string(),
+  company_id: z.number().int().nullable(),
+  contact_uuid: z.string().nullable(),
+  staff_id: z.number().int().nullable(),
+  request_position_title: z.string().nullable(),
+  request_job_description: z.string(),
+  request_compensation: z.string(),
+  request_number_of_employees: z.number().int().nullable(),
+  request_location: z.string().nullable(),
+  request_additional_info: z.string().nullable(),
+  request_status: z.string().nullable(),
+  request_feedback: z.string().nullable(),
+  request_created_datetime: z.date(),
+  request_updated_datetime: z.date(),
+  company_name: z.string().nullable(),
+});
+
+export const listCompanyRequestsResultSchema = z.object({
+  requests: z.array(companyRequestListItemSchema),
+  total: z.number(),
+  page: z.number(),
+  limit: z.number(),
+  totalPages: z.number(),
+});
 
 // ---------------------------------------------------------------------------
 // Company Requests — types

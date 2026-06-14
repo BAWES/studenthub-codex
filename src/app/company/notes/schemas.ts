@@ -11,6 +11,9 @@ export {
   createCompanyNoteSchema,
   updateCompanyNoteSchema,
   deleteCompanyNoteSchema,
+  companyNoteListItemSchema,
+  companyNoteDetailSchema,
+  listCompanyNotesResultSchema,
 } from "@/modules/company/schemas";
 
 export type {
