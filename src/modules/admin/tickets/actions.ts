@@ -79,18 +79,29 @@ export async function getTicket(
       staff: { select: { staff_name: true } },
     },
   });
-  if (!row) return { ticket: null };
-  return {
-    ticket: {
-      ticket_uuid: row.ticket_uuid, candidate_id: row.candidate_id, staff_id: row.staff_id,
-      ticket_detail: row.ticket_detail, ticket_status: row.ticket_status,
-      ticket_started_at: row.ticket_started_at, ticket_completed_at: row.ticket_completed_at,
-      response_time: row.response_time, resolution_time: row.resolution_time,
-      created_at: row.created_at, updated_at: row.updated_at,
-      candidate_name: row.candidate?.candidate_name ?? null,
-      staff_name: row.staff?.staff_name ?? null,
-    },
+  if (!row) {
+    const result = { ticket: null };
+    const outputParsed = getTicketResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error("[admin/tickets] getTicket output failed:", outputParsed.error.issues);
+    }
+    return result;
+  }
+  const detail: TicketDetail = {
+    ticket_uuid: row.ticket_uuid, candidate_id: row.candidate_id, staff_id: row.staff_id,
+    ticket_detail: row.ticket_detail, ticket_status: row.ticket_status,
+    ticket_started_at: row.ticket_started_at, ticket_completed_at: row.ticket_completed_at,
+    response_time: row.response_time, resolution_time: row.resolution_time,
+    created_at: row.created_at, updated_at: row.updated_at,
+    candidate_name: row.candidate?.candidate_name ?? null,
+    staff_name: row.staff?.staff_name ?? null,
   };
+  const result = { ticket: detail };
+  const outputParsed = getTicketResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error("[admin/tickets] getTicket output failed:", outputParsed.error.issues);
+  }
+  return result;
 }
 
 export async function createTicket(
@@ -98,7 +109,14 @@ export async function createTicket(
 ): Promise<{ operation: string; message: string }> {
   await requireCapability("admin.write");
   const parsed = createTicketSchema.safeParse({ detail, candidateId });
-  if (!parsed.success) return { operation: "error", message: parsed.error.issues[0]?.message ?? "Invalid parameters" };
+  if (!parsed.success) {
+    const result = { operation: "error", message: parsed.error.issues[0]?.message ?? "Invalid parameters" };
+    const outputParsed = ticketActionResponseSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error("[admin/tickets] createTicket output failed:", outputParsed.error.issues);
+    }
+    return result;
+  }
   try {
     await prisma.ticket.create({
       data: {
@@ -109,9 +127,19 @@ export async function createTicket(
       },
     });
     revalidatePath("/admin/tickets");
-    return { operation: "success", message: "Ticket created successfully" };
+    const result = { operation: "success", message: "Ticket created successfully" };
+    const outputParsed = ticketActionResponseSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error("[admin/tickets] createTicket output failed:", outputParsed.error.issues);
+    }
+    return result;
   } catch (_e) {
-    return { operation: "error", message: "We've faced a problem creating the ticket, please contact us for assistance." };
+    const result = { operation: "error", message: "We've faced a problem creating the ticket, please contact us for assistance." };
+    const outputParsed = ticketActionResponseSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error("[admin/tickets] createTicket output failed:", outputParsed.error.issues);
+    }
+    return result;
   }
 }
 
