@@ -1,13 +1,11 @@
-"use server";
-
 export {
   addCompanyContact,
   removeCompanyContact,
-} from "./actions/contacts";
+} from "./contacts";
 
 export {
   addCompanyStore,
   removeCompanyStore,
-} from "./actions/stores";
+} from "./stores";
 
-export * from "./actions/company";
+export * from "./company";
