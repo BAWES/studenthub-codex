@@ -163,6 +163,7 @@ describe("workspaceListItemSchema", () => {
     id: 1,
     title: "Acme Corp",
     subtitle: "Active",
+    meta: "extra-data",
   };
 
   it("accepts a valid list item", () => {
