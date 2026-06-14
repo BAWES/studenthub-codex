@@ -21,6 +21,7 @@ export default async function CompanyNoteDetailPage({ params }: { params: Promis
       session={session}
       eyebrow="Company / Note"
       title={note.note_type ?? "Note"}
+      metrics={[]}
     >
       <DetailSection
         title="Note Details"
