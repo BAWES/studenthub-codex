@@ -15,13 +15,13 @@ import {
 describe("fixedPriceDetailSchema", () => {
   const valid = {
     type: "Fixed Price" as const,
-    fp_contract_uuid: "550e8400-e29b-41d4-a716-446655440000",
+    fp_contract_uuid: "uuid-fp-1",
     candidate_total: 5000,
     company_total: 6000,
     completion_percentage: 75,
   };
 
-  it("accepts valid fixed-price detail", () => {
+  it("accepts a valid fixed price detail", () => {
     expect(fixedPriceDetailSchema.safeParse(valid).success).toBe(true);
   });
 
@@ -42,15 +42,25 @@ describe("fixedPriceDetailSchema", () => {
     expect(fixedPriceDetailSchema.safeParse(rest).success).toBe(false);
   });
 
+  it("rejects missing candidate_total", () => {
+    const { candidate_total: _, ...rest } = valid;
+    expect(fixedPriceDetailSchema.safeParse(rest).success).toBe(false);
+  });
+
+  it("rejects missing company_total", () => {
+    const { company_total: _, ...rest } = valid;
+    expect(fixedPriceDetailSchema.safeParse(rest).success).toBe(false);
+  });
+
   it("rejects wrong type for candidate_total", () => {
     expect(
-      fixedPriceDetailSchema.safeParse({ ...valid, candidate_total: "not-a-number" }).success,
+      fixedPriceDetailSchema.safeParse({ ...valid, candidate_total: "5000" }).success,
     ).toBe(false);
   });
 
-  it("rejects wrong type for company_total", () => {
+  it("rejects wrong type for completion_percentage", () => {
     expect(
-      fixedPriceDetailSchema.safeParse({ ...valid, company_total: "not-a-number" }).success,
+      fixedPriceDetailSchema.safeParse({ ...valid, completion_percentage: "75" }).success,
     ).toBe(false);
   });
 });
@@ -61,12 +71,12 @@ describe("fixedPriceDetailSchema", () => {
 describe("hourlyDetailSchema", () => {
   const valid = {
     type: "Hourly" as const,
-    h_contract_uuid: "550e8400-e29b-41d4-a716-446655440000",
-    candidate_hourly_rate: 15.5,
-    company_hourly_rate: 25.0,
+    h_contract_uuid: "uuid-h-1",
+    candidate_hourly_rate: 15,
+    company_hourly_rate: 25,
   };
 
-  it("accepts valid hourly detail", () => {
+  it("accepts a valid hourly detail", () => {
     expect(hourlyDetailSchema.safeParse(valid).success).toBe(true);
   });
 
@@ -81,15 +91,19 @@ describe("hourlyDetailSchema", () => {
     expect(hourlyDetailSchema.safeParse(rest).success).toBe(false);
   });
 
-  it("rejects wrong type for candidate_hourly_rate", () => {
-    expect(
-      hourlyDetailSchema.safeParse({ ...valid, candidate_hourly_rate: "high" }).success,
-    ).toBe(false);
+  it("rejects missing candidate_hourly_rate", () => {
+    const { candidate_hourly_rate: _, ...rest } = valid;
+    expect(hourlyDetailSchema.safeParse(rest).success).toBe(false);
   });
 
-  it("rejects wrong type for company_hourly_rate", () => {
+  it("rejects missing company_hourly_rate", () => {
+    const { company_hourly_rate: _, ...rest } = valid;
+    expect(hourlyDetailSchema.safeParse(rest).success).toBe(false);
+  });
+
+  it("rejects wrong type for candidate_hourly_rate", () => {
     expect(
-      hourlyDetailSchema.safeParse({ ...valid, company_hourly_rate: "high" }).success,
+      hourlyDetailSchema.safeParse({ ...valid, candidate_hourly_rate: "15" }).success,
     ).toBe(false);
   });
 });
@@ -100,13 +114,13 @@ describe("hourlyDetailSchema", () => {
 describe("monthlySalaryDetailSchema", () => {
   const valid = {
     type: "Monthly Salary" as const,
-    ms_contract_uuid: "550e8400-e29b-41d4-a716-446655440000",
-    candidate_total: 1200,
-    company_total: 1500,
-    salary_day: 1,
+    ms_contract_uuid: "uuid-ms-1",
+    candidate_total: 3000,
+    company_total: 3500,
+    salary_day: 15,
   };
 
-  it("accepts valid monthly salary detail", () => {
+  it("accepts a valid monthly salary detail", () => {
     expect(monthlySalaryDetailSchema.safeParse(valid).success).toBe(true);
   });
 
@@ -127,22 +141,38 @@ describe("monthlySalaryDetailSchema", () => {
     expect(monthlySalaryDetailSchema.safeParse(rest).success).toBe(false);
   });
 
+  it("rejects missing candidate_total", () => {
+    const { candidate_total: _, ...rest } = valid;
+    expect(monthlySalaryDetailSchema.safeParse(rest).success).toBe(false);
+  });
+
+  it("rejects missing company_total", () => {
+    const { company_total: _, ...rest } = valid;
+    expect(monthlySalaryDetailSchema.safeParse(rest).success).toBe(false);
+  });
+
   it("rejects wrong type for candidate_total", () => {
     expect(
-      monthlySalaryDetailSchema.safeParse({ ...valid, candidate_total: "high" }).success,
+      monthlySalaryDetailSchema.safeParse({ ...valid, candidate_total: "3000" }).success,
+    ).toBe(false);
+  });
+
+  it("rejects wrong type for salary_day", () => {
+    expect(
+      monthlySalaryDetailSchema.safeParse({ ...valid, salary_day: "15" }).success,
     ).toBe(false);
   });
 });
 
 // ---------------------------------------------------------------------------
-// contractRelatedDetailSchema (discriminated union)
+// contractRelatedDetailSchema  (discriminated union)
 // ---------------------------------------------------------------------------
 describe("contractRelatedDetailSchema", () => {
-  it("accepts fixed price detail", () => {
+  it("accepts Fixed Price detail", () => {
     expect(
       contractRelatedDetailSchema.safeParse({
         type: "Fixed Price",
-        fp_contract_uuid: "uuid-1",
+        fp_contract_uuid: "uuid-fp-1",
         candidate_total: 5000,
         company_total: 6000,
         completion_percentage: null,
@@ -150,24 +180,24 @@ describe("contractRelatedDetailSchema", () => {
     ).toBe(true);
   });
 
-  it("accepts hourly detail", () => {
+  it("accepts Hourly detail", () => {
     expect(
       contractRelatedDetailSchema.safeParse({
         type: "Hourly",
-        h_contract_uuid: "uuid-1",
-        candidate_hourly_rate: 15.5,
-        company_hourly_rate: 25.0,
+        h_contract_uuid: "uuid-h-1",
+        candidate_hourly_rate: 15,
+        company_hourly_rate: 25,
       }).success,
     ).toBe(true);
   });
 
-  it("accepts monthly salary detail", () => {
+  it("accepts Monthly Salary detail", () => {
     expect(
       contractRelatedDetailSchema.safeParse({
         type: "Monthly Salary",
-        ms_contract_uuid: "uuid-1",
-        candidate_total: 1200,
-        company_total: 1500,
+        ms_contract_uuid: "uuid-ms-1",
+        candidate_total: 3000,
+        company_total: 3500,
         salary_day: null,
       }).success,
     ).toBe(true);
@@ -175,17 +205,12 @@ describe("contractRelatedDetailSchema", () => {
 
   it("rejects unknown type", () => {
     expect(
-      contractRelatedDetailSchema.safeParse({
-        type: "Unknown",
-        fp_contract_uuid: "uuid-1",
-      }).success,
+      contractRelatedDetailSchema.safeParse({ type: "Unknown" }).success,
     ).toBe(false);
   });
 
-  it("rejects non-object", () => {
-    expect(contractRelatedDetailSchema.safeParse(null).success).toBe(false);
-    expect(contractRelatedDetailSchema.safeParse(undefined).success).toBe(false);
-    expect(contractRelatedDetailSchema.safeParse("string").success).toBe(false);
+  it("rejects empty object", () => {
+    expect(contractRelatedDetailSchema.safeParse({}).success).toBe(false);
   });
 });
 
@@ -194,22 +219,22 @@ describe("contractRelatedDetailSchema", () => {
 // ---------------------------------------------------------------------------
 describe("contractListItemSchema", () => {
   const valid = {
-    contract_uuid: "550e8400-e29b-41d4-a716-446655440000",
+    contract_uuid: "uuid-contract-1",
     candidate_id: 42,
-    company_id: 7,
+    company_id: 10,
     type: "Hourly",
-    detail: "Some detail",
+    detail: "Standard hourly contract",
     start_date: "2026-01-01",
-    end_date: "2026-06-01",
-    transfer_cost: 500,
+    end_date: "2026-12-31",
+    transfer_cost: 100,
     currency_code: "KWD",
     status: 1,
     created_at: "2026-01-01T00:00:00Z",
     detailModel: {
       type: "Hourly" as const,
-      h_contract_uuid: "550e8400-e29b-41d4-a716-446655440000",
-      candidate_hourly_rate: 15.5,
-      company_hourly_rate: 25.0,
+      h_contract_uuid: "uuid-h-1",
+      candidate_hourly_rate: 15,
+      company_hourly_rate: 25,
     },
   };
 
@@ -217,22 +242,51 @@ describe("contractListItemSchema", () => {
     expect(contractListItemSchema.safeParse(valid).success).toBe(true);
   });
 
-  it("accepts nullable fields", () => {
+  it("accepts nullable candidate_id", () => {
     expect(
-      contractListItemSchema.safeParse({
-        contract_uuid: "550e8400-e29b-41d4-a716-446655440000",
-        candidate_id: null,
-        company_id: 7,
-        type: "Hourly",
-        detail: null,
-        start_date: null,
-        end_date: null,
-        transfer_cost: null,
-        currency_code: null,
-        status: 1,
-        created_at: null,
-        detailModel: null,
-      }).success,
+      contractListItemSchema.safeParse({ ...valid, candidate_id: null }).success,
+    ).toBe(true);
+  });
+
+  it("accepts nullable detail", () => {
+    expect(
+      contractListItemSchema.safeParse({ ...valid, detail: null }).success,
+    ).toBe(true);
+  });
+
+  it("accepts nullable start_date", () => {
+    expect(
+      contractListItemSchema.safeParse({ ...valid, start_date: null }).success,
+    ).toBe(true);
+  });
+
+  it("accepts nullable end_date", () => {
+    expect(
+      contractListItemSchema.safeParse({ ...valid, end_date: null }).success,
+    ).toBe(true);
+  });
+
+  it("accepts nullable transfer_cost", () => {
+    expect(
+      contractListItemSchema.safeParse({ ...valid, transfer_cost: null }).success,
+    ).toBe(true);
+  });
+
+  it("accepts nullable currency_code", () => {
+    expect(
+      contractListItemSchema.safeParse({ ...valid, currency_code: null }).success,
+    ).toBe(true);
+  });
+
+  it("accepts nullable created_at", () => {
+    expect(
+      contractListItemSchema.safeParse({ ...valid, created_at: null }).success,
+    ).toBe(true);
+  });
+
+  it("accepts nullable detailModel", () => {
+    expect(
+      contractListItemSchema.safeParse({ ...valid, detailModel: null }).success,
     ).toBe(true);
   });
 
@@ -246,6 +300,11 @@ describe("contractListItemSchema", () => {
     expect(contractListItemSchema.safeParse(rest).success).toBe(false);
   });
 
+  it("rejects missing type", () => {
+    const { type: _, ...rest } = valid;
+    expect(contractListItemSchema.safeParse(rest).success).toBe(false);
+  });
+
   it("rejects missing status", () => {
     const { status: _, ...rest } = valid;
     expect(contractListItemSchema.safeParse(rest).success).toBe(false);
@@ -253,7 +312,7 @@ describe("contractListItemSchema", () => {
 
   it("rejects wrong type for company_id", () => {
     expect(
-      contractListItemSchema.safeParse({ ...valid, company_id: "not-a-number" }).success,
+      contractListItemSchema.safeParse({ ...valid, company_id: "10" }).success,
     ).toBe(false);
   });
 
@@ -263,36 +322,47 @@ describe("contractListItemSchema", () => {
     ).toBe(false);
   });
 
-  it("rejects wrong type for transfer_cost", () => {
+  it("rejects wrong type for detailModel", () => {
     expect(
-      contractListItemSchema.safeParse({ ...valid, transfer_cost: "free" }).success,
+      contractListItemSchema.safeParse({ ...valid, detailModel: "not-a-model" }).success,
     ).toBe(false);
   });
 });
 
 // ---------------------------------------------------------------------------
-// contractDetailSchema (nullable union)
+// contractDetailSchema  (nullable)
 // ---------------------------------------------------------------------------
 describe("contractDetailSchema", () => {
-  it("accepts null", () => {
-    expect(contractDetailSchema.safeParse(null).success).toBe(true);
-  });
-
-  it("accepts a valid contract detail", () => {
+  it("accepts a valid Fixed Price detail", () => {
     expect(
       contractDetailSchema.safeParse({
-        type: "Monthly Salary",
-        ms_contract_uuid: "uuid-1",
-        candidate_total: 1200,
-        company_total: 1500,
-        salary_day: 15,
+        type: "Fixed Price",
+        fp_contract_uuid: "uuid-fp-1",
+        candidate_total: 5000,
+        company_total: 6000,
+        completion_percentage: null,
       }).success,
     ).toBe(true);
   });
 
-  it("rejects invalid type", () => {
+  it("accepts a valid Hourly detail", () => {
     expect(
-      contractDetailSchema.safeParse({ type: "Bogus", foo: "bar" }).success,
+      contractDetailSchema.safeParse({
+        type: "Hourly",
+        h_contract_uuid: "uuid-h-1",
+        candidate_hourly_rate: 15,
+        company_hourly_rate: 25,
+      }).success,
+    ).toBe(true);
+  });
+
+  it("accepts null (no contract detail)", () => {
+    expect(contractDetailSchema.safeParse(null).success).toBe(true);
+  });
+
+  it("rejects invalid detail", () => {
+    expect(
+      contractDetailSchema.safeParse({ type: "Bogus" }).success,
     ).toBe(false);
   });
 });
@@ -304,17 +374,17 @@ describe("listContractsResultSchema", () => {
   const valid = {
     contracts: [
       {
-        contract_uuid: "550e8400-e29b-41d4-a716-446655440000",
-        candidate_id: 42,
-        company_id: 7,
+        contract_uuid: "uuid-c-1",
+        candidate_id: null,
+        company_id: 10,
         type: "Hourly",
-        detail: "Some detail",
-        start_date: "2026-01-01",
-        end_date: "2026-06-01",
-        transfer_cost: 500,
-        currency_code: "KWD",
+        detail: null,
+        start_date: null,
+        end_date: null,
+        transfer_cost: null,
+        currency_code: null,
         status: 1,
-        created_at: "2026-01-01T00:00:00Z",
+        created_at: null,
         detailModel: null,
       },
     ],
@@ -347,6 +417,11 @@ describe("listContractsResultSchema", () => {
 
   it("rejects missing page", () => {
     const { page: _, ...rest } = valid;
+    expect(listContractsResultSchema.safeParse(rest).success).toBe(false);
+  });
+
+  it("rejects missing limit", () => {
+    const { limit: _, ...rest } = valid;
     expect(listContractsResultSchema.safeParse(rest).success).toBe(false);
   });
 
