@@ -1,5 +1,6 @@
 "use server";
 
+import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
@@ -9,10 +10,13 @@ import {
   createEmployeeSchema,
   listEmployeesResultSchema,
   actionResponseSchema,
+  getEmployeeByIdSchema,
+  employeeDetailSchema,
   type ListEmployeesInput,
   type ListEmployeesResult,
   type CreateEmployeeInput,
   type ActionResponse,
+  type GetEmployeeByIdInput,
 } from "./schemas";
 
 function generateUuid(): string {
@@ -138,4 +142,59 @@ export async function getDesignations(): Promise<{ uuid: string; nameEn: string 
     select: { designation_uuid: true, designation_name_en: true },
   });
   return rows.map((r) => ({ uuid: r.designation_uuid, nameEn: r.designation_name_en }));
+}
+
+// ---------------------------------------------------------------------------
+// getEmployeeById
+// ---------------------------------------------------------------------------
+
+/**
+ * Get a single employee by UUID with designation and department names.
+ * Requires `admin.read` capability.
+ */
+export async function getEmployeeById(
+  input: GetEmployeeByIdInput,
+): Promise<z.infer<typeof employeeDetailSchema> | null> {
+  await requireCapability("admin.read");
+
+  const parsed = getEmployeeByIdSchema.safeParse(input);
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid employee UUID");
+  }
+
+  const row = await prisma.employee.findUnique({
+    where: { employee_uuid: parsed.data.uuid },
+    include: {
+      designation: { select: { designation_name_en: true } },
+      department: { select: { department_name_en: true } },
+    },
+  });
+
+  if (!row) return null;
+
+  const result = {
+    employee_uuid: row.employee_uuid,
+    employee_name: row.employee_name,
+    employee_email: row.employee_email,
+    employee_phone: row.employee_phone,
+    employee_salary: row.employee_salary ? Number(row.employee_salary) : null,
+    employee_status: row.employee_status,
+    employee_created_at: row.employee_created_at,
+    employee_updated_at: row.employee_updated_at,
+    designation_uuid: row.designation_uuid,
+    department_uuid: row.department_uuid,
+    designation_name_en: row.designation?.designation_name_en ?? null,
+    department_name_en: row.department?.department_name_en ?? null,
+  };
+
+  // Validate output shape
+  const outputParsed = employeeDetailSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[admin/employees] getEmployeeById output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
