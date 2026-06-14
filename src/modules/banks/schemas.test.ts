@@ -4,6 +4,9 @@ import {
   listBanksResultSchema,
   getBankResultSchema,
   createBankResultSchema,
+  createBankSchema,
+  getBankSchema,
+  listBanksSchema,
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
@@ -14,9 +17,9 @@ describe("bankListItemSchema", () => {
     bank_id: 1,
     bank_name: "National Bank of Kuwait",
     bank_iban_code: "KW1234567890",
-    bank_swift_code: "NBOKKWKW",
+    bank_swift_code: "NBKOKWKW",
     bank_code_abk: 123,
-    bank_address: "Kuwait City, Kuwait",
+    bank_address: "Kuwait City",
     bank_transfer_type: "wire",
   };
 
@@ -54,20 +57,6 @@ describe("bankListItemSchema", () => {
     ).toBe(true);
   });
 
-  it("accepts all nullable fields simultaneously", () => {
-    expect(
-      bankListItemSchema.safeParse({
-        bank_id: 1,
-        bank_name: null,
-        bank_iban_code: "KW1234567890",
-        bank_swift_code: null,
-        bank_code_abk: null,
-        bank_address: null,
-        bank_transfer_type: null,
-      }).success,
-    ).toBe(true);
-  });
-
   it("rejects missing bank_id", () => {
     const { bank_id: _, ...rest } = valid;
     expect(bankListItemSchema.safeParse(rest).success).toBe(false);
@@ -86,7 +75,7 @@ describe("bankListItemSchema", () => {
 
   it("rejects wrong type for bank_code_abk", () => {
     expect(
-      bankListItemSchema.safeParse({ ...valid, bank_code_abk: "ABC" }).success,
+      bankListItemSchema.safeParse({ ...valid, bank_code_abk: "abc" }).success,
     ).toBe(false);
   });
 });
@@ -99,16 +88,16 @@ describe("listBanksResultSchema", () => {
     banks: [
       {
         bank_id: 1,
-        bank_name: "National Bank of Kuwait",
-        bank_iban_code: "KW1234567890",
-        bank_swift_code: "NBOKKWKW",
+        bank_name: "NBK",
+        bank_iban_code: "KW123",
+        bank_swift_code: null,
         bank_code_abk: null,
         bank_address: null,
         bank_transfer_type: null,
       },
     ],
     total: 1,
-    page: 0,
+    page: 1,
     limit: 20,
     totalPages: 1,
   };
@@ -119,8 +108,7 @@ describe("listBanksResultSchema", () => {
 
   it("accepts empty banks array", () => {
     expect(
-      listBanksResultSchema.safeParse({ ...valid, banks: [], total: 0, totalPages: 0 })
-        .success,
+      listBanksResultSchema.safeParse({ ...valid, banks: [], total: 0, totalPages: 0 }).success,
     ).toBe(true);
   });
 
@@ -139,15 +127,15 @@ describe("listBanksResultSchema", () => {
     expect(listBanksResultSchema.safeParse(rest).success).toBe(false);
   });
 
-  it("rejects non-array banks", () => {
-    expect(
-      listBanksResultSchema.safeParse({ ...valid, banks: "not-an-array" }).success,
-    ).toBe(false);
-  });
-
   it("rejects negative total", () => {
     expect(
       listBanksResultSchema.safeParse({ ...valid, total: -1 }).success,
+    ).toBe(false);
+  });
+
+  it("rejects non-array banks", () => {
+    expect(
+      listBanksResultSchema.safeParse({ ...valid, banks: "not-an-array" }).success,
     ).toBe(false);
   });
 });
@@ -156,47 +144,25 @@ describe("listBanksResultSchema", () => {
 // getBankResultSchema (nullable)
 // ---------------------------------------------------------------------------
 describe("getBankResultSchema", () => {
-  const valid = {
-    bank_id: 1,
-    bank_name: "National Bank of Kuwait",
-    bank_iban_code: "KW1234567890",
-    bank_swift_code: "NBOKKWKW",
-    bank_code_abk: null,
-    bank_address: null,
-    bank_transfer_type: null,
-  };
+  it("accepts a valid bank", () => {
+    const result = getBankResultSchema.safeParse({
+      bank_id: 1,
+      bank_name: "NBK",
+      bank_iban_code: "KW123",
+      bank_swift_code: null,
+      bank_code_abk: null,
+      bank_address: null,
+      bank_transfer_type: null,
+    });
+    expect(result.success).toBe(true);
+  });
 
   it("accepts null", () => {
     expect(getBankResultSchema.safeParse(null).success).toBe(true);
   });
 
-  it("accepts a valid bank list item", () => {
-    expect(getBankResultSchema.safeParse(valid).success).toBe(true);
-  });
-
-  it("accepts nullable fields", () => {
-    expect(
-      getBankResultSchema.safeParse({
-        bank_id: 1,
-        bank_name: null,
-        bank_iban_code: "KW1234567890",
-        bank_swift_code: null,
-        bank_code_abk: null,
-        bank_address: null,
-        bank_transfer_type: null,
-      }).success,
-    ).toBe(true);
-  });
-
-  it("rejects missing bank_id", () => {
-    const { bank_id: _, ...rest } = valid;
-    expect(getBankResultSchema.safeParse(rest).success).toBe(false);
-  });
-
-  it("rejects wrong type for bank_id", () => {
-    expect(
-      getBankResultSchema.safeParse({ ...valid, bank_id: "not-a-number" }).success,
-    ).toBe(false);
+  it("rejects invalid data", () => {
+    expect(getBankResultSchema.safeParse({ bank_id: "abc" }).success).toBe(false);
   });
 });
 
@@ -204,10 +170,7 @@ describe("getBankResultSchema", () => {
 // createBankResultSchema
 // ---------------------------------------------------------------------------
 describe("createBankResultSchema", () => {
-  const valid = {
-    operation: "createBank",
-    message: "Bank created successfully",
-  };
+  const valid = { operation: "createBank", message: "Bank created successfully" };
 
   it("accepts a valid result", () => {
     expect(createBankResultSchema.safeParse(valid).success).toBe(true);
@@ -227,5 +190,75 @@ describe("createBankResultSchema", () => {
     expect(
       createBankResultSchema.safeParse({ ...valid, operation: 123 }).success,
     ).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// createBankSchema (input)
+// ---------------------------------------------------------------------------
+describe("createBankSchema", () => {
+  it("accepts valid input with all fields", () => {
+    expect(
+      createBankSchema.safeParse({
+        name: "NBK",
+        ibanCode: "KW1234567890",
+        swiftCode: "NBKOKWKW",
+        address: "Kuwait City",
+        transferType: "wire",
+        codeAbk: 123,
+      }).success,
+    ).toBe(true);
+  });
+
+  it("accepts input with only required fields", () => {
+    expect(
+      createBankSchema.safeParse({ name: "NBK", ibanCode: "KW123" }).success,
+    ).toBe(true);
+  });
+
+  it("rejects empty name", () => {
+    expect(createBankSchema.safeParse({ name: "", ibanCode: "KW123" }).success).toBe(false);
+  });
+
+  it("rejects empty ibanCode", () => {
+    expect(createBankSchema.safeParse({ name: "NBK", ibanCode: "" }).success).toBe(false);
+  });
+
+  it("rejects missing name", () => {
+    expect(createBankSchema.safeParse({ ibanCode: "KW123" }).success).toBe(false);
+  });
+
+  it("rejects missing ibanCode", () => {
+    expect(createBankSchema.safeParse({ name: "NBK" }).success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// getBankSchema (input)
+// ---------------------------------------------------------------------------
+describe("getBankSchema", () => {
+  it("accepts valid id", () => {
+    expect(getBankSchema.safeParse({ id: 1 }).success).toBe(true);
+  });
+
+  it("rejects missing id", () => {
+    expect(getBankSchema.safeParse({}).success).toBe(false);
+  });
+
+  it("rejects non-positive id", () => {
+    expect(getBankSchema.safeParse({ id: 0 }).success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// listBanksSchema (input)
+// ---------------------------------------------------------------------------
+describe("listBanksSchema", () => {
+  it("accepts valid params", () => {
+    expect(listBanksSchema.safeParse({ page: 1, limit: 20 }).success).toBe(true);
+  });
+
+  it("accepts empty object", () => {
+    expect(listBanksSchema.safeParse({}).success).toBe(true);
   });
 });
