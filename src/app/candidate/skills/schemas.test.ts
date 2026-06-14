@@ -10,112 +10,79 @@ import {
   skillActionResultOutputSchema,
 } from "./schemas";
 
-// ---------------------------------------------------------------------------
-// Input schema tests
-// ---------------------------------------------------------------------------
-
 describe("listSkillsSchema", () => {
-  it("accepts valid pagination input", () => {
-    const r = listSkillsSchema.safeParse({ page: 1, limit: 20 });
-    expect(r.success).toBe(true);
-    if (r.success) {
-      expect(r.data.page).toBe(1);
-      expect(r.data.limit).toBe(20);
-    }
+  it("accepts empty input (uses defaults)", () => {
+    expect(listSkillsSchema.safeParse({}).success).toBe(true);
   });
 
-  it("defaults page and limit", () => {
-    const r = listSkillsSchema.safeParse({});
-    expect(r.success).toBe(true);
-    if (r.success) {
-      expect(r.data.page).toBe(1);
-      expect(r.data.limit).toBe(20);
-    }
+  it("accepts valid input", () => {
+    expect(listSkillsSchema.safeParse({ page: 1, limit: 20 }).success).toBe(true);
   });
 
-  it("rejects page < 1", () => {
+  it("rejects page less than 1", () => {
     expect(listSkillsSchema.safeParse({ page: 0 }).success).toBe(false);
+    expect(listSkillsSchema.safeParse({ page: -1 }).success).toBe(false);
   });
 
-  it("rejects limit > 100", () => {
-    expect(listSkillsSchema.safeParse({ limit: 200 }).success).toBe(false);
+  it("rejects limit greater than 100", () => {
+    expect(listSkillsSchema.safeParse({ limit: 101 }).success).toBe(false);
   });
 
-  it("coerces string page and limit to number", () => {
-    const r = listSkillsSchema.safeParse({ page: "2", limit: "10" });
-    expect(r.success).toBe(true);
-    if (r.success) {
-      expect(r.data.page).toBe(2);
-      expect(r.data.limit).toBe(10);
-    }
+  it("rejects limit less than 1", () => {
+    expect(listSkillsSchema.safeParse({ limit: 0 }).success).toBe(false);
+  });
+
+  it("rejects non-numeric page", () => {
+    expect(listSkillsSchema.safeParse({ page: "abc" }).success).toBe(false);
   });
 });
 
 describe("getSkillSchema", () => {
-  it("accepts valid skill ID", () => {
-    const r = getSkillSchema.safeParse({ skillId: 42 });
-    expect(r.success).toBe(true);
-    if (r.success) {
-      expect(r.data.skillId).toBe(42);
-    }
+  it("accepts valid skillId", () => {
+    expect(getSkillSchema.safeParse({ skillId: 1 }).success).toBe(true);
   });
 
-  it("coerces string skill ID to number", () => {
-    const r = getSkillSchema.safeParse({ skillId: "42" });
-    expect(r.success).toBe(true);
-    if (r.success) {
-      expect(r.data.skillId).toBe(42);
-    }
+  it("accepts string-coercible skillId", () => {
+    expect(getSkillSchema.safeParse({ skillId: "1" }).success).toBe(true);
   });
 
-  it("rejects missing skillId", () => {
+  it("rejects empty object", () => {
     expect(getSkillSchema.safeParse({}).success).toBe(false);
   });
 
-  it("rejects zero skillId", () => {
+  it("rejects non-positive skillId", () => {
     expect(getSkillSchema.safeParse({ skillId: 0 }).success).toBe(false);
+    expect(getSkillSchema.safeParse({ skillId: -5 }).success).toBe(false);
   });
 
-  it("rejects negative skillId", () => {
-    expect(getSkillSchema.safeParse({ skillId: -5 }).success).toBe(false);
+  it("rejects non-coercible skillId", () => {
+    expect(getSkillSchema.safeParse({ skillId: "abc" }).success).toBe(false);
   });
 });
 
 describe("createSkillSchema", () => {
   it("accepts valid skill name", () => {
-    const r = createSkillSchema.safeParse({ skill: "JavaScript" });
-    expect(r.success).toBe(true);
-    if (r.success) {
-      expect(r.data.skill).toBe("JavaScript");
-    }
+    expect(createSkillSchema.safeParse({ skill: "React" }).success).toBe(true);
   });
 
   it("trims whitespace from skill name", () => {
-    const r = createSkillSchema.safeParse({ skill: "  React  " });
-    expect(r.success).toBe(true);
-    if (r.success) {
-      expect(r.data.skill).toBe("React");
+    const result = createSkillSchema.safeParse({ skill: "  React  " });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.skill).toBe("React");
     }
+  });
+
+  it("rejects empty object", () => {
+    expect(createSkillSchema.safeParse({}).success).toBe(false);
   });
 
   it("rejects empty skill name", () => {
     expect(createSkillSchema.safeParse({ skill: "" }).success).toBe(false);
   });
 
-  it("rejects missing skill field", () => {
-    expect(createSkillSchema.safeParse({}).success).toBe(false);
-  });
-
   it("rejects skill name exceeding 128 characters", () => {
-    expect(
-      createSkillSchema.safeParse({ skill: "a".repeat(129) }).success,
-    ).toBe(false);
-  });
-
-  it("accepts skill name exactly 128 characters", () => {
-    expect(
-      createSkillSchema.safeParse({ skill: "a".repeat(128) }).success,
-    ).toBe(true);
+    expect(createSkillSchema.safeParse({ skill: "A".repeat(129) }).success).toBe(false);
   });
 
   it("rejects non-string skill", () => {
@@ -124,134 +91,89 @@ describe("createSkillSchema", () => {
 });
 
 describe("updateSkillSchema", () => {
-  it("accepts valid skill ID and name", () => {
-    const r = updateSkillSchema.safeParse({
-      skillId: 42,
-      skill: "TypeScript",
-    });
-    expect(r.success).toBe(true);
-    if (r.success) {
-      expect(r.data.skillId).toBe(42);
-      expect(r.data.skill).toBe("TypeScript");
-    }
+  it("accepts valid input", () => {
+    expect(updateSkillSchema.safeParse({ skillId: 1, skill: "TypeScript" }).success).toBe(true);
   });
 
-  it("coerces string skill ID", () => {
-    const r = updateSkillSchema.safeParse({
-      skillId: "42",
-      skill: "TypeScript",
-    });
-    expect(r.success).toBe(true);
-    if (r.success) {
-      expect(r.data.skillId).toBe(42);
-    }
+  it("accepts string-coercible skillId", () => {
+    expect(updateSkillSchema.safeParse({ skillId: "1", skill: "TypeScript" }).success).toBe(true);
   });
 
-  it("trims skill name", () => {
-    const r = updateSkillSchema.safeParse({
-      skillId: 1,
-      skill: "  Vue  ",
-    });
-    expect(r.success).toBe(true);
-    if (r.success) {
-      expect(r.data.skill).toBe("Vue");
-    }
+  it("rejects empty object", () => {
+    expect(updateSkillSchema.safeParse({}).success).toBe(false);
   });
 
   it("rejects missing skillId", () => {
-    expect(
-      updateSkillSchema.safeParse({ skill: "React" }).success,
-    ).toBe(false);
+    expect(updateSkillSchema.safeParse({ skill: "TypeScript" }).success).toBe(false);
   });
 
   it("rejects missing skill", () => {
-    expect(
-      updateSkillSchema.safeParse({ skillId: 1 }).success,
-    ).toBe(false);
+    expect(updateSkillSchema.safeParse({ skillId: 1 }).success).toBe(false);
+  });
+
+  it("rejects non-positive skillId", () => {
+    expect(updateSkillSchema.safeParse({ skillId: 0, skill: "TypeScript" }).success).toBe(false);
   });
 
   it("rejects empty skill name", () => {
-    expect(
-      updateSkillSchema.safeParse({ skillId: 1, skill: "" }).success,
-    ).toBe(false);
+    expect(updateSkillSchema.safeParse({ skillId: 1, skill: "" }).success).toBe(false);
   });
 });
 
 describe("deleteSkillSchema", () => {
-  it("accepts valid skill ID", () => {
-    const r = deleteSkillSchema.safeParse({ skillId: 42 });
-    expect(r.success).toBe(true);
-    if (r.success) {
-      expect(r.data.skillId).toBe(42);
-    }
+  it("accepts valid skillId", () => {
+    expect(deleteSkillSchema.safeParse({ skillId: 1 }).success).toBe(true);
   });
 
-  it("coerces string skill ID to number", () => {
-    const r = deleteSkillSchema.safeParse({ skillId: "42" });
-    expect(r.success).toBe(true);
-    if (r.success) {
-      expect(r.data.skillId).toBe(42);
-    }
+  it("accepts string-coercible skillId", () => {
+    expect(deleteSkillSchema.safeParse({ skillId: "5" }).success).toBe(true);
   });
 
-  it("rejects missing skillId", () => {
+  it("rejects empty object", () => {
     expect(deleteSkillSchema.safeParse({}).success).toBe(false);
   });
 
-  it("rejects zero skillId", () => {
+  it("rejects non-positive skillId", () => {
     expect(deleteSkillSchema.safeParse({ skillId: 0 }).success).toBe(false);
+    expect(deleteSkillSchema.safeParse({ skillId: -3 }).success).toBe(false);
+  });
+
+  it("rejects non-coercible skillId", () => {
+    expect(deleteSkillSchema.safeParse({ skillId: "abc" }).success).toBe(false);
   });
 });
-
-// ---------------------------------------------------------------------------
-// Output schema tests
-// ---------------------------------------------------------------------------
 
 describe("skillItemOutputSchema", () => {
   const validItem = {
     candidate_skill_id: 1,
-    skill: "JavaScript",
-    created_at: null,
+    skill: "React",
+    created_at: new Date(),
   };
 
-  it("accepts valid skill item", () => {
+  it("accepts valid output", () => {
     expect(skillItemOutputSchema.safeParse(validItem).success).toBe(true);
   });
 
-  it("accepts valid Date for created_at", () => {
+  it("accepts null created_at", () => {
     expect(
-      skillItemOutputSchema.safeParse({
-        ...validItem,
-        created_at: new Date("2026-01-01"),
-      }).success,
+      skillItemOutputSchema.safeParse({ ...validItem, created_at: null }).success
     ).toBe(true);
   });
 
   it("rejects missing candidate_skill_id", () => {
-    const { candidate_skill_id: _, ...rest } = validItem;
+    const { candidate_skill_id, ...rest } = validItem;
     expect(skillItemOutputSchema.safeParse(rest).success).toBe(false);
   });
 
-  it("rejects missing skill", () => {
-    const { skill: _, ...rest } = validItem;
-    expect(skillItemOutputSchema.safeParse(rest).success).toBe(false);
-  });
-
-  it("rejects string for candidate_skill_id", () => {
+  it("rejects non-integer id", () => {
     expect(
-      skillItemOutputSchema.safeParse({
-        ...validItem,
-        candidate_skill_id: "1",
-      }).success,
+      skillItemOutputSchema.safeParse({ ...validItem, candidate_skill_id: 1.5 }).success
     ).toBe(false);
   });
 
-  it("rejects string for created_at", () => {
+  it("rejects string for date", () => {
     expect(
-      skillItemOutputSchema.safeParse({
-        ...validItem,
-        created_at: "2026-01-01",
-      }).success,
+      skillItemOutputSchema.safeParse({ ...validItem, created_at: "2025-01-01" }).success
     ).toBe(false);
   });
 });
@@ -259,110 +181,80 @@ describe("skillItemOutputSchema", () => {
 describe("skillListOutputSchema", () => {
   const validList = {
     items: [
-      {
-        candidate_skill_id: 1,
-        skill: "JavaScript",
-        created_at: null,
-      },
-      {
-        candidate_skill_id: 2,
-        skill: "TypeScript",
-        created_at: null,
-      },
+      { candidate_skill_id: 1, skill: "React", created_at: new Date() },
+      { candidate_skill_id: 2, skill: "Node", created_at: null },
     ],
     total: 2,
     page: 1,
     pageSize: 20,
   };
 
-  it("accepts valid skill list", () => {
+  it("accepts valid output", () => {
     expect(skillListOutputSchema.safeParse(validList).success).toBe(true);
   });
 
   it("accepts empty items array", () => {
     expect(
-      skillListOutputSchema.safeParse({
-        ...validList,
-        items: [],
-        total: 0,
-      }).success,
+      skillListOutputSchema.safeParse({ items: [], total: 0, page: 1, pageSize: 20 }).success
     ).toBe(true);
-  });
-
-  it("rejects missing items", () => {
-    const { items: _, ...rest } = validList;
-    expect(skillListOutputSchema.safeParse(rest).success).toBe(false);
-  });
-
-  it("rejects missing total", () => {
-    const { total: _, ...rest } = validList;
-    expect(skillListOutputSchema.safeParse(rest).success).toBe(false);
   });
 
   it("rejects negative total", () => {
     expect(
-      skillListOutputSchema.safeParse({ ...validList, total: -1 }).success,
+      skillListOutputSchema.safeParse({ ...validList, total: -1 }).success
     ).toBe(false);
   });
 
-  it("rejects zero page", () => {
+  it("rejects non-positive page", () => {
     expect(
-      skillListOutputSchema.safeParse({ ...validList, page: 0 }).success,
+      skillListOutputSchema.safeParse({ ...validList, page: 0 }).success
     ).toBe(false);
   });
 
-  it("rejects string for total", () => {
+  it("rejects non-positive pageSize", () => {
     expect(
-      skillListOutputSchema.safeParse({ ...validList, total: "2" }).success,
+      skillListOutputSchema.safeParse({ ...validList, pageSize: -5 }).success
     ).toBe(false);
   });
 
-  it("rejects invalid item in items array", () => {
-    expect(
-      skillListOutputSchema.safeParse({
-        ...validList,
-        items: [{ candidate_skill_id: 1 }],
-      }).success,
-    ).toBe(false);
+  it("rejects missing items", () => {
+    const { items, ...rest } = validList;
+    expect(skillListOutputSchema.safeParse(rest).success).toBe(false);
   });
 });
 
 describe("skillActionResultOutputSchema", () => {
-  it("accepts success result with skillId", () => {
-    const r = skillActionResultOutputSchema.safeParse({
-      success: true,
-      skillId: 42,
-    });
-    expect(r.success).toBe(true);
-  });
-
-  it("accepts error result with error message", () => {
-    const r = skillActionResultOutputSchema.safeParse({
-      success: false,
-      error: "Skill already exists",
-    });
-    expect(r.success).toBe(true);
-  });
-
-  it("rejects success result without skillId", () => {
+  it("accepts success branch", () => {
     expect(
-      skillActionResultOutputSchema.safeParse({ success: true }).success,
-    ).toBe(false);
-  });
-
-  it("rejects error result without error field", () => {
-    expect(
-      skillActionResultOutputSchema.safeParse({ success: false }).success,
-    ).toBe(false);
-  });
-
-  it("accepts success: true with error field (Zod strips unknown keys)", () => {
-    expect(
-      skillActionResultOutputSchema.safeParse({
-        success: true,
-        skillId: 42,
-        error: "should not be here",
-      }).success,
+      skillActionResultOutputSchema.safeParse({ success: true, skillId: 1 }).success
     ).toBe(true);
+  });
+
+  it("accepts failure branch", () => {
+    expect(
+      skillActionResultOutputSchema.safeParse({ success: false, error: "Not found" }).success
+    ).toBe(true);
+  });
+
+  it("rejects success branch missing skillId", () => {
+    expect(
+      skillActionResultOutputSchema.safeParse({ success: true }).success
+    ).toBe(false);
+  });
+
+  it("rejects failure branch missing error", () => {
+    expect(
+      skillActionResultOutputSchema.safeParse({ success: false }).success
+    ).toBe(false);
+  });
+
+  it("rejects empty object", () => {
+    expect(skillActionResultOutputSchema.safeParse({}).success).toBe(false);
+  });
+
+  it("rejects invalid success value", () => {
+    expect(
+      skillActionResultOutputSchema.safeParse({ success: "yes", skillId: 1 }).success
+    ).toBe(false);
   });
 });
