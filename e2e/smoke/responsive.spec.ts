@@ -128,6 +128,15 @@ async function createAuthedPage(
   return { page, context };
 }
 
+/** Navigate and wait for full settle before responsive checks. */
+async function navAndSettle(page: Page, url: string) {
+  await page.goto(url);
+  await page.waitForLoadState("networkidle");
+  // Allow CSS reflow/transitions to settle after viewport-aware rendering
+  await page.waitForTimeout(300);
+  await expect(page.locator("body")).toBeVisible({ timeout: 15000 });
+}
+
 // ═══════════════════════════════════════════════════════════════════
 //  Mobile viewport (390×844)
 // ═══════════════════════════════════════════════════════════════════
@@ -139,22 +148,19 @@ test.describe("responsive — mobile viewport (390×844)", () => {
 
   test("landing page loads with no horizontal overflow", async ({ page }) => {
     await page.setViewportSize(mobileViewport);
-    await page.goto("/");
-    await expect(page.locator("body")).toBeVisible({ timeout: 15000 });
+    await navAndSettle(page, "/");
     await assertNoHorizontalOverflow(page);
   });
 
   test("landing page has readable text and no zero-height nodes", async ({ page }) => {
     await page.setViewportSize(mobileViewport);
-    await page.goto("/");
-    await expect(page.locator("body")).toBeVisible({ timeout: 15000 });
+    await navAndSettle(page, "/");
     await assertTextReadable(page);
   });
 
   test("landing tap targets (CTAs, links) meet 44px minimum", async ({ page }) => {
     await page.setViewportSize(mobileViewport);
-    await page.goto("/");
-    await expect(page.locator("body")).toBeVisible({ timeout: 15000 });
+    await navAndSettle(page, "/");
 
     // CTAs and nav links
     await assertTapTargets(page, ".landingActions a, nav a, .portalGrid a");
@@ -164,22 +170,19 @@ test.describe("responsive — mobile viewport (390×844)", () => {
 
   test("login page loads with no horizontal overflow", async ({ page }) => {
     await page.setViewportSize(mobileViewport);
-    await page.goto("/login");
-    await expect(page.locator("h1")).toBeVisible({ timeout: 15000 });
+    await navAndSettle(page, "/login");
     await assertNoHorizontalOverflow(page);
   });
 
   test("login page has readable text and no zero-height nodes", async ({ page }) => {
     await page.setViewportSize(mobileViewport);
-    await page.goto("/login");
-    await expect(page.locator("h1")).toBeVisible({ timeout: 15000 });
+    await navAndSettle(page, "/login");
     await assertTextReadable(page);
   });
 
   test("login form inputs and button meet 44px tap target minimum", async ({ page }) => {
     await page.setViewportSize(mobileViewport);
-    await page.goto("/login");
-    await expect(page.locator('input[type="email"]')).toBeVisible({ timeout: 15000 });
+    await navAndSettle(page, "/login");
     await assertTapTargets(page, 'input[type="email"], input[type="password"], button[type="submit"]');
   });
 
@@ -187,8 +190,7 @@ test.describe("responsive — mobile viewport (390×844)", () => {
 
   test("candidate portal shows mobile tab bar, hides sidebar", async ({ browser }) => {
     const { page, context } = await createAuthedPage(browser, mobileViewport);
-    await page.goto("/candidate");
-    await expect(page.locator('text="Readiness"')).toBeVisible({ timeout: 15000 });
+    await navAndSettle(page, "/candidate");
 
     // Mobile tab bar should be visible and interactive
     // Use .first() — the app renders WorkspaceOS twice; CSS shows the right one
@@ -206,16 +208,14 @@ test.describe("responsive — mobile viewport (390×844)", () => {
 
   test("candidate portal has no horizontal overflow", async ({ browser }) => {
     const { page, context } = await createAuthedPage(browser, mobileViewport);
-    await page.goto("/candidate");
-    await expect(page.locator('text="Readiness"')).toBeVisible({ timeout: 15000 });
+    await navAndSettle(page, "/candidate");
     await assertNoHorizontalOverflow(page);
     await context.close();
   });
 
   test("candidate portal nav tap targets meet 44px minimum", async ({ browser }) => {
     const { page, context } = await createAuthedPage(browser, mobileViewport);
-    await page.goto("/candidate");
-    await expect(page.locator('text="Readiness"')).toBeVisible({ timeout: 15000 });
+    await navAndSettle(page, "/candidate");
 
     await assertTapTargets(page, ".mobileTabBar a");
     await assertTapTargets(page, ".candidateProfileActions a");
@@ -224,8 +224,7 @@ test.describe("responsive — mobile viewport (390×844)", () => {
 
   test("candidate portal has readable text and no zero-height nodes", async ({ browser }) => {
     const { page, context } = await createAuthedPage(browser, mobileViewport);
-    await page.goto("/candidate");
-    await expect(page.locator('text="Readiness"')).toBeVisible({ timeout: 15000 });
+    await navAndSettle(page, "/candidate");
     await assertTextReadable(page);
     await context.close();
   });
@@ -242,22 +241,19 @@ test.describe("responsive — tablet viewport (768×1024)", () => {
 
   test("landing page loads with no horizontal overflow", async ({ page }) => {
     await page.setViewportSize(tabletViewport);
-    await page.goto("/");
-    await expect(page.locator("body")).toBeVisible({ timeout: 15000 });
+    await navAndSettle(page, "/");
     await assertNoHorizontalOverflow(page);
   });
 
   test("landing page has readable text and no zero-height nodes", async ({ page }) => {
     await page.setViewportSize(tabletViewport);
-    await page.goto("/");
-    await expect(page.locator("body")).toBeVisible({ timeout: 15000 });
+    await navAndSettle(page, "/");
     await assertTextReadable(page);
   });
 
   test("landing tap targets (CTAs, links) meet 44px minimum", async ({ page }) => {
     await page.setViewportSize(tabletViewport);
-    await page.goto("/");
-    await expect(page.locator("body")).toBeVisible({ timeout: 15000 });
+    await navAndSettle(page, "/");
 
     await assertTapTargets(page, ".landingActions a, nav a, .portalGrid a");
   });
@@ -266,22 +262,19 @@ test.describe("responsive — tablet viewport (768×1024)", () => {
 
   test("login page loads with no horizontal overflow", async ({ page }) => {
     await page.setViewportSize(tabletViewport);
-    await page.goto("/login");
-    await expect(page.locator("h1")).toBeVisible({ timeout: 15000 });
+    await navAndSettle(page, "/login");
     await assertNoHorizontalOverflow(page);
   });
 
   test("login page has readable text and no zero-height nodes", async ({ page }) => {
     await page.setViewportSize(tabletViewport);
-    await page.goto("/login");
-    await expect(page.locator("h1")).toBeVisible({ timeout: 15000 });
+    await navAndSettle(page, "/login");
     await assertTextReadable(page);
   });
 
   test("login form inputs and button meet 44px tap target minimum", async ({ page }) => {
     await page.setViewportSize(tabletViewport);
-    await page.goto("/login");
-    await expect(page.locator('input[type="email"]')).toBeVisible({ timeout: 15000 });
+    await navAndSettle(page, "/login");
     await assertTapTargets(page, 'input[type="email"], input[type="password"], button[type="submit"]');
   });
 
@@ -289,8 +282,7 @@ test.describe("responsive — tablet viewport (768×1024)", () => {
 
   test("candidate portal shows floating tab bar, hides sidebar", async ({ browser }) => {
     const { page, context } = await createAuthedPage(browser, tabletViewport);
-    await page.goto("/candidate");
-    await expect(page.locator('text="Readiness"')).toBeVisible({ timeout: 15000 });
+    await navAndSettle(page, "/candidate");
 
     // At 768px, the mobileTabBar should be visible (full-width bottom bar)
     // and workspaceRail hidden (max-width: 768px rule triggers display:none)
@@ -311,16 +303,14 @@ test.describe("responsive — tablet viewport (768×1024)", () => {
 
   test("candidate portal has no horizontal overflow on tablet", async ({ browser }) => {
     const { page, context } = await createAuthedPage(browser, tabletViewport);
-    await page.goto("/candidate");
-    await expect(page.locator('text="Readiness"')).toBeVisible({ timeout: 15000 });
+    await navAndSettle(page, "/candidate");
     await assertNoHorizontalOverflow(page);
     await context.close();
   });
 
   test("candidate profile action links meet 44px tap target minimum", async ({ browser }) => {
     const { page, context } = await createAuthedPage(browser, tabletViewport);
-    await page.goto("/candidate");
-    await expect(page.locator('text="Readiness"')).toBeVisible({ timeout: 15000 });
+    await navAndSettle(page, "/candidate");
 
     await assertTapTargets(page, ".candidateProfileActions a");
     await context.close();
@@ -328,8 +318,7 @@ test.describe("responsive — tablet viewport (768×1024)", () => {
 
   test("candidate portal has readable text and no zero-height nodes", async ({ browser }) => {
     const { page, context } = await createAuthedPage(browser, tabletViewport);
-    await page.goto("/candidate");
-    await expect(page.locator('text="Readiness"')).toBeVisible({ timeout: 15000 });
+    await navAndSettle(page, "/candidate");
     await assertTextReadable(page);
     await context.close();
   });

@@ -1,9 +1,17 @@
 import { test, expect } from "@playwright/test";
 
+/** Navigate and wait for full settle before checking hero content. */
+async function navAndSettle(page: any) {
+  await page.goto("/");
+  await page.waitForLoadState("networkidle");
+  // Allow CSS reflow/transitions for hero entrance animations
+  await page.waitForTimeout(300);
+  await expect(page.locator("body")).toBeVisible({ timeout: 15000 });
+}
+
 test.describe("Landing page smoke tests (STU-2776 redesign)", () => {
   test("landing page loads with hero section", async ({ page }) => {
-    await page.goto("/");
-    await expect(page.locator("body")).toBeVisible({ timeout: 15000 });
+    await navAndSettle(page);
 
     // Hero section renders with aria-label
     const hero = page.locator(
@@ -21,7 +29,7 @@ test.describe("Landing page smoke tests (STU-2776 redesign)", () => {
   });
 
   test("hero CTA buttons render", async ({ page }) => {
-    await page.goto("/");
+    await navAndSettle(page);
 
     // Student CTA
     await expect(
@@ -38,7 +46,7 @@ test.describe("Landing page smoke tests (STU-2776 redesign)", () => {
   });
 
   test("hero feature pills render", async ({ page }) => {
-    await page.goto("/");
+    await navAndSettle(page);
 
     // Student pills
     const studentPills = page.locator('[aria-label="Key benefits for students"]');
@@ -54,7 +62,7 @@ test.describe("Landing page smoke tests (STU-2776 redesign)", () => {
   test("persona switcher renders and switches between candidate/company", async ({
     page,
   }) => {
-    await page.goto("/");
+    await navAndSettle(page);
 
     // Persona switcher component renders
     const personaSwitcher = page.locator("text=For students").first();
@@ -67,7 +75,7 @@ test.describe("Landing page smoke tests (STU-2776 redesign)", () => {
   });
 
   test("navigation renders brand and sign in link", async ({ page }) => {
-    await page.goto("/");
+    await navAndSettle(page);
     const nav = page.locator("nav[aria-label='StudentHub public navigation']");
     await expect(nav).toBeVisible();
     await expect(nav).toContainText("StudentHub");
@@ -75,7 +83,7 @@ test.describe("Landing page smoke tests (STU-2776 redesign)", () => {
   });
 
   test("CTA section renders with get-started content", async ({ page }) => {
-    await page.goto("/");
+    await navAndSettle(page);
     const ctaSection = page.locator('section[aria-label="Get started"]');
     await expect(ctaSection).toBeVisible();
     await expect(ctaSection).toContainText("Your next role is one profile away");
@@ -85,7 +93,7 @@ test.describe("Landing page smoke tests (STU-2776 redesign)", () => {
   });
 
   test("decorative elements have aria-hidden", async ({ page }) => {
-    await page.goto("/");
+    await navAndSettle(page);
     const gradients = page.locator(".shHeroGradientDramatic");
     await expect(gradients.first()).toHaveAttribute("aria-hidden", "true");
   });
@@ -94,7 +102,7 @@ test.describe("Landing page smoke tests (STU-2776 redesign)", () => {
     test.use({ viewport: { width: 390, height: 844 } });
 
     test("landing page renders on mobile without overflow", async ({ page }) => {
-      await page.goto("/");
+      await navAndSettle(page);
       await expect(page.locator("h1")).toContainText("Connecting students with");
       // CTA buttons still visible on mobile
       await expect(
