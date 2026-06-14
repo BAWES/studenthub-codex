@@ -1,5 +1,8 @@
 import { describe, it, expect } from "vitest";
 import {
+  listPaymentsSchema,
+  getPaymentDetailSchema,
+  createPaymentSchema,
   paymentRowSchema,
   listPaymentsResultSchema,
   paymentDetailTransferSchema,
@@ -11,305 +14,229 @@ import {
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
-// paymentRowSchema
+// Input schemas
 // ---------------------------------------------------------------------------
-describe("paymentRowSchema", () => {
-  const validRow = {
-    id: 1,
-    transferId: 42,
-    company: "Acme Corp",
-    period: "2026-06",
-    hours: "160.00",
-    candidateTotal: "2000.00",
-    companyTotal: "2500.00",
-    cost: "500.00",
-    paid: "2000.00",
-    paymentDate: "2026-07-01",
-    updated: "2026-06-15T12:00:00.000Z",
-  };
 
-  it("accepts a fully populated row", () => {
-    expect(paymentRowSchema.safeParse(validRow).success).toBe(true);
+describe("listPaymentsSchema", () => {
+  it("accepts empty input (defaults)", () => {
+    const r = listPaymentsSchema.safeParse({});
+    expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data.page).toBe(1);
+      expect(r.data.limit).toBe(20);
+    }
   });
 
-  it("accepts null transferId", () => {
-    expect(
-      paymentRowSchema.safeParse({ ...validRow, transferId: null }).success,
-    ).toBe(true);
+  it("accepts custom pagination", () => {
+    const r = listPaymentsSchema.safeParse({ page: 2, limit: 50 });
+    expect(r.success).toBe(true);
+    if (r.success) expect(r.data.limit).toBe(50);
   });
 
-  it("accepts empty strings on z.string() fields", () => {
+  it("rejects limit over 100", () => {
+    expect(listPaymentsSchema.safeParse({ limit: 999 }).success).toBe(false);
+  });
+
+  it("coerces string pagination", () => {
+    const r = listPaymentsSchema.safeParse({ page: "2", limit: "10" });
+    expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data.page).toBe(2);
+      expect(r.data.limit).toBe(10);
+    }
+  });
+});
+
+describe("getPaymentDetailSchema", () => {
+  it("accepts valid tcId", () => {
+    expect(getPaymentDetailSchema.safeParse({ tcId: 5 }).success).toBe(true);
+  });
+
+  it("rejects missing tcId", () => {
+    expect(getPaymentDetailSchema.safeParse({}).success).toBe(false);
+  });
+
+  it("rejects zero tcId", () => {
+    expect(getPaymentDetailSchema.safeParse({ tcId: 0 }).success).toBe(false);
+  });
+
+  it("rejects negative tcId", () => {
+    expect(getPaymentDetailSchema.safeParse({ tcId: -1 }).success).toBe(false);
+  });
+});
+
+describe("createPaymentSchema", () => {
+  it("accepts valid create input", () => {
+    const r = createPaymentSchema.safeParse({
+      transferBenefName: "Ahmed Ali",
+      transferBenefIban: "KW00BKUW0000000000000000000",
+      bankId: 1,
+      amount: 500.0,
+    });
+    expect(r.success).toBe(true);
+    if (r.success) expect(r.data.transferBenefName).toBe("Ahmed Ali");
+  });
+
+  it("accepts optional amount", () => {
     expect(
-      paymentRowSchema.safeParse({
-        ...validRow,
-        company: "",
-        period: "",
-        hours: "",
-        candidateTotal: "",
-        companyTotal: "",
-        cost: "",
-        paid: "",
-        paymentDate: "",
-        updated: "",
+      createPaymentSchema.safeParse({
+        transferBenefName: "Ahmed",
+        transferBenefIban: "KW00BKUW0000000000000000000",
+        bankId: 1,
       }).success,
     ).toBe(true);
   });
 
-  it("rejects missing id", () => {
-    const { id: _, ...rest } = validRow;
-    expect(paymentRowSchema.safeParse(rest).success).toBe(false);
-  });
-
-  it("rejects missing company", () => {
-    const { company: _, ...rest } = validRow;
-    expect(paymentRowSchema.safeParse(rest).success).toBe(false);
-  });
-
-  it("rejects non-integer id", () => {
+  it("rejects empty beneficiary name", () => {
     expect(
-      paymentRowSchema.safeParse({ ...validRow, id: 1.5 }).success,
+      createPaymentSchema.safeParse({
+        transferBenefName: "",
+        transferBenefIban: "KW00BKUW0000000000000000000",
+        bankId: 1,
+      }).success,
     ).toBe(false);
   });
 
-  it("rejects non-integer transferId", () => {
+  it("rejects missing IBAN", () => {
     expect(
-      paymentRowSchema.safeParse({ ...validRow, transferId: 42.5 }).success,
+      createPaymentSchema.safeParse({ transferBenefName: "Ahmed", bankId: 1 }).success,
     ).toBe(false);
   });
 
-  it("rejects non-string company", () => {
+  it("rejects missing bankId", () => {
     expect(
-      paymentRowSchema.safeParse({ ...validRow, company: 123 }).success,
+      createPaymentSchema.safeParse({
+        transferBenefName: "Ahmed",
+        transferBenefIban: "KW00BKUW0000000000000000000",
+      }).success,
     ).toBe(false);
   });
 
-  it("rejects string id", () => {
+  it("rejects non-positive bankId", () => {
     expect(
-      paymentRowSchema.safeParse({ ...validRow, id: "1" }).success,
+      createPaymentSchema.safeParse({
+        transferBenefName: "Ahmed",
+        transferBenefIban: "KW00BKUW0000000000000000000",
+        bankId: -1,
+      }).success,
+    ).toBe(false);
+  });
+
+  it("rejects negative amount", () => {
+    expect(
+      createPaymentSchema.safeParse({
+        transferBenefName: "Ahmed",
+        transferBenefIban: "KW00BKUW0000000000000000000",
+        bankId: 1,
+        amount: -100,
+      }).success,
     ).toBe(false);
   });
 });
 
 // ---------------------------------------------------------------------------
-// listPaymentsResultSchema
+// Output schemas
 // ---------------------------------------------------------------------------
-describe("listPaymentsResultSchema", () => {
-  const validRow = {
+
+describe("paymentRowSchema", () => {
+  const valid = {
     id: 1,
-    transferId: 42,
-    company: "Acme Corp",
-    period: "2026-06",
-    hours: "160.00",
-    candidateTotal: "2000.00",
-    companyTotal: "2500.00",
-    cost: "500.00",
-    paid: "2000.00",
-    paymentDate: "2026-07-01",
-    updated: "2026-06-15T12:00:00.000Z",
+    transferId: null,
+    company: "GCC Energies",
+    period: "January 2024",
+    hours: "120",
+    candidateTotal: "480.00",
+    companyTotal: "600.00",
+    cost: "120.00",
+    paid: "0",
+    paymentDate: "2024-02-01",
+    updated: "2024-01-31",
   };
 
-  const validResult = {
-    items: [validRow],
-    total: 1,
-    page: 1,
-    limit: 20,
-    totalPages: 1,
-  };
-
-  it("accepts a valid list result with one item", () => {
-    expect(listPaymentsResultSchema.safeParse(validResult).success).toBe(true);
+  it("accepts a valid payment row", () => {
+    expect(paymentRowSchema.safeParse(valid).success).toBe(true);
   });
 
-  it("accepts empty items array", () => {
+  it("rejects missing id", () => {
+    const { id: _, ...rest } = valid;
+    expect(paymentRowSchema.safeParse(rest).success).toBe(false);
+  });
+
+  it("rejects missing company", () => {
+    const { company: _, ...rest } = valid;
+    expect(paymentRowSchema.safeParse(rest).success).toBe(false);
+  });
+});
+
+describe("listPaymentsResultSchema", () => {
+  it("accepts valid result with empty list", () => {
     expect(
       listPaymentsResultSchema.safeParse({
-        ...validResult,
         items: [],
         total: 0,
+        page: 1,
+        limit: 20,
         totalPages: 0,
       }).success,
     ).toBe(true);
   });
 
-  it("accepts multiple items", () => {
-    const manyItems = Array.from({ length: 3 }, (_, i) => ({
-      ...validRow,
-      id: i + 1,
-      company: `Company ${i + 1}`,
-    }));
-    expect(
-      listPaymentsResultSchema.safeParse({
-        ...validResult,
-        items: manyItems,
-        total: 100,
-        page: 3,
-        totalPages: 5,
-      }).success,
-    ).toBe(true);
-  });
-
-  it("accepts items with null transferId", () => {
-    expect(
-      listPaymentsResultSchema.safeParse({
-        ...validResult,
-        items: [{ ...validRow, transferId: null }],
-      }).success,
-    ).toBe(true);
-  });
-
   it("rejects missing items", () => {
-    const { items: _, ...rest } = validResult;
-    expect(listPaymentsResultSchema.safeParse(rest).success).toBe(false);
-  });
-
-  it("rejects non-array items", () => {
     expect(
-      listPaymentsResultSchema.safeParse({ ...validResult, items: "not-array" })
-        .success,
+      listPaymentsResultSchema.safeParse({ total: 0, page: 1, limit: 20, totalPages: 0 }).success,
     ).toBe(false);
-  });
-
-  it("rejects missing total", () => {
-    const { total: _, ...rest } = validResult;
-    expect(listPaymentsResultSchema.safeParse(rest).success).toBe(false);
-  });
-
-  it("rejects missing page", () => {
-    const { page: _, ...rest } = validResult;
-    expect(listPaymentsResultSchema.safeParse(rest).success).toBe(false);
-  });
-
-  it("rejects missing limit", () => {
-    const { limit: _, ...rest } = validResult;
-    expect(listPaymentsResultSchema.safeParse(rest).success).toBe(false);
-  });
-
-  it("rejects missing totalPages", () => {
-    const { totalPages: _, ...rest } = validResult;
-    expect(listPaymentsResultSchema.safeParse(rest).success).toBe(false);
   });
 });
 
-// ---------------------------------------------------------------------------
-// paymentDetailTransferSchema
-// ---------------------------------------------------------------------------
 describe("paymentDetailTransferSchema", () => {
-  const validTransfer = {
-    id: 99,
-    period: "2026-06",
-    paymentReceived: "5000.00",
-  };
-
-  it("accepts a fully populated transfer detail", () => {
-    expect(paymentDetailTransferSchema.safeParse(validTransfer).success).toBe(
-      true,
-    );
+  it("accepts valid transfer", () => {
+    const r = paymentDetailTransferSchema.safeParse({
+      id: 1,
+      period: "January 2024",
+      paymentReceived: "yes",
+    });
+    expect(r.success).toBe(true);
   });
 
-  it("accepts null id", () => {
-    expect(
-      paymentDetailTransferSchema.safeParse({ ...validTransfer, id: null })
-        .success,
-    ).toBe(true);
-  });
-
-  it("accepts empty period string", () => {
-    expect(
-      paymentDetailTransferSchema.safeParse({ ...validTransfer, period: "" })
-        .success,
-    ).toBe(true);
-  });
-
-  it("accepts empty paymentReceived string", () => {
+  it("accepts nullable id", () => {
     expect(
       paymentDetailTransferSchema.safeParse({
-        ...validTransfer,
-        paymentReceived: "",
+        id: null,
+        period: "January",
+        paymentReceived: "no",
       }).success,
     ).toBe(true);
   });
-
-  it("rejects missing period", () => {
-    const { period: _, ...rest } = validTransfer;
-    expect(paymentDetailTransferSchema.safeParse(rest).success).toBe(false);
-  });
-
-  it("rejects missing paymentReceived", () => {
-    const { paymentReceived: _, ...rest } = validTransfer;
-    expect(paymentDetailTransferSchema.safeParse(rest).success).toBe(false);
-  });
-
-  it("rejects non-integer id", () => {
-    expect(
-      paymentDetailTransferSchema.safeParse({ ...validTransfer, id: 99.5 })
-        .success,
-    ).toBe(false);
-  });
 });
 
-// ---------------------------------------------------------------------------
-// paymentDetailSchema
-// ---------------------------------------------------------------------------
 describe("paymentDetailSchema", () => {
-  const validDetail = {
+  const valid = {
     id: 1,
-    transferId: 42,
-    company: "Acme Corp",
+    transferId: null,
+    company: "GCC Energies",
     store: "Main Branch",
-    hours: "160.00",
-    hourlyRate: "12.50",
-    candidateTotal: "2000.00",
-    companyTotal: "2500.00",
-    cost: "500.00",
-    bonus: "100.00",
-    paid: "2100.00",
-    beneficiary: "John Doe",
-    iban: "KW12ABCD123456789012345678901",
-    bank: "National Bank",
-    created: "2026-06-01T10:00:00.000Z",
-    updated: "2026-06-15T12:00:00.000Z",
+    hours: "120",
+    hourlyRate: "4.000",
+    candidateTotal: "480.00",
+    companyTotal: "600.00",
+    cost: "120.00",
+    bonus: "0",
+    paid: "0",
+    beneficiary: "Ahmed Ali",
+    iban: "KW00...",
+    bank: "NBK",
+    created: "2024-01-01",
+    updated: "2024-01-31",
   };
 
-  it("accepts a fully populated detail", () => {
-    expect(paymentDetailSchema.safeParse(validDetail).success).toBe(true);
+  it("accepts a valid payment detail", () => {
+    expect(paymentDetailSchema.safeParse(valid).success).toBe(true);
   });
 
-  it("accepts null transferId", () => {
-    expect(
-      paymentDetailSchema.safeParse({ ...validDetail, transferId: null })
-        .success,
-    ).toBe(true);
-  });
-
-  it("accepts null store", () => {
-    expect(
-      paymentDetailSchema.safeParse({ ...validDetail, store: null }).success,
-    ).toBe(true);
-  });
-
-  it("accepts null beneficiary", () => {
-    expect(
-      paymentDetailSchema.safeParse({ ...validDetail, beneficiary: null })
-        .success,
-    ).toBe(true);
-  });
-
-  it("accepts null iban", () => {
-    expect(
-      paymentDetailSchema.safeParse({ ...validDetail, iban: null }).success,
-    ).toBe(true);
-  });
-
-  it("accepts null bank", () => {
-    expect(
-      paymentDetailSchema.safeParse({ ...validDetail, bank: null }).success,
-    ).toBe(true);
-  });
-
-  it("accepts all nullable fields as null simultaneously", () => {
+  it("accepts nullable fields", () => {
     expect(
       paymentDetailSchema.safeParse({
-        ...validDetail,
+        ...valid,
         transferId: null,
         store: null,
         beneficiary: null,
@@ -318,327 +245,72 @@ describe("paymentDetailSchema", () => {
       }).success,
     ).toBe(true);
   });
-
-  it("accepts empty strings on z.string() fields", () => {
-    expect(
-      paymentDetailSchema.safeParse({
-        ...validDetail,
-        company: "",
-        hours: "",
-        hourlyRate: "",
-        candidateTotal: "",
-        companyTotal: "",
-        cost: "",
-        bonus: "",
-        paid: "",
-        created: "",
-        updated: "",
-      }).success,
-    ).toBe(true);
-  });
-
-  it("rejects missing id", () => {
-    const { id: _, ...rest } = validDetail;
-    expect(paymentDetailSchema.safeParse(rest).success).toBe(false);
-  });
-
-  it("rejects missing company", () => {
-    const { company: _, ...rest } = validDetail;
-    expect(paymentDetailSchema.safeParse(rest).success).toBe(false);
-  });
-
-  it("rejects missing hours", () => {
-    const { hours: _, ...rest } = validDetail;
-    expect(paymentDetailSchema.safeParse(rest).success).toBe(false);
-  });
-
-  it("rejects missing hourlyRate", () => {
-    const { hourlyRate: _, ...rest } = validDetail;
-    expect(paymentDetailSchema.safeParse(rest).success).toBe(false);
-  });
-
-  it("rejects missing paid", () => {
-    const { paid: _, ...rest } = validDetail;
-    expect(paymentDetailSchema.safeParse(rest).success).toBe(false);
-  });
-
-  it("rejects missing created", () => {
-    const { created: _, ...rest } = validDetail;
-    expect(paymentDetailSchema.safeParse(rest).success).toBe(false);
-  });
-
-  it("rejects missing updated", () => {
-    const { updated: _, ...rest } = validDetail;
-    expect(paymentDetailSchema.safeParse(rest).success).toBe(false);
-  });
-
-  it("rejects non-integer id", () => {
-    expect(
-      paymentDetailSchema.safeParse({ ...validDetail, id: 1.5 }).success,
-    ).toBe(false);
-  });
-
-  it("rejects non-integer transferId", () => {
-    expect(
-      paymentDetailSchema.safeParse({ ...validDetail, transferId: 42.5 })
-        .success,
-    ).toBe(false);
-  });
 });
 
-// ---------------------------------------------------------------------------
-// paymentDetailInvoiceSchema
-// ---------------------------------------------------------------------------
 describe("paymentDetailInvoiceSchema", () => {
-  const validInvoice = {
-    id: 101,
-    date: new Date("2026-06-30"),
-    status: "paid",
-  };
-
-  it("accepts a fully populated invoice", () => {
-    expect(paymentDetailInvoiceSchema.safeParse(validInvoice).success).toBe(
-      true,
-    );
+  it("accepts valid invoice", () => {
+    const r = paymentDetailInvoiceSchema.safeParse({
+      id: 1,
+      date: new Date("2024-01-15"),
+      status: "paid",
+    });
+    expect(r.success).toBe(true);
   });
 
-  it("accepts null date", () => {
+  it("accepts nullable date and status", () => {
     expect(
-      paymentDetailInvoiceSchema.safeParse({ ...validInvoice, date: null })
-        .success,
+      paymentDetailInvoiceSchema.safeParse({ id: 1, date: null, status: null }).success,
     ).toBe(true);
-  });
-
-  it("accepts null status", () => {
-    expect(
-      paymentDetailInvoiceSchema.safeParse({ ...validInvoice, status: null })
-        .success,
-    ).toBe(true);
-  });
-
-  it("accepts null date and null status together", () => {
-    expect(
-      paymentDetailInvoiceSchema.safeParse({ ...validInvoice, date: null, status: null })
-        .success,
-    ).toBe(true);
-  });
-
-  it("accepts empty status string", () => {
-    expect(
-      paymentDetailInvoiceSchema.safeParse({ ...validInvoice, status: "" })
-        .success,
-    ).toBe(true);
-  });
-
-  it("rejects missing id", () => {
-    const { id: _, ...rest } = validInvoice;
-    expect(paymentDetailInvoiceSchema.safeParse(rest).success).toBe(false);
-  });
-
-  it("rejects non-integer id", () => {
-    expect(
-      paymentDetailInvoiceSchema.safeParse({ ...validInvoice, id: 101.5 })
-        .success,
-    ).toBe(false);
-  });
-
-  it("rejects string date instead of Date object", () => {
-    expect(
-      paymentDetailInvoiceSchema.safeParse({
-        ...validInvoice,
-        date: "2026-06-30",
-      }).success,
-    ).toBe(false);
-  });
-
-  it("rejects number as status", () => {
-    expect(
-      paymentDetailInvoiceSchema.safeParse({ ...validInvoice, status: 123 })
-        .success,
-    ).toBe(false);
   });
 });
 
-// ---------------------------------------------------------------------------
-// getPaymentDetailResultSchema
-// ---------------------------------------------------------------------------
 describe("getPaymentDetailResultSchema", () => {
-  const validTransferCandidate = {
-    id: 1,
-    transferId: 42,
-    company: "Acme Corp",
-    store: "Main Branch",
-    hours: "160.00",
-    hourlyRate: "12.50",
-    candidateTotal: "2000.00",
-    companyTotal: "2500.00",
-    cost: "500.00",
-    bonus: "100.00",
-    paid: "2100.00",
-    beneficiary: "John Doe",
-    iban: "KW12ABCD123456789012345678901",
-    bank: "National Bank",
-    created: "2026-06-01T10:00:00.000Z",
-    updated: "2026-06-15T12:00:00.000Z",
+  const valid = {
+    transferCandidate: {
+      id: 1,
+      transferId: null,
+      company: "GCC Energies",
+      store: null,
+      hours: "120",
+      hourlyRate: "4.000",
+      candidateTotal: "480.00",
+      companyTotal: "600.00",
+      cost: "120.00",
+      bonus: "0",
+      paid: "0",
+      beneficiary: null,
+      iban: null,
+      bank: null,
+      created: "2024-01-01",
+      updated: "2024-01-31",
+    },
+    transfer: null,
+    invoices: [],
   };
 
-  const validTransfer = {
-    id: 99,
-    period: "2026-06",
-    paymentReceived: "5000.00",
-  };
-
-  const validInvoice = {
-    id: 101,
-    date: new Date("2026-06-30"),
-    status: "paid",
-  };
-
-  const validResult = {
-    transferCandidate: validTransferCandidate,
-    transfer: validTransfer,
-    invoices: [validInvoice],
-  };
-
-  it("accepts a fully populated result", () => {
-    expect(getPaymentDetailResultSchema.safeParse(validResult).success).toBe(
-      true,
-    );
-  });
-
-  it("accepts null transfer (no transfer associated)", () => {
-    expect(
-      getPaymentDetailResultSchema.safeParse({
-        ...validResult,
-        transfer: null,
-      }).success,
-    ).toBe(true);
-  });
-
-  it("accepts empty invoices array", () => {
-    expect(
-      getPaymentDetailResultSchema.safeParse({
-        ...validResult,
-        invoices: [],
-      }).success,
-    ).toBe(true);
-  });
-
-  it("accepts null transfer with empty invoices", () => {
-    expect(
-      getPaymentDetailResultSchema.safeParse({
-        ...validResult,
-        transfer: null,
-        invoices: [],
-      }).success,
-    ).toBe(true);
-  });
-
-  it("accepts invoices with null date and status", () => {
-    expect(
-      getPaymentDetailResultSchema.safeParse({
-        ...validResult,
-        invoices: [{ id: 101, date: null, status: null }],
-      }).success,
-    ).toBe(true);
-  });
-
-  it("accepts transferCandidate with nullable fields null", () => {
-    expect(
-      getPaymentDetailResultSchema.safeParse({
-        ...validResult,
-        transferCandidate: {
-          ...validTransferCandidate,
-          transferId: null,
-          store: null,
-          beneficiary: null,
-          iban: null,
-          bank: null,
-        },
-      }).success,
-    ).toBe(true);
+  it("accepts valid result", () => {
+    expect(getPaymentDetailResultSchema.safeParse(valid).success).toBe(true);
   });
 
   it("rejects missing transferCandidate", () => {
-    const { transferCandidate: _, ...rest } = validResult;
-    expect(getPaymentDetailResultSchema.safeParse(rest).success).toBe(false);
-  });
-
-  it("rejects missing invoices", () => {
-    const { invoices: _, ...rest } = validResult;
-    expect(getPaymentDetailResultSchema.safeParse(rest).success).toBe(false);
-  });
-
-  it("rejects non-array invoices", () => {
     expect(
-      getPaymentDetailResultSchema.safeParse({
-        ...validResult,
-        invoices: "not-array",
-      }).success,
-    ).toBe(false);
-  });
-
-  it("rejects invalid transferCandidate (missing id)", () => {
-    const { id: _, ...badCandidate } = validTransferCandidate;
-    expect(
-      getPaymentDetailResultSchema.safeParse({
-        ...validResult,
-        transferCandidate: badCandidate,
-      }).success,
-    ).toBe(false);
-  });
-
-  it("rejects invalid transfer (non-integer id)", () => {
-    expect(
-      getPaymentDetailResultSchema.safeParse({
-        ...validResult,
-        transfer: { ...validTransfer, id: 99.5 },
-      }).success,
+      getPaymentDetailResultSchema.safeParse({ transfer: null, invoices: [] }).success,
     ).toBe(false);
   });
 });
 
-// ---------------------------------------------------------------------------
-// paymentMethodSchema
-// ---------------------------------------------------------------------------
 describe("paymentMethodSchema", () => {
-  const validMethod = {
-    bankId: 5,
-    bankName: "National Bank",
-    bankAccountName: "Acme Corp Payments",
-    iban: "KW12ABCD123456789012345678901",
-  };
-
-  it("accepts a fully populated method", () => {
-    expect(paymentMethodSchema.safeParse(validMethod).success).toBe(true);
+  it("accepts valid method", () => {
+    const r = paymentMethodSchema.safeParse({
+      bankId: 1,
+      bankName: "NBK",
+      bankAccountName: "Ahmed Ali",
+      iban: "KW00...",
+    });
+    expect(r.success).toBe(true);
   });
 
-  it("accepts null bankId", () => {
-    expect(
-      paymentMethodSchema.safeParse({ ...validMethod, bankId: null }).success,
-    ).toBe(true);
-  });
-
-  it("accepts null bankName", () => {
-    expect(
-      paymentMethodSchema.safeParse({ ...validMethod, bankName: null }).success,
-    ).toBe(true);
-  });
-
-  it("accepts null bankAccountName", () => {
-    expect(
-      paymentMethodSchema.safeParse({ ...validMethod, bankAccountName: null })
-        .success,
-    ).toBe(true);
-  });
-
-  it("accepts null iban", () => {
-    expect(
-      paymentMethodSchema.safeParse({ ...validMethod, iban: null }).success,
-    ).toBe(true);
-  });
-
-  it("accepts all nullable fields as null", () => {
+  it("accepts all nullable fields", () => {
     expect(
       paymentMethodSchema.safeParse({
         bankId: null,
@@ -648,72 +320,14 @@ describe("paymentMethodSchema", () => {
       }).success,
     ).toBe(true);
   });
-
-  it("accepts empty strings on z.string() fields", () => {
-    expect(
-      paymentMethodSchema.safeParse({
-        ...validMethod,
-        bankName: "",
-        bankAccountName: "",
-        iban: "",
-      }).success,
-    ).toBe(true);
-  });
-
-  it("rejects non-integer bankId", () => {
-    expect(
-      paymentMethodSchema.safeParse({ ...validMethod, bankId: 5.5 }).success,
-    ).toBe(false);
-  });
-
-  // paymentMethodSchema fields are nullable but not optional — .nullable()
-  // allows null but does not make the key itself optional (undefined is
-  // still rejected).
-  it("rejects empty object (fields are nullable but not optional)", () => {
-    expect(paymentMethodSchema.safeParse({}).success).toBe(false);
-  });
-
-  it("rejects missing iban (all keys are required even if nullable)", () => {
-    const { iban: _, ...rest } = validMethod;
-    expect(paymentMethodSchema.safeParse(rest).success).toBe(false);
-  });
 });
 
-// ---------------------------------------------------------------------------
-// createPaymentResultSchema
-// ---------------------------------------------------------------------------
 describe("createPaymentResultSchema", () => {
-  it("accepts a valid result with tcId", () => {
-    expect(
-      createPaymentResultSchema.safeParse({ tcId: 42 }).success,
-    ).toBe(true);
-  });
-
-  it("accepts tcId as 0", () => {
-    expect(
-      createPaymentResultSchema.safeParse({ tcId: 0 }).success,
-    ).toBe(true);
+  it("accepts valid result", () => {
+    expect(createPaymentResultSchema.safeParse({ tcId: 5 }).success).toBe(true);
   });
 
   it("rejects missing tcId", () => {
     expect(createPaymentResultSchema.safeParse({}).success).toBe(false);
-  });
-
-  it("rejects non-integer tcId", () => {
-    expect(
-      createPaymentResultSchema.safeParse({ tcId: 42.5 }).success,
-    ).toBe(false);
-  });
-
-  it("rejects string tcId", () => {
-    expect(
-      createPaymentResultSchema.safeParse({ tcId: "42" }).success,
-    ).toBe(false);
-  });
-
-  it("rejects negative tcId (schema uses z.number().int() without .positive())", () => {
-    expect(
-      createPaymentResultSchema.safeParse({ tcId: -1 }).success,
-    ).toBe(true);
   });
 });

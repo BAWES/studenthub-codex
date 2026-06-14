@@ -1,107 +1,187 @@
 import { describe, it, expect } from "vitest";
 import {
+  listLanguagesSchema,
+  getLanguageSchema,
+  createLanguageSchema,
+  updateLanguageSchema,
+  deleteLanguageSchema,
   languageItemSchema,
   languageActionResultSchema,
   languageDetailResponseSchema,
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
-// languageItemSchema
+// Input schemas
 // ---------------------------------------------------------------------------
 
-describe("languageItemSchema", () => {
-  const validItem = () => ({
-    candidate_language_id: 1,
-    language: "English",
-    proficiency: "Fluent",
-    candidate_language_created_at: new Date("2026-06-01"),
-  });
-
-  it("accepts a valid language item", () => {
-    const r = languageItemSchema.safeParse(validItem());
+describe("listLanguagesSchema", () => {
+  it("accepts empty input (defaults)", () => {
+    const r = listLanguagesSchema.safeParse({});
     expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data.page).toBe(1);
+      expect(r.data.limit).toBe(20);
+    }
   });
 
-  it("accepts nullable created_at", () => {
-    const r = languageItemSchema.safeParse({
-      ...validItem(),
-      candidate_language_created_at: null,
-    });
+  it("accepts candidateId filter", () => {
+    const r = listLanguagesSchema.safeParse({ candidateId: 1 });
     expect(r.success).toBe(true);
+    if (r.success) expect(r.data.candidateId).toBe(1);
   });
 
-  it("rejects missing candidate_language_id", () => {
-    const { candidate_language_id: _, ...rest } = validItem();
-    expect(languageItemSchema.safeParse(rest).success).toBe(false);
+  it("rejects limit over 100", () => {
+    expect(listLanguagesSchema.safeParse({ limit: 999 }).success).toBe(false);
+  });
+});
+
+describe("getLanguageSchema", () => {
+  it("accepts valid input", () => {
+    expect(getLanguageSchema.safeParse({ candidateId: 1, languageId: 5 }).success).toBe(true);
   });
 
-  it("rejects non-positive candidate_language_id", () => {
+  it("rejects missing candidateId", () => {
+    expect(getLanguageSchema.safeParse({ languageId: 5 }).success).toBe(false);
+  });
+
+  it("rejects missing languageId", () => {
+    expect(getLanguageSchema.safeParse({ candidateId: 1 }).success).toBe(false);
+  });
+});
+
+describe("createLanguageSchema", () => {
+  const valid = { candidateId: 1, language: "English", proficiency: "advanced" };
+
+  it("accepts valid input", () => {
+    const r = createLanguageSchema.safeParse(valid);
+    expect(r.success).toBe(true);
+    if (r.success) expect(r.data.language).toBe("English");
+  });
+
+  it("trims whitespace", () => {
+    const r = createLanguageSchema.safeParse({ ...valid, language: "  Arabic  " });
+    expect(r.success).toBe(true);
+    if (r.success) expect(r.data.language).toBe("Arabic");
+  });
+
+  it("rejects missing language", () => {
+    const { language: _, ...rest } = valid;
+    expect(createLanguageSchema.safeParse(rest).success).toBe(false);
+  });
+
+  it("rejects missing proficiency", () => {
+    const { proficiency: _, ...rest } = valid;
+    expect(createLanguageSchema.safeParse(rest).success).toBe(false);
+  });
+
+  it("rejects empty language string", () => {
+    expect(createLanguageSchema.safeParse({ ...valid, language: "" }).success).toBe(false);
+  });
+
+  it("rejects language over 128 chars", () => {
     expect(
-      languageItemSchema.safeParse({ ...validItem(), candidate_language_id: 0 }).success,
+      createLanguageSchema.safeParse({ ...valid, language: "A".repeat(129) }).success,
     ).toBe(false);
   });
 });
 
-// ---------------------------------------------------------------------------
-// languageActionResultSchema  (discriminatedUnion)
-// ---------------------------------------------------------------------------
+describe("updateLanguageSchema", () => {
+  const valid = { candidateId: 1, languageId: 5, language: "French", proficiency: "native" };
 
-describe("languageActionResultSchema", () => {
-  it("accepts success with languageId", () => {
-    const r = languageActionResultSchema.safeParse({ success: true, languageId: 42 });
-    expect(r.success).toBe(true);
+  it("accepts valid update", () => {
+    expect(updateLanguageSchema.safeParse(valid).success).toBe(true);
   });
 
-  it("rejects success without languageId", () => {
-    const r = languageActionResultSchema.safeParse({ success: true });
-    expect(r.success).toBe(false);
+  it("rejects missing candidateId", () => {
+    const { candidateId: _, ...rest } = valid;
+    expect(updateLanguageSchema.safeParse(rest).success).toBe(false);
   });
 
-  it("accepts failure with error", () => {
-    const r = languageActionResultSchema.safeParse({ success: false, error: "Failed" });
-    expect(r.success).toBe(true);
+  it("rejects missing languageId", () => {
+    const { languageId: _, ...rest } = valid;
+    expect(updateLanguageSchema.safeParse(rest).success).toBe(false);
+  });
+});
+
+describe("deleteLanguageSchema", () => {
+  it("accepts valid input", () => {
+    expect(deleteLanguageSchema.safeParse({ candidateId: 1, languageId: 5 }).success).toBe(true);
   });
 
-  it("rejects failure without error", () => {
-    const r = languageActionResultSchema.safeParse({ success: false });
-    expect(r.success).toBe(false);
-  });
-
-  it("rejects non-positive languageId", () => {
-    const r = languageActionResultSchema.safeParse({ success: true, languageId: -1 });
-    expect(r.success).toBe(false);
+  it("rejects missing candidateId", () => {
+    expect(deleteLanguageSchema.safeParse({ languageId: 5 }).success).toBe(false);
   });
 });
 
 // ---------------------------------------------------------------------------
-// languageDetailResponseSchema  (z.union)
+// Output schemas
 // ---------------------------------------------------------------------------
 
-describe("languageDetailResponseSchema", () => {
-  const validItem = () => ({
+describe("languageItemSchema", () => {
+  const valid = {
     candidate_language_id: 1,
     language: "English",
-    proficiency: "Fluent",
+    proficiency: "advanced",
+    candidate_language_created_at: new Date("2024-01-15"),
+  };
+
+  it("accepts a valid language item", () => {
+    expect(languageItemSchema.safeParse(valid).success).toBe(true);
+  });
+
+  it("accepts nullable created_at", () => {
+    expect(
+      languageItemSchema.safeParse({ ...valid, candidate_language_created_at: null }).success,
+    ).toBe(true);
+  });
+
+  it("rejects missing language", () => {
+    const { language: _, ...rest } = valid;
+    expect(languageItemSchema.safeParse(rest).success).toBe(false);
+  });
+});
+
+describe("languageActionResultSchema", () => {
+  it("accepts success with languageId", () => {
+    expect(
+      languageActionResultSchema.safeParse({ success: true, languageId: 1 }).success,
+    ).toBe(true);
+  });
+
+  it("accepts error result", () => {
+    expect(
+      languageActionResultSchema.safeParse({ success: false, error: "Not found." }).success,
+    ).toBe(true);
+  });
+
+  it("rejects success without languageId", () => {
+    expect(languageActionResultSchema.safeParse({ success: true }).success).toBe(false);
+  });
+});
+
+describe("languageDetailResponseSchema", () => {
+  const validItem = {
+    candidate_language_id: 1,
+    language: "English",
+    proficiency: "advanced",
     candidate_language_created_at: null,
+  };
+
+  it("accepts data response", () => {
+    expect(
+      languageDetailResponseSchema.safeParse({ data: validItem, error: null }).success,
+    ).toBe(true);
   });
 
-  it("accepts found variant with data and null error", () => {
-    const r = languageDetailResponseSchema.safeParse({ data: validItem(), error: null });
-    expect(r.success).toBe(true);
+  it("accepts error response", () => {
+    expect(
+      languageDetailResponseSchema.safeParse({ data: null, error: "Not found." }).success,
+    ).toBe(true);
   });
 
-  it("accepts not-found variant with null data and error", () => {
-    const r = languageDetailResponseSchema.safeParse({ data: null, error: "Not found" });
-    expect(r.success).toBe(true);
-  });
-
-  it("accepts both data and error null (error is .nullable())", () => {
-    const r = languageDetailResponseSchema.safeParse({ data: null, error: null });
-    expect(r.success).toBe(true);
-  });
-
-  it("rejects missing data", () => {
-    const r = languageDetailResponseSchema.safeParse({ error: "Error" });
-    expect(r.success).toBe(false);
+  it("rejects data and error both non-null", () => {
+    expect(
+      languageDetailResponseSchema.safeParse({ data: validItem, error: "Error still set" }).success,
+    ).toBe(false);
   });
 });

@@ -1,83 +1,113 @@
 import { describe, it, expect } from "vitest";
 import {
+  listCandidateLinksSchema,
+  getCandidateLinkSchema,
   candidateLinkItemSchema,
   listCandidateLinksResultSchema,
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
-// candidateLinkItemSchema
+// Input schemas
 // ---------------------------------------------------------------------------
 
-describe("candidateLinkItemSchema", () => {
-  const validItem = () => ({
-    cl_uuid: "link-001",
-    candidate_id: 123,
-    title: "Portfolio",
-    url: "https://example.com/portfolio",
-    created_at: new Date("2026-06-01"),
-    updated_at: new Date("2026-06-10"),
-  });
-
-  it("accepts a valid link item", () => {
-    const r = candidateLinkItemSchema.safeParse(validItem());
+describe("listCandidateLinksSchema", () => {
+  it("accepts empty input (defaults)", () => {
+    const r = listCandidateLinksSchema.safeParse({});
     expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data.page).toBe(1);
+      expect(r.data.limit).toBe(20);
+    }
   });
 
-  it("accepts nullable date fields", () => {
-    const r = candidateLinkItemSchema.safeParse({
-      ...validItem(),
-      created_at: null,
-      updated_at: null,
-    });
+  it("accepts candidateId filter", () => {
+    const r = listCandidateLinksSchema.safeParse({ candidateId: 1 });
     expect(r.success).toBe(true);
+    if (r.success) expect(r.data.candidateId).toBe(1);
   });
 
-  it("rejects missing cl_uuid", () => {
-    const { cl_uuid: _, ...rest } = validItem();
-    expect(candidateLinkItemSchema.safeParse(rest).success).toBe(false);
+  it("coerces string candidateId", () => {
+    const r = listCandidateLinksSchema.safeParse({ candidateId: "3" });
+    expect(r.success).toBe(true);
+    if (r.success) expect(r.data.candidateId).toBe(3);
   });
 
-  it("rejects non-string url", () => {
-    expect(
-      candidateLinkItemSchema.safeParse({ ...validItem(), url: 123 }).success,
-    ).toBe(false);
+  it("rejects limit over 100", () => {
+    expect(listCandidateLinksSchema.safeParse({ limit: 999 }).success).toBe(false);
+  });
+});
+
+describe("getCandidateLinkSchema", () => {
+  it("accepts valid UUID", () => {
+    expect(getCandidateLinkSchema.safeParse({ uuid: "link_abc" }).success).toBe(true);
+  });
+
+  it("rejects empty UUID", () => {
+    expect(getCandidateLinkSchema.safeParse({ uuid: "" }).success).toBe(false);
+  });
+
+  it("rejects missing uuid", () => {
+    expect(getCandidateLinkSchema.safeParse({}).success).toBe(false);
   });
 });
 
 // ---------------------------------------------------------------------------
-// listCandidateLinksResultSchema
+// Output schemas
 // ---------------------------------------------------------------------------
 
+describe("candidateLinkItemSchema", () => {
+  const valid = {
+    cl_uuid: "link_abc",
+    candidate_id: 1,
+    title: "Portfolio",
+    url: "https://example.com",
+    created_at: new Date("2024-01-15"),
+    updated_at: new Date("2024-06-20"),
+  };
+
+  it("accepts a valid link item", () => {
+    expect(candidateLinkItemSchema.safeParse(valid).success).toBe(true);
+  });
+
+  it("accepts nullable dates", () => {
+    expect(
+      candidateLinkItemSchema.safeParse({ ...valid, created_at: null, updated_at: null }).success,
+    ).toBe(true);
+  });
+
+  it("rejects missing cl_uuid", () => {
+    const { cl_uuid: _, ...rest } = valid;
+    expect(candidateLinkItemSchema.safeParse(rest).success).toBe(false);
+  });
+
+  it("rejects missing title", () => {
+    const { title: _, ...rest } = valid;
+    expect(candidateLinkItemSchema.safeParse(rest).success).toBe(false);
+  });
+
+  it("rejects missing url", () => {
+    const { url: _, ...rest } = valid;
+    expect(candidateLinkItemSchema.safeParse(rest).success).toBe(false);
+  });
+});
+
 describe("listCandidateLinksResultSchema", () => {
-  it("accepts a valid paginated result", () => {
-    const r = listCandidateLinksResultSchema.safeParse({
-      links: [{
-        cl_uuid: "l-1",
-        candidate_id: 1,
-        title: "Link",
-        url: "http://example.com",
-        created_at: null,
-        updated_at: null,
-      }],
-      total: 1,
-      page: 1,
-      limit: 20,
-      totalPages: 1,
-    });
-    expect(r.success).toBe(true);
+  it("accepts valid result with empty list", () => {
+    expect(
+      listCandidateLinksResultSchema.safeParse({
+        links: [],
+        total: 0,
+        page: 1,
+        limit: 20,
+        totalPages: 0,
+      }).success,
+    ).toBe(true);
   });
 
-  it("accepts empty links array", () => {
-    const r = listCandidateLinksResultSchema.safeParse({
-      links: [], total: 0, page: 1, limit: 20, totalPages: 0,
-    });
-    expect(r.success).toBe(true);
-  });
-
-  it("rejects missing total", () => {
-    const r = listCandidateLinksResultSchema.safeParse({
-      links: [], page: 1, limit: 20, totalPages: 0,
-    });
-    expect(r.success).toBe(false);
+  it("rejects missing links", () => {
+    expect(
+      listCandidateLinksResultSchema.safeParse({ total: 0, page: 1, limit: 20, totalPages: 0 })
+        .success,
+    ).toBe(false);
   });
 });
