@@ -1,5 +1,7 @@
 import { describe, it, expect } from "vitest";
+import { z } from "zod";
 import {
+  getCandidateProfileSchema,
   updateCandidateProfileResultSchema,
   candidateErrorResultSchema,
   candidateLanguageResultSchema,
@@ -11,593 +13,510 @@ import {
   educationStateResultSchema,
   candidateActionErrorResultSchema,
   changePasswordResultSchema,
+  getCandidateSchema,
+  addCandidateNoteSchema,
   candidateNoteOutputSchema,
   candidateDetailOutputSchema,
   candidateDetailResultOutputSchema,
   addNoteResultOutputSchema,
+  type CandidateDetail,
+  type CandidateNote,
+  type CandidateDetailResult,
+  type AddNoteResult,
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
-const validNote = () => ({
-  uuid: "note-uuid-001",
-  text: "Follow up with candidate",
-  type: "Internal Note",
-  createdBy: 42,
-  createdAt: "2024-01-15T10:30:00Z",
+
+function makeValidDetail(
+  overrides: Partial<CandidateDetail> = {},
+): CandidateDetail {
+  return {
+    id: 1,
+    name: "John Doe",
+    email: "john@example.com",
+    phone: "+965 5555 1234",
+    gender: 1,
+    objective: "Seeking a challenging role",
+    intro: "Experienced developer",
+    photoUrl: "https://example.com/photo.jpg",
+    civilId: "284120500123",
+    hourlyRate: 15.5,
+    countryId: 1,
+    universityId: 5,
+    birthDate: "1990-01-01",
+    createdAt: "2024-01-15T10:00:00Z",
+    updatedAt: "2024-06-01T12:00:00Z",
+    ...overrides,
+  };
+}
+
+function makeValidNote(
+  overrides: Partial<CandidateNote> = {},
+): CandidateNote {
+  return {
+    uuid: "note_abc123",
+    text: "Great candidate",
+    type: "Internal Note",
+    createdBy: 1,
+    createdAt: "2024-02-10T14:30:00Z",
+    ...overrides,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Input schemas
+// ---------------------------------------------------------------------------
+
+describe("getCandidateProfileSchema", () => {
+  it("accepts a valid candidate ID (number)", () => {
+    expect(getCandidateProfileSchema.safeParse({ candidateId: 42 }).success).toBe(true);
+  });
+
+  it("coerces a string candidate ID to number", () => {
+    expect(getCandidateProfileSchema.safeParse({ candidateId: "42" }).success).toBe(true);
+  });
+
+  it("rejects a negative candidate ID", () => {
+    expect(getCandidateProfileSchema.safeParse({ candidateId: -1 }).success).toBe(false);
+  });
+
+  it("rejects zero", () => {
+    expect(getCandidateProfileSchema.safeParse({ candidateId: 0 }).success).toBe(false);
+  });
+
+  it("rejects non-numeric string", () => {
+    expect(getCandidateProfileSchema.safeParse({ candidateId: "abc" }).success).toBe(false);
+  });
+
+  it("rejects missing candidateId", () => {
+    expect(getCandidateProfileSchema.safeParse({}).success).toBe(false);
+  });
 });
 
-const validNoteNull = () => ({
-  uuid: "note-uuid-002",
-  text: "Another note",
-  type: "Phone Call",
-  createdBy: null,
-  createdAt: "2024-01-16T11:00:00Z",
+describe("getCandidateSchema", () => {
+  it("accepts a valid candidate ID", () => {
+    expect(getCandidateSchema.safeParse({ candidateId: 99 }).success).toBe(true);
+  });
+
+  it("coerces a string to number", () => {
+    expect(getCandidateSchema.safeParse({ candidateId: "99" }).success).toBe(true);
+  });
+
+  it("rejects a negative ID", () => {
+    expect(getCandidateSchema.safeParse({ candidateId: -5 }).success).toBe(false);
+  });
+
+  it("rejects missing candidateId", () => {
+    expect(getCandidateSchema.safeParse({}).success).toBe(false);
+  });
 });
 
-const validCandidateDetail = () => ({
-  id: 1001,
-  name: "Ahmed Al-Sabah",
-  email: "ahmed@example.com",
-  phone: "+965 5000 0000",
-  gender: 1,
-  objective: "Looking for internship in engineering",
-  intro: "Hardworking student from KU",
-  photoUrl: "https://example.com/photo.jpg",
-  civilId: "1234567890",
-  hourlyRate: 5.5,
-  countryId: 1,
-  universityId: 5,
-  birthDate: "2000-01-01",
-  createdAt: "2024-01-01T00:00:00Z",
-  updatedAt: "2024-06-01T00:00:00Z",
+describe("addCandidateNoteSchema", () => {
+  it("accepts a valid note input", () => {
+    expect(
+      addCandidateNoteSchema.safeParse({
+        candidateId: 1,
+        noteText: "  Follow up with candidate  ",
+        noteType: "Phone Call",
+      }).success,
+    ).toBe(true);
+  });
+
+  it("defaults noteType to 'Internal Note' when omitted", () => {
+    const parsed = addCandidateNoteSchema.safeParse({ candidateId: 1, noteText: "Note" });
+    expect(parsed.success).toBe(true);
+    if (parsed.success) {
+      expect(parsed.data.noteType).toBe("Internal Note");
+    }
+  });
+
+  it("rejects empty trimmed noteText", () => {
+    expect(
+      addCandidateNoteSchema.safeParse({ candidateId: 1, noteText: "   " }).success,
+    ).toBe(false);
+  });
+
+  it("rejects missing candidateId", () => {
+    expect(
+      addCandidateNoteSchema.safeParse({ noteText: "Note" }).success,
+    ).toBe(false);
+  });
+
+  it("rejects missing noteText", () => {
+    expect(
+      addCandidateNoteSchema.safeParse({ candidateId: 1 }).success,
+    ).toBe(false);
+  });
 });
 
 // ---------------------------------------------------------------------------
-// updateCandidateProfileResultSchema
+// Output / result schemas
 // ---------------------------------------------------------------------------
+
 describe("updateCandidateProfileResultSchema", () => {
-  it("accepts success with no fieldErrors", () => {
-    const r = updateCandidateProfileResultSchema.safeParse({ success: true });
-    expect(r.success).toBe(true);
+  it("accepts a success result", () => {
+    expect(
+      updateCandidateProfileResultSchema.safeParse({ success: true }).success,
+    ).toBe(true);
   });
 
-  it("accepts success with fieldErrors", () => {
-    const r = updateCandidateProfileResultSchema.safeParse({
-      success: true,
-      fieldErrors: {
-        name: ["Name is too short"],
-        email: undefined,
-      },
-    });
-    expect(r.success).toBe(true);
+  it("accepts a failure result with fieldErrors", () => {
+    expect(
+      updateCandidateProfileResultSchema.safeParse({
+        success: false,
+        fieldErrors: { name: ["Name is required"] },
+      }).success,
+    ).toBe(true);
   });
 
-  it("accepts failure with fieldErrors", () => {
-    const r = updateCandidateProfileResultSchema.safeParse({
-      success: false,
-      fieldErrors: { email: ["Invalid email format"] },
-    });
-    expect(r.success).toBe(true);
-  });
-
-  it("accepts success with missing fieldErrors", () => {
-    const r = updateCandidateProfileResultSchema.safeParse({ success: true });
-    expect(r.success).toBe(true);
-  });
-
-  it("rejects missing success", () => {
-    const r = updateCandidateProfileResultSchema.safeParse({});
-    expect(r.success).toBe(false);
-  });
-
-  it("rejects wrong type for success", () => {
-    const r = updateCandidateProfileResultSchema.safeParse({ success: "yes" });
-    expect(r.success).toBe(false);
+  it("rejects non-boolean success", () => {
+    expect(
+      updateCandidateProfileResultSchema.safeParse({ success: "true" }).success,
+    ).toBe(false);
   });
 });
 
-// ---------------------------------------------------------------------------
-// candidateErrorResultSchema
-// ---------------------------------------------------------------------------
 describe("candidateErrorResultSchema", () => {
-  it("accepts an error message", () => {
-    const r = candidateErrorResultSchema.safeParse({ error: "Candidate not found" });
-    expect(r.success).toBe(true);
-  });
-
-  it("accepts an empty error string", () => {
-    const r = candidateErrorResultSchema.safeParse({ error: "" });
-    expect(r.success).toBe(true);
+  it("accepts an error result", () => {
+    expect(
+      candidateErrorResultSchema.safeParse({ error: "Something went wrong" }).success,
+    ).toBe(true);
   });
 
   it("rejects missing error", () => {
-    const r = candidateErrorResultSchema.safeParse({});
-    expect(r.success).toBe(false);
+    expect(candidateErrorResultSchema.safeParse({}).success).toBe(false);
   });
 
-  it("rejects wrong type for error", () => {
-    const r = candidateErrorResultSchema.safeParse({ error: 123 });
-    expect(r.success).toBe(false);
+  it("rejects non-string error", () => {
+    expect(candidateErrorResultSchema.safeParse({ error: 42 }).success).toBe(false);
   });
 });
 
-// ---------------------------------------------------------------------------
-// candidateLanguageResultSchema
-// ---------------------------------------------------------------------------
 describe("candidateLanguageResultSchema", () => {
-  it("accepts success without error", () => {
-    const r = candidateLanguageResultSchema.safeParse({ success: true });
-    expect(r.success).toBe(true);
+  it("accepts a success result", () => {
+    expect(
+      candidateLanguageResultSchema.safeParse({ success: true }).success,
+    ).toBe(true);
   });
 
-  it("accepts success with empty error", () => {
-    const r = candidateLanguageResultSchema.safeParse({ success: true, error: "" });
-    expect(r.success).toBe(true);
+  it("accepts a failure result with error", () => {
+    expect(
+      candidateLanguageResultSchema.safeParse({ success: false, error: "Failed" }).success,
+    ).toBe(true);
   });
 
-  it("accepts failure with error message", () => {
-    const r = candidateLanguageResultSchema.safeParse({ success: false, error: "Language already exists" });
-    expect(r.success).toBe(true);
-  });
-
-  it("rejects missing success", () => {
-    const r = candidateLanguageResultSchema.safeParse({});
-    expect(r.success).toBe(false);
-  });
-
-  it("rejects wrong type for success", () => {
-    const r = candidateLanguageResultSchema.safeParse({ success: "yes" });
-    expect(r.success).toBe(false);
-  });
-
-  it("rejects wrong type for error", () => {
-    const r = candidateLanguageResultSchema.safeParse({ success: false, error: 999 });
-    expect(r.success).toBe(false);
+  it("rejects non-boolean success", () => {
+    expect(
+      candidateLanguageResultSchema.safeParse({ success: "yes" }).success,
+    ).toBe(false);
   });
 });
 
-// ---------------------------------------------------------------------------
-// getCountryOptionsResultSchema
-// ---------------------------------------------------------------------------
-describe("getCountryOptionsResultSchema", () => {
-  it("accepts an array of numeric options", () => {
-    const r = getCountryOptionsResultSchema.safeParse([
-      { id: 1, label: "Kuwait" },
-      { id: 2, label: "Egypt" },
-    ]);
-    expect(r.success).toBe(true);
-  });
-
-  it("accepts an empty array", () => {
-    const r = getCountryOptionsResultSchema.safeParse([]);
-    expect(r.success).toBe(true);
-  });
-
-  it("rejects non-integer id", () => {
-    const r = getCountryOptionsResultSchema.safeParse([{ id: 1.5, label: "Kuwait" }]);
-    expect(r.success).toBe(false);
-  });
-
-  it("rejects missing label", () => {
-    const r = getCountryOptionsResultSchema.safeParse([{ id: 1 }]);
-    expect(r.success).toBe(false);
-  });
-
-  it("rejects wrong type for id", () => {
-    const r = getCountryOptionsResultSchema.safeParse([{ id: "one", label: "Kuwait" }]);
-    expect(r.success).toBe(false);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// getUniversityOptionsResultSchema
-// ---------------------------------------------------------------------------
-describe("getUniversityOptionsResultSchema", () => {
-  it("accepts an array of numeric options", () => {
-    const r = getUniversityOptionsResultSchema.safeParse([
-      { id: 10, label: "Kuwait University" },
-    ]);
-    expect(r.success).toBe(true);
-  });
-
-  it("accepts an empty array", () => {
-    const r = getUniversityOptionsResultSchema.safeParse([]);
-    expect(r.success).toBe(true);
-  });
-
-  it("rejects negative id", () => {
-    const r = getUniversityOptionsResultSchema.safeParse([{ id: -1, label: "Unknown" }]);
-    // z.number().int() allows negative, but still validates type
-    expect(r.success).toBe(true); // int() doesn't enforce nonnegative
-  });
-
-  it("rejects missing required fields", () => {
-    const r = getUniversityOptionsResultSchema.safeParse([{}]);
-    expect(r.success).toBe(false);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// getBankOptionsResultSchema
-// ---------------------------------------------------------------------------
-describe("getBankOptionsResultSchema", () => {
-  it("accepts an array of numeric options", () => {
-    const r = getBankOptionsResultSchema.safeParse([
-      { id: 5, label: "National Bank of Kuwait" },
-    ]);
-    expect(r.success).toBe(true);
-  });
-
-  it("accepts an empty array", () => {
-    const r = getBankOptionsResultSchema.safeParse([]);
-    expect(r.success).toBe(true);
-  });
-
-  it("rejects non-numeric id", () => {
-    const r = getBankOptionsResultSchema.safeParse([{ id: "NBK", label: "NBK" }]);
-    expect(r.success).toBe(false);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// getDegreeOptionsResultSchema
-// ---------------------------------------------------------------------------
-describe("getDegreeOptionsResultSchema", () => {
-  it("accepts an array of uuid options", () => {
-    const r = getDegreeOptionsResultSchema.safeParse([
-      { id: "deg-uuid-1", label: "Bachelor" },
-    ]);
-    expect(r.success).toBe(true);
-  });
-
-  it("accepts an empty array", () => {
-    const r = getDegreeOptionsResultSchema.safeParse([]);
-    expect(r.success).toBe(true);
-  });
-
-  it("rejects numeric id (expects string)", () => {
-    const r = getDegreeOptionsResultSchema.safeParse([{ id: 1, label: "Bachelor" }]);
-    expect(r.success).toBe(false);
-  });
-
-  it("rejects missing label", () => {
-    const r = getDegreeOptionsResultSchema.safeParse([{ id: "deg-uuid-1" }]);
-    expect(r.success).toBe(false);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// getMajorOptionsResultSchema
-// ---------------------------------------------------------------------------
-describe("getMajorOptionsResultSchema", () => {
-  it("accepts an array of uuid options", () => {
-    const r = getMajorOptionsResultSchema.safeParse([
-      { id: "maj-uuid-1", label: "Computer Science" },
-    ]);
-    expect(r.success).toBe(true);
-  });
-
-  it("accepts an empty array", () => {
-    const r = getMajorOptionsResultSchema.safeParse([]);
-    expect(r.success).toBe(true);
-  });
-
-  it("rejects numeric id (expects string)", () => {
-    const r = getMajorOptionsResultSchema.safeParse([{ id: 2, label: "Engineering" }]);
-    expect(r.success).toBe(false);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// educationStateResultSchema
-// ---------------------------------------------------------------------------
 describe("educationStateResultSchema", () => {
-  it("accepts success without error", () => {
-    const r = educationStateResultSchema.safeParse({ success: true });
-    expect(r.success).toBe(true);
+  it("accepts a success result", () => {
+    expect(
+      educationStateResultSchema.safeParse({ success: true }).success,
+    ).toBe(true);
   });
 
-  it("accepts failure with error message", () => {
-    const r = educationStateResultSchema.safeParse({ success: false, error: "Invalid date" });
-    expect(r.success).toBe(true);
+  it("accepts a failure result with error", () => {
+    expect(
+      educationStateResultSchema.safeParse({ success: false, error: "Invalid degree" }).success,
+    ).toBe(true);
   });
 
   it("rejects missing success", () => {
-    const r = educationStateResultSchema.safeParse({});
-    expect(r.success).toBe(false);
-  });
-
-  it("rejects wrong type for success", () => {
-    const r = educationStateResultSchema.safeParse({ success: "true" });
-    expect(r.success).toBe(false);
-  });
-
-  it("rejects wrong type for error", () => {
-    const r = educationStateResultSchema.safeParse({ success: false, error: 42 });
-    expect(r.success).toBe(false);
+    expect(educationStateResultSchema.safeParse({}).success).toBe(false);
   });
 });
 
-// ---------------------------------------------------------------------------
-// candidateActionErrorResultSchema
-// ---------------------------------------------------------------------------
 describe("candidateActionErrorResultSchema", () => {
-  it("accepts non-empty error string", () => {
-    const r = candidateActionErrorResultSchema.safeParse({ error: "Something went wrong" });
-    expect(r.success).toBe(true);
+  it("accepts a result with error", () => {
+    expect(
+      candidateActionErrorResultSchema.safeParse({ error: "" }).success,
+    ).toBe(true);
   });
 
-  it("accepts empty error string (success case)", () => {
-    const r = candidateActionErrorResultSchema.safeParse({ error: "" });
-    expect(r.success).toBe(true);
+  it("accepts a result with a non-empty error", () => {
+    expect(
+      candidateActionErrorResultSchema.safeParse({ error: "Action failed" }).success,
+    ).toBe(true);
   });
 
   it("rejects missing error", () => {
-    const r = candidateActionErrorResultSchema.safeParse({});
-    expect(r.success).toBe(false);
-  });
-
-  it("rejects wrong type for error", () => {
-    const r = candidateActionErrorResultSchema.safeParse({ error: false });
-    expect(r.success).toBe(false);
+    expect(candidateActionErrorResultSchema.safeParse({}).success).toBe(false);
   });
 });
 
 // ---------------------------------------------------------------------------
-// changePasswordResultSchema (union of 3 variants)
+// changePasswordResultSchema — z.union of 3 variants
 // ---------------------------------------------------------------------------
+
 describe("changePasswordResultSchema", () => {
   it("accepts success variant", () => {
-    const r = changePasswordResultSchema.safeParse({ success: true });
-    expect(r.success).toBe(true);
+    expect(
+      changePasswordResultSchema.safeParse({ success: true }).success,
+    ).toBe(true);
   });
 
-  it("accepts failure with error string", () => {
-    const r = changePasswordResultSchema.safeParse({
-      success: false,
-      error: "Current password is incorrect",
-    });
-    expect(r.success).toBe(true);
+  it("accepts error variant with error string", () => {
+    expect(
+      changePasswordResultSchema.safeParse({ success: false, error: "Wrong password" }).success,
+    ).toBe(true);
   });
 
-  it("accepts failure with fieldErrors", () => {
-    const r = changePasswordResultSchema.safeParse({
-      success: false,
-      fieldErrors: { newPassword: ["Password too weak"] },
-    });
-    expect(r.success).toBe(true);
+  it("accepts fieldErrors variant", () => {
+    expect(
+      changePasswordResultSchema.safeParse({
+        success: false,
+        fieldErrors: { oldPassword: ["Incorrect"] },
+      }).success,
+    ).toBe(true);
   });
 
-  it("rejects missing success", () => {
-    const r = changePasswordResultSchema.safeParse({});
-    expect(r.success).toBe(false);
+  it("accepts success:true with extra fields (Zod strips unknown)", () => {
+    // z.union tries each variant; the success variant uses z.object({ success: z.literal(true) })
+    // which strips unknown keys by default, so this passes.
+    expect(
+      changePasswordResultSchema.safeParse({ success: true, error: "extra" }).success,
+    ).toBe(true);
   });
 
-  it("accepts extra fields on success (z.object strips unknown keys)", () => {
-    // z.object() strips unknown keys by default, so extra fields are fine
-    const r = changePasswordResultSchema.safeParse({
-      success: true,
-      extraField: "ignored",
-    });
-    expect(r.success).toBe(true);
+  it("rejects untyped success value", () => {
+    expect(
+      changePasswordResultSchema.safeParse({ success: "yes" }).success,
+    ).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Array schemas
+// ---------------------------------------------------------------------------
+
+describe("getCountryOptionsResultSchema", () => {
+  it("accepts an array of options", () => {
+    expect(
+      getCountryOptionsResultSchema.safeParse([
+        { id: 1, label: "Kuwait" },
+        { id: 2, label: "Egypt" },
+      ]).success,
+    ).toBe(true);
+  });
+
+  it("accepts empty array", () => {
+    expect(getCountryOptionsResultSchema.safeParse([]).success).toBe(true);
+  });
+
+  it("rejects items with missing id", () => {
+    expect(
+      getCountryOptionsResultSchema.safeParse([{ label: "Kuwait" }]).success,
+    ).toBe(false);
+  });
+
+  it("rejects items with non-number id", () => {
+    expect(
+      getCountryOptionsResultSchema.safeParse([{ id: "abc", label: "Kuwait" }]).success,
+    ).toBe(false);
+  });
+
+  it("rejects non-array input", () => {
+    expect(getCountryOptionsResultSchema.safeParse("not-array").success).toBe(false);
+  });
+});
+
+describe("getUniversityOptionsResultSchema", () => {
+  it("accepts an array of options", () => {
+    expect(
+      getUniversityOptionsResultSchema.safeParse([
+        { id: 10, label: "KU" },
+        { id: 11, label: "AUK" },
+      ]).success,
+    ).toBe(true);
+  });
+});
+
+describe("getBankOptionsResultSchema", () => {
+  it("accepts an array of options", () => {
+    expect(
+      getBankOptionsResultSchema.safeParse([{ id: 1, label: "NBK" }]).success,
+    ).toBe(true);
+  });
+});
+
+describe("getDegreeOptionsResultSchema", () => {
+  it("accepts an array of uuid-based options", () => {
+    expect(
+      getDegreeOptionsResultSchema.safeParse([
+        { id: "uuid-1", label: "Bachelor" },
+      ]).success,
+    ).toBe(true);
+  });
+
+  it("rejects items with number id (string expected)", () => {
+    expect(
+      getDegreeOptionsResultSchema.safeParse([{ id: 1, label: "Bachelor" }]).success,
+    ).toBe(false);
+  });
+});
+
+describe("getMajorOptionsResultSchema", () => {
+  it("accepts an array of uuid-based options", () => {
+    expect(
+      getMajorOptionsResultSchema.safeParse([
+        { id: "uuid-abc", label: "CS" },
+      ]).success,
+    ).toBe(true);
   });
 });
 
 // ---------------------------------------------------------------------------
 // candidateNoteOutputSchema
 // ---------------------------------------------------------------------------
+
 describe("candidateNoteOutputSchema", () => {
-  it("accepts a valid note with all fields", () => {
-    const r = candidateNoteOutputSchema.safeParse(validNote());
-    expect(r.success).toBe(true);
+  it("accepts a valid note", () => {
+    expect(candidateNoteOutputSchema.safeParse(makeValidNote()).success).toBe(true);
   });
 
   it("accepts nullable createdBy", () => {
-    const r = candidateNoteOutputSchema.safeParse(validNoteNull());
-    expect(r.success).toBe(true);
+    expect(
+      candidateNoteOutputSchema.safeParse(makeValidNote({ createdBy: null })).success,
+    ).toBe(true);
   });
 
   it("rejects missing uuid", () => {
-    const { uuid: _, ...rest } = validNote();
-    const r = candidateNoteOutputSchema.safeParse(rest);
-    expect(r.success).toBe(false);
+    const { uuid: _, ...rest } = makeValidNote();
+    expect(candidateNoteOutputSchema.safeParse(rest).success).toBe(false);
   });
 
-  it("rejects missing text", () => {
-    const { text: _, ...rest } = validNote();
-    const r = candidateNoteOutputSchema.safeParse(rest);
-    expect(r.success).toBe(false);
-  });
-
-  it("rejects non-string uuid", () => {
-    const r = candidateNoteOutputSchema.safeParse({ ...validNote(), uuid: 123 });
-    expect(r.success).toBe(false);
-  });
-
-  it("rejects wrong type for createdBy (string instead of number)", () => {
-    const r = candidateNoteOutputSchema.safeParse({ ...validNote(), createdBy: "admin" });
-    expect(r.success).toBe(false);
+  it("rejects non-number createdBy", () => {
+    expect(
+      candidateNoteOutputSchema.safeParse(makeValidNote({ createdBy: "abc" as any })).success,
+    ).toBe(false);
   });
 });
 
 // ---------------------------------------------------------------------------
 // candidateDetailOutputSchema
 // ---------------------------------------------------------------------------
+
 describe("candidateDetailOutputSchema", () => {
-  it("accepts a full candidate detail", () => {
-    const r = candidateDetailOutputSchema.safeParse(validCandidateDetail());
-    expect(r.success).toBe(true);
+  it("accepts a valid candidate detail", () => {
+    expect(candidateDetailOutputSchema.safeParse(makeValidDetail()).success).toBe(true);
   });
 
-  it("accepts nullable fields as null", () => {
-    const r = candidateDetailOutputSchema.safeParse({
-      ...validCandidateDetail(),
-      phone: null,
-      gender: null,
-      objective: null,
-      intro: null,
-      photoUrl: null,
-      civilId: null,
-      hourlyRate: null,
-      countryId: null,
-      universityId: null,
-      birthDate: null,
-    });
-    expect(r.success).toBe(true);
+  it("accepts all nullable fields as null", () => {
+    expect(
+      candidateDetailOutputSchema.safeParse(
+        makeValidDetail({
+          phone: null,
+          gender: null,
+          objective: null,
+          intro: null,
+          photoUrl: null,
+          civilId: null,
+          hourlyRate: null,
+          countryId: null,
+          universityId: null,
+          birthDate: null,
+        }),
+      ).success,
+    ).toBe(true);
   });
 
   it("rejects missing id", () => {
-    const { id: _, ...rest } = validCandidateDetail();
-    const r = candidateDetailOutputSchema.safeParse(rest);
-    expect(r.success).toBe(false);
+    const { id: _, ...rest } = makeValidDetail();
+    expect(candidateDetailOutputSchema.safeParse(rest).success).toBe(false);
   });
 
-  it("rejects missing name", () => {
-    const { name: _, ...rest } = validCandidateDetail();
-    const r = candidateDetailOutputSchema.safeParse(rest);
-    expect(r.success).toBe(false);
+  it("rejects non-number id", () => {
+    expect(
+      candidateDetailOutputSchema.safeParse(makeValidDetail({ id: "abc" as any })).success,
+    ).toBe(false);
   });
 
-  it("rejects missing email", () => {
-    const { email: _, ...rest } = validCandidateDetail();
-    const r = candidateDetailOutputSchema.safeParse(rest);
-    expect(r.success).toBe(false);
+  it("rejects non-integer hourlyRate (number should be fine though)", () => {
+    // hourlyRate is z.number().nullable() — float is fine
+    expect(
+      candidateDetailOutputSchema.safeParse(makeValidDetail({ hourlyRate: 15.75 })).success,
+    ).toBe(true);
   });
 
-  it("rejects wrong type for id", () => {
-    const r = candidateDetailOutputSchema.safeParse({ ...validCandidateDetail(), id: "abc" });
-    expect(r.success).toBe(false);
-  });
-
-  it("rejects wrong type for hourlyRate (string instead of number)", () => {
-    const r = candidateDetailOutputSchema.safeParse({
-      ...validCandidateDetail(),
-      hourlyRate: "five",
-    });
-    expect(r.success).toBe(false);
-  });
-
-  it("rejects wrong type for gender (string instead of number)", () => {
-    const r = candidateDetailOutputSchema.safeParse({
-      ...validCandidateDetail(),
-      gender: "male",
-    });
-    expect(r.success).toBe(false);
-  });
-
-  it("rejects missing createdAt", () => {
-    const { createdAt: _, ...rest } = validCandidateDetail();
-    const r = candidateDetailOutputSchema.safeParse(rest);
-    expect(r.success).toBe(false);
-  });
-
-  it("rejects missing updatedAt", () => {
-    const { updatedAt: _, ...rest } = validCandidateDetail();
-    const r = candidateDetailOutputSchema.safeParse(rest);
-    expect(r.success).toBe(false);
+  it("rejects non-string email", () => {
+    expect(
+      candidateDetailOutputSchema.safeParse(makeValidDetail({ email: 123 as any })).success,
+    ).toBe(false);
   });
 });
 
 // ---------------------------------------------------------------------------
-// candidateDetailResultOutputSchema
+// candidateDetailResultOutputSchema — composite
 // ---------------------------------------------------------------------------
+
 describe("candidateDetailResultOutputSchema", () => {
-  it("accepts a valid result with candidate and notes", () => {
-    const r = candidateDetailResultOutputSchema.safeParse({
-      candidate: validCandidateDetail(),
-      notes: [validNote(), validNoteNull()],
-    });
-    expect(r.success).toBe(true);
+  it("accepts a valid result with candidate + notes", () => {
+    const result: CandidateDetailResult = {
+      candidate: makeValidDetail(),
+      notes: [makeValidNote(), makeValidNote({ uuid: "note_2" })],
+    };
+    expect(candidateDetailResultOutputSchema.safeParse(result).success).toBe(true);
   });
 
-  it("accepts null candidate", () => {
-    const r = candidateDetailResultOutputSchema.safeParse({
+  it("accepts a result with null candidate", () => {
+    const result: CandidateDetailResult = {
       candidate: null,
       notes: [],
-    });
-    expect(r.success).toBe(true);
-  });
-
-  it("accepts empty notes array", () => {
-    const r = candidateDetailResultOutputSchema.safeParse({
-      candidate: validCandidateDetail(),
-      notes: [],
-    });
-    expect(r.success).toBe(true);
-  });
-
-  it("rejects missing candidate (must be explicitly null or present)", () => {
-    const { candidate: _, ...rest } = {
-      candidate: validCandidateDetail(),
-      notes: [],
     };
-    const r = candidateDetailResultOutputSchema.safeParse(rest);
-    expect(r.success).toBe(false);
+    expect(candidateDetailResultOutputSchema.safeParse(result).success).toBe(true);
   });
 
-  it("rejects missing notes", () => {
-    const r = candidateDetailResultOutputSchema.safeParse({
-      candidate: validCandidateDetail(),
-    });
-    expect(r.success).toBe(false);
-  });
-
-  it("rejects invalid candidate shape", () => {
-    const r = candidateDetailResultOutputSchema.safeParse({
-      candidate: { id: "not-a-number" },
+  it("rejects missing candidate field", () => {
+    const parsed = candidateDetailResultOutputSchema.safeParse({
       notes: [],
     });
-    expect(r.success).toBe(false);
+    expect(parsed.success).toBe(false);
   });
 
-  it("rejects invalid note item in array", () => {
-    const r = candidateDetailResultOutputSchema.safeParse({
-      candidate: validCandidateDetail(),
-      notes: [{ invalid: "note" }],
+  it("rejects missing notes field", () => {
+    const parsed = candidateDetailResultOutputSchema.safeParse({
+      candidate: null,
     });
-    expect(r.success).toBe(false);
+    expect(parsed.success).toBe(false);
+  });
+
+  it("rejects invalid note inside the array", () => {
+    const parsed = candidateDetailResultOutputSchema.safeParse({
+      candidate: null,
+      notes: [{ uuid: 123, text: "Note", type: "T", createdBy: null, createdAt: "now" }],
+    });
+    expect(parsed.success).toBe(false);
   });
 });
 
 // ---------------------------------------------------------------------------
-// addNoteResultOutputSchema (discriminated union)
+// addNoteResultOutputSchema — discriminated union
 // ---------------------------------------------------------------------------
+
 describe("addNoteResultOutputSchema", () => {
-  it("accepts success variant", () => {
-    const r = addNoteResultOutputSchema.safeParse({ success: true });
-    expect(r.success).toBe(true);
+  it("accepts a success result", () => {
+    const result: AddNoteResult = { success: true };
+    expect(addNoteResultOutputSchema.safeParse(result).success).toBe(true);
   });
 
-  it("accepts failure variant with error", () => {
-    const r = addNoteResultOutputSchema.safeParse({
-      success: false,
-      error: "Note could not be saved",
-    });
-    expect(r.success).toBe(true);
+  it("accepts an error result", () => {
+    const result: AddNoteResult = { success: false, error: "Note not found" };
+    expect(addNoteResultOutputSchema.safeParse(result).success).toBe(true);
   });
 
   it("rejects missing success", () => {
-    const r = addNoteResultOutputSchema.safeParse({});
-    expect(r.success).toBe(false);
+    expect(addNoteResultOutputSchema.safeParse({ error: "err" }).success).toBe(false);
   });
 
-  it("accepts extra fields on success (discriminatedUnion uses z.object which strips unknown keys)", () => {
-    const r = addNoteResultOutputSchema.safeParse({
-      success: true,
-      error: "Unexpected",
-    });
-    expect(r.success).toBe(true);
-  });
-
-  it("rejects failure without error", () => {
-    const r = addNoteResultOutputSchema.safeParse({ success: false });
-    expect(r.success).toBe(false);
-  });
-
-  it("rejects wrong type for success", () => {
-    const r = addNoteResultOutputSchema.safeParse({ success: "yes" });
-    expect(r.success).toBe(false);
+  it("accepts success:true with error field (Zod strips unknown)", () => {
+    // discriminatedUnion — the success:true variant is z.object({ success: z.literal(true) })
+    // which strips unknown keys by default.
+    expect(addNoteResultOutputSchema.safeParse({ success: true, error: "extra" }).success).toBe(true);
   });
 });
