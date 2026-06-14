@@ -8,6 +8,4 @@
 
 export {
   getStoreDetail,
-  listStores,
 } from "@/modules/company/stores/actions";
-export type { StoreDetail } from "@/modules/company/stores/schemas";

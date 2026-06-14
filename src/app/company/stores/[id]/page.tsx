@@ -10,32 +10,38 @@ export const dynamic = "force-dynamic";
 export default async function CompanyStoreDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await requireRoleCapability("company", "company.read.linked");
   const { id } = await params;
-  const store = await getStoreDetail(Number(id));
+  const storeId = Number(id);
 
-  if (!store) {
+  if (Number.isNaN(storeId)) {
+    notFound();
+  }
+
+  const data = await getStoreDetail(storeId);
+
+  if (!data) {
     notFound();
   }
 
   return (
     <WorkspaceShell
       session={session}
-      eyebrow="Company / Store"
-      title={store.store_name}
+      eyebrow="Company / Stores"
+      title={data.store_name}
       metrics={[]}
     >
       <DetailSection
         title="Store Details"
         facts={[
-          { label: "Name", value: store.store_name },
-          { label: "Location", value: store.store_location },
-          { label: "Status", value: store.store_status === "active" ? "Active" : "Inactive" },
-          { label: "Company", value: store.company_name ?? "—" },
-          { label: "Mall", value: store.mall_name ?? "—" },
-          { label: "Brand", value: store.brand_name ?? "—" },
-          { label: "Manager", value: store.manager_name ?? "—" },
-          { label: "Manager Email", value: store.manager_email ?? "—" },
-          { label: "Created", value: formatDate(new Date(store.created_at)) },
-          { label: "Updated", value: formatDate(new Date(store.updated_at)) },
+          { label: "Name", value: data.store_name },
+          { label: "Location", value: data.store_location },
+          { label: "Status", value: data.store_status },
+          { label: "Company", value: data.company_name },
+          { label: "Mall", value: data.mall_name },
+          { label: "Brand", value: data.brand_name },
+          { label: "Manager", value: data.manager_name },
+          { label: "Manager Email", value: data.manager_email },
+          { label: "Created", value: formatDate(new Date(data.created_at)) },
+          { label: "Updated", value: formatDate(new Date(data.updated_at)) },
         ]}
       />
     </WorkspaceShell>
