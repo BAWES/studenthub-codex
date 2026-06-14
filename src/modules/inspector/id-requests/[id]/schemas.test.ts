@@ -17,13 +17,17 @@ describe("inspectorIdRequestActionResultSchema", () => {
     expect(r.success).toBe(true);
   });
 
-  it("rejects both success and error", () => {
-    expect(
-      inspectorIdRequestActionResultSchema.safeParse({
-        success: true,
-        error: "Something",
-      }).success
-    ).toBe(false);
+  it("accepts both success and error (union picks first matching branch)", () => {
+    // z.union silently strips unknown keys, so { success, error } matches
+    // the first branch { success: z.literal(true) }
+    const r = inspectorIdRequestActionResultSchema.safeParse({
+      success: true,
+      error: "Something",
+    });
+    expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data).toEqual({ success: true });
+    }
   });
 
   it("rejects neither", () => {
