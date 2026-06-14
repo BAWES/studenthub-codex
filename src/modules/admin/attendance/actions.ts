@@ -4,12 +4,12 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
 import type { ListAttendanceParams, ListAttendanceResult } from "@/modules/attendance/schemas";
-import { listAttendance, createAttendance } from "@/modules/attendance/actions";
+import { listAttendance, createAttendance, getAttendance } from "@/modules/attendance/actions";
 import {
   listEmployeeOptionsResultSchema,
   type ListEmployeeOptionsResult,
 } from "./schemas";
-import { listAttendanceResultSchema, createAttendanceResultSchema } from "@/modules/attendance/schemas";
+import { listAttendanceResultSchema, createAttendanceResultSchema, attendanceDetailSchema } from "@/modules/attendance/schemas";
 
 export async function listAdminAttendance(
   params: ListAttendanceParams = {},
@@ -54,6 +54,43 @@ export async function getEmployeeOptions(): Promise<ListEmployeeOptionsResult> {
   const parsed = listEmployeeOptionsResultSchema.safeParse(result);
   if (!parsed.success) {
     console.error("[admin/attendance] getEmployeeOptions output validation failed:", parsed.error.issues);
+  }
+
+  return result;
+}
+
+// ---------------------------------------------------------------------------
+// getAdminAttendance
+// ---------------------------------------------------------------------------
+
+/**
+ * Get a single attendance record by UUID with employee name.
+ * Requires `admin.read` capability.
+ */
+export async function getAdminAttendance(uuid: string) {
+  await requireCapability("admin.read");
+
+  const attendance = await getAttendance({ uuid });
+
+  if (!attendance) {
+    return { attendance: null, employee_name: null };
+  }
+
+  // Fetch employee name for display
+  let employee_name: string | null = null;
+  if (attendance.employee_uuid) {
+    const employee = await prisma.employee.findUnique({
+      where: { employee_uuid: attendance.employee_uuid },
+      select: { employee_name: true },
+    });
+    employee_name = employee?.employee_name ?? null;
+  }
+
+  const result = { attendance, employee_name };
+
+  const parsed = attendanceDetailSchema.safeParse(attendance);
+  if (!parsed.success) {
+    console.error("[admin/attendance] getAdminAttendance output validation failed:", parsed.error.issues);
   }
 
   return result;
