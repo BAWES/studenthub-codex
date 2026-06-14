@@ -18,7 +18,7 @@ import {
 // Schemas
 // ---------------------------------------------------------------------------
 
-const listStaffLeavesSchema = z.object({
+export const listStaffLeavesSchema = z.object({
   page: z.coerce.number().int().positive().optional().default(1),
   limit: z.coerce.number().int().min(1).max(100).optional().default(20),
   staffId: z.coerce.number().int().positive().optional(),
