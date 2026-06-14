@@ -1,5 +1,9 @@
 import { describe, it, expect } from "vitest";
 import {
+  listCompaniesSchema,
+  getCompanySchema,
+  createCompanySchema,
+  updateCompanySchema,
   companyListItemSchema,
   listCompaniesResultSchema,
   companyDetailSchema,
@@ -412,6 +416,305 @@ describe("companyAccountDetailOutputSchema", () => {
       stores: [],
       notes: [],
     });
+    expect(r.success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// listCompaniesSchema (input)
+// ---------------------------------------------------------------------------
+describe("listCompaniesSchema", () => {
+  it("accepts valid params", () => {
+    const r = listCompaniesSchema.safeParse({ page: 1, limit: 20, search: "acme", country_id: 1, currency_code: "KWD" });
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts empty object (all optional)", () => {
+    const r = listCompaniesSchema.safeParse({});
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts partial params", () => {
+    const r = listCompaniesSchema.safeParse({ page: 2, search: "test" });
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts nullable fields (optional -> undefined is fine)", () => {
+    const r = listCompaniesSchema.safeParse({ page: 1, limit: undefined, search: undefined });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects zero page", () => {
+    const r = listCompaniesSchema.safeParse({ page: 0 });
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects negative page", () => {
+    const r = listCompaniesSchema.safeParse({ page: -1 });
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects limit below 1", () => {
+    const r = listCompaniesSchema.safeParse({ limit: 0 });
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects limit above 100", () => {
+    const r = listCompaniesSchema.safeParse({ limit: 101 });
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects non-integer page", () => {
+    const r = listCompaniesSchema.safeParse({ page: 1.5 });
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects wrong type for search", () => {
+    const r = listCompaniesSchema.safeParse({ search: 123 });
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects search exceeding max length", () => {
+    const r = listCompaniesSchema.safeParse({ search: "a".repeat(256) });
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects empty search string", () => {
+    const r = listCompaniesSchema.safeParse({ search: "" });
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects wrong type for country_id (string)", () => {
+    const r = listCompaniesSchema.safeParse({ country_id: "one" });
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects currency_code exceeding max length", () => {
+    const r = listCompaniesSchema.safeParse({ currency_code: "ABCD" });
+    expect(r.success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// getCompanySchema (input)
+// ---------------------------------------------------------------------------
+describe("getCompanySchema", () => {
+  it("accepts a valid company ID", () => {
+    const r = getCompanySchema.safeParse({ companyId: 1 });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects missing companyId", () => {
+    const r = getCompanySchema.safeParse({});
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects non-positive ID", () => {
+    const r = getCompanySchema.safeParse({ companyId: 0 });
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects negative ID", () => {
+    const r = getCompanySchema.safeParse({ companyId: -5 });
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects wrong type (string instead of number)", () => {
+    const r = getCompanySchema.safeParse({ companyId: "not-a-number" });
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects non-integer (float)", () => {
+    const r = getCompanySchema.safeParse({ companyId: 1.5 });
+    expect(r.success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// createCompanySchema (input)
+// ---------------------------------------------------------------------------
+describe("createCompanySchema", () => {
+  const valid = {
+    company_name: "Acme Corp",
+    company_common_name_en: "Acme",
+    company_common_name_ar: "أكمه",
+    company_description_en: "A great company",
+    company_description_ar: "شركة رائعة",
+    company_website: "https://acme.com",
+    company_email: "contact@acme.com",
+    commercial_licence: "LIC-12345",
+    country_id: 1,
+    currency_code: "KWD",
+    company_hourly_rate: 50.0,
+    company_bonus_commission: 10.0,
+  };
+
+  it("accepts valid input with all fields", () => {
+    const r = createCompanySchema.safeParse(valid);
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts minimal input (only required fields)", () => {
+    const r = createCompanySchema.safeParse({ company_name: "Minimal Corp" });
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts optional fields omitting company_common_name_en", () => {
+    const { company_common_name_en: _, ...without } = valid;
+    const r = createCompanySchema.safeParse(without);
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects missing company_name", () => {
+    const r = createCompanySchema.safeParse({});
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects empty company_name", () => {
+    const r = createCompanySchema.safeParse({ company_name: "" });
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects company_name exceeding max length", () => {
+    const r = createCompanySchema.safeParse({ company_name: "a".repeat(256) });
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects wrong type for company_name", () => {
+    const r = createCompanySchema.safeParse({ company_name: 123 });
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects invalid URL for company_website", () => {
+    const r = createCompanySchema.safeParse({ ...valid, company_website: "not-a-url" });
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects invalid email for company_email", () => {
+    const r = createCompanySchema.safeParse({ ...valid, company_email: "not-an-email" });
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects non-positive hourly rate", () => {
+    const r = createCompanySchema.safeParse({ ...valid, company_hourly_rate: -1 });
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects commission below 0", () => {
+    const r = createCompanySchema.safeParse({ ...valid, company_bonus_commission: -5 });
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects commission above 100", () => {
+    const r = createCompanySchema.safeParse({ ...valid, company_bonus_commission: 150 });
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects wrong type for country_id (string)", () => {
+    const r = createCompanySchema.safeParse({ ...valid, country_id: "one" });
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects currency_code exceeding max length", () => {
+    const r = createCompanySchema.safeParse({ ...valid, currency_code: "ABCD" });
+    expect(r.success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// updateCompanySchema (input)
+// ---------------------------------------------------------------------------
+describe("updateCompanySchema", () => {
+  it("accepts valid update with all fields", () => {
+    const r = updateCompanySchema.safeParse({
+      companyId: 1,
+      company_name: "Updated Corp",
+      company_common_name_en: "Updated",
+      company_common_name_ar: "محدث",
+      company_description_en: "Updated description",
+      company_description_ar: "وصف محدث",
+      company_website: "https://updated.com",
+      company_email: "updated@acme.com",
+      commercial_licence: "LIC-99999",
+      country_id: 2,
+      currency_code: "USD",
+      company_hourly_rate: 75.0,
+      company_bonus_commission: 15.0,
+      company_followup: true,
+      company_approved_to_hire: false,
+      company_status_override: true,
+      parent_company_id: 10,
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts update with only companyId (all optional fields)", () => {
+    const r = updateCompanySchema.safeParse({ companyId: 1 });
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts update omitting all optional fields", () => {
+    const r = updateCompanySchema.safeParse({ companyId: 1 });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects missing companyId", () => {
+    const r = updateCompanySchema.safeParse({ company_name: "Test" });
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects non-positive companyId", () => {
+    const r = updateCompanySchema.safeParse({ companyId: 0 });
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects negative companyId", () => {
+    const r = updateCompanySchema.safeParse({ companyId: -1 });
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects wrong type for companyId", () => {
+    const r = updateCompanySchema.safeParse({ companyId: "not-a-number" });
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects non-integer companyId", () => {
+    const r = updateCompanySchema.safeParse({ companyId: 1.5 });
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects empty company_name when provided", () => {
+    const r = updateCompanySchema.safeParse({ companyId: 1, company_name: "" });
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects invalid URL for company_website", () => {
+    const r = updateCompanySchema.safeParse({ companyId: 1, company_website: "not-a-url" });
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects invalid email for company_email", () => {
+    const r = updateCompanySchema.safeParse({ companyId: 1, company_email: "not-an-email" });
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects non-positive hourly rate", () => {
+    const r = updateCompanySchema.safeParse({ companyId: 1, company_hourly_rate: 0 });
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects commission above 100", () => {
+    const r = updateCompanySchema.safeParse({ companyId: 1, company_bonus_commission: 101 });
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects wrong type for company_followup (number instead of boolean)", () => {
+    const r = updateCompanySchema.safeParse({ companyId: 1, company_followup: 1 });
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects currency_code exceeding max length", () => {
+    const r = updateCompanySchema.safeParse({ companyId: 1, currency_code: "ABCD" });
     expect(r.success).toBe(false);
   });
 });
