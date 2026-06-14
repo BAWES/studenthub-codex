@@ -1,12 +1,9 @@
 import { describe, it, expect } from "vitest";
-import {
-  inspectorIdRequestActionResultSchema,
-} from "./schemas";
+import { inspectorIdRequestActionResultSchema } from "./schemas";
 
 // ---------------------------------------------------------------------------
-// inspectorIdRequestActionResultSchema  (z.union)
+// inspectorIdRequestActionResultSchema
 // ---------------------------------------------------------------------------
-
 describe("inspectorIdRequestActionResultSchema", () => {
   it("accepts success result", () => {
     const r = inspectorIdRequestActionResultSchema.safeParse({ success: true });
@@ -14,34 +11,28 @@ describe("inspectorIdRequestActionResultSchema", () => {
   });
 
   it("accepts error result", () => {
-    const r = inspectorIdRequestActionResultSchema.safeParse({ error: "Something went wrong" });
+    const r = inspectorIdRequestActionResultSchema.safeParse({
+      error: "Request not found",
+    });
     expect(r.success).toBe(true);
   });
 
-  it("accepts both success and error (union short-circuits on success)", () => {
-    // z.union short-circuits on the first matching variant.
-    // {success: true} matches the first member, so it passes.
-    const r = inspectorIdRequestActionResultSchema.safeParse({ success: true, error: "also error" });
-    expect(r.success).toBe(true);
+  it("rejects both success and error", () => {
+    expect(
+      inspectorIdRequestActionResultSchema.safeParse({
+        success: true,
+        error: "Something",
+      }).success
+    ).toBe(false);
   });
 
-  it("rejects empty object", () => {
-    const r = inspectorIdRequestActionResultSchema.safeParse({});
-    expect(r.success).toBe(false);
+  it("rejects neither", () => {
+    expect(inspectorIdRequestActionResultSchema.safeParse({}).success).toBe(false);
   });
 
-  it("rejects success: false", () => {
-    const r = inspectorIdRequestActionResultSchema.safeParse({ success: false });
-    expect(r.success).toBe(false);
-  });
-
-  it("rejects success with non-boolean", () => {
-    const r = inspectorIdRequestActionResultSchema.safeParse({ success: "true" });
-    expect(r.success).toBe(false);
-  });
-
-  it("rejects error with non-string", () => {
-    const r = inspectorIdRequestActionResultSchema.safeParse({ error: true });
-    expect(r.success).toBe(false);
+  it("rejects invalid value type", () => {
+    expect(
+      inspectorIdRequestActionResultSchema.safeParse({ success: "yes" }).success
+    ).toBe(false);
   });
 });

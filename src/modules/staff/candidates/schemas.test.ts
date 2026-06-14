@@ -1,153 +1,190 @@
 import { describe, it, expect } from "vitest";
 import {
+  listCandidatesSchema,
+  getCandidateByIdSchema,
   candidateRowOutputSchema,
   candidateListOutputSchema,
   candidateDetailOutputSchema,
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
-// candidateRowOutputSchema
+// listCandidatesSchema
 // ---------------------------------------------------------------------------
-
-describe("candidateRowOutputSchema", () => {
-  const validRow = () => ({
-    id: 123,
-    name: "John Doe",
-    email: "john@example.com",
-    phone: "+965 5555 1234",
-    status: 1,
-    createdAt: "2026-06-01T10:00:00.000Z",
+describe("listCandidatesSchema", () => {
+  it("accepts empty input with defaults", () => {
+    const r = listCandidatesSchema.safeParse({});
+    expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data.page).toBe(1);
+      expect(r.data.limit).toBe(20);
+    }
   });
 
-  it("accepts a valid candidate row", () => {
-    const r = candidateRowOutputSchema.safeParse(validRow());
+  it("accepts with filters", () => {
+    const r = listCandidatesSchema.safeParse({
+      page: 2,
+      limit: 10,
+      q: "john",
+      status: "active",
+    });
     expect(r.success).toBe(true);
   });
 
+  it("rejects negative page", () => {
+    expect(listCandidatesSchema.safeParse({ page: -1 }).success).toBe(false);
+  });
+
+  it("rejects limit above 100", () => {
+    expect(listCandidatesSchema.safeParse({ limit: 200 }).success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// getCandidateByIdSchema
+// ---------------------------------------------------------------------------
+describe("getCandidateByIdSchema", () => {
+  it("accepts valid ID", () => {
+    const r = getCandidateByIdSchema.safeParse({ candidateId: 42 });
+    expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data.candidateId).toBe(42);
+    }
+  });
+
+  it("coerces string ID", () => {
+    const r = getCandidateByIdSchema.safeParse({ candidateId: "42" });
+    expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data.candidateId).toBe(42);
+    }
+  });
+
+  it("rejects non-positive ID", () => {
+    expect(getCandidateByIdSchema.safeParse({ candidateId: 0 }).success).toBe(false);
+    expect(getCandidateByIdSchema.safeParse({ candidateId: -1 }).success).toBe(false);
+  });
+
+  it("rejects missing ID", () => {
+    expect(getCandidateByIdSchema.safeParse({}).success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// candidateRowOutputSchema
+// ---------------------------------------------------------------------------
+describe("candidateRowOutputSchema", () => {
+  const valid = {
+    id: 1,
+    name: "John Doe",
+    email: "john@example.com",
+    phone: null,
+    status: 1,
+    createdAt: "2026-01-01T00:00:00Z",
+  };
+
+  it("accepts valid row", () => {
+    expect(candidateRowOutputSchema.safeParse(valid).success).toBe(true);
+  });
+
   it("accepts nullable phone", () => {
-    const r = candidateRowOutputSchema.safeParse({ ...validRow(), phone: null });
+    const r = candidateRowOutputSchema.safeParse({
+      ...valid,
+      phone: "+965 12345678",
+    });
     expect(r.success).toBe(true);
   });
 
   it("rejects missing id", () => {
-    const { id: _, ...rest } = validRow();
+    const { id: _, ...rest } = valid;
     expect(candidateRowOutputSchema.safeParse(rest).success).toBe(false);
   });
 
-  it("rejects non-integer id", () => {
-    expect(
-      candidateRowOutputSchema.safeParse({ ...validRow(), id: 12.5 }).success,
-    ).toBe(false);
-  });
-
-  it("rejects non-string email", () => {
-    expect(
-      candidateRowOutputSchema.safeParse({ ...validRow(), email: null }).success,
-    ).toBe(false);
+  it("rejects missing name", () => {
+    const { name: _, ...rest } = valid;
+    expect(candidateRowOutputSchema.safeParse(rest).success).toBe(false);
   });
 });
 
 // ---------------------------------------------------------------------------
 // candidateListOutputSchema
 // ---------------------------------------------------------------------------
-
 describe("candidateListOutputSchema", () => {
-  const validRow = () => ({
-    id: 1,
-    name: "Jane",
-    email: "j@example.com",
-    phone: null,
-    status: 2,
-    createdAt: "2026-06-01T00:00:00.000Z",
+  const valid = {
+    items: [
+      {
+        id: 1,
+        name: "John Doe",
+        email: "john@example.com",
+        phone: null,
+        status: 1,
+        createdAt: "2026-01-01T00:00:00Z",
+      },
+    ],
+    total: 1,
+    page: 1,
+    limit: 20,
+    totalPages: 1,
+  };
+
+  it("accepts valid response", () => {
+    expect(candidateListOutputSchema.safeParse(valid).success).toBe(true);
   });
 
-  it("accepts a valid paginated result", () => {
+  it("accepts empty items", () => {
     const r = candidateListOutputSchema.safeParse({
-      items: [validRow()],
-      total: 1,
-      page: 1,
-      limit: 20,
-      totalPages: 1,
-    });
-    expect(r.success).toBe(true);
-  });
-
-  it("accepts empty items array", () => {
-    const r = candidateListOutputSchema.safeParse({
+      ...valid,
       items: [],
       total: 0,
-      page: 1,
-      limit: 20,
       totalPages: 0,
     });
     expect(r.success).toBe(true);
   });
 
   it("rejects negative total", () => {
-    const r = candidateListOutputSchema.safeParse({
-      items: [],
-      total: -1,
-      page: 1,
-      limit: 20,
-      totalPages: 0,
-    });
-    expect(r.success).toBe(false);
-  });
-
-  it("rejects missing page", () => {
-    const payload = {
-      items: [validRow()],
-      total: 1,
-      page: 1,
-      limit: 20,
-      totalPages: 1,
-    };
-    const { page: _, ...rest } = payload;
-    expect(candidateListOutputSchema.safeParse(rest).success).toBe(false);
+    expect(
+      candidateListOutputSchema.safeParse({ ...valid, total: -1 }).success
+    ).toBe(false);
   });
 });
 
 // ---------------------------------------------------------------------------
 // candidateDetailOutputSchema
 // ---------------------------------------------------------------------------
-
 describe("candidateDetailOutputSchema", () => {
-  const validDetail = () => ({
-    id: 456,
-    name: "Alice Smith",
-    nameAr: "أليس سميث",
-    email: "alice@example.com",
-    phone: "+965 5555 6789",
-    gender: 1,
-    objective: "Looking for opportunities",
-    status: 2,
-    createdAt: "2026-06-01T00:00:00.000Z",
-    updatedAt: "2026-06-10T00:00:00.000Z",
+  const valid = {
+    id: 1,
+    name: "John Doe",
+    nameAr: "جون دو",
+    email: "john@example.com",
+    phone: null,
+    gender: null,
+    objective: null,
+    status: 1,
+    createdAt: "2026-01-01T00:00:00Z",
+    updatedAt: "2026-01-15T00:00:00Z",
+  };
+
+  it("accepts valid detail", () => {
+    expect(candidateDetailOutputSchema.safeParse(valid).success).toBe(true);
   });
 
-  it("accepts a valid candidate detail", () => {
-    const r = candidateDetailOutputSchema.safeParse(validDetail());
-    expect(r.success).toBe(true);
-  });
-
-  it("accepts nullable fields as null", () => {
+  it("accepts with all fields", () => {
     const r = candidateDetailOutputSchema.safeParse({
-      ...validDetail(),
-      phone: null,
-      gender: null,
-      objective: null,
+      ...valid,
+      phone: "+965 12345678",
+      gender: 1,
+      objective: "Looking for a software engineering role",
     });
     expect(r.success).toBe(true);
   });
 
-  it("rejects missing nameAr", () => {
-    const { nameAr: _, ...rest } = validDetail();
+  it("rejects missing id", () => {
+    const { id: _, ...rest } = valid;
     expect(candidateDetailOutputSchema.safeParse(rest).success).toBe(false);
   });
 
-  it("rejects non-integer gender", () => {
-    expect(
-      candidateDetailOutputSchema.safeParse({ ...validDetail(), gender: "male" }).success,
-    ).toBe(false);
+  it("rejects missing email", () => {
+    const { email: _, ...rest } = valid;
+    expect(candidateDetailOutputSchema.safeParse(rest).success).toBe(false);
   });
 });

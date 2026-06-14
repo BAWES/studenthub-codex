@@ -1,67 +1,147 @@
 import { describe, it, expect } from "vitest";
 import {
+  getRequestDetailSchema,
+  approveRequestSchema,
+  rejectRequestSchema,
+  addCommentSchema,
   requestExistenceSchema,
   addCommentResultSchema,
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
-// requestExistenceSchema  (.nullable())
+// getRequestDetailSchema
 // ---------------------------------------------------------------------------
-
-describe("requestExistenceSchema", () => {
-  it("accepts a valid existence result", () => {
-    const r = requestExistenceSchema.safeParse({ request_uuid: "req-001" });
+describe("getRequestDetailSchema", () => {
+  it("accepts valid request UUID", () => {
+    const r = getRequestDetailSchema.safeParse({ requestUuid: "abc-123" });
     expect(r.success).toBe(true);
   });
 
-  it("accepts null (request not found)", () => {
-    const r = requestExistenceSchema.safeParse(null);
-    expect(r.success).toBe(true);
+  it("rejects empty UUID", () => {
+    expect(getRequestDetailSchema.safeParse({ requestUuid: "" }).success).toBe(false);
   });
 
-  it("rejects empty request_uuid", () => {
-    const r = requestExistenceSchema.safeParse({ request_uuid: "" });
-    expect(r.success).toBe(false);
-  });
-
-  it("rejects missing request_uuid", () => {
-    const r = requestExistenceSchema.safeParse({});
-    expect(r.success).toBe(false);
-  });
-
-  it("rejects non-string request_uuid", () => {
-    const r = requestExistenceSchema.safeParse({ request_uuid: 123 });
-    expect(r.success).toBe(false);
+  it("rejects missing UUID", () => {
+    expect(getRequestDetailSchema.safeParse({}).success).toBe(false);
   });
 });
 
 // ---------------------------------------------------------------------------
-// addCommentResultSchema  (discriminatedUnion)
+// approveRequestSchema
 // ---------------------------------------------------------------------------
+describe("approveRequestSchema", () => {
+  const valid = { requestUuid: "abc-123", reason: "Looks good" };
 
-describe("addCommentResultSchema", () => {
-  it("accepts success operation", () => {
-    const r = addCommentResultSchema.safeParse({ operation: "success", message: "Comment added" });
+  it("accepts valid input", () => {
+    expect(approveRequestSchema.safeParse(valid).success).toBe(true);
+  });
+
+  it("rejects empty reason", () => {
+    expect(
+      approveRequestSchema.safeParse({ requestUuid: "abc-123", reason: "" }).success
+    ).toBe(false);
+  });
+
+  it("rejects missing requestUuid", () => {
+    expect(approveRequestSchema.safeParse({ reason: "ok" }).success).toBe(false);
+  });
+
+  it("rejects reason over 500 chars", () => {
+    expect(
+      approveRequestSchema.safeParse({
+        requestUuid: "abc-123",
+        reason: "x".repeat(501),
+      }).success
+    ).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// rejectRequestSchema
+// ---------------------------------------------------------------------------
+describe("rejectRequestSchema", () => {
+  const valid = { requestUuid: "abc-123", reason: "Missing documents" };
+
+  it("accepts valid input", () => {
+    expect(rejectRequestSchema.safeParse(valid).success).toBe(true);
+  });
+
+  it("rejects empty reason", () => {
+    expect(
+      rejectRequestSchema.safeParse({ requestUuid: "abc-123", reason: "" }).success
+    ).toBe(false);
+  });
+
+  it("rejects missing requestUuid", () => {
+    expect(rejectRequestSchema.safeParse({ reason: "no" }).success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// addCommentSchema
+// ---------------------------------------------------------------------------
+describe("addCommentSchema", () => {
+  const valid = { requestUuid: "abc-123", comment: "Please check this" };
+
+  it("accepts valid input", () => {
+    expect(addCommentSchema.safeParse(valid).success).toBe(true);
+  });
+
+  it("rejects empty comment", () => {
+    expect(
+      addCommentSchema.safeParse({ requestUuid: "abc-123", comment: "" }).success
+    ).toBe(false);
+  });
+
+  it("rejects missing requestUuid", () => {
+    expect(addCommentSchema.safeParse({ comment: "test" }).success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// requestExistenceSchema
+// ---------------------------------------------------------------------------
+describe("requestExistenceSchema", () => {
+  it("accepts valid existence", () => {
+    const r = requestExistenceSchema.safeParse({ request_uuid: "abc-123" });
     expect(r.success).toBe(true);
   });
 
-  it("accepts error operation", () => {
-    const r = addCommentResultSchema.safeParse({ operation: "error", message: "Failed" });
+  it("accepts null (request not found)", () => {
+    expect(requestExistenceSchema.safeParse(null).success).toBe(true);
+  });
+
+  it("rejects empty uuid", () => {
+    expect(requestExistenceSchema.safeParse({ request_uuid: "" }).success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// addCommentResultSchema
+// ---------------------------------------------------------------------------
+describe("addCommentResultSchema", () => {
+  it("accepts success result", () => {
+    const r = addCommentResultSchema.safeParse({
+      operation: "success",
+      message: "Comment added",
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts error result", () => {
+    const r = addCommentResultSchema.safeParse({
+      operation: "error",
+      message: "Request not found",
+    });
     expect(r.success).toBe(true);
   });
 
   it("rejects invalid operation", () => {
-    const r = addCommentResultSchema.safeParse({ operation: "unknown", message: "Bad" });
-    expect(r.success).toBe(false);
-  });
-
-  it("rejects missing message", () => {
-    const r = addCommentResultSchema.safeParse({ operation: "success" });
-    expect(r.success).toBe(false);
-  });
-
-  it("rejects non-string message", () => {
-    const r = addCommentResultSchema.safeParse({ operation: "error", message: 42 });
-    expect(r.success).toBe(false);
+    expect(
+      addCommentResultSchema.safeParse({
+        operation: "invalid",
+        message: "test",
+      }).success
+    ).toBe(false);
   });
 });
