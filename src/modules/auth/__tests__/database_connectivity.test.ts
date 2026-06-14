@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 
-const isDbAvailable = !!process.env.DATABASE_URL;
+// Must start with mysql:// — the shell may have a postgres:// DATABASE_URL from Paperclip
+const isDbAvailable = !!process.env.DATABASE_URL && process.env.DATABASE_URL.startsWith("mysql://");
 
 describe("MySQL database connectivity on port 3307", () => {
   it("connects to the database and returns admin users", async () => {
