@@ -1,5 +1,5 @@
 import { requireRoleCapability } from "@/modules/auth/session";
-import { listStaffLeaves } from "./actions";
+import { listStaffLeaves } from "@/modules/staff-leaves/actions";
 import { StaffLeavesTable } from "./_components";
 
 export const dynamic = "force-dynamic";

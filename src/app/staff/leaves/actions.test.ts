@@ -5,9 +5,9 @@ import { z } from "zod";
 // Page-level imports test — verify barrel re-exports resolve correctly
 // ---------------------------------------------------------------------------
 
-describe("staff/leaves barrel exports", () => {
+describe("staff/leaves exports", () => {
   it("exports listStaffLeaves, getStaffLeave, createStaffLeave", async () => {
-    const mod = await import("./actions");
+    const mod = await import("@/modules/staff-leaves/actions");
     expect(mod).toHaveProperty("listStaffLeaves");
     expect(mod).toHaveProperty("getStaffLeave");
     expect(mod).toHaveProperty("createStaffLeave");

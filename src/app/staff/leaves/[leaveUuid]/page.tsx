@@ -5,7 +5,7 @@ import { requireRoleCapability } from "@/modules/auth/session";
 import { DetailSection } from "@/modules/workspace/DetailPanels";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { Button } from "@/components/ui/button";
-import { getStaffLeave } from "./actions";
+import { getStaffLeave } from "@/modules/staff-leaves/actions";
 
 export const dynamic = "force-dynamic";
 

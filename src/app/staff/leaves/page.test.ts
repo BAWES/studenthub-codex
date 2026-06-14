@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { listStaffLeavesSchema } from "@/modules/staff-leaves/actions";
+import { listStaffLeavesSchema } from "@/modules/staff-leaves/schemas";
 
 /**
  * Page migration test for staff/leaves.
