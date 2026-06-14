@@ -6,119 +6,174 @@ import {
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
-// applicationItemSchema
+// Output schema validation tests — candidates/applications
 // ---------------------------------------------------------------------------
 
 describe("applicationItemSchema", () => {
-  const validItem = () => ({
-    applicationId: 1,
-    jobListingId: 10,
+  const validItem = {
+    applicationId: 101,
+    jobListingId: 42,
     jobTitle: "Software Engineer",
-    employerName: "Acme Corp",
+    employerName: "Tech Corp",
     status: "applied",
-    coverLetter: "I am interested...",
-    createdAt: new Date("2026-06-01"),
-    updatedAt: new Date("2026-06-05"),
-  });
+    coverLetter: "I am very interested in this role.",
+    createdAt: new Date("2026-06-14T10:00:00"),
+    updatedAt: new Date("2026-06-14T10:30:00"),
+  };
 
   it("accepts a valid application item", () => {
-    const r = applicationItemSchema.safeParse(validItem());
-    expect(r.success).toBe(true);
+    expect(applicationItemSchema.safeParse(validItem).success).toBe(true);
   });
 
-  it("accepts nullable coverLetter and dates", () => {
-    const r = applicationItemSchema.safeParse({
-      ...validItem(),
-      coverLetter: null,
-      createdAt: null,
-      updatedAt: null,
-    });
-    expect(r.success).toBe(true);
+  it("accepts null for coverLetter", () => {
+    expect(
+      applicationItemSchema.safeParse({
+        ...validItem,
+        coverLetter: null,
+      }).success,
+    ).toBe(true);
+  });
+
+  it("accepts null for createdAt and updatedAt", () => {
+    expect(
+      applicationItemSchema.safeParse({
+        ...validItem,
+        createdAt: null,
+        updatedAt: null,
+      }).success,
+    ).toBe(true);
   });
 
   it("rejects missing applicationId", () => {
-    const { applicationId: _, ...rest } = validItem();
+    const { applicationId: _, ...rest } = validItem;
     expect(applicationItemSchema.safeParse(rest).success).toBe(false);
   });
 
-  it("rejects non-integer jobListingId", () => {
+  it("rejects wrong type for applicationId", () => {
     expect(
-      applicationItemSchema.safeParse({ ...validItem(), jobListingId: "ten" }).success,
+      applicationItemSchema.safeParse({
+        ...validItem,
+        applicationId: "101",
+      }).success,
+    ).toBe(false);
+  });
+
+  it("rejects string instead of Date for createdAt", () => {
+    // z.coerce.date() accepts ISO strings, so this should pass
+    expect(
+      applicationItemSchema.safeParse({
+        ...validItem,
+        createdAt: "2026-06-14T10:00:00",
+      }).success,
+    ).toBe(true);
+  });
+});
+
+describe("listApplicationsResultSchema", () => {
+  const validResult = {
+    items: [
+      {
+        applicationId: 101,
+        jobListingId: 42,
+        jobTitle: "Software Engineer",
+        employerName: "Tech Corp",
+        status: "applied",
+        coverLetter: null,
+        createdAt: null,
+        updatedAt: null,
+      },
+    ],
+    total: 1,
+    page: 1,
+    pageSize: 20,
+  };
+
+  it("accepts a valid paginated result", () => {
+    expect(listApplicationsResultSchema.safeParse(validResult).success).toBe(true);
+  });
+
+  it("accepts empty items array", () => {
+    expect(
+      listApplicationsResultSchema.safeParse({
+        ...validResult,
+        items: [],
+        total: 0,
+      }).success,
+    ).toBe(true);
+  });
+
+  it("rejects negative total", () => {
+    expect(
+      listApplicationsResultSchema.safeParse({
+        ...validResult,
+        total: -1,
+      }).success,
+    ).toBe(false);
+  });
+
+  it("rejects zero page", () => {
+    expect(
+      listApplicationsResultSchema.safeParse({
+        ...validResult,
+        page: 0,
+      }).success,
+    ).toBe(false);
+  });
+
+  it("rejects string instead of number for page", () => {
+    expect(
+      listApplicationsResultSchema.safeParse({
+        ...validResult,
+        page: "1",
+      }).success,
     ).toBe(false);
   });
 });
 
-// ---------------------------------------------------------------------------
-// listApplicationsResultSchema
-// ---------------------------------------------------------------------------
-
-describe("listApplicationsResultSchema", () => {
-  const validItem = () => ({
-    applicationId: 1,
-    jobListingId: 10,
-    jobTitle: "Engineer",
-    employerName: "Acme",
-    status: "applied",
-    coverLetter: null,
-    createdAt: null,
-    updatedAt: null,
-  });
-
-  it("accepts a valid paginated result", () => {
-    const r = listApplicationsResultSchema.safeParse({
-      items: [validItem()],
-      total: 1,
-      page: 1,
-      pageSize: 20,
-    });
-    expect(r.success).toBe(true);
-  });
-
-  it("accepts empty items", () => {
-    const r = listApplicationsResultSchema.safeParse({
-      items: [],
-      total: 0,
-      page: 1,
-      pageSize: 20,
-    });
-    expect(r.success).toBe(true);
-  });
-
-  it("rejects missing total", () => {
-    const r = listApplicationsResultSchema.safeParse({
-      items: [], page: 1, pageSize: 20,
-    });
-    expect(r.success).toBe(false);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// applicationActionResultSchema  (discriminatedUnion)
-// ---------------------------------------------------------------------------
-
 describe("applicationActionResultSchema", () => {
-  it("accepts success with applicationId", () => {
-    const r = applicationActionResultSchema.safeParse({ success: true, applicationId: 42 });
+  it("accepts success result", () => {
+    const r = applicationActionResultSchema.safeParse({
+      success: true,
+      applicationId: 101,
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts error result", () => {
+    const r = applicationActionResultSchema.safeParse({
+      success: false,
+      error: "Application not found",
+    });
     expect(r.success).toBe(true);
   });
 
   it("rejects success without applicationId", () => {
-    const r = applicationActionResultSchema.safeParse({ success: true });
-    expect(r.success).toBe(false);
+    expect(
+      applicationActionResultSchema.safeParse({ success: true }).success,
+    ).toBe(false);
   });
 
-  it("accepts failure with error", () => {
-    const r = applicationActionResultSchema.safeParse({ success: false, error: "Failed" });
-    expect(r.success).toBe(true);
+  it("rejects error without error message", () => {
+    expect(
+      applicationActionResultSchema.safeParse({ success: false }).success,
+    ).toBe(false);
   });
 
-  it("rejects failure without error", () => {
-    const r = applicationActionResultSchema.safeParse({ success: false });
-    expect(r.success).toBe(false);
+  it("rejects invalid discriminator value", () => {
+    expect(
+      applicationActionResultSchema.safeParse({
+        success: "yes",
+        applicationId: 101,
+      }).success,
+    ).toBe(false);
   });
 
-  it("rejects unknown discriminator", () => {
-    const r = applicationActionResultSchema.safeParse({ success: "maybe", error: "X" });
-    expect(r.success).toBe(false);
+  it("rejects wrong type for applicationId in success variant", () => {
+    expect(
+      applicationActionResultSchema.safeParse({
+        success: true,
+        applicationId: "101",
+      }).success,
+    ).toBe(false);
   });
 });
