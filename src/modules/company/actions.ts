@@ -1,5 +1,4 @@
-"use server";
-
+// Sub-action files each declare their own "use server"
 export {
   addCompanyContact,
   removeCompanyContact,
