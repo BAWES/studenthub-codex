@@ -8,12 +8,15 @@ import {
   listDesignationsSchema,
   createDesignationSchema,
   updateDesignationSchema,
+  getDesignationSchema,
+  getDesignationResultSchema,
   listDesignationsResultSchema,
   actionResponseSchema,
   type ListDesignationsInput,
   type ListDesignationsResult,
   type CreateDesignationInput,
   type UpdateDesignationInput,
+  type GetDesignationResult,
   type ActionResponse,
 } from "./schemas";
 
@@ -62,6 +65,47 @@ export async function listDesignations(
   const outputParsed = listDesignationsResultSchema.safeParse(result);
   if (!outputParsed.success) {
     console.error("[admin/designations] listDesignations output failed:", outputParsed.error.issues);
+  }
+
+  return result;
+}
+
+// ---------------------------------------------------------------------------
+// getDesignation
+// ---------------------------------------------------------------------------
+
+/**
+ * Get a single designation by UUID.
+ */
+export async function getDesignation(
+  designationUuid: string,
+): Promise<GetDesignationResult> {
+  await requireCapability("admin.read");
+
+  const parsed = getDesignationSchema.safeParse({ designationUuid });
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid designation UUID");
+  }
+
+  const row = await prisma.designation.findUnique({
+    where: { designation_uuid: parsed.data.designationUuid },
+  });
+
+  const result: GetDesignationResult = {
+    designation: row
+      ? {
+          designation_uuid: row.designation_uuid,
+          designation_name_en: row.designation_name_en,
+          designation_name_ar: row.designation_name_ar,
+          designation_created_at: row.designation_created_at,
+          designation_updated_at: row.designation_updated_at,
+        }
+      : null,
+  };
+
+  const outputParsed = getDesignationResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error("[admin/designations] getDesignation output failed:", outputParsed.error.issues);
   }
 
   return result;
