@@ -20,7 +20,7 @@ vi.mock("@/modules/auth/session", () => ({
   requireCapability: vi.fn().mockResolvedValue(undefined),
 }));
 
-const { getStaffLeave } = await import("../actions");
+const { getStaffLeave } = await import("@/modules/staff-leaves/actions");
 
 // ---------------------------------------------------------------------------
 // staff/leaves/[leaveUuid] actions

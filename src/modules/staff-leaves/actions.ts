@@ -9,34 +9,13 @@ import {
   staffLeaveListItemSchema,
   listStaffLeavesResultSchema,
   createStaffLeaveResultSchema,
+  listStaffLeavesSchema,
+  getStaffLeaveSchema,
+  createStaffLeaveSchema,
   type StaffLeaveListItem,
   type ListStaffLeavesResult,
   type CreateStaffLeaveResult,
 } from "./schemas";
-
-// ---------------------------------------------------------------------------
-// Schemas
-// ---------------------------------------------------------------------------
-
-export const listStaffLeavesSchema = z.object({
-  page: z.coerce.number().int().positive().optional().default(1),
-  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
-  staffId: z.coerce.number().int().positive().optional(),
-  status: z.coerce.number().int().optional(),
-});
-
-const getStaffLeaveSchema = z.object({
-  leaveUuid: z.string().min(1, "Leave UUID is required"),
-});
-
-const createStaffLeaveSchema = z.object({
-  staffId: z.coerce.number().int().positive().optional(),
-  fromDate: z.string().optional(),
-  toDate: z.string().optional(),
-  note: z.string().optional(),
-  category: z.string().optional(),
-  status: z.coerce.number().int().optional(),
-});
 
 // ---------------------------------------------------------------------------
 // listStaffLeaves

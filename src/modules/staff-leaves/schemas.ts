@@ -1,6 +1,30 @@
 import { z } from "zod";
 
 // ---------------------------------------------------------------------------
+// Input schemas
+// ---------------------------------------------------------------------------
+
+export const listStaffLeavesSchema = z.object({
+  page: z.coerce.number().int().positive().optional().default(1),
+  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
+  staffId: z.coerce.number().int().positive().optional(),
+  status: z.coerce.number().int().optional(),
+});
+
+export const getStaffLeaveSchema = z.object({
+  leaveUuid: z.string().min(1, "Leave UUID is required"),
+});
+
+export const createStaffLeaveSchema = z.object({
+  staffId: z.coerce.number().int().positive().optional(),
+  fromDate: z.string().optional(),
+  toDate: z.string().optional(),
+  note: z.string().optional(),
+  category: z.string().optional(),
+  status: z.coerce.number().int().optional(),
+});
+
+// ---------------------------------------------------------------------------
 // Output schemas
 // ---------------------------------------------------------------------------
 
