@@ -1,3 +1,6 @@
+// Force USE_MOCK_FIXTURES=true — these tests must never need DB seed data
+process.env.USE_MOCK_FIXTURES = "true";
+
 import { test, expect } from "@playwright/test";
 import { getMockFixtures, type FixtureUser } from "../fixtures/users";
 
