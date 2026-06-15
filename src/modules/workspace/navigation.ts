@@ -62,6 +62,7 @@ export function navForRole(role: Role): NavItem[] {
       { label: "Overview", href: "/company", icon: User },
       { label: "Job Postings", href: "/employer/jobs", icon: ClipboardList },
       { label: "Requests", href: "/company/requests", icon: FileCheck },
+      { label: "Search", href: "/company/search" as Route, icon: Search },
       { label: "Companies", href: "/company/companies", icon: Building2 },
       { label: "Contacts", href: "/company/contacts" as Route, icon: Phone },
       { label: "Stores", href: "/company/stores" as Route, icon: Store }
