@@ -525,6 +525,61 @@ export const updateNoteEntrySchema = z.object({
   companyId: z.number().int().positive("Company ID is required"),
 });
 
+
+// ---------------------------------------------------------------------------
+// Company Notes — output validation schemas
+// ---------------------------------------------------------------------------
+
+/**
+ * Schema for a single company note list item.
+ */
+export const companyNoteListItemSchema = z.object({
+  note_uuid: z.string(),
+  note_text: z.string().nullable(),
+  note_type: z.string().nullable(),
+  company_id: z.number().nullable(),
+  created_by: z.number().nullable(),
+  created_at: z.string().nullable(),
+  updated_at: z.string().nullable(),
+  company_name: z.string().nullable(),
+});
+
+/**
+ * Schema for the listCompanyNotes response.
+ */
+export const listCompanyNotesResultSchema = z.object({
+  notes: z.array(companyNoteListItemSchema),
+  total: z.number(),
+  page: z.number(),
+  limit: z.number(),
+  totalPages: z.number(),
+});
+
+/**
+ * Schema for a single company note detail (nullable).
+ */
+export const companyNoteDetailSchema = z
+  .object({
+    note_uuid: z.string(),
+    company_id: z.number().nullable(),
+    note_text: z.string().nullable(),
+    note_type: z.string().nullable(),
+    created_by: z.number().nullable(),
+    updated_by: z.number().nullable(),
+    created_at: z.string().nullable(),
+    updated_at: z.string().nullable(),
+    company_name: z.string().nullable(),
+  })
+  .nullable();
+
+/**
+ * Schema for note action results (create, update, delete).
+ */
+export const companyNoteActionResultSchema = z.union([
+  z.object({ note_uuid: z.string() }),
+  z.object({ success: z.boolean() }),
+]);
+
 // ---------------------------------------------------------------------------
 // Company Notes — types
 // ---------------------------------------------------------------------------
@@ -533,36 +588,11 @@ export type ListCompanyNotesInput = z.input<typeof listCompanyNotesSchema>;
 export type CreateCompanyNoteInput = z.input<typeof createCompanyNoteSchema>;
 export type UpdateCompanyNoteInput = z.input<typeof updateCompanyNoteSchema>;
 
-export type CompanyNoteListItem = {
-  note_uuid: string;
-  note_text: string | null;
-  note_type: string | null;
-  company_id: number | null;
-  created_by: number | null;
-  created_at: string | null;
-  updated_at: string | null;
-  company_name: string | null;
-};
+export type CompanyNoteListItem = z.output<typeof companyNoteListItemSchema>;
 
-export type CompanyNoteDetail = {
-  note_uuid: string;
-  company_id: number | null;
-  note_text: string | null;
-  note_type: string | null;
-  created_by: number | null;
-  updated_by: number | null;
-  created_at: string | null;
-  updated_at: string | null;
-  company_name: string | null;
-};
+export type CompanyNoteDetail = z.output<typeof companyNoteDetailSchema>;
 
-export type ListCompanyNotesResult = {
-  notes: CompanyNoteListItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
+export type ListCompanyNotesResult = z.output<typeof listCompanyNotesResultSchema>;
 
 export type GetNoteEntryInput = z.input<typeof getNoteEntrySchema>;
 export type UpdateNoteEntryInput = z.input<typeof updateNoteEntrySchema>;
@@ -725,6 +755,63 @@ export const companyRequestActionResultSchema = z.union([
   z.object({ error: z.string() }),
 ]);
 
+/**
+ * Schema for a single company request list item.
+ */
+export const companyRequestListItemSchema = z.object({
+  request_uuid: z.string(),
+  company_id: z.number().nullable(),
+  request_position_title: z.string().nullable(),
+  request_compensation: z.string().nullable(),
+  request_number_of_employees: z.number().nullable(),
+  request_location: z.string().nullable(),
+  request_status: z.string().nullable(),
+  request_created_datetime: z.date(),
+  request_updated_datetime: z.date(),
+  company_name: z.string().nullable(),
+});
+
+/**
+ * Schema for the listCompanyRequests response.
+ */
+export const listCompanyRequestsResultSchema = z.object({
+  requests: z.array(companyRequestListItemSchema),
+  total: z.number(),
+  page: z.number(),
+  limit: z.number(),
+  totalPages: z.number(),
+});
+
+/**
+ * Schema for a single company request detail (nullable).
+ */
+export const companyRequestDetailSchema = z
+  .object({
+    request_uuid: z.string(),
+    company_id: z.number().nullable(),
+    contact_uuid: z.string().nullable(),
+    staff_id: z.number().nullable(),
+    request_position_title: z.string().nullable(),
+    request_job_description: z.string(),
+    request_compensation: z.string(),
+    request_number_of_employees: z.number().nullable(),
+    request_location: z.string().nullable(),
+    request_additional_info: z.string().nullable(),
+    request_status: z.string().nullable(),
+    request_feedback: z.string().nullable(),
+    request_created_datetime: z.date(),
+    request_updated_datetime: z.date(),
+    company_name: z.string().nullable(),
+  })
+  .nullable();
+
+/**
+ * Schema for create request action result.
+ */
+export const companyRequestCreateResultSchema = z.object({
+  request_uuid: z.string(),
+});
+
 // ---------------------------------------------------------------------------
 // Company Requests — types
 // ---------------------------------------------------------------------------
@@ -735,44 +822,11 @@ export type UpdateRequestStatusInput = z.input<typeof updateRequestStatusSchema>
 export type DeleteRequestInput = z.input<typeof deleteRequestSchema>;
 export type GetCompanyListInput = z.input<typeof getCompanyListSchema>;
 
-export type CompanyRequestListItem = {
-  request_uuid: string;
-  company_id: number | null;
-  request_position_title: string | null;
-  request_compensation: string | null;
-  request_number_of_employees: number | null;
-  request_location: string | null;
-  request_status: string | null;
-  request_created_datetime: Date;
-  request_updated_datetime: Date;
-  company_name: string | null;
-};
+export type CompanyRequestListItem = z.output<typeof companyRequestListItemSchema>;
 
-export type CompanyRequestDetail = {
-  request_uuid: string;
-  company_id: number | null;
-  contact_uuid: string | null;
-  staff_id: number | null;
-  request_position_title: string | null;
-  request_job_description: string;
-  request_compensation: string;
-  request_number_of_employees: number | null;
-  request_location: string | null;
-  request_additional_info: string | null;
-  request_status: string | null;
-  request_feedback: string | null;
-  request_created_datetime: Date;
-  request_updated_datetime: Date;
-  company_name: string | null;
-};
+export type CompanyRequestDetail = z.output<typeof companyRequestDetailSchema>;
 
-export type ListCompanyRequestsResult = {
-  requests: CompanyRequestListItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
+export type ListCompanyRequestsResult = z.output<typeof listCompanyRequestsResultSchema>;
 
 export type CompanyRequestActionResult = z.output<
   typeof companyRequestActionResultSchema
