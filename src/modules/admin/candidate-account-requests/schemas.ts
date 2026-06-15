@@ -91,22 +91,8 @@ export type ListCandidateIdRequestsInput = z.input<typeof listCandidateIdRequest
 export type GetCandidateIdRequestInput = z.input<typeof getCandidateIdRequestSchema>;
 export type UpdateCandidateIdRequestStatusInput = z.input<typeof updateCandidateIdRequestStatusSchema>;
 
-export type CandidateIdRequestRow = {
-  cir_uuid: string;
-  candidate_ids: string | null;
-  status: string | null;
-  rejection_reason: string | null;
-  created_by_name: string | null;
-  updated_by_name: string | null;
-  created_at: string | null;
-  updated_at: string | null;
-};
+export type CandidateIdRequestRow = z.output<typeof candidateIdRequestRowSchema>;
 
-export type CandidateIdRequestDetail = {
-  request: CandidateIdRequestRow | null;
-};
+export type CandidateIdRequestDetail = z.output<typeof getCandidateIdRequestOutputSchema>;
 
-export type UpdateCandidateIdRequestStatusResult = {
-  operation: "success" | "error";
-  message: string;
-};
+export type UpdateCandidateIdRequestStatusResult = z.output<typeof updateCandidateIdRequestStatusOutputSchema>;
