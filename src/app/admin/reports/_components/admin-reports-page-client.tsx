@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import type { SessionUser } from "@/modules/auth/types";
-import type { ReportTypeItem } from "../actions";
+import type { ReportTypeItem } from "../schemas";
 import { generateReport } from "../actions";
 
 type Props = {

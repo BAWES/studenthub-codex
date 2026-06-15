@@ -87,7 +87,18 @@ export const singleReportSchema = z.object({
  * Schema for the generateReport response.
  */
 export const generateReportResultSchema = z.object({
-  operation: z.string().min(1),
+  operation: z.enum(["success", "error"]),
   message: z.string().min(1),
   data: singleReportSchema.optional(),
 });
+
+// ---------------------------------------------------------------------------
+// Inferred output types
+// ---------------------------------------------------------------------------
+
+export type ReportTypeItem = z.output<typeof reportTypeItemSchema>;
+export type RecruiterStaffReport = z.output<typeof recruiterStaffReportSchema>;
+export type GetRecruiterReportResult = z.output<typeof getRecruiterReportResultSchema>;
+export type ListReportsResult = z.output<typeof listReportsResultSchema>;
+export type SingleReportResult = z.output<typeof singleReportSchema>;
+export type GenerateReportResult = z.output<typeof generateReportResultSchema>;

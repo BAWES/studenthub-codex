@@ -24,63 +24,23 @@ import {
   listReportsResultSchema,
   singleReportSchema,
   generateReportResultSchema,
+  type ReportTypeItem,
+  type RecruiterStaffReport,
+  type GetRecruiterReportResult,
+  type ListReportsResult,
+  type SingleReportResult,
+  type GenerateReportResult,
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
-// Types
+// Types — inferred from Zod schemas via z.output<>
 // ---------------------------------------------------------------------------
 
-export type ReportTypeItem = {
-  type: string;
-  label: string;
-  description: string;
-};
-
-export type RecruiterStaffReport = {
-  staffEmail: string;
-  staffName: string;
-  totalAssigned: number;
-  totalRequests: number;
-  totalNotes: number;
-  totalStories: number;
-  totalAcceptedInvitations: number;
-  totalRejectedInvitations: number;
-  totalSuggestions: number;
-  totalInvitations: number;
-  totalCompletedStories: number;
-};
-
-export type GetRecruiterReportResult = {
-  date: string;
-  reports: RecruiterStaffReport[];
-  total: number;
-};
+export type { ReportTypeItem, RecruiterStaffReport, GetRecruiterReportResult, ListReportsResult, SingleReportResult, GenerateReportResult };
 
 export type ListReportsInput = z.input<typeof listReportsSchema>;
 export type GetReportInput = z.input<typeof getReportSchema>;
 export type GenerateReportInput = z.input<typeof generateReportSchema>;
-
-export type ListReportsResult = {
-  reports: ReportTypeItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
-
-export type SingleReportResult = {
-  id: string;
-  type: string;
-  label: string;
-  data: GetRecruiterReportResult | Record<string, unknown>;
-  generatedAt: string;
-};
-
-export type GenerateReportResult = {
-  operation: "success" | "error";
-  message: string;
-  data?: SingleReportResult;
-};
 
 // ---------------------------------------------------------------------------
 // Available report types (static catalog — no DB dependency)
