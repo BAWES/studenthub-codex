@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
 import { listTagsSchema, getTagSchema, createTagSchema, updateTagSchema, deleteTagSchema, listTagsResultSchema, getTagResultSchema, tagActionResponseSchema } from "./schemas";
-import type { ListTagsInput, ListTagsResult } from "./schemas";
+import type { ListTagsInput, ListTagsResult, GetTagResult, TagActionResponse } from "./schemas";
 
 export async function listTags(input: ListTagsInput = {}): Promise<ListTagsResult> {
   await requireCapability("admin.read");
@@ -27,7 +27,7 @@ export async function listTags(input: ListTagsInput = {}): Promise<ListTagsResul
   return result;
 }
 
-export async function getTag(tagId: number): Promise<{ tag: { tag_id: number; tag: string; created_at: Date | null; updated_at: Date | null } | null }> {
+export async function getTag(tagId: number): Promise<GetTagResult> {
   await requireCapability("admin.read");
   const parsed = getTagSchema.safeParse({ tagId });
   if (!parsed.success) throw new Error(parsed.error.issues[0]?.message ?? "Invalid tag ID");
@@ -48,7 +48,7 @@ export async function getTag(tagId: number): Promise<{ tag: { tag_id: number; ta
   return result;
 }
 
-export async function createTag(name: string): Promise<{ operation: string; message: string }> {
+export async function createTag(name: string): Promise<TagActionResponse> {
   await requireCapability("admin.write");
   const parsed = createTagSchema.safeParse({ tag: name });
   if (!parsed.success) return { operation: "error", message: parsed.error.issues[0]?.message ?? "Invalid tag name" };
@@ -71,7 +71,7 @@ export async function createTag(name: string): Promise<{ operation: string; mess
   }
 }
 
-export async function updateTag(tagId: number, name: string): Promise<{ operation: string; message: string }> {
+export async function updateTag(tagId: number, name: string): Promise<TagActionResponse> {
   await requireCapability("admin.write");
   const parsed = updateTagSchema.safeParse({ tagId, tag: name });
   if (!parsed.success) return { operation: "error", message: parsed.error.issues[0]?.message ?? "Invalid parameters" };
@@ -96,7 +96,7 @@ export async function updateTag(tagId: number, name: string): Promise<{ operatio
   }
 }
 
-export async function deleteTag(tagId: number): Promise<{ operation: string; message: string }> {
+export async function deleteTag(tagId: number): Promise<TagActionResponse> {
   await requireCapability("admin.write");
   const parsed = deleteTagSchema.safeParse({ tagId });
   if (!parsed.success) return { operation: "error", message: parsed.error.issues[0]?.message ?? "Invalid tag ID" };

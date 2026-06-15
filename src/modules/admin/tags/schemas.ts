@@ -52,5 +52,7 @@ export type CreateTagInput = z.input<typeof createTagSchema>;
 export type UpdateTagInput = z.input<typeof updateTagSchema>;
 export type DeleteTagInput = z.input<typeof deleteTagSchema>;
 
-export type TagItem = { tag_id: number; tag: string; created_at: Date | null; updated_at: Date | null };
-export type ListTagsResult = { tags: TagItem[]; total: number; page: number; limit: number; totalPages: number };
+export type TagItem = z.output<typeof tagItemSchema>;
+export type ListTagsResult = z.output<typeof listTagsResultSchema>;
+export type GetTagResult = z.output<typeof getTagResultSchema>;
+export type TagActionResponse = z.output<typeof tagActionResponseSchema>;
