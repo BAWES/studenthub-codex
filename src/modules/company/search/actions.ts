@@ -16,7 +16,7 @@ import {
   companySearchResultSchema,
   type CompanySearchResult,
   type CompanySearchRow,
-} from "@/app/company/search/schemas";
+} from "@/modules/company/search/schemas";
 
 // ---------------------------------------------------------------------------
 // Helpers
