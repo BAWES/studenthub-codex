@@ -51,6 +51,10 @@ import {
   getNoteEntrySchema,
   updateNoteEntrySchema,
   deleteNoteEntrySchema,
+  companyNoteListItemSchema,
+  listCompanyNotesResultSchema,
+  companyNoteDetailSchema,
+  companyNoteActionResultSchema,
 } from "../schemas";
 import type {
   ListCompanyNotesInput,
@@ -97,6 +101,10 @@ import {
   deleteRequestSchema,
   getCompanyListSchema,
   companyRequestActionResultSchema,
+  companyRequestListItemSchema,
+  listCompanyRequestsResultSchema,
+  companyRequestDetailSchema,
+  companyRequestCreateResultSchema,
 } from "../schemas";
 import type {
   ListCompanyRequestsInput,
@@ -825,13 +833,18 @@ export async function listCompanyNotes(
     company_name: n.company?.company_name ?? null,
   }));
 
-  return {
+  const result = {
     notes,
     total,
     page,
     limit,
     totalPages: Math.ceil(total / limit),
   };
+  const outputParsed = listCompanyNotesResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error("listCompanyNotes output validation failed:", outputParsed.error);
+  }
+  return result;
 }
 
 /**
@@ -866,7 +879,7 @@ export async function getCompanyNote(
 
   if (!raw) return null;
 
-  return {
+  const result = {
     note_uuid: raw.note_uuid,
     company_id: raw.company_id,
     note_text: raw.note_text,
@@ -877,6 +890,11 @@ export async function getCompanyNote(
     updated_at: raw.note_updated_datetime?.toISOString() ?? null,
     company_name: raw.company?.company_name ?? null,
   };
+  const outputParsed = companyNoteDetailSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error("getCompanyNote output validation failed:", outputParsed.error);
+  }
+  return result;
 }
 
 /**
@@ -905,7 +923,12 @@ export async function createCompanyNote(
   });
 
   revalidatePath(`/company/notes`);
-  return { note_uuid: note.note_uuid };
+  const result = { note_uuid: note.note_uuid };
+  const outputParsed = companyNoteActionResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error("createCompanyNote output validation failed:", outputParsed.error);
+  }
+  return result;
 }
 
 /**
@@ -938,7 +961,12 @@ export async function updateCompanyNote(
   });
 
   revalidatePath(`/company/notes`);
-  return { note_uuid: parsed.data.noteUuid };
+  const result = { note_uuid: parsed.data.noteUuid };
+  const parsed2 = companyNoteActionResultSchema.safeParse(result);
+  if (!parsed2.success) {
+    console.error("updateCompanyNote output validation failed:", parsed2.error);
+  }
+  return result;
 }
 
 /**
@@ -964,7 +992,12 @@ export async function deleteCompanyNote(
   });
 
   revalidatePath(`/company/notes`);
-  return { success: true };
+  const result = { success: true };
+  const outputParsed = companyNoteActionResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error("deleteCompanyNote output validation failed:", outputParsed.error);
+  }
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -1436,7 +1469,7 @@ export async function listCompanyRequests(
     prisma.request.count({ where }),
   ]);
 
-  return {
+  const result = {
     requests: requests.map((r) => ({
       request_uuid: r.request_uuid,
       company_id: r.company_id,
@@ -1454,6 +1487,11 @@ export async function listCompanyRequests(
     limit,
     totalPages: Math.ceil(total / limit),
   };
+  const outputParsed = listCompanyRequestsResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error("listCompanyRequests output validation failed:", outputParsed.error);
+  }
+  return result;
 }
 
 /**
@@ -1493,7 +1531,7 @@ export async function getCompanyRequestDetail(
 
   if (!request) return null;
 
-  return {
+  const result = {
     request_uuid: request.request_uuid,
     company_id: request.company_id,
     contact_uuid: request.contact_uuid,
@@ -1510,6 +1548,11 @@ export async function getCompanyRequestDetail(
     request_updated_datetime: request.request_updated_datetime,
     company_name: request.company?.company_name ?? null,
   };
+  const outputParsed = companyRequestDetailSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error("getCompanyRequestDetail output validation failed:", outputParsed.error);
+  }
+  return result;
 }
 
 /**
@@ -1546,7 +1589,12 @@ export async function createCompanyRequest(
   });
 
   revalidatePath("/company/requests");
-  return { request_uuid: request.request_uuid };
+  const result = { request_uuid: request.request_uuid };
+  const outputParsed = companyRequestCreateResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error("createCompanyRequest output validation failed:", outputParsed.error);
+  }
+  return result;
 }
 
 // ---------------------------------------------------------------------------

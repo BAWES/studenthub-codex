@@ -11,6 +11,11 @@ export {
   createCompanyRequestSchema,
   updateRequestStatusSchema,
   deleteRequestSchema,
+  companyRequestListItemSchema,
+  listCompanyRequestsResultSchema,
+  companyRequestDetailSchema,
+  companyRequestCreateResultSchema,
+  companyRequestActionResultSchema,
 } from "@/modules/company/schemas";
 
 export type {

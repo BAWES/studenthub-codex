@@ -49,6 +49,11 @@ import {
   createCompanyNoteSchema,
   updateCompanyNoteSchema,
   deleteCompanyNoteSchema,
+  // Company Notes — output
+  companyNoteListItemSchema,
+  listCompanyNotesResultSchema,
+  companyNoteDetailSchema,
+  companyNoteActionResultSchema,
   // Company Notes — [id] sub-page
   getNoteEntrySchema,
   deleteNoteEntrySchema,
@@ -68,6 +73,10 @@ import {
   getCompanyListSchema,
   // Company Requests — output
   companyRequestActionResultSchema,
+  companyRequestListItemSchema,
+  listCompanyRequestsResultSchema,
+  companyRequestDetailSchema,
+  companyRequestCreateResultSchema,
 } from "./schemas";
 
 // ===========================================================================
@@ -2525,6 +2534,169 @@ describe("getCompanyListSchema", () => {
 });
 
 // ===========================================================================
+// Company Notes — output schemas
+// ===========================================================================
+
+// ---------------------------------------------------------------------------
+// companyNoteListItemSchema
+// ---------------------------------------------------------------------------
+describe("companyNoteListItemSchema", () => {
+  const valid = {
+    note_uuid: "uuid-123",
+    note_text: "Some note text",
+    note_type: "Internal Note",
+    company_id: 42,
+    created_by: 1,
+    created_at: "2026-01-01T00:00:00.000Z",
+    updated_at: "2026-01-02T00:00:00.000Z",
+    company_name: "Acme Corp",
+  };
+
+  it("accepts a valid note list item", () => {
+    expect(companyNoteListItemSchema.safeParse(valid).success).toBe(true);
+  });
+
+  it("accepts nullable fields as null", () => {
+    expect(
+      companyNoteListItemSchema.safeParse({
+        ...valid,
+        note_text: null,
+        note_type: null,
+        company_id: null,
+        created_by: null,
+        created_at: null,
+        updated_at: null,
+        company_name: null,
+      }).success,
+    ).toBe(true);
+  });
+
+  it("rejects missing note_uuid", () => {
+    const { note_uuid: _, ...rest } = valid;
+    expect(companyNoteListItemSchema.safeParse(rest).success).toBe(false);
+  });
+
+  it("rejects wrong type for note_uuid (number)", () => {
+    expect(
+      companyNoteListItemSchema.safeParse({ ...valid, note_uuid: 123 }).success,
+    ).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// listCompanyNotesResultSchema
+// ---------------------------------------------------------------------------
+describe("listCompanyNotesResultSchema", () => {
+  const valid = {
+    notes: [
+      {
+        note_uuid: "uuid-1",
+        note_text: "Note 1",
+        note_type: "Internal",
+        company_id: 42,
+        created_by: 1,
+        created_at: "2026-01-01T00:00:00.000Z",
+        updated_at: "2026-01-02T00:00:00.000Z",
+        company_name: null,
+      },
+    ],
+    total: 1,
+    page: 1,
+    limit: 20,
+    totalPages: 1,
+  };
+
+  it("accepts a valid result", () => {
+    expect(listCompanyNotesResultSchema.safeParse(valid).success).toBe(true);
+  });
+
+  it("accepts empty notes array", () => {
+    expect(
+      listCompanyNotesResultSchema.safeParse({ ...valid, notes: [], total: 0, totalPages: 0 }).success,
+    ).toBe(true);
+  });
+
+  it("rejects missing total", () => {
+    const { total: _, ...rest } = valid;
+    expect(listCompanyNotesResultSchema.safeParse(rest).success).toBe(false);
+  });
+
+  it("rejects missing notes", () => {
+    const { notes: _, ...rest } = valid;
+    expect(listCompanyNotesResultSchema.safeParse(rest).success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// companyNoteDetailSchema (nullable)
+// ---------------------------------------------------------------------------
+describe("companyNoteDetailSchema", () => {
+  const valid = {
+    note_uuid: "uuid-123",
+    company_id: 42,
+    note_text: "Some note text",
+    note_type: "Internal Note",
+    created_by: 1,
+    updated_by: null,
+    created_at: "2026-01-01T00:00:00.000Z",
+    updated_at: "2026-01-02T00:00:00.000Z",
+    company_name: "Acme Corp",
+  };
+
+  it("accepts a valid note detail", () => {
+    expect(companyNoteDetailSchema.safeParse(valid).success).toBe(true);
+  });
+
+  it("accepts null", () => {
+    expect(companyNoteDetailSchema.safeParse(null).success).toBe(true);
+  });
+
+  it("rejects missing note_uuid", () => {
+    const { note_uuid: _, ...rest } = valid;
+    expect(companyNoteDetailSchema.safeParse(rest).success).toBe(false);
+  });
+
+  it("rejects wrong type for note_uuid (number)", () => {
+    expect(
+      companyNoteDetailSchema.safeParse({ ...valid, note_uuid: 123 }).success,
+    ).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// companyNoteActionResultSchema (union)
+// ---------------------------------------------------------------------------
+describe("companyNoteActionResultSchema", () => {
+  it("accepts { note_uuid: string }", () => {
+    expect(
+      companyNoteActionResultSchema.safeParse({ note_uuid: "uuid-123" }).success,
+    ).toBe(true);
+  });
+
+  it("accepts { success: true }", () => {
+    expect(
+      companyNoteActionResultSchema.safeParse({ success: true }).success,
+    ).toBe(true);
+  });
+
+  it("accepts { success: false }", () => {
+    expect(
+      companyNoteActionResultSchema.safeParse({ success: false }).success,
+    ).toBe(true);
+  });
+
+  it("rejects empty object", () => {
+    expect(companyNoteActionResultSchema.safeParse({}).success).toBe(false);
+  });
+
+  it("rejects wrong type for note_uuid (number)", () => {
+    expect(
+      companyNoteActionResultSchema.safeParse({ note_uuid: 123 }).success,
+    ).toBe(false);
+  });
+});
+
+// ===========================================================================
 // Company Requests — output schemas
 // ===========================================================================
 
@@ -2557,6 +2729,169 @@ describe("companyRequestActionResultSchema", () => {
   it("rejects wrong type for error (number)", () => {
     expect(
       companyRequestActionResultSchema.safeParse({ error: 123 }).success,
+    ).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// companyRequestListItemSchema
+// ---------------------------------------------------------------------------
+describe("companyRequestListItemSchema", () => {
+  const valid = {
+    request_uuid: "uuid-123",
+    company_id: 42,
+    request_position_title: "Software Engineer",
+    request_compensation: "500 KWD",
+    request_number_of_employees: 3,
+    request_location: "Kuwait City",
+    request_status: "pending",
+    request_created_datetime: new Date("2026-01-01"),
+    request_updated_datetime: new Date("2026-01-02"),
+    company_name: "Acme Corp",
+  };
+
+  it("accepts a valid request list item", () => {
+    expect(companyRequestListItemSchema.safeParse(valid).success).toBe(true);
+  });
+
+  it("accepts nullable fields as null", () => {
+    expect(
+      companyRequestListItemSchema.safeParse({
+        ...valid,
+        company_id: null,
+        request_position_title: null,
+        request_compensation: null,
+        request_number_of_employees: null,
+        request_location: null,
+        request_status: null,
+        company_name: null,
+      }).success,
+    ).toBe(true);
+  });
+
+  it("rejects missing request_uuid", () => {
+    const { request_uuid: _, ...rest } = valid;
+    expect(companyRequestListItemSchema.safeParse(rest).success).toBe(false);
+  });
+
+  it("rejects wrong type for request_created_datetime (string)", () => {
+    expect(
+      companyRequestListItemSchema.safeParse({
+        ...valid,
+        request_created_datetime: "not-a-date",
+      }).success,
+    ).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// listCompanyRequestsResultSchema
+// ---------------------------------------------------------------------------
+describe("listCompanyRequestsResultSchema", () => {
+  const valid = {
+    requests: [
+      {
+        request_uuid: "uuid-1",
+        company_id: 42,
+        request_position_title: "Engineer",
+        request_compensation: "500 KWD",
+        request_number_of_employees: 3,
+        request_location: "Kuwait City",
+        request_status: "pending",
+        request_created_datetime: new Date("2026-01-01"),
+        request_updated_datetime: new Date("2026-01-02"),
+        company_name: "Acme Corp",
+      },
+    ],
+    total: 1,
+    page: 1,
+    limit: 20,
+    totalPages: 1,
+  };
+
+  it("accepts a valid result", () => {
+    expect(listCompanyRequestsResultSchema.safeParse(valid).success).toBe(true);
+  });
+
+  it("accepts empty requests array", () => {
+    expect(
+      listCompanyRequestsResultSchema.safeParse({
+        ...valid,
+        requests: [],
+        total: 0,
+        totalPages: 0,
+      }).success,
+    ).toBe(true);
+  });
+
+  it("rejects missing requests", () => {
+    const { requests: _, ...rest } = valid;
+    expect(listCompanyRequestsResultSchema.safeParse(rest).success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// companyRequestDetailSchema (nullable)
+// ---------------------------------------------------------------------------
+describe("companyRequestDetailSchema", () => {
+  const valid = {
+    request_uuid: "uuid-123",
+    company_id: 42,
+    contact_uuid: "contact-uuid",
+    staff_id: 1,
+    request_position_title: "Engineer",
+    request_job_description: "Full stack developer",
+    request_compensation: "500 KWD",
+    request_number_of_employees: 3,
+    request_location: "Kuwait City",
+    request_additional_info: null,
+    request_status: "pending",
+    request_feedback: null,
+    request_created_datetime: new Date("2026-01-01"),
+    request_updated_datetime: new Date("2026-01-02"),
+    company_name: "Acme Corp",
+  };
+
+  it("accepts a valid request detail", () => {
+    expect(companyRequestDetailSchema.safeParse(valid).success).toBe(true);
+  });
+
+  it("accepts null", () => {
+    expect(companyRequestDetailSchema.safeParse(null).success).toBe(true);
+  });
+
+  it("rejects missing request_uuid", () => {
+    const { request_uuid: _, ...rest } = valid;
+    expect(companyRequestDetailSchema.safeParse(rest).success).toBe(false);
+  });
+
+  it("rejects wrong type for request_job_description (number)", () => {
+    expect(
+      companyRequestDetailSchema.safeParse({
+        ...valid,
+        request_job_description: 123,
+      }).success,
+    ).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// companyRequestCreateResultSchema
+// ---------------------------------------------------------------------------
+describe("companyRequestCreateResultSchema", () => {
+  it("accepts a valid create result", () => {
+    expect(
+      companyRequestCreateResultSchema.safeParse({ request_uuid: "uuid-123" }).success,
+    ).toBe(true);
+  });
+
+  it("rejects missing request_uuid", () => {
+    expect(companyRequestCreateResultSchema.safeParse({}).success).toBe(false);
+  });
+
+  it("rejects wrong type for request_uuid (number)", () => {
+    expect(
+      companyRequestCreateResultSchema.safeParse({ request_uuid: 123 }).success,
     ).toBe(false);
   });
 });
