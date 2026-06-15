@@ -279,7 +279,7 @@ describe("singleReportSchema", () => {
 // generateReportResultSchema
 // ---------------------------------------------------------------------------
 describe("generateReportResultSchema", () => {
-  const valid = { operation: "generate", message: "Report generated" };
+  const valid = { operation: "success" as const, message: "Report generated" };
 
   it("accepts valid result without data", () => {
     expect(generateReportResultSchema.safeParse(valid).success).toBe(true);

@@ -21,10 +21,8 @@ import {
 } from "../actions";
 
 // Re-export parent types so consumers have a single import path
-export type {
-  TransferDetail,
-  TransferActionResponse,
-} from "../actions";
+import type { TransferDetail, TransferActionResponse } from "../schemas";
+export type { TransferDetail, TransferActionResponse };
 
 import { getTransferSchema, updateTransferStatusSchema, transferStatusUpdateResultSchema, transferExistenceSchema } from "./schemas";
 import type { UpdateTransferStatusInput } from "./schemas";
@@ -39,7 +37,7 @@ import type { UpdateTransferStatusInput } from "./schemas";
  */
 export async function getTransfer(
   transferId: number,
-): Promise<import("../actions").TransferDetail> {
+): Promise<TransferDetail> {
   await requireCapability("finance.read");
 
   const parsed = getTransferSchema.safeParse({ transferId });

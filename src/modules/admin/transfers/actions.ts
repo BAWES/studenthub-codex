@@ -29,61 +29,18 @@ import {
   listTransfersResultSchema,
   transferDetailResultSchema,
   transferActionResponseSchema,
+  type ListTransfersInput,
+  type TransferRow,
+  type TransferDetail,
+  type TransferActionResponse,
+  type AdminTransferDetailResult,
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
-// Types
+// Types — inferred from Zod schemas via z.output<>
 // ---------------------------------------------------------------------------
 
-export type ListTransfersInput = z.input<typeof listTransfersSchema>;
-
-export type TransferRow = {
-  id: number;
-  company: string;
-  period: string;
-  status: string;
-  statusCode: number;
-  total: string | null;
-  currencyCode: string | null;
-  createdAt: string | null;
-};
-
-export type TransferDetail = {
-  transfer: {
-    transferId: number;
-    total: string | null;
-    companyTotal: string | null;
-    transferCost: string | null;
-    status: string;
-    statusLabel: string;
-    currencyCode: string | null;
-    startDate: string | null;
-    endDate: string | null;
-    paymentReceivedOn: string | null;
-    createdAt: string | null;
-    updatedAt: string | null;
-    companyName: string | null;
-    companyEmail: string | null;
-  } | null;
-  candidates: {
-    tcId: number;
-    candidateName: string | null;
-    hours: number | null;
-    amount: string | null;
-    paid: number;
-  }[];
-  invoices: {
-    invoiceId: number;
-    invoiceDate: string | null;
-    invoiceStatus: string | null;
-  }[];
-  metrics: { label: string; value: string | number; note: string }[];
-};
-
-export type TransferActionResponse = {
-  success: boolean;
-  error?: string;
-};
+export type { TransferRow, TransferDetail, TransferActionResponse, AdminTransferDetailResult };
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -424,31 +381,6 @@ export async function listAdminTransfers(
 /**
  * @deprecated Use getTransferDetail() instead. Maps to old detail shape for backward compatibility.
  */
-type AdminTransferDetailTransfer = {
-  transfer_id: number;
-  total: string | null;
-  company_total: string | null;
-  transfer_cost: string | null;
-  transfer_status: number;
-  currency_code: string | null;
-  start_date: Date | null;
-  end_date: Date | null;
-  payment_received_on: Date | null;
-  transfer_created_at: Date;
-  transfer_updated_at: Date;
-  company: { company_name: string | null; company_email: string | null } | null;
-  staff_transfer_transfer_created_byTostaff: { staff_name: string } | null;
-  staff_transfer_transfer_updated_byTostaff: { staff_name: string } | null;
-};
-
-type AdminTransferDetailResult = {
-  transfer: AdminTransferDetailTransfer | null;
-  candidates: { id: number; title: string; subtitle: string; meta: string }[];
-  invoices: { id: number; title: string; subtitle: string; meta: string }[];
-  metrics: { label: string; value: string | number; note: string }[];
-  fileEntries: never[];
-};
-
 export async function getAdminTransferDetail(
   transferId: number,
 ): Promise<AdminTransferDetailResult> {

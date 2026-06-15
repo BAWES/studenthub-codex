@@ -9,7 +9,7 @@
 // ---------------------------------------------------------------------------
 
 import { getReport as _getReport } from "../../../../modules/admin/reports/actions";
-import type { SingleReportResult } from "../../../../modules/admin/reports/actions";
+import type { SingleReportResult } from "../../../../modules/admin/reports/schemas";
 
 /**
  * Get a single generated report by ID and type.
