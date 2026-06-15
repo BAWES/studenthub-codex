@@ -137,7 +137,7 @@ export function AdminEvaluationsTable({
         title="Evaluations"
         description="All candidate evaluations."
         rows={evaluations.map((e) => ({ ...e, id: e.can_eval_uuid }))}
-        rowHref={undefined}
+        rowHref="/admin/evaluations/"
         columns={[
           {
             key: "candidate_name",
