@@ -118,12 +118,12 @@ export const companySelectOptionOutputSchema = z.object({
 // Output types (inferred from schemas)
 // ---------------------------------------------------------------------------
 
-export type StoreListItemOutput = z.infer<typeof storeListItemOutputSchema>;
-export type ListStoresResultOutput = z.infer<typeof listStoresResultOutputSchema>;
-export type StoreDetailOutput = z.infer<typeof storeDetailOutputSchema>;
-export type StoreRowOutput = z.infer<typeof storeRowOutputSchema>;
-export type MallsAndBrandsResultOutput = z.infer<typeof mallsAndBrandsResultOutputSchema>;
-export type CompanySelectOptionOutput = z.infer<typeof companySelectOptionOutputSchema>;
+export type StoreListItemOutput = z.output<typeof storeListItemOutputSchema>;
+export type ListStoresResultOutput = z.output<typeof listStoresResultOutputSchema>;
+export type StoreDetailOutput = z.output<typeof storeDetailOutputSchema>;
+export type StoreRowOutput = z.output<typeof storeRowOutputSchema>;
+export type MallsAndBrandsResultOutput = z.output<typeof mallsAndBrandsResultOutputSchema>;
+export type CompanySelectOptionOutput = z.output<typeof companySelectOptionOutputSchema>;
 
 export type StoreListItem = {
   store_id: number;
