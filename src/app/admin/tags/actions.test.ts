@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { listTagsSchema, getTagSchema, createTagSchema, updateTagSchema, deleteTagSchema, tagItemSchema, listTagsResultSchema, getTagResultSchema, tagActionResponseSchema } from "./schemas";
+import { listTagsSchema, createTagSchema, updateTagSchema, deleteTagSchema, tagItemSchema, listTagsResultSchema, tagActionResponseSchema } from "./schemas";
 import type { TagItem, ListTagsResult } from "./schemas";
 
 describe("listTagsSchema", () => {
@@ -9,11 +9,7 @@ describe("listTagsSchema", () => {
   it("rejects negative page", () => expect(listTagsSchema.safeParse({ page: -1 }).success).toBe(false));
 });
 
-describe("getTagSchema", () => {
-  it("accepts valid id", () => expect(getTagSchema.safeParse({ tagId: 1 }).success).toBe(true));
-  it("rejects missing id", () => expect(getTagSchema.safeParse({}).success).toBe(false));
-  it("rejects zero id", () => expect(getTagSchema.safeParse({ tagId: 0 }).success).toBe(false));
-});
+
 
 describe("createTagSchema", () => {
   it("accepts valid name", () => { const r = createTagSchema.safeParse({ tag: "New Tag" }); expect(r.success).toBe(true); if (r.success) expect(r.data.tag).toBe("New Tag"); });
@@ -158,27 +154,7 @@ describe("listTagsResultSchema (output validation)", () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// Output validation — getTagResultSchema
-// ---------------------------------------------------------------------------
 
-describe("getTagResultSchema (output validation)", () => {
-  it("accepts a valid tag result", () => {
-    const r = getTagResultSchema.safeParse({
-      tag: { tag_id: 1, tag: "urgent", created_at: new Date(), updated_at: null },
-    });
-    expect(r.success).toBe(true);
-  });
-
-  it("accepts null tag (not found)", () => {
-    const r = getTagResultSchema.safeParse({ tag: null });
-    expect(r.success).toBe(true);
-  });
-
-  it("rejects missing tag field", () => {
-    expect(getTagResultSchema.safeParse({}).success).toBe(false);
-  });
-});
 
 // ---------------------------------------------------------------------------
 // Output validation — tagActionResponseSchema

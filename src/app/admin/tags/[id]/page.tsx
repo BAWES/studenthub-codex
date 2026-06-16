@@ -21,7 +21,7 @@ export default async function AdminTagDetailPage({
     notFound();
   }
 
-  const data = await getTag(tagIdNum);
+  const data = await getTag({ tagId: tagIdNum });
 
   if (!data.tag) {
     notFound();

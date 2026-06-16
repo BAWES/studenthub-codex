@@ -3,8 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
-import { listTagsSchema, getTagSchema, createTagSchema, updateTagSchema, deleteTagSchema, listTagsResultSchema, getTagResultSchema, tagActionResponseSchema } from "./schemas";
-import type { ListTagsInput, ListTagsResult, GetTagResult, TagActionResponse } from "./schemas";
+import { listTagsSchema, createTagSchema, updateTagSchema, deleteTagSchema, listTagsResultSchema, tagActionResponseSchema } from "./schemas";
+import type { ListTagsInput, ListTagsResult, TagActionResponse } from "./schemas";
 
 export async function listTags(input: ListTagsInput = {}): Promise<ListTagsResult> {
   await requireCapability("admin.read");
@@ -24,27 +24,6 @@ export async function listTags(input: ListTagsInput = {}): Promise<ListTagsResul
     console.error("[admin/tags] listTags output failed:", outputParsed.error.issues);
   }
 
-  return result;
-}
-
-export async function getTag(tagId: number): Promise<GetTagResult> {
-  await requireCapability("admin.read");
-  const parsed = getTagSchema.safeParse({ tagId });
-  if (!parsed.success) throw new Error(parsed.error.issues[0]?.message ?? "Invalid tag ID");
-  const row = await prisma.tag.findUnique({ where: { tag_id: parsed.data.tagId } });
-  if (!row) {
-    const result = { tag: null };
-    const outputParsed = getTagResultSchema.safeParse(result);
-    if (!outputParsed.success) {
-      console.error("[admin/tags] getTag output failed:", outputParsed.error.issues);
-    }
-    return result;
-  }
-  const result = { tag: { tag_id: row.tag_id, tag: row.tag, created_at: row.created_at, updated_at: row.updated_at } };
-  const outputParsed = getTagResultSchema.safeParse(result);
-  if (!outputParsed.success) {
-    console.error("[admin/tags] getTag output failed:", outputParsed.error.issues);
-  }
   return result;
 }
 
