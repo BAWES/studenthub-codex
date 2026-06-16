@@ -57,7 +57,7 @@ describe("admin departments — data contracts", () => {
 
   it("departmentListResponseSchema validates response", () => {
     const r = departmentListResponseSchema.safeParse({
-      departments: [
+      items: [
         {
           department_uuid: "dept-1",
           department_name_en: "Engineering",

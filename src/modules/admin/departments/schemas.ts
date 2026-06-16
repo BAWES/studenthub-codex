@@ -43,7 +43,7 @@ const departmentRowSchema = z.object({
 });
 
 export const departmentListResponseSchema = z.object({
-  departments: z.array(departmentRowSchema),
+  items: z.array(departmentRowSchema),
   total: z.number().int().nonnegative(),
   page: z.number().int().positive(),
   limit: z.number().int().positive(),
