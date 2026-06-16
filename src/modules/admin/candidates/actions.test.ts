@@ -608,11 +608,18 @@ describe("getCandidate — runtime", () => {
   const MOCK_CANDIDATE = {
     candidate_id: 1,
     candidate_name: "Ahmed Al-Sabah",
+    candidate_name_ar: null,
     candidate_email: "ahmed@example.com",
     candidate_phone: "50000000",
     candidate_status: 10,
+    candidate_gender: null,
+    candidate_birth_date: null,
+    candidate_hourly_rate: null,
+    currency_code: null,
     candidate_created_at: new Date("2026-06-01"),
     candidate_updated_at: new Date("2026-06-10"),
+    store: null,
+    country: null,
   };
 
   beforeEach(() => {

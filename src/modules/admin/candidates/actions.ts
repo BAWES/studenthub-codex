@@ -106,7 +106,7 @@ export async function listCandidates(
     items: candidates.map((c): CandidateRow => ({
       candidate_id: c.candidate_id,
       name: c.candidate_name,
-      name_ar: c.candidate_name_ar,
+      name_ar: c.candidate_name_ar ?? "",
       email: c.candidate_email,
       phone: c.candidate_phone ?? null,
       status: c.candidate_status,
@@ -187,7 +187,7 @@ export async function getCandidate(
     candidate: {
       candidate_id: c.candidate_id,
       candidate_name: c.candidate_name,
-      candidate_name_ar: c.candidate_name_ar,
+      candidate_name_ar: c.candidate_name_ar ?? "",
       candidate_email: c.candidate_email,
       candidate_phone: c.candidate_phone ?? null,
       candidate_status: c.candidate_status,
@@ -282,7 +282,7 @@ export async function searchCandidates(
     items: candidates.map((c): CandidateRow => ({
       candidate_id: c.candidate_id,
       name: c.candidate_name,
-      name_ar: c.candidate_name_ar,
+      name_ar: c.candidate_name_ar ?? "",
       email: c.candidate_email,
       phone: c.candidate_phone ?? null,
       status: c.candidate_status,
