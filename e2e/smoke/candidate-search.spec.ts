@@ -49,14 +49,8 @@ test.describe("Candidate search", () => {
     ]);
     const page = await context.newPage();
     await page.goto("/admin/candidates");
-    // Search should be present (Command menu or search input)
-    await expect(
-      page
-        .locator(
-          'input[type="search"], input[placeholder*="Search"], input[placeholder*="search"]',
-        )
-        .or(page.locator("[cmdk-input]")),
-    ).toBeVisible({ timeout: 15000 });
+    // Search should be present (scoped to candidate search input, not global CmdK)
+    await expect(page.locator("#candidate-query")).toBeVisible({ timeout: 15000 });
     await context.close();
   });
 
