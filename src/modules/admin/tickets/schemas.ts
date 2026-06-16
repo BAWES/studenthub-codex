@@ -68,15 +68,7 @@ export type GetTicketInput = z.input<typeof getTicketSchema>;
 export type CreateTicketInput = z.input<typeof createTicketSchema>;
 export type UpdateTicketStatusInput = z.input<typeof updateTicketStatusSchema>;
 
-export type TicketItem = { ticket_uuid: string; ticket_detail: string | null; ticket_status: number | null; created_at: Date | null; candidate_name: string | null; staff_name: string | null };
-
-export type ListTicketsResult = { tickets: TicketItem[]; total: number; page: number; limit: number; totalPages: number };
-
-export type TicketDetail = {
-  ticket_uuid: string; candidate_id: number | null; staff_id: number | null;
-  ticket_detail: string | null; ticket_status: number | null;
-  ticket_started_at: Date | null; ticket_completed_at: Date | null;
-  response_time: number | null; resolution_time: number | null;
-  created_at: Date | null; updated_at: Date | null;
-  candidate_name: string | null; staff_name: string | null;
-};
+// Output types derived from Zod schemas
+export type TicketItem = z.output<typeof ticketItemSchema>;
+export type ListTicketsResult = z.output<typeof listTicketsResultSchema>;
+export type TicketDetail = z.output<typeof ticketDetailSchema>;

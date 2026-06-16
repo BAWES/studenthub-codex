@@ -129,46 +129,8 @@ export type CreateStoreInput = z.input<typeof createStoreSchema>;
 export type UpdateStoreInput = z.input<typeof updateStoreSchema>;
 export type DeleteStoreInput = z.input<typeof deleteStoreSchema>;
 
-export type StoreRow = {
-  store_id: number;
-  store_name: string;
-  store_location: string;
-  store_status: number;
-  store_total_candidates: number | null;
-  company_name: string | null;
-  brand_name: string | null;
-  mall_name: string | null;
-  manager_name: string | null;
-  created_at: string | null;
-  updated_at: string | null;
-};
-
-export type StoreDetail = {
-  store: {
-    store_id: number;
-    store_name: string;
-    store_location: string;
-    store_status: number;
-    store_total_candidates: number | null;
-    store_created_at: string | null;
-    store_updated_at: string | null;
-    company: { company_name: string | null; company_email: string | null } | null;
-    contact: { contact_name: string | null; contact_email: string | null } | null;
-    brand: { brand_name_en: string | null } | null;
-    mall: { mall_name_en: string | null } | null;
-  } | null;
-};
-
-export type StoreActionResult = {
-  success: boolean;
-  storeId?: number;
-  error?: string;
-};
-
-export type ListStoresResult = {
-  items: StoreRow[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
+// Output types derived from Zod schemas
+export type StoreRow = z.output<typeof storeRowSchema>;
+export type StoreDetail = z.output<typeof storeDetailSchema>;
+export type StoreActionResult = z.output<typeof storeActionResultSchema>;
+export type ListStoresResult = z.output<typeof listStoresResultSchema>;
