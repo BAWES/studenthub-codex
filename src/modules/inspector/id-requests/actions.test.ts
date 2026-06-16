@@ -1,13 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 // ── Hoisted mock functions ──────────────────────────────────
-const { mockRequireCapability, mockFindMany, mockCount, mockFindUnique, mockCandidateFindMany } =
+const { mockRequireCapability, mockFindMany, mockCount, mockFindUnique, mockCandidateFindMany, mockUpdate } =
   vi.hoisted(() => ({
     mockRequireCapability: vi.fn(),
     mockFindMany: vi.fn(),
     mockCount: vi.fn(),
     mockFindUnique: vi.fn(),
     mockCandidateFindMany: vi.fn(),
+    mockUpdate: vi.fn(),
   }));
 
 // ── Mock session module ─────────────────────────────────────
@@ -22,6 +23,7 @@ vi.mock("@/lib/prisma", () => ({
       findMany: mockFindMany,
       count: mockCount,
       findUnique: mockFindUnique,
+      update: mockUpdate,
     },
     candidate: {
       findMany: mockCandidateFindMany,
@@ -42,7 +44,7 @@ import {
   type IdRequestDetail,
   type ListIdRequestsResult,
 } from "./schemas";
-import { listIdRequests, getIdRequest } from "./actions";
+import { listIdRequests, getIdRequest, approveIdRequest, rejectIdRequest } from "./actions";
 
 // ===========================================================================
 // Input schema validation
@@ -587,5 +589,147 @@ describe("getIdRequest()", () => {
       "Request ID is required",
     );
     expect(mockFindUnique).not.toHaveBeenCalled();
+  });
+});
+
+// ===========================================================================
+// approveIdRequest / rejectIdRequest mutation action tests
+// ===========================================================================
+
+const mockExistingPending = {
+  cir_uuid: "cir-abc-123-4567-8901-2345",
+  status: "pending",
+};
+
+describe("approveIdRequest()", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockRequireCapability.mockResolvedValue(undefined);
+    mockFindUnique.mockResolvedValue(mockExistingPending);
+    mockUpdate.mockResolvedValue({ cir_uuid: "cir-abc-123", status: "approved" });
+  });
+
+  it("requires id_review.mutate capability", async () => {
+    mockRequireCapability.mockRejectedValue(new Error("Unauthorized"));
+
+    await expect(approveIdRequest("cir-abc-123")).rejects.toThrow(
+      "Unauthorized",
+    );
+    expect(mockRequireCapability).toHaveBeenCalledWith("id_review.mutate");
+  });
+
+  it("approves a pending request", async () => {
+    const result = await approveIdRequest("cir-abc-123-4567-8901-2345");
+
+    expect(mockRequireCapability).toHaveBeenCalledWith("id_review.mutate");
+    expect(mockFindUnique).toHaveBeenCalledWith({
+      where: { cir_uuid: "cir-abc-123-4567-8901-2345" },
+      select: { cir_uuid: true, status: true },
+    });
+    expect(mockUpdate).toHaveBeenCalledWith({
+      where: { cir_uuid: "cir-abc-123-4567-8901-2345" },
+      data: { status: "approved", updated_at: expect.any(Date) },
+    });
+    expect(result).toEqual({ success: true });
+  });
+
+  it("returns error for non-existent request", async () => {
+    mockFindUnique.mockResolvedValue(null);
+
+    const result = await approveIdRequest("non-existent");
+
+    expect(result).toEqual({ error: "ID request not found." });
+    expect(mockUpdate).not.toHaveBeenCalled();
+  });
+
+  it("returns error if request is not pending", async () => {
+    mockFindUnique.mockResolvedValue({
+      ...mockExistingPending,
+      status: "approved",
+    });
+
+    const result = await approveIdRequest("cir-abc-123-4567-8901-2345");
+
+    expect(result).toEqual({
+      error:
+        'Cannot update a request with status "approved". Only \'pending\' requests can be updated.',
+    });
+    expect(mockUpdate).not.toHaveBeenCalled();
+  });
+});
+
+describe("rejectIdRequest()", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockRequireCapability.mockResolvedValue(undefined);
+    mockFindUnique.mockResolvedValue(mockExistingPending);
+    mockUpdate.mockResolvedValue({ cir_uuid: "cir-abc-123", status: "rejected" });
+  });
+
+  it("requires id_review.mutate capability", async () => {
+    mockRequireCapability.mockRejectedValue(new Error("Unauthorized"));
+
+    await expect(
+      rejectIdRequest("cir-abc-123", "Documents do not match"),
+    ).rejects.toThrow("Unauthorized");
+    expect(mockRequireCapability).toHaveBeenCalledWith("id_review.mutate");
+  });
+
+  it("rejects a pending request with a reason", async () => {
+    const result = await rejectIdRequest(
+      "cir-abc-123-4567-8901-2345",
+      "Documents do not match civil records.",
+    );
+
+    expect(mockFindUnique).toHaveBeenCalledWith({
+      where: { cir_uuid: "cir-abc-123-4567-8901-2345" },
+      select: { cir_uuid: true, status: true },
+    });
+    expect(mockUpdate).toHaveBeenCalledWith({
+      where: { cir_uuid: "cir-abc-123-4567-8901-2345" },
+      data: {
+        status: "rejected",
+        rejection_reason: "Documents do not match civil records.",
+        updated_at: expect.any(Date),
+      },
+    });
+    expect(result).toEqual({ success: true });
+  });
+
+  it("returns error when rejection reason is missing", async () => {
+    const result = await rejectIdRequest("cir-abc-123-4567-8901-2345", "");
+
+    expect(result).toEqual({
+      error:
+        "String must contain at least 10 character(s)",
+    });
+    expect(mockUpdate).not.toHaveBeenCalled();
+  });
+
+  it("returns error for non-existent request", async () => {
+    mockFindUnique.mockResolvedValue(null);
+
+    const result = await rejectIdRequest("cir-abc-123", "Invalid docs");
+
+    expect(result).toEqual({ error: "ID request not found." });
+    expect(mockUpdate).not.toHaveBeenCalled();
+  });
+
+  it("returns error if request is not pending", async () => {
+    mockFindUnique.mockResolvedValue({
+      ...mockExistingPending,
+      status: "approved",
+    });
+
+    const result = await rejectIdRequest(
+      "cir-abc-123",
+      "Already approved cannot reject",
+    );
+
+    expect(result).toEqual({
+      error:
+        'Cannot update a request with status "approved". Only \'pending\' requests can be updated.',
+    });
+    expect(mockUpdate).not.toHaveBeenCalled();
   });
 });
