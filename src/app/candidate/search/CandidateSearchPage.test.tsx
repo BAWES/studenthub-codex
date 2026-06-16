@@ -30,7 +30,7 @@ vi.mock("@/components/matching/MatchScoreBadge", () => ({
   ),
 }));
 
-const { CandidateSearchPage } = await import("./CandidateSearchPage");
+import { CandidateSearchPage } from "./CandidateSearchPage";
 
 // =============================================================================
 // Fixtures
