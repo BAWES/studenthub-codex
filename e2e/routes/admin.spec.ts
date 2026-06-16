@@ -78,6 +78,10 @@ test.describe("Admin routes", () => {
     await assertRouteLoads("/admin/agents");
   });
 
+  test("admin events page loads", async () => {
+    await assertRouteLoads("/admin/events");
+  });
+
   // ── Role guards ──
 
   test("candidate cannot access admin", async () => {
