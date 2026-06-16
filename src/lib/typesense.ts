@@ -158,3 +158,39 @@ export interface CompanyDocument {
   country_name: string;
   deleted: number;
 }
+
+export const JOBS_COLLECTION = "jobs";
+
+export const jobsCollectionSchema = {
+  name: JOBS_COLLECTION,
+  fields: [
+    { name: "job_listing_id", type: "int32" as const },
+    { name: "employer_id", type: "int32" as const },
+    { name: "title", type: "string" as const },
+    { name: "description", type: "string" as const },
+    { name: "requirements", type: "string" as const },
+    { name: "location", type: "string" as const },
+    { name: "employment_type", type: "string" as const },
+    { name: "salary_range", type: "string" as const },
+    { name: "status", type: "string" as const, facet: true },
+    { name: "company_name", type: "string" as const },
+    { name: "created_at", type: "int64" as const },
+    { name: "updated_at", type: "int64" as const },
+  ],
+  default_sorting_field: "updated_at",
+};
+
+export interface JobDocument {
+  job_listing_id: number;
+  employer_id: number;
+  title: string;
+  description: string;
+  requirements?: string;
+  location?: string;
+  employment_type?: string;
+  salary_range?: string;
+  status?: string;
+  company_name?: string;
+  created_at: number;
+  updated_at: number;
+}
