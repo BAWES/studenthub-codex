@@ -96,9 +96,9 @@ test.describe("Admin Transfer Lifecycle", () => {
       );
       await expect(introSection.first()).toBeVisible({ timeout: 10000 });
 
-      // Title/eyebrow text
+      // Title/eyebrow text — use exact role to avoid strict mode violation
       await expect(
-        ctx.page.locator("text=Transfer Runs"),
+        ctx.page.getByRole('heading', { name: 'Transfer Runs', exact: true }),
       ).toBeVisible({ timeout: 5000 });
 
       // Data table or empty state renders
