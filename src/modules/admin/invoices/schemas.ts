@@ -35,7 +35,7 @@ export const deleteInvoiceSchema = z.object({
 });
 
 // ---------------------------------------------------------------------------
-// Types
+// Types (derived from output validation schemas)
 // ---------------------------------------------------------------------------
 
 export type ListInvoicesInput = z.input<typeof listInvoicesSchema>;
@@ -44,37 +44,8 @@ export type CreateInvoiceInput = z.input<typeof createInvoiceSchema>;
 export type UpdateInvoiceInput = z.input<typeof updateInvoiceSchema>;
 export type DeleteInvoiceInput = z.input<typeof deleteInvoiceSchema>;
 
-export type InvoiceRow = {
-  invoice_id: number;
-  transfer_id: number | null;
-  company_name: string | null;
-  invoice_date: string | null;
-  invoice_status: string | null;
-  total: string | null;
-  currency_code: string | null;
-};
-
-export type InvoiceDetail = {
-  invoice: {
-    invoice_id: number;
-    transfer_id: number | null;
-    invoice_date: string | null;
-    invoice_status: string | null;
-    total: string | null;
-    company_total: string | null;
-    currency_code: string | null;
-    payment_received_on: string | null;
-    company: { company_name: string | null; company_email: string | null } | null;
-  } | null;
-  candidate_payouts: {
-    tc_id: number;
-    candidate_name: string | null;
-    hours: number | null;
-    amount: string | null;
-    paid: number;
-  }[];
-  metrics: { label: string; value: string | number; note: string }[];
-};
+export type InvoiceRow = z.output<typeof invoiceRowOutputSchema>;
+export type InvoiceDetail = z.output<typeof invoiceDetailOutputSchema>;
 
 // ---------------------------------------------------------------------------
 // Output validation schemas
