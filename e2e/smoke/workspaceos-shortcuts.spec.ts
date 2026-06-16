@@ -70,7 +70,7 @@ async function focusPage(page: any) {
 /** Navigate and wait for full idle/networking settle. */
 async function nav(page: any, url: string) {
   await page.goto(url);
-  await page.waitForLoadState("networkidle");
+  await page.waitForLoadState("load");
   await page.locator("body").waitFor({ state: "visible", timeout: 15000 });
   await focusPage(page);
 }

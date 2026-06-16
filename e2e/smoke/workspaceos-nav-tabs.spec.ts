@@ -76,7 +76,7 @@ test.describe("WorkspaceOS — nav tabs per role", () => {
   async function verifyNavTabs(roleName: string, user: FixtureUser, startUrl: string, expectedTabs: string[]) {
     const ctx = await authContext(user);
     await ctx.page.goto(startUrl);
-    await ctx.page.waitForLoadState("networkidle");
+    await ctx.page.waitForLoadState("load");
     await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
 
     // Find navigation elements — the sidebar/rail nav renders links with labels

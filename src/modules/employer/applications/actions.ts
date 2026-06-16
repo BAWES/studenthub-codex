@@ -1,9 +1,11 @@
 "use server";
 
+import { z } from "zod";
+import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
 import { listJobApplicationsByEmployer } from "@/modules/employer/jobs/[id]/applications/actions";
-import { listEmployerApplicationsSchema } from "./schemas";
-import type { ListEmployerApplicationsInput, EmployerApplicationRow } from "./schemas";
+import { listEmployerApplicationsSchema, getApplicationDetailSchema, getApplicationDetailOutputSchema } from "./schemas";
+import type { ListEmployerApplicationsInput, EmployerApplicationRow, GetApplicationDetailInput } from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Output type from the module-level action
@@ -61,6 +63,56 @@ export async function listEmployerApplications(
 // ---------------------------------------------------------------------------
 // Metric computation helper
 // ---------------------------------------------------------------------------
+
+/**
+ * Get a single application's full details for the employer detail page.
+ */
+export async function getApplicationDetail(
+  input: GetApplicationDetailInput,
+): Promise<z.output<typeof getApplicationDetailOutputSchema>> {
+  await requireCapability("company.read.linked");
+
+  const parsed = getApplicationDetailSchema.safeParse(input);
+  if (!parsed.success) {
+    return { success: true, application: null };
+  }
+
+  const app = await prisma.job_listing_application.findUnique({
+    where: { id: parsed.data.applicationId },
+    include: {
+      candidate: {
+        select: {
+          candidate_id: true,
+          candidate_name: true,
+          candidate_name_ar: true,
+        },
+      },
+      jobListing: {
+        select: { title: true },
+      },
+    },
+  });
+
+  if (!app) {
+    return { success: true, application: null };
+  }
+
+  return {
+    success: true,
+    application: {
+      applicationId: app.id,
+      jobListingId: app.jobListingId,
+      candidateId: app.candidateId,
+      candidateName: app.candidate?.candidate_name ?? app.candidate?.candidate_name_ar ?? null,
+      jobTitle: app.jobListing?.title ?? "Unknown",
+      status: app.status,
+      coverLetter: app.coverLetter,
+      notes: app.notes,
+      createdAt: app.createdAt,
+      updatedAt: app.updatedAt,
+    },
+  };
+}
 
 function computeMetrics(
   applications: { status: string }[],

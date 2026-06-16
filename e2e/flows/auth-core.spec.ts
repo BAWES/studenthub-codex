@@ -321,7 +321,7 @@ test.describe("Auth critical flows — authentication, redirects, session, logou
       const page = await context.newPage();
 
       await page.goto("/candidate");
-      await page.waitForLoadState("networkidle");
+      await page.waitForLoadState("load");
       // Should reject the tampered cookie and redirect to /login
       await expect(page).toHaveURL(/\/login/);
 
@@ -343,7 +343,7 @@ test.describe("Auth critical flows — authentication, redirects, session, logou
       const page = await context.newPage();
 
       await page.goto("/inspector/id-requests");
-      await page.waitForLoadState("networkidle");
+      await page.waitForLoadState("load");
       await expect(page).toHaveURL(/\/login/);
 
       await context.close();

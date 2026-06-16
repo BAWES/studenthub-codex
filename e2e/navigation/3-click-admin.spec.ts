@@ -63,7 +63,7 @@ test.describe("3-click audit — Admin", () => {
     if (route === "/admin") {
       test(`${route} hub loads directly (0 clicks)`, async () => {
         const ctx = await authContext(admin);
-        await ctx.page.goto(route, { waitUntil: "networkidle" });
+        await ctx.page.goto(route, { waitUntil: "load" });
         await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
         await expect(ctx.page).toHaveURL(route, { timeout: 15000 });
 
