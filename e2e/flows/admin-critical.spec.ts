@@ -125,8 +125,7 @@ test.describe("Admin critical flows — Workspace + Management Views", () => {
     test("1a. Admin workspace renders with tab navigation bar", async () => {
       const ctx = await adminContext();
 
-      await ctx.page.goto("/admin");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.goto("/admin", { waitUntil: "load" });
       await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
       await expect(ctx.page).toHaveURL("/admin");
 
@@ -149,8 +148,7 @@ test.describe("Admin critical flows — Workspace + Management Views", () => {
     test("1b. Admin hub renders with dashboard content", async () => {
       const ctx = await adminContext();
 
-      await ctx.page.goto("/admin");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.goto("/admin", { waitUntil: "load" });
       await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
       await expect(ctx.page).toHaveURL("/admin");
 
@@ -170,13 +168,11 @@ test.describe("Admin critical flows — Workspace + Management Views", () => {
     test("2a. Admin can navigate to candidates section", async () => {
       const ctx = await adminContext();
 
-      await ctx.page.goto("/admin");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.goto("/admin", { waitUntil: "load" });
       await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
 
       // Navigate to Candidates via URL
-      await ctx.page.goto("/admin/candidates");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.goto("/admin/candidates", { waitUntil: "load" });
       await expect(ctx.page).toHaveURL(/\/admin\/candidates/);
 
       // Candidates page renders
@@ -189,8 +185,7 @@ test.describe("Admin critical flows — Workspace + Management Views", () => {
     test("2b. Admin can navigate to companies section", async () => {
       const ctx = await adminContext();
 
-      await ctx.page.goto("/admin/companies");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.goto("/admin/companies", { waitUntil: "load" });
       await expect(ctx.page).toHaveURL(/\/admin\/companies/);
       await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
 
@@ -201,8 +196,7 @@ test.describe("Admin critical flows — Workspace + Management Views", () => {
     test("2c. Admin can navigate to requests section", async () => {
       const ctx = await adminContext();
 
-      await ctx.page.goto("/admin/requests");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.goto("/admin/requests", { waitUntil: "load" });
       await expect(ctx.page).toHaveURL(/\/admin\/requests/);
       await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
 
@@ -213,8 +207,7 @@ test.describe("Admin critical flows — Workspace + Management Views", () => {
     test("2d. Admin can navigate to transfers section", async () => {
       const ctx = await adminContext();
 
-      await ctx.page.goto("/admin/transfers");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.goto("/admin/transfers", { waitUntil: "load" });
       await expect(ctx.page).toHaveURL(/\/admin\/transfers/);
       await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
 
@@ -225,8 +218,7 @@ test.describe("Admin critical flows — Workspace + Management Views", () => {
     test("2e. Admin can navigate to compliance section", async () => {
       const ctx = await adminContext();
 
-      await ctx.page.goto("/admin/compliance");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.goto("/admin/compliance", { waitUntil: "load" });
       await expect(ctx.page).toHaveURL(/\/admin\/compliance/);
       await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
 
@@ -237,8 +229,7 @@ test.describe("Admin critical flows — Workspace + Management Views", () => {
     test("2f. Admin can navigate to payments section", async () => {
       const ctx = await adminContext();
 
-      await ctx.page.goto("/admin/payments");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.goto("/admin/payments", { waitUntil: "load" });
       await expect(ctx.page).toHaveURL(/\/admin\/payments/);
       await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
 
@@ -249,8 +240,7 @@ test.describe("Admin critical flows — Workspace + Management Views", () => {
     test("2g. Admin can navigate to agents section", async () => {
       const ctx = await adminContext();
 
-      await ctx.page.goto("/admin/agents");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.goto("/admin/agents", { waitUntil: "load" });
       await expect(ctx.page).toHaveURL(/\/admin\/agents/);
       await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
 
@@ -261,8 +251,7 @@ test.describe("Admin critical flows — Workspace + Management Views", () => {
     test("2h. Admin candidates page networkidles with DataTable", async () => {
       const ctx = await adminContext();
 
-      await ctx.page.goto("/admin/candidates");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.goto("/admin/candidates", { waitUntil: "load" });
       await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
       await expect(ctx.page).toHaveURL(/\/admin\/candidates/);
 
@@ -281,8 +270,7 @@ test.describe("Admin critical flows — Workspace + Management Views", () => {
     test("2i. Admin companies page networkidles with DataTable", async () => {
       const ctx = await adminContext();
 
-      await ctx.page.goto("/admin/companies");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.goto("/admin/companies", { waitUntil: "load" });
       await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
       await expect(ctx.page).toHaveURL(/\/admin\/companies/);
 
@@ -307,8 +295,7 @@ test.describe("Admin critical flows — Workspace + Management Views", () => {
     test("3a. Admin candidate detail page networkidles", async () => {
       const ctx = await adminContext();
 
-      await ctx.page.goto("/admin/candidates");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.goto("/admin/candidates", { waitUntil: "load" });
       await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
 
       // Find a candidate link and navigate to detail
@@ -318,8 +305,7 @@ test.describe("Admin critical flows — Workspace + Management Views", () => {
       if (linkCount > 0) {
         const href = await detailLinks.first().getAttribute("href").catch(() => null);
         if (href) {
-          await ctx.page.goto(href);
-          await ctx.page.waitForLoadState("load");
+          await ctx.page.goto(href, { waitUntil: "load" });
           await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
           console.log(`Admin candidate detail networkidleed: ${href}`);
         }
@@ -335,8 +321,7 @@ test.describe("Admin critical flows — Workspace + Management Views", () => {
     test("3b. Admin company detail page networkidles", async () => {
       const ctx = await adminContext();
 
-      await ctx.page.goto("/admin/companies");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.goto("/admin/companies", { waitUntil: "load" });
       await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
 
       const detailLinks = ctx.page.locator('a[href*="/admin/companies/"]');
@@ -345,8 +330,7 @@ test.describe("Admin critical flows — Workspace + Management Views", () => {
       if (linkCount > 0) {
         const href = await detailLinks.first().getAttribute("href").catch(() => null);
         if (href) {
-          await ctx.page.goto(href);
-          await ctx.page.waitForLoadState("load");
+          await ctx.page.goto(href, { waitUntil: "load" });
           await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
         }
       } else {
@@ -360,8 +344,7 @@ test.describe("Admin critical flows — Workspace + Management Views", () => {
     test("3c. Admin request detail page networkidles", async () => {
       const ctx = await adminContext();
 
-      await ctx.page.goto("/admin/requests");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.goto("/admin/requests", { waitUntil: "load" });
       await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
 
       const detailLinks = ctx.page.locator('a[href*="/admin/requests/"]');
@@ -370,8 +353,7 @@ test.describe("Admin critical flows — Workspace + Management Views", () => {
       if (linkCount > 0) {
         const href = await detailLinks.first().getAttribute("href").catch(() => null);
         if (href) {
-          await ctx.page.goto(href);
-          await ctx.page.waitForLoadState("load");
+          await ctx.page.goto(href, { waitUntil: "load" });
           await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
         }
       } else {
@@ -385,8 +367,7 @@ test.describe("Admin critical flows — Workspace + Management Views", () => {
     test("3d. Admin transfer detail page networkidles", async () => {
       const ctx = await adminContext();
 
-      await ctx.page.goto("/admin/transfers");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.goto("/admin/transfers", { waitUntil: "load" });
       await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
 
       const detailLinks = ctx.page.locator('a[href*="/admin/transfers/"]');
@@ -395,8 +376,7 @@ test.describe("Admin critical flows — Workspace + Management Views", () => {
       if (linkCount > 0) {
         const href = await detailLinks.first().getAttribute("href").catch(() => null);
         if (href) {
-          await ctx.page.goto(href);
-          await ctx.page.waitForLoadState("load");
+          await ctx.page.goto(href, { waitUntil: "load" });
           await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
         }
       } else {
@@ -416,8 +396,7 @@ test.describe("Admin critical flows — Workspace + Management Views", () => {
     test("4a. Candidate cannot access admin hub", async () => {
       const ctx = await roleContext(candidateUser);
 
-      await ctx.page.goto("/admin");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.goto("/admin", { waitUntil: "load" });
 
       // Candidate should be redirected away from /admin
       await ctx.page.waitForURL((url) => !url.pathname.startsWith("/admin"), { timeout: 15000 });
@@ -427,8 +406,7 @@ test.describe("Admin critical flows — Workspace + Management Views", () => {
     test("4b. Candidate cannot access admin candidates", async () => {
       const ctx = await roleContext(candidateUser);
 
-      await ctx.page.goto("/admin/candidates");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.goto("/admin/candidates", { waitUntil: "load" });
 
       await ctx.page.waitForURL((url) => !url.pathname.startsWith("/admin"), { timeout: 15000 });
       await ctx.close();
@@ -437,8 +415,7 @@ test.describe("Admin critical flows — Workspace + Management Views", () => {
     test("4c. Candidate cannot access admin companies", async () => {
       const ctx = await roleContext(candidateUser);
 
-      await ctx.page.goto("/admin/companies");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.goto("/admin/companies", { waitUntil: "load" });
 
       await ctx.page.waitForURL((url) => !url.pathname.startsWith("/admin"), { timeout: 15000 });
       await ctx.close();
@@ -447,8 +424,7 @@ test.describe("Admin critical flows — Workspace + Management Views", () => {
     test("4d. Candidate cannot access admin requests", async () => {
       const ctx = await roleContext(candidateUser);
 
-      await ctx.page.goto("/admin/requests");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.goto("/admin/requests", { waitUntil: "load" });
 
       await ctx.page.waitForURL((url) => !url.pathname.startsWith("/admin"), { timeout: 15000 });
       await ctx.close();
@@ -457,8 +433,7 @@ test.describe("Admin critical flows — Workspace + Management Views", () => {
     test("4e. Company user cannot access admin hub", async () => {
       const ctx = await roleContext(companyUser);
 
-      await ctx.page.goto("/admin");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.goto("/admin", { waitUntil: "load" });
 
       await ctx.page.waitForURL((url) => !url.pathname.startsWith("/admin"), { timeout: 15000 });
       await ctx.close();
@@ -467,8 +442,7 @@ test.describe("Admin critical flows — Workspace + Management Views", () => {
     test("4f. Company user cannot access admin candidates", async () => {
       const ctx = await roleContext(companyUser);
 
-      await ctx.page.goto("/admin/candidates");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.goto("/admin/candidates", { waitUntil: "load" });
 
       await ctx.page.waitForURL((url) => !url.pathname.startsWith("/admin"), { timeout: 15000 });
       await ctx.close();
@@ -477,8 +451,7 @@ test.describe("Admin critical flows — Workspace + Management Views", () => {
     test("4g. Company user cannot access admin companies", async () => {
       const ctx = await roleContext(companyUser);
 
-      await ctx.page.goto("/admin/companies");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.goto("/admin/companies", { waitUntil: "load" });
 
       await ctx.page.waitForURL((url) => !url.pathname.startsWith("/admin"), { timeout: 15000 });
       await ctx.close();
@@ -487,8 +460,7 @@ test.describe("Admin critical flows — Workspace + Management Views", () => {
     test("4h. Company user cannot access admin requests", async () => {
       const ctx = await roleContext(companyUser);
 
-      await ctx.page.goto("/admin/requests");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.goto("/admin/requests", { waitUntil: "load" });
 
       await ctx.page.waitForURL((url) => !url.pathname.startsWith("/admin"), { timeout: 15000 });
       await ctx.close();
@@ -497,8 +469,7 @@ test.describe("Admin critical flows — Workspace + Management Views", () => {
     test("4i. Staff cannot access admin hub", async () => {
       const ctx = await roleContext(staffUser);
 
-      await ctx.page.goto("/admin");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.goto("/admin", { waitUntil: "load" });
 
       await ctx.page.waitForURL((url) => !url.pathname.startsWith("/admin"), { timeout: 15000 });
       await ctx.close();
@@ -507,8 +478,7 @@ test.describe("Admin critical flows — Workspace + Management Views", () => {
     test("4j. Staff cannot access admin candidates", async () => {
       const ctx = await roleContext(staffUser);
 
-      await ctx.page.goto("/admin/candidates");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.goto("/admin/candidates", { waitUntil: "load" });
 
       await ctx.page.waitForURL((url) => !url.pathname.startsWith("/admin"), { timeout: 15000 });
       await ctx.close();
@@ -517,8 +487,7 @@ test.describe("Admin critical flows — Workspace + Management Views", () => {
     test("4k. Staff cannot access admin companies", async () => {
       const ctx = await roleContext(staffUser);
 
-      await ctx.page.goto("/admin/companies");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.goto("/admin/companies", { waitUntil: "load" });
 
       await ctx.page.waitForURL((url) => !url.pathname.startsWith("/admin"), { timeout: 15000 });
       await ctx.close();
@@ -527,8 +496,7 @@ test.describe("Admin critical flows — Workspace + Management Views", () => {
     test("4l. Staff cannot access admin requests", async () => {
       const ctx = await roleContext(staffUser);
 
-      await ctx.page.goto("/admin/requests");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.goto("/admin/requests", { waitUntil: "load" });
 
       await ctx.page.waitForURL((url) => !url.pathname.startsWith("/admin"), { timeout: 15000 });
       await ctx.close();
@@ -554,8 +522,7 @@ test.describe("Admin critical flows — Workspace + Management Views", () => {
         "/admin/agents",
       ];
       for (const route of pages) {
-        await ctx.page.goto(route);
-        await ctx.page.waitForLoadState("load");
+        await ctx.page.goto(route, { waitUntil: "load" });
         await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
       }
 

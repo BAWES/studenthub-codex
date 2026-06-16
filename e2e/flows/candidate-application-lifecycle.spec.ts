@@ -113,7 +113,8 @@ test.describe("Candidate application lifecycle — Browse → Apply → Track", 
       const ctx = await candidateContext();
 
       await ctx.page.goto("/candidate");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.waitForLoadState("networkidle");
+    await ctx.page.waitForTimeout(300);
       await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
       await expect(ctx.page).toHaveURL(/\/candidate/);
 
@@ -147,7 +148,8 @@ test.describe("Candidate application lifecycle — Browse → Apply → Track", 
       const ctx = await candidateContext();
 
       await ctx.page.goto("/candidate");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.waitForLoadState("networkidle");
+    await ctx.page.waitForTimeout(300);
 
       // Applications summary or recent activity section
       const summarySection = ctx.page.locator(
@@ -172,7 +174,8 @@ test.describe("Candidate application lifecycle — Browse → Apply → Track", 
       const ctx = await candidateContext();
 
       await ctx.page.goto("/candidate/jobs");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.waitForLoadState("networkidle");
+    await ctx.page.waitForTimeout(300);
       await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
       await expect(ctx.page).toHaveURL(/\/candidate\/jobs/);
 
@@ -199,7 +202,8 @@ test.describe("Candidate application lifecycle — Browse → Apply → Track", 
       const ctx = await candidateContext();
 
       await ctx.page.goto("/candidate/jobs");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.waitForLoadState("networkidle");
+    await ctx.page.waitForTimeout(300);
 
       // Job rows or cards show details
       const jobRows = ctx.page.locator("table tbody tr, [class*='card'], [class*='Card'], [class*='job-row']");
@@ -237,7 +241,8 @@ test.describe("Candidate application lifecycle — Browse → Apply → Track", 
 
       // Navigate to jobs listing first
       await ctx.page.goto("/candidate/jobs");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.waitForLoadState("networkidle");
+    await ctx.page.waitForTimeout(300);
 
       // Find a job link and navigate to its detail
       const jobLink = ctx.page.locator(
@@ -248,7 +253,8 @@ test.describe("Candidate application lifecycle — Browse → Apply → Track", 
       if (linkCount > 0) {
         const href = await jobLink.getAttribute("href");
         await ctx.page.goto(href!);
-        await ctx.page.waitForLoadState("load");
+        await ctx.page.waitForLoadState("networkidle");
+    await ctx.page.waitForTimeout(300);
         await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
 
         // Job detail page renders with job title
@@ -282,14 +288,16 @@ test.describe("Candidate application lifecycle — Browse → Apply → Track", 
 
       // Navigate to "Apply" if the route exists
       await ctx.page.goto("/candidate/jobs");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.waitForLoadState("networkidle");
+    await ctx.page.waitForTimeout(300);
 
       const jobLink = ctx.page.locator('a[href*="/candidate/jobs/"]').first();
       if ((await jobLink.count().catch(() => 0)) > 0) {
         await ctx.page.goto("/candidate/jobs/apply");
         const resp = await ctx.page.goto("/candidate/jobs/apply");
         if (resp && resp.status() < 400) {
-          await ctx.page.waitForLoadState("load");
+          await ctx.page.waitForLoadState("networkidle");
+    await ctx.page.waitForTimeout(300);
           // Application form should render
           const formSection = ctx.page.locator(
             "form, text=Apply, text=Submit Application, input, textarea",
@@ -315,7 +323,8 @@ test.describe("Candidate application lifecycle — Browse → Apply → Track", 
       const ctx = await candidateContext();
 
       await ctx.page.goto("/candidate/applications");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.waitForLoadState("networkidle");
+    await ctx.page.waitForTimeout(300);
       await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
       await expect(ctx.page).toHaveURL(/\/candidate\/applications/);
 
@@ -341,7 +350,8 @@ test.describe("Candidate application lifecycle — Browse → Apply → Track", 
       const ctx = await candidateContext();
 
       await ctx.page.goto("/candidate/applications");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.waitForLoadState("networkidle");
+    await ctx.page.waitForTimeout(300);
 
       // Check for application rows
       const appRows = ctx.page.locator("table tbody tr, [class*='application-row'], li");
@@ -372,7 +382,8 @@ test.describe("Candidate application lifecycle — Browse → Apply → Track", 
       const ctx = await candidateContext();
 
       await ctx.page.goto("/candidate/applications");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.waitForLoadState("networkidle");
+    await ctx.page.waitForTimeout(300);
 
       // Find a link to an application detail
       const appLink = ctx.page.locator(
@@ -383,7 +394,8 @@ test.describe("Candidate application lifecycle — Browse → Apply → Track", 
       if (linkCount > 0) {
         const href = await appLink.getAttribute("href");
         await ctx.page.goto(href!);
-        await ctx.page.waitForLoadState("load");
+        await ctx.page.waitForLoadState("networkidle");
+    await ctx.page.waitForTimeout(300);
         await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
 
         // Application detail renders with status information
@@ -423,7 +435,8 @@ test.describe("Candidate application lifecycle — Browse → Apply → Track", 
         const ctx = await roleContext(companyUser);
 
         await ctx.page.goto(route);
-        await ctx.page.waitForLoadState("load");
+        await ctx.page.waitForLoadState("networkidle");
+    await ctx.page.waitForTimeout(300);
 
         // Company should be redirected away from candidate routes
         await expect(ctx.page).not.toHaveURL(route);
@@ -434,7 +447,8 @@ test.describe("Candidate application lifecycle — Browse → Apply → Track", 
         const ctx = await roleContext(staffUser);
 
         await ctx.page.goto(route);
-        await ctx.page.waitForLoadState("load");
+        await ctx.page.waitForLoadState("networkidle");
+    await ctx.page.waitForTimeout(300);
 
         await expect(ctx.page).not.toHaveURL(route);
         await ctx.close();
@@ -459,7 +473,8 @@ test.describe("Candidate application lifecycle — Browse → Apply → Track", 
 
       for (const route of pages) {
         await ctx.page.goto(route);
-        await ctx.page.waitForLoadState("load");
+        await ctx.page.waitForLoadState("networkidle");
+    await ctx.page.waitForTimeout(300);
         await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
       }
 

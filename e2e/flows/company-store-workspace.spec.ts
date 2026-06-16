@@ -111,7 +111,8 @@ test.describe("Company Store & Workspace Management", () => {
       const ctx = await companyContext();
 
       await ctx.page.goto("/company/stores");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.waitForLoadState("networkidle");
+    await ctx.page.waitForTimeout(300);
       await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
       await expect(ctx.page).toHaveURL(/\/company\/stores/);
 
@@ -143,7 +144,8 @@ test.describe("Company Store & Workspace Management", () => {
       const ctx = await companyContext();
 
       await ctx.page.goto("/company/stores");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.waitForLoadState("networkidle");
+    await ctx.page.waitForTimeout(300);
 
       // Check for store data rows
       const storeRows = ctx.page.locator("table tbody tr");
@@ -157,7 +159,8 @@ test.describe("Company Store & Workspace Management", () => {
         if (linkCount > 0) {
           const href = await firstStoreLink.getAttribute("href");
           await ctx.page.goto(href!);
-          await ctx.page.waitForLoadState("load");
+          await ctx.page.waitForLoadState("networkidle");
+    await ctx.page.waitForTimeout(300);
           await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
 
           // Store detail page renders
@@ -191,7 +194,8 @@ test.describe("Company Store & Workspace Management", () => {
       const ctx = await companyContext();
 
       await ctx.page.goto("/company/workspace");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.waitForLoadState("networkidle");
+    await ctx.page.waitForTimeout(300);
       await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
       await expect(ctx.page).toHaveURL(/\/company\/workspace/);
 
@@ -225,7 +229,8 @@ test.describe("Company Store & Workspace Management", () => {
       const ctx = await companyContext();
 
       await ctx.page.goto("/company/workspace");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.waitForLoadState("networkidle");
+    await ctx.page.waitForTimeout(300);
 
       // Interactive elements on workspace — buttons, links, data tables
       const interactables = ctx.page.locator(
@@ -251,7 +256,8 @@ test.describe("Company Store & Workspace Management", () => {
       const ctx = await roleContext(candidateUser);
 
       await ctx.page.goto("/company/stores");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.waitForLoadState("networkidle");
+    await ctx.page.waitForTimeout(300);
 
       await expect(ctx.page).not.toHaveURL("/company/stores");
       await ctx.close();
@@ -261,7 +267,8 @@ test.describe("Company Store & Workspace Management", () => {
       const ctx = await roleContext(staffUser);
 
       await ctx.page.goto("/company/stores");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.waitForLoadState("networkidle");
+    await ctx.page.waitForTimeout(300);
 
       await expect(ctx.page).not.toHaveURL("/company/stores");
       await ctx.close();
@@ -271,7 +278,8 @@ test.describe("Company Store & Workspace Management", () => {
       const ctx = await roleContext(candidateUser);
 
       await ctx.page.goto("/company/workspace");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.waitForLoadState("networkidle");
+    await ctx.page.waitForTimeout(300);
 
       await expect(ctx.page).not.toHaveURL("/company/workspace");
       await ctx.close();
@@ -281,7 +289,8 @@ test.describe("Company Store & Workspace Management", () => {
       const ctx = await roleContext(staffUser);
 
       await ctx.page.goto("/company/workspace");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.waitForLoadState("networkidle");
+    await ctx.page.waitForTimeout(300);
 
       await expect(ctx.page).not.toHaveURL("/company/workspace");
       await ctx.close();
@@ -291,7 +300,8 @@ test.describe("Company Store & Workspace Management", () => {
       const ctx = await roleContext(candidateUser);
 
       await ctx.page.goto("/company/contacts");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.waitForLoadState("networkidle");
+    await ctx.page.waitForTimeout(300);
 
       await expect(ctx.page).not.toHaveURL("/company/contacts");
       await ctx.close();
@@ -301,7 +311,8 @@ test.describe("Company Store & Workspace Management", () => {
       const ctx = await roleContext(staffUser);
 
       await ctx.page.goto("/company/contacts");
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.waitForLoadState("networkidle");
+    await ctx.page.waitForTimeout(300);
 
       await expect(ctx.page).not.toHaveURL("/company/contacts");
       await ctx.close();
@@ -324,7 +335,8 @@ test.describe("Company Store & Workspace Management", () => {
       ];
       for (const route of pages) {
         await ctx.page.goto(route);
-        await ctx.page.waitForLoadState("load");
+        await ctx.page.waitForLoadState("networkidle");
+    await ctx.page.waitForTimeout(300);
         await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
       }
 

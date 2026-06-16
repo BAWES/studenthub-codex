@@ -96,7 +96,8 @@ test.describe("Company Critical Flows", () => {
     const ctx = await authContext(company);
 
     await ctx.page.goto("/company");
-    await ctx.page.waitForLoadState("load");
+    await ctx.page.waitForLoadState("networkidle");
+    await ctx.page.waitForTimeout(300);
     await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
     await expect(ctx.page).toHaveURL(/\/company/);
 
@@ -118,7 +119,8 @@ test.describe("Company Critical Flows", () => {
     const ctx = await authContext(company);
 
     await ctx.page.goto("/company");
-    await ctx.page.waitForLoadState("load");
+    await ctx.page.waitForLoadState("networkidle");
+    await ctx.page.waitForTimeout(300);
 
     // Role header / CTA section
     await expect(ctx.page.locator("text=Create Request").first()).toBeVisible({ timeout: 10000 });
@@ -131,7 +133,8 @@ test.describe("Company Critical Flows", () => {
     const ctx = await authContext(company);
 
     await ctx.page.goto("/company");
-    await ctx.page.waitForLoadState("load");
+    await ctx.page.waitForLoadState("networkidle");
+    await ctx.page.waitForTimeout(300);
 
     // Pipeline section
     const pipelineHeading = ctx.page.locator("text=Active Requests").first();
@@ -148,7 +151,8 @@ test.describe("Company Critical Flows", () => {
     const ctx = await roleContext(candidateUser);
 
     await ctx.page.goto("/company");
-    await ctx.page.waitForLoadState("load");
+    await ctx.page.waitForLoadState("networkidle");
+    await ctx.page.waitForTimeout(300);
 
     await expect(ctx.page).not.toHaveURL("/company");
     await ctx.close();
@@ -162,7 +166,8 @@ test.describe("Company Critical Flows", () => {
     const ctx = await authContext(company);
 
     await ctx.page.goto("/employer/jobs");
-    await ctx.page.waitForLoadState("load");
+    await ctx.page.waitForLoadState("networkidle");
+    await ctx.page.waitForTimeout(300);
     await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
 
     // Jobs list page renders
@@ -175,7 +180,8 @@ test.describe("Company Critical Flows", () => {
       // Navigate into the first job
       const href = await jobRows.first().getAttribute("href");
       await ctx.page.goto(href!);
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.waitForLoadState("networkidle");
+    await ctx.page.waitForTimeout(300);
       await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
     }
 
@@ -188,14 +194,16 @@ test.describe("Company Critical Flows", () => {
 
     // Navigate to jobs list to find a valid job ID
     await ctx.page.goto("/employer/jobs");
-    await ctx.page.waitForLoadState("load");
+    await ctx.page.waitForLoadState("networkidle");
+    await ctx.page.waitForTimeout(300);
 
     const jobLink = ctx.page.locator("table a[href*='/employer/jobs/']").first();
     if ((await jobLink.count()) > 0) {
       const href = await jobLink.getAttribute("href");
       // Navigate to applications page for that job
       await ctx.page.goto(`${href}/applications`);
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.waitForLoadState("networkidle");
+    await ctx.page.waitForTimeout(300);
       await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
 
       // Page should load — check for applications heading
@@ -219,7 +227,8 @@ test.describe("Company Critical Flows", () => {
     const ctx = await roleContext(staff);
 
     await ctx.page.goto("/employer/jobs");
-    await ctx.page.waitForLoadState("load");
+    await ctx.page.waitForLoadState("networkidle");
+    await ctx.page.waitForTimeout(300);
 
     await expect(ctx.page).not.toHaveURL("/employer/jobs");
     await ctx.close();
@@ -234,7 +243,8 @@ test.describe("Company Critical Flows", () => {
 
     // Navigate to requests list
     await ctx.page.goto("/company/requests");
-    await ctx.page.waitForLoadState("load");
+    await ctx.page.waitForLoadState("networkidle");
+    await ctx.page.waitForTimeout(300);
     await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
 
     // Find a request link and navigate to detail
@@ -242,7 +252,8 @@ test.describe("Company Critical Flows", () => {
     if ((await requestLink.count()) > 0) {
       const href = await requestLink.getAttribute("href");
       await ctx.page.goto(href!);
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.waitForLoadState("networkidle");
+    await ctx.page.waitForTimeout(300);
       await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
 
       // Request Brief section
@@ -268,13 +279,15 @@ test.describe("Company Critical Flows", () => {
     const ctx = await authContext(company);
 
     await ctx.page.goto("/company/requests");
-    await ctx.page.waitForLoadState("load");
+    await ctx.page.waitForLoadState("networkidle");
+    await ctx.page.waitForTimeout(300);
 
     const requestLink = ctx.page.locator("table a").first();
     if ((await requestLink.count()) > 0) {
       const href = await requestLink.getAttribute("href");
       await ctx.page.goto(href!);
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.waitForLoadState("networkidle");
+    await ctx.page.waitForTimeout(300);
       await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
 
       // Key fact fields in the Request Brief section
@@ -294,7 +307,8 @@ test.describe("Company Critical Flows", () => {
     const ctx = await roleContext(candidateUser);
 
     await ctx.page.goto("/company/requests");
-    await ctx.page.waitForLoadState("load");
+    await ctx.page.waitForLoadState("networkidle");
+    await ctx.page.waitForTimeout(300);
 
     await expect(ctx.page).not.toHaveURL("/company/requests");
     await ctx.close();
@@ -316,7 +330,8 @@ test.describe("Company Critical Flows", () => {
     ];
     for (const route of pages) {
       await ctx.page.goto(route);
-      await ctx.page.waitForLoadState("load");
+      await ctx.page.waitForLoadState("networkidle");
+    await ctx.page.waitForTimeout(300);
       await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
     }
 
@@ -333,7 +348,8 @@ test.describe("Company Critical Flows", () => {
     const ctx = await authContext(company);
 
     await ctx.page.goto("/employer/jobs/new");
-    await ctx.page.waitForLoadState("load");
+    await ctx.page.waitForLoadState("networkidle");
+    await ctx.page.waitForTimeout(300);
     await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
     await expect(ctx.page).toHaveURL(/\/employer\/jobs\/new/);
 
@@ -348,7 +364,8 @@ test.describe("Company Critical Flows", () => {
     const ctx = await roleContext(candidateUser);
 
     await ctx.page.goto("/employer/jobs/new");
-    await ctx.page.waitForLoadState("load");
+    await ctx.page.waitForLoadState("networkidle");
+    await ctx.page.waitForTimeout(300);
 
     await expect(ctx.page).not.toHaveURL("/employer/jobs/new");
     await ctx.close();
