@@ -4,7 +4,7 @@ import { AdminXeroPage } from "./_components";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminXeroListPage() {
+export default async function AdminXeroRoute() {
   const session = await requireRoleCapability("admin", "admin.read");
   const [result, reconciliation] = await Promise.all([
     listBankTransactions({ limit: 100 }),
@@ -15,7 +15,6 @@ export default async function AdminXeroListPage() {
     <AdminXeroPage
       session={session}
       transactions={result.transactions}
-      total={result.total}
       reconciliation={reconciliation}
     />
   );
