@@ -95,6 +95,7 @@ describe("getEmployerDashboardData", () => {
     vi.mocked(prisma.job_listing.count).mockResolvedValueOnce(2);  // activeJobs
     vi.mocked(prisma.job_listing_application.count).mockResolvedValueOnce(10);  // totalApplications
     vi.mocked(prisma.job_listing_application.count).mockResolvedValueOnce(3);  // newApplications30d
+    vi.mocked(prisma.job_listing_application.count).mockResolvedValueOnce(5);  // pendingReviews
     vi.mocked(prisma.job_listing.groupBy).mockResolvedValue(mockJobStatusRows);
     vi.mocked(prisma.job_listing_application.findMany).mockResolvedValue(mockRecentAppRows);
 
@@ -102,13 +103,16 @@ describe("getEmployerDashboardData", () => {
 
     expect(result.totalJobs).toBe(4);
     expect(result.totalApplications).toBe(10);
-    expect(result.metrics).toHaveLength(3);
+    expect(result.pendingReviews).toBe(5);
+    expect(result.metrics).toHaveLength(4);
     expect(result.metrics[0].label).toBe("Active Job Listings");
     expect(result.metrics[0].value).toBe(2);
     expect(result.metrics[1].label).toBe("Total Applications");
     expect(result.metrics[1].value).toBe(10);
-    expect(result.metrics[2].label).toBe("New Applications (30d)");
-    expect(result.metrics[2].value).toBe(3);
+    expect(result.metrics[2].label).toBe("Pending Reviews");
+    expect(result.metrics[2].value).toBe(5);
+    expect(result.metrics[3].label).toBe("New Applications (30d)");
+    expect(result.metrics[3].value).toBe(3);
     expect(result.jobStatusBreakdown).toHaveLength(3);
     expect(result.recentApplications).toHaveLength(2);
 
@@ -155,6 +159,7 @@ describe("getEmployerDashboardData", () => {
     vi.mocked(prisma.job_listing.count).mockResolvedValueOnce(0);  // activeJobs
     vi.mocked(prisma.job_listing_application.count).mockResolvedValueOnce(0);  // totalApplications
     vi.mocked(prisma.job_listing_application.count).mockResolvedValueOnce(0);  // newApplications30d
+    vi.mocked(prisma.job_listing_application.count).mockResolvedValueOnce(0);  // pendingReviews
     vi.mocked(prisma.job_listing.groupBy).mockResolvedValue([]);
     vi.mocked(prisma.job_listing_application.findMany).mockResolvedValue([]);
 
@@ -162,10 +167,12 @@ describe("getEmployerDashboardData", () => {
 
     expect(result.totalJobs).toBe(0);
     expect(result.totalApplications).toBe(0);
-    expect(result.metrics).toHaveLength(3);
+    expect(result.pendingReviews).toBe(0);
+    expect(result.metrics).toHaveLength(4);
     expect(result.metrics[0].value).toBe(0);
     expect(result.metrics[1].value).toBe(0);
     expect(result.metrics[2].value).toBe(0);
+    expect(result.metrics[3].value).toBe(0);
     expect(result.recentApplications).toHaveLength(0);
     expect(result.jobStatusBreakdown).toHaveLength(0);
   });
@@ -178,6 +185,7 @@ describe("getEmployerDashboardData", () => {
     vi.mocked(prisma.job_listing.count).mockResolvedValueOnce(2);
     vi.mocked(prisma.job_listing_application.count).mockResolvedValueOnce(10);
     vi.mocked(prisma.job_listing_application.count).mockResolvedValueOnce(3);
+    vi.mocked(prisma.job_listing_application.count).mockResolvedValueOnce(5);  // pendingReviews
     vi.mocked(prisma.job_listing.groupBy).mockResolvedValue(mockJobStatusRows);
     vi.mocked(prisma.job_listing_application.findMany).mockResolvedValue(mockRecentAppRows);
 
@@ -197,6 +205,7 @@ describe("getEmployerDashboardData", () => {
     vi.mocked(prisma.job_listing.count).mockResolvedValueOnce(2);
     vi.mocked(prisma.job_listing_application.count).mockResolvedValueOnce(10);
     vi.mocked(prisma.job_listing_application.count).mockResolvedValueOnce(3);
+    vi.mocked(prisma.job_listing_application.count).mockResolvedValueOnce(1);  // pendingReviews
     vi.mocked(prisma.job_listing.groupBy).mockResolvedValue(mockJobStatusRows);
     vi.mocked(prisma.job_listing_application.findMany).mockResolvedValue([
       {
@@ -218,7 +227,7 @@ describe("getEmployerDashboardData", () => {
     expect(result.recentApplications[0].candidateName).toBe("أحمد الصباح");
   });
 
-  it("runs 6 parallel queries via Promise.all", async () => {
+  it("runs 7 parallel queries via Promise.all", async () => {
     vi.mocked(auth.requireCapability).mockResolvedValue(undefined as any);
     vi.mocked(auth.getSession).mockResolvedValue(mockSession);
     vi.mocked(prisma.company_contact.findFirst).mockResolvedValue(mockContactLink);
@@ -226,12 +235,13 @@ describe("getEmployerDashboardData", () => {
     vi.mocked(prisma.job_listing.count).mockResolvedValueOnce(2);
     vi.mocked(prisma.job_listing_application.count).mockResolvedValueOnce(10);
     vi.mocked(prisma.job_listing_application.count).mockResolvedValueOnce(3);
+    vi.mocked(prisma.job_listing_application.count).mockResolvedValueOnce(5);  // pendingReviews
     vi.mocked(prisma.job_listing.groupBy).mockResolvedValue(mockJobStatusRows);
     vi.mocked(prisma.job_listing_application.findMany).mockResolvedValue(mockRecentAppRows);
 
     await mod.getEmployerDashboardData();
 
-    // Verify all 6 prisma calls were made with correct parameters
+    // Verify all 7 prisma calls were made with correct parameters
     expect(prisma.job_listing.count).toHaveBeenCalledWith({ where: { employerId: 42 } });
     expect(prisma.job_listing.count).toHaveBeenCalledWith({ where: { employerId: 42, status: "active" } });
     expect(prisma.job_listing_application.count).toHaveBeenCalledWith({
@@ -241,6 +251,12 @@ describe("getEmployerDashboardData", () => {
       where: {
         jobListing: { employerId: 42 },
         createdAt: { gte: expect.any(Date) },
+      },
+    });
+    expect(prisma.job_listing_application.count).toHaveBeenCalledWith({
+      where: {
+        jobListing: { employerId: 42 },
+        status: { in: ["reviewing", "shortlisted"] },
       },
     });
     expect(prisma.job_listing.groupBy).toHaveBeenCalledWith({
@@ -341,6 +357,7 @@ describe("employerDashboardDataSchema", () => {
       jobStatusBreakdown: [{ status: "active", count: 2 }],
       totalJobs: 5,
       totalApplications: 10,
+      pendingReviews: 2,
     };
     expect(employerDashboardDataSchema.safeParse(data).success).toBe(true);
   });
@@ -352,6 +369,7 @@ describe("employerDashboardDataSchema", () => {
       jobStatusBreakdown: [],
       totalJobs: 0,
       totalApplications: 0,
+      pendingReviews: 0,
     };
     expect(employerDashboardDataSchema.safeParse(data).success).toBe(true);
   });

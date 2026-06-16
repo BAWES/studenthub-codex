@@ -25,7 +25,7 @@ export async function getEmployerDashboardData(): Promise<EmployerDashboardData>
 
   const session = await getSession();
   if (!session) {
-    return { metrics: [], recentApplications: [], jobStatusBreakdown: [], totalJobs: 0, totalApplications: 0 };
+    return { metrics: [], recentApplications: [], jobStatusBreakdown: [], totalJobs: 0, totalApplications: 0, pendingReviews: 0 };
   }
 
   // Get the employer's company ID from their contact link
@@ -36,7 +36,7 @@ export async function getEmployerDashboardData(): Promise<EmployerDashboardData>
 
   const employerId = contactLink?.company?.company_id;
   if (!employerId) {
-    return { metrics: [], recentApplications: [], jobStatusBreakdown: [], totalJobs: 0, totalApplications: 0 };
+    return { metrics: [], recentApplications: [], jobStatusBreakdown: [], totalJobs: 0, totalApplications: 0, pendingReviews: 0 };
   }
 
   // Run all queries in parallel for performance
@@ -45,6 +45,7 @@ export async function getEmployerDashboardData(): Promise<EmployerDashboardData>
     activeJobs,
     totalApplications,
     newApplications30d,
+    pendingReviews,
     jobStatusRows,
     recentAppRows,
   ] = await Promise.all([
@@ -55,6 +56,12 @@ export async function getEmployerDashboardData(): Promise<EmployerDashboardData>
       where: {
         jobListing: { employerId },
         createdAt: { gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) },
+      },
+    }),
+    prisma.job_listing_application.count({
+      where: {
+        jobListing: { employerId },
+        status: { in: ["reviewing", "shortlisted"] },
       },
     }),
     prisma.job_listing.groupBy({
@@ -91,13 +98,15 @@ export async function getEmployerDashboardData(): Promise<EmployerDashboardData>
   const result: EmployerDashboardData = {
     metrics: [
       { label: "Active Job Listings", value: activeJobs, note: `${totalJobs} total job postings` },
-      { label: "Total Applications", value: totalApplications, note: `${newApplications30d} submitted in the last 30 days` },
-      { label: "New Applications (30d)", value: newApplications30d, note: "Received across all active jobs" },
+      { label: "Total Applications", value: totalApplications, note: `${totalJobs} active job postings` },
+      { label: "Pending Reviews", value: pendingReviews, note: "Applications awaiting your review" },
+      { label: "New Applications (30d)", value: newApplications30d, note: "Submitted in the last 30 days" },
     ],
     recentApplications,
     jobStatusBreakdown,
     totalJobs,
     totalApplications,
+    pendingReviews,
   };
 
   // Validate output shape

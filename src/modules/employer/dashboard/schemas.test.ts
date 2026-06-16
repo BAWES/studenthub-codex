@@ -101,6 +101,7 @@ describe("employerDashboardDataSchema", () => {
       jobStatusBreakdown: [{ status: "active", count: 3 }],
       totalJobs: 10,
       totalApplications: 50,
+      pendingReviews: 3,
     });
     expect(r.success).toBe(true);
   });
@@ -112,13 +113,14 @@ describe("employerDashboardDataSchema", () => {
       jobStatusBreakdown: [],
       totalJobs: 0,
       totalApplications: 0,
+      pendingReviews: 0,
     });
     expect(r.success).toBe(true);
   });
 
   it("rejects missing totalJobs", () => {
     const r = employerDashboardDataSchema.safeParse({
-      metrics: [], recentApplications: [], jobStatusBreakdown: [], totalApplications: 0,
+      metrics: [], recentApplications: [], jobStatusBreakdown: [], totalApplications: 0, pendingReviews: 0,
     });
     expect(r.success).toBe(false);
   });
