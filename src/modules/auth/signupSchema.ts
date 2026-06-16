@@ -29,7 +29,7 @@ export const signupSchema = z
     path: ["confirmPassword"],
   });
 
-export type SignupInput = z.infer<typeof signupSchema>;
+export type SignupInput = z.input<typeof signupSchema>;
 
 export type SignupState = {
   success?: boolean;

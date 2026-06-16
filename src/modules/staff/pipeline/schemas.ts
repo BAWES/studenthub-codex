@@ -14,7 +14,7 @@ export const updatePipelineStageSchema = z.object({
   stage: pipelineStageSchema,
 });
 
-export type UpdatePipelineStageInput = z.infer<typeof updatePipelineStageSchema>;
+export type UpdatePipelineStageInput = z.input<typeof updatePipelineStageSchema>;
 
 export const pipelineStageLabel: Record<string, string> = {
   pending_review: "Pending Review",

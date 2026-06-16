@@ -34,9 +34,9 @@ export const listDiscountsByApplicantSchema = z.object({
   page: z.number().int().positive().optional(),
   limit: z.number().int().min(1).max(100).optional(),
 });
-export type CreateDiscountInput = z.infer<typeof createDiscountSchema>;
-export type ListDiscountsInput = z.infer<typeof listDiscountsSchema>;
-export type ListDiscountsByApplicantInput = z.infer<typeof listDiscountsByApplicantSchema>;
+export type CreateDiscountInput = z.input<typeof createDiscountSchema>;
+export type ListDiscountsInput = z.input<typeof listDiscountsSchema>;
+export type ListDiscountsByApplicantInput = z.input<typeof listDiscountsByApplicantSchema>;
 
 // ---------------------------------------------------------------------------
 // Output validation schemas
