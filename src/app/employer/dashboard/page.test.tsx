@@ -5,8 +5,11 @@ import type { SessionUser } from "@/modules/auth/types";
 // Mock auth
 vi.mock("@/modules/auth/session", () => ({
   requireRoleCapability: vi.fn().mockResolvedValue({
-    user: { id: "42", email: "employer@test.com" },
+    id: "42",
+    name: "Test Employer",
+    email: "employer@test.com",
     role: "company",
+    issuedAt: Date.now(),
   } as SessionUser),
 }));
 
