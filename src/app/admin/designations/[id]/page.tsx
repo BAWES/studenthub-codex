@@ -16,7 +16,7 @@ export default async function AdminDesignationDetailPage({
   const session = await requireRoleCapability("admin", "admin.read");
   const { id } = await params;
 
-  const data = await getDesignation(id);
+  const data = await getDesignation({ designationUuid: id });
 
   if (!data.designation) {
     notFound();

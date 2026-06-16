@@ -50,14 +50,4 @@ export const updateDesignationSchema = z.object({
 
 export type UpdateDesignationInput = z.input<typeof updateDesignationSchema>;
 
-export const getDesignationSchema = z.object({
-  designationUuid: z.string().min(1, "Designation UUID is required"),
-});
 
-export type GetDesignationInput = z.input<typeof getDesignationSchema>;
-
-export const getDesignationResultSchema = z.object({
-  designation: designationRowSchema.nullable(),
-});
-
-export type GetDesignationResult = z.output<typeof getDesignationResultSchema>;
