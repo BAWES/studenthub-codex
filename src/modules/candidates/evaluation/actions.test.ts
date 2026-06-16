@@ -9,6 +9,9 @@ import {
   evaluationDetailSchema,
   evaluationAnswerSchema,
   createEvaluationResultSchema,
+  evaluationPdfDataSchema,
+  evaluationPdfCandidateSchema,
+  evaluationPdfStaffSchema,
   type EvalQuestionItem,
   type EvaluationListItem,
   type CreateEvaluationResult,
@@ -400,5 +403,92 @@ describe("evaluationAnswerSchema (output)", () => {
       rating: null,
     });
     expect(result.success).toBe(true);
+  });
+});
+
+describe("evaluationPdfCandidateSchema", () => {
+  it("validates candidate with name and email", () => {
+    const result = evaluationPdfCandidateSchema.safeParse({
+      candidate_name: "John Doe",
+      candidate_email: "john@example.com",
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.candidate_name).toBe("John Doe");
+      expect(result.data.candidate_email).toBe("john@example.com");
+    }
+  });
+
+  it("validates candidate with null values", () => {
+    const result = evaluationPdfCandidateSchema.safeParse({
+      candidate_name: null,
+      candidate_email: null,
+    });
+    expect(result.success).toBe(true);
+  });
+});
+
+describe("evaluationPdfStaffSchema", () => {
+  it("validates staff with name", () => {
+    const result = evaluationPdfStaffSchema.safeParse({
+      staff_name: "Jane Smith",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("validates staff with null name", () => {
+    const result = evaluationPdfStaffSchema.safeParse({
+      staff_name: null,
+    });
+    expect(result.success).toBe(true);
+  });
+});
+
+describe("evaluationPdfDataSchema (combined)", () => {
+  const baseEvaluation = {
+    can_eval_uuid: "can_eval_abc123",
+    candidate_id: 42,
+    dept_id: 1,
+    start_date: "2026-01-01T00:00:00.000Z",
+    end_date: "2026-01-31T00:00:00.000Z",
+    staff_id: 7,
+    created_at: new Date("2026-06-01"),
+    answers: [
+      { ceq_uuid: "q1", question: "Performance?", answer: "Good", rating: 4 },
+    ],
+  };
+
+  it("validates complete PDF data with candidate and staff", () => {
+    const result = evaluationPdfDataSchema.safeParse({
+      ...baseEvaluation,
+      candidate: { candidate_name: "John Doe", candidate_email: "john@example.com" },
+      staff: { staff_name: "Jane Smith" },
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("validates PDF data with null candidate and staff", () => {
+    const result = evaluationPdfDataSchema.safeParse({
+      ...baseEvaluation,
+      candidate: null,
+      staff: null,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects missing candidate field", () => {
+    const result = evaluationPdfDataSchema.safeParse({
+      ...baseEvaluation,
+      staff: { staff_name: "Jane Smith" },
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects missing staff field", () => {
+    const result = evaluationPdfDataSchema.safeParse({
+      ...baseEvaluation,
+      candidate: { candidate_name: "John Doe", candidate_email: "john@example.com" },
+    });
+    expect(result.success).toBe(false);
   });
 });
