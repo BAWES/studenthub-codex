@@ -18,7 +18,7 @@ export const companyRequestSchema = z.object({
 export type CompanyRequestFormState = {
   success: boolean;
   error?: string;
-  errors?: Partial<Record<keyof z.infer<typeof companyRequestSchema>, string>>;
+  errors?: Partial<Record<keyof z.input<typeof companyRequestSchema>, string>>;
   requestUuid?: string;
 };
 

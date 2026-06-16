@@ -56,7 +56,7 @@ function configAvailable(): string | null {
  * bucket. The URL expires after 5 minutes.
  */
 export async function getPresignedUploadUrl(
-  params: z.infer<typeof getPresignedUploadUrlSchema>,
+  params: z.input<typeof getPresignedUploadUrlSchema>,
 ): Promise<PresignedUploadResult | { error: string }> {
   await requireCapability("document.write");
 
@@ -121,7 +121,7 @@ export async function getPresignedUploadUrl(
  * The URL expires after 15 minutes.
  */
 export async function getPresignedDownloadUrl(
-  params: z.infer<typeof getPresignedDownloadUrlSchema>,
+  params: z.input<typeof getPresignedDownloadUrlSchema>,
 ): Promise<PresignedDownloadResult | { error: string }> {
   await requireCapability("document.read");
 

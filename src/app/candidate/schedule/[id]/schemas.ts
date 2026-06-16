@@ -65,4 +65,4 @@ export type GetScheduleEntryInput = z.input<typeof getScheduleEntrySchema>;
 export type UpdateScheduleEntryInput = z.input<typeof updateScheduleEntrySchema>;
 export type DeleteScheduleEntryInput = z.input<typeof deleteScheduleEntrySchema>;
 
-export type ScheduleEntryResponse = z.infer<typeof scheduleEntryActionResultSchema>;
+export type ScheduleEntryResponse = z.output<typeof scheduleEntryActionResultSchema>;
