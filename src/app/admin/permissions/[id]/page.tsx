@@ -19,7 +19,7 @@ export default async function AdminPermissionDetailPage({
   const session = await requireRoleCapability("admin", "admin.read");
   const { id } = await params;
 
-  const section = await getPermissionSection(id);
+  const section = await getPermissionSection({ permissionUuid: id });
 
   if (!section) {
     notFound();

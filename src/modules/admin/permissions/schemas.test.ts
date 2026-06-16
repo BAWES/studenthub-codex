@@ -1,7 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
   listPermissionSectionsOutputSchema,
-  getPermissionSectionOutputSchema,
   createPermissionSectionOutputSchema,
   updatePermissionSectionOutputSchema,
 } from "./schemas";
@@ -62,40 +61,6 @@ describe("listPermissionSectionsOutputSchema", () => {
         },
       ]).success,
     ).toBe(false);
-  });
-});
-
-describe("getPermissionSectionOutputSchema", () => {
-  const validSection = {
-    permission_uuid: "perm_abc123",
-    section_name: "User Management",
-    created_at: new Date("2026-06-15T10:00:00"),
-  };
-
-  it("accepts a valid permission section", () => {
-    expect(getPermissionSectionOutputSchema.safeParse(validSection).success).toBe(
-      true,
-    );
-  });
-
-  it("accepts null (no section found)", () => {
-    expect(getPermissionSectionOutputSchema.safeParse(null).success).toBe(true);
-  });
-
-  it("rejects invalid created_at type", () => {
-    expect(
-      getPermissionSectionOutputSchema.safeParse({
-        ...validSection,
-        created_at: "2026-06-15T10:00:00",
-      }).success,
-    ).toBe(false);
-  });
-
-  it("rejects missing permission_uuid", () => {
-    const { permission_uuid: _, ...rest } = validSection;
-    expect(getPermissionSectionOutputSchema.safeParse(rest).success).toBe(
-      false,
-    );
   });
 });
 

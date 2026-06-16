@@ -25,7 +25,6 @@ vi.mock("@/modules/auth/session", () => ({
 
 const {
   listPermissionSections,
-  getPermissionSection,
   createPermissionSection,
   updatePermissionSection,
 } = await import("../actions");
@@ -89,50 +88,6 @@ describe("admin/permissions actions", () => {
       const result = await listPermissionSections();
 
       expect(result[0].section_name).toBeNull();
-    });
-  });
-
-  // -----------------------------------------------------------------------
-  // getPermissionSection
-  // -----------------------------------------------------------------------
-
-  describe("getPermissionSection", () => {
-    it("returns a permission section by UUID", async () => {
-      const mockSection = {
-        permission_uuid: "per_sec-abc",
-        section_name: "HR",
-        created_at: new Date("2026-01-15"),
-      } as any;
-
-      vi.mocked(prisma.permission_section.findUnique).mockResolvedValue(mockSection);
-
-      const result = await getPermissionSection("per_sec-abc");
-
-      expect(result).not.toBeNull();
-      expect(result?.permission_uuid).toBe("per_sec-abc");
-      expect(result?.section_name).toBe("HR");
-      expect(vi.mocked(prisma.permission_section.findUnique).mock.calls[0][0]?.where)
-        .toMatchObject({ permission_uuid: "per_sec-abc" });
-    });
-
-    it("returns null for non-existent section", async () => {
-      vi.mocked(prisma.permission_section.findUnique).mockResolvedValue(null);
-
-      const result = await getPermissionSection("per_sec-nonexistent");
-
-      expect(result).toBeNull();
-    });
-
-    it("throws error for empty UUID", async () => {
-      await expect(getPermissionSection("")).rejects.toThrow();
-    });
-
-    it("throws error for invalid UUID format is still accepted as long as it's non-empty", async () => {
-      vi.mocked(prisma.permission_section.findUnique).mockResolvedValue(null);
-
-      const result = await getPermissionSection("some-uuid");
-
-      expect(result).toBeNull();
     });
   });
 

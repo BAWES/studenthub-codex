@@ -6,10 +6,6 @@ import { z } from "zod";
 
 export const listPermissionSectionsSchema = z.object({});
 
-export const getPermissionSectionSchema = z.object({
-  permission_uuid: z.string().min(1, "Permission section UUID is required"),
-});
-
 export const createPermissionSectionSchema = z.object({
   section_name: z
     .string({ required_error: "Section name is required" })
@@ -38,10 +34,6 @@ const permissionSectionDetailSchema = z.object({
 export const listPermissionSectionsOutputSchema = z.array(permissionSectionDetailSchema);
 
 export type ListPermissionSectionsOutput = z.infer<typeof listPermissionSectionsOutputSchema>;
-
-export const getPermissionSectionOutputSchema = permissionSectionDetailSchema.nullable();
-
-export type GetPermissionSectionOutput = z.infer<typeof getPermissionSectionOutputSchema>;
 
 const permissionUuidSchema = z.object({
   permission_uuid: z.string().min(1),
