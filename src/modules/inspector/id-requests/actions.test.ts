@@ -612,14 +612,16 @@ describe("approveIdRequest()", () => {
   it("requires id_review.mutate capability", async () => {
     mockRequireCapability.mockRejectedValue(new Error("Unauthorized"));
 
-    await expect(approveIdRequest("cir-abc-123")).rejects.toThrow(
-      "Unauthorized",
-    );
+    await expect(
+      approveIdRequest({ id: "cir-abc-123-4567-8901-2345" }),
+    ).rejects.toThrow("Unauthorized");
     expect(mockRequireCapability).toHaveBeenCalledWith("id_review.mutate");
   });
 
   it("approves a pending request", async () => {
-    const result = await approveIdRequest("cir-abc-123-4567-8901-2345");
+    const result = await approveIdRequest({
+      id: "cir-abc-123-4567-8901-2345",
+    });
 
     expect(mockRequireCapability).toHaveBeenCalledWith("id_review.mutate");
     expect(mockFindUnique).toHaveBeenCalledWith({
@@ -636,7 +638,7 @@ describe("approveIdRequest()", () => {
   it("returns error for non-existent request", async () => {
     mockFindUnique.mockResolvedValue(null);
 
-    const result = await approveIdRequest("non-existent");
+    const result = await approveIdRequest({ id: "non-existent" });
 
     expect(result).toEqual({ error: "ID request not found." });
     expect(mockUpdate).not.toHaveBeenCalled();
@@ -648,7 +650,9 @@ describe("approveIdRequest()", () => {
       status: "approved",
     });
 
-    const result = await approveIdRequest("cir-abc-123-4567-8901-2345");
+    const result = await approveIdRequest({
+      id: "cir-abc-123-4567-8901-2345",
+    });
 
     expect(result).toEqual({
       error:
@@ -670,16 +674,16 @@ describe("rejectIdRequest()", () => {
     mockRequireCapability.mockRejectedValue(new Error("Unauthorized"));
 
     await expect(
-      rejectIdRequest("cir-abc-123", "Documents do not match"),
+      rejectIdRequest({ id: "cir-abc-123", comment: "Documents do not match" }),
     ).rejects.toThrow("Unauthorized");
     expect(mockRequireCapability).toHaveBeenCalledWith("id_review.mutate");
   });
 
   it("rejects a pending request with a reason", async () => {
-    const result = await rejectIdRequest(
-      "cir-abc-123-4567-8901-2345",
-      "Documents do not match civil records.",
-    );
+    const result = await rejectIdRequest({
+      id: "cir-abc-123-4567-8901-2345",
+      comment: "Documents do not match civil records.",
+    });
 
     expect(mockFindUnique).toHaveBeenCalledWith({
       where: { cir_uuid: "cir-abc-123-4567-8901-2345" },
@@ -697,11 +701,11 @@ describe("rejectIdRequest()", () => {
   });
 
   it("returns error when rejection reason is missing", async () => {
-    const result = await rejectIdRequest("cir-abc-123-4567-8901-2345", "");
+    const result = await rejectIdRequest({ id: "cir-abc-123-4567-8901-2345", comment: "" });
 
     expect(result).toEqual({
       error:
-        "String must contain at least 10 character(s)",
+        "Rejection reason must be at least 10 characters",
     });
     expect(mockUpdate).not.toHaveBeenCalled();
   });
@@ -709,7 +713,7 @@ describe("rejectIdRequest()", () => {
   it("returns error for non-existent request", async () => {
     mockFindUnique.mockResolvedValue(null);
 
-    const result = await rejectIdRequest("cir-abc-123", "Invalid docs");
+    const result = await rejectIdRequest({ id: "cir-abc-123", comment: "Invalid docs" });
 
     expect(result).toEqual({ error: "ID request not found." });
     expect(mockUpdate).not.toHaveBeenCalled();
@@ -721,10 +725,10 @@ describe("rejectIdRequest()", () => {
       status: "approved",
     });
 
-    const result = await rejectIdRequest(
-      "cir-abc-123",
-      "Already approved cannot reject",
-    );
+    const result = await rejectIdRequest({
+      id: "cir-abc-123",
+      comment: "Already approved cannot reject",
+    });
 
     expect(result).toEqual({
       error:
