@@ -24,38 +24,9 @@ export const getJobSchema = z.object({
 });
 export type ListJobsParams = z.input<typeof listJobsSchema>;
 export type GetJobParams = z.input<typeof getJobSchema>;
-export type JobListItem = {
-  job_uuid: string;
-  position: string;
-  position_ar: string | null;
-  description: string | null;
-  hours_per_day: number | null;
-  days_per_week: boolean | null;
-  status: boolean | null;
-  area_uuid: string | null;
-  request_uuid: string;
-  created_at: Date | null;
-  updated_at: Date | null;
-};
-export type JobDetail = JobListItem & {
-  description_ar: string | null;
-  compensation_type: string | null;
-  compensation_amount: string | null;
-  compensation_description: string | null;
-  compensation_description_ar: string | null;
-  min_age: number | null;
-  max_age: number | null;
-  gender: boolean | null;
-  available_from: Date | null;
-  available_to: Date | null;
-};
-export type ListJobsResult = {
-  jobs: JobListItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
+export type JobListItem = z.output<typeof jobListItemSchema>;
+export type JobDetail = z.output<typeof jobDetailSchema>;
+export type ListJobsResult = z.output<typeof listJobsResultSchema>;
 
 // ---------------------------------------------------------------------------
 // Output validation schemas
