@@ -67,11 +67,11 @@ export const createAbsenceResultSchema = z.object({
 export type ListQuestionsInput = z.input<typeof listQuestionsSchema>;
 export type CreateAbsenceInput = z.input<typeof createAbsenceSchema>;
 
-export type DailyStandupQuestionItem = z.infer<
+export type DailyStandupQuestionItem = z.output<
   typeof dailyStandupQuestionItemSchema
 >;
-export type ListQuestionsResult = z.infer<typeof listQuestionsResultSchema>;
-export type WorkSessionItem = z.infer<typeof workSessionItemSchema>;
-export type LeaveItem = z.infer<typeof leaveItemSchema>;
-export type GetSessionResult = z.infer<typeof getSessionResultSchema>;
-export type CreateAbsenceResult = z.infer<typeof createAbsenceResultSchema>;
+export type ListQuestionsResult = z.output<typeof listQuestionsResultSchema>;
+export type WorkSessionItem = z.output<typeof workSessionItemSchema>;
+export type LeaveItem = z.output<typeof leaveItemSchema>;
+export type GetSessionResult = z.output<typeof getSessionResultSchema>;
+export type CreateAbsenceResult = z.output<typeof createAbsenceResultSchema>;
