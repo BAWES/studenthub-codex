@@ -5,6 +5,8 @@ import { requireCapability } from "@/modules/auth/session";
 import {
   listIdRequestsSchema,
   getIdRequestSchema,
+  listIdRequestsResultSchema,
+  idRequestDetailSchema,
   type ListIdRequestsInput,
   type GetIdRequestInput,
   type IdRequestRow,
@@ -103,13 +105,24 @@ export async function listIdRequests(
     updated: formatDate(row.updated_at),
   }));
 
-  return {
+  const result = {
     items,
     total,
     page,
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  // Output validation — log mismatches without throwing
+  const outputParsed = listIdRequestsResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/inspector/id-requests] listIdRequests output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -177,7 +190,7 @@ export async function getIdRequest(
       })
     : [];
 
-  return {
+  const result = {
     cir_uuid: request.cir_uuid,
     status: request.status,
     rejection_reason: request.rejection_reason,
@@ -202,7 +215,20 @@ export async function getIdRequest(
       id: candidate.candidate_id,
       title: candidate.candidate_name ?? "Unknown",
       subtitle: candidate.candidate_email ?? "No email",
-      meta: `${candidate.candidate_civil_need_verification ? "Needs verification" : "No flag"} · expires ${candidate.candidate_civil_expiry_date?.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) ?? "N/A"}`,
+      meta: `${candidate.candidate_civil_need_verification ? "Needs verification" : "No flag"} \u00b7 expires ${candidate.candidate_civil_expiry_date?.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) ?? "N/A"}`,
     })),
   };
+
+  // Output validation — log mismatches without throwing (only when not null)
+  if (result !== null) {
+    const outputParsed = idRequestDetailSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/inspector/id-requests] getIdRequest output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+  }
+
+  return result;
 }
