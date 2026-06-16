@@ -1,11 +1,9 @@
 import { describe, it, expect } from "vitest";
 import {
   listPermissionSectionsSchema,
-  getPermissionSectionSchema,
   createPermissionSectionSchema,
   updatePermissionSectionSchema,
   listPermissionSectionsOutputSchema,
-  getPermissionSectionOutputSchema,
   createPermissionSectionOutputSchema,
   updatePermissionSectionOutputSchema,
 } from "./schemas";
@@ -21,18 +19,6 @@ describe("admin permissions page — data contract", () => {
   it("listPermissionSectionsSchema accepts empty input", () => {
     const r = listPermissionSectionsSchema.safeParse({});
     expect(r.success).toBe(true);
-  });
-
-  it("getPermissionSectionSchema validates permission_uuid", () => {
-    const r = getPermissionSectionSchema.safeParse({
-      permission_uuid: "uuid-123",
-    });
-    expect(r.success).toBe(true);
-  });
-
-  it("getPermissionSectionSchema rejects missing uuid", () => {
-    const r = getPermissionSectionSchema.safeParse({});
-    expect(r.success).toBe(false);
   });
 
   it("createPermissionSectionSchema validates with section_name", () => {

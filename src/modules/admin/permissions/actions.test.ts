@@ -1,11 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import {
-  getPermissionSectionSchema,
   createPermissionSectionSchema,
   updatePermissionSectionSchema,
   listPermissionSectionsSchema,
   listPermissionSectionsOutputSchema,
-  getPermissionSectionOutputSchema,
   createPermissionSectionOutputSchema,
   updatePermissionSectionOutputSchema,
 } from "./schemas";
@@ -18,25 +16,6 @@ describe("listPermissionSectionsSchema", () => {
   it("accepts empty params (no pagination needed — returns full tree)", () => {
     const r = listPermissionSectionsSchema.safeParse({});
     expect(r.success).toBe(true);
-  });
-});
-
-describe("getPermissionSectionSchema", () => {
-  it("accepts a valid UUID", () => {
-    const r = getPermissionSectionSchema.safeParse({
-      permission_uuid: "per_sec1234-5678-90ab-cdef-1234567890ab",
-    });
-    expect(r.success).toBe(true);
-  });
-
-  it("rejects empty UUID", () => {
-    expect(
-      getPermissionSectionSchema.safeParse({ permission_uuid: "" }).success,
-    ).toBe(false);
-  });
-
-  it("rejects missing UUID", () => {
-    expect(getPermissionSectionSchema.safeParse({}).success).toBe(false);
   });
 });
 
@@ -162,32 +141,6 @@ describe("listPermissionSectionsOutputSchema", () => {
   });
 });
 
-describe("getPermissionSectionOutputSchema", () => {
-  it("validates a valid permission section", () => {
-    const data = {
-      permission_uuid: "per_sec_uuid_1",
-      section_name: "Finance Management",
-      created_at: new Date("2024-01-01"),
-    };
-    const r = getPermissionSectionOutputSchema.safeParse(data);
-    expect(r.success).toBe(true);
-  });
-
-  it("validates null for not-found", () => {
-    const r = getPermissionSectionOutputSchema.safeParse(null);
-    expect(r.success).toBe(true);
-  });
-
-  it("rejects missing created_at", () => {
-    const data = {
-      permission_uuid: "per_sec_uuid_1",
-      section_name: "Finance Management",
-    };
-    const r = getPermissionSectionOutputSchema.safeParse(data);
-    expect(r.success).toBe(false);
-  });
-});
-
 describe("createPermissionSectionOutputSchema", () => {
   it("validates a valid creation result", () => {
     const r = createPermissionSectionOutputSchema.safeParse({
@@ -258,7 +211,6 @@ vi.mock("@/lib/prisma", () => ({
 
 import {
   listPermissionSections,
-  getPermissionSection,
   createPermissionSection,
   updatePermissionSection,
 } from "./actions";
@@ -339,69 +291,6 @@ describe("listPermissionSections — runtime", () => {
     await expect(listPermissionSections()).rejects.toThrow(
       "Database connection failed",
     );
-  });
-});
-
-// ---------------------------------------------------------------------------
-// getPermissionSection — runtime
-// ---------------------------------------------------------------------------
-
-describe("getPermissionSection — runtime", () => {
-  const MOCK_SECTION = {
-    permission_uuid: "per_sec_001",
-    section_name: "Finance Management",
-    created_at: new Date("2024-01-01"),
-  };
-
-  const VALID_UUID = "per_sec_001";
-
-  beforeEach(() => {
-    vi.clearAllMocks();
-    mockRequireCapabilityPerm.mockResolvedValue(undefined);
-    mockFindUniquePerm.mockResolvedValue(MOCK_SECTION);
-  });
-
-  it("returns the permission section by UUID", async () => {
-    const result = await getPermissionSection(VALID_UUID);
-    expect(result).not.toBeNull();
-    expect(result!.permission_uuid).toBe("per_sec_001");
-    expect(result!.section_name).toBe("Finance Management");
-  });
-
-  it("calls requireCapability with admin.read", async () => {
-    await getPermissionSection(VALID_UUID);
-    expect(mockRequireCapabilityPerm).toHaveBeenCalledWith("admin.read");
-  });
-
-  it("queries Prisma findUnique with the given UUID", async () => {
-    await getPermissionSection(VALID_UUID);
-    expect(mockFindUniquePerm).toHaveBeenCalledWith({
-      where: { permission_uuid: VALID_UUID },
-    });
-  });
-
-  it("returns null when section not found", async () => {
-    mockFindUniquePerm.mockResolvedValue(null);
-    const result = await getPermissionSection("per_sec_nonexistent");
-    expect(result).toBeNull();
-  });
-
-  it("throws on empty UUID", async () => {
-    await expect(getPermissionSection("")).rejects.toThrow();
-  });
-
-  it("propagates requireCapability rejection", async () => {
-    mockRequireCapabilityPerm.mockRejectedValue(
-      new Error("Unauthorized: insufficient capability"),
-    );
-    await expect(getPermissionSection(VALID_UUID)).rejects.toThrow(
-      "Unauthorized: insufficient capability",
-    );
-  });
-
-  it("propagates Prisma exception", async () => {
-    mockFindUniquePerm.mockRejectedValue(new Error("DB error"));
-    await expect(getPermissionSection(VALID_UUID)).rejects.toThrow("DB error");
   });
 });
 

@@ -5,11 +5,9 @@ import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
 import {
   listPermissionSectionsSchema,
-  getPermissionSectionSchema,
   createPermissionSectionSchema,
   updatePermissionSectionSchema,
   listPermissionSectionsOutputSchema,
-  getPermissionSectionOutputSchema,
   createPermissionSectionOutputSchema,
   updatePermissionSectionOutputSchema,
 } from "./schemas";
@@ -43,49 +41,6 @@ export async function listPermissionSections(): Promise<
   const outputParsed = listPermissionSectionsOutputSchema.safeParse(result);
   if (!outputParsed.success) {
     console.error("[admin/permissions] listPermissionSections output failed:", outputParsed.error.issues);
-  }
-
-  return result;
-}
-
-/**
- * Get a single permission section by UUID.
- * Mirrors the legacy Yii2 PermissionSectionController::actionView().
- */
-export async function getPermissionSection(
-  permission_uuid: string,
-): Promise<PermissionSectionDetail | null> {
-  await requireCapability("admin.read");
-
-  const parsed = getPermissionSectionSchema.safeParse({ permission_uuid });
-  if (!parsed.success) {
-    throw new Error(
-      parsed.error.issues[0]?.message ?? "Invalid permission section UUID",
-    );
-  }
-
-  const section = await prisma.permission_section.findUnique({
-    where: { permission_uuid: parsed.data.permission_uuid },
-  });
-
-  if (!section) {
-    const result = null;
-
-    // Validate output shape
-    const outputParsed = getPermissionSectionOutputSchema.safeParse(result);
-    if (!outputParsed.success) {
-      console.error("[admin/permissions] getPermissionSection (not found) output failed:", outputParsed.error.issues);
-    }
-
-    return result;
-  }
-
-  const result = section as PermissionSectionDetail;
-
-  // Validate output shape
-  const outputParsed = getPermissionSectionOutputSchema.safeParse(result);
-  if (!outputParsed.success) {
-    console.error("[admin/permissions] getPermissionSection output failed:", outputParsed.error.issues);
   }
 
   return result;

@@ -1,11 +1,9 @@
 import { describe, it, expect } from "vitest";
 import {
   listPermissionSectionsSchema,
-  getPermissionSectionSchema,
   createPermissionSectionSchema,
   updatePermissionSectionSchema,
   listPermissionSectionsOutputSchema,
-  getPermissionSectionOutputSchema,
   createPermissionSectionOutputSchema,
   updatePermissionSectionOutputSchema,
 } from "./schemas";
@@ -28,31 +26,6 @@ describe("listPermissionSectionsSchema", () => {
 
   it("rejects undefined", () => {
     expect(listPermissionSectionsSchema.safeParse(undefined).success).toBe(false);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// getPermissionSectionSchema
-// ---------------------------------------------------------------------------
-describe("getPermissionSectionSchema", () => {
-  it("accepts valid input", () => {
-    expect(
-      getPermissionSectionSchema.safeParse({ permission_uuid: "ps-123" }).success,
-    ).toBe(true);
-  });
-
-  it("rejects missing permission_uuid", () => {
-    expect(getPermissionSectionSchema.safeParse({}).success).toBe(false);
-  });
-
-  it("rejects empty permission_uuid", () => {
-    expect(getPermissionSectionSchema.safeParse({ permission_uuid: "" }).success).toBe(false);
-  });
-
-  it("rejects wrong type", () => {
-    expect(
-      getPermissionSectionSchema.safeParse({ permission_uuid: 123 }).success,
-    ).toBe(false);
   });
 });
 
@@ -186,48 +159,6 @@ describe("listPermissionSectionsOutputSchema", () => {
         { permission_uuid: "ps-1", section_name: "Mgmt", created_at: "not-a-date" },
       ]).success,
     ).toBe(false);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// getPermissionSectionOutputSchema
-// ---------------------------------------------------------------------------
-describe("getPermissionSectionOutputSchema", () => {
-  const validItem = {
-    permission_uuid: "ps-1",
-    section_name: "User Management",
-    created_at: new Date("2024-01-01"),
-  };
-
-  it("accepts a valid section", () => {
-    expect(getPermissionSectionOutputSchema.safeParse(validItem).success).toBe(true);
-  });
-
-  it("accepts null", () => {
-    expect(getPermissionSectionOutputSchema.safeParse(null).success).toBe(true);
-  });
-
-  it("accepts nullable section_name", () => {
-    expect(
-      getPermissionSectionOutputSchema.safeParse({
-        ...validItem,
-        section_name: null,
-      }).success,
-    ).toBe(true);
-  });
-
-  it("rejects empty permission_uuid", () => {
-    expect(
-      getPermissionSectionOutputSchema.safeParse({
-        ...validItem,
-        permission_uuid: "",
-      }).success,
-    ).toBe(false);
-  });
-
-  it("rejects missing permission_uuid", () => {
-    const { permission_uuid: _, ...rest } = validItem;
-    expect(getPermissionSectionOutputSchema.safeParse(rest).success).toBe(false);
   });
 });
 
