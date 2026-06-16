@@ -122,7 +122,7 @@ describe("deleteDepartmentSchema", () => {
 // ---------------------------------------------------------------------------
 describe("departmentListResponseSchema", () => {
   const valid = {
-    departments: [
+    items: [
       {
         department_uuid: "abc-123",
         department_name_en: "Engineering",
