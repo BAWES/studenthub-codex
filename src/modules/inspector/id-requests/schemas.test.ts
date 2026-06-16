@@ -3,6 +3,8 @@ import {
   listIdRequestsSchema,
   getIdRequestSchema,
   updateIdRequestStatusSchema,
+  approveIdRequestSchema,
+  rejectIdRequestSchema,
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
@@ -106,5 +108,87 @@ describe("updateIdRequestStatusSchema", () => {
     expect(
       updateIdRequestStatusSchema.safeParse({ status: "approved" }).success
     ).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// approveIdRequestSchema
+// ---------------------------------------------------------------------------
+describe("approveIdRequestSchema", () => {
+  it("accepts valid ID without comment", () => {
+    const r = approveIdRequestSchema.safeParse({
+      id: "cir-abc-123-4567-8901-2345",
+    });
+    expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data.id).toBe("cir-abc-123-4567-8901-2345");
+      expect(r.data.comment).toBeUndefined();
+    }
+  });
+
+  it("accepts valid ID with optional comment", () => {
+    const r = approveIdRequestSchema.safeParse({
+      id: "cir-abc-123-4567-8901-2345",
+      comment: "Looks good",
+    });
+    expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data.comment).toBe("Looks good");
+    }
+  });
+
+  it("rejects empty id", () => {
+    const r = approveIdRequestSchema.safeParse({
+      id: "",
+    });
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects missing id", () => {
+    expect(approveIdRequestSchema.safeParse({}).success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// rejectIdRequestSchema
+// ---------------------------------------------------------------------------
+describe("rejectIdRequestSchema", () => {
+  it("accepts valid ID with valid comment", () => {
+    const r = rejectIdRequestSchema.safeParse({
+      id: "cir-abc-123-4567-8901-2345",
+      comment: "Documents do not match civil records.",
+    });
+    expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data.id).toBe("cir-abc-123-4567-8901-2345");
+      expect(r.data.comment).toBe("Documents do not match civil records.");
+    }
+  });
+
+  it("rejects comment under 10 characters", () => {
+    const r = rejectIdRequestSchema.safeParse({
+      id: "cir-abc-123-4567-8901-2345",
+      comment: "Short",
+    });
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects missing comment", () => {
+    const r = rejectIdRequestSchema.safeParse({
+      id: "cir-abc-123-4567-8901-2345",
+    });
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects missing id", () => {
+    expect(rejectIdRequestSchema.safeParse({ comment: "Reason text here" }).success).toBe(false);
+  });
+
+  it("rejects empty id", () => {
+    const r = rejectIdRequestSchema.safeParse({
+      id: "",
+      comment: "This is a valid rejection reason",
+    });
+    expect(r.success).toBe(false);
   });
 });

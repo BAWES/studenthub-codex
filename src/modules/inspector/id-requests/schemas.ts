@@ -23,6 +23,16 @@ export const updateIdRequestStatusSchema = z.object({
   rejection_reason: z.string().min(10).max(500).optional(),
 });
 
+export const approveIdRequestSchema = z.object({
+  id: z.string().min(1, "Request ID is required"),
+  comment: z.string().optional(),
+});
+
+export const rejectIdRequestSchema = z.object({
+  id: z.string().min(1, "Request ID is required"),
+  comment: z.string().min(10, "Rejection reason must be at least 10 characters").max(500, "Rejection reason must be under 500 characters"),
+});
+
 // ---------------------------------------------------------------------------
 // Input type aliases
 // ---------------------------------------------------------------------------
@@ -30,6 +40,8 @@ export const updateIdRequestStatusSchema = z.object({
 export type ListIdRequestsInput = z.input<typeof listIdRequestsSchema>;
 export type GetIdRequestInput = z.input<typeof getIdRequestSchema>;
 export type UpdateIdRequestStatusInput = z.input<typeof updateIdRequestStatusSchema>;
+export type ApproveIdRequestInput = z.input<typeof approveIdRequestSchema>;
+export type RejectIdRequestInput = z.input<typeof rejectIdRequestSchema>;
 
 // ---------------------------------------------------------------------------
 // Output validation schemas

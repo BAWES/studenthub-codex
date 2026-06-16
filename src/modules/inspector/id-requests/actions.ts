@@ -6,11 +6,15 @@ import {
   listIdRequestsSchema,
   getIdRequestSchema,
   updateIdRequestStatusSchema,
+  approveIdRequestSchema,
+  rejectIdRequestSchema,
   listIdRequestsResultSchema,
   idRequestDetailSchema,
   type ListIdRequestsInput,
   type GetIdRequestInput,
   type UpdateIdRequestStatusInput,
+  type ApproveIdRequestInput,
+  type RejectIdRequestInput,
   type IdRequestRow,
   type IdRequestDetail,
   type ListIdRequestsResult,
@@ -246,9 +250,41 @@ export async function getIdRequest(
  * Returns { success: true } on success, or { error: string } on failure.
  */
 export async function approveIdRequest(
-  id: string,
+  params: ApproveIdRequestInput,
 ): Promise<{ success: true } | { error: string }> {
-  return updateIdRequestStatusCore({ id, status: "approved" });
+  await requireCapability("id_review.mutate");
+
+  const parsed = approveIdRequestSchema.safeParse(params);
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
+  }
+
+  const { id } = parsed.data;
+
+  const existing = await prisma.candidate_id_request.findUnique({
+    where: { cir_uuid: id },
+    select: { cir_uuid: true, status: true },
+  });
+
+  if (!existing) {
+    return { error: "ID request not found." };
+  }
+
+  if (existing.status !== "pending") {
+    return {
+      error: `Cannot update a request with status "${existing.status}". Only 'pending' requests can be updated.`,
+    };
+  }
+
+  await prisma.candidate_id_request.update({
+    where: { cir_uuid: id },
+    data: {
+      status: "approved",
+      updated_at: new Date(),
+    },
+  });
+
+  return { success: true } as const;
 }
 
 // ---------------------------------------------------------------------------
@@ -258,19 +294,47 @@ export async function approveIdRequest(
 /**
  * Reject a candidate ID verification request with a required reason.
  * Only 'pending' requests can be rejected.
- * The rejection_reason must be 10–500 characters.
+ * The comment (used as rejection_reason) must be 10–500 characters.
  * Requires id_review.mutate capability.
  * Returns { success: true } on success, or { error: string } on failure.
  */
 export async function rejectIdRequest(
-  id: string,
-  rejection_reason: string,
+  params: RejectIdRequestInput,
 ): Promise<{ success: true } | { error: string }> {
-  return updateIdRequestStatusCore({
-    id,
-    status: "rejected",
-    rejection_reason,
+  await requireCapability("id_review.mutate");
+
+  const parsed = rejectIdRequestSchema.safeParse(params);
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
+  }
+
+  const { id, comment } = parsed.data;
+
+  const existing = await prisma.candidate_id_request.findUnique({
+    where: { cir_uuid: id },
+    select: { cir_uuid: true, status: true },
   });
+
+  if (!existing) {
+    return { error: "ID request not found." };
+  }
+
+  if (existing.status !== "pending") {
+    return {
+      error: `Cannot update a request with status "${existing.status}". Only 'pending' requests can be updated.`,
+    };
+  }
+
+  await prisma.candidate_id_request.update({
+    where: { cir_uuid: id },
+    data: {
+      status: "rejected",
+      rejection_reason: comment,
+      updated_at: new Date(),
+    },
+  });
+
+  return { success: true } as const;
 }
 
 // ---------------------------------------------------------------------------
