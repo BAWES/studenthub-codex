@@ -32,7 +32,7 @@ export const areaItemSchema = z.object({
   area_longitude: z.number().nullable(),
 });
 
-export type AreaItem = z.infer<typeof areaItemSchema>;
+export type AreaItem = z.output<typeof areaItemSchema>;
 
 export const listAreasResultSchema = z.object({
   areas: z.array(areaItemSchema),
@@ -42,4 +42,4 @@ export const listAreasResultSchema = z.object({
   totalPages: z.number().int().nonnegative(),
 });
 
-export type ListAreasResult = z.infer<typeof listAreasResultSchema>;
+export type ListAreasResult = z.output<typeof listAreasResultSchema>;
