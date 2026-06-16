@@ -31,6 +31,7 @@ export const employerDashboardDataSchema = z.object({
   jobStatusBreakdown: z.array(jobStatusBreakdownSchema),
   totalJobs: z.number(),
   totalApplications: z.number(),
+  pendingReviews: z.number(),
 });
 
 // ---------------------------------------------------------------------------
