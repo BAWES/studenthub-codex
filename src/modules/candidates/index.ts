@@ -34,8 +34,6 @@ export {
   setCandidateApproval,
   setCandidateProfileComplete,
   clearCandidateCivilVerification,
-  approveIdRequest,
-  rejectIdRequest,
   changePassword,
   getCandidateProfile,
   getCandidate,

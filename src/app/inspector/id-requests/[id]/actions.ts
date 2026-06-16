@@ -6,4 +6,4 @@
 // their current import paths without duplicating the "use server" directive.
 // ---------------------------------------------------------------------------
 
-export { getIdRequest, updateIdRequestStatus } from "@/modules/inspector/id-requests/[id]/actions";
+export { getIdRequest, updateIdRequestStatus, approveIdRequest, rejectIdRequest } from "@/modules/inspector/id-requests/[id]/actions";
