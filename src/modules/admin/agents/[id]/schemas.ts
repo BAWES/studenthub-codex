@@ -47,5 +47,5 @@ export const agentDetailSchema = z.object({
 // Exported types
 // ---------------------------------------------------------------------------
 
-export type AgentDetail = z.infer<typeof agentDetailSchema>;
+export type AgentDetail = z.output<typeof agentDetailSchema>;
 export type GetAgentByIdInput = z.input<typeof getAgentByIdSchema>;

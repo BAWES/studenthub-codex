@@ -38,6 +38,6 @@ export const agentsHealthDataSchema = z.object({
 // Exported types
 // ---------------------------------------------------------------------------
 
-export type AgentHealthMetric = z.infer<typeof agentHealthMetricSchema>;
-export type AgentHealthData = z.infer<typeof agentHealthDataSchema>;
-export type AgentsHealthData = z.infer<typeof agentsHealthDataSchema>;
+export type AgentHealthMetric = z.output<typeof agentHealthMetricSchema>;
+export type AgentHealthData = z.output<typeof agentHealthDataSchema>;
+export type AgentsHealthData = z.output<typeof agentsHealthDataSchema>;
