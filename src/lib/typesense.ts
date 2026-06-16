@@ -161,7 +161,7 @@ export interface CompanyDocument {
 
 export const JOBS_COLLECTION = "jobs";
 
-export const jobsCollectionSchema = {
+export const jobCollectionSchema = {
   name: JOBS_COLLECTION,
   fields: [
     { name: "job_listing_id", type: "int32" as const },
@@ -170,7 +170,7 @@ export const jobsCollectionSchema = {
     { name: "description", type: "string" as const },
     { name: "requirements", type: "string" as const },
     { name: "location", type: "string" as const },
-    { name: "employment_type", type: "string" as const },
+    { name: "employment_type", type: "string" as const, facet: true },
     { name: "salary_range", type: "string" as const },
     { name: "status", type: "string" as const, facet: true },
     { name: "company_name", type: "string" as const },
@@ -185,12 +185,12 @@ export interface JobDocument {
   employer_id: number;
   title: string;
   description: string;
-  requirements?: string;
-  location?: string;
-  employment_type?: string;
-  salary_range?: string;
-  status?: string;
-  company_name?: string;
+  requirements: string | null;
+  location: string | null;
+  employment_type: string | null;
+  salary_range: string | null;
+  status: string | null;
+  company_name: string;
   created_at: number;
   updated_at: number;
 }
