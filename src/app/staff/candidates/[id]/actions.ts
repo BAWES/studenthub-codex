@@ -1,7 +1,11 @@
 "use server";
 
-// Barrel re-export — actions now live in src/modules/candidates/actions.ts
-export {
-  getCandidate,
-  addCandidateNote as addNote,
-} from "@/modules/candidates/actions";
+// ---------------------------------------------------------------------------
+// Barrel re-export — delegates to module-level implementation
+// ---------------------------------------------------------------------------
+// All business logic lives in src/modules/candidates/actions.ts (which has
+// "use server"). This barrel re-exports so page consumers keep their
+// current import paths without duplicating the "use server" directive.
+// ---------------------------------------------------------------------------
+
+export * from "@/modules/candidates/actions";
