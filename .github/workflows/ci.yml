@@ -61,7 +61,9 @@ jobs:
   build:
     name: Next.js Build
     runs-on: [self-hosted, macOS, ARM64]
-    timeout-minutes: 10
+    timeout-minutes: 15
+    env:
+      NODE_OPTIONS: "--max-old-space-size=4096"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
