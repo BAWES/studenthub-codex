@@ -147,7 +147,7 @@ describe("deleteDepartmentSchema", () => {
 // ---------------------------------------------------------------------------
 describe("departmentListResponseSchema", () => {
   const validResponse = {
-    departments: [
+    items: [
       {
         department_uuid: "dept-1",
         department_name_en: "Engineering",
@@ -168,7 +168,7 @@ describe("departmentListResponseSchema", () => {
 
   it("accepts empty departments array", () => {
     expect(
-      departmentListResponseSchema.safeParse({ ...validResponse, departments: [], total: 0 }).success,
+      departmentListResponseSchema.safeParse({ ...validResponse, items: [], total: 0 }).success,
     ).toBe(true);
   });
 
@@ -178,8 +178,8 @@ describe("departmentListResponseSchema", () => {
     ).toBe(true);
   });
 
-  it("rejects missing departments", () => {
-    const { departments: _, ...rest } = validResponse;
+  it("rejects missing items", () => {
+    const { items: _, ...rest } = validResponse;
     expect(departmentListResponseSchema.safeParse(rest).success).toBe(false);
   });
 
@@ -195,7 +195,7 @@ describe("departmentListResponseSchema", () => {
     expect(
       departmentListResponseSchema.safeParse({
         ...validResponse,
-        departments: [{ department_uuid: "d-1", department_name_en: "", department_name_ar: null, employee_count: 0, created_at: null, updated_at: null }],
+        items: [{ department_uuid: "d-1", department_name_en: "", department_name_ar: null, employee_count: 0, created_at: null, updated_at: null }],
       }).success,
     ).toBe(false);
   });
@@ -204,7 +204,7 @@ describe("departmentListResponseSchema", () => {
     expect(
       departmentListResponseSchema.safeParse({
         ...validResponse,
-        departments: [{ department_uuid: "d-1", department_name_en: "Eng", department_name_ar: null, employee_count: -1, created_at: null, updated_at: null }],
+        items: [{ department_uuid: "d-1", department_name_en: "Eng", department_name_ar: null, employee_count: -1, created_at: null, updated_at: null }],
       }).success,
     ).toBe(false);
   });

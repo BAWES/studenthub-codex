@@ -248,20 +248,20 @@ describe("departmentListResponseSchema", () => {
     });
     expect(result.success).toBe(true);
     if (result.success) {
-      expect(result.data.departments).toHaveLength(1);
+      expect(result.data.items).toHaveLength(1);
     }
   });
 
   it("accepts an empty list response", () => {
     const result = departmentListResponseSchema.safeParse({
-      departments: [],
+      items: [],
       total: 0,
       page: 1,
       limit: 20,
     });
     expect(result.success).toBe(true);
     if (result.success) {
-      expect(result.data.departments).toHaveLength(0);
+      expect(result.data.items).toHaveLength(0);
       expect(result.data.total).toBe(0);
     }
   });
@@ -269,7 +269,7 @@ describe("departmentListResponseSchema", () => {
   it("rejects negative total", () => {
     expect(
       departmentListResponseSchema.safeParse({
-        departments: [],
+        items: [],
         total: -1,
         page: 1,
         limit: 20,
@@ -290,7 +290,7 @@ describe("departmentListResponseSchema", () => {
   it("rejects zero page", () => {
     expect(
       departmentListResponseSchema.safeParse({
-        departments: [],
+        items: [],
         total: 0,
         page: 0,
         limit: 20,
@@ -301,7 +301,7 @@ describe("departmentListResponseSchema", () => {
   it("rejects zero limit", () => {
     expect(
       departmentListResponseSchema.safeParse({
-        departments: [],
+        items: [],
         total: 0,
         page: 1,
         limit: 0,
