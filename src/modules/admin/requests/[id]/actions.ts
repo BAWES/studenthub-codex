@@ -124,7 +124,7 @@ export async function rejectRequest(
  */
 export async function addComment(
   input: AddCommentInput,
-): Promise<z.infer<typeof addCommentResultSchema>> {
+): Promise<z.output<typeof addCommentResultSchema>> {
   await requireRoleCapability("admin", "request.write.any");
 
   const parsed = addCommentSchema.safeParse(input);

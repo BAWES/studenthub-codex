@@ -48,7 +48,7 @@ import type { UpdateAdminCompanyInput } from "./schemas";
  */
 export async function updateAdminCompany(
   input: UpdateAdminCompanyInput,
-): Promise<z.infer<typeof updateCompanyResultSchema>> {
+): Promise<z.output<typeof updateCompanyResultSchema>> {
   await requireCapability("admin.write");
 
   const parsed = updateAdminCompanySchema.safeParse(input);
