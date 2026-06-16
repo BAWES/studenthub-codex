@@ -97,7 +97,7 @@ export function CompanyNotesList({
           />
           <div className="flex items-center justify-between">
             {createError && (
-              <span className="text-xs text-red-500">{createError}</span>
+              <span className="text-xs text-[var(--sh-error)]">{createError}</span>
             )}
             <button
               type="submit"
@@ -232,7 +232,7 @@ function NoteCard({
             </button>
             <button
               onClick={onDelete}
-              className="rounded px-2 py-1 text-xs hover:bg-red-500/10"
+              className="rounded px-2 py-1 text-xs hover:bg-[var(--sh-error)]/10"
               style={{ color: "var(--ink-muted)" }}
               title="Delete"
             >

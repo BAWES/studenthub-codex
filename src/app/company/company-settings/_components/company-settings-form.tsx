@@ -100,8 +100,8 @@ export function CompanySettingsForm({
         <div
           className={`rounded px-3 py-2 text-xs ${
             feedback.type === "success"
-              ? "bg-green-500/10 text-green-600"
-              : "bg-red-500/10 text-red-600"
+              ? "bg-[var(--sh-success-bg)] text-[var(--sh-success)]"
+              : "bg-[var(--sh-error-bg)] text-[var(--sh-error)]"
           }`}
         >
           {feedback.message}

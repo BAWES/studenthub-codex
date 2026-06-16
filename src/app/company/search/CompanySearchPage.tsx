@@ -62,7 +62,7 @@ function useDebounce<T>(value: T, delay: number): T {
 
 function SearchResultSkeleton() {
   return (
-    <div className="rounded-lg border border-[var(--border)] bg-white p-4 flex flex-col gap-3">
+    <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4 flex flex-col gap-3">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-2 flex-1">
           <Skeleton variant="pulse" className="h-5 w-40" />
@@ -92,12 +92,12 @@ function SearchResultSkeletons({ count = 5 }: { count?: number }) {
 
 function TypeBadge({ type }: { type: string }) {
   const colors: Record<string, string> = {
-    company: "bg-blue-100 text-blue-700",
-    store: "bg-green-100 text-green-700",
-    contact: "bg-purple-100 text-purple-700",
+    company: "bg-[var(--sh-info-bg)] text-[var(--sh-info)]",
+    store: "bg-[var(--sh-success-bg)] text-[var(--sh-success)]",
+    contact: "bg-[var(--sh-coral-light)] text-[var(--sh-coral)]",
   };
   return (
-    <span className={cn("rounded-full px-2 py-0.5 text-[0.6875rem] font-medium", colors[type] ?? "bg-gray-100 text-gray-700")}>
+    <span className={cn("rounded-full px-2 py-0.5 text-[0.6875rem] font-medium", colors[type] ?? "bg-[var(--surface)] text-[var(--muted)]")}>
       {type}
     </span>
   );
@@ -237,8 +237,8 @@ export function CompanySearchPage({
             onChange={(e) => setQuery(e.target.value)}
             autoFocus
             onFocus={(e) => {
-              e.currentTarget.style.borderColor = "#eb6651";
-              e.currentTarget.style.boxShadow = "0 0 0 3px rgba(235, 102, 81, 0.12)";
+              e.currentTarget.style.borderColor = "var(--sh-coral)";
+              e.currentTarget.style.boxShadow = "var(--sh-coral-glow)";
             }}
             onBlur={(e) => {
               e.currentTarget.style.borderColor = "var(--border)";
@@ -248,7 +248,7 @@ export function CompanySearchPage({
           <button
             type="submit"
             className="rounded-lg px-6 py-2.5 text-[0.9375rem] font-semibold text-white transition-opacity duration-150 disabled:cursor-not-allowed disabled:opacity-60 hover:opacity-90"
-            style={{ background: "#eb6651" }}
+            style={{ background: "var(--sh-coral)" }}
             disabled={loading}
           >
             {loading ? "Searching..." : "Search"}
@@ -304,9 +304,9 @@ export function CompanySearchPage({
                         style={
                           isActive
                             ? {
-                                background: "rgba(235, 102, 81, 0.08)",
-                                borderColor: "#eb6651",
-                                color: "#eb6651",
+                                background: "var(--sh-coral-light)",
+                                borderColor: "var(--sh-coral)",
+                                color: "var(--sh-coral)",
                               }
                             : { color: "var(--ink)" }
                         }
@@ -317,7 +317,7 @@ export function CompanySearchPage({
                           className={cn(
                             "ml-2 rounded-full px-1.5 py-0.5 text-[0.6875rem]",
                             isActive
-                              ? "bg-[rgba(235,102,81,0.12)] text-[#eb6651]"
+                              ? "bg-[var(--sh-coral-light)] text-[var(--sh-coral)]"
                               : "bg-[var(--accent)]",
                           )}
                           style={isActive ? {} : { color: "var(--muted)" }}
@@ -341,7 +341,7 @@ export function CompanySearchPage({
               <span className="font-semibold" style={{ color: "var(--ink)" }}>
                 {isTyping ? (
                   <>
-                    <span className="inline-block align-middle mr-1.5 h-2 w-2 rounded-full bg-[#eb6651] animate-pulse" />
+                    <span className="inline-block align-middle mr-1.5 h-2 w-2 rounded-full bg-[var(--sh-coral)] animate-pulse" />
                     Searching...
                   </>
                 ) : (
@@ -452,11 +452,11 @@ export function CompanySearchPage({
                         type="button"
                         className={cn(
                           "rounded-md border px-3 py-1.5 text-xs font-medium",
-                          p === page ? "text-white" : "",
+                          p === page ? "text-[var(--sh-coral)]" : "",
                         )}
                         style={
                           p === page
-                            ? { background: "#eb6651", borderColor: "#eb6651" }
+                            ? { background: "var(--sh-coral-light)", borderColor: "var(--sh-coral)" }
                             : { borderColor: "var(--border)", color: "var(--ink)" }
                         }
                         onClick={() => goToPage(p)}
