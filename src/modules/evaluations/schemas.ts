@@ -12,24 +12,8 @@ export const getEvaluationParamsSchema = z.object({
 // Types
 // ---------------------------------------------------------------------------
 
-export type EvaluationDetail = {
-  uuid: string;
-  candidateId: number | null;
-  staffId: number | null;
-  startDate: Date | null;
-  endDate: Date | null;
-  createdAt: Date | null;
-  candidateName: string | null;
-  candidateEmail: string | null;
-  staffName: string | null;
-};
-
-export type EvaluationAnswer = {
-  ceqUuid: string | null;
-  question: string | null;
-  answer: string | null;
-  rating: number | null;
-};
+export type EvaluationDetail = z.output<typeof evaluationDetailOutputSchema>;
+export type EvaluationAnswer = z.output<typeof evaluationAnswerOutputSchema>;
 
 // ---------------------------------------------------------------------------
 // Output validation schemas
@@ -56,4 +40,4 @@ export const evaluationAnswerOutputSchema = z.object({
 
 export const evaluationAnswersOutputSchema = z.array(evaluationAnswerOutputSchema);
 
-export type EvaluationDetailOutput = z.infer<typeof evaluationDetailOutputSchema>;
+export type EvaluationDetailOutput = EvaluationDetail;
