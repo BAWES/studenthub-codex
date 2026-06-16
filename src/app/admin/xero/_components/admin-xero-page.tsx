@@ -4,40 +4,91 @@ import { DataTable } from "@/modules/workspace/DataTable";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 
 import type { SessionUser } from "@/modules/auth/types";
-import type { BankTransactionItem, ReconciliationStatus } from "@/modules/admin/xero/schemas";
+import type { BankTransactionItem, ReconciliationStatus } from "../schemas";
 
 type Props = {
   session: SessionUser;
   transactions: BankTransactionItem[];
-  total: number;
   reconciliation: ReconciliationStatus;
 };
 
-export function AdminXeroPage({ session, transactions, total, reconciliation }: Props) {
+export function AdminXeroPage({ session, transactions, reconciliation }: Props) {
   return (
     <WorkspaceShell
       session={session}
       eyebrow="Admin settings"
-      title="Xero Bank Transactions — view and reconcile incoming transactions synced from Xero."
+      title="Xero bank transactions — finance reconciliation and audit."
       metrics={[
-        { label: "Total transactions", value: total, note: "Bank transactions in the system" },
-        { label: "Reconciled", value: reconciliation.reconciledCount, note: `${reconciliation.reconciledPercentage}% of total` },
-        { label: "Unreconciled", value: reconciliation.unreconciledCount, note: "Requires attention" },
+        {
+          label: "Reconciled",
+          value: reconciliation.reconciledCount,
+          note: `${reconciliation.reconciledPercentage.toFixed(1)}% of total`,
+        },
+        {
+          label: "Unreconciled",
+          value: reconciliation.unreconciledCount,
+          note: "Requires attention",
+        },
+        {
+          label: "Total",
+          value: reconciliation.totalCount,
+          note: "Bank transactions loaded",
+        },
       ]}
     >
       <DataTable
         title="Bank Transactions"
-        description="All synced Xero bank transactions. Click a row to view details."
+        description="Xero-synced bank transactions with reconciliation status."
         rows={transactions.map((t) => ({ ...t, id: t.bankTransactionId }))}
         rowHref={undefined}
         columns={[
           {
+            key: "bankTransactionId",
+            label: "ID",
+            render: (row) => (
+              <code
+                className="text-sm font-mono"
+                style={{ color: "var(--muted)" }}
+              >
+                {row.bankTransactionId.slice(0, 8)}...
+              </code>
+            ),
+          },
+          {
+            key: "contactName",
+            label: "Contact",
+            render: (row) => (
+              <span
+                className="text-sm"
+                style={{ color: "var(--ink)" }}
+              >
+                {row.contactName ?? "—"}
+              </span>
+            ),
+          },
+          {
             key: "reference",
             label: "Reference",
             render: (row) => (
-              <span className="text-sm font-medium truncate block max-w-[200px]"
-                style={{ color: "var(--sh-primary)" }}>
-                {row.reference || "—"}
+              <span
+                className="text-sm"
+                style={{ color: "var(--muted)" }}
+              >
+                {row.reference ?? "—"}
+              </span>
+            ),
+          },
+          {
+            key: "total",
+            label: "Amount",
+            render: (row) => (
+              <span
+                className="text-sm font-mono"
+                style={{ color: "var(--ink)" }}
+              >
+                {row.total != null
+                  ? `${row.currencyCode ?? ""} ${row.total.toFixed(2)}`
+                  : "—"}
               </span>
             ),
           },
@@ -45,26 +96,11 @@ export function AdminXeroPage({ session, transactions, total, reconciliation }: 
             key: "type",
             label: "Type",
             render: (row) => (
-              <span className="text-sm">{row.type || "—"}</span>
-            ),
-          },
-          {
-            key: "contactName",
-            label: "Contact",
-            render: (row) => (
-              <span className="text-sm truncate block max-w-[180px]">
-                {row.contactName || "—"}
-              </span>
-            ),
-          },
-          {
-            key: "total",
-            label: "Total",
-            render: (row) => (
-              <span className="text-sm font-mono">
-                {row.total != null
-                  ? `${Number(row.total).toFixed(3)} ${row.currencyCode ?? "KWD"}`
-                  : "—"}
+              <span
+                className="text-sm"
+                style={{ color: "var(--ink)" }}
+              >
+                {row.type ?? "—"}
               </span>
             ),
           },
@@ -73,10 +109,14 @@ export function AdminXeroPage({ session, transactions, total, reconciliation }: 
             label: "Status",
             render: (row) => (
               <span
-                className="text-xs px-2 py-0.5 rounded-full font-medium"
+                className={`text-xs px-2 py-0.5 rounded-full`}
                 style={{
-                  background: row.isReconciled ? "rgba(34,197,94,0.15)" : "rgba(239,68,68,0.15)",
-                  color: row.isReconciled ? "#22c55e" : "#ef4444",
+                  color: row.isReconciled
+                    ? "var(--sh-success)"
+                    : "var(--sh-error)",
+                  background: row.isReconciled
+                    ? "color-mix(in srgb, var(--sh-success) 10%, transparent)"
+                    : "color-mix(in srgb, var(--sh-error) 10%, transparent)",
                 }}
               >
                 {row.isReconciled ? "Reconciled" : "Unreconciled"}
@@ -87,16 +127,16 @@ export function AdminXeroPage({ session, transactions, total, reconciliation }: 
             key: "date",
             label: "Date",
             render: (row) => {
-              if (!row.date) return "—";
-              return new Date(row.date).toLocaleDateString();
+              const d = row.date ? new Date(row.date) : null;
+              return (
+                <span
+                  className="text-sm"
+                  style={{ color: "var(--muted)" }}
+                >
+                  {d ? d.toLocaleDateString() : "—"}
+                </span>
+              );
             },
-          },
-          {
-            key: "status",
-            label: "Xero Status",
-            render: (row) => (
-              <span className="text-sm">{row.status || "—"}</span>
-            ),
           },
         ]}
       />
