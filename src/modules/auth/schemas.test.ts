@@ -6,6 +6,7 @@ import {
   verifySessionUnauthenticatedSchema,
   verifySessionResultSchema,
   switchRoleSchema,
+  impersonationUserSchema,
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
@@ -227,5 +228,51 @@ describe("switchRoleSchema", () => {
 
   it("rejects wrong type", () => {
     expect(switchRoleSchema.safeParse({ targetRole: 123 }).success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// impersonationUserSchema
+// ---------------------------------------------------------------------------
+describe("impersonationUserSchema", () => {
+  const valid = {
+    role: "admin",
+    id: "user-123",
+    name: "John Doe",
+    email: "john@example.com",
+  };
+
+  it("accepts valid admin user", () => {
+    expect(impersonationUserSchema.safeParse(valid).success).toBe(true);
+  });
+
+  it("accepts all valid roles", () => {
+    const roles = ["admin", "staff", "candidate", "company", "inspector"] as const;
+    for (const role of roles) {
+      expect(impersonationUserSchema.safeParse({ ...valid, role }).success).toBe(true);
+    }
+  });
+
+  it("rejects null name", () => {
+    expect(
+      impersonationUserSchema.safeParse({ ...valid, name: null }).success,
+    ).toBe(false);
+  });
+
+  it("rejects invalid role", () => {
+    expect(
+      impersonationUserSchema.safeParse({ ...valid, role: "superadmin" }).success,
+    ).toBe(false);
+  });
+
+  it("rejects empty id", () => {
+    expect(
+      impersonationUserSchema.safeParse({ ...valid, id: "" }).success,
+    ).toBe(false);
+  });
+
+  it("rejects missing email", () => {
+    const { email: _, ...rest } = valid;
+    expect(impersonationUserSchema.safeParse(rest).success).toBe(false);
   });
 });
