@@ -78,7 +78,7 @@ export const listRequestsOutputSchema = z.object({
   totalPages: z.number().int().nonnegative(),
 });
 
-export type ListRequestsOutput = z.infer<typeof listRequestsOutputSchema>;
+export type ListRequestsOutput = z.output<typeof listRequestsOutputSchema>;
 
 const requestMetricSchema = z.object({
   label: z.string().min(1),
@@ -141,7 +141,7 @@ export const getRequestOutputSchema = z.object({
   metrics: z.array(requestMetricSchema),
 });
 
-export type GetRequestOutput = z.infer<typeof getRequestOutputSchema>;
+export type GetRequestOutput = z.output<typeof getRequestOutputSchema>;
 
 const requestActionResponseSchema = z.object({
   operation: z.enum(["success", "error"]),
@@ -150,19 +150,19 @@ const requestActionResponseSchema = z.object({
 
 export const updateRequestStatusOutputSchema = requestActionResponseSchema;
 
-export type UpdateRequestStatusOutput = z.infer<typeof updateRequestStatusOutputSchema>;
+export type UpdateRequestStatusOutput = z.output<typeof updateRequestStatusOutputSchema>;
 
 export const approveRequestOutputSchema = requestActionResponseSchema;
 
-export type ApproveRequestOutput = z.infer<typeof approveRequestOutputSchema>;
+export type ApproveRequestOutput = z.output<typeof approveRequestOutputSchema>;
 
 export const rejectRequestOutputSchema = requestActionResponseSchema;
 
-export type RejectRequestOutput = z.infer<typeof rejectRequestOutputSchema>;
+export type RejectRequestOutput = z.output<typeof rejectRequestOutputSchema>;
 
 export const closeRequestOutputSchema = requestActionResponseSchema;
 
-export type CloseRequestOutput = z.infer<typeof closeRequestOutputSchema>;
+export type CloseRequestOutput = z.output<typeof closeRequestOutputSchema>;
 
 export type ListRequestsInput = z.input<typeof listRequestsSchema>;
 export type GetRequestInput = z.input<typeof getRequestSchema>;

@@ -56,7 +56,7 @@ export const complianceRowSchema = z.object({
   updated: z.string().min(1),
 });
 
-export type ComplianceRowOutput = z.infer<typeof complianceRowSchema>;
+export type ComplianceRowOutput = z.output<typeof complianceRowSchema>;
 
 export const complianceSummarySchema = z.object({
   totalCompanies: z.number().int().nonnegative(),
@@ -66,7 +66,7 @@ export const complianceSummarySchema = z.object({
   incompleteCandidates: z.number().int().nonnegative(),
 });
 
-export type ComplianceSummaryOutput = z.infer<typeof complianceSummarySchema>;
+export type ComplianceSummaryOutput = z.output<typeof complianceSummarySchema>;
 
 const complianceMetricSchema = z.object({
   label: z.string().min(1),
@@ -98,7 +98,7 @@ export const companyComplianceDetailSchema = z.object({
   idRequests: z.array(idRequestRecordSchema),
 });
 
-export type CompanyComplianceDetailOutput = z.infer<typeof companyComplianceDetailSchema>;
+export type CompanyComplianceDetailOutput = z.output<typeof companyComplianceDetailSchema>;
 
 const idRequestRecordLightSchema = z.object({
   cir_uuid: z.string().min(1),
@@ -115,7 +115,7 @@ export const idRequestComplianceDetailSchema = z.object({
   metrics: z.array(complianceMetricSchema),
 });
 
-export type IdRequestComplianceDetailOutput = z.infer<typeof idRequestComplianceDetailSchema>;
+export type IdRequestComplianceDetailOutput = z.output<typeof idRequestComplianceDetailSchema>;
 
 export const listComplianceRecordsResponseSchema = z.object({
   items: z.array(complianceRowSchema),
@@ -126,14 +126,14 @@ export const listComplianceRecordsResponseSchema = z.object({
   summary: complianceSummarySchema,
 });
 
-export type ListComplianceRecordsResponseOutput = z.infer<typeof listComplianceRecordsResponseSchema>;
+export type ListComplianceRecordsResponseOutput = z.output<typeof listComplianceRecordsResponseSchema>;
 
 export const complianceMutationResponseSchema = z.object({
   id: z.string().min(1),
   type: z.enum(["company", "id_request"]),
 });
 
-export type ComplianceMutationResponseOutput = z.infer<typeof complianceMutationResponseSchema>;
+export type ComplianceMutationResponseOutput = z.output<typeof complianceMutationResponseSchema>;
 
 export type ListComplianceRecordsInput = z.input<typeof listComplianceRecordsSchema>;
 export type GetComplianceRecordInput = z.input<typeof getComplianceRecordSchema>;
