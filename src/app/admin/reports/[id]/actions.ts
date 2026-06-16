@@ -1,20 +1,9 @@
-"use server";
-
 // ---------------------------------------------------------------------------
-// Admin Reports [id] — server actions barrel
+// Barrel re-export — delegates to module-level [id] implementation
 // ---------------------------------------------------------------------------
-// Detail-page server actions for a single report.
-// getReport already lives in the parent module — re-export with Next.js 15
-// compatible pattern (bare re-exports are forbidden in "use server" files).
+// All business logic lives in src/modules/admin/reports/[id]/actions.ts (which
+// has "use server"). This barrel re-exports so page consumers keep their
+// current import paths without duplicating the "use server" directive.
 // ---------------------------------------------------------------------------
 
-import { getReport as _getReport } from "../../../../modules/admin/reports/actions";
-import type { SingleReportResult } from "../../../../modules/admin/reports/schemas";
-
-/**
- * Get a single generated report by ID and type.
- * Requires admin.read capability.
- */
-export async function getReport(input: { id: string; type: string }): Promise<SingleReportResult> {
-  return _getReport(input);
-}
+export { getReport } from "@/modules/admin/reports/[id]/actions";
