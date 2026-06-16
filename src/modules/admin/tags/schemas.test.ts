@@ -2,7 +2,6 @@ import { describe, it, expect } from "vitest";
 import {
   tagItemSchema,
   listTagsResultSchema,
-  getTagResultSchema,
   tagActionResponseSchema,
 } from "./schemas";
 
@@ -114,36 +113,6 @@ describe("listTagsResultSchema", () => {
 
   it("rejects negative totalPages", () => {
     expect(listTagsResultSchema.safeParse({ ...validResult, totalPages: -1 }).success).toBe(false);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// getTagResultSchema
-// ---------------------------------------------------------------------------
-describe("getTagResultSchema", () => {
-  const validResult = {
-    tag: {
-      tag_id: 1,
-      tag: "urgent",
-      created_at: new Date("2026-01-01"),
-      updated_at: null,
-    },
-  };
-
-  it("accepts a valid get tag result", () => {
-    expect(getTagResultSchema.safeParse(validResult).success).toBe(true);
-  });
-
-  it("accepts null tag", () => {
-    expect(getTagResultSchema.safeParse({ tag: null }).success).toBe(true);
-  });
-
-  it("rejects missing tag field", () => {
-    expect(getTagResultSchema.safeParse({}).success).toBe(false);
-  });
-
-  it("rejects invalid tag in result", () => {
-    expect(getTagResultSchema.safeParse({ tag: { tag_id: 0, tag: "" } }).success).toBe(false);
   });
 });
 

@@ -1,13 +1,11 @@
 import { describe, it, expect } from "vitest";
 import {
   listTagsSchema,
-  getTagSchema,
   createTagSchema,
   updateTagSchema,
   deleteTagSchema,
   tagItemSchema,
   listTagsResultSchema,
-  getTagResultSchema,
   tagActionResponseSchema,
 } from "./schemas";
 
@@ -36,34 +34,7 @@ describe("listTagsSchema", () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// getTagSchema
-// ---------------------------------------------------------------------------
-describe("getTagSchema", () => {
-  it("accepts valid input", () => {
-    expect(getTagSchema.safeParse({ tagId: 1 }).success).toBe(true);
-  });
 
-  it("accepts coerced string", () => {
-    expect(getTagSchema.safeParse({ tagId: "5" }).success).toBe(true);
-  });
-
-  it("rejects missing tagId", () => {
-    expect(getTagSchema.safeParse({}).success).toBe(false);
-  });
-
-  it("rejects zero tagId", () => {
-    expect(getTagSchema.safeParse({ tagId: 0 }).success).toBe(false);
-  });
-
-  it("rejects negative tagId", () => {
-    expect(getTagSchema.safeParse({ tagId: -1 }).success).toBe(false);
-  });
-
-  it("rejects non-numeric string", () => {
-    expect(getTagSchema.safeParse({ tagId: "abc" }).success).toBe(false);
-  });
-});
 
 // ---------------------------------------------------------------------------
 // createTagSchema
@@ -240,30 +211,7 @@ describe("listTagsResultSchema", () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// getTagResultSchema
-// ---------------------------------------------------------------------------
-describe("getTagResultSchema", () => {
-  it("accepts a valid tag", () => {
-    expect(
-      getTagResultSchema.safeParse({
-        tag: { tag_id: 1, tag: "javascript", created_at: null, updated_at: null },
-      }).success,
-    ).toBe(true);
-  });
 
-  it("accepts null tag", () => {
-    expect(getTagResultSchema.safeParse({ tag: null }).success).toBe(true);
-  });
-
-  it("rejects missing tag", () => {
-    expect(getTagResultSchema.safeParse({}).success).toBe(false);
-  });
-
-  it("rejects invalid tag data", () => {
-    expect(getTagResultSchema.safeParse({ tag: { tag_id: 0, tag: "" } }).success).toBe(false);
-  });
-});
 
 // ---------------------------------------------------------------------------
 // tagActionResponseSchema
