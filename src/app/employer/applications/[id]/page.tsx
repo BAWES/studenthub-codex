@@ -66,9 +66,9 @@ export default async function EmployerApplicationDetailPage({ params }: Props) {
       eyebrow="Employer / Applications"
       title={`Application #${app.applicationId}`}
       metrics={[
-        { label: "Status", value: app.status },
-        { label: "Candidate", value: app.candidateName ?? "—" },
-        { label: "Job", value: app.jobTitle },
+        { label: "Status", value: app.status, note: "" },
+        { label: "Candidate", value: app.candidateName ?? "—", note: "" },
+        { label: "Job", value: app.jobTitle, note: "" },
       ]}
     >
       <div className="max-w-3xl space-y-6">
