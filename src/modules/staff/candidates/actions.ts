@@ -139,21 +139,14 @@ export async function getCandidateById(
   });
 
   if (!row) {
-    const nullResult = null;
-    const nullParsed = candidateDetailOutputSchema.safeParse(nullResult);
-    if (!nullParsed.success) {
-      console.error(
-        "[staff/candidates] getCandidateById output validation failed (null):",
-        nullParsed.error.issues,
-      );
-    }
-    return nullResult;
+    // null is a legitimate "not found" response — skip output validation
+    return null;
   }
 
   const result = {
     id: row.candidate_id,
     name: row.candidate_name,
-    nameAr: row.candidate_name_ar,
+    nameAr: row.candidate_name_ar ?? "",
     email: row.candidate_email,
     phone: row.candidate_phone,
     gender: row.candidate_gender,
