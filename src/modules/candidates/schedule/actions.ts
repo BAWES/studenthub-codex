@@ -470,7 +470,7 @@ const scheduleEntryActionResultOutputSchema = z.discriminatedUnion("success", [
   z.object({ success: z.literal(false), error: z.string() }),
 ]);
 
-type ScheduleEntryActionResult = z.infer<typeof scheduleEntryActionResultOutputSchema>;
+type ScheduleEntryActionResult = z.output<typeof scheduleEntryActionResultOutputSchema>;
 
 /**
  * Get a single schedule entry with full detail (store, company, timestamps).
