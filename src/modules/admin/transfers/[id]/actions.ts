@@ -62,7 +62,7 @@ export async function getTransfer(
  */
 export async function updateTransferStatus(
   input: UpdateTransferStatusInput,
-): Promise<z.infer<typeof transferStatusUpdateResultSchema>> {
+): Promise<z.output<typeof transferStatusUpdateResultSchema>> {
   await requireCapability("finance.mutate");
 
   const parsed = updateTransferStatusSchema.safeParse(input);

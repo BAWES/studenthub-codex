@@ -154,7 +154,7 @@ export async function getDesignations(): Promise<{ uuid: string; nameEn: string 
  */
 export async function getEmployeeById(
   input: GetEmployeeByIdInput,
-): Promise<z.infer<typeof employeeDetailSchema> | null> {
+): Promise<z.output<typeof employeeDetailSchema> | null> {
   await requireCapability("admin.read");
 
   const parsed = getEmployeeByIdSchema.safeParse(input);
