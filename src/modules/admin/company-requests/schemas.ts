@@ -66,7 +66,7 @@ export const listCompanyRequestsOutputSchema = z.object({
   totalPages: z.number().int().nonnegative(),
 });
 
-export type ListCompanyRequestsOutput = z.infer<typeof listCompanyRequestsOutputSchema>;
+export type ListCompanyRequestsOutput = z.output<typeof listCompanyRequestsOutputSchema>;
 
 /**
  * Schema for a single company request detail (same shape as row).
@@ -75,7 +75,7 @@ export const getCompanyRequestOutputSchema = z.object({
   request: companyRequestRowSchema.nullable(),
 });
 
-export type GetCompanyRequestOutput = z.infer<typeof getCompanyRequestOutputSchema>;
+export type GetCompanyRequestOutput = z.output<typeof getCompanyRequestOutputSchema>;
 
 /**
  * Schema for status update action response.
@@ -87,7 +87,7 @@ const companyRequestActionResponseSchema = z.object({
 
 export const updateCompanyRequestStatusOutputSchema = companyRequestActionResponseSchema;
 
-export type UpdateCompanyRequestStatusOutput = z.infer<typeof updateCompanyRequestStatusOutputSchema>;
+export type UpdateCompanyRequestStatusOutput = z.output<typeof updateCompanyRequestStatusOutputSchema>;
 
 // ---------------------------------------------------------------------------
 // Types

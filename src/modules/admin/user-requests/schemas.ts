@@ -62,7 +62,7 @@ export const listStoreAssignmentRequestsOutputSchema = z.object({
   totalPages: z.number().int().nonnegative(),
 });
 
-export type ListStoreAssignmentRequestsOutput = z.infer<typeof listStoreAssignmentRequestsOutputSchema>;
+export type ListStoreAssignmentRequestsOutput = z.output<typeof listStoreAssignmentRequestsOutputSchema>;
 
 /**
  * Schema for a single store assignment request detail (same shape as row).
@@ -71,7 +71,7 @@ export const getStoreAssignmentRequestOutputSchema = z.object({
   request: storeAssignmentRequestRowSchema.nullable(),
 });
 
-export type GetStoreAssignmentRequestOutput = z.infer<typeof getStoreAssignmentRequestOutputSchema>;
+export type GetStoreAssignmentRequestOutput = z.output<typeof getStoreAssignmentRequestOutputSchema>;
 
 /**
  * Schema for status update action response.
@@ -83,7 +83,7 @@ const storeAssignmentActionResponseSchema = z.object({
 
 export const updateStoreAssignmentRequestStatusOutputSchema = storeAssignmentActionResponseSchema;
 
-export type UpdateStoreAssignmentRequestStatusOutput = z.infer<typeof updateStoreAssignmentRequestStatusOutputSchema>;
+export type UpdateStoreAssignmentRequestStatusOutput = z.output<typeof updateStoreAssignmentRequestStatusOutputSchema>;
 
 // ---------------------------------------------------------------------------
 // Types

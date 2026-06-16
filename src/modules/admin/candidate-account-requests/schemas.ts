@@ -60,7 +60,7 @@ export const listCandidateIdRequestsOutputSchema = z.object({
   totalPages: z.number().int().nonnegative(),
 });
 
-export type ListCandidateIdRequestsOutput = z.infer<typeof listCandidateIdRequestsOutputSchema>;
+export type ListCandidateIdRequestsOutput = z.output<typeof listCandidateIdRequestsOutputSchema>;
 
 /**
  * Schema for a single candidate ID request detail (same shape as row).
@@ -69,7 +69,7 @@ export const getCandidateIdRequestOutputSchema = z.object({
   request: candidateIdRequestRowSchema.nullable(),
 });
 
-export type GetCandidateIdRequestOutput = z.infer<typeof getCandidateIdRequestOutputSchema>;
+export type GetCandidateIdRequestOutput = z.output<typeof getCandidateIdRequestOutputSchema>;
 
 /**
  * Schema for status update action response.
@@ -81,7 +81,7 @@ const candidateIdRequestActionResponseSchema = z.object({
 
 export const updateCandidateIdRequestStatusOutputSchema = candidateIdRequestActionResponseSchema;
 
-export type UpdateCandidateIdRequestStatusOutput = z.infer<typeof updateCandidateIdRequestStatusOutputSchema>;
+export type UpdateCandidateIdRequestStatusOutput = z.output<typeof updateCandidateIdRequestStatusOutputSchema>;
 
 // ---------------------------------------------------------------------------
 // Types
