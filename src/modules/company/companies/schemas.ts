@@ -191,7 +191,7 @@ export const companyUpdateResultOutputSchema = z.object({
 // Output types (inferred from schemas)
 // ---------------------------------------------------------------------------
 
-export type CompanyLinkOutput = z.infer<typeof companyLinkOutputSchema>;
-export type CompanyWithRelationsOutput = z.infer<typeof companyWithRelationsOutputSchema>;
-export type CompanyDetailTxOutput = z.infer<typeof companyDetailTxOutputSchema>;
-export type CompanyUpdateResultOutput = z.infer<typeof companyUpdateResultOutputSchema>;
+export type CompanyLinkOutput = z.output<typeof companyLinkOutputSchema>;
+export type CompanyWithRelationsOutput = z.output<typeof companyWithRelationsOutputSchema>;
+export type CompanyDetailTxOutput = z.output<typeof companyDetailTxOutputSchema>;
+export type CompanyUpdateResultOutput = z.output<typeof companyUpdateResultOutputSchema>;
