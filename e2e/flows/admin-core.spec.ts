@@ -207,8 +207,12 @@ test.describe("Admin critical flows - Payments / Compliance / Transfers / Agents
       }
 
       // Compliance list data table or empty state
+      // Use .or() to combine locators instead of CSS comma syntax which breaks with Playwright text selectors
       const listSection = ctx.page
-        .locator("table, [class*='DataTable'], [class*='data-table'], text=No compliance")
+        .locator("table")
+        .or(ctx.page.locator("[class*='DataTable']"))
+        .or(ctx.page.locator("[class*='data-table']"))
+        .or(ctx.page.locator("text=No compliance"))
         .first();
       await expect(listSection).toBeVisible({ timeout: 10000 });
 

@@ -266,8 +266,13 @@ test.describe("Admin critical flows — Workspace + Management Views", () => {
       await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
       await expect(ctx.page).toHaveURL(/\/admin\/candidates/);
 
-      // DataTable renders
-      await expect(ctx.page.locator("table").first()).toBeVisible({ timeout: 10000 });
+      // DataTable renders (use broader locator for different table implementations)
+      const dataTable = ctx.page
+        .locator("table")
+        .or(ctx.page.locator("[class*='shTable']"))
+        .or(ctx.page.locator("[class*='DataTable']"))
+        .first();
+      await expect(dataTable).toBeVisible({ timeout: 10000 });
 
       assertNoReactErrors(ctx.errors);
       await ctx.close();
@@ -281,8 +286,13 @@ test.describe("Admin critical flows — Workspace + Management Views", () => {
       await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
       await expect(ctx.page).toHaveURL(/\/admin\/companies/);
 
-      // DataTable renders
-      await expect(ctx.page.locator("table").first()).toBeVisible({ timeout: 10000 });
+      // DataTable renders (use broader locator for different table implementations)
+      const dataTable = ctx.page
+        .locator("table")
+        .or(ctx.page.locator("[class*='shTable']"))
+        .or(ctx.page.locator("[class*='DataTable']"))
+        .first();
+      await expect(dataTable).toBeVisible({ timeout: 10000 });
 
       assertNoReactErrors(ctx.errors);
       await ctx.close();

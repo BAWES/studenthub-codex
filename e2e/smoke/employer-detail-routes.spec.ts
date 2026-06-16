@@ -14,8 +14,12 @@ process.env.USE_MOCK_FIXTURES = "true";
 
 let company: FixtureUser;
 
-// Real job UUID from production DB — detail page resolves correctly
-const JOB_UUID = "5e736750-87dc-11eb-99cf-0025227780a4";
+// Real job ID from E2E fixtures — the route uses jobListingId (Int auto-increment)
+// NOT a UUID. The Number() coercion on a UUID returns NaN which causes SSR errors.
+// See seed-test-fixtures.ts or prisma/seed.ts for the fixture-created job IDs.
+// With USE_MOCK_FIXTURES=true, the mock login bypasses real DB, so the actual
+// numeric value just needs to produce a working URL path.
+const JOB_ID = 1;
 
 test.describe("Employer detail routes", () => {
   test.describe.configure({ mode: "serial" });
@@ -52,15 +56,15 @@ test.describe("Employer detail routes", () => {
 
   test("employer job detail page loads without errors", async () => {
     const ctx = await authContext(company);
-    await ctx.page.goto(`/employer/jobs/${JOB_UUID}`);
+    await ctx.page.goto(`/employer/jobs/${JOB_ID}`);
     await ctx.page.waitForLoadState("load");
     await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
 
     const currentUrl = ctx.page.url();
-    if (currentUrl.includes(JOB_UUID)) {
+    if (currentUrl.includes(`/jobs/${JOB_ID}`)) {
       console.log(`Employer job detail page loaded at ${currentUrl}`);
     } else {
-      console.log(`Redirected from /employer/jobs/${JOB_UUID} to: ${currentUrl}`);
+      console.log(`Redirected from /employer/jobs/${JOB_ID} to: ${currentUrl}`);
     }
 
     assertNoReactErrors(ctx.errors);
@@ -69,7 +73,7 @@ test.describe("Employer detail routes", () => {
 
   test("employer job detail renders heading or content", async () => {
     const ctx = await authContext(company);
-    await ctx.page.goto(`/employer/jobs/${JOB_UUID}`);
+    await ctx.page.goto(`/employer/jobs/${JOB_ID}`);
     await ctx.page.waitForLoadState("load");
     const hasContent = await ctx.page
       .locator("h1, h2, table, [role='tablist'], [role='tab'], main")
@@ -85,7 +89,7 @@ test.describe("Employer detail routes", () => {
 
   test("employer job applications page loads without errors", async () => {
     const ctx = await authContext(company);
-    await ctx.page.goto(`/employer/jobs/${JOB_UUID}/applications`);
+    await ctx.page.goto(`/employer/jobs/${JOB_ID}/applications`);
     await ctx.page.waitForLoadState("load");
     await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
 
@@ -93,7 +97,7 @@ test.describe("Employer detail routes", () => {
     if (currentUrl.includes("applications")) {
       console.log(`Employer job applications page loaded at ${currentUrl}`);
     } else {
-      console.log(`Redirected from /employer/jobs/${JOB_UUID}/applications to: ${currentUrl}`);
+      console.log(`Redirected from /employer/jobs/${JOB_ID}/applications to: ${currentUrl}`);
     }
 
     assertNoReactErrors(ctx.errors);
@@ -102,7 +106,7 @@ test.describe("Employer detail routes", () => {
 
   test("employer job applications renders heading or content", async () => {
     const ctx = await authContext(company);
-    await ctx.page.goto(`/employer/jobs/${JOB_UUID}/applications`);
+    await ctx.page.goto(`/employer/jobs/${JOB_ID}/applications`);
     await ctx.page.waitForLoadState("load");
     const hasContent = await ctx.page
       .locator("h1, h2, table, [role='tablist'], main")
@@ -124,9 +128,9 @@ test.describe("Employer detail routes", () => {
       { name: "studenthub_next_session", value: candidate.cookie, domain: "127.0.0.1", path: "/" },
     ]);
     const page = await bContext.newPage();
-    await page.goto(`/employer/jobs/${JOB_UUID}`);
+    await page.goto(`/employer/jobs/${JOB_ID}`);
     await page.waitForLoadState("load");
-    await expect(page).not.toHaveURL(`/employer/jobs/${JOB_UUID}`);
+    await expect(page).not.toHaveURL(`/employer/jobs/${JOB_ID}`);
     await bContext.close();
     await browser.close();
   });
