@@ -130,40 +130,9 @@ export type ApplyToJobInput = z.input<typeof applyToJobSchema>;
 export type ListMyApplicationsInput = z.input<typeof listMyApplicationsSchema>;
 export type ListJobApplicationsInput = z.input<typeof listJobApplicationsSchema>;
 
-export type CandidateJobRow = {
-  jobListingId: number;
-  title: string;
-  description: string;
-  requirements: string | null;
-  location: string | null;
-  employmentType: string | null;
-  salaryRange: string | null;
-  employerName: string;
-  matchScore: number | null;
-  createdAt: Date;
-  updatedAt: Date;
-};
-
-export type CandidateJobDetail = CandidateJobRow & {
-  status: string | null;
-  hasApplied: boolean;
-  applicationStatus: string | null;
-  skillScore: number | null;
-  educationScore: number | null;
-  locationScore: number | null;
-  breakdown: string[];
-};
-
-export type ApplicationRow = {
-  applicationId: number;
-  jobListingId: number;
-  jobTitle: string;
-  employerName: string;
-  status: string;
-  coverLetter: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-};
+export type CandidateJobRow = z.output<typeof candidateJobRowSchema>;
+export type CandidateJobDetail = z.output<typeof candidateJobDetailSchema>;
+export type ApplicationRow = z.output<typeof applicationRowSchema>;
 
 export type JobApplicationRow = {
   applicationId: number;

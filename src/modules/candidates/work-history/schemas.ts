@@ -64,4 +64,8 @@ export type CandidateWorkHistoryItem = z.output<
 export type ListCandidateWorkHistoryResult = z.output<
   typeof listCandidateWorkHistoryResultSchema
 >;
-export type CandidateWorkHistoryDetail = CandidateWorkHistoryItem | null;
+export const candidateWorkHistoryDetailSchema =
+  candidateWorkHistoryItemSchema.nullable();
+export type CandidateWorkHistoryDetail = z.output<
+  typeof candidateWorkHistoryDetailSchema
+>;

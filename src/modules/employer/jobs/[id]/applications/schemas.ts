@@ -31,15 +31,9 @@ export type ListJobApplicationsInput = z.input<typeof listJobApplicationsSchema>
 export type ListJobApplicationsByEmployerInput = z.input<typeof listJobApplicationsByEmployerSchema>;
 export type UpdateApplicationStatusInput = z.input<typeof updateApplicationStatusSchema>;
 
-export type JobApplicationRow = {
-  applicationId: number;
-  candidateId: number;
-  candidateName: string | null;
-  status: string;
-  coverLetter: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-};
+export type JobApplicationRow = z.output<
+  typeof jobApplicationRowOutputSchema
+>;
 
 // ---------------------------------------------------------------------------
 // Output validation schemas

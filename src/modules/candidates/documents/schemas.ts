@@ -21,31 +21,18 @@ export const DOCUMENT_TYPES = [
 
 export type DocumentType = (typeof DOCUMENT_TYPES)[number];
 
-/** A single document entry returned from list / get. */
-export type CandidateDocumentItem = {
-  type: DocumentType;
-  label: string;
-  filePath: string | null;
-  fileUrl: string | null;
-};
-
-export type ListCandidateDocumentsResult = {
-  items: CandidateDocumentItem[];
-  candidateId: number;
-};
-
-/** Upload result shape for useActionState. */
-export type UploadDocumentState = {
-  success: boolean;
-  error?: string;
-  filePath?: string;
-};
-
-/** Delete result shape for useActionState. */
-export type DeleteDocumentState = {
-  success: boolean;
-  error?: string;
-};
+export type CandidateDocumentItem = z.output<
+  typeof candidateDocumentItemResultSchema
+>;
+export type ListCandidateDocumentsResult = z.output<
+  typeof listCandidateDocumentsResultSchema
+>;
+export type UploadDocumentState = z.output<
+  typeof uploadDocumentStateResultSchema
+>;
+export type DeleteDocumentState = z.output<
+  typeof deleteDocumentStateResultSchema
+>;
 
 // ---------------------------------------------------------------------------
 // Zod input schemas

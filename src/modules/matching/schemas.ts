@@ -35,31 +35,9 @@ export type ListMatchingCandidatesInput = z.input<typeof listMatchingCandidatesS
 // Types
 // ---------------------------------------------------------------------------
 
-export type MatchScore = {
-  overall: number;           // 0-100
-  skillMatch: number;        // 0-100
-  educationMatch: number;    // 0-100
-  locationMatch: number;     // 0-100
-  breakdown: string[];       // human-readable bullet points
-};
-
-export type MatchedJobRow = {
-  jobListingId: number;
-  title: string;
-  employerName: string;
-  location: string | null;
-  employmentType: string | null;
-  salaryRange: string | null;
-  score: MatchScore;
-};
-
-export type MatchedCandidateRow = {
-  candidateId: number;
-  candidateName: string;
-  candidateSkills: string[];
-  universityName: string | null;
-  score: MatchScore;
-};
+export type MatchScore = z.output<typeof matchScoreSchema>;
+export type MatchedJobRow = z.output<typeof matchedJobRowSchema>;
+export type MatchedCandidateRow = z.output<typeof matchedCandidateRowSchema>;
 
 // ---------------------------------------------------------------------------
 // Output validation schemas
