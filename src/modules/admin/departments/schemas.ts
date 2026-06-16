@@ -49,7 +49,7 @@ export const departmentListResponseSchema = z.object({
   limit: z.number().int().positive(),
 });
 
-export type DepartmentListResponseOutput = z.infer<typeof departmentListResponseSchema>;
+export type DepartmentListResponseOutput = z.output<typeof departmentListResponseSchema>;
 
 export const departmentDetailSchema = z.object({
   department: z.object({
@@ -62,7 +62,7 @@ export const departmentDetailSchema = z.object({
   employee_count: z.number().int().nonnegative(),
 });
 
-export type DepartmentDetailOutput = z.infer<typeof departmentDetailSchema>;
+export type DepartmentDetailOutput = z.output<typeof departmentDetailSchema>;
 
 export const departmentActionResponseSchema = z.object({
   operation: z.enum(["success", "error"]),
@@ -70,7 +70,7 @@ export const departmentActionResponseSchema = z.object({
   data: departmentRowSchema.optional(),
 });
 
-export type DepartmentActionResponseOutput = z.infer<typeof departmentActionResponseSchema>;
+export type DepartmentActionResponseOutput = z.output<typeof departmentActionResponseSchema>;
 
 export type ListDepartmentsInput = z.input<typeof listDepartmentsSchema>;
 export type GetDepartmentInput = z.input<typeof getDepartmentSchema>;

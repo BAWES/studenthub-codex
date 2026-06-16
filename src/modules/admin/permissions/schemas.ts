@@ -33,7 +33,7 @@ const permissionSectionDetailSchema = z.object({
 
 export const listPermissionSectionsOutputSchema = z.array(permissionSectionDetailSchema);
 
-export type ListPermissionSectionsOutput = z.infer<typeof listPermissionSectionsOutputSchema>;
+export type ListPermissionSectionsOutput = z.output<typeof listPermissionSectionsOutputSchema>;
 
 const permissionUuidSchema = z.object({
   permission_uuid: z.string().min(1),
@@ -41,11 +41,11 @@ const permissionUuidSchema = z.object({
 
 export const createPermissionSectionOutputSchema = permissionUuidSchema;
 
-export type CreatePermissionSectionOutput = z.infer<typeof createPermissionSectionOutputSchema>;
+export type CreatePermissionSectionOutput = z.output<typeof createPermissionSectionOutputSchema>;
 
 export const updatePermissionSectionOutputSchema = permissionUuidSchema;
 
-export type UpdatePermissionSectionOutput = z.infer<typeof updatePermissionSectionOutputSchema>;
+export type UpdatePermissionSectionOutput = z.output<typeof updatePermissionSectionOutputSchema>;
 
 export type CreatePermissionSectionInput = z.input<
   typeof createPermissionSectionSchema
