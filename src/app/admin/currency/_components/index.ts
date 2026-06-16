@@ -1,1 +1,1 @@
-export { AdminCurrencyTable } from "./admin-currency-table";
+export { AdminCurrenciesTable } from "./admin-currencies-table";
