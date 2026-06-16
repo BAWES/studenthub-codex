@@ -1,23 +1,18 @@
 import { requireRoleCapability } from "@/modules/auth/session";
-import { listJobs } from "./actions";
-import { EmployerJobsTable } from "./employer-jobs-table";
+import { searchJobs } from "@/modules/employer/jobs/actions";
+import { EmployerJobsSearchPage } from "./EmployerJobsSearchPage";
 
 export const dynamic = "force-dynamic";
 
 export default async function EmployerJobsPage() {
   const session = await requireRoleCapability("company", "company.read.linked");
-  const result = await listJobs({ limit: 50 });
+  const initialData = await searchJobs({ q: "", page: 1 });
 
-  // Map Prisma rows to include `id` for DataTable compatibility
-  const rows = result.items.map((job) => ({
-    id: job.jobListingId,
-    title: job.title,
-    employmentType: job.employmentType ?? undefined,
-    location: job.location ?? undefined,
-    salaryRange: job.salaryRange ?? undefined,
-    status: job.status,
-    createdAt: job.createdAt.toISOString().slice(0, 10),
-  }));
-
-  return <EmployerJobsTable session={session} rows={rows} total={result.total} />;
+  return (
+    <EmployerJobsSearchPage
+      session={session}
+      initialData={initialData}
+      searchAction={searchJobs}
+    />
+  );
 }

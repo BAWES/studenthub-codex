@@ -11,210 +11,141 @@ vi.mock("@/modules/auth/session", () => ({
     role: "company",
     issuedAt: Date.now(),
   } as SessionUser),
+  requireCapability: vi.fn().mockResolvedValue(undefined),
+  getSession: vi.fn().mockResolvedValue({ id: "42" }),
 }));
 
-// Mock the action
-const mockListJobs = vi.fn();
-vi.mock("./actions", () => ({
-  listJobs: (...args: unknown[]) => mockListJobs(...args),
+// Mock the search action
+const mockSearchJobs = vi.fn();
+vi.mock("@/modules/employer/jobs/actions", () => ({
+  searchJobs: (...args: unknown[]) => mockSearchJobs(...args),
 }));
 
-// Mock WorkspaceShell (used by EmployerJobsTable)
-vi.mock("@/modules/workspace/WorkspaceShell", () => ({
-  WorkspaceShell: ({
-    children,
-    eyebrow,
-    title,
-    metrics,
+// Mock EmployerJobsSearchPage
+vi.mock("./EmployerJobsSearchPage", () => ({
+  EmployerJobsSearchPage: ({
+    session,
+    initialData,
+    searchAction,
   }: {
-    children: React.ReactNode;
-    eyebrow: string;
-    title: string;
-    metrics: { label: string; value: string | number; note: string }[];
+    session: SessionUser;
+    initialData: unknown;
+    searchAction: (...args: unknown[]) => unknown;
   }) => (
-    <div data-testid="workspace-shell">
-      <div data-testid="eyebrow">{eyebrow}</div>
-      <div data-testid="title">{title}</div>
-      {metrics.map((m) => (
-        <span key={m.label} data-testid={`metric-${m.label}`}>
-          {String(m.value)}
-        </span>
-      ))}
-      {children}
+    <div data-testid="employer-jobs-search-page">
+      <div data-testid="session-id">{session.id}</div>
+      <div data-testid="initial-count">
+        {initialData && typeof initialData === "object" && "matchingCount" in initialData
+          ? String((initialData as { matchingCount: number }).matchingCount)
+          : "none"}
+      </div>
+      <div data-testid="has-search-action">{typeof searchAction === "function" ? "yes" : "no"}</div>
     </div>
   ),
 }));
 
-// Mock StatusBadge
-vi.mock("@/modules/workspace/StatusBadge", () => ({
-  StatusBadge: ({ label }: { label: string }) => (
-    <span data-testid="status-badge">{label}</span>
-  ),
-}));
+import EmployerJobsPage from "./page";
 
-// Mock DataTablePage
-vi.mock("@/modules/workspace/DataTablePage", () => ({
-  DataTablePage: ({
-    title,
-    description,
-    rows,
-    searchable,
-    searchPlaceholder,
-  }: {
-    title: string;
-    description: string;
-    rows: Record<string, unknown>[];
-    searchable: boolean;
-    searchPlaceholder: string;
-  }) => (
-    <div data-testid="datatable-page">
-      <div data-testid="dt-title">{title}</div>
-      <div data-testid="dt-desc">{description}</div>
-      <div data-testid="dt-searchable">{String(searchable)}</div>
-      <div data-testid="dt-search-placeholder">{searchPlaceholder}</div>
-      <div data-testid="dt-row-count">{rows.length}</div>
-      {rows.map((row) => (
-        <div key={String(row.id)} data-testid="dt-row">
-          {String(row.title)}
-        </div>
-      ))}
-    </div>
-  ),
-}));
+function makeInitialData(overrides: Record<string, unknown> = {}) {
+  return {
+    query: "",
+    page: 1,
+    matchingCount: 0,
+    rows: [],
+    source: { current: "MySQL", target: "Typesense" },
+    ...overrides,
+  };
+}
 
 describe("EmployerJobsPage", () => {
-  const sampleJobs = [
-    {
-      jobListingId: 1,
-      employerId: 42,
-      title: "Software Engineer",
-      description: "Build cool stuff",
-      requirements: "5 years experience",
-      location: "Kuwait City",
-      employmentType: "full-time",
-      salaryRange: "1500-2000 KWD",
-      status: "active",
-      createdAt: new Date("2025-06-01"),
-      updatedAt: new Date("2025-06-01"),
-    },
-    {
-      jobListingId: 2,
-      employerId: 42,
-      title: "UI Designer",
-      description: "Design interfaces",
-      requirements: null,
-      location: null,
-      employmentType: null,
-      salaryRange: null,
-      status: "draft",
-      createdAt: new Date("2025-06-10"),
-      updatedAt: new Date("2025-06-10"),
-    },
-  ];
-
   beforeEach(() => {
-    vi.clearAllMocks();
-    mockListJobs.mockResolvedValue({
-      items: sampleJobs,
-      total: 2,
-      page: 1,
-      limit: 50,
-      totalPages: 1,
-    });
+    mockSearchJobs.mockReset();
+    mockSearchJobs.mockResolvedValue(makeInitialData());
   });
 
   afterEach(() => {
     cleanup();
+    vi.clearAllMocks();
   });
 
   it("calls requireRoleCapability with company role and company.read.linked", async () => {
     const { requireRoleCapability } = await import("@/modules/auth/session");
-    const Page = (await import("./page")).default;
+    const { default: Page } = await import("./page");
 
-    await Page();
+    try {
+      const page = await Page();
+      const { render } = await import("@testing-library/react");
+      const { container } = render(page);
 
-    expect(requireRoleCapability).toHaveBeenCalledWith(
-      "company",
-      "company.read.linked",
-    );
-  });
-
-  it("calls listJobs with limit: 50", async () => {
-    const Page = (await import("./page")).default;
-
-    await Page();
-
-    expect(mockListJobs).toHaveBeenCalledWith({ limit: 50 });
-  });
-
-  it("renders the page with job data mapped to rows", async () => {
-    const Page = (await import("./page")).default;
-
-    const element = await Page();
-
-    expect(element).toBeDefined();
-    expect(mockListJobs).toHaveBeenCalledTimes(1);
-  });
-
-  it("handles empty data (zero state)", async () => {
-    mockListJobs.mockResolvedValue({
-      items: [],
-      total: 0,
-      page: 1,
-      limit: 50,
-      totalPages: 0,
-    });
-
-    const Page = (await import("./page")).default;
-    const element = await Page();
-
-    expect(element).toBeDefined();
-    expect(mockListJobs).toHaveBeenCalledWith({ limit: 50 });
-  });
-
-  it("handles nullable fields (employmentType, location, salaryRange)", async () => {
-    mockListJobs.mockResolvedValue({
-      items: [
-        {
-          jobListingId: 3,
-          employerId: 42,
-          title: "Designer",
-          description: "Design things",
-          requirements: null,
-          location: null,
-          employmentType: null,
-          salaryRange: null,
-          status: "active",
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-      ],
-      total: 1,
-      page: 1,
-      limit: 50,
-      totalPages: 1,
-    });
-
-    const Page = (await import("./page")).default;
-    const element = await Page();
-
-    expect(element).toBeDefined();
-    expect(mockListJobs).toHaveBeenCalledTimes(1);
-  });
-
-  it("maps job.jobListingId to row.id for DataTable rowHref compatibility", async () => {
-    const Page = (await import("./page")).default;
-
-    await Page();
-
-    // The page maps job.jobListingId -> row.id
-    // Verify listJobs data was accessed correctly
-    const items = mockListJobs.mock.results[0]?.value?.items;
-    if (items) {
-      const result = await items;
-      expect(result[0].jobListingId).toBe(1);
+      expect(requireRoleCapability).toHaveBeenCalledWith("company", "company.read.linked");
+    } finally {
+      cleanup();
     }
-    // Primary assertion: page called the action
-    expect(mockListJobs).toHaveBeenCalledTimes(1);
+  });
+
+  it("calls searchJobs with default query on initial load", async () => {
+    const { default: Page } = await import("./page");
+
+    try {
+      const page = await Page();
+      const { render } = await import("@testing-library/react");
+      render(page);
+
+      expect(mockSearchJobs).toHaveBeenCalledWith({ q: "", page: 1 });
+    } finally {
+      cleanup();
+    }
+  });
+
+  it("renders EmployerJobsSearchPage with session, initialData, and searchAction", async () => {
+    const { default: Page } = await import("./page");
+
+    try {
+      const page = await Page();
+      const { render, screen } = await import("@testing-library/react");
+      render(page);
+
+      expect(screen.getByTestId("employer-jobs-search-page")).toBeDefined();
+      expect(screen.getByTestId("session-id").textContent).toBe("42");
+      expect(screen.getByTestId("has-search-action").textContent).toBe("yes");
+    } finally {
+      cleanup();
+    }
+  });
+
+  it("passes initial search results matchingCount to EmployerJobsSearchPage", async () => {
+    mockSearchJobs.mockResolvedValue(makeInitialData({ matchingCount: 5 }));
+    const { default: Page } = await import("./page");
+
+    try {
+      const page = await Page();
+      const { render, screen } = await import("@testing-library/react");
+      render(page);
+
+      expect(screen.getByTestId("initial-count").textContent).toBe("5");
+    } finally {
+      cleanup();
+    }
+  });
+
+  it("handles empty search results gracefully", async () => {
+    mockSearchJobs.mockResolvedValue(makeInitialData({ matchingCount: 0, rows: [] }));
+    const { default: Page } = await import("./page");
+
+    try {
+      const page = await Page();
+      const { render, screen } = await import("@testing-library/react");
+      render(page);
+
+      expect(screen.getByTestId("initial-count").textContent).toBe("0");
+    } finally {
+      cleanup();
+    }
+  });
+
+  it("renders as a server component with force-dynamic re-export", async () => {
+    // This test verifies the module doesn't crash during RSC rendering
+    const mod = await import("./page");
+    expect(mod.dynamic).toBe("force-dynamic");
   });
 });
