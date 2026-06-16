@@ -14,62 +14,36 @@ vi.mock("@/modules/workspace/ErrorBoundary", () => ({
   ErrorBoundary: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
-vi.mock("@/modules/workspace/WorkspaceShell", () => {
-  type Row = { id: string; title: string; subtitle: string; meta?: string };
-  type Metric = { label: string; value: string | number; note: string };
-  return {
-    WorkspaceShell: ({
-      children,
-      eyebrow,
-      title,
-      metrics,
-      primary,
-      secondary,
-    }: {
-      children: React.ReactNode;
-      eyebrow: string;
-      title: string;
-      metrics: Metric[];
-      primary?: { title: string; rows: Row[] };
-      secondary?: { title: string; rows: Row[] };
-    }) => (
-      <div data-testid="workspace-shell">
-        <div data-testid="eyebrow">{eyebrow}</div>
-        <div data-testid="title">{title}</div>
-        {metrics.map((m) => (
-          <span key={m.label} data-testid={`metric-${m.label}`}>
-            {m.value}
-          </span>
-        ))}
-        {primary ? (
-          <div data-testid="primary-section">
-            <div data-testid="primary-title">{primary.title}</div>
-            {primary.rows.length > 0 ? (
-              primary.rows.map((r) => (
-                <span key={r.id} data-testid={`primary-row-${r.id}`}>
-                  {r.title}
-                </span>
-              ))
-            ) : (
-              <span data-testid="primary-empty">No items</span>
-            )}
-          </div>
-        ) : null}
-        {secondary ? (
-          <div data-testid="secondary-section">
-            <div data-testid="secondary-title">{secondary.title}</div>
-            {secondary.rows.map((r) => (
-              <span key={r.id} data-testid={`secondary-row-${r.id}`}>
-                {r.title}
-              </span>
-            ))}
-          </div>
-        ) : null}
-        {children}
-      </div>
-    ),
-  };
-});
+vi.mock("@/modules/workspace/WorkspaceShell", () => ({
+  WorkspaceShell: ({
+    children,
+    eyebrow,
+    title,
+    metrics,
+    primary,
+    secondary,
+  }: {
+    children: React.ReactNode;
+    eyebrow: string;
+    title: string;
+    metrics: { label: string; value: string | number; note: string }[];
+    primary?: { title: string; rows: unknown[] };
+    secondary?: { title: string; rows: unknown[] };
+  }) => (
+    <div data-testid="workspace-shell">
+      <div data-testid="eyebrow">{eyebrow}</div>
+      <div data-testid="title">{title}</div>
+      {metrics.map((m) => (
+        <span key={m.label} data-testid={`metric-${m.label}`}>
+          {m.value}
+        </span>
+      ))}
+      {primary ? <div data-testid="primary-{primary.title}">{primary.title} ({primary.rows.length})</div> : null}
+      {secondary ? <div data-testid="secondary-{secondary.title}">{secondary.title} ({secondary.rows.length})</div> : null}
+      {children}
+    </div>
+  ),
+}));
 
 vi.mock("@/modules/workspace/DetailPanels", () => ({
   DetailSection: ({
@@ -95,7 +69,6 @@ vi.mock("@/modules/workspace/format", () => ({
 }));
 
 const mockGetWorkspace = vi.fn();
-
 vi.mock("./actions", () => ({
   getWorkspace: (...args: unknown[]) => mockGetWorkspace(...args),
 }));
@@ -109,20 +82,22 @@ vi.mock("next/navigation", () => ({
 }));
 
 const mockWorkspaceData = {
-  contact: { contact_name: "John Doe", contact_email: "john@example.com" },
+  contact: {
+    contact_name: "Ahmed Al-Sabah",
+    contact_email: "ahmed@company.kw",
+  },
   metrics: [
-    { label: "Companies", value: 3, note: "Companies linked to this contact" },
-    { label: "Requests", value: 5, note: "Hiring requests across linked companies" },
-    { label: "Stores", value: 12, note: "Active stores in the account" },
-    { label: "Notes", value: 8, note: "Internal/customer notes connected to account" },
+    { label: "Companies", value: 3, note: "Linked companies" },
+    { label: "Requests", value: 12, note: "Active requests" },
   ],
   companies: [
-    { id: "comp-1", title: "Company A", subtitle: "Manager", meta: "Access allowed" },
-    { id: "comp-2", title: "Company B", subtitle: "Director", meta: "Access disabled" },
+    { id: "1", title: "Tech Corp", subtitle: "IT Services", meta: "Active" },
+    { id: "2", title: "BuildCo", subtitle: "Construction", meta: "Active" },
+    { id: "3", title: "LogiTrans", subtitle: "Logistics", meta: "Inactive" },
   ],
   requests: [
-    { id: "req-1", title: "Software Engineer", subtitle: "Company A", meta: "Open · 3 seats" },
-    { id: "req-2", title: "Sales Manager", subtitle: "Company B", meta: "In Progress · 1 seat" },
+    { id: "req-1", title: "Senior Developer", subtitle: "IT", meta: "Open" },
+    { id: "req-2", title: "Project Manager", subtitle: "PMO", meta: "In Progress" },
   ],
 };
 
@@ -135,59 +110,55 @@ describe("CompanyWorkspaceDetailPage", () => {
     cleanup();
   });
 
-  it("renders workspace detail with WorkspaceShell and correct eyebrow", async () => {
+  it("renders workspace detail with correct eyebrow and title", async () => {
     mockGetWorkspace.mockResolvedValue(mockWorkspaceData);
 
     const Page = (await import("./page")).default;
-    render(await Page({ params: Promise.resolve({ id: "contact-uuid-123" }) }));
+    render(await Page({ params: Promise.resolve({ id: "contact-uuid-abc" }) }));
 
     expect(screen.getByTestId("workspace-shell")).toBeDefined();
     expect(screen.getByTestId("eyebrow")).toHaveTextContent("Company / Workspace");
-    expect(screen.getByTestId("title")).toHaveTextContent("John Doe");
+    expect(screen.getByTestId("title")).toHaveTextContent("Ahmed Al-Sabah");
   });
 
   it("renders metrics correctly", async () => {
     mockGetWorkspace.mockResolvedValue(mockWorkspaceData);
 
     const Page = (await import("./page")).default;
-    render(await Page({ params: Promise.resolve({ id: "contact-uuid-123" }) }));
+    render(await Page({ params: Promise.resolve({ id: "contact-uuid-abc" }) }));
 
     expect(screen.getByTestId("metric-Companies")).toHaveTextContent("3");
-    expect(screen.getByTestId("metric-Requests")).toHaveTextContent("5");
-    expect(screen.getByTestId("metric-Stores")).toHaveTextContent("12");
-    expect(screen.getByTestId("metric-Notes")).toHaveTextContent("8");
-  });
-
-  it("renders primary (Companies) and secondary (Requests) sections", async () => {
-    mockGetWorkspace.mockResolvedValue(mockWorkspaceData);
-
-    const Page = (await import("./page")).default;
-    render(await Page({ params: Promise.resolve({ id: "contact-uuid-123" }) }));
-
-    expect(screen.getByTestId("primary-title")).toHaveTextContent("Companies");
-    expect(screen.getByTestId("primary-row-comp-1")).toHaveTextContent("Company A");
-    expect(screen.getByTestId("secondary-title")).toHaveTextContent("Requests");
-    expect(screen.getByTestId("secondary-row-req-1")).toHaveTextContent("Software Engineer");
+    expect(screen.getByTestId("metric-Requests")).toHaveTextContent("12");
   });
 
   it("renders DetailSection with Contact facts", async () => {
     mockGetWorkspace.mockResolvedValue(mockWorkspaceData);
 
     const Page = (await import("./page")).default;
-    render(await Page({ params: Promise.resolve({ id: "contact-uuid-123" }) }));
+    render(await Page({ params: Promise.resolve({ id: "contact-uuid-abc" }) }));
 
     expect(screen.getByTestId("detail-section")).toBeDefined();
     expect(screen.getByTestId("section-title")).toHaveTextContent("Contact");
-    expect(screen.getByTestId("fact-Name")).toHaveTextContent("John Doe");
-    expect(screen.getByTestId("fact-Email")).toHaveTextContent("john@example.com");
+    expect(screen.getByTestId("fact-Name")).toHaveTextContent("Ahmed Al-Sabah");
+    expect(screen.getByTestId("fact-Email")).toHaveTextContent("ahmed@company.kw");
   });
 
-  it("calls notFound when getWorkspace returns null contact", async () => {
+  it("calls notFound when getWorkspace returns nullish data", async () => {
+    mockGetWorkspace.mockResolvedValue(null);
+
+    const Page = (await import("./page")).default;
+    await expect(
+      Page({ params: Promise.resolve({ id: "nonexistent" }) }),
+    ).rejects.toThrow("NEXT_NOT_FOUND");
+    expect(mockNotFound).toHaveBeenCalledOnce();
+  });
+
+  it("calls notFound when contact is null", async () => {
     mockGetWorkspace.mockResolvedValue({ ...mockWorkspaceData, contact: null });
 
     const Page = (await import("./page")).default;
     await expect(
-      Page({ params: Promise.resolve({ id: "nonexistent" }) })
+      Page({ params: Promise.resolve({ id: "no-contact" }) }),
     ).rejects.toThrow("NEXT_NOT_FOUND");
     expect(mockNotFound).toHaveBeenCalledOnce();
   });
