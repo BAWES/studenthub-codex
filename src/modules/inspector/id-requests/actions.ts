@@ -5,10 +5,12 @@ import { requireCapability } from "@/modules/auth/session";
 import {
   listIdRequestsSchema,
   getIdRequestSchema,
+  updateIdRequestStatusSchema,
   listIdRequestsResultSchema,
   idRequestDetailSchema,
   type ListIdRequestsInput,
   type GetIdRequestInput,
+  type UpdateIdRequestStatusInput,
   type IdRequestRow,
   type IdRequestDetail,
   type ListIdRequestsResult,
@@ -231,4 +233,92 @@ export async function getIdRequest(
   }
 
   return result;
+}
+
+// ---------------------------------------------------------------------------
+// approveIdRequest — approve a pending ID verification request
+// ---------------------------------------------------------------------------
+
+/**
+ * Approve a candidate ID verification request by UUID.
+ * Only 'pending' requests can be approved.
+ * Requires id_review.mutate capability.
+ * Returns { success: true } on success, or { error: string } on failure.
+ */
+export async function approveIdRequest(
+  id: string,
+): Promise<{ success: true } | { error: string }> {
+  return updateIdRequestStatusCore({ id, status: "approved" });
+}
+
+// ---------------------------------------------------------------------------
+// rejectIdRequest — reject a pending ID verification request with a reason
+// ---------------------------------------------------------------------------
+
+/**
+ * Reject a candidate ID verification request with a required reason.
+ * Only 'pending' requests can be rejected.
+ * The rejection_reason must be 10–500 characters.
+ * Requires id_review.mutate capability.
+ * Returns { success: true } on success, or { error: string } on failure.
+ */
+export async function rejectIdRequest(
+  id: string,
+  rejection_reason: string,
+): Promise<{ success: true } | { error: string }> {
+  return updateIdRequestStatusCore({
+    id,
+    status: "rejected",
+    rejection_reason,
+  });
+}
+
+// ---------------------------------------------------------------------------
+// updateIdRequestStatusCore — shared mutation logic for approve/reject
+// ---------------------------------------------------------------------------
+
+async function updateIdRequestStatusCore(
+  params: UpdateIdRequestStatusInput,
+): Promise<{ success: true } | { error: string }> {
+  await requireCapability("id_review.mutate");
+
+  const parsed = updateIdRequestStatusSchema.safeParse(params);
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
+  }
+
+  const { id, status, rejection_reason } = parsed.data;
+
+  const existing = await prisma.candidate_id_request.findUnique({
+    where: { cir_uuid: id },
+    select: { cir_uuid: true, status: true },
+  });
+
+  if (!existing) {
+    return { error: "ID request not found." };
+  }
+
+  if (existing.status !== "pending") {
+    return {
+      error: `Cannot update a request with status "${existing.status}". Only 'pending' requests can be updated.`,
+    };
+  }
+
+  if (status === "rejected" && !rejection_reason) {
+    return {
+      error:
+        "Rejection reason is required when rejecting an ID verification request.",
+    };
+  }
+
+  await prisma.candidate_id_request.update({
+    where: { cir_uuid: id },
+    data: {
+      status,
+      ...(rejection_reason ? { rejection_reason } : {}),
+      updated_at: new Date(),
+    },
+  });
+
+  return { success: true } as const;
 }

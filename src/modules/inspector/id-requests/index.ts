@@ -1,6 +1,8 @@
 export {
   listIdRequests,
   getIdRequest,
+  approveIdRequest,
+  rejectIdRequest,
 } from "./actions";
 export type {
   ListIdRequestsInput,
