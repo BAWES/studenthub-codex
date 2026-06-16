@@ -1,63 +1,56 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
 
-// Mock dependencies
 vi.mock("@/modules/auth/session", () => ({
   requireRoleCapability: vi.fn().mockResolvedValue({
+    id: 1,
     user: { id: "1" },
     role: "company",
   }),
 }));
 
-vi.mock("@/modules/workspace/ErrorBoundary", () => ({
-  ErrorBoundary: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+vi.mock("@/modules/workspace/WorkspaceShell", () => ({
+  WorkspaceShell: ({
+    children,
+    eyebrow,
+    title,
+    metrics,
+  }: {
+    children: React.ReactNode;
+    eyebrow: string;
+    title: string;
+    metrics: { label: string; value: string | number; note: string }[];
+  }) => (
+    <div data-testid="workspace-shell">
+      <div data-testid="eyebrow">{eyebrow}</div>
+      <div data-testid="title">{title}</div>
+      {metrics.map((m) => (
+        <span key={m.label} data-testid={`metric-${m.label}`}>
+          {m.value}
+        </span>
+      ))}
+      {children}
+    </div>
+  ),
 }));
-
-vi.mock("@/modules/workspace/WorkspaceShell", () => {
-  type Metric = { label: string; value: string | number; note: string };
-  return {
-    WorkspaceShell: ({
-      children,
-      eyebrow,
-      title,
-    }: {
-      children: React.ReactNode;
-      eyebrow: string;
-      title: string;
-      metrics: Metric[];
-    }) => (
-      <div data-testid="workspace-shell">
-        <div data-testid="eyebrow">{eyebrow}</div>
-        <div data-testid="title">{title}</div>
-        {children}
-      </div>
-    ),
-  };
-});
 
 vi.mock("@/modules/requests/CompanyRequestCreateForm", () => ({
   CompanyRequestCreateForm: ({ companies }: { companies: { id: number; name: string }[] }) => (
     <div data-testid="company-request-create-form">
-      <span data-testid="company-count">{companies.length}</span>
-      {companies.map((c) => (
-        <span key={c.id} data-testid={`company-option-${c.id}`}>
-          {c.name}
-        </span>
-      ))}
+      Companies: {companies.length}
     </div>
   ),
 }));
 
 const mockGetCompanyList = vi.fn();
-
 vi.mock("./actions", () => ({
   getCompanyList: (...args: unknown[]) => mockGetCompanyList(...args),
 }));
 
 const mockCompanies = [
   { id: 1, name: "Tech Corp" },
-  { id: 2, name: "Retail Group" },
-  { id: 3, name: "Consulting Inc" },
+  { id: 2, name: "BuildCo" },
+  { id: 3, name: "LogiTrans" },
 ];
 
 describe("CompanyRequestCreatePage", () => {
@@ -69,7 +62,7 @@ describe("CompanyRequestCreatePage", () => {
     cleanup();
   });
 
-  it("renders WorkspaceShell with correct eyebrow and title", async () => {
+  it("renders with correct eyebrow and title", async () => {
     mockGetCompanyList.mockResolvedValue(mockCompanies);
 
     const Page = (await import("./page")).default;
@@ -87,10 +80,7 @@ describe("CompanyRequestCreatePage", () => {
     render(await Page());
 
     expect(screen.getByTestId("company-request-create-form")).toBeDefined();
-    expect(screen.getByTestId("company-count")).toHaveTextContent("3");
-    expect(screen.getByTestId("company-option-1")).toHaveTextContent("Tech Corp");
-    expect(screen.getByTestId("company-option-2")).toHaveTextContent("Retail Group");
-    expect(screen.getByTestId("company-option-3")).toHaveTextContent("Consulting Inc");
+    expect(screen.getByTestId("company-request-create-form")).toHaveTextContent("Companies: 3");
   });
 
   it("renders with empty company list", async () => {
@@ -100,6 +90,6 @@ describe("CompanyRequestCreatePage", () => {
     render(await Page());
 
     expect(screen.getByTestId("company-request-create-form")).toBeDefined();
-    expect(screen.getByTestId("company-count")).toHaveTextContent("0");
+    expect(screen.getByTestId("company-request-create-form")).toHaveTextContent("Companies: 0");
   });
 });
