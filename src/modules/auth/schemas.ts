@@ -56,3 +56,16 @@ export const verifySessionResultSchema = z.discriminatedUnion("authenticated", [
 export const switchRoleSchema = z.object({
   targetRole: z.enum(["admin", "staff", "company", "candidate", "inspector"]),
 });
+
+/**
+ * Schema for dev impersonation user lookup result.
+ * Guarded by NODE_ENV=development — never exposed in production.
+ */
+export const impersonationUserSchema = z.object({
+  role: z.enum(["admin", "staff", "candidate", "company", "inspector"]),
+  id: z.string().min(1),
+  name: z.string(),
+  email: z.string(),
+});
+
+export type ImpersonationUser = z.output<typeof impersonationUserSchema>;
