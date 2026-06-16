@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 // ---------------------------------------------------------------------------
-// Schemas — inspector ID verification requests
+// Input schemas — inspector ID verification requests
 // ---------------------------------------------------------------------------
 
 export const listIdRequestsSchema = z.object({
@@ -24,46 +24,66 @@ export const updateIdRequestStatusSchema = z.object({
 });
 
 // ---------------------------------------------------------------------------
-// Types
+// Input type aliases
 // ---------------------------------------------------------------------------
 
 export type ListIdRequestsInput = z.input<typeof listIdRequestsSchema>;
 export type GetIdRequestInput = z.input<typeof getIdRequestSchema>;
 export type UpdateIdRequestStatusInput = z.input<typeof updateIdRequestStatusSchema>;
 
-export type IdRequestRow = {
-  id: string;
-  request: string;
-  candidates: number;
-  status: string;
-  createdBy: string;
-  updatedBy: string;
-  created: string;
-  updated: string;
-};
+// ---------------------------------------------------------------------------
+// Output validation schemas
+// ---------------------------------------------------------------------------
 
-export type IdRequestDetail = {
-  cir_uuid: string;
-  status: string | null;
-  rejection_reason: string | null;
-  candidate_ids: string | null;
-  created_at: Date | null;
-  updated_at: Date | null;
-  created_by_name: string | null;
-  updated_by_name: string | null;
-  metrics: { label: string; value: string | number; note: string }[];
-  candidates: {
-    id: number;
-    title: string;
-    subtitle: string;
-    meta: string;
-  }[];
-};
+export const idRequestRowSchema = z.object({
+  id: z.string(),
+  request: z.string(),
+  candidates: z.number().int().nonnegative(),
+  status: z.string(),
+  createdBy: z.string(),
+  updatedBy: z.string(),
+  created: z.string(),
+  updated: z.string(),
+});
 
-export type ListIdRequestsResult = {
-  items: IdRequestRow[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
+export const idRequestMetricsItemSchema = z.object({
+  label: z.string(),
+  value: z.union([z.string(), z.number()]),
+  note: z.string(),
+});
+
+export const idRequestCandidateRowSchema = z.object({
+  id: z.number().int(),
+  title: z.string(),
+  subtitle: z.string(),
+  meta: z.string(),
+});
+
+export const idRequestDetailSchema = z.object({
+  cir_uuid: z.string(),
+  status: z.string().nullable(),
+  rejection_reason: z.string().nullable(),
+  candidate_ids: z.string().nullable(),
+  created_at: z.date().nullable(),
+  updated_at: z.date().nullable(),
+  created_by_name: z.string().nullable(),
+  updated_by_name: z.string().nullable(),
+  metrics: z.array(idRequestMetricsItemSchema),
+  candidates: z.array(idRequestCandidateRowSchema),
+});
+
+export const listIdRequestsResultSchema = z.object({
+  items: z.array(idRequestRowSchema),
+  total: z.number().int().nonnegative(),
+  page: z.number().int().positive(),
+  limit: z.number().int().positive(),
+  totalPages: z.number().int().nonnegative(),
+});
+
+// ---------------------------------------------------------------------------
+// Derived types
+// ---------------------------------------------------------------------------
+
+export type IdRequestRow = z.output<typeof idRequestRowSchema>;
+export type IdRequestDetail = z.output<typeof idRequestDetailSchema>;
+export type ListIdRequestsResult = z.output<typeof listIdRequestsResultSchema>;
