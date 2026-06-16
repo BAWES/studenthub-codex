@@ -43,3 +43,31 @@ export const employerApplicationListOutputSchema = z.object({
     rejected: z.number().int().nonnegative(),
   }),
 });
+
+// ---------------------------------------------------------------------------
+// Detail schemas — single application detail page
+// ---------------------------------------------------------------------------
+
+export const getApplicationDetailSchema = z.object({
+  applicationId: z.coerce.number().int().positive(),
+});
+
+export type GetApplicationDetailInput = z.input<typeof getApplicationDetailSchema>;
+
+export const employerApplicationDetailOutputSchema = z.object({
+  applicationId: z.number().int(),
+  jobListingId: z.number().int(),
+  candidateId: z.number().int(),
+  candidateName: z.string().nullable(),
+  jobTitle: z.string(),
+  status: z.string(),
+  coverLetter: z.string().nullable(),
+  notes: z.string().nullable(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export const getApplicationDetailOutputSchema = z.object({
+  success: z.literal(true),
+  application: employerApplicationDetailOutputSchema.nullable(),
+});
