@@ -99,6 +99,24 @@ export type EvaluationDetail = z.output<typeof evaluationDetailSchema>;
 export type CreateEvaluationResult = z.output<
   typeof createEvaluationResultSchema
 >;
+/**
+ * Schema for PDF report: candidate info with evaluation detail + staff info.
+ */
+export const evaluationPdfCandidateSchema = z.object({
+  candidate_name: z.string().nullable(),
+  candidate_email: z.string().nullable(),
+});
+
+export const evaluationPdfStaffSchema = z.object({
+  staff_name: z.string().nullable(),
+});
+
+export const evaluationPdfDataSchema = evaluationDetailSchema.extend({
+  candidate: evaluationPdfCandidateSchema.nullable(),
+  staff: evaluationPdfStaffSchema.nullable(),
+});
+
 export type ListQuestionsResult = EvalQuestionItem[];
 export type ListReportsResult = EvaluationListItem[];
 export type ViewReportResult = EvaluationDetail | null;
+export type EvaluationPdfData = z.output<typeof evaluationPdfDataSchema>;

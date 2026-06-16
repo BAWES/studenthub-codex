@@ -14,6 +14,7 @@ import {
   evaluationListItemSchema,
   evaluationDetailSchema,
   createEvaluationResultSchema,
+  evaluationPdfDataSchema,
   type ListQuestionsInput,
   type CreateEvaluationInput,
   type ListReportsInput,
@@ -22,6 +23,7 @@ import {
   type CreateEvaluationResult,
   type ListReportsResult,
   type ViewReportResult,
+  type EvaluationPdfData,
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
@@ -217,6 +219,54 @@ export async function viewEvaluationReport(
   if (!outputParsed.success) {
     console.error(
       "[modules/candidates/evaluation] viewEvaluationReport output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
+}
+
+/**
+ * Fetch full evaluation data for PDF report generation.
+ * Extends viewEvaluationReport with candidate name/email and staff name.
+ * Maps to GET /api/evaluations/[uuid]/pdf
+ */
+export async function getEvaluationPdfData(
+  params: ViewReportInput,
+): Promise<EvaluationPdfData | null> {
+  const { evaluationUuid } = viewReportSchema.parse(params);
+
+  // Reuse existing report logic
+  const report = await viewEvaluationReport({ evaluationUuid });
+  if (!report) return null;
+
+  // Fetch candidate and staff names via module (avoids direct prisma in route)
+  const [candidate, staff] = await Promise.all([
+    report.candidate_id
+      ? prisma.candidate.findUnique({
+          where: { candidate_id: report.candidate_id },
+          select: { candidate_name: true, candidate_email: true },
+        })
+      : null,
+    report.staff_id
+      ? prisma.staff.findUnique({
+          where: { staff_id: report.staff_id },
+          select: { staff_name: true },
+        })
+      : null,
+  ]);
+
+  const result = {
+    ...report,
+    candidate,
+    staff,
+  };
+
+  // Validate output shape
+  const outputParsed = evaluationPdfDataSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/candidates/evaluation] getEvaluationPdfData output validation failed:",
       outputParsed.error.issues,
     );
   }

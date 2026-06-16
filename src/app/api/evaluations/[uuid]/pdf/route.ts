@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 import { escapeHtml, validateUuid, calculateAverageRating, renderStars } from "@/modules/candidates/evaluation/pdf-helpers";
+import { getEvaluationPdfData } from "@/modules/candidates/evaluation/actions";
 
 export const dynamic = "force-dynamic";
 
@@ -34,56 +34,27 @@ export async function GET(
     return new NextResponse(valid.error ?? "Missing evaluation UUID", { status: 400 });
   }
 
-  const evaluation = await prisma.candidate_evaluation.findUnique({
-    where: { can_eval_uuid: uuid },
-  });
-
-  if (!evaluation) {
+  const data = await getEvaluationPdfData({ evaluationUuid: uuid });
+  if (!data) {
     return new NextResponse("Evaluation not found", { status: 404 });
   }
 
-  // Fetch candidate and staff names
-  const [candidate, staff] = await Promise.all([
-    evaluation.candidate_id
-      ? prisma.candidate.findUnique({
-          where: { candidate_id: evaluation.candidate_id },
-          select: { candidate_name: true, candidate_email: true },
-        })
-      : null,
-    evaluation.staff_id
-      ? prisma.staff.findUnique({
-          where: { staff_id: evaluation.staff_id },
-          select: { staff_name: true },
-        })
-      : null,
-  ]);
-
-  // Fetch answers via raw SQL (candidate_evaluation_answer has no PK, @@ignore'd)
-  const answers = await prisma.$queryRawUnsafe<
-    Array<{ ceq_uuid: string | null; question: string | null; answer: string | null; rating: number | null }>
-  >(
-    `SELECT ceq_uuid, question, answer, rating
-     FROM candidate_evaluation_answer
-     WHERE can_eval_uuid = ?`,
-    uuid,
-  );
-
-  const candidateName = candidate?.candidate_name ?? "Unknown Candidate";
-  const candidateEmail = candidate?.candidate_email ?? "";
-  const staffName = staff?.staff_name ?? "N/A";
-  const evalDate = evaluation.created_at
-    ? new Date(evaluation.created_at).toLocaleDateString("en-KW", {
+  const candidateName = data.candidate?.candidate_name ?? "Unknown Candidate";
+  const candidateEmail = data.candidate?.candidate_email ?? "";
+  const staffName = data.staff?.staff_name ?? "N/A";
+  const evalDate = data.created_at
+    ? new Date(data.created_at).toLocaleDateString("en-KW", {
         year: "numeric",
         month: "long",
         day: "numeric",
       })
     : "N/A";
   const period =
-    evaluation.start_date && evaluation.end_date
-      ? `${new Date(evaluation.start_date).toLocaleDateString("en-KW")} \u2192 ${new Date(evaluation.end_date).toLocaleDateString("en-KW")}`
+    data.start_date && data.end_date
+      ? `${new Date(data.start_date).toLocaleDateString("en-KW")} \u2192 ${new Date(data.end_date).toLocaleDateString("en-KW")}`
       : "N/A";
 
-  const answerRows = answers
+  const answerRows = (data.answers ?? [])
     .map(
       (a, i) => `
     <tr>
@@ -95,7 +66,7 @@ export async function GET(
     )
     .join("\n");
 
-  const avgRating = calculateAverageRating(answers);
+  const avgRating = calculateAverageRating(data.answers ?? []);
 
   const html = buildReportHtml({
     candidateName,
@@ -105,7 +76,7 @@ export async function GET(
     evalDate,
     uuid,
     answerRows,
-    answersCount: answers.length,
+    answersCount: (data.answers ?? []).length,
     avgRating,
   });
 
