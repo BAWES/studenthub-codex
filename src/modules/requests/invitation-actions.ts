@@ -232,7 +232,7 @@ export type ListInvitationsResult = {
  * Requires the time.read.any capability.
  */
 export async function getInvitation(
-  params: z.infer<typeof getInvitationSchema>,
+  params: z.input<typeof getInvitationSchema>,
 ): Promise<{ invitation: InvitationDetail | null; error?: string }> {
   await requireCapability("time.read.any");
 
@@ -297,7 +297,7 @@ export async function getInvitation(
  * Returns notes linked to the invitation, paginated, newest first.
  */
 export async function getInvitationLog(
-  params: z.infer<typeof getInvitationLogSchema>,
+  params: z.input<typeof getInvitationLogSchema>,
 ): Promise<InvitationLogResult & { error?: string }> {
   await requireCapability("time.read.any");
 
@@ -347,7 +347,7 @@ export async function getInvitationLog(
  * Updates the timestamp so the UI knows the user has seen the latest activity.
  */
 export async function markInvitationLogViewed(
-  params: z.infer<typeof markInvitationLogViewedSchema>,
+  params: z.input<typeof markInvitationLogViewedSchema>,
 ): Promise<{ success: boolean; error?: string }> {
   await requireCapability("time.read.any");
 

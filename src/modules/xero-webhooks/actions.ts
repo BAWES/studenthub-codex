@@ -110,7 +110,7 @@ export async function listXeroWebhookEvents(
  * Get a single Xero webhook event by ID.
  */
 export async function getXeroWebhookEvent(
-  params: z.infer<typeof getWebhookEventSchema>,
+  params: z.input<typeof getWebhookEventSchema>,
 ): Promise<XeroWebhookEventItem | null> {
   await requireCapability("admin.read");
 

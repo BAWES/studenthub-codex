@@ -395,7 +395,7 @@ async function companyIdsForContact(contactUuid: string): Promise<number[]> {
 export async function getCompanyAccountDetail(
   contactUuid: string,
   companyId: number,
-): Promise<z.infer<typeof companyAccountDetailOutputSchema> | null> {
+): Promise<z.output<typeof companyAccountDetailOutputSchema> | null> {
   await requireCapability("company.read.linked");
 
   // Scope to contact's linked companies

@@ -163,7 +163,7 @@ export async function listAppeals(
  * @returns The appeal record or error
  */
 export async function getAppeal(
-  params: z.infer<typeof getAppealSchema>,
+  params: z.input<typeof getAppealSchema>,
 ): Promise<{ appeal: AppealRow | null; error?: string }> {
   const session = await requireCapability("time.approve");
   const staffId = Number(session.id);
@@ -370,7 +370,7 @@ export async function updateAppealStatus(
  * @returns Paginated list of appeal updates
  */
 export async function listAppealUpdates(
-  params: z.infer<typeof listAppealUpdatesSchema>,
+  params: z.input<typeof listAppealUpdatesSchema>,
 ): Promise<PaginatedResult<AppealUpdateRow> | { error: string }> {
   const session = await requireCapability("time.approve");
 
