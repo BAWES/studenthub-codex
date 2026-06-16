@@ -265,8 +265,8 @@ export function CandidateSearchPage({ session, initialData }: { session: Session
             onChange={(e) => setQuery(e.target.value)}
             autoFocus
             onFocus={(e) => {
-              e.currentTarget.style.borderColor = "#eb6651";
-              e.currentTarget.style.boxShadow = "0 0 0 3px rgba(235, 102, 81, 0.12)";
+              e.currentTarget.style.borderColor = "var(--sh-coral)";
+              e.currentTarget.style.boxShadow = "var(--sh-coral-glow)";
             }}
             onBlur={(e) => {
               e.currentTarget.style.borderColor = "var(--border)";
@@ -276,7 +276,7 @@ export function CandidateSearchPage({ session, initialData }: { session: Session
           <button
             type="submit"
             className="rounded-lg px-6 py-2.5 text-[0.9375rem] font-semibold text-white transition-opacity duration-150 disabled:cursor-not-allowed disabled:opacity-60 hover:opacity-90"
-            style={{ background: "#eb6651" }}
+            style={{ background: "var(--sh-coral)" }}
             disabled={loading}
           >
             {loading ? "Searching..." : "Search"}
@@ -330,9 +330,9 @@ export function CandidateSearchPage({ session, initialData }: { session: Session
                       style={
                         option.active
                           ? {
-                              background: "rgba(235, 102, 81, 0.08)",
-                              borderColor: "#eb6651",
-                              color: "#eb6651",
+                              background: "var(--sh-coral-light)",
+                              borderColor: "var(--sh-coral)",
+                              color: "var(--sh-coral)",
                             }
                           : {
                               color: "var(--ink)",
@@ -345,7 +345,7 @@ export function CandidateSearchPage({ session, initialData }: { session: Session
                         className={cn(
                           "ml-2 rounded-full px-1.5 py-0.5 text-[0.6875rem]",
                           option.active
-                            ? "bg-[rgba(235,102,81,0.12)] text-[#eb6651]"
+                            ? "bg-[var(--sh-coral-light)] text-[var(--sh-coral)]"
                             : "bg-[var(--accent)]",
                         )}
                         style={option.active ? {} : { color: "var(--muted)" }}
@@ -368,7 +368,7 @@ export function CandidateSearchPage({ session, initialData }: { session: Session
               <span className="font-semibold" style={{ color: "var(--ink)" }}>
                 {isTyping ? (
                   <>
-                    <span className="inline-block align-middle mr-1.5 h-2 w-2 rounded-full bg-[#eb6651] animate-pulse" />
+                    <span className="inline-block align-middle mr-1.5 h-2 w-2 rounded-full bg-[var(--sh-coral)] animate-pulse" />
                     Searching...
                   </>
                 ) : (
@@ -501,8 +501,8 @@ export function CandidateSearchPage({ session, initialData }: { session: Session
                             key={skill}
                             className="rounded-md px-2 py-0.5 text-[0.6875rem] font-medium"
                             style={{
-                              background: "rgba(235, 102, 81, 0.08)",
-                              color: "#eb6651",
+                              background: "var(--sh-coral-light)",
+                              color: "var(--sh-coral)",
                             }}
                           >
                             {skill}
@@ -518,7 +518,7 @@ export function CandidateSearchPage({ session, initialData }: { session: Session
                           <span
                             key={flag}
                             className="rounded-md px-2 py-0.5 text-[0.6875rem] font-medium"
-                            style={{ background: "rgba(234, 179, 8, 0.12)", color: "#a16207" }}
+                            style={{ background: "var(--sh-warning-bg)", color: "var(--sh-warning)" }}
                           >
                             {flag}
                           </span>
@@ -544,8 +544,8 @@ export function CandidateSearchPage({ session, initialData }: { session: Session
                     disabled={page <= 1}
                     onMouseEnter={(e) => {
                       if (!(e.currentTarget as HTMLButtonElement).disabled) {
-                        e.currentTarget.style.borderColor = "#eb6651";
-                        e.currentTarget.style.color = "#eb6651";
+                        e.currentTarget.style.borderColor = "var(--sh-coral)";
+                        e.currentTarget.style.color = "var(--sh-coral)";
                       }
                     }}
                     onMouseLeave={(e) => {
@@ -570,8 +570,8 @@ export function CandidateSearchPage({ session, initialData }: { session: Session
                     disabled={page >= totalPages}
                     onMouseEnter={(e) => {
                       if (!(e.currentTarget as HTMLButtonElement).disabled) {
-                        e.currentTarget.style.borderColor = "#eb6651";
-                        e.currentTarget.style.color = "#eb6651";
+                        e.currentTarget.style.borderColor = "var(--sh-coral)";
+                        e.currentTarget.style.color = "var(--sh-coral)";
                       }
                     }}
                     onMouseLeave={(e) => {
