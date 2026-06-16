@@ -82,6 +82,96 @@ test.describe("Admin routes", () => {
     await assertRouteLoads("/admin/events");
   });
 
+  // ── Remaining admin list pages ──
+
+  test("admin attendance loads", async () => {
+    await assertRouteLoads("/admin/attendance");
+  });
+
+  test("admin aws loads", async () => {
+    await assertRouteLoads("/admin/aws");
+  });
+
+  test("admin bank loads", async () => {
+    await assertRouteLoads("/admin/bank");
+  });
+
+  test("admin blocked-ips loads", async () => {
+    await assertRouteLoads("/admin/blocked-ips");
+  });
+
+  test("admin candidate-account-requests loads", async () => {
+    await assertRouteLoads("/admin/candidate-account-requests");
+  });
+
+  test("admin candidate-education loads", async () => {
+    await assertRouteLoads("/admin/candidate-education");
+  });
+
+  test("admin company-requests loads", async () => {
+    await assertRouteLoads("/admin/company-requests");
+  });
+
+  test("admin currency loads", async () => {
+    await assertRouteLoads("/admin/currency");
+  });
+
+  test("admin departments loads", async () => {
+    await assertRouteLoads("/admin/departments");
+  });
+
+  test("admin designations loads", async () => {
+    await assertRouteLoads("/admin/designations");
+  });
+
+  test("admin employees loads", async () => {
+    await assertRouteLoads("/admin/employees");
+  });
+
+  test("admin evaluations loads", async () => {
+    await assertRouteLoads("/admin/evaluations");
+  });
+
+  test("admin invoices loads", async () => {
+    await assertRouteLoads("/admin/invoices");
+  });
+
+  test("admin jira loads", async () => {
+    await assertRouteLoads("/admin/jira");
+  });
+
+  test("admin note loads", async () => {
+    await assertRouteLoads("/admin/note");
+  });
+
+  test("admin permissions loads", async () => {
+    await assertRouteLoads("/admin/permissions");
+  });
+
+  test("admin reports loads", async () => {
+    await assertRouteLoads("/admin/reports");
+  });
+
+  test("admin stores loads", async () => {
+    await assertRouteLoads("/admin/stores");
+  });
+
+  test("admin tags loads", async () => {
+    await assertRouteLoads("/admin/tags");
+  });
+
+  test("admin tickets loads", async () => {
+    await assertRouteLoads("/admin/tickets");
+  });
+
+  test("admin user-requests loads", async () => {
+    await assertRouteLoads("/admin/user-requests");
+  });
+
+  test("admin xero loads", async () => {
+    await assertRouteLoads("/admin/xero");
+  });
+
   // ── Role guards ──
 
   test("candidate cannot access admin", async () => {
