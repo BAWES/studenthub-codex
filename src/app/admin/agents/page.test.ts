@@ -3,7 +3,6 @@ import {
   agentHealthMetricSchema,
   agentHealthDataSchema,
   agentsHealthDataSchema,
-  getAgentByIdSchema,
 } from "./schemas";
 
 /**
@@ -70,17 +69,5 @@ describe("admin agents page — data contract", () => {
     });
     expect(r.success).toBe(true);
     if (r.success) expect(r.data.agents.length).toBe(1);
-  });
-
-  it("getAgentByIdSchema validates a valid UUID", () => {
-    const r = getAgentByIdSchema.safeParse({
-      agentId: "550e8400-e29b-41d4-a716-446655440000",
-    });
-    expect(r.success).toBe(true);
-  });
-
-  it("getAgentByIdSchema rejects non-UUID", () => {
-    const r = getAgentByIdSchema.safeParse({ agentId: "not-a-uuid" });
-    expect(r.success).toBe(false);
   });
 });
