@@ -54,7 +54,7 @@ function formatDate(date: Date): string {
 export default async function EmployerApplicationDetailPage({ params }: Props) {
   const { id } = await params;
   const session = await requireRoleCapability("company", "company.read.linked");
-  const result = await getApplicationDetail({ applicationId: id });
+  const result = await getApplicationDetail({ applicationId: Number(id) });
 
   if (!result.application) notFound();
 
