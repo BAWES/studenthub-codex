@@ -5,6 +5,7 @@ let company: FixtureUser;
 let staff: FixtureUser;
 let candidateUser: FixtureUser;
 let jobId: string | null = null;
+let applicationId: string | null = null;
 
 test.describe("Employer detail routes", () => {
   test.describe.configure({ mode: "serial" });
@@ -25,6 +26,12 @@ test.describe("Employer detail routes", () => {
         select: { jobListingId: true },
       });
       if (job) jobId = String(job.jobListingId);
+
+      // Try to discover a job application from the seed DB.
+      const app = await prisma.job_listing_application.findFirst({
+        select: { id: true },
+      });
+      if (app) applicationId = String(app.id);
       await prisma.$disconnect();
     } catch {
       // No DB available — tests requiring jobId will skip gracefully
@@ -84,5 +91,20 @@ test.describe("Employer detail routes", () => {
   test("candidate cannot access employer job detail", async () => {
     test.skip(!jobId, "No job listing record in DB");
     await assertRoleGuard(`/employer/jobs/${jobId}`, candidateUser);
+  });
+
+  test("employer application detail loads", async () => {
+    test.skip(!applicationId, "No job application record in DB");
+    await assertRouteLoads(`/employer/applications/${applicationId}`, company);
+  });
+
+  test("staff cannot access employer application detail", async () => {
+    test.skip(!applicationId, "No job application record in DB");
+    await assertRoleGuard(`/employer/applications/${applicationId}`, staff);
+  });
+
+  test("candidate cannot access employer application detail", async () => {
+    test.skip(!applicationId, "No job application record in DB");
+    await assertRoleGuard(`/employer/applications/${applicationId}`, candidateUser);
   });
 });
