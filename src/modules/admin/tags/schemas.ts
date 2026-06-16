@@ -5,10 +5,6 @@ export const listTagsSchema = z.object({
   limit: z.coerce.number().int().min(1).max(200).optional().default(50),
 });
 
-export const getTagSchema = z.object({
-  tagId: z.coerce.number().int().positive("Tag ID is required"),
-});
-
 export const createTagSchema = z.object({
   tag: z.string().min(1, "Tag name is required").max(128),
 });
@@ -37,22 +33,16 @@ export const listTagsResultSchema = z.object({
   totalPages: z.number().int().nonnegative(),
 });
 
-export const getTagResultSchema = z.object({
-  tag: tagItemSchema.nullable(),
-});
-
 export const tagActionResponseSchema = z.object({
   operation: z.string().min(1),
   message: z.string().min(1),
 });
 
 export type ListTagsInput = z.input<typeof listTagsSchema>;
-export type GetTagInput = z.input<typeof getTagSchema>;
 export type CreateTagInput = z.input<typeof createTagSchema>;
 export type UpdateTagInput = z.input<typeof updateTagSchema>;
 export type DeleteTagInput = z.input<typeof deleteTagSchema>;
 
 export type TagItem = z.output<typeof tagItemSchema>;
 export type ListTagsResult = z.output<typeof listTagsResultSchema>;
-export type GetTagResult = z.output<typeof getTagResultSchema>;
 export type TagActionResponse = z.output<typeof tagActionResponseSchema>;

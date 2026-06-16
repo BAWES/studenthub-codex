@@ -1,9 +1,9 @@
 // ---------------------------------------------------------------------------
-// Barrel re-export — delegates to module-level implementation
+// Barrel re-export — delegates to module-level [id] implementation
 // ---------------------------------------------------------------------------
-// All business logic lives in src/modules/admin/tags/actions.ts (which
+// All business logic lives in src/modules/admin/tags/[id]/actions.ts (which
 // has "use server"). This barrel re-exports so page consumers keep their
 // current import paths without duplicating the "use server" directive.
 // ---------------------------------------------------------------------------
 
-export { getTag } from "@/modules/admin/tags/actions";
+export { getTag } from "@/modules/admin/tags/[id]/actions";

@@ -1,13 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import {
   listTagsSchema,
-  getTagSchema,
   createTagSchema,
   updateTagSchema,
   deleteTagSchema,
   tagItemSchema,
   listTagsResultSchema,
-  getTagResultSchema,
   tagActionResponseSchema,
 } from "./schemas";
 import type { TagItem, ListTagsResult } from "./schemas";
@@ -49,7 +47,7 @@ vi.mock("@/lib/prisma", () => ({
   },
 }));
 
-import { listTags, getTag, createTag, updateTag, deleteTag } from "./actions";
+import { listTags, createTag, updateTag, deleteTag } from "./actions";
 
 // ---------------------------------------------------------------------------
 // Input schema validation
@@ -106,38 +104,7 @@ describe("listTagsSchema", () => {
   });
 });
 
-describe("getTagSchema", () => {
-  it("accepts a valid numeric tag ID", () => {
-    const result = getTagSchema.safeParse({ tagId: 42 });
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.tagId).toBe(42);
-    }
-  });
 
-  it("coerces string ID to number", () => {
-    const result = getTagSchema.safeParse({ tagId: "99" });
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.tagId).toBe(99);
-    }
-  });
-
-  it("rejects missing tagId", () => {
-    const result = getTagSchema.safeParse({});
-    expect(result.success).toBe(false);
-  });
-
-  it("rejects zero tagId", () => {
-    const result = getTagSchema.safeParse({ tagId: 0 });
-    expect(result.success).toBe(false);
-  });
-
-  it("rejects negative tagId", () => {
-    const result = getTagSchema.safeParse({ tagId: -5 });
-    expect(result.success).toBe(false);
-  });
-});
 
 describe("createTagSchema", () => {
   it("accepts a valid tag name", () => {
@@ -300,21 +267,7 @@ describe("listTagsResultSchema", () => {
   });
 });
 
-describe("getTagResultSchema", () => {
-  it("accepts a tag present", () => {
-    const result = {
-      tag: { tag_id: 1, tag: "JavaScript", created_at: new Date("2025-01-01"), updated_at: null },
-    };
-    const parsed = getTagResultSchema.safeParse(result);
-    expect(parsed.success).toBe(true);
-  });
 
-  it("accepts tag null (not found)", () => {
-    const result = { tag: null };
-    const parsed = getTagResultSchema.safeParse(result);
-    expect(parsed.success).toBe(true);
-  });
-});
 
 describe("tagActionResponseSchema", () => {
   it("accepts a success response", () => {
@@ -431,49 +384,7 @@ describe("listTags action", () => {
   });
 });
 
-describe("getTag action", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
 
-  it("returns tag when found", async () => {
-    const dbRow = { tag_id: 42, tag: "TypeScript", created_at: new Date("2025-03-01"), updated_at: new Date("2025-03-15") };
-
-    mockRequireCapability.mockResolvedValue({ user: { id: 1 } });
-    mockFindUnique.mockResolvedValue(dbRow);
-
-    const result = await getTag(42);
-
-    expect(mockRequireCapability).toHaveBeenCalledWith("admin.read");
-    expect(mockFindUnique).toHaveBeenCalledWith({ where: { tag_id: 42 } });
-    expect(result.tag).not.toBeNull();
-    expect(result.tag!.tag_id).toBe(42);
-    expect(result.tag!.tag).toBe("TypeScript");
-  });
-
-  it("returns null tag when not found", async () => {
-    mockRequireCapability.mockResolvedValue({ user: { id: 1 } });
-    mockFindUnique.mockResolvedValue(null);
-
-    const result = await getTag(999);
-
-    expect(result.tag).toBeNull();
-  });
-
-  it("throws on invalid tag ID (schema rejection)", async () => {
-    mockRequireCapability.mockResolvedValue({ user: { id: 1 } });
-
-    await expect(getTag(0)).rejects.toThrow("Tag ID is required");
-    expect(mockFindUnique).not.toHaveBeenCalled();
-  });
-
-  it("throws when session fails", async () => {
-    mockRequireCapability.mockRejectedValue(new Error("Unauthorized"));
-
-    await expect(getTag(1)).rejects.toThrow("Unauthorized");
-    expect(mockFindUnique).not.toHaveBeenCalled();
-  });
-});
 
 describe("createTag action", () => {
   beforeEach(() => {
