@@ -241,7 +241,7 @@ const validDepartmentRow: DepartmentRow = {
 describe("departmentListResponseSchema", () => {
   it("accepts a valid list response", () => {
     const result = departmentListResponseSchema.safeParse({
-      departments: [validDepartmentRow],
+      items: [validDepartmentRow],
       total: 1,
       page: 1,
       limit: 20,
