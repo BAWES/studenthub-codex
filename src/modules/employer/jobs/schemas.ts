@@ -51,32 +51,10 @@ export type CreateJobInput = z.input<typeof createJobSchema>;
 export type UpdateJobInput = z.input<typeof updateJobSchema>;
 export type DeleteJobInput = z.input<typeof deleteJobSchema>;
 
-export type JobRow = {
-  jobListingId: number;
-  employerId: number;
-  title: string;
-  description: string;
-  requirements: string | null;
-  location: string | null;
-  employmentType: string | null;
-  salaryRange: string | null;
-  status: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-};
-
-export type CreateJobResult = {
-  success: true;
-  jobListingId: number;
-};
-
-export type UpdateJobResult = {
-  success: true;
-};
-
-export type DeleteJobResult = {
-  success: true;
-};
+export type JobRow = z.output<typeof jobRowSchema>;
+export type CreateJobResult = CreateJobResultOutput;
+export type UpdateJobResult = UpdateJobResultOutput;
+export type DeleteJobResult = DeleteJobResultOutput;
 
 // ---------------------------------------------------------------------------
 // Output schemas

@@ -122,6 +122,10 @@ export const candidateCertificationActionResultSchema = z.discriminatedUnion("su
 
 // Output types
 export type CandidateCertificationItem = z.output<typeof candidateCertificationItemSchema>;
-export type CandidateCertificationDetail = CandidateCertificationItem | null;
+export const candidateCertificationDetailSchema =
+  candidateCertificationItemSchema.nullable();
+export type CandidateCertificationDetail = z.output<
+  typeof candidateCertificationDetailSchema
+>;
 export type ListCandidateCertificationsResult = z.output<typeof listCandidateCertificationsResultSchema>;
 export type CandidateCertificationActionResult = z.output<typeof candidateCertificationActionResultSchema>;

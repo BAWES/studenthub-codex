@@ -134,6 +134,10 @@ export const candidateReferenceActionResultSchema = z.discriminatedUnion("succes
 
 // Output types
 export type CandidateReferenceItem = z.output<typeof candidateReferenceItemSchema>;
-export type CandidateReferenceDetail = CandidateReferenceItem | null;
+export const candidateReferenceDetailSchema =
+  candidateReferenceItemSchema.nullable();
+export type CandidateReferenceDetail = z.output<
+  typeof candidateReferenceDetailSchema
+>;
 export type ListCandidateReferencesResult = z.output<typeof listCandidateReferencesResultSchema>;
 export type CandidateReferenceActionResult = z.output<typeof candidateReferenceActionResultSchema>;

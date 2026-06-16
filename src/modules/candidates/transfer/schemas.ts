@@ -75,7 +75,11 @@ export const transferCandidateItemSchema = z.object({
 });
 
 export type TransferCandidateItem = z.output<typeof transferCandidateItemSchema>;
-export type TransferCandidateDetail = TransferCandidateItem | null;
+export const transferCandidateDetailSchema =
+  transferCandidateItemSchema.nullable();
+export type TransferCandidateDetail = z.output<
+  typeof transferCandidateDetailSchema
+>;
 
 export const listTransferCandidatesResultSchema = z.object({
   items: z.array(transferCandidateItemSchema),

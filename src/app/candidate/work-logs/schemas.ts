@@ -109,45 +109,14 @@ export const updateWorkLogStatusResultOutputSchema = z.discriminatedUnion("opera
 // Types
 // ---------------------------------------------------------------------------
 
-export type WorkLogItem = {
-  candidate_working_hour_uuid: string;
-  date: Date | null;
-  start_time: Date | null;
-  end_time: Date | null;
-  total_time: number | null;
-  status: number | null;
-  via: string | null;
-  note: string | null;
-  store_name: string | null;
-  company_name: string | null;
-  created_at: Date | null;
-  updated_at: Date | null;
-};
-
-export type WorkLogDetail = WorkLogItem & {
-  start_location_lat: number | null;
-  start_location_long: number | null;
-  end_location_lat: number | null;
-  end_location_long: number | null;
-  store_location: string | null;
-};
-
-export type ListWorkLogsResult = {
-  items: WorkLogItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
-
-export type SubmitWorkLogResult = {
-  operation: "success" | "error";
-  message: string;
-  workLog?: WorkLogItem;
-};
-
-export type UpdateWorkLogStatusResult = {
-  operation: "success" | "error";
-  message: string;
-  workLog?: WorkLogItem;
-};
+export type WorkLogItem = z.output<typeof workLogItemOutputSchema>;
+export type WorkLogDetail = z.output<typeof workLogDetailOutputSchema>;
+export type ListWorkLogsResult = z.output<
+  typeof listWorkLogsResultOutputSchema
+>;
+export type SubmitWorkLogResult = z.output<
+  typeof submitWorkLogResultOutputSchema
+>;
+export type UpdateWorkLogStatusResult = z.output<
+  typeof updateWorkLogStatusResultOutputSchema
+>;

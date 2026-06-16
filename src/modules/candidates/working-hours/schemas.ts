@@ -58,7 +58,11 @@ export const candidateWorkingHourItemSchema = z.object({
 });
 
 export type CandidateWorkingHourItem = z.output<typeof candidateWorkingHourItemSchema>;
-export type CandidateWorkingHourDetail = CandidateWorkingHourItem | null;
+export const candidateWorkingHourDetailSchema =
+  candidateWorkingHourItemSchema.nullable();
+export type CandidateWorkingHourDetail = z.output<
+  typeof candidateWorkingHourDetailSchema
+>;
 
 export const listCandidateWorkingHoursResultSchema = z.object({
   items: z.array(candidateWorkingHourItemSchema),

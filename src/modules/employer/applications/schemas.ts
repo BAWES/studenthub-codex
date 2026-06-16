@@ -16,13 +16,9 @@ export const listEmployerApplicationsSchema = z.object({
 
 export type ListEmployerApplicationsInput = z.input<typeof listEmployerApplicationsSchema>;
 
-export type EmployerApplicationRow = {
-  id: number;
-  jobTitle: string;
-  candidateName: string | null;
-  status: string;
-  createdAt: Date;
-};
+export type EmployerApplicationRow = z.output<
+  typeof employerApplicationRowOutputSchema
+>;
 
 // ---------------------------------------------------------------------------
 // Output validation schemas

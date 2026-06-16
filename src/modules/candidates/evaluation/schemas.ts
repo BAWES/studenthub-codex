@@ -116,7 +116,10 @@ export const evaluationPdfDataSchema = evaluationDetailSchema.extend({
   staff: evaluationPdfStaffSchema.nullable(),
 });
 
-export type ListQuestionsResult = EvalQuestionItem[];
-export type ListReportsResult = EvaluationListItem[];
-export type ViewReportResult = EvaluationDetail | null;
+export const listQuestionsResultSchema = z.array(evalQuestionItemSchema);
+export type ListQuestionsResult = z.output<typeof listQuestionsResultSchema>;
+export const listReportsResultSchema = z.array(evaluationListItemSchema);
+export type ListReportsResult = z.output<typeof listReportsResultSchema>;
+export const viewReportResultSchema = evaluationDetailSchema.nullable();
+export type ViewReportResult = z.output<typeof viewReportResultSchema>;
 export type EvaluationPdfData = z.output<typeof evaluationPdfDataSchema>;

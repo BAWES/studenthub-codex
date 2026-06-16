@@ -96,6 +96,10 @@ export const candidateEducationActionResultSchema = z.discriminatedUnion("succes
 
 // Output types
 export type CandidateEducationItem = z.output<typeof candidateEducationItemSchema>;
-export type CandidateEducationDetail = CandidateEducationItem | null;
+export const candidateEducationDetailSchema =
+  candidateEducationItemSchema.nullable();
+export type CandidateEducationDetail = z.output<
+  typeof candidateEducationDetailSchema
+>;
 export type ListCandidateEducationResult = z.output<typeof listCandidateEducationResultSchema>;
 export type CandidateEducationActionResult = z.output<typeof candidateEducationActionResultSchema>;
