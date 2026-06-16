@@ -131,7 +131,7 @@ async function createAuthedPage(
 /** Navigate and wait for full settle before responsive checks. */
 async function navAndSettle(page: Page, url: string) {
   await page.goto(url);
-  await page.waitForLoadState("networkidle");
+  await page.waitForLoadState("load");
   // Allow CSS reflow/transitions to settle after viewport-aware rendering
   await page.waitForTimeout(300);
   await expect(page.locator("body")).toBeVisible({ timeout: 15000 });

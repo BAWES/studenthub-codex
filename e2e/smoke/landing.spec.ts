@@ -3,7 +3,7 @@ import { test, expect } from "@playwright/test";
 /** Navigate and wait for full settle before checking hero content. */
 async function navAndSettle(page: any) {
   await page.goto("/");
-  await page.waitForLoadState("networkidle");
+  await page.waitForLoadState("load");
   // Allow CSS reflow/transitions for hero entrance animations
   await page.waitForTimeout(300);
   await expect(page.locator("body")).toBeVisible({ timeout: 15000 });
