@@ -88,7 +88,7 @@ describe("ComparisonTable (visual redesign)", () => {
   it("renders company feature rows for company persona", async () => {
     render(<ComparisonTable persona="company" />);
     await waitFor(() => {
-      const features = screen.getAllByText("Staff-matched candidate suggestions");
+      const features = screen.getAllByText("Staff-matched candidates");
       expect(features.length).toBeGreaterThanOrEqual(1);
     });
   });
