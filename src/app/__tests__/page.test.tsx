@@ -87,7 +87,7 @@ vi.mock("lucide-react", () => ({
   UserPlus: () => <span data-testid="icon-user-plus" />,
 }));
 
-// ── Mock FadeInSection ────────────────────────────────────────
+// ── Mock marketing components ──────────────────────────────────
 vi.mock("@/components/marketing", () => ({
   FadeInSection: ({
     children,
@@ -96,6 +96,12 @@ vi.mock("@/components/marketing", () => ({
     children: React.ReactNode;
     asDiv?: boolean;
   }) => (asDiv ? <div>{children}</div> : <>{children}</>),
+  HeroSection: () => <section aria-label="StudentHub — connecting students with the right employers"><h1>Connecting students with the right employers</h1></section>,
+  StatsSection: () => <section aria-label="Platform statistics"><span>Students placed</span><span>Active employers</span></section>,
+  HowItWorks: () => <section aria-label="How it works"><span>How it works</span><span>From profile to placement in three steps.</span><span>Create your profile</span><span>Get matched</span></section>,
+  EmployerSection: () => <section aria-label="For employers" />,
+  TestimonialCarousel: () => <section aria-label="Customer testimonials"><span>Real stories from real placements.</span></section>,
+  ComparisonTable: () => <section aria-label="Feature comparison"><span>Why students choose StudentHub.</span></section>,
 }));
 
 afterEach(() => {
@@ -250,7 +256,7 @@ describe("Landing page (blue+amber redesign)", () => {
     const companyCTA = screen.getAllByText("Set up company account");
     expect(companyCTA.length).toBeGreaterThanOrEqual(1);
     expect(
-      screen.getByText("From posting to placement in three steps.")
+      screen.getByText("From profile to placement in three steps.")
     ).toBeInTheDocument();
   });
 
