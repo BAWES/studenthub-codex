@@ -35,6 +35,13 @@ export default async function AdminAgentDetailPage({
   const session = await requireRoleCapability("admin", "admin.system");
   const { id } = await params;
 
+  // Validate UUID format before calling the action
+  const UUID_RE =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!UUID_RE.test(id)) {
+    notFound();
+  }
+
   const data = await getAgentById({ agentId: id });
 
   if (!data.agent) {

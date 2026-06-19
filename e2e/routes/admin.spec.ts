@@ -1,14 +1,16 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Browser } from "@playwright/test";
 import { getMockFixtures, type FixtureUser } from "../fixtures/users";
 
 let admin: FixtureUser;
 let candidateUser: FixtureUser;
 let companyUser: FixtureUser;
+let sharedBrowser: Browser;
 
 test.describe("Admin routes", () => {
   test.describe.configure({ mode: "serial" });
 
-  test.beforeAll(() => {
+  test.beforeAll(async ({ browser }) => {
+    sharedBrowser = browser;
     const fixtures = getMockFixtures();
     admin = fixtures.get("admin")!;
     candidateUser = fixtures.get("candidate")!;
@@ -17,9 +19,8 @@ test.describe("Admin routes", () => {
 
   async function assertRouteLoads(route: string) {
     const consoleMessages: string[] = [];
-    const browser = await (await import("@playwright/test")).chromium.launch();
-    const bContext = await browser.newContext();
-    await bContext.addCookies([
+    const context = await sharedBrowser.newContext();
+    await context.addCookies([
       {
         name: "studenthub_next_session",
         value: admin.cookie,
@@ -27,7 +28,7 @@ test.describe("Admin routes", () => {
         path: "/",
       },
     ]);
-    const page = await bContext.newPage();
+    const page = await context.newPage();
     page.on("console", (msg) => {
       if (msg.type() === "error") consoleMessages.push(msg.text());
     });
@@ -42,8 +43,7 @@ test.describe("Admin routes", () => {
         m.includes("Functions cannot be passed"),
     );
     expect(errors).toEqual([]);
-    await bContext.close();
-    await browser.close();
+    await context.close();
   }
 
   test("admin dashboard loads", async () => {
@@ -175,8 +175,7 @@ test.describe("Admin routes", () => {
   // ── Role guards ──
 
   test("candidate cannot access admin", async () => {
-    const browser = await (await import("@playwright/test")).chromium.launch();
-    const bContext = await browser.newContext();
+    const bContext = await sharedBrowser.newContext();
     await bContext.addCookies([
       {
         name: "studenthub_next_session",
@@ -190,12 +189,10 @@ test.describe("Admin routes", () => {
     await page.waitForLoadState("load");
     await expect(page).not.toHaveURL("/admin");
     await bContext.close();
-    await browser.close();
   });
 
   test("company cannot access admin", async () => {
-    const browser = await (await import("@playwright/test")).chromium.launch();
-    const bContext = await browser.newContext();
+    const bContext = await sharedBrowser.newContext();
     await bContext.addCookies([
       {
         name: "studenthub_next_session",
@@ -209,6 +206,5 @@ test.describe("Admin routes", () => {
     await page.waitForLoadState("load");
     await expect(page).not.toHaveURL("/admin");
     await bContext.close();
-    await browser.close();
   });
 });
