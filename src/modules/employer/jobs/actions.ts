@@ -8,6 +8,7 @@ import { revalidatePath } from "next/cache";
 
 import { prisma } from "@/lib/prisma";
 import { requireCapability, getSession } from "@/modules/auth/session";
+import { listJobsTypesense } from "./search-typesense";
 import {
   listJobsSchema,
   getJobSchema,
@@ -218,4 +219,56 @@ export async function deleteJob(
   revalidatePath("/candidate/jobs");
 
   return { success: true };
+}
+
+// ---------------------------------------------------------------------------
+// searchJobs — Typesense-powered job search (for EmployerJobsSearchPage)
+// ---------------------------------------------------------------------------
+
+/**
+ * Search job listings via Typesense, returning the shape expected by
+ * EmployerJobsSearchPage. Falls back to MySQL if Typesense is unavailable.
+ */
+export async function searchJobs(
+  params: Record<string, unknown>,
+): Promise<{
+  query: string;
+  page: number;
+  matchingCount: number;
+  rows: Array<{
+    jobListingId: number;
+    title: string;
+    description: string;
+    location: string | null;
+    employmentType: string | null;
+    salaryRange: string | null;
+    status: string | null;
+    companyName: string;
+    createdAt: string;
+    score?: number;
+  }>;
+  source: { current: string; target: string };
+}> {
+  const q = typeof params.q === "string" ? params.q : "";
+  const page = typeof params.page === "number" ? params.page : 1;
+
+  const result = await listJobsTypesense({ q, page, limit: 20 });
+
+  return {
+    query: q,
+    page,
+    matchingCount: result.total,
+    rows: result.items.map((item) => ({
+      jobListingId: item.jobListingId,
+      title: item.title,
+      description: item.description,
+      location: item.location,
+      employmentType: item.employmentType,
+      salaryRange: item.salaryRange,
+      status: item.status,
+      companyName: "",
+      createdAt: item.createdAt.toISOString().slice(0, 10),
+    })),
+    source: result.source,
+  };
 }
