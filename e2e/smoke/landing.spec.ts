@@ -57,7 +57,7 @@ test.describe("Landing page smoke tests (STU-2776 redesign)", () => {
     // Feature pills — employer benefits
     const employerPills = page.locator('[aria-label="Key benefits for employers"]');
     await expect(employerPills).toBeVisible();
-    await expect(employerPills).toContainText("AI-matched candidate suggestions");
+    await expect(employerPills).toContainText("Staff-matched candidate suggestions");
   });
 
   test("persona switcher renders and switches between candidate/company", async ({
