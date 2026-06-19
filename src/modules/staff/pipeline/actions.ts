@@ -17,6 +17,10 @@ import {
 
 import { type PipelineStage, stageFromInvitationStatus } from "./stage";
 
+function logOutputError(source: string, error: unknown): void {
+  console.error(`[modules/staff/pipeline] ${source} output validation failed:`, error);
+}
+
 // ── Data fetching ────────────────────────────────────────────────────
 
 export async function getPipelineData(staffId: number) {
@@ -63,10 +67,7 @@ export async function getPipelineData(staffId: number) {
 
   const outputParsed = z.array(pipelineItemSchema).safeParse(items);
   if (!outputParsed.success) {
-    console.error(
-      "[modules/staff/pipeline] getPipelineData output validation failed:",
-      outputParsed.error.issues,
-    );
+    logOutputError("getPipelineData", outputParsed.error.issues);
   }
 
   return items;
@@ -93,10 +94,7 @@ export async function getPipelineMetrics(items: PipelineItem[]): Promise<Pipelin
 
   const outputParsed = pipelineMetricsSchema.safeParse(result);
   if (!outputParsed.success) {
-    console.error(
-      "[modules/staff/pipeline] getPipelineMetrics output validation failed:",
-      outputParsed.error.issues,
-    );
+    logOutputError("getPipelineMetrics", outputParsed.error.issues);
   }
 
   return result;
@@ -120,10 +118,7 @@ export async function updatePipelineStageAction(
       const result: UpdatePipelineStageResult = { success: false, error: "Invalid input: " + parsed.error.issues[0]?.message };
       const outputParsed = updatePipelineStageResultSchema.safeParse(result);
       if (!outputParsed.success) {
-        console.error(
-          "[modules/staff/pipeline] updatePipelineStageAction output validation failed:",
-          outputParsed.error.issues,
-        );
+        logOutputError("updatePipelineStageAction", outputParsed.error.issues);
       }
       return result;
     }
@@ -145,10 +140,7 @@ export async function updatePipelineStageAction(
     const result: UpdatePipelineStageResult = { success: true, newStage: stage };
     const outputParsed2 = updatePipelineStageResultSchema.safeParse(result);
     if (!outputParsed2.success) {
-      console.error(
-        "[modules/staff/pipeline] updatePipelineStageAction output validation failed:",
-        outputParsed2.error.issues,
-      );
+      logOutputError("updatePipelineStageAction", outputParsed2.error.issues);
     }
     return result;
   } catch (error) {
@@ -158,10 +150,7 @@ export async function updatePipelineStageAction(
     };
     const outputParsed = updatePipelineStageResultSchema.safeParse(result);
     if (!outputParsed.success) {
-      console.error(
-        "[modules/staff/pipeline] updatePipelineStageAction output validation failed:",
-        outputParsed.error.issues,
-      );
+      logOutputError("updatePipelineStageAction", outputParsed.error.issues);
     }
     return result;
   }

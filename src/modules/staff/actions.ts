@@ -13,6 +13,10 @@ import {
 import type { StaffListItem, StaffListResult, StaffWorkspaceData } from "./schemas";
 import { formatDate, formatMoney } from "@/modules/workspace/format";
 
+function logOutputError(source: string, error: unknown): void {
+  console.error(`[modules/staff] ${source} output validation failed:`, error);
+}
+
 // ---------------------------------------------------------------------------
 // Schemas
 // ---------------------------------------------------------------------------
@@ -121,10 +125,7 @@ export async function listStaff(
 
   const outputParsed = listStaffResultSchema.safeParse(result);
   if (!outputParsed.success) {
-    console.error(
-      "[modules/staff] listStaff output validation failed:",
-      outputParsed.error.issues,
-    );
+    logOutputError("listStaff", outputParsed.error.issues);
   }
 
   return result;
@@ -165,10 +166,7 @@ export async function getStaff(params: GetStaffParams): Promise<StaffListItem | 
 
   const outputParsed = staffListItemSchema.safeParse(staff);
   if (staff !== null && !outputParsed.success) {
-    console.error(
-      "[modules/staff] getStaff output validation failed:",
-      outputParsed.error.issues,
-    );
+    logOutputError("getStaff", outputParsed.error.issues);
   }
 
   return staff;
@@ -274,10 +272,7 @@ export async function getStaffWorkspace(
   // Validate output shape
   const validated = staffWorkspaceOutputSchema.safeParse(result);
   if (!validated.success) {
-    console.error(
-      "[modules/staff] getStaffWorkspace output validation failed:",
-      validated.error.issues,
-    );
+    logOutputError("getStaffWorkspace", validated.error.issues);
   }
 
   return result;

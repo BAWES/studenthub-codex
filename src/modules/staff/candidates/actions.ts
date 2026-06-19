@@ -15,6 +15,10 @@ import {
   type ListCandidatesResult,
 } from "./schemas";
 
+function logOutputError(source: string, error: unknown): void {
+  console.error(`[modules/staff/candidates] ${source} output validation failed:`, error);
+}
+
 // ---------------------------------------------------------------------------
 // Server actions
 // ---------------------------------------------------------------------------
@@ -93,10 +97,7 @@ export async function listCandidates(
   // Validate output shape
   const outputParsed = candidateListOutputSchema.safeParse(result);
   if (!outputParsed.success) {
-    console.error(
-      "[staff/candidates] listCandidates output validation failed:",
-      outputParsed.error.issues,
-    );
+    logOutputError("listCandidates", outputParsed.error.issues);
   }
 
   return result;
@@ -159,10 +160,7 @@ export async function getCandidateById(
   // Validate output shape
   const outputParsed = candidateDetailOutputSchema.safeParse(result);
   if (!outputParsed.success) {
-    console.error(
-      "[staff/candidates] getCandidateById output validation failed:",
-      outputParsed.error.issues,
-    );
+    logOutputError("getCandidateById", outputParsed.error.issues);
   }
 
   return result;

@@ -37,6 +37,10 @@ import type {
   ListContractsResult,
 } from "./schemas";
 
+function logOutputError(source: string, error: unknown): void {
+  console.error(`[modules/staff/contracts] ${source} output validation failed:`, error);
+}
+
 // ---------------------------------------------------------------------------
 // Status map
 // ---------------------------------------------------------------------------
@@ -125,10 +129,7 @@ export async function listContracts(
   // Validate output shape
   const outputParsed = contractListOutputSchema.safeParse(result);
   if (!outputParsed.success) {
-    console.error(
-      "[staff/contracts] listContracts output validation failed:",
-      outputParsed.error.issues,
-    );
+    logOutputError("listContracts", outputParsed.error.issues);
   }
 
   return result;
@@ -163,10 +164,7 @@ export async function getContractDetail(
     const nullResult = { contract: null };
     const nullParsed = contractDetailOutputSchema.safeParse(nullResult);
     if (!nullParsed.success) {
-      console.error(
-        "[staff/contracts] getContractDetail output validation failed:",
-        nullParsed.error.issues,
-      );
+      logOutputError("getContractDetail", nullParsed.error.issues);
     }
     return nullResult;
   }
@@ -199,10 +197,7 @@ export async function getContractDetail(
   // Validate output shape
   const outputParsed = contractDetailOutputSchema.safeParse(result);
   if (!outputParsed.success) {
-    console.error(
-      "[staff/contracts] getContractDetail output validation failed:",
-      outputParsed.error.issues,
-    );
+    logOutputError("getContractDetail", outputParsed.error.issues);
   }
 
   return result;
@@ -254,10 +249,7 @@ export async function updateContractStatus(
     // Validate output shape
     const outputParsed = contractStatusUpdateOutputSchema.safeParse(result);
     if (!outputParsed.success) {
-      console.error(
-        "[staff/contracts] updateContractStatus output validation failed:",
-        outputParsed.error.issues,
-      );
+      logOutputError("updateContractStatus", outputParsed.error.issues);
     }
 
     return result;
