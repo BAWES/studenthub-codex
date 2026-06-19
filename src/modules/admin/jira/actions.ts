@@ -17,6 +17,7 @@
 // ---------------------------------------------------------------------------
 
 import { z } from "zod";
+import { requireCapability } from "@/modules/auth/session";
 import {
   jiraIssueSchema,
   listJiraIssuesResultSchema,
@@ -49,12 +50,17 @@ const listJiraUsersSchema = z.object({
   maxResults: z.coerce.number().int().positive().optional().default(1000),
 });
 
+const getJiraIssueSchema = z.object({
+  issueKey: z.string().min(1, "Issue key is required"),
+});
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
 export type ListJiraIssuesParams = z.input<typeof listJiraIssuesSchema>;
 export type ListJiraUsersParams = z.input<typeof listJiraUsersSchema>;
+export type GetJiraIssueParams = z.input<typeof getJiraIssueSchema>;
 
 
 // ---------------------------------------------------------------------------
@@ -241,6 +247,69 @@ export async function listJiraUsers(
   if (!outputParsed.success) {
     console.error(
       "[modules/admin/jira] listJiraUsers output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
+}
+
+// ---------------------------------------------------------------------------
+// getJiraIssue
+// ---------------------------------------------------------------------------
+
+/**
+ * Get a single Jira issue by its key (e.g. "PROJ-123").
+ * Calls the Jira Cloud REST API v3 issue endpoint.
+ * Requires admin.read capability.
+ */
+export async function getJiraIssue(
+  params: GetJiraIssueParams,
+): Promise<JiraIssue | null> {
+  await requireCapability("admin.read");
+
+  const parsed = getJiraIssueSchema.safeParse(params);
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid issue key");
+  }
+
+  const { issueKey } = parsed.data;
+
+  const data = await jiraGet<{
+    id: string;
+    key: string;
+    fields?: {
+      summary?: string;
+      status?: { name?: string };
+      assignee?: {
+        displayName?: string;
+        emailAddress?: string;
+      } | null;
+      created?: string;
+      updated?: string;
+    };
+  }>(`issue/${issueKey}`);
+
+  const result: JiraIssue = {
+    id: data.id,
+    key: data.key,
+    summary: data.fields?.summary ?? null,
+    status: data.fields?.status?.name ?? null,
+    assignee: data.fields?.assignee
+      ? {
+          displayName: data.fields.assignee.displayName ?? "",
+          emailAddress: data.fields.assignee.emailAddress ?? null,
+        }
+      : null,
+    created: data.fields?.created ?? null,
+    updated: data.fields?.updated ?? null,
+  };
+
+  // Validate output shape
+  const outputParsed = jiraIssueSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/admin/jira] getJiraIssue output validation failed:",
       outputParsed.error.issues,
     );
   }
