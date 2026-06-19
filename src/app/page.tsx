@@ -5,13 +5,13 @@ import { LandingPage } from "@/components/landing";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "StudentHub — Connecting Students with the Right Employers",
+  title: "StudentHub — Student Jobs & Hiring in Kuwait",
   description:
-    "Kuwait's two-sided marketplace for student placement. Students build careers and employers discover vetted talent — powered by our staff recruiters.",
+    "Kuwait's student placement platform. Students build careers and employers find vetted talent — powered by our staff recruiters who match candidates to roles.",
   openGraph: {
-    title: "StudentHub | Find Student Jobs & Hire Talent in Kuwait",
+    title: "StudentHub | Student Jobs & Hiring in Kuwait",
     description:
-      "Kuwait's two-sided marketplace connecting students with employers. Staff recruiters match candidates to roles. Timesheets, payments, and compliance in one platform.",
+      "Kuwait's student placement platform connecting students with employers. Staff recruiters match candidates to roles. Timesheets, payments, and compliance in one platform.",
     type: "website",
   },
   keywords: [
@@ -20,7 +20,7 @@ export const metadata = {
     "student placement",
     "Kuwait jobs for students",
     "employer student hiring",
-    "two-sided marketplace Kuwait",
+    "staff-matched placement",
     "student work placement Kuwait",
   ],
 };
