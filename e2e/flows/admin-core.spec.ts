@@ -435,7 +435,7 @@ test.describe("Admin critical flows - Payments / Compliance / Transfers / Agents
           }
 
           // Check for primary entity table (candidate payouts)
-          const payoutTable = ctx.page.locator("table").first();
+          const payoutTable = ctx.page.locator(".dataList, .rows, table").first();
           if (await payoutTable.isVisible().catch(() => false)) {
             console.log("Candidate payouts table visible on transfer detail");
           }

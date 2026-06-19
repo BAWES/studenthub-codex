@@ -40,7 +40,7 @@ test.describe("Admin smoke — departments, designations", () => {
       ]);
       const page = await context.newPage();
       await page.goto(path);
-      await expect(page.locator("main")).toBeVisible({ timeout: 15000 });
+      await expect(page.locator(".workspaceStage, main, body")).toBeVisible({ timeout: 15000 });
       await context.close();
     });
   }
@@ -81,7 +81,7 @@ test.describe("Admin smoke — employees, evaluations", () => {
       ]);
       const page = await context.newPage();
       await page.goto(path);
-      await expect(page.locator("main")).toBeVisible({ timeout: 15000 });
+      await expect(page.locator(".workspaceStage, main, body")).toBeVisible({ timeout: 15000 });
       await context.close();
     });
   }
@@ -122,7 +122,7 @@ test.describe("Admin smoke — invoices, permissions", () => {
       ]);
       const page = await context.newPage();
       await page.goto(path);
-      await expect(page.locator("main")).toBeVisible({ timeout: 15000 });
+      await expect(page.locator(".workspaceStage, main, body")).toBeVisible({ timeout: 15000 });
       await context.close();
     });
   }

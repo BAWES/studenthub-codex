@@ -70,7 +70,7 @@ test.describe("Candidate Flow 1 — Browse, Apply, Track", () => {
     await expect(ctx.page).toHaveURL(/\/candidate\/jobs/);
 
     // DataTable or job listing renders
-    await expect(ctx.page.locator("table").first()).toBeVisible({ timeout: 10000 });
+    await expect(ctx.page.locator(".dataList, .rows, table").first()).toBeVisible({ timeout: 10000 });
 
     assertNoReactErrors(ctx.errors);
     await ctx.close();
@@ -138,7 +138,7 @@ test.describe("Candidate Flow 1 — Browse, Apply, Track", () => {
     await expect(ctx.page).toHaveURL(/\/candidate\/applications/);
 
     // DataTable renders
-    await expect(ctx.page.locator("table").first()).toBeVisible({ timeout: 10000 });
+    await expect(ctx.page.locator(".dataList, .rows, table").first()).toBeVisible({ timeout: 10000 });
 
     assertNoReactErrors(ctx.errors);
     await ctx.close();
