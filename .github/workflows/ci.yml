@@ -141,15 +141,15 @@ jobs:
       - name: Generate Prisma client
         run: npx prisma generate
         env:
-          DATABASE_URL: "mysql://studenthub:studenthub@localhost:3307/studenthub_prod_local?auth_plugin=mysql_native_password"
+          DATABASE_URL: "mysql://studenthub:studenthub@localhost:3307/studenthub_prod_local"
       - name: Push schema to MySQL
         run: npx prisma db push --skip-generate
         env:
-          DATABASE_URL: "mysql://studenthub:studenthub@localhost:3307/studenthub_prod_local?auth_plugin=mysql_native_password"
+          DATABASE_URL: "mysql://studenthub:studenthub@localhost:3307/studenthub_prod_local"
       - name: Seed E2E test fixtures
         run: npx tsx prisma/seed-test-fixtures.ts
         env:
-          DATABASE_URL: "mysql://studenthub:studenthub@localhost:3307/studenthub_prod_local?auth_plugin=mysql_native_password"
+          DATABASE_URL: "mysql://studenthub:studenthub@localhost:3307/studenthub_prod_local"
       - name: Cache Next.js build
         uses: actions/cache@v4
         id: next-cache-e2e
@@ -163,7 +163,7 @@ jobs:
         run: npx next build
         env:
           NODE_OPTIONS: "--max-old-space-size=4096"
-          DATABASE_URL: "mysql://studenthub:studenthub@localhost:3307/studenthub_prod_local?auth_plugin=mysql_native_password"
+          DATABASE_URL: "mysql://studenthub:studenthub@localhost:3307/studenthub_prod_local"
           AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
       - name: Run E2E tests
         run: npx playwright test --project=chromium --shard=${{ matrix.shard }}/${{ strategy.job-total }}
@@ -202,7 +202,7 @@ jobs:
       - name: Push schema to MySQL
         run: npx prisma db push --skip-generate
         env:
-          DATABASE_URL: "mysql://studenthub:studenthub@localhost:3307/studenthub_prod_local?auth_plugin=mysql_native_password"
+          DATABASE_URL: "mysql://studenthub:studenthub@localhost:3307/studenthub_prod_local"
       - name: Build
         run: npx next build
         env:
@@ -221,5 +221,5 @@ jobs:
           done
           node scripts/validate.mjs
         env:
-          DATABASE_URL: "mysql://studenthub:studenthub@localhost:3307/studenthub_prod_local?auth_plugin=mysql_native_password"
+          DATABASE_URL: "mysql://studenthub:studenthub@localhost:3307/studenthub_prod_local"
           AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
