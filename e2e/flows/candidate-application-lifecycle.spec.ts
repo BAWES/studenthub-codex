@@ -190,7 +190,7 @@ test.describe("Candidate application lifecycle — Browse → Apply → Track", 
     await ctx.page.waitForTimeout(300);
 
       // Job rows or cards show details
-      const jobRows = ctx.page.locator("table tbody tr, [class*='card'], [class*='Card'], [class*='job-row']");
+      const jobRows = ctx.page.locator(".dataList, .rows, table tbody tr, [class*='card'], [class*='Card'], [class*='job-row']");
 
       // Check if jobs exist
       const count = await jobRows.count().catch(() => 0);
@@ -338,7 +338,7 @@ test.describe("Candidate application lifecycle — Browse → Apply → Track", 
     await ctx.page.waitForTimeout(300);
 
       // Check for application rows
-      const appRows = ctx.page.locator("table tbody tr, [class*='application-row'], li");
+      const appRows = ctx.page.locator(".dataList, .rows, table tbody tr, [class*='application-row'], li");
       const rowCount = await appRows.count().catch(() => 0);
       console.log(`Application rows found: ${rowCount}`);
 

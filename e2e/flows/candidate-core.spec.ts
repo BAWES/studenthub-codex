@@ -84,7 +84,7 @@ test.describe("Candidate Flow 1 — Browse, Apply, Track", () => {
     await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
 
     // Find first job link and navigate to detail
-    const firstJobLink = ctx.page.locator("table a").first();
+    const firstJobLink = ctx.page.locator("a[href*='/candidate/jobs/']").first();
     if ((await firstJobLink.count()) > 0) {
       const href = await firstJobLink.getAttribute("href");
       await ctx.page.goto(href!);

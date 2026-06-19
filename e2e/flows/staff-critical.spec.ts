@@ -291,7 +291,7 @@ test.describe("Staff critical flows — Workspace + Request Management", () => {
       await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
 
       // Find a request link and navigate to its detail page
-      const firstRequestLink = ctx.page.locator("table a").first();
+      const firstRequestLink = ctx.page.locator("a[href*='/staff/requests/']").first();
       const linkCount = await firstRequestLink.count();
 
       if (linkCount > 0) {
@@ -319,7 +319,7 @@ test.describe("Staff critical flows — Workspace + Request Management", () => {
       await ctx.page.waitForLoadState("load");
       await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
 
-      const firstRequestLink = ctx.page.locator("table a").first();
+      const firstRequestLink = ctx.page.locator("a[href*='/staff/requests/']").first();
       if ((await firstRequestLink.count()) > 0) {
         const href = await firstRequestLink.getAttribute("href");
         await ctx.page.goto(href!);

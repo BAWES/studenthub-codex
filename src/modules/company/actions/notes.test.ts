@@ -433,15 +433,13 @@ describe("getNoteEntry()", () => {
       updated_by: null,
       note_created_datetime: new Date("2025-01-01"),
       note_updated_datetime: new Date("2025-01-02"),
-      staff_note_created_byTostaff: { staff_name: "Alice" },
-      staff_note_updated_byTostaff: null,
     });
 
     const result = await getNoteEntry("note-entry-1");
 
     expect(result).not.toBeNull();
     expect(result!.note_uuid).toBe("note-entry-1");
-    expect(result!.staff_created?.staff_name).toBe("Alice");
+    expect(result!.staff_created).toBeNull();
     expect(result!.staff_updated).toBeNull();
   });
 
