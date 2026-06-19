@@ -54,13 +54,15 @@ export default function LandingNav({ session, persona, onPersonaChange }: Landin
             >
               How it works
             </Link>
-            <Link
-              href="#for-employers"
-              className="px-3 py-1.5 rounded-md text-sm no-underline transition-colors hover:text-[var(--ink)]"
-              style={{ color: "var(--muted)" }}
-            >
-              For employers
-            </Link>
+            {persona === "company" && (
+              <Link
+                href="#for-employers"
+                className="px-3 py-1.5 rounded-md text-sm no-underline transition-colors hover:text-[var(--ink)]"
+                style={{ color: "var(--muted)" }}
+              >
+                For employers
+              </Link>
+            )}
             <Link
               href="#testimonials"
               className="px-3 py-1.5 rounded-md text-sm no-underline transition-colors hover:text-[var(--ink)]"
