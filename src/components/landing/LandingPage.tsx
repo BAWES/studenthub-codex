@@ -27,21 +27,21 @@ interface LandingPageProps {
 
 function TrustBar() {
   return (
-    <section className="shSection" aria-label="Trusted organizations">
+    <section className="scroll-mt-20" aria-label="Trusted organizations">
       <div
         className="relative overflow-hidden rounded-xl p-6 sm:p-8 text-center"
         style={{
-          background: "var(--sh-glass-bg)",
-          border: "1px solid var(--sh-glass-border)",
+          backgroundColor: "var(--surface)",
+          border: "1px solid var(--border)",
         }}
       >
         <p
-          className="text-center text-[11px] font-black uppercase tracking-wider mb-5"
+          className="text-center text-[11px] font-bold uppercase tracking-wider mb-5"
           style={{ color: "var(--muted)" }}
         >
           Trusted by leading organizations across Kuwait
         </p>
-        <div className="flex flex-wrap items-center justify-center gap-6 gap-y-3 opacity-40">
+        <div className="flex flex-wrap items-center justify-center gap-6 gap-y-3 opacity-30">
           {["Alshaya", "KIPCO", "NBK", "Zain", "Kuwait Airways", "GUST"].map((name) => (
             <span
               key={name}
@@ -83,15 +83,13 @@ export default function LandingPage({ session }: LandingPageProps) {
   return (
     <div
       style={{
-        "--sh-coral": SH_BLUE,
-        "--sh-amber": SH_AMBER,
         "--sh-blue": SH_BLUE,
+        "--sh-amber": SH_AMBER,
         "--sh-info": SH_BLUE,
+        "--sh-coral": SH_BLUE,
         "--sh-coral-hover": "#0a56b0",
-        "--sh-coral-glow": `0 0 12px rgba(11, 99, 206, 0.25)`,
-        "--sh-amber-glow": "0 4px 14px rgba(245, 158, 11, 0.35)",
-        "--success": "var(--green)",
-        "--error": "var(--destructive)",
+        "--sh-coral-glow": `0 0 12px ${SH_BLUE}40`,
+        "--sh-amber-glow": `0 4px 14px ${SH_AMBER}50`,
         backgroundColor: "var(--paper)",
         minHeight: "100svh",
       } as React.CSSProperties}
@@ -107,7 +105,7 @@ export default function LandingPage({ session }: LandingPageProps) {
 
       <main
         id="main-content"
-        className="min-h-svh w-[min(1320px,calc(100%_-_28px))] mx-auto grid content-start gap-6 pt-[18px] pb-[42px] max-sm:w-[min(calc(100%_-_20px),720px)]"
+        className="min-h-svh w-[min(1320px,calc(100%_-_28px))] mx-auto grid content-start gap-8 pt-5 pb-[42px] max-sm:w-[min(calc(100%_-_20px),720px)]"
       >
         <HeroSection />
 

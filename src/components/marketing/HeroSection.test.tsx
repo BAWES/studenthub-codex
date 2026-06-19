@@ -60,7 +60,7 @@ describe("HeroSection (two-sided marketplace redesign)", () => {
     it("renders body paragraph about two-sided marketplace", () => {
       render(<HeroSection />);
       expect(
-        screen.getByText(/StudentHub is the platform where students build careers/i),
+        screen.getByText(/the platform where students build careers/i),
       ).toBeTruthy();
     });
 
@@ -84,22 +84,23 @@ describe("HeroSection (two-sided marketplace redesign)", () => {
 
     it("renders social proof", () => {
       render(<HeroSection />);
-      const proofEl = document.querySelector('[class*="Proof"]');
-      expect(proofEl?.textContent).toBeTruthy();
+      expect(
+        screen.getByText(/9,500\+ placements/i),
+      ).toBeTruthy();
     });
 
     it("renders student feature pills", () => {
       render(<HeroSection />);
-      const pills = screen.getByLabelText("Key benefits for students");
+      const pills = screen.getByText("For students").closest("div");
       expect(pills).toBeTruthy();
-      expect(pills.children.length).toBeGreaterThanOrEqual(2);
+      expect(pills!.querySelectorAll('[data-testid="icon-check-circle"]').length).toBeGreaterThanOrEqual(2);
     });
 
     it("renders employer feature pills", () => {
       render(<HeroSection />);
-      const pills = screen.getByLabelText("Key benefits for employers");
+      const pills = screen.getByText("For employers").closest("div");
       expect(pills).toBeTruthy();
-      expect(pills.children.length).toBeGreaterThanOrEqual(2);
+      expect(pills!.querySelectorAll('[data-testid="icon-check-circle"]').length).toBeGreaterThanOrEqual(2);
     });
 
     it("renders sign-in link alongside CTAs", () => {

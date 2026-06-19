@@ -6,24 +6,18 @@ import { Users, Building2, Briefcase, Star } from "lucide-react";
 
 // ── Stat definitions ───────────────────────────────────────────
 
+const SH_BLUE = "#0b63ce";
+const SH_AMBER = "#f59e0b";
+
 interface StatItem {
   value: string;
   label: string;
   suffix: string;
   numericValue: number;
   icon: typeof Users;
-  /** Optional gradient overlay for special stats (e.g. rating) */
-  accent?: "info" | "amber" | "gradient";
+  accent?: "info" | "amber";
 }
 
-/**
- * Real data verified from production database (queried 2026-06-11):
- *   - Contracts: 9,605
- *   - Companies: 523
- *   - Candidates: 53,517
- * Rounded down conservatively for landing page display.
- * Rating: 4.8/5 from verified employer and candidate reviews.
- */
 const stats: StatItem[] = [
   {
     value: "9,500",
@@ -53,7 +47,7 @@ const stats: StatItem[] = [
     value: "4.8",
     label: "Platform rating",
     suffix: "",
-    numericValue: 48, // 48 ticks → 4.8 display
+    numericValue: 48,
     icon: Star,
     accent: "amber",
   },
@@ -66,7 +60,6 @@ function useCountUp(target: number, duration: number, started: boolean) {
 
   useEffect(() => {
     if (!started) return;
-
     let startTime: number | null = null;
     let animationId: number;
 
@@ -74,10 +67,8 @@ function useCountUp(target: number, duration: number, started: boolean) {
       if (!startTime) startTime = timestamp;
       const elapsed = timestamp - startTime;
       const progress = Math.min(elapsed / duration, 1);
-      // Ease-out cubic
       const eased = 1 - Math.pow(1 - progress, 3);
       setCount(Math.floor(eased * target));
-
       if (progress < 1) {
         animationId = requestAnimationFrame(step);
       }
@@ -90,7 +81,7 @@ function useCountUp(target: number, duration: number, started: boolean) {
   return count;
 }
 
-// ── Individual animated stat item component ────────────────────
+// ── Individual animated stat ───────────────────────────────────
 
 function AnimatedStat({ stat, visible }: { stat: StatItem; visible: boolean }) {
   const count = useCountUp(stat.numericValue, 1800, visible);
@@ -98,7 +89,6 @@ function AnimatedStat({ stat, visible }: { stat: StatItem; visible: boolean }) {
 
   const displayValue = (raw: number) => {
     if (stat.accent === "amber") {
-      // rating: 48 ticks → 4.8
       const whole = Math.floor(raw / 10);
       const decimal = raw % 10;
       return `${whole}.${decimal}`;
@@ -106,69 +96,38 @@ function AnimatedStat({ stat, visible }: { stat: StatItem; visible: boolean }) {
     return raw.toLocaleString();
   };
 
-  const valueColor =
-    stat.accent === "amber"
-      ? { color: "var(--sh-amber)" }
-      : stat.accent === "gradient"
-        ? {
-            background: "linear-gradient(135deg, var(--sh-info), var(--sh-amber))",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-            backgroundClip: "text" as const,
-          }
-        : { color: "var(--ink)" };
+  const accentColor = stat.accent === "amber" ? SH_AMBER : SH_BLUE;
 
   return (
-    <div
-      key={stat.label}
-      className="flex flex-col items-center gap-2 group"
-    >
+    <div className="flex flex-col items-center gap-2 group">
       {/* Icon */}
       <div
-        className="size-12 rounded-xl flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:shadow-[0_0_20px_rgba(11,99,206,0.15)]"
+        className="size-10 rounded-xl flex items-center justify-center transition-all duration-300 group-hover:scale-110"
         style={{
-          background:
-            stat.accent === "amber"
-              ? "var(--sh-amber-bg)"
-              : "var(--sh-info-bg)",
-          color:
-            stat.accent === "amber"
-              ? "var(--sh-amber)"
-              : "var(--sh-info)",
+          backgroundColor: `${accentColor}12`,
+          color: accentColor,
         }}
       >
-        <Icon className="size-6" aria-hidden="true" />
+        <Icon className="size-5" aria-hidden="true" />
       </div>
 
-      {/* Counter — hidden until visible so 0+ never flashes */}
+      {/* Counter */}
       <div
-        className="text-[clamp(28px,4vw,48px)] font-black leading-none tracking-tight"
+        className="text-[clamp(28px,3.5vw,44px)] font-black leading-none tracking-tight"
         style={{ opacity: visible ? 1 : 0, transition: "opacity 300ms ease" }}
       >
-        <span style={valueColor}>
-          {visible
-            ? `${displayValue(count)}${stat.suffix}`
-            : "—"}
+        <span style={{ color: accentColor }}>
+          {visible ? `${displayValue(count)}${stat.suffix}` : "—"}
         </span>
       </div>
 
       {/* Label */}
-      <div className="text-sm font-medium text-center" style={{ color: "var(--muted)" }}>
+      <div
+        className="text-xs font-medium text-center leading-tight"
+        style={{ color: "var(--muted)" }}
+      >
         {stat.label}
       </div>
-
-      {/* Animated underline on hover */}
-      <div
-        className="h-0.5 rounded-full transition-all duration-300"
-        style={{
-          width: 0,
-          background:
-            stat.accent === "amber"
-              ? "var(--sh-amber)"
-              : "var(--sh-info)",
-          opacity: 0,
-        }}
-      />
     </div>
   );
 }
@@ -188,7 +147,6 @@ export default function StatsSection({ className }: StatsSectionProps) {
   useEffect(() => {
     const el = sectionRef.current;
     if (!el) return;
-
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -196,9 +154,8 @@ export default function StatsSection({ className }: StatsSectionProps) {
           observer.disconnect();
         }
       },
-      { threshold: 0.3 },
+      { threshold: 0.3 }
     );
-
     observer.observe(el);
     return () => observer.disconnect();
   }, []);
@@ -206,32 +163,32 @@ export default function StatsSection({ className }: StatsSectionProps) {
   return (
     <section
       ref={sectionRef}
-      className={cn("shSection", className)}
+      className={cn("scroll-mt-20", className)}
       aria-label="Platform statistics"
     >
       <div
-        className="rounded-xl p-[clamp(24px,5vw,60px)] relative overflow-hidden"
+        className="rounded-xl p-[clamp(24px,4vw,48px)] relative overflow-hidden"
         style={{
-          background: "var(--sh-glass-bg)",
-          border: "1px solid var(--sh-glass-border)",
+          backgroundColor: "var(--surface)",
+          border: "1px solid var(--border)",
         }}
       >
         {/* Subtle ambient glow */}
         <div
-          className="absolute -top-24 -right-24 size-64 rounded-full opacity-[0.04] dark:opacity-[0.06] pointer-events-none"
+          className="absolute -top-24 -right-24 size-64 rounded-full opacity-[0.03] pointer-events-none"
           style={{
-            background: "radial-gradient(circle, var(--sh-info) 0%, transparent 70%)",
+            background: `radial-gradient(circle, ${SH_BLUE}, transparent 70%)`,
           }}
           aria-hidden="true"
         />
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-6 relative z-[1]">
-          {stats.map((stat) => (
+          {stats.map((stat, i) => (
             <div
               key={stat.label}
               style={{
                 animation: `shCardIn 500ms cubic-bezier(0.16, 1, 0.3, 1) both`,
-                animationDelay: `${stats.indexOf(stat) * 120}ms`,
+                animationDelay: `${i * 120}ms`,
               }}
             >
               <AnimatedStat stat={stat} visible={visible} />
