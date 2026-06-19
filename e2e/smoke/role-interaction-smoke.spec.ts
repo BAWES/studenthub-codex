@@ -144,7 +144,8 @@ test.describe("Staff Interaction Smoke", () => {
     const ctx = await authContext(candidateUser);
     await ctx.page.goto("/staff");
     await ctx.page.waitForLoadState("load");
-    await expect(ctx.page).not.toHaveURL("/staff");
+    const url = new URL(ctx.page.url());
+    expect(url.pathname).not.toBe("/staff");
     await ctx.close();
   });
 });
@@ -227,7 +228,8 @@ test.describe("Company Interaction Smoke", () => {
     const ctx = await authContext(candidateUser);
     await ctx.page.goto("/company");
     await ctx.page.waitForLoadState("load");
-    await expect(ctx.page).not.toHaveURL("/company");
+    const url = new URL(ctx.page.url());
+    expect(url.pathname).not.toBe("/company");
     await ctx.close();
   });
 });
@@ -367,7 +369,8 @@ test.describe("Admin Interaction Smoke", () => {
     const ctx = await authContext(staffUser);
     await ctx.page.goto("/admin");
     await ctx.page.waitForLoadState("load");
-    await expect(ctx.page).not.toHaveURL("/admin");
+    const url = new URL(ctx.page.url());
+    expect(url.pathname).not.toBe("/admin");
     await ctx.close();
   });
 });
@@ -418,7 +421,8 @@ test.describe("Inspector Interaction Smoke", () => {
     const ctx = await authContext(companyUser);
     await ctx.page.goto("/inspector");
     await ctx.page.waitForLoadState("load");
-    await expect(ctx.page).not.toHaveURL("/inspector");
+    const url = new URL(ctx.page.url());
+    expect(url.pathname).not.toBe("/inspector");
     await ctx.close();
   });
 });
