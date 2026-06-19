@@ -113,7 +113,7 @@ test.describe("Staff critical flows — Request fulfillment pipeline", () => {
       await expect(ctx.page).toHaveURL(/\/staff\/candidates/);
 
       // DataTable renders
-      await expect(ctx.page.locator("table").first()).toBeVisible({ timeout: 10000 });
+      await expect(ctx.page.locator(".dataList, .rows, table").first()).toBeVisible({ timeout: 10000 });
 
       assertNoReactErrors(ctx.errors);
       await ctx.close();
@@ -144,7 +144,7 @@ test.describe("Staff critical flows — Request fulfillment pipeline", () => {
       await expect(ctx.page).toHaveURL(/\/staff\/interviews/);
 
       // Interview list content
-      const dataSection = ctx.page.locator("table, h1, [class*='content']").first();
+      const dataSection = ctx.page.locator(".dataList, .rows, table, h1, [class*='content']").first();
       await expect(dataSection).toBeVisible({ timeout: 10000 });
 
       assertNoReactErrors(ctx.errors);
@@ -198,7 +198,7 @@ test.describe("Staff critical flows — Request fulfillment pipeline", () => {
       await expect(ctx.page.locator("h1")).toContainText("Requests");
 
       // DataTable renders
-      await expect(ctx.page.locator("table").first()).toBeVisible({ timeout: 10000 });
+      await expect(ctx.page.locator(".dataList, .rows, table").first()).toBeVisible({ timeout: 10000 });
 
       // Table columns render (Request, Company, Seats, Status, Updated)
       const requestCol = ctx.page.locator("text=Request").first();

@@ -59,7 +59,7 @@ test.describe("Admin companies page", () => {
     console.log(`Admin companies heading: ${headingText}`);
 
     // Check for table or data grid
-    const table = ctx.page.locator("table, [role='grid'], [role='table'], [class*='DataTable']").first();
+    const table = ctx.page.locator(".dataList, .rows, table, [role='grid'], [role='table'], [class*='DataTable']").first();
     if (await table.isVisible().catch(() => false)) {
       console.log("Companies DataTable found");
       // Check column headers exist
