@@ -100,7 +100,7 @@ export default function EmployerSection({ className }: EmployerSectionProps) {
     >
       <div className="text-center mb-8 md:mb-10">
         <span
-          className="inline-block text-[11px] font-bold uppercase tracking-wider mb-3 px-3 py-1 rounded-full"
+          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold tracking-wider uppercase"
           style={{
             color: SH_AMBER,
             backgroundColor: `${SH_AMBER}12`,
@@ -108,16 +108,10 @@ export default function EmployerSection({ className }: EmployerSectionProps) {
         >
           For employers
         </span>
-        <h2
-          className="text-[clamp(24px,3vw,36px)] font-bold leading-tight"
-          style={{ color: "var(--ink)" }}
-        >
+        <h2 className="shLandingSectionTitle mt-3">
           Hire student talent without the runaround.
         </h2>
-        <p
-          className="max-w-[520px] mx-auto mt-2 text-sm leading-relaxed"
-          style={{ color: "var(--muted)" }}
-        >
+        <p className="shLandingSectionSub mx-auto mt-2">
           From posting a role to paying your staff — one system replaces five
           tools. No spreadsheets, no agency fees, no middlemen.
         </p>
@@ -131,10 +125,12 @@ export default function EmployerSection({ className }: EmployerSectionProps) {
           return (
             <div
               key={feat.title}
-              className="group rounded-xl p-5 transition-all duration-[280ms] hover:-translate-y-1"
+              className="group rounded-xl p-5 shLandingGlassHover"
               style={{
-                backgroundColor: "var(--surface)",
-                border: "1px solid var(--border)",
+                backgroundColor: "var(--sh-glass-bg)",
+                backdropFilter: "blur(12px)",
+                WebkitBackdropFilter: "blur(12px)",
+                border: "1px solid var(--sh-glass-border)",
                 opacity: isVisible ? 1 : 0,
                 transform: isVisible
                   ? "translateY(0)"
@@ -155,7 +151,7 @@ export default function EmployerSection({ className }: EmployerSectionProps) {
               </div>
 
               <strong
-                className="block text-sm mb-1.5"
+                className="block text-sm mb-1.5 tracking-tight"
                 style={{ color: "var(--ink)" }}
               >
                 {feat.title}
@@ -172,7 +168,7 @@ export default function EmployerSection({ className }: EmployerSectionProps) {
                 className="mt-3 pt-3 text-[11px] font-semibold flex items-center gap-1.5"
                 style={{
                   color: SH_BLUE,
-                  borderTop: "1px solid var(--border)",
+                  borderTop: "1px solid var(--sh-glass-border)",
                 }}
               >
                 <Sparkles className="size-3" />
@@ -187,7 +183,7 @@ export default function EmployerSection({ className }: EmployerSectionProps) {
       <div className="text-center mt-8">
         <a
           href="/signup?role=company"
-          className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-semibold text-white transition-all duration-200 hover:brightness-110 hover:-translate-y-0.5 active:translate-y-0"
+          className="shLandingBtnPrimary"
           style={{
             backgroundColor: SH_AMBER,
             boxShadow: `0 4px 14px ${SH_AMBER}40`,

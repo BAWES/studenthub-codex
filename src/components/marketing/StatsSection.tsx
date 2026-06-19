@@ -113,7 +113,7 @@ function AnimatedStat({ stat, visible }: { stat: StatItem; visible: boolean }) {
 
       {/* Counter */}
       <div
-        className="text-[clamp(28px,3.5vw,44px)] font-black leading-none tracking-tight"
+        className="shLandingStatValue"
         style={{ opacity: visible ? 1 : 0, transition: "opacity 300ms ease" }}
       >
         <span style={{ color: accentColor }}>
@@ -167,15 +167,15 @@ export default function StatsSection({ className }: StatsSectionProps) {
       aria-label="Platform statistics"
     >
       <div
-        className="rounded-xl p-[clamp(24px,4vw,48px)] relative overflow-hidden"
+        className="relative rounded-xl p-[clamp(24px,4vw,48px)] overflow-hidden shLandingGlass"
         style={{
-          backgroundColor: "var(--surface)",
-          border: "1px solid var(--border)",
+          backdropFilter: "blur(16px)",
+          WebkitBackdropFilter: "blur(16px)",
         }}
       >
         {/* Subtle ambient glow */}
         <div
-          className="absolute -top-24 -right-24 size-64 rounded-full opacity-[0.03] pointer-events-none"
+          className="absolute -top-24 -right-24 size-64 rounded-full opacity-[0.04] pointer-events-none"
           style={{
             background: `radial-gradient(circle, ${SH_BLUE}, transparent 70%)`,
           }}
