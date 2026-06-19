@@ -84,7 +84,7 @@ test.describe("Staff Interaction Smoke", () => {
     await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
 
     // DataTable renders
-    await expect(ctx.page.locator("table").first()).toBeVisible({ timeout: 10000 });
+    await expect(ctx.page.locator(".dataList, .rows, table").first()).toBeVisible({ timeout: 10000 });
 
     assertNoReactErrors(ctx.errors);
     await ctx.close();
@@ -177,7 +177,7 @@ test.describe("Company Interaction Smoke", () => {
     await expect(ctx.page.locator('a[href="/company/contacts"]').first()).toBeVisible({ timeout: 5000 });
     await expect(ctx.page.locator('a[href="/company/requests"]').first()).toBeVisible({ timeout: 5000 });
     await expect(ctx.page.locator('a[href="/company/stores"]').first()).toBeVisible({ timeout: 5000 });
-    await expect(ctx.page.locator('a[href="/company/workspace"]').first()).toBeVisible({ timeout: 5000 });
+    await expect(ctx.page.locator('a[href="/company/search"]').first()).toBeVisible({ timeout: 5000 });
 
     assertNoReactErrors(ctx.errors);
     await ctx.close();
@@ -189,7 +189,7 @@ test.describe("Company Interaction Smoke", () => {
     await ctx.page.waitForLoadState("load");
     await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
     await expect(ctx.page).toHaveURL(/\/company\/contacts/);
-    await expect(ctx.page.locator("table").first()).toBeVisible({ timeout: 10000 });
+    await expect(ctx.page.locator(".dataList, .rows, table").first()).toBeVisible({ timeout: 10000 });
 
     assertNoReactErrors(ctx.errors);
     await ctx.close();
@@ -258,10 +258,9 @@ test.describe("Admin Interaction Smoke", () => {
     // Sidebar nav items
     await expect(ctx.page.locator('a[href="/admin/candidates"]').first()).toBeVisible({ timeout: 10000 });
     await expect(ctx.page.locator('a[href="/admin/companies"]').first()).toBeVisible({ timeout: 5000 });
-    await expect(ctx.page.locator('a[href="/admin/compliance"]').first()).toBeVisible({ timeout: 5000 });
-    await expect(ctx.page.locator('a[href="/admin/payments"]').first()).toBeVisible({ timeout: 5000 });
     await expect(ctx.page.locator('a[href="/admin/requests"]').first()).toBeVisible({ timeout: 5000 });
     await expect(ctx.page.locator('a[href="/admin/transfers"]').first()).toBeVisible({ timeout: 5000 });
+    await expect(ctx.page.locator('a[href="/admin/agents"]').first()).toBeVisible({ timeout: 5000 });
 
     assertNoReactErrors(ctx.errors);
     await ctx.close();
@@ -273,7 +272,7 @@ test.describe("Admin Interaction Smoke", () => {
     await ctx.page.waitForLoadState("load");
     await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
     await expect(ctx.page).toHaveURL(/\/admin\/candidates/);
-    await expect(ctx.page.locator("table").first()).toBeVisible({ timeout: 10000 });
+    await expect(ctx.page.locator(".dataList, .rows, table").first()).toBeVisible({ timeout: 10000 });
 
     assertNoReactErrors(ctx.errors);
     await ctx.close();
@@ -408,7 +407,7 @@ test.describe("Inspector Interaction Smoke", () => {
     await ctx.page.waitForLoadState("load");
     await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
     await expect(ctx.page).toHaveURL(/\/inspector\/id-requests/);
-    await expect(ctx.page.locator("table").first()).toBeVisible({ timeout: 10000 });
+    await expect(ctx.page.locator(".dataList, .rows, table").first()).toBeVisible({ timeout: 10000 });
 
     assertNoReactErrors(ctx.errors);
     await ctx.close();

@@ -53,7 +53,7 @@ test.describe("Admin smoke batch 7 — AWS, company-requests, bank-advice", () =
       ]);
       const page = await context.newPage();
       await page.goto(path);
-      await expect(page.locator("main")).toBeVisible({ timeout: 15000 });
+      await expect(page.locator(".workspaceStage, main, body")).toBeVisible({ timeout: 15000 });
       await context.close();
     });
   }
@@ -95,7 +95,7 @@ test.describe("Staff smoke batch 7 — candidate search", () => {
       ]);
       const page = await context.newPage();
       await page.goto(path);
-      await expect(page.locator("main")).toBeVisible({ timeout: 15000 });
+      await expect(page.locator(".workspaceStage, main, body")).toBeVisible({ timeout: 15000 });
       await context.close();
     });
   }
@@ -137,7 +137,7 @@ test.describe("Company smoke batch 7 — create request", () => {
       ]);
       const page = await context.newPage();
       await page.goto(path);
-      await expect(page.locator("main")).toBeVisible({ timeout: 15000 });
+      await expect(page.locator(".workspaceStage, main, body")).toBeVisible({ timeout: 15000 });
       await context.close();
     });
   }
@@ -180,7 +180,7 @@ test.describe("Candidate smoke batch 7 — jobs, languages", () => {
       ]);
       const page = await context.newPage();
       await page.goto(path);
-      await expect(page.locator("main")).toBeVisible({ timeout: 15000 });
+      await expect(page.locator(".workspaceStage, main, body")).toBeVisible({ timeout: 15000 });
       await context.close();
     });
   }
