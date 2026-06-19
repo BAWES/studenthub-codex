@@ -148,6 +148,7 @@ describe("employerDashboardDataSchema", () => {
     jobStatusBreakdown: [validBreakdown],
     totalJobs: 50,
     totalApplications: 200,
+    pendingReviews: 5,
   };
 
   it("accepts valid input", () => {

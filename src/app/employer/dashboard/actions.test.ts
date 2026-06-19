@@ -132,6 +132,7 @@ describe("employerDashboardDataSchema", () => {
       ],
       totalJobs: 10,
       totalApplications: 120,
+      pendingReviews: 3,
     });
     expect(result.success).toBe(true);
     if (result.success) {
@@ -150,6 +151,7 @@ describe("employerDashboardDataSchema", () => {
       jobStatusBreakdown: [],
       totalJobs: 0,
       totalApplications: 0,
+      pendingReviews: 0,
     });
     expect(result.success).toBe(true);
     if (result.success) {
@@ -164,6 +166,7 @@ describe("employerDashboardDataSchema", () => {
       recentApplications: [],
       jobStatusBreakdown: [],
       totalApplications: 0,
+      pendingReviews: 0,
     });
     expect(result.success).toBe(false);
   });
