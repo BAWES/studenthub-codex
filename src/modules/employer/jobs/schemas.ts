@@ -108,3 +108,27 @@ export const deleteJobResultSchema = z.object({
 });
 
 export type DeleteJobResultOutput = z.output<typeof deleteJobResultSchema>;
+
+export const getMyEmployerIdResultSchema = z.number().int().positive().nullable();
+
+export const searchJobsResultSchema = z.object({
+  query: z.string(),
+  page: z.number().int().positive(),
+  matchingCount: z.number().int().nonnegative(),
+  rows: z.array(z.object({
+    jobListingId: z.number().int(),
+    title: z.string(),
+    description: z.string(),
+    location: z.string().nullable(),
+    employmentType: z.string().nullable(),
+    salaryRange: z.string().nullable(),
+    status: z.string().nullable(),
+    companyName: z.string(),
+    createdAt: z.string(),
+    score: z.number().optional(),
+  })),
+  source: z.object({
+    current: z.string(),
+    target: z.string(),
+  }),
+});
