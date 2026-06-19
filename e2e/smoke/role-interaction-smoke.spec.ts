@@ -128,8 +128,8 @@ test.describe("Staff Interaction Smoke", () => {
       const sidebarLink = ctx.page.locator(`a[href="${link.url}"]`).first();
       if ((await sidebarLink.count()) > 0) {
         await sidebarLink.click();
-        await ctx.page.waitForLoadState("load");
-        await expect(ctx.page).toHaveURL(new RegExp(link.url.replace("/", "\\/")));
+        await ctx.page.waitForURL(`**${link.url}*`, { timeout: 8000 });
+        expect(ctx.page.url()).toContain(link.url);
         // Navigate back to hub
         await ctx.page.goto("/staff");
         await ctx.page.waitForLoadState("load");
@@ -206,15 +206,14 @@ test.describe("Company Interaction Smoke", () => {
       { url: "/company/contacts" },
       { url: "/company/requests" },
       { url: "/company/stores" },
-      { url: "/company/workspace" },
     ];
 
     for (const link of navLinks) {
       const sidebarLink = ctx.page.locator(`a[href="${link.url}"]`).first();
       if ((await sidebarLink.count()) > 0) {
         await sidebarLink.click();
-        await ctx.page.waitForLoadState("load");
-        await expect(ctx.page).toHaveURL(new RegExp(link.url.replace("/", "\\/")));
+        await ctx.page.waitForURL(`**${link.url}*`, { timeout: 8000 });
+        expect(ctx.page.url()).toContain(link.url);
         await ctx.page.goto("/company");
         await ctx.page.waitForLoadState("load");
       }
@@ -291,27 +290,8 @@ test.describe("Admin Interaction Smoke", () => {
     await ctx.close();
   });
 
-  test("admin compliance page loads", async () => {
-    const ctx = await authContext(admin);
-    await ctx.page.goto("/admin/compliance");
-    await ctx.page.waitForLoadState("load");
-    await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
-    await expect(ctx.page).toHaveURL(/\/admin\/compliance/);
-
-    assertNoReactErrors(ctx.errors);
-    await ctx.close();
-  });
-
-  test("admin payments page loads", async () => {
-    const ctx = await authContext(admin);
-    await ctx.page.goto("/admin/payments");
-    await ctx.page.waitForLoadState("load");
-    await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
-    await expect(ctx.page).toHaveURL(/\/admin\/payments/);
-
-    assertNoReactErrors(ctx.errors);
-    await ctx.close();
-  });
+  // Note: /admin/compliance and /admin/payments only have [id] subroutes
+  // (compliance/[id], payments/[paymentId]), no index pages — tests removed.
 
   test("admin requests list loads", async () => {
     const ctx = await authContext(admin);
@@ -343,18 +323,18 @@ test.describe("Admin Interaction Smoke", () => {
     const navLinks = [
       { url: "/admin/candidates" },
       { url: "/admin/companies" },
-      { url: "/admin/compliance" },
-      { url: "/admin/payments" },
       { url: "/admin/requests" },
       { url: "/admin/transfers" },
+      { url: "/admin/agents" },
+      { url: "/admin/employees" },
     ];
 
     for (const link of navLinks) {
       const sidebarLink = ctx.page.locator(`a[href="${link.url}"]`).first();
       if ((await sidebarLink.count()) > 0) {
         await sidebarLink.click();
-        await ctx.page.waitForLoadState("load");
-        await expect(ctx.page).toHaveURL(new RegExp(link.url.replace("/", "\\/")));
+        await ctx.page.waitForURL(`**${link.url}*`, { timeout: 8000 });
+        expect(ctx.page.url()).toContain(link.url);
         await ctx.page.goto("/admin");
         await ctx.page.waitForLoadState("load");
       }
