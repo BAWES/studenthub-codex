@@ -76,7 +76,7 @@ export default function CTASection({ persona }: CTASectionProps) {
                   ? "/signup?role=company"
                   : "/signup?role=candidate"
               }
-              className="inline-flex items-center gap-1.5 px-6 py-2.5 rounded-lg text-sm font-semibold text-white transition-all duration-200 hover:brightness-110 hover:-translate-y-0.5 active:translate-y-0"
+              className="inline-flex items-center gap-1.5 px-6 py-2.5 rounded-lg text-sm font-semibold text-white transition-all duration-200 hover:brightness-110 hover:-translate-y-0.5 active:translate-y-0 group"
               style={{
                 backgroundColor: persona === "company" ? SH_AMBER : SH_BLUE,
                 boxShadow: persona === "company"

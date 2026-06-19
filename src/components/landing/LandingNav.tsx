@@ -49,30 +49,24 @@ export default function LandingNav({ session, persona, onPersonaChange }: Landin
           <div className="hidden md:flex items-center gap-1 ml-8">
             <Link
               href="#how-it-works"
-              className="px-3 py-1.5 rounded-md text-sm no-underline transition-colors"
+              className="px-3 py-1.5 rounded-md text-sm no-underline transition-colors hover:text-[var(--ink)]"
               style={{ color: "var(--muted)" }}
-              onMouseOver={(e) => (e.currentTarget.style.color = "var(--ink)")}
-              onMouseOut={(e) => (e.currentTarget.style.color = "var(--muted)")}
             >
               How it works
             </Link>
             {persona === "company" && (
               <Link
                 href="#for-employers"
-                className="px-3 py-1.5 rounded-md text-sm no-underline transition-colors"
+                className="px-3 py-1.5 rounded-md text-sm no-underline transition-colors hover:text-[var(--ink)]"
                 style={{ color: "var(--muted)" }}
-                onMouseOver={(e) => (e.currentTarget.style.color = "var(--ink)")}
-                onMouseOut={(e) => (e.currentTarget.style.color = "var(--muted)")}
               >
                 For employers
               </Link>
             )}
             <Link
               href="#testimonials"
-              className="px-3 py-1.5 rounded-md text-sm no-underline transition-colors"
+              className="px-3 py-1.5 rounded-md text-sm no-underline transition-colors hover:text-[var(--ink)]"
               style={{ color: "var(--muted)" }}
-              onMouseOver={(e) => (e.currentTarget.style.color = "var(--ink)")}
-              onMouseOut={(e) => (e.currentTarget.style.color = "var(--muted)")}
             >
               Testimonials
             </Link>
