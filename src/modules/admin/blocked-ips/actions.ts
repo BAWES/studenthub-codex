@@ -17,6 +17,14 @@ import type {
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
+// Internal helpers
+// ---------------------------------------------------------------------------
+
+function logOutputError(source: string, error: unknown): void {
+  console.error(`[modules/admin/blocked-ips] ${source} output failed:`, error);
+}
+
+// ---------------------------------------------------------------------------
 // Schemas
 // ---------------------------------------------------------------------------
 
@@ -116,10 +124,7 @@ export async function listBlockedIps(
   // Validate output shape
   const outputParsed = listBlockedIpsResultSchema.safeParse(result);
   if (!outputParsed.success) {
-    console.error(
-      "[modules/admin/blocked-ips] listBlockedIps output validation failed:",
-      outputParsed.error.issues,
-    );
+    logOutputError("listBlockedIps", outputParsed.error.issues);
   }
 
   return result;
@@ -161,10 +166,7 @@ export async function getBlockedIp(
   // Validate output shape
   const outputParsed = blockedIpListItemSchema.safeParse(result);
   if (!outputParsed.success) {
-    console.error(
-      "[modules/admin/blocked-ips] getBlockedIp output validation failed:",
-      outputParsed.error.issues,
-    );
+    logOutputError("getBlockedIp", outputParsed.error.issues);
   }
 
   return result;
@@ -205,10 +207,7 @@ export async function createBlockedIp(
   // Validate output shape
   const outputParsed = blockedIpUuidResultSchema.safeParse(ipResult);
   if (!outputParsed.success) {
-    console.error(
-      "[modules/admin/blocked-ips] createBlockedIp output validation failed:",
-      outputParsed.error.issues,
-    );
+    logOutputError("createBlockedIp", outputParsed.error.issues);
   }
 
   return ipResult;
@@ -257,10 +256,7 @@ export async function updateBlockedIp(
   // Validate output shape
   const outputParsed2 = blockedIpUuidResultSchema.safeParse(updateResult);
   if (!outputParsed2.success) {
-    console.error(
-      "[modules/admin/blocked-ips] updateBlockedIp output validation failed:",
-      outputParsed2.error.issues,
-    );
+    logOutputError("updateBlockedIp", outputParsed2.error.issues);
   }
 
   return updateResult;
@@ -303,10 +299,7 @@ export async function deleteBlockedIp(
   // Validate output shape
   const outputParsed3 = blockedIpUuidResultSchema.safeParse(deleteResult);
   if (!outputParsed3.success) {
-    console.error(
-      "[modules/admin/blocked-ips] deleteBlockedIp output validation failed:",
-      outputParsed3.error.issues,
-    );
+    logOutputError("deleteBlockedIp", outputParsed3.error.issues);
   }
 
   return deleteResult;

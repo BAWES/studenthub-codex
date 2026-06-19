@@ -42,6 +42,14 @@ import {
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
+// Internal helpers
+// ---------------------------------------------------------------------------
+
+function logOutputError(source: string, error: unknown): void {
+  console.error(`[modules/admin/candidate-account-requests] ${source} output failed:`, error);
+}
+
+// ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
@@ -114,10 +122,7 @@ export async function listCandidateIdRequests(
   // Validate output shape
   const outputParsed = listCandidateIdRequestsOutputSchema.safeParse(result);
   if (!outputParsed.success) {
-    console.error(
-      "[admin/candidate-account-requests] listCandidateIdRequests output failed:",
-      outputParsed.error.issues,
-    );
+    logOutputError("listCandidateIdRequests", outputParsed.error.issues);
   }
 
   return result;
@@ -154,10 +159,7 @@ export async function getCandidateIdRequest(
 
     const outputParsed = getCandidateIdRequestOutputSchema.safeParse(result);
     if (!outputParsed.success) {
-      console.error(
-        "[admin/candidate-account-requests] getCandidateIdRequest (not found) output failed:",
-        outputParsed.error.issues,
-      );
+      logOutputError("getCandidateIdRequest", outputParsed.error.issues);
     }
 
     return result;
@@ -169,10 +171,7 @@ export async function getCandidateIdRequest(
 
   const outputParsed = getCandidateIdRequestOutputSchema.safeParse(result);
   if (!outputParsed.success) {
-    console.error(
-      "[admin/candidate-account-requests] getCandidateIdRequest output failed:",
-      outputParsed.error.issues,
-    );
+    logOutputError("getCandidateIdRequest", outputParsed.error.issues);
   }
 
   return result;
@@ -204,10 +203,7 @@ export async function updateCandidateIdRequestStatus(
 
     const outputParsed = updateCandidateIdRequestStatusOutputSchema.safeParse(result);
     if (!outputParsed.success) {
-      console.error(
-        "[admin/candidate-account-requests] updateCandidateIdRequestStatus output failed:",
-        outputParsed.error.issues,
-      );
+      logOutputError("updateCandidateIdRequestStatus", outputParsed.error.issues);
     }
 
     return result;
@@ -229,10 +225,7 @@ export async function updateCandidateIdRequestStatus(
 
     const outputParsed = updateCandidateIdRequestStatusOutputSchema.safeParse(result);
     if (!outputParsed.success) {
-      console.error(
-        "[admin/candidate-account-requests] updateCandidateIdRequestStatus output failed:",
-        outputParsed.error.issues,
-      );
+      logOutputError("updateCandidateIdRequestStatus", outputParsed.error.issues);
     }
 
     return result;
@@ -263,10 +256,7 @@ export async function updateCandidateIdRequestStatus(
 
     const outputParsed = updateCandidateIdRequestStatusOutputSchema.safeParse(result);
     if (!outputParsed.success) {
-      console.error(
-        "[admin/candidate-account-requests] updateCandidateIdRequestStatus output failed:",
-        outputParsed.error.issues,
-      );
+      logOutputError("updateCandidateIdRequestStatus", outputParsed.error.issues);
     }
 
     return result;
@@ -278,10 +268,7 @@ export async function updateCandidateIdRequestStatus(
 
     const outputParsed = updateCandidateIdRequestStatusOutputSchema.safeParse(result);
     if (!outputParsed.success) {
-      console.error(
-        "[admin/candidate-account-requests] updateCandidateIdRequestStatus output failed:",
-        outputParsed.error.issues,
-      );
+      logOutputError("updateCandidateIdRequestStatus", outputParsed.error.issues);
     }
 
     return result;

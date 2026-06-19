@@ -11,6 +11,14 @@ import {
 } from "./schemas";
 import { listAttendanceResultSchema, createAttendanceResultSchema, attendanceDetailSchema } from "@/modules/attendance/schemas";
 
+// ---------------------------------------------------------------------------
+// Internal helpers
+// ---------------------------------------------------------------------------
+
+function logOutputError(source: string, error: unknown): void {
+  console.error(`[modules/admin/attendance] ${source} output failed:`, error);
+}
+
 export async function listAdminAttendance(
   params: ListAttendanceParams = {},
 ): Promise<ListAttendanceResult> {
@@ -18,7 +26,7 @@ export async function listAdminAttendance(
   const result = await listAttendance(params);
   const parsed = listAttendanceResultSchema.safeParse(result);
   if (!parsed.success) {
-    console.error("[admin/attendance] listAdminAttendance output validation failed:", parsed.error.issues);
+    logOutputError("listAdminAttendance", parsed.error.issues);
   }
   return result;
 }
@@ -36,7 +44,7 @@ export async function createAdminAttendance(data: {
   const result = await createAttendance(data);
   const parsed = createAttendanceResultSchema.safeParse(result);
   if (!parsed.success) {
-    console.error("[admin/attendance] createAdminAttendance output validation failed:", parsed.error.issues);
+    logOutputError("createAdminAttendance", parsed.error.issues);
   }
   revalidatePath("/admin/attendance");
   return result;
@@ -53,7 +61,7 @@ export async function getEmployeeOptions(): Promise<ListEmployeeOptionsResult> {
 
   const parsed = listEmployeeOptionsResultSchema.safeParse(result);
   if (!parsed.success) {
-    console.error("[admin/attendance] getEmployeeOptions output validation failed:", parsed.error.issues);
+    logOutputError("getEmployeeOptions", parsed.error.issues);
   }
 
   return result;
@@ -90,7 +98,7 @@ export async function getAdminAttendance(uuid: string) {
 
   const parsed = attendanceDetailSchema.safeParse(attendance);
   if (!parsed.success) {
-    console.error("[admin/attendance] getAdminAttendance output validation failed:", parsed.error.issues);
+    logOutputError("getAdminAttendance", parsed.error.issues);
   }
 
   return result;
