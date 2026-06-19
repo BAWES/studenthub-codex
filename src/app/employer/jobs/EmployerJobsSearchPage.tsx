@@ -169,6 +169,7 @@ export function EmployerJobsSearchPage({
 
   return (
     <div className="mx-auto max-w-7xl">
+      <h1 className="sr-only">Job Postings</h1>
       {/* Search form */}
       <form className="mb-6" onSubmit={handleSubmit}>
         <div className="flex gap-2">

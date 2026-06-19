@@ -323,12 +323,12 @@ test.describe("Auth critical flows — Login, cross-role isolation, public route
 
       // Hit the logout endpoint — returns JSON/redirect, wait for network idle
       await ctx.page.goto("/api/auth/logout");
-      await ctx.page.waitForLoadState("networkidle");
+      await ctx.page.waitForLoadState("load");
       await ctx.page.waitForTimeout(300);
 
       // After logout, a protected route should redirect to login
       await ctx.page.goto("/staff");
-      await ctx.page.waitForLoadState("networkidle");
+      await ctx.page.waitForLoadState("load");
       await ctx.page.waitForTimeout(300);
       await expect(ctx.page).toHaveURL(/\/login/);
 
@@ -346,12 +346,12 @@ test.describe("Auth critical flows — Login, cross-role isolation, public route
 
       // Logout — returns JSON/redirect, wait for network idle
       await ctx.page.goto("/api/auth/logout");
-      await ctx.page.waitForLoadState("networkidle");
+      await ctx.page.waitForLoadState("load");
       await ctx.page.waitForTimeout(300);
 
       // Protected route should now redirect
       await ctx.page.goto("/company");
-      await ctx.page.waitForLoadState("networkidle");
+      await ctx.page.waitForLoadState("load");
       await ctx.page.waitForTimeout(300);
       await expect(ctx.page).toHaveURL(/\/login/);
 
