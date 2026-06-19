@@ -363,8 +363,13 @@ test.describe("Auth critical flows — authentication, redirects, session, logou
       await ctx.page.waitForLoadState("load");
       await expect(ctx.page).toHaveURL(/\/candidate/);
 
-      // Clear session cookie via Playwright API (httpOnly cookie, can't use document.cookie)
-      await ctx.page.context().clearCookies();
+      // Clear the session cookie (simulates logout — /api/auth/logout route is
+      // not served; auth uses Next.js server actions now)
+      const cookies = await ctx.context.cookies();
+      const sessionCookie = cookies.find((c) => c.name === "studenthub_next_session");
+      if (sessionCookie) {
+        await ctx.context.clearCookies();
+      }
 
       // After logout, a protected route should redirect to /login
       await ctx.page.goto("/candidate");
@@ -375,7 +380,6 @@ test.describe("Auth critical flows — authentication, redirects, session, logou
       await ctx.close();
     });
   });
-
   // ──────────────────────────────────────────────────────────────────────────
   // Flow 6 — Password Reset Flow
   // ──────────────────────────────────────────────────────────────────────────

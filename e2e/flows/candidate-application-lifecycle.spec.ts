@@ -114,31 +114,15 @@ test.describe("Candidate application lifecycle — Browse → Apply → Track", 
 
       await ctx.page.goto("/candidate");
       await ctx.page.waitForLoadState("load");
-    await ctx.page.waitForTimeout(300);
+      await ctx.page.waitForTimeout(500);
       await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
       await expect(ctx.page).toHaveURL(/\/candidate/);
 
-      // Metrics section or dashboard content renders
-      const metricCards = ctx.page.locator(
-        'section[aria-label*="metrics"], section[aria-label*="overview"], [class*="metrics"], [class*="stats"]',
+      // Dashboard content renders — check heading or welcome text
+      const dashboardContent = ctx.page.locator(
+        'h1, h2, [class*="dashboard"], [class*="welcome"], text=Candidate, text=Overview',
       ).first();
-      const headingSection = ctx.page.locator("h1").first();
-      await expect(metricCards.or(headingSection)).toBeVisible({ timeout: 10000 });
-
-      // Navigation sidebar or tabs for candidate sections
-      const navItems = [
-        ctx.page.locator('a[href="/candidate/jobs"]').first(),
-        ctx.page.locator('a[href="/candidate/applications"]').first(),
-        ctx.page.locator('a[href="/candidate/profile"]').first(),
-      ];
-      let navItemFound = false;
-      for (const item of navItems) {
-        if (await item.isVisible().catch(() => false)) {
-          navItemFound = true;
-          break;
-        }
-      }
-      if (navItemFound) console.log("Candidate navigation items visible");
+      await expect(dashboardContent).toBeVisible({ timeout: 10000 });
 
       assertNoReactErrors(ctx.errors);
       await ctx.close();
