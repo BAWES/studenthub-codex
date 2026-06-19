@@ -14,6 +14,7 @@ export {
   contractDetailObjectOutputSchema,
   contractDetailOutputSchema,
   contractStatusUpdateOutputSchema,
+  contractActionResponseOutputSchema,
   type ListContractsInput,
   type GetContractInput,
   type UpdateContractStatusInput,

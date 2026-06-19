@@ -43,55 +43,9 @@ export type GetStaffRequestDetailInput = z.input<
 
 export type UpdateRequestStatusInput = z.input<typeof updateRequestStatusSchema>;
 
-export type StaffRequestRow = {
-  id: string;
-  title: string;
-  company: string;
-  seats: number;
-  status: string;
-  updated: string;
-};
-
-export type StaffRequestDetail = {
-  requestUuid: string;
-  positionTitle: string | null;
-  jobDescription: string;
-  compensation: string;
-  seats: number;
-  location: string | null;
-  status: string | null;
-  priority: number | null;
-  assignedAt: Date | null;
-  startedAt: Date | null;
-  finishedAt: Date | null;
-  updatedAt: Date;
-  createdAt: Date;
-  company: {
-    company_id: number;
-    company_name: string | null;
-    company_email: string | null;
-  } | null;
-  contact: {
-    contact_name: string | null;
-    contact_email: string | null;
-  } | null;
-  staff: {
-    staff_name: string | null;
-    staff_email: string | null;
-  } | null;
-  candidates: {
-    uuid: string;
-    name: string | null;
-    email: string | null;
-    applicationStatus: number | null;
-    appliedAt: Date | null;
-  }[];
-};
-
-export type UpdateRequestStatusResult = {
-  operation: "success" | "error";
-  message: string;
-};
+export type StaffRequestRow = z.output<typeof staffRequestRowOutputSchema>;
+export type StaffRequestDetail = z.output<typeof staffRequestDetailOutputSchema>;
+export type UpdateRequestStatusResult = z.output<typeof updateRequestStatusOutputSchema>;
 
 // ---------------------------------------------------------------------------
 // Output validation schemas

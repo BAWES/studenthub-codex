@@ -22,35 +22,9 @@ export const getCandidateByIdSchema = z.object({
 export type ListCandidatesInput = z.input<typeof listCandidatesSchema>;
 export type GetCandidateByIdInput = z.input<typeof getCandidateByIdSchema>;
 
-export type CandidateRow = {
-  id: number;
-  name: string;
-  email: string;
-  phone: string | null;
-  status: number;
-  createdAt: string;
-};
-
-export type CandidateDetail = {
-  id: number;
-  name: string;
-  nameAr: string;
-  email: string;
-  phone: string | null;
-  gender: number | null;
-  objective: string | null;
-  status: number;
-  createdAt: string;
-  updatedAt: string;
-};
-
-export type ListCandidatesResult = {
-  items: CandidateRow[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
+export type CandidateRow = z.output<typeof candidateRowOutputSchema>;
+export type CandidateDetail = z.output<typeof candidateDetailOutputSchema>;
+export type ListCandidatesResult = z.output<typeof candidateListOutputSchema>;
 
 // ---------------------------------------------------------------------------
 // Output validation schemas
