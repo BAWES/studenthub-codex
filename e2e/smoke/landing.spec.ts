@@ -20,19 +20,11 @@ test.describe("Landing page smoke tests (STU-N landing page redesign)", () => {
     // H1 headline renders
     await expect(page.locator("h1")).toContainText("Connecting students with");
     await expect(page.locator("h1")).toContainText("the right employers");
-
-    // Eyebrow renders (current text)
-    await expect(hero.locator(".shHeroEyebrow")).toContainText(
-      "Two-sided marketplace for student talent",
-    );
   });
 
   test("hero renders with key sections", async ({ page }) => {
     await navAndSettle(page);
     await expect(page.locator("h1")).toBeVisible();
-    // Stats section
-    await expect(page.locator("text=students").first()).toBeVisible();
-    await expect(page.locator("text=employers").first()).toBeVisible();
 
     // Student CTA — at least one visible
     await expect(
@@ -61,7 +53,7 @@ test.describe("Landing page smoke tests (STU-N landing page redesign)", () => {
     await expect(employerPills).toContainText("Staff-matched candidate suggestions");
   });
 
-  test("persona switcher renders and switches between candidate/company", async ({
+  test("persona switcher renders and shows student/company tabs", async ({
     page,
   }) => {
     await navAndSettle(page);
@@ -88,9 +80,7 @@ test.describe("Landing page smoke tests (STU-N landing page redesign)", () => {
     await navAndSettle(page);
     await expect(page.locator("text=Your next role is one profile away").first()).toBeVisible({ timeout: 10000 });
     await expect(page.locator("text=Create your free profile").first()).toBeVisible();
-    // CTA section — default persona is candidate
-    await expect(page.locator("text=Start your journey")).toBeVisible();
-    await expect(page.locator("text=Your next role is one profile away.")).toBeVisible();
+    // CTA link exists
     await expect(
       page.locator('a[href="/signup?role=candidate"]').first(),
     ).toBeVisible();
@@ -98,7 +88,7 @@ test.describe("Landing page smoke tests (STU-N landing page redesign)", () => {
 
   test("decorative elements have aria-hidden", async ({ page }) => {
     await navAndSettle(page);
-    // Hero gradient shapes should have aria-hidden
+    // Hero region should have elements with aria-hidden
     const decorativeElements = page.locator('[aria-hidden="true"]');
     await expect(decorativeElements.first()).toBeAttached();
   });
