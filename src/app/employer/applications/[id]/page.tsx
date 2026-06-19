@@ -1,11 +1,9 @@
 import { notFound } from "next/navigation";
 import { requireRoleCapability } from "@/modules/auth/session";
 import { getApplicationDetail } from "./actions";
-import { acceptApplication, rejectApplication, revertApplicationStatus } from "./actions";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { StatusBadge } from "@/modules/workspace/StatusBadge";
 import { genericStatusVariant } from "@/modules/workspace/status-mapping";
-import { APPLICATION_STATUS_LABELS } from "@/modules/status-labels";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
@@ -53,8 +51,6 @@ function formatDate(date: Date): string {
   });
 }
 
-const ACCEPT_REJECT_STATUSES = new Set(["applied", "reviewing", "shortlisted", "interviewed"]);
-
 export default async function EmployerApplicationDetailPage({ params }: Props) {
   const { id } = await params;
   const session = await requireRoleCapability("company", "company.read.linked");
@@ -63,8 +59,6 @@ export default async function EmployerApplicationDetailPage({ params }: Props) {
   if (!result.application) notFound();
 
   const app = result.application;
-  const canAcceptReject = ACCEPT_REJECT_STATUSES.has(app.status);
-  const canRevert = app.status === "accepted" || app.status === "rejected";
 
   return (
     <WorkspaceShell
@@ -99,7 +93,7 @@ export default async function EmployerApplicationDetailPage({ params }: Props) {
           <DetailRow label="Status">
             <StatusBadge
               variant={genericStatusVariant(app.status)}
-              label={APPLICATION_STATUS_LABELS[app.status] ?? app.status}
+              label={app.status}
               size="md"
             />
           </DetailRow>
@@ -127,64 +121,21 @@ export default async function EmployerApplicationDetailPage({ params }: Props) {
           </DetailSection>
         )}
 
-        <div className="space-y-4">
-          {/* Accept / Reject actions */}
-          {canAcceptReject && (
-            <div className="flex gap-3">
-              <form action={acceptApplication}>
-                <input type="hidden" name="applicationId" value={app.applicationId} />
-                <button
-                  type="submit"
-                  className="inline-flex items-center gap-2 h-10 rounded-lg px-5 text-sm font-semibold transition-colors"
-                  style={{ backgroundColor: "var(--accent)", color: "white" }}
-                >
-                  Accept Application
-                </button>
-              </form>
-              <form action={rejectApplication}>
-                <input type="hidden" name="applicationId" value={app.applicationId} />
-                <button
-                  type="submit"
-                  className="inline-flex items-center gap-2 h-10 rounded-lg px-5 text-sm font-semibold transition-colors"
-                  style={{ backgroundColor: "var(--destructive)", color: "white" }}
-                >
-                  Reject Application
-                </button>
-              </form>
-            </div>
-          )}
-
-          {/* Revert action for accepted/rejected applications */}
-          {canRevert && (
-            <form action={revertApplicationStatus}>
-              <input type="hidden" name="applicationId" value={app.applicationId} />
-              <button
-                type="submit"
-                className="inline-flex items-center gap-2 h-10 rounded-lg px-5 text-sm font-semibold transition-colors"
-                style={{ backgroundColor: "var(--surface)", color: "var(--ink)" }}
-              >
-                Revert to Reviewing
-              </button>
-            </form>
-          )}
-
-          {/* Navigation links */}
-          <div className="flex gap-3 pt-2">
-            <Link
-              href="/employer/applications"
-              className="inline-flex items-center gap-2 h-10 rounded-lg px-4 text-sm font-semibold transition-colors"
-              style={{ background: "var(--surface)", color: "var(--ink)" }}
-            >
-              Back to Applications
-            </Link>
-            <Link
-              href={`/employer/jobs/${app.jobListingId}/applications`}
-              className="inline-flex items-center gap-2 h-10 rounded-lg px-4 text-sm font-semibold transition-colors"
-              style={{ background: "var(--surface)", color: "var(--ink)" }}
-            >
-              View Job Applications
-            </Link>
-          </div>
+        <div className="flex gap-3 pt-2">
+          <Link
+            href={`/employer/applications`}
+            className="inline-flex items-center gap-2 h-10 rounded-lg px-4 text-sm font-semibold transition-colors"
+            style={{ background: "var(--surface)", color: "var(--ink)" }}
+          >
+            Back to Applications
+          </Link>
+          <Link
+            href={`/employer/jobs/${app.jobListingId}/applications`}
+            className="inline-flex items-center gap-2 h-10 rounded-lg px-4 text-sm font-semibold transition-colors"
+            style={{ background: "var(--surface)", color: "var(--ink)" }}
+          >
+            View Job Applications
+          </Link>
         </div>
       </div>
     </WorkspaceShell>
