@@ -38,7 +38,7 @@ export default defineConfig({
     ? {
         command: "npm run start",
         port: 3000,
-        reuseExistingServer: false,
+        reuseExistingServer: true,
         timeout: 120_000,
       }
     : undefined,

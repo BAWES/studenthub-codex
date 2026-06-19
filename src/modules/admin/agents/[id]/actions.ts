@@ -19,7 +19,7 @@ const COMPANY_ID = "f56ea475-d349-431c-9a40-3111f1a49819";
 
 const pool = new Pool({
   host: "127.0.0.1",
-  port: 5433,
+  port: 5432,
   user: "paperclip",
   password: "paperclip",
   database: "paperclip",
