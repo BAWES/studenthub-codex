@@ -64,7 +64,7 @@ test.describe("Candidate Flow 1 — Browse, Apply, Track", () => {
   test("Step 1a — Jobs list page loads with DataTable", async () => {
     const ctx = await authContext(candidate);
     await ctx.page.goto("/candidate/jobs");
-    await ctx.page.waitForLoadState("networkidle");
+    await ctx.page.waitForLoadState("load");
     await ctx.page.waitForTimeout(300);
     await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
     await expect(ctx.page).toHaveURL(/\/candidate\/jobs/);
@@ -79,7 +79,7 @@ test.describe("Candidate Flow 1 — Browse, Apply, Track", () => {
   test("Step 1b — Job detail page loads from list", async () => {
     const ctx = await authContext(candidate);
     await ctx.page.goto("/candidate/jobs");
-    await ctx.page.waitForLoadState("networkidle");
+    await ctx.page.waitForLoadState("load");
     await ctx.page.waitForTimeout(300);
     await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
 
@@ -88,7 +88,7 @@ test.describe("Candidate Flow 1 — Browse, Apply, Track", () => {
     if ((await firstJobLink.count()) > 0) {
       const href = await firstJobLink.getAttribute("href");
       await ctx.page.goto(href!);
-      await ctx.page.waitForLoadState("networkidle");
+      await ctx.page.waitForLoadState("load");
     await ctx.page.waitForTimeout(300);
       await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
     } else {
@@ -103,7 +103,7 @@ test.describe("Candidate Flow 1 — Browse, Apply, Track", () => {
   test("Step 1c — Navigate to applications page via sidebar", async () => {
     const ctx = await authContext(candidate);
     await ctx.page.goto("/candidate");
-    await ctx.page.waitForLoadState("networkidle");
+    await ctx.page.waitForLoadState("load");
     await ctx.page.waitForTimeout(300);
     await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
 
@@ -111,14 +111,14 @@ test.describe("Candidate Flow 1 — Browse, Apply, Track", () => {
     const appLink = ctx.page.locator('a[href="/candidate/applications"]').first();
     if ((await appLink.count()) > 0) {
       await appLink.click();
-      await ctx.page.waitForLoadState("networkidle");
+      await ctx.page.waitForLoadState("load");
     await ctx.page.waitForTimeout(300);
       await expect(ctx.page).toHaveURL(/\/candidate\/applications/);
       await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
     } else {
       // Try direct navigation
       await ctx.page.goto("/candidate/applications");
-      await ctx.page.waitForLoadState("networkidle");
+      await ctx.page.waitForLoadState("load");
     await ctx.page.waitForTimeout(300);
       await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
     }
@@ -130,7 +130,7 @@ test.describe("Candidate Flow 1 — Browse, Apply, Track", () => {
   test("Step 1d — Applications page loads with DataTable", async () => {
     const ctx = await authContext(candidate);
     await ctx.page.goto("/candidate/applications");
-    await ctx.page.waitForLoadState("networkidle");
+    await ctx.page.waitForLoadState("load");
     await ctx.page.waitForTimeout(300);
     await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
     await expect(ctx.page).toHaveURL(/\/candidate\/applications/);
@@ -145,7 +145,7 @@ test.describe("Candidate Flow 1 — Browse, Apply, Track", () => {
   test("Step 1e — Jobs to Applications navigation in ≤3 clicks", async () => {
     const ctx = await authContext(candidate);
     await ctx.page.goto("/candidate/jobs");
-    await ctx.page.waitForLoadState("networkidle");
+    await ctx.page.waitForLoadState("load");
     await ctx.page.waitForTimeout(300);
     await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
 
@@ -153,7 +153,7 @@ test.describe("Candidate Flow 1 — Browse, Apply, Track", () => {
     const appLink = ctx.page.locator('a[href="/candidate/applications"]').first();
     await expect(appLink).toBeVisible({ timeout: 10000 });
     await appLink.click();
-    await ctx.page.waitForLoadState("networkidle");
+    await ctx.page.waitForLoadState("load");
     await ctx.page.waitForTimeout(300);
 
     // Should land on applications page in 1 click
@@ -181,7 +181,7 @@ test.describe("Candidate Flow 2 — Full Profile Edit", () => {
   test("Step 2a — Edit profile page loads with form fields", async () => {
     const ctx = await authContext(candidate);
     await ctx.page.goto("/candidate/edit");
-    await ctx.page.waitForLoadState("networkidle");
+    await ctx.page.waitForLoadState("load");
     await ctx.page.waitForTimeout(300);
     await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
     await expect(ctx.page).toHaveURL(/\/candidate\/edit/);
@@ -197,7 +197,7 @@ test.describe("Candidate Flow 2 — Full Profile Edit", () => {
   test("Step 2b — Education section loads on edit page", async () => {
     const ctx = await authContext(candidate);
     await ctx.page.goto("/candidate/edit");
-    await ctx.page.waitForLoadState("networkidle");
+    await ctx.page.waitForLoadState("load");
     await ctx.page.waitForTimeout(300);
     await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
 
@@ -213,7 +213,7 @@ test.describe("Candidate Flow 2 — Full Profile Edit", () => {
   test("Step 2c — Experience section loads", async () => {
     const ctx = await authContext(candidate);
     await ctx.page.goto("/candidate/edit");
-    await ctx.page.waitForLoadState("networkidle");
+    await ctx.page.waitForLoadState("load");
     await ctx.page.waitForTimeout(300);
     await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
 
@@ -228,7 +228,7 @@ test.describe("Candidate Flow 2 — Full Profile Edit", () => {
   test("Step 2d — Certifications section loads", async () => {
     const ctx = await authContext(candidate);
     await ctx.page.goto("/candidate/edit");
-    await ctx.page.waitForLoadState("networkidle");
+    await ctx.page.waitForLoadState("load");
     await ctx.page.waitForTimeout(300);
     await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
 
@@ -243,7 +243,7 @@ test.describe("Candidate Flow 2 — Full Profile Edit", () => {
   test("Step 2e — Languages section loads", async () => {
     const ctx = await authContext(candidate);
     await ctx.page.goto("/candidate/edit");
-    await ctx.page.waitForLoadState("networkidle");
+    await ctx.page.waitForLoadState("load");
     await ctx.page.waitForTimeout(300);
     await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
 
@@ -258,7 +258,7 @@ test.describe("Candidate Flow 2 — Full Profile Edit", () => {
   test("Step 2f — All sections on edit page load without hydration errors", async () => {
     const ctx = await authContext(candidate);
     await ctx.page.goto("/candidate/edit");
-    await ctx.page.waitForLoadState("networkidle");
+    await ctx.page.waitForLoadState("load");
     await ctx.page.waitForTimeout(300);
     await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
 
@@ -272,7 +272,7 @@ test.describe("Candidate Flow 2 — Full Profile Edit", () => {
   test("Step 2g — Profile page reflects same sections", async () => {
     const ctx = await authContext(candidate);
     await ctx.page.goto("/candidate");
-    await ctx.page.waitForLoadState("networkidle");
+    await ctx.page.waitForLoadState("load");
     await ctx.page.waitForTimeout(300);
     await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
     await expect(ctx.page).toHaveURL("/candidate");

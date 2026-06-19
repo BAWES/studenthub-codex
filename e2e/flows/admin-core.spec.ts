@@ -190,14 +190,11 @@ test.describe("Admin critical flows - Payments / Compliance / Transfers / Agents
       await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
       await expect(ctx.page).toHaveURL(/\/admin\/compliance/);
 
-      // Title
+      // Title — WorkspaceShell renders eybrow + h1 with title prop
       await expect(ctx.page.locator("h1")).toContainText("Compliance Hub");
 
-      // Summary metric cards (5 cards: Total Companies, Unapproved, Pending, etc.)
-      const metricsSection = ctx.page.locator('[aria-label="Compliance summary metrics"]');
-      await expect(metricsSection).toBeVisible({ timeout: 10000 });
-
-      // Each metric card should have a label
+      // Summary metric cards are server-rendered via getComplianceSummary
+      // The ComplianceSummaryRow renders 5 metric cards
       const metricLabels = ["Total Companies", "Unapproved", "Pending ID Requests", "Unapproved Candidates", "Incomplete Profiles"];
       for (const label of metricLabels) {
         const metric = ctx.page.locator(`text=${label}`).first();

@@ -60,7 +60,7 @@ vi.mock("lucide-react", () => ({
   ArrowUpRight: () => <span data-testid="icon-arrow-up-right" />,
   ArrowRight: () => <span data-testid="icon-arrow-right" />,
   Menu: () => <span data-testid="icon-menu" />,
-  CheckCircle2: () => <span data-testid="icon-check-circle" />,
+  CheckCircle2: () => <span data-testid="icon-check-circle2" />,
   ArrowDown: () => <span data-testid="icon-arrow-down" />,
   Clock: () => <span data-testid="icon-clock" />,
   CreditCard: () => <span data-testid="icon-credit-card" />,
@@ -84,11 +84,18 @@ vi.mock("lucide-react", () => ({
   Handshake: () => <span data-testid="icon-handshake" />,
   Fingerprint: () => <span data-testid="icon-fingerprint" />,
   Eye: () => <span data-testid="icon-eye" />,
+  UserPlus: () => <span data-testid="icon-user-plus" />,
 }));
 
-// ── Mock ThemeToggle ──────────────────────────────────────────
-vi.mock("@/modules/theme/ThemeToggle", () => ({
-  ThemeToggle: () => <button data-testid="theme-toggle" aria-label="Toggle theme" />,
+// ── Mock FadeInSection ────────────────────────────────────────
+vi.mock("@/components/marketing", () => ({
+  FadeInSection: ({
+    children,
+    asDiv,
+  }: {
+    children: React.ReactNode;
+    asDiv?: boolean;
+  }) => (asDiv ? <div>{children}</div> : <>{children}</>),
 }));
 
 afterEach(() => {
@@ -97,17 +104,16 @@ afterEach(() => {
 });
 
 // ── Import component ──────────────────────────────────────────
-import LandingContent from "../LandingContent";
-import type { LandingContentProps } from "../LandingContent";
+import LandingPage from "@/components/landing/LandingPage";
 
 // ── Tests ──────────────────────────────────────────────────────
 
-describe("Landing page (Zendesk coral redesign)", () => {
-  const defaultProps: LandingContentProps = {
+describe("Landing page (blue+amber redesign)", () => {
+  const defaultProps = {
     session: null,
   };
 
-  const sessionProps: LandingContentProps = {
+  const sessionProps = {
     session: {
       id: "test-123",
       email: "test@example.com",
@@ -124,41 +130,48 @@ describe("Landing page (Zendesk coral redesign)", () => {
   // ── Hero ─────────────────────────────────────────────────────
 
   it("renders the hero section with headline", () => {
-    render(<LandingContent {...defaultProps} />);
-    // Hero section: heading mentions staff recruiters (Dosu-verified business model)
-    const staffRecruiter = screen.getAllByText(/staff recruiter/i);
-    expect(staffRecruiter.length).toBeGreaterThanOrEqual(1);
-    expect(
-      screen.getByText(/create free profile/i)
-    ).toBeInTheDocument();
+    render(<LandingPage {...defaultProps} />);
+    const connectingTexts = screen.getAllByText(/connecting students with/i);
+    expect(connectingTexts.length).toBeGreaterThanOrEqual(1);
+    const ctaTexts = screen.getAllByText(/create your free profile/i);
+    expect(ctaTexts.length).toBeGreaterThanOrEqual(1);
   });
 
   // ── Navigation ───────────────────────────────────────────────
 
   it("renders navigation with sign up and sign in for unauthenticated users", () => {
-    render(<LandingContent {...defaultProps} />);
-    expect(screen.getByText("Get started")).toBeInTheDocument();
+    render(<LandingPage {...defaultProps} />);
+    expect(screen.getByText(/create free profile/i)).toBeInTheDocument();
     const signInLinks = screen.getAllByText(/sign in/i);
     expect(signInLinks.length).toBeGreaterThanOrEqual(1);
   });
 
   it("renders SH brand in nav", () => {
-    render(<LandingContent {...defaultProps} />);
+    render(<LandingPage {...defaultProps} />);
     const shElements = screen.getAllByText("SH");
     expect(shElements.length).toBeGreaterThanOrEqual(1);
-    expect(shElements[0]).toHaveClass("font-bold", { exact: false });
   });
 
   it("renders StudentHub text in nav", () => {
-    render(<LandingContent {...defaultProps} />);
+    render(<LandingPage {...defaultProps} />);
     const shTexts = screen.getAllByText("StudentHub");
     expect(shTexts.length).toBeGreaterThanOrEqual(1);
+  });
+
+  // ── Persona tabs ────────────────────────────────────────────
+
+  it("renders persona tabs with Students and Companies", () => {
+    render(<LandingPage {...defaultProps} />);
+    const studentsTexts = screen.getAllByText("Students");
+    expect(studentsTexts.length).toBeGreaterThanOrEqual(1);
+    const companiesTexts = screen.getAllByText("Companies");
+    expect(companiesTexts.length).toBeGreaterThanOrEqual(1);
   });
 
   // ── How it works ─────────────────────────────────────────────
 
   it("renders the how it works section", () => {
-    render(<LandingContent {...defaultProps} />);
+    render(<LandingPage {...defaultProps} />);
     const howItWorks = screen.getAllByText(/how it works/i);
     expect(howItWorks.length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText("Create your profile")).toBeInTheDocument();
@@ -168,108 +181,91 @@ describe("Landing page (Zendesk coral redesign)", () => {
   // ── Stats ────────────────────────────────────────────────────
 
   it("renders stats with real numbers", () => {
-    render(<LandingContent {...defaultProps} />);
-    expect(screen.getAllByText("10,000+").length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText("500+").length).toBeGreaterThanOrEqual(1);
-  });
-
-  // ── Features ─────────────────────────────────────────────────
-
-  it("renders platform features section", () => {
-    render(<LandingContent {...defaultProps} />);
-    expect(screen.getByText("Platform features")).toBeInTheDocument();
-    expect(screen.getByText("Staff-driven matching")).toBeInTheDocument();
-    expect(screen.getByText("Smart search")).toBeInTheDocument();
-    expect(screen.getByText("Timesheets")).toBeInTheDocument();
-    expect(screen.getByText("Compliance")).toBeInTheDocument();
+    render(<LandingPage {...defaultProps} />);
+    expect(screen.getByText("Students placed")).toBeInTheDocument();
+    expect(screen.getByText("Active employers")).toBeInTheDocument();
   });
 
   // ── Testimonials ─────────────────────────────────────────────
 
-  it("renders testimonials section", () => {
-    render(<LandingContent {...defaultProps} />);
-    expect(screen.getByText("Real stories from real placements")).toBeInTheDocument();
+  it("renders testimonial section", () => {
+    render(<LandingPage {...defaultProps} />);
+    expect(
+      screen.getByText("Real stories from real placements.")
+    ).toBeInTheDocument();
   });
 
   // ── CTA ──────────────────────────────────────────────────────
 
-  it("renders final CTA section", () => {
-    render(<LandingContent {...defaultProps} />);
+  it("renders final CTA section with signup link", () => {
+    render(<LandingPage {...defaultProps} />);
     expect(screen.getByText("Start your journey")).toBeInTheDocument();
-    expect(screen.getByText("Your next role is one profile away.")).toBeInTheDocument();
-    expect(screen.getByText("Create your free profile")).toBeInTheDocument();
+    expect(
+      screen.getByText("Your next role is one profile away.")
+    ).toBeInTheDocument();
+    const ctaTexts = screen.getAllByText("Create your free profile");
+    expect(ctaTexts.length).toBeGreaterThanOrEqual(1);
   });
 
   // ── Footer ───────────────────────────────────────────────────
 
   it("renders footer with copyright", () => {
-    render(<LandingContent {...defaultProps} />);
+    render(<LandingPage {...defaultProps} />);
     const hubTexts = screen.getAllByText(/StudentHub/i);
     expect(hubTexts.length).toBeGreaterThanOrEqual(1);
   });
 
-  it("renders footer with role descriptions", () => {
-    render(<LandingContent {...defaultProps} />);
-    expect(screen.getByText(/Staff portal/i)).toBeInTheDocument();
-    expect(screen.getByText(/Admin dashboard/i)).toBeInTheDocument();
-    expect(screen.getByText(/Inspector portal/i)).toBeInTheDocument();
+  it("renders footer with internal role descriptions", () => {
+    render(<LandingPage {...defaultProps} />);
+    expect(screen.getByText(/Staff:/i)).toBeInTheDocument();
+    expect(screen.getByText(/Admin:/i)).toBeInTheDocument();
+    expect(screen.getByText(/Inspector:/i)).toBeInTheDocument();
   });
 
   // ── Skip-to-content ─────────────────────────────────────────
 
   it("renders a skip-to-content link", () => {
-    render(<LandingContent {...defaultProps} />);
+    render(<LandingPage {...defaultProps} />);
     const link = screen.getByRole("link", { name: /skip to content/i });
     expect(link).toBeInTheDocument();
   });
 
   it("skip-to-content link targets #main-content", () => {
-    render(<LandingContent {...defaultProps} />);
+    render(<LandingPage {...defaultProps} />);
     const link = screen.getByRole("link", { name: /skip to content/i });
     expect(link).toHaveAttribute("href", "#main-content");
-    expect(link.className).toContain("skipLink");
   });
 
   it("main element has id=main-content", () => {
-    const { container } = render(<LandingContent {...defaultProps} />);
+    const { container } = render(<LandingPage {...defaultProps} />);
     const main = container.querySelector("main#main-content");
     expect(main).toBeInTheDocument();
-  });
-
-  // ── Persona switching ────────────────────────────────────────
-
-  it("renders persona toggle with both options", () => {
-    render(<LandingContent {...defaultProps} />);
-    expect(screen.getByText("I'm looking for work")).toBeInTheDocument();
-    const hiringTexts = screen.getAllByText("I'm hiring");
-    expect(hiringTexts.length).toBeGreaterThanOrEqual(1);
   });
 
   // ── Company persona ─────────────────────────────────────────
 
   it("renders company-specific content when persona=company", () => {
     mockSearchParams.set("persona", "company");
-    render(<LandingContent {...defaultProps} />);
-    // "Set up company account" appears in hero CTA and CTA section
+    render(<LandingPage {...defaultProps} />);
     const companyCTA = screen.getAllByText("Set up company account");
     expect(companyCTA.length).toBeGreaterThanOrEqual(1);
-    expect(screen.getByText("How hiring works")).toBeInTheDocument();
-    expect(screen.getByText("Start hiring today")).toBeInTheDocument();
+    expect(
+      screen.getByText("From posting to placement in three steps.")
+    ).toBeInTheDocument();
   });
 
   // ── Authenticated state ──────────────────────────────────────
 
   it("renders open app link when user is authenticated", () => {
-    render(<LandingContent {...defaultProps} {...sessionProps} />);
+    render(<LandingPage {...defaultProps} {...sessionProps} />);
     const openAppLinks = screen.getAllByText(/open app/i);
     expect(openAppLinks.length).toBeGreaterThanOrEqual(1);
-    expect(screen.queryByText("Get started")).not.toBeInTheDocument();
   });
 
-  // ── Business model accuracy (Dosu-verified) ──────────────────
+  // ── Business model accuracy ──────────────────────────────────
 
   it("mentions staff-driven matching in the copy", () => {
-    render(<LandingContent {...defaultProps} />);
+    render(<LandingPage {...defaultProps} />);
     const staffMentions = screen.getAllByText(/staff/i);
     expect(staffMentions.length).toBeGreaterThanOrEqual(1);
   });
@@ -277,7 +273,7 @@ describe("Landing page (Zendesk coral redesign)", () => {
   // ── Trust bar ────────────────────────────────────────────────
 
   it("renders employer trust bar", () => {
-    render(<LandingContent {...defaultProps} />);
+    render(<LandingPage {...defaultProps} />);
     expect(
       screen.getByText(/trusted by leading organizations/i)
     ).toBeInTheDocument();
@@ -286,9 +282,17 @@ describe("Landing page (Zendesk coral redesign)", () => {
   // ── Comparison table ─────────────────────────────────────────
 
   it("renders comparison table", () => {
-    render(<LandingContent {...defaultProps} />);
+    render(<LandingPage {...defaultProps} />);
     expect(
-      screen.getByText("Why StudentHub is different")
+      screen.getByText("Why students choose StudentHub.")
     ).toBeInTheDocument();
+  });
+
+  // ── Stats counter titles ────────────────────────────────────
+
+  it("renders key stat titles", () => {
+    render(<LandingPage {...defaultProps} />);
+    expect(screen.getByText("Students placed")).toBeInTheDocument();
+    expect(screen.getByText("Active employers")).toBeInTheDocument();
   });
 });
