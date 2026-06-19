@@ -30,7 +30,7 @@ const heroContent: HeroContent = {
   eyebrow: "Two-sided marketplace for student talent",
   headlineParts: ["Connecting students with", "the right employers"],
   highlight: "the right employers",
-  body: "StudentHub is the platform where students build careers and employers discover vetted talent. Create a profile that gets seen by 500+ employers, or post openings and get AI-matched candidates — all in one platform, built for Kuwait.",
+  body: "StudentHub is the platform where students build careers and employers discover vetted talent. Create a profile that gets seen by 500+ employers, or post openings and get staff-matched candidates — all in one platform, built for Kuwait.",
   studentCta: "Create your free profile",
   studentCtaHref: "/signup?role=candidate",
   employerCta: "Hire students",
@@ -39,10 +39,10 @@ const heroContent: HeroContent = {
   studentPills: [
     "Profile visible to employers across Kuwait",
     "One-tap timesheets and payments",
-    "AI-matched role suggestions",
+    "Staff-matched role suggestions",
   ],
   employerPills: [
-    "AI-matched candidate suggestions",
+    "Staff-matched candidate suggestions",
     "Real-time timesheet approvals",
     "Consolidated monthly invoicing",
   ],
