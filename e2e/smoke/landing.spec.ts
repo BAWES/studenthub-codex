@@ -9,7 +9,7 @@ async function navAndSettle(page: any) {
   await expect(page.locator("body")).toBeVisible({ timeout: 15000 });
 }
 
-test.describe("Landing page smoke tests (STU-2776 redesign)", () => {
+test.describe("Landing page smoke tests (STU-N landing page redesign)", () => {
   test("landing page loads with hero section", async ({ page }) => {
     await navAndSettle(page);
 
@@ -21,10 +21,11 @@ test.describe("Landing page smoke tests (STU-2776 redesign)", () => {
 
     // H1 headline renders
     await expect(page.locator("h1")).toContainText("Connecting students with");
+    await expect(page.locator("h1")).toContainText("the right employers");
 
-    // Eyebrow renders
+    // Eyebrow renders (current text)
     await expect(hero.locator(".shHeroEyebrow")).toContainText(
-      "The two-sided marketplace",
+      "Two-sided marketplace for student talent",
     );
   });
 
@@ -45,7 +46,7 @@ test.describe("Landing page smoke tests (STU-2776 redesign)", () => {
     await expect(page.locator('a[href="/login"] >> text=Sign in')).toBeVisible();
   });
 
-  test("hero feature pills render", async ({ page }) => {
+  test("hero feature pills render with staff-matched references", async ({ page }) => {
     await navAndSettle(page);
 
     // Student pills
@@ -56,22 +57,7 @@ test.describe("Landing page smoke tests (STU-2776 redesign)", () => {
     // Employer pills
     const employerPills = page.locator('[aria-label="Key benefits for employers"]');
     await expect(employerPills).toBeVisible();
-    await expect(employerPills).toContainText("AI-matched candidate suggestions");
-  });
-
-  test("persona switcher renders and switches between candidate/company", async ({
-    page,
-  }) => {
-    await navAndSettle(page);
-
-    // Persona switcher component renders
-    const personaSwitcher = page.locator("text=For students").first();
-    await expect(personaSwitcher).toBeVisible();
-
-    // Default persona shows candidate-focused CTA
-    await expect(
-      page.locator('[aria-label="Get started"] >> text=Create your free candidate profile'),
-    ).toBeVisible();
+    await expect(employerPills).toContainText("Staff-matched candidate suggestions");
   });
 
   test("navigation renders brand and sign in link", async ({ page }) => {
@@ -82,20 +68,21 @@ test.describe("Landing page smoke tests (STU-2776 redesign)", () => {
     await expect(nav).toContainText("Sign in");
   });
 
-  test("CTA section renders with get-started content", async ({ page }) => {
+  test("CTA section renders with get-started content for candidate default persona", async ({ page }) => {
     await navAndSettle(page);
-    const ctaSection = page.locator('section[aria-label="Get started"]');
-    await expect(ctaSection).toBeVisible();
-    await expect(ctaSection).toContainText("Your next role is one profile away");
-    await expect(ctaSection).toContainText(
-      "Create your free candidate profile",
-    );
+    // CTA section — default persona is candidate
+    await expect(page.locator("text=Start your journey")).toBeVisible();
+    await expect(page.locator("text=Your next role is one profile away.")).toBeVisible();
+    await expect(
+      page.locator('a[href="/signup?role=candidate"] >> text=Create your free profile'),
+    ).toBeVisible();
   });
 
   test("decorative elements have aria-hidden", async ({ page }) => {
     await navAndSettle(page);
-    const gradients = page.locator(".shHeroGradientDramatic");
-    await expect(gradients.first()).toHaveAttribute("aria-hidden", "true");
+    // Ambient glow / decorative backgrounds
+    const ambient = page.locator(".shHeroAmbientGlow");
+    await expect(ambient.first()).toHaveAttribute("aria-hidden", "true");
   });
 
   test.describe("mobile", () => {
