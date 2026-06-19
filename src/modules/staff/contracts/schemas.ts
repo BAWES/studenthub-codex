@@ -31,51 +31,17 @@ export type ListContractsInput = z.input<typeof listContractsSchema>;
 export type GetContractInput = z.input<typeof getContractSchema>;
 export type UpdateContractStatusInput = z.input<typeof updateContractStatusSchema>;
 
-export type ContractRow = {
-  contract_uuid: string;
-  candidate_name: string | null;
-  company_name: string | null;
-  type: string;
-  status: number;
-  status_label: string;
-  start_date: string | null;
-  end_date: string | null;
-  transfer_cost: string | null;
-  currency_code: string | null;
-  created_at: string | null;
-};
+export type ContractRow = z.output<typeof contractRowOutputSchema>;
+export type ContractDetail = z.output<typeof contractDetailOutputSchema>;
+export type ListContractsResult = z.output<typeof contractListOutputSchema>;
 
-export type ContractDetail = {
-  contract: {
-    contract_uuid: string;
-    type: string;
-    detail: string | null;
-    status: number;
-    status_label: string;
-    start_date: string | null;
-    end_date: string | null;
-    transfer_cost: string | null;
-    currency_code: string | null;
-    auto_generate: boolean;
-    created_at: string | null;
-    updated_at: string | null;
-    candidate: { candidate_name: string | null } | null;
-    company: { company_name: string | null } | null;
-  } | null;
-};
+/** Validates the ContractActionResponse return shape (updateContractStatus etc.) */
+export const contractActionResponseOutputSchema = z.object({
+  operation: z.enum(["success", "error"]),
+  message: z.string(),
+});
 
-export type ListContractsResult = {
-  items: ContractRow[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
-
-export type ContractActionResponse = {
-  operation: "success" | "error";
-  message: string;
-};
+export type ContractActionResponse = z.output<typeof contractActionResponseOutputSchema>;
 
 // ---------------------------------------------------------------------------
 // Output validation schemas

@@ -44,40 +44,9 @@ export type UpdateInterviewStatusInput = z.input<
 // Output types
 // ---------------------------------------------------------------------------
 
-export type InterviewRow = {
-  id: string;
-  candidate: string;
-  candidateEmail: string;
-  candidateId: number | null;
-  requestTitle: string;
-  requestUuid: string;
-  scheduledAt: string;
-  status: string;
-  note: string;
-};
-
-export type InterviewDetail = {
-  interviewUuid: string;
-  candidateName: string | null;
-  candidateEmail: string | null;
-  candidatePhone: string | null;
-  candidateId: number | null;
-  requestTitle: string | null;
-  requestUuid: string | null;
-  companyName: string | null;
-  scheduledAt: Date | null;
-  status: number | null;
-  interviewNote: string | null;
-  note: string | null;
-  staffName: string | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
-};
-
-export type UpdateInterviewStatusResult = {
-  operation: "success" | "error";
-  message: string;
-};
+export type InterviewRow = z.output<typeof interviewRowOutputSchema>;
+export type InterviewDetail = z.output<typeof interviewDetailOutputSchema>;
+export type UpdateInterviewStatusResult = z.output<typeof updateInterviewStatusOutputSchema>;
 
 // ---------------------------------------------------------------------------
 // Output validation schemas
@@ -138,10 +107,7 @@ export const updateInterviewNotesSchema = z.object({
 
 export type UpdateInterviewNotesInput = z.input<typeof updateInterviewNotesSchema>;
 
-export type UpdateInterviewNotesResult = {
-  operation: "success" | "error";
-  message: string;
-};
+export type UpdateInterviewNotesResult = z.output<typeof updateInterviewNotesOutputSchema>;
 
 export const updateInterviewNotesOutputSchema = z.object({
   operation: z.enum(["success", "error"]),
