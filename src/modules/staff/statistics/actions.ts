@@ -11,6 +11,10 @@ import {
   type StaffStatisticValue,
 } from "./schemas";
 
+function logOutputError(source: string, error: unknown): void {
+  console.error(`[modules/staff/statistics] ${source} output validation failed:`, error);
+}
+
 // ---------------------------------------------------------------------------
 // Constants (mirroring Yii2 PHP values)
 // ---------------------------------------------------------------------------
@@ -369,10 +373,7 @@ export async function listStaffStatistics(
 
   const outputParsed = staffStatisticsSchema.safeParse(result);
   if (!outputParsed.success) {
-    console.error(
-      "[modules/staff/statistics] listStaffStatistics output validation failed:",
-      outputParsed.error.issues,
-    );
+    logOutputError("listStaffStatistics", outputParsed.error.issues);
   }
 
   return result;
@@ -411,10 +412,7 @@ export async function getStaffStatistic(
 
   const outputParsed = staffStatisticValueSchema.safeParse(result);
   if (!outputParsed.success) {
-    console.error(
-      "[modules/staff/statistics] getStaffStatistic output validation failed:",
-      outputParsed.error.issues,
-    );
+    logOutputError("getStaffStatistic", outputParsed.error.issues);
   }
 
   return result;
