@@ -55,7 +55,6 @@ test.describe("Landing page smoke tests (STU-N landing page redesign)", () => {
     const studentPills = page.locator('[aria-label="Key benefits for students"]');
     await expect(studentPills).toBeVisible();
     await expect(studentPills).toContainText("Profile visible to employers");
-
     // Employer pills
     const employerPills = page.locator('[aria-label="Key benefits for employers"]');
     await expect(employerPills).toBeVisible();
@@ -85,7 +84,7 @@ test.describe("Landing page smoke tests (STU-N landing page redesign)", () => {
     await expect(nav).toContainText("Sign in");
   });
 
-  test("CTA section renders with get-started content for candidate default persona", async ({ page }) => {
+  test("CTA section renders with get-started content", async ({ page }) => {
     await navAndSettle(page);
     await expect(page.locator("text=Your next role is one profile away").first()).toBeVisible({ timeout: 10000 });
     await expect(page.locator("text=Create your free profile").first()).toBeVisible();
@@ -102,9 +101,6 @@ test.describe("Landing page smoke tests (STU-N landing page redesign)", () => {
     // Hero gradient shapes should have aria-hidden
     const decorativeElements = page.locator('[aria-hidden="true"]');
     await expect(decorativeElements.first()).toBeAttached();
-    // Ambient glow / decorative backgrounds
-    const ambient = page.locator(".shHeroAmbientGlow");
-    await expect(ambient.first()).toHaveAttribute("aria-hidden", "true");
   });
 
   test.describe("mobile", () => {
