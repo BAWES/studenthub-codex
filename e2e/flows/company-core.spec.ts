@@ -197,7 +197,7 @@ test.describe("Company Core Flows", () => {
     await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
 
     // Find a request row and navigate to detail
-    const firstRequestLink = ctx.page.locator("table a").first();
+    const firstRequestLink = ctx.page.locator("a[href*='/company/requests/']").first();
     if ((await firstRequestLink.count()) > 0) {
       const href = await firstRequestLink.getAttribute("href");
       await ctx.page.goto(href!);
