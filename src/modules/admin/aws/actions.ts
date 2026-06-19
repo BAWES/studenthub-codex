@@ -11,6 +11,14 @@ import { requireCapability } from "@/modules/auth/session";
 import { getAwsConfigSchema, awsConfigEntryListSchema, awsConfigResultSchema } from "./schemas";
 import type { AwsConfigEntry, AwsConfigResult } from "./schemas";
 
+// ---------------------------------------------------------------------------
+// Internal helpers
+// ---------------------------------------------------------------------------
+
+function logOutputError(source: string, error: unknown): void {
+  console.error(`[modules/admin/aws] ${source} output failed:`, error);
+}
+
 /**
  * Known AWS config keys used by the app.
  * Mirrors what the legacy AwsController::actionConfig() returns.
@@ -62,7 +70,7 @@ export async function listAwsConfigs(): Promise<AwsConfigEntry[]> {
   // Validate output shape — log mismatches without throwing
   const listParsed = awsConfigEntryListSchema.safeParse(result);
   if (!listParsed.success) {
-    console.error("[admin/aws] listAwsConfigs output validation failed:", listParsed.error.issues);
+    logOutputError("listAwsConfigs", listParsed.error.issues);
   }
 
   return result;
@@ -84,7 +92,7 @@ export async function getAwsConfig(): Promise<AwsConfigResult> {
   // Validate output shape — log mismatches without throwing
   const parsed = awsConfigResultSchema.safeParse(result);
   if (!parsed.success) {
-    console.error("[admin/aws] getAwsConfig output validation failed:", parsed.error.issues);
+    logOutputError("getAwsConfig", parsed.error.issues);
   }
 
   return result;

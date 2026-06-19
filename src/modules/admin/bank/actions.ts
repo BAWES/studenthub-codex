@@ -38,6 +38,14 @@ import {
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
+// Internal helpers
+// ---------------------------------------------------------------------------
+
+function logOutputError(source: string, error: unknown): void {
+  console.error(`[modules/admin/bank] ${source} output failed:`, error);
+}
+
+// ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
@@ -115,10 +123,7 @@ export async function listBanks(
   // Validate output shape
   const outputParsed = listBanksOutputSchema.safeParse(result);
   if (!outputParsed.success) {
-    console.error(
-      "[modules/admin/bank] listBanks output validation failed:",
-      outputParsed.error.issues,
-    );
+    logOutputError("listBanks", outputParsed.error.issues);
   }
 
   return result;
@@ -168,10 +173,7 @@ export async function getBank(
   // Validate output shape
   const outputParsed = bankDetailOutputSchema.safeParse(result);
   if (!outputParsed.success) {
-    console.error(
-      "[modules/admin/bank] getBank output validation failed:",
-      outputParsed.error.issues,
-    );
+    logOutputError("getBank", outputParsed.error.issues);
   }
 
   return result;
@@ -228,10 +230,7 @@ export async function createBank(
     // Validate output shape
     const outputParsed = bankMutationOutputSchema.safeParse(result);
     if (!outputParsed.success) {
-      console.error(
-        "[modules/admin/bank] createBank output validation failed:",
-        outputParsed.error.issues,
-      );
+      logOutputError("createBank", outputParsed.error.issues);
     }
 
     return result;
@@ -306,10 +305,7 @@ export async function updateBank(
     // Validate output shape
     const outputParsed = bankMutationOutputSchema.safeParse(result);
     if (!outputParsed.success) {
-      console.error(
-        "[modules/admin/bank] updateBank output validation failed:",
-        outputParsed.error.issues,
-      );
+      logOutputError("updateBank", outputParsed.error.issues);
     }
 
     return result;
@@ -372,10 +368,7 @@ export async function deleteBank(
     // Validate output shape
     const outputParsed = bankMutationOutputSchema.safeParse(result);
     if (!outputParsed.success) {
-      console.error(
-        "[modules/admin/bank] deleteBank output validation failed:",
-        outputParsed.error.issues,
-      );
+      logOutputError("deleteBank", outputParsed.error.issues);
     }
 
     return result;

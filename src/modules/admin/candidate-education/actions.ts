@@ -14,6 +14,14 @@ import {
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
+// Internal helpers
+// ---------------------------------------------------------------------------
+
+function logOutputError(source: string, error: unknown): void {
+  console.error(`[modules/admin/candidate-education] ${source} output failed:`, error);
+}
+
+// ---------------------------------------------------------------------------
 // listCandidateEducation — List all candidate education entries (admin view)
 // ---------------------------------------------------------------------------
 
@@ -79,10 +87,7 @@ export async function listCandidateEducation(
 
   const outputParsed = listCandidateEducationResultSchema.safeParse(result);
   if (!outputParsed.success) {
-    console.error(
-      "[modules/admin/candidate-education] listCandidateEducation output validation failed:",
-      outputParsed.error.issues,
-    );
+    logOutputError("listCandidateEducation", outputParsed.error.issues);
   }
 
   return result;
@@ -140,10 +145,7 @@ export async function getCandidateEducation(
 
   const outputParsed = candidateEducationDetailResultSchema.safeParse(result);
   if (!outputParsed.success) {
-    console.error(
-      "[modules/admin/candidate-education] getCandidateEducation output validation failed:",
-      outputParsed.error.issues,
-    );
+    logOutputError("getCandidateEducation", outputParsed.error.issues);
   }
 
   return result;

@@ -17,6 +17,14 @@ import {
   type AgentsHealthData,
 } from "./schemas";
 
+// ---------------------------------------------------------------------------
+// Internal helpers
+// ---------------------------------------------------------------------------
+
+function logOutputError(source: string, error: unknown): void {
+  console.error(`[modules/admin/agents] ${source} output failed:`, error);
+}
+
 const COMPANY_ID = "f56ea475-d349-431c-9a40-3111f1a49819";
 
 const pool = new Pool({
@@ -168,7 +176,7 @@ export async function getAllAgentsHealth(): Promise<AgentsHealthData> {
     // Output validation — log mismatches without throwing
     const agentsParsed = agentsHealthDataSchema.safeParse(result);
     if (!agentsParsed.success) {
-      console.error("[admin/agents] getAllAgentsHealth output failed:", agentsParsed.error.issues);
+      logOutputError("getAllAgentsHealth", agentsParsed.error.issues);
     }
 
     return result;
