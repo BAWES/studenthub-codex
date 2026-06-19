@@ -12,7 +12,7 @@ import {
   storeRowOutputSchema,
   mallsAndBrandsResultOutputSchema,
   companySelectOptionOutputSchema,
-  type StoreListItemOutput,
+  type StoreListItem,
   type ListStoresResultOutput,
   type StoreDetailOutput,
   type StoreRowOutput,
@@ -386,9 +386,9 @@ describe("companySelectOptionOutputSchema", () => {
 // Type-level tests
 // ---------------------------------------------------------------------------
 
-describe("StoreListItemOutput type", () => {
+describe("StoreListItem type", () => {
   it("accepts a valid item", () => {
-    const item: StoreListItemOutput = {
+    const item: StoreListItem = {
       store_id: 1,
       store_name: "Branch",
       store_location: "Floor 1",

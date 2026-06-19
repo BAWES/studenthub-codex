@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
 import {
@@ -9,6 +10,11 @@ import {
   listStoresRowsSchema,
   listMallsAndBrandsSchema,
   listCompanySelectOptionsSchema,
+  listStoresResultOutputSchema,
+  storeDetailOutputSchema,
+  storeRowOutputSchema,
+  mallsAndBrandsResultOutputSchema,
+  companySelectOptionOutputSchema,
 } from "./schemas";
 import type {
   ListStoresInput,
@@ -23,6 +29,10 @@ import type {
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
+
+function logOutputError(source: string, error: unknown): void {
+  console.error(`[modules/company/stores] ${source} output validation failed:`, error);
+}
 
 function mapStoreStatus(status: number): "active" | "inactive" {
   return status === 10 ? "active" : "inactive";
@@ -96,13 +106,21 @@ export async function listStores(
     manager_name: s.contact?.contact_name ?? null,
   }));
 
-  return {
+  const result = {
     stores,
     total,
     page,
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  // Validate output shape
+  const outputParsed = listStoresResultOutputSchema.safeParse(result);
+  if (!outputParsed.success) {
+    logOutputError("listStores", outputParsed.error.issues);
+  }
+
+  return result;
 }
 
 /**
@@ -154,7 +172,7 @@ export async function getStoreDetail(
 
   if (!raw) return null;
 
-  return {
+  const result = {
     store_id: raw.store_id,
     store_name: raw.store_name,
     store_location: raw.store_location,
@@ -168,6 +186,14 @@ export async function getStoreDetail(
     created_at: raw.store_created_at.toISOString(),
     updated_at: raw.store_updated_at.toISOString(),
   };
+
+  // Validate output shape
+  const outputParsed = storeDetailOutputSchema.safeParse(result);
+  if (!outputParsed.success) {
+    logOutputError("getStoreDetail", outputParsed.error.issues);
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -214,7 +240,7 @@ export async function listStoresRows(
     orderBy: { store_updated_at: "desc" },
   });
 
-  return stores.map((s) => ({
+  const result = stores.map((s) => ({
     id: s.store_id,
     name: s.store_name,
     location: s.store_location,
@@ -223,6 +249,14 @@ export async function listStoresRows(
     companyName: s.company?.company_name ?? "—",
     managerName: s.contact?.contact_name ?? "—",
   }));
+
+  // Validate output shape
+  const outputParsed = z.array(storeRowOutputSchema).safeParse(result);
+  if (!outputParsed.success) {
+    logOutputError("listStoresRows", outputParsed.error.issues);
+  }
+
+  return result;
 }
 
 /**
@@ -261,10 +295,18 @@ export async function listMallsAndBrands(
     }),
   ]);
 
-  return {
+  const result = {
     malls: malls.map((m) => ({ uuid: m.mall_uuid, name: m.mall_name_en })),
     brands: brands.map((b) => ({ uuid: b.brand_uuid, name: b.brand_name_en })),
   };
+
+  // Validate output shape
+  const outputParsed = mallsAndBrandsResultOutputSchema.safeParse(result);
+  if (!outputParsed.success) {
+    logOutputError("listMallsAndBrands", outputParsed.error.issues);
+  }
+
+  return result;
 }
 
 /**
@@ -286,8 +328,16 @@ export async function listCompanySelectOptions(
     select: { company_id: true, company: { select: { company_name: true } } },
   });
 
-  return links
+  const result = links
     .filter((l) => l.company_id !== null && l.company !== null)
     .map((l) => ({ id: l.company_id as number, name: l.company!.company_name }))
     .sort((a, b) => a.name.localeCompare(b.name));
+
+  // Validate output shape
+  const outputParsed = z.array(companySelectOptionOutputSchema).safeParse(result);
+  if (!outputParsed.success) {
+    logOutputError("listCompanySelectOptions", outputParsed.error.issues);
+  }
+
+  return result;
 }

@@ -26,37 +26,50 @@ export const updateContactSchema = z.object({
 });
 
 // ---------------------------------------------------------------------------
-// Types — raw Prisma return shapes (no formatting)
+// Output validation schemas
 // ---------------------------------------------------------------------------
 
-export type ContactResult = {
-  contact_name: string;
-  contact_email: string | null;
-} | null;
+/** Schema for a single contact result (findContactByUuid) */
+export const contactResultOutputSchema = z.object({
+  contact_name: z.string(),
+  contact_email: z.string().nullable(),
+}).nullable();
 
-export type CompanyLinkWithCompany = {
-  company_contact_uuid: string;
-  contact_position: string | null;
-  allow_access: boolean | null;
-  company?: {
-    company_id: number;
-    company_name: string | null;
-    company_email: string | null;
-    no_of_active_requests: number | null;
-    company_approved_to_hire: boolean | null;
-  } | null;
-};
+/** Schema for a company link with nested company data */
+export const companyLinkWithCompanyOutputSchema = z.object({
+  company_contact_uuid: z.string(),
+  contact_position: z.string().nullable(),
+  allow_access: z.boolean().nullable(),
+  company: z.object({
+    company_id: z.number().int(),
+    company_name: z.string().nullable(),
+    company_email: z.string().nullable(),
+    no_of_active_requests: z.number().int().nullable(),
+    company_approved_to_hire: z.boolean().nullable(),
+  }).nullable(),
+});
 
-export type WorkspaceStats = {
-  requestCount: number;
-  storeCount: number;
-  noteCount: number;
-  recentRequests: unknown[];
-};
+/** Schema for workspace statistics */
+export const workspaceStatsOutputSchema = z.object({
+  requestCount: z.number().int(),
+  storeCount: z.number().int(),
+  noteCount: z.number().int(),
+  recentRequests: z.array(z.unknown()),
+});
 
-export type ContactUpdateResult = {
-  contact_uuid: string;
-};
+/** Schema for a contact update result */
+export const contactUpdateResultOutputSchema = z.object({
+  contact_uuid: z.string(),
+});
+
+// ---------------------------------------------------------------------------
+// Output types (inferred from schemas)
+// ---------------------------------------------------------------------------
+
+export type ContactResult = z.output<typeof contactResultOutputSchema>;
+export type CompanyLinkWithCompany = z.output<typeof companyLinkWithCompanyOutputSchema>;
+export type WorkspaceStats = z.output<typeof workspaceStatsOutputSchema>;
+export type ContactUpdateResult = z.output<typeof contactUpdateResultOutputSchema>;
 
 // ---------------------------------------------------------------------------
 // Input types

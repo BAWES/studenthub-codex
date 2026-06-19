@@ -118,68 +118,26 @@ export const companySelectOptionOutputSchema = z.object({
 // Output types (inferred from schemas)
 // ---------------------------------------------------------------------------
 
-export type StoreListItemOutput = z.output<typeof storeListItemOutputSchema>;
 export type ListStoresResultOutput = z.output<typeof listStoresResultOutputSchema>;
 export type StoreDetailOutput = z.output<typeof storeDetailOutputSchema>;
 export type StoreRowOutput = z.output<typeof storeRowOutputSchema>;
 export type MallsAndBrandsResultOutput = z.output<typeof mallsAndBrandsResultOutputSchema>;
 export type CompanySelectOptionOutput = z.output<typeof companySelectOptionOutputSchema>;
 
-export type StoreListItem = {
-  store_id: number;
-  store_name: string;
-  store_location: string;
-  mall_name: string | null;
-  brand_name: string | null;
-  manager_name: string | null;
-  store_status: "active" | "inactive";
-};
+export type StoreListItem = z.output<typeof storeListItemOutputSchema>;
 
-export type StoreDetail = {
-  store_id: number;
-  store_name: string;
-  store_location: string;
-  store_status: "active" | "inactive";
-  company_id: number | null;
-  company_name: string | null;
-  mall_name: string | null;
-  brand_name: string | null;
-  manager_name: string | null;
-  manager_email: string | null;
-  created_at: string;
-  updated_at: string;
-};
+export type StoreDetail = z.output<typeof storeDetailOutputSchema>;
 
-export type ListStoresResult = {
-  stores: StoreListItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
+export type ListStoresResult = z.output<typeof listStoresResultOutputSchema>;
 
 /**
  * A flat display row for the DataTable in company/stores/page.tsx.
  */
-export type StoreRow = {
-  id: number;
-  name: string;
-  location: string;
-  mallName: string;
-  brandName: string;
-  companyName: string;
-  managerName: string;
-};
+export type StoreRow = z.output<typeof storeRowOutputSchema>;
 
-export type MallsAndBrandsResult = {
-  malls: { uuid: string; name: string }[];
-  brands: { uuid: string; name: string }[];
-};
+export type MallsAndBrandsResult = z.output<typeof mallsAndBrandsResultOutputSchema>;
 
 /**
  * A company option for the AddStoreForm dropdown.
  */
-export type CompanySelectOption = {
-  id: number;
-  name: string;
-};
+export type CompanySelectOption = z.output<typeof companySelectOptionOutputSchema>;

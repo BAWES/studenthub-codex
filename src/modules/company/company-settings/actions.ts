@@ -31,6 +31,10 @@ import type {
 // Helpers
 // ---------------------------------------------------------------------------
 
+function logOutputError(source: string, error: unknown): void {
+  console.error(`[modules/company/company-settings] ${source} output validation failed:`, error);
+}
+
 /**
  * Map a raw company row to the CompanySettings shape.
  * Handles Decimal → number conversion for numeric fields.
@@ -82,10 +86,7 @@ export async function list(): Promise<{
   // Validate output shape
   const outputParsed = companySettingsListOutputSchema.safeParse({ items });
   if (!outputParsed.success) {
-    console.error(
-      "[company-settings] list output validation failed:",
-      outputParsed.error.issues,
-    );
+    logOutputError("list", outputParsed.error.issues);
   }
 
   return { items };
@@ -113,10 +114,7 @@ export async function get(
   if (result !== null) {
     const outputParsed = companySettingsOutputSchema.safeParse(result);
     if (!outputParsed.success) {
-      console.error(
-        "[company-settings] get output validation failed:",
-        outputParsed.error.issues,
-      );
+      logOutputError("get", outputParsed.error.issues);
     }
   }
 
@@ -195,10 +193,7 @@ export async function update(
     // Validate output shape
     const outputParsed = companySettingsActionResultOutputSchema.safeParse(result);
     if (!outputParsed.success) {
-      console.error(
-        "[company-settings] update output validation failed:",
-        outputParsed.error.issues,
-      );
+      logOutputError("update", outputParsed.error.issues);
     }
 
     return result;
