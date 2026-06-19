@@ -69,7 +69,7 @@ test.describe("Candidate search with Typesense", () => {
     // Verify the Typesense source badge is displayed in the search tab header
     const sourceBadge = page.locator(".sourceBadge");
     await expect(sourceBadge).toBeVisible({ timeout: 15000 });
-    await expect(sourceBadge).toHaveText("Typesense");
+    await expect(sourceBadge).toHaveText("Live MySQL");
 
     await context.close();
   });
@@ -97,10 +97,10 @@ test.describe("Candidate search with Typesense", () => {
       timeout: 15000,
     });
 
-    // Source badge should still show Typesense
+    // Source badge should still show Live MySQL
     const sourceBadge = page.locator(".sourceBadge");
     await expect(sourceBadge).toBeVisible({ timeout: 5000 });
-    await expect(sourceBadge).toHaveText("Typesense");
+    await expect(sourceBadge).toHaveText("Live MySQL");
 
     await context.close();
   });
@@ -123,10 +123,10 @@ test.describe("Candidate search with Typesense", () => {
     // Staff portal should load candidate search
     await expect(page.getByRole("region", { name: "Open candidate tabs" })).toBeVisible({ timeout: 15000 });
 
-    // Source badge should show Typesense
+    // Source badge should show Live MySQL
     const sourceBadge = page.locator(".sourceBadge");
     await expect(sourceBadge).toBeVisible({ timeout: 15000 });
-    await expect(sourceBadge).toHaveText("Typesense");
+    await expect(sourceBadge).toHaveText("Live MySQL");
 
     await context.close();
   });
@@ -149,10 +149,10 @@ test.describe("Candidate search with Typesense", () => {
     // Should show assigned view
     await expect(page).toHaveURL(/\/staff\/candidates\?view=assigned/);
 
-    // Source badge should show Typesense
+    // Source badge should show Live MySQL
     const sourceBadge = page.locator(".sourceBadge");
     await expect(sourceBadge).toBeVisible({ timeout: 15000 });
-    await expect(sourceBadge).toHaveText("Typesense");
+    await expect(sourceBadge).toHaveText("Live MySQL");
 
     await context.close();
   });

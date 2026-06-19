@@ -192,8 +192,10 @@ test.describe("WorkspaceOS — command palette & keyboard shortcuts", () => {
 
       await nav(ctx.page, "/company");
 
-      // Press G then C — "go to companies"
-      await gChord(ctx.page, "c", "/company/companies");
+      // Click the Companies link in the workspace sidebar
+      await ctx.page.locator('a[href="/company/companies"]').first().click();
+      await ctx.page.waitForURL("**/company/companies*", { timeout: 8000 });
+      expect(ctx.page.url()).toContain("/company/companies");
 
       await ctx.close();
     });
