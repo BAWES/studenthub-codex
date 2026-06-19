@@ -5,6 +5,7 @@
 export {
   listJiraIssues,
   listJiraUsers,
+  getJiraIssue,
 } from "./actions";
 
 export type {
