@@ -691,6 +691,96 @@ export type CompanySelectOption = {
 };
 
 // ---------------------------------------------------------------------------
+// Company Stores — output validation schemas
+// ---------------------------------------------------------------------------
+
+/**
+ * Schema for a single store list item.
+ */
+export const storeListItemOutputSchema = z.object({
+  store_id: z.number().int(),
+  store_name: z.string(),
+  store_location: z.string(),
+  store_status: z.enum(["active", "inactive"]),
+  mall_name: z.string().nullable(),
+  brand_name: z.string().nullable(),
+  manager_name: z.string().nullable(),
+});
+
+/**
+ * Schema for the paginated listStores result.
+ */
+export const listStoresResultOutputSchema = z.object({
+  stores: z.array(storeListItemOutputSchema),
+  total: z.number().int().nonnegative(),
+  page: z.number().int().positive(),
+  limit: z.number().int().positive(),
+  totalPages: z.number().int().nonnegative(),
+});
+
+/**
+ * Schema for a single store detail (nullable).
+ */
+export const storeDetailOutputSchema = z
+  .object({
+    store_id: z.number().int(),
+    store_name: z.string(),
+    store_location: z.string(),
+    store_status: z.enum(["active", "inactive"]),
+    company_id: z.number().int().nullable(),
+    company_name: z.string().nullable(),
+    mall_name: z.string().nullable(),
+    brand_name: z.string().nullable(),
+    manager_name: z.string().nullable(),
+    manager_email: z.string().nullable(),
+    created_at: z.string(),
+    updated_at: z.string(),
+  })
+  .nullable();
+
+/**
+ * Schema for a DataTable store row.
+ */
+export const storeRowOutputSchema = z.object({
+  id: z.number().int(),
+  name: z.string(),
+  location: z.string(),
+  mallName: z.string(),
+  brandName: z.string(),
+  companyName: z.string(),
+  managerName: z.string(),
+});
+
+/**
+ * Schema for malls and brands lookup result.
+ */
+export const mallsAndBrandsResultOutputSchema = z.object({
+  malls: z.array(z.object({ uuid: z.string(), name: z.string() })),
+  brands: z.array(z.object({ uuid: z.string(), name: z.string() })),
+});
+
+/**
+ * Schema for a company select option.
+ */
+export const companySelectOptionOutputSchema = z.object({
+  id: z.number().int(),
+  name: z.string(),
+});
+
+/**
+ * Schema for the getCompanyRequestRows result array item.
+ */
+export const companyRequestRowOutputSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  company: z.string(),
+  owner: z.string(),
+  seats: z.number(),
+  status: z.string(),
+  updated: z.string(),
+});
+
+// ---------------------------------------------------------------------------
 // Company Requests — input schemas
 // ---------------------------------------------------------------------------
 

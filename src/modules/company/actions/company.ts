@@ -69,6 +69,10 @@ import type {
   NoteEntryResponse,
 } from "../schemas";
 import type { NoteItem } from "@/modules/admin/note/schemas";
+
+function logOutputError(source: string, error: unknown): void {
+  console.error(`[modules/company] ${source} output validation failed:`, error);
+}
 export type { NoteItem };
 import { getRequestDetail as _getRequestDetail } from "@/modules/workspace/request-detail-core";
 import {
@@ -83,6 +87,12 @@ import {
   listStoresRowsSchema,
   listMallsAndBrandsSchema,
   listCompanySelectOptionsSchema,
+  listStoresResultOutputSchema,
+  storeDetailOutputSchema,
+  storeRowOutputSchema,
+  mallsAndBrandsResultOutputSchema,
+  companySelectOptionOutputSchema,
+  companyRequestRowOutputSchema,
 } from "../schemas";
 import type {
   ListStoresInput,
@@ -224,11 +234,10 @@ export async function listCompanies(
 
   const outputParsed = adminListCompaniesResultSchema.safeParse(result);
   if (!outputParsed.success) {
-    console.error("listCompanies output validation failed:", outputParsed.error);
-    throw new Error("Invalid response shape from listCompanies");
+    logOutputError("listCompanies", outputParsed.error.issues);
   }
 
-  return outputParsed.data;
+  return result;
 }
 
 /**
@@ -278,11 +287,10 @@ export async function getCompany(params: GetCompanyInput): Promise<AdminCompanyD
 
   const outputParsed = adminCompanyDetailResultSchema.safeParse(result);
   if (!outputParsed.success) {
-    console.error("getCompany output validation failed:", outputParsed.error);
-    throw new Error("Invalid response shape from getCompany");
+    logOutputError("getCompany", outputParsed.error.issues);
   }
 
-  return outputParsed.data;
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -356,7 +364,7 @@ export async function getStaffWorkspace(
       }),
     ]);
 
-  return staffWorkspaceOutputSchema.parse({
+  const result: StaffWorkspaceData = {
     staff: staff
       ? {
           ...staff,
@@ -381,7 +389,15 @@ export async function getStaffWorkspace(
       subtitle: `Status ${story.story_status}`,
       meta: formatDate(story.story_last_updated_at),
     })),
-  });
+  };
+
+  // Validate output shape
+  const validated = staffWorkspaceOutputSchema.safeParse(result);
+  if (!validated.success) {
+    logOutputError("getStaffWorkspace", validated.error.issues);
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -491,7 +507,7 @@ export async function getCompanyHomeData(
     0,
   );
 
-  return companyHomeOutputSchema.parse({
+  const result: CompanyHomeData = {
     ...base,
     activeRequestCount,
     pendingRequestCount,
@@ -510,7 +526,15 @@ export async function getCompanyHomeData(
       timestamp: a.activity_created_datetime,
       relatedEntityId: a.request_uuid,
     })),
-  });
+  };
+
+  // Validate output shape
+  const validated = companyHomeOutputSchema.safeParse(result);
+  if (!validated.success) {
+    logOutputError("getCompanyHomeData", validated.error.issues);
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -575,13 +599,21 @@ export async function listCompanyContacts(
     company_name: c.company?.company_name ?? null,
   }));
 
-  return listCompanyContactsResultSchema.parse({
+  const contactResult = {
     contacts,
     total,
     page,
     limit,
     totalPages: Math.ceil(total / limit),
-  });
+  };
+
+  // Validate output shape
+  const outputParsed = listCompanyContactsResultSchema.safeParse(contactResult);
+  if (!outputParsed.success) {
+    logOutputError("listCompanyContacts", outputParsed.error.issues);
+  }
+
+  return contactResult;
 }
 
 /**
@@ -617,7 +649,7 @@ export async function getCompanyContact(
 
   if (!raw) return null;
 
-  return companyContactDetailSchema.parse({
+  const result = {
     company_contact_uuid: raw.company_contact_uuid,
     contact_uuid: raw.contact_uuid,
     company_id: raw.company_id,
@@ -628,7 +660,15 @@ export async function getCompanyContact(
     contact_name: raw.contact?.contact_name ?? null,
     contact_email: raw.contact?.contact_email ?? null,
     company_name: raw.company?.company_name ?? null,
-  });
+  };
+
+  // Validate output shape
+  const outputParsed = companyContactDetailSchema.safeParse(result);
+  if (!outputParsed.success) {
+    logOutputError("getCompanyContact", outputParsed.error.issues);
+  }
+
+  return result;
 }
 
 /**
@@ -695,7 +735,15 @@ export async function createCompanyContact(
   });
 
   revalidatePath("/company/contacts");
-  return companyContactUuidResultSchema.parse({ company_contact_uuid: companyContact.company_contact_uuid });
+  const result = { company_contact_uuid: companyContact.company_contact_uuid };
+
+  // Validate output shape
+  const outputParsed = companyContactUuidResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    logOutputError("createCompanyContact", outputParsed.error.issues);
+  }
+
+  return result;
 }
 
 /**
@@ -725,7 +773,15 @@ export async function updateCompanyContact(
   });
 
   revalidatePath("/company/contacts");
-  return companyContactUuidResultSchema.parse({ company_contact_uuid: parsed.data.uuid });
+  const result = { company_contact_uuid: parsed.data.uuid };
+
+  // Validate output shape
+  const outputParsed = companyContactUuidResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    logOutputError("updateCompanyContact", outputParsed.error.issues);
+  }
+
+  return result;
 }
 
 /**
@@ -766,14 +822,22 @@ export async function listCompanyContactsRows(
     orderBy: { updated_at: "desc" },
   });
 
-  return z.array(companyContactRowSchema).parse(contacts.map((c) => ({
+  const result = contacts.map((c) => ({
     id: c.company_contact_uuid,
     name: c.contact?.contact_name ?? "—",
     email: c.contact?.contact_email ?? "—",
     position: c.contact_position ?? "—",
     companyName: c.company?.company_name ?? "—",
     allowAccess: c.allow_access ?? false,
-  })));
+  }));
+
+  // Validate output shape
+  const outputParsed = z.array(companyContactRowSchema).safeParse(result);
+  if (!outputParsed.success) {
+    logOutputError("listCompanyContactsRows", outputParsed.error.issues);
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -842,7 +906,7 @@ export async function listCompanyNotes(
   };
   const outputParsed = listCompanyNotesResultSchema.safeParse(result);
   if (!outputParsed.success) {
-    console.error("listCompanyNotes output validation failed:", outputParsed.error);
+    logOutputError("listCompanyNotes", outputParsed.error.issues);
   }
   return result;
 }
@@ -1223,13 +1287,21 @@ export async function listStores(
     manager_name: s.contact?.contact_name ?? null,
   }));
 
-  return {
+  const result = {
     stores,
     total,
     page,
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  // Validate output shape
+  const outputParsed = listStoresResultOutputSchema.safeParse(result);
+  if (!outputParsed.success) {
+    logOutputError("listStores", outputParsed.error.issues);
+  }
+
+  return result;
 }
 
 /**
@@ -1281,7 +1353,7 @@ export async function getStoreDetail(
 
   if (!raw) return null;
 
-  return {
+  const result = {
     store_id: raw.store_id,
     store_name: raw.store_name,
     store_location: raw.store_location,
@@ -1295,6 +1367,14 @@ export async function getStoreDetail(
     created_at: raw.store_created_at.toISOString(),
     updated_at: raw.store_updated_at.toISOString(),
   };
+
+  // Validate output shape
+  const outputParsed = storeDetailOutputSchema.safeParse(result);
+  if (!outputParsed.success) {
+    logOutputError("getStoreDetail", outputParsed.error.issues);
+  }
+
+  return result;
 }
 
 /**
@@ -1337,7 +1417,7 @@ export async function listStoresRows(
     orderBy: { store_updated_at: "desc" },
   });
 
-  return stores.map((s) => ({
+  const result = stores.map((s) => ({
     id: s.store_id,
     name: s.store_name,
     location: s.store_location,
@@ -1346,6 +1426,14 @@ export async function listStoresRows(
     companyName: s.company?.company_name ?? "—",
     managerName: s.contact?.contact_name ?? "—",
   }));
+
+  // Validate output shape
+  const outputParsed = z.array(storeRowOutputSchema).safeParse(result);
+  if (!outputParsed.success) {
+    logOutputError("listStoresRows", outputParsed.error.issues);
+  }
+
+  return result;
 }
 
 /**
@@ -1384,10 +1472,18 @@ export async function listMallsAndBrands(
     }),
   ]);
 
-  return {
+  const result = {
     malls: malls.map((m) => ({ uuid: m.mall_uuid, name: m.mall_name_en })),
     brands: brands.map((b) => ({ uuid: b.brand_uuid, name: b.brand_name_en })),
   };
+
+  // Validate output shape
+  const outputParsed = mallsAndBrandsResultOutputSchema.safeParse(result);
+  if (!outputParsed.success) {
+    logOutputError("listMallsAndBrands", outputParsed.error.issues);
+  }
+
+  return result;
 }
 
 /**
@@ -1409,10 +1505,18 @@ export async function listCompanySelectOptions(
     select: { company_id: true, company: { select: { company_name: true } } },
   });
 
-  return links
+  const result = links
     .filter((l) => l.company_id !== null && l.company !== null)
     .map((l) => ({ id: l.company_id as number, name: l.company!.company_name }))
     .sort((a, b) => a.name.localeCompare(b.name));
+
+  // Validate output shape
+  const outputParsed = z.array(companySelectOptionOutputSchema).safeParse(result);
+  if (!outputParsed.success) {
+    logOutputError("listCompanySelectOptions", outputParsed.error.issues);
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -1633,7 +1737,7 @@ export async function getCompanyRequestRows(contactUuid: string): Promise<Compan
     },
   });
 
-  return rows.map((row) => ({
+  const result = rows.map((row) => ({
     id: row.request_uuid,
     title: row.request_position_title ?? "Untitled request",
     company: row.company?.company_name ?? "No company",
@@ -1642,6 +1746,14 @@ export async function getCompanyRequestRows(contactUuid: string): Promise<Compan
     status: row.request_status ?? "No status",
     updated: row.request_updated_datetime.toISOString().slice(0, 10).replace(/-/g, "/"),
   }));
+
+  // Validate output shape
+  const outputParsed = z.array(companyRequestRowOutputSchema).safeParse(result);
+  if (!outputParsed.success) {
+    logOutputError("getCompanyRequestRows", outputParsed.error.issues);
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
