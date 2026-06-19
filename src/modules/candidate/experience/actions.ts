@@ -106,7 +106,8 @@ export async function listCandidateExperience(
   const mapped = items.map((i) => toExperienceItem(i as unknown as Record<string, unknown>));
 
   // Validate output shape
-  const validatedList = experienceItemOutputSchema.safeParse(mapped);
+  const listSchema = z.array(experienceItemOutputSchema);
+  const validatedList = listSchema.safeParse(mapped);
   if (!validatedList.success) {
     logOutputError("listCandidateExperience", validatedList.error.issues);
   }

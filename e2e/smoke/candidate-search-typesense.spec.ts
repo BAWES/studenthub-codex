@@ -1,6 +1,12 @@
 import { test, expect } from "@playwright/test";
 import { getFixtures, disconnectPrisma } from "../fixtures/auth";
 
+// Skip Typesense tests in CI — no Typesense service available
+const hasTypesense = Boolean(process.env.TYPESENSE_API_URL ?? process.env.TYPESENSE_URL);
+if (!hasTypesense && process.env.CI) {
+  test.skip("Typesense not available — skipping Typesense tests", () => {});
+} else {
+
 test.afterAll(async () => {
   await disconnectPrisma();
 });
@@ -151,3 +157,5 @@ test.describe("Candidate search with Typesense", () => {
     await context.close();
   });
 });
+
+}

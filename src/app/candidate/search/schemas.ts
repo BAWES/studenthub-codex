@@ -101,7 +101,7 @@ export const candidateSearchResultSchema = z.object({
   totalPages: z.number().int(),
   assignedCount: z.number().int().nullable(),
   matchingCount: z.number().int(),
-  selectedId: z.number().int().optional(),
+  selectedId: z.number().int().nullable().optional(),
   selectedBlocked: z.boolean(),
   openTabs: z.array(openTabSchema),
   params: searchParamStateSchema,
