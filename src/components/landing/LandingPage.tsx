@@ -2,14 +2,15 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { FadeInSection } from "@/components/marketing";
+import {
+  HeroSection,
+  StatsSection,
+  HowItWorks,
+  EmployerSection,
+  TestimonialCarousel,
+  ComparisonTable,
+} from "@/components/marketing";
 import LandingNav, { type Persona } from "./LandingNav";
-import LandingHero from "./LandingHero";
-import StatsCounters from "./StatsCounters";
-import HowItWorksSection from "./HowItWorksSection";
-import EmployerValueSection from "./EmployerValueSection";
-import TestimonialsSection from "./TestimonialsSection";
-import ComparisonSection from "./ComparisonSection";
 import CTASection from "./CTASection";
 import LandingFooter from "./LandingFooter";
 
@@ -26,23 +27,32 @@ interface LandingPageProps {
 
 function TrustBar() {
   return (
-    <section className="py-12 sm:py-16 px-6 max-w-6xl mx-auto max-sm:px-4">
-      <FadeInSection asDiv>
-        <p className="text-center text-xs font-medium mb-6" style={{ color: "var(--muted)" }}>
+    <section className="shSection" aria-label="Trusted organizations">
+      <div
+        className="relative overflow-hidden rounded-xl p-6 sm:p-8 text-center"
+        style={{
+          background: "var(--sh-glass-bg)",
+          border: "1px solid var(--sh-glass-border)",
+        }}
+      >
+        <p
+          className="text-center text-[11px] font-black uppercase tracking-wider mb-5"
+          style={{ color: "var(--muted)" }}
+        >
           Trusted by leading organizations across Kuwait
         </p>
-        <div className="flex flex-wrap items-center justify-center gap-8 gap-y-4 opacity-40">
+        <div className="flex flex-wrap items-center justify-center gap-6 gap-y-3 opacity-40">
           {["Alshaya", "KIPCO", "NBK", "Zain", "Kuwait Airways", "GUST"].map((name) => (
             <span
               key={name}
-              className="text-sm font-semibold tracking-tight"
+              className="text-sm font-bold tracking-tight"
               style={{ color: "var(--ink)" }}
             >
               {name}
             </span>
           ))}
         </div>
-      </FadeInSection>
+      </div>
     </section>
   );
 }
@@ -86,7 +96,6 @@ export default function LandingPage({ session }: LandingPageProps) {
         minHeight: "100svh",
       } as React.CSSProperties}
     >
-
       <a href="#main-content" className="skipLink" style={{ color: "var(--ink)" }}>
         Skip to content
       </a>
@@ -96,20 +105,31 @@ export default function LandingPage({ session }: LandingPageProps) {
         onPersonaChange={handlePersonaChange}
       />
 
-      <main id="main-content" className="relative">
-        <LandingHero />
+      <main
+        id="main-content"
+        className="min-h-svh w-[min(1320px,calc(100%_-_28px))] mx-auto grid content-start gap-6 pt-[18px] pb-[42px] max-sm:w-[min(calc(100%_-_20px),720px)]"
+      >
+        <HeroSection />
 
         <TrustBar />
 
-        <StatsCounters />
+        <StatsSection />
 
-        <HowItWorksSection forEmployer={persona === "company"} />
+        <div id="how-it-works">
+          <HowItWorks />
+        </div>
 
-        {persona === "company" && <EmployerValueSection />}
+        <div id="for-employers">
+          <EmployerSection />
+        </div>
 
-        <TestimonialsSection personas={[persona]} />
+        <div id="testimonials">
+          <TestimonialCarousel persona={persona === "company" ? "company" : "candidate"} />
+        </div>
 
-        <ComparisonSection persona={persona} />
+        <div id="comparison">
+          <ComparisonTable persona={persona === "company" ? "company" : "candidate"} />
+        </div>
 
         <CTASection persona={persona} />
       </main>
