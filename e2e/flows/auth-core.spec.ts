@@ -415,18 +415,21 @@ test.describe("Auth critical flows — authentication, redirects, session, logou
       await ctx.close();
     });
 
-    test("6b. Reset password page renders with new password fields", async () => {
+    test("6b. Reset password page shows invalid-link state without a token", async () => {
       const ctx = await unauthContext();
 
-      // Navigate to reset-password with a dummy token path
+      // Navigate to reset-password without a token — page validates server-side
+      // and shows "Invalid link" UI since no valid reset token was provided
       await ctx.page.goto("/reset-password");
       await ctx.page.waitForLoadState("load");
       await expect(ctx.page).toHaveURL(/\/reset-password/);
       await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
 
-      // Expect password input fields for setting a new password
-      const passwordInputs = ctx.page.locator('input[type="password"]');
-      await expect(passwordInputs.first()).toBeVisible({ timeout: 5000 });
+      // Without a valid token, the page shows "Invalid link" heading
+      await expect(ctx.page.getByText("Invalid link")).toBeVisible({ timeout: 10000 });
+
+      // "Request a new link" CTA should be present
+      await expect(ctx.page.getByText("Request a new link")).toBeVisible({ timeout: 5000 });
 
       assertNoReactErrors(ctx.errors);
       await ctx.close();

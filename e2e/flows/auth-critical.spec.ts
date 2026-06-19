@@ -345,7 +345,11 @@ test.describe("Auth critical flows — Login, cross-role isolation, public route
       // Clear session cookie (simulates logout)
       await ctx.context.clearCookies();
 
-      // Protected route should now redirect
+      // Clear RSC cache to avoid ERR_ABORTED from stale server components
+      await ctx.page.goto("about:blank");
+      await ctx.page.waitForLoadState("load");
+
+      // Protected route should now redirect to login
       await ctx.page.goto("/company");
       await ctx.page.waitForLoadState("load");
       await expect(ctx.page).toHaveURL(/\/login/);
