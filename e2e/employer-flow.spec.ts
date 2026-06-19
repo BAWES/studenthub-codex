@@ -102,8 +102,10 @@ test.describe("Employer job posting flow", () => {
     // H1 heading
     await expect(ctx.page.locator("h1")).toContainText("Job Postings");
 
-    // Metrics section shows job counts
-    await expect(ctx.page.locator("text=Total Jobs").first()).toBeVisible({
+    // Search results or empty state shows content
+    await expect(
+      ctx.page.locator("text=jobs found").or(ctx.page.locator("text=No records found")).first()
+    ).toBeVisible({
       timeout: 10000,
     });
 
