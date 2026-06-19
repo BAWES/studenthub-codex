@@ -1,5 +1,8 @@
 import { test, expect, type Browser, type BrowserContext, type Page } from "@playwright/test";
-import { getFixtures, disconnectPrisma, type FixtureUser } from "./fixtures/auth";
+import { getMockFixtures, type FixtureUser } from "./fixtures/users";
+
+// Force USE_MOCK_FIXTURES=true — no DB dependency
+process.env.USE_MOCK_FIXTURES = "true";
 
 let company: FixtureUser;
 let staff: FixtureUser;
@@ -8,15 +11,11 @@ let candidateUser: FixtureUser;
 test.describe("Employer job posting flow", () => {
   test.describe.configure({ mode: "serial" });
 
-  test.beforeAll(async () => {
-    const fixtures = await getFixtures();
+  test.beforeAll(() => {
+    const fixtures = getMockFixtures();
     company = fixtures.get("company")!;
     staff = fixtures.get("staff")!;
     candidateUser = fixtures.get("candidate")!;
-  });
-
-  test.afterAll(async () => {
-    await disconnectPrisma();
   });
 
   /**
