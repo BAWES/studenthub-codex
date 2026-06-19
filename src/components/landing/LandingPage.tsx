@@ -13,6 +13,7 @@ import {
 import LandingNav, { type Persona } from "./LandingNav";
 import CTASection from "./CTASection";
 import LandingFooter from "./LandingFooter";
+import "./landing.css";
 
 const SH_BLUE = "#0b63ce";
 const SH_AMBER = "#f59e0b";

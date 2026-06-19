@@ -5,6 +5,7 @@ import { Check, X, Minus, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const SH_BLUE = "#0b63ce";
+const SH_AMBER = "#f59e0b";
 
 // ── Types ────────────────────────────────────────────────
 
@@ -81,13 +82,12 @@ function getScore(value: ScoreValue): "full" | "partial" | "none" {
   return "none";
 }
 
-function ScoreIcon({ value }: { value: ScoreValue }) {
+function ScoreDot({ value }: { value: ScoreValue }) {
   const score = getScore(value);
-  if (score === "full")
-    return <Check className="size-3.5" style={{ color: "#24835b" }} />;
-  if (score === "partial")
-    return <Minus className="size-3.5" style={{ color: "#f59e0b" }} />;
-  return <X className="size-3.5" style={{ color: "var(--muted)" }} />;
+  const cls = score === "full" ? "shLandingScoreDot shLandingScoreFull"
+    : score === "partial" ? "shLandingScoreDot shLandingScorePartial"
+    : "shLandingScoreDot shLandingScoreNone";
+  return <span className={cls} />;
 }
 
 // ── Component ────────────────────────────────────────────
@@ -112,28 +112,16 @@ export default function ComparisonTable({ persona = "candidate", className }: Co
       aria-label="Feature comparison"
     >
       <div className="text-center mb-8 md:mb-10">
-        <span
-          className="inline-block text-[11px] font-bold uppercase tracking-wider mb-3 px-3 py-1 rounded-full"
-          style={{
-            color: SH_BLUE,
-            backgroundColor: `${SH_BLUE}12`,
-          }}
-        >
-          <Sparkles className="size-3 inline mr-1" />
+        <span className="shLandingEyebrow">
+          <Sparkles className="size-3" />
           See the difference
         </span>
-        <h2
-          className="text-[clamp(24px,3vw,36px)] font-bold leading-tight"
-          style={{ color: "var(--ink)" }}
-        >
+        <h2 className="shLandingSectionTitle mt-3">
           {persona === "candidate"
             ? "Why students choose StudentHub."
             : "Why companies choose StudentHub."}
         </h2>
-        <p
-          className="max-w-[480px] mx-auto mt-2 text-sm leading-relaxed"
-          style={{ color: "var(--muted)" }}
-        >
+        <p className="shLandingSectionSub mx-auto mt-2">
           {persona === "candidate"
             ? "StudentHub gives you tools that job boards and agencies can't match."
             : "One platform replaces four legacy tools."}
@@ -145,11 +133,11 @@ export default function ComparisonTable({ persona = "candidate", className }: Co
         <div
           className="rounded-xl p-4 flex items-center justify-center gap-3"
           style={{
-            backgroundColor: `${SH_BLUE}08`,
+            background: `linear-gradient(135deg, ${SH_BLUE}08, ${SH_BLUE}04)`,
             border: `1px solid ${SH_BLUE}20`,
           }}
         >
-          <Check className="size-4" style={{ color: "#24835b" }} />
+          <span className="shLandingScoreDot shLandingScoreFull" />
           <span className="text-sm font-semibold" style={{ color: "var(--ink)" }}>
             StudentHub scores{" "}
             <span style={{ color: SH_BLUE }}>
@@ -160,8 +148,16 @@ export default function ComparisonTable({ persona = "candidate", className }: Co
         </div>
       </div>
 
-      {/* Desktop: horizontal scrollable table */}
-      <div className="hidden md:block overflow-x-auto rounded-xl" style={{ border: "1px solid var(--border)" }}>
+      {/* Desktop: glass table */}
+      <div
+        className="hidden md:block overflow-x-auto rounded-xl"
+        style={{
+          backgroundColor: "var(--sh-glass-bg)",
+          backdropFilter: "blur(12px)",
+          WebkitBackdropFilter: "blur(12px)",
+          border: "1px solid var(--sh-glass-border)",
+        }}
+      >
         <table className="w-full" style={{ borderCollapse: "collapse" }}>
           <thead>
             <tr>
@@ -169,8 +165,8 @@ export default function ComparisonTable({ persona = "candidate", className }: Co
                 className="text-left p-3 text-xs font-semibold"
                 style={{
                   color: "var(--muted)",
-                  backgroundColor: "var(--secondary)",
-                  borderBottom: "1px solid var(--border)",
+                  backgroundColor: "var(--sh-glass-bg-strong)",
+                  borderBottom: "1px solid var(--sh-glass-border)",
                   minWidth: 200,
                 }}
               >
@@ -184,8 +180,8 @@ export default function ComparisonTable({ persona = "candidate", className }: Co
                     color: col.accent ? SH_BLUE : "var(--muted)",
                     backgroundColor: col.accent
                       ? `${SH_BLUE}06`
-                      : "var(--secondary)",
-                    borderBottom: "1px solid var(--border)",
+                      : "var(--sh-glass-bg-strong)",
+                    borderBottom: "1px solid var(--sh-glass-border)",
                     minWidth: 120,
                   }}
                 >
@@ -205,7 +201,7 @@ export default function ComparisonTable({ persona = "candidate", className }: Co
                     style={{
                       color: SH_BLUE,
                       backgroundColor: `${SH_BLUE}04`,
-                      borderBottom: "1px solid var(--border)",
+                      borderBottom: "1px solid var(--sh-glass-border)",
                     }}
                   >
                     {cat.category}
@@ -217,14 +213,14 @@ export default function ComparisonTable({ persona = "candidate", className }: Co
                     className="transition-colors duration-150"
                     style={{
                       backgroundColor:
-                        ri % 2 === 0 ? "var(--surface)" : "var(--secondary)",
+                        ri % 2 === 0 ? "var(--sh-glass-bg)" : "transparent",
                     }}
                   >
                     <td
                       className="p-3 text-xs"
                       style={{
                         color: "var(--ink)",
-                        borderBottom: "1px solid var(--border)",
+                        borderBottom: "1px solid var(--sh-glass-border)",
                       }}
                     >
                       {row.feature}
@@ -234,13 +230,13 @@ export default function ComparisonTable({ persona = "candidate", className }: Co
                         key={col.key}
                         className="text-center p-3"
                         style={{
-                          borderBottom: "1px solid var(--border)",
+                          borderBottom: "1px solid var(--sh-glass-border)",
                           backgroundColor: col.accent
                             ? `${SH_BLUE}04`
                             : "transparent",
                         }}
                       >
-                        <ScoreIcon value={row[col.key]} />
+                        <ScoreDot value={row[col.key]} />
                       </td>
                     ))}
                   </tr>
@@ -258,7 +254,10 @@ export default function ComparisonTable({ persona = "candidate", className }: Co
             key={cat.category}
             className="rounded-xl overflow-hidden"
             style={{
-              border: "1px solid var(--border)",
+              backgroundColor: "var(--sh-glass-bg)",
+              backdropFilter: "blur(12px)",
+              WebkitBackdropFilter: "blur(12px)",
+              border: "1px solid var(--sh-glass-border)",
             }}
           >
             <div
@@ -266,7 +265,7 @@ export default function ComparisonTable({ persona = "candidate", className }: Co
               style={{
                 color: SH_BLUE,
                 backgroundColor: `${SH_BLUE}08`,
-                borderBottom: "1px solid var(--border)",
+                borderBottom: "1px solid var(--sh-glass-border)",
               }}
             >
               {cat.category}
@@ -277,7 +276,7 @@ export default function ComparisonTable({ persona = "candidate", className }: Co
                 className="p-3"
                 style={{
                   borderBottom:
-                    ri < cat.rows.length - 1 ? "1px solid var(--border)" : "none",
+                    ri < cat.rows.length - 1 ? "1px solid var(--sh-glass-border)" : "none",
                 }}
               >
                 <strong
@@ -290,7 +289,7 @@ export default function ComparisonTable({ persona = "candidate", className }: Co
                   {columns.map((col) => (
                     <div
                       key={col.key}
-                      className="flex items-center justify-between"
+                      className="flex items-center justify-between gap-2"
                     >
                       <span
                         className="font-medium"
@@ -300,7 +299,7 @@ export default function ComparisonTable({ persona = "candidate", className }: Co
                       >
                         {col.label}
                       </span>
-                      <ScoreIcon value={row[col.key]} />
+                      <ScoreDot value={row[col.key]} />
                     </div>
                   ))}
                 </div>

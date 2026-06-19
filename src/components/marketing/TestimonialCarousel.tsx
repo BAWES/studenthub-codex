@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Quote, ChevronLeft, ChevronRight, Star } from "lucide-react";
+import { ChevronLeft, ChevronRight, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+const SH_BLUE = "#0b63ce";
 const SH_AMBER = "#f59e0b";
 
 // ── Types ────────────────────────────────────────────────
@@ -168,21 +169,12 @@ export default function TestimonialCarousel({
       onMouseLeave={() => setIsPaused(false)}
     >
       <div className="text-center mb-8 md:mb-10">
-        <span
-          className="inline-block text-[11px] font-bold uppercase tracking-wider mb-3 px-3 py-1 rounded-full"
-          style={{
-            color: "#0b63ce",
-            backgroundColor: "#0b63ce12",
-          }}
-        >
+        <span className="shLandingEyebrow" style={{ background: `linear-gradient(135deg, ${SH_BLUE}12, ${SH_BLUE}06)` }}>
           {persona === "company"
             ? "Trusted by leading employers"
             : "Trusted by candidates and employers"}
         </span>
-        <h2
-          className="text-[clamp(24px,3vw,36px)] font-bold leading-tight"
-          style={{ color: "var(--ink)" }}
-        >
+        <h2 className="shLandingSectionTitle mt-3">
           {persona === "company"
             ? "Employers that found their team."
             : "Real stories from real placements."}
@@ -193,12 +185,7 @@ export default function TestimonialCarousel({
         {/* Navigation arrows */}
         <button
           onClick={prev}
-          className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-3 z-10 size-9 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 max-sm:hidden"
-          style={{
-            backgroundColor: "var(--surface)",
-            border: "1px solid var(--border)",
-            color: "var(--muted)",
-          }}
+          className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-3 z-10 size-9 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 max-sm:hidden shLandingGlass shLandingGlassHover"
           aria-label="Previous testimonial"
         >
           <ChevronLeft className="size-4" />
@@ -206,34 +193,31 @@ export default function TestimonialCarousel({
 
         <button
           onClick={next}
-          className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-3 z-10 size-9 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 max-sm:hidden"
-          style={{
-            backgroundColor: "var(--surface)",
-            border: "1px solid var(--border)",
-            color: "var(--muted)",
-          }}
+          className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-3 z-10 size-9 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 max-sm:hidden shLandingGlass shLandingGlassHover"
           aria-label="Next testimonial"
         >
           <ChevronRight className="size-4" />
         </button>
 
-        {/* Testimonial card */}
+        {/* Testimonial card — glass effect */}
         <div
           key={active}
-          className="rounded-xl p-8 md:p-10 text-center animate-in fade-in slide-in-from-bottom-4 duration-500"
+          className="relative rounded-xl p-8 md:p-10 text-center overflow-hidden"
           style={{
-            backgroundColor: "var(--surface)",
-            border: "1px solid var(--border)",
+            backgroundColor: "var(--sh-glass-bg)",
+            backdropFilter: "blur(12px)",
+            WebkitBackdropFilter: "blur(12px)",
+            border: "1px solid var(--sh-glass-border)",
+            animation: "shLandingFadeIn 400ms ease",
           }}
         >
-          <Quote
-            className="size-7 mx-auto mb-4"
-            style={{ color: "#0b63ce" }}
-            aria-hidden="true"
-          />
+          {/* Decorative quote mark */}
+          <div className="shLandingQuote" aria-hidden="true">
+            &ldquo;
+          </div>
 
           <blockquote
-            className="text-[clamp(16px,1.8vw,20px)] leading-relaxed mb-6 font-medium"
+            className="text-[clamp(16px,1.8vw,20px)] leading-relaxed mb-6 font-medium relative z-[1]"
             style={{ color: "var(--ink)" }}
           >
             &ldquo;{t.quote}&rdquo;
@@ -260,7 +244,7 @@ export default function TestimonialCarousel({
           <div className="flex items-center justify-center gap-3">
             <div
               className="size-9 rounded-full flex items-center justify-center text-xs font-bold text-white"
-              style={{ backgroundColor: "#0b63ce" }}
+              style={{ backgroundColor: SH_BLUE }}
             >
               {t.avatar}
             </div>
@@ -291,7 +275,7 @@ export default function TestimonialCarousel({
               style={{
                 height: 8,
                 backgroundColor:
-                  i === active ? "#0b63ce" : "var(--border)",
+                  i === active ? SH_BLUE : "var(--border)",
                 width: i === active ? 24 : 8,
               }}
               aria-label={`Go to testimonial ${i + 1}`}

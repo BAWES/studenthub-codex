@@ -25,10 +25,12 @@ export default function LandingNav({ session, persona, onPersonaChange }: Landin
 
   return (
     <nav
-      className="sticky top-0 z-50 backdrop-blur-xl"
+      className="sticky top-0 z-50"
       style={{
         backgroundColor: "color-mix(in srgb, var(--card) 85%, transparent)",
-        borderBottom: "1px solid color-mix(in srgb, var(--border) 60%, transparent)",
+        backdropFilter: "blur(20px)",
+        WebkitBackdropFilter: "blur(20px)",
+        borderBottom: "1px solid var(--sh-glass-border)",
       }}
       aria-label="StudentHub public navigation"
     >
@@ -96,7 +98,7 @@ export default function LandingNav({ session, persona, onPersonaChange }: Landin
                   Sign in
                 </Link>
                 <Link
-                  href={`/signup?role=${persona === "company" ? "company" : "candidate"}`}
+                  href={{ pathname: "/signup", query: { role: persona === "company" ? "company" : "candidate" } }}
                   className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium no-underline text-white transition-all hover:brightness-110 hover:-translate-y-0.5`}
                   style={{
                     backgroundColor: persona === "company" ? SH_AMBER : SH_BLUE,

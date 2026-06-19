@@ -8,6 +8,7 @@ import {
   Search,
   CheckCircle2,
   Sparkles,
+  Star,
 } from "lucide-react";
 
 // ── Two-sided marketplace hero ─────────────────────────────────
@@ -50,13 +51,12 @@ export default function HeroSection({ onCtaClick }: HeroSectionProps) {
 
   return (
     <section
-      className="relative overflow-hidden rounded-2xl min-h-[min(700px,calc(100svh_-_90px))] grid grid-cols-1 lg:grid-cols-[1fr_440px] items-center gap-0"
+      className="relative overflow-hidden rounded-2xl min-h-[min(700px,calc(100svh_-_90px))] grid grid-cols-1 lg:grid-cols-[1fr_440px] items-center gap-0 shLandingGlassStrong"
       aria-label="StudentHub — connecting students with the right employers"
-      style={{ backgroundColor: "var(--surface)" }}
     >
       {/* Subtle grid pattern overlay */}
       <div
-        className="absolute inset-0 opacity-[0.015] pointer-events-none"
+        className="absolute inset-0 opacity-[0.02] pointer-events-none"
         aria-hidden="true"
         style={{
           backgroundImage:
@@ -66,12 +66,19 @@ export default function HeroSection({ onCtaClick }: HeroSectionProps) {
         }}
       />
 
-      {/* Ambient glow */}
+      {/* Dual ambient glows */}
       <div
-        className="absolute -top-32 -left-32 size-96 rounded-full opacity-[0.04] pointer-events-none"
+        className="absolute -top-32 -left-32 size-96 rounded-full opacity-[0.06] pointer-events-none"
         aria-hidden="true"
         style={{
           background: `radial-gradient(circle, ${SH_BLUE}, transparent 70%)`,
+        }}
+      />
+      <div
+        className="absolute -bottom-32 -right-32 size-80 rounded-full opacity-[0.04] pointer-events-none"
+        aria-hidden="true"
+        style={{
+          background: `radial-gradient(circle, ${SH_AMBER}, transparent 70%)`,
         }}
       />
 
@@ -89,9 +96,9 @@ export default function HeroSection({ onCtaClick }: HeroSectionProps) {
           {content.eyebrow}
         </div>
 
-        {/* Headline */}
+        {/* Headline — tighter tracking for premium feel */}
         <h1
-          className="text-[clamp(32px,5vw,56px)] font-bold leading-[1.05] tracking-tight mb-4"
+          className="text-[clamp(32px,5vw,56px)] font-bold leading-[1.05] tracking-[-0.03em] mb-4"
           style={{ color: "var(--ink)" }}
         >
           {content.headline}
@@ -110,7 +117,7 @@ export default function HeroSection({ onCtaClick }: HeroSectionProps) {
           {onCtaClick ? (
             <button
               onClick={onCtaClick}
-              className="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg text-sm font-semibold text-white transition-all duration-200 hover:brightness-110 hover:-translate-y-0.5 active:translate-y-0 group"
+              className="shLandingBtnPrimary"
               style={{
                 backgroundColor: SH_BLUE,
                 boxShadow: `0 4px 14px ${SH_BLUE}40`,
@@ -122,8 +129,8 @@ export default function HeroSection({ onCtaClick }: HeroSectionProps) {
             </button>
           ) : (
             <Link
-              href={content.studentCtaHref}
-              className="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg text-sm font-semibold text-white transition-all duration-200 hover:brightness-110 hover:-translate-y-0.5 active:translate-y-0 group"
+              href={{ pathname: "/signup", query: { role: "candidate" } }}
+              className="shLandingBtnPrimary group"
               style={{
                 backgroundColor: SH_BLUE,
                 boxShadow: `0 4px 14px ${SH_BLUE}40`,
@@ -135,8 +142,8 @@ export default function HeroSection({ onCtaClick }: HeroSectionProps) {
             </Link>
           )}
           <Link
-            href={content.employerCtaHref}
-            className="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg text-sm font-semibold text-white transition-all duration-200 hover:brightness-110 hover:-translate-y-0.5 active:translate-y-0 group"
+            href={{ pathname: "/signup", query: { role: "company" } }}
+            className="shLandingBtnPrimary group"
             style={{
               backgroundColor: SH_AMBER,
               boxShadow: `0 4px 14px ${SH_AMBER}50`,
@@ -148,8 +155,7 @@ export default function HeroSection({ onCtaClick }: HeroSectionProps) {
           </Link>
           <Link
             href="/login"
-            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-[var(--accent)]"
-            style={{ color: "var(--muted)" }}
+            className="shLandingBtnGhost"
           >
             Sign in
           </Link>
@@ -206,31 +212,12 @@ export default function HeroSection({ onCtaClick }: HeroSectionProps) {
 
       {/* ── Right Column: Premium Mockup ──────────────────── */}
       <div className="relative z-[2] flex items-center justify-center p-[clamp(20px,4vw,48px)] max-lg:pt-6 max-lg:pb-10 max-lg:min-h-[340px]">
-        <div
-          className="relative w-full max-w-[420px] rounded-xl overflow-hidden"
-          style={{
-            backgroundColor: "var(--surface)",
-            border: "1px solid var(--border)",
-            boxShadow: "0 8px 40px rgba(0,0,0,0.08)",
-          }}
-        >
+        <div className="shLandingMockup w-full max-w-[420px]">
           {/* Mockup header */}
-          <div
-            className="flex items-center gap-2 px-4 py-3"
-            style={{ borderBottom: "1px solid var(--border)" }}
-          >
-            <div
-              className="size-2.5 rounded-full"
-              style={{ backgroundColor: "#ef4444" }}
-            />
-            <div
-              className="size-2.5 rounded-full"
-              style={{ backgroundColor: "#eab308" }}
-            />
-            <div
-              className="size-2.5 rounded-full"
-              style={{ backgroundColor: "#22c55e" }}
-            />
+          <div className="shLandingMockupHeader">
+            <div className="shLandingMockupDot" style={{ backgroundColor: "#ef4444" }} />
+            <div className="shLandingMockupDot" style={{ backgroundColor: "#eab308" }} />
+            <div className="shLandingMockupDot" style={{ backgroundColor: "#22c55e" }} />
             <span
               className="ml-2 text-[11px] font-medium"
               style={{ color: "var(--muted)" }}
@@ -240,13 +227,14 @@ export default function HeroSection({ onCtaClick }: HeroSectionProps) {
           </div>
 
           {/* Mockup body */}
-          <div className="p-4 space-y-3">
+          <div className="shLandingMockupBody">
             {/* Search bar */}
             <div
               className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs"
               style={{
-                backgroundColor: "var(--secondary)",
+                backgroundColor: `${SH_BLUE}08`,
                 color: "var(--muted)",
+                border: "1px solid var(--sh-glass-border)",
               }}
             >
               <Search className="size-3.5 shrink-0" />
@@ -262,22 +250,36 @@ export default function HeroSection({ onCtaClick }: HeroSectionProps) {
               </span>
             </div>
 
-            {/* Result card */}
+            {/* Result card — glass style */}
             <div
-              className="rounded-lg p-4"
+              className="rounded-xl p-4 shLandingGlassHover"
               style={{
-                backgroundColor: `${SH_BLUE}08`,
+                background: `linear-gradient(135deg, ${SH_BLUE}10, ${SH_BLUE}04)`,
                 border: `1px solid ${SH_BLUE}20`,
               }}
             >
-              <span
-                className="text-[10px] font-bold uppercase tracking-wider"
-                style={{ color: SH_BLUE }}
-              >
-                Matched roles
-              </span>
+              {/* Match tag */}
+              <div className="flex items-center justify-between mb-2">
+                <span
+                  className="text-[10px] font-bold uppercase tracking-wider"
+                  style={{ color: SH_BLUE }}
+                >
+                  Matched roles
+                </span>
+                <span
+                  className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full"
+                  style={{
+                    color: "var(--green)",
+                    backgroundColor: `${"#24835b"}12`,
+                  }}
+                >
+                  <CheckCircle2 className="size-2.5" />
+                  Profile ready
+                </span>
+              </div>
+
               <strong
-                className="block text-[clamp(32px,5vw,48px)] leading-[0.9] mt-1"
+                className="block text-[clamp(32px,5vw,48px)] leading-[0.9] mt-1 font-black tracking-tight"
                 style={{ color: "var(--ink)" }}
               >
                 care assistant
@@ -285,26 +287,27 @@ export default function HeroSection({ onCtaClick }: HeroSectionProps) {
               <span className="text-xs block mt-1" style={{ color: "var(--muted)" }}>
                 12 matching roles · Kuwait City · KWD 3-5/hr
               </span>
+
               <div className="flex gap-2 mt-3">
                 <span
                   className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-full"
                   style={{
-                    color: "var(--green)",
-                    backgroundColor: `${"#24835b"}15`,
-                  }}
-                >
-                  <CheckCircle2 className="size-2.5" />
-                  Profile ready
-                </span>
-                <span
-                  className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-full"
-                  style={{
                     color: SH_BLUE,
-                    backgroundColor: `${SH_BLUE}15`,
+                    backgroundColor: `${SH_BLUE}12`,
                   }}
                 >
                   <CheckCircle2 className="size-2.5" />
                   3 saved roles
+                </span>
+                <span
+                  className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-full"
+                  style={{
+                    color: SH_AMBER,
+                    backgroundColor: `${SH_AMBER}12`,
+                  }}
+                >
+                  <Star className="size-2.5" />
+                  Top match
                 </span>
               </div>
             </div>
@@ -318,10 +321,10 @@ export default function HeroSection({ onCtaClick }: HeroSectionProps) {
               ].map((item) => (
                 <div
                   key={item.label}
-                  className="rounded-lg p-3 transition-all duration-200 hover:-translate-y-0.5"
+                  className="rounded-xl p-3 shLandingGlassHover"
                   style={{
-                    backgroundColor: "var(--secondary)",
-                    border: "1px solid var(--border)",
+                    backgroundColor: `${SH_BLUE}06`,
+                    border: "1px solid var(--sh-glass-border)",
                   }}
                 >
                   <span
@@ -342,9 +345,9 @@ export default function HeroSection({ onCtaClick }: HeroSectionProps) {
 
             {/* Employer tab note */}
             <div
-              className="flex items-center gap-2 p-3 rounded-lg text-xs"
+              className="flex items-center gap-2 p-3 rounded-xl text-xs"
               style={{
-                backgroundColor: `${SH_AMBER}0A`,
+                background: `linear-gradient(135deg, ${SH_AMBER}0A, ${SH_AMBER}04)`,
                 border: `1px solid ${SH_AMBER}15`,
                 color: SH_AMBER,
               }}

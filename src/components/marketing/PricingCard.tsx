@@ -338,14 +338,14 @@ export default function PricingCard({ persona = "candidate", className }: Pricin
               {/* CTA */}
               {isEnterprise ? (
                 <Link
-                  href={tier.ctaHref}
+                  href={tier.ctaHref as any}
                   className="uiButton uiButton_ghost uiButton_defaultSize w-full justify-center"
                 >
                   {tier.cta} <ArrowUpRight className="size-4" />
                 </Link>
               ) : (
                 <Link
-                  href={tier.ctaHref}
+                  href={tier.ctaHref as any}
                   className={cn(
                     "uiButton uiButton_defaultSize w-full justify-center",
                     tier.popular ? "uiButton_default" : "uiButton_ghost",

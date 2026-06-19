@@ -53,25 +53,12 @@ export default function HowItWorks({ className }: HowItWorksProps) {
       aria-label="How it works"
     >
       <div className="text-center mb-8 md:mb-10">
-        <span
-          className="inline-block text-[11px] font-bold uppercase tracking-wider mb-3 px-3 py-1 rounded-full"
-          style={{
-            color: SH_BLUE,
-            backgroundColor: `${SH_BLUE}12`,
-          }}
-        >
-          How it works
-        </span>
-        <h2
-          className="text-[clamp(24px,3vw,36px)] font-bold leading-tight"
-          style={{ color: "var(--ink)" }}
-        >
+        <span className="shLandingEyebrow">How it works</span>
+        <div className="shLandingGlowDivider mt-3" />
+        <h2 className="shLandingSectionTitle mt-3">
           From profile to placement in three steps.
         </h2>
-        <p
-          className="max-w-[520px] mx-auto mt-2 text-sm leading-relaxed"
-          style={{ color: "var(--muted)" }}
-        >
+        <p className="shLandingSectionSub mx-auto mt-2">
           Whether you&apos;re a student looking for work or an employer hiring
           talent, StudentHub serves both sides of the marketplace seamlessly.
         </p>
@@ -83,10 +70,12 @@ export default function HowItWorks({ className }: HowItWorksProps) {
           return (
             <div
               key={step.title}
-              className="relative flex flex-col items-center text-center p-6 rounded-xl transition-all duration-[280ms] hover:-translate-y-1"
+              className="relative flex flex-col items-center text-center p-6 rounded-xl shLandingGlassHover"
               style={{
-                backgroundColor: "var(--surface)",
-                border: "1px solid var(--border)",
+                backgroundColor: "var(--sh-glass-bg)",
+                backdropFilter: "blur(12px)",
+                WebkitBackdropFilter: "blur(12px)",
+                border: "1px solid var(--sh-glass-border)",
                 animation: `shCardIn 500ms cubic-bezier(0.16, 1, 0.3, 1) both`,
                 animationDelay: `${i * 120}ms`,
               }}
@@ -125,7 +114,7 @@ export default function HowItWorks({ className }: HowItWorksProps) {
               </span>
 
               <strong
-                className="block text-base mb-2"
+                className="block text-base mb-2 tracking-tight"
                 style={{ color: "var(--ink)" }}
               >
                 {step.title}

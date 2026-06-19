@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Sparkles } from "lucide-react";
 import Link from "next/link";
 
 const SH_BLUE = "#0b63ce";
@@ -14,10 +14,12 @@ export default function CTASection({ persona }: CTASectionProps) {
   return (
     <section className="py-12 sm:py-16 px-6 max-w-6xl mx-auto max-sm:px-4">
       <div
-        className="relative overflow-hidden rounded-xl p-8 sm:p-12 text-center"
+        className="relative overflow-hidden rounded-xl p-8 sm:p-12 text-center shLandingGlassHover"
         style={{
-          backgroundColor: "var(--surface)",
-          border: `1px solid ${SH_BLUE}20`,
+          backgroundColor: "var(--sh-glass-bg)",
+          backdropFilter: "blur(16px)",
+          WebkitBackdropFilter: "blur(16px)",
+          border: `1px solid ${persona === "company" ? `${SH_AMBER}30` : `${SH_BLUE}30`}`,
         }}
       >
         {/* Ambient gradient */}
@@ -31,17 +33,18 @@ export default function CTASection({ persona }: CTASectionProps) {
 
         <div className="relative z-[1] max-w-xl mx-auto">
           <span
-            className="inline-block text-[11px] font-bold uppercase tracking-wider mb-2 px-3 py-1 rounded-full"
+            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold tracking-wider uppercase"
             style={{
-              color: SH_BLUE,
-              backgroundColor: `${SH_BLUE}12`,
+              color: persona === "company" ? SH_AMBER : SH_BLUE,
+              backgroundColor: persona === "company" ? `${SH_AMBER}12` : `${SH_BLUE}12`,
             }}
           >
+            <Sparkles className="size-3" />
             {persona === "company" ? "Start hiring today" : "Start your journey"}
           </span>
 
           <h2
-            className="text-[clamp(22px,2.8vw,30px)] font-bold mt-3 mb-2 leading-tight"
+            className="text-[clamp(22px,2.8vw,30px)] font-bold mt-3 mb-2 leading-tight tracking-tight"
             style={{ color: "var(--ink)" }}
           >
             {persona === "company"
@@ -56,8 +59,8 @@ export default function CTASection({ persona }: CTASectionProps) {
           </p>
 
           <Link
-            href={persona === "company" ? "/signup?role=company" : "/signup?role=candidate"}
-            className="inline-flex items-center gap-1.5 px-6 py-2.5 rounded-lg text-sm font-semibold text-white transition-all duration-200 hover:brightness-110 hover:-translate-y-0.5 active:translate-y-0 group"
+            href={{ pathname: "/signup", query: { role: persona === "company" ? "company" : "candidate" } }}
+            className="shLandingBtnPrimary group"
             style={{
               backgroundColor: persona === "company" ? SH_AMBER : SH_BLUE,
               boxShadow: persona === "company"
