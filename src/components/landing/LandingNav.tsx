@@ -25,25 +25,18 @@ export default function LandingNav({ session, persona, onPersonaChange }: Landin
 
   return (
     <nav
-      className="sticky top-0 z-50"
-      style={{
-        backgroundColor: "color-mix(in srgb, var(--card) 85%, transparent)",
-        backdropFilter: "blur(20px)",
-        WebkitBackdropFilter: "blur(20px)",
-        borderBottom: "1px solid var(--sh-glass-border)",
-      }}
+      className="sticky top-0 z-50 bg-[var(--card)] border-b border-[var(--border)]"
       aria-label="StudentHub public navigation"
     >
       <div className="mx-auto max-w-6xl px-6">
         <div className="flex h-14 items-center justify-between">
           <Link href="/" className="flex items-center gap-2.5 no-underline shrink-0">
             <span
-              className="flex h-8 w-8 items-center justify-center rounded-lg text-[11px] font-bold text-white"
-              style={{ backgroundColor: SH_BLUE }}
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-[11px] font-bold text-white bg-[#0b63ce]"
             >
               SH
             </span>
-            <span className="text-sm font-semibold" style={{ color: "var(--ink)" }}>
+            <span className="text-sm font-semibold text-[var(--ink)]">
               StudentHub
             </span>
           </Link>
@@ -51,29 +44,25 @@ export default function LandingNav({ session, persona, onPersonaChange }: Landin
           <div className="hidden md:flex items-center gap-1 ml-8">
             <Link
               href="#how-it-works"
-              className="px-3 py-1.5 rounded-md text-sm no-underline transition-colors hover:text-[var(--ink)]"
-              style={{ color: "var(--muted)" }}
+              className="px-3 py-1.5 rounded-md text-sm no-underline transition-colors hover:text-[var(--ink)] text-[var(--muted)]"
             >
               How it works
             </Link>
             <Link
               href="#for-employers"
-              className="px-3 py-1.5 rounded-md text-sm no-underline transition-colors hover:text-[var(--ink)]"
-              style={{ color: "var(--muted)" }}
+              className="px-3 py-1.5 rounded-md text-sm no-underline transition-colors hover:text-[var(--ink)] text-[var(--muted)]"
             >
               For employers
             </Link>
             <Link
               href="#testimonials"
-              className="px-3 py-1.5 rounded-md text-sm no-underline transition-colors hover:text-[var(--ink)]"
-              style={{ color: "var(--muted)" }}
+              className="px-3 py-1.5 rounded-md text-sm no-underline transition-colors hover:text-[var(--ink)] text-[var(--muted)]"
             >
               Testimonials
             </Link>
             <Link
               href="#comparison"
-              className="px-3 py-1.5 rounded-md text-sm no-underline transition-colors hover:text-[var(--ink)]"
-              style={{ color: "var(--muted)" }}
+              className="px-3 py-1.5 rounded-md text-sm no-underline transition-colors hover:text-[var(--ink)] text-[var(--muted)]"
             >
               Comparison
             </Link>
@@ -92,8 +81,7 @@ export default function LandingNav({ session, persona, onPersonaChange }: Landin
               <>
                 <Link
                   href="/login"
-                  className="hidden sm:inline-flex px-3 py-2 rounded-lg text-sm no-underline"
-                  style={{ color: "var(--muted)" }}
+                  className="hidden sm:inline-flex px-3 py-2 rounded-lg text-sm no-underline text-[var(--muted)]"
                 >
                   Sign in
                 </Link>
@@ -114,8 +102,7 @@ export default function LandingNav({ session, persona, onPersonaChange }: Landin
             )}
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
-              className="md:hidden p-1.5 rounded-md"
-              style={{ color: "var(--ink)" }}
+              className="md:hidden p-1.5 rounded-md text-[var(--ink)]"
             >
               {mobileOpen ? <X className="size-5" /> : <Menu className="size-5" />}
             </button>
@@ -131,14 +118,11 @@ export default function LandingNav({ session, persona, onPersonaChange }: Landin
               <button
                 key={tab.value}
                 onClick={() => onPersonaChange(tab.value)}
-                className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium border-b-2 transition-all cursor-pointer"
+                className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium border-b-2 transition-all cursor-pointer rounded-t-lg"
                 style={{
                   color: active ? accentColor : "var(--muted)",
                   borderBottomColor: active ? accentColor : "transparent",
                   backgroundColor: active ? `color-mix(in srgb, ${accentColor} 8%, transparent)` : "transparent",
-                  borderTopLeftRadius: "8px",
-                  borderTopRightRadius: "8px",
-                  marginBottom: "-1px",
                 }}
               >
                 <tab.icon className="size-3.5" />
@@ -151,11 +135,11 @@ export default function LandingNav({ session, persona, onPersonaChange }: Landin
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="md:hidden pb-3 space-y-1 px-6" style={{ borderTop: "1px solid var(--border)" }}>
-          <Link href="#how-it-works" className="block px-3 py-2 rounded-md text-sm no-underline" style={{ color: "var(--muted)" }}>How it works</Link>
-          <Link href="#for-employers" className="block px-3 py-2 rounded-md text-sm no-underline" style={{ color: "var(--muted)" }}>For employers</Link>
-          <Link href="#testimonials" className="block px-3 py-2 rounded-md text-sm no-underline" style={{ color: "var(--muted)" }}>Testimonials</Link>
-          <Link href="#comparison" className="block px-3 py-2 rounded-md text-sm no-underline" style={{ color: "var(--muted)" }}>Comparison</Link>
+        <div className="md:hidden pb-3 space-y-1 px-6 border-t border-[var(--border)]">
+          <Link href="#how-it-works" className="block px-3 py-2 rounded-md text-sm no-underline text-[var(--muted)]">How it works</Link>
+          <Link href="#for-employers" className="block px-3 py-2 rounded-md text-sm no-underline text-[var(--muted)]">For employers</Link>
+          <Link href="#testimonials" className="block px-3 py-2 rounded-md text-sm no-underline text-[var(--muted)]">Testimonials</Link>
+          <Link href="#comparison" className="block px-3 py-2 rounded-md text-sm no-underline text-[var(--muted)]">Comparison</Link>
         </div>
       )}
     </nav>
