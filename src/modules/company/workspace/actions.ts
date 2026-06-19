@@ -4,7 +4,20 @@
 // Page-level server actions import these and add auth/validation/revalidation.
 // ---------------------------------------------------------------------------
 
+import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import {
+  contactResultOutputSchema,
+  companyLinkWithCompanyOutputSchema,
+  workspaceStatsOutputSchema,
+  contactUpdateResultOutputSchema,
+} from "./schemas";
+import type {
+  ContactResult,
+  CompanyLinkWithCompany,
+  WorkspaceStats,
+  ContactUpdateResult,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // findContactByUuid
@@ -16,14 +29,24 @@ import { prisma } from "@/lib/prisma";
  */
 export async function findContactByUuid(
   contactUuid: string,
-): Promise<{
-  contact_name: string;
-  contact_email: string | null;
-} | null> {
-  return prisma.contact.findUnique({
+): Promise<ContactResult> {
+  const result = await prisma.contact.findUnique({
     where: { contact_uuid: contactUuid },
     select: { contact_name: true, contact_email: true },
   });
+
+  // Validate output shape
+  if (result !== null) {
+    const outputParsed = contactResultOutputSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/company/workspace] findContactByUuid output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -36,21 +59,8 @@ export async function findContactByUuid(
  */
 export async function getCompanyLinksForWorkspace(
   contactUuid: string,
-): Promise<
-  {
-    company_contact_uuid: string;
-    contact_position: string | null;
-    allow_access: boolean | null;
-    company: {
-      company_id: number;
-      company_name: string | null;
-      company_email: string | null;
-      no_of_active_requests: number | null;
-      company_approved_to_hire: boolean | null;
-    } | null;
-  }[]
-> {
-  return prisma.company_contact.findMany({
+): Promise<CompanyLinkWithCompany[]> {
+  const result = await prisma.company_contact.findMany({
     where: { contact_uuid: contactUuid },
     take: 20,
     select: {
@@ -68,6 +78,17 @@ export async function getCompanyLinksForWorkspace(
       },
     },
   });
+
+  // Validate output shape
+  const outputParsed = z.array(companyLinkWithCompanyOutputSchema).safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/company/workspace] getCompanyLinksForWorkspace output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -114,10 +135,21 @@ export async function getWorkspaceStatsTx(
 export async function updateContactByUuid(
   contactUuid: string,
   data: Record<string, unknown>,
-): Promise<{ contact_uuid: string }> {
-  return prisma.contact.update({
+): Promise<ContactUpdateResult> {
+  const result = await prisma.contact.update({
     where: { contact_uuid: contactUuid },
     data: data as any,
     select: { contact_uuid: true },
   });
+
+  // Validate output shape
+  const outputParsed = contactUpdateResultOutputSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/company/workspace] updateContactByUuid output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }

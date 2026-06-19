@@ -486,7 +486,7 @@ describe("findCompanyById()", () => {
     currency_code: "USD",
     country: { country_name_en: "United States" },
     company: { company_name: "Parent Inc" },
-    staff: { staff_name: "John Doe" },
+    staff: { staff_name: "John Doe", staff_email: "john@example.com" },
   };
 
   beforeEach(() => {
@@ -502,7 +502,7 @@ describe("findCompanyById()", () => {
       include: {
         country: { select: { country_name_en: true } },
         company: { select: { company_name: true } },
-        staff: { select: { staff_name: true } },
+        staff: { select: { staff_name: true, staff_email: true } },
       },
     });
 

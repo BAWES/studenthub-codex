@@ -4,7 +4,20 @@
 // Page-level server actions import these and add auth/validation/revalidation.
 // ---------------------------------------------------------------------------
 
+import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import {
+  companyLinkOutputSchema,
+  companyDetailTxOutputSchema,
+  companyWithRelationsOutputSchema,
+  companyUpdateResultOutputSchema,
+} from "./schemas";
+import type {
+  CompanyLinkOutput as CompanyLink,
+  CompanyWithRelationsOutput as CompanyWithRelations,
+  CompanyDetailTxOutput as CompanyDetailData,
+  CompanyUpdateResultOutput as CompanyUpdateResult,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // getCompanyLinksByContact
@@ -16,11 +29,22 @@ import { prisma } from "@/lib/prisma";
  */
 export async function getCompanyLinksByContact(
   contactUuid: string,
-): Promise<{ company_id: number | null }[]> {
-  return prisma.company_contact.findMany({
+): Promise<CompanyLink[]> {
+  const result = await prisma.company_contact.findMany({
     where: { contact_uuid: contactUuid, allow_access: true },
     select: { company_id: true },
   });
+
+  // Validate output shape
+  const outputParsed = z.array(companyLinkOutputSchema).safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/company/companies] getCompanyLinksByContact output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -35,7 +59,7 @@ export async function getCompanyLinksByContact(
 export async function getCompanyDetailTx(
   companyId: number,
 ): Promise<readonly [unknown, unknown[], unknown[], unknown[], unknown[]]> {
-  return prisma.$transaction([
+  const result = await prisma.$transaction([
     prisma.company.findUnique({
       where: { company_id: companyId },
       select: {
@@ -93,6 +117,17 @@ export async function getCompanyDetailTx(
       },
     }),
   ]);
+
+  // Validate output shape
+  const outputParsed = companyDetailTxOutputSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/company/companies] getCompanyDetailTx output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -105,44 +140,28 @@ export async function getCompanyDetailTx(
  */
 export async function findCompanyById(
   companyId: number,
-): Promise<{
-  company_id: number;
-  parent_company_id: number | null;
-  company_name: string;
-  company_common_name_en: string | null;
-  company_common_name_ar: string | null;
-  company_description_en: string | null;
-  company_description_ar: string | null;
-  company_website: string | null;
-  company_email: string | null;
-  company_logo: string | null;
-  commercial_licence: string | null;
-  company_hourly_rate: unknown | null;
-  company_bonus_commission: unknown | null;
-  company_followup: boolean | null;
-  total_candidate: bigint | number | null;
-  no_of_active_requests: number | null;
-  is_request_updates_in_30_days: boolean | null;
-  company_approved_to_hire: boolean | null;
-  company_status_override: boolean | null;
-  company_created_at: Date;
-  company_updated_at: Date;
-  last_request_datetime: Date | null;
-  last_payment_datetime: Date | null;
-  country_id: number | null;
-  currency_code: string | null;
-  country: { country_name_en: string } | null;
-  company: { company_name: string } | null;
-  staff: { staff_name: string } | null;
-} | null> {
-  return prisma.company.findUnique({
+): Promise<CompanyWithRelations | null> {
+  const result = await prisma.company.findUnique({
     where: { company_id: companyId },
     include: {
       country: { select: { country_name_en: true } },
       company: { select: { company_name: true } },
-      staff: { select: { staff_name: true } },
+      staff: { select: { staff_name: true, staff_email: true } },
     },
   });
+
+  // Validate output shape (only when not null)
+  if (result !== null) {
+    const outputParsed = companyWithRelationsOutputSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/company/companies] findCompanyById output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -157,10 +176,21 @@ export async function findCompanyById(
 export async function updateCompanyById(
   companyId: number,
   data: Record<string, unknown>,
-): Promise<{ company_id: number }> {
-  return prisma.company.update({
+): Promise<CompanyUpdateResult> {
+  const result = await prisma.company.update({
     where: { company_id: companyId },
     data: data as any,
     select: { company_id: true },
   });
+
+  // Validate output shape
+  const outputParsed = companyUpdateResultOutputSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/company/companies] updateCompanyById output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }
