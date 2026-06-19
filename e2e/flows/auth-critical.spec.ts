@@ -321,13 +321,13 @@ test.describe("Auth critical flows — Login, cross-role isolation, public route
       await ctx.page.waitForLoadState("load");
       await expect(ctx.page).toHaveURL(/\/staff/);
 
-      // Clear session cookie via Playwright API (httpOnly cookie, can't use document.cookie)
-      await ctx.page.context().clearCookies();
+      // Clear session cookie (simulates logout — /api/auth/logout route is
+      // not served; auth uses Next.js server actions now)
+      await ctx.context.clearCookies();
 
       // After logout, a protected route should redirect to login
       await ctx.page.goto("/staff");
       await ctx.page.waitForLoadState("load");
-      await ctx.page.waitForTimeout(300);
       await expect(ctx.page).toHaveURL(/\/login/);
 
       assertNoReactErrors(ctx.errors);
@@ -342,15 +342,12 @@ test.describe("Auth critical flows — Login, cross-role isolation, public route
       await ctx.page.waitForLoadState("load");
       await expect(ctx.page).toHaveURL(/\/company/);
 
-      // Clear session cookie (logout is a server action, not an API route)
-      await ctx.page.evaluate(() => {
-        document.cookie = "studenthub_next_session=; Max-Age=0; path=/";
-      });
+      // Clear session cookie (simulates logout)
+      await ctx.context.clearCookies();
 
       // Protected route should now redirect
       await ctx.page.goto("/company");
       await ctx.page.waitForLoadState("load");
-      await ctx.page.waitForTimeout(300);
       await expect(ctx.page).toHaveURL(/\/login/);
 
       assertNoReactErrors(ctx.errors);
