@@ -1,8 +1,10 @@
 "use client";
 
-import { UserRound, Search, Briefcase, ArrowRight } from "lucide-react";
+import { UserRound, Search, Briefcase } from "lucide-react";
 
 // ── Step definitions ──────────────────────────────────────────
+
+const SH_BLUE = "#0b63ce";
 
 interface Step {
   icon: typeof UserRound;
@@ -17,22 +19,22 @@ const steps: Step[] = [
     icon: UserRound,
     number: 1,
     title: "Create your profile",
-    tag: "One-time setup",
-    body: "Tell us about your skills, experience, and what you're looking for. One profile makes you visible to every employer on the platform — no need to sign up for multiple agencies.",
+    tag: "3 minutes · No CV needed",
+    body: "Tell us about your skills, experience, and preferences. One profile makes you visible to every employer on the platform — no need to sign up for multiple agencies.",
   },
   {
     icon: Search,
     number: 2,
     title: "Get matched",
-    tag: "Staff-powered",
-    body: "Our staff recruiters match you with relevant openings across employers on the platform. Get alerted the moment a role matches your profile, and apply in one click.",
+    tag: "Staff-powered matching",
+    body: "Our staff recruiters match you with relevant openings across employers. Get alerted the moment a role fits your profile, and apply in one click.",
   },
   {
     icon: Briefcase,
     number: 3,
     title: "Get hired",
     tag: "Fast placement",
-    body: "One-click apply, real-time application tracking, and direct communication with employers. From profile to placement — all on one platform.",
+    body: "One-click apply, real-time tracking, and direct communication with employers. Timesheets, payments, and compliance — all on one platform.",
   },
 ];
 
@@ -46,20 +48,32 @@ export interface HowItWorksProps {
 
 export default function HowItWorks({ className }: HowItWorksProps) {
   return (
-    <section className={`shSection ${className ?? ""}`} aria-label="How it works">
+    <section
+      className={`scroll-mt-20 ${className ?? ""}`}
+      aria-label="How it works"
+    >
       <div className="text-center mb-8 md:mb-10">
-        <p className="text-[var(--sh-info)] text-[11px] font-black uppercase tracking-wider mb-2">
+        <span
+          className="inline-block text-[11px] font-bold uppercase tracking-wider mb-3 px-3 py-1 rounded-full"
+          style={{
+            color: SH_BLUE,
+            backgroundColor: `${SH_BLUE}12`,
+          }}
+        >
           How it works
-        </p>
-        <h2 className="shBenefitsTitle text-center">
+        </span>
+        <h2
+          className="text-[clamp(24px,3vw,36px)] font-bold leading-tight"
+          style={{ color: "var(--ink)" }}
+        >
           From profile to placement in three steps.
         </h2>
         <p
-          className="max-w-[520px] mx-auto mt-2 leading-relaxed"
+          className="max-w-[520px] mx-auto mt-2 text-sm leading-relaxed"
           style={{ color: "var(--muted)" }}
         >
-          Whether you&apos;re a student looking for work or an employer hiring talent,
-          StudentHub serves both sides of the marketplace seamlessly.
+          Whether you&apos;re a student looking for work or an employer hiring
+          talent, StudentHub serves both sides of the marketplace seamlessly.
         </p>
       </div>
 
@@ -69,65 +83,46 @@ export default function HowItWorks({ className }: HowItWorksProps) {
           return (
             <div
               key={step.title}
-              className="relative flex flex-col items-center text-center p-6 rounded-xl shCardGlow transition-all duration-[280ms] hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(16,24,40,0.08)]"
+              className="relative flex flex-col items-center text-center p-6 rounded-xl transition-all duration-[280ms] hover:-translate-y-1"
               style={{
-                background: "var(--sh-glass-bg)",
-                border: "1px solid var(--sh-glass-border)",
+                backgroundColor: "var(--surface)",
+                border: "1px solid var(--border)",
                 animation: `shCardIn 500ms cubic-bezier(0.16, 1, 0.3, 1) both`,
                 animationDelay: `${i * 120}ms`,
               }}
             >
-              {/* Arrow connector (desktop only) */}
-              {i < steps.length - 1 && (
-                <div
-                  className="hidden md:block absolute top-8 -right-3 z-10"
-                  aria-hidden="true"
-                >
-                  <div
-                    className="size-8 rounded-full flex items-center justify-center"
-                    style={{
-                      background: "var(--sh-glass-bg-strong)",
-                      border: "1px solid var(--sh-glass-border)",
-                    }}
-                  >
-                    <ArrowRight className="size-4" style={{ color: "var(--muted)" }} />
-                  </div>
-                </div>
-              )}
-
-              {/* Step number badge */}
+              {/* Step number */}
               <div
-                className="size-10 rounded-full flex items-center justify-center text-sm font-black mb-3"
+                className="size-9 rounded-full flex items-center justify-center text-xs font-black mb-4"
                 style={{
-                  background: "var(--sh-info-bg)",
-                  color: "var(--sh-info)",
+                  backgroundColor: `${SH_BLUE}12`,
+                  color: SH_BLUE,
                 }}
               >
                 {step.number}
+              </div>
+
+              {/* Icon */}
+              <div
+                className="size-12 rounded-xl flex items-center justify-center mb-3"
+                style={{
+                  backgroundColor: `${SH_BLUE}08`,
+                  color: SH_BLUE,
+                }}
+              >
+                <Icon className="size-6" aria-hidden="true" />
               </div>
 
               {/* Tag */}
               <span
                 className="inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full mb-3"
                 style={{
-                  background: "var(--sh-glass-bg-strong)",
+                  backgroundColor: "var(--secondary)",
                   color: "var(--muted)",
-                  border: "1px solid var(--sh-glass-border)",
                 }}
               >
                 {step.tag}
               </span>
-
-              {/* Icon with glow */}
-              <div
-                className="size-12 rounded-xl flex items-center justify-center mb-3 transition-all duration-300 group-hover:scale-110"
-                style={{
-                  background: "var(--sh-glass-bg-strong)",
-                  color: "var(--sh-info)",
-                }}
-              >
-                <Icon className="size-6" aria-hidden="true" />
-              </div>
 
               <strong
                 className="block text-base mb-2"

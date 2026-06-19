@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback } from "react";
 import { Quote, ChevronLeft, ChevronRight, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+const SH_AMBER = "#f59e0b";
+
 // ── Types ────────────────────────────────────────────────
 
 export interface Testimonial {
@@ -11,7 +13,7 @@ export interface Testimonial {
   name: string;
   title: string;
   company: string;
-  avatar: string; // initials fallback
+  avatar: string;
   rating: number;
 }
 
@@ -31,7 +33,7 @@ const candidateTestimonials: Testimonial[] = [
   },
   {
     quote:
-      "The timesheet and payment system is seamless. I log my hours on my phone, my manager approves in seconds, and the money hits my account on payday. No chasing, no spreadsheets.",
+      "The timesheet and payment system is seamless. I log my hours on my phone, my manager approves in seconds, and the money hits my account on payday.",
     name: "James K.",
     title: "Support Worker",
     company: "Placed via StudentHub",
@@ -49,7 +51,7 @@ const candidateTestimonials: Testimonial[] = [
   },
   {
     quote:
-      "StudentHub saved me hours every week. Instead of visiting 5 different agency websites, I have one profile that all employers can see. The matching algorithm actually works.",
+      "StudentHub saved me hours every week. Instead of visiting 5 different agency websites, I have one profile that all employers can see.",
     name: "Daniel O.",
     title: "Healthcare Worker",
     company: "Placed via StudentHub",
@@ -160,29 +162,43 @@ export default function TestimonialCarousel({
 
   return (
     <section
-      className={cn("shSection", className)}
+      className={cn("scroll-mt-20", className)}
       aria-label="Customer testimonials"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
       <div className="text-center mb-8 md:mb-10">
-        <p className="text-[var(--sh-info)] text-[11px] font-black uppercase tracking-wider mb-2">
+        <span
+          className="inline-block text-[11px] font-bold uppercase tracking-wider mb-3 px-3 py-1 rounded-full"
+          style={{
+            color: "#0b63ce",
+            backgroundColor: "#0b63ce12",
+          }}
+        >
           {persona === "company"
             ? "Trusted by leading employers"
             : "Trusted by candidates and employers"}
-        </p>
-        <h2 className="shBenefitsTitle text-center">
+        </span>
+        <h2
+          className="text-[clamp(24px,3vw,36px)] font-bold leading-tight"
+          style={{ color: "var(--ink)" }}
+        >
           {persona === "company"
             ? "Employers that found their team."
             : "Real stories from real placements."}
         </h2>
       </div>
 
-      <div className="relative mx-auto max-w-[800px]">
+      <div className="relative mx-auto max-w-[720px]">
         {/* Navigation arrows */}
         <button
           onClick={prev}
-          className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 size-10 rounded-full flex items-center justify-center bg-[var(--surface)] border border-[var(--border)] text-[var(--muted)] hover:text-[var(--ink)] hover:border-[var(--border)] transition-all duration-200 max-sm:hidden"
+          className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-3 z-10 size-9 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 max-sm:hidden"
+          style={{
+            backgroundColor: "var(--surface)",
+            border: "1px solid var(--border)",
+            color: "var(--muted)",
+          }}
           aria-label="Previous testimonial"
         >
           <ChevronLeft className="size-4" />
@@ -190,7 +206,12 @@ export default function TestimonialCarousel({
 
         <button
           onClick={next}
-          className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 size-10 rounded-full flex items-center justify-center bg-[var(--surface)] border border-[var(--border)] text-[var(--muted)] hover:text-[var(--ink)] hover:border-[var(--border)] transition-all duration-200 max-sm:hidden"
+          className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-3 z-10 size-9 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 max-sm:hidden"
+          style={{
+            backgroundColor: "var(--surface)",
+            border: "1px solid var(--border)",
+            color: "var(--muted)",
+          }}
           aria-label="Next testimonial"
         >
           <ChevronRight className="size-4" />
@@ -199,31 +220,37 @@ export default function TestimonialCarousel({
         {/* Testimonial card */}
         <div
           key={active}
-          className="shCard rounded-xl p-8 md:p-10 text-center animate-in fade-in slide-in-from-bottom-4 duration-500 shCardGlow"
+          className="rounded-xl p-8 md:p-10 text-center animate-in fade-in slide-in-from-bottom-4 duration-500"
           style={{
-            background: "var(--sh-glass-bg)",
+            backgroundColor: "var(--surface)",
             border: "1px solid var(--border)",
           }}
         >
           <Quote
-            className="size-8 mx-auto mb-4"
-            style={{ color: "var(--sh-info)" }}
+            className="size-7 mx-auto mb-4"
+            style={{ color: "#0b63ce" }}
             aria-hidden="true"
           />
 
-          <blockquote className="text-[clamp(17px,2vw,22px)] leading-relaxed mb-6 font-medium" style={{ color: "var(--ink)" }}>
+          <blockquote
+            className="text-[clamp(16px,1.8vw,20px)] leading-relaxed mb-6 font-medium"
+            style={{ color: "var(--ink)" }}
+          >
             &ldquo;{t.quote}&rdquo;
           </blockquote>
 
           {/* Star rating */}
-          <div className="flex items-center justify-center gap-1 mb-4" aria-label={`${t.rating} out of 5 stars`}>
+          <div
+            className="flex items-center justify-center gap-1 mb-4"
+            aria-label={`${t.rating} out of 5 stars`}
+          >
             {Array.from({ length: 5 }).map((_, i) => (
               <Star
                 key={i}
                 className="size-4"
                 style={{
-                  color: i < t.rating ? "var(--sh-warning)" : "var(--border)",
-                  fill: i < t.rating ? "var(--sh-warning)" : "transparent",
+                  color: i < t.rating ? SH_AMBER : "var(--border)",
+                  fill: i < t.rating ? SH_AMBER : "transparent",
                 }}
               />
             ))}
@@ -232,19 +259,22 @@ export default function TestimonialCarousel({
           {/* Author */}
           <div className="flex items-center justify-center gap-3">
             <div
-              className="size-10 rounded-full flex items-center justify-center text-xs font-bold"
-              style={{
-                background: "var(--sh-info-bg)",
-                color: "var(--sh-info)",
-              }}
+              className="size-9 rounded-full flex items-center justify-center text-xs font-bold text-white"
+              style={{ backgroundColor: "#0b63ce" }}
             >
               {t.avatar}
             </div>
             <div className="text-left">
-              <strong className="block text-sm" style={{ color: "var(--ink)" }}>
+              <strong
+                className="block text-sm"
+                style={{ color: "var(--ink)" }}
+              >
                 {t.name}
               </strong>
-              <span className="text-xs" style={{ color: "var(--muted)" }}>
+              <span
+                className="text-xs"
+                style={{ color: "var(--muted)" }}
+              >
                 {t.title} — {t.company}
               </span>
             </div>
@@ -257,9 +287,11 @@ export default function TestimonialCarousel({
             <button
               key={i}
               onClick={() => setActive(i)}
-              className="size-2 rounded-full transition-all duration-300"
+              className="rounded-full transition-all duration-300"
               style={{
-                background: i === active ? "var(--sh-info)" : "var(--border)",
+                height: 8,
+                backgroundColor:
+                  i === active ? "#0b63ce" : "var(--border)",
                 width: i === active ? 24 : 8,
               }}
               aria-label={`Go to testimonial ${i + 1}`}
