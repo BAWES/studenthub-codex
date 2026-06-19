@@ -22,8 +22,8 @@ test.describe("Landing page smoke tests (STU-2776 redesign)", () => {
     // H1 headline renders
     await expect(page.locator("h1")).toContainText("Connecting students with");
 
-    // Eyebrow badge renders
-    await expect(hero.locator("text=Staff-driven matching").first()).toBeVisible();
+    // Eyebrow renders with two-sided marketplace tagline
+    await expect(hero.locator("text=Two-sided marketplace for student talent").first()).toBeVisible();
   });
 
   test("hero CTA buttons render", async ({ page }) => {
@@ -46,10 +46,18 @@ test.describe("Landing page smoke tests (STU-2776 redesign)", () => {
   test("hero feature pills render", async ({ page }) => {
     await navAndSettle(page);
 
-    // Social proof badges in hero
-    await expect(page.locator("text=1,200+ students placed").first()).toBeVisible();
-    await expect(page.locator("text=500+ employers").first()).toBeVisible();
-    await expect(page.locator("text=4.8 average rating").first()).toBeVisible();
+    // Social proof text in hero
+    await expect(page.locator("text=500+ employers across Kuwait").first()).toBeVisible();
+
+    // Feature pills — student benefits
+    const studentPills = page.locator('[aria-label="Key benefits for students"]');
+    await expect(studentPills).toBeVisible();
+    await expect(studentPills).toContainText("Profile visible to employers across Kuwait");
+
+    // Feature pills — employer benefits
+    const employerPills = page.locator('[aria-label="Key benefits for employers"]');
+    await expect(employerPills).toBeVisible();
+    await expect(employerPills).toContainText("AI-matched candidate suggestions");
   });
 
   test("persona switcher renders and switches between candidate/company", async ({
