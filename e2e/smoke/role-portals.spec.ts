@@ -82,8 +82,9 @@ test.describe("Role portal smoke tests", () => {
     const page = await context.newPage();
     await page.goto("/staff");
     await expect(page).toHaveURL("/staff");
-    await expect(page.locator('text="Staff operating home"')).toBeVisible({ timeout: 15000 });
-    await expect(page.locator('text="Production data loaded"')).toBeVisible({ timeout: 15000 });
+    // Staff page uses WorkspaceShell — eyebrow and title
+    await expect(page.locator("text=Staff Workspace").first()).toBeVisible({ timeout: 15000 });
+    await expect(page.locator("text=Welcome back").first()).toBeVisible({ timeout: 15000 });
     await context.close();
   });
 

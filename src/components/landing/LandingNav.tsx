@@ -49,32 +49,31 @@ export default function LandingNav({ session, persona, onPersonaChange }: Landin
           <div className="hidden md:flex items-center gap-1 ml-8">
             <Link
               href="#how-it-works"
-              className="px-3 py-1.5 rounded-md text-sm no-underline transition-colors"
+              className="px-3 py-1.5 rounded-md text-sm no-underline transition-colors hover:text-[var(--ink)]"
               style={{ color: "var(--muted)" }}
-              onMouseOver={(e) => (e.currentTarget.style.color = "var(--ink)")}
-              onMouseOut={(e) => (e.currentTarget.style.color = "var(--muted)")}
             >
               How it works
             </Link>
-            {persona === "company" && (
-              <Link
-                href="#for-employers"
-                className="px-3 py-1.5 rounded-md text-sm no-underline transition-colors"
-                style={{ color: "var(--muted)" }}
-                onMouseOver={(e) => (e.currentTarget.style.color = "var(--ink)")}
-                onMouseOut={(e) => (e.currentTarget.style.color = "var(--muted)")}
-              >
-                For employers
-              </Link>
-            )}
+            <Link
+              href="#for-employers"
+              className="px-3 py-1.5 rounded-md text-sm no-underline transition-colors hover:text-[var(--ink)]"
+              style={{ color: "var(--muted)" }}
+            >
+              For employers
+            </Link>
             <Link
               href="#testimonials"
-              className="px-3 py-1.5 rounded-md text-sm no-underline transition-colors"
+              className="px-3 py-1.5 rounded-md text-sm no-underline transition-colors hover:text-[var(--ink)]"
               style={{ color: "var(--muted)" }}
-              onMouseOver={(e) => (e.currentTarget.style.color = "var(--ink)")}
-              onMouseOut={(e) => (e.currentTarget.style.color = "var(--muted)")}
             >
               Testimonials
+            </Link>
+            <Link
+              href="#comparison"
+              className="px-3 py-1.5 rounded-md text-sm no-underline transition-colors hover:text-[var(--ink)]"
+              style={{ color: "var(--muted)" }}
+            >
+              Comparison
             </Link>
           </div>
 
@@ -152,7 +151,9 @@ export default function LandingNav({ session, persona, onPersonaChange }: Landin
       {mobileOpen && (
         <div className="md:hidden pb-3 space-y-1 px-6" style={{ borderTop: "1px solid var(--border)" }}>
           <Link href="#how-it-works" className="block px-3 py-2 rounded-md text-sm no-underline" style={{ color: "var(--muted)" }}>How it works</Link>
+          <Link href="#for-employers" className="block px-3 py-2 rounded-md text-sm no-underline" style={{ color: "var(--muted)" }}>For employers</Link>
           <Link href="#testimonials" className="block px-3 py-2 rounded-md text-sm no-underline" style={{ color: "var(--muted)" }}>Testimonials</Link>
+          <Link href="#comparison" className="block px-3 py-2 rounded-md text-sm no-underline" style={{ color: "var(--muted)" }}>Comparison</Link>
         </div>
       )}
     </nav>
