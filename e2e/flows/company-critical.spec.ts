@@ -175,7 +175,7 @@ test.describe("Company Critical Flows", () => {
 
     // Applications link or jobs listing is present
     // Check for job rows in the data table
-    const jobRows = ctx.page.locator("table a[href*='/employer/jobs/']");
+    const jobRows = ctx.page.locator("a[href*='/employer/jobs/']");
     if ((await jobRows.count()) > 0) {
       // Navigate into the first job
       const href = await jobRows.first().getAttribute("href");
@@ -197,7 +197,7 @@ test.describe("Company Critical Flows", () => {
     await ctx.page.waitForLoadState("load");
     await ctx.page.waitForTimeout(300);
 
-    const jobLink = ctx.page.locator("table a[href*='/employer/jobs/']").first();
+    const jobLink = ctx.page.locator("a[href*='/employer/jobs/']").first();
     if ((await jobLink.count()) > 0) {
       const href = await jobLink.getAttribute("href");
       // Navigate to applications page for that job
@@ -248,7 +248,7 @@ test.describe("Company Critical Flows", () => {
     await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
 
     // Find a request link and navigate to detail
-    const requestLink = ctx.page.locator("table a").first();
+    const requestLink = ctx.page.locator("a[href*='/company/requests/']").first();
     if ((await requestLink.count()) > 0) {
       const href = await requestLink.getAttribute("href");
       await ctx.page.goto(href!);
@@ -282,7 +282,7 @@ test.describe("Company Critical Flows", () => {
     await ctx.page.waitForLoadState("load");
     await ctx.page.waitForTimeout(300);
 
-    const requestLink = ctx.page.locator("table a").first();
+    const requestLink = ctx.page.locator("a[href*='/company/requests/']").first();
     if ((await requestLink.count()) > 0) {
       const href = await requestLink.getAttribute("href");
       await ctx.page.goto(href!);

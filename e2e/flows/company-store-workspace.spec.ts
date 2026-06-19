@@ -123,7 +123,7 @@ test.describe("Company Store & Workspace Management", () => {
       console.log(`Stores heading: "${headingText.trim()}"`);
 
       // DataTable renders with columns
-      const dataTable = ctx.page.locator("table").first();
+      const dataTable = ctx.page.locator(".dataList, .rows, table").first();
       await expect(dataTable).toBeVisible({ timeout: 10000 });
 
       // Common store columns
@@ -148,13 +148,13 @@ test.describe("Company Store & Workspace Management", () => {
     await ctx.page.waitForTimeout(300);
 
       // Check for store data rows
-      const storeRows = ctx.page.locator("table tbody tr");
+      const storeRows = ctx.page.locator(".dataList, .rows, table tbody tr");
       const rowCount = await storeRows.count().catch(() => 0);
       console.log(`Store rows found: ${rowCount}`);
 
       if (rowCount > 0) {
         // First row should have a link to store detail
-        const firstStoreLink = ctx.page.locator("table a").first();
+        const firstStoreLink = ctx.page.locator("a[href*='/company/stores/']").first();
         const linkCount = await firstStoreLink.count().catch(() => 0);
         if (linkCount > 0) {
           const href = await firstStoreLink.getAttribute("href");
@@ -234,7 +234,7 @@ test.describe("Company Store & Workspace Management", () => {
 
       // Interactive elements on workspace — buttons, links, data tables
       const interactables = ctx.page.locator(
-        "button, a, [role='button'], table, [class*='card'], [class*='Card'], [class*='metric'], [class*='Metric']",
+        "button, a, [role='button'], [class*='dataList'], [class*='rows'], table, [class*='card'], [class*='Card'], [class*='metric'], [class*='Metric']",
       );
       const count = await interactables.count().catch(() => 0);
       console.log(`Workspace interactive elements: ${count}`);
