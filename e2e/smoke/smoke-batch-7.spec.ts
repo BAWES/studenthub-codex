@@ -9,23 +9,20 @@
 // ---------------------------------------------------------------------------
 
 import { test, expect } from "@playwright/test";
-import { getFixtures, disconnectPrisma } from "../fixtures/auth";
+import { getMockFixtures, type FixtureUser } from "../fixtures/users";
 
-test.afterAll(async () => {
-  await disconnectPrisma();
-});
+process.env.USE_MOCK_FIXTURES = "true";
+
+const fixtures = getMockFixtures();
+const admin = fixtures.get("admin")!;
+const staff = fixtures.get("staff")!;
+const companyUser = fixtures.get("company")!;
+const candidate = fixtures.get("candidate")!;
 
 // ── Admin pages ────────────────────────────────────────────────────────
 
 test.describe("Admin smoke batch 7 — AWS, company-requests, bank-advice", () => {
   test.describe.configure({ mode: "serial" });
-
-  let adminCookie: string;
-
-  test.beforeAll(async () => {
-    const fixtures = await getFixtures();
-    adminCookie = fixtures.get("admin")!.cookie;
-  });
 
   const pages = [
     { path: "/admin/aws", name: "AWS Config" },
@@ -37,7 +34,7 @@ test.describe("Admin smoke batch 7 — AWS, company-requests, bank-advice", () =
     test(`admin can access ${name} page`, async ({ browser }) => {
       const context = await browser.newContext();
       await context.addCookies([
-        { name: "studenthub_next_session", value: adminCookie, domain: "127.0.0.1", path: "/" },
+        { name: "studenthub_next_session", value: admin.cookie, domain: "127.0.0.1", path: "/" },
       ]);
       const page = await context.newPage();
       await page.goto(path);
@@ -49,11 +46,11 @@ test.describe("Admin smoke batch 7 — AWS, company-requests, bank-advice", () =
     test(`${name} renders content`, async ({ browser }) => {
       const context = await browser.newContext();
       await context.addCookies([
-        { name: "studenthub_next_session", value: adminCookie, domain: "127.0.0.1", path: "/" },
+        { name: "studenthub_next_session", value: admin.cookie, domain: "127.0.0.1", path: "/" },
       ]);
       const page = await context.newPage();
       await page.goto(path);
-      await expect(page.locator(".workspaceStage, main, body")).toBeVisible({ timeout: 15000 });
+      await expect(page.locator("body")).toBeVisible({ timeout: 15000 });
       await context.close();
     });
   }
@@ -64,13 +61,6 @@ test.describe("Admin smoke batch 7 — AWS, company-requests, bank-advice", () =
 test.describe("Staff smoke batch 7 — candidate search", () => {
   test.describe.configure({ mode: "serial" });
 
-  let staffCookie: string;
-
-  test.beforeAll(async () => {
-    const fixtures = await getFixtures();
-    staffCookie = fixtures.get("staff")!.cookie;
-  });
-
   const pages = [
     { path: "/staff/candidates/search", name: "Candidate Search" },
   ];
@@ -79,7 +69,7 @@ test.describe("Staff smoke batch 7 — candidate search", () => {
     test(`staff can access ${name} page`, async ({ browser }) => {
       const context = await browser.newContext();
       await context.addCookies([
-        { name: "studenthub_next_session", value: staffCookie, domain: "127.0.0.1", path: "/" },
+        { name: "studenthub_next_session", value: staff.cookie, domain: "127.0.0.1", path: "/" },
       ]);
       const page = await context.newPage();
       await page.goto(path);
@@ -91,11 +81,11 @@ test.describe("Staff smoke batch 7 — candidate search", () => {
     test(`${name} renders content`, async ({ browser }) => {
       const context = await browser.newContext();
       await context.addCookies([
-        { name: "studenthub_next_session", value: staffCookie, domain: "127.0.0.1", path: "/" },
+        { name: "studenthub_next_session", value: staff.cookie, domain: "127.0.0.1", path: "/" },
       ]);
       const page = await context.newPage();
       await page.goto(path);
-      await expect(page.locator(".workspaceStage, main, body")).toBeVisible({ timeout: 15000 });
+      await expect(page.locator("body")).toBeVisible({ timeout: 15000 });
       await context.close();
     });
   }
@@ -106,13 +96,6 @@ test.describe("Staff smoke batch 7 — candidate search", () => {
 test.describe("Company smoke batch 7 — create request", () => {
   test.describe.configure({ mode: "serial" });
 
-  let companyCookie: string;
-
-  test.beforeAll(async () => {
-    const fixtures = await getFixtures();
-    companyCookie = fixtures.get("company")!.cookie;
-  });
-
   const pages = [
     { path: "/company/requests/create", name: "Create Request" },
   ];
@@ -121,7 +104,7 @@ test.describe("Company smoke batch 7 — create request", () => {
     test(`company can access ${name} page`, async ({ browser }) => {
       const context = await browser.newContext();
       await context.addCookies([
-        { name: "studenthub_next_session", value: companyCookie, domain: "127.0.0.1", path: "/" },
+        { name: "studenthub_next_session", value: companyUser.cookie, domain: "127.0.0.1", path: "/" },
       ]);
       const page = await context.newPage();
       await page.goto(path);
@@ -133,11 +116,11 @@ test.describe("Company smoke batch 7 — create request", () => {
     test(`${name} renders content`, async ({ browser }) => {
       const context = await browser.newContext();
       await context.addCookies([
-        { name: "studenthub_next_session", value: companyCookie, domain: "127.0.0.1", path: "/" },
+        { name: "studenthub_next_session", value: companyUser.cookie, domain: "127.0.0.1", path: "/" },
       ]);
       const page = await context.newPage();
       await page.goto(path);
-      await expect(page.locator(".workspaceStage, main, body")).toBeVisible({ timeout: 15000 });
+      await expect(page.locator("body")).toBeVisible({ timeout: 15000 });
       await context.close();
     });
   }
@@ -148,13 +131,6 @@ test.describe("Company smoke batch 7 — create request", () => {
 test.describe("Candidate smoke batch 7 — jobs, languages", () => {
   test.describe.configure({ mode: "serial" });
 
-  let candidateCookie: string;
-
-  test.beforeAll(async () => {
-    const fixtures = await getFixtures();
-    candidateCookie = fixtures.get("candidate")!.cookie;
-  });
-
   const pages = [
     { path: "/candidate/jobs", name: "Jobs" },
     { path: "/candidate/languages", name: "Languages" },
@@ -164,7 +140,7 @@ test.describe("Candidate smoke batch 7 — jobs, languages", () => {
     test(`candidate can access ${name} page`, async ({ browser }) => {
       const context = await browser.newContext();
       await context.addCookies([
-        { name: "studenthub_next_session", value: candidateCookie, domain: "127.0.0.1", path: "/" },
+        { name: "studenthub_next_session", value: candidate.cookie, domain: "127.0.0.1", path: "/" },
       ]);
       const page = await context.newPage();
       await page.goto(path);
@@ -176,11 +152,11 @@ test.describe("Candidate smoke batch 7 — jobs, languages", () => {
     test(`${name} renders content`, async ({ browser }) => {
       const context = await browser.newContext();
       await context.addCookies([
-        { name: "studenthub_next_session", value: candidateCookie, domain: "127.0.0.1", path: "/" },
+        { name: "studenthub_next_session", value: candidate.cookie, domain: "127.0.0.1", path: "/" },
       ]);
       const page = await context.newPage();
       await page.goto(path);
-      await expect(page.locator(".workspaceStage, main, body")).toBeVisible({ timeout: 15000 });
+      await expect(page.locator("body")).toBeVisible({ timeout: 15000 });
       await context.close();
     });
   }

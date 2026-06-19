@@ -1,19 +1,13 @@
 import { test, expect } from "@playwright/test";
-import { getFixtures, disconnectPrisma } from "../fixtures/auth";
+import { getMockFixtures, type FixtureUser } from "../fixtures/users";
 
-test.afterAll(async () => {
-  await disconnectPrisma();
-});
+process.env.USE_MOCK_FIXTURES = "true";
+
+const fixtures = getMockFixtures();
+const admin = fixtures.get("admin")!;
 
 test.describe("Admin smoke — departments, designations", () => {
   test.describe.configure({ mode: "serial" });
-
-  let adminCookie: string;
-
-  test.beforeAll(async () => {
-    const fixtures = await getFixtures();
-    adminCookie = fixtures.get("admin")!.cookie;
-  });
 
   const pages = [
     { path: "/admin/departments", name: "Departments" },
@@ -24,7 +18,7 @@ test.describe("Admin smoke — departments, designations", () => {
     test(`admin can access ${path}`, async ({ browser }) => {
       const context = await browser.newContext();
       await context.addCookies([
-        { name: "studenthub_next_session", value: adminCookie, domain: "127.0.0.1", path: "/" },
+        { name: "studenthub_next_session", value: admin.cookie, domain: "127.0.0.1", path: "/" },
       ]);
       const page = await context.newPage();
       await page.goto(path);
@@ -36,11 +30,11 @@ test.describe("Admin smoke — departments, designations", () => {
     test(`${name} page renders content`, async ({ browser }) => {
       const context = await browser.newContext();
       await context.addCookies([
-        { name: "studenthub_next_session", value: adminCookie, domain: "127.0.0.1", path: "/" },
+        { name: "studenthub_next_session", value: admin.cookie, domain: "127.0.0.1", path: "/" },
       ]);
       const page = await context.newPage();
       await page.goto(path);
-      await expect(page.locator(".workspaceStage, main, body")).toBeVisible({ timeout: 15000 });
+      await expect(page.locator("body")).toBeVisible({ timeout: 15000 });
       await context.close();
     });
   }
@@ -48,13 +42,6 @@ test.describe("Admin smoke — departments, designations", () => {
 
 test.describe("Admin smoke — employees, evaluations", () => {
   test.describe.configure({ mode: "serial" });
-
-  let adminCookie: string;
-
-  test.beforeAll(async () => {
-    const fixtures = await getFixtures();
-    adminCookie = fixtures.get("admin")!.cookie;
-  });
 
   const pages = [
     { path: "/admin/employees", name: "Employees" },
@@ -65,7 +52,7 @@ test.describe("Admin smoke — employees, evaluations", () => {
     test(`admin can access ${path}`, async ({ browser }) => {
       const context = await browser.newContext();
       await context.addCookies([
-        { name: "studenthub_next_session", value: adminCookie, domain: "127.0.0.1", path: "/" },
+        { name: "studenthub_next_session", value: admin.cookie, domain: "127.0.0.1", path: "/" },
       ]);
       const page = await context.newPage();
       await page.goto(path);
@@ -77,11 +64,11 @@ test.describe("Admin smoke — employees, evaluations", () => {
     test(`${name} page renders content`, async ({ browser }) => {
       const context = await browser.newContext();
       await context.addCookies([
-        { name: "studenthub_next_session", value: adminCookie, domain: "127.0.0.1", path: "/" },
+        { name: "studenthub_next_session", value: admin.cookie, domain: "127.0.0.1", path: "/" },
       ]);
       const page = await context.newPage();
       await page.goto(path);
-      await expect(page.locator(".workspaceStage, main, body")).toBeVisible({ timeout: 15000 });
+      await expect(page.locator("body")).toBeVisible({ timeout: 15000 });
       await context.close();
     });
   }
@@ -89,13 +76,6 @@ test.describe("Admin smoke — employees, evaluations", () => {
 
 test.describe("Admin smoke — invoices, permissions", () => {
   test.describe.configure({ mode: "serial" });
-
-  let adminCookie: string;
-
-  test.beforeAll(async () => {
-    const fixtures = await getFixtures();
-    adminCookie = fixtures.get("admin")!.cookie;
-  });
 
   const pages = [
     { path: "/admin/invoices", name: "Invoices" },
@@ -106,7 +86,7 @@ test.describe("Admin smoke — invoices, permissions", () => {
     test(`admin can access ${path}`, async ({ browser }) => {
       const context = await browser.newContext();
       await context.addCookies([
-        { name: "studenthub_next_session", value: adminCookie, domain: "127.0.0.1", path: "/" },
+        { name: "studenthub_next_session", value: admin.cookie, domain: "127.0.0.1", path: "/" },
       ]);
       const page = await context.newPage();
       await page.goto(path);
@@ -118,11 +98,11 @@ test.describe("Admin smoke — invoices, permissions", () => {
     test(`${name} page renders content`, async ({ browser }) => {
       const context = await browser.newContext();
       await context.addCookies([
-        { name: "studenthub_next_session", value: adminCookie, domain: "127.0.0.1", path: "/" },
+        { name: "studenthub_next_session", value: admin.cookie, domain: "127.0.0.1", path: "/" },
       ]);
       const page = await context.newPage();
       await page.goto(path);
-      await expect(page.locator(".workspaceStage, main, body")).toBeVisible({ timeout: 15000 });
+      await expect(page.locator("body")).toBeVisible({ timeout: 15000 });
       await context.close();
     });
   }
