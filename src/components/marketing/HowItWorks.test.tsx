@@ -51,7 +51,7 @@ describe("HowItWorks", () => {
       screen.getByText(/tell us about your skills/i),
     ).toBeTruthy();
     expect(
-      screen.getByText(/AI matches/i),
+      screen.getByText(/staff.*match/i),
     ).toBeTruthy();
     expect(
       screen.getByText(/one-click apply/i),

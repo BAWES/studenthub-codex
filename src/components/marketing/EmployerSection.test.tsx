@@ -34,7 +34,7 @@ describe("EmployerSection", () => {
 
   it("renders all 6 feature cards by title", () => {
     render(<EmployerSection />);
-    expect(screen.getByText("AI-matched candidates")).toBeTruthy();
+    expect(screen.getByText("Staff-matched candidates")).toBeTruthy();
     expect(screen.getByText("Vetted talent pool")).toBeTruthy();
     expect(screen.getByText("Timesheet approvals")).toBeTruthy();
     expect(screen.getByText("Consolidated invoicing")).toBeTruthy();
