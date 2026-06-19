@@ -79,8 +79,8 @@ test.describe("WorkspaceOS — nav tabs per role", () => {
     await ctx.page.waitForLoadState("load");
     await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
 
-    // Find navigation elements — the sidebar/rail nav renders links with labels
-    const navLinks = ctx.page.locator("nav a, [class*='workspaceRailNav'] a, aside a");
+    // Find sidebar nav links — scope to workspaceRailNav only (avoid mobile tab bar / header nav)
+    const navLinks = ctx.page.locator("[class*='workspaceRailNav'] a");
     const linkCount = await navLinks.count();
     console.log(`${roleName}: found ${linkCount} nav links, expected ${expectedTabs.length} tabs`);
 
@@ -93,7 +93,7 @@ test.describe("WorkspaceOS — nav tabs per role", () => {
 
     // Check that all expected tabs are present
     for (const tab of expectedTabs) {
-      const tabLink = ctx.page.locator(`nav a:has-text("${tab}"), a:has-text("${tab}")`).first();
+      const tabLink = ctx.page.locator(`[class*='workspaceRailNav'] a:has-text("${tab}")`).first();
       await expect(tabLink).toBeVisible({ timeout: 5000 });
       console.log(`${roleName}: verified tab "${tab}" is visible`);
     }
