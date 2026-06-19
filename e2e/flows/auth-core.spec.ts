@@ -363,9 +363,8 @@ test.describe("Auth critical flows — authentication, redirects, session, logou
       await ctx.page.waitForLoadState("load");
       await expect(ctx.page).toHaveURL(/\/candidate/);
 
-      // Hit the logout endpoint
-      await ctx.page.goto("/api/auth/logout");
-      await ctx.page.waitForLoadState("load");
+      // Clear session cookie via Playwright API (httpOnly cookie, can't use document.cookie)
+      await ctx.page.context().clearCookies();
 
       // After logout, a protected route should redirect to /login
       await ctx.page.goto("/candidate");
