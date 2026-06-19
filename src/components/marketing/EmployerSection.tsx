@@ -26,8 +26,8 @@ interface EmployerFeature {
 const features: EmployerFeature[] = [
   {
     icon: Search,
-    title: "AI-matched candidates",
-    body: "Get matched candidates within 48 hours of posting. Our algorithm learns your preferences and delivers better results over time.",
+    title: "Staff-matched candidates",
+    body: "Get matched candidates within 48 hours of posting. Our staff recruiters learn your preferences and deliver better results over time.",
     stat: "48h avg time-to-match",
     gradient: "linear-gradient(135deg, #0b63ce, #2563eb)",
   },

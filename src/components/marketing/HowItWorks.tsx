@@ -24,8 +24,8 @@ const steps: Step[] = [
     icon: Search,
     number: 2,
     title: "Get matched",
-    tag: "AI-powered",
-    body: "Our AI matches you with relevant openings across employers on the platform. Get alerted the moment a role matches your profile, and apply in one click.",
+    tag: "Staff-powered",
+    body: "Our staff recruiters match you with relevant openings across employers on the platform. Get alerted the moment a role matches your profile, and apply in one click.",
   },
   {
     icon: Briefcase,

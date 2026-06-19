@@ -52,7 +52,7 @@ const candidateRows: ComparisonRow[] = [
   { category: "Profile", feature: "Profile readiness score", studenthub: true, alternatives: false, emailSpreadsheets: false, traditionalAgencies: false },
   { category: "Search", feature: "Typo-tolerant search", studenthub: true, alternatives: false, emailSpreadsheets: false, traditionalAgencies: false },
   { category: "Search", feature: "Filter by location, skill, pay rate", studenthub: true, alternatives: "Partial", emailSpreadsheets: false, traditionalAgencies: "Partial" },
-  { category: "Matching", feature: "AI-matched role suggestions", studenthub: true, alternatives: "Partial", emailSpreadsheets: false, traditionalAgencies: false },
+  { category: "Matching", feature: "Staff-matched role suggestions", studenthub: true, alternatives: "Partial", emailSpreadsheets: false, traditionalAgencies: false },
   { category: "Matching", feature: "Real-time application tracking", studenthub: true, alternatives: false, emailSpreadsheets: false, traditionalAgencies: false },
   { category: "Payments", feature: "Integrated timesheets", studenthub: true, alternatives: false, emailSpreadsheets: false, traditionalAgencies: "Partial" },
   { category: "Payments", feature: "Direct payment tracking", studenthub: true, alternatives: false, emailSpreadsheets: false, traditionalAgencies: "Partial" },
@@ -61,7 +61,7 @@ const candidateRows: ComparisonRow[] = [
 ];
 
 const companyRows: ComparisonRow[] = [
-  { category: "Sourcing", feature: "AI-matched candidate suggestions", studenthub: true, alternatives: "Partial", emailSpreadsheets: false, traditionalAgencies: "Partial" },
+  { category: "Sourcing", feature: "Staff-matched candidate suggestions", studenthub: true, alternatives: "Partial", emailSpreadsheets: false, traditionalAgencies: "Partial" },
   { category: "Sourcing", feature: "Post to multiple branches at once", studenthub: true, alternatives: false, emailSpreadsheets: false, traditionalAgencies: "Partial" },
   { category: "Compliance", feature: "Auto right-to-work verification", studenthub: true, alternatives: false, emailSpreadsheets: false, traditionalAgencies: "Partial" },
   { category: "Compliance", feature: "Expiring certification tracking", studenthub: true, alternatives: false, emailSpreadsheets: false, traditionalAgencies: false },

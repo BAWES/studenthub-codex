@@ -40,11 +40,10 @@ export default function LandingFooter({ persona }: LandingFooterProps) {
               For students
             </p>
             <div className="space-y-2">
-              {["Create profile", "Sign in", "How it works", "Testimonials"].map((link) => (
-                <p key={link} className="text-xs" style={{ color: "var(--muted)" }}>
-                  {link}
-                </p>
-              ))}
+              <Link href="/signup?role=candidate" className="block text-xs no-underline transition-colors hover:opacity-80" style={{ color: "var(--muted)" }}>Create profile</Link>
+              <Link href="/login" className="block text-xs no-underline transition-colors hover:opacity-80" style={{ color: "var(--muted)" }}>Sign in</Link>
+              <Link href="#how-it-works" className="block text-xs no-underline transition-colors hover:opacity-80" style={{ color: "var(--muted)" }}>How it works</Link>
+              <Link href="#testimonials" className="block text-xs no-underline transition-colors hover:opacity-80" style={{ color: "var(--muted)" }}>Testimonials</Link>
             </div>
           </div>
 
@@ -54,11 +53,10 @@ export default function LandingFooter({ persona }: LandingFooterProps) {
               For employers
             </p>
             <div className="space-y-2">
-              {["Set up account", "Sign in", "Post openings", "Pricing"].map((link) => (
-                <p key={link} className="text-xs" style={{ color: "var(--muted)" }}>
-                  {link}
-                </p>
-              ))}
+              <Link href="/signup?role=company" className="block text-xs no-underline transition-colors hover:opacity-80" style={{ color: "var(--muted)" }}>Set up account</Link>
+              <Link href="/login" className="block text-xs no-underline transition-colors hover:opacity-80" style={{ color: "var(--muted)" }}>Sign in</Link>
+              <Link href="#for-employers" className="block text-xs no-underline transition-colors hover:opacity-80" style={{ color: "var(--muted)" }}>Post openings</Link>
+              <Link href="#comparison" className="block text-xs no-underline transition-colors hover:opacity-80" style={{ color: "var(--muted)" }}>Pricing</Link>
             </div>
           </div>
 

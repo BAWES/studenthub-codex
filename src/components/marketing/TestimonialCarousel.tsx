@@ -79,7 +79,7 @@ const companyTestimonials: Testimonial[] = [
   },
   {
     quote:
-      "AI-matched candidates are surprisingly accurate. We hired three staff members in the first week — all matched by the algorithm, all still with us 6 months on.",
+      "Staff-matched candidates are surprisingly accurate. We hired three staff members in the first week — all matched by our recruiters, all still with us 6 months on.",
     name: "Layla A.",
     title: "Operations Director",
     company: "BrightCare Kuwait",
