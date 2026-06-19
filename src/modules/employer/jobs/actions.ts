@@ -16,6 +16,16 @@ import {
   updateJobSchema,
   deleteJobSchema,
 } from "./schemas";
+import {
+  listJobsResultSchema,
+  getJobResultSchema,
+  createJobResultSchema,
+  updateJobResultSchema,
+  deleteJobResultSchema,
+  getMyEmployerIdResultSchema,
+  searchJobsResultSchema,
+  jobRowSchema,
+} from "./schemas";
 import type {
   ListJobsInput,
   GetJobInput,
@@ -23,10 +33,20 @@ import type {
   UpdateJobInput,
   DeleteJobInput,
   JobRow,
+  ListJobsResult,
+  GetJobResult,
   CreateJobResult,
   UpdateJobResult,
   DeleteJobResult,
 } from "./schemas";
+
+// ---------------------------------------------------------------------------
+// Internal helpers
+// ---------------------------------------------------------------------------
+
+function logOutputError(source: string, error: unknown): void {
+  console.error(`[modules/employer/jobs] ${source} output validation failed:`, error);
+}
 
 // ---------------------------------------------------------------------------
 // getMyEmployerId
@@ -45,7 +65,15 @@ export async function getMyEmployerId(): Promise<number | null> {
     select: { company: { select: { company_id: true } } },
   });
 
-  return link?.company?.company_id ?? null;
+  const result = link?.company?.company_id ?? null;
+
+  // Validate output shape
+  const validated = getMyEmployerIdResultSchema.safeParse(result);
+  if (!validated.success) {
+    logOutputError("getMyEmployerId", validated.error.issues);
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -93,13 +121,21 @@ export async function listJobs(
     prisma.job_listing.count({ where }),
   ]);
 
-  return {
+  const result = {
     items,
     total,
     page,
     limit,
     totalPages: Math.ceil(total / limit),
   };
+
+  // Validate output shape
+  const validatedList = listJobsResultSchema.safeParse(result);
+  if (!validatedList.success) {
+    logOutputError("listJobs", validatedList.error.issues);
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -122,6 +158,12 @@ export async function getJob(
   const job = await prisma.job_listing.findUnique({
     where: { jobListingId: parsed.data.jobId },
   });
+
+  // Validate output shape
+  const validated = jobRowSchema.nullable().safeParse(job);
+  if (!validated.success) {
+    logOutputError("getJob", validated.error.issues);
+  }
 
   return job;
 }
@@ -161,7 +203,15 @@ export async function createJob(
   revalidatePath("/employer/jobs");
   revalidatePath("/candidate/jobs");
 
-  return { success: true, jobListingId: job.jobListingId };
+  const result = { success: true as const, jobListingId: job.jobListingId };
+
+  // Validate output shape
+  const validated = createJobResultSchema.safeParse(result);
+  if (!validated.success) {
+    logOutputError("createJob", validated.error.issues);
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -191,7 +241,15 @@ export async function updateJob(
   revalidatePath("/employer/jobs");
   revalidatePath("/candidate/jobs");
 
-  return { success: true };
+  const result = { success: true as const };
+
+  // Validate output shape
+  const validated = updateJobResultSchema.safeParse(result);
+  if (!validated.success) {
+    logOutputError("updateJob", validated.error.issues);
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -218,7 +276,15 @@ export async function deleteJob(
   revalidatePath("/employer/jobs");
   revalidatePath("/candidate/jobs");
 
-  return { success: true };
+  const result = { success: true as const };
+
+  // Validate output shape
+  const validated = deleteJobResultSchema.safeParse(result);
+  if (!validated.success) {
+    logOutputError("deleteJob", validated.error.issues);
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -252,13 +318,13 @@ export async function searchJobs(
   const q = typeof params.q === "string" ? params.q : "";
   const page = typeof params.page === "number" ? params.page : 1;
 
-  const result = await listJobsTypesense({ q, page, limit: 20 });
+  const typesenseResult = await listJobsTypesense({ q, page, limit: 20 });
 
-  return {
+  const result = {
     query: q,
     page,
-    matchingCount: result.total,
-    rows: result.items.map((item) => ({
+    matchingCount: typesenseResult.total,
+    rows: typesenseResult.items.map((item) => ({
       jobListingId: item.jobListingId,
       title: item.title,
       description: item.description,
@@ -269,6 +335,14 @@ export async function searchJobs(
       companyName: "",
       createdAt: item.createdAt.toISOString().slice(0, 10),
     })),
-    source: result.source,
+    source: typesenseResult.source,
   };
+
+  // Validate output shape
+  const validated = searchJobsResultSchema.safeParse(result);
+  if (!validated.success) {
+    logOutputError("searchJobs", validated.error.issues);
+  }
+
+  return result;
 }
