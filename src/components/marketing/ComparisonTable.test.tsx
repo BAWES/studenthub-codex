@@ -71,7 +71,7 @@ describe("ComparisonTable (visual redesign)", () => {
     render(<ComparisonTable persona="candidate" />);
     await waitFor(() => {
       expect(
-        screen.getByText("Why candidates choose StudentHub."),
+        screen.getByText("Why students choose StudentHub."),
       ).toBeInTheDocument();
     });
   });

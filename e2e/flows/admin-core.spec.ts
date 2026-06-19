@@ -233,7 +233,7 @@ test.describe("Admin critical flows - Payments / Compliance / Transfers / Agents
       }
 
       // Try to click a compliance row to open the detail panel
-      const rows = ctx.page.locator("table tbody tr, [class*='row'], [data-testid*='row']");
+      const rows = ctx.page.locator(".dataList, .rows, table tbody tr, [class*='row'], [data-testid*='row']");
       const rowCount = await rows.count().catch(() => 0);
 
       if (rowCount > 0) {

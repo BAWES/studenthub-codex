@@ -136,7 +136,7 @@ test.describe("Admin Transfer Lifecycle", () => {
       expect(combined).toMatch(/Total/i);
 
       // Table body should have at least one row (or empty state message)
-      const rows = ctx.page.locator("table tbody tr, [class*='DataTable'] tbody tr");
+      const rows = ctx.page.locator(".dataList, .rows, table tbody tr, [class*='DataTable'] tbody tr");
       const rowCount = await rows.count().catch(() => 0);
       if (rowCount > 0) {
         // Verify first row has a transfer ID link

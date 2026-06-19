@@ -136,7 +136,7 @@ test.describe("Transfer flow — admin transfers", () => {
     }
 
     // Verify data rows exist (even if empty state)
-    const dataRows = ctx.page.locator("table tbody tr, [class*='DataTable'] [class*='row']");
+    const dataRows = ctx.page.locator(".dataList, .rows, table tbody tr, [class*='DataTable'] [class*='row']");
     const rowCount = await dataRows.count().catch(() => 0);
     console.log(`Data rows found: ${rowCount}`);
 

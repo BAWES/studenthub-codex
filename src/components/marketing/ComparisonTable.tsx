@@ -426,7 +426,7 @@ export default function ComparisonTable({ persona = "candidate", className }: Co
         </p>
         <h2 className="shBenefitsTitle text-center">
           {persona === "candidate"
-            ? "Why candidates choose StudentHub."
+            ? "Why students choose StudentHub."
             : "Why companies choose StudentHub."}
         </h2>
         <p
