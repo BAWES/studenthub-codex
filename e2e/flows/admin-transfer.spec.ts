@@ -103,7 +103,7 @@ test.describe("Admin Transfer Lifecycle", () => {
 
       // Data table or empty state renders
       const table = ctx.page
-        .locator("table, [class*='DataTable'], [class*='data-table']")
+        .locator(".dataList, .rows, table, [class*='DataTable'], [class*='data-table']")
         .first();
       await expect(table).toBeVisible({ timeout: 10000 });
 

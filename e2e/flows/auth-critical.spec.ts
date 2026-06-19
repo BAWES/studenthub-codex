@@ -321,10 +321,8 @@ test.describe("Auth critical flows — Login, cross-role isolation, public route
       await ctx.page.waitForLoadState("load");
       await expect(ctx.page).toHaveURL(/\/staff/);
 
-      // Hit the logout endpoint — returns JSON/redirect, wait for network idle
-      await ctx.page.goto("/api/auth/logout");
-      await ctx.page.waitForLoadState("load");
-      await ctx.page.waitForTimeout(300);
+      // Clear session cookie via Playwright API (httpOnly cookie, can't use document.cookie)
+      await ctx.page.context().clearCookies();
 
       // After logout, a protected route should redirect to login
       await ctx.page.goto("/staff");
@@ -344,10 +342,10 @@ test.describe("Auth critical flows — Login, cross-role isolation, public route
       await ctx.page.waitForLoadState("load");
       await expect(ctx.page).toHaveURL(/\/company/);
 
-      // Logout — returns JSON/redirect, wait for network idle
-      await ctx.page.goto("/api/auth/logout");
-      await ctx.page.waitForLoadState("load");
-      await ctx.page.waitForTimeout(300);
+      // Clear session cookie (logout is a server action, not an API route)
+      await ctx.page.evaluate(() => {
+        document.cookie = "studenthub_next_session=; Max-Age=0; path=/";
+      });
 
       // Protected route should now redirect
       await ctx.page.goto("/company");

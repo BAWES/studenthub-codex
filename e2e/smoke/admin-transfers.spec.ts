@@ -55,7 +55,7 @@ test.describe("Admin transfers page", () => {
     await expect(ctx.page.locator("h2").filter({ hasText: "Start with a transfer run" })).toBeVisible({ timeout: 15000 });
 
     // Check the DataTable renders with expected column labels
-    const table = ctx.page.locator("table, [role='grid'], [role='table']").first();
+    const table = ctx.page.locator(".dataList, .rows, table, [role='grid'], [role='table']").first();
     await expect(table).toBeVisible();
     await expect(ctx.page.locator("th, [role='columnheader']").filter({ hasText: "Company" })).toBeVisible();
     await expect(ctx.page.locator("th, [role='columnheader']").filter({ hasText: "Period" })).toBeVisible();

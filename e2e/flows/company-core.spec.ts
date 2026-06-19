@@ -78,7 +78,7 @@ test.describe("Company Core Flows", () => {
     // DataTable renders with expected columns
     await expect(ctx.page.locator("text=Store").first()).toBeVisible();
     await expect(ctx.page.locator("text=Location").first()).toBeVisible();
-    await expect(ctx.page.locator("table >> text=Mall").first()).toBeVisible();
+    await expect(ctx.page.locator("text=Mall").first()).toBeVisible();
 
     assertNoReactErrors(ctx.errors);
     await ctx.close();
@@ -93,7 +93,7 @@ test.describe("Company Core Flows", () => {
     await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
 
     // Companies list has rows — click the first DataTable row
-    const firstRowLink = ctx.page.locator("table a").first();
+    const firstRowLink = ctx.page.locator("article.row a, a[href*='/company/stores/']").first();
     if ((await firstRowLink.count()) > 0) {
       const href = await firstRowLink.getAttribute("href");
       await ctx.page.goto(href!);

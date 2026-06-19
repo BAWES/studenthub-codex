@@ -119,7 +119,7 @@ test.describe("Inspector ID requests flow", () => {
       // Check for data table, cards, or empty state
       const listContent = ctx.page
         .locator(
-          "table, [class*='DataTable'], [class*='data-table'], [class*='cards'], [class*='list'], [class*='table'], text=No requests, text=no requests, text=No ID",
+          ".dataList, .rows, table, [class*='DataTable'], [class*='data-table'], [class*='cards'], [class*='list'], [class*='table'], text=No requests, text=no requests, text=No ID",
         )
         .first();
       if (await listContent.isVisible().catch(() => false)) {
