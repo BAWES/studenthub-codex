@@ -170,7 +170,7 @@ jobs:
         env:
           NODE_OPTIONS: "--max-old-space-size=4096"
           CI: "true"
-          DATABASE_URL: "mysql://studenthub:studenthub@localhost:3307/studenthub_prod_local?auth_plugin=mysql_native_password"
+          DATABASE_URL: "mysql://studenthub:***@localhost:3307/studenthub_prod_local?auth_plugin=mysql_native_password"
           AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
 
   validate:
