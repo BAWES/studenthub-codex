@@ -147,7 +147,7 @@ test.describe("Inspector ID requests flow", () => {
       }
 
       // Count rows to determine if data exists
-      const rows = ctx.page.locator("tr, [class*='row'], [class*='card'], li").count();
+      const rows = ctx.page.locator(".dataList, .rows, tr, [class*='row'], [class*='card'], li").count();
       const rowCount = await rows.catch(() => 0);
       console.log(`ID requests list — rows/cards found: ${rowCount}`);
 

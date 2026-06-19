@@ -110,7 +110,7 @@ describe("AdminAgentDetailPage", () => {
     const Page = (await import("./page")).default;
     render(
       await Page({
-        params: Promise.resolve({ id: "agent_uuid_123" }),
+        params: Promise.resolve({ id: "11111111-1111-1111-1111-111111111111" }),
       }),
     );
 
@@ -149,7 +149,7 @@ describe("AdminAgentDetailPage", () => {
     const Page = (await import("./page")).default;
     render(
       await Page({
-        params: Promise.resolve({ id: "agent_uuid_null" }),
+        params: Promise.resolve({ id: "00000000-0000-0000-0000-000000000000" }),
       }),
     );
 
@@ -166,7 +166,7 @@ describe("AdminAgentDetailPage", () => {
     const Page = (await import("./page")).default;
 
     await expect(
-      Page({ params: Promise.resolve({ id: "nonexistent" }) }),
+      Page({ params: Promise.resolve({ id: "22222222-2222-2222-2222-222222222222" }) }),
     ).rejects.toThrow("NEXT_NOT_FOUND");
   });
 });

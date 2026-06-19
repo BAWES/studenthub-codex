@@ -26,24 +26,31 @@ test.describe("Landing page smoke tests (STU-N landing page redesign)", () => {
     await navAndSettle(page);
     await expect(page.locator("h1")).toBeVisible();
 
-    // Primary CTAs visible
+    // Student CTA — at least one visible
     await expect(
-      page.locator('a >> text=Create your free profile').first(),
+      page.locator('a[href="/signup?role=candidate"]').first(),
     ).toBeVisible();
 
+    // Employer CTA — at least one visible
     await expect(
-      page.locator('a >> text=Hire students').first(),
+      page.locator('a[href="/signup?role=company"]').first(),
     ).toBeVisible();
 
-    // Sign in link in hero
-    await expect(page.locator('a >> text=Sign in').first()).toBeVisible();
+    // Sign in link
+    await expect(page.locator('a[href="/login"]').first()).toBeVisible();
   });
 
   test("hero feature pills render with staff-matched references", async ({ page }) => {
     await navAndSettle(page);
-    // The landing page now uses section-based layout, not specific pills
-    // Verify key value props are visible
-    await expect(page.locator("h1")).toContainText("Connecting students");
+
+    // Student pills
+    const studentPills = page.locator('[aria-label="Key benefits for students"]');
+    await expect(studentPills).toBeVisible();
+    await expect(studentPills).toContainText("Profile visible to employers");
+    // Employer pills
+    const employerPills = page.locator('[aria-label="Key benefits for employers"]');
+    await expect(employerPills).toBeVisible();
+    await expect(employerPills).toContainText("Staff-matched candidate suggestions");
   });
 
   test("persona switcher renders and shows student/company tabs", async ({
@@ -51,13 +58,14 @@ test.describe("Landing page smoke tests (STU-N landing page redesign)", () => {
   }) => {
     await navAndSettle(page);
 
-    // Persona tabs render
-    const studentTab = page.locator("button", { hasText: "Students" }).first();
-    await expect(studentTab).toBeVisible();
+    // Persona switcher renders with Students/Companies tabs
+    await expect(page.locator('button:has-text("Students")')).toBeVisible();
+    await expect(page.locator('button:has-text("Companies")')).toBeVisible();
 
-    // Company tab exists
-    const companyTab = page.locator("button", { hasText: "Companies" }).first();
-    await expect(companyTab).toBeVisible();
+    // Default persona shows candidate-focused CTA
+    await expect(
+      page.locator('a[href="/signup?role=candidate"]').first(),
+    ).toBeVisible();
   });
 
   test("navigation renders brand and sign in link", async ({ page }) => {
@@ -74,7 +82,7 @@ test.describe("Landing page smoke tests (STU-N landing page redesign)", () => {
     await expect(page.locator("text=Create your free profile").first()).toBeVisible();
     // CTA link exists
     await expect(
-      page.locator('a:has-text("Create your free profile")').first(),
+      page.locator('a[href="/signup?role=candidate"]').first(),
     ).toBeVisible();
   });
 
@@ -90,11 +98,10 @@ test.describe("Landing page smoke tests (STU-N landing page redesign)", () => {
 
     test("landing page renders on mobile without overflow", async ({ page }) => {
       await navAndSettle(page);
-      // Mobile shows same h1 as desktop
       await expect(page.locator("h1")).toContainText("Connecting students with");
       // CTA buttons still visible on mobile
       await expect(
-        page.locator('a:has-text("Create your free profile")').first(),
+        page.locator('a[href="/signup?role=candidate"]').first(),
       ).toBeVisible();
       // Nav still renders
       await expect(

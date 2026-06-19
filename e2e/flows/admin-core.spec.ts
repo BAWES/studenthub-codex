@@ -123,7 +123,7 @@ test.describe("Admin critical flows - Payments / Compliance / Transfers / Agents
       await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
 
       // Try to click a payment row — if any exist, verify detail drawer opens
-      const rows = ctx.page.locator("table tbody tr, [data-testid='payment-row']");
+      const rows = ctx.page.locator(".dataList, .rows, table tbody tr, [data-testid='payment-row']");
       const rowCount = await rows.count().catch(() => 0);
 
       if (rowCount > 0) {
@@ -233,7 +233,7 @@ test.describe("Admin critical flows - Payments / Compliance / Transfers / Agents
       }
 
       // Try to click a compliance row to open the detail panel
-      const rows = ctx.page.locator("table tbody tr, [class*='row'], [data-testid*='row']");
+      const rows = ctx.page.locator(".dataList, .rows, table tbody tr, [class*='row'], [data-testid*='row']");
       const rowCount = await rows.count().catch(() => 0);
 
       if (rowCount > 0) {
@@ -460,7 +460,7 @@ test.describe("Admin critical flows - Payments / Compliance / Transfers / Agents
       await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
 
       // Find clickable table rows
-      const rows = ctx.page.locator("table tbody tr");
+      const rows = ctx.page.locator(".dataList, .rows, table tbody tr");
       const rowCount = await rows.count().catch(() => 0);
 
       if (rowCount > 0) {

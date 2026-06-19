@@ -20,9 +20,7 @@ test.describe("Admin agents page", () => {
     admin = fixtures.get("admin")!;
   });
 
-  async function assertPageLoads(route: string) {
-    const { chromium } = await import("@playwright/test");
-    const browser = await chromium.launch();
+  async function assertPageLoads(route: string, browser: any) {
     const context = await browser.newContext();
     await context.addCookies([
       { name: "studenthub_next_session", value: admin.cookie, domain: "127.0.0.1", path: "/" },
@@ -39,10 +37,9 @@ test.describe("Admin agents page", () => {
     );
     expect(badErrors).toEqual([]);
     await context.close();
-    await browser.close();
   }
 
-  test("admin agents page loads without errors", async () => {
-    await assertPageLoads("/admin/agents");
+  test("admin agents page loads without errors", async ({ browser }) => {
+    await assertPageLoads("/admin/agents", browser);
   });
 });

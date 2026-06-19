@@ -1004,6 +1004,9 @@ export async function deleteCompanyNote(
 // Company Notes — [id] sub-page server actions
 // ---------------------------------------------------------------------------
 
+// NOTE: staff_note_created_byTostaff / staff_note_updated_byTostaff relations
+// were removed from the Prisma schema. staff_created/staff_updated are set to null
+// until those relations are restored.
 const noteSelect = {
   note_uuid: true,
   company_id: true,
@@ -1015,12 +1018,6 @@ const noteSelect = {
   updated_by: true,
   note_created_datetime: true,
   note_updated_datetime: true,
-  staff_note_created_byTostaff: {
-    select: { staff_name: true },
-  },
-  staff_note_updated_byTostaff: {
-    select: { staff_name: true },
-  },
 } as const;
 
 function mapNote(note: any): NoteItem {
@@ -1035,12 +1032,8 @@ function mapNote(note: any): NoteItem {
     updated_by: note.updated_by,
     note_created_datetime: note.note_created_datetime,
     note_updated_datetime: note.note_updated_datetime,
-    staff_created: note.staff_note_created_byTostaff
-      ? { staff_name: note.staff_note_created_byTostaff.staff_name }
-      : null,
-    staff_updated: note.staff_note_updated_byTostaff
-      ? { staff_name: note.staff_note_updated_byTostaff.staff_name }
-      : null,
+    staff_created: null,
+    staff_updated: null,
   };
 }
 
