@@ -214,7 +214,7 @@ test.describe("Candidate search facet filters", () => {
     );
 
     // Verify empty state or no-results text is shown
-    await expect(emptyState.or(noResultsText)).toBeVisible({
+    await expect(emptyState.or(noResultsText).first()).toBeVisible({
       timeout: 15000,
     });
 
