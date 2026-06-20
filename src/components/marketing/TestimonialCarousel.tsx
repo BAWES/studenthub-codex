@@ -5,7 +5,7 @@ import { ChevronLeft, ChevronRight, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const SH_BLUE = "#1f73b7";
-const SH_AMBER = "#f59e0b";
+const SH_CORAL = "#eb6651";
 
 // ── Types ────────────────────────────────────────────────
 
@@ -231,8 +231,8 @@ export default function TestimonialCarousel({
                 key={i}
                 className="size-4"
                 style={{
-                  color: i < t.rating ? SH_AMBER : "var(--border)",
-                  fill: i < t.rating ? SH_AMBER : "transparent",
+                  color: i < t.rating ? SH_CORAL : "var(--border)",
+                  fill: i < t.rating ? SH_CORAL : "transparent",
                 }}
               />
             ))}
