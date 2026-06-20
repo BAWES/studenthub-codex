@@ -20,13 +20,13 @@ export interface StaffLandingContentProps {
   } | null;
 }
 
-// ── Staff-specific copy ───────────────────────────────────────
+// ── Staff-specific copy ────────────────────────────────────────
 
 const PAIN_POINTS = [
   {
     problem: "Hours wasted matching candidates to roles manually",
     solution:
-      "Staff-powered matching surfaces the right candidates for every open role in seconds. Filter by qualification, availability, and location — no more spreadsheets and gut feelings.",
+      "AI-powered matching surfaces the right candidates for every open role in seconds. Filter by qualification, availability, and location — no more spreadsheets and gut feelings.",
   },
   {
     problem: "Placement paperwork drowning your desk",
@@ -67,13 +67,13 @@ export default function StaffLandingContent({
         className="min-h-svh w-[min(1320px,calc(100%_-_28px))] mx-auto grid content-start gap-6 pt-[18px] pb-[42px] max-sm:w-[min(calc(100%_-_20px),720px)]"
       >
         {/* ── Navigation ── */}
-        <nav className="sticky top-[3px] z-20 min-h-[62px] flex items-center justify-between gap-[14px] rounded-xl p-[2px] bg-white shadow-md border border-gray-200" aria-label="StudentHub public navigation">
+        <nav className="sticky top-[3px] z-20 min-h-[62px] flex items-center justify-between gap-[14px] rounded-xl p-[2px] bg-white shadow-md border border-[var(--border)]" aria-label="StudentHub public navigation">
           <div className="w-full min-h-[58px] flex items-center justify-between gap-[14px] px-1">
             <Link
-              className="inline-flex items-center gap-2.5 text-gray-900 px-2 no-underline min-h-11"
+              className="inline-flex items-center gap-2.5 text-[var(--ink)] px-2 no-underline min-h-11"
               href="/"
             >
-              <span className="size-9 inline-flex items-center justify-center rounded-lg bg-gray-900 text-white font-black">
+              <span className="size-9 inline-flex items-center justify-center rounded-lg bg-[var(--ink)] text-[var(--paper)] font-black">
                 SH
               </span>
               <strong>StudentHub</strong>
@@ -112,20 +112,20 @@ export default function StaffLandingContent({
 
         {/* ── Pain-point section — the staffing frustrations ── */}
         <section
-          className="relative overflow-hidden rounded-xl border border-gray-200 bg-white p-[clamp(24px,5vw,48px)]"
+          className="shSection relative overflow-hidden rounded-xl p-[clamp(24px,5vw,48px)] bg-white border border-[var(--border)]"
           aria-label="Staffing pain points and solutions"
         >
-          <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-[#fef1ef] via-white to-gray-50 z-0" aria-hidden="true" />
+          <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-[#fef1ef] via-white to-[var(--paper)] z-0" aria-hidden="true" />
 
           <div className="relative z-[2]">
-            <p className="text-[#1f73b7] text-[11px] font-black uppercase tracking-wider mb-1">
+            <p className="text-[var(--sh-coral)] text-[11px] font-black uppercase tracking-wider mb-1">
               The real staffing headache
             </p>
-            <h2 className="text-[clamp(22px,3vw,28px)] font-bold leading-tight tracking-tight text-gray-900 mb-8">
+            <h2 className="shBenefitsTitle mb-8">
               You don&apos;t need another spreadsheet.
               <br />
               You need a{" "}
-              <em className="text-[#1f73b7] not-italic">faster</em> way
+              <em className="text-[var(--sh-coral)]">faster</em> way
               to place candidates.
             </h2>
 
@@ -133,16 +133,22 @@ export default function StaffLandingContent({
               {PAIN_POINTS.map((point, i) => (
                 <div
                   key={i}
-                  className="rounded-xl p-5 flex flex-col gap-3 transition-transform duration-300 hover:-translate-y-[3px] bg-gray-50 border border-gray-200"
+                  className="rounded-xl p-5 flex flex-col gap-3 transition-transform duration-300 hover:-translate-y-[3px] bg-white border border-[var(--border)]"
                 >
-                  <div className="size-10 rounded-lg flex items-center justify-center shrink-0 bg-[#1f73b7]/10 text-[#1f73b7]">
+                  <div
+                    className="size-10 rounded-lg flex items-center justify-center shrink-0 bg-[var(--sh-coral)]/15 text-[var(--sh-coral)]"
+                  >
                     <span className="font-black text-sm">0{i + 1}</span>
                   </div>
                   <div>
-                    <p className="text-sm font-semibold mb-1.5 text-gray-900">
+                    <p
+                      className="text-sm font-semibold mb-1.5 text-[var(--ink)]"
+                    >
                       {point.problem}
                     </p>
-                    <p className="text-sm leading-relaxed text-gray-500">
+                    <p
+                      className="text-sm leading-relaxed text-[var(--muted)]"
+                    >
                       {point.solution}
                     </p>
                   </div>
@@ -154,15 +160,17 @@ export default function StaffLandingContent({
 
         {/* ── Stats strip — staff authority signals ── */}
         <section
-          className="rounded-xl border border-gray-200 bg-gray-50 p-[clamp(20px,4vw,40px)] grid grid-cols-2 sm:grid-cols-4 gap-6 text-center"
+          className="shSection rounded-xl p-[clamp(20px,4vw,40px)] grid grid-cols-2 sm:grid-cols-4 gap-6 text-center bg-white border border-[var(--border)]"
           aria-label="Staffing stats"
         >
           {STAFF_STATS.map((stat) => (
             <div key={stat.label}>
-              <p className="text-[clamp(24px,4vw,36px)] font-black leading-none mb-1 text-gray-900">
+              <p className="text-[clamp(24px,4vw,36px)] font-black leading-none mb-1">
                 {stat.value}
               </p>
-              <p className="text-xs leading-tight text-gray-500">
+              <p
+                className="text-xs leading-tight text-[var(--muted)]"
+              >
                 {stat.label}
               </p>
             </div>
@@ -183,19 +191,21 @@ export default function StaffLandingContent({
 
         {/* ── Final CTA — tailored for staffing agencies ── */}
         <section
-          className="relative overflow-hidden rounded-xl border border-gray-200 bg-white p-[clamp(24px,5vw,60px)] text-center"
+          className="shSection relative overflow-hidden rounded-xl p-[clamp(24px,5vw,60px)] text-center bg-white border border-[var(--border)]"
           aria-label="Get started as staff"
         >
-          <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-[#fef1ef] via-white to-gray-50 z-0" aria-hidden="true" />
+          <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-[#fef1ef] via-white to-[var(--paper)] z-0" aria-hidden="true" />
 
           <div className="relative z-[2] max-w-[640px] mx-auto">
-            <p className="text-[#1f73b7] text-[11px] font-black uppercase tracking-wider mb-2">
+            <p className="text-[var(--sh-coral)] text-[11px] font-black uppercase tracking-wider mb-2">
               Start placing faster
             </p>
-            <h2 className="text-[clamp(24px,4vw,36px)] font-bold leading-tight tracking-tight text-gray-900 text-center">
+            <h2 className="shBenefitsTitle text-center">
               Your next placement is one search away.
             </h2>
-            <p className="max-w-[480px] mx-auto mt-2 mb-6 leading-relaxed text-gray-500">
+            <p
+              className="max-w-[480px] mx-auto mt-2 mb-6 leading-relaxed text-[var(--muted)]"
+            >
               Start searching, shortlisting, and placing candidates
               immediately. Access the full staffing toolkit from day one. No
               setup fee, no minimum commitment.
@@ -215,7 +225,9 @@ export default function StaffLandingContent({
                 Get staff access <ChevronRight className="size-4" />
               </Link>
             )}
-            <div className="flex items-center justify-center gap-4 mt-4 text-xs text-gray-500">
+            <div
+              className="flex items-center justify-center gap-4 mt-4 text-xs text-[var(--muted)]"
+            >
               <span>350+ agencies on StudentHub</span>
               <span>62% faster placement</span>
             </div>
@@ -223,18 +235,20 @@ export default function StaffLandingContent({
         </section>
 
         {/* ── Footer ── */}
-        <footer className="flex items-center justify-between pt-4 pb-2 text-xs text-gray-500">
+        <footer
+          className="shSection flex items-center justify-between pt-4 pb-2 text-xs text-[var(--muted)]"
+        >
           <span>&copy; {new Date().getFullYear()} StudentHub. All rights reserved.</span>
           <div className="flex items-center gap-4">
             <Link
               href="/login"
-              className="hover:text-gray-900 transition-colors no-underline text-gray-500"
+              className="hover:text-[var(--ink)] transition-colors no-underline"
             >
               Sign in
             </Link>
             <Link
               href="/signup?role=staff"
-              className="hover:text-gray-900 transition-colors no-underline text-gray-500"
+              className="hover:text-[var(--ink)] transition-colors no-underline"
             >
               Sign up as staff
             </Link>

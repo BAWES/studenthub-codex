@@ -8,6 +8,7 @@ import { FeatureGrid } from "@/components/marketing";
 import { TestimonialCarousel } from "@/components/marketing";
 import { PricingCard } from "@/components/marketing";
 import { ComparisonTable } from "@/components/marketing";
+import "@/components/landing/landing.css";
 
 // ── Props ─────────────────────────────────────────────────────
 
@@ -134,7 +135,7 @@ export default function CompanyLandingContent({
                 className="rounded-xl p-5 flex flex-col gap-3 transition-transform duration-300 hover:-translate-y-[3px] bg-white border border-[var(--border)]"
               >
                 <div
-                  className="size-10 rounded-lg flex items-center justify-center shrink-0 bg-[var(--sh-coral-light)] text-[var(--sh-coral)]"
+                  className="size-10 rounded-lg flex items-center justify-center shrink-0 bg-[var(--sh-coral)]/15 text-[var(--sh-coral)]"
                 >
                   <span className="font-black text-sm">0{i + 1}</span>
                 </div>
@@ -240,13 +241,13 @@ export default function CompanyLandingContent({
         <div className="flex items-center gap-4">
           <Link
             href="/login"
-            className="hover:text-[var(--ink)] transition-colors no-underline text-inherit"
+            className="hover:text-[var(--ink)] transition-colors no-underline"
           >
             Sign in
           </Link>
           <Link
             href="/signup?role=company"
-            className="hover:text-[var(--ink)] transition-colors no-underline text-inherit"
+            className="hover:text-[var(--ink)] transition-colors no-underline"
           >
             Sign up as company
           </Link>
