@@ -61,7 +61,7 @@ describe("HowItWorks", () => {
   it("renders description about connecting students and employers", () => {
     render(<HowItWorks />);
     expect(
-      screen.getByText(/connects students and employers/i),
+      screen.getByText(/our staff recruiters match students/i),
     ).toBeTruthy();
   });
 });

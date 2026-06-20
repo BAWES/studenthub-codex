@@ -53,7 +53,7 @@ describe("HeroSection (staff-matched platform redesign)", () => {
     it("renders eyebrow text", () => {
       render(<HeroSection />);
       expect(
-        screen.getByText("Staff-matched platform for student talent"),
+        screen.getByText("Staff-matched student placements"),
       ).toBeTruthy();
     });
 
