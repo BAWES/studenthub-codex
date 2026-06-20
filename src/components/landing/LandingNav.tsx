@@ -5,7 +5,7 @@ import Link from "next/link";
 import { GraduationCap, Building2, Menu, X, ArrowRight } from "lucide-react";
 
 const SH_BLUE = "#1f73b7";
-const SH_AMBER = "#f59e0b";
+const SH_CORAL = "#eb6651";
 
 export type Persona = "candidate" | "company";
 
@@ -25,11 +25,7 @@ export default function LandingNav({ session, persona, onPersonaChange }: Landin
 
   return (
     <nav
-      className="sticky top-0 z-50"
-      style={{
-        borderBottom: "1px solid var(--border)",
-        backgroundColor: "var(--surface)",
-      }}
+      className="sticky top-0 z-50 border-b border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-950"
       aria-label="StudentHub public navigation"
     >
       <div className="mx-auto max-w-6xl px-6">
@@ -41,7 +37,7 @@ export default function LandingNav({ session, persona, onPersonaChange }: Landin
             >
               SH
             </span>
-            <span className="text-sm font-semibold" style={{ color: "var(--ink)" }}>
+            <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
               StudentHub
             </span>
           </Link>
@@ -109,9 +105,9 @@ export default function LandingNav({ session, persona, onPersonaChange }: Landin
                   href={`/signup?role=${persona === "company" ? "company" : "candidate"}`}
                   className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium no-underline text-white transition-all hover:brightness-110 hover:-translate-y-0.5`}
                   style={{
-                    backgroundColor: persona === "company" ? SH_AMBER : SH_BLUE,
+                    backgroundColor: persona === "company" ? SH_CORAL : SH_BLUE,
                     boxShadow: persona === "company"
-                      ? "0 4px 14px rgba(245, 158, 11, 0.35)"
+                      ? "0 4px 14px rgba(235, 102, 81, 0.35)"
                       : "0 4px 14px rgba(31, 115, 183, 0.30)",
                   }}
                 >
@@ -134,7 +130,7 @@ export default function LandingNav({ session, persona, onPersonaChange }: Landin
         <div className="flex items-center gap-0 -mb-px">
           {tabs.map((tab) => {
             const active = persona === tab.value;
-            const accentColor = tab.value === "company" ? SH_AMBER : SH_BLUE;
+            const accentColor = tab.value === "company" ? SH_CORAL : SH_BLUE;
             return (
               <button
                 key={tab.value}
