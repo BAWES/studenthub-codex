@@ -13,7 +13,7 @@ interface LandingFooterProps {
 export default function LandingFooter({ persona }: LandingFooterProps) {
   const role = persona === "company" ? "company" : "candidate";
   return (
-    <footer className="border-t" style={{ borderColor: "var(--sh-glass-border)" }}>
+    <footer style={{ borderTop: "1px solid var(--border)" }}>
       <div className="max-w-6xl mx-auto px-6 py-10 sm:py-12">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           {/* Brand */}
@@ -95,8 +95,8 @@ export default function LandingFooter({ persona }: LandingFooterProps) {
 
         {/* Bottom bar */}
         <div
-          className="mt-8 pt-5 flex items-center justify-between border-t"
-          style={{ borderColor: "var(--sh-glass-border)" }}
+            className="mt-8 pt-5 flex items-center justify-between"
+            style={{ borderTop: "1px solid var(--border)" }}
         >
           <p className="text-xs" style={{ color: "var(--muted)" }}>
             &copy; {new Date().getFullYear()} StudentHub
