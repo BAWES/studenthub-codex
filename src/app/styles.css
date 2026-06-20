@@ -364,7 +364,6 @@ body {
 [data-theme="dark"] .loginPanel,
 [data-theme="dark"] .loginPath,
 [data-theme="dark"] .loginProof,
-[data-theme="dark"] .tableSurface,
 [data-theme="dark"] .financePrimary,
 [data-theme="dark"] .financeSteps,
 [data-theme="dark"] .linearFocus,
@@ -1129,8 +1128,7 @@ h2 {
 }
 
 .financePrimary,
-.financeSteps,
-.tableSurface {
+.financeSteps {
   border: 1px solid #dfe4ed;
   border-radius: 8px;
   background: #fff;
@@ -1897,12 +1895,6 @@ h2 {
   min-height: 360px;
 }
 
-.tableSurface {
-  margin-top: 20px;
-  border: 1px solid var(--line);
-  background: var(--surface);
-  box-shadow: 0 12px 44px rgba(16, 24, 40, 0.05);
-}
 
 .commandSurface {
   display: grid;
@@ -2916,35 +2908,6 @@ h2 {
   background: #eef5ff;
 }
 
-.tableHeader {
-  min-height: 76px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 18px;
-  padding: 18px;
-  border-bottom: 1px solid var(--line);
-}
-
-.tableHeader h2 {
-  margin-bottom: 4px;
-}
-
-.tableHeader p,
-.tableHeader span {
-  color: var(--muted);
-  margin-bottom: 0;
-}
-
-.tableHeader span {
-  font-size: 13px;
-  font-weight: 700;
-}
-
-.tableScroller {
-  overflow-x: auto;
-}
-
 table {
   width: 100%;
   border-collapse: collapse;
@@ -2971,29 +2934,6 @@ td {
 
 tr:last-child td {
   border-bottom: 0;
-}
-
-.rowAction {
-  width: 1%;
-  white-space: nowrap;
-}
-
-.rowAction a {
-  display: inline-flex;
-  min-height: 36px;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid var(--line);
-  padding: 0 14px;
-  color: var(--blue);
-  font-size: 13px;
-  font-weight: 800;
-  text-decoration: none;
-}
-
-.rowAction a:hover {
-  border-color: var(--blue);
-  background: #eef5ff;
 }
 
 .detailPanel {
@@ -3065,9 +3005,6 @@ tr:last-child td {
   font-size: 15px;
 }
 
-.emptyTableRow td {
-  padding: 0;
-}
 
 .listHeader {
   min-height: 62px;
@@ -3219,17 +3156,20 @@ tr:last-child td {
   display: grid;
   align-content: center;
   gap: 3px;
-  border: 1px solid transparent;
   border-radius: 8px;
   color: var(--muted);
   padding: 0 12px;
 }
 
-.commandRailNav a:hover,
-.commandRailNav a.active {
-  border-color: var(--line);
+.commandRailNav a:hover {
   background: var(--surface-soft);
-  color: var(--blue);
+  color: var(--foreground);
+}
+
+.commandRailNav a.active {
+  background: color-mix(in srgb, #1f73b7 10%, transparent);
+  color: #1f73b7;
+  font-weight: 600;
 }
 
 .commandRailNav a > strong {
@@ -3279,9 +3219,8 @@ tr:last-child td {
   grid-template-columns: 220px minmax(280px, 1fr) auto;
   align-items: center;
   gap: 10px;
-  border-bottom: 1px solid var(--line);
-  background: color-mix(in srgb, var(--surface) 90%, transparent);
-  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  background: var(--card);
   padding: 10px 14px;
 }
 
@@ -5457,10 +5396,8 @@ kbd {
     z-index: 30;
     display: flex;
     justify-content: center;
-    border-top: 1px solid var(--line);
-    background: rgba(255, 255, 255, 0.97);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    border-top: 1px solid var(--border);
+    background: var(--card);
     padding: 6px 4px max(6px, env(safe-area-inset-bottom, 6px));
   }
 
@@ -5475,9 +5412,8 @@ kbd {
     justify-content: center;
     gap: 2px;
     border: none;
-    border-top: 3px solid transparent;
     background: transparent;
-    color: var(--faint);
+    color: var(--muted-foreground);
     padding: 4px 2px;
     font-size: 11px;
     font-weight: 600;
@@ -5486,11 +5422,11 @@ kbd {
     transition: color 0.15s, background 0.15s;
   }
 
-  .mobileTabBar a svg {
-    flex-shrink: 0;
-  }
-
   .mobileTabBar a.active {
+    background: color-mix(in srgb, #1f73b7 10%, transparent);
+    color: #1f73b7;
+    font-weight: 700;
+  }
     border-top-color: var(--blue);
     background: transparent;
     color: var(--blue);
@@ -6002,12 +5938,6 @@ kbd {
     text-align: left;
   }
 
-  .tableSurface {
-    margin-top: 14px;
-    border: 0;
-    background: transparent;
-    box-shadow: none;
-  }
 
   .commandSurface {
     margin-top: 12px;
