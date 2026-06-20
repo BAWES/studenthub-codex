@@ -2,7 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { updateExperienceEntry } from "./actions";
 import type { ExperienceActionResult } from "./actions";
 
@@ -57,40 +60,35 @@ export function ExperienceEditForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {error && (
-        <div className="rounded-lg bg-red-500/10 border border-red-500/20 p-4 text-sm text-red-400">
-          {error}
-        </div>
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
 
       <div className="space-y-2">
-        <label htmlFor="experience" className="text-sm font-medium">
-          Position / Title *
-        </label>
-        <input
+        <Label htmlFor="experience">Position / Title *</Label>
+        <Input
           id="experience"
           type="text"
           value={experience}
           onChange={(e) => setExperience(e.target.value)}
-          className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-sm outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/30"
           placeholder="e.g. Senior Software Engineer"
           maxLength={128}
           required
+          autoFocus
         />
-        <p className="text-xs text-white/40">
+        <p className="text-xs text-muted-foreground">
           {experience.length}/128 characters
         </p>
       </div>
 
       <div className="space-y-2">
-        <label htmlFor="employer" className="text-sm font-medium">
-          Employer
-        </label>
-        <input
+        <Label htmlFor="employer">Employer</Label>
+        <Input
           id="employer"
           type="text"
           value={employer}
           onChange={(e) => setEmployer(e.target.value)}
-          className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-sm outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/30"
           placeholder="e.g. Acme Corp"
           maxLength={255}
         />
@@ -98,15 +96,12 @@ export function ExperienceEditForm({
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <label htmlFor="startYear" className="text-sm font-medium">
-            Start Year
-          </label>
-          <input
+          <Label htmlFor="startYear">Start Year</Label>
+          <Input
             id="startYear"
             type="number"
             value={startYear}
             onChange={(e) => setStartYear(e.target.value)}
-            className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-sm outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/30"
             placeholder="e.g. 2020"
             min={1900}
             max={2100}
@@ -114,15 +109,12 @@ export function ExperienceEditForm({
         </div>
 
         <div className="space-y-2">
-          <label htmlFor="endYear" className="text-sm font-medium">
-            End Year
-          </label>
-          <input
+          <Label htmlFor="endYear">End Year</Label>
+          <Input
             id="endYear"
             type="number"
             value={endYear}
             onChange={(e) => setEndYear(e.target.value)}
-            className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-sm outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/30"
             placeholder="e.g. 2023"
             min={1900}
             max={2100}
