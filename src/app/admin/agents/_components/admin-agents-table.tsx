@@ -53,7 +53,7 @@ function AgentCard({
   index: number;
 }) {
   return (
-    <div className="rounded-lg border border-[var(--border)] bg-white p-5">
+    <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
       {/* Agent header */}
       <div className="flex items-center justify-between mb-4">
         <div>
@@ -71,7 +71,7 @@ function AgentCard({
 
       {/* Last heartbeat */}
       {agent.lastHeartbeat && (
-        <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+        <p className="text-xs text-[var(--muted)] mb-3">
           Last heartbeat: {agent.lastHeartbeat}
         </p>
       )}
@@ -115,7 +115,7 @@ interface AdminAgentsTableProps {
 function SkeletonBlock({ className }: { className?: string }) {
   return (
     <div
-      className={`animate-pulse rounded bg-gray-200 dark:bg-gray-700 ${className || ""}`}
+      className={`animate-pulse rounded bg-[var(--border)] ${className || ""}`}
       aria-hidden="true"
     />
   );
@@ -127,7 +127,7 @@ function LoadingSkeleton() {
       {[1, 2, 3].map((i) => (
         <div
           key={i}
-          className="rounded-lg border border-[var(--border)] bg-white p-5"
+          className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5"
         >
           <div className="flex items-center justify-between mb-4">
             <div className="space-y-1">
@@ -153,7 +153,7 @@ function LoadingSkeleton() {
 function EmptyAgentsState() {
   return (
     <section className="shDashboardSection" aria-label="No agents found">
-      <div className="rounded-lg border border-[var(--border)] bg-white p-5">
+      <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
         <div className="shPipelineHeader">
           <div>
             <span className="shPipelineEyebrow">Agents</span>
@@ -176,7 +176,7 @@ function EmptyAgentsState() {
 function ErrorAgentsState({ message }: { message: string }) {
   return (
     <section className="shDashboardSection" aria-label="Agent health error">
-      <div className="rounded-lg border border-[var(--border)] bg-white p-5">
+      <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
         <div className="shPipelineHeader">
           <div>
             <span className="shPipelineEyebrow">Error</span>

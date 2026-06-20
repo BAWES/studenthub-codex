@@ -121,7 +121,7 @@ export function AdminAttendanceTable({ session, attendance, employees }: Props) 
           {
             key: "note",
             label: "Note",
-            render: (row) => <span className="text-sm text-gray-500">{row.note ?? "—"}</span>,
+            render: (row) => <span className="text-sm text-[var(--muted)]">{row.note ?? "—"}</span>,
           },
         ]}
       />
