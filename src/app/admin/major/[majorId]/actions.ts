@@ -6,4 +6,4 @@
 // current import paths without duplicating the "use server" directive.
 // ---------------------------------------------------------------------------
 
-export * from "@/modules/admin/major/actions";
+export { getMajor } from "@/modules/admin/major/actions";

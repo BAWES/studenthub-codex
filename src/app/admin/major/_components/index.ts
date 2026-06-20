@@ -1,1 +1,1 @@
-export { AdminMajorsTable } from "./admin-majors-table";
+export { AdminMajorTable } from "./admin-major-table";

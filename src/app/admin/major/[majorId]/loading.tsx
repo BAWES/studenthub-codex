@@ -1,6 +1,6 @@
 import { DataTableSkeleton } from "@/modules/workspace/Skeletons";
 
-export default function AdminMajorLoading() {
+export default function AdminMajorDetailLoading() {
   return (
     <div className="shell shellEmbedded">
       <section className="workspaceStage">
