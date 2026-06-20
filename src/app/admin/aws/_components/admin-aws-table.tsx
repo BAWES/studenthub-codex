@@ -29,34 +29,34 @@ export function AdminAwsTable({ session, entries, awsResult }: Props) {
       {/* Summary card */}
       <section className="mb-6">
         <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
-          <h3 className="text-sm font-semibold mb-3" style={{ color: "var(--ink)" }}>
+          <h3 className="text-sm font-semibold mb-3 text-foreground">
             Connection summary
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <span className="text-xs font-medium uppercase tracking-wide" style={{ color: "var(--muted)" }}>
+              <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 Region
               </span>
-              <p className="text-sm mt-1 font-mono" style={{ color: "var(--ink)" }}>
-                {awsResult.region || <span style={{ color: "var(--muted)" }}>Not configured</span>}
+              <p className="text-sm mt-1 font-mono text-foreground">
+                {awsResult.region || <span className="text-muted-foreground">Not configured</span>}
               </p>
             </div>
             <div>
-              <span className="text-xs font-medium uppercase tracking-wide" style={{ color: "var(--muted)" }}>
+              <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 S3 Bucket
               </span>
-              <p className="text-sm mt-1 font-mono" style={{ color: "var(--ink)" }}>
-                {awsResult.bucket || <span style={{ color: "var(--muted)" }}>Not configured</span>}
+              <p className="text-sm mt-1 font-mono text-foreground">
+                {awsResult.bucket || <span className="text-muted-foreground">Not configured</span>}
               </p>
             </div>
             <div>
-              <span className="text-xs font-medium uppercase tracking-wide" style={{ color: "var(--muted)" }}>
+              <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 Access Key
               </span>
-              <p className="text-sm mt-1 font-mono" style={{ color: "var(--ink)" }}>
+              <p className="text-sm mt-1 font-mono text-foreground">
                 {awsResult.key
                   ? `••••••••${awsResult.key.slice(-4)}`
-                  : <span style={{ color: "var(--muted)" }}>Not configured</span>}
+                  : <span className="text-muted-foreground">Not configured</span>}
               </p>
             </div>
           </div>
@@ -70,14 +70,12 @@ export function AdminAwsTable({ session, entries, awsResult }: Props) {
             <thead>
               <tr className="border-b border-[var(--border)]">
                 <th
-                  className="text-left px-4 py-3 text-xs font-medium uppercase tracking-wide"
-                  style={{ color: "var(--muted)" }}
+                  className="text-left px-4 py-3 text-xs font-medium uppercase tracking-wide text-muted-foreground"
                 >
                   Config key
                 </th>
                 <th
-                  className="text-left px-4 py-3 text-xs font-medium uppercase tracking-wide"
-                  style={{ color: "var(--muted)" }}
+                  className="text-left px-4 py-3 text-xs font-medium uppercase tracking-wide text-muted-foreground"
                 >
                   Value
                 </th>
@@ -89,7 +87,7 @@ export function AdminAwsTable({ session, entries, awsResult }: Props) {
                   key={entry.key}
                   className="border-t border-[var(--border)] first:border-t-0"
                 >
-                  <td className="px-4 py-3 font-mono text-xs" style={{ color: "var(--ink)" }}>
+                  <td className="px-4 py-3 font-mono text-xs text-foreground">
                     {entry.key}
                   </td>
                   <td className="px-4 py-3 font-mono text-xs" style={{ color: entry.value ? "var(--ink)" : "var(--muted)" }}>
@@ -102,7 +100,7 @@ export function AdminAwsTable({ session, entries, awsResult }: Props) {
         </div>
       ) : (
         <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-8 text-center">
-          <p className="text-sm" style={{ color: "var(--muted)" }}>
+          <p className="text-sm text-muted-foreground">
             No AWS config keys found. Configure them in the server environment.
           </p>
         </div>

@@ -141,8 +141,8 @@ export function PaymentDataTable({
         <div className="flex flex-col items-center gap-4 text-center">
           <span className="text-3xl" aria-hidden="true">⚠️</span>
           <div>
-            <p className="text-lg font-semibold" style={{ color: "var(--ink)" }}>Could not load payments</p>
-            <p className="text-sm mt-1" style={{ color: "var(--muted)" }}>{error}</p>
+            <p className="text-lg font-semibold text-foreground">Could not load payments</p>
+            <p className="text-sm mt-1 text-muted-foreground">{error}</p>
           </div>
           <button onClick={onRetry} className="h-10 rounded-lg px-4 text-sm font-semibold" style={{ background: "var(--sh-info)", color: "#fff" }}>
             Retry
@@ -182,8 +182,8 @@ export function PaymentDataTable({
       ) : !sortedPayments.length ? (
         <div className="flex flex-col items-center justify-center py-16 gap-4" role="status">
           <span className="text-4xl" aria-hidden="true">💳</span>
-          <p className="text-lg font-semibold" style={{ color: "var(--ink)" }}>No payments yet</p>
-          <p className="text-sm text-center max-w-md" style={{ color: "var(--muted)" }}>
+          <p className="text-lg font-semibold text-foreground">No payments yet</p>
+          <p className="text-sm text-center max-w-md text-muted-foreground">
             Payments will appear here once bank transactions are synced from Xero.
           </p>
         </div>
@@ -203,12 +203,12 @@ export function PaymentDataTable({
               onClick={() => onRowClick(payment)}
               onKeyDown={(e) => handleKeyDown(e, payment)}
             >
-              <span className="text-sm" style={{ color: "var(--ink)" }}>{formatDate(payment.date)}</span>
-              <span className="text-sm font-medium" style={{ color: "var(--ink)" }}>{payment.reference ?? "—"}</span>
-              <span className="text-sm truncate" style={{ color: "var(--ink)" }}>{payment.contact_name ?? "—"}</span>
-              <span className="text-sm text-center" style={{ color: "var(--muted)" }}>{payment.type ?? "—"}</span>
-              <span className="text-sm text-right font-medium" style={{ color: "var(--ink)" }}>{formatAmount(payment.total, payment.currency_code)}</span>
-              <span className="text-sm text-center" style={{ color: "var(--muted)" }}>{payment.currency_code ?? "—"}</span>
+              <span className="text-sm text-foreground">{formatDate(payment.date)}</span>
+              <span className="text-sm font-medium text-foreground">{payment.reference ?? "—"}</span>
+              <span className="text-sm truncate text-foreground">{payment.contact_name ?? "—"}</span>
+              <span className="text-sm text-center text-muted-foreground">{payment.type ?? "—"}</span>
+              <span className="text-sm text-right font-medium text-foreground">{formatAmount(payment.total, payment.currency_code)}</span>
+              <span className="text-sm text-center text-muted-foreground">{payment.currency_code ?? "—"}</span>
               <span className="flex justify-center"><StatusBadge status={payment.status} /></span>
               <span className="flex justify-center"><ReconciledCheck reconciled={payment.is_reconciled} /></span>
             </div>
