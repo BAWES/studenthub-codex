@@ -71,7 +71,7 @@ describe("AdminFulltimerDetailPage", () => {
   afterEach(() => { cleanup(); });
 
   it("renders fulltimer detail with all fields", async () => {
-    mockGetFulltimer.mockResolvedValue({ fulltimer: mockFulltimer });
+    mockGetFulltimer.mockResolvedValue(mockFulltimer);
     const Page = (await import("./page")).default;
     render(await Page({ params: Promise.resolve({ fulltimerUuid: "ft-456" }) }));
     expect(screen.getByTestId("eyebrow")).toHaveTextContent("Admin / Fulltimers");
@@ -87,7 +87,7 @@ describe("AdminFulltimerDetailPage", () => {
 
   it("renders null fields as em-dash", async () => {
     mockGetFulltimer.mockResolvedValue({
-      fulltimer: { ...mockFulltimer, fulltimer_phone: null, fulltimer_employed: null, fulltimer_current_salary: null, fulltimer_created_datetime: null, fulltimer_updated_datetime: null },
+      ...mockFulltimer, fulltimer_phone: null, fulltimer_employed: null, fulltimer_current_salary: null, fulltimer_created_datetime: null, fulltimer_updated_datetime: null,
     });
     const Page = (await import("./page")).default;
     render(await Page({ params: Promise.resolve({ fulltimerUuid: "sparse" }) }));
@@ -99,7 +99,7 @@ describe("AdminFulltimerDetailPage", () => {
   });
 
   it("calls notFound when fulltimer is null", async () => {
-    mockGetFulltimer.mockResolvedValue({ fulltimer: null });
+    mockGetFulltimer.mockResolvedValue(null);
     const Page = (await import("./page")).default;
     await expect(Page({ params: Promise.resolve({ fulltimerUuid: "nonexistent" }) })).rejects.toThrow("NEXT_NOT_FOUND");
   });
