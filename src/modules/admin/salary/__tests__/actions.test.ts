@@ -12,6 +12,10 @@ vi.mock("@/lib/prisma", () => ({
       findMany: vi.fn(),
       count: vi.fn(),
     },
+    staff: {
+      findMany: vi.fn(),
+      count: vi.fn(),
+    },
   },
 }));
 
@@ -34,6 +38,7 @@ describe("admin/salary actions", () => {
         salary_currency: "KWD",
         comment: "Monthly salary",
         salary_date: new Date("2026-06-01"),
+        staff: { staff_name: "John Doe" },
       },
       {
         staff_salary_uuid: "SAL-002",
@@ -41,6 +46,7 @@ describe("admin/salary actions", () => {
         salary_currency: "KWD",
         comment: "Bonus",
         salary_date: new Date("2026-05-01"),
+        staff: { staff_name: "Jane Smith" },
       },
     ];
     mockedFindMany.mockResolvedValue(mockRows as any);
@@ -63,6 +69,7 @@ describe("admin/salary actions", () => {
         salary_currency: null,
         comment: null,
         salary_date: null,
+        staff: null,
       },
     ];
     mockedFindMany.mockResolvedValue(mockRows as any);
@@ -95,5 +102,41 @@ describe("admin/salary actions", () => {
         take: 10,
       }),
     );
+  });
+
+  it("includes staff_name from staff relation", async () => {
+    const mockRows = [
+      {
+        staff_salary_uuid: "SAL-004",
+        salary: 3000,
+        salary_currency: "KWD",
+        comment: null,
+        salary_date: null,
+        staff: { staff_name: "Ahmed Ali" },
+      },
+    ];
+    mockedFindMany.mockResolvedValue(mockRows as any);
+    mockedCount.mockResolvedValue(1);
+
+    const result = await listSalaries();
+    expect(result.salaries[0].staff_name).toBe("Ahmed Ali");
+  });
+
+  it("handles null staff gracefully", async () => {
+    const mockRows = [
+      {
+        staff_salary_uuid: "SAL-005",
+        salary: 2000,
+        salary_currency: "KWD",
+        comment: null,
+        salary_date: null,
+        staff: null,
+      },
+    ];
+    mockedFindMany.mockResolvedValue(mockRows as any);
+    mockedCount.mockResolvedValue(1);
+
+    const result = await listSalaries();
+    expect(result.salaries[0].staff_name).toBeNull();
   });
 });
