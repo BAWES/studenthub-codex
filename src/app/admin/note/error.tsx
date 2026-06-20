@@ -13,15 +13,9 @@ export default function AdminNotesError({ error, reset }: Props) {
   }, [error]);
 
   return (
-<<<<<<< Updated upstream
-    <div className="min-h-screen p-6">
-      <section className="space-y-6">
-        <section className="flex items-center justify-between gap-4">
-=======
     <div className="shell shellEmbedded">
       <section className="min-w-0 overflow-x-hidden grid content-start gap-3.5 p-3.5">
         <section className="topbar">
->>>>>>> Stashed changes
           <h1 className="text-lg font-semibold" style={{ color: "var(--sh-error)" }}>
             Something went wrong
           </h1>
