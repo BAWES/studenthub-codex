@@ -296,8 +296,8 @@ describe("uploadCandidateDocument with S3/MinIO", () => {
 
     const updateCall = (prisma.candidate.update as any).mock.calls[0][0];
     const dbValue = updateCall.data.candidate_resume;
-    // S3 key — no leading slash, starts with uploads/
-    expect(dbValue).toMatch(/^uploads\/candidates\/42\/cv_.+\.pdf$/);
+    // S3 key — prefixed with s3://, starts with uploads/
+    expect(dbValue).toMatch(/^s3:\/\/uploads\/candidates\/42\/cv_.+\.pdf$/);
   });
 
   it("falls back to local disk when S3 env vars are not set", async () => {
