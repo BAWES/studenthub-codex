@@ -5427,10 +5427,6 @@ kbd {
     color: #1f73b7;
     font-weight: 700;
   }
-    border-top-color: var(--blue);
-    background: transparent;
-    color: var(--blue);
-  }
 }
 
 @media (max-width: 680px) {
