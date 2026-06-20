@@ -6,66 +6,59 @@ import { loginAction } from "./actions";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export function LoginForm() {
   const [state, action, pending] = useActionState(loginAction, {});
   const emailRef = useRef<HTMLInputElement>(null);
 
-  // Auto-focus email field on mount
   useEffect(() => {
     emailRef.current?.focus();
   }, []);
 
   return (
-    <form action={action} className="grid gap-4">
-      <div className="grid gap-2">
-        <Label htmlFor="login-email">Email</Label>
-        <Input
-          ref={emailRef}
-          id="login-email"
-          name="email"
-          type="email"
-          autoComplete="email"
-          defaultValue={state.email ?? ""}
-          placeholder="name@studenthub.app"
-          required
-        />
-      </div>
+    <div>
+      <form action={action} className="grid gap-5">
+        <div className="grid gap-2">
+          <Label htmlFor="login-email">Email</Label>
+          <Input
+            ref={emailRef}
+            id="login-email"
+            name="email"
+            type="email"
+            autoComplete="email"
+            defaultValue={state.email ?? ""}
+            placeholder="name@studenthub.app"
+            required
+          />
+        </div>
 
-      <div className="grid gap-2">
-        <Label htmlFor="login-password">Password</Label>
-        <Input
-          id="login-password"
-          name="password"
-          type="password"
-          autoComplete="current-password"
-          placeholder="Your password"
-          required
-        />
-      </div>
+        <div className="grid gap-2">
+          <Label htmlFor="login-password">Password</Label>
+          <Input
+            id="login-password"
+            name="password"
+            type="password"
+            autoComplete="current-password"
+            placeholder="Your password"
+            required
+          />
+        </div>
 
-      {state.error ? (
-        <Alert variant="destructive">
-          <AlertDescription>{state.error}</AlertDescription>
-        </Alert>
-      ) : null}
+        {state.error ? (
+          <div className="flex items-center gap-2 px-3.5 py-2.5 rounded-md text-[13px] font-semibold bg-destructive/10 text-destructive border border-destructive/20">
+            <span>{state.error}</span>
+          </div>
+        ) : null}
 
-      <Button
-        type="submit"
-        disabled={pending}
-        className="w-full"
-        style={{ backgroundColor: "#eb6651", color: "white" }}
-        onMouseEnter={(e) => {
-          (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#d45441";
-        }}
-        onMouseLeave={(e) => {
-          (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#eb6651";
-        }}
-      >
-        <LogIn className="size-4" />
-        {pending ? "Checking credentials..." : "Sign in"}
-      </Button>
-    </form>
+        <Button
+          type="submit"
+          disabled={pending}
+          className="w-full bg-primary text-white hover:bg-primary/90 disabled:bg-primary/80"
+        >
+          <LogIn className="size-4" />
+          {pending ? "Checking credentials..." : "Sign in"}
+        </Button>
+      </form>
+    </div>
   );
 }

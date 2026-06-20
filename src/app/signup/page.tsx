@@ -40,30 +40,30 @@ export default async function SignupPage({
   }
 
   return (
-    <main className="min-h-svh grid grid-cols-[minmax(0,1fr)_minmax(400px,520px)] bg-[var(--paper)] max-[900px]:grid-cols-1 max-[900px]:grid-rows-[auto_minmax(0,1fr)]">
+    <main className="min-h-svh grid grid-cols-[minmax(0,1fr)_minmax(400px,520px)] bg-background max-[900px]:grid-cols-1 max-[900px]:grid-rows-[auto_minmax(0,1fr)]">
       {/* ── Brand side -- an ambient coral/blue gradient ──────────────── */}
       <div className="relative grid content-center gap-4 p-[clamp(32px,5vw,64px)] overflow-hidden">
         <div className="absolute inset-0 shLoginGradient" aria-hidden="true" />
 
         <div className="relative z-1 animate-[shLoginBrandFadeIn_600ms_var(--sh-easing)_both]">
           <div className="inline-flex items-center gap-[10px] mb-3">
-            <span className="w-11 h-11 inline-flex items-center justify-center rounded-xl bg-[#1f73b7] text-white text-lg font-black">
+            <span className="w-11 h-11 inline-flex items-center justify-center rounded-xl bg-primary text-white text-lg font-black">
               SH
             </span>
-            <strong className="text-xl font-bold text-[var(--ink)]">
+            <strong className="text-xl font-bold text-foreground">
               StudentHub
             </strong>
           </div>
 
-          <h1 className="m-0 text-[clamp(40px,5vw,72px)] leading-[0.92] font-extrabold tracking-[-0.03em] text-[var(--ink)]">
+          <h1 className="m-0 text-[clamp(40px,5vw,72px)] leading-[0.92] font-extrabold tracking-[-0.03em] text-foreground">
             Join StudentHub.
             <br />
-            <span className="bg-gradient-to-r from-[var(--ink)] to-[var(--sh-coral)] bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-foreground to-primary bg-clip-text text-transparent">
               Start building your future.
             </span>
           </h1>
 
-          <p className="max-w-[480px] text-[clamp(15px,1.4vw,18px)] leading-[1.5] text-[var(--muted)] mt-3">
+          <p className="max-w-[480px] text-[clamp(15px,1.4vw,18px)] leading-[1.5] text-muted-foreground mt-3">
             Create your free account. Staff recruiters find the right
             opportunities — no automated matching, no spam.
           </p>
@@ -73,7 +73,7 @@ export default async function SignupPage({
               (item) => (
                 <span
                   key={item}
-                  className="min-h-8 inline-flex items-center px-3 rounded-full text-[11px] font-black uppercase tracking-[0.03em] bg-[var(--sh-coral-light)] border border-[color-mix(in_srgb,var(--sh-coral)_20%,transparent)] text-[var(--sh-coral)]"
+                  className="min-h-8 inline-flex items-center px-3 rounded-full text-[11px] font-black uppercase tracking-[0.03em] bg-primary/10 border-primary/20 text-primary"
                 >
                   {item}
                 </span>
@@ -84,13 +84,13 @@ export default async function SignupPage({
       </div>
 
       {/* ── Form side -- solid card ────────────────────────────────────── */}
-      <div className="grid content-center p-6 bg-[var(--surface)] border-l border-[var(--line)] max-[900px]:border-l-0 max-[900px]:p-4">
+      <div className="grid content-center p-6 bg-card border-l border-border max-[900px]:border-l-0 max-[900px]:p-4">
         <div className="w-full max-w-[420px] mx-auto">
-          <div className="rounded-[var(--sh-radius-xl)] bg-[var(--surface)] border border-[var(--line)] shadow-[var(--shadow-sm)] overflow-hidden animate-[shLoginFormIn_400ms_var(--sh-easing)_both] [animation-delay:60ms]">
+          <div className="rounded-xl bg-card border border-border shadow-sm overflow-hidden animate-[shLoginFormIn_400ms_var(--sh-easing)_both] [animation-delay:60ms]">
             <SignupForm defaultRole={defaultRole} />
           </div>
 
-          <div className="flex items-center justify-center gap-5 mt-5 text-[13px] text-[var(--muted)] animate-[shLoginFormIn_500ms_var(--sh-easing)_both] [animation-delay:200ms]">
+          <div className="flex items-center justify-center gap-5 mt-5 text-[13px] text-muted-foreground animate-[shLoginFormIn_500ms_var(--sh-easing)_both] [animation-delay:200ms]">
             <span className="inline-flex items-center gap-1.5">
               <Shield className="size-3.5" />
               Encrypted & secure
