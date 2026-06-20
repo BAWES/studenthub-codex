@@ -135,14 +135,14 @@ export function InvoiceDataTable({
 
   if (error && !loading) {
     return (
-      <div className="rounded-lg border border-[var(--border)] bg-white p-8" role="alert">
+      <div className="rounded-lg border-border bg-white p-8" role="alert">
         <div className="flex flex-col items-center gap-4 text-center">
           <span className="text-3xl" aria-hidden="true">⚠️</span>
           <div>
             <p className="text-lg font-semibold text-foreground">Could not load invoices</p>
             <p className="text-sm mt-1 text-muted-foreground">{error}</p>
           </div>
-          <button onClick={onRetry} className="h-10 rounded-lg px-4 text-sm font-semibold" style={{ background: "var(--sh-info)", color: "#fff" }}>
+          <button onClick={onRetry} className="h-10 rounded-lg px-4 text-sm font-semibold bg-primary text-primary-foreground">
             Retry
           </button>
         </div>
@@ -151,13 +151,11 @@ export function InvoiceDataTable({
   }
 
   return (
-    <div className="rounded-lg border border-[var(--border)] bg-white overflow-hidden">
+    <div className="rounded-lg border-border bg-white overflow-hidden">
       <div
-        className="grid gap-0 text-[11px] font-bold uppercase tracking-wider px-4 py-3"
+        className="grid gap-0 text-[11px] font-bold uppercase tracking-wider px-4 py-3 text-muted-foreground border-b border-border/10"
         style={{
           gridTemplateColumns: COLUMNS.map((c) => c.width).join(" "),
-          color: "var(--muted)",
-          borderBottom: "1px solid rgba(255,255,255,0.06)",
         }}
       >
         {COLUMNS.map((col) => (
@@ -169,7 +167,7 @@ export function InvoiceDataTable({
           >
             {col.label}
             {sortKey === col.key && (
-              <span style={{ color: "var(--sh-info)" }}>{sortDir === "asc" ? "▲" : "▼"}</span>
+              <span className="text-primary">{sortDir === "asc" ? "▲" : "▼"}</span>
             )}
           </div>
         ))}
@@ -227,8 +225,7 @@ export function InvoiceDataTable({
 
       {!loading && !error && total > 20 && onPageChange && (
         <div
-          className="flex items-center justify-between px-4 py-3 text-sm"
-          style={{ borderTop: "1px solid rgba(255,255,255,0.06)", color: "var(--muted)" }}
+          className="flex items-center justify-between px-4 py-3 text-sm border-t border-border/10 text-muted-foreground"
         >
           <span>Showing {1 + (page - 1) * 20}-{Math.min(page * 20, total)} of {total}</span>
           <div className="flex items-center gap-2">

@@ -41,10 +41,8 @@ export function InvoiceDetailDrawer({
 
       {/* Drawer panel */}
       <div
-        className="fixed top-0 right-0 z-50 h-full w-full max-w-lg overflow-y-auto border-l shadow-xl transition-transform duration-300"
+        className="fixed top-0 right-0 z-50 h-full w-full max-w-lg overflow-y-auto border-l shadow-xl transition-transform duration-300 bg-card border-border"
         style={{
-          background: "var(--surface)",
-          borderColor: "var(--border)",
           transform: open ? "translateX(0)" : "translateX(100%)",
         }}
         role="dialog"
@@ -61,8 +59,7 @@ export function InvoiceDetailDrawer({
               <p className="text-lg font-semibold text-foreground">Invoice not found</p>
               <button
                 onClick={onClose}
-                className="h-10 rounded-lg px-4 text-sm font-semibold"
-                style={{ background: "var(--sh-info)", color: "#fff" }}
+                className="h-10 rounded-lg px-4 text-sm font-semibold bg-primary text-primary-foreground"
               >
                 Close
               </button>
@@ -89,7 +86,7 @@ export function InvoiceDetailDrawer({
               </div>
 
               {/* Detail fields */}
-              <div className="grid grid-cols-2 gap-4 mb-6 pb-6" style={{ borderBottom: "1px solid var(--border)" }}>
+              <div className="grid grid-cols-2 gap-4 mb-6 pb-6 border-b border-border">
                 <div>
                   <p className="text-[11px] font-bold uppercase tracking-wider mb-1 text-muted-foreground">Status</p>
                   <p className="text-sm font-medium text-foreground">
@@ -136,7 +133,7 @@ export function InvoiceDetailDrawer({
                         
                       >
                         <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{m.label}</p>
-                        <p className="text-lg font-bold mt-1" style={{ color: "var(--accent)" }}>{m.value}</p>
+                        <p className="text-lg font-bold mt-1 text-primary">{m.value}</p>
                         {m.note && (
                           <p className="text-xs mt-0.5 text-muted-foreground">{m.note}</p>
                         )}
