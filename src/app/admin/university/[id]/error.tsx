@@ -12,16 +12,15 @@ export default function UniversityDetailError({
       <section className="workspaceStage">
         <div className="flex flex-col items-center justify-center py-24 gap-4">
           <span className="text-4xl" aria-hidden="true">⚠️</span>
-          <h2 className="text-xl font-bold" style={{ color: "var(--ink)" }}>
+          <h2 className="text-xl font-bold text-foreground">
             Failed to load university details
           </h2>
-          <p className="text-sm" style={{ color: "var(--muted)" }}>
+          <p className="text-sm text-muted-foreground">
             {error.message ?? "An unexpected error occurred."}
           </p>
           <button
             onClick={reset}
-            className="px-4 py-2 rounded-lg text-sm font-semibold"
-            style={{ background: "var(--sh-primary)", color: "#fff" }}
+            className="px-4 py-2 rounded-lg text-sm font-semibold bg-primary text-white"
           >
             Try again
           </button>

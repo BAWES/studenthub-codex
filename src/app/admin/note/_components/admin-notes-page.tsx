@@ -1,7 +1,12 @@
 "use client";
 
-import { useActionState, useState, useRef } from "react";
+import { useActionState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { DataTable } from "@/modules/workspace/DataTable";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 
@@ -29,10 +34,10 @@ export function AdminNotesPage({ session, notes, total }: Props) {
     >
       <section className="mb-6">
         <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
-          <h3 className="text-sm font-semibold mb-3" style={{ color: "var(--ink)" }}>Add note</h3>
+          <h3 className="text-sm font-semibold mb-3 text-foreground">Add note</h3>
           <CreateNoteForm onSuccess={() => router.refresh()} />
-        </div>
-      </section>
+        </CardContent>
+      </Card>
 
       <DataTable
         title="Notes"
@@ -121,46 +126,42 @@ function CreateNoteForm({ onSuccess }: { onSuccess: () => void }) {
       onSubmit={() => setTimeout(() => { formRef.current?.reset(); }, 100)}
     >
       <div className="grid gap-1">
-        <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>Note text</label>
+        <label className="text-xs font-medium text-muted-foreground">Note text</label>
         <input
           name="noteText"
           required
           maxLength={2000}
           placeholder="Enter note text..."
-          className="h-9 rounded-lg px-3 text-sm border w-64"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+          className="w-64"
         />
       </div>
       <div className="grid gap-1">
-        <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>Type</label>
+        <label className="text-xs font-medium text-muted-foreground">Type</label>
         <input
           name="noteType"
           maxLength={50}
           placeholder="e.g. general, feedback"
-          className="h-9 rounded-lg px-3 text-sm border w-36"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+          className="w-36"
         />
       </div>
       <div className="grid gap-1">
-        <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>Company ID</label>
+        <label className="text-xs font-medium text-muted-foreground">Company ID</label>
         <input
           name="companyId"
           type="number"
           placeholder="Optional"
-          className="h-9 rounded-lg px-3 text-sm border w-24"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+          className="w-24"
         />
       </div>
       <button
         type="submit"
         disabled={pending}
-        className="h-9 rounded-lg px-4 text-sm font-semibold"
-        style={{ background: "var(--sh-primary)", color: "#fff" }}
+        className="h-9 rounded-lg px-4 text-sm font-semibold bg-primary text-primary-foreground"
       >
         {pending ? "Adding..." : "Add"}
-      </button>
+      </Button>
       {state?.error ? (
-        <p className="text-xs w-full" style={{ color: "var(--sh-error)" }}>{state.error}</p>
+        <p className="text-xs w-full text-destructive">{state.error}</p>
       ) : null}
     </form>
   );

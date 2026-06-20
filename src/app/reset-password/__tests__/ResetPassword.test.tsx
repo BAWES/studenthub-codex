@@ -41,9 +41,9 @@ describe("ResetPasswordForm", () => {
 
     render(<ResetPasswordForm token="valid-token" />);
 
-    // Skeleton shows pulsing lines while validating
-    const skeletonLines = document.querySelectorAll(".shLoginSkeletonLine");
-    expect(skeletonLines.length).toBeGreaterThan(0);
+    // Skeleton shows pulsing animation while validating
+    const skeleton = document.querySelectorAll(".animate-pulse");
+    expect(skeleton.length).toBeGreaterThan(0);
   });
 
   it("shows invalid link state when token is invalid", async () => {

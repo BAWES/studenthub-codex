@@ -34,7 +34,7 @@ export function AdminCandidateEducationTable({ session, education }: Props) {
             key: "candidate_name",
             label: "Candidate",
             render: (row) => (
-              <span className="font-medium" style={{ color: "var(--ink)" }}>
+              <span className="font-medium text-foreground">
                 {row.candidate_name ?? "—"}
               </span>
             ),

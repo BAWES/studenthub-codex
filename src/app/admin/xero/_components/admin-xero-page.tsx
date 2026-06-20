@@ -47,8 +47,7 @@ export function AdminXeroPage({ session, transactions, reconciliation }: Props) 
             label: "ID",
             render: (row) => (
               <code
-                className="text-sm font-mono"
-                style={{ color: "var(--muted)" }}
+                className="text-sm font-mono text-muted-foreground"
               >
                 {row.bankTransactionId.slice(0, 8)}...
               </code>
@@ -59,8 +58,7 @@ export function AdminXeroPage({ session, transactions, reconciliation }: Props) 
             label: "Contact",
             render: (row) => (
               <span
-                className="text-sm"
-                style={{ color: "var(--ink)" }}
+                className="text-sm text-foreground"
               >
                 {row.contactName ?? "—"}
               </span>
@@ -71,8 +69,7 @@ export function AdminXeroPage({ session, transactions, reconciliation }: Props) 
             label: "Reference",
             render: (row) => (
               <span
-                className="text-sm"
-                style={{ color: "var(--muted)" }}
+                className="text-sm text-muted-foreground"
               >
                 {row.reference ?? "—"}
               </span>
@@ -83,8 +80,7 @@ export function AdminXeroPage({ session, transactions, reconciliation }: Props) 
             label: "Amount",
             render: (row) => (
               <span
-                className="text-sm font-mono"
-                style={{ color: "var(--ink)" }}
+                className="text-sm font-mono text-foreground"
               >
                 {row.total != null
                   ? `${row.currencyCode ?? ""} ${row.total.toFixed(2)}`
@@ -97,8 +93,7 @@ export function AdminXeroPage({ session, transactions, reconciliation }: Props) 
             label: "Type",
             render: (row) => (
               <span
-                className="text-sm"
-                style={{ color: "var(--ink)" }}
+                className="text-sm text-foreground"
               >
                 {row.type ?? "—"}
               </span>
@@ -130,8 +125,7 @@ export function AdminXeroPage({ session, transactions, reconciliation }: Props) 
               const d = row.date ? new Date(row.date) : null;
               return (
                 <span
-                  className="text-sm"
-                  style={{ color: "var(--muted)" }}
+                  className="text-sm text-muted-foreground"
                 >
                   {d ? d.toLocaleDateString() : "—"}
                 </span>

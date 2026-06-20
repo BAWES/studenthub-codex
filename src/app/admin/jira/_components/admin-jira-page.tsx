@@ -100,8 +100,7 @@ export function AdminJiraPage({ session, issues, users, error }: Props) {
               label: "Summary",
               render: (row) => (
                 <span
-                  className="text-sm truncate max-w-xs inline-block"
-                  style={{ color: "var(--ink)" }}
+                  className="text-sm truncate max-w-xs inline-block text-foreground"
                   title={row.summary ?? undefined}
                 >
                   {row.summary ?? "—"}
@@ -113,8 +112,7 @@ export function AdminJiraPage({ session, issues, users, error }: Props) {
               label: "Status",
               render: (row) => (
                 <span
-                  className="text-sm"
-                  style={{ color: "var(--ink)" }}
+                  className="text-sm text-foreground"
                 >
                   {row.status ?? "—"}
                 </span>
@@ -125,8 +123,7 @@ export function AdminJiraPage({ session, issues, users, error }: Props) {
               label: "Assignee",
               render: (row) => (
                 <span
-                  className="text-sm"
-                  style={{ color: "var(--ink)" }}
+                  className="text-sm text-foreground"
                 >
                   {row.assignee?.displayName ?? "Unassigned"}
                 </span>
@@ -137,8 +134,7 @@ export function AdminJiraPage({ session, issues, users, error }: Props) {
               label: "Created",
               render: (row) => (
                 <span
-                  className="text-sm"
-                  style={{ color: "var(--muted)" }}
+                  className="text-sm text-muted-foreground"
                 >
                   {row.created
                     ? new Date(row.created).toLocaleDateString()
@@ -160,8 +156,7 @@ export function AdminJiraPage({ session, issues, users, error }: Props) {
               label: "Name",
               render: (row) => (
                 <span
-                  className="text-sm"
-                  style={{ color: "var(--ink)" }}
+                  className="text-sm text-foreground"
                 >
                   {row.displayName}
                 </span>
@@ -172,8 +167,7 @@ export function AdminJiraPage({ session, issues, users, error }: Props) {
               label: "Email",
               render: (row) => (
                 <span
-                  className="text-sm"
-                  style={{ color: "var(--muted)" }}
+                  className="text-sm text-muted-foreground"
                 >
                   {row.emailAddress ?? "—"}
                 </span>
@@ -184,8 +178,7 @@ export function AdminJiraPage({ session, issues, users, error }: Props) {
               label: "Account ID",
               render: (row) => (
                 <code
-                  className="text-sm font-mono"
-                  style={{ color: "var(--muted)" }}
+                  className="text-sm font-mono text-muted-foreground"
                 >
                   {row.accountId.slice(0, 16)}...
                 </code>

@@ -176,7 +176,7 @@ export default async function AdminComplianceDetailPage({
         >
           <CompanyDetailView company={data.company} idRequests={data.idRequests} />
 
-          <section style={{ display: "flex", gap: "0.5rem", padding: "1rem" }}>
+          <section className="flex gap-2 p-4">
             <Link href={backHref}>
               <Button variant="outline">Back to Compliance</Button>
             </Link>
@@ -205,7 +205,7 @@ export default async function AdminComplianceDetailPage({
       >
         <IdRequestDetailView record={data.record} />
 
-        <section style={{ display: "flex", gap: "0.5rem", padding: "1rem" }}>
+        <section className="flex gap-2 p-4">
           <Link href={backHref}>
             <Button variant="outline">Back to Compliance</Button>
           </Link>

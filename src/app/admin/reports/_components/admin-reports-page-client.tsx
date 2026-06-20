@@ -64,18 +64,17 @@ export function AdminReportsPageClient({ session, reportTypes }: Props) {
             key={rt.type}
             className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5"
           >
-            <h3 className="text-sm font-semibold mb-1" style={{ color: "var(--ink)" }}>
+            <h3 className="text-sm font-semibold mb-1 text-foreground">
               {rt.label}
             </h3>
-            <p className="text-xs mb-4" style={{ color: "var(--muted)" }}>
+            <p className="text-xs mb-4 text-muted-foreground">
               {rt.description}
             </p>
             <button
               type="button"
               disabled={generating === rt.type}
               onClick={() => handleGenerate(rt.type)}
-              className="h-9 rounded-lg px-4 text-sm font-semibold disabled:opacity-50"
-              style={{ background: "var(--sh-primary)", color: "#fff" }}
+              className="h-9 rounded-lg px-4 text-sm font-semibold disabled:opacity-50 bg-primary text-primary-foreground"
             >
               {generating === rt.type ? "Generating..." : "Generate Report"}
             </button>
@@ -96,7 +95,7 @@ export function AdminReportsPageClient({ session, reportTypes }: Props) {
       {/* Report results */}
       {reportData ? (
         <section className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
-          <h3 className="text-sm font-semibold mb-3" style={{ color: "var(--ink)" }}>
+          <h3 className="text-sm font-semibold mb-3 text-foreground">
             Report Results
           </h3>
 
@@ -104,36 +103,36 @@ export function AdminReportsPageClient({ session, reportTypes }: Props) {
             <div className="overflow-x-auto">
               <table className="w-full text-xs">
                 <thead>
-                  <tr className="border-b" style={{ borderColor: "var(--border)" }}>
-                    <th className="text-left py-2 px-2 font-medium" style={{ color: "var(--muted)" }}>Staff</th>
-                    <th className="text-right py-2 px-2 font-medium" style={{ color: "var(--muted)" }}>Assigned</th>
-                    <th className="text-right py-2 px-2 font-medium" style={{ color: "var(--muted)" }}>Requests</th>
-                    <th className="text-right py-2 px-2 font-medium" style={{ color: "var(--muted)" }}>Notes</th>
-                    <th className="text-right py-2 px-2 font-medium" style={{ color: "var(--muted)" }}>Stories</th>
-                    <th className="text-right py-2 px-2 font-medium" style={{ color: "var(--muted)" }}>Invitations</th>
-                    <th className="text-right py-2 px-2 font-medium" style={{ color: "var(--muted)" }}>Accepted</th>
-                    <th className="text-right py-2 px-2 font-medium" style={{ color: "var(--muted)" }}>Rejected</th>
+                  <tr className="border-b" >
+                    <th className="text-left py-2 px-2 font-medium text-muted-foreground">Staff</th>
+                    <th className="text-right py-2 px-2 font-medium text-muted-foreground">Assigned</th>
+                    <th className="text-right py-2 px-2 font-medium text-muted-foreground">Requests</th>
+                    <th className="text-right py-2 px-2 font-medium text-muted-foreground">Notes</th>
+                    <th className="text-right py-2 px-2 font-medium text-muted-foreground">Stories</th>
+                    <th className="text-right py-2 px-2 font-medium text-muted-foreground">Invitations</th>
+                    <th className="text-right py-2 px-2 font-medium text-muted-foreground">Accepted</th>
+                    <th className="text-right py-2 px-2 font-medium text-muted-foreground">Rejected</th>
                   </tr>
                 </thead>
                 <tbody>
                   {reportData.reports.map((r, i) => (
-                    <tr key={i} className="border-b" style={{ borderColor: "var(--border)" }}>
-                      <td className="py-2 px-2" style={{ color: "var(--ink)" }}>
+                    <tr key={i} className="border-b" >
+                      <td className="py-2 px-2 text-foreground">
                         <div className="font-medium">{r.staffName as string}</div>
-                        <div style={{ color: "var(--muted)" }}>{r.staffEmail as string}</div>
+                        <div className="text-muted-foreground">{r.staffEmail as string}</div>
                       </td>
-                      <td className="text-right py-2 px-2" style={{ color: "var(--ink)" }}>{r.totalAssigned as number}</td>
-                      <td className="text-right py-2 px-2" style={{ color: "var(--ink)" }}>{r.totalRequests as number}</td>
-                      <td className="text-right py-2 px-2" style={{ color: "var(--ink)" }}>{r.totalNotes as number}</td>
-                      <td className="text-right py-2 px-2" style={{ color: "var(--ink)" }}>{r.totalStories as number}</td>
-                      <td className="text-right py-2 px-2" style={{ color: "var(--ink)" }}>{r.totalInvitations as number}</td>
-                      <td className="text-right py-2 px-2" style={{ color: "var(--ink)" }}>{r.totalAcceptedInvitations as number}</td>
-                      <td className="text-right py-2 px-2" style={{ color: "var(--ink)" }}>{r.totalRejectedInvitations as number}</td>
+                      <td className="text-right py-2 px-2 text-foreground">{r.totalAssigned as number}</td>
+                      <td className="text-right py-2 px-2 text-foreground">{r.totalRequests as number}</td>
+                      <td className="text-right py-2 px-2 text-foreground">{r.totalNotes as number}</td>
+                      <td className="text-right py-2 px-2 text-foreground">{r.totalStories as number}</td>
+                      <td className="text-right py-2 px-2 text-foreground">{r.totalInvitations as number}</td>
+                      <td className="text-right py-2 px-2 text-foreground">{r.totalAcceptedInvitations as number}</td>
+                      <td className="text-right py-2 px-2 text-foreground">{r.totalRejectedInvitations as number}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-              <p className="text-xs mt-3" style={{ color: "var(--muted)" }}>
+              <p className="text-xs mt-3 text-muted-foreground">
                 Total staff: {reportData.total}
               </p>
             </div>
@@ -143,18 +142,18 @@ export function AdminReportsPageClient({ session, reportTypes }: Props) {
             <div className="overflow-x-auto">
               <table className="w-full text-xs">
                 <thead>
-                  <tr className="border-b" style={{ borderColor: "var(--border)" }}>
-                    <th className="text-left py-2 px-2 font-medium" style={{ color: "var(--muted)" }}>Status</th>
-                    <th className="text-right py-2 px-2 font-medium" style={{ color: "var(--muted)" }}>Count</th>
+                  <tr className="border-b" >
+                    <th className="text-left py-2 px-2 font-medium text-muted-foreground">Status</th>
+                    <th className="text-right py-2 px-2 font-medium text-muted-foreground">Count</th>
                   </tr>
                 </thead>
                 <tbody>
                   {reportData.summary.map((s, i) => (
-                    <tr key={i} className="border-b" style={{ borderColor: "var(--border)" }}>
-                      <td className="py-2 px-2" style={{ color: "var(--ink)" }}>
+                    <tr key={i} className="border-b" >
+                      <td className="py-2 px-2 text-foreground">
                         {s.status === 1 ? "Accepted" : s.status === 2 ? "Rejected" : `Status ${s.status}`}
                       </td>
-                      <td className="text-right py-2 px-2" style={{ color: "var(--ink)" }}>{s.count}</td>
+                      <td className="text-right py-2 px-2 text-foreground">{s.count}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -163,7 +162,7 @@ export function AdminReportsPageClient({ session, reportTypes }: Props) {
           )}
 
           {reportData.kind === "unknown" && (
-            <p className="text-sm" style={{ color: "var(--muted)" }}>
+            <p className="text-sm text-muted-foreground">
               Report generated. Raw data available in the response.
             </p>
           )}
