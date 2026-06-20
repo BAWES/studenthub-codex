@@ -9,16 +9,13 @@ import {
 } from "@/modules/candidates/evaluation/pdf-helpers";
 import { getEvaluationPdfData } from "@/modules/candidates/evaluation/actions";
 
-// Type-only import — prevents webpack from bundling playwright at build time
-import type { Page } from "playwright";
-
 export const dynamic = "force-dynamic";
 
 /** Minimal browser interface for the cached Chromium instance */
 interface BrowserHandle {
   contexts(): unknown[];
   isConnected(): boolean;
-  newPage(): Promise<Page>;
+  newPage(): Promise<any>;
   close(): Promise<void>;
 }
 
@@ -39,7 +36,11 @@ async function getBrowser(): Promise<BrowserHandle> {
     }
   }
 
-  const { chromium } = await import("playwright");
+  // Dynamic import hidden from webpack — prevents build-time bundling of
+  // playwright-core's optional chromium-bidi dependency
+  // eslint-disable-next-line @typescript-eslint/no-implied-eval
+  const playwrightModule = await new Function('return import("playwright")')();
+  const { chromium } = playwrightModule;
   _browser = (await chromium.launch({ headless: true })) as unknown as BrowserHandle;
 
   // Ensure cleanup on process exit to avoid orphaned Chromium processes
@@ -143,7 +144,7 @@ export async function GET(
 // ---------------------------------------------------------------------------
 
 async function generatePdf(html: string, uuid: string): Promise<NextResponse> {
-  let page: Page | null = null;
+  let page: any = null;
   try {
     const browser = await getBrowser();
     page = await browser.newPage();
