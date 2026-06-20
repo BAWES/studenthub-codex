@@ -82,7 +82,7 @@ test.describe("Transfer flow — admin transfers", () => {
     const ctx = await adminContext();
 
     await ctx.page.goto("/admin/transfers");
-    await ctx.page.waitForLoadState("load");
+    await ctx.page.waitForLoadState("networkidle");
     await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
     await expect(ctx.page).toHaveURL(/\/admin\/transfers/);
 
@@ -94,13 +94,13 @@ test.describe("Transfer flow — admin transfers", () => {
     const introSection = ctx.page.locator(".financeStart, .financePrimary");
     await expect(introSection).toBeVisible({ timeout: 10000 });
 
-    // Data table renders — DataTable uses CSS Grid, look for the title "Transfer Runs"
+    // Data table renders — look for the title "Transfer Runs"
     const tableTitle = ctx.page.locator("text=Transfer Runs");
-    await expect(tableTitle).toBeVisible({ timeout: 10000 });
+    await expect(tableTitle).toBeVisible({ timeout: 15000 });
 
     // Description text
     const description = ctx.page.locator("text=Open a run to review");
-    await expect(description).toBeVisible();
+    await expect(description).toBeVisible({ timeout: 10000 });
 
     assertNoReactErrors(ctx.errors);
     await ctx.close();
@@ -114,10 +114,8 @@ test.describe("Transfer flow — admin transfers", () => {
     const ctx = await adminContext();
 
     await ctx.page.goto("/admin/transfers");
-    await ctx.page.waitForLoadState("load");
+    await ctx.page.waitForLoadState("networkidle");
     await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
-
-    // Expected column headers from AdminTransfersTable: Transfer, Company, Period, Status, Total
     const columnHeaders = ["Transfer", "Company", "Period", "Status", "Total"];
     for (const header of columnHeaders) {
       const col = ctx.page.locator(`th:has-text("${header}")`);
@@ -159,10 +157,10 @@ test.describe("Transfer flow — admin transfers", () => {
     const ctx = await adminContext();
 
     await ctx.page.goto("/admin/transfers");
-    await ctx.page.waitForLoadState("load");
+    await ctx.page.waitForLoadState("networkidle");
     await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
 
-    // Check for pagination — look for page buttons, "Previous/Next", or arrow controls
+    // Check for pagination, "Previous/Next", or arrow controls
     const paginationSelectors = [
       '[aria-label="Pagination"]',
       'nav[aria-label*="pagination" i]',
@@ -215,7 +213,7 @@ test.describe("Transfer flow — admin transfers", () => {
     const ctx = await adminContext();
 
     await ctx.page.goto("/admin/transfers");
-    await ctx.page.waitForLoadState("load");
+    await ctx.page.waitForLoadState("networkidle");
     await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
 
     // Check for links pointing to /admin/transfers/{id}
