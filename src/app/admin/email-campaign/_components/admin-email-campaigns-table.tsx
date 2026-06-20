@@ -33,7 +33,7 @@ export function AdminEmailCampaignsTable({ session, campaigns }: Props) {
     >
       <section className="mb-6">
         <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
-          <h3 className="text-sm font-semibold mb-3" style={{ color: "var(--ink)" }}>New campaign</h3>
+          <h3 className="text-sm font-semibold mb-3 text-foreground">New campaign</h3>
           <CreateCampaignForm onSuccess={() => router.refresh()} />
         </div>
       </section>
@@ -57,8 +57,7 @@ export function AdminEmailCampaignsTable({ session, campaigns }: Props) {
               ) : (
                 <button
                   type="button"
-                  className="text-sm hover:underline text-left"
-                  style={{ color: "var(--sh-primary)" }}
+                  className="text-sm hover:underline text-left text-primary"
                   onClick={() => setEditingId(row.campaign_uuid)}
                 >
                   {row.subject ?? "(no subject)"}
@@ -70,7 +69,7 @@ export function AdminEmailCampaignsTable({ session, campaigns }: Props) {
             label: "Target",
             render: (row) =>
               editingId === row.campaign_uuid ? null : (
-                <span className="text-sm" style={{ color: "var(--ink)" }}>
+                <span className="text-sm text-foreground">
                   {row.target ?? "—"}
                 </span>
               ),
@@ -80,7 +79,7 @@ export function AdminEmailCampaignsTable({ session, campaigns }: Props) {
             label: "Progress",
             render: (row) =>
               editingId === row.campaign_uuid ? null : (
-                <span className="text-sm font-medium" style={{ color: "var(--ink)" }}>
+                <span className="text-sm font-medium text-foreground">
                   {row.progress != null ? `${row.progress}%` : "—"}
                 </span>
               ),
@@ -110,7 +109,7 @@ export function AdminEmailCampaignsTable({ session, campaigns }: Props) {
             label: "Created",
             render: (row) =>
               editingId === row.campaign_uuid ? null : (
-                <span className="text-sm" style={{ color: "var(--muted)" }}>
+                <span className="text-sm text-muted-foreground">
                   {row.created_at
                     ? new Date(row.created_at).toLocaleDateString()
                     : "—"}
@@ -153,7 +152,7 @@ function CreateCampaignForm({ onSuccess }: { onSuccess: () => void }) {
       onSubmit={() => setTimeout(() => { formRef.current?.reset(); }, 100)}
     >
       <div className="grid gap-1">
-        <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>Subject</label>
+        <label className="text-xs font-medium text-muted-foreground">Subject</label>
         <input
           name="subject"
           required
@@ -164,7 +163,7 @@ function CreateCampaignForm({ onSuccess }: { onSuccess: () => void }) {
         />
       </div>
       <div className="grid gap-1">
-        <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>Message</label>
+        <label className="text-xs font-medium text-muted-foreground">Message</label>
         <input
           name="message"
           placeholder="Campaign message body"
@@ -173,7 +172,7 @@ function CreateCampaignForm({ onSuccess }: { onSuccess: () => void }) {
         />
       </div>
       <div className="grid gap-1">
-        <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>Target</label>
+        <label className="text-xs font-medium text-muted-foreground">Target</label>
         <select
           name="target"
           defaultValue="both"
@@ -188,13 +187,12 @@ function CreateCampaignForm({ onSuccess }: { onSuccess: () => void }) {
       <button
         type="submit"
         disabled={pending}
-        className="h-9 rounded-lg px-4 text-sm font-semibold"
-        style={{ background: "var(--sh-primary)", color: "#fff" }}
+        className="h-9 rounded-lg px-4 text-sm font-semibold bg-primary text-primary-foreground"
       >
         {pending ? "Creating..." : "Create"}
       </button>
       {state?.error ? (
-        <p className="text-xs w-full" style={{ color: "var(--sh-error)" }}>{state.error}</p>
+        <p className="text-xs w-full text-destructive">{state.error}</p>
       ) : null}
     </form>
   );
@@ -258,7 +256,7 @@ function EditCampaignForm({
         <option value="candidate">Candidate</option>
         <option value="customer">Customer</option>
       </select>
-      <label className="flex items-center gap-1 text-xs" style={{ color: "var(--muted)" }}>
+      <label className="flex items-center gap-1 text-xs text-muted-foreground">
         <input
           name="status"
           type="checkbox"
@@ -271,21 +269,19 @@ function EditCampaignForm({
       <button
         type="submit"
         disabled={pending}
-        className="h-8 rounded px-3 text-xs font-semibold"
-        style={{ background: "var(--sh-primary)", color: "#fff" }}
+        className="h-8 rounded px-3 text-xs font-semibold bg-primary text-primary-foreground"
       >
         {pending ? "..." : "Save"}
       </button>
       <button
         type="button"
         onClick={onCancel}
-        className="h-8 rounded px-3 text-xs"
-        style={{ color: "var(--muted)" }}
+        className="h-8 rounded px-3 text-xs text-muted-foreground"
       >
         Cancel
       </button>
       {state?.error ? (
-        <p className="text-xs w-full" style={{ color: "var(--sh-error)" }}>{state.error}</p>
+        <p className="text-xs w-full text-destructive">{state.error}</p>
       ) : null}
     </form>
   );

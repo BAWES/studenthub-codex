@@ -37,8 +37,7 @@ export function AdminPermissionsTable({ session, sections }: Props) {
       <section className="mb-6">
         <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
           <h3
-            className="mb-3 text-sm font-semibold"
-            style={{ color: "var(--ink)" }}
+            className="mb-3 text-sm font-semibold text-foreground"
           >
             Add permission section
           </h3>
@@ -57,8 +56,7 @@ export function AdminPermissionsTable({ session, sections }: Props) {
             label: "UUID",
             render: (row) => (
               <span
-                className="font-mono text-sm"
-                style={{ color: "var(--muted)" }}
+                className="font-mono text-sm text-muted-foreground"
               >
                 {row.permission_uuid.slice(0, 8)}...
               </span>
@@ -80,8 +78,7 @@ export function AdminPermissionsTable({ session, sections }: Props) {
               ) : (
                 <button
                   type="button"
-                  className="text-sm hover:underline"
-                  style={{ color: "var(--sh-primary)" }}
+                  className="text-sm hover:underline text-primary"
                   onClick={() => setEditingUuid(row.permission_uuid)}
                 >
                   {row.section_name ?? "—"}
@@ -138,8 +135,7 @@ function CreateSectionForm({ onSuccess }: { onSuccess: () => void }) {
     >
       <div className="grid gap-1">
         <label
-          className="text-xs font-medium"
-          style={{ color: "var(--muted)" }}
+          className="text-xs font-medium text-muted-foreground"
         >
           Section name
         </label>
@@ -159,13 +155,12 @@ function CreateSectionForm({ onSuccess }: { onSuccess: () => void }) {
       <button
         type="submit"
         disabled={pending}
-        className="h-9 rounded-lg px-4 text-sm font-semibold"
-        style={{ background: "var(--sh-primary)", color: "#fff" }}
+        className="h-9 rounded-lg px-4 text-sm font-semibold bg-primary text-primary-foreground"
       >
         {pending ? "Adding..." : "Add"}
       </button>
       {state?.error ? (
-        <p className="w-full text-xs" style={{ color: "var(--sh-error)" }}>
+        <p className="w-full text-xs text-destructive">
           {state.error}
         </p>
       ) : null}
@@ -223,21 +218,19 @@ function EditSectionForm({
       <button
         type="submit"
         disabled={pending}
-        className="h-8 rounded px-3 text-xs font-semibold"
-        style={{ background: "var(--sh-primary)", color: "#fff" }}
+        className="h-8 rounded px-3 text-xs font-semibold bg-primary text-primary-foreground"
       >
         {pending ? "..." : "Save"}
       </button>
       <button
         type="button"
         onClick={onCancel}
-        className="h-8 rounded px-3 text-xs"
-        style={{ color: "var(--muted)" }}
+        className="h-8 rounded px-3 text-xs text-muted-foreground"
       >
         Cancel
       </button>
       {state?.error ? (
-        <p className="text-xs" style={{ color: "var(--sh-error)" }}>
+        <p className="text-xs text-destructive">
           {state.error}
         </p>
       ) : null}

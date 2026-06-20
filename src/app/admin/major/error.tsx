@@ -9,15 +9,14 @@ export default function AdminMajorError({
 }) {
   return (
     <div className="flex flex-col items-center justify-center min-h-[40vh] gap-4">
-      <h2 className="text-lg font-semibold" style={{ color: "var(--ink)" }}>
+      <h2 className="text-lg font-semibold text-foreground">
         Something went wrong loading majors
       </h2>
-      <p className="text-sm" style={{ color: "var(--muted)" }}>
+      <p className="text-sm text-muted-foreground">
         {error.message ?? "An unexpected error occurred."}
       </p>
       <button type="button" onClick={reset}
-        className="h-9 rounded-lg px-4 text-sm font-semibold"
-        style={{ background: "var(--sh-primary)", color: "#fff" }}>
+        className="h-9 rounded-lg px-4 text-sm font-semibold bg-primary text-white">
         Try again
       </button>
     </div>

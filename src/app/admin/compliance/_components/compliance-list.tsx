@@ -128,10 +128,10 @@ export function ComplianceList({
         header: "Record",
         cell: (row: ComplianceRow) => (
           <div>
-            <div className="font-medium text-sm" style={{ color: "var(--ink)" }}>
+            <div className="font-medium text-sm text-foreground">
               {row.title}
             </div>
-            <div className="text-xs mt-0.5" style={{ color: "var(--muted)" }}>
+            <div className="text-xs mt-0.5 text-muted-foreground">
               {row.subtitle}
             </div>
           </div>
@@ -140,7 +140,7 @@ export function ComplianceList({
       {
         header: "Type",
         cell: (row: ComplianceRow) => (
-          <span className="text-xs capitalize" style={{ color: "var(--muted)" }}>
+          <span className="text-xs capitalize text-muted-foreground">
             {row.type.replace("_", " ")}
           </span>
         ),
@@ -156,7 +156,7 @@ export function ComplianceList({
       {
         header: "Updated",
         cell: (row: ComplianceRow) => (
-          <span className="text-xs" style={{ color: "var(--muted)" }}>
+          <span className="text-xs text-muted-foreground">
             {row.updated}
           </span>
         ),
@@ -175,7 +175,7 @@ export function ComplianceList({
         {/* Toolbar: filter tabs + search */}
         <div
           className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 border-b"
-          style={{ borderColor: "var(--border)" }}
+          
         >
           {/* Type filter tabs */}
           <div className="flex gap-1 flex-wrap">
@@ -200,8 +200,7 @@ export function ComplianceList({
           {/* Search */}
           <div className="relative w-full sm:w-56">
             <Search
-              className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5"
-              style={{ color: "var(--muted)" }}
+              className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground"
               aria-hidden="true"
             />
             <Input

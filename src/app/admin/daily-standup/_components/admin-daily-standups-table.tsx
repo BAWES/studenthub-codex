@@ -34,7 +34,7 @@ export function AdminDailyStandupsTable({ session, answers }: Props) {
             key: "question",
             label: "Question",
             render: (row) => (
-              <span className="text-sm" style={{ color: "var(--ink)" }}>
+              <span className="text-sm text-foreground">
                 {row.question ?? "—"}
               </span>
             ),
@@ -43,7 +43,7 @@ export function AdminDailyStandupsTable({ session, answers }: Props) {
             key: "answer",
             label: "Answer",
             render: (row) => (
-              <span className="text-sm max-w-[300px] truncate block" style={{ color: "var(--ink)" }}>
+              <span className="text-sm max-w-[300px] truncate block text-foreground">
                 {row.answer ?? "—"}
               </span>
             ),
@@ -52,7 +52,7 @@ export function AdminDailyStandupsTable({ session, answers }: Props) {
             key: "staff_id",
             label: "Staff ID",
             render: (row) => (
-              <span className="text-sm" style={{ color: "var(--muted)" }}>
+              <span className="text-sm text-muted-foreground">
                 {row.staff_id ?? "—"}
               </span>
             ),
@@ -61,7 +61,7 @@ export function AdminDailyStandupsTable({ session, answers }: Props) {
             key: "updated_at",
             label: "Updated",
             render: (row) => (
-              <span className="text-sm" style={{ color: "var(--muted)" }}>
+              <span className="text-sm text-muted-foreground">
                 {row.updated_at ? new Date(row.updated_at).toLocaleDateString() : "—"}
               </span>
             ),

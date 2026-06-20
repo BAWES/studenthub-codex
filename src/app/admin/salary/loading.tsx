@@ -1,7 +1,5 @@
-export default function AdminSalaryListLoading() {
-  return (
-    <div className="flex items-center justify-center min-h-[400px]">
-      <div className="text-sm text-muted-foreground">Loading salaries...</div>
-    </div>
-  );
+import { DataTableSkeleton } from "@/modules/workspace/Skeletons";
+
+export default function Loading() {
+  return <DataTableSkeleton rows={5} />;
 }

@@ -52,21 +52,18 @@ export function AdminWebhooksTable({ session, webhooks }: Props) {
             label: "Method",
             render: (row) =>
               row.method ? (
-                <span className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold"
-                  style={{
-                    background:
-                      row.method === "POST"
-                        ? "var(--sh-primary)"
-                        : row.method === "GET"
-                          ? "var(--sh-info)"
-                          : "var(--sh-warning)",
-                    color: "#fff",
-                  }}
+                <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold text-white ${
+                  row.method === "POST"
+                    ? "bg-[var(--sh-primary)]"
+                    : row.method === "GET"
+                      ? "bg-[var(--sh-info)]"
+                      : "bg-[var(--sh-warning)]"
+                }`}
                 >
                   {row.method}
                 </span>
               ) : (
-                <span className="text-xs" style={{ color: "var(--muted)" }}>—</span>
+                <span className="text-xs text-muted-foreground">—</span>
               ),
           },
           {
