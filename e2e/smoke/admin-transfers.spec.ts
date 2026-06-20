@@ -40,7 +40,7 @@ test.describe("Admin transfers page", () => {
   test("admin transfers page loads without errors", async () => {
     const ctx = await authContext(admin);
     await ctx.page.goto("/admin/transfers");
-    await ctx.page.waitForLoadState("load");
+    await ctx.page.waitForLoadState("networkidle");
     await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
     assertNoReactErrors(ctx.errors);
     await ctx.close();
@@ -49,7 +49,7 @@ test.describe("Admin transfers page", () => {
   test("admin transfers page renders heading and DataTable", async () => {
     const ctx = await authContext(admin);
     await ctx.page.goto("/admin/transfers");
-    await ctx.page.waitForLoadState("load");
+    await ctx.page.waitForLoadState("networkidle");
 
     // Check the page title appears
     await expect(ctx.page.locator("h2").filter({ hasText: "Start with a transfer run" })).toBeVisible({ timeout: 15000 });
