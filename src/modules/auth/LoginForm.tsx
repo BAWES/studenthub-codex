@@ -6,6 +6,7 @@ import { loginAction } from "./actions";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export function LoginForm() {
   const [state, action, pending] = useActionState(loginAction, {});
@@ -45,16 +46,12 @@ export function LoginForm() {
         </div>
 
         {state.error ? (
-          <div className="flex items-center gap-2 px-3.5 py-2.5 rounded-md text-[13px] font-semibold bg-destructive/10 text-destructive border border-destructive/20">
-            <span>{state.error}</span>
-          </div>
+          <Alert variant="destructive">
+            <AlertDescription>{state.error}</AlertDescription>
+          </Alert>
         ) : null}
 
-        <Button
-          type="submit"
-          disabled={pending}
-          className="w-full bg-primary text-white hover:bg-primary/90 disabled:bg-primary/80"
-        >
+        <Button type="submit" disabled={pending} className="w-full">
           <LogIn className="size-4" />
           {pending ? "Checking credentials..." : "Sign in"}
         </Button>
