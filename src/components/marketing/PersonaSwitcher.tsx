@@ -74,7 +74,7 @@ export default function PersonaSwitcher({
               "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)]",
               isActive
                 ? "text-[var(--ink)]"
-                : "text-[var(--muted)] hover:text-[var(--ink)] hover:bg-[var(--accent)]",
+                : "text-[var(--muted)] hover:text-[var(--ink)] hover:bg-[var(--border)]",
             )}
           >
             {/* Active glow indicator */}
@@ -113,7 +113,7 @@ export default function PersonaSwitcher({
                 "opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none",
               )}
               style={{
-                background: "var(--surface-soft)",
+                background: "var(--surface)",
                 border: "1px solid var(--border)",
                 color: "var(--muted)",
               }}
