@@ -20,7 +20,7 @@ WORKDIR /app
 FROM base AS deps
 LABEL stage=deps
 
-COPY package.json pnpm-lock.yaml ./
+COPY package.json pnpm-lock.yaml .npmrc ./
 
 RUN pnpm install --frozen-lockfile --prod --ignore-scripts
 
