@@ -15,7 +15,7 @@ export default function InvoiceDetailLoading() {
       </div>
 
       {/* Detail panels skeleton */}
-      <div className="detailPanel">
+      <div className="rounded-lg border border-border bg-card">
         <Skeleton className="h-5 w-24 mb-4" />
         <div className="factGrid">
           {Array.from({ length: 7 }).map((_, i) => (
@@ -27,7 +27,7 @@ export default function InvoiceDetailLoading() {
         </div>
       </div>
 
-      <div className="detailPanel">
+      <div className="rounded-lg border border-border bg-card">
         <Skeleton className="h-5 w-24 mb-4" />
         <div className="factGrid">
           {Array.from({ length: 2 }).map((_, i) => (
@@ -40,7 +40,7 @@ export default function InvoiceDetailLoading() {
       </div>
 
       {/* Payouts skeleton */}
-      <div className="detailPanel">
+      <div className="rounded-lg border border-border bg-card">
         <Skeleton className="h-5 w-40 mb-4" />
         <div className="rows compactRows">
           {Array.from({ length: 3 }).map((_, i) => (

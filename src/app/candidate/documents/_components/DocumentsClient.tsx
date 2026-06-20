@@ -46,9 +46,9 @@ function DocumentCard({
   const hasFile = Boolean(doc.filePath);
 
   return (
-    <div className="detailPanel">
+    <div className="rounded-lg border border-border bg-card">
       <h3>{doc.label}</h3>
-      <p className="detailPanelNote">
+      <p className="text-sm text-muted-foreground">
         {hasFile
           ? `File: ${doc.filePath?.split("/").pop()}`
           : "No file uploaded yet."}

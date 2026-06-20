@@ -15,7 +15,7 @@ export default function InspectorIdRequestDetailLoading() {
       </div>
 
       {/* Detail panels */}
-      <div className="detailPanel">
+      <div className="rounded-lg border border-border bg-card">
         <Skeleton className="h-5 w-24 mb-4" />
         <div className="factGrid">
           {Array.from({ length: 6 }).map((_, i) => (

@@ -117,7 +117,7 @@ export default function AdminLandingContent({
             <p className="text-info text-[11px] font-black uppercase tracking-wider mb-1">
               The real admin headache
             </p>
-            <h2 className="shBenefitsTitle mb-8">
+            <h2 className="text-[clamp(22px,3.4vw,38px)] font-extrabold leading-[1.08] tracking-tight mb-8">
               You don&apos;t need another login.
               <br />
               You need a{" "}
@@ -179,7 +179,7 @@ export default function AdminLandingContent({
             <p className="text-info text-[11px] font-black uppercase tracking-wider mb-2">
               Take control of operations
             </p>
-            <h2 className="shBenefitsTitle text-center">
+            <h2 className="text-[clamp(22px,3.4vw,38px)] font-extrabold leading-[1.08] tracking-tight text-center">
               Your next dashboard is one login away.
             </h2>
             <p className="max-w-[480px] mx-auto mt-2 mb-6 leading-relaxed text-muted-foreground">
@@ -208,7 +208,7 @@ export default function AdminLandingContent({
         </Card>
 
         {/* ── Footer ── */}
-        <footer className="shSection flex items-center justify-between pt-4 pb-2 text-xs text-muted-foreground">
+        <footer className="mb-[clamp(8px,1.5vw,20px)] flex items-center justify-between pt-4 pb-2 text-xs text-muted-foreground">
           <span>&copy; {new Date().getFullYear()} StudentHub. All rights reserved.</span>
           <div className="flex items-center gap-4">
             <Link

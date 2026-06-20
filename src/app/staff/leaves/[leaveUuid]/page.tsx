@@ -74,7 +74,7 @@ export default async function StaffLeaveDetailPage({
     >
       <DetailSection title="Leave Details" facts={facts} />
 
-      <section className="detailPanel">
+      <section className="rounded-lg border border-border bg-card">
         <h3 className="text-base font-semibold border-l-2 border-[#eb6651] pl-3 mb-4">Navigation</h3>
         <div className="flex flex-wrap gap-2">
           <Link href={"/staff/leaves" as Route}>

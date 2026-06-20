@@ -54,7 +54,7 @@ export default async function StaffInterviewDetailPage({
     >
       <DetailSection title="Interview Details" facts={facts} />
 
-      <section className="detailPanel">
+      <section className="rounded-lg border border-border bg-card">
         <h2>Actions</h2>
         <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
           {interview.status !== 1 && (
@@ -81,7 +81,7 @@ export default async function StaffInterviewDetailPage({
         </div>
       </section>
 
-      <section className="detailPanel">
+      <section className="rounded-lg border border-border bg-card">
         <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
           {interview.candidateId && (
             <Link href={`/staff/candidates?candidate=${interview.candidateId}` as Route}>
@@ -100,7 +100,7 @@ export default async function StaffInterviewDetailPage({
       </section>
 
       {notice && (
-        <section className="detailPanel">
+        <section className="rounded-lg border border-border bg-card">
           <p className="notice">
             {notice === "interview-updated" && "Interview updated successfully."}
             {notice === "not-found" && "Interview not found."}

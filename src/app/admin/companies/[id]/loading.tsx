@@ -15,7 +15,7 @@ export default function AdminDetailLoading() {
       </div>
 
       {/* Detail panels skeleton */}
-      <div className="detailPanel">
+      <div className="rounded-lg border border-border bg-card">
         <Skeleton className="h-5 w-24 mb-4" />
         <div className="factGrid">
           {Array.from({ length: 8 }).map((_, i) => (
@@ -27,7 +27,7 @@ export default function AdminDetailLoading() {
         </div>
       </div>
 
-      <div className="detailPanel">
+      <div className="rounded-lg border border-border bg-card">
         <Skeleton className="h-5 w-24 mb-4" />
         <div className="factGrid">
           {Array.from({ length: 4 }).map((_, i) => (

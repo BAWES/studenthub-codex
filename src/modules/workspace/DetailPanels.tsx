@@ -101,7 +101,7 @@ export function DetailSection({
   /* ─── Error state ─── */
   if (errorMessage) {
     return (
-      <section className="detailPanel">
+      <section className="rounded-lg border border-border bg-card">
         <h2>{title}</h2>
         <ErrorState error={errorMessage} onRetry={onRetry} />
       </section>
@@ -111,7 +111,7 @@ export function DetailSection({
   /* ─── Loading state ─── */
   if (loading) {
     return (
-      <section className="detailPanel">
+      <section className="rounded-lg border border-border bg-card">
         <h2>{title}</h2>
         {type === "list" ? (
           <div className="rows compactRows" aria-busy="true">
@@ -143,7 +143,7 @@ export function DetailSection({
     const hasSensitive = sensitive && facts?.some((f) => f.sensitive);
 
     return (
-      <section className="detailPanel">
+      <section className="rounded-lg border border-border bg-card">
         <div className="listHeader">
           <h2>{title}</h2>
           {hasSensitive && (
@@ -180,7 +180,7 @@ export function DetailSection({
   /* ─── List (CompactList) type ─── */
   const resolvedRows = rows ?? [];
   return (
-    <section className="detailPanel">
+    <section className="rounded-lg border border-border bg-card">
       <div className="listHeader compact">
         <h2>{title}</h2>
         {resolvedRows.length > 0 && <span>{resolvedRows.length}</span>}
