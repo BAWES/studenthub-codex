@@ -11,45 +11,34 @@ import { getEvaluationPdfData } from "@/modules/candidates/evaluation/actions";
 
 export const dynamic = "force-dynamic";
 
-/** Minimal browser interface for the cached Chromium instance */
-interface BrowserHandle {
-  contexts(): unknown[];
-  isConnected(): boolean;
-  newPage(): Promise<any>;
-  close(): Promise<void>;
-}
-
 // Keep Chromium instance cached across warm invocations
-let _browser: BrowserHandle | null = null;
+let _chromium: Awaited<ReturnType<typeof import("playwright").chromium.launch>> | null = null;
 
-async function getBrowser(): Promise<BrowserHandle> {
+async function getBrowser() {
   // If we have a cached instance, verify it's still alive
-  if (_browser) {
+  if (_chromium) {
     try {
-      const contexts = _browser.contexts();
+      const contexts = _chromium.contexts();
       // If it has no contexts it may have crashed — re-launch
-      if (contexts.length > 0 || _browser.isConnected()) {
-        return _browser;
+      if (contexts.length > 0 || _chromium.isConnected()) {
+        return _chromium;
       }
     } catch {
       // Browser is dead — fall through to re-launch
     }
   }
 
-  // Dynamic import hidden from webpack — prevents build-time bundling of
-  // playwright-core's optional chromium-bidi dependency
-  const playwrightModule = await new Function('return import("playwright")')();
-  const { chromium } = playwrightModule;
-  _browser = (await chromium.launch({ headless: true })) as unknown as BrowserHandle;
+  const { chromium } = await import("playwright");
+  _chromium = await chromium.launch({ headless: true });
 
   // Ensure cleanup on process exit to avoid orphaned Chromium processes
   process.once("beforeExit", () => {
-    if (_browser) {
-      _browser.close().catch(() => {});
+    if (_chromium) {
+      _chromium.close().catch(() => {});
     }
   });
 
-  return _browser;
+  return _chromium!;
 }
 
 /**
@@ -142,11 +131,18 @@ export async function GET(
 // PDF generation via Playwright
 // ---------------------------------------------------------------------------
 
+/** Timeout for Playwright PDF operations (30 seconds). */
+const PDF_TIMEOUT_MS = 30_000;
+
 async function generatePdf(html: string, uuid: string): Promise<NextResponse> {
-  let page: any = null;
+  let page: import("playwright").Page | null = null;
   try {
     const browser = await getBrowser();
     page = await browser.newPage();
+
+    // Set page-level default timeout so setContent and pdf respect it
+    page.setDefaultTimeout(PDF_TIMEOUT_MS);
+
     await page.setContent(html, { waitUntil: "networkidle" });
 
     const pdfBuffer = await page.pdf({
@@ -161,6 +157,9 @@ async function generatePdf(html: string, uuid: string): Promise<NextResponse> {
         </div>`,
     });
 
+    await page.close();
+    page = null;
+
     return new NextResponse(pdfBuffer.toString() as unknown as BodyInit, {
       headers: {
         "Content-Type": "application/pdf",
@@ -169,8 +168,16 @@ async function generatePdf(html: string, uuid: string): Promise<NextResponse> {
       },
     });
   } catch (error) {
-    console.error("PDF generation failed:", error);
-    return new NextResponse("Failed to generate PDF", { status: 500 });
+    const isTimeout =
+      error instanceof Error &&
+      (error.name === "TimeoutError" ||
+        (error.message && /timeout/i.test(error.message)));
+
+    console.error(`PDF generation ${isTimeout ? "timed out" : "failed"}:`, error);
+    return new NextResponse(
+      isTimeout ? "PDF generation timed out" : "Failed to generate PDF",
+      { status: isTimeout ? 504 : 500 },
+    );
   } finally {
     // Ensure page is always closed to avoid resource leaks
     if (page) {
@@ -178,11 +185,3 @@ async function generatePdf(html: string, uuid: string): Promise<NextResponse> {
     }
   }
 }
-
-// ---------------------------------------------------------------------------
-// HTML report builder (extracted to pdf-helpers.ts for testability)
-// ---------------------------------------------------------------------------
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
