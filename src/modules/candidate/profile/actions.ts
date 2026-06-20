@@ -15,7 +15,7 @@ import {
 } from "@/modules/candidates/profile/actions";
 import {
   getCandidateProfileDetailResultSchema,
-} from "@/app/candidate/profile/schemas";
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // getCandidateProfileDetail — full profile + metrics

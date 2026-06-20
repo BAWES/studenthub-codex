@@ -26,7 +26,7 @@ import {
   type UpdateCertificationInput,
   type CertificationActionResult,
   type CertificationItem,
-} from "@/app/candidate/certifications/schemas";
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Internal helpers
