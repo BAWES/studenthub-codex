@@ -46,6 +46,17 @@ export const listSettingsResultSchema = z.object({
   totalPages: z.number().int().nonnegative(),
 });
 
+export const createSettingSchema = z.object({
+  code: z.string().min(1, "Code is required").max(128),
+  key: z.string().min(1, "Key is required").max(128),
+  value: z.string().nullable().optional(),
+  serialized: z.boolean().optional().default(false),
+});
+
+export const deleteSettingSchema = z.object({
+  settingUuid: z.string().min(1, "Setting UUID is required"),
+});
+
 export const updateSettingResultSchema = z.object({
   operation: z.string(),
   message: z.string(),
@@ -55,3 +66,5 @@ export const updateSettingResultSchema = z.object({
 export type SettingItem = z.output<typeof settingItemSchema>;
 export type ListSettingsResult = z.output<typeof listSettingsResultSchema>;
 export type UpdateSettingResult = z.output<typeof updateSettingResultSchema>;
+export type CreateSettingInput = z.input<typeof createSettingSchema>;
+export type DeleteSettingInput = z.input<typeof deleteSettingSchema>;

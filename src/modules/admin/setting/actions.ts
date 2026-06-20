@@ -1,83 +1,50 @@
-"use server";
+// ---------------------------------------------------------------------------
+// Admin Setting — server actions
+// All business logic lives in src/modules/settings/actions.ts (which has
+// "use server"). This barrel re-exports so page consumers keep their
+// current import paths without duplicating the "use server" directive.
+// Also adds admin-specific wrappers (updateSettingAction, deleteSettingAction)
+// that match the {operation, message} API contract used by admin components.
+// ---------------------------------------------------------------------------
 
-import { prisma } from "@/lib/prisma";
-import { requireCapability } from "@/modules/auth/session";
-import {
-  listSettingsSchema,
-  listSettingsResultSchema,
-} from "./schemas";
-import type {
+export {
+  listSettings,
+  getSetting,
+  createSetting,
+} from "@/modules/settings/actions";
+
+// Re-export types
+export type {
   ListSettingsInput,
-  ListSettingsResult,
+  GetSettingInput,
+  CreateSettingInput,
+  DeleteSettingInput,
   SettingItem,
-} from "./schemas";
+  ListSettingsResult,
+  UpdateSettingResult,
+} from "@/modules/settings/schemas";
 
-export async function listSettings(
-  input: ListSettingsInput = {},
-): Promise<ListSettingsResult> {
-  await requireCapability("admin.read");
-  const parsed = listSettingsSchema.safeParse(input);
-  if (!parsed.success) {
-    return { settings: [], total: 0, page: 1, limit: 50, totalPages: 0 };
-  }
-  const { page, limit } = parsed.data;
-  const skip = (page - 1) * limit;
+import { updateSetting, deleteSetting as deleteSettingFull } from "@/modules/settings/actions";
+import type { UpdateSettingInput, DeleteSettingInput, UpdateSettingResult } from "@/modules/settings/schemas";
 
-  const [rows, total] = await Promise.all([
-    prisma.setting.findMany({
-      orderBy: { updated_at: "desc" },
-      skip,
-      take: limit,
-      select: {
-        setting_uuid: true,
-        code: true,
-        key: true,
-        value: true,
-        serialized: true,
-        created_at: true,
-        updated_at: true,
-      },
-    }),
-    prisma.setting.count(),
-  ]);
-
-  const result = {
-    settings: rows,
-    total,
-    page,
-    limit,
-    totalPages: Math.ceil(total / limit),
-  };
-
-  const outputParsed = listSettingsResultSchema.safeParse(result);
-  if (!outputParsed.success) {
-    console.error(
-      "[admin/setting] listSettings output validation failed:",
-      outputParsed.error.issues,
-    );
-  }
-
-  return result;
+/**
+ * Update a setting's value.
+ * Delegates to src/modules/settings/actions.ts updateSetting.
+ * Returns {operation, message} matching the admin component contract.
+ */
+export async function updateSettingAction(
+  params: UpdateSettingInput,
+): Promise<UpdateSettingResult> {
+  return updateSetting(params);
 }
 
-export async function getSetting(
-  settingUuid: string,
-): Promise<{ setting: SettingItem | null }> {
-  await requireCapability("admin.read");
-
-  const row = await prisma.setting.findUnique({
-    where: { setting_uuid: settingUuid },
-    select: {
-      setting_uuid: true,
-      code: true,
-      key: true,
-      value: true,
-      serialized: true,
-      created_at: true,
-      updated_at: true,
-    },
-  });
-
-  if (!row) return { setting: null };
-  return { setting: row };
+/**
+ * Delete a setting by UUID.
+ * Delegates to src/modules/settings/actions.ts deleteSetting.
+ * Returns {operation, message} matching the admin component contract.
+ */
+export async function deleteSettingAction(
+  params: DeleteSettingInput,
+): Promise<UpdateSettingResult> {
+  return deleteSettingFull(params);
 }
