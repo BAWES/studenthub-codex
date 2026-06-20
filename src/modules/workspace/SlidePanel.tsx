@@ -82,7 +82,7 @@ export function SlidePanel({
       <SheetContent side={side} showCloseButton={showCloseButton} className={className}>
         <div className="slidePanel">
           <SheetHeader className={!title && !eyebrow && !description ? "sr-only" : undefined}>
-            {eyebrow ? <p className="eyebrow">{eyebrow}</p> : null}
+            {eyebrow ? <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{eyebrow}</p> : null}
             {title ? <SheetTitle>{title}</SheetTitle> : <SheetTitle className="sr-only">Dialog</SheetTitle>}
             {description ? <SheetDescription>{description}</SheetDescription> : null}
           </SheetHeader>

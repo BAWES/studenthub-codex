@@ -8,19 +8,25 @@ export default function UniversityDetailError({
   reset: () => void;
 }) {
   return (
-    <div className="block">
-      <section className="overflow-x-hidden grid content-start gap-3.5 p-3.5">
+<<<<<<< Updated upstream
+    <div className="min-h-screen p-6">
+      <section className="space-y-6">
+=======
+    <div className="shell shellEmbedded">
+      <section className="min-w-0 overflow-x-hidden grid content-start gap-3.5 p-3.5">
+>>>>>>> Stashed changes
         <div className="flex flex-col items-center justify-center py-24 gap-4">
           <span className="text-4xl" aria-hidden="true">⚠️</span>
-          <h2 className="text-xl font-bold text-foreground">
+          <h2 className="text-xl font-bold" style={{ color: "var(--ink)" }}>
             Failed to load university details
           </h2>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm" style={{ color: "var(--muted)" }}>
             {error.message ?? "An unexpected error occurred."}
           </p>
           <button
             onClick={reset}
-            className="px-4 py-2 rounded-lg text-sm font-semibold bg-primary text-white"
+            className="px-4 py-2 rounded-lg text-sm font-semibold"
+            style={{ background: "var(--sh-primary)", color: "#fff" }}
           >
             Try again
           </button>
