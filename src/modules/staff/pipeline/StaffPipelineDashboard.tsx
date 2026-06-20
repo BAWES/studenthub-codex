@@ -5,6 +5,9 @@ import { StageMetricsRow } from "./StageMetricsRow";
 import { PipelineBoard } from "./PipelineBoard";
 import { PipelineDataTable } from "./PipelineDataTable";
 import { useState } from "react";
+import { Alert, AlertTitle } from "@/components/ui/alert";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 
 export interface StaffPipelineDashboardProps {
   initialItems: PipelineItem[];
@@ -43,87 +46,39 @@ export function StaffPipelineDashboard({
 
   return (
     <section className="space-y-4">
-      {/* Error banner */}
+      {/* Error banner — shadcn Alert */}
       {error && (
-        <div
-          className="rounded-lg border border-[var(--border)] bg-white p-3"
-          style={{
-            borderLeft: "4px solid var(--rose-500, #f43f5e)",
-            background: "var(--rose-50, rgba(244,63,94,0.08))",
-          }}
-        >
-          <span className="text-[13px] font-medium" style={{ color: "var(--rose-500, #f43f5e)" }}>
-            {error}
-          </span>
-        </div>
+        <Alert variant="destructive">
+          <AlertTitle>{error}</AlertTitle>
+        </Alert>
       )}
 
       {/* Pipeline stage metrics */}
       <StageMetricsRow metrics={metrics} />
 
-      {/* View mode toggle */}
-      <div className="flex items-center gap-2">
-        <button
-          type="button"
-          onClick={() => setViewMode("board")}
-          className="text-[12px] font-semibold px-3 py-1.5 rounded-lg transition-colors"
-          style={{
-            background: viewMode === "board"
-              ? "var(--surface, rgba(255,255,255,0.08))"
-              : "transparent",
-            color: viewMode === "board"
-              ? "var(--text-primary, var(--ink))"
-              : "var(--text-tertiary, var(--muted))",
-            border: "1px solid",
-            borderColor: viewMode === "board"
-              ? "rgba(255,255,255,0.12)"
-              : "transparent",
-          }}
-        >
-          Board
-        </button>
-        <button
-          type="button"
-          onClick={() => setViewMode("table")}
-          className="text-[12px] font-semibold px-3 py-1.5 rounded-lg transition-colors"
-          style={{
-            background: viewMode === "table"
-              ? "var(--surface, rgba(255,255,255,0.08))"
-              : "transparent",
-            color: viewMode === "table"
-              ? "var(--text-primary, var(--ink))"
-              : "var(--text-tertiary, var(--muted))",
-            border: "1px solid",
-            borderColor: viewMode === "table"
-              ? "rgba(255,255,255,0.12)"
-              : "transparent",
-          }}
-        >
-          Table
-        </button>
-      </div>
+      {/* View mode toggle — shadcn Tabs */}
+      <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as ViewMode)}>
+        <TabsList>
+          <TabsTrigger value="board">Board</TabsTrigger>
+          <TabsTrigger value="table">Table</TabsTrigger>
+        </TabsList>
+      </Tabs>
 
       {/* Pipeline content */}
       {viewMode === "board" ? (
-        <div className="rounded-lg border border-[var(--border)] bg-white">
-          <div className="p-4">
-            <div className="flex items-center justify-between mb-3">
-              <h3
-                className="text-[14px] font-semibold m-0"
-                style={{ color: "var(--text-primary, var(--ink))" }}
-              >
-                Candidate Pipeline
-              </h3>
-              <span
-                className="text-[11px] font-medium"
-                style={{ color: "var(--text-tertiary, var(--muted))" }}
-              >
-                {items.length} total candidates
-              </span>
-            </div>
+        <Card>
+          <CardHeader className="flex-row items-center justify-between space-y-0 p-4">
+            <CardTitle className="text-[14px] font-semibold">
+              Candidate Pipeline
+            </CardTitle>
+            <span className="text-[11px] font-medium text-muted-foreground">
+              {items.length} total candidates
+            </span>
+          </CardHeader>
+          <div className="px-4 pb-4">
             <PipelineBoard items={items} onStageChange={handleStageChange} />
           </div>
-        </div>
+        </Card>
       ) : (
         <PipelineDataTable
           items={items}
@@ -133,10 +88,7 @@ export function StaffPipelineDashboard({
 
       {/* Drag hint (board only) */}
       {viewMode === "board" && (
-        <p
-          className="text-[11px] text-center m-0"
-          style={{ color: "var(--text-tertiary, var(--muted))" }}
-        >
+        <p className="text-[11px] text-center m-0 text-muted-foreground">
           Drag cards between columns to update candidate pipeline stage
         </p>
       )}
