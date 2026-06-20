@@ -250,7 +250,7 @@ export default function HeroSection({ onCtaClick }: HeroSectionProps) {
               </span>
             </div>
 
-            {/* Result card — glass style */}
+            {/* Result card */}
             <div
               className="rounded-xl p-4 shLandingCardHover"
               style={{
