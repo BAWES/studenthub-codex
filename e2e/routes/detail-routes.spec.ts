@@ -59,7 +59,7 @@ test.describe("Detail routes and remaining static routes", () => {
     if (transferRecord) adminTransferId = String(transferRecord.transfer_id);
 
     // Staff detail IDs
-    const [staffCan, staffReq] = await Promise.all([
+    const [staffCan, staffReq, staffInt] = await Promise.all([
       prisma.candidate.findFirst({
         where: { deleted: 0 },
         select: { candidate_id: true },
@@ -73,10 +73,10 @@ test.describe("Detail routes and remaining static routes", () => {
     ]);
     if (staffCan) staffCandidateId = String(staffCan.candidate_id);
     if (staffReq) staffRequestId = staffReq.request_uuid;
-    staffInterviewId = undefined as any;
+    if (staffInt) staffInterviewId = String(staffInt.interview_id);
 
     // Candidate detail IDs
-    const [invitation] = await Promise.all([
+    const [invitation, workLog] = await Promise.all([
       prisma.invitation.findFirst({
         select: { invitation_uuid: true },
       }),
@@ -85,8 +85,7 @@ test.describe("Detail routes and remaining static routes", () => {
       }),
     ]);
     if (invitation) candidateInvitationId = invitation.invitation_uuid;
-    // work_log model does not exist in Prisma schema — skip work log detail tests
-    candidateWorkLogId = undefined as any;
+    if (workLog) candidateWorkLogId = workLog.work_log_uuid;
 
     // Company detail IDs
     const [compDetail, compReq] = await Promise.all([
