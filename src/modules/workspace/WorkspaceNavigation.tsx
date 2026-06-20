@@ -9,7 +9,7 @@ import type { NavItem } from "./navigation";
 export function WorkspaceNavigation({ items, role }: { items: NavItem[]; role: string }) {
   const pathname = usePathname();
   return (
-    <nav className="workspaceRailNav" aria-label={`${role} workspace navigation`}>
+    <nav className="grid content-start gap-1 w-full" aria-label={`${role} workspace navigation`}>
       {items.map((item) => {
         const active = isActive(pathname, item.href);
         const Icon = item.icon;
@@ -20,7 +20,7 @@ export function WorkspaceNavigation({ items, role }: { items: NavItem[]; role: s
               buttonVariants({ variant: "ghost" }),
               "w-full justify-start gap-3 px-3 no-underline text-sm font-semibold",
               active
-                ? "bg-[#1f73b7]/10 text-[#1f73b7] font-bold"
+                ? "bg-[#eb6651]/10 text-[#eb6651] font-bold"
                 : "text-muted-foreground hover:text-foreground",
             )}
             href={item.href}
@@ -28,7 +28,7 @@ export function WorkspaceNavigation({ items, role }: { items: NavItem[]; role: s
             title={item.label}
           >
             <Icon size={16} strokeWidth={2.5} aria-hidden="true" />
-            <strong>{item.label}</strong>
+            {item.label}
           </Link>
         );
       })}
@@ -50,7 +50,7 @@ export function WorkspaceMobileNavigation({ items, role }: { items: NavItem[]; r
               "flex flex-1 flex-col items-center justify-center gap-0.5 px-2 py-1.5 rounded-lg no-underline",
               "min-h-[56px] max-w-[96px] text-[11px] font-semibold transition-colors",
               active
-                ? "bg-[#1f73b7]/10 text-[#1f73b7] font-bold"
+                ? "bg-[#eb6651]/10 text-[#eb6651] font-bold"
                 : "text-muted-foreground hover:text-foreground",
             )}
             href={item.href}

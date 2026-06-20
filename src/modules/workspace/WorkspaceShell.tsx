@@ -44,13 +44,13 @@ export function WorkspaceShell({
   const navItems = navForRole(session.role);
 
   const rail = (
-    <aside className="workspaceRail">
-      <Link className="workspaceMark" href="/app" aria-label="StudentHub app">
-        <span>SH</span>
-        <strong>StudentHub</strong>
+    <aside className="sticky top-0 h-svh grid grid-rows-[auto_1fr_auto] justify-items-center gap-3 border-r border-border bg-card p-3.5 px-3">
+      <Link className="w-full min-h-12 flex items-center gap-2.5 border border-border rounded-lg bg-foreground text-background px-3 no-underline" href="/app" aria-label="StudentHub app">
+        <span className="inline-flex items-center justify-center w-[30px] h-[30px] rounded-[7px] bg-white/[0.14] font-black">SH</span>
+        <strong className="text-[15px] font-black">StudentHub</strong>
       </Link>
       <WorkspaceNavigation items={navItems} role={session.role} />
-      <div className="workspaceRailFooter">
+      <div className="w-full grid gap-2">
         <ThemeToggle />
         <form className="workspaceSignout" action={logoutAction}>
           <button type="submit">Sign out</button>
