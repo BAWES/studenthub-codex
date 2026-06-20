@@ -82,13 +82,13 @@ export function WorkspaceShell({
   );
 
   const stage = (
-    <section className="workspaceStage">
-      <section className="topbar">
+    <section className="overflow-x-hidden grid content-start gap-3.5 p-3.5">
+      <section className="sticky top-2.5 z-20 flex items-center justify-between gap-3 min-h-14 px-4 mb-1 rounded-lg bg-card border border-border">
         <div>
           <p className="eyebrow">{eyebrow}</p>
           <h1>{title}</h1>
         </div>
-        <div className="accountBox">
+        <div className="flex items-center gap-2.5 min-h-10 rounded-md bg-card border border-border px-3">
           <span>{session.role}</span>
           <strong>{session.name}</strong>
           <small>{session.email}</small>
@@ -133,7 +133,7 @@ export function WorkspaceShell({
 
   const mainContent = embedded
     ? (
-      <div className="shell shellEmbedded">
+      <div className="block">
         {stage}
         <MobileNavBar role={session.role} />
       </div>

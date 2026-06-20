@@ -13,9 +13,9 @@ export default function AdminXeroError({ error, reset }: Props) {
   }, [error]);
 
   return (
-    <div className="shell shellEmbedded">
-      <section className="workspaceStage">
-        <section className="topbar">
+    <div className="block">
+      <section className="overflow-x-hidden grid content-start gap-3.5 p-3.5">
+        <section className="sticky top-2.5 z-20 flex items-center justify-between gap-3 min-h-14 px-4 mb-1 rounded-lg bg-card border border-border">
           <h1 className="text-lg font-semibold" style={{ color: "var(--sh-error)" }}>
             Something went wrong
           </h1>

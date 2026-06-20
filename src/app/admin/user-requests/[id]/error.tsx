@@ -8,8 +8,8 @@ export default function UserRequestDetailError({
   reset: () => void;
 }) {
   return (
-    <div className="shell shellEmbedded">
-      <section className="workspaceStage">
+    <div className="block">
+      <section className="overflow-x-hidden grid content-start gap-3.5 p-3.5">
         <div className="flex flex-col items-center justify-center py-24 gap-4">
           <span className="text-4xl" aria-hidden="true">⚠️</span>
           <h2 className="text-xl font-bold" style={{ color: "var(--ink)" }}>
