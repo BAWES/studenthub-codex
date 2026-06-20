@@ -70,7 +70,9 @@ test.describe("Candidate search", () => {
     const page = await context.newPage();
     await page.goto("/admin/candidates?q=test");
     await expect(page).toHaveURL(/\/admin\/candidates\?q=test/);
-    await expect(page.locator('text="Filtered view"').first()).toBeVisible({
+    await expect(
+      page.locator('text="Filtered view"').first(),
+    ).toBeVisible({
       timeout: 15000,
     });
     await context.close();

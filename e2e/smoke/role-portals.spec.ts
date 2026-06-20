@@ -31,7 +31,7 @@ test.describe("Role portal smoke tests", () => {
       await expect(page).toHaveURL(`/${expectedUrl}`);
       await expect(page.locator("body")).toBeVisible({ timeout: 15000 });
       if (expectedText) {
-        await expect(page.locator(`text="${expectedText}"`)).toBeVisible({ timeout: 15000 });
+        await expect(page.locator(`text="${expectedText}"`).first()).toBeVisible({ timeout: 15000 });
       }
       await context.close();
     });

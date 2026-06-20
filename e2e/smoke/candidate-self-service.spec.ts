@@ -94,7 +94,7 @@ test.describe("Candidate self-service — mobile smoke", () => {
     await page.goto("/candidate/invitations");
 
     await expect(page).toHaveURL("/candidate/invitations");
-    await expect(page.locator('text="Invitation History"')).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('text="Invitation History"').first()).toBeVisible({ timeout: 15000 });
 
     await context.close();
   });
@@ -117,7 +117,7 @@ test.describe("Candidate self-service — mobile smoke", () => {
     ).toBeVisible({ timeout: 15000 });
 
     // Invitation brief panel
-    await expect(page.locator('text="Invitation Brief"')).toBeVisible();
+    await expect(page.locator('text="Invitation Brief"').first()).toBeVisible();
 
     await context.close();
   });
@@ -133,7 +133,7 @@ test.describe("Candidate self-service — mobile smoke", () => {
     await page.goto("/candidate/work-logs");
 
     await expect(page).toHaveURL("/candidate/work-logs");
-    await expect(page.locator('text="Work Log History"')).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('text="Work Log History"').first()).toBeVisible({ timeout: 15000 });
 
     await context.close();
   });
@@ -169,7 +169,7 @@ test.describe("Candidate self-service — mobile smoke", () => {
     await page.goto("/candidate/payments");
 
     await expect(page).toHaveURL("/candidate/payments");
-    await expect(page.locator('text="Transfer & Payment History"')).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('text="Transfer & Payment History"').first()).toBeVisible({ timeout: 15000 });
 
     await context.close();
   });
@@ -185,7 +185,7 @@ test.describe("Candidate self-service — mobile smoke", () => {
     await page.goto("/candidate/edit");
 
     await expect(page).toHaveURL("/candidate/edit");
-    await expect(page.locator('text="Update your candidate profile"')).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('text="Update your candidate profile"').first()).toBeVisible({ timeout: 15000 });
     // Key form inputs present
     await expect(page.locator('input[name="name"]')).toBeVisible();
     await expect(page.locator('input[name="email"]')).toBeVisible();
