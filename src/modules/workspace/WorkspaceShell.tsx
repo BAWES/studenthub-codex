@@ -8,6 +8,7 @@ import { LogOut } from "lucide-react";
 import Link from "next/link";
 import { navForRole } from "./navigation";
 import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
 import { WorkspaceNavigation } from "./WorkspaceNavigation";
 import { MobileNavBar } from "@/components/ui/mobile-nav-bar";
 import { useWorkspaceOS } from "./WorkspaceOSContext";
@@ -58,45 +59,44 @@ export function WorkspaceShell({
   const navItems = navForRole(session.role);
 
   const rail = (
-    <aside className="workspaceRail" aria-label="Workspace sidebar">
-      <Link className="workspaceMark" href="/app" aria-label="StudentHub app">
-        <span>SH</span>
-        <strong>StudentHub</strong>
+    <aside className="group/rail sticky top-0 h-screen grid grid-rows-[auto_minmax(0,1fr)_auto] content-start gap-1 overflow-hidden z-30 border-r border-border transition-[width,padding] duration-300 w-14 p-2 hover:w-[200px] hover:border-r-[color-mix(in_srgb,#eb6651_30%,hsl(var(--border)))]" aria-label="Workspace sidebar">
+      <Link className="flex items-center justify-center w-11 h-11 border border-border rounded-[calc(var(--radius)-2px)] bg-foreground text-background overflow-hidden no-underline transition-all duration-300 hover:w-full hover:gap-2.5 hover:justify-start hover:px-2.5 hover:rounded-[calc(var(--radius)-2px)]" href="/app" aria-label="StudentHub app">
+        <span className="inline-flex items-center justify-center shrink-0 w-7 h-7 rounded-md bg-[#eb6651] text-white text-[11px] font-bold leading-none">SH</span>
+        <strong className="text-sm font-semibold whitespace-nowrap opacity-0 transition-opacity duration-200 delay-100 group-hover/rail:opacity-100">StudentHub</strong>
       </Link>
       <WorkspaceNavigation items={navItems} role={session.role} />
-      <Separator className="workspaceRailDivider" />
-      <div className="workspaceRailFooter">
+      <Separator className="mx-2 my-1" />
+      <div className="flex flex-col gap-1 w-11 transition-[width] duration-300 group-hover/rail:w-full">
         <RoleSwitcher
           currentRole={session.role}
           availableRoles={(session.roles ?? [session.role]) as any}
         />
         <ThemeToggle />
         <form action={logoutAction}>
-          <button type="submit" aria-label="Sign out">
+          <Button type="submit" variant="ghost" size="icon" aria-label="Sign out">
             <LogOut size={18} strokeWidth={1.5} aria-hidden="true" />
-            <span>Sign out</span>
-          </button>
+          </Button>
         </form>
       </div>
     </aside>
   );
 
   const stage = (
-    <section className="workspaceStage">
-      <section className="topbar">
+    <section className="min-w-0 overflow-x-hidden grid content-start gap-3.5 p-3.5">
+      <section className="flex items-center justify-between gap-4 border-b border-border pb-3 mb-1">
         <div>
-          <p className="eyebrow">{eyebrow}</p>
-          <h1>{title}</h1>
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{eyebrow}</p>
+          <h1 className="text-xl font-bold text-foreground">{title}</h1>
         </div>
-        <div className="accountBox">
-          <span>{session.role}</span>
-          <strong>{session.name}</strong>
-          <small>{session.email}</small>
+        <div className="min-w-[140px] max-w-[220px] grid content-center gap-0.5 rounded-lg border border-border bg-card p-2.5 text-right text-xs leading-tight">
+          <span className="text-[11px] font-semibold uppercase text-muted-foreground">{session.role}</span>
+          <strong className="truncate text-sm font-semibold">{session.name}</strong>
+          <small className="truncate text-muted-foreground">{session.email}</small>
         </div>
       </section>
 
       {metrics.length ? (
-        <section className="metrics" aria-label={`${session.role} workspace metrics`}>
+        <section className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3" aria-label={`${session.role} workspace metrics`}>
           {metrics.map((metric, i) => (
             <MetricCard
               key={metric.label}
@@ -115,7 +115,7 @@ export function WorkspaceShell({
 
       {children}
 
-      <section className="lists">
+      <section className="grid gap-4">
         {primary ? <WorkspaceList title={primary.title} rows={primary.rows} /> : null}
         {secondary ? <WorkspaceList title={secondary.title} rows={secondary.rows} /> : null}
       </section>
@@ -154,30 +154,32 @@ export function WorkspaceShell({
 
 function WorkspaceList({ title, rows }: { title: string; rows: Row[] }) {
   return (
-    <section className="dataList">
-      <div className="listHeader">
-        <h2>{title}</h2>
-        <span>{rows.length}</span>
+    <section className="border border-border rounded-lg bg-card overflow-hidden">
+      <div className="flex items-center justify-between gap-2.5 border-b border-border px-4 py-3">
+        <h2 className="text-sm font-semibold">{title}</h2>
+        <span className="text-xs font-semibold uppercase text-muted-foreground">{rows.length}</span>
       </div>
-      <div className="rows">
+      <div className="divide-y divide-border">
         {rows.length ? (
           rows.map((row) => (
-            <article className="row" key={row.id}>
-              <div className="rowMain">
+            <article className="flex items-center justify-between gap-3 px-4 py-3 min-h-0" key={row.id}>
+              <div className="min-w-0 grid gap-0.5">
                 {row.href ? (
-                  <Link href={row.href as Route}>
-                    <strong>{row.title}</strong>
+                  <Link href={row.href as Route} className="text-sm font-semibold text-foreground hover:underline">
+                    {row.title}
                   </Link>
                 ) : (
-                  <strong>{row.title}</strong>
+                  <strong className="text-sm font-semibold">{row.title}</strong>
                 )}
-                <span>{row.subtitle}</span>
+                <span className="text-xs text-muted-foreground">{row.subtitle}</span>
               </div>
-              <div className="rowMeta">{row.meta ? <span>{row.meta}</span> : null}</div>
+              <div className="shrink-0 text-xs text-muted-foreground">{row.meta ? <span>{row.meta}</span> : null}</div>
             </article>
           ))
         ) : (
-          <EmptyState variant="empty" message="No records found" hint="Records will appear here once they are created or imported." />
+          <div className="p-4">
+            <EmptyState variant="empty" message="No records found" hint="Records will appear here once they are created or imported." />
+          </div>
         )}
       </div>
     </section>
