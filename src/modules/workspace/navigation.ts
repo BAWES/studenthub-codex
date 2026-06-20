@@ -34,6 +34,7 @@ export function navForRole(role: Role): NavItem[] {
       { label: "User Requests", href: "/admin/user-requests", icon: Mail },
       { label: "Webhooks", href: "/admin/webhooks", icon: Webhook },
       { label: "Expenses", href: "/admin/expense", icon: DollarSign },
+      { label: "Salaries", href: "/admin/salary", icon: DollarSign },
     ];
   }
   if (role === "staff") {
