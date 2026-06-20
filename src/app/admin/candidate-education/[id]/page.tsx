@@ -87,7 +87,7 @@ export default async function AdminCandidateEducationDetailPage({
           ]}
         />
 
-        <section style={{ display: "flex", gap: "0.5rem", padding: "1rem" }}>
+        <section className="flex gap-2 p-4">
           <Link href={"/admin/candidate-education" as Route}>
             <Button variant="outline">Back to Candidate Education</Button>
           </Link>
