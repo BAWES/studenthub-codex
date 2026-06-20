@@ -12,5 +12,6 @@ export {
   getJob,
   createJob,
   updateJob,
+  closeJob,
   deleteJob,
 } from "@/modules/employer/jobs/actions";
