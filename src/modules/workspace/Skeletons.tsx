@@ -32,7 +32,11 @@ export function WorkspaceShellSkeleton({ rowCount = 8 }: { rowCount?: number }) 
         </section>
 
         {/* Content area */}
+<<<<<<< HEAD
         <div className="grid gap-3.5 px-[22px] py-[18px]">
+=======
+        <div className="skeletonContent px-[22px] py-[18px] grid gap-3.5">
+>>>>>>> origin/main
           <Skeleton className="h-6 w-48" />
           <Skeleton className="h-40 w-full rounded-lg" />
         </div>
@@ -69,9 +73,15 @@ export function WorkspaceShellSkeleton({ rowCount = 8 }: { rowCount?: number }) 
 /** Skeleton for data-table list pages. */
 export function DataTableSkeleton({ rows = 10 }: { rows?: number }) {
   return (
+<<<<<<< HEAD
     <div className="grid gap-3 px-[22px] py-[18px]">
       {/* Header */}
       <div className="flex items-center justify-between mb-2">
+=======
+    <div className="skeletonTable px-[22px] py-[18px] grid gap-3">
+      {/* Header */}
+      <div className="flex justify-between items-center mb-2">
+>>>>>>> origin/main
         <Skeleton className="h-7 w-40" />
         <Skeleton className="h-9 w-28 rounded-lg" />
       </div>
@@ -94,7 +104,11 @@ export function DataTableSkeleton({ rows = 10 }: { rows?: number }) {
         {Array.from({ length: rows }).map((_, i) => (
           <div
             key={i}
+<<<<<<< HEAD
             className="grid grid-cols-[1fr_1fr_120px_100px] gap-3 border-t border-[var(--line)] px-[14px] py-3"
+=======
+            className="grid grid-cols-[1fr_1fr_120px_100px] gap-3 px-[14px] py-3 border-t border-[var(--line)]"
+>>>>>>> origin/main
           >
             <Skeleton className="h-4 w-44" />
             <Skeleton className="h-3 w-56" />
@@ -110,7 +124,11 @@ export function DataTableSkeleton({ rows = 10 }: { rows?: number }) {
 /** Compact skeleton for detail pages with fact panels. */
 export function DetailPageSkeleton({ panels = 3 }: { panels?: number }) {
   return (
+<<<<<<< HEAD
     <div className="grid gap-3.5 px-[22px] py-[18px]">
+=======
+    <div className="px-[22px] py-[18px] grid gap-3.5">
+>>>>>>> origin/main
       {/* Action bar placeholder */}
       <Skeleton className="h-32 w-full rounded-lg" />
 
@@ -118,6 +136,7 @@ export function DetailPageSkeleton({ panels = 3 }: { panels?: number }) {
       <Skeleton className="h-56 w-full rounded-lg" />
 
       {/* Fact panels */}
+<<<<<<< HEAD
       <div
         className="grid gap-3"
         style={{ gridTemplateColumns: `repeat(${Math.min(panels, 2)}, 1fr)` }}
@@ -127,6 +146,11 @@ export function DetailPageSkeleton({ panels = 3 }: { panels?: number }) {
             key={i}
             className="grid gap-2 border border-[var(--line)] rounded-[10px] p-4"
           >
+=======
+      <div className={`grid ${Math.min(panels, 2) === 2 ? 'grid-cols-2' : 'grid-cols-1'} gap-3`}>
+        {Array.from({ length: panels }).map((_, i) => (
+          <div key={i} className="grid gap-2 p-4 border border-[var(--line)] rounded-[10px]">
+>>>>>>> origin/main
             <Skeleton className="h-4 w-24" />
             {[1, 2, 3, 4].map((r) => (
               <div key={r} className="flex justify-between">
@@ -141,10 +165,14 @@ export function DetailPageSkeleton({ panels = 3 }: { panels?: number }) {
       {/* Related lists */}
       <div className="grid grid-cols-2 gap-3">
         {[1, 2].map((col) => (
+<<<<<<< HEAD
           <div
             key={col}
             className="grid gap-1 border border-[var(--line)] rounded-[10px] p-4"
           >
+=======
+          <div key={col} className="grid gap-1 p-4 border border-[var(--line)] rounded-[10px]">
+>>>>>>> origin/main
             <Skeleton className="h-4 w-32 mb-2" />
             {[1, 2, 3, 4].map((r) => (
               <Skeleton key={r} className="h-10 w-full" />
@@ -159,9 +187,13 @@ export function DetailPageSkeleton({ panels = 3 }: { panels?: number }) {
 /** Lightweight top-of-page pulse skeleton for Suspense fallbacks. */
 export function QuickSkeleton({ lines = 4 }: { lines?: number }) {
   return (
+<<<<<<< HEAD
     <div className="grid gap-2 px-[22px] py-[14px]">
+=======
+    <div className="px-[22px] py-[14px] grid gap-2">
+>>>>>>> origin/main
       {Array.from({ length: lines }).map((_, i) => (
-        <Skeleton key={i} className={`h-${i === 0 ? 5 : 3} w-${i === 0 ? 48 : 36}`} />
+        <Skeleton key={i} className={i === 0 ? "h-5 w-48" : "h-3 w-36"} />
       ))}
     </div>
   );
