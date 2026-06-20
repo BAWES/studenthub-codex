@@ -32,7 +32,7 @@ export function WorkspaceShellSkeleton({ rowCount = 8 }: { rowCount?: number }) 
         </section>
 
         {/* Content area */}
-        <div className="skeletonContent" style={{ padding: "18px 22px", display: "grid", gap: 14 }}>
+        <div className="skeletonContent p-[18px_22px] grid gap-3.5">
           <Skeleton className="h-6 w-48" />
           <Skeleton className="h-40 w-full rounded-lg" />
         </div>
@@ -69,21 +69,21 @@ export function WorkspaceShellSkeleton({ rowCount = 8 }: { rowCount?: number }) 
 /** Skeleton for data-table list pages. */
 export function DataTableSkeleton({ rows = 10 }: { rows?: number }) {
   return (
-    <div className="skeletonTable" style={{ padding: "18px 22px", display: "grid", gap: 12 }}>
+    <div className="skeletonTable p-[18px_22px] grid gap-3">
       {/* Header */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+      <div className="flex justify-between items-center mb-2">
         <Skeleton className="h-7 w-40" />
         <Skeleton className="h-9 w-28 rounded-lg" />
       </div>
 
       {/* Filter/search bar */}
-      <div style={{ display: "flex", gap: 10, marginBottom: 4 }}>
+      <div className="flex gap-2.5 mb-1">
         <Skeleton className="h-9 flex-1 rounded-lg" />
         <Skeleton className="h-9 w-24 rounded-lg" />
       </div>
 
       {/* Rows */}
-      <div style={{ display: "grid", gap: 1 }}>
+      <div className="grid gap-px">
         {/* Header row */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 120px 100px", gap: 12, padding: "10px 14px" }}>
           <Skeleton className="h-3 w-20" />
@@ -116,7 +116,7 @@ export function DataTableSkeleton({ rows = 10 }: { rows?: number }) {
 /** Compact skeleton for detail pages with fact panels. */
 export function DetailPageSkeleton({ panels = 3 }: { panels?: number }) {
   return (
-    <div style={{ padding: "18px 22px", display: "grid", gap: 14 }}>
+    <div className="skeletonTable grid gap-3 px-[22px] py-[18px]">
       {/* Action bar placeholder */}
       <Skeleton className="h-32 w-full rounded-lg" />
 

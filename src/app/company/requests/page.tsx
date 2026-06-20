@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import type { Route } from "next";
 import Link from "next/link";
 import { requireRoleCapability } from "@/modules/auth/session";
@@ -18,16 +19,8 @@ const statusBadge = (status: string) => {
   const color = colors[status] ?? "#6b7280";
   return (
     <span
-      style={{
-        display: "inline-block",
-        padding: "0.125rem 0.625rem",
-        borderRadius: "9999px",
-        fontSize: "0.75rem",
-        fontWeight: 600,
-        color: "#fff",
-        background: color,
-        textTransform: "capitalize",
-      }}
+      className="inline-block px-[0.625rem] py-[0.125rem] rounded-full text-xs font-semibold text-white"
+      style={{ backgroundColor: color }}
     >
       {status.replace(/_/g, " ")}
     </span>
@@ -40,22 +33,9 @@ export default async function CompanyRequestsPage() {
 
   return (
     <WorkspaceShell session={session} eyebrow="Company" title="Requests" metrics={[]}>
-      <div style={{ marginBottom: "1rem" }}>
-        <Link
-          href="/company/requests/create"
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            padding: "0.5rem 1rem",
-            background: "var(--primary, #2563eb)",
-            color: "#fff",
-            borderRadius: "6px",
-            fontWeight: 600,
-            fontSize: "0.875rem",
-            textDecoration: "none",
-          }}
-        >
-          + New Request
+      <div className="mb-4">
+        <Link href="/company/requests/create">
+          <Button>+ New Request</Button>
         </Link>
       </div>
       <DataTable
