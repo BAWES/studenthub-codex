@@ -166,9 +166,17 @@ export async function updateApplicationStatus(
     throw new Error(parsed.error.issues[0]?.message ?? "Invalid input");
   }
 
+  const { applicationId, status, rejectionReason } = parsed.data;
+
+  const updateData: Record<string, unknown> = { status };
+
+  if (status === "rejected" && rejectionReason) {
+    updateData.notes = `Rejection reason: ${rejectionReason}`;
+  }
+
   await prisma.job_listing_application.update({
-    where: { id: parsed.data.applicationId },
-    data: { status: parsed.data.status },
+    where: { id: applicationId },
+    data: updateData,
   });
 
   const result = { success: true as const };
