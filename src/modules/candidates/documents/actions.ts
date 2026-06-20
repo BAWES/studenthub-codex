@@ -57,6 +57,44 @@ const DOCUMENT_FIELD_MAP: Record<DocumentType, string> = {
   civilBack: "candidate_civil_photo_back",
 };
 
+// ---------------------------------------------------------------------------
+// S3 / MinIO client (lazy-initialized, supports custom endpoint)
+// ---------------------------------------------------------------------------
+
+let s3Client: S3Client | null = null;
+
+function getS3Client(): S3Client {
+  if (!s3Client) {
+    const config: ConstructorParameters<typeof S3Client>[0] = {
+      region: process.env.AWS_TEMP_BUCKET_REGION ?? "",
+      credentials: {
+        accessKeyId: process.env.AWS_TEMP_ACCESS_KEY_ID ?? "",
+        secretAccessKey: process.env.AWS_TEMP_SECRET_ACCESS_KEY ?? "",
+      },
+    };
+
+    if (process.env.AWS_ENDPOINT_URL) {
+      config.endpoint = process.env.AWS_ENDPOINT_URL;
+    }
+
+    if (process.env.AWS_S3_FORCE_PATH_STYLE === "true") {
+      config.forcePathStyle = true;
+    }
+
+    s3Client = new S3Client(config);
+  }
+  return s3Client;
+}
+
+function s3ConfigAvailable(): boolean {
+  return !!(
+    process.env.AWS_TEMP_BUCKET_REGION &&
+    process.env.AWS_TEMP_ACCESS_KEY_ID &&
+    process.env.AWS_TEMP_SECRET_ACCESS_KEY &&
+    process.env.AWS_TEMP_BUCKET_NAME
+  );
+}
+
 // Upload configuration
 const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads", "candidates");
 
@@ -97,14 +135,36 @@ const ALLOWED_TYPES: Record<string, { mime: string[]; ext: string[]; maxSize: nu
 // ---------------------------------------------------------------------------
 
 /**
+ * Build a viewable URL from a stored file path/key.
+ * Local paths (/uploads/...) are returned as-is.
+ * S3 keys (uploads/...) generate a presigned download URL if S3 is configured.
+ */
+async function resolveFileUrl(storedPath: string | null): Promise<string | null> {
+  if (!storedPath) return null;
+  if (storedPath.startsWith("/")) return storedPath; // local path — direct URL
+  // S3 key — generate presigned URL if S3 is configured
+  if (!s3ConfigAvailable()) return null;
+  try {
+    const command = new GetObjectCommand({
+      Bucket: process.env.AWS_TEMP_BUCKET_NAME,
+      Key: storedPath,
+    });
+    return await getSignedUrl(getS3Client(), command, { expiresIn: 900 });
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Build a CandidateDocumentItem from type + raw file path from DB.
  */
-function toDocumentItem(type: DocumentType, filePath: string | null): CandidateDocumentItem {
+async function toDocumentItem(type: DocumentType, filePath: string | null): Promise<CandidateDocumentItem> {
+  const url = await resolveFileUrl(filePath);
   return {
     type,
     label: DOCUMENT_LABELS[type],
     filePath,
-    fileUrl: filePath ? filePath : null,
+    fileUrl: url,
   };
 }
 
@@ -151,11 +211,13 @@ export async function listCandidateDocuments(
     return result;
   }
 
-  const items: CandidateDocumentItem[] = DOCUMENT_TYPES.map((type) => {
+  const items: CandidateDocumentItem[] = await Promise.all(
+    DOCUMENT_TYPES.map(async (type) => {
     const field = DOCUMENT_FIELD_MAP[type];
     const filePath = (candidate as Record<string, unknown>)[field] as string | null;
-    return toDocumentItem(type, filePath);
-  });
+    return await toDocumentItem(type, filePath);
+  })
+  );
 
   const result: ListCandidateDocumentsResult = { items, candidateId: candidate.candidate_id };
 
@@ -206,7 +268,7 @@ export async function getCandidateDocument(
   }
 
   const filePath = (candidate as Record<string, unknown>)[field] as string | null;
-  const result: CandidateDocumentItem = toDocumentItem(documentType, filePath);
+  const result: CandidateDocumentItem = await toDocumentItem(documentType, filePath);
 
   // Validate output shape
   const outputParsed = getCandidateDocumentResultSchema.safeParse(result);
@@ -352,6 +414,8 @@ export async function uploadCandidateDocument(
     const relativePath = path.join(relativeDir, filename);
     const buffer = Buffer.from(await file.arrayBuffer());
 
+    const field = DOCUMENT_FIELD_MAP[documentType];
+
     let storedPath: string;
 
     if (s3ConfigAvailable()) {
@@ -367,7 +431,6 @@ export async function uploadCandidateDocument(
     }
 
     // Update the correct DB field
-    const field = DOCUMENT_FIELD_MAP[documentType];
     await prisma.candidate.update({
       where: { candidate_id: candidateId },
       data: { [field]: storedPath },
