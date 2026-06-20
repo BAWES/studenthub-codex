@@ -10,6 +10,19 @@ interface Props {
 
 export default async function StudentProfilePage({ params }: Props) {
   const { studentId } = await params;
+
+  // If no studentId provided, show the empty state instead of crashing
+  if (!studentId) {
+    return (
+      <div className="container mx-auto py-8">
+        <div className="max-w-3xl mx-auto text-center">
+          <h1 className="text-2xl font-bold">Profile Not Found</h1>
+          <p className="text-muted-foreground mt-2">No candidate ID provided.</p>
+        </div>
+      </div>
+    );
+  }
+
   const profile = await getStudentProfile({ studentId: Number(studentId) });
 
   if (!profile) {
