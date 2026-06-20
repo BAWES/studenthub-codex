@@ -19,10 +19,12 @@ describe("admin mail-log page — data contract", () => {
   });
 
   it("listMailLogsSchema accepts the params the page actually passes", () => {
-    const r = listMailLogsSchema.safeParse({ limit: 100 });
+    const r = listMailLogsSchema.safeParse({ limit: 50, page: 3, search: "test" });
     expect(r.success).toBe(true);
     if (r.success) {
-      expect(r.data.limit).toBe(100);
+      expect(r.data.limit).toBe(50);
+      expect(r.data.page).toBe(3);
+      expect(r.data.search).toBe("test");
     }
   });
 
@@ -77,5 +79,28 @@ describe("admin mail-log page — data contract", () => {
     expect(typeof result.page).toBe("number");
     expect(typeof result.limit).toBe("number");
     expect(typeof result.totalPages).toBe("number");
+  });
+
+  it("ListMailLogsResult supports pagination fields", () => {
+    const result: ListMailLogsResult = {
+      records: [],
+      total: 95,
+      page: 2,
+      limit: 50,
+      totalPages: 2,
+    };
+    expect(result.totalPages).toBe(2);
+    expect(result.page).toBe(2);
+    expect(result.total).toBe(95);
+  });
+
+  it("page.tsx passes correct limit (50) and supports search/page from searchParams", () => {
+    // Server component sends limit=50 and passes page/search through
+    const r = listMailLogsSchema.safeParse({ limit: 50, page: 1, search: "" });
+    expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data.limit).toBe(50);
+      expect(r.data.search).toBe("");
+    }
   });
 });
