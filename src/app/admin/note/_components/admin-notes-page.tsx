@@ -36,8 +36,8 @@ export function AdminNotesPage({ session, notes, total }: Props) {
         <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
           <h3 className="text-sm font-semibold mb-3 text-foreground">Add note</h3>
           <CreateNoteForm onSuccess={() => router.refresh()} />
-        </CardContent>
-      </Card>
+        </div>
+      </section>
 
       <DataTable
         title="Notes"
@@ -153,10 +153,9 @@ function CreateNoteForm({ onSuccess }: { onSuccess: () => void }) {
           className="w-24"
         />
       </div>
-      <button
+      <Button
         type="submit"
         disabled={pending}
-        className="h-9 rounded-lg px-4 text-sm font-semibold bg-primary text-primary-foreground"
       >
         {pending ? "Adding..." : "Add"}
       </Button>
