@@ -1,5 +1,6 @@
 "use client";
 
+import { Badge } from "@/components/ui/badge";
 import { DataTable } from "@/modules/workspace/DataTable";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 
@@ -25,13 +26,13 @@ export function AdminMailLogTable({ session, records }: Props) {
         title="Mail log"
         description="All outgoing emails. Read-only view of the system's email dispatch log."
         rows={records.map((r) => ({ ...r, id: r.mail_uuid }))}
-        rowHref={undefined}
+        rowHref="/admin/mail-log/"
         columns={[
           {
             key: "mail_uuid",
             label: "UUID",
             render: (row) => (
-              <span className="font-mono text-xs" style={{ color: "var(--muted)" }}>
+              <span className="font-mono text-xs text-muted-foreground">
                 {row.mail_uuid?.substring(0, 8) ?? "—"}…
               </span>
             ),
@@ -40,7 +41,7 @@ export function AdminMailLogTable({ session, records }: Props) {
             key: "subject",
             label: "Subject",
             render: (row) => (
-              <span className="text-sm font-medium" style={{ color: "var(--ink)" }}>
+              <span className="text-sm font-medium text-foreground">
                 {row.subject ?? "—"}
               </span>
             ),
@@ -49,7 +50,7 @@ export function AdminMailLogTable({ session, records }: Props) {
             key: "from",
             label: "From",
             render: (row) => (
-              <span className="text-sm" style={{ color: "var(--ink)" }}>
+              <span className="text-sm text-foreground">
                 {row.from ?? "—"}
               </span>
             ),
@@ -58,7 +59,7 @@ export function AdminMailLogTable({ session, records }: Props) {
             key: "to",
             label: "To",
             render: (row) => (
-              <span className="text-sm" style={{ color: "var(--ink)" }}>
+              <span className="text-sm text-foreground">
                 {row.to ?? "—"}
               </span>
             ),
@@ -67,11 +68,9 @@ export function AdminMailLogTable({ session, records }: Props) {
             key: "app",
             label: "App",
             render: (row) => (
-              <span className="text-xs px-2 py-0.5 rounded-full"
-                style={{ background: "var(--sh-primary-light)", color: "var(--sh-primary)" }}
-              >
+              <Badge variant="secondary">
                 {row.app ?? "—"}
-              </span>
+              </Badge>
             ),
           },
           {
