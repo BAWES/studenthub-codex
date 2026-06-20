@@ -1,163 +1,174 @@
-import { useState } from "react";
-import { GripVertical, Plus, X } from "lucide-react";
+"use client";
+
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import {
-  Bug,
-  LayoutDashboard,
-  Search,
-  UserCheck,
+  X,
+  Pin,
+  PinOff,
+  GripVertical,
+  Plus,
+  User,
   Users,
   Building2,
-  FileText,
-  ClipboardCheck,
-  Settings,
-  ShieldCheck,
-  CreditCard,
+  FileCheck,
+  ArrowRightLeft,
+  Monitor,
   Calendar,
-  BookOpen,
-  GraduationCap,
-  User,
-  type LucideIcon,
+  Mail,
+  ClipboardList,
+  CreditCard,
+  Phone,
+  Store,
+  Search,
+  LayoutGrid,
 } from "lucide-react";
-import type { Role } from "@/lib/auth/roles";
+import { useTabs, type TabEntry } from "./TabContext";
+import type { Role } from "@/modules/auth/types";
+import { navForRole } from "./navigation";
 
-interface Tab {
-  id: string;
-  label: string;
-  href: string;
-  icon: string;
-  pinned: boolean;
-}
+// ─── Icon map ────────────────────────────────────────────────────────────
 
-const workNav: Record<Role, { href: string; label: string; icon: string }[]> = {
-  admin: [
-    { href: "/admin", label: "Dashboard", icon: "LayoutDashboard" },
-    { href: "/admin/candidates", label: "Candidates", icon: "Users" },
-    { href: "/admin/companies", label: "Companies", icon: "Building2" },
-    { href: "/admin/requests", label: "Requests", icon: "FileText" },
-    { href: "/admin/transfers", label: "Transfers", icon: "ClipboardCheck" },
-  ],
-  staff: [
-    { href: "/staff", label: "Dashboard", icon: "LayoutDashboard" },
-    { href: "/staff/candidates", label: "Candidates", icon: "UserCheck" },
-    { href: "/staff/requests", label: "Requests", icon: "FileText" },
-    { href: "/staff/interviews", label: "Interviews", icon: "Calendar" },
-  ],
-  candidate: [
-    { href: "/candidate", label: "Dashboard", icon: "LayoutDashboard" },
-    { href: "/candidate/edit", label: "Profile", icon: "User" },
-    { href: "/candidate/search", label: "Jobs", icon: "Search" },
-    { href: "/candidate/applications", label: "Applications", icon: "FileText" },
-  ],
-  company: [
-    { href: "/company", label: "Dashboard", icon: "LayoutDashboard" },
-    { href: "/company/contacts", label: "Contacts", icon: "Users" },
-    { href: "/company/requests", label: "Requests", icon: "FileText" },
-  ],
-  inspector: [
-    { href: "/inspector", label: "Dashboard", icon: "LayoutDashboard" },
-    { href: "/inspector/id-requests", label: "ID Requests", icon: "ShieldCheck" },
-    { href: "/inspector/payments", label: "Payments", icon: "CreditCard" },
-  ],
+const iconRegistry: Record<string, React.ComponentType<{ size?: number; strokeWidth?: number }>> = {
+  User,
+  Users,
+  Building2,
+  FileCheck,
+  ArrowRightLeft,
+  Monitor,
+  Calendar,
+  Mail,
+  ClipboardList,
+  CreditCard,
+  Phone,
+  Store,
+  Search,
+  LayoutGrid,
 };
 
-function resolveIcon(name: string): LucideIcon {
-  const icons: Record<string, LucideIcon> = {
-    LayoutDashboard,
-    Users,
-    Building2,
-    FileText,
-    ClipboardCheck,
-    UserCheck,
-    Search,
-    Calendar,
-    User,
-    ShieldCheck,
-    CreditCard,
-    Bug,
-    BookOpen,
-    GraduationCap,
-    Settings,
-  };
-  return icons[name] ?? Bug;
+function resolveIcon(name: string | null): ReactNode {
+  if (!name) return <DotIcon />;
+  const Icon = iconRegistry[name];
+  if (!Icon) return <DotIcon />;
+  return <Icon size={14} strokeWidth={2} aria-hidden="true" />;
 }
 
+function DotIcon({ size = 12, strokeWidth = 2 }: { size?: number; strokeWidth?: number }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={strokeWidth}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="12" cy="12" r="6" />
+    </svg>
+  );
+}
+
+// ─── TabBar ─────────────────────────────────────────────────────────────
+
+/**
+ * TabBar — A browser-style tab bar with open, close, pin, and reorder.
+ *
+ * Renders inside the WorkspaceOS shell, above the page content.
+ * Uses TabContext for state management with localStorage persistence.
+ */
 export function TabBar({ role }: { role: Role }) {
+  const { tabs, activeTabId, closeTab, pinTab, setActive, moveTab, openTab } = useTabs();
+
+  // ── Drag-to-reorder state ───────────────────────────────────────
+  const [dragOverIdx, setDragOverIdx] = useState<number | null>(null);
+  const dragFromIdx = useRef<number | null>(null);
+
+  // ── "+" tab creation menu state ─────────────────────────────────
   const [menuOpen, setMenuOpen] = useState(false);
-  const [tabs, setTabs] = useState<Tab[]>([
-    { id: "home", label: "Home", href: `/${role}`, icon: "LayoutDashboard", pinned: true },
-  ]);
-  const [activeTab, setActiveTab] = useState(0);
+  const menuRef = useRef<HTMLDivElement>(null);
 
-  const navItems = workNav[role] ?? [];
-
-  const openTab = (href: string, label: string) => {
-    const existing = tabs.find((t) => t.href === href);
-    if (existing) {
-      setActiveTab(tabs.indexOf(existing));
-      return;
+  // Close dropdown on outside click
+  useEffect(() => {
+    if (!menuOpen) return;
+    function handleClick(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
     }
-    const navItem = navItems.find((n) => n.href === href);
-    const newTab: Tab = {
-      id: `tab-${Date.now()}`,
-      label,
-      href,
-      icon: navItem?.icon ?? "Bug",
-      pinned: false,
+    // Delay to avoid the trigger click itself being captured
+    const id = setTimeout(() => document.addEventListener("click", handleClick), 0);
+    return () => {
+      clearTimeout(id);
+      document.removeEventListener("click", handleClick);
     };
-    setTabs((prev) => [...prev, newTab]);
-    setActiveTab(tabs.length);
-  };
+  }, [menuOpen]);
 
-  const closeTab = (idx: number) => {
-    setTabs((prev) => prev.filter((_, i) => i !== idx));
-    if (activeTab >= idx) {
-      setActiveTab(Math.max(0, activeTab - 1));
-    }
-  };
+  const navItems = navForRole(role);
 
-  const togglePin = (idx: number) => {
-    setTabs((prev) => prev.map((t, i) => (i === idx ? { ...t, pinned: !t.pinned } : t)));
-  };
+  const handleDragStart = useCallback(
+    (_e: React.DragEvent, idx: number) => {
+      dragFromIdx.current = idx;
+    },
+    [],
+  );
 
-  const [dragIdx, setDragIdx] = useState<number | null>(null);
+  const handleDragOver = useCallback(
+    (e: React.DragEvent, idx: number) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "move";
+      if (dragFromIdx.current !== null && dragFromIdx.current !== idx) {
+        setDragOverIdx(idx);
+      }
+    },
+    [],
+  );
+
+  const handleDrop = useCallback(
+    (e: React.DragEvent, toIdx: number) => {
+      e.preventDefault();
+      const fromIdx = dragFromIdx.current;
+      if (fromIdx !== null && fromIdx !== toIdx) {
+        moveTab(fromIdx, toIdx);
+      }
+      dragFromIdx.current = null;
+      setDragOverIdx(null);
+    },
+    [moveTab],
+  );
+
+  const handleDragEnd = useCallback(() => {
+    dragFromIdx.current = null;
+    setDragOverIdx(null);
+  }, []);
 
   if (tabs.length === 0) return null;
 
   return (
-    <nav className="flex items-center gap-0 min-h-[36px] px-1 pt-[3px] pb-0 border-b border-border overflow-x-auto [scrollbar-width:none]" role="tablist" aria-label={`${role} workspace tabs`}>
+    <nav className="workspaceTabs" role="tablist" aria-label={`${role} workspace tabs`}>
       {tabs.map((tab, idx) => (
         <TabItem
           key={tab.id}
           tab={tab}
           idx={idx}
-          isActive={idx === activeTab}
+          isActive={tab.id === activeTabId}
           role={role}
-          onSelect={() => setActiveTab(idx)}
-          onClose={() => closeTab(idx)}
-          onPin={() => togglePin(idx)}
-          onDragStart={(e, fromIdx) => {
-            setDragIdx(fromIdx);
-            e.dataTransfer.effectAllowed = "move";
-          }}
-          onDragOver={(e, overIdx) => {
-            e.preventDefault();
-            if (dragIdx === null || dragIdx === overIdx) return;
-            const reordered = [...tabs];
-            const [moved] = reordered.splice(dragIdx, 1);
-            reordered.splice(overIdx, 0, moved);
-            setTabs(reordered);
-            setDragIdx(overIdx);
-          }}
-          onDragEnd={() => setDragIdx(null)}
-          onDragLeave={() => {}}
-          isDragOver={false}
+          onSelect={() => setActive(tab.id)}
+          onClose={() => closeTab(tab.id)}
+          onPin={() => pinTab(tab.id)}
+          onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
+          onDrop={handleDrop}
+          onDragEnd={handleDragEnd}
+          onDragLeave={handleDragEnd}
+          isDragOver={dragOverIdx === idx}
         />
       ))}
 
       {/* "+" tab creation button */}
-      <div className="relative flex items-center shrink-0" ref={null as unknown as React.RefObject<HTMLDivElement>}>
+      <div className="workspaceTabAddWrapper" ref={menuRef}>
         <button
-          className={`inline-flex items-center justify-center shrink-0 w-[26px] h-[26px] p-0 border-0 rounded-sm bg-transparent text-muted-foreground cursor-pointer transition-colors ml-[2px] ${menuOpen ? "bg-muted text-foreground" : ""}`}
+          className={`workspaceTabAdd ${menuOpen ? "active" : ""}`}
           type="button"
           aria-label="Open new tab"
           title="Open new tab"
@@ -167,11 +178,11 @@ export function TabBar({ role }: { role: Role }) {
         </button>
 
         {menuOpen && (
-          <div className="absolute top-full left-0 z-50 min-w-[180px] p-1 bg-card border border-border rounded-lg shadow-lg flex flex-col gap-[1px]" role="menu">
+          <div className="workspaceTabMenu" role="menu">
             {navItems.map((item) => (
               <button
                 key={item.href}
-                className="flex items-center gap-2 w-full px-[10px] py-[7px] border-0 rounded-sm bg-transparent text-foreground text-xs font-medium text-left cursor-pointer whitespace-nowrap transition-colors hover:bg-muted"
+                className="workspaceTabMenuItem"
                 role="menuitem"
                 type="button"
                 onClick={() => {
@@ -189,6 +200,8 @@ export function TabBar({ role }: { role: Role }) {
   );
 }
 
+// ─── TabItem ────────────────────────────────────────────────────────────
+
 function TabItem({
   tab,
   idx,
@@ -199,11 +212,12 @@ function TabItem({
   onPin,
   onDragStart,
   onDragOver,
+  onDrop,
   onDragEnd,
   onDragLeave,
   isDragOver,
 }: {
-  tab: Tab;
+  tab: TabEntry;
   idx: number;
   isActive: boolean;
   role: Role;
@@ -212,6 +226,7 @@ function TabItem({
   onPin: () => void;
   onDragStart: (e: React.DragEvent, idx: number) => void;
   onDragOver: (e: React.DragEvent, idx: number) => void;
+  onDrop: (e: React.DragEvent, idx: number) => void;
   onDragEnd: () => void;
   onDragLeave: () => void;
   isDragOver: boolean;
@@ -220,16 +235,12 @@ function TabItem({
   const iconEl = resolveIcon(tab.icon);
   const isHome = tab.href === `/${role}`;
 
-  const baseClasses = "relative flex items-center gap-0 min-w-0 max-w-[200px] px-[2px] py-1 border-0 rounded-t-sm bg-transparent text-muted-foreground text-xs font-medium whitespace-nowrap select-none cursor-default transition-colors hover:bg-muted hover:text-foreground group/tab";
-  const activeClasses = isActive
-    ? "bg-card text-foreground [&::after]:content-[''] [&::after]:absolute [&::after]:bottom-[-1px] [&::after]:left-2 [&::after]:right-2 [&::after]:h-[2px] [&::after]:rounded-t-[1px] [&::after]:bg-primary"
-    : "";
-  const dragOverClasses = isDragOver
-    ? "outline-[1px] outline-dashed outline-[hsl(var(--primary)/0.5)]"
-    : "";
-  const pinnedClasses = tab.pinned ? "opacity-95" : "";
-
-  const className = [baseClasses, activeClasses, dragOverClasses, pinnedClasses]
+  const className = [
+    "workspaceTab",
+    isActive ? "active" : "",
+    isDragOver ? "dragOver" : "",
+    tab.pinned ? "pinned" : "",
+  ]
     .filter(Boolean)
     .join(" ");
 
@@ -242,33 +253,38 @@ function TabItem({
       draggable={!isHome}
       onDragStart={(e) => onDragStart(e, idx)}
       onDragOver={(e) => onDragOver(e, idx)}
+      onDrop={(e) => onDrop(e, idx)}
       onDragEnd={onDragEnd}
-      onDragLeave={onDragLeave}
+      onDragLeave={onDragEnd}
       onMouseEnter={() => setShowPin(true)}
       onMouseLeave={() => setShowPin(false)}
+      onContextMenu={(e) => {
+        e.preventDefault();
+        onPin();
+      }}
     >
       {/* Drag handle (not for home tab) */}
       {!isHome && (
-        <span className="inline-flex items-center justify-center shrink-0 w-[14px] h-full cursor-grab opacity-0 group-hover/tab:opacity-50 transition-opacity text-muted-foreground [&:active]:cursor-grabbing" aria-hidden="true">
+        <span className="workspaceTabDragHandle" aria-hidden="true">
           <GripVertical size={10} strokeWidth={1.5} />
         </span>
       )}
 
       {/* Tab content — click to activate */}
       <button
-        className={`flex items-center gap-[5px] min-w-0 px-1 py-[3px] border-0 bg-none text-inherit font-inherit text-xs cursor-pointer truncate [&>svg]:shrink-0 [&>svg]:opacity-60 ${isActive ? '[&>svg]:opacity-100 [&>svg]:text-[hsl(var(--primary))]' : ''}`}
+        className="workspaceTabButton"
         type="button"
         onClick={onSelect}
         aria-label={`Navigate to ${tab.label}`}
       >
         {iconEl}
-        <span className="truncate">{tab.label}</span>
+        <span className="workspaceTabLabel">{tab.label}</span>
       </button>
 
       {/* Pin toggle */}
       {!isHome && (showPin || tab.pinned) && (
         <button
-          className={`inline-flex items-center justify-center shrink-0 w-[18px] h-[18px] p-0 border-0 rounded-sm bg-none text-muted-foreground cursor-pointer opacity-0 group-hover/tab:opacity-100 transition-opacity [&:hover]:opacity-100 [&:hover]:bg-card ${tab.pinned ? 'opacity-100 text-[hsl(var(--primary))]' : ''}`}
+          className="workspaceTabPin"
           type="button"
           onClick={(e) => {
             e.stopPropagation();
@@ -277,23 +293,23 @@ function TabItem({
           aria-label={tab.pinned ? "Unpin tab" : "Pin tab"}
           title={tab.pinned ? "Unpin tab" : "Pin tab"}
         >
-          {tab.pinned ? "📌" : "📍"}
+          {tab.pinned ? <PinOff size={11} strokeWidth={1.5} /> : <Pin size={11} strokeWidth={1.5} />}
         </button>
       )}
 
       {/* Close button (not for pinned or home) */}
       {!tab.pinned && !isHome && (
         <button
-          className="inline-flex items-center justify-center shrink-0 w-[18px] h-[18px] p-0 ml-[1px] border-0 rounded-sm bg-none text-muted-foreground cursor-pointer opacity-0 group-hover/tab:opacity-60 transition-all hover:opacity-100 hover:bg-destructive/10 hover:text-destructive"
+          className="workspaceTabClose"
           type="button"
           onClick={(e) => {
             e.stopPropagation();
             onClose();
           }}
           aria-label={`Close ${tab.label} tab`}
-          title={`Close ${tab.label} tab`}
+          title="Close tab"
         >
-          <X size={12} strokeWidth={2} />
+          <X size={11} strokeWidth={2} />
         </button>
       )}
     </div>
