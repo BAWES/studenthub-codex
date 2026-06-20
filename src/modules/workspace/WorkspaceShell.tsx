@@ -67,7 +67,7 @@ export function WorkspaceShell({
         href="/app"
         aria-label="StudentHub app"
       >
-        <span className="inline-flex items-center justify-center w-7 h-7 rounded-md bg-[#eb6651] text-white text-[11px] font-bold shrink-0">SH</span>
+        <span className="inline-flex items-center justify-center w-7 h-7 rounded-md bg-primary text-white text-[11px] font-bold shrink-0">SH</span>
         <strong className="opacity-0 group-hover/rail:opacity-100 transition-opacity duration-300 delay-[80ms] text-sm font-semibold whitespace-nowrap">StudentHub</strong>
       </Link>
       <WorkspaceNavigation items={navItems} role={session.role} />
@@ -96,7 +96,7 @@ export function WorkspaceShell({
           <h1 className="m-0 text-lg font-semibold leading-tight text-foreground">{title}</h1>
         </div>
         <div className="flex items-center gap-2.5 min-h-10 px-3 rounded-sm bg-card border border-border transition-colors duration-180 hover:border-[color-mix(in_srgb,#eb6651_30%,hsl(var(--border)))]">
-          <span className="text-[11px] font-bold uppercase tracking-[0.03em] text-[#eb6651] px-1.5 py-0.5 rounded bg-[#fef1ef]">{session.role}</span>
+          <span className="text-[11px] font-bold uppercase tracking-[0.03em] text-primary px-1.5 py-0.5 rounded bg-primary/10">{session.role}</span>
           <strong className="text-sm font-semibold text-foreground whitespace-nowrap">{session.name}</strong>
           <small className="text-xs text-muted-foreground hidden">{session.email}</small>
         </div>
