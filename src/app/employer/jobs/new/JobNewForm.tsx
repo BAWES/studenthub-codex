@@ -3,18 +3,27 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { createJob } from "../actions";
+
+const CORAL = "#eb6651";
 
 type Props = {
   employerId: number | null;
 };
 
-const inputBase =
-  "w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-4 py-2.5 text-sm text-[var(--ink)] outline-none transition-colors duration-200 " +
-  "focus:border-[var(--sh-coral)] focus:ring-1 focus:ring-[var(--sh-coral)]/30";
-const textareaBase = `${inputBase} min-h-[120px] resize-y`;
-const textareaShort = `${inputBase} min-h-[80px] resize-y`;
-const selectBase = `${inputBase} cursor-pointer`;
+function selectClasses() {
+  return [
+    "w-full min-h-[48px] rounded-lg border border-[var(--border)]",
+    "bg-[var(--surface)] text-[var(--ink)] text-sm",
+    "px-3 py-2.5 outline-none",
+    "transition-all duration-200",
+    "focus:border-[#eb6651] focus:shadow-[0_0_0_3px_rgba(235,102,81,0.15)]",
+    "hover:bg-[var(--surface-soft)]",
+  ].join(" ");
+}
 
 export function JobNewForm({ employerId }: Props) {
   const router = useRouter();
@@ -65,24 +74,30 @@ export function JobNewForm({ employerId }: Props) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
+    <form onSubmit={handleSubmit} className="max-w-2xl space-y-6">
       {error && (
-        <div className="rounded-lg bg-[var(--error)]/10 border border-[var(--error)]/20 p-4 text-sm text-[var(--error)]">
+        <div
+          className="rounded-lg border p-4 text-sm font-medium"
+          style={{
+            borderColor: "color-mix(in srgb, var(--destructive) 20%, transparent)",
+            backgroundColor: "color-mix(in srgb, var(--destructive) 10%, transparent)",
+            color: "var(--destructive)",
+          }}
+        >
           {error}
         </div>
       )}
 
       {/* Title */}
-      <div className="space-y-2">
-        <label htmlFor="title" className="text-sm font-medium text-[var(--ink)]">
-          Job Title <span className="text-[var(--error)]">*</span>
-        </label>
-        <input
+      <div className="grid gap-2">
+        <Label htmlFor="title">
+          Job Title <span style={{ color: "var(--destructive)" }}>*</span>
+        </Label>
+        <Input
           id="title"
           type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          className={inputBase}
           placeholder="e.g. Software Engineer Intern"
           maxLength={255}
           required
@@ -91,59 +106,52 @@ export function JobNewForm({ employerId }: Props) {
       </div>
 
       {/* Description */}
-      <div className="space-y-2">
-        <label htmlFor="description" className="text-sm font-medium text-[var(--ink)]">
-          Description <span className="text-[var(--error)]">*</span>
-        </label>
-        <textarea
+      <div className="grid gap-2">
+        <Label htmlFor="description">
+          Description <span style={{ color: "var(--destructive)" }}>*</span>
+        </Label>
+        <Textarea
           id="description"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          className={textareaBase}
           placeholder="Describe the role, responsibilities, and day-to-day activities..."
           required
+          className="min-h-[120px]"
         />
       </div>
 
       {/* Requirements */}
-      <div className="space-y-2">
-        <label htmlFor="requirements" className="text-sm font-medium text-[var(--ink)]">
-          Requirements
-        </label>
-        <textarea
+      <div className="grid gap-2">
+        <Label htmlFor="requirements">Requirements</Label>
+        <Textarea
           id="requirements"
           value={requirements}
           onChange={(e) => setRequirements(e.target.value)}
-          className={textareaShort}
           placeholder="Required skills, experience, certifications..."
+          className="min-h-[80px]"
         />
       </div>
 
       {/* Location & Employment Type */}
       <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <label htmlFor="location" className="text-sm font-medium text-[var(--ink)]">
-            Location
-          </label>
-          <input
+        <div className="grid gap-2">
+          <Label htmlFor="location">Location</Label>
+          <Input
             id="location"
             type="text"
             value={location}
             onChange={(e) => setLocation(e.target.value)}
-            className={inputBase}
             placeholder="Kuwait City"
           />
         </div>
 
-        <div className="space-y-2">
-          <label htmlFor="employmentType" className="text-sm font-medium text-[var(--ink)]">
-            Employment Type
-          </label>
+        <div className="grid gap-2">
+          <Label htmlFor="employmentType">Employment Type</Label>
           <select
             id="employmentType"
             value={employmentType}
             onChange={(e) => setEmploymentType(e.target.value)}
-            className={selectBase}
+            className={selectClasses()}
           >
             <option value="full-time">Full-time</option>
             <option value="part-time">Part-time</option>
@@ -155,44 +163,36 @@ export function JobNewForm({ employerId }: Props) {
       </div>
 
       {/* Salary Range (KWD) */}
-      <div className="space-y-2">
-        <label className="text-sm font-medium text-[var(--ink)]">Salary Range (KWD/month)</label>
+      <div className="grid gap-2">
+        <Label>Salary Range (KWD/month)</Label>
         <div className="grid grid-cols-2 gap-4">
-          <div>
-            <input
-              id="salaryMin"
-              type="number"
-              value={salaryMin}
-              onChange={(e) => setSalaryMin(e.target.value)}
-              className={inputBase}
-              placeholder="Min"
-              min={0}
-            />
-          </div>
-          <div>
-            <input
-              id="salaryMax"
-              type="number"
-              value={salaryMax}
-              onChange={(e) => setSalaryMax(e.target.value)}
-              className={inputBase}
-              placeholder="Max"
-              min={0}
-            />
-          </div>
+          <Input
+            id="salaryMin"
+            type="number"
+            value={salaryMin}
+            onChange={(e) => setSalaryMin(e.target.value)}
+            placeholder="Min"
+            min={0}
+          />
+          <Input
+            id="salaryMax"
+            type="number"
+            value={salaryMax}
+            onChange={(e) => setSalaryMax(e.target.value)}
+            placeholder="Max"
+            min={0}
+          />
         </div>
       </div>
 
       {/* Status */}
-      <div className="space-y-2">
-        <label htmlFor="status" className="text-sm font-medium text-[var(--ink)]">
-          Status
-        </label>
+      <div className="grid gap-2">
+        <Label htmlFor="status">Status</Label>
         <select
           id="status"
           value={status}
           onChange={(e) => setStatus(e.target.value)}
-          className={selectBase}
+          className={selectClasses()}
         >
           <option value="active">Active (visible to candidates)</option>
           <option value="draft">Draft (not visible)</option>
@@ -201,7 +201,18 @@ export function JobNewForm({ employerId }: Props) {
 
       {/* Buttons */}
       <div className="flex items-center gap-3 pt-4">
-        <Button type="submit" disabled={submitting || !title.trim() || !description.trim()}>
+        <Button
+          type="submit"
+          disabled={submitting || !title.trim() || !description.trim()}
+          style={{
+            backgroundColor: CORAL,
+            color: "white",
+            border: "none",
+            minHeight: 48,
+            paddingLeft: 28,
+            paddingRight: 28,
+          }}
+        >
           {submitting ? "Creating..." : "Create Job Posting"}
         </Button>
         <Button
