@@ -108,7 +108,6 @@ import { AdminSalaryTable } from "./_components/admin-salary-table";
 const mockSalaries = [
   {
     staff_salary_uuid: "SAL-001",
-    staff_name: "John Doe",
     salary: 2500,
     salary_currency: "KWD",
     comment: "Monthly salary",
@@ -116,7 +115,6 @@ const mockSalaries = [
   },
   {
     staff_salary_uuid: "SAL-002",
-    staff_name: null,
     salary: null,
     salary_currency: null,
     comment: null,
@@ -145,7 +143,6 @@ describe("AdminSalaryTable", () => {
 
   it("renders the DataTable with correct columns", () => {
     render(<AdminSalaryTable session={mockSession} salaries={[]} total={0} />);
-    expect(screen.getByTestId("col-staff_name")).toHaveTextContent("Staff");
     expect(screen.getByTestId("col-salary")).toHaveTextContent("Salary");
     expect(screen.getByTestId("col-comment")).toHaveTextContent("Comment");
     expect(screen.getByTestId("col-salary_date")).toHaveTextContent("Date");
