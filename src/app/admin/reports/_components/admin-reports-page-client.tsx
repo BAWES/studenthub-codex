@@ -5,8 +5,17 @@ import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import type { SessionUser } from "@/modules/auth/types";
 import type { ReportTypeItem } from "../schemas";
 import { generateReport } from "../actions";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from "@/components/ui/table";
 
 type Props = {
   session: SessionUser;
@@ -64,7 +73,7 @@ export function AdminReportsPageClient({ session, reportTypes }: Props) {
         {reportTypes.map((rt) => (
           <Card key={rt.type}>
             <CardHeader>
-              <CardTitle className="text-sm">{rt.label}</CardTitle>
+              <CardTitle>{rt.label}</CardTitle>
               <CardDescription>{rt.description}</CardDescription>
             </CardHeader>
             <CardContent>
@@ -81,51 +90,52 @@ export function AdminReportsPageClient({ session, reportTypes }: Props) {
 
       {/* Error */}
       {error ? (
-        <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-4 mb-6 text-sm text-destructive">
-          {error}
-        </div>
+        <Alert variant="destructive" className="mb-6">
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       ) : null}
 
       {/* Report results */}
       {reportData ? (
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm">Report Results</CardTitle>
+            <CardTitle>Report Results</CardTitle>
           </CardHeader>
           <CardContent>
             {reportData.kind === "recruiter-daily" && (
               <div className="overflow-x-auto">
-                <table className="w-full text-xs">
-                  <thead>
-                    <tr className="border-b border-border">
-                      <th className="text-left py-2 px-2 font-medium text-muted-foreground">Staff</th>
-                      <th className="text-right py-2 px-2 font-medium text-muted-foreground">Assigned</th>
-                      <th className="text-right py-2 px-2 font-medium text-muted-foreground">Requests</th>
-                      <th className="text-right py-2 px-2 font-medium text-muted-foreground">Notes</th>
-                      <th className="text-right py-2 px-2 font-medium text-muted-foreground">Stories</th>
-                      <th className="text-right py-2 px-2 font-medium text-muted-foreground">Invitations</th>
-                      <th className="text-right py-2 px-2 font-medium text-muted-foreground">Accepted</th>
-                      <th className="text-right py-2 px-2 font-medium text-muted-foreground">Rejected</th>
-                    </tr>
-                  </thead>
-                  <tbody>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Staff</TableHead>
+                      <TableHead className="text-right">Assigned</TableHead>
+                      <TableHead className="text-right">Requests</TableHead>
+                      <TableHead className="text-right">Notes</TableHead>
+                      <TableHead className="text-right">Stories</TableHead>
+                      <TableHead className="text-right">Invitations</TableHead>
+                      <TableHead className="text-right">Accepted</TableHead>
+                      <TableHead className="text-right">Rejected</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
                     {reportData.reports.map((r, i) => (
-                      <tr key={i} className="border-b border-border">
-                        <td className="py-2 px-2 text-card-foreground">
+                      <TableRow key={i}>
+                        <TableCell>
                           <div className="font-medium">{r.staffName as string}</div>
                           <div className="text-muted-foreground">{r.staffEmail as string}</div>
-                        </td>
-                        <td className="text-right py-2 px-2 text-card-foreground">{r.totalAssigned as number}</td>
-                        <td className="text-right py-2 px-2 text-card-foreground">{r.totalRequests as number}</td>
-                        <td className="text-right py-2 px-2 text-card-foreground">{r.totalNotes as number}</td>
-                        <td className="text-right py-2 px-2 text-card-foreground">{r.totalStories as number}</td>
-                        <td className="text-right py-2 px-2 text-card-foreground">{r.totalInvitations as number}</td>
-                        <td className="text-right py-2 px-2 text-card-foreground">{r.totalAcceptedInvitations as number}</td>
-                        <td className="text-right py-2 px-2 text-card-foreground">{r.totalRejectedInvitations as number}</td>
-                      </tr>
+                        </TableCell>
+                        <TableCell className="text-right">{r.totalAssigned as number}</TableCell>
+                        <TableCell className="text-right">{r.totalRequests as number}</TableCell>
+                        <TableCell className="text-right">{r.totalNotes as number}</TableCell>
+                        <TableCell className="text-right">{r.totalStories as number}</TableCell>
+                        <TableCell className="text-right">{r.totalInvitations as number}</TableCell>
+                        <TableCell className="text-right">{r.totalAcceptedInvitations as number}</TableCell>
+                        <TableCell className="text-right">{r.totalRejectedInvitations as number}</TableCell>
+                      </TableRow>
                     ))}
-                  </tbody>
-                </table>
+                  </TableBody>
+                </Table>
                 <p className="text-xs mt-3 text-muted-foreground">
                   Total staff: {reportData.total}
                 </p>
@@ -134,24 +144,24 @@ export function AdminReportsPageClient({ session, reportTypes }: Props) {
 
             {reportData.kind === "invitation-summary" && (
               <div className="overflow-x-auto">
-                <table className="w-full text-xs">
-                  <thead>
-                    <tr className="border-b border-border">
-                      <th className="text-left py-2 px-2 font-medium text-muted-foreground">Status</th>
-                      <th className="text-right py-2 px-2 font-medium text-muted-foreground">Count</th>
-                    </tr>
-                  </thead>
-                  <tbody>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Count</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
                     {reportData.summary.map((s, i) => (
-                      <tr key={i} className="border-b border-border">
-                        <td className="py-2 px-2 text-card-foreground">
+                      <TableRow key={i}>
+                        <TableCell>
                           {s.status === 1 ? "Accepted" : s.status === 2 ? "Rejected" : `Status ${s.status}`}
-                        </td>
-                        <td className="text-right py-2 px-2 text-card-foreground">{s.count}</td>
-                      </tr>
+                        </TableCell>
+                        <TableCell className="text-right">{s.count}</TableCell>
+                      </TableRow>
                     ))}
-                  </tbody>
-                </table>
+                  </TableBody>
+                </Table>
               </div>
             )}
 
