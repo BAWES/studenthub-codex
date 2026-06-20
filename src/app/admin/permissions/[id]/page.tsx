@@ -56,7 +56,7 @@ export default async function AdminPermissionDetailPage({
           ]}
         />
 
-        <section style={{ display: "flex", gap: "0.5rem", padding: "1rem" }}>
+        <section className="flex gap-2 p-4">
           <Link href={"/admin/permissions" as Route}>
             <Button variant="outline">Back to Permissions</Button>
           </Link>
