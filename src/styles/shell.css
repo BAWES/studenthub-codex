@@ -4,34 +4,17 @@
    "An operating system that happens to be a web app."
    ========================================================================== */
 
-/* ── OS Layout ───────────────────────────────────────────────────────── */
+/* ── OS Layout (flexbox wraps sidebar + stage) ────────────────────── */
 .shell {
   min-height: 100svh;
-  display: grid;
-  grid-template-columns: 56px minmax(0, 1fr);
+  display: flex;
   background: var(--paper);
-  transition: grid-template-columns 300ms var(--sh-easing);
 }
-
-/* No sidebar hover expansion needed — handled via Tailwind group/rail */
 
 /* Embedded (no sidebar rail from shell) */
 .shellEmbedded {
   display: block;
   min-height: 0;
-  grid-template-columns: none;
-}
-
-/* No sidebar rail CSS needed — fully converted to Tailwind in WorkspaceOS/WorkspaceShell */
-
-/* ── Workspace Stage (content area) ─────────────────────────────────── */
-.workspaceStage {
-  min-width: 0;
-  overflow-x: hidden;
-  display: grid;
-  align-content: start;
-  gap: 14px;
-  padding: 14px;
 }
 
 /* ── Workspace Tabs — Browser-style tab bar ─────────────────────────── */
@@ -83,7 +66,7 @@
 
 .workspaceTab.active {
   color: var(--ink);
-  background: var(--sh-coral-light);
+  background: var(--sh-glass-bg-strong);
 }
 
 .workspaceTab.dragOver {
@@ -302,152 +285,8 @@
   color: var(--ink);
 }
 
-/* ── Glass Topbar ───────────────────────────────────────────────────── */
-.topbar {
-  position: sticky;
-  top: 10px;
-  z-index: 20;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  min-height: 56px;
-  padding: 0 12px;
-  margin-bottom: 4px;
-  border-radius: var(--sh-radius-lg);
-  background: var(--sh-glass-bg-strong);
-  padding: 0 16px;
-  border-radius: var(--sh-radius-lg);
-  background: var(--surface);
-  border: 1px solid var(--line);
-  transition:
-    background 200ms var(--sh-easing),
-    border-color 200ms var(--sh-easing),
-    box-shadow 200ms var(--sh-easing);
-}
-
-.topbar:hover {
-  background: var(--surface);
-  border-color: color-mix(in srgb, var(--sh-coral) 30%, var(--line));
-  box-shadow: var(--shadow-sm);
-}
-
-.topbar div:first-child {
-  display: grid;
-  gap: 2px;
-  min-width: 0;
-}
-
-.eyebrow {
-  margin: 0;
-  color: var(--sh-coral);
-  font-size: 11px;
-  font-weight: var(--weight-black, 900);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-.topbar h1 {
-  margin: 0;
-  font-size: 18px;
-  font-weight: var(--weight-semibold);
-  line-height: 1.2;
-  color: var(--ink);
-}
-
-/* ── Account Box ────────────────────────────────────────────────────── */
-.accountBox {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-height: 40px;
-  padding: 0 12px;
-  border-radius: var(--sh-radius-sm);
-  background: var(--surface);
-  border: 1px solid var(--line);
-  cursor: default;
-  transition:
-    background 180ms var(--sh-easing),
-    border-color 180ms var(--sh-easing);
-}
-
-.accountBox span {
-  font-size: 11px;
-  font-weight: var(--weight-bold);
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  color: var(--sh-coral);
-  padding: 2px 6px;
-  border-radius: 4px;
-  background: var(--sh-coral-light);
-}
-
-.accountBox strong {
-  font-size: 13px;
-  font-weight: var(--weight-semibold);
-  color: var(--ink);
-  white-space: nowrap;
-}
-
-.accountBox small {
-  font-size: 12px;
-  color: var(--muted);
-  display: none;
-}
 
 /* ── Metric Cards — Glass Panels with Data ──────────────────────────── */
-.metrics {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 10px;
-}
-
-.metric {
-  min-height: 100px;
-  display: grid;
-  align-content: start;
-  gap: 6px;
-  padding: 16px;
-  border-radius: var(--sh-radius-lg);
-  background: var(--surface);
-  border: 1px solid var(--line);
-  box-shadow: var(--shadow-sm);
-  transition:
-    background 200ms var(--sh-easing),
-    border-color 200ms var(--sh-easing),
-    box-shadow 200ms var(--sh-easing),
-    transform 200ms var(--sh-easing);
-}
-
-.metric:hover {
-  background: var(--surface);
-  border-color: color-mix(in srgb, var(--sh-coral) 20%, var(--line));
-  box-shadow: var(--shadow-md);
-  transform: translateY(-2px);
-}
-
-.metric span {
-  font-size: 11px;
-  font-weight: var(--weight-black, 900);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--sh-coral);
-}
-
-.metric strong {
-  font-size: 28px;
-  font-weight: var(--weight-bold);
-  line-height: 1;
-  color: var(--ink);
-  letter-spacing: -0.02em;
-}
-
-.metric p {
-  margin: 0;
-  font-size: 12px;
-  color: var(--muted);
-  line-height: 1.4;
-}
 
 /* ── MetricCard Component (enhanced glass panel with trend + animation) ── */
 .metricCard {
@@ -587,90 +426,6 @@
   }
 }
 
-/* ── Data List (WorkspaceList) ──────────────────────────────────────── */
-.dataList {
-  display: grid;
-  gap: 8px;
-}
-
-.listHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 4px;
-}
-
-.listHeader h2 {
-  margin: 0;
-  font-size: 14px;
-  font-weight: var(--weight-semibold);
-  color: var(--ink);
-}
-
-.listHeader span {
-  font-size: 12px;
-  color: var(--muted);
-  font-weight: var(--weight-medium);
-}
-
-.rows {
-  display: grid;
-  gap: 3px;
-}
-
-.row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  min-height: 44px;
-  padding: 8px 12px;
-  border-radius: var(--sh-radius-sm);
-  background: var(--sh-glass-bg);
-  border: 1px solid transparent;
-  transition:
-    background 180ms var(--sh-easing),
-    border-color 180ms var(--sh-easing),
-    transform 180ms var(--sh-easing);
-}
-
-.row:hover {
-  background: var(--sh-glass-bg-strong);
-  border-color: var(--sh-glass-border);
-  transform: translateX(4px);
-}
-
-.rowMain {
-  display: grid;
-  gap: 2px;
-  min-width: 0;
-}
-
-.rowMain a {
-  text-decoration: none;
-  color: inherit;
-}
-
-.rowMain a:hover {
-  color: var(--sh-info);
-}
-
-.rowMain strong {
-  font-size: 14px;
-  font-weight: var(--weight-medium);
-  color: var(--ink);
-}
-
-.rowMain span {
-  font-size: 12px;
-  color: var(--muted);
-}
-
-.rowMeta span {
-  font-size: 12px;
-  color: var(--faint);
-  white-space: nowrap;
-}
 
 /* ── Mobile Tab Bar ─────────────────────────────────────────────────── */
 .mobileTabBar {
@@ -680,8 +435,10 @@
   left: 0;
   right: 0;
   z-index: 40;
-  border-top: 1px solid hsl(var(--border));
-  background: hsl(var(--card));
+  border-top: 1px solid var(--sh-glass-border);
+  background: var(--sh-glass-bg-strong);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
   padding: 4px env(safe-area-inset-bottom) 4px;
 }
 
@@ -699,14 +456,6 @@
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
-}
-
-.topbar h1 {
-  margin: 0;
-  font-size: 18px;
-  font-weight: var(--weight-semibold);
-  line-height: 1.2;
-  color: var(--ink);
 }
 
 /* ── PageHeader — Consistent Page Title + Actions ──────────────────── */
@@ -1038,8 +787,10 @@
   padding: 32px 24px;
   text-align: center;
   border-radius: var(--sh-radius-lg);
-  background: hsl(var(--card));
-  border: 1px solid hsl(var(--border));
+  background: var(--sh-glass-bg);
+  backdrop-filter: blur(var(--sh-glass-blur));
+  -webkit-backdrop-filter: blur(var(--sh-glass-blur));
+  border: 1px solid var(--sh-glass-border);
   animation: shEmptyIn 360ms var(--sh-easing) both;
 }
 
@@ -1061,16 +812,16 @@
 }
 
 .shGlassStrong {
-  background: hsl(var(--card));
-  border-color: hsl(var(--border));
+  background: var(--sh-glass-bg-strong);
+  border-color: var(--sh-glass-border-strong);
 }
 
 .shGlassElevated {
-  background: hsl(var(--card));
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  border: 1px solid hsl(var(--border));
-  box-shadow: var(--shadow-md);
+  background: var(--sh-glass-bg-strong);
+  backdrop-filter: blur(var(--sh-glass-blur));
+  -webkit-backdrop-filter: blur(var(--sh-glass-blur));
+  border: 1px solid var(--sh-glass-border-strong);
+  box-shadow: var(--sh-glow-sm);
 }
 
 .shGlassRadiusSm { border-radius: var(--sh-radius-sm); }
@@ -1328,8 +1079,10 @@
     justify-content: space-around;
     height: 56px;
     padding: 0 8px;
-    background: hsl(var(--card));
-    border-top: 1px solid hsl(var(--border));
+    background: var(--sh-glass-bg-strong);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid var(--sh-glass-border);
   }
 
   .mobileNav a {
