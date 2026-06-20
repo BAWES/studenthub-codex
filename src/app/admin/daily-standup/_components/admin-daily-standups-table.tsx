@@ -4,10 +4,7 @@ import { useRouter } from "next/navigation";
 import { DataTable } from "@/modules/workspace/DataTable";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 
-<<<<<<< HEAD
 import type { Route } from "next";
-=======
->>>>>>> origin/develop
 import type { SessionUser } from "@/modules/auth/types";
 import type { DailyStandupAnswerItem } from "../schemas";
 
@@ -32,20 +29,12 @@ export function AdminDailyStandupsTable({ session, answers }: Props) {
         title="Daily Standup Answers"
         description="All staff standup check-in answers."
         rows={answers.map((a) => ({ ...a, id: a.answer_uuid }))}
-<<<<<<< HEAD
         rowHref={(row: { id: string }) => `/admin/daily-standup/${row.id}` as Route}
-=======
-        rowHref={undefined}
->>>>>>> origin/develop
         columns={[
           {
             key: "question",
             label: "Question",
-<<<<<<< HEAD
             render: (row: DailyStandupAnswerItem) => (
-=======
-            render: (row) => (
->>>>>>> origin/develop
               <span className="text-sm text-foreground">
                 {row.question ?? "—"}
               </span>
@@ -54,11 +43,7 @@ export function AdminDailyStandupsTable({ session, answers }: Props) {
           {
             key: "answer",
             label: "Answer",
-<<<<<<< HEAD
             render: (row: DailyStandupAnswerItem) => (
-=======
-            render: (row) => (
->>>>>>> origin/develop
               <span className="text-sm max-w-[300px] truncate block text-foreground">
                 {row.answer ?? "—"}
               </span>
@@ -67,11 +52,7 @@ export function AdminDailyStandupsTable({ session, answers }: Props) {
           {
             key: "staff_id",
             label: "Staff ID",
-<<<<<<< HEAD
             render: (row: DailyStandupAnswerItem) => (
-=======
-            render: (row) => (
->>>>>>> origin/develop
               <span className="text-sm text-muted-foreground">
                 {row.staff_id ?? "—"}
               </span>
@@ -80,11 +61,7 @@ export function AdminDailyStandupsTable({ session, answers }: Props) {
           {
             key: "updated_at",
             label: "Updated",
-<<<<<<< HEAD
             render: (row: DailyStandupAnswerItem) => (
-=======
-            render: (row) => (
->>>>>>> origin/develop
               <span className="text-sm text-muted-foreground">
                 {row.updated_at ? new Date(row.updated_at).toLocaleDateString() : "—"}
               </span>

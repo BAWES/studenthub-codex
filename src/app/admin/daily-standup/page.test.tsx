@@ -3,19 +3,11 @@ import {
   listDailyStandupsSchema,
   dailyStandupAnswerItemSchema,
   listDailyStandupsResultSchema,
-<<<<<<< HEAD
 } from "@/modules/admin/daily-standup/schemas";
 import type {
   DailyStandupAnswerItem,
   ListDailyStandupsResult,
 } from "@/modules/admin/daily-standup/schemas";
-=======
-} from "./schemas";
-import type {
-  DailyStandupAnswerItem,
-  ListDailyStandupsResult,
-} from "./schemas";
->>>>>>> origin/develop
 
 describe("admin daily-standup — data contract", () => {
   it("listDailyStandupsSchema accepts empty params (defaults apply)", () => {
