@@ -48,7 +48,7 @@ export function LoginForm() {
         </div>
 
         {state.error ? (
-          <div className="flex items-center gap-2 px-3.5 py-2.5 rounded-md text-[13px] font-semibold bg-[var(--sh-error-bg)] text-[var(--sh-error)] border border-[var(--sh-error)]/20">
+          <div className="flex items-center gap-2 px-3.5 py-2.5 rounded-md text-[13px] font-semibold bg-destructive/10 text-destructive border border-destructive/20">
             <span>{state.error}</span>
           </div>
         ) : null}
@@ -56,7 +56,7 @@ export function LoginForm() {
         <Button
           type="submit"
           disabled={pending}
-          className="w-full bg-[var(--sh-coral)] text-white disabled:bg-[var(--sh-coral-hover)]"
+          className="w-full bg-[#eb6651] text-white hover:bg-[#d45441]"
         >
           <LogIn className="size-4" />
           {pending ? "Checking credentials..." : "Sign in"}
@@ -65,7 +65,7 @@ export function LoginForm() {
 
       {accounts.length > 0 ? (
         <section
-          className="grid gap-3 pt-5 mt-5 border-t border-[var(--line)]"
+          className="grid gap-3 pt-5 mt-5 border-t border-border"
           aria-label="Verified StudentHub accounts"
         >
           <div className="grid gap-0.5">
@@ -85,7 +85,7 @@ export function LoginForm() {
               <input name="accountKey" type="hidden" value={account.accountKey} />
               <button
                 type="submit"
-                className="w-full min-h-[52px] flex items-center gap-3 px-3.5 py-2.5 rounded-md text-left text-[15px] cursor-pointer transition-all duration-[180ms] border border-[var(--line)] bg-card text-foreground hover:border-foreground hover:bg-muted"
+                className="w-full min-h-[52px] flex items-center gap-3 px-3.5 py-2.5 rounded-md text-left text-[15px] cursor-pointer transition-all duration-[180ms] border border-border bg-card text-foreground hover:border-foreground hover:bg-muted"
               >
                 <span className="grid gap-0.5 min-w-0">
                   <strong className="text-sm font-semibold">

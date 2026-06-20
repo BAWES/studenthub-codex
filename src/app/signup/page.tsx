@@ -3,6 +3,7 @@ import { getSession } from "@/modules/auth/session";
 import { SignupForm } from "@/modules/auth/SignupForm";
 import { redirect } from "next/navigation";
 import type { Role } from "@/modules/auth/types";
+import { Card } from "@/components/ui/card";
 
 export const dynamic = "force-dynamic";
 
@@ -42,14 +43,12 @@ export default async function SignupPage({
   return (
     <main className="min-h-svh w-full grid place-items-center p-4">
       <div className="w-full max-w-[640px]">
-        {/* Glass panel container for the form */}
-        <div
-          className="rounded-xl border border-[var(--border)] bg-white shadow-[0_18px_50px_rgba(16,24,40,0.08)]"
-        >
+        {/* Card container for the form */}
+        <Card className="overflow-hidden">
           <SignupForm defaultRole={defaultRole} />
-        </div>
+        </Card>
 
-        <div className="flex items-center justify-center gap-5 mt-5 text-[13px] text-[var(--muted)]">
+        <div className="flex items-center justify-center gap-5 mt-5 text-[13px] text-muted-foreground">
           <span className="inline-flex items-center gap-1.5">
             <Shield className="size-3.5" />
             Encrypted & secure

@@ -2,9 +2,12 @@
 
 import { useActionState, useEffect, useRef } from "react";
 import { Mail, ArrowLeft, CheckCircle } from "lucide-react";
+import Link from "next/link";
 import { forgotPasswordAction } from "@/modules/auth/forgotPasswordActions";
 import type { ForgotPasswordState } from "@/modules/auth/forgotPasswordActions";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export function ForgotPasswordForm() {
   const [state, action, pending] = useActionState(forgotPasswordAction, {});
@@ -48,13 +51,13 @@ export function ForgotPasswordForm() {
             </Button>
           </form>
 
-          <a
+          <Link
             href="/login"
             className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary transition-colors"
           >
             <ArrowLeft className="size-3.5" />
             Back to sign in
-          </a>
+          </Link>
         </div>
       </div>
     );
@@ -65,13 +68,8 @@ export function ForgotPasswordForm() {
     <form action={action} className="p-6 pt-2">
       <div className="space-y-4">
         <div className="space-y-2">
-          <label
-            htmlFor="forgot-email"
-            className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
-          >
-            Email
-          </label>
-          <input
+          <Label htmlFor="forgot-email">Email</Label>
+          <Input
             ref={emailRef}
             id="forgot-email"
             name="email"
@@ -80,7 +78,6 @@ export function ForgotPasswordForm() {
             defaultValue={state.email ?? ""}
             placeholder="name@studenthub.app"
             required
-            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
           />
         </div>
 
@@ -99,13 +96,13 @@ export function ForgotPasswordForm() {
           {pending ? "Sending..." : "Send reset link"}
         </Button>
 
-        <a
+        <Link
           href="/login"
           className="inline-flex items-center justify-center gap-1.5 text-sm text-muted-foreground hover:text-primary transition-colors w-full mt-4"
         >
           <ArrowLeft className="size-3.5" />
           Back to sign in
-        </a>
+        </Link>
       </div>
     </form>
   );
