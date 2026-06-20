@@ -3,7 +3,7 @@
 import { ArrowRight, Sparkles } from "lucide-react";
 import Link from "next/link";
 
-const SH_BLUE = "#0b63ce";
+const SH_BLUE = "#1f73b7";
 const SH_AMBER = "#f59e0b";
 
 interface CTASectionProps {
