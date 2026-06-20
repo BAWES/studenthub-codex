@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Sparkles } from "lucide-react";
 
 const SH_BLUE = "#1f73b7";
-const SH_AMBER = "#f59e0b";
+const SH_CORAL = "#eb6651";
 
 interface LandingFooterProps {
   persona: "candidate" | "company";
@@ -34,7 +34,7 @@ export default function LandingFooter({ persona }: LandingFooterProps) {
               placement.
             </p>
             <div className="flex items-center gap-1.5 mt-3 text-[11px] font-medium">
-              <Sparkles className="size-3" style={{ color: SH_AMBER }} />
+              <Sparkles className="size-3" style={{ color: SH_CORAL }} />
               <span style={{ color: "var(--muted)" }}>Staff-powered · Kuwait</span>
             </div>
           </div>
