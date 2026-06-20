@@ -125,12 +125,18 @@ describe("WorkspaceNavigation", () => {
     });
   });
 
-  it("applies the CSS class 'active' to the active item", () => {
+  it("applies the correct active classes to the active item", () => {
     mockPath("/admin/candidates");
     render(<WorkspaceNavigation items={navItems} role="admin" />);
 
     const candidatesLink = screen.getByText("Candidates").closest("a");
-    expect(candidatesLink).toHaveClass("active");
+    // Active link gets aria-current="page" and the Zendesk blue bg/text classes
+    expect(candidatesLink).toHaveAttribute("aria-current", "page");
+    expect(candidatesLink).toHaveClass("text-[#1f73b7]");
+
+    // Inactive items should not have aria-current
+    const companiesLink = screen.getByText("Companies").closest("a");
+    expect(companiesLink).not.toHaveAttribute("aria-current");
   });
 
   it("renders a title attribute on each link", () => {
