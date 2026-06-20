@@ -34,6 +34,9 @@ vi.mock("lucide-react", () => ({
   UserPlus: () => <span data-testid="icon-user-plus" />,
   Sparkles: () => <span data-testid="icon-sparkles" />,
   Shield: () => <span data-testid="icon-shield" />,
+  Briefcase: () => <span data-testid="icon-briefcase" />,
+  GraduationCap: () => <span data-testid="icon-graduation" />,
+  Users: () => <span data-testid="icon-users" />,
 }));
 
 // ── Mock auth modules ─────────────────────────────────────────
