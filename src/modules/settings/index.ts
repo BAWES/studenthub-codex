@@ -5,23 +5,29 @@
 export {
   listSettings,
   getSetting,
-  updateSetting
+  updateSetting,
+  createSetting,
+  deleteSetting,
 } from "./actions";
 
 export type {
   ListSettingsInput,
   GetSettingInput,
   UpdateSettingInput,
+  CreateSettingInput,
+  DeleteSettingInput,
   SettingItem,
   ListSettingsResult,
-  UpdateSettingResult
+  UpdateSettingResult,
 } from "./schemas";
 
 export {
   listSettingsSchema,
   getSettingSchema,
   updateSettingSchema,
+  createSettingSchema,
+  deleteSettingSchema,
   settingItemSchema,
   listSettingsResultSchema,
-  updateSettingResultSchema
+  updateSettingResultSchema,
 } from "./schemas";
