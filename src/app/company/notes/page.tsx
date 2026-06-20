@@ -20,7 +20,7 @@ export default async function CompanyNotesPage() {
           { label: "Total notes", value: result.total, note: "Across all companies" },
         ]}
       >
-        <div className="space-y-6" style={{ marginTop: "1.5rem" }}>
+        <div className="space-y-6 mt-6">
           <CompanyNotesList
             notes={result.notes}
             total={result.total}

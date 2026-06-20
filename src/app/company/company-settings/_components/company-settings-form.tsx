@@ -4,6 +4,9 @@ import { useCallback, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { update } from "../actions";
 import type { CompanySettings, UpdateCompanySettingsInput } from "../schemas";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export function CompanySettingsForm({
   companyId,
@@ -81,27 +84,23 @@ export function CompanySettingsForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-6 space-y-5"
+      className="rounded-lg border border-border bg-card p-6 space-y-5"
     >
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold" style={{ color: "var(--ink)" }}>
+        <h3 className="text-sm font-semibold text-foreground">
           {companyName ?? `Company #${companyId}`}
         </h3>
-        <button
-          type="submit"
-          disabled={pending}
-          className="rounded-md bg-[var(--accent)] px-4 py-1.5 text-xs font-medium text-white disabled:opacity-50"
-        >
+        <Button type="submit" size="sm" disabled={pending}>
           {pending ? "Saving..." : "Save"}
-        </button>
+        </Button>
       </div>
 
       {feedback && (
         <div
-          className={`rounded px-3 py-2 text-xs ${
+          className={`rounded-md px-3 py-2 text-xs ${
             feedback.type === "success"
-              ? "bg-[var(--sh-success-bg)] text-[var(--sh-success)]"
-              : "bg-[var(--sh-error-bg)] text-[var(--sh-error)]"
+              ? "bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-400"
+              : "bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-400"
           }`}
         >
           {feedback.message}
@@ -110,7 +109,7 @@ export function CompanySettingsForm({
 
       {/* Name & Identity */}
       <fieldset>
-        <legend className="text-xs font-medium mb-3" style={{ color: "var(--ink-muted)" }}>
+        <legend className="text-xs font-medium mb-3 text-muted-foreground">
           Company Identity
         </legend>
         <div className="grid gap-4 sm:grid-cols-2">
@@ -124,7 +123,7 @@ export function CompanySettingsForm({
 
       {/* Descriptions */}
       <fieldset>
-        <legend className="text-xs font-medium mb-3" style={{ color: "var(--ink-muted)" }}>
+        <legend className="text-xs font-medium mb-3 text-muted-foreground">
           Descriptions
         </legend>
         <div className="grid gap-4 sm:grid-cols-2">
@@ -135,7 +134,7 @@ export function CompanySettingsForm({
 
       {/* Rates & Finance */}
       <fieldset>
-        <legend className="text-xs font-medium mb-3" style={{ color: "var(--ink-muted)" }}>
+        <legend className="text-xs font-medium mb-3 text-muted-foreground">
           Rates & Finance
         </legend>
         <div className="grid gap-4 sm:grid-cols-2">
@@ -148,7 +147,7 @@ export function CompanySettingsForm({
 
       {/* Toggles */}
       <fieldset>
-        <legend className="text-xs font-medium mb-3" style={{ color: "var(--ink-muted)" }}>
+        <legend className="text-xs font-medium mb-3 text-muted-foreground">
           Settings
         </legend>
         <div className="flex flex-wrap gap-6">
@@ -186,9 +185,10 @@ function InputField({
   dir?: string;
 }) {
   return (
-    <label className="flex flex-col gap-1">
-      <span className="text-xs" style={{ color: "var(--ink-muted)" }}>{label}</span>
-      <input
+    <div className="flex flex-col gap-1.5">
+      <Label htmlFor={name} className="text-xs text-muted-foreground">{label}</Label>
+      <Input
+        id={name}
         type={type}
         name={name}
         defaultValue={defaultValue}
@@ -198,10 +198,8 @@ function InputField({
         maxLength={maxLength}
         placeholder={placeholder}
         dir={dir}
-        className="rounded-md border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-sm outline-none focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)]"
-        style={{ color: "var(--ink)" }}
       />
-    </label>
+    </div>
   );
 }
 
@@ -217,17 +215,17 @@ function TextareaField({
   dir?: string;
 }) {
   return (
-    <label className="flex flex-col gap-1">
-      <span className="text-xs" style={{ color: "var(--ink-muted)" }}>{label}</span>
+    <div className="flex flex-col gap-1.5">
+      <Label htmlFor={name} className="text-xs text-muted-foreground">{label}</Label>
       <textarea
+        id={name}
         name={name}
         defaultValue={defaultValue}
         dir={dir}
         rows={3}
-        className="rounded-md border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-sm outline-none focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)] resize-y"
-        style={{ color: "var(--ink)" }}
+        className="flex min-h-[60px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 resize-y"
       />
-    </label>
+    </div>
   );
 }
 
@@ -246,9 +244,9 @@ function CheckboxField({
         type="checkbox"
         name={name}
         defaultChecked={defaultChecked}
-        className="rounded border-[var(--border)] text-[var(--accent)] focus:ring-[var(--accent)]"
+        className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
       />
-      <span className="text-xs" style={{ color: "var(--ink)" }}>{label}</span>
+      <span className="text-xs text-foreground">{label}</span>
     </label>
   );
 }
