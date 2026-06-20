@@ -8,7 +8,7 @@
  * Prisma-based search automatically.
  */
 
-import { getTypesenseClient, COMPANIES_COLLECTION, type CompanyDocument } from "@/lib/typesense";
+import { getTypesenseClient, COMPANIES_COLLECTION, type CompanyDocument, isTypesenseAvailable } from "@/lib/typesense";
 import { prisma } from "@/lib/prisma";
 import { formatMoney, formatDate } from "@/modules/workspace/format";
 import type { ListAdminCompaniesInput, CompanyRow } from "./schemas";
@@ -48,13 +48,10 @@ export async function listAdminCompaniesTypesense(input: ListAdminCompaniesInput
 async function searchTypesense(input: ListAdminCompaniesInput): Promise<any> {
   const client = getTypesenseClient();
 
-  // Health check
-  try {
-    const health = await client.health.retrieve();
-    if (!health.ok) return null;
-  } catch {
-    return null;
-  }
+  // Quick health check with 60s cache — avoids 1s timeout on every SSR request
+  // when Typesense is simply not running (e.g. CI, local dev).
+  const available = await isTypesenseAvailable();
+  if (!available) return null;
 
   // Verify collection exists and has docs
   try {
