@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useMemo, useCallback, type KeyboardEvent } from "react";
-import { Badge } from "@/components/ui/badge";
 import type { PaymentRow } from "../schemas";
+import { StatusBadge } from "@/components/ui/status-badge";
 
 // ---------------------------------------------------------------------------
 // PaymentDataTable
@@ -23,21 +23,12 @@ export type PaymentDataTableProps = {
 type SortKey = "date" | "reference" | "total" | "status";
 type SortDir = "asc" | "desc";
 
-const STATUS_BADGE_VARIANTS: Record<string, "success" | "destructive" | "secondary" | "warning" | "default"> = {
+const STATUS_MAP: Record<string, "success" | "warning" | "error" | "info" | "neutral"> = {
   AUTHORISED: "success",
   PAID: "success",
-  VOIDED: "destructive",
-  DELETED: "destructive",
+  VOIDED: "error",
+  DELETED: "error",
 };
-
-function StatusBadge({ status }: { status: string | null }) {
-  const variant = STATUS_BADGE_VARIANTS[status ?? ""] ?? "secondary";
-  return (
-    <Badge variant={variant} aria-label={`Status: ${status ?? "Unknown"}`}>
-      {status ?? "Unknown"}
-    </Badge>
-  );
-}
 
 function formatDate(iso: string): string {
   const d = new Date(iso);
@@ -49,15 +40,13 @@ function formatAmount(total: number | null, currency: string | null): string {
   return `${total.toLocaleString("en-US", { maximumFractionDigits: 3 })} ${currency ?? "KWD"}`;
 }
 
-
-
 function ReconciledCheck({ reconciled }: { reconciled: boolean | null }) {
   return (
     <span
       className="inline-flex items-center justify-center w-6 h-6 rounded-full text-sm"
       style={{
-        background: reconciled ? "rgba(34, 197, 94, 0.15)" : "rgba(239, 68, 68, 0.1)",
-        color: reconciled ? "#22c55e" : "#ef4444",
+        background: reconciled ? "var(--sh-success-bg)" : "var(--sh-error-bg)",
+        color: reconciled ? "var(--sh-success)" : "var(--sh-error)",
       }}
       aria-label={reconciled ? "Reconciled" : "Not reconciled"}
     >
@@ -70,7 +59,7 @@ function SkeletonRow() {
   return (
     <div className="flex items-center gap-4 px-4 py-3" aria-hidden="true">
       {Array.from({ length: 8 }).map((_, i) => (
-        <div key={i} className="h-4 rounded bg-white/5 animate-pulse" style={{ width: `${60 + i * 15}px`, flex: i === 2 ? "1" : undefined }} />
+        <div key={i} className="h-4 rounded bg-[var(--surface)] animate-pulse" style={{ width: `${60 + i * 15}px`, flex: i === 2 ? "1" : undefined }} />
       ))}
     </div>
   );
@@ -136,14 +125,14 @@ export function PaymentDataTable({
 
   if (error && !loading) {
     return (
-      <div className="rounded-lg border border-border bg-white p-8" role="alert">
+      <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-8" role="alert">
         <div className="flex flex-col items-center gap-4 text-center">
           <span className="text-3xl" aria-hidden="true">⚠️</span>
           <div>
-            <p className="text-lg font-semibold text-foreground">Could not load payments</p>
-            <p className="text-sm mt-1 text-muted-foreground">{error}</p>
+            <p className="text-lg font-semibold text-[var(--ink)]">Could not load payments</p>
+            <p className="text-sm mt-1 text-[var(--muted)]">{error}</p>
           </div>
-          <button onClick={onRetry} className="h-10 rounded-lg px-4 text-sm font-semibold bg-primary text-primary-foreground">
+          <button onClick={onRetry} className="h-10 rounded-lg px-4 text-sm font-semibold bg-[var(--sh-info)] text-white">
             Retry
           </button>
         </div>
@@ -152,9 +141,9 @@ export function PaymentDataTable({
   }
 
   return (
-    <div className="rounded-lg border border-border bg-white overflow-hidden">
+    <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] overflow-hidden">
       <div
-        className="grid gap-0 text-[11px] font-bold uppercase tracking-wider px-4 py-3 text-muted-foreground border-b border-border/10"
+        className="grid gap-0 text-[11px] font-bold uppercase tracking-wider px-4 py-3 text-[var(--muted)] border-b border-[var(--border)]"
         style={{
           gridTemplateColumns: COLUMNS.map((c) => c.width).join(" "),
         }}
@@ -162,11 +151,12 @@ export function PaymentDataTable({
         {COLUMNS.map((col) => (
           <div
             key={col.key}
-            className={`flex items-center gap-1 ${col.align === "right" ? "justify-end" : col.align === "center" ? "justify-center" : ""} ${col.sortable ? "cursor-pointer" : "cursor-default"}`}
+            className={`flex items-center gap-1 ${col.align === "right" ? "justify-end" : col.align === "center" ? "justify-center" : ""}`}
+            style={{ cursor: col.sortable ? "pointer" : "default" }}
             onClick={() => col.sortable && handleSort(col.key)}
           >
             {col.label}
-            {sortKey === col.key && <span>{sortDir === "asc" ? "▲" : "▼"}</span>}
+            {sortKey === col.key && <span className="text-[var(--sh-info)]">{sortDir === "asc" ? "▲" : "▼"}</span>}
           </div>
         ))}
       </div>
@@ -178,9 +168,9 @@ export function PaymentDataTable({
       ) : !sortedPayments.length ? (
         <div className="flex flex-col items-center justify-center py-16 gap-4" role="status">
           <span className="text-4xl" aria-hidden="true">💳</span>
-          <p className="text-lg font-semibold text-foreground">No payments yet</p>
-          <p className="text-sm text-center max-w-md text-muted-foreground">
-            Payments will appear here once bank transactions are synced from Xero.
+          <p className="text-lg font-semibold text-[var(--ink)]">No payments yet</p>
+          <p className="text-sm text-center max-w-md text-[var(--muted)]">
+            Payments will appear here once bank transactions are synced.
           </p>
         </div>
       ) : (
@@ -188,7 +178,7 @@ export function PaymentDataTable({
           {sortedPayments.map((payment, i) => (
             <div
               key={payment.bank_transaction_id}
-              className="grid gap-0 px-4 py-3 transition-all duration-150 cursor-pointer even:bg-transparent odd:bg-muted/5"
+              className={`grid gap-0 px-4 py-3 transition-all duration-150 cursor-pointer ${i % 2 === 0 ? "" : "bg-[var(--surface)]"}`}
               style={{
                 gridTemplateColumns: COLUMNS.map((c) => c.width).join(" "),
               }}
@@ -198,13 +188,15 @@ export function PaymentDataTable({
               onClick={() => onRowClick(payment)}
               onKeyDown={(e) => handleKeyDown(e, payment)}
             >
-              <span className="text-sm text-foreground">{formatDate(payment.date)}</span>
-              <span className="text-sm font-medium text-foreground">{payment.reference ?? "—"}</span>
-              <span className="text-sm truncate text-foreground">{payment.contact_name ?? "—"}</span>
-              <span className="text-sm text-center text-muted-foreground">{payment.type ?? "—"}</span>
-              <span className="text-sm text-right font-medium text-foreground">{formatAmount(payment.total, payment.currency_code)}</span>
-              <span className="text-sm text-center text-muted-foreground">{payment.currency_code ?? "—"}</span>
-              <span className="flex justify-center"><StatusBadge status={payment.status} /></span>
+              <span className="text-sm text-[var(--ink)]">{formatDate(payment.date)}</span>
+              <span className="text-sm font-medium text-[var(--ink)]">{payment.reference ?? "—"}</span>
+              <span className="text-sm truncate text-[var(--ink)]">{payment.contact_name ?? "—"}</span>
+              <span className="text-sm text-center text-[var(--muted)]">{payment.type ?? "—"}</span>
+              <span className="text-sm text-right font-medium text-[var(--ink)]">{formatAmount(payment.total, payment.currency_code)}</span>
+              <span className="text-sm text-center text-[var(--muted)]">{payment.currency_code ?? "—"}</span>
+              <span className="flex justify-center">
+                <StatusBadge status={STATUS_MAP[payment.status ?? ""] ?? "neutral"}>{payment.status ?? "Unknown"}</StatusBadge>
+              </span>
               <span className="flex justify-center"><ReconciledCheck reconciled={payment.is_reconciled} /></span>
             </div>
           ))}
@@ -212,13 +204,13 @@ export function PaymentDataTable({
       )}
 
       {!loading && !error && total > 0 && onPageChange && (
-        <div className="flex items-center justify-between px-4 py-3 text-sm border-t border-border/10 text-muted-foreground">
+        <div className="flex items-center justify-between px-4 py-3 text-sm border-t border-[var(--border)] text-[var(--muted)]">
           <span>Showing {1 + (page - 1) * 20}-{Math.min(page * 20, total)} of {total}</span>
           <div className="flex items-center gap-2">
             <button
               disabled={page <= 1}
               onClick={() => onPageChange(page - 1)}
-              className="px-3 py-1.5 rounded-md text-sm font-medium disabled:opacity-30 bg-muted/10"
+              className="px-3 py-1.5 rounded-md text-sm font-medium disabled:opacity-30 bg-[var(--surface)] border border-[var(--border)]"
               aria-label="Previous page"
             >
               ← Prev
@@ -227,7 +219,7 @@ export function PaymentDataTable({
             <button
               disabled={page >= totalPages}
               onClick={() => onPageChange(page + 1)}
-              className="px-3 py-1.5 rounded-md text-sm font-medium disabled:opacity-30 bg-muted/10"
+              className="px-3 py-1.5 rounded-md text-sm font-medium disabled:opacity-30 bg-[var(--surface)] border border-[var(--border)]"
               aria-label="Next page"
             >
               Next →

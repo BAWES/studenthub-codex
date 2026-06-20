@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useCallback, type KeyboardEvent } from "react";
 import type { InvoiceRow } from "../schemas";
+import { StatusBadge } from "@/components/ui/status-badge";
 
 // ---------------------------------------------------------------------------
 // InvoiceDataTable
@@ -30,6 +31,11 @@ type ColDef = {
   sortable: boolean;
 };
 
+const STATUS_MAP: Record<string, "success" | "warning" | "error" | "info" | "neutral"> = {
+  paid: "success",
+  unpaid: "error",
+};
+
 const COLUMNS: ColDef[] = [
   { key: "company_name", label: "Company", width: "1fr", align: "left", sortable: true },
   { key: "invoice_date", label: "Date", width: "140px", align: "left", sortable: true },
@@ -53,26 +59,13 @@ function formatAmount(total: string | null, currency: string | null): string {
   return `${num.toLocaleString("en-US", { maximumFractionDigits: 3 })} ${currency ?? "KWD"}`;
 }
 
-function StatusBadge({ status }: { status: string | null }) {
-  return (
-    <span
-      className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold ${
-        status === "paid" ? "bg-green-500/15 text-green-600" : status === "unpaid" ? "bg-red-500/15 text-red-500" : "bg-white/5 text-white/40"
-      }`}
-      aria-label={`Status: ${status ?? "Unknown"}`}
-    >
-      {status ? status.charAt(0).toUpperCase() + status.slice(1) : "Unknown"}
-    </span>
-  );
-}
-
 function SkeletonRow() {
   return (
     <div className="flex items-center gap-4 px-4 py-3" aria-hidden="true">
       {Array.from({ length: 5 }).map((_, i) => (
         <div
           key={i}
-          className="h-4 rounded bg-white/5 animate-pulse"
+          className="h-4 rounded bg-[var(--surface)] animate-pulse"
           style={{ width: `${80 + i * 25}px`, flex: i === 0 ? "1" : undefined }}
         />
       ))}
@@ -130,14 +123,14 @@ export function InvoiceDataTable({
 
   if (error && !loading) {
     return (
-      <div className="rounded-lg border border-border bg-white p-8" role="alert">
+      <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-8" role="alert">
         <div className="flex flex-col items-center gap-4 text-center">
           <span className="text-3xl" aria-hidden="true">⚠️</span>
           <div>
-            <p className="text-lg font-semibold text-foreground">Could not load invoices</p>
-            <p className="text-sm mt-1 text-muted-foreground">{error}</p>
+            <p className="text-lg font-semibold text-[var(--ink)]">Could not load invoices</p>
+            <p className="text-sm mt-1 text-[var(--muted)]">{error}</p>
           </div>
-          <button onClick={onRetry} className="h-10 rounded-lg px-4 text-sm font-semibold bg-primary text-primary-foreground">
+          <button onClick={onRetry} className="h-10 rounded-lg px-4 text-sm font-semibold bg-[var(--sh-info)] text-white">
             Retry
           </button>
         </div>
@@ -146,9 +139,9 @@ export function InvoiceDataTable({
   }
 
   return (
-    <div className="rounded-lg border border-border bg-white overflow-hidden">
+    <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] overflow-hidden">
       <div
-        className="grid gap-0 text-[11px] font-bold uppercase tracking-wider px-4 py-3 text-muted-foreground border-b border-white/10"
+        className="grid gap-0 text-[11px] font-bold uppercase tracking-wider px-4 py-3 text-[var(--muted)] border-b border-[var(--border)]"
         style={{
           gridTemplateColumns: COLUMNS.map((c) => c.width).join(" "),
         }}
@@ -156,12 +149,13 @@ export function InvoiceDataTable({
         {COLUMNS.map((col) => (
           <div
             key={col.key}
-            className={`flex items-center gap-1 ${col.align === "right" ? "justify-end" : col.align === "center" ? "justify-center" : ""} ${col.sortable ? "cursor-pointer" : "cursor-default"}`}
+            className={`flex items-center gap-1 ${col.align === "right" ? "justify-end" : col.align === "center" ? "justify-center" : ""}`}
+            style={{ cursor: col.sortable ? "pointer" : "default" }}
             onClick={() => col.sortable && handleSort(col.key)}
           >
             {col.label}
             {sortKey === col.key && (
-              <span className="text-blue-500">{sortDir === "asc" ? "▲" : "▼"}</span>
+              <span className="text-[var(--sh-info)]">{sortDir === "asc" ? "▲" : "▼"}</span>
             )}
           </div>
         ))}
@@ -176,8 +170,8 @@ export function InvoiceDataTable({
       ) : !sortedInvoices.length ? (
         <div className="flex flex-col items-center justify-center py-16 gap-4" role="status">
           <span className="text-4xl" aria-hidden="true">📄</span>
-          <p className="text-lg font-semibold text-foreground">No invoices yet</p>
-          <p className="text-sm text-center max-w-md text-muted-foreground">
+          <p className="text-lg font-semibold text-[var(--ink)]">No invoices yet</p>
+          <p className="text-sm text-center max-w-md text-[var(--muted)]">
             Invoices will appear here once they are generated from transfer billing.
           </p>
         </div>
@@ -186,7 +180,7 @@ export function InvoiceDataTable({
           {sortedInvoices.map((invoice, i) => (
             <div
               key={invoice.invoice_id}
-              className="grid gap-0 px-4 py-3 transition-all duration-150 cursor-pointer even:bg-transparent odd:bg-white/[0.02]"
+              className={`grid gap-0 px-4 py-3 transition-all duration-150 cursor-pointer ${i % 2 === 0 ? "" : "bg-[var(--surface)]"}`}
               style={{
                 gridTemplateColumns: COLUMNS.map((c) => c.width).join(" "),
               }}
@@ -196,20 +190,22 @@ export function InvoiceDataTable({
               onClick={() => onRowClick(invoice)}
               onKeyDown={(e) => handleKeyDown(e, invoice)}
             >
-              <span className="text-sm font-medium truncate text-foreground">
+              <span className="text-sm font-medium truncate text-[var(--ink)]">
                 {invoice.company_name ?? "—"}
               </span>
-              <span className="text-sm text-foreground">
+              <span className="text-sm text-[var(--ink)]">
                 {formatDate(invoice.invoice_date)}
               </span>
-              <span className="text-sm text-right font-medium text-foreground">
+              <span className="text-sm text-right font-medium text-[var(--ink)]">
                 {formatAmount(invoice.total, invoice.currency_code)}
               </span>
-              <span className="text-sm text-center text-muted-foreground">
+              <span className="text-sm text-center text-[var(--muted)]">
                 {invoice.currency_code ?? "—"}
               </span>
               <span className="flex justify-center">
-                <StatusBadge status={invoice.invoice_status} />
+                <StatusBadge status={STATUS_MAP[invoice.invoice_status ?? ""] ?? "neutral"}>
+                  {invoice.invoice_status ? invoice.invoice_status.charAt(0).toUpperCase() + invoice.invoice_status.slice(1) : "Unknown"}
+                </StatusBadge>
               </span>
             </div>
           ))}
@@ -217,15 +213,13 @@ export function InvoiceDataTable({
       )}
 
       {!loading && !error && total > 20 && onPageChange && (
-        <div
-          className="flex items-center justify-between px-4 py-3 text-sm border-t border-white/10 text-muted-foreground"
-        >
+        <div className="flex items-center justify-between px-4 py-3 text-sm border-t border-[var(--border)] text-[var(--muted)]">
           <span>Showing {1 + (page - 1) * 20}-{Math.min(page * 20, total)} of {total}</span>
           <div className="flex items-center gap-2">
             <button
               disabled={page <= 1}
               onClick={() => onPageChange(page - 1)}
-              className="px-3 py-1.5 rounded-md text-sm font-medium disabled:opacity-30 bg-white/5"
+              className="px-3 py-1.5 rounded-md text-sm font-medium disabled:opacity-30 bg-[var(--surface)] border border-[var(--border)]"
               aria-label="Previous page"
             >
               ← Prev
@@ -234,7 +228,7 @@ export function InvoiceDataTable({
             <button
               disabled={page >= totalPages}
               onClick={() => onPageChange(page + 1)}
-              className="px-3 py-1.5 rounded-md text-sm font-medium disabled:opacity-30 bg-white/5"
+              className="px-3 py-1.5 rounded-md text-sm font-medium disabled:opacity-30 bg-[var(--surface)] border border-[var(--border)]"
               aria-label="Next page"
             >
               Next →
