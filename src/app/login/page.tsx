@@ -27,10 +27,10 @@ export default async function LoginPage({
   const params = await searchParams;
 
   return (
-    <main className="min-h-svh w-[min(1160px,calc(100%_-_28px))] mx-auto grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(400px,500px)] content-start items-start gap-4 pt-[18px] pb-[42px] max-sm:w-[min(calc(100%_-_20px),720px)]">
+    <main className="min-h-svh w-[min(1160px,calc(100%_-_28px))] mx-auto grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(400px,500px)] content-start items-start gap-4 pt-5 pb-10 max-sm:w-[min(calc(100%_-_20px),720px)]">
       {/* Nav - spans full width */}
       <nav
-        className="col-span-full sticky top-3 z-20 min-h-[62px] flex items-center justify-between gap-3.5 border border-border/80 rounded-lg bg-card/92 p-2 shadow-[0_18px_50px_rgba(16,24,40,0.08)] max-sm:static max-sm:flex-col max-sm:items-stretch"
+        className="col-span-full sticky top-3 z-20 min-h-16 flex items-center justify-between gap-3.5 border border-border/80 rounded-lg bg-card/92 p-2 shadow-lg max-sm:static max-sm:flex-col max-sm:items-stretch"
         aria-label="StudentHub login navigation"
       >
         <Link
@@ -46,11 +46,9 @@ export default async function LoginPage({
       </nav>
 
       {/* Intro */}
-      <Card className="overflow-hidden border-border" style={{
-        background: "linear-gradient(135deg,color-mix(in srgb,var(--blue) 9%,transparent),transparent 48%),var(--card)"
-      }}>
-        <CardContent className="p-[clamp(22px,4vw,48px)]">
-          <p className="text-[var(--blue)] text-[11px] font-black uppercase">One StudentHub login</p>
+      <Card className="overflow-hidden border-border bg-gradient-to-br from-blue-50/80 dark:from-blue-950/20 to-card">
+        <CardContent className="p-8 lg:p-12">
+          <p className="text-blue-600 dark:text-blue-400 text-xs font-black uppercase tracking-wide">One StudentHub login</p>
           <h1 className="mt-0 max-w-[760px] text-[clamp(44px,6.4vw,92px)] leading-[0.94] max-sm:text-[40px]">
             Sign in once. We&rsquo;ll open the right workspace.
           </h1>
@@ -58,20 +56,20 @@ export default async function LoginPage({
             No more guessing whether you are entering as admin, staff, candidate, company, or inspector. Your production
             credentials decide what you can see and do.
           </p>
-          <div className="flex flex-wrap gap-2 mt-[18px]">
+          <div className="flex flex-wrap gap-2 mt-5">
             {["Production-compatible credentials", "Server-side account detection", "Capability-scoped workspaces"].map(
               (item) => (
                 <Badge
                   key={item}
-                  variant="outline"
-                  className="text-[var(--blue)] text-[11px] font-black uppercase px-3 py-1.5"
+                  variant="secondary"
+                  className="text-xs font-black uppercase px-3 py-1.5"
                 >
                   {item}
                 </Badge>
               )
             )}
           </div>
-          <Link href="/" className="inline-block mt-4 text-sm no-underline text-muted-foreground hover:text-[var(--blue)]">
+          <Link href="/" className="inline-block mt-4 text-sm no-underline text-muted-foreground hover:text-blue-600 dark:hover:text-blue-400">
             Back to landing
           </Link>
         </CardContent>
@@ -79,7 +77,7 @@ export default async function LoginPage({
 
       {/* Login panel */}
       <Card
-        className="self-start border-[#c5cfdd] dark:border-border shadow-[0_30px_90px_rgba(16,24,40,0.16)]"
+        className="self-start shadow-xl border-border"
         aria-label="StudentHub sign in"
       >
         {params.error === "expired" ? (
@@ -96,7 +94,7 @@ export default async function LoginPage({
         {roleNotes.map(({ icon: Icon, label, detail }) => (
           <Card key={label}>
             <CardContent className="grid gap-1.5 p-3.5">
-              <Icon className="size-4 text-[var(--blue)] shrink-0" aria-hidden="true" />
+              <Icon className="size-4 text-blue-600 dark:text-blue-400 shrink-0" aria-hidden="true" />
               <span className="text-muted-foreground text-xs font-extrabold uppercase">{label}</span>
               <strong className="text-sm text-foreground">{detail}</strong>
             </CardContent>
