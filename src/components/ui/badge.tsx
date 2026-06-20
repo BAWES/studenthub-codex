@@ -9,7 +9,8 @@ const badgeVariants = cva("uiBadge", {
       secondary: "uiBadge_secondary",
       success: "uiBadge_success",
       warning: "uiBadge_warning",
-      outline: "uiBadge_outline"
+      outline: "uiBadge_outline",
+      destructive: "uiBadge_destructive"
     }
   },
   defaultVariants: {
