@@ -22,20 +22,14 @@ export default async function LoginPage({
   const params = await searchParams;
 
   return (
-    <main
-      className="min-h-svh flex items-center justify-center p-6"
-      style={{ backgroundColor: "var(--paper)" }}
-    >
+    <main className="min-h-svh flex items-center justify-center p-6 bg-background">
       <div className="w-full max-w-[420px] grid gap-8">
         {/* ── Brand ────────────────────────────────────────────────── */}
         <div className="grid justify-items-center gap-3 text-center">
-          <span
-            className="inline-flex items-center justify-center w-11 h-11 rounded-xl text-white text-lg font-black"
-            style={{ backgroundColor: "var(--sh-coral)" }}
-          >
+          <span className="inline-flex items-center justify-center w-11 h-11 rounded-xl text-white text-lg font-black bg-[var(--sh-coral)]">
             SH
           </span>
-          <strong className="text-xl font-bold" style={{ color: "var(--ink)" }}>
+          <strong className="text-xl font-bold text-foreground">
             StudentHub
           </strong>
         </div>
@@ -50,26 +44,12 @@ export default async function LoginPage({
           </CardHeader>
           <CardContent>
             {params.error === "expired" ? (
-              <div
-                className="flex items-center gap-2 px-3.5 py-2.5 rounded-md text-[13px] font-semibold mb-4"
-                style={{
-                  backgroundColor: "var(--sh-error-bg)",
-                  border: "1px solid color-mix(in srgb, var(--sh-error) 20%, transparent)",
-                  color: "var(--sh-error)",
-                }}
-              >
+              <div className="flex items-center gap-2 px-3.5 py-2.5 rounded-md text-[13px] font-semibold mb-4 bg-[var(--sh-error-bg)] text-[var(--sh-error)] border border-[var(--sh-error)]/20">
                 That verified account choice expired. Sign in again to continue.
               </div>
             ) : null}
             {params.error === "account" ? (
-              <div
-                className="flex items-center gap-2 px-3.5 py-2.5 rounded-md text-[13px] font-semibold mb-4"
-                style={{
-                  backgroundColor: "var(--sh-error-bg)",
-                  border: "1px solid color-mix(in srgb, var(--sh-error) 20%, transparent)",
-                  color: "var(--sh-error)",
-                }}
-              >
+              <div className="flex items-center gap-2 px-3.5 py-2.5 rounded-md text-[13px] font-semibold mb-4 bg-[var(--sh-error-bg)] text-[var(--sh-error)] border border-[var(--sh-error)]/20">
                 Choose a verified account to continue.
               </div>
             ) : null}
@@ -84,12 +64,7 @@ export default async function LoginPage({
             (item) => (
               <span
                 key={item}
-                className="inline-flex items-center px-3 h-7 rounded-full text-[11px] font-black uppercase tracking-[0.03em]"
-                style={{
-                  backgroundColor: "var(--sh-coral-light)",
-                  border: "1px solid color-mix(in srgb, var(--sh-coral) 20%, transparent)",
-                  color: "var(--sh-coral)",
-                }}
+                className="inline-flex items-center px-3 h-7 rounded-full text-[11px] font-black uppercase tracking-[0.03em] bg-[var(--sh-coral-light)] text-[var(--sh-coral)] border border-[var(--sh-coral)]/20"
               >
                 {item}
               </span>

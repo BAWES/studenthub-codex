@@ -48,14 +48,7 @@ export function LoginForm() {
         </div>
 
         {state.error ? (
-          <div
-            className="flex items-center gap-2 px-3.5 py-2.5 rounded-md text-[13px] font-semibold"
-            style={{
-              backgroundColor: "var(--sh-error-bg)",
-              border: "1px solid color-mix(in srgb, var(--sh-error) 20%, transparent)",
-              color: "var(--sh-error)",
-            }}
-          >
+          <div className="flex items-center gap-2 px-3.5 py-2.5 rounded-md text-[13px] font-semibold bg-[var(--sh-error-bg)] text-[var(--sh-error)] border border-[var(--sh-error)]/20">
             <span>{state.error}</span>
           </div>
         ) : null}
@@ -63,11 +56,7 @@ export function LoginForm() {
         <Button
           type="submit"
           disabled={pending}
-          className="w-full"
-          style={{
-            backgroundColor: pending ? "var(--sh-coral-hover)" : "var(--sh-coral)",
-            color: "#fff",
-          }}
+          className="w-full bg-[var(--sh-coral)] text-white disabled:bg-[var(--sh-coral-hover)]"
         >
           <LogIn className="size-4" />
           {pending ? "Checking credentials..." : "Sign in"}
@@ -76,21 +65,14 @@ export function LoginForm() {
 
       {accounts.length > 0 ? (
         <section
-          className="grid gap-3 pt-5 mt-5"
-          style={{ borderTop: "1px solid var(--line)" }}
+          className="grid gap-3 pt-5 mt-5 border-t border-[var(--line)]"
           aria-label="Verified StudentHub accounts"
         >
           <div className="grid gap-0.5">
-            <strong
-              className="text-[15px] leading-[1.2] font-semibold"
-              style={{ color: "var(--ink)" }}
-            >
+            <strong className="text-[15px] leading-[1.2] font-semibold text-foreground">
               Multiple accounts found
             </strong>
-            <p
-              className="text-[13px] leading-relaxed m-0"
-              style={{ color: "var(--muted)" }}
-            >
+            <p className="text-[13px] leading-relaxed m-0 text-muted-foreground">
               Choose where to continue.
             </p>
           </div>
@@ -103,29 +85,13 @@ export function LoginForm() {
               <input name="accountKey" type="hidden" value={account.accountKey} />
               <button
                 type="submit"
-                className="w-full min-h-[52px] flex items-center gap-3 px-3.5 py-2.5 rounded-md text-left text-[15px] cursor-pointer transition-all duration-[180ms]"
-                style={{
-                  border: "1px solid var(--line)",
-                  backgroundColor: "var(--surface)",
-                  color: "var(--ink)",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = "var(--ink)";
-                  e.currentTarget.style.backgroundColor = "var(--surface-soft)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = "var(--line)";
-                  e.currentTarget.style.backgroundColor = "var(--surface)";
-                }}
+                className="w-full min-h-[52px] flex items-center gap-3 px-3.5 py-2.5 rounded-md text-left text-[15px] cursor-pointer transition-all duration-[180ms] border border-[var(--line)] bg-card text-foreground hover:border-foreground hover:bg-muted"
               >
                 <span className="grid gap-0.5 min-w-0">
                   <strong className="text-sm font-semibold">
                     {account.name}
                   </strong>
-                  <small
-                    className="block text-xs font-normal"
-                    style={{ color: "var(--muted)" }}
-                  >
+                  <small className="block text-xs font-normal text-muted-foreground">
                     {account.email}
                   </small>
                 </span>
