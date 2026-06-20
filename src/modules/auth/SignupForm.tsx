@@ -86,7 +86,7 @@ export function SignupForm({ defaultRole }: { defaultRole?: Role }) {
     return (
       <div className="grid gap-7 p-7 sm:p-9 w-full max-w-[480px] mx-auto text-center">
         <div className="grid gap-2">
-          <span className="text-[var(--sh-info)] text-[11px] font-black uppercase tracking-[0.04em]">
+          <span className="text-[var(--sh-coral)] text-[11px] font-black uppercase tracking-[0.04em]">
             {defaultRole} access
           </span>
           <strong className="text-[var(--ink)] text-[22px] leading-[1.15] font-bold tracking-[-0.02em]">
@@ -98,11 +98,7 @@ export function SignupForm({ defaultRole }: { defaultRole?: Role }) {
         </div>
         <Link
           href="/"
-          className="inline-flex items-center justify-center gap-2 min-h-[50px] px-6 rounded-xl text-[15px] font-semibold no-underline transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
-          style={{
-            background: "var(--sh-info)",
-            color: "var(--paper)",
-          }}
+          className="inline-flex items-center justify-center gap-2 min-h-[50px] px-6 rounded-xl text-[15px] font-semibold no-underline transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg bg-[var(--sh-coral)] text-white"
         >
           {msg.cta} <ArrowRight className="size-4" />
         </Link>
@@ -115,7 +111,7 @@ export function SignupForm({ defaultRole }: { defaultRole?: Role }) {
     return (
       <div className="grid gap-7 p-7 sm:p-9 w-full max-w-[640px] mx-auto">
         <div className="grid gap-1.5 text-center">
-          <span className="text-[var(--sh-info)] text-[11px] font-black uppercase tracking-[0.04em]">
+          <span className="text-[var(--sh-coral)] text-[11px] font-black uppercase tracking-[0.04em]">
             Get started
           </span>
           <strong className="text-[var(--ink)] text-[24px] leading-[1.15] font-bold tracking-[-0.02em]">
@@ -138,17 +134,16 @@ export function SignupForm({ defaultRole }: { defaultRole?: Role }) {
               >
                 <div className="flex items-start gap-4">
                   <div
-                    className="shrink-0 size-12 rounded-xl flex items-center justify-center"
-                    style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
+                    className="shrink-0 size-12 rounded-xl flex items-center justify-center bg-[var(--surface)] border border-[var(--border)]"
                   >
-                    <Icon className="size-5 text-[var(--sh-info)]" />
+                    <Icon className="size-5 text-[var(--sh-coral)]" />
                   </div>
                   <div className="grid gap-1.5 min-w-0 flex-1">
                     <strong className="text-[var(--ink)] text-[16px] font-bold">{role.title}</strong>
                     <p className="text-[var(--muted)] text-[13px] leading-relaxed m-0">{role.description}</p>
                     <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1">
                       {role.features.map((f) => (
-                        <span key={f} className="text-[12px] text-[var(--sh-info)]">
+                        <span key={f} className="text-[12px] text-[var(--sh-coral)]">
                           {f}
                         </span>
                       ))}
@@ -162,7 +157,7 @@ export function SignupForm({ defaultRole }: { defaultRole?: Role }) {
 
         <p className="text-center text-[13px] text-[var(--muted)] m-0">
           Already have an account?{" "}
-          <a href="/login" className="text-[var(--sh-info)] font-semibold no-underline hover:underline">
+          <a href="/login" className="text-[var(--sh-coral)] font-semibold no-underline hover:underline">
             Sign in
           </a>
         </p>
@@ -178,12 +173,12 @@ export function SignupForm({ defaultRole }: { defaultRole?: Role }) {
           <button
             type="button"
             onClick={handleBack}
-            className="inline-flex items-center gap-1.5 text-[13px] text-[var(--sh-info)] font-semibold cursor-pointer bg-transparent border-none p-0 w-fit hover:opacity-80 transition-opacity"
+            className="inline-flex items-center gap-1.5 text-[13px] text-[var(--sh-coral)] font-semibold cursor-pointer bg-transparent border-none p-0 w-fit hover:opacity-80 transition-opacity"
           >
             <ArrowLeft className="size-3.5" />
             Back to role selection
           </button>
-          <span className="text-[var(--sh-info)] text-[11px] font-black uppercase tracking-[0.04em] mt-2">
+          <span className="text-[var(--sh-coral)] text-[11px] font-black uppercase tracking-[0.04em] mt-2">
             {selectedRole === "candidate" ? "Worker account" : "Employer account"}
           </span>
           <strong className="text-[var(--ink)] text-[24px] leading-[1.15] font-bold tracking-[-0.02em]">
@@ -212,7 +207,7 @@ export function SignupForm({ defaultRole }: { defaultRole?: Role }) {
             autoComplete="name"
             placeholder={selectedRole === "candidate" ? "Your full name" : "Contact name"}
             required
-            className="min-h-[48px] bg-white border border-[var(--border)] focus:border-[var(--sh-info)] focus:shadow-[var(--sh-glow-sm)] transition-all duration-200"
+            className="min-h-[48px] bg-white border border-[var(--border)] focus:border-[var(--sh-coral)] focus:shadow-[var(--sh-coral-glow)] transition-all duration-200"
           />
           {state.fieldErrors?.name ? (
             <p className="text-[var(--destructive)] font-bold m-0 text-xs">{state.fieldErrors.name[0]}</p>
@@ -230,7 +225,7 @@ export function SignupForm({ defaultRole }: { defaultRole?: Role }) {
             autoComplete="email"
             placeholder="name@example.com"
             required
-            className="min-h-[48px] bg-white border border-[var(--border)] focus:border-[var(--sh-info)] focus:shadow-[var(--sh-glow-sm)] transition-all duration-200"
+            className="min-h-[48px] bg-white border border-[var(--border)] focus:border-[var(--sh-coral)] focus:shadow-[var(--sh-coral-glow)] transition-all duration-200"
           />
           {state.fieldErrors?.email ? (
             <p className="text-[var(--destructive)] font-bold m-0 text-xs">{state.fieldErrors.email[0]}</p>
@@ -249,7 +244,7 @@ export function SignupForm({ defaultRole }: { defaultRole?: Role }) {
             placeholder="At least 5 characters"
             required
             minLength={5}
-            className="min-h-[48px] bg-white border border-[var(--border)] focus:border-[var(--sh-info)] focus:shadow-[var(--sh-glow-sm)] transition-all duration-200"
+            className="min-h-[48px] bg-white border border-[var(--border)] focus:border-[var(--sh-coral)] focus:shadow-[var(--sh-coral-glow)] transition-all duration-200"
           />
           {state.fieldErrors?.password ? (
             <p className="text-[var(--destructive)] font-bold m-0 text-xs">{state.fieldErrors.password[0]}</p>
@@ -267,7 +262,7 @@ export function SignupForm({ defaultRole }: { defaultRole?: Role }) {
             autoComplete="new-password"
             placeholder="Re-enter your password"
             required
-            className="min-h-[48px] bg-white border border-[var(--border)] focus:border-[var(--sh-info)] focus:shadow-[var(--sh-glow-sm)] transition-all duration-200"
+            className="min-h-[48px] bg-white border border-[var(--border)] focus:border-[var(--sh-coral)] focus:shadow-[var(--sh-coral-glow)] transition-all duration-200"
           />
           {state.fieldErrors?.confirmPassword ? (
             <p className="text-[var(--destructive)] font-bold m-0 text-xs">{state.fieldErrors.confirmPassword[0]}</p>
@@ -282,7 +277,7 @@ export function SignupForm({ defaultRole }: { defaultRole?: Role }) {
           type="submit"
           disabled={pending}
           size="lg"
-          className="min-h-[50px] w-full text-[15px] font-semibold transition-all duration-200 cursor-pointer hover:translate-y-[-1px] hover:shadow-lg"
+          className="min-h-[52px] w-full text-[15px] font-semibold transition-all duration-200 cursor-pointer bg-[var(--sh-coral)] text-white hover:bg-[var(--sh-coral-hover)] hover:translate-y-[-1px] hover:shadow-[var(--sh-coral-glow)] disabled:opacity-56 disabled:pointer-events-none"
         >
           <UserPlus className="size-4" />
           {pending ? "Creating account..." : `Create ${selectedRole === "candidate" ? "worker" : "employer"} account`}
@@ -291,7 +286,7 @@ export function SignupForm({ defaultRole }: { defaultRole?: Role }) {
 
       <p className="text-center text-[13px] text-[var(--muted)] m-0 pb-7 sm:pb-9">
         Already have an account?{" "}
-        <a href="/login" className="text-[var(--sh-info)] font-semibold no-underline hover:underline">
+        <a href="/login" className="text-[var(--sh-coral)] font-semibold no-underline hover:underline">
           Sign in
         </a>
       </p>
