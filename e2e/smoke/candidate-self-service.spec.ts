@@ -74,9 +74,8 @@ test.describe("Candidate self-service — mobile smoke", () => {
     const page = await context.newPage();
     await page.goto("/candidate");
 
-    await expect(page.locator(".candidateAvatar")).toBeVisible();
-    await expect(page.locator(".candidateProfileTitle h2")).toBeVisible();
-    await expect(page.locator(".candidateStatusLine")).toBeVisible();
+    await expect(page.locator(".shProfileHero")).toBeVisible();
+    await expect(page.locator(".shProfileInfoName")).toBeVisible();
 
     // Fact grid is present
     await expect(page.locator(".candidateFactGrid")).toBeVisible();

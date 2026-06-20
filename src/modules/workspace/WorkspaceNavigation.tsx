@@ -2,32 +2,24 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import type { NavItem } from "./navigation";
 
 export function WorkspaceNavigation({ items, role }: { items: NavItem[]; role: string }) {
   const pathname = usePathname();
   return (
-    <nav className="w-full grid content-start gap-1" aria-label={`${role} workspace navigation`}>
+    <nav className="workspaceRailNav" aria-label={`${role} workspace navigation`}>
       {items.map((item) => {
         const active = isActive(pathname, item.href);
         const Icon = item.icon;
         return (
           <Link
             aria-current={active ? "page" : undefined}
-            className={cn(
-              buttonVariants({ variant: "ghost" }),
-              "w-full justify-start gap-3 px-3 no-underline text-sm font-semibold",
-              active
-                ? "bg-[#1f73b7]/10 text-[#1f73b7] font-bold"
-                : "text-muted-foreground hover:text-foreground",
-            )}
+            className={active ? "active" : ""}
             href={item.href}
             key={item.href}
             title={item.label}
           >
-            <Icon size={16} strokeWidth={2.5} aria-hidden="true" />
+            <Icon size={18} strokeWidth={2} aria-hidden="true" />
             <strong>{item.label}</strong>
           </Link>
         );
@@ -39,27 +31,18 @@ export function WorkspaceNavigation({ items, role }: { items: NavItem[]; role: s
 export function WorkspaceMobileNavigation({ items, role }: { items: NavItem[]; role: string }) {
   const pathname = usePathname();
   return (
-    <nav
-      className="hidden max-md:flex fixed bottom-0 left-0 right-0 z-50 h-16 border-t border-border bg-card px-1 safe-area-inset-bottom"
-      aria-label={`${role} mobile navigation`}
-    >
+    <nav className="mobileTabBar" aria-label={`${role} mobile navigation`}>
       {items.map((item) => {
         const active = isActive(pathname, item.href);
         const Icon = item.icon;
         return (
           <Link
             aria-current={active ? "page" : undefined}
-            className={cn(
-              "flex flex-1 flex-col items-center justify-center gap-0.5 px-2 py-1.5 rounded-lg no-underline",
-              "min-h-[56px] max-w-[96px] text-[11px] font-semibold transition-colors",
-              active
-                ? "bg-[#1f73b7]/10 text-[#1f73b7] font-bold"
-                : "text-muted-foreground hover:text-foreground",
-            )}
+            className={active ? "active" : ""}
             href={item.href}
             key={item.href}
           >
-            <Icon size={20} strokeWidth={active ? 2.5 : 2} aria-hidden="true" />
+            <Icon size={20} strokeWidth={2} aria-hidden="true" />
             <span>{item.label}</span>
           </Link>
         );
@@ -69,6 +52,5 @@ export function WorkspaceMobileNavigation({ items, role }: { items: NavItem[]; r
 }
 
 function isActive(pathname: string, href: string) {
-  if (href === "/app") return pathname === href || pathname === "/hub";
   return pathname === href || pathname.startsWith(`${href}/`);
 }

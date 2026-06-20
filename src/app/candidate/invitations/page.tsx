@@ -1,31 +1,28 @@
-import type { Route } from "next";
 import { requireRoleCapability } from "@/modules/auth/session";
-import { DataTable } from "@/modules/workspace/DataTable";
-import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
-import { getCandidateInvitationRows } from "@/modules/workspace/data";
+import { formatDate } from "@/modules/workspace/format";
+import { listCandidateInvitations } from "./actions";
+import { CandidateInvitationsTable } from "./_components";
 
 export const dynamic = "force-dynamic";
 
 export default async function CandidateInvitationsPage() {
   const session = await requireRoleCapability("candidate", "candidate.read.own");
-  const rows = await getCandidateInvitationRows(Number(session.id));
+  const result = await listCandidateInvitations({});
 
-  return (
-    <WorkspaceShell session={session} eyebrow="Candidate" title="Invitations" metrics={[]}>
-      <DataTable
-        title="Invitation History"
-        description="Requests and roles sent to your candidate account from the imported production data."
-        rows={rows}
-        rowHref={(row) => `/candidate/invitations/${row.id}` as Route}
-        columns={[
-          { key: "role", label: "Role", render: (row) => <strong>{row.role}</strong> },
-          { key: "company", label: "Company", render: (row) => row.company },
-          { key: "compensation", label: "Compensation", render: (row) => row.compensation },
-          { key: "status", label: "Status", render: (row) => row.status },
-          { key: "seen", label: "Seen", render: (row) => row.seen },
-          { key: "created", label: "Created", render: (row) => row.created }
-        ]}
-      />
-    </WorkspaceShell>
-  );
+  const rows = result.items.map((row) => ({
+    id: row.invitation_uuid,
+    role: row.position_title ?? "Invitation",
+    company: row.company_name ?? "No company",
+    compensation: row.compensation || "Not set",
+    status: `Status ${row.invitation_status ?? 0}`,
+    seen:
+      row.invitation_app_seen_at || row.invitation_email_seen_at
+        ? "Seen"
+        : "Unseen",
+    created: row.invitation_created_at
+      ? formatDate(row.invitation_created_at)
+      : "N/A",
+  }));
+
+  return <CandidateInvitationsTable session={session} rows={rows} />;
 }

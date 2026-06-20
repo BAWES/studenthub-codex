@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useCallback } from "react";
+import { CommandPalette } from "@/components/ui/CommandPalette";
+import type { OSCommand } from "@/components/ui/CommandPalette";
 
 export type HubCommand = {
   id: string;
@@ -16,13 +18,25 @@ type HubShortcutsProps = {
 };
 
 const shortcutRows = [
-  { keys: "Cmd/Ctrl K", label: "Open command menu" },
+  { keys: "⌘K", label: "Open command menu" },
   { keys: "/", label: "Focus workspace search" },
-  { keys: "G then H", label: "Go to command workspace" },
-  { keys: "G then R", label: "Go to requests" },
-  { keys: "G then C", label: "Go to candidates or company" },
+  { keys: "G H", label: "Go to command workspace" },
+  { keys: "G R", label: "Go to requests" },
+  { keys: "G C", label: "Go to candidates or company" },
   { keys: "Esc", label: "Close menu or clear focus" }
 ];
+
+// Re-type HubCommands as OSCommands for the shared component
+function toOSCommands(commands: HubCommand[]): OSCommand[] {
+  return commands.map((c) => ({
+    id: c.id,
+    title: c.title,
+    subtitle: c.subtitle,
+    section: c.section,
+    href: c.href,
+    shortcut: c.shortcut,
+  }));
+}
 
 export function HubShortcuts({ commands }: HubShortcutsProps) {
   const [open, setOpen] = useState(false);
@@ -31,10 +45,12 @@ export function HubShortcuts({ commands }: HubShortcutsProps) {
   const sequenceRef = useRef("");
   const inputRef = useRef<HTMLInputElement | null>(null);
 
+  const osCommands = useMemo(() => toOSCommands(commands), [commands]);
+
   const filteredCommands = useMemo(() => {
     const normalized = query.trim().toLowerCase();
-    if (!normalized) return commands.slice(0, 18);
-    return commands
+    if (!normalized) return osCommands.slice(0, 18);
+    return osCommands
       .filter((command) =>
         [command.title, command.subtitle, command.section, command.shortcut]
           .filter(Boolean)
@@ -43,16 +59,15 @@ export function HubShortcuts({ commands }: HubShortcutsProps) {
           .includes(normalized)
       )
       .slice(0, 18);
-  }, [commands, query]);
+  }, [osCommands, query]);
 
-  const groupedCommands = useMemo(() => {
-    const groups = new Map<string, HubCommand[]>();
-    for (const command of filteredCommands) {
-      groups.set(command.section, [...(groups.get(command.section) ?? []), command]);
-    }
-    return [...groups.entries()];
-  }, [filteredCommands]);
+  const handleVisit = useCallback((href: string) => {
+    setOpen(false);
+    setQuery("");
+    window.location.href = href;
+  }, []);
 
+  // G-chord keyboard navigation (outside command palette)
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
       const target = event.target as HTMLElement | null;
@@ -60,42 +75,36 @@ export function HubShortcuts({ commands }: HubShortcutsProps) {
         target?.tagName === "INPUT" || target?.tagName === "TEXTAREA" || target?.isContentEditable === true;
       const wantsCommand = (event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k";
       const wantsShortcuts = !isTyping && event.key === "?";
-      const wantsSearch = !isTyping && event.key === "/";
 
-      if (open) {
-        if (event.key === "Escape") {
-          event.preventDefault();
-          setOpen(false);
-          setQuery("");
-          return;
-        }
-        if (event.key === "ArrowDown") {
-          event.preventDefault();
-          setActiveIndex((index) => Math.min(index + 1, filteredCommands.length - 1));
-          return;
-        }
-        if (event.key === "ArrowUp") {
-          event.preventDefault();
-          setActiveIndex((index) => Math.max(index - 1, 0));
-          return;
-        }
-        if (event.key === "Enter" && filteredCommands[activeIndex]) {
-          event.preventDefault();
-          visit(filteredCommands[activeIndex].href);
-          return;
-        }
-      }
-
+      // Open command palette
       if (wantsCommand || wantsShortcuts) {
         event.preventDefault();
         setOpen(true);
         setActiveIndex(0);
         setQuery(wantsShortcuts ? "shortcut" : "");
-        window.setTimeout(() => inputRef.current?.focus(), 0);
         return;
       }
 
-      if (wantsSearch) {
+      // G-chord navigation (when palette is closed)
+      if (!open && !isTyping && event.key.toLowerCase() === "g") {
+        sequenceRef.current = "g";
+        window.setTimeout(() => { sequenceRef.current = ""; }, 900);
+        return;
+      }
+
+      if (!open && !isTyping && sequenceRef.current === "g") {
+        const key = event.key.toLowerCase();
+        const command = osCommands.find((item) => item.shortcut?.toLowerCase() === `g ${key}`);
+        if (command) {
+          event.preventDefault();
+          sequenceRef.current = "";
+          handleVisit(command.href);
+        }
+        return;
+      }
+
+      // / → focus search
+      if (!open && !isTyping && event.key === "/") {
         const input = document.querySelector<HTMLInputElement>("[data-command-search]");
         if (!input) return;
         event.preventDefault();
@@ -103,29 +112,11 @@ export function HubShortcuts({ commands }: HubShortcutsProps) {
         input.select();
         return;
       }
-
-      if (!isTyping && event.key.toLowerCase() === "g") {
-        sequenceRef.current = "g";
-        window.setTimeout(() => {
-          sequenceRef.current = "";
-        }, 900);
-        return;
-      }
-
-      if (!isTyping && sequenceRef.current === "g") {
-        const key = event.key.toLowerCase();
-        const command = commands.find((item) => item.shortcut?.toLowerCase() === `g ${key}`);
-        if (command) {
-          event.preventDefault();
-          sequenceRef.current = "";
-          visit(command.href);
-        }
-      }
     }
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [activeIndex, commands, filteredCommands, open]);
+  }, [open, osCommands, handleVisit]);
 
   useEffect(() => {
     setActiveIndex(0);
@@ -138,68 +129,19 @@ export function HubShortcuts({ commands }: HubShortcutsProps) {
         <kbd>⌘K</kbd>
       </button>
 
-      {open ? (
-        <div className="commandOverlay" role="dialog" aria-modal="true" aria-label="Command menu">
-          <button className="commandScrim" aria-label="Close command menu" type="button" onClick={() => setOpen(false)} />
-          <section className="commandMenu">
-            <div className="commandInputWrap">
-              <span>⌘</span>
-              <input
-                ref={inputRef}
-                autoFocus
-                placeholder="Jump to a view, search visible records, or run an action..."
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-              />
-              <kbd>Esc</kbd>
-            </div>
-            <div className="commandList">
-              {groupedCommands.length ? (
-                groupedCommands.map(([section, items]) => (
-                  <div className="commandGroup" key={section}>
-                    <h3>{section}</h3>
-                    {items.map((command) => {
-                      const absoluteIndex = filteredCommands.findIndex((item) => item.id === command.id);
-                      return (
-                        <button
-                          className={absoluteIndex === activeIndex ? "active" : ""}
-                          key={command.id}
-                          type="button"
-                          onMouseEnter={() => setActiveIndex(absoluteIndex)}
-                          onClick={() => visit(command.href)}
-                        >
-                          <span>
-                            <strong>{command.title}</strong>
-                            <small>{command.subtitle}</small>
-                          </span>
-                          {command.shortcut ? <kbd>{command.shortcut}</kbd> : null}
-                        </button>
-                      );
-                    })}
-                  </div>
-                ))
-              ) : (
-                <div className="commandEmpty">
-                  <strong>No command found</strong>
-                  <span>Try a view, record name, scope, or shortcut.</span>
-                </div>
-              )}
-            </div>
-            <div className="shortcutGrid">
-              {shortcutRows.map((row) => (
-                <div key={row.keys}>
-                  <kbd>{row.keys}</kbd>
-                  <span>{row.label}</span>
-                </div>
-              ))}
-            </div>
-          </section>
-        </div>
-      ) : null}
+      <CommandPalette
+        open={open}
+        query={query}
+        onQueryChange={setQuery}
+        selectedIndex={activeIndex}
+        onSelectIndex={setActiveIndex}
+        onClose={() => { setOpen(false); setQuery(""); }}
+        onVisit={handleVisit}
+        commands={osCommands}
+        filtered={filteredCommands}
+        chords={shortcutRows}
+        inputRef={inputRef}
+      />
     </>
   );
-}
-
-function visit(href: string) {
-  window.location.href = href;
 }

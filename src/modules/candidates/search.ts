@@ -2,7 +2,7 @@ import type { Prisma } from "@prisma/client";
 import type { Route } from "next";
 import { prisma } from "@/lib/prisma";
 import { formatDate, formatMoney } from "@/modules/workspace/format";
-import { getCandidateDetail } from "@/modules/workspace/data";
+import { getCandidateDetail } from "@/modules/candidates/candidate-detail";
 
 export type CandidateSearchRole = "admin" | "staff";
 export type CandidateSearchFilter = "all" | "active" | "needs-review" | "incomplete" | "civil-id";
@@ -27,6 +27,7 @@ export type CandidateSearchParams = {
   profile?: string;
   assignment?: string;
   document?: string;
+  page?: number;
 };
 
 export type CandidateSearchFacet = {
@@ -62,6 +63,40 @@ export const candidateSearchFilters: { label: string; value: CandidateSearchFilt
   { label: "Civil ID", value: "civil-id" }
 ];
 
+export function parseFilter(value: string | string[] | undefined): CandidateSearchFilter {
+  const filter = Array.isArray(value) ? value[0] : value;
+  const validValues = candidateSearchFilters.map((f) => f.value);
+  return validValues.includes(filter as CandidateSearchFilter) ? (filter as CandidateSearchFilter) : "all";
+}
+
+export function parseCandidateId(value: string | string[] | undefined) {
+  const candidate = Array.isArray(value) ? value[0] : value;
+  const id = Number(candidate);
+  return Number.isInteger(id) && id > 0 ? id : undefined;
+}
+
+export function parseCandidateIds(value: string | string[] | undefined, limit = 8) {
+  const raw = Array.isArray(value) ? value[0] : value;
+  if (!raw) return [];
+  return raw
+    .split(",")
+    .map((item) => Number(item))
+    .filter((id) => Number.isInteger(id) && id > 0)
+    .slice(0, limit);
+}
+
+export function parseSearchPage(value: string | string[] | undefined): number | undefined {
+  const raw = Array.isArray(value) ? value[0] : value;
+  if (!raw) return undefined;
+  const page = Number(raw);
+  return Number.isInteger(page) && page > 0 ? page : undefined;
+}
+
+export function parseVisibility(value: string | string[] | undefined): CandidateSearchVisibility {
+  const visibility = Array.isArray(value) ? value[0] : value;
+  return visibility === "assigned" ? "assigned" : "all";
+}
+
 export async function getCandidateSearchWorkspace(params: CandidateSearchParams) {
   const query = params.query?.trim() ?? "";
   const filter = params.filter ?? "all";
@@ -86,6 +121,7 @@ export async function getCandidateSearchWorkspace(params: CandidateSearchParams)
     prisma.candidate.findMany({
       where,
       orderBy: [{ candidate_updated_at: "desc" }, { candidate_id: "desc" }],
+      skip: params.page ? (params.page - 1) * 60 : 0,
       take: 60,
       select: candidateSearchSelect
     }),
@@ -157,6 +193,8 @@ export async function getCandidateSearchWorkspace(params: CandidateSearchParams)
     query,
     filter,
     visibility,
+    page: params.page ?? 1,
+    totalPages: Math.max(1, Math.ceil(matchingCount / 60)),
     assignedCount: staffCandidateIds?.length ?? null,
     matchingCount,
     selectedId,
@@ -518,7 +556,7 @@ function sortFacetOption(a: { label: string; count: number }, b: { label: string
   return b.count - a.count || a.label.localeCompare(b.label);
 }
 
-function topFacet(values: { value: string; label: string }[], activeValue?: string): CandidateSearchFacet["options"] {
+export function topFacet(values: { value: string; label: string }[], activeValue?: string): CandidateSearchFacet["options"] {
   const counts = new Map<string, { label: string; count: number }>();
   for (const item of values) {
     const key = item.value.trim();
@@ -550,7 +588,7 @@ async function resolveSelectedCandidateId({
   return null;
 }
 
-function buildSelectedActions(role: CandidateSearchRole, candidate: Awaited<ReturnType<typeof getCandidateDetail>>["candidate"]) {
+export function buildSelectedActions(role: CandidateSearchRole, candidate: Awaited<ReturnType<typeof getCandidateDetail>>["candidate"]) {
   if (!candidate) return [];
   const base = role === "admin" ? "/admin/candidates" : "/staff/candidates";
   return [
@@ -560,7 +598,7 @@ function buildSelectedActions(role: CandidateSearchRole, candidate: Awaited<Retu
   ].filter((item): item is { label: string; href: string } => Boolean(item));
 }
 
-async function candidateIdsForStaff(staffId: number) {
+export async function candidateIdsForStaff(staffId: number) {
   if (!staffId) return [];
   const rows = await prisma.candidate_work_history.findMany({
     where: { staff_id: staffId, candidate_id: { not: null } },
@@ -576,15 +614,15 @@ function candidateIdScope(candidateIds: number[]): Prisma.candidateWhereInput {
   return candidateIds.length ? { candidate_id: { in: candidateIds } } : { candidate_id: -1 };
 }
 
-function parsePositiveInt(value?: string) {
+export function parsePositiveInt(value?: string) {
   const parsed = Number(value);
   return Number.isInteger(parsed) && parsed > 0 ? parsed : undefined;
 }
 
-function parseEnum<T extends string>(value: string | undefined, allowed: T[]) {
+export function parseEnum<T extends string>(value: string | undefined, allowed: T[]) {
   return allowed.includes(value as T) ? (value as T) : undefined;
 }
 
-function uniqueCandidateIds(ids: number[]) {
+export function uniqueCandidateIds(ids: number[]) {
   return [...new Set(ids.filter((id) => Number.isInteger(id) && id > 0))];
 }

@@ -1,36 +1,9 @@
 import { requireRoleCapability } from "@/modules/auth/session";
 import { CandidateSearchOS } from "@/modules/candidates/CandidateSearchOS";
-import { getCandidateSearchWorkspace, type CandidateSearchFilter, type CandidateSearchVisibility } from "@/modules/candidates/search";
+import { getCandidateSearchWorkspaceTypesense as getCandidateSearchWorkspace, parseFilter, parseCandidateId, parseCandidateIds, parseSearchPage } from "@/modules/candidates/search-typesense";
+import { parseVisibility } from "@/modules/candidates/search";
 
 export const dynamic = "force-dynamic";
-
-const filterValues: CandidateSearchFilter[] = ["all", "active", "needs-review", "incomplete", "civil-id"];
-
-function parseFilter(value: string | string[] | undefined): CandidateSearchFilter {
-  const filter = Array.isArray(value) ? value[0] : value;
-  return filterValues.includes(filter as CandidateSearchFilter) ? (filter as CandidateSearchFilter) : "all";
-}
-
-function parseCandidateId(value: string | string[] | undefined) {
-  const candidate = Array.isArray(value) ? value[0] : value;
-  const id = Number(candidate);
-  return Number.isInteger(id) && id > 0 ? id : undefined;
-}
-
-function parseCandidateIds(value: string | string[] | undefined, limit = 8) {
-  const raw = Array.isArray(value) ? value[0] : value;
-  if (!raw) return [];
-  return raw
-    .split(",")
-    .map((item) => Number(item))
-    .filter((id) => Number.isInteger(id) && id > 0)
-    .slice(0, limit);
-}
-
-function parseVisibility(value: string | string[] | undefined): CandidateSearchVisibility {
-  const visibility = Array.isArray(value) ? value[0] : value;
-  return visibility === "assigned" ? "assigned" : "all";
-}
 
 export default async function StaffCandidatesPage({
   searchParams
@@ -42,6 +15,7 @@ export default async function StaffCandidatesPage({
     candidate?: string;
     tabs?: string;
     selected?: string;
+    page?: string;
     country?: string;
     university?: string;
     company?: string;
@@ -63,6 +37,7 @@ export default async function StaffCandidatesPage({
     candidateId: parseCandidateId(params.candidate),
     tabIds: parseCandidateIds(params.tabs),
     selectedIds: parseCandidateIds(params.selected, 100),
+    page: parseSearchPage(params.page),
     country: params.country,
     university: params.university,
     company: params.company,

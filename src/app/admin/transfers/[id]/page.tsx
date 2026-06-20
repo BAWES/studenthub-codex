@@ -1,9 +1,9 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { requireRoleCapability } from "@/modules/auth/session";
-import { CompactList, FactPanel } from "@/modules/workspace/DetailPanels";
+import { DetailSection } from "@/modules/workspace/DetailPanels";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
-import { getAdminTransferDetail } from "@/modules/workspace/data";
+import { getAdminTransferDetail } from "./actions";
 import { TransferActionBar } from "@/modules/finance/TransferActionBar";
 import { formatDate, formatMoney } from "@/modules/workspace/format";
 
@@ -31,7 +31,7 @@ export default async function AdminTransferDetailPage({ params }: { params: Prom
         <TransferActionBar data={data} />
       </Suspense>
 
-      <FactPanel
+      <DetailSection
         title="Transfer Run"
         facts={[
           { label: "Company", value: data.transfer.company?.company_name },
@@ -45,7 +45,7 @@ export default async function AdminTransferDetailPage({ params }: { params: Prom
         ]}
       />
       <section className="detailGrid">
-        <CompactList title="Transfer File Entries" rows={data.fileEntries} />
+        <DetailSection type="list" title="Transfer File Entries" rows={data.fileEntries} />
       </section>
     </WorkspaceShell>
   );

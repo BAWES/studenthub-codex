@@ -4,7 +4,7 @@ import { requireRoleCapability } from "@/modules/auth/session";
 import { RequestFulfillmentOS } from "@/modules/requests/RequestFulfillmentOS";
 import { RequestActionBar } from "@/modules/requests/RequestActionBar";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
-import { getRequestDetail } from "@/modules/workspace/data";
+import { getStaffRequestDetail } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -18,7 +18,7 @@ export default async function StaffRequestDetailPage({
   const session = await requireRoleCapability("staff", "request.read.assigned");
   const { id } = await params;
   const { notice } = await searchParams;
-  const data = await getRequestDetail(id, Number(session.id));
+  const data = await getStaffRequestDetail({ requestUuid: id });
 
   if (!data.request) {
     notFound();

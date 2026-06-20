@@ -6,6 +6,9 @@ import { HubShortcuts, type HubCommand } from "@/modules/hub/HubShortcuts";
 import { ThemeToggle } from "@/modules/theme/ThemeToggle";
 import { CandidateProfile } from "./CandidateProfile";
 import { ExportCVsForm } from "./ExportCVsForm";
+import { SearchStatusPill } from "./SearchStatusPill";
+import { SearchFormWrapper } from "./SearchFormWrapper";
+import MatchScoreBadge from "@/components/matching/MatchScoreBadge";
 import type {
   CandidateSearchFacet,
   CandidateSearchFilter,
@@ -21,6 +24,7 @@ type CandidateSearchParamKey =
   | "candidate"
   | "tabs"
   | "selected"
+  | "page"
   | "country"
   | "university"
   | "company"
@@ -56,7 +60,7 @@ export function CandidateSearchOS({
           <span>SH</span>
           <strong>Candidates</strong>
         </Link>
-        <form className="candidateDeskSearch" id="candidate-search">
+        <SearchFormWrapper>
           <input
             data-command-search
             id="candidate-query"
@@ -70,7 +74,7 @@ export function CandidateSearchOS({
           {selectedIds.length ? <input name="selected" type="hidden" value={selectedIds.join(",")} /> : null}
           <HiddenFacetInputs data={data} />
           <button type="submit">Search</button>
-        </form>
+        </SearchFormWrapper>
         <div className="candidateDeskTools">
           <HubShortcuts commands={commands} />
           <ThemeToggle />
@@ -134,9 +138,15 @@ function CandidateSearchTab({
           <span>Search tab</span>
           <strong>{data.query ? `Results for ${data.query}` : "Candidate search"}</strong>
         </div>
+        <SearchStatusPill resultsCount={data.rows.length} query={data.query} />
         <small>
-          {data.rows.length.toLocaleString("en-US")} of {data.matchingCount.toLocaleString("en-US")}
+          {data.matchingCount.toLocaleString("en-US")} total
         </small>
+        {data.source?.current ? (
+          <span className="sourceBadge" title={data.source.note}>
+            {data.source.current}
+          </span>
+        ) : null}
       </header>
       <details className="candidatePowerFilters">
         <summary>
@@ -160,6 +170,7 @@ function CandidateSearchTab({
           </Link>
         ))}
       </nav>
+      <FacetChips basePath={basePath} data={data} params={params} />
       {data.selectedBlocked ? (
         <div className="candidateAccessNotice">
           <strong>Candidate unavailable</strong>
@@ -184,6 +195,7 @@ function CandidateSearchTab({
                   <small>{row.email}</small>
                 </div>
                 <em>{row.status}</em>
+                <MatchScoreBadge score={row.score} label="Score" showBar={false} />
               </div>
               <div className="candidateResultMeta">
                 <span>{row.signal}</span>
@@ -203,6 +215,8 @@ function CandidateSearchTab({
             <strong>No candidates match this search.</strong>
             <span>Remove a facet or search a different name, email, phone, skill, or candidate ID.</span>
           </div>
+        ) : data.totalPages && data.totalPages > 1 ? (
+          <CandidatePagination basePath={basePath} params={params} page={data.page ?? 1} totalPages={data.totalPages} />
         ) : null}
       </div>
     </section>
@@ -296,7 +310,7 @@ function ActiveSearchContext({
     data.filter !== "all" ? { key: "filter" as const, label: candidateFilterLinks.find((item) => item.value === data.filter)?.label ?? data.filter } : null,
     data.role === "staff" && data.visibility === "assigned" ? { key: "view" as const, label: `Assigned: ${data.assignedCount ?? 0}` } : null,
     ...activeFacets
-  ].filter((item): item is { key: Exclude<CandidateSearchParamKey, "candidate" | "tabs" | "selected">; label: string } => Boolean(item));
+  ].filter((item): item is { key: Exclude<CandidateSearchParamKey, "candidate" | "tabs" | "selected" | "page">; label: string } => Boolean(item));
 
   return (
     <section className="candidateSearchContext" aria-label="Candidate search context">
@@ -384,6 +398,7 @@ function candidateSearchHref(
     candidate: params.candidateId ? String(params.candidateId) : "",
     tabs: existingTabs,
     selected: (params.selectedIds ?? []).join(","),
+    page: params.page && params.page > 1 ? String(params.page) : "",
     country: params.country ?? "",
     university: params.university ?? "",
     company: params.company ?? "",
@@ -408,7 +423,10 @@ function toggleCandidateId(ids: number[], id: number) {
   return ids.includes(id) ? ids.filter((item) => item !== id) : [...ids, id];
 }
 
-function candidateInitials(name: string) {
+// Exported for testing
+export { FacetChips, QUICK_FACET_KEYS };
+
+export function candidateInitials(name: string) {
   return name
     .split(/\s+/)
     .filter(Boolean)
@@ -447,4 +465,102 @@ function buildCandidateSearchCommands(
       href: action.href
     }))
   ];
+}
+
+// ---------------------------------------------------------------------------
+// FacetChips — inline clickable facet chips surfaced above search results
+// ---------------------------------------------------------------------------
+// Shows the most commonly-used facet groups (country, skills, company, university)
+// as clickable chips so users can filter without opening the power filters panel.
+// Each chip toggles the corresponding facet on click.
+// ---------------------------------------------------------------------------
+
+const QUICK_FACET_KEYS = ["country", "skill", "company", "university"];
+
+function FacetChips({
+  basePath,
+  data,
+  params,
+}: {
+  basePath: "/admin/candidates" | "/staff/candidates";
+  data: CandidateSearchData;
+  params: CandidateSearchParams;
+}) {
+  // Show facets that match the quick filter keys and have options
+  const quickFacets = data.facets.filter((f) => QUICK_FACET_KEYS.includes(f.key) && f.options.length > 0);
+  if (quickFacets.length === 0) return null;
+
+  const activeCount = quickFacets.reduce(
+    (count, facet) => count + facet.options.filter((o) => o.active).length,
+    0,
+  );
+
+  return (
+    <section className="candidateFacetChips" aria-label="Quick facet filters">
+      {quickFacets.map((facet) => (
+        <div className="candidateFacetChipGroup" key={facet.key}>
+          <span className="candidateFacetChipLabel">{facet.label}</span>
+          <div className="candidateFacetChipList">
+            {facet.options.slice(0, 6).map((option) => (
+              <Link
+                className={option.active ? "chip active" : "chip"}
+                href={candidateSearchHref(basePath, params, {
+                  [facet.key]: option.active ? "" : option.value,
+                  candidate: "",
+                })}
+                key={option.value}
+              >
+                <span>{option.label}</span>
+                {option.count > 0 ? <strong>{option.count}</strong> : null}
+                {option.active ? <span className="chip-remove" aria-label={`Remove ${option.label} filter`}>✕</span> : null}
+              </Link>
+            ))}
+          </div>
+        </div>
+      ))}
+      {activeCount > 1 ? (
+        <Link className="chip-clear-all" href={basePath}>
+          Clear all
+        </Link>
+      ) : null}
+    </section>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// CandidatePagination — prev/next page controls for search results
+// ---------------------------------------------------------------------------
+
+function CandidatePagination({
+  basePath,
+  params,
+  page,
+  totalPages,
+}: {
+  basePath: "/admin/candidates" | "/staff/candidates";
+  params: CandidateSearchParams;
+  page: number;
+  totalPages: number;
+}) {
+  return (
+    <nav className="candidatePagination" aria-label="Candidate search pagination">
+      <div>
+        <span>Page</span>
+        <strong>{page.toLocaleString("en-US")}</strong>
+        <span>of {totalPages.toLocaleString("en-US")}</span>
+      </div>
+      <div>
+        {page > 1 ? (
+          <Link href={candidateSearchHref(basePath, params, { page: String(page - 1) })}>
+            ← Previous
+          </Link>
+        ) : null}
+        {page < totalPages ? (
+          <Link href={candidateSearchHref(basePath, params, { page: String(page + 1) })}>
+            Next →
+          </Link>
+        ) : null}
+      </div>
+    </nav>
+  );
 }

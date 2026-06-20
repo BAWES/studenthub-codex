@@ -26,7 +26,7 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
   return (
     <Button
       aria-pressed={isDark}
-      className={className}
+      className={`themeToggle ${className}`.trim()}
       type="button"
       variant="outline"
       size="sm"

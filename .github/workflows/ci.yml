@@ -2,43 +2,40 @@ name: StudentHub CI
 
 on:
   pull_request:
-    branches: [main]
+    branches: [main, develop]
   push:
-    branches: [main]
+    branches: [main, develop]
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.head_ref || github.run_id }}
   cancel-in-progress: true
 
 jobs:
   branch-name:
     name: Branch Name Check
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     if: github.event_name == 'pull_request'
     steps:
       - name: Validate branch name
         run: |
           BRANCH="${{ github.head_ref }}"
           echo "Checking branch: $BRANCH"
-          if echo "$BRANCH" | grep -qiE '^(feature|fix|chore|coder2)/STU-[a-z0-9]+[-a-z0-9]+$'; then
+          if echo "$BRANCH" | grep -qiE '^(feature|fix|chore)/STU-[a-z0-9]+[-a-z0-9]+$'; then
             echo "Branch name OK: $BRANCH"
-          elif echo "$BRANCH" | grep -qiE '^ux/[a-z0-9-]+$'; then
-            echo "Branch name OK (UX): $BRANCH"
           else
             echo "Branch name REJECTED: $BRANCH"
-            echo "Expected: feature/STU-N-*, fix/STU-N-*, chore/STU-N-*, or coder2/STU-N-* (kebab-case) — UX: ux/*"
+            echo "Expected: feature/STU-N-*, fix/STU-N-*, or chore/STU-N-* (kebab-case)"
             exit 1
           fi
 
   clean-tree:
     name: Clean Working Tree
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: "npm"
       - run: npm ci
       - name: Check for uncommitted changes
         run: |
@@ -50,35 +47,88 @@ jobs:
 
   typescript:
     name: TypeScript Check
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
+    env:
+      NODE_OPTIONS: "--max-old-space-size=4096"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: "npm"
       - run: npm ci
+      - name: Generate Prisma client
+        run: npx prisma generate
       - run: npx tsc --noEmit
 
   build:
     name: Next.js Build
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
+    runs-on: macos-latest
+    timeout-minutes: 15
+    env:
+      NODE_OPTIONS: "--max-old-space-size=4096"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: "npm"
       - run: npm ci
       - name: Generate Prisma client
         run: npx prisma generate
+      - name: Cache Next.js build
+        uses: actions/cache@v4
+        id: next-cache
+        with:
+          path: .next/cache
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**/*.ts', '**/*.tsx', '**/*.js', '**/*.jsx') }}
+          restore-keys: |
+            ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
+            ${{ runner.os }}-nextjs-
       - name: Build
         run: npx next build
 
   lint:
     name: ESLint
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npm run lint
+
+  unit-test:
+    name: Unit Tests
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npx vitest run
+
+  e2e:
+    name: E2E Tests (${{ matrix.shard }}/${{ strategy.job-total }})
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: studenthub
+          MYSQL_DATABASE: studenthub_prod_local
+          MYSQL_USER: studenthub
+          MYSQL_PASSWORD: studenthub
+        ports:
+          - 3307:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost"
+          --health-interval=10s --health-timeout=5s --health-retries=5
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -86,7 +136,42 @@ jobs:
           node-version: 22
           cache: "npm"
       - run: npm ci
-      - run: npm run lint
+      - name: Install Playwright browsers
+        run: npx playwright install chromium --with-deps
+      - name: Generate Prisma client
+        run: npx prisma generate
+        env:
+          DATABASE_URL: "mysql://studenthub:studenthub@localhost:3307/studenthub_prod_local"
+      - name: Push schema to MySQL
+        run: npx prisma db push --skip-generate
+        env:
+          DATABASE_URL: "mysql://studenthub:studenthub@localhost:3307/studenthub_prod_local"
+      - name: Seed E2E test fixtures
+        run: npx tsx prisma/seed-test-fixtures.ts
+        env:
+          DATABASE_URL: "mysql://studenthub:studenthub@localhost:3307/studenthub_prod_local"
+      - name: Cache Next.js build
+        uses: actions/cache@v4
+        id: next-cache-e2e
+        with:
+          path: .next/cache
+          key: ${{ runner.os }}-nextjs-e2e-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**/*.ts', '**/*.tsx', '**/*.js', '**/*.jsx') }}
+          restore-keys: |
+            ${{ runner.os }}-nextjs-e2e-${{ hashFiles('**/package-lock.json') }}-
+            ${{ runner.os }}-nextjs-e2e-
+      - name: Build
+        run: npx next build
+        env:
+          NODE_OPTIONS: "--max-old-space-size=4096"
+          DATABASE_URL: "mysql://studenthub:studenthub@localhost:3307/studenthub_prod_local"
+          AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
+      - name: Run E2E tests
+        run: npx playwright test --project=chromium --shard=${{ matrix.shard }}/${{ strategy.job-total }}
+        env:
+          NODE_OPTIONS: "--max-old-space-size=4096"
+          CI: "true"
+          DATABASE_URL: "mysql://studenthub:studenthub@localhost:3307/studenthub_prod_local"
+          AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
 
   validate:
     name: Validation Suite
@@ -104,9 +189,7 @@ jobs:
           - 3307:3306
         options: >-
           --health-cmd="mysqladmin ping -h localhost"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
+          --health-interval=10s --health-timeout=5s --health-retries=5
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -122,6 +205,9 @@ jobs:
           DATABASE_URL: "mysql://studenthub:studenthub@localhost:3307/studenthub_prod_local"
       - name: Build
         run: npx next build
+        env:
+          NODE_OPTIONS: "--max-old-space-size=4096"
+          AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
       - name: Start and validate
         run: |
           npm run dev &
@@ -136,3 +222,4 @@ jobs:
           node scripts/validate.mjs
         env:
           DATABASE_URL: "mysql://studenthub:studenthub@localhost:3307/studenthub_prod_local"
+          AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
