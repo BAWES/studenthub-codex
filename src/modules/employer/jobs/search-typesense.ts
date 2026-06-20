@@ -8,7 +8,7 @@
  * Prisma-based search automatically.
  */
 
-import { getTypesenseClient, JOBS_COLLECTION, type JobDocument } from "@/lib/typesense";
+import { getTypesenseClient, JOBS_COLLECTION, type JobDocument, isTypesenseAvailable } from "@/lib/typesense";
 import type { ListJobsInput, JobRow } from "./schemas";
 
 // ---------------------------------------------------------------------------
@@ -46,13 +46,10 @@ export async function listJobsTypesense(input: ListJobsInput = {}): Promise<{
 async function searchTypesense(input: ListJobsInput): Promise<any> {
   const client = getTypesenseClient();
 
-  // Health check
-  try {
-    const health = await client.health.retrieve();
-    if (!health.ok) return null;
-  } catch {
-    return null;
-  }
+  // Quick health check with 60s cache — avoids 1s timeout on every SSR request
+  // when Typesense is simply not running (e.g. CI, local dev).
+  const available = await isTypesenseAvailable();
+  if (!available) return null;
 
   // Verify collection exists and has docs
   try {

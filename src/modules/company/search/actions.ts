@@ -9,7 +9,7 @@
 // ---------------------------------------------------------------------------
 
 import { prisma } from "@/lib/prisma";
-import { getTypesenseClient, COMPANIES_COLLECTION, STORES_COLLECTION, type CompanyDocument, type StoreDocument } from "@/lib/typesense";
+import { getTypesenseClient, COMPANIES_COLLECTION, STORES_COLLECTION, type CompanyDocument, type StoreDocument, isTypesenseAvailable } from "@/lib/typesense";
 import { formatDate, formatMoney } from "@/modules/workspace/format";
 import {
   searchCompanyEntitiesSchema,
