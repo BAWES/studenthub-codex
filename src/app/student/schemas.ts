@@ -8,7 +8,7 @@ import { z } from "zod";
 // ---------------------------------------------------------------------------
 
 export const getStudentProfileSchema = z.object({
-  studentId: z.coerce.number().int().positive("Student ID is required"),
+  studentId: z.coerce.number().finite().int().positive("Student ID is required"),
 });
 
 export const updateStudentProfileSchema = z.object({

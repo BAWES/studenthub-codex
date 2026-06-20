@@ -1,5 +1,4 @@
 import { getStudentProfile } from "./actions";
-import { notFound } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
@@ -25,11 +24,20 @@ function PeriodLabel({ startYear, endYear }: { startYear?: number | null; endYea
 
 export default async function StudentProfilePage({ params }: Props) {
   const { studentId } = await params;
-  const studentIdNum = Number(studentId);
-  if (Number.isNaN(studentIdNum) || studentIdNum <= 0) {
-    notFound();
+
+  // If no studentId provided, show the empty state instead of crashing
+  if (!studentId) {
+    return (
+      <div className="container mx-auto py-8">
+        <div className="max-w-3xl mx-auto text-center">
+          <h1 className="text-2xl font-bold">Profile Not Found</h1>
+          <p className="text-muted-foreground mt-2">No candidate ID provided.</p>
+        </div>
+      </div>
+    );
   }
-  const profile = await getStudentProfile({ studentId: studentIdNum });
+
+  const profile = await getStudentProfile({ studentId: Number(studentId) });
 
   if (!profile) {
     return (
