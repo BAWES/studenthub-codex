@@ -411,6 +411,7 @@ describe("listConversations", () => {
   });
 
   it("does not throw when output validation fails (just logs error)", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
     mockListChats.mockResolvedValue({
       chats: [{ chat_uuid: "chat-1" }], // Missing required fields
       total: 1,

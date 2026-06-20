@@ -58,10 +58,10 @@ describe("HowItWorks", () => {
     ).toBeTruthy();
   });
 
-  it("renders two-sided marketplace description", () => {
+  it("renders description about connecting students and employers", () => {
     render(<HowItWorks />);
     expect(
-      screen.getByText(/both sides of the marketplace/i),
+      screen.getByText(/our staff recruiters match students/i),
     ).toBeTruthy();
   });
 });
