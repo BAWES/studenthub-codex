@@ -4,6 +4,10 @@ import { useActionState, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { DataTable } from "@/modules/workspace/DataTable";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent } from "@/components/ui/card";
 
 import type { SessionUser } from "@/modules/auth/types";
 import type { DegreeGroupItem } from "../schemas";
@@ -27,12 +31,12 @@ export function AdminDegreeGroupsTable({ session, degreeGroups }: Props) {
         { label: "Total degree groups", value: degreeGroups.length, note: "Degree groups in the system" },
       ]}
     >
-      <section className="mb-6">
-        <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
+      <Card className="mb-6">
+        <CardContent className="p-5">
           <h3 className="text-sm font-semibold mb-3 text-foreground">Add degree group</h3>
           <CreateDegreeGroupForm onSuccess={() => router.refresh()} />
-        </div>
-      </section>
+        </CardContent>
+      </Card>
 
       <DataTable
         title="Degree Groups"
@@ -133,55 +137,51 @@ function CreateDegreeGroupForm({ onSuccess }: { onSuccess: () => void }) {
       className="flex flex-wrap items-end gap-3"
       onSubmit={() => setTimeout(() => { formRef.current?.reset(); }, 100)}
     >
-      <div className="grid gap-1">
-        <label className="text-xs font-medium text-muted-foreground">English name *</label>
-        <input
+      <div className="grid gap-1.5">
+        <Label htmlFor="nameEn">English name *</Label>
+        <Input
+          id="nameEn"
           name="nameEn"
           required
           maxLength={255}
           placeholder="e.g. Science, Arts, Engineering"
-          className="h-9 rounded-lg px-3 text-sm border"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+          className="w-56"
         />
       </div>
-      <div className="grid gap-1">
-        <label className="text-xs font-medium text-muted-foreground">Arabic name</label>
-        <input
+      <div className="grid gap-1.5">
+        <Label htmlFor="nameAr">Arabic name</Label>
+        <Input
+          id="nameAr"
           name="nameAr"
           maxLength={255}
           placeholder="الاسم بالعربية"
-          className="h-9 rounded-lg px-3 text-sm border"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+          className="w-56"
         />
       </div>
-      <div className="grid gap-1">
-        <label className="text-xs font-medium text-muted-foreground">Sort order</label>
-        <input
+      <div className="grid gap-1.5">
+        <Label htmlFor="sortOrder">Sort order</Label>
+        <Input
+          id="sortOrder"
           name="sortOrder"
           type="number"
           placeholder="0"
-          className="h-9 rounded-lg px-3 text-sm border w-20"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+          className="w-20"
         />
       </div>
-      <div className="grid gap-1">
-        <label className="text-xs font-medium text-muted-foreground">Skip major</label>
+      <div className="grid gap-1.5">
+        <Label htmlFor="skipMajor">Skip major</Label>
         <select
+          id="skipMajor"
           name="skipMajor"
-          className="h-9 rounded-lg px-3 text-sm border"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+          className="flex h-9 w-full rounded-lg border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
         >
           <option value="0">No</option>
           <option value="1">Yes</option>
         </select>
       </div>
-      <button
-        type="submit"
-        disabled={pending}
-        className="h-9 rounded-lg px-4 text-sm font-semibold bg-primary text-primary-foreground"
-      >
+      <Button type="submit" disabled={pending}>
         {pending ? "Adding..." : "Add"}
-      </button>
+      </Button>
       {state?.error ? (
         <p className="text-xs w-full text-destructive">{state.error}</p>
       ) : null}
@@ -222,51 +222,40 @@ function EditDegreeGroupForm({
 
   return (
     <form action={action} className="flex items-center gap-2 flex-wrap">
-      <input
+      <Input
         name="nameEn"
         defaultValue={row.degree_group_name_en}
         required
         maxLength={255}
-        className="h-8 rounded px-2 text-sm border w-36"
-        style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+        className="w-36 h-8"
       />
-      <input
+      <Input
         name="nameAr"
         defaultValue={row.degree_group_name_ar || ""}
         maxLength={255}
-        className="h-8 rounded px-2 text-sm border w-36"
-        style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+        placeholder="Name (AR)"
+        className="w-36 h-8"
       />
-      <input
+      <Input
         name="sortOrder"
         defaultValue={row.degree_group_sort_order ?? ""}
         type="number"
-        className="h-8 rounded px-2 text-sm border w-16"
-        style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+        className="w-16 h-8"
       />
       <select
         name="skipMajor"
         defaultValue={row.skip_major ? "1" : "0"}
-        className="h-8 rounded px-2 text-sm border w-20"
-        style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+        className="flex h-8 w-20 rounded border border-input bg-transparent px-2 text-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
       >
         <option value="0">No</option>
         <option value="1">Yes</option>
       </select>
-      <button
-        type="submit"
-        disabled={pending}
-        className="h-8 rounded px-3 text-xs font-semibold bg-primary text-primary-foreground"
-      >
+      <Button type="submit" size="sm" disabled={pending}>
         {pending ? "..." : "Save"}
-      </button>
-      <button
-        type="button"
-        onClick={onCancel}
-        className="h-8 rounded px-3 text-xs text-muted-foreground"
-      >
+      </Button>
+      <Button type="button" variant="ghost" size="sm" onClick={onCancel}>
         Cancel
-      </button>
+      </Button>
       {state?.error ? (
         <p className="text-xs text-destructive">{state.error}</p>
       ) : null}
