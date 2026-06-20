@@ -16,20 +16,13 @@ const statusBadge = (status: string) => {
     finished_by_recruitment: "#8b5cf6",
   };
   const color = colors[status] ?? "#6b7280";
+  const label = status.replace(/_/g, " ");
   return (
     <span
-      style={{
-        display: "inline-block",
-        padding: "0.125rem 0.625rem",
-        borderRadius: "9999px",
-        fontSize: "0.75rem",
-        fontWeight: 600,
-        color: "#fff",
-        background: color,
-        textTransform: "capitalize",
-      }}
+      className="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold text-white capitalize"
+      style={{ backgroundColor: color }}
     >
-      {status.replace(/_/g, " ")}
+      {label}
     </span>
   );
 };
@@ -40,20 +33,10 @@ export default async function CompanyRequestsPage() {
 
   return (
     <WorkspaceShell session={session} eyebrow="Company" title="Requests" metrics={[]}>
-      <div style={{ marginBottom: "1rem" }}>
+      <div className="mb-4">
         <Link
           href="/company/requests/create"
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            padding: "0.5rem 1rem",
-            background: "var(--primary, #2563eb)",
-            color: "#fff",
-            borderRadius: "6px",
-            fontWeight: 600,
-            fontSize: "0.875rem",
-            textDecoration: "none",
-          }}
+          className="inline-flex items-center px-4 py-2 rounded-md text-sm font-semibold no-underline bg-[var(--sh-coral)] text-white hover:bg-[var(--sh-coral-hover)] transition-colors"
         >
           + New Request
         </Link>
