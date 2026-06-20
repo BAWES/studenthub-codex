@@ -65,14 +65,14 @@ export default function CompanyLandingContent({
       <main
         id="main-content"
         className="min-h-svh w-[min(1320px,calc(100%_-_28px))] mx-auto grid content-start gap-6 pt-[18px] pb-[42px] max-sm:w-[min(calc(100%_-_20px),720px)]">
-      {/* ── Glass Navigation ── */}
-      <nav className="sticky top-[3px] z-20 min-h-[62px] flex items-center justify-between gap-[14px] rounded-xl p-[2px] bg-white shadow-md border border-[var(--border)]" aria-label="StudentHub public navigation">
+      {/* ── Navigation ── */}
+      <nav className="sticky top-[3px] z-20 min-h-[62px] flex items-center justify-between gap-[14px] rounded-xl p-[2px] bg-white shadow-md border border-gray-200" aria-label="StudentHub public navigation">
         <div className="w-full min-h-[58px] flex items-center justify-between gap-[14px] px-1">
           <Link
-            className="inline-flex items-center gap-2.5 text-[var(--ink)] px-2 no-underline min-h-11"
+            className="inline-flex items-center gap-2.5 text-gray-900 px-2 no-underline min-h-11"
             href="/"
           >
-            <span className="size-9 inline-flex items-center justify-center rounded-lg bg-[var(--ink)] text-[var(--paper)] font-black">
+            <span className="size-9 inline-flex items-center justify-center rounded-lg bg-gray-900 text-white font-black">
               SH
             </span>
             <strong>StudentHub</strong>
@@ -111,16 +111,16 @@ export default function CompanyLandingContent({
 
       {/* ── Pain-point section — the specific hiring pain points ── */}
       <section
-        className="relative overflow-hidden rounded-xl border border-gray-200 bg-white p-[clamp(24px,5vw,48px)]"
+        className="relative overflow-hidden rounded-xl bg-gray-50 border border-gray-200 p-[clamp(24px,5vw,48px)]"
         aria-label="Hiring pain points and solutions"
       >
-        <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-[#fef1ef] via-white to-gray-50 z-0" aria-hidden="true" />
+        <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-[#fef1ef] via-white to-white z-0" aria-hidden="true" />
 
         <div className="relative z-[2]">
-          <p className="text-[#1f73b7] text-[11px] font-black uppercase tracking-wider mb-1">
+          <p className="text-[#eb6651] text-[11px] font-black uppercase tracking-wider mb-1">
             The real hiring headache
           </p>
-          <h2 className="text-[clamp(22px,3vw,28px)] font-bold leading-tight tracking-tight text-gray-900 mb-8">
+          <h2 className="mb-8 font-bold text-2xl sm:text-3xl text-gray-900">
             You don&apos;t have a talent problem.
             <br />
             You have a <em className="text-[#eb6651] not-italic">process</em>{" "}
@@ -131,9 +131,9 @@ export default function CompanyLandingContent({
             {PAIN_POINTS.map((point, i) => (
               <div
                 key={i}
-                className="rounded-xl p-5 flex flex-col gap-3 transition-transform duration-300 hover:-translate-y-[3px] bg-gray-50 border border-gray-200"
+                className="bg-white border border-gray-200 rounded-xl p-5 flex flex-col gap-3 transition-transform duration-300 hover:-translate-y-[3px]"
               >
-                <div className="size-10 rounded-lg flex items-center justify-center shrink-0 bg-[#1f73b7]/10 text-[#1f73b7]">
+                <div className="size-10 rounded-lg bg-[#eb6651]/10 text-[#eb6651] flex items-center justify-center shrink-0">
                   <span className="font-black text-sm">0{i + 1}</span>
                 </div>
                 <div>
@@ -152,7 +152,7 @@ export default function CompanyLandingContent({
 
       {/* ── Stats strip — company authority signals ── */}
       <section
-        className="rounded-xl border border-gray-200 bg-gray-50 p-[clamp(20px,4vw,40px)] grid grid-cols-2 sm:grid-cols-4 gap-6 text-center"
+        className="rounded-xl bg-gray-50 border border-gray-200 p-[clamp(20px,4vw,40px)] grid grid-cols-2 sm:grid-cols-4 gap-6 text-center"
         aria-label="Company stats"
       >
         {COMPANY_STATS.map((stat) => (
@@ -181,16 +181,16 @@ export default function CompanyLandingContent({
 
       {/* ── Final CTA — tailored for employers ── */}
       <section
-        className="relative overflow-hidden rounded-xl border border-gray-200 bg-white p-[clamp(24px,5vw,60px)] text-center"
+        className="relative overflow-hidden rounded-xl bg-white border border-gray-200 p-[clamp(24px,5vw,60px)] text-center"
         aria-label="Get started as a company"
       >
-        <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-[#fef1ef] via-white to-gray-50 z-0" aria-hidden="true" />
+        <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-[#fef1ef] via-white to-white z-0" aria-hidden="true" />
 
         <div className="relative z-[2] max-w-[640px] mx-auto">
-          <p className="text-[#1f73b7] text-[11px] font-black uppercase tracking-wider mb-2">
+          <p className="text-[#eb6651] text-[11px] font-black uppercase tracking-wider mb-2">
             Let StudentHub handle your workforce
           </p>
-          <h2 className="text-[clamp(24px,4vw,36px)] font-bold leading-tight tracking-tight text-gray-900 text-center">
+          <h2 className="text-center font-bold text-2xl sm:text-3xl text-gray-900">
             Stop managing staff. Start running your business.
           </h2>
           <p className="max-w-[480px] mx-auto mt-2 mb-6 leading-relaxed text-gray-500">
@@ -201,14 +201,14 @@ export default function CompanyLandingContent({
           {isLoggedIn ? (
             <Link
               href="/app"
-              className="uiButton uiButton_default uiButton_lg shGlowButton"
+              className="uiButton uiButton_default uiButton_lg"
             >
               Open app <ChevronRight className="size-4" />
             </Link>
           ) : (
             <Link
               href="/signup?role=company"
-              className="uiButton uiButton_default uiButton_lg shGlowButton"
+              className="uiButton uiButton_default uiButton_lg"
             >
               Set up your company account <ChevronRight className="size-4" />
             </Link>
@@ -221,18 +221,18 @@ export default function CompanyLandingContent({
       </section>
 
       {/* ── Footer ── */}
-      <footer className="flex items-center justify-between pt-4 pb-2 text-xs text-gray-500">
+      <footer className="flex items-center justify-between pt-4 pb-2 text-xs text-gray-400">
         <span>&copy; {new Date().getFullYear()} StudentHub. All rights reserved.</span>
         <div className="flex items-center gap-4">
           <Link
             href="/login"
-            className="hover:text-gray-900 transition-colors no-underline text-gray-500"
+            className="hover:text-gray-900 transition-colors no-underline text-inherit"
           >
             Sign in
           </Link>
           <Link
             href="/signup?role=company"
-            className="hover:text-gray-900 transition-colors no-underline text-gray-500"
+            className="hover:text-gray-900 transition-colors no-underline text-inherit"
           >
             Sign up as company
           </Link>
