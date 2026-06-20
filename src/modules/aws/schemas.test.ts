@@ -2,6 +2,9 @@ import { describe, it, expect } from "vitest";
 import {
   presignedUploadResultSchema,
   presignedDownloadResultSchema,
+  putS3ObjectParamsSchema,
+  deleteS3ObjectParamsSchema,
+  s3OperationResultSchema,
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
@@ -94,6 +97,108 @@ describe("presignedDownloadResultSchema", () => {
     expect(
       presignedDownloadResultSchema.safeParse({ ...valid, downloadUrl: false })
         .success,
+    ).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// putS3ObjectParamsSchema
+// ---------------------------------------------------------------------------
+describe("putS3ObjectParamsSchema", () => {
+  const valid = {
+    key: "uploads/candidates/123/photo.jpg",
+    contentType: "image/jpeg",
+  };
+
+  it("accepts valid params", () => {
+    expect(putS3ObjectParamsSchema.safeParse(valid).success).toBe(true);
+  });
+
+  it("accepts no contentType", () => {
+    expect(
+      putS3ObjectParamsSchema.safeParse({ key: "uploads/test.pdf" }).success,
+    ).toBe(true);
+  });
+
+  it("rejects missing key", () => {
+    expect(putS3ObjectParamsSchema.safeParse({}).success).toBe(false);
+  });
+
+  it("rejects empty key", () => {
+    expect(putS3ObjectParamsSchema.safeParse({ key: "" }).success).toBe(false);
+  });
+
+  it("rejects path traversal in key", () => {
+    expect(
+      putS3ObjectParamsSchema.safeParse({ key: "../etc/passwd" }).success,
+    ).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// deleteS3ObjectParamsSchema
+// ---------------------------------------------------------------------------
+describe("deleteS3ObjectParamsSchema", () => {
+  it("accepts valid key", () => {
+    expect(
+      deleteS3ObjectParamsSchema.safeParse({
+        key: "uploads/candidates/123/photo.jpg",
+      }).success,
+    ).toBe(true);
+  });
+
+  it("rejects missing key", () => {
+    expect(deleteS3ObjectParamsSchema.safeParse({}).success).toBe(false);
+  });
+
+  it("rejects path traversal", () => {
+    expect(
+      deleteS3ObjectParamsSchema.safeParse({ key: "../etc/passwd" }).success,
+    ).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// s3OperationResultSchema
+// ---------------------------------------------------------------------------
+describe("s3OperationResultSchema", () => {
+  const valid = { success: true, key: "uploads/test.pdf" };
+
+  it("accepts success result", () => {
+    expect(s3OperationResultSchema.safeParse(valid).success).toBe(true);
+  });
+
+  it("accepts error result", () => {
+    expect(
+      s3OperationResultSchema.safeParse({
+        success: false,
+        key: "uploads/test.pdf",
+        error: "S3 not configured",
+      }).success,
+    ).toBe(true);
+  });
+
+  it("accepts optional error", () => {
+    expect(
+      s3OperationResultSchema.safeParse({
+        success: true,
+        key: "uploads/test.pdf",
+      }).success,
+    ).toBe(true);
+  });
+
+  it("rejects missing success", () => {
+    expect(
+      s3OperationResultSchema.safeParse({ key: "uploads/test.pdf" }).success,
+    ).toBe(false);
+  });
+
+  it("rejects non-boolean success", () => {
+    expect(
+      s3OperationResultSchema.safeParse({
+        success: "true",
+        key: "uploads/test.pdf",
+      }).success,
     ).toBe(false);
   });
 });
