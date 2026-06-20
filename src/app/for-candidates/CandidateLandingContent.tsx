@@ -58,7 +58,7 @@ export default function CandidateLandingContent({
     <>
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded focus:bg-white focus:px-3 focus:py-2 focus:text-sm focus:font-semibold focus:text-gray-900 focus:shadow-lg focus:outline-none"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded focus:bg-[var(--surface)] focus:px-3 focus:py-2 focus:text-sm focus:font-semibold focus:text-[var(--ink)] focus:shadow-lg focus:outline-none"
       >
         Skip to content
       </a>
@@ -68,18 +68,18 @@ export default function CandidateLandingContent({
       >
         {/* ── Navigation ── */}
         <nav
-          className="sticky top-[3px] z-20 min-h-[62px] flex items-center justify-between gap-[14px] rounded-xl p-[2px] bg-white shadow-md border border-gray-200"
+          className="sticky top-[3px] z-20 min-h-[62px] flex items-center justify-between gap-[14px] rounded-xl p-[2px] bg-[var(--surface)] shadow-md border border-[var(--border)]"
           aria-label="StudentHub public navigation"
         >
           <div className="w-full min-h-[58px] flex items-center justify-between gap-[14px] px-1">
             <Link
-              className="inline-flex items-center gap-2.5 text-gray-900 px-2 no-underline min-h-11"
+              className="inline-flex items-center gap-2.5 text-[var(--ink)] px-2 no-underline min-h-11"
               href="/"
             >
-              <span className="size-9 inline-flex items-center justify-center rounded-lg bg-gray-900 text-white font-black">
+              <span className="size-9 inline-flex items-center justify-center rounded-lg bg-[var(--ink)] text-white font-black">
                 SH
               </span>
-              <strong className="text-gray-900">StudentHub</strong>
+              <strong className="text-[var(--ink)]">StudentHub</strong>
             </Link>
             <div className="flex items-center gap-3.5 max-sm:flex-col max-sm:items-stretch">
               {isLoggedIn ? (
@@ -115,20 +115,20 @@ export default function CandidateLandingContent({
 
         {/* ── Pain-point section — the real candidate frustrations ── */}
         <section
-          className="relative overflow-hidden rounded-xl border border-gray-200 bg-white p-[clamp(24px,5vw,48px)]"
+          className="relative overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--surface)] p-[clamp(24px,5vw,48px)]"
           aria-label="Candidate pain points and solutions"
         >
-          <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-[#fef1ef] via-white to-gray-50 z-0" aria-hidden="true" />
+          <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-[var(--sh-coral-light)] via-[var(--surface)] to-[var(--paper)] z-0" aria-hidden="true" />
 
           <div className="relative z-[2]">
-            <p className="text-[#1f73b7] text-[11px] font-black uppercase tracking-wider mb-1">
+            <p className="text-[var(--sh-info)] text-[11px] font-black uppercase tracking-wider mb-1">
               The real work experience problem
             </p>
-            <h2 className="text-[clamp(22px,3vw,28px)] font-bold leading-tight tracking-tight text-gray-900 mb-8">
+            <h2 className="text-[clamp(22px,3vw,28px)] font-bold leading-tight tracking-tight text-[var(--ink)] mb-8">
               You don&apos;t need another job board.
               <br />
               You need{" "}
-              <em className="text-[#eb6651] not-italic">real experience</em>{" "}
+              <em className="text-[var(--sh-coral)] not-italic">real experience</em>{" "}
               across multiple industries.
             </h2>
 
@@ -136,16 +136,16 @@ export default function CandidateLandingContent({
               {PAIN_POINTS.map((point, i) => (
                 <div
                   key={i}
-                  className="rounded-xl p-5 flex flex-col gap-3 transition-transform duration-300 hover:-translate-y-[3px] bg-gray-50 border border-gray-200"
+                  className="rounded-xl p-5 flex flex-col gap-3 transition-transform duration-300 hover:-translate-y-[3px] bg-[var(--paper)] border border-[var(--border)]"
                 >
-                  <div className="size-10 rounded-lg flex items-center justify-center shrink-0 bg-[#1f73b7]/10 text-[#1f73b7]">
+                  <div className="size-10 rounded-lg flex items-center justify-center shrink-0 bg-[var(--sh-info)]/10 text-[var(--sh-info)]">
                     <span className="font-black text-sm">0{i + 1}</span>
                   </div>
                   <div>
-                    <p className="text-sm font-semibold mb-1.5 text-gray-900">
+                    <p className="text-sm font-semibold mb-1.5 text-[var(--ink)]">
                       {point.problem}
                     </p>
-                    <p className="text-sm leading-relaxed text-gray-500">
+                    <p className="text-sm leading-relaxed text-[var(--muted)]">
                       {point.solution}
                     </p>
                   </div>
@@ -157,15 +157,15 @@ export default function CandidateLandingContent({
 
         {/* ── Stats strip — candidate authority signals ── */}
         <section
-          className="rounded-xl border border-gray-200 bg-gray-50 p-[clamp(20px,4vw,40px)] grid grid-cols-2 sm:grid-cols-4 gap-6 text-center"
+          className="rounded-xl border border-[var(--border)] bg-[var(--paper)] p-[clamp(20px,4vw,40px)] grid grid-cols-2 sm:grid-cols-4 gap-6 text-center"
           aria-label="Candidate stats"
         >
           {CANDIDATE_STATS.map((stat) => (
             <div key={stat.label}>
-              <p className="text-[clamp(24px,4vw,36px)] font-black leading-none mb-1 text-gray-900">
+              <p className="text-[clamp(24px,4vw,36px)] font-black leading-none mb-1 text-[var(--ink)]">
                 {stat.value}
               </p>
-              <p className="text-xs leading-tight text-gray-500">
+              <p className="text-xs leading-tight text-[var(--muted)]">
                 {stat.label}
               </p>
             </div>
@@ -186,19 +186,19 @@ export default function CandidateLandingContent({
 
         {/* ── Final CTA — tailored for candidates ── */}
         <section
-          className="relative overflow-hidden rounded-xl border border-gray-200 bg-white p-[clamp(24px,5vw,60px)] text-center"
+          className="relative overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--surface)] p-[clamp(24px,5vw,60px)] text-center"
           aria-label="Get started as a candidate"
         >
-          <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-[#fef1ef] via-white to-gray-50 z-0" aria-hidden="true" />
+          <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-[var(--sh-coral-light)] via-[var(--surface)] to-[var(--paper)] z-0" aria-hidden="true" />
 
           <div className="relative z-[2] max-w-[640px] mx-auto">
-            <p className="text-[#1f73b7] text-[11px] font-black uppercase tracking-wider mb-2">
+            <p className="text-[var(--sh-info)] text-[11px] font-black uppercase tracking-wider mb-2">
               Start building your career — free
             </p>
-            <h2 className="text-[clamp(24px,3.5vw,36px)] font-bold leading-tight tracking-tight text-gray-900 text-center">
+            <h2 className="text-[clamp(24px,3.5vw,36px)] font-bold leading-tight tracking-tight text-[var(--ink)] text-center">
               Get real work experience that builds your CV.
             </h2>
-            <p className="max-w-[480px] mx-auto mt-2 mb-6 leading-relaxed text-gray-500">
+            <p className="max-w-[480px] mx-auto mt-2 mb-6 leading-relaxed text-[var(--muted)]">
               Registration is completely free. StudentHub places you in real positions
               across multiple industries — 3 months per rotation. No CV required.
               By graduation, you&apos;ll have a stacked portfolio of experience.
@@ -219,7 +219,7 @@ export default function CandidateLandingContent({
                 <ChevronRight className="size-4" />
               </Link>
             )}
-            <div className="flex items-center justify-center gap-4 mt-4 text-xs text-gray-400">
+            <div className="flex items-center justify-center gap-4 mt-4 text-xs text-[var(--muted)]">
               <span>1,200+ active student placements</span>
               <span>Completely free for students</span>
             </div>
@@ -227,18 +227,18 @@ export default function CandidateLandingContent({
         </section>
 
         {/* ── Footer ── */}
-        <footer className="flex items-center justify-between pt-4 pb-2 text-xs text-gray-400">
+        <footer className="flex items-center justify-between pt-4 pb-2 text-xs text-[var(--muted)]">
           <span>&copy; {new Date().getFullYear()} StudentHub. All rights reserved.</span>
           <div className="flex items-center gap-4">
             <Link
               href="/login"
-              className="hover:text-gray-900 transition-colors no-underline text-gray-400"
+              className="hover:text-[var(--ink)] transition-colors no-underline text-[var(--muted)]"
             >
               Sign in
             </Link>
             <Link
               href="/signup?role=candidate"
-              className="hover:text-gray-900 transition-colors no-underline text-gray-400"
+              className="hover:text-[var(--ink)] transition-colors no-underline text-[var(--muted)]"
             >
               Sign up as candidate
             </Link>
