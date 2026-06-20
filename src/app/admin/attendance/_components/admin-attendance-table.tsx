@@ -55,19 +55,18 @@ export function AdminAttendanceTable({ session, attendance, employees }: Props) 
       ]}
     >
       <section className="mb-6">
-        <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
-          <h3 className="text-sm font-semibold mb-3" style={{ color: "var(--ink)" }}>Record attendance</h3>
+        <div className="rounded-lg border-border bg-card p-5">
+          <h3 className="text-sm font-semibold mb-3 text-foreground">Record attendance</h3>
           <CreateAttendanceForm employees={employees} onSuccess={() => router.refresh()} />
         </div>
       </section>
 
       <div className="mb-4 flex items-center gap-3">
-        <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>Filter by employee:</label>
+        <label className="text-xs font-medium text-muted-foreground">Filter by employee:</label>
         <select
           value={employeeFilter}
           onChange={(e) => setEmployeeFilter(e.target.value)}
-          className="h-9 rounded-lg px-3 text-sm border max-w-xs"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+          className="h-9 rounded-lg px-3 text-sm border max-w-xs bg-card border-border text-foreground"
         >
           <option value="">All employees</option>
           {employees.map((e) => (
@@ -161,12 +160,6 @@ function CreateAttendanceForm({
   );
 
   const formRef = useRef<HTMLFormElement>(null);
-  const inputStyle = {
-    background: "var(--surface)",
-    borderColor: "var(--border)",
-    color: "var(--ink)",
-    width: "100%",
-  };
 
   return (
     <form
@@ -177,12 +170,11 @@ function CreateAttendanceForm({
     >
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <div className="grid gap-1">
-          <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>Employee *</label>
+          <label className="text-xs font-medium text-muted-foreground">Employee *</label>
           <select
             name="employee_uuid"
             required
-            className="h-9 rounded-lg px-3 text-sm border"
-            style={inputStyle}
+            className="h-9 rounded-lg px-3 text-sm border bg-card border-border text-foreground w-full"
           >
             <option value="">— Select —</option>
             {employees.map((e) => (
@@ -191,68 +183,62 @@ function CreateAttendanceForm({
           </select>
         </div>
         <div className="grid gap-1">
-          <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>Date *</label>
+          <label className="text-xs font-medium text-muted-foreground">Date *</label>
           <input
             name="date"
             type="date"
             required
-            className="h-9 rounded-lg px-3 text-sm border"
-            style={inputStyle}
+            className="h-9 rounded-lg px-3 text-sm border bg-card border-border text-foreground w-full"
           />
         </div>
         <div className="grid gap-1">
-          <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>Clock In</label>
+          <label className="text-xs font-medium text-muted-foreground">Clock In</label>
           <input
             name="clock_in"
             type="datetime-local"
-            className="h-9 rounded-lg px-3 text-sm border"
-            style={inputStyle}
+            className="h-9 rounded-lg px-3 text-sm border bg-card border-border text-foreground w-full"
           />
         </div>
         <div className="grid gap-1">
-          <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>Clock Out</label>
+          <label className="text-xs font-medium text-muted-foreground">Clock Out</label>
           <input
             name="clock_out"
             type="datetime-local"
-            className="h-9 rounded-lg px-3 text-sm border"
-            style={inputStyle}
+            className="h-9 rounded-lg px-3 text-sm border bg-card border-border text-foreground w-full"
           />
         </div>
         <div className="grid gap-1">
-          <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>Total hours</label>
+          <label className="text-xs font-medium text-muted-foreground">Total hours</label>
           <input
             name="total_hours"
             type="number"
             min="0"
             step="0.1"
             placeholder="8.0"
-            className="h-9 rounded-lg px-3 text-sm border"
-            style={inputStyle}
+            className="h-9 rounded-lg px-3 text-sm border bg-card border-border text-foreground w-full"
           />
         </div>
         <div className="grid gap-1">
-          <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>Note</label>
+          <label className="text-xs font-medium text-muted-foreground">Note</label>
           <input
             name="note"
             maxLength={500}
             placeholder="Optional note"
-            className="h-9 rounded-lg px-3 text-sm border"
-            style={inputStyle}
+            className="h-9 rounded-lg px-3 text-sm border bg-card border-border text-foreground w-full"
           />
         </div>
         <div className="flex items-end">
           <button
             type="submit"
             disabled={pending}
-            className="h-9 rounded-lg px-5 text-sm font-semibold"
-            style={{ background: "var(--sh-primary)", color: "#fff" }}
+            className="h-9 rounded-lg px-5 text-sm font-semibold bg-primary text-primary-foreground"
           >
             {pending ? "Adding..." : "Record"}
           </button>
         </div>
       </div>
       {state?.error ? (
-        <p className="text-xs" style={{ color: "var(--sh-error)" }}>{state.error}</p>
+        <p className="text-xs text-destructive">{state.error}</p>
       ) : null}
     </form>
   );

@@ -63,7 +63,7 @@ export default async function AdminXeroDetailPage({
             {
               label: "Reconciled",
               value: (
-                <span style={{ color: tx.isReconciled ? "#22c55e" : "#ef4444", fontWeight: 600 }}>
+                <span className="inline-flex items-center gap-1.5 text-xs font-semibold" style={{ color: tx.isReconciled ? "#22c55e" : "#ef4444" }}>
                   {tx.isReconciled ? "Yes" : "No"}
                 </span>
               ),
@@ -129,7 +129,7 @@ export default async function AdminXeroDetailPage({
           />
         )}
 
-        <section style={{ display: "flex", gap: "0.5rem", padding: "1rem" }}>
+        <section className="flex gap-2 p-4">
           <Link href={"/admin/xero" as Route}>
             <Button variant="outline">Back to Transactions</Button>
           </Link>

@@ -20,10 +20,10 @@ export default async function CompanySettingsPage() {
           { label: "Companies", value: items.length, note: "Linked companies" },
         ]}
       >
-        <div className="space-y-6" style={{ marginTop: "1.5rem" }}>
+        <div className="space-y-6 mt-6">
           {items.length === 0 ? (
-            <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-8 text-center">
-              <p className="text-sm" style={{ color: "var(--ink-muted)" }}>
+            <div className="rounded-lg border border-border bg-card p-8 text-center">
+              <p className="text-sm text-muted-foreground">
                 No company settings found. Contact support if you believe this is an error.
               </p>
             </div>

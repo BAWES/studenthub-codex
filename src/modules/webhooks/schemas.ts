@@ -29,3 +29,39 @@ export type ListWebhooksResult = z.output<typeof listWebhooksResultSchema>;
 export const webhookGetResultSchema = webhookListItemSchema.nullable();
 
 export type WebhookGetResult = z.output<typeof webhookGetResultSchema>;
+
+// ---------------------------------------------------------------------------
+// CRUD schemas
+// ---------------------------------------------------------------------------
+
+export const webhookMethodEnum = z.enum(["GET", "POST", "PUT", "PATCH", "DELETE"]);
+
+export const createWebhookSchema = z.object({
+  event: z.string().min(1, "Event is required").max(50),
+  endpoint: z.string().min(1, "Endpoint is required").max(255),
+  method: webhookMethodEnum.optional(),
+});
+
+export type CreateWebhookInput = z.input<typeof createWebhookSchema>;
+
+export const updateWebhookSchema = z.object({
+  webhookId: z.coerce.number().int().positive("Webhook ID is required"),
+  event: z.string().min(1, "Event is required").max(50),
+  endpoint: z.string().min(1, "Endpoint is required").max(255),
+  method: webhookMethodEnum.optional(),
+});
+
+export type UpdateWebhookInput = z.input<typeof updateWebhookSchema>;
+
+export const deleteWebhookSchema = z.object({
+  webhookId: z.coerce.number().int().positive("Webhook ID is required"),
+});
+
+export type DeleteWebhookInput = z.input<typeof deleteWebhookSchema>;
+
+export const webhookActionResponseSchema = z.object({
+  operation: z.string().min(1),
+  message: z.string().min(1),
+});
+
+export type WebhookActionResponse = z.output<typeof webhookActionResponseSchema>;

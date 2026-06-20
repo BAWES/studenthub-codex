@@ -28,8 +28,8 @@ export function AdminBlockedIpsTable({ session, records }: Props) {
       ]}
     >
       <section className="mb-6">
-        <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
-          <h3 className="text-sm font-semibold mb-3" style={{ color: "var(--ink)" }}>Block an IP</h3>
+        <div className="rounded-lg border-border bg-card p-5">
+          <h3 className="text-sm font-semibold mb-3 text-foreground">Block an IP</h3>
           <CreateBlockedIpForm onSuccess={() => router.refresh()} />
         </div>
       </section>
@@ -44,7 +44,7 @@ export function AdminBlockedIpsTable({ session, records }: Props) {
             key: "ip_address",
             label: "IP address",
             render: (row) => (
-              <code className="text-sm font-mono" style={{ color: "var(--ink)" }}>
+              <code className="text-sm font-mono text-foreground">
                 {row.ip_address ?? "—"}
               </code>
             ),
@@ -53,7 +53,7 @@ export function AdminBlockedIpsTable({ session, records }: Props) {
             key: "note",
             label: "Note",
             render: (row) => (
-              <span className="text-sm" style={{ color: "var(--muted)" }}>
+              <span className="text-sm text-muted-foreground">
                 {row.note ?? "—"}
               </span>
             ),
@@ -62,7 +62,7 @@ export function AdminBlockedIpsTable({ session, records }: Props) {
             key: "created_at",
             label: "Blocked at",
             render: (row) => (
-              <span className="text-sm" style={{ color: "var(--muted)" }}>
+              <span className="text-sm text-muted-foreground">
                 {row.created_at
                   ? new Date(row.created_at).toLocaleDateString("en-KW", {
                       year: "numeric",
@@ -79,8 +79,7 @@ export function AdminBlockedIpsTable({ session, records }: Props) {
             render: (row) => (
               <button
                 type="button"
-                className="text-xs px-2 py-1 rounded hover:bg-red-500/10"
-                style={{ color: "var(--sh-error)" }}
+                className="text-xs px-2 py-1 rounded hover:bg-red-500/10 text-destructive"
                 onClick={async () => {
                   if (confirm(`Unblock IP "${row.ip_address}"?`)) {
                     try {
@@ -128,36 +127,33 @@ function CreateBlockedIpForm({ onSuccess }: { onSuccess: () => void }) {
       onSubmit={() => setTimeout(() => { formRef.current?.reset(); }, 100)}
     >
       <div className="grid gap-1">
-        <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>IP address</label>
+        <label className="text-xs font-medium text-muted-foreground">IP address</label>
         <input
           name="ip_address"
           required
           maxLength={45}
           placeholder="e.g. 192.168.1.1"
-          className="h-9 rounded-lg px-3 text-sm border"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+          className="h-9 rounded-lg px-3 text-sm border bg-card border-border text-foreground"
         />
       </div>
       <div className="grid gap-1">
-        <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>Note (optional)</label>
+        <label className="text-xs font-medium text-muted-foreground">Note (optional)</label>
         <input
           name="note"
           maxLength={255}
           placeholder="Reason for blocking"
-          className="h-9 rounded-lg px-3 text-sm border"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+          className="h-9 rounded-lg px-3 text-sm border bg-card border-border text-foreground"
         />
       </div>
       <button
         type="submit"
         disabled={pending}
-        className="h-9 rounded-lg px-4 text-sm font-semibold"
-        style={{ background: "var(--sh-primary)", color: "#fff" }}
+        className="h-9 rounded-lg px-4 text-sm font-semibold bg-primary text-primary-foreground"
       >
         {pending ? "Blocking..." : "Block IP"}
       </button>
       {state?.error ? (
-        <p className="text-xs w-full" style={{ color: "var(--sh-error)" }}>{state.error}</p>
+        <p className="text-xs w-full text-destructive">{state.error}</p>
       ) : null}
     </form>
   );

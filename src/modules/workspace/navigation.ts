@@ -4,7 +4,8 @@ import type { LucideIcon } from "lucide-react";
 import {
   LayoutGrid, User, Mail, ClipboardList, CreditCard,
   Building2, Phone, Store, FileCheck, Search, Users,
-  ArrowRightLeft, Calendar, Monitor, Clock, Briefcase, Webhook
+  ArrowRightLeft, Calendar, Monitor, Clock, Briefcase, Webhook,
+  FileText
 } from "lucide-react";
 
 export type NavItem = {
@@ -32,6 +33,8 @@ export function navForRole(role: Role): NavItem[] {
       { label: "Company Requests", href: "/admin/company-requests", icon: Building2 },
       { label: "User Requests", href: "/admin/user-requests", icon: Mail },
       { label: "Webhooks", href: "/admin/webhooks", icon: Webhook },
+      { label: "Documents", href: "/admin/documents", icon: FileText },
+      { label: "Stories", href: "/admin/story", icon: ClipboardList },
     ];
   }
   if (role === "staff") {

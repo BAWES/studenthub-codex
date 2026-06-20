@@ -24,17 +24,17 @@ export function CompanyActivityPanel({
   activities,
 }: CompanyActivityPanelProps) {
   return (
-    <div className="rounded-lg border border-[var(--border)] bg-white p-5">
+    <div className="rounded-lg border border-border bg-white p-5">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h2 className="text-sm font-black uppercase tracking-wider" style={{ color: "var(--muted)" }}>
+          <h2 className="text-sm font-black uppercase tracking-wider text-muted-foreground">
             Recent Activity
           </h2>
-          <p className="text-xs mt-0.5" style={{ color: "var(--muted)" }}>
+          <p className="text-xs mt-0.5 text-muted-foreground">
             Last {activities.length} actions
           </p>
         </div>
-        <Activity className="size-4 shrink-0" style={{ color: "var(--muted)" }} aria-hidden="true" />
+        <Activity className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
       </div>
 
       <div className="space-y-1">
@@ -47,16 +47,15 @@ export function CompanyActivityPanel({
                 className="flex items-start gap-3 rounded-lg p-2.5 transition-colors hover:bg-black/5 dark:hover:bg-white/5"
               >
                 <div
-                  className="flex size-7 shrink-0 items-center justify-center rounded-lg"
-                  style={{ background: "var(--sh-info-bg)" }}
+                  className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-950/30"
                 >
-                  <Icon className="size-3.5" style={{ color: "var(--sh-info)" }} aria-hidden="true" />
+                  <Icon className="size-3.5 text-blue-600 dark:text-blue-400" aria-hidden="true" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs leading-relaxed line-clamp-2" style={{ color: "var(--ink)" }}>
+                  <p className="text-xs leading-relaxed line-clamp-2 text-foreground">
                     {activity.detail}
                   </p>
-                  <span className="text-[11px] mt-0.5 block" style={{ color: "var(--muted)" }}>
+                  <span className="text-[11px] mt-0.5 block text-muted-foreground">
                     {formatDate(activity.timestamp)}
                   </span>
                 </div>

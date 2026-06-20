@@ -3,6 +3,7 @@
 import { pipelineStageColor, pipelineStageLabel } from "./schemas";
 import type { PipelineMetrics, PipelineStage } from "@/modules/staff/pipeline";
 import { TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { Card } from "@/components/ui/card";
 
 interface StageMetricsRowProps {
   metrics: PipelineMetrics;
@@ -43,9 +44,9 @@ export function StageMetricsRow({ metrics }: StageMetricsRowProps) {
               : Minus;
 
         return (
-          <div
+          <Card
             key={stage}
-            className="rounded-lg border border-[var(--border)] bg-white relative overflow-hidden transition-all duration-200 hover:-translate-y-0.5"
+            className="relative overflow-hidden transition-all duration-200 hover:-translate-y-0.5"
             style={{
               borderLeft: `4px solid ${color}`,
             }}
@@ -59,34 +60,27 @@ export function StageMetricsRow({ metrics }: StageMetricsRowProps) {
                 {count.toLocaleString()}
               </strong>
               {/* Label */}
-              <span
-                className="block text-[13px] font-medium"
-                style={{ color: "var(--text-secondary, var(--muted))" }}
-              >
+              <span className="block text-[13px] font-medium text-muted-foreground">
                 {label}
               </span>
               {/* Trend */}
               <div className="flex items-center gap-1">
                 <TrendIcon
                   size={12}
-                  style={{
-                    color:
-                      trend.direction === "up"
-                        ? "var(--emerald-500, #10b981)"
-                        : trend.direction === "down"
-                          ? "var(--rose-500, #f43f5e)"
-                          : "var(--text-tertiary, var(--muted))",
-                  }}
+                  className={
+                    trend.direction === "up"
+                      ? "text-emerald-500"
+                      : trend.direction === "down"
+                        ? "text-rose-500"
+                        : "text-muted-foreground"
+                  }
                 />
-                <span
-                  className="text-[11px]"
-                  style={{ color: "var(--text-tertiary, var(--muted))" }}
-                >
+                <span className="text-[11px] text-muted-foreground">
                   {trend.label} this week
                 </span>
               </div>
             </div>
-          </div>
+          </Card>
         );
       })}
     </div>

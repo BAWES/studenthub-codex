@@ -73,7 +73,7 @@ export default async function AdminEventDetailPage({
           ]}
         />
 
-        <section style={{ display: "flex", gap: "0.5rem", padding: "1rem" }}>
+        <section className="flex gap-2 p-4">
           <Link href={"/admin/event" as Route}>
             <Button variant="outline">Back to Events</Button>
           </Link>

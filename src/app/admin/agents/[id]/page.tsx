@@ -96,7 +96,7 @@ export default async function AdminAgentDetailPage({
             {
               label: "Status",
               value: (
-                <span style={{ color: statusColor, fontWeight: 600 }}>
+                <span className="font-semibold" style={{ color: statusColor }}>
                   {agent.status}
                 </span>
               ),
@@ -164,7 +164,7 @@ export default async function AdminAgentDetailPage({
           ]}
         />
 
-        <section style={{ display: "flex", gap: "0.5rem", padding: "1rem" }}>
+        <section className="flex gap-2 p-4">
           <Link href={"/admin/agents" as Route}>
             <Button variant="outline">Back to Agents</Button>
           </Link>
