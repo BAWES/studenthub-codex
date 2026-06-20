@@ -4,6 +4,7 @@ import { EmptyState } from "@/modules/workspace/EmptyState";
 import { MetricCard } from "@/components/ui/metric-card";
 import { StatusBadge } from "@/modules/workspace/StatusBadge";
 import Link from "next/link";
+import { ChevronRight } from "lucide-react";
 import type { Route } from "next";
 
 /* ── Status badge variant map ─────────────────────────────────────── */
@@ -24,12 +25,9 @@ export async function Dashboard() {
 
   return (
     <>
-      {/* ── Glass metric cards with sparklines ── */}
-      <section
-        className="shDashboardSection"
-        aria-label="StudentHub health metrics"
-      >
-        <div className="shDashboardGrid4">
+      {/* ── Health metric cards ── */}
+      <section aria-label="StudentHub health metrics" className="mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
           <MetricCard
             label="Candidates"
             value={dashboard.metrics[0]?.value ?? 0}
@@ -65,39 +63,37 @@ export async function Dashboard() {
         </div>
       </section>
 
-      {/* ── Request Pipeline — glass overview + status breakdown ── */}
-      <section
-        className="shDashboardSection"
-        aria-label="Request pipeline status"
-      >
-        <div className="rounded-lg border border-[var(--border)] bg-white p-5">
-          <div className="shPipelineHeader">
+      {/* ── Request Pipeline — overview + status breakdown ── */}
+      <section aria-label="Request pipeline status" className="mb-6">
+        <div className="rounded-lg border border-border bg-card text-card-foreground p-5 shadow-sm">
+          <div className="flex items-start justify-between gap-3 mb-4">
             <div>
-              <span className="shPipelineEyebrow">Pipeline</span>
-              <h2 className="shPipelineTitle">Request Pipeline</h2>
+              <span className="block text-[10px] font-bold text-blue-600 uppercase tracking-[0.05em] mb-0.5">
+                Pipeline
+              </span>
+              <h2 className="m-0 text-base font-semibold text-foreground leading-tight">
+                Request Pipeline
+              </h2>
             </div>
             <Link
               href="/admin/requests"
-              className="shPipelineLink"
+              className="inline-flex items-center gap-1 text-xs font-medium text-blue-600 no-underline px-2 py-1 rounded-md hover:bg-blue-50 shrink-0 transition-colors"
             >
               View all
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-                <path d="M5 3l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
+              <ChevronRight className="size-3.5" />
             </Link>
           </div>
 
           {dashboard.statusMix.length > 0 ? (
-            <div className="shPipelineGrid">
+            <div className="grid gap-3">
               {/* Visual bar showing proportional breakdown */}
-              <div className="shPipelineBar" aria-hidden="true">
+              <div className="flex h-1.5 rounded-full overflow-hidden bg-muted" aria-hidden="true">
                 {dashboard.statusMix.map((status) => {
                   const total = dashboard.statusMix.reduce((s, a) => s + a.value, 0);
                   const pct = total > 0 ? (status.value / total) * 100 : 0;
                   return (
                     <div
                       key={status.label}
-                      className="shPipelineBarSegment"
                       style={{
                         width: `${pct}%`,
                         backgroundColor: `var(--sh-${statusVariant(status.label)}-bg)`,
@@ -109,15 +105,15 @@ export async function Dashboard() {
               </div>
 
               {/* Status items */}
-              <div className="shPipelineList">
+              <div className="space-y-2">
                 {dashboard.statusMix.map((status) => (
-                  <div key={status.label} className="shPipelineRow">
+                  <div key={status.label} className="flex items-center justify-between">
                     <StatusBadge
                       variant={statusVariant(status.label)}
                       size="sm"
                       label={status.label}
                     />
-                    <strong className="shPipelineCount">
+                    <strong className="text-base font-bold text-foreground">
                       {status.value.toLocaleString("en-US")}
                     </strong>
                   </div>
@@ -125,7 +121,7 @@ export async function Dashboard() {
               </div>
             </div>
           ) : (
-            <div className="shPipelineEmpty">
+            <div className="py-6">
               <EmptyState variant="idle" message="No requests in pipeline" />
             </div>
           )}
@@ -133,32 +129,31 @@ export async function Dashboard() {
       </section>
 
       {/* ── PR Merge Time-to-Merge Metrics ── */}
-      <section
-        className="shDashboardSection"
-        aria-label="PR merge time-to-merge metrics"
-      >
-        <div className="rounded-lg border border-[var(--border)] bg-white p-5">
-          <div className="shPipelineHeader">
+      <section aria-label="PR merge time-to-merge metrics" className="mb-6">
+        <div className="rounded-lg border border-border bg-card text-card-foreground p-5 shadow-sm">
+          <div className="flex items-start justify-between gap-3 mb-4">
             <div>
-              <span className="shPipelineEyebrow">Engineering</span>
-              <h2 className="shPipelineTitle">PR Time-to-Merge</h2>
+              <span className="block text-[10px] font-bold text-blue-600 uppercase tracking-[0.05em] mb-0.5">
+                Engineering
+              </span>
+              <h2 className="m-0 text-base font-semibold text-foreground leading-tight">
+                PR Time-to-Merge
+              </h2>
             </div>
             <Link
               href="https://github.com/BAWES/studenthub-codex/pulls"
-              className="shPipelineLink"
+              className="inline-flex items-center gap-1 text-xs font-medium text-blue-600 no-underline px-2 py-1 rounded-md hover:bg-blue-50 shrink-0 transition-colors"
               target="_blank"
               rel="noopener noreferrer"
             >
               Open GitHub
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-                <path d="M5 3l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
+              <ChevronRight className="size-3.5" />
             </Link>
           </div>
 
           {dashboard.prMergeMetrics.length > 0 ? (
-            <div className="shPipelineGrid">
-              <div className="shDashboardGrid4 shMt2">
+            <div className="grid gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 mt-2">
                 {dashboard.prMergeMetrics.map((metric, idx) => (
                   <MetricCard
                     key={metric.label}
@@ -173,8 +168,10 @@ export async function Dashboard() {
 
               {dashboard.recentPrMergeTimes.length > 0 && (
                 <>
-                  <h3 className="shDataListEyebrow shMt3">Recent merges</h3>
-                  <div className="shDataListBody">
+                  <h3 className="block text-[10px] font-bold text-blue-600 uppercase tracking-[0.05em] mb-0.5 mt-3">
+                    Recent merges
+                  </h3>
+                  <div className="grid gap-0.5">
                     {dashboard.recentPrMergeTimes.map((pr) => {
                       const fmtHours = pr.hours < 1
                         ? `${Math.round(pr.hours * 60)}m`
@@ -183,16 +180,22 @@ export async function Dashboard() {
                         <Link
                           href={`https://github.com/BAWES/studenthub-codex/pull/${pr.number}` as Route}
                           key={pr.number}
-                          className="shDataListRow"
+                          className="grid grid-cols-[1fr_auto] gap-2.5 items-center p-2.5 rounded-md no-underline text-foreground transition-colors hover:bg-muted/40"
                           target="_blank"
                           rel="noopener noreferrer"
                         >
-                          <div className="shDataListRowMain">
-                            <strong className="shDataListRowTitle">#{pr.number}</strong>
-                            <span className="shDataListRowSub">{pr.title}</span>
+                          <div className="min-w-0 grid gap-px">
+                            <strong className="text-[13px] font-medium text-foreground truncate">
+                              #{pr.number}
+                            </strong>
+                            <span className="text-[11px] text-muted-foreground truncate">
+                              {pr.title}
+                            </span>
                           </div>
-                          <div className="shDataListRowMeta">
-                            <span className="shDataListRowDate">{fmtHours}</span>
+                          <div className="flex items-center gap-2 shrink-0">
+                            <span className="text-[11px] text-muted-foreground whitespace-nowrap">
+                              {fmtHours}
+                            </span>
                           </div>
                         </Link>
                       );
@@ -202,7 +205,7 @@ export async function Dashboard() {
               )}
             </div>
           ) : (
-            <div className="shPipelineEmpty">
+            <div className="py-6">
               <EmptyState variant="idle" message="No PR merge data available" />
             </div>
           )}
@@ -213,38 +216,31 @@ export async function Dashboard() {
       <CoderHealthSection />
 
       {/* ── Recent Activity ── */}
-      <section
-        className="shDashboardSection"
-        aria-label="Recent activity"
-      >
-        <div className="shDashboardGrid2">
+      <section aria-label="Recent activity" className="mb-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-2.5">
           <DataList
             title="Candidates"
             href="/admin/candidates"
             items={dashboard.recentCandidates}
             emptyMessage="No recent candidates"
-            entranceDelay={0}
           />
           <DataList
             title="Companies"
             href="/admin/companies"
             items={dashboard.recentCompanies}
             emptyMessage="No recent companies"
-            entranceDelay={80}
           />
           <DataList
             title="Requests"
             href="/admin/requests"
             items={dashboard.recentRequests}
             emptyMessage="No recent requests"
-            entranceDelay={160}
           />
           <DataList
             title="Transfers"
             href="/admin/transfers"
             items={dashboard.recentTransfers}
             emptyMessage="No recent transfers"
-            entranceDelay={240}
           />
         </div>
       </section>
@@ -264,69 +260,67 @@ type DataListItem = {
   count?: number;
 };
 
-/* ── DataList — glass card with rows ───────────────────────────── */
+/* ── DataList — card with rows ────────────────────────────────── */
 
 function DataList({
   title,
   href,
   items,
   emptyMessage,
-  entranceDelay = 0,
 }: {
   title: string;
   href: string;
   items: DataListItem[];
   emptyMessage?: string;
-  entranceDelay?: number;
 }) {
   return (
-    <div
-      className="rounded-lg border border-[var(--border)] bg-white shDashboardDataList"
-      style={{ animationDelay: `${entranceDelay}ms` } as React.CSSProperties}
-    >
-      <div className="shDataListHeader">
+    <div className="rounded-lg border border-border bg-card text-card-foreground p-5 shadow-sm">
+      <div className="flex items-start justify-between gap-2 pb-3 border-b border-border mb-2">
         <div>
-          <span className="shDataListEyebrow">Recent</span>
-          <h3 className="shDataListTitle">{title}</h3>
+          <span className="block text-[10px] font-bold text-blue-600 uppercase tracking-[0.05em] mb-0.5">
+            Recent
+          </span>
+          <h3 className="m-0 text-[15px] font-semibold text-foreground leading-tight">{title}</h3>
         </div>
-        <span className="shDataListCount">{items.length}</span>
+        <span className="inline-flex items-center justify-center min-w-[22px] h-[22px] px-1.5 rounded-full text-[11px] font-semibold text-muted-foreground bg-muted/50 shrink-0">
+          {items.length}
+        </span>
       </div>
 
-      <div className="shDataListBody">
+      <div className="grid gap-0.5">
         {items.length > 0 ? (
-          items.map((item, idx) => (
+          items.map((item) => (
             <Link
               href={`${href}/${item.id}` as Route}
               key={item.id}
-              className="shDataListRow"
-              style={{ animationDelay: `${Math.min((idx + 1) * 40, 400)}ms` } as React.CSSProperties}
+              className="grid grid-cols-[1fr_auto] gap-2.5 items-center p-2.5 rounded-md no-underline text-foreground transition-colors hover:bg-muted/40"
             >
-              <div className="shDataListRowMain">
-                <strong className="shDataListRowTitle">{item.title}</strong>
-                <span className="shDataListRowSub">{item.subtitle}</span>
+              <div className="min-w-0 grid gap-px">
+                <strong className="text-[13px] font-medium text-foreground truncate">{item.title}</strong>
+                <span className="text-[11px] text-muted-foreground truncate">{item.subtitle}</span>
               </div>
-              <div className="shDataListRowMeta">
+              <div className="flex items-center gap-2 shrink-0">
                 <StatusBadge
                   variant={statusVariant(item.meta)}
                   size="sm"
                   label={item.meta}
                 />
-                <div className="shDataListRowMetaRight">
+                <div className="flex items-center gap-2">
                   {item.amount != null && (
-                    <span className="shDataListRowAmount">{item.amount}</span>
+                    <span className="text-xs font-semibold text-foreground whitespace-nowrap">{item.amount}</span>
                   )}
                   {item.count != null && (
-                    <span className="shDataListRowCount">{item.count} seats</span>
+                    <span className="text-[11px] text-blue-600 whitespace-nowrap">{item.count} seats</span>
                   )}
                   {item.date != null && (
-                    <span className="shDataListRowDate">{item.date}</span>
+                    <span className="text-[11px] text-muted-foreground whitespace-nowrap">{item.date}</span>
                   )}
                 </div>
               </div>
             </Link>
           ))
         ) : (
-          <div className="shDataListEmpty">
+          <div className="py-4">
             <EmptyState variant="idle" message={emptyMessage ?? "No records"} />
           </div>
         )}
@@ -343,15 +337,19 @@ async function CoderHealthSection() {
     data = await getCoderHealthData();
   } catch {
     return (
-      <section className="shDashboardSection" aria-label="Coder agent health">
-        <div className="rounded-lg border border-[var(--border)] bg-white p-5">
-          <div className="shPipelineHeader">
+      <section aria-label="Coder agent health" className="mb-6">
+        <div className="rounded-lg border border-border bg-card text-card-foreground p-5 shadow-sm">
+          <div className="flex items-start justify-between gap-3 mb-4">
             <div>
-              <span className="shPipelineEyebrow">Agent</span>
-              <h2 className="shPipelineTitle">Coder Health</h2>
+              <span className="block text-[10px] font-bold text-blue-600 uppercase tracking-[0.05em] mb-0.5">
+                Agent
+              </span>
+              <h2 className="m-0 text-base font-semibold text-foreground leading-tight">
+                Coder Health
+              </h2>
             </div>
           </div>
-          <div className="shPipelineEmpty">
+          <div className="py-6">
             <EmptyState variant="idle" message="Could not load Coder health data" />
           </div>
         </div>
@@ -360,17 +358,21 @@ async function CoderHealthSection() {
   }
 
   return (
-    <section className="shDashboardSection" aria-label="Coder agent health metrics">
-      <div className="rounded-lg border border-[var(--border)] bg-white p-5">
-        <div className="shPipelineHeader">
+    <section aria-label="Coder agent health metrics" className="mb-6">
+      <div className="rounded-lg border border-border bg-card text-card-foreground p-5 shadow-sm">
+        <div className="flex items-start justify-between gap-3 mb-4">
           <div>
-            <span className="shPipelineEyebrow">Agent</span>
-            <h2 className="shPipelineTitle">Coder Health</h2>
+            <span className="block text-[10px] font-bold text-blue-600 uppercase tracking-[0.05em] mb-0.5">
+              Agent
+            </span>
+            <h2 className="m-0 text-base font-semibold text-foreground leading-tight">
+              Coder Health
+            </h2>
           </div>
         </div>
 
         {data.heartbeatMetrics.length > 0 ? (
-          <div className="shDashboardGrid4 shMt2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 mt-2">
             {data.heartbeatMetrics.map((metric, idx) => (
               <MetricCard
                 key={metric.label}
@@ -383,7 +385,7 @@ async function CoderHealthSection() {
             ))}
           </div>
         ) : (
-          <div className="shPipelineEmpty">
+          <div className="py-6">
             <EmptyState variant="idle" message="No heartbeat data yet" />
           </div>
         )}
@@ -391,16 +393,18 @@ async function CoderHealthSection() {
         {/* Recent issues */}
         {data.recentIssues.length > 0 && (
           <>
-            <h3 className="shDataListEyebrow shMt3">Recent issues</h3>
-            <div className="shDataListBody">
+            <h3 className="block text-[10px] font-bold text-blue-600 uppercase tracking-[0.05em] mb-0.5 mt-3">
+              Recent issues
+            </h3>
+            <div className="grid gap-0.5">
               {data.recentIssues.slice(0, 6).map((issue, idx) => (
-                <div key={idx} className="shDataListRow">
-                  <div className="shDataListRowMain">
-                    <strong className="shDataListRowTitle">{issue.title}</strong>
-                    <span className="shDataListRowSub">{issue.status}</span>
+                <div key={idx} className="grid grid-cols-[1fr_auto] gap-2.5 items-center p-2.5 rounded-md text-foreground">
+                  <div className="min-w-0 grid gap-px">
+                    <strong className="text-[13px] font-medium text-foreground truncate">{issue.title}</strong>
+                    <span className="text-[11px] text-muted-foreground truncate">{issue.status}</span>
                   </div>
-                  <div className="shDataListRowMeta">
-                    <span className="shDataListRowDate">{issue.updatedAt}</span>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className="text-[11px] text-muted-foreground whitespace-nowrap">{issue.updatedAt}</span>
                   </div>
                 </div>
               ))}
@@ -411,22 +415,24 @@ async function CoderHealthSection() {
         {/* Recent commits */}
         {data.recentCommits.length > 0 && (
           <>
-            <h3 className="shDataListEyebrow shMt3">Recent commits</h3>
-            <div className="shDataListBody">
+            <h3 className="block text-[10px] font-bold text-blue-600 uppercase tracking-[0.05em] mb-0.5 mt-3">
+              Recent commits
+            </h3>
+            <div className="grid gap-0.5">
               {data.recentCommits.map((commit) => (
                 <Link
                   key={commit.sha}
                   href={`https://github.com/BAWES/studenthub-codex/commit/${commit.sha}` as Route}
-                  className="shDataListRow"
+                  className="grid grid-cols-[1fr_auto] gap-2.5 items-center p-2.5 rounded-md no-underline text-foreground transition-colors hover:bg-muted/40"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  <div className="shDataListRowMain">
-                    <strong className="shDataListRowTitle">{commit.sha}</strong>
-                    <span className="shDataListRowSub">{commit.message}</span>
+                  <div className="min-w-0 grid gap-px">
+                    <strong className="text-[13px] font-medium text-foreground truncate">{commit.sha}</strong>
+                    <span className="text-[11px] text-muted-foreground truncate">{commit.message}</span>
                   </div>
-                  <div className="shDataListRowMeta">
-                    <span className="shDataListRowDate">{commit.date}</span>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className="text-[11px] text-muted-foreground whitespace-nowrap">{commit.date}</span>
                   </div>
                 </Link>
               ))}
