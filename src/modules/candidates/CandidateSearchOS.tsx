@@ -9,6 +9,7 @@ import { ExportCVsForm } from "./ExportCVsForm";
 import { SearchStatusPill } from "./SearchStatusPill";
 import { SearchFormWrapper } from "./SearchFormWrapper";
 import MatchScoreBadge from "@/components/matching/MatchScoreBadge";
+import { EmptyState } from "@/components/ui/empty-state";
 import type {
   CandidateSearchFacet,
   CandidateSearchFilter,
@@ -54,11 +55,11 @@ export function CandidateSearchOS({
   const activeFacetCount = data.facets.reduce((count, facet) => count + facet.options.filter((option) => option.active).length, 0);
 
   return (
-    <main className="candidateDesk">
-      <header className="candidateDeskTopbar">
-        <Link className="candidateDeskBrand" href={homePath}>
-          <span>SH</span>
-          <strong>Candidates</strong>
+    <main className="min-h-svh grid grid-rows-[auto_auto_auto_1fr] gap-2 bg-[length:44px_44px] bg-[linear-gradient(90deg,var(--grid-line)_1px,transparent_1px),linear-gradient(180deg,var(--grid-line)_1px,transparent_1px)] bg-[var(--paper)] text-[var(--ink)] p-2">
+      <header className="min-w-0 grid grid-cols-[auto_minmax(320px,1fr)_auto] gap-2 items-center border border-[var(--line)] rounded-lg bg-[var(--surface)]/95 p-2">
+        <Link className="flex items-center gap-[9px] min-h-[40px] text-[var(--ink)] no-underline px-2" href={homePath}>
+          <span className="w-8 h-8 inline-flex items-center justify-center rounded-lg bg-[var(--ink)] text-[var(--surface)] font-bold">SH</span>
+          <strong className="text-sm">Candidates</strong>
         </Link>
         <SearchFormWrapper>
           <input
@@ -75,12 +76,12 @@ export function CandidateSearchOS({
           <HiddenFacetInputs data={data} />
           <button type="submit">Search</button>
         </SearchFormWrapper>
-        <div className="candidateDeskTools">
+        <div className="flex items-center gap-[6px] justify-end">
           <HubShortcuts commands={commands} />
           <ThemeToggle />
-          <div className="candidateDeskAccount" title={session.email}>
-            <span>{session.role}</span>
-            <strong>{session.name}</strong>
+          <div className="min-w-[140px] max-w-[220px] min-h-[42px] grid content-center border border-[var(--line)] rounded-lg bg-[var(--surface-soft)] px-[11px]" title={session.email}>
+            <span className="overflow-hidden text-ellipsis whitespace-nowrap text-[var(--blue)] text-[10px] font-bold uppercase">{session.role}</span>
+            <strong className="overflow-hidden text-ellipsis whitespace-nowrap text-[var(--ink)] text-xs">{session.name}</strong>
           </div>
           <form action={logoutAction}>
             <button type="submit">Sign out</button>
@@ -91,8 +92,8 @@ export function CandidateSearchOS({
       <ActiveSearchContext basePath={basePath} data={data} params={params} />
       <BulkCandidateBar basePath={basePath} params={params} selectedIds={selectedIds} selectedRows={selectedRows} />
 
-      <section className="candidateDeskBody">
-        <section className="candidateTabWorkspace" aria-label="Open candidate tabs">
+      <section className="min-w-0 min-h-0 grid grid-cols-[minmax(0,1fr)] gap-2">
+        <section className="min-w-0 min-h-0 overflow-hidden border border-[var(--line)] rounded-lg bg-[var(--surface)]/96 grid grid-rows-[auto_minmax(0,1fr)]" aria-label="Open candidate tabs">
           <CandidateTabs basePath={basePath} data={data} params={params} />
           {data.selected?.candidate ? (
             <CandidateProfile
@@ -132,14 +133,14 @@ function CandidateSearchTab({
   selectedIds: number[];
 }) {
   return (
-    <section className="candidateSearchPanel" aria-label="Candidate search and filters">
-      <header className="candidateSearchTabHeader">
-        <div>
-          <span>Search tab</span>
-          <strong>{data.query ? `Results for ${data.query}` : "Candidate search"}</strong>
+    <section className="min-w-0 min-h-0 overflow-hidden border border-[var(--line)] rounded-lg bg-[var(--surface)]/96 grid grid-rows-[auto_auto_auto_minmax(0,1fr)]" aria-label="Candidate search and filters">
+      <header className="flex items-center justify-between gap-3 border-b border-[var(--line)] px-[14px] py-3">
+        <div className="min-w-0 grid gap-[3px]">
+          <span className="text-[var(--blue)] text-[11px] font-bold uppercase">Search tab</span>
+          <strong className="overflow-hidden text-ellipsis whitespace-nowrap text-[22px]">{data.query ? `Results for ${data.query}` : "Candidate search"}</strong>
         </div>
         <SearchStatusPill resultsCount={data.rows.length} query={data.query} />
-        <small>
+        <small className="text-[var(--muted)] text-[13px] font-bold whitespace-nowrap">
           {data.matchingCount.toLocaleString("en-US")} total
         </small>
         {data.source?.current ? (
@@ -148,21 +149,26 @@ function CandidateSearchTab({
           </span>
         ) : null}
       </header>
-      <details className="candidatePowerFilters">
-        <summary>
-          <span>Filters</span>
-          <strong>{activeFacetCount ? `${activeFacetCount} active` : "Open power filters"}</strong>
+      <details className="border-b border-[var(--line)]">
+        <summary className="min-h-[42px] grid grid-cols-[minmax(0,1fr)_auto] gap-2 items-center cursor-pointer list-none px-3 [&::-webkit-details-marker]:hidden">
+          <span className="text-[var(--blue)] text-[11px] font-bold uppercase">Filters</span>
+          <strong className="border border-[var(--line)] rounded-full bg-[var(--surface-soft)] text-[var(--ink)] px-2 py-1 text-[11px] font-semibold">{activeFacetCount ? `${activeFacetCount} active` : "Open power filters"}</strong>
         </summary>
-        <section className="candidateFacetRail" aria-label="Candidate power filters">
+        <section className="grid grid-cols-2 gap-[6px] max-h-[280px] overflow-y-auto p-2 border-b border-[var(--line)]" aria-label="Candidate power filters">
           {facetGroups.map((facet) => (
             <FacetGroup basePath={basePath} facet={facet} key={facet.key} params={params} />
           ))}
         </section>
       </details>
-      <nav className="candidateSearchFilters" aria-label="Candidate search filters">
+      <nav className="flex gap-[6px] overflow-x-auto border-b border-[var(--line)] p-2 scrollbar-none" aria-label="Candidate search filters">
         {candidateFilterLinks.map((item) => (
           <Link
-            className={item.value === data.filter ? "active" : ""}
+            className={`
+              flex-[0_0_auto] min-h-[32px] inline-flex items-center border border-[var(--line)] rounded-lg px-[10px] text-[13px] font-semibold whitespace-nowrap no-underline
+              ${item.value === data.filter
+                ? "border-[var(--blue)] bg-[color-mix(in_srgb,var(--blue)_10%,var(--surface))] text-[var(--blue)]"
+                : "text-[var(--muted)]"}
+            `}
             href={candidateSearchHref(basePath, params, { filter: item.value, candidate: "" })}
             key={item.value}
           >
@@ -172,49 +178,57 @@ function CandidateSearchTab({
       </nav>
       <FacetChips basePath={basePath} data={data} params={params} />
       {data.selectedBlocked ? (
-        <div className="candidateAccessNotice">
+        <div className="grid gap-[5px] border border-[var(--line)] rounded-lg bg-[color-mix(in_srgb,var(--rose)_8%,var(--surface))] mx-[10px] p-3">
           <strong>Candidate unavailable</strong>
-          <span>This record is missing, deleted, or outside the candidates visible to this login.</span>
+          <span className="text-[var(--muted)] leading-[1.45]">This record is missing, deleted, or outside the candidates visible to this login.</span>
         </div>
       ) : null}
-      <div className="candidateResultList">
+      <div className="overflow-y-auto align-content-start grid gap-2 p-[10px] min-h-0 grid-cols-[repeat(auto-fill,minmax(300px,1fr))]">
         {data.rows.map((row) => (
           <article
-            className={row.id === data.selectedId ? "candidateResultCard active" : "candidateResultCard"}
+            className={`
+              relative grid gap-[7px] border border-[var(--line)] rounded-lg bg-[var(--surface)] text-[var(--ink)] px-[10px] py-[9px] no-underline transition-[border-color,transform,box-shadow] duration-[140ms] ease
+              ${row.id === data.selectedId ? "border-[var(--blue)] bg-[color-mix(in_srgb,var(--blue)_7%,var(--surface))] shadow-[0_10px_30px_rgba(16,24,40,0.08)]" : ""}
+              hover:border-[var(--blue)] hover:bg-[color-mix(in_srgb,var(--blue)_7%,var(--surface))] hover:shadow-[0_10px_30px_rgba(16,24,40,0.08)]
+            `}
             key={row.id}
           >
-            <Link className="candidateResultSelect" href={candidateSearchHref(basePath, params, { selected: toggleCandidateId(selectedIds, row.id).join(",") })}>
-              <span aria-hidden="true">{selectedIds.includes(row.id) ? "✓" : ""}</span>
-              <small>{selectedIds.includes(row.id) ? "Selected" : "Select"}</small>
+            <Link
+              className="absolute top-[10px] right-[10px] z-[2] w-[26px] h-[26px] inline-flex items-center justify-center border border-[var(--line)] rounded-lg bg-[var(--surface-soft)] text-[var(--blue)] no-underline hover:border-[var(--blue)] hover:bg-[color-mix(in_srgb,var(--blue)_10%,var(--surface))]"
+              href={candidateSearchHref(basePath, params, { selected: toggleCandidateId(selectedIds, row.id).join(",") })}
+            >
+              <span className="w-[14px] h-[14px] inline-flex items-center justify-center border border-[var(--line)] rounded text-[10px] font-bold" aria-hidden="true">{selectedIds.includes(row.id) ? "✓" : ""}</span>
+              <small className="absolute w-px h-px overflow-hidden [clip:rect(0_0_0_0)]">{selectedIds.includes(row.id) ? "Selected" : "Select"}</small>
             </Link>
-            <Link className="candidateResultOpen" href={candidateSearchHref(basePath, params, { candidate: String(row.id) })}>
-              <div className="candidateResultMain">
-                <span className="candidateResultAvatar">{candidateInitials(row.name)}</span>
+            <Link className="grid gap-[7px] text-inherit no-underline" href={candidateSearchHref(basePath, params, { candidate: String(row.id) })}>
+              <div className="min-w-0 grid grid-cols-[36px_minmax(0,1fr)_auto] gap-[9px] items-center pr-[30px]">
+                <span className="w-9 h-9 inline-flex items-center justify-center rounded-lg bg-[var(--ink)] text-[var(--surface)] font-bold text-[13px]">{candidateInitials(row.name)}</span>
                 <div>
-                  <strong>{row.name}</strong>
-                  <small>{row.email}</small>
+                  <strong className="block overflow-hidden text-ellipsis whitespace-nowrap">{row.name}</strong>
+                  <small className="block overflow-hidden text-ellipsis whitespace-nowrap">{row.email}</small>
                 </div>
-                <em>{row.status}</em>
+                <em className="border border-[color-mix(in_srgb,var(--green)_38%,var(--line))] rounded-full text-[var(--green)] px-[7px] py-[3px] text-[11px] not-italic font-semibold whitespace-nowrap">{row.status}</em>
                 <MatchScoreBadge score={row.score} label="Score" showBar={false} />
               </div>
-              <div className="candidateResultMeta">
-                <span>{row.signal}</span>
-                <span>{row.country}</span>
-                <span>{row.updated}</span>
+              <div className="flex flex-wrap gap-[5px] items-center">
+                <span className="text-xs text-[var(--muted)]">{row.signal}</span>
+                <span className="text-xs text-[var(--muted)]">{row.country}</span>
+                <span className="text-xs text-[var(--muted)]">{row.updated}</span>
               </div>
-              <div className="candidateResultTags">
+              <div className="flex flex-wrap gap-[5px] items-center">
                 {[...row.flags, ...row.skills].slice(0, 3).map((flag) => (
-                  <span key={flag}>{flag}</span>
+                  <span key={flag} className="min-h-[23px] inline-flex items-center border border-[var(--line)] rounded-full bg-[var(--surface)] text-[var(--muted)] px-[7px] text-[11px] font-bold">{flag}</span>
                 ))}
               </div>
             </Link>
           </article>
         ))}
         {data.rows.length === 0 ? (
-          <div className="candidateEmptyState">
-            <strong>No candidates match this search.</strong>
-            <span>Remove a facet or search a different name, email, phone, skill, or candidate ID.</span>
-          </div>
+          <EmptyState
+            variant="search"
+            title="No candidates match this search."
+            description="Remove a facet or search a different name, email, phone, skill, or candidate ID."
+          />
         ) : data.totalPages && data.totalPages > 1 ? (
           <CandidatePagination basePath={basePath} params={params} page={data.page ?? 1} totalPages={data.totalPages} />
         ) : null}
@@ -243,18 +257,18 @@ function BulkCandidateBar({
   const loadedEmailRecipients = selectedRows.map((row) => row.email).filter(Boolean).join(",");
 
   return (
-    <section className="candidateBulkBar" aria-label="Selected candidate actions">
-      <div>
-        <span>Selection</span>
-        <strong>{selectedIds.length.toLocaleString("en-US")} selected</strong>
+    <section className="grid grid-cols-[auto_minmax(0,1fr)] gap-[10px] items-center border border-[var(--blue)] rounded-lg bg-[color-mix(in_srgb,var(--blue)_9%,var(--surface))] px-[10px] py-2" aria-label="Selected candidate actions">
+      <div className="grid gap-[2px]">
+        <span className="text-[var(--blue)] text-[10px] font-bold uppercase">Selection</span>
+        <strong className="text-[var(--ink)] text-sm">{selectedIds.length.toLocaleString("en-US")} selected</strong>
       </div>
-      <nav>
-        <Link href={candidateSearchHref(basePath, params, { tabs: selectedValue, candidate: String(selectedIds[0] ?? ""), selected: selectedValue })}>Open as tabs</Link>
-        {selectedIds.length === 2 ? <Link href={candidateSearchHref(basePath, params, { selected: selectedValue })}>Merge review</Link> : null}
-        {loadedEmailRecipients ? <a href={`mailto:${loadedEmailRecipients}`}>Email loaded</a> : null}
-        <Link href={candidateSearchHref(basePath, params, { selected: selectedValue })}>Generate ID batch</Link>
+      <nav className="min-w-0 flex flex-wrap justify-end gap-[6px]">
+        <Link className="min-h-[32px] inline-flex items-center border border-[var(--line)] rounded-lg bg-[var(--surface)] text-[var(--ink)] px-[10px] text-xs font-semibold no-underline" href={candidateSearchHref(basePath, params, { tabs: selectedValue, candidate: String(selectedIds[0] ?? ""), selected: selectedValue })}>Open as tabs</Link>
+        {selectedIds.length === 2 ? <Link className="min-h-[32px] inline-flex items-center border border-[var(--line)] rounded-lg bg-[var(--surface)] text-[var(--ink)] px-[10px] text-xs font-semibold no-underline" href={candidateSearchHref(basePath, params, { selected: selectedValue })}>Merge review</Link> : null}
+        {loadedEmailRecipients ? <a className="min-h-[32px] inline-flex items-center border border-[var(--line)] rounded-lg bg-[var(--surface)] text-[var(--ink)] px-[10px] text-xs font-semibold no-underline" href={`mailto:${loadedEmailRecipients}`}>Email loaded</a> : null}
+        <Link className="min-h-[32px] inline-flex items-center border border-[var(--line)] rounded-lg bg-[var(--surface)] text-[var(--ink)] px-[10px] text-xs font-semibold no-underline" href={candidateSearchHref(basePath, params, { selected: selectedValue })}>Generate ID batch</Link>
         <ExportCVsForm candidateIds={selectedValue} />
-        <Link href={candidateSearchHref(basePath, params, { selected: "" })}>Deselect</Link>
+        <Link className="min-h-[32px] inline-flex items-center border border-[var(--line)] rounded-lg bg-[var(--surface)] text-[var(--ink)] px-[10px] text-xs font-semibold no-underline" href={candidateSearchHref(basePath, params, { selected: "" })}>Deselect</Link>
       </nav>
     </section>
   );
@@ -270,20 +284,30 @@ function CandidateTabs({
   params: CandidateSearchParams;
 }) {
   return (
-    <nav className="candidateTabs" aria-label="Open candidate tabs">
-      <Link className={!data.selectedId ? "active" : ""} href={candidateSearchHref(basePath, params, { candidate: "" })}>
+    <nav className="min-w-0 flex gap-1 overflow-x-auto border-b border-[var(--line)] bg-[var(--surface)] p-[6px] scrollbar-none" aria-label="Open candidate tabs">
+      <Link className={`
+        min-h-[40px] inline-flex items-center border border-[var(--line)] rounded-lg bg-[var(--surface-soft)] text-[var(--ink)] no-underline px-3 text-[13px] font-semibold
+        ${!data.selectedId ? "border-[var(--blue)] bg-[color-mix(in_srgb,var(--blue)_8%,var(--surface))]" : ""}
+      `} href={candidateSearchHref(basePath, params, { candidate: "" })}>
         Search
       </Link>
       {data.openTabs.map((tab) => {
         const remainingTabs = data.openTabs.filter((item) => item.id !== tab.id).map((item) => item.id);
         const nextCandidate = data.selectedId === tab.id ? remainingTabs.at(-1) : data.selectedId;
         return (
-          <span className={data.selectedId === tab.id ? "active" : ""} key={tab.id}>
-            <Link href={candidateSearchHref(basePath, params, { candidate: String(tab.id), tabs: data.openTabs.map((item) => item.id).join(",") })}>
-              <strong>{tab.title}</strong>
-              <small>{tab.status}</small>
+          <span className={`
+            overflow-hidden flex-[0_0_auto] max-w-[260px] min-h-[40px] inline-flex items-center border border-[var(--line)] rounded-lg bg-[var(--surface-soft)] text-[var(--ink)] no-underline
+            ${data.selectedId === tab.id ? "border-[var(--blue)] bg-[color-mix(in_srgb,var(--blue)_8%,var(--surface))]" : ""}
+          `} key={tab.id}>
+            <Link className="min-w-0 grid gap-[1px] text-inherit no-underline px-[10px] py-[5px]" href={candidateSearchHref(basePath, params, { candidate: String(tab.id), tabs: data.openTabs.map((item) => item.id).join(",") })}>
+              <strong className="overflow-hidden text-ellipsis whitespace-nowrap text-[13px]">{tab.title}</strong>
+              <small className="overflow-hidden text-ellipsis whitespace-nowrap text-[11px] text-[var(--muted)]">{tab.status}</small>
             </Link>
-            <Link aria-label={`Close ${tab.title}`} href={candidateSearchHref(basePath, params, { candidate: nextCandidate ? String(nextCandidate) : "", tabs: remainingTabs.join(",") })}>
+            <Link
+              aria-label={`Close ${tab.title}`}
+              className="min-w-[34px] self-stretch inline-flex items-center justify-center border-l border-[var(--line)] text-[var(--muted)] text-xs font-semibold no-underline hover:bg-[color-mix(in_srgb,var(--rose)_10%,var(--surface))] hover:text-[var(--rose)]"
+              href={candidateSearchHref(basePath, params, { candidate: nextCandidate ? String(nextCandidate) : "", tabs: remainingTabs.join(",") })}
+            >
               x
             </Link>
           </span>
@@ -313,31 +337,45 @@ function ActiveSearchContext({
   ].filter((item): item is { key: Exclude<CandidateSearchParamKey, "candidate" | "tabs" | "selected" | "page">; label: string } => Boolean(item));
 
   return (
-    <section className="candidateSearchContext" aria-label="Candidate search context">
-      <div>
-        <span>{activeItems.length ? "Filtered view" : "Default view"}</span>
-        <strong>
+    <section className="grid grid-cols-[minmax(0,1fr)_auto] gap-[10px] items-center border border-[var(--line)] rounded-lg bg-[var(--surface)] px-3 py-[10px]" aria-label="Candidate search context">
+      <div className="min-w-0 grid gap-[3px]">
+        <span className="text-[var(--blue)] text-[11px] font-semibold uppercase">{activeItems.length ? "Filtered view" : "Default view"}</span>
+        <strong className="overflow-hidden text-ellipsis whitespace-nowrap text-[var(--ink)]">
           {data.matchingCount.toLocaleString("en-US")} matching candidates from{" "}
           {data.role === "staff" && data.visibility === "assigned" ? "your assigned production records" : "all production data"}
         </strong>
       </div>
-      <nav aria-label="Active candidate filters">
+      <nav className="flex flex-wrap justify-end gap-[6px]" aria-label="Active candidate filters">
         {data.role === "staff" ? (
           <>
-            <Link className={data.visibility === "all" ? "active" : ""} href={candidateSearchHref(basePath, params, { view: "", candidate: "" })}>
+            <Link
+              className={`min-h-[30px] inline-flex items-center border border-[var(--line)] rounded-lg bg-[var(--surface-soft)] text-[var(--ink)] px-[9px] text-xs font-semibold no-underline hover:border-[var(--blue)] hover:text-[var(--blue)] ${data.visibility === "all" ? "border-[var(--blue)] bg-[var(--blue)] text-white" : ""}`}
+              href={candidateSearchHref(basePath, params, { view: "", candidate: "" })}
+            >
               All production
             </Link>
-            <Link className={data.visibility === "assigned" ? "active" : ""} href={candidateSearchHref(basePath, params, { view: "assigned", candidate: "" })}>
+            <Link
+              className={`min-h-[30px] inline-flex items-center border border-[var(--line)] rounded-lg bg-[var(--surface-soft)] text-[var(--ink)] px-[9px] text-xs font-semibold no-underline hover:border-[var(--blue)] hover:text-[var(--blue)] ${data.visibility === "assigned" ? "border-[var(--blue)] bg-[var(--blue)] text-white" : ""}`}
+              href={candidateSearchHref(basePath, params, { view: "assigned", candidate: "" })}
+            >
               Assigned to me
             </Link>
           </>
         ) : null}
         {activeItems.map((item) => (
-          <Link href={candidateSearchHref(basePath, params, { [item.key]: "", candidate: "" })} key={`${item.key}-${item.label}`}>
+          <Link
+            className="min-h-[30px] inline-flex items-center border border-[var(--line)] rounded-lg bg-[var(--surface-soft)] text-[var(--ink)] px-[9px] text-xs font-semibold no-underline hover:border-[var(--blue)] hover:text-[var(--blue)]"
+            href={candidateSearchHref(basePath, params, { [item.key]: "", candidate: "" })}
+            key={`${item.key}-${item.label}`}
+          >
             {item.label}
           </Link>
         ))}
-        {activeItems.length ? <Link href={basePath}>Clear all</Link> : <Link href={candidateSearchHref(basePath, params, { filter: "needs-review", candidate: "" })}>Review queue</Link>}
+        {activeItems.length ? (
+          <Link className="min-h-[30px] inline-flex items-center border border-[var(--line)] rounded-lg bg-[var(--surface-soft)] text-[var(--ink)] px-[9px] text-xs font-semibold no-underline hover:border-[var(--blue)] hover:text-[var(--blue)]" href={basePath}>Clear all</Link>
+        ) : (
+          <Link className="min-h-[30px] inline-flex items-center border border-[var(--line)] rounded-lg bg-[var(--surface-soft)] text-[var(--ink)] px-[9px] text-xs font-semibold no-underline hover:border-[var(--blue)] hover:text-[var(--blue)]" href={candidateSearchHref(basePath, params, { filter: "needs-review", candidate: "" })}>Review queue</Link>
+        )}
       </nav>
     </section>
   );
@@ -368,16 +406,20 @@ function HiddenFacetInputs({ data }: { data: CandidateSearchData }) {
 
 function FacetGroup({ basePath, facet, params }: { basePath: "/admin/candidates" | "/staff/candidates"; facet: CandidateSearchFacet; params: CandidateSearchParams }) {
   return (
-    <section className="candidateFacetGroup">
-      <h3>{facet.label}</h3>
+    <section className="border border-[var(--line)] rounded-lg bg-[var(--surface)] p-[7px]">
+      <h3 className="m-0 mb-[4px] text-[11px] text-[var(--blue)] text-[11px] font-bold uppercase">{facet.label}</h3>
       {facet.options.map((option) => (
         <Link
-          className={option.active ? "active" : ""}
+          className={`
+            min-w-0 min-h-[34px] grid grid-cols-[minmax(0,1fr)_auto] gap-[10px] items-center border border-transparent rounded-lg text-[var(--muted)] px-2 no-underline
+            ${option.active ? "border-[var(--line)] bg-[var(--surface-soft)] text-[var(--blue)]" : ""}
+            hover:border-[var(--line)] hover:bg-[var(--surface-soft)] hover:text-[var(--blue)]
+          `}
           href={candidateSearchHref(basePath, params, { [facet.key]: option.active ? "" : option.value, candidate: "" })}
           key={option.value}
         >
-          <span>{option.label}</span>
-          <strong>{option.count}</strong>
+          <span className="overflow-hidden text-ellipsis whitespace-nowrap">{option.label}</span>
+          <strong className="text-xs">{option.count}</strong>
         </Link>
       ))}
     </section>
@@ -496,14 +538,14 @@ function FacetChips({
   );
 
   return (
-    <section className="candidateFacetChips" aria-label="Quick facet filters">
+    <section className="flex flex-wrap gap-2 px-[14px] py-[10px] border-b border-[var(--line)]" aria-label="Quick facet filters">
       {quickFacets.map((facet) => (
-        <div className="candidateFacetChipGroup" key={facet.key}>
-          <span className="candidateFacetChipLabel">{facet.label}</span>
-          <div className="candidateFacetChipList">
+        <div className="flex flex-wrap items-center gap-[6px]" key={facet.key}>
+          <span className="text-[var(--blue)] text-[11px] font-bold uppercase">{facet.label}</span>
+          <div className="flex flex-wrap gap-[6px]">
             {facet.options.slice(0, 6).map((option) => (
               <Link
-                className={option.active ? "chip active" : "chip"}
+                className={`inline-flex items-center gap-1 min-h-[26px] border border-[var(--line)] rounded-full bg-[var(--surface)] px-[10px] text-xs font-medium text-[var(--ink)] no-underline whitespace-nowrap transition-all duration-[120ms] ease hover:border-[var(--blue)] hover:bg-[color-mix(in_srgb,var(--blue)_8%,var(--surface))] hover:text-[var(--blue)] ${option.active ? "border-[var(--blue)] bg-[var(--blue)] text-[var(--surface)] hover:text-[var(--surface)]" : ""}`}
                 href={candidateSearchHref(basePath, params, {
                   [facet.key]: option.active ? "" : option.value,
                   candidate: "",
@@ -512,14 +554,14 @@ function FacetChips({
               >
                 <span>{option.label}</span>
                 {option.count > 0 ? <strong>{option.count}</strong> : null}
-                {option.active ? <span className="chip-remove" aria-label={`Remove ${option.label} filter`}>✕</span> : null}
+                {option.active ? <span className="inline-flex items-center justify-center w-4 h-4 ml-1 text-[10px] leading-none cursor-pointer" aria-label={`Remove ${option.label} filter`}>✕</span> : null}
               </Link>
             ))}
           </div>
         </div>
       ))}
       {activeCount > 1 ? (
-        <Link className="chip-clear-all" href={basePath}>
+        <Link className="text-xs font-semibold text-[var(--blue)] no-underline hover:underline" href={basePath}>
           Clear all
         </Link>
       ) : null}
@@ -543,20 +585,20 @@ function CandidatePagination({
   totalPages: number;
 }) {
   return (
-    <nav className="candidatePagination" aria-label="Candidate search pagination">
-      <div>
-        <span>Page</span>
-        <strong>{page.toLocaleString("en-US")}</strong>
-        <span>of {totalPages.toLocaleString("en-US")}</span>
+    <nav className="flex items-center justify-between gap-3 col-span-full border-t border-[var(--line)] px-[14px] py-3" aria-label="Candidate search pagination">
+      <div className="flex items-center gap-1">
+        <span className="text-[var(--muted)] text-xs">Page</span>
+        <strong className="text-[var(--ink)] text-sm">{page.toLocaleString("en-US")}</strong>
+        <span className="text-[var(--muted)] text-xs">of {totalPages.toLocaleString("en-US")}</span>
       </div>
-      <div>
+      <div className="flex gap-2">
         {page > 1 ? (
-          <Link href={candidateSearchHref(basePath, params, { page: String(page - 1) })}>
+          <Link className="min-h-[34px] inline-flex items-center border border-[var(--line)] rounded-lg bg-[var(--surface-soft)] text-[var(--ink)] px-3 text-xs font-semibold no-underline hover:border-[var(--blue)] hover:text-[var(--blue)]" href={candidateSearchHref(basePath, params, { page: String(page - 1) })}>
             ← Previous
           </Link>
         ) : null}
         {page < totalPages ? (
-          <Link href={candidateSearchHref(basePath, params, { page: String(page + 1) })}>
+          <Link className="min-h-[34px] inline-flex items-center border border-[var(--line)] rounded-lg bg-[var(--surface-soft)] text-[var(--ink)] px-3 text-xs font-semibold no-underline hover:border-[var(--blue)] hover:text-[var(--blue)]" href={candidateSearchHref(basePath, params, { page: String(page + 1) })}>
             Next →
           </Link>
         ) : null}

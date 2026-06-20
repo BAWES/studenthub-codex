@@ -120,7 +120,7 @@ export function DetailPage({
 
       {/* Eyebrow + title + action bar */}
       <section className="detailHero">
-        {eyebrow ? <p className="eyebrow">{eyebrow}</p> : null}
+        {eyebrow ? <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{eyebrow}</p> : null}
         <div className="detailHeroRow">
           <h1>{title}</h1>
           {actions && actions.length > 0 ? (
@@ -153,10 +153,10 @@ export function DetailPage({
       {relatedRecords ? (
         <section className="detailRelated">
           <h2>{relatedRecords.title}</h2>
-          <div className="rows">
+          <div className="divide-y divide-border">
             {relatedRecords.rows.map((row) => (
-              <article className="row" key={row.id}>
-                <div className="rowMain">
+              <article className="flex items-center justify-between gap-3 px-4 py-3 min-h-0" key={row.id}>
+                <div className="min-w-0 grid gap-0.5">
                   {row.href ? (
                     <a href={row.href}>
                       <strong>{row.title}</strong>
@@ -166,7 +166,7 @@ export function DetailPage({
                   )}
                   <span>{row.subtitle}</span>
                 </div>
-                {row.meta ? <div className="rowMeta"><span>{row.meta}</span></div> : null}
+                {row.meta ? <div className="shrink-0 text-xs text-muted-foreground"><span>{row.meta}</span></div> : null}
               </article>
             ))}
             {relatedRecords.rows.length === 0 ? (

@@ -8,8 +8,13 @@ export default function EmailCampaignDetailError({
   reset: () => void;
 }) {
   return (
+<<<<<<< Updated upstream
+    <div className="min-h-screen p-6">
+      <section className="space-y-6">
+=======
     <div className="shell shellEmbedded">
-      <section className="workspaceStage">
+      <section className="min-w-0 overflow-x-hidden grid content-start gap-3.5 p-3.5">
+>>>>>>> Stashed changes
         <div className="flex flex-col items-center justify-center py-24 gap-4">
           <span className="text-4xl" aria-hidden="true">⚠️</span>
           <h2 className="text-xl font-bold" style={{ color: "var(--ink)" }}>
