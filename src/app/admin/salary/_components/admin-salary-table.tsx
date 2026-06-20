@@ -4,6 +4,17 @@ import { useActionState, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { DataTable } from "@/modules/workspace/DataTable";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Card, CardContent } from "@/components/ui/card";
 
 import type { SessionUser } from "@/modules/auth/types";
 import type { SalaryItem } from "../schemas";
@@ -29,12 +40,12 @@ export function AdminSalaryTable({ session, salaries, total, staff }: Props) {
         { label: "Total records", value: total, note: "Salary records in the system" },
       ]}
     >
-      <section className="mb-6">
-        <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
-          <h3 className="text-sm font-semibold mb-3" style={{ color: "var(--ink)" }}>Add salary record</h3>
+      <Card className="mb-6">
+        <CardContent className="p-5">
+          <h3 className="text-sm font-semibold mb-3 text-foreground">Add salary record</h3>
           <CreateSalaryForm staff={staff} onSuccess={() => router.refresh()} />
-        </div>
-      </section>
+        </CardContent>
+      </Card>
 
       <DataTable
         title="Salary records"
@@ -56,8 +67,7 @@ export function AdminSalaryTable({ session, salaries, total, staff }: Props) {
               ) : (
                 <button
                   type="button"
-                  className="text-sm hover:underline"
-                  style={{ color: "var(--sh-primary)" }}
+                  className="text-sm hover:underline text-primary"
                   onClick={() => setEditingId(row.staff_salary_uuid)}
                 >
                   {row.staff_name ?? `Staff #${row.staff_id}`}
@@ -70,7 +80,7 @@ export function AdminSalaryTable({ session, salaries, total, staff }: Props) {
             render: (row) => {
               if (row.salary === null || row.salary === undefined) return "—";
               return (
-                <span className="text-sm font-medium">
+                <span className="text-sm font-medium text-foreground">
                   {Number(row.salary).toLocaleString()} {row.salary_currency ?? "KWD"}
                 </span>
               );
@@ -81,20 +91,24 @@ export function AdminSalaryTable({ session, salaries, total, staff }: Props) {
             label: "Date",
             render: (row) => {
               if (!row.salary_date) return "—";
-              return <span className="text-sm">{new Date(row.salary_date).toLocaleDateString()}</span>;
+              return <span className="text-sm text-foreground">{new Date(row.salary_date).toLocaleDateString()}</span>;
             },
           },
           {
             key: "comment",
             label: "Comment",
-            render: (row) => <span className="text-sm text-[var(--muted)] truncate max-w-[200px] inline-block">{row.comment ?? "—"}</span>,
+            render: (row) => (
+              <span className="text-sm text-muted-foreground truncate max-w-[200px] inline-block">
+                {row.comment ?? "—"}
+              </span>
+            ),
           },
           {
             key: "updated_at",
             label: "Updated",
             render: (row) => {
               if (!row.updated_at) return "—";
-              return <span className="text-sm">{new Date(row.updated_at).toLocaleDateString()}</span>;
+              return <span className="text-sm text-foreground">{new Date(row.updated_at).toLocaleDateString()}</span>;
             },
           },
           {
@@ -102,10 +116,10 @@ export function AdminSalaryTable({ session, salaries, total, staff }: Props) {
             label: "Actions",
             render: (row) =>
               editingId !== row.staff_salary_uuid ? (
-                <button
+                <Button
                   type="button"
-                  className="text-xs px-2 py-1 rounded hover:bg-red-500/10"
-                  style={{ color: "var(--sh-error)" }}
+                  variant="destructive"
+                  size="sm"
                   onClick={async () => {
                     if (confirm(`Delete salary record for "${row.staff_name ?? "staff #" + row.staff_id}"?`)) {
                       const result = await deleteSalary(row.staff_salary_uuid);
@@ -117,7 +131,7 @@ export function AdminSalaryTable({ session, salaries, total, staff }: Props) {
                   }}
                 >
                   Delete
-                </button>
+                </Button>
               ) : null,
           },
         ]}
@@ -153,75 +167,68 @@ function CreateSalaryForm({
       className="flex flex-wrap items-end gap-3"
       onSubmit={() => setTimeout(() => { formRef.current?.reset(); }, 100)}
     >
-      <div className="grid gap-1">
-        <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>Staff</label>
-        <select
-          name="staffId"
-          required
-          className="h-9 rounded-lg px-3 text-sm border min-w-[180px]"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
-        >
-          <option value="">Select staff...</option>
-          {staff.map((s) => (
-            <option key={s.staff_id} value={s.staff_id}>{s.staff_name}</option>
-          ))}
-        </select>
+      <div className="grid gap-1.5">
+        <Label className="text-xs">Staff</Label>
+        <Select name="staffId" required>
+          <SelectTrigger className="min-w-[180px]">
+            <SelectValue placeholder="Select staff..." />
+          </SelectTrigger>
+          <SelectContent>
+            {staff.map((s) => (
+              <SelectItem key={s.staff_id} value={String(s.staff_id)}>
+                {s.staff_name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
-      <div className="grid gap-1">
-        <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>Salary</label>
-        <input
+      <div className="grid gap-1.5">
+        <Label className="text-xs">Salary</Label>
+        <Input
           name="salary"
           type="number"
           step="0.001"
           min="0"
           required
           placeholder="e.g. 500.000"
-          className="h-9 rounded-lg px-3 text-sm border w-32"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+          className="w-32"
         />
       </div>
-      <div className="grid gap-1">
-        <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>Currency</label>
-        <select
-          name="salaryCurrency"
-          defaultValue="KWD"
-          className="h-9 rounded-lg px-3 text-sm border w-20"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
-        >
-          <option value="KWD">KWD</option>
-          <option value="USD">USD</option>
-        </select>
+      <div className="grid gap-1.5">
+        <Label className="text-xs">Currency</Label>
+        <Select name="salaryCurrency" defaultValue="KWD">
+          <SelectTrigger className="w-20">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="KWD">KWD</SelectItem>
+            <SelectItem value="USD">USD</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
-      <div className="grid gap-1">
-        <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>Date</label>
-        <input
+      <div className="grid gap-1.5">
+        <Label className="text-xs">Date</Label>
+        <Input
           name="salaryDate"
           type="date"
           required
-          className="h-9 rounded-lg px-3 text-sm border w-36"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+          className="w-36"
         />
       </div>
-      <div className="grid gap-1">
-        <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>Comment</label>
-        <input
+      <div className="grid gap-1.5">
+        <Label className="text-xs">Comment</Label>
+        <Input
           name="comment"
           maxLength={255}
           placeholder="Optional note"
-          className="h-9 rounded-lg px-3 text-sm border w-44"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+          className="w-44"
         />
       </div>
-      <button
-        type="submit"
-        disabled={pending}
-        className="h-9 rounded-lg px-4 text-sm font-semibold"
-        style={{ background: "var(--sh-primary)", color: "#fff" }}
-      >
+      <Button type="submit" disabled={pending}>
         {pending ? "Adding..." : "Add"}
-      </button>
+      </Button>
       {state?.error ? (
-        <p className="text-xs w-full" style={{ color: "var(--sh-error)" }}>{state.error}</p>
+        <p className="text-xs w-full text-destructive">{state.error}</p>
       ) : null}
     </form>
   );
@@ -257,59 +264,46 @@ function EditSalaryForm({
 
   return (
     <form action={action} className="flex items-center gap-2 flex-wrap">
-      <input
+      <Input
         name="salary"
         type="number"
         step="0.001"
         min="0"
         required
         defaultValue={row.salary ?? ""}
-        className="h-8 rounded px-2 text-sm border w-24"
-        style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+        className="w-24 h-8"
       />
-      <select
-        name="salaryCurrency"
-        defaultValue={row.salary_currency ?? "KWD"}
-        className="h-8 rounded px-2 text-sm border w-16"
-        style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
-      >
-        <option value="KWD">KWD</option>
-        <option value="USD">USD</option>
-      </select>
-      <input
+      <Select name="salaryCurrency" defaultValue={row.salary_currency ?? "KWD"}>
+        <SelectTrigger className="w-16 h-8">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="KWD">KWD</SelectItem>
+          <SelectItem value="USD">USD</SelectItem>
+        </SelectContent>
+      </Select>
+      <Input
         name="salaryDate"
         type="date"
         required
         defaultValue={salaryDate}
-        className="h-8 rounded px-2 text-sm border w-32"
-        style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+        className="w-32 h-8"
       />
-      <input
+      <Input
         name="comment"
         maxLength={255}
         defaultValue={row.comment ?? ""}
         placeholder="Comment"
-        className="h-8 rounded px-2 text-sm border w-36"
-        style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+        className="w-36 h-8"
       />
-      <button
-        type="submit"
-        disabled={pending}
-        className="h-8 rounded px-3 text-xs font-semibold"
-        style={{ background: "var(--sh-primary)", color: "#fff" }}
-      >
+      <Button type="submit" disabled={pending} size="sm">
         {pending ? "..." : "Save"}
-      </button>
-      <button
-        type="button"
-        onClick={onCancel}
-        className="h-8 rounded px-3 text-xs"
-        style={{ color: "var(--muted)" }}
-      >
+      </Button>
+      <Button type="button" variant="ghost" size="sm" onClick={onCancel}>
         Cancel
-      </button>
+      </Button>
       {state?.error ? (
-        <p className="text-xs w-full" style={{ color: "var(--sh-error)" }}>{state.error}</p>
+        <p className="text-xs w-full text-destructive">{state.error}</p>
       ) : null}
     </form>
   );
