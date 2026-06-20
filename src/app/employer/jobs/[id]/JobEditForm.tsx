@@ -20,6 +20,17 @@ function parseSalaryRange(salaryRange: string | null): [string, string] {
   return [salaryRange.replace(/KWD\s*/g, ""), ""];
 }
 
+const inputActive =
+  "w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-4 py-2.5 text-sm text-[var(--ink)] outline-none transition-colors duration-200 " +
+  "focus:border-[var(--sh-coral)] focus:ring-1 focus:ring-[var(--sh-coral)]/30";
+const inputReadOnly =
+  "w-full rounded-lg border border-[var(--border)] bg-[var(--surface)]/50 px-4 py-2.5 text-sm text-[var(--muted)] cursor-not-allowed";
+const textareaActive = `${inputActive} min-h-[120px] resize-y`;
+const textareaShortActive = `${inputActive} min-h-[80px] resize-y`;
+const textareaReadOnly = `${inputReadOnly} min-h-[80px] cursor-not-allowed`;
+const selectActive = `${inputActive} cursor-pointer`;
+const selectReadOnly = `${inputReadOnly} cursor-not-allowed`;
+
 export function JobEditForm({ job, readOnly }: Props) {
   const router = useRouter();
   const [title, setTitle] = useState(job.title);
@@ -81,20 +92,16 @@ export function JobEditForm({ job, readOnly }: Props) {
     }
   }
 
-  const inputClass = readOnly
-    ? "w-full rounded-lg border border-white/5 bg-white/5 px-4 py-2.5 text-sm text-white/60 cursor-not-allowed"
-    : "w-full rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-sm outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/30";
+  const inputClass = readOnly ? inputReadOnly : inputActive;
   const textareaClass = readOnly
-    ? "w-full rounded-lg border border-white/5 bg-white/5 px-4 py-2.5 text-sm text-white/60 cursor-not-allowed min-h-[80px]"
-    : "w-full rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-sm outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/30 min-h-[80px]";
-  const selectClass = readOnly
-    ? "w-full rounded-lg border border-white/5 bg-white/5 px-4 py-2.5 text-sm text-white/60 cursor-not-allowed"
-    : "w-full rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-sm outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/30";
+    ? "w-full rounded-lg border border-[var(--border)] bg-[var(--surface)]/50 px-4 py-2.5 text-sm text-[var(--muted)] cursor-not-allowed min-h-[120px]"
+    : textareaActive;
+  const selectClass = readOnly ? selectReadOnly : selectActive;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
       {error && (
-        <div className="rounded-lg bg-red-500/10 border border-red-500/20 p-4 text-sm text-red-400">
+        <div className="rounded-lg bg-[var(--error)]/10 border border-[var(--error)]/20 p-4 text-sm text-[var(--error)]">
           {error}
         </div>
       )}
@@ -102,14 +109,14 @@ export function JobEditForm({ job, readOnly }: Props) {
       {/* Status badge header */}
       <div className="flex items-center gap-3">
         <StatusBadge variant={genericStatusVariant(status)} label={status} size="md" />
-        <span className="text-xs text-white/40">Posted: {new Date(job.createdAt).toLocaleDateString("en-KW")}</span>
-        <span className="text-xs text-white/40">Updated: {new Date(job.updatedAt).toLocaleDateString("en-KW")}</span>
+        <span className="text-xs text-[var(--muted)]">Posted: {new Date(job.createdAt).toLocaleDateString("en-KW")}</span>
+        <span className="text-xs text-[var(--muted)]">Updated: {new Date(job.updatedAt).toLocaleDateString("en-KW")}</span>
       </div>
 
       {/* Title */}
       <div className="space-y-2">
-        <label htmlFor="title" className="text-sm font-medium">
-          Job Title <span className="text-red-400">*</span>
+        <label htmlFor="title" className="text-sm font-medium text-[var(--ink)]">
+          Job Title <span className="text-[var(--error)]">*</span>
         </label>
         <input
           id="title"
@@ -127,16 +134,14 @@ export function JobEditForm({ job, readOnly }: Props) {
 
       {/* Description */}
       <div className="space-y-2">
-        <label htmlFor="description" className="text-sm font-medium">
-          Description <span className="text-red-400">*</span>
+        <label htmlFor="description" className="text-sm font-medium text-[var(--ink)]">
+          Description <span className="text-[var(--error)]">*</span>
         </label>
         <textarea
           id="description"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          className={readOnly
-            ? "w-full rounded-lg border border-white/5 bg-white/5 px-4 py-2.5 text-sm text-white/60 cursor-not-allowed min-h-[120px]"
-            : "w-full rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-sm outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/30 min-h-[120px]"}
+          className={textareaClass}
           placeholder="Describe the role..."
           required
           readOnly={readOnly}
@@ -145,14 +150,14 @@ export function JobEditForm({ job, readOnly }: Props) {
 
       {/* Requirements */}
       <div className="space-y-2">
-        <label htmlFor="requirements" className="text-sm font-medium">
+        <label htmlFor="requirements" className="text-sm font-medium text-[var(--ink)]">
           Requirements
         </label>
         <textarea
           id="requirements"
           value={requirements}
           onChange={(e) => setRequirements(e.target.value)}
-          className={textareaClass}
+          className={readOnly ? textareaReadOnly : textareaShortActive}
           placeholder="Required skills, experience..."
           readOnly={readOnly}
         />
@@ -161,7 +166,7 @@ export function JobEditForm({ job, readOnly }: Props) {
       {/* Location & Employment Type */}
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <label htmlFor="location" className="text-sm font-medium">
+          <label htmlFor="location" className="text-sm font-medium text-[var(--ink)]">
             Location
           </label>
           <input
@@ -176,7 +181,7 @@ export function JobEditForm({ job, readOnly }: Props) {
         </div>
 
         <div className="space-y-2">
-          <label htmlFor="employmentType" className="text-sm font-medium">
+          <label htmlFor="employmentType" className="text-sm font-medium text-[var(--ink)]">
             Employment Type
           </label>
           <select
@@ -197,7 +202,7 @@ export function JobEditForm({ job, readOnly }: Props) {
 
       {/* Salary Range (KWD) */}
       <div className="space-y-2">
-        <label className="text-sm font-medium">Salary Range (KWD/month)</label>
+        <label className="text-sm font-medium text-[var(--ink)]">Salary Range (KWD/month)</label>
         <div className="grid grid-cols-2 gap-4">
           <div>
             <input
@@ -228,7 +233,7 @@ export function JobEditForm({ job, readOnly }: Props) {
 
       {/* Status */}
       <div className="space-y-2">
-        <label htmlFor="status" className="text-sm font-medium">
+        <label htmlFor="status" className="text-sm font-medium text-[var(--ink)]">
           Status
         </label>
         <select
@@ -247,7 +252,7 @@ export function JobEditForm({ job, readOnly }: Props) {
 
       {/* Buttons */}
       {!readOnly && (
-        <div className="flex items-center gap-3 pt-4 border-t border-white/10">
+        <div className="flex items-center gap-3 pt-4 border-t border-[var(--border)]">
           <Button type="submit" disabled={submitting || !title.trim() || !description.trim()}>
             {submitting ? "Saving..." : "Save Changes"}
           </Button>

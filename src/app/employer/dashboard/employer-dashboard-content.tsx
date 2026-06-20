@@ -17,11 +17,11 @@ type Props = {
 
 function MetricCard({ label, value, note }: EmployerDashboardMetric) {
   return (
-    <div className="flex flex-col gap-1 rounded-xl border bg-card p-5" style={{ borderColor: "var(--border)", backgroundColor: "var(--card)" }}>
-      <span className="text-sm font-medium" style={{ color: "var(--muted-foreground)" }}>{label}</span>
-      <span className="text-3xl font-bold" style={{ color: "var(--ink)" }}>{value.toLocaleString()}</span>
+    <div className="flex flex-col gap-1 rounded-xl border border-[var(--border)] bg-[var(--card)] p-5">
+      <span className="text-sm font-medium text-[var(--muted-foreground)]">{label}</span>
+      <span className="text-3xl font-bold text-[var(--ink)]">{value.toLocaleString()}</span>
       {note && (
-        <span className="text-xs" style={{ color: "var(--muted-foreground)" }}>{note}</span>
+        <span className="text-xs text-[var(--muted-foreground)]">{note}</span>
       )}
     </div>
   );
@@ -30,7 +30,7 @@ function MetricCard({ label, value, note }: EmployerDashboardMetric) {
 function RecentApplicationsTable({ applications }: { applications: RecentApplication[] }) {
   if (applications.length === 0) {
     return (
-      <p className="py-8 text-center text-sm" style={{ color: "var(--muted-foreground)" }}>
+      <p className="py-8 text-center text-sm text-[var(--muted-foreground)]">
         No applications yet. Post a job listing to start receiving applications.
       </p>
     );
@@ -40,24 +40,24 @@ function RecentApplicationsTable({ applications }: { applications: RecentApplica
     <div className="overflow-x-auto">
       <table className="w-full text-left text-sm">
         <thead>
-          <tr style={{ borderBottom: "1px solid var(--border)" }}>
-            <th className="py-3 pr-4 font-medium" style={{ color: "var(--muted-foreground)" }}>Candidate</th>
-            <th className="py-3 pr-4 font-medium" style={{ color: "var(--muted-foreground)" }}>Job</th>
-            <th className="py-3 pr-4 font-medium" style={{ color: "var(--muted-foreground)" }}>Status</th>
-            <th className="py-3 font-medium" style={{ color: "var(--muted-foreground)" }}>Date</th>
+          <tr className="border-b border-[var(--border)]">
+            <th className="py-3 pr-4 font-medium text-[var(--muted-foreground)]">Candidate</th>
+            <th className="py-3 pr-4 font-medium text-[var(--muted-foreground)]">Job</th>
+            <th className="py-3 pr-4 font-medium text-[var(--muted-foreground)]">Status</th>
+            <th className="py-3 font-medium text-[var(--muted-foreground)]">Date</th>
           </tr>
         </thead>
         <tbody>
           {applications.map((app) => (
-            <tr key={app.applicationId} style={{ borderBottom: "1px solid var(--border)" }}>
-              <td className="py-3 pr-4" style={{ color: "var(--ink)" }}>
+            <tr key={app.applicationId} className="border-b border-[var(--border)]">
+              <td className="py-3 pr-4 text-[var(--ink)]">
                 {app.candidateName ?? `Candidate #${app.candidateId}`}
               </td>
-              <td className="py-3 pr-4" style={{ color: "var(--ink)" }}>{app.jobTitle}</td>
+              <td className="py-3 pr-4 text-[var(--ink)]">{app.jobTitle}</td>
               <td className="py-3 pr-4">
                 <StatusBadge variant={genericStatusVariant(app.status)} label={app.status} size="sm" />
               </td>
-              <td className="py-3" style={{ color: "var(--muted-foreground)" }}>
+              <td className="py-3 text-[var(--muted-foreground)]">
                 {new Date(app.createdAt).toLocaleDateString()}
               </td>
             </tr>
@@ -71,7 +71,7 @@ function RecentApplicationsTable({ applications }: { applications: RecentApplica
 function StatusBreakdownBar({ breakdown }: { breakdown: JobStatusBreakdown[] }) {
   if (breakdown.length === 0) {
     return (
-      <p className="py-4 text-center text-sm" style={{ color: "var(--muted-foreground)" }}>
+      <p className="py-4 text-center text-sm text-[var(--muted-foreground)]">
         No job listings yet.
       </p>
     );
@@ -85,19 +85,17 @@ function StatusBreakdownBar({ breakdown }: { breakdown: JobStatusBreakdown[] }) 
         const pct = total > 0 ? Math.round((item.count / total) * 100) : 0;
         return (
           <div key={item.status} className="flex items-center gap-3">
-            <span className="w-24 text-sm font-medium capitalize" style={{ color: "var(--ink)" }}>{item.status}</span>
-            <div className="flex-1 rounded-full" style={{ height: 8, backgroundColor: "var(--border)" }}>
+            <span className="w-24 text-sm font-medium capitalize text-[var(--ink)]">{item.status}</span>
+            <div className="flex-1 h-2 rounded-full bg-[var(--border)]">
               <div
-                className="rounded-full"
+                className="h-2 rounded-full transition-all duration-[300ms]"
                 style={{
                   width: `${pct}%`,
-                  height: 8,
                   backgroundColor: item.status === "active" ? "var(--sh-success)" : "#eb6651",
-                  transition: "width 300ms ease",
                 }}
               />
             </div>
-            <span className="w-16 text-right text-sm font-medium" style={{ color: "var(--muted-foreground)" }}>
+            <span className="w-16 text-right text-sm font-medium text-[var(--muted-foreground)]">
               {item.count} ({pct}%)
             </span>
           </div>
@@ -136,10 +134,10 @@ export function EmployerDashboardContent({
       {/* Two-column layout for tables */}
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
         {/* Recent Applications */}
-        <div className="rounded-xl border" style={{ borderColor: "var(--border)", backgroundColor: "var(--card)" }}>
-          <div className="border-b px-5 py-4" style={{ borderColor: "var(--border)" }}>
-            <h2 className="text-lg font-semibold" style={{ color: "var(--ink)" }}>Recent Applications</h2>
-            <p className="text-sm" style={{ color: "var(--muted-foreground)" }}>Latest {recentApplications.length} applications</p>
+        <div className="rounded-xl border border-[var(--border)] bg-[var(--card)]">
+          <div className="border-b border-[var(--border)] px-5 py-4">
+            <h2 className="text-lg font-semibold text-[var(--ink)]">Recent Applications</h2>
+            <p className="text-sm text-[var(--muted-foreground)]">Latest {recentApplications.length} applications</p>
           </div>
           <div className="px-5 pb-4">
             <RecentApplicationsTable applications={recentApplications} />
@@ -147,10 +145,10 @@ export function EmployerDashboardContent({
         </div>
 
         {/* Job Status Breakdown */}
-        <div className="rounded-xl border" style={{ borderColor: "var(--border)", backgroundColor: "var(--card)" }}>
-          <div className="border-b px-5 py-4" style={{ borderColor: "var(--border)" }}>
-            <h2 className="text-lg font-semibold" style={{ color: "var(--ink)" }}>Job Status Breakdown</h2>
-            <p className="text-sm" style={{ color: "var(--muted-foreground)" }}>{totalJobs} total job listings</p>
+        <div className="rounded-xl border border-[var(--border)] bg-[var(--card)]">
+          <div className="border-b border-[var(--border)] px-5 py-4">
+            <h2 className="text-lg font-semibold text-[var(--ink)]">Job Status Breakdown</h2>
+            <p className="text-sm text-[var(--muted-foreground)]">{totalJobs} total job listings</p>
           </div>
           <div className="px-5 pb-4">
             <StatusBreakdownBar breakdown={jobStatusBreakdown} />
