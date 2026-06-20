@@ -64,7 +64,7 @@ export default async function CandidateApplicationDetailPage({
       <DetailSection title="Application Details" facts={facts} />
 
       <section className="detailPanel">
-        <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+        <div className="flex gap-2 flex-wrap">
           <Link href={"/candidate/applications" as Route}>
             <Button variant="outline">Back to Applications</Button>
           </Link>

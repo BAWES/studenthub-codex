@@ -41,7 +41,7 @@ export default async function StudentProfilePage({ params }: Props) {
                 !
               </div>
               <CardTitle>Profile Not Found</CardTitle>
-              <p className="text-sm text-[#6e6b66]">
+              <p className="text-sm text-muted-foreground">
                 No candidate found with the given ID.
               </p>
             </CardContent>
@@ -59,22 +59,22 @@ export default async function StudentProfilePage({ params }: Props) {
             <AvatarCircle name={profile.name} />
             <div className="space-y-3">
               <div>
-                <h1 className="text-2xl font-bold text-[#1d1c1a]">
+                <h1 className="text-2xl font-bold text-foreground">
                   {profile.name || "Student Profile"}
                 </h1>
                 {profile.intro && (
-                  <p className="mt-1 text-lg text-[#6e6b66]">
+                  <p className="mt-1 text-lg text-muted-foreground">
                     {profile.intro}
                   </p>
                 )}
               </div>
               {profile.objective && (
-                <p className="text-sm text-[#a09d98]">
+                <p className="text-sm text-muted-foreground/70">
                   {profile.objective}
                 </p>
               )}
               {profile.email && (
-                <div className="flex items-center gap-2 text-sm text-[#6e6b66]">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <svg className="size-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                   </svg>
@@ -99,7 +99,7 @@ export default async function StudentProfilePage({ params }: Props) {
                 ))}
               </div>
             ) : (
-              <p className="text-sm text-[#a09d98]">
+              <p className="text-sm text-muted-foreground/70">
                 No skills listed yet.
               </p>
             )}
@@ -116,18 +116,18 @@ export default async function StudentProfilePage({ params }: Props) {
                 {profile.experience.map((exp) => (
                   <div
                     key={exp.id}
-                    className="rounded-lg border border-[#e8e6e3] bg-white p-4 transition-colors"
+                    className="rounded-lg border border-border bg-card p-4 transition-colors"
                   >
-                    <h3 className="font-semibold text-[#1d1c1a]">
+                    <h3 className="font-semibold text-foreground">
                       {exp.title}
                     </h3>
                     {exp.employer && (
-                      <p className="mt-0.5 text-sm text-[#6e6b66]">
+                      <p className="mt-0.5 text-sm text-muted-foreground">
                         {exp.employer}
                       </p>
                     )}
                     {(exp.startYear || exp.endYear) && (
-                      <p className="mt-2 text-xs text-[#a09d98]">
+                      <p className="mt-2 text-xs text-muted-foreground/70">
                         <PeriodLabel startYear={exp.startYear} endYear={exp.endYear} />
                       </p>
                     )}
@@ -135,7 +135,7 @@ export default async function StudentProfilePage({ params }: Props) {
                 ))}
               </div>
             ) : (
-              <p className="text-sm text-[#a09d98]">
+              <p className="text-sm text-muted-foreground/70">
                 No experience listed yet.
               </p>
             )}

@@ -1,6 +1,7 @@
 "use client";
 
 import { Mail, Phone, MapPin } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import type { StudentProfile } from "@/app/student/actions";
 
 const CORAL = "#eb6651";
@@ -38,30 +39,24 @@ export function HeroSection({ profile }: HeroSectionProps) {
 
       {/* Info */}
       <div className="flex-1 space-y-3 min-w-0">
-        <h1 className="text-3xl font-bold" style={{ color: "var(--ink)" }}>
+        <h1 className="text-3xl font-bold text-foreground">
           {profile.name || "Student Profile"}
         </h1>
 
         {profile.intro && (
-          <p className="text-lg" style={{ color: "var(--muted)" }}>
+          <p className="text-lg text-muted-foreground">
             {profile.intro}
           </p>
         )}
 
         {profile.objective && (
-          <p
-            className="text-sm line-clamp-2"
-            style={{ color: "var(--muted)" }}
-          >
+          <p className="text-sm line-clamp-2 text-muted-foreground">
             {profile.objective}
           </p>
         )}
 
         {/* Contact info */}
-        <div
-          className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm"
-          style={{ color: "var(--muted)" }}
-        >
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-muted-foreground">
           <span className="inline-flex items-center gap-1.5">
             <Mail size={14} />
             {profile.email}
@@ -81,21 +76,15 @@ export function HeroSection({ profile }: HeroSectionProps) {
         </div>
 
         {/* CTA */}
-        <a
-          href={`mailto:${profile.email}`}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold text-white transition-all duration-150 hover:scale-[1.02]"
-          style={{
-            backgroundColor: CORAL,
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = CORAL_HOVER;
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = CORAL;
-          }}
+        <Button
+          asChild
+          className="transition-all duration-150 hover:scale-[1.02]"
+          style={{ backgroundColor: CORAL }}
         >
-          Contact
-        </a>
+          <a href={`mailto:${profile.email}`}>
+            Contact
+          </a>
+        </Button>
       </div>
     </section>
   );
