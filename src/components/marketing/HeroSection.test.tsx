@@ -11,13 +11,19 @@ vi.mock("next/link", () => ({
     ...rest
   }: {
     children: React.ReactNode;
-    href: string;
+    href: string | { pathname: string; query?: Record<string, string> };
     className?: string;
-  }) => (
-    <a href={href} className={className} {...rest}>
-      {children}
-    </a>
-  ),
+  }) => {
+    const resolved =
+      typeof href === "string"
+        ? href
+        : `${href.pathname}${href.query ? "?" + new URLSearchParams(href.query).toString() : ""}`;
+    return (
+      <a href={resolved} className={className} {...rest}>
+        {children}
+      </a>
+    );
+  },
 }));
 
 // ── Mock lucide-react icons ───────────────────────────────────
@@ -31,6 +37,7 @@ vi.mock("lucide-react", () => ({
   Zap: () => <span data-testid="icon-zap" />,
   Shield: () => <span data-testid="icon-shield" />,
   Clock: () => <span data-testid="icon-clock" />,
+  Star: () => <span data-testid="icon-star" />,
 }));
 
 afterEach(() => {

@@ -139,7 +139,7 @@ describe("Inspector landing page (/for-inspectors)", () => {
     render(<InspectorLandingContent {...defaultProps} />);
     // Proof text appears in HeroSection
     expect(
-      screen.getByText(/Connecting students with 500\+ employers across Kuwait/i)
+      screen.getByText(/9,500\+ placements/i)
     ).toBeInTheDocument();
   });
 
