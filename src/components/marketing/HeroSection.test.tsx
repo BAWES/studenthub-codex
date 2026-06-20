@@ -31,6 +31,7 @@ vi.mock("lucide-react", () => ({
   Zap: () => <span data-testid="icon-zap" />,
   Shield: () => <span data-testid="icon-shield" />,
   Clock: () => <span data-testid="icon-clock" />,
+  Star: () => <span data-testid="icon-star" />,
 }));
 
 afterEach(() => {
@@ -41,23 +42,23 @@ afterEach(() => {
 // ── Import component ──────────────────────────────────────────
 import HeroSection from "./HeroSection";
 
-describe("HeroSection (two-sided marketplace redesign)", () => {
+describe("HeroSection (staff-matched placement)", () => {
   describe("Default render", () => {
     it("renders eyebrow text", () => {
       render(<HeroSection />);
       expect(
-        screen.getByText("Two-sided marketplace for student talent"),
+        screen.getByText("Staff-matched student placements"),
       ).toBeTruthy();
     });
 
-    it("renders an H1 heading with marketplace messaging", () => {
+    it("renders an H1 heading with placement messaging", () => {
       render(<HeroSection />);
       const heading = screen.getByRole("heading", { level: 1 });
       expect(heading.textContent).toBeTruthy();
       expect(heading.textContent!.length).toBeGreaterThan(10);
     });
 
-    it("renders body paragraph about two-sided marketplace", () => {
+    it("renders body paragraph about staff-matched placement", () => {
       render(<HeroSection />);
       expect(
         screen.getByText(/the platform where students build careers/i),

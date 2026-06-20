@@ -11,16 +11,16 @@ import {
   Star,
 } from "lucide-react";
 
-// ── Two-sided marketplace hero ─────────────────────────────────
+// ── Staff-matched placement hero ───────────────────────────────
 
 const SH_BLUE = "#0b63ce";
 const SH_AMBER = "#f59e0b";
 
 const heroContent = {
-  eyebrow: "Two-sided marketplace for student talent",
+  eyebrow: "Staff-matched student placements",
   headline: "Connecting students with the right employers",
   subhead:
-    "The platform where students build careers and employers discover vetted talent. Staff recruiters match both sides — no algorithm guessing.",
+    "The platform where students build careers and employers discover vetted talent. Our staff recruiters match students with the right employers — no algorithm guessing.",
   studentCta: "Create your free profile",
   studentCtaHref: "/signup?role=candidate",
   employerCta: "Hire students",
