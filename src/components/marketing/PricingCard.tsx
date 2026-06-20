@@ -216,18 +216,15 @@ export default function PricingCard({ persona = "candidate", className }: Pricin
 
       {/* Annual/Monthly toggle */}
       <div className="flex items-center justify-center gap-3 mb-8">
-        <span
-          className="text-sm font-medium"
-          style={{ color: annual ? "var(--muted)" : "var(--ink)" }}
-        >
+        <span className={cn("text-sm font-medium", annual ? "text-muted-foreground" : "text-foreground")}>
           Monthly
         </span>
         <button
           onClick={() => setAnnual(!annual)}
-          className="relative inline-flex h-7 w-12 items-center rounded-full transition-colors"
-          style={{
-            background: annual ? "var(--sh-info)" : "var(--line)",
-          }}
+          className={cn(
+            "relative inline-flex h-7 w-12 items-center rounded-full transition-colors",
+            annual ? "bg-[var(--sh-info)]" : "bg-border"
+          )}
           aria-label={`Switch to ${annual ? "monthly" : "annual"} billing`}
         >
           <span
@@ -235,18 +232,9 @@ export default function PricingCard({ persona = "candidate", className }: Pricin
             style={{ transform: annual ? "translateX(26px)" : "translateX(3px)" }}
           />
         </button>
-        <span
-          className="text-sm font-medium"
-          style={{ color: annual ? "var(--ink)" : "var(--muted)" }}
-        >
+        <span className={cn("text-sm font-medium", annual ? "text-foreground" : "text-muted-foreground")}>
           Annual
-          <span
-            className="ml-1.5 text-[10px] font-black px-1.5 py-0.5 rounded-full"
-            style={{
-              background: "rgba(36,131,91,0.10)",
-              color: "#24835b",
-            }}
-          >
+          <span className="ml-1.5 text-[10px] font-black px-1.5 py-0.5 rounded-full bg-[#24835b]/10 text-[#24835b]">
             Save up to 20%
           </span>
         </span>
@@ -264,28 +252,14 @@ export default function PricingCard({ persona = "candidate", className }: Pricin
               className={cn(
                 "relative rounded-xl p-6 transition-all duration-[280ms] flex flex-col",
                 "hover:-translate-y-1",
+                tier.popular
+                  ? "bg-gradient-to-br from-card to-[var(--sh-info-bg)] border-[1.5px] border-[var(--sh-info)] shadow-[0_8px_32px_rgba(0,0,0,0.08)]"
+                  : "bg-card border border-border shadow-[0_2px_8px_rgba(0,0,0,0.04)]"
               )}
-              style={{
-                background: tier.popular
-                  ? "linear-gradient(135deg, var(--surface), var(--sh-info-bg))"
-                  : "var(--surface)",
-                border: tier.popular
-                  ? "1.5px solid var(--sh-info)"
-                  : "1px solid var(--border)",
-                boxShadow: tier.popular
-                  ? "0 8px 32px rgba(0,0,0,0.08)"
-                  : "0 2px 8px rgba(0,0,0,0.04)",
-              }}
             >
               {/* Popular badge */}
               {tier.popular && (
-                <div
-                  className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-black uppercase"
-                  style={{
-                    background: "#1f73b7",
-                    color: "white",
-                  }}
-                >
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-black uppercase bg-[#1f73b7] text-white">
                   <Sparkles className="size-3" />
                   Most popular
                 </div>
@@ -314,7 +288,7 @@ export default function PricingCard({ persona = "candidate", className }: Pricin
                       /{annual ? "year" : "month"}
                     </span>
                     {price > 0 && annual && (
-                      <div className="text-xs mt-1" style={{ color: "#24835b" }}>
+                      <div className="text-xs mt-1 text-[#24835b]">
                         £{tier.monthlyPrice}/mo billed annually
                       </div>
                     )}

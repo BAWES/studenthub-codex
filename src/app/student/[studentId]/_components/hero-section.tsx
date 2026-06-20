@@ -4,9 +4,6 @@ import { Mail, Phone, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { StudentProfile } from "@/app/student/actions";
 
-const CORAL = "#eb6651";
-const CORAL_HOVER = "#d45441";
-
 interface HeroSectionProps {
   profile: StudentProfile;
 }
@@ -17,15 +14,7 @@ export function HeroSection({ profile }: HeroSectionProps) {
   return (
     <section className="flex flex-col sm:flex-row items-start gap-6">
       {/* Avatar */}
-      <div
-        className="w-24 h-24 rounded-full flex-shrink-0 flex items-center justify-center text-3xl font-bold overflow-hidden ring-2 transition-shadow duration-200"
-        style={{
-          backgroundColor: "var(--surface)",
-          color: CORAL,
-          borderColor: "var(--border)",
-          ["--tw-ring-color" as string]: CORAL,
-        }}
-      >
+      <div className="w-24 h-24 rounded-full flex-shrink-0 flex items-center justify-center text-3xl font-bold overflow-hidden ring-2 ring-[#eb6651] transition-shadow duration-200 bg-card text-[#eb6651] border border-border">
         {profile.photo ? (
           <img
             src={profile.photo}
@@ -78,9 +67,7 @@ export function HeroSection({ profile }: HeroSectionProps) {
         {/* CTA */}
         <Button
           asChild
-          className="transition-all duration-150 hover:scale-[1.02]"
-          style={{ backgroundColor: CORAL }}
-        >
+          className="transition-all duration-150 hover:scale-[1.02] bg-[#eb6651] hover:bg-[#d45441]">
           <a href={`mailto:${profile.email}`}>
             Contact
           </a>

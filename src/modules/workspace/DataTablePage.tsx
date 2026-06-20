@@ -124,10 +124,10 @@ export function DataTablePage<T extends { id: string | number }>({
             <div className="size-12 rounded-xl bg-red-500/10 flex items-center justify-center">
               <X size={24} className="text-red-400" />
             </div>
-            <strong className="text-sm" style={{ color: "var(--ink)" }}>
+            <strong className="text-sm text-foreground">
               Error loading data
             </strong>
-            <span className="text-sm" style={{ color: "var(--muted)" }}>
+            <span className="text-sm text-muted-foreground">
               {error}
             </span>
           </div>
