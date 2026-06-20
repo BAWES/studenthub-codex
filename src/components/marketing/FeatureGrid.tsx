@@ -322,7 +322,7 @@ export default function FeatureGrid({
                 <div
                   className="mt-3 pt-3 text-[11px] font-semibold"
                   style={{
-                    color: "#1f73b7",
+                    color: "var(--sh-info)",
                     borderTop: "1px solid var(--border)",
                   }}
                 >

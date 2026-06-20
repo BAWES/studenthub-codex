@@ -4,8 +4,7 @@ import React from "react";
 import { Check, X, Minus, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const SH_BLUE = "#0b63ce";
-const SH_AMBER = "#f59e0b";
+const SH_BLUE = "#1f73b7";
 
 // ── Types ────────────────────────────────────────────────
 
