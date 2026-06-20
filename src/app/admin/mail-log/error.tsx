@@ -1,5 +1,7 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+
 export default function AdminMailLogError({
   error,
   reset,
@@ -15,13 +17,9 @@ export default function AdminMailLogError({
       <p className="text-sm text-muted-foreground">
         {error.message ?? "An unexpected error occurred."}
       </p>
-      <button
-        type="button"
-        onClick={reset}
-        className="rounded-lg px-4 py-2 text-sm font-semibold bg-primary text-white"
-      >
+      <Button onClick={reset} variant="default">
         Try again
-      </button>
+      </Button>
     </div>
   );
 }
