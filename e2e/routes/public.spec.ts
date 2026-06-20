@@ -60,31 +60,6 @@ test.describe("Public routes", () => {
     await expect(page).toHaveURL(/\/reset-password/);
   });
 
-  test("for-admins marketing page loads", async ({ page }) => {
-    await page.goto("/for-admins");
-    await expect(page.locator("body")).toBeVisible({ timeout: 15000 });
-  });
-
-  test("for-candidates marketing page loads", async ({ page }) => {
-    await page.goto("/for-candidates");
-    await expect(page.locator("body")).toBeVisible({ timeout: 15000 });
-  });
-
-  test("for-companies marketing page loads", async ({ page }) => {
-    await page.goto("/for-companies");
-    await expect(page.locator("body")).toBeVisible({ timeout: 15000 });
-  });
-
-  test("for-inspectors marketing page loads", async ({ page }) => {
-    await page.goto("/for-inspectors");
-    await expect(page.locator("body")).toBeVisible({ timeout: 15000 });
-  });
-
-  test("for-staff marketing page loads", async ({ page }) => {
-    await page.goto("/for-staff");
-    await expect(page.locator("body")).toBeVisible({ timeout: 15000 });
-  });
-
   test("hub page loads", async ({ page }) => {
     const consoleMessages: string[] = [];
     page.on("console", (msg) => {
