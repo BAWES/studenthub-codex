@@ -6,9 +6,13 @@ export const dynamic = "force-dynamic";
 
 export default async function AdminSettingPage() {
   const session = await requireRoleCapability("admin", "admin.read");
-  const result = await listSettings({ limit: 100 });
+  const result = await listSettings({ limit: 50, page: 1 });
 
   return (
-    <AdminSettingsTable session={session} settings={result.settings} />
+    <AdminSettingsTable
+      session={session}
+      initialSettings={result.settings}
+      initialTotal={result.total}
+    />
   );
 }

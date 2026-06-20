@@ -2,7 +2,13 @@
 
 import { Button } from "@/components/ui/button";
 
-export default function Error({error, reset}: {error: Error & {digest?: string}; reset: () => void}) {
+export default function Error({
+  error,
+  reset,
+}: {
+  error: Error & { digest?: string };
+  reset: () => void;
+}) {
   return (
     <div className="flex flex-col items-center justify-center py-24 gap-4">
       <span className="text-4xl" aria-hidden="true">⚠️</span>
@@ -12,7 +18,10 @@ export default function Error({error, reset}: {error: Error & {digest?: string};
       <p className="text-sm max-w-md text-center text-muted-foreground">
         {error.message ?? "An unexpected error occurred while loading the leaves page."}
       </p>
-      <Button onClick={reset} variant="default" className="bg-[#eb6651] hover:bg-[#d45441] text-white mt-2" >Try again</Button>
+      {error.digest ? <small className="text-muted-foreground">Error ID: {error.digest}</small> : null}
+      <Button onClick={reset} variant="default" className="mt-2">
+        Try again
+      </Button>
     </div>
   );
 }
