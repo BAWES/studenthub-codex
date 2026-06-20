@@ -30,17 +30,25 @@ describe("admin/salary actions", () => {
     const mockRows = [
       {
         staff_salary_uuid: "SAL-001",
+        staff_id: 1,
         salary: 2500,
         salary_currency: "KWD",
         comment: "Monthly salary",
         salary_date: new Date("2026-06-01"),
+        created_at: null,
+        updated_at: null,
+        staff: { staff_name: "John Doe" },
       },
       {
         staff_salary_uuid: "SAL-002",
+        staff_id: 2,
         salary: 1800,
         salary_currency: "KWD",
         comment: "Bonus",
         salary_date: new Date("2026-05-01"),
+        created_at: null,
+        updated_at: null,
+        staff: { staff_name: "Jane Smith" },
       },
     ];
     mockedFindMany.mockResolvedValue(mockRows as any);
@@ -59,10 +67,14 @@ describe("admin/salary actions", () => {
     const mockRows = [
       {
         staff_salary_uuid: "SAL-003",
+        staff_id: null,
         salary: null,
         salary_currency: null,
         comment: null,
         salary_date: null,
+        created_at: null,
+        updated_at: null,
+        staff: null,
       },
     ];
     mockedFindMany.mockResolvedValue(mockRows as any);

@@ -1,2 +1,2 @@
-export { listSalaries } from "@/modules/admin/salary/actions";
-export type { SalaryItem, ListSalariesResult } from "@/modules/admin/salary/schemas";
+export { listSalaries, createSalary, updateSalary, deleteSalary } from "@/modules/admin/salary/actions";
+export type { SalaryItem, ListSalaryResult, CreateSalaryParams, UpdateSalaryParams, DeleteSalaryParams } from "@/modules/admin/salary/schemas";
