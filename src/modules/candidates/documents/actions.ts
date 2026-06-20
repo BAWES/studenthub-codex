@@ -7,14 +7,14 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
 import {
-  uploadToS3,
-  deleteFromS3,
-  getS3DownloadUrl,
+  uploadFile as uploadToS3,
+  deleteFile as deleteFromS3,
+  isS3Configured as s3ConfigAvailable,
   isS3Path,
   toS3Key,
   toS3StoredPath,
-  s3ConfigAvailable,
 } from "@/lib/s3";
+import { getS3DownloadUrl } from "@/modules/aws/actions";
 import { DOCUMENT_TYPES } from "./constants";
 import type { DocumentType } from "./constants";
 import {
@@ -376,7 +376,7 @@ export async function uploadCandidateDocument(
 
     if (s3ConfigAvailable()) {
       // Upload to S3/MinIO
-      await uploadToS3(relativePath, buffer, file.type || undefined);
+      await uploadToS3(relativePath, buffer, file.type || "application/octet-stream");
       storedPath = toS3StoredPath(relativePath);
     } else {
       // Fallback: save to local disk

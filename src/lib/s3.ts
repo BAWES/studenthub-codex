@@ -148,7 +148,29 @@ export function keyFromUrl(url: string): string | null {
   return null;
 }
 
-/** Whether S3 is configured (has endpoint or access key) */
+/** Whether S3 is configured (has endpoint or access key, or AWS_TEMP_* vars) */
 export function isS3Configured(): boolean {
-  return !!(process.env.S3_ENDPOINT || process.env.S3_ACCESS_KEY);
+  return !!(
+    process.env.S3_ENDPOINT ||
+    process.env.S3_ACCESS_KEY ||
+    (process.env.AWS_TEMP_BUCKET_REGION &&
+      process.env.AWS_TEMP_ACCESS_KEY_ID &&
+      process.env.AWS_TEMP_SECRET_ACCESS_KEY &&
+      process.env.AWS_TEMP_BUCKET_NAME)
+  );
+}
+
+/** Check whether a stored path looks like an S3 key rather than a local path. */
+export function isS3Path(path: string): boolean {
+  return path.startsWith("s3://");
+}
+
+/** Strip S3 prefix to get the raw key. */
+export function toS3Key(path: string): string {
+  return path.startsWith("s3://") ? path.slice(5) : path;
+}
+
+/** Wrap a raw key with the S3 prefix for DB storage. */
+export function toS3StoredPath(key: string): string {
+  return `s3://${key}`;
 }

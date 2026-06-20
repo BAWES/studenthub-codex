@@ -1,5 +1,7 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+
 // ---------------------------------------------------------------------------
 // Admin Invoices [id] — error boundary
 // ---------------------------------------------------------------------------
@@ -18,7 +20,6 @@ export default function InvoiceDetailError({
         {error.message ?? "An unexpected error occurred."}
       </p>
       <button
-        type="button"
         className="uiButton uiButtonGhost"
         onClick={() => reset()}
       >

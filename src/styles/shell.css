@@ -1961,115 +1961,9 @@ kbd {
 }
 
 /* ==========================================================================
-   Mobile Navigation — OS Glass Tab Bar, FAB, Pull-to-Refresh, Swipeable
+   Mobile Navigation — Migrated to Tailwind (mobile-nav-bar.tsx)
+   No longer uses custom CSS. See src/components/ui/mobile-nav-bar.tsx
    ========================================================================== */
-
-/* ── Mobile Nav Bar ──────────────────────────────────────────────────── */
-.shMobileNavBar {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 50;
-  background: color-mix(in srgb, var(--paper, #fff) 5%, transparent);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border-top: 1px solid color-mix(in srgb, var(--ink, #000) 10%, transparent);
-  border-radius: 16px 16px 0 0;
-  padding: 4px 16px calc(4px + env(safe-area-inset-bottom, 0px));
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
-  animation: shNavRise 400ms var(--sh-easing) forwards;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .shMobileNavBar {
-    animation: none;
-  }
-}
-
-@media (orientation: landscape) {
-  .shMobileNavBar {
-    height: 48px;
-    padding: 2px 16px calc(2px + env(safe-area-inset-bottom, 0px));
-  }
-}
-
-.shMobileNavTab {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  padding: 6px 12px;
-  border-radius: 8px;
-  cursor: pointer;
-  user-select: none;
-  position: relative;
-  text-decoration: none;
-  transition: all 160ms var(--sh-easing);
-  -webkit-tap-highlight-color: transparent;
-}
-
-.shMobileNavTab:active {
-  transform: scale(0.94);
-}
-
-.shMobileNavTabActive {
-  color: var(--sh-info, #60a5fa);
-}
-
-.shMobileNavTabInactive {
-  color: color-mix(in srgb, var(--muted, #6b7280) 100%, transparent);
-  opacity: 0.4;
-}
-
-.shMobileNavTabInactive:hover {
-  opacity: 0.7;
-  background: color-mix(in srgb, var(--paper, #fff) 10%, transparent);
-}
-
-/* Active indicator dot */
-.shMobileNavIndicator {
-  position: absolute;
-  top: -2px;
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: var(--sh-info, #60a5fa);
-  transition: all 400ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.shMobileNavLabel {
-  font-size: 10px;
-  font-weight: 500;
-  line-height: 1;
-  transition: color 160ms ease;
-}
-
-@media (orientation: landscape) {
-  .shMobileNavLabel {
-    display: none;
-  }
-}
-
-/* Badge on nav tab */
-.shMobileNavBadge {
-  position: absolute;
-  top: 2px;
-  right: 4px;
-  min-width: 16px;
-  height: 16px;
-  padding: 0 4px;
-  border-radius: 8px;
-  background: var(--sh-error, #ef4444);
-  color: #fff;
-  font-size: 10px;
-  font-weight: 700;
-  line-height: 16px;
-  text-align: center;
-  pointer-events: none;
-}
 
 /* ── FAB ─────────────────────────────────────────────────────────────── */
 .shMobileFAB {
@@ -2247,17 +2141,6 @@ kbd {
 }
 
 /* ── Animations ──────────────────────────────────────────────────────── */
-@keyframes shNavRise {
-  from {
-    transform: translateY(100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
 @keyframes shFadeSlideUp {
   from {
     opacity: 0;
