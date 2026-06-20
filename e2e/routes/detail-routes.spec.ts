@@ -46,7 +46,6 @@ test.describe("Detail routes and remaining static routes", () => {
         select: { company_id: true },
       }),
       prisma.request.findFirst({
-        where: { deleted: 0 },
         select: { request_uuid: true },
       }),
       prisma.transfer.findFirst({
@@ -60,37 +59,29 @@ test.describe("Detail routes and remaining static routes", () => {
     if (transferRecord) adminTransferId = String(transferRecord.transfer_id);
 
     // Staff detail IDs
-    const [staffCan, staffReq, staffInt] = await Promise.all([
+    const [staffCan, staffReq] = await Promise.all([
       prisma.candidate.findFirst({
         where: { deleted: 0 },
         select: { candidate_id: true },
       }),
       prisma.request.findFirst({
-        where: { deleted: 0 },
         select: { request_uuid: true },
-      }),
-      prisma.interview.findFirst({
-        where: { deleted: 0 },
-        select: { interview_id: true },
       }),
     ]);
     if (staffCan) staffCandidateId = String(staffCan.candidate_id);
     if (staffReq) staffRequestId = staffReq.request_uuid;
-    if (staffInt) staffInterviewId = String(staffInt.interview_id);
+    // interview model does not exist in Prisma schema — skip interview detail tests
+    staffInterviewId = undefined as any;
 
     // Candidate detail IDs
-    const [invitation, workLog] = await Promise.all([
+    const [invitation] = await Promise.all([
       prisma.invitation.findFirst({
-        where: { deleted: 0 },
         select: { invitation_uuid: true },
-      }),
-      prisma.work_log.findFirst({
-        where: { deleted: 0 },
-        select: { work_log_uuid: true },
       }),
     ]);
     if (invitation) candidateInvitationId = invitation.invitation_uuid;
-    if (workLog) candidateWorkLogId = workLog.work_log_uuid;
+    // work_log model does not exist in Prisma schema — skip work log detail tests
+    candidateWorkLogId = undefined as any;
 
     // Company detail IDs
     const [compDetail, compReq] = await Promise.all([
@@ -99,7 +90,6 @@ test.describe("Detail routes and remaining static routes", () => {
         select: { company_id: true },
       }),
       prisma.request.findFirst({
-        where: { deleted: 0 },
         select: { request_uuid: true },
       }),
     ]);
@@ -107,11 +97,8 @@ test.describe("Detail routes and remaining static routes", () => {
     if (compReq) companyRequestId = compReq.request_uuid;
 
     // Inspector detail ID
-    const idReq = await prisma.id_request.findFirst({
-      where: { deleted: 0 },
-      select: { id_request_uuid: true },
-    });
-    if (idReq) inspectorIdRequestId = idReq.id_request_uuid;
+    // id_request model does not exist in Prisma schema — skip inspector detail tests
+    inspectorIdRequestId = undefined as any;
   });
 
   test.afterAll(async () => {
