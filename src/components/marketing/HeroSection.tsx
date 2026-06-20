@@ -17,10 +17,10 @@ const SH_BLUE = "#0b63ce";
 const SH_AMBER = "#f59e0b";
 
 const heroContent = {
-  eyebrow: "Staff-matched platform for student talent",
+  eyebrow: "Staff-matched student placements",
   headline: "Connecting students with the right employers",
   subhead:
-    "The platform where students build careers and employers discover vetted talent. Staff recruiters find the right fit — no algorithm guessing.",
+    "The platform where students build careers and employers discover vetted talent. Our staff recruiters match students with the right employers — no algorithms.",
   studentCta: "Create your free profile",
   studentCtaHref: "/signup?role=candidate",
   employerCta: "Hire students",
