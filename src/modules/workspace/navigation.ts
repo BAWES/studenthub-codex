@@ -5,8 +5,9 @@ import {
   LayoutGrid, User, Mail, ClipboardList, CreditCard,
   Building2, Phone, Store, FileCheck, Search, Users,
   ArrowRightLeft, Calendar, Monitor, Clock, Briefcase, Webhook,
-  FileText
-} from "lucide-react";
+ FileText,
+ MessageSquare
+ } from "lucide-react";
 
 export type NavItem = {
   label: string;
@@ -35,6 +36,7 @@ export function navForRole(role: Role): NavItem[] {
       { label: "Webhooks", href: "/admin/webhooks", icon: Webhook },
       { label: "Documents", href: "/admin/documents", icon: FileText },
       { label: "Stories", href: "/admin/story", icon: ClipboardList },
+      { label: "Daily Standup", href: "/admin/daily-standup", icon: MessageSquare },
     ];
   }
   if (role === "staff") {
