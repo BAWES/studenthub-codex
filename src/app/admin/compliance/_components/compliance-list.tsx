@@ -171,7 +171,7 @@ export function ComplianceList({
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-4">
       {/* ── Left pane: list ───────────────────────────────────── */}
-      <div className="rounded-lg border border-[var(--border)] bg-white p-0 overflow-hidden">
+      <div className="rounded-lg border border-border bg-white p-0 overflow-hidden">
         {/* Toolbar: filter tabs + search */}
         <div
           className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 border-b"
@@ -183,14 +183,11 @@ export function ComplianceList({
               <button
                 key={tab.key}
                 onClick={() => handleTypeChange(tab.key)}
-                className="px-3 py-1.5 text-xs font-semibold rounded-full transition-all duration-150"
-                style={{
-                  background: typeFilter === tab.key ? "var(--surface)" : "transparent",
-                  color: typeFilter === tab.key ? "var(--ink)" : "var(--muted)",
-                  border: `1px solid ${
-                    typeFilter === tab.key ? "var(--border)" : "transparent"
-                  }`,
-                }}
+                className={`px-3 py-1.5 text-xs font-semibold rounded-full transition-all duration-150 ${
+                  typeFilter === tab.key
+                    ? "bg-muted text-foreground border border-border"
+                    : "bg-transparent text-muted-foreground border border-transparent"
+                }`}
               >
                 {tab.label}
               </button>
