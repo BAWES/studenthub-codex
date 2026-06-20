@@ -1,4 +1,5 @@
 import { getStudentProfile } from "./actions";
+import { notFound } from "next/navigation";
 
 /**
  * Student Public Profile — page orchestration
@@ -10,7 +11,11 @@ interface Props {
 
 export default async function StudentProfilePage({ params }: Props) {
   const { studentId } = await params;
-  const profile = await getStudentProfile({ studentId: Number(studentId) });
+  const studentIdNum = Number(studentId);
+  if (Number.isNaN(studentIdNum) || studentIdNum <= 0) {
+    notFound();
+  }
+  const profile = await getStudentProfile({ studentId: studentIdNum });
 
   if (!profile) {
     return (
