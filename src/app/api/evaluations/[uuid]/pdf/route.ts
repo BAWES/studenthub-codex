@@ -32,11 +32,11 @@ async function getBrowser() {
     }
   }
 
-  const { chromium } = await import("playwright");
-  _chromium = await chromium.launch({
-    headless: true,
-    timeout: BROWSER_LAUNCH_TIMEOUT_MS,
-  });
+  // Dynamic import hidden from webpack — prevents build-time bundling of
+  // playwright-core's optional chromium-bidi dependency
+  const playwrightModule = await new Function('return import("playwright")')();
+  const { chromium } = playwrightModule;
+  _browser = (await chromium.launch({ headless: true })) as unknown as BrowserHandle;
 
   // Ensure cleanup on process exit to avoid orphaned Chromium processes
   process.once("beforeExit", () => {
