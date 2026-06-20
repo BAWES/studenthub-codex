@@ -53,12 +53,12 @@ function AgentCard({
   index: number;
 }) {
   return (
-    <div className="rounded-lg border border-[var(--border)] bg-white p-5">
+    <div className="rounded-lg border border-border bg-card text-card-foreground p-5 shadow-sm">
       {/* Agent header */}
       <div className="flex items-center justify-between mb-4">
         <div>
-          <span className="shPipelineEyebrow">{agent.role}</span>
-          <h2 className="shPipelineTitle text-lg">{agent.name}</h2>
+          <span className="block text-[10px] font-bold text-blue-600 uppercase tracking-[0.05em] mb-0.5">{agent.role}</span>
+          <h2 className="m-0 text-base font-semibold text-foreground leading-tight">{agent.name}</h2>
         </div>
         <div className="flex items-center gap-2">
           <StatusBadge
@@ -152,15 +152,15 @@ function LoadingSkeleton() {
 
 function EmptyAgentsState() {
   return (
-    <section className="shDashboardSection" aria-label="No agents found">
-      <div className="rounded-lg border border-[var(--border)] bg-white p-5">
-        <div className="shPipelineHeader">
+    <section aria-label="No agents found" className="mb-6">
+      <div className="rounded-lg border border-border bg-card text-card-foreground p-5 shadow-sm">
+        <div className="flex items-start justify-between gap-3 mb-4">
           <div>
-            <span className="shPipelineEyebrow">Agents</span>
-            <h2 className="shPipelineTitle">No active agents</h2>
+            <span className="block text-[10px] font-bold text-blue-600 uppercase tracking-[0.05em] mb-0.5">Agents</span>
+            <h2 className="m-0 text-base font-semibold text-foreground leading-tight">No active agents</h2>
           </div>
         </div>
-        <div className="shPipelineEmpty">
+        <div className="py-6">
           <EmptyState
             variant="idle"
             message="No agents with running/idle/error status found"
@@ -175,15 +175,15 @@ function EmptyAgentsState() {
 
 function ErrorAgentsState({ message }: { message: string }) {
   return (
-    <section className="shDashboardSection" aria-label="Agent health error">
-      <div className="rounded-lg border border-[var(--border)] bg-white p-5">
-        <div className="shPipelineHeader">
+    <section aria-label="Agent health error" className="mb-6">
+      <div className="rounded-lg border border-border bg-card text-card-foreground p-5 shadow-sm">
+        <div className="flex items-start justify-between gap-3 mb-4">
           <div>
-            <span className="shPipelineEyebrow">Error</span>
-            <h2 className="shPipelineTitle">Could not load agent data</h2>
+            <span className="block text-[10px] font-bold text-blue-600 uppercase tracking-[0.05em] mb-0.5">Error</span>
+            <h2 className="m-0 text-base font-semibold text-foreground leading-tight">Could not load agent data</h2>
           </div>
         </div>
-        <div className="shPipelineEmpty">
+        <div className="py-6">
           <EmptyState variant="error" message={message} />
         </div>
       </div>
