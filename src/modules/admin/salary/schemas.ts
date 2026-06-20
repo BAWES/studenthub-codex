@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 // ---------------------------------------------------------------------------
-// Admin salary — schemas and types
+// Input validation schemas
 // ---------------------------------------------------------------------------
 
 export const listSalarySchema = z.object({
@@ -9,29 +9,26 @@ export const listSalarySchema = z.object({
   limit: z.coerce.number().int().min(1).max(200).optional().default(50),
   search: z.string().optional(),
 });
-export type ListSalaryParams = z.input<typeof listSalarySchema>;
 
 export const createSalarySchema = z.object({
-  staffId: z.number().int().positive("Staff ID is required"),
-  salary: z.number().positive("Salary must be positive"),
-  salaryCurrency: z.string().optional(),
-  comment: z.string().optional(),
-  salaryDate: z.string().min(1, "Salary date is required"),
+  staffId: z.coerce.number().int().positive("Staff is required"),
+  salary: z.coerce.number().min(0, "Salary must be non-negative"),
+  salaryCurrency: z.string().min(1).max(3).default("KWD"),
+  comment: z.string().max(255).optional(),
+  salaryDate: z.coerce.date({ required_error: "Salary date is required" }),
 });
-export type CreateSalaryParams = z.input<typeof createSalarySchema>;
 
 export const updateSalarySchema = z.object({
   salaryUuid: z.string().min(1, "Salary UUID is required"),
-  salary: z.number().positive("Salary must be positive").optional(),
-  salaryCurrency: z.string().optional(),
-  salaryDate: z.string().optional(),
+  salary: z.coerce.number().min(0, "Salary must be non-negative"),
+  salaryCurrency: z.string().min(1).max(3).default("KWD"),
+  comment: z.string().max(255).optional(),
+  salaryDate: z.coerce.date({ required_error: "Salary date is required" }),
 });
-export type UpdateSalaryParams = z.input<typeof updateSalarySchema>;
 
 export const deleteSalarySchema = z.object({
   salaryUuid: z.string().min(1, "Salary UUID is required"),
 });
-export type DeleteSalaryParams = z.input<typeof deleteSalarySchema>;
 
 // ---------------------------------------------------------------------------
 // Output validation schemas
@@ -39,14 +36,14 @@ export type DeleteSalaryParams = z.input<typeof deleteSalarySchema>;
 
 export const salaryItemSchema = z.object({
   staff_salary_uuid: z.string().min(1),
-  staff_id: z.number().int().nullable().optional(),
-  staff_name: z.string().nullable().optional(),
-  salary: z.number().nullable().optional(),
-  salary_currency: z.string().nullable().optional(),
-  comment: z.string().nullable().optional(),
-  salary_date: z.date().nullable().optional(),
-  created_at: z.date().nullable().optional(),
-  updated_at: z.date().nullable().optional(),
+  staff_id: z.number().int().positive().nullable(),
+  staff_name: z.string().nullable(),
+  salary: z.number().nullable(),
+  salary_currency: z.string().nullable(),
+  comment: z.string().nullable(),
+  salary_date: z.date().nullable(),
+  created_at: z.date().nullable(),
+  updated_at: z.date().nullable(),
 });
 
 export const listSalaryResultSchema = z.object({
@@ -57,9 +54,18 @@ export const listSalaryResultSchema = z.object({
   totalPages: z.number().int().nonnegative(),
 });
 
+export const getSalaryInputSchema = z.object({
+  salaryUuid: z.string().min(1, "Salary UUID is required"),
+});
+
+export const salaryDetailResultSchema = z.object({
+  salary: salaryItemSchema.nullable(),
+  staff_name: z.string().nullable(),
+});
+
 export const salaryActionResponseSchema = z.object({
-  operation: z.string().min(1, "Operation is required"),
-  message: z.string().min(1, "Message is required"),
+  operation: z.string().min(1),
+  message: z.string().min(1),
 });
 
 // ---------------------------------------------------------------------------
@@ -69,3 +75,9 @@ export const salaryActionResponseSchema = z.object({
 export type SalaryItem = z.output<typeof salaryItemSchema>;
 export type ListSalaryResult = z.output<typeof listSalaryResultSchema>;
 export type SalaryActionResponse = z.output<typeof salaryActionResponseSchema>;
+export type SalaryDetailResult = z.output<typeof salaryDetailResultSchema>;
+
+export type ListSalaryInput = z.input<typeof listSalarySchema>;
+export type CreateSalaryInput = z.input<typeof createSalarySchema>;
+export type UpdateSalaryInput = z.input<typeof updateSalarySchema>;
+export type DeleteSalaryInput = z.input<typeof deleteSalarySchema>;
