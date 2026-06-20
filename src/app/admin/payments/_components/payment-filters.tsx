@@ -1,11 +1,17 @@
 "use client";
 
 import { useCallback } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 // ---------------------------------------------------------------------------
 // PaymentFilters
-// ---------------------------------------------------------------------------
-// Glass-styled filter bar for status, type, and date range.
 // ---------------------------------------------------------------------------
 
 export type PaymentFilterValues = {
@@ -23,8 +29,8 @@ export type PaymentFiltersProps = {
   emptyResult?: boolean;
 };
 
-const STATUS_OPTIONS = ["", "AUTHORISED", "PAID", "VOIDED", "DELETED"];
-const TYPE_OPTIONS = ["", "RECEIVE", "SPEND", "TRANSFER"];
+const STATUS_OPTIONS = ["AUTHORISED", "PAID", "VOIDED", "DELETED"];
+const TYPE_OPTIONS = ["RECEIVE", "SPEND", "TRANSFER"];
 
 export function PaymentFilters({
   filters,
@@ -44,75 +50,84 @@ export function PaymentFilters({
     <>
       <div className="rounded-lg border border-border bg-white p-4 mb-6">
         <div className="flex flex-wrap items-end gap-4">
-          <div className="flex flex-col gap-1">
-            <label htmlFor="payment-status" className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+          {/* Status */}
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
               Status
             </label>
-            <select
-              id="payment-status"
-              className="h-10 rounded-lg px-3 text-sm bg-transparent border border-border text-foreground"
+            <Select
               value={filters.status}
-              onChange={(e) => handleChange("status", e.target.value)}
+              onValueChange={(v) => handleChange("status", v)}
             >
-              <option value="">All Status</option>
-              {STATUS_OPTIONS.filter(Boolean).map((s) => (
-                <option key={s} value={s}>{s}</option>
-              ))}
-            </select>
+              <SelectTrigger className="h-10 w-36" aria-label="Filter by status">
+                <SelectValue placeholder="All Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">All Status</SelectItem>
+                {STATUS_OPTIONS.map((s) => (
+                  <SelectItem key={s} value={s}>{s}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
-          <div className="flex flex-col gap-1">
-            <label htmlFor="payment-type" className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+
+          {/* Type */}
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
               Type
             </label>
-            <select
-              id="payment-type"
-              className="h-10 rounded-lg px-3 text-sm bg-transparent border border-border text-foreground"
+            <Select
               value={filters.type}
-              onChange={(e) => handleChange("type", e.target.value)}
+              onValueChange={(v) => handleChange("type", v)}
             >
-              <option value="">All Types</option>
-              {TYPE_OPTIONS.filter(Boolean).map((t) => (
-                <option key={t} value={t}>{t}</option>
-              ))}
-            </select>
+              <SelectTrigger className="h-10 w-36" aria-label="Filter by type">
+                <SelectValue placeholder="All Types" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">All Types</SelectItem>
+                {TYPE_OPTIONS.map((t) => (
+                  <SelectItem key={t} value={t}>{t}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
-          <div className="flex flex-col gap-1">
+
+          {/* Date from */}
+          <div className="flex flex-col gap-1.5">
             <label htmlFor="payment-date-from" className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
               From
             </label>
             <input
               id="payment-date-from"
               type="date"
-              className="h-10 rounded-lg px-3 text-sm bg-transparent border border-border text-foreground"
+              className="flex h-10 w-40 rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               value={filters.dateFrom}
               onChange={(e) => handleChange("dateFrom", e.target.value)}
             />
           </div>
-          <div className="flex flex-col gap-1">
+
+          {/* Date to */}
+          <div className="flex flex-col gap-1.5">
             <label htmlFor="payment-date-to" className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
               To
             </label>
             <input
               id="payment-date-to"
               type="date"
-              className="h-10 rounded-lg px-3 text-sm bg-transparent border border-border text-foreground"
+              className="flex h-10 w-40 rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               value={filters.dateTo}
               onChange={(e) => handleChange("dateTo", e.target.value)}
             />
           </div>
+
+          {/* Action buttons */}
           <div className="flex items-center gap-2">
-            <button
-              onClick={onApply}
-              className="h-10 rounded-lg px-4 text-sm font-semibold transition-all duration-150 bg-primary text-primary-foreground"
-            >
+            <Button onClick={onApply} size="default">
               Apply
-            </button>
-            <button
-              onClick={onClear}
-              className="h-10 rounded-lg px-4 text-sm font-semibold bg-transparent border border-border text-muted-foreground"
-            >
+            </Button>
+            <Button onClick={onClear} variant="outline">
               Clear
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -122,9 +137,9 @@ export function PaymentFilters({
           <span className="text-4xl" aria-hidden="true">🔍</span>
           <p className="text-lg font-semibold text-foreground">No payments match your filters</p>
           <p className="text-sm text-muted-foreground">Try adjusting your search or filter criteria</p>
-          <button onClick={onClear} className="h-10 rounded-lg px-4 text-sm font-semibold bg-primary text-primary-foreground">
+          <Button onClick={onClear} variant="default">
             Clear Filters
-          </button>
+          </Button>
         </div>
       )}
     </>

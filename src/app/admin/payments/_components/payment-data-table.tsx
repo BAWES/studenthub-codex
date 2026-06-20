@@ -23,11 +23,11 @@ export type PaymentDataTableProps = {
 type SortKey = "date" | "reference" | "total" | "status";
 type SortDir = "asc" | "desc";
 
-const STATUS_BADGE_VARIANTS: Record<string, "success" | "destructive" | "secondary" | "warning" | "default"> = {
+const STATUS_BADGE_VARIANTS: Record<string, "success" | "warning" | "secondary" | "default"> = {
   AUTHORISED: "success",
   PAID: "success",
-  VOIDED: "destructive",
-  DELETED: "destructive",
+  VOIDED: "warning",
+  DELETED: "warning",
 };
 
 function StatusBadge({ status }: { status: string | null }) {
@@ -54,11 +54,11 @@ function formatAmount(total: number | null, currency: string | null): string {
 function ReconciledCheck({ reconciled }: { reconciled: boolean | null }) {
   return (
     <span
-      className="inline-flex items-center justify-center w-6 h-6 rounded-full text-sm"
-      style={{
-        background: reconciled ? "rgba(34, 197, 94, 0.15)" : "rgba(239, 68, 68, 0.1)",
-        color: reconciled ? "#22c55e" : "#ef4444",
-      }}
+      className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-sm ${
+        reconciled
+          ? "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400"
+          : "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400"
+      }`}
       aria-label={reconciled ? "Reconciled" : "Not reconciled"}
     >
       {reconciled ? "✓" : "✗"}
