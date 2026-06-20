@@ -10,11 +10,7 @@ export function WorkspaceNavigation({ items, role }: { items: NavItem[]; role: s
   const pathname = usePathname();
   return (
     <nav
-      className={cn(
-        "grid content-start gap-[3px] w-11",
-        "transition-all duration-300 ease-[var(--sh-easing)]",
-        "group-hover/rail:w-full overflow-hidden",
-      )}
+      className="w-11 group-hover/rail:w-full transition-all duration-300 grid content-start gap-[3px]"
       aria-label={`${role} workspace navigation`}
     >
       {items.map((item) => {
@@ -25,23 +21,19 @@ export function WorkspaceNavigation({ items, role }: { items: NavItem[]; role: s
             aria-current={active ? "page" : undefined}
             className={cn(
               buttonVariants({ variant: "ghost", size: "sm" }),
-              "relative flex items-center gap-2.5 min-h-[38px] px-[9px]",
-              "text-muted-foreground no-underline whitespace-nowrap overflow-hidden",
-              "transition-[background,color,box-shadow,padding] duration-180",
-              active && [
-                "bg-[color-mix(in_srgb,_#eb6651_12%,_transparent)] text-[#eb6651]",
-                "before:absolute before:inset-y-0 before:left-0",
-                "before:w-[3px] before:h-5 before:my-auto",
-                "before:rounded-r-sm before:bg-[#eb6651]",
-                "before:content-['']",
-              ],
+              "relative flex items-center gap-2.5 min-h-[38px] px-[9px] justify-start w-full whitespace-nowrap overflow-hidden no-underline",
+              active
+                ? "bg-[color-mix(in_srgb,#eb6651_12%,transparent)] text-[#eb6651]"
+                : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
             )}
             href={item.href}
             key={item.href}
             title={item.label}
           >
             <Icon size={18} strokeWidth={2} aria-hidden="true" />
-            <strong>{item.label}</strong>
+            <strong className="opacity-0 group-hover/rail:opacity-100 transition-opacity duration-300 delay-[80ms] text-sm font-semibold whitespace-nowrap">
+              {item.label}
+            </strong>
           </Link>
         );
       })}

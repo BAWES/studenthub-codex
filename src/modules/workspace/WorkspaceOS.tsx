@@ -321,14 +321,21 @@ export function WorkspaceOS({
       <TabProvider role={session.role}>
       <main id="main-content" className="shell">
         {/* ── Sidebar Rail ─────────────────────────────────── */}
-        <aside className="workspaceRail group/rail" aria-label="Workspace sidebar">
-          <Link className="workspaceMark" href="/app" aria-label="StudentHub app">
-            <span>SH</span>
-            <strong>StudentHub</strong>
+        <aside
+          className="group/rail sticky top-0 h-svh grid grid-rows-[auto_minmax(0,1fr)_auto] gap-1 p-2 border-r border-border overflow-hidden z-30 transition-all duration-300 w-14 hover:w-[200px] hover:border-r-[color-mix(in_srgb,#eb6651_30%,hsl(var(--border)))]"
+          aria-label="Workspace sidebar"
+        >
+          <Link
+            className="flex items-center justify-center w-11 h-11 rounded-[calc(var(--radius)-2px)] border border-border bg-foreground text-background no-underline overflow-hidden hover:w-full hover:justify-start hover:gap-2.5 hover:px-2.5 transition-all duration-300"
+            href="/app"
+            aria-label="StudentHub app"
+          >
+            <span className="inline-flex items-center justify-center w-7 h-7 rounded-md bg-[#eb6651] text-white text-[11px] font-bold shrink-0">SH</span>
+            <strong className="opacity-0 group-hover/rail:opacity-100 transition-opacity duration-300 delay-[80ms] text-sm font-semibold whitespace-nowrap">StudentHub</strong>
           </Link>
           <WorkspaceNavigation items={navItems} role={session.role} />
           <hr className="border-t border-border mx-2 my-1" />
-          <div className="workspaceRailFooter">
+          <div className="grid gap-1 transition-all duration-300 w-11 group-hover/rail:w-full">
             <Button variant="ghost" size="icon" aria-label="Open command menu" onClick={() => { setCmdOpen(true); }}>
               <span className="text-xs font-bold text-muted-foreground">⌘K</span>
             </Button>
@@ -342,7 +349,7 @@ export function WorkspaceOS({
         </aside>
 
         {/* ── Content Stage ───────────────────────────────── */}
-        <section className="workspaceStage">
+        <section className="min-w-0 overflow-x-hidden grid content-start gap-3.5 p-3.5">
           <TabBar role={session.role} />
           <PageTransition>{children}</PageTransition>
         </section>
