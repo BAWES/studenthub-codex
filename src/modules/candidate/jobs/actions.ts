@@ -22,16 +22,14 @@ import {
   getCandidateJobResultSchema,
   applyToJobResultSchema,
   listMyApplicationsResultSchema,
-} from "@/app/candidate/jobs/schemas";
-import type {
-  ListCandidateJobsInput,
-  GetCandidateJobInput,
-  ApplyToJobInput,
-  ListMyApplicationsInput,
-  CandidateJobRow,
-  CandidateJobDetail,
-  ApplicationRow,
-} from "@/app/candidate/jobs/schemas";
+  type ListCandidateJobsInput,
+  type GetCandidateJobInput,
+  type ApplyToJobInput,
+  type ListMyApplicationsInput,
+  type CandidateJobRow,
+  type CandidateJobDetail,
+  type ApplicationRow,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Internal helpers
