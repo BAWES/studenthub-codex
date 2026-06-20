@@ -9,8 +9,8 @@
 // ---------------------------------------------------------------------------
 
 import { getCandidateSearchWorkspaceTypesense } from "@/modules/candidates/search-typesense";
-import { searchCandidatesSchema, candidateSearchResultSchema } from "@/app/candidate/search/schemas";
-import type { CandidateSearchResult } from "@/app/candidate/search/schemas";
+import { searchCandidatesSchema, candidateSearchResultSchema } from "./schemas";
+import type { CandidateSearchResult } from "./schemas";
 
 // ---------------------------------------------------------------------------
 // searchCandidates
