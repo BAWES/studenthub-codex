@@ -1,10 +1,9 @@
-export { listSalaries, createSalary, updateSalary, deleteSalary } from "@/modules/admin/salary/actions";
-export type {
-  SalaryItem,
-  ListSalaryResult,
-  ListSalaryParams,
-  CreateSalaryParams,
-  UpdateSalaryParams,
-  DeleteSalaryParams,
-  SalaryActionResponse,
-} from "@/modules/admin/salary/schemas";
+// ---------------------------------------------------------------------------
+// Barrel re-export — delegates to module-level implementation
+// ---------------------------------------------------------------------------
+// All business logic lives in src/modules/admin/salary/actions.ts (which
+// has "use server"). This barrel re-exports so page consumers keep their
+// current import paths without duplicating the "use server" directive.
+// ---------------------------------------------------------------------------
+
+export * from "@/modules/admin/salary/actions";
