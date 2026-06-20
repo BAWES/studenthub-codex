@@ -16,7 +16,7 @@
     "test:all": "npm run test:unit && npm run lint && npx tsc --noEmit && next build && node scripts/validate.mjs",
     "test:fixtures:discover": "node scripts/fixtures/discover.mjs",
     "test:fixtures:validate": "node scripts/fixtures/validate.mjs",
-    "test:e2e": "npx playwright test",
+    "test:e2e": "node node_modules/@playwright/test/cli.js test",
     "test:e2e:ui": "npx playwright test --ui",
     "db:inspect-dump": "node scripts/inspect-dump.mjs",
     "db:create-sample": "node scripts/create-sample-sql.mjs",
