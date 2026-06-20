@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { GraduationCap, Building2, Menu, X, ArrowRight } from "lucide-react";
 
-const SH_BLUE = "#0b63ce";
+const SH_BLUE = "#1f73b7";
 const SH_AMBER = "#f59e0b";
 
 export type Persona = "candidate" | "company";
@@ -112,7 +112,7 @@ export default function LandingNav({ session, persona, onPersonaChange }: Landin
                     backgroundColor: persona === "company" ? SH_AMBER : SH_BLUE,
                     boxShadow: persona === "company"
                       ? "0 4px 14px rgba(245, 158, 11, 0.35)"
-                      : "0 4px 14px rgba(11, 99, 206, 0.30)",
+                      : "0 4px 14px rgba(31, 115, 183, 0.30)",
                   }}
                 >
                   {persona === "company" ? "Set up company account" : "Create free profile"}
