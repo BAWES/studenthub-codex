@@ -19,33 +19,23 @@ function PipelineCard({ item, onDragStart, onDragEnd, isDragging }: PipelineCard
       onDragStart={() => onDragStart(item.id)}
       onDragEnd={onDragEnd}
       className={`
-        cursor-grab active:cursor-grabbing
+        cursor-grab active:cursor-grabbing select-none
         transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]
         ${isDragging ? "opacity-50 scale-[0.97]" : "hover:-translate-y-0.5"}
       `}
-      style={{ WebkitUserSelect: "none", userSelect: "none" } as React.CSSProperties}
     >
-      <div className="rounded-lg border border-[var(--border)] bg-white p-3 space-y-2">
+      <div className="rounded-lg border border-border bg-card p-3 space-y-2">
         <div className="flex items-center gap-2">
-          <GripVertical size={14} className="shrink-0" style={{ color: "var(--text-tertiary, var(--muted))" }} />
-          <span
-            className="text-[13px] font-semibold leading-snug truncate"
-            style={{ color: "var(--text-primary, var(--ink))" }}
-          >
+          <GripVertical size={14} className="shrink-0 text-muted-foreground" />
+          <span className="text-[13px] font-semibold leading-snug truncate text-foreground">
             {item.candidateName}
           </span>
         </div>
         <div className="pl-6 space-y-0.5">
-          <p
-            className="text-[12px] leading-snug truncate m-0"
-            style={{ color: "var(--text-secondary, var(--muted))" }}
-          >
+          <p className="text-[12px] leading-snug truncate m-0 text-muted-foreground">
             {item.positionTitle}
           </p>
-          <p
-            className="text-[11px] leading-snug truncate m-0"
-            style={{ color: "var(--text-tertiary, var(--muted))" }}
-          >
+          <p className="text-[11px] leading-snug truncate m-0 text-muted-foreground/70">
             {item.companyName}
           </p>
         </div>
@@ -106,11 +96,8 @@ function PipelineColumn({ stage, items, onDrop, draggedItemId, onDragStart, onDr
       className={`
         flex flex-col gap-2 min-w-[220px] w-[260px] flex-shrink-0
         rounded-xl p-3 transition-colors duration-200
-        ${isOver ? "bg-[rgba(255,255,255,0.06)]" : "bg-transparent"}
+        ${isOver ? "bg-muted/10 border border-dashed border-border/20" : "bg-transparent border border-transparent"}
       `}
-      style={{
-        border: isOver ? "1px dashed rgba(255,255,255,0.2)" : "1px solid transparent",
-      }}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
@@ -122,20 +109,11 @@ function PipelineColumn({ stage, items, onDrop, draggedItemId, onDragStart, onDr
             className="size-2.5 rounded-full"
             style={{ backgroundColor: color }}
           />
-          <span
-            className="text-[12px] font-semibold uppercase tracking-[0.04em]"
-            style={{ color: "var(--text-secondary, var(--muted))" }}
-          >
+          <span className="text-[12px] font-semibold uppercase tracking-[0.04em] text-muted-foreground">
             {label}
           </span>
         </div>
-        <span
-          className="text-[11px] font-semibold px-2 py-0.5 rounded-full min-w-[22px] text-center"
-          style={{
-            background: "var(--surface, rgba(255,255,255,0.06))",
-            color: "var(--text-tertiary, var(--muted))",
-          }}
-        >
+        <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full min-w-[22px] text-center bg-muted text-muted-foreground">
           {items.length}
         </span>
       </div>
@@ -153,13 +131,7 @@ function PipelineColumn({ stage, items, onDrop, draggedItemId, onDragStart, onDr
             />
           ))
         ) : (
-          <div
-            className="text-[12px] text-center py-6 rounded-lg"
-            style={{
-              color: "var(--text-tertiary, var(--muted))",
-              border: "1px dashed rgba(255,255,255,0.08)",
-            }}
-          >
+          <div className="text-[12px] text-center text-muted-foreground/50 py-6 rounded-lg border border-dashed border-border/10">
             Drop items here
           </div>
         )}
@@ -201,7 +173,7 @@ export function PipelineBoard({ items, onStageChange }: PipelineBoardProps) {
       className="flex gap-3 overflow-x-auto pb-4"
       style={{
         scrollbarWidth: "thin",
-        scrollbarColor: "rgba(255,255,255,0.1) transparent",
+        scrollbarColor: "var(--border) transparent",
       }}
     >
       {STAGE_ORDER.map((stage) => (

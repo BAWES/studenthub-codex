@@ -1,20 +1,20 @@
 "use client";
 
+import { Badge } from "@/components/ui/badge";
 import { DataTablePage } from "@/modules/workspace/DataTablePage";
-import { StatusBadge } from "@/modules/workspace/StatusBadge";
-import { pipelineStageColor, pipelineStageLabel } from "./schemas";
+import { pipelineStageLabel } from "./schemas";
 import { useCallback, useState } from "react";
 import type { PipelineItem, PipelineStage } from "@/modules/staff/pipeline";
 
 // ── Stage badge variant mapping ──────────────────────────────────────────
 
-function stageBadgeVariant(stage: PipelineStage): string {
+function stageBadgeVariant(stage: PipelineStage) {
   switch (stage) {
     case "pending_review": return "warning";
-    case "interviewing": return "info";
+    case "interviewing": return "success";
     case "offered": return "success";
     case "hired": return "success";
-    case "rejected": return "error";
+    case "rejected": return "secondary";
     default: return "default";
   }
 }
@@ -87,14 +87,7 @@ export function PipelineDataTable({ items, onStageChange }: PipelineDataTablePro
   return (
     <div className="space-y-3">
       {stageError && (
-        <div
-          className="p-3 text-[13px] font-medium rounded-lg"
-          style={{
-            background: "var(--rose-50, rgba(244,63,94,0.08))",
-            color: "var(--rose-500, #f43f5e)",
-            borderLeft: "4px solid var(--rose-500, #f43f5e)",
-          }}
-        >
+        <div className="p-3 text-[13px] font-medium rounded-lg bg-destructive/10 text-destructive border-l-4 border-destructive">
           {stageError}
         </div>
       )}
@@ -109,10 +102,7 @@ export function PipelineDataTable({ items, onStageChange }: PipelineDataTablePro
             key: "candidate",
             label: "Candidate",
             render: (row) => (
-              <strong
-                className="text-[13px]"
-                style={{ color: "var(--text-primary, var(--ink))" }}
-              >
+              <strong className="text-[13px] text-foreground">
                 {row.candidateName}
               </strong>
             ),
@@ -121,10 +111,7 @@ export function PipelineDataTable({ items, onStageChange }: PipelineDataTablePro
             key: "position",
             label: "Position",
             render: (row) => (
-              <span
-                className="text-[13px]"
-                style={{ color: "var(--text-secondary, var(--muted))" }}
-              >
+              <span className="text-[13px] text-muted-foreground">
                 {row.positionTitle}
               </span>
             ),
@@ -133,10 +120,7 @@ export function PipelineDataTable({ items, onStageChange }: PipelineDataTablePro
             key: "company",
             label: "Company",
             render: (row) => (
-              <span
-                className="text-[13px]"
-                style={{ color: "var(--text-secondary, var(--muted))" }}
-              >
+              <span className="text-[13px] text-muted-foreground">
                 {row.companyName}
               </span>
             ),
@@ -146,11 +130,9 @@ export function PipelineDataTable({ items, onStageChange }: PipelineDataTablePro
             label: "Stage",
             render: (row) => (
               <div className="flex items-center gap-2">
-                <StatusBadge
-                  variant={stageBadgeVariant(row.stage)}
-                  label={pipelineStageLabel[row.stage] ?? row.stage}
-                  size="sm"
-                />
+                <Badge variant={stageBadgeVariant(row.stage)}>
+                  {pipelineStageLabel[row.stage] ?? row.stage}
+                </Badge>
                 <select
                   value=""
                   onChange={(e) => {
@@ -158,12 +140,7 @@ export function PipelineDataTable({ items, onStageChange }: PipelineDataTablePro
                     if (val) handleStageChange(row.id, val);
                   }}
                   disabled={changingId === row.id}
-                  className="text-[11px] px-1.5 py-0.5 rounded-md cursor-pointer"
-                  style={{
-                    background: "var(--surface)",
-                    color: "var(--text-tertiary, var(--muted))",
-                    border: "1px solid rgba(255,255,255,0.08)",
-                  }}
+                  className="text-[11px] px-1.5 py-0.5 rounded-md cursor-pointer bg-card text-muted-foreground border border-border"
                   aria-label={`Change stage for ${row.candidateName}`}
                 >
                   <option value="">Move to…</option>
@@ -182,15 +159,12 @@ export function PipelineDataTable({ items, onStageChange }: PipelineDataTablePro
             render: (row) => {
               const color =
                 row.priority === "high"
-                  ? "var(--rose-500, #f43f5e)"
+                  ? "text-rose-500"
                   : row.priority === "low"
-                    ? "var(--text-tertiary, var(--muted))"
-                    : "var(--amber-500, #f59e0b)";
+                    ? "text-muted-foreground"
+                    : "text-amber-500";
               return (
-                <span
-                  className="text-[12px] font-medium capitalize"
-                  style={{ color }}
-                >
+                <span className={`text-[12px] font-medium capitalize ${color}`}>
                   {row.priority}
                 </span>
               );
@@ -200,10 +174,7 @@ export function PipelineDataTable({ items, onStageChange }: PipelineDataTablePro
             key: "updated",
             label: "Updated",
             render: (row) => (
-              <span
-                className="text-[12px]"
-                style={{ color: "var(--text-tertiary, var(--muted))" }}
-              >
+              <span className="text-[12px] text-muted-foreground">
                 {formatDate(row.updatedAt)}
               </span>
             ),
