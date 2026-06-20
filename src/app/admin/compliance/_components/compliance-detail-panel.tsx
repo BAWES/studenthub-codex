@@ -35,7 +35,7 @@ export function ComplianceDetailPanel({
   // Guard: no selection
   if (!selectedRow) {
     return (
-      <div className="rounded-lg border border-[var(--border)] bg-white p-6">
+      <div className="rounded-lg border-border border bg-white p-6">
         <EmptyState
           variant="idle"
           title="No record selected"
@@ -96,15 +96,15 @@ export function ComplianceDetailPanel({
 
   function renderCompanyDetail(detail: CompanyComplianceDetail) {
     const company = detail.company;
-    if (!company) return <p className="text-xs" style={{ color: "var(--muted)" }}>Company not found</p>;
+    if (!company) return <p className="text-xs text-muted-foreground">Company not found</p>;
 
     return (
       <div className="space-y-4">
         <div>
-          <h3 className="text-sm font-bold" style={{ color: "var(--ink)" }}>
+          <h3 className="text-sm font-bold text-foreground">
             {company.company_name}
           </h3>
-          <p className="text-xs mt-0.5" style={{ color: "var(--muted)" }}>
+          <p className="text-xs mt-0.5 text-muted-foreground">
             {company.company_email ?? "No email"} · ID: {company.company_id}
           </p>
         </div>
@@ -114,20 +114,16 @@ export function ComplianceDetailPanel({
           {detail.metrics.map((m, i) => (
             <div
               key={i}
-              className="p-2 rounded"
-              style={{ background: "var(--surface)" }}
+              className="p-2 rounded bg-muted/50"
             >
-              <div
-                className="text-[10px] font-semibold uppercase tracking-wider"
-                style={{ color: "var(--muted)" }}
-              >
+              <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                 {m.label}
               </div>
-              <div className="text-sm font-bold mt-0.5" style={{ color: "var(--ink)" }}>
+              <div className="text-sm font-bold mt-0.5 text-foreground">
                 {m.value}
               </div>
               {m.note && (
-                <div className="text-[10px] mt-0.5" style={{ color: "var(--muted)" }}>
+                <div className="text-[10px] mt-0.5 text-muted-foreground">
                   {m.note}
                 </div>
               )}
@@ -138,20 +134,16 @@ export function ComplianceDetailPanel({
         {/* Recent ID requests */}
         {detail.idRequests.length > 0 && (
           <div>
-            <h4
-              className="text-xs font-bold uppercase tracking-wider mb-2"
-              style={{ color: "var(--muted)" }}
-            >
+            <h4 className="text-xs font-bold uppercase tracking-wider mb-2 text-muted-foreground">
               Recent ID Requests
             </h4>
             <div className="space-y-1.5">
               {detail.idRequests.map((req) => (
                 <div
                   key={req.id}
-                  className="flex items-center justify-between p-1.5 rounded text-xs"
-                  style={{ background: "var(--surface)" }}
+                  className="flex items-center justify-between p-1.5 rounded text-xs bg-muted/50"
                 >
-                  <span style={{ color: "var(--muted)" }}>{req.id.slice(0, 12)}…</span>
+                  <span className="text-muted-foreground">{req.id.slice(0, 12)}…</span>
                   <StatusBadge
                     status={
                       req.status === "approved"
@@ -178,13 +170,13 @@ export function ComplianceDetailPanel({
 
   function renderIdRequestDetail(detail: IdRequestComplianceDetail) {
     const record = detail.record;
-    if (!record) return <p className="text-xs" style={{ color: "var(--muted)" }}>Record not found</p>;
+    if (!record) return <p className="text-xs text-muted-foreground">Record not found</p>;
 
     return (
       <div className="space-y-4">
         <div>
-          <h3 className="text-sm font-bold" style={{ color: "var(--ink)" }}>ID Request</h3>
-          <p className="text-xs mt-0.5" style={{ color: "var(--muted)" }}>
+          <h3 className="text-sm font-bold text-foreground">ID Request</h3>
+          <p className="text-xs mt-0.5 text-muted-foreground">
             {record.cir_uuid.slice(0, 16)}…
           </p>
         </div>
@@ -194,20 +186,16 @@ export function ComplianceDetailPanel({
           {detail.metrics.map((m, i) => (
             <div
               key={i}
-              className="p-2 rounded"
-              style={{ background: "var(--surface)" }}
+              className="p-2 rounded bg-muted/50"
             >
-              <div
-                className="text-[10px] font-semibold uppercase tracking-wider"
-                style={{ color: "var(--muted)" }}
-              >
+              <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                 {m.label}
               </div>
-              <div className="text-sm font-bold mt-0.5" style={{ color: "var(--ink)" }}>
+              <div className="text-sm font-bold mt-0.5 text-foreground">
                 {m.value}
               </div>
               {m.note && (
-                <div className="text-[10px] mt-0.5" style={{ color: "var(--muted)" }}>
+                <div className="text-[10px] mt-0.5 text-muted-foreground">
                   {m.note}
                 </div>
               )}
@@ -218,26 +206,20 @@ export function ComplianceDetailPanel({
         {/* Candidate IDs */}
         {record.candidate_ids && (
           <div>
-            <h4
-              className="text-xs font-bold uppercase tracking-wider mb-1"
-              style={{ color: "var(--muted)" }}
-            >
+            <h4 className="text-xs font-bold uppercase tracking-wider mb-1 text-muted-foreground">
               Candidate IDs
             </h4>
-            <p className="text-xs" style={{ color: "var(--ink)" }}>{record.candidate_ids}</p>
+            <p className="text-xs text-foreground">{record.candidate_ids}</p>
           </div>
         )}
 
         {/* Rejection reason */}
         {record.rejection_reason && (
           <div>
-            <h4
-              className="text-xs font-bold uppercase tracking-wider mb-1"
-              style={{ color: "var(--sh-error)" }}
-            >
+            <h4 className="text-xs font-bold uppercase tracking-wider mb-1 text-destructive">
               Rejection Reason
             </h4>
-            <p className="text-xs" style={{ color: "var(--sh-error)" }}>
+            <p className="text-xs text-destructive">
               {record.rejection_reason}
             </p>
           </div>
@@ -251,10 +233,10 @@ export function ComplianceDetailPanel({
   const isActionable = row.type === "company" || row.type === "id_request";
 
   return (
-    <div className="rounded-lg border border-[var(--border)] bg-white p-4 flex flex-col gap-4">
+    <div className="rounded-lg border-border border bg-white p-4 flex flex-col gap-4">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h3 className="text-xs font-bold uppercase tracking-wider" style={{ color: "var(--muted)" }}>
+        <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
           {loading ? "Loading…" : "Record Details"}
         </h3>
         <StatusBadge status={loading ? "neutral" : "info"} size="sm" showDot={false}>
@@ -265,9 +247,9 @@ export function ComplianceDetailPanel({
       {/* Content */}
       {loading ? (
         <div className="space-y-3">
-          <Skeleton className="h-4 w-3/4" variant="glass" />
-          <Skeleton className="h-4 w-1/2" variant="glass" />
-          <Skeleton className="h-20 w-full" variant="glass" />
+          <Skeleton className="h-4 w-3/4 bg-muted/30" />
+          <Skeleton className="h-4 w-1/2 bg-muted/30" />
+          <Skeleton className="h-20 w-full bg-muted/30" />
         </div>
       ) : detailData ? (
         <>
@@ -275,21 +257,21 @@ export function ComplianceDetailPanel({
           {detailData.type === "id_request" && renderIdRequestDetail(detailData as IdRequestComplianceDetail)}
 
           {/* Divider */}
-          <hr style={{ borderColor: "var(--border)" }} />
+          <hr className="border-border" />
 
           {/* Actions */}
           {isActionable && (
             <div className="space-y-3">
-              <p className="text-xs font-semibold" style={{ color: "var(--ink)" }}>Actions</p>
+              <p className="text-xs font-semibold text-foreground">Actions</p>
 
               {/* Action feedback */}
               {actionSuccess && (
-                <p className="text-xs font-semibold" style={{ color: "var(--sh-success)" }}>
+                <p className="text-xs font-semibold text-green-600 dark:text-green-400">
                   {actionSuccess}
                 </p>
               )}
               {actionError && (
-                <p className="text-xs" style={{ color: "var(--sh-error)" }}>
+                <p className="text-xs text-destructive">
                   {actionError}
                 </p>
               )}
@@ -355,7 +337,7 @@ export function ComplianceDetailPanel({
           )}
         </>
       ) : (
-        <p className="text-xs" style={{ color: "var(--sh-error)" }}>
+        <p className="text-xs text-destructive">
           Failed to load record details.
         </p>
       )}

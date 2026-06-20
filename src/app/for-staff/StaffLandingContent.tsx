@@ -8,6 +8,8 @@ import { FeatureGrid } from "@/components/marketing";
 import { TestimonialCarousel } from "@/components/marketing";
 import { PricingCard } from "@/components/marketing";
 import { ComparisonTable } from "@/components/marketing";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 // ── Props ─────────────────────────────────────────────────────
 
@@ -67,38 +69,35 @@ export default function StaffLandingContent({
         className="min-h-svh w-[min(1320px,calc(100%_-_28px))] mx-auto grid content-start gap-6 pt-[18px] pb-[42px] max-sm:w-[min(calc(100%_-_20px),720px)]"
       >
         {/* ── Navigation ── */}
-        <nav className="sticky top-[3px] z-20 min-h-[62px] flex items-center justify-between gap-[14px] rounded-xl p-[2px] bg-white shadow-md border border-[var(--border)]" aria-label="StudentHub public navigation">
+        <nav className="sticky top-[3px] z-20 min-h-[62px] flex items-center justify-between gap-[14px] rounded-xl p-[2px] bg-card shadow-md border-border border" aria-label="StudentHub public navigation">
           <div className="w-full min-h-[58px] flex items-center justify-between gap-[14px] px-1">
             <Link
-              className="inline-flex items-center gap-2.5 text-[var(--ink)] px-2 no-underline min-h-11"
+              className="inline-flex items-center gap-2.5 text-foreground px-2 no-underline min-h-11"
               href="/"
             >
-              <span className="size-9 inline-flex items-center justify-center rounded-lg bg-[var(--ink)] text-[var(--paper)] font-black">
+              <span className="size-9 inline-flex items-center justify-center rounded-lg bg-foreground text-background font-black">
                 SH
               </span>
               <strong>StudentHub</strong>
             </Link>
             <div className="flex items-center gap-3.5 max-sm:flex-col max-sm:items-stretch">
               {isLoggedIn ? (
-                <Link
-                  href="/app"
-                  className="uiButton uiButton_default uiButton_defaultSize"
-                >
-                  Open app <ChevronRight className="size-3.5" />
+                <Link href="/app">
+                  <Button size="default">
+                    Open app <ChevronRight className="size-3.5" />
+                  </Button>
                 </Link>
               ) : (
                 <>
-                  <Link
-                    href="/signup?role=staff"
-                    className="uiButton uiButton_default uiButton_defaultSize"
-                  >
-                    Request staff access <Sparkles className="size-3.5" />
+                  <Link href="/signup?role=staff">
+                    <Button size="default">
+                      Request staff access <Sparkles className="size-3.5" />
+                    </Button>
                   </Link>
-                  <Link
-                    href="/login"
-                    className="uiButton uiButton_ghost uiButton_defaultSize"
-                  >
-                    Sign in
+                  <Link href="/login">
+                    <Button variant="ghost" size="default">
+                      Sign in
+                    </Button>
                   </Link>
                 </>
               )}
@@ -111,91 +110,54 @@ export default function StaffLandingContent({
         <HeroSection />
 
         {/* ── Pain-point section — the staffing frustrations ── */}
-        <section
-          className="shSection relative overflow-hidden rounded-xl p-[clamp(24px,5vw,48px)]"
-          style={{
-            background: "var(--sh-glass-bg)",
-            border: "1px solid var(--sh-glass-border)",
-          }}
-          aria-label="Staffing pain points and solutions"
-        >
-          <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-[#fef1ef] via-white to-[var(--paper)] z-0" aria-hidden="true" />
+        <Card className="relative overflow-hidden p-[clamp(24px,5vw,48px)]" aria-label="Staffing pain points and solutions">
+          <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-[#fef1ef] via-white to-background z-0" aria-hidden="true" />
 
           <div className="relative z-[2]">
-            <p className="text-[var(--sh-info)] text-[11px] font-black uppercase tracking-wider mb-1">
+            <p className="text-info text-[11px] font-black uppercase tracking-wider mb-1">
               The real staffing headache
             </p>
             <h2 className="shBenefitsTitle mb-8">
               You don&apos;t need another spreadsheet.
               <br />
               You need a{" "}
-              <em style={{ color: "var(--sh-info)" }}>faster</em> way
+              <em className="text-info not-italic">faster</em> way
               to place candidates.
             </h2>
 
             <div className="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-5">
               {PAIN_POINTS.map((point, i) => (
-                <div
-                  key={i}
-                  className="rounded-xl p-5 flex flex-col gap-3 transition-transform duration-300 hover:-translate-y-[3px]"
-                  style={{
-                    background: "var(--sh-glass-bg)",
-                    border: "1px solid var(--sh-glass-border)",
-                  }}
-                >
-                  <div
-                    className="size-10 rounded-lg flex items-center justify-center shrink-0"
-                    style={{
-                      background:
-                        "color-mix(in srgb, var(--sh-info) 15%, transparent)",
-                      color: "var(--sh-info)",
-                    }}
-                  >
+                <Card key={i} className="p-5 flex flex-col gap-3 transition-transform duration-300 hover:-translate-y-[3px]">
+                  <div className="size-10 rounded-lg flex items-center justify-center shrink-0 bg-info/15 text-info">
                     <span className="font-black text-sm">0{i + 1}</span>
                   </div>
                   <div>
-                    <p
-                      className="text-sm font-semibold mb-1.5"
-                      style={{ color: "var(--ink)" }}
-                    >
+                    <p className="text-sm font-semibold mb-1.5 text-foreground">
                       {point.problem}
                     </p>
-                    <p
-                      className="text-sm leading-relaxed"
-                      style={{ color: "var(--muted)" }}
-                    >
+                    <p className="text-sm leading-relaxed text-muted-foreground">
                       {point.solution}
                     </p>
                   </div>
-                </div>
+                </Card>
               ))}
             </div>
           </div>
-        </section>
+        </Card>
 
         {/* ── Stats strip — staff authority signals ── */}
-        <section
-          className="shSection rounded-xl p-[clamp(20px,4vw,40px)] grid grid-cols-2 sm:grid-cols-4 gap-6 text-center"
-          style={{
-            background: "var(--sh-glass-bg)",
-            border: "1px solid var(--sh-glass-border)",
-          }}
-          aria-label="Staffing stats"
-        >
+        <Card className="p-[clamp(20px,4vw,40px)] grid grid-cols-2 sm:grid-cols-4 gap-6 text-center" aria-label="Staffing stats">
           {STAFF_STATS.map((stat) => (
             <div key={stat.label}>
               <p className="text-[clamp(24px,4vw,36px)] font-black leading-none mb-1">
                 {stat.value}
               </p>
-              <p
-                className="text-xs leading-tight"
-                style={{ color: "var(--muted)" }}
-              >
+              <p className="text-xs leading-tight text-muted-foreground">
                 {stat.label}
               </p>
             </div>
           ))}
-        </section>
+        </Card>
 
         {/* ── Features — staff-specific ── */}
         <FeatureGrid persona="staff" />
@@ -210,74 +172,54 @@ export default function StaffLandingContent({
         <PricingCard persona="staff" />
 
         {/* ── Final CTA — tailored for staffing agencies ── */}
-        <section
-          className="shSection relative overflow-hidden rounded-xl p-[clamp(24px,5vw,60px)] text-center"
-          style={{
-            background: "var(--sh-glass-bg)",
-            border: "1px solid var(--sh-glass-border)",
-          }}
-          aria-label="Get started as staff"
-        >
-          <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-[#fef1ef] via-white to-[var(--paper)] z-0" aria-hidden="true" />
+        <Card className="relative overflow-hidden p-[clamp(24px,5vw,60px)] text-center" aria-label="Get started as staff">
+          <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-[#fef1ef] via-white to-background z-0" aria-hidden="true" />
 
           <div className="relative z-[2] max-w-[640px] mx-auto">
-            <p className="text-[var(--sh-info)] text-[11px] font-black uppercase tracking-wider mb-2">
+            <p className="text-info text-[11px] font-black uppercase tracking-wider mb-2">
               Start placing faster
             </p>
             <h2 className="shBenefitsTitle text-center">
               Your next placement is one search away.
             </h2>
-            <p
-              className="max-w-[480px] mx-auto mt-2 mb-6 leading-relaxed"
-              style={{ color: "var(--muted)" }}
-            >
+            <p className="max-w-[480px] mx-auto mt-2 mb-6 leading-relaxed text-muted-foreground">
               Start searching, shortlisting, and placing candidates
               immediately. Access the full staffing toolkit from day one. No
               setup fee, no minimum commitment.
             </p>
             {isLoggedIn ? (
-              <Link
-                href="/app"
-                className="uiButton uiButton_default uiButton_lg shGlowButton"
-              >
-                Open app <ChevronRight className="size-4" />
+              <Link href="/app">
+                <Button size="lg">
+                  Open app <ChevronRight className="size-4" />
+                </Button>
               </Link>
             ) : (
-              <Link
-                href="/signup?role=staff"
-                className="uiButton uiButton_default uiButton_lg shGlowButton"
-              >
-                Get staff access <ChevronRight className="size-4" />
+              <Link href="/signup?role=staff">
+                <Button size="lg">
+                  Get staff access <ChevronRight className="size-4" />
+                </Button>
               </Link>
             )}
-            <div
-              className="flex items-center justify-center gap-4 mt-4 text-xs"
-              style={{ color: "var(--muted)" }}
-            >
+            <div className="flex items-center justify-center gap-4 mt-4 text-xs text-muted-foreground">
               <span>350+ agencies on StudentHub</span>
               <span>62% faster placement</span>
             </div>
           </div>
-        </section>
+        </Card>
 
         {/* ── Footer ── */}
-        <footer
-          className="shSection flex items-center justify-between pt-4 pb-2 text-xs"
-          style={{ color: "var(--muted)" }}
-        >
+        <footer className="shSection flex items-center justify-between pt-4 pb-2 text-xs text-muted-foreground">
           <span>&copy; {new Date().getFullYear()} StudentHub. All rights reserved.</span>
           <div className="flex items-center gap-4">
             <Link
               href="/login"
-              className="hover:text-[var(--ink)] transition-colors no-underline"
-              style={{ color: "inherit" }}
+              className="hover:text-foreground transition-colors no-underline"
             >
               Sign in
             </Link>
             <Link
               href="/signup?role=staff"
-              className="hover:text-[var(--ink)] transition-colors no-underline"
-              style={{ color: "inherit" }}
+              className="hover:text-foreground transition-colors no-underline"
             >
               Sign up as staff
             </Link>
