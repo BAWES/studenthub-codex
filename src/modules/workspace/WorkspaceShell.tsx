@@ -143,7 +143,7 @@ export function WorkspaceShell({
 
   const mainContent = embedded
     ? (
-      <div className="shell shellEmbedded">
+      <div className="block">
         {stage}
         <MobileNavBar role={session.role} />
       </div>

@@ -28,7 +28,7 @@ export function AdminBlockedIpsTable({ session, records }: Props) {
       ]}
     >
       <section className="mb-6">
-        <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
+        <div className="rounded-lg border-border bg-card p-5">
           <h3 className="text-sm font-semibold mb-3 text-foreground">Block an IP</h3>
           <CreateBlockedIpForm onSuccess={() => router.refresh()} />
         </div>
@@ -133,8 +133,7 @@ function CreateBlockedIpForm({ onSuccess }: { onSuccess: () => void }) {
           required
           maxLength={45}
           placeholder="e.g. 192.168.1.1"
-          className="h-9 rounded-lg px-3 text-sm border"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+          className="h-9 rounded-lg px-3 text-sm border bg-card border-border text-foreground"
         />
       </div>
       <div className="grid gap-1">
@@ -143,8 +142,7 @@ function CreateBlockedIpForm({ onSuccess }: { onSuccess: () => void }) {
           name="note"
           maxLength={255}
           placeholder="Reason for blocking"
-          className="h-9 rounded-lg px-3 text-sm border"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+          className="h-9 rounded-lg px-3 text-sm border bg-card border-border text-foreground"
         />
       </div>
       <button
