@@ -34,7 +34,7 @@ export function AdminFulltimersTable({ session, fulltimers }: Props) {
             key: "fulltimer_name",
             label: "Name",
             render: (row) => (
-              <span className="text-sm font-medium" style={{ color: "var(--sh-primary)" }}>
+              <span className="text-sm font-medium text-primary">
                 {row.fulltimer_name}
               </span>
             ),
@@ -43,7 +43,7 @@ export function AdminFulltimersTable({ session, fulltimers }: Props) {
             key: "fulltimer_email",
             label: "Email",
             render: (row) => (
-              <span className="text-sm" style={{ color: "var(--ink)" }}>
+              <span className="text-sm text-foreground">
                 {row.fulltimer_email}
               </span>
             ),
@@ -52,7 +52,7 @@ export function AdminFulltimersTable({ session, fulltimers }: Props) {
             key: "fulltimer_phone",
             label: "Phone",
             render: (row) => (
-              <span className="text-sm" style={{ color: "var(--muted)" }}>
+              <span className="text-sm text-muted-foreground">
                 {row.fulltimer_phone ?? "—"}
               </span>
             ),
@@ -61,7 +61,7 @@ export function AdminFulltimersTable({ session, fulltimers }: Props) {
             key: "fulltimer_employed",
             label: "Employed",
             render: (row) => (
-              <span className="text-sm" style={{ color: "var(--muted)" }}>
+              <span className="text-sm text-muted-foreground">
                 {row.fulltimer_employed === true ? "Yes" : row.fulltimer_employed === false ? "No" : "—"}
               </span>
             ),
