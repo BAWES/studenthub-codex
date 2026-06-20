@@ -11,16 +11,16 @@ import {
   Star,
 } from "lucide-react";
 
-// ── Staff-matched placement hero ────────────────────────────────
+// ── Landing hero ─────────────────────────────────
 
-const SH_BLUE = "#1f73b7";
-const SH_CORAL = "#eb6651";
+const SH_BLUE = "#0b63ce";
+const SH_AMBER = "#f59e0b";
 
 const heroContent = {
-  eyebrow: "Staff-matched student placements",
+  eyebrow: "Staff-matched student placement",
   headline: "Connecting students with the right employers",
   subhead:
-    "The platform where students build careers and employers discover vetted talent. Our staff recruiters match students with the right employers — no algorithms.",
+    "The platform where students build careers and employers discover vetted talent. Staff recruiters match both sides — no algorithm guessing.",
   studentCta: "Create your free profile",
   studentCtaHref: "/signup?role=candidate",
   employerCta: "Hire students",
@@ -78,7 +78,7 @@ export default function HeroSection({ onCtaClick }: HeroSectionProps) {
         className="absolute -bottom-32 -right-32 size-80 rounded-full opacity-[0.04] pointer-events-none"
         aria-hidden="true"
         style={{
-          background: `radial-gradient(circle, ${SH_CORAL}, transparent 70%)`,
+          background: `radial-gradient(circle, ${SH_AMBER}, transparent 70%)`,
         }}
       />
 
@@ -145,8 +145,8 @@ export default function HeroSection({ onCtaClick }: HeroSectionProps) {
             href={{ pathname: "/signup", query: { role: "company" } }}
             className="shLandingBtnPrimary group"
             style={{
-              backgroundColor: SH_CORAL,
-              boxShadow: `0 4px 14px ${SH_CORAL}50`,
+              backgroundColor: SH_AMBER,
+              boxShadow: `0 4px 14px ${SH_AMBER}50`,
             }}
           >
             <Building2 className="size-4" />
@@ -169,7 +169,7 @@ export default function HeroSection({ onCtaClick }: HeroSectionProps) {
             backgroundColor: "var(--secondary)",
           }}
         >
-          <Sparkles className="size-3" style={{ color: SH_CORAL }} />
+          <Sparkles className="size-3" style={{ color: SH_AMBER }} />
           {content.proof}
         </div>
 
@@ -194,7 +194,7 @@ export default function HeroSection({ onCtaClick }: HeroSectionProps) {
           <div>
             <span
               className="text-[10px] font-bold uppercase tracking-wider mb-1.5 block"
-              style={{ color: SH_CORAL }}
+              style={{ color: SH_AMBER }}
             >
               For employers
             </span>
@@ -302,8 +302,8 @@ export default function HeroSection({ onCtaClick }: HeroSectionProps) {
                 <span
                   className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-full"
                   style={{
-                    color: SH_CORAL,
-                    backgroundColor: `${SH_CORAL}12`,
+                    color: SH_AMBER,
+                    backgroundColor: `${SH_AMBER}12`,
                   }}
                 >
                   <Star className="size-2.5" />
@@ -347,9 +347,9 @@ export default function HeroSection({ onCtaClick }: HeroSectionProps) {
             <div
               className="flex items-center gap-2 p-3 rounded-xl text-xs"
               style={{
-                background: `linear-gradient(135deg, ${SH_CORAL}0A, ${SH_CORAL}04)`,
-                border: `1px solid ${SH_CORAL}15`,
-                color: SH_CORAL,
+                background: `linear-gradient(135deg, ${SH_AMBER}0A, ${SH_AMBER}04)`,
+                border: `1px solid ${SH_AMBER}15`,
+                color: SH_AMBER,
               }}
             >
               <Building2 className="size-3.5 shrink-0" />
