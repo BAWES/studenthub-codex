@@ -24,7 +24,6 @@
 
 /* No sidebar rail CSS needed — fully converted to Tailwind in WorkspaceOS/WorkspaceShell */
 
-
 /* ── Workspace Stage (content area) ─────────────────────────────────── */
 .workspaceStage {
   min-width: 0;
