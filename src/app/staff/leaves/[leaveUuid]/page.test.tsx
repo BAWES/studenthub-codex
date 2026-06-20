@@ -48,7 +48,7 @@ vi.mock("@/modules/workspace/DetailPanels", () => ({
       <div data-testid="section-title">{title}</div>
       {facts.map((f) => (
         <span key={String(f.label)} data-testid={`fact-${f.label}`}>
-          {String(f.value)}
+          {typeof f.value === "object" ? f.value : String(f.value)}
         </span>
       ))}
     </div>
