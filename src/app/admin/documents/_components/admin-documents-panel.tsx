@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AlertCircle, Download, FileText, UserCheck, FileSignature } from "lucide-react";
+import { AlertCircle, Download, FileText, UserCheck, FileSignature, Landmark } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   cvDownloadSchema,
@@ -14,16 +14,18 @@ import {
   buildCvDownloadUrl,
   buildEvaluationDownloadUrl,
   buildOfferLetterDownloadUrl,
+  buildBankAdviceDownloadUrl,
 } from "./schemas";
 import { ZodError } from "zod";
 
-type TabValue = "cv" | "evaluation" | "offer-letter";
+type TabValue = "cv" | "evaluation" | "offer-letter" | "bank-advice";
 
 export function AdminDocumentsPanel() {
   const [activeTab, setActiveTab] = useState<TabValue>("cv");
   const [candidateId, setCandidateId] = useState("");
   const [evalUuid, setEvalUuid] = useState("");
   const [offerUuid, setOfferUuid] = useState("");
+  const [bankAdviceUuid, setBankAdviceUuid] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<TabValue | null>(null);
 
@@ -70,6 +72,13 @@ export function AdminDocumentsPanel() {
     });
   }
 
+  function handleBankAdviceDownload() {
+    handleDownload("bank-advice", () => {
+      const parsed = uuidDownloadSchema.parse({ uuid: bankAdviceUuid });
+      return buildBankAdviceDownloadUrl(parsed.uuid);
+    });
+  }
+
   return (
     <div className="p-6 space-y-6">
       <div>
@@ -99,6 +108,10 @@ export function AdminDocumentsPanel() {
           <TabsTrigger value="offer-letter" className="gap-2">
             <FileSignature className="size-4" />
             Offer Letter
+          </TabsTrigger>
+          <TabsTrigger value="bank-advice" className="gap-2">
+            <Landmark className="size-4" />
+            Bank Advice
           </TabsTrigger>
         </TabsList>
 
@@ -265,6 +278,62 @@ export function AdminDocumentsPanel() {
                   <span className="font-mono text-xs bg-muted px-1.5 py-0.5 rounded">GET</span>{" "}
                   <code className="text-xs bg-muted px-1.5 py-0.5 rounded break-all">
                     /api/fulltimers/{`{uuid}`}/offer-letter/pdf?format=pdf
+                  </code>
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* ─── Bank Advice Tab ─────────────────────── */}
+        <TabsContent value="bank-advice" className="space-y-4 mt-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Landmark className="size-5 text-primary" />
+                Bank Advice Document
+              </CardTitle>
+              <CardDescription>
+                Generate a PDF bank advice document for a transfer by entering the bank advice UUID.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="bank-advice-uuid">Bank Advice UUID</Label>
+                <Input
+                  id="bank-advice-uuid"
+                  placeholder="e.g. 550e8400-e29b-41d4-a716-446655440000"
+                  value={bankAdviceUuid}
+                  onChange={(e) => setBankAdviceUuid(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter") handleBankAdviceDownload(); }}
+                />
+                <p className="text-xs text-muted-foreground">
+                  The UUID of the bank advice record you want to generate a PDF for.
+                </p>
+              </div>
+            </CardContent>
+            <CardFooter>
+              <Button
+                onClick={handleBankAdviceDownload}
+                disabled={loading === "bank-advice" || !bankAdviceUuid.trim()}
+                className="gap-2"
+              >
+                <Download className="size-4" />
+                {loading === "bank-advice" ? "Downloading..." : "Download Bank Advice PDF"}
+              </Button>
+            </CardFooter>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">API Details</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-sm text-muted-foreground space-y-1">
+                <p>
+                  <span className="font-mono text-xs bg-muted px-1.5 py-0.5 rounded">GET</span>{" "}
+                  <code className="text-xs bg-muted px-1.5 py-0.5 rounded break-all">
+                    /api/transfers/bank-advice/{`{uuid}`}/pdf?format=pdf
                   </code>
                 </p>
               </div>

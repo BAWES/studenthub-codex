@@ -52,6 +52,13 @@ export function buildOfferLetterDownloadUrl(uuid: string): string {
 }
 
 /**
+ * Builds a download URL for a bank advice PDF.
+ */
+export function buildBankAdviceDownloadUrl(uuid: string): string {
+  return `/api/transfers/bank-advice/${uuid}/pdf?format=pdf`;
+}
+
+/**
  * Validates and builds a download URL for a candidate's CV PDF.
  */
 export function validateAndBuildCvUrl(input: CvDownloadInput): DownloadUrlResult {
