@@ -196,13 +196,13 @@ export default function PricingCard({ persona = "candidate", className }: Pricin
   const tiers = personaTiers[persona] ?? candidateTiers;
 
   return (
-    <section className={cn("shSection", className)} aria-label="Pricing plans">
+    <section className={cn("mb-[clamp(8px,1.5vw,20px)]", className)} aria-label="Pricing plans">
       {/* Header */}
       <div className="text-center mb-8 md:mb-10">
         <p className="text-[#1f73b7] text-[11px] font-black uppercase tracking-wider mb-2">
           Simple pricing
         </p>
-        <h2 className="shBenefitsTitle text-center">
+        <h2 className="text-[clamp(22px,3.4vw,38px)] font-extrabold leading-[1.08] tracking-tight text-center">
           {persona === "candidate"
             ? "Completely free for students. Always."
             : "Plans that scale with your team."}

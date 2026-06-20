@@ -59,9 +59,9 @@ export default async function CandidatePaymentDetailPage({
       <DetailSection title="Payment Breakdown" facts={facts} />
       {transfer && <DetailSection title="Transfer Run" facts={transferFacts} />}
       {data.invoices.length > 0 && (
-        <section className="detailPanel">
+        <section className="rounded-lg border border-border bg-card">
           <h2>Receipts & Invoices</h2>
-          <p className="detailPanelNote">
+          <p className="text-sm text-muted-foreground">
             Paid invoices linked to this payment period serve as your receipt.
           </p>
           <DetailSection

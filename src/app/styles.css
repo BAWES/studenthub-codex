@@ -24,13 +24,6 @@
   --color-ring: var(--ring);
   --radius: var(--radius);
   --font-size-label: 0.8125rem;
-  --color-coral: var(--sh-coral);
-  --color-coral-hover: var(--sh-coral-hover);
-  --color-coral-light: var(--sh-coral-light);
-  --color-success: var(--sh-success);
-  --color-warning: var(--sh-warning);
-  --color-error: var(--sh-error);
-  --color-info: var(--sh-info);
 }
 
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
@@ -507,11 +500,6 @@ body {
   color: var(--amber);
 }
 
-.uiBadge_destructive {
-  background: color-mix(in srgb, var(--destructive) 14%, transparent);
-  color: var(--destructive);
-}
-
 .uiBadge_outline {
   border-color: var(--border);
   background: color-mix(in srgb, var(--card) 68%, transparent);
@@ -519,14 +507,14 @@ body {
 }
 
 .shGlassStrong {
-  background: hsl(var(--card));
-  border-color: hsl(var(--border));
+  background: var(--sh-glass-bg-strong);
+  border-color: var(--sh-glass-border-strong);
 }
 
 .shGlassElevated {
-  background: hsl(var(--card));
-  border-color: hsl(var(--border));
-  box-shadow: var(--shadow-md);
+  background: var(--sh-glass-bg-strong);
+  border-color: var(--sh-glass-border-strong);
+  box-shadow: var(--sh-glow-sm);
 }
 
 .shGlassRadiusSm { border-radius: var(--sh-radius-sm); }
@@ -679,23 +667,6 @@ body {
   color: var(--muted-foreground);
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 .lockedRole span {
   color: var(--blue);
   font-size: 11px;
@@ -703,29 +674,14 @@ body {
   text-transform: uppercase;
 }
 
-
-
-
-
-
 .portalChooserHero h1,
 
 .portalChooserHero p:not(.eyebrow),
-
-
-
-
-
-
-
-
 
 .portalChooserHero {
   max-width: 820px;
   padding: 42px 0 12px;
 }
-
-
 
 [data-theme="dark"] .topbar,
 [data-theme="dark"] .accountBox,
@@ -892,9 +848,75 @@ body {
 }
 
 /* ── Navigation rail — glass items with glow indicator ─────────────── */
+.workspaceRailNav {
+  width: 100%;
+  display: grid;
+  align-content: start;
+  gap: 2px;
+}
 
+.workspaceRailNav a {
+  width: 100%;
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  position: relative;
+  text-decoration: none;
+  color: var(--muted);
+  padding: 0 10px;
+  border-radius: var(--sh-radius-sm);
+  font-size: 13px;
+  font-weight: 500;
+  transition:
+    color 180ms var(--sh-easing),
+    background 180ms var(--sh-easing);
+}
 
+.workspaceRailNav a:hover {
+  color: var(--ink);
+  background: var(--sh-glass-bg-strong);
+}
 
+.workspaceRailNav a.active {
+  color: var(--blue);
+  background: var(--sh-info-bg);
+}
+
+/* Glowing left-indicator on active item — the signature OS look */
+.workspaceRailNav a.active::before {
+  content: "";
+  position: absolute;
+  left: -10px;
+  top: 50%;
+  translate: 0 -50%;
+  width: var(--sh-active-width);
+  height: 20px;
+  border-radius: 0 2px 2px 0;
+  background: var(--blue);
+  box-shadow: var(--sh-glow-sm);
+  transition:
+    height 200ms var(--sh-easing),
+    opacity 200ms var(--sh-easing);
+}
+
+.workspaceRailNav a svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+.workspaceRailNav a:hover svg,
+.workspaceRailNav a.active svg {
+  opacity: 1;
+}
+
+.workspaceRailNav a > strong {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.3;
+}
 
 /* ── Rail footer ───────────────────────────────────────────────────── */
 .workspaceRailFooter {
@@ -1014,22 +1036,6 @@ body {
   color: var(--ink);
 }
 
-/* ── Workspace stage area ───────────────────────────────────────────── */
-.workspaceStage {
-  min-width: 0;
-  width: calc(100vw - 216px);
-  overflow-x: hidden;
-  display: grid;
-  align-content: start;
-  gap: 14px;
-  padding: 14px;
-  animation: shFadeSlideIn 300ms var(--sh-easing);
-}
-
-/* ── Page transitions ─────────────────────────────────────────────────── */
-@keyframes shFadeSlideIn {
-  from {
-    opacity: 0;
     transform: translateY(6px);
   }
   to {
@@ -1051,11 +1057,6 @@ body {
 @keyframes shFloat {
   0%, 100% { transform: translateY(0px); }
   50% { transform: translateY(-12px); }
-}
-
-/* Apply to content changes within the stage */
-.workspaceStage > section {
-  animation: shFadeIn 240ms var(--sh-easing);
 }
 
 /* ── Glass Metric Card ────────────────────────────────────────────────── */
@@ -1304,9 +1305,6 @@ h2 {
   padding: 28px 0;
 }
 
-
-
-
 .brandMark {
   width: 44px;
   height: 44px;
@@ -1317,8 +1315,6 @@ h2 {
   color: #fff;
   font-weight: 900;
 }
-
-
 
 .loginSignal span,
 .loginProof span {
@@ -1353,12 +1349,6 @@ h2 {
   border: 1px solid var(--line);
   background: #fff;
 }
-
-
-
-
-
-
 
 .loginProof div {
   min-height: 104px;
@@ -1397,15 +1387,6 @@ h2 {
   overflow-wrap: anywhere;
   font-size: 14px;
 }
-
-
-
-
-
-
-
-
-
 
 .rolePicker {
   display: grid;
@@ -1499,11 +1480,6 @@ h2 {
   color: var(--muted);
   font-size: 12px;
 }
-
-
-
-
-
 
 .formError {
   color: var(--rose);
@@ -1608,23 +1584,6 @@ h2 {
   font-weight: 500;
   color: var(--muted-foreground);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 @media (max-width: 760px) {
 }
@@ -3618,18 +3577,6 @@ tr:last-child td {
 .rowAction a:hover {
   border-color: var(--blue);
   background: #eef5ff;
-}
-
-.detailPanel {
-  margin-top: 20px;
-  border: 1px solid var(--line);
-  background: var(--surface);
-}
-
-.detailPanel > h2 {
-  margin: 0;
-  padding: 18px;
-  border-bottom: 1px solid var(--line);
 }
 
 .factGrid {
@@ -6024,7 +5971,6 @@ kbd {
     grid-template-columns: 1fr;
   }
 
-
   .loginHero h1 {
     max-width: 560px;
     font-size: 38px;
@@ -6056,13 +6002,6 @@ kbd {
     gap: 14px;
     padding: 16px 0 32px;
   }
-
-
-
-
-
-
-
 
   .studentOS {
     grid-template-columns: 1fr;
@@ -6455,11 +6394,6 @@ kbd {
     display: none;
   }
 
-  .workspaceStage {
-    width: auto;
-    padding: 10px 10px 76px;
-  }
-
   .mobileTabBar {
     position: fixed;
     right: 0;
@@ -6816,11 +6750,6 @@ kbd {
     display: none;
   }
 
-  .workspaceStage {
-    width: auto;
-    padding: 10px 10px 88px;
-  }
-
   .mobileTabBar {
     position: fixed;
     right: 10px;
@@ -6994,14 +6923,7 @@ kbd {
     border-top: 1px solid var(--line);
   }
 
-
-
-
   .portalChooserHero h1,
-
-
-
-
 
   .row {
     grid-template-columns: 1fr;
@@ -7218,41 +7140,13 @@ kbd {
 
 /* Public product entry points */
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 .portalChooserPromise span,
 
-
-
-
-
-
-
-
-
 .portalChooserHero h1,
-
-
 
 .portalChooserPromise,
 
 .portalChooserPromise span,
-
-
-
-
-
 
 .portalChooserHero {
   max-width: 900px;
@@ -7262,16 +7156,6 @@ kbd {
 .portalChooserHero h1 {
   max-width: 900px;
 }
-
-
-
-
-
-
-
-
-
-
 
 [data-theme="dark"] .landingHero::after {
   background:
@@ -7293,8 +7177,6 @@ kbd {
   background-color: var(--surface);
 }
 
-
-
 .journeyWorkbench .previewPanel {
   grid-column: 1 / -1;
 }
@@ -7310,7 +7192,6 @@ kbd {
 }
 
 @media (min-width: 760px) and (max-width: 1040px) {
-
 
 }
 
@@ -8156,7 +8037,10 @@ kbd {
   color: var(--rose);
 }
 
-/* Candidate Tab workspace (no candidateProfile class — now shadcn) */
+.candidateTabWorkspace > .candidateProfile {
+  min-height: 0;
+  overflow-y: auto;
+}
 
 .candidateTabEmpty {
   display: grid;
@@ -8616,7 +8500,406 @@ kbd {
   overflow-y: auto;
 }
 
-/* Candidate profile converted to shadcn/Tailwind */
+.candidateProfile {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+}
+
+.candidateProfile.empty {
+  min-height: 360px;
+  align-content: center;
+  justify-items: center;
+  padding: 24px;
+  text-align: center;
+}
+
+.candidateProfile.empty span {
+  max-width: 340px;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.candidateProfileHero {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
+  border-bottom: 1px solid var(--line);
+  padding: 16px;
+}
+
+.candidateAvatar {
+  width: 64px;
+  height: 64px;
+  font-size: 18px;
+}
+
+.candidateProfileTitle {
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+}
+
+.candidateProfileTitle > span,
+.candidateReadinessScore span,
+.candidateFactGrid span,
+.candidateNarrative span,
+.candidatePanelHeader span,
+.candidateRows small,
+.candidateReadinessItems span {
+  color: var(--blue);
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.candidateProfileTitle h2 {
+  overflow-wrap: anywhere;
+  margin: 0;
+  font-size: clamp(28px, 3vw, 44px);
+  line-height: 0.98;
+}
+
+.candidateProfile.compact .candidateProfileTitle h2 {
+  font-size: 30px;
+}
+
+.candidateProfileTitle p,
+.candidateStatusLine span,
+.candidateRows span,
+.candidateRows small,
+.candidateNarrative p {
+  color: var(--muted);
+}
+
+.candidateProfileTitle p {
+  margin: 0;
+}
+
+.candidateStatusLine {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.candidateStatusLine strong {
+  border: 1px solid color-mix(in srgb, var(--green) 38%, var(--line));
+  border-radius: 999px;
+  color: var(--green);
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+.candidateProfileActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  border-bottom: 1px solid var(--line);
+  padding: 0 16px 14px;
+}
+
+.candidateProfileActions a,
+.candidateRows a {
+  text-decoration: none;
+}
+
+.candidateProfileActions a {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-soft);
+  color: var(--ink);
+  padding: 0 11px;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.candidateProfileActions a:first-child {
+  border-color: var(--blue);
+  background: var(--blue);
+  color: #fff;
+}
+
+.candidateReadiness {
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr);
+  gap: 10px;
+  border-bottom: 1px solid var(--line);
+  padding: 0 16px 14px;
+}
+
+.candidateReadinessScore {
+  display: grid;
+  align-content: center;
+  gap: 5px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-soft);
+  padding: 12px;
+}
+
+.candidateReadinessScore strong {
+  font-size: 34px;
+  line-height: 1;
+}
+
+.candidateReadinessScore small {
+  color: var(--muted);
+  line-height: 1.35;
+}
+
+.candidateReadinessItems {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.candidateReadinessItems div {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  padding: 8px;
+}
+
+.candidateReadinessItems div.done span {
+  color: var(--green);
+}
+
+.candidateReadinessItems div.open span {
+  color: var(--rose);
+}
+
+.candidateReadinessItems strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+}
+
+.candidateFactGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  border-bottom: 1px solid var(--line);
+}
+
+.candidateFactGrid div {
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  padding: 11px 16px;
+}
+
+.candidateFactGrid div:nth-child(2n) {
+  border-right: 0;
+}
+
+.candidateFactGrid strong {
+  overflow-wrap: anywhere;
+  font-size: 13px;
+}
+
+.candidateNarrative {
+  display: grid;
+  gap: 7px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  padding: 14px;
+}
+
+.candidateNarrative p {
+  max-width: 980px;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.civilIdPanel {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.civilIdPanelBody {
+  padding: 12px;
+  display: grid;
+  gap: 12px;
+}
+
+.civilIdPanelFields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.civilIdPanelFields div {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.civilIdPanelFields span {
+  font-size: 12px;
+  color: var(--ink-muted, #6b7280);
+}
+
+.civilIdPanelFields strong {
+  overflow-wrap: anywhere;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.civilIdExpired {
+  color: var(--rose, #e11d48);
+}
+
+.civilIdWarning {
+  color: var(--amber, #d97706);
+}
+
+.civilIdPhotos {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.civilIdPhotos div {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.civilIdPhotos span {
+  font-size: 12px;
+  color: var(--ink-muted, #6b7280);
+}
+
+.civilIdPhotos img {
+  max-width: 100%;
+  height: auto;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+}
+
+.civilIdClearVerification {
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+}
+
+.civilIdClearVerification button {
+  font-size: 13px;
+  padding: 6px 12px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.civilIdClearVerification button:hover {
+  background: var(--rose);
+  color: #fff;
+  border-color: var(--rose);
+}
+
+[data-theme="dark"] .civilIdPanel {
+  border-color: var(--line);
+  background: var(--surface);
+  color: var(--ink);
+}
+
+@media (max-width: 760px) {
+  .civilIdPhotos {
+    grid-template-columns: 1fr;
+  }
+}
+
+.candidateProfileColumns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  padding: 0 16px 16px;
+}
+
+.candidateProfilePanel {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.candidatePanelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border-bottom: 1px solid var(--line);
+  padding: 10px 12px;
+}
+
+.candidatePills,
+.candidateRows {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+}
+
+.candidatePills {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.candidatePills span {
+  min-height: 28px;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface-soft);
+  color: var(--ink);
+  padding: 0 9px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.candidateRows a,
+.candidateRows article {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-soft);
+  color: var(--ink);
+  padding: 10px;
+}
+
+.candidateRows a:hover {
+  border-color: var(--blue);
+  background: color-mix(in srgb, var(--blue) 7%, var(--surface));
+}
+
+.candidateRows strong,
+.candidateRows span,
+.candidateRows small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 [data-theme="dark"] .candidateSearchHeroRail article,
 [data-theme="dark"] .candidateDeskTopbar,
 [data-theme="dark"] .candidateDeskSearch,
@@ -8634,6 +8917,12 @@ kbd {
 [data-theme="dark"] .candidateSearchContext a,
 [data-theme="dark"] .candidateResultSelect,
 [data-theme="dark"] .candidateFacetGroup,
+[data-theme="dark"] .candidateReadinessScore,
+[data-theme="dark"] .candidateReadinessItems div,
+[data-theme="dark"] .candidateNarrative,
+[data-theme="dark"] .candidateProfilePanel,
+[data-theme="dark"] .candidateRows a,
+[data-theme="dark"] .candidateRows article {
   border-color: var(--line);
   background: var(--surface);
   color: var(--ink);
@@ -9071,13 +9360,7 @@ kbd {
     height: 18px;
   }
 
-  .workspaceStage {
-    padding: 8px 8px 72px;
-  }
-
-  .shell .workspaceStage {
-    width: auto;
-  }
+  
 
   .workTabs {
     gap: 2px;
@@ -10022,7 +10305,6 @@ kbd {
   }
 }
 
-
 .candidateMissingFields {
   grid-column: 1 / -1;
   display: grid;
@@ -10464,15 +10746,6 @@ kbd {
   }
 }
 
-.shBenefitsTitle {
-  margin: 0.35em 0 0.35em;
-  font-size: clamp(22px, 3.4vw, 38px);
-  font-weight: 800;
-  line-height: 1.08;
-  letter-spacing: -0.02em;
-  color: var(--ink);
-}
-
 /* ── Glass hover enhancement for portal cards ───────────────────────── */
 [data-slot="glass-panel"]:hover {
   border-color: var(--sh-glass-border-strong) !important;
@@ -10558,15 +10831,8 @@ kbd {
 }
 
 /* ── OS Landing — Section layout container ──────────────────── */
-.shSection {
-  /* Sections animate in on scroll via FadeInSection wrapper */
-  margin-bottom: clamp(8px, 1.5vw, 20px);
-}
 
 /* ── OS Landing — Hero section wrapper ──────────────────────── */
-.shSection:first-of-type {
-  margin-top: 0;
-}
 
 /* ── OS Landing — Smooth theme transitions ─────────────────── */
 /* Only body/html get smooth dark/light theme crossfade */
@@ -11092,9 +11358,11 @@ body {
 
 .shTableGlass {
   border-radius: var(--sh-radius-lg, 12px);
-  background: hsl(var(--card));
-  border: 1px solid hsl(var(--border));
-  box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  background: var(--sh-glass-bg, rgba(255,255,255,0.04));
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--sh-glass-border, rgba(255,255,255,0.08));
+  box-shadow: 0 12px 48px rgba(16, 24, 40, 0.06);
   overflow: hidden;
   transition:
     background 250ms var(--sh-easing, cubic-bezier(0.16,1,0.3,1)),
@@ -11103,9 +11371,9 @@ body {
 }
 
 [data-theme="dark"] .shTableGlass {
-  background: hsl(var(--card));
-  border-color: hsl(var(--border));
-  box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  background: var(--sh-glass-bg, rgba(255,255,255,0.03));
+  border-color: var(--sh-glass-border, rgba(255,255,255,0.06));
+  box-shadow: 0 12px 48px rgba(0,0,0,0.3);
 }
 
 .shTableHeader {
@@ -11114,11 +11382,13 @@ body {
   justify-content: space-between;
   gap: 16px;
   padding: 16px 20px;
-  border-bottom: 1px solid hsl(var(--border));
+  border-bottom: 1px solid var(--sh-glass-border, rgba(255,255,255,0.06));
   position: sticky;
   top: 0;
   z-index: 5;
-  background: hsl(var(--card));
+  background: var(--sh-glass-bg-strong, rgba(255,255,255,0.06));
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   transition: background 250ms var(--sh-easing, cubic-bezier(0.16,1,0.3,1));
 }
 
@@ -11160,8 +11430,8 @@ body {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: hsl(var(--muted-foreground));
-  border-bottom: 1px solid hsl(var(--border));
+  color: var(--muted, #60646c);
+  border-bottom: 1px solid var(--sh-glass-border, rgba(255,255,255,0.06));
   white-space: nowrap;
   user-select: none;
 }
@@ -11169,8 +11439,8 @@ body {
 .shTable td {
   padding: 10px 16px;
   font-size: 14px;
-  color: hsl(var(--foreground));
-  border-bottom: 1px solid hsl(var(--border));
+  color: var(--ink, #e1e4e8);
+  border-bottom: 1px solid var(--sh-glass-border, rgba(255,255,255,0.04));
   transition: background 200ms var(--sh-easing, cubic-bezier(0.16,1,0.3,1));
 }
 
@@ -11188,11 +11458,11 @@ body {
 }
 
 .shTableRow:hover {
-  background: hsl(var(--accent) / 0.3);
+  background: rgba(255,255,255,0.03);
 }
 
 [data-theme="dark"] .shTableRow:hover {
-  background: hsl(var(--accent) / 0.2);
+  background: rgba(255,255,255,0.04);
 }
 
 .shTableRow.clickable {
@@ -11200,14 +11470,14 @@ body {
 }
 
 .shTableRow.clickable:hover {
-  background: hsl(var(--accent) / 0.4);
+  background: rgba(59,130,246,0.04);
   transform: translateY(-1px);
-  box-shadow: 0 2px 12px rgba(31,115,183,0.08);
+  box-shadow: 0 2px 12px rgba(59,130,246,0.06);
 }
 
 [data-theme="dark"] .shTableRow.clickable:hover {
-  background: hsl(var(--accent) / 0.3);
-  box-shadow: 0 2px 12px rgba(31,115,183,0.12);
+  background: rgba(59,130,246,0.06);
+  box-shadow: 0 2px 12px rgba(59,130,246,0.08);
 }
 
 /* Inline action that appears on row hover */
@@ -11230,7 +11500,7 @@ tr:hover .shTableRowAction,
   border-radius: 6px;
   font-size: 12px;
   font-weight: 600;
-  color: #1f73b7;
+  color: var(--sh-info, #3b82f6);
   text-decoration: none;
   transition:
     background 180ms var(--sh-easing, cubic-bezier(0.16,1,0.3,1)),
@@ -11238,8 +11508,8 @@ tr:hover .shTableRowAction,
 }
 
 .shTableRowAction a:hover {
-  background: rgba(31,115,183,0.1);
-  color: #1f73b7;
+  background: rgba(59,130,246,0.1);
+  color: #60a5fa;
 }
 
 /* Shimmer skeleton loading */
@@ -11247,7 +11517,7 @@ tr:hover .shTableRowAction,
   position: relative;
   overflow: hidden;
   border-radius: 4px;
-  background: hsl(var(--muted));
+  background: var(--sh-glass-bg-strong, rgba(255,255,255,0.06));
 }
 
 .shTableSkeleton::after {
@@ -11257,7 +11527,7 @@ tr:hover .shTableRowAction,
   background: linear-gradient(
     90deg,
     transparent 0%,
-    hsl(var(--accent) / 0.08) 50%,
+    rgba(255,255,255,0.06) 50%,
     transparent 100%
   );
   background-size: 200% 100%;
@@ -11268,19 +11538,19 @@ tr:hover .shTableRowAction,
   background: linear-gradient(
     90deg,
     transparent 0%,
-    hsl(var(--accent) / 0.05) 50%,
+    rgba(255,255,255,0.04) 50%,
     transparent 100%
   );
 }
 
-/* Pagination */
+/* Glass pagination */
 .shTablePagination {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   padding: 12px 20px;
-  border-top: 1px solid hsl(var(--border));
+  border-top: 1px solid var(--sh-glass-border, rgba(255,255,255,0.06));
   animation: shFadeSlideUp 300ms var(--sh-easing, cubic-bezier(0.16,1,0.3,1)) both;
 }
 
@@ -11292,9 +11562,9 @@ tr:hover .shTableRowAction,
   min-height: 32px;
   padding: 0 12px;
   border-radius: 8px;
-  border: 1px solid hsl(var(--border));
-  background: hsl(var(--card));
-  color: hsl(var(--foreground));
+  border: 1px solid var(--sh-glass-border, rgba(255,255,255,0.08));
+  background: var(--sh-glass-bg, rgba(255,255,255,0.04));
+  color: var(--ink, #e1e4e8);
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
@@ -11306,11 +11576,10 @@ tr:hover .shTableRowAction,
 }
 
 .shTablePageBtn:hover:not(:disabled) {
-  background: hsl(var(--accent));
-  color: white;
-  border-color: hsl(var(--accent));
+  background: var(--sh-glass-bg-strong, rgba(255,255,255,0.08));
+  border-color: var(--sh-glass-border-strong, rgba(255,255,255,0.12));
   transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(31,115,183,0.15);
+  box-shadow: var(--sh-glow-sm, 0 2px 8px rgba(59,130,246,0.1));
 }
 
 .shTablePageBtn:disabled {
@@ -11320,15 +11589,15 @@ tr:hover .shTableRowAction,
 
 .shTablePageInfo {
   font-size: 13px;
-  color: hsl(var(--muted-foreground));
+  color: var(--muted, #60646c);
   font-weight: 500;
   padding: 0 4px;
 }
 
-/* Search bar */
+/* Glass search bar */
 .shTableSearch {
   padding: 12px 20px;
-  border-bottom: 1px solid hsl(var(--border));
+  border-bottom: 1px solid var(--sh-glass-border, rgba(255,255,255,0.06));
   animation: shFadeSlideUp 300ms var(--sh-easing, cubic-bezier(0.16,1,0.3,1)) both;
 }
 
@@ -11341,7 +11610,7 @@ tr:hover .shTableRowAction,
 .shTableSearchIcon {
   position: absolute;
   left: 12px;
-  color: hsl(var(--muted-foreground));
+  color: var(--muted, #60646c);
   pointer-events: none;
 }
 
@@ -11350,9 +11619,9 @@ tr:hover .shTableRowAction,
   min-height: 36px;
   padding: 0 34px 0 36px;
   border-radius: 10px;
-  border: 1px solid hsl(var(--border));
-  background: hsl(var(--muted) / 0.3);
-  color: hsl(var(--foreground));
+  border: 1px solid var(--sh-glass-border, rgba(255,255,255,0.08));
+  background: var(--sh-glass-bg, rgba(255,255,255,0.04));
+  color: var(--ink, #e1e4e8);
   font-size: 13px;
   font-family: inherit;
   outline: none;
@@ -11363,14 +11632,14 @@ tr:hover .shTableRowAction,
 }
 
 .shTableSearchInput::placeholder {
-  color: hsl(var(--muted-foreground));
+  color: var(--muted, #60646c);
   opacity: 0.6;
 }
 
 .shTableSearchInput:focus {
-  border-color: #1f73b7;
-  background: hsl(var(--card));
-  box-shadow: 0 0 0 3px rgba(31,115,183,0.1);
+  border-color: var(--sh-info, #3b82f6);
+  background: var(--sh-glass-bg-strong, rgba(255,255,255,0.06));
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
 }
 
 .shTableSearchClear {

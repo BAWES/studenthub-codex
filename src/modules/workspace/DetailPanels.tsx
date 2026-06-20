@@ -101,7 +101,7 @@ export function DetailSection({
   /* ─── Error state ─── */
   if (errorMessage) {
     return (
-      <section className="detailPanel">
+      <section className="rounded-lg border border-border bg-card">
         <h2>{title}</h2>
         <ErrorState error={errorMessage} onRetry={onRetry} />
       </section>
@@ -111,13 +111,13 @@ export function DetailSection({
   /* ─── Loading state ─── */
   if (loading) {
     return (
-      <section className="detailPanel">
+      <section className="rounded-lg border border-border bg-card">
         <h2>{title}</h2>
         {type === "list" ? (
-          <div className="divide-y divide-border compactRows" aria-busy="true">
+          <div className="rows compactRows" aria-busy="true">
             {Array.from({ length: 3 }).map((_, i) => (
-              <article className="flex items-center justify-between gap-3 px-4 py-3 min-h-0" key={i}>
-                <div className="min-w-0 grid gap-0.5">
+              <article className="row" key={i}>
+                <div className="rowMain">
                   <Skeleton className="h-4 w-48 mb-1" />
                   <Skeleton className="h-3 w-32" />
                 </div>
@@ -143,8 +143,8 @@ export function DetailSection({
     const hasSensitive = sensitive && facts?.some((f) => f.sensitive);
 
     return (
-      <section className="detailPanel">
-        <div className="flex items-center justify-between gap-2.5 border-b border-border px-4 py-3">
+      <section className="rounded-lg border border-border bg-card">
+        <div className="listHeader">
           <h2>{title}</h2>
           {hasSensitive && (
             <button
@@ -180,16 +180,16 @@ export function DetailSection({
   /* ─── List (CompactList) type ─── */
   const resolvedRows = rows ?? [];
   return (
-    <section className="detailPanel">
-      <div className="flex items-center justify-between gap-2.5 border-b border-border px-4 py-3 compact">
+    <section className="rounded-lg border border-border bg-card">
+      <div className="listHeader compact">
         <h2>{title}</h2>
         {resolvedRows.length > 0 && <span>{resolvedRows.length}</span>}
       </div>
       {resolvedRows.length > 0 ? (
-        <div className="divide-y divide-border compactRows">
+        <div className="rows compactRows">
           {resolvedRows.map((row) => (
-            <article className="flex items-center justify-between gap-3 px-4 py-3 min-h-0" key={row.id}>
-              <div className="min-w-0 grid gap-0.5">
+            <article className="row" key={row.id}>
+              <div className="rowMain">
                 {row.href ? (
                   <Link href={row.href as Route}>
                     <strong>{row.title}</strong>
@@ -199,7 +199,7 @@ export function DetailSection({
                 )}
                 <span>{row.subtitle}</span>
               </div>
-              {row.meta ? <div className="shrink-0 text-xs text-muted-foreground">{row.meta}</div> : null}
+              {row.meta ? <div className="rowMeta">{row.meta}</div> : null}
             </article>
           ))}
         </div>

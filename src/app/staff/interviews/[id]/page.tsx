@@ -54,9 +54,9 @@ export default async function StaffInterviewDetailPage({
     >
       <DetailSection title="Interview Details" facts={facts} />
 
-      <section className="detailPanel">
+      <section className="rounded-lg border border-border bg-card">
         <h2>Actions</h2>
-        <div className="flex gap-2 flex-wrap">
+        <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
           {interview.status !== 1 && (
             <form action={updateInterviewStatusAction}>
               <input type="hidden" name="interview_uuid" value={interview.interviewUuid} />
@@ -81,8 +81,8 @@ export default async function StaffInterviewDetailPage({
         </div>
       </section>
 
-      <section className="detailPanel">
-        <div className="flex gap-2 flex-wrap">
+      <section className="rounded-lg border border-border bg-card">
+        <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
           {interview.candidateId && (
             <Link href={`/staff/candidates?candidate=${interview.candidateId}` as Route}>
               <Button variant="outline">View Candidate</Button>
@@ -100,7 +100,7 @@ export default async function StaffInterviewDetailPage({
       </section>
 
       {notice && (
-        <section className="detailPanel">
+        <section className="rounded-lg border border-border bg-card">
           <p className="notice">
             {notice === "interview-updated" && "Interview updated successfully."}
             {notice === "not-found" && "Interview not found."}

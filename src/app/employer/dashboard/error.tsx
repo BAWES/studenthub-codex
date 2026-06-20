@@ -19,7 +19,7 @@ export default function Error({
       {error.digest ? <small className="text-muted-foreground">Error ID: {error.digest}</small> : null}
       <button
         onClick={reset}
-        className="mt-2 h-10 rounded-lg px-4 text-sm font-semibold bg-coral text-white hover:bg-coral-hover transition-colors"
+        className="mt-2 h-10 rounded-lg px-4 text-sm font-semibold bg-primary text-primary-foreground"
       >
         Try again
       </button>

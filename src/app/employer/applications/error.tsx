@@ -1,7 +1,5 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-
 export default function Error({
   error,
   reset,
@@ -18,9 +16,12 @@ export default function Error({
         <p className="mb-6 text-sm text-muted-foreground">
           {error.message ?? "Failed to load applications. Please try again."}
         </p>
-        <Button onClick={reset} variant="default">
+        <button
+          onClick={reset}
+          className="rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors hover:opacity-90 bg-[#eb6651] text-white"
+        >
           Try Again
-        </Button>
+        </button>
       </div>
     </div>
   );

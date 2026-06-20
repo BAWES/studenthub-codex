@@ -28,7 +28,7 @@ export default async function CandidateDocumentsPage() {
       title="Document Management"
       metrics={metrics}
     >
-      <p className="detailPanelNote" style={{ marginBottom: "1rem" }}>
+      <p className="text-sm text-muted-foreground" style={{ marginBottom: "1rem" }}>
         Upload and manage your documents — personal photo, CV/resume, video
         profile, and civil ID photos. These documents are visible to companies
         reviewing your profile.
