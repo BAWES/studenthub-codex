@@ -9,7 +9,10 @@ import { cn } from "@/lib/utils";
 export function WorkspaceNavigation({ items, role }: { items: NavItem[]; role: string }) {
   const pathname = usePathname();
   return (
-    <nav className="workspaceRailNav" aria-label={`${role} workspace navigation`}>
+    <nav
+      className="w-11 group-hover/rail:w-full transition-all duration-300 grid content-start gap-[3px]"
+      aria-label={`${role} workspace navigation`}
+    >
       {items.map((item) => {
         const active = isActive(pathname, item.href);
         const Icon = item.icon;
@@ -18,15 +21,19 @@ export function WorkspaceNavigation({ items, role }: { items: NavItem[]; role: s
             aria-current={active ? "page" : undefined}
             className={cn(
               buttonVariants({ variant: "ghost", size: "sm" }),
-              "workspaceRailLink",
-              active && "active"
+              "relative flex items-center gap-2.5 min-h-[38px] px-[9px] justify-start w-full whitespace-nowrap overflow-hidden no-underline",
+              active
+                ? "bg-[color-mix(in_srgb,#eb6651_12%,transparent)] text-[#eb6651]"
+                : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
             )}
             href={item.href}
             key={item.href}
             title={item.label}
           >
             <Icon size={18} strokeWidth={2} aria-hidden="true" />
-            <strong>{item.label}</strong>
+            <strong className="opacity-0 group-hover/rail:opacity-100 transition-opacity duration-300 delay-[80ms] text-sm font-semibold whitespace-nowrap">
+              {item.label}
+            </strong>
           </Link>
         );
       })}
