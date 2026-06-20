@@ -11,10 +11,11 @@ export const dynamic = "force-dynamic";
  */
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const jobId = Number(params.id);
+    const { id } = await params;
+    const jobId = Number(id);
     if (!Number.isInteger(jobId) || jobId < 1) {
       return NextResponse.json(
         { error: "Invalid job ID; must be a positive integer" },
@@ -44,10 +45,11 @@ export async function PUT(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const jobId = Number(params.id);
+    const { id } = await params;
+    const jobId = Number(id);
     if (!Number.isInteger(jobId) || jobId < 1) {
       return NextResponse.json(
         { error: "Invalid job ID; must be a positive integer" },
