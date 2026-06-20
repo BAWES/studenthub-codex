@@ -1,5 +1,3 @@
-"use client";
-
 import * as React from "react";
 import { cn } from "@/lib/utils";
 import { TrendingUp, TrendingDown, Minus, type LucideIcon } from "lucide-react";
@@ -112,21 +110,21 @@ const MetricCard = React.forwardRef<HTMLDivElement, MetricCardProps>(function Me
     >
       {/* Header row: label */}
       <div className="flex items-center justify-between">
-        <span className="text-[11px] font-black uppercase tracking-wider" style={{ color: "var(--muted)" }}>
+        <span className="text-[11px] font-black uppercase tracking-wider text-muted-foreground">
           {label}
         </span>
         {Icon && (
-          <Icon className="size-4 shrink-0" style={{ color: "var(--sh-info)" }} aria-hidden="true" />
+          <Icon className="size-4 shrink-0 text-[var(--sh-info)]" aria-hidden="true" />
         )}
       </div>
 
       {/* Value */}
       <div className="flex items-baseline gap-2">
-        <span className="text-[28px] font-bold leading-none tracking-[-0.02em]" style={{ color: "var(--ink)" }}>
+        <span className="text-[28px] font-bold leading-none tracking-[-0.02em] text-foreground">
           {formatValue(value)}
         </span>
         {resolvedSubtitle && (
-          <span className="text-xs" style={{ color: "var(--muted)" }}>
+          <span className="text-xs text-muted-foreground">
             {resolvedSubtitle}
           </span>
         )}

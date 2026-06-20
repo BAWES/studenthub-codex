@@ -4,8 +4,6 @@ import { UserRound, Search, Briefcase } from "lucide-react";
 
 // ── Step definitions ──────────────────────────────────────────
 
-const SH_BLUE = "#1f73b7";
-
 interface Step {
   icon: typeof UserRound;
   title: string;
@@ -46,6 +44,10 @@ export interface HowItWorksProps {
 
 // ── Component ──────────────────────────────────────────────────
 
+const cardAnimationDelay = (i: number): React.CSSProperties => ({
+  animationDelay: `${i * 120}ms`,
+});
+
 export default function HowItWorks({ className }: HowItWorksProps) {
   return (
     <section
@@ -71,57 +73,28 @@ export default function HowItWorks({ className }: HowItWorksProps) {
           return (
             <div
               key={step.title}
-              className="relative flex flex-col items-center text-center p-6 rounded-xl shLandingCardHover"
-              style={{
-                backgroundColor: "var(--surface)",
-                border: "1px solid var(--border)",
-                animation: `shCardIn 500ms cubic-bezier(0.16, 1, 0.3, 1) both`,
-                animationDelay: `${i * 120}ms`,
-              }}
+              className="relative flex flex-col items-center text-center p-6 rounded-xl shLandingCardHover bg-card border border-border"
+              style={cardAnimationDelay(i)}
             >
               {/* Step number */}
-              <div
-                className="size-9 rounded-full flex items-center justify-center text-xs font-black mb-4"
-                style={{
-                  backgroundColor: `${SH_BLUE}12`,
-                  color: SH_BLUE,
-                }}
-              >
+              <div className="size-9 rounded-full flex items-center justify-center text-xs font-black mb-4 bg-[#1f73b7]/10 text-[#1f73b7]">
                 {step.number}
               </div>
 
               {/* Icon */}
-              <div
-                className="size-12 rounded-xl flex items-center justify-center mb-3"
-                style={{
-                  backgroundColor: `${SH_BLUE}08`,
-                  color: SH_BLUE,
-                }}
-              >
+              <div className="size-12 rounded-xl flex items-center justify-center mb-3 bg-[#1f73b7]/5 text-[#1f73b7]">
                 <Icon className="size-6" aria-hidden="true" />
               </div>
 
               {/* Tag */}
-              <span
-                className="inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full mb-3"
-                style={{
-                  backgroundColor: "var(--secondary)",
-                  color: "var(--muted)",
-                }}
-              >
+              <span className="inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full mb-3 bg-secondary text-muted-foreground">
                 {step.tag}
               </span>
 
-              <strong
-                className="block text-base mb-2 tracking-tight"
-                style={{ color: "var(--ink)" }}
-              >
+              <strong className="block text-base mb-2 tracking-tight text-foreground">
                 {step.title}
               </strong>
-              <p
-                className="text-xs leading-relaxed m-0 max-w-[280px]"
-                style={{ color: "var(--muted)" }}
-              >
+              <p className="text-xs leading-relaxed m-0 max-w-[280px] text-muted-foreground">
                 {step.body}
               </p>
             </div>

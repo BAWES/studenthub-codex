@@ -3,8 +3,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import type { ExperienceItem } from "@/app/student/actions";
 
-const CORAL = "#eb6651";
-
 interface ExperienceSectionProps {
   experience: ExperienceItem[];
 }
@@ -14,10 +12,7 @@ export function ExperienceSection({ experience }: ExperienceSectionProps) {
     <section>
       {/* Section title with coral left border */}
       <div className="flex items-center gap-3 mb-4">
-        <div
-          className="w-1 h-6 rounded-full flex-shrink-0"
-          style={{ backgroundColor: CORAL }}
-        />
+        <div className="w-1 h-6 rounded-full flex-shrink-0 bg-[#eb6651]" />
         <h2 className="text-xl font-semibold text-foreground">
           Experience
         </h2>
