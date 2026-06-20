@@ -81,7 +81,7 @@ import type { InspectorLandingContentProps } from "../InspectorLandingContent";
 describe("Inspector landing page (/for-inspectors)", () => {
   const defaultProps: InspectorLandingContentProps = { session: null };
 
-  it("renders the hero section with two-sided marketplace headline", () => {
+  it("renders the hero section with staff-matched headline", () => {
     render(<InspectorLandingContent {...defaultProps} />);
     expect(
       screen.getByRole("heading", { level: 1, name: /connecting students/i })

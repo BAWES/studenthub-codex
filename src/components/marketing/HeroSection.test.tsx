@@ -48,7 +48,7 @@ afterEach(() => {
 // ── Import component ──────────────────────────────────────────
 import HeroSection from "./HeroSection";
 
-describe("HeroSection (two-sided marketplace redesign)", () => {
+describe("HeroSection (staff-matched platform redesign)", () => {
   describe("Default render", () => {
     it("renders eyebrow text", () => {
       render(<HeroSection />);
@@ -57,14 +57,14 @@ describe("HeroSection (two-sided marketplace redesign)", () => {
       ).toBeTruthy();
     });
 
-    it("renders an H1 heading with marketplace messaging", () => {
+    it("renders an H1 heading with staff-matched messaging", () => {
       render(<HeroSection />);
       const heading = screen.getByRole("heading", { level: 1 });
       expect(heading.textContent).toBeTruthy();
       expect(heading.textContent!.length).toBeGreaterThan(10);
     });
 
-    it("renders body paragraph about two-sided marketplace", () => {
+    it("renders body paragraph about staff matching", () => {
       render(<HeroSection />);
       expect(
         screen.getByText(/the platform where students build careers/i),
