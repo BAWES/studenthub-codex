@@ -230,15 +230,47 @@ export async function viewEvaluationReport(
  * Fetch full evaluation data for PDF report generation.
  * Extends viewEvaluationReport with candidate name/email and staff name.
  * Maps to GET /api/evaluations/[uuid]/pdf
+ *
+ * NOTE: This function does NOT call requireCapability because it is
+ * called from the API route (not a page server action). The API route
+ * is a downloadable PDF link that must work without session auth.
  */
 export async function getEvaluationPdfData(
   params: ViewReportInput,
 ): Promise<EvaluationPdfData | null> {
   const { evaluationUuid } = viewReportSchema.parse(params);
 
-  // Reuse existing report logic
-  const report = await viewEvaluationReport({ evaluationUuid });
-  if (!report) return null;
+  // Inline the report query (without requireCapability)
+  const evaluation = await prisma.candidate_evaluation.findUnique({
+    where: { can_eval_uuid: evaluationUuid },
+  });
+  if (!evaluation) return null;
+
+  // Fetch answers via raw SQL (candidate_evaluation_answer has no PK, @@ignore'd)
+  const answers = await prisma.$queryRawUnsafe<
+    Array<{ ceq_uuid: string | null; question: string | null; answer: string | null; rating: number | null }>
+  >(
+    `SELECT ceq_uuid, question, answer, rating
+     FROM candidate_evaluation_answer
+     WHERE can_eval_uuid = ?`,
+    evaluationUuid,
+  );
+
+  const report = {
+    can_eval_uuid: evaluation.can_eval_uuid,
+    candidate_id: evaluation.candidate_id,
+    dept_id: evaluation.dept_id,
+    start_date: evaluation.start_date ? evaluation.start_date.toISOString() : null,
+    end_date: evaluation.end_date ? evaluation.end_date.toISOString() : null,
+    staff_id: evaluation.staff_id,
+    created_at: evaluation.created_at,
+    answers: answers.map((a) => ({
+      ceq_uuid: a.ceq_uuid,
+      question: a.question,
+      answer: a.answer,
+      rating: a.rating,
+    })),
+  };
 
   // Fetch candidate and staff names via module (avoids direct prisma in route)
   const [candidate, staff] = await Promise.all([
