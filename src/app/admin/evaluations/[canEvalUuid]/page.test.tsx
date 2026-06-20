@@ -172,4 +172,23 @@ describe("AdminEvaluationDetailPage", () => {
 
     expect(screen.getByTestId("title")).toHaveTextContent("Evaluation — Unknown Candidate");
   });
+
+  it("renders download PDF link with correct href", async () => {
+    mockGetEvaluation.mockResolvedValue({ evaluation: mockEvaluation });
+
+    const Page = (await import("./page")).default;
+    render(
+      await Page({
+        params: Promise.resolve({ canEvalUuid: "eval-uuid-123" }),
+      }),
+    );
+
+    const downloadLink = screen.getByText("Download PDF").closest("a");
+    expect(downloadLink).toBeInTheDocument();
+    expect(downloadLink).toHaveAttribute(
+      "href",
+      "/api/evaluations/eval-uuid-123/pdf?format=pdf",
+    );
+    expect(downloadLink).toHaveAttribute("download");
+  });
 });
