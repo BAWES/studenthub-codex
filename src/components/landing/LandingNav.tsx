@@ -4,8 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { GraduationCap, Building2, Menu, X, ArrowRight } from "lucide-react";
 
-const SH_BLUE = "#0b63ce";
-const SH_AMBER = "#f59e0b";
+const SH_BLUE = "#1f73b7";
+const SH_CORAL = "#eb6651";
 
 export type Persona = "candidate" | "company";
 
@@ -109,10 +109,10 @@ export default function LandingNav({ session, persona, onPersonaChange }: Landin
                   href={`/signup?role=${persona === "company" ? "company" : "candidate"}`}
                   className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium no-underline text-white transition-all hover:brightness-110 hover:-translate-y-0.5`}
                   style={{
-                    backgroundColor: persona === "company" ? SH_AMBER : SH_BLUE,
+                    backgroundColor: persona === "company" ? SH_CORAL : SH_BLUE,
                     boxShadow: persona === "company"
-                      ? "0 4px 14px rgba(245, 158, 11, 0.35)"
-                      : "0 4px 14px rgba(11, 99, 206, 0.30)",
+                      ? "0 4px 14px rgba(235, 102, 81, 0.35)"
+                      : "0 4px 14px rgba(31, 115, 183, 0.30)",
                   }}
                 >
                   {persona === "company" ? "Set up company account" : "Create free profile"}
@@ -134,7 +134,7 @@ export default function LandingNav({ session, persona, onPersonaChange }: Landin
         <div className="flex items-center gap-0 -mb-px">
           {tabs.map((tab) => {
             const active = persona === tab.value;
-            const accentColor = tab.value === "company" ? SH_AMBER : SH_BLUE;
+            const accentColor = tab.value === "company" ? SH_CORAL : SH_BLUE;
             return (
               <button
                 key={tab.value}
