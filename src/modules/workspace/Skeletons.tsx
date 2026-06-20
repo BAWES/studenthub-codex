@@ -2,68 +2,57 @@
 
 import { Skeleton } from "@/components/ui/skeleton";
 
-/** Shimmer skeleton block. */
-function ShimmerBlock({ className = "" }: { className?: string }) {
-  return (
-    <div
-      data-slot="skeleton"
-      className={className}
-      aria-hidden="true"
-    />
-  );
-}
-
 /** Full-page skeleton matching the WorkspaceShell layout for route transitions. */
 export function WorkspaceShellSkeleton({ rowCount = 8 }: { rowCount?: number }) {
   return (
-    <div className="min-h-0">
-      <section className="min-w-0 overflow-x-hidden grid content-start gap-3.5 p-3.5">
-        {/* Topbar — matches WorkspaceShell Tailwind layout */}
-        <section className="flex items-center justify-between gap-4 border-b border-border pb-3 mb-1">
+    <main className="shell shellEmbedded">
+      <section className="workspaceStage">
+        {/* Topbar */}
+        <section className="topbar">
           <div>
             <Skeleton className="h-3 w-24 mb-2" />
             <Skeleton className="h-7 w-64" />
           </div>
-          <div className="min-w-[140px] max-w-[220px] grid content-center gap-0.5 rounded-lg border border-border bg-card p-2.5 text-right">
-            <Skeleton className="h-3 w-12 ml-auto" />
-            <Skeleton className="h-4 w-28 ml-auto" />
-            <Skeleton className="h-3 w-40 ml-auto" />
+          <div className="accountBox">
+            <Skeleton className="h-3 w-12" />
+            <Skeleton className="h-4 w-28" />
+            <Skeleton className="h-3 w-40" />
           </div>
         </section>
 
-        {/* Metrics — matches WorkspaceShell Tailwind grid */}
-        <section className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3" aria-label="Loading metrics">
+        {/* Metrics */}
+        <section className="metrics" aria-label="Loading metrics">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="border border-border rounded-lg bg-card p-4 grid gap-3">
-              <Skeleton className="h-3 w-16" />
-              <Skeleton className="h-9 w-20" />
+            <article className="metric" key={i}>
+              <Skeleton className="h-3 w-16 mb-2" />
+              <Skeleton className="h-9 w-20 mb-1" />
               <Skeleton className="h-3 w-12" />
-            </div>
+            </article>
           ))}
         </section>
 
         {/* Content area */}
-        <div className="grid gap-3.5 p-0">
+        <div className="grid gap-3.5 px-[22px] py-[18px]">
           <Skeleton className="h-6 w-48" />
-          <Skeleton className="h-40 w-full rounded-lg border border-border" />
+          <Skeleton className="h-40 w-full rounded-lg" />
         </div>
 
-        {/* Data lists — matches WorkspaceShell WorkspaceList layout */}
-        <section className="grid gap-4">
+        {/* Data lists */}
+        <section className="lists">
           {[1, 2].map((col) => (
-            <section key={col} className="border border-border rounded-lg bg-card overflow-hidden">
-              <div className="flex items-center justify-between gap-2.5 border-b border-border px-4 py-3">
+            <section className="dataList" key={col}>
+              <div className="listHeader">
                 <Skeleton className="h-4 w-32" />
                 <Skeleton className="h-5 w-8 rounded-full" />
               </div>
-              <div className="divide-y divide-border">
+              <div className="rows">
                 {Array.from({ length: rowCount }).map((_, i) => (
-                  <article key={i} className="flex items-center justify-between gap-3 px-4 py-3">
-                    <div className="min-w-0 grid gap-0.5">
+                  <article className="row" key={i}>
+                    <div className="rowMain">
                       <Skeleton className="h-4 w-48 mb-1" />
                       <Skeleton className="h-3 w-64" />
                     </div>
-                    <div className="shrink-0">
+                    <div className="rowMeta">
                       <Skeleton className="h-3 w-16" />
                     </div>
                   </article>
@@ -73,33 +62,30 @@ export function WorkspaceShellSkeleton({ rowCount = 8 }: { rowCount?: number }) 
           ))}
         </section>
       </section>
-    </div>
+    </main>
   );
 }
 
-/** Skeleton for data-table list pages. Uses card container with shimmer. */
+/** Skeleton for data-table list pages. */
 export function DataTableSkeleton({ rows = 10 }: { rows?: number }) {
   return (
-    <div className="border border-border rounded-lg bg-card p-5 grid gap-4">
+    <div className="grid gap-3 px-[22px] py-[18px]">
       {/* Header */}
-      <div className="flex justify-between items-center">
-        <Skeleton className="h-6 w-40" />
-        <Skeleton className="h-8 w-28" />
+      <div className="flex items-center justify-between mb-2">
+        <Skeleton className="h-7 w-40" />
+        <Skeleton className="h-9 w-28 rounded-lg" />
       </div>
 
       {/* Filter/search bar */}
-      <div className="flex gap-2.5">
-        <Skeleton className="h-9 flex-1" />
-        <Skeleton className="h-9 w-24" />
+      <div className="flex gap-2.5 mb-1">
+        <Skeleton className="h-9 flex-1 rounded-lg" />
+        <Skeleton className="h-9 w-24 rounded-lg" />
       </div>
 
       {/* Rows */}
       <div className="grid gap-px">
         {/* Header row */}
-        <div
-          className="grid gap-3 px-3.5 py-2.5 border-b border-border"
-          style={{ gridTemplateColumns: "1fr 1fr 120px 100px" }}
-        >
+        <div className="grid grid-cols-[1fr_1fr_120px_100px] gap-3 px-[14px] py-[10px]">
           <Skeleton className="h-3 w-20" />
           <Skeleton className="h-3 w-24" />
           <Skeleton className="h-3 w-16" />
@@ -108,12 +94,11 @@ export function DataTableSkeleton({ rows = 10 }: { rows?: number }) {
         {Array.from({ length: rows }).map((_, i) => (
           <div
             key={i}
-            className="grid gap-3 px-3.5 py-3 border-b border-border"
-            style={{ gridTemplateColumns: "1fr 1fr 120px 100px" }}
+            className="grid grid-cols-[1fr_1fr_120px_100px] gap-3 border-t border-[var(--line)] px-[14px] py-3"
           >
             <Skeleton className="h-4 w-44" />
             <Skeleton className="h-3 w-56" />
-            <Skeleton className="h-5 w-20" />
+            <Skeleton className="h-5 w-20 rounded-full" />
             <Skeleton className="h-4 w-16" />
           </div>
         ))}
@@ -125,16 +110,12 @@ export function DataTableSkeleton({ rows = 10 }: { rows?: number }) {
 /** Compact skeleton for detail pages with fact panels. */
 export function DetailPageSkeleton({ panels = 3 }: { panels?: number }) {
   return (
-    <div className="p-4 grid gap-3.5">
+    <div className="grid gap-3.5 px-[22px] py-[18px]">
       {/* Action bar placeholder */}
-      <div className="border border-border rounded-lg bg-card p-5">
-        <Skeleton className="h-24 w-full" />
-      </div>
+      <Skeleton className="h-32 w-full rounded-lg" />
 
       {/* Hero section */}
-      <div className="border border-border rounded-lg bg-card p-5">
-        <Skeleton className="h-48 w-full" />
-      </div>
+      <Skeleton className="h-56 w-full rounded-lg" />
 
       {/* Fact panels */}
       <div
@@ -142,10 +123,13 @@ export function DetailPageSkeleton({ panels = 3 }: { panels?: number }) {
         style={{ gridTemplateColumns: `repeat(${Math.min(panels, 2)}, 1fr)` }}
       >
         {Array.from({ length: panels }).map((_, i) => (
-          <div key={i} className="border border-border rounded-lg bg-card p-4">
-            <Skeleton className="h-4 w-24 mb-3" />
+          <div
+            key={i}
+            className="grid gap-2 border border-[var(--line)] rounded-[10px] p-4"
+          >
+            <Skeleton className="h-4 w-24" />
             {[1, 2, 3, 4].map((r) => (
-              <div key={r} className="flex justify-between mb-2">
+              <div key={r} className="flex justify-between">
                 <Skeleton className="h-3 w-16" />
                 <Skeleton className="h-3 w-32" />
               </div>
@@ -157,10 +141,13 @@ export function DetailPageSkeleton({ panels = 3 }: { panels?: number }) {
       {/* Related lists */}
       <div className="grid grid-cols-2 gap-3">
         {[1, 2].map((col) => (
-          <div key={col} className="border border-border rounded-lg bg-card p-4">
-            <Skeleton className="h-4 w-32 mb-3" />
+          <div
+            key={col}
+            className="grid gap-1 border border-[var(--line)] rounded-[10px] p-4"
+          >
+            <Skeleton className="h-4 w-32 mb-2" />
             {[1, 2, 3, 4].map((r) => (
-              <Skeleton key={r} className="h-10 w-full mb-2" />
+              <Skeleton key={r} className="h-10 w-full" />
             ))}
           </div>
         ))}
@@ -172,7 +159,7 @@ export function DetailPageSkeleton({ panels = 3 }: { panels?: number }) {
 /** Lightweight top-of-page pulse skeleton for Suspense fallbacks. */
 export function QuickSkeleton({ lines = 4 }: { lines?: number }) {
   return (
-    <div className="p-3.5 grid gap-2">
+    <div className="grid gap-2 px-[22px] py-[14px]">
       {Array.from({ length: lines }).map((_, i) => (
         <Skeleton key={i} className={`h-${i === 0 ? 5 : 3} w-${i === 0 ? 48 : 36}`} />
       ))}

@@ -13,7 +13,7 @@ function cookieArgs(user: RoleFixture) {
 
 const ROLES: Array<{ key: string; label: string; expectedUrl?: string; expectedText?: string }> = [
   { key: "admin", label: "admin", expectedUrl: "/admin" },
-  { key: "staff", label: "staff", expectedUrl: "/staff", expectedText: "Welcome back" },
+  { key: "staff", label: "staff", expectedUrl: "/staff", expectedText: "Staff operating home" },
   { key: "candidate", label: "candidate", expectedUrl: "/candidate", expectedText: "Readiness" },
   { key: "company", label: "company", expectedUrl: "/company" },
   { key: "inspector", label: "inspector", expectedUrl: "/inspector" },
@@ -27,11 +27,11 @@ test.describe("Role portal smoke tests", () => {
       const context = await browser.newContext();
       await context.addCookies(cookieArgs(user));
       const page = await context.newPage();
-      await page.goto(expectedUrl);
-      await expect(page).toHaveURL(expectedUrl);
+      await page.goto(`/${expectedUrl}`);
+      await expect(page).toHaveURL(`/${expectedUrl}`);
       await expect(page.locator("body")).toBeVisible({ timeout: 15000 });
       if (expectedText) {
-        await expect(page.locator(`text="${expectedText}"`).first()).toBeVisible({ timeout: 15000 });
+        await expect(page.locator(`text="${expectedText}"`)).toBeVisible({ timeout: 15000 });
       }
       await context.close();
     });

@@ -1,26 +1,57 @@
+import type { Route } from "next";
 import Link from "next/link";
-import { Plus } from "lucide-react";
 import { requireRoleCapability } from "@/modules/auth/session";
-import { buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import { listCompanyRequests } from "./actions";
-import { CompanyRequestsTable } from "./_components";
+import { DataTable } from "@/modules/workspace/DataTable";
+import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
+import { getCompanyRequestRows } from "@/modules/workspace/data";
+import { Badge } from "@/components/ui/badge";
 
 export const dynamic = "force-dynamic";
 
+const statusVariant: Record<string, "default" | "secondary" | "success" | "warning" | "outline"> = {
+  pending: "warning",
+  started: "outline",
+  delivered: "success",
+  cancelled: "outline",
+  finished_by_recruitment: "secondary",
+};
+
 export default async function CompanyRequestsPage() {
   const session = await requireRoleCapability("company", "request.read.linked");
-  const result = await listCompanyRequests();
+  const rows = await getCompanyRequestRows(session.id);
 
-  const rows = result.requests.map((r) => ({
-    id: r.request_uuid,
-    title: r.request_position_title ?? "Untitled request",
-    company: r.company_name ?? "No company",
-    owner: "",
-    seats: r.request_number_of_employees ?? 0,
-    status: r.request_status ?? "pending",
-    updated: r.request_updated_datetime ? new Date(r.request_updated_datetime).toLocaleDateString() : "N/A",
-  }));
-
-  return <CompanyRequestsTable session={session} rows={rows} />;
+  return (
+    <WorkspaceShell session={session} eyebrow="Company" title="Requests" metrics={[]}>
+      <div className="mb-4">
+        <Link
+          href="/company/requests/create"
+          className="inline-flex items-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow hover:bg-primary/90"
+        >
+          + New Request
+        </Link>
+      </div>
+      <DataTable
+        title="Hiring Requests"
+        description="Requests across the company accounts linked to this contact."
+        rows={rows}
+        rowHref={(row) => `/company/requests/${row.id}` as Route}
+        columns={[
+          { key: "title", label: "Request", render: (row) => <strong>{row.title}</strong> },
+          { key: "company", label: "Company", render: (row) => row.company },
+          { key: "owner", label: "Owner", render: (row) => row.owner },
+          { key: "seats", label: "Seats", render: (row) => row.seats },
+          {
+            key: "status",
+            label: "Status",
+            render: (row) => (
+              <Badge variant={statusVariant[row.status as string] ?? "secondary"}>
+                {(row.status as string).replace(/_/g, " ")}
+              </Badge>
+            ),
+          },
+          { key: "updated", label: "Updated", render: (row) => row.updated }
+        ]}
+      />
+    </WorkspaceShell>
+  );
 }

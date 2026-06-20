@@ -1,27 +1,32 @@
 "use client";
 
-import { useActionState, useEffect, useRef } from "react";
+import { useActionState } from "react";
 import { LogIn } from "lucide-react";
-import { loginAction } from "./actions";
+import { chooseAccountAction, loginAction } from "./actions";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
+import type { LoginAccountChoice } from "./types";
 
 export function LoginForm() {
   const [state, action, pending] = useActionState(loginAction, {});
-  const emailRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    emailRef.current?.focus();
-  }, []);
+  const accounts = state.accounts ?? [];
 
   return (
-    <div>
-      <form action={action} className="grid gap-5">
+    <div className="grid gap-[14px]">
+      <form action={action} className="grid gap-[18px] p-[30px]">
+        <div className="grid gap-[7px] pb-2">
+          <span className="text-[var(--blue)] text-xs font-black uppercase">Secure sign in</span>
+          <strong className="text-[28px] leading-[1.1]">Continue to StudentHub</strong>
+          <p className="text-[var(--muted)] leading-relaxed m-0">
+            Use your existing production credentials. StudentHub will detect the right account and permissions after
+            your password is verified.
+          </p>
+        </div>
+
         <div className="grid gap-2">
           <Label htmlFor="login-email">Email</Label>
           <Input
-            ref={emailRef}
             id="login-email"
             name="email"
             type="email"
@@ -29,6 +34,7 @@ export function LoginForm() {
             defaultValue={state.email ?? ""}
             placeholder="name@studenthub.app"
             required
+            className="min-h-[46px]"
           />
         </div>
 
@@ -41,24 +47,46 @@ export function LoginForm() {
             autoComplete="current-password"
             placeholder="Your password"
             required
+            className="min-h-[46px]"
           />
         </div>
 
-        {state.error ? (
-          <div className="flex items-center gap-2 px-3.5 py-2.5 rounded-md text-[13px] font-semibold bg-destructive/10 text-destructive border border-destructive/20">
-            <span>{state.error}</span>
-          </div>
-        ) : null}
+        {state.error ? <p className="text-[var(--destructive)] font-bold m-0">{state.error}</p> : null}
 
-        <Button
-          type="submit"
-          disabled={pending}
-          className="w-full bg-primary text-white hover:bg-primary/90 disabled:bg-primary/80"
-        >
+        <Button type="submit" disabled={pending} size="lg" className="min-h-[52px]">
           <LogIn className="size-4" />
           {pending ? "Checking credentials..." : "Sign in"}
         </Button>
       </form>
+
+      {accounts.length ? <VerifiedAccountChooser accounts={accounts} /> : null}
     </div>
+  );
+}
+
+function VerifiedAccountChooser({ accounts }: { accounts: LoginAccountChoice[] }) {
+  return (
+    <section className="grid gap-[14px] p-[30px] pt-0 border-t border-[var(--line)]" aria-label="Verified StudentHub accounts">
+      <div className="grid gap-[7px]">
+        <span className="text-[var(--blue)] text-xs font-black uppercase">Verified accounts</span>
+        <strong className="text-[28px] leading-[1.1]">Choose where to continue</strong>
+        <p className="text-[var(--muted)] leading-relaxed m-0">Your password matched more than one active account. Only verified accounts are shown here.</p>
+      </div>
+      {accounts.map((account) => (
+        <form action={chooseAccountAction} key={account.accountKey}>
+          <input name="accountKey" type="hidden" value={account.accountKey} />
+          <Button
+            type="submit"
+            variant="outline"
+            className="w-full min-h-[62px] justify-start h-auto p-3 gap-3 text-left"
+          >
+            <span className="grid gap-1 min-w-0">
+              <strong className="text-sm">{account.name}</strong>
+              <small className="text-[var(--muted)] text-xs font-normal">{account.email}</small>
+            </span>
+          </Button>
+        </form>
+      ))}
+    </section>
   );
 }

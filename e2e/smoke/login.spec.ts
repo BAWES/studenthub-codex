@@ -4,7 +4,7 @@ test.describe("Login flow", () => {
   test("renders unified login page", async ({ page }) => {
     await page.goto("/login");
     await expect(page.locator("h1")).toContainText("Sign in once");
-    await expect(page.locator(".shLoginBrandBody")).toContainText("Your account credentials know who you are");
+    await expect(page.locator(".eyebrow")).toContainText("One StudentHub login");
   });
 
   test("login form has email and password fields", async ({ page }) => {

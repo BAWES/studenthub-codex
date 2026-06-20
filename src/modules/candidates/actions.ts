@@ -8,7 +8,6 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability, requireRoleCapability } from "@/modules/auth/session";
-import { uploadFile, candidateKey, isS3Configured } from "@/lib/s3";
 import {
   candidateErrorResultSchema,
   profileStateSchema,
@@ -168,22 +167,13 @@ async function saveUpload(candidateId: number, field: string, file: File, typeCo
     throw new Error(`File is too large. Maximum size is ${typeConfig.maxSize / 1024 / 1024} MB.`);
   }
 
-  const mimeType = file.type || typeConfig.mime[0];
-  const buffer = Buffer.from(await file.arrayBuffer());
-
-  if (isS3Configured()) {
-    // Upload to S3-compatible storage
-    const key = candidateKey(candidateId, field, ext);
-    const result = await uploadFile(key, buffer, mimeType);
-    return result.url;
-  }
-
-  // Fallback: local disk storage
   const dir = path.join(UPLOAD_DIR, String(candidateId));
   await fs.mkdir(dir, { recursive: true });
 
   const filename = `${field}_${crypto.randomUUID()}${ext}`;
   const filepath = path.join(dir, filename);
+
+  const buffer = Buffer.from(await file.arrayBuffer());
   await fs.writeFile(filepath, buffer);
 
   return `/uploads/candidates/${candidateId}/${filename}`;
