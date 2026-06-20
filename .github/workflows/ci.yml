@@ -221,5 +221,23 @@ jobs:
           done
           node scripts/validate.mjs
         env:
-          DATABASE_URL: "mysql://studenthub:studenthub@localhost:3307/studenthub_prod_local"
+          DATABASE_URL: "mysql://studenthub:***@localhost:3307/studenthub_prod_local"
           AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
+
+  docker:
+    name: Docker Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Build Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          push: false
+          tags: studenthub-next:ci-${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
