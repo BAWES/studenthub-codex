@@ -262,7 +262,7 @@ export function DataTable<T extends { id: string | number }>({
                     <div className="size-10 rounded-xl bg-red-500/10 flex items-center justify-center">
                       <AlertCircle size={20} className="text-red-400" />
                     </div>
-                    <strong className="text-sm" style={{ color: "var(--ink)" }}>
+                    <strong className="text-sm text-foreground">
                       {error}
                     </strong>
                     {onRetry ? (

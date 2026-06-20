@@ -192,8 +192,7 @@ function CreateBankForm({ onSuccess }: { onSuccess: () => void }) {
           required
           maxLength={100}
           placeholder="e.g. National Bank of Kuwait"
-          className="h-9 rounded-lg px-3 text-sm border"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+          className="h-9 rounded-lg px-3 text-sm border bg-card border-border text-foreground"
         />
       </div>
       <div className="grid gap-1">
@@ -203,8 +202,7 @@ function CreateBankForm({ onSuccess }: { onSuccess: () => void }) {
           required
           maxLength={64}
           placeholder="e.g. KW81NBK000000000000123456"
-          className="h-9 rounded-lg px-3 text-sm border"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+          className="h-9 rounded-lg px-3 text-sm border bg-card border-border text-foreground"
         />
       </div>
       <div className="grid gap-1">
@@ -213,8 +211,7 @@ function CreateBankForm({ onSuccess }: { onSuccess: () => void }) {
           name="bankSwiftCode"
           maxLength={100}
           placeholder="Optional"
-          className="h-9 rounded-lg px-3 text-sm border"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+          className="h-9 rounded-lg px-3 text-sm border bg-card border-border text-foreground"
         />
       </div>
       <div className="grid gap-1">
@@ -223,8 +220,7 @@ function CreateBankForm({ onSuccess }: { onSuccess: () => void }) {
           name="bankCodeAbk"
           type="number"
           placeholder="Optional"
-          className="h-9 rounded-lg px-3 text-sm border w-28"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+          className="h-9 rounded-lg px-3 text-sm border w-28 bg-card border-border text-foreground"
         />
       </div>
       <div className="grid gap-1">
@@ -233,8 +229,7 @@ function CreateBankForm({ onSuccess }: { onSuccess: () => void }) {
           name="bankAddress"
           maxLength={100}
           placeholder="Optional"
-          className="h-9 rounded-lg px-3 text-sm border"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+          className="h-9 rounded-lg px-3 text-sm border bg-card border-border text-foreground"
         />
       </div>
       <div className="grid gap-1">
@@ -243,8 +238,7 @@ function CreateBankForm({ onSuccess }: { onSuccess: () => void }) {
           name="bankTransferType"
           maxLength={3}
           placeholder="e.g. WIR"
-          className="h-9 rounded-lg px-3 text-sm border w-20"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+          className="h-9 rounded-lg px-3 text-sm border w-20 bg-card border-border text-foreground"
         />
       </div>
       <button
@@ -303,8 +297,7 @@ function EditBankForm({
         name="bankName"
         defaultValue={row.bank_name ?? ""}
         maxLength={100}
-        className="h-8 rounded px-2 text-sm border w-36"
-        style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+        className="h-8 rounded px-2 text-sm border w-36 bg-card border-border text-foreground"
       />
       <input
         name="bankIbanCode"
@@ -312,40 +305,35 @@ function EditBankForm({
         required
         maxLength={64}
         placeholder="IBAN"
-        className="h-8 rounded px-2 text-sm border w-48"
-        style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+        className="h-8 rounded px-2 text-sm border w-48 bg-card border-border text-foreground"
       />
       <input
         name="bankSwiftCode"
         defaultValue={row.bank_swift_code ?? ""}
         maxLength={100}
         placeholder="SWIFT"
-        className="h-8 rounded px-2 text-sm border w-28"
-        style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+        className="h-8 rounded px-2 text-sm border w-28 bg-card border-border text-foreground"
       />
       <input
         name="bankCodeAbk"
         type="number"
         defaultValue={row.bank_code_abk ?? ""}
         placeholder="ABK"
-        className="h-8 rounded px-2 text-sm border w-20"
-        style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+        className="h-8 rounded px-2 text-sm border w-20 bg-card border-border text-foreground"
       />
       <input
         name="bankAddress"
         defaultValue={row.bank_address ?? ""}
         maxLength={100}
         placeholder="Address"
-        className="h-8 rounded px-2 text-sm border w-36"
-        style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+        className="h-8 rounded px-2 text-sm border w-36 bg-card border-border text-foreground"
       />
       <input
         name="bankTransferType"
         defaultValue={row.bank_transfer_type ?? ""}
         maxLength={3}
         placeholder="Type"
-        className="h-8 rounded px-2 text-sm border w-16"
-        style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+        className="h-8 rounded px-2 text-sm border w-16 bg-card border-border text-foreground"
       />
       <button
         type="submit"
