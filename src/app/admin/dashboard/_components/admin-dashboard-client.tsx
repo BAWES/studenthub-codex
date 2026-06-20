@@ -118,8 +118,8 @@ export function AdminDashboardClient({ session, dashboard }: Props) {
 
       {/* ── Request Pipeline ── */}
       <section className="mb-6" aria-label="Request pipeline status">
-        <div className="rounded-lg border border-[var(--border)] bg-white p-5">
-          <h2 className="mb-4 text-base font-semibold text-foreground">
+        <div className="rounded-lg border border-[var(--border)] bg-card p-5">
+          <h2 className="mb-4 text-base font-semibold" style={{ color: "var(--ink)" }}>
             Request Pipeline
           </h2>
 
@@ -164,7 +164,8 @@ export function AdminDashboardClient({ session, dashboard }: Props) {
                       label={status.label}
                     />
                     <strong
-                      className="text-sm tabular-nums text-foreground"
+                      className="text-sm tabular-nums"
+                      style={{ color: "var(--ink)" }}
                     >
                       {status.value.toLocaleString("en-US")}
                     </strong>
@@ -180,14 +181,15 @@ export function AdminDashboardClient({ session, dashboard }: Props) {
 
       {/* ── PR Merge Metrics ── */}
       <section className="mb-6" aria-label="PR merge time-to-merge metrics">
-        <div className="rounded-lg border border-[var(--border)] bg-white p-5">
+        <div className="rounded-lg border border-[var(--border)] bg-card p-5">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-base font-semibold text-foreground">
+            <h2 className="text-base font-semibold" style={{ color: "var(--ink)" }}>
               PR Time-to-Merge
             </h2>
             <Link
               href="https://github.com/BAWES/studenthub-codex/pulls"
-              className="text-xs font-medium hover:underline text-primary"
+              className="text-xs font-medium hover:underline"
+              style={{ color: "var(--sh-primary)" }}
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -223,7 +225,8 @@ export function AdminDashboardClient({ session, dashboard }: Props) {
               {dashboard.recentPrMergeTimes.length > 0 && (
                 <>
                   <h3
-                    className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                    className="text-xs font-semibold uppercase tracking-wider"
+                    style={{ color: "var(--muted)" }}
                   >
                     Recent merges
                   </h3>
@@ -243,18 +246,21 @@ export function AdminDashboardClient({ session, dashboard }: Props) {
                         >
                           <div className="min-w-0">
                             <strong
-                              className="text-sm text-foreground"
+                              className="text-sm"
+                              style={{ color: "var(--ink)" }}
                             >
                               #{pr.number}
                             </strong>
                             <span
-                              className="ml-2 text-sm text-muted-foreground"
+                              className="ml-2 text-sm"
+                              style={{ color: "var(--muted)" }}
                             >
                               {pr.title}
                             </span>
                           </div>
                           <span
-                            className="text-xs whitespace-nowrap ml-3 text-muted-foreground"
+                            className="text-xs whitespace-nowrap ml-3"
+                            style={{ color: "var(--muted)" }}
                           >
                             {fmtHours}
                           </span>
@@ -318,20 +324,22 @@ function DataListCard({
   emptyMessage?: string;
 }) {
   return (
-    <div className="rounded-lg border border-[var(--border)] bg-white">
+    <div className="rounded-lg border border-[var(--border)] bg-card">
       <div className="flex items-center justify-between border-b border-[var(--border)] px-4 py-3">
         <div>
           <span
-            className="text-xs font-medium uppercase tracking-wider text-muted-foreground"
+            className="text-xs font-medium uppercase tracking-wider"
+            style={{ color: "var(--muted)" }}
           >
             Recent
           </span>
-          <h3 className="text-sm font-semibold text-foreground">
+          <h3 className="text-sm font-semibold" style={{ color: "var(--ink)" }}>
             {title}
           </h3>
         </div>
         <span
-          className="text-xs tabular-nums bg-[var(--surface)] rounded-full px-2 py-0.5 text-muted-foreground"
+          className="text-xs tabular-nums bg-[var(--surface)] rounded-full px-2 py-0.5"
+          style={{ color: "var(--muted)" }}
         >
           {items.length}
         </span>
@@ -347,12 +355,14 @@ function DataListCard({
             >
               <div className="min-w-0 flex-1">
                 <strong
-                  className="block truncate text-sm text-foreground"
+                  className="block truncate text-sm"
+                  style={{ color: "var(--ink)" }}
                 >
                   {item.title}
                 </strong>
                 <span
-                  className="block truncate text-xs text-muted-foreground"
+                  className="block truncate text-xs"
+                  style={{ color: "var(--muted)" }}
                 >
                   {item.subtitle}
                 </span>
@@ -366,21 +376,24 @@ function DataListCard({
                 <div className="text-right">
                   {item.amount != null && (
                     <span
-                      className="block text-xs font-medium tabular-nums text-foreground"
+                      className="block text-xs font-medium tabular-nums"
+                      style={{ color: "var(--ink)" }}
                     >
                       {item.amount}
                     </span>
                   )}
                   {item.date != null && (
                     <span
-                      className="block text-xs text-muted-foreground"
+                      className="block text-xs"
+                      style={{ color: "var(--muted)" }}
                     >
                       {item.date}
                     </span>
                   )}
                   {item.count != null && item.count > 0 && (
                     <span
-                      className="block text-xs text-muted-foreground"
+                      className="block text-xs"
+                      style={{ color: "var(--muted)" }}
                     >
                       {item.count} seats
                     </span>
