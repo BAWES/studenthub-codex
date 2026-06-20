@@ -1,32 +1,32 @@
 import { describe, it, expect } from "vitest";
 import {
-  listSalaryInputSchema,
+  listSalarySchema,
   salaryItemSchema,
-  listSalariesResultSchema,
+  listSalaryResultSchema,
   salaryActionResponseSchema,
 } from "../schemas";
 
 describe("admin/salary schemas", () => {
-  describe("listSalaryInputSchema", () => {
+  describe("listSalarySchema", () => {
     it("defaults page and limit", () => {
-      const result = listSalaryInputSchema.parse({});
+      const result = listSalarySchema.parse({});
       expect(result.page).toBe(1);
       expect(result.limit).toBe(50);
     });
 
     it("accepts explicit page and limit", () => {
-      const result = listSalaryInputSchema.parse({ page: "2", limit: "25" });
+      const result = listSalarySchema.parse({ page: "2", limit: "25" });
       expect(result.page).toBe(2);
       expect(result.limit).toBe(25);
     });
 
     it("rejects negative page", () => {
-      const result = listSalaryInputSchema.safeParse({ page: "-1" });
+      const result = listSalarySchema.safeParse({ page: "-1" });
       expect(result.success).toBe(false);
     });
 
     it("rejects limit over 200", () => {
-      const result = listSalaryInputSchema.safeParse({ limit: "300" });
+      const result = listSalarySchema.safeParse({ limit: "300" });
       expect(result.success).toBe(false);
     });
   });
@@ -54,9 +54,9 @@ describe("admin/salary schemas", () => {
     });
   });
 
-  describe("listSalariesResultSchema", () => {
+  describe("listSalaryResultSchema", () => {
     it("validates a complete list result", () => {
-      const result = listSalariesResultSchema.parse({
+      const result = listSalaryResultSchema.parse({
         salaries: [
           { staff_salary_uuid: "SAL-001", salary: 2500, salary_currency: "KWD" },
         ],
