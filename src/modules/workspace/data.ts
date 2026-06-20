@@ -2406,3 +2406,32 @@ export async function getAdminDegreeRows() {
     updated: formatDate(row.degree_updated_at)
   }));
 }
+
+export async function getAdminEmailCampaignRows() {
+  const rows = await prisma.email_campaign.findMany({
+    orderBy: { created_at: "desc" },
+    take: 60,
+    select: {
+      campaign_uuid: true,
+      subject: true,
+      progress: true,
+      trigger_date_time: true,
+      is_recurring: true,
+      target: true,
+      status: true,
+      created_at: true,
+      updated_at: true,
+    }
+  });
+
+  return rows.map((row) => ({
+    id: row.campaign_uuid,
+    subject: row.subject ?? "(no subject)",
+    target: row.target ?? "both",
+    status: row.status ?? false,
+    progress: row.progress ?? 0,
+    is_recurring: row.is_recurring ?? false,
+    trigger_date: row.trigger_date_time ? formatDate(row.trigger_date_time) : "Not scheduled",
+    updated: formatDate(row.updated_at)
+  }));
+}
