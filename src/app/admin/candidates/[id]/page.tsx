@@ -46,7 +46,7 @@ export default async function AdminCandidateDetailPage({
     switch (status) {
       case 10: return <Badge className="bg-green-600">Active</Badge>;
       case 20: return <Badge variant="secondary">Inactive</Badge>;
-      case 30: return <Badge variant="destructive">Banned</Badge>;
+      case 30: return <Badge className="bg-destructive text-destructive-foreground hover:bg-destructive/80">Banned</Badge>;
       default: return <Badge variant="outline">{`Status ${status}`}</Badge>;
     }
   }
