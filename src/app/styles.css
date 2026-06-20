@@ -24,6 +24,13 @@
   --color-ring: var(--ring);
   --radius: var(--radius);
   --font-size-label: 0.8125rem;
+  --color-coral: var(--sh-coral);
+  --color-coral-hover: var(--sh-coral-hover);
+  --color-coral-light: var(--sh-coral-light);
+  --color-success: var(--sh-success);
+  --color-warning: var(--sh-warning);
+  --color-error: var(--sh-error);
+  --color-info: var(--sh-info);
 }
 
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
