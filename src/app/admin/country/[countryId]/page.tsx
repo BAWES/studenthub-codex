@@ -42,8 +42,8 @@ export default async function AdminCountryDetailPage({
           facts={[
             { label: "Name (EN)", value: country.country_name_en },
             { label: "Name (AR)", value: country.country_name_ar ?? "—" },
-            { label: "Nationality (EN)", value: country.nationality_name_en },
-            { label: "Nationality (AR)", value: country.nationality_name_ar ?? "—" },
+            { label: "Nationality (EN)", value: country.country_nationality_name_en },
+            { label: "Nationality (AR)", value: country.country_nationality_name_ar ?? "—" },
             { label: "ISO Code", value: country.iso ?? "—" },
             { label: "Country Code", value: country.country_code != null ? `+${country.country_code}` : "—" },
             { label: "Currency", value: country.currency_code ?? "—" },

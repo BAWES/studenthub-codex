@@ -272,7 +272,7 @@ function EditCountryForm({
       <input name="countryNameAr" defaultValue={row.country_name_ar ?? ""} maxLength={100}
         className="h-8 rounded px-2 text-sm border w-32"
         style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }} />
-      <input name="nationalityNameEn" defaultValue={row.nationality_name_en} required maxLength={100}
+      <input name="nationalityNameEn" defaultValue={row.country_nationality_name_en} required maxLength={100}
         className="h-8 rounded px-2 text-sm border w-32"
         style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }} />
       <input name="iso" defaultValue={row.iso ?? ""} maxLength={3}
