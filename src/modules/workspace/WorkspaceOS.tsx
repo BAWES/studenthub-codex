@@ -12,6 +12,7 @@ import { WorkspaceOSContext } from "./WorkspaceOSContext";
 import { WorkspaceMobileNavigation, WorkspaceNavigation } from "./WorkspaceNavigation";
 import { navForRole } from "./navigation";
 import type { NavItem } from "./navigation";
+import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { PageTransition } from "./PageTransition";
 import { RaycastCommandPalette } from "./RaycastCommandPalette";
@@ -326,17 +327,16 @@ export function WorkspaceOS({
             <strong>StudentHub</strong>
           </Link>
           <WorkspaceNavigation items={navItems} role={session.role} />
-          <Separator className="workspaceRailDivider" />
+          <hr className="border-t border-border mx-2 my-1" />
           <div className="workspaceRailFooter">
-            <button className="commandLauncher" type="button" aria-label="Open command menu" onClick={() => { setCmdOpen(true); }}>
-              <span>⌘K</span>
-            </button>
+            <Button variant="ghost" size="icon" aria-label="Open command menu" onClick={() => { setCmdOpen(true); }}>
+              <span className="text-xs font-bold text-muted-foreground">⌘K</span>
+            </Button>
             <ThemeToggle />
             <form action={logoutAction}>
-              <button type="submit" aria-label="Sign out">
+              <Button type="submit" variant="ghost" size="icon" aria-label="Sign out">
                 <LogOut size={18} strokeWidth={1.5} aria-hidden="true" />
-                <span>Sign out</span>
-              </button>
+              </Button>
             </form>
           </div>
         </aside>
