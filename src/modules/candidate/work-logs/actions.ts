@@ -25,7 +25,7 @@ import {
   type ListWorkLogsResult,
   type SubmitWorkLogResult,
   type UpdateWorkLogStatusResult,
-} from "@/app/candidate/work-logs/schemas";
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // listWorkLogs — paginated list of work logs for the current candidate

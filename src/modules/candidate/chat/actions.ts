@@ -17,16 +17,16 @@ import {
   getConversationMessagesSchema,
   listConversationsResultOutputSchema,
   getConversationMessagesResultOutputSchema,
-} from "@/app/candidate/chat/schemas";
+} from "./schemas";
 import type {
   ListConversationsParams,
   GetConversationMessagesParams,
   ListConversationsResult,
   GetConversationMessagesResult,
-} from "@/app/candidate/chat/schemas";
+} from "./schemas";
 
 // Re-export types for client components
-export type { ConversationItem, ConversationMessageItem, ListConversationsResult, GetConversationMessagesResult } from "@/app/candidate/chat/schemas";
+export type { ConversationItem, ConversationMessageItem, ListConversationsResult, GetConversationMessagesResult } from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Server actions — delegate to module-level implementations
