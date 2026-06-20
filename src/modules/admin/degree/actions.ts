@@ -3,16 +3,33 @@
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
 import {
-  listDegreesSchema,
+  degreeItemSchema,
   listDegreesResultSchema,
 } from "./schemas";
-import type { ListDegreesInput, ListDegreesResult } from "./schemas";
+import type { ListDegreesResult } from "./schemas";
+import { z } from "zod";
+
+// ---------------------------------------------------------------------------
+// Input schemas
+// ---------------------------------------------------------------------------
+
+const listDegreesSchema = z.object({
+  page: z.coerce.number().int().positive().optional().default(1),
+  limit: z.coerce.number().int().min(1).max(200).optional().default(50),
+});
+
+export type ListDegreesParams = z.input<typeof listDegreesSchema>;
+
+// ---------------------------------------------------------------------------
+// listDegrees
+// ---------------------------------------------------------------------------
 
 export async function listDegrees(
-  input: ListDegreesInput = {},
+  params: ListDegreesParams = {},
 ): Promise<ListDegreesResult> {
   await requireCapability("admin.read");
-  const parsed = listDegreesSchema.safeParse(input);
+
+  const parsed = listDegreesSchema.safeParse(params);
   if (!parsed.success)
     return { degrees: [], total: 0, page: 1, limit: 50, totalPages: 0 };
 
@@ -44,7 +61,7 @@ export async function listDegrees(
     degree_sort_order: row.degree_sort_order ?? null,
   }));
 
-  const result = {
+  const result: ListDegreesResult = {
     degrees,
     total,
     page,
@@ -52,10 +69,11 @@ export async function listDegrees(
     totalPages: Math.ceil(total / limit),
   };
 
+  // Validate output shape
   const outputParsed = listDegreesResultSchema.safeParse(result);
   if (!outputParsed.success) {
     console.error(
-      "[admin/degree] listDegrees output failed:",
+      "[modules/admin/degree] listDegrees output validation failed:",
       outputParsed.error.issues,
     );
   }

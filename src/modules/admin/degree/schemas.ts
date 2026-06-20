@@ -1,9 +1,8 @@
 import { z } from "zod";
 
-export const listDegreesSchema = z.object({
-  page: z.coerce.number().int().positive().optional().default(1),
-  limit: z.coerce.number().int().min(1).max(200).optional().default(50),
-});
+// ---------------------------------------------------------------------------
+// Output validation schemas
+// ---------------------------------------------------------------------------
 
 export const degreeItemSchema = z.object({
   degree_uuid: z.string().min(1),
@@ -23,12 +22,9 @@ export const listDegreesResultSchema = z.object({
   totalPages: z.number().int().nonnegative(),
 });
 
-export const degreeActionResponseSchema = z.object({
-  operation: z.string().min(1),
-  message: z.string().min(1),
-});
+// ---------------------------------------------------------------------------
+// Types derived from output schemas
+// ---------------------------------------------------------------------------
 
-export type ListDegreesInput = z.input<typeof listDegreesSchema>;
 export type DegreeItem = z.output<typeof degreeItemSchema>;
 export type ListDegreesResult = z.output<typeof listDegreesResultSchema>;
-export type DegreeActionResponse = z.output<typeof degreeActionResponseSchema>;

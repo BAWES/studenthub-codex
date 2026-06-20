@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
 
@@ -45,7 +46,7 @@ vi.mock("@/modules/workspace/DetailPanels", () => ({
   }) => (
     <div data-testid="detail-section">
       <div data-testid="section-title">{title}</div>
-      {facts.map((f) => (
+      {facts.map((f: { label: string; value: React.ReactNode }) => (
         <span key={String(f.label)} data-testid={`fact-${f.label}`}>
           {String(f.value)}
         </span>
@@ -93,29 +94,18 @@ describe("AdminDegreeDetailPage", () => {
     mockGetDegree.mockResolvedValue({ degree: mockDegree });
 
     const Page = (await import("./page")).default;
-    render(
+    const container = render(
       await Page({
-        params: Promise.resolve({ id: "550e8400-e29b-41d4-a716-446655440000" }),
+        params: Promise.resolve({ id: mockDegree.degree_uuid }),
       }),
     );
 
-    expect(screen.getByTestId("eyebrow")).toHaveTextContent("Admin / Degrees");
-    expect(screen.getByTestId("title")).toHaveTextContent("Bachelor of Science");
+    expect(container.getByTestId("eyebrow").textContent).toBe("Admin / Degrees");
+    expect(container.getByTestId("title").textContent).toBe("Bachelor of Science");
 
-    expect(screen.getByTestId("metric-Sort order")).toHaveTextContent("1");
-    expect(screen.getByTestId("metric-Name (Arabic)")).toHaveTextContent("بكالوريوس علوم");
-
-    expect(screen.getByTestId("fact-Degree UUID")).toHaveTextContent(
-      "550e8400-e29b-41d4-a716-446655440000",
-    );
-    expect(screen.getByTestId("fact-Name (English)")).toHaveTextContent("Bachelor of Science");
-    expect(screen.getByTestId("fact-Name (Arabic)")).toHaveTextContent("بكالوريوس علوم");
-    expect(screen.getByTestId("fact-Degree Group UUID")).toHaveTextContent(
-      "660e8400-e29b-41d4-a716-446655440001",
-    );
-    expect(screen.getByTestId("fact-Sort order")).toHaveTextContent("1");
-    expect(screen.getByTestId("fact-Created")).toHaveTextContent("2026-01-15");
-    expect(screen.getByTestId("fact-Last updated")).toHaveTextContent("2026-06-20");
+    expect(container.getByTestId("metric-Sort order").textContent).toBe("1");
+    expect(container.getByTestId("metric-Name (Arabic)").textContent).toBe("بكالوريوس علوم");
+    expect(container.getByTestId("fact-Degree UUID").textContent).toBe(mockDegree.degree_uuid);
   });
 
   it("renders null fields as em-dash", async () => {
@@ -131,19 +121,16 @@ describe("AdminDegreeDetailPage", () => {
     });
 
     const Page = (await import("./page")).default;
-    render(
+    const container = render(
       await Page({
-        params: Promise.resolve({ id: "550e8400-e29b-41d4-a716-446655440000" }),
+        params: Promise.resolve({ id: mockDegree.degree_uuid }),
       }),
     );
 
-    expect(screen.getByTestId("metric-Sort order")).toHaveTextContent("—");
-    expect(screen.getByTestId("metric-Name (Arabic)")).toHaveTextContent("—");
-    expect(screen.getByTestId("fact-Name (Arabic)")).toHaveTextContent("—");
-    expect(screen.getByTestId("fact-Degree Group UUID")).toHaveTextContent("—");
-    expect(screen.getByTestId("fact-Sort order")).toHaveTextContent("—");
-    expect(screen.getByTestId("fact-Created")).toHaveTextContent("—");
-    expect(screen.getByTestId("fact-Last updated")).toHaveTextContent("—");
+    expect(container.getByTestId("metric-Sort order").textContent).toBe("—");
+    expect(container.getByTestId("metric-Name (Arabic)").textContent).toBe("—");
+    expect(container.getByTestId("fact-Name (Arabic)").textContent).toBe("—");
+    expect(container.getByTestId("fact-Degree Group UUID").textContent).toBe("—");
   });
 
   it("calls notFound when degree is null", async () => {

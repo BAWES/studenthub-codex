@@ -29,7 +29,7 @@ export function AdminDegreesTable({ session, degrees }: Props) {
         title="Degrees"
         description="All academic degrees. Click a row to view details."
         rows={degrees.map((d) => ({ ...d, id: d.degree_uuid }))}
-        rowHref="/admin/degree/"
+        rowHref={(row) => `/admin/degree/${row.id}`}
         columns={[
           {
             key: "degree_name_en",
