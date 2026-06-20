@@ -5,6 +5,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 // ---------------------------------------------------------------------------
 vi.mock("@/modules/employer/jobs/[id]/applications/actions", () => ({
   listJobApplicationsByEmployer: vi.fn(),
+  updateApplicationStatus: vi.fn(),
 }));
 
 // Mock session
@@ -12,11 +13,10 @@ vi.mock("@/modules/auth/session", () => ({
   requireCapability: vi.fn(),
 }));
 
-const { listJobApplicationsByEmployer } = await import(
-  "@/modules/employer/jobs/[id]/applications/actions"
-);
+const { listJobApplicationsByEmployer, updateApplicationStatus: mockedUpdateAppStatus } =
+  await import("@/modules/employer/jobs/[id]/applications/actions");
 const auth = await import("@/modules/auth/session");
-const { listEmployerApplications } = await import("./actions");
+const actions = await import("./actions");
 
 // ---------------------------------------------------------------------------
 // Fixtures
@@ -66,7 +66,7 @@ const mockApplications = [
 ];
 
 // ---------------------------------------------------------------------------
-// Tests
+// Tests — listEmployerApplications
 // ---------------------------------------------------------------------------
 
 describe("listEmployerApplications", () => {
@@ -82,7 +82,7 @@ describe("listEmployerApplications", () => {
       total: 4,
     });
 
-    const result = await listEmployerApplications({});
+    const result = await actions.listEmployerApplications({});
 
     expect(auth.requireCapability).toHaveBeenCalledWith("company.read.linked");
     expect(result.success).toBe(true);
@@ -103,7 +103,7 @@ describe("listEmployerApplications", () => {
       total: 1,
     });
 
-    const result = await listEmployerApplications({});
+    const result = await actions.listEmployerApplications({});
 
     const app = result.applications[0];
     expect(app.id).toBe(1);
@@ -120,7 +120,7 @@ describe("listEmployerApplications", () => {
       total: 0,
     });
 
-    await listEmployerApplications({ page: 2, limit: 10 });
+    await actions.listEmployerApplications({ page: 2, limit: 10 });
 
     expect(listJobApplicationsByEmployer).toHaveBeenCalledWith({
       page: 2,
@@ -136,7 +136,7 @@ describe("listEmployerApplications", () => {
       total: 1,
     });
 
-    const result = await listEmployerApplications({ status: "accepted" });
+    const result = await actions.listEmployerApplications({ status: "accepted" });
 
     expect(listJobApplicationsByEmployer).toHaveBeenCalledWith({
       page: 1,
@@ -153,7 +153,7 @@ describe("listEmployerApplications", () => {
       total: 0,
     });
 
-    const result = await listEmployerApplications({});
+    const result = await actions.listEmployerApplications({});
 
     expect(result.metrics).toEqual({
       total: 0,
@@ -165,11 +165,56 @@ describe("listEmployerApplications", () => {
 
   it("returns empty result on invalid input", async () => {
     // negative page triggers parse failure
-    const result = await listEmployerApplications({ page: -1 } as any);
+    const result = await actions.listEmployerApplications({ page: -1 } as any);
 
     expect(listJobApplicationsByEmployer).not.toHaveBeenCalled();
     expect(result.applications).toEqual([]);
     expect(result.total).toBe(0);
     expect(result.metrics).toEqual({ total: 0, pending: 0, accepted: 0, rejected: 0 });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Tests — updateApplicationStatus
+// ---------------------------------------------------------------------------
+
+describe("updateApplicationStatus", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(auth.requireCapability).mockResolvedValue(undefined as never);
+  });
+
+  it("calls jobs-level updateApplicationStatus with correct params", async () => {
+    vi.mocked(mockedUpdateAppStatus).mockResolvedValue({ success: true });
+
+    const result = await actions.updateApplicationStatus({
+      applicationId: 42,
+      status: "accepted",
+    });
+
+    expect(auth.requireCapability).toHaveBeenCalledWith("company.write.linked");
+    expect(mockedUpdateAppStatus).toHaveBeenCalledWith({
+      applicationId: 42,
+      status: "accepted",
+    });
+    expect(result).toEqual({ success: true });
+  });
+
+  it("rejects invalid status", async () => {
+    await expect(
+      actions.updateApplicationStatus({ applicationId: 1, status: "invalid_status" } as any),
+    ).rejects.toThrow();
+  });
+
+  it("rejects missing applicationId", async () => {
+    await expect(
+      actions.updateApplicationStatus({ status: "accepted" } as any),
+    ).rejects.toThrow();
+  });
+
+  it("rejects zero applicationId", async () => {
+    await expect(
+      actions.updateApplicationStatus({ applicationId: 0, status: "accepted" }),
+    ).rejects.toThrow();
   });
 });

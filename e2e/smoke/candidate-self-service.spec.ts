@@ -54,7 +54,7 @@ test.describe("Candidate self-service — mobile smoke", () => {
     // Readiness section
     await expect(page.locator('text="Readiness"').first()).toBeVisible({ timeout: 15000 });
     await expect(page.locator(".candidateReadinessScore strong")).toBeVisible();
-    await expect(page.locator(".candidateReadinessItems")).toBeVisible();
+    await expect(page.locator(".candidateReadinessItems").first()).toBeVisible();
 
     // All four section action links visible on profile
     const actions = page.locator(".candidateProfileActions");
@@ -74,11 +74,11 @@ test.describe("Candidate self-service — mobile smoke", () => {
     const page = await context.newPage();
     await page.goto("/candidate");
 
-    await expect(page.locator(".shProfileHero")).toBeVisible();
-    await expect(page.locator(".shProfileInfoName")).toBeVisible();
+    await expect(page.locator(".shProfileHero").first()).toBeVisible();
+    await expect(page.locator(".shProfileInfoName").first()).toBeVisible();
 
     // Fact grid is present
-    await expect(page.locator(".candidateFactGrid")).toBeVisible();
+    await expect(page.locator(".candidateFactGrid").first()).toBeVisible();
 
     await context.close();
   });
@@ -211,7 +211,7 @@ test.describe("Candidate self-service — mobile smoke", () => {
 
     for (const section of sections) {
       await page.goto("/candidate");
-      await page.waitForSelector('text="Readiness"', { timeout: 15000 });
+      await page.locator('text="Readiness"').first().waitFor({ state: "visible", timeout: 15000 });
       const link = page.locator(".candidateProfileActions").getByRole("link", { name: section.name });
       await expect(link).toBeVisible();
       await link.click();

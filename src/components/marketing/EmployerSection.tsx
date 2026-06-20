@@ -125,12 +125,10 @@ export default function EmployerSection({ className }: EmployerSectionProps) {
           return (
             <div
               key={feat.title}
-              className="group rounded-xl p-5 shLandingGlassHover"
+              className="group rounded-xl p-5 shLandingCardHover"
               style={{
-                backgroundColor: "var(--sh-glass-bg)",
-                backdropFilter: "blur(12px)",
-                WebkitBackdropFilter: "blur(12px)",
-                border: "1px solid var(--sh-glass-border)",
+                backgroundColor: "var(--surface)",
+                border: "1px solid var(--border)",
                 opacity: isVisible ? 1 : 0,
                 transform: isVisible
                   ? "translateY(0)"
@@ -168,7 +166,7 @@ export default function EmployerSection({ className }: EmployerSectionProps) {
                 className="mt-3 pt-3 text-[11px] font-semibold flex items-center gap-1.5"
                 style={{
                   color: SH_BLUE,
-                  borderTop: "1px solid var(--sh-glass-border)",
+                  borderTop: "1px solid var(--border)",
                 }}
               >
                 <Sparkles className="size-3" />

@@ -3,9 +3,23 @@
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
-import { listJobApplicationsByEmployer } from "@/modules/employer/jobs/[id]/applications/actions";
-import { listEmployerApplicationsSchema, getApplicationDetailSchema, getApplicationDetailOutputSchema } from "./schemas";
-import type { ListEmployerApplicationsInput, EmployerApplicationRow, GetApplicationDetailInput } from "./schemas";
+import {
+  listJobApplicationsByEmployer,
+  updateApplicationStatus as updateJobApplicationStatus,
+} from "@/modules/employer/jobs/[id]/applications/actions";
+import {
+  listEmployerApplicationsSchema,
+  getApplicationDetailSchema,
+  getApplicationDetailOutputSchema,
+  updateEmployerApplicationStatusSchema,
+  updateEmployerApplicationStatusOutputSchema,
+} from "./schemas";
+import type {
+  ListEmployerApplicationsInput,
+  EmployerApplicationRow,
+  GetApplicationDetailInput,
+  UpdateEmployerApplicationStatusInput,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Output type from the module-level action
@@ -127,4 +141,25 @@ function computeMetrics(
   ).length;
 
   return { total, pending, accepted, rejected };
+}
+
+// ---------------------------------------------------------------------------
+// Update application status — accept or reject an application
+// ---------------------------------------------------------------------------
+
+/**
+ * Update the status of an application (accept/reject/review).
+ * Delegates to the jobs-level action for the actual DB mutation.
+ */
+export async function updateApplicationStatus(
+  input: UpdateEmployerApplicationStatusInput,
+): Promise<z.output<typeof updateEmployerApplicationStatusOutputSchema>> {
+  await requireCapability("company.write.linked");
+
+  const parsed = updateEmployerApplicationStatusSchema.safeParse(input);
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid input");
+  }
+
+  return updateJobApplicationStatus(parsed.data);
 }
