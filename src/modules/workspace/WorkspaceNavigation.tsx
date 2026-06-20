@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { buttonVariants } from "@/components/ui/button";
 import type { NavItem } from "./navigation";
+import { cn } from "@/lib/utils";
 
 export function WorkspaceNavigation({ items, role }: { items: NavItem[]; role: string }) {
   const pathname = usePathname();
@@ -14,7 +16,11 @@ export function WorkspaceNavigation({ items, role }: { items: NavItem[]; role: s
         return (
           <Link
             aria-current={active ? "page" : undefined}
-            className={active ? "active" : ""}
+            className={cn(
+              buttonVariants({ variant: "ghost", size: "sm" }),
+              "workspaceRailLink",
+              active && "active"
+            )}
             href={item.href}
             key={item.href}
             title={item.label}
