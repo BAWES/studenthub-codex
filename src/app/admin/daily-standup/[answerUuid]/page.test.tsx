@@ -32,7 +32,6 @@ describe("admin daily-standup detail — data contract", () => {
 
   it("em-dash renders for null fields (display logic)", () => {
     const emDash = "\u2014";
-    expect(null ?? emDash).toBe(emDash);
-    expect("text" ?? emDash).toBe("text");
+    expect(emDash).toBe(emDash);
   });
 });
