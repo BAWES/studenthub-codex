@@ -12,6 +12,20 @@ import type {
   RecruiterStaffReport,
   GetRecruiterReportResult,
 } from "@/modules/admin/reports/actions";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 export const dynamic = "force-dynamic";
 
@@ -129,119 +143,56 @@ async function RecruiterDailySection({
   data: GetRecruiterReportResult;
 }) {
   return (
-    <section
-      className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5"
-    >
-      <h3
-        className="text-sm font-semibold mb-3 text-foreground"
-      >
-        Recruiter Activity — {data.date}
-      </h3>
-
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-sm">
+          Recruiter Activity — {data.date}
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
       <div className="overflow-x-auto">
-        <table className="w-full text-xs">
-          <thead>
-            <tr className="border-b" >
-              <th
-                className="text-left py-2 px-2 font-medium text-muted-foreground"
-              >
-                Staff
-              </th>
-              <th
-                className="text-right py-2 px-2 font-medium text-muted-foreground"
-              >
-                Assigned
-              </th>
-              <th
-                className="text-right py-2 px-2 font-medium text-muted-foreground"
-              >
-                Requests
-              </th>
-              <th
-                className="text-right py-2 px-2 font-medium text-muted-foreground"
-              >
-                Notes
-              </th>
-              <th
-                className="text-right py-2 px-2 font-medium text-muted-foreground"
-              >
-                Stories
-              </th>
-              <th
-                className="text-right py-2 px-2 font-medium text-muted-foreground"
-              >
-                Completed
-              </th>
-              <th
-                className="text-right py-2 px-2 font-medium text-muted-foreground"
-              >
-                Suggestions
-              </th>
-              <th
-                className="text-right py-2 px-2 font-medium text-muted-foreground"
-              >
-                Invitations
-              </th>
-              <th
-                className="text-right py-2 px-2 font-medium text-muted-foreground"
-              >
-                Accepted
-              </th>
-              <th
-                className="text-right py-2 px-2 font-medium text-muted-foreground"
-              >
-                Rejected
-              </th>
-            </tr>
-          </thead>
-          <tbody>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Staff</TableHead>
+              <TableHead className="text-right">Assigned</TableHead>
+              <TableHead className="text-right">Requests</TableHead>
+              <TableHead className="text-right">Notes</TableHead>
+              <TableHead className="text-right">Stories</TableHead>
+              <TableHead className="text-right">Completed</TableHead>
+              <TableHead className="text-right">Suggestions</TableHead>
+              <TableHead className="text-right">Invitations</TableHead>
+              <TableHead className="text-right">Accepted</TableHead>
+              <TableHead className="text-right">Rejected</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {data.reports.map((r, i) => (
-              <tr
-                key={i}
-                className="border-b"
-                
-              >
-                <td className="py-2 px-2 text-foreground">
+              <TableRow key={i}>
+                <TableCell>
                   <div className="font-medium">{r.staffName}</div>
                   <div className="text-muted-foreground">{r.staffEmail}</div>
-                </td>
-                <td className="text-right py-2 px-2 text-foreground">
-                  {numberCell(r.totalAssigned)}
-                </td>
-                <td className="text-right py-2 px-2 text-foreground">
-                  {numberCell(r.totalRequests)}
-                </td>
-                <td className="text-right py-2 px-2 text-foreground">
-                  {numberCell(r.totalNotes)}
-                </td>
-                <td className="text-right py-2 px-2 text-foreground">
-                  {numberCell(r.totalStories)}
-                </td>
-                <td className="text-right py-2 px-2 text-foreground">
-                  {numberCell(r.totalCompletedStories)}
-                </td>
-                <td className="text-right py-2 px-2 text-foreground">
-                  {numberCell(r.totalSuggestions)}
-                </td>
-                <td className="text-right py-2 px-2 text-foreground">
-                  {numberCell(r.totalInvitations)}
-                </td>
-                <td className="text-right py-2 px-2 text-foreground">
-                  {numberCell(r.totalAcceptedInvitations)}
-                </td>
-                <td className="text-right py-2 px-2 text-foreground">
-                  {numberCell(r.totalRejectedInvitations)}
-                </td>
-              </tr>
+                </TableCell>
+                <TableCell className="text-right">{numberCell(r.totalAssigned)}</TableCell>
+                <TableCell className="text-right">{numberCell(r.totalRequests)}</TableCell>
+                <TableCell className="text-right">{numberCell(r.totalNotes)}</TableCell>
+                <TableCell className="text-right">{numberCell(r.totalStories)}</TableCell>
+                <TableCell className="text-right">{numberCell(r.totalCompletedStories)}</TableCell>
+                <TableCell className="text-right">{numberCell(r.totalSuggestions)}</TableCell>
+                <TableCell className="text-right">{numberCell(r.totalInvitations)}</TableCell>
+                <TableCell className="text-right">{numberCell(r.totalAcceptedInvitations)}</TableCell>
+                <TableCell className="text-right">{numberCell(r.totalRejectedInvitations)}</TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
 
       <p className="text-xs mt-3 text-muted-foreground">
         Total staff: {data.total}
       </p>
-    </section>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -255,49 +206,36 @@ async function InvitationSummarySection({
   data: { date: string; summary: Array<{ status: number; count: number }> };
 }) {
   return (
-    <section
-      className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5"
-    >
-      <h3
-        className="text-sm font-semibold mb-3 text-foreground"
-      >
-        Invitation Summary — {data.date}
-      </h3>
-
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-sm">
+          Invitation Summary — {data.date}
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
       <div className="overflow-x-auto">
-        <table className="w-full text-xs">
-          <thead>
-            <tr className="border-b" >
-              <th
-                className="text-left py-2 px-2 font-medium text-muted-foreground"
-              >
-                Status
-              </th>
-              <th
-                className="text-right py-2 px-2 font-medium text-muted-foreground"
-              >
-                Count
-              </th>
-            </tr>
-          </thead>
-          <tbody>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Status</TableHead>
+              <TableHead className="text-right">Count</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {data.summary.map((s, i) => (
-              <tr
-                key={i}
-                className="border-b"
-                
-              >
-                <td className="py-2 px-2 text-foreground">
+              <TableRow key={i}>
+                <TableCell>
                   {statusLabel(s.status)}
-                </td>
-                <td className="text-right py-2 px-2 text-foreground">
+                </TableCell>
+                <TableCell className="text-right">
                   {numberCell(s.count)}
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
-    </section>
+      </CardContent>
+    </Card>
   );
 }
