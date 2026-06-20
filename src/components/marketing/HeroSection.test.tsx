@@ -41,23 +41,23 @@ afterEach(() => {
 // ── Import component ──────────────────────────────────────────
 import HeroSection from "./HeroSection";
 
-describe("HeroSection", () => {
+describe("HeroSection (staff-matched placement)", () => {
   describe("Default render", () => {
     it("renders eyebrow text", () => {
       render(<HeroSection />);
       expect(
-        screen.getByText("Staff-matched student placement"),
+        screen.getByText("Staff-matched student placements"),
       ).toBeTruthy();
     });
 
-    it("renders an H1 heading", () => {
+    it("renders an H1 heading with placement messaging", () => {
       render(<HeroSection />);
       const heading = screen.getByRole("heading", { level: 1 });
       expect(heading.textContent).toBeTruthy();
       expect(heading.textContent!.length).toBeGreaterThan(10);
     });
 
-    it("renders body paragraph", () => {
+    it("renders body paragraph about staff-matched placement", () => {
       render(<HeroSection />);
       expect(
         screen.getByText(/the platform where students build careers/i),
