@@ -14,6 +14,10 @@ export const dynamic = "force-dynamic";
 // Keep Chromium instance cached across warm invocations
 let _chromium: Awaited<ReturnType<typeof import("playwright").chromium.launch>> | null = null;
 
+const PDF_TIMEOUT_MS = 30_000; // 30 seconds max for PDF generation
+const BROWSER_LAUNCH_TIMEOUT_MS = 15_000; // 15 seconds for Chromium launch
+const PAGE_CONTENT_TIMEOUT_MS = 20_000; // 20 seconds for page content rendering
+
 async function getBrowser() {
   // If we have a cached instance, verify it's still alive
   if (_chromium) {
@@ -29,7 +33,10 @@ async function getBrowser() {
   }
 
   const { chromium } = await import("playwright");
-  _chromium = await chromium.launch({ headless: true });
+  _chromium = await chromium.launch({
+    headless: true,
+    timeout: BROWSER_LAUNCH_TIMEOUT_MS,
+  });
 
   // Ensure cleanup on process exit to avoid orphaned Chromium processes
   process.once("beforeExit", () => {
@@ -54,8 +61,8 @@ export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ uuid: string }> },
 ) {
+  const { uuid } = await params;
   try {
-    const { uuid } = await params;
 
     const valid = validateUuid(uuid);
     if (!valid.valid) {
@@ -122,7 +129,7 @@ export async function GET(
       },
     });
   } catch (error) {
-    console.error("PDF route handler failed:", error);
+    console.error(`[evaluation-pdf] Route handler failed for evaluation ${uuid}:`, error);
     return new NextResponse("Failed to generate the evaluation report", { status: 500 });
   }
 }
@@ -131,19 +138,13 @@ export async function GET(
 // PDF generation via Playwright
 // ---------------------------------------------------------------------------
 
-/** Timeout for Playwright PDF operations (30 seconds). */
-const PDF_TIMEOUT_MS = 30_000;
-
 async function generatePdf(html: string, uuid: string): Promise<NextResponse> {
   let page: import("playwright").Page | null = null;
   try {
     const browser = await getBrowser();
     page = await browser.newPage();
-
-    // Set page-level default timeout so setContent and pdf respect it
-    page.setDefaultTimeout(PDF_TIMEOUT_MS);
-
-    await page.setContent(html, { waitUntil: "networkidle" });
+    page.setDefaultTimeout(PAGE_CONTENT_TIMEOUT_MS);
+    await page.setContent(html, { waitUntil: "networkidle", timeout: PAGE_CONTENT_TIMEOUT_MS });
 
     const pdfBuffer = await page.pdf({
       format: "A4",
@@ -157,9 +158,6 @@ async function generatePdf(html: string, uuid: string): Promise<NextResponse> {
         </div>`,
     });
 
-    await page.close();
-    page = null;
-
     return new NextResponse(pdfBuffer.toString() as unknown as BodyInit, {
       headers: {
         "Content-Type": "application/pdf",
@@ -168,16 +166,8 @@ async function generatePdf(html: string, uuid: string): Promise<NextResponse> {
       },
     });
   } catch (error) {
-    const isTimeout =
-      error instanceof Error &&
-      (error.name === "TimeoutError" ||
-        (error.message && /timeout/i.test(error.message)));
-
-    console.error(`PDF generation ${isTimeout ? "timed out" : "failed"}:`, error);
-    return new NextResponse(
-      isTimeout ? "PDF generation timed out" : "Failed to generate PDF",
-      { status: isTimeout ? 504 : 500 },
-    );
+    console.error(`[evaluation-pdf] PDF generation failed for evaluation ${uuid}:`, error);
+    return new NextResponse("Failed to generate PDF", { status: 500 });
   } finally {
     // Ensure page is always closed to avoid resource leaks
     if (page) {
@@ -185,3 +175,13 @@ async function generatePdf(html: string, uuid: string): Promise<NextResponse> {
     }
   }
 }
+
+// ---------------------------------------------------------------------------
+// HTML report builder (extracted to pdf-helpers.ts for testability)
+// ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+
