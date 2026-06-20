@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation";
 import { requireRoleCapability } from "@/modules/auth/session";
-import { DetailSection } from "@/modules/workspace/DetailPanels";
+import { CompactList, FactPanel } from "@/modules/workspace/DetailPanels";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
-import { getCompanyRequestDetail } from "./actions";
+import { getCompanyRequestDetail } from "@/modules/workspace/data";
 import { formatDate } from "@/modules/workspace/format";
 
 export const dynamic = "force-dynamic";
@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 export default async function CompanyRequestDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await requireRoleCapability("company", "request.read.linked");
   const { id } = await params;
-  const data = await getCompanyRequestDetail(id);
+  const data = await getCompanyRequestDetail(session.id, id);
 
   if (!data?.request) {
     notFound();
@@ -25,7 +25,7 @@ export default async function CompanyRequestDetailPage({ params }: { params: Pro
       primary={{ title: "Applications", rows: data.applications }}
       secondary={{ title: "Invitations", rows: data.invitations }}
     >
-      <DetailSection
+      <FactPanel
         title="Request Brief"
         facts={[
           { label: "Company", value: data.request.company?.company_name },
@@ -38,8 +38,8 @@ export default async function CompanyRequestDetailPage({ params }: { params: Pro
         ]}
       />
       <section className="detailGrid">
-        <DetailSection type="list" title="Interviews" rows={data.interviews} />
-        <DetailSection type="list" title="Stories" rows={data.stories} />
+        <CompactList title="Interviews" rows={data.interviews} />
+        <CompactList title="Stories" rows={data.stories} />
       </section>
     </WorkspaceShell>
   );

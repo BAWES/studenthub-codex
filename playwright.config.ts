@@ -5,12 +5,8 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 2 : undefined,
+  workers: process.env.CI ? 1 : undefined,
   reporter: [["list"], ["html", { open: "never" }]],
-  timeout: 30_000,
-  expect: {
-    timeout: 10_000,
-  },
   use: {
     baseURL: process.env.PLAYWRIGHT_BASE_URL ?? "http://127.0.0.1:3000",
     trace: "on-first-retry",
@@ -36,9 +32,9 @@ export default defineConfig({
   ],
   webServer: process.env.CI
     ? {
-        command: "bash scripts/next-start-wrapper.sh",
+        command: "npm run build && npm run start",
         port: 3000,
-        reuseExistingServer: true,
+        reuseExistingServer: false,
         timeout: 120_000,
       }
     : undefined,

@@ -105,7 +105,7 @@ function section(title) {
     "src/modules/requests/RequestActionBar.tsx", "src/modules/requests/RequestFulfillmentOS.tsx",
     "src/modules/auth/service.ts", "src/modules/auth/session.ts", "src/modules/auth/capabilities.ts",
     "src/modules/auth/actions.ts", "src/modules/auth/password.ts",
-    "src/modules/workspace/WorkspaceOS.tsx",
+    "src/modules/workspace/data.ts", "src/modules/workspace/WorkspaceOS.tsx",
     "src/modules/workspace/WorkspaceOSContext.tsx", "src/modules/workspace/WorkspaceShell.tsx",
     "src/modules/workspace/Skeletons.tsx", "src/modules/workspace/SlidePanel.tsx",
     "src/components/ui/sheet.tsx", "src/components/ui/skeleton.tsx",
@@ -123,7 +123,7 @@ function section(title) {
   section("Prisma Schema");
   const schema = readFileSync(join(ROOT, "prisma/schema.prisma"), "utf8");
   const modelCount = (schema.match(/^model \w+/gm) || []).length;
-  ok(`Prisma schema has 139 models`, modelCount === 139, `Found ${modelCount}`);
+  ok(`Prisma schema has 129 models`, modelCount === 129, `Found ${modelCount}`);
   for (const name of ["candidate", "company", "request", "transfer", "invoice", "staff", "admin", "inspector", "suggestion", "transfer_candidate"]) {
     ok(`Model: ${name}`, schema.includes(`model ${name}`));
   }

@@ -52,7 +52,7 @@ test.describe("Candidate self-service — mobile smoke", () => {
     await page.goto("/candidate");
 
     // Readiness section
-    await expect(page.locator('text="Readiness"').first()).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('text="Readiness"')).toBeVisible({ timeout: 15000 });
     await expect(page.locator(".candidateReadinessScore strong")).toBeVisible();
     await expect(page.locator(".candidateReadinessItems")).toBeVisible();
 
@@ -74,8 +74,9 @@ test.describe("Candidate self-service — mobile smoke", () => {
     const page = await context.newPage();
     await page.goto("/candidate");
 
-    await expect(page.locator(".shProfileHero")).toBeVisible();
-    await expect(page.locator(".shProfileInfoName")).toBeVisible();
+    await expect(page.locator(".candidateAvatar")).toBeVisible();
+    await expect(page.locator(".candidateProfileTitle h2")).toBeVisible();
+    await expect(page.locator(".candidateStatusLine")).toBeVisible();
 
     // Fact grid is present
     await expect(page.locator(".candidateFactGrid")).toBeVisible();
@@ -94,7 +95,7 @@ test.describe("Candidate self-service — mobile smoke", () => {
     await page.goto("/candidate/invitations");
 
     await expect(page).toHaveURL("/candidate/invitations");
-    await expect(page.locator('text="Invitation History"').first()).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('text="Invitation History"')).toBeVisible({ timeout: 15000 });
 
     await context.close();
   });
@@ -117,7 +118,7 @@ test.describe("Candidate self-service — mobile smoke", () => {
     ).toBeVisible({ timeout: 15000 });
 
     // Invitation brief panel
-    await expect(page.locator('text="Invitation Brief"').first()).toBeVisible();
+    await expect(page.locator('text="Invitation Brief"')).toBeVisible();
 
     await context.close();
   });
@@ -133,7 +134,7 @@ test.describe("Candidate self-service — mobile smoke", () => {
     await page.goto("/candidate/work-logs");
 
     await expect(page).toHaveURL("/candidate/work-logs");
-    await expect(page.locator('text="Work Log History"').first()).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('text="Work Log History"')).toBeVisible({ timeout: 15000 });
 
     await context.close();
   });
@@ -169,7 +170,7 @@ test.describe("Candidate self-service — mobile smoke", () => {
     await page.goto("/candidate/payments");
 
     await expect(page).toHaveURL("/candidate/payments");
-    await expect(page.locator('text="Transfer & Payment History"').first()).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('text="Transfer & Payment History"')).toBeVisible({ timeout: 15000 });
 
     await context.close();
   });
@@ -185,7 +186,7 @@ test.describe("Candidate self-service — mobile smoke", () => {
     await page.goto("/candidate/edit");
 
     await expect(page).toHaveURL("/candidate/edit");
-    await expect(page.locator('text="Update your candidate profile"').first()).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('text="Update your candidate profile"')).toBeVisible({ timeout: 15000 });
     // Key form inputs present
     await expect(page.locator('input[name="name"]')).toBeVisible();
     await expect(page.locator('input[name="email"]')).toBeVisible();
