@@ -1,7 +1,6 @@
-import { ErrorBoundary } from "@/modules/workspace/ErrorBoundary";
 import { notFound } from "next/navigation";
 import { requireRoleCapability } from "@/modules/auth/session";
-import { DetailSection } from "@/modules/workspace/DetailPanels";
+import { FactPanel } from "@/modules/workspace/DetailPanels";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { getDailyStandupAnswer } from "./actions";
 import { formatDate } from "@/modules/workspace/format";
@@ -13,7 +12,7 @@ export default async function AdminDailyStandupDetailPage({
 }: {
   params: Promise<{ answerUuid: string }>;
 }) {
-  const session = await requireRoleCapability("admin", "admin.read");
+  const session = await requireRoleCapability("admin", "admin.system");
   const { answerUuid } = await params;
 
   if (!answerUuid) notFound();
@@ -24,14 +23,13 @@ export default async function AdminDailyStandupDetailPage({
   const answer = data.answer;
 
   return (
-    <ErrorBoundary>
-      <WorkspaceShell
+    <WorkspaceShell
         session={session}
         eyebrow="Admin / Daily Standup Answers"
         title={answer.question ?? "Standup Answer"}
         metrics={[]}
       >
-        <DetailSection
+        <FactPanel
           title="Answer Details"
           facts={[
             { label: "Question", value: answer.question ?? "—" },
@@ -42,6 +40,5 @@ export default async function AdminDailyStandupDetailPage({
           ]}
         />
       </WorkspaceShell>
-    </ErrorBoundary>
   );
 }
