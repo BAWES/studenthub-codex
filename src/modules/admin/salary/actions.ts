@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
 import {
@@ -7,89 +8,60 @@ import {
   createSalarySchema,
   updateSalarySchema,
   deleteSalarySchema,
-  salaryItemSchema,
   listSalaryResultSchema,
   salaryActionResponseSchema,
-  type ListSalaryParams,
-  type CreateSalaryParams,
-  type UpdateSalaryParams,
-  type DeleteSalaryParams,
-  type SalaryItem,
-  type ListSalaryResult,
+  getSalaryInputSchema,
+} from "./schemas";
+import type {
+  ListSalaryInput,
+  ListSalaryResult,
+  SalaryActionResponse,
+  SalaryDetailResult,
 } from "./schemas";
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
+export async function listSalaries(
+  input: ListSalaryInput = {},
+): Promise<ListSalaryResult> {
+  await requireCapability("admin.read");
+  const parsed = listSalarySchema.safeParse(input);
+  if (!parsed.success)
+    return { salaries: [], total: 0, page: 1, limit: 50, totalPages: 0 };
+  const { page, limit, search } = parsed.data;
+  const skip = (page - 1) * limit;
 
-const salarySelect = {
-  staff_salary_uuid: true,
-  staff_id: true,
-  salary: true,
-  salary_currency: true,
-  comment: true,
-  salary_date: true,
-  created_at: true,
-  updated_at: true,
-} as const;
+  const where: Record<string, unknown> = {};
+  if (search) {
+    where.staff = {
+      staff_name: { contains: search },
+    };
+  }
 
-function mapSalary(row: any): SalaryItem {
-  return {
+  const [rows, total] = await Promise.all([
+    prisma.staff_salary.findMany({
+      where,
+      orderBy: { salary_date: "desc" },
+      skip,
+      take: limit,
+      include: {
+        staff: { select: { staff_name: true } },
+      },
+    }),
+    prisma.staff_salary.count({ where }),
+  ]);
+
+  const salaries = rows.map((row) => ({
     staff_salary_uuid: row.staff_salary_uuid,
     staff_id: row.staff_id,
-    staff_name: null,
+    staff_name: row.staff?.staff_name ?? null,
     salary: row.salary ? Number(row.salary) : null,
     salary_currency: row.salary_currency,
     comment: row.comment,
     salary_date: row.salary_date,
     created_at: row.created_at,
     updated_at: row.updated_at,
-  };
-}
+  }));
 
-// ---------------------------------------------------------------------------
-// Server actions
-// ---------------------------------------------------------------------------
-
-/**
- * List salary records for the admin page.
- * Returns paginated salary records ordered by salary_date desc.
- */
-export async function listSalaries(
-  input: ListSalaryParams = {},
-): Promise<ListSalaryResult> {
-  await requireCapability("admin.read");
-
-  const parsed = listSalarySchema.safeParse(input);
-  if (!parsed.success) {
-    return { salaries: [], total: 0, page: 1, limit: 50, totalPages: 0 };
-  }
-
-  const { page, limit, search } = parsed.data;
-  const skip = (page - 1) * limit;
-
-  const where: Record<string, unknown> = {};
-  if (search) {
-    where.OR = [
-      { comment: { contains: search } },
-      { staff_id: isNaN(Number(search)) ? undefined : Number(search) },
-    ].filter(Boolean);
-  }
-
-  const [rows, total] = await Promise.all([
-    prisma.staff_salary.findMany({
-      where: where as any,
-      orderBy: { salary_date: "desc" },
-      skip,
-      take: limit,
-      select: salarySelect,
-    }),
-    prisma.staff_salary.count({ where: where as any }),
-  ]);
-
-  const salaries = rows.map(mapSalary);
-
-  const result: ListSalaryResult = {
+  const result = {
     salaries,
     total,
     page,
@@ -97,11 +69,10 @@ export async function listSalaries(
     totalPages: Math.ceil(total / limit),
   };
 
-  // Validate output shape
   const outputParsed = listSalaryResultSchema.safeParse(result);
   if (!outputParsed.success) {
     console.error(
-      "[modules/admin/salary] listSalaries output validation failed:",
+      "[admin/salary] listSalaries output failed:",
       outputParsed.error.issues,
     );
   }
@@ -109,232 +80,228 @@ export async function listSalaries(
   return result;
 }
 
-/**
- * Create a new salary record.
- */
 export async function createSalary(
-  params: CreateSalaryParams,
-): Promise<{ operation: string; message: string }> {
+  _prev: unknown,
+  formData: FormData,
+): Promise<SalaryActionResponse> {
   await requireCapability("admin.write");
-
-  const parsed = createSalarySchema.safeParse(params);
+  const parsed = createSalarySchema.safeParse({
+    staffId: formData.get("staffId"),
+    salary: formData.get("salary"),
+    salaryCurrency: formData.get("salaryCurrency") || "KWD",
+    comment: formData.get("comment") || undefined,
+    salaryDate: formData.get("salaryDate"),
+  });
   if (!parsed.success) {
-    const errorResult = {
+    return {
       operation: "error",
-      message: parsed.error.issues[0]?.message ?? "Invalid create parameters",
+      message: parsed.error.issues[0]?.message ?? "Invalid input",
     };
-    const outputParsed = salaryActionResponseSchema.safeParse(errorResult);
-    if (!outputParsed.success) {
-      console.error(
-        "[modules/admin/salary] createSalary output validation failed (input error):",
-        outputParsed.error.issues,
-      );
-    }
-    return errorResult;
   }
 
-  const { staffId, salary, salaryCurrency, comment, salaryDate } = parsed.data;
-
   try {
+    const data = parsed.data;
     await prisma.staff_salary.create({
       data: {
         staff_salary_uuid: crypto.randomUUID(),
-        staff_id: staffId,
-        salary,
-        salary_currency: salaryCurrency ?? null,
-        comment: comment ?? null,
-        salary_date: new Date(salaryDate),
-        created_at: new Date(),
-        updated_at: new Date(),
+        staff_id: data.staffId,
+        salary: data.salary,
+        salary_currency: data.salaryCurrency,
+        comment: data.comment ?? null,
+        salary_date: data.salaryDate,
       },
     });
-
-    const successResult = {
+    revalidatePath("/admin/salary");
+    const result = {
       operation: "success",
       message: "Salary record created successfully",
     };
-    const outputParsed = salaryActionResponseSchema.safeParse(successResult);
+    const outputParsed = salaryActionResponseSchema.safeParse(result);
     if (!outputParsed.success) {
       console.error(
-        "[modules/admin/salary] createSalary output validation failed:",
+        "[admin/salary] createSalary output failed:",
         outputParsed.error.issues,
       );
     }
-    return successResult;
-  } catch (error) {
-    const errorResult = {
+    return result;
+  } catch (_e) {
+    const result = {
       operation: "error",
-      message: "We've faced a problem creating the Salary record, please contact us for assistance.",
+      message:
+        "We've faced a problem creating the salary record, please contact us for assistance.",
     };
-    const outputParsed = salaryActionResponseSchema.safeParse(errorResult);
+    const outputParsed = salaryActionResponseSchema.safeParse(result);
     if (!outputParsed.success) {
       console.error(
-        "[modules/admin/salary] createSalary output validation failed (catch):",
+        "[admin/salary] createSalary output failed:",
         outputParsed.error.issues,
       );
     }
-    return errorResult;
+    return result;
   }
 }
 
-/**
- * Update an existing salary record.
- */
 export async function updateSalary(
-  params: UpdateSalaryParams,
-): Promise<{ operation: string; message: string }> {
+  _prev: unknown,
+  formData: FormData,
+): Promise<SalaryActionResponse> {
   await requireCapability("admin.write");
-
-  const parsed = updateSalarySchema.safeParse(params);
-  if (!parsed.success) {
-    const errorResult = {
-      operation: "error",
-      message: parsed.error.issues[0]?.message ?? "Invalid update parameters",
-    };
-    const outputParsed = salaryActionResponseSchema.safeParse(errorResult);
-    if (!outputParsed.success) {
-      console.error(
-        "[modules/admin/salary] updateSalary output validation failed (input error):",
-        outputParsed.error.issues,
-      );
-    }
-    return errorResult;
-  }
-
-  const { salaryUuid, salary, salaryCurrency, salaryDate } = parsed.data;
-
-  const existing = await prisma.staff_salary.findFirst({
-    where: { staff_salary_uuid: salaryUuid },
+  const parsed = updateSalarySchema.safeParse({
+    salaryUuid: formData.get("salaryUuid"),
+    salary: formData.get("salary"),
+    salaryCurrency: formData.get("salaryCurrency") || "KWD",
+    comment: formData.get("comment") || undefined,
+    salaryDate: formData.get("salaryDate"),
   });
-
-  if (!existing) {
-    const notFoundResult = {
+  if (!parsed.success) {
+    return {
       operation: "error",
-      message: "Salary record not found",
+      message: parsed.error.issues[0]?.message ?? "Invalid input",
     };
-    const outputParsed = salaryActionResponseSchema.safeParse(notFoundResult);
-    if (!outputParsed.success) {
-      console.error(
-        "[modules/admin/salary] updateSalary output validation failed (not found):",
-        outputParsed.error.issues,
-      );
-    }
-    return notFoundResult;
   }
 
   try {
+    const data = parsed.data;
+    const existing = await prisma.staff_salary.findUnique({
+      where: { staff_salary_uuid: data.salaryUuid },
+      select: { staff_salary_uuid: true },
+    });
+    if (!existing)
+      return { operation: "error", message: "Salary record not found" };
+
     await prisma.staff_salary.update({
-      where: { staff_salary_uuid: salaryUuid },
+      where: { staff_salary_uuid: data.salaryUuid },
       data: {
-        salary: salary ?? existing.salary,
-        salary_currency: salaryCurrency ?? existing.salary_currency,
-        salary_date: salaryDate ? new Date(salaryDate) : existing.salary_date,
-        updated_at: new Date(),
+        salary: data.salary,
+        salary_currency: data.salaryCurrency,
+        comment: data.comment ?? null,
+        salary_date: data.salaryDate,
       },
     });
-
-    const successResult = {
+    revalidatePath("/admin/salary");
+    const result = {
       operation: "success",
       message: "Salary record updated successfully",
     };
-    const outputParsed = salaryActionResponseSchema.safeParse(successResult);
+    const outputParsed = salaryActionResponseSchema.safeParse(result);
     if (!outputParsed.success) {
       console.error(
-        "[modules/admin/salary] updateSalary output validation failed:",
+        "[admin/salary] updateSalary output failed:",
         outputParsed.error.issues,
       );
     }
-    return successResult;
-  } catch (error) {
-    const errorResult = {
+    return result;
+  } catch (_e) {
+    const result = {
       operation: "error",
-      message: "We've faced a problem updating the Salary record, please contact us for assistance.",
+      message:
+        "We've faced a problem updating the salary record, please contact us for assistance.",
     };
-    const outputParsed = salaryActionResponseSchema.safeParse(errorResult);
+    const outputParsed = salaryActionResponseSchema.safeParse(result);
     if (!outputParsed.success) {
       console.error(
-        "[modules/admin/salary] updateSalary output validation failed (catch):",
+        "[admin/salary] updateSalary output failed:",
         outputParsed.error.issues,
       );
     }
-    return errorResult;
+    return result;
   }
 }
 
-/**
- * Delete a salary record by UUID.
- */
 export async function deleteSalary(
-  params: DeleteSalaryParams,
-): Promise<{ operation: string; message: string }> {
+  salaryUuid: string,
+): Promise<SalaryActionResponse> {
   await requireCapability("admin.write");
-
-  const parsed = deleteSalarySchema.safeParse(params);
-  if (!parsed.success) {
-    const errorResult = {
+  const parsed = deleteSalarySchema.safeParse({ salaryUuid });
+  if (!parsed.success)
+    return {
       operation: "error",
-      message: parsed.error.issues[0]?.message ?? "Invalid delete parameters",
+      message: parsed.error.issues[0]?.message ?? "Invalid salary UUID",
     };
-    const outputParsed = salaryActionResponseSchema.safeParse(errorResult);
-    if (!outputParsed.success) {
-      console.error(
-        "[modules/admin/salary] deleteSalary output validation failed (input error):",
-        outputParsed.error.issues,
-      );
-    }
-    return errorResult;
-  }
-
-  const { salaryUuid } = parsed.data;
-
-  const existing = await prisma.staff_salary.findFirst({
-    where: { staff_salary_uuid: salaryUuid },
-  });
-
-  if (!existing) {
-    const notFoundResult = {
-      operation: "error",
-      message: "Salary record not found",
-    };
-    const outputParsed = salaryActionResponseSchema.safeParse(notFoundResult);
-    if (!outputParsed.success) {
-      console.error(
-        "[modules/admin/salary] deleteSalary output validation failed (not found):",
-        outputParsed.error.issues,
-      );
-    }
-    return notFoundResult;
-  }
 
   try {
-    await prisma.staff_salary.delete({
-      where: { staff_salary_uuid: salaryUuid },
+    const existing = await prisma.staff_salary.findUnique({
+      where: { staff_salary_uuid: parsed.data.salaryUuid },
+      select: { staff_salary_uuid: true },
     });
+    if (!existing)
+      return { operation: "error", message: "Salary record not found" };
 
-    const successResult = {
+    await prisma.staff_salary.delete({
+      where: { staff_salary_uuid: parsed.data.salaryUuid },
+    });
+    revalidatePath("/admin/salary");
+    const result = {
       operation: "success",
       message: "Salary record deleted successfully",
     };
-    const outputParsed = salaryActionResponseSchema.safeParse(successResult);
+    const outputParsed = salaryActionResponseSchema.safeParse(result);
     if (!outputParsed.success) {
       console.error(
-        "[modules/admin/salary] deleteSalary output validation failed:",
+        "[admin/salary] deleteSalary output failed:",
         outputParsed.error.issues,
       );
     }
-    return successResult;
-  } catch (error) {
-    const errorResult = {
+    return result;
+  } catch (_e) {
+    const result = {
       operation: "error",
-      message: "Failed to delete salary record. Please try again.",
+      message:
+        "We've faced a problem deleting the salary record, please contact us for assistance.",
     };
-    const outputParsed = salaryActionResponseSchema.safeParse(errorResult);
+    const outputParsed = salaryActionResponseSchema.safeParse(result);
     if (!outputParsed.success) {
       console.error(
-        "[modules/admin/salary] deleteSalary output validation failed (catch):",
+        "[admin/salary] deleteSalary output failed:",
         outputParsed.error.issues,
       );
     }
-    return errorResult;
+    return result;
   }
+}
+
+export async function getSalary(
+  salaryUuid: string,
+): Promise<SalaryDetailResult> {
+  await requireCapability("admin.read");
+  const parsed = getSalaryInputSchema.safeParse({ salaryUuid });
+  if (!parsed.success) return { salary: null, staff_name: null };
+
+  const row = await prisma.staff_salary.findUnique({
+    where: { staff_salary_uuid: parsed.data.salaryUuid },
+    include: {
+      staff: { select: { staff_name: true } },
+    },
+  });
+
+  if (!row) return { salary: null, staff_name: null };
+
+  const result: SalaryDetailResult = {
+    salary: {
+      staff_salary_uuid: row.staff_salary_uuid,
+      staff_id: row.staff_id,
+      staff_name: row.staff?.staff_name ?? null,
+      salary: row.salary ? Number(row.salary) : null,
+      salary_currency: row.salary_currency,
+      comment: row.comment,
+      salary_date: row.salary_date,
+      created_at: row.created_at,
+      updated_at: row.updated_at,
+    },
+    staff_name: row.staff?.staff_name ?? null,
+  };
+
+  return result;
+}
+
+export async function listStaff(): Promise<
+  { staff_id: number; staff_name: string }[]
+> {
+  await requireCapability("admin.read");
+  const rows = await prisma.staff.findMany({
+    where: { deleted: 0 },
+    orderBy: { staff_name: "asc" },
+    select: { staff_id: true, staff_name: true },
+  });
+  return rows;
 }
