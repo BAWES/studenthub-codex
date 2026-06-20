@@ -229,7 +229,7 @@ export default function PricingCard({ persona = "candidate", className }: Pricin
           onClick={() => setAnnual(!annual)}
           className="relative inline-flex h-7 w-12 items-center rounded-full transition-colors"
           style={{
-            background: annual ? "var(--sh-info)" : "var(--sh-glass-border-strong)",
+            background: annual ? "var(--sh-info)" : "var(--line)",
           }}
           aria-label={`Switch to ${annual ? "monthly" : "annual"} billing`}
         >
@@ -270,11 +270,11 @@ export default function PricingCard({ persona = "candidate", className }: Pricin
               )}
               style={{
                 background: tier.popular
-                  ? "linear-gradient(135deg, var(--sh-glass-bg-strong), var(--sh-info-bg))"
-                  : "var(--sh-glass-bg)",
+                  ? "linear-gradient(135deg, var(--surface), var(--sh-info-bg))"
+                  : "var(--surface)",
                 border: tier.popular
                   ? "1.5px solid var(--sh-info)"
-                  : "1px solid var(--sh-glass-border)",
+                  : "1px solid var(--border)",
                 boxShadow: tier.popular
                   ? "0 8px 32px rgba(0,0,0,0.08)"
                   : "0 2px 8px rgba(0,0,0,0.04)",
