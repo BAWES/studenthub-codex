@@ -29,13 +29,21 @@ export default async function EmployerJobDetailPage({ params }: Props) {
       metrics={[]}
     >
       <JobEditForm job={job} readOnly={!isOwner} />
-      <div className="mt-8 pt-6 border-t border-white/10">
-        <Link
-          href={`/employer/jobs/${job.jobListingId}/applications`}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors"
-        >
-          View Applications
-        </Link>
+      <div className="mt-8 pt-6 border-t border-[var(--border)]">
+        <div className="flex gap-4">
+          <Link
+            href={`/employer/jobs/${job.jobListingId}/applications`}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 bg-[var(--sh-coral)] text-white hover:bg-[var(--sh-coral-hover)]"
+          >
+            View Applications
+          </Link>
+          <Link
+            href={`/employer/jobs/${job.jobListingId}/matching`}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 border border-[var(--border)] text-[var(--ink)] hover:bg-[var(--surface)]"
+          >
+            Matching Candidates
+          </Link>
+        </div>
       </div>
     </WorkspaceShell>
   );
