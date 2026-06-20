@@ -22,8 +22,7 @@ export function LoginForm() {
           <div className="shLoginStagger grid gap-2">
             <label
               htmlFor="login-email"
-              className="text-xs font-semibold uppercase tracking-wider"
-              style={{ color: "var(--muted)" }}
+              className="text-xs font-semibold uppercase tracking-wider text-[var(--muted)]"
             >
               Email
             </label>
@@ -43,8 +42,7 @@ export function LoginForm() {
           <div className="shLoginStagger grid gap-2">
             <label
               htmlFor="login-password"
-              className="text-xs font-semibold uppercase tracking-wider"
-              style={{ color: "var(--muted)" }}
+              className="text-xs font-semibold uppercase tracking-wider text-[var(--muted)]"
             >
               Password
             </label>
