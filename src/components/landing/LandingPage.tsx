@@ -15,8 +15,8 @@ import CTASection from "./CTASection";
 import LandingFooter from "./LandingFooter";
 import "./landing.css";
 
-const SH_BLUE = "#0b63ce";
-const SH_AMBER = "#f59e0b";
+const SH_BLUE = "#1f73b7";
+const SH_CORAL = "#eb6651";
 
 interface LandingPageProps {
   session: { id: string; email: string; role: string; name: string } | null;
@@ -85,12 +85,11 @@ export default function LandingPage({ session }: LandingPageProps) {
     <div
       style={{
         "--sh-blue": SH_BLUE,
-        "--sh-amber": SH_AMBER,
+        "--sh-coral": SH_CORAL,
         "--sh-info": SH_BLUE,
-        "--sh-coral": SH_BLUE,
-        "--sh-coral-hover": "#0a56b0",
-        "--sh-coral-glow": `0 0 12px ${SH_BLUE}40`,
-        "--sh-amber-glow": `0 4px 14px ${SH_AMBER}50`,
+        "--sh-coral-hover": "#d4533d",
+        "--sh-coral-glow": `0 0 12px ${SH_CORAL}40`,
+        "--sh-coral-glow-light": `0 4px 14px ${SH_CORAL}50`,
         backgroundColor: "var(--paper)",
         minHeight: "100svh",
       } as React.CSSProperties}

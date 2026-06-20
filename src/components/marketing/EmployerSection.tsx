@@ -13,8 +13,8 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
-const SH_BLUE = "#0b63ce";
-const SH_AMBER = "#f59e0b";
+const SH_BLUE = "#1f73b7";
+const SH_CORAL = "#eb6651";
 
 // ── Feature definitions ───────────────────────────────────────
 
@@ -102,8 +102,8 @@ export default function EmployerSection({ className }: EmployerSectionProps) {
         <span
           className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold tracking-wider uppercase"
           style={{
-            color: SH_AMBER,
-            backgroundColor: `${SH_AMBER}12`,
+            color: SH_CORAL,
+            backgroundColor: `${SH_CORAL}12`,
           }}
         >
           For employers
@@ -183,8 +183,8 @@ export default function EmployerSection({ className }: EmployerSectionProps) {
           href="/signup?role=company"
           className="shLandingBtnPrimary"
           style={{
-            backgroundColor: SH_AMBER,
-            boxShadow: `0 4px 14px ${SH_AMBER}40`,
+            backgroundColor: SH_CORAL,
+            boxShadow: `0 4px 14px ${SH_CORAL}40`,
           }}
         >
           Start hiring today

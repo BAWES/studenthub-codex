@@ -187,6 +187,156 @@ export {
 
 export type { WorkLogItem } from "@/app/candidate/work-logs/schemas";
 
+// -- Interview ---
+export {
+  interviewItemSchema as candidateInterviewItemSchema,
+  listInterviewsResultSchema as candidateListInterviewsResultSchema,
+  interviewActionResultSchema as candidateInterviewActionResultSchema,
+  interviewDetailSchema as candidateInterviewDetailSchema,
+} from "./interview/schemas";
+
+export type {
+  InterviewItem,
+  ListInterviewsResult,
+  InterviewActionResult,
+  InterviewDetail,
+} from "./interview/schemas";
+
+// -- Onboarding ---
+export {
+  onboardingItemSchema as candidateOnboardingItemSchema,
+  listOnboardingResultSchema as candidateListOnboardingResultSchema,
+  onboardingActionResultSchema as candidateOnboardingActionResultSchema,
+  onboardingDetailSchema as candidateOnboardingDetailSchema,
+} from "./onboarding/schemas";
+
+export type {
+  OnboardingItem,
+  ListOnboardingResult,
+  OnboardingActionResult,
+  OnboardingDetail,
+} from "./onboarding/schemas";
+
+// -- Performance ---
+export {
+  performanceReviewItemSchema as candidatePerformanceReviewItemSchema,
+  listPerformanceReviewsResultSchema as candidateListPerformanceReviewsResultSchema,
+  performanceActionResultSchema as candidatePerformanceActionResultSchema,
+  performanceDetailSchema as candidatePerformanceDetailSchema,
+} from "./performance/schemas";
+
+export type {
+  PerformanceReviewItem,
+  ListPerformanceReviewsResult,
+  PerformanceActionResult,
+  PerformanceDetail,
+} from "./performance/schemas";
+
+// -- Recommendations ---
+export {
+  recommendationItemSchema as candidateRecommendationItemSchema,
+  listRecommendationsResultSchema as candidateListRecommendationsResultSchema,
+  recommendationActionResultSchema as candidateRecommendationActionResultSchema,
+  recommendationDetailSchema as candidateRecommendationDetailSchema,
+} from "./recommendations/schemas";
+
+export type {
+  RecommendationItem,
+  ListRecommendationsResult,
+  RecommendationActionResult,
+  RecommendationDetail,
+} from "./recommendations/schemas";
+
+// -- Referrals ---
+export {
+  referralItemSchema as candidateReferralItemSchema,
+  listReferralsResultSchema as candidateListReferralsResultSchema,
+  referralActionResultSchema as candidateReferralActionResultSchema,
+  referralDetailSchema as candidateReferralDetailSchema,
+} from "./referrals/schemas";
+
+export type {
+  ReferralItem,
+  ListReferralsResult,
+  ReferralActionResult,
+  ReferralDetail,
+} from "./referrals/schemas";
+
+// -- Support ---
+export {
+  supportTicketItemSchema as candidateSupportTicketItemSchema,
+  listSupportTicketsResultSchema as candidateListSupportTicketsResultSchema,
+  supportTicketActionResultSchema as candidateSupportTicketActionResultSchema,
+  supportTicketDetailSchema as candidateSupportTicketDetailSchema,
+} from "./support/schemas";
+
+export type {
+  SupportTicketItem,
+  ListSupportTicketsResult,
+  SupportTicketActionResult,
+  SupportTicketDetail,
+} from "./support/schemas";
+
+// -- Tasks ---
+export {
+  taskItemSchema as candidateTaskItemSchema,
+  listTasksResultSchema as candidateListTasksResultSchema,
+  taskActionResultSchema as candidateTaskActionResultSchema,
+  taskDetailSchema as candidateTaskDetailSchema,
+} from "./tasks/schemas";
+
+export type {
+  TaskItem,
+  ListTasksResult,
+  TaskActionResult,
+  TaskDetail,
+} from "./tasks/schemas";
+
+// -- Training ---
+export {
+  trainingItemSchema as candidateTrainingItemSchema,
+  listTrainingResultSchema as candidateListTrainingResultSchema,
+  trainingActionResultSchema as candidateTrainingActionResultSchema,
+  trainingDetailSchema as candidateTrainingDetailSchema,
+} from "./training/schemas";
+
+export type {
+  TrainingItem,
+  ListTrainingResult,
+  TrainingActionResult,
+  TrainingDetail,
+} from "./training/schemas";
+
+// -- Transfers ---
+export {
+  transferItemSchema as candidateTransferItemSchema,
+  listTransfersResultSchema as candidateListTransfersResultSchema,
+  transferActionResultSchema as candidateTransferActionResultSchema,
+  transferDetailSchema as candidateTransferDetailSchema,
+} from "./transfers/schemas";
+
+export type {
+  TransferItem,
+  ListTransfersResult,
+  TransferActionResult,
+  TransferDetail,
+} from "./transfers/schemas";
+
+// -- Verify ---
+export {
+  verificationItemSchema as candidateVerificationItemSchema,
+  listVerificationsResultSchema as candidateListVerificationsResultSchema,
+  verificationActionResultSchema as candidateVerificationActionResultSchema,
+  verificationDetailSchema as candidateVerificationDetailSchema,
+} from "./verify/schemas";
+
+export type {
+  VerificationItem,
+  ListVerificationsResult,
+  VerificationActionResult,
+  VerificationDetail,
+} from "./verify/schemas";
+
 // -- Shared / common result types used by multiple submodules --
 export const candidateErrorResultSchema = z.object({
   error: z.string(),

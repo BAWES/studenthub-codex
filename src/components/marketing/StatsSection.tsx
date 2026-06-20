@@ -6,7 +6,7 @@ import { Users, Building2, Briefcase, Star } from "lucide-react";
 
 // ── Stat definitions ───────────────────────────────────────────
 
-const SH_BLUE = "#0b63ce";
+const SH_BLUE = "#1f73b7";
 const SH_AMBER = "#f59e0b";
 
 interface StatItem {

@@ -199,7 +199,7 @@ export default function PricingCard({ persona = "candidate", className }: Pricin
     <section className={cn("shSection", className)} aria-label="Pricing plans">
       {/* Header */}
       <div className="text-center mb-8 md:mb-10">
-        <p className="text-[var(--sh-info)] text-[11px] font-black uppercase tracking-wider mb-2">
+        <p className="text-[#1f73b7] text-[11px] font-black uppercase tracking-wider mb-2">
           Simple pricing
         </p>
         <h2 className="shBenefitsTitle text-center">
@@ -246,8 +246,8 @@ export default function PricingCard({ persona = "candidate", className }: Pricin
           <span
             className="ml-1.5 text-[10px] font-black px-1.5 py-0.5 rounded-full"
             style={{
-              background: "var(--sh-success-bg)",
-              color: "var(--sh-success)",
+              background: "rgba(36,131,91,0.10)",
+              color: "#24835b",
             }}
           >
             Save up to 20%
@@ -285,8 +285,8 @@ export default function PricingCard({ persona = "candidate", className }: Pricin
                 <div
                   className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-black uppercase"
                   style={{
-                    background: "var(--sh-info)",
-                    color: "var(--sh-info-text, white)",
+                    background: "#1f73b7",
+                    color: "white",
                   }}
                 >
                   <Sparkles className="size-3" />
@@ -317,7 +317,7 @@ export default function PricingCard({ persona = "candidate", className }: Pricin
                       /{annual ? "year" : "month"}
                     </span>
                     {price > 0 && annual && (
-                      <div className="text-xs mt-1" style={{ color: "var(--sh-success)" }}>
+                      <div className="text-xs mt-1" style={{ color: "#24835b" }}>
                         £{tier.monthlyPrice}/mo billed annually
                       </div>
                     )}
@@ -329,8 +329,8 @@ export default function PricingCard({ persona = "candidate", className }: Pricin
               <ul className="grid gap-2 mb-6 flex-1">
                 {tier.features.map((f) => (
                   <li key={f} className="flex items-start gap-2 text-sm" style={{ color: "var(--ink)" }}>
-                    <Check className="size-4 mt-0.5 shrink-0" style={{ color: "var(--sh-success)" }} />
-                    {f}
+                    <Check className="size-4 mt-0.5 shrink-0" style={{ color: "#24835b" }} />
+                     {f}
                   </li>
                 ))}
               </ul>

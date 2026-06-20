@@ -11,7 +11,7 @@ import {
   Star,
 } from "lucide-react";
 
-// ── Staff-matched placement hero ────────────────────────────────
+// ── Staff-matched platform hero ────────────────────────────────
 
 const SH_BLUE = "#1f73b7";
 const SH_CORAL = "#eb6651";

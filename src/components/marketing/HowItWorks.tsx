@@ -4,7 +4,7 @@ import { UserRound, Search, Briefcase } from "lucide-react";
 
 // ── Step definitions ──────────────────────────────────────────
 
-const SH_BLUE = "#0b63ce";
+const SH_BLUE = "#1f73b7";
 
 interface Step {
   icon: typeof UserRound;

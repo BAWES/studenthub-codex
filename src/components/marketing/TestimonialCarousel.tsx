@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { ChevronLeft, ChevronRight, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const SH_BLUE = "#0b63ce";
+const SH_BLUE = "#1f73b7";
 const SH_AMBER = "#f59e0b";
 
 // ── Types ────────────────────────────────────────────────
