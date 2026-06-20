@@ -53,7 +53,7 @@ export function LoginForm() {
         <Button
           type="submit"
           disabled={pending}
-          className="w-full bg-[#eb6651] text-white hover:bg-[#d45441] disabled:bg-[#d45441]"
+          className="w-full bg-primary text-white hover:bg-primary/90 disabled:bg-primary/80"
         >
           <LogIn className="size-4" />
           {pending ? "Checking credentials..." : "Sign in"}

@@ -23,8 +23,9 @@ export default async function LoginPage({
   return (
     <main className="min-h-svh flex items-center justify-center p-6 bg-background">
       <div className="w-full max-w-[400px] grid gap-6">
+        {/* ── Brand ────────────────────────────────────────────────── */}
         <div className="grid justify-items-center gap-2 text-center">
-          <span className="inline-flex items-center justify-center w-11 h-11 rounded-xl text-white text-lg font-black bg-[#eb6651]">
+          <span className="inline-flex items-center justify-center w-11 h-11 rounded-xl text-white text-lg font-black bg-primary">
             SH
           </span>
         </div>
@@ -38,6 +39,7 @@ export default async function LoginPage({
                 That verified account choice expired. Sign in again to continue.
               </div>
             ) : null}
+
             <LoginForm />
           </CardContent>
         </Card>

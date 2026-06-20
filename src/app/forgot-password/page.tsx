@@ -1,6 +1,13 @@
 import { redirect } from "next/navigation";
 import { getSession } from "@/modules/auth/session";
 import { ForgotPasswordForm } from "./ForgotPasswordForm";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 
 export const dynamic = "force-dynamic";
 
@@ -52,17 +59,17 @@ export default async function ForgotPasswordPage() {
       {/* ── Form side ────────────────────────────────────────────── */}
       <div className="flex items-center justify-center p-6 lg:p-12">
         <div className="w-full max-w-[420px]">
-          <div className="rounded-lg border border-border bg-card text-card-foreground shadow-sm">
-            <div className="p-6 space-y-1">
-              <strong className="text-base font-semibold text-foreground block">
-                Reset your password
-              </strong>
-              <p className="text-sm text-muted-foreground">
+          <Card>
+            <CardHeader className="space-y-1 pb-2">
+              <CardTitle>Reset your password</CardTitle>
+              <CardDescription>
                 We&apos;ll send a reset link to your email.
-              </p>
-            </div>
-            <ForgotPasswordForm />
-          </div>
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="!pt-0">
+              <ForgotPasswordForm />
+            </CardContent>
+          </Card>
         </div>
       </div>
     </main>
