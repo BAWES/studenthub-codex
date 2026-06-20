@@ -51,7 +51,7 @@ export default function HeroSection({ onCtaClick }: HeroSectionProps) {
 
   return (
     <section
-      className="relative overflow-hidden rounded-2xl min-h-[min(700px,calc(100svh_-_90px))] grid grid-cols-1 lg:grid-cols-[1fr_440px] items-center gap-0 shLandingGlassStrong"
+      className="relative overflow-hidden rounded-2xl min-h-[min(700px,calc(100svh_-_90px))] grid grid-cols-1 lg:grid-cols-[1fr_440px] items-center gap-0 shLandingCardStrong"
       aria-label="StudentHub — connecting students with the right employers"
     >
       {/* Subtle grid pattern overlay */}
@@ -234,7 +234,7 @@ export default function HeroSection({ onCtaClick }: HeroSectionProps) {
               style={{
                 backgroundColor: `${SH_BLUE}08`,
                 color: "var(--muted)",
-                border: "1px solid var(--sh-glass-border)",
+                border: "1px solid var(--border)",
               }}
             >
               <Search className="size-3.5 shrink-0" />
@@ -252,7 +252,7 @@ export default function HeroSection({ onCtaClick }: HeroSectionProps) {
 
             {/* Result card — glass style */}
             <div
-              className="rounded-xl p-4 shLandingGlassHover"
+              className="rounded-xl p-4 shLandingCardHover"
               style={{
                 background: `linear-gradient(135deg, ${SH_BLUE}10, ${SH_BLUE}04)`,
                 border: `1px solid ${SH_BLUE}20`,
@@ -321,10 +321,10 @@ export default function HeroSection({ onCtaClick }: HeroSectionProps) {
               ].map((item) => (
                 <div
                   key={item.label}
-                  className="rounded-xl p-3 shLandingGlassHover"
+                  className="rounded-xl p-3 shLandingCardHover"
                   style={{
                     backgroundColor: `${SH_BLUE}06`,
-                    border: "1px solid var(--sh-glass-border)",
+                    border: "1px solid var(--border)",
                   }}
                 >
                   <span
