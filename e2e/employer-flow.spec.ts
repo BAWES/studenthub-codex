@@ -111,7 +111,7 @@ test.describe("Employer job posting flow", () => {
     // Empty state text when no jobs exist
     const emptyState = ctx.page.locator("text=No records found");
     if ((await emptyState.count()) > 0) {
-      await expect(emptyState).toBeVisible();
+      await expect(emptyState.first()).toBeVisible();
     }
 
     assertNoReactErrors(ctx.errors);

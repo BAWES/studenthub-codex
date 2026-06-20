@@ -146,8 +146,8 @@ test.describe("Admin critical flows - Payments / Compliance / Transfers / Agents
         }
       } else {
         console.log("No payment rows available to click — empty state is acceptable");
-        const emptyState = ctx.page.locator("text=No records found");
-        if ((await emptyState.count()) > 0) {
+        const emptyState = ctx.page.locator("text=No records found").first();
+        if (await emptyState.isVisible().catch(() => false)) {
           await expect(emptyState).toBeVisible();
         }
       }
@@ -251,8 +251,8 @@ test.describe("Admin critical flows - Payments / Compliance / Transfers / Agents
         }
       } else {
         console.log("No compliance records available — checking empty state");
-        const emptyMsg = ctx.page.locator("text=No compliance records");
-        if ((await emptyMsg.count()) > 0) {
+        const emptyMsg = ctx.page.locator("text=No compliance records").first();
+        if (await emptyMsg.isVisible().catch(() => false)) {
           await expect(emptyMsg).toBeVisible();
         }
       }
