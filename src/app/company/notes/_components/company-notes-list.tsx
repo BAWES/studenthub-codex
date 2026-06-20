@@ -4,6 +4,7 @@ import { useCallback, useOptimistic, useRef, startTransition, useState } from "r
 import { useRouter } from "next/navigation";
 import { createCompanyNote, updateCompanyNote, deleteCompanyNote } from "../actions";
 import type { CompanyNoteListItem } from "../schemas";
+import { Button } from "@/components/ui/button";
 
 export function CompanyNotesList({
   notes: initialNotes,
@@ -81,8 +82,8 @@ export function CompanyNotesList({
   return (
     <div className="space-y-4">
       {/* Create Note */}
-      <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
-        <h3 className="text-sm font-semibold mb-3" style={{ color: "var(--ink)" }}>
+      <div className="rounded-lg border border-border bg-card p-5">
+        <h3 className="text-sm font-semibold mb-3 text-foreground">
           Add a note
         </h3>
         <form ref={formRef} onSubmit={(e) => { e.preventDefault(); handleCreate(); }} className="flex flex-col gap-3">
@@ -92,28 +93,28 @@ export function CompanyNotesList({
             rows={2}
             value={createText}
             onChange={(e) => setCreateText(e.target.value)}
-            className="rounded-md border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-sm outline-none focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)] resize-y"
-            style={{ color: "var(--ink)" }}
+            className="rounded-md border border-border bg-card px-3 py-1.5 text-sm outline-none focus:border-accent focus:ring-1 focus:ring-accent resize-y text-foreground"
           />
           <div className="flex items-center justify-between">
             {createError && (
-              <span className="text-xs text-[var(--sh-error)]">{createError}</span>
+              <span className="text-xs text-destructive">{createError}</span>
             )}
-            <button
+            <Button
               type="submit"
               disabled={creating}
-              className="rounded-md bg-[var(--accent)] px-4 py-1.5 text-xs font-medium text-white disabled:opacity-50 ml-auto"
+              size="sm"
+              className="ml-auto"
             >
               {creating ? "Adding..." : "Add note"}
-            </button>
+            </Button>
           </div>
         </form>
       </div>
 
       {/* Notes List */}
       {optimisticNotes.length === 0 ? (
-        <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-8 text-center">
-          <p className="text-sm" style={{ color: "var(--ink-muted)" }}>
+        <div className="rounded-lg border border-border bg-card p-8 text-center">
+          <p className="text-sm text-muted-foreground">
             No notes yet. Add your first note above.
           </p>
         </div>
@@ -137,7 +138,7 @@ export function CompanyNotesList({
 
       {/* Pagination hint */}
       {totalPages > 1 && (
-        <div className="text-center text-xs" style={{ color: "var(--ink-muted)" }}>
+        <div className="text-center text-xs text-muted-foreground">
           Page {page} of {totalPages} &middot; {total} notes total
         </div>
       )}
@@ -167,20 +168,18 @@ function NoteCard({
   onDelete: () => void;
 }) {
   return (
-    <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4">
+    <div className="rounded-lg border border-border bg-card p-4">
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
           {/* Header */}
           <div className="flex items-center gap-2 mb-1.5">
             {note.note_type && (
-              <span className="rounded bg-[var(--accent)]/10 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider"
-                style={{ color: "var(--accent)" }}
-              >
+              <span className="rounded bg-accent/10 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-accent-foreground">
                 {note.note_type}
               </span>
             )}
             {note.company_name && (
-              <span className="text-xs" style={{ color: "var(--ink-muted)" }}>
+              <span className="text-xs text-muted-foreground">
                 {note.company_name}
               </span>
             )}
@@ -193,27 +192,26 @@ function NoteCard({
                 value={editText}
                 onChange={(e) => onEditTextChange(e.target.value)}
                 rows={3}
-                className="rounded-md border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-sm outline-none focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)] resize-y w-full"
-                style={{ color: "var(--ink)" }}
+                className="rounded-md border border-border bg-card px-3 py-1.5 text-sm outline-none focus:border-accent focus:ring-1 focus:ring-accent resize-y w-full text-foreground"
               />
               <div className="flex gap-2">
-                <button
+                <Button
                   onClick={onSaveEdit}
-                  className="rounded-md bg-[var(--accent)] px-3 py-1 text-xs font-medium text-white"
+                  size="sm"
                 >
                   Save
-                </button>
-                <button
+                </Button>
+                <Button
                   onClick={onCancelEdit}
-                  className="rounded-md border border-[var(--border)] px-3 py-1 text-xs"
-                  style={{ color: "var(--ink-muted)" }}
+                  variant="outline"
+                  size="sm"
                 >
                   Cancel
-                </button>
+                </Button>
               </div>
             </div>
           ) : (
-            <p className="text-sm whitespace-pre-wrap break-words" style={{ color: "var(--ink)" }}>
+            <p className="text-sm whitespace-pre-wrap break-words text-foreground">
               {note.note_text}
             </p>
           )}
@@ -224,16 +222,14 @@ function NoteCard({
           <div className="flex gap-1 shrink-0">
             <button
               onClick={onStartEdit}
-              className="rounded px-2 py-1 text-xs hover:bg-[var(--border)]/30"
-              style={{ color: "var(--ink-muted)" }}
+              className="rounded px-2 py-1 text-xs text-muted-foreground hover:bg-border/30"
               title="Edit"
             >
               &#9998;
             </button>
             <button
               onClick={onDelete}
-              className="rounded px-2 py-1 text-xs hover:bg-[var(--sh-error)]/10"
-              style={{ color: "var(--ink-muted)" }}
+              className="rounded px-2 py-1 text-xs text-muted-foreground hover:bg-destructive/10"
               title="Delete"
             >
               &#10005;
@@ -245,12 +241,12 @@ function NoteCard({
       {/* Timestamps */}
       <div className="flex gap-3 mt-2">
         {note.created_at && (
-          <span className="text-[11px]" style={{ color: "var(--ink-muted)" }}>
+          <span className="text-[11px] text-muted-foreground">
             Created {formatDate(note.created_at)}
           </span>
         )}
         {note.updated_at && note.updated_at !== note.created_at && (
-          <span className="text-[11px]" style={{ color: "var(--ink-muted)" }}>
+          <span className="text-[11px] text-muted-foreground">
             Updated {formatDate(note.updated_at)}
           </span>
         )}
