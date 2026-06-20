@@ -90,6 +90,7 @@ export const uploadDocumentStateResultSchema = z.object({
   success: z.boolean(),
   error: z.string().optional(),
   filePath: z.string().optional(),
+  s3Key: z.string().optional(),
 });
 
 export const deleteDocumentStateResultSchema = z.object({
