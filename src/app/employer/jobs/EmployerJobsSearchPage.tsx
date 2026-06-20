@@ -6,7 +6,6 @@ import Link from "next/link";
 import type { SessionUser } from "@/modules/auth/types";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
-import { cn } from "@/lib/utils";
 import { StatusBadge } from "@/modules/workspace/StatusBadge";
 import { genericStatusVariant } from "@/modules/workspace/status-mapping";
 
@@ -54,7 +53,7 @@ function useDebounce<T>(value: T, delay: number): T {
 
 function SearchResultSkeleton() {
   return (
-    <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4 flex flex-col gap-3">
+    <div className="rounded-lg border border-border bg-card p-4 flex flex-col gap-3">
       <div className="flex items-start justify-between gap-3">
         <Skeleton variant="pulse" className="h-5 w-40" />
         <Skeleton variant="pulse" className="h-5 w-16 rounded-md" />
@@ -176,29 +175,16 @@ export function EmployerJobsSearchPage({
           <input
             ref={inputRef}
             type="text"
-            className="flex-1 rounded-lg border px-4 py-2.5 text-[0.9375rem] outline-none transition-[border-color] duration-150"
-            style={{
-              borderColor: "var(--border)",
-              background: "var(--card)",
-              color: "var(--ink)",
-            }}
+            className="flex-1 rounded-lg border border-border bg-card px-4 py-2.5 text-[0.9375rem] text-foreground outline-none transition-all duration-150 placeholder:text-muted-foreground/50 focus:border-[var(--sh-coral)] focus:ring-1 focus:ring-[var(--sh-coral)] focus:shadow-[var(--sh-coral-glow)]"
             placeholder="Search job postings by title, description, requirements..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             autoFocus
-            onFocus={(e) => {
-              e.currentTarget.style.borderColor = "var(--sh-coral)";
-              e.currentTarget.style.boxShadow = "var(--sh-coral-glow)";
-            }}
-            onBlur={(e) => {
-              e.currentTarget.style.borderColor = "var(--border)";
-              e.currentTarget.style.boxShadow = "none";
-            }}
           />
           <button
             type="submit"
-            className="rounded-lg px-6 py-2.5 text-[0.9375rem] font-semibold text-white transition-opacity duration-150 disabled:cursor-not-allowed disabled:opacity-60 hover:opacity-90"
-            style={{ background: "var(--sh-coral)" }}
+            className="rounded-lg px-6 py-2.5 text-[0.9375rem] font-semibold text-white transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-60 hover:opacity-90 hover:-translate-y-px"
+            style={{ backgroundColor: "var(--sh-coral)" }}
             disabled={loading}
           >
             {loading ? "Searching..." : "Search"}
@@ -224,7 +210,7 @@ export function EmployerJobsSearchPage({
         {/* Count indicator */}
         {results && (
           <div className="mb-4 flex items-center justify-between text-xs">
-            <span className="font-semibold" style={{ color: "var(--ink)" }}>
+            <span className="font-semibold text-foreground">
               {isTyping ? (
                 <>
                   <span className="inline-block align-middle mr-1.5 h-2 w-2 rounded-full bg-[var(--sh-coral)] animate-pulse" />
@@ -239,8 +225,8 @@ export function EmployerJobsSearchPage({
             </span>
             {!isTyping && (
               <span
-                className="rounded-md px-2 py-0.5"
-                style={{ color: "var(--muted)", background: "var(--accent)" }}
+                className="rounded-md px-2 py-0.5 text-muted-foreground"
+                style={{ background: "var(--accent)" }}
               >
                 {results.source.current}
               </span>
@@ -276,11 +262,7 @@ export function EmployerJobsSearchPage({
                 <Link
                   key={row.jobListingId}
                   href={`/employer/jobs/${row.jobListingId}`}
-                  className="block rounded-xl border p-4 transition-all duration-150 hover:shadow-md hover:-translate-y-px"
-                  style={{
-                    background: "var(--card)",
-                    borderColor: "var(--border)",
-                  }}
+                  className="block rounded-xl border border-border bg-card p-4 transition-all duration-150 hover:shadow-md hover:-translate-y-px"
                   onClick={(e) => {
                     if (e.button === 1 || e.metaKey || e.ctrlKey) return;
                   }}
@@ -288,7 +270,7 @@ export function EmployerJobsSearchPage({
                   {/* Result header */}
                   <div className="mb-2 flex items-start justify-between gap-3">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="m-0 text-base font-semibold" style={{ color: "var(--ink)" }}>
+                      <h3 className="m-0 text-base font-semibold text-foreground">
                         {row.title}
                       </h3>
                       {row.status && (
@@ -303,7 +285,7 @@ export function EmployerJobsSearchPage({
 
                   {/* Description excerpt */}
                   {row.description && (
-                    <p className="m-0 mb-2 text-sm line-clamp-2" style={{ color: "var(--muted)" }}>
+                    <p className="m-0 mb-2 text-sm line-clamp-2 text-muted-foreground">
                       {row.description}
                     </p>
                   )}
@@ -312,39 +294,39 @@ export function EmployerJobsSearchPage({
                   <div className="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-2">
                     {row.employmentType && (
                       <div className="flex flex-col gap-0.5">
-                        <span className="text-[0.6875rem] font-medium uppercase tracking-wider" style={{ color: "var(--muted)" }}>
+                        <span className="text-[0.6875rem] font-medium uppercase tracking-wider text-muted-foreground">
                           Type
                         </span>
-                        <span className="text-xs" style={{ color: "var(--ink)" }}>
+                        <span className="text-xs text-foreground">
                           {row.employmentType}
                         </span>
                       </div>
                     )}
                     {row.location && (
                       <div className="flex flex-col gap-0.5">
-                        <span className="text-[0.6875rem] font-medium uppercase tracking-wider" style={{ color: "var(--muted)" }}>
+                        <span className="text-[0.6875rem] font-medium uppercase tracking-wider text-muted-foreground">
                           Location
                         </span>
-                        <span className="text-xs" style={{ color: "var(--ink)" }}>
+                        <span className="text-xs text-foreground">
                           {row.location}
                         </span>
                       </div>
                     )}
                     {row.salaryRange && (
                       <div className="flex flex-col gap-0.5">
-                        <span className="text-[0.6875rem] font-medium uppercase tracking-wider" style={{ color: "var(--muted)" }}>
+                        <span className="text-[0.6875rem] font-medium uppercase tracking-wider text-muted-foreground">
                           Salary
                         </span>
-                        <span className="text-xs" style={{ color: "var(--ink)" }}>
+                        <span className="text-xs text-foreground">
                           {row.salaryRange}
                         </span>
                       </div>
                     )}
                     <div className="flex flex-col gap-0.5">
-                      <span className="text-[0.6875rem] font-medium uppercase tracking-wider" style={{ color: "var(--muted)" }}>
+                      <span className="text-[0.6875rem] font-medium uppercase tracking-wider text-muted-foreground">
                         Posted
                       </span>
-                      <span className="text-xs" style={{ color: "var(--ink)" }}>
+                      <span className="text-xs text-foreground">
                         {row.createdAt}
                       </span>
                     </div>
@@ -358,8 +340,7 @@ export function EmployerJobsSearchPage({
               <div className="mt-6 flex items-center justify-center gap-2">
                 <button
                   type="button"
-                  className="rounded-md border px-3 py-1.5 text-xs font-medium disabled:opacity-30"
-                  style={{ borderColor: "var(--border)", color: "var(--ink)" }}
+                  className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-foreground disabled:opacity-30 hover:bg-accent transition-colors"
                   disabled={page <= 1}
                   onClick={() => goToPage(page - 1)}
                 >
@@ -371,15 +352,11 @@ export function EmployerJobsSearchPage({
                     <button
                       key={p}
                       type="button"
-                      className={cn(
-                        "rounded-md border px-3 py-1.5 text-xs font-medium",
-                        p === page ? "text-[var(--sh-coral)]" : "",
-                      )}
-                      style={
+                      className={`rounded-md border px-3 py-1.5 text-xs font-medium transition-colors ${
                         p === page
-                          ? { background: "var(--sh-coral-light)", borderColor: "var(--sh-coral)" }
-                          : { borderColor: "var(--border)", color: "var(--ink)" }
-                      }
+                          ? "text-[var(--sh-coral)] bg-[var(--sh-coral-light)] border-[var(--sh-coral)]"
+                          : "text-foreground border-border hover:bg-accent"
+                      }`}
                       onClick={() => goToPage(p)}
                     >
                       {p}
@@ -388,8 +365,7 @@ export function EmployerJobsSearchPage({
                 })}
                 <button
                   type="button"
-                  className="rounded-md border px-3 py-1.5 text-xs font-medium disabled:opacity-30"
-                  style={{ borderColor: "var(--border)", color: "var(--ink)" }}
+                  className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-foreground disabled:opacity-30 hover:bg-accent transition-colors"
                   disabled={page >= totalPages}
                   onClick={() => goToPage(page + 1)}
                 >
