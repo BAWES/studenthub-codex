@@ -4,6 +4,11 @@ import { useActionState, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { DataTable } from "@/modules/workspace/DataTable";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 import type { SessionUser } from "@/modules/auth/types";
 import type { MajorItem } from "../schemas";
@@ -27,12 +32,12 @@ export function AdminMajorsTable({ session, majors }: Props) {
         { label: "Total majors", value: majors.length, note: "Majors in the system" },
       ]}
     >
-      <section className="mb-6">
-        <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
+      <Card className="mb-6">
+        <CardContent className="p-5">
           <h3 className="text-sm font-semibold mb-3 text-foreground">Add major</h3>
           <CreateMajorForm onSuccess={() => router.refresh()} />
-        </div>
-      </section>
+        </CardContent>
+      </Card>
 
       <DataTable
         title="Majors"
@@ -87,9 +92,9 @@ export function AdminMajorsTable({ session, majors }: Props) {
             label: "",
             render: (row) =>
               editingId !== row.major_uuid ? (
-                <button
-                  type="button"
-                  className="text-xs px-2 py-1 rounded hover:bg-red-500/10 text-destructive"
+                <Button
+                  variant="destructive"
+                  size="sm"
                   onClick={async () => {
                     if (confirm(`Delete major "${row.major_name_en}"?`)) {
                       const result = await deleteMajor(row.major_uuid);
@@ -101,7 +106,7 @@ export function AdminMajorsTable({ session, majors }: Props) {
                   }}
                 >
                   Delete
-                </button>
+                </Button>
               ) : null,
           },
         ]}
@@ -133,24 +138,35 @@ function CreateMajorForm({ onSuccess }: { onSuccess: () => void }) {
       className="flex flex-wrap items-end gap-3"
       onSubmit={() => setTimeout(() => { formRef.current?.reset(); }, 100)}
     >
-      <div className="grid gap-1">
-        <label className="text-xs font-medium text-muted-foreground">Name (EN) *</label>
-        <input name="majorNameEn" required maxLength={150} placeholder="e.g. Computer Science"
-   className="h-9 rounded-lg px-3 text-sm border w-48 bg-[var(--surface)] border-[var(--border)] text-[var(--ink)]"/>
+      <div className="grid gap-1.5">
+        <Label htmlFor="major-name-en" className="text-xs font-medium text-muted-foreground">Name (EN) *</Label>
+        <Input
+          id="major-name-en"
+          name="majorNameEn"
+          required
+          maxLength={150}
+          placeholder="e.g. Computer Science"
+          className="h-9 w-48"
+        />
       </div>
-      <div className="grid gap-1">
-        <label className="text-xs font-medium text-muted-foreground">Name (AR) *</label>
-        <input name="majorNameAr" required maxLength={150} placeholder="علوم الحاسوب"
-   className="h-9 rounded-lg px-3 text-sm border w-36 bg-[var(--surface)] border-[var(--border)] text-[var(--ink)]"/>
+      <div className="grid gap-1.5">
+        <Label htmlFor="major-name-ar" className="text-xs font-medium text-muted-foreground">Name (AR) *</Label>
+        <Input
+          id="major-name-ar"
+          name="majorNameAr"
+          required
+          maxLength={150}
+          placeholder="علوم الحاسوب"
+          className="h-9 w-36"
+        />
       </div>
-      <button
-        type="submit" disabled={pending}
-        className="h-9 rounded-lg px-4 text-sm font-semibold bg-primary text-primary-foreground"
-      >
+      <Button type="submit" disabled={pending}>
         {pending ? "Adding..." : "Add"}
-      </button>
+      </Button>
       {state?.error ? (
-        <p className="text-xs w-full text-destructive">{state.error}</p>
+        <Alert variant="destructive" className="w-full mt-2">
+          <AlertDescription>{state.error}</AlertDescription>
+        </Alert>
       ) : null}
     </form>
   );
@@ -179,20 +195,30 @@ function EditMajorForm({
 
   return (
     <form action={action} className="flex items-center gap-2 flex-wrap">
-      <input name="majorNameEn" defaultValue={row.major_name_en} required maxLength={150}
-        className="h-8 rounded px-2 text-sm border w-40 bg-[var(--surface)] border-[var(--border)] text-[var(--ink)]" />
-      <input name="majorNameAr" defaultValue={row.major_name_ar} required maxLength={150}
-        className="h-8 rounded px-2 text-sm border w-36 bg-[var(--surface)] border-[var(--border)] text-[var(--ink)]" />
-      <button type="submit" disabled={pending}
-        className="h-8 rounded px-3 text-xs font-semibold bg-primary text-primary-foreground">
+      <Input
+        name="majorNameEn"
+        defaultValue={row.major_name_en}
+        required
+        maxLength={150}
+        className="h-8 w-40"
+      />
+      <Input
+        name="majorNameAr"
+        defaultValue={row.major_name_ar}
+        required
+        maxLength={150}
+        className="h-8 w-36"
+      />
+      <Button type="submit" size="sm" disabled={pending}>
         {pending ? "..." : "Save"}
-      </button>
-      <button type="button" onClick={onCancel}
-        className="h-8 rounded px-3 text-xs text-muted-foreground">
+      </Button>
+      <Button type="button" variant="ghost" size="sm" onClick={onCancel}>
         Cancel
-      </button>
+      </Button>
       {state?.error ? (
-        <p className="text-xs w-full text-destructive">{state.error}</p>
+        <Alert variant="destructive" className="w-full mt-2">
+          <AlertDescription>{state.error}</AlertDescription>
+        </Alert>
       ) : null}
     </form>
   );
