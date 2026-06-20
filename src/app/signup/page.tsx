@@ -1,4 +1,3 @@
-import { Shield, Sparkles } from "lucide-react";
 import { getSession } from "@/modules/auth/session";
 import { SignupForm } from "@/modules/auth/SignupForm";
 import { redirect } from "next/navigation";
@@ -40,24 +39,45 @@ export default async function SignupPage({
   }
 
   return (
-    <main className="min-h-svh w-full grid place-items-center p-4">
-      <div className="w-full max-w-[640px]">
-        {/* Glass panel container for the form */}
-        <div
-          className="rounded-xl border border-[var(--border)] bg-white shadow-[0_18px_50px_rgba(16,24,40,0.08)]"
-        >
-          <SignupForm defaultRole={defaultRole} />
-        </div>
+    <main className="shLoginRoot">
+      {/* ── Brand side — animated gradient + visual statement ────────── */}
+      <div className="shLoginBrand">
+        <div className="shLoginGradient" aria-hidden="true" />
 
-        <div className="flex items-center justify-center gap-5 mt-5 text-[13px] text-[var(--muted)]">
-          <span className="inline-flex items-center gap-1.5">
-            <Shield className="size-3.5" />
-            Encrypted & secure
-          </span>
-          <span className="inline-flex items-center gap-1.5">
-            <Sparkles className="size-3.5" />
-            Free to join
-          </span>
+        <div className="shLoginBrandContent">
+          <div className="shLoginBrandLogo">
+            <span>SH</span>
+            <strong>StudentHub</strong>
+          </div>
+
+          <h1 className="shLoginBrandTitle">
+            Create your account.<br />
+            <span className="shLoginBrandHighlight">The right workspace opens.</span>
+          </h1>
+
+          <p className="shLoginBrandBody">
+            Sign up as a student looking for work or an employer hiring talent.
+            One account, one platform — staff recruiters handle the match.
+          </p>
+
+          <div className="shLoginBrandPills">
+            {["Student or employer", "Free to join", "Encrypted & secure"].map(
+              (item) => (
+                <span key={item} className="shLoginBrandPill">
+                  {item}
+                </span>
+              )
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* ── Form side — clean card ──────────────────────────────────── */}
+      <div className="shLoginFormSide">
+        <div className="shLoginFormWrap">
+          <div className="shLoginFormCard">
+            <SignupForm defaultRole={defaultRole} />
+          </div>
         </div>
       </div>
     </main>
