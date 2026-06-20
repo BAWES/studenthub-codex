@@ -86,8 +86,8 @@
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  background: linear-gradient(135deg, rgba(11, 99, 206, 0.10), rgba(11, 99, 206, 0.04));
-  color: #0b63ce;
+  background: linear-gradient(135deg, rgba(31, 115, 183, 0.10), rgba(31, 115, 183, 0.04));
+  color: #1f73b7;
 }
 
 .shLandingSectionTitle {
@@ -248,7 +248,7 @@
   left: 24px;
   font-size: 64px;
   line-height: 1;
-  color: rgba(11, 99, 206, 0.08);
+  color: rgba(31, 115, 183, 0.08);
   font-family: Georgia, serif;
   pointer-events: none;
 }
@@ -259,7 +259,7 @@
   width: 80px;
   height: 3px;
   border-radius: 2px;
-  background: linear-gradient(90deg, transparent, #0b63ce, transparent);
+  background: linear-gradient(90deg, transparent, #1f73b7, transparent);
   margin: 0 auto 20px;
 }
 

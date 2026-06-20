@@ -295,8 +295,8 @@ export default function FeatureGrid({
               key={feat.title}
               className="group shCard rounded-xl p-5 transition-all duration-[280ms] hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(16,24,40,0.1)]"
               style={{
-                background: "var(--sh-glass-bg)",
-                border: "1px solid var(--sh-glass-border)",
+                background: "var(--surface)",
+                border: "1px solid var(--border)",
                 animationDelay: `${i * 80 + 100}ms`,
               }}
             >
@@ -323,7 +323,7 @@ export default function FeatureGrid({
                   className="mt-3 pt-3 text-[11px] font-semibold"
                   style={{
                     color: "var(--sh-info)",
-                    borderTop: "1px solid var(--sh-glass-border)",
+                    borderTop: "1px solid var(--border)",
                   }}
                 >
                   {feat.stat}
