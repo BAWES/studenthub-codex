@@ -109,7 +109,7 @@ export function DataTableSkeleton({ rows = 10 }: { rows?: number }) {
             gridTemplateColumns: "1fr 1fr 120px 100px",
             gap: 12,
             padding: "10px 14px",
-            borderBottom: "1px solid var(--sh-glass-border)",
+            borderBottom: "1px solid var(--border)",
           }}
         >
           <ShimmerBlock className="h-3 w-20" />
@@ -125,7 +125,7 @@ export function DataTableSkeleton({ rows = 10 }: { rows?: number }) {
               gridTemplateColumns: "1fr 1fr 120px 100px",
               gap: 12,
               padding: "12px 14px",
-              borderBottom: "1px solid var(--sh-glass-border)",
+              borderBottom: "1px solid var(--border)",
             }}
           >
             <ShimmerBlock className="h-4 w-44" />

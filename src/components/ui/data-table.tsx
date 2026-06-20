@@ -15,8 +15,8 @@ import { EmptyState } from "@/components/ui/empty-state";
 
 /* ==========================================================================
    StudentHub OS — DataTable
-   Unified list component with glass aesthetic, loading skeletons,
-   empty states with illustrations, error states, and pagination.
+   Unified list component with loading skeletons, empty states with
+   illustrations, error states, and pagination.
    Wraps the shOsTable primitives with data-aware states.
    ========================================================================== */
 
@@ -93,7 +93,7 @@ function DataTableSkeleton({
                   className="h-4 rounded animate-pulse"
                   style={{
                     width: `${50 + Math.random() * 40}%`,
-                    background: "var(--sh-glass-border)",
+                    background: "var(--border)",
                   }}
                 />
               </TableCell>
