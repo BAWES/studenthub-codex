@@ -20,7 +20,7 @@ function SearchPageFallback() {
       </div>
       <div className="flex flex-col gap-3">
         {Array.from({ length: 5 }).map((_, i) => (
-          <div key={i} className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4 flex flex-col gap-3">
+          <div key={i} className="rounded-lg border border-border bg-card p-4 flex flex-col gap-3">
             <Skeleton variant="pulse" className="h-5 w-40" />
             <Skeleton variant="pulse" className="h-4 w-full" />
           </div>
