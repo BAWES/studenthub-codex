@@ -2,10 +2,12 @@ import { describe, it, expect } from "vitest";
 import {
   listChatsSchema,
   getChatMessagesSchema,
+  sendChatMessageSchema,
   chatListItemSchema,
   chatMessageItemSchema,
   listChatsResultSchema,
   listChatMessagesResultSchema,
+  sendChatMessageResultSchema,
   type ChatListItem,
   type ChatMessageItem,
 } from "./schemas";
@@ -600,5 +602,86 @@ describe("listChatMessagesResultSchema", () => {
 
   it("rejects completely empty object", () => {
     expect(listChatMessagesResultSchema.safeParse({}).success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Input: sendChatMessageSchema
+// ---------------------------------------------------------------------------
+
+describe("sendChatMessageSchema (input)", () => {
+  it("accepts valid params", () => {
+    const r = sendChatMessageSchema.safeParse({
+      chatUuid: "chat_abc123",
+      message: "Hello, I need help",
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects missing chatUuid", () => {
+    expect(
+      sendChatMessageSchema.safeParse({ message: "Hello" }).success,
+    ).toBe(false);
+  });
+
+  it("rejects empty chatUuid", () => {
+    expect(
+      sendChatMessageSchema.safeParse({ chatUuid: "", message: "Hello" }).success,
+    ).toBe(false);
+  });
+
+  it("rejects missing message", () => {
+    expect(
+      sendChatMessageSchema.safeParse({ chatUuid: "abc" }).success,
+    ).toBe(false);
+  });
+
+  it("rejects empty message", () => {
+    expect(
+      sendChatMessageSchema.safeParse({ chatUuid: "abc", message: "" }).success,
+    ).toBe(false);
+  });
+
+  it("rejects message over 1000 chars", () => {
+    expect(
+      sendChatMessageSchema.safeParse({ chatUuid: "abc", message: "x".repeat(1001) }).success,
+    ).toBe(false);
+  });
+
+  it("accepts message at 1000 chars", () => {
+    expect(
+      sendChatMessageSchema.safeParse({ chatUuid: "abc", message: "x".repeat(1000) }).success,
+    ).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Output: sendChatMessageResultSchema
+// ---------------------------------------------------------------------------
+
+describe("sendChatMessageResultSchema", () => {
+  it("accepts a valid send result", () => {
+    const r = sendChatMessageResultSchema.safeParse({
+      message: {
+        chat_message_uuid: "msg_abc123",
+        chat_uuid: "chat_abc123",
+        message: "Hello!",
+        message_index: 5,
+        from: "candidate",
+        status: false,
+        created_at: "2026-01-15T10:00:00Z",
+      },
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects missing message field", () => {
+    expect(sendChatMessageResultSchema.safeParse({}).success).toBe(false);
+  });
+
+  it("rejects invalid message shape", () => {
+    expect(
+      sendChatMessageResultSchema.safeParse({ message: "not-an-object" }).success,
+    ).toBe(false);
   });
 });
