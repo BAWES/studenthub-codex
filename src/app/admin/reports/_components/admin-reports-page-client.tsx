@@ -5,6 +5,8 @@ import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import type { SessionUser } from "@/modules/auth/types";
 import type { ReportTypeItem } from "../schemas";
 import { generateReport } from "../actions";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 type Props = {
   session: SessionUser;
@@ -60,113 +62,106 @@ export function AdminReportsPageClient({ session, reportTypes }: Props) {
       {/* Report type cards */}
       <section className="grid gap-4 md:grid-cols-2 mb-8">
         {reportTypes.map((rt) => (
-          <div
-            key={rt.type}
-            className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5"
-          >
-            <h3 className="text-sm font-semibold mb-1 text-foreground">
-              {rt.label}
-            </h3>
-            <p className="text-xs mb-4 text-muted-foreground">
-              {rt.description}
-            </p>
-            <button
-              type="button"
-              disabled={generating === rt.type}
-              onClick={() => handleGenerate(rt.type)}
-              className="h-9 rounded-lg px-4 text-sm font-semibold disabled:opacity-50 bg-primary text-primary-foreground"
-            >
-              {generating === rt.type ? "Generating..." : "Generate Report"}
-            </button>
-          </div>
+          <Card key={rt.type}>
+            <CardHeader>
+              <CardTitle className="text-sm">{rt.label}</CardTitle>
+              <CardDescription>{rt.description}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button
+                disabled={generating === rt.type}
+                onClick={() => handleGenerate(rt.type)}
+              >
+                {generating === rt.type ? "Generating..." : "Generate Report"}
+              </Button>
+            </CardContent>
+          </Card>
         ))}
       </section>
 
       {/* Error */}
       {error ? (
-        <div
-          className="rounded-lg border p-4 mb-6 text-sm"
-          style={{ borderColor: "var(--sh-error)", background: "#fef2f2", color: "var(--sh-error)" }}
-        >
+        <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-4 mb-6 text-sm text-destructive">
           {error}
         </div>
       ) : null}
 
       {/* Report results */}
       {reportData ? (
-        <section className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
-          <h3 className="text-sm font-semibold mb-3 text-foreground">
-            Report Results
-          </h3>
-
-          {reportData.kind === "recruiter-daily" && (
-            <div className="overflow-x-auto">
-              <table className="w-full text-xs">
-                <thead>
-                  <tr className="border-b" >
-                    <th className="text-left py-2 px-2 font-medium text-muted-foreground">Staff</th>
-                    <th className="text-right py-2 px-2 font-medium text-muted-foreground">Assigned</th>
-                    <th className="text-right py-2 px-2 font-medium text-muted-foreground">Requests</th>
-                    <th className="text-right py-2 px-2 font-medium text-muted-foreground">Notes</th>
-                    <th className="text-right py-2 px-2 font-medium text-muted-foreground">Stories</th>
-                    <th className="text-right py-2 px-2 font-medium text-muted-foreground">Invitations</th>
-                    <th className="text-right py-2 px-2 font-medium text-muted-foreground">Accepted</th>
-                    <th className="text-right py-2 px-2 font-medium text-muted-foreground">Rejected</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {reportData.reports.map((r, i) => (
-                    <tr key={i} className="border-b" >
-                      <td className="py-2 px-2 text-foreground">
-                        <div className="font-medium">{r.staffName as string}</div>
-                        <div className="text-muted-foreground">{r.staffEmail as string}</div>
-                      </td>
-                      <td className="text-right py-2 px-2 text-foreground">{r.totalAssigned as number}</td>
-                      <td className="text-right py-2 px-2 text-foreground">{r.totalRequests as number}</td>
-                      <td className="text-right py-2 px-2 text-foreground">{r.totalNotes as number}</td>
-                      <td className="text-right py-2 px-2 text-foreground">{r.totalStories as number}</td>
-                      <td className="text-right py-2 px-2 text-foreground">{r.totalInvitations as number}</td>
-                      <td className="text-right py-2 px-2 text-foreground">{r.totalAcceptedInvitations as number}</td>
-                      <td className="text-right py-2 px-2 text-foreground">{r.totalRejectedInvitations as number}</td>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm">Report Results</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {reportData.kind === "recruiter-daily" && (
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="border-b border-border">
+                      <th className="text-left py-2 px-2 font-medium text-muted-foreground">Staff</th>
+                      <th className="text-right py-2 px-2 font-medium text-muted-foreground">Assigned</th>
+                      <th className="text-right py-2 px-2 font-medium text-muted-foreground">Requests</th>
+                      <th className="text-right py-2 px-2 font-medium text-muted-foreground">Notes</th>
+                      <th className="text-right py-2 px-2 font-medium text-muted-foreground">Stories</th>
+                      <th className="text-right py-2 px-2 font-medium text-muted-foreground">Invitations</th>
+                      <th className="text-right py-2 px-2 font-medium text-muted-foreground">Accepted</th>
+                      <th className="text-right py-2 px-2 font-medium text-muted-foreground">Rejected</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-              <p className="text-xs mt-3 text-muted-foreground">
-                Total staff: {reportData.total}
+                  </thead>
+                  <tbody>
+                    {reportData.reports.map((r, i) => (
+                      <tr key={i} className="border-b border-border">
+                        <td className="py-2 px-2 text-card-foreground">
+                          <div className="font-medium">{r.staffName as string}</div>
+                          <div className="text-muted-foreground">{r.staffEmail as string}</div>
+                        </td>
+                        <td className="text-right py-2 px-2 text-card-foreground">{r.totalAssigned as number}</td>
+                        <td className="text-right py-2 px-2 text-card-foreground">{r.totalRequests as number}</td>
+                        <td className="text-right py-2 px-2 text-card-foreground">{r.totalNotes as number}</td>
+                        <td className="text-right py-2 px-2 text-card-foreground">{r.totalStories as number}</td>
+                        <td className="text-right py-2 px-2 text-card-foreground">{r.totalInvitations as number}</td>
+                        <td className="text-right py-2 px-2 text-card-foreground">{r.totalAcceptedInvitations as number}</td>
+                        <td className="text-right py-2 px-2 text-card-foreground">{r.totalRejectedInvitations as number}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                <p className="text-xs mt-3 text-muted-foreground">
+                  Total staff: {reportData.total}
+                </p>
+              </div>
+            )}
+
+            {reportData.kind === "invitation-summary" && (
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="border-b border-border">
+                      <th className="text-left py-2 px-2 font-medium text-muted-foreground">Status</th>
+                      <th className="text-right py-2 px-2 font-medium text-muted-foreground">Count</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {reportData.summary.map((s, i) => (
+                      <tr key={i} className="border-b border-border">
+                        <td className="py-2 px-2 text-card-foreground">
+                          {s.status === 1 ? "Accepted" : s.status === 2 ? "Rejected" : `Status ${s.status}`}
+                        </td>
+                        <td className="text-right py-2 px-2 text-card-foreground">{s.count}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {reportData.kind === "unknown" && (
+              <p className="text-sm text-muted-foreground">
+                Report generated. Raw data available in the response.
               </p>
-            </div>
-          )}
-
-          {reportData.kind === "invitation-summary" && (
-            <div className="overflow-x-auto">
-              <table className="w-full text-xs">
-                <thead>
-                  <tr className="border-b" >
-                    <th className="text-left py-2 px-2 font-medium text-muted-foreground">Status</th>
-                    <th className="text-right py-2 px-2 font-medium text-muted-foreground">Count</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {reportData.summary.map((s, i) => (
-                    <tr key={i} className="border-b" >
-                      <td className="py-2 px-2 text-foreground">
-                        {s.status === 1 ? "Accepted" : s.status === 2 ? "Rejected" : `Status ${s.status}`}
-                      </td>
-                      <td className="text-right py-2 px-2 text-foreground">{s.count}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-
-          {reportData.kind === "unknown" && (
-            <p className="text-sm text-muted-foreground">
-              Report generated. Raw data available in the response.
-            </p>
-          )}
-        </section>
+            )}
+          </CardContent>
+        </Card>
       ) : null}
     </WorkspaceShell>
   );
