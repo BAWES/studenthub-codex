@@ -76,8 +76,8 @@ const candidateFeatures: Feature[] = [
 const companyFeatures: Feature[] = [
   {
     icon: Search,
-    title: "AI-matched candidates",
-    body: "Get matched candidates within 48 hours of posting. Our algorithm learns your preferences and gets better over time.",
+    title: "Staff-matched candidates",
+    body: "Get matched candidates within 48 hours of posting. Our staff recruiters learn your preferences and deliver better results over time.",
     stat: "48h avg time-to-match",
   },
   {
