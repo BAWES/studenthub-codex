@@ -3,10 +3,13 @@ import Link from "next/link";
 import type { Route } from "next";
 import { requireRoleCapability } from "@/modules/auth/session";
 import { DetailSection } from "@/modules/workspace/DetailPanels";
+import { StatusBadge } from "@/modules/workspace/StatusBadge";
+import { genericStatusVariant } from "@/modules/workspace/status-mapping";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { getStaffInterviewDetail } from "../actions";
 import { updateInterviewStatusAction } from "@/modules/requests/interview-actions";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export const dynamic = "force-dynamic";
 
@@ -32,6 +35,8 @@ export default async function StaffInterviewDetailPage({
     notFound();
   }
 
+  const statusText = statusLabel(interview.status);
+
   const facts = [
     { label: "Candidate", value: interview.candidateName },
     { label: "Email", value: interview.candidateEmail },
@@ -39,7 +44,10 @@ export default async function StaffInterviewDetailPage({
     { label: "Request", value: interview.requestTitle },
     { label: "Company", value: interview.companyName },
     { label: "Scheduled At", value: interview.scheduledAt?.toLocaleString() },
-    { label: "Status", value: statusLabel(interview.status) },
+    {
+      label: "Status",
+      value: <StatusBadge variant={genericStatusVariant(statusText)} label={statusText} />,
+    },
     { label: "Staff", value: interview.staffName },
     { label: "Internal Note", value: interview.note },
     { label: "Interview Note", value: interview.interviewNote }
@@ -54,59 +62,70 @@ export default async function StaffInterviewDetailPage({
     >
       <DetailSection title="Interview Details" facts={facts} />
 
-      <section className="detailPanel">
-        <h2>Actions</h2>
-        <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
-          {interview.status !== 1 && (
-            <form action={updateInterviewStatusAction}>
-              <input type="hidden" name="interview_uuid" value={interview.interviewUuid} />
-              <input type="hidden" name="status" value={1} />
-              <Button type="submit" variant="default">Mark Completed</Button>
-            </form>
-          )}
-          {interview.status !== 2 && (
-            <form action={updateInterviewStatusAction}>
-              <input type="hidden" name="interview_uuid" value={interview.interviewUuid} />
-              <input type="hidden" name="status" value={2} />
-              <Button type="submit" variant="outline">Mark Cancelled</Button>
-            </form>
-          )}
-          {interview.status !== 0 && interview.status !== null && (
-            <form action={updateInterviewStatusAction}>
-              <input type="hidden" name="interview_uuid" value={interview.interviewUuid} />
-              <input type="hidden" name="status" value={0} />
-              <Button type="submit" variant="secondary">Reset to Scheduled</Button>
-            </form>
-          )}
-        </div>
-      </section>
+      <Card className="border-l-4 border-l-[#eb6651]">
+        <CardHeader>
+          <CardTitle>Actions</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-wrap gap-2">
+            {interview.status !== 1 && (
+              <form action={updateInterviewStatusAction}>
+                <input type="hidden" name="interview_uuid" value={interview.interviewUuid} />
+                <input type="hidden" name="status" value={1} />
+                <Button type="submit" variant="default">Mark Completed</Button>
+              </form>
+            )}
+            {interview.status !== 2 && (
+              <form action={updateInterviewStatusAction}>
+                <input type="hidden" name="interview_uuid" value={interview.interviewUuid} />
+                <input type="hidden" name="status" value={2} />
+                <Button type="submit" variant="outline">Mark Cancelled</Button>
+              </form>
+            )}
+            {interview.status !== 0 && interview.status !== null && (
+              <form action={updateInterviewStatusAction}>
+                <input type="hidden" name="interview_uuid" value={interview.interviewUuid} />
+                <input type="hidden" name="status" value={0} />
+                <Button type="submit" variant="secondary">Reset to Scheduled</Button>
+              </form>
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
-      <section className="detailPanel">
-        <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
-          {interview.candidateId && (
-            <Link href={`/staff/candidates?candidate=${interview.candidateId}` as Route}>
-              <Button variant="outline">View Candidate</Button>
+      <Card className="border-l-4 border-l-[#eb6651] mt-4">
+        <CardHeader>
+          <CardTitle>Navigation</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-wrap gap-2">
+            {interview.candidateId && (
+              <Link href={`/staff/candidates?candidate=${interview.candidateId}` as Route}>
+                <Button variant="outline">View Candidate</Button>
+              </Link>
+            )}
+            {interview.requestUuid && (
+              <Link href={`/staff/requests/${interview.requestUuid}` as Route}>
+                <Button variant="outline">View Request</Button>
+              </Link>
+            )}
+            <Link href={"/staff/interviews" as Route}>
+              <Button variant="ghost">Back to Interviews</Button>
             </Link>
-          )}
-          {interview.requestUuid && (
-            <Link href={`/staff/requests/${interview.requestUuid}` as Route}>
-              <Button variant="outline">View Request</Button>
-            </Link>
-          )}
-          <Link href={"/staff/interviews" as Route}>
-            <Button variant="ghost">Back to Interviews</Button>
-          </Link>
-        </div>
-      </section>
+          </div>
+        </CardContent>
+      </Card>
 
       {notice && (
-        <section className="detailPanel">
-          <p className="notice">
-            {notice === "interview-updated" && "Interview updated successfully."}
-            {notice === "not-found" && "Interview not found."}
-            {notice === "missing-fields" && "Missing required fields."}
-          </p>
-        </section>
+        <Card className="mt-4">
+          <CardContent className="pt-6">
+            <p className="text-sm text-muted-foreground">
+              {notice === "interview-updated" && "Interview updated successfully."}
+              {notice === "not-found" && "Interview not found."}
+              {notice === "missing-fields" && "Missing required fields."}
+            </p>
+          </CardContent>
+        </Card>
       )}
     </WorkspaceShell>
   );
