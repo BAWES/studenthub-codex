@@ -17,4 +17,4 @@ export {
 export type {
   CertificationActionResult,
   CertificationItem,
-} from "@/app/candidate/certifications/schemas";
+} from "./schemas";

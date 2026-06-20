@@ -13,4 +13,4 @@ export type {
   CandidateJobRow,
   CandidateJobDetail,
   ApplicationRow,
-} from "@/app/candidate/jobs/schemas";
+} from "./schemas";
