@@ -4,6 +4,7 @@ import { useActionState, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { DataTable } from "@/modules/workspace/DataTable";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
+import { Badge } from "@/components/ui/badge";
 
 import type { SessionUser } from "@/modules/auth/types";
 import type { WebhookItem } from "../schemas";
@@ -29,7 +30,7 @@ export function AdminWebhooksTable({ session, webhooks }: Props) {
         { label: "Total webhooks", value: webhooks.length, note: "Webhooks in the system" },
       ]}
     >
-      <section className="mb-6">
+      <section className="bg-[var(--surface)] border-[var(--border)] text-[var(--ink)] bg-[var(--surface)] border-[var(--border)] text-[var(--ink)] bg-[var(--surface)] border-[var(--border)] text-[var(--ink)] bg-[var(--surface)] border-[var(--border)] text-[var(--ink)] bg-[var(--surface)] border-[var(--border)] text-[var(--ink)] bg-[var(--surface)] border-[var(--border)] text-[var(--ink)] mb-6">
         <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
           <h3 className="text-sm font-semibold mb-3 text-foreground">Add webhook</h3>
           <CreateWebhookForm onSuccess={() => router.refresh()} />
@@ -75,7 +76,7 @@ export function AdminWebhooksTable({ session, webhooks }: Props) {
             key: "method",
             label: "Method",
             render: (row) => (
-              <span className="text-xs font-mono px-2 py-0.5 rounded" style={{ background: "var(--border)", color: "var(--ink)" }}>
+              <Badge variant="outline">
                 {row.method ?? "—"}
               </span>
             ),
@@ -156,7 +157,7 @@ function CreateWebhookForm({ onSuccess }: { onSuccess: () => void }) {
           maxLength={50}
           placeholder="e.g. user.created"
           className="h-9 rounded-lg px-3 text-sm border"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+          
         />
       </div>
       <div className="grid gap-1">
@@ -167,7 +168,7 @@ function CreateWebhookForm({ onSuccess }: { onSuccess: () => void }) {
           maxLength={255}
           placeholder="https://hooks.example.com/notify"
           className="h-9 rounded-lg px-3 text-sm border"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+          
         />
       </div>
       <div className="grid gap-1">
@@ -176,7 +177,7 @@ function CreateWebhookForm({ onSuccess }: { onSuccess: () => void }) {
           name="method"
           defaultValue="POST"
           className="h-9 rounded-lg px-3 text-sm border"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+          
         >
           <option value="">No method</option>
           {WEBHOOK_METHOD_OPTIONS.map((m) => (
@@ -230,7 +231,7 @@ function EditWebhookForm({
         required
         maxLength={50}
         className="h-8 rounded px-2 text-sm border w-32"
-        style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+        
       />
       <input
         name="endpoint"
@@ -238,13 +239,13 @@ function EditWebhookForm({
         required
         maxLength={255}
         className="h-8 rounded px-2 text-sm border w-48"
-        style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+        
       />
       <select
         name="method"
         defaultValue={row.method ?? ""}
         className="h-8 rounded px-2 text-sm border"
-        style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+        
       >
         <option value="">No method</option>
         {WEBHOOK_METHOD_OPTIONS.map((m) => (

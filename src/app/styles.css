@@ -507,14 +507,14 @@ body {
 }
 
 .shGlassStrong {
-  background: var(--sh-glass-bg-strong);
-  border-color: var(--sh-glass-border-strong);
+  background: hsl(var(--card));
+  border-color: hsl(var(--border));
 }
 
 .shGlassElevated {
-  background: var(--sh-glass-bg-strong);
-  border-color: var(--sh-glass-border-strong);
-  box-shadow: var(--sh-glow-sm);
+  background: hsl(var(--card));
+  border-color: hsl(var(--border));
+  box-shadow: var(--shadow-md);
 }
 
 .shGlassRadiusSm { border-radius: var(--sh-radius-sm); }

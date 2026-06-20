@@ -36,10 +36,10 @@ const statusConfig: Record<StatusLevel, {
     dot: "var(--sh-info)",
   },
   neutral: {
-    bg: "var(--sh-glass-bg)",
-    text: "var(--muted)",
+    bg: "hsl(var(--muted)/0.1)",
+    text: "hsl(var(--muted-foreground))",
     glow: "transparent",
-    dot: "var(--muted)",
+    dot: "hsl(var(--muted-foreground))",
   },
 };
 

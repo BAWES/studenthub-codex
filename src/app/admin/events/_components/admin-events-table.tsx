@@ -65,12 +65,7 @@ export function AdminEventsTable({ session, events }: Props) {
     >
       {error ? (
         <div
-          className="mb-4 rounded-lg border px-4 py-3 text-sm"
-          style={{
-            borderColor: "var(--sh-error)",
-            color: "var(--sh-error)",
-            background: "var(--surface)",
-          }}
+          className="mb-4 rounded-lg border px-4 py-3 text-sm border-[var(--sh-error)] text-[var(--sh-error)] bg-[var(--surface)]"
         >
           {error}
         </div>
@@ -80,7 +75,7 @@ export function AdminEventsTable({ session, events }: Props) {
         <div className="mb-6">
           <div className="flex items-center justify-between mb-4">
             <h3
-              className="text-sm font-semibold text-foreground"
+              className="text-sm font-semibold text-[var(--ink)]"
             >
               Timeline for request:{" "}
               <span className="font-mono">{timelineRequestUuid}</span>
@@ -88,18 +83,13 @@ export function AdminEventsTable({ session, events }: Props) {
             <button
               type="button"
               onClick={closeTimeline}
-              className="text-xs px-3 py-1 rounded-md transition-all duration-200 hover:opacity-80"
-              style={{
-                background: "var(--surface)",
-                color: "var(--muted)",
-                border: "1px solid var(--border)",
-              }}
+              className="text-xs px-3 py-1 rounded-md transition-all duration-200 hover:opacity-80 bg-[var(--surface)] text-[var(--muted)] border border-[var(--border)]"
             >
               Close timeline
             </button>
           </div>
           {timeline.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-[var(--muted)]">
               No events found for this request.
             </p>
           ) : (
@@ -107,7 +97,7 @@ export function AdminEventsTable({ session, events }: Props) {
               {timeline.map((entry) => (
                 <div key={entry.date}>
                   <h4
-                    className="text-xs font-semibold uppercase tracking-wider mb-2 text-muted-foreground"
+                    className="text-xs font-semibold uppercase tracking-wider mb-2 text-[var(--muted)]"
                   >
                     {entry.date}
                   </h4>
@@ -115,17 +105,13 @@ export function AdminEventsTable({ session, events }: Props) {
                     {entry.events.map((evt) => (
                       <div
                         key={evt.activity_uuid}
-                        className="rounded-lg border p-3 text-sm"
-                        style={{
-                          borderColor: "var(--border)",
-                          background: "var(--surface)",
-                        }}
+                        className="rounded-lg border p-3 text-sm border-[var(--border)] bg-[var(--surface)]"
                       >
-                        <p className="text-foreground">
+                        <p className="text-[var(--ink)]">
                           {evt.activity_detail}
                         </p>
                         <p
-                          className="text-xs mt-1 text-muted-foreground"
+                          className="text-xs mt-1 text-[var(--muted)]"
                         >
                           {evt.staff_name ?? "System"} &middot;{" "}
                           {evt.activity_created_datetime
@@ -155,7 +141,7 @@ export function AdminEventsTable({ session, events }: Props) {
             label: "UUID",
             render: (row) => (
               <span
-                className="text-sm font-mono text-muted-foreground"
+                className="text-sm font-mono text-[var(--muted)]"
               >
                 {row.activity_uuid.slice(0, 8)}...
               </span>
@@ -168,8 +154,7 @@ export function AdminEventsTable({ session, events }: Props) {
               <button
                 type="button"
                 onClick={() => viewTimeline(row.request_uuid)}
-                className="text-sm font-mono transition-all duration-200 hover:opacity-80"
-                style={{ color: "var(--accent)", cursor: "pointer" }}
+                className="text-sm font-mono transition-all duration-200 hover:opacity-80 text-[var(--accent)] cursor-pointer"
                 disabled={loadingTimeline}
               >
                 {row.request_uuid.slice(0, 8)}...
@@ -181,7 +166,7 @@ export function AdminEventsTable({ session, events }: Props) {
             label: "Detail",
             render: (row) => (
               <span
-                className="text-sm text-foreground"
+                className="text-sm text-[var(--ink)]"
               >
                 {row.activity_detail ?? "—"}
               </span>
@@ -192,7 +177,7 @@ export function AdminEventsTable({ session, events }: Props) {
             label: "Staff",
             render: (row) => (
               <span
-                className="text-sm text-foreground"
+                className="text-sm text-[var(--ink)]"
               >
                 {row.staff_name ?? "—"}
               </span>
@@ -207,7 +192,7 @@ export function AdminEventsTable({ session, events }: Props) {
                 : null;
               return (
                 <span
-                  className="text-sm text-foreground"
+                  className="text-sm text-[var(--ink)]"
                 >
                   {d ? d.toLocaleDateString() : "—"}
                 </span>

@@ -178,7 +178,7 @@ function CreateStoreForm({ onSuccess }: { onSuccess: () => void }) {
           maxLength={255}
           placeholder="e.g. The Luxury Boutique"
           className="h-9 rounded-lg px-3 text-sm border"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+          
         />
       </div>
       <div className="grid gap-1">
@@ -189,7 +189,7 @@ function CreateStoreForm({ onSuccess }: { onSuccess: () => void }) {
           maxLength={255}
           placeholder="e.g. The Avenues, Floor 2"
           className="h-9 rounded-lg px-3 text-sm border"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+          
         />
       </div>
       <div className="grid gap-1">
@@ -199,7 +199,7 @@ function CreateStoreForm({ onSuccess }: { onSuccess: () => void }) {
           maxLength={36}
           placeholder="Optional"
           className="h-9 rounded-lg px-3 text-sm border"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+          
         />
       </div>
       <div className="grid gap-1">
@@ -209,7 +209,7 @@ function CreateStoreForm({ onSuccess }: { onSuccess: () => void }) {
           maxLength={36}
           placeholder="Optional"
           className="h-9 rounded-lg px-3 text-sm border"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+          
         />
       </div>
       <button
@@ -262,7 +262,7 @@ function EditStoreForm({
         required
         maxLength={255}
         className="h-8 rounded px-2 text-sm border w-40"
-        style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+        
       />
       <input
         name="storeLocation"
@@ -270,7 +270,7 @@ function EditStoreForm({
         required
         maxLength={255}
         className="h-8 rounded px-2 text-sm border w-40"
-        style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+        
       />
       <button
         type="submit"

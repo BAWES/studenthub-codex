@@ -158,12 +158,7 @@ export function PipelineDataTable({ items, onStageChange }: PipelineDataTablePro
                     if (val) handleStageChange(row.id, val);
                   }}
                   disabled={changingId === row.id}
-                  className="text-[11px] px-1.5 py-0.5 rounded-md cursor-pointer"
-                  style={{
-                    background: "var(--sh-glass-bg-strong, rgba(255,255,255,0.06))",
-                    color: "var(--text-tertiary, var(--muted))",
-                    border: "1px solid rgba(255,255,255,0.08)",
-                  }}
+                  className="text-[11px] px-1.5 py-0.5 rounded-md cursor-pointer bg-card border-border text-muted-foreground"
                   aria-label={`Change stage for ${row.candidateName}`}
                 >
                   <option value="">Move to…</option>
