@@ -1,8 +1,13 @@
+import { z } from "zod";
+
 // ---------------------------------------------------------------------------
-// Admin salaries — schemas and types for the admin/salary page
+// Admin salary — schemas and types
 // ---------------------------------------------------------------------------
 
-import { z } from "zod";
+export const listSalaryInputSchema = z.object({
+  page: z.coerce.number().int().positive().optional().default(1),
+  limit: z.coerce.number().int().min(1).max(200).optional().default(50),
+});
 
 export const salaryItemSchema = z.object({
   staff_salary_uuid: z.string(),
@@ -13,11 +18,20 @@ export const salaryItemSchema = z.object({
   salary_date: z.date().nullable().optional(),
 });
 
-export type SalaryItem = z.infer<typeof salaryItemSchema>;
-
 export const listSalariesResultSchema = z.object({
   salaries: z.array(salaryItemSchema),
-  total: z.number(),
+  total: z.number().int().nonnegative(),
+  page: z.number().int().positive(),
+  limit: z.number().int().positive(),
+  totalPages: z.number().int().nonnegative(),
 });
 
-export type ListSalariesResult = z.infer<typeof listSalariesResultSchema>;
+export const salaryActionResponseSchema = z.object({
+  operation: z.string().min(1),
+  message: z.string().min(1),
+});
+
+export type ListSalaryInput = z.input<typeof listSalaryInputSchema>;
+export type SalaryItem = z.output<typeof salaryItemSchema>;
+export type ListSalariesResult = z.output<typeof listSalariesResultSchema>;
+export type SalaryActionResponse = z.output<typeof salaryActionResponseSchema>;
