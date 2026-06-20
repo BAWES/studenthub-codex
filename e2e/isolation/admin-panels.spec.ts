@@ -44,12 +44,12 @@ test.describe("Admin workspace panel isolation", () => {
   // ── Panel definitions: route + expected-unique text fragment ──────────
 
   const panels: { label: string; route: string; heading: string }[] = [
-    { label: "Dashboard",       route: "/admin",         heading: "Command center" },
-    { label: "Candidates",      route: "/admin/candidates", heading: "Candidate" },
-    { label: "Companies",       route: "/admin/companies",  heading: "Company" },
-    { label: "Requests",        route: "/admin/requests",   heading: "Request" },
-    { label: "Payments",        route: "/admin/payments",   heading: "Payment" },
-    { label: "Transfers",       route: "/admin/transfers",  heading: "Transfer" },
+    { label: "Dashboard",       route: "/admin",         heading: "Command center for the whole operation" },
+    { label: "Candidates",      route: "/admin/candidates", heading: "Candidates" },
+    { label: "Companies",       route: "/admin/companies",  heading: "Companies" },
+    { label: "Requests",        route: "/admin/requests",   heading: "Requests" },
+    { label: "Payments",        route: "/admin/payments",   heading: "Payments" },
+    { label: "Transfers",       route: "/admin/transfers",  heading: "Transfer Runs" },
   ];
 
   for (const panel of panels) {
