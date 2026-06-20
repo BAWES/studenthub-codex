@@ -75,29 +75,21 @@ test.describe("WorkspaceOS tab system isolation", () => {
     await ctx.close();
   });
 
-  test("clicking sidebar nav item opens a new tab", async () => {
+  test("navigating to a sub-route opens a new tab", async () => {
     const ctx = await authContext(admin);
     await ctx.page.goto("/app");
     await ctx.page.waitForLoadState("load");
     await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
 
-    // Click the workspace "+" tab button to open the menu, then select "Candidates"
-    const addTabButton = ctx.page.locator('[aria-label="Open new tab"]');
-    const addBtnVisible = await addTabButton.isVisible().catch(() => false);
-    if (addBtnVisible) {
-      await addTabButton.click();
-      await ctx.page.waitForTimeout(300);
-      const menuItem = ctx.page.locator('[role="menuitem"]').filter({ hasText: /candidates/i }).first();
-      if (await menuItem.isVisible().catch(() => false)) {
-        await menuItem.click();
-        await ctx.page.waitForLoadState("load");
+    // Navigate directly to a sub-route — TabContext auto-opens a new unpinned tab
+    await ctx.page.goto("/app/candidates");
+    await ctx.page.waitForLoadState("networkidle");
+    await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
 
-        // Should have at least 2 tabs now (default + candidates)
-        const tabs = ctx.page.locator('[role="tab"]').or(ctx.page.locator("[data-tab-id]"));
-        const tabCount = await tabs.count();
-        expect(tabCount).toBeGreaterThanOrEqual(2);
-      }
-    }
+    // Should have at least 2 tabs now (default Overview + Candidates)
+    const tabs = ctx.page.locator('[role="tab"]');
+    const tabCount = await tabs.count();
+    expect(tabCount).toBeGreaterThanOrEqual(2);
 
     assertNoReactErrors(ctx.errors);
     await ctx.close();
@@ -109,29 +101,14 @@ test.describe("WorkspaceOS tab system isolation", () => {
     await ctx.page.waitForLoadState("load");
     await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
 
-    // Open a second tab by clicking "+" and selecting from menu
-    const addBtn = ctx.page.locator('[aria-label="Open new tab"]');
-    if (await addBtn.isVisible().catch(() => false)) {
-      await addBtn.click();
-      await ctx.page.waitForTimeout(300);
-      const menuItem = ctx.page.locator('[role="menuitem"]').filter({ hasText: /candidates/i }).first();
-      if (await menuItem.isVisible().catch(() => false)) {
-        await menuItem.click();
-        await ctx.page.waitForLoadState("load");
-      }
-    }
+    // Open a new unpinned tab by navigating directly to a sub-route
+    await ctx.page.goto("/app/candidates");
+    await ctx.page.waitForLoadState("networkidle");
+    await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
 
-    // Check for close buttons on tabs — each non-home tab renders <button class="workspaceTabClose">
-    const closeButtons = ctx.page
-      .locator('[aria-label^="Close"], .workspaceTabClose')
-      .first();
-
-    const hasCloseButton = await closeButtons.isVisible().catch(() => false);
-
-    // Tabs should have close buttons — assert if we found one
-    if (hasCloseButton) {
-      await expect(closeButtons).toBeVisible();
-    }
+    // Close buttons render on all non-home, non-pinned tabs via .workspaceTabClose
+    const closeButtons = ctx.page.locator(".workspaceTabClose");
+    await expect(closeButtons.first()).toBeVisible({ timeout: 5000 });
 
     assertNoReactErrors(ctx.errors);
     await ctx.close();

@@ -95,11 +95,11 @@ test.describe("Transfer flow — admin transfers", () => {
     await expect(introSection).toBeVisible({ timeout: 10000 });
 
     // Data table renders — look for the title "Transfer Runs"
-    const tableTitle = ctx.page.locator("text=Transfer Runs");
+    const tableTitle = ctx.page.locator("text=Transfer Runs").first();
     await expect(tableTitle).toBeVisible({ timeout: 15000 });
 
     // Description text
-    const description = ctx.page.locator("text=Open a run to review");
+    const description = ctx.page.locator("text=Open a run to review").first();
     await expect(description).toBeVisible({ timeout: 10000 });
 
     assertNoReactErrors(ctx.errors);
