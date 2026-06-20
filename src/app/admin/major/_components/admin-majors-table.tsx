@@ -136,14 +136,12 @@ function CreateMajorForm({ onSuccess }: { onSuccess: () => void }) {
       <div className="grid gap-1">
         <label className="text-xs font-medium text-muted-foreground">Name (EN) *</label>
         <input name="majorNameEn" required maxLength={150} placeholder="e.g. Computer Science"
-          className="h-9 rounded-lg px-3 text-sm border w-48"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }} />
+          className="h-9 rounded-lg px-3 text-sm border w-48 bg-[var(--surface)] border-[var(--border)] text-[var(--ink)]" />
       </div>
       <div className="grid gap-1">
         <label className="text-xs font-medium text-muted-foreground">Name (AR) *</label>
         <input name="majorNameAr" required maxLength={150} placeholder="علوم الحاسوب"
-          className="h-9 rounded-lg px-3 text-sm border w-36"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }} />
+          className="h-9 rounded-lg px-3 text-sm border w-36 bg-[var(--surface)] border-[var(--border)] text-[var(--ink)]" />
       </div>
       <button
         type="submit" disabled={pending}
@@ -182,11 +180,9 @@ function EditMajorForm({
   return (
     <form action={action} className="flex items-center gap-2 flex-wrap">
       <input name="majorNameEn" defaultValue={row.major_name_en} required maxLength={150}
-        className="h-8 rounded px-2 text-sm border w-40"
-        style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }} />
+        className="h-8 rounded px-2 text-sm border w-40 bg-[var(--surface)] border-[var(--border)] text-[var(--ink)]" />
       <input name="majorNameAr" defaultValue={row.major_name_ar} required maxLength={150}
-        className="h-8 rounded px-2 text-sm border w-36"
-        style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }} />
+        className="h-8 rounded px-2 text-sm border w-36 bg-[var(--surface)] border-[var(--border)] text-[var(--ink)]" />
       <button type="submit" disabled={pending}
         className="h-8 rounded px-3 text-xs font-semibold bg-primary text-primary-foreground">
         {pending ? "..." : "Save"}

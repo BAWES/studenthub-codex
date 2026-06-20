@@ -65,8 +65,7 @@ export function AdminInvoicesTable({ session, invoices }: Props) {
     >
       {error ? (
         <div
-          className="mb-4 rounded-lg border px-4 py-3 text-sm"
-          style={{ borderColor: "var(--sh-error)", color: "var(--sh-error)", background: "var(--surface)" }}
+          className="mb-4 rounded-lg border px-4 py-3 text-sm border-[var(--sh-error)] text-[var(--sh-error)] bg-[var(--surface)]"
         >
           {error}
         </div>

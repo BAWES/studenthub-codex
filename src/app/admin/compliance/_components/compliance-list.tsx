@@ -183,14 +183,11 @@ export function ComplianceList({
               <button
                 key={tab.key}
                 onClick={() => handleTypeChange(tab.key)}
-                className="px-3 py-1.5 text-xs font-semibold rounded-full transition-all duration-150"
-                style={{
-                  background: typeFilter === tab.key ? "var(--surface)" : "transparent",
-                  color: typeFilter === tab.key ? "var(--ink)" : "var(--muted)",
-                  border: `1px solid ${
-                    typeFilter === tab.key ? "var(--border)" : "transparent"
-                  }`,
-                }}
+                className={`px-3 py-1.5 text-xs font-semibold rounded-full transition-all duration-150 ${
+                  typeFilter === tab.key
+                    ? "bg-[var(--surface)] text-[var(--ink)] border border-[var(--border)]"
+                    : "bg-transparent text-[var(--muted)] border border-transparent"
+                }`}
               >
                 {tab.label}
               </button>

@@ -142,7 +142,7 @@ export function InvoiceDataTable({
             <p className="text-lg font-semibold text-foreground">Could not load invoices</p>
             <p className="text-sm mt-1 text-muted-foreground">{error}</p>
           </div>
-          <button onClick={onRetry} className="h-10 rounded-lg px-4 text-sm font-semibold" style={{ background: "var(--sh-info)", color: "#fff" }}>
+          <button onClick={onRetry} className="h-10 rounded-lg px-4 text-sm font-semibold bg-[var(--sh-info)] text-white">
             Retry
           </button>
         </div>
@@ -153,11 +153,9 @@ export function InvoiceDataTable({
   return (
     <div className="rounded-lg border border-[var(--border)] bg-white overflow-hidden">
       <div
-        className="grid gap-0 text-[11px] font-bold uppercase tracking-wider px-4 py-3"
+        className="grid gap-0 text-[11px] font-bold uppercase tracking-wider px-4 py-3 text-[var(--muted)] border-b border-[rgba(255,255,255,0.06)]"
         style={{
           gridTemplateColumns: COLUMNS.map((c) => c.width).join(" "),
-          color: "var(--muted)",
-          borderBottom: "1px solid rgba(255,255,255,0.06)",
         }}
       >
         {COLUMNS.map((col) => (
@@ -169,7 +167,7 @@ export function InvoiceDataTable({
           >
             {col.label}
             {sortKey === col.key && (
-              <span style={{ color: "var(--sh-info)" }}>{sortDir === "asc" ? "▲" : "▼"}</span>
+              <span className="text-[var(--sh-info)]">{sortDir === "asc" ? "▲" : "▼"}</span>
             )}
           </div>
         ))}
@@ -227,16 +225,14 @@ export function InvoiceDataTable({
 
       {!loading && !error && total > 20 && onPageChange && (
         <div
-          className="flex items-center justify-between px-4 py-3 text-sm"
-          style={{ borderTop: "1px solid rgba(255,255,255,0.06)", color: "var(--muted)" }}
+          className="flex items-center justify-between px-4 py-3 text-sm border-t border-[rgba(255,255,255,0.06)] text-[var(--muted)]"
         >
           <span>Showing {1 + (page - 1) * 20}-{Math.min(page * 20, total)} of {total}</span>
           <div className="flex items-center gap-2">
             <button
               disabled={page <= 1}
               onClick={() => onPageChange(page - 1)}
-              className="px-3 py-1.5 rounded-md text-sm font-medium disabled:opacity-30"
-              style={{ background: "rgba(255,255,255,0.06)" }}
+              className="px-3 py-1.5 rounded-md text-sm font-medium disabled:opacity-30 bg-white/[0.06]"
               aria-label="Previous page"
             >
               ← Prev
@@ -245,8 +241,7 @@ export function InvoiceDataTable({
             <button
               disabled={page >= totalPages}
               onClick={() => onPageChange(page + 1)}
-              className="px-3 py-1.5 rounded-md text-sm font-medium disabled:opacity-30"
-              style={{ background: "rgba(255,255,255,0.06)" }}
+              className="px-3 py-1.5 rounded-md text-sm font-medium disabled:opacity-30 bg-white/[0.06]"
               aria-label="Next page"
             >
               Next →

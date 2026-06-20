@@ -29,7 +29,7 @@ export function AdminStoryTable({ session, stories }: Props) {
     >
       <section className="mb-6">
         <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
-          <h3 className="text-sm font-semibold mb-3" style={{ color: "var(--ink)" }}>Add story</h3>
+          <h3 className="text-sm font-semibold mb-3 text-[var(--ink)]">Add story</h3>
           <CreateStoryForm onSuccess={() => router.refresh()} />
         </div>
       </section>
@@ -44,7 +44,7 @@ export function AdminStoryTable({ session, stories }: Props) {
             key: "position",
             label: "Position",
             render: (row) => (
-              <span className="text-sm" style={{ color: "var(--ink)" }}>
+              <span className="text-sm text-[var(--ink)]">
                 {row.request_position_title ?? "—"}
               </span>
             ),
@@ -62,8 +62,7 @@ export function AdminStoryTable({ session, stories }: Props) {
               ) : (
                 <button
                   type="button"
-                  className="text-sm hover:underline"
-                  style={{ color: "var(--sh-primary)" }}
+                  className="text-sm hover:underline text-[var(--sh-primary)]"
                   onClick={() => setEditingId(row.story_uuid)}
                 >
                   {row.staff_name ?? "—"}
@@ -75,7 +74,7 @@ export function AdminStoryTable({ session, stories }: Props) {
             label: "Employees",
             render: (row) =>
               editingId === row.story_uuid ? null : (
-                <span className="text-sm" style={{ color: "var(--ink)" }}>
+                <span className="text-sm text-[var(--ink)]">
                   {row.number_of_employees ?? "—"}
                 </span>
               ),
@@ -85,7 +84,7 @@ export function AdminStoryTable({ session, stories }: Props) {
             label: "Status",
             render: (row) =>
               editingId === row.story_uuid ? null : (
-                <span className="text-sm" style={{ color: "var(--muted)" }}>
+                <span className="text-sm text-[var(--muted)]">
                   {row.story_status === 1 ? "Active" : row.story_status === 2 ? "Closed" : "Draft"}
                 </span>
               ),
@@ -95,7 +94,7 @@ export function AdminStoryTable({ session, stories }: Props) {
             label: "Updated",
             render: (row) =>
               editingId === row.story_uuid ? null : (
-                <span className="text-sm" style={{ color: "var(--muted)" }}>
+                <span className="text-sm text-[var(--muted)]">
                   {row.story_last_updated_at
                     ? new Date(row.story_last_updated_at).toLocaleDateString()
                     : "—"}
@@ -109,8 +108,7 @@ export function AdminStoryTable({ session, stories }: Props) {
               editingId !== row.story_uuid ? (
                 <button
                   type="button"
-                  className="text-xs px-2 py-1 rounded hover:bg-red-500/10"
-                  style={{ color: "var(--sh-error)" }}
+                  className="text-xs px-2 py-1 rounded hover:bg-red-500/10 text-[var(--sh-error)]"
                   onClick={async () => {
                     if (confirm(`Delete story for "${row.request_position_title ?? "unknown position"}"?`)) {
                       const result = await deleteStory(row.story_uuid);
@@ -154,28 +152,24 @@ function CreateStoryForm({ onSuccess }: { onSuccess: () => void }) {
       onSubmit={() => setTimeout(() => { formRef.current?.reset(); }, 100)}
     >
       <div className="grid gap-1">
-        <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>Request UUID *</label>
+        <label className="text-xs font-medium text-[var(--muted)]">Request UUID *</label>
         <input name="requestUuid" required placeholder="e.g. req-abc-123"
-          className="h-9 rounded-lg px-3 text-sm border w-56"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }} />
+          className="h-9 rounded-lg px-3 text-sm border w-56 bg-[var(--surface)] border-[var(--border)] text-[var(--ink)]" />
       </div>
       <div className="grid gap-1">
-        <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>Staff ID</label>
+        <label className="text-xs font-medium text-[var(--muted)]">Staff ID</label>
         <input name="staffId" type="number" placeholder="Optional"
-          className="h-9 rounded-lg px-3 text-sm border w-24"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }} />
+          className="h-9 rounded-lg px-3 text-sm border w-24 bg-[var(--surface)] border-[var(--border)] text-[var(--ink)]" />
       </div>
       <div className="grid gap-1">
-        <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>Employees</label>
+        <label className="text-xs font-medium text-[var(--muted)]">Employees</label>
         <input name="numberOfEmployees" type="number" placeholder="#"
-          className="h-9 rounded-lg px-3 text-sm border w-20"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }} />
+          className="h-9 rounded-lg px-3 text-sm border w-20 bg-[var(--surface)] border-[var(--border)] text-[var(--ink)]" />
       </div>
       <div className="grid gap-1">
-        <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>Status</label>
+        <label className="text-xs font-medium text-[var(--muted)]">Status</label>
         <select name="storyStatus"
-          className="h-9 rounded-lg px-3 text-sm border"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}>
+          className="h-9 rounded-lg px-3 text-sm border bg-[var(--surface)] border-[var(--border)] text-[var(--ink)]">
           <option value="0">Draft</option>
           <option value="1">Active</option>
           <option value="2">Closed</option>
@@ -183,13 +177,12 @@ function CreateStoryForm({ onSuccess }: { onSuccess: () => void }) {
       </div>
       <button
         type="submit" disabled={pending}
-        className="h-9 rounded-lg px-4 text-sm font-semibold"
-        style={{ background: "var(--sh-primary)", color: "#fff" }}
+        className="h-9 rounded-lg px-4 text-sm font-semibold bg-[var(--sh-primary)] text-white"
       >
         {pending ? "Adding..." : "Add"}
       </button>
       {state?.error ? (
-        <p className="text-xs w-full" style={{ color: "var(--sh-error)" }}>{state.error}</p>
+        <p className="text-xs w-full text-[var(--sh-error)]">{state.error}</p>
       ) : null}
     </form>
   );
@@ -218,36 +211,30 @@ function EditStoryForm({
   return (
     <form action={action} className="flex items-center gap-2 flex-wrap">
       <input name="requestUuid" defaultValue={row.request_uuid} required
-        className="h-8 rounded px-2 text-sm border w-40"
-        style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }} />
+        className="h-8 rounded px-2 text-sm border w-40 bg-[var(--surface)] border-[var(--border)] text-[var(--ink)]" />
       <input name="staffId" type="number" defaultValue={row.staff_id ?? ""} placeholder="Staff ID"
-        className="h-8 rounded px-2 text-sm border w-24"
-        style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }} />
+        className="h-8 rounded px-2 text-sm border w-24 bg-[var(--surface)] border-[var(--border)] text-[var(--ink)]" />
       <input name="numberOfEmployees" type="number" defaultValue={row.number_of_employees ?? ""} placeholder="#"
-        className="h-8 rounded px-2 text-sm border w-20"
-        style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }} />
+        className="h-8 rounded px-2 text-sm border w-20 bg-[var(--surface)] border-[var(--border)] text-[var(--ink)]" />
       <select name="storyStatus" defaultValue={row.story_status}
-        className="h-8 rounded px-2 text-sm border"
-        style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}>
+        className="h-8 rounded px-2 text-sm border bg-[var(--surface)] border-[var(--border)] text-[var(--ink)]">
         <option value="0">Draft</option>
         <option value="1">Active</option>
         <option value="2">Closed</option>
       </select>
       <input name="isOld" type="checkbox" defaultChecked={row.is_old ?? false} className="hidden" />
       <input name="storyTimeSpent" type="number" defaultValue={row.story_time_spent ?? ""} placeholder="Time"
-        className="h-8 rounded px-2 text-sm border w-16"
-        style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }} />
+        className="h-8 rounded px-2 text-sm border w-16 bg-[var(--surface)] border-[var(--border)] text-[var(--ink)]" />
       <button type="submit" disabled={pending}
-        className="h-8 rounded px-3 text-xs font-semibold"
-        style={{ background: "var(--sh-primary)", color: "#fff" }}>
+        className="h-8 rounded px-3 text-xs font-semibold bg-[var(--sh-primary)] text-white">
         {pending ? "..." : "Save"}
       </button>
       <button type="button" onClick={onCancel}
-        className="h-8 rounded px-3 text-xs" style={{ color: "var(--muted)" }}>
+        className="h-8 rounded px-3 text-xs text-[var(--muted)]">
         Cancel
       </button>
       {state?.error ? (
-        <p className="text-xs w-full" style={{ color: "var(--sh-error)" }}>{state.error}</p>
+        <p className="text-xs w-full text-[var(--sh-error)]">{state.error}</p>
       ) : null}
     </form>
   );

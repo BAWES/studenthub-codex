@@ -4,6 +4,7 @@ import { useActionState, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { DataTable } from "@/modules/workspace/DataTable";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
+import { Input } from "@/components/ui/input";
 
 import type { SessionUser } from "@/modules/auth/types";
 import type { DegreeGroupItem } from "../schemas";
@@ -28,7 +29,7 @@ export function AdminDegreeGroupsTable({ session, degreeGroups }: Props) {
       ]}
     >
       <section className="mb-6">
-        <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
+        <div className="rounded-lg border border-border bg-card p-5">
           <h3 className="text-sm font-semibold mb-3 text-foreground">Add degree group</h3>
           <CreateDegreeGroupForm onSuccess={() => router.refresh()} />
         </div>
@@ -135,41 +136,37 @@ function CreateDegreeGroupForm({ onSuccess }: { onSuccess: () => void }) {
     >
       <div className="grid gap-1">
         <label className="text-xs font-medium text-muted-foreground">English name *</label>
-        <input
+        <Input
           name="nameEn"
           required
           maxLength={255}
           placeholder="e.g. Science, Arts, Engineering"
-          className="h-9 rounded-lg px-3 text-sm border"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+          className="h-9"
         />
       </div>
       <div className="grid gap-1">
         <label className="text-xs font-medium text-muted-foreground">Arabic name</label>
-        <input
+        <Input
           name="nameAr"
           maxLength={255}
           placeholder="الاسم بالعربية"
-          className="h-9 rounded-lg px-3 text-sm border"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+          className="h-9"
         />
       </div>
       <div className="grid gap-1">
         <label className="text-xs font-medium text-muted-foreground">Sort order</label>
-        <input
+        <Input
           name="sortOrder"
           type="number"
           placeholder="0"
-          className="h-9 rounded-lg px-3 text-sm border w-20"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+          className="h-9 w-20"
         />
       </div>
       <div className="grid gap-1">
         <label className="text-xs font-medium text-muted-foreground">Skip major</label>
         <select
           name="skipMajor"
-          className="h-9 rounded-lg px-3 text-sm border"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+          className="h-9 rounded-md px-3 text-sm border border-input bg-transparent text-foreground"
         >
           <option value="0">No</option>
           <option value="1">Yes</option>
@@ -178,7 +175,7 @@ function CreateDegreeGroupForm({ onSuccess }: { onSuccess: () => void }) {
       <button
         type="submit"
         disabled={pending}
-        className="h-9 rounded-lg px-4 text-sm font-semibold bg-primary text-primary-foreground"
+        className="h-9 rounded-md px-4 text-sm font-semibold bg-primary text-primary-foreground"
       >
         {pending ? "Adding..." : "Add"}
       </button>
@@ -222,33 +219,29 @@ function EditDegreeGroupForm({
 
   return (
     <form action={action} className="flex items-center gap-2 flex-wrap">
-      <input
+      <Input
         name="nameEn"
         defaultValue={row.degree_group_name_en}
         required
         maxLength={255}
-        className="h-8 rounded px-2 text-sm border w-36"
-        style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+        className="h-8 w-36 text-sm"
       />
-      <input
+      <Input
         name="nameAr"
         defaultValue={row.degree_group_name_ar || ""}
         maxLength={255}
-        className="h-8 rounded px-2 text-sm border w-36"
-        style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+        className="h-8 w-36 text-sm"
       />
-      <input
+      <Input
         name="sortOrder"
         defaultValue={row.degree_group_sort_order ?? ""}
         type="number"
-        className="h-8 rounded px-2 text-sm border w-16"
-        style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+        className="h-8 w-16 text-sm"
       />
       <select
         name="skipMajor"
         defaultValue={row.skip_major ? "1" : "0"}
-        className="h-8 rounded px-2 text-sm border w-20"
-        style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+        className="h-8 rounded px-2 text-sm border border-input bg-transparent text-foreground w-20"
       >
         <option value="0">No</option>
         <option value="1">Yes</option>

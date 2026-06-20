@@ -79,7 +79,7 @@ export function PaymentDetailDrawer({ payment, lineItems, loading, open, onClose
 
   return (
     <>
-      <div className="fixed inset-0 z-40 transition-opacity duration-200" style={{ background: "rgba(0,0,0,0.4)" }} onClick={onClose} aria-hidden="true" />
+      <div className="fixed inset-0 z-40 bg-black/40 transition-opacity duration-200" onClick={onClose} aria-hidden="true" />
       <div
         className="fixed top-0 right-0 z-50 h-full w-full sm:w-[480px] transition-transform duration-300 ease-out"
         style={{ transform: open ? "translateX(0)" : "translateX(100%)" }}
@@ -110,7 +110,7 @@ export function PaymentDetailDrawer({ payment, lineItems, loading, open, onClose
             <div className="flex flex-col items-center justify-center h-full gap-4 text-center">
               <span className="text-4xl">🔍</span>
               <p className="text-lg font-semibold text-foreground">Payment not found</p>
-              <button onClick={onClose} className="h-10 rounded-lg px-4 text-sm font-semibold" style={{ background: "var(--sh-info)", color: "#fff" }}>
+              <button onClick={onClose} className="h-10 rounded-lg px-4 text-sm font-semibold bg-[var(--sh-info)] text-white">
                 Close
               </button>
             </div>
@@ -170,7 +170,7 @@ export function PaymentDetailDrawer({ payment, lineItems, loading, open, onClose
                       </thead>
                       <tbody>
                         {lineItems.map((li) => (
-                          <tr key={li.line_item_id} className="border-t" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
+                          <tr key={li.line_item_id} className="border-t border-[rgba(255,255,255,0.04)]">
                             <td className="py-1.5 pr-2 font-mono text-xs text-muted-foreground">{li.account_code ?? "—"}</td>
                             <td className="py-1.5 pr-2 text-foreground">{li.description ?? "—"}</td>
                             <td className="py-1.5 pr-2 text-right text-foreground">{li.quantity ?? "—"}</td>
@@ -185,7 +185,7 @@ export function PaymentDetailDrawer({ payment, lineItems, loading, open, onClose
               )}
 
               <div className="flex justify-end pt-2">
-                <button onClick={onClose} className="h-10 rounded-lg px-4 text-sm font-semibold" style={{ background: "transparent", border: "1px solid var(--border)", color: "var(--muted)" }}>
+                <button onClick={onClose} className="h-10 rounded-lg px-4 text-sm font-semibold bg-transparent border border-[var(--border)] text-[var(--muted)]">
                   Close
                 </button>
               </div>

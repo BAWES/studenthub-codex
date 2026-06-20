@@ -51,8 +51,7 @@ export function InvoiceFilters({
             </label>
             <select
               id="invoice-status"
-              className="h-10 rounded-lg px-3 text-sm bg-transparent border"
-              style={{ borderColor: "var(--border)", color: "var(--ink)" }}
+              className="h-10 rounded-lg px-3 text-sm bg-transparent border border-[var(--border)] text-[var(--ink)]"
               value={filters.status}
               onChange={(e) => handleChange("status", e.target.value)}
             >
@@ -74,8 +73,7 @@ export function InvoiceFilters({
             <input
               id="invoice-date-from"
               type="date"
-              className="h-10 rounded-lg px-3 text-sm bg-transparent border"
-              style={{ borderColor: "var(--border)", color: "var(--ink)" }}
+              className="h-10 rounded-lg px-3 text-sm bg-transparent border border-[var(--border)] text-[var(--ink)]"
               value={filters.dateFrom}
               onChange={(e) => handleChange("dateFrom", e.target.value)}
             />
@@ -90,8 +88,7 @@ export function InvoiceFilters({
             <input
               id="invoice-date-to"
               type="date"
-              className="h-10 rounded-lg px-3 text-sm bg-transparent border"
-              style={{ borderColor: "var(--border)", color: "var(--ink)" }}
+              className="h-10 rounded-lg px-3 text-sm bg-transparent border border-[var(--border)] text-[var(--ink)]"
               value={filters.dateTo}
               onChange={(e) => handleChange("dateTo", e.target.value)}
             />
@@ -99,15 +96,13 @@ export function InvoiceFilters({
           <div className="flex items-center gap-2">
             <button
               onClick={onApply}
-              className="h-10 rounded-lg px-4 text-sm font-semibold transition-all duration-150"
-              style={{ background: "var(--sh-info)", color: "#fff" }}
+              className="h-10 rounded-lg px-4 text-sm font-semibold transition-all duration-150 bg-[var(--sh-info)] text-white"
             >
               Apply
             </button>
             <button
               onClick={onClear}
-              className="h-10 rounded-lg px-4 text-sm font-semibold"
-              style={{ background: "transparent", border: "1px solid var(--border)", color: "var(--muted)" }}
+              className="h-10 rounded-lg px-4 text-sm font-semibold bg-transparent border border-[var(--border)] text-[var(--muted)]"
             >
               Clear
             </button>
@@ -120,7 +115,7 @@ export function InvoiceFilters({
           <span className="text-4xl" aria-hidden="true">📄</span>
           <p className="text-lg font-semibold text-foreground">No invoices match your filters</p>
           <p className="text-sm text-muted-foreground">Try adjusting your search or filter criteria</p>
-          <button onClick={onClear} className="h-10 rounded-lg px-4 text-sm font-semibold" style={{ background: "var(--sh-info)", color: "#fff" }}>
+          <button onClick={onClear} className="h-10 rounded-lg px-4 text-sm font-semibold bg-[var(--sh-info)] text-white">
             Clear Filters
           </button>
         </div>

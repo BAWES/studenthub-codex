@@ -133,8 +133,7 @@ function CreateBlockedIpForm({ onSuccess }: { onSuccess: () => void }) {
           required
           maxLength={45}
           placeholder="e.g. 192.168.1.1"
-          className="h-9 rounded-lg px-3 text-sm border"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+          className="h-9 rounded-lg px-3 text-sm border bg-[var(--surface)] border-[var(--border)] text-[var(--ink)]"
         />
       </div>
       <div className="grid gap-1">
@@ -143,8 +142,7 @@ function CreateBlockedIpForm({ onSuccess }: { onSuccess: () => void }) {
           name="note"
           maxLength={255}
           placeholder="Reason for blocking"
-          className="h-9 rounded-lg px-3 text-sm border"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+          className="h-9 rounded-lg px-3 text-sm border bg-[var(--surface)] border-[var(--border)] text-[var(--ink)]"
         />
       </div>
       <button
