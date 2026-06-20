@@ -23,7 +23,7 @@ export function WorkspaceNavigation({ items, role }: { items: NavItem[]; role: s
               buttonVariants({ variant: "ghost", size: "sm" }),
               "relative flex items-center gap-2.5 min-h-[38px] px-[9px] justify-start w-full whitespace-nowrap overflow-hidden no-underline",
               active
-                ? "bg-[color-mix(in_srgb,#eb6651_12%,transparent)] text-[#eb6651]"
+                ? "bg-[color-mix(in_srgb,#1f73b7_12%,transparent)] text-[#1f73b7]"
                 : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
             )}
             href={item.href}
@@ -63,7 +63,7 @@ export function WorkspaceMobileNavigation({ items, role }: { items: NavItem[]; r
               "flex flex-col items-center gap-0.5 py-2 px-3 rounded-md",
               "text-xs font-medium leading-none",
               active
-                ? "text-[#eb6651]"
+                ? "text-[#1f73b7]"
                 : "text-muted-foreground hover:text-foreground",
             )}
             href={item.href}

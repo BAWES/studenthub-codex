@@ -8,6 +8,7 @@ import { LogOut } from "lucide-react";
 import Link from "next/link";
 import { navForRole } from "./navigation";
 import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
 import { WorkspaceNavigation } from "./WorkspaceNavigation";
 import { MobileNavBar } from "@/components/ui/mobile-nav-bar";
 import { useWorkspaceOS } from "./WorkspaceOSContext";
@@ -79,10 +80,9 @@ export function WorkspaceShell({
         />
         <ThemeToggle />
         <form action={logoutAction}>
-          <button type="submit" aria-label="Sign out">
+          <Button type="submit" variant="ghost" size="icon" aria-label="Sign out">
             <LogOut size={18} strokeWidth={1.5} aria-hidden="true" />
-            <span>Sign out</span>
-          </button>
+          </Button>
         </form>
       </div>
     </aside>
