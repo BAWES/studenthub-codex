@@ -241,11 +241,27 @@ describe("buildReportHtml", () => {
 // Tests: GET /api/evaluations/[uuid]/pdf handler
 // ---------------------------------------------------------------------------
 
-// Mock the server action used by the route
 const mockGetEvaluationPdfData = vi.fn();
 
 vi.mock("@/modules/candidates/evaluation/actions", () => ({
   getEvaluationPdfData: (...args: unknown[]) => mockGetEvaluationPdfData(...args),
+}));
+
+const mockNewPage = vi.fn();
+const mockSetContent = vi.fn();
+const mockPdf = vi.fn();
+const mockPageClose = vi.fn();
+const mockSetDefaultTimeout = vi.fn();
+
+vi.mock("playwright", () => ({
+  chromium: {
+    launch: vi.fn().mockResolvedValue({
+      newPage: mockNewPage,
+      isConnected: vi.fn().mockReturnValue(true),
+      contexts: vi.fn().mockReturnValue([{}]),
+      close: vi.fn(),
+    }),
+  },
 }));
 
 function pdfRequest(url: string): NextRequest {
@@ -254,9 +270,61 @@ function pdfRequest(url: string): NextRequest {
   });
 }
 
+const mockEvalData = {
+  can_eval_uuid: "550e8400-e29b-41d4-a716-446655440000",
+  candidate_id: 1,
+  dept_id: 1,
+  start_date: "2026-01-01",
+  end_date: "2026-03-31",
+  staff_id: 7,
+  created_at: new Date("2026-04-15"),
+  answers: [
+    {
+      ceq_uuid: "abc-123",
+      question: "Communication skills",
+      answer: "Excellent",
+      rating: 5,
+    },
+  ],
+  candidate: {
+    candidate_name: "John Doe",
+    candidate_email: "john@example.com",
+  },
+  staff: {
+    staff_name: "Jane Smith",
+  },
+};
+
+function generateLargeAnswers(count: number) {
+  return Array.from({ length: count }, (_, i) => ({
+    ceq_uuid: `q-${i}`,
+    question: `Question ${i + 1} about candidate performance`,
+    answer: `Sample answer for question ${i + 1}`,
+    rating: (i % 5) + 1,
+  }));
+}
+
 describe("GET /api/evaluations/[uuid]/pdf", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockNewPage.mockReset();
+    mockSetContent.mockReset();
+    mockPdf.mockReset();
+    mockPageClose.mockReset();
+    mockSetDefaultTimeout.mockReset();
+
+    vi.resetModules();
+
+    mockNewPage.mockResolvedValue({
+      setContent: mockSetContent,
+      pdf: mockPdf,
+      close: mockPageClose,
+      setDefaultTimeout: mockSetDefaultTimeout,
+    });
+    mockSetContent.mockResolvedValue(undefined);
+    mockPdf.mockResolvedValue(Buffer.from("fake-pdf-content"));
+    mockPageClose.mockResolvedValue(undefined);
+    mockSetDefaultTimeout.mockResolvedValue(undefined);
   });
 
   it("returns 400 for missing UUID", async () => {
@@ -283,30 +351,7 @@ describe("GET /api/evaluations/[uuid]/pdf", () => {
   });
 
   it("returns HTML without format query param", async () => {
-    mockGetEvaluationPdfData.mockResolvedValue({
-      can_eval_uuid: "550e8400-e29b-41d4-a716-446655440000",
-      candidate_id: 1,
-      dept_id: 1,
-      start_date: "2026-01-01",
-      end_date: "2026-03-31",
-      staff_id: 7,
-      created_at: new Date("2026-04-15"),
-      answers: [
-        {
-          ceq_uuid: "abc-123",
-          question: "Communication skills",
-          answer: "Excellent",
-          rating: 5,
-        },
-      ],
-      candidate: {
-        candidate_name: "John Doe",
-        candidate_email: "john@example.com",
-      },
-      staff: {
-        staff_name: "Jane Smith",
-      },
-    });
+    mockGetEvaluationPdfData.mockResolvedValue(mockEvalData);
 
     const { GET } = await import("./route");
     const response = await GET(
@@ -375,5 +420,153 @@ describe("GET /api/evaluations/[uuid]/pdf", () => {
     const html = await response.text();
     expect(html).toContain("Unknown Candidate");
     expect(html).toContain("N/A");
+  });
+
+  it("shows N/A period when start_date and end_date are both null", async () => {
+    mockGetEvaluationPdfData.mockResolvedValue({
+      ...mockEvalData,
+      start_date: null,
+      end_date: null,
+    });
+
+    const { GET } = await import("./route");
+    const response = await GET(
+      pdfRequest("/api/evaluations/550e8400-e29b-41d4-a716-446655440000/pdf"),
+      { params: Promise.resolve({ uuid: "550e8400-e29b-41d4-a716-446655440000" }) },
+    );
+    expect(response.status).toBe(200);
+    const html = await response.text();
+    expect(html).toContain("Evaluation Period</dt><dd>N/A</dd>");
+  });
+
+  it("shows N/A date when created_at is null", async () => {
+    mockGetEvaluationPdfData.mockResolvedValue({
+      ...mockEvalData,
+      created_at: null,
+    });
+
+    const { GET } = await import("./route");
+    const response = await GET(
+      pdfRequest("/api/evaluations/550e8400-e29b-41d4-a716-446655440000/pdf"),
+      { params: Promise.resolve({ uuid: "550e8400-e29b-41d4-a716-446655440000" }) },
+    );
+    expect(response.status).toBe(200);
+    const html = await response.text();
+    expect(html).toContain("Date</dt><dd>N/A</dd>");
+  });
+
+  // -------------------------------------------------------------------------
+  // PDF generation tests (format=pdf)
+  // -------------------------------------------------------------------------
+
+  it("returns PDF when format=pdf", async () => {
+    mockGetEvaluationPdfData.mockResolvedValue(mockEvalData);
+
+    const { GET } = await import("./route");
+    const response = await GET(
+      pdfRequest("/api/evaluations/550e8400-e29b-41d4-a716-446655440000/pdf?format=pdf"),
+      { params: Promise.resolve({ uuid: "550e8400-e29b-41d4-a716-446655440000" }) },
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("Content-Type")).toBe("application/pdf");
+    expect(response.headers.get("Content-Disposition")).toBe(
+      'attachment; filename="evaluation-report-550e8400-e29.pdf"',
+    );
+
+    const buffer = await response.arrayBuffer();
+    expect(buffer.byteLength).toBeGreaterThan(0);
+
+    expect(mockNewPage).toHaveBeenCalledTimes(1);
+    expect(mockSetDefaultTimeout).toHaveBeenCalledWith(30_000);
+    expect(mockSetContent).toHaveBeenCalledTimes(1);
+    expect(mockSetContent).toHaveBeenCalledWith(
+      expect.stringContaining("John Doe"),
+      expect.objectContaining({ waitUntil: "networkidle" }),
+    );
+    expect(mockPdf).toHaveBeenCalledTimes(1);
+    expect(mockPageClose).toHaveBeenCalledTimes(1);
+    expect(mockPdf).toHaveBeenCalledWith(
+      expect.objectContaining({
+        format: "A4",
+        printBackground: true,
+      }),
+    );
+  });
+
+  it("returns PDF with large evaluation dataset (50+ questions)", async () => {
+    mockGetEvaluationPdfData.mockResolvedValue({
+      ...mockEvalData,
+      answers: generateLargeAnswers(50),
+    });
+
+    const { GET } = await import("./route");
+    const response = await GET(
+      pdfRequest("/api/evaluations/550e8400-e29b-41d4-a716-446655440000/pdf?format=pdf"),
+      { params: Promise.resolve({ uuid: "550e8400-e29b-41d4-a716-446655440000" }) },
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("Content-Type")).toBe("application/pdf");
+
+    const buffer = await response.arrayBuffer();
+    expect(buffer.byteLength).toBeGreaterThan(0);
+
+    // Verify HTML content passed to Playwright includes all 50 questions
+    expect(mockSetContent).toHaveBeenCalledWith(
+      expect.stringContaining("Question 50 about candidate performance"),
+      expect.any(Object),
+    );
+  });
+
+  it("returns 500 when PDF generation fails (Playwright error)", async () => {
+    mockGetEvaluationPdfData.mockResolvedValue(mockEvalData);
+    mockPdf.mockRejectedValue(new Error("Playwright page crash"));
+
+    const { GET } = await import("./route");
+    const response = await GET(
+      pdfRequest("/api/evaluations/550e8400-e29b-41d4-a716-446655440000/pdf?format=pdf"),
+      { params: Promise.resolve({ uuid: "550e8400-e29b-41d4-a716-446655440000" }) },
+    );
+
+    expect(response.status).toBe(500);
+    const text = await response.text();
+    expect(text).toContain("Failed to generate PDF");
+
+    // Verify page.close() is called in finally block even on error
+    expect(mockPageClose).toHaveBeenCalledTimes(1);
+  });
+
+  it("returns 504 when PDF generation times out (TimeoutError)", async () => {
+    mockGetEvaluationPdfData.mockResolvedValue(mockEvalData);
+    mockSetContent.mockRejectedValue(
+      Object.assign(new Error("page.setContent timed out"), { name: "TimeoutError" }),
+    );
+
+    const { GET } = await import("./route");
+    const response = await GET(
+      pdfRequest("/api/evaluations/550e8400-e29b-41d4-a716-446655440000/pdf?format=pdf"),
+      { params: Promise.resolve({ uuid: "550e8400-e29b-41d4-a716-446655440000" }) },
+    );
+
+    expect(response.status).toBe(504);
+    const text = await response.text();
+    expect(text).toContain("PDF generation timed out");
+    expect(mockPageClose).toHaveBeenCalledTimes(1);
+  });
+
+  it("returns 504 when pdf generation times out (message-based detection)", async () => {
+    mockGetEvaluationPdfData.mockResolvedValue(mockEvalData);
+    mockPdf.mockRejectedValue(new Error("page.pdf: Timeout of 30000ms exceeded"));
+
+    const { GET } = await import("./route");
+    const response = await GET(
+      pdfRequest("/api/evaluations/550e8400-e29b-41d4-a716-446655440000/pdf?format=pdf"),
+      { params: Promise.resolve({ uuid: "550e8400-e29b-41d4-a716-446655440000" }) },
+    );
+
+    expect(response.status).toBe(504);
+    const text = await response.text();
+    expect(text).toContain("PDF generation timed out");
   });
 });
