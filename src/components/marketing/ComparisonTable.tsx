@@ -147,15 +147,9 @@ export default function ComparisonTable({ persona = "candidate", className }: Co
         </div>
       </div>
 
-      {/* Desktop: glass table */}
+      {/* Desktop: solid table */}
       <div
-        className="hidden md:block overflow-x-auto rounded-xl"
-        style={{
-          backgroundColor: "var(--sh-glass-bg)",
-          backdropFilter: "blur(12px)",
-          WebkitBackdropFilter: "blur(12px)",
-          border: "1px solid var(--sh-glass-border)",
-        }}
+        className="hidden md:block overflow-x-auto rounded-xl shLandingCardStrong"
       >
         <table className="w-full" style={{ borderCollapse: "collapse" }}>
           <thead>
@@ -164,8 +158,8 @@ export default function ComparisonTable({ persona = "candidate", className }: Co
                 className="text-left p-3 text-xs font-semibold"
                 style={{
                   color: "var(--muted)",
-                  backgroundColor: "var(--sh-glass-bg-strong)",
-                  borderBottom: "1px solid var(--sh-glass-border)",
+                  backgroundColor: "var(--surface)",
+                  borderBottom: "1px solid var(--border)",
                   minWidth: 200,
                 }}
               >
@@ -179,8 +173,8 @@ export default function ComparisonTable({ persona = "candidate", className }: Co
                     color: col.accent ? SH_BLUE : "var(--muted)",
                     backgroundColor: col.accent
                       ? `${SH_BLUE}06`
-                      : "var(--sh-glass-bg-strong)",
-                    borderBottom: "1px solid var(--sh-glass-border)",
+                      : "var(--surface)",
+                    borderBottom: "1px solid var(--border)",
                     minWidth: 120,
                   }}
                 >
@@ -200,7 +194,7 @@ export default function ComparisonTable({ persona = "candidate", className }: Co
                     style={{
                       color: SH_BLUE,
                       backgroundColor: `${SH_BLUE}04`,
-                      borderBottom: "1px solid var(--sh-glass-border)",
+                      borderBottom: "1px solid var(--border)",
                     }}
                   >
                     {cat.category}
@@ -212,14 +206,14 @@ export default function ComparisonTable({ persona = "candidate", className }: Co
                     className="transition-colors duration-150"
                     style={{
                       backgroundColor:
-                        ri % 2 === 0 ? "var(--sh-glass-bg)" : "transparent",
+                        ri % 2 === 0 ? "var(--surface)" : "transparent",
                     }}
                   >
                     <td
                       className="p-3 text-xs"
                       style={{
                         color: "var(--ink)",
-                        borderBottom: "1px solid var(--sh-glass-border)",
+                        borderBottom: "1px solid var(--border)",
                       }}
                     >
                       {row.feature}
@@ -229,7 +223,7 @@ export default function ComparisonTable({ persona = "candidate", className }: Co
                         key={col.key}
                         className="text-center p-3"
                         style={{
-                          borderBottom: "1px solid var(--sh-glass-border)",
+                          borderBottom: "1px solid var(--border)",
                           backgroundColor: col.accent
                             ? `${SH_BLUE}04`
                             : "transparent",
@@ -251,20 +245,14 @@ export default function ComparisonTable({ persona = "candidate", className }: Co
         {categories.map((cat) => (
           <div
             key={cat.category}
-            className="rounded-xl overflow-hidden"
-            style={{
-              backgroundColor: "var(--sh-glass-bg)",
-              backdropFilter: "blur(12px)",
-              WebkitBackdropFilter: "blur(12px)",
-              border: "1px solid var(--sh-glass-border)",
-            }}
+            className="rounded-xl overflow-hidden shLandingCard"
           >
             <div
               className="p-3 text-[11px] font-bold uppercase tracking-wider"
               style={{
                 color: SH_BLUE,
                 backgroundColor: `${SH_BLUE}08`,
-                borderBottom: "1px solid var(--sh-glass-border)",
+                borderBottom: "1px solid var(--border)",
               }}
             >
               {cat.category}
@@ -275,7 +263,7 @@ export default function ComparisonTable({ persona = "candidate", className }: Co
                 className="p-3"
                 style={{
                   borderBottom:
-                    ri < cat.rows.length - 1 ? "1px solid var(--sh-glass-border)" : "none",
+                    ri < cat.rows.length - 1 ? "1px solid var(--border)" : "none",
                 }}
               >
                 <strong
