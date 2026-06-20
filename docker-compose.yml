@@ -13,10 +13,10 @@ services:
     container_name: studenthub-next-mysql
     restart: unless-stopped
     environment:
-      MYSQL_DATABASE: studenthub_sample
-      MYSQL_USER: studenthub
-      MYSQL_PASSWORD: studenthub
-      MYSQL_ROOT_PASSWORD: studenthub_root
+      MYSQL_DATABASE: "${MYSQL_DATABASE:-studenthub_sample}"
+      MYSQL_USER: "${MYSQL_USER:-studenthub}"
+      MYSQL_PASSWORD: "${MYSQL_PASSWORD:-studenthub}"
+      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD:-studenthub_root}"
     ports:
       - "3307:3306"
     volumes:
@@ -57,8 +57,8 @@ services:
     container_name: studenthub-next-minio
     restart: unless-stopped
     environment:
-      MINIO_ROOT_USER: studenthub
-      MINIO_ROOT_PASSWORD: studenthub_minio_secret
+      MINIO_ROOT_USER: "${MINIO_ROOT_USER:-studenthub}"
+      MINIO_ROOT_PASSWORD: "${MINIO_ROOT_PASSWORD:-studenthub_minio_secret}"
     ports:
       - "9000:9000"   # API
       - "9001:9001"   # Console
@@ -82,7 +82,7 @@ services:
       minio:
         condition: service_healthy
     environment:
-      - MC_HOST_local=http://studenthub:studenthub_minio_secret@minio:9000
+      - MC_HOST_local=http://${MINIO_ROOT_USER:-studenthub}:${MINIO_ROOT_PASSWORD:-studenthub_minio_secret}@minio:9000
     entrypoint: >
       /bin/sh -c "
       until mc ls local >/dev/null 2>&1; do echo 'waiting for minio...'; sleep 2; done;
@@ -103,7 +103,7 @@ services:
       - "3000:3000"
     environment:
       NODE_ENV: production
-      DATABASE_URL: "mysql://studenthub:studenthub@mysql:3306/studenthub_sample"
+      DATABASE_URL: "mysql://${MYSQL_USER:-studenthub}:${MYSQL_PASSWORD:-studenthub}@mysql:3306/${MYSQL_DATABASE:-studenthub_sample}"
       AUTH_SECRET: "${AUTH_SECRET:-replace-with-a-long-local-secret}"
 
       # Redis (for future caching)
