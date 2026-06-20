@@ -14,9 +14,7 @@ type Props = {
 export default async function EmployerJobDetailPage({ params }: Props) {
   const { id } = await params;
   const session = await requireRoleCapability("company", "company.write.linked");
-  const jobId = Number(id);
-  if (Number.isNaN(jobId) || jobId <= 0) notFound();
-  const job = await getJob({ jobId });
+  const job = await getJob({ jobId: Number(id) });
 
   if (!job) notFound();
 
@@ -31,17 +29,17 @@ export default async function EmployerJobDetailPage({ params }: Props) {
       metrics={[]}
     >
       <JobEditForm job={job} readOnly={!isOwner} />
-      <div className="mt-8 pt-6 border-t border-[var(--border)]">
+      <div className="mt-8 pt-6 border-t border-border">
         <div className="flex gap-4">
           <Link
             href={`/employer/jobs/${job.jobListingId}/applications`}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 bg-[var(--sh-coral)] text-white hover:bg-[var(--sh-coral-hover)]"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors bg-[var(--sh-coral)] text-white hover:bg-[var(--sh-coral-hover)]"
           >
             View Applications
           </Link>
           <Link
             href={`/employer/jobs/${job.jobListingId}/matching`}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 border border-[var(--border)] text-[var(--ink)] hover:bg-[var(--surface)]"
+            className="inline-flex items-center gap-2 px-4 py-2 border border-border rounded-lg text-sm font-medium text-foreground hover:bg-accent transition-colors"
           >
             Matching Candidates
           </Link>
