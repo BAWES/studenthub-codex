@@ -4119,10 +4119,8 @@ tr:last-child td {
   grid-template-columns: 220px minmax(280px, 1fr) auto;
   align-items: center;
   gap: 10px;
-  border-bottom: 1px solid var(--sh-glass-border);
-  background: var(--sh-glass-bg);
-  backdrop-filter: blur(var(--sh-glass-blur));
-  -webkit-backdrop-filter: blur(var(--sh-glass-blur));
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
   padding: 10px 14px;
 }
 
