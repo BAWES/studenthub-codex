@@ -1,5 +1,5 @@
 import { requireRoleCapability } from "@/modules/auth/session";
-import { CandidateSearchOS } from "@/modules/candidates/CandidateSearchOS";
+import { CandidateSearchPage } from "@/modules/candidates/CandidateSearchPage";
 import { getCandidateSearchWorkspaceTypesense as getCandidateSearchWorkspace, parseFilter, parseCandidateId, parseCandidateIds, parseSearchPage } from "@/modules/candidates/search-typesense";
 
 export const dynamic = "force-dynamic";
@@ -45,5 +45,5 @@ export default async function AdminCandidatesPage({
   };
   const data = await getCandidateSearchWorkspace(search);
 
-  return <CandidateSearchOS basePath="/admin/candidates" data={data} homePath="/admin" params={search} session={session} />;
+  return <CandidateSearchPage basePath="/admin/candidates" data={data} homePath="/admin" params={search} session={session} />;
 }
