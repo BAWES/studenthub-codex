@@ -32,6 +32,7 @@ export function navForRole(role: Role): NavItem[] {
       { label: "Company Requests", href: "/admin/company-requests", icon: Building2 },
       { label: "User Requests", href: "/admin/user-requests", icon: Mail },
       { label: "Webhooks", href: "/admin/webhooks", icon: Webhook },
+      { label: "Stories", href: "/admin/story", icon: ClipboardList },
     ];
   }
   if (role === "staff") {
