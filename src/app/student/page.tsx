@@ -2,9 +2,7 @@ import { getStudentProfile } from "./actions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
-interface Props {
-  params: Promise<{ studentId: string }>;
-}
+const CORAL = "#eb6651";
 
 function AvatarCircle({ name }: { name?: string | null }) {
   const initial = name?.charAt(0)?.toUpperCase() || "?";
@@ -18,8 +16,16 @@ function AvatarCircle({ name }: { name?: string | null }) {
 function PeriodLabel({ startYear, endYear }: { startYear?: number | null; endYear?: number | null }) {
   if (!startYear && !endYear) return null;
   if (startYear && endYear) return <>{startYear} — {endYear}</>;
-  if (startYear) return <>From {startYear}</>;
-  return <>Until {endYear}</>;
+  if (startYear) return <>{startYear} (start)</>;
+  return <>{endYear} (end)</>;
+}
+
+/**
+ * Student Public Profile — Zendesk Coral + Slack design
+ * Card-based layout with coral accent accents throughout.
+ */
+interface Props {
+  params: Promise<{ studentId: string }>;
 }
 
 export default async function StudentProfilePage({ params }: Props) {
@@ -93,17 +99,52 @@ export default async function StudentProfilePage({ params }: Props) {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Skills</CardTitle>
-          </CardHeader>
-          <CardContent>
+        {/* ── Skills Card ────────────────────────────────────────────── */}
+        <div
+          style={{
+            backgroundColor: "var(--surface)",
+            border: "1px solid var(--border)",
+            borderRadius: 12,
+            boxShadow: "var(--shadow-sm)",
+            overflow: "hidden",
+          }}
+        >
+          <div
+            style={{
+              padding: "24px 28px 0",
+              borderLeft: `3px solid ${CORAL}`,
+            }}
+          >
+            <h2
+              style={{
+                margin: 0,
+                fontSize: 20,
+                fontWeight: 700,
+                color: "var(--ink)",
+              }}
+            >
+              Skills
+            </h2>
+          </div>
+          <div style={{ padding: 20 }}>
             {profile.skills.length > 0 ? (
               <div className="flex flex-wrap gap-2">
                 {profile.skills.map((skill) => (
-                  <Badge key={skill.id} variant="secondary">
+                  <span
+                    key={skill.id}
+                    style={{
+                      padding: "4px 14px",
+                      backgroundColor: "#fef1ef",
+                      border: "1px solid rgba(235, 102, 81, 0.2)",
+                      borderRadius: 999,
+                      color: CORAL,
+                      fontSize: 13,
+                      fontWeight: 700,
+                      lineHeight: "24px",
+                    }}
+                  >
                     {skill.name}
-                  </Badge>
+                  </span>
                 ))}
               </div>
             ) : (
@@ -111,14 +152,37 @@ export default async function StudentProfilePage({ params }: Props) {
                 No skills listed yet.
               </p>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Experience</CardTitle>
-          </CardHeader>
-          <CardContent>
+        {/* ── Experience Card ─────────────────────────────────────────── */}
+        <div
+          style={{
+            backgroundColor: "var(--surface)",
+            border: "1px solid var(--border)",
+            borderRadius: 12,
+            boxShadow: "var(--shadow-sm)",
+            overflow: "hidden",
+          }}
+        >
+          <div
+            style={{
+              padding: "24px 28px 0",
+              borderLeft: `3px solid ${CORAL}`,
+            }}
+          >
+            <h2
+              style={{
+                margin: 0,
+                fontSize: 20,
+                fontWeight: 700,
+                color: "var(--ink)",
+              }}
+            >
+              Experience
+            </h2>
+          </div>
+          <div className="space-y-1" style={{ padding: 20 }}>
             {profile.experience.length > 0 ? (
               <div className="space-y-4">
                 {profile.experience.map((exp) => (
@@ -147,8 +211,93 @@ export default async function StudentProfilePage({ params }: Props) {
                 No experience listed yet.
               </p>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
+
+        {/* ── Contact Info Card ───────────────────────────────────────── */}
+        <div
+          style={{
+            backgroundColor: "var(--surface)",
+            border: "1px solid var(--border)",
+            borderRadius: 12,
+            boxShadow: "var(--shadow-sm)",
+            overflow: "hidden",
+          }}
+        >
+          <div
+            style={{
+              padding: "24px 28px 0",
+              borderLeft: `3px solid ${CORAL}`,
+            }}
+          >
+            <h2
+              style={{
+                margin: 0,
+                fontSize: 20,
+                fontWeight: 700,
+                color: "var(--ink)",
+              }}
+            >
+              Contact Info
+            </h2>
+          </div>
+          <div className="space-y-3" style={{ padding: "16px 28px 24px" }}>
+            {profile.email && (
+              <div className="flex items-center gap-3">
+                <span
+                  style={{
+                    color: CORAL,
+                    fontSize: 14,
+                    fontWeight: 600,
+                    width: 60,
+                    flexShrink: 0,
+                  }}
+                >
+                  Email
+                </span>
+                <span style={{ color: "var(--ink)", fontSize: 14 }}>
+                  {profile.email}
+                </span>
+              </div>
+            )}
+            {profile.phone && (
+              <div className="flex items-center gap-3">
+                <span
+                  style={{
+                    color: CORAL,
+                    fontSize: 14,
+                    fontWeight: 600,
+                    width: 60,
+                    flexShrink: 0,
+                  }}
+                >
+                  Phone
+                </span>
+                <span style={{ color: "var(--ink)", fontSize: 14 }}>
+                  {profile.phone}
+                </span>
+              </div>
+            )}
+            {profile.address && (
+              <div className="flex items-center gap-3">
+                <span
+                  style={{
+                    color: CORAL,
+                    fontSize: 14,
+                    fontWeight: 600,
+                    width: 60,
+                    flexShrink: 0,
+                  }}
+                >
+                  Address
+                </span>
+                <span style={{ color: "var(--ink)", fontSize: 14 }}>
+                  {profile.address}
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
