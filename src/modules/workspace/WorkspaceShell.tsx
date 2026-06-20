@@ -58,7 +58,7 @@ export function WorkspaceShell({
   const navItems = navForRole(session.role);
 
   const rail = (
-    <aside className="workspaceRail" aria-label="Workspace sidebar">
+    <aside className="workspaceRail group/rail" aria-label="Workspace sidebar">
       <Link className="workspaceMark" href="/app" aria-label="StudentHub app">
         <span>SH</span>
         <strong>StudentHub</strong>

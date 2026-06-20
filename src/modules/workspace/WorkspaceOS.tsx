@@ -321,7 +321,7 @@ export function WorkspaceOS({
       <TabProvider role={session.role}>
       <main id="main-content" className="shell">
         {/* ── Sidebar Rail ─────────────────────────────────── */}
-        <aside className="workspaceRail" aria-label="Workspace sidebar">
+        <aside className="workspaceRail group/rail" aria-label="Workspace sidebar">
           <Link className="workspaceMark" href="/app" aria-label="StudentHub app">
             <span>SH</span>
             <strong>StudentHub</strong>
