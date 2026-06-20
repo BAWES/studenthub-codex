@@ -53,6 +53,10 @@ RUN mkdir -p /app/public
 # (Next.js standalone trace requires it when traversing playwright-core)
 RUN pnpm add chromium-bidi --no-save
 
+# Install chromium-bidi — playwright-core's bundled CDP dep needed at build time
+# (Next.js standalone trace requires it when traversing playwright-core)
+RUN pnpm add chromium-bidi --no-save 2>/dev/null || true
+
 # Generate Prisma client so the build can resolve types
 # DATABASE_URL placeholder needed — prisma generate may introspect
 ENV DATABASE_URL="mysql://placeholder:placeholder@localhost:3306/placeholder"
