@@ -1,9 +1,9 @@
 // ---------------------------------------------------------------------------
-// Barrel re-export — delegates to module-level implementation
+// Barrel re-export — delegates to module-level [id] implementation
 // ---------------------------------------------------------------------------
-// All business logic lives in src/modules/admin/story/actions.ts (which
+// All business logic lives in src/modules/admin/story/[id]/actions.ts (which
 // has "use server"). This barrel re-exports so page consumers keep their
 // current import paths without duplicating the "use server" directive.
 // ---------------------------------------------------------------------------
 
-export * from "@/modules/admin/story/actions";
+export { getStory } from "@/modules/admin/story/[id]/actions";

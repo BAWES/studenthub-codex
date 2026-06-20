@@ -1,1 +1,1 @@
-export { AdminStoryTable } from "./admin-story-table";
+export { AdminStoriesTable } from "./admin-stories-table";
