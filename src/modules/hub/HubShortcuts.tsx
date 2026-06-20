@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { CommandPalette } from "@/components/ui/CommandPalette";
 import type { OSCommand } from "@/components/ui/CommandPalette";
+import { Button } from "@/components/ui/button";
 
 export type HubCommand = {
   id: string;
@@ -124,10 +125,18 @@ export function HubShortcuts({ commands }: HubShortcutsProps) {
 
   return (
     <>
-      <button className="commandLauncher" type="button" onClick={() => setOpen(true)}>
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        className="gap-1.5"
+        onClick={() => setOpen(true)}
+      >
         <span>Command</span>
-        <kbd>⌘K</kbd>
-      </button>
+        <kbd className="inline-flex items-center rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-mono font-medium text-muted-foreground">
+          ⌘K
+        </kbd>
+      </Button>
 
       <CommandPalette
         open={open}
