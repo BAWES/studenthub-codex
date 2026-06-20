@@ -111,23 +111,19 @@ export default function CompanyLandingContent({
 
       {/* ── Pain-point section — the specific hiring pain points ── */}
       <section
-        className="shSection relative overflow-hidden rounded-xl p-[clamp(24px,5vw,48px)]"
-        style={{
-          background: "var(--sh-glass-bg)",
-          border: "1px solid var(--sh-glass-border)",
-        }}
+        className="relative overflow-hidden rounded-xl border border-gray-200 bg-white p-[clamp(24px,5vw,48px)]"
         aria-label="Hiring pain points and solutions"
       >
-        <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-[#fef1ef] via-white to-[var(--paper)] z-0" aria-hidden="true" />
+        <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-[#fef1ef] via-white to-gray-50 z-0" aria-hidden="true" />
 
         <div className="relative z-[2]">
-          <p className="text-[var(--sh-info)] text-[11px] font-black uppercase tracking-wider mb-1">
+          <p className="text-[#1f73b7] text-[11px] font-black uppercase tracking-wider mb-1">
             The real hiring headache
           </p>
-          <h2 className="shBenefitsTitle mb-8">
+          <h2 className="text-[clamp(22px,3vw,28px)] font-bold leading-tight tracking-tight text-gray-900 mb-8">
             You don&apos;t have a talent problem.
             <br />
-            You have a <em style={{ color: "var(--sh-info)" }}>process</em>{" "}
+            You have a <em className="text-[#eb6651] not-italic">process</em>{" "}
             problem.
           </h2>
 
@@ -135,32 +131,16 @@ export default function CompanyLandingContent({
             {PAIN_POINTS.map((point, i) => (
               <div
                 key={i}
-                className="rounded-xl p-5 flex flex-col gap-3 transition-transform duration-300 hover:-translate-y-[3px]"
-                style={{
-                  background: "var(--sh-glass-bg)",
-                  border: "1px solid var(--sh-glass-border)",
-                }}
+                className="rounded-xl p-5 flex flex-col gap-3 transition-transform duration-300 hover:-translate-y-[3px] bg-gray-50 border border-gray-200"
               >
-                <div
-                  className="size-10 rounded-lg flex items-center justify-center shrink-0"
-                  style={{
-                    background: "color-mix(in srgb, var(--sh-info) 15%, transparent)",
-                    color: "var(--sh-info)",
-                  }}
-                >
+                <div className="size-10 rounded-lg flex items-center justify-center shrink-0 bg-[#1f73b7]/10 text-[#1f73b7]">
                   <span className="font-black text-sm">0{i + 1}</span>
                 </div>
                 <div>
-                  <p
-                    className="text-sm font-semibold mb-1.5"
-                    style={{ color: "var(--ink)" }}
-                  >
+                  <p className="text-sm font-semibold mb-1.5 text-gray-900">
                     {point.problem}
                   </p>
-                  <p
-                    className="text-sm leading-relaxed"
-                    style={{ color: "var(--muted)" }}
-                  >
+                  <p className="text-sm leading-relaxed text-gray-500">
                     {point.solution}
                   </p>
                 </div>
@@ -172,22 +152,15 @@ export default function CompanyLandingContent({
 
       {/* ── Stats strip — company authority signals ── */}
       <section
-        className="shSection rounded-xl p-[clamp(20px,4vw,40px)] grid grid-cols-2 sm:grid-cols-4 gap-6 text-center"
-        style={{
-          background: "var(--sh-glass-bg)",
-          border: "1px solid var(--sh-glass-border)",
-        }}
+        className="rounded-xl border border-gray-200 bg-gray-50 p-[clamp(20px,4vw,40px)] grid grid-cols-2 sm:grid-cols-4 gap-6 text-center"
         aria-label="Company stats"
       >
         {COMPANY_STATS.map((stat) => (
           <div key={stat.label}>
-            <p className="text-[clamp(24px,4vw,36px)] font-black leading-none mb-1">
+            <p className="text-[clamp(24px,4vw,36px)] font-black leading-none mb-1 text-gray-900">
               {stat.value}
             </p>
-            <p
-              className="text-xs leading-tight"
-              style={{ color: "var(--muted)" }}
-            >
+            <p className="text-xs leading-tight text-gray-500">
               {stat.label}
             </p>
           </div>
@@ -208,26 +181,19 @@ export default function CompanyLandingContent({
 
       {/* ── Final CTA — tailored for employers ── */}
       <section
-        className="shSection relative overflow-hidden rounded-xl p-[clamp(24px,5vw,60px)] text-center"
-        style={{
-          background: "var(--sh-glass-bg)",
-          border: "1px solid var(--sh-glass-border)",
-        }}
+        className="relative overflow-hidden rounded-xl border border-gray-200 bg-white p-[clamp(24px,5vw,60px)] text-center"
         aria-label="Get started as a company"
       >
-        <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-[#fef1ef] via-white to-[var(--paper)] z-0" aria-hidden="true" />
+        <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-[#fef1ef] via-white to-gray-50 z-0" aria-hidden="true" />
 
         <div className="relative z-[2] max-w-[640px] mx-auto">
-          <p className="text-[var(--sh-info)] text-[11px] font-black uppercase tracking-wider mb-2">
+          <p className="text-[#1f73b7] text-[11px] font-black uppercase tracking-wider mb-2">
             Let StudentHub handle your workforce
           </p>
-          <h2 className="shBenefitsTitle text-center">
+          <h2 className="text-[clamp(24px,4vw,36px)] font-bold leading-tight tracking-tight text-gray-900 text-center">
             Stop managing staff. Start running your business.
           </h2>
-          <p
-            className="max-w-[480px] mx-auto mt-2 mb-6 leading-relaxed"
-            style={{ color: "var(--muted)" }}
-          >
+          <p className="max-w-[480px] mx-auto mt-2 mb-6 leading-relaxed text-gray-500">
             StudentHub handles everything — sourcing, placement, compliance, payroll.
             You get pre-vetted student workers on a simple monthly fee or hourly rate.
             No recruitment costs, no HR paperwork, no compliance headaches.
@@ -247,10 +213,7 @@ export default function CompanyLandingContent({
               Set up your company account <ChevronRight className="size-4" />
             </Link>
           )}
-          <div
-            className="flex items-center justify-center gap-4 mt-4 text-xs"
-            style={{ color: "var(--muted)" }}
-          >
+          <div className="flex items-center justify-center gap-4 mt-4 text-xs text-gray-500">
             <span>200+ companies using StudentHub</span>
             <span>48h avg time to first match</span>
           </div>
@@ -258,23 +221,18 @@ export default function CompanyLandingContent({
       </section>
 
       {/* ── Footer ── */}
-      <footer
-        className="shSection flex items-center justify-between pt-4 pb-2 text-xs"
-        style={{ color: "var(--muted)" }}
-      >
+      <footer className="flex items-center justify-between pt-4 pb-2 text-xs text-gray-500">
         <span>&copy; {new Date().getFullYear()} StudentHub. All rights reserved.</span>
         <div className="flex items-center gap-4">
           <Link
             href="/login"
-            className="hover:text-[var(--ink)] transition-colors no-underline"
-            style={{ color: "inherit" }}
+            className="hover:text-gray-900 transition-colors no-underline text-gray-500"
           >
             Sign in
           </Link>
           <Link
             href="/signup?role=company"
-            className="hover:text-[var(--ink)] transition-colors no-underline"
-            style={{ color: "inherit" }}
+            className="hover:text-gray-900 transition-colors no-underline text-gray-500"
           >
             Sign up as company
           </Link>
