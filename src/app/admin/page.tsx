@@ -85,7 +85,7 @@ export default async function AdminPage() {
           className="shDashboardSection"
           aria-label="Request pipeline status"
         >
-          <div className="rounded-lg border border-[var(--border)] bg-white p-5">
+          <div className="rounded-lg border border-[var(--border)] bg-card p-5">
             <div className="shPipelineHeader">
               <div>
                 <span className="shPipelineEyebrow">Pipeline</span>
@@ -152,7 +152,7 @@ export default async function AdminPage() {
           className="shDashboardSection"
           aria-label="PR merge time-to-merge metrics"
         >
-          <div className="rounded-lg border border-[var(--border)] bg-white p-5">
+          <div className="rounded-lg border border-[var(--border)] bg-card p-5">
             <div className="shPipelineHeader">
               <div>
                 <span className="shPipelineEyebrow">Engineering</span>
@@ -297,7 +297,7 @@ function DataList({
 }) {
   return (
     <div
-      className="rounded-lg border border-[var(--border)] bg-white shDashboardDataList"
+      className="rounded-lg border border-[var(--border)] bg-card shDashboardDataList"
       style={{ animationDelay: `${entranceDelay}ms` } as React.CSSProperties}
     >
       <div className="shDataListHeader">
@@ -360,7 +360,7 @@ async function CoderHealthSection() {
   } catch {
     return (
       <section className="shDashboardSection" aria-label="Coder agent health">
-        <div className="rounded-lg border border-[var(--border)] bg-white p-5">
+        <div className="rounded-lg border border-[var(--border)] bg-card p-5">
           <div className="shPipelineHeader">
             <div>
               <span className="shPipelineEyebrow">Agent</span>
@@ -377,7 +377,7 @@ async function CoderHealthSection() {
 
   return (
     <section className="shDashboardSection" aria-label="Coder agent health metrics">
-      <div className="rounded-lg border border-[var(--border)] bg-white p-5">
+      <div className="rounded-lg border border-[var(--border)] bg-card p-5">
         <div className="shPipelineHeader">
           <div>
             <span className="shPipelineEyebrow">Agent</span>
