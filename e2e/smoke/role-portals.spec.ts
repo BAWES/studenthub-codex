@@ -27,8 +27,8 @@ test.describe("Role portal smoke tests", () => {
       const context = await browser.newContext();
       await context.addCookies(cookieArgs(user));
       const page = await context.newPage();
-      await page.goto(`/${expectedUrl}`);
-      await expect(page).toHaveURL(`/${expectedUrl}`);
+      await page.goto(expectedUrl);
+      await expect(page).toHaveURL(expectedUrl);
       await expect(page.locator("body")).toBeVisible({ timeout: 15000 });
       if (expectedText) {
         await expect(page.locator(`text="${expectedText}"`).first()).toBeVisible({ timeout: 15000 });
