@@ -11,19 +11,13 @@ vi.mock("next/link", () => ({
     ...rest
   }: {
     children: React.ReactNode;
-    href: string | { pathname: string; query?: Record<string, string> };
+    href: string;
     className?: string;
-  }) => {
-    const resolved =
-      typeof href === "string"
-        ? href
-        : `${href.pathname}${href.query ? "?" + new URLSearchParams(href.query).toString() : ""}`;
-    return (
-      <a href={resolved} className={className} {...rest}>
-        {children}
-      </a>
-    );
-  },
+  }) => (
+    <a href={href} className={className} {...rest}>
+      {children}
+    </a>
+  ),
 }));
 
 // ── Mock lucide-react icons ───────────────────────────────────
@@ -37,7 +31,6 @@ vi.mock("lucide-react", () => ({
   Zap: () => <span data-testid="icon-zap" />,
   Shield: () => <span data-testid="icon-shield" />,
   Clock: () => <span data-testid="icon-clock" />,
-  Star: () => <span data-testid="icon-star" />,
 }));
 
 afterEach(() => {
@@ -48,23 +41,23 @@ afterEach(() => {
 // ── Import component ──────────────────────────────────────────
 import HeroSection from "./HeroSection";
 
-describe("HeroSection (two-sided marketplace redesign)", () => {
+describe("HeroSection", () => {
   describe("Default render", () => {
     it("renders eyebrow text", () => {
       render(<HeroSection />);
       expect(
-        screen.getByText("Staff-matched student placements"),
+        screen.getByText("Staff-matched student placement"),
       ).toBeTruthy();
     });
 
-    it("renders an H1 heading with marketplace messaging", () => {
+    it("renders an H1 heading", () => {
       render(<HeroSection />);
       const heading = screen.getByRole("heading", { level: 1 });
       expect(heading.textContent).toBeTruthy();
       expect(heading.textContent!.length).toBeGreaterThan(10);
     });
 
-    it("renders body paragraph about two-sided marketplace", () => {
+    it("renders body paragraph", () => {
       render(<HeroSection />);
       expect(
         screen.getByText(/the platform where students build careers/i),
