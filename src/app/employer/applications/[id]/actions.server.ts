@@ -19,7 +19,8 @@ export async function acceptApplication(formData: FormData): Promise<void> {
  */
 export async function rejectApplication(formData: FormData): Promise<void> {
   const applicationId = Number(formData.get("applicationId"));
-  await updateStatus({ applicationId, status: "rejected" });
+  const rejectionReason = (formData.get("rejectionReason") as string) || undefined;
+  await updateStatus({ applicationId, status: "rejected", rejectionReason });
   revalidatePath(`/employer/applications/${applicationId}`);
 }
 
