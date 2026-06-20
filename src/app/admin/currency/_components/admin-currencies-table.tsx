@@ -1,0 +1,114 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import { DataTable } from "@/modules/workspace/DataTable";
+import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
+
+import type { SessionUser } from "@/modules/auth/types";
+import type { CurrencyItem } from "../schemas";
+
+type Props = {
+  session: SessionUser;
+  currencies: CurrencyItem[];
+};
+
+export function AdminCurrenciesTable({ session, currencies }: Props) {
+  return (
+    <WorkspaceShell
+      session={session}
+      eyebrow="Admin settings"
+      title="Manage currencies — supported currency codes and exchange rates."
+      metrics={[
+        {
+          label: "Active currencies",
+          value: currencies.filter((c) => c.status).length,
+          note: `${currencies.length} total`,
+        },
+      ]}
+    >
+      <DataTable
+        title="Currencies"
+        description="Currency codes, symbols, and exchange rates used across the system."
+        rows={currencies.map((c) => ({ ...c, id: String(c.currency_id) }))}
+        rowHref={undefined}
+        columns={[
+          {
+            key: "code",
+            label: "Code",
+            render: (row) => (
+              <code
+                className="text-sm font-mono font-semibold"
+                style={{ color: "var(--accent)" }}
+              >
+                {row.code}
+              </code>
+            ),
+          },
+          {
+            key: "title",
+            label: "Currency",
+            render: (row) => (
+              <span
+                className="text-sm text-foreground"
+              >
+                {row.title}
+              </span>
+            ),
+          },
+          {
+            key: "currency_symbol",
+            label: "Symbol",
+            render: (row) => (
+              <span
+                className="text-sm text-foreground"
+              >
+                {row.currency_symbol ?? "—"}
+              </span>
+            ),
+          },
+          {
+            key: "rate",
+            label: "Rate",
+            render: (row) => (
+              <span
+                className="text-sm font-mono text-foreground"
+              >
+                {row.rate != null ? row.rate.toFixed(4) : "—"}
+              </span>
+            ),
+          },
+          {
+            key: "status",
+            label: "Status",
+            render: (row) => (
+              <span
+                className={`text-xs px-2 py-0.5 rounded-full ${
+                  row.status ? "" : ""
+                }`}
+                style={{
+                  color: row.status ? "var(--sh-success)" : "var(--muted)",
+                  background: row.status
+                    ? "color-mix(in srgb, var(--sh-success) 10%, transparent)"
+                    : "color-mix(in srgb, var(--border) 30%, transparent)",
+                }}
+              >
+                {row.status ? "Active" : "Inactive"}
+              </span>
+            ),
+          },
+          {
+            key: "sort_order",
+            label: "Sort",
+            render: (row) => (
+              <span
+                className="text-sm text-muted-foreground"
+              >
+                {row.sort_order ?? "—"}
+              </span>
+            ),
+          },
+        ]}
+      />
+    </WorkspaceShell>
+  );
+}

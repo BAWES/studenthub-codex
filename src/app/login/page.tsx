@@ -4,6 +4,8 @@ import { UserRound, Search, Building2, Shield, ClipboardCheck } from "lucide-rea
 import { getSession } from "@/modules/auth/session";
 import { LoginForm } from "@/modules/auth/LoginForm";
 import { ThemeToggle } from "@/modules/theme/ThemeToggle";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 export const dynamic = "force-dynamic";
 
@@ -28,14 +30,14 @@ export default async function LoginPage({
     <main className="min-h-svh w-[min(1160px,calc(100%_-_28px))] mx-auto grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(400px,500px)] content-start items-start gap-4 pt-[18px] pb-[42px] max-sm:w-[min(calc(100%_-_20px),720px)]">
       {/* Nav - spans full width */}
       <nav
-        className="col-span-full sticky top-3 z-20 min-h-[62px] flex items-center justify-between gap-3.5 border border-[color-mix(in_srgb,var(--border)_84%,transparent)] rounded-lg bg-[color-mix(in_srgb,var(--card)_92%,transparent)] p-2 shadow-[0_18px_50px_rgba(16,24,40,0.08)] max-sm:static max-sm:flex-col max-sm:items-stretch"
+        className="col-span-full sticky top-3 z-20 min-h-[62px] flex items-center justify-between gap-3.5 border border-border/80 rounded-lg bg-card/92 p-2 shadow-[0_18px_50px_rgba(16,24,40,0.08)] max-sm:static max-sm:flex-col max-sm:items-stretch"
         aria-label="StudentHub login navigation"
       >
         <Link
           className="inline-flex items-center gap-2.5 text-foreground px-2 no-underline"
           href="/"
         >
-          <span className="size-9 inline-flex items-center justify-center rounded-lg bg-card text-white font-black">
+          <span className="size-9 inline-flex items-center justify-center rounded-lg bg-foreground text-card font-black">
             SH
           </span>
           <strong>StudentHub</strong>
@@ -44,9 +46,11 @@ export default async function LoginPage({
       </nav>
 
       {/* Intro */}
-      <section className="overflow-hidden rounded-lg border border-[var(--border)] bg-[linear-gradient(135deg,color-mix(in_srgb,#1f73b7_9%,transparent),transparent_48%),var(--card)] p-[clamp(22px,4vw,48px)]">
-        <div>
-          <p className="text-[#1f73b7] text-[11px] font-black uppercase">One StudentHub login</p>
+      <Card className="overflow-hidden border-border" style={{
+        background: "linear-gradient(135deg,color-mix(in srgb,var(--blue) 9%,transparent),transparent 48%),var(--card)"
+      }}>
+        <CardContent className="p-[clamp(22px,4vw,48px)]">
+          <p className="text-[var(--blue)] text-[11px] font-black uppercase">One StudentHub login</p>
           <h1 className="mt-0 max-w-[760px] text-[clamp(44px,6.4vw,92px)] leading-[0.94] max-sm:text-[40px]">
             Sign in once. We&rsquo;ll open the right workspace.
           </h1>
@@ -57,24 +61,25 @@ export default async function LoginPage({
           <div className="flex flex-wrap gap-2 mt-[18px]">
             {["Production-compatible credentials", "Server-side account detection", "Capability-scoped workspaces"].map(
               (item) => (
-                <span
+                <Badge
                   key={item}
-                  className="min-h-8 inline-flex items-center border border-[var(--border)] rounded-full bg-[color-mix(in_srgb,var(--card)_88%,transparent)] px-3 text-[#1f73b7] text-[11px] font-black uppercase"
+                  variant="outline"
+                  className="text-[var(--blue)] text-[11px] font-black uppercase px-3 py-1.5"
                 >
                   {item}
-                </span>
+                </Badge>
               )
             )}
           </div>
-        </div>
-        <Link href="/" className="inline-block mt-4 text-sm no-underline text-muted-foreground hover:text-[#1f73b7]">
-          Back to landing
-        </Link>
-      </section>
+          <Link href="/" className="inline-block mt-4 text-sm no-underline text-muted-foreground hover:text-[var(--blue)]">
+            Back to landing
+          </Link>
+        </CardContent>
+      </Card>
 
       {/* Login panel */}
-      <section
-        className="self-start border border-border rounded-lg bg-card shadow-[0_30px_90px_rgba(16,24,40,0.16)] dark:border-[var(--border)]"
+      <Card
+        className="self-start border-[#c5cfdd] dark:border-border shadow-[0_30px_90px_rgba(16,24,40,0.16)]"
         aria-label="StudentHub sign in"
       >
         {params.error === "expired" ? (
@@ -84,19 +89,18 @@ export default async function LoginPage({
           <p className="text-destructive font-bold m-0 p-4 pb-0">Choose a verified account to continue.</p>
         ) : null}
         <LoginForm />
-      </section>
+      </Card>
 
       {/* Role notes - spans full width */}
       <section className="col-span-full grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5" aria-label="Account detection notes">
         {roleNotes.map(({ icon: Icon, label, detail }) => (
-          <article
-            key={label}
-            className="grid gap-1.5 border-border rounded-lg bg-card p-3.5"
-          >
-            <Icon className="size-4 text-[#1f73b7] shrink-0" aria-hidden="true" />
-            <span className="text-muted-foreground text-xs font-extrabold uppercase">{label}</span>
-            <strong className="text-sm">{detail}</strong>
-          </article>
+          <Card key={label}>
+            <CardContent className="grid gap-1.5 p-3.5">
+              <Icon className="size-4 text-[var(--blue)] shrink-0" aria-hidden="true" />
+              <span className="text-muted-foreground text-xs font-extrabold uppercase">{label}</span>
+              <strong className="text-sm text-foreground">{detail}</strong>
+            </CardContent>
+          </Card>
         ))}
       </section>
     </main>

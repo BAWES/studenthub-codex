@@ -13,7 +13,11 @@ import type {
 export async function listDailyStandups(
   input: ListDailyStandupsInput = {},
 ): Promise<ListDailyStandupsResult> {
+<<<<<<< HEAD
   await requireCapability("app.access");
+=======
+  await requireCapability("admin.read");
+>>>>>>> origin/develop
   const parsed = listDailyStandupsSchema.safeParse(input);
   if (!parsed.success) {
     return { answers: [], total: 0, page: 1, limit: 50, totalPages: 0 };
@@ -71,7 +75,11 @@ export async function listDailyStandups(
 export async function getDailyStandupAnswer(
   answerUuid: string,
 ): Promise<{ answer: DailyStandupAnswerItem | null }> {
+<<<<<<< HEAD
   await requireCapability("app.access");
+=======
+  await requireCapability("admin.read");
+>>>>>>> origin/develop
 
   const row = await prisma.daily_standup_answer.findUnique({
     where: { answer_uuid: answerUuid },
