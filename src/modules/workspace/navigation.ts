@@ -71,7 +71,8 @@ export function navForRole(role: Role): NavItem[] {
       { label: "Search", href: "/company/search" as Route, icon: Search },
       { label: "Companies", href: "/company/companies", icon: Building2 },
       { label: "Contacts", href: "/company/contacts" as Route, icon: Phone },
-      { label: "Stores", href: "/company/stores" as Route, icon: Store }
+      { label: "Stores", href: "/company/stores" as Route, icon: Store },
+      { label: "Settings", href: "/company/company-settings" as Route, icon: User }
     ];
   }
   return [
