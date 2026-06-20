@@ -13,7 +13,7 @@ function cookieArgs(user: RoleFixture) {
 
 const ROLES: Array<{ key: string; label: string; expectedUrl?: string; expectedText?: string }> = [
   { key: "admin", label: "admin", expectedUrl: "/admin" },
-  { key: "staff", label: "staff", expectedUrl: "/staff", expectedText: "Staff operating home" },
+  { key: "staff", label: "staff", expectedUrl: "/staff", expectedText: "Welcome back" },
   { key: "candidate", label: "candidate", expectedUrl: "/candidate", expectedText: "Readiness" },
   { key: "company", label: "company", expectedUrl: "/company" },
   { key: "inspector", label: "inspector", expectedUrl: "/inspector" },
