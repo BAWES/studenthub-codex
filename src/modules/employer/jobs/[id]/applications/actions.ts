@@ -6,11 +6,22 @@ import {
   listJobApplicationsSchema,
   listJobApplicationsByEmployerSchema,
   updateApplicationStatusSchema,
+  jobApplicationListOutputSchema,
+  jobApplicationListByEmployerOutputSchema,
+  updateApplicationStatusOutputSchema,
   type ListJobApplicationsInput,
   type ListJobApplicationsByEmployerInput,
   type UpdateApplicationStatusInput,
   type JobApplicationRow,
 } from "./schemas";
+
+// ---------------------------------------------------------------------------
+// Output validation helper
+// ---------------------------------------------------------------------------
+
+function logOutputError(source: string, error: unknown): void {
+  console.error(`[modules/employer/jobs/[id]/applications] ${source} output validation failed:`, error);
+}
 
 /**
  * List applications for a specific job listing.
@@ -50,8 +61,8 @@ export async function listJobApplications(
     prisma.job_listing_application.count({ where: where as any }),
   ]);
 
-  return {
-    success: true,
+  const result = {
+    success: true as const,
     applications: applications.map((app) => ({
       applicationId: app.id,
       candidateId: app.candidateId,
@@ -63,6 +74,14 @@ export async function listJobApplications(
     })),
     total,
   };
+
+  // Validate output shape
+  const validated = jobApplicationListOutputSchema.safeParse(result);
+  if (!validated.success) {
+    logOutputError("listJobApplications", validated.error.issues);
+  }
+
+  return result;
 }
 
 /**
@@ -110,8 +129,8 @@ export async function listJobApplicationsByEmployer(
     prisma.job_listing_application.count({ where: where as any }),
   ]);
 
-  return {
-    success: true,
+  const result = {
+    success: true as const,
     applications: applications.map((app) => ({
       applicationId: app.id,
       candidateId: app.candidateId,
@@ -124,6 +143,14 @@ export async function listJobApplicationsByEmployer(
     })),
     total,
   };
+
+  // Validate output shape
+  const validated = jobApplicationListByEmployerOutputSchema.safeParse(result);
+  if (!validated.success) {
+    logOutputError("listJobApplicationsByEmployer", validated.error.issues);
+  }
+
+  return result;
 }
 
 /**
@@ -144,5 +171,13 @@ export async function updateApplicationStatus(
     data: { status: parsed.data.status },
   });
 
-  return { success: true };
+  const result = { success: true as const };
+
+  // Validate output shape
+  const validated = updateApplicationStatusOutputSchema.safeParse(result);
+  if (!validated.success) {
+    logOutputError("updateApplicationStatus", validated.error.issues);
+  }
+
+  return result;
 }
