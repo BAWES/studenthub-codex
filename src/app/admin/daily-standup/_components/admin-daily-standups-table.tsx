@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { DataTable } from "@/modules/workspace/DataTable";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
+import type { Route } from "next";
 
 import type { SessionUser } from "@/modules/auth/types";
 import type { DailyStandupAnswerItem } from "../schemas";
@@ -28,14 +29,14 @@ export function AdminDailyStandupsTable({ session, answers }: Props) {
         title="Daily Standup Answers"
         description="All staff standup check-in answers."
         rows={answers.map((a) => ({ ...a, id: a.answer_uuid }))}
-        rowHref={(row) => `/admin/daily-standup/${row.id}`}
+        rowHref={"row": RowType any }) => `/admin/daily-standup/${row.id}` as Route}
         columns={[
           {
             key: "question",
             label: "Question",
             render: (row) => (
               <span className="text-sm text-foreground">
-                {row.question ?? "—"}
+                {row.question ?? " }
               </span>
             ),
           },
@@ -44,7 +45,7 @@ export function AdminDailyStandupsTable({ session, answers }: Props) {
             label: "Answer",
             render: (row) => (
               <span className="text-sm max-w-[300px] truncate block text-foreground">
-                {row.answer ?? "—"}
+                {row.answer ?? " }
               </span>
             ),
           },
@@ -53,7 +54,7 @@ export function AdminDailyStandupsTable({ session, answers }: Props) {
             label: "Staff ID",
             render: (row) => (
               <span className="text-sm text-muted-foreground">
-                {row.staff_id ?? "—"}
+                {row.staff_id ?? " }
               </span>
             ),
           },
@@ -62,7 +63,7 @@ export function AdminDailyStandupsTable({ session, answers }: Props) {
             label: "Updated",
             render: (row) => (
               <span className="text-sm text-muted-foreground">
-                {row.updated_at ? new Date(row.updated_at).toLocaleDateString() : "—"}
+                {row.updated_at ? new Date(row.updated_at).toLocaleDateString() : " }
               </span>
             ),
           },
