@@ -5,6 +5,7 @@ import { Check, X, Minus, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const SH_BLUE = "#1f73b7";
+const SH_CORAL = "#eb6651";
 
 // ── Types ────────────────────────────────────────────────
 
