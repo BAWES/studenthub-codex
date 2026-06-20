@@ -198,6 +198,182 @@ describe("listWebhooksResultSchema", () => {
   });
 });
 
+// ---------------------------------------------------------------------------
+// CRUD input schemas (mirrors admin/webhook schemas)
+// ---------------------------------------------------------------------------
+
+const webhookMethodEnum = z.enum(["GET", "POST", "PUT", "PATCH", "DELETE"]);
+
+const createWebhookSchema = z.object({
+  event: z.string().min(1, "Event is required").max(50),
+  endpoint: z.string().min(1, "Endpoint is required").max(255),
+  method: webhookMethodEnum.optional(),
+});
+
+const updateWebhookSchema = z.object({
+  webhookId: z.coerce.number().int().positive("Webhook ID is required"),
+  event: z.string().min(1, "Event is required").max(50),
+  endpoint: z.string().min(1, "Endpoint is required").max(255),
+  method: webhookMethodEnum.optional(),
+});
+
+const deleteWebhookSchema = z.object({
+  webhookId: z.coerce.number().int().positive("Webhook ID is required"),
+});
+
+const webhookActionResponseSchema = z.object({
+  operation: z.string().min(1),
+  message: z.string().min(1),
+});
+
+describe("createWebhookSchema", () => {
+  it("accepts valid create params with method", () => {
+    const result = createWebhookSchema.safeParse({
+      event: "issue.created",
+      endpoint: "https://hooks.example.com/callback",
+      method: "POST",
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.event).toBe("issue.created");
+      expect(result.data.endpoint).toBe("https://hooks.example.com/callback");
+      expect(result.data.method).toBe("POST");
+    }
+  });
+
+  it("accepts valid create params without method", () => {
+    const result = createWebhookSchema.safeParse({
+      event: "issue.created",
+      endpoint: "https://hooks.example.com/callback",
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.method).toBeUndefined();
+    }
+  });
+
+  it("rejects empty event", () => {
+    const result = createWebhookSchema.safeParse({
+      event: "",
+      endpoint: "https://hooks.example.com/callback",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects empty endpoint", () => {
+    const result = createWebhookSchema.safeParse({
+      event: "issue.created",
+      endpoint: "",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects invalid method", () => {
+    const result = createWebhookSchema.safeParse({
+      event: "issue.created",
+      endpoint: "https://hooks.example.com/callback",
+      method: "INVALID",
+    });
+    expect(result.success).toBe(false);
+  });
+});
+
+describe("updateWebhookSchema", () => {
+  it("accepts valid update params", () => {
+    const result = updateWebhookSchema.safeParse({
+      webhookId: 42,
+      event: "user.created",
+      endpoint: "https://hooks.example.com/user",
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.webhookId).toBe(42);
+    }
+  });
+
+  it("coerces string webhookId", () => {
+    const result = updateWebhookSchema.safeParse({
+      webhookId: "7",
+      event: "test.event",
+      endpoint: "https://example.com/hook",
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.webhookId).toBe(7);
+    }
+  });
+
+  it("rejects zero webhookId", () => {
+    const result = updateWebhookSchema.safeParse({
+      webhookId: 0,
+      event: "test.event",
+      endpoint: "https://example.com/hook",
+    });
+    expect(result.success).toBe(false);
+  });
+});
+
+describe("deleteWebhookSchema", () => {
+  it("accepts valid webhook ID", () => {
+    const result = deleteWebhookSchema.safeParse({ webhookId: 42 });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.webhookId).toBe(42);
+    }
+  });
+
+  it("coerces string webhookId", () => {
+    const result = deleteWebhookSchema.safeParse({ webhookId: "7" });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.webhookId).toBe(7);
+    }
+  });
+
+  it("rejects zero webhookId", () => {
+    const result = deleteWebhookSchema.safeParse({ webhookId: 0 });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects missing webhookId", () => {
+    const result = deleteWebhookSchema.safeParse({});
+    expect(result.success).toBe(false);
+  });
+});
+
+describe("webhookActionResponseSchema", () => {
+  it("accepts success response", () => {
+    const result = webhookActionResponseSchema.safeParse({
+      operation: "success",
+      message: "Webhook created",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts error response", () => {
+    const result = webhookActionResponseSchema.safeParse({
+      operation: "error",
+      message: "Something went wrong",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects missing operation", () => {
+    const result = webhookActionResponseSchema.safeParse({
+      message: "Something went wrong",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects empty message", () => {
+    const result = webhookActionResponseSchema.safeParse({
+      operation: "success",
+      message: "",
+    });
+    expect(result.success).toBe(false);
+  });
+});
+
 describe("webhookGetResultSchema", () => {
   it("accepts a valid webhook item", () => {
     const result = webhookGetResultSchema.safeParse({
