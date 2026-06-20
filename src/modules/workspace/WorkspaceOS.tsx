@@ -6,11 +6,21 @@ import type { Route } from "next";
 import type { SessionUser } from "@/modules/auth/types";
 import { logoutAction } from "@/modules/auth/actions";
 import { ThemeToggle } from "@/modules/theme/ThemeToggle";
+import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { WorkspaceOSContext } from "./WorkspaceOSContext";
 import { WorkspaceMobileNavigation, WorkspaceNavigation } from "./WorkspaceNavigation";
 import { navForRole } from "./navigation";
 import type { NavItem } from "./navigation";
+import {
+  CommandDialog,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandShortcut,
+} from "@/components/ui/command";
 
 // ── Command types ─────────────────────────────────────────────
 
@@ -129,35 +139,14 @@ export function WorkspaceOS({
 
   // ── Command palette state ────────────────────────────────────
   const [cmdOpen, setCmdOpen] = useState(false);
-  const [cmdQuery, setCmdQuery] = useState("");
-  const [cmdIndex, setCmdIndex] = useState(0);
   const cmdInputRef = useRef<HTMLInputElement | null>(null);
   const seqRef = useRef("");
 
   const commands = useMemo(() => buildOSCommands(navItems, session.role), [navItems, session.role]);
 
-  const filtered = useMemo(() => {
-    const q = cmdQuery.trim().toLowerCase();
-    if (!q) return commands.slice(0, 18);
-    return commands
-      .filter((c) =>
-        [c.title, c.subtitle, c.section, c.shortcut].filter(Boolean).join(" ").toLowerCase().includes(q)
-      )
-      .slice(0, 18);
-  }, [commands, cmdQuery]);
-
-  const grouped = useMemo(() => {
-    const g = new Map<string, OSCommand[]>();
-    for (const c of filtered) {
-      g.set(c.section, [...(g.get(c.section) ?? []), c]);
-    }
-    return [...g.entries()];
-  }, [filtered]);
-
   const visit = useCallback(
     (href: string) => {
       setCmdOpen(false);
-      setCmdQuery("");
       router.push(href as Route);
     },
     [router]
@@ -173,17 +162,12 @@ export function WorkspaceOS({
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
         setCmdOpen(true);
-        setCmdIndex(0);
-        setCmdQuery("");
         window.setTimeout(() => cmdInputRef.current?.focus(), 0);
         return;
       }
       if (!typing && e.key === "?") {
         e.preventDefault();
         setCmdOpen(true);
-        setCmdIndex(0);
-        setCmdQuery("shortcut");
-        window.setTimeout(() => cmdInputRef.current?.focus(), 0);
         return;
       }
 
@@ -215,32 +199,7 @@ export function WorkspaceOS({
         return;
       }
 
-      // Command palette open → arrow keys / enter / esc
-      if (cmdOpen) {
-        if (e.key === "Escape") {
-          e.preventDefault();
-          setCmdOpen(false);
-          setCmdQuery("");
-          return;
-        }
-        if (e.key === "ArrowDown") {
-          e.preventDefault();
-          setCmdIndex((i) => Math.min(i + 1, filtered.length - 1));
-          return;
-        }
-        if (e.key === "ArrowUp") {
-          e.preventDefault();
-          setCmdIndex((i) => Math.max(i - 1, 0));
-          return;
-        }
-        if (e.key === "Enter" && filtered[cmdIndex]) {
-          e.preventDefault();
-          visit(filtered[cmdIndex].href);
-          return;
-        }
-      }
-
-      // j/k navigation on rows (when not in input)
+      // j/k navigation on rows (when not in input or command palette)
       if (!typing && !cmdOpen && (e.key === "j" || e.key === "k")) {
         const rows = document.querySelectorAll("[data-os-navigable]");
         if (!rows.length) return;
@@ -259,36 +218,39 @@ export function WorkspaceOS({
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [cmdOpen, cmdIndex, filtered, commands, visit]);
-
-  // Reset active index when query changes
-  useEffect(() => { setCmdIndex(0); }, [cmdQuery]);
+  }, [cmdOpen, commands, visit]);
 
   const chords = useMemo(() => roleChords(session.role), [session.role]);
 
   return (
     <WorkspaceOSContext.Provider value={{ embedded: true, session }}>
-      <main className="shell">
+      <main className="min-h-svh grid grid-cols-[236px_minmax(0,1fr)] bg-background">
         {/* ── Sidebar Rail ─────────────────────────────────── */}
-        <aside className="workspaceRail">
-          <Link className="workspaceMark" href="/app" aria-label="StudentHub app">
-            <span>SH</span>
+        <aside className="sticky top-0 h-screen grid grid-rows-[auto_1fr_auto] justify-items-center gap-3 border-r border-border bg-card p-3">
+          <Link
+            className="w-full min-h-12 flex items-center gap-2.5 px-3 border border-border rounded-lg bg-foreground text-card-foreground no-underline transition-opacity hover:opacity-90 font-black text-sm"
+            href="/app"
+            aria-label="StudentHub app"
+          >
+            <span className="w-[30px] h-[30px] inline-flex items-center justify-center rounded-[7px] bg-white/14">SH</span>
             <strong>StudentHub</strong>
           </Link>
           <WorkspaceNavigation items={navItems} role={session.role} />
-          <div className="workspaceRailFooter">
-            <button className="commandLauncher" type="button" onClick={() => { setCmdOpen(true); }}>
+          <div className="w-full grid gap-2">
+            <Button variant="outline" size="sm" className="w-full justify-between font-black" type="button" onClick={() => { setCmdOpen(true); }}>
               <span>⌘K</span>
-            </button>
+            </Button>
             <ThemeToggle />
-            <form className="workspaceSignout" action={logoutAction}>
-              <button type="submit">Sign out</button>
+            <form action={logoutAction}>
+              <Button variant="outline" size="sm" type="submit" className="w-full font-black">
+                Sign out
+              </Button>
             </form>
           </div>
         </aside>
 
         {/* ── Content Stage ───────────────────────────────── */}
-        <section className="workspaceStage">
+        <section className="min-w-0 overflow-x-hidden grid content-start gap-3.5 p-3.5">
           {children}
         </section>
 
@@ -296,65 +258,51 @@ export function WorkspaceOS({
         <WorkspaceMobileNavigation items={navItems} role={session.role} />
       </main>
 
-      {/* ── Command Palette Overlay ───────────────────────── */}
-      {cmdOpen ? (
-        <div className="commandOverlay" role="dialog" aria-modal="true" aria-label="Command menu">
-          <button className="commandScrim" aria-label="Close" type="button" onClick={() => setCmdOpen(false)} />
-          <section className="commandMenu">
-            <div className="commandInputWrap">
-              <span>⌘</span>
-              <input
-                ref={cmdInputRef}
-                autoFocus
-                placeholder="Jump to a view, search records, or run an action..."
-                value={cmdQuery}
-                onChange={(e) => setCmdQuery(e.target.value)}
-              />
-              <kbd>Esc</kbd>
-            </div>
-            <div className="commandList">
-              {grouped.length ? (
-                grouped.map(([section, items]) => (
-                  <div className="commandGroup" key={section}>
-                    <h3>{section}</h3>
-                    {items.map((cmd) => {
-                      const idx = filtered.findIndex((f) => f.id === cmd.id);
-                      return (
-                        <button
-                          className={idx === cmdIndex ? "active" : ""}
-                          key={cmd.id}
-                          type="button"
-                          onMouseEnter={() => setCmdIndex(idx)}
-                          onClick={() => visit(cmd.href)}
-                        >
-                          <span>
-                            <strong>{cmd.title}</strong>
-                            <small>{cmd.subtitle}</small>
-                          </span>
-                          {cmd.shortcut ? <kbd>{cmd.shortcut}</kbd> : null}
-                        </button>
-                      );
-                    })}
-                  </div>
-                ))
-              ) : (
-                <div className="commandEmpty">
-                  <strong>No command found</strong>
-                  <span>Try a view, record name, scope, or shortcut.</span>
-                </div>
-              )}
-            </div>
-            <div className="shortcutGrid">
+      {/* ── shadcn Command Dialog ─────────────────────────── */}
+      <CommandDialog open={cmdOpen} onOpenChange={(open) => { if (!open) setCmdOpen(false); }}>
+        <CommandInput
+          ref={cmdInputRef}
+          placeholder="Jump to a view, search records, or run an action..."
+        />
+        <CommandList>
+          {chords.length > 0 && (
+            <CommandGroup heading="Keyboard Shortcuts">
               {chords.map((row) => (
-                <div key={row.keys}>
-                  <kbd>{row.keys}</kbd>
+                <CommandItem
+                  key={row.keys}
+                  onSelect={() => {
+                    // Chord hints are informational, not navigable directly
+                  }}
+                >
                   <span>{row.label}</span>
-                </div>
+                  <CommandShortcut>{row.keys}</CommandShortcut>
+                </CommandItem>
               ))}
-            </div>
-          </section>
-        </div>
-      ) : null}
+            </CommandGroup>
+          )}
+          {["Navigation", "Quick Scopes"].map((section) => {
+            const items = commands.filter((c) => c.section === section);
+            if (!items.length) return null;
+            return (
+              <CommandGroup key={section} heading={section}>
+                {items.map((cmd) => (
+                  <CommandItem
+                    key={cmd.id}
+                    onSelect={() => visit(cmd.href)}
+                  >
+                    <span>{cmd.title}</span>
+                    {cmd.shortcut && <CommandShortcut>{cmd.shortcut}</CommandShortcut>}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            );
+          })}
+          <CommandEmpty>
+            <strong>No command found</strong>
+            <span>Try a view, record name, scope, or shortcut.</span>
+          </CommandEmpty>
+        </CommandList>
+      </CommandDialog>
     </WorkspaceOSContext.Provider>
   );
 }
