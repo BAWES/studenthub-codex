@@ -1,5 +1,7 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+
 export default function Error({
   error,
   reset,
@@ -17,12 +19,7 @@ export default function Error({
         {error.message ?? "An unexpected error occurred while loading the Employer Dashboard page."}
       </p>
       {error.digest ? <small className="text-muted-foreground">Error ID: {error.digest}</small> : null}
-      <button
-        onClick={reset}
-        className="mt-2 h-10 rounded-lg px-4 text-sm font-semibold bg-coral text-white hover:bg-coral-hover transition-colors"
-      >
-        Try again
-      </button>
+      <Button onClick={reset} variant="default" className="bg-[#eb6651] hover:bg-[#d45441] text-white mt-2" >Try again</Button>
     </div>
   );
 }
