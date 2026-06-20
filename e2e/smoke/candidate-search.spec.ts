@@ -52,7 +52,8 @@ test.describe("Candidate search", () => {
         .locator(
           'input[type="search"], input[placeholder*="Search"], input[placeholder*="search"]',
         )
-        .or(page.locator("[cmdk-input]")),
+        .or(page.locator("[cmdk-input]"))
+        .first(),
     ).toBeVisible({ timeout: 15000 });
     await context.close();
   });
