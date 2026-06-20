@@ -32,8 +32,8 @@ export function AdminNotesPage({ session, notes, total }: Props) {
         { label: "Total notes", value: total, note: "Notes in the system" },
       ]}
     >
-      <Card className="mb-6">
-        <CardContent className="p-5">
+      <section className="mb-6">
+        <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
           <h3 className="text-sm font-semibold mb-3 text-foreground">Add note</h3>
           <CreateNoteForm onSuccess={() => router.refresh()} />
         </CardContent>
@@ -125,10 +125,9 @@ function CreateNoteForm({ onSuccess }: { onSuccess: () => void }) {
       className="flex flex-wrap items-end gap-3"
       onSubmit={() => setTimeout(() => { formRef.current?.reset(); }, 100)}
     >
-      <div className="grid gap-1.5">
-        <Label htmlFor="noteText">Note text</Label>
-        <Input
-          id="noteText"
+      <div className="grid gap-1">
+        <label className="text-xs font-medium text-muted-foreground">Note text</label>
+        <input
           name="noteText"
           required
           maxLength={2000}
@@ -136,33 +135,33 @@ function CreateNoteForm({ onSuccess }: { onSuccess: () => void }) {
           className="w-64"
         />
       </div>
-      <div className="grid gap-1.5">
-        <Label htmlFor="noteType">Type</Label>
-        <Input
-          id="noteType"
+      <div className="grid gap-1">
+        <label className="text-xs font-medium text-muted-foreground">Type</label>
+        <input
           name="noteType"
           maxLength={50}
           placeholder="e.g. general, feedback"
           className="w-36"
         />
       </div>
-      <div className="grid gap-1.5">
-        <Label htmlFor="companyId">Company ID</Label>
-        <Input
-          id="companyId"
+      <div className="grid gap-1">
+        <label className="text-xs font-medium text-muted-foreground">Company ID</label>
+        <input
           name="companyId"
           type="number"
           placeholder="Optional"
           className="w-24"
         />
       </div>
-      <Button type="submit" disabled={pending} variant="default">
+      <button
+        type="submit"
+        disabled={pending}
+        className="h-9 rounded-lg px-4 text-sm font-semibold bg-primary text-primary-foreground"
+      >
         {pending ? "Adding..." : "Add"}
       </Button>
       {state?.error ? (
-        <Alert variant="destructive" className="w-full">
-          <AlertDescription>{state.error}</AlertDescription>
-        </Alert>
+        <p className="text-xs w-full text-destructive">{state.error}</p>
       ) : null}
     </form>
   );
