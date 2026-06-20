@@ -1,5 +1,7 @@
 import type { Route } from "next";
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { requireRoleCapability } from "@/modules/auth/session";
 import { DataTable } from "@/modules/workspace/DataTable";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
@@ -24,31 +26,53 @@ export default async function AdminTransfersPage() {
         { label: "Next action", value: "Review", note: "Open a run before exporting PDFs or reconciling pay" }
       ]}
     >
-      <section className="financeStart" aria-label="Finance workflow">
-        <div className="financePrimary">
-          <span>Finance path</span>
-          <h2>Start with a transfer run. Everything else should hang off that.</h2>
-          <p>
+      {/* ── Finance Workflow ───────────────────────────────────── */}
+      <section
+        className="grid grid-cols-[minmax(0,0.9fr)_minmax(360px,1.1fr)] gap-3"
+        aria-label="Finance workflow"
+      >
+        {/* Primary card */}
+        <div className="rounded-lg border border-border bg-card p-[18px] grid content-start gap-2.5">
+          <span className="text-blue text-[11px] font-black uppercase tracking-wider">Finance path</span>
+          <h2 className="max-w-[620px] text-[26px] leading-[1.08] m-0 text-foreground">
+            Start with a transfer run. Everything else should hang off that.
+          </h2>
+          <p className="max-w-[640px] text-muted-foreground leading-relaxed m-0">
             A run is the place to inspect candidate payouts, employer charges, period dates, status, invoice context,
             and PDF exports. The table below is only the index.
           </p>
-          {latest ? <Link href={`/admin/transfers/${latest.id}` as Route}>Open latest run #{latest.id}</Link> : null}
+          {latest ? (
+            <Button variant="default" size="sm" className="w-fit" asChild>
+              <Link href={`/admin/transfers/${latest.id}` as Route}>
+                Open latest run #{latest.id}
+                <ArrowRight className="ml-1 size-3.5" />
+              </Link>
+            </Button>
+          ) : null}
         </div>
-        <div className="financeSteps">
+
+        {/* Steps grid (2x2) */}
+        <div className="rounded-lg border border-border bg-card grid grid-cols-2 overflow-hidden">
           {[
-            ["1", "Review run", "Check company, period, total, and status."],
-            ["2", "Check payouts", "Inspect candidate rows before payment."],
-            ["3", "Issue invoice", "Generate employer invoice PDF from the same source."],
-            ["4", "Reconcile", "Mark what is paid, exported, or needs correction."]
-          ].map(([step, title, note]) => (
-            <article key={step}>
-              <span>{step}</span>
-              <strong>{title}</strong>
-              <small>{note}</small>
+            { step: "1", title: "Review run", note: "Check company, period, total, and status." },
+            { step: "2", title: "Check payouts", note: "Inspect candidate rows before payment." },
+            { step: "3", title: "Issue invoice", note: "Generate employer invoice PDF from the same source." },
+            { step: "4", title: "Reconcile", note: "Mark what is paid, exported, or needs correction." }
+          ].map((item, i) => (
+            <article
+              key={item.step}
+              className={`grid content-center gap-1.5 p-3.5 min-h-[118px] ${
+                i % 2 === 0 ? "border-r border-[#e2e6ee]" : ""
+              } ${i < 2 ? "border-b border-[#e2e6ee]" : ""}`}
+            >
+              <span className="text-blue text-[11px] font-black uppercase tracking-wider">{item.step}</span>
+              <strong className="text-[#101828] text-[17px] font-bold">{item.title}</strong>
+              <small className="text-muted-foreground leading-relaxed">{item.note}</small>
             </article>
           ))}
         </div>
       </section>
+
       <DataTable
         title="Transfer Runs"
         description="Open a run to review candidate payouts, employer totals, invoices, and supporting PDF actions."
