@@ -6,7 +6,7 @@ import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { StatusBadge } from "@/modules/workspace/StatusBadge";
 import { genericStatusVariant } from "@/modules/workspace/status-mapping";
 import { APPLICATION_STATUS_LABELS } from "@/modules/status-labels";
-import Link from "next/link";
+import { AcceptRejectActions } from "./application-actions";
 
 export const dynamic = "force-dynamic";
 
@@ -17,9 +17,7 @@ type Props = {
 function DetailRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex items-start gap-4 py-3">
-      <dt
-        className="w-32 shrink-0 text-sm font-medium pt-0.5 text-muted-foreground"
-      >
+      <dt className="w-32 shrink-0 text-sm font-medium pt-0.5 text-muted-foreground">
         {label}
       </dt>
       <dd className="text-sm text-foreground">
@@ -84,12 +82,7 @@ export default async function EmployerApplicationDetailPage({ params }: Props) {
             </code>
           </DetailRow>
           <DetailRow label="Job">
-            <Link
-              href={`/employer/jobs/${app.jobListingId}`}
-              className="font-medium hover:underline text-accent"
-            >
-              {app.jobTitle}
-            </Link>
+            <span className="text-accent font-medium">{app.jobTitle}</span>
           </DetailRow>
           <DetailRow label="Candidate">
             <span>{app.candidateName ?? <span className="text-muted-foreground">—</span>}</span>
@@ -125,60 +118,15 @@ export default async function EmployerApplicationDetailPage({ params }: Props) {
           </DetailSection>
         )}
 
-        <div className="space-y-4">
-          {/* Accept / Reject actions */}
-          {canAcceptReject && (
-            <div className="flex gap-3">
-              <form action={acceptApplication}>
-                <input type="hidden" name="applicationId" value={app.applicationId} />
-                <button
-                  type="submit"
-                  className="inline-flex items-center gap-2 h-10 rounded-lg px-5 text-sm font-semibold transition-colors bg-accent text-white"
-                >
-                  Accept Application
-                </button>
-              </form>
-              <form action={rejectApplication}>
-                <input type="hidden" name="applicationId" value={app.applicationId} />
-                <button
-                  type="submit"
-                  className="inline-flex items-center gap-2 h-10 rounded-lg px-5 text-sm font-semibold transition-colors bg-destructive text-white"
-                >
-                  Reject Application
-                </button>
-              </form>
-            </div>
-          )}
-
-          {/* Revert action for accepted/rejected applications */}
-          {canRevert && (
-            <form action={revertApplicationStatus}>
-              <input type="hidden" name="applicationId" value={app.applicationId} />
-              <button
-                type="submit"
-                className="inline-flex items-center gap-2 h-10 rounded-lg px-5 text-sm font-semibold transition-colors bg-card text-foreground"
-              >
-                Revert to Reviewing
-              </button>
-            </form>
-          )}
-
-          {/* Navigation links */}
-          <div className="flex gap-3 pt-2">
-            <Link
-              href="/employer/applications"
-              className="inline-flex items-center gap-2 h-10 rounded-lg px-4 text-sm font-semibold transition-colors bg-card text-foreground"
-            >
-              Back to Applications
-            </Link>
-            <Link
-              href={`/employer/jobs/${app.jobListingId}/applications`}
-              className="inline-flex items-center gap-2 h-10 rounded-lg px-4 text-sm font-semibold transition-colors bg-card text-foreground"
-            >
-              View Job Applications
-            </Link>
-          </div>
-        </div>
+        <AcceptRejectActions
+          applicationId={app.applicationId}
+          jobListingId={app.jobListingId}
+          canAcceptReject={canAcceptReject}
+          canRevert={canRevert}
+          acceptAction={acceptApplication}
+          rejectAction={rejectApplication}
+          revertAction={revertApplicationStatus}
+        />
       </div>
     </WorkspaceShell>
   );
