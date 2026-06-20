@@ -7,6 +7,8 @@ import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Card, CardContent } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 import type { SessionUser } from "@/modules/auth/types";
 import type { DiscountCategoryItem } from "../schemas";
@@ -30,12 +32,12 @@ export function AdminDiscountCategoriesTable({ session, categories }: Props) {
         { label: "Total categories", value: categories.length, note: "Discount categories in the system" },
       ]}
     >
-      <section className="mb-6">
-        <div className="rounded-lg border border-border bg-card p-5">
+      <Card className="mb-6">
+        <CardContent className="p-5">
           <h3 className="text-sm font-semibold mb-3 text-foreground">Add discount category</h3>
           <CreateDiscountCategoryForm onSuccess={() => router.refresh()} />
-        </div>
-      </section>
+        </CardContent>
+      </Card>
 
       <DataTable
         title="Discount Categories"
@@ -195,7 +197,9 @@ function CreateDiscountCategoryForm({ onSuccess }: { onSuccess: () => void }) {
         {pending ? "Adding..." : "Add"}
       </Button>
       {state?.error ? (
-        <p className="text-xs w-full text-destructive">{state.error}</p>
+        <Alert variant="destructive" className="w-full mt-2">
+          <AlertDescription>{state.error}</AlertDescription>
+        </Alert>
       ) : null}
     </form>
   );
@@ -253,7 +257,9 @@ function EditDiscountCategoryForm({
         Cancel
       </Button>
       {state?.error ? (
-        <p className="text-xs text-destructive">{state.error}</p>
+        <Alert variant="destructive" className="w-full mt-2">
+          <AlertDescription>{state.error}</AlertDescription>
+        </Alert>
       ) : null}
     </form>
   );
