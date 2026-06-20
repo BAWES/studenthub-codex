@@ -174,22 +174,21 @@
   color: var(--green);
 }
 
-
-
 .uiBadge_warning {
   background: color-mix(in srgb, var(--amber) 14%, transparent);
   color: var(--amber);
 }
 
-
+.uiBadge_destructive {
+  background: color-mix(in srgb, var(--destructive) 14%, transparent);
+  color: var(--destructive);
+}
 
 .uiBadge_outline {
   border-color: var(--border);
   background: color-mix(in srgb, var(--card) 68%, transparent);
   color: var(--muted-foreground);
 }
-
-
 
 .uiCard {
   border: 1px solid var(--border);
