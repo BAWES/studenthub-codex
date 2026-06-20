@@ -1,8 +1,16 @@
 "use client";
 
-import { useEffect, useCallback, type KeyboardEvent } from "react";
-import { X } from "lucide-react";
+import { useCallback } from "react";
+import {
+  Sheet,
+  SheetBody,
+  SheetClose,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 // ---------------------------------------------------------------------------
 // PaymentDetailDrawer
@@ -40,11 +48,11 @@ export type PaymentDetailDrawerProps = {
   onClose: () => void;
 };
 
-const STATUS_BADGE_VARIANTS_DRAWER: Record<string, "success" | "destructive" | "secondary"> = {
+const STATUS_BADGE_VARIANTS_DRAWER: Record<string, "success" | "warning" | "secondary"> = {
   AUTHORISED: "success",
   PAID: "success",
-  VOIDED: "destructive",
-  DELETED: "destructive",
+  VOIDED: "warning",
+  DELETED: "warning",
 };
 
 function formatAmount(value: number | null, currency?: string | null): string {
@@ -67,129 +75,117 @@ function DetailRow({ label, value }: { label: string; value: string }) {
 }
 
 export function PaymentDetailDrawer({ payment, lineItems, loading, open, onClose }: PaymentDetailDrawerProps) {
-  const handleKeyDown = useCallback((e: KeyboardEvent) => {
-    if (e.key === "Escape") onClose();
-  }, [onClose]);
-
-  useEffect(() => {
-    if (open) document.body.style.overflow = "hidden";
-    return () => { document.body.style.overflow = ""; };
-  }, [open]);
-
-  if (!open) return null;
+  const handleOpenChange = useCallback(
+    (open: boolean) => {
+      if (!open) onClose();
+    },
+    [onClose],
+  );
 
   return (
-    <>
-      <div className="fixed inset-0 z-40 transition-opacity duration-200 bg-black/40" onClick={onClose} aria-hidden="true" />
-      <div
-        className="fixed top-0 right-0 z-50 h-full w-full sm:w-[480px] transition-transform duration-300 ease-out"
-        style={{ transform: open ? "translateX(0)" : "translateX(100%)" }}
-        onKeyDown={handleKeyDown}
-        aria-modal="true"
-        role="dialog"
-        aria-label="Payment detail"
-      >
-        <div className="h-full overflow-y-auto p-6 rounded-none bg-white border-l border-border">
-          <div className="flex items-start justify-between mb-6">
-            <div>
-              <h2 className="text-xl font-bold text-foreground">
-                {loading ? "Loading..." : payment?.reference ?? "No Reference"}
-              </h2>
-            </div>
-            <button onClick={onClose} className="p-2 rounded-lg hover:bg-white/10" aria-label="Close payment detail">
-              <X size={20} className="text-muted-foreground" aria-hidden="true" />
-            </button>
-          </div>
+    <Sheet open={open} onOpenChange={handleOpenChange}>
+      <SheetContent side="right" className="w-full sm:w-[480px] p-0">
+        <div className="h-full overflow-y-auto p-6">
+          <SheetHeader className="flex items-start justify-between mb-6">
+            <SheetTitle className="text-xl font-bold text-foreground">
+              {loading ? "Loading..." : payment?.reference ?? "No Reference"}
+            </SheetTitle>
+            <SheetClose className="p-2 rounded-lg hover:bg-white/10" aria-label="Close payment detail" />
+          </SheetHeader>
 
-          {loading ? (
-            <div className="space-y-6" aria-hidden="true">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="h-6 rounded bg-white/5 animate-pulse" />
-              ))}
-            </div>
-          ) : !payment ? (
-            <div className="flex flex-col items-center justify-center h-full gap-4 text-center">
-              <span className="text-4xl">🔍</span>
-              <p className="text-lg font-semibold text-foreground">Payment not found</p>
-              <button onClick={onClose} className="h-10 rounded-lg px-4 text-sm font-semibold bg-primary text-primary-foreground">
-                Close
-              </button>
-            </div>
-          ) : (
-            <div className="space-y-6">
-              <Badge
-                variant={STATUS_BADGE_VARIANTS_DRAWER[payment.status ?? ""] ?? "secondary"}
-                aria-label={`Status: ${payment.status ?? "Unknown"}`}
-              >
-                {payment.status ?? "Unknown"}
-              </Badge>
-
-              {payment.contact && (
-                <div className="rounded-lg border-border bg-white p-4">
-                  <p className="text-[11px] font-bold uppercase tracking-wider mb-2 text-muted-foreground">Contact</p>
-                  <p className="text-sm font-medium text-foreground">{payment.contact.name ?? "Unknown"}</p>
-                  <p className="text-xs text-muted-foreground">ID: {payment.contact.contact_id}</p>
-                </div>
-              )}
-
-              <div className="rounded-lg border-border bg-white p-4 space-y-1">
-                <p className="text-[11px] font-bold uppercase tracking-wider mb-2 text-muted-foreground">Financial Summary</p>
-                <DetailRow label="Total" value={formatAmount(payment.total, payment.currency_code)} />
-                <DetailRow label="Sub-total" value={formatAmount(payment.sub_total, payment.currency_code)} />
-                <DetailRow label="Tax" value={formatAmount(payment.total_tax, payment.currency_code)} />
-                {payment.currency_rate != null && <DetailRow label="Currency Rate" value={String(payment.currency_rate)} />}
+          <SheetBody>
+            {loading ? (
+              <div className="space-y-6" aria-hidden="true">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="h-6 rounded bg-white/5 animate-pulse" />
+                ))}
               </div>
-
-              <div className="rounded-lg border-border bg-white p-4 space-y-1">
-                <p className="text-[11px] font-bold uppercase tracking-wider mb-2 text-muted-foreground">Details</p>
-                <DetailRow label="Type" value={payment.type ?? "—"} />
-                <DetailRow label="Date" value={formatDate(payment.date)} />
-                <DetailRow label="Created" value={formatDate(payment.created_at)} />
-                <DetailRow label="Updated" value={formatDate(payment.updated_at)} />
-                {payment.line_amount_types && <DetailRow label="Line Amount Type" value={payment.line_amount_types} />}
-                <DetailRow label="Attachments" value={payment.has_attachments ? "Yes" : "No"} />
-                <DetailRow label="Reconciled" value={payment.is_reconciled ? "Yes" : "No"} />
-              </div>
-
-              {lineItems.length > 0 && (
-                <div className="rounded-lg border-border bg-white p-4">
-                  <p className="text-[11px] font-bold uppercase tracking-wider mb-2 text-muted-foreground">Line Items</p>
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
-                      <thead>
-                        <tr className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
-                          <th className="text-left py-1 pr-2">Code</th>
-                          <th className="text-left py-1 pr-2">Description</th>
-                          <th className="text-right py-1 pr-2">Qty</th>
-                          <th className="text-right py-1 pr-2">Unit</th>
-                          <th className="text-right py-1">Amount</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {lineItems.map((li) => (
-                          <tr key={li.line_item_id} className="border-t border-border/5">
-                            <td className="py-1.5 pr-2 font-mono text-xs text-muted-foreground">{li.account_code ?? "—"}</td>
-                            <td className="py-1.5 pr-2 text-foreground">{li.description ?? "—"}</td>
-                            <td className="py-1.5 pr-2 text-right text-foreground">{li.quantity ?? "—"}</td>
-                            <td className="py-1.5 pr-2 text-right text-foreground">{li.unit_amount != null ? formatAmount(li.unit_amount) : "—"}</td>
-                            <td className="py-1.5 text-right font-medium text-foreground">{li.line_amount != null ? formatAmount(li.line_amount) : "—"}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              )}
-
-              <div className="flex justify-end pt-2">
-                <button onClick={onClose} className="h-10 rounded-lg px-4 text-sm font-semibold bg-transparent border-border text-muted-foreground">
+            ) : !payment ? (
+              <div className="flex flex-col items-center justify-center h-full gap-4 text-center">
+                <span className="text-4xl">🔍</span>
+                <p className="text-lg font-semibold text-foreground">Payment not found</p>
+                <Button onClick={onClose} variant="default" size="sm">
                   Close
-                </button>
+                </Button>
               </div>
-            </div>
-          )}
+            ) : (
+              <div className="space-y-6">
+                <Badge
+                  variant={STATUS_BADGE_VARIANTS_DRAWER[payment.status ?? ""] ?? "secondary"}
+                  aria-label={`Status: ${payment.status ?? "Unknown"}`}
+                >
+                  {payment.status ?? "Unknown"}
+                </Badge>
+
+                {payment.contact && (
+                  <div className="rounded-lg border border-border bg-white p-4">
+                    <p className="text-[11px] font-bold uppercase tracking-wider mb-2 text-muted-foreground">Contact</p>
+                    <p className="text-sm font-medium text-foreground">{payment.contact.name ?? "Unknown"}</p>
+                    <p className="text-xs text-muted-foreground">ID: {payment.contact.contact_id}</p>
+                  </div>
+                )}
+
+                <div className="rounded-lg border border-border bg-white p-4 space-y-1">
+                  <p className="text-[11px] font-bold uppercase tracking-wider mb-2 text-muted-foreground">Financial Summary</p>
+                  <DetailRow label="Total" value={formatAmount(payment.total, payment.currency_code)} />
+                  <DetailRow label="Sub-total" value={formatAmount(payment.sub_total, payment.currency_code)} />
+                  <DetailRow label="Tax" value={formatAmount(payment.total_tax, payment.currency_code)} />
+                  {payment.currency_rate != null && <DetailRow label="Currency Rate" value={String(payment.currency_rate)} />}
+                </div>
+
+                <div className="rounded-lg border border-border bg-white p-4 space-y-1">
+                  <p className="text-[11px] font-bold uppercase tracking-wider mb-2 text-muted-foreground">Details</p>
+                  <DetailRow label="Type" value={payment.type ?? "—"} />
+                  <DetailRow label="Date" value={formatDate(payment.date)} />
+                  <DetailRow label="Created" value={formatDate(payment.created_at)} />
+                  <DetailRow label="Updated" value={formatDate(payment.updated_at)} />
+                  {payment.line_amount_types && <DetailRow label="Line Amount Type" value={payment.line_amount_types} />}
+                  <DetailRow label="Attachments" value={payment.has_attachments ? "Yes" : "No"} />
+                  <DetailRow label="Reconciled" value={payment.is_reconciled ? "Yes" : "No"} />
+                </div>
+
+                {lineItems.length > 0 && (
+                  <div className="rounded-lg border border-border bg-white p-4">
+                    <p className="text-[11px] font-bold uppercase tracking-wider mb-2 text-muted-foreground">Line Items</p>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                            <th className="text-left py-1 pr-2">Code</th>
+                            <th className="text-left py-1 pr-2">Description</th>
+                            <th className="text-right py-1 pr-2">Qty</th>
+                            <th className="text-right py-1 pr-2">Unit</th>
+                            <th className="text-right py-1">Amount</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {lineItems.map((li) => (
+                            <tr key={li.line_item_id} className="border-t border-border/5">
+                              <td className="py-1.5 pr-2 font-mono text-xs text-muted-foreground">{li.account_code ?? "—"}</td>
+                              <td className="py-1.5 pr-2 text-foreground">{li.description ?? "—"}</td>
+                              <td className="py-1.5 pr-2 text-right text-foreground">{li.quantity ?? "—"}</td>
+                              <td className="py-1.5 pr-2 text-right text-foreground">{li.unit_amount != null ? formatAmount(li.unit_amount) : "—"}</td>
+                              <td className="py-1.5 text-right font-medium text-foreground">{li.line_amount != null ? formatAmount(li.line_amount) : "—"}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex justify-end pt-2">
+                  <SheetClose asChild>
+                    <Button variant="outline" size="sm">
+                      Close
+                    </Button>
+                  </SheetClose>
+                </div>
+              </div>
+            )}
+          </SheetBody>
         </div>
-      </div>
-    </>
+      </SheetContent>
+    </Sheet>
   );
 }
