@@ -33,7 +33,7 @@ describe("FeatureGrid", () => {
 
   it("renders company features when persona is company", () => {
     render(<FeatureGrid persona="company" />);
-    expect(screen.getAllByText("AI-matched candidates").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Staff-matched candidates").length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText("Hiring infrastructure that actually works.").length).toBeGreaterThanOrEqual(1);
   });
 
