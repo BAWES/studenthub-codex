@@ -1,6 +1,6 @@
 /* ==========================================================================
    StudentHub OS — Workspace Shell
-   Glass-morphism sidebar, topbar, metric cards, mobile tab bar.
+   Slack-inspired sidebar, coral accents, clean white cards.
    "An operating system that happens to be a web app."
    ========================================================================== */
 
@@ -33,12 +33,10 @@
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
   align-content: start;
-  gap: 6px;
+  gap: 4px;
   padding: 8px 6px;
-  background: var(--sh-glass-bg);
-  backdrop-filter: blur(var(--sh-glass-blur));
-  -webkit-backdrop-filter: blur(var(--sh-glass-blur));
-  border-right: 1px solid var(--sh-glass-border);
+  background: var(--surface);
+  border-right: 1px solid var(--line);
   overflow: hidden;
   z-index: 30;
   transition:
@@ -47,7 +45,7 @@
 }
 
 .workspaceRail:hover {
-  border-right-color: var(--sh-glass-border-strong);
+  border-right-color: color-mix(in srgb, var(--sh-coral) 30%, var(--line));
 }
 
 /* ── Brand Mark ──────────────────────────────────────────────────────── */
@@ -58,7 +56,7 @@
   align-items: center;
   justify-content: center;
   gap: 0;
-  border: 1px solid var(--sh-glass-border);
+  border: 1px solid var(--line);
   border-radius: var(--sh-radius-md);
   background: var(--ink);
   color: var(--paper);
@@ -86,8 +84,10 @@
   align-items: center;
   justify-content: center;
   border-radius: 6px;
-  background: rgba(255, 255, 255, 0.14);
-  font-size: 12px;
+  background: var(--sh-coral);
+  color: white;
+  font-size: 11px;
+  line-height: 1;
   font-weight: var(--weight-bold);
   flex-shrink: 0;
 }
@@ -147,8 +147,7 @@
   width: 3px;
   height: 0;
   border-radius: 0 2px 2px 0;
-  background: var(--sh-info);
-  box-shadow: var(--sh-glow-sm);
+  background: var(--sh-coral);
   transition:
     height 200ms var(--sh-easing),
     opacity 200ms var(--sh-easing);
@@ -163,7 +162,7 @@
 .workspaceMark {
   justify-content: center;
   gap: 0;
-  border: 1px solid var(--sh-glass-border);
+  border: 1px solid var(--line);
   border-radius: var(--sh-radius-md);
   background: var(--ink);
   color: var(--paper);
@@ -254,8 +253,7 @@
   width: 3px;
   height: 0;
   border-radius: 0 2px 2px 0;
-  background: var(--sh-info);
-  box-shadow: var(--sh-glow-sm);
+  background: var(--sh-coral);
   transition:
     height 200ms var(--sh-easing),
     opacity 200ms var(--sh-easing);
@@ -268,13 +266,13 @@
 }
 
 .workspaceRailNav a:hover {
-  background: var(--sh-glass-bg);
+  background: var(--sh-coral-light);
   color: var(--ink);
 }
 
 .workspaceRailNav a.active {
-  background: var(--sh-info-bg);
-  color: var(--sh-info);
+  background: var(--sh-coral-light);
+  color: var(--sh-coral);
 }
 
 .workspaceRailNav a svg {
@@ -298,7 +296,7 @@
 .workspaceRailDivider {
   height: 1px;
   margin: 2px 10px;
-  background: var(--sh-glass-border);
+  background: var(--line);
   transition:
     margin 300ms var(--sh-easing),
     opacity 200ms var(--sh-easing);
@@ -324,7 +322,7 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  border: 1px solid var(--sh-glass-border);
+  border: 1px solid var(--line);
   border-radius: var(--sh-radius-sm);
   background: transparent;
   color: var(--muted);
@@ -348,9 +346,9 @@
 }
 
 .workspaceRailFooter button:hover {
-  background: var(--sh-glass-bg-strong);
-  border-color: var(--sh-glass-border-strong);
-  color: var(--ink);
+  background: var(--sh-coral-light);
+  border-color: color-mix(in srgb, var(--sh-coral) 30%, var(--line));
+  color: var(--sh-coral);
 }
 
 /* Sign-out button icon + text — matches nav item pattern */
@@ -385,7 +383,7 @@
   gap: 0;
   min-height: 36px;
   padding: 2px 4px 0;
-  border-bottom: 1px solid var(--sh-glass-border);
+  border-bottom: 1px solid var(--line);
   overflow-x: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -420,7 +418,7 @@
 }
 
 .workspaceTab:hover {
-  background: var(--sh-glass-bg);
+  background: var(--sh-coral-light);
   color: var(--ink);
 }
 
@@ -567,8 +565,7 @@
   right: 8px;
   height: 2px;
   border-radius: 1px 1px 0 0;
-  background: var(--sh-info);
-  box-shadow: var(--sh-glow-sm);
+  background: var(--sh-coral);
 }
 
 /* ── "+" tab creation button ────────────────────────────────────── */
@@ -601,7 +598,7 @@
 
 .workspaceTabAdd:hover,
 .workspaceTabAdd.active {
-  background: var(--sh-glass-bg);
+  background: var(--sh-coral-light);
   color: var(--ink);
 }
 
@@ -614,10 +611,8 @@
   z-index: 50;
   min-width: 180px;
   padding: 4px;
-  background: var(--sh-glass-bg-strong);
-  backdrop-filter: blur(var(--sh-glass-blur));
-  -webkit-backdrop-filter: blur(var(--sh-glass-blur));
-  border: 1px solid var(--sh-glass-border);
+  background: var(--surface);
+  border: 1px solid var(--line);
   border-radius: var(--sh-radius-md);
   box-shadow: var(--sh-shadow-lg, 0 8px 24px rgba(0, 0, 0, 0.12));
   display: flex;
@@ -644,7 +639,7 @@
 }
 
 .workspaceTabMenuItem:hover {
-  background: var(--sh-glass-bg);
+  background: var(--sh-coral-light);
   color: var(--ink);
 }
 
@@ -664,10 +659,8 @@
   background: var(--sh-glass-bg-strong);
   padding: 0 16px;
   border-radius: var(--sh-radius-lg);
-  background: var(--sh-glass-bg);
-  backdrop-filter: blur(var(--sh-glass-blur));
-  -webkit-backdrop-filter: blur(var(--sh-glass-blur));
-  border: 1px solid var(--sh-glass-border);
+  background: var(--surface);
+  border: 1px solid var(--line);
   transition:
     background 200ms var(--sh-easing),
     border-color 200ms var(--sh-easing),
@@ -675,9 +668,9 @@
 }
 
 .topbar:hover {
-  background: var(--sh-glass-bg-strong);
-  border-color: var(--sh-glass-border-strong);
-  box-shadow: var(--sh-glow-sm);
+  background: var(--surface);
+  border-color: color-mix(in srgb, var(--sh-coral) 30%, var(--line));
+  box-shadow: var(--shadow-sm);
 }
 
 .topbar div:first-child {
@@ -688,7 +681,7 @@
 
 .eyebrow {
   margin: 0;
-  color: var(--sh-info);
+  color: var(--sh-coral);
   font-size: 11px;
   font-weight: var(--weight-black, 900);
   text-transform: uppercase;
@@ -711,8 +704,8 @@
   min-height: 40px;
   padding: 0 12px;
   border-radius: var(--sh-radius-sm);
-  background: var(--sh-glass-bg);
-  border: 1px solid var(--sh-glass-border);
+  background: var(--surface);
+  border: 1px solid var(--line);
   cursor: default;
   transition:
     background 180ms var(--sh-easing),
@@ -724,10 +717,10 @@
   font-weight: var(--weight-bold);
   text-transform: uppercase;
   letter-spacing: 0.03em;
-  color: var(--sh-info);
+  color: var(--sh-coral);
   padding: 2px 6px;
   border-radius: 4px;
-  background: var(--sh-info-bg);
+  background: var(--sh-coral-light);
 }
 
 .accountBox strong {
@@ -757,10 +750,9 @@
   gap: 6px;
   padding: 16px;
   border-radius: var(--sh-radius-lg);
-  background: var(--sh-glass-bg);
-  backdrop-filter: blur(var(--sh-glass-blur));
-  -webkit-backdrop-filter: blur(var(--sh-glass-blur));
-  border: 1px solid var(--sh-glass-border);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-sm);
   transition:
     background 200ms var(--sh-easing),
     border-color 200ms var(--sh-easing),
@@ -769,9 +761,9 @@
 }
 
 .metric:hover {
-  background: var(--sh-glass-bg-strong);
-  border-color: var(--sh-glass-border-strong);
-  box-shadow: var(--sh-glow-sm);
+  background: var(--surface);
+  border-color: color-mix(in srgb, var(--sh-coral) 20%, var(--line));
+  box-shadow: var(--shadow-md);
   transform: translateY(-2px);
 }
 
@@ -780,7 +772,7 @@
   font-weight: var(--weight-black, 900);
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: var(--sh-info);
+  color: var(--sh-coral);
 }
 
 .metric strong {
@@ -808,10 +800,9 @@
   gap: 0;
   padding: 0;
   border-radius: var(--sh-radius-lg);
-  background: var(--sh-glass-bg);
-  backdrop-filter: blur(var(--sh-glass-blur));
-  -webkit-backdrop-filter: blur(var(--sh-glass-blur));
-  border: 1px solid var(--sh-glass-border);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-sm);
   transition:
     background 200ms var(--sh-easing),
     border-color 200ms var(--sh-easing),
@@ -839,9 +830,9 @@
 }
 
 .metricCard--interactive:hover {
-  background: var(--sh-glass-bg-strong);
-  border-color: var(--sh-glass-border-strong);
-  box-shadow: var(--sh-glow-sm);
+  background: var(--surface);
+  border-color: color-mix(in srgb, var(--sh-coral) 20%, var(--line));
+  box-shadow: var(--shadow-md);
   transform: translateY(-3px);
 }
 
@@ -871,7 +862,7 @@
   justify-content: center;
   width: 20px;
   height: 20px;
-  color: var(--sh-info);
+  color: var(--sh-coral);
   flex-shrink: 0;
 }
 
@@ -880,7 +871,7 @@
   font-weight: var(--weight-black, 900);
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: var(--sh-info);
+  color: var(--sh-coral);
 }
 
 .metricCardValue {
@@ -1154,9 +1145,9 @@
 }
 
 .shPageHeader-back:hover {
-  background: var(--sh-glass-bg-strong);
-  border-color: var(--sh-glass-border-strong);
-  color: var(--ink);
+  background: var(--sh-coral-light);
+  border-color: color-mix(in srgb, var(--sh-coral) 30%, var(--line));
+  color: var(--sh-coral);
 }
 
 .shPageHeader-back:focus-visible {
@@ -1211,8 +1202,8 @@
   min-height: 40px;
   padding: 0 12px;
   border-radius: var(--sh-radius-sm);
-  background: var(--sh-glass-bg);
-  border: 1px solid var(--sh-glass-border);
+  background: var(--surface);
+  border: 1px solid var(--line);
   cursor: default;
   transition:
     background 180ms var(--sh-easing),
@@ -1231,8 +1222,8 @@
   align-items: center;
   justify-content: center;
   border-radius: 6px;
-  background: var(--sh-info-bg);
-  color: var(--sh-info);
+  background: var(--sh-coral-light);
+  color: var(--sh-coral);
   font-size: 11px;
   font-weight: var(--weight-bold);
   text-transform: uppercase;
@@ -1276,7 +1267,7 @@
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  border-bottom: 1px solid var(--sh-glass-border);
+  border-bottom: 1px solid var(--line);
   white-space: nowrap;
 }
 
@@ -1284,7 +1275,7 @@
   padding: 12px;
   font-size: 13px;
   color: var(--ink);
-  border-bottom: 1px solid var(--sh-glass-border);
+  border-bottom: 1px solid var(--line);
   transition: background 180ms var(--sh-easing);
 }
 
@@ -1477,8 +1468,8 @@
 }
 
 .shStatusBadge_info {
-  background: var(--sh-info-bg);
-  color: var(--sh-info);
+  background: var(--sh-coral-light);
+  color: var(--sh-coral);
 }
 
 .shStatusBadge_neutral {
@@ -1815,7 +1806,7 @@
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: 10px;
-  border-bottom: 1px solid var(--sh-glass-border);
+  border-bottom: 1px solid var(--line);
   padding: 14px 16px;
 }
 
@@ -1826,8 +1817,8 @@
   align-items: center;
   justify-content: center;
   border-radius: 6px;
-  background: var(--sh-info-bg);
-  color: var(--sh-info);
+  background: var(--sh-coral-light);
+  color: var(--sh-coral);
   font-size: 14px;
   font-weight: var(--weight-semibold);
   flex-shrink: 0;
@@ -1990,7 +1981,7 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  border: 1px solid var(--sh-glass-border);
+  border: 1px solid var(--line);
   border-radius: var(--sh-radius-sm);
   background: transparent;
   color: var(--muted);
@@ -2013,9 +2004,9 @@
 }
 
 .commandLauncher:hover {
-  background: var(--sh-glass-bg-strong);
-  border-color: var(--sh-glass-border-strong);
-  color: var(--ink);
+  background: var(--sh-coral-light);
+  border-color: color-mix(in srgb, var(--sh-coral) 30%, var(--line));
+  color: var(--sh-coral);
 }
 
 /* ── kbd reset for dark mode compatibility ──────────────────────────── */
@@ -2112,7 +2103,7 @@ kbd {
 }
 
 .cmdPaletteGroup:not(:last-child) {
-  border-bottom: 1px solid var(--sh-glass-border);
+  border-bottom: 1px solid var(--line);
 }
 
 .cmdPaletteGroupLabel {
@@ -2613,7 +2604,7 @@ kbd {
   justify-content: space-between;
   gap: 8px;
   padding-bottom: 12px;
-  border-bottom: 1px solid var(--sh-glass-border);
+  border-bottom: 1px solid var(--line);
   margin-bottom: 8px;
 }
 
@@ -3455,8 +3446,8 @@ kbd {
   height: 32px;
   border-radius: 50%;
   border: 2px solid transparent;
-  background: var(--sh-info-bg);
-  color: var(--sh-info);
+  background: var(--sh-coral-light);
+  color: var(--sh-coral);
   display: flex;
   align-items: center;
   justify-content: center;

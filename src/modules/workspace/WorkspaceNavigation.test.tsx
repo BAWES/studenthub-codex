@@ -130,7 +130,7 @@ describe("WorkspaceNavigation", () => {
     render(<WorkspaceNavigation items={navItems} role="admin" />);
 
     const candidatesLink = screen.getByText("Candidates").closest("a");
-    expect(candidatesLink).toHaveAttribute("class", "active");
+    expect(candidatesLink).toHaveClass("active");
   });
 
   it("renders a title attribute on each link", () => {
