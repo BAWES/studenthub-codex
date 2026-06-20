@@ -85,12 +85,7 @@ export function AdminTicketsTable({ session, tickets }: Props) {
     >
       {error ? (
         <div
-          className="mb-4 rounded-lg border px-4 py-3 text-sm"
-          style={{
-            borderColor: "var(--sh-error)",
-            color: "var(--sh-error)",
-            background: "var(--surface)",
-          }}
+          className="mb-4 rounded-lg border border-destructive/30 bg-card px-4 py-3 text-sm text-destructive"
         >
           {error}
         </div>

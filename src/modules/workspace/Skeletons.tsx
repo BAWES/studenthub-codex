@@ -14,15 +14,15 @@ function ShimmerBlock({ className = "" }: { className?: string }) {
 /** Full-page skeleton matching the WorkspaceShell layout for route transitions. */
 export function WorkspaceShellSkeleton({ rowCount = 8 }: { rowCount?: number }) {
   return (
-    <div className="shell shellEmbedded">
-      <section className="min-w-0 overflow-x-hidden grid content-start gap-3.5 p-3.5">
+    <div className="block">
+      <section className="overflow-x-hidden grid content-start gap-3.5 p-3.5">
         {/* Topbar */}
-        <section className="sticky top-[10px] z-20 flex items-center justify-between gap-3 min-h-14 px-4 mb-1 rounded-lg bg-card border border-border">
-          <div className="grid gap-0.5 min-w-0">
+        <section className="sticky top-2.5 z-20 flex items-center justify-between gap-3 min-h-14 px-4 mb-1 rounded-lg bg-card border border-border">
+          <div>
             <ShimmerBlock className="h-3 w-24 mb-2" />
             <ShimmerBlock className="h-7 w-64" />
           </div>
-          <div className="flex items-center gap-2.5 min-h-10 px-3 rounded-sm bg-card border border-border">
+          <div className="flex items-center gap-2.5 min-h-10 rounded-md bg-card border border-border px-3">
             <ShimmerBlock className="h-3 w-12" />
             <ShimmerBlock className="h-4 w-28" />
             <ShimmerBlock className="h-3 w-40" />
@@ -109,7 +109,7 @@ export function DataTableSkeleton({ rows = 10 }: { rows?: number }) {
             gridTemplateColumns: "1fr 1fr 120px 100px",
             gap: 12,
             padding: "10px 14px",
-            borderBottom: "1px solid var(--sh-glass-border)",
+            borderBottom: "1px solid var(--border)",
           }}
         >
           <ShimmerBlock className="h-3 w-20" />
@@ -125,7 +125,7 @@ export function DataTableSkeleton({ rows = 10 }: { rows?: number }) {
               gridTemplateColumns: "1fr 1fr 120px 100px",
               gap: 12,
               padding: "12px 14px",
-              borderBottom: "1px solid var(--sh-glass-border)",
+              borderBottom: "1px solid var(--border)",
             }}
           >
             <ShimmerBlock className="h-4 w-44" />

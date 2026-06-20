@@ -5,9 +5,8 @@ import { cn } from "@/lib/utils";
 
 /* ==========================================================================
    StudentHub OS — Data Table
-   Glass-morphism table with sticky header, row hover lift, entrance
-   stagger animations, and compact data-dense layout.
-   Designed for the StudentHub OS aesthetic — Linear/Arc/Notion inspired.
+   Sticky header, row hover lift, entrance stagger animations,
+   and compact data-dense layout. shadcn-based.
    ========================================================================== */
 
 // ── Inline style injection for entrance animations ──────────────
@@ -46,7 +45,7 @@ const Table = React.forwardRef<HTMLTableElement, React.ComponentPropsWithoutRef<
       <TableContext.Provider value={{ staggerMs }}>
         <div
           data-slot="table-wrapper"
-          className="relative w-full overflow-auto rounded-lg border border-[var(--sh-glass-border)] bg-[color-mix(in_srgb,var(--surface)_92%,transparent)]"
+          className="relative w-full overflow-auto rounded-lg border border-[var(--border)] bg-[color-mix(in_srgb,var(--surface)_92%,transparent)]"
         >
           <table
             ref={ref}
@@ -75,7 +74,7 @@ const TableHeader = React.forwardRef<HTMLTableSectionElement, React.ComponentPro
         className={cn(
           "sticky top-0 z-10",
           "bg-[var(--surface)]",
-          "after:absolute after:inset-x-0 after:bottom-0 after:h-px after:bg-[var(--sh-glass-border)]",
+          "after:absolute after:inset-x-0 after:bottom-0 after:h-px after:bg-[var(--border)]",
           className,
         )}
         {...props}
@@ -111,7 +110,7 @@ const TableFooter = React.forwardRef<HTMLTableSectionElement, React.ComponentPro
         ref={ref}
         data-slot="table-footer"
         className={cn(
-          "border-t border-[var(--sh-glass-border)] bg-[color-mix(in_srgb,var(--surface)_92%,transparent)] font-medium",
+          "border-t border-[var(--border)] bg-[color-mix(in_srgb,var(--surface)_92%,transparent)] font-medium",
           "[&>tr]:last:border-b-0",
           className,
         )}
@@ -154,9 +153,9 @@ const TableRow = React.forwardRef<HTMLTableRowElement, TableRowProps>(
         onClick={onClick}
         onKeyDown={isInteractive ? handleKeyDown : onKeyDown}
         className={cn(
-          "border-b border-[var(--sh-glass-border)]",
+          "border-b border-[var(--border)]",
           "transition-all duration-[200ms] ease-out",
-          "hover:bg-[var(--sh-glass-bg)] hover:translate-x-[2px]",
+          "hover:bg-[var(--surface)] hover:translate-x-[2px]",
           "data-[state=selected]:bg-[var(--sh-info-bg)]",
           "cursor-default",
           isInteractive && "cursor-pointer",

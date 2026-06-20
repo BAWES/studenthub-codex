@@ -2,8 +2,8 @@ import { DetailPageSkeleton } from "@/modules/workspace/Skeletons";
 
 export default function CurrencyDetailLoading() {
   return (
-    <div className="shell shellEmbedded">
-      <section className="workspaceStage">
+    <div className="block">
+      <section className="overflow-x-hidden grid content-start gap-3.5 p-3.5">
         <DetailPageSkeleton panels={3} />
       </section>
     </div>

@@ -5,20 +5,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 export default function CandidateDetailLoading() {
   return (
     <div className="p-6 space-y-6">
-      {/* Eyebrow + Title skeleton */}
       <div>
         <div className="h-3 w-24 mb-2 rounded bg-muted animate-pulse" />
         <div className="h-7 w-48 rounded bg-muted animate-pulse" />
       </div>
-
-      {/* Metrics row skeleton */}
       <div className="flex gap-3">
         <div className="h-12 w-32 rounded-lg bg-muted animate-pulse" />
         <div className="h-12 w-32 rounded-lg bg-muted animate-pulse" />
         <div className="h-12 w-32 rounded-lg bg-muted animate-pulse" />
       </div>
-
-      {/* Detail card skeleton */}
       <Card>
         <CardHeader>
           <CardTitle className="h-5 w-40 rounded bg-muted animate-pulse">&nbsp;</CardTitle>
@@ -34,27 +29,6 @@ export default function CandidateDetailLoading() {
           </div>
         </CardContent>
       </Card>
-
-      {/* Lower cards skeleton */}
-      <div className="grid grid-cols-2 gap-4">
-        {[1, 2].map((col) => (
-          <Card key={col}>
-            <CardHeader>
-              <CardTitle className="h-5 w-32 rounded bg-muted animate-pulse">&nbsp;</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="flex justify-between">
-                    <div className="h-3 w-20 rounded bg-muted animate-pulse" />
-                    <div className="h-3 w-28 rounded bg-muted animate-pulse" />
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
     </div>
   );
 }

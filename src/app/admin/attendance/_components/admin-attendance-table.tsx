@@ -55,7 +55,7 @@ export function AdminAttendanceTable({ session, attendance, employees }: Props) 
       ]}
     >
       <section className="mb-6">
-        <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
+        <div className="rounded-lg border-border bg-card p-5">
           <h3 className="text-sm font-semibold mb-3 text-foreground">Record attendance</h3>
           <CreateAttendanceForm employees={employees} onSuccess={() => router.refresh()} />
         </div>
@@ -66,8 +66,7 @@ export function AdminAttendanceTable({ session, attendance, employees }: Props) 
         <select
           value={employeeFilter}
           onChange={(e) => setEmployeeFilter(e.target.value)}
-          className="h-9 rounded-lg px-3 text-sm border max-w-xs"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+          className="h-9 rounded-lg px-3 text-sm border max-w-xs bg-card border-border text-foreground"
         >
           <option value="">All employees</option>
           {employees.map((e) => (
@@ -161,12 +160,6 @@ function CreateAttendanceForm({
   );
 
   const formRef = useRef<HTMLFormElement>(null);
-  const inputStyle = {
-    background: "var(--surface)",
-    borderColor: "var(--border)",
-    color: "var(--ink)",
-    width: "100%",
-  };
 
   return (
     <form
@@ -181,8 +174,7 @@ function CreateAttendanceForm({
           <select
             name="employee_uuid"
             required
-            className="h-9 rounded-lg px-3 text-sm border"
-            style={inputStyle}
+            className="h-9 rounded-lg px-3 text-sm border bg-card border-border text-foreground w-full"
           >
             <option value="">— Select —</option>
             {employees.map((e) => (
@@ -196,8 +188,7 @@ function CreateAttendanceForm({
             name="date"
             type="date"
             required
-            className="h-9 rounded-lg px-3 text-sm border"
-            style={inputStyle}
+            className="h-9 rounded-lg px-3 text-sm border bg-card border-border text-foreground w-full"
           />
         </div>
         <div className="grid gap-1">
@@ -205,8 +196,7 @@ function CreateAttendanceForm({
           <input
             name="clock_in"
             type="datetime-local"
-            className="h-9 rounded-lg px-3 text-sm border"
-            style={inputStyle}
+            className="h-9 rounded-lg px-3 text-sm border bg-card border-border text-foreground w-full"
           />
         </div>
         <div className="grid gap-1">
@@ -214,8 +204,7 @@ function CreateAttendanceForm({
           <input
             name="clock_out"
             type="datetime-local"
-            className="h-9 rounded-lg px-3 text-sm border"
-            style={inputStyle}
+            className="h-9 rounded-lg px-3 text-sm border bg-card border-border text-foreground w-full"
           />
         </div>
         <div className="grid gap-1">
@@ -226,8 +215,7 @@ function CreateAttendanceForm({
             min="0"
             step="0.1"
             placeholder="8.0"
-            className="h-9 rounded-lg px-3 text-sm border"
-            style={inputStyle}
+            className="h-9 rounded-lg px-3 text-sm border bg-card border-border text-foreground w-full"
           />
         </div>
         <div className="grid gap-1">
@@ -236,8 +224,7 @@ function CreateAttendanceForm({
             name="note"
             maxLength={500}
             placeholder="Optional note"
-            className="h-9 rounded-lg px-3 text-sm border"
-            style={inputStyle}
+            className="h-9 rounded-lg px-3 text-sm border bg-card border-border text-foreground w-full"
           />
         </div>
         <div className="flex items-end">
