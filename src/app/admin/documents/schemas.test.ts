@@ -5,6 +5,7 @@ import {
   buildCvDownloadUrl,
   buildEvaluationDownloadUrl,
   buildOfferLetterDownloadUrl,
+  buildBankAdviceDownloadUrl,
   validateAndBuildCvUrl,
   validateAndBuildEvaluationUrl,
   validateAndBuildOfferLetterUrl,
@@ -100,6 +101,13 @@ describe("admin documents — URL builders", () => {
     const uuid = "550e8400-e29b-41d4-a716-446655440000";
     expect(buildOfferLetterDownloadUrl(uuid)).toBe(
       `/api/fulltimers/${uuid}/offer-letter/pdf?format=pdf`,
+    );
+  });
+
+  it("buildBankAdviceDownloadUrl constructs correct URL", () => {
+    const uuid = "550e8400-e29b-41d4-a716-446655440000";
+    expect(buildBankAdviceDownloadUrl(uuid)).toBe(
+      `/api/transfers/bank-advice/${uuid}/pdf?format=pdf`,
     );
   });
 });
