@@ -131,11 +131,18 @@ export async function GET(
 // PDF generation via Playwright
 // ---------------------------------------------------------------------------
 
+/** Timeout for Playwright PDF operations (30 seconds). */
+const PDF_TIMEOUT_MS = 30_000;
+
 async function generatePdf(html: string, uuid: string): Promise<NextResponse> {
   let page: import("playwright").Page | null = null;
   try {
     const browser = await getBrowser();
     page = await browser.newPage();
+
+    // Set page-level default timeout so setContent and pdf respect it
+    page.setDefaultTimeout(PDF_TIMEOUT_MS);
+
     await page.setContent(html, { waitUntil: "networkidle" });
 
     const pdfBuffer = await page.pdf({
@@ -150,6 +157,9 @@ async function generatePdf(html: string, uuid: string): Promise<NextResponse> {
         </div>`,
     });
 
+    await page.close();
+    page = null;
+
     return new NextResponse(pdfBuffer.toString() as unknown as BodyInit, {
       headers: {
         "Content-Type": "application/pdf",
@@ -158,8 +168,16 @@ async function generatePdf(html: string, uuid: string): Promise<NextResponse> {
       },
     });
   } catch (error) {
-    console.error("PDF generation failed:", error);
-    return new NextResponse("Failed to generate PDF", { status: 500 });
+    const isTimeout =
+      error instanceof Error &&
+      (error.name === "TimeoutError" ||
+        (error.message && /timeout/i.test(error.message)));
+
+    console.error(`PDF generation ${isTimeout ? "timed out" : "failed"}:`, error);
+    return new NextResponse(
+      isTimeout ? "PDF generation timed out" : "Failed to generate PDF",
+      { status: isTimeout ? 504 : 500 },
+    );
   } finally {
     // Ensure page is always closed to avoid resource leaks
     if (page) {
@@ -167,13 +185,3 @@ async function generatePdf(html: string, uuid: string): Promise<NextResponse> {
     }
   }
 }
-
-// ---------------------------------------------------------------------------
-// HTML report builder (extracted to pdf-helpers.ts for testability)
-// ---------------------------------------------------------------------------
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-
