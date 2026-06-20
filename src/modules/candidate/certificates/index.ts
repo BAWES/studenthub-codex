@@ -15,4 +15,4 @@ export type {
   ListCertificatesResult,
   CertificateActionResult,
   DeleteCertificateResult,
-} from "@/app/candidate/certificates/schemas";
+} from "./schemas";

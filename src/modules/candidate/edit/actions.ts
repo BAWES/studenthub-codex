@@ -16,7 +16,7 @@ import {
   type ProfileActionResult,
   parseDate,
   parseDrivingLicense,
-} from "@/app/candidate/edit/schemas";
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Helpers

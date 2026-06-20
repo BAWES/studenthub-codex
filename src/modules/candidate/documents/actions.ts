@@ -34,8 +34,8 @@ import {
   getDocumentOutputSchema,
   uploadDocumentOutputSchema,
   deleteDocumentOutputSchema,
-} from "@/app/candidate/documents/schemas";
-import type { ListDocumentsParams, GetDocumentParams } from "@/app/candidate/documents/schemas";
+} from "./schemas";
+import type { ListDocumentsParams, GetDocumentParams } from "./schemas";
 
 // ---------------------------------------------------------------------------
 // listDocuments

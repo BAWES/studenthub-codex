@@ -17,16 +17,14 @@ import {
   getInvitationDetailSchema,
   listInvitationsResultOutputSchema,
   getInvitationDetailResultOutputSchema,
-} from "@/app/candidate/invitations/schemas";
-import type {
-  ListInvitationsParams,
-  GetInvitationDetailParams,
-  ListInvitationsResult,
-  GetInvitationDetailResult,
-} from "@/app/candidate/invitations/schemas";
+  type ListInvitationsParams,
+  type GetInvitationDetailParams,
+  type ListInvitationsResult,
+  type GetInvitationDetailResult,
+} from "./schemas";
 
 // Re-export types for client components
-export type { InvitationRow, ListInvitationsResult, GetInvitationDetailResult } from "@/app/candidate/invitations/schemas";
+export type { InvitationRow, ListInvitationsResult, GetInvitationDetailResult } from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Server actions — delegate to module-level implementations

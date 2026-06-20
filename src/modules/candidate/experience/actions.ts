@@ -25,18 +25,14 @@ import {
   createExperienceSchema,
   updateExperienceSchema,
   deleteExperienceSchema,
-} from "@/app/candidate/experience/schemas";
-import type {
-  ListExperienceInput,
-  CreateExperienceInput,
-  UpdateExperienceInput,
-  ExperienceActionResult,
-  ExperienceItem,
-} from "@/app/candidate/experience/schemas";
-import {
   experienceItemOutputSchema,
   experienceActionResultOutputSchema,
-} from "@/app/candidate/experience/schemas";
+  type ListExperienceInput,
+  type CreateExperienceInput,
+  type UpdateExperienceInput,
+  type ExperienceActionResult,
+  type ExperienceItem,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Internal helpers

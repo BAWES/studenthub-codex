@@ -17,4 +17,4 @@ export {
 export type {
   CandidateProfileEditData,
   ProfileActionResult,
-} from "@/app/candidate/edit/schemas";
+} from "./schemas";
