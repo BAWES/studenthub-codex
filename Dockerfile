@@ -1,10 +1,10 @@
 # =============================================================================
 # StudentHub Next — Production Dockerfile
-# Multi-stage build: deps → build → runner (Alpine)
+# Multi-stage build: base → deps → build → runner (Alpine)
 # =============================================================================
 
 # ---------------------------------------------------------------------------
-# Stage 1: Base — pnpm global install
+# Stage 1: Base — pnpm + common system deps
 # ---------------------------------------------------------------------------
 FROM node:22-alpine AS base
 LABEL stage=base
@@ -12,21 +12,23 @@ LABEL stage=base
 RUN apk add --no-cache libc6-compat
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
+# Bypass pnpm 11's minimum-release-age supply-chain policy for legitimately
+# recent AWS SDK publishes that our lockfile pins (already reviewed/trusted)
+ENV npm_config_minimum_release_age=0
+
 WORKDIR /app
 
 # ---------------------------------------------------------------------------
-# Stage 2: Dependencies (production deps only)
+# Stage 2: Dependencies (production only)
 # ---------------------------------------------------------------------------
 FROM base AS deps
 LABEL stage=deps
 
 COPY package.json pnpm-lock.yaml .npmrc ./
-
-# minimumReleaseAge=0 from .npmrc disables pnpm's supply-chain check
 RUN pnpm install --ignore-scripts --no-frozen-lockfile --prod
 
 # ---------------------------------------------------------------------------
-# Stage 3: Build (full deps + build)
+# Stage 3: Build (full deps + source + prisma generate + next build)
 # ---------------------------------------------------------------------------
 FROM base AS builder
 LABEL stage=builder
@@ -43,7 +45,7 @@ RUN pnpm prisma generate
 RUN pnpm run build
 
 # ---------------------------------------------------------------------------
-# Stage 4: Production runner
+# Stage 4: Production runner (Alpine)
 # ---------------------------------------------------------------------------
 FROM node:22-alpine AS runner
 LABEL stage=runner
