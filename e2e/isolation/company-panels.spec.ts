@@ -46,7 +46,7 @@ test.describe("Company workspace panel isolation", () => {
   const panels: { label: string; route: string; heading: string }[] = [
     { label: "Overview",       route: "/company",           heading: "Hiring workspace" },
     { label: "Job Postings",   route: "/employer/jobs",     heading: "Job Postings" },
-    { label: "Requests",       route: "/company/requests",  heading: "Requests" },
+    { label: "Requests",       route: "/company/requests",  heading: "Company Requests" },
     { label: "Companies",      route: "/company/companies", heading: "Linked Companies" },
     { label: "Contacts",       route: "/company/contacts",  heading: "Linked Contacts" },
     { label: "Stores",         route: "/company/stores",    heading: "Stores" },
@@ -70,7 +70,7 @@ test.describe("Company workspace panel isolation", () => {
       // panels should NOT appear in the current panel viewport
       for (const other of panels) {
         if (other.label === panel.label) continue;
-        const main = ctx.page.locator("main, [role='main'], article, section").first();
+        const main = ctx.page.locator("section.workspaceStage").first();
         const inMain = main.locator(`h1, h2, h3`).filter({ hasText: other.heading });
         const inMainCount = await inMain.count();
         expect(inMainCount, `${panel.label} should not leak "${other.heading}" heading into its main content`)

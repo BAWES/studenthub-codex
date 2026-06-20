@@ -44,12 +44,12 @@ test.describe("Admin workspace panel isolation", () => {
   // ── Panel definitions: route + expected-unique text fragment ──────────
 
   const panels: { label: string; route: string; heading: string }[] = [
-    { label: "Dashboard",       route: "/admin",         heading: "Command center" },
-    { label: "Candidates",      route: "/admin/candidates", heading: "Candidate" },
-    { label: "Companies",       route: "/admin/companies",  heading: "Company" },
-    { label: "Requests",        route: "/admin/requests",   heading: "Request" },
-    { label: "Payments",        route: "/admin/payments",   heading: "Payment" },
-    { label: "Transfers",       route: "/admin/transfers",  heading: "Transfer" },
+    { label: "Dashboard",       route: "/admin",         heading: "Command center for the whole operation" },
+    { label: "Candidates",      route: "/admin/candidates", heading: "Candidates" },
+    { label: "Companies",       route: "/admin/companies",  heading: "Companies" },
+    { label: "Requests",        route: "/admin/requests",   heading: "Requests" },
+    { label: "Payments",        route: "/admin/payments",   heading: "Payments" },
+    { label: "Transfers",       route: "/admin/transfers",  heading: "Transfer Runs" },
   ];
 
   for (const panel of panels) {
@@ -74,7 +74,7 @@ test.describe("Admin workspace panel isolation", () => {
         const count = await otherHeading.count();
         // Other panel headings may appear in sidebar nav (legitimate), so we
         // assert they do NOT appear in the main content area of this panel
-        const main = ctx.page.locator("main, [role='main'], article, section").first();
+        const main = ctx.page.locator("section.workspaceStage").first();
         const inMain = main.locator(`h1, h2, h3`).filter({ hasText: other.heading });
         const inMainCount = await inMain.count();
         expect(inMainCount, `${panel.label} should not leak "${other.heading}" heading into its main content`)

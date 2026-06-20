@@ -38,7 +38,7 @@ import {
   type ListCertificatesResult,
   type CertificateActionResult,
   type DeleteCertificateResult,
-} from "@/app/candidate/certificates/schemas";
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Internal helpers

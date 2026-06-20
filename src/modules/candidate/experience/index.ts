@@ -17,4 +17,4 @@ export {
 export type {
   ExperienceActionResult,
   ExperienceItem,
-} from "@/app/candidate/experience/schemas";
+} from "./schemas";

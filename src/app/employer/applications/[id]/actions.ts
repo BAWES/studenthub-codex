@@ -1,9 +1,10 @@
 // ---------------------------------------------------------------------------
-// Employer Application Detail — Server Actions (page-level re-exports)
+// Employer Application Detail — Re-exports (page-level imports)
 // ---------------------------------------------------------------------------
-// All business logic lives in src/modules/employer/applications/actions.ts
-// (which has "use server"). This barrel re-exports so page consumers keep
-// their current import paths without duplicating the "use server" directive.
+// All business logic lives in src/modules/employer/applications/actions.ts.
+// Form actions (accept/reject/revert) live in actions.server.ts.
+// This barrel just re-exports the data-fetching so page consumers keep their
+// current import paths.
 // ---------------------------------------------------------------------------
 
 export {

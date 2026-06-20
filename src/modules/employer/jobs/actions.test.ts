@@ -35,6 +35,7 @@ const {
   getJob,
   createJob,
   updateJob,
+  closeJob,
   deleteJob,
 } = await import("./actions");
 
@@ -311,6 +312,37 @@ describe("deleteJob", () => {
 
     expect(prisma.job_listing.delete).toHaveBeenCalledWith({
       where: { jobListingId: 42 },
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // closeJob
+  // ---------------------------------------------------------------------------
+
+  it("closes a job and returns success", async () => {
+    const { revalidatePath } = await import("next/cache");
+
+    vi.mocked(prisma.job_listing.update).mockResolvedValue({ ...fakeJobRow(), status: "closed" } as never);
+
+    const result = await closeJob({ jobId: 1 });
+
+    expect(result.success).toBe(true);
+    expect(prisma.job_listing.update).toHaveBeenCalledWith({
+      where: { jobListingId: 1 },
+      data: { status: "closed" },
+    });
+    expect(revalidatePath).toHaveBeenCalledWith("/employer/jobs");
+    expect(revalidatePath).toHaveBeenCalledWith("/candidate/jobs");
+  });
+
+  it("closes with correct jobId", async () => {
+    vi.mocked(prisma.job_listing.update).mockResolvedValue({ ...fakeJobRow(), status: "closed" } as never);
+
+    await closeJob({ jobId: 42 });
+
+    expect(prisma.job_listing.update).toHaveBeenCalledWith({
+      where: { jobListingId: 42 },
+      data: { status: "closed" },
     });
   });
 });

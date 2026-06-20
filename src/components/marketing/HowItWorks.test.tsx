@@ -58,10 +58,10 @@ describe("HowItWorks", () => {
     ).toBeTruthy();
   });
 
-  it("renders staff-matched placement description", () => {
+  it("renders staff-matched description", () => {
     render(<HowItWorks />);
     expect(
-      screen.getByText(/staff recruiters match students/i),
+      screen.getByText(/our staff recruiters match students/i),
     ).toBeTruthy();
   });
 });

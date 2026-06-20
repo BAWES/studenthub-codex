@@ -14,16 +14,14 @@ import {
   dismissNotification as moduleDismissNotification,
   updateNotification as moduleUpdateNotification,
 } from "@/modules/notifications/actions";
-import type {
-  NotificationRow,
-  NotificationDetail,
-} from "@/modules/notifications/actions";
 import {
   notificationRowArraySchema,
   notificationDetailSchema,
   dismissResultSchema,
   updateResultSchema,
-} from "@/app/candidate/notifications/schemas";
+  type NotificationRow,
+  type NotificationDetail,
+} from "./schemas";
 
 // Re-export types for client components
 export type { NotificationRow, NotificationDetail };

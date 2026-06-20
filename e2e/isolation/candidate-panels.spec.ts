@@ -46,10 +46,10 @@ test.describe("Candidate workspace panel isolation", () => {
 
   const panels: { label: string; route: string; heading: string }[] = [
     { label: "Dashboard",    route: "/candidate",              heading: "StudentHub profile" },
-    { label: "Profile",      route: "/candidate/profile",      heading: "Welcome" },
-    { label: "Invitations",  route: "/candidate/invitations",   heading: "Invitations" },
+    { label: "Profile",      route: "/candidate/profile",      heading: "Update your candidate profile" },
+    { label: "Invitations",  route: "/candidate/invitations",   heading: "Invitation History" },
     { label: "Documents",    route: "/candidate/documents",     heading: "Document Management" },
-    { label: "Skills",       route: "/candidate/skills",        heading: "Skills" },
+    { label: "Skills",       route: "/candidate/skills",        heading: "Skills & Expertise" },
     { label: "Schedule",     route: "/candidate/schedule",      heading: "Work Schedule" },
   ];
 
@@ -71,7 +71,7 @@ test.describe("Candidate workspace panel isolation", () => {
       // panels should NOT appear in the current panel's main content area
       for (const other of panels) {
         if (other.label === panel.label) continue;
-        const main = ctx.page.locator("main, [role='main'], article, section").first();
+        const main = ctx.page.locator("section.workspaceStage").first();
         const inMain = main.locator(`h1, h2, h3, [class*="title"]`).filter({ hasText: other.heading });
         const inMainCount = await inMain.count();
         expect(inMainCount,

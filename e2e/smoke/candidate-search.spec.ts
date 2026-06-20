@@ -70,7 +70,9 @@ test.describe("Candidate search", () => {
     const page = await context.newPage();
     await page.goto("/admin/candidates?q=test");
     await expect(page).toHaveURL(/\/admin\/candidates\?q=test/);
-    await expect(page.locator('text="Filtered view"')).toBeVisible({
+    await expect(
+      page.locator('text="Filtered view"').first(),
+    ).toBeVisible({
       timeout: 15000,
     });
     await context.close();
@@ -89,7 +91,7 @@ test.describe("Candidate search", () => {
     const page = await context.newPage();
     await page.goto("/staff/candidates");
     await expect(page).toHaveURL("/staff/candidates");
-    await expect(page.locator('text="All production"')).toBeVisible({
+    await expect(page.locator('text="All production"').first()).toBeVisible({
       timeout: 15000,
     });
     await context.close();
@@ -108,7 +110,7 @@ test.describe("Candidate search", () => {
     const page = await context.newPage();
     await page.goto("/staff/candidates?view=assigned");
     await expect(page).toHaveURL(/\/staff\/candidates\?view=assigned/);
-    await expect(page.locator('text="Assigned to me"')).toBeVisible({
+    await expect(page.locator('text="Assigned to me"').first()).toBeVisible({
       timeout: 15000,
     });
     await context.close();

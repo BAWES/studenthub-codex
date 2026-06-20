@@ -96,8 +96,8 @@ describe("ComparisonTable (visual redesign)", () => {
   it("renders check icons for StudentHub features", async () => {
     const { container } = render(<ComparisonTable persona="candidate" />);
     await waitFor(() => {
-      const checks = container.querySelectorAll('[data-testid="icon-check"]');
-      expect(checks.length).toBeGreaterThan(0);
+      const dots = container.querySelectorAll('[class*="shLandingScoreFull"]');
+      expect(dots.length).toBeGreaterThan(0);
     });
   });
 
