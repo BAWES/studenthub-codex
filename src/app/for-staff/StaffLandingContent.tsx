@@ -8,6 +8,7 @@ import { FeatureGrid } from "@/components/marketing";
 import { TestimonialCarousel } from "@/components/marketing";
 import { PricingCard } from "@/components/marketing";
 import { ComparisonTable } from "@/components/marketing";
+import "@/components/landing/landing.css";
 
 // ── Props ─────────────────────────────────────────────────────
 
