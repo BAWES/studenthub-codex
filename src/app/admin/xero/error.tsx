@@ -1,5 +1,7 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+
 import { useEffect } from "react";
 
 type Props = {
@@ -22,13 +24,7 @@ export default function AdminXeroError({ error, reset }: Props) {
           <p className="text-sm mt-1 text-muted-foreground">
             {error.message || "Failed to load bank transactions."}
           </p>
-          <button
-            type="button"
-            onClick={reset}
-            className="mt-4 rounded-lg px-4 py-2 text-sm font-semibold bg-primary text-white"
-          >
-            Try again
-          </button>
+          <Button onClick={reset} variant="default" className="mt-4 rounded-lg px-4 py-2 text-sm font-semibold bg-primary text-white" type="button">Try again</Button>
         </section>
       </section>
     </div>

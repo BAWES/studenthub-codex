@@ -1,5 +1,7 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+
 export default function Error({
   error,
   reset,
@@ -10,19 +12,14 @@ export default function Error({
   return (
     <div className="flex flex-col items-center justify-center py-24 gap-4">
       <span className="text-4xl" aria-hidden="true">⚠️</span>
-      <h2 className="text-xl font-bold text-[var(--ink)]">
+      <h2 className="text-xl font-bold text-foreground">
         Something went wrong
       </h2>
-      <p className="text-sm max-w-md text-center text-[var(--muted)]">
+      <p className="text-sm max-w-md text-center text-muted-foreground">
         {error.message ?? "An unexpected error occurred while loading the page."}
       </p>
-      {error.digest ? <small className="text-[var(--muted)]">Error ID: {error.digest}</small> : null}
-      <button
-        onClick={reset}
-        className="mt-2 h-10 rounded-lg px-4 text-sm font-semibold bg-[#eb6651] hover:bg-[#d45441] text-white"
-      >
-        Try again
-      </button>
+      {error.digest ? <small className="text-muted-foreground">Error ID: {error.digest}</small> : null}
+      <Button onClick={reset} variant="default" className="bg-[#eb6651] hover:bg-[#d45441] text-white mt-2" >Try again</Button>
     </div>
   );
 }

@@ -1,5 +1,7 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+
 export default function Error({
   error,
   reset,
@@ -16,12 +18,7 @@ export default function Error({
       <p className="text-sm max-w-md text-center text-muted-foreground">
         {error.message ?? "An unexpected error occurred while loading the invoices page."}
       </p>
-      <button
-        onClick={reset}
-        className="mt-2 h-10 rounded-lg px-4 text-sm font-semibold bg-[var(--sh-info)] text-white"
-      >
-        Try again
-      </button>
+      <Button onClick={reset} variant="default" className="mt-2" >Try again</Button>
     </div>
   );
 }

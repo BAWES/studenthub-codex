@@ -1,5 +1,7 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+
 export default function UniversityDetailError({
   error,
   reset,
@@ -18,12 +20,7 @@ export default function UniversityDetailError({
           <p className="text-sm text-muted-foreground">
             {error.message ?? "An unexpected error occurred."}
           </p>
-          <button
-            onClick={reset}
-            className="px-4 py-2 rounded-lg text-sm font-semibold bg-primary text-white"
-          >
-            Try again
-          </button>
+          <Button onClick={reset} variant="default" className="px-4 py-2 rounded-lg text-sm font-semibold bg-primary text-white" >Try again</Button>
         </div>
       </section>
     </div>
