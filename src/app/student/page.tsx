@@ -2,8 +2,6 @@ import { getStudentProfile } from "./actions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
-const CORAL = "#eb6651";
-
 function AvatarCircle({ name }: { name?: string | null }) {
   const initial = name?.charAt(0)?.toUpperCase() || "?";
   return (
@@ -100,51 +98,21 @@ export default async function StudentProfilePage({ params }: Props) {
         </Card>
 
         {/* ── Skills Card ────────────────────────────────────────────── */}
-        <div
-          style={{
-            backgroundColor: "var(--surface)",
-            border: "1px solid var(--border)",
-            borderRadius: 12,
-            boxShadow: "var(--shadow-sm)",
-            overflow: "hidden",
-          }}
-        >
-          <div
-            style={{
-              padding: "24px 28px 0",
-              borderLeft: `3px solid ${CORAL}`,
-            }}
-          >
-            <h2
-              style={{
-                margin: 0,
-                fontSize: 20,
-                fontWeight: 700,
-                color: "var(--ink)",
-              }}
-            >
-              Skills
-            </h2>
-          </div>
-          <div style={{ padding: 20 }}>
+        <Card>
+          <CardHeader className="border-l-[3px] border-l-[#eb6651] px-7 pt-6 pb-0">
+            <CardTitle className="text-xl font-bold text-foreground">Skills</CardTitle>
+          </CardHeader>
+          <CardContent className="p-5">
             {profile.skills.length > 0 ? (
               <div className="flex flex-wrap gap-2">
                 {profile.skills.map((skill) => (
-                  <span
+                  <Badge
                     key={skill.id}
-                    style={{
-                      padding: "4px 14px",
-                      backgroundColor: "#fef1ef",
-                      border: "1px solid rgba(235, 102, 81, 0.2)",
-                      borderRadius: 999,
-                      color: CORAL,
-                      fontSize: 13,
-                      fontWeight: 700,
-                      lineHeight: "24px",
-                    }}
+                    variant="secondary"
+                    className="rounded-full bg-[#fef1ef] border border-[rgba(235,102,81,0.2)] text-[#eb6651] font-bold"
                   >
                     {skill.name}
-                  </span>
+                  </Badge>
                 ))}
               </div>
             ) : (
@@ -152,37 +120,15 @@ export default async function StudentProfilePage({ params }: Props) {
                 No skills listed yet.
               </p>
             )}
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
         {/* ── Experience Card ─────────────────────────────────────────── */}
-        <div
-          style={{
-            backgroundColor: "var(--surface)",
-            border: "1px solid var(--border)",
-            borderRadius: 12,
-            boxShadow: "var(--shadow-sm)",
-            overflow: "hidden",
-          }}
-        >
-          <div
-            style={{
-              padding: "24px 28px 0",
-              borderLeft: `3px solid ${CORAL}`,
-            }}
-          >
-            <h2
-              style={{
-                margin: 0,
-                fontSize: 20,
-                fontWeight: 700,
-                color: "var(--ink)",
-              }}
-            >
-              Experience
-            </h2>
-          </div>
-          <div className="space-y-1" style={{ padding: 20 }}>
+        <Card>
+          <CardHeader className="border-l-[3px] border-l-[#eb6651] px-7 pt-6 pb-0">
+            <CardTitle className="text-xl font-bold text-foreground">Experience</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-1 p-5">
             {profile.experience.length > 0 ? (
               <div className="space-y-4">
                 {profile.experience.map((exp) => (
@@ -211,93 +157,47 @@ export default async function StudentProfilePage({ params }: Props) {
                 No experience listed yet.
               </p>
             )}
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
         {/* ── Contact Info Card ───────────────────────────────────────── */}
-        <div
-          style={{
-            backgroundColor: "var(--surface)",
-            border: "1px solid var(--border)",
-            borderRadius: 12,
-            boxShadow: "var(--shadow-sm)",
-            overflow: "hidden",
-          }}
-        >
-          <div
-            style={{
-              padding: "24px 28px 0",
-              borderLeft: `3px solid ${CORAL}`,
-            }}
-          >
-            <h2
-              style={{
-                margin: 0,
-                fontSize: 20,
-                fontWeight: 700,
-                color: "var(--ink)",
-              }}
-            >
-              Contact Info
-            </h2>
-          </div>
-          <div className="space-y-3" style={{ padding: "16px 28px 24px" }}>
+        <Card>
+          <CardHeader className="border-l-[3px] border-l-[#eb6651] px-7 pt-6 pb-0">
+            <CardTitle className="text-xl font-bold text-foreground">Contact Info</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3 px-7 pb-6 pt-4">
             {profile.email && (
               <div className="flex items-center gap-3">
-                <span
-                  style={{
-                    color: CORAL,
-                    fontSize: 14,
-                    fontWeight: 600,
-                    width: 60,
-                    flexShrink: 0,
-                  }}
-                >
+                <span className="w-[60px] shrink-0 text-sm font-semibold text-[#eb6651]">
                   Email
                 </span>
-                <span style={{ color: "var(--ink)", fontSize: 14 }}>
+                <span className="text-sm text-foreground">
                   {profile.email}
                 </span>
               </div>
             )}
             {profile.phone && (
               <div className="flex items-center gap-3">
-                <span
-                  style={{
-                    color: CORAL,
-                    fontSize: 14,
-                    fontWeight: 600,
-                    width: 60,
-                    flexShrink: 0,
-                  }}
-                >
+                <span className="w-[60px] shrink-0 text-sm font-semibold text-[#eb6651]">
                   Phone
                 </span>
-                <span style={{ color: "var(--ink)", fontSize: 14 }}>
+                <span className="text-sm text-foreground">
                   {profile.phone}
                 </span>
               </div>
             )}
             {profile.address && (
               <div className="flex items-center gap-3">
-                <span
-                  style={{
-                    color: CORAL,
-                    fontSize: 14,
-                    fontWeight: 600,
-                    width: 60,
-                    flexShrink: 0,
-                  }}
-                >
+                <span className="w-[60px] shrink-0 text-sm font-semibold text-[#eb6651]">
                   Address
                 </span>
-                <span style={{ color: "var(--ink)", fontSize: 14 }}>
+                <span className="text-sm text-foreground">
                   {profile.address}
                 </span>
               </div>
             )}
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
