@@ -66,14 +66,14 @@ export default function AdminLandingContent({
         id="main-content"
         className="min-h-svh w-[min(1320px,calc(100%_-_28px))] mx-auto grid content-start gap-6 pt-[18px] pb-[42px] max-sm:w-[min(calc(100%_-_20px),720px)]"
       >
-        {/* ── Glass Navigation ── */}
-        <nav className="sticky top-[3px] z-20 min-h-[62px] flex items-center justify-between gap-[14px] rounded-xl p-[2px] bg-white shadow-md border border-[var(--border)]" aria-label="StudentHub public navigation">
+        {/* ── Navigation ── */}
+        <nav className="sticky top-[3px] z-20 min-h-[62px] flex items-center justify-between gap-[14px] rounded-xl p-[2px] bg-white shadow-md border border-gray-200" aria-label="StudentHub public navigation">
           <div className="w-full min-h-[58px] flex items-center justify-between gap-[14px] px-1">
             <Link
-              className="inline-flex items-center gap-2.5 text-[var(--ink)] px-2 no-underline min-h-11"
+              className="inline-flex items-center gap-2.5 text-gray-900 px-2 no-underline min-h-11"
               href="/"
             >
-              <span className="size-9 inline-flex items-center justify-center rounded-lg bg-[var(--ink)] text-[var(--paper)] font-black">
+              <span className="size-9 inline-flex items-center justify-center rounded-lg bg-gray-900 text-white font-black">
                 SH
               </span>
               <strong>StudentHub</strong>
@@ -112,24 +112,20 @@ export default function AdminLandingContent({
 
         {/* ── Pain-point section — the admin frustrations ── */}
         <section
-          className="shSection relative overflow-hidden rounded-xl p-[clamp(24px,5vw,48px)]"
-          style={{
-            background: "var(--sh-glass-bg)",
-            border: "1px solid var(--sh-glass-border)",
-          }}
+          className="relative overflow-hidden rounded-xl bg-gray-50 border border-gray-200 p-[clamp(24px,5vw,48px)]"
           aria-label="Admin pain points and solutions"
         >
-          <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-[#fef1ef] via-white to-[var(--paper)] z-0" aria-hidden="true" />
+          <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-[#fef1ef] via-white to-gray-50 z-0" aria-hidden="true" />
 
           <div className="relative z-[2]">
-            <p className="text-[var(--sh-info)] text-[11px] font-black uppercase tracking-wider mb-1">
+            <p className="text-[#eb6651] text-[11px] font-black uppercase tracking-wider mb-1">
               The real admin headache
             </p>
-            <h2 className="shBenefitsTitle mb-8">
+            <h2 className="mb-8 text-2xl sm:text-3xl font-extrabold tracking-tight text-gray-900">
               You don&apos;t need another login.
               <br />
               You need a{" "}
-              <em style={{ color: "var(--sh-info)" }}>single</em>{" "}
+              <em className="text-[#eb6651] not-italic">single</em>{" "}
               source of truth.
             </h2>
 
@@ -137,33 +133,16 @@ export default function AdminLandingContent({
               {PAIN_POINTS.map((point, i) => (
                 <div
                   key={i}
-                  className="rounded-xl p-5 flex flex-col gap-3 transition-transform duration-300 hover:-translate-y-[3px]"
-                  style={{
-                    background: "var(--sh-glass-bg)",
-                    border: "1px solid var(--sh-glass-border)",
-                  }}
+                  className="bg-white border border-gray-200 rounded-xl p-5 flex flex-col gap-3 transition-transform duration-300 hover:-translate-y-[3px]"
                 >
-                  <div
-                    className="size-10 rounded-lg flex items-center justify-center shrink-0"
-                    style={{
-                      background:
-                        "color-mix(in srgb, var(--sh-info) 15%, transparent)",
-                      color: "var(--sh-info)",
-                    }}
-                  >
+                  <div className="size-10 rounded-lg flex items-center justify-center shrink-0 bg-[#eb6651]/10 text-[#eb6651]">
                     <span className="font-black text-sm">0{i + 1}</span>
                   </div>
                   <div>
-                    <p
-                      className="text-sm font-semibold mb-1.5"
-                      style={{ color: "var(--ink)" }}
-                    >
+                    <p className="text-sm font-semibold mb-1.5 text-gray-900">
                       {point.problem}
                     </p>
-                    <p
-                      className="text-sm leading-relaxed"
-                      style={{ color: "var(--muted)" }}
-                    >
+                    <p className="text-sm leading-relaxed text-gray-500">
                       {point.solution}
                     </p>
                   </div>
@@ -175,22 +154,15 @@ export default function AdminLandingContent({
 
         {/* ── Stats strip — admin authority signals ── */}
         <section
-          className="shSection rounded-xl p-[clamp(20px,4vw,40px)] grid grid-cols-2 sm:grid-cols-4 gap-6 text-center"
-          style={{
-            background: "var(--sh-glass-bg)",
-            border: "1px solid var(--sh-glass-border)",
-          }}
+          className="rounded-xl bg-gray-50 border border-gray-200 p-[clamp(20px,4vw,40px)] grid grid-cols-2 sm:grid-cols-4 gap-6 text-center"
           aria-label="Admin stats"
         >
           {ADMIN_STATS.map((stat) => (
             <div key={stat.label}>
-              <p className="text-[clamp(24px,4vw,36px)] font-black leading-none mb-1">
+              <p className="text-[clamp(24px,4vw,36px)] font-black leading-none mb-1 text-gray-900">
                 {stat.value}
               </p>
-              <p
-                className="text-xs leading-tight"
-                style={{ color: "var(--muted)" }}
-              >
+              <p className="text-xs leading-tight text-gray-500">
                 {stat.label}
               </p>
             </div>
@@ -211,26 +183,19 @@ export default function AdminLandingContent({
 
         {/* ── Final CTA — tailored for administrators ── */}
         <section
-          className="shSection relative overflow-hidden rounded-xl p-[clamp(24px,5vw,60px)] text-center"
-          style={{
-            background: "var(--sh-glass-bg)",
-            border: "1px solid var(--sh-glass-border)",
-          }}
+          className="relative overflow-hidden rounded-xl bg-white border border-gray-200 p-[clamp(24px,5vw,60px)] text-center"
           aria-label="Get started as admin"
         >
-          <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-[#fef1ef] via-white to-[var(--paper)] z-0" aria-hidden="true" />
+          <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-[#fef1ef] via-white to-gray-50 z-0" aria-hidden="true" />
 
           <div className="relative z-[2] max-w-[640px] mx-auto">
-            <p className="text-[var(--sh-info)] text-[11px] font-black uppercase tracking-wider mb-2">
+            <p className="text-[#eb6651] text-[11px] font-black uppercase tracking-wider mb-2">
               Take control of operations
             </p>
-            <h2 className="shBenefitsTitle text-center">
+            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-gray-900 text-center">
               Your next dashboard is one login away.
             </h2>
-            <p
-              className="max-w-[480px] mx-auto mt-2 mb-6 leading-relaxed"
-              style={{ color: "var(--muted)" }}
-            >
+            <p className="max-w-[480px] mx-auto mt-2 mb-6 leading-relaxed text-gray-500">
               Get full visibility across users, finances, compliance, and
               payroll. One workspace replaces a dozen logins. No setup fee,
               no minimum commitment.
@@ -238,22 +203,19 @@ export default function AdminLandingContent({
             {isLoggedIn ? (
               <Link
                 href="/app"
-                className="uiButton uiButton_default uiButton_lg shGlowButton"
+                className="uiButton uiButton_default uiButton_lg"
               >
                 Open app <ChevronRight className="size-4" />
               </Link>
             ) : (
               <Link
                 href="/signup?role=admin"
-                className="uiButton uiButton_default uiButton_lg shGlowButton"
+                className="uiButton uiButton_default uiButton_lg"
               >
                 Get admin access <ChevronRight className="size-4" />
               </Link>
             )}
-            <div
-              className="flex items-center justify-center gap-4 mt-4 text-xs"
-              style={{ color: "var(--muted)" }}
-            >
+            <div className="flex items-center justify-center gap-4 mt-4 text-xs text-gray-400">
               <span>15,000+ worker records managed</span>
               <span>99.7% audit pass rate</span>
             </div>
@@ -261,23 +223,18 @@ export default function AdminLandingContent({
         </section>
 
         {/* ── Footer ── */}
-        <footer
-          className="shSection flex items-center justify-between pt-4 pb-2 text-xs"
-          style={{ color: "var(--muted)" }}
-        >
+        <footer className="flex items-center justify-between pt-4 pb-2 text-xs text-gray-400">
           <span>&copy; {new Date().getFullYear()} StudentHub. All rights reserved.</span>
           <div className="flex items-center gap-4">
             <Link
               href="/login"
-              className="hover:text-[var(--ink)] transition-colors no-underline"
-              style={{ color: "inherit" }}
+              className="hover:text-gray-900 transition-colors no-underline text-inherit"
             >
               Sign in
             </Link>
             <Link
               href="/signup?role=admin"
-              className="hover:text-[var(--ink)] transition-colors no-underline"
-              style={{ color: "inherit" }}
+              className="hover:text-gray-900 transition-colors no-underline text-inherit"
             >
               Sign up as admin
             </Link>
