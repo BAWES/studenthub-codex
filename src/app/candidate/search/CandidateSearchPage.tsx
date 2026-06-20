@@ -8,6 +8,8 @@ import MatchScoreBadge from "@/components/matching/MatchScoreBadge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 // ─── Types ────────────────────────────────────────────────────────────
 
@@ -73,7 +75,7 @@ function useDebounce<T>(value: T, delay: number): T {
 
 function SearchResultSkeleton() {
   return (
-    <div className="rounded-lg border border-[var(--border)] bg-white p-4 flex flex-col gap-3">
+    <div className="rounded-lg border border-border bg-card p-4 flex flex-col gap-3">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-2 flex-1">
           <Skeleton variant="pulse" className="h-5 w-40" />
@@ -236,14 +238,16 @@ export function CandidateSearchPage({ session, initialData }: { session: Session
 
   const totalPages = results ? Math.ceil(results.matchingCount / ITEMS_PER_PAGE) : 0;
 
+  const [focused, setFocused] = useState(false);
+
   return (
     <div className="mx-auto max-w-7xl p-6">
       {/* Search header */}
       <div className="mb-6">
-        <h1 className="m-0 text-[1.625rem] font-bold" style={{ color: "var(--ink)" }}>
+        <h1 className="text-[1.625rem] font-bold text-foreground m-0">
           Search Candidates
         </h1>
-        <p className="m-0 mt-1 text-sm" style={{ color: "var(--muted)" }}>
+        <p className="text-sm text-muted-foreground m-0 mt-1">
           Find candidates by name, skills, or keyword — powered by Typesense
         </p>
       </div>
@@ -251,36 +255,19 @@ export function CandidateSearchPage({ session, initialData }: { session: Session
       {/* Search form */}
       <form className="mb-6" onSubmit={handleSubmit}>
         <div className="flex gap-2">
-          <input
+          <Input
             ref={inputRef}
-            type="text"
-            className="flex-1 rounded-lg border px-4 py-2.5 text-[0.9375rem] outline-none transition-[border-color] duration-150"
-            style={{
-              borderColor: "var(--border)",
-              background: "var(--card)",
-              color: "var(--ink)",
-            }}
             placeholder="Search by name, email, skills..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
+            onFocus={() => setFocused(true)}
+            onBlur={() => setFocused(false)}
+            className="flex-1"
             autoFocus
-            onFocus={(e) => {
-              e.currentTarget.style.borderColor = "var(--sh-coral)";
-              e.currentTarget.style.boxShadow = "var(--sh-coral-glow)";
-            }}
-            onBlur={(e) => {
-              e.currentTarget.style.borderColor = "var(--border)";
-              e.currentTarget.style.boxShadow = "none";
-            }}
           />
-          <button
-            type="submit"
-            className="rounded-lg px-6 py-2.5 text-[0.9375rem] font-semibold text-white transition-opacity duration-150 disabled:cursor-not-allowed disabled:opacity-60 hover:opacity-90"
-            style={{ background: "var(--sh-coral)" }}
-            disabled={loading}
-          >
+          <Button type="submit" disabled={loading}>
             {loading ? "Searching..." : "Search"}
-          </button>
+          </Button>
         </div>
       </form>
 
@@ -301,19 +288,10 @@ export function CandidateSearchPage({ session, initialData }: { session: Session
       <div className="grid grid-cols-[240px_1fr] gap-6 max-md:grid-cols-1">
         {/* Facet sidebar */}
         {results && results.facets.length > 0 && (
-          <aside
-            className="sticky top-6 self-start rounded-xl border p-4"
-            style={{
-              background: "var(--card)",
-              borderColor: "var(--border)",
-            }}
-          >
+          <aside className="sticky top-6 self-start rounded-xl border border-border bg-card p-4">
             {results.facets.map((group) => (
               <div key={group.key} className="mb-5 last:mb-0">
-                <h3
-                  className="m-0 mb-2 text-xs font-semibold uppercase tracking-wider"
-                  style={{ color: "var(--muted)" }}
-                >
+                <h3 className="m-0 mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                   {group.label}
                 </h3>
                 <div className="flex flex-col gap-1">
@@ -322,22 +300,11 @@ export function CandidateSearchPage({ session, initialData }: { session: Session
                       key={option.value}
                       type="button"
                       className={cn(
-                        "flex items-center justify-between rounded-md border border-transparent px-2.5 py-1.5 text-left text-xs transition-all duration-100",
+                        "flex items-center justify-between rounded-md border px-2.5 py-1.5 text-left text-xs transition-all duration-100",
                         option.active
-                          ? "font-semibold"
-                          : "hover:border-[var(--border)] hover:bg-[var(--accent)]",
+                          ? "border-primary bg-primary/10 font-semibold text-primary"
+                          : "border-transparent text-foreground hover:border-border hover:bg-muted",
                       )}
-                      style={
-                        option.active
-                          ? {
-                              background: "var(--sh-coral-light)",
-                              borderColor: "var(--sh-coral)",
-                              color: "var(--sh-coral)",
-                            }
-                          : {
-                              color: "var(--ink)",
-                            }
-                      }
                       onClick={() => toggleFacet(group.key, option.value)}
                     >
                       <span className="flex-1">{option.label}</span>
@@ -345,10 +312,9 @@ export function CandidateSearchPage({ session, initialData }: { session: Session
                         className={cn(
                           "ml-2 rounded-full px-1.5 py-0.5 text-[0.6875rem]",
                           option.active
-                            ? "bg-[var(--sh-coral-light)] text-[var(--sh-coral)]"
-                            : "bg-[var(--accent)]",
+                            ? "bg-primary/10 text-primary"
+                            : "bg-muted text-muted-foreground",
                         )}
-                        style={option.active ? {} : { color: "var(--muted)" }}
                       >
                         {option.count}
                       </span>
@@ -365,10 +331,10 @@ export function CandidateSearchPage({ session, initialData }: { session: Session
           {/* Source indicator / typing indicator */}
           {results && (
             <div className="mb-4 flex items-center justify-between text-xs">
-              <span className="font-semibold" style={{ color: "var(--ink)" }}>
+              <span className="font-semibold text-foreground">
                 {isTyping ? (
                   <>
-                    <span className="inline-block align-middle mr-1.5 h-2 w-2 rounded-full bg-[var(--sh-coral)] animate-pulse" />
+                    <span className="inline-block align-middle mr-1.5 h-2 w-2 rounded-full bg-primary animate-pulse" />
                     Searching...
                   </>
                 ) : (
@@ -379,10 +345,7 @@ export function CandidateSearchPage({ session, initialData }: { session: Session
                 )}
               </span>
               {!isTyping && (
-                <span
-                  className="rounded-md px-2 py-0.5"
-                  style={{ color: "var(--muted)", background: "var(--accent)" }}
-                >
+                <span className="rounded-md px-2 py-0.5 text-muted-foreground bg-muted">
                   {results.source.current}
                 </span>
               )}
@@ -416,11 +379,7 @@ export function CandidateSearchPage({ session, initialData }: { session: Session
                   <Link
                     key={row.id}
                     href={`${candidateProfilePrefix}/${row.id}`}
-                    className="block rounded-xl border p-4 transition-all duration-150 hover:shadow-md hover:-translate-y-px"
-                    style={{
-                      background: "var(--card)",
-                      borderColor: "var(--border)",
-                    }}
+                    className="block rounded-xl border border-border bg-card p-4 transition-all duration-150 hover:shadow-md hover:-translate-y-px"
                     onClick={(e) => {
                       // Allow middle-click / cmd+click for new tab
                       if (e.button === 1 || e.metaKey || e.ctrlKey) return;
@@ -429,10 +388,10 @@ export function CandidateSearchPage({ session, initialData }: { session: Session
                     {/* Result header */}
                     <div className="mb-3 flex items-start justify-between gap-3">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <h3 className="m-0 text-base font-semibold" style={{ color: "var(--ink)" }}>
+                        <h3 className="m-0 text-base font-semibold text-foreground">
                           {row.name}
                         </h3>
-                        <span className="font-mono text-[0.6875rem]" style={{ color: "var(--muted)" }}>
+                        <span className="font-mono text-[0.6875rem] text-muted-foreground">
                           {row.uid}
                         </span>
                       </div>
@@ -442,52 +401,52 @@ export function CandidateSearchPage({ session, initialData }: { session: Session
                     {/* Details grid */}
                     <div className="mb-3 grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2">
                       <div className="flex flex-col gap-0.5">
-                        <span className="text-[0.6875rem] font-medium uppercase tracking-wider" style={{ color: "var(--muted)" }}>
+                        <span className="text-[0.6875rem] font-medium uppercase tracking-wider text-muted-foreground">
                           Email
                         </span>
-                        <span className="text-xs" style={{ color: "var(--ink)" }}>
+                        <span className="text-xs text-foreground">
                           {row.email}
                         </span>
                       </div>
                       <div className="flex flex-col gap-0.5">
-                        <span className="text-[0.6875rem] font-medium uppercase tracking-wider" style={{ color: "var(--muted)" }}>
+                        <span className="text-[0.6875rem] font-medium uppercase tracking-wider text-muted-foreground">
                           Phone
                         </span>
-                        <span className="text-xs" style={{ color: "var(--ink)" }}>
+                        <span className="text-xs text-foreground">
                           {row.phone}
                         </span>
                       </div>
                       <div className="flex flex-col gap-0.5">
-                        <span className="text-[0.6875rem] font-medium uppercase tracking-wider" style={{ color: "var(--muted)" }}>
+                        <span className="text-[0.6875rem] font-medium uppercase tracking-wider text-muted-foreground">
                           Location
                         </span>
-                        <span className="text-xs" style={{ color: "var(--ink)" }}>
+                        <span className="text-xs text-foreground">
                           {row.country}
                         </span>
                       </div>
                       <div className="flex flex-col gap-0.5">
-                        <span className="text-[0.6875rem] font-medium uppercase tracking-wider" style={{ color: "var(--muted)" }}>
+                        <span className="text-[0.6875rem] font-medium uppercase tracking-wider text-muted-foreground">
                           University
                         </span>
-                        <span className="text-xs" style={{ color: "var(--ink)" }}>
+                        <span className="text-xs text-foreground">
                           {row.university}
                         </span>
                       </div>
                       {row.company !== "No company" && (
                         <div className="flex flex-col gap-0.5">
-                          <span className="text-[0.6875rem] font-medium uppercase tracking-wider" style={{ color: "var(--muted)" }}>
+                          <span className="text-[0.6875rem] font-medium uppercase tracking-wider text-muted-foreground">
                             Company
                           </span>
-                          <span className="text-xs" style={{ color: "var(--ink)" }}>
+                          <span className="text-xs text-foreground">
                             {row.company}
                           </span>
                         </div>
                       )}
                       <div className="flex flex-col gap-0.5">
-                        <span className="text-[0.6875rem] font-medium uppercase tracking-wider" style={{ color: "var(--muted)" }}>
+                        <span className="text-[0.6875rem] font-medium uppercase tracking-wider text-muted-foreground">
                           Rate
                         </span>
-                        <span className="text-xs" style={{ color: "var(--ink)" }}>
+                        <span className="text-xs text-foreground">
                           {row.rate}
                         </span>
                       </div>
@@ -499,11 +458,7 @@ export function CandidateSearchPage({ session, initialData }: { session: Session
                         {row.skills.map((skill) => (
                           <span
                             key={skill}
-                            className="rounded-md px-2 py-0.5 text-[0.6875rem] font-medium"
-                            style={{
-                              background: "var(--sh-coral-light)",
-                              color: "var(--sh-coral)",
-                            }}
+                            className="rounded-md px-2 py-0.5 text-[0.6875rem] font-medium bg-primary/10 text-primary"
                           >
                             {skill}
                           </span>
@@ -517,8 +472,7 @@ export function CandidateSearchPage({ session, initialData }: { session: Session
                         {row.flags.map((flag) => (
                           <span
                             key={flag}
-                            className="rounded-md px-2 py-0.5 text-[0.6875rem] font-medium"
-                            style={{ background: "var(--sh-warning-bg)", color: "var(--sh-warning)" }}
+                            className="rounded-md px-2 py-0.5 text-[0.6875rem] font-medium bg-amber-500/10 text-amber-600"
                           >
                             {flag}
                           </span>
@@ -532,55 +486,25 @@ export function CandidateSearchPage({ session, initialData }: { session: Session
               {/* Pagination */}
               {totalPages > 1 && (
                 <div className="mt-6 flex items-center justify-center gap-4 py-4">
-                  <button
-                    type="button"
-                    className="rounded-lg border px-5 py-2 text-sm font-medium transition-all duration-100 disabled:cursor-not-allowed disabled:opacity-40"
-                    style={{
-                      borderColor: "var(--border)",
-                      background: "var(--card)",
-                      color: "var(--ink)",
-                    }}
+                  <Button
+                    variant="outline"
+                    size="sm"
                     onClick={() => goToPage(page - 1)}
                     disabled={page <= 1}
-                    onMouseEnter={(e) => {
-                      if (!(e.currentTarget as HTMLButtonElement).disabled) {
-                        e.currentTarget.style.borderColor = "var(--sh-coral)";
-                        e.currentTarget.style.color = "var(--sh-coral)";
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.borderColor = "var(--border)";
-                      e.currentTarget.style.color = "var(--ink)";
-                    }}
                   >
                     &larr; Previous
-                  </button>
-                  <div className="text-sm" style={{ color: "var(--muted)" }}>
+                  </Button>
+                  <div className="text-sm text-muted-foreground">
                     Page {page} of {totalPages}
                   </div>
-                  <button
-                    type="button"
-                    className="rounded-lg border px-5 py-2 text-sm font-medium transition-all duration-100 disabled:cursor-not-allowed disabled:opacity-40"
-                    style={{
-                      borderColor: "var(--border)",
-                      background: "var(--card)",
-                      color: "var(--ink)",
-                    }}
+                  <Button
+                    variant="outline"
+                    size="sm"
                     onClick={() => goToPage(page + 1)}
                     disabled={page >= totalPages}
-                    onMouseEnter={(e) => {
-                      if (!(e.currentTarget as HTMLButtonElement).disabled) {
-                        e.currentTarget.style.borderColor = "var(--sh-coral)";
-                        e.currentTarget.style.color = "var(--sh-coral)";
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.borderColor = "var(--border)";
-                      e.currentTarget.style.color = "var(--ink)";
-                    }}
                   >
                     Next &rarr;
-                  </button>
+                  </Button>
                 </div>
               )}
             </>
