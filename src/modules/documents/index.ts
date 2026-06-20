@@ -5,7 +5,8 @@
 export {
   listDocuments,
   getDocument,
-  uploadDocument
+  uploadDocument,
+  getDocumentDownloadUrl,
 } from "./actions";
 
 export type {
