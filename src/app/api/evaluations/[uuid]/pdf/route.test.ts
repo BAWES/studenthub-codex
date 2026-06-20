@@ -241,18 +241,17 @@ describe("buildReportHtml", () => {
 // Tests: GET /api/evaluations/[uuid]/pdf handler
 // ---------------------------------------------------------------------------
 
-// Mock the server action used by the route
 const mockGetEvaluationPdfData = vi.fn();
 
 vi.mock("@/modules/candidates/evaluation/actions", () => ({
   getEvaluationPdfData: (...args: unknown[]) => mockGetEvaluationPdfData(...args),
 }));
 
-// Mock Playwright for PDF generation tests
 const mockNewPage = vi.fn();
 const mockSetContent = vi.fn();
 const mockPdf = vi.fn();
-const mockClose = vi.fn();
+const mockPageClose = vi.fn();
+const mockSetDefaultTimeout = vi.fn();
 
 vi.mock("playwright", () => ({
   chromium: {
@@ -296,26 +295,36 @@ const mockEvalData = {
   },
 };
 
+function generateLargeAnswers(count: number) {
+  return Array.from({ length: count }, (_, i) => ({
+    ceq_uuid: `q-${i}`,
+    question: `Question ${i + 1} about candidate performance`,
+    answer: `Sample answer for question ${i + 1}`,
+    rating: (i % 5) + 1,
+  }));
+}
+
 describe("GET /api/evaluations/[uuid]/pdf", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockNewPage.mockReset();
     mockSetContent.mockReset();
     mockPdf.mockReset();
-    mockClose.mockReset();
+    mockPageClose.mockReset();
+    mockSetDefaultTimeout.mockReset();
 
-    // Reset module-level browser cache by invalidating the route module
     vi.resetModules();
 
-    // Default mock page
     mockNewPage.mockResolvedValue({
       setContent: mockSetContent,
       pdf: mockPdf,
-      close: mockClose,
+      close: mockPageClose,
+      setDefaultTimeout: mockSetDefaultTimeout,
     });
     mockSetContent.mockResolvedValue(undefined);
     mockPdf.mockResolvedValue(Buffer.from("fake-pdf-content"));
-    mockClose.mockResolvedValue(undefined);
+    mockPageClose.mockResolvedValue(undefined);
+    mockSetDefaultTimeout.mockResolvedValue(undefined);
   });
 
   it("returns 400 for missing UUID", async () => {
@@ -413,9 +422,42 @@ describe("GET /api/evaluations/[uuid]/pdf", () => {
     expect(html).toContain("N/A");
   });
 
-  // ---------------------------------------------------------------------------
+  it("shows N/A period when start_date and end_date are both null", async () => {
+    mockGetEvaluationPdfData.mockResolvedValue({
+      ...mockEvalData,
+      start_date: null,
+      end_date: null,
+    });
+
+    const { GET } = await import("./route");
+    const response = await GET(
+      pdfRequest("/api/evaluations/550e8400-e29b-41d4-a716-446655440000/pdf"),
+      { params: Promise.resolve({ uuid: "550e8400-e29b-41d4-a716-446655440000" }) },
+    );
+    expect(response.status).toBe(200);
+    const html = await response.text();
+    expect(html).toContain("Evaluation Period</dt><dd>N/A</dd>");
+  });
+
+  it("shows N/A date when created_at is null", async () => {
+    mockGetEvaluationPdfData.mockResolvedValue({
+      ...mockEvalData,
+      created_at: null,
+    });
+
+    const { GET } = await import("./route");
+    const response = await GET(
+      pdfRequest("/api/evaluations/550e8400-e29b-41d4-a716-446655440000/pdf"),
+      { params: Promise.resolve({ uuid: "550e8400-e29b-41d4-a716-446655440000" }) },
+    );
+    expect(response.status).toBe(200);
+    const html = await response.text();
+    expect(html).toContain("Date</dt><dd>N/A</dd>");
+  });
+
+  // -------------------------------------------------------------------------
   // PDF generation tests (format=pdf)
-  // ---------------------------------------------------------------------------
+  // -------------------------------------------------------------------------
 
   it("returns PDF when format=pdf", async () => {
     mockGetEvaluationPdfData.mockResolvedValue(mockEvalData);
@@ -435,20 +477,45 @@ describe("GET /api/evaluations/[uuid]/pdf", () => {
     const buffer = await response.arrayBuffer();
     expect(buffer.byteLength).toBeGreaterThan(0);
 
-    // Verify Playwright was invoked with correct HTML content
     expect(mockNewPage).toHaveBeenCalledTimes(1);
+    expect(mockSetDefaultTimeout).toHaveBeenCalledWith(30_000);
     expect(mockSetContent).toHaveBeenCalledTimes(1);
     expect(mockSetContent).toHaveBeenCalledWith(
       expect.stringContaining("John Doe"),
       expect.objectContaining({ waitUntil: "networkidle" }),
     );
     expect(mockPdf).toHaveBeenCalledTimes(1);
-    expect(mockClose).toHaveBeenCalledTimes(1);
+    expect(mockPageClose).toHaveBeenCalledTimes(1);
     expect(mockPdf).toHaveBeenCalledWith(
       expect.objectContaining({
         format: "A4",
         printBackground: true,
       }),
+    );
+  });
+
+  it("returns PDF with large evaluation dataset (50+ questions)", async () => {
+    mockGetEvaluationPdfData.mockResolvedValue({
+      ...mockEvalData,
+      answers: generateLargeAnswers(50),
+    });
+
+    const { GET } = await import("./route");
+    const response = await GET(
+      pdfRequest("/api/evaluations/550e8400-e29b-41d4-a716-446655440000/pdf?format=pdf"),
+      { params: Promise.resolve({ uuid: "550e8400-e29b-41d4-a716-446655440000" }) },
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("Content-Type")).toBe("application/pdf");
+
+    const buffer = await response.arrayBuffer();
+    expect(buffer.byteLength).toBeGreaterThan(0);
+
+    // Verify HTML content passed to Playwright includes all 50 questions
+    expect(mockSetContent).toHaveBeenCalledWith(
+      expect.stringContaining("Question 50 about candidate performance"),
+      expect.any(Object),
     );
   });
 
@@ -466,17 +533,15 @@ describe("GET /api/evaluations/[uuid]/pdf", () => {
     const text = await response.text();
     expect(text).toContain("Failed to generate PDF");
 
-    // Verify page.close() is called even on error (resource cleanup)
-    expect(mockClose).toHaveBeenCalledTimes(1);
+    // Verify page.close() is called in finally block even on error
+    expect(mockPageClose).toHaveBeenCalledTimes(1);
   });
 
-  it("returns 500 when browser launch fails", async () => {
+  it("returns 504 when PDF generation times out (TimeoutError)", async () => {
     mockGetEvaluationPdfData.mockResolvedValue(mockEvalData);
-
-    // Need to re-mock the module for this test since browser is cached
-    // The first call in the test suite caches _chromium, so subsequent
-    // imports use it. We test error handling via mockPdf rejection instead.
-    vi.resetModules();
+    mockSetContent.mockRejectedValue(
+      Object.assign(new Error("page.setContent timed out"), { name: "TimeoutError" }),
+    );
 
     const { GET } = await import("./route");
     const response = await GET(
@@ -484,9 +549,24 @@ describe("GET /api/evaluations/[uuid]/pdf", () => {
       { params: Promise.resolve({ uuid: "550e8400-e29b-41d4-a716-446655440000" }) },
     );
 
-    // With vi.resetModules(), the Playwright mock should still work
-    // because the mock is hoisted. If _chromium is null, getBrowser will
-    // try to import playwright again, which returns our mock.
-    expect([200, 500]).toContain(response.status);
+    expect(response.status).toBe(504);
+    const text = await response.text();
+    expect(text).toContain("PDF generation timed out");
+    expect(mockPageClose).toHaveBeenCalledTimes(1);
+  });
+
+  it("returns 504 when pdf generation times out (message-based detection)", async () => {
+    mockGetEvaluationPdfData.mockResolvedValue(mockEvalData);
+    mockPdf.mockRejectedValue(new Error("page.pdf: Timeout of 30000ms exceeded"));
+
+    const { GET } = await import("./route");
+    const response = await GET(
+      pdfRequest("/api/evaluations/550e8400-e29b-41d4-a716-446655440000/pdf?format=pdf"),
+      { params: Promise.resolve({ uuid: "550e8400-e29b-41d4-a716-446655440000" }) },
+    );
+
+    expect(response.status).toBe(504);
+    const text = await response.text();
+    expect(text).toContain("PDF generation timed out");
   });
 });
