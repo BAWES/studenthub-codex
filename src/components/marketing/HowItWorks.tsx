@@ -60,7 +60,8 @@ export default function HowItWorks({ className }: HowItWorksProps) {
         </h2>
         <p className="shLandingSectionSub mx-auto mt-2">
           Whether you&apos;re a student looking for work or an employer hiring
-          talent, StudentHub serves both sides of the marketplace seamlessly.
+          talent, our staff recruiters match candidates to the right roles
+          across both sides.
         </p>
       </div>
 
