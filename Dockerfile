@@ -21,7 +21,7 @@ FROM base AS deps
 LABEL stage=deps
 
 COPY package.json pnpm-lock.yaml .npmrc ./
-RUN npm_config_minimum_release_age=0 pnpm install --ignore-scripts --no-frozen-lockfile --prod
+RUN pnpm install --ignore-scripts --no-frozen-lockfile --config.minimumReleaseAge=0 --prod
 
 # ---------------------------------------------------------------------------
 # Stage 3: Build (full deps + source + prisma generate + next build)
@@ -30,7 +30,7 @@ FROM base AS builder
 LABEL stage=builder
 
 COPY package.json pnpm-lock.yaml .npmrc ./
-RUN npm_config_minimum_release_age=0 pnpm install --ignore-scripts --no-frozen-lockfile
+RUN pnpm install --ignore-scripts --no-frozen-lockfile --config.minimumReleaseAge=0
 
 COPY . .
 
