@@ -14,7 +14,7 @@ export default function AdminNotesError({ error, reset }: Props) {
 
   return (
     <div className="shell shellEmbedded">
-      <section className="workspaceStage">
+      <section className="min-w-0 overflow-x-hidden grid content-start gap-3.5 p-3.5">
         <section className="topbar">
           <h1 className="text-lg font-semibold text-destructive">
             Something went wrong
