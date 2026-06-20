@@ -86,7 +86,7 @@ export default async function AdminUserRequestDetailPage({
           ]}
         />
 
-        <section style={{ display: "flex", gap: "0.5rem", padding: "1rem" }}>
+        <section className="flex gap-2 p-4">
           <Link href={"/admin/user-requests" as Route}>
             <Button variant="outline">Back to User Requests</Button>
           </Link>

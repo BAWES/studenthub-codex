@@ -67,7 +67,7 @@ export default async function AdminCurrencyDetailPage({
           ]}
         />
 
-        <section style={{ display: "flex", gap: "0.5rem", padding: "1rem" }}>
+        <section className="flex gap-2 p-4">
           <Link href={"/admin/currency" as Route}>
             <Button variant="outline">Back to Currency</Button>
           </Link>
