@@ -20,11 +20,10 @@ WORKDIR /app
 FROM base AS deps
 LABEL stage=deps
 
-COPY package.json pnpm-lock.yaml ./
+COPY package.json pnpm-lock.yaml .npmrc ./
 
-# minimumReleaseAge=0 disables pnpm 9's supply-chain check against recently-
-# published packages (e.g. @aws-sdk/* published the same day as build)
-RUN pnpm install --frozen-lockfile --config.minimumReleaseAge=0 --prod --ignore-scripts
+# minimumReleaseAge=0 from .npmrc disables pnpm's supply-chain check
+RUN pnpm install --frozen-lockfile --prod --ignore-scripts
 
 # ---------------------------------------------------------------------------
 # Stage 3: Build (full deps + build)
@@ -32,8 +31,8 @@ RUN pnpm install --frozen-lockfile --config.minimumReleaseAge=0 --prod --ignore-
 FROM base AS builder
 LABEL stage=builder
 
-COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile --config.minimumReleaseAge=0 --ignore-scripts
+COPY package.json pnpm-lock.yaml .npmrc ./
+RUN pnpm install --frozen-lockfile --ignore-scripts
 
 COPY . .
 
