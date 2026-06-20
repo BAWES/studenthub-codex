@@ -118,7 +118,7 @@ export function AdminDashboardClient({ session, dashboard }: Props) {
 
       {/* ── Request Pipeline ── */}
       <section className="mb-6" aria-label="Request pipeline status">
-        <div className="rounded-lg border border-[var(--border)] bg-white p-5">
+        <div className="rounded-lg border border-border bg-card p-5">
           <h2 className="mb-4 text-base font-semibold text-foreground">
             Request Pipeline
           </h2>
@@ -180,7 +180,7 @@ export function AdminDashboardClient({ session, dashboard }: Props) {
 
       {/* ── PR Merge Metrics ── */}
       <section className="mb-6" aria-label="PR merge time-to-merge metrics">
-        <div className="rounded-lg border border-[var(--border)] bg-white p-5">
+        <div className="rounded-lg border border-[var(--border)] bg-card p-5">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-base font-semibold text-foreground">
               PR Time-to-Merge
@@ -318,7 +318,7 @@ function DataListCard({
   emptyMessage?: string;
 }) {
   return (
-    <div className="rounded-lg border border-[var(--border)] bg-white">
+    <div className="rounded-lg border border-[var(--border)] bg-card">
       <div className="flex items-center justify-between border-b border-[var(--border)] px-4 py-3">
         <div>
           <span
