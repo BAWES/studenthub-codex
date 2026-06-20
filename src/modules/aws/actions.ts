@@ -197,7 +197,7 @@ function bucketName(): string {
  * Check whether a stored path looks like an S3 key rather than a local path.
  * S3 keys do not start with "/"; local paths (and legacy paths) do.
  */
-export function isS3Key(key: string): boolean {
+export async function isS3Key(key: string): Promise<boolean> {
   return key.length > 0 && !key.startsWith("/");
 }
 

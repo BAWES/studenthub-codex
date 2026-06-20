@@ -100,7 +100,7 @@ const ALLOWED_TYPES: Record<string, { mime: string[]; ext: string[]; maxSize: nu
 async function toDocumentItem(type: DocumentType, filePath: string | null): Promise<CandidateDocumentItem> {
   let fileUrl: string | null = filePath;
 
-  if (filePath && isS3Key(filePath)) {
+  if (filePath && await isS3Key(filePath)) {
     // Generate a presigned download URL for S3-stored objects
     const result = await getPresignedDownloadUrl({ key: filePath });
     if (!("error" in result)) {
@@ -518,7 +518,7 @@ export async function deleteCandidateDocument(
 
     // Delete from S3 if the stored path is an S3 key (no leading "/").
     // Legacy local paths (starting with "/uploads/") are cleaned from disk.
-    if (currentPath && isS3Key(currentPath)) {
+    if (currentPath && await isS3Key(currentPath)) {
       await deleteS3Object({ key: currentPath });
     } else if (currentPath && currentPath.startsWith("/uploads/")) {
       // Legacy cleanup: remove from local disk
