@@ -6,6 +6,15 @@ import path from "node:path";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
+import {
+  uploadToS3,
+  deleteFromS3,
+  getS3DownloadUrl,
+  isS3Path,
+  toS3Key,
+  toS3StoredPath,
+  s3ConfigAvailable,
+} from "@/lib/s3";
 import { DOCUMENT_TYPES } from "./constants";
 import type { DocumentType } from "./constants";
 import {
@@ -336,29 +345,38 @@ export async function uploadCandidateDocument(
   }
 
   try {
-    // Save file to disk
-    const dir = path.join(UPLOAD_DIR, String(candidateId));
-    await fs.mkdir(dir, { recursive: true });
-
+    // Determine storage path
+    const ext = path.extname(file.name).toLowerCase();
     const filename = `${documentType}_${crypto.randomUUID()}${ext}`;
-    const filepath = path.join(dir, filename);
-
+    const relativeDir = path.join("uploads", "candidates", String(candidateId));
+    const relativePath = path.join(relativeDir, filename);
     const buffer = Buffer.from(await file.arrayBuffer());
-    await fs.writeFile(filepath, buffer);
 
-    const publicPath = `/uploads/candidates/${candidateId}/${filename}`;
+    let storedPath: string;
+
+    if (s3ConfigAvailable()) {
+      // Upload to S3/MinIO
+      await uploadToS3(relativePath, buffer, file.type || undefined);
+      storedPath = toS3StoredPath(relativePath);
+    } else {
+      // Fallback: save to local disk
+      const fullDir = path.join(process.cwd(), "public", relativeDir);
+      await fs.mkdir(fullDir, { recursive: true });
+      await fs.writeFile(path.join(fullDir, filename), buffer);
+      storedPath = `/uploads/candidates/${candidateId}/${filename}`;
+    }
 
     // Update the correct DB field
     const field = DOCUMENT_FIELD_MAP[documentType];
     await prisma.candidate.update({
       where: { candidate_id: candidateId },
-      data: { [field]: publicPath },
+      data: { [field]: storedPath },
     });
 
     revalidatePath("/candidate");
     revalidatePath("/candidate/edit");
 
-    const result: UploadDocumentState = { success: true, filePath: publicPath };
+    const result: UploadDocumentState = { success: true, filePath: storedPath };
 
     // Validate output shape
     const outputParsed = uploadDocumentStateResultSchema.safeParse(result);
@@ -387,6 +405,29 @@ export async function uploadCandidateDocument(
 
     return result;
   }
+}
+
+// ---------------------------------------------------------------------------
+// URL resolver
+// ---------------------------------------------------------------------------
+
+/**
+ * Resolve the display/download URL for a candidate document.
+ * For S3-stored files, generates a presigned URL.
+ * For local files, returns the public path as-is.
+ * Returns null if the path is empty.
+ */
+export async function getCandidateDocumentUrl(
+  filePath: string | null,
+): Promise<string | null> {
+  if (!filePath) return null;
+
+  if (isS3Path(filePath)) {
+    return getS3DownloadUrl(toS3Key(filePath));
+  }
+
+  // Local file — serve directly from public/
+  return filePath;
 }
 
 // ---------------------------------------------------------------------------
@@ -475,13 +516,23 @@ export async function deleteCandidateDocument(
       data: { [field]: null },
     });
 
-    // Delete the file from disk if it exists and is a local file
-    if (currentPath && currentPath.startsWith("/uploads/")) {
-      const filePath = path.join(process.cwd(), "public", currentPath);
-      try {
-        await fs.unlink(filePath);
-      } catch {
-        // File may already be gone — that's fine
+    // Delete the file from disk or S3
+    if (currentPath) {
+      if (isS3Path(currentPath)) {
+        // Delete from S3/MinIO (best-effort)
+        try {
+          await deleteFromS3(toS3Key(currentPath));
+        } catch {
+          // Object may already be gone
+        }
+      } else if (currentPath.startsWith("/uploads/")) {
+        // Delete from local disk
+        const filePath = path.join(process.cwd(), "public", currentPath);
+        try {
+          await fs.unlink(filePath);
+        } catch {
+          // File may already be gone — that's fine
+        }
       }
     }
 
