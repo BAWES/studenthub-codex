@@ -25,6 +25,9 @@ vi.mock("@/modules/auth/SignupForm", () => ({
 vi.mock("lucide-react", () => ({
   Shield: () => <span data-testid="icon-shield" />,
   Sparkles: () => <span data-testid="icon-sparkles" />,
+  Briefcase: () => <span data-testid="icon-briefcase" />,
+  GraduationCap: () => <span data-testid="icon-graduation" />,
+  Users: () => <span data-testid="icon-users" />,
 }));
 
 afterEach(() => {
