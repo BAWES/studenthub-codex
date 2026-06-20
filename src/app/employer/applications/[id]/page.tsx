@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { requireRoleCapability } from "@/modules/auth/session";
 import { getApplicationDetail } from "./actions";
-import { acceptApplication, rejectApplication, revertApplicationStatus } from "./actions";
+import { acceptApplication, rejectApplication, revertApplicationStatus } from "./actions.server";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { StatusBadge } from "@/modules/workspace/StatusBadge";
 import { genericStatusVariant } from "@/modules/workspace/status-mapping";
