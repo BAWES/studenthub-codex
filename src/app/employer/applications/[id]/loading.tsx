@@ -4,8 +4,8 @@ export default function EmployerApplicationDetailLoading() {
       <section className="min-w-0 overflow-x-hidden grid content-start gap-3.5 p-3.5">
         <section className="topbar">
           <div>
-            <div className="h-3 w-32 mb-2 rounded bg-white/5 animate-pulse" />
-            <div className="h-7 w-56 rounded bg-white/5 animate-pulse" />
+            <div className="h-3 w-32 mb-2 rounded bg-[var(--skeleton)] animate-pulse" />
+            <div className="h-7 w-56 rounded bg-[var(--skeleton)] animate-pulse" />
           </div>
         </section>
         <div className="max-w-3xl space-y-6 mt-8">
