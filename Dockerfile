@@ -59,11 +59,10 @@ RUN addgroup --system --gid 1001 nodejs && \
 
 WORKDIR /app
 
-# Copy standalone build output
+# Copy standalone build output — includes all required node_modules
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 
 # Prisma schema (for runtime introspection if needed)
 COPY --from=builder /app/prisma ./prisma
