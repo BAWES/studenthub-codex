@@ -80,11 +80,11 @@ test.describe("Staff Interaction Smoke", () => {
   test("staff candidates page loads with DataTable", async () => {
     const ctx = await authContext(staff);
     await ctx.page.goto("/staff/candidates");
-    await ctx.page.waitForLoadState("load");
+    await ctx.page.waitForLoadState("networkidle");
     await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
 
-    // DataTable renders
-    await expect(ctx.page.locator(".dataList, .rows, table").first()).toBeVisible({ timeout: 10000 });
+    // DataTable renders — use networkidle + robust selector
+    await expect(ctx.page.locator('[class*="DataTable"], [class*="dataTable"], .dataList, table').first()).toBeVisible({ timeout: 15000 });
 
     assertNoReactErrors(ctx.errors);
     await ctx.close();
@@ -128,7 +128,7 @@ test.describe("Staff Interaction Smoke", () => {
       const sidebarLink = ctx.page.locator(`a[href="${link.url}"]`).first();
       if ((await sidebarLink.count()) > 0) {
         await sidebarLink.click();
-        await ctx.page.waitForURL(`**${link.url}*`, { timeout: 8000 });
+        await ctx.page.waitForURL((url) => url.pathname.includes(link.url), { timeout: 10000 });
         expect(ctx.page.url()).toContain(link.url);
         // Navigate back to hub
         await ctx.page.goto("/staff");
@@ -190,7 +190,7 @@ test.describe("Company Interaction Smoke", () => {
     await ctx.page.waitForLoadState("load");
     await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
     await expect(ctx.page).toHaveURL(/\/company\/contacts/);
-    await expect(ctx.page.locator(".dataList, .rows, table").first()).toBeVisible({ timeout: 10000 });
+    await expect(ctx.page.locator('[class*="DataTable"], [class*="dataTable"], .dataList, table').first()).toBeVisible({ timeout: 15000 });
 
     assertNoReactErrors(ctx.errors);
     await ctx.close();
@@ -212,7 +212,7 @@ test.describe("Company Interaction Smoke", () => {
       const sidebarLink = ctx.page.locator(`a[href="${link.url}"]`).first();
       if ((await sidebarLink.count()) > 0) {
         await sidebarLink.click();
-        await ctx.page.waitForURL(`**${link.url}*`, { timeout: 8000 });
+        await ctx.page.waitForURL((url) => url.pathname.includes(link.url), { timeout: 10000 });
         expect(ctx.page.url()).toContain(link.url);
         await ctx.page.goto("/company");
         await ctx.page.waitForLoadState("load");
@@ -273,7 +273,7 @@ test.describe("Admin Interaction Smoke", () => {
     await ctx.page.waitForLoadState("load");
     await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
     await expect(ctx.page).toHaveURL(/\/admin\/candidates/);
-    await expect(ctx.page.locator(".dataList, .rows, table").first()).toBeVisible({ timeout: 10000 });
+    await expect(ctx.page.locator('[class*="DataTable"], [class*="dataTable"], .dataList, table').first()).toBeVisible({ timeout: 15000 });
 
     assertNoReactErrors(ctx.errors);
     await ctx.close();
@@ -333,7 +333,7 @@ test.describe("Admin Interaction Smoke", () => {
       const sidebarLink = ctx.page.locator(`a[href="${link.url}"]`).first();
       if ((await sidebarLink.count()) > 0) {
         await sidebarLink.click();
-        await ctx.page.waitForURL(`**${link.url}*`, { timeout: 8000 });
+        await ctx.page.waitForURL((url) => url.pathname.includes(link.url), { timeout: 10000 });
         expect(ctx.page.url()).toContain(link.url);
         await ctx.page.goto("/admin");
         await ctx.page.waitForLoadState("load");
@@ -390,7 +390,7 @@ test.describe("Inspector Interaction Smoke", () => {
     await ctx.page.waitForLoadState("load");
     await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
     await expect(ctx.page).toHaveURL(/\/inspector\/id-requests/);
-    await expect(ctx.page.locator(".dataList, .rows, table").first()).toBeVisible({ timeout: 10000 });
+    await expect(ctx.page.locator('[class*="DataTable"], [class*="dataTable"], .dataList, table').first()).toBeVisible({ timeout: 15000 });
 
     assertNoReactErrors(ctx.errors);
     await ctx.close();

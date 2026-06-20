@@ -46,7 +46,7 @@ test.describe("Company workspace panel isolation", () => {
   const panels: { label: string; route: string; heading: string }[] = [
     { label: "Overview",       route: "/company",           heading: "Hiring workspace" },
     { label: "Job Postings",   route: "/employer/jobs",     heading: "Job Postings" },
-    { label: "Requests",       route: "/company/requests",  heading: "Requests" },
+    { label: "Requests",       route: "/company/requests",  heading: "Company Requests" },
     { label: "Companies",      route: "/company/companies", heading: "Linked Companies" },
     { label: "Contacts",       route: "/company/contacts",  heading: "Linked Contacts" },
     { label: "Stores",         route: "/company/stores",    heading: "Stores" },
