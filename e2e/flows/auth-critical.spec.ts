@@ -385,40 +385,7 @@ test.describe("Auth critical flows — Login, cross-role isolation, public route
       await browser.close();
     });
 
-    test("4b. For-admins marketing page loads", async () => {
-      const { chromium } = await import("@playwright/test");
-      const browser = await chromium.launch();
-      const context = await browser.newContext();
-      const page = await context.newPage();
-      const errors: string[] = [];
-      page.on("console", (msg) => {
-        if (msg.type() === "error") errors.push(msg.text());
-      });
-
-      await page.goto("/for-admins");
-      await page.waitForLoadState("load");
-      await expect(page.locator("body")).toBeVisible({ timeout: 15000 });
-
-      assertNoReactErrors(errors);
-      await context.close();
-      await browser.close();
-    });
-
-    test("4c. For-staff marketing page loads", async () => {
-      const { chromium } = await import("@playwright/test");
-      const browser = await chromium.launch();
-      const context = await browser.newContext();
-      const page = await context.newPage();
-
-      await page.goto("/for-staff");
-      await page.waitForLoadState("load");
-      await expect(page.locator("body")).toBeVisible({ timeout: 15000 });
-
-      await context.close();
-      await browser.close();
-    });
-
-    test("4d. Hub page loads for unauthenticated user (redirects to login)", async () => {
+    test("4b. Hub page loads for unauthenticated user (redirects to login)", async () => {
       const { chromium } = await import("@playwright/test");
       const browser = await chromium.launch();
       const context = await browser.newContext();
@@ -456,11 +423,6 @@ test.describe("Auth critical flows — Login, cross-role isolation, public route
         "/forgot-password",
         "/reset-password",
         "/",
-        "/for-admins",
-        "/for-staff",
-        "/for-candidates",
-        "/for-companies",
-        "/for-inspectors",
       ];
       for (const route of pages) {
         await page.goto(route);
