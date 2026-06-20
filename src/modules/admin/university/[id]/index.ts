@@ -1,0 +1,1 @@
+export { getUniversity } from "./actions";

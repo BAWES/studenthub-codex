@@ -1,0 +1,1 @@
+export { getMajor } from "./actions";
