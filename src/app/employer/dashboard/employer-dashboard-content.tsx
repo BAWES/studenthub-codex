@@ -1,0 +1,162 @@
+"use client";
+
+import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
+import { StatusBadge } from "@/modules/workspace/StatusBadge";
+import { genericStatusVariant } from "@/modules/workspace/status-mapping";
+import type { SessionUser } from "@/modules/auth/types";
+import type { EmployerDashboardMetric, RecentApplication, JobStatusBreakdown } from "./schemas";
+
+type Props = {
+  session: SessionUser;
+  metrics: EmployerDashboardMetric[];
+  recentApplications: RecentApplication[];
+  jobStatusBreakdown: JobStatusBreakdown[];
+  totalJobs: number;
+  totalApplications: number;
+};
+
+function MetricCard({ label, value, note }: EmployerDashboardMetric) {
+  return (
+    <div className="flex flex-col gap-1 rounded-xl border bg-card p-5" style={{ borderColor: "var(--border)", backgroundColor: "var(--card)" }}>
+      <span className="text-sm font-medium" style={{ color: "var(--muted-foreground)" }}>{label}</span>
+      <span className="text-3xl font-bold" style={{ color: "var(--ink)" }}>{value.toLocaleString()}</span>
+      {note && (
+        <span className="text-xs" style={{ color: "var(--muted-foreground)" }}>{note}</span>
+      )}
+    </div>
+  );
+}
+
+function RecentApplicationsTable({ applications }: { applications: RecentApplication[] }) {
+  if (applications.length === 0) {
+    return (
+      <p className="py-8 text-center text-sm" style={{ color: "var(--muted-foreground)" }}>
+        No applications yet. Post a job listing to start receiving applications.
+      </p>
+    );
+  }
+
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full text-left text-sm">
+        <thead>
+          <tr style={{ borderBottom: "1px solid var(--border)" }}>
+            <th className="py-3 pr-4 font-medium" style={{ color: "var(--muted-foreground)" }}>Candidate</th>
+            <th className="py-3 pr-4 font-medium" style={{ color: "var(--muted-foreground)" }}>Job</th>
+            <th className="py-3 pr-4 font-medium" style={{ color: "var(--muted-foreground)" }}>Status</th>
+            <th className="py-3 font-medium" style={{ color: "var(--muted-foreground)" }}>Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          {applications.map((app) => (
+            <tr key={app.applicationId} style={{ borderBottom: "1px solid var(--border)" }}>
+              <td className="py-3 pr-4" style={{ color: "var(--ink)" }}>
+                {app.candidateName ?? `Candidate #${app.candidateId}`}
+              </td>
+              <td className="py-3 pr-4" style={{ color: "var(--ink)" }}>{app.jobTitle}</td>
+              <td className="py-3 pr-4">
+                <StatusBadge variant={genericStatusVariant(app.status)} label={app.status} size="sm" />
+              </td>
+              <td className="py-3" style={{ color: "var(--muted-foreground)" }}>
+                {new Date(app.createdAt).toLocaleDateString()}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function StatusBreakdownBar({ breakdown }: { breakdown: JobStatusBreakdown[] }) {
+  if (breakdown.length === 0) {
+    return (
+      <p className="py-4 text-center text-sm" style={{ color: "var(--muted-foreground)" }}>
+        No job listings yet.
+      </p>
+    );
+  }
+
+  const total = breakdown.reduce((sum, s) => sum + s.count, 0);
+
+  return (
+    <div className="space-y-3">
+      {breakdown.map((item) => {
+        const pct = total > 0 ? Math.round((item.count / total) * 100) : 0;
+        return (
+          <div key={item.status} className="flex items-center gap-3">
+            <span className="w-24 text-sm font-medium capitalize" style={{ color: "var(--ink)" }}>{item.status}</span>
+            <div className="flex-1 rounded-full" style={{ height: 8, backgroundColor: "var(--border)" }}>
+              <div
+                className="rounded-full"
+                style={{
+                  width: `${pct}%`,
+                  height: 8,
+                  backgroundColor: item.status === "active" ? "var(--sh-success)" : "#eb6651",
+                  transition: "width 300ms ease",
+                }}
+              />
+            </div>
+            <span className="w-16 text-right text-sm font-medium" style={{ color: "var(--muted-foreground)" }}>
+              {item.count} ({pct}%)
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+export function EmployerDashboardContent({
+  session,
+  metrics,
+  recentApplications,
+  jobStatusBreakdown,
+  totalJobs,
+  totalApplications,
+}: Props) {
+  return (
+    <WorkspaceShell
+      session={session}
+      eyebrow="Employer"
+      title="Dashboard"
+      metrics={[
+        { label: "Total Jobs", value: totalJobs, note: "all listings" },
+        { label: "Total Applications", value: totalApplications, note: "across all jobs" },
+        { label: "Active Jobs", value: metrics.find((m) => m.label === "Active Job Listings")?.value ?? 0, note: "currently accepting applications" },
+      ]}
+    >
+      {/* Metrics grid */}
+      <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {metrics.map((metric) => (
+          <MetricCard key={metric.label} {...metric} />
+        ))}
+      </div>
+
+      {/* Two-column layout for tables */}
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+        {/* Recent Applications */}
+        <div className="rounded-xl border" style={{ borderColor: "var(--border)", backgroundColor: "var(--card)" }}>
+          <div className="border-b px-5 py-4" style={{ borderColor: "var(--border)" }}>
+            <h2 className="text-lg font-semibold" style={{ color: "var(--ink)" }}>Recent Applications</h2>
+            <p className="text-sm" style={{ color: "var(--muted-foreground)" }}>Latest {recentApplications.length} applications</p>
+          </div>
+          <div className="px-5 pb-4">
+            <RecentApplicationsTable applications={recentApplications} />
+          </div>
+        </div>
+
+        {/* Job Status Breakdown */}
+        <div className="rounded-xl border" style={{ borderColor: "var(--border)", backgroundColor: "var(--card)" }}>
+          <div className="border-b px-5 py-4" style={{ borderColor: "var(--border)" }}>
+            <h2 className="text-lg font-semibold" style={{ color: "var(--ink)" }}>Job Status Breakdown</h2>
+            <p className="text-sm" style={{ color: "var(--muted-foreground)" }}>{totalJobs} total job listings</p>
+          </div>
+          <div className="px-5 pb-4">
+            <StatusBreakdownBar breakdown={jobStatusBreakdown} />
+          </div>
+        </div>
+      </div>
+    </WorkspaceShell>
+  );
+}

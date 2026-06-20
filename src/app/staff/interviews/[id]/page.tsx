@@ -2,9 +2,9 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Route } from "next";
 import { requireRoleCapability } from "@/modules/auth/session";
-import { FactPanel } from "@/modules/workspace/DetailPanels";
+import { DetailSection } from "@/modules/workspace/DetailPanels";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
-import { getStaffInterviewDetail } from "@/modules/workspace/data";
+import { getStaffInterviewDetail } from "../actions";
 import { updateInterviewStatusAction } from "@/modules/requests/interview-actions";
 import { Button } from "@/components/ui/button";
 
@@ -26,54 +26,54 @@ export default async function StaffInterviewDetailPage({
   const session = await requireRoleCapability("staff", "request.interview");
   const { id } = await params;
   const { notice } = await searchParams;
-  const interview = await getStaffInterviewDetail(id, Number(session.id));
+  const interview = await getStaffInterviewDetail({ interviewUuid: id });
 
   if (!interview) {
     notFound();
   }
 
   const facts = [
-    { label: "Candidate", value: interview.candidate?.candidate_name },
-    { label: "Email", value: interview.candidate?.candidate_email },
-    { label: "Phone", value: interview.candidate?.candidate_phone },
-    { label: "Request", value: interview.request?.request_position_title },
-    { label: "Company", value: interview.request?.company?.company_name },
-    { label: "Scheduled At", value: interview.interview_at?.toLocaleString() },
+    { label: "Candidate", value: interview.candidateName },
+    { label: "Email", value: interview.candidateEmail },
+    { label: "Phone", value: interview.candidatePhone },
+    { label: "Request", value: interview.requestTitle },
+    { label: "Company", value: interview.companyName },
+    { label: "Scheduled At", value: interview.scheduledAt?.toLocaleString() },
     { label: "Status", value: statusLabel(interview.status) },
-    { label: "Staff", value: interview.staff?.staff_name },
-    { label: "Internal Note", value: interview.internal_note },
-    { label: "Interview Note", value: interview.interview_note }
+    { label: "Staff", value: interview.staffName },
+    { label: "Internal Note", value: interview.note },
+    { label: "Interview Note", value: interview.interviewNote }
   ];
 
   return (
     <WorkspaceShell
       session={session}
       eyebrow="Staff / Interviews"
-      title={interview.candidate?.candidate_name ?? "Interview Detail"}
+      title={interview.candidateName ?? "Interview Detail"}
       metrics={[]}
     >
-      <FactPanel title="Interview Details" facts={facts} />
+      <DetailSection title="Interview Details" facts={facts} />
 
-      <section className="rounded-lg border border-border bg-card mt-5">
-        <h2 className="m-0 px-4 py-[18px] text-base font-bold text-foreground border-b border-border">Actions</h2>
-        <div className="flex flex-wrap gap-2 p-4">
+      <section className="detailPanel">
+        <h2>Actions</h2>
+        <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
           {interview.status !== 1 && (
             <form action={updateInterviewStatusAction}>
-              <input type="hidden" name="interview_uuid" value={interview.request_interview_uuid} />
+              <input type="hidden" name="interview_uuid" value={interview.interviewUuid} />
               <input type="hidden" name="status" value={1} />
               <Button type="submit" variant="default">Mark Completed</Button>
             </form>
           )}
           {interview.status !== 2 && (
             <form action={updateInterviewStatusAction}>
-              <input type="hidden" name="interview_uuid" value={interview.request_interview_uuid} />
+              <input type="hidden" name="interview_uuid" value={interview.interviewUuid} />
               <input type="hidden" name="status" value={2} />
               <Button type="submit" variant="outline">Mark Cancelled</Button>
             </form>
           )}
           {interview.status !== 0 && interview.status !== null && (
             <form action={updateInterviewStatusAction}>
-              <input type="hidden" name="interview_uuid" value={interview.request_interview_uuid} />
+              <input type="hidden" name="interview_uuid" value={interview.interviewUuid} />
               <input type="hidden" name="status" value={0} />
               <Button type="submit" variant="secondary">Reset to Scheduled</Button>
             </form>
@@ -81,15 +81,15 @@ export default async function StaffInterviewDetailPage({
         </div>
       </section>
 
-      <section className="rounded-lg border border-border bg-card mt-5">
-        <div className="flex flex-wrap gap-2 p-4">
-          {interview.candidate?.candidate_id && (
-            <Link href={`/staff/candidates?candidate=${interview.candidate.candidate_id}` as Route}>
+      <section className="detailPanel">
+        <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+          {interview.candidateId && (
+            <Link href={`/staff/candidates?candidate=${interview.candidateId}` as Route}>
               <Button variant="outline">View Candidate</Button>
             </Link>
           )}
-          {interview.request?.request_uuid && (
-            <Link href={`/staff/requests/${interview.request.request_uuid}` as Route}>
+          {interview.requestUuid && (
+            <Link href={`/staff/requests/${interview.requestUuid}` as Route}>
               <Button variant="outline">View Request</Button>
             </Link>
           )}
@@ -100,8 +100,8 @@ export default async function StaffInterviewDetailPage({
       </section>
 
       {notice && (
-        <section className="rounded-lg border border-border bg-card mt-5">
-          <p className="px-4 py-3 text-sm text-muted-foreground">
+        <section className="detailPanel">
+          <p className="notice">
             {notice === "interview-updated" && "Interview updated successfully."}
             {notice === "not-found" && "Interview not found."}
             {notice === "missing-fields" && "Missing required fields."}

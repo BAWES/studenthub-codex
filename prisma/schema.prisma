@@ -257,6 +257,8 @@ model candidate {
   candidate_link                    candidate_link[]
   candidate_note                    candidate_note[]
   candidate_notification            candidate_notification[]
+  candidate_reference               candidate_reference[]
+  candidate_certification           candidate_certification[]
   candidate_skill                   candidate_skill[]
   candidate_stats                   candidate_stats[]
   candidate_tag                     candidate_tag[]
@@ -273,6 +275,7 @@ model candidate {
   interview_evaluation              interview_evaluation[]
   invitation                        invitation[]
   job_interest                      job_interest[]
+  job_listing_application           job_listing_application[]
   note                              note[]
   request_application               request_application[]
   request_interview                 request_interview[]
@@ -546,6 +549,23 @@ model candidate_notification {
   @@index([tc_id], map: "idx-candidate_notification-tc_id")
 }
 
+model candidate_reference {
+  reference_uuid String    @id @db.Char(60)
+  candidate_id   Int
+  name           String    @db.VarChar(255)
+  company        String?   @db.VarChar(255)
+  position       String?   @db.VarChar(255)
+  phone          String?   @db.VarChar(50)
+  email          String?   @db.VarChar(255)
+  relationship   String?   @db.VarChar(255)
+  deleted        Int       @default(0) @db.SmallInt
+  created_at     DateTime? @db.DateTime(0)
+  updated_at     DateTime? @db.DateTime(0)
+  candidate      candidate @relation(fields: [candidate_id], references: [candidate_id], onDelete: Cascade, map: "fk-candidate_reference-candidate_id")
+
+  @@index([candidate_id], map: "idx-candidate_reference-candidate_id")
+}
+
 model candidate_skill {
   candidate_skill_id         Int        @id @default(autoincrement())
   candidate_id               Int?
@@ -555,6 +575,24 @@ model candidate_skill {
   candidate                  candidate? @relation(fields: [candidate_id], references: [candidate_id], onDelete: Cascade, onUpdate: Restrict, map: "fk-candidate_skill-candidate_id")
 
   @@index([candidate_id], map: "fk-candidate_skill-candidate_id")
+}
+
+model candidate_certification {
+  certification_id      Int        @id @default(autoincrement())
+  candidate_id          Int
+  certification_name   String     @db.VarChar(255)
+  issuing_organization String     @db.VarChar(255)
+  issue_date           DateTime?  @db.Date
+  expiry_date          DateTime?  @db.Date
+  credential_id        String?    @db.VarChar(128)
+  credential_url       String?    @db.VarChar(500)
+  description          String?    @db.Text
+  deleted              Int        @default(0) @db.SmallInt
+  created_at           DateTime?  @db.DateTime(0)
+  updated_at           DateTime?  @db.DateTime(0)
+  candidate            candidate  @relation(fields: [candidate_id], references: [candidate_id], onDelete: Cascade, onUpdate: Restrict, map: "fk-candidate_certification-candidate_id")
+
+  @@index([candidate_id], map: "fk-candidate_certification-candidate_id")
 }
 
 model candidate_stats {
@@ -655,6 +693,7 @@ model candidate_work_history {
   @@index([company_id], map: "idx-candidate_work_history-company_id")
   @@index([parent_company_id], map: "idx-candidate_work_history-parent_company_id")
   @@index([staff_id], map: "idx-candidate_work_history-staff_id")
+  @@index([staff_id, candidate_id], map: "idx-candidate_work_history-staff_id-candidate_id")
 }
 
 model candidate_work_log_feedback {
@@ -881,6 +920,7 @@ model company {
   transfer                                                                 transfer[]
   transfer_candidate                                                       transfer_candidate[]
   transfer_cost                                                            transfer_cost[]
+  job_listing                                                              job_listing[]
 
   @@index([parent_company_id], map: "idx-company-parent_company_id")
   @@index([staff_id], map: "idx-company-staff_id")
@@ -962,6 +1002,47 @@ model company_token {
   company                  company   @relation(fields: [company_id], references: [company_id], onDelete: Cascade, onUpdate: Restrict, map: "fk-company_token-company_id")
 
   @@index([company_id], map: "idx-company_token-company_id")
+}
+
+// ---------------------------------------------------------------------------
+// Job listing — employer posts for student recruitment
+// ---------------------------------------------------------------------------
+model job_listing {
+  jobListingId   Int      @id @default(autoincrement())
+  employerId     Int
+  title          String   @db.VarChar(255)
+  description    String   @db.Text
+  requirements   String?  @db.Text
+  location       String?  @db.VarChar(255)
+  employmentType String?  @db.VarChar(50)
+  salaryRange    String?  @db.VarChar(100)
+  status         String?  @default("active") @db.VarChar(20)
+  createdAt      DateTime @default(now()) @db.DateTime(0)
+  updatedAt      DateTime @updatedAt @db.DateTime(0)
+
+  employer     company                      @relation(fields: [employerId], references: [company_id], onDelete: Cascade, onUpdate: Restrict, map: "fk-job_listing-employer_id")
+  applications job_listing_application[]
+
+  @@index([employerId], map: "idx-job_listing-employer_id")
+  @@index([status], map: "idx-job_listing-status")
+}
+
+model job_listing_application {
+  id            Int       @id @default(autoincrement())
+  jobListingId  Int
+  candidateId   Int
+  status        String    @default("applied") @db.VarChar(50)
+  coverLetter   String?   @db.Text
+  notes         String?   @db.Text
+  createdAt     DateTime  @default(now()) @db.DateTime(0)
+  updatedAt     DateTime  @updatedAt @db.DateTime(0)
+
+  jobListing job_listing @relation(fields: [jobListingId], references: [jobListingId], onDelete: Cascade, onUpdate: Restrict, map: "fk-job_listing_application-job_listing_id")
+  candidate  candidate   @relation(fields: [candidateId], references: [candidate_id], onDelete: Cascade, onUpdate: Restrict, map: "fk-job_listing_application-candidate_id")
+
+  @@index([jobListingId], map: "idx-job_listing_application-job_listing_id")
+  @@index([candidateId], map: "idx-job_listing_application-candidate_id")
+  @@index([status], map: "idx-job_listing_application-status")
 }
 
 model contact {
@@ -1166,6 +1247,24 @@ model daily_standup_question {
   created_at           DateTime               @db.DateTime(0)
   updated_at           DateTime               @db.DateTime(0)
   daily_standup_answer daily_standup_answer[]
+}
+
+model department {
+  department_uuid       String     @id @db.Char(60)
+  department_name_en    String     @db.VarChar(255)
+  department_name_ar    String?    @db.VarChar(255)
+  department_created_at DateTime?  @db.DateTime(0)
+  department_updated_at DateTime?  @db.DateTime(0)
+  employee              employee[]
+}
+
+model designation {
+  designation_uuid       String     @id @db.Char(60)
+  designation_name_en    String     @db.VarChar(255)
+  designation_name_ar    String?    @db.VarChar(255)
+  designation_created_at DateTime?  @db.DateTime(0)
+  designation_updated_at DateTime?  @db.DateTime(0)
+  employee               employee[]
 }
 
 model degree {
@@ -2239,6 +2338,20 @@ model story_activity {
   @@index([story_uuid], map: "idx-story_activity-story_uuid")
 }
 
+model holiday {
+  holiday_uuid String    @id @db.Char(60)
+  name         String    @db.VarChar(255)
+  date         DateTime  @db.Date
+  is_recurring Boolean   @default(false)
+  description  String?   @db.Text
+  is_deleted   Boolean   @default(false)
+  created_at   DateTime? @db.DateTime(0)
+  updated_at   DateTime? @db.DateTime(0)
+
+  @@index([is_deleted], map: "idx-holiday-is_deleted")
+  @@index([date], map: "idx-holiday-date")
+}
+
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model suggestion {
   suggestion_uuid                         String     @id @db.Char(60)
@@ -2570,6 +2683,43 @@ enum invoice_invoice_status {
   unpaid
 }
 
+model employee {
+  employee_uuid       String     @id @db.Char(60)
+  employee_name       String     @db.VarChar(255)
+  employee_email      String     @db.VarChar(255)
+  employee_phone      String?    @db.VarChar(45)
+  employee_salary     Decimal?   @default(0.000) @db.Decimal(10, 3)
+  employee_status     Int        @default(10) @db.SmallInt
+  employee_created_at DateTime   @db.DateTime(0)
+  employee_updated_at DateTime   @db.DateTime(0)
+  deleted             Int        @default(0) @db.SmallInt
+  designation_uuid    String?    @db.Char(60)
+  department_uuid     String?    @db.Char(60)
+  designation         designation?  @relation(fields: [designation_uuid], references: [designation_uuid], onUpdate: Restrict, map: "fk-employee-designation_uuid")
+  department          department?   @relation(fields: [department_uuid], references: [department_uuid], onUpdate: Restrict, map: "fk-employee-department_uuid")
+  attendance          attendance[]
+
+  @@index([designation_uuid], map: "idx-employee-designation_uuid")
+  @@index([department_uuid], map: "idx-employee-department_uuid")
+}
+
+model attendance {
+  attendance_uuid     String     @id @db.Char(60)
+  employee_uuid       String?    @db.Char(60)
+  date                DateTime   @db.Date
+  clock_in            DateTime?  @db.DateTime(0)
+  clock_out           DateTime?  @db.DateTime(0)
+  total_hours         Decimal?   @db.Decimal(5, 2)
+  status              Int        @db.SmallInt
+  note                String?    @db.VarChar(500)
+  created_at          DateTime   @db.DateTime(0)
+  updated_at          DateTime   @db.DateTime(0)
+  employee            employee?  @relation(fields: [employee_uuid], references: [employee_uuid], onUpdate: Restrict, map: "fk-attendance-employee_uuid")
+
+  @@index([employee_uuid], map: "idx-attendance-employee_uuid")
+  @@index([date], map: "idx-attendance-date")
+}
+
 enum webhook_method {
   GET
   POST
@@ -2591,4 +2741,20 @@ enum request_request_status {
   cancelled
   finished_by_recruitment
   re_work
+}
+
+model PasswordResetToken {
+  id        String    @id @default(uuid())
+  tokenHash String    @unique          @map("token_hash")
+  userId    String                     @map("user_id")
+  userType  String                     @map("user_type")
+  email     String
+  expiresAt DateTime                   @map("expires_at")
+  usedAt    DateTime?                  @map("used_at")
+  createdAt DateTime  @default(now())  @map("created_at")
+
+  @@index([tokenHash])
+  @@index([userId])
+  @@index([email])
+  @@map("password_reset_token")
 }

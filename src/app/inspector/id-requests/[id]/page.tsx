@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation";
 import { requireRoleCapability } from "@/modules/auth/session";
-import { CompactList, FactPanel } from "@/modules/workspace/DetailPanels";
+import { DetailSection } from "@/modules/workspace/DetailPanels";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
-import { getInspectorIdRequestDetail } from "@/modules/workspace/data";
+import { getIdRequest } from "./actions";
 import { formatDate } from "@/modules/workspace/format";
 import { IdRequestActions } from "./IdRequestActions";
 
@@ -11,9 +11,9 @@ export const dynamic = "force-dynamic";
 export default async function InspectorIdRequestDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await requireRoleCapability("inspector", "id_review.read");
   const { id } = await params;
-  const data = await getInspectorIdRequestDetail(id);
+  const data = await getIdRequest({ id });
 
-  if (!data.request) {
+  if (!data) {
     notFound();
   }
 
@@ -21,27 +21,27 @@ export default async function InspectorIdRequestDetailPage({ params }: { params:
     <WorkspaceShell
       session={session}
       eyebrow="Inspector / ID Request"
-      title={`ID request ${data.request.cir_uuid.slice(0, 18)}`}
+      title={`ID request ${data.cir_uuid.slice(0, 18)}`}
       metrics={data.metrics}
       primary={{ title: "Candidates", rows: data.candidates }}
     >
-      <FactPanel
+      <DetailSection
         title="Batch"
         facts={[
-          { label: "Status", value: data.request.status },
-          { label: "Created By", value: data.request.staff_candidate_id_request_created_byTostaff?.staff_name },
-          { label: "Updated By", value: data.request.staff_candidate_id_request_updated_byTostaff?.staff_name },
-          { label: "Created", value: formatDate(data.request.created_at) },
-          { label: "Updated", value: formatDate(data.request.updated_at) },
-          { label: "Raw Candidate IDs", value: data.request.candidate_ids },
-          ...(data.request.status === "rejected" && data.request.rejection_reason
-            ? [{ label: "Rejection reason", value: data.request.rejection_reason }]
+          { label: "Status", value: data.status },
+          { label: "Created By", value: data.created_by_name },
+          { label: "Updated By", value: data.updated_by_name },
+          { label: "Created", value: formatDate(data.created_at) },
+          { label: "Updated", value: formatDate(data.updated_at) },
+          { label: "Raw Candidate IDs", value: data.candidate_ids },
+          ...(data.status === "rejected" && data.rejection_reason
+            ? [{ label: "Rejection reason", value: data.rejection_reason }]
             : [])
         ]}
       />
       <IdRequestActions
-        requestUuid={data.request.cir_uuid}
-        currentStatus={data.request.status}
+        requestUuid={data.cir_uuid}
+        currentStatus={data.status}
       />
     </WorkspaceShell>
   );

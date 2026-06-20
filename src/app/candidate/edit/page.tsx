@@ -1,7 +1,13 @@
 import { requireRoleCapability } from "@/modules/auth/session";
 import { CandidateEditForm } from "@/modules/candidates/CandidateEditForm";
-import { getCountryOptions, getUniversityOptions, getBankOptions, getDegreeOptions, getMajorOptions } from "@/modules/candidates/actions";
-import { getCandidateDetail } from "@/modules/workspace/data";
+import {
+  getCountryOptions,
+  getUniversityOptions,
+  getBankOptions,
+  getDegreeOptions,
+  getMajorOptions,
+  getCandidateProfileEdit,
+} from "./actions";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 
 export const dynamic = "force-dynamic";
@@ -9,7 +15,7 @@ export const dynamic = "force-dynamic";
 export default async function CandidateEditPage() {
   const session = await requireRoleCapability("candidate", "candidate.read.own");
   const [data, countries, universities, banks, degrees, majors] = await Promise.all([
-    getCandidateDetail(Number(session.id), "/candidate/invitations"),
+    getCandidateProfileEdit({ candidateId: Number(session.id) }),
     getCountryOptions(),
     getUniversityOptions(),
     getBankOptions(),
@@ -39,6 +45,12 @@ export default async function CandidateEditPage() {
             ? new Date(c.candidate_birth_date).toISOString().slice(0, 10)
             : "",
           address: c?.candidate_address_line1 ?? "",
+          gender: c?.candidate_gender !== null && c?.candidate_gender !== undefined ? String(c.candidate_gender) : "",
+          drivingLicense: c?.candidate_driving_license !== null && c?.candidate_driving_license !== undefined ? (c.candidate_driving_license ? "1" : "0") : "",
+          civilExpiry: c?.candidate_civil_expiry_date
+            ? new Date(c.candidate_civil_expiry_date).toISOString().slice(0, 10)
+            : "",
+          preferredTime: c?.candidate_preferred_time ?? "",
           countryId: c?.country_id ?? null,
           universityId: c?.university_id ?? null,
           bankId: c?.bank_id ?? null,
@@ -82,6 +94,12 @@ export default async function CandidateEditPage() {
         }))}
         degrees={degrees}
         majors={majors}
+        workHistory={data.histories?.map((h: any) => ({
+          id: h.id,
+          title: h.title,
+          subtitle: h.subtitle,
+          meta: h.meta,
+        }))}
       />
     </WorkspaceShell>
   );
