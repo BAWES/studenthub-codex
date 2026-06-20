@@ -8,7 +8,7 @@
  * Prisma-based search automatically.
  */
 
-import { getTypesenseClient, STORES_COLLECTION, type StoreDocument } from "@/lib/typesense";
+import { getTypesenseClient, STORES_COLLECTION, type StoreDocument, isTypesenseAvailable } from "@/lib/typesense";
 import { prisma } from "@/lib/prisma";
 import type { ListStoresInput, StoreRow } from "./schemas";
 
@@ -47,13 +47,10 @@ export async function listStoresTypesense(input: ListStoresInput = {}): Promise<
 async function searchTypesense(input: ListStoresInput): Promise<any> {
   const client = getTypesenseClient();
 
-  // Health check
-  try {
-    const health = await client.health.retrieve();
-    if (!health.ok) return null;
-  } catch {
-    return null;
-  }
+  // Quick health check with 60s cache — avoids 1s timeout on every SSR request
+  // when Typesense is simply not running (e.g. CI, local dev).
+  const available = await isTypesenseAvailable();
+  if (!available) return null;
 
   // Verify collection exists and has docs
   try {
