@@ -14,7 +14,7 @@ export default function Error({
         Something went wrong
       </h2>
       <p className="text-sm max-w-md text-center" style={{ color: "var(--muted)" }}>
-        {error.message ?? "An unexpected error occurred while loading the stories page."}
+        {error.message ?? "An unexpected error occurred while loading the story details."}
       </p>
       {error.digest ? <small style={{ color: "var(--muted)" }}>Error ID: {error.digest}</small> : null}
       <button
