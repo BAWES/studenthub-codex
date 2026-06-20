@@ -5,9 +5,7 @@ import {
   LayoutGrid, User, Mail, ClipboardList, CreditCard,
   Building2, Phone, Store, FileCheck, Search, Users,
   ArrowRightLeft, Calendar, Monitor, Clock, Briefcase, Webhook,
-  DollarSign,
-  ArrowRightLeft, Calendar, Monitor, Clock, Briefcase,
-  Webhook, DollarSign, Settings
+  FileText
 } from "lucide-react";
 
 export type NavItem = {
@@ -25,7 +23,6 @@ export function navForRole(role: Role): NavItem[] {
       { label: "Overview", href: "/admin", icon: User },
       { label: "Candidates", href: "/admin/candidates", icon: Users },
       { label: "Companies", href: "/admin/companies", icon: Building2 },
-      { label: "Company Settings", href: "/admin/company-settings", icon: Settings },
       { label: "Requests", href: "/admin/requests", icon: FileCheck },
       { label: "Transfers", href: "/admin/transfers", icon: ArrowRightLeft },
       { label: "Agents", href: "/admin/agents", icon: Monitor },
@@ -35,9 +32,9 @@ export function navForRole(role: Role): NavItem[] {
       { label: "Candidate Requests", href: "/admin/candidate-account-requests", icon: User },
       { label: "Company Requests", href: "/admin/company-requests", icon: Building2 },
       { label: "User Requests", href: "/admin/user-requests", icon: Mail },
-      { label: "Salaries", href: "/admin/salary", icon: DollarSign },
       { label: "Webhooks", href: "/admin/webhooks", icon: Webhook },
-      { label: "Expenses", href: "/admin/expense", icon: DollarSign },
+      { label: "Documents", href: "/admin/documents", icon: FileText },
+      { label: "Stories", href: "/admin/story", icon: ClipboardList },
     ];
   }
   if (role === "staff") {
