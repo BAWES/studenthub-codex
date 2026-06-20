@@ -67,16 +67,21 @@ test.describe("Detail routes and remaining static routes", () => {
       prisma.request.findFirst({
         select: { request_uuid: true },
       }),
+      prisma.interview_evaluation.findFirst({
+        select: { interview_evaluation_uuid: true },
+      }),
     ]);
     if (staffCan) staffCandidateId = String(staffCan.candidate_id);
     if (staffReq) staffRequestId = staffReq.request_uuid;
-    // interview model does not exist in Prisma schema — skip interview detail tests
     staffInterviewId = undefined as any;
 
     // Candidate detail IDs
     const [invitation] = await Promise.all([
       prisma.invitation.findFirst({
         select: { invitation_uuid: true },
+      }),
+      prisma.candidate_working_hour.findFirst({
+        select: { candidate_working_hour_uuid: true },
       }),
     ]);
     if (invitation) candidateInvitationId = invitation.invitation_uuid;
@@ -97,8 +102,10 @@ test.describe("Detail routes and remaining static routes", () => {
     if (compReq) companyRequestId = compReq.request_uuid;
 
     // Inspector detail ID
-    // id_request model does not exist in Prisma schema — skip inspector detail tests
-    inspectorIdRequestId = undefined as any;
+    const idReq = await prisma.candidate_id_request.findFirst({
+      select: { cir_uuid: true },
+    });
+    if (idReq) inspectorIdRequestId = idReq.cir_uuid;
   });
 
   test.afterAll(async () => {
