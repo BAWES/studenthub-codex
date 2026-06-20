@@ -8,6 +8,7 @@ import { LogOut } from "lucide-react";
 import Link from "next/link";
 import { navForRole } from "./navigation";
 import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
 import { WorkspaceNavigation } from "./WorkspaceNavigation";
 import { MobileNavBar } from "@/components/ui/mobile-nav-bar";
 import { useWorkspaceOS } from "./WorkspaceOSContext";
@@ -58,31 +59,23 @@ export function WorkspaceShell({
   const navItems = navForRole(session.role);
 
   const rail = (
-    <aside
-      className="group/rail sticky top-0 h-svh grid grid-rows-[auto_minmax(0,1fr)_auto] gap-1 p-2 border-r border-border overflow-hidden z-30 transition-all duration-300 w-14 hover:w-[200px] hover:border-r-[color-mix(in_srgb,#eb6651_30%,hsl(var(--border)))]"
-      aria-label="Workspace sidebar"
-    >
-      <Link
-        className="flex items-center justify-center w-11 h-11 rounded-[calc(var(--radius)-2px)] border border-border bg-foreground text-background no-underline overflow-hidden hover:w-full hover:justify-start hover:gap-2.5 hover:px-2.5 transition-all duration-300"
-        href="/app"
-        aria-label="StudentHub app"
-      >
-        <span className="inline-flex items-center justify-center w-7 h-7 rounded-md bg-primary text-white text-[11px] font-bold shrink-0">SH</span>
-        <strong className="opacity-0 group-hover/rail:opacity-100 transition-opacity duration-300 delay-[80ms] text-sm font-semibold whitespace-nowrap">StudentHub</strong>
+    <aside className="group/rail sticky top-0 h-screen grid grid-rows-[auto_minmax(0,1fr)_auto] content-start gap-1 overflow-hidden z-30 border-r border-border transition-[width,padding] duration-300 w-14 p-2 hover:w-[200px] hover:border-r-[color-mix(in_srgb,#eb6651_30%,hsl(var(--border)))]" aria-label="Workspace sidebar">
+      <Link className="flex items-center justify-center w-11 h-11 border border-border rounded-[calc(var(--radius)-2px)] bg-foreground text-background overflow-hidden no-underline transition-all duration-300 hover:w-full hover:gap-2.5 hover:justify-start hover:px-2.5 hover:rounded-[calc(var(--radius)-2px)]" href="/app" aria-label="StudentHub app">
+        <span className="inline-flex items-center justify-center shrink-0 w-7 h-7 rounded-md bg-[#eb6651] text-white text-[11px] font-bold leading-none">SH</span>
+        <strong className="text-sm font-semibold whitespace-nowrap opacity-0 transition-opacity duration-200 delay-100 group-hover/rail:opacity-100">StudentHub</strong>
       </Link>
       <WorkspaceNavigation items={navItems} role={session.role} />
       <Separator className="mx-2 my-1" />
-      <div className="grid gap-1 transition-all duration-300 w-11 group-hover/rail:w-full">
+      <div className="flex flex-col gap-1 w-11 transition-[width] duration-300 group-hover/rail:w-full">
         <RoleSwitcher
           currentRole={session.role}
           availableRoles={(session.roles ?? [session.role]) as any}
         />
         <ThemeToggle />
         <form action={logoutAction}>
-          <button type="submit" aria-label="Sign out">
+          <Button type="submit" variant="ghost" size="icon" aria-label="Sign out">
             <LogOut size={18} strokeWidth={1.5} aria-hidden="true" />
-            <span>Sign out</span>
-          </button>
+          </Button>
         </form>
       </div>
     </aside>
@@ -90,23 +83,20 @@ export function WorkspaceShell({
 
   const stage = (
     <section className="min-w-0 overflow-x-hidden grid content-start gap-3.5 p-3.5">
-      <section className="sticky top-[10px] z-20 flex items-center justify-between gap-3 min-h-14 px-4 mb-1 rounded-lg bg-card border border-border transition-colors duration-200 hover:border-[color-mix(in_srgb,#eb6651_30%,hsl(var(--border)))] hover:shadow-sm">
-        <div className="grid gap-0.5 min-w-0">
-          <p className="m-0 text-[#eb6651] text-[11px] font-black uppercase tracking-[0.04em]">{eyebrow}</p>
-          <h1 className="m-0 text-lg font-semibold leading-tight text-foreground">{title}</h1>
+      <section className="flex items-center justify-between gap-4 border-b border-border pb-3 mb-1">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{eyebrow}</p>
+          <h1 className="text-xl font-bold text-foreground">{title}</h1>
         </div>
-        <div className="flex items-center gap-2.5 min-h-10 px-3 rounded-sm bg-card border border-border transition-colors duration-180 hover:border-[color-mix(in_srgb,#eb6651_30%,hsl(var(--border)))]">
-          <span className="text-[11px] font-bold uppercase tracking-[0.03em] text-primary px-1.5 py-0.5 rounded bg-primary/10">{session.role}</span>
-          <strong className="text-sm font-semibold text-foreground whitespace-nowrap">{session.name}</strong>
-          <small className="text-xs text-muted-foreground hidden">{session.email}</small>
+        <div className="min-w-[140px] max-w-[220px] grid content-center gap-0.5 rounded-lg border border-border bg-card p-2.5 text-right text-xs leading-tight">
+          <span className="text-[11px] font-semibold uppercase text-muted-foreground">{session.role}</span>
+          <strong className="truncate text-sm font-semibold">{session.name}</strong>
+          <small className="truncate text-muted-foreground">{session.email}</small>
         </div>
       </section>
 
       {metrics.length ? (
-        <section
-          className="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2.5"
-          aria-label={`${session.role} workspace metrics`}
-        >
+        <section className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3" aria-label={`${session.role} workspace metrics`}>
           {metrics.map((metric, i) => (
             <MetricCard
               key={metric.label}
@@ -125,7 +115,7 @@ export function WorkspaceShell({
 
       {children}
 
-      <section className="lists">
+      <section className="grid gap-4">
         {primary ? <WorkspaceList title={primary.title} rows={primary.rows} /> : null}
         {secondary ? <WorkspaceList title={secondary.title} rows={secondary.rows} /> : null}
       </section>
@@ -143,7 +133,7 @@ export function WorkspaceShell({
 
   const mainContent = embedded
     ? (
-      <div className="block">
+      <div className="shell shellEmbedded">
         {stage}
         <MobileNavBar role={session.role} />
       </div>
@@ -164,33 +154,32 @@ export function WorkspaceShell({
 
 function WorkspaceList({ title, rows }: { title: string; rows: Row[] }) {
   return (
-    <section className="grid gap-2">
-      <div className="flex items-center justify-between px-1">
-        <h2 className="m-0 text-sm font-semibold text-foreground">{title}</h2>
-        <span className="text-xs text-muted-foreground font-medium">{rows.length}</span>
+    <section className="border border-border rounded-lg bg-card overflow-hidden">
+      <div className="flex items-center justify-between gap-2.5 border-b border-border px-4 py-3">
+        <h2 className="text-sm font-semibold">{title}</h2>
+        <span className="text-xs font-semibold uppercase text-muted-foreground">{rows.length}</span>
       </div>
-      <div className="grid gap-[3px]">
+      <div className="divide-y divide-border">
         {rows.length ? (
           rows.map((row) => (
-            <article
-              className="flex items-center justify-between gap-3 min-h-11 px-3 py-2 rounded-sm bg-card border border-transparent transition-all duration-180 hover:bg-accent hover:border-border hover:translate-x-1"
-              key={row.id}
-            >
-              <div className="grid gap-0.5 min-w-0">
+            <article className="flex items-center justify-between gap-3 px-4 py-3 min-h-0" key={row.id}>
+              <div className="min-w-0 grid gap-0.5">
                 {row.href ? (
-                  <Link href={row.href as Route}>
-                    <strong className="text-sm font-medium text-foreground">{row.title}</strong>
+                  <Link href={row.href as Route} className="text-sm font-semibold text-foreground hover:underline">
+                    {row.title}
                   </Link>
                 ) : (
-                  <strong className="text-sm font-medium text-foreground">{row.title}</strong>
+                  <strong className="text-sm font-semibold">{row.title}</strong>
                 )}
                 <span className="text-xs text-muted-foreground">{row.subtitle}</span>
               </div>
-              <div className="text-xs text-muted-foreground/60 whitespace-nowrap">{row.meta ? <span>{row.meta}</span> : null}</div>
+              <div className="shrink-0 text-xs text-muted-foreground">{row.meta ? <span>{row.meta}</span> : null}</div>
             </article>
           ))
         ) : (
-          <EmptyState variant="empty" message="No records found" hint="Records will appear here once they are created or imported." />
+          <div className="p-4">
+            <EmptyState variant="empty" message="No records found" hint="Records will appear here once they are created or imported." />
+          </div>
         )}
       </div>
     </section>
