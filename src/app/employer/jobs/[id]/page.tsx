@@ -29,17 +29,17 @@ export default async function EmployerJobDetailPage({ params }: Props) {
       metrics={[]}
     >
       <JobEditForm job={job} readOnly={!isOwner} />
-      <div className="mt-8 pt-6 border-t border-white/10">
+      <div className="mt-8 pt-6 border-t border-border">
         <div className="flex gap-4">
           <Link
             href={`/employer/jobs/${job.jobListingId}/applications`}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors"
+            className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
           >
             View Applications
           </Link>
           <Link
             href={`/employer/jobs/${job.jobListingId}/matching`}
-            className="inline-flex items-center gap-2 px-4 py-2 border border-white/20 rounded-lg text-sm font-medium hover:bg-white/5 transition-colors"
+            className="inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-muted/50 transition-colors"
           >
             Matching Candidates
           </Link>
