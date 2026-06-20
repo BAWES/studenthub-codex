@@ -8,6 +8,62 @@ import { HubShortcuts, type HubCommand } from "@/modules/hub/HubShortcuts";
 import { ThemeToggle } from "@/modules/theme/ThemeToggle";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+
+export const dynamic = "force-dynamic";
+
+export default async function HubPage({
+  searchParams
+}: {
+  searchParams: Promise<{ q?: string; scope?: string; record?: string; required?: string }>;
+}) {
+  const session = await requireSession();
+  const params = await searchParams;
+  const scope = parseHubScope(params.scope);
+  const requiredRole = parseRequiredRole(params.required);
+  const data = await getUnifiedHub(session, { query: params.q, scope, record: params.record });
+  const hubContext = hubContextHref(data.query, data.scope);
+  const commands = buildCommands(data);
+  const guide = buildRoleGuide(session.role, data);
+
+  return (
+    <main className="commandOS">
+      <aside className="commandRail">
+        <Link className="commandBrand" href="/app" aria-label="StudentHub command home">
+          <span>SH</span>
+          <strong>StudentHub</strong>
+        </Link>
+
+        <nav className="commandRailNav" aria-label="Workspace navigation">
+          {data.navigation.map((item) => (
+            <Link
+              className={item.href === hubContext || item.href === "/app" ? "active" : ""}
+              href={item.href}
+              key={item.href}
+              title={`${item.label}: ${item.description}`}
+            >
+              <strong>{item.label}</strong>
+              <small>{item.description}</small>
+            </Link>
+          ))}
+        </nav>
+
+        <div className="commandRailFooter">
+          <ThemeToggle />
+          <form className="commandRailSignout" action={logoutAction}>
+            <button type="submit">Sign out</button>
+          </form>
+        </div>
+      </aside>
+
+      <section className="commandDesk">
+        <header className="commandTopbar">
+          <div className="commandIdentity">
+            <span>{session.role}</span>
+            <strong>{session.name}</strong>
+            <small>{session.email}</small>
+          </div>
+          <form className="commandSearch" action={undefined}>
+            <Input
               aria-label="Find records"
               data-command-search
               defaultValue={data.query}
