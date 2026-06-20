@@ -1,6 +1,7 @@
 # =============================================================================
 # StudentHub Next — Production Dockerfile
-# Multi-stage build: base → deps → build → runner (Alpine)
+# Multi-stage build: base → deps → build → runner (Alpine with Chromium)
+# Includes Playwright + Chromium for PDF report generation.
 # =============================================================================
 
 # ---------------------------------------------------------------------------
@@ -58,6 +59,21 @@ RUN pnpm run build
 # ---------------------------------------------------------------------------
 FROM node:22-alpine AS runner
 LABEL stage=runner
+
+# Install system dependencies for Playwright + Chromium
+RUN apk add --no-cache \
+  chromium \
+  nss \
+  freetype \
+  freetype-dev \
+  harfbuzz \
+  ca-certificates \
+  ttf-freefont \
+  dumb-init
+
+# Store Chromium path for Playwright's chromium.launch()
+ENV PLAYWRIGHT_CHROMIUM_PATH=/usr/bin/chromium-browser \
+    PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
 
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs
