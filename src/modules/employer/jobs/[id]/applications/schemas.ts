@@ -21,6 +21,7 @@ export const listJobApplicationsByEmployerSchema = z.object({
 export const updateApplicationStatusSchema = z.object({
   applicationId: z.coerce.number().int().positive(),
   status: z.enum(APPLICATION_STATUSES),
+  rejectionReason: z.string().optional(),
 });
 
 // ---------------------------------------------------------------------------

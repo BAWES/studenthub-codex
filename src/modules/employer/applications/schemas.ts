@@ -80,6 +80,7 @@ export const getApplicationDetailOutputSchema = z.object({
 export const updateEmployerApplicationStatusSchema = z.object({
   applicationId: z.coerce.number().int().positive(),
   status: z.enum(APPLICATION_STATUSES),
+  rejectionReason: z.string().optional(),
 });
 
 export type UpdateEmployerApplicationStatusInput = z.input<

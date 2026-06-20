@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation";
 import { requireRoleCapability } from "@/modules/auth/session";
 import { getApplicationDetail } from "./actions";
-import { acceptApplication, rejectApplication, revertApplicationStatus } from "./actions.server";
+import { acceptApplication, revertApplicationStatus } from "./actions.server";
+import { RejectButton } from "./reject-button";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { StatusBadge } from "@/modules/workspace/StatusBadge";
 import { genericStatusVariant } from "@/modules/workspace/status-mapping";
@@ -75,6 +76,7 @@ export default async function EmployerApplicationDetailPage({ params }: Props) {
       ]}
     >
       <div className="max-w-3xl space-y-6">
+        {/* Application Details card */}
         <DetailSection title="Application Details">
           <DetailRow label="Application ID">
             <code className="text-xs font-mono text-muted-foreground">
@@ -102,6 +104,7 @@ export default async function EmployerApplicationDetailPage({ params }: Props) {
           </DetailRow>
         </DetailSection>
 
+        {/* Cover Letter */}
         {app.coverLetter && (
           <DetailSection title="Cover Letter">
             <div className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">
@@ -110,6 +113,7 @@ export default async function EmployerApplicationDetailPage({ params }: Props) {
           </DetailSection>
         )}
 
+        {/* Notes */}
         {app.notes && (
           <DetailSection title="Notes">
             <div className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">
