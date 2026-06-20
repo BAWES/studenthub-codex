@@ -3,6 +3,16 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { createJob } from "../actions";
 
 type Props = {
@@ -60,22 +70,21 @@ export function JobNewForm({ employerId }: Props) {
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
       {error && (
-        <div className="rounded-lg bg-destructive/10 border border-destructive/30 p-4 text-sm text-destructive">
+        <div className="rounded-lg bg-[#eb6651]/10 border border-[#eb6651]/20 p-4 text-sm text-[#eb6651]">
           {error}
         </div>
       )}
 
       {/* Title */}
       <div className="space-y-2">
-        <label htmlFor="title" className="text-sm font-medium">
-          Job Title <span className="text-destructive">*</span>
-        </label>
-        <input
+        <Label htmlFor="title">
+          Job Title <span className="text-[#eb6651]">*</span>
+        </Label>
+        <Input
           id="title"
           type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          className="w-full rounded-lg border border-input bg-card px-4 py-2.5 text-sm outline-none focus:border-[var(--sh-coral)] focus:ring-1 focus:ring-[var(--sh-coral)]/30"
           placeholder="e.g. Software Engineer Intern"
           maxLength={255}
           required
@@ -85,111 +94,102 @@ export function JobNewForm({ employerId }: Props) {
 
       {/* Description */}
       <div className="space-y-2">
-        <label htmlFor="description" className="text-sm font-medium">
-          Description <span className="text-destructive">*</span>
-        </label>
-        <textarea
+        <Label htmlFor="description">
+          Description <span className="text-[#eb6651]">*</span>
+        </Label>
+        <Textarea
           id="description"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          className="w-full rounded-lg border border-input bg-card px-4 py-2.5 text-sm outline-none focus:border-[var(--sh-coral)] focus:ring-1 focus:ring-[var(--sh-coral)]/30 min-h-[120px]"
           placeholder="Describe the role, responsibilities, and day-to-day activities..."
+          className="min-h-[120px]"
           required
         />
       </div>
 
       {/* Requirements */}
       <div className="space-y-2">
-        <label htmlFor="requirements" className="text-sm font-medium">
-          Requirements
-        </label>
-        <textarea
+        <Label htmlFor="requirements">Requirements</Label>
+        <Textarea
           id="requirements"
           value={requirements}
           onChange={(e) => setRequirements(e.target.value)}
-          className="w-full rounded-lg border border-input bg-card px-4 py-2.5 text-sm outline-none focus:border-[var(--sh-coral)] focus:ring-1 focus:ring-[var(--sh-coral)]/30 min-h-[80px]"
           placeholder="Required skills, experience, certifications..."
+          className="min-h-[80px]"
         />
       </div>
 
       {/* Location & Employment Type */}
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <label htmlFor="location" className="text-sm font-medium">
-            Location
-          </label>
-          <input
+          <Label htmlFor="location">Location</Label>
+          <Input
             id="location"
             type="text"
             value={location}
             onChange={(e) => setLocation(e.target.value)}
-            className="w-full rounded-lg border border-input bg-card px-4 py-2.5 text-sm outline-none focus:border-[var(--sh-coral)] focus:ring-1 focus:ring-[var(--sh-coral)]/30"
             placeholder="Kuwait City"
           />
         </div>
 
         <div className="space-y-2">
-          <label htmlFor="employmentType" className="text-sm font-medium">
-            Employment Type
-          </label>
-          <select
-            id="employmentType"
+          <Label htmlFor="employmentType">Employment Type</Label>
+          <Select
             value={employmentType}
-            onChange={(e) => setEmploymentType(e.target.value)}
-            className="w-full rounded-lg border border-input bg-card px-4 py-2.5 text-sm outline-none focus:border-[var(--sh-coral)] focus:ring-1 focus:ring-[var(--sh-coral)]/30"
+            onValueChange={setEmploymentType}
           >
-            <option value="full-time">Full-time</option>
-            <option value="part-time">Part-time</option>
-            <option value="internship">Internship</option>
-            <option value="contract">Contract</option>
-            <option value="temporary">Temporary</option>
-          </select>
+            <SelectTrigger id="employmentType" className="w-full">
+              <SelectValue placeholder="Select type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="full-time">Full-time</SelectItem>
+              <SelectItem value="part-time">Part-time</SelectItem>
+              <SelectItem value="internship">Internship</SelectItem>
+              <SelectItem value="contract">Contract</SelectItem>
+              <SelectItem value="temporary">Temporary</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
       {/* Salary Range (KWD) */}
       <div className="space-y-2">
-        <label className="text-sm font-medium">Salary Range (KWD/month)</label>
+        <Label>Salary Range (KWD/month)</Label>
         <div className="grid grid-cols-2 gap-4">
-          <div>
-            <input
-              id="salaryMin"
-              type="number"
-              value={salaryMin}
-              onChange={(e) => setSalaryMin(e.target.value)}
-              className="w-full rounded-lg border border-input bg-card px-4 py-2.5 text-sm outline-none focus:border-[var(--sh-coral)] focus:ring-1 focus:ring-[var(--sh-coral)]/30"
-              placeholder="Min"
-              min={0}
-            />
-          </div>
-          <div>
-            <input
-              id="salaryMax"
-              type="number"
-              value={salaryMax}
-              onChange={(e) => setSalaryMax(e.target.value)}
-              className="w-full rounded-lg border border-input bg-card px-4 py-2.5 text-sm outline-none focus:border-[var(--sh-coral)] focus:ring-1 focus:ring-[var(--sh-coral)]/30"
-              placeholder="Max"
-              min={0}
-            />
-          </div>
+          <Input
+            id="salaryMin"
+            type="number"
+            value={salaryMin}
+            onChange={(e) => setSalaryMin(e.target.value)}
+            placeholder="Min"
+            min={0}
+          />
+          <Input
+            id="salaryMax"
+            type="number"
+            value={salaryMax}
+            onChange={(e) => setSalaryMax(e.target.value)}
+            placeholder="Max"
+            min={0}
+          />
         </div>
       </div>
 
       {/* Status */}
       <div className="space-y-2">
-        <label htmlFor="status" className="text-sm font-medium">
-          Status
-        </label>
-        <select
-          id="status"
+        <Label htmlFor="status">Status</Label>
+        <Select
           value={status}
-          onChange={(e) => setStatus(e.target.value)}
-          className="w-full rounded-lg border border-input bg-card px-4 py-2.5 text-sm outline-none focus:border-[var(--sh-coral)] focus:ring-1 focus:ring-[var(--sh-coral)]/30"
+          onValueChange={setStatus}
         >
-          <option value="active">Active (visible to candidates)</option>
-          <option value="draft">Draft (not visible)</option>
-        </select>
+          <SelectTrigger id="status" className="w-full">
+            <SelectValue placeholder="Select status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="active">Active (visible to candidates)</SelectItem>
+            <SelectItem value="draft">Draft (not visible)</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Buttons */}
