@@ -29,7 +29,7 @@ export function AdminCountryTable({ session, countries }: Props) {
     >
       <section className="mb-6">
         <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
-          <h3 className="text-sm font-semibold mb-3" style={{ color: "var(--ink)" }}>Add country</h3>
+          <h3 className="text-sm font-semibold mb-3 text-foreground">Add country</h3>
           <CreateCountryForm onSuccess={() => router.refresh()} />
         </div>
       </section>
@@ -53,8 +53,7 @@ export function AdminCountryTable({ session, countries }: Props) {
               ) : (
                 <button
                   type="button"
-                  className="text-sm hover:underline"
-                  style={{ color: "var(--sh-primary)" }}
+                  className="text-sm text-primary hover:underline"
                   onClick={() => setEditingId(row.country_id)}
                 >
                   {row.country_name_en}
@@ -66,9 +65,8 @@ export function AdminCountryTable({ session, countries }: Props) {
             label: "Name (AR)",
             render: (row) =>
               editingId === row.country_id ? null : (
-                <span className="text-sm" style={{ color: "var(--ink)" }}>
+                <span className="text-sm text-foreground">
                   {row.country_name_ar ?? "—"}
-                </span>
               ),
           },
           {
@@ -76,7 +74,7 @@ export function AdminCountryTable({ session, countries }: Props) {
             label: "ISO",
             render: (row) =>
               editingId === row.country_id ? null : (
-                <code className="text-xs" style={{ color: "var(--muted)" }}>
+                <code className="text-xs text-muted-foreground">
                   {row.iso ?? "—"}
                 </code>
               ),
@@ -94,7 +92,7 @@ export function AdminCountryTable({ session, countries }: Props) {
             label: "Code",
             render: (row) =>
               editingId === row.country_id ? null : (
-                <span className="text-sm" style={{ color: "var(--ink)" }}>
+                <span className="text-sm text-foreground">
                   {row.country_code != null ? `+${row.country_code}` : "—"}
                 </span>
               ),
@@ -104,7 +102,7 @@ export function AdminCountryTable({ session, countries }: Props) {
             label: "Currency",
             render: (row) =>
               editingId === row.country_id ? null : (
-                <span className="text-sm" style={{ color: "var(--ink)" }}>
+                <span className="text-sm text-foreground">
                   {row.currency_code ?? "—"}
                 </span>
               ),
@@ -117,7 +115,7 @@ export function AdminCountryTable({ session, countries }: Props) {
                 <button
                   type="button"
                   className="text-xs px-2 py-1 rounded hover:bg-red-500/10"
-                  style={{ color: "var(--sh-error)" }}
+                  className="text-destructive"
                   onClick={async () => {
                     if (confirm(`Delete country "${row.country_name_en}"?`)) {
                       const result = await deleteCountry(row.country_id);
@@ -175,43 +173,43 @@ function CreateCountryForm({ onSuccess }: { onSuccess: () => void }) {
       onSubmit={() => setTimeout(() => { formRef.current?.reset(); }, 100)}
     >
       <div className="grid gap-1">
-        <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>Name (EN) *</label>
+        <label className="text-xs font-medium text-muted-foreground">Name (EN) *</label>
         <input name="countryNameEn" required maxLength={100} placeholder="e.g. Kuwait"
           className="h-9 rounded-lg px-3 text-sm border w-36"
           style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }} />
       </div>
       <div className="grid gap-1">
-        <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>Name (AR)</label>
+        <label className="text-xs font-medium text-muted-foreground">Name (AR)</label>
         <input name="countryNameAr" maxLength={100} placeholder="الكويت"
           className="h-9 rounded-lg px-3 text-sm border w-36"
           style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }} />
       </div>
       <div className="grid gap-1">
-        <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>Nationality (EN) *</label>
+        <label className="text-xs font-medium text-muted-foreground">Nationality (EN) *</label>
         <input name="nationalityNameEn" required maxLength={100} placeholder="e.g. Kuwaiti"
           className="h-9 rounded-lg px-3 text-sm border w-36"
           style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }} />
       </div>
       <div className="grid gap-1">
-        <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>ISO</label>
+        <label className="text-xs font-medium text-muted-foreground">ISO</label>
         <input name="iso" maxLength={3} placeholder="KWT"
           className="h-9 rounded-lg px-3 text-sm border w-16"
           style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }} />
       </div>
       <div className="grid gap-1">
-        <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>Code</label>
+        <label className="text-xs font-medium text-muted-foreground">Code</label>
         <input name="countryCode" type="number" placeholder="965"
           className="h-9 rounded-lg px-3 text-sm border w-20"
           style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }} />
       </div>
       <div className="grid gap-1">
-        <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>Currency</label>
+        <label className="text-xs font-medium text-muted-foreground">Currency</label>
         <input name="currencyCode" maxLength={3} placeholder="KWD"
           className="h-9 rounded-lg px-3 text-sm border w-16"
           style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }} />
       </div>
       <div className="grid gap-1">
-        <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>Emoji</label>
+        <label className="text-xs font-medium text-muted-foreground">Emoji</label>
         <input name="emoji" maxLength={255} placeholder="🇰🇼"
           className="h-9 rounded-lg px-3 text-sm border w-16"
           style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }} />
@@ -219,12 +217,12 @@ function CreateCountryForm({ onSuccess }: { onSuccess: () => void }) {
       <button
         type="submit" disabled={pending}
         className="h-9 rounded-lg px-4 text-sm font-semibold"
-        style={{ background: "var(--sh-primary)", color: "#fff" }}
+        className="bg-primary text-primary-foreground"
       >
         {pending ? "Adding..." : "Add"}
       </button>
       {state?.error ? (
-        <p className="text-xs w-full" style={{ color: "var(--sh-error)" }}>{state.error}</p>
+        <p className="text-xs w-full text-destructive">{state.error}</p>
       ) : null}
     </form>
   );
@@ -289,15 +287,15 @@ function EditCountryForm({
         style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }} />
       <button type="submit" disabled={pending}
         className="h-8 rounded px-3 text-xs font-semibold"
-        style={{ background: "var(--sh-primary)", color: "#fff" }}>
+        className="bg-primary text-primary-foreground">
         {pending ? "..." : "Save"}
       </button>
       <button type="button" onClick={onCancel}
-        className="h-8 rounded px-3 text-xs" style={{ color: "var(--muted)" }}>
+        className="h-8 rounded px-3 text-xs text-muted-foreground">
         Cancel
       </button>
       {state?.error ? (
-        <p className="text-xs w-full" style={{ color: "var(--sh-error)" }}>{state.error}</p>
+        <p className="text-xs w-full text-destructive">{state.error}</p>
       ) : null}
     </form>
   );

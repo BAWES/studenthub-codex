@@ -31,7 +31,7 @@ export function AdminStoresTable({ session, stores }: Props) {
     >
       <section className="mb-6">
         <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
-          <h3 className="text-sm font-semibold mb-3" style={{ color: "var(--ink)" }}>Add store</h3>
+          <h3 className="text-sm font-semibold mb-3 text-foreground">Add store</h3>
           <CreateStoreForm onSuccess={() => router.refresh()} />
         </div>
       </section>
@@ -55,8 +55,7 @@ export function AdminStoresTable({ session, stores }: Props) {
               ) : (
                 <button
                   type="button"
-                  className="text-sm hover:underline"
-                  style={{ color: "var(--sh-primary)" }}
+                  className="text-sm hover:underline text-primary"
                   onClick={() => setEditingId(row.store_id)}
                 >
                   {row.store_name}
@@ -68,7 +67,7 @@ export function AdminStoresTable({ session, stores }: Props) {
             label: "Location",
             render: (row) =>
               editingId === row.store_id ? null : (
-                <span className="text-sm" style={{ color: "var(--ink)" }}>
+                <span className="text-sm text-foreground">
                   {row.store_location}
                 </span>
               ),
@@ -120,8 +119,7 @@ export function AdminStoresTable({ session, stores }: Props) {
               editingId !== row.store_id ? (
                 <button
                   type="button"
-                  className="text-xs px-2 py-1 rounded hover:bg-red-500/10"
-                  style={{ color: "var(--sh-error)" }}
+                  className="text-xs px-2 py-1 rounded hover:bg-red-500/10 text-destructive"
                   onClick={async () => {
                     if (confirm(`Delete store "${row.store_name}"?`)) {
                       const result = await deleteStore({ storeId: row.store_id });
@@ -173,7 +171,7 @@ function CreateStoreForm({ onSuccess }: { onSuccess: () => void }) {
       onSubmit={() => setTimeout(() => { formRef.current?.reset(); }, 100)}
     >
       <div className="grid gap-1">
-        <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>Store name</label>
+        <label className="text-xs font-medium text-muted-foreground">Store name</label>
         <input
           name="storeName"
           required
@@ -184,7 +182,7 @@ function CreateStoreForm({ onSuccess }: { onSuccess: () => void }) {
         />
       </div>
       <div className="grid gap-1">
-        <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>Location</label>
+        <label className="text-xs font-medium text-muted-foreground">Location</label>
         <input
           name="storeLocation"
           required
@@ -195,7 +193,7 @@ function CreateStoreForm({ onSuccess }: { onSuccess: () => void }) {
         />
       </div>
       <div className="grid gap-1">
-        <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>Brand UUID</label>
+        <label className="text-xs font-medium text-muted-foreground">Brand UUID</label>
         <input
           name="brandUuid"
           maxLength={36}
@@ -205,7 +203,7 @@ function CreateStoreForm({ onSuccess }: { onSuccess: () => void }) {
         />
       </div>
       <div className="grid gap-1">
-        <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>Mall UUID</label>
+        <label className="text-xs font-medium text-muted-foreground">Mall UUID</label>
         <input
           name="mallUuid"
           maxLength={36}
@@ -217,13 +215,12 @@ function CreateStoreForm({ onSuccess }: { onSuccess: () => void }) {
       <button
         type="submit"
         disabled={pending}
-        className="h-9 rounded-lg px-4 text-sm font-semibold"
-        style={{ background: "var(--sh-primary)", color: "#fff" }}
+        className="h-9 rounded-lg px-4 text-sm font-semibold bg-primary text-primary-foreground"
       >
         {pending ? "Adding..." : "Add"}
       </button>
       {state?.error ? (
-        <p className="text-xs w-full" style={{ color: "var(--sh-error)" }}>{state.error}</p>
+        <p className="text-xs w-full text-destructive">{state.error}</p>
       ) : null}
     </form>
   );
@@ -278,21 +275,19 @@ function EditStoreForm({
       <button
         type="submit"
         disabled={pending}
-        className="h-8 rounded px-3 text-xs font-semibold"
-        style={{ background: "var(--sh-primary)", color: "#fff" }}
+        className="h-8 rounded px-3 text-xs font-semibold bg-primary text-primary-foreground"
       >
         {pending ? "..." : "Save"}
       </button>
       <button
         type="button"
         onClick={onCancel}
-        className="h-8 rounded px-3 text-xs"
-        style={{ color: "var(--muted)" }}
+        className="h-8 rounded px-3 text-xs text-muted-foreground"
       >
         Cancel
       </button>
       {state?.error ? (
-        <p className="text-xs" style={{ color: "var(--sh-error)" }}>{state.error}</p>
+        <p className="text-xs text-destructive">{state.error}</p>
       ) : null}
     </form>
   );

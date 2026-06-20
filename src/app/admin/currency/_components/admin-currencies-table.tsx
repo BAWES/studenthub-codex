@@ -49,8 +49,7 @@ export function AdminCurrenciesTable({ session, currencies }: Props) {
             label: "Currency",
             render: (row) => (
               <span
-                className="text-sm"
-                style={{ color: "var(--ink)" }}
+                className="text-sm text-foreground"
               >
                 {row.title}
               </span>
@@ -61,8 +60,7 @@ export function AdminCurrenciesTable({ session, currencies }: Props) {
             label: "Symbol",
             render: (row) => (
               <span
-                className="text-sm"
-                style={{ color: "var(--ink)" }}
+                className="text-sm text-foreground"
               >
                 {row.currency_symbol ?? "—"}
               </span>
@@ -73,8 +71,7 @@ export function AdminCurrenciesTable({ session, currencies }: Props) {
             label: "Rate",
             render: (row) => (
               <span
-                className="text-sm font-mono"
-                style={{ color: "var(--ink)" }}
+                className="text-sm font-mono text-foreground"
               >
                 {row.rate != null ? row.rate.toFixed(4) : "—"}
               </span>
@@ -104,8 +101,7 @@ export function AdminCurrenciesTable({ session, currencies }: Props) {
             label: "Sort",
             render: (row) => (
               <span
-                className="text-sm"
-                style={{ color: "var(--muted)" }}
+                className="text-sm text-muted-foreground"
               >
                 {row.sort_order ?? "—"}
               </span>
