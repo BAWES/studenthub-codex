@@ -1,9 +1,9 @@
 "use client";
 
+import { Badge } from "@/components/ui/badge";
 import type { SkillItem } from "@/app/student/actions";
 
 const CORAL = "#eb6651";
-const CORAL_LIGHT = "#fef1ef";
 
 interface SkillsSectionProps {
   skills: SkillItem[];
@@ -18,7 +18,7 @@ export function SkillsSection({ skills }: SkillsSectionProps) {
           className="w-1 h-6 rounded-full flex-shrink-0"
           style={{ backgroundColor: CORAL }}
         />
-        <h2 className="text-xl font-semibold" style={{ color: "var(--ink)" }}>
+        <h2 className="text-xl font-semibold text-foreground">
           Skills
         </h2>
       </div>
@@ -26,20 +26,22 @@ export function SkillsSection({ skills }: SkillsSectionProps) {
       {skills.length > 0 ? (
         <div className="flex flex-wrap gap-2">
           {skills.map((skill) => (
-            <span
+            <Badge
               key={skill.id}
-              className="px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-[0.03em]"
+              variant="outline"
+              className="text-[11px] font-black uppercase tracking-[0.03em]"
               style={{
-                backgroundColor: CORAL_LIGHT,
+                backgroundColor: "#fef1ef",
                 color: CORAL,
+                borderColor: CORAL,
               }}
             >
               {skill.name}
-            </span>
+            </Badge>
           ))}
         </div>
       ) : (
-        <p className="text-sm" style={{ color: "var(--muted)" }}>
+        <p className="text-sm text-muted-foreground">
           No skills listed yet.
         </p>
       )}

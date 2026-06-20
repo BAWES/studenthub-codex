@@ -39,16 +39,8 @@ function fileTypeDescription(documentType: string): string {
 function DocumentPreview({ document }: { document: { type: string; filePath: string | null; label: string } }) {
   if (!document.filePath) {
     return (
-      <div
-        className="flex items-center justify-center rounded-lg border-2 border-dashed"
-        style={{
-          width: "100%",
-          height: 200,
-          borderColor: "var(--border)",
-          background: "var(--surface)",
-        }}
-      >
-        <span style={{ color: "var(--muted)" }}>Not uploaded yet</span>
+      <div className="flex items-center justify-center rounded-lg border-2 border-dashed border-border bg-card w-full h-[200px]">
+        <span className="text-muted-foreground">Not uploaded yet</span>
       </div>
     );
   }
@@ -56,19 +48,12 @@ function DocumentPreview({ document }: { document: { type: string; filePath: str
   // Show thumbnail for image types
   if (["photo", "civilFront", "civilBack"].includes(document.type)) {
     return (
-      <div
-        className="flex items-center justify-center rounded-lg overflow-hidden"
-        style={{
-          width: "100%",
-          maxHeight: 400,
-          background: "var(--surface)",
-        }}
-      >
-        { }
+      <div className="flex items-center justify-center rounded-lg overflow-hidden w-full bg-card" style={{ maxHeight: 400 }}>
         <img
           src={document.filePath}
           alt={document.label}
-          style={{ maxWidth: "100%", maxHeight: 400, objectFit: "contain" }}
+          className="max-w-full object-contain"
+          style={{ maxHeight: 400 }}
         />
       </div>
     );
@@ -137,14 +122,14 @@ export default async function CandidateDocumentDetailPage({
           ]}
         />
 
-        <section style={{ padding: "1rem" }}>
-          <h3 style={{ fontSize: "1rem", fontWeight: 600, marginBottom: "0.75rem", color: "var(--ink)" }}>
+        <section className="p-4">
+          <h3 className="text-base font-semibold mb-3 text-foreground">
             Preview
           </h3>
           <DocumentPreview document={document} />
         </section>
 
-        <section style={{ display: "flex", gap: "0.5rem", padding: "1rem" }}>
+        <section className="flex gap-2 p-4">
           <Link href={"/candidate/documents" as Route}>
             <Button variant="outline">Back to Documents</Button>
           </Link>
