@@ -167,7 +167,11 @@ export default function StatsSection({ className }: StatsSectionProps) {
       aria-label="Platform statistics"
     >
       <div
-        className="relative rounded-xl p-[clamp(24px,4vw,48px)] overflow-hidden shLandingCardStrong"
+        className="relative rounded-xl p-[clamp(24px,4vw,48px)] overflow-hidden shLandingGlass"
+        style={{
+          backdropFilter: "blur(16px)",
+          WebkitBackdropFilter: "blur(16px)",
+        }}
       >
         {/* Subtle ambient glow */}
         <div

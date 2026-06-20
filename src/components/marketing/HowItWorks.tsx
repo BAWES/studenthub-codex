@@ -70,10 +70,12 @@ export default function HowItWorks({ className }: HowItWorksProps) {
           return (
             <div
               key={step.title}
-              className="relative flex flex-col items-center text-center p-6 rounded-xl shLandingCardHover"
+              className="relative flex flex-col items-center text-center p-6 rounded-xl shLandingGlassHover"
               style={{
-                backgroundColor: "var(--surface)",
-                border: "1px solid var(--border)",
+                backgroundColor: "var(--sh-glass-bg)",
+                backdropFilter: "blur(12px)",
+                WebkitBackdropFilter: "blur(12px)",
+                border: "1px solid var(--sh-glass-border)",
                 animation: `shCardIn 500ms cubic-bezier(0.16, 1, 0.3, 1) both`,
                 animationDelay: `${i * 120}ms`,
               }}
