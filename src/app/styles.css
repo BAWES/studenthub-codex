@@ -156,6 +156,14 @@
   /* Active indicator */
   --sh-active-width: 3px;
 
+  /* App Header (light mode defaults) */
+  --sh-header-h: 64px;
+  --sh-header-glass-bg: rgba(255, 255, 255, 0.78);
+  --sh-header-glass-border: rgba(214, 220, 231, 0.5);
+  --sh-header-blur: 18px;
+  --sh-header-tab-h: 40px;
+  --sh-header-tab-indicator: 3px;
+
   /* ------------------------------------------------------------------ */
   /* Responsive breakpoints (reference — use in @media queries)          */
   /* ------------------------------------------------------------------ */
@@ -267,6 +275,10 @@
   --sh-info: #8abfff;
   --sh-info-bg: rgba(138, 191, 255, 0.10);
   --sh-info-glow: 0 0 14px rgba(138, 191, 255, 0.25);
+
+  /* App Header (dark mode) */
+  --sh-header-glass-bg: rgba(17, 24, 36, 0.72);
+  --sh-header-glass-border: rgba(42, 53, 71, 0.5);
 }
 
 * {
@@ -451,10 +463,8 @@ body {
 
 /* ── Glass Panel — StudentHub OS morphism ──────────────────────────── */
 .shGlassBase {
-  background: var(--sh-glass-bg);
-  backdrop-filter: blur(var(--sh-glass-blur));
-  -webkit-backdrop-filter: blur(var(--sh-glass-blur));
-  border: 1px solid var(--sh-glass-border);
+  background: var(--surface);
+  border: 1px solid var(--line);
   transition:
     background 200ms var(--sh-easing),
     border-color 200ms var(--sh-easing),
@@ -463,14 +473,15 @@ body {
 }
 
 .shGlassStrong {
-  background: var(--sh-glass-bg-strong);
-  border-color: var(--sh-glass-border-strong);
+  background: var(--surface-soft);
+  border-color: var(--line);
+  box-shadow: var(--shadow-sm);
 }
 
 .shGlassElevated {
-  background: var(--sh-glass-bg-strong);
-  border-color: var(--sh-glass-border-strong);
-  box-shadow: var(--sh-glow-sm);
+  background: var(--surface);
+  border-color: var(--line);
+  box-shadow: var(--shadow-md);
 }
 
 .shGlassRadiusSm { border-radius: var(--sh-radius-sm); }
@@ -10793,7 +10804,7 @@ kbd {
     radial-gradient(ellipse 90% 70% at 0% 100%, color-mix(in srgb, var(--blue) 20%, transparent) 0%, transparent 70%),
     radial-gradient(ellipse 80% 60% at 70% 0%, color-mix(in srgb, var(--blue) 14%, transparent) 0%, transparent 60%),
     radial-gradient(ellipse 60% 50% at 100% 80%, color-mix(in srgb, var(--ring) 10%, transparent) 0%, transparent 60%),
-    var(--sh-glass-bg);
+    var(--paper);
   animation: shLoginDrift 14s ease-in-out infinite alternate;
 }
 
@@ -10803,21 +10814,21 @@ kbd {
       radial-gradient(ellipse 90% 70% at 0% 100%, color-mix(in srgb, var(--blue) 20%, transparent) 0%, transparent 70%),
       radial-gradient(ellipse 80% 60% at 70% 0%, color-mix(in srgb, var(--blue) 14%, transparent) 0%, transparent 60%),
       radial-gradient(ellipse 60% 50% at 100% 80%, color-mix(in srgb, var(--ring) 10%, transparent) 0%, transparent 60%),
-      var(--sh-glass-bg);
+      var(--paper);
   }
   50% {
     background:
       radial-gradient(ellipse 80% 60% at 20% 90%, color-mix(in srgb, var(--blue) 18%, transparent) 0%, transparent 65%),
       radial-gradient(ellipse 85% 65% at 60% 10%, color-mix(in srgb, var(--ring) 12%, transparent) 0%, transparent 55%),
       radial-gradient(ellipse 70% 50% at 90% 70%, color-mix(in srgb, var(--blue) 14%, transparent) 0%, transparent 60%),
-      var(--sh-glass-bg);
+      var(--paper);
   }
   100% {
     background:
       radial-gradient(ellipse 85% 65% at 15% 85%, color-mix(in srgb, var(--ring) 16%, transparent) 0%, transparent 60%),
       radial-gradient(ellipse 75% 55% at 80% 15%, color-mix(in srgb, var(--blue) 18%, transparent) 0%, transparent 65%),
       radial-gradient(ellipse 80% 60% at 45% 100%, color-mix(in srgb, var(--blue) 14%, transparent) 0%, transparent 55%),
-      var(--sh-glass-bg);
+      var(--paper);
   }
 }
 
@@ -10894,18 +10905,18 @@ kbd {
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: 0.03em;
-  background: var(--sh-glass-bg);
-  border: 1px solid var(--sh-glass-border);
-  color: var(--sh-info);
+  background: #eaf2ff;
+  border: 1px solid transparent;
+  color: #1f73b7;
 }
 
-/* ── Form side — centered glass card ────────────────────────────────── */
+/* ── Form side — centered card ────────────────────────────────────────── */
 .shLoginFormSide {
   display: grid;
   align-content: center;
   padding: 24px;
   background: var(--surface);
-  border-left: 1px solid var(--sh-glass-border);
+  border-left: 1px solid var(--line);
 }
 
 @media (max-width: 900px) {
@@ -10942,13 +10953,13 @@ kbd {
 .shLoginStagger:nth-child(4) { animation-delay: 260ms; }
 .shLoginStagger:nth-child(5) { animation-delay: 320ms; }
 
-/* ── Glass input overrides for login form ───────────────────────────── */
+/* ── Clean input overrides for login form ────────────────────────────── */
 .shLoginInput {
   min-height: 50px !important;
   padding: 0 14px !important;
   border-radius: var(--sh-radius-md) !important;
-  border: 1px solid var(--sh-glass-border) !important;
-  background: var(--sh-glass-bg) !important;
+  border: 1px solid var(--line) !important;
+  background: var(--paper) !important;
   color: var(--ink) !important;
   font-size: 15px !important;
   transition:
@@ -10962,15 +10973,15 @@ kbd {
 }
 
 .shLoginInput:focus {
-  border-color: var(--sh-info) !important;
-  box-shadow: var(--sh-glow-sm) !important;
-  background: var(--sh-glass-bg-strong) !important;
+  border-color: #1f73b7 !important;
+  box-shadow: 0 0 0 3px rgba(31, 115, 183, 0.15) !important;
+  background: var(--surface) !important;
   outline: none !important;
 }
 
 .shLoginInput:hover {
-  border-color: var(--sh-glass-border-strong) !important;
-  background: var(--sh-glass-bg-strong) !important;
+  border-color: #1f73b7 !important;
+  background: var(--surface) !important;
 }
 
 /* ── Login CTA ──────────────────────────────────────────────────────── */
@@ -10983,8 +10994,8 @@ kbd {
   gap: 8px;
   border: none;
   border-radius: var(--sh-radius-md);
-  background: var(--ink);
-  color: var(--paper);
+  background: #1f73b7;
+  color: #fff;
   font: inherit;
   font-size: 15px;
   font-weight: 600;
@@ -10997,7 +11008,7 @@ kbd {
 
 .shLoginCTA:hover {
   transform: translateY(-1px);
-  box-shadow: 0 8px 24px color-mix(in srgb, var(--ink) 20%, transparent);
+  box-shadow: 0 8px 24px color-mix(in srgb, #1f73b7 25%, transparent);
 }
 
 .shLoginCTA:active {
@@ -11021,13 +11032,12 @@ kbd {
   }
 }
 
-/* ── Glass card on form side ──────────────────────────────────────────── */
+/* ── Login form card — clean solid card ────────────────────────────────── */
 .shLoginFormCard {
   border-radius: var(--sh-radius-xl);
-  background: var(--sh-glass-bg);
-  backdrop-filter: blur(var(--sh-glass-blur));
-  -webkit-backdrop-filter: blur(var(--sh-glass-blur));
-  border: 1px solid var(--sh-glass-border);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-md);
   overflow: hidden;
   animation: shLoginFormIn 400ms var(--sh-easing) both;
   animation-delay: 60ms;
@@ -11112,7 +11122,7 @@ kbd {
   }
 }
 
-/* ── Error state in glass form ──────────────────────────────────────── */
+/* ── Error state in form ─────────────────────────────────────────────── */
 .shLoginError {
   display: flex;
   align-items: center;
@@ -11127,9 +11137,9 @@ kbd {
   animation: shLoginFormIn 300ms var(--sh-easing) both;
 }
 
-/* ── Verified account chooser (glass variant) ───────────────────────── */
+/* ── Verified account chooser ────────────────────────────────────────── */
 .shLoginAccountSection {
-  border-top: 1px solid var(--sh-glass-border);
+  border-top: 1px solid var(--line);
   padding: 20px 28px;
   display: grid;
   gap: 12px;
@@ -11156,9 +11166,9 @@ kbd {
   align-items: center;
   gap: 12px;
   padding: 10px 14px;
-  border: 1px solid var(--sh-glass-border);
+  border: 1px solid var(--line);
   border-radius: var(--sh-radius-md);
-  background: var(--sh-glass-bg);
+  background: var(--paper);
   color: var(--ink);
   cursor: pointer;
   font: inherit;
@@ -11169,8 +11179,8 @@ kbd {
 }
 
 .shLoginAccountBtn:hover {
-  background: var(--sh-glass-bg-strong);
-  border-color: var(--sh-glass-border-strong);
+  background: var(--surface);
+  border-color: #1f73b7;
 }
 
 .shLoginAccountBtn strong {
@@ -12170,4 +12180,55 @@ tr:hover .shTableRowAction,
 /* OS empty state inside table */
 .shTableEmptyCell {
   padding: 0 !important;
+}
+
+/* ── Password Reset specific ──────────────────────────────────── */
+
+/* Back-link below form */
+.shLoginBackLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 16px;
+  font-size: var(--fs-sm);
+  color: var(--muted);
+  transition: color 160ms var(--sh-easing);
+}
+.shLoginBackLink:hover {
+  color: var(--blue);
+}
+
+/* Sent/success confirmation card */
+.shLoginSuccessCard {
+  display: grid;
+  gap: 20px;
+  text-align: center;
+  padding: 32px 24px;
+}
+.shLoginSuccessIcon {
+  justify-self: center;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-xl);
+  background: var(--sh-glass-bg-strong);
+  border: 1px solid var(--sh-glass-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--sh-success);
+}
+.shLoginSuccessTitle {
+  font-size: var(--fs-h3);
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0;
+}
+.shLoginSuccessBody {
+  font-size: var(--fs-body);
+  color: var(--muted);
+  line-height: 1.5;
+}
+.shLoginSuccessEmail {
+  font-weight: 600;
+  color: var(--ink);
 }

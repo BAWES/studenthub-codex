@@ -1,7 +1,8 @@
 import { requireRoleCapability } from "@/modules/auth/session";
 import { DataTable } from "@/modules/workspace/DataTable";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
-import { getCompanyContactsRows, getCompanySelectOptions } from "@/modules/company/data";
+import { listCompanyContactsRows } from "./actions";
+import { listCompanySelectOptions } from "@/app/company/stores/actions";
 import { AddContactForm } from "@/modules/company/AddContactForm";
 import { RemoveContactButton } from "@/modules/company/RemoveContactButton";
 
@@ -10,8 +11,8 @@ export const dynamic = "force-dynamic";
 export default async function CompanyContactsPage() {
   const session = await requireRoleCapability("company", "company.read.linked");
   const [rows, companies] = await Promise.all([
-    getCompanyContactsRows(session.id),
-    getCompanySelectOptions(session.id)
+    listCompanyContactsRows(session.id),
+    listCompanySelectOptions(session.id)
   ]);
 
   return (

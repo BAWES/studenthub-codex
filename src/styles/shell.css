@@ -2653,3 +2653,563 @@ kbd {
 .sh-glow {
   box-shadow: 0 0 8px 2px color-mix(in srgb, currentColor 20%, transparent);
 }
+
+/* ==========================================================================
+   Mobile Navigation — OS Glass Tab Bar, FAB, Pull-to-Refresh, Swipeable
+   ========================================================================== */
+
+/* ── Mobile Nav Bar ──────────────────────────────────────────────────── */
+.shMobileNavBar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background: color-mix(in srgb, var(--paper, #fff) 5%, transparent);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-top: 1px solid color-mix(in srgb, var(--ink, #000) 10%, transparent);
+  border-radius: 16px 16px 0 0;
+  padding: 4px 16px calc(4px + env(safe-area-inset-bottom, 0px));
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  animation: shNavRise 400ms var(--sh-easing) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shMobileNavBar {
+    animation: none;
+  }
+}
+
+@media (orientation: landscape) {
+  .shMobileNavBar {
+    height: 48px;
+    padding: 2px 16px calc(2px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+.shMobileNavTab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+  text-decoration: none;
+  transition: all 160ms var(--sh-easing);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.shMobileNavTab:active {
+  transform: scale(0.94);
+}
+
+.shMobileNavTabActive {
+  color: var(--sh-info, #60a5fa);
+}
+
+.shMobileNavTabInactive {
+  color: color-mix(in srgb, var(--muted, #6b7280) 100%, transparent);
+  opacity: 0.4;
+}
+
+.shMobileNavTabInactive:hover {
+  opacity: 0.7;
+  background: color-mix(in srgb, var(--paper, #fff) 10%, transparent);
+}
+
+/* Active indicator dot */
+.shMobileNavIndicator {
+  position: absolute;
+  top: -2px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--sh-info, #60a5fa);
+  transition: all 400ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.shMobileNavLabel {
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1;
+  transition: color 160ms ease;
+}
+
+@media (orientation: landscape) {
+  .shMobileNavLabel {
+    display: none;
+  }
+}
+
+/* Badge on nav tab */
+.shMobileNavBadge {
+  position: absolute;
+  top: 2px;
+  right: 4px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 8px;
+  background: var(--sh-error, #ef4444);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 16px;
+  text-align: center;
+  pointer-events: none;
+}
+
+/* ── FAB ─────────────────────────────────────────────────────────────── */
+.shMobileFAB {
+  position: fixed;
+  z-index: 50;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--sh-info, #3b82f6) 20%, transparent);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid color-mix(in srgb, var(--sh-info, #3b82f6) 30%, transparent);
+  box-shadow: 0 10px 40px color-mix(in srgb, var(--sh-info, #3b82f6) 10%, transparent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 24px;
+  cursor: pointer;
+  user-select: none;
+  bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+  right: 24px;
+  transition:
+    transform 300ms var(--sh-easing),
+    box-shadow 300ms var(--sh-easing);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.shMobileFAB:active {
+  transform: scale(0.92);
+  box-shadow: 0 0 20px color-mix(in srgb, var(--sh-info, #3b82f6) 30%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shMobileFAB {
+    transition: none;
+  }
+}
+
+.shMobileFABHidden {
+  transform: translateY(80px);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Speed-dial menu */
+.shMobileFABSpeedDial {
+  position: fixed;
+  bottom: calc(140px + env(safe-area-inset-bottom, 0px));
+  right: 24px;
+  z-index: 49;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  animation: shFadeSlideUp 200ms var(--sh-easing) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shMobileFABSpeedDial {
+    animation: none;
+  }
+}
+
+.shMobileFABSpeedDialItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--paper, #fff) 10%, transparent);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid color-mix(in srgb, var(--ink, #000) 10%, transparent);
+  color: var(--ink, #111);
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  transition: background 180ms ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.shMobileFABSpeedDialItem:hover {
+  background: color-mix(in srgb, var(--paper, #fff) 20%, transparent);
+}
+
+.shMobileFABSpeedDialItem:active {
+  transform: scale(0.96);
+}
+
+/* ── Pull to Refresh ─────────────────────────────────────────────────── */
+.shPullToRefreshPill {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 50;
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--paper, #fff) 10%, transparent);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid color-mix(in srgb, var(--ink, #000) 10%, transparent);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--muted, #6b7280);
+  animation: shPillDrop 300ms var(--sh-easing);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shPullToRefreshPill {
+    animation: none;
+  }
+}
+
+/* ── Swipeable Row ───────────────────────────────────────────────────── */
+.shSwipeableRow {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.shSwipeableRowContent {
+  position: relative;
+  z-index: 1;
+  background: inherit;
+  transition: transform 300ms cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+}
+
+.shSwipeableRowActions {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  align-items: stretch;
+  z-index: 0;
+}
+
+.shSwipeableRowActionsLeft {
+  left: 0;
+  flex-direction: row;
+}
+
+.shSwipeableRowActionsRight {
+  right: 0;
+  flex-direction: row-reverse;
+}
+
+.shSwipeAction {
+  width: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 2px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 500;
+  cursor: pointer;
+  user-select: none;
+  transition: opacity 200ms ease, filter 200ms ease;
+  border: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.shSwipeAction:active {
+  filter: brightness(0.85);
+}
+
+/* ── Animations ──────────────────────────────────────────────────────── */
+@keyframes shNavRise {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes shFadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shPillDrop {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -20px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+@keyframes shSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   OS Glass App Header — sticky top navigation
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.shAppHeader {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  height: var(--sh-header-h);
+}
+
+.shAppHeaderGlass {
+  height: 100%;
+  background: var(--sh-header-glass-bg);
+  backdrop-filter: blur(var(--sh-header-blur));
+  -webkit-backdrop-filter: blur(var(--sh-header-blur));
+  border-bottom: 1px solid var(--sh-header-glass-border);
+  box-shadow: var(--shadow-sm);
+  animation: shHeaderSlideIn 400ms var(--sh-easing) both;
+}
+
+.shAppHeaderInner {
+  max-width: var(--sh-content-max, 1280px);
+  margin: 0 auto;
+  padding: 0 var(--space-6);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+  gap: var(--space-4);
+}
+
+/* ── Brand Logo ─── */
+
+.shAppHeaderBrand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  text-decoration: none;
+  color: var(--ink);
+  flex-shrink: 0;
+}
+
+.shAppHeaderBrand strong {
+  font-size: var(--fs-body);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.shAppHeaderLogoIcon {
+  color: var(--blue);
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+/* ── Navigation Tabs ─── */
+
+.shAppHeaderNav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  flex: 1;
+  justify-content: center;
+}
+
+@media (max-width: 768px) {
+  .shAppHeaderNav {
+    display: none;
+  }
+}
+
+.shAppHeaderTab {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  height: var(--sh-header-tab-h);
+  padding: 0 var(--space-3);
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  color: var(--muted);
+  border-radius: var(--radius-md);
+  transition: all var(--dur-fast) var(--sh-easing);
+  position: relative;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.shAppHeaderTab:hover {
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.shAppHeaderTabActive {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.shAppHeaderTabInactive {
+  color: var(--muted);
+}
+
+.shAppHeaderTabActiveIndicator {
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: var(--sh-header-tab-indicator);
+  background: linear-gradient(90deg, var(--blue), #6ed5a0);
+  border-radius: 2px;
+  animation: shTabIn var(--dur-slow) var(--sh-easing) forwards;
+}
+
+@keyframes shTabIn {
+  from {
+    width: 0%;
+    opacity: 0;
+  }
+  to {
+    width: 60%;
+    opacity: 1;
+  }
+}
+
+@keyframes shHeaderSlideIn {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* ── Right Actions ─── */
+
+.shAppHeaderActions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-shrink: 0;
+}
+
+/* ── Notification Bell ─── */
+
+.shBellContainer {
+  position: relative;
+}
+
+.shBellBtn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-lg);
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all var(--dur-fast) var(--sh-easing);
+}
+
+.shBellBtn:hover {
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.shBellDot {
+  position: absolute;
+  top: -2px;
+  right: -4px;
+  min-width: 16px;
+  height: 16px;
+  background: var(--sh-error);
+  color: #fff;
+  font-size: var(--fs-xxs);
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 0 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  animation: shBellPulse 300ms ease-out;
+}
+
+@keyframes shBellPulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* ── User Avatar ─── */
+
+.shAppHeaderAvatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  background: var(--sh-info-bg);
+  color: var(--sh-info);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--sh-easing);
+  padding: 0;
+  overflow: hidden;
+}
+
+.shAppHeaderAvatar:hover,
+.shAppHeaderAvatar[aria-expanded="true"] {
+  border-color: var(--blue);
+}
+
+.shAppHeaderAvatarFallback {
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  line-height: 1;
+}

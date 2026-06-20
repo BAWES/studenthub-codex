@@ -24,6 +24,7 @@ export default async function CandidatePage() {
           { label: "Invitations", href: "/candidate/invitations" },
           { label: "Skills", href: "/candidate/skills" },
           { label: "Certifications", href: "/candidate/certifications" },
+          { label: "References", href: "/candidate/references" },
           { label: "Schedule", href: "/candidate/schedule" },
           { label: "Documents", href: "/candidate/documents" },
           { label: "Work logs", href: "/candidate/work-logs" },

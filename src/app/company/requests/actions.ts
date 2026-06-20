@@ -175,3 +175,57 @@ export async function createCompanyRequest(
   revalidatePath("/company/requests");
   return { request_uuid: request.request_uuid };
 }
+
+// ---------------------------------------------------------------------------
+// Row helpers for DataTable pages — replaces imports from @/modules/workspace/data
+// ---------------------------------------------------------------------------
+
+type CompanyRequestRow = {
+  id: string;
+  title: string;
+  company: string;
+  owner: string;
+  seats: number;
+  status: string;
+  updated: string;
+};
+
+/**
+ * List company request rows for the DataTable on the company/requests page.
+ * Mirrors the legacy getCompanyRequestRows() from @/modules/workspace/data/company.ts.
+ */
+export async function getCompanyRequestRows(contactUuid: string): Promise<CompanyRequestRow[]> {
+  await requireCapability("request.read.linked");
+
+  const companyLinks = await prisma.company_contact.findMany({
+    where: { contact_uuid: contactUuid, allow_access: true },
+    select: { company_id: true },
+  });
+  const companyIds = companyLinks.map((l) => l.company_id).filter((id): id is number => Boolean(id));
+  if (companyIds.length === 0) return [];
+
+  const rows = await prisma.request.findMany({
+    where: { company_id: { in: companyIds } },
+    orderBy: { request_updated_datetime: "desc" },
+    take: 80,
+    select: {
+      request_uuid: true,
+      request_position_title: true,
+      request_status: true,
+      request_number_of_employees: true,
+      request_updated_datetime: true,
+      company: { select: { company_name: true } },
+      staff: { select: { staff_name: true } },
+    },
+  });
+
+  return rows.map((row) => ({
+    id: row.request_uuid,
+    title: row.request_position_title ?? "Untitled request",
+    company: row.company?.company_name ?? "No company",
+    owner: row.staff?.staff_name ?? "Unassigned",
+    seats: row.request_number_of_employees ?? 0,
+    status: row.request_status ?? "No status",
+    updated: row.request_updated_datetime.toISOString().slice(0, 10).replace(/-/g, "/"),
+  }));
+}

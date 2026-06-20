@@ -6,12 +6,18 @@ import { requireCapability } from "@/modules/auth/session";
 import {
   listStoresSchema,
   getStoreSchema,
+  listStoresRowsSchema,
+  listMallsAndBrandsSchema,
+  listCompanySelectOptionsSchema,
 } from "./schemas";
 import type {
   ListStoresInput,
   StoreListItem,
   StoreDetail,
   ListStoresResult,
+  StoreRow,
+  MallsAndBrandsResult,
+  CompanySelectOption,
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
@@ -162,4 +168,126 @@ export async function getStoreDetail(
     created_at: raw.store_created_at.toISOString(),
     updated_at: raw.store_updated_at.toISOString(),
   };
+}
+
+// ---------------------------------------------------------------------------
+// DataTable rows — colocated replacements for @/modules/company/data
+// ---------------------------------------------------------------------------
+
+/**
+ * List stores as flat DataTable rows for the company/stores page.
+ * Mirrors getCompanyStoresRows from @/modules/company/data.
+ */
+export async function listStoresRows(
+  contactUuid: string,
+): Promise<StoreRow[]> {
+  await requireCapability("company.read.linked");
+
+  const parsed = listStoresRowsSchema.safeParse({ contactUuid });
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid contact UUID");
+  }
+
+  // Get companies linked to this contact
+  const linked = await prisma.company_contact.findMany({
+    where: { contact_uuid: parsed.data.contactUuid, allow_access: true },
+    select: { company_id: true },
+  });
+
+  const companyIds = linked
+    .filter((l) => l.company_id !== null)
+    .map((l) => l.company_id as number);
+
+  if (companyIds.length === 0) return [];
+
+  const stores = await prisma.store.findMany({
+    where: { company_id: { in: companyIds }, deleted: 0 },
+    select: {
+      store_id: true,
+      store_name: true,
+      store_location: true,
+      brand: { select: { brand_name_en: true } },
+      mall: { select: { mall_name_en: true } },
+      company: { select: { company_name: true } },
+      contact: { select: { contact_name: true } },
+    },
+    orderBy: { store_updated_at: "desc" },
+  });
+
+  return stores.map((s) => ({
+    id: s.store_id,
+    name: s.store_name,
+    location: s.store_location,
+    mallName: s.mall?.mall_name_en ?? "—",
+    brandName: s.brand?.brand_name_en ?? "—",
+    companyName: s.company?.company_name ?? "—",
+    managerName: s.contact?.contact_name ?? "—",
+  }));
+}
+
+/**
+ * Fetch malls and brands for the AddStoreForm dropdowns.
+ * Mirrors getCompanyMallsAndBrands from @/modules/company/data.
+ */
+export async function listMallsAndBrands(
+  contactUuid: string,
+): Promise<MallsAndBrandsResult> {
+  await requireCapability("company.read.linked");
+
+  const parsed = listMallsAndBrandsSchema.safeParse({ contactUuid });
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid contact UUID");
+  }
+
+  // Get companies linked to this contact
+  const linked = await prisma.company_contact.findMany({
+    where: { contact_uuid: parsed.data.contactUuid, allow_access: true },
+    select: { company_id: true },
+  });
+
+  const companyIds = linked
+    .filter((l) => l.company_id !== null)
+    .map((l) => l.company_id as number);
+
+  const [malls, brands] = await Promise.all([
+    prisma.mall.findMany({
+      select: { mall_uuid: true, mall_name_en: true },
+      orderBy: { mall_name_en: "asc" },
+    }),
+    prisma.brand.findMany({
+      where: companyIds.length > 0 ? { company_id: { in: companyIds } } : undefined,
+      select: { brand_uuid: true, brand_name_en: true },
+      orderBy: { brand_name_en: "asc" },
+    }),
+  ]);
+
+  return {
+    malls: malls.map((m) => ({ uuid: m.mall_uuid, name: m.mall_name_en })),
+    brands: brands.map((b) => ({ uuid: b.brand_uuid, name: b.brand_name_en })),
+  };
+}
+
+/**
+ * List company select options for the AddStoreForm dropdown.
+ * Mirrors getCompanySelectOptions from @/modules/company/data.
+ */
+export async function listCompanySelectOptions(
+  contactUuid: string,
+): Promise<CompanySelectOption[]> {
+  await requireCapability("company.read.linked");
+
+  const parsed = listCompanySelectOptionsSchema.safeParse({ contactUuid });
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid contact UUID");
+  }
+
+  const links = await prisma.company_contact.findMany({
+    where: { contact_uuid: parsed.data.contactUuid, allow_access: true },
+    select: { company_id: true, company: { select: { company_name: true } } },
+  });
+
+  return links
+    .filter((l) => l.company_id !== null && l.company !== null)
+    .map((l) => ({ id: l.company_id as number, name: l.company!.company_name }))
+    .sort((a, b) => a.name.localeCompare(b.name));
 }

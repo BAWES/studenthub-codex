@@ -2,6 +2,14 @@ import { prisma } from "@/lib/prisma";
 import { formatDate, formatMoney } from "@/modules/workspace/format";
 import { computeMatchScore, matchScoreLabel } from "@/modules/workspace/data/match-score";
 
+// ---------------------------------------------------------------------------
+// request-detail-core.ts
+// ---------------------------------------------------------------------------
+// Core query logic for fetching full request detail with pipeline data.
+// Extracted from @/modules/workspace/data/shared to eliminate the data/
+// directory dependency from route-level actions.
+// ---------------------------------------------------------------------------
+
 /**
  * Attempt to extract a numeric hourly-equivalent from a compensation string.
  * Examples: "3,000 KWD/month" -> 3000, "500-800" -> 650 (midpoint).
@@ -30,8 +38,20 @@ export async function getRequestDetail(
   staffId?: number,
   options: { candidateHref?: (candidateId: number) => string | undefined } = {}
 ) {
-  const where = staffId ? { request_uuid: requestUuid, staff_id: staffId } : { request_uuid: requestUuid };
-  const [request, applications, interviews, invitations, activities, notes, stories, requestSkills, suggestions] = await prisma.$transaction([
+  const where = staffId
+    ? { request_uuid: requestUuid, staff_id: staffId }
+    : { request_uuid: requestUuid };
+  const [
+    request,
+    applications,
+    interviews,
+    invitations,
+    activities,
+    notes,
+    stories,
+    requestSkills,
+    suggestions,
+  ] = await prisma.$transaction([
     prisma.request.findFirst({
       where,
       select: {
@@ -48,10 +68,17 @@ export async function getRequestDetail(
         request_updated_datetime: true,
         request_started_at: true,
         request_finished_at: true,
-        company: { select: { company_id: true, company_name: true, company_email: true, currency_code: true } },
+        company: {
+          select: {
+            company_id: true,
+            company_name: true,
+            company_email: true,
+            currency_code: true,
+          },
+        },
         contact: { select: { contact_name: true, contact_email: true } },
-        staff: { select: { staff_name: true, staff_email: true } }
-      }
+        staff: { select: { staff_name: true, staff_email: true } },
+      },
     }),
     prisma.request_application.findMany({
       where: { request_uuid: requestUuid },
@@ -61,8 +88,14 @@ export async function getRequestDetail(
         application_uuid: true,
         status: true,
         created_at: true,
-        candidate: { select: { candidate_id: true, candidate_name: true, candidate_email: true } }
-      }
+        candidate: {
+          select: {
+            candidate_id: true,
+            candidate_name: true,
+            candidate_email: true,
+          },
+        },
+      },
     }),
     prisma.request_interview.findMany({
       where: { request_uuid: requestUuid },
@@ -72,8 +105,14 @@ export async function getRequestDetail(
         request_interview_uuid: true,
         interview_at: true,
         status: true,
-        candidate: { select: { candidate_id: true, candidate_name: true, candidate_email: true } }
-      }
+        candidate: {
+          select: {
+            candidate_id: true,
+            candidate_name: true,
+            candidate_email: true,
+          },
+        },
+      },
     }),
     prisma.invitation.findMany({
       where: { request_uuid: requestUuid },
@@ -83,8 +122,14 @@ export async function getRequestDetail(
         invitation_uuid: true,
         invitation_status: true,
         invitation_created_at: true,
-        candidate: { select: { candidate_id: true, candidate_name: true, candidate_email: true } }
-      }
+        candidate: {
+          select: {
+            candidate_id: true,
+            candidate_name: true,
+            candidate_email: true,
+          },
+        },
+      },
     }),
     prisma.request_activity.findMany({
       where: { request_uuid: requestUuid },
@@ -94,14 +139,19 @@ export async function getRequestDetail(
         activity_uuid: true,
         activity_detail: true,
         activity_created_datetime: true,
-        staff: { select: { staff_name: true } }
-      }
+        staff: { select: { staff_name: true } },
+      },
     }),
     prisma.note.findMany({
       where: { request_uuid: requestUuid },
       orderBy: { note_created_datetime: "desc" },
       take: 8,
-      select: { note_uuid: true, note_type: true, note_text: true, note_created_datetime: true }
+      select: {
+        note_uuid: true,
+        note_type: true,
+        note_text: true,
+        note_created_datetime: true,
+      },
     }),
     prisma.story.findMany({
       where: { request_uuid: requestUuid },
@@ -110,14 +160,14 @@ export async function getRequestDetail(
       select: {
         story_uuid: true,
         story_status: true,
-        story_last_updated_at: true
-      }
+        story_last_updated_at: true,
+      },
     }),
     prisma.request_skill.findMany({
       where: { request_uuid: requestUuid },
       orderBy: { skill: "asc" },
       take: 18,
-      select: { skill: true }
+      select: { skill: true },
     }),
     prisma.suggestion.findMany({
       where: { request_uuid: requestUuid },
@@ -134,19 +184,19 @@ export async function getRequestDetail(
             candidate_name: true,
             candidate_email: true,
             candidate_hourly_rate: true,
-            currency_code: true
-          }
+            currency_code: true,
+          },
         },
-        note_suggestion_note_uuidTonote: { select: { note_text: true } }
-      }
-    })
+        note_suggestion_note_uuidTonote: { select: { note_text: true } },
+      },
+    }),
   ]);
   const requestSkillValues = requestSkills.map((item) => item.skill).filter(Boolean);
   const excludedCandidateIds = [
     ...applications.map((item) => item.candidate?.candidate_id),
     ...interviews.map((item) => item.candidate?.candidate_id),
     ...invitations.map((item) => item.candidate?.candidate_id),
-    ...suggestions.map((item) => item.candidate?.candidate_id)
+    ...suggestions.map((item) => item.candidate?.candidate_id),
   ].filter((id): id is number => Boolean(id));
   const matchedCandidates = request
     ? await prisma.candidate.findMany({
@@ -154,12 +204,21 @@ export async function getRequestDetail(
           deleted: 0,
           candidate_status: 10,
           approved: { not: 0 },
-          ...(excludedCandidateIds.length ? { candidate_id: { notIn: excludedCandidateIds } } : {}),
+          ...(excludedCandidateIds.length
+            ? { candidate_id: { notIn: excludedCandidateIds } }
+            : {}),
           ...(requestSkillValues.length
-            ? { candidate_skill: { some: { deleted: 0, skill: { in: requestSkillValues } } } }
-            : {})
+            ? {
+                candidate_skill: {
+                  some: { deleted: 0, skill: { in: requestSkillValues } },
+                },
+              }
+            : {}),
         },
-        orderBy: [{ candidate_updated_at: "desc" }, { candidate_id: "desc" }],
+        orderBy: [
+          { candidate_updated_at: "desc" },
+          { candidate_id: "desc" },
+        ],
         take: 10,
         select: {
           candidate_id: true,
@@ -172,14 +231,18 @@ export async function getRequestDetail(
           country: { select: { country_name_en: true } },
           university: { select: { university_name_en: true } },
           candidate_skill: {
-            where: requestSkillValues.length ? { deleted: 0, skill: { in: requestSkillValues } } : { deleted: 0 },
+            where: requestSkillValues.length
+              ? { deleted: 0, skill: { in: requestSkillValues } }
+              : { deleted: 0 },
             take: 6,
-            select: { skill: true }
-          }
-        }
+            select: { skill: true },
+          },
+        },
       })
     : [];
-  const requestCompensationValue = parseCompensationToNumber(request?.request_compensation);
+  const requestCompensationValue = parseCompensationToNumber(
+    request?.request_compensation
+  );
   const scoredCandidates = matchedCandidates.map((candidate) => {
     const matchedSkillNames = candidate.candidate_skill
       .map((skill) => skill.skill)
@@ -209,48 +272,108 @@ export async function getRequestDetail(
   const suggestionEmailHref =
     request?.contact?.contact_email || request?.company?.company_email
       ? `mailto:${request.contact?.contact_email ?? request.company?.company_email}?subject=${encodeURIComponent(
-          `Candidates for ${request.request_position_title ?? "your request"}`
+          `Candidates for ${request.request_position_title ?? "your request"}`,
         )}&body=${encodeURIComponent(suggestedForEmail.length ? suggestedForEmail.join("\n") : "No suggestions selected yet.")}`
       : null;
 
   return {
     request,
     requestSkills: requestSkillValues,
-    requestSummary: stripHtml(request?.request_job_description || request?.request_additional_info || "No request description imported.").slice(0, 220),
+    requestSummary: stripHtml(
+      request?.request_job_description ||
+        request?.request_additional_info ||
+        "No request description imported."
+    ).slice(0, 220),
     suggestionEmailHref,
     pipeline: [
-      { id: "matches", label: "Matches", value: matchedCandidates.length, note: "Skill-fit candidates" },
-      { id: "suggestions", label: "Suggested", value: suggestions.length, note: "Employer-ready candidates" },
-      { id: "invited", label: "Invited", value: invitations.length, note: "Candidate outreach" },
-      { id: "applications", label: "Applied", value: applications.length, note: "Inbound applications" },
-      { id: "interviews", label: "Interviews", value: interviews.length, note: "Evaluation queue" },
-      { id: "stories", label: "Stories", value: stories.length, note: "Operational fulfillment" }
+      {
+        id: "matches",
+        label: "Matches",
+        value: matchedCandidates.length,
+        note: "Skill-fit candidates",
+      },
+      {
+        id: "suggestions",
+        label: "Suggested",
+        value: suggestions.length,
+        note: "Employer-ready candidates",
+      },
+      {
+        id: "invited",
+        label: "Invited",
+        value: invitations.length,
+        note: "Candidate outreach",
+      },
+      {
+        id: "applications",
+        label: "Applied",
+        value: applications.length,
+        note: "Inbound applications",
+      },
+      {
+        id: "interviews",
+        label: "Interviews",
+        value: interviews.length,
+        note: "Evaluation queue",
+      },
+      {
+        id: "stories",
+        label: "Stories",
+        value: stories.length,
+        note: "Operational fulfillment",
+      },
     ],
     metrics: [
-      { label: "Seats", value: request?.request_number_of_employees ?? 0, note: "Requested employees" },
-      { label: "Status", value: request?.request_status ?? "No status", note: `Priority ${request?.request_priority ?? 0}` },
-      { label: "Suggestions", value: suggestions.length, note: "Recent suggestions shown" },
-      { label: "Invitations", value: invitations.length, note: "Recent invitations shown" }
+      {
+        label: "Seats",
+        value: request?.request_number_of_employees ?? 0,
+        note: "Requested employees",
+      },
+      {
+        label: "Status",
+        value: request?.request_status ?? "No status",
+        note: `Priority ${request?.request_priority ?? 0}`,
+      },
+      {
+        label: "Suggestions",
+        value: suggestions.length,
+        note: "Recent suggestions shown",
+      },
+      {
+        label: "Invitations",
+        value: invitations.length,
+        note: "Recent invitations shown",
+      },
     ],
-    matchedCandidates: scoredCandidates.map(({ candidate, matchedSkillNames, matchScore }) => {
-      return {
-        id: candidate.candidate_id,
-        uid: candidate.candidate_uid ?? `#${candidate.candidate_id}`,
-        name: candidate.candidate_name,
-        email: candidate.candidate_email,
-        country: candidate.country?.country_name_en ?? "No country",
-        university: candidate.university?.university_name_en ?? "No university",
-        rate: formatMoney(candidate.candidate_hourly_rate, candidate.currency_code ?? request?.company?.currency_code ?? "KWD"),
-        signal: matchedSkillNames.length ? `${matchedSkillNames.length} skill match${matchedSkillNames.length === 1 ? "" : "es"}` : "Recently active",
-        matchScore,
-        matchLabel: matchScoreLabel(matchScore),
-        reasons: [
-          ...matchedSkillNames.slice(0, 4),
-          candidate.country?.country_name_en ? `Country: ${candidate.country.country_name_en}` : null,
-          `Updated ${formatDate(candidate.candidate_updated_at)}`
-        ].filter((reason): reason is string => Boolean(reason))
-      };
-    }),
+    matchedCandidates: scoredCandidates.map(
+      ({ candidate, matchedSkillNames, matchScore }) => {
+        return {
+          id: candidate.candidate_id,
+          uid: candidate.candidate_uid ?? `#${candidate.candidate_id}`,
+          name: candidate.candidate_name,
+          email: candidate.candidate_email,
+          country: candidate.country?.country_name_en ?? "No country",
+          university:
+            candidate.university?.university_name_en ?? "No university",
+          rate: formatMoney(
+            candidate.candidate_hourly_rate,
+            candidate.currency_code ?? request?.company?.currency_code ?? "KWD"
+          ),
+          signal: matchedSkillNames.length
+            ? `${matchedSkillNames.length} skill match${matchedSkillNames.length === 1 ? "" : "es"}`
+            : "Recently active",
+          matchScore,
+          matchLabel: matchScoreLabel(matchScore),
+          reasons: [
+            ...matchedSkillNames.slice(0, 4),
+            candidate.country?.country_name_en
+              ? `Country: ${candidate.country.country_name_en}`
+              : null,
+            `Updated ${formatDate(candidate.candidate_updated_at)}`,
+          ].filter((reason): reason is string => Boolean(reason)),
+        };
+      }
+    ),
     applications: applications.map((application) => ({
       id: application.application_uuid,
       title: application.candidate?.candidate_name ?? "Unknown candidate",
@@ -263,46 +386,49 @@ export async function getRequestDetail(
           : staffId
             ? `/app/companies?candidate=${application.candidate.candidate_id}`
             : `/admin/candidates/${application.candidate.candidate_id}`
-        : undefined
+        : undefined,
     })),
     interviews: interviews.map((interview) => ({
       id: interview.request_interview_uuid,
       title: interview.candidate?.candidate_name ?? "Interview",
       subtitle: interview.candidate?.candidate_email ?? "No email",
       meta: `Status ${interview.status ?? 0} · ${formatDate(interview.interview_at)}`,
-      status: interview.status
+      status: interview.status,
     })),
     invitations: invitations.map((invitation) => ({
       id: invitation.invitation_uuid,
       title: invitation.candidate?.candidate_name ?? "Invitation",
       subtitle: invitation.candidate?.candidate_email ?? "No email",
       meta: `Status ${invitation.invitation_status ?? 0} · ${formatDate(invitation.invitation_created_at)}`,
-      status: invitation.invitation_status
+      status: invitation.invitation_status,
     })),
     suggestions: suggestions.map((suggestion) => ({
       id: suggestion.suggestion_uuid,
       title: suggestion.candidate?.candidate_name ?? "Suggestion",
-      subtitle: suggestion.note_suggestion_note_uuidTonote.note_text ?? suggestion.candidate?.candidate_email ?? "No note",
-      meta: `Status ${suggestion.suggestion_status ?? 0} · ${suggestion.mail_to_company ? "Mailed" : "Not mailed"} · ${formatDate(suggestion.suggestion_datetime)}`
+      subtitle:
+        suggestion.note_suggestion_note_uuidTonote.note_text ??
+        suggestion.candidate?.candidate_email ??
+        "No note",
+      meta: `Status ${suggestion.suggestion_status ?? 0} · ${suggestion.mail_to_company ? "Mailed" : "Not mailed"} · ${formatDate(suggestion.suggestion_datetime)}`,
     })),
     activities: activities.map((activity) => ({
       id: activity.activity_uuid,
       title: activity.staff?.staff_name ?? "Activity",
       subtitle: activity.activity_detail.slice(0, 180),
-      meta: formatDate(activity.activity_created_datetime)
+      meta: formatDate(activity.activity_created_datetime),
     })),
     notes: notes.map((note) => ({
       id: note.note_uuid,
       title: note.note_type ?? "Note",
       subtitle: note.note_text?.slice(0, 180) ?? "Empty note",
-      meta: formatDate(note.note_created_datetime)
+      meta: formatDate(note.note_created_datetime),
     })),
     stories: stories.map((story) => ({
       id: story.story_uuid,
       title: `Story ${story.story_uuid.slice(0, 12)}`,
       subtitle: `Status ${story.story_status}`,
       meta: formatDate(story.story_last_updated_at),
-      status: story.story_status
-    }))
+      status: story.story_status,
+    })),
   };
 }

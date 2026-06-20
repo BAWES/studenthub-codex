@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { requireRoleCapability } from "@/modules/auth/session";
 import { DetailSection } from "@/modules/workspace/DetailPanels";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
-import { getCompanyDetail } from "@/modules/workspace/data";
+import { getAdminCompanyDetail } from "../actions";
 import { formatDate } from "@/modules/workspace/format";
 
 export const dynamic = "force-dynamic";
@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 export default async function AdminCompanyDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await requireRoleCapability("admin", "company.read.any");
   const { id } = await params;
-  const data = await getCompanyDetail(Number(id));
+  const data = await getAdminCompanyDetail(Number(id));
 
   if (!data.company) {
     notFound();
@@ -31,7 +31,7 @@ export default async function AdminCompanyDetailPage({ params }: { params: Promi
           { label: "Email", value: data.company.company_email },
           { label: "Common Name", value: data.company.company_common_name_en },
           { label: "Website", value: data.company.company_website },
-          { label: "Country", value: data.company.country?.country_name_en },
+          { label: "Country", value: data.company.country_name_en },
           { label: "Created", value: formatDate(data.company.company_created_at) },
           { label: "Updated", value: formatDate(data.company.company_updated_at) }
         ]}

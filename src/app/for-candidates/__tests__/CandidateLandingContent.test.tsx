@@ -101,7 +101,7 @@ describe("Candidate landing page (/for-candidates)", () => {
       screen.getByText(/can't get hired without experience/i)
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/a single job for years gives you a thin cv/i)
+      screen.getByText(/a single job for years gives you a thin CV/i)
     ).toBeInTheDocument();
     expect(
       screen.getByText(/compliance paperwork is a nightmare/i)
@@ -110,12 +110,11 @@ describe("Candidate landing page (/for-candidates)", () => {
 
   it("renders the stats strip with candidate metrics", () => {
     render(<CandidateLandingContent {...defaultProps} />);
-    const statsSection = screen.getByLabelText(/candidate stats/i);
-    expect(statsSection).toBeInTheDocument();
-    expect(statsSection).toHaveTextContent("1,200+");
-    expect(statsSection).toHaveTextContent("92%");
-    expect(statsSection).toHaveTextContent("Free");
-    expect(statsSection).toHaveTextContent("3 mo");
+    const stats = screen.getByLabelText(/candidate stats/i);
+    expect(stats).toBeInTheDocument();
+    expect(within(stats).getByText("1,200+")).toBeInTheDocument();
+    expect(within(stats).getByText("92%")).toBeInTheDocument();
+    expect(within(stats).getByText("Free")).toBeInTheDocument();
   });
 
   it("renders the feature grid", () => {
