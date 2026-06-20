@@ -1,5 +1,8 @@
 import { describe, it, expect } from "vitest";
 import {
+  createDegreeSchema,
+  updateDegreeSchema,
+  deleteDegreeSchema,
   degreeItemSchema,
   listDegreesResultSchema,
   degreeActionResponseSchema,
@@ -110,5 +113,103 @@ describe("degreeActionResponseSchema", () => {
     expect(
       degreeActionResponseSchema.safeParse({ message: "Done" }).success,
     ).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// CRUD Schema Validation Tests
+// ---------------------------------------------------------------------------
+
+describe("createDegreeSchema", () => {
+  it("accepts valid input with just english name", () => {
+    const r = createDegreeSchema.safeParse({ degree_name_en: "Bachelor of Science" });
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts all optional fields", () => {
+    const r = createDegreeSchema.safeParse({
+      degree_name_en: "Master of Arts",
+      degree_name_ar: "ماجستير في الآداب",
+      degree_group_uuid: "group-123",
+      degree_sort_order: 2,
+    });
+    expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data.degree_sort_order).toBe(2);
+    }
+  });
+
+  it("rejects empty english name", () => {
+    const r = createDegreeSchema.safeParse({ degree_name_en: "" });
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects missing english name", () => {
+    const r = createDegreeSchema.safeParse({});
+    expect(r.success).toBe(false);
+  });
+
+  it("coerces string sort_order to number", () => {
+    const r = createDegreeSchema.safeParse({
+      degree_name_en: "PhD",
+      degree_sort_order: "3",
+    });
+    expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data.degree_sort_order).toBe(3);
+    }
+  });
+});
+
+describe("updateDegreeSchema", () => {
+  it("accepts valid update input", () => {
+    const r = updateDegreeSchema.safeParse({
+      degree_uuid: "deg-001",
+      degree_name_en: "Bachelor of Science",
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("accepts nullable optional fields", () => {
+    const r = updateDegreeSchema.safeParse({
+      degree_uuid: "deg-001",
+      degree_name_en: "Updated Name",
+      degree_name_ar: null,
+      degree_group_uuid: null,
+      degree_sort_order: null,
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects missing uuid", () => {
+    const r = updateDegreeSchema.safeParse({
+      degree_name_en: "Name Only",
+    });
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects empty english name", () => {
+    const r = updateDegreeSchema.safeParse({
+      degree_uuid: "deg-001",
+      degree_name_en: "",
+    });
+    expect(r.success).toBe(false);
+  });
+});
+
+describe("deleteDegreeSchema", () => {
+  it("accepts valid uuid", () => {
+    const r = deleteDegreeSchema.safeParse({ degree_uuid: "deg-001" });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects empty uuid", () => {
+    const r = deleteDegreeSchema.safeParse({ degree_uuid: "" });
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects missing uuid", () => {
+    const r = deleteDegreeSchema.safeParse({});
+    expect(r.success).toBe(false);
   });
 });

@@ -1,12 +1,22 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
 import {
+  createDegreeSchema,
+  updateDegreeSchema,
+  deleteDegreeSchema,
   degreeItemSchema,
   listDegreesResultSchema,
+  degreeActionResponseSchema,
 } from "./schemas";
-import type { ListDegreesResult } from "./schemas";
+import type {
+  ListDegreesResult,
+  DegreeActionResponse,
+  CreateDegreeInput,
+  UpdateDegreeInput,
+} from "./schemas";
 import { z } from "zod";
 
 // ---------------------------------------------------------------------------
@@ -79,4 +89,193 @@ export async function listDegrees(
   }
 
   return result;
+}
+
+// ---------------------------------------------------------------------------
+// createDegree
+// ---------------------------------------------------------------------------
+
+export async function createDegree(
+  name_en: string,
+  name_ar?: string,
+  degree_group_uuid?: string,
+  sort_order?: number,
+): Promise<DegreeActionResponse> {
+  await requireCapability("admin.write");
+
+  const parsed = createDegreeSchema.safeParse({
+    degree_name_en: name_en,
+    degree_name_ar: name_ar,
+    degree_group_uuid: degree_group_uuid,
+    degree_sort_order: sort_order,
+  });
+
+  if (!parsed.success) {
+    return {
+      operation: "error",
+      message: parsed.error.issues[0]?.message ?? "Invalid input",
+    };
+  }
+
+  try {
+    await prisma.degree.create({
+      data: {
+        degree_uuid: crypto.randomUUID(),
+        degree_name_en: parsed.data.degree_name_en,
+        degree_name_ar: parsed.data.degree_name_ar ?? null,
+        degree_group_uuid: parsed.data.degree_group_uuid ?? null,
+        degree_sort_order: parsed.data.degree_sort_order ?? null,
+      },
+    });
+
+    revalidatePath("/admin/degree");
+    const result: DegreeActionResponse = {
+      operation: "success",
+      message: "Degree created successfully",
+    };
+
+    const outputParsed = degreeActionResponseSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/admin/degree] createDegree output failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
+  } catch (_e) {
+    return {
+      operation: "error",
+      message:
+        "We've faced a problem creating the degree, please contact us for assistance.",
+    };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// updateDegree
+// ---------------------------------------------------------------------------
+
+export async function updateDegree(
+  uuid: string,
+  name_en: string,
+  name_ar?: string | null,
+  degree_group_uuid?: string | null,
+  sort_order?: number | null,
+): Promise<DegreeActionResponse> {
+  await requireCapability("admin.write");
+
+  const parsed = updateDegreeSchema.safeParse({
+    degree_uuid: uuid,
+    degree_name_en: name_en,
+    degree_name_ar: name_ar,
+    degree_group_uuid: degree_group_uuid,
+    degree_sort_order: sort_order,
+  });
+
+  if (!parsed.success) {
+    return {
+      operation: "error",
+      message: parsed.error.issues[0]?.message ?? "Invalid parameters",
+    };
+  }
+
+  try {
+    const existing = await prisma.degree.findUnique({
+      where: { degree_uuid: parsed.data.degree_uuid },
+      select: { degree_uuid: true },
+    });
+
+    if (!existing) {
+      return { operation: "error", message: "Degree not found" };
+    }
+
+    await prisma.degree.update({
+      where: { degree_uuid: parsed.data.degree_uuid },
+      data: {
+        degree_name_en: parsed.data.degree_name_en,
+        degree_name_ar: parsed.data.degree_name_ar ?? null,
+        degree_group_uuid: parsed.data.degree_group_uuid ?? null,
+        degree_sort_order: parsed.data.degree_sort_order ?? null,
+      },
+    });
+
+    revalidatePath("/admin/degree");
+    const result: DegreeActionResponse = {
+      operation: "success",
+      message: "Degree updated successfully",
+    };
+
+    const outputParsed = degreeActionResponseSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/admin/degree] updateDegree output failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
+  } catch (_e) {
+    return {
+      operation: "error",
+      message:
+        "We've faced a problem updating the degree, please contact us for assistance.",
+    };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// deleteDegree
+// ---------------------------------------------------------------------------
+
+export async function deleteDegree(
+  uuid: string,
+): Promise<DegreeActionResponse> {
+  await requireCapability("admin.write");
+
+  const parsed = deleteDegreeSchema.safeParse({ degree_uuid: uuid });
+
+  if (!parsed.success) {
+    return {
+      operation: "error",
+      message: parsed.error.issues[0]?.message ?? "Invalid UUID",
+    };
+  }
+
+  try {
+    const existing = await prisma.degree.findUnique({
+      where: { degree_uuid: parsed.data.degree_uuid },
+      select: { degree_uuid: true },
+    });
+
+    if (!existing) {
+      return { operation: "error", message: "Degree not found" };
+    }
+
+    await prisma.degree.delete({
+      where: { degree_uuid: parsed.data.degree_uuid },
+    });
+
+    revalidatePath("/admin/degree");
+    const result: DegreeActionResponse = {
+      operation: "success",
+      message: "Degree deleted successfully",
+    };
+
+    const outputParsed = degreeActionResponseSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/admin/degree] deleteDegree output failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
+  } catch (_e) {
+    return {
+      operation: "error",
+      message:
+        "We've faced a problem deleting the degree, please contact us for assistance.",
+    };
+  }
 }

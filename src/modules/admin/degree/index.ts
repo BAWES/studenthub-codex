@@ -1,13 +1,25 @@
 export {
-  listDegreesSchema,
+  createDegreeSchema,
+  updateDegreeSchema,
+  deleteDegreeSchema,
   degreeItemSchema,
   listDegreesResultSchema,
   degreeActionResponseSchema,
 } from "./schemas";
+
 export type {
-  ListDegreesInput,
+  CreateDegreeInput,
+  UpdateDegreeInput,
+  DeleteDegreeInput,
   DegreeItem,
   ListDegreesResult,
   DegreeActionResponse,
 } from "./schemas";
-export { listDegrees } from "./actions";
+
+export {
+  listDegrees,
+  createDegree,
+  updateDegree,
+  deleteDegree,
+} from "./actions";
+export type { ListDegreesParams } from "./actions";

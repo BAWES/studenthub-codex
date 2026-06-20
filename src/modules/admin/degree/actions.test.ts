@@ -1,17 +1,16 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import {
-  listDegreesSchema,
-  degreeItemSchema,
-  listDegreesResultSchema,
-} from "./schemas";
 import type { DegreeItem, ListDegreesResult } from "./schemas";
 
 // ── Hoisted mock functions ──────────────────────────────────
-const { mockRequireCapability, mockFindMany, mockCount } = vi.hoisted(
+const { mockRequireCapability, mockFindMany, mockCount, mockCreate, mockUpdate, mockFindUnique, mockDelete } = vi.hoisted(
   () => ({
     mockRequireCapability: vi.fn(),
     mockFindMany: vi.fn(),
     mockCount: vi.fn(),
+    mockCreate: vi.fn(),
+    mockUpdate: vi.fn(),
+    mockFindUnique: vi.fn(),
+    mockDelete: vi.fn(),
   }),
 );
 
@@ -20,151 +19,29 @@ vi.mock("@/modules/auth/session", () => ({
   requireCapability: mockRequireCapability,
 }));
 
+// ── Mock next/cache ─────────────────────────────────────────
+vi.mock("next/cache", () => ({
+  revalidatePath: vi.fn(),
+}));
+
 // ── Mock Prisma ─────────────────────────────────────────────
 vi.mock("@/lib/prisma", () => ({
   prisma: {
     degree: {
       findMany: mockFindMany,
       count: mockCount,
+      create: mockCreate,
+      update: mockUpdate,
+      findUnique: mockFindUnique,
+      delete: mockDelete,
     },
   },
 }));
 
-import { listDegrees } from "./actions";
+import { listDegrees, createDegree, updateDegree, deleteDegree } from "./actions";
 
 // ---------------------------------------------------------------------------
-// Input schema validation
-// ---------------------------------------------------------------------------
-
-describe("listDegreesSchema", () => {
-  it("accepts empty params (default pagination)", () => {
-    const result = listDegreesSchema.safeParse({});
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.page).toBe(1);
-      expect(result.data.limit).toBe(50);
-    }
-  });
-
-  it("accepts explicit pagination params", () => {
-    const result = listDegreesSchema.safeParse({ page: 2, limit: 25 });
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.page).toBe(2);
-      expect(result.data.limit).toBe(25);
-    }
-  });
-
-  it("rejects limit over 200", () => {
-    const result = listDegreesSchema.safeParse({ limit: 999 });
-    expect(result.success).toBe(false);
-  });
-
-  it("rejects negative page", () => {
-    const result = listDegreesSchema.safeParse({ page: -1 });
-    expect(result.success).toBe(false);
-  });
-
-  it("coerces string page to number", () => {
-    const result = listDegreesSchema.safeParse({ page: "3" });
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.page).toBe(3);
-    }
-  });
-});
-
-// ---------------------------------------------------------------------------
-// Output schema validation
-// ---------------------------------------------------------------------------
-
-describe("degreeItemSchema", () => {
-  it("accepts a valid degree item", () => {
-    const item: DegreeItem = {
-      degree_uuid: "deg-001",
-      degree_group_uuid: null,
-      degree_name_en: "Bachelor of Science",
-      degree_name_ar: null,
-      degree_sort_order: 1,
-      degree_created_at: new Date("2026-01-01"),
-      degree_updated_at: null,
-    };
-    const result = degreeItemSchema.safeParse(item);
-    expect(result.success).toBe(true);
-  });
-
-  it("accepts nullable fields", () => {
-    const item: DegreeItem = {
-      degree_uuid: "deg-002",
-      degree_group_uuid: null,
-      degree_name_en: "Master of Arts",
-      degree_name_ar: null,
-      degree_sort_order: null,
-      degree_created_at: null,
-      degree_updated_at: null,
-    };
-    const result = degreeItemSchema.safeParse(item);
-    expect(result.success).toBe(true);
-  });
-
-  it("rejects missing degree_uuid", () => {
-    const result = degreeItemSchema.safeParse({
-      degree_name_en: "Test",
-    });
-    expect(result.success).toBe(false);
-  });
-});
-
-describe("listDegreesResultSchema", () => {
-  it("accepts a valid list result with items", () => {
-    const result: ListDegreesResult = {
-      degrees: [
-        {
-          degree_uuid: "deg-001",
-          degree_group_uuid: null,
-          degree_name_en: "Bachelor",
-          degree_name_ar: null,
-          degree_sort_order: 1,
-          degree_created_at: new Date("2026-01-01"),
-          degree_updated_at: null,
-        },
-      ],
-      total: 1,
-      page: 1,
-      limit: 50,
-      totalPages: 1,
-    };
-    const parsed = listDegreesResultSchema.safeParse(result);
-    expect(parsed.success).toBe(true);
-  });
-
-  it("accepts empty degrees array", () => {
-    const result: ListDegreesResult = {
-      degrees: [],
-      total: 0,
-      page: 1,
-      limit: 50,
-      totalPages: 0,
-    };
-    const parsed = listDegreesResultSchema.safeParse(result);
-    expect(parsed.success).toBe(true);
-  });
-
-  it("rejects non-array degrees", () => {
-    const result = {
-      degrees: "not-an-array",
-      total: 0,
-      page: 1,
-      limit: 50,
-      totalPages: 0,
-    };
-    const parsed = listDegreesResultSchema.safeParse(result);
-    expect(parsed.success).toBe(false);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// Action-level tests — mocked DB
+// Action-level tests — listDegrees
 // ---------------------------------------------------------------------------
 
 describe("listDegrees action", () => {
@@ -238,5 +115,187 @@ describe("listDegrees action", () => {
 
     await expect(listDegrees({})).rejects.toThrow("Unauthorized");
     expect(mockFindMany).not.toHaveBeenCalled();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Action-level tests — createDegree
+// ---------------------------------------------------------------------------
+
+describe("createDegree action", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("creates a degree with just english name", async () => {
+    mockRequireCapability.mockResolvedValue({ user: { id: 1 } });
+    mockCreate.mockResolvedValue({ degree_uuid: "new-uuid" });
+
+    const result = await createDegree("Bachelor of Science");
+
+    expect(mockRequireCapability).toHaveBeenCalledWith("admin.write");
+    expect(mockCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          degree_name_en: "Bachelor of Science",
+          degree_name_ar: null,
+          degree_group_uuid: null,
+          degree_sort_order: null,
+        }),
+      }),
+    );
+    expect(result.operation).toBe("success");
+    expect(result.message).toBe("Degree created successfully");
+  });
+
+  it("creates a degree with all fields", async () => {
+    mockRequireCapability.mockResolvedValue({ user: { id: 1 } });
+    mockCreate.mockResolvedValue({ degree_uuid: "new-uuid" });
+
+    const result = await createDegree("Master of Arts", "ماجستير في الآداب", "group-123", 2);
+
+    expect(mockCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          degree_name_en: "Master of Arts",
+          degree_name_ar: "ماجستير في الآداب",
+          degree_group_uuid: "group-123",
+          degree_sort_order: 2,
+        }),
+      }),
+    );
+    expect(result.operation).toBe("success");
+  });
+
+  it("returns error on invalid input (empty name)", async () => {
+    const result = await createDegree("");
+
+    expect(result.operation).toBe("error");
+    expect(mockCreate).not.toHaveBeenCalled();
+  });
+
+  it("returns error when db fails", async () => {
+    mockRequireCapability.mockResolvedValue({ user: { id: 1 } });
+    mockCreate.mockRejectedValue(new Error("DB error"));
+
+    const result = await createDegree("Bachelor");
+
+    expect(result.operation).toBe("error");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Action-level tests — updateDegree
+// ---------------------------------------------------------------------------
+
+describe("updateDegree action", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("updates an existing degree", async () => {
+    mockRequireCapability.mockResolvedValue({ user: { id: 1 } });
+    mockFindUnique.mockResolvedValue({ degree_uuid: "deg-001" });
+    mockUpdate.mockResolvedValue({ degree_uuid: "deg-001" });
+
+    const result = await updateDegree("deg-001", "Updated Name");
+
+    expect(mockRequireCapability).toHaveBeenCalledWith("admin.write");
+    expect(mockFindUnique).toHaveBeenCalledWith({
+      where: { degree_uuid: "deg-001" },
+      select: { degree_uuid: true },
+    });
+    expect(mockUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { degree_uuid: "deg-001" },
+        data: expect.objectContaining({ degree_name_en: "Updated Name" }),
+      }),
+    );
+    expect(result.operation).toBe("success");
+  });
+
+  it("returns error when degree not found", async () => {
+    mockRequireCapability.mockResolvedValue({ user: { id: 1 } });
+    mockFindUnique.mockResolvedValue(null);
+
+    const result = await updateDegree("nonexistent", "Name");
+
+    expect(result.operation).toBe("error");
+    expect(result.message).toBe("Degree not found");
+    expect(mockUpdate).not.toHaveBeenCalled();
+  });
+
+  it("returns error on invalid input (missing uuid)", async () => {
+    const result = await updateDegree("", "Name");
+
+    expect(result.operation).toBe("error");
+    expect(mockFindUnique).not.toHaveBeenCalled();
+  });
+
+  it("returns error when db update fails", async () => {
+    mockRequireCapability.mockResolvedValue({ user: { id: 1 } });
+    mockFindUnique.mockResolvedValue({ degree_uuid: "deg-001" });
+    mockUpdate.mockRejectedValue(new Error("DB error"));
+
+    const result = await updateDegree("deg-001", "Name");
+
+    expect(result.operation).toBe("error");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Action-level tests — deleteDegree
+// ---------------------------------------------------------------------------
+
+describe("deleteDegree action", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("deletes an existing degree", async () => {
+    mockRequireCapability.mockResolvedValue({ user: { id: 1 } });
+    mockFindUnique.mockResolvedValue({ degree_uuid: "deg-001" });
+    mockDelete.mockResolvedValue({ degree_uuid: "deg-001" });
+
+    const result = await deleteDegree("deg-001");
+
+    expect(mockRequireCapability).toHaveBeenCalledWith("admin.write");
+    expect(mockFindUnique).toHaveBeenCalledWith({
+      where: { degree_uuid: "deg-001" },
+      select: { degree_uuid: true },
+    });
+    expect(mockDelete).toHaveBeenCalledWith({
+      where: { degree_uuid: "deg-001" },
+    });
+    expect(result.operation).toBe("success");
+    expect(result.message).toBe("Degree deleted successfully");
+  });
+
+  it("returns error when degree not found", async () => {
+    mockRequireCapability.mockResolvedValue({ user: { id: 1 } });
+    mockFindUnique.mockResolvedValue(null);
+
+    const result = await deleteDegree("nonexistent");
+
+    expect(result.operation).toBe("error");
+    expect(result.message).toBe("Degree not found");
+    expect(mockDelete).not.toHaveBeenCalled();
+  });
+
+  it("returns error on invalid uuid", async () => {
+    const result = await deleteDegree("");
+
+    expect(result.operation).toBe("error");
+    expect(mockFindUnique).not.toHaveBeenCalled();
+  });
+
+  it("returns error when db delete fails", async () => {
+    mockRequireCapability.mockResolvedValue({ user: { id: 1 } });
+    mockFindUnique.mockResolvedValue({ degree_uuid: "deg-001" });
+    mockDelete.mockRejectedValue(new Error("DB error"));
+
+    const result = await deleteDegree("deg-001");
+
+    expect(result.operation).toBe("error");
   });
 });

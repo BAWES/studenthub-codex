@@ -1,6 +1,29 @@
 import { z } from "zod";
 
 // ---------------------------------------------------------------------------
+// Input schemas
+// ---------------------------------------------------------------------------
+
+export const createDegreeSchema = z.object({
+  degree_name_en: z.string().min(1, "English name is required").max(255),
+  degree_name_ar: z.string().max(255).optional(),
+  degree_group_uuid: z.string().max(60).optional(),
+  degree_sort_order: z.coerce.number().int().optional(),
+});
+
+export const updateDegreeSchema = z.object({
+  degree_uuid: z.string().min(1, "UUID is required"),
+  degree_name_en: z.string().min(1, "English name is required").max(255),
+  degree_name_ar: z.string().max(255).optional().nullable(),
+  degree_group_uuid: z.string().max(60).optional().nullable(),
+  degree_sort_order: z.coerce.number().int().optional().nullable(),
+});
+
+export const deleteDegreeSchema = z.object({
+  degree_uuid: z.string().min(1, "UUID is required"),
+});
+
+// ---------------------------------------------------------------------------
 // Output validation schemas
 // ---------------------------------------------------------------------------
 
@@ -22,9 +45,18 @@ export const listDegreesResultSchema = z.object({
   totalPages: z.number().int().nonnegative(),
 });
 
+export const degreeActionResponseSchema = z.object({
+  operation: z.string().min(1),
+  message: z.string().min(1),
+});
+
 // ---------------------------------------------------------------------------
-// Types derived from output schemas
+// Types derived from schemas
 // ---------------------------------------------------------------------------
 
+export type CreateDegreeInput = z.input<typeof createDegreeSchema>;
+export type UpdateDegreeInput = z.input<typeof updateDegreeSchema>;
+export type DeleteDegreeInput = z.input<typeof deleteDegreeSchema>;
 export type DegreeItem = z.output<typeof degreeItemSchema>;
 export type ListDegreesResult = z.output<typeof listDegreesResultSchema>;
+export type DegreeActionResponse = z.output<typeof degreeActionResponseSchema>;
