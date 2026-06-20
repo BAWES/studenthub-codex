@@ -5,8 +5,9 @@ import {
   LayoutGrid, User, Mail, ClipboardList, CreditCard,
   Building2, Phone, Store, FileCheck, Search, Users,
   ArrowRightLeft, Calendar, Monitor, Clock, Briefcase, Webhook,
-  FileText, DollarSign, MessageSquare
-} from "lucide-react";
+ FileText,
+ MessageSquare
+ } from "lucide-react";
 
 export type NavItem = {
   label: string;
@@ -29,7 +30,6 @@ export function navForRole(role: Role): NavItem[] {
       { label: "Employees", href: "/admin/employees", icon: Users },
       { label: "Attendance", href: "/admin/attendance", icon: Clock },
       { label: "Designations", href: "/admin/designations", icon: Briefcase },
-      { label: "Salaries", href: "/admin/salary", icon: DollarSign },
       { label: "Candidate Requests", href: "/admin/candidate-account-requests", icon: User },
       { label: "Company Requests", href: "/admin/company-requests", icon: Building2 },
       { label: "User Requests", href: "/admin/user-requests", icon: Mail },
