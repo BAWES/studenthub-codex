@@ -160,7 +160,7 @@ describe("PUT /api/employer/jobs/[id]", () => {
     const { PUT } = await import("./[id]/route");
     const response = await PUT(
       jsonRequest("PUT", "/api/employer/jobs/1", { title: "Senior Engineer" }),
-      { params: { id: "1" } },
+      { params: Promise.resolve({ id: "1" }) },
     );
     const data = await response.json();
 
@@ -176,7 +176,7 @@ describe("PUT /api/employer/jobs/[id]", () => {
     const { PUT } = await import("./[id]/route");
     const response = await PUT(
       jsonRequest("PUT", "/api/employer/jobs/abc", { title: "Test" }),
-      { params: { id: "abc" } },
+      { params: Promise.resolve({ id: "abc" }) },
     );
     const data = await response.json();
 
@@ -190,7 +190,7 @@ describe("PUT /api/employer/jobs/[id]", () => {
     const { PUT } = await import("./[id]/route");
     const response = await PUT(
       jsonRequest("PUT", "/api/employer/jobs/999", { title: "None" }),
-      { params: { id: "999" } },
+      { params: Promise.resolve({ id: "999" }) },
     );
     const data = await response.json();
 
@@ -210,7 +210,7 @@ describe("DELETE /api/employer/jobs/[id]", () => {
     const { DELETE } = await import("./[id]/route");
     const response = await DELETE(
       jsonRequest("DELETE", "/api/employer/jobs/1"),
-      { params: { id: "1" } },
+      { params: Promise.resolve({ id: "1" }) },
     );
     const data = await response.json();
 
@@ -223,7 +223,7 @@ describe("DELETE /api/employer/jobs/[id]", () => {
     const { DELETE } = await import("./[id]/route");
     const response = await DELETE(
       jsonRequest("DELETE", "/api/employer/jobs/abc"),
-      { params: { id: "abc" } },
+      { params: Promise.resolve({ id: "abc" }) },
     );
     const data = await response.json();
 
@@ -237,7 +237,7 @@ describe("DELETE /api/employer/jobs/[id]", () => {
     const { DELETE } = await import("./[id]/route");
     const response = await DELETE(
       jsonRequest("DELETE", "/api/employer/jobs/999"),
-      { params: { id: "999" } },
+      { params: Promise.resolve({ id: "999" }) },
     );
     const data = await response.json();
 
