@@ -6,6 +6,8 @@ import path from "node:path";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
+import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { DOCUMENT_TYPES } from "./constants";
 import type { DocumentType } from "./constants";
 import {
@@ -55,7 +57,7 @@ const ALLOWED_TYPES: Record<string, { mime: string[]; ext: string[]; maxSize: nu
   photo: {
     mime: ["image/jpeg", "image/png", "image/webp", "image/gif"],
     ext: [".jpg", ".jpeg", ".png", ".webp", ".gif"],
-    maxSize: 5 * 1024 * 1024, // 5 MB
+    maxSize: 5 * 1024 * 1024,
   },
   cv: {
     mime: [
@@ -64,12 +66,12 @@ const ALLOWED_TYPES: Record<string, { mime: string[]; ext: string[]; maxSize: nu
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     ],
     ext: [".pdf", ".doc", ".docx"],
-    maxSize: 10 * 1024 * 1024, // 10 MB
+    maxSize: 10 * 1024 * 1024,
   },
   video: {
     mime: ["video/mp4", "video/webm", "video/ogg", "video/quicktime"],
     ext: [".mp4", ".webm", ".ogv", ".mov"],
-    maxSize: 50 * 1024 * 1024, // 50 MB
+    maxSize: 50 * 1024 * 1024,
   },
   civilFront: {
     mime: ["image/jpeg", "image/png", "image/webp", "image/gif"],
@@ -84,12 +86,51 @@ const ALLOWED_TYPES: Record<string, { mime: string[]; ext: string[]; maxSize: nu
 };
 
 // ---------------------------------------------------------------------------
+// S3 client (lazy-initialized, supports MinIO via AWS_ENDPOINT_URL)
+// ---------------------------------------------------------------------------
+
+let s3Client: S3Client | null = null;
+
+function getS3Client(): S3Client {
+  if (!s3Client) {
+    const config: ConstructorParameters<typeof S3Client>[0] = {
+      region: process.env.AWS_TEMP_BUCKET_REGION ?? "",
+      credentials: {
+        accessKeyId: process.env.AWS_TEMP_ACCESS_KEY_ID ?? "",
+        secretAccessKey: process.env.AWS_TEMP_SECRET_ACCESS_KEY ?? "",
+      },
+    };
+
+    if (process.env.AWS_ENDPOINT_URL) {
+      config.endpoint = process.env.AWS_ENDPOINT_URL;
+    }
+
+    if (process.env.AWS_S3_FORCE_PATH_STYLE === "true") {
+      config.forcePathStyle = true;
+    }
+
+    s3Client = new S3Client(config);
+  }
+  return s3Client;
+}
+
+function s3ConfigAvailable(): boolean {
+  return !!(
+    process.env.AWS_TEMP_BUCKET_REGION &&
+    process.env.AWS_TEMP_ACCESS_KEY_ID &&
+    process.env.AWS_TEMP_SECRET_ACCESS_KEY &&
+    process.env.AWS_TEMP_BUCKET_NAME
+  );
+}
+
+function getBucketName(): string {
+  return process.env.AWS_TEMP_BUCKET_NAME ?? "";
+}
+
+// ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
-/**
- * Build a CandidateDocumentItem from type + raw file path from DB.
- */
 function toDocumentItem(type: DocumentType, filePath: string | null): CandidateDocumentItem {
   return {
     type,
@@ -99,19 +140,18 @@ function toDocumentItem(type: DocumentType, filePath: string | null): CandidateD
   };
 }
 
+function isS3Key(filePath: string | null): boolean {
+  return !!filePath && !filePath.startsWith("/");
+}
+
 // ---------------------------------------------------------------------------
 // Server Actions
 // ---------------------------------------------------------------------------
 
-/**
- * List all document types and their file paths for a candidate.
- * Requires candidate.read capability.
- * Returns an item for each known document type, with null filePath if not uploaded.
- */
 export async function listCandidateDocuments(
   params: ListDocumentsParams,
 ): Promise<ListCandidateDocumentsResult> {
-  await requireCapability("candidate.read");
+  await requireCapability("candidate.read.own");
 
   const { candidateId } = listDocumentsSchema.parse(params);
 
@@ -130,7 +170,6 @@ export async function listCandidateDocuments(
   if (!candidate) {
     const result: ListCandidateDocumentsResult = { items: [], candidateId };
 
-    // Validate output shape
     const outputParsed = listCandidateDocumentsResultSchema.safeParse(result);
     if (!outputParsed.success) {
       console.error(
@@ -150,7 +189,6 @@ export async function listCandidateDocuments(
 
   const result: ListCandidateDocumentsResult = { items, candidateId: candidate.candidate_id };
 
-  // Validate output shape
   const outputParsed = listCandidateDocumentsResultSchema.safeParse(result);
   if (!outputParsed.success) {
     console.error(
@@ -162,15 +200,10 @@ export async function listCandidateDocuments(
   return result;
 }
 
-/**
- * Get a single document by type for a candidate.
- * Requires candidate.read capability.
- * Returns null if the candidate does not exist or the document field is not set.
- */
 export async function getCandidateDocument(
   params: GetDocumentParams,
 ): Promise<CandidateDocumentItem | null> {
-  await requireCapability("candidate.read");
+  await requireCapability("candidate.read.own");
 
   const { candidateId, documentType } = getDocumentSchema.parse(params);
 
@@ -184,7 +217,6 @@ export async function getCandidateDocument(
   if (!candidate) {
     const result: CandidateDocumentItem | null = null;
 
-    // Validate output shape
     const outputParsed = getCandidateDocumentResultSchema.safeParse(result);
     if (!outputParsed.success) {
       console.error(
@@ -199,7 +231,6 @@ export async function getCandidateDocument(
   const filePath = (candidate as Record<string, unknown>)[field] as string | null;
   const result: CandidateDocumentItem = toDocumentItem(documentType, filePath);
 
-  // Validate output shape
   const outputParsed = getCandidateDocumentResultSchema.safeParse(result);
   if (!outputParsed.success) {
     console.error(
@@ -211,12 +242,6 @@ export async function getCandidateDocument(
   return result;
 }
 
-/**
- * Upload a document for a candidate.
- * Requires candidate.profile.edit capability.
- * Accepts FormData with file_{type} field matching the document type.
- * Returns UploadDocumentState for useActionState.
- */
 export async function uploadCandidateDocument(
   _prevState: UploadDocumentState,
   formData: FormData,
@@ -224,7 +249,6 @@ export async function uploadCandidateDocument(
   const session = await requireCapability("candidate.profile.edit");
   const candidateId = Number(session.id);
 
-  // Parse document type from form data
   let documentType: DocumentType | null = null;
   let file: File | null = null;
 
@@ -243,7 +267,6 @@ export async function uploadCandidateDocument(
       error: "No file provided. Use file_{type} field (e.g. file_photo).",
     };
 
-    // Validate output shape
     const outputParsed = uploadDocumentStateResultSchema.safeParse(result);
     if (!outputParsed.success) {
       console.error(
@@ -262,7 +285,6 @@ export async function uploadCandidateDocument(
       error: parseResult.error.errors.map((e) => e.message).join("; "),
     };
 
-    // Validate output shape
     const outputParsed = uploadDocumentStateResultSchema.safeParse(result);
     if (!outputParsed.success) {
       console.error(
@@ -276,7 +298,6 @@ export async function uploadCandidateDocument(
 
   const typeConfig = ALLOWED_TYPES[documentType];
 
-  // Validate file extension
   const ext = path.extname(file.name).toLowerCase();
   if (!typeConfig.ext.includes(ext)) {
     const result: UploadDocumentState = {
@@ -284,7 +305,6 @@ export async function uploadCandidateDocument(
       error: `File type "${ext}" is not allowed for ${documentType}. Accepted: ${typeConfig.ext.join(", ")}.`,
     };
 
-    // Validate output shape
     const outputParsed = uploadDocumentStateResultSchema.safeParse(result);
     if (!outputParsed.success) {
       console.error(
@@ -296,14 +316,12 @@ export async function uploadCandidateDocument(
     return result;
   }
 
-  // Validate MIME type
   if (file.type && !typeConfig.mime.includes(file.type)) {
     const result: UploadDocumentState = {
       success: false,
       error: `Invalid MIME type "${file.type}" for ${documentType}.`,
     };
 
-    // Validate output shape
     const outputParsed = uploadDocumentStateResultSchema.safeParse(result);
     if (!outputParsed.success) {
       console.error(
@@ -315,7 +333,6 @@ export async function uploadCandidateDocument(
     return result;
   }
 
-  // Validate size
   if (file.size > typeConfig.maxSize) {
     const sizeMB = typeConfig.maxSize / 1024 / 1024;
     const result: UploadDocumentState = {
@@ -323,7 +340,6 @@ export async function uploadCandidateDocument(
       error: `File is too large. Maximum size for ${documentType} is ${sizeMB} MB.`,
     };
 
-    // Validate output shape
     const outputParsed = uploadDocumentStateResultSchema.safeParse(result);
     if (!outputParsed.success) {
       console.error(
@@ -335,20 +351,34 @@ export async function uploadCandidateDocument(
     return result;
   }
 
+  const useS3 = s3ConfigAvailable();
+
   try {
-    // Save file to disk
-    const dir = path.join(UPLOAD_DIR, String(candidateId));
-    await fs.mkdir(dir, { recursive: true });
-
-    const filename = `${documentType}_${crypto.randomUUID()}${ext}`;
-    const filepath = path.join(dir, filename);
-
     const buffer = Buffer.from(await file.arrayBuffer());
-    await fs.writeFile(filepath, buffer);
+    const filename = `${documentType}_${crypto.randomUUID()}${ext}`;
+    let publicPath: string;
+    let s3Key: string | undefined;
 
-    const publicPath = `/uploads/candidates/${candidateId}/${filename}`;
+    if (useS3) {
+      const s3ObjectKey = `candidates/${candidateId}/${filename}`;
+      const command = new PutObjectCommand({
+        Bucket: getBucketName(),
+        Key: s3ObjectKey,
+        Body: buffer,
+        ContentType: file.type || undefined,
+      });
+      await getS3Client().send(command);
 
-    // Update the correct DB field
+      s3Key = s3ObjectKey;
+      publicPath = s3ObjectKey;
+    } else {
+      const dir = path.join(UPLOAD_DIR, String(candidateId));
+      await fs.mkdir(dir, { recursive: true });
+      const filepath = path.join(dir, filename);
+      await fs.writeFile(filepath, buffer);
+      publicPath = `/uploads/candidates/${candidateId}/${filename}`;
+    }
+
     const field = DOCUMENT_FIELD_MAP[documentType];
     await prisma.candidate.update({
       where: { candidate_id: candidateId },
@@ -358,9 +388,12 @@ export async function uploadCandidateDocument(
     revalidatePath("/candidate");
     revalidatePath("/candidate/edit");
 
-    const result: UploadDocumentState = { success: true, filePath: publicPath };
+    const result: UploadDocumentState = {
+      success: true,
+      filePath: publicPath,
+      s3Key: s3Key,
+    };
 
-    // Validate output shape
     const outputParsed = uploadDocumentStateResultSchema.safeParse(result);
     if (!outputParsed.success) {
       console.error(
@@ -376,7 +409,6 @@ export async function uploadCandidateDocument(
       error: e instanceof Error ? e.message : "Upload failed due to an unknown error.",
     };
 
-    // Validate output shape
     const outputParsed = uploadDocumentStateResultSchema.safeParse(result);
     if (!outputParsed.success) {
       console.error(
@@ -393,13 +425,6 @@ export async function uploadCandidateDocument(
 // Delete document
 // ---------------------------------------------------------------------------
 
-/**
- * Delete a candidate's document by type.
- * Requires candidate.profile.edit capability.
- * Derives candidateId from the session (self-service).
- * Clears the DB field and removes the file from disk if it exists.
- * Returns DeleteDocumentState for useActionState.
- */
 export async function deleteCandidateDocument(
   _prevState: DeleteDocumentState,
   formData: FormData,
@@ -411,7 +436,6 @@ export async function deleteCandidateDocument(
   if (!rawType || typeof rawType !== "string" || rawType.trim().length === 0) {
     const result: DeleteDocumentState = { success: false, error: "documentType is required." };
 
-    // Validate output shape
     const outputParsed = deleteDocumentStateResultSchema.safeParse(result);
     if (!outputParsed.success) {
       console.error(
@@ -430,7 +454,6 @@ export async function deleteCandidateDocument(
       error: parseResult.error.errors.map((e) => e.message).join("; "),
     };
 
-    // Validate output shape
     const outputParsed = deleteDocumentStateResultSchema.safeParse(result);
     if (!outputParsed.success) {
       console.error(
@@ -446,7 +469,6 @@ export async function deleteCandidateDocument(
   const field = DOCUMENT_FIELD_MAP[documentType];
 
   try {
-    // Get current file path before clearing
     const candidate = await prisma.candidate.findUnique({
       where: { candidate_id: candidateId },
       select: { [field]: true },
@@ -455,7 +477,6 @@ export async function deleteCandidateDocument(
     if (!candidate) {
       const result: DeleteDocumentState = { success: false, error: "Candidate not found." };
 
-      // Validate output shape
       const outputParsed = deleteDocumentStateResultSchema.safeParse(result);
       if (!outputParsed.success) {
         console.error(
@@ -469,19 +490,27 @@ export async function deleteCandidateDocument(
 
     const currentPath = (candidate as Record<string, unknown>)[field] as string | null;
 
-    // Clear the DB field
     await prisma.candidate.update({
       where: { candidate_id: candidateId },
       data: { [field]: null },
     });
 
-    // Delete the file from disk if it exists and is a local file
-    if (currentPath && currentPath.startsWith("/uploads/")) {
+    if (currentPath && isS3Key(currentPath) && s3ConfigAvailable()) {
+      try {
+        const deleteCommand = new DeleteObjectCommand({
+          Bucket: getBucketName(),
+          Key: currentPath,
+        });
+        await getS3Client().send(deleteCommand);
+      } catch {
+        // Object may already be gone
+      }
+    } else if (currentPath && currentPath.startsWith("/uploads/")) {
       const filePath = path.join(process.cwd(), "public", currentPath);
       try {
         await fs.unlink(filePath);
       } catch {
-        // File may already be gone — that's fine
+        // File may already be gone
       }
     }
 
@@ -490,7 +519,6 @@ export async function deleteCandidateDocument(
 
     const result: DeleteDocumentState = { success: true };
 
-    // Validate output shape
     const outputParsed = deleteDocumentStateResultSchema.safeParse(result);
     if (!outputParsed.success) {
       console.error(
@@ -506,7 +534,6 @@ export async function deleteCandidateDocument(
       error: e instanceof Error ? e.message : "Delete failed due to an unknown error.",
     };
 
-    // Validate output shape
     const outputParsed = deleteDocumentStateResultSchema.safeParse(result);
     if (!outputParsed.success) {
       console.error(
@@ -516,5 +543,56 @@ export async function deleteCandidateDocument(
     }
 
     return result;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// getCandidateDocumentDownloadUrl
+// ---------------------------------------------------------------------------
+
+export async function getCandidateDocumentDownloadUrl(
+  params: GetDocumentParams,
+): Promise<{ downloadUrl: string; key: string } | null> {
+  await requireCapability("candidate.read.own");
+
+  if (!s3ConfigAvailable()) {
+    return null;
+  }
+
+  const { candidateId, documentType } = getDocumentSchema.parse(params);
+
+  const field = DOCUMENT_FIELD_MAP[documentType];
+
+  const candidate = await prisma.candidate.findUnique({
+    where: { candidate_id: candidateId },
+    select: { [field]: true },
+  });
+
+  if (!candidate) {
+    return null;
+  }
+
+  const filePath = (candidate as Record<string, unknown>)[field] as string | null;
+
+  if (!filePath || !isS3Key(filePath)) {
+    return null;
+  }
+
+  const command = new GetObjectCommand({
+    Bucket: getBucketName(),
+    Key: filePath,
+  });
+
+  try {
+    const downloadUrl = await getSignedUrl(getS3Client(), command, {
+      expiresIn: 900,
+    });
+
+    return {
+      downloadUrl,
+      key: filePath,
+    };
+  } catch {
+    return null;
   }
 }
