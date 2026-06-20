@@ -6,8 +6,8 @@ export default function StaffInterviewsIdLoading() {
       <section className="workspaceStage">
         <section className="topbar">
           <div>
-            <div className="h-3 w-24 mb-2 rounded bg-white/5 animate-pulse" />
-            <div className="h-7 w-48 rounded bg-white/5 animate-pulse" />
+            <div className="h-3 w-24 mb-2 rounded bg-gray-200 dark:bg-gray-700 animate-pulse" />
+            <div className="h-7 w-48 rounded bg-gray-200 dark:bg-gray-700 animate-pulse" />
           </div>
         </section>
         <DataTableSkeleton rows={8} />

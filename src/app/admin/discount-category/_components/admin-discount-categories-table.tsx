@@ -4,6 +4,9 @@ import { useActionState, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { DataTable } from "@/modules/workspace/DataTable";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 import type { SessionUser } from "@/modules/auth/types";
 import type { DiscountCategoryItem } from "../schemas";
@@ -28,8 +31,8 @@ export function AdminDiscountCategoriesTable({ session, categories }: Props) {
       ]}
     >
       <section className="mb-6">
-        <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
-          <h3 className="text-sm font-semibold mb-3" style={{ color: "var(--ink)" }}>Add discount category</h3>
+        <div className="rounded-lg border border-border bg-card p-5">
+          <h3 className="text-sm font-semibold mb-3 text-foreground">Add discount category</h3>
           <CreateDiscountCategoryForm onSuccess={() => router.refresh()} />
         </div>
       </section>
@@ -53,8 +56,7 @@ export function AdminDiscountCategoriesTable({ session, categories }: Props) {
               ) : (
                 <button
                   type="button"
-                  className="text-sm hover:underline"
-                  style={{ color: "var(--sh-primary)" }}
+                  className="text-sm hover:underline text-primary"
                   onClick={() => setEditingId(row.category_id)}
                 >
                   {row.name_en}
@@ -66,7 +68,7 @@ export function AdminDiscountCategoriesTable({ session, categories }: Props) {
             label: "Name (AR)",
             render: (row) =>
               editingId === row.category_id ? null : (
-                <span className="text-sm" style={{ color: "var(--muted)" }}>
+                <span className="text-sm text-muted-foreground">
                   {row.name_ar || "—"}
                 </span>
               ),
@@ -76,14 +78,13 @@ export function AdminDiscountCategoriesTable({ session, categories }: Props) {
             label: "Image",
             render: (row) => {
               if (editingId === row.category_id) return null;
-              if (!row.image) return <span className="text-sm" style={{ color: "var(--muted)" }}>—</span>;
+              if (!row.image) return <span className="text-sm text-muted-foreground">—</span>;
               return (
                 <a
                   href={row.image}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-xs underline"
-                  style={{ color: "var(--sh-primary)" }}
+                  className="text-xs underline text-primary"
                 >
                   View
                 </a>
@@ -111,10 +112,9 @@ export function AdminDiscountCategoriesTable({ session, categories }: Props) {
             label: "Actions",
             render: (row) =>
               editingId !== row.category_id ? (
-                <button
-                  type="button"
-                  className="text-xs px-2 py-1 rounded hover:bg-red-500/10"
-                  style={{ color: "var(--sh-error)" }}
+                <Button
+                  variant="destructive"
+                  size="sm"
                   onClick={async () => {
                     if (confirm(`Delete discount category "${row.name_en}"?`)) {
                       const result = await deleteDiscountCategory(row.category_id);
@@ -126,7 +126,7 @@ export function AdminDiscountCategoriesTable({ session, categories }: Props) {
                   }}
                 >
                   Delete
-                </button>
+                </Button>
               ) : null,
           },
         ]}
@@ -163,47 +163,39 @@ function CreateDiscountCategoryForm({ onSuccess }: { onSuccess: () => void }) {
       className="flex flex-wrap items-end gap-3"
       onSubmit={() => setTimeout(() => { formRef.current?.reset(); }, 100)}
     >
-      <div className="grid gap-1">
-        <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>Name (EN) *</label>
-        <input
+      <div className="grid gap-1.5">
+        <Label htmlFor="name_en">Name (EN) *</Label>
+        <Input
+          id="name_en"
           name="name_en"
           required
           maxLength={255}
           placeholder="e.g. Student Discount"
-          className="h-9 rounded-lg px-3 text-sm border"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
         />
       </div>
-      <div className="grid gap-1">
-        <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>Name (AR)</label>
-        <input
+      <div className="grid gap-1.5">
+        <Label htmlFor="name_ar">Name (AR)</Label>
+        <Input
+          id="name_ar"
           name="name_ar"
           maxLength={255}
           placeholder="خصم الطلاب"
-          className="h-9 rounded-lg px-3 text-sm border"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
         />
       </div>
-      <div className="grid gap-1">
-        <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>Image URL</label>
-        <input
+      <div className="grid gap-1.5">
+        <Label htmlFor="image">Image URL</Label>
+        <Input
+          id="image"
           name="image"
           maxLength={255}
           placeholder="https://example.com/image.png"
-          className="h-9 rounded-lg px-3 text-sm border"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
         />
       </div>
-      <button
-        type="submit"
-        disabled={pending}
-        className="h-9 rounded-lg px-4 text-sm font-semibold"
-        style={{ background: "var(--sh-primary)", color: "#fff" }}
-      >
+      <Button type="submit" disabled={pending}>
         {pending ? "Adding..." : "Add"}
-      </button>
+      </Button>
       {state?.error ? (
-        <p className="text-xs w-full" style={{ color: "var(--sh-error)" }}>{state.error}</p>
+        <p className="text-xs w-full text-destructive">{state.error}</p>
       ) : null}
     </form>
   );
@@ -240,40 +232,28 @@ function EditDiscountCategoryForm({
 
   return (
     <form action={action} className="flex items-center gap-2">
-      <input
+      <Input
         name="name_en"
         defaultValue={row.name_en}
         required
         maxLength={255}
-        className="h-8 rounded px-2 text-sm border w-40"
-        style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+        className="w-40"
       />
-      <input
+      <Input
         name="name_ar"
         defaultValue={row.name_ar ?? ""}
         maxLength={255}
         placeholder="Name (AR)"
-        className="h-8 rounded px-2 text-sm border w-40"
-        style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+        className="w-40"
       />
-      <button
-        type="submit"
-        disabled={pending}
-        className="h-8 rounded px-3 text-xs font-semibold"
-        style={{ background: "var(--sh-primary)", color: "#fff" }}
-      >
+      <Button type="submit" size="sm" disabled={pending}>
         {pending ? "..." : "Save"}
-      </button>
-      <button
-        type="button"
-        onClick={onCancel}
-        className="h-8 rounded px-3 text-xs"
-        style={{ color: "var(--muted)" }}
-      >
+      </Button>
+      <Button type="button" variant="ghost" size="sm" onClick={onCancel}>
         Cancel
-      </button>
+      </Button>
       {state?.error ? (
-        <p className="text-xs" style={{ color: "var(--sh-error)" }}>{state.error}</p>
+        <p className="text-xs text-destructive">{state.error}</p>
       ) : null}
     </form>
   );

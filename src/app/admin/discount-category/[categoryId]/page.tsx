@@ -49,8 +49,7 @@ export default async function AdminDiscountCategoryDetailPage({
                   href={cat.image}
                   target="_blank"
                   rel="noopener noreferrer"
-                  style={{ color: "var(--sh-primary)" }}
-                  className="underline"
+                  className="underline text-primary"
                 >
                   View Image
                 </a>
