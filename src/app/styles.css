@@ -12034,3 +12034,9 @@ tr:hover .shTableRowAction,
 @keyframes search-spin {
   to { transform: rotate(360deg); }
 }
+
+
+.uiBadge_destructive {
+  background: color-mix(in srgb, var(--red) 14%, transparent);
+  color: var(--red);
+}
