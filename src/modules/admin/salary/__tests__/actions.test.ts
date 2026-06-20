@@ -34,6 +34,15 @@ const mockedCreate = vi.mocked(prisma.staff_salary.create);
 const mockedUpdate = vi.mocked(prisma.staff_salary.update);
 const mockedDelete = vi.mocked(prisma.staff_salary.delete);
 
+// Helper: create a FormData with the given entries
+function formDataFrom(entries: Record<string, string>): FormData {
+  const fd = new FormData();
+  for (const [key, value] of Object.entries(entries)) {
+    fd.append(key, value);
+  }
+  return fd;
+}
+
 describe("admin/salary actions", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -125,12 +134,13 @@ describe("admin/salary actions", () => {
     it("creates a salary record with valid input", async () => {
       mockedCreate.mockResolvedValue({} as any);
 
-      const result = await createSalary({
-        staffId: 1,
-        salary: 750.5,
+      const fd = formDataFrom({
+        staffId: "1",
+        salary: "750.5",
         salaryCurrency: "KWD",
         salaryDate: "2026-06-01",
       });
+      const result = await createSalary(null, fd);
 
       expect(result.operation).toBe("success");
       expect(result.message).toContain("created");
@@ -141,7 +151,8 @@ describe("admin/salary actions", () => {
     });
 
     it("returns error for invalid input", async () => {
-      const result = await createSalary({} as any);
+      const fd = formDataFrom({});
+      const result = await createSalary(null, fd);
 
       expect(result.operation).toBe("error");
       expect(mockedCreate).not.toHaveBeenCalled();
@@ -159,10 +170,11 @@ describe("admin/salary actions", () => {
       } as any);
       mockedUpdate.mockResolvedValue({} as any);
 
-      const result = await updateSalary({
+      const fd = formDataFrom({
         salaryUuid: "SAL-001",
-        salary: 800,
+        salary: "800",
       });
+      const result = await updateSalary(null, fd);
 
       expect(result.operation).toBe("success");
       expect(mockedUpdate).toHaveBeenCalledOnce();
@@ -171,10 +183,11 @@ describe("admin/salary actions", () => {
     it("returns error when salary not found", async () => {
       mockedFindFirst.mockResolvedValue(null);
 
-      const result = await updateSalary({
+      const fd = formDataFrom({
         salaryUuid: "DOES-NOT-EXIST",
-        salary: 800,
+        salary: "800",
       });
+      const result = await updateSalary(null, fd);
 
       expect(result.operation).toBe("error");
       expect(result.message).toContain("not found");
@@ -182,7 +195,8 @@ describe("admin/salary actions", () => {
     });
 
     it("returns error for invalid input", async () => {
-      const result = await updateSalary({} as any);
+      const fd = formDataFrom({});
+      const result = await updateSalary(null, fd);
 
       expect(result.operation).toBe("error");
       expect(mockedUpdate).not.toHaveBeenCalled();
@@ -196,7 +210,7 @@ describe("admin/salary actions", () => {
       } as any);
       mockedDelete.mockResolvedValue({} as any);
 
-      const result = await deleteSalary({ salaryUuid: "SAL-001" });
+      const result = await deleteSalary("SAL-001");
 
       expect(result.operation).toBe("success");
       expect(mockedDelete).toHaveBeenCalledOnce();
@@ -206,7 +220,7 @@ describe("admin/salary actions", () => {
     it("returns error when salary not found", async () => {
       mockedFindFirst.mockResolvedValue(null);
 
-      const result = await deleteSalary({ salaryUuid: "DOES-NOT-EXIST" });
+      const result = await deleteSalary("DOES-NOT-EXIST");
 
       expect(result.operation).toBe("error");
       expect(result.message).toContain("not found");
@@ -214,7 +228,7 @@ describe("admin/salary actions", () => {
     });
 
     it("returns error for invalid input", async () => {
-      const result = await deleteSalary({} as any);
+      const result = await deleteSalary("");
 
       expect(result.operation).toBe("error");
       expect(mockedDelete).not.toHaveBeenCalled();

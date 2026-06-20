@@ -2,9 +2,9 @@ export { listSalaries, createSalary, updateSalary, deleteSalary } from "./action
 export type {
   SalaryItem,
   ListSalaryResult,
-  ListSalaryParams,
-  CreateSalaryParams,
-  UpdateSalaryParams,
-  DeleteSalaryParams,
+  ListSalaryInput,
+  CreateSalaryInput,
+  UpdateSalaryInput,
+  DeleteSalaryInput,
   SalaryActionResponse,
 } from "./schemas";

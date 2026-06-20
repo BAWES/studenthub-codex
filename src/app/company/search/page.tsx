@@ -4,16 +4,13 @@ import { CompanySearchPage } from "./CompanySearchPage";
 import { searchCompanyEntities } from "./actions";
 import type { CompanySearchResult } from "./schemas";
 import { Skeleton } from "@/components/ui/skeleton";
+import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 
 export const dynamic = "force-dynamic";
 
 function SearchPageFallback() {
   return (
     <div className="mx-auto max-w-7xl p-6">
-      <div className="mb-6">
-        <Skeleton variant="pulse" className="mb-2 h-8 w-40" />
-        <Skeleton variant="pulse" className="h-4 w-72" />
-      </div>
       <div className="mb-6 flex gap-2">
         <Skeleton variant="pulse" className="h-11 flex-1 rounded-lg" />
         <Skeleton variant="pulse" className="h-11 w-24 rounded-lg" />
@@ -42,7 +39,9 @@ export default async function CompanySearchPageWrapper() {
 
   return (
     <Suspense fallback={<SearchPageFallback />}>
-      <CompanySearchPage session={session} initialData={initialData} searchAction={searchCompanyEntities} />
+      <WorkspaceShell session={session} eyebrow="Company" title="Search" metrics={[]}>
+        <CompanySearchPage session={session} initialData={initialData} searchAction={searchCompanyEntities} />
+      </WorkspaceShell>
     </Suspense>
   );
 }
