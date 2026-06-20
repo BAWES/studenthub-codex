@@ -4,23 +4,28 @@
 
 export {
   listChats,
-  getChatMessages
+  getChatMessages,
+  sendChatMessage,
 } from "./actions";
 
 export type {
   ListChatsParams,
   GetChatMessagesParams,
+  SendChatMessageParams,
   ChatListItem,
   ChatMessageItem,
   ListChatsResult,
-  ListChatMessagesResult
+  ListChatMessagesResult,
+  SendChatMessageResult,
 } from "./schemas";
 
 export {
   listChatsSchema,
   getChatMessagesSchema,
+  sendChatMessageSchema,
   chatListItemSchema,
   chatMessageItemSchema,
   listChatsResultSchema,
-  listChatMessagesResultSchema
+  listChatMessagesResultSchema,
+  sendChatMessageResultSchema,
 } from "./schemas";
