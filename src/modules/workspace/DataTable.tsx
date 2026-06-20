@@ -79,7 +79,7 @@ function ShimmerSkeleton({ className = "" }: { className?: string }) {
   return (
     <div
       data-slot="skeleton"
-      className={`shTableSkeleton ${className}`}
+      className={`animate-pulse rounded-md bg-muted ${className}`}
       aria-hidden="true"
     />
   );
@@ -196,7 +196,7 @@ export function DataTable<T extends { id: string | number }>({
   // ── Loading state ──────────────────────────────────────────
   if (loading) {
     return (
-      <section className="shTableGlass">
+      <section className="rounded-lg border bg-white shadow-sm">
         <div className="shTableHeader">
           <div>
             <h2>{title}</h2>
@@ -238,7 +238,7 @@ export function DataTable<T extends { id: string | number }>({
   // ── Error state ────────────────────────────────────────────
   if (error) {
     return (
-      <section className="shTableGlass">
+      <section className="rounded-lg border bg-white shadow-sm">
         <div className="shTableHeader">
           <div>
             <h2>{title}</h2>
@@ -262,7 +262,7 @@ export function DataTable<T extends { id: string | number }>({
                     <div className="size-10 rounded-xl bg-red-500/10 flex items-center justify-center">
                       <AlertCircle size={20} className="text-red-400" />
                     </div>
-                    <strong className="text-sm" style={{ color: "var(--ink)" }}>
+                    <strong className="text-sm text-foreground">
                       {error}
                     </strong>
                     {onRetry ? (
@@ -297,7 +297,7 @@ export function DataTable<T extends { id: string | number }>({
     onPageChange !== undefined;
 
   return (
-    <section className="shTableGlass">
+    <section className="rounded-lg border bg-white shadow-sm">
       <div className="shTableHeader">
         <div>
           <h2>{title}</h2>

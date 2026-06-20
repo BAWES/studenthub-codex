@@ -85,12 +85,7 @@ export function AdminTicketsTable({ session, tickets }: Props) {
     >
       {error ? (
         <div
-          className="mb-4 rounded-lg border px-4 py-3 text-sm"
-          style={{
-            borderColor: "var(--sh-error)",
-            color: "var(--sh-error)",
-            background: "var(--surface)",
-          }}
+          className="mb-4 rounded-lg border border-destructive/30 bg-card px-4 py-3 text-sm text-destructive"
         >
           {error}
         </div>
@@ -107,8 +102,7 @@ export function AdminTicketsTable({ session, tickets }: Props) {
             label: "UUID",
             render: (row) => (
               <span
-                className="text-sm font-mono"
-                style={{ color: "var(--muted)" }}
+                className="text-sm font-mono text-muted-foreground"
               >
                 {row.ticket_uuid.slice(0, 8)}...
               </span>
@@ -118,7 +112,7 @@ export function AdminTicketsTable({ session, tickets }: Props) {
             key: "ticket_detail",
             label: "Detail",
             render: (row) => (
-              <span className="text-sm" style={{ color: "var(--ink)" }}>
+              <span className="text-sm text-foreground">
                 {row.ticket_detail ?? "—"}
               </span>
             ),
@@ -127,7 +121,7 @@ export function AdminTicketsTable({ session, tickets }: Props) {
             key: "candidate_name",
             label: "Candidate",
             render: (row) => (
-              <span className="text-sm" style={{ color: "var(--ink)" }}>
+              <span className="text-sm text-foreground">
                 {row.candidate_name ?? "—"}
               </span>
             ),
@@ -136,7 +130,7 @@ export function AdminTicketsTable({ session, tickets }: Props) {
             key: "staff_name",
             label: "Staff",
             render: (row) => (
-              <span className="text-sm" style={{ color: "var(--ink)" }}>
+              <span className="text-sm text-foreground">
                 {row.staff_name ?? "—"}
               </span>
             ),
@@ -147,7 +141,7 @@ export function AdminTicketsTable({ session, tickets }: Props) {
             render: (row) => {
               const d = row.created_at ? new Date(row.created_at) : null;
               return (
-                <span className="text-sm" style={{ color: "var(--ink)" }}>
+                <span className="text-sm text-foreground">
                   {d ? d.toLocaleDateString() : "—"}
                 </span>
               );

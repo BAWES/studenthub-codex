@@ -45,7 +45,7 @@ export function AdminEmployeesTable({ session, employees, departments, designati
     >
       <section className="mb-6">
         <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
-          <h3 className="text-sm font-semibold mb-3" style={{ color: "var(--ink)" }}>Add employee</h3>
+          <h3 className="text-sm font-semibold mb-3 text-foreground">Add employee</h3>
           <CreateEmployeeForm
             departments={departments}
             designations={designations}
@@ -63,7 +63,7 @@ export function AdminEmployeesTable({ session, employees, departments, designati
             key: "name",
             label: "Name",
             render: (row) => (
-              <span className="text-sm font-medium" style={{ color: "var(--ink)" }}>
+              <span className="text-sm font-medium text-foreground">
                 {row.employee_name}
               </span>
             ),
@@ -104,8 +104,7 @@ export function AdminEmployeesTable({ session, employees, departments, designati
             render: (row) => (
               <button
                 type="button"
-                className="text-xs px-2 py-1 rounded hover:bg-red-500/10"
-                style={{ color: "var(--sh-error)" }}
+                className="text-xs px-2 py-1 rounded hover:bg-red-500/10 text-destructive"
                 onClick={async () => {
                   if (confirm(`Deactivate "${row.employee_name}"?`)) {
                     await deleteAdminEmployee(row.employee_uuid);
@@ -169,7 +168,7 @@ function CreateEmployeeForm({
     >
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <div className="grid gap-1">
-          <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>Name *</label>
+          <label className="text-xs font-medium text-muted-foreground">Name *</label>
           <input
             name="employeeName"
             required
@@ -180,7 +179,7 @@ function CreateEmployeeForm({
           />
         </div>
         <div className="grid gap-1">
-          <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>Email *</label>
+          <label className="text-xs font-medium text-muted-foreground">Email *</label>
           <input
             name="employeeEmail"
             type="email"
@@ -192,7 +191,7 @@ function CreateEmployeeForm({
           />
         </div>
         <div className="grid gap-1">
-          <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>Phone</label>
+          <label className="text-xs font-medium text-muted-foreground">Phone</label>
           <input
             name="employeePhone"
             maxLength={45}
@@ -202,7 +201,7 @@ function CreateEmployeeForm({
           />
         </div>
         <div className="grid gap-1">
-          <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>Salary (KWD)</label>
+          <label className="text-xs font-medium text-muted-foreground">Salary (KWD)</label>
           <input
             name="employeeSalary"
             type="number"
@@ -214,7 +213,7 @@ function CreateEmployeeForm({
           />
         </div>
         <div className="grid gap-1">
-          <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>Department</label>
+          <label className="text-xs font-medium text-muted-foreground">Department</label>
           <select
             name="departmentUuid"
             className="h-9 rounded-lg px-3 text-sm border"
@@ -227,7 +226,7 @@ function CreateEmployeeForm({
           </select>
         </div>
         <div className="grid gap-1">
-          <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>Designation</label>
+          <label className="text-xs font-medium text-muted-foreground">Designation</label>
           <select
             name="designationUuid"
             className="h-9 rounded-lg px-3 text-sm border"
@@ -243,15 +242,14 @@ function CreateEmployeeForm({
           <button
             type="submit"
             disabled={pending}
-            className="h-9 rounded-lg px-5 text-sm font-semibold"
-            style={{ background: "var(--sh-primary)", color: "#fff" }}
+            className="h-9 rounded-lg px-5 text-sm font-semibold bg-primary text-primary-foreground"
           >
             {pending ? "Adding..." : "Add employee"}
           </button>
         </div>
       </div>
       {state?.error ? (
-        <p className="text-xs" style={{ color: "var(--sh-error)" }}>{state.error}</p>
+        <p className="text-xs text-destructive">{state.error}</p>
       ) : null}
     </form>
   );

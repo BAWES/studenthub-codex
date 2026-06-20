@@ -1,6 +1,9 @@
 import { test, expect } from "@playwright/test";
 import { getMockFixtures, type FixtureUser } from "../fixtures/users";
 
+// Force USE_MOCK_FIXTURES=true — these tests must never need DB seed data
+process.env.USE_MOCK_FIXTURES = "true";
+
 /**
  * Auth context helper — uses mock session cookie from fixtures.
  * Returns { browser, context, page, close } — caller must close.
@@ -84,7 +87,7 @@ test.describe("Staff Interaction Smoke", () => {
     await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
 
     // DataTable renders — use networkidle + robust selector
-    await expect(ctx.page.locator('[class*="DataTable"], [class*="dataTable"], .dataList, table').first()).toBeVisible({ timeout: 15000 });
+    await expect(ctx.page.locator('[class*="shOsDataTable"], [class*="DataTable"], [class*="dataTable"], .dataList, table').first()).toBeVisible({ timeout: 15000 });
 
     assertNoReactErrors(ctx.errors);
     await ctx.close();
@@ -190,7 +193,7 @@ test.describe("Company Interaction Smoke", () => {
     await ctx.page.waitForLoadState("load");
     await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
     await expect(ctx.page).toHaveURL(/\/company\/contacts/);
-    await expect(ctx.page.locator('[class*="DataTable"], [class*="dataTable"], .dataList, table').first()).toBeVisible({ timeout: 15000 });
+    await expect(ctx.page.locator('[class*="shOsDataTable"], [class*="DataTable"], [class*="dataTable"], .dataList, table').first()).toBeVisible({ timeout: 15000 });
 
     assertNoReactErrors(ctx.errors);
     await ctx.close();
@@ -273,7 +276,7 @@ test.describe("Admin Interaction Smoke", () => {
     await ctx.page.waitForLoadState("load");
     await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
     await expect(ctx.page).toHaveURL(/\/admin\/candidates/);
-    await expect(ctx.page.locator('[class*="DataTable"], [class*="dataTable"], .dataList, table').first()).toBeVisible({ timeout: 15000 });
+    await expect(ctx.page.locator('[class*="shOsDataTable"], [class*="DataTable"], [class*="dataTable"], .dataList, table').first()).toBeVisible({ timeout: 15000 });
 
     assertNoReactErrors(ctx.errors);
     await ctx.close();
@@ -390,7 +393,7 @@ test.describe("Inspector Interaction Smoke", () => {
     await ctx.page.waitForLoadState("load");
     await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
     await expect(ctx.page).toHaveURL(/\/inspector\/id-requests/);
-    await expect(ctx.page.locator('[class*="DataTable"], [class*="dataTable"], .dataList, table').first()).toBeVisible({ timeout: 15000 });
+    await expect(ctx.page.locator('[class*="shOsDataTable"], [class*="DataTable"], [class*="dataTable"], .dataList, table').first()).toBeVisible({ timeout: 15000 });
 
     assertNoReactErrors(ctx.errors);
     await ctx.close();

@@ -1,5 +1,5 @@
 import { requireRoleCapability } from "@/modules/auth/session";
-import { CandidateSearchOS } from "@/modules/candidates/CandidateSearchOS";
+import { CandidateSearchPage } from "@/modules/candidates/CandidateSearchPage";
 import { getCandidateSearchWorkspaceTypesense as getCandidateSearchWorkspace, parseFilter, parseCandidateId, parseCandidateIds, parseSearchPage } from "@/modules/candidates/search-typesense";
 import { parseVisibility } from "@/modules/candidates/search";
 
@@ -49,5 +49,5 @@ export default async function StaffCandidatesPage({
   };
   const data = await getCandidateSearchWorkspace(search);
 
-  return <CandidateSearchOS basePath="/staff/candidates" data={data} homePath="/staff" params={search} session={session} />;
+  return <CandidateSearchPage basePath="/staff/candidates" data={data} homePath="/staff" params={search} session={session} />;
 }

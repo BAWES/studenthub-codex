@@ -2,6 +2,7 @@
 
 import { useEffect, useCallback, type KeyboardEvent } from "react";
 import { X } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 // ---------------------------------------------------------------------------
 // PaymentDetailDrawer
@@ -39,11 +40,11 @@ export type PaymentDetailDrawerProps = {
   onClose: () => void;
 };
 
-const STATUS_COLORS: Record<string, { bg: string; text: string }> = {
-  AUTHORISED: { bg: "rgba(34, 197, 94, 0.15)", text: "#22c55e" },
-  PAID: { bg: "rgba(34, 197, 94, 0.15)", text: "#22c55e" },
-  VOIDED: { bg: "rgba(239, 68, 68, 0.15)", text: "#ef4444" },
-  DELETED: { bg: "rgba(239, 68, 68, 0.15)", text: "#ef4444" },
+const STATUS_BADGE_VARIANTS_DRAWER: Record<string, "success" | "destructive" | "secondary"> = {
+  AUTHORISED: "success",
+  PAID: "success",
+  VOIDED: "destructive",
+  DELETED: "destructive",
 };
 
 function formatAmount(value: number | null, currency?: string | null): string {
@@ -59,8 +60,8 @@ function formatDate(value: string | null): string {
 function DetailRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex justify-between items-center py-1.5">
-      <span className="text-sm" style={{ color: "var(--muted)" }}>{label}</span>
-      <span className="text-sm font-medium" style={{ color: "var(--ink)" }}>{value}</span>
+      <span className="text-sm text-muted-foreground">{label}</span>
+      <span className="text-sm font-medium text-foreground">{value}</span>
     </div>
   );
 }
@@ -79,7 +80,7 @@ export function PaymentDetailDrawer({ payment, lineItems, loading, open, onClose
 
   return (
     <>
-      <div className="fixed inset-0 z-40 transition-opacity duration-200" style={{ background: "rgba(0,0,0,0.4)" }} onClick={onClose} aria-hidden="true" />
+      <div className="fixed inset-0 z-40 transition-opacity duration-200 bg-black/40" onClick={onClose} aria-hidden="true" />
       <div
         className="fixed top-0 right-0 z-50 h-full w-full sm:w-[480px] transition-transform duration-300 ease-out"
         style={{ transform: open ? "translateX(0)" : "translateX(100%)" }}
@@ -88,15 +89,15 @@ export function PaymentDetailDrawer({ payment, lineItems, loading, open, onClose
         role="dialog"
         aria-label="Payment detail"
       >
-        <div className="h-full overflow-y-auto p-6 rounded-none bg-white border-l border-[var(--border)]">
+        <div className="h-full overflow-y-auto p-6 rounded-none bg-white border-l border-border">
           <div className="flex items-start justify-between mb-6">
             <div>
-              <h2 className="text-xl font-bold" style={{ color: "var(--ink)" }}>
+              <h2 className="text-xl font-bold text-foreground">
                 {loading ? "Loading..." : payment?.reference ?? "No Reference"}
               </h2>
             </div>
             <button onClick={onClose} className="p-2 rounded-lg hover:bg-white/10" aria-label="Close payment detail">
-              <X size={20} style={{ color: "var(--muted)" }} aria-hidden="true" />
+              <X size={20} className="text-muted-foreground" aria-hidden="true" />
             </button>
           </div>
 
@@ -109,42 +110,38 @@ export function PaymentDetailDrawer({ payment, lineItems, loading, open, onClose
           ) : !payment ? (
             <div className="flex flex-col items-center justify-center h-full gap-4 text-center">
               <span className="text-4xl">🔍</span>
-              <p className="text-lg font-semibold" style={{ color: "var(--ink)" }}>Payment not found</p>
-              <button onClick={onClose} className="h-10 rounded-lg px-4 text-sm font-semibold" style={{ background: "var(--sh-info)", color: "#fff" }}>
+              <p className="text-lg font-semibold text-foreground">Payment not found</p>
+              <button onClick={onClose} className="h-10 rounded-lg px-4 text-sm font-semibold bg-primary text-primary-foreground">
                 Close
               </button>
             </div>
           ) : (
             <div className="space-y-6">
-              <span
-                className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold"
-                style={{
-                  background: STATUS_COLORS[payment.status ?? ""]?.bg ?? "rgba(255,255,255,0.06)",
-                  color: STATUS_COLORS[payment.status ?? ""]?.text ?? "rgba(255,255,255,0.4)",
-                }}
+              <Badge
+                variant={STATUS_BADGE_VARIANTS_DRAWER[payment.status ?? ""] ?? "secondary"}
                 aria-label={`Status: ${payment.status ?? "Unknown"}`}
               >
                 {payment.status ?? "Unknown"}
-              </span>
+              </Badge>
 
               {payment.contact && (
-                <div className="rounded-lg border border-[var(--border)] bg-white p-4">
-                  <p className="text-[11px] font-bold uppercase tracking-wider mb-2" style={{ color: "var(--muted)" }}>Contact</p>
-                  <p className="text-sm font-medium" style={{ color: "var(--ink)" }}>{payment.contact.name ?? "Unknown"}</p>
-                  <p className="text-xs" style={{ color: "var(--muted)" }}>ID: {payment.contact.contact_id}</p>
+                <div className="rounded-lg border-border bg-white p-4">
+                  <p className="text-[11px] font-bold uppercase tracking-wider mb-2 text-muted-foreground">Contact</p>
+                  <p className="text-sm font-medium text-foreground">{payment.contact.name ?? "Unknown"}</p>
+                  <p className="text-xs text-muted-foreground">ID: {payment.contact.contact_id}</p>
                 </div>
               )}
 
-              <div className="rounded-lg border border-[var(--border)] bg-white p-4 space-y-1">
-                <p className="text-[11px] font-bold uppercase tracking-wider mb-2" style={{ color: "var(--muted)" }}>Financial Summary</p>
+              <div className="rounded-lg border-border bg-white p-4 space-y-1">
+                <p className="text-[11px] font-bold uppercase tracking-wider mb-2 text-muted-foreground">Financial Summary</p>
                 <DetailRow label="Total" value={formatAmount(payment.total, payment.currency_code)} />
                 <DetailRow label="Sub-total" value={formatAmount(payment.sub_total, payment.currency_code)} />
                 <DetailRow label="Tax" value={formatAmount(payment.total_tax, payment.currency_code)} />
                 {payment.currency_rate != null && <DetailRow label="Currency Rate" value={String(payment.currency_rate)} />}
               </div>
 
-              <div className="rounded-lg border border-[var(--border)] bg-white p-4 space-y-1">
-                <p className="text-[11px] font-bold uppercase tracking-wider mb-2" style={{ color: "var(--muted)" }}>Details</p>
+              <div className="rounded-lg border-border bg-white p-4 space-y-1">
+                <p className="text-[11px] font-bold uppercase tracking-wider mb-2 text-muted-foreground">Details</p>
                 <DetailRow label="Type" value={payment.type ?? "—"} />
                 <DetailRow label="Date" value={formatDate(payment.date)} />
                 <DetailRow label="Created" value={formatDate(payment.created_at)} />
@@ -155,12 +152,12 @@ export function PaymentDetailDrawer({ payment, lineItems, loading, open, onClose
               </div>
 
               {lineItems.length > 0 && (
-                <div className="rounded-lg border border-[var(--border)] bg-white p-4">
-                  <p className="text-[11px] font-bold uppercase tracking-wider mb-2" style={{ color: "var(--muted)" }}>Line Items</p>
+                <div className="rounded-lg border-border bg-white p-4">
+                  <p className="text-[11px] font-bold uppercase tracking-wider mb-2 text-muted-foreground">Line Items</p>
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                       <thead>
-                        <tr className="text-[11px] font-bold uppercase tracking-wider" style={{ color: "var(--muted)" }}>
+                        <tr className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
                           <th className="text-left py-1 pr-2">Code</th>
                           <th className="text-left py-1 pr-2">Description</th>
                           <th className="text-right py-1 pr-2">Qty</th>
@@ -170,12 +167,12 @@ export function PaymentDetailDrawer({ payment, lineItems, loading, open, onClose
                       </thead>
                       <tbody>
                         {lineItems.map((li) => (
-                          <tr key={li.line_item_id} className="border-t" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
-                            <td className="py-1.5 pr-2 font-mono text-xs" style={{ color: "var(--muted)" }}>{li.account_code ?? "—"}</td>
-                            <td className="py-1.5 pr-2" style={{ color: "var(--ink)" }}>{li.description ?? "—"}</td>
-                            <td className="py-1.5 pr-2 text-right" style={{ color: "var(--ink)" }}>{li.quantity ?? "—"}</td>
-                            <td className="py-1.5 pr-2 text-right" style={{ color: "var(--ink)" }}>{li.unit_amount != null ? formatAmount(li.unit_amount) : "—"}</td>
-                            <td className="py-1.5 text-right font-medium" style={{ color: "var(--ink)" }}>{li.line_amount != null ? formatAmount(li.line_amount) : "—"}</td>
+                          <tr key={li.line_item_id} className="border-t border-border/5">
+                            <td className="py-1.5 pr-2 font-mono text-xs text-muted-foreground">{li.account_code ?? "—"}</td>
+                            <td className="py-1.5 pr-2 text-foreground">{li.description ?? "—"}</td>
+                            <td className="py-1.5 pr-2 text-right text-foreground">{li.quantity ?? "—"}</td>
+                            <td className="py-1.5 pr-2 text-right text-foreground">{li.unit_amount != null ? formatAmount(li.unit_amount) : "—"}</td>
+                            <td className="py-1.5 text-right font-medium text-foreground">{li.line_amount != null ? formatAmount(li.line_amount) : "—"}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -185,7 +182,7 @@ export function PaymentDetailDrawer({ payment, lineItems, loading, open, onClose
               )}
 
               <div className="flex justify-end pt-2">
-                <button onClick={onClose} className="h-10 rounded-lg px-4 text-sm font-semibold" style={{ background: "transparent", border: "1px solid var(--border)", color: "var(--muted)" }}>
+                <button onClick={onClose} className="h-10 rounded-lg px-4 text-sm font-semibold bg-transparent border-border text-muted-foreground">
                   Close
                 </button>
               </div>

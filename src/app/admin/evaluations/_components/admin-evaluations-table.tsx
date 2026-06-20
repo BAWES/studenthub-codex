@@ -89,18 +89,16 @@ export function AdminEvaluationsTable({
                 if (e.key === "Enter") handleSearch();
               }}
               placeholder="Search by candidate or staff name..."
-              className="h-9 w-full rounded-lg pl-9 pr-3 text-sm border"
-              style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+              className="h-9 w-full rounded-lg pl-9 pr-3 text-sm border bg-card border-border text-foreground"
             />
             <svg
-              className="absolute left-3 top-1/2 -translate-y-1/2"
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
               width="14"
               height="14"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
               strokeWidth="2"
-              style={{ color: "var(--muted)" }}
             >
               <circle cx="11" cy="11" r="8" />
               <path d="m21 21-4.35-4.35" />
@@ -110,8 +108,7 @@ export function AdminEvaluationsTable({
             type="button"
             onClick={handleSearch}
             disabled={loading}
-            className="h-9 rounded-lg px-4 text-sm font-semibold"
-            style={{ background: "var(--sh-primary)", color: "#fff" }}
+            className="h-9 rounded-lg px-4 text-sm font-semibold bg-primary text-primary-foreground"
           >
             {loading ? "Searching..." : "Search"}
           </button>
@@ -119,14 +116,13 @@ export function AdminEvaluationsTable({
             <button
               type="button"
               onClick={handleClear}
-              className="h-9 rounded-lg px-3 text-xs"
-              style={{ color: "var(--muted)" }}
+              className="h-9 rounded-lg px-3 text-xs text-muted-foreground"
             >
               Clear
             </button>
           ) : null}
           {search ? (
-            <span className="text-xs" style={{ color: "var(--muted)" }}>
+            <span className="text-xs text-muted-foreground">
               Results for: &ldquo;{search}&rdquo;
             </span>
           ) : null}
@@ -143,7 +139,7 @@ export function AdminEvaluationsTable({
             key: "candidate_name",
             label: "Candidate",
             render: (row) => (
-              <span className="text-sm font-medium" style={{ color: "var(--ink)" }}>
+              <span className="text-sm font-medium text-foreground">
                 {row.candidate_name ?? "—"}
               </span>
             ),
@@ -152,7 +148,7 @@ export function AdminEvaluationsTable({
             key: "staff_name",
             label: "Evaluator",
             render: (row) => (
-              <span className="text-sm" style={{ color: "var(--ink)" }}>
+              <span className="text-sm text-foreground">
                 {row.staff_name ?? "—"}
               </span>
             ),
@@ -161,7 +157,7 @@ export function AdminEvaluationsTable({
             key: "dept_id",
             label: "Department",
             render: (row) => (
-              <span className="text-sm" style={{ color: "var(--muted)" }}>
+              <span className="text-sm text-muted-foreground">
                 {row.dept_id ?? "—"}
               </span>
             ),
@@ -200,8 +196,7 @@ export function AdminEvaluationsTable({
             type="button"
             disabled={page <= 1 || loading}
             onClick={() => fetchPage(page - 1, search)}
-            className="h-8 rounded px-3 text-xs font-medium disabled:opacity-30"
-            style={{ background: "var(--surface)", border: "1px solid var(--border)", color: "var(--ink)" }}
+            className="h-8 rounded px-3 text-xs font-medium disabled:opacity-30 bg-card border border-border text-foreground"
           >
             Previous
           </button>
@@ -222,12 +217,11 @@ export function AdminEvaluationsTable({
                 type="button"
                 onClick={() => fetchPage(pageNum, search)}
                 disabled={loading}
-                className="h-8 w-8 rounded text-xs font-medium"
-                style={{
-                  background: pageNum === page ? "var(--sh-primary)" : "var(--surface)",
-                  border: "1px solid var(--border)",
-                  color: pageNum === page ? "#fff" : "var(--ink)",
-                }}
+                className={`h-8 w-8 rounded text-xs font-medium ${
+                  pageNum === page
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-card text-foreground border border-border"
+                }`}
               >
                 {pageNum}
               </button>
@@ -237,8 +231,7 @@ export function AdminEvaluationsTable({
             type="button"
             disabled={page >= totalPages || loading}
             onClick={() => fetchPage(page + 1, search)}
-            className="h-8 rounded px-3 text-xs font-medium disabled:opacity-30"
-            style={{ background: "var(--surface)", border: "1px solid var(--border)", color: "var(--ink)" }}
+            className="h-8 rounded px-3 text-xs font-medium disabled:opacity-30 bg-card border border-border text-foreground"
           >
             Next
           </button>

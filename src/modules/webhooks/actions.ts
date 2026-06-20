@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
@@ -20,8 +21,12 @@ const getWebhookSchema = z.object({
 import {
   webhookListItemSchema,
   listWebhooksResultSchema,
+  webhookActionResponseSchema,
+  createWebhookSchema,
+  updateWebhookSchema,
+  deleteWebhookSchema,
 } from "./schemas";
-import type { WebhookListItem, ListWebhooksResult } from "./schemas";
+import type { WebhookListItem, ListWebhooksResult, WebhookActionResponse } from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Server actions
@@ -125,4 +130,143 @@ export async function getWebhook(
   }
 
   return result;
+}
+
+// ---------------------------------------------------------------------------
+// CRUD actions (create, update, delete)
+// ---------------------------------------------------------------------------
+
+/**
+ * Create a new webhook.
+ * Mirrors the legacy Yii2 Admin WebhookController::actionCreate().
+ */
+export async function createWebhook(
+  event: string,
+  endpoint: string,
+  method?: string,
+): Promise<WebhookActionResponse> {
+  await requireCapability("admin.write");
+
+  const parsed = createWebhookSchema.safeParse({ event, endpoint, method: method || undefined });
+  if (!parsed.success) {
+    return { operation: "error", message: parsed.error.issues[0]?.message ?? "Invalid webhook parameters" };
+  }
+
+  try {
+    await prisma.webhook.create({
+      data: {
+        event: parsed.data.event,
+        endpoint: parsed.data.endpoint,
+        method: parsed.data.method ?? null,
+      },
+    });
+
+    revalidatePath("/admin/webhooks");
+    const result: WebhookActionResponse = { operation: "success", message: "Webhook created successfully" };
+    const outputParsed = webhookActionResponseSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error("[modules/webhooks] createWebhook output failed:", outputParsed.error.issues);
+    }
+    return result;
+  } catch (_e) {
+    const result: WebhookActionResponse = { operation: "error", message: "Failed to create webhook. Please try again." };
+    const outputParsed = webhookActionResponseSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error("[modules/webhooks] createWebhook output failed:", outputParsed.error.issues);
+    }
+    return result;
+  }
+}
+
+/**
+ * Update an existing webhook.
+ * Mirrors the legacy Yii2 Admin WebhookController::actionUpdate().
+ */
+export async function updateWebhook(
+  webhookId: number,
+  event: string,
+  endpoint: string,
+  method?: string,
+): Promise<WebhookActionResponse> {
+  await requireCapability("admin.write");
+
+  const parsed = updateWebhookSchema.safeParse({ webhookId, event, endpoint, method: method || undefined });
+  if (!parsed.success) {
+    return { operation: "error", message: parsed.error.issues[0]?.message ?? "Invalid parameters" };
+  }
+
+  try {
+    const existing = await prisma.webhook.findUnique({
+      where: { webhook_id: parsed.data.webhookId },
+      select: { webhook_id: true },
+    });
+    if (!existing) {
+      return { operation: "error", message: "Webhook not found" };
+    }
+
+    await prisma.webhook.update({
+      where: { webhook_id: parsed.data.webhookId },
+      data: {
+        event: parsed.data.event,
+        endpoint: parsed.data.endpoint,
+        method: parsed.data.method ?? null,
+      },
+    });
+
+    revalidatePath("/admin/webhooks");
+    revalidatePath(`/admin/webhooks/${parsed.data.webhookId}`);
+    const result: WebhookActionResponse = { operation: "success", message: "Webhook successfully updated" };
+    const outputParsed = webhookActionResponseSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error("[modules/webhooks] updateWebhook output failed:", outputParsed.error.issues);
+    }
+    return result;
+  } catch (_e) {
+    const result: WebhookActionResponse = { operation: "error", message: "Failed to update webhook. Please try again." };
+    const outputParsed = webhookActionResponseSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error("[modules/webhooks] updateWebhook output failed:", outputParsed.error.issues);
+    }
+    return result;
+  }
+}
+
+/**
+ * Delete a webhook.
+ * Mirrors the legacy Yii2 Admin WebhookController::actionDelete().
+ */
+export async function deleteWebhook(webhookId: number): Promise<WebhookActionResponse> {
+  await requireCapability("admin.write");
+
+  const parsed = deleteWebhookSchema.safeParse({ webhookId });
+  if (!parsed.success) {
+    return { operation: "error", message: parsed.error.issues[0]?.message ?? "Invalid webhook ID" };
+  }
+
+  try {
+    const existing = await prisma.webhook.findUnique({
+      where: { webhook_id: parsed.data.webhookId },
+      select: { webhook_id: true },
+    });
+    if (!existing) {
+      return { operation: "error", message: "Webhook not found" };
+    }
+
+    await prisma.webhook.delete({ where: { webhook_id: parsed.data.webhookId } });
+
+    revalidatePath("/admin/webhooks");
+    const result: WebhookActionResponse = { operation: "success", message: "Webhook deleted successfully" };
+    const outputParsed = webhookActionResponseSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error("[modules/webhooks] deleteWebhook output failed:", outputParsed.error.issues);
+    }
+    return result;
+  } catch (_e) {
+    const result: WebhookActionResponse = { operation: "error", message: "Failed to delete webhook. Please try again." };
+    const outputParsed = webhookActionResponseSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error("[modules/webhooks] deleteWebhook output failed:", outputParsed.error.issues);
+    }
+    return result;
+  }
 }

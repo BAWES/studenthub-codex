@@ -36,7 +36,7 @@ test.describe("Employer dashboard", () => {
     });
 
     // Verify metric cards are rendered
-    const metricCards = page.locator("div.rounded-xl.border.bg-card");
+    const metricCards = page.locator("div.rounded-xl.border");
     await expect(metricCards.first()).toBeVisible({ timeout: 5000 });
 
     // Verify no hydration/serialization errors

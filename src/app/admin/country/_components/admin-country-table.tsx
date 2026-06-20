@@ -4,6 +4,8 @@ import { useActionState, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { DataTable } from "@/modules/workspace/DataTable";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 import type { SessionUser } from "@/modules/auth/types";
 import type { CountryItem } from "../schemas";
@@ -28,8 +30,8 @@ export function AdminCountryTable({ session, countries }: Props) {
       ]}
     >
       <section className="mb-6">
-        <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
-          <h3 className="text-sm font-semibold mb-3" style={{ color: "var(--ink)" }}>Add country</h3>
+        <div className="rounded-lg border border-border bg-card p-5">
+          <h3 className="text-sm font-semibold mb-3 text-foreground">Add country</h3>
           <CreateCountryForm onSuccess={() => router.refresh()} />
         </div>
       </section>
@@ -53,8 +55,7 @@ export function AdminCountryTable({ session, countries }: Props) {
               ) : (
                 <button
                   type="button"
-                  className="text-sm hover:underline"
-                  style={{ color: "var(--sh-primary)" }}
+                  className="text-sm hover:underline text-[#1f73b7]"
                   onClick={() => setEditingId(row.country_id)}
                 >
                   {row.country_name_en}
@@ -66,7 +67,7 @@ export function AdminCountryTable({ session, countries }: Props) {
             label: "Name (AR)",
             render: (row) =>
               editingId === row.country_id ? null : (
-                <span className="text-sm" style={{ color: "var(--ink)" }}>
+                <span className="text-sm text-foreground">
                   {row.country_name_ar ?? "—"}
                 </span>
               ),
@@ -76,7 +77,7 @@ export function AdminCountryTable({ session, countries }: Props) {
             label: "ISO",
             render: (row) =>
               editingId === row.country_id ? null : (
-                <code className="text-xs" style={{ color: "var(--muted)" }}>
+                <code className="text-xs text-muted-foreground">
                   {row.iso ?? "—"}
                 </code>
               ),
@@ -94,7 +95,7 @@ export function AdminCountryTable({ session, countries }: Props) {
             label: "Code",
             render: (row) =>
               editingId === row.country_id ? null : (
-                <span className="text-sm" style={{ color: "var(--ink)" }}>
+                <span className="text-sm text-foreground">
                   {row.country_code != null ? `+${row.country_code}` : "—"}
                 </span>
               ),
@@ -104,7 +105,7 @@ export function AdminCountryTable({ session, countries }: Props) {
             label: "Currency",
             render: (row) =>
               editingId === row.country_id ? null : (
-                <span className="text-sm" style={{ color: "var(--ink)" }}>
+                <span className="text-sm text-foreground">
                   {row.currency_code ?? "—"}
                 </span>
               ),
@@ -116,8 +117,7 @@ export function AdminCountryTable({ session, countries }: Props) {
               editingId !== row.country_id ? (
                 <button
                   type="button"
-                  className="text-xs px-2 py-1 rounded hover:bg-red-500/10"
-                  style={{ color: "var(--sh-error)" }}
+                  className="text-xs px-2 py-1 rounded hover:bg-red-500/10 text-destructive"
                   onClick={async () => {
                     if (confirm(`Delete country "${row.country_name_en}"?`)) {
                       const result = await deleteCountry(row.country_id);
@@ -175,56 +175,38 @@ function CreateCountryForm({ onSuccess }: { onSuccess: () => void }) {
       onSubmit={() => setTimeout(() => { formRef.current?.reset(); }, 100)}
     >
       <div className="grid gap-1">
-        <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>Name (EN) *</label>
-        <input name="countryNameEn" required maxLength={100} placeholder="e.g. Kuwait"
-          className="h-9 rounded-lg px-3 text-sm border w-36"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }} />
+        <label className="text-xs font-medium text-muted-foreground">Name (EN) *</label>
+        <Input name="countryNameEn" required maxLength={100} placeholder="e.g. Kuwait" className="w-36" />
       </div>
       <div className="grid gap-1">
-        <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>Name (AR)</label>
-        <input name="countryNameAr" maxLength={100} placeholder="الكويت"
-          className="h-9 rounded-lg px-3 text-sm border w-36"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }} />
+        <label className="text-xs font-medium text-muted-foreground">Name (AR)</label>
+        <Input name="countryNameAr" maxLength={100} placeholder="الكويت" className="w-36" />
       </div>
       <div className="grid gap-1">
-        <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>Nationality (EN) *</label>
-        <input name="nationalityNameEn" required maxLength={100} placeholder="e.g. Kuwaiti"
-          className="h-9 rounded-lg px-3 text-sm border w-36"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }} />
+        <label className="text-xs font-medium text-muted-foreground">Nationality (EN) *</label>
+        <Input name="nationalityNameEn" required maxLength={100} placeholder="e.g. Kuwaiti" className="w-36" />
       </div>
       <div className="grid gap-1">
-        <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>ISO</label>
-        <input name="iso" maxLength={3} placeholder="KWT"
-          className="h-9 rounded-lg px-3 text-sm border w-16"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }} />
+        <label className="text-xs font-medium text-muted-foreground">ISO</label>
+        <Input name="iso" maxLength={3} placeholder="KWT" className="w-16" />
       </div>
       <div className="grid gap-1">
-        <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>Code</label>
-        <input name="countryCode" type="number" placeholder="965"
-          className="h-9 rounded-lg px-3 text-sm border w-20"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }} />
+        <label className="text-xs font-medium text-muted-foreground">Code</label>
+        <Input name="countryCode" type="number" placeholder="965" className="w-20" />
       </div>
       <div className="grid gap-1">
-        <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>Currency</label>
-        <input name="currencyCode" maxLength={3} placeholder="KWD"
-          className="h-9 rounded-lg px-3 text-sm border w-16"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }} />
+        <label className="text-xs font-medium text-muted-foreground">Currency</label>
+        <Input name="currencyCode" maxLength={3} placeholder="KWD" className="w-16" />
       </div>
       <div className="grid gap-1">
-        <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>Emoji</label>
-        <input name="emoji" maxLength={255} placeholder="🇰🇼"
-          className="h-9 rounded-lg px-3 text-sm border w-16"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }} />
+        <label className="text-xs font-medium text-muted-foreground">Emoji</label>
+        <Input name="emoji" maxLength={255} placeholder="🇰🇼" className="w-16" />
       </div>
-      <button
-        type="submit" disabled={pending}
-        className="h-9 rounded-lg px-4 text-sm font-semibold"
-        style={{ background: "var(--sh-primary)", color: "#fff" }}
-      >
+      <Button type="submit" disabled={pending}>
         {pending ? "Adding..." : "Add"}
-      </button>
+      </Button>
       {state?.error ? (
-        <p className="text-xs w-full" style={{ color: "var(--sh-error)" }}>{state.error}</p>
+        <p className="text-xs w-full text-destructive">{state.error}</p>
       ) : null}
     </form>
   );
@@ -266,38 +248,21 @@ function EditCountryForm({
 
   return (
     <form action={action} className="flex items-center gap-2 flex-wrap">
-      <input name="countryNameEn" defaultValue={row.country_name_en} required maxLength={100}
-        className="h-8 rounded px-2 text-sm border w-32"
-        style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }} />
-      <input name="countryNameAr" defaultValue={row.country_name_ar ?? ""} maxLength={100}
-        className="h-8 rounded px-2 text-sm border w-32"
-        style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }} />
-      <input name="nationalityNameEn" defaultValue={row.country_nationality_name_en} required maxLength={100}
-        className="h-8 rounded px-2 text-sm border w-32"
-        style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }} />
-      <input name="iso" defaultValue={row.iso ?? ""} maxLength={3}
-        className="h-8 rounded px-2 text-sm border w-14"
-        style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }} />
-      <input name="emoji" defaultValue={row.emoji ?? ""} maxLength={255}
-        className="h-8 rounded px-2 text-sm border w-14"
-        style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }} />
-      <input name="countryCode" type="number" defaultValue={row.country_code ?? ""}
-        className="h-8 rounded px-2 text-sm border w-16"
-        style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }} />
-      <input name="currencyCode" defaultValue={row.currency_code ?? ""} maxLength={3}
-        className="h-8 rounded px-2 text-sm border w-14"
-        style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }} />
-      <button type="submit" disabled={pending}
-        className="h-8 rounded px-3 text-xs font-semibold"
-        style={{ background: "var(--sh-primary)", color: "#fff" }}>
+      <Input name="countryNameEn" defaultValue={row.country_name_en} required maxLength={100} className="w-32" />
+      <Input name="countryNameAr" defaultValue={row.country_name_ar ?? ""} maxLength={100} className="w-32" />
+      <Input name="nationalityNameEn" defaultValue={row.country_nationality_name_en} required maxLength={100} className="w-32" />
+      <Input name="iso" defaultValue={row.iso ?? ""} maxLength={3} className="w-14" />
+      <Input name="emoji" defaultValue={row.emoji ?? ""} maxLength={255} className="w-14" />
+      <Input name="countryCode" type="number" defaultValue={row.country_code ?? ""} className="w-16" />
+      <Input name="currencyCode" defaultValue={row.currency_code ?? ""} maxLength={3} className="w-14" />
+      <Button type="submit" disabled={pending} size="sm">
         {pending ? "..." : "Save"}
-      </button>
-      <button type="button" onClick={onCancel}
-        className="h-8 rounded px-3 text-xs" style={{ color: "var(--muted)" }}>
+      </Button>
+      <Button type="button" onClick={onCancel} variant="ghost" size="sm">
         Cancel
-      </button>
+      </Button>
       {state?.error ? (
-        <p className="text-xs w-full" style={{ color: "var(--sh-error)" }}>{state.error}</p>
+        <p className="text-xs w-full text-destructive">{state.error}</p>
       ) : null}
     </form>
   );

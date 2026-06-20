@@ -109,7 +109,7 @@ export default async function AdminReportDetailPage({
         )}
 
         {/* Back link */}
-        <section style={{ display: "flex", gap: "0.5rem", padding: "1rem" }}>
+        <section className="flex gap-2 p-4">
           <Link href={"/admin/reports" as Route}>
             <Button variant="outline">Back to Reports</Button>
           </Link>
@@ -133,8 +133,7 @@ async function RecruiterDailySection({
       className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5"
     >
       <h3
-        className="text-sm font-semibold mb-3"
-        style={{ color: "var(--ink)" }}
+        className="text-sm font-semibold mb-3 text-foreground"
       >
         Recruiter Activity — {data.date}
       </h3>
@@ -142,64 +141,54 @@ async function RecruiterDailySection({
       <div className="overflow-x-auto">
         <table className="w-full text-xs">
           <thead>
-            <tr className="border-b" style={{ borderColor: "var(--border)" }}>
+            <tr className="border-b" >
               <th
-                className="text-left py-2 px-2 font-medium"
-                style={{ color: "var(--muted)" }}
+                className="text-left py-2 px-2 font-medium text-muted-foreground"
               >
                 Staff
               </th>
               <th
-                className="text-right py-2 px-2 font-medium"
-                style={{ color: "var(--muted)" }}
+                className="text-right py-2 px-2 font-medium text-muted-foreground"
               >
                 Assigned
               </th>
               <th
-                className="text-right py-2 px-2 font-medium"
-                style={{ color: "var(--muted)" }}
+                className="text-right py-2 px-2 font-medium text-muted-foreground"
               >
                 Requests
               </th>
               <th
-                className="text-right py-2 px-2 font-medium"
-                style={{ color: "var(--muted)" }}
+                className="text-right py-2 px-2 font-medium text-muted-foreground"
               >
                 Notes
               </th>
               <th
-                className="text-right py-2 px-2 font-medium"
-                style={{ color: "var(--muted)" }}
+                className="text-right py-2 px-2 font-medium text-muted-foreground"
               >
                 Stories
               </th>
               <th
-                className="text-right py-2 px-2 font-medium"
-                style={{ color: "var(--muted)" }}
+                className="text-right py-2 px-2 font-medium text-muted-foreground"
               >
                 Completed
               </th>
               <th
-                className="text-right py-2 px-2 font-medium"
-                style={{ color: "var(--muted)" }}
+                className="text-right py-2 px-2 font-medium text-muted-foreground"
               >
                 Suggestions
               </th>
               <th
-                className="text-right py-2 px-2 font-medium"
-                style={{ color: "var(--muted)" }}
+                className="text-right py-2 px-2 font-medium text-muted-foreground"
               >
                 Invitations
               </th>
               <th
-                className="text-right py-2 px-2 font-medium"
-                style={{ color: "var(--muted)" }}
+                className="text-right py-2 px-2 font-medium text-muted-foreground"
               >
                 Accepted
               </th>
               <th
-                className="text-right py-2 px-2 font-medium"
-                style={{ color: "var(--muted)" }}
+                className="text-right py-2 px-2 font-medium text-muted-foreground"
               >
                 Rejected
               </th>
@@ -210,37 +199,37 @@ async function RecruiterDailySection({
               <tr
                 key={i}
                 className="border-b"
-                style={{ borderColor: "var(--border)" }}
+                
               >
-                <td className="py-2 px-2" style={{ color: "var(--ink)" }}>
+                <td className="py-2 px-2 text-foreground">
                   <div className="font-medium">{r.staffName}</div>
-                  <div style={{ color: "var(--muted)" }}>{r.staffEmail}</div>
+                  <div className="text-muted-foreground">{r.staffEmail}</div>
                 </td>
-                <td className="text-right py-2 px-2" style={{ color: "var(--ink)" }}>
+                <td className="text-right py-2 px-2 text-foreground">
                   {numberCell(r.totalAssigned)}
                 </td>
-                <td className="text-right py-2 px-2" style={{ color: "var(--ink)" }}>
+                <td className="text-right py-2 px-2 text-foreground">
                   {numberCell(r.totalRequests)}
                 </td>
-                <td className="text-right py-2 px-2" style={{ color: "var(--ink)" }}>
+                <td className="text-right py-2 px-2 text-foreground">
                   {numberCell(r.totalNotes)}
                 </td>
-                <td className="text-right py-2 px-2" style={{ color: "var(--ink)" }}>
+                <td className="text-right py-2 px-2 text-foreground">
                   {numberCell(r.totalStories)}
                 </td>
-                <td className="text-right py-2 px-2" style={{ color: "var(--ink)" }}>
+                <td className="text-right py-2 px-2 text-foreground">
                   {numberCell(r.totalCompletedStories)}
                 </td>
-                <td className="text-right py-2 px-2" style={{ color: "var(--ink)" }}>
+                <td className="text-right py-2 px-2 text-foreground">
                   {numberCell(r.totalSuggestions)}
                 </td>
-                <td className="text-right py-2 px-2" style={{ color: "var(--ink)" }}>
+                <td className="text-right py-2 px-2 text-foreground">
                   {numberCell(r.totalInvitations)}
                 </td>
-                <td className="text-right py-2 px-2" style={{ color: "var(--ink)" }}>
+                <td className="text-right py-2 px-2 text-foreground">
                   {numberCell(r.totalAcceptedInvitations)}
                 </td>
-                <td className="text-right py-2 px-2" style={{ color: "var(--ink)" }}>
+                <td className="text-right py-2 px-2 text-foreground">
                   {numberCell(r.totalRejectedInvitations)}
                 </td>
               </tr>
@@ -249,7 +238,7 @@ async function RecruiterDailySection({
         </table>
       </div>
 
-      <p className="text-xs mt-3" style={{ color: "var(--muted)" }}>
+      <p className="text-xs mt-3 text-muted-foreground">
         Total staff: {data.total}
       </p>
     </section>
@@ -270,8 +259,7 @@ async function InvitationSummarySection({
       className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5"
     >
       <h3
-        className="text-sm font-semibold mb-3"
-        style={{ color: "var(--ink)" }}
+        className="text-sm font-semibold mb-3 text-foreground"
       >
         Invitation Summary — {data.date}
       </h3>
@@ -279,16 +267,14 @@ async function InvitationSummarySection({
       <div className="overflow-x-auto">
         <table className="w-full text-xs">
           <thead>
-            <tr className="border-b" style={{ borderColor: "var(--border)" }}>
+            <tr className="border-b" >
               <th
-                className="text-left py-2 px-2 font-medium"
-                style={{ color: "var(--muted)" }}
+                className="text-left py-2 px-2 font-medium text-muted-foreground"
               >
                 Status
               </th>
               <th
-                className="text-right py-2 px-2 font-medium"
-                style={{ color: "var(--muted)" }}
+                className="text-right py-2 px-2 font-medium text-muted-foreground"
               >
                 Count
               </th>
@@ -299,12 +285,12 @@ async function InvitationSummarySection({
               <tr
                 key={i}
                 className="border-b"
-                style={{ borderColor: "var(--border)" }}
+                
               >
-                <td className="py-2 px-2" style={{ color: "var(--ink)" }}>
+                <td className="py-2 px-2 text-foreground">
                   {statusLabel(s.status)}
                 </td>
-                <td className="text-right py-2 px-2" style={{ color: "var(--ink)" }}>
+                <td className="text-right py-2 px-2 text-foreground">
                   {numberCell(s.count)}
                 </td>
               </tr>
