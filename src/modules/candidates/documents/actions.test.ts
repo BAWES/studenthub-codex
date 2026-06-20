@@ -206,10 +206,23 @@ vi.mock("@aws-sdk/client-s3", () => ({
   },
   PutObjectCommand: vi.fn(),
   GetObjectCommand: vi.fn(),
+  DeleteObjectCommand: vi.fn(),
 }));
 
 vi.mock("@aws-sdk/s3-request-presigner", () => ({
   getSignedUrl: vi.fn().mockResolvedValue("https://s3.example.com/presigned-url"),
+}));
+
+vi.mock("@aws-sdk/lib-storage", () => ({
+  Upload: class {
+    done: any;
+    constructor(opts: any) {
+      if (opts?.client?.send) {
+        opts.client.send({});
+      }
+      this.done = vi.fn().mockResolvedValue({});
+    }
+  },
 }));
 
 vi.mock("@/lib/prisma", () => ({
