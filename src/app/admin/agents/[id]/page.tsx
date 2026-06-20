@@ -96,7 +96,7 @@ export default async function AdminAgentDetailPage({
             {
               label: "Status",
               value: (
-                <span style={{ color: statusColor, fontWeight: 600 }}>
+                <span className="font-semibold" style={{ color: statusColor }}>
                   {agent.status}
                 </span>
               ),
