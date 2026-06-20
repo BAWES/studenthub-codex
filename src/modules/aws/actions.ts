@@ -2,7 +2,7 @@
 
 import crypto from "node:crypto";
 import { z } from "zod";
-import { S3Client, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { requireCapability } from "@/modules/auth/session";
 import {
@@ -10,8 +10,12 @@ import {
   getPresignedDownloadUrlSchema,
   presignedUploadResultSchema,
   presignedDownloadResultSchema,
+  putS3ObjectParamsSchema,
+  deleteS3ObjectParamsSchema,
+  s3OperationResultSchema,
   type PresignedUploadResult,
   type PresignedDownloadResult,
+  type S3OperationResult,
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
@@ -177,5 +181,162 @@ export async function getPresignedDownloadUrl(
     const message =
       err instanceof Error ? err.message : "Failed to generate presigned download URL";
     return { error: message };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Direct S3 object operations
+// ---------------------------------------------------------------------------
+
+/**
+ * Generate a presigned S3 download URL without capability check.
+ *
+ * Unlike getPresignedDownloadUrl (which requires document.read), this is a
+ * pure utility that generates the URL from any authenticated context that
+ * already performed its own authorization.
+ */
+export async function getS3DownloadUrl(
+  key: string,
+  expiresIn = 900,
+): Promise<string | null> {
+  const configError = configAvailable();
+  if (configError) return null;
+
+  const command = new GetObjectCommand({
+    Bucket: bucketName(),
+    Key: key,
+  });
+
+  try {
+    return await getSignedUrl(getS3Client(), command, { expiresIn });
+  } catch {
+    return null;
+  }
+}
+function bucketName(): string {
+  return process.env.AWS_TEMP_BUCKET_NAME ?? "";
+}
+
+/** Check whether a stored path looks like an S3 key rather than a local path. */
+export function isS3Path(path: string): boolean {
+  return path.startsWith("s3://");
+}
+
+/** Strip S3 prefix to get the raw key. */
+export function toS3Key(path: string): string {
+  return path.startsWith("s3://") ? path.slice(4) : path;
+}
+
+/** Wrap a raw key with the S3 prefix for DB storage. */
+export function toS3StoredPath(key: string): string {
+  return `s3://${key}`;
+}
+
+/** Check whether S3 configuration is available. */
+export async function isS3Configured(): Promise<boolean> {
+  return configAvailable() === null;
+}
+
+/**
+ * Upload a buffer directly to the S3/MinIO bucket.
+ *
+ * Used by server actions that receive FormData and need to store files in S3
+ * rather than via client-side presigned uploads.
+ */
+export async function putS3Object(
+  params: z.input<typeof putS3ObjectParamsSchema> & { buffer: Buffer },
+): Promise<S3OperationResult> {
+  const configError = configAvailable();
+  if (configError) {
+    return { success: false, error: configError, key: params.key };
+  }
+
+  const parsed = putS3ObjectParamsSchema.safeParse(params);
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: parsed.error.errors[0]?.message ?? "Invalid parameters.",
+      key: params.key,
+    };
+  }
+
+  const { key, contentType } = parsed.data;
+  const { buffer } = params;
+
+  try {
+    const command = new PutObjectCommand({
+      Bucket: bucketName(),
+      Key: key,
+      Body: buffer,
+      ContentType: contentType,
+    });
+
+    await getS3Client().send(command);
+
+    const result: S3OperationResult = { success: true, key };
+
+    // Validate output shape
+    const outputParsed = s3OperationResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/aws] putS3Object output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
+  } catch (err) {
+    const message =
+      err instanceof Error ? err.message : "Failed to upload object to S3";
+    return { success: false, error: message, key: params.key };
+  }
+}
+
+/**
+ * Delete an object from the S3/MinIO bucket.
+ */
+export async function deleteS3Object(
+  params: z.input<typeof deleteS3ObjectParamsSchema>,
+): Promise<S3OperationResult> {
+  const configError = configAvailable();
+  if (configError) {
+    return { success: false, error: configError, key: params.key };
+  }
+
+  const parsed = deleteS3ObjectParamsSchema.safeParse(params);
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: parsed.error.errors[0]?.message ?? "Invalid parameters.",
+      key: params.key,
+    };
+  }
+
+  const { key } = parsed.data;
+
+  try {
+    const command = new DeleteObjectCommand({
+      Bucket: bucketName(),
+      Key: key,
+    });
+
+    await getS3Client().send(command);
+
+    const result: S3OperationResult = { success: true, key };
+
+    // Validate output shape
+    const outputParsed = s3OperationResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/aws] deleteS3Object output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
+  } catch (err) {
+    const message =
+      err instanceof Error ? err.message : "Failed to delete object from S3";
+    return { success: false, error: message, key: params.key };
   }
 }
