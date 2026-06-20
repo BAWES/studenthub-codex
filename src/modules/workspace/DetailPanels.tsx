@@ -4,6 +4,8 @@ import type { Route } from "next";
 import Link from "next/link";
 import React from "react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import {
   EMPTY_NO_SECTION_DATA,
   EMPTY_NO_IMPORTED_RECORDS,
@@ -60,16 +62,17 @@ export interface DetailSectionProps {
 
 function ErrorState({ error, onRetry }: { error: string; onRetry?: () => void }) {
   return (
-    <div className="errorState" role="alert">
-      <p>{error}</p>
+    <div className="grid gap-2 p-3 rounded-sm border border-destructive/30 bg-destructive/5" role="alert">
+      <p className="text-sm text-destructive">{error}</p>
       {onRetry && (
-        <button
+        <Button
           type="button"
-          className="uiButton uiButtonGhost"
+          variant="outline"
+          size="sm"
           onClick={onRetry}
         >
           Try again
-        </button>
+        </Button>
       )}
     </div>
   );
@@ -101,8 +104,8 @@ export function DetailSection({
   /* ─── Error state ─── */
   if (errorMessage) {
     return (
-      <section className="detailPanel">
-        <h2>{title}</h2>
+      <section className="grid gap-3">
+        <h2 className="m-0 text-sm font-semibold text-foreground">{title}</h2>
         <ErrorState error={errorMessage} onRetry={onRetry} />
       </section>
     );
@@ -111,23 +114,23 @@ export function DetailSection({
   /* ─── Loading state ─── */
   if (loading) {
     return (
-      <section className="detailPanel">
-        <h2>{title}</h2>
+      <section className="grid gap-3">
+        <h2 className="m-0 text-sm font-semibold text-foreground">{title}</h2>
         {type === "list" ? (
-          <div className="rows compactRows" aria-busy="true">
+          <div className="grid gap-[3px]" aria-busy="true">
             {Array.from({ length: 3 }).map((_, i) => (
-              <article className="row" key={i}>
-                <div className="rowMain">
+              <div className="flex items-center gap-3 min-h-11 px-3 py-2" key={i}>
+                <div className="grid gap-1 min-w-0 flex-1">
                   <Skeleton className="h-4 w-48 mb-1" />
                   <Skeleton className="h-3 w-32" />
                 </div>
-              </article>
+              </div>
             ))}
           </div>
         ) : (
-          <div className="factGrid" aria-busy="true">
+          <div className="grid grid-cols-2 gap-x-6 gap-y-2.5" aria-busy="true">
             {Array.from({ length: 6 }).map((_, i) => (
-              <div className="fact" key={i}>
+              <div className="grid gap-0.5" key={i}>
                 <Skeleton className="h-3 w-16 mb-1" />
                 <Skeleton className="h-4 w-28" />
               </div>
@@ -143,35 +146,36 @@ export function DetailSection({
     const hasSensitive = sensitive && facts?.some((f) => f.sensitive);
 
     return (
-      <section className="detailPanel">
-        <div className="listHeader">
-          <h2>{title}</h2>
+      <section className="grid gap-3">
+        <div className="flex items-center justify-between">
+          <h2 className="m-0 text-sm font-semibold text-foreground">{title}</h2>
           {hasSensitive && (
-            <button
+            <Button
               type="button"
-              className="uiButton uiButtonGhost"
+              variant="ghost"
+              size="sm"
               onClick={() => setSensitiveRevealed((v) => !v)}
-              style={{ fontSize: "0.75rem" }}
+              className="text-xs text-muted-foreground h-auto min-h-0 px-2 py-1"
             >
               {sensitiveRevealed ? "Hide sensitive" : "Show sensitive"}
-            </button>
+            </Button>
           )}
         </div>
         {facts && facts.length > 0 ? (
-          <div className="factGrid">
+          <div className="grid grid-cols-2 gap-x-6 gap-y-2.5">
             {facts.map((fact) => (
-              <div className="fact" key={fact.label}>
-                <span>{fact.label}</span>
-                <strong>
+              <div className="grid gap-0.5" key={fact.label}>
+                <span className="text-xs text-muted-foreground font-medium">{fact.label}</span>
+                <strong className="text-sm font-medium text-foreground">
                   {fact.sensitive && !sensitiveRevealed
                     ? "•••••"
-                    : fact.value ?? "Not set"}
+                    : fact.value ?? <span className="text-muted-foreground italic">Not set</span>}
                 </strong>
               </div>
             ))}
           </div>
         ) : (
-          <p className="emptyState">{emptyMessage ?? EMPTY_NO_SECTION_DATA}</p>
+          <p className="text-sm text-muted-foreground italic">{emptyMessage ?? EMPTY_NO_SECTION_DATA}</p>
         )}
       </section>
     );
@@ -180,31 +184,36 @@ export function DetailSection({
   /* ─── List (CompactList) type ─── */
   const resolvedRows = rows ?? [];
   return (
-    <section className="detailPanel">
-      <div className="listHeader compact">
-        <h2>{title}</h2>
-        {resolvedRows.length > 0 && <span>{resolvedRows.length}</span>}
+    <section className="grid gap-2">
+      <div className="flex items-center justify-between">
+        <h2 className="m-0 text-sm font-semibold text-foreground">{title}</h2>
+        {resolvedRows.length > 0 && <span className="text-xs text-muted-foreground font-medium">{resolvedRows.length}</span>}
       </div>
       {resolvedRows.length > 0 ? (
-        <div className="rows compactRows">
+        <div className="grid gap-[3px]">
           {resolvedRows.map((row) => (
-            <article className="row" key={row.id}>
-              <div className="rowMain">
+            <article
+              className="flex items-center justify-between gap-3 min-h-11 px-3 py-2 rounded-sm bg-card border border-transparent transition-all duration-180 hover:bg-accent hover:border-border hover:translate-x-1"
+              key={row.id}
+            >
+              <div className="grid gap-0.5 min-w-0 flex-1">
                 {row.href ? (
                   <Link href={row.href as Route}>
-                    <strong>{row.title}</strong>
+                    <strong className="text-sm font-medium text-foreground">{row.title}</strong>
                   </Link>
                 ) : (
-                  <strong>{row.title}</strong>
+                  <strong className="text-sm font-medium text-foreground">{row.title}</strong>
                 )}
-                <span>{row.subtitle}</span>
+                <span className="text-xs text-muted-foreground">{row.subtitle}</span>
               </div>
-              {row.meta ? <div className="rowMeta">{row.meta}</div> : null}
+              {row.meta ? (
+                <div className="text-xs text-muted-foreground/60 whitespace-nowrap shrink-0">{row.meta}</div>
+              ) : null}
             </article>
           ))}
         </div>
       ) : (
-        <p className="emptyState">{emptyMessage ?? EMPTY_NO_IMPORTED_RECORDS}</p>
+        <p className="text-sm text-muted-foreground italic">{emptyMessage ?? EMPTY_NO_IMPORTED_RECORDS}</p>
       )}
     </section>
   );

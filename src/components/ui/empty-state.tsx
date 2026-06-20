@@ -2,12 +2,13 @@
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 /* ------------------------------------------------------------------ */
 /*  EmptyState — custom illustration + CTA per state                   */
 /*  Each variant has a unique inline SVG illustration designed for the  */
 /*  StudentHub OS aesthetic — playful, purposeful, never apologetic.    */
-/*  Inspired by Linear"s empty states.                                  */
+/*  Inspired by Linear's empty states.                                  */
 /* ------------------------------------------------------------------ */
 
 export type EmptyStateVariant =
@@ -82,7 +83,7 @@ function EmptyCanvas({ className }: { className?: string }) {
   );
 }
 
-function ErrorState({ className }: { className?: string }) {
+function ErrorIllustration({ className }: { className?: string }) {
   return (
     <svg
       width="120"
@@ -103,7 +104,7 @@ function ErrorState({ className }: { className?: string }) {
   );
 }
 
-function SuccessState({ className }: { className?: string }) {
+function SuccessIllustration({ className }: { className?: string }) {
   return (
     <svg
       width="120"
@@ -126,7 +127,7 @@ function SuccessState({ className }: { className?: string }) {
   );
 }
 
-function LoadingState({ className }: { className?: string }) {
+function LoadingIllustration({ className }: { className?: string }) {
   return (
     <svg
       width="120"
@@ -145,7 +146,7 @@ function LoadingState({ className }: { className?: string }) {
   );
 }
 
-function IdleState({ className }: { className?: string }) {
+function IdleIllustration({ className }: { className?: string }) {
   return (
     <svg
       width="120"
@@ -174,10 +175,10 @@ function IdleState({ className }: { className?: string }) {
 const illustrationMap: Record<EmptyStateVariant, React.ComponentType<{ className?: string }>> = {
   search: SearchEmpty,
   empty: EmptyCanvas,
-  error: ErrorState,
-  success: SuccessState,
-  loading: LoadingState,
-  idle: IdleState,
+  error: ErrorIllustration,
+  success: SuccessIllustration,
+  loading: LoadingIllustration,
+  idle: IdleIllustration,
 };
 
 /* ── Component ────────────────────────────────────────────────── */
@@ -217,20 +218,13 @@ function EmptyState({
       {actionLabel && (onAction || actionHref) && (
         <div className="shEmptyStateAction">
           {actionHref ? (
-            <a
-              href={actionHref}
-              className="uiButton uiButton_default uiButton_sm"
-            >
-              {actionLabel}
-            </a>
+            <Button asChild variant="default" size="sm">
+              <a href={actionHref}>{actionLabel}</a>
+            </Button>
           ) : (
-            <button
-              type="button"
-              onClick={onAction}
-              className="uiButton uiButton_default uiButton_sm"
-            >
+            <Button type="button" variant="default" size="sm" onClick={onAction}>
               {actionLabel}
-            </button>
+            </Button>
           )}
         </div>
       )}

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 type Theme = "light" | "dark";
 
@@ -26,14 +27,22 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
   return (
     <Button
       aria-pressed={isDark}
-      className={`themeToggle ${className}`.trim()}
+      className={cn(
+        "w-full min-h-9 flex items-center gap-2 justify-start overflow-hidden",
+        "px-[9px] text-xs font-semibold text-muted-foreground",
+        className,
+      )}
       type="button"
-      variant="outline"
+      variant="ghost"
       size="sm"
       onClick={toggleTheme}
     >
-      {isDark ? <Sun aria-hidden="true" /> : <Moon aria-hidden="true" />}
-      <span>{isDark ? "Light" : "Dark"}</span>
+      <span className="inline-flex items-center justify-center shrink-0 w-[18px]">
+        {isDark ? <Sun size={16} strokeWidth={2.5} aria-hidden="true" /> : <Moon size={16} strokeWidth={2.5} aria-hidden="true" />}
+      </span>
+      <span className="opacity-0 group-hover/rail:opacity-100 transition-opacity duration-300 delay-[80ms] whitespace-nowrap">
+        {isDark ? "Light" : "Dark"}
+      </span>
     </Button>
   );
 }
