@@ -3131,8 +3131,7 @@ tr:last-child td {
   align-items: center;
   gap: 10px;
   border-bottom: 1px solid var(--line);
-  background: color-mix(in srgb, var(--surface) 90%, transparent);
-  backdrop-filter: blur(16px);
+  background: var(--surface);
   padding: 10px 14px;
 }
 
