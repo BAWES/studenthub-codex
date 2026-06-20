@@ -25,6 +25,8 @@ export function navForRole(role: Role): NavItem[] {
       { label: "Countries", href: "/admin/country", icon: Globe },
       { label: "Requests", href: "/admin/requests", icon: FileCheck },
       { label: "Degrees", href: "/admin/degree", icon: GraduationCap },
+      { label: "Degree Groups", href: "/admin/degree-group" as Route, icon: GraduationCap },
+      { label: "Email Campaigns", href: "/admin/email-campaign" as Route, icon: Mail },
       { label: "Transfers", href: "/admin/transfers", icon: ArrowRightLeft }
     ];
   }
