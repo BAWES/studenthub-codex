@@ -2,23 +2,38 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function CompanySearchLoading() {
   return (
-    <div className="mx-auto max-w-7xl p-6">
-      <div className="mb-6">
-        <Skeleton variant="pulse" className="mb-2 h-8 w-40" />
-        <Skeleton variant="pulse" className="h-4 w-72" />
-      </div>
-      <div className="mb-6 flex gap-2">
-        <Skeleton variant="pulse" className="h-11 flex-1 rounded-lg" />
-        <Skeleton variant="pulse" className="h-11 w-24 rounded-lg" />
-      </div>
-      <div className="flex flex-col gap-3">
-        {Array.from({ length: 5 }).map((_, i) => (
-          <div key={i} className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4 flex flex-col gap-3">
-            <Skeleton variant="pulse" className="h-5 w-40" />
-            <Skeleton variant="pulse" className="h-4 w-full" />
+    <div className="shell">
+      <aside className="workspaceRail" aria-label="Workspace sidebar">
+        <div className="workspaceMark"><span>SH</span><strong>StudentHub</strong></div>
+        <div className="flex flex-col gap-1 p-3">
+          <Skeleton variant="pulse" className="h-9 w-full rounded-lg" />
+          <Skeleton variant="pulse" className="h-9 w-full rounded-lg" />
+          <Skeleton variant="pulse" className="h-9 w-full rounded-lg" />
+        </div>
+      </aside>
+      <section className="workspaceStage">
+        <section className="topbar">
+          <div>
+            <Skeleton variant="pulse" className="mb-1 h-3 w-24" />
+            <Skeleton variant="pulse" className="h-7 w-32" />
           </div>
-        ))}
-      </div>
+          <Skeleton variant="pulse" className="h-10 w-40 rounded-lg" />
+        </section>
+        <div className="mx-auto max-w-7xl p-6">
+          <div className="mb-6 flex gap-2">
+            <Skeleton variant="pulse" className="h-11 flex-1 rounded-lg" />
+            <Skeleton variant="pulse" className="h-11 w-24 rounded-lg" />
+          </div>
+          <div className="flex flex-col gap-3">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-4 flex flex-col gap-3">
+                <Skeleton variant="pulse" className="h-5 w-40" />
+                <Skeleton variant="pulse" className="h-4 w-full" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

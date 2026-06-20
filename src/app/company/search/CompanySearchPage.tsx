@@ -62,7 +62,7 @@ function useDebounce<T>(value: T, delay: number): T {
 
 function SearchResultSkeleton() {
   return (
-    <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4 flex flex-col gap-3">
+    <div className="rounded-lg border border-border bg-card p-4 flex flex-col gap-3">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-2 flex-1">
           <Skeleton variant="pulse" className="h-5 w-40" />
@@ -92,12 +92,12 @@ function SearchResultSkeletons({ count = 5 }: { count?: number }) {
 
 function TypeBadge({ type }: { type: string }) {
   const colors: Record<string, string> = {
-    company: "bg-[var(--sh-info-bg)] text-[var(--sh-info)]",
-    store: "bg-[var(--sh-success-bg)] text-[var(--sh-success)]",
-    contact: "bg-[var(--sh-coral-light)] text-[var(--sh-coral)]",
+    company: "bg-[#fef1ef] text-[#eb6651]",
+    store: "bg-green-50 text-green-700",
+    contact: "bg-[#fef1ef] text-[#eb6651]",
   };
   return (
-    <span className={cn("rounded-full px-2 py-0.5 text-[0.6875rem] font-medium", colors[type] ?? "bg-[var(--surface)] text-[var(--muted)]")}>
+    <span className={cn("rounded-full px-2 py-0.5 text-[0.6875rem] font-medium", colors[type] ?? "bg-muted text-muted-foreground")}>
       {type}
     </span>
   );
@@ -210,15 +210,10 @@ export function CompanySearchPage({
 
   return (
     <div className="mx-auto max-w-7xl p-6">
-      {/* Search header */}
-      <div className="mb-6">
-        <h1 className="m-0 text-[1.625rem] font-bold" style={{ color: "var(--ink)" }}>
-          Search
-        </h1>
-        <p className="m-0 mt-1 text-sm" style={{ color: "var(--muted)" }}>
-          Find companies, stores, and contacts — powered by Typesense
-        </p>
-      </div>
+      {/* Search header — WorkspaceShell provides the h1 title, we add a subtitle */}
+      <p className="mb-6 mt-0 text-sm text-muted-foreground">
+        Find companies, stores, and contacts — powered by Typesense
+      </p>
 
       {/* Search form */}
       <form className="mb-6" onSubmit={handleSubmit}>
@@ -226,29 +221,15 @@ export function CompanySearchPage({
           <input
             ref={inputRef}
             type="text"
-            className="flex-1 rounded-lg border px-4 py-2.5 text-[0.9375rem] outline-none transition-[border-color] duration-150"
-            style={{
-              borderColor: "var(--border)",
-              background: "var(--card)",
-              color: "var(--ink)",
-            }}
+            className="flex-1 rounded-lg border border-border bg-card px-4 py-2.5 text-[0.9375rem] text-foreground placeholder:text-muted-foreground transition-all duration-150 focus:ring-2 focus:ring-[#eb6651] focus:border-[#eb6651] focus:outline-none"
             placeholder="Search companies, stores, contacts..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             autoFocus
-            onFocus={(e) => {
-              e.currentTarget.style.borderColor = "var(--sh-coral)";
-              e.currentTarget.style.boxShadow = "var(--sh-coral-glow)";
-            }}
-            onBlur={(e) => {
-              e.currentTarget.style.borderColor = "var(--border)";
-              e.currentTarget.style.boxShadow = "none";
-            }}
           />
           <button
             type="submit"
-            className="rounded-lg px-6 py-2.5 text-[0.9375rem] font-semibold text-white transition-opacity duration-150 disabled:cursor-not-allowed disabled:opacity-60 hover:opacity-90"
-            style={{ background: "var(--sh-coral)" }}
+            className="rounded-lg bg-[#eb6651] px-6 py-2.5 text-[0.9375rem] font-semibold text-white transition-opacity duration-150 hover:bg-[#d45441] disabled:cursor-not-allowed disabled:opacity-60"
             disabled={loading}
           >
             {loading ? "Searching..." : "Search"}
@@ -273,19 +254,10 @@ export function CompanySearchPage({
       <div className="grid grid-cols-[240px_1fr] gap-6 max-md:grid-cols-1">
         {/* Facet sidebar — type filter */}
         {facets.length > 0 && (
-          <aside
-            className="sticky top-6 self-start rounded-xl border p-4"
-            style={{
-              background: "var(--card)",
-              borderColor: "var(--border)",
-            }}
-          >
+          <aside className="sticky top-6 self-start rounded-xl border border-border bg-card p-4">
             {facets.map((group) => (
               <div key={group.key} className="mb-5 last:mb-0">
-                <h3
-                  className="m-0 mb-2 text-xs font-semibold uppercase tracking-wider"
-                  style={{ color: "var(--muted)" }}
-                >
+                <h3 className="m-0 mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                   {group.label}
                 </h3>
                 <div className="flex flex-col gap-1">
@@ -298,18 +270,9 @@ export function CompanySearchPage({
                         className={cn(
                           "flex items-center justify-between rounded-md border border-transparent px-2.5 py-1.5 text-left text-xs transition-all duration-100",
                           isActive
-                            ? "font-semibold"
-                            : "hover:border-[var(--border)] hover:bg-[var(--accent)]",
+                            ? "bg-[#fef1ef] border-[#eb6651] text-[#eb6651] font-semibold"
+                            : "text-foreground hover:border-border hover:bg-accent",
                         )}
-                        style={
-                          isActive
-                            ? {
-                                background: "var(--sh-coral-light)",
-                                borderColor: "var(--sh-coral)",
-                                color: "var(--sh-coral)",
-                              }
-                            : { color: "var(--ink)" }
-                        }
                         onClick={() => setTypeFilter(option.value)}
                       >
                         <span className="flex-1">{option.label}</span>
@@ -317,10 +280,9 @@ export function CompanySearchPage({
                           className={cn(
                             "ml-2 rounded-full px-1.5 py-0.5 text-[0.6875rem]",
                             isActive
-                              ? "bg-[var(--sh-coral-light)] text-[var(--sh-coral)]"
-                              : "bg-[var(--accent)]",
+                              ? "bg-[#fef1ef] text-[#eb6651]"
+                              : "bg-accent text-muted-foreground",
                           )}
-                          style={isActive ? {} : { color: "var(--muted)" }}
                         >
                           {option.count}
                         </span>
@@ -338,10 +300,10 @@ export function CompanySearchPage({
           {/* Count indicator */}
           {results && (
             <div className="mb-4 flex items-center justify-between text-xs">
-              <span className="font-semibold" style={{ color: "var(--ink)" }}>
+              <span className="font-semibold text-foreground">
                 {isTyping ? (
                   <>
-                    <span className="inline-block align-middle mr-1.5 h-2 w-2 rounded-full bg-[var(--sh-coral)] animate-pulse" />
+                    <span className="inline-block align-middle mr-1.5 h-2 w-2 rounded-full bg-[#eb6651] animate-pulse" />
                     Searching...
                   </>
                 ) : (
@@ -381,11 +343,7 @@ export function CompanySearchPage({
                   <Link
                     key={`${row.type}-${row.id}-${idx}`}
                     href={row.href as any}
-                    className="block rounded-xl border p-4 transition-all duration-150 hover:shadow-md hover:-translate-y-px"
-                    style={{
-                      background: "var(--card)",
-                      borderColor: "var(--border)",
-                    }}
+                    className="block rounded-xl border border-border bg-card p-4 shadow-sm transition-all duration-150 hover:shadow-md hover:-translate-y-px"
                     onClick={(e) => {
                       if (e.button === 1 || e.metaKey || e.ctrlKey) return;
                     }}
@@ -393,13 +351,13 @@ export function CompanySearchPage({
                     {/* Result header */}
                     <div className="mb-2 flex items-start justify-between gap-3">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <h3 className="m-0 text-base font-semibold" style={{ color: "var(--ink)" }}>
+                        <h3 className="m-0 text-base font-semibold text-foreground">
                           {row.name}
                         </h3>
                         <TypeBadge type={row.type} />
                       </div>
                       {row.status && (
-                        <span className="text-xs font-medium whitespace-nowrap" style={{ color: "var(--muted)" }}>
+                        <span className="text-xs font-medium whitespace-nowrap text-muted-foreground">
                           {row.status}
                         </span>
                       )}
@@ -409,20 +367,20 @@ export function CompanySearchPage({
                     <div className="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2">
                       {row.subtitle && (
                         <div className="flex flex-col gap-0.5">
-                          <span className="text-[0.6875rem] font-medium uppercase tracking-wider" style={{ color: "var(--muted)" }}>
+                          <span className="text-[0.6875rem] font-medium uppercase tracking-wider text-muted-foreground">
                             Details
                           </span>
-                          <span className="text-xs truncate" style={{ color: "var(--ink)" }}>
+                          <span className="text-xs truncate text-foreground">
                             {row.subtitle}
                           </span>
                         </div>
                       )}
                       {row.meta && (
                         <div className="flex flex-col gap-0.5">
-                          <span className="text-[0.6875rem] font-medium uppercase tracking-wider" style={{ color: "var(--muted)" }}>
+                          <span className="text-[0.6875rem] font-medium uppercase tracking-wider text-muted-foreground">
                             Info
                           </span>
-                          <span className="text-xs truncate" style={{ color: "var(--ink)" }}>
+                          <span className="text-xs truncate text-foreground">
                             {row.meta}
                           </span>
                         </div>
@@ -437,8 +395,7 @@ export function CompanySearchPage({
                 <div className="mt-6 flex items-center justify-center gap-2">
                   <button
                     type="button"
-                    className="rounded-md border px-3 py-1.5 text-xs font-medium disabled:opacity-30"
-                    style={{ borderColor: "var(--border)", color: "var(--ink)" }}
+                    className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-foreground disabled:opacity-30"
                     disabled={page <= 1}
                     onClick={() => goToPage(page - 1)}
                   >
@@ -452,13 +409,10 @@ export function CompanySearchPage({
                         type="button"
                         className={cn(
                           "rounded-md border px-3 py-1.5 text-xs font-medium",
-                          p === page ? "text-[var(--sh-coral)]" : "",
-                        )}
-                        style={
                           p === page
-                            ? { background: "var(--sh-coral-light)", borderColor: "var(--sh-coral)" }
-                            : { borderColor: "var(--border)", color: "var(--ink)" }
-                        }
+                            ? "bg-[#fef1ef] border-[#eb6651] text-[#eb6651]"
+                            : "border-border text-foreground",
+                        )}
                         onClick={() => goToPage(p)}
                       >
                         {p}
@@ -467,8 +421,7 @@ export function CompanySearchPage({
                   })}
                   <button
                     type="button"
-                    className="rounded-md border px-3 py-1.5 text-xs font-medium disabled:opacity-30"
-                    style={{ borderColor: "var(--border)", color: "var(--ink)" }}
+                    className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-foreground disabled:opacity-30"
                     disabled={page >= totalPages}
                     onClick={() => goToPage(page + 1)}
                   >
