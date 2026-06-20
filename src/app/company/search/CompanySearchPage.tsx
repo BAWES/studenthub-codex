@@ -212,16 +212,6 @@ export function CompanySearchPage({
 
   return (
     <div className="mx-auto max-w-7xl p-6">
-      {/* Search header */}
-      <div className="mb-6">
-        <h1 className="text-[1.625rem] font-bold text-foreground m-0">
-          Search
-        </h1>
-        <p className="text-sm text-muted-foreground m-0 mt-1">
-          Find companies, stores, and contacts — powered by Typesense
-        </p>
-      </div>
-
       {/* Search form */}
       <form className="mb-6" onSubmit={handleSubmit}>
         <div className="flex gap-2">

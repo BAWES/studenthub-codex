@@ -1,7 +1,7 @@
 import { ErrorBoundary } from "@/modules/workspace/ErrorBoundary";
 import { notFound } from "next/navigation";
 import { requireRoleCapability } from "@/modules/auth/session";
-import { DetailSection } from "@/modules/workspace/DetailPanels";
+import { FactPanel } from "@/modules/workspace/DetailPanels";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { getSalary } from "../actions";
 
@@ -42,7 +42,7 @@ export default async function AdminSalaryDetailPage({
           },
         ]}
       >
-        <DetailSection
+        <FactPanel
           title="Salary details"
           facts={[
             { label: "Staff name", value: staffName },
