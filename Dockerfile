@@ -59,9 +59,8 @@ COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 
-# Prisma schema (needed at runtime for generate)
+# Prisma schema (for runtime introspection if needed)
 COPY --from=builder /app/prisma ./prisma
-RUN npx prisma generate
 
 USER nextjs
 
