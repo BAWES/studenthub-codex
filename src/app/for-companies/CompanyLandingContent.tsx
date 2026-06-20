@@ -65,7 +65,7 @@ export default function CompanyLandingContent({
       <main
         id="main-content"
         className="min-h-svh w-[min(1320px,calc(100%_-_28px))] mx-auto grid content-start gap-6 pt-[18px] pb-[42px] max-sm:w-[min(calc(100%_-_20px),720px)]">
-      {/* ── Glass Navigation ── */}
+      {/* ── Navigation ── */}
       <nav className="sticky top-[3px] z-20 min-h-[62px] flex items-center justify-between gap-[14px] rounded-xl p-[2px] bg-white shadow-md border border-[var(--border)]" aria-label="StudentHub public navigation">
         <div className="w-full min-h-[58px] flex items-center justify-between gap-[14px] px-1">
           <Link
@@ -113,8 +113,8 @@ export default function CompanyLandingContent({
       <section
         className="shSection relative overflow-hidden rounded-xl p-[clamp(24px,5vw,48px)]"
         style={{
-          background: "var(--sh-glass-bg)",
-          border: "1px solid var(--sh-glass-border)",
+          background: "var(--surface)",
+          border: "1px solid var(--border)",
         }}
         aria-label="Hiring pain points and solutions"
       >
@@ -137,8 +137,8 @@ export default function CompanyLandingContent({
                 key={i}
                 className="rounded-xl p-5 flex flex-col gap-3 transition-transform duration-300 hover:-translate-y-[3px]"
                 style={{
-                  background: "var(--sh-glass-bg)",
-                  border: "1px solid var(--sh-glass-border)",
+                  background: "var(--card)",
+                  border: "1px solid var(--border)",
                 }}
               >
                 <div
@@ -174,8 +174,8 @@ export default function CompanyLandingContent({
       <section
         className="shSection rounded-xl p-[clamp(20px,4vw,40px)] grid grid-cols-2 sm:grid-cols-4 gap-6 text-center"
         style={{
-          background: "var(--sh-glass-bg)",
-          border: "1px solid var(--sh-glass-border)",
+          background: "var(--surface)",
+          border: "1px solid var(--border)",
         }}
         aria-label="Company stats"
       >
@@ -210,8 +210,8 @@ export default function CompanyLandingContent({
       <section
         className="shSection relative overflow-hidden rounded-xl p-[clamp(24px,5vw,60px)] text-center"
         style={{
-          background: "var(--sh-glass-bg)",
-          border: "1px solid var(--sh-glass-border)",
+          background: "var(--surface)",
+          border: "1px solid var(--border)",
         }}
         aria-label="Get started as a company"
       >
