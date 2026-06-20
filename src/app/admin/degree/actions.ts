@@ -1,14 +1,3 @@
-<<<<<<< HEAD
-// ---------------------------------------------------------------------------
-// Barrel re-export — delegates to module-level implementation
-// ---------------------------------------------------------------------------
-// All business logic lives in src/modules/admin/degree/actions.ts (which
-// has "use server"). This barrel re-exports so page consumers keep their
-// current import paths without duplicating the "use server" directive.
-// ---------------------------------------------------------------------------
-
-export * from "@/modules/admin/degree/actions";
-=======
 "use server";
 
 import { revalidatePath } from "next/cache";
@@ -111,4 +100,3 @@ export async function deleteDegree(degreeUuid: string) {
 
   revalidatePath("/admin/degree");
 }
->>>>>>> origin/main

@@ -32,11 +32,7 @@ export function IdRequestActions({
           {approvePending ? "Approving..." : "Approve request"}
         </Button>
         {approveState.error && (
-<<<<<<< HEAD
-          <p className="text-sm text-destructive mt-1">{approveState.error}</p>
-=======
           <p className="text-destructive text-sm mt-1">{approveState.error}</p>
->>>>>>> origin/main
         )}
       </form>
 
@@ -61,11 +57,7 @@ export function IdRequestActions({
               />
             </label>
             {rejectState.error && (
-<<<<<<< HEAD
-              <p className="text-sm text-destructive mt-1">{rejectState.error}</p>
-=======
               <p className="text-destructive text-sm mt-1">{rejectState.error}</p>
->>>>>>> origin/main
             )}
             <div className="flex gap-2 mt-2">
               <Button type="submit" variant="destructive" disabled={rejectPending}>
