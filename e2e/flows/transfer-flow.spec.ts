@@ -91,7 +91,7 @@ test.describe("Transfer flow — admin transfers", () => {
     await expect(heading).toBeVisible({ timeout: 10000 });
 
     // Finance workflow intro section with the "Start with a transfer run" copy
-    const introSection = ctx.page.locator(".financeStart, .financePrimary");
+    const introSection = ctx.page.locator(".financeStart, .financePrimary").first();
     await expect(introSection).toBeVisible({ timeout: 10000 });
 
     // Data table renders — look for the title "Transfer Runs"

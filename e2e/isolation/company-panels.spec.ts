@@ -62,16 +62,18 @@ test.describe("Company workspace panel isolation", () => {
       await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
       assertNoReactErrors(ctx.errors);
 
-      // The panel should render its own heading
-      const heading = ctx.page.locator(`h1, h2, h3`).filter({ hasText: panel.heading }).first();
+      // The panel should render its own heading (exact match to avoid false positives)
+      const heading = ctx.page.getByRole('heading', { name: panel.heading, exact: true });
       await expect(heading).toBeVisible({ timeout: 10000 });
 
       // Verify no content from other panels leaks — heading texts from other
       // panels should NOT appear in the current panel viewport
       for (const other of panels) {
         if (other.label === panel.label) continue;
-        const main = ctx.page.locator("main, [role='main'], article, section").first();
-        const inMain = main.locator(`h1, h2, h3`).filter({ hasText: other.heading });
+        // Other panel headings may appear in sidebar nav (legitimate), so we
+        // assert they do NOT appear in the main content area of this panel
+        const main = ctx.page.locator("section.workspaceStage").first();
+        const inMain = main.getByRole('heading', { name: other.heading, exact: true });
         const inMainCount = await inMain.count();
         expect(inMainCount, `${panel.label} should not leak "${other.heading}" heading into its main content`)
           .toBe(0);
