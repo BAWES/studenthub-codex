@@ -3,7 +3,7 @@ export {
   getCandidateDocument,
   uploadCandidateDocument,
   deleteCandidateDocument,
-  getCandidateDocumentUrl,
+  getCandidateDocumentDownloadUrl,
 } from "./actions";
 
 export type {
