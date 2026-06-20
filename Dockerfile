@@ -38,7 +38,16 @@ RUN pnpm install --ignore-scripts --no-frozen-lockfile --config.minimum-release-
 
 COPY . .
 
+# Ensure public/ directory exists (needed for Docker COPY --from=builder step)
+RUN mkdir -p /app/public
+
+# Install chromium-bidi — playwright-core's bundled CDP dep needed at build time
+# (Next.js standalone trace requires it when traversing playwright-core)
+RUN pnpm add chromium-bidi --no-save
+
 # Generate Prisma client so the build can resolve types
+# DATABASE_URL placeholder needed — prisma generate may introspect
+ENV DATABASE_URL="mysql://placeholder:placeholder@localhost:3306/placeholder"
 RUN pnpm prisma generate
 
 # Build Next.js (outputs standalone + static)
@@ -55,11 +64,10 @@ RUN addgroup --system --gid 1001 nodejs && \
 
 WORKDIR /app
 
-# Copy standalone build output
+# Copy standalone build output — includes all required node_modules
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 
 # Prisma schema (for runtime introspection if needed)
 COPY --from=builder /app/prisma ./prisma
