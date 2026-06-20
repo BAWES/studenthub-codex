@@ -78,7 +78,7 @@ export function LoginForm() {
 
       {accounts.length > 0 ? (
         <section
-          className="grid gap-2 p-6 pt-0 border-t border-[var(--sh-glass-border)]"
+          className="grid gap-2 p-6 pt-0 border-t border-[var(--line)]"
           aria-label="Verified StudentHub accounts"
         >
           <div className="grid gap-0.5">
