@@ -4,6 +4,7 @@ export {
   uploadCandidateDocument,
   deleteCandidateDocument,
   getCandidateDocumentDownloadUrl,
+  getCandidateDocumentUrl,
 } from "./actions";
 
 export type {

@@ -6,8 +6,15 @@ import path from "node:path";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
-import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import {
+  uploadToS3,
+  deleteFromS3,
+  getS3DownloadUrl,
+  isS3Path,
+  toS3Key,
+  toS3StoredPath,
+  s3ConfigAvailable,
+} from "@/lib/s3";
 import { DOCUMENT_TYPES } from "./constants";
 import type { DocumentType } from "./constants";
 import {
@@ -50,9 +57,6 @@ const DOCUMENT_FIELD_MAP: Record<DocumentType, string> = {
   civilBack: "candidate_civil_photo_back",
 };
 
-// Upload configuration
-const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads", "candidates");
-
 const ALLOWED_TYPES: Record<string, { mime: string[]; ext: string[]; maxSize: number }> = {
   photo: {
     mime: ["image/jpeg", "image/png", "image/webp", "image/gif"],
@@ -86,48 +90,6 @@ const ALLOWED_TYPES: Record<string, { mime: string[]; ext: string[]; maxSize: nu
 };
 
 // ---------------------------------------------------------------------------
-// S3 client (lazy-initialized, supports MinIO via AWS_ENDPOINT_URL)
-// ---------------------------------------------------------------------------
-
-let s3Client: S3Client | null = null;
-
-function getS3Client(): S3Client {
-  if (!s3Client) {
-    const config: ConstructorParameters<typeof S3Client>[0] = {
-      region: process.env.AWS_TEMP_BUCKET_REGION ?? "",
-      credentials: {
-        accessKeyId: process.env.AWS_TEMP_ACCESS_KEY_ID ?? "",
-        secretAccessKey: process.env.AWS_TEMP_SECRET_ACCESS_KEY ?? "",
-      },
-    };
-
-    if (process.env.AWS_ENDPOINT_URL) {
-      config.endpoint = process.env.AWS_ENDPOINT_URL;
-    }
-
-    if (process.env.AWS_S3_FORCE_PATH_STYLE === "true") {
-      config.forcePathStyle = true;
-    }
-
-    s3Client = new S3Client(config);
-  }
-  return s3Client;
-}
-
-function s3ConfigAvailable(): boolean {
-  return !!(
-    process.env.AWS_TEMP_BUCKET_REGION &&
-    process.env.AWS_TEMP_ACCESS_KEY_ID &&
-    process.env.AWS_TEMP_SECRET_ACCESS_KEY &&
-    process.env.AWS_TEMP_BUCKET_NAME
-  );
-}
-
-function getBucketName(): string {
-  return process.env.AWS_TEMP_BUCKET_NAME ?? "";
-}
-
-// ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
@@ -138,10 +100,6 @@ function toDocumentItem(type: DocumentType, filePath: string | null): CandidateD
     filePath,
     fileUrl: filePath ? filePath : null,
   };
-}
-
-function isS3Key(filePath: string | null): boolean {
-  return !!filePath && !filePath.startsWith("/");
 }
 
 // ---------------------------------------------------------------------------
@@ -354,45 +312,37 @@ export async function uploadCandidateDocument(
   const useS3 = s3ConfigAvailable();
 
   try {
-    const buffer = Buffer.from(await file.arrayBuffer());
+    // Determine storage path
+    const ext = path.extname(file.name).toLowerCase();
     const filename = `${documentType}_${crypto.randomUUID()}${ext}`;
-    let publicPath: string;
-    let s3Key: string | undefined;
+    const relativeDir = path.join("uploads", "candidates", String(candidateId));
+    const relativePath = path.join(relativeDir, filename);
+    const buffer = Buffer.from(await file.arrayBuffer());
 
-    if (useS3) {
-      const s3ObjectKey = `candidates/${candidateId}/${filename}`;
-      const command = new PutObjectCommand({
-        Bucket: getBucketName(),
-        Key: s3ObjectKey,
-        Body: buffer,
-        ContentType: file.type || undefined,
-      });
-      await getS3Client().send(command);
+    let storedPath: string;
 
-      s3Key = s3ObjectKey;
-      publicPath = s3ObjectKey;
+    if (s3ConfigAvailable()) {
+      // Upload to S3/MinIO
+      await uploadToS3(relativePath, buffer, file.type || undefined);
+      storedPath = toS3StoredPath(relativePath);
     } else {
-      const dir = path.join(UPLOAD_DIR, String(candidateId));
-      await fs.mkdir(dir, { recursive: true });
-      const filepath = path.join(dir, filename);
-      await fs.writeFile(filepath, buffer);
-      publicPath = `/uploads/candidates/${candidateId}/${filename}`;
+      // Fallback: save to local disk
+      const fullDir = path.join(process.cwd(), "public", relativeDir);
+      await fs.mkdir(fullDir, { recursive: true });
+      await fs.writeFile(path.join(fullDir, filename), buffer);
+      storedPath = `/uploads/candidates/${candidateId}/${filename}`;
     }
 
     const field = DOCUMENT_FIELD_MAP[documentType];
     await prisma.candidate.update({
       where: { candidate_id: candidateId },
-      data: { [field]: publicPath },
+      data: { [field]: storedPath },
     });
 
     revalidatePath("/candidate");
     revalidatePath("/candidate/edit");
 
-    const result: UploadDocumentState = {
-      success: true,
-      filePath: publicPath,
-      s3Key: s3Key,
-    };
+    const result: UploadDocumentState = { success: true, filePath: storedPath };
 
     const outputParsed = uploadDocumentStateResultSchema.safeParse(result);
     if (!outputParsed.success) {
@@ -419,6 +369,29 @@ export async function uploadCandidateDocument(
 
     return result;
   }
+}
+
+// ---------------------------------------------------------------------------
+// URL resolver
+// ---------------------------------------------------------------------------
+
+/**
+ * Resolve the display/download URL for a candidate document.
+ * For S3-stored files, generates a presigned URL.
+ * For local files, returns the public path as-is.
+ * Returns null if the path is empty.
+ */
+export async function getCandidateDocumentUrl(
+  filePath: string | null,
+): Promise<string | null> {
+  if (!filePath) return null;
+
+  if (isS3Path(filePath)) {
+    return getS3DownloadUrl(toS3Key(filePath));
+  }
+
+  // Local file — serve directly from public/
+  return filePath;
 }
 
 // ---------------------------------------------------------------------------
@@ -495,22 +468,23 @@ export async function deleteCandidateDocument(
       data: { [field]: null },
     });
 
-    if (currentPath && isS3Key(currentPath) && s3ConfigAvailable()) {
-      try {
-        const deleteCommand = new DeleteObjectCommand({
-          Bucket: getBucketName(),
-          Key: currentPath,
-        });
-        await getS3Client().send(deleteCommand);
-      } catch {
-        // Object may already be gone
-      }
-    } else if (currentPath && currentPath.startsWith("/uploads/")) {
-      const filePath = path.join(process.cwd(), "public", currentPath);
-      try {
-        await fs.unlink(filePath);
-      } catch {
-        // File may already be gone
+    // Delete the file from disk or S3
+    if (currentPath) {
+      if (isS3Path(currentPath)) {
+        // Delete from S3/MinIO (best-effort)
+        try {
+          await deleteFromS3(toS3Key(currentPath));
+        } catch {
+          // Object may already be gone
+        }
+      } else if (currentPath.startsWith("/uploads/")) {
+        // Delete from local disk
+        const filePath = path.join(process.cwd(), "public", currentPath);
+        try {
+          await fs.unlink(filePath);
+        } catch {
+          // File may already be gone — that's fine
+        }
       }
     }
 
@@ -574,24 +548,14 @@ export async function getCandidateDocumentDownloadUrl(
 
   const filePath = (candidate as Record<string, unknown>)[field] as string | null;
 
-  if (!filePath || !isS3Key(filePath)) {
+  if (!filePath || !isS3Path(filePath)) {
     return null;
   }
 
-  const command = new GetObjectCommand({
-    Bucket: getBucketName(),
-    Key: filePath,
-  });
-
   try {
-    const downloadUrl = await getSignedUrl(getS3Client(), command, {
-      expiresIn: 900,
-    });
-
-    return {
-      downloadUrl,
-      key: filePath,
-    };
+    const downloadUrl = await getS3DownloadUrl(toS3Key(filePath));
+    if (!downloadUrl) return null;
+    return { downloadUrl, key: filePath };
   } catch {
     return null;
   }

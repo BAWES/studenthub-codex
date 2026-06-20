@@ -225,3 +225,56 @@ describe("ALLOWED_TYPES config", () => {
     }
   });
 });
+
+// ---------------------------------------------------------------------------
+// S3 path helpers (from @/lib/s3)
+// ---------------------------------------------------------------------------
+
+const S3_PREFIX = "s3://";
+
+function isS3Path(path: string): boolean {
+  return path.startsWith(S3_PREFIX);
+}
+
+function toS3Key(path: string): string {
+  return path.startsWith(S3_PREFIX) ? path.slice(S3_PREFIX.length) : path;
+}
+
+function toS3StoredPath(key: string): string {
+  return `${S3_PREFIX}${key}`;
+}
+
+describe("isS3Path", () => {
+  it("returns true for s3:// prefixed paths", () => {
+    expect(isS3Path("s3://uploads/candidates/42/photo_uuid.jpg")).toBe(true);
+  });
+
+  it("returns false for local paths", () => {
+    expect(isS3Path("/uploads/candidates/42/photo.jpg")).toBe(false);
+  });
+
+  it("returns false for null-like empty string", () => {
+    expect(isS3Path("")).toBe(false);
+  });
+});
+
+describe("toS3Key", () => {
+  it("strips s3:// prefix", () => {
+    expect(toS3Key("s3://uploads/candidates/42/photo.jpg")).toBe(
+      "uploads/candidates/42/photo.jpg",
+    );
+  });
+
+  it("returns path unchanged if no prefix", () => {
+    const p = "/uploads/candidates/42/photo.jpg";
+    expect(toS3Key(p)).toBe(p);
+  });
+});
+
+describe("toS3StoredPath", () => {
+  it("prefixes a raw key with s3://", () => {
+    expect(toS3StoredPath("uploads/candidates/42/photo.jpg")).toBe(
+      "s3://uploads/candidates/42/photo.jpg",
+    );
+  });
+});
