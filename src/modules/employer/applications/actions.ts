@@ -13,6 +13,7 @@ import {
   getApplicationDetailOutputSchema,
   updateEmployerApplicationStatusSchema,
   updateEmployerApplicationStatusOutputSchema,
+  employerApplicationListOutputSchema,
 } from "./schemas";
 import type {
   ListEmployerApplicationsInput,
@@ -20,6 +21,14 @@ import type {
   GetApplicationDetailInput,
   UpdateEmployerApplicationStatusInput,
 } from "./schemas";
+
+// ---------------------------------------------------------------------------
+// Output validation helper
+// ---------------------------------------------------------------------------
+
+function logOutputError(source: string, error: unknown): void {
+  console.error(`[modules/employer/applications] ${source} output validation failed:`, error);
+}
 
 // ---------------------------------------------------------------------------
 // Output type from the module-level action
@@ -60,8 +69,8 @@ export async function listEmployerApplications(
 
   const result = await listJobApplicationsByEmployer({ page, limit, status });
 
-  return {
-    success: true,
+  const output = {
+    success: true as const,
     applications: result.applications.map((app) => ({
       id: app.applicationId,
       jobTitle: app.jobTitle,
@@ -72,6 +81,14 @@ export async function listEmployerApplications(
     total: result.total,
     metrics: computeMetrics(result.applications),
   };
+
+  // Validate output shape
+  const validated = employerApplicationListOutputSchema.safeParse(output);
+  if (!validated.success) {
+    logOutputError("listEmployerApplications", validated.error.issues);
+  }
+
+  return output;
 }
 
 // ---------------------------------------------------------------------------
@@ -108,11 +125,11 @@ export async function getApplicationDetail(
   });
 
   if (!app) {
-    return { success: true, application: null };
+    return { success: true as const, application: null };
   }
 
-  return {
-    success: true,
+  const output = {
+    success: true as const,
     application: {
       applicationId: app.id,
       jobListingId: app.jobListingId,
@@ -126,6 +143,14 @@ export async function getApplicationDetail(
       updatedAt: app.updatedAt,
     },
   };
+
+  // Validate output shape
+  const validated = getApplicationDetailOutputSchema.safeParse(output);
+  if (!validated.success) {
+    logOutputError("getApplicationDetail", validated.error.issues);
+  }
+
+  return output;
 }
 
 function computeMetrics(
@@ -161,5 +186,13 @@ export async function updateApplicationStatus(
     throw new Error(parsed.error.issues[0]?.message ?? "Invalid input");
   }
 
-  return updateJobApplicationStatus(parsed.data);
+  const output = await updateJobApplicationStatus(parsed.data);
+
+  // Validate output shape
+  const validated = updateEmployerApplicationStatusOutputSchema.safeParse(output);
+  if (!validated.success) {
+    logOutputError("updateApplicationStatus", validated.error.issues);
+  }
+
+  return output;
 }
