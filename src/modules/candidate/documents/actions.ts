@@ -19,6 +19,7 @@ import {
   getCandidateDocument,
   uploadCandidateDocument,
   deleteCandidateDocument,
+  getCandidateDocumentDownloadUrl,
 } from "@/modules/candidates/documents";
 import type {
   CandidateDocumentItem,
@@ -99,6 +100,33 @@ export async function getDocument(
       getOutputParsed.error.issues,
     );
   }
+
+  return result;
+}
+
+// ---------------------------------------------------------------------------
+// getDocumentDownloadUrl
+// ---------------------------------------------------------------------------
+
+/**
+ * Generate a presigned S3 download URL for a candidate document.
+ * Returns null if S3 is not configured or the file is stored locally.
+ */
+export async function getDocumentDownloadUrl(
+  documentType: string,
+): Promise<{ downloadUrl: string; key: string } | null> {
+  const session = await requireRoleCapability("candidate", "candidate.read.own");
+
+  const parsed = getDocumentSchema.safeParse({ documentType });
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid document type");
+  }
+
+  const candidateId = Number(session.id);
+  const result = await getCandidateDocumentDownloadUrl({
+    candidateId,
+    documentType: parsed.data.documentType,
+  });
 
   return result;
 }
