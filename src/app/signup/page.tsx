@@ -1,8 +1,8 @@
-import { Shield, Sparkles } from "lucide-react";
 import { getSession } from "@/modules/auth/session";
 import { SignupForm } from "@/modules/auth/SignupForm";
 import { redirect } from "next/navigation";
 import type { Role } from "@/modules/auth/types";
+import { Briefcase, GraduationCap, Shield, Sparkles, Users } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -10,6 +10,26 @@ export const dynamic = "force-dynamic";
 // support self-registration; staff, admin, and inspector roles show a
 // contextual message in SignupForm guiding users to request access.
 const VALID_ROLES: Role[] = ["candidate", "company", "staff", "admin", "inspector"];
+
+const BRAND_COPY = {
+  headline: "Your career starts here",
+  subheadline:
+    "Join thousands of students finding work and employers building their teams.",
+  features: [
+    {
+      icon: GraduationCap,
+      text: "Staff recruiters match you to relevant opportunities",
+    },
+    {
+      icon: Briefcase,
+      text: "Track hours, invoices, and payments in one place",
+    },
+    {
+      icon: Users,
+      text: "Trusted by 50,000+ students and 1,500+ employers",
+    },
+  ],
+};
 
 export default async function SignupPage({
   searchParams,
