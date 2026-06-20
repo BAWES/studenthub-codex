@@ -37,7 +37,7 @@ export function ForgotPasswordForm() {
               type="submit"
               disabled={pending}
               className="shLoginCTA"
-              style={{ background: "transparent", border: "1px solid var(--sh-glass-border)", color: "var(--ink)" }}
+              style={{ background: "transparent", border: "1px solid var(--line)", color: "var(--ink)" }}
             >
               {pending ? "Sending..." : "Resend link"}
             </button>
