@@ -28,8 +28,7 @@ export function AdminDashboardContent({ session, data }: Props) {
       {/* ── Request Pipeline Status ── */}
       <section className="mb-6">
         <div
-          className="rounded-lg border p-5"
-          style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+          className="rounded-lg border border-border bg-card p-5"
         >
           <div className="mb-1 text-xs font-medium uppercase tracking-wider text-muted-foreground">
             Pipeline
@@ -41,7 +40,7 @@ export function AdminDashboardContent({ session, data }: Props) {
           {statusMix.length > 0 ? (
             <div className="space-y-3">
               {/* Visual bar */}
-              <div className="flex h-2 w-full overflow-hidden rounded-full" style={{ background: "var(--border)" }}>
+              <div className="flex h-2 w-full overflow-hidden rounded-full bg-border">
                 {statusMix.map((status) => {
                   const total = statusMix.reduce((s, a) => s + a.value, 0);
                   const pct = total > 0 ? (status.value / total) * 100 : 0;
@@ -65,11 +64,10 @@ export function AdminDashboardContent({ session, data }: Props) {
                 {statusMix.map((status) => (
                   <div
                     key={status.label}
-                    className="flex items-center justify-between rounded-md px-3 py-2 text-sm"
-                    style={{ background: "var(--hover)" }}
+                    className="flex items-center justify-between rounded-md px-3 py-2 text-sm bg-[var(--hover)]"
                   >
                     <span className="text-foreground">{status.label}</span>
-                    <strong style={{ color: "var(--accent)" }}>{status.value}</strong>
+                    <strong className="text-[var(--accent)]">{status.value}</strong>
                   </div>
                 ))}
               </div>
@@ -84,8 +82,7 @@ export function AdminDashboardContent({ session, data }: Props) {
       {prMergeMetrics.length > 0 && (
         <section className="mb-6">
           <div
-            className="rounded-lg border p-5"
-            style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+            className="rounded-lg border border-border bg-card p-5"
           >
             <div className="mb-1 text-xs font-medium uppercase tracking-wider text-muted-foreground">
               Engineering
@@ -98,11 +95,10 @@ export function AdminDashboardContent({ session, data }: Props) {
               {prMergeMetrics.map((metric, idx) => (
                 <div
                   key={metric.label}
-                  className="rounded-lg border p-3"
-                  style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+                  className="rounded-lg border border-border bg-card p-3"
                 >
                   <div className="text-xs text-muted-foreground">{metric.label}</div>
-                  <div className="mt-1 text-lg font-bold" style={{ color: "var(--accent)" }}>{metric.value}</div>
+                  <div className="mt-1 text-lg font-bold text-[var(--accent)]">{metric.value}</div>
                   {metric.note && (
                     <div className="mt-0.5 text-xs text-muted-foreground">{metric.note}</div>
                   )}
