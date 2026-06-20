@@ -82,7 +82,7 @@ export function AdminInvoicesTable({ session, invoices }: Props) {
             key: "invoice_id",
             label: "ID",
             render: (row) => (
-              <span className="text-sm font-mono" style={{ color: "var(--muted)" }}>
+              <span className="text-sm font-mono text-muted-foreground">
                 #{row.invoice_id}
               </span>
             ),
@@ -91,7 +91,7 @@ export function AdminInvoicesTable({ session, invoices }: Props) {
             key: "company_name",
             label: "Company",
             render: (row) => (
-              <span className="text-sm" style={{ color: "var(--ink)" }}>
+              <span className="text-sm text-foreground">
                 {row.company_name ?? "—"}
               </span>
             ),
@@ -102,7 +102,7 @@ export function AdminInvoicesTable({ session, invoices }: Props) {
             render: (row) => {
               const d = row.invoice_date ? new Date(row.invoice_date) : null;
               return (
-                <span className="text-sm" style={{ color: "var(--ink)" }}>
+                <span className="text-sm text-foreground">
                   {d ? d.toLocaleDateString() : "—"}
                 </span>
               );
@@ -144,7 +144,7 @@ export function AdminInvoicesTable({ session, invoices }: Props) {
             key: "total",
             label: "Total",
             render: (row) => (
-              <span className="text-sm font-medium" style={{ color: "var(--ink)" }}>
+              <span className="text-sm font-medium text-foreground">
                 {row.total ? `${parseFloat(row.total).toFixed(3)}` : "—"}{" "}
                 {row.currency_code ?? ""}
               </span>
@@ -156,8 +156,7 @@ export function AdminInvoicesTable({ session, invoices }: Props) {
             render: (row) => (
               <button
                 type="button"
-                className="text-xs px-2 py-1 rounded hover:bg-red-500/10"
-                style={{ color: "var(--sh-error)" }}
+                className="text-xs px-2 py-1 rounded hover:bg-red-500/10 text-destructive"
                 onClick={() => handleDelete(row)}
               >
                 Delete

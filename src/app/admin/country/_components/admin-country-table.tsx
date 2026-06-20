@@ -67,6 +67,7 @@ export function AdminCountryTable({ session, countries }: Props) {
               editingId === row.country_id ? null : (
                 <span className="text-sm text-foreground">
                   {row.country_name_ar ?? "—"}
+                </span>
               ),
           },
           {
@@ -114,8 +115,7 @@ export function AdminCountryTable({ session, countries }: Props) {
               editingId !== row.country_id ? (
                 <button
                   type="button"
-                  className="text-xs px-2 py-1 rounded hover:bg-red-500/10"
-                  className="text-destructive"
+                  className="text-xs px-2 py-1 rounded text-destructive hover:bg-red-500/10"
                   onClick={async () => {
                     if (confirm(`Delete country "${row.country_name_en}"?`)) {
                       const result = await deleteCountry(row.country_id);
@@ -175,49 +175,41 @@ function CreateCountryForm({ onSuccess }: { onSuccess: () => void }) {
       <div className="grid gap-1">
         <label className="text-xs font-medium text-muted-foreground">Name (EN) *</label>
         <input name="countryNameEn" required maxLength={100} placeholder="e.g. Kuwait"
-          className="h-9 rounded-lg px-3 text-sm border w-36"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }} />
+          className="h-9 rounded-lg px-3 text-sm border w-36 bg-card border-border text-foreground" />
       </div>
       <div className="grid gap-1">
         <label className="text-xs font-medium text-muted-foreground">Name (AR)</label>
         <input name="countryNameAr" maxLength={100} placeholder="الكويت"
-          className="h-9 rounded-lg px-3 text-sm border w-36"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }} />
+          className="h-9 rounded-lg px-3 text-sm border w-36 bg-card border-border text-foreground" />
       </div>
       <div className="grid gap-1">
         <label className="text-xs font-medium text-muted-foreground">Nationality (EN) *</label>
         <input name="nationalityNameEn" required maxLength={100} placeholder="e.g. Kuwaiti"
-          className="h-9 rounded-lg px-3 text-sm border w-36"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }} />
+          className="h-9 rounded-lg px-3 text-sm border w-36 bg-card border-border text-foreground" />
       </div>
       <div className="grid gap-1">
         <label className="text-xs font-medium text-muted-foreground">ISO</label>
         <input name="iso" maxLength={3} placeholder="KWT"
-          className="h-9 rounded-lg px-3 text-sm border w-16"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }} />
+          className="h-9 rounded-lg px-3 text-sm border w-16 bg-card border-border text-foreground" />
       </div>
       <div className="grid gap-1">
         <label className="text-xs font-medium text-muted-foreground">Code</label>
         <input name="countryCode" type="number" placeholder="965"
-          className="h-9 rounded-lg px-3 text-sm border w-20"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }} />
+          className="h-9 rounded-lg px-3 text-sm border w-20 bg-card border-border text-foreground" />
       </div>
       <div className="grid gap-1">
         <label className="text-xs font-medium text-muted-foreground">Currency</label>
         <input name="currencyCode" maxLength={3} placeholder="KWD"
-          className="h-9 rounded-lg px-3 text-sm border w-16"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }} />
+          className="h-9 rounded-lg px-3 text-sm border w-16 bg-card border-border text-foreground" />
       </div>
       <div className="grid gap-1">
         <label className="text-xs font-medium text-muted-foreground">Emoji</label>
         <input name="emoji" maxLength={255} placeholder="🇰🇼"
-          className="h-9 rounded-lg px-3 text-sm border w-16"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }} />
+          className="h-9 rounded-lg px-3 text-sm border w-16 bg-card border-border text-foreground" />
       </div>
       <button
         type="submit" disabled={pending}
-        className="h-9 rounded-lg px-4 text-sm font-semibold"
-        className="bg-primary text-primary-foreground"
+        className="h-9 rounded-lg px-4 text-sm font-semibold bg-primary text-primary-foreground"
       >
         {pending ? "Adding..." : "Add"}
       </button>
@@ -265,29 +257,21 @@ function EditCountryForm({
   return (
     <form action={action} className="flex items-center gap-2 flex-wrap">
       <input name="countryNameEn" defaultValue={row.country_name_en} required maxLength={100}
-        className="h-8 rounded px-2 text-sm border w-32"
-        style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }} />
+        className="h-8 rounded px-2 text-sm border w-32 bg-card border-border text-foreground" />
       <input name="countryNameAr" defaultValue={row.country_name_ar ?? ""} maxLength={100}
-        className="h-8 rounded px-2 text-sm border w-32"
-        style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }} />
+        className="h-8 rounded px-2 text-sm border w-32 bg-card border-border text-foreground" />
       <input name="nationalityNameEn" defaultValue={row.country_nationality_name_en} required maxLength={100}
-        className="h-8 rounded px-2 text-sm border w-32"
-        style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }} />
+        className="h-8 rounded px-2 text-sm border w-32 bg-card border-border text-foreground" />
       <input name="iso" defaultValue={row.iso ?? ""} maxLength={3}
-        className="h-8 rounded px-2 text-sm border w-14"
-        style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }} />
+        className="h-8 rounded px-2 text-sm border w-14 bg-card border-border text-foreground" />
       <input name="emoji" defaultValue={row.emoji ?? ""} maxLength={255}
-        className="h-8 rounded px-2 text-sm border w-14"
-        style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }} />
+        className="h-8 rounded px-2 text-sm border w-14 bg-card border-border text-foreground" />
       <input name="countryCode" type="number" defaultValue={row.country_code ?? ""}
-        className="h-8 rounded px-2 text-sm border w-16"
-        style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }} />
+        className="h-8 rounded px-2 text-sm border w-16 bg-card border-border text-foreground" />
       <input name="currencyCode" defaultValue={row.currency_code ?? ""} maxLength={3}
-        className="h-8 rounded px-2 text-sm border w-14"
-        style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }} />
+        className="h-8 rounded px-2 text-sm border w-14 bg-card border-border text-foreground" />
       <button type="submit" disabled={pending}
-        className="h-8 rounded px-3 text-xs font-semibold"
-        className="bg-primary text-primary-foreground">
+        className="h-8 rounded px-3 text-xs font-semibold bg-primary text-primary-foreground">
         {pending ? "..." : "Save"}
       </button>
       <button type="button" onClick={onCancel}
