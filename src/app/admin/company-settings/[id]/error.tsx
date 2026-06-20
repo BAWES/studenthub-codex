@@ -20,8 +20,7 @@ export default function Error({
         <p className="text-sm mb-4">Failed to load company settings.</p>
         <button
           onClick={() => reset()}
-          className="rounded-lg px-4 py-2 text-sm font-semibold text-white"
-          className="bg-primary text-primary-foreground"
+          className="rounded-lg px-4 py-2 text-sm font-semibold text-white bg-primary text-primary-foreground"
         >
           Try again
         </button>
