@@ -12,6 +12,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const SH_BLUE = "#1f73b7";
 const SH_CORAL = "#eb6651";
@@ -125,17 +126,15 @@ export default function EmployerSection({ className }: EmployerSectionProps) {
           return (
             <div
               key={feat.title}
-              className="group rounded-xl p-5 shLandingCardHover"
-              style={{
-                backgroundColor: "var(--surface)",
-                border: "1px solid var(--border)",
-                opacity: isVisible ? 1 : 0,
-                transform: isVisible
-                  ? "translateY(0)"
-                  : "translateY(12px)",
-                transition: `opacity 400ms ease, transform 400ms cubic-bezier(0.16, 1, 0.3, 1)`,
-                transitionDelay: `${i * 80}ms`,
-              }}
+              className={cn(
+                "group rounded-xl p-5 shLandingCardHover",
+                "border border-border",
+                "transition-all duration-[400ms] ease-out",
+                isVisible
+                  ? "opacity-100 translate-y-0"
+                  : "opacity-0 translate-y-3"
+              )}
+              style={{ transitionDelay: `${i * 80}ms` }}
             >
               {/* Icon */}
               <div
@@ -148,26 +147,17 @@ export default function EmployerSection({ className }: EmployerSectionProps) {
                 <Icon className="size-5" aria-hidden="true" />
               </div>
 
-              <strong
-                className="block text-sm mb-1.5 tracking-tight"
-                style={{ color: "var(--ink)" }}
-              >
+              <strong className="block text-sm mb-1.5 tracking-tight text-foreground">
                 {feat.title}
               </strong>
-              <p
-                className="text-xs leading-relaxed m-0"
-                style={{ color: "var(--muted)" }}
-              >
+              <p className="text-xs leading-relaxed m-0 text-muted-foreground">
                 {feat.body}
               </p>
 
               {/* Stat */}
               <div
-                className="mt-3 pt-3 text-[11px] font-semibold flex items-center gap-1.5"
-                style={{
-                  color: SH_BLUE,
-                  borderTop: "1px solid var(--border)",
-                }}
+                className="mt-3 pt-3 text-[11px] font-semibold flex items-center gap-1.5 border-t border-border"
+                style={{ color: SH_BLUE }}
               >
                 <Sparkles className="size-3" />
                 {feat.stat}
@@ -179,16 +169,16 @@ export default function EmployerSection({ className }: EmployerSectionProps) {
 
       {/* Employer CTA */}
       <div className="text-center mt-8">
-        <a
-          href="/signup?role=company"
-          className="shLandingBtnPrimary"
+        <Button
+          asChild
+          className="shadow-lg"
           style={{
             backgroundColor: SH_CORAL,
             boxShadow: `0 4px 14px ${SH_CORAL}40`,
           }}
         >
-          Start hiring today
-        </a>
+          <a href="/signup?role=company">Start hiring today</a>
+        </Button>
       </div>
     </section>
   );

@@ -207,10 +207,7 @@ export default function PricingCard({ persona = "candidate", className }: Pricin
             ? "Completely free for students. Always."
             : "Plans that scale with your team."}
         </h2>
-        <p
-          className="max-w-[520px] mx-auto mt-2 leading-relaxed"
-          style={{ color: "var(--muted)" }}
-        >
+        <p className="max-w-[520px] mx-auto mt-2 leading-relaxed text-muted-foreground">
           {persona === "candidate"
             ? "Registration is completely free for students. No hidden fees, no subscriptions — ever."
             : "From single openings to enterprise compliance — we have a plan for every stage."}
@@ -295,25 +292,25 @@ export default function PricingCard({ persona = "candidate", className }: Pricin
               )}
 
               {/* Tier name & description */}
-              <strong className="text-lg" style={{ color: "var(--ink)" }}>
+              <strong className="text-lg text-foreground">
                 {tier.name}
               </strong>
-              <p className="text-xs mt-1 mb-4" style={{ color: "var(--muted)" }}>
+              <p className="text-xs mt-1 mb-4 text-muted-foreground">
                 {tier.description}
               </p>
 
               {/* Price */}
               <div className="mb-5">
                 {isEnterprise ? (
-                  <strong className="text-2xl" style={{ color: "var(--ink)" }}>
+                  <strong className="text-2xl text-foreground">
                     Custom
                   </strong>
                 ) : (
                   <>
-                    <span className="text-4xl font-black" style={{ color: "var(--ink)" }}>
+                    <span className="text-4xl font-black text-foreground">
                       £{price}
                     </span>
-                    <span className="text-sm ml-1" style={{ color: "var(--muted)" }}>
+                    <span className="text-sm ml-1 text-muted-foreground">
                       /{annual ? "year" : "month"}
                     </span>
                     {price > 0 && annual && (
@@ -328,8 +325,8 @@ export default function PricingCard({ persona = "candidate", className }: Pricin
               {/* Features */}
               <ul className="grid gap-2 mb-6 flex-1">
                 {tier.features.map((f) => (
-                  <li key={f} className="flex items-start gap-2 text-sm" style={{ color: "var(--ink)" }}>
-                    <Check className="size-4 mt-0.5 shrink-0" style={{ color: "#24835b" }} />
+                  <li key={f} className="flex items-start gap-2 text-sm text-foreground">
+                    <Check className="size-4 mt-0.5 shrink-0 text-[#24835b]" />
                      {f}
                   </li>
                 ))}
