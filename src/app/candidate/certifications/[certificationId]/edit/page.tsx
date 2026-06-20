@@ -15,7 +15,10 @@ export default async function CandidateCertificationEditPage({
   const session = await requireRoleCapability("candidate", "candidate.profile.edit");
   const { certificationId } = await params;
 
-  const certification = await getCandidateCertification(Number(certificationId));
+  const id = Number(certificationId);
+  if (isNaN(id)) notFound();
+
+  const certification = await getCandidateCertification(id);
   if (!certification) {
     notFound();
   }

@@ -14,7 +14,10 @@ export default async function CandidateExperienceEditPage({
   const session = await requireRoleCapability("candidate", "candidate.profile.edit");
   const { experienceId } = await params;
 
-  const item = await getExperienceEntry(Number(experienceId));
+  const id = Number(experienceId);
+  if (isNaN(id)) notFound();
+
+  const item = await getExperienceEntry(id);
   if (!item) {
     notFound();
   }
