@@ -34,27 +34,6 @@ export default function CandidateDetailLoading() {
           </div>
         </CardContent>
       </Card>
-
-      {/* Lower cards skeleton */}
-      <div className="grid grid-cols-2 gap-4">
-        {[1, 2].map((col) => (
-          <Card key={col}>
-            <CardHeader>
-              <CardTitle className="h-5 w-32 rounded bg-muted animate-pulse">&nbsp;</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="flex justify-between">
-                    <div className="h-3 w-20 rounded bg-muted animate-pulse" />
-                    <div className="h-3 w-28 rounded bg-muted animate-pulse" />
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
     </div>
   );
 }
