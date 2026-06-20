@@ -20,6 +20,7 @@ const mockGetTypesenseClient = vi.hoisted(() => vi.fn(() => ({
 
 vi.mock("@/lib/typesense", () => ({
   getTypesenseClient: mockGetTypesenseClient,
+  isTypesenseAvailable: vi.fn().mockResolvedValue(true),
   CANDIDATES_COLLECTION: "candidates",
 }));
 

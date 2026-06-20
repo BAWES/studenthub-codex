@@ -8,7 +8,37 @@ const TYPESENSE_API_KEY = typeof process !== "undefined" ? (process.env.TYPESENS
 
 const globalForTypesense = globalThis as unknown as {
   typesense?: TypesenseClient;
+  typesenseAvailable?: boolean | null;
+  typesenseCheckedAt?: number;
 };
+
+const TYPESENSE_HEALTH_CACHE_TTL_MS = 60_000;
+
+/**
+ * Quick check if Typesense is reachable. Caches result for 60s to avoid
+ * hammering the connection timeout on every SSR request when Typesense is
+ * simply not running (e.g. CI, local dev with no local Typesense).
+ */
+export async function isTypesenseAvailable(): Promise<boolean> {
+  const now = Date.now();
+  if (
+    globalForTypesense.typesenseCheckedAt &&
+    now - globalForTypesense.typesenseCheckedAt < TYPESENSE_HEALTH_CACHE_TTL_MS &&
+    globalForTypesense.typesenseAvailable !== null
+  ) {
+    return globalForTypesense.typesenseAvailable as boolean;
+  }
+
+  try {
+    const client = getTypesenseClient();
+    const health = await client.health.retrieve();
+    globalForTypesense.typesenseAvailable = Boolean(health?.ok);
+  } catch {
+    globalForTypesense.typesenseAvailable = false;
+  }
+  globalForTypesense.typesenseCheckedAt = now;
+  return globalForTypesense.typesenseAvailable as boolean;
+}
 
 export function getTypesenseClient(): TypesenseClient {
   if (!globalForTypesense.typesense) {
@@ -21,7 +51,7 @@ export function getTypesenseClient(): TypesenseClient {
         },
       ],
       apiKey: TYPESENSE_API_KEY,
-      connectionTimeoutSeconds: 5,
+      connectionTimeoutSeconds: 1,
     });
   }
   return globalForTypesense.typesense;
