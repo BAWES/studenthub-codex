@@ -14,9 +14,6 @@ import {
 import type { LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-const SH_BLUE = "#1f73b7";
-const SH_CORAL = "#eb6651";
-
 // ── Feature definitions ───────────────────────────────────────
 
 interface EmployerFeature {
@@ -100,13 +97,7 @@ export default function EmployerSection({ className }: EmployerSectionProps) {
       aria-label="For employers"
     >
       <div className="text-center mb-8 md:mb-10">
-        <span
-          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold tracking-wider uppercase"
-          style={{
-            color: SH_CORAL,
-            backgroundColor: `${SH_CORAL}12`,
-          }}
-        >
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold tracking-wider uppercase text-[#eb6651] bg-[#eb6651]/10">
           For employers
         </span>
         <h2 className="shLandingSectionTitle mt-3">
@@ -128,7 +119,7 @@ export default function EmployerSection({ className }: EmployerSectionProps) {
               key={feat.title}
               className={cn(
                 "group rounded-xl p-5 shLandingCardHover",
-                "border border-border",
+                "border border-border bg-card",
                 "transition-all duration-[400ms] ease-out",
                 isVisible
                   ? "opacity-100 translate-y-0"
@@ -137,13 +128,7 @@ export default function EmployerSection({ className }: EmployerSectionProps) {
               style={{ transitionDelay: `${i * 80}ms` }}
             >
               {/* Icon */}
-              <div
-                className="size-10 rounded-lg flex items-center justify-center mb-4 transition-transform duration-300 group-hover:scale-110"
-                style={{
-                  backgroundColor: `${SH_BLUE}10`,
-                  color: SH_BLUE,
-                }}
-              >
+              <div className="size-10 rounded-lg flex items-center justify-center mb-4 transition-transform duration-300 group-hover:scale-110 bg-[#1f73b7]/10 text-[#1f73b7]">
                 <Icon className="size-5" aria-hidden="true" />
               </div>
 
@@ -155,10 +140,7 @@ export default function EmployerSection({ className }: EmployerSectionProps) {
               </p>
 
               {/* Stat */}
-              <div
-                className="mt-3 pt-3 text-[11px] font-semibold flex items-center gap-1.5 border-t border-border"
-                style={{ color: SH_BLUE }}
-              >
+              <div className="mt-3 pt-3 text-[11px] font-semibold flex items-center gap-1.5 border-t border-border text-[#1f73b7]">
                 <Sparkles className="size-3" />
                 {feat.stat}
               </div>
@@ -171,11 +153,7 @@ export default function EmployerSection({ className }: EmployerSectionProps) {
       <div className="text-center mt-8">
         <Button
           asChild
-          className="shadow-lg"
-          style={{
-            backgroundColor: SH_CORAL,
-            boxShadow: `0 4px 14px ${SH_CORAL}40`,
-          }}
+          className="shadow-lg bg-[#eb6651] hover:bg-[#d45441]"
         >
           <a href="/signup?role=company">Start hiring today</a>
         </Button>

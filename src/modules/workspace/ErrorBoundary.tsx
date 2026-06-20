@@ -1,155 +1,98 @@
 "use client";
 
-import { Component, type ErrorInfo, type ReactNode } from "react";
+import type { ReactNode } from "react";
+import { Component } from "react";
 
-type Props = {
+// ── Props / State ─────────────────────────────────────────────
+
+export interface ErrorBoundaryProps {
   children: ReactNode;
-  /** Custom fallback UI. When provided, the default error state is not shown. */
-  fallback?: ReactNode;
-  /** Callback invoked when the error boundary catches an error. */
-  onError?: (error: Error, errorInfo: ErrorInfo) => void;
-};
+  /** Optional label to qualify the error context */
+  label?: string;
+  /** Optional retry handler */
+  onRetry?: () => void;
+}
 
-type State = {
+interface ErrorBoundaryState {
   hasError: boolean;
   error: Error | null;
-};
+}
 
-/**
- * Shared error boundary for WorkspaceShell pages.
- *
- * Catches rendering errors in its subtree and displays a clean error state
- * matching the WorkspaceShell design, with a Try Again button and
- * dev-only error details.
- *
- * @example
- * ```tsx
- * <ErrorBoundary>
- *   <WorkspaceShell ...>
- *     <Dashboard />
- *   </WorkspaceShell>
- * </ErrorBoundary>
- * ```
- */
-export class ErrorBoundary extends Component<Props, State> {
-  constructor(props: Props) {
+// ── Component ────────────────────────────────────────────────
+
+export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false, error: null };
   }
 
-  static getDerivedStateFromError(error: Error): State {
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
     return { hasError: true, error };
   }
 
-  componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
-    // Log to console in all environments for debugging
-    console.error("[ErrorBoundary]", error, errorInfo);
-    this.props.onError?.(error, errorInfo);
-  }
-
-  private handleRetry = (): void => {
+  handleRetry = () => {
     this.setState({ hasError: false, error: null });
+    this.props.onRetry?.();
   };
 
-  render(): ReactNode {
-    if (this.state.hasError) {
-      if (this.props.fallback) {
-        return this.props.fallback;
-      }
+  render() {
+    if (!this.state.hasError) return this.props.children;
 
-      const isDev = process.env.NODE_ENV === "development";
-      const error = this.state.error;
-
-      return (
-        <section
-          className="workspaceError"
-          role="alert"
-          aria-live="assertive"
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "4rem 2rem",
-            gap: "1rem",
-            textAlign: "center",
-            minHeight: "300px",
-          }}
-        >
-          <span
-            aria-hidden="true"
-            style={{ fontSize: "2.5rem", lineHeight: 1 }}
-          >
-            ⚠️
-          </span>
-          <h2 style={{ margin: 0, fontSize: "1.25rem", fontWeight: 600 }}>
-            Something went wrong
-          </h2>
-          <p
-            style={{
-              margin: 0,
-              color: "var(--muted-foreground, #6b7280)",
-              maxWidth: "480px",
-              fontSize: "0.875rem",
-            }}
-          >
-            An unexpected error occurred while rendering this page. Please try
-            again, and if the problem persists contact support.
-          </p>
-          <button
-            type="button"
-            onClick={this.handleRetry}
-            style={{
-              marginTop: "0.5rem",
-              padding: "0.5rem 1.25rem",
-              borderRadius: "6px",
-              border: "1px solid var(--border, #e5e7eb)",
-              background: "var(--accent, #f3f4f6)",
-              color: "var(--accent-foreground, #111827)",
-              fontWeight: 500,
-              fontSize: "0.875rem",
-              cursor: "pointer",
-            }}
-          >
-            Try Again
-          </button>
-          {isDev && error && (
-            <details
-              style={{
-                marginTop: "1.5rem",
-                width: "100%",
-                maxWidth: "640px",
-                textAlign: "left",
-                fontSize: "0.8rem",
-                color: "var(--muted-foreground, #6b7280)",
-              }}
-            >
-              <summary style={{ cursor: "pointer", fontWeight: 500 }}>
-                Error details (dev only)
-              </summary>
-              <pre
-                style={{
-                  marginTop: "0.5rem",
-                  padding: "0.75rem",
-                  background: "var(--muted, #f9fafb)",
-                  borderRadius: "4px",
-                  overflow: "auto",
-                  fontSize: "0.75rem",
-                  lineHeight: 1.4,
-                  whiteSpace: "pre-wrap",
-                  wordBreak: "break-word",
-                }}
-              >
-                {error.name}: {error.message}
-                {"\n\n"}
-                {error.stack}
-              </pre>
-            </details>
-          )}
-        </section>
-      );
+    if (this.state.error?.message === "ROUTER_ABORT") {
+      return null;
     }
 
-    return this.props.children;
+    return <DefaultErrorFallback error={this.state.error} onRetry={this.handleRetry} />;
   }
+}
+
+// ── Default Fallback ─────────────────────────────────────────
+
+interface FallbackProps {
+  error: Error | null;
+  onRetry: () => void;
+}
+
+function DefaultErrorFallback({ error, onRetry }: FallbackProps) {
+  const isDev = process.env.NODE_ENV === "development";
+
+  return (
+    <section
+      className="flex flex-col items-center justify-center p-16 gap-4 text-center min-h-[300px]"
+      role="alert"
+      aria-live="assertive"
+    >
+      <span aria-hidden="true" className="text-[2.5rem] leading-none">
+        ⚠️
+      </span>
+      <h2 className="m-0 text-xl font-semibold">
+        Something went wrong
+      </h2>
+      <p className="m-0 text-muted-foreground max-w-[480px] text-sm">
+        An unexpected error occurred while rendering this page. Please try
+        again, and if the problem persists contact support.
+      </p>
+      <button
+        type="button"
+        onClick={onRetry}
+        className="mt-2 px-5 py-2 rounded-md border border-border bg-accent text-accent-foreground font-medium text-sm cursor-pointer"
+      >
+        Try Again
+      </button>
+      {isDev && error && (
+        <details
+          className="mt-6 w-full max-w-[640px] text-left text-xs text-muted-foreground"
+        >
+          <summary className="cursor-pointer font-medium text-sm">
+            Error details (dev only)
+          </summary>
+          <pre
+            className="mt-2 p-3 bg-muted rounded overflow-auto text-xs leading-relaxed whitespace-pre-wrap"
+          >
+            {error.stack || error.message}
+          </pre>
+        </details>
+      )}
+    </section>
+  );
 }
