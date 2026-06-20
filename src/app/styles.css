@@ -10947,10 +10947,9 @@ kbd {
 
 /* ════════════════════════════════════════════════════════════════════
    Login Page — StudentHub OS
-   "Sign in once. We'll open the right workspace."
-   Inspired by Stripe + Linear login — everything is glass, nothing
-   competes with the single CTA.
-   ════════════════════════════════════════════════════════════════════ */
+  Zendesk Coral brand side with animated gradient, solid form card on
+  the right. Clean, purposeful, no decoration. Single CTA focus.
+  ════════════════════════════════════════════════════════════════════ */
 
 /* Full-viewport login — brand on the left, form on the right */
 .shLoginRoot {
@@ -10990,23 +10989,23 @@ kbd {
 @keyframes shLoginDrift {
   0% {
     background:
-      radial-gradient(ellipse 90% 70% at 0% 100%, color-mix(in srgb, var(--blue) 20%, transparent) 0%, transparent 70%),
-      radial-gradient(ellipse 80% 60% at 70% 0%, color-mix(in srgb, var(--blue) 14%, transparent) 0%, transparent 60%),
-      radial-gradient(ellipse 60% 50% at 100% 80%, color-mix(in srgb, var(--ring) 10%, transparent) 0%, transparent 60%),
+      radial-gradient(ellipse 90% 70% at 0% 100%, color-mix(in srgb, var(--sh-coral) 18%, transparent) 0%, transparent 70%),
+      radial-gradient(ellipse 80% 60% at 70% 0%, color-mix(in srgb, var(--sh-coral) 12%, transparent) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 50% at 100% 80%, color-mix(in srgb, var(--ring) 8%, transparent) 0%, transparent 60%),
       var(--paper);
   }
   50% {
     background:
-      radial-gradient(ellipse 80% 60% at 20% 90%, color-mix(in srgb, var(--blue) 18%, transparent) 0%, transparent 65%),
-      radial-gradient(ellipse 85% 65% at 60% 10%, color-mix(in srgb, var(--ring) 12%, transparent) 0%, transparent 55%),
-      radial-gradient(ellipse 70% 50% at 90% 70%, color-mix(in srgb, var(--blue) 14%, transparent) 0%, transparent 60%),
+      radial-gradient(ellipse 80% 60% at 20% 90%, color-mix(in srgb, var(--sh-coral) 16%, transparent) 0%, transparent 65%),
+      radial-gradient(ellipse 85% 65% at 60% 10%, color-mix(in srgb, var(--ring) 10%, transparent) 0%, transparent 55%),
+      radial-gradient(ellipse 70% 50% at 90% 70%, color-mix(in srgb, var(--sh-coral) 10%, transparent) 0%, transparent 60%),
       var(--paper);
   }
   100% {
     background:
-      radial-gradient(ellipse 85% 65% at 15% 85%, color-mix(in srgb, var(--ring) 16%, transparent) 0%, transparent 60%),
-      radial-gradient(ellipse 75% 55% at 80% 15%, color-mix(in srgb, var(--blue) 18%, transparent) 0%, transparent 65%),
-      radial-gradient(ellipse 80% 60% at 45% 100%, color-mix(in srgb, var(--blue) 14%, transparent) 0%, transparent 55%),
+      radial-gradient(ellipse 85% 65% at 15% 85%, color-mix(in srgb, var(--ring) 12%, transparent) 0%, transparent 60%),
+      radial-gradient(ellipse 75% 55% at 80% 15%, color-mix(in srgb, var(--sh-coral) 14%, transparent) 0%, transparent 65%),
+      radial-gradient(ellipse 80% 60% at 45% 100%, color-mix(in srgb, var(--sh-coral) 12%, transparent) 0%, transparent 55%),
       var(--paper);
   }
 }
