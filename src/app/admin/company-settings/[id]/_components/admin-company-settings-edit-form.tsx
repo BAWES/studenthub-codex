@@ -4,6 +4,17 @@ import { useActionState, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { updateAdminCompanySettings } from "../../actions";
 import type { AdminCompanySettingsItem } from "../../schemas";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type Props = {
   settings: AdminCompanySettingsItem;
@@ -77,17 +88,12 @@ export function AdminCompanySettingsEditForm({ settings }: Props) {
   return (
     <section className="mt-6">
       {!expanded ? (
-        <button
-          type="button"
-          onClick={() => setExpanded(true)}
-          className="rounded-lg px-4 py-2 text-sm font-semibold"
-          style={{ background: "var(--sh-primary)", color: "#fff" }}
-        >
+        <Button type="button" onClick={() => setExpanded(true)}>
           Edit settings
-        </button>
+        </Button>
       ) : (
-        <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
-          <h3 className="text-sm font-semibold mb-3" style={{ color: "var(--ink)" }}>
+        <div className="rounded-lg border border-border bg-card p-5">
+          <h3 className="text-sm font-semibold mb-3 text-foreground">
             Edit {settings.company_name || `Company #${settings.company_id}`}
           </h3>
           <form
@@ -105,15 +111,13 @@ export function AdminCompanySettingsEditForm({ settings }: Props) {
               { name: "companyEmail", label: "Email", maxLength: 225 },
             ].map((field) => (
               <div className="grid gap-1" key={field.name}>
-                <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>
+                <Label className="text-xs text-muted-foreground">
                   {field.label}
-                </label>
-                <input
+                </Label>
+                <Input
                   name={field.name}
                   defaultValue={(settings as any)[camelToSnake(field.name)] ?? ""}
                   maxLength={field.maxLength}
-                  className="h-9 rounded-lg px-3 text-sm border"
-                  style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
                 />
               </div>
             ))}
@@ -123,13 +127,11 @@ export function AdminCompanySettingsEditForm({ settings }: Props) {
               const name = label === "Description (EN)" ? "companyDescriptionEn" : "companyDescriptionAr";
               return (
                 <div className="grid gap-1" key={name}>
-                  <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>{label}</label>
-                  <textarea
+                  <Label className="text-xs text-muted-foreground">{label}</Label>
+                  <Textarea
                     name={name}
                     defaultValue={(settings as any)[camelToSnake(name)] ?? ""}
                     rows={3}
-                    className="rounded-lg px-3 py-2 text-sm border resize-y"
-                    style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
                   />
                 </div>
               );
@@ -142,18 +144,16 @@ export function AdminCompanySettingsEditForm({ settings }: Props) {
               { name: "companyFollowupIntervalWeeks", label: "Followup interval (weeks)", min: 1, max: 52 },
             ].map((field) => (
               <div className="grid gap-1" key={field.name}>
-                <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>
+                <Label className="text-xs text-muted-foreground">
                   {field.label}
-                </label>
-                <input
+                </Label>
+                <Input
                   name={field.name}
                   type="number"
                   step={(field as any).step}
                   min={(field as any).min}
                   max={(field as any).max}
                   defaultValue={(settings as any)[camelToSnake(field.name)] ?? ""}
-                  className="h-9 rounded-lg px-3 text-sm border"
-                  style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
                 />
               </div>
             ))}
@@ -164,52 +164,43 @@ export function AdminCompanySettingsEditForm({ settings }: Props) {
               { name: "companyApprovedToHire", label: "Approved to hire" },
             ].map((field) => (
               <div className="grid gap-1" key={field.name}>
-                <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>{field.label}</label>
-                <select
+                <Label className="text-xs text-muted-foreground">{field.label}</Label>
+                <Select
                   name={field.name}
                   defaultValue={(settings as any)[camelToSnake(field.name)] == null ? "" : String((settings as any)[camelToSnake(field.name)])}
-                  className="h-9 rounded-lg px-3 text-sm border"
-                  style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
                 >
-                  <option value="">—</option>
-                  <option value="true">Yes</option>
-                  <option value="false">No</option>
-                </select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="—" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">—</SelectItem>
+                    <SelectItem value="true">Yes</SelectItem>
+                    <SelectItem value="false">No</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             ))}
 
             {/* Currency */}
             <div className="grid gap-1">
-              <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>Currency code</label>
-              <input
+              <Label className="text-xs text-muted-foreground">Currency code</Label>
+              <Input
                 name="currencyCode"
                 defaultValue={settings.currency_code || ""}
                 maxLength={3}
                 placeholder="KWD"
-                className="h-9 rounded-lg px-3 text-sm border"
-                style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
               />
             </div>
 
             <div className="col-span-full flex items-center gap-3 pt-2">
-              <button
-                type="submit"
-                disabled={pending}
-                className="h-9 rounded-lg px-4 text-sm font-semibold"
-                style={{ background: "var(--sh-primary)", color: "#fff" }}
-              >
+              <Button type="submit" disabled={pending}>
                 {pending ? "Saving..." : "Save changes"}
-              </button>
-              <button
-                type="button"
-                onClick={() => setExpanded(false)}
-                className="h-9 rounded-lg px-4 text-sm"
-                style={{ color: "var(--muted)" }}
-              >
+              </Button>
+              <Button type="button" variant="outline" onClick={() => setExpanded(false)}>
                 Cancel
-              </button>
+              </Button>
               {state?.error ? (
-                <p className="text-xs" style={{ color: "var(--sh-error)" }}>{state.error}</p>
+                <p className="text-xs text-destructive">{state.error}</p>
               ) : null}
             </div>
           </form>

@@ -4,9 +4,12 @@ import { useCallback, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { update } from "../actions";
 import type { CompanySettings, UpdateCompanySettingsInput } from "../schemas";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 export function CompanySettingsForm({
   companyId,
@@ -96,15 +99,9 @@ export function CompanySettingsForm({
       </div>
 
       {feedback && (
-        <div
-          className={`rounded-md px-3 py-2 text-xs ${
-            feedback.type === "success"
-              ? "bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-400"
-              : "bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-400"
-          }`}
-        >
-          {feedback.message}
-        </div>
+        <Alert variant={feedback.type === "success" ? "default" : "destructive"}>
+          <AlertDescription>{feedback.message}</AlertDescription>
+        </Alert>
       )}
 
       {/* Name & Identity */}
@@ -217,13 +214,13 @@ function TextareaField({
   return (
     <div className="flex flex-col gap-1.5">
       <Label htmlFor={name} className="text-xs text-muted-foreground">{label}</Label>
-      <textarea
+      <Textarea
         id={name}
         name={name}
         defaultValue={defaultValue}
         dir={dir}
         rows={3}
-        className="flex min-h-[60px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 resize-y"
+
       />
     </div>
   );
@@ -239,14 +236,9 @@ function CheckboxField({
   defaultChecked: boolean;
 }) {
   return (
-    <label className="flex items-center gap-2 cursor-pointer">
-      <input
-        type="checkbox"
-        name={name}
-        defaultChecked={defaultChecked}
-        className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-      />
-      <span className="text-xs text-foreground">{label}</span>
-    </label>
+    <div className="flex items-center gap-2">
+      <Checkbox id={name} name={name} defaultChecked={defaultChecked} />
+      <Label htmlFor={name} className="text-xs text-foreground cursor-pointer">{label}</Label>
+    </div>
   );
 }
