@@ -12,10 +12,6 @@ LABEL stage=base
 RUN apk add --no-cache libc6-compat
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
-# Disable pnpm minimum release age policy — prevents false positives on
-# legitimately recent package releases (e.g. @aws-sdk/* published same day)
-RUN pnpm config set minimum-release-age 0 --location project
-
 WORKDIR /app
 
 # ---------------------------------------------------------------------------
@@ -26,7 +22,9 @@ LABEL stage=deps
 
 COPY package.json pnpm-lock.yaml ./
 
-RUN pnpm install --frozen-lockfile --prod --ignore-scripts
+# minimumReleaseAge=0 disables pnpm 9's supply-chain check against recently-
+# published packages (e.g. @aws-sdk/* published the same day as build)
+RUN pnpm install --frozen-lockfile --config.minimumReleaseAge=0 --prod --ignore-scripts
 
 # ---------------------------------------------------------------------------
 # Stage 3: Build (full deps + build)
