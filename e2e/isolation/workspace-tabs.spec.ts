@@ -81,18 +81,22 @@ test.describe("WorkspaceOS tab system isolation", () => {
     await ctx.page.waitForLoadState("load");
     await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
 
-    // Click a sidebar navigation link to trigger tab creation
-    const navLinks = ctx.page.locator("a").or(ctx.page.locator("[data-nav-item]"));
-    const adminCandidateLink = navLinks.filter({ hasText: /candidates/i }).first();
+    // Click the workspace "+" tab button to open the menu, then select "Candidates"
+    const addTabButton = ctx.page.locator('[aria-label="Open new tab"]');
+    const addBtnVisible = await addTabButton.isVisible().catch(() => false);
+    if (addBtnVisible) {
+      await addTabButton.click();
+      await ctx.page.waitForTimeout(300);
+      const menuItem = ctx.page.locator('[role="menuitem"]').filter({ hasText: /candidates/i }).first();
+      if (await menuItem.isVisible().catch(() => false)) {
+        await menuItem.click();
+        await ctx.page.waitForLoadState("load");
 
-    if (await adminCandidateLink.isVisible()) {
-      await adminCandidateLink.click();
-      await ctx.page.waitForLoadState("load");
-
-      // Should have at least 2 tabs now (default + candidates)
-      const tabs = ctx.page.locator('[role="tab"]').or(ctx.page.locator("[data-tab-id]"));
-      const tabCount = await tabs.count();
-      expect(tabCount).toBeGreaterThanOrEqual(2);
+        // Should have at least 2 tabs now (default + candidates)
+        const tabs = ctx.page.locator('[role="tab"]').or(ctx.page.locator("[data-tab-id]"));
+        const tabCount = await tabs.count();
+        expect(tabCount).toBeGreaterThanOrEqual(2);
+      }
     }
 
     assertNoReactErrors(ctx.errors);
@@ -105,16 +109,21 @@ test.describe("WorkspaceOS tab system isolation", () => {
     await ctx.page.waitForLoadState("load");
     await expect(ctx.page.locator("body")).toBeVisible({ timeout: 15000 });
 
-    // Open a second tab by navigating
-    const navLinks = ctx.page.locator("a").first();
-    if (await navLinks.isVisible()) {
-      await navLinks.click();
-      await ctx.page.waitForLoadState("load");
+    // Open a second tab by clicking "+" and selecting from menu
+    const addBtn = ctx.page.locator('[aria-label="Open new tab"]');
+    if (await addBtn.isVisible().catch(() => false)) {
+      await addBtn.click();
+      await ctx.page.waitForTimeout(300);
+      const menuItem = ctx.page.locator('[role="menuitem"]').filter({ hasText: /candidates/i }).first();
+      if (await menuItem.isVisible().catch(() => false)) {
+        await menuItem.click();
+        await ctx.page.waitForLoadState("load");
+      }
     }
 
-    // Check for close buttons on tabs
+    // Check for close buttons on tabs — each non-home tab renders <button class="workspaceTabClose">
     const closeButtons = ctx.page
-      .locator('[role="tab"] button, [data-tab-close], [aria-label="close"], button:has(svg)')
+      .locator('[aria-label^="Close"], .workspaceTabClose')
       .first();
 
     const hasCloseButton = await closeButtons.isVisible().catch(() => false);
