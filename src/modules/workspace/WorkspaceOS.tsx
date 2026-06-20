@@ -330,7 +330,7 @@ export function WorkspaceOS({
             href="/app"
             aria-label="StudentHub app"
           >
-            <span className="inline-flex items-center justify-center w-7 h-7 rounded-md bg-[#eb6651] text-white text-[11px] font-bold shrink-0">SH</span>
+            <span className="inline-flex items-center justify-center w-7 h-7 rounded-md bg-primary text-white text-[11px] font-bold shrink-0">SH</span>
             <strong className="opacity-0 group-hover/rail:opacity-100 transition-opacity duration-300 delay-[80ms] text-sm font-semibold whitespace-nowrap">StudentHub</strong>
           </Link>
           <WorkspaceNavigation items={navItems} role={session.role} />
