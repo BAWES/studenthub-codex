@@ -9,13 +9,6 @@ type Props = {
   employerId: number | null;
 };
 
-const inputBase =
-  "w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-4 py-2.5 text-sm text-[var(--ink)] outline-none transition-colors duration-200 " +
-  "focus:border-[var(--sh-coral)] focus:ring-1 focus:ring-[var(--sh-coral)]/30";
-const textareaBase = `${inputBase} min-h-[120px] resize-y`;
-const textareaShort = `${inputBase} min-h-[80px] resize-y`;
-const selectBase = `${inputBase} cursor-pointer`;
-
 export function JobNewForm({ employerId }: Props) {
   const router = useRouter();
   const [title, setTitle] = useState("");
@@ -67,22 +60,35 @@ export function JobNewForm({ employerId }: Props) {
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
       {error && (
-        <div className="rounded-lg bg-[var(--error)]/10 border border-[var(--error)]/20 p-4 text-sm text-[var(--error)]">
+        <div className="rounded-lg border border-[var(--sh-coral-light)] bg-[#fef1ef] p-4 text-sm text-[#d45441]">
           {error}
         </div>
       )}
 
       {/* Title */}
       <div className="space-y-2">
-        <label htmlFor="title" className="text-sm font-medium text-[var(--ink)]">
-          Job Title <span className="text-[var(--error)]">*</span>
+        <label htmlFor="title" className="text-sm font-medium" style={{ color: "var(--ink)" }}>
+          Job Title <span style={{ color: "var(--sh-coral)" }}>*</span>
         </label>
         <input
           id="title"
           type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          className={inputBase}
+          className="w-full rounded-lg border px-4 py-2.5 text-sm outline-none transition-[border-color,box-shadow] duration-150"
+          style={{
+            borderColor: "var(--border)",
+            background: "var(--card)",
+            color: "var(--ink)",
+          }}
+          onFocus={(e) => {
+            e.currentTarget.style.borderColor = "var(--sh-coral)";
+            e.currentTarget.style.boxShadow = "0 0 0 3px rgba(235, 102, 81, 0.15)";
+          }}
+          onBlur={(e) => {
+            e.currentTarget.style.borderColor = "var(--border)";
+            e.currentTarget.style.boxShadow = "none";
+          }}
           placeholder="e.g. Software Engineer Intern"
           maxLength={255}
           required
@@ -92,14 +98,27 @@ export function JobNewForm({ employerId }: Props) {
 
       {/* Description */}
       <div className="space-y-2">
-        <label htmlFor="description" className="text-sm font-medium text-[var(--ink)]">
-          Description <span className="text-[var(--error)]">*</span>
+        <label htmlFor="description" className="text-sm font-medium" style={{ color: "var(--ink)" }}>
+          Description <span style={{ color: "var(--sh-coral)" }}>*</span>
         </label>
         <textarea
           id="description"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          className={textareaBase}
+          className="w-full rounded-lg border px-4 py-2.5 text-sm outline-none transition-[border-color,box-shadow] duration-150 min-h-[120px]"
+          style={{
+            borderColor: "var(--border)",
+            background: "var(--card)",
+            color: "var(--ink)",
+          }}
+          onFocus={(e) => {
+            e.currentTarget.style.borderColor = "var(--sh-coral)";
+            e.currentTarget.style.boxShadow = "0 0 0 3px rgba(235, 102, 81, 0.15)";
+          }}
+          onBlur={(e) => {
+            e.currentTarget.style.borderColor = "var(--border)";
+            e.currentTarget.style.boxShadow = "none";
+          }}
           placeholder="Describe the role, responsibilities, and day-to-day activities..."
           required
         />
@@ -107,14 +126,27 @@ export function JobNewForm({ employerId }: Props) {
 
       {/* Requirements */}
       <div className="space-y-2">
-        <label htmlFor="requirements" className="text-sm font-medium text-[var(--ink)]">
+        <label htmlFor="requirements" className="text-sm font-medium" style={{ color: "var(--ink)" }}>
           Requirements
         </label>
         <textarea
           id="requirements"
           value={requirements}
           onChange={(e) => setRequirements(e.target.value)}
-          className={textareaShort}
+          className="w-full rounded-lg border px-4 py-2.5 text-sm outline-none transition-[border-color,box-shadow] duration-150 min-h-[80px]"
+          style={{
+            borderColor: "var(--border)",
+            background: "var(--card)",
+            color: "var(--ink)",
+          }}
+          onFocus={(e) => {
+            e.currentTarget.style.borderColor = "var(--sh-coral)";
+            e.currentTarget.style.boxShadow = "0 0 0 3px rgba(235, 102, 81, 0.15)";
+          }}
+          onBlur={(e) => {
+            e.currentTarget.style.borderColor = "var(--border)";
+            e.currentTarget.style.boxShadow = "none";
+          }}
           placeholder="Required skills, experience, certifications..."
         />
       </div>
@@ -122,7 +154,7 @@ export function JobNewForm({ employerId }: Props) {
       {/* Location & Employment Type */}
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <label htmlFor="location" className="text-sm font-medium text-[var(--ink)]">
+          <label htmlFor="location" className="text-sm font-medium" style={{ color: "var(--ink)" }}>
             Location
           </label>
           <input
@@ -130,20 +162,46 @@ export function JobNewForm({ employerId }: Props) {
             type="text"
             value={location}
             onChange={(e) => setLocation(e.target.value)}
-            className={inputBase}
+            className="w-full rounded-lg border px-4 py-2.5 text-sm outline-none transition-[border-color,box-shadow] duration-150"
+            style={{
+              borderColor: "var(--border)",
+              background: "var(--card)",
+              color: "var(--ink)",
+            }}
+            onFocus={(e) => {
+              e.currentTarget.style.borderColor = "var(--sh-coral)";
+              e.currentTarget.style.boxShadow = "0 0 0 3px rgba(235, 102, 81, 0.15)";
+            }}
+            onBlur={(e) => {
+              e.currentTarget.style.borderColor = "var(--border)";
+              e.currentTarget.style.boxShadow = "none";
+            }}
             placeholder="Kuwait City"
           />
         </div>
 
         <div className="space-y-2">
-          <label htmlFor="employmentType" className="text-sm font-medium text-[var(--ink)]">
+          <label htmlFor="employmentType" className="text-sm font-medium" style={{ color: "var(--ink)" }}>
             Employment Type
           </label>
           <select
             id="employmentType"
             value={employmentType}
             onChange={(e) => setEmploymentType(e.target.value)}
-            className={selectBase}
+            className="w-full rounded-lg border px-4 py-2.5 text-sm outline-none transition-[border-color,box-shadow] duration-150"
+            style={{
+              borderColor: "var(--border)",
+              background: "var(--card)",
+              color: "var(--ink)",
+            }}
+            onFocus={(e) => {
+              e.currentTarget.style.borderColor = "var(--sh-coral)";
+              e.currentTarget.style.boxShadow = "0 0 0 3px rgba(235, 102, 81, 0.15)";
+            }}
+            onBlur={(e) => {
+              e.currentTarget.style.borderColor = "var(--border)";
+              e.currentTarget.style.boxShadow = "none";
+            }}
           >
             <option value="full-time">Full-time</option>
             <option value="part-time">Part-time</option>
@@ -156,7 +214,7 @@ export function JobNewForm({ employerId }: Props) {
 
       {/* Salary Range (KWD) */}
       <div className="space-y-2">
-        <label className="text-sm font-medium text-[var(--ink)]">Salary Range (KWD/month)</label>
+        <label className="text-sm font-medium" style={{ color: "var(--ink)" }}>Salary Range (KWD/month)</label>
         <div className="grid grid-cols-2 gap-4">
           <div>
             <input
@@ -164,7 +222,20 @@ export function JobNewForm({ employerId }: Props) {
               type="number"
               value={salaryMin}
               onChange={(e) => setSalaryMin(e.target.value)}
-              className={inputBase}
+              className="w-full rounded-lg border px-4 py-2.5 text-sm outline-none transition-[border-color,box-shadow] duration-150"
+              style={{
+                borderColor: "var(--border)",
+                background: "var(--card)",
+                color: "var(--ink)",
+              }}
+              onFocus={(e) => {
+                e.currentTarget.style.borderColor = "var(--sh-coral)";
+                e.currentTarget.style.boxShadow = "0 0 0 3px rgba(235, 102, 81, 0.15)";
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.borderColor = "var(--border)";
+                e.currentTarget.style.boxShadow = "none";
+              }}
               placeholder="Min"
               min={0}
             />
@@ -175,7 +246,20 @@ export function JobNewForm({ employerId }: Props) {
               type="number"
               value={salaryMax}
               onChange={(e) => setSalaryMax(e.target.value)}
-              className={inputBase}
+              className="w-full rounded-lg border px-4 py-2.5 text-sm outline-none transition-[border-color,box-shadow] duration-150"
+              style={{
+                borderColor: "var(--border)",
+                background: "var(--card)",
+                color: "var(--ink)",
+              }}
+              onFocus={(e) => {
+                e.currentTarget.style.borderColor = "var(--sh-coral)";
+                e.currentTarget.style.boxShadow = "0 0 0 3px rgba(235, 102, 81, 0.15)";
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.borderColor = "var(--border)";
+                e.currentTarget.style.boxShadow = "none";
+              }}
               placeholder="Max"
               min={0}
             />
@@ -185,15 +269,28 @@ export function JobNewForm({ employerId }: Props) {
 
       {/* Status */}
       <div className="space-y-2">
-        <label htmlFor="status" className="text-sm font-medium text-[var(--ink)]">
-          Status
-        </label>
-        <select
-          id="status"
-          value={status}
-          onChange={(e) => setStatus(e.target.value)}
-          className={selectBase}
-        >
+      <label htmlFor="status" className="text-sm font-medium" style={{ color: "var(--ink)" }}>
+        Status
+      </label>
+      <select
+        id="status"
+        value={status}
+        onChange={(e) => setStatus(e.target.value)}
+        className="w-full rounded-lg border px-4 py-2.5 text-sm outline-none transition-[border-color,box-shadow] duration-150"
+        style={{
+          borderColor: "var(--border)",
+          background: "var(--card)",
+          color: "var(--ink)",
+        }}
+        onFocus={(e) => {
+          e.currentTarget.style.borderColor = "var(--sh-coral)";
+          e.currentTarget.style.boxShadow = "0 0 0 3px rgba(235, 102, 81, 0.15)";
+        }}
+        onBlur={(e) => {
+          e.currentTarget.style.borderColor = "var(--border)";
+          e.currentTarget.style.boxShadow = "none";
+        }}
+      >
           <option value="active">Active (visible to candidates)</option>
           <option value="draft">Draft (not visible)</option>
         </select>

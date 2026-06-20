@@ -20,17 +20,6 @@ function parseSalaryRange(salaryRange: string | null): [string, string] {
   return [salaryRange.replace(/KWD\s*/g, ""), ""];
 }
 
-const inputActive =
-  "w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-4 py-2.5 text-sm text-[var(--ink)] outline-none transition-colors duration-200 " +
-  "focus:border-[var(--sh-coral)] focus:ring-1 focus:ring-[var(--sh-coral)]/30";
-const inputReadOnly =
-  "w-full rounded-lg border border-[var(--border)] bg-[var(--surface)]/50 px-4 py-2.5 text-sm text-[var(--muted)] cursor-not-allowed";
-const textareaActive = `${inputActive} min-h-[120px] resize-y`;
-const textareaShortActive = `${inputActive} min-h-[80px] resize-y`;
-const textareaReadOnly = `${inputReadOnly} min-h-[80px] cursor-not-allowed`;
-const selectActive = `${inputActive} cursor-pointer`;
-const selectReadOnly = `${inputReadOnly} cursor-not-allowed`;
-
 export function JobEditForm({ job, readOnly }: Props) {
   const router = useRouter();
   const [title, setTitle] = useState(job.title);
@@ -92,16 +81,36 @@ export function JobEditForm({ job, readOnly }: Props) {
     }
   }
 
-  const inputClass = readOnly ? inputReadOnly : inputActive;
+  const inputClass = readOnly
+    ? "w-full rounded-lg border px-4 py-2.5 text-sm opacity-60 cursor-not-allowed"
+    : "w-full rounded-lg border px-4 py-2.5 text-sm outline-none transition-[border-color,box-shadow] duration-150";
   const textareaClass = readOnly
-    ? "w-full rounded-lg border border-[var(--border)] bg-[var(--surface)]/50 px-4 py-2.5 text-sm text-[var(--muted)] cursor-not-allowed min-h-[120px]"
-    : textareaActive;
-  const selectClass = readOnly ? selectReadOnly : selectActive;
+    ? "w-full rounded-lg border px-4 py-2.5 text-sm opacity-60 cursor-not-allowed min-h-[80px]"
+    : "w-full rounded-lg border px-4 py-2.5 text-sm outline-none transition-[border-color,box-shadow] duration-150 min-h-[80px]";
+  const selectClass = readOnly
+    ? "w-full rounded-lg border px-4 py-2.5 text-sm opacity-60 cursor-not-allowed"
+    : "w-full rounded-lg border px-4 py-2.5 text-sm outline-none transition-[border-color,box-shadow] duration-150";
+
+  const inputStyle: React.CSSProperties = readOnly
+    ? { borderColor: "var(--border)", background: "var(--card)", color: "var(--muted-foreground)" }
+    : { borderColor: "var(--border)", background: "var(--card)", color: "var(--ink)" };
+
+  const handleFocus = (e: React.FocusEvent<HTMLElement>) => {
+    if (readOnly) return;
+    (e.currentTarget as HTMLElement).style.borderColor = "var(--sh-coral)";
+    (e.currentTarget as HTMLElement).style.boxShadow = "0 0 0 3px rgba(235, 102, 81, 0.15)";
+  };
+
+  const handleBlur = (e: React.FocusEvent<HTMLElement>) => {
+    if (readOnly) return;
+    (e.currentTarget as HTMLElement).style.borderColor = "var(--border)";
+    (e.currentTarget as HTMLElement).style.boxShadow = "none";
+  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
       {error && (
-        <div className="rounded-lg bg-[var(--error)]/10 border border-[var(--error)]/20 p-4 text-sm text-[var(--error)]">
+        <div className="rounded-lg border border-[var(--sh-coral-light)] bg-[#fef1ef] p-4 text-sm text-[#d45441]">
           {error}
         </div>
       )}
@@ -109,14 +118,14 @@ export function JobEditForm({ job, readOnly }: Props) {
       {/* Status badge header */}
       <div className="flex items-center gap-3">
         <StatusBadge variant={genericStatusVariant(status)} label={status} size="md" />
-        <span className="text-xs text-[var(--muted)]">Posted: {new Date(job.createdAt).toLocaleDateString("en-KW")}</span>
-        <span className="text-xs text-[var(--muted)]">Updated: {new Date(job.updatedAt).toLocaleDateString("en-KW")}</span>
+        <span className="text-xs" style={{ color: "var(--muted-foreground)" }}>Posted: {new Date(job.createdAt).toLocaleDateString("en-KW")}</span>
+        <span className="text-xs" style={{ color: "var(--muted-foreground)" }}>Updated: {new Date(job.updatedAt).toLocaleDateString("en-KW")}</span>
       </div>
 
       {/* Title */}
       <div className="space-y-2">
-        <label htmlFor="title" className="text-sm font-medium text-[var(--ink)]">
-          Job Title <span className="text-[var(--error)]">*</span>
+        <label htmlFor="title" className="text-sm font-medium" style={{ color: "var(--ink)" }}>
+          Job Title <span style={{ color: "var(--sh-coral)" }}>*</span>
         </label>
         <input
           id="title"
@@ -124,6 +133,9 @@ export function JobEditForm({ job, readOnly }: Props) {
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           className={inputClass}
+          style={inputStyle}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
           placeholder="e.g. Software Engineer Intern"
           maxLength={255}
           required
@@ -134,14 +146,19 @@ export function JobEditForm({ job, readOnly }: Props) {
 
       {/* Description */}
       <div className="space-y-2">
-        <label htmlFor="description" className="text-sm font-medium text-[var(--ink)]">
-          Description <span className="text-[var(--error)]">*</span>
+        <label htmlFor="description" className="text-sm font-medium" style={{ color: "var(--ink)" }}>
+          Description <span style={{ color: "var(--sh-coral)" }}>*</span>
         </label>
         <textarea
           id="description"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          className={textareaClass}
+          className={readOnly
+            ? "w-full rounded-lg border px-4 py-2.5 text-sm opacity-60 cursor-not-allowed min-h-[120px]"
+            : "w-full rounded-lg border px-4 py-2.5 text-sm outline-none transition-[border-color,box-shadow] duration-150 min-h-[120px]"}
+          style={inputStyle}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
           placeholder="Describe the role..."
           required
           readOnly={readOnly}
@@ -150,14 +167,17 @@ export function JobEditForm({ job, readOnly }: Props) {
 
       {/* Requirements */}
       <div className="space-y-2">
-        <label htmlFor="requirements" className="text-sm font-medium text-[var(--ink)]">
+        <label htmlFor="requirements" className="text-sm font-medium" style={{ color: "var(--ink)" }}>
           Requirements
         </label>
         <textarea
           id="requirements"
           value={requirements}
           onChange={(e) => setRequirements(e.target.value)}
-          className={readOnly ? textareaReadOnly : textareaShortActive}
+          className={textareaClass}
+          style={inputStyle}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
           placeholder="Required skills, experience..."
           readOnly={readOnly}
         />
@@ -166,7 +186,7 @@ export function JobEditForm({ job, readOnly }: Props) {
       {/* Location & Employment Type */}
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <label htmlFor="location" className="text-sm font-medium text-[var(--ink)]">
+          <label htmlFor="location" className="text-sm font-medium" style={{ color: "var(--ink)" }}>
             Location
           </label>
           <input
@@ -175,13 +195,16 @@ export function JobEditForm({ job, readOnly }: Props) {
             value={location}
             onChange={(e) => setLocation(e.target.value)}
             className={inputClass}
+            style={inputStyle}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
             placeholder="Kuwait City"
             readOnly={readOnly}
           />
         </div>
 
         <div className="space-y-2">
-          <label htmlFor="employmentType" className="text-sm font-medium text-[var(--ink)]">
+          <label htmlFor="employmentType" className="text-sm font-medium" style={{ color: "var(--ink)" }}>
             Employment Type
           </label>
           <select
@@ -189,6 +212,9 @@ export function JobEditForm({ job, readOnly }: Props) {
             value={employmentType}
             onChange={(e) => setEmploymentType(e.target.value)}
             className={selectClass}
+            style={inputStyle}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
             disabled={readOnly}
           >
             <option value="full-time">Full-time</option>
@@ -202,7 +228,7 @@ export function JobEditForm({ job, readOnly }: Props) {
 
       {/* Salary Range (KWD) */}
       <div className="space-y-2">
-        <label className="text-sm font-medium text-[var(--ink)]">Salary Range (KWD/month)</label>
+        <label className="text-sm font-medium" style={{ color: "var(--ink)" }}>Salary Range (KWD/month)</label>
         <div className="grid grid-cols-2 gap-4">
           <div>
             <input
@@ -211,6 +237,9 @@ export function JobEditForm({ job, readOnly }: Props) {
               value={salaryMinVal}
               onChange={(e) => setSalaryMinVal(e.target.value)}
               className={inputClass}
+              style={inputStyle}
+              onFocus={handleFocus}
+              onBlur={handleBlur}
               placeholder="Min"
               min={0}
               readOnly={readOnly}
@@ -223,6 +252,9 @@ export function JobEditForm({ job, readOnly }: Props) {
               value={salaryMaxVal}
               onChange={(e) => setSalaryMaxVal(e.target.value)}
               className={inputClass}
+              style={inputStyle}
+              onFocus={handleFocus}
+              onBlur={handleBlur}
               placeholder="Max"
               min={0}
               readOnly={readOnly}
@@ -233,7 +265,7 @@ export function JobEditForm({ job, readOnly }: Props) {
 
       {/* Status */}
       <div className="space-y-2">
-        <label htmlFor="status" className="text-sm font-medium text-[var(--ink)]">
+        <label htmlFor="status" className="text-sm font-medium" style={{ color: "var(--ink)" }}>
           Status
         </label>
         <select
@@ -241,6 +273,9 @@ export function JobEditForm({ job, readOnly }: Props) {
           value={status}
           onChange={(e) => setStatus(e.target.value)}
           className={selectClass}
+          style={inputStyle}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
           disabled={readOnly}
         >
           <option value="active">Active (visible to candidates)</option>
@@ -252,7 +287,7 @@ export function JobEditForm({ job, readOnly }: Props) {
 
       {/* Buttons */}
       {!readOnly && (
-        <div className="flex items-center gap-3 pt-4 border-t border-[var(--border)]">
+        <div className="flex items-center gap-3 pt-4 border-t" style={{ borderColor: "var(--border)" }}>
           <Button type="submit" disabled={submitting || !title.trim() || !description.trim()}>
             {submitting ? "Saving..." : "Save Changes"}
           </Button>
