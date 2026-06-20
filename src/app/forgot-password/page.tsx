@@ -9,31 +9,38 @@ export default async function ForgotPasswordPage() {
   if (session) redirect("/app");
 
   return (
-    <main className="shLoginRoot">
+    <main className="min-h-svh grid lg:grid-cols-2">
       {/* ── Brand side ──────────────────────────────────────────── */}
-      <div className="shLoginBrand">
-        <div className="shLoginGradient" aria-hidden="true" />
-
-        <div className="shLoginBrandContent">
-          <div className="shLoginBrandLogo">
-            <span>SH</span>
-            <strong>StudentHub</strong>
+      <div className="relative hidden lg:flex flex-col items-center justify-center bg-gradient-to-br from-primary/5 via-background to-primary/10 p-12">
+        <div className="max-w-sm text-center space-y-6">
+          <div className="inline-flex items-center gap-2.5 rounded-xl bg-primary/10 px-5 py-3">
+            <span className="inline-flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground text-sm font-black">
+              SH
+            </span>
+            <strong className="text-lg font-bold text-foreground">
+              StudentHub
+            </strong>
           </div>
 
-          <h1 className="shLoginBrandTitle">
-            Forgot your password?<br />
-            <span className="shLoginBrandHighlight">Don&apos;t worry — it happens to the best of us.</span>
+          <h1 className="text-2xl font-bold text-foreground leading-tight">
+            Forgot your password?
+            <span className="block text-muted-foreground font-normal text-base mt-2">
+              Don&apos;t worry — it happens to the best of us.
+            </span>
           </h1>
 
-          <p className="shLoginBrandBody">
+          <p className="text-sm text-muted-foreground">
             Enter the email address associated with your account and we&apos;ll
             send you a link to reset your password.
           </p>
 
-          <div className="shLoginBrandPills">
+          <div className="flex flex-wrap justify-center gap-2">
             {["Encrypted tokens", "One-time use", "15 min expiry"].map(
               (item) => (
-                <span key={item} className="shLoginBrandPill">
+                <span
+                  key={item}
+                  className="inline-flex items-center rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground"
+                >
                   {item}
                 </span>
               )
@@ -43,14 +50,17 @@ export default async function ForgotPasswordPage() {
       </div>
 
       {/* ── Form side ────────────────────────────────────────────── */}
-      <div className="shLoginFormSide">
-        <div className="shLoginFormWrap">
-          <div className="shLoginFormCard">
-            <div className="shLoginFormCardHeader shLoginStagger">
-              <strong>Reset your password</strong>
-              <p>We&apos;ll send a reset link to your email.</p>
+      <div className="flex items-center justify-center p-6 lg:p-12">
+        <div className="w-full max-w-[420px]">
+          <div className="rounded-lg border border-border bg-card text-card-foreground shadow-sm">
+            <div className="p-6 space-y-1">
+              <strong className="text-base font-semibold text-foreground block">
+                Reset your password
+              </strong>
+              <p className="text-sm text-muted-foreground">
+                We&apos;ll send a reset link to your email.
+              </p>
             </div>
-
             <ForgotPasswordForm />
           </div>
         </div>
