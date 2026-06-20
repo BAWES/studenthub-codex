@@ -1,7 +1,7 @@
 export default function Loading() {
   return (
     <div className="flex items-center justify-center min-h-[60vh]">
-      <div className="text-sm text-muted-foreground animate-pulse">Loading countries...</div>
+      <div className="text-sm text-muted-foreground animate-pulse">Loading country details...</div>
     </div>
   );
 }
