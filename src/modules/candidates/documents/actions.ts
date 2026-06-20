@@ -1,11 +1,17 @@
 "use server";
 
 import crypto from "node:crypto";
-import fs from "node:fs/promises";
 import path from "node:path";
+import fs from "node:fs/promises";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
+import {
+  putS3Object,
+  deleteS3Object,
+  isS3Key,
+  getPresignedDownloadUrl,
+} from "@/modules/aws";
 import { DOCUMENT_TYPES } from "./constants";
 import type { DocumentType } from "./constants";
 import {
@@ -49,7 +55,6 @@ const DOCUMENT_FIELD_MAP: Record<DocumentType, string> = {
 };
 
 // Upload configuration
-const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads", "candidates");
 
 const ALLOWED_TYPES: Record<string, { mime: string[]; ext: string[]; maxSize: number }> = {
   photo: {
@@ -88,14 +93,30 @@ const ALLOWED_TYPES: Record<string, { mime: string[]; ext: string[]; maxSize: nu
 // ---------------------------------------------------------------------------
 
 /**
- * Build a CandidateDocumentItem from type + raw file path from DB.
+ * Build a CandidateDocumentItem from type + stored key/path from DB.
+ * If the stored path is an S3 key (no leading "/"), generates a presigned
+ * download URL for the fileUrl. Legacy local paths are returned as-is.
  */
-function toDocumentItem(type: DocumentType, filePath: string | null): CandidateDocumentItem {
+async function toDocumentItem(type: DocumentType, filePath: string | null): Promise<CandidateDocumentItem> {
+  let fileUrl: string | null = filePath;
+
+  if (filePath && isS3Key(filePath)) {
+    // Generate a presigned download URL for S3-stored objects
+    const result = await getPresignedDownloadUrl({ key: filePath });
+    if (!("error" in result)) {
+      fileUrl = result.downloadUrl;
+    }
+    // If presigned URL generation fails, fall back to the raw key
+  } else if (filePath) {
+    // Legacy local path — use as-is (served by Next.js from public/)
+    fileUrl = filePath;
+  }
+
   return {
     type,
     label: DOCUMENT_LABELS[type],
     filePath,
-    fileUrl: filePath ? filePath : null,
+    fileUrl,
   };
 }
 
@@ -142,11 +163,12 @@ export async function listCandidateDocuments(
     return result;
   }
 
-  const items: CandidateDocumentItem[] = DOCUMENT_TYPES.map((type) => {
+  const items: CandidateDocumentItem[] = [];
+  for (const type of DOCUMENT_TYPES) {
     const field = DOCUMENT_FIELD_MAP[type];
     const filePath = (candidate as Record<string, unknown>)[field] as string | null;
-    return toDocumentItem(type, filePath);
-  });
+    items.push(await toDocumentItem(type, filePath));
+  }
 
   const result: ListCandidateDocumentsResult = { items, candidateId: candidate.candidate_id };
 
@@ -197,7 +219,7 @@ export async function getCandidateDocument(
   }
 
   const filePath = (candidate as Record<string, unknown>)[field] as string | null;
-  const result: CandidateDocumentItem = toDocumentItem(documentType, filePath);
+  const result: CandidateDocumentItem = await toDocumentItem(documentType, filePath);
 
   // Validate output shape
   const outputParsed = getCandidateDocumentResultSchema.safeParse(result);
@@ -336,29 +358,48 @@ export async function uploadCandidateDocument(
   }
 
   try {
-    // Save file to disk
-    const dir = path.join(UPLOAD_DIR, String(candidateId));
-    await fs.mkdir(dir, { recursive: true });
-
-    const filename = `${documentType}_${crypto.randomUUID()}${ext}`;
-    const filepath = path.join(dir, filename);
-
     const buffer = Buffer.from(await file.arrayBuffer());
-    await fs.writeFile(filepath, buffer);
 
-    const publicPath = `/uploads/candidates/${candidateId}/${filename}`;
+    // Upload to S3/MinIO instead of local disk
+    // The key pattern is: candidates/{candidateId}/{documentType}_{uuid}.ext
+    const uuid = crypto.randomUUID();
+    const s3Key = `candidates/${candidateId}/${documentType}_${uuid}${ext}`;
 
-    // Update the correct DB field
+    const uploadResult = await putS3Object({
+      key: s3Key,
+      contentType: file.type || "application/octet-stream",
+      buffer,
+    });
+
+    if (!uploadResult.success) {
+      const result: UploadDocumentState = {
+        success: false,
+        error: uploadResult.error ?? "Failed to upload file to S3",
+      };
+
+      // Validate output shape
+      const outputParsed = uploadDocumentStateResultSchema.safeParse(result);
+      if (!outputParsed.success) {
+        console.error(
+          "[modules/candidates/documents] uploadCandidateDocument output validation failed:",
+          outputParsed.error.issues,
+        );
+      }
+
+      return result;
+    }
+
+    // Update the correct DB field with the S3 key
     const field = DOCUMENT_FIELD_MAP[documentType];
     await prisma.candidate.update({
       where: { candidate_id: candidateId },
-      data: { [field]: publicPath },
+      data: { [field]: s3Key },
     });
 
     revalidatePath("/candidate");
     revalidatePath("/candidate/edit");
 
-    const result: UploadDocumentState = { success: true, filePath: publicPath };
+    const result: UploadDocumentState = { success: true, filePath: s3Key };
 
     // Validate output shape
     const outputParsed = uploadDocumentStateResultSchema.safeParse(result);
@@ -475,8 +516,12 @@ export async function deleteCandidateDocument(
       data: { [field]: null },
     });
 
-    // Delete the file from disk if it exists and is a local file
-    if (currentPath && currentPath.startsWith("/uploads/")) {
+    // Delete from S3 if the stored path is an S3 key (no leading "/").
+    // Legacy local paths (starting with "/uploads/") are cleaned from disk.
+    if (currentPath && isS3Key(currentPath)) {
+      await deleteS3Object({ key: currentPath });
+    } else if (currentPath && currentPath.startsWith("/uploads/")) {
+      // Legacy cleanup: remove from local disk
       const filePath = path.join(process.cwd(), "public", currentPath);
       try {
         await fs.unlink(filePath);

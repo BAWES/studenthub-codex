@@ -2,7 +2,7 @@
 
 import crypto from "node:crypto";
 import { z } from "zod";
-import { S3Client, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { requireCapability } from "@/modules/auth/session";
 import {
@@ -12,6 +12,10 @@ import {
   presignedDownloadResultSchema,
   type PresignedUploadResult,
   type PresignedDownloadResult,
+  putS3ObjectParamsSchema,
+  deleteS3ObjectParamsSchema,
+  s3OperationResultSchema,
+  type S3OperationResult,
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
@@ -177,5 +181,126 @@ export async function getPresignedDownloadUrl(
     const message =
       err instanceof Error ? err.message : "Failed to generate presigned download URL";
     return { error: message };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Direct S3 object operations
+// ---------------------------------------------------------------------------
+
+/** Helper to get the configured bucket name (no error). */
+function bucketName(): string {
+  return process.env.AWS_TEMP_BUCKET_NAME ?? "";
+}
+
+/**
+ * Check whether a stored path looks like an S3 key rather than a local path.
+ * S3 keys do not start with "/"; local paths (and legacy paths) do.
+ */
+export function isS3Key(key: string): boolean {
+  return key.length > 0 && !key.startsWith("/");
+}
+
+/**
+ * Upload a buffer directly to the S3/MinIO bucket.
+ *
+ * Used by server actions that receive FormData and need to store files in S3
+ * rather than via client-side presigned uploads.
+ */
+export async function putS3Object(
+  params: z.input<typeof putS3ObjectParamsSchema> & { buffer: Buffer },
+): Promise<S3OperationResult> {
+  const configError = configAvailable();
+  if (configError) {
+    return { success: false, error: configError, key: params.key };
+  }
+
+  const parsed = putS3ObjectParamsSchema.safeParse(params);
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: parsed.error.errors[0]?.message ?? "Invalid parameters.",
+      key: params.key,
+    };
+  }
+
+  const { key, contentType } = parsed.data;
+  const { buffer } = params;
+
+  try {
+    const command = new PutObjectCommand({
+      Bucket: bucketName(),
+      Key: key,
+      Body: buffer,
+      ContentType: contentType,
+    });
+
+    await getS3Client().send(command);
+
+    const result: S3OperationResult = { success: true, key };
+
+    // Validate output shape
+    const outputParsed = s3OperationResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/aws] putS3Object output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
+  } catch (err) {
+    const message =
+      err instanceof Error ? err.message : "Failed to upload object to S3";
+    return { success: false, error: message, key: params.key };
+  }
+}
+
+/**
+ * Delete an object from the S3/MinIO bucket.
+ */
+export async function deleteS3Object(
+  params: z.input<typeof deleteS3ObjectParamsSchema>,
+): Promise<S3OperationResult> {
+  const configError = configAvailable();
+  if (configError) {
+    return { success: false, error: configError, key: params.key };
+  }
+
+  const parsed = deleteS3ObjectParamsSchema.safeParse(params);
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: parsed.error.errors[0]?.message ?? "Invalid parameters.",
+      key: params.key,
+    };
+  }
+
+  const { key } = parsed.data;
+
+  try {
+    const command = new DeleteObjectCommand({
+      Bucket: bucketName(),
+      Key: key,
+    });
+
+    await getS3Client().send(command);
+
+    const result: S3OperationResult = { success: true, key };
+
+    // Validate output shape
+    const outputParsed = s3OperationResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/aws] deleteS3Object output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
+  } catch (err) {
+    const message =
+      err instanceof Error ? err.message : "Failed to delete object from S3";
+    return { success: false, error: message, key: params.key };
   }
 }
