@@ -8,7 +8,7 @@
  * MySQL-based search automatically.
  */
 
-import { getTypesenseClient, CANDIDATES_COLLECTION, type CandidateDocument } from "@/lib/typesense";
+import { getTypesenseClient, CANDIDATES_COLLECTION, type CandidateDocument, isTypesenseAvailable } from "@/lib/typesense";
 import { prisma } from "@/lib/prisma";
 import { getCandidateDetail } from "@/modules/candidates/candidate-detail";
 import { formatDate, formatMoney } from "@/modules/workspace/format";
@@ -63,13 +63,10 @@ async function searchTypesense({
 }): Promise<any> {
   const client = getTypesenseClient();
 
-  // Health check
-  try {
-    const health = await client.health.retrieve();
-    if (!health.ok) return null;
-  } catch {
-    return null;
-  }
+  // Quick health check with 60s cache — avoids 1s timeout on every SSR request
+  // when Typesense is simply not running (e.g. CI, local dev).
+  const available = await isTypesenseAvailable();
+  if (!available) return null;
 
   // Verify collection exists and has docs
   try {

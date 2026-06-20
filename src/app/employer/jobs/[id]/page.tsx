@@ -14,7 +14,9 @@ type Props = {
 export default async function EmployerJobDetailPage({ params }: Props) {
   const { id } = await params;
   const session = await requireRoleCapability("company", "company.write.linked");
-  const job = await getJob({ jobId: Number(id) });
+  const jobId = Number(id);
+  if (Number.isNaN(jobId) || jobId <= 0) notFound();
+  const job = await getJob({ jobId });
 
   if (!job) notFound();
 

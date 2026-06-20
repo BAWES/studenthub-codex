@@ -18,12 +18,11 @@ export function LoginForm() {
   return (
     <div>
       <form action={action}>
-        <div className="shLoginFormCardBody">
-          <div className="shLoginStagger grid gap-2">
+        <div className="px-7 pb-7 grid gap-4">
+          <div className="grid gap-2 animate-[shLoginFormIn_500ms_var(--sh-easing)_both] [animation-delay:140ms]">
             <label
               htmlFor="login-email"
-              className="text-xs font-semibold uppercase tracking-wider"
-              style={{ color: "var(--muted)" }}
+              className="text-xs font-semibold uppercase tracking-wider text-[var(--muted)]"
             >
               Email
             </label>
@@ -36,15 +35,14 @@ export function LoginForm() {
               defaultValue={state.email ?? ""}
               placeholder="name@studenthub.app"
               required
-              className="shLoginInput"
+              className="min-h-[50px] px-3.5 rounded-[var(--sh-radius-md)] border border-[var(--line)] bg-[var(--surface)] text-[15px] text-[var(--ink)] transition-[border-color,box-shadow,background] duration-200 ease-[var(--sh-easing)] placeholder:text-[var(--muted)] focus:border-[var(--sh-coral)] focus:shadow-[0_0_0_3px_color-mix(in_srgb,var(--sh-coral)_15%,transparent)] focus:bg-[var(--surface)] focus:outline-none hover:border-[var(--sh-coral-hover)] hover:bg-[var(--surface-soft)]"
             />
           </div>
 
-          <div className="shLoginStagger grid gap-2">
+          <div className="grid gap-2 animate-[shLoginFormIn_500ms_var(--sh-easing)_both] [animation-delay:200ms]">
             <label
               htmlFor="login-password"
-              className="text-xs font-semibold uppercase tracking-wider"
-              style={{ color: "var(--muted)" }}
+              className="text-xs font-semibold uppercase tracking-wider text-[var(--muted)]"
             >
               Password
             </label>
@@ -55,12 +53,12 @@ export function LoginForm() {
               autoComplete="current-password"
               placeholder="Your password"
               required
-              className="shLoginInput"
+              className="min-h-[50px] px-3.5 rounded-[var(--sh-radius-md)] border border-[var(--line)] bg-[var(--surface)] text-[15px] text-[var(--ink)] transition-[border-color,box-shadow,background] duration-200 ease-[var(--sh-easing)] placeholder:text-[var(--muted)] focus:border-[var(--sh-coral)] focus:shadow-[0_0_0_3px_color-mix(in_srgb,var(--sh-coral)_15%,transparent)] focus:bg-[var(--surface)] focus:outline-none hover:border-[var(--sh-coral-hover)] hover:bg-[var(--surface-soft)]"
             />
           </div>
 
           {state.error ? (
-            <div className="shLoginError">
+            <div className="flex items-center gap-2 px-3.5 py-2.5 rounded-[var(--sh-radius-sm)] bg-[var(--sh-error-bg)] border border-[color-mix(in_srgb,var(--sh-error)_20%,transparent)] text-[var(--sh-error)] text-[13px] font-semibold animate-[shLoginFormIn_300ms_var(--sh-easing)_both]">
               <span>{state.error}</span>
             </div>
           ) : null}
@@ -68,7 +66,7 @@ export function LoginForm() {
           <button
             type="submit"
             disabled={pending}
-            className="shLoginCTA shLoginStagger"
+            className="w-full min-h-[52px] inline-flex items-center justify-center gap-2 border-none rounded-[var(--sh-radius-md)] bg-[var(--sh-coral)] text-white font-inherit text-[15px] font-semibold cursor-pointer transition-[transform,box-shadow,background] duration-200 ease-[var(--sh-easing)] hover:bg-[var(--sh-coral-hover)] hover:-translate-y-px hover:shadow-[var(--sh-coral-glow)] active:translate-y-0 disabled:pointer-events-none disabled:opacity-[0.56] animate-[shLoginFormIn_500ms_var(--sh-easing)_both] [animation-delay:260ms]"
           >
             <LogIn className="size-4" />
             {pending ? "Checking credentials..." : "Sign in"}
@@ -78,14 +76,14 @@ export function LoginForm() {
 
       {accounts.length > 0 ? (
         <section
-          className="grid gap-2 p-6 pt-0 border-t border-[var(--line)]"
+          className="grid gap-3 px-7 pb-5 pt-5 border-t border-[var(--line)]"
           aria-label="Verified StudentHub accounts"
         >
           <div className="grid gap-0.5">
-            <strong className="text-[var(--ink)] text-[15px] leading-[1.2] font-semibold">
+            <strong className="text-[15px] leading-[1.2] font-semibold text-[var(--ink)]">
               Multiple accounts found
             </strong>
-            <p className="text-[var(--muted)] text-[13px] leading-relaxed m-0">
+            <p className="text-[13px] leading-relaxed m-0 text-[var(--muted)]">
               Choose where to continue.
             </p>
           </div>
@@ -94,11 +92,13 @@ export function LoginForm() {
               <input name="accountKey" type="hidden" value={account.accountKey} />
               <button
                 type="submit"
-                className="shLoginAccountBtn shLoginStagger"
+                className="w-full min-h-[52px] flex items-center gap-3 px-3.5 py-2.5 border border-[var(--line)] rounded-[var(--sh-radius-md)] bg-[var(--surface)] text-left text-[var(--ink)] font-inherit cursor-pointer transition-[background,border-color] duration-[180ms] ease-[var(--sh-easing)] hover:bg-[var(--surface-soft)] hover:border-[var(--ink)] animate-[shLoginFormIn_500ms_var(--sh-easing)_both]"
               >
                 <span className="grid gap-0.5 min-w-0">
-                  <strong>{account.name}</strong>
-                  <small>{account.email}</small>
+                  <strong className="text-sm font-semibold">{account.name}</strong>
+                  <small className="block text-xs text-[var(--muted)] font-normal">
+                    {account.email}
+                  </small>
                 </span>
               </button>
             </form>
