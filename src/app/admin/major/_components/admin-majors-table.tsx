@@ -7,6 +7,8 @@ import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Card, CardContent } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 import type { SessionUser } from "@/modules/auth/types";
 import type { MajorItem } from "../schemas";
@@ -30,12 +32,12 @@ export function AdminMajorsTable({ session, majors }: Props) {
         { label: "Total majors", value: majors.length, note: "Majors in the system" },
       ]}
     >
-      <section className="mb-6">
-        <div className="rounded-lg border border-border bg-card p-5">
+      <Card className="mb-6">
+        <CardContent className="p-5">
           <h3 className="text-sm font-semibold mb-3 text-foreground">Add major</h3>
           <CreateMajorForm onSuccess={() => router.refresh()} />
-        </div>
-      </section>
+        </CardContent>
+      </Card>
 
       <DataTable
         title="Majors"
@@ -162,7 +164,9 @@ function CreateMajorForm({ onSuccess }: { onSuccess: () => void }) {
         {pending ? "Adding..." : "Add"}
       </Button>
       {state?.error ? (
-        <p className="text-xs w-full text-destructive">{state.error}</p>
+        <Alert variant="destructive" className="w-full mt-2">
+          <AlertDescription>{state.error}</AlertDescription>
+        </Alert>
       ) : null}
     </form>
   );
@@ -212,7 +216,9 @@ function EditMajorForm({
         Cancel
       </Button>
       {state?.error ? (
-        <p className="text-xs w-full text-destructive">{state.error}</p>
+        <Alert variant="destructive" className="w-full mt-2">
+          <AlertDescription>{state.error}</AlertDescription>
+        </Alert>
       ) : null}
     </form>
   );

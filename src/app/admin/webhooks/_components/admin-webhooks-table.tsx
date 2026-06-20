@@ -4,6 +4,11 @@ import { useActionState, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { DataTable } from "@/modules/workspace/DataTable";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 import type { SessionUser } from "@/modules/auth/types";
 import type { WebhookListItem } from "../schemas";
@@ -27,12 +32,12 @@ export function AdminWebhooksTable({ session, webhooks }: Props) {
         { label: "Total webhooks", value: webhooks.length, note: "Registered webhook endpoints" },
       ]}
     >
-      <section className="mb-6">
-        <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
+      <Card className="mb-6">
+        <CardContent className="p-5">
           <h3 className="text-sm font-semibold mb-3 text-foreground">Add webhook</h3>
           <CreateWebhookForm onSuccess={() => router.refresh()} />
-        </div>
-      </section>
+        </CardContent>
+      </Card>
 
       <DataTable
         title="Webhooks"
@@ -114,9 +119,9 @@ export function AdminWebhooksTable({ session, webhooks }: Props) {
             label: "",
             render: (row) =>
               editingId !== row.webhook_id ? (
-                <button
-                  type="button"
-                  className="text-xs px-2 py-1 rounded hover:bg-red-500/10 text-destructive"
+                <Button
+                  variant="destructive"
+                  size="sm"
                   onClick={async () => {
                     if (confirm(`Delete webhook for "${row.event}"?`)) {
                       const result = await deleteWebhook(row.webhook_id);
@@ -128,7 +133,7 @@ export function AdminWebhooksTable({ session, webhooks }: Props) {
                   }}
                 >
                   Delete
-                </button>
+                </Button>
               ) : null,
           },
         ]}
@@ -164,22 +169,17 @@ function CreateWebhookForm({ onSuccess }: { onSuccess: () => void }) {
       onSubmit={() => setTimeout(() => { formRef.current?.reset(); }, 100)}
     >
       <div className="grid gap-1">
-        <label className="text-xs font-medium text-muted-foreground">Event *</label>
-        <input name="event" required maxLength={50} placeholder="e.g. issue.created"
-          className="h-9 rounded-lg px-3 text-sm border w-44"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }} />
+        <Label htmlFor="event">Event *</Label>
+        <Input id="event" name="event" required maxLength={50} placeholder="e.g. issue.created" className="w-44" />
       </div>
       <div className="grid gap-1">
-        <label className="text-xs font-medium text-muted-foreground">Endpoint *</label>
-        <input name="endpoint" required maxLength={255} placeholder="https://hooks.example.com/callback"
-          className="h-9 rounded-lg px-3 text-sm border w-72"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }} />
+        <Label htmlFor="endpoint">Endpoint *</Label>
+        <Input id="endpoint" name="endpoint" required maxLength={255} placeholder="https://hooks.example.com/callback" className="w-72" />
       </div>
       <div className="grid gap-1">
-        <label className="text-xs font-medium text-muted-foreground">Method</label>
-        <select name="method"
-          className="h-9 rounded-lg px-3 text-sm border"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+        <Label htmlFor="method">Method</Label>
+        <select id="method" name="method"
+          className="h-9 rounded-lg px-3 text-sm border border-input bg-background text-foreground"
         >
           <option value="">Auto</option>
           {HTTP_METHODS.map((m) => (
@@ -187,14 +187,13 @@ function CreateWebhookForm({ onSuccess }: { onSuccess: () => void }) {
           ))}
         </select>
       </div>
-      <button
-        type="submit" disabled={pending}
-        className="h-9 rounded-lg px-4 text-sm font-semibold bg-primary text-primary-foreground"
-      >
+      <Button type="submit" disabled={pending}>
         {pending ? "Adding..." : "Add"}
-      </button>
+      </Button>
       {state?.error ? (
-        <p className="text-xs w-full text-destructive">{state.error}</p>
+        <Alert variant="destructive" className="w-full mt-2">
+          <AlertDescription>{state.error}</AlertDescription>
+        </Alert>
       ) : null}
     </form>
   );
@@ -224,31 +223,38 @@ function EditWebhookForm({
 
   return (
     <form action={action} className="flex items-center gap-2 flex-wrap">
-      <input name="event" defaultValue={row.event} required maxLength={50}
-        className="h-8 rounded px-2 text-sm border w-36"
-        style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }} />
-      <input name="endpoint" defaultValue={row.endpoint} required maxLength={255}
-        className="h-8 rounded px-2 text-sm border w-48"
-        style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }} />
+      <Input
+        name="event"
+        defaultValue={row.event}
+        required
+        maxLength={50}
+        className="w-36"
+      />
+      <Input
+        name="endpoint"
+        defaultValue={row.endpoint}
+        required
+        maxLength={255}
+        className="w-48"
+      />
       <select name="method" defaultValue={row.method ?? ""}
-        className="h-8 rounded px-2 text-sm border w-24"
-        style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+        className="h-8 rounded px-2 text-sm border border-input bg-background text-foreground w-24"
       >
         <option value="">Auto</option>
         {HTTP_METHODS.map((m) => (
           <option key={m} value={m}>{m}</option>
         ))}
       </select>
-      <button type="submit" disabled={pending}
-        className="h-8 rounded px-3 text-xs font-semibold bg-primary text-primary-foreground">
+      <Button type="submit" size="sm" disabled={pending}>
         {pending ? "..." : "Save"}
-      </button>
-      <button type="button" onClick={onCancel}
-        className="h-8 rounded px-3 text-xs text-muted-foreground">
+      </Button>
+      <Button type="button" variant="ghost" size="sm" onClick={onCancel}>
         Cancel
-      </button>
+      </Button>
       {state?.error ? (
-        <p className="text-xs w-full text-destructive">{state.error}</p>
+        <Alert variant="destructive" className="w-full mt-2">
+          <AlertDescription>{state.error}</AlertDescription>
+        </Alert>
       ) : null}
     </form>
   );
