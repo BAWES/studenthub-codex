@@ -18,9 +18,20 @@ const mockGetTypesenseClient = vi.hoisted(() => vi.fn(() => ({
   }),
 })));
 
+// Mock isTypesenseAvailable to call through to mockHealthRetrieve
+// so tests can control fallback behavior by mocking the health check directly.
+const mockIsTypesenseAvailable = vi.hoisted(() => vi.fn().mockImplementation(async () => {
+  try {
+    const health = await mockHealthRetrieve();
+    return Boolean(health?.ok);
+  } catch {
+    return false;
+  }
+}));
+
 vi.mock("@/lib/typesense", () => ({
   getTypesenseClient: mockGetTypesenseClient,
-  isTypesenseAvailable: vi.fn().mockResolvedValue(true),
+  isTypesenseAvailable: mockIsTypesenseAvailable,
   CANDIDATES_COLLECTION: "candidates",
 }));
 

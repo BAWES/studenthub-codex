@@ -137,7 +137,7 @@ jobs:
           cache: "npm"
       - run: npm ci
       - name: Install Playwright browsers
-        run: npx playwright install chromium --with-deps
+        run: node node_modules/@playwright/test/cli.js install chromium --with-deps
       - name: Generate Prisma client
         run: npx prisma generate
         env:
@@ -166,7 +166,7 @@ jobs:
           DATABASE_URL: "mysql://studenthub:studenthub@localhost:3307/studenthub_prod_local"
           AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
       - name: Run E2E tests
-        run: npx playwright test --project=chromium --shard=${{ matrix.shard }}/${{ strategy.job-total }}
+        run: node node_modules/@playwright/test/cli.js test --project=chromium --shard=${{ matrix.shard }}/${{ strategy.job-total }}
         env:
           NODE_OPTIONS: "--max-old-space-size=4096"
           CI: "true"
