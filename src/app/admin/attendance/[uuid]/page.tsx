@@ -100,7 +100,7 @@ export default async function AdminAttendanceDetailPage({
           ]}
         />
 
-        <section style={{ display: "flex", gap: "0.5rem", padding: "1rem" }}>
+        <section className="flex gap-2 p-4">
           <Link href={"/admin/attendance" as Route}>
             <Button variant="outline">Back to Attendance</Button>
           </Link>
