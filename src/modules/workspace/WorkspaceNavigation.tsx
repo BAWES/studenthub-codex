@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import type { NavItem } from "./navigation";
 
 export function WorkspaceNavigation({ items, role }: { items: NavItem[]; role: string }) {

@@ -6,31 +6,6 @@ import { LoginForm } from "@/modules/auth/LoginForm";
 import { ThemeToggle } from "@/modules/theme/ThemeToggle";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-
-export const dynamic = "force-dynamic";
-
-const roleNotes = [
-  { icon: UserRound, label: "Students", detail: "Profile, jobs, hours, pay" },
-  { icon: Search, label: "Staff", detail: "Requests, candidates, CVs, time" },
-  { icon: Building2, label: "Companies", detail: "Requests, candidates, invoices" },
-  { icon: Shield, label: "Admin", detail: "Finance, approvals, migration" },
-  { icon: ClipboardCheck, label: "Inspectors", detail: "ID review, document queues" }
-];
-
-export default async function LoginPage({
-  searchParams
-}: {
-  searchParams: Promise<{ error?: string }>;
-}) {
-  const session = await getSession();
-  if (session) redirect("/app");
-  const params = await searchParams;
-
-  return (
-    <main className="min-h-svh w-[min(1160px,calc(100%_-_28px))] mx-auto grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(400px,500px)] content-start items-start gap-4 pt-5 pb-10 max-sm:w-[min(calc(100%_-_20px),720px)]">
-      {/* Nav - spans full width */}
-      <nav
-        className="col-span-full sticky top-3 z-20 min-h-16 flex items-center justify-between gap-3.5 border border-border/80 rounded-lg bg-card/92 p-2 shadow-lg max-sm:static max-sm:flex-col max-sm:items-stretch"
         aria-label="StudentHub login navigation"
       >
         <Link
