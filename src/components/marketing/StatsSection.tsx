@@ -7,7 +7,7 @@ import { Users, Building2, Briefcase, Star } from "lucide-react";
 // ── Stat definitions ───────────────────────────────────────────
 
 const SH_BLUE = "#1f73b7";
-const SH_AMBER = "#f59e0b";
+const SH_CORAL = "#eb6651";
 
 interface StatItem {
   value: string;
@@ -96,7 +96,7 @@ function AnimatedStat({ stat, visible }: { stat: StatItem; visible: boolean }) {
     return raw.toLocaleString();
   };
 
-  const accentColor = stat.accent === "amber" ? SH_AMBER : SH_BLUE;
+  const accentColor = stat.accent === "amber" ? SH_CORAL : SH_BLUE;
 
   return (
     <div className="flex flex-col items-center gap-2 group">
