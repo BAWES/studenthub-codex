@@ -26,11 +26,17 @@ services:
       - "--collation-server=utf8mb4_unicode_ci"
       - "--max-allowed-packet=64M"
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pstudenthub_root"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 30s
+    networks:
+      - studenthub-net
+    deploy:
+      resources:
+        limits:
+          memory: 512M
 
   # ---------------------------------------------------------------------------
   # Redis — Cache / session store
@@ -48,6 +54,12 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - studenthub-net
+    deploy:
+      resources:
+        limits:
+          memory: 128M
 
   # ---------------------------------------------------------------------------
   # MinIO — S3-compatible object storage
@@ -71,6 +83,12 @@ services:
       timeout: 5s
       retries: 5
       start_period: 15s
+    networks:
+      - studenthub-net
+    deploy:
+      resources:
+        limits:
+          memory: 256M
 
   # ---------------------------------------------------------------------------
   # MinIO Bucket Setup — one-shot init to create the temp bucket
@@ -82,13 +100,19 @@ services:
       minio:
         condition: service_healthy
     environment:
-      - MC_HOST_local=http://${MINIO_ROOT_USER:-studenthub}:${MINIO_ROOT_PASSWORD:-studenthub_minio_secret}@minio:9000
+      MC_HOST_local: "http://${MINIO_ROOT_USER:-studenthub}:${MINIO_ROOT_PASSWORD:-studenthub_minio_secret}@minio:9000"
     entrypoint: >
       /bin/sh -c "
       until mc ls local >/dev/null 2>&1; do echo 'waiting for minio...'; sleep 2; done;
       mc mb local/studenthub-temp --ignore-existing;
       echo 'Bucket studenthub-temp ready.';
       "
+    networks:
+      - studenthub-net
+    deploy:
+      resources:
+        limits:
+          memory: 64M
 
   # ---------------------------------------------------------------------------
   # Next.js Application
@@ -104,7 +128,7 @@ services:
     environment:
       NODE_ENV: production
       DATABASE_URL: "mysql://${MYSQL_USER:-studenthub}:${MYSQL_PASSWORD:-studenthub}@mysql:3306/${MYSQL_DATABASE:-studenthub_sample}"
-      AUTH_SECRET: "${AUTH_SECRET:-replace-with-a-long-local-secret}"
+      AUTH_SECRET: "${AUTH_SECRET}"
 
       # Redis (for future caching)
       REDIS_URL: "redis://redis:6379"
@@ -112,12 +136,12 @@ services:
       # MinIO / S3 config
       AWS_ENDPOINT_URL: "http://minio:9000"
       AWS_TEMP_BUCKET_REGION: "us-east-1"
-      AWS_TEMP_ACCESS_KEY_ID: "studenthub"
-      AWS_TEMP_SECRET_ACCESS_KEY: "studenthub_minio_secret"
+      AWS_TEMP_ACCESS_KEY_ID: "${MINIO_ROOT_USER:-studenthub}"
+      AWS_TEMP_SECRET_ACCESS_KEY: "${MINIO_ROOT_PASSWORD:-studenthub_minio_secret}"
       AWS_TEMP_BUCKET_NAME: "studenthub-temp"
       AWS_REGION: "us-east-1"
       AWS_S3_BUCKET: "studenthub-temp"
-      AWS_ACCESS_KEY_ID: "studenthub"
+      AWS_ACCESS_KEY_ID: "${MINIO_ROOT_USER:-studenthub}"
       AWS_DEFAULT_REGION: "us-east-1"
       AWS_BUCKET: "studenthub-temp"
 
@@ -138,8 +162,18 @@ services:
       timeout: 5s
       retries: 3
       start_period: 30s
+    networks:
+      - studenthub-net
+    deploy:
+      resources:
+        limits:
+          memory: 512M
 
 volumes:
   studenthub-next-mysql:
   studenthub-next-redis:
   studenthub-next-minio:
+
+networks:
+  studenthub-net:
+    driver: bridge
