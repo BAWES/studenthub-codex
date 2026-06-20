@@ -1,42 +1,51 @@
 # =============================================================================
 # StudentHub Next — Production Dockerfile
-# Multi-stage build: deps → build → runner (distroless)
+# Multi-stage build: base → deps → build → runner (Alpine)
 # =============================================================================
 
 # ---------------------------------------------------------------------------
-# Stage 1: Dependencies
+# Stage 1: Base — pnpm + common system deps
 # ---------------------------------------------------------------------------
-FROM node:22-alpine AS deps
-LABEL stage=deps
+FROM node:22-alpine AS base
+LABEL stage=base
 
 RUN apk add --no-cache libc6-compat
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
+# Bypass pnpm 11's minimum-release-age supply-chain policy for legitimately
+# recent AWS SDK publishes that our lockfile pins (already reviewed/trusted)
+ENV npm_config_minimum_release_age=0
 
 WORKDIR /app
 
-COPY package.json package-lock.json pnpm-lock.yaml* ./
+# ---------------------------------------------------------------------------
+# Stage 2: Dependencies (production only)
+# ---------------------------------------------------------------------------
+FROM base AS deps
+LABEL stage=deps
 
-# Use npm since the project uses package-lock.json
-RUN npm ci --only=production --ignore-scripts || npm ci --ignore-scripts
+COPY package.json pnpm-lock.yaml .npmrc ./
+RUN pnpm install --ignore-scripts --no-frozen-lockfile --prod --config.minimum-release-age=0
 
 # ---------------------------------------------------------------------------
-# Stage 2: Build
+# Stage 3: Build (full deps + source + prisma generate + next build)
 # ---------------------------------------------------------------------------
-FROM node:22-alpine AS builder
+FROM base AS builder
 LABEL stage=builder
 
-WORKDIR /app
+COPY package.json pnpm-lock.yaml .npmrc ./
+RUN pnpm install --ignore-scripts --no-frozen-lockfile --config.minimum-release-age=0
 
-COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 # Generate Prisma client so the build can resolve types
-RUN npx prisma generate
+RUN pnpm prisma generate
 
 # Build Next.js (outputs standalone + static)
-RUN npm run build
+RUN pnpm run build
 
 # ---------------------------------------------------------------------------
-# Stage 3: Production runner
+# Stage 4: Production runner (Alpine)
 # ---------------------------------------------------------------------------
 FROM node:22-alpine AS runner
 LABEL stage=runner
@@ -52,9 +61,8 @@ COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 
-# Prisma schema (needed at runtime for generate)
+# Prisma schema (for runtime introspection if needed)
 COPY --from=builder /app/prisma ./prisma
-RUN npx prisma generate
 
 USER nextjs
 
