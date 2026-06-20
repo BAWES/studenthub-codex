@@ -24,7 +24,7 @@ export default async function CompanyPage() {
           trend: "flat" as const,
         }))}
       >
-        <div className="space-y-6" style={{ marginTop: "1.5rem" }}>
+        <div className="space-y-6 mt-6">
           {/* Role header with contact info + Create Request CTA */}
           <CompanyRoleHeader
             contactName={data.contact?.contact_name ?? session.name}

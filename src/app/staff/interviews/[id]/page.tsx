@@ -56,7 +56,7 @@ export default async function StaffInterviewDetailPage({
 
       <section className="detailPanel">
         <h2>Actions</h2>
-        <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+        <div className="flex gap-2 flex-wrap">
           {interview.status !== 1 && (
             <form action={updateInterviewStatusAction}>
               <input type="hidden" name="interview_uuid" value={interview.interviewUuid} />
@@ -82,7 +82,7 @@ export default async function StaffInterviewDetailPage({
       </section>
 
       <section className="detailPanel">
-        <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+        <div className="flex gap-2 flex-wrap">
           {interview.candidateId && (
             <Link href={`/staff/candidates?candidate=${interview.candidateId}` as Route}>
               <Button variant="outline">View Candidate</Button>
