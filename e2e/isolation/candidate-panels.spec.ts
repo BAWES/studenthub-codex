@@ -71,7 +71,7 @@ test.describe("Candidate workspace panel isolation", () => {
       // panels should NOT appear in the current panel's main content area
       for (const other of panels) {
         if (other.label === panel.label) continue;
-        const main = ctx.page.locator("main, [role='main'], article, section").first();
+        const main = ctx.page.locator("section.workspaceStage").first();
         const inMain = main.locator(`h1, h2, h3, [class*="title"]`).filter({ hasText: other.heading });
         const inMainCount = await inMain.count();
         expect(inMainCount,
