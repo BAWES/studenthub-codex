@@ -7,6 +7,7 @@ import { ThemeToggle } from "@/modules/theme/ThemeToggle";
 import { LogOut } from "lucide-react";
 import Link from "next/link";
 import { navForRole } from "./navigation";
+import { Separator } from "@/components/ui/separator";
 import { WorkspaceNavigation } from "./WorkspaceNavigation";
 import { MobileNavBar } from "@/components/ui/mobile-nav-bar";
 import { useWorkspaceOS } from "./WorkspaceOSContext";
@@ -63,7 +64,7 @@ export function WorkspaceShell({
         <strong>StudentHub</strong>
       </Link>
       <WorkspaceNavigation items={navItems} role={session.role} />
-      <div className="workspaceRailDivider" aria-hidden="true" />
+      <Separator className="workspaceRailDivider" />
       <div className="workspaceRailFooter">
         <RoleSwitcher
           currentRole={session.role}
