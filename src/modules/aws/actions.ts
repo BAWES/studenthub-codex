@@ -22,13 +22,25 @@ let s3Client: S3Client | null = null;
 
 function getS3Client(): S3Client {
   if (!s3Client) {
-    s3Client = new S3Client({
+    const config: ConstructorParameters<typeof S3Client>[0] = {
       region: process.env.AWS_TEMP_BUCKET_REGION ?? "",
       credentials: {
         accessKeyId: process.env.AWS_TEMP_ACCESS_KEY_ID ?? "",
         secretAccessKey: process.env.AWS_TEMP_SECRET_ACCESS_KEY ?? "",
       },
-    });
+    };
+
+    // Support custom S3-compatible endpoint (MinIO, etc.)
+    if (process.env.AWS_ENDPOINT_URL) {
+      config.endpoint = process.env.AWS_ENDPOINT_URL;
+    }
+
+    // Force path-style addressing for MinIO compatibility
+    if (process.env.AWS_S3_FORCE_PATH_STYLE === "true") {
+      config.forcePathStyle = true;
+    }
+
+    s3Client = new S3Client(config);
   }
   return s3Client;
 }
