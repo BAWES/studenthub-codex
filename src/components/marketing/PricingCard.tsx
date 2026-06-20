@@ -171,7 +171,7 @@ const inspectorTiers: PricingTier[] = [
     features: [
       "Everything in Starter",
       "Bulk document processing",
-      "AI-assisted verification",
+      "Staff-reviewed verification",
       "Multi-client management",
       "Advanced analytics",
       "Priority support",
