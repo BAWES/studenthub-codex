@@ -26,7 +26,7 @@ const PAIN_POINTS = [
   {
     problem: "Hours wasted matching candidates to roles manually",
     solution:
-      "AI-powered matching surfaces the right candidates for every open role in seconds. Filter by qualification, availability, and location — no more spreadsheets and gut feelings.",
+      "Staff-powered matching surfaces the right candidates for every open role with recruiter insight and precision. Filter by qualification, availability, and location — no more spreadsheets and gut feelings.",
   },
   {
     problem: "Placement paperwork drowning your desk",

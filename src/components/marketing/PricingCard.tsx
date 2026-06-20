@@ -34,7 +34,7 @@ const candidateTiers: PricingTier[] = [
     popular: true,
     features: [
       "Full candidate profile",
-      "AI-matched work placements",
+      "Staff-matched work placements",
       "3-month rotation positions",
       "Multiple placements across industries",
       "Build a stacked CV by graduation",
@@ -64,13 +64,13 @@ const companyTiers: PricingTier[] = [
   },
   {
     name: "Professional",
-    description: "AI matching and priority placement.",
+    description: "Staff matching and priority placement.",
     monthlyPrice: 599,
     annualPrice: 499,
     popular: true,
     features: [
       "Everything in Starter",
-      "AI-matched candidate suggestions",
+      "Staff-matched candidate suggestions",
       "Priority shortlisting",
       "Multi-branch management",
       "Custom branded portal",
@@ -120,7 +120,7 @@ const staffTiers: PricingTier[] = [
     popular: true,
     features: [
       "Everything in Starter",
-      "AI candidate matching",
+      "Staff candidate matching",
       "Priority placement tools",
       "Multi-agency management",
       "Advanced analytics",
@@ -171,7 +171,7 @@ const inspectorTiers: PricingTier[] = [
     features: [
       "Everything in Starter",
       "Bulk document processing",
-      "AI-assisted verification",
+      "Staff-reviewed verification",
       "Multi-client management",
       "Advanced analytics",
       "Priority support",
