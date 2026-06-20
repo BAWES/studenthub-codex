@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useCallback, type KeyboardEvent } from "react";
+import { Badge } from "@/components/ui/badge";
 import type { PaymentRow } from "../schemas";
 
 // ---------------------------------------------------------------------------
@@ -22,12 +23,21 @@ export type PaymentDataTableProps = {
 type SortKey = "date" | "reference" | "total" | "status";
 type SortDir = "asc" | "desc";
 
-const STATUS_COLORS: Record<string, { bg: string; text: string }> = {
-  AUTHORISED: { bg: "rgba(34, 197, 94, 0.15)", text: "#22c55e" },
-  PAID: { bg: "rgba(34, 197, 94, 0.15)", text: "#22c55e" },
-  VOIDED: { bg: "rgba(239, 68, 68, 0.15)", text: "#ef4444" },
-  DELETED: { bg: "rgba(239, 68, 68, 0.15)", text: "#ef4444" },
+const STATUS_BADGE_VARIANTS: Record<string, "success" | "destructive" | "secondary" | "warning" | "default"> = {
+  AUTHORISED: "success",
+  PAID: "success",
+  VOIDED: "destructive",
+  DELETED: "destructive",
 };
+
+function StatusBadge({ status }: { status: string | null }) {
+  const variant = STATUS_BADGE_VARIANTS[status ?? ""] ?? "secondary";
+  return (
+    <Badge variant={variant} aria-label={`Status: ${status ?? "Unknown"}`}>
+      {status ?? "Unknown"}
+    </Badge>
+  );
+}
 
 function formatDate(iso: string): string {
   const d = new Date(iso);
@@ -39,18 +49,7 @@ function formatAmount(total: number | null, currency: string | null): string {
   return `${total.toLocaleString("en-US", { maximumFractionDigits: 3 })} ${currency ?? "KWD"}`;
 }
 
-function StatusBadge({ status }: { status: string | null }) {
-  const color = STATUS_COLORS[status ?? ""] ?? { bg: "rgba(255,255,255,0.06)", text: "rgba(255,255,255,0.4)" };
-  return (
-    <span
-      className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold"
-      style={{ background: color.bg, color: color.text }}
-      aria-label={`Status: ${status ?? "Unknown"}`}
-    >
-      {status ?? "Unknown"}
-    </span>
-  );
-}
+
 
 function ReconciledCheck({ reconciled }: { reconciled: boolean | null }) {
   return (
@@ -163,8 +162,7 @@ export function PaymentDataTable({
         {COLUMNS.map((col) => (
           <div
             key={col.key}
-            className={`flex items-center gap-1 ${col.align === "right" ? "justify-end" : col.align === "center" ? "justify-center" : ""}`}
-            style={{ cursor: col.sortable ? "pointer" : "default" }}
+            className={`flex items-center gap-1 ${col.align === "right" ? "justify-end" : col.align === "center" ? "justify-center" : ""} ${col.sortable ? "cursor-pointer" : "cursor-default"}`}
             onClick={() => col.sortable && handleSort(col.key)}
           >
             {col.label}

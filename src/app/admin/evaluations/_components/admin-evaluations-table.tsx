@@ -89,8 +89,7 @@ export function AdminEvaluationsTable({
                 if (e.key === "Enter") handleSearch();
               }}
               placeholder="Search by candidate or staff name..."
-              className="h-9 w-full rounded-lg pl-9 pr-3 text-sm border"
-              style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+              className="h-9 w-full rounded-lg pl-9 pr-3 text-sm border bg-card border-border text-foreground"
             />
             <svg
               className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
@@ -197,8 +196,7 @@ export function AdminEvaluationsTable({
             type="button"
             disabled={page <= 1 || loading}
             onClick={() => fetchPage(page - 1, search)}
-            className="h-8 rounded px-3 text-xs font-medium disabled:opacity-30"
-            style={{ background: "var(--surface)", border: "1px solid var(--border)", color: "var(--ink)" }}
+            className="h-8 rounded px-3 text-xs font-medium disabled:opacity-30 bg-card border border-border text-foreground"
           >
             Previous
           </button>
@@ -219,12 +217,11 @@ export function AdminEvaluationsTable({
                 type="button"
                 onClick={() => fetchPage(pageNum, search)}
                 disabled={loading}
-                className="h-8 w-8 rounded text-xs font-medium"
-                style={{
-                  background: pageNum === page ? "var(--sh-primary)" : "var(--surface)",
-                  border: "1px solid var(--border)",
-                  color: pageNum === page ? "#fff" : "var(--ink)",
-                }}
+                className={`h-8 w-8 rounded text-xs font-medium ${
+                  pageNum === page
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-card text-foreground border border-border"
+                }`}
               >
                 {pageNum}
               </button>
@@ -234,8 +231,7 @@ export function AdminEvaluationsTable({
             type="button"
             disabled={page >= totalPages || loading}
             onClick={() => fetchPage(page + 1, search)}
-            className="h-8 rounded px-3 text-xs font-medium disabled:opacity-30"
-            style={{ background: "var(--surface)", border: "1px solid var(--border)", color: "var(--ink)" }}
+            className="h-8 rounded px-3 text-xs font-medium disabled:opacity-30 bg-card border border-border text-foreground"
           >
             Next
           </button>
