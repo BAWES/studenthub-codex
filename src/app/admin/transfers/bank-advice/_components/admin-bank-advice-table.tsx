@@ -36,7 +36,7 @@ export function AdminBankAdviceTable({ session, advices }: Props) {
             key: "tba_uuid",
             label: "UUID",
             render: (row) => (
-              <span className="font-mono text-xs" style={{ color: "var(--ink)" }}>
+              <span className="font-mono text-xs text-foreground">
                 {row.tba_uuid.slice(0, 8)}…
               </span>
             ),

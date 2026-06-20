@@ -1,6 +1,5 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
 import { DataTable } from "@/modules/workspace/DataTable";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 
@@ -26,7 +25,7 @@ export function AdminMailLogTable({ session, records }: Props) {
         title="Mail log"
         description="All outgoing emails. Read-only view of the system's email dispatch log."
         rows={records.map((r) => ({ ...r, id: r.mail_uuid }))}
-        rowHref="/admin/mail-log/"
+        rowHref={undefined}
         columns={[
           {
             key: "mail_uuid",
@@ -68,9 +67,9 @@ export function AdminMailLogTable({ session, records }: Props) {
             key: "app",
             label: "App",
             render: (row) => (
-              <Badge variant="secondary">
+              <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary">
                 {row.app ?? "—"}
-              </Badge>
+              </span>
             ),
           },
           {
