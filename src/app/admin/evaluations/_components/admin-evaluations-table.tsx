@@ -93,14 +93,13 @@ export function AdminEvaluationsTable({
               style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
             />
             <svg
-              className="absolute left-3 top-1/2 -translate-y-1/2"
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
               width="14"
               height="14"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
               strokeWidth="2"
-              style={{ color: "var(--muted)" }}
             >
               <circle cx="11" cy="11" r="8" />
               <path d="m21 21-4.35-4.35" />
@@ -110,8 +109,7 @@ export function AdminEvaluationsTable({
             type="button"
             onClick={handleSearch}
             disabled={loading}
-            className="h-9 rounded-lg px-4 text-sm font-semibold"
-            style={{ background: "var(--sh-primary)", color: "#fff" }}
+            className="h-9 rounded-lg px-4 text-sm font-semibold bg-primary text-primary-foreground"
           >
             {loading ? "Searching..." : "Search"}
           </button>
@@ -119,14 +117,13 @@ export function AdminEvaluationsTable({
             <button
               type="button"
               onClick={handleClear}
-              className="h-9 rounded-lg px-3 text-xs"
-              style={{ color: "var(--muted)" }}
+              className="h-9 rounded-lg px-3 text-xs text-muted-foreground"
             >
               Clear
             </button>
           ) : null}
           {search ? (
-            <span className="text-xs" style={{ color: "var(--muted)" }}>
+            <span className="text-xs text-muted-foreground">
               Results for: &ldquo;{search}&rdquo;
             </span>
           ) : null}
@@ -143,7 +140,7 @@ export function AdminEvaluationsTable({
             key: "candidate_name",
             label: "Candidate",
             render: (row) => (
-              <span className="text-sm font-medium" style={{ color: "var(--ink)" }}>
+              <span className="text-sm font-medium text-foreground">
                 {row.candidate_name ?? "—"}
               </span>
             ),
@@ -152,7 +149,7 @@ export function AdminEvaluationsTable({
             key: "staff_name",
             label: "Evaluator",
             render: (row) => (
-              <span className="text-sm" style={{ color: "var(--ink)" }}>
+              <span className="text-sm text-foreground">
                 {row.staff_name ?? "—"}
               </span>
             ),
@@ -161,7 +158,7 @@ export function AdminEvaluationsTable({
             key: "dept_id",
             label: "Department",
             render: (row) => (
-              <span className="text-sm" style={{ color: "var(--muted)" }}>
+              <span className="text-sm text-muted-foreground">
                 {row.dept_id ?? "—"}
               </span>
             ),
