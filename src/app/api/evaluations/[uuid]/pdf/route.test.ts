@@ -5,6 +5,94 @@ import {
   calculateAverageRating,
   renderStars,
 } from "@/modules/candidates/evaluation/pdf-helpers";
+import { buildReportHtml, type ReportData } from "@/modules/candidates/evaluation/pdf-helpers";
+
+// ---------------------------------------------------------------------------
+// Tests: buildReportHtml
+// ---------------------------------------------------------------------------
+
+describe("buildReportHtml", () => {
+  const baseData: ReportData = {
+    candidateName: "John Doe",
+    candidateEmail: "john@example.com",
+    staffName: "Jane Staff",
+    period: "2026-01-01 → 2026-03-31",
+    evalDate: "June 20, 2026",
+    uuid: "can_eval_550e8400-e29b-41d4-a716-446655440000",
+    answerRows: "<tr><td>1</td><td>Test Q</td><td>Test A</td><td>★★★★★</td></tr>",
+    answersCount: 1,
+    avgRating: "5.0",
+  };
+
+  it("renders candidate name in the title", () => {
+    const html = buildReportHtml(baseData);
+    expect(html).toContain("John Doe");
+    expect(html).toContain("Candidate Evaluation Report");
+  });
+
+  it("renders the h1 heading", () => {
+    const html = buildReportHtml(baseData);
+    expect(html).toContain("<h1>Candidate Evaluation Report</h1>");
+  });
+
+  it("renders header info with candidate details", () => {
+    const html = buildReportHtml(baseData);
+    expect(html).toContain("john@example.com");
+    expect(html).toContain("Jane Staff");
+    expect(html).toContain("can_eval_550e8400");
+  });
+
+  it("renders answer rows in the table body", () => {
+    const html = buildReportHtml(baseData);
+    expect(html).toContain("<tr><td>1</td><td>Test Q</td>");
+  });
+
+  it("renders summary section with questions count and average rating", () => {
+    const html = buildReportHtml(baseData);
+    expect(html).toContain("Questions");
+    expect(html).toContain("1");
+    expect(html).toContain("Average Rating");
+    expect(html).toContain("5.0");
+    expect(html).toContain("Report Date");
+    expect(html).toContain("June 20, 2026");
+  });
+
+  it("renders the footer", () => {
+    const html = buildReportHtml(baseData);
+    expect(html).toContain("StudentHub");
+    expect(html).toContain("Candidate Evaluation Report");
+  });
+
+  it("escapes HTML in candidate name", () => {
+    const data = { ...baseData, candidateName: "<script>alert('xss')</script>" };
+    const html = buildReportHtml(data);
+    expect(html).toContain("&lt;script&gt;alert(&#039;xss&#039;)&lt;/script&gt;");
+    expect(html).not.toContain("<script>");
+  });
+
+  it("renders zero answers gracefully", () => {
+    const data = { ...baseData, answersCount: 0, avgRating: "—", answerRows: "" };
+    const html = buildReportHtml(data);
+    expect(html).toContain("0");
+  });
+
+  it("renders empty candidate email as em-dash", () => {
+    const data = { ...baseData, candidateEmail: "" };
+    const html = buildReportHtml(data);
+    expect(html).toContain("—");
+  });
+
+  it("renders multiple answer rows", () => {
+    const rows = Array.from({ length: 3 }, (_, i) =>
+      `<tr><td class="num">${i + 1}</td><td>Q${i + 1}</td><td>A${i + 1}</td><td class="rating">★</td></tr>`
+    ).join("\n");
+    const data = { ...baseData, answerRows: rows, answersCount: 3 };
+    const html = buildReportHtml(data);
+    expect(html).toContain("Q1");
+    expect(html).toContain("A2");
+    expect(html).toContain("Q3");
+  });
+});
 
 // ---------------------------------------------------------------------------
 // Tests: escapeHtml
