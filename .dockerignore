@@ -12,3 +12,10 @@ playwright-report
 test-results
 screenshots
 node_modules/.cache
+data
+docs
+.github
+ops
+*.zip
+*.sql
+*.sql.gz
