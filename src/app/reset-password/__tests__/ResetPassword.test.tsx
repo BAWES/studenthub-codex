@@ -42,7 +42,7 @@ describe("ResetPasswordForm", () => {
     render(<ResetPasswordForm token="valid-token" />);
 
     // Skeleton shows pulsing lines while validating
-    const skeletonLines = document.querySelectorAll(".shLoginSkeletonLine");
+    const skeletonLines = document.querySelectorAll(".animate-pulse");
     expect(skeletonLines.length).toBeGreaterThan(0);
   });
 

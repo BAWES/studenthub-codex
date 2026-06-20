@@ -16,9 +16,12 @@ export default async function LoginPage({
 
   return (
     <main className="min-h-svh grid grid-cols-[minmax(0,1fr)_minmax(400px,520px)] bg-[var(--paper)] max-[900px]:grid-cols-1 max-[900px]:grid-rows-[auto_minmax(0,1fr)]">
-      {/* ── Brand side — an ambient coral/blue gradient ──────────────── */}
+      {/* ── Brand side — an ambient coral gradient ────────────────────── */}
       <div className="relative grid content-center gap-4 p-[clamp(32px,5vw,64px)] overflow-hidden">
-        <div className="absolute inset-0 shLoginGradient" aria-hidden="true" />
+        <div
+          className="absolute inset-0 bg-gradient-to-br from-[color-mix(in_srgb,var(--sh-coral)_18%,transparent)] via-transparent to-[color-mix(in_srgb,#1f73b7_12%,transparent)]"
+          aria-hidden="true"
+        />
 
         <div className="relative z-1 animate-[shLoginBrandFadeIn_600ms_var(--sh-easing)_both]">
           <div className="inline-flex items-center gap-[10px] mb-3">
