@@ -1,12 +1,28 @@
 import { getStudentProfile } from "./actions";
 import { notFound } from "next/navigation";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
-/**
- * Student Public Profile — page orchestration
- * Fetches and renders a student's public-facing profile.
- */
 interface Props {
   params: Promise<{ studentId: string }>;
+}
+
+function AvatarCircle({ name }: { name?: string | null }) {
+  const initial = name?.charAt(0)?.toUpperCase() || "?";
+  return (
+    <div className="flex size-24 items-center justify-center rounded-full text-3xl font-bold shrink-0"
+      style={{ backgroundColor: "#fef1ef", color: "#eb6651" }}
+    >
+      {initial}
+    </div>
+  );
+}
+
+function PeriodLabel({ startYear, endYear }: { startYear?: number | null; endYear?: number | null }) {
+  if (!startYear && !endYear) return null;
+  if (startYear && endYear) return <>{startYear} &mdash; {endYear}</>;
+  if (startYear) return <>From {startYear}</>;
+  return <>Until {endYear}</>;
 }
 
 export default async function StudentProfilePage({ params }: Props) {
@@ -20,9 +36,20 @@ export default async function StudentProfilePage({ params }: Props) {
   if (!profile) {
     return (
       <div className="container mx-auto py-8">
-        <div className="max-w-3xl mx-auto text-center">
-          <h1 className="text-2xl font-bold">Profile Not Found</h1>
-          <p className="text-muted-foreground mt-2">No candidate found with the given ID.</p>
+        <div className="mx-auto max-w-lg text-center">
+          <Card>
+            <CardContent className="flex flex-col items-center gap-4 py-12">
+              <div className="flex size-16 items-center justify-center rounded-full text-2xl"
+                style={{ backgroundColor: "#fef1ef", color: "#eb6651" }}
+              >
+                !
+              </div>
+              <CardTitle>Profile Not Found</CardTitle>
+              <p className="text-sm" style={{ color: "#6e6b66" }}>
+                No candidate found with the given ID.
+              </p>
+            </CardContent>
+          </Card>
         </div>
       </div>
     );
@@ -30,52 +57,95 @@ export default async function StudentProfilePage({ params }: Props) {
 
   return (
     <div className="container mx-auto py-8">
-      <div className="max-w-3xl mx-auto space-y-8">
-        {/* Profile Header */}
-        <section className="flex items-start gap-6">
-          <div className="w-24 h-24 bg-muted rounded-full flex items-center justify-center text-3xl font-bold text-muted-foreground">
-            {profile.name?.charAt(0) || "?"}
-          </div>
-          <div className="space-y-2">
-            <h1 className="text-3xl font-bold">{profile.name || "Student Profile"}</h1>
-            {profile.intro && <p className="text-lg text-muted-foreground">{profile.intro}</p>}
-            {profile.objective && <p className="text-muted-foreground">{profile.objective}</p>}
-          </div>
-        </section>
-
-        {/* Skills */}
-        <section>
-          <h2 className="text-xl font-semibold mb-4">Skills</h2>
-          <div className="flex flex-wrap gap-2">
-            {profile.skills.length > 0 ? (
-              profile.skills.map((skill) => (
-                <span key={skill.id} className="px-3 py-1 bg-secondary text-secondary-foreground rounded-full text-sm">
-                  {skill.name}
-                </span>
-              ))
-            ) : (
-              <p className="text-muted-foreground text-sm">No skills listed yet.</p>
-            )}
-          </div>
-        </section>
-
-        {/* Experience */}
-        <section>
-          <h2 className="text-xl font-semibold mb-4">Experience</h2>
-          {profile.experience.length > 0 ? (
-            <div className="space-y-4">
-              {profile.experience.map((exp) => (
-                <div key={exp.id} className="border rounded-lg p-4">
-                  <h3 className="font-medium">{exp.title}</h3>
-                  {exp.employer && <p className="text-sm text-muted-foreground">{exp.employer}</p>}
-                  {exp.startYear && <p className="mt-2 text-sm text-muted-foreground">Started: {exp.startYear}{exp.endYear ? ` — Ended: ${exp.endYear}` : ""}</p>}
+      <div className="mx-auto max-w-3xl space-y-8">
+        <Card>
+          <CardContent className="flex flex-col gap-6 sm:flex-row sm:items-start">
+            <AvatarCircle name={profile.name} />
+            <div className="space-y-3">
+              <div>
+                <h1 className="text-2xl font-bold" style={{ color: "#1d1c1a" }}>
+                  {profile.name || "Student Profile"}
+                </h1>
+                {profile.intro && (
+                  <p className="mt-1 text-lg" style={{ color: "#6e6b66" }}>
+                    {profile.intro}
+                  </p>
+                )}
+              </div>
+              {profile.objective && (
+                <p className="text-sm" style={{ color: "#a09d98" }}>
+                  {profile.objective}
+                </p>
+              )}
+              {profile.email && (
+                <div className="flex items-center gap-2 text-sm" style={{ color: "#6e6b66" }}>
+                  <svg className="size-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                  {profile.email}
                 </div>
-              ))}
+              )}
             </div>
-          ) : (
-            <p className="text-muted-foreground text-sm">No experience listed yet.</p>
-          )}
-        </section>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Skills</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {profile.skills.length > 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {profile.skills.map((skill) => (
+                  <Badge key={skill.id} variant="secondary">
+                    {skill.name}
+                  </Badge>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm" style={{ color: "#a09d98" }}>
+                No skills listed yet.
+              </p>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Experience</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {profile.experience.length > 0 ? (
+              <div className="space-y-4">
+                {profile.experience.map((exp) => (
+                  <div
+                    key={exp.id}
+                    className="rounded-lg border p-4 transition-colors"
+                    style={{ borderColor: "#e8e6e3", backgroundColor: "#ffffff" }}
+                  >
+                    <h3 className="font-semibold" style={{ color: "#1d1c1a" }}>
+                      {exp.title}
+                    </h3>
+                    {exp.employer && (
+                      <p className="mt-0.5 text-sm" style={{ color: "#6e6b66" }}>
+                        {exp.employer}
+                      </p>
+                    )}
+                    {(exp.startYear || exp.endYear) && (
+                      <p className="mt-2 text-xs" style={{ color: "#a09d98" }}>
+                        <PeriodLabel startYear={exp.startYear} endYear={exp.endYear} />
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm" style={{ color: "#a09d98" }}>
+                No experience listed yet.
+              </p>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
