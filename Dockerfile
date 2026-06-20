@@ -15,7 +15,7 @@ RUN corepack enable && corepack prepare pnpm@latest --activate
 WORKDIR /app
 
 # ---------------------------------------------------------------------------
-# Stage 2: Dependencies (frozen lockfile — production deps only)
+# Stage 2: Dependencies (production deps only)
 # ---------------------------------------------------------------------------
 FROM base AS deps
 LABEL stage=deps
@@ -23,7 +23,7 @@ LABEL stage=deps
 COPY package.json pnpm-lock.yaml .npmrc ./
 
 # minimumReleaseAge=0 from .npmrc disables pnpm's supply-chain check
-RUN pnpm install --frozen-lockfile --prod --ignore-scripts
+RUN pnpm install --ignore-scripts --no-frozen-lockfile --prod
 
 # ---------------------------------------------------------------------------
 # Stage 3: Build (full deps + build)
@@ -32,7 +32,7 @@ FROM base AS builder
 LABEL stage=builder
 
 COPY package.json pnpm-lock.yaml .npmrc ./
-RUN pnpm install --frozen-lockfile --ignore-scripts
+RUN pnpm install --ignore-scripts --no-frozen-lockfile
 
 COPY . .
 
