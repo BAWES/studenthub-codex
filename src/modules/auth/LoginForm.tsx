@@ -22,8 +22,7 @@ export function LoginForm() {
           <div className="shLoginStagger grid gap-2">
             <label
               htmlFor="login-email"
-              className="text-xs font-semibold uppercase tracking-wider"
-              style={{ color: "var(--muted)" }}
+              className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
             >
               Email
             </label>
@@ -43,8 +42,7 @@ export function LoginForm() {
           <div className="shLoginStagger grid gap-2">
             <label
               htmlFor="login-password"
-              className="text-xs font-semibold uppercase tracking-wider"
-              style={{ color: "var(--muted)" }}
+              className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
             >
               Password
             </label>
@@ -78,14 +76,14 @@ export function LoginForm() {
 
       {accounts.length > 0 ? (
         <section
-          className="grid gap-2 p-6 pt-0 border-t border-[var(--line)]"
+          className="grid gap-2 p-6 pt-0 border-t border-border"
           aria-label="Verified StudentHub accounts"
         >
           <div className="grid gap-0.5">
-            <strong className="text-[var(--ink)] text-[15px] leading-[1.2] font-semibold">
+            <strong className="text-foreground text-[15px] leading-[1.2] font-semibold">
               Multiple accounts found
             </strong>
-            <p className="text-[var(--muted)] text-[13px] leading-relaxed m-0">
+            <p className="text-muted-foreground text-[13px] leading-relaxed m-0">
               Choose where to continue.
             </p>
           </div>
