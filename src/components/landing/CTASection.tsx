@@ -14,11 +14,9 @@ export default function CTASection({ persona }: CTASectionProps) {
   return (
     <section className="py-12 sm:py-16 px-6 max-w-6xl mx-auto max-sm:px-4">
       <div
-        className="relative overflow-hidden rounded-xl p-8 sm:p-12 text-center shLandingGlassHover"
+        className="relative overflow-hidden rounded-xl p-8 sm:p-12 text-center shLandingCardStrong"
         style={{
-          backgroundColor: "var(--sh-glass-bg)",
-          backdropFilter: "blur(16px)",
-          WebkitBackdropFilter: "blur(16px)",
+          backgroundColor: "var(--surface)",
           border: `1px solid ${persona === "company" ? `${SH_AMBER}30` : `${SH_BLUE}30`}`,
         }}
       >
