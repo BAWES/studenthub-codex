@@ -255,7 +255,7 @@ export default function FeatureGrid({
   return (
     <section className={cn("shSection", className)} aria-label="Key features">
       <div className="text-center mb-8 md:mb-10">
-        <p className="text-[var(--sh-info)] text-[11px] font-black uppercase tracking-wider mb-2">
+        <p className="text-[#1f73b7] text-[11px] font-black uppercase tracking-wider mb-2">
           Everything you need
         </p>
         <h2 className="shBenefitsTitle text-center">
@@ -295,8 +295,8 @@ export default function FeatureGrid({
               key={feat.title}
               className="group shCard rounded-xl p-5 transition-all duration-[280ms] hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(16,24,40,0.1)]"
               style={{
-                background: "var(--sh-glass-bg)",
-                border: "1px solid var(--sh-glass-border)",
+                background: "var(--surface)",
+                border: "1px solid var(--border)",
                 animationDelay: `${i * 80 + 100}ms`,
               }}
             >
@@ -304,8 +304,8 @@ export default function FeatureGrid({
               <div
                 className="size-10 rounded-lg flex items-center justify-center mb-4 transition-colors duration-200"
                 style={{
-                  background: "var(--sh-info-bg)",
-                  color: "var(--sh-info)",
+                  background: "rgba(31,115,183,0.08)",
+                  color: "#1f73b7",
                 }}
               >
                 <Icon className="size-5" aria-hidden="true" />
@@ -322,8 +322,8 @@ export default function FeatureGrid({
                 <div
                   className="mt-3 pt-3 text-[11px] font-semibold"
                   style={{
-                    color: "var(--sh-info)",
-                    borderTop: "1px solid var(--sh-glass-border)",
+                    color: "#1f73b7",
+                    borderTop: "1px solid var(--border)",
                   }}
                 >
                   {feat.stat}

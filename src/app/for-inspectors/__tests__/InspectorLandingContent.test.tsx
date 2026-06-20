@@ -83,6 +83,7 @@ describe("Inspector landing page (/for-inspectors)", () => {
 
   it("renders the hero section with staff-matched headline", () => {
     render(<InspectorLandingContent {...defaultProps} />);
+    // HeroSection renders h1 with placement messaging
     expect(
       screen.getByRole("heading", { level: 1, name: /connecting students/i })
     ).toBeInTheDocument();

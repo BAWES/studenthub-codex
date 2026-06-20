@@ -30,12 +30,20 @@ export default async function EmployerJobDetailPage({ params }: Props) {
     >
       <JobEditForm job={job} readOnly={!isOwner} />
       <div className="mt-8 pt-6 border-t border-white/10">
-        <Link
-          href={`/employer/jobs/${job.jobListingId}/applications`}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors"
-        >
-          View Applications
-        </Link>
+        <div className="flex gap-4">
+          <Link
+            href={`/employer/jobs/${job.jobListingId}/applications`}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors"
+          >
+            View Applications
+          </Link>
+          <Link
+            href={`/employer/jobs/${job.jobListingId}/matching`}
+            className="inline-flex items-center gap-2 px-4 py-2 border border-white/20 rounded-lg text-sm font-medium hover:bg-white/5 transition-colors"
+          >
+            Matching Candidates
+          </Link>
+        </div>
       </div>
     </WorkspaceShell>
   );

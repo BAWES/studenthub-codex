@@ -83,7 +83,7 @@ describe("Company landing page (/for-companies)", () => {
 
   it("renders the hero section with staff-matched headline", () => {
     render(<CompanyLandingContent {...defaultProps} />);
-    // HeroSection renders h1 with staff-matched messaging
+    // HeroSection renders h1 with placement messaging
     expect(
       screen.getByRole("heading", { level: 1, name: /connecting students/i })
     ).toBeInTheDocument();
