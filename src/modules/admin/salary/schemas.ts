@@ -10,7 +10,7 @@ export const listSalaryInputSchema = z.object({
 });
 
 export const salaryItemSchema = z.object({
-  staff_salary_uuid: z.string().min(1),
+  staff_salary_uuid: z.string(),
   staff_name: z.string().nullable().optional(),
   salary: z.number().nullable().optional(),
   salary_currency: z.string().nullable().optional(),

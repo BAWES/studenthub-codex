@@ -15,8 +15,6 @@ export function AdminSalaryTable({
   total: number;
 }) {
   const columns = [
-    { key: "staff_name", label: "Staff", render: (row: SalaryItem) =>
-      row.staff_name ?? "\u2014" },
     { key: "salary", label: "Salary", render: (row: SalaryItem) =>
       row.salary != null
         ? `${Number(row.salary).toLocaleString()} ${row.salary_currency ?? ""}`
