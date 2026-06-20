@@ -8,6 +8,9 @@ import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
 
 // Re-exports from individual action files
+export { createInvitationAction, updateInvitationStatusAction } from "./invitation-actions";
+export { transitionApplicationAction } from "./application-actions";
+export { scheduleInterviewAction, updateInterviewAction } from "./interview-actions";
 
 export async function createInterviewEvaluationAction(formData: FormData) {
   const session = await requireCapability("request.interview");

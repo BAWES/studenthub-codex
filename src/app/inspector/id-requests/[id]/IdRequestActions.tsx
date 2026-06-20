@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { approveIdRequest, rejectIdRequest } from "@/modules/inspector/id-requests/[id]/actions";
+import { approveIdRequest, rejectIdRequest } from "@/modules/candidates/actions";
 
 export function IdRequestActions({
   requestUuid,
@@ -17,7 +17,7 @@ export function IdRequestActions({
   if (currentStatus !== "pending") return null;
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "1rem", marginTop: "1rem" }}>
+    <div className="flex flex-col gap-4 mt-4">
       <form
         action={approveAction}
         onSubmit={(e) => {
@@ -33,7 +33,7 @@ export function IdRequestActions({
           </button>
         </div>
         {approveState.error && (
-          <p style={{ color: "var(--destructive)", fontSize: "0.875rem", marginTop: "0.25rem" }}>{approveState.error}</p>
+          <p className="text-sm text-destructive mt-1">{approveState.error}</p>
         )}
       </form>
 
@@ -59,7 +59,7 @@ export function IdRequestActions({
               />
             </label>
             {rejectState.error && (
-              <p style={{ color: "var(--destructive)", fontSize: "0.875rem", marginTop: "0.25rem" }}>{rejectState.error}</p>
+              <p className="text-sm text-destructive mt-1">{rejectState.error}</p>
             )}
             <div className="formActions">
               <button type="submit" className="rejectButton" disabled={rejectPending}>

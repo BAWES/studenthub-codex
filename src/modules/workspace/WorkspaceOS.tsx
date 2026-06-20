@@ -6,41 +6,33 @@ import type { Route } from "next";
 import type { SessionUser } from "@/modules/auth/types";
 import { logoutAction } from "@/modules/auth/actions";
 import { ThemeToggle } from "@/modules/theme/ThemeToggle";
-import { LogOut } from "lucide-react";
 import Link from "next/link";
 import { WorkspaceOSContext } from "./WorkspaceOSContext";
 import { WorkspaceMobileNavigation, WorkspaceNavigation } from "./WorkspaceNavigation";
 import { navForRole } from "./navigation";
 import type { NavItem } from "./navigation";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { PageTransition } from "./PageTransition";
-import { RaycastCommandPalette } from "./RaycastCommandPalette";
-import { TabBar } from "./TabBar";
-import { TabProvider } from "./TabContext";
-import { searchCandidatesForPalette } from "./searchPalette";
-import type { CandidatePaletteResult } from "./searchPalette";
 
-// ── Command item shape ──────────────────────────────────────────────
+// ── Command types ─────────────────────────────────────────────
 
-export interface OSCommand {
+export type OSCommand = {
   id: string;
   title: string;
   subtitle: string;
   section: string;
   href: string;
   shortcut?: string;
-}
+};
 
-// ── Keyboard shortcut chords per role ────────────────────────────────
+const builtinShortcuts = [
+  { keys: "⌘K", label: "Open command menu" },
+  { keys: "/", label: "Focus workspace search" },
+  { keys: "G H", label: "Go to command workspace" },
+  { keys: "Esc", label: "Close menu or clear focus" }
+];
+
+// ── Keyboard shortcut chords per role ──────────────────────────
 
 function roleChords(role: string): { keys: string; label: string }[] {
-  const builtinShortcuts = [
-    { keys: "⌘K", label: "Open command menu" },
-    { keys: "/", label: "Focus workspace search" },
-    { keys: "G H", label: "Go to command workspace" },
-    { keys: "Esc", label: "Close menu or clear focus" }
-  ];
   const base = builtinShortcuts;
   if (role === "admin") {
     return [
@@ -69,7 +61,7 @@ function roleChords(role: string): { keys: string; label: string }[] {
   return base;
 }
 
-// ── Build commands from nav items ────────────────────────────────────
+// ── Build commands from nav items ──────────────────────────────
 
 function buildOSCommands(navItems: NavItem[], role: string): OSCommand[] {
   const chordByHref: Record<string, string> = {};
@@ -122,7 +114,7 @@ function buildOSCommands(navItems: NavItem[], role: string): OSCommand[] {
   return [...nav, ...scopes];
 }
 
-// ── WorkspaceOS Component ──────────────────────────────────────────────
+// ── WorkspaceOS Component ──────────────────────────────────────
 
 export function WorkspaceOS({
   session,
@@ -144,61 +136,23 @@ export function WorkspaceOS({
 
   const commands = useMemo(() => buildOSCommands(navItems, session.role), [navItems, session.role]);
 
-  // ── Candidate search (Typesense, inline in palette) ────────────────
-  const [cmdCandidates, setCmdCandidates] = useState<CandidatePaletteResult[]>([]);
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    const q = cmdQuery.trim();
-    if (q.length < 2) {
-      setCmdCandidates([]);
-      return;
-    }
-    debounceRef.current = setTimeout(async () => {
-      const results = await searchCandidatesForPalette(q);
-      setCmdCandidates(results);
-    }, 200);
-    return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-    };
-  }, [cmdQuery]);
-
-  // Flatten command palette items: nav commands + candidate results
-  const allPaletteItems = useMemo(() => {
-    const items = [...commands];
-    for (const c of cmdCandidates) {
-      items.push({
-        id: `candidate-${c.id}`,
-        title: c.name,
-        subtitle: `${c.email} · ${c.uid}`,
-        section: "Candidates",
-        href: `/${session.role}/candidates/${c.id}`,
-      });
-    }
-    return items;
-  }, [commands, cmdCandidates, session.role]);
-
   const filtered = useMemo(() => {
     const q = cmdQuery.trim().toLowerCase();
-    if (!q) return allPaletteItems.slice(0, 18);
-    return allPaletteItems
+    if (!q) return commands.slice(0, 18);
+    return commands
       .filter((c) =>
         [c.title, c.subtitle, c.section, c.shortcut].filter(Boolean).join(" ").toLowerCase().includes(q)
       )
       .slice(0, 18);
-  }, [allPaletteItems, cmdQuery]);
+  }, [commands, cmdQuery]);
 
-  const grouped = useMemo((): [string, OSCommand[]][] => {
-    const groups = new Map<string, OSCommand[]>();
-    const list = cmdQuery.trim() ? filtered : allPaletteItems;
-    for (const cmd of list) {
-      const key = cmd.section || "Other";
-      if (!groups.has(key)) groups.set(key, []);
-      groups.get(key)!.push(cmd);
+  const grouped = useMemo(() => {
+    const g = new Map<string, OSCommand[]>();
+    for (const c of filtered) {
+      g.set(c.section, [...(g.get(c.section) ?? []), c]);
     }
-    return Array.from(groups.entries());
-  }, [allPaletteItems, filtered, cmdQuery]);
+    return [...g.entries()];
+  }, [filtered]);
 
   const visit = useCallback(
     (href: string) => {
@@ -215,12 +169,13 @@ export function WorkspaceOS({
       const el = e.target as HTMLElement | null;
       const typing = el?.tagName === "INPUT" || el?.tagName === "TEXTAREA" || el?.isContentEditable === true;
 
-      // Cmd+K → open command palette
+      // Cmd+K or ? → open command palette
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
         setCmdOpen(true);
         setCmdIndex(0);
         setCmdQuery("");
+        window.setTimeout(() => cmdInputRef.current?.focus(), 0);
         return;
       }
       if (!typing && e.key === "?") {
@@ -228,6 +183,7 @@ export function WorkspaceOS({
         setCmdOpen(true);
         setCmdIndex(0);
         setCmdQuery("shortcut");
+        window.setTimeout(() => cmdInputRef.current?.focus(), 0);
         return;
       }
 
@@ -312,67 +268,93 @@ export function WorkspaceOS({
 
   return (
     <WorkspaceOSContext.Provider value={{ embedded: true, session }}>
-      <a
-        href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded focus:bg-background focus:px-3 focus:py-2 focus:text-sm focus:font-semibold focus:text-foreground focus:shadow-lg focus:outline-none"
-      >
-        Skip to content
-      </a>
-      <TabProvider role={session.role}>
-      <main id="main-content" className="shell">
+      <main className="shell">
         {/* ── Sidebar Rail ─────────────────────────────────── */}
-        <aside
-          className="group/rail sticky top-0 h-svh grid grid-rows-[auto_minmax(0,1fr)_auto] gap-1 p-2 border-r border-border overflow-hidden z-30 transition-all duration-300 w-14 hover:w-[200px] hover:border-r-[color-mix(in_srgb,#eb6651_30%,hsl(var(--border)))]"
-          aria-label="Workspace sidebar"
-        >
-          <Link
-            className="flex items-center justify-center w-11 h-11 rounded-[calc(var(--radius)-2px)] border border-border bg-foreground text-background no-underline overflow-hidden hover:w-full hover:justify-start hover:gap-2.5 hover:px-2.5 transition-all duration-300"
-            href="/app"
-            aria-label="StudentHub app"
-          >
-            <span className="inline-flex items-center justify-center w-7 h-7 rounded-md bg-primary text-white text-[11px] font-bold shrink-0">SH</span>
-            <strong className="opacity-0 group-hover/rail:opacity-100 transition-opacity duration-300 delay-[80ms] text-sm font-semibold whitespace-nowrap">StudentHub</strong>
+        <aside className="workspaceRail">
+          <Link className="workspaceMark" href="/app" aria-label="StudentHub app">
+            <span>SH</span>
+            <strong>StudentHub</strong>
           </Link>
           <WorkspaceNavigation items={navItems} role={session.role} />
-          <hr className="border-t border-border mx-2 my-1" />
-          <div className="grid gap-1 transition-all duration-300 w-11 group-hover/rail:w-full">
-            <Button variant="ghost" size="icon" aria-label="Open command menu" onClick={() => { setCmdOpen(true); }}>
-              <span className="text-xs font-bold text-muted-foreground">⌘K</span>
-            </Button>
+          <div className="workspaceRailFooter">
+            <button className="commandLauncher" type="button" onClick={() => { setCmdOpen(true); }}>
+              <span>⌘K</span>
+            </button>
             <ThemeToggle />
-            <form action={logoutAction}>
-              <Button type="submit" variant="ghost" size="icon" aria-label="Sign out">
-                <LogOut size={18} strokeWidth={1.5} aria-hidden="true" />
-              </Button>
+            <form className="workspaceSignout" action={logoutAction}>
+              <button type="submit">Sign out</button>
             </form>
           </div>
         </aside>
 
         {/* ── Content Stage ───────────────────────────────── */}
-        <section className="min-w-0 overflow-x-hidden grid content-start gap-3.5 p-3.5">
-          <TabBar role={session.role} />
-          <PageTransition>{children}</PageTransition>
+        <section className="workspaceStage">
+          {children}
         </section>
 
         {/* ── Mobile Tab Bar ──────────────────────────────── */}
         <WorkspaceMobileNavigation items={navItems} role={session.role} />
       </main>
-      </TabProvider>
 
-      {/* ── Command Palette (Raycast-style) ──────────────────── */}
-      <RaycastCommandPalette
-        open={cmdOpen}
-        query={cmdQuery}
-        onQueryChange={setCmdQuery}
-        index={cmdIndex}
-        onIndexChange={setCmdIndex}
-        grouped={grouped}
-        flatCommands={filtered}
-        onVisit={visit}
-        onClose={() => { setCmdOpen(false); setCmdQuery(""); }}
-        inputRef={cmdInputRef}
-        role={session.role}
-      />
+      {/* ── Command Palette Overlay ───────────────────────── */}
+      {cmdOpen ? (
+        <div className="commandOverlay" role="dialog" aria-modal="true" aria-label="Command menu">
+          <button className="commandScrim" aria-label="Close" type="button" onClick={() => setCmdOpen(false)} />
+          <section className="commandMenu">
+            <div className="commandInputWrap">
+              <span>⌘</span>
+              <input
+                ref={cmdInputRef}
+                autoFocus
+                placeholder="Jump to a view, search records, or run an action..."
+                value={cmdQuery}
+                onChange={(e) => setCmdQuery(e.target.value)}
+              />
+              <kbd>Esc</kbd>
+            </div>
+            <div className="commandList">
+              {grouped.length ? (
+                grouped.map(([section, items]) => (
+                  <div className="commandGroup" key={section}>
+                    <h3>{section}</h3>
+                    {items.map((cmd) => {
+                      const idx = filtered.findIndex((f) => f.id === cmd.id);
+                      return (
+                        <button
+                          className={idx === cmdIndex ? "active" : ""}
+                          key={cmd.id}
+                          type="button"
+                          onMouseEnter={() => setCmdIndex(idx)}
+                          onClick={() => visit(cmd.href)}
+                        >
+                          <span>
+                            <strong>{cmd.title}</strong>
+                            <small>{cmd.subtitle}</small>
+                          </span>
+                          {cmd.shortcut ? <kbd>{cmd.shortcut}</kbd> : null}
+                        </button>
+                      );
+                    })}
+                  </div>
+                ))
+              ) : (
+                <div className="commandEmpty">
+                  <strong>No command found</strong>
+                  <span>Try a view, record name, scope, or shortcut.</span>
+                </div>
+              )}
+            </div>
+            <div className="shortcutGrid">
+              {chords.map((row) => (
+                <div key={row.keys}>
+                  <kbd>{row.keys}</kbd>
+                  <span>{row.label}</span>
+                </div>
+              ))}
+            </div>
+          </section>
+        </div>
+      ) : null}
     </WorkspaceOSContext.Provider>
   );
 }

@@ -6,9 +6,6 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
-import {
-  transitionError,
-} from "./transition-rules";
 
 /**
  * Create a new hiring request for a company.
@@ -210,31 +207,6 @@ export async function transitionRequestStatusAction(formData: FormData) {
   }
 
   const now = new Date();
-
-  // Validate the status transition
-  const currentStatus = request.request_status ?? undefined;
-  const fromStatus = currentStatus as string | undefined;
-  const errMsg = fromStatus
-    ? transitionError(fromStatus, toStatus)
-    : null;
-
-  if (errMsg) {
-    await prisma.request_activity.create({
-      data: {
-        activity_uuid: `req_act_${crypto.randomUUID()}`,
-        request_uuid: requestUuid,
-        staff_id: Number(session.id),
-        activity_detail: `Blocked status transition: ${errMsg}`,
-        activity_created_datetime: now,
-        activity_updated_datetime: now,
-      },
-    });
-
-    revalidatePath(detailPath);
-    redirect(
-      `${detailPath}?notice=invalid-transition&from=${encodeURIComponent(fromStatus ?? "")}&to=${encodeURIComponent(toStatus)}` as Route,
-    );
-  }
 
   await prisma.$transaction([
     prisma.request.update({

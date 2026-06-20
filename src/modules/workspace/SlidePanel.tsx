@@ -79,13 +79,19 @@ export function SlidePanel({
 }: SlidePanelProps) {
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side={side} showCloseButton={showCloseButton} className={className}>
+      <SheetContent
+        side={side}
+        showCloseButton={showCloseButton}
+        className={className}
+      >
         <div className="slidePanel">
-          <SheetHeader className={!title && !eyebrow && !description ? "sr-only" : undefined}>
-            {eyebrow ? <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{eyebrow}</p> : null}
-            {title ? <SheetTitle>{title}</SheetTitle> : <SheetTitle className="sr-only">Dialog</SheetTitle>}
-            {description ? <SheetDescription>{description}</SheetDescription> : null}
-          </SheetHeader>
+          {title || eyebrow || description ? (
+            <SheetHeader>
+              {eyebrow ? <p className="eyebrow">{eyebrow}</p> : null}
+              {title ? <SheetTitle>{title}</SheetTitle> : null}
+              {description ? <SheetDescription>{description}</SheetDescription> : null}
+            </SheetHeader>
+          ) : null}
           <SheetBody>
             <div className="slidePanelInner">{children}</div>
           </SheetBody>

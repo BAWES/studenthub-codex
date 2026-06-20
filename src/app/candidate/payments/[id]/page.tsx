@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation";
 import { requireRoleCapability } from "@/modules/auth/session";
-import { DetailSection, type DetailSectionRow } from "@/modules/workspace/DetailPanels";
+import { CompactList, FactPanel } from "@/modules/workspace/DetailPanels";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
-import { getCandidatePaymentDetail } from "../actions";
+import { getCandidateTransferDetail } from "@/modules/workspace/data";
 
 export const dynamic = "force-dynamic";
 
@@ -13,7 +13,7 @@ export default async function CandidatePaymentDetailPage({
 }) {
   const session = await requireRoleCapability("candidate", "candidate.read.own");
   const { id } = await params;
-  const data = await getCandidatePaymentDetail({ tcId: Number(id) });
+  const data = await getCandidateTransferDetail(Number(id), Number(session.id));
 
   if (!data) {
     notFound();
@@ -56,30 +56,15 @@ export default async function CandidatePaymentDetailPage({
         { label: "Hours", value: tc.hours, note: "Worked" },
       ]}
     >
-      <DetailSection title="Payment Breakdown" facts={facts} />
-      {transfer && <DetailSection title="Transfer Run" facts={transferFacts} />}
+      <FactPanel title="Payment Breakdown" facts={facts} />
+      {transfer && <FactPanel title="Transfer Run" facts={transferFacts} />}
       {data.invoices.length > 0 && (
         <section className="detailPanel">
           <h2>Receipts & Invoices</h2>
           <p className="detailPanelNote">
             Paid invoices linked to this payment period serve as your receipt.
           </p>
-          <DetailSection
-            type="list"
-            title="Invoices"
-            rows={data.invoices.map((inv) => ({
-              id: inv.id,
-              title: `Invoice #${inv.id}`,
-              subtitle: inv.date
-                ? new Intl.DateTimeFormat("en-US", {
-                    month: "short",
-                    day: "numeric",
-                    year: "numeric",
-                  }).format(inv.date)
-                : "No date",
-              meta: inv.status ?? "Unknown",
-            })) as DetailSectionRow[]}
-          />
+          <CompactList title="Invoices" rows={data.invoices} />
         </section>
       )}
     </WorkspaceShell>

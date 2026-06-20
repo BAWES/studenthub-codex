@@ -5,13 +5,6 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
-import {
-  toggleCandidatePaidSchema,
-  toggleTransferStatusSchema,
-  markPaymentReceivedSchema,
-  deleteTransferSchema,
-  financeNoticeSchema,
-} from "./schemas";
 
 /**
  * Toggle a transfer_candidate row between paid and unpaid.
@@ -20,18 +13,13 @@ import {
 export async function toggleCandidatePaidAction(formData: FormData) {
   const session = await requireCapability("finance.mutate");
 
-  const raw = {
-    tc_id: formData.get("tc_id"),
-    transfer_id: formData.get("transfer_id"),
-  };
-
-  const parsed = toggleCandidatePaidSchema.safeParse(raw);
-  if (!parsed.success) {
-    redirect("/admin/transfers?notice=invalid-params" as Route);
-  }
-
-  const { tc_id: tcId, transfer_id: transferId } = parsed.data;
+  const tcId = Number(formData.get("tc_id"));
+  const transferId = Number(formData.get("transfer_id"));
   const detailPath = `/admin/transfers/${transferId}`;
+
+  if (!Number.isInteger(tcId) || tcId <= 0 || !Number.isInteger(transferId) || transferId <= 0) {
+    redirect(`${detailPath}?notice=invalid-params` as Route);
+  }
 
   const transfer = await prisma.transfer.findUnique({
     where: { transfer_id: transferId, deleted: 0 },
@@ -69,17 +57,7 @@ export async function toggleCandidatePaidAction(formData: FormData) {
 
   revalidatePath(detailPath);
   revalidatePath("/admin/transfers");
-
-  const notice = "paid-toggled";
-  const noticeParsed = financeNoticeSchema.safeParse(notice);
-  if (!noticeParsed.success) {
-    console.error(
-      "[modules/finance] toggleCandidatePaidAction notice validation failed:",
-      noticeParsed.error.issues,
-    );
-  }
-
-  redirect(`${detailPath}?notice=${notice}` as Route);
+  redirect(`${detailPath}?notice=paid-toggled` as Route);
 }
 
 /**
@@ -89,17 +67,12 @@ export async function toggleCandidatePaidAction(formData: FormData) {
 export async function toggleTransferStatusAction(formData: FormData) {
   const session = await requireCapability("finance.mutate");
 
-  const raw = {
-    transfer_id: formData.get("transfer_id"),
-  };
-
-  const parsed = toggleTransferStatusSchema.safeParse(raw);
-  if (!parsed.success) {
-    redirect("/admin/transfers?notice=invalid-params" as Route);
-  }
-
-  const { transfer_id: transferId } = parsed.data;
+  const transferId = Number(formData.get("transfer_id"));
   const detailPath = `/admin/transfers/${transferId}`;
+
+  if (!Number.isInteger(transferId) || transferId <= 0) {
+    redirect(`${detailPath}?notice=invalid-params` as Route);
+  }
 
   const transfer = await prisma.transfer.findUnique({
     where: { transfer_id: transferId, deleted: 0 },
@@ -124,17 +97,7 @@ export async function toggleTransferStatusAction(formData: FormData) {
 
   revalidatePath(detailPath);
   revalidatePath("/admin/transfers");
-
-  const notice = "status-toggled";
-  const noticeParsed = financeNoticeSchema.safeParse(notice);
-  if (!noticeParsed.success) {
-    console.error(
-      "[modules/finance] toggleTransferStatusAction notice validation failed:",
-      noticeParsed.error.issues,
-    );
-  }
-
-  redirect(`${detailPath}?notice=${notice}` as Route);
+  redirect(`${detailPath}?notice=status-toggled` as Route);
 }
 
 /**
@@ -144,18 +107,13 @@ export async function toggleTransferStatusAction(formData: FormData) {
 export async function markPaymentReceivedAction(formData: FormData) {
   const session = await requireCapability("finance.mutate");
 
-  const raw = {
-    transfer_id: formData.get("transfer_id"),
-    received_on: formData.get("received_on"),
-  };
-
-  const parsed = markPaymentReceivedSchema.safeParse(raw);
-  if (!parsed.success) {
-    redirect("/admin/transfers?notice=invalid-params" as Route);
-  }
-
-  const { transfer_id: transferId, received_on: receivedDate } = parsed.data;
+  const transferId = Number(formData.get("transfer_id"));
+  const receivedDate = String(formData.get("received_on") ?? "");
   const detailPath = `/admin/transfers/${transferId}`;
+
+  if (!Number.isInteger(transferId) || transferId <= 0) {
+    redirect(`${detailPath}?notice=invalid-params` as Route);
+  }
 
   const paymentDate = receivedDate ? new Date(receivedDate) : new Date();
 
@@ -185,17 +143,7 @@ export async function markPaymentReceivedAction(formData: FormData) {
 
   revalidatePath(detailPath);
   revalidatePath("/admin/transfers");
-
-  const notice = "payment-received";
-  const noticeParsed = financeNoticeSchema.safeParse(notice);
-  if (!noticeParsed.success) {
-    console.error(
-      "[modules/finance] markPaymentReceivedAction notice validation failed:",
-      noticeParsed.error.issues,
-    );
-  }
-
-  redirect(`${detailPath}?notice=${notice}` as Route);
+  redirect(`${detailPath}?notice=payment-received` as Route);
 }
 
 /**
@@ -204,17 +152,12 @@ export async function markPaymentReceivedAction(formData: FormData) {
 export async function deleteTransferAction(formData: FormData) {
   const session = await requireCapability("finance.mutate");
 
-  const raw = {
-    transfer_id: formData.get("transfer_id"),
-  };
-
-  const parsed = deleteTransferSchema.safeParse(raw);
-  if (!parsed.success) {
-    redirect("/admin/transfers?notice=invalid-params" as Route);
-  }
-
-  const { transfer_id: transferId } = parsed.data;
+  const transferId = Number(formData.get("transfer_id"));
   const cancelPath = "/admin/transfers";
+
+  if (!Number.isInteger(transferId) || transferId <= 0) {
+    redirect(`${cancelPath}?notice=invalid-params` as Route);
+  }
 
   const transfer = await prisma.transfer.findUnique({
     where: { transfer_id: transferId, deleted: 0 },
@@ -238,15 +181,5 @@ export async function deleteTransferAction(formData: FormData) {
 
   revalidatePath(cancelPath);
   revalidatePath("/admin");
-
-  const notice = "transfer-deleted";
-  const noticeParsed = financeNoticeSchema.safeParse(notice);
-  if (!noticeParsed.success) {
-    console.error(
-      "[modules/finance] deleteTransferAction notice validation failed:",
-      noticeParsed.error.issues,
-    );
-  }
-
-  redirect(`${cancelPath}?notice=${notice}` as Route);
+  redirect(`${cancelPath}?notice=transfer-deleted` as Route);
 }

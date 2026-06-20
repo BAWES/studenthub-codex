@@ -1,21 +1,13 @@
-
-!.gitkeep
-# Test artifacts
+node_modules
+.next
 *.tsbuildinfo
 .env
 .env.local
-.hermes/
-.next
-.next-old*
-.next-old*/
-.next_stale_*
-.next.old*
-.next-stale*
+data/*.sql
 data/*.json
 data/*.log
-data/*.sql
-fetch_*.py
-node_modules
+!.gitkeep
+
+# Test artifacts
 playwright-report/
-scripts/
 test-results/

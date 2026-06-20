@@ -16,8 +16,6 @@ test.describe("Candidate language CRUD", () => {
   let candidateCookie: string;
   let candidateId: number;
   let languageIdToRemove: number | null = null;
-  const testLanguage = "Arabic";
-  const testProficiency = "native";
 
   test.beforeAll(async () => {
     const fixtures = await getFixtures();
@@ -27,7 +25,7 @@ test.describe("Candidate language CRUD", () => {
 
     // Clean up leftovers from earlier runs
     await prisma.candidate_language.updateMany({
-      where: { candidate_id: candidateId, language: testLanguage },
+      where: { candidate_id: candidateId, language: "E2E Test Lang" },
       data: { deleted: 1 },
     });
   });
@@ -77,11 +75,16 @@ test.describe("Candidate language CRUD", () => {
     await page.goto("/candidate/edit");
 
     // Either "No languages added yet." or the editable list exists
-    await expect(async () => {
-      const count = await page.locator(".editableList li").count();
-      const emptyVisible = await page.locator('text="No languages added yet."').isVisible();
-      expect(count > 0 || emptyVisible).toBe(true);
-    }).toPass({ timeout: 10000 });
+    const hasAnyLanguages = await page
+      .locator(".editableList li")
+      .count()
+      .then((c) => c > 0);
+    const hasEmptyNotice = await page
+      .locator('text="No languages added yet."')
+      .isVisible()
+      .catch(() => false);
+
+    expect(hasAnyLanguages || hasEmptyNotice).toBe(true);
 
     await context.close();
   });
@@ -106,21 +109,26 @@ test.describe("Candidate language CRUD", () => {
     });
 
     // Select language
-    await page.selectOption('select[name="language"]', testLanguage);
+    await page.selectOption('select[name="language"]', "E2E Test Lang");
     // Select proficiency
-    await page.selectOption('select[name="proficiency"]', testProficiency);
+    await page.selectOption('select[name="proficiency"]', "native");
 
     // Submit
     await page.locator('button:has-text("Add language")').click();
 
-    // Wait for the list to update with the new language
+    // Wait for toast or list update
+    await expect(
+      page.locator('text="Language added"').or(page.locator(".editableList")),
+    ).toBeVisible({ timeout: 10000 });
+
+    // The new language should appear in the list
     const listItem = page.locator(".editableList li", {
-      hasText: testLanguage,
+      hasText: "E2E Test Lang",
     });
     await expect(listItem).toBeVisible({ timeout: 10000 });
 
     // Proficiency badge
-    await expect(listItem.locator(".proficiencyBadge")).toHaveText(testProficiency);
+    await expect(listItem.locator(".proficiencyBadge")).toHaveText("native");
 
     await context.close();
   });
@@ -144,7 +152,7 @@ test.describe("Candidate language CRUD", () => {
 
     // Verify the language exists from the previous test
     const listItem = page.locator(".editableList li", {
-      hasText: testLanguage,
+      hasText: "E2E Test Lang",
     });
     await expect(listItem).toBeVisible({ timeout: 10000 });
 
@@ -155,19 +163,20 @@ test.describe("Candidate language CRUD", () => {
     await expect(
       page
         .locator('text="Language removed"')
-        .or(page.locator(".editableList li", { hasText: testLanguage })),
+        .or(page.locator(".editableList li", { hasText: "E2E Test Lang" })),
     ).toBeVisible({ timeout: 10000 });
 
     // The item should be gone (or the empty notice appears)
-    await expect(async () => {
-      const itemGone = await page
-        .locator(".editableList li", { hasText: testLanguage })
-        .isHidden();
-      const emptyVisible = await page
-        .locator('text="No languages added yet."')
-        .isVisible();
-      expect(itemGone || emptyVisible).toBe(true);
-    }).toPass({ timeout: 10000 });
+    const gone = await page
+      .locator(".editableList li", { hasText: "E2E Test Lang" })
+      .isHidden()
+      .catch(() => true);
+    const emptyNotice = await page
+      .locator('text="No languages added yet."')
+      .isVisible()
+      .catch(() => false);
+
+    expect(gone || emptyNotice).toBe(true);
 
     await context.close();
   });
@@ -190,14 +199,8 @@ test.describe("Candidate language CRUD", () => {
     const page = await context.newPage();
     await page.goto("/candidate/edit");
 
-    // Staff may now have candidate edit access; check the page rendered either way
-    const redirectAway = !page.url().includes("/candidate/edit");
-    if (redirectAway) {
-      await expect(page).not.toHaveURL("/candidate/edit");
-    } else {
-      // Page loaded — verify it's the actual edit form
-      await expect(page.locator("body")).toBeVisible({ timeout: 15000 });
-    }
+    // Should redirect away from candidate edit
+    await expect(page).not.toHaveURL("/candidate/edit");
 
     await context.close();
   });
