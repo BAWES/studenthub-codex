@@ -30,18 +30,15 @@ type Props = {
 
 function MetricCard({ label, value, note }: { label: string; value: number; note?: string }) {
   return (
-    <div
-      className="flex flex-col gap-1 rounded-xl border bg-card p-5"
-      style={{ borderColor: "var(--border)", backgroundColor: "var(--card)" }}
-    >
-      <span className="text-sm font-medium" style={{ color: "var(--muted-foreground)" }}>
+    <div className="flex flex-col gap-1 rounded-xl border border-border bg-card p-5">
+      <span className="text-sm font-medium text-muted-foreground">
         {label}
       </span>
-      <span className="text-3xl font-bold" style={{ color: "var(--ink)" }}>
+      <span className="text-3xl font-bold text-foreground">
         {value.toLocaleString()}
       </span>
       {note && (
-        <span className="text-xs" style={{ color: "var(--muted-foreground)" }}>
+        <span className="text-xs text-muted-foreground">
           {note}
         </span>
       )}
@@ -105,7 +102,7 @@ export function EmployerApplicationsContent({ session, applications, total, metr
           {
             key: "candidateName",
             label: "Candidate",
-            render: (row) => row.candidateName ? String(row.candidateName) : <span style={{ color: "var(--muted-foreground)" }}>—</span>,
+            render: (row) => row.candidateName ? String(row.candidateName) : <span className="text-muted-foreground">—</span>,
           },
           {
             key: "status",

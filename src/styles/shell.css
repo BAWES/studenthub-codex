@@ -25,7 +25,7 @@
   grid-template-columns: none;
 }
 
-/* ── Sidebar Rail — OS Dock ──────────────────────────────────────────── */
+/* ── Sidebar Rail — Workspace Dock (solid surface) ──────────────────── */
 .workspaceRail {
   position: sticky;
   top: 0;
@@ -35,10 +35,8 @@
   align-content: start;
   gap: 6px;
   padding: 8px 6px;
-  background: var(--sh-glass-bg);
-  backdrop-filter: blur(var(--sh-glass-blur));
-  -webkit-backdrop-filter: blur(var(--sh-glass-blur));
-  border-right: 1px solid var(--sh-glass-border);
+  background: var(--surface);
+  border-right: 1px solid var(--border);
   overflow: hidden;
   z-index: 30;
   transition:
@@ -47,7 +45,7 @@
 }
 
 .workspaceRail:hover {
-  border-right-color: var(--sh-glass-border-strong);
+  border-right-color: var(--line);
 }
 
 /* ── Brand Mark ──────────────────────────────────────────────────────── */
@@ -58,7 +56,7 @@
   align-items: center;
   justify-content: center;
   gap: 0;
-  border: 1px solid var(--sh-glass-border);
+  border: 1px solid var(--border);
   border-radius: var(--sh-radius-md);
   background: var(--ink);
   color: var(--paper);
@@ -268,7 +266,7 @@
 }
 
 .workspaceRailNav a:hover {
-  background: var(--sh-glass-bg);
+  background: var(--surface-soft);
   color: var(--ink);
 }
 
@@ -298,7 +296,7 @@
 .workspaceRailDivider {
   height: 1px;
   margin: 2px 10px;
-  background: var(--sh-glass-border);
+  background: var(--line);
   transition:
     margin 300ms var(--sh-easing),
     opacity 200ms var(--sh-easing);
@@ -324,7 +322,7 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  border: 1px solid var(--sh-glass-border);
+  border: 1px solid var(--border);
   border-radius: var(--sh-radius-sm);
   background: transparent;
   color: var(--muted);
@@ -420,17 +418,17 @@
 }
 
 .workspaceTab:hover {
-  background: var(--sh-glass-bg);
+  background: var(--surface-soft);
   color: var(--ink);
 }
 
 .workspaceTab.active {
   color: var(--ink);
-  background: var(--sh-glass-bg-strong);
+  background: var(--surface);
 }
 
 .workspaceTab.dragOver {
-  background: var(--sh-glass-bg-hover, rgba(255,255,255,0.08));
+  background: var(--surface-soft);
   outline: 1px dashed var(--sh-info);
 }
 
@@ -601,7 +599,7 @@
 
 .workspaceTabAdd:hover,
 .workspaceTabAdd.active {
-  background: var(--sh-glass-bg);
+  background: var(--surface-soft);
   color: var(--ink);
 }
 
@@ -614,12 +612,10 @@
   z-index: 50;
   min-width: 180px;
   padding: 4px;
-  background: var(--sh-glass-bg-strong);
-  backdrop-filter: blur(var(--sh-glass-blur));
-  -webkit-backdrop-filter: blur(var(--sh-glass-blur));
-  border: 1px solid var(--sh-glass-border);
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: var(--sh-radius-md);
-  box-shadow: var(--sh-shadow-lg, 0 8px 24px rgba(0, 0, 0, 0.12));
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
   display: flex;
   flex-direction: column;
   gap: 1px;
@@ -644,11 +640,11 @@
 }
 
 .workspaceTabMenuItem:hover {
-  background: var(--sh-glass-bg);
+  background: var(--surface-soft);
   color: var(--ink);
 }
 
-/* ── Glass Topbar ───────────────────────────────────────────────────── */
+/* ── Solid Topbar ────────────────────────────────────────────────── */
 .topbar {
   position: sticky;
   top: 10px;
@@ -660,14 +656,10 @@
   min-height: 56px;
   padding: 0 12px;
   margin-bottom: 4px;
-  border-radius: var(--sh-radius-lg);
-  background: var(--sh-glass-bg-strong);
   padding: 0 16px;
   border-radius: var(--sh-radius-lg);
-  background: var(--sh-glass-bg);
-  backdrop-filter: blur(var(--sh-glass-blur));
-  -webkit-backdrop-filter: blur(var(--sh-glass-blur));
-  border: 1px solid var(--sh-glass-border);
+  background: var(--surface);
+  border: 1px solid var(--border);
   transition:
     background 200ms var(--sh-easing),
     border-color 200ms var(--sh-easing),
@@ -675,9 +667,9 @@
 }
 
 .topbar:hover {
-  background: var(--sh-glass-bg-strong);
-  border-color: var(--sh-glass-border-strong);
-  box-shadow: var(--sh-glow-sm);
+  background: var(--surface-soft);
+  border-color: var(--line);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
 .topbar div:first-child {
@@ -743,7 +735,7 @@
   display: none;
 }
 
-/* ── Metric Cards — Glass Panels with Data ──────────────────────────── */
+/* ── Metric Cards — Solid Surface Panels ──────────────────────────── */
 .metrics {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -757,10 +749,8 @@
   gap: 6px;
   padding: 16px;
   border-radius: var(--sh-radius-lg);
-  background: var(--sh-glass-bg);
-  backdrop-filter: blur(var(--sh-glass-blur));
-  -webkit-backdrop-filter: blur(var(--sh-glass-blur));
-  border: 1px solid var(--sh-glass-border);
+  background: var(--surface);
+  border: 1px solid var(--border);
   transition:
     background 200ms var(--sh-easing),
     border-color 200ms var(--sh-easing),
@@ -769,9 +759,9 @@
 }
 
 .metric:hover {
-  background: var(--sh-glass-bg-strong);
-  border-color: var(--sh-glass-border-strong);
-  box-shadow: var(--sh-glow-sm);
+  background: var(--surface-soft);
+  border-color: var(--line);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   transform: translateY(-2px);
 }
 
@@ -798,7 +788,7 @@
   line-height: 1.4;
 }
 
-/* ── MetricCard Component (enhanced glass panel with trend + animation) ── */
+/* ── MetricCard Component (solid card surface) ── */
 .metricCard {
   position: relative;
   overflow: hidden;
@@ -808,10 +798,8 @@
   gap: 0;
   padding: 0;
   border-radius: var(--sh-radius-lg);
-  background: var(--sh-glass-bg);
-  backdrop-filter: blur(var(--sh-glass-blur));
-  -webkit-backdrop-filter: blur(var(--sh-glass-blur));
-  border: 1px solid var(--sh-glass-border);
+  background: var(--surface);
+  border: 1px solid var(--border);
   transition:
     background 200ms var(--sh-easing),
     border-color 200ms var(--sh-easing),
@@ -1030,10 +1018,8 @@
   left: 0;
   right: 0;
   z-index: 40;
-  border-top: 1px solid var(--sh-glass-border);
-  background: var(--sh-glass-bg-strong);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
+  border-top: 1px solid var(--border);
+  background: var(--surface);
   padding: 4px env(safe-area-inset-bottom) 4px;
 }
 
@@ -1390,10 +1376,8 @@
   padding: 32px 24px;
   text-align: center;
   border-radius: var(--sh-radius-lg);
-  background: var(--sh-glass-bg);
-  backdrop-filter: blur(var(--sh-glass-blur));
-  -webkit-backdrop-filter: blur(var(--sh-glass-blur));
-  border: 1px solid var(--sh-glass-border);
+  background: var(--surface);
+  border: 1px solid var(--border);
   animation: shEmptyIn 360ms var(--sh-easing) both;
 }
 
@@ -1415,16 +1399,14 @@
 }
 
 .shGlassStrong {
-  background: var(--sh-glass-bg-strong);
-  border-color: var(--sh-glass-border-strong);
+  background: var(--surface-soft);
+  border-color: var(--line);
 }
 
 .shGlassElevated {
-  background: var(--sh-glass-bg-strong);
-  backdrop-filter: blur(var(--sh-glass-blur));
-  -webkit-backdrop-filter: blur(var(--sh-glass-blur));
-  border: 1px solid var(--sh-glass-border-strong);
-  box-shadow: var(--sh-glow-sm);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
 }
 
 .shGlassRadiusSm { border-radius: var(--sh-radius-sm); }
