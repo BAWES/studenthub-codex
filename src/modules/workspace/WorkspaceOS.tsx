@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, useCallback, useId } from "react";
+import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import type { Route } from "next";
 import type { SessionUser } from "@/modules/auth/types";
 import { logoutAction } from "@/modules/auth/actions";
 import { ThemeToggle } from "@/modules/theme/ThemeToggle";
+import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { WorkspaceOSContext } from "./WorkspaceOSContext";
 import { WorkspaceMobileNavigation, WorkspaceNavigation } from "./WorkspaceNavigation";
@@ -36,7 +37,7 @@ const builtinShortcuts = [
   { keys: "⌘K", label: "Open command menu" },
   { keys: "/", label: "Focus workspace search" },
   { keys: "G H", label: "Go to command workspace" },
-  { keys: "Esc", label: "Close menu or clear focus" },
+  { keys: "Esc", label: "Close menu or clear focus" }
 ];
 
 // ── Keyboard shortcut chords per role ──────────────────────────
@@ -49,7 +50,7 @@ function roleChords(role: string): { keys: string; label: string }[] {
       { keys: "G C", label: "Go to candidates" },
       { keys: "G R", label: "Go to requests" },
       { keys: "G T", label: "Go to transfers" },
-      { keys: "G O", label: "Go to companies" },
+      { keys: "G O", label: "Go to companies" }
     ];
   }
   if (role === "staff") {
@@ -57,14 +58,14 @@ function roleChords(role: string): { keys: string; label: string }[] {
       ...base,
       { keys: "G R", label: "Go to requests" },
       { keys: "G C", label: "Go to candidates" },
-      { keys: "G I", label: "Go to interviews" },
+      { keys: "G I", label: "Go to interviews" }
     ];
   }
   if (role === "candidate") {
     return [
       ...base,
       { keys: "G I", label: "Go to invitations" },
-      { keys: "G W", label: "Go to work logs" },
+      { keys: "G W", label: "Go to work logs" }
     ];
   }
   return base;
@@ -97,26 +98,26 @@ function buildOSCommands(navItems: NavItem[], role: string): OSCommand[] {
     subtitle: item.href,
     section: "Navigation",
     href: item.href,
-    shortcut: shortcutFor(item.href),
+    shortcut: shortcutFor(item.href)
   }));
 
   const scopes: OSCommand[] = [];
   if (role === "admin" || role === "staff") {
     scopes.push(
       { id: "scope-candidates", title: "Candidates", subtitle: "Search and manage student candidates", section: "Quick Scopes", href: `/${role}/candidates`, shortcut: shortcutFor(`/${role}/candidates`) },
-      { id: "scope-requests", title: "Requests", subtitle: "Hiring requests and fulfillment", section: "Quick Scopes", href: `/${role}/requests`, shortcut: shortcutFor(`/${role}/requests`) },
+      { id: "scope-requests", title: "Requests", subtitle: "Hiring requests and fulfillment", section: "Quick Scopes", href: `/${role}/requests`, shortcut: shortcutFor(`/${role}/requests`) }
     );
   }
   if (role === "admin") {
     scopes.push(
       { id: "scope-companies", title: "Companies", subtitle: "Client company profiles", section: "Quick Scopes", href: "/admin/companies", shortcut: shortcutFor("/admin/companies") },
-      { id: "scope-transfers", title: "Transfers", subtitle: "Financial transfers and payouts", section: "Quick Scopes", href: "/admin/transfers", shortcut: shortcutFor("/admin/transfers") },
+      { id: "scope-transfers", title: "Transfers", subtitle: "Financial transfers and payouts", section: "Quick Scopes", href: "/admin/transfers", shortcut: shortcutFor("/admin/transfers") }
     );
   }
   if (role === "candidate") {
     scopes.push(
       { id: "scope-invitations", title: "Invitations", subtitle: "Your open invitations", section: "Quick Scopes", href: "/candidate/invitations", shortcut: shortcutFor("/candidate/invitations") },
-      { id: "scope-work-logs", title: "Work Logs", subtitle: "Track your work activities", section: "Quick Scopes", href: "/candidate/work-logs", shortcut: shortcutFor("/candidate/work-logs") },
+      { id: "scope-work-logs", title: "Work Logs", subtitle: "Track your work activities", section: "Quick Scopes", href: "/candidate/work-logs", shortcut: shortcutFor("/candidate/work-logs") }
     );
   }
 
@@ -127,7 +128,7 @@ function buildOSCommands(navItems: NavItem[], role: string): OSCommand[] {
 
 export function WorkspaceOS({
   session,
-  children,
+  children
 }: {
   session: SessionUser;
   children: React.ReactNode;
@@ -135,10 +136,10 @@ export function WorkspaceOS({
   const router = useRouter();
   const pathname = usePathname();
   const navItems = useMemo(() => navForRole(session.role), [session.role]);
-  const commandDialogId = useId();
 
   // ── Command palette state ────────────────────────────────────
   const [cmdOpen, setCmdOpen] = useState(false);
+  const cmdInputRef = useRef<HTMLInputElement | null>(null);
   const seqRef = useRef("");
 
   const commands = useMemo(() => buildOSCommands(navItems, session.role), [navItems, session.role]);
@@ -148,7 +149,7 @@ export function WorkspaceOS({
       setCmdOpen(false);
       router.push(href as Route);
     },
-    [router],
+    [router]
   );
 
   // ── Global keyboard handler ──────────────────────────────────
@@ -161,6 +162,7 @@ export function WorkspaceOS({
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
         setCmdOpen(true);
+        window.setTimeout(() => cmdInputRef.current?.focus(), 0);
         return;
       }
       if (!typing && e.key === "?") {
@@ -197,7 +199,7 @@ export function WorkspaceOS({
         return;
       }
 
-      // j/k navigation on rows (when not in input)
+      // j/k navigation on rows (when not in input or command palette)
       if (!typing && !cmdOpen && (e.key === "j" || e.key === "k")) {
         const rows = document.querySelectorAll("[data-os-navigable]");
         if (!rows.length) return;
@@ -222,42 +224,33 @@ export function WorkspaceOS({
 
   return (
     <WorkspaceOSContext.Provider value={{ embedded: true, session }}>
-      <main className="flex min-h-screen">
+      <main className="min-h-svh grid grid-cols-[236px_minmax(0,1fr)] bg-background">
         {/* ── Sidebar Rail ─────────────────────────────────── */}
-        <aside className="flex w-[236px] shrink-0 flex-col border-r border-border bg-card">
+        <aside className="sticky top-0 h-screen grid grid-rows-[auto_1fr_auto] justify-items-center gap-3 border-r border-border bg-card p-3">
           <Link
-            className="flex items-center gap-2 border-b border-border px-5 py-4 font-semibold text-foreground"
+            className="w-full min-h-12 flex items-center gap-2.5 px-3 border border-border rounded-lg bg-foreground text-card-foreground no-underline transition-opacity hover:opacity-90 font-black text-sm"
             href="/app"
             aria-label="StudentHub app"
           >
-            <span className="flex size-7 items-center justify-center rounded-md bg-primary text-xs font-bold text-primary-foreground">
-              SH
-            </span>
-            <strong className="text-sm">StudentHub</strong>
+            <span className="w-[30px] h-[30px] inline-flex items-center justify-center rounded-[7px] bg-white/14">SH</span>
+            <strong>StudentHub</strong>
           </Link>
           <WorkspaceNavigation items={navItems} role={session.role} />
-          <div className="mt-auto flex items-center gap-2 border-t border-border px-4 py-3">
-            <button
-              type="button"
-              onClick={() => setCmdOpen(true)}
-              className="flex items-center gap-1.5 rounded-md px-2 py-1 text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-            >
+          <div className="w-full grid gap-2">
+            <Button variant="outline" size="sm" className="w-full justify-between font-black" type="button" onClick={() => { setCmdOpen(true); }}>
               <span>⌘K</span>
-            </button>
+            </Button>
             <ThemeToggle />
-            <form className="ml-auto" action={logoutAction}>
-              <button
-                type="submit"
-                className="rounded-md px-2 py-1 text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-              >
+            <form action={logoutAction}>
+              <Button variant="outline" size="sm" type="submit" className="w-full font-black">
                 Sign out
-              </button>
+              </Button>
             </form>
           </div>
         </aside>
 
         {/* ── Content Stage ───────────────────────────────── */}
-        <section className="flex flex-1 flex-col overflow-auto">
+        <section className="min-w-0 overflow-x-hidden grid content-start gap-3.5 p-3.5">
           {children}
         </section>
 
@@ -265,69 +258,50 @@ export function WorkspaceOS({
         <WorkspaceMobileNavigation items={navItems} role={session.role} />
       </main>
 
-      {/* ── Command Palette (shadcn CommandDialog) ────────── */}
-      <CommandDialog open={cmdOpen} onOpenChange={setCmdOpen}>
+      {/* ── shadcn Command Dialog ─────────────────────────── */}
+      <CommandDialog open={cmdOpen} onOpenChange={(open) => { if (!open) setCmdOpen(false); }}>
         <CommandInput
+          ref={cmdInputRef}
           placeholder="Jump to a view, search records, or run an action..."
-          data-command-search
         />
         <CommandList>
+          {chords.length > 0 && (
+            <CommandGroup heading="Keyboard Shortcuts">
+              {chords.map((row) => (
+                <CommandItem
+                  key={row.keys}
+                  onSelect={() => {
+                    // Chord hints are informational, not navigable directly
+                  }}
+                >
+                  <span>{row.label}</span>
+                  <CommandShortcut>{row.keys}</CommandShortcut>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          )}
+          {["Navigation", "Quick Scopes"].map((section) => {
+            const items = commands.filter((c) => c.section === section);
+            if (!items.length) return null;
+            return (
+              <CommandGroup key={section} heading={section}>
+                {items.map((cmd) => (
+                  <CommandItem
+                    key={cmd.id}
+                    onSelect={() => visit(cmd.href)}
+                  >
+                    <span>{cmd.title}</span>
+                    {cmd.shortcut && <CommandShortcut>{cmd.shortcut}</CommandShortcut>}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            );
+          })}
           <CommandEmpty>
-            <div className="flex flex-col items-center gap-1 py-6">
-              <strong className="text-sm text-muted-foreground">No command found</strong>
-              <span className="text-xs text-muted-foreground/70">
-                Try a view, record name, scope, or shortcut.
-              </span>
-            </div>
+            <strong>No command found</strong>
+            <span>Try a view, record name, scope, or shortcut.</span>
           </CommandEmpty>
-          {/* Group by section using cmdk's built-in grouping */}
-          <CommandGroup heading="Navigation">
-            {commands
-              .filter((c) => c.section === "Navigation")
-              .map((cmd) => (
-                <CommandItem
-                  key={cmd.id}
-                  value={`${cmd.title} ${cmd.subtitle}`}
-                  onSelect={() => visit(cmd.href)}
-                >
-                  <span className="flex flex-col">
-                    <strong className="text-sm">{cmd.title}</strong>
-                    <small className="text-xs text-muted-foreground">{cmd.subtitle}</small>
-                  </span>
-                  {cmd.shortcut && <CommandShortcut>{cmd.shortcut}</CommandShortcut>}
-                </CommandItem>
-              ))}
-          </CommandGroup>
-          <CommandGroup heading="Quick Scopes">
-            {commands
-              .filter((c) => c.section === "Quick Scopes")
-              .map((cmd) => (
-                <CommandItem
-                  key={cmd.id}
-                  value={`${cmd.title} ${cmd.subtitle}`}
-                  onSelect={() => visit(cmd.href)}
-                >
-                  <span className="flex flex-col">
-                    <strong className="text-sm">{cmd.title}</strong>
-                    <small className="text-xs text-muted-foreground">{cmd.subtitle}</small>
-                  </span>
-                  {cmd.shortcut && <CommandShortcut>{cmd.shortcut}</CommandShortcut>}
-                </CommandItem>
-              ))}
-          </CommandGroup>
         </CommandList>
-
-        {/* ── Shortcut footer ─────────────────────────────── */}
-        <div className="grid grid-cols-2 gap-x-4 gap-y-1 border-t border-border px-4 py-3 text-xs text-muted-foreground">
-          {chords.map((row) => (
-            <div key={row.keys} className="flex items-center gap-2">
-              <kbd className="rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-[10px] font-medium text-foreground">
-                {row.keys}
-              </kbd>
-              <span>{row.label}</span>
-            </div>
-          ))}
-        </div>
       </CommandDialog>
     </WorkspaceOSContext.Provider>
   );
