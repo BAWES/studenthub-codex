@@ -3,8 +3,8 @@
 import { ArrowRight, Sparkles } from "lucide-react";
 import Link from "next/link";
 
-const SH_BLUE = "#0b63ce";
-const SH_AMBER = "#f59e0b";
+const SH_BLUE = "#1f73b7";
+const SH_CORAL = "#eb6651";
 
 interface CTASectionProps {
   persona: "candidate" | "company";
@@ -17,7 +17,7 @@ export default function CTASection({ persona }: CTASectionProps) {
         className="relative overflow-hidden rounded-xl p-8 sm:p-12 text-center shLandingCardStrong"
         style={{
           backgroundColor: "var(--surface)",
-          border: `1px solid ${persona === "company" ? `${SH_AMBER}30` : `${SH_BLUE}30`}`,
+          border: `1px solid ${persona === "company" ? `${SH_CORAL}30` : `${SH_BLUE}30`}`,
         }}
       >
         {/* Ambient gradient */}
@@ -25,7 +25,7 @@ export default function CTASection({ persona }: CTASectionProps) {
           className="absolute inset-0 pointer-events-none"
           aria-hidden="true"
           style={{
-            background: `radial-gradient(ellipse at 30% 0%, ${SH_BLUE}12, transparent 60%), radial-gradient(ellipse at 70% 100%, ${SH_AMBER}0A, transparent 50%)`,
+            background: `radial-gradient(ellipse at 30% 0%, ${SH_BLUE}12, transparent 60%), radial-gradient(ellipse at 70% 100%, ${SH_CORAL}0A, transparent 50%)`,
           }}
         />
 
@@ -33,8 +33,8 @@ export default function CTASection({ persona }: CTASectionProps) {
           <span
             className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold tracking-wider uppercase"
             style={{
-              color: persona === "company" ? SH_AMBER : SH_BLUE,
-              backgroundColor: persona === "company" ? `${SH_AMBER}12` : `${SH_BLUE}12`,
+              color: persona === "company" ? SH_CORAL : SH_BLUE,
+              backgroundColor: persona === "company" ? `${SH_CORAL}12` : `${SH_BLUE}12`,
             }}
           >
             <Sparkles className="size-3" />
@@ -60,9 +60,9 @@ export default function CTASection({ persona }: CTASectionProps) {
             href={{ pathname: "/signup", query: { role: persona === "company" ? "company" : "candidate" } }}
             className="shLandingBtnPrimary group"
             style={{
-              backgroundColor: persona === "company" ? SH_AMBER : SH_BLUE,
+              backgroundColor: persona === "company" ? SH_CORAL : SH_BLUE,
               boxShadow: persona === "company"
-                ? `0 4px 14px ${SH_AMBER}50`
+                ? `0 4px 14px ${SH_CORAL}50`
                 : `0 4px 14px ${SH_BLUE}40`,
             }}
           >
