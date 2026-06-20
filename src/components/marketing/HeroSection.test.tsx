@@ -11,13 +11,19 @@ vi.mock("next/link", () => ({
     ...rest
   }: {
     children: React.ReactNode;
-    href: string;
+    href: string | { pathname: string; query?: Record<string, string> };
     className?: string;
-  }) => (
-    <a href={href} className={className} {...rest}>
-      {children}
-    </a>
-  ),
+  }) => {
+    const resolved =
+      typeof href === "string"
+        ? href
+        : `${href.pathname}${href.query ? "?" + new URLSearchParams(href.query).toString() : ""}`;
+    return (
+      <a href={resolved} className={className} {...rest}>
+        {children}
+      </a>
+    );
+  },
 }));
 
 // ── Mock lucide-react icons ───────────────────────────────────
@@ -31,6 +37,7 @@ vi.mock("lucide-react", () => ({
   Zap: () => <span data-testid="icon-zap" />,
   Shield: () => <span data-testid="icon-shield" />,
   Clock: () => <span data-testid="icon-clock" />,
+  Star: () => <span data-testid="icon-star" />,
 }));
 
 afterEach(() => {
@@ -41,7 +48,7 @@ afterEach(() => {
 // ── Import component ──────────────────────────────────────────
 import HeroSection from "./HeroSection";
 
-describe("HeroSection (staff-matched placement)", () => {
+describe("HeroSection (staff-matched platform redesign)", () => {
   describe("Default render", () => {
     it("renders eyebrow text", () => {
       render(<HeroSection />);
@@ -50,14 +57,14 @@ describe("HeroSection (staff-matched placement)", () => {
       ).toBeTruthy();
     });
 
-    it("renders an H1 heading with placement messaging", () => {
+    it("renders an H1 heading with staff-matched messaging", () => {
       render(<HeroSection />);
       const heading = screen.getByRole("heading", { level: 1 });
       expect(heading.textContent).toBeTruthy();
       expect(heading.textContent!.length).toBeGreaterThan(10);
     });
 
-    it("renders body paragraph about staff-matched placement", () => {
+    it("renders body paragraph about staff matching", () => {
       render(<HeroSection />);
       expect(
         screen.getByText(/the platform where students build careers/i),
