@@ -14,6 +14,7 @@ const {
 // ── Mock Typesense ──────────────────────────────────────────
 vi.mock("@/lib/typesense", () => ({
   getTypesenseClient: mockGetTypesenseClient,
+  isTypesenseAvailable: vi.fn().mockResolvedValue(true),
   COMPANIES_COLLECTION: "companies",
   STORES_COLLECTION: "stores",
 }));
