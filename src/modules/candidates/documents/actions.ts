@@ -97,14 +97,30 @@ const ALLOWED_TYPES: Record<string, { mime: string[]; ext: string[]; maxSize: nu
 // ---------------------------------------------------------------------------
 
 /**
+ * Build a viewable URL from a stored file path/key.
+ * Local paths (/uploads/...) are returned as-is.
+ * S3 keys (uploads/...) generate a presigned download URL if S3 is configured.
+ */
+async function resolveFileUrl(storedPath: string | null): Promise<string | null> {
+  if (!storedPath) return null;
+  if (isS3Path(storedPath)) {
+    return getS3DownloadUrl(toS3Key(storedPath));
+  }
+  if (storedPath.startsWith("/")) return storedPath;
+  // Fallback for other paths
+  return storedPath;
+}
+
+/**
  * Build a CandidateDocumentItem from type + raw file path from DB.
  */
-function toDocumentItem(type: DocumentType, filePath: string | null): CandidateDocumentItem {
+async function toDocumentItem(type: DocumentType, filePath: string | null): Promise<CandidateDocumentItem> {
+  const url = await resolveFileUrl(filePath);
   return {
     type,
     label: DOCUMENT_LABELS[type],
     filePath,
-    fileUrl: filePath ? filePath : null,
+    fileUrl: url,
   };
 }
 
@@ -151,11 +167,13 @@ export async function listCandidateDocuments(
     return result;
   }
 
-  const items: CandidateDocumentItem[] = DOCUMENT_TYPES.map((type) => {
+  const items: CandidateDocumentItem[] = await Promise.all(
+    DOCUMENT_TYPES.map(async (type) => {
     const field = DOCUMENT_FIELD_MAP[type];
     const filePath = (candidate as Record<string, unknown>)[field] as string | null;
-    return toDocumentItem(type, filePath);
-  });
+    return await toDocumentItem(type, filePath);
+  })
+  );
 
   const result: ListCandidateDocumentsResult = { items, candidateId: candidate.candidate_id };
 
@@ -206,7 +224,7 @@ export async function getCandidateDocument(
   }
 
   const filePath = (candidate as Record<string, unknown>)[field] as string | null;
-  const result: CandidateDocumentItem = toDocumentItem(documentType, filePath);
+  const result: CandidateDocumentItem = await toDocumentItem(documentType, filePath);
 
   // Validate output shape
   const outputParsed = getCandidateDocumentResultSchema.safeParse(result);
@@ -352,6 +370,8 @@ export async function uploadCandidateDocument(
     const relativePath = path.join(relativeDir, filename);
     const buffer = Buffer.from(await file.arrayBuffer());
 
+    const field = DOCUMENT_FIELD_MAP[documentType];
+
     let storedPath: string;
 
     if (s3ConfigAvailable()) {
@@ -367,7 +387,6 @@ export async function uploadCandidateDocument(
     }
 
     // Update the correct DB field
-    const field = DOCUMENT_FIELD_MAP[documentType];
     await prisma.candidate.update({
       where: { candidate_id: candidateId },
       data: { [field]: storedPath },

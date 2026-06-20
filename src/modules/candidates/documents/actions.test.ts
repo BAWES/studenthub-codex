@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { z } from "zod";
 
 // ---------------------------------------------------------------------------
@@ -184,6 +184,135 @@ describe("deleteDocumentSchema", () => {
   it("rejects empty document type", () => {
     const result = deleteDocumentSchema.safeParse({ documentType: "" });
     expect(result.success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// S3/MinIO upload integration tests
+// ---------------------------------------------------------------------------
+
+const { mockRequireCapability, mockS3Send } = vi.hoisted(() => ({
+  mockRequireCapability: vi.fn(),
+  mockS3Send: vi.fn(),
+}));
+
+vi.mock("@/modules/auth/session", () => ({
+  requireCapability: mockRequireCapability,
+}));
+
+vi.mock("@aws-sdk/client-s3", () => ({
+  S3Client: class {
+    send = mockS3Send;
+  },
+  PutObjectCommand: vi.fn(),
+  GetObjectCommand: vi.fn(),
+}));
+
+vi.mock("@aws-sdk/s3-request-presigner", () => ({
+  getSignedUrl: vi.fn().mockResolvedValue("https://s3.example.com/presigned-url"),
+}));
+
+vi.mock("@/lib/prisma", () => ({
+  prisma: {
+    candidate: {
+      findUnique: vi.fn(),
+      update: vi.fn(),
+    },
+  },
+}));
+
+vi.mock("next/cache", () => ({
+  revalidatePath: vi.fn(),
+}));
+
+vi.mock("node:fs/promises", () => ({
+  default: {
+    mkdir: vi.fn(),
+    writeFile: vi.fn(),
+    unlink: vi.fn(),
+  },
+  mkdir: vi.fn(),
+  writeFile: vi.fn(),
+  unlink: vi.fn(),
+}));
+
+const { prisma } = await import("@/lib/prisma");
+
+function setValidS3Env() {
+  process.env.AWS_TEMP_BUCKET_REGION = "us-east-1";
+  process.env.AWS_TEMP_ACCESS_KEY_ID = "AKIAIO...MPLE";
+  process.env.AWS_TEMP_SECRET_ACCESS_KEY = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY";
+  process.env.AWS_TEMP_BUCKET_NAME = "studenthub-temp";
+}
+
+function clearS3Env() {
+  delete process.env.AWS_TEMP_BUCKET_REGION;
+  delete process.env.AWS_TEMP_ACCESS_KEY_ID;
+  delete process.env.AWS_TEMP_SECRET_ACCESS_KEY;
+  delete process.env.AWS_TEMP_BUCKET_NAME;
+  delete process.env.AWS_ENDPOINT_URL;
+  delete process.env.AWS_S3_FORCE_PATH_STYLE;
+}
+
+describe("uploadCandidateDocument with S3/MinIO", () => {
+  let uploadCandidateDocument: any;
+
+  beforeEach(async () => {
+    vi.clearAllMocks();
+    setValidS3Env();
+    mockRequireCapability.mockResolvedValue({ id: "42" });
+    mockS3Send.mockResolvedValue({ ETag: '"abc123"' });
+    (prisma.candidate.update as any).mockResolvedValue({
+      candidate_id: 42,
+    });
+    const mod = await import("./actions");
+    uploadCandidateDocument = mod.uploadCandidateDocument;
+  });
+
+  afterEach(() => {
+    clearS3Env();
+  });
+
+  it("uploads file to S3 when S3 is configured", async () => {
+    const buffer = Buffer.from("fake photo content");
+    const formData = new FormData();
+    formData.append("file_photo", new File([buffer], "photo.jpg", { type: "image/jpeg" }));
+
+    const result = await uploadCandidateDocument({ success: false }, formData);
+
+    expect(result.success).toBe(true);
+    expect(result.filePath).toBeDefined();
+    // S3 key should NOT start with "/" (indicates local path)
+    expect(result.filePath).not.toMatch(/^\//);
+    expect(mockS3Send).toHaveBeenCalledTimes(1);
+  });
+
+  it("stores S3 key in the candidate DB record", async () => {
+    const buffer = Buffer.from("fake cv content");
+    const formData = new FormData();
+    formData.append("file_cv", new File([buffer], "resume.pdf", { type: "application/pdf" }));
+
+    await uploadCandidateDocument({ success: false }, formData);
+
+    const updateCall = (prisma.candidate.update as any).mock.calls[0][0];
+    const dbValue = updateCall.data.candidate_resume;
+    // S3 key — prefixed with s3://, starts with uploads/
+    expect(dbValue).toMatch(/^s3:\/\/uploads\/candidates\/42\/cv_.+\.pdf$/);
+  });
+
+  it("falls back to local disk when S3 env vars are not set", async () => {
+    clearS3Env();
+
+    const buffer = Buffer.from("local content");
+    const formData = new FormData();
+    formData.append("file_video", new File([buffer], "intro.mp4", { type: "video/mp4" }));
+
+    const result = await uploadCandidateDocument({ success: false }, formData);
+
+    expect(result.success).toBe(true);
+    expect(result.filePath).toBeDefined();
+    // Local path starts with /
+    expect(result.filePath).toMatch(/^\/uploads\/candidates\/42\/video_.+\.mp4$/);
   });
 });
 
