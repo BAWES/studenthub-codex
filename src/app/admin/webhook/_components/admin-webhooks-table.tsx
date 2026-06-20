@@ -4,6 +4,16 @@ import { useActionState, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { DataTable } from "@/modules/workspace/DataTable";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 import type { SessionUser } from "@/modules/auth/types";
 import type { WebhookItem } from "../schemas";
@@ -101,9 +111,9 @@ export function AdminWebhooksTable({ session, webhooks }: Props) {
             label: "Actions",
             render: (row) =>
               editingId !== row.webhook_id ? (
-                <button
-                  type="button"
-                  className="text-xs px-2 py-1 rounded hover:bg-red-500/10 text-destructive"
+                <Button
+                  variant="destructive"
+                  size="sm"
                   onClick={async () => {
                     if (confirm(`Delete webhook "${row.event}"?`)) {
                       const result = await deleteWebhook(row.webhook_id);
@@ -115,7 +125,7 @@ export function AdminWebhooksTable({ session, webhooks }: Props) {
                   }}
                 >
                   Delete
-                </button>
+                </Button>
               ) : null,
           },
         ]}
@@ -148,46 +158,45 @@ function CreateWebhookForm({ onSuccess }: { onSuccess: () => void }) {
       className="flex flex-wrap items-end gap-3"
       onSubmit={() => setTimeout(() => { formRef.current?.reset(); }, 100)}
     >
-      <div className="grid gap-1">
-        <label className="text-xs font-medium text-muted-foreground">Event</label>
-        <input
+      <div className="grid gap-1.5">
+        <Label htmlFor="webhook-event" className="text-xs font-medium text-muted-foreground">Event</Label>
+        <Input
+          id="webhook-event"
           name="event"
           required
           maxLength={50}
           placeholder="e.g. user.created"
-          className="h-9 rounded-lg px-3 text-sm border bg-card border-border text-foreground"
+          className="h-9"
         />
       </div>
-      <div className="grid gap-1">
-        <label className="text-xs font-medium text-muted-foreground">Endpoint</label>
-        <input
+      <div className="grid gap-1.5">
+        <Label htmlFor="webhook-endpoint" className="text-xs font-medium text-muted-foreground">Endpoint</Label>
+        <Input
+          id="webhook-endpoint"
           name="endpoint"
           required
           maxLength={255}
           placeholder="https://hooks.example.com/notify"
-          className="h-9 rounded-lg px-3 text-sm border bg-card border-border text-foreground"
+          className="h-9"
         />
       </div>
-      <div className="grid gap-1">
-        <label className="text-xs font-medium text-muted-foreground">Method</label>
-        <select
-          name="method"
-          defaultValue="POST"
-          className="h-9 rounded-lg px-3 text-sm border bg-card border-border text-foreground"
-        >
-          <option value="">No method</option>
-          {WEBHOOK_METHOD_OPTIONS.map((m) => (
-            <option key={m} value={m}>{m}</option>
-          ))}
-        </select>
+      <div className="grid gap-1.5">
+        <Label htmlFor="webhook-method" className="text-xs font-medium text-muted-foreground">Method</Label>
+        <Select name="method" defaultValue="POST">
+          <SelectTrigger id="webhook-method" className="h-9 w-28">
+            <SelectValue placeholder="No method" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="none">No method</SelectItem>
+            {WEBHOOK_METHOD_OPTIONS.map((m) => (
+              <SelectItem key={m} value={m}>{m}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
-      <button
-        type="submit"
-        disabled={pending}
-        className="h-9 rounded-lg px-4 text-sm font-semibold bg-primary text-primary-foreground"
-      >
+      <Button type="submit" disabled={pending}>
         {pending ? "Adding..." : "Add"}
-      </button>
+      </Button>
       {state?.error ? (
         <p className="text-xs w-full text-destructive">{state.error}</p>
       ) : null}
@@ -221,44 +230,37 @@ function EditWebhookForm({
 
   return (
     <form action={action} className="flex items-center gap-2 flex-wrap">
-      <input
+      <Input
         name="event"
         defaultValue={row.event}
         required
         maxLength={50}
-        className="h-8 rounded px-2 text-sm border w-32 bg-card border-border text-foreground"
+        className="h-8 w-32"
       />
-      <input
+      <Input
         name="endpoint"
         defaultValue={row.endpoint}
         required
         maxLength={255}
-        className="h-8 rounded px-2 text-sm border w-48 bg-card border-border text-foreground"
+        className="h-8 w-48"
       />
-      <select
-        name="method"
-        defaultValue={row.method ?? ""}
-        className="h-8 rounded px-2 text-sm border bg-card border-border text-foreground"
-      >
-        <option value="">No method</option>
-        {WEBHOOK_METHOD_OPTIONS.map((m) => (
-          <option key={m} value={m}>{m}</option>
-        ))}
-      </select>
-      <button
-        type="submit"
-        disabled={pending}
-        className="h-8 rounded px-3 text-xs font-semibold bg-primary text-primary-foreground"
-      >
+      <Select name="method" defaultValue={row.method ?? ""}>
+        <SelectTrigger className="h-8 w-28">
+          <SelectValue placeholder="No method" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="none">No method</SelectItem>
+          {WEBHOOK_METHOD_OPTIONS.map((m) => (
+            <SelectItem key={m} value={m}>{m}</SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <Button type="submit" size="sm" disabled={pending}>
         {pending ? "..." : "Save"}
-      </button>
-      <button
-        type="button"
-        onClick={onCancel}
-        className="h-8 rounded px-3 text-xs text-muted-foreground"
-      >
+      </Button>
+      <Button type="button" variant="ghost" size="sm" onClick={onCancel}>
         Cancel
-      </button>
+      </Button>
       {state?.error ? (
         <p className="text-xs text-destructive">{state.error}</p>
       ) : null}
