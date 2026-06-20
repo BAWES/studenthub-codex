@@ -500,6 +500,11 @@ body {
   color: var(--amber);
 }
 
+.uiBadge_destructive {
+  background: color-mix(in srgb, var(--destructive) 14%, transparent);
+  color: var(--destructive);
+}
+
 .uiBadge_outline {
   border-color: var(--border);
   background: color-mix(in srgb, var(--card) 68%, transparent);
