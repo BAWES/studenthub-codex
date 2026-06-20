@@ -22,6 +22,35 @@ export const getPresignedDownloadUrlSchema = z.object({
     .refine((v) => !v.includes(".."), "Key must not contain path traversal")
     .refine((v) => v.length > 1 && !/^\/+$/.test(v), "Key must not be only slashes"),
 });
+
+// ---------------------------------------------------------------------------
+// Direct S3 object operation schemas
+// ---------------------------------------------------------------------------
+
+export const putS3ObjectParamsSchema = z.object({
+  key: z
+    .string({ required_error: "S3 key is required" })
+    .min(1, "S3 key is required")
+    .refine((v) => !v.includes(".."), "Key must not contain path traversal"),
+  contentType: z.string().optional(),
+});
+export type PutS3ObjectParams = z.input<typeof putS3ObjectParamsSchema>;
+
+export const deleteS3ObjectParamsSchema = z.object({
+  key: z
+    .string({ required_error: "S3 key is required" })
+    .min(1, "S3 key is required")
+    .refine((v) => !v.includes(".."), "Key must not contain path traversal"),
+});
+export type DeleteS3ObjectParams = z.input<typeof deleteS3ObjectParamsSchema>;
+
+export const s3OperationResultSchema = z.object({
+  success: z.boolean(),
+  key: z.string(),
+  error: z.string().optional(),
+});
+export type S3OperationResult = z.output<typeof s3OperationResultSchema>;
+
 // ---------------------------------------------------------------------------
 // Output schemas
 // ---------------------------------------------------------------------------
