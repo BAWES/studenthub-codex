@@ -8,41 +8,27 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability, requireRoleCapability } from "@/modules/auth/session";
-import { verifyYiiPassword } from "@/modules/auth/password";
-import bcrypt from "bcryptjs";
-import { getCandidateDetail } from "@/modules/candidates/candidate-detail";
+import { uploadFile, candidateKey, isS3Configured } from "@/lib/s3";
 import {
-  getCandidateProfileSchema,
-  type GetCandidateProfileInput,
-  updateCandidateProfileResultSchema,
   candidateErrorResultSchema,
-  candidateLanguageResultSchema,
-  getCountryOptionsResultSchema,
-  getUniversityOptionsResultSchema,
-  getBankOptionsResultSchema,
-  getDegreeOptionsResultSchema,
-  getMajorOptionsResultSchema,
-  educationStateResultSchema,
-  candidateActionErrorResultSchema,
-  changePasswordResultSchema,
-  getCandidateSchema,
-  addCandidateNoteSchema,
-  candidateDetailResultOutputSchema,
-  addNoteResultOutputSchema,
-  type GetCandidateInput,
-  type AddCandidateNoteInput,
-  type CandidateDetailResult,
-  type AddNoteResult,
+  profileStateSchema,
+  languageStateSchema,
+  educationStateSchema,
+  numericOptionSchema,
+  stringIdOptionSchema,
 } from "./schemas";
+import type {
+  ProfileState,
+  LanguageState,
+  EducationState,
+} from "./schemas";
+
+// Re-export types for external consumers (CandidateEditForm, etc.)
+export type { ProfileState, LanguageState, EducationState };
 
 // ---------------------------------------------------------------------------
 // Profile edit
 // ---------------------------------------------------------------------------
-
-export type ProfileState = {
-  success: boolean;
-  fieldErrors?: Record<string, string[] | undefined>;
-};
 
 const profileSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -60,10 +46,6 @@ const profileSchema = z.object({
   iban: z.string().optional().default(""),
   birthDate: z.string().optional().default(""),
   address: z.string().optional().default(""),
-  gender: z.string().optional().default(""),
-  drivingLicense: z.string().optional().default(""),
-  civilExpiry: z.string().optional().default(""),
-  preferredTime: z.string().optional().default(""),
 });
 
 export async function updateCandidateProfile(
@@ -89,23 +71,14 @@ export async function updateCandidateProfile(
     iban: (formData.get("iban") ?? "") as string,
     birthDate: (formData.get("birthDate") ?? "") as string,
     address: (formData.get("address") ?? "") as string,
-    gender: (formData.get("gender") ?? "") as string,
-    drivingLicense: (formData.get("drivingLicense") ?? "") as string,
-    civilExpiry: (formData.get("civilExpiry") ?? "") as string,
-    preferredTime: (formData.get("preferredTime") ?? "") as string,
   };
 
   const parsed = profileSchema.safeParse(raw);
   if (!parsed.success) {
-    const result: ProfileState = {
+    return {
       success: false,
       fieldErrors: parsed.error.flatten().fieldErrors,
     };
-    const outputParsed = updateCandidateProfileResultSchema.safeParse(result);
-    if (!outputParsed.success) {
-      console.error("[modules/candidates] updateCandidateProfile output validation failed:", outputParsed.error.issues);
-    }
-    return result;
   }
 
   const d = parsed.data;
@@ -133,26 +106,22 @@ export async function updateCandidateProfile(
             return isFinite(date.getTime()) ? date : undefined;
           })()
         : undefined,
-      candidate_gender: d.gender ? Number(d.gender) : null,
-      candidate_driving_license: d.drivingLicense === "1" ? true : d.drivingLicense === "0" ? false : null,
-      candidate_civil_expiry_date: d.civilExpiry
-        ? (() => {
-            const date = new Date(d.civilExpiry);
-            return isFinite(date.getTime()) ? date : undefined;
-          })()
-        : null,
-      candidate_preferred_time: d.preferredTime || undefined,
     },
   });
 
   revalidatePath("/candidate");
   revalidatePath("/candidate/edit");
-  const result: ProfileState = { success: true };
-  const outputParsed = updateCandidateProfileResultSchema.safeParse(result);
-  if (!outputParsed.success) {
-    console.error("[modules/candidates] updateCandidateProfile output validation failed:", outputParsed.error.issues);
+
+  const profileResult = { success: true };
+  const profileParsed = profileStateSchema.safeParse(profileResult);
+  if (!profileParsed.success) {
+    console.error(
+      "[modules/candidates] updateCandidateProfile output validation failed:",
+      profileParsed.error.issues,
+    );
   }
-  return result;
+
+  return profileResult;
 }
 
 // ---------------------------------------------------------------------------
@@ -199,13 +168,22 @@ async function saveUpload(candidateId: number, field: string, file: File, typeCo
     throw new Error(`File is too large. Maximum size is ${typeConfig.maxSize / 1024 / 1024} MB.`);
   }
 
+  const mimeType = file.type || typeConfig.mime[0];
+  const buffer = Buffer.from(await file.arrayBuffer());
+
+  if (isS3Configured()) {
+    // Upload to S3-compatible storage
+    const key = candidateKey(candidateId, field, ext);
+    const result = await uploadFile(key, buffer, mimeType);
+    return result.url;
+  }
+
+  // Fallback: local disk storage
   const dir = path.join(UPLOAD_DIR, String(candidateId));
   await fs.mkdir(dir, { recursive: true });
 
   const filename = `${field}_${crypto.randomUUID()}${ext}`;
   const filepath = path.join(dir, filename);
-
-  const buffer = Buffer.from(await file.arrayBuffer());
   await fs.writeFile(filepath, buffer);
 
   return `/uploads/candidates/${candidateId}/${filename}`;
@@ -228,47 +206,18 @@ export async function uploadDocument(_prevState: { error: string }, formData: Fo
   }
 
   if (!file || file.size === 0) {
-    const result = { error: "Please select a file to upload." };
-    const outputParsed = candidateErrorResultSchema.safeParse(result);
-    if (!outputParsed.success) {
-      console.error("[modules/candidates] uploadDocument output validation failed:", outputParsed.error.issues);
-    }
-    return result;
+    return { error: "Please select a file to upload." };
   }
 
   const typeConfig = ALLOWED_TYPES[type];
   if (file.type && !typeConfig.mime.includes(file.type)) {
-    if (type === "cv") {
-      const result = { error: "Invalid file type for CV. Accepted: PDF, DOC, DOCX." };
-      const outputParsed = candidateErrorResultSchema.safeParse(result);
-      if (!outputParsed.success) {
-        console.error("[modules/candidates] uploadDocument output validation failed:", outputParsed.error.issues);
-      }
-      return result;
-    }
-    if (type === "video") {
-      const result = { error: "Invalid file type for video. Accepted: MP4, WebM, OGG, MOV." };
-      const outputParsed = candidateErrorResultSchema.safeParse(result);
-      if (!outputParsed.success) {
-        console.error("[modules/candidates] uploadDocument output validation failed:", outputParsed.error.issues);
-      }
-      return result;
-    }
-    const result = { error: `Invalid file type for ${type}. Accepted image formats.` };
-    const outputParsed = candidateErrorResultSchema.safeParse(result);
-    if (!outputParsed.success) {
-      console.error("[modules/candidates] uploadDocument output validation failed:", outputParsed.error.issues);
-    }
-    return result;
+    if (type === "cv") return { error: "Invalid file type for CV. Accepted: PDF, DOC, DOCX." };
+    if (type === "video") return { error: "Invalid file type for video. Accepted: MP4, WebM, OGG, MOV." };
+    return { error: `Invalid file type for ${type}. Accepted image formats.` };
   }
 
   if (file.size > typeConfig.maxSize) {
-    const result = { error: `File is too large. Maximum size is ${typeConfig.maxSize / 1024 / 1024} MB.` };
-    const outputParsed = candidateErrorResultSchema.safeParse(result);
-    if (!outputParsed.success) {
-      console.error("[modules/candidates] uploadDocument output validation failed:", outputParsed.error.issues);
-    }
-    return result;
+    return { error: `File is too large. Maximum size is ${typeConfig.maxSize / 1024 / 1024} MB.` };
   }
 
   try {
@@ -289,19 +238,16 @@ export async function uploadDocument(_prevState: { error: string }, formData: Fo
 
     revalidatePath("/candidate");
     revalidatePath("/candidate/edit");
-    const result = { error: "" };
-    const outputParsed = candidateErrorResultSchema.safeParse(result);
-    if (!outputParsed.success) {
-      console.error("[modules/candidates] uploadDocument output validation failed:", outputParsed.error.issues);
+
+    const uploadResult = { error: "" };
+    const uploadParsed = candidateErrorResultSchema.safeParse(uploadResult);
+    if (!uploadParsed.success) {
+      console.error("[modules/candidates] uploadDocument output validation failed:", uploadParsed.error.issues);
     }
-    return result;
+
+    return uploadResult;
   } catch (e) {
-    const result = { error: e instanceof Error ? e.message : "Upload failed." };
-    const outputParsed = candidateErrorResultSchema.safeParse(result);
-    if (!outputParsed.success) {
-      console.error("[modules/candidates] uploadDocument output validation failed:", outputParsed.error.issues);
-    }
-    return result;
+    return { error: e instanceof Error ? e.message : "Upload failed." };
   }
 }
 
@@ -320,21 +266,11 @@ export async function respondToInvitation(_prevState: { error: string }, formDat
   const action = String(formData.get("action") ?? ""); // "accept" | "reject"
 
   if (!invitationUuid) {
-    const result = { error: "Missing invitation identifier." };
-    const outputParsed = candidateErrorResultSchema.safeParse(result);
-    if (!outputParsed.success) {
-      console.error("[modules/candidates] respondToInvitation output validation failed:", outputParsed.error.issues);
-    }
-    return result;
+    return { error: "Missing invitation identifier." };
   }
 
   if (action !== "accept" && action !== "reject") {
-    const result = { error: "Invalid action." };
-    const outputParsed = candidateErrorResultSchema.safeParse(result);
-    if (!outputParsed.success) {
-      console.error("[modules/candidates] respondToInvitation output validation failed:", outputParsed.error.issues);
-    }
-    return result;
+    return { error: "Invalid action." };
   }
 
   const invitation = await prisma.invitation.findFirst({
@@ -343,12 +279,7 @@ export async function respondToInvitation(_prevState: { error: string }, formDat
   });
 
   if (!invitation) {
-    const result = { error: "Invitation not found." };
-    const outputParsed = candidateErrorResultSchema.safeParse(result);
-    if (!outputParsed.success) {
-      console.error("[modules/candidates] respondToInvitation output validation failed:", outputParsed.error.issues);
-    }
-    return result;
+    return { error: "Invitation not found." };
   }
 
   const newStatus = action === "accept" ? INVITATION_STATUS_ACCEPTED : INVITATION_STATUS_REJECTED;
@@ -364,10 +295,6 @@ export async function respondToInvitation(_prevState: { error: string }, formDat
 
   revalidatePath("/candidate/invitations");
   revalidatePath(`/candidate/invitations/${invitationUuid}`);
-  const outputParsed = candidateErrorResultSchema.safeParse({ error: "" });
-  if (!outputParsed.success) {
-    console.error("[modules/candidates] respondToInvitation output validation failed:", outputParsed.error.issues);
-  }
   redirect(`/candidate/invitations/${invitationUuid}`);
 }
 
@@ -383,21 +310,11 @@ export async function appealWorkLog(_prevState: { error: string }, formData: For
   const reason = String(formData.get("reason") ?? "").trim();
 
   if (!workLogUuid) {
-    const result = { error: "Missing work-log identifier." };
-    const outputParsed = candidateErrorResultSchema.safeParse(result);
-    if (!outputParsed.success) {
-      console.error("[modules/candidates] appealWorkLog output validation failed:", outputParsed.error.issues);
-    }
-    return result;
+    return { error: "Missing work-log identifier." };
   }
 
   if (!reason) {
-    const result = { error: "Please provide a reason for the appeal." };
-    const outputParsed = candidateErrorResultSchema.safeParse(result);
-    if (!outputParsed.success) {
-      console.error("[modules/candidates] appealWorkLog output validation failed:", outputParsed.error.issues);
-    }
-    return result;
+    return { error: "Please provide a reason for the appeal." };
   }
 
   const workLog = await prisma.candidate_working_hour.findFirst({
@@ -406,12 +323,7 @@ export async function appealWorkLog(_prevState: { error: string }, formData: For
   });
 
   if (!workLog) {
-    const result = { error: "Work log not found." };
-    const outputParsed = candidateErrorResultSchema.safeParse(result);
-    if (!outputParsed.success) {
-      console.error("[modules/candidates] appealWorkLog output validation failed:", outputParsed.error.issues);
-    }
-    return result;
+    return { error: "Work log not found." };
   }
 
   const appealUuid = `appeal_${crypto.randomUUID()}`;
@@ -437,10 +349,6 @@ export async function appealWorkLog(_prevState: { error: string }, formData: For
 
   revalidatePath("/candidate/work-logs");
   revalidatePath(`/candidate/work-logs/${workLogUuid}`);
-  const outputParsed = candidateErrorResultSchema.safeParse({ error: "" });
-  if (!outputParsed.success) {
-    console.error("[modules/candidates] appealWorkLog output validation failed:", outputParsed.error.issues);
-  }
   redirect(`/candidate/work-logs/${workLogUuid}`);
 }
 
@@ -458,7 +366,7 @@ export async function getCountryOptions() {
     id: r.country_id,
     label: `${r.country_name_en}${r.country_nationality_name_en && r.country_nationality_name_en !== r.country_name_en ? ` (${r.country_nationality_name_en})` : ""}`,
   }));
-  const outputParsed = getCountryOptionsResultSchema.safeParse(result);
+  const outputParsed = z.array(numericOptionSchema).safeParse(result);
   if (!outputParsed.success) {
     console.error("[modules/candidates] getCountryOptions output validation failed:", outputParsed.error.issues);
   }
@@ -476,7 +384,7 @@ export async function getUniversityOptions() {
     id: r.university_id,
     label: r.university_name_en ?? `University #${r.university_id}`,
   }));
-  const outputParsed = getUniversityOptionsResultSchema.safeParse(result);
+  const outputParsed = z.array(numericOptionSchema).safeParse(result);
   if (!outputParsed.success) {
     console.error("[modules/candidates] getUniversityOptions output validation failed:", outputParsed.error.issues);
   }
@@ -494,7 +402,7 @@ export async function getBankOptions() {
     id: r.bank_id,
     label: r.bank_name ?? `Bank #${r.bank_id}`,
   }));
-  const outputParsed = getBankOptionsResultSchema.safeParse(result);
+  const outputParsed = z.array(numericOptionSchema).safeParse(result);
   if (!outputParsed.success) {
     console.error("[modules/candidates] getBankOptions output validation failed:", outputParsed.error.issues);
   }
@@ -510,14 +418,7 @@ export async function addCandidateSkill(_prevState: { error: string }, formData:
   const candidateId = Number(session.id);
 
   const skill = String(formData.get("skill") ?? "").trim();
-  if (!skill) {
-    const result = { error: "Skill name is required." };
-    const outputParsed = candidateErrorResultSchema.safeParse(result);
-    if (!outputParsed.success) {
-      console.error("[modules/candidates] addCandidateSkill output validation failed:", outputParsed.error.issues);
-    }
-    return result;
-  }
+  if (!skill) return { error: "Skill name is required." };
 
   await prisma.candidate_skill.create({
     data: {
@@ -530,12 +431,7 @@ export async function addCandidateSkill(_prevState: { error: string }, formData:
 
   revalidatePath("/candidate");
   revalidatePath("/candidate/edit");
-  const result = { error: "" };
-  const outputParsed = candidateErrorResultSchema.safeParse(result);
-  if (!outputParsed.success) {
-    console.error("[modules/candidates] addCandidateSkill output validation failed:", outputParsed.error.issues);
-  }
-  return result;
+  return { error: "" };
 }
 
 export async function removeCandidateSkill(_prevState: { error: string }, formData: FormData) {
@@ -543,28 +439,14 @@ export async function removeCandidateSkill(_prevState: { error: string }, formDa
   const candidateId = Number(session.id);
 
   const skillId = Number(formData.get("skillId"));
-  if (!Number.isInteger(skillId) || skillId <= 0) {
-    const result = { error: "Invalid skill identifier." };
-    const outputParsed = candidateErrorResultSchema.safeParse(result);
-    if (!outputParsed.success) {
-      console.error("[modules/candidates] removeCandidateSkill output validation failed:", outputParsed.error.issues);
-    }
-    return result;
-  }
+  if (!Number.isInteger(skillId) || skillId <= 0) return { error: "Invalid skill identifier." };
 
   const row = await prisma.candidate_skill.findFirst({
     where: { candidate_skill_id: skillId, candidate_id: candidateId, deleted: 0 },
     select: { candidate_skill_id: true },
   });
 
-  if (!row) {
-    const result = { error: "Skill not found." };
-    const outputParsed = candidateErrorResultSchema.safeParse(result);
-    if (!outputParsed.success) {
-      console.error("[modules/candidates] removeCandidateSkill output validation failed:", outputParsed.error.issues);
-    }
-    return result;
-  }
+  if (!row) return { error: "Skill not found." };
 
   await prisma.candidate_skill.update({
     where: { candidate_skill_id: skillId },
@@ -573,20 +455,10 @@ export async function removeCandidateSkill(_prevState: { error: string }, formDa
 
   revalidatePath("/candidate");
   revalidatePath("/candidate/edit");
-  const result = { error: "" };
-  const outputParsed = candidateErrorResultSchema.safeParse(result);
-  if (!outputParsed.success) {
-    console.error("[modules/candidates] removeCandidateSkill output validation failed:", outputParsed.error.issues);
-  }
-  return result;
+  return { error: "" };
 }
 
 // -- Language CRUD ---------------------------------------------------------
-
-export type LanguageState = {
-  success: boolean;
-  error?: string;
-};
 
 const PROFICIENCY_LEVELS = ["basic", "intermediate", "advanced", "native"] as const;
 
@@ -600,22 +472,18 @@ export async function addCandidateLanguage(_prevState: LanguageState, formData: 
   const candidateId = Number(session.id);
   const parsed = languageSchema.safeParse({ language: formData.get("language"), proficiency: formData.get("proficiency") });
   if (!parsed.success) {
-    const result: LanguageState = { success: false, error: parsed.error.errors.map((e) => e.message).join("; ") };
-    const outputParsed = candidateLanguageResultSchema.safeParse(result);
-    if (!outputParsed.success) {
-      console.error("[modules/candidates] addCandidateLanguage output validation failed:", outputParsed.error.issues);
-    }
-    return result;
+    const langResult = { success: false, error: parsed.error.errors.map((e) => e.message).join("; ") };
+    const langParsed = languageStateSchema.safeParse(langResult);
+    if (!langParsed.success) console.error("[modules/candidates] addCandidateLanguage output validation failed:", langParsed.error.issues);
+    return langResult;
   }
   await prisma.candidate_language.create({ data: { candidate_id: candidateId, language: parsed.data.language, proficiency: parsed.data.proficiency, deleted: 0 } });
   revalidatePath("/candidate");
   revalidatePath("/candidate/edit");
-  const result: LanguageState = { success: true };
-  const outputParsed = candidateLanguageResultSchema.safeParse(result);
-  if (!outputParsed.success) {
-    console.error("[modules/candidates] addCandidateLanguage output validation failed:", outputParsed.error.issues);
-  }
-  return result;
+  const langResult = { success: true };
+  const langParsed = languageStateSchema.safeParse(langResult);
+  if (!langParsed.success) console.error("[modules/candidates] addCandidateLanguage output validation failed:", langParsed.error.issues);
+  return langResult;
 }
 
 export async function removeCandidateLanguage(_prevState: LanguageState, formData: FormData) {
@@ -623,31 +491,25 @@ export async function removeCandidateLanguage(_prevState: LanguageState, formDat
   const candidateId = Number(session.id);
   const languageId = Number(formData.get("languageId"));
   if (!Number.isInteger(languageId) || languageId <= 0) {
-    const result: LanguageState = { success: false, error: "Invalid language ID." };
-    const outputParsed = candidateLanguageResultSchema.safeParse(result);
-    if (!outputParsed.success) {
-      console.error("[modules/candidates] removeCandidateLanguage output validation failed:", outputParsed.error.issues);
-    }
-    return result;
+    const langRmResult = { success: false, error: "Invalid language ID." };
+    const langRmParsed = languageStateSchema.safeParse(langRmResult);
+    if (!langRmParsed.success) console.error("[modules/candidates] removeCandidateLanguage output validation failed:", langRmParsed.error.issues);
+    return langRmResult;
   }
   const row = await prisma.candidate_language.findFirst({ where: { candidate_language_id: languageId, candidate_id: candidateId, deleted: 0 } });
   if (!row) {
-    const result: LanguageState = { success: false, error: "Language entry not found." };
-    const outputParsed = candidateLanguageResultSchema.safeParse(result);
-    if (!outputParsed.success) {
-      console.error("[modules/candidates] removeCandidateLanguage output validation failed:", outputParsed.error.issues);
-    }
-    return result;
+    const langRmResult = { success: false, error: "Language entry not found." };
+    const langRmParsed = languageStateSchema.safeParse(langRmResult);
+    if (!langRmParsed.success) console.error("[modules/candidates] removeCandidateLanguage output validation failed:", langRmParsed.error.issues);
+    return langRmResult;
   }
   await prisma.candidate_language.update({ where: { candidate_language_id: languageId }, data: { deleted: 1 } });
   revalidatePath("/candidate");
   revalidatePath("/candidate/edit");
-  const result: LanguageState = { success: true };
-  const outputParsed = candidateLanguageResultSchema.safeParse(result);
-  if (!outputParsed.success) {
-    console.error("[modules/candidates] removeCandidateLanguage output validation failed:", outputParsed.error.issues);
-  }
-  return result;
+  const langRmResult = { success: true };
+  const langRmParsed = languageStateSchema.safeParse(langRmResult);
+  if (!langRmParsed.success) console.error("[modules/candidates] removeCandidateLanguage output validation failed:", langRmParsed.error.issues);
+  return langRmResult;
 }
 
 // Degree & major lookup helpers
@@ -663,7 +525,7 @@ export async function getDegreeOptions() {
     id: r.degree_uuid,
     label: r.degree_name_en,
   }));
-  const outputParsed = getDegreeOptionsResultSchema.safeParse(result);
+  const outputParsed = z.array(stringIdOptionSchema).safeParse(result);
   if (!outputParsed.success) {
     console.error("[modules/candidates] getDegreeOptions output validation failed:", outputParsed.error.issues);
   }
@@ -680,7 +542,7 @@ export async function getMajorOptions() {
     id: r.major_uuid,
     label: r.major_name_en,
   }));
-  const outputParsed = getMajorOptionsResultSchema.safeParse(result);
+  const outputParsed = z.array(stringIdOptionSchema).safeParse(result);
   if (!outputParsed.success) {
     console.error("[modules/candidates] getMajorOptions output validation failed:", outputParsed.error.issues);
   }
@@ -718,12 +580,7 @@ export async function addCandidateExperience(_prevState: { error: string }, form
 
   revalidatePath("/candidate");
   revalidatePath("/candidate/edit");
-  const result = { error: "" };
-  const outputParsed = candidateActionErrorResultSchema.safeParse(result);
-  if (!outputParsed.success) {
-    console.error("[modules/candidates] addCandidateExperience output validation failed:", outputParsed.error.issues);
-  }
-  return result;
+  return { error: "" };
 }
 
 export async function removeCandidateExperience(_prevState: { error: string }, formData: FormData) {
@@ -747,12 +604,7 @@ export async function removeCandidateExperience(_prevState: { error: string }, f
 
   revalidatePath("/candidate");
   revalidatePath("/candidate/edit");
-  const result = { error: "" };
-  const outputParsed = candidateActionErrorResultSchema.safeParse(result);
-  if (!outputParsed.success) {
-    console.error("[modules/candidates] removeCandidateExperience output validation failed:", outputParsed.error.issues);
-  }
-  return result;
+  return { error: "" };
 }
 
 // ---------------------------------------------------------------------------
@@ -790,12 +642,7 @@ export async function addCandidateCertificate(_prevState: { error: string }, for
   });
   revalidatePath("/candidate");
   revalidatePath("/candidate/edit");
-  const result = { error: "" };
-  const outputParsed = candidateActionErrorResultSchema.safeParse(result);
-  if (!outputParsed.success) {
-    console.error("[modules/candidates] addCandidateCertificate output validation failed:", outputParsed.error.issues);
-  }
-  return result;
+  return { error: "" };
 }
 
 export async function removeCandidateCertificate(_prevState: { error: string }, formData: FormData) {
@@ -814,24 +661,14 @@ export async function removeCandidateCertificate(_prevState: { error: string }, 
   });
   revalidatePath("/candidate");
   revalidatePath("/candidate/edit");
-  const result = { error: "" };
-  const outputParsed = candidateActionErrorResultSchema.safeParse(result);
-  if (!outputParsed.success) {
-    console.error("[modules/candidates] removeCandidateCertificate output validation failed:", outputParsed.error.issues);
-  }
-  return result;
+  return { error: "" };
 }
 
 // ---------------------------------------------------------------------------
 // Education CRUD
 // ---------------------------------------------------------------------------
 
-export type EducationState = {
-  success: boolean;
-  error?: string;
-};
-
-const educationSchema = z.object({
+const EDUCATION_SCHEMA = z.object({
   universityId: z.coerce.number().int().positive("University is required."),
   degreeUuid: z.string().optional().default(""),
   majorUuid: z.string().optional().default(""),
@@ -850,7 +687,7 @@ function parseEducationFields(formData: FormData) {
     isCurrentlyStudying: formData.get("isCurrentlyStudying") ?? "0",
   };
 
-  const parsed = educationSchema.safeParse(raw);
+  const parsed = EDUCATION_SCHEMA.safeParse(raw);
   if (!parsed.success) {
     const err = parsed.error.flatten().fieldErrors;
     state.error = err.universityId?.[0] ?? "Invalid education fields.";
@@ -900,12 +737,10 @@ export async function addCandidateEducation(
 
   revalidatePath("/candidate");
   revalidatePath("/candidate/edit");
-  const eduResult: EducationState = { success: true };
-  const outputParsed = educationStateResultSchema.safeParse(eduResult);
-  if (!outputParsed.success) {
-    console.error("[modules/candidates] addCandidateEducation output validation failed:", outputParsed.error.issues);
-  }
-  return eduResult;
+  const addEduResult = { success: true };
+  const addEduParsed = educationStateSchema.safeParse(addEduResult);
+  if (!addEduParsed.success) console.error("[modules/candidates] addCandidateEducation output validation failed:", addEduParsed.error.issues);
+  return addEduResult;
 }
 
 export async function editCandidateEducation(
@@ -916,7 +751,12 @@ export async function editCandidateEducation(
   const candidateId = Number(session.id);
 
   const educationUuid = String(formData.get("educationUuid") ?? "").trim();
-  if (!educationUuid) return { success: false, error: "Missing education identifier." };
+  if (!educationUuid) {
+    const editEduErr = { success: false, error: "Missing education identifier." };
+    const editEduParsed = educationStateSchema.safeParse(editEduErr);
+    if (!editEduParsed.success) console.error("[modules/candidates] editCandidateEducation output validation failed:", editEduParsed.error.issues);
+    return editEduErr;
+  }
 
   const result = parseEducationFields(formData);
   if (!result.fields) return result.state;
@@ -925,7 +765,12 @@ export async function editCandidateEducation(
     where: { education_uuid: educationUuid, candidate_id: candidateId },
     select: { education_uuid: true },
   });
-  if (!existing) return { success: false, error: "Education entry not found." };
+  if (!existing) {
+    const editEduErr = { success: false, error: "Education entry not found." };
+    const editEduParsed = educationStateSchema.safeParse(editEduErr);
+    if (!editEduParsed.success) console.error("[modules/candidates] editCandidateEducation output validation failed:", editEduParsed.error.issues);
+    return editEduErr;
+  }
 
   const f = result.fields;
   const newUuid = `edu_${crypto.randomUUID()}`;
@@ -952,12 +797,10 @@ export async function editCandidateEducation(
 
   revalidatePath("/candidate");
   revalidatePath("/candidate/edit");
-  const editResult: EducationState = { success: true };
-  const outputParsed = educationStateResultSchema.safeParse(editResult);
-  if (!outputParsed.success) {
-    console.error("[modules/candidates] editCandidateEducation output validation failed:", outputParsed.error.issues);
-  }
-  return editResult;
+  const editEduOk = { success: true };
+  const editEduParsed = educationStateSchema.safeParse(editEduOk);
+  if (!editEduParsed.success) console.error("[modules/candidates] editCandidateEducation output validation failed:", editEduParsed.error.issues);
+  return editEduOk;
 }
 
 export async function removeCandidateEducation(
@@ -968,13 +811,23 @@ export async function removeCandidateEducation(
   const candidateId = Number(session.id);
 
   const educationUuid = String(formData.get("educationUuid") ?? "").trim();
-  if (!educationUuid) return { success: false, error: "Missing education identifier." };
+  if (!educationUuid) {
+    const rmEduErr = { success: false, error: "Missing education identifier." };
+    const rmEduParsed = educationStateSchema.safeParse(rmEduErr);
+    if (!rmEduParsed.success) console.error("[modules/candidates] removeCandidateEducation output validation failed:", rmEduParsed.error.issues);
+    return rmEduErr;
+  }
 
   const row = await prisma.candidate_education.findFirst({
     where: { education_uuid: educationUuid, candidate_id: candidateId },
     select: { education_uuid: true },
   });
-  if (!row) return { success: false, error: "Education entry not found." };
+  if (!row) {
+    const rmEduErr = { success: false, error: "Education entry not found." };
+    const rmEduParsed = educationStateSchema.safeParse(rmEduErr);
+    if (!rmEduParsed.success) console.error("[modules/candidates] removeCandidateEducation output validation failed:", rmEduParsed.error.issues);
+    return rmEduErr;
+  }
 
   await prisma.candidate_education.delete({
     where: { education_uuid: educationUuid },
@@ -982,12 +835,10 @@ export async function removeCandidateEducation(
 
   revalidatePath("/candidate");
   revalidatePath("/candidate/edit");
-  const result: EducationState = { success: true };
-  const outputParsed = educationStateResultSchema.safeParse(result);
-  if (!outputParsed.success) {
-    console.error("[modules/candidates] removeCandidateEducation output validation failed:", outputParsed.error.issues);
-  }
-  return result;
+  const rmEduOk = { success: true };
+  const rmEduParsed = educationStateSchema.safeParse(rmEduOk);
+  if (!rmEduParsed.success) console.error("[modules/candidates] removeCandidateEducation output validation failed:", rmEduParsed.error.issues);
+  return rmEduOk;
 }
 
 // ---------------------------------------------------------------------------
@@ -1305,270 +1156,122 @@ export async function clearCandidateCivilVerification(_prevState: { error: strin
   return { error: "" };
 }
 
-// ---------------------------------------------------------------------------
-// changePassword — candidate self-service or admin password change
-// ---------------------------------------------------------------------------
+// -- ID Request approve/reject -----------------------------------------------
 
-export type ChangePasswordResult =
-  | { success: true }
-  | { success: false; error: string }
-  | { success: false; fieldErrors: Record<string, string[]> };
+const rejectIdRequestSchema = z.object({
+  requestUuid: z.string().min(1, "Request UUID is required."),
+  reason: z
+    .string()
+    .min(10, "Rejection reason must be at least 10 characters.")
+    .max(500, "Rejection reason must be under 500 characters."),
+});
 
-const changePasswordSchema = z
-  .object({
-    candidateId: z.coerce.number().int().positive("Candidate ID is required."),
-    currentPassword: z
-      .string({ required_error: "Current password is required" })
-      .min(1, "Current password is required"),
-    newPassword: z
-      .string({ required_error: "New password is required" })
-      .min(8, "New password must be at least 8 characters")
-      .regex(/[A-Z]/, "New password must contain at least one uppercase letter")
-      .regex(/[a-z]/, "New password must contain at least one lowercase letter")
-      .regex(/[0-9]/, "New password must contain at least one number"),
-  })
-  .refine((data) => data.currentPassword !== data.newPassword, {
-    message: "New password must be different from current password",
-    path: ["newPassword"],
-  });
-
-export async function changePassword(
-  candidateId: string,
-  currentPassword: string,
-  newPassword: string,
-): Promise<ChangePasswordResult> {
-  let result: ChangePasswordResult;
-  try {
-    const parsed = changePasswordSchema.safeParse({
-      candidateId,
-      currentPassword,
-      newPassword,
-    });
-
-    if (!parsed.success) {
-      const fieldErrors: Record<string, string[]> = {};
-      for (const issue of parsed.error.issues) {
-        const path = issue.path.join(".");
-        if (!fieldErrors[path]) fieldErrors[path] = [];
-        fieldErrors[path].push(issue.message);
-      }
-      result = { success: false, fieldErrors };
-    } else {
-      const { candidateId: cid, currentPassword: current, newPassword: newPw } = parsed.data;
-
-      const candidate = await prisma.candidate.findUnique({
-        where: { candidate_id: cid },
-        select: { candidate_id: true, candidate_password_hash: true },
-      });
-
-      if (!candidate) {
-        result = { success: false, error: "Candidate account not found." };
-      } else {
-        const isValid = await verifyYiiPassword(current, candidate.candidate_password_hash);
-        if (!isValid) {
-          result = { success: false, error: "Current password is incorrect." };
-        } else {
-          const newHash = await bcrypt.hash(newPw, 10);
-          const yiiHash = newHash.startsWith("$2b$") ? `$2y$${newHash.slice(4)}` : newHash;
-
-          await prisma.candidate.update({
-            where: { candidate_id: candidate.candidate_id },
-            data: { candidate_password_hash: yiiHash },
-          });
-
-          result = { success: true };
-        }
-      }
-    }
-  } catch (err) {
-    console.error("changePassword error:", err);
-    result = { success: false, error: "An unexpected error occurred. Please try again." };
-  }
-
-  const outputParsed = changePasswordResultSchema.safeParse(result);
-  if (!outputParsed.success) {
-    console.error("[modules/candidates] changePassword output validation failed:", outputParsed.error.issues);
-  }
-  return result;
+function parseCandidateIdList(raw: string | null | undefined): number[] {
+  if (!raw) return [];
+  return raw
+    .split(/[^0-9]+/)
+    .map((item) => Number(item))
+    .filter((item) => Number.isInteger(item) && item > 0);
 }
 
-// ---------------------------------------------------------------------------
-// getCandidateProfile
-// ---------------------------------------------------------------------------
+export async function approveIdRequest(_prevState: { error: string }, formData: FormData) {
+  const session = await requireRoleCapability("inspector", "id_review.mutate");
+  const requestUuid = formData.get("requestUuid");
 
-/**
- * Fetch the full candidate profile detail + metrics.
- * Delegates to the existing data layer; intended as a server-action wrapper
- * that pages can import instead of importing from data.ts directly.
- */
-export async function getCandidateProfile(input: GetCandidateProfileInput) {
-  const parsed = getCandidateProfileSchema.safeParse(input);
-  if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Invalid input");
+  if (typeof requestUuid !== "string" || !requestUuid.trim()) {
+    return { error: "Invalid request." };
   }
 
-  return getCandidateDetail(parsed.data.candidateId, "/candidate/invitations");
-}
-
-// ---------------------------------------------------------------------------
-// getCandidate — read a candidate by ID for staff detail view
-// ---------------------------------------------------------------------------
-
-/**
- * Get full candidate profile detail and notes for the staff detail view.
- * Requires "candidate.search" capability.
- * Returns null if the candidate is not found.
- */
-export async function getCandidate(
-  params: z.input<typeof getCandidateSchema>,
-): Promise<CandidateDetailResult> {
-  await requireCapability("candidate.search");
-
-  const parsed = getCandidateSchema.safeParse(params);
-  if (!parsed.success) {
-    return { candidate: null, notes: [] };
-  }
-
-  const { candidateId } = parsed.data;
-
-  const candidate = await prisma.candidate.findUnique({
-    where: { candidate_id: candidateId },
-    select: {
-      candidate_id: true,
-      candidate_name: true,
-      candidate_email: true,
-      candidate_phone: true,
-      candidate_gender: true,
-      candidate_objective: true,
-      candidate_intro: true,
-      candidate_personal_photo: true,
-      candidate_civil_id: true,
-      candidate_hourly_rate: true,
-      country_id: true,
-      university_id: true,
-      candidate_birth_date: true,
-      candidate_created_at: true,
-      candidate_updated_at: true,
-    },
+  const request = await prisma.candidate_id_request.findUnique({
+    where: { cir_uuid: requestUuid },
+    select: { cir_uuid: true, status: true, candidate_ids: true },
   });
 
-  if (!candidate) {
-    return { candidate: null, notes: [] };
-  }
-
-  const notes = await prisma.note.findMany({
-    where: { candidate_id: candidateId },
-    orderBy: { note_created_datetime: "desc" },
-    take: 50,
-    select: {
-      note_uuid: true,
-      note_text: true,
-      note_type: true,
-      created_by: true,
-      note_created_datetime: true,
-    },
-  });
-
-  const isoDate = (d: Date | null | undefined): string | null => {
-    if (!d) return null;
-    return d instanceof Date && isFinite(d.getTime()) ? d.toISOString() : null;
-  };
-
-  const result: CandidateDetailResult = {
-    candidate: {
-      id: candidate.candidate_id,
-      name: candidate.candidate_name,
-      email: candidate.candidate_email,
-      phone: candidate.candidate_phone ?? null,
-      gender: candidate.candidate_gender ?? null,
-      objective: candidate.candidate_objective ?? null,
-      intro: candidate.candidate_intro ?? null,
-      photoUrl: candidate.candidate_personal_photo ?? null,
-      civilId: candidate.candidate_civil_id ?? null,
-      hourlyRate: candidate.candidate_hourly_rate
-        ? Number(candidate.candidate_hourly_rate)
-        : null,
-      countryId: candidate.country_id ?? null,
-      universityId: candidate.university_id ?? null,
-      birthDate: isoDate(candidate.candidate_birth_date),
-      createdAt: isoDate(candidate.candidate_created_at) ?? "",
-      updatedAt: isoDate(candidate.candidate_updated_at) ?? "",
-    },
-    notes: notes.map((n) => ({
-      uuid: n.note_uuid,
-      text: n.note_text ?? "",
-      type: n.note_type ?? "Internal Note",
-      createdBy: n.created_by ?? null,
-      createdAt: isoDate(n.note_created_datetime) ?? "",
-    })),
-  };
-
-  // Validate output shape
-  const outputParsed = candidateDetailResultOutputSchema.safeParse(result);
-  if (!outputParsed.success) {
-    console.error(
-      "[modules/candidates] getCandidate output validation failed:",
-      outputParsed.error.issues,
-    );
-  }
-
-  return result;
-}
-
-// ---------------------------------------------------------------------------
-// addCandidateNote — add a note to a candidate (staff-side)
-// ---------------------------------------------------------------------------
-
-/**
- * Add a note to a candidate record from the staff detail view.
- * Requires "candidate.search" capability.
- * Creates a note record linked to the candidate and the current staff member.
- * Revalidates the staff/candidates path on success.
- */
-export async function addCandidateNote(
-  params: z.input<typeof addCandidateNoteSchema>,
-): Promise<AddNoteResult> {
-  const session = await requireCapability("candidate.search");
-
-  const parsed = addCandidateNoteSchema.safeParse(params);
-  if (!parsed.success) {
-    return {
-      success: false,
-      error: parsed.error.issues[0]?.message ?? "Invalid input",
-    };
-  }
-
-  const { candidateId, noteText, noteType } = parsed.data;
-
-  // Verify the candidate exists
-  const candidate = await prisma.candidate.findUnique({
-    where: { candidate_id: candidateId },
-    select: { candidate_id: true },
-  });
-
-  if (!candidate) {
-    return { success: false, error: "Candidate not found" };
-  }
+  if (!request) return { error: "ID request not found." };
+  if (request.status !== "pending") return { error: "This request can only be processed from 'pending' status." };
 
   const staffId = Number(session.id);
   const now = new Date();
 
-  await prisma.note.create({
+  await prisma.candidate_id_request.update({
+    where: { cir_uuid: requestUuid },
     data: {
-      note_uuid: `note_${crypto.randomUUID()}`,
-      candidate_id: candidateId,
-      note_type: noteType,
-      note_text: noteText,
-      created_by: staffId,
+      status: "approved",
       updated_by: staffId,
-      note_created_datetime: now,
-      note_updated_datetime: now,
+      updated_at: now,
     },
   });
 
-  // Revalidate cache paths for the candidate detail view
-  revalidatePath(`/staff/candidates/${candidateId}`);
-  revalidatePath("/staff/candidates");
+  const candidateIds = parseCandidateIdList(request.candidate_ids);
+  if (candidateIds.length > 0) {
+    await prisma.candidate_notification.createMany({
+      data: candidateIds.map((candidateId) => ({
+        cn_uuid: crypto.randomUUID(),
+        candidate_id: candidateId,
+        type: 50,
+        staff_id: staffId,
+        message: "Your ID verification request has been approved.",
+        is_new: true,
+        created_at: now,
+        updated_at: now,
+      })),
+    });
+  }
 
-  return { success: true };
+  revalidatePath(`/inspector/id-requests/${requestUuid}`);
+  revalidatePath("/inspector/id-requests");
+  redirect(`/inspector/id-requests/${requestUuid}?notice=id-request-approved`);
+}
+
+export async function rejectIdRequest(_prevState: { error: string }, formData: FormData) {
+  const session = await requireRoleCapability("inspector", "id_review.mutate");
+  const requestUuid = formData.get("requestUuid");
+  const reason = formData.get("reason");
+
+  const parsed = rejectIdRequestSchema.safeParse({ requestUuid, reason });
+
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Invalid input." };
+  }
+
+  const request = await prisma.candidate_id_request.findUnique({
+    where: { cir_uuid: parsed.data.requestUuid },
+    select: { cir_uuid: true, status: true, candidate_ids: true },
+  });
+
+  if (!request) return { error: "ID request not found." };
+  if (request.status !== "pending") return { error: "This request can only be processed from 'pending' status." };
+
+  const staffId = Number(session.id);
+  const now = new Date();
+
+  await prisma.candidate_id_request.update({
+    where: { cir_uuid: parsed.data.requestUuid },
+    data: {
+      status: "rejected",
+      rejection_reason: parsed.data.reason,
+      updated_by: staffId,
+      updated_at: now,
+    },
+  });
+
+  const candidateIds = parseCandidateIdList(request.candidate_ids);
+  if (candidateIds.length > 0) {
+    await prisma.candidate_notification.createMany({
+      data: candidateIds.map((candidateId) => ({
+        cn_uuid: crypto.randomUUID(),
+        candidate_id: candidateId,
+        type: 50,
+        staff_id: staffId,
+        message: `Your ID verification request has been rejected. Reason: ${parsed.data.reason}`,
+        is_new: true,
+        created_at: now,
+        updated_at: now,
+      })),
+    });
+  }
+
+  revalidatePath(`/inspector/id-requests/${requestUuid}`);
+  revalidatePath("/inspector/id-requests");
+  redirect(`/inspector/id-requests/${requestUuid}?notice=id-request-rejected`);
 }
