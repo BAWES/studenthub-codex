@@ -12,6 +12,7 @@ import { WorkspaceOSContext } from "./WorkspaceOSContext";
 import { WorkspaceMobileNavigation, WorkspaceNavigation } from "./WorkspaceNavigation";
 import { navForRole } from "./navigation";
 import type { NavItem } from "./navigation";
+import { Separator } from "@/components/ui/separator";
 import { PageTransition } from "./PageTransition";
 import { RaycastCommandPalette } from "./RaycastCommandPalette";
 import { TabBar } from "./TabBar";
@@ -325,7 +326,7 @@ export function WorkspaceOS({
             <strong>StudentHub</strong>
           </Link>
           <WorkspaceNavigation items={navItems} role={session.role} />
-          <div className="workspaceRailDivider" aria-hidden="true" />
+          <Separator className="workspaceRailDivider" />
           <div className="workspaceRailFooter">
             <button className="commandLauncher" type="button" aria-label="Open command menu" onClick={() => { setCmdOpen(true); }}>
               <span>⌘K</span>
