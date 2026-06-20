@@ -1,7 +1,6 @@
 /* ==========================================================================
-   StudentHub Landing — Zendesk/Slack Design System
-   "Connecting students with the right employers"
-   Clean, solid surfaces — no glass effects.
+   StudentHub Landing — Zendesk/Slack Design System (stripped)
+   Clean auth page — no marketing sections, no glass effects.
    ========================================================================== */
 
 /* ── Entry Animations ─────────────────────────────────────────────── */
@@ -17,127 +16,12 @@
   }
 }
 
-@keyframes shLandingFadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes shLandingScaleIn {
-  from {
-    opacity: 0;
-    transform: scale(0.92);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-@keyframes shLandingSlideLeft {
-  from {
-    opacity: 0;
-    transform: translateX(24px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes shCardIn {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* ── Solid Card (replaces glass) ─────────────────────────────────── */
+/* ── Solid Card ─────────────────────────────────── */
 
 .shLandingCard {
   background: var(--surface, #ffffff);
   border: 1px solid var(--border, #e2e8f0);
   border-radius: 12px;
-}
-
-.shLandingCardStrong {
-  background: var(--surface, #ffffff);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-}
-
-.shLandingCardHover {
-  transition: transform 280ms var(--sh-easing),
-              box-shadow 280ms var(--sh-easing),
-              border-color 280ms var(--sh-easing);
-}
-
-.shLandingCardHover:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-  border-color: var(--border);
-}
-
-/* ── Section Title / Eyebrow ─────────────────────────────────────── */
-
-.shLandingEyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 12px;
-  border-radius: 999px;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  background: linear-gradient(135deg, rgba(31, 115, 183, 0.10), rgba(31, 115, 183, 0.04));
-  color: #1f73b7;
-}
-
-.shLandingSectionTitle {
-  font-size: clamp(28px, 3.5vw, 40px);
-  font-weight: 700;
-  line-height: 1.08;
-  letter-spacing: -0.03em;
-  color: var(--ink);
-}
-
-.shLandingSectionSub {
-  font-size: clamp(14px, 1.2vw, 16px);
-  line-height: 1.6;
-  color: var(--muted);
-  max-width: 520px;
-}
-
-/* ── Entrance stagger ─────────────────────────────────────────────── */
-
-.shLandingStagger {
-  opacity: 0;
-  transform: translateY(20px);
-  animation: shLandingFadeUp 500ms var(--sh-easing) forwards;
-}
-
-.shLandingStaggerFast {
-  opacity: 0;
-  transform: translateY(12px);
-  animation: shLandingFadeUp 400ms var(--sh-easing) forwards;
-}
-
-/* ── Scroll-reveal helper ─────────────────────────────────────────── */
-
-.shLandingReveal {
-  opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 500ms ease, transform 500ms var(--sh-easing);
-}
-
-.shLandingRevealVisible {
-  opacity: 1;
-  transform: translateY(0);
 }
 
 /* ── Premium button core ──────────────────────────────────────────── */
@@ -152,7 +36,7 @@
   font-size: 14px;
   font-weight: 600;
   color: #fff;
-  transition: all 200ms var(--sh-easing);
+  transition: all 200ms ease;
   cursor: pointer;
   text-decoration: none;
   border: none;
@@ -177,7 +61,7 @@
   font-size: 14px;
   font-weight: 500;
   color: var(--muted);
-  transition: all 200ms var(--sh-easing);
+  transition: all 200ms ease;
   cursor: pointer;
   text-decoration: none;
 }
@@ -187,95 +71,35 @@
   background: rgba(128, 128, 128, 0.06);
 }
 
-/* ── Mockup card (solid) ──────────────────────────────────────────── */
+/* ── Section utilities ────────────────────────────────────────────── */
 
-.shLandingMockup {
-  position: relative;
-  border-radius: 14px;
-  overflow: hidden;
-  background: var(--surface, #ffffff);
-  border: 1px solid var(--border);
-  box-shadow:
-    0 2px 12px rgba(0, 0, 0, 0.06),
-    0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+.shLandingSectionTitle {
+  font-size: clamp(28px, 3.5vw, 40px);
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+  color: var(--ink);
 }
 
-.shLandingMockupHeader {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--border, #e2e8f0);
+.shLandingSectionSub {
+  font-size: clamp(14px, 1.2vw, 16px);
+  line-height: 1.6;
+  color: var(--muted);
+  max-width: 520px;
 }
 
-.shLandingMockupDot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
+/* ── Staggered entrance ─────────────────────────────────────────────── */
+
+.shLandingStagger {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: shLandingFadeUp 500ms ease forwards;
 }
 
-.shLandingMockupBody {
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-/* ── Comparison score dots ────────────────────────────────────────── */
-
-.shLandingScoreDot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  display: inline-block;
-  flex-shrink: 0;
-}
-
-.shLandingScoreFull {
-  background: #24835b;
-  box-shadow: 0 0 6px rgba(36, 131, 91, 0.35);
-}
-
-.shLandingScorePartial {
-  background: #f59e0b;
-  box-shadow: 0 0 6px rgba(245, 158, 11, 0.35);
-}
-
-.shLandingScoreNone {
-  background: var(--line);
-  opacity: 0.35;
-}
-
-/* ── Testimonial quote mark ───────────────────────────────────────── */
-
-.shLandingQuote {
-  position: absolute;
-  top: -8px;
-  left: 24px;
-  font-size: 64px;
-  line-height: 1;
-  color: rgba(31, 115, 183, 0.08);
-  font-family: Georgia, serif;
-  pointer-events: none;
-}
-
-/* ── Section divider glow ─────────────────────────────────────────── */
-
-.shLandingGlowDivider {
-  width: 80px;
-  height: 3px;
-  border-radius: 2px;
-  background: linear-gradient(90deg, transparent, #1f73b7, transparent);
-  margin: 0 auto 20px;
-}
-
-/* ── Stats counter container ──────────────────────────────────────── */
-
-.shLandingStatValue {
-  font-size: clamp(32px, 4vw, 48px);
-  font-weight: 800;
-  line-height: 0.9;
-  letter-spacing: -0.04em;
+.shLandingStaggerFast {
+  opacity: 0;
+  transform: translateY(12px);
+  animation: shLandingFadeUp 400ms ease forwards;
 }
 
 /* ── Responsive tweaks ────────────────────────────────────────────── */
