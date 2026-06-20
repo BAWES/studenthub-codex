@@ -3,8 +3,6 @@
 import { Badge } from "@/components/ui/badge";
 import type { SkillItem } from "@/app/student/actions";
 
-const CORAL = "#eb6651";
-
 interface SkillsSectionProps {
   skills: SkillItem[];
 }
@@ -14,10 +12,7 @@ export function SkillsSection({ skills }: SkillsSectionProps) {
     <section>
       {/* Section title with coral left border */}
       <div className="flex items-center gap-3 mb-4">
-        <div
-          className="w-1 h-6 rounded-full flex-shrink-0"
-          style={{ backgroundColor: CORAL }}
-        />
+        <div className="w-1 h-6 rounded-full flex-shrink-0 bg-[#eb6651]" />
         <h2 className="text-xl font-semibold text-foreground">
           Skills
         </h2>
@@ -29,12 +24,7 @@ export function SkillsSection({ skills }: SkillsSectionProps) {
             <Badge
               key={skill.id}
               variant="outline"
-              className="text-[11px] font-black uppercase tracking-[0.03em]"
-              style={{
-                backgroundColor: "#fef1ef",
-                color: CORAL,
-                borderColor: CORAL,
-              }}
+              className="text-[11px] font-black uppercase tracking-[0.03em] bg-[#fef1ef] text-[#eb6651] border-[#eb6651]"
             >
               {skill.name}
             </Badge>
