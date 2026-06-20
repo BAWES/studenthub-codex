@@ -319,7 +319,7 @@ export function WorkspaceOS({
         Skip to content
       </a>
       <TabProvider role={session.role}>
-      <main id="main-content" className="shell">
+      <main id="main-content" className="min-h-svh grid grid-cols-[236px_minmax(0,1fr)] bg-background">
         {/* ── Sidebar Rail ─────────────────────────────────── */}
         <aside
           className="group/rail sticky top-0 h-svh grid grid-rows-[auto_minmax(0,1fr)_auto] gap-1 p-2 border-r border-border overflow-hidden z-30 transition-all duration-300 w-14 hover:w-[200px] hover:border-r-[color-mix(in_srgb,#eb6651_30%,hsl(var(--border)))]"

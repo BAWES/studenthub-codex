@@ -14,9 +14,9 @@ export default function AdminExpensesError({ error, reset }: Props) {
   }, [error]);
 
   return (
-    <div className="shell shellEmbedded">
-      <section className="workspaceStage">
-        <section className="topbar">
+    <div className="block">
+      <section className="min-w-0 overflow-x-hidden grid content-start gap-3.5 p-3.5">
+        <section className="sticky top-[10px] z-20 flex items-center justify-between gap-3 min-h-14 px-4 mb-1 rounded-lg bg-card border border-border">
           <h1 className="text-lg font-semibold text-destructive">
             Something went wrong
           </h1>

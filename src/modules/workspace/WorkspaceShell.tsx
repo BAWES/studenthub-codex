@@ -151,7 +151,7 @@ export function WorkspaceShell({
     : (
       <>
         {skipLink}
-        <main id="main-content" className="shell">
+        <main id="main-content" className="min-h-svh grid grid-cols-[236px_minmax(0,1fr)] bg-background">
           {rail}
           {stage}
           <MobileNavBar role={session.role} />
