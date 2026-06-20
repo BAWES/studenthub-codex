@@ -7,6 +7,8 @@ import {
   listSettingsSchema,
   getSettingSchema,
   updateSettingSchema,
+  createSettingSchema,
+  deleteSettingSchema,
   listSettingsResultSchema,
   updateSettingResultSchema,
   settingItemSchema,
@@ -36,12 +38,11 @@ export type ListSettingsResult = {
 
 export type GetSettingInput = z.input<typeof getSettingSchema>;
 export type UpdateSettingInput = z.input<typeof updateSettingSchema>;
+export type CreateSettingInput = z.input<typeof createSettingSchema>;
+export type DeleteSettingInput = z.input<typeof deleteSettingSchema>;
 export type ListSettingsInput = z.input<typeof listSettingsSchema>;
 
-export type UpdateSettingResult = {
-  operation: string;
-  message: string;
-};
+export type UpdateSettingResult = z.output<typeof updateSettingResultSchema>;
 
 // ---------------------------------------------------------------------------
 // Exported schemas (for shared validation in tests)
@@ -245,6 +246,175 @@ export async function updateSetting(
     if (!outputParsed.success) {
       console.error(
         "[modules/settings] updateSetting catch output failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
+  }
+}
+
+
+// ---------------------------------------------------------------------------
+// createSetting
+// ---------------------------------------------------------------------------
+
+/**
+ * Create a new setting.
+ * Admin only — requires "setting.write" capability.
+ * Mirrors the legacy SettingController::actionCreate().
+ */
+export async function createSetting(
+  params: CreateSettingInput,
+): Promise<UpdateSettingResult> {
+  await requireCapability("setting.write");
+
+  const parsed = createSettingSchema.safeParse(params);
+  if (!parsed.success) {
+    const result = {
+      operation: "error",
+      message: parsed.error.issues[0]?.message ?? "Invalid setting data",
+    };
+    const outputParsed = updateSettingResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/settings] createSetting validation output failed:",
+        outputParsed.error.issues,
+      );
+    }
+    return result;
+  }
+
+  const { code, key, value, serialized } = parsed.data;
+
+  try {
+    await prisma.setting.create({
+      data: {
+        setting_uuid: `setting_${crypto.randomUUID()}`,
+        code,
+        key,
+        value: value ?? null,
+        serialized,
+        created_at: new Date(),
+        updated_at: new Date(),
+      },
+    });
+
+    const result = {
+      operation: "success",
+      message: "Setting created successfully",
+    };
+
+    const outputParsed = updateSettingResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/settings] createSetting output failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
+  } catch (err) {
+    const result = {
+      operation: "error",
+      message: err instanceof Error ? err.message : "Failed to create setting",
+    };
+
+    const outputParsed = updateSettingResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/settings] createSetting catch output failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// deleteSetting
+// ---------------------------------------------------------------------------
+
+/**
+ * Delete a setting by UUID.
+ * Admin only — requires "setting.write" capability.
+ * Mirrors the legacy SettingController::actionDelete().
+ */
+export async function deleteSetting(
+  params: DeleteSettingInput,
+): Promise<UpdateSettingResult> {
+  await requireCapability("setting.write");
+
+  const parsed = deleteSettingSchema.safeParse(params);
+  if (!parsed.success) {
+    const result = {
+      operation: "error",
+      message: parsed.error.issues[0]?.message ?? "Invalid setting data",
+    };
+    const outputParsed = updateSettingResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/settings] deleteSetting validation output failed:",
+        outputParsed.error.issues,
+      );
+    }
+    return result;
+  }
+
+  const { settingUuid } = parsed.data;
+
+  // Verify the setting exists
+  const existing = await prisma.setting.findUnique({
+    where: { setting_uuid: settingUuid },
+  });
+
+  if (!existing) {
+    const result = {
+      operation: "error",
+      message: "Setting not found",
+    };
+
+    const outputParsed = updateSettingResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/settings] deleteSetting not-found output failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
+  }
+
+  try {
+    await prisma.setting.delete({
+      where: { setting_uuid: settingUuid },
+    });
+
+    const result = {
+      operation: "success",
+      message: "Setting deleted successfully",
+    };
+
+    const outputParsed = updateSettingResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/settings] deleteSetting output failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
+  } catch (err) {
+    const result = {
+      operation: "error",
+      message: err instanceof Error ? err.message : "Failed to delete setting",
+    };
+
+    const outputParsed = updateSettingResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/settings] deleteSetting catch output failed:",
         outputParsed.error.issues,
       );
     }

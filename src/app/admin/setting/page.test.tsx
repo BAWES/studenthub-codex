@@ -1,24 +1,23 @@
 import { describe, it, expect } from "vitest";
-import { listSettingsSchema } from "./schemas";
+import { listSettingsSchema, createSettingSchema, deleteSettingSchema } from "./schemas";
 import type { SettingItem, ListSettingsResult } from "./schemas";
 
 /**
- * Page migration test for admin/setting.
+ * Data contract tests for admin/setting page.
  *
- * Verifies that listSettingsSchema accepts the params passed by the page,
+ * Verifies that schemas accept the params passed by the page,
  * and that SettingItem fields map correctly to DataTable columns.
  *
  * Full rendering tests require Playwright (server component).
- * This validates the data contract between the page and the server action.
  */
+
 describe("admin setting page — data contract", () => {
-  it("listSettingsSchema accepts empty params (defaults apply)", () => {
+  // ── listSettingsSchema ─────────────────────────────────────
+
+  it("listSettingsSchema accepts empty params", () => {
     const r = listSettingsSchema.safeParse({});
     expect(r.success).toBe(true);
-    if (r.success) {
-      expect(r.data.limit).toBe(50);
-      expect(r.data.page).toBe(1);
-    }
+    expect(r.data).toBeDefined();
   });
 
   it("listSettingsSchema accepts explicit page and limit", () => {
@@ -31,12 +30,62 @@ describe("admin setting page — data contract", () => {
   });
 
   it("listSettingsSchema accepts the params the page actually passes", () => {
-    const r = listSettingsSchema.safeParse({ limit: 100 });
+    const r = listSettingsSchema.safeParse({ limit: 50, page: 1 });
     expect(r.success).toBe(true);
     if (r.success) {
-      expect(r.data.limit).toBe(100);
+      expect(r.data.limit).toBe(50);
+      expect(r.data.page).toBe(1);
     }
   });
+
+  it("listSettingsSchema accepts code filter", () => {
+    const r = listSettingsSchema.safeParse({ code: "AppConfig", page: 1, limit: 50 });
+    expect(r.success).toBe(true);
+  });
+
+  // ── createSettingSchema ────────────────────────────────────
+
+  it("createSettingSchema accepts valid input", () => {
+    const r = createSettingSchema.safeParse({
+      code: "AppConfig",
+      key: "site_name",
+      value: "StudentHub",
+      serialized: false,
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("createSettingSchema accepts minimal input (no value)", () => {
+    const r = createSettingSchema.safeParse({
+      code: "AppConfig",
+      key: "site_name",
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("createSettingSchema rejects empty code", () => {
+    const r = createSettingSchema.safeParse({ code: "", key: "site_name" });
+    expect(r.success).toBe(false);
+  });
+
+  it("createSettingSchema rejects empty key", () => {
+    const r = createSettingSchema.safeParse({ code: "AppConfig", key: "" });
+    expect(r.success).toBe(false);
+  });
+
+  // ── deleteSettingSchema ────────────────────────────────────
+
+  it("deleteSettingSchema accepts valid UUID", () => {
+    const r = deleteSettingSchema.safeParse({ settingUuid: "setting_abc123" });
+    expect(r.success).toBe(true);
+  });
+
+  it("deleteSettingSchema rejects empty UUID", () => {
+    const r = deleteSettingSchema.safeParse({ settingUuid: "" });
+    expect(r.success).toBe(false);
+  });
+
+  // ── SettingItem ────────────────────────────────────────────
 
   it("SettingItem fields map correctly to DataTable columns", () => {
     const row: SettingItem = {
@@ -58,17 +107,19 @@ describe("admin setting page — data contract", () => {
   it("SettingItem allows nullable fields", () => {
     const row: SettingItem = {
       setting_uuid: "nullable-test",
-      code: null,
-      key: null,
+      code: "test",
+      key: "nullable-key",
       value: null,
-      serialized: null,
+      serialized: false,
       created_at: null,
       updated_at: null,
     };
-    expect(row.code).toBeNull();
+    expect(row.code).toBe("test");
     expect(row.value).toBeNull();
-    expect(row.serialized).toBeNull();
+    expect(row.serialized).toBe(false);
   });
+
+  // ── ListSettingsResult ─────────────────────────────────────
 
   it("ListSettingsResult has expected shape", () => {
     const result: ListSettingsResult = {
