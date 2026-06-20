@@ -46,6 +46,7 @@ test.describe("Detail routes and remaining static routes", () => {
         select: { company_id: true },
       }),
       prisma.request.findFirst({
+        where: { deleted: 0 },
         select: { request_uuid: true },
       }),
       prisma.transfer.findFirst({
@@ -65,10 +66,12 @@ test.describe("Detail routes and remaining static routes", () => {
         select: { candidate_id: true },
       }),
       prisma.request.findFirst({
+        where: { deleted: 0 },
         select: { request_uuid: true },
       }),
-      prisma.interview_evaluation.findFirst({
-        select: { interview_evaluation_uuid: true },
+      prisma.interview.findFirst({
+        where: { deleted: 0 },
+        select: { interview_id: true },
       }),
     ]);
     if (staffCan) staffCandidateId = String(staffCan.candidate_id);
@@ -78,10 +81,12 @@ test.describe("Detail routes and remaining static routes", () => {
     // Candidate detail IDs
     const [invitation, workLog] = await Promise.all([
       prisma.invitation.findFirst({
+        where: { deleted: 0 },
         select: { invitation_uuid: true },
       }),
-      prisma.candidate_working_hour.findFirst({
-        select: { candidate_working_hour_uuid: true },
+      prisma.work_log.findFirst({
+        where: { deleted: 0 },
+        select: { work_log_uuid: true },
       }),
     ]);
     if (invitation) candidateInvitationId = invitation.invitation_uuid;
@@ -94,6 +99,7 @@ test.describe("Detail routes and remaining static routes", () => {
         select: { company_id: true },
       }),
       prisma.request.findFirst({
+        where: { deleted: 0 },
         select: { request_uuid: true },
       }),
     ]);
@@ -101,10 +107,11 @@ test.describe("Detail routes and remaining static routes", () => {
     if (compReq) companyRequestId = compReq.request_uuid;
 
     // Inspector detail ID
-    const idReq = await prisma.candidate_id_request.findFirst({
-      select: { cir_uuid: true },
+    const idReq = await prisma.id_request.findFirst({
+      where: { deleted: 0 },
+      select: { id_request_uuid: true },
     });
-    if (idReq) inspectorIdRequestId = idReq.cir_uuid;
+    if (idReq) inspectorIdRequestId = idReq.id_request_uuid;
   });
 
   test.afterAll(async () => {
