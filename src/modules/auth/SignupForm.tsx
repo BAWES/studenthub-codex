@@ -86,19 +86,19 @@ export function SignupForm({ defaultRole }: { defaultRole?: Role }) {
     return (
       <div className="grid gap-7 p-7 sm:p-9 w-full max-w-[480px] mx-auto text-center">
         <div className="grid gap-2">
-          <span className="text-primary text-[11px] font-black uppercase tracking-[0.04em]">
+          <span className="text-[var(--sh-coral)] text-[11px] font-black uppercase tracking-[0.04em]">
             {defaultRole} access
           </span>
-          <strong className="text-foreground text-[22px] leading-[1.15] font-bold tracking-[-0.02em]">
+          <strong className="text-[var(--ink)] text-[22px] leading-[1.15] font-bold tracking-[-0.02em]">
             {msg.title}
           </strong>
-          <p className="text-muted-foreground text-[14px] leading-relaxed m-0 max-w-[400px] mx-auto">
+          <p className="text-[var(--muted)] text-[14px] leading-relaxed m-0 max-w-[400px] mx-auto">
             {msg.description}
           </p>
         </div>
         <Link
           href="/"
-          className="inline-flex items-center justify-center gap-2 min-h-[50px] px-6 rounded-xl text-[15px] font-semibold no-underline transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg bg-primary text-primary-foreground hover:bg-primary/90"
+          className="inline-flex items-center justify-center gap-2 min-h-[50px] px-6 rounded-xl text-[15px] font-semibold no-underline transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg bg-[var(--sh-coral)] text-[var(--paper)] hover:bg-[var(--sh-coral-hover)]"
         >
           {msg.cta} <ArrowRight className="size-4" />
         </Link>
@@ -111,13 +111,13 @@ export function SignupForm({ defaultRole }: { defaultRole?: Role }) {
     return (
       <div className="grid gap-7 p-7 sm:p-9 w-full max-w-[640px] mx-auto">
         <div className="grid gap-1.5 text-center">
-          <span className="text-primary text-[11px] font-black uppercase tracking-[0.04em]">
+          <span className="text-[var(--sh-coral)] text-[11px] font-black uppercase tracking-[0.04em]">
             Get started
           </span>
-          <strong className="text-foreground text-[24px] leading-[1.15] font-bold tracking-[-0.02em]">
+          <strong className="text-[var(--ink)] text-[24px] leading-[1.15] font-bold tracking-[-0.02em]">
             Create your StudentHub account
           </strong>
-          <p className="text-muted-foreground text-[14px] leading-relaxed m-0 max-w-[440px] mx-auto">
+          <p className="text-[var(--muted)] text-[14px] leading-relaxed m-0 max-w-[440px] mx-auto">
             Choose how you&apos;ll use StudentHub. You can create one account per email.
           </p>
         </div>
@@ -130,20 +130,20 @@ export function SignupForm({ defaultRole }: { defaultRole?: Role }) {
                 key={role.value}
                 type="button"
                 onClick={() => handleRoleSelect(role.value)}
-                className="group text-left w-full min-h-[120px] rounded-xl p-5 cursor-pointer transition-all duration-[280ms] hover:-translate-y-0.5 hover:shadow-[0_16px_45px_rgba(16,24,40,0.1)] border border-border bg-white hover:bg-card hover:border-border"
+                className="group text-left w-full min-h-[120px] rounded-xl p-5 cursor-pointer transition-all duration-[280ms] hover:-translate-y-0.5 hover:shadow-[0_16px_45px_rgba(16,24,40,0.1)] border border-[var(--border)] bg-[var(--surface)] hover:bg-[var(--surface)] hover:border-[var(--border)]"
               >
                 <div className="flex items-start gap-4">
                   <div
-                    className="shrink-0 size-12 rounded-xl flex items-center justify-center bg-card border border-border"
+                    className="shrink-0 size-12 rounded-xl flex items-center justify-center bg-[var(--surface)] border border-[var(--border)]"
                   >
-                    <Icon className="size-5 text-primary" />
+                    <Icon className="size-5 text-[var(--sh-coral)]" />
                   </div>
                   <div className="grid gap-1.5 min-w-0 flex-1">
-                    <strong className="text-foreground text-[16px] font-bold">{role.title}</strong>
-                    <p className="text-muted-foreground text-[13px] leading-relaxed m-0">{role.description}</p>
+                    <strong className="text-[var(--ink)] text-[16px] font-bold">{role.title}</strong>
+                    <p className="text-[var(--muted)] text-[13px] leading-relaxed m-0">{role.description}</p>
                     <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1">
                       {role.features.map((f) => (
-                        <span key={f} className="text-[12px] text-primary">
+                        <span key={f} className="text-[12px] text-[var(--sh-coral)]">
                           {f}
                         </span>
                       ))}
@@ -155,9 +155,9 @@ export function SignupForm({ defaultRole }: { defaultRole?: Role }) {
           })}
         </div>
 
-        <p className="text-center text-[13px] text-muted-foreground m-0">
+        <p className="text-center text-[13px] text-[var(--muted)] m-0">
           Already have an account?{" "}
-          <a href="/login" className="text-primary font-semibold no-underline hover:underline">
+          <a href="/login" className="text-[var(--sh-coral)] font-semibold no-underline hover:underline">
             Sign in
           </a>
         </p>
@@ -173,20 +173,20 @@ export function SignupForm({ defaultRole }: { defaultRole?: Role }) {
           <button
             type="button"
             onClick={handleBack}
-            className="inline-flex items-center gap-1.5 text-[13px] text-primary font-semibold cursor-pointer bg-transparent border-none p-0 w-fit hover:opacity-80 transition-opacity"
+            className="inline-flex items-center gap-1.5 text-[13px] text-[var(--sh-coral)] font-semibold cursor-pointer bg-transparent border-none p-0 w-fit hover:opacity-80 transition-opacity"
           >
             <ArrowLeft className="size-3.5" />
             Back to role selection
           </button>
-          <span className="text-primary text-[11px] font-black uppercase tracking-[0.04em] mt-2">
+          <span className="text-[var(--sh-coral)] text-[11px] font-black uppercase tracking-[0.04em] mt-2">
             {selectedRole === "candidate" ? "Worker account" : "Employer account"}
           </span>
-          <strong className="text-foreground text-[24px] leading-[1.15] font-bold tracking-[-0.02em]">
+          <strong className="text-[var(--ink)] text-[24px] leading-[1.15] font-bold tracking-[-0.02em]">
             {selectedRole === "candidate"
               ? "Start your career journey"
               : "Start hiring with StudentHub"}
           </strong>
-          <p className="text-muted-foreground text-[14px] leading-relaxed m-0">
+          <p className="text-[var(--muted)] text-[14px] leading-relaxed m-0">
             Fill in your details to create your account. You&apos;ll be able to complete your
             {selectedRole === "candidate" ? " profile" : " company setup"} afterwards.
           </p>
@@ -196,7 +196,7 @@ export function SignupForm({ defaultRole }: { defaultRole?: Role }) {
         <input name="role" type="hidden" value={selectedRole ?? ""} />
 
         <div className="grid gap-2">
-          <Label htmlFor="signup-name" className="text-[13px] font-semibold text-foreground">
+          <Label htmlFor="signup-name" className="text-[13px] font-semibold text-[var(--ink)]">
             Full name
           </Label>
           <Input
@@ -207,15 +207,15 @@ export function SignupForm({ defaultRole }: { defaultRole?: Role }) {
             autoComplete="name"
             placeholder={selectedRole === "candidate" ? "Your full name" : "Contact name"}
             required
-            className="min-h-[48px] bg-white border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
+            className="min-h-[48px] border border-[var(--border)] focus:border-[var(--sh-coral)] focus:shadow-[var(--sh-coral-glow)] transition-all duration-200"
           />
           {state.fieldErrors?.name ? (
-            <p className="text-destructive font-bold m-0 text-xs">{state.fieldErrors.name[0]}</p>
+            <p className="text-[var(--destructive)] font-bold m-0 text-xs">{state.fieldErrors.name[0]}</p>
           ) : null}
         </div>
 
         <div className="grid gap-2">
-          <Label htmlFor="signup-email" className="text-[13px] font-semibold text-foreground">
+          <Label htmlFor="signup-email" className="text-[13px] font-semibold text-[var(--ink)]">
             Email address
           </Label>
           <Input
@@ -225,15 +225,15 @@ export function SignupForm({ defaultRole }: { defaultRole?: Role }) {
             autoComplete="email"
             placeholder="name@example.com"
             required
-            className="min-h-[48px] bg-white border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
+            className="min-h-[48px] border border-[var(--border)] focus:border-[var(--sh-coral)] focus:shadow-[var(--sh-coral-glow)] transition-all duration-200"
           />
           {state.fieldErrors?.email ? (
-            <p className="text-destructive font-bold m-0 text-xs">{state.fieldErrors.email[0]}</p>
+            <p className="text-[var(--destructive)] font-bold m-0 text-xs">{state.fieldErrors.email[0]}</p>
           ) : null}
         </div>
 
         <div className="grid gap-2">
-          <Label htmlFor="signup-password" className="text-[13px] font-semibold text-foreground">
+          <Label htmlFor="signup-password" className="text-[13px] font-semibold text-[var(--ink)]">
             Password
           </Label>
           <Input
@@ -244,15 +244,15 @@ export function SignupForm({ defaultRole }: { defaultRole?: Role }) {
             placeholder="At least 5 characters"
             required
             minLength={5}
-            className="min-h-[48px] bg-white border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
+            className="min-h-[48px] border border-[var(--border)] focus:border-[var(--sh-coral)] focus:shadow-[var(--sh-coral-glow)] transition-all duration-200"
           />
           {state.fieldErrors?.password ? (
-            <p className="text-destructive font-bold m-0 text-xs">{state.fieldErrors.password[0]}</p>
+            <p className="text-[var(--destructive)] font-bold m-0 text-xs">{state.fieldErrors.password[0]}</p>
           ) : null}
         </div>
 
         <div className="grid gap-2">
-          <Label htmlFor="signup-confirm-password" className="text-[13px] font-semibold text-foreground">
+          <Label htmlFor="signup-confirm-password" className="text-[13px] font-semibold text-[var(--ink)]">
             Confirm password
           </Label>
           <Input
@@ -262,15 +262,15 @@ export function SignupForm({ defaultRole }: { defaultRole?: Role }) {
             autoComplete="new-password"
             placeholder="Re-enter your password"
             required
-            className="min-h-[48px] bg-white border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
+            className="min-h-[48px] border border-[var(--border)] focus:border-[var(--sh-coral)] focus:shadow-[var(--sh-coral-glow)] transition-all duration-200"
           />
           {state.fieldErrors?.confirmPassword ? (
-            <p className="text-destructive font-bold m-0 text-xs">{state.fieldErrors.confirmPassword[0]}</p>
+            <p className="text-[var(--destructive)] font-bold m-0 text-xs">{state.fieldErrors.confirmPassword[0]}</p>
           ) : null}
         </div>
 
         {state.error ? (
-          <p className="text-destructive font-bold m-0 text-sm">{state.error}</p>
+          <p className="text-[var(--destructive)] font-bold m-0 text-sm">{state.error}</p>
         ) : null}
 
         <Button
@@ -284,9 +284,9 @@ export function SignupForm({ defaultRole }: { defaultRole?: Role }) {
         </Button>
       </form>
 
-      <p className="text-center text-[13px] text-muted-foreground m-0 pb-7 sm:pb-9">
+      <p className="text-center text-[13px] text-[var(--muted)] m-0 pb-7 sm:pb-9">
         Already have an account?{" "}
-        <a href="/login" className="text-primary font-semibold no-underline hover:underline">
+        <a href="/login" className="text-[var(--sh-coral)] font-semibold no-underline hover:underline">
           Sign in
         </a>
       </p>
