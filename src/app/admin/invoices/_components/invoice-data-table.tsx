@@ -139,8 +139,8 @@ export function InvoiceDataTable({
         <div className="flex flex-col items-center gap-4 text-center">
           <span className="text-3xl" aria-hidden="true">⚠️</span>
           <div>
-            <p className="text-lg font-semibold" style={{ color: "var(--ink)" }}>Could not load invoices</p>
-            <p className="text-sm mt-1" style={{ color: "var(--muted)" }}>{error}</p>
+            <p className="text-lg font-semibold text-foreground">Could not load invoices</p>
+            <p className="text-sm mt-1 text-muted-foreground">{error}</p>
           </div>
           <button onClick={onRetry} className="h-10 rounded-lg px-4 text-sm font-semibold" style={{ background: "var(--sh-info)", color: "#fff" }}>
             Retry
@@ -184,8 +184,8 @@ export function InvoiceDataTable({
       ) : !sortedInvoices.length ? (
         <div className="flex flex-col items-center justify-center py-16 gap-4" role="status">
           <span className="text-4xl" aria-hidden="true">📄</span>
-          <p className="text-lg font-semibold" style={{ color: "var(--ink)" }}>No invoices yet</p>
-          <p className="text-sm text-center max-w-md" style={{ color: "var(--muted)" }}>
+          <p className="text-lg font-semibold text-foreground">No invoices yet</p>
+          <p className="text-sm text-center max-w-md text-muted-foreground">
             Invoices will appear here once they are generated from transfer billing.
           </p>
         </div>
@@ -205,16 +205,16 @@ export function InvoiceDataTable({
               onClick={() => onRowClick(invoice)}
               onKeyDown={(e) => handleKeyDown(e, invoice)}
             >
-              <span className="text-sm font-medium truncate" style={{ color: "var(--ink)" }}>
+              <span className="text-sm font-medium truncate text-foreground">
                 {invoice.company_name ?? "—"}
               </span>
-              <span className="text-sm" style={{ color: "var(--ink)" }}>
+              <span className="text-sm text-foreground">
                 {formatDate(invoice.invoice_date)}
               </span>
-              <span className="text-sm text-right font-medium" style={{ color: "var(--ink)" }}>
+              <span className="text-sm text-right font-medium text-foreground">
                 {formatAmount(invoice.total, invoice.currency_code)}
               </span>
-              <span className="text-sm text-center" style={{ color: "var(--muted)" }}>
+              <span className="text-sm text-center text-muted-foreground">
                 {invoice.currency_code ?? "—"}
               </span>
               <span className="flex justify-center">

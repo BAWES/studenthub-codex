@@ -30,7 +30,7 @@ export function AdminUniversityTable({ session, records }: Props) {
     >
       <section className="mb-6">
         <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
-          <h3 className="text-sm font-semibold mb-3" style={{ color: "var(--ink)" }}>Add a university</h3>
+          <h3 className="text-sm font-semibold mb-3 text-foreground">Add a university</h3>
           <CreateUniversityForm onSuccess={() => router.refresh()} />
         </div>
       </section>
@@ -45,7 +45,7 @@ export function AdminUniversityTable({ session, records }: Props) {
             key: "university_name_en",
             label: "Name (English)",
             render: (row) => (
-              <span className="text-sm font-medium" style={{ color: "var(--ink)" }}>
+              <span className="text-sm font-medium text-foreground">
                 {row.university_name_en ?? "—"}
               </span>
             ),
@@ -54,7 +54,7 @@ export function AdminUniversityTable({ session, records }: Props) {
             key: "university_name_ar",
             label: "Name (Arabic)",
             render: (row) => (
-              <span className="text-sm" style={{ color: "var(--muted)" }} dir="rtl">
+              <span className="text-sm text-muted-foreground" dir="rtl">
                 {row.university_name_ar ?? "—"}
               </span>
             ),
@@ -63,7 +63,7 @@ export function AdminUniversityTable({ session, records }: Props) {
             key: "university_created_at",
             label: "Created",
             render: (row) => (
-              <span className="text-sm" style={{ color: "var(--muted)" }}>
+              <span className="text-sm text-muted-foreground">
                 {row.university_created_at
                   ? new Date(row.university_created_at).toLocaleDateString("en-KW", {
                       year: "numeric",
@@ -80,8 +80,7 @@ export function AdminUniversityTable({ session, records }: Props) {
             render: (row) => (
               <button
                 type="button"
-                className="text-xs px-2 py-1 rounded hover:bg-red-500/10"
-                style={{ color: "var(--sh-error)" }}
+                className="text-xs px-2 py-1 rounded hover:bg-red-500/10 text-destructive"
                 onClick={async (e) => {
                   e.stopPropagation();
                   if (confirm(`Delete university "${row.university_name_en || row.university_name_ar || "Unnamed"}"?`)) {
@@ -133,7 +132,7 @@ function CreateUniversityForm({ onSuccess }: { onSuccess: () => void }) {
       onSubmit={() => setTimeout(() => { formRef.current?.reset(); }, 100)}
     >
       <div className="grid gap-1">
-        <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>Name (English)</label>
+        <label className="text-xs font-medium text-muted-foreground">Name (English)</label>
         <input
           name="university_name_en"
           maxLength={100}
@@ -143,7 +142,7 @@ function CreateUniversityForm({ onSuccess }: { onSuccess: () => void }) {
         />
       </div>
       <div className="grid gap-1">
-        <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>Name (Arabic)</label>
+        <label className="text-xs font-medium text-muted-foreground">Name (Arabic)</label>
         <input
           name="university_name_ar"
           maxLength={100}
@@ -155,13 +154,12 @@ function CreateUniversityForm({ onSuccess }: { onSuccess: () => void }) {
       <button
         type="submit"
         disabled={pending}
-        className="h-9 rounded-lg px-4 text-sm font-semibold"
-        style={{ background: "var(--sh-primary)", color: "#fff" }}
+        className="h-9 rounded-lg px-4 text-sm font-semibold bg-primary text-primary-foreground"
       >
         {pending ? "Adding..." : "Add University"}
       </button>
       {state?.error ? (
-        <p className="text-xs w-full" style={{ color: "var(--sh-error)" }}>{state.error}</p>
+        <p className="text-xs w-full text-destructive">{state.error}</p>
       ) : null}
     </form>
   );
