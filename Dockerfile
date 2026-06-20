@@ -32,11 +32,13 @@ RUN pnpm install --frozen-lockfile --config.minimumReleaseAge=0 --prod --ignore-
 FROM base AS builder
 LABEL stage=builder
 
-COPY --from=deps /app/node_modules ./node_modules
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile --config.minimumReleaseAge=0 --ignore-scripts
+
 COPY . .
 
 # Generate Prisma client so the build can resolve types
-RUN npx prisma generate
+RUN pnpm prisma generate
 
 # Build Next.js (outputs standalone + static)
 RUN pnpm run build
