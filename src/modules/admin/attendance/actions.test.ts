@@ -226,7 +226,7 @@ describe("createAdminAttendance — runtime", () => {
     clock_out: "17:00",
   };
 
-  const MOCK_RESULT = { success: true, attendance_id: 1 };
+  const MOCK_RESULT = { attendance_uuid: "mock-uuid" };
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -258,7 +258,7 @@ describe("createAdminAttendance — runtime", () => {
 describe("getAdminAttendance — runtime", () => {
   const MOCK_UUID = "attendance-uuid-123";
   const MOCK_ATTENDANCE = {
-    id: 1,
+    attendance_uuid: "attendance-uuid-123",
     employee_uuid: "emp-uuid-1",
     date: "2026-06-15",
     clock_in: "09:00",
