@@ -8,6 +8,7 @@ import Link from "next/link";
 import { navForRole } from "./navigation";
 import { WorkspaceMobileNavigation, WorkspaceNavigation } from "./WorkspaceNavigation";
 import { useWorkspaceOS } from "./WorkspaceOSContext";
+import { Card, CardContent } from "@/components/ui/card";
 
 type Metric = {
   label: string;
@@ -44,50 +45,72 @@ export function WorkspaceShell({
   const navItems = navForRole(session.role);
 
   const rail = (
-    <aside className="workspaceRail">
-      <Link className="workspaceMark" href="/app" aria-label="StudentHub app">
-        <span>SH</span>
-        <strong>StudentHub</strong>
+    <aside className="flex w-[236px] shrink-0 flex-col border-r border-border bg-card">
+      <Link
+        className="flex items-center gap-2 border-b border-border px-5 py-4 font-semibold text-foreground"
+        href="/app"
+        aria-label="StudentHub app"
+      >
+        <span className="flex size-7 items-center justify-center rounded-md bg-primary text-xs font-bold text-primary-foreground">
+          SH
+        </span>
+        <strong className="text-sm">StudentHub</strong>
       </Link>
       <WorkspaceNavigation items={navItems} role={session.role} />
-      <div className="workspaceRailFooter">
+      <div className="mt-auto flex items-center gap-2 border-t border-border px-4 py-3">
         <ThemeToggle />
-        <form className="workspaceSignout" action={logoutAction}>
-          <button type="submit">Sign out</button>
+        <form className="ml-auto" action={logoutAction}>
+          <button
+            type="submit"
+            className="rounded-md px-2 py-1 text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          >
+            Sign out
+          </button>
         </form>
       </div>
     </aside>
   );
 
   const stage = (
-    <section className="workspaceStage">
-      <section className="topbar">
+    <section className="flex flex-1 flex-col overflow-auto">
+      {/* Top bar */}
+      <section className="flex items-center justify-between border-b border-border bg-card px-6 py-3">
         <div>
-          <p className="eyebrow">{eyebrow}</p>
-          <h1>{title}</h1>
+          <p className="text-xs font-medium text-muted-foreground">{eyebrow}</p>
+          <h1 className="text-xl font-bold text-foreground">{title}</h1>
         </div>
-        <div className="accountBox">
-          <span>{session.role}</span>
-          <strong>{session.name}</strong>
-          <small>{session.email}</small>
+        <div className="flex flex-col items-end text-right">
+          <span className="text-xs font-medium uppercase text-muted-foreground">{session.role}</span>
+          <strong className="text-sm text-foreground">{session.name}</strong>
+          <small className="text-xs text-muted-foreground">{session.email}</small>
         </div>
       </section>
 
+      {/* Metrics grid */}
       {metrics.length ? (
-        <section className="metrics" aria-label={`${session.role} workspace metrics`}>
+        <section
+          className="grid gap-4 p-6 pb-0"
+          style={{ gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))" }}
+          aria-label={`${session.role} workspace metrics`}
+        >
           {metrics.map((metric) => (
-            <article className="metric" key={metric.label}>
-              <span>{metric.label}</span>
-              <strong>{typeof metric.value === "number" ? metric.value.toLocaleString("en-US") : metric.value}</strong>
-              <p>{metric.note}</p>
-            </article>
+            <Card key={metric.label}>
+              <CardContent className="flex flex-col gap-1 p-4">
+                <span className="text-xs font-medium text-muted-foreground">{metric.label}</span>
+                <strong className="text-2xl font-bold text-foreground">
+                  {typeof metric.value === "number" ? metric.value.toLocaleString("en-US") : metric.value}
+                </strong>
+                <p className="text-xs text-muted-foreground">{metric.note}</p>
+              </CardContent>
+            </Card>
           ))}
         </section>
       ) : null}
 
       {children}
 
-      <section className="lists">
+      {/* Lists grid */}
+      <section className="grid gap-6 p-6 md:grid-cols-2">
         {primary ? <WorkspaceList title={primary.title} rows={primary.rows} /> : null}
         {secondary ? <WorkspaceList title={secondary.title} rows={secondary.rows} /> : null}
       </section>
@@ -97,7 +120,7 @@ export function WorkspaceShell({
   // When embedded in a WorkspaceOS layout, the layout already provides the rail and mobile nav.
   if (embedded) {
     return (
-      <main className="shell shellEmbedded">
+      <main className="flex min-h-0 flex-1 flex-col">
         {stage}
         <WorkspaceMobileNavigation items={navItems} role={session.role} />
       </main>
@@ -105,45 +128,51 @@ export function WorkspaceShell({
   }
 
   return (
-    <main className="shell">
+    <main className="flex min-h-screen">
       {rail}
       {stage}
       <WorkspaceMobileNavigation items={navItems} role={session.role} />
-      </main>
+    </main>
   );
 }
 
 function WorkspaceList({ title, rows }: { title: string; rows: Row[] }) {
   return (
-    <section className="dataList">
-      <div className="listHeader">
-        <h2>{title}</h2>
-        <span>{rows.length}</span>
+    <Card>
+      <div className="flex items-center justify-between border-b border-border px-5 py-3">
+        <h2 className="text-sm font-semibold text-foreground">{title}</h2>
+        <span className="flex size-5 items-center justify-center rounded-full bg-muted text-xs font-medium text-muted-foreground">
+          {rows.length}
+        </span>
       </div>
-      <div className="rows">
+      <div className="divide-y divide-border">
         {rows.length ? (
           rows.map((row) => (
-            <article className="row" key={row.id}>
-              <div className="rowMain">
+            <article key={row.id} className="flex items-center justify-between px-5 py-3">
+              <div className="flex flex-col gap-0.5">
                 {row.href ? (
-                  <Link href={row.href as Route}>
+                  <Link href={row.href as Route} className="text-sm font-medium text-foreground hover:text-primary">
                     <strong>{row.title}</strong>
                   </Link>
                 ) : (
-                  <strong>{row.title}</strong>
+                  <strong className="text-sm font-medium text-foreground">{row.title}</strong>
                 )}
-                <span>{row.subtitle}</span>
+                <span className="text-xs text-muted-foreground">{row.subtitle}</span>
               </div>
-              <div className="rowMeta">{row.meta ? <span>{row.meta}</span> : null}</div>
+              <div className="shrink-0 text-xs text-muted-foreground">
+                {row.meta ? <span>{row.meta}</span> : null}
+              </div>
             </article>
           ))
         ) : (
-          <div className="emptyState">
-            <strong>No items here</strong>
-            <span>The imported database did not return rows for this panel.</span>
+          <div className="flex flex-col items-center gap-1 px-5 py-8 text-center">
+            <strong className="text-sm text-muted-foreground">No items here</strong>
+            <span className="text-xs text-muted-foreground/70">
+              The imported database did not return rows for this panel.
+            </span>
           </div>
         )}
       </div>
-    </section>
+    </Card>
   );
 }
