@@ -6,4 +6,10 @@
 // current import paths without duplicating the "use server" directive.
 // ---------------------------------------------------------------------------
 
-export { listWebhooks, getWebhook } from "@/modules/webhooks/actions";
+export {
+  listWebhooks,
+  getWebhook,
+  createWebhook,
+  updateWebhook,
+  deleteWebhook,
+} from "@/modules/webhooks/actions";
