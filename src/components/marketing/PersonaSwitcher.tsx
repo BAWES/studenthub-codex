@@ -54,8 +54,8 @@ export default function PersonaSwitcher({
       role="tablist"
       aria-label="Select your role to see tailored information"
       style={{
-        background: "var(--sh-glass-bg)",
-        border: "1px solid var(--sh-glass-border)",
+        background: "var(--surface)",
+        border: "1px solid var(--border)",
       }}
     >
       {personas.map((p) => {
@@ -74,7 +74,7 @@ export default function PersonaSwitcher({
               "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)]",
               isActive
                 ? "text-[var(--ink)]"
-                : "text-[var(--muted)] hover:text-[var(--ink)] hover:bg-[var(--sh-glass-bg-strong)]",
+                : "text-[var(--muted)] hover:text-[var(--ink)] hover:bg-[var(--accent)]",
             )}
           >
             {/* Active glow indicator */}
@@ -83,7 +83,7 @@ export default function PersonaSwitcher({
                 className="absolute inset-0 rounded-xl pointer-events-none"
                 style={{
                   background: "var(--sh-info-bg)",
-                  border: "1px solid var(--sh-glass-border-strong)",
+                  border: "1px solid var(--border)",
                   boxShadow: "0 2px 8px rgba(16,24,40,0.06)",
                 }}
               />
@@ -113,8 +113,8 @@ export default function PersonaSwitcher({
                 "opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none",
               )}
               style={{
-                background: "var(--sh-glass-bg-strong)",
-                border: "1px solid var(--sh-glass-border)",
+                background: "var(--surface-soft)",
+                border: "1px solid var(--border)",
                 color: "var(--muted)",
               }}
             >
