@@ -12,10 +12,6 @@ LABEL stage=base
 RUN apk add --no-cache libc6-compat
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
-# Bypass pnpm 11's minimum-release-age supply-chain policy for legitimately
-# recent AWS SDK publishes that our lockfile pins (already reviewed/trusted)
-ENV npm_config_minimum_release_age=0
-
 WORKDIR /app
 
 # ---------------------------------------------------------------------------
@@ -25,7 +21,7 @@ FROM base AS deps
 LABEL stage=deps
 
 COPY package.json pnpm-lock.yaml .npmrc ./
-RUN pnpm install --ignore-scripts --no-frozen-lockfile --prod
+RUN npm_config_minimum_release_age=0 pnpm install --ignore-scripts --no-frozen-lockfile --prod
 
 # ---------------------------------------------------------------------------
 # Stage 3: Build (full deps + source + prisma generate + next build)
@@ -34,7 +30,7 @@ FROM base AS builder
 LABEL stage=builder
 
 COPY package.json pnpm-lock.yaml .npmrc ./
-RUN pnpm install --ignore-scripts --no-frozen-lockfile
+RUN npm_config_minimum_release_age=0 pnpm install --ignore-scripts --no-frozen-lockfile
 
 COPY . .
 
