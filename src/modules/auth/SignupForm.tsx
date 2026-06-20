@@ -277,7 +277,7 @@ export function SignupForm({ defaultRole }: { defaultRole?: Role }) {
           type="submit"
           disabled={pending}
           size="lg"
-          className="min-h-[50px] w-full text-[15px] font-semibold transition-all duration-200 cursor-pointer hover:translate-y-[-1px] hover:shadow-lg"
+          className="min-h-[52px] w-full text-[15px] font-semibold transition-all duration-200 cursor-pointer bg-[var(--sh-coral)] text-white hover:bg-[var(--sh-coral-hover)] hover:translate-y-[-1px] hover:shadow-[var(--sh-coral-glow)] disabled:opacity-56 disabled:pointer-events-none"
         >
           <UserPlus className="size-4" />
           {pending ? "Creating account..." : `Create ${selectedRole === "candidate" ? "worker" : "employer"} account`}
