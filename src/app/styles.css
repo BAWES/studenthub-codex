@@ -685,7 +685,7 @@ body {
 
 
 .lockedRole span {
-  color: var(--blue);
+  color: #1f73b7;
   font-size: 11px;
   font-weight: 900;
   text-transform: uppercase;
@@ -774,7 +774,7 @@ body {
 }
 
 [data-theme="dark"] .mobileTabBar a.active {
-  color: var(--blue);
+  color: #1f73b7;
 }
 
 [data-theme="dark"] .loginPath span,
@@ -783,8 +783,8 @@ body {
 [data-theme="dark"] .commandSectionTitle strong,
 [data-theme="dark"] .linearMiniPills span,
 [data-theme="dark"] .linearPills span {
-  background: color-mix(in srgb, var(--blue) 16%, var(--surface));
-  color: var(--blue);
+  background: color-mix(in srgb, #1f73b7 16%, var(--surface));
+  color: #1f73b7;
 }
 
 [data-theme="dark"] .commandBrand,
@@ -911,7 +911,7 @@ body {
 }
 
 .workspaceRailNav a.active {
-  color: var(--blue);
+  color: #1f73b7;
   background: var(--sh-info-bg);
 }
 
@@ -925,7 +925,7 @@ body {
   width: var(--sh-active-width);
   height: 20px;
   border-radius: 0 2px 2px 0;
-  background: var(--blue);
+  background: #1f73b7;
   box-shadow: var(--sh-glow-sm);
   transition:
     height 200ms var(--sh-easing),
@@ -1180,7 +1180,7 @@ body {
 }
 
 .workTab.active {
-  border-color: var(--blue);
+  border-color: #1f73b7;
   background: #eef5ff;
 }
 
@@ -1200,7 +1200,7 @@ body {
 }
 
 .workTab.active button {
-  color: var(--blue);
+  color: #1f73b7;
 }
 
 .workTabClose {
@@ -1250,12 +1250,12 @@ body {
 }
 
 [data-theme="dark"] .workTab.active {
-  border-color: var(--blue);
+  border-color: #1f73b7;
   background: rgba(138, 191, 255, 0.12);
 }
 
 [data-theme="dark"] .workTab.active button {
-  color: var(--blue);
+  color: #1f73b7;
 }
 
 [data-theme="dark"] .workTabClose {
@@ -1274,7 +1274,7 @@ body {
 }
 
 .eyebrow {
-  color: var(--blue);
+  color: #1f73b7;
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0;
@@ -1328,7 +1328,7 @@ h2 {
 }
 
 .accountBox span {
-  color: var(--blue);
+  color: #1f73b7;
   font-size: 12px;
   font-weight: 700;
   text-transform: uppercase;
@@ -1483,7 +1483,7 @@ h2 {
   gap: 5px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: color-mix(in srgb, var(--blue) 8%, var(--surface));
+  background: color-mix(in srgb, #1f73b7 8%, var(--surface));
   padding: 13px;
 }
 
@@ -1534,9 +1534,9 @@ h2 {
 }
 
 .roleOption:has(input:checked) {
-  border-color: var(--blue);
-  background: color-mix(in srgb, var(--blue) 12%, var(--surface));
-  box-shadow: inset 0 0 0 1px var(--blue);
+  border-color: #1f73b7;
+  background: color-mix(in srgb, #1f73b7 12%, var(--surface));
+  box-shadow: inset 0 0 0 1px #1f73b7;
 }
 
 .roleOption span {
@@ -1726,7 +1726,7 @@ h2 {
 
 .financePrimary span,
 .financeSteps article span {
-  color: var(--blue);
+  color: #1f73b7;
   font-size: 11px;
   font-weight: 900;
   text-transform: uppercase;
@@ -1827,7 +1827,7 @@ h2 {
 .linearActivityList span,
 .linearEstate span,
 .linearPrimaryLabel {
-  color: var(--blue);
+  color: #1f73b7;
   font-size: 11px;
   font-weight: 900;
   text-transform: uppercase;
@@ -1948,9 +1948,9 @@ h2 {
 
 .linearFilters a.active,
 .linearFilters a:hover {
-  border-color: var(--blue);
+  border-color: #1f73b7;
   background: #eef5ff;
-  color: var(--blue);
+  color: #1f73b7;
 }
 
 .linearSplit {
@@ -2047,7 +2047,7 @@ h2 {
 }
 
 .linearCandidateCard.active {
-  box-shadow: inset 3px 0 0 var(--blue), 0 8px 24px rgba(16, 24, 40, 0.08);
+  box-shadow: inset 3px 0 0 #1f73b7, 0 8px 24px rgba(16, 24, 40, 0.08);
 }
 
 .linearCardTop,
@@ -2152,9 +2152,9 @@ h2 {
 
 .linearPeekActions a:hover,
 .linearEmpty a:hover {
-  border-color: var(--blue);
+  border-color: #1f73b7;
   background: #eef5ff;
-  color: var(--blue);
+  color: #1f73b7;
 }
 
 .linearPeekFacts {
@@ -2192,7 +2192,7 @@ h2 {
 }
 
 .linearNext article > span {
-  color: var(--blue);
+  color: #1f73b7;
   font-size: 11px;
   font-weight: 900;
   text-transform: uppercase;
@@ -2342,7 +2342,7 @@ h2 {
 
 .workspaceNav a:hover {
   border-color: #9fb9db;
-  color: var(--blue);
+  color: #1f73b7;
 }
 
 .mobileTabBar {
@@ -2363,7 +2363,7 @@ h2 {
   display: grid;
   align-content: space-between;
   border: 1px solid var(--line);
-  border-top: 4px solid var(--blue);
+  border-top: 4px solid #1f73b7;
   background: var(--surface);
   color: var(--ink);
   padding: 16px;
@@ -2377,7 +2377,7 @@ h2 {
 }
 
 .featureTile strong {
-  color: var(--blue);
+  color: #1f73b7;
   font-size: 13px;
 }
 
@@ -2653,9 +2653,9 @@ h2 {
 }
 
 .filterRail a.active {
-  border-color: var(--blue);
+  border-color: #1f73b7;
   background: #eef5ff;
-  color: var(--blue);
+  color: #1f73b7;
 }
 
 .stackedCell,
@@ -2674,7 +2674,7 @@ h2 {
   width: fit-content;
   border: 1px solid #b7cff0;
   background: #eef5ff;
-  color: var(--blue);
+  color: #1f73b7;
   padding: 2px 6px;
   font-weight: 800;
 }
@@ -2698,7 +2698,7 @@ h2 {
 }
 
 .candidateIdentity > span {
-  color: var(--blue);
+  color: #1f73b7;
   font-size: 12px;
   font-weight: 900;
   text-transform: uppercase;
@@ -2722,7 +2722,7 @@ h2 {
   align-items: center;
   border: 1px solid #b7cff0;
   background: #eef5ff;
-  color: var(--blue);
+  color: #1f73b7;
   padding: 0 10px;
   font-size: 12px;
   font-weight: 900;
@@ -2748,8 +2748,8 @@ h2 {
 }
 
 .candidateActions a:hover {
-  border-color: var(--blue);
-  color: var(--blue);
+  border-color: #1f73b7;
+  color: #1f73b7;
   background: #eef5ff;
 }
 
@@ -3058,7 +3058,7 @@ h2 {
   justify-content: center;
   border-top: 1px solid var(--line);
   background: #fbfcfe;
-  color: var(--blue);
+  color: #1f73b7;
   font-size: 13px;
   font-weight: 900;
 }
@@ -3151,7 +3151,7 @@ h2 {
 
 .opsSearch input:focus {
   outline: 3px solid rgba(11, 99, 206, 0.14);
-  border-color: var(--blue);
+  border-color: #1f73b7;
   background: #fff;
 }
 
@@ -3219,7 +3219,7 @@ h2 {
   justify-content: center;
   border: 1px solid #b7cff0;
   background: #eef5ff;
-  color: var(--blue);
+  color: #1f73b7;
   font-size: 12px;
   font-weight: 900;
 }
@@ -3250,12 +3250,12 @@ h2 {
 
 .opsCandidateCard:hover,
 .opsCandidateCard.active {
-  border-left-color: var(--blue);
+  border-left-color: #1f73b7;
   background: #f8fbff;
 }
 
 .opsCandidateCard > span {
-  color: var(--blue);
+  color: #1f73b7;
   font-size: 11px;
   font-weight: 900;
   text-transform: uppercase;
@@ -3349,7 +3349,7 @@ h2 {
 }
 
 .opsRecordHeader span {
-  color: var(--blue);
+  color: #1f73b7;
   font-size: 12px;
   font-weight: 900;
   text-transform: uppercase;
@@ -3511,7 +3511,7 @@ h2 {
 
 .opsRecordRow a:hover,
 .opsActivityItem:hover strong {
-  color: var(--blue);
+  color: #1f73b7;
 }
 
 .opsRecordRow span,
@@ -3589,8 +3589,8 @@ h2 {
 }
 
 .opsNoSelectionActions a:hover {
-  border-color: var(--blue);
-  color: var(--blue);
+  border-color: #1f73b7;
+  color: #1f73b7;
   background: #eef5ff;
 }
 
@@ -3663,14 +3663,14 @@ tr:last-child td {
   justify-content: center;
   border: 1px solid var(--line);
   padding: 0 14px;
-  color: var(--blue);
+  color: #1f73b7;
   font-size: 13px;
   font-weight: 800;
   text-decoration: none;
 }
 
 .rowAction a:hover {
-  border-color: var(--blue);
+  border-color: #1f73b7;
   background: #eef5ff;
 }
 
@@ -3929,7 +3929,7 @@ tr:last-child td {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: var(--blue);
+  color: #1f73b7;
   border: 1px solid #b7cff0;
   background: #eef5ff;
   font-weight: 700;
@@ -3974,7 +3974,7 @@ tr:last-child td {
 }
 
 .rowMain a:hover {
-  color: var(--blue);
+  color: #1f73b7;
   text-decoration: underline;
   text-underline-offset: 3px;
 }
@@ -3993,7 +3993,7 @@ tr:last-child td {
   display: grid;
   grid-template-columns: 224px minmax(0, 1fr);
   background:
-    radial-gradient(circle at top left, color-mix(in srgb, var(--blue) 10%, transparent), transparent 32rem),
+    radial-gradient(circle at top left, color-mix(in srgb, #1f73b7 10%, transparent), transparent 32rem),
     var(--paper);
   color: var(--ink);
 }
@@ -4069,7 +4069,7 @@ tr:last-child td {
 .commandRailNav a.active {
   border-color: var(--line);
   background: var(--surface-soft);
-  color: var(--blue);
+  color: #1f73b7;
 }
 
 .commandRailNav a > strong {
@@ -5040,7 +5040,7 @@ tr:last-child td {
 .hubQueue span,
 .resultType,
 .hubSystem span {
-  color: var(--blue);
+  color: #1f73b7;
   font-size: 11px;
   font-weight: 900;
   text-transform: uppercase;
@@ -5076,7 +5076,7 @@ tr:last-child td {
 }
 
 .hubRoleNav a.active {
-  border-color: var(--blue);
+  border-color: #1f73b7;
   background: #eef5ff;
 }
 
@@ -5179,7 +5179,7 @@ tr:last-child td {
 
 .hubSearchRow input:focus {
   outline: 3px solid rgba(11, 99, 206, 0.14);
-  border-color: var(--blue);
+  border-color: #1f73b7;
   background: #fff;
 }
 
@@ -5187,7 +5187,7 @@ tr:last-child td {
   min-height: 44px;
   border: 0;
   border-radius: 8px;
-  background: var(--blue);
+  background: #1f73b7;
   color: #fff;
   padding: 0 22px;
   font-weight: 900;
@@ -5222,9 +5222,9 @@ tr:last-child td {
 }
 
 .hubScopes a.active {
-  border-color: var(--blue);
+  border-color: #1f73b7;
   background: #eef5ff;
-  color: var(--blue);
+  color: #1f73b7;
 }
 
 .hubQueues {
@@ -5239,7 +5239,7 @@ tr:last-child td {
   align-content: space-between;
   gap: 8px;
   border: 1px solid var(--line);
-  border-top: 4px solid var(--blue);
+  border-top: 4px solid #1f73b7;
   background: var(--surface);
   border-radius: 8px;
   color: var(--ink);
@@ -5312,7 +5312,7 @@ tr:last-child td {
 }
 
 .workstream span:first-child {
-  color: var(--blue);
+  color: #1f73b7;
   font-size: 11px;
   font-weight: 900;
   text-transform: uppercase;
@@ -5340,7 +5340,7 @@ tr:last-child td {
 .streamMeter span {
   display: block;
   height: 100%;
-  background: var(--blue);
+  background: #1f73b7;
 }
 
 .workstream.attention .streamMeter span {
@@ -5429,7 +5429,7 @@ tr:last-child td {
 
 .hubResult.active {
   background: #f1f6ff;
-  box-shadow: inset 3px 0 0 var(--blue);
+  box-shadow: inset 3px 0 0 #1f73b7;
 }
 
 .hubResult:last-child,
@@ -5465,7 +5465,7 @@ tr:last-child td {
   border: 1px solid var(--line);
   border-radius: 7px;
   padding: 0 12px;
-  color: var(--blue);
+  color: #1f73b7;
   font-size: 12px;
   font-weight: 900;
 }
@@ -6556,9 +6556,9 @@ kbd {
   }
 
   .mobileTabBar a.active {
-    border-top-color: var(--blue);
+    border-top-color: #1f73b7;
     background: transparent;
-    color: var(--blue);
+    color: #1f73b7;
   }
 }
 
@@ -6821,9 +6821,9 @@ kbd {
   }
 
   .hubMobileDock a.active {
-    border-color: var(--blue);
+    border-color: #1f73b7;
     background: #eef5ff;
-    color: var(--blue);
+    color: #1f73b7;
   }
 
   .shell {
@@ -6911,9 +6911,9 @@ kbd {
   }
 
   .mobileTabBar a.active {
-    border-color: var(--blue);
+    border-color: #1f73b7;
     background: #eef5ff;
-    color: var(--blue);
+    color: #1f73b7;
   }
 
   .metrics {
@@ -7411,7 +7411,7 @@ kbd {
 .candidatePreviewHeader span,
 .candidatePreviewFacts span,
 .candidatePreviewSectionHeader span {
-  color: var(--blue);
+  color: #1f73b7;
   font-size: 11px;
   font-weight: 900;
   text-transform: uppercase;
@@ -7505,8 +7505,8 @@ kbd {
 }
 
 .candidateSearchForm input:focus {
-  border-color: var(--blue);
-  outline: 3px solid color-mix(in srgb, var(--blue) 16%, transparent);
+  border-color: #1f73b7;
+  outline: 3px solid color-mix(in srgb, #1f73b7 16%, transparent);
 }
 
 .candidateSearchForm button {
@@ -7552,9 +7552,9 @@ kbd {
 
 .candidateSearchFilters a:hover,
 .candidateSearchFilters a.active {
-  border-color: var(--blue);
-  background: color-mix(in srgb, var(--blue) 10%, var(--surface));
-  color: var(--blue);
+  border-color: #1f73b7;
+  background: color-mix(in srgb, #1f73b7 10%, var(--surface));
+  color: #1f73b7;
 }
 
 .candidateSearchGrid {
@@ -7620,7 +7620,7 @@ kbd {
 .candidateFacetGroup a.active {
   border-color: var(--line);
   background: var(--surface-soft);
-  color: var(--blue);
+  color: #1f73b7;
 }
 
 .candidateFacetGroup a span {
@@ -7681,8 +7681,8 @@ kbd {
 
 .candidateResultCard:hover,
 .candidateResultCard.active {
-  border-color: var(--blue);
-  background: color-mix(in srgb, var(--blue) 6%, var(--surface));
+  border-color: #1f73b7;
+  background: color-mix(in srgb, #1f73b7 6%, var(--surface));
   transform: translateY(-1px);
   box-shadow: 0 14px 38px rgba(16, 24, 40, 0.1);
 }
@@ -7776,8 +7776,8 @@ kbd {
 
 .candidatePreviewActions a:first-child,
 .candidatePreviewFullRecord {
-  border-color: var(--blue);
-  background: var(--blue);
+  border-color: #1f73b7;
+  background: #1f73b7;
   color: #fff;
 }
 
@@ -7984,8 +7984,8 @@ kbd {
 }
 
 .candidateDeskSearch:focus-within {
-  border-color: var(--blue);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--blue) 15%, transparent);
+  border-color: #1f73b7;
+  box-shadow: 0 0 0 3px color-mix(in srgb, #1f73b7 15%, transparent);
 }
 
 .candidateDeskSearch button,
@@ -8034,7 +8034,7 @@ kbd {
 }
 
 .candidateDeskAccount span {
-  color: var(--blue);
+  color: #1f73b7;
   font-size: 10px;
   font-weight: 950;
   text-transform: uppercase;
@@ -8089,7 +8089,7 @@ kbd {
 }
 
 .candidateSearchTabHeader span {
-  color: var(--blue);
+  color: #1f73b7;
   font-size: 11px;
   font-weight: 950;
   text-transform: uppercase;
@@ -8163,8 +8163,8 @@ kbd {
 
 .candidateTabs > a.active,
 .candidateTabs > span.active {
-  border-color: var(--blue);
-  background: color-mix(in srgb, var(--blue) 8%, var(--surface));
+  border-color: #1f73b7;
+  background: color-mix(in srgb, #1f73b7 8%, var(--surface));
 }
 
 .candidateTabs > span > a:first-child {
@@ -8242,7 +8242,7 @@ kbd {
   grid-template-columns: minmax(0, 1fr) minmax(260px, 420px);
   overflow: hidden;
   background:
-    linear-gradient(135deg, color-mix(in srgb, var(--blue) 9%, transparent), transparent 58%),
+    linear-gradient(135deg, color-mix(in srgb, #1f73b7 9%, transparent), transparent 58%),
     var(--surface);
   padding: 16px;
 }
@@ -8266,7 +8266,7 @@ kbd {
   gap: 5px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: color-mix(in srgb, var(--surface) 86%, var(--blue));
+  background: color-mix(in srgb, var(--surface) 86%, #1f73b7);
   padding: 12px;
 }
 
@@ -8295,7 +8295,7 @@ kbd {
 }
 
 .candidateSearchContext span {
-  color: var(--blue);
+  color: #1f73b7;
   font-size: 11px;
   font-weight: 900;
   text-transform: uppercase;
@@ -8330,13 +8330,13 @@ kbd {
 }
 
 .candidateSearchContext a:hover {
-  border-color: var(--blue);
-  color: var(--blue);
+  border-color: #1f73b7;
+  color: #1f73b7;
 }
 
 .candidateSearchContext a.active {
-  border-color: var(--blue);
-  background: var(--blue);
+  border-color: #1f73b7;
+  background: #1f73b7;
   color: #fff;
 }
 
@@ -8345,9 +8345,9 @@ kbd {
   grid-template-columns: auto minmax(0, 1fr);
   gap: 10px;
   align-items: center;
-  border: 1px solid var(--blue);
+  border: 1px solid #1f73b7;
   border-radius: 8px;
-  background: color-mix(in srgb, var(--blue) 9%, var(--surface));
+  background: color-mix(in srgb, #1f73b7 9%, var(--surface));
   padding: 8px 10px;
 }
 
@@ -8357,7 +8357,7 @@ kbd {
 }
 
 .candidateBulkBar span {
-  color: var(--blue);
+  color: #1f73b7;
   font-size: 10px;
   font-weight: 950;
   text-transform: uppercase;
@@ -8414,7 +8414,7 @@ kbd {
 }
 
 .candidateSearchForm label {
-  color: var(--blue);
+  color: #1f73b7;
   font-size: 11px;
   font-weight: 900;
   text-transform: uppercase;
@@ -8461,7 +8461,7 @@ kbd {
 }
 
 .candidatePowerFilters summary span {
-  color: var(--blue);
+  color: #1f73b7;
   font-size: 11px;
   font-weight: 950;
   text-transform: uppercase;
@@ -8572,7 +8572,7 @@ kbd {
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--surface-soft);
-  color: var(--blue);
+  color: #1f73b7;
   text-decoration: none;
 }
 
@@ -8590,8 +8590,8 @@ kbd {
 
 .candidateResultSelect:hover,
 .candidateResultCard:has(.candidateResultSelect:hover) .candidateResultSelect {
-  border-color: var(--blue);
-  background: color-mix(in srgb, var(--blue) 10%, var(--surface));
+  border-color: #1f73b7;
+  background: color-mix(in srgb, #1f73b7 10%, var(--surface));
 }
 
 .candidateResultSelect small {
@@ -8604,7 +8604,7 @@ kbd {
 
 .candidateResultCard:hover,
 .candidateResultCard.active {
-  background: color-mix(in srgb, var(--blue) 7%, var(--surface));
+  background: color-mix(in srgb, #1f73b7 7%, var(--surface));
   box-shadow: 0 10px 30px rgba(16, 24, 40, 0.08);
 }
 
@@ -8721,7 +8721,7 @@ kbd {
 .candidatePanelHeader span,
 .candidateRows small,
 .candidateReadinessItems span {
-  color: var(--blue);
+  color: #1f73b7;
   font-size: 11px;
   font-weight: 900;
   text-transform: uppercase;
@@ -8793,8 +8793,8 @@ kbd {
 }
 
 .candidateProfileActions a:first-child {
-  border-color: var(--blue);
-  background: var(--blue);
+  border-color: #1f73b7;
+  background: #1f73b7;
   color: #fff;
 }
 
@@ -9066,8 +9066,8 @@ kbd {
 }
 
 .candidateRows a:hover {
-  border-color: var(--blue);
-  background: color-mix(in srgb, var(--blue) 7%, var(--surface));
+  border-color: #1f73b7;
+  background: color-mix(in srgb, #1f73b7 7%, var(--surface));
 }
 
 .candidateRows strong,
@@ -9319,7 +9319,7 @@ kbd {
 .staffHomeHero span,
 .staffHomeGrid span,
 .staffHomePanel > div span {
-  color: var(--blue);
+  color: #1f73b7;
   font-size: 11px;
   font-weight: 900;
   text-transform: uppercase;
@@ -9353,7 +9353,7 @@ kbd {
   gap: 7px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: color-mix(in srgb, var(--blue) 7%, var(--surface));
+  background: color-mix(in srgb, #1f73b7 7%, var(--surface));
   padding: 14px;
 }
 
@@ -9396,8 +9396,8 @@ kbd {
 }
 
 .staffHomeActions a.primary {
-  border-color: var(--blue);
-  background: var(--blue);
+  border-color: #1f73b7;
+  background: #1f73b7;
   color: #fff;
 }
 
@@ -9416,8 +9416,8 @@ kbd {
 }
 
 .staffHomeGrid a:hover {
-  border-color: var(--blue);
-  background: color-mix(in srgb, var(--blue) 7%, var(--surface));
+  border-color: #1f73b7;
+  background: color-mix(in srgb, #1f73b7 7%, var(--surface));
 }
 
 .staffHomeGrid a div {
@@ -9430,7 +9430,7 @@ kbd {
 
 .staffHomeGrid em {
   gap: 5px;
-  color: var(--blue);
+  color: #1f73b7;
   font-style: normal;
   font-size: 12px;
   font-weight: 900;
@@ -10171,7 +10171,7 @@ kbd {
   width: 32px;
   height: 32px;
   border: 3px solid var(--line);
-  border-top-color: var(--blue);
+  border-top-color: #1f73b7;
   border-radius: 50%;
   animation: spin 0.6s linear infinite;
 }
@@ -10565,7 +10565,7 @@ kbd {
   width: 32px;
   height: 32px;
   border-radius: 8px;
-  background: var(--blue);
+  background: #1f73b7;
   color: #fff;
   flex-shrink: 0;
 }
@@ -10597,7 +10597,7 @@ kbd {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: var(--blue);
+  color: #1f73b7;
 }
 
 .roleHeaderUserName {
@@ -10731,8 +10731,8 @@ kbd {
   inset: 0;
   border-radius: var(--sh-radius-xl);
   background:
-    radial-gradient(ellipse 80% 60% at 0% 100%, color-mix(in srgb, var(--blue) 18%, transparent) 0%, transparent 70%),
-    radial-gradient(ellipse 70% 50% at 70% 0%, color-mix(in srgb, var(--blue) 12%, transparent) 0%, transparent 60%),
+    radial-gradient(ellipse 80% 60% at 0% 100%, color-mix(in srgb, #1f73b7 18%, transparent) 0%, transparent 70%),
+    radial-gradient(ellipse 70% 50% at 70% 0%, color-mix(in srgb, #1f73b7 12%, transparent) 0%, transparent 60%),
     radial-gradient(ellipse 60% 40% at 100% 80%, color-mix(in srgb, var(--ring) 10%, transparent) 0%, transparent 60%),
     var(--sh-glass-bg);
   border: 1px solid var(--sh-glass-border);
@@ -10743,23 +10743,23 @@ kbd {
 @keyframes shGradientDrift {
   0% {
     background:
-      radial-gradient(ellipse 80% 60% at 0% 100%, color-mix(in srgb, var(--blue) 18%, transparent) 0%, transparent 70%),
-      radial-gradient(ellipse 70% 50% at 70% 0%, color-mix(in srgb, var(--blue) 12%, transparent) 0%, transparent 60%),
+      radial-gradient(ellipse 80% 60% at 0% 100%, color-mix(in srgb, #1f73b7 18%, transparent) 0%, transparent 70%),
+      radial-gradient(ellipse 70% 50% at 70% 0%, color-mix(in srgb, #1f73b7 12%, transparent) 0%, transparent 60%),
       radial-gradient(ellipse 60% 40% at 100% 80%, color-mix(in srgb, var(--ring) 10%, transparent) 0%, transparent 60%),
       var(--sh-glass-bg);
   }
   50% {
     background:
-      radial-gradient(ellipse 70% 50% at 20% 90%, color-mix(in srgb, var(--blue) 15%, transparent) 0%, transparent 65%),
+      radial-gradient(ellipse 70% 50% at 20% 90%, color-mix(in srgb, #1f73b7 15%, transparent) 0%, transparent 65%),
       radial-gradient(ellipse 80% 60% at 60% 10%, color-mix(in srgb, var(--ring) 14%, transparent) 0%, transparent 55%),
-      radial-gradient(ellipse 60% 40% at 90% 70%, color-mix(in srgb, var(--blue) 12%, transparent) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 90% 70%, color-mix(in srgb, #1f73b7 12%, transparent) 0%, transparent 60%),
       var(--sh-glass-bg);
   }
   100% {
     background:
       radial-gradient(ellipse 75% 55% at 10% 80%, color-mix(in srgb, var(--ring) 16%, transparent) 0%, transparent 60%),
-      radial-gradient(ellipse 60% 45% at 80% 20%, color-mix(in srgb, var(--blue) 15%, transparent) 0%, transparent 65%),
-      radial-gradient(ellipse 80% 50% at 40% 100%, color-mix(in srgb, var(--blue) 12%, transparent) 0%, transparent 55%),
+      radial-gradient(ellipse 60% 45% at 80% 20%, color-mix(in srgb, #1f73b7 15%, transparent) 0%, transparent 65%),
+      radial-gradient(ellipse 80% 50% at 40% 100%, color-mix(in srgb, #1f73b7 12%, transparent) 0%, transparent 55%),
       var(--sh-glass-bg);
   }
 }
@@ -10990,24 +10990,21 @@ kbd {
 @keyframes shLoginDrift {
   0% {
     background:
-      radial-gradient(ellipse 90% 70% at 0% 100%, color-mix(in srgb, var(--blue) 20%, transparent) 0%, transparent 70%),
-      radial-gradient(ellipse 80% 60% at 70% 0%, color-mix(in srgb, var(--blue) 14%, transparent) 0%, transparent 60%),
-      radial-gradient(ellipse 60% 50% at 100% 80%, color-mix(in srgb, var(--ring) 10%, transparent) 0%, transparent 60%),
-      var(--sh-glass-bg);
+      radial-gradient(ellipse 90% 70% at 0% 100%, color-mix(in srgb, #1f73b7 20%, transparent) 0%, transparent 70%),
+      radial-gradient(ellipse 80% 60% at 70% 0%, color-mix(in srgb, #1f73b7 14%, transparent) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 50% at 100% 80%, color-mix(in srgb, var(--ring) 10%, transparent) 0%, transparent 60%);
   }
   50% {
     background:
-      radial-gradient(ellipse 80% 60% at 20% 90%, color-mix(in srgb, var(--blue) 18%, transparent) 0%, transparent 65%),
+      radial-gradient(ellipse 80% 60% at 20% 90%, color-mix(in srgb, #1f73b7 18%, transparent) 0%, transparent 65%),
       radial-gradient(ellipse 85% 65% at 60% 10%, color-mix(in srgb, var(--ring) 12%, transparent) 0%, transparent 55%),
-      radial-gradient(ellipse 70% 50% at 90% 70%, color-mix(in srgb, var(--blue) 14%, transparent) 0%, transparent 60%),
-      var(--sh-glass-bg);
+      radial-gradient(ellipse 70% 50% at 90% 70%, color-mix(in srgb, #1f73b7 14%, transparent) 0%, transparent 60%);
   }
   100% {
     background:
       radial-gradient(ellipse 85% 65% at 15% 85%, color-mix(in srgb, var(--ring) 16%, transparent) 0%, transparent 60%),
-      radial-gradient(ellipse 75% 55% at 80% 15%, color-mix(in srgb, var(--blue) 18%, transparent) 0%, transparent 65%),
-      radial-gradient(ellipse 80% 60% at 45% 100%, color-mix(in srgb, var(--blue) 14%, transparent) 0%, transparent 55%),
-      var(--sh-glass-bg);
+      radial-gradient(ellipse 75% 55% at 80% 15%, color-mix(in srgb, #1f73b7 18%, transparent) 0%, transparent 65%),
+      radial-gradient(ellipse 80% 60% at 45% 100%, color-mix(in srgb, #1f73b7 14%, transparent) 0%, transparent 60%);
   }
 }
 
@@ -11422,7 +11419,7 @@ kbd {
   height: 420px;
   top: -120px;
   left: -80px;
-  background: radial-gradient(circle, color-mix(in srgb, var(--blue) 22%, transparent) 0%, transparent 70%);
+  background: radial-gradient(circle, color-mix(in srgb, #1f73b7 22%, transparent) 0%, transparent 70%);
   animation: shOrbADrift 20s var(--sh-easing) infinite alternate;
 }
 
@@ -11472,7 +11469,7 @@ kbd {
   mask-image: radial-gradient(ellipse 60% 50% at 50% 50%, black, transparent 70%);
   -webkit-mask-image: radial-gradient(ellipse 60% 50% at 50% 50%, black, transparent 70%);
   background-image:
-    radial-gradient(circle, var(--blue) 1px, transparent 1px);
+    radial-gradient(circle, #1f73b7 1px, transparent 1px);
   background-size: 32px 32px;
   animation: shParticleDrift 40s linear infinite;
 }
@@ -11521,7 +11518,7 @@ body {
   transform: translate(-50%, -30%);
   background: radial-gradient(
     circle,
-    color-mix(in srgb, var(--blue) 20%, transparent) 0%,
+    color-mix(in srgb, #1f73b7 20%, transparent) 0%,
     color-mix(in srgb, var(--ring) 10%, transparent) 40%,
     transparent 70%
   );
@@ -12430,14 +12427,14 @@ tr:hover .shTableRowAction,
 }
 
 .candidateFacetChipList a.chip:hover {
-  border-color: var(--blue);
-  background: color-mix(in srgb, var(--blue) 8%, var(--surface));
-  color: var(--blue);
+  border-color: #1f73b7;
+  background: color-mix(in srgb, #1f73b7 8%, var(--surface));
+  color: #1f73b7;
 }
 
 .candidateFacetChipList a.chip.active {
-  border-color: var(--blue);
-  background: var(--blue);
+  border-color: #1f73b7;
+  background: #1f73b7;
   color: var(--surface);
 }
 
