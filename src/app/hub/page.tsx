@@ -6,8 +6,6 @@ import { roles, type Role } from "@/modules/auth/types";
 import { getUnifiedHub, parseHubScope } from "@/modules/hub/data";
 import { HubShortcuts, type HubCommand } from "@/modules/hub/HubShortcuts";
 import { ThemeToggle } from "@/modules/theme/ThemeToggle";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
 
@@ -62,8 +60,8 @@ export default async function HubPage({
             <strong>{session.name}</strong>
             <small>{session.email}</small>
           </div>
-          <form className="commandSearch" action={undefined}>
-            <Input
+          <form className="commandSearch">
+            <input
               aria-label="Find records"
               data-command-search
               defaultValue={data.query}
@@ -72,7 +70,7 @@ export default async function HubPage({
               placeholder="Search candidates, companies, requests, transfers, ID batches"
             />
             <input type="hidden" name="scope" value={data.scope} />
-            <Button type="submit" variant="ghost" size="sm">Search</Button>
+            <button type="submit">Search</button>
           </form>
           <HubShortcuts commands={commands} />
         </header>
@@ -217,9 +215,9 @@ function RecordPreview({ preview }: { preview: NonNullable<HubData["preview"]> }
       {preview.actions.length ? (
         <div className="previewActions">
           {preview.actions.map((action) => (
-            <Button key={`${action.label}-${action.href}`} variant="outline" size="sm" asChild>
-              <a href={action.href}>{action.label}</a>
-            </Button>
+            <a href={action.href} key={`${action.label}-${action.href}`}>
+              {action.label}
+            </a>
           ))}
         </div>
       ) : null}

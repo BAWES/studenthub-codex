@@ -1,24 +1,20 @@
 import type { Route } from "next";
 import Link from "next/link";
 import { requireRoleCapability } from "@/modules/auth/session";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { DataTable } from "@/modules/workspace/DataTable";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { getCompanyRequestRows } from "@/modules/workspace/data";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
 
-const statusBadge = (status: string) => {
-  const variants: Record<string, "default" | "secondary" | "success" | "warning" | "outline"> = {
-    pending: "secondary",
-    started: "default",
-    delivered: "success",
-    cancelled: "outline",
-    finished_by_recruitment: "outline",
-  };
-  const variant = variants[status] ?? "outline";
-  return <Badge variant={variant}>{status.replace(/_/g, " ")}</Badge>;
+const statusVariant: Record<string, "default" | "secondary" | "success" | "warning" | "outline"> = {
+  pending: "warning",
+  started: "outline",
+  delivered: "success",
+  cancelled: "outline",
+  finished_by_recruitment: "secondary",
 };
 
 export default async function CompanyRequestsPage() {
@@ -28,8 +24,10 @@ export default async function CompanyRequestsPage() {
   return (
     <WorkspaceShell session={session} eyebrow="Company" title="Requests" metrics={[]}>
       <div className="mb-4">
-        <Button asChild>
-          <Link href="/company/requests/create">+ New Request</Link>
+        <Button variant="default" asChild>
+          <Link href="/company/requests/create">
+            + New Request
+          </Link>
         </Button>
       </div>
       <DataTable
@@ -45,7 +43,11 @@ export default async function CompanyRequestsPage() {
           {
             key: "status",
             label: "Status",
-            render: (row) => statusBadge(row.status as string),
+            render: (row) => (
+              <Badge variant={statusVariant[row.status as string] ?? "secondary"}>
+                {(row.status as string).replace(/_/g, " ")}
+              </Badge>
+            ),
           },
           { key: "updated", label: "Updated", render: (row) => row.updated }
         ]}
