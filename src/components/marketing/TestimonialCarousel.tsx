@@ -185,7 +185,7 @@ export default function TestimonialCarousel({
         {/* Navigation arrows */}
         <button
           onClick={prev}
-          className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-3 z-10 size-9 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 max-sm:hidden shLandingGlass shLandingGlassHover"
+          className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-3 z-10 size-9 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 max-sm:hidden shLandingCardStrong"
           aria-label="Previous testimonial"
         >
           <ChevronLeft className="size-4" />
@@ -193,21 +193,19 @@ export default function TestimonialCarousel({
 
         <button
           onClick={next}
-          className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-3 z-10 size-9 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 max-sm:hidden shLandingGlass shLandingGlassHover"
+          className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-3 z-10 size-9 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 max-sm:hidden shLandingCardStrong"
           aria-label="Next testimonial"
         >
           <ChevronRight className="size-4" />
         </button>
 
-        {/* Testimonial card — glass effect */}
+        {/* Testimonial card — solid */}
         <div
           key={active}
-          className="relative rounded-xl p-8 md:p-10 text-center overflow-hidden"
+          className="relative rounded-xl p-8 md:p-10 text-center overflow-hidden shLandingCardStrong"
           style={{
-            backgroundColor: "var(--sh-glass-bg)",
-            backdropFilter: "blur(12px)",
-            WebkitBackdropFilter: "blur(12px)",
-            border: "1px solid var(--sh-glass-border)",
+            backgroundColor: "var(--surface)",
+            border: "1px solid var(--border)",
             animation: "shLandingFadeIn 400ms ease",
           }}
         >
