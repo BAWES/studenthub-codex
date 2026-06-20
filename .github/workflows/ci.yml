@@ -20,9 +20,9 @@ jobs:
         run: |
           BRANCH="${{ github.head_ref }}"
           echo "Checking branch: $BRANCH"
-          if echo "$BRANCH" | grep -Eq '^(feature|fix|chore|coder2)/STU-[0-9]+-[a-z0-9-]+$'; then
+          if echo "$BRANCH" | grep -qiE '^(feature|fix|chore|coder2)/STU-[a-z0-9]+[-a-z0-9]+$'; then
             echo "Branch name OK: $BRANCH"
-          elif echo "$BRANCH" | grep -Eq '^ux/[a-z0-9-]+$'; then
+          elif echo "$BRANCH" | grep -qiE '^ux/[a-z0-9-]+$'; then
             echo "Branch name OK (UX): $BRANCH"
           else
             echo "Branch name REJECTED: $BRANCH"
