@@ -47,8 +47,8 @@ export type DashboardGridProps = {
 
 function DashboardSkeleton() {
   return (
-    <div style={{ display: "grid", gap: 20 }}>
-      <div className="metrics" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
+    <div className="grid gap-5">
+      <div className="grid grid-cols-4 gap-3">
         {[1, 2, 3, 4].map((i) => (
           <article className="metric" key={i}>
             <Skeleton className="h-3 w-16 mb-2" />

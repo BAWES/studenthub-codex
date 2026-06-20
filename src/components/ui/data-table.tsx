@@ -90,10 +90,9 @@ function DataTableSkeleton({
             {columns.map((col, colIdx) => (
               <TableCell key={colIdx} className={col.className}>
                 <div
-                  className="h-4 rounded animate-pulse"
+                  className="h-4 rounded animate-pulse bg-border"
                   style={{
                     width: `${50 + Math.random() * 40}%`,
-                    background: "var(--border)",
                   }}
                 />
               </TableCell>

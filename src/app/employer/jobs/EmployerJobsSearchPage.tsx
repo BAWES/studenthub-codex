@@ -176,7 +176,7 @@ export function EmployerJobsSearchPage({
           <input
             ref={inputRef}
             type="text"
-            className="flex-1 rounded-lg border border-[var(--border)] bg-[var(--card)] text-[var(--ink)] px-4 py-2.5 text-[0.9375rem] outline-none transition-[border-color,box-shadow] duration-150 focus:border-[var(--sh-coral)] focus:shadow-[var(--sh-coral-glow)]"
+            className="flex-1 rounded-lg border border-[var(--border)] bg-[var(--card)] px-4 py-2.5 text-[0.9375rem] text-[var(--ink)] outline-none transition-[border-color] duration-150 focus:border-[#eb6651] focus:shadow-[0_0_0_3px_rgba(235,102,81,0.15)]"
             placeholder="Search job postings by title, description, requirements..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -184,7 +184,7 @@ export function EmployerJobsSearchPage({
           />
           <button
             type="submit"
-            className="rounded-lg bg-[var(--sh-coral)] px-6 py-2.5 text-[0.9375rem] font-semibold text-white transition-opacity duration-150 disabled:cursor-not-allowed disabled:opacity-60 hover:opacity-90"
+            className="rounded-lg bg-[#eb6651] px-6 py-2.5 text-[0.9375rem] font-semibold text-white transition-opacity duration-150 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
             disabled={loading}
           >
             {loading ? "Searching..." : "Search"}
@@ -224,7 +224,9 @@ export function EmployerJobsSearchPage({
               )}
             </span>
             {!isTyping && (
-              <span className="rounded-md px-2 py-0.5 text-[var(--muted)] bg-[var(--accent)]">
+              <span
+                className="rounded-md px-2 py-0.5 text-[var(--muted)] bg-[var(--accent)]"
+              >
                 {results.source.current}
               </span>
             )}
@@ -351,7 +353,9 @@ export function EmployerJobsSearchPage({
                       type="button"
                       className={cn(
                         "rounded-md border px-3 py-1.5 text-xs font-medium",
-                        p === page ? "text-[var(--sh-coral)] border-[var(--sh-coral)] bg-[var(--sh-coral-light)]" : "border-[var(--border)] text-[var(--ink)]",
+                        p === page
+                          ? "bg-[#fef1ef] border-[#eb6651] text-[#eb6651]"
+                          : "border-[var(--border)] text-[var(--ink)]",
                       )}
                       onClick={() => goToPage(p)}
                     >
