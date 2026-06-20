@@ -117,13 +117,13 @@ export default function CompanyLandingContent({
         <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-[#fef1ef] via-white to-[var(--paper)] z-0" aria-hidden="true" />
 
         <div className="relative z-[2]">
-          <p className="text-[var(--sh-info)] text-[11px] font-black uppercase tracking-wider mb-1">
+          <p className="text-[var(--sh-coral)] text-[11px] font-black uppercase tracking-wider mb-1">
             The real hiring headache
           </p>
           <h2 className="shBenefitsTitle mb-8">
             You don&apos;t have a talent problem.
             <br />
-            You have a <em style={{ color: "var(--sh-info)" }}>process</em>{" "}
+            You have a <em className="text-[var(--sh-coral)]">process</em>{" "}
             problem.
           </h2>
 
@@ -134,24 +134,18 @@ export default function CompanyLandingContent({
                 className="rounded-xl p-5 flex flex-col gap-3 transition-transform duration-300 hover:-translate-y-[3px] bg-white border border-[var(--border)]"
               >
                 <div
-                  className="size-10 rounded-lg flex items-center justify-center shrink-0"
-                  style={{
-                    background: "color-mix(in srgb, var(--sh-info) 15%, transparent)",
-                    color: "var(--sh-info)",
-                  }}
+                  className="size-10 rounded-lg flex items-center justify-center shrink-0 bg-[var(--sh-coral-light)] text-[var(--sh-coral)]"
                 >
                   <span className="font-black text-sm">0{i + 1}</span>
                 </div>
                 <div>
                   <p
-                    className="text-sm font-semibold mb-1.5"
-                    style={{ color: "var(--ink)" }}
+                    className="text-sm font-semibold mb-1.5 text-[var(--ink)]"
                   >
                     {point.problem}
                   </p>
                   <p
-                    className="text-sm leading-relaxed"
-                    style={{ color: "var(--muted)" }}
+                    className="text-sm leading-relaxed text-[var(--muted)]"
                   >
                     {point.solution}
                   </p>
@@ -173,8 +167,7 @@ export default function CompanyLandingContent({
               {stat.value}
             </p>
             <p
-              className="text-xs leading-tight"
-              style={{ color: "var(--muted)" }}
+              className="text-xs leading-tight text-[var(--muted)]"
             >
               {stat.label}
             </p>
@@ -202,15 +195,14 @@ export default function CompanyLandingContent({
         <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-[#fef1ef] via-white to-[var(--paper)] z-0" aria-hidden="true" />
 
         <div className="relative z-[2] max-w-[640px] mx-auto">
-          <p className="text-[var(--sh-info)] text-[11px] font-black uppercase tracking-wider mb-2">
+          <p className="text-[var(--sh-coral)] text-[11px] font-black uppercase tracking-wider mb-2">
             Let StudentHub handle your workforce
           </p>
           <h2 className="shBenefitsTitle text-center">
             Stop managing staff. Start running your business.
           </h2>
           <p
-            className="max-w-[480px] mx-auto mt-2 mb-6 leading-relaxed"
-            style={{ color: "var(--muted)" }}
+            className="max-w-[480px] mx-auto mt-2 mb-6 leading-relaxed text-[var(--muted)]"
           >
             StudentHub handles everything — sourcing, placement, compliance, payroll.
             You get pre-vetted student workers on a simple monthly fee or hourly rate.
@@ -232,8 +224,7 @@ export default function CompanyLandingContent({
             </Link>
           )}
           <div
-            className="flex items-center justify-center gap-4 mt-4 text-xs"
-            style={{ color: "var(--muted)" }}
+            className="flex items-center justify-center gap-4 mt-4 text-xs text-[var(--muted)]"
           >
             <span>200+ companies using StudentHub</span>
             <span>48h avg time to first match</span>
@@ -243,22 +234,19 @@ export default function CompanyLandingContent({
 
       {/* ── Footer ── */}
       <footer
-        className="shSection flex items-center justify-between pt-4 pb-2 text-xs"
-        style={{ color: "var(--muted)" }}
+        className="shSection flex items-center justify-between pt-4 pb-2 text-xs text-[var(--muted)]"
       >
         <span>&copy; {new Date().getFullYear()} StudentHub. All rights reserved.</span>
         <div className="flex items-center gap-4">
           <Link
             href="/login"
-            className="hover:text-[var(--ink)] transition-colors no-underline"
-            style={{ color: "inherit" }}
+            className="hover:text-[var(--ink)] transition-colors no-underline text-inherit"
           >
             Sign in
           </Link>
           <Link
             href="/signup?role=company"
-            className="hover:text-[var(--ink)] transition-colors no-underline"
-            style={{ color: "inherit" }}
+            className="hover:text-[var(--ink)] transition-colors no-underline text-inherit"
           >
             Sign up as company
           </Link>
