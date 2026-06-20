@@ -81,9 +81,9 @@ import type { CandidateLandingContentProps } from "../CandidateLandingContent";
 describe("Candidate landing page (/for-candidates)", () => {
   const defaultProps: CandidateLandingContentProps = { session: null };
 
-  it("renders the hero section with two-sided marketplace headline", () => {
+  it("renders the hero section with staff-matched headline", () => {
     render(<CandidateLandingContent {...defaultProps} />);
-    // HeroSection renders h1 with marketplace messaging
+    // HeroSection renders h1 with staff-matched messaging
     expect(
       screen.getByRole("heading", { level: 1, name: /connecting students/i })
     ).toBeInTheDocument();
