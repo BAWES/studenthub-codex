@@ -1,39 +1,39 @@
 import { describe, it, expect } from "vitest";
 import {
-  listStoriesSchema as listStorySchema,
+  listStoriesSchema,
   createStorySchema,
   updateStorySchema,
   deleteStorySchema,
   storyItemSchema,
-  listStoriesResultSchema as listStoryResultSchema,
+  listStoriesResultSchema,
   storyActionResponseSchema,
 } from "./schemas";
 import type { StoryItem, ListStoriesResult } from "./schemas";
 
 // ---------------------------------------------------------------------------
-// listStorySchema
+// listStoriesSchema
 // ---------------------------------------------------------------------------
-describe("listStorySchema", () => {
+describe("listStoriesSchema", () => {
   it("accepts empty input with defaults", () => {
-    expect(listStorySchema.safeParse({}).success).toBe(true);
+    expect(listStoriesSchema.safeParse({}).success).toBe(true);
   });
 
   it("accepts explicit values", () => {
     expect(
-      listStorySchema.safeParse({ page: 2, limit: 100 }).success,
+      listStoriesSchema.safeParse({ page: 2, limit: 100 }).success,
     ).toBe(true);
   });
 
   it("rejects limit below 1", () => {
-    expect(listStorySchema.safeParse({ limit: 0 }).success).toBe(false);
+    expect(listStoriesSchema.safeParse({ limit: 0 }).success).toBe(false);
   });
 
   it("rejects limit above 200", () => {
-    expect(listStorySchema.safeParse({ limit: 201 }).success).toBe(false);
+    expect(listStoriesSchema.safeParse({ limit: 201 }).success).toBe(false);
   });
 
   it("rejects zero page", () => {
-    expect(listStorySchema.safeParse({ page: 0 }).success).toBe(false);
+    expect(listStoriesSchema.safeParse({ page: 0 }).success).toBe(false);
   });
 });
 
@@ -75,7 +75,7 @@ describe("createStorySchema", () => {
 // updateStorySchema
 // ---------------------------------------------------------------------------
 describe("updateStorySchema", () => {
-  it("accepts valid input", () => {
+  it("accepts valid input with required fields", () => {
     expect(
       updateStorySchema.safeParse({
         storyUuid: "abc-123",
@@ -132,7 +132,6 @@ describe("storyItemSchema", () => {
     story_status: 1,
     is_old: false,
     story_time_spent: 120,
-    story_created_at: null,
     story_last_updated_at: null,
   };
 
@@ -166,9 +165,9 @@ describe("storyItemSchema", () => {
 });
 
 // ---------------------------------------------------------------------------
-// listStoryResultSchema (paginated)
+// listStoriesResultSchema (paginated)
 // ---------------------------------------------------------------------------
-describe("listStoryResultSchema", () => {
+describe("listStoriesResultSchema", () => {
   const validResult = {
     stories: [
       {
@@ -181,7 +180,6 @@ describe("listStoryResultSchema", () => {
         story_status: 1,
         is_old: false,
         story_time_spent: 120,
-        story_created_at: null,
         story_last_updated_at: null,
       },
     ],
@@ -192,12 +190,12 @@ describe("listStoryResultSchema", () => {
   };
 
   it("accepts a valid result", () => {
-    expect(listStoryResultSchema.safeParse(validResult).success).toBe(true);
+    expect(listStoriesResultSchema.safeParse(validResult).success).toBe(true);
   });
 
   it("accepts empty stories array", () => {
     expect(
-      listStoryResultSchema.safeParse({
+      listStoriesResultSchema.safeParse({
         ...validResult,
         stories: [],
         total: 0,
@@ -208,24 +206,24 @@ describe("listStoryResultSchema", () => {
 
   it("rejects missing stories", () => {
     const { stories: _, ...rest } = validResult;
-    expect(listStoryResultSchema.safeParse(rest).success).toBe(false);
+    expect(listStoriesResultSchema.safeParse(rest).success).toBe(false);
   });
 
   it("rejects negative total", () => {
     expect(
-      listStoryResultSchema.safeParse({ ...validResult, total: -1 }).success,
+      listStoriesResultSchema.safeParse({ ...validResult, total: -1 }).success,
     ).toBe(false);
   });
 
   it("rejects zero page", () => {
     expect(
-      listStoryResultSchema.safeParse({ ...validResult, page: 0 }).success,
+      listStoriesResultSchema.safeParse({ ...validResult, page: 0 }).success,
     ).toBe(false);
   });
 
   it("rejects negative totalPages", () => {
     expect(
-      listStoryResultSchema.safeParse({
+      listStoriesResultSchema.safeParse({
         ...validResult,
         totalPages: -1,
       }).success,

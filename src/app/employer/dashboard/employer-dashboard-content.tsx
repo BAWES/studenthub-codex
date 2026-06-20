@@ -1,10 +1,7 @@
 "use client";
 
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
-import { StatusBadge } from "@/modules/workspace/StatusBadge";
-import { genericStatusVariant } from "@/modules/workspace/status-mapping";
-import type { SessionUser } from "@/modules/auth/types";
-import type { EmployerDashboardMetric, RecentApplication, JobStatusBreakdown } from "./schemas";
+import { MetricCard } from "@/components/ui/metric-card";
 import {
   Table,
   TableBody,
@@ -13,9 +10,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { MetricCard } from "@/components/ui/metric-card";
+import { StatusBadge } from "@/components/ui/status-badge";
+import { genericStatusVariant } from "@/modules/workspace/status-mapping";
+import type { SessionUser } from "@/modules/auth/types";
+import type { EmployerDashboardMetric, RecentApplication, JobStatusBreakdown } from "./schemas";
 
 type Props = {
   session: SessionUser;
@@ -46,14 +46,16 @@ function RecentApplicationsTable({ applications }: { applications: RecentApplica
         </TableRow>
       </TableHeader>
       <TableBody>
-        {applications.map((app, i) => (
-          <TableRow key={app.applicationId} index={i}>
-            <TableCell className="font-medium text-foreground">
+        {applications.map((app) => (
+          <TableRow key={app.applicationId}>
+            <TableCell>
               {app.candidateName ?? `Candidate #${app.candidateId}`}
             </TableCell>
-            <TableCell className="text-foreground">{app.jobTitle}</TableCell>
+            <TableCell>{app.jobTitle}</TableCell>
             <TableCell>
-              <StatusBadge variant={genericStatusVariant(app.status)} label={app.status} size="sm" />
+              <StatusBadge status={genericStatusVariant(app.status)} size="sm">
+                {app.status}
+              </StatusBadge>
             </TableCell>
             <TableCell className="text-muted-foreground">
               {new Date(app.createdAt).toLocaleDateString()}
@@ -81,19 +83,14 @@ function StatusBreakdownBar({ breakdown }: { breakdown: JobStatusBreakdown[] }) 
       {breakdown.map((item) => {
         const pct = total > 0 ? Math.round((item.count / total) * 100) : 0;
         return (
-          <div key={item.status} className="flex items-center gap-3">
-            <span className="w-24 shrink-0 text-sm font-medium capitalize text-foreground">
-              {item.status}
-            </span>
-            <div className="flex-1">
-              <Progress
-                value={pct}
-                className={item.status === "active" ? "[&>[data-slot=progress-indicator]]:bg-[var(--sh-success)]" : "[&>[data-slot=progress-indicator]]:bg-[#eb6651]"}
-              />
+          <div key={item.status} className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium capitalize text-foreground">{item.status}</span>
+              <span className="text-sm text-muted-foreground">
+                {item.count} ({pct}%)
+              </span>
             </div>
-            <span className="w-16 shrink-0 text-right text-sm font-medium text-muted-foreground">
-              {item.count} ({pct}%)
-            </span>
+            <Progress value={pct} className="h-2" />
           </div>
         );
       })}
@@ -123,7 +120,12 @@ export function EmployerDashboardContent({
       {/* Metrics grid */}
       <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {metrics.map((metric) => (
-          <MetricCard key={metric.label} label={metric.label} value={metric.value} note={metric.note} />
+          <MetricCard
+            key={metric.label}
+            label={metric.label}
+            value={metric.value}
+            subtitle={metric.note}
+          />
         ))}
       </div>
 
