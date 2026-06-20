@@ -1,5 +1,7 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+
 export default function Error({
   error,
   reset,
@@ -17,13 +19,7 @@ export default function Error({
       <p className="text-xs max-w-md text-center">
         {error.message}
       </p>
-      <button
-        type="button"
-        onClick={reset}
-        className="h-8 rounded-lg px-4 text-xs font-semibold bg-primary text-white"
-      >
-        Try again
-      </button>
+      <Button onClick={reset} variant="default" className="h-8 rounded-lg px-4 text-xs font-semibold bg-primary text-white" type="button">Try again</Button>
     </div>
   );
 }

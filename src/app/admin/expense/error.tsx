@@ -23,7 +23,7 @@ export default function AdminExpensesError({ error, reset }: Props) {
           <p className="text-sm mt-1 text-muted-foreground">
             {error.message || "Failed to load expenses."}
           </p>
-          <Button type="button" onClick={reset} className="mt-4">
+          <Button onClick={reset} className="mt-4">
             Try again
           </Button>
         </section>

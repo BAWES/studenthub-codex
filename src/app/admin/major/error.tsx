@@ -1,5 +1,7 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+
 export default function AdminMajorError({
   error,
   reset,
@@ -15,10 +17,7 @@ export default function AdminMajorError({
       <p className="text-sm text-muted-foreground">
         {error.message ?? "An unexpected error occurred."}
       </p>
-      <button type="button" onClick={reset}
-        className="h-9 rounded-lg px-4 text-sm font-semibold bg-primary text-white">
-        Try again
-      </button>
+      <Button onClick={reset} variant="default" className="h-9 rounded-lg px-4 text-sm font-semibold bg-primary text-white" type="button">Try again</Button>
     </div>
   );
 }

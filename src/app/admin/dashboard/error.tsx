@@ -1,5 +1,7 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+
 export default function Error({
   error,
   reset,
@@ -17,12 +19,7 @@ export default function Error({
         {error.message ?? "An unexpected error occurred while loading the dashboard page."}
       </p>
       {error.digest ? <small text-muted-foreground>Error ID: {error.digest}</small> : null}
-      <button
-        onClick={reset}
-        className="mt-2 h-10 rounded-lg px-4 text-sm font-semibold bg-[var(--sh-info)] text-white"
-      >
-        Try again
-      </button>
+      <Button onClick={reset} variant="default" className="mt-2" >Try again</Button>
     </div>
   );
 }
