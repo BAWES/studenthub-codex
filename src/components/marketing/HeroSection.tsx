@@ -11,13 +11,13 @@ import {
   Star,
 } from "lucide-react";
 
-// ── Landing hero ─────────────────────────────────
+// ── Staff-matched placement hero ─────────────────────────────────
 
 const SH_BLUE = "#0b63ce";
 const SH_AMBER = "#f59e0b";
 
 const heroContent = {
-  eyebrow: "Staff-matched student placement",
+  eyebrow: "Staff-matched student placements",
   headline: "Connecting students with the right employers",
   subhead:
     "The platform where students build careers and employers discover vetted talent. Staff recruiters match both sides — no algorithm guessing.",
