@@ -45,7 +45,7 @@ export function PaymentFilters({
       <div className="rounded-lg border border-[var(--border)] bg-white p-4 mb-6">
         <div className="flex flex-wrap items-end gap-4">
           <div className="flex flex-col gap-1">
-            <label htmlFor="payment-status" className="text-[11px] font-bold uppercase tracking-wider" style={{ color: "var(--muted)" }}>
+            <label htmlFor="payment-status" className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
               Status
             </label>
             <select
@@ -62,7 +62,7 @@ export function PaymentFilters({
             </select>
           </div>
           <div className="flex flex-col gap-1">
-            <label htmlFor="payment-type" className="text-[11px] font-bold uppercase tracking-wider" style={{ color: "var(--muted)" }}>
+            <label htmlFor="payment-type" className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
               Type
             </label>
             <select
@@ -79,7 +79,7 @@ export function PaymentFilters({
             </select>
           </div>
           <div className="flex flex-col gap-1">
-            <label htmlFor="payment-date-from" className="text-[11px] font-bold uppercase tracking-wider" style={{ color: "var(--muted)" }}>
+            <label htmlFor="payment-date-from" className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
               From
             </label>
             <input
@@ -92,7 +92,7 @@ export function PaymentFilters({
             />
           </div>
           <div className="flex flex-col gap-1">
-            <label htmlFor="payment-date-to" className="text-[11px] font-bold uppercase tracking-wider" style={{ color: "var(--muted)" }}>
+            <label htmlFor="payment-date-to" className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
               To
             </label>
             <input
@@ -126,8 +126,8 @@ export function PaymentFilters({
       {emptyResult && (
         <div className="flex flex-col items-center justify-center py-16 gap-4" role="status">
           <span className="text-4xl" aria-hidden="true">🔍</span>
-          <p className="text-lg font-semibold" style={{ color: "var(--ink)" }}>No payments match your filters</p>
-          <p className="text-sm" style={{ color: "var(--muted)" }}>Try adjusting your search or filter criteria</p>
+          <p className="text-lg font-semibold text-foreground">No payments match your filters</p>
+          <p className="text-sm text-muted-foreground">Try adjusting your search or filter criteria</p>
           <button onClick={onClear} className="h-10 rounded-lg px-4 text-sm font-semibold" style={{ background: "var(--sh-info)", color: "#fff" }}>
             Clear Filters
           </button>

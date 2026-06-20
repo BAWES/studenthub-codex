@@ -29,7 +29,7 @@ export function AdminDepartmentsTable({ session, departments }: Props) {
     >
       <section className="mb-6">
         <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
-          <h3 className="text-sm font-semibold mb-3" style={{ color: "var(--ink)" }}>Add department</h3>
+          <h3 className="text-sm font-semibold mb-3 text-foreground">Add department</h3>
           <CreateDepartmentForm onSuccess={() => router.refresh()} />
         </div>
       </section>
@@ -53,8 +53,7 @@ export function AdminDepartmentsTable({ session, departments }: Props) {
               ) : (
                 <button
                   type="button"
-                  className="text-sm hover:underline"
-                  style={{ color: "var(--sh-primary)" }}
+                  className="text-sm hover:underline text-primary"
                   onClick={() => setEditingUuid(row.department_uuid)}
                 >
                   {row.department_name_en}
@@ -87,8 +86,7 @@ export function AdminDepartmentsTable({ session, departments }: Props) {
               editingUuid !== row.department_uuid ? (
                 <button
                   type="button"
-                  className="text-xs px-2 py-1 rounded hover:bg-red-500/10"
-                  style={{ color: "var(--sh-error)" }}
+                  className="text-xs px-2 py-1 rounded hover:bg-red-500/10 text-destructive"
                   onClick={async () => {
                     if (confirm(`Delete "${row.department_name_en}"?`)) {
                       const result = await deleteDepartment({ departmentUuid: row.department_uuid });
@@ -133,7 +131,7 @@ function CreateDepartmentForm({ onSuccess }: { onSuccess: () => void }) {
       onSubmit={() => setTimeout(() => { formRef.current?.reset(); }, 100)}
     >
       <div className="grid gap-1">
-        <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>English name</label>
+        <label className="text-xs font-medium text-muted-foreground">English name</label>
         <input
           name="departmentNameEn"
           required
@@ -144,7 +142,7 @@ function CreateDepartmentForm({ onSuccess }: { onSuccess: () => void }) {
         />
       </div>
       <div className="grid gap-1">
-        <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>Arabic name</label>
+        <label className="text-xs font-medium text-muted-foreground">Arabic name</label>
         <input
           name="departmentNameAr"
           maxLength={255}
@@ -156,13 +154,12 @@ function CreateDepartmentForm({ onSuccess }: { onSuccess: () => void }) {
       <button
         type="submit"
         disabled={pending}
-        className="h-9 rounded-lg px-4 text-sm font-semibold"
-        style={{ background: "var(--sh-primary)", color: "#fff" }}
+        className="h-9 rounded-lg px-4 text-sm font-semibold bg-primary text-primary-foreground"
       >
         {pending ? "Adding..." : "Add"}
       </button>
       {state?.error ? (
-        <p className="text-xs w-full" style={{ color: "var(--sh-error)" }}>{state.error}</p>
+        <p className="text-xs w-full text-destructive">{state.error}</p>
       ) : null}
     </form>
   );
@@ -215,21 +212,19 @@ function EditDepartmentForm({
       <button
         type="submit"
         disabled={pending}
-        className="h-8 rounded px-3 text-xs font-semibold"
-        style={{ background: "var(--sh-primary)", color: "#fff" }}
+        className="h-8 rounded px-3 text-xs font-semibold bg-primary text-primary-foreground"
       >
         {pending ? "..." : "Save"}
       </button>
       <button
         type="button"
         onClick={onCancel}
-        className="h-8 rounded px-3 text-xs"
-        style={{ color: "var(--muted)" }}
+        className="h-8 rounded px-3 text-xs text-muted-foreground"
       >
         Cancel
       </button>
       {state?.error ? (
-        <p className="text-xs" style={{ color: "var(--sh-error)" }}>{state.error}</p>
+        <p className="text-xs text-destructive">{state.error}</p>
       ) : null}
     </form>
   );

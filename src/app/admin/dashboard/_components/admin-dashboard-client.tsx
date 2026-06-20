@@ -119,7 +119,7 @@ export function AdminDashboardClient({ session, dashboard }: Props) {
       {/* ── Request Pipeline ── */}
       <section className="mb-6" aria-label="Request pipeline status">
         <div className="rounded-lg border border-[var(--border)] bg-white p-5">
-          <h2 className="mb-4 text-base font-semibold" style={{ color: "var(--ink)" }}>
+          <h2 className="mb-4 text-base font-semibold text-foreground">
             Request Pipeline
           </h2>
 
@@ -164,8 +164,7 @@ export function AdminDashboardClient({ session, dashboard }: Props) {
                       label={status.label}
                     />
                     <strong
-                      className="text-sm tabular-nums"
-                      style={{ color: "var(--ink)" }}
+                      className="text-sm tabular-nums text-foreground"
                     >
                       {status.value.toLocaleString("en-US")}
                     </strong>
@@ -183,13 +182,12 @@ export function AdminDashboardClient({ session, dashboard }: Props) {
       <section className="mb-6" aria-label="PR merge time-to-merge metrics">
         <div className="rounded-lg border border-[var(--border)] bg-white p-5">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-base font-semibold" style={{ color: "var(--ink)" }}>
+            <h2 className="text-base font-semibold text-foreground">
               PR Time-to-Merge
             </h2>
             <Link
               href="https://github.com/BAWES/studenthub-codex/pulls"
-              className="text-xs font-medium hover:underline"
-              style={{ color: "var(--sh-primary)" }}
+              className="text-xs font-medium hover:underline text-primary"
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -225,8 +223,7 @@ export function AdminDashboardClient({ session, dashboard }: Props) {
               {dashboard.recentPrMergeTimes.length > 0 && (
                 <>
                   <h3
-                    className="text-xs font-semibold uppercase tracking-wider"
-                    style={{ color: "var(--muted)" }}
+                    className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
                   >
                     Recent merges
                   </h3>
@@ -246,21 +243,18 @@ export function AdminDashboardClient({ session, dashboard }: Props) {
                         >
                           <div className="min-w-0">
                             <strong
-                              className="text-sm"
-                              style={{ color: "var(--ink)" }}
+                              className="text-sm text-foreground"
                             >
                               #{pr.number}
                             </strong>
                             <span
-                              className="ml-2 text-sm"
-                              style={{ color: "var(--muted)" }}
+                              className="ml-2 text-sm text-muted-foreground"
                             >
                               {pr.title}
                             </span>
                           </div>
                           <span
-                            className="text-xs whitespace-nowrap ml-3"
-                            style={{ color: "var(--muted)" }}
+                            className="text-xs whitespace-nowrap ml-3 text-muted-foreground"
                           >
                             {fmtHours}
                           </span>
@@ -328,18 +322,16 @@ function DataListCard({
       <div className="flex items-center justify-between border-b border-[var(--border)] px-4 py-3">
         <div>
           <span
-            className="text-xs font-medium uppercase tracking-wider"
-            style={{ color: "var(--muted)" }}
+            className="text-xs font-medium uppercase tracking-wider text-muted-foreground"
           >
             Recent
           </span>
-          <h3 className="text-sm font-semibold" style={{ color: "var(--ink)" }}>
+          <h3 className="text-sm font-semibold text-foreground">
             {title}
           </h3>
         </div>
         <span
-          className="text-xs tabular-nums bg-[var(--surface)] rounded-full px-2 py-0.5"
-          style={{ color: "var(--muted)" }}
+          className="text-xs tabular-nums bg-[var(--surface)] rounded-full px-2 py-0.5 text-muted-foreground"
         >
           {items.length}
         </span>
@@ -355,14 +347,12 @@ function DataListCard({
             >
               <div className="min-w-0 flex-1">
                 <strong
-                  className="block truncate text-sm"
-                  style={{ color: "var(--ink)" }}
+                  className="block truncate text-sm text-foreground"
                 >
                   {item.title}
                 </strong>
                 <span
-                  className="block truncate text-xs"
-                  style={{ color: "var(--muted)" }}
+                  className="block truncate text-xs text-muted-foreground"
                 >
                   {item.subtitle}
                 </span>
@@ -376,24 +366,21 @@ function DataListCard({
                 <div className="text-right">
                   {item.amount != null && (
                     <span
-                      className="block text-xs font-medium tabular-nums"
-                      style={{ color: "var(--ink)" }}
+                      className="block text-xs font-medium tabular-nums text-foreground"
                     >
                       {item.amount}
                     </span>
                   )}
                   {item.date != null && (
                     <span
-                      className="block text-xs"
-                      style={{ color: "var(--muted)" }}
+                      className="block text-xs text-muted-foreground"
                     >
                       {item.date}
                     </span>
                   )}
                   {item.count != null && item.count > 0 && (
                     <span
-                      className="block text-xs"
-                      style={{ color: "var(--muted)" }}
+                      className="block text-xs text-muted-foreground"
                     >
                       {item.count} seats
                     </span>

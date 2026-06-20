@@ -30,7 +30,7 @@ export function AdminCurrencyTable({ session, records, total }: Props) {
     >
       <section className="mb-6">
         <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
-          <h3 className="text-sm font-semibold mb-3" style={{ color: "var(--ink)" }}>Add a currency</h3>
+          <h3 className="text-sm font-semibold mb-3 text-foreground">Add a currency</h3>
           <CreateCurrencyForm onSuccess={() => router.refresh()} />
         </div>
       </section>
@@ -45,7 +45,7 @@ export function AdminCurrencyTable({ session, records, total }: Props) {
             key: "code",
             label: "Code",
             render: (row) => (
-              <span className="text-sm font-semibold" style={{ color: "var(--ink)" }}>
+              <span className="text-sm font-semibold text-foreground">
                 {row.code ?? "—"}
               </span>
             ),
@@ -54,7 +54,7 @@ export function AdminCurrencyTable({ session, records, total }: Props) {
             key: "title",
             label: "Name",
             render: (row) => (
-              <span className="text-sm" style={{ color: "var(--ink)" }}>
+              <span className="text-sm text-foreground">
                 {row.title ?? "—"}
               </span>
             ),
@@ -63,7 +63,7 @@ export function AdminCurrencyTable({ session, records, total }: Props) {
             key: "currency_symbol",
             label: "Symbol",
             render: (row) => (
-              <span className="text-sm font-mono" style={{ color: "var(--muted)" }}>
+              <span className="text-sm font-mono text-muted-foreground">
                 {row.currency_symbol ?? "—"}
               </span>
             ),
@@ -72,7 +72,7 @@ export function AdminCurrencyTable({ session, records, total }: Props) {
             key: "rate",
             label: "Rate",
             render: (row) => (
-              <span className="text-sm" style={{ color: "var(--muted)" }}>
+              <span className="text-sm text-muted-foreground">
                 {row.rate != null ? row.rate.toFixed(4) : "—"}
               </span>
             ),
@@ -96,7 +96,7 @@ export function AdminCurrencyTable({ session, records, total }: Props) {
             key: "sort_order",
             label: "Sort",
             render: (row) => (
-              <span className="text-sm" style={{ color: "var(--muted)" }}>
+              <span className="text-sm text-muted-foreground">
                 {row.sort_order ?? "—"}
               </span>
             ),
@@ -140,7 +140,7 @@ function CreateCurrencyForm({ onSuccess }: { onSuccess: () => void }) {
       onSubmit={() => setTimeout(() => { formRef.current?.reset(); }, 100)}
     >
       <div className="grid gap-1">
-        <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>Title</label>
+        <label className="text-xs font-medium text-muted-foreground">Title</label>
         <input
           name="title"
           required
@@ -151,7 +151,7 @@ function CreateCurrencyForm({ onSuccess }: { onSuccess: () => void }) {
         />
       </div>
       <div className="grid gap-1">
-        <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>Code</label>
+        <label className="text-xs font-medium text-muted-foreground">Code</label>
         <input
           name="code"
           required
@@ -162,7 +162,7 @@ function CreateCurrencyForm({ onSuccess }: { onSuccess: () => void }) {
         />
       </div>
       <div className="grid gap-1">
-        <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>Symbol</label>
+        <label className="text-xs font-medium text-muted-foreground">Symbol</label>
         <input
           name="currencySymbol"
           maxLength={10}
@@ -172,7 +172,7 @@ function CreateCurrencyForm({ onSuccess }: { onSuccess: () => void }) {
         />
       </div>
       <div className="grid gap-1">
-        <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>Rate</label>
+        <label className="text-xs font-medium text-muted-foreground">Rate</label>
         <input
           name="rate"
           type="number"
@@ -186,13 +186,12 @@ function CreateCurrencyForm({ onSuccess }: { onSuccess: () => void }) {
       <button
         type="submit"
         disabled={pending}
-        className="h-9 rounded-lg px-4 text-sm font-semibold"
-        style={{ background: "var(--sh-primary)", color: "#fff" }}
+        className="h-9 rounded-lg px-4 text-sm font-semibold bg-primary text-primary-foreground"
       >
         {pending ? "Adding..." : "Add currency"}
       </button>
       {state?.error ? (
-        <p className="text-xs w-full" style={{ color: "var(--sh-error)" }}>{state.error}</p>
+        <p className="text-xs w-full text-destructive">{state.error}</p>
       ) : null}
     </form>
   );

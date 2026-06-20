@@ -31,10 +31,10 @@ export function AdminDashboardContent({ session, data }: Props) {
           className="rounded-lg border p-5"
           style={{ borderColor: "var(--border)", background: "var(--surface)" }}
         >
-          <div className="mb-1 text-xs font-medium uppercase tracking-wider" style={{ color: "var(--muted)" }}>
+          <div className="mb-1 text-xs font-medium uppercase tracking-wider text-muted-foreground">
             Pipeline
           </div>
-          <h2 className="mb-4 text-lg font-semibold" style={{ color: "var(--ink)" }}>
+          <h2 className="mb-4 text-lg font-semibold text-foreground">
             Request Pipeline
           </h2>
 
@@ -68,14 +68,14 @@ export function AdminDashboardContent({ session, data }: Props) {
                     className="flex items-center justify-between rounded-md px-3 py-2 text-sm"
                     style={{ background: "var(--hover)" }}
                   >
-                    <span style={{ color: "var(--ink)" }}>{status.label}</span>
+                    <span className="text-foreground">{status.label}</span>
                     <strong style={{ color: "var(--accent)" }}>{status.value}</strong>
                   </div>
                 ))}
               </div>
             </div>
           ) : (
-            <p className="text-sm" style={{ color: "var(--muted)" }}>No requests in pipeline</p>
+            <p className="text-sm text-muted-foreground">No requests in pipeline</p>
           )}
         </div>
       </section>
@@ -87,10 +87,10 @@ export function AdminDashboardContent({ session, data }: Props) {
             className="rounded-lg border p-5"
             style={{ borderColor: "var(--border)", background: "var(--surface)" }}
           >
-            <div className="mb-1 text-xs font-medium uppercase tracking-wider" style={{ color: "var(--muted)" }}>
+            <div className="mb-1 text-xs font-medium uppercase tracking-wider text-muted-foreground">
               Engineering
             </div>
-            <h2 className="mb-4 text-lg font-semibold" style={{ color: "var(--ink)" }}>
+            <h2 className="mb-4 text-lg font-semibold text-foreground">
               PR Time-to-Merge
             </h2>
 
@@ -101,10 +101,10 @@ export function AdminDashboardContent({ session, data }: Props) {
                   className="rounded-lg border p-3"
                   style={{ borderColor: "var(--border)", background: "var(--surface)" }}
                 >
-                  <div className="text-xs" style={{ color: "var(--muted)" }}>{metric.label}</div>
+                  <div className="text-xs text-muted-foreground">{metric.label}</div>
                   <div className="mt-1 text-lg font-bold" style={{ color: "var(--accent)" }}>{metric.value}</div>
                   {metric.note && (
-                    <div className="mt-0.5 text-xs" style={{ color: "var(--muted)" }}>{metric.note}</div>
+                    <div className="mt-0.5 text-xs text-muted-foreground">{metric.note}</div>
                   )}
                 </div>
               ))}
@@ -127,8 +127,8 @@ export function AdminDashboardContent({ session, data }: Props) {
             date: c.date ?? "",
           }))}
           columns={[
-            { key: "name", label: "Name", render: (row) => <span className="text-sm" style={{ color: "var(--ink)" }}>{String(row.name)}</span> },
-            { key: "email", label: "Email", render: (row) => <span className="text-sm" style={{ color: "var(--muted)" }}>{String(row.email)}</span> },
+            { key: "name", label: "Name", render: (row) => <span className="text-sm text-foreground">{String(row.name)}</span> },
+            { key: "email", label: "Email", render: (row) => <span className="text-sm text-muted-foreground">{String(row.email)}</span> },
             { key: "status", label: "Status", render: (row) => <span className="text-xs">{String(row.status)}</span> },
           ]}
         />
@@ -145,8 +145,8 @@ export function AdminDashboardContent({ session, data }: Props) {
             date: c.date ?? "",
           }))}
           columns={[
-            { key: "name", label: "Name", render: (row) => <span className="text-sm" style={{ color: "var(--ink)" }}>{String(row.name)}</span> },
-            { key: "email", label: "Email", render: (row) => <span className="text-sm" style={{ color: "var(--muted)" }}>{String(row.email)}</span> },
+            { key: "name", label: "Name", render: (row) => <span className="text-sm text-foreground">{String(row.name)}</span> },
+            { key: "email", label: "Email", render: (row) => <span className="text-sm text-muted-foreground">{String(row.email)}</span> },
             { key: "status", label: "Status", render: (row) => <span className="text-xs">{String(row.status)}</span> },
           ]}
         />
@@ -163,8 +163,8 @@ export function AdminDashboardContent({ session, data }: Props) {
             date: r.date ?? "",
           }))}
           columns={[
-            { key: "title", label: "Position", render: (row) => <span className="text-sm" style={{ color: "var(--ink)" }}>{String(row.title)}</span> },
-            { key: "company", label: "Company", render: (row) => <span className="text-sm" style={{ color: "var(--muted)" }}>{String(row.company)}</span> },
+            { key: "title", label: "Position", render: (row) => <span className="text-sm text-foreground">{String(row.title)}</span> },
+            { key: "company", label: "Company", render: (row) => <span className="text-sm text-muted-foreground">{String(row.company)}</span> },
             { key: "status", label: "Status", render: (row) => <span className="text-xs">{String(row.status)}</span> },
           ]}
         />
@@ -181,8 +181,8 @@ export function AdminDashboardContent({ session, data }: Props) {
             amount: t.amount ?? "",
           }))}
           columns={[
-            { key: "company", label: "Company", render: (row) => <span className="text-sm" style={{ color: "var(--ink)" }}>{String(row.company)}</span> },
-            { key: "period", label: "Period", render: (row) => <span className="text-sm" style={{ color: "var(--muted)" }}>{String(row.period)}</span> },
+            { key: "company", label: "Company", render: (row) => <span className="text-sm text-foreground">{String(row.company)}</span> },
+            { key: "period", label: "Period", render: (row) => <span className="text-sm text-muted-foreground">{String(row.period)}</span> },
             { key: "amount", label: "Amount", render: (row) => <span className="text-sm font-medium">{String(row.amount)}</span> },
           ]}
         />

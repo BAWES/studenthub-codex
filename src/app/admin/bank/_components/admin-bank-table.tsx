@@ -31,7 +31,7 @@ export function AdminBankTable({ session, banks }: Props) {
     >
       <section className="mb-6">
         <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
-          <h3 className="text-sm font-semibold mb-3" style={{ color: "var(--ink)" }}>Add bank</h3>
+          <h3 className="text-sm font-semibold mb-3 text-foreground">Add bank</h3>
           <CreateBankForm onSuccess={() => router.refresh()} />
         </div>
       </section>
@@ -55,8 +55,7 @@ export function AdminBankTable({ session, banks }: Props) {
               ) : (
                 <button
                   type="button"
-                  className="text-sm hover:underline"
-                  style={{ color: "var(--sh-primary)" }}
+                  className="text-sm hover:underline text-primary"
                   onClick={() => setEditingId(row.bank_id)}
                 >
                   {row.bank_name ?? "—"}
@@ -68,7 +67,7 @@ export function AdminBankTable({ session, banks }: Props) {
             label: "IBAN",
             render: (row) =>
               editingId === row.bank_id ? null : (
-                <code className="text-xs" style={{ color: "var(--ink)" }}>
+                <code className="text-xs text-foreground">
                   {row.bank_iban_code}
                 </code>
               ),
@@ -78,7 +77,7 @@ export function AdminBankTable({ session, banks }: Props) {
             label: "SWIFT",
             render: (row) =>
               editingId === row.bank_id ? null : (
-                <span className="text-sm" style={{ color: "var(--ink)" }}>
+                <span className="text-sm text-foreground">
                   {row.bank_swift_code ?? "—"}
                 </span>
               ),
@@ -88,7 +87,7 @@ export function AdminBankTable({ session, banks }: Props) {
             label: "ABK code",
             render: (row) =>
               editingId === row.bank_id ? null : (
-                <span className="text-sm" style={{ color: "var(--ink)" }}>
+                <span className="text-sm text-foreground">
                   {row.bank_code_abk ?? "—"}
                 </span>
               ),
@@ -98,7 +97,7 @@ export function AdminBankTable({ session, banks }: Props) {
             label: "Address",
             render: (row) =>
               editingId === row.bank_id ? null : (
-                <span className="text-sm" style={{ color: "var(--ink)" }}>
+                <span className="text-sm text-foreground">
                   {row.bank_address ?? "—"}
                 </span>
               ),
@@ -108,7 +107,7 @@ export function AdminBankTable({ session, banks }: Props) {
             label: "Transfer type",
             render: (row) =>
               editingId === row.bank_id ? null : (
-                <span className="text-sm" style={{ color: "var(--ink)" }}>
+                <span className="text-sm text-foreground">
                   {row.bank_transfer_type ?? "—"}
                 </span>
               ),
@@ -117,7 +116,7 @@ export function AdminBankTable({ session, banks }: Props) {
             key: "candidate_count",
             label: "Candidates",
             render: (row) => (
-              <span className="text-sm font-medium" style={{ color: "var(--ink)" }}>
+              <span className="text-sm font-medium text-foreground">
                 {row.candidate_count}
               </span>
             ),
@@ -129,8 +128,7 @@ export function AdminBankTable({ session, banks }: Props) {
               editingId !== row.bank_id ? (
                 <button
                   type="button"
-                  className="text-xs px-2 py-1 rounded hover:bg-red-500/10"
-                  style={{ color: "var(--sh-error)" }}
+                  className="text-xs px-2 py-1 rounded hover:bg-red-500/10 text-destructive"
                   onClick={async () => {
                     if (confirm(`Delete bank "${row.bank_name ?? row.bank_iban_code}"?`)) {
                       const result = await deleteBank({ bankId: row.bank_id });
@@ -188,7 +186,7 @@ function CreateBankForm({ onSuccess }: { onSuccess: () => void }) {
       onSubmit={() => setTimeout(() => { formRef.current?.reset(); }, 100)}
     >
       <div className="grid gap-1">
-        <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>Bank name</label>
+        <label className="text-xs font-medium text-muted-foreground">Bank name</label>
         <input
           name="bankName"
           required
@@ -199,7 +197,7 @@ function CreateBankForm({ onSuccess }: { onSuccess: () => void }) {
         />
       </div>
       <div className="grid gap-1">
-        <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>IBAN</label>
+        <label className="text-xs font-medium text-muted-foreground">IBAN</label>
         <input
           name="bankIbanCode"
           required
@@ -210,7 +208,7 @@ function CreateBankForm({ onSuccess }: { onSuccess: () => void }) {
         />
       </div>
       <div className="grid gap-1">
-        <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>SWIFT</label>
+        <label className="text-xs font-medium text-muted-foreground">SWIFT</label>
         <input
           name="bankSwiftCode"
           maxLength={100}
@@ -220,7 +218,7 @@ function CreateBankForm({ onSuccess }: { onSuccess: () => void }) {
         />
       </div>
       <div className="grid gap-1">
-        <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>ABK code</label>
+        <label className="text-xs font-medium text-muted-foreground">ABK code</label>
         <input
           name="bankCodeAbk"
           type="number"
@@ -230,7 +228,7 @@ function CreateBankForm({ onSuccess }: { onSuccess: () => void }) {
         />
       </div>
       <div className="grid gap-1">
-        <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>Address</label>
+        <label className="text-xs font-medium text-muted-foreground">Address</label>
         <input
           name="bankAddress"
           maxLength={100}
@@ -240,7 +238,7 @@ function CreateBankForm({ onSuccess }: { onSuccess: () => void }) {
         />
       </div>
       <div className="grid gap-1">
-        <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>Transfer type</label>
+        <label className="text-xs font-medium text-muted-foreground">Transfer type</label>
         <input
           name="bankTransferType"
           maxLength={3}
@@ -252,13 +250,12 @@ function CreateBankForm({ onSuccess }: { onSuccess: () => void }) {
       <button
         type="submit"
         disabled={pending}
-        className="h-9 rounded-lg px-4 text-sm font-semibold"
-        style={{ background: "var(--sh-primary)", color: "#fff" }}
+        className="h-9 rounded-lg px-4 text-sm font-semibold bg-primary text-primary-foreground"
       >
         {pending ? "Adding..." : "Add"}
       </button>
       {state?.error ? (
-        <p className="text-xs w-full" style={{ color: "var(--sh-error)" }}>{state.error}</p>
+        <p className="text-xs w-full text-destructive">{state.error}</p>
       ) : null}
     </form>
   );
@@ -353,21 +350,19 @@ function EditBankForm({
       <button
         type="submit"
         disabled={pending}
-        className="h-8 rounded px-3 text-xs font-semibold"
-        style={{ background: "var(--sh-primary)", color: "#fff" }}
+        className="h-8 rounded px-3 text-xs font-semibold bg-primary text-primary-foreground"
       >
         {pending ? "..." : "Save"}
       </button>
       <button
         type="button"
         onClick={onCancel}
-        className="h-8 rounded px-3 text-xs"
-        style={{ color: "var(--muted)" }}
+        className="h-8 rounded px-3 text-xs text-muted-foreground"
       >
         Cancel
       </button>
       {state?.error ? (
-        <p className="text-xs w-full" style={{ color: "var(--sh-error)" }}>{state.error}</p>
+        <p className="text-xs w-full text-destructive">{state.error}</p>
       ) : null}
     </form>
   );

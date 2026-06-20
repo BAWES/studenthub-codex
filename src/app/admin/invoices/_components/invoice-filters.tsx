@@ -45,8 +45,7 @@ export function InvoiceFilters({
           <div className="flex flex-col gap-1">
             <label
               htmlFor="invoice-status"
-              className="text-[11px] font-bold uppercase tracking-wider"
-              style={{ color: "var(--muted)" }}
+              className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground"
             >
               Status
             </label>
@@ -68,8 +67,7 @@ export function InvoiceFilters({
           <div className="flex flex-col gap-1">
             <label
               htmlFor="invoice-date-from"
-              className="text-[11px] font-bold uppercase tracking-wider"
-              style={{ color: "var(--muted)" }}
+              className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground"
             >
               From
             </label>
@@ -85,8 +83,7 @@ export function InvoiceFilters({
           <div className="flex flex-col gap-1">
             <label
               htmlFor="invoice-date-to"
-              className="text-[11px] font-bold uppercase tracking-wider"
-              style={{ color: "var(--muted)" }}
+              className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground"
             >
               To
             </label>
@@ -121,8 +118,8 @@ export function InvoiceFilters({
       {emptyResult && (
         <div className="flex flex-col items-center justify-center py-16 gap-4" role="status">
           <span className="text-4xl" aria-hidden="true">📄</span>
-          <p className="text-lg font-semibold" style={{ color: "var(--ink)" }}>No invoices match your filters</p>
-          <p className="text-sm" style={{ color: "var(--muted)" }}>Try adjusting your search or filter criteria</p>
+          <p className="text-lg font-semibold text-foreground">No invoices match your filters</p>
+          <p className="text-sm text-muted-foreground">Try adjusting your search or filter criteria</p>
           <button onClick={onClear} className="h-10 rounded-lg px-4 text-sm font-semibold" style={{ background: "var(--sh-info)", color: "#fff" }}>
             Clear Filters
           </button>
