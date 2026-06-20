@@ -158,6 +158,26 @@ describe("AdminEvaluationDetailPage", () => {
     ).rejects.toThrow("NEXT_NOT_FOUND");
   });
 
+  it("renders a download PDF link with correct href", async () => {
+    mockGetEvaluation.mockResolvedValue({ evaluation: mockEvaluation });
+
+    const Page = (await import("./page")).default;
+    render(
+      await Page({
+        params: Promise.resolve({ canEvalUuid: "eval-uuid-123" }),
+      }),
+    );
+
+    const downloadLink = screen.getByTestId("download-pdf");
+    expect(downloadLink).toBeInTheDocument();
+    expect(downloadLink).toHaveAttribute(
+      "href",
+      "/api/evaluations/eval-uuid-123/pdf?format=pdf",
+    );
+    expect(downloadLink).toHaveAttribute("download");
+    expect(downloadLink).toHaveTextContent("Download PDF Report");
+  });
+
   it("shows 'Unknown Candidate' when candidate_name is null in title", async () => {
     mockGetEvaluation.mockResolvedValue({
       evaluation: { ...mockEvaluation, candidate_name: null },
