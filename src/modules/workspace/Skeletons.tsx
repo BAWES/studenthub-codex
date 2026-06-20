@@ -125,7 +125,7 @@ export function DetailPageSkeleton({ panels = 3 }: { panels?: number }) {
         {Array.from({ length: panels }).map((_, i) => (
           <div
             key={i}
-            className="grid gap-2 border border-[var(--line)] rounded-[10px] p-4"
+            className="grid gap-2 border border-border rounded-[10px] p-4"
           >
             <Skeleton className="h-4 w-24" />
             {[1, 2, 3, 4].map((r) => (

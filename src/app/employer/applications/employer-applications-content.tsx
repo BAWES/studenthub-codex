@@ -30,7 +30,9 @@ type Props = {
 
 function MetricCard({ label, value, note }: { label: string; value: number; note?: string }) {
   return (
-    <div className="flex flex-col gap-1 rounded-xl border border-[var(--border)] bg-[var(--card)] p-5">
+    <div
+      className="flex flex-col gap-1 rounded-xl border border-[var(--border)] bg-[var(--card)] p-5"
+    >
       <span className="text-sm font-medium text-[var(--muted-foreground)]">
         {label}
       </span>
