@@ -84,10 +84,10 @@ export function WorkspaceShellSkeleton({ rowCount = 8 }: { rowCount?: number }) 
   );
 }
 
-/** Skeleton for data-table list pages. Uses glass container with shimmer. */
+/** Skeleton for data-table list pages. Uses Card container with shimmer. */
 export function DataTableSkeleton({ rows = 10 }: { rows?: number }) {
   return (
-    <div className="shTableGlass" style={{ padding: "18px 22px" }}>
+    <div className="rounded-xl border border-border bg-white shadow-sm overflow-hidden" style={{ padding: "18px 22px" }}>
       {/* Header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
         <ShimmerBlock className="h-6 w-40" />
@@ -109,7 +109,7 @@ export function DataTableSkeleton({ rows = 10 }: { rows?: number }) {
             gridTemplateColumns: "1fr 1fr 120px 100px",
             gap: 12,
             padding: "10px 14px",
-            borderBottom: "1px solid var(--sh-glass-border)",
+            borderBottom: "1px solid hsl(var(--border))",
           }}
         >
           <ShimmerBlock className="h-3 w-20" />
@@ -125,7 +125,7 @@ export function DataTableSkeleton({ rows = 10 }: { rows?: number }) {
               gridTemplateColumns: "1fr 1fr 120px 100px",
               gap: 12,
               padding: "12px 14px",
-              borderBottom: "1px solid var(--sh-glass-border)",
+              borderBottom: "1px solid hsl(var(--border))",
             }}
           >
             <ShimmerBlock className="h-4 w-44" />
@@ -144,19 +144,19 @@ export function DetailPageSkeleton({ panels = 3 }: { panels?: number }) {
   return (
     <div style={{ padding: "18px 22px", display: "grid", gap: 14 }}>
       {/* Action bar placeholder */}
-      <div className="shTableGlass" style={{ padding: 20 }}>
+      <div className="rounded-xl border border-border bg-white shadow-sm" style={{ padding: 20 }}>
         <ShimmerBlock className="h-24 w-full" />
       </div>
 
       {/* Hero section */}
-      <div className="shTableGlass" style={{ padding: 20 }}>
+      <div className="rounded-xl border border-border bg-white shadow-sm" style={{ padding: 20 }}>
         <ShimmerBlock className="h-48 w-full" />
       </div>
 
       {/* Fact panels */}
       <div style={{ display: "grid", gridTemplateColumns: `repeat(${Math.min(panels, 2)}, 1fr)`, gap: 12 }}>
         {Array.from({ length: panels }).map((_, i) => (
-          <div key={i} className="shTableGlass" style={{ padding: 16 }}>
+          <div key={i} className="rounded-xl border border-border bg-white shadow-sm" style={{ padding: 16 }}>
             <ShimmerBlock className="h-4 w-24 mb-3" />
             {[1, 2, 3, 4].map((r) => (
               <div key={r} style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
@@ -171,7 +171,7 @@ export function DetailPageSkeleton({ panels = 3 }: { panels?: number }) {
       {/* Related lists */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 12 }}>
         {[1, 2].map((col) => (
-          <div key={col} className="shTableGlass" style={{ padding: 16 }}>
+          <div key={col} className="rounded-xl border border-border bg-white shadow-sm" style={{ padding: 16 }}>
             <ShimmerBlock className="h-4 w-32 mb-3" />
             {[1, 2, 3, 4].map((r) => (
               <ShimmerBlock key={r} className="h-10 w-full mb-2" />

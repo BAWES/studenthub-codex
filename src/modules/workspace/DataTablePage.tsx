@@ -7,6 +7,9 @@ import { DataTable, type DataTableColumn } from "./DataTable";
 import { DataTableSkeleton } from "./Skeletons";
 import { Search, X } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
+import { Card, CardHeader } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import {
   EMPTY_NO_RECORDS,
   EMPTY_HINT_DEFAULT,
@@ -113,58 +116,58 @@ export function DataTablePage<T extends { id: string | number }>({
   if (error) {
     return (
       <section className={className}>
-        <div className="shTableGlass">
-          <div className="shTableHeader">
+      <Card className="overflow-hidden">
+          <CardHeader className="flex-row items-center justify-between gap-4 border-b border-border">
             <div>
-              <h2>{title}</h2>
-              <p>{description}</p>
+              <h2 className="text-[15px] font-bold tracking-tight mb-0.5">{title}</h2>
+              <p className="text-[13px] text-muted-foreground">{description}</p>
             </div>
-          </div>
+          </CardHeader>
           <div className="flex flex-col items-center justify-center gap-3 py-16 px-6 text-center">
             <div className="size-12 rounded-xl bg-red-500/10 flex items-center justify-center">
               <X size={24} className="text-red-400" />
             </div>
-            <strong className="text-sm" style={{ color: "var(--ink)" }}>
+            <strong className="text-sm text-foreground">
               Error loading data
             </strong>
-            <span className="text-sm" style={{ color: "var(--muted)" }}>
+            <span className="text-sm text-muted-foreground">
               {error}
             </span>
           </div>
-        </div>
+        </Card>
       </section>
     );
   }
 
   return (
     <section className={className}>
-      <div className="shTableGlass">
-        {/* Glass header */}
-        <div className="shTableHeader">
+      <Card className="overflow-hidden">
+        {/* Header */}
+        <CardHeader className="flex-row items-center justify-between gap-4 border-b border-border">
           <div>
-            <h2>{title}</h2>
-            <p>{description}</p>
+            <h2 className="text-[15px] font-bold tracking-tight mb-0.5">{title}</h2>
+            <p className="text-[13px] text-muted-foreground">{description}</p>
           </div>
           {actions ? <div className="flex items-center gap-2">{actions}</div> : null}
-        </div>
+        </CardHeader>
 
-        {/* Glass search bar */}
+        {/* Search bar */}
         {searchable ? (
-          <div className="shTableSearch">
-            <div className="shTableSearchWrap">
-              <Search size={15} className="shTableSearchIcon" aria-hidden="true" />
+          <div className="px-5 py-3 border-b border-border">
+            <div className="relative flex items-center">
+              <Search size={15} className="absolute left-3 text-muted-foreground pointer-events-none" aria-hidden="true" />
               <input
                 data-command-search
                 type="text"
                 placeholder={searchPlaceholder}
                 value={searchValue}
                 onChange={(e) => setSearchValue(e.target.value)}
-                className="shTableSearchInput"
+                className="w-full h-9 pl-9 pr-9 rounded-lg border border-border bg-muted/30 text-sm text-foreground placeholder:text-muted-foreground/60 outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-colors"
               />
               {searchValue ? (
                 <button
                   type="button"
-                  className="shTableSearchClear"
+                  className="absolute right-1.5 inline-flex items-center justify-center size-7 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
                   onClick={() => setSearchValue("")}
                   aria-label="Clear search"
                 >
@@ -196,7 +199,7 @@ export function DataTablePage<T extends { id: string | number }>({
             />
           </div>
         )}
-      </div>
+      </Card>
     </section>
   );
 }
