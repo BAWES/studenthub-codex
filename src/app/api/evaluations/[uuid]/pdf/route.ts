@@ -9,19 +9,30 @@ import {
 } from "@/modules/candidates/evaluation/pdf-helpers";
 import { getEvaluationPdfData } from "@/modules/candidates/evaluation/actions";
 
+// Type-only import — prevents webpack from bundling playwright at build time
+import type { Page } from "playwright";
+
 export const dynamic = "force-dynamic";
 
-// Keep Chromium instance cached across warm invocations
-let _chromium: Awaited<ReturnType<typeof import("playwright").chromium.launch>> | null = null;
+/** Minimal browser interface for the cached Chromium instance */
+interface BrowserHandle {
+  contexts(): unknown[];
+  isConnected(): boolean;
+  newPage(): Promise<Page>;
+  close(): Promise<void>;
+}
 
-async function getBrowser() {
+// Keep Chromium instance cached across warm invocations
+let _browser: BrowserHandle | null = null;
+
+async function getBrowser(): Promise<BrowserHandle> {
   // If we have a cached instance, verify it's still alive
-  if (_chromium) {
+  if (_browser) {
     try {
-      const contexts = _chromium.contexts();
+      const contexts = _browser.contexts();
       // If it has no contexts it may have crashed — re-launch
-      if (contexts.length > 0 || _chromium.isConnected()) {
-        return _chromium;
+      if (contexts.length > 0 || _browser.isConnected()) {
+        return _browser;
       }
     } catch {
       // Browser is dead — fall through to re-launch
@@ -29,16 +40,16 @@ async function getBrowser() {
   }
 
   const { chromium } = await import("playwright");
-  _chromium = await chromium.launch({ headless: true });
+  _browser = (await chromium.launch({ headless: true })) as unknown as BrowserHandle;
 
   // Ensure cleanup on process exit to avoid orphaned Chromium processes
   process.once("beforeExit", () => {
-    if (_chromium) {
-      _chromium.close().catch(() => {});
+    if (_browser) {
+      _browser.close().catch(() => {});
     }
   });
 
-  return _chromium!;
+  return _browser;
 }
 
 /**
@@ -132,7 +143,7 @@ export async function GET(
 // ---------------------------------------------------------------------------
 
 async function generatePdf(html: string, uuid: string): Promise<NextResponse> {
-  let page: import("playwright").Page | null = null;
+  let page: Page | null = null;
   try {
     const browser = await getBrowser();
     page = await browser.newPage();
@@ -175,5 +186,3 @@ async function generatePdf(html: string, uuid: string): Promise<NextResponse> {
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
-
-
