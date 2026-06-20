@@ -5,8 +5,8 @@ import { cn } from "@/lib/utils";
 
 /* ==========================================================================
    StudentHub OS — Data Table
-   Sticky header, row hover lift, entrance stagger animations,
-   and compact data-dense layout. shadcn-based.
+   shadcn-style table with row hover lift, entrance stagger animations,
+   and compact data-dense layout.
    ========================================================================== */
 
 // ── Inline style injection for entrance animations ──────────────
@@ -45,7 +45,7 @@ const Table = React.forwardRef<HTMLTableElement, React.ComponentPropsWithoutRef<
       <TableContext.Provider value={{ staggerMs }}>
         <div
           data-slot="table-wrapper"
-          className="relative w-full overflow-auto rounded-lg border border-[var(--border)] bg-[color-mix(in_srgb,var(--surface)_92%,transparent)]"
+          className="relative w-full overflow-auto rounded-lg border border-border bg-card"
         >
           <table
             ref={ref}
@@ -74,7 +74,7 @@ const TableHeader = React.forwardRef<HTMLTableSectionElement, React.ComponentPro
         className={cn(
           "sticky top-0 z-10",
           "bg-[var(--surface)]",
-          "after:absolute after:inset-x-0 after:bottom-0 after:h-px after:bg-[var(--border)]",
+          "after:absolute after:inset-x-0 after:bottom-0 after:h-px after:bg-border",
           className,
         )}
         {...props}
@@ -110,7 +110,7 @@ const TableFooter = React.forwardRef<HTMLTableSectionElement, React.ComponentPro
         ref={ref}
         data-slot="table-footer"
         className={cn(
-          "border-t border-[var(--border)] bg-[color-mix(in_srgb,var(--surface)_92%,transparent)] font-medium",
+          "border-t border-border bg-card font-medium",
           "[&>tr]:last:border-b-0",
           className,
         )}
@@ -153,9 +153,9 @@ const TableRow = React.forwardRef<HTMLTableRowElement, TableRowProps>(
         onClick={onClick}
         onKeyDown={isInteractive ? handleKeyDown : onKeyDown}
         className={cn(
-          "border-b border-[var(--border)]",
+          "border-b border-border",
           "transition-all duration-[200ms] ease-out",
-          "hover:bg-[var(--surface)] hover:translate-x-[2px]",
+          "hover:bg-muted/30 hover:translate-x-[2px]",
           "data-[state=selected]:bg-[var(--sh-info-bg)]",
           "cursor-default",
           isInteractive && "cursor-pointer",

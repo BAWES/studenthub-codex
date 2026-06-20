@@ -11,6 +11,8 @@ import {
   EMPTY_HINT_DEFAULT,
 } from "./emptyStates";
 import { EmptyState } from "./EmptyState";
+import { Card, CardHeader } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -79,7 +81,7 @@ function ShimmerSkeleton({ className = "" }: { className?: string }) {
   return (
     <div
       data-slot="skeleton"
-      className={`animate-pulse rounded-md bg-muted ${className}`}
+      className={`shTableSkeleton ${className}`}
       aria-hidden="true"
     />
   );
@@ -89,7 +91,7 @@ function ShimmerSkeleton({ className = "" }: { className?: string }) {
 // Glass pagination
 // ---------------------------------------------------------------------------
 
-function GlassPagination({
+function ShadcnPagination({
   page,
   totalPages,
   onPageChange,
@@ -99,30 +101,32 @@ function GlassPagination({
   onPageChange: (page: number) => void;
 }) {
   return (
-    <nav className="shTablePagination" aria-label="Pagination">
-      <button
-        type="button"
-        className="shTablePageBtn"
+    <nav className="flex items-center justify-center gap-2 px-5 py-3 border-t border-border" aria-label="Pagination">
+      <Button
+        variant="outline"
+        size="sm"
         disabled={page <= 1}
         onClick={() => onPageChange(page - 1)}
         aria-label="Previous page"
+        className="gap-1.5"
       >
         <ChevronRight className="size-3.5 rotate-180" />
         Previous
-      </button>
-      <span className="shTablePageInfo">
+      </Button>
+      <span className="text-[13px] text-muted-foreground font-medium px-1">
         Page {page} of {totalPages}
       </span>
-      <button
-        type="button"
-        className="shTablePageBtn"
+      <Button
+        variant="outline"
+        size="sm"
         disabled={page >= totalPages}
         onClick={() => onPageChange(page + 1)}
         aria-label="Next page"
+        className="gap-1.5"
       >
         Next
         <ChevronRight className="size-3.5" />
-      </button>
+      </Button>
     </nav>
   );
 }
@@ -196,15 +200,15 @@ export function DataTable<T extends { id: string | number }>({
   // ── Loading state ──────────────────────────────────────────
   if (loading) {
     return (
-      <section className="rounded-lg border bg-white shadow-sm">
-        <div className="shTableHeader">
+      <Card className="overflow-hidden">
+        <CardHeader className="flex-row items-center justify-between gap-4 border-b border-border">
           <div>
-            <h2>{title}</h2>
-            <p>{description}</p>
+            <h2 className="text-[15px] font-bold tracking-tight mb-0.5">{title}</h2>
+            <p className="text-[13px] text-muted-foreground">{description}</p>
           </div>
-        </div>
-        <div className="shTableScroller">
-          <table className="shTable" aria-label={title}>
+        </CardHeader>
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse border-spacing-0 min-w-[720px]" aria-label={title}>
             <thead>
               <tr>
                 {visibleColumns.map((column) => (
@@ -231,22 +235,22 @@ export function DataTable<T extends { id: string | number }>({
             </tbody>
           </table>
         </div>
-      </section>
+      </Card>
     );
   }
 
   // ── Error state ────────────────────────────────────────────
   if (error) {
     return (
-      <section className="rounded-lg border bg-white shadow-sm">
-        <div className="shTableHeader">
+      <Card className="overflow-hidden">
+        <CardHeader className="flex-row items-center justify-between gap-4 border-b border-border">
           <div>
-            <h2>{title}</h2>
-            <p>{description}</p>
+            <h2 className="text-[15px] font-bold tracking-tight mb-0.5">{title}</h2>
+            <p className="text-[13px] text-muted-foreground">{description}</p>
           </div>
-        </div>
-        <div className="shTableScroller">
-          <table className="shTable" aria-label={title}>
+        </CardHeader>
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse border-spacing-0 min-w-[720px]" aria-label={title}>
             <thead>
               <tr>
                 {visibleColumns.map((column) => (
@@ -257,8 +261,8 @@ export function DataTable<T extends { id: string | number }>({
             </thead>
             <tbody>
               <tr>
-                <td colSpan={colCount} className="shTableEmptyCell">
-                  <div className="flex flex-col items-center justify-center gap-3 py-12 px-6 text-center">
+                <td colSpan={colCount} className="text-center py-12 px-6">
+                  <div className="flex flex-col items-center justify-center gap-3">
                     <div className="size-10 rounded-xl bg-red-500/10 flex items-center justify-center">
                       <AlertCircle size={20} className="text-red-400" />
                     </div>
@@ -266,13 +270,14 @@ export function DataTable<T extends { id: string | number }>({
                       {error}
                     </strong>
                     {onRetry ? (
-                      <button
+                      <Button
+                        variant="outline"
+                        size="sm"
                         type="button"
                         onClick={onRetry}
-                        className="shTablePageBtn"
                       >
                         Retry
-                      </button>
+                      </Button>
                     ) : null}
                   </div>
                 </td>
@@ -280,7 +285,7 @@ export function DataTable<T extends { id: string | number }>({
             </tbody>
           </table>
         </div>
-      </section>
+      </Card>
     );
   }
 
@@ -297,16 +302,16 @@ export function DataTable<T extends { id: string | number }>({
     onPageChange !== undefined;
 
   return (
-    <section className="rounded-lg border bg-white shadow-sm">
-      <div className="shTableHeader">
+    <Card className="overflow-hidden">
+      <CardHeader className="flex-row items-center justify-between gap-4 border-b border-border">
         <div>
-          <h2>{title}</h2>
-          <p>{description}</p>
+          <h2 className="text-[15px] font-bold tracking-tight mb-0.5">{title}</h2>
+          <p className="text-[13px] text-muted-foreground">{description}</p>
         </div>
-        <span>{rowCountLabel}</span>
-      </div>
-      <div className="shTableScroller">
-        <table className="shTable" aria-label={title}>
+        <span className="text-[12px] text-muted-foreground font-semibold">{rowCountLabel}</span>
+      </CardHeader>
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse border-spacing-0 min-w-[720px]" aria-label={title}>
           <thead>
             <tr>
               {visibleColumns.map((column) => (
@@ -367,12 +372,12 @@ export function DataTable<T extends { id: string | number }>({
         </table>
       </div>
       {hasPagination ? (
-        <GlassPagination
+        <ShadcnPagination
           page={page}
           totalPages={totalPages}
           onPageChange={onPageChange}
         />
       ) : null}
-    </section>
+    </Card>
   );
 }
