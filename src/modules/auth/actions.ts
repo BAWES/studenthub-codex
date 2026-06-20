@@ -70,26 +70,6 @@ export async function loginAction(_state: LoginState, formData: FormData): Promi
   return result;
 }
 
-export async function chooseAccountAction(formData: FormData) {
-  const accountKey = formData.get("accountKey");
-  if (typeof accountKey !== "string") {
-    redirect("/login?error=account");
-  }
-
-  const accounts = await getPendingAccounts();
-  const account = accounts.find((item) => item.accountKey === accountKey);
-  if (!account) {
-    await clearPendingAccounts();
-    redirect("/login?error=expired");
-  }
-
-  const { accountKey: _accountKey, label: _label, ...user } = account;
-  // Include all pending roles so the session knows the user can switch
-  const allRoles = accounts.map((a) => a.role);
-  await createSession({ ...user, roles: allRoles.length > 1 ? allRoles : undefined });
-  redirect(roleDefaultRoute(user.role));
-}
-
 export async function verifySession() {
   try {
     const session = await getSession();

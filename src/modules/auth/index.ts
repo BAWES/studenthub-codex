@@ -4,7 +4,6 @@
 
 export {
   loginAction,
-  chooseAccountAction,
   verifySession,
   logoutAction,
   switchRoleAction,
