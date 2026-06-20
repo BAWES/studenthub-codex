@@ -48,15 +48,11 @@ export default function PersonaSwitcher({
     <div
       className={cn(
         "flex flex-wrap items-center justify-center gap-1.5 p-1 rounded-2xl",
-        "w-fit mx-auto",
+        "w-fit mx-auto bg-card border border-border",
         className,
       )}
       role="tablist"
       aria-label="Select your role to see tailored information"
-      style={{
-        background: "var(--sh-glass-bg)",
-        border: "1px solid var(--sh-glass-border)",
-      }}
     >
       {personas.map((p) => {
         const Icon = p.icon;
@@ -71,20 +67,19 @@ export default function PersonaSwitcher({
             className={cn(
               "group relative flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-sm font-semibold",
               "transition-all duration-200",
-              "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)]",
+              "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
               isActive
-                ? "text-[var(--ink)]"
-                : "text-[var(--muted)] hover:text-[var(--ink)] hover:bg-[var(--sh-glass-bg-strong)]",
+                ? "text-foreground"
+                : "text-muted-foreground hover:text-foreground hover:bg-accent",
             )}
           >
-            {/* Active glow indicator */}
+            {/* Active indicator — solid card style */}
             {isActive && (
               <span
-                className="absolute inset-0 rounded-xl pointer-events-none"
+                className="absolute inset-0 rounded-xl pointer-events-none border"
                 style={{
-                  background: "var(--sh-info-bg)",
-                  border: "1px solid var(--sh-glass-border-strong)",
-                  boxShadow: "0 2px 8px rgba(16,24,40,0.06)",
+                  background: "color-mix(in srgb, var(--primary) 8%, transparent)",
+                  borderColor: "color-mix(in srgb, var(--primary) 20%, transparent)",
                 }}
               />
             )}
@@ -93,7 +88,7 @@ export default function PersonaSwitcher({
             {isActive && (
               <span
                 className="absolute -top-1 left-1/2 -translate-x-1/2 size-1.5 rounded-full"
-                style={{ background: "var(--sh-info)" }}
+                style={{ background: "var(--primary)" }}
                 aria-hidden="true"
               />
             )}
@@ -111,12 +106,8 @@ export default function PersonaSwitcher({
                 "absolute -bottom-7 left-1/2 -translate-x-1/2 whitespace-nowrap",
                 "text-[10px] font-medium px-2 py-0.5 rounded-md",
                 "opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none",
+                "bg-popover border border-border text-muted-foreground",
               )}
-              style={{
-                background: "var(--sh-glass-bg-strong)",
-                border: "1px solid var(--sh-glass-border)",
-                color: "var(--muted)",
-              }}
             >
               {p.subtitle}
             </span>
