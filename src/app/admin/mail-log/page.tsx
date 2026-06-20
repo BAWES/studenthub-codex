@@ -6,9 +6,9 @@ export const dynamic = "force-dynamic";
 
 export default async function AdminMailLogPage() {
   const session = await requireRoleCapability("admin", "admin.read");
-  const result = await listMailLogs({ limit: 100 });
+  const result = await listMailLogs({ limit: 50, page: 1 });
 
   return (
-    <AdminMailLogTable session={session} records={result.records} />
+    <AdminMailLogTable session={session} initialRecords={result.records} />
   );
 }
