@@ -2,6 +2,7 @@
 
 import { useEffect, useCallback, type KeyboardEvent } from "react";
 import { X } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 // ---------------------------------------------------------------------------
 // PaymentDetailDrawer
@@ -39,11 +40,11 @@ export type PaymentDetailDrawerProps = {
   onClose: () => void;
 };
 
-const STATUS_COLORS: Record<string, { bg: string; text: string }> = {
-  AUTHORISED: { bg: "rgba(34, 197, 94, 0.15)", text: "#22c55e" },
-  PAID: { bg: "rgba(34, 197, 94, 0.15)", text: "#22c55e" },
-  VOIDED: { bg: "rgba(239, 68, 68, 0.15)", text: "#ef4444" },
-  DELETED: { bg: "rgba(239, 68, 68, 0.15)", text: "#ef4444" },
+const STATUS_BADGE_VARIANTS_DRAWER: Record<string, "success" | "destructive" | "secondary"> = {
+  AUTHORISED: "success",
+  PAID: "success",
+  VOIDED: "destructive",
+  DELETED: "destructive",
 };
 
 function formatAmount(value: number | null, currency?: string | null): string {
@@ -116,16 +117,12 @@ export function PaymentDetailDrawer({ payment, lineItems, loading, open, onClose
             </div>
           ) : (
             <div className="space-y-6">
-              <span
-                className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold"
-                style={{
-                  background: STATUS_COLORS[payment.status ?? ""]?.bg ?? "rgba(255,255,255,0.06)",
-                  color: STATUS_COLORS[payment.status ?? ""]?.text ?? "rgba(255,255,255,0.4)",
-                }}
+              <Badge
+                variant={STATUS_BADGE_VARIANTS_DRAWER[payment.status ?? ""] ?? "secondary"}
                 aria-label={`Status: ${payment.status ?? "Unknown"}`}
               >
                 {payment.status ?? "Unknown"}
-              </span>
+              </Badge>
 
               {payment.contact && (
                 <div className="rounded-lg border-border bg-white p-4">
