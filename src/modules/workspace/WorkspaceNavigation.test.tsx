@@ -34,17 +34,6 @@ function mockPath(value: string) {
   mockPathname = value;
 }
 
-=======
-// Self-contained render — no @testing-library/react dependency
-function renderInDoc(ui: React.ReactElement): { container: HTMLElement } {
-  const container = document.createElement("div");
-  document.body.appendChild(container);
-  const root = ReactDOM.createRoot(container);
-  root.render(ui);
-  return { container };
-}
-
->>>>>>> main
 // ---------------------------------------------------------------------------
 // Fixtures
 // ---------------------------------------------------------------------------

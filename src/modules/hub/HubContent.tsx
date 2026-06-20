@@ -7,6 +7,122 @@ import { useWorkspaceOS } from "@/modules/workspace/WorkspaceOSContext";
 import { HubShortcuts, type HubCommand } from "./HubShortcuts";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+
+type HubNavigationItem = {
+  label: string;
+  description: string;
+  href: Route;
+};
+
+type HubScopeItem = {
+  value: string;
+  label: string;
+};
+
+type HubQueue = {
+  label: string;
+  value: number;
+  note: string;
+  href?: Route;
+  tone: string;
+};
+
+type HubResult = {
+  id: string;
+  type: string;
+  title: string;
+  subtitle: string;
+  meta: string;
+  href?: Route;
+};
+
+type HubPreviewAction = { label: string; href: string };
+type HubPreviewFact = { label: string; value: string | number };
+type HubPreviewRelatedRow = {
+  id: string | number;
+  title: string;
+  subtitle: string;
+  meta: string;
+  href?: Route;
+};
+type HubPreviewRelated = {
+  title: string;
+  rows: HubPreviewRelatedRow[];
+};
+
+type HubPreview = {
+  id: string;
+  type: string;
+  title: string;
+  subtitle: string;
+  meta: string;
+  href?: Route;
+  actions: HubPreviewAction[];
+  flags: string[];
+  facts: HubPreviewFact[];
+  related: HubPreviewRelated[];
+};
+
+type HubSystemItem = {
+  label: string;
+  value: number;
+  note: string;
+};
+
+type RoleJourney = {
+  kicker: string;
+  title: string;
+  description: string;
+  steps: string[];
+  href: Route;
+  action: string;
+};
+
+type RoleGuide = {
+  title: string;
+  description: string;
+  guardrail: string;
+  primary: { label: string; href: Route };
+  journeys: RoleJourney[];
+};
+
+export type HubContentData = {
+  query: string;
+  scope: string;
+  scopes: HubScopeItem[];
+  navigation: HubNavigationItem[];
+  queues: HubQueue[];
+  system: HubSystemItem[];
+  results: HubResult[];
+  preview: HubPreview | null;
+};
+
+export function HubContent({
+  data,
+  guide,
+  commands,
+  session,
+  requiredRole,
+}: {
+  data: HubContentData;
+  guide: RoleGuide;
+  commands: HubCommand[];
+  session: SessionUser;
+  requiredRole?: string | null;
+}) {
+  const { embedded } = useWorkspaceOS();
+  const hubContext = hubContextHref(data.query, data.scope);
+
+  const desk = (
+    <section className="commandDesk">
+      <header className="commandTopbar">
+        <div className="commandIdentity">
+          <span>{session.role}</span>
+          <strong>{session.name}</strong>
+          <small>{session.email}</small>
+        </div>
+        <form className="commandSearch" action={undefined}>
+          <Input
             aria-label="Find records"
             data-command-search
             defaultValue={data.query}

@@ -15,5 +15,79 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
+
+export type DataTableColumn<T> = {
+  key: string;
+  label: string;
+  render: (row: T) => ReactNode;
+};
+
+export function DataTable<T extends { id: string | number }>({
+  title,
+  description,
+  rows,
+  columns,
+  rowHref
+}: {
+  title: string;
+  description: string;
+  rows: T[];
+  columns: DataTableColumn<T>[];
+  rowHref?: (row: T) => Route;
+}) {
+  return (
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between gap-4">
+        <div>
+          <CardTitle>{title}</CardTitle>
+          <CardDescription>{description}</CardDescription>
+        </div>
+        <span className="text-sm text-muted-foreground whitespace-nowrap">{rows.length} shown</span>
+      </CardHeader>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            {columns.map((column) => (
+              <TableHead key={column.key}>{column.label}</TableHead>
+            ))}
+            {rowHref ? <TableHead aria-label="Open record" /> : null}
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {rows.length ? (
+            rows.map((row) => (
+              <TableRow key={row.id}>
+                {columns.map((column) => (
+                  <TableCell key={column.key}>
+                    {column.render(row)}
+                  </TableCell>
+                ))}
+                {rowHref ? (
+                  <TableCell>
+                    <Link
+                      href={rowHref(row)}
+                      className="text-sm font-medium text-primary hover:underline"
+                    >
+                      Open
+                    </Link>
+                  </TableCell>
+                ) : null}
+              </TableRow>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell colSpan={columns.length + (rowHref ? 1 : 0)} className="h-32 text-center">
+                <div className="flex flex-col items-center gap-1 py-8">
+                  <strong className="text-sm font-medium text-foreground">No records found</strong>
+                  <span className="text-sm text-muted-foreground max-w-xs">
+                    This view is connected to the prod clone, but this account has no matching rows yet.
+                  </span>
+                </div>
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+    </Card>
   );
 }
