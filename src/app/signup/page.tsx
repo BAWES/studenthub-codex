@@ -40,24 +40,56 @@ export default async function SignupPage({
   }
 
   return (
-    <main className="min-h-svh w-full grid place-items-center p-4">
-      <div className="w-full max-w-[640px]">
-        {/* Glass panel container for the form */}
-        <div
-          className="rounded-xl border border-[var(--border)] bg-white shadow-[0_18px_50px_rgba(16,24,40,0.08)]"
-        >
-          <SignupForm defaultRole={defaultRole} />
-        </div>
+    <main className="shSignupRoot">
+      {/* ── Brand side — animated gradient + value proposition ────────── */}
+      <div className="shSignupBrand">
+        <div className="shSignupGradient" aria-hidden="true" />
 
-        <div className="flex items-center justify-center gap-5 mt-5 text-[13px] text-[var(--muted)]">
-          <span className="inline-flex items-center gap-1.5">
-            <Shield className="size-3.5" />
-            Encrypted & secure
-          </span>
-          <span className="inline-flex items-center gap-1.5">
-            <Sparkles className="size-3.5" />
-            Free to join
-          </span>
+        <div className="shSignupBrandContent">
+          <div className="shSignupBrandLogo">
+            <span>SH</span>
+            <strong>StudentHub</strong>
+          </div>
+
+          <h1 className="shSignupBrandTitle">
+            Join StudentHub.<br />
+            <span className="shSignupBrandHighlight">Start building your future.</span>
+          </h1>
+
+          <p className="shSignupBrandBody">
+            Whether you&apos;re looking for work or hiring talent — one
+            account gives you access to everything.
+          </p>
+
+          <div className="shSignupBrandPills">
+            {["Free to join", "Staff-matched roles", "Secure & verified"].map(
+              (item) => (
+                <span key={item} className="shSignupBrandPill">
+                  {item}
+                </span>
+              )
+            )}
+          </div>
+
+          <div className="shSignupTrustRow">
+            <span className="shSignupTrustItem">
+              <Shield className="shSignupTrustIcon" />
+              Encrypted & secure
+            </span>
+            <span className="shSignupTrustItem">
+              <Sparkles className="shSignupTrustIcon" />
+              Free to join
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Form side — clean card with role selection / registration ──── */}
+      <div className="shSignupFormSide">
+        <div className="shSignupFormWrap">
+          <div className="shSignupFormCard">
+            <SignupForm defaultRole={defaultRole} />
+          </div>
         </div>
       </div>
     </main>
