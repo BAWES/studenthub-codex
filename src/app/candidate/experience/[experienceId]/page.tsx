@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import { requireRoleCapability } from "@/modules/auth/session";
 import { DetailSection } from "@/modules/workspace/DetailPanels";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
@@ -54,12 +55,12 @@ export default async function CandidateExperienceDetailPage({
       />
 
       <div className="flex items-center gap-3 mt-8">
-        <Link href={`/candidate/experience/${experienceId}/edit`} className="shButtonSecondary">
-          Edit Experience
+        <Link href={`/candidate/experience/${experienceId}/edit`}>
+          <Button>Edit Experience</Button>
         </Link>
         <DeleteExperienceButton experienceId={item.candidate_experience_id} />
-        <Link href="/candidate/experience" className="shButtonOutline">
-          Back to Experience
+        <Link href="/candidate/experience">
+          <Button variant="outline">Back to Experience</Button>
         </Link>
       </div>
     </WorkspaceShell>
