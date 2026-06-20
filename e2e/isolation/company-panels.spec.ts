@@ -70,7 +70,7 @@ test.describe("Company workspace panel isolation", () => {
       // panels should NOT appear in the current panel viewport
       for (const other of panels) {
         if (other.label === panel.label) continue;
-        const main = ctx.page.locator("main, [role='main'], article, section").first();
+        const main = ctx.page.locator("section.workspaceStage").first();
         const inMain = main.locator(`h1, h2, h3`).filter({ hasText: other.heading });
         const inMainCount = await inMain.count();
         expect(inMainCount, `${panel.label} should not leak "${other.heading}" heading into its main content`)
