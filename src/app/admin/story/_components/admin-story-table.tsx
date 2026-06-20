@@ -4,6 +4,9 @@ import { useActionState, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { DataTable } from "@/modules/workspace/DataTable";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 import type { SessionUser } from "@/modules/auth/types";
 import type { StoryItem } from "../schemas";
@@ -28,8 +31,8 @@ export function AdminStoryTable({ session, stories }: Props) {
       ]}
     >
       <section className="mb-6">
-        <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
-          <h3 className="text-sm font-semibold mb-3" style={{ color: "var(--ink)" }}>Add story</h3>
+        <div className="rounded-lg border border-border bg-card p-5">
+          <h3 className="text-sm font-semibold mb-3 text-card-foreground">Add story</h3>
           <CreateStoryForm onSuccess={() => router.refresh()} />
         </div>
       </section>
@@ -44,7 +47,7 @@ export function AdminStoryTable({ session, stories }: Props) {
             key: "position",
             label: "Position",
             render: (row) => (
-              <span className="text-sm" style={{ color: "var(--ink)" }}>
+              <span className="text-sm text-card-foreground">
                 {row.request_position_title ?? "—"}
               </span>
             ),
@@ -62,8 +65,7 @@ export function AdminStoryTable({ session, stories }: Props) {
               ) : (
                 <button
                   type="button"
-                  className="text-sm hover:underline"
-                  style={{ color: "var(--sh-primary)" }}
+                  className="text-sm text-primary hover:underline"
                   onClick={() => setEditingId(row.story_uuid)}
                 >
                   {row.staff_name ?? "—"}
@@ -75,7 +77,7 @@ export function AdminStoryTable({ session, stories }: Props) {
             label: "Employees",
             render: (row) =>
               editingId === row.story_uuid ? null : (
-                <span className="text-sm" style={{ color: "var(--ink)" }}>
+                <span className="text-sm text-card-foreground">
                   {row.number_of_employees ?? "—"}
                 </span>
               ),
@@ -85,7 +87,7 @@ export function AdminStoryTable({ session, stories }: Props) {
             label: "Status",
             render: (row) =>
               editingId === row.story_uuid ? null : (
-                <span className="text-sm" style={{ color: "var(--muted)" }}>
+                <span className="text-sm text-muted-foreground">
                   {row.story_status === 1 ? "Active" : row.story_status === 2 ? "Closed" : "Draft"}
                 </span>
               ),
@@ -95,7 +97,7 @@ export function AdminStoryTable({ session, stories }: Props) {
             label: "Updated",
             render: (row) =>
               editingId === row.story_uuid ? null : (
-                <span className="text-sm" style={{ color: "var(--muted)" }}>
+                <span className="text-sm text-muted-foreground">
                   {row.story_last_updated_at
                     ? new Date(row.story_last_updated_at).toLocaleDateString()
                     : "—"}
@@ -107,10 +109,9 @@ export function AdminStoryTable({ session, stories }: Props) {
             label: "",
             render: (row) =>
               editingId !== row.story_uuid ? (
-                <button
-                  type="button"
-                  className="text-xs px-2 py-1 rounded hover:bg-red-500/10"
-                  style={{ color: "var(--sh-error)" }}
+                <Button
+                  variant="destructive"
+                  size="sm"
                   onClick={async () => {
                     if (confirm(`Delete story for "${row.request_position_title ?? "unknown position"}"?`)) {
                       const result = await deleteStory(row.story_uuid);
@@ -122,7 +123,7 @@ export function AdminStoryTable({ session, stories }: Props) {
                   }}
                 >
                   Delete
-                </button>
+                </Button>
               ) : null,
           },
         ]}
@@ -154,42 +155,31 @@ function CreateStoryForm({ onSuccess }: { onSuccess: () => void }) {
       onSubmit={() => setTimeout(() => { formRef.current?.reset(); }, 100)}
     >
       <div className="grid gap-1">
-        <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>Request UUID *</label>
-        <input name="requestUuid" required placeholder="e.g. req-abc-123"
-          className="h-9 rounded-lg px-3 text-sm border w-56"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }} />
+        <Label className="text-xs font-medium">Request UUID *</Label>
+        <Input name="requestUuid" required placeholder="e.g. req-abc-123" className="w-56" />
       </div>
       <div className="grid gap-1">
-        <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>Staff ID</label>
-        <input name="staffId" type="number" placeholder="Optional"
-          className="h-9 rounded-lg px-3 text-sm border w-24"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }} />
+        <Label className="text-xs font-medium">Staff ID</Label>
+        <Input name="staffId" type="number" placeholder="Optional" className="w-24" />
       </div>
       <div className="grid gap-1">
-        <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>Employees</label>
-        <input name="numberOfEmployees" type="number" placeholder="#"
-          className="h-9 rounded-lg px-3 text-sm border w-20"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }} />
+        <Label className="text-xs font-medium">Employees</Label>
+        <Input name="numberOfEmployees" type="number" placeholder="#" className="w-20" />
       </div>
       <div className="grid gap-1">
-        <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>Status</label>
+        <Label className="text-xs font-medium">Status</Label>
         <select name="storyStatus"
-          className="h-9 rounded-lg px-3 text-sm border"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}>
+          className="flex h-9 w-fit items-center justify-between gap-2 rounded-md border border-input bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-70 aria-invalid:border-destructive aria-invalid:ring-destructive/20 data-[placeholder]:text-muted-foreground *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 dark:bg-input/30 dark:hover:bg-input/50 dark:aria-invalid:ring-destructive/40">
           <option value="0">Draft</option>
           <option value="1">Active</option>
           <option value="2">Closed</option>
         </select>
       </div>
-      <button
-        type="submit" disabled={pending}
-        className="h-9 rounded-lg px-4 text-sm font-semibold"
-        style={{ background: "var(--sh-primary)", color: "#fff" }}
-      >
+      <Button type="submit" disabled={pending}>
         {pending ? "Adding..." : "Add"}
-      </button>
+      </Button>
       {state?.error ? (
-        <p className="text-xs w-full" style={{ color: "var(--sh-error)" }}>{state.error}</p>
+        <p className="text-xs w-full text-destructive">{state.error}</p>
       ) : null}
     </form>
   );
@@ -217,37 +207,25 @@ function EditStoryForm({
 
   return (
     <form action={action} className="flex items-center gap-2 flex-wrap">
-      <input name="requestUuid" defaultValue={row.request_uuid} required
-        className="h-8 rounded px-2 text-sm border w-40"
-        style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }} />
-      <input name="staffId" type="number" defaultValue={row.staff_id ?? ""} placeholder="Staff ID"
-        className="h-8 rounded px-2 text-sm border w-24"
-        style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }} />
-      <input name="numberOfEmployees" type="number" defaultValue={row.number_of_employees ?? ""} placeholder="#"
-        className="h-8 rounded px-2 text-sm border w-20"
-        style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }} />
+      <Input name="requestUuid" defaultValue={row.request_uuid} required className="w-40 h-8 text-sm" />
+      <Input name="staffId" type="number" defaultValue={row.staff_id ?? ""} placeholder="Staff ID" className="w-24 h-8 text-sm" />
+      <Input name="numberOfEmployees" type="number" defaultValue={row.number_of_employees ?? ""} placeholder="#" className="w-20 h-8 text-sm" />
       <select name="storyStatus" defaultValue={row.story_status}
-        className="h-8 rounded px-2 text-sm border"
-        style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}>
+        className="h-8 rounded-md border border-input bg-transparent px-2 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 dark:bg-input/30">
         <option value="0">Draft</option>
         <option value="1">Active</option>
         <option value="2">Closed</option>
       </select>
       <input name="isOld" type="checkbox" defaultChecked={row.is_old ?? false} className="hidden" />
-      <input name="storyTimeSpent" type="number" defaultValue={row.story_time_spent ?? ""} placeholder="Time"
-        className="h-8 rounded px-2 text-sm border w-16"
-        style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }} />
-      <button type="submit" disabled={pending}
-        className="h-8 rounded px-3 text-xs font-semibold"
-        style={{ background: "var(--sh-primary)", color: "#fff" }}>
+      <Input name="storyTimeSpent" type="number" defaultValue={row.story_time_spent ?? ""} placeholder="Time" className="w-16 h-8 text-sm" />
+      <Button type="submit" disabled={pending} size="sm">
         {pending ? "..." : "Save"}
-      </button>
-      <button type="button" onClick={onCancel}
-        className="h-8 rounded px-3 text-xs" style={{ color: "var(--muted)" }}>
+      </Button>
+      <Button type="button" variant="ghost" size="sm" onClick={onCancel}>
         Cancel
-      </button>
+      </Button>
       {state?.error ? (
-        <p className="text-xs w-full" style={{ color: "var(--sh-error)" }}>{state.error}</p>
+        <p className="text-xs w-full text-destructive">{state.error}</p>
       ) : null}
     </form>
   );
