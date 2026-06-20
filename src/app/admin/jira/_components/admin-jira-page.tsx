@@ -37,12 +37,8 @@ export function AdminJiraPage({ session, issues, users, error }: Props) {
     >
       {error ? (
         <div
-          className="mb-4 rounded-lg border px-4 py-3 text-sm"
-          style={{
-            borderColor: "var(--sh-error)",
-            color: "var(--sh-error)",
-            background: "var(--surface)",
-          }}
+          className="mb-4 rounded-lg border border-[var(--sh-error)] px-4 py-3 text-sm bg-card"
+          style={{ color: "var(--sh-error)" }}
         >
           {error}
         </div>
@@ -52,25 +48,14 @@ export function AdminJiraPage({ session, issues, users, error }: Props) {
         <button
           type="button"
           onClick={() => setTab("issues")}
-          className="text-xs px-3 py-1.5 rounded-md transition-all duration-200"
-          style={{
-            background:
-              tab === "issues" ? "var(--accent)" : "var(--surface)",
-            color: tab === "issues" ? "#fff" : "var(--ink)",
-            border: "1px solid var(--border)",
-          }}
+          className={`text-xs px-3 py-1.5 rounded-md transition-all duration-200 border border-border ${tab === "issues" ? "bg-primary text-white" : "bg-card text-foreground"}`}
         >
           Issues
         </button>
         <button
           type="button"
           onClick={() => setTab("users")}
-          className="text-xs px-3 py-1.5 rounded-md transition-all duration-200"
-          style={{
-            background: tab === "users" ? "var(--accent)" : "var(--surface)",
-            color: tab === "users" ? "#fff" : "var(--ink)",
-            border: "1px solid var(--border)",
-          }}
+          className={`text-xs px-3 py-1.5 rounded-md transition-all duration-200 border border-border ${tab === "users" ? "bg-primary text-white" : "bg-card text-foreground"}`}
         >
           Users
         </button>
@@ -88,8 +73,7 @@ export function AdminJiraPage({ session, issues, users, error }: Props) {
               label: "Key",
               render: (row) => (
                 <code
-                  className="text-sm font-mono"
-                  style={{ color: "var(--accent)" }}
+                  className="text-sm font-mono text-primary"
                 >
                   {row.key}
                 </code>

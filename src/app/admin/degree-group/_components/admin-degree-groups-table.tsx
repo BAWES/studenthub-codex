@@ -140,8 +140,7 @@ function CreateDegreeGroupForm({ onSuccess }: { onSuccess: () => void }) {
           required
           maxLength={255}
           placeholder="e.g. Science, Arts, Engineering"
-          className="h-9 rounded-lg px-3 text-sm border"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+          className="h-9 rounded-lg px-3 text-sm border bg-card border-border text-foreground"
         />
       </div>
       <div className="grid gap-1">
@@ -150,8 +149,7 @@ function CreateDegreeGroupForm({ onSuccess }: { onSuccess: () => void }) {
           name="nameAr"
           maxLength={255}
           placeholder="الاسم بالعربية"
-          className="h-9 rounded-lg px-3 text-sm border"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+          className="h-9 rounded-lg px-3 text-sm border bg-card border-border text-foreground"
         />
       </div>
       <div className="grid gap-1">
@@ -160,16 +158,14 @@ function CreateDegreeGroupForm({ onSuccess }: { onSuccess: () => void }) {
           name="sortOrder"
           type="number"
           placeholder="0"
-          className="h-9 rounded-lg px-3 text-sm border w-20"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+          className="h-9 rounded-lg px-3 text-sm border w-20 bg-card border-border text-foreground"
         />
       </div>
       <div className="grid gap-1">
         <label className="text-xs font-medium text-muted-foreground">Skip major</label>
         <select
           name="skipMajor"
-          className="h-9 rounded-lg px-3 text-sm border"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+          className="h-9 rounded-lg px-3 text-sm border bg-card border-border text-foreground"
         >
           <option value="0">No</option>
           <option value="1">Yes</option>
@@ -227,28 +223,24 @@ function EditDegreeGroupForm({
         defaultValue={row.degree_group_name_en}
         required
         maxLength={255}
-        className="h-8 rounded px-2 text-sm border w-36"
-        style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+        className="h-8 rounded px-2 text-sm border w-36 bg-card border-border text-foreground"
       />
       <input
         name="nameAr"
         defaultValue={row.degree_group_name_ar || ""}
         maxLength={255}
-        className="h-8 rounded px-2 text-sm border w-36"
-        style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+        className="h-8 rounded px-2 text-sm border w-36 bg-card border-border text-foreground"
       />
       <input
         name="sortOrder"
         defaultValue={row.degree_group_sort_order ?? ""}
         type="number"
-        className="h-8 rounded px-2 text-sm border w-16"
-        style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+        className="h-8 rounded px-2 text-sm border w-16 bg-card border-border text-foreground"
       />
       <select
         name="skipMajor"
         defaultValue={row.skip_major ? "1" : "0"}
-        className="h-8 rounded px-2 text-sm border w-20"
-        style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+        className="h-8 rounded px-2 text-sm border w-20 bg-card border-border text-foreground"
       >
         <option value="0">No</option>
         <option value="1">Yes</option>

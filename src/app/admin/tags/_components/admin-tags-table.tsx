@@ -28,7 +28,7 @@ export function AdminTagsTable({ session, tags }: Props) {
       ]}
     >
       <section className="mb-6">
-        <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
+        <div className="rounded-lg border border-border bg-card p-5">
           <h3 className="text-sm font-semibold mb-3 text-foreground">Add tag</h3>
           <CreateTagForm onSuccess={() => router.refresh()} />
         </div>
@@ -133,8 +133,7 @@ function CreateTagForm({ onSuccess }: { onSuccess: () => void }) {
           required
           maxLength={128}
           placeholder="e.g. urgent, featured, top-talent"
-          className="h-9 rounded-lg px-3 text-sm border"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+          className="h-9 rounded-lg px-3 text-sm border bg-card border-border text-foreground"
         />
       </div>
       <button
@@ -180,8 +179,7 @@ function EditTagForm({
         defaultValue={row.tag}
         required
         maxLength={128}
-        className="h-8 rounded px-2 text-sm border w-40"
-        style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+        className="h-8 rounded px-2 text-sm border w-40 bg-card border-border text-foreground"
       />
       <button
         type="submit"

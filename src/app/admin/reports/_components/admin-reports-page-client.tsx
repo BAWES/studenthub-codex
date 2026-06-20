@@ -62,7 +62,7 @@ export function AdminReportsPageClient({ session, reportTypes }: Props) {
         {reportTypes.map((rt) => (
           <div
             key={rt.type}
-            className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5"
+            className="rounded-lg border border-border bg-card p-5"
           >
             <h3 className="text-sm font-semibold mb-1 text-foreground">
               {rt.label}
@@ -85,8 +85,7 @@ export function AdminReportsPageClient({ session, reportTypes }: Props) {
       {/* Error */}
       {error ? (
         <div
-          className="rounded-lg border p-4 mb-6 text-sm"
-          style={{ borderColor: "var(--sh-error)", background: "#fef2f2", color: "var(--sh-error)" }}
+          className="rounded-lg border border-destructive bg-destructive/10 p-4 mb-6 text-sm text-destructive"
         >
           {error}
         </div>
@@ -94,7 +93,7 @@ export function AdminReportsPageClient({ session, reportTypes }: Props) {
 
       {/* Report results */}
       {reportData ? (
-        <section className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
+        <section className="rounded-lg border border-border bg-card p-5">
           <h3 className="text-sm font-semibold mb-3 text-foreground">
             Report Results
           </h3>

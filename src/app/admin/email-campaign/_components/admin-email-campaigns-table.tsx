@@ -32,7 +32,7 @@ export function AdminEmailCampaignsTable({ session, campaigns }: Props) {
       ]}
     >
       <section className="mb-6">
-        <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
+        <div className="rounded-lg border border-border bg-card p-5">
           <h3 className="text-sm font-semibold mb-3 text-foreground">New campaign</h3>
           <CreateCampaignForm onSuccess={() => router.refresh()} />
         </div>
@@ -90,15 +90,11 @@ export function AdminEmailCampaignsTable({ session, campaigns }: Props) {
             render: (row) =>
               editingId === row.campaign_uuid ? null : (
                 <span
-                  className="text-xs px-2 py-0.5 rounded-full font-medium"
-                  style={{
-                    background: row.status
-                      ? "rgba(34, 197, 94, 0.12)"
-                      : "rgba(156, 163, 175, 0.2)",
-                    color: row.status
-                      ? "rgb(34, 197, 94)"
-                      : "var(--muted)",
-                  }}
+                  className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                    row.status
+                      ? "bg-green-500/10 text-green-500"
+                      : "bg-gray-400/20 text-muted-foreground"
+                  }`}
                 >
                   {row.status ? "Active" : "Inactive"}
                 </span>
@@ -158,8 +154,7 @@ function CreateCampaignForm({ onSuccess }: { onSuccess: () => void }) {
           required
           maxLength={255}
           placeholder="e.g. New opportunity at..."
-          className="h-9 rounded-lg px-3 text-sm border"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+          className="h-9 rounded-lg px-3 text-sm border bg-card text-foreground border-border"
         />
       </div>
       <div className="grid gap-1">
@@ -167,8 +162,7 @@ function CreateCampaignForm({ onSuccess }: { onSuccess: () => void }) {
         <input
           name="message"
           placeholder="Campaign message body"
-          className="h-9 rounded-lg px-3 text-sm border w-80"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+          className="h-9 rounded-lg px-3 text-sm border w-80 bg-card text-foreground border-border"
         />
       </div>
       <div className="grid gap-1">
@@ -176,8 +170,7 @@ function CreateCampaignForm({ onSuccess }: { onSuccess: () => void }) {
         <select
           name="target"
           defaultValue="both"
-          className="h-9 rounded-lg px-3 text-sm border"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+          className="h-9 rounded-lg px-3 text-sm border bg-card text-foreground border-border"
         >
           <option value="both">Both</option>
           <option value="candidate">Candidate</option>
@@ -236,21 +229,18 @@ function EditCampaignForm({
         name="subject"
         defaultValue={row.subject ?? ""}
         maxLength={255}
-        className="h-8 rounded px-2 text-sm border w-44"
-        style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+        className="h-8 rounded px-2 text-sm border w-44 bg-card text-foreground border-border"
       />
       <input
         name="message"
         defaultValue={row.message ?? ""}
         placeholder="Message"
-        className="h-8 rounded px-2 text-sm border w-48"
-        style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+        className="h-8 rounded px-2 text-sm border w-48 bg-card text-foreground border-border"
       />
       <select
         name="target"
         defaultValue={row.target ?? "both"}
-        className="h-8 rounded px-2 text-sm border"
-        style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+        className="h-8 rounded px-2 text-sm border bg-card text-foreground border-border"
       >
         <option value="both">Both</option>
         <option value="candidate">Candidate</option>

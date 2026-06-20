@@ -29,7 +29,7 @@ export function AdminCurrencyTable({ session, records, total }: Props) {
       ]}
     >
       <section className="mb-6">
-        <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
+        <div className="rounded-lg border border-border bg-card p-5">
           <h3 className="text-sm font-semibold mb-3 text-foreground">Add a currency</h3>
           <CreateCurrencyForm onSuccess={() => router.refresh()} />
         </div>
@@ -146,8 +146,7 @@ function CreateCurrencyForm({ onSuccess }: { onSuccess: () => void }) {
           required
           maxLength={255}
           placeholder="e.g. Kuwaiti Dinar"
-          className="h-9 rounded-lg px-3 text-sm border"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+          className="h-9 rounded-lg px-3 text-sm border bg-card text-foreground border-border"
         />
       </div>
       <div className="grid gap-1">
@@ -157,8 +156,7 @@ function CreateCurrencyForm({ onSuccess }: { onSuccess: () => void }) {
           required
           maxLength={10}
           placeholder="e.g. KWD"
-          className="h-9 rounded-lg px-3 text-sm border"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+          className="h-9 rounded-lg px-3 text-sm border bg-card text-foreground border-border"
         />
       </div>
       <div className="grid gap-1">
@@ -167,8 +165,7 @@ function CreateCurrencyForm({ onSuccess }: { onSuccess: () => void }) {
           name="currencySymbol"
           maxLength={10}
           placeholder="e.g. د.ك"
-          className="h-9 rounded-lg px-3 text-sm border"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+          className="h-9 rounded-lg px-3 text-sm border bg-card text-foreground border-border"
         />
       </div>
       <div className="grid gap-1">
@@ -179,8 +176,7 @@ function CreateCurrencyForm({ onSuccess }: { onSuccess: () => void }) {
           step="0.0001"
           min="0"
           placeholder="e.g. 1.0000"
-          className="h-9 rounded-lg px-3 text-sm border"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+          className="h-9 rounded-lg px-3 text-sm border bg-card text-foreground border-border"
         />
       </div>
       <button

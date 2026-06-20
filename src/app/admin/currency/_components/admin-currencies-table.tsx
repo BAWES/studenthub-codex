@@ -37,8 +37,7 @@ export function AdminCurrenciesTable({ session, currencies }: Props) {
             label: "Code",
             render: (row) => (
               <code
-                className="text-sm font-mono font-semibold"
-                style={{ color: "var(--accent)" }}
+                className="text-sm font-mono font-semibold text-primary"
               >
                 {row.code}
               </code>
@@ -83,14 +82,8 @@ export function AdminCurrenciesTable({ session, currencies }: Props) {
             render: (row) => (
               <span
                 className={`text-xs px-2 py-0.5 rounded-full ${
-                  row.status ? "" : ""
+                  row.status ? "bg-green-500/10 text-green-500" : "bg-muted/20 text-muted-foreground"
                 }`}
-                style={{
-                  color: row.status ? "var(--sh-success)" : "var(--muted)",
-                  background: row.status
-                    ? "color-mix(in srgb, var(--sh-success) 10%, transparent)"
-                    : "color-mix(in srgb, var(--border) 30%, transparent)",
-                }}
               >
                 {row.status ? "Active" : "Inactive"}
               </span>
