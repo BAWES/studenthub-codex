@@ -7,13 +7,25 @@ import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { getStaffInterviewDetail } from "../actions";
 import { updateInterviewStatusAction } from "@/modules/requests/interview-actions";
 import { Button } from "@/components/ui/button";
+import { StatusBadge, type StatusLevel } from "@/components/ui/status-badge";
 
 export const dynamic = "force-dynamic";
+
+const STATUS_VARIANTS: Record<number, StatusLevel> = {
+  0: "info",
+  1: "success",
+  2: "neutral",
+};
 
 function statusLabel(status: number | null | undefined) {
   if (status === 1) return "Completed";
   if (status === 2) return "Cancelled";
   return "Scheduled";
+}
+
+function statusLevel(status: number | null | undefined): StatusLevel {
+  if (status === null || status === undefined) return "neutral";
+  return STATUS_VARIANTS[status] ?? "neutral";
 }
 
 export default async function StaffInterviewDetailPage({
@@ -39,7 +51,14 @@ export default async function StaffInterviewDetailPage({
     { label: "Request", value: interview.requestTitle },
     { label: "Company", value: interview.companyName },
     { label: "Scheduled At", value: interview.scheduledAt?.toLocaleString() },
-    { label: "Status", value: statusLabel(interview.status) },
+    {
+      label: "Status",
+      value: (
+        <StatusBadge status={statusLevel(interview.status)} size="sm" showDot>
+          {statusLabel(interview.status)}
+        </StatusBadge>
+      ),
+    },
     { label: "Staff", value: interview.staffName },
     { label: "Internal Note", value: interview.note },
     { label: "Interview Note", value: interview.interviewNote }
@@ -54,9 +73,11 @@ export default async function StaffInterviewDetailPage({
     >
       <DetailSection title="Interview Details" facts={facts} />
 
-      <section className="detailPanel">
-        <h2>Actions</h2>
-        <div className="flex gap-2 flex-wrap">
+      <section className="rounded-lg border border-[var(--sh-card-border)] bg-white p-4 shadow-[var(--sh-card-shadow)]">
+        <h3 className="mb-3 border-l-2 border-[#eb6651] pl-3 text-base font-semibold text-[var(--ink)]">
+          Actions
+        </h3>
+        <div className="flex flex-wrap gap-2">
           {interview.status !== 1 && (
             <form action={updateInterviewStatusAction}>
               <input type="hidden" name="interview_uuid" value={interview.interviewUuid} />
@@ -81,8 +102,11 @@ export default async function StaffInterviewDetailPage({
         </div>
       </section>
 
-      <section className="detailPanel">
-        <div className="flex gap-2 flex-wrap">
+      <section className="rounded-lg border border-[var(--sh-card-border)] bg-white p-4 shadow-[var(--sh-card-shadow)]">
+        <h3 className="mb-3 border-l-2 border-[#eb6651] pl-3 text-base font-semibold text-[var(--ink)]">
+          Navigation
+        </h3>
+        <div className="flex flex-wrap gap-2">
           {interview.candidateId && (
             <Link href={`/staff/candidates?candidate=${interview.candidateId}` as Route}>
               <Button variant="outline">View Candidate</Button>
@@ -100,8 +124,8 @@ export default async function StaffInterviewDetailPage({
       </section>
 
       {notice && (
-        <section className="detailPanel">
-          <p className="notice">
+        <section className="rounded-lg border border-[var(--sh-card-border)] bg-white p-4 shadow-[var(--sh-card-shadow)]">
+          <p className="text-sm text-[var(--sh-text-secondary)]">
             {notice === "interview-updated" && "Interview updated successfully."}
             {notice === "not-found" && "Interview not found."}
             {notice === "missing-fields" && "Missing required fields."}

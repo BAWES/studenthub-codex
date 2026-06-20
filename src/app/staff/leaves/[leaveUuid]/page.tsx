@@ -5,16 +5,17 @@ import { requireRoleCapability } from "@/modules/auth/session";
 import { DetailSection } from "@/modules/workspace/DetailPanels";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { StatusBadge, type StatusLevel } from "@/components/ui/status-badge";
 import { getStaffLeave } from "@/modules/staff-leaves/actions";
 
 export const dynamic = "force-dynamic";
 
-function statusVariant(status: number | null) {
-  if (status === 1) return "success" as const;
-  if (status === 2 || status === 3) return "warning" as const;
-  return "default" as const;
-}
+const STATUS_VARIANTS: Record<number, StatusLevel> = {
+  0: "warning",
+  1: "success",
+  2: "error",
+  3: "neutral",
+};
 
 const STATUS_LABELS: Record<number, string> = {
   0: "Pending",
@@ -26,6 +27,11 @@ const STATUS_LABELS: Record<number, string> = {
 function getStatusLabel(status: number | null): string {
   if (status === null) return "Unknown";
   return STATUS_LABELS[status] ?? `Unknown (${status})`;
+}
+
+function statusLevel(status: number | null): StatusLevel {
+  if (status === null) return "neutral";
+  return STATUS_VARIANTS[status] ?? "neutral";
 }
 
 function formatDate(d: string | null): string {
@@ -58,7 +64,11 @@ export default async function StaffLeaveDetailPage({
     { label: "To", value: formatDate(leave.to_date) },
     {
       label: "Status",
-      value: <Badge variant={statusVariant(leave.status)}>{getStatusLabel(leave.status)}</Badge>
+      value: (
+        <StatusBadge status={statusLevel(leave.status)} size="sm" showDot>
+          {getStatusLabel(leave.status)}
+        </StatusBadge>
+      ),
     },
     { label: "Note", value: leave.note ?? "—" },
     { label: "Created", value: formatDate(leave.created_at) },
@@ -74,8 +84,10 @@ export default async function StaffLeaveDetailPage({
     >
       <DetailSection title="Leave Details" facts={facts} />
 
-      <section className="detailPanel">
-        <h3 className="text-base font-semibold border-l-2 border-[#eb6651] pl-3 mb-4">Navigation</h3>
+      <section className="rounded-lg border border-[var(--sh-card-border)] bg-white p-4 shadow-[var(--sh-card-shadow)]">
+        <h3 className="mb-3 border-l-2 border-[#eb6651] pl-3 text-base font-semibold text-[var(--ink)]">
+          Actions
+        </h3>
         <div className="flex flex-wrap gap-2">
           <Link href={"/staff/leaves" as Route}>
             <Button variant="ghost">Back to Leaves</Button>
