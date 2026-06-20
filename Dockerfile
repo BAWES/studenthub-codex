@@ -19,7 +19,7 @@ ENV npm_config_minimum_release_age=0
 WORKDIR /app
 
 # ---------------------------------------------------------------------------
-# Stage 2: Dependencies (production only)
+# Stage 2: Dependencies (production only — slim deps layer)
 # ---------------------------------------------------------------------------
 FROM base AS deps
 LABEL stage=deps
