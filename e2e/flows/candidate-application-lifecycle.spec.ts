@@ -120,7 +120,7 @@ test.describe("Candidate application lifecycle — Browse → Apply → Track", 
 
       // Dashboard content renders — check heading or welcome text
       const dashboardContent = ctx.page.locator(
-        'h1, h2, [class*="dashboard"], [class*="welcome"], text=Candidate, text=Overview',
+        'h1, h2, [class*="dashboard"], [class*="welcome"], :has-text("Candidate"), :has-text("Overview")',
       ).first();
       await expect(dashboardContent).toBeVisible({ timeout: 10000 });
 
