@@ -137,14 +137,14 @@ export function PaymentDataTable({
 
   if (error && !loading) {
     return (
-      <div className="rounded-lg border border-[var(--border)] bg-white p-8" role="alert">
+      <div className="rounded-lg border border-border bg-white p-8" role="alert">
         <div className="flex flex-col items-center gap-4 text-center">
           <span className="text-3xl" aria-hidden="true">⚠️</span>
           <div>
             <p className="text-lg font-semibold text-foreground">Could not load payments</p>
             <p className="text-sm mt-1 text-muted-foreground">{error}</p>
           </div>
-          <button onClick={onRetry} className="h-10 rounded-lg px-4 text-sm font-semibold" style={{ background: "var(--sh-info)", color: "#fff" }}>
+          <button onClick={onRetry} className="h-10 rounded-lg px-4 text-sm font-semibold bg-primary text-primary-foreground">
             Retry
           </button>
         </div>
@@ -153,13 +153,11 @@ export function PaymentDataTable({
   }
 
   return (
-    <div className="rounded-lg border border-[var(--border)] bg-white overflow-hidden">
+    <div className="rounded-lg border border-border bg-white overflow-hidden">
       <div
-        className="grid gap-0 text-[11px] font-bold uppercase tracking-wider px-4 py-3"
+        className="grid gap-0 text-[11px] font-bold uppercase tracking-wider px-4 py-3 text-muted-foreground border-b border-border/10"
         style={{
           gridTemplateColumns: COLUMNS.map((c) => c.width).join(" "),
-          color: "var(--muted)",
-          borderBottom: "1px solid rgba(255,255,255,0.06)",
         }}
       >
         {COLUMNS.map((col) => (
@@ -170,7 +168,7 @@ export function PaymentDataTable({
             onClick={() => col.sortable && handleSort(col.key)}
           >
             {col.label}
-            {sortKey === col.key && <span style={{ color: "var(--sh-info)" }}>{sortDir === "asc" ? "▲" : "▼"}</span>}
+            {sortKey === col.key && <span>{sortDir === "asc" ? "▲" : "▼"}</span>}
           </div>
         ))}
       </div>
@@ -192,10 +190,9 @@ export function PaymentDataTable({
           {sortedPayments.map((payment, i) => (
             <div
               key={payment.bank_transaction_id}
-              className="grid gap-0 px-4 py-3 transition-all duration-150 cursor-pointer"
+              className="grid gap-0 px-4 py-3 transition-all duration-150 cursor-pointer even:bg-transparent odd:bg-muted/5"
               style={{
                 gridTemplateColumns: COLUMNS.map((c) => c.width).join(" "),
-                background: i % 2 === 0 ? "transparent" : "rgba(255,255,255,0.02)",
               }}
               role="button"
               tabIndex={0}
@@ -217,14 +214,13 @@ export function PaymentDataTable({
       )}
 
       {!loading && !error && total > 0 && onPageChange && (
-        <div className="flex items-center justify-between px-4 py-3 text-sm" style={{ borderTop: "1px solid rgba(255,255,255,0.06)", color: "var(--muted)" }}>
+        <div className="flex items-center justify-between px-4 py-3 text-sm border-t border-border/10 text-muted-foreground">
           <span>Showing {1 + (page - 1) * 20}-{Math.min(page * 20, total)} of {total}</span>
           <div className="flex items-center gap-2">
             <button
               disabled={page <= 1}
               onClick={() => onPageChange(page - 1)}
-              className="px-3 py-1.5 rounded-md text-sm font-medium disabled:opacity-30"
-              style={{ background: "rgba(255,255,255,0.06)" }}
+              className="px-3 py-1.5 rounded-md text-sm font-medium disabled:opacity-30 bg-muted/10"
               aria-label="Previous page"
             >
               ← Prev
@@ -233,8 +229,7 @@ export function PaymentDataTable({
             <button
               disabled={page >= totalPages}
               onClick={() => onPageChange(page + 1)}
-              className="px-3 py-1.5 rounded-md text-sm font-medium disabled:opacity-30"
-              style={{ background: "rgba(255,255,255,0.06)" }}
+              className="px-3 py-1.5 rounded-md text-sm font-medium disabled:opacity-30 bg-muted/10"
               aria-label="Next page"
             >
               Next →

@@ -79,7 +79,7 @@ export function PaymentDetailDrawer({ payment, lineItems, loading, open, onClose
 
   return (
     <>
-      <div className="fixed inset-0 z-40 transition-opacity duration-200" style={{ background: "rgba(0,0,0,0.4)" }} onClick={onClose} aria-hidden="true" />
+      <div className="fixed inset-0 z-40 transition-opacity duration-200 bg-black/40" onClick={onClose} aria-hidden="true" />
       <div
         className="fixed top-0 right-0 z-50 h-full w-full sm:w-[480px] transition-transform duration-300 ease-out"
         style={{ transform: open ? "translateX(0)" : "translateX(100%)" }}
@@ -88,7 +88,7 @@ export function PaymentDetailDrawer({ payment, lineItems, loading, open, onClose
         role="dialog"
         aria-label="Payment detail"
       >
-        <div className="h-full overflow-y-auto p-6 rounded-none bg-white border-l border-[var(--border)]">
+        <div className="h-full overflow-y-auto p-6 rounded-none bg-white border-l border-border">
           <div className="flex items-start justify-between mb-6">
             <div>
               <h2 className="text-xl font-bold text-foreground">
@@ -110,7 +110,7 @@ export function PaymentDetailDrawer({ payment, lineItems, loading, open, onClose
             <div className="flex flex-col items-center justify-center h-full gap-4 text-center">
               <span className="text-4xl">🔍</span>
               <p className="text-lg font-semibold text-foreground">Payment not found</p>
-              <button onClick={onClose} className="h-10 rounded-lg px-4 text-sm font-semibold" style={{ background: "var(--sh-info)", color: "#fff" }}>
+              <button onClick={onClose} className="h-10 rounded-lg px-4 text-sm font-semibold bg-primary text-primary-foreground">
                 Close
               </button>
             </div>
@@ -128,14 +128,14 @@ export function PaymentDetailDrawer({ payment, lineItems, loading, open, onClose
               </span>
 
               {payment.contact && (
-                <div className="rounded-lg border border-[var(--border)] bg-white p-4">
+                <div className="rounded-lg border-border bg-white p-4">
                   <p className="text-[11px] font-bold uppercase tracking-wider mb-2 text-muted-foreground">Contact</p>
                   <p className="text-sm font-medium text-foreground">{payment.contact.name ?? "Unknown"}</p>
                   <p className="text-xs text-muted-foreground">ID: {payment.contact.contact_id}</p>
                 </div>
               )}
 
-              <div className="rounded-lg border border-[var(--border)] bg-white p-4 space-y-1">
+              <div className="rounded-lg border-border bg-white p-4 space-y-1">
                 <p className="text-[11px] font-bold uppercase tracking-wider mb-2 text-muted-foreground">Financial Summary</p>
                 <DetailRow label="Total" value={formatAmount(payment.total, payment.currency_code)} />
                 <DetailRow label="Sub-total" value={formatAmount(payment.sub_total, payment.currency_code)} />
@@ -143,7 +143,7 @@ export function PaymentDetailDrawer({ payment, lineItems, loading, open, onClose
                 {payment.currency_rate != null && <DetailRow label="Currency Rate" value={String(payment.currency_rate)} />}
               </div>
 
-              <div className="rounded-lg border border-[var(--border)] bg-white p-4 space-y-1">
+              <div className="rounded-lg border-border bg-white p-4 space-y-1">
                 <p className="text-[11px] font-bold uppercase tracking-wider mb-2 text-muted-foreground">Details</p>
                 <DetailRow label="Type" value={payment.type ?? "—"} />
                 <DetailRow label="Date" value={formatDate(payment.date)} />
@@ -155,7 +155,7 @@ export function PaymentDetailDrawer({ payment, lineItems, loading, open, onClose
               </div>
 
               {lineItems.length > 0 && (
-                <div className="rounded-lg border border-[var(--border)] bg-white p-4">
+                <div className="rounded-lg border-border bg-white p-4">
                   <p className="text-[11px] font-bold uppercase tracking-wider mb-2 text-muted-foreground">Line Items</p>
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
@@ -170,7 +170,7 @@ export function PaymentDetailDrawer({ payment, lineItems, loading, open, onClose
                       </thead>
                       <tbody>
                         {lineItems.map((li) => (
-                          <tr key={li.line_item_id} className="border-t" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
+                          <tr key={li.line_item_id} className="border-t border-border/5">
                             <td className="py-1.5 pr-2 font-mono text-xs text-muted-foreground">{li.account_code ?? "—"}</td>
                             <td className="py-1.5 pr-2 text-foreground">{li.description ?? "—"}</td>
                             <td className="py-1.5 pr-2 text-right text-foreground">{li.quantity ?? "—"}</td>
@@ -185,7 +185,7 @@ export function PaymentDetailDrawer({ payment, lineItems, loading, open, onClose
               )}
 
               <div className="flex justify-end pt-2">
-                <button onClick={onClose} className="h-10 rounded-lg px-4 text-sm font-semibold" style={{ background: "transparent", border: "1px solid var(--border)", color: "var(--muted)" }}>
+                <button onClick={onClose} className="h-10 rounded-lg px-4 text-sm font-semibold bg-transparent border-border text-muted-foreground">
                   Close
                 </button>
               </div>

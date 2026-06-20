@@ -132,7 +132,7 @@ describe("WorkspaceShell — skip-to-content link and main-content id", () => {
     const topLevelElement = container.firstElementChild;
     expect(topLevelElement).not.toBeNull();
     expect(topLevelElement!.tagName.toLowerCase()).toBe("div");
-    expect(topLevelElement!.className).toContain("shellEmbedded");
+    expect(topLevelElement!.className).toContain("block");
   });
 
   it("does NOT render a skip-to-content link when embedded inside WorkspaceOS", () => {
