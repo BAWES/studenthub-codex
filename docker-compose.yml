@@ -103,7 +103,7 @@ services:
       - "3000:3000"
     environment:
       NODE_ENV: production
-      DATABASE_URL: "mysql://studenthub:studenthub@mysql:3306/studenthub_sample"
+      DATABASE_URL: "mysql://studenthub:***@mysql:3306/studenthub_sample"
       AUTH_SECRET: "${AUTH_SECRET:-replace-with-a-long-local-secret}"
 
       # Redis (for future caching)
