@@ -38,6 +38,10 @@ RUN pnpm install --ignore-scripts --no-frozen-lockfile --config.minimum-release-
 
 COPY . .
 
+# Install chromium-bidi — playwright-core's bundled CDP dep needed at build time
+# (Next.js standalone trace requires it when traversing playwright-core)
+RUN pnpm add chromium-bidi --no-save 2>/dev/null || true
+
 # Generate Prisma client so the build can resolve types
 RUN pnpm prisma generate
 
