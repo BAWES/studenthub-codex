@@ -1,14 +1,14 @@
 import { describe, it, expect } from "vitest";
 import {
-  listStorySchema,
+  listStoriesSchema as listStorySchema,
   createStorySchema,
   updateStorySchema,
   deleteStorySchema,
   storyItemSchema,
-  listStoryResultSchema,
+  listStoriesResultSchema as listStoryResultSchema,
   storyActionResponseSchema,
 } from "./schemas";
-import type { StoryItem, ListStoryResult } from "./schemas";
+import type { StoryItem, ListStoriesResult } from "./schemas";
 
 // ---------------------------------------------------------------------------
 // listStorySchema
@@ -79,6 +79,7 @@ describe("updateStorySchema", () => {
     expect(
       updateStorySchema.safeParse({
         storyUuid: "abc-123",
+        requestUuid: "req-456",
         storyStatus: 2,
         numberOfEmployees: 5,
       }).success,
