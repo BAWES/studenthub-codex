@@ -38,7 +38,6 @@ async function getBrowser(): Promise<BrowserHandle> {
 
   // Dynamic import hidden from webpack — prevents build-time bundling of
   // playwright-core's optional chromium-bidi dependency
-  // eslint-disable-next-line @typescript-eslint/no-implied-eval
   const playwrightModule = await new Function('return import("playwright")')();
   const { chromium } = playwrightModule;
   _browser = (await chromium.launch({ headless: true })) as unknown as BrowserHandle;
