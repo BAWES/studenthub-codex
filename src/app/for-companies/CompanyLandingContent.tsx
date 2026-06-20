@@ -66,13 +66,13 @@ export default function CompanyLandingContent({
         id="main-content"
         className="min-h-svh w-[min(1320px,calc(100%_-_28px))] mx-auto grid content-start gap-6 pt-[18px] pb-[42px] max-sm:w-[min(calc(100%_-_20px),720px)]">
       {/* ── Glass Navigation ── */}
-      <nav className="sticky top-[3px] z-20 min-h-[62px] flex items-center justify-between gap-[14px] rounded-xl p-[2px] bg-white shadow-md border border-[var(--border)]" aria-label="StudentHub public navigation">
+      <nav className="sticky top-[3px] z-20 min-h-[62px] flex items-center justify-between gap-[14px] rounded-xl p-[2px] bg-white shadow-md border border-gray-200" aria-label="StudentHub public navigation">
         <div className="w-full min-h-[58px] flex items-center justify-between gap-[14px] px-1">
           <Link
-            className="inline-flex items-center gap-2.5 text-[var(--ink)] px-2 no-underline min-h-11"
+            className="inline-flex items-center gap-2.5 text-gray-900 px-2 no-underline min-h-11"
             href="/"
           >
-            <span className="size-9 inline-flex items-center justify-center rounded-lg bg-[var(--ink)] text-[var(--paper)] font-black">
+            <span className="size-9 inline-flex items-center justify-center rounded-lg bg-gray-900 text-white font-black">
               SH
             </span>
             <strong>StudentHub</strong>
@@ -201,14 +201,14 @@ export default function CompanyLandingContent({
           {isLoggedIn ? (
             <Link
               href="/app"
-              className="uiButton uiButton_default uiButton_lg shGlowButton"
+              className="uiButton uiButton_default uiButton_lg"
             >
               Open app <ChevronRight className="size-4" />
             </Link>
           ) : (
             <Link
               href="/signup?role=company"
-              className="uiButton uiButton_default uiButton_lg shGlowButton"
+              className="uiButton uiButton_default uiButton_lg"
             >
               Set up your company account <ChevronRight className="size-4" />
             </Link>
