@@ -2,6 +2,11 @@
 
 import { useActionState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { DataTable } from "@/modules/workspace/DataTable";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 
@@ -28,12 +33,12 @@ export function AdminExpensesPage({ session, expenses, total }: Props) {
         { label: "Total expenses", value: total, note: "Expenses in the system" },
       ]}
     >
-      <section className="mb-6">
-        <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
-          <h3 className="text-sm font-semibold mb-3" style={{ color: "var(--ink)" }}>Add expense</h3>
+      <Card className="mb-6">
+        <CardContent className="p-5">
+          <h3 className="text-sm font-semibold mb-3 text-foreground">Add expense</h3>
           <CreateExpenseForm onSuccess={() => router.refresh()} />
-        </div>
-      </section>
+        </CardContent>
+      </Card>
 
       <DataTable
         title="Expenses"
@@ -120,58 +125,55 @@ function CreateExpenseForm({ onSuccess }: { onSuccess: () => void }) {
       className="flex flex-wrap items-end gap-3"
       onSubmit={() => setTimeout(() => { formRef.current?.reset(); }, 100)}
     >
-      <div className="grid gap-1">
-        <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>Title *</label>
-        <input
+      <div className="grid gap-1.5">
+        <Label htmlFor="expenseTitle">Title *</Label>
+        <Input
+          id="expenseTitle"
           name="title"
           required
           maxLength={128}
           placeholder="Expense title..."
-          className="h-9 rounded-lg px-3 text-sm border w-56"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+          className="w-56"
         />
       </div>
-      <div className="grid gap-1">
-        <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>Type *</label>
-        <input
+      <div className="grid gap-1.5">
+        <Label htmlFor="expenseType">Type *</Label>
+        <Input
+          id="expenseType"
           name="type"
           required
           maxLength={128}
           placeholder="e.g. office, travel"
-          className="h-9 rounded-lg px-3 text-sm border w-36"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+          className="w-36"
         />
       </div>
-      <div className="grid gap-1">
-        <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>Amount</label>
-        <input
+      <div className="grid gap-1.5">
+        <Label htmlFor="expenseAmount">Amount</Label>
+        <Input
+          id="expenseAmount"
           name="amount"
           step="0.001"
           placeholder="0.000"
-          className="h-9 rounded-lg px-3 text-sm border w-28"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+          className="w-28"
         />
       </div>
-      <div className="grid gap-1">
-        <label className="text-xs font-medium" style={{ color: "var(--muted)" }}>Detail</label>
-        <input
+      <div className="grid gap-1.5">
+        <Label htmlFor="expenseDetail">Detail</Label>
+        <Input
+          id="expenseDetail"
           name="detail"
           maxLength={500}
           placeholder="Optional detail..."
-          className="h-9 rounded-lg px-3 text-sm border w-48"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+          className="w-48"
         />
       </div>
-      <button
-        type="submit"
-        disabled={pending}
-        className="h-9 rounded-lg px-4 text-sm font-semibold"
-        style={{ background: "var(--sh-primary)", color: "#fff" }}
-      >
+      <Button type="submit" disabled={pending}>
         {pending ? "Adding..." : "Add"}
-      </button>
+      </Button>
       {state?.error ? (
-        <p className="text-xs w-full" style={{ color: "var(--sh-error)" }}>{state.error}</p>
+        <Alert variant="destructive" className="w-full mt-2">
+          <AlertDescription>{state.error}</AlertDescription>
+        </Alert>
       ) : null}
     </form>
   );
