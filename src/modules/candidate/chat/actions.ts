@@ -11,22 +11,34 @@ import { requireCapability } from "@/modules/auth/session";
 import {
   listChats as moduleListChats,
   getChatMessages as moduleGetChatMessages,
+  sendChatMessage as moduleSendChatMessage,
 } from "@/modules/chat/actions";
 import {
   listConversationsSchema,
   getConversationMessagesSchema,
+  sendConversationMessageSchema,
   listConversationsResultOutputSchema,
   getConversationMessagesResultOutputSchema,
+  sendConversationMessageResultOutputSchema,
 } from "./schemas";
 import type {
   ListConversationsParams,
   GetConversationMessagesParams,
+  SendConversationMessageParams,
   ListConversationsResult,
   GetConversationMessagesResult,
+  SendConversationMessageResult,
 } from "./schemas";
 
 // Re-export types for client components
-export type { ConversationItem, ConversationMessageItem, ListConversationsResult, GetConversationMessagesResult } from "./schemas";
+export type {
+  ConversationItem,
+  ConversationMessageItem,
+  ListConversationsResult,
+  GetConversationMessagesResult,
+  SendConversationMessageResult,
+  SendConversationMessageParams,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Server actions — delegate to module-level implementations
@@ -118,4 +130,42 @@ export async function getConversationMessages(
   }
 
   return messagesResult;
+}
+
+/**
+ * Send a message to an existing conversation.
+ * Delegates to modules/chat/sendChatMessage.
+ */
+export async function sendConversationMessage(
+  params: SendConversationMessageParams,
+): Promise<SendConversationMessageResult> {
+  await requireCapability("candidate.write");
+
+  const parsed = sendConversationMessageSchema.safeParse(params);
+  if (!parsed.success) {
+    return { message: {
+      chat_message_uuid: "error",
+      chat_uuid: "",
+      message: parsed.error.issues[0]?.message ?? "Invalid params",
+      message_index: null,
+      from: null,
+      status: null,
+      created_at: null,
+    }};
+  }
+
+  const { chatUuid, message } = parsed.data;
+
+  const result = await moduleSendChatMessage({ chatUuid, message });
+
+  // Output validation
+  const outputParsed = sendConversationMessageResultOutputSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[candidate/chat] sendConversationMessage output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
 }

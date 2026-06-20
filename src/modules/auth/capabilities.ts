@@ -87,6 +87,7 @@ const roleCapabilities: Record<Role, Capability[]> = {
   candidate: [
     "app.access",
     "candidate.read.own",
+    "candidate.write",
     "candidate.profile.edit",
     "time.read.own",
     "document.export"
