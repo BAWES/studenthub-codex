@@ -1,5 +1,7 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+
 export default function DiscountCategoryDetailError({
   error,
   reset,
@@ -12,19 +14,15 @@ export default function DiscountCategoryDetailError({
       <section className="workspaceStage">
         <div className="flex flex-col items-center justify-center py-24 gap-4">
           <span className="text-4xl" aria-hidden="true">⚠️</span>
-          <h2 className="text-xl font-bold" style={{ color: "var(--ink)" }}>
+          <h2 className="text-xl font-bold text-foreground">
             Something went wrong
           </h2>
-          <p className="text-sm max-w-md text-center" style={{ color: "var(--muted)" }}>
+          <p className="text-sm max-w-md text-center text-muted-foreground">
             {error.message ?? "An unexpected error occurred while loading the discount category details."}
           </p>
-          <button
-            onClick={reset}
-            className="mt-2 h-10 rounded-lg px-4 text-sm font-semibold"
-            style={{ background: "var(--sh-info)", color: "#fff" }}
-          >
+          <Button onClick={reset} variant="outline" className="mt-2">
             Try again
-          </button>
+          </Button>
         </div>
       </section>
     </div>

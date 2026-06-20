@@ -51,18 +51,7 @@ export function LoginForm() {
         </Alert>
       ) : null}
 
-      <Button
-        type="submit"
-        disabled={pending}
-        className="w-full"
-        style={{ backgroundColor: "#eb6651", color: "white" }}
-        onMouseEnter={(e) => {
-          (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#d45441";
-        }}
-        onMouseLeave={(e) => {
-          (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#eb6651";
-        }}
-      >
+      <Button type="submit" disabled={pending} className="w-full">
         <LogIn className="size-4" />
         {pending ? "Checking credentials..." : "Sign in"}
       </Button>
