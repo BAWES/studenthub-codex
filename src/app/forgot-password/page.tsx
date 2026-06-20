@@ -1,13 +1,6 @@
 import { redirect } from "next/navigation";
 import { getSession } from "@/modules/auth/session";
 import { ForgotPasswordForm } from "./ForgotPasswordForm";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
 
 export const dynamic = "force-dynamic";
 
@@ -16,37 +9,49 @@ export default async function ForgotPasswordPage() {
   if (session) redirect("/app");
 
   return (
-    <main className="min-h-svh grid lg:grid-cols-2">
+    <main className="min-h-[100svh] grid grid-cols-[1fr_minmax(400px,520px)] bg-[var(--paper)] max-md:grid-cols-1 max-md:grid-rows-[auto_1fr]">
       {/* ── Brand side ──────────────────────────────────────────── */}
-      <div className="relative hidden lg:flex flex-col items-center justify-center bg-gradient-to-br from-primary/5 via-background to-primary/10 p-12">
-        <div className="max-w-sm text-center space-y-6">
-          <div className="inline-flex items-center gap-2.5 rounded-xl bg-primary/10 px-5 py-3">
-            <span className="inline-flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground text-sm font-black">
+      <div className="relative grid content-center gap-4 px-[clamp(32px,5vw,64px)] py-[clamp(32px,5vw,64px)] overflow-hidden max-md:p-5 max-md:pt-5 max-md:pb-2 max-md:min-h-auto">
+        <div
+          className="absolute inset-0 animate-[shLoginDrift_14s_ease-in-out_infinite_alternate]"
+          style={{
+            background: [
+              "radial-gradient(ellipse 90% 70% at 0% 100%, color-mix(in srgb, var(--sh-coral) 18%, transparent) 0%, transparent 70%)",
+              "radial-gradient(ellipse 80% 60% at 70% 0%, color-mix(in srgb, var(--sh-coral) 12%, transparent) 0%, transparent 60%)",
+              "radial-gradient(ellipse 60% 50% at 100% 80%, color-mix(in srgb, var(--ring) 8%, transparent) 0%, transparent 60%)",
+            ].join(","),
+          }}
+          aria-hidden="true"
+        />
+
+        <div className="relative z-[1] animate-[shLoginBrandFadeIn_600ms_var(--sh-easing)_both] max-md:flex max-md:items-center max-md:gap-4 max-md:flex-wrap">
+          <div className="inline-flex items-center gap-[10px] mb-3 max-md:mb-0">
+            <span className="size-[44px] inline-flex items-center justify-center rounded-xl bg-[var(--ink)] text-[var(--paper)] text-lg font-black max-md:size-[36px] max-md:text-sm">
               SH
             </span>
-            <strong className="text-lg font-bold text-foreground">
+            <strong className="text-xl font-bold text-[var(--ink)] max-md:hidden">
               StudentHub
             </strong>
           </div>
 
-          <h1 className="text-2xl font-bold text-foreground leading-tight">
-            Forgot your password?
-            <span className="block text-muted-foreground font-normal text-base mt-2">
+          <h1 className="m-0 text-[clamp(40px,5vw,72px)] leading-[0.92] font-extrabold tracking-[-0.03em] text-[var(--ink)] max-md:text-[clamp(24px,6vw,32px)]">
+            Forgot your password?<br />
+            <span className="bg-gradient-to-br from-[var(--ink)] to-[var(--sh-coral)] bg-clip-text text-transparent">
               Don&apos;t worry — it happens to the best of us.
             </span>
           </h1>
 
-          <p className="text-sm text-muted-foreground">
+          <p className="max-w-[480px] text-[clamp(15px,1.4vw,18px)] leading-relaxed text-[var(--muted)] mt-3">
             Enter the email address associated with your account and we&apos;ll
             send you a link to reset your password.
           </p>
 
-          <div className="flex flex-wrap justify-center gap-2">
+          <div className="flex flex-wrap gap-2 mt-[18px] max-md:hidden">
             {["Encrypted tokens", "One-time use", "15 min expiry"].map(
               (item) => (
                 <span
                   key={item}
-                  className="inline-flex items-center rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground"
+                  className="min-h-[32px] inline-flex items-center px-3 rounded-full text-[11px] font-black uppercase tracking-[0.03em] bg-[var(--sh-coral-light)] border border-[color-mix(in_srgb,var(--sh-coral)_20%,transparent)] text-[var(--sh-coral)]"
                 >
                   {item}
                 </span>
@@ -57,19 +62,20 @@ export default async function ForgotPasswordPage() {
       </div>
 
       {/* ── Form side ────────────────────────────────────────────── */}
-      <div className="flex items-center justify-center p-6 lg:p-12">
-        <div className="w-full max-w-[420px]">
-          <Card>
-            <CardHeader className="space-y-1 pb-2">
-              <CardTitle>Reset your password</CardTitle>
-              <CardDescription>
+      <div className="grid content-center p-6 bg-[var(--surface)] border-l border-[var(--line)] max-md:border-l-0 max-md:p-3">
+        <div className="w-full max-w-[420px] mx-auto">
+          <div className="rounded-[var(--sh-radius-xl)] bg-[var(--surface)] border border-[var(--line)] shadow-[var(--shadow-sm)] overflow-hidden animate-[shLoginFormIn_400ms_var(--sh-easing)_both] [animation-delay:60ms]">
+            <div className="grid gap-1 px-7 pt-7 pb-3 max-md:px-5 max-md:pt-5 max-md:pb-2">
+              <strong className="text-2xl font-bold leading-[1.15] text-[var(--ink)] max-md:text-xl">
+                Reset your password
+              </strong>
+              <p className="m-0 text-sm leading-[1.45] text-[var(--muted)]">
                 We&apos;ll send a reset link to your email.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="!pt-0">
-              <ForgotPasswordForm />
-            </CardContent>
-          </Card>
+              </p>
+            </div>
+
+            <ForgotPasswordForm />
+          </div>
         </div>
       </div>
     </main>
