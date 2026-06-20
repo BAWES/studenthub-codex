@@ -41,10 +41,6 @@ export const deleteJobSchema = z.object({
   jobId: z.coerce.number().int().positive(),
 });
 
-export const closeJobSchema = z.object({
-  jobId: z.coerce.number().int().positive(),
-});
-
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -54,13 +50,11 @@ export type GetJobInput = z.input<typeof getJobSchema>;
 export type CreateJobInput = z.input<typeof createJobSchema>;
 export type UpdateJobInput = z.input<typeof updateJobSchema>;
 export type DeleteJobInput = z.input<typeof deleteJobSchema>;
-export type CloseJobInput = z.input<typeof closeJobSchema>;
 
 export type JobRow = z.output<typeof jobRowSchema>;
 export type CreateJobResult = CreateJobResultOutput;
 export type UpdateJobResult = UpdateJobResultOutput;
 export type DeleteJobResult = DeleteJobResultOutput;
-export type CloseJobResult = CloseJobResultOutput;
 
 // ---------------------------------------------------------------------------
 // Output schemas
@@ -113,12 +107,7 @@ export const deleteJobResultSchema = z.object({
   success: z.literal(true),
 });
 
-export const closeJobResultSchema = z.object({
-  success: z.literal(true),
-});
-
 export type DeleteJobResultOutput = z.output<typeof deleteJobResultSchema>;
-export type CloseJobResultOutput = z.output<typeof closeJobResultSchema>;
 
 export const getMyEmployerIdResultSchema = z.number().int().positive().nullable();
 

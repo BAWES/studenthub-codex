@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { APPLICATION_STATUSES } from "@/modules/status-labels";
 
 // ---------------------------------------------------------------------------
 // Schemas — employer applications list
@@ -70,4 +71,21 @@ export const employerApplicationDetailOutputSchema = z.object({
 export const getApplicationDetailOutputSchema = z.object({
   success: z.literal(true),
   application: employerApplicationDetailOutputSchema.nullable(),
+});
+
+// ---------------------------------------------------------------------------
+// Update application status schemas
+// ---------------------------------------------------------------------------
+
+export const updateEmployerApplicationStatusSchema = z.object({
+  applicationId: z.coerce.number().int().positive(),
+  status: z.enum(APPLICATION_STATUSES),
+});
+
+export type UpdateEmployerApplicationStatusInput = z.input<
+  typeof updateEmployerApplicationStatusSchema
+>;
+
+export const updateEmployerApplicationStatusOutputSchema = z.object({
+  success: z.literal(true),
 });

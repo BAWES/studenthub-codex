@@ -15,7 +15,6 @@ import {
   createJobSchema,
   updateJobSchema,
   deleteJobSchema,
-  closeJobSchema,
 } from "./schemas";
 import {
   listJobsResultSchema,
@@ -23,7 +22,6 @@ import {
   createJobResultSchema,
   updateJobResultSchema,
   deleteJobResultSchema,
-  closeJobResultSchema,
   getMyEmployerIdResultSchema,
   searchJobsResultSchema,
   jobRowSchema,
@@ -34,14 +32,12 @@ import type {
   CreateJobInput,
   UpdateJobInput,
   DeleteJobInput,
-  CloseJobInput,
   JobRow,
   ListJobsResult,
   GetJobResult,
   CreateJobResult,
   UpdateJobResult,
   DeleteJobResult,
-  CloseJobResult,
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
@@ -286,43 +282,6 @@ export async function deleteJob(
   const validated = deleteJobResultSchema.safeParse(result);
   if (!validated.success) {
     logOutputError("deleteJob", validated.error.issues);
-  }
-
-  return result;
-}
-
-// ---------------------------------------------------------------------------
-// closeJob
-// ---------------------------------------------------------------------------
-
-/**
- * Close (deactivate) a job listing without deleting it.
- * Sets status to "closed" instead of hard-removing the record.
- */
-export async function closeJob(
-  input: CloseJobInput,
-): Promise<CloseJobResult> {
-  await requireCapability("company.write.linked");
-
-  const parsed = closeJobSchema.safeParse(input);
-  if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Invalid input");
-  }
-
-  await prisma.job_listing.update({
-    where: { jobListingId: parsed.data.jobId },
-    data: { status: "closed" },
-  });
-
-  revalidatePath("/employer/jobs");
-  revalidatePath("/candidate/jobs");
-
-  const result = { success: true as const };
-
-  // Validate output shape
-  const validated = closeJobResultSchema.safeParse(result);
-  if (!validated.success) {
-    logOutputError("closeJob", validated.error.issues);
   }
 
   return result;
