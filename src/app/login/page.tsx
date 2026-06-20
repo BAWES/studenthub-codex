@@ -48,7 +48,7 @@ export default async function LoginPage({
         </div>
       </div>
 
-      {/* ── Form side — glass card ────────────────────────────────────── */}
+      {/* ── Form side — solid card ────────────────────────────────────── */}
       <div className="shLoginFormSide">
         <div className="shLoginFormWrap">
           <div className="shLoginFormCard">
