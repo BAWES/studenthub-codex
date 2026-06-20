@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useCallback, type KeyboardEvent } from "react";
 import type { InvoiceRow } from "../schemas";
+import { StatusBadge } from "@/components/ui/status-badge";
 
 // ---------------------------------------------------------------------------
 // InvoiceDataTable
@@ -30,9 +31,9 @@ type ColDef = {
   sortable: boolean;
 };
 
-const STATUS_COLORS: Record<string, { bg: string; text: string }> = {
-  paid: { bg: "rgba(34, 197, 94, 0.15)", text: "#22c55e" },
-  unpaid: { bg: "rgba(239, 68, 68, 0.15)", text: "#ef4444" },
+const STATUS_MAP: Record<string, "success" | "warning" | "error" | "info" | "neutral"> = {
+  paid: "success",
+  unpaid: "error",
 };
 
 const COLUMNS: ColDef[] = [
@@ -58,26 +59,13 @@ function formatAmount(total: string | null, currency: string | null): string {
   return `${num.toLocaleString("en-US", { maximumFractionDigits: 3 })} ${currency ?? "KWD"}`;
 }
 
-function StatusBadge({ status }: { status: string | null }) {
-  const color = STATUS_COLORS[status ?? ""] ?? { bg: "rgba(255,255,255,0.06)", text: "rgba(255,255,255,0.4)" };
-  return (
-    <span
-      className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold"
-      style={{ background: color.bg, color: color.text }}
-      aria-label={`Status: ${status ?? "Unknown"}`}
-    >
-      {status ? status.charAt(0).toUpperCase() + status.slice(1) : "Unknown"}
-    </span>
-  );
-}
-
 function SkeletonRow() {
   return (
     <div className="flex items-center gap-4 px-4 py-3" aria-hidden="true">
       {Array.from({ length: 5 }).map((_, i) => (
         <div
           key={i}
-          className="h-4 rounded bg-white/5 animate-pulse"
+          className="h-4 rounded bg-[var(--surface)] animate-pulse"
           style={{ width: `${80 + i * 25}px`, flex: i === 0 ? "1" : undefined }}
         />
       ))}
@@ -135,14 +123,14 @@ export function InvoiceDataTable({
 
   if (error && !loading) {
     return (
-      <div className="rounded-lg border border-[var(--border)] bg-white p-8" role="alert">
+      <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-8" role="alert">
         <div className="flex flex-col items-center gap-4 text-center">
           <span className="text-3xl" aria-hidden="true">⚠️</span>
           <div>
-            <p className="text-lg font-semibold" style={{ color: "var(--ink)" }}>Could not load invoices</p>
-            <p className="text-sm mt-1" style={{ color: "var(--muted)" }}>{error}</p>
+            <p className="text-lg font-semibold text-[var(--ink)]">Could not load invoices</p>
+            <p className="text-sm mt-1 text-[var(--muted)]">{error}</p>
           </div>
-          <button onClick={onRetry} className="h-10 rounded-lg px-4 text-sm font-semibold" style={{ background: "var(--sh-info)", color: "#fff" }}>
+          <button onClick={onRetry} className="h-10 rounded-lg px-4 text-sm font-semibold bg-[var(--sh-info)] text-white">
             Retry
           </button>
         </div>
@@ -151,13 +139,11 @@ export function InvoiceDataTable({
   }
 
   return (
-    <div className="rounded-lg border border-[var(--border)] bg-white overflow-hidden">
+    <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] overflow-hidden">
       <div
-        className="grid gap-0 text-[11px] font-bold uppercase tracking-wider px-4 py-3"
+        className="grid gap-0 text-[11px] font-bold uppercase tracking-wider px-4 py-3 text-[var(--muted)] border-b border-[var(--border)]"
         style={{
           gridTemplateColumns: COLUMNS.map((c) => c.width).join(" "),
-          color: "var(--muted)",
-          borderBottom: "1px solid rgba(255,255,255,0.06)",
         }}
       >
         {COLUMNS.map((col) => (
@@ -169,7 +155,7 @@ export function InvoiceDataTable({
           >
             {col.label}
             {sortKey === col.key && (
-              <span style={{ color: "var(--sh-info)" }}>{sortDir === "asc" ? "▲" : "▼"}</span>
+              <span className="text-[var(--sh-info)]">{sortDir === "asc" ? "▲" : "▼"}</span>
             )}
           </div>
         ))}
@@ -184,8 +170,8 @@ export function InvoiceDataTable({
       ) : !sortedInvoices.length ? (
         <div className="flex flex-col items-center justify-center py-16 gap-4" role="status">
           <span className="text-4xl" aria-hidden="true">📄</span>
-          <p className="text-lg font-semibold" style={{ color: "var(--ink)" }}>No invoices yet</p>
-          <p className="text-sm text-center max-w-md" style={{ color: "var(--muted)" }}>
+          <p className="text-lg font-semibold text-[var(--ink)]">No invoices yet</p>
+          <p className="text-sm text-center max-w-md text-[var(--muted)]">
             Invoices will appear here once they are generated from transfer billing.
           </p>
         </div>
@@ -194,10 +180,9 @@ export function InvoiceDataTable({
           {sortedInvoices.map((invoice, i) => (
             <div
               key={invoice.invoice_id}
-              className="grid gap-0 px-4 py-3 transition-all duration-150 cursor-pointer"
+              className={`grid gap-0 px-4 py-3 transition-all duration-150 cursor-pointer ${i % 2 === 0 ? "" : "bg-[var(--surface)]"}`}
               style={{
                 gridTemplateColumns: COLUMNS.map((c) => c.width).join(" "),
-                background: i % 2 === 0 ? "transparent" : "rgba(255,255,255,0.02)",
               }}
               role="button"
               tabIndex={0}
@@ -205,20 +190,22 @@ export function InvoiceDataTable({
               onClick={() => onRowClick(invoice)}
               onKeyDown={(e) => handleKeyDown(e, invoice)}
             >
-              <span className="text-sm font-medium truncate" style={{ color: "var(--ink)" }}>
+              <span className="text-sm font-medium truncate text-[var(--ink)]">
                 {invoice.company_name ?? "—"}
               </span>
-              <span className="text-sm" style={{ color: "var(--ink)" }}>
+              <span className="text-sm text-[var(--ink)]">
                 {formatDate(invoice.invoice_date)}
               </span>
-              <span className="text-sm text-right font-medium" style={{ color: "var(--ink)" }}>
+              <span className="text-sm text-right font-medium text-[var(--ink)]">
                 {formatAmount(invoice.total, invoice.currency_code)}
               </span>
-              <span className="text-sm text-center" style={{ color: "var(--muted)" }}>
+              <span className="text-sm text-center text-[var(--muted)]">
                 {invoice.currency_code ?? "—"}
               </span>
               <span className="flex justify-center">
-                <StatusBadge status={invoice.invoice_status} />
+                <StatusBadge status={STATUS_MAP[invoice.invoice_status ?? ""] ?? "neutral"}>
+                  {invoice.invoice_status ? invoice.invoice_status.charAt(0).toUpperCase() + invoice.invoice_status.slice(1) : "Unknown"}
+                </StatusBadge>
               </span>
             </div>
           ))}
@@ -226,17 +213,13 @@ export function InvoiceDataTable({
       )}
 
       {!loading && !error && total > 20 && onPageChange && (
-        <div
-          className="flex items-center justify-between px-4 py-3 text-sm"
-          style={{ borderTop: "1px solid rgba(255,255,255,0.06)", color: "var(--muted)" }}
-        >
+        <div className="flex items-center justify-between px-4 py-3 text-sm border-t border-[var(--border)] text-[var(--muted)]">
           <span>Showing {1 + (page - 1) * 20}-{Math.min(page * 20, total)} of {total}</span>
           <div className="flex items-center gap-2">
             <button
               disabled={page <= 1}
               onClick={() => onPageChange(page - 1)}
-              className="px-3 py-1.5 rounded-md text-sm font-medium disabled:opacity-30"
-              style={{ background: "rgba(255,255,255,0.06)" }}
+              className="px-3 py-1.5 rounded-md text-sm font-medium disabled:opacity-30 bg-[var(--surface)] border border-[var(--border)]"
               aria-label="Previous page"
             >
               ← Prev
@@ -245,8 +228,7 @@ export function InvoiceDataTable({
             <button
               disabled={page >= totalPages}
               onClick={() => onPageChange(page + 1)}
-              className="px-3 py-1.5 rounded-md text-sm font-medium disabled:opacity-30"
-              style={{ background: "rgba(255,255,255,0.06)" }}
+              className="px-3 py-1.5 rounded-md text-sm font-medium disabled:opacity-30 bg-[var(--surface)] border border-[var(--border)]"
               aria-label="Next page"
             >
               Next →
