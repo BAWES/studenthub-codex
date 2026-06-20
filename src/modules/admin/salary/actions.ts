@@ -32,10 +32,12 @@ export async function listSalaries(
       take: limit,
       select: {
         staff_salary_uuid: true,
+        staff_id: true,
         salary: true,
         salary_currency: true,
         comment: true,
         salary_date: true,
+        staff: { select: { staff_name: true } },
       },
     }),
     prisma.staff_salary.count(),
@@ -43,6 +45,7 @@ export async function listSalaries(
 
   const salaries = rows.map((row) => ({
     staff_salary_uuid: row.staff_salary_uuid,
+    staff_name: row.staff?.staff_name ?? null,
     salary: row.salary ? Number(row.salary) : null,
     salary_currency: row.salary_currency,
     comment: row.comment,
