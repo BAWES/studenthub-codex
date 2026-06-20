@@ -9,25 +9,16 @@ export const dynamic = "force-dynamic";
 
 const statusBadge = (status: string) => {
   const colors: Record<string, string> = {
-    pending: "#f59e0b",
-    started: "#3b82f6",
-    delivered: "#10b981",
-    cancelled: "#ef4444",
-    finished_by_recruitment: "#8b5cf6",
+    pending: "bg-[#f59e0b]",
+    started: "bg-[#3b82f6]",
+    delivered: "bg-[#10b981]",
+    cancelled: "bg-[#ef4444]",
+    finished_by_recruitment: "bg-[#8b5cf6]",
   };
-  const color = colors[status] ?? "#6b7280";
+  const bg = colors[status] ?? "bg-[#6b7280]";
   return (
     <span
-      style={{
-        display: "inline-block",
-        padding: "0.125rem 0.625rem",
-        borderRadius: "9999px",
-        fontSize: "0.75rem",
-        fontWeight: 600,
-        color: "#fff",
-        background: color,
-        textTransform: "capitalize",
-      }}
+      className={`${bg} inline-block px-[0.625rem] py-[0.125rem] rounded-full text-[0.75rem] font-semibold text-white capitalize`}
     >
       {status.replace(/_/g, " ")}
     </span>
@@ -40,20 +31,10 @@ export default async function CompanyRequestsPage() {
 
   return (
     <WorkspaceShell session={session} eyebrow="Company" title="Requests" metrics={[]}>
-      <div style={{ marginBottom: "1rem" }}>
+      <div className="mb-4">
         <Link
           href="/company/requests/create"
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            padding: "0.5rem 1rem",
-            background: "var(--primary, #2563eb)",
-            color: "#fff",
-            borderRadius: "6px",
-            fontWeight: 600,
-            fontSize: "0.875rem",
-            textDecoration: "none",
-          }}
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-[6px] bg-[var(--sh-coral)] text-white font-semibold text-[0.875rem] no-underline hover:bg-[var(--sh-coral-hover)] transition-colors"
         >
           + New Request
         </Link>
