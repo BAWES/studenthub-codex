@@ -17,13 +17,10 @@ type Props = {
 function DetailRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex items-start gap-4 py-3">
-      <dt
-        className="w-32 shrink-0 text-sm font-medium pt-0.5"
-        style={{ color: "var(--muted-foreground)" }}
-      >
+      <dt className="w-32 shrink-0 text-sm font-medium pt-0.5 text-muted-foreground">
         {label}
       </dt>
-      <dd className="text-sm" style={{ color: "var(--ink)" }}>
+      <dd className="text-sm text-foreground">
         {children}
       </dd>
     </div>
@@ -32,11 +29,11 @@ function DetailRow({ label, children }: { label: string; children: React.ReactNo
 
 function DetailSection({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="rounded-xl border p-6 space-y-2" style={{ borderColor: "var(--border)", backgroundColor: "var(--card)" }}>
-      <h3 className="text-base font-semibold mb-4" style={{ color: "var(--ink)" }}>
+    <section className="rounded-xl border border-border bg-card p-6 space-y-2 shadow-sm">
+      <h3 className="text-base font-semibold mb-4 text-foreground">
         {title}
       </h3>
-      <dl className="divide-y" style={{ borderColor: "var(--border)" }}>
+      <dl className="divide-y divide-border">
         {children}
       </dl>
     </section>
@@ -80,21 +77,20 @@ export default async function EmployerApplicationDetailPage({ params }: Props) {
       <div className="max-w-3xl space-y-6">
         <DetailSection title="Application Details">
           <DetailRow label="Application ID">
-            <code className="text-xs font-mono" style={{ color: "var(--muted-foreground)" }}>
+            <code className="text-xs font-mono text-muted-foreground">
               #{app.applicationId}
             </code>
           </DetailRow>
           <DetailRow label="Job">
             <Link
               href={`/employer/jobs/${app.jobListingId}`}
-              className="font-medium hover:underline"
-              style={{ color: "var(--accent)" }}
+              className="font-medium hover:underline text-[var(--sh-coral)]"
             >
               {app.jobTitle}
             </Link>
           </DetailRow>
           <DetailRow label="Candidate">
-            <span>{app.candidateName ?? <span style={{ color: "var(--muted-foreground)" }}>—</span>}</span>
+            <span>{app.candidateName ?? <span className="text-muted-foreground">—</span>}</span>
           </DetailRow>
           <DetailRow label="Status">
             <StatusBadge
@@ -112,16 +108,16 @@ export default async function EmployerApplicationDetailPage({ params }: Props) {
         </DetailSection>
 
         {app.coverLetter && (
-          <DetailSection title="Cover Letter">
-            <div className="whitespace-pre-wrap text-sm leading-relaxed" style={{ color: "var(--ink)" }}>
-              {app.coverLetter}
-            </div>
+        <DetailSection title="Cover Letter">
+          <div className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">
+            {app.coverLetter}
+          </div>
           </DetailSection>
         )}
 
         {app.notes && (
           <DetailSection title="Notes">
-            <div className="whitespace-pre-wrap text-sm leading-relaxed" style={{ color: "var(--ink)" }}>
+            <div className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">
               {app.notes}
             </div>
           </DetailSection>
@@ -135,8 +131,7 @@ export default async function EmployerApplicationDetailPage({ params }: Props) {
                 <input type="hidden" name="applicationId" value={app.applicationId} />
                 <button
                   type="submit"
-                  className="inline-flex items-center gap-2 h-10 rounded-lg px-5 text-sm font-semibold transition-colors"
-                  style={{ backgroundColor: "var(--accent)", color: "white" }}
+                  className="inline-flex items-center gap-2 h-10 rounded-lg px-5 text-sm font-semibold text-white bg-[var(--sh-coral)] hover:bg-[var(--sh-coral-hover)] transition-colors"
                 >
                   Accept Application
                 </button>
@@ -145,8 +140,7 @@ export default async function EmployerApplicationDetailPage({ params }: Props) {
                 <input type="hidden" name="applicationId" value={app.applicationId} />
                 <button
                   type="submit"
-                  className="inline-flex items-center gap-2 h-10 rounded-lg px-5 text-sm font-semibold transition-colors"
-                  style={{ backgroundColor: "var(--destructive)", color: "white" }}
+                  className="inline-flex items-center gap-2 h-10 rounded-lg px-5 text-sm font-semibold text-white bg-destructive hover:opacity-90 transition-colors"
                 >
                   Reject Application
                 </button>
@@ -160,8 +154,7 @@ export default async function EmployerApplicationDetailPage({ params }: Props) {
               <input type="hidden" name="applicationId" value={app.applicationId} />
               <button
                 type="submit"
-                className="inline-flex items-center gap-2 h-10 rounded-lg px-5 text-sm font-semibold transition-colors"
-                style={{ backgroundColor: "var(--surface)", color: "var(--ink)" }}
+                className="inline-flex items-center gap-2 h-10 rounded-lg px-5 text-sm font-semibold text-foreground bg-card border border-border hover:bg-accent transition-colors"
               >
                 Revert to Reviewing
               </button>
@@ -172,15 +165,13 @@ export default async function EmployerApplicationDetailPage({ params }: Props) {
           <div className="flex gap-3 pt-2">
             <Link
               href="/employer/applications"
-              className="inline-flex items-center gap-2 h-10 rounded-lg px-4 text-sm font-semibold transition-colors"
-              style={{ background: "var(--surface)", color: "var(--ink)" }}
+              className="inline-flex items-center gap-2 h-10 rounded-lg px-4 text-sm font-semibold text-foreground bg-card border border-border hover:bg-accent transition-colors"
             >
               Back to Applications
             </Link>
             <Link
               href={`/employer/jobs/${app.jobListingId}/applications`}
-              className="inline-flex items-center gap-2 h-10 rounded-lg px-4 text-sm font-semibold transition-colors"
-              style={{ background: "var(--surface)", color: "var(--ink)" }}
+              className="inline-flex items-center gap-2 h-10 rounded-lg px-4 text-sm font-semibold text-foreground bg-card border border-border hover:bg-accent transition-colors"
             >
               View Job Applications
             </Link>
