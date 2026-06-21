@@ -1,11 +1,9 @@
-import { notFound } from "next/navigation";
 import { requireRoleCapability } from "@/modules/auth/session";
 import { FactPanel } from "@/modules/workspace/DetailPanels";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { getMailLog } from "@/modules/mail-logs/actions";
 import { formatDate } from "@/modules/workspace/format";
-import { Badge } from "@/components/ui/badge";
-
+import { notFound } from "next/navigation";
 export const dynamic = "force-dynamic";
 
 type Props = {
@@ -41,7 +39,7 @@ export default async function AdminMailLogDetailPage({ params }: Props) {
           { label: "Subject", value: record.subject ?? "—" },
           {
             label: "App",
-            value: record.app ? <Badge variant="secondary">{record.app}</Badge> : "—",
+            value: record.app ?? "—",
           },
           {
             label: "Sent at",
