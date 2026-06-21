@@ -46,11 +46,9 @@ export default async function LoginPage({
       </nav>
 
       {/* Intro */}
-      <Card className="overflow-hidden border-border" style={{
-        background: "linear-gradient(135deg,color-mix(in srgb,var(--blue) 9%,transparent),transparent 48%),var(--card)"
-      }}>
+      <Card className="overflow-hidden border-border bg-gradient-to-br from-primary/[0.09] via-transparent to-transparent">
         <CardContent className="p-[clamp(22px,4vw,48px)]">
-          <p className="text-[var(--blue)] text-[11px] font-black uppercase">One StudentHub login</p>
+          <p className="text-primary text-[11px] font-black uppercase">One StudentHub login</p>
           <h1 className="mt-0 max-w-[760px] text-[clamp(44px,6.4vw,92px)] leading-[0.94] max-sm:text-[40px]">
             Sign in once. We&rsquo;ll open the right workspace.
           </h1>
@@ -64,14 +62,14 @@ export default async function LoginPage({
                 <Badge
                   key={item}
                   variant="outline"
-                  className="text-[var(--blue)] text-[11px] font-black uppercase px-3 py-1.5"
+                  className="text-primary text-[11px] font-black uppercase px-3 py-1.5"
                 >
                   {item}
                 </Badge>
               )
             )}
           </div>
-          <Link href="/" className="inline-block mt-4 text-sm no-underline text-muted-foreground hover:text-[var(--blue)]">
+          <Link href="/" className="inline-block mt-4 text-sm no-underline text-muted-foreground hover:text-primary">
             Back to landing
           </Link>
         </CardContent>
@@ -96,7 +94,7 @@ export default async function LoginPage({
         {roleNotes.map(({ icon: Icon, label, detail }) => (
           <Card key={label}>
             <CardContent className="grid gap-1.5 p-3.5">
-              <Icon className="size-4 text-[var(--blue)] shrink-0" aria-hidden="true" />
+              <Icon className="size-4 text-primary shrink-0" aria-hidden="true" />
               <span className="text-muted-foreground text-xs font-extrabold uppercase">{label}</span>
               <strong className="text-sm text-foreground">{detail}</strong>
             </CardContent>

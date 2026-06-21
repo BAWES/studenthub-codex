@@ -85,16 +85,15 @@ function StatusBreakdownBar({ breakdown }: { breakdown: JobStatusBreakdown[] }) 
         const pct = total > 0 ? Math.round((item.count / total) * 100) : 0;
         return (
           <div key={item.status} className="flex items-center gap-3">
-            <span className="w-24 text-sm font-medium capitalize text-[var(--ink)]">{item.status}</span>
-            <div className="flex-1 rounded-full h-2 bg-[var(--border)]">
+            <span className="w-24 text-sm font-medium capitalize text-foreground">{item.status}</span>
+            <div className="flex-1 rounded-full h-2 bg-border">
               <div
-                className="rounded-full"
-                style={{
-                  width: `${pct}%`,
-                  height: 8,
-                  backgroundColor: item.status === "active" ? "var(--sh-success)" : "#eb6651",
-                  transition: "width 300ms ease",
-                }}
+                className={`rounded-full h-2 transition-[width] duration-300 ease-in-out ${
+                  item.status === "active"
+                    ? "bg-[var(--sh-success)]"
+                    : "bg-primary"
+                }`}
+                style={{ width: `${pct}%` }}
               />
             </div>
             <span className="w-16 text-right text-sm font-medium text-[var(--muted-foreground)]">
