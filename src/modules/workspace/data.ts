@@ -2441,3 +2441,38 @@ export async function getAdminExpenseRows() {
     updated_at: formatDate(row.updated_at)
   }));
 }
+
+export async function getAdminStoryRows() {
+  const rows = await prisma.story.findMany({
+    orderBy: { story_created_at: "desc" },
+    take: 60,
+    select: {
+      story_uuid: true,
+      request_uuid: true,
+      suggestion_uuid: true,
+      staff_id: true,
+      number_of_employees: true,
+      story_status: true,
+      is_old: true,
+      story_time_spent: true,
+      story_created_at: true,
+      story_last_updated_at: true,
+      staff: { select: { staff_name: true } },
+      request: { select: { request_position_title: true, company: { select: { company_name: true } } } }
+    }
+  });
+
+  return rows.map((row) => ({
+    id: row.story_uuid,
+    request_uuid: row.request_uuid,
+    position: row.request?.request_position_title ?? "-",
+    company_name: row.request?.company?.company_name ?? "-",
+    staff_name: row.staff?.staff_name ?? "Unassigned",
+    number_of_employees: row.number_of_employees ?? 0,
+    story_status: row.story_status,
+    is_old: row.is_old ?? false,
+    time_spent: row.story_time_spent ?? 0,
+    created_at: formatDate(row.story_created_at),
+    updated_at: formatDate(row.story_last_updated_at)
+  }));
+}
