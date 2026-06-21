@@ -695,26 +695,7 @@ body {
 [data-theme="dark"] .linearBoard,
 [data-theme="dark"] .linearPeek,
 [data-theme="dark"] .linearPanel,
-[data-theme="dark"] .journeyHero,
-[data-theme="dark"] .journeyCard,
-[data-theme="dark"] .journeyPanel,
-[data-theme="dark"] .journeyGuardrail,
-[data-theme="dark"] .roleBoundaryNotice,
-[data-theme="dark"] .commandSearch,
-[data-theme="dark"] .commandSearch button,
-[data-theme="dark"] .commandTabs,
-[data-theme="dark"] .commandTabs a,
-[data-theme="dark"] .commandViews,
-[data-theme="dark"] .commandInspector,
-[data-theme="dark"] .commandWorklistHeader,
-[data-theme="dark"] .commandResult:hover,
-[data-theme="dark"] .commandResult.active,
-[data-theme="dark"] .hubHeader,
-[data-theme="dark"] .hubPanel,
-[data-theme="dark"] .featureTile {
-  border-color: var(--sh-glass-border);
-  background: var(--sh-glass-bg);
-}
+
 
 [data-theme="dark"] .roleOption,
 [data-theme="dark"] .loginForm input,
@@ -723,30 +704,15 @@ body {
 [data-theme="dark"] .linearLaneHeader,
 [data-theme="dark"] .linearWorkflowDock a,
 [data-theme="dark"] .linearFilters a,
-[data-theme="dark"] .journeyQueue,
-[data-theme="dark"] .journeyScopePills a {
-  border-color: var(--sh-glass-border);
-  background: var(--sh-glass-bg-strong);
-  color: var(--ink);
-}
+
 
 
 
 [data-theme="dark"] .loginPath span,
 [data-theme="dark"] .linearLaneHeader span,
-[data-theme="dark"] .journeySectionTitle strong,
-[data-theme="dark"] .commandSectionTitle strong,
-[data-theme="dark"] .linearMiniPills span,
-[data-theme="dark"] .linearPills span {
-  background: color-mix(in srgb, var(--blue) 16%, var(--surface));
-  color: var(--blue);
-}
 
-[data-theme="dark"] .commandBrand,
-[data-theme="dark"] .brandMark {
-  background: #e7ecf5;
-  color: #090d14;
-}
+
+
 
 
 
