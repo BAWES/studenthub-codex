@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@import url("../styles/shell.css") layer(components);
 
 @theme {
   --color-background: var(--background);
@@ -687,9 +686,6 @@ body {
 }
 
 
-[data-theme="dark"] .topbar,
-[data-theme="dark"] .accountBox,
-[data-theme="dark"] .metric,
 [data-theme="dark"] .loginBrandPanel,
 [data-theme="dark"] .loginPanel,
 [data-theme="dark"] .loginPath,
@@ -734,18 +730,7 @@ body {
   color: var(--ink);
 }
 
-[data-theme="dark"] .mobileTabBar {
-  border-top-color: var(--line);
-  background: rgba(22, 24, 28, 0.97);
-}
 
-[data-theme="dark"] .mobileTabBar a {
-  color: var(--faint);
-}
-
-[data-theme="dark"] .mobileTabBar a.active {
-  color: var(--blue);
-}
 
 [data-theme="dark"] .loginPath span,
 [data-theme="dark"] .linearLaneHeader span,
@@ -763,190 +748,24 @@ body {
   color: #090d14;
 }
 
-[data-theme="dark"] .workspaceMark span,
-[data-theme="dark"] .commandBrand span {
-  background: rgba(9, 13, 20, 0.12);
-}
 
-.shell {
-  min-height: 100svh;
-  display: grid;
-  grid-template-columns: 216px minmax(0, 1fr);
-  background: var(--paper);
-}
 
-/* Embedded mode: WorkspaceShell inside a WorkspaceOS layout.
-   The layout already provides the rail, so the inner shell is just a wrapper. */
-.shellEmbedded {
-  display: block;
-  min-height: 0;
-  grid-template-columns: none;
-}
 
-.workspaceRail {
-  position: sticky;
-  top: 0;
-  height: 100svh;
-  display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto;
-  gap: 12px;
-  padding: 16px 10px;
-  width: 216px;
-  /* Glass morphism — no visible border, depth via shadow */
-  background: var(--sh-glass-bg);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border-right: 1px solid var(--sh-glass-border);
-  transition:
-    width 280ms var(--sh-easing),
-    padding 280ms var(--sh-easing),
-    background 280ms var(--sh-easing);
-}
 
-/* In dark mode, the glass rail sits on a slightly different surface */
-[data-theme="dark"] .workspaceRail {
-  border-right-color: var(--sh-glass-border);
-}
 
-/* ── Workspace brand mark (glass, not solid) ────────────────────────── */
-.workspaceMark {
-  width: 100%;
-  min-height: 44px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  border: 1px solid var(--sh-glass-border-strong);
-  border-radius: var(--sh-radius-md);
-  background: var(--sh-glass-bg-strong);
-  color: var(--ink);
-  padding: 0 10px;
-  text-decoration: none;
-  transition:
-    background 200ms var(--sh-easing),
-    border-color 200ms var(--sh-easing);
-}
 
-.workspaceMark:hover {
-  border-color: var(--sh-glass-border-strong);
-  background: var(--sh-glass-bg-strong);
-}
 
-.workspaceMark span {
-  width: 28px;
-  height: 28px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 6px;
-  background: var(--ink);
-  color: var(--paper);
-  font-size: 12px;
-  font-weight: 900;
-}
 
-.workspaceMark strong {
-  font-size: 14px;
-  font-weight: 800;
-}
 
-/* ── Navigation rail — glass items with glow indicator ─────────────── */
-.workspaceRailNav {
-  width: 100%;
-  display: grid;
-  align-content: start;
-  gap: 2px;
-}
 
-.workspaceRailNav a {
-  width: 100%;
-  min-height: 38px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  position: relative;
-  text-decoration: none;
-  color: var(--muted);
-  padding: 0 10px;
-  border-radius: var(--sh-radius-sm);
-  font-size: 13px;
-  font-weight: 500;
-  transition:
-    color 180ms var(--sh-easing),
-    background 180ms var(--sh-easing);
-}
 
-.workspaceRailNav a:hover {
-  color: var(--ink);
-  background: var(--sh-glass-bg-strong);
-}
 
-.workspaceRailNav a.active {
-  color: var(--blue);
-  background: var(--sh-info-bg);
-}
 
-/* Glowing left-indicator on active item — the signature OS look */
-.workspaceRailNav a.active::before {
-  content: "";
-  position: absolute;
-  left: -10px;
-  top: 50%;
-  translate: 0 -50%;
-  width: var(--sh-active-width);
-  height: 20px;
-  border-radius: 0 2px 2px 0;
-  background: var(--blue);
-  box-shadow: var(--sh-glow-sm);
-  transition:
-    height 200ms var(--sh-easing),
-    opacity 200ms var(--sh-easing);
-}
 
-.workspaceRailNav a svg {
-  width: 18px;
-  height: 18px;
-  flex-shrink: 0;
-  opacity: 0.7;
-}
 
-.workspaceRailNav a:hover svg,
-.workspaceRailNav a.active svg {
-  opacity: 1;
-}
 
-.workspaceRailNav a > strong {
-  font-size: 13px;
-  font-weight: 600;
-  line-height: 1.3;
-}
 
-/* ── Rail footer ───────────────────────────────────────────────────── */
-.workspaceRailFooter {
-  width: 100%;
-  display: grid;
-  gap: 6px;
-}
 
-.workspaceSignout button {
-  width: 100%;
-  min-height: 36px;
-  border: 1px solid var(--sh-glass-border);
-  border-radius: var(--sh-radius-sm);
-  background: transparent;
-  color: var(--muted);
-  font: inherit;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition:
-    all 180ms var(--sh-easing);
-}
-
-.workspaceSignout button:hover {
-  border-color: color-mix(in srgb, var(--rose) 30%, transparent);
-  background: var(--sh-error-bg);
-  color: var(--sh-error);
-}
 
 /* ── Role Switcher ────────────────────────────────────────────────────── */
 .roleSwitcher {
@@ -1038,17 +857,8 @@ body {
   color: var(--ink);
 }
 
-/* ── Workspace stage area ───────────────────────────────────────────── */
-.workspaceStage {
-  min-width: 0;
-  width: calc(100vw - 216px);
-  overflow-x: hidden;
-  display: grid;
-  align-content: start;
-  gap: 14px;
-  padding: 14px;
-  animation: shFadeSlideIn 300ms var(--sh-easing);
-}
+
+
 
 /* ── Page transitions ─────────────────────────────────────────────────── */
 @keyframes shFadeSlideIn {
@@ -1077,10 +887,7 @@ body {
   50% { transform: translateY(-12px); }
 }
 
-/* Apply to content changes within the stage */
-.workspaceStage > section {
-  animation: shFadeIn 240ms var(--sh-easing);
-}
+
 
 /* ── Glass Metric Card ────────────────────────────────────────────────── */
 .shMetricCard {
@@ -1232,25 +1039,7 @@ body {
   border-color: var(--line);
 }
 
-.topbar {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(220px, 300px);
-  align-items: center;
-  gap: 18px;
-  border: 1px solid #dfe4ed;
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--surface) 92%, transparent);
-  padding: 16px 18px;
-}
 
-.eyebrow {
-  color: var(--blue);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0;
-  text-transform: uppercase;
-  margin: 0 0 10px;
-}
 
 h1,
 h2,
@@ -1281,41 +1070,7 @@ h2 {
   background: var(--surface);
 }
 
-.accountBox {
-  min-width: 0;
-  display: grid;
-  gap: 6px;
-  padding: 14px 16px;
-  border: 1px solid var(--line);
-  background: var(--surface);
-  border-radius: 8px;
-}
 
-.accountBox strong {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.accountBox span {
-  color: var(--blue);
-  font-size: 12px;
-  font-weight: 700;
-  text-transform: uppercase;
-}
-
-.accountBox small {
-  color: var(--muted);
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.accountBox button,
-
-.accountBox button {
-  width: 100%;
-  margin-top: 6px;
-}
 
 .loginShell {
   min-height: 100svh;
@@ -1631,11 +1386,7 @@ h2 {
   font-size: 15px;
 }
 
-.metrics {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
-}
+
 
 
 .linearDesk {
@@ -2189,11 +1940,7 @@ h2 {
   color: var(--blue);
 }
 
-.mobileTabBar {
-  display: none;
-  -webkit-tap-highlight-color: transparent;
-  user-select: none;
-}
+
 
 .featureGrid {
   display: grid;
@@ -2356,10 +2103,7 @@ h2 {
 
 .focus,
 .rail,
-.dataList {
-  border: 1px solid var(--line);
-  background: var(--surface);
-}
+
 
 .focus {
   display: grid;
@@ -2409,15 +2153,9 @@ h2 {
   margin: 18px 0 0;
 }
 
-.lists {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-}
 
-.dataList {
-  min-height: 360px;
-}
+
+
 
 .tableSurface {
   margin-top: 20px;
@@ -2426,14 +2164,7 @@ h2 {
   box-shadow: 0 12px 44px rgba(16, 24, 40, 0.05);
 }
 
-.commandSurface {
-  display: grid;
-  gap: 12px;
-  margin-top: 18px;
-  border: 1px solid var(--line);
-  background: var(--surface);
-  padding: 14px;
-}
+
 
 .searchForm {
   display: grid;
@@ -3562,25 +3293,11 @@ tr:last-child td {
 }
 
 
-.listHeader.compact {
-  min-height: 56px;
-}
 
-.compactRows .row {
-  min-height: 72px;
-}
 
-.emptyState {
-  display: grid;
-  gap: 6px;
-  padding: 18px;
-  color: var(--muted);
-}
 
-.emptyState strong {
-  color: var(--ink);
-  font-size: 15px;
-}
+
+
 
 .emptyTableRow td {
   padding: 0;
@@ -3748,48 +3465,11 @@ tr:last-child td {
   50% { opacity: 0.75; }
 }
 
-.listHeader {
-  min-height: 62px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 18px 18px 14px;
-  border-bottom: 1px solid var(--line);
-}
 
-.listHeader h2 {
-  margin-bottom: 0;
-}
 
-.listHeader span {
-  min-width: 30px;
-  min-height: 30px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--blue);
-  border: 1px solid #b7cff0;
-  background: #eef5ff;
-  font-weight: 700;
-}
 
-.rows {
-  display: grid;
-}
 
-.row {
-  min-height: 72px;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(126px, auto);
-  gap: 16px;
-  padding: 14px 18px;
-  border-bottom: 1px solid var(--line);
-}
 
-.row:last-child {
-  border-bottom: 0;
-}
 
 .rowMain,
 .rowMeta {
@@ -3799,13 +3479,7 @@ tr:last-child td {
   gap: 6px;
 }
 
-.rowMain strong,
-.rowMain span,
-.rowMeta span {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
+
 
 .rowMain a {
   color: inherit;
@@ -3823,9 +3497,7 @@ tr:last-child td {
   text-align: right;
 }
 
-.rowMeta strong {
-  font-size: 13px;
-}
+
 
 .commandOS {
   min-height: 100svh;
@@ -6113,7 +5785,7 @@ kbd {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  
+}
 
 @media (min-width: 901px) and (max-width: 1040px) {
   .hubShell {
@@ -6694,7 +6366,10 @@ kbd {
   background: var(--sh-glass-bg);
 }
 
+}
+
 @media (min-width: 760px) and (max-width: 1040px) {
+
 
 
 }
