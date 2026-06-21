@@ -2406,3 +2406,62 @@ export async function getAdminDegreeRows() {
     updated: formatDate(row.degree_updated_at)
   }));
 }
+
+export async function getAdminExpenseRows() {
+  const rows = await prisma.expense.findMany({
+    orderBy: { transaction_datetime: "desc" },
+    take: 60,
+    select: {
+      expense_uuid: true,
+      title: true,
+      type: true,
+      amount: true,
+      transaction_datetime: true,
+      created_at: true,
+      updated_at: true
+    }
+  });
+
+  return rows.map((row) => ({
+    id: row.expense_uuid,
+    title: row.title,
+    type: row.type,
+    amount: formatMoney(row.amount),
+    transactionDate: formatDate(row.transaction_datetime),
+    created: formatDate(row.created_at),
+    updated: formatDate(row.updated_at)
+  }));
+}
+
+export async function getAdminExpenseDetail(expenseUuid: string) {
+  const expense = await prisma.expense.findUnique({
+    where: { expense_uuid: expenseUuid },
+    select: {
+      expense_uuid: true,
+      title: true,
+      type: true,
+      detail: true,
+      amount: true,
+      transaction_datetime: true,
+      created_at: true,
+      updated_at: true,
+      admin_expense_created_byToadmin: { select: { admin_name: true } },
+      admin_expense_updated_byToadmin: { select: { admin_name: true } }
+    }
+  });
+
+  if (!expense) return null;
+
+  return {
+    id: expense.expense_uuid,
+    title: expense.title,
+    type: expense.type,
+    detail: expense.detail ?? "No detail",
+    amount: formatMoney(expense.amount),
+    transactionDate: formatDate(expense.transaction_datetime),
+    createdBy: expense.admin_expense_created_byToadmin?.admin_name ?? "System",
+    updatedBy: expense.admin_expense_updated_byToadmin?.admin_name ?? "System",
+    createdAt: formatDate(expense.created_at),
+    updatedAt: formatDate(expense.updated_at)
+  };
+}
