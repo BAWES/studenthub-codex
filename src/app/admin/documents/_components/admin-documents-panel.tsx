@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Download, IdCard } from "lucide-react";
-import { idCardDownloadSchema, buildIdCardDownloadUrl } from "../schemas";
+import { Download, IdCard, FileText } from "lucide-react";
+import { idCardDownloadSchema, buildIdCardDownloadUrl, buildCvDownloadUrl } from "../schemas";
 import { ZodError } from "zod";
 
 export function AdminDocumentsPanel() {
@@ -21,6 +21,25 @@ export function AdminDocumentsPanel() {
     try {
       const parsed = idCardDownloadSchema.parse({ candidateId });
       const url = buildIdCardDownloadUrl(parsed.candidateId);
+      window.open(url, "_blank");
+    } catch (e) {
+      if (e instanceof ZodError) {
+        setError(e.errors.map((err) => err.message).join(". "));
+      } else {
+        setError("Validation failed. Please check your input.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function handleCvDownload() {
+    setError(null);
+    setLoading(true);
+
+    try {
+      const parsed = idCardDownloadSchema.parse({ candidateId });
+      const url = buildCvDownloadUrl(parsed.candidateId);
       window.open(url, "_blank");
     } catch (e) {
       if (e instanceof ZodError) {
@@ -87,16 +106,60 @@ export function AdminDocumentsPanel() {
         </CardContent>
       </Card>
 
+      {/* ─── CV Tab ──────────────────────────────── */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FileText className="size-5 text-primary" />
+            Candidate CV
+          </CardTitle>
+          <CardDescription>
+            Generate a PDF of a candidate&apos;s CV/resume by entering their candidate ID.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="cv-candidate-id">Candidate ID</Label>
+            <Input
+              id="cv-candidate-id"
+              type="number"
+              min={1}
+              placeholder="e.g. 12345"
+              value={candidateId}
+              onChange={(e) => setCandidateId(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") handleCvDownload(); }}
+            />
+            <p className="text-xs text-muted-foreground">
+              The numeric ID of the candidate whose CV you want to export.
+            </p>
+          </div>
+          <Button
+            onClick={handleCvDownload}
+            disabled={loading || !candidateId.trim()}
+            className="gap-2"
+          >
+            <Download className="size-4" />
+            {loading ? "Downloading..." : "Download CV PDF"}
+          </Button>
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader>
           <CardTitle className="text-base">API Details</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-sm text-muted-foreground space-y-1">
+          <div className="text-sm text-muted-foreground space-y-2">
             <p>
               <span className="font-mono text-xs bg-muted px-1.5 py-0.5 rounded">GET</span>{" "}
               <code className="text-xs bg-muted px-1.5 py-0.5 rounded break-all">
                 /api/candidates/{`{candidateId}`}/id-card/pdf?format=pdf
+              </code>
+            </p>
+            <p>
+              <span className="font-mono text-xs bg-muted px-1.5 py-0.5 rounded">GET</span>{" "}
+              <code className="text-xs bg-muted px-1.5 py-0.5 rounded break-all">
+                /api/candidates/{`{candidateId}`}/cv/pdf?format=pdf
               </code>
             </p>
           </div>

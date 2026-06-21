@@ -33,3 +33,28 @@ export function validateAndBuildIdCardUrl(input: IdCardDownloadInput): {
     filename: `id-card-candidate-${parsed.candidateId}.pdf`,
   };
 }
+
+// ---------------------------------------------------------------------------
+// CV PDF download
+// ---------------------------------------------------------------------------
+
+/**
+ * Builds a download URL for a candidate CV PDF.
+ */
+export function buildCvDownloadUrl(candidateId: number): string {
+  return `/api/candidates/${candidateId}/cv/pdf?format=pdf`;
+}
+
+/**
+ * Validates and builds a download URL for a candidate CV PDF.
+ */
+export function validateAndBuildCvUrl(input: IdCardDownloadInput): {
+  url: string;
+  filename: string;
+} {
+  const parsed = idCardDownloadSchema.parse(input);
+  return {
+    url: buildCvDownloadUrl(parsed.candidateId),
+    filename: `cv-candidate-${parsed.candidateId}.pdf`,
+  };
+}

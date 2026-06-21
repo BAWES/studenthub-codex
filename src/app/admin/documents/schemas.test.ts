@@ -3,6 +3,8 @@ import {
   idCardDownloadSchema,
   buildIdCardDownloadUrl,
   validateAndBuildIdCardUrl,
+  buildCvDownloadUrl,
+  validateAndBuildCvUrl,
 } from "./schemas";
 
 describe("admin documents — ID card download schema", () => {
@@ -56,5 +58,21 @@ describe("admin documents — ID card URL builders", () => {
 
   it("validateAndBuildIdCardUrl throws on invalid input", () => {
     expect(() => validateAndBuildIdCardUrl({ candidateId: -1 })).toThrow();
+  });
+});
+
+describe("admin documents — CV URL builders", () => {
+  it("buildCvDownloadUrl constructs correct URL", () => {
+    expect(buildCvDownloadUrl(789)).toBe("/api/candidates/789/cv/pdf?format=pdf");
+  });
+
+  it("validateAndBuildCvUrl returns URL and filename", () => {
+    const result = validateAndBuildCvUrl({ candidateId: 999 });
+    expect(result.url).toBe("/api/candidates/999/cv/pdf?format=pdf");
+    expect(result.filename).toBe("cv-candidate-999.pdf");
+  });
+
+  it("validateAndBuildCvUrl throws on invalid input", () => {
+    expect(() => validateAndBuildCvUrl({ candidateId: -1 })).toThrow();
   });
 });
