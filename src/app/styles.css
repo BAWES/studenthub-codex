@@ -21,6 +21,7 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-blue-zendesk: var(--sh-blue);
   --radius: var(--radius);
   --font-size-label: 0.8125rem;
 }
@@ -110,6 +111,11 @@
   --sh-coral-hover: #d45441;
   --sh-coral-light: #fef1ef;
   --sh-coral-glow: 0 0 12px rgba(235, 102, 81, 0.25);
+
+  /* Zendesk blue — nav & link color */
+  --sh-blue: #1f73b7;
+  --sh-blue-hover: #1a5f99;
+  --sh-blue-light: #eef5ff;
 
   /* Glow effects */
   --sh-glow-sm: 0 0 12px rgba(11, 99, 206, 0.20);

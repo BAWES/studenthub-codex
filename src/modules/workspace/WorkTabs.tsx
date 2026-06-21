@@ -127,7 +127,7 @@ export function WorkTabs({ state }: { state: WorkTabState }) {
             className={cn(
               "inline-flex items-center overflow-hidden shrink-0 border rounded-md",
               active
-                ? "border-[#1f73b7] bg-[#eef5ff] dark:bg-[#1f73b7]/12"
+                ? "border-blue-zendesk bg-blue-zendesk/5 dark:bg-blue-zendesk/12"
                 : "border-border bg-muted/30 dark:bg-card"
             )}
           >
@@ -137,7 +137,7 @@ export function WorkTabs({ state }: { state: WorkTabState }) {
               aria-current={active ? "page" : undefined}
               className={cn(
                 "min-h-8 inline-flex items-center border-0 bg-none font-inherit text-[12px] font-bold px-2.5 cursor-pointer whitespace-nowrap",
-                active ? "text-[#1f73b7]" : "text-foreground hover:text-foreground"
+                active ? "text-blue-zendesk" : "text-foreground hover:text-foreground"
               )}
             >
               {tab.label}
@@ -151,7 +151,7 @@ export function WorkTabs({ state }: { state: WorkTabState }) {
               }}
               className={cn(
                 "min-w-6 min-h-6 inline-flex items-center justify-center border-0 border-l border-border bg-none text-muted-foreground cursor-pointer p-0",
-                "hover:text-[#b42357] hover:bg-[rgba(180,35,87,0.08)]"
+                "hover:text-destructive hover:bg-destructive/10"
               )}
             >
               <X size={12} />
@@ -166,7 +166,7 @@ export function WorkTabs({ state }: { state: WorkTabState }) {
           aria-label="Close all tabs"
           className={cn(
             "min-h-8 inline-flex items-center border border-transparent rounded-md bg-none text-muted-foreground/70 font-inherit text-[11px] font-semibold px-2.5 cursor-pointer whitespace-nowrap shrink-0",
-            "hover:text-[#b42357] hover:border-border"
+            "hover:text-destructive hover:border-border"
           )}
         >
           Clear all
