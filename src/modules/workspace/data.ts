@@ -2435,3 +2435,30 @@ export async function getAdminEmailCampaignRows() {
     updated: formatDate(row.updated_at)
   }));
 }
+
+export async function getAdminDegreeGroupRows() {
+  const rows = await prisma.degree_group.findMany({
+    orderBy: { degree_group_sort_order: "asc" },
+    take: 60,
+    select: {
+      degree_group_uuid: true,
+      degree_group_name_en: true,
+      degree_group_name_ar: true,
+      degree_group_sort_order: true,
+      skip_major: true,
+      degree_group_created_at: true,
+      degree_group_updated_at: true,
+      _count: { select: { degree: true } }
+    }
+  });
+
+  return rows.map((row) => ({
+    id: row.degree_group_uuid,
+    name_en: row.degree_group_name_en,
+    name_ar: row.degree_group_name_ar ?? "-",
+    sort_order: row.degree_group_sort_order ?? 0,
+    skip_major: row.skip_major ?? 0,
+    degree_count: row._count.degree,
+    updated: formatDate(row.degree_group_updated_at)
+  }));
+}
