@@ -94,7 +94,7 @@ export function DataTableSkeleton({ rows = 10 }: { rows?: number }) {
         {Array.from({ length: rows }).map((_, i) => (
           <div
             key={i}
-            className="grid grid-cols-[1fr_1fr_120px_100px] gap-3 px-[14px] py-3 border-t border-[var(--line)]"
+            className="grid grid-cols-[1fr_1fr_120px_100px] gap-3 px-[14px] py-3 border-t border-border"
           >
             <Skeleton className="h-4 w-44" />
             <Skeleton className="h-3 w-56" />
