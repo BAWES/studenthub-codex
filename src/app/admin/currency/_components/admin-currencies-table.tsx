@@ -38,7 +38,7 @@ export function AdminCurrenciesTable({ session, currencies }: Props) {
             label: "Code",
             render: (row) => (
               <code
-                className="text-sm font-mono font-semibold text-[var(--accent)]"
+                className="text-sm font-mono font-semibold text-primary"
               >
                 {row.code}
               </code>
