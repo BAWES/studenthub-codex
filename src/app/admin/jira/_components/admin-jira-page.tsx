@@ -37,12 +37,7 @@ export function AdminJiraPage({ session, issues, users, error }: Props) {
     >
       {error ? (
         <div
-          className="mb-4 rounded-lg border px-4 py-3 text-sm"
-          style={{
-            borderColor: "var(--sh-error)",
-            color: "var(--sh-error)",
-            background: "var(--surface)",
-          }}
+          className="mb-4 rounded-lg border px-4 py-3 text-sm border-[var(--sh-error)] text-[var(--sh-error)] bg-[var(--surface)]"
         >
           {error}
         </div>
@@ -52,25 +47,22 @@ export function AdminJiraPage({ session, issues, users, error }: Props) {
         <button
           type="button"
           onClick={() => setTab("issues")}
-          className="text-xs px-3 py-1.5 rounded-md transition-all duration-200"
-          style={{
-            background:
-              tab === "issues" ? "var(--accent)" : "var(--surface)",
-            color: tab === "issues" ? "#fff" : "var(--ink)",
-            border: "1px solid var(--border)",
-          }}
+          className={`text-xs px-3 py-1.5 rounded-md transition-all duration-200 border border-[var(--border)] ${
+            tab === "issues"
+              ? "bg-[var(--accent)] text-white"
+              : "bg-[var(--surface)] text-[var(--ink)]"
+          }`}
         >
           Issues
         </button>
         <button
           type="button"
           onClick={() => setTab("users")}
-          className="text-xs px-3 py-1.5 rounded-md transition-all duration-200"
-          style={{
-            background: tab === "users" ? "var(--accent)" : "var(--surface)",
-            color: tab === "users" ? "#fff" : "var(--ink)",
-            border: "1px solid var(--border)",
-          }}
+          className={`text-xs px-3 py-1.5 rounded-md transition-all duration-200 border border-[var(--border)] ${
+            tab === "users"
+              ? "bg-[var(--accent)] text-white"
+              : "bg-[var(--surface)] text-[var(--ink)]"
+          }`}
         >
           Users
         </button>
@@ -88,8 +80,7 @@ export function AdminJiraPage({ session, issues, users, error }: Props) {
               label: "Key",
               render: (row) => (
                 <code
-                  className="text-sm font-mono"
-                  style={{ color: "var(--accent)" }}
+                  className="text-sm font-mono text-[var(--accent)]"
                 >
                   {row.key}
                 </code>
@@ -189,12 +180,7 @@ export function AdminJiraPage({ session, issues, users, error }: Props) {
               label: "Status",
               render: (row) => (
                 <span
-                  className="text-xs px-2 py-0.5 rounded-full"
-                  style={{
-                    color: "var(--sh-success)",
-                    background:
-                      "color-mix(in srgb, var(--sh-success) 10%, transparent)",
-                  }}
+                  className="text-xs px-2 py-0.5 rounded-full text-green-600 bg-green-500/10"
                 >
                   Active
                 </span>
