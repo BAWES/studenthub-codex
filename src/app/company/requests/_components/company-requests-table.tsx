@@ -40,16 +40,8 @@ function statusBadge(status: string) {
     : FALLBACK_BG;
   return (
     <span
-      style={{
-        display: "inline-block",
-        padding: "0.125rem 0.625rem",
-        borderRadius: "9999px",
-        fontSize: "0.75rem",
-        fontWeight: 600,
-        color,
-        background: bg,
-        textTransform: "capitalize",
-      }}
+      className="inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize"
+      style={{ color, background: bg }}
     >
       {status.replace(/_/g, " ")}
     </span>
@@ -59,7 +51,7 @@ function statusBadge(status: string) {
 export function CompanyRequestsTable({ session, rows }: Props) {
   return (
     <WorkspaceShell session={session} eyebrow="Company" title="Requests" metrics={[]}>
-      <div style={{ marginBottom: "1rem" }}>
+      <div className="mb-4">
         <Link
           href="/company/requests/create"
           className={cn(

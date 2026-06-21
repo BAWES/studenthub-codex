@@ -137,8 +137,7 @@ function CreateUniversityForm({ onSuccess }: { onSuccess: () => void }) {
           name="university_name_en"
           maxLength={100}
           placeholder="e.g. Kuwait University"
-          className="h-9 rounded-lg px-3 text-sm border"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+          className="h-9 rounded-lg px-3 text-sm border bg-[var(--surface)] border-[var(--border)] text-[var(--ink)]"
         />
       </div>
       <div className="grid gap-1">
@@ -147,8 +146,7 @@ function CreateUniversityForm({ onSuccess }: { onSuccess: () => void }) {
           name="university_name_ar"
           maxLength={100}
           placeholder="مثال: جامعة الكويت"
-          className="h-9 rounded-lg px-3 text-sm border"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+          className="h-9 rounded-lg px-3 text-sm border bg-[var(--surface)] border-[var(--border)] text-[var(--ink)]"
         />
       </div>
       <button

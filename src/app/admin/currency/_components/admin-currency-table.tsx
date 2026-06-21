@@ -82,11 +82,9 @@ export function AdminCurrencyTable({ session, records, total }: Props) {
             label: "Active",
             render: (row) => (
               <span
-                className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium"
-                style={{
-                  background: row.status ? "rgba(34,197,94,0.1)" : "rgba(239,68,68,0.1)",
-                  color: row.status ? "rgb(34,197,94)" : "rgb(239,68,68)",
-                }}
+                className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
+                  row.status ? "bg-green-500/10 text-green-600 dark:text-green-400" : "bg-red-500/10 text-red-600 dark:text-red-400"
+                }`}
               >
                 {row.status ? "Active" : "Inactive"}
               </span>
@@ -146,8 +144,7 @@ function CreateCurrencyForm({ onSuccess }: { onSuccess: () => void }) {
           required
           maxLength={255}
           placeholder="e.g. Kuwaiti Dinar"
-          className="h-9 rounded-lg px-3 text-sm border"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+          className="h-9 rounded-lg px-3 text-sm border bg-[var(--surface)] border-[var(--border)] text-[var(--ink)]"
         />
       </div>
       <div className="grid gap-1">
@@ -157,8 +154,7 @@ function CreateCurrencyForm({ onSuccess }: { onSuccess: () => void }) {
           required
           maxLength={10}
           placeholder="e.g. KWD"
-          className="h-9 rounded-lg px-3 text-sm border"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+          className="h-9 rounded-lg px-3 text-sm border bg-[var(--surface)] border-[var(--border)] text-[var(--ink)]"
         />
       </div>
       <div className="grid gap-1">
@@ -167,8 +163,7 @@ function CreateCurrencyForm({ onSuccess }: { onSuccess: () => void }) {
           name="currencySymbol"
           maxLength={10}
           placeholder="e.g. د.ك"
-          className="h-9 rounded-lg px-3 text-sm border"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+          className="h-9 rounded-lg px-3 text-sm border bg-[var(--surface)] border-[var(--border)] text-[var(--ink)]"
         />
       </div>
       <div className="grid gap-1">
@@ -179,8 +174,7 @@ function CreateCurrencyForm({ onSuccess }: { onSuccess: () => void }) {
           step="0.0001"
           min="0"
           placeholder="e.g. 1.0000"
-          className="h-9 rounded-lg px-3 text-sm border"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+          className="h-9 rounded-lg px-3 text-sm border bg-[var(--surface)] border-[var(--border)] text-[var(--ink)]"
         />
       </div>
       <button
