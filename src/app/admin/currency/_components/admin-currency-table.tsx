@@ -146,8 +146,7 @@ function CreateCurrencyForm({ onSuccess }: { onSuccess: () => void }) {
           required
           maxLength={255}
           placeholder="e.g. Kuwaiti Dinar"
-          className="h-9 rounded-lg px-3 text-sm border bg-background text-foreground border-border"
-        />
+          className="h-9 rounded-lg px-3 text-sm border bg-background text-foreground border-border"        />
       </div>
       <div className="grid gap-1">
         <label className="text-xs font-medium text-muted-foreground">Code</label>
@@ -156,8 +155,7 @@ function CreateCurrencyForm({ onSuccess }: { onSuccess: () => void }) {
           required
           maxLength={10}
           placeholder="e.g. KWD"
-          className="h-9 rounded-lg px-3 text-sm border bg-background text-foreground border-border"
-        />
+          className="h-9 rounded-lg px-3 text-sm border bg-background text-foreground border-border"        />
       </div>
       <div className="grid gap-1">
         <label className="text-xs font-medium text-muted-foreground">Symbol</label>
@@ -165,8 +163,7 @@ function CreateCurrencyForm({ onSuccess }: { onSuccess: () => void }) {
           name="currencySymbol"
           maxLength={10}
           placeholder="e.g. د.ك"
-          className="h-9 rounded-lg px-3 text-sm border bg-background text-foreground border-border"
-        />
+          className="h-9 rounded-lg px-3 text-sm border bg-background text-foreground border-border"        />
       </div>
       <div className="grid gap-1">
         <label className="text-xs font-medium text-muted-foreground">Rate</label>
@@ -176,8 +173,7 @@ function CreateCurrencyForm({ onSuccess }: { onSuccess: () => void }) {
           step="0.0001"
           min="0"
           placeholder="e.g. 1.0000"
-          className="h-9 rounded-lg px-3 text-sm border bg-background text-foreground border-border"
-        />
+          className="h-9 rounded-lg px-3 text-sm border bg-background text-foreground border-border"        />
       </div>
       <button
         type="submit"

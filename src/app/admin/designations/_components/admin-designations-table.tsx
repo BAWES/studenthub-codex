@@ -121,8 +121,7 @@ function CreateDesignationForm({ onSuccess }: { onSuccess: () => void }) {
           required
           maxLength={255}
           placeholder="e.g. Software Engineer"
-          className="h-9 rounded-lg px-3 text-sm border bg-background text-foreground"
-        />
+          className="h-9 rounded-lg px-3 text-sm border bg-background text-foreground"        />
       </div>
       <div className="grid gap-1">
         <label className="text-xs font-medium text-muted-foreground">Arabic name</label>
@@ -130,8 +129,7 @@ function CreateDesignationForm({ onSuccess }: { onSuccess: () => void }) {
           name="nameAr"
           maxLength={255}
           placeholder="مهندس برمجيات"
-          className="h-9 rounded-lg px-3 text-sm border bg-background text-foreground"
-        />
+          className="h-9 rounded-lg px-3 text-sm border bg-background text-foreground"        />
       </div>
       <button
         type="submit"
