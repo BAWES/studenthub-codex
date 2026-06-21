@@ -7684,35 +7684,7 @@ kbd {
 
 
 
-/* ── Error & Loading Pages ── */
-.errorPage {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 60vh;
-  gap: 12px;
-  text-align: center;
-  padding: 32px;
-}
-
-.errorPage h1 {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--ink);
-}
-
-.errorPage p {
-  font-size: 0.9375rem;
-  color: var(--muted);
-  max-width: 400px;
-}
-
-.errorPage small {
-  font-size: 0.75rem;
-  color: var(--faint);
-  font-family: monospace;
-}
+/* ── Error & Loading Pages ── (converted to Tailwind) */
 
 /* ── Generic form error ── */
 .formError {
