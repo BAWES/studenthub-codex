@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 function AvatarCircle({ name }: { name?: string | null }) {
   const initial = name?.charAt(0)?.toUpperCase() || "?";
   return (
-    <div className="flex size-24 items-center justify-center rounded-full bg-[#fef1ef] text-[#eb6651] text-3xl font-bold shrink-0">
+    <div className="flex size-24 items-center justify-center rounded-full bg-primary/10 text-primary text-3xl font-bold shrink-0">
       {initial}
     </div>
   );
@@ -49,7 +49,7 @@ export default async function StudentProfilePage({ params }: Props) {
         <div className="mx-auto max-w-lg text-center">
           <Card>
             <CardContent className="flex flex-col items-center gap-4 py-12">
-              <div className="flex size-16 items-center justify-center rounded-full bg-[#fef1ef] text-[#eb6651] text-2xl">
+              <div className="flex size-16 items-center justify-center rounded-full bg-primary/10 text-primary text-2xl">
                 !
               </div>
               <CardTitle>Profile Not Found</CardTitle>
@@ -66,8 +66,9 @@ export default async function StudentProfilePage({ params }: Props) {
   return (
     <div className="container mx-auto py-8">
       <div className="mx-auto max-w-3xl space-y-8">
+        {/* ── Hero Card ──────────────────────────────────────────────── */}
         <Card>
-          <CardContent className="flex flex-col gap-6 sm:flex-row sm:items-start">
+          <CardContent className="flex flex-col gap-6 sm:flex-row sm:items-start p-7">
             <AvatarCircle name={profile.name} />
             <div className="space-y-3">
               <div>
@@ -98,18 +99,18 @@ export default async function StudentProfilePage({ params }: Props) {
         </Card>
 
         {/* ── Skills Card ────────────────────────────────────────────── */}
-        <Card>
-          <CardHeader className="border-l-[3px] border-l-[#eb6651] px-7 pt-6 pb-0">
-            <CardTitle className="text-xl font-bold text-foreground">Skills</CardTitle>
+        <Card className="overflow-hidden">
+          <CardHeader className="border-l-[3px] border-primary pb-0">
+            <CardTitle>Skills</CardTitle>
           </CardHeader>
-          <CardContent className="p-5">
+          <CardContent className="pt-5">
             {profile.skills.length > 0 ? (
               <div className="flex flex-wrap gap-2">
                 {profile.skills.map((skill) => (
                   <Badge
                     key={skill.id}
                     variant="secondary"
-                    className="rounded-full bg-[#fef1ef] border border-[rgba(235,102,81,0.2)] text-[#eb6651] font-bold"
+                    className="rounded-full bg-primary/10 text-primary border-primary/20 text-sm font-bold px-4 py-1.5"
                   >
                     {skill.name}
                   </Badge>
@@ -124,11 +125,11 @@ export default async function StudentProfilePage({ params }: Props) {
         </Card>
 
         {/* ── Experience Card ─────────────────────────────────────────── */}
-        <Card>
-          <CardHeader className="border-l-[3px] border-l-[#eb6651] px-7 pt-6 pb-0">
-            <CardTitle className="text-xl font-bold text-foreground">Experience</CardTitle>
+        <Card className="overflow-hidden">
+          <CardHeader className="border-l-[3px] border-primary pb-0">
+            <CardTitle>Experience</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-1 p-5">
+          <CardContent className="pt-5">
             {profile.experience.length > 0 ? (
               <div className="space-y-4">
                 {profile.experience.map((exp) => (
@@ -161,37 +162,37 @@ export default async function StudentProfilePage({ params }: Props) {
         </Card>
 
         {/* ── Contact Info Card ───────────────────────────────────────── */}
-        <Card>
-          <CardHeader className="border-l-[3px] border-l-[#eb6651] px-7 pt-6 pb-0">
-            <CardTitle className="text-xl font-bold text-foreground">Contact Info</CardTitle>
+        <Card className="overflow-hidden">
+          <CardHeader className="border-l-[3px] border-primary pb-0">
+            <CardTitle>Contact Info</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3 px-7 pb-6 pt-4">
+          <CardContent className="pt-5 space-y-3">
             {profile.email && (
               <div className="flex items-center gap-3">
-                <span className="w-[60px] shrink-0 text-sm font-semibold text-[#eb6651]">
+                <span className="text-primary text-sm font-semibold w-[60px] shrink-0">
                   Email
                 </span>
-                <span className="text-sm text-foreground">
+                <span className="text-foreground text-sm">
                   {profile.email}
                 </span>
               </div>
             )}
             {profile.phone && (
               <div className="flex items-center gap-3">
-                <span className="w-[60px] shrink-0 text-sm font-semibold text-[#eb6651]">
+                <span className="text-primary text-sm font-semibold w-[60px] shrink-0">
                   Phone
                 </span>
-                <span className="text-sm text-foreground">
+                <span className="text-foreground text-sm">
                   {profile.phone}
                 </span>
               </div>
             )}
             {profile.address && (
               <div className="flex items-center gap-3">
-                <span className="w-[60px] shrink-0 text-sm font-semibold text-[#eb6651]">
+                <span className="text-primary text-sm font-semibold w-[60px] shrink-0">
                   Address
                 </span>
-                <span className="text-sm text-foreground">
+                <span className="text-foreground text-sm">
                   {profile.address}
                 </span>
               </div>
