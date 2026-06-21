@@ -212,7 +212,7 @@ export function EmployerJobsSearchPage({
             <span className="font-semibold">
               {isTyping ? (
                 <>
-                  <span className="inline-block align-middle mr-1.5 h-2 w-2 rounded-full bg-[var(--sh-coral)] animate-pulse" />
+                  <span className="inline-block align-middle mr-1.5 h-2 w-2 rounded-full bg-[#eb6651] animate-pulse" />
                   Searching...
                 </>
               ) : (
