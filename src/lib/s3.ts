@@ -174,3 +174,108 @@ export function toS3Key(path: string): string {
 export function toS3StoredPath(key: string): string {
   return `s3://${key}`;
 }
+
+// ---------------------------------------------------------------------------
+// Candidate documents S3 helpers — used by modules/candidates/documents
+// ---------------------------------------------------------------------------
+
+/** Check whether AWS_TEMP_* S3 config is available. */
+export function s3ConfigAvailable(): boolean {
+  return !!(
+    process.env.AWS_TEMP_BUCKET_REGION &&
+    process.env.AWS_TEMP_ACCESS_KEY_ID &&
+    process.env.AWS_TEMP_SECRET_ACCESS_KEY &&
+    process.env.AWS_TEMP_BUCKET_NAME
+  );
+}
+
+/** Get the bucket name from AWS_TEMP_BUCKET_NAME. */
+function tempBucketName(): string {
+  return process.env.AWS_TEMP_BUCKET_NAME ?? "";
+}
+
+/** Get or create the S3 client for AWS_TEMP_* config. */
+let _tempClient: S3Client | null = null;
+
+function getTempClient(): S3Client {
+  if (_tempClient) return _tempClient;
+  const config: ConstructorParameters<typeof S3Client>[0] = {
+    region: process.env.AWS_TEMP_BUCKET_REGION ?? "us-east-1",
+    credentials: {
+      accessKeyId: process.env.AWS_TEMP_ACCESS_KEY_ID ?? "",
+      secretAccessKey: process.env.AWS_TEMP_SECRET_ACCESS_KEY ?? "",
+    },
+  };
+  if (process.env.AWS_ENDPOINT_URL) {
+    config.endpoint = process.env.AWS_ENDPOINT_URL;
+  }
+  if (process.env.AWS_S3_FORCE_PATH_STYLE === "true") {
+    config.forcePathStyle = true;
+  }
+  _tempClient = new S3Client(config);
+  return _tempClient;
+}
+
+/**
+ * Upload a buffer to the temp S3 bucket.
+ * Used by candidate document upload.
+ */
+export async function uploadToS3(
+  key: string,
+  body: Buffer,
+  contentType?: string,
+): Promise<{ url: string; key: string }> {
+  const command = new PutObjectCommand({
+    Bucket: tempBucketName(),
+    Key: key,
+    Body: body,
+    ContentType: contentType,
+  });
+  await getTempClient().send(command);
+  return { url: key, key };
+}
+
+/**
+ * Delete an object from the temp S3 bucket.
+ */
+export async function deleteFromS3(key: string): Promise<void> {
+  const command = new DeleteObjectCommand({
+    Bucket: tempBucketName(),
+    Key: key,
+  });
+  await getTempClient().send(command);
+}
+
+/**
+ * Generate a presigned download URL for an S3 object.
+ */
+export async function getS3DownloadUrl(
+  key: string,
+  expiresIn = 900,
+): Promise<string | null> {
+  try {
+    const command = new GetObjectCommand({
+      Bucket: tempBucketName(),
+      Key: key,
+    });
+    const { getSignedUrl } = await import("@aws-sdk/s3-request-presigner");
+    return await getSignedUrl(getTempClient(), command, { expiresIn });
+  } catch {
+    return null;
+  }
+}
+
+/** Check whether a stored path looks like an S3 key rather than a local path. */
+export function isS3Path(path: string): boolean {
+  return path.startsWith("s3://");
+}
+
+/** Strip S3 prefix to get the raw key. */
+export function toS3Key(path: string): string {
+  return path.startsWith("s3://") ? path.slice(5) : path;
+}
+
+/** Wrap a raw key with the S3 prefix for DB storage. */
+export function toS3StoredPath(key: string): string {
+  return `s3://${key}`;
+}
