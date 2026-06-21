@@ -687,66 +687,31 @@ body {
 }
 
 
-[data-theme="dark"] .loginBrandPanel,
-[data-theme="dark"] .loginPanel,
-[data-theme="dark"] .loginPath,
-[data-theme="dark"] .loginProof,
+/* ── Dark theme: used classes only (dead CSS removed) ──────────────────── */
 [data-theme="dark"] .tableSurface,
 [data-theme="dark"] .linearFocus,
 [data-theme="dark"] .linearBoard,
 [data-theme="dark"] .linearPeek,
-[data-theme="dark"] .linearPanel,
-[data-theme="dark"] .journeyHero,
-[data-theme="dark"] .journeyCard,
-[data-theme="dark"] .journeyPanel,
-[data-theme="dark"] .journeyGuardrail,
-[data-theme="dark"] .roleBoundaryNotice,
-[data-theme="dark"] .commandSearch,
-[data-theme="dark"] .commandSearch button,
-[data-theme="dark"] .commandTabs,
-[data-theme="dark"] .commandTabs a,
-[data-theme="dark"] .commandViews,
-[data-theme="dark"] .commandInspector,
-[data-theme="dark"] .commandWorklistHeader,
-[data-theme="dark"] .commandResult:hover,
-[data-theme="dark"] .commandResult.active,
-[data-theme="dark"] .hubHeader,
-[data-theme="dark"] .hubPanel,
-[data-theme="dark"] .featureTile {
+[data-theme="dark"] .linearPanel {
   border-color: var(--sh-glass-border);
   background: var(--sh-glass-bg);
 }
 
-[data-theme="dark"] .roleOption,
-[data-theme="dark"] .loginForm input,
 [data-theme="dark"] .linearCandidateCard,
 [data-theme="dark"] .linearLane,
 [data-theme="dark"] .linearLaneHeader,
 [data-theme="dark"] .linearWorkflowDock a,
-[data-theme="dark"] .linearFilters a,
-[data-theme="dark"] .journeyQueue,
-[data-theme="dark"] .journeyScopePills a {
+[data-theme="dark"] .linearFilters a {
   border-color: var(--sh-glass-border);
   background: var(--sh-glass-bg-strong);
   color: var(--ink);
 }
 
-
-
-[data-theme="dark"] .loginPath span,
 [data-theme="dark"] .linearLaneHeader span,
-[data-theme="dark"] .journeySectionTitle strong,
-[data-theme="dark"] .commandSectionTitle strong,
 [data-theme="dark"] .linearMiniPills span,
 [data-theme="dark"] .linearPills span {
   background: color-mix(in srgb, var(--blue) 16%, var(--surface));
   color: var(--blue);
-}
-
-[data-theme="dark"] .commandBrand,
-[data-theme="dark"] .brandMark {
-  background: #e7ecf5;
-  color: #090d14;
 }
 
 
@@ -890,49 +855,7 @@ body {
 
 
 
-/* ── Glass Metric Card ────────────────────────────────────────────────── */
-.shMetricCard {
-  display: grid;
-  gap: 4px;
-  padding: var(--sh-space-lg);
-  background: var(--sh-glass-bg);
-  border: 1px solid var(--sh-glass-border);
-  border-radius: var(--sh-radius-lg);
-  backdrop-filter: blur(var(--sh-glass-blur));
-  -webkit-backdrop-filter: blur(var(--sh-glass-blur));
-  transition:
-    transform 200ms var(--sh-easing),
-    box-shadow 200ms var(--sh-easing),
-    border-color 200ms var(--sh-easing);
-}
-
-.shMetricCard:hover {
-  transform: translateY(-1px);
-  border-color: var(--sh-glass-border-strong);
-  box-shadow: var(--sh-glow-sm);
-}
-
-.shMetricCard-label {
-  font-size: var(--sh-fs-sm);
-  font-weight: 500;
-  color: var(--muted);
-}
-
-.shMetricCard-value {
-  font-size: var(--sh-fs-2xl);
-  font-weight: 700;
-  color: var(--ink);
-  line-height: 1.1;
-}
-
-.shMetricCard-trend {
-  font-size: var(--sh-fs-sm);
-  font-weight: 600;
-}
-
-.shMetricCard-trend[data-direction="up"] { color: var(--sh-success); }
-.shMetricCard-trend[data-direction="down"] { color: var(--sh-error); }
-.shMetricCard-trend[data-direction="flat"] { color: var(--muted); }
+/* .shMetricCard (glass) — removed (dead CSS) */
 
 .workTabs {
   display: flex;
@@ -1904,196 +1827,13 @@ h2 {
   text-align: center;
 }
 
-.workspaceNav {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  margin: 0 -8px;
-  padding: 12px 8px;
-  background: rgba(245, 247, 250, 0.92);
-  backdrop-filter: blur(10px);
-  scrollbar-width: none;
-}
-
-.workspaceNav::-webkit-scrollbar {
-  display: none;
-}
-
-.workspaceNav a {
-  min-height: 42px;
-  display: inline-flex;
-  align-items: center;
-  border: 1px solid var(--line);
-  background: var(--surface);
-  color: var(--ink);
-  padding: 0 16px;
-  font-size: 14px;
-  font-weight: 700;
-  text-decoration: none;
-  white-space: nowrap;
-}
-
-.workspaceNav a:hover {
-  border-color: #9fb9db;
-  color: var(--blue);
-}
+/* .workspaceNav, .shMetricCard — removed (dead CSS, replaced by shadcn) */
 
 
 
-.featureGrid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
-  padding: 20px 0 0;
-}
+/* FeatureGrid now uses shadcn Card + Tailwind — see FeatureGrid.tsx */
 
-.featureTile {
-  min-height: 112px;
-  display: grid;
-  align-content: space-between;
-  border: 1px solid var(--line);
-  border-top: 4px solid var(--blue);
-  background: var(--surface);
-  color: var(--ink);
-  padding: 16px;
-  text-decoration: none;
-  box-shadow: 0 10px 36px rgba(16, 24, 40, 0.04);
-}
-
-.featureTile span {
-  font-size: 18px;
-  font-weight: 700;
-}
-
-.featureTile strong {
-  color: var(--blue);
-  font-size: 13px;
-}
-
-.featureTile:hover {
-  border-color: #9fb9db;
-  box-shadow: 0 18px 54px rgba(16, 24, 40, 0.09);
-  transform: translateY(-1px);
-}
-
-/* ------------------------------------------------------------------ */
-/*  MetricCard — glass card with value, label, sparkline, trend.       */
-/*  Replaces the old bordered .metric block.                           */
-/* ------------------------------------------------------------------ */
-
-.shMetricCard {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  min-height: 130px;
-  padding: var(--space-4) var(--space-5);
-  background: var(--sh-glass-bg);
-  backdrop-filter: blur(var(--sh-glass-blur));
-  -webkit-backdrop-filter: blur(var(--sh-glass-blur));
-  border: 1px solid var(--sh-glass-border);
-  border-radius: var(--radius-xl);
-  transition:
-    transform var(--dur-slow) var(--sh-easing),
-    box-shadow var(--dur-slow) var(--sh-easing),
-    border-color var(--dur-slow) var(--sh-easing);
-  animation: shMetricFadeIn 400ms var(--sh-easing) both;
-}
-
-.shMetricCard:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
-  border-color: var(--sh-glass-border-strong);
-}
-
-.shMetricCardClickable {
-  cursor: pointer;
-}
-
-.shMetricCardClickable:hover {
-  background: var(--sh-glass-bg-strong);
-}
-
-.shMetricCardBody {
-  display: flex;
-  flex-direction: column;
-  gap: var(--gap-xs);
-}
-
-.shMetricCardTop {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--gap-sm);
-}
-
-.shMetricCardLabel {
-  font-size: var(--sh-fs-sm);
-  font-weight: var(--weight-medium);
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-.shMetricCardTrend {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-}
-
-.shMetricCardTrend small {
-  font-size: var(--sh-fs-xs);
-  font-weight: var(--weight-semibold);
-  color: var(--muted);
-}
-
-.shMetricCardTrend[data-trend="up"] small { color: var(--sh-success); }
-.shMetricCardTrend[data-trend="down"] small { color: var(--sh-error); }
-
-.shMetricCardValue {
-  display: block;
-  font-size: var(--sh-fs-3xl);
-  font-weight: var(--weight-semibold);
-  line-height: 1.1;
-  color: var(--foreground);
-  letter-spacing: -0.02em;
-}
-
-.shMetricCardNote {
-  font-size: var(--sh-fs-xs);
-  color: var(--faint);
-  margin: 0;
-  line-height: 1.3;
-}
-
-.shMetricCardChart {
-  display: flex;
-  justify-content: flex-end;
-  align-items: flex-end;
-  margin-top: var(--space-2);
-}
-
-.shMetricSparkline {
-  opacity: 0.7;
-  transition: opacity var(--dur-default) var(--sh-easing);
-}
-
-.shMetricCard:hover .shMetricSparkline {
-  opacity: 1;
-}
-
-@keyframes shMetricFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
+/* .shMetricCard + @keyframes shMetricFadeIn — removed (dead glass CSS) */
 
 .workspace {
   display: grid;
