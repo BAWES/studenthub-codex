@@ -5,7 +5,7 @@ import { AdminDiscountCategoriesTable } from "./_components";
 export const dynamic = "force-dynamic";
 
 export default async function AdminDiscountCategoriesPage() {
-  const session = await requireRoleCapability("admin", "admin.read");
+  const session = await requireRoleCapability("admin", "admin.system");
   const result = await listDiscountCategories({ limit: 100 });
 
   return (
