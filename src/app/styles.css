@@ -21,6 +21,10 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-zendesk-blue: #1f73b7;
+  --color-zendesk-coral: #eb6651;
+  --color-zendesk-coral-hover: #d45441;
+  --color-zendesk-coral-light: #fef1ef;
   --radius: var(--radius);
   --font-size-label: 0.8125rem;
 }

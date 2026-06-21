@@ -122,7 +122,7 @@ export function HubContent({
       <header className="sticky top-0 z-40 flex items-center gap-3 border-b border-border bg-card px-4 py-2.5">
         <div className="flex items-center gap-2.5 min-w-0">
           <div className="flex flex-col items-end text-right leading-tight">
-            <span className="text-[11px] font-bold uppercase text-[#1f73b7]">{session.role}</span>
+            <span className="text-[11px] font-bold uppercase text-zendesk-blue">{session.role}</span>
             <strong className="text-sm text-foreground truncate max-w-[140px]">{session.name}</strong>
             <small className="text-[11px] text-muted-foreground truncate max-w-[140px]">{session.email}</small>
           </div>
@@ -139,7 +139,7 @@ export function HubContent({
             className="max-w-md"
           />
           <input type="hidden" name="scope" value={data.scope} />
-          <Button type="submit" size="sm" className="bg-[#eb6651] hover:bg-[#d45441] text-white">
+          <Button type="submit" size="sm" className="bg-zendesk-coral hover:bg-zendesk-coral-hover text-white">
             Search
           </Button>
         </form>
@@ -174,14 +174,14 @@ export function HubContent({
         <Card>
           <CardContent className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,280px)] gap-4 p-6">
             <div>
-              <span className="text-[11px] font-bold uppercase text-[#1f73b7]">Start here</span>
+              <span className="text-[11px] font-bold uppercase text-zendesk-blue">Start here</span>
               <h1 className="text-2xl font-bold text-foreground mt-1 mb-1">{guide.title}</h1>
               <p className="text-sm text-muted-foreground">{guide.description}</p>
               <div className="flex flex-wrap items-center gap-2 mt-4">
                 <Link
                   className={cn(
                     buttonVariants({ variant: "default", size: "default" }),
-                    "no-underline bg-[#eb6651] hover:bg-[#d45441] text-white"
+                    "no-underline bg-zendesk-coral hover:bg-zendesk-coral-hover text-white"
                   )}
                   href={guide.primary.href as Route}
                 >
@@ -194,7 +194,7 @@ export function HubContent({
             </div>
             <Card className="bg-muted/30 border-dashed">
               <CardContent className="p-4 flex flex-col gap-1">
-                <span className="text-[11px] font-bold uppercase text-[#1f73b7]">Signed in as {session.role}</span>
+                <span className="text-[11px] font-bold uppercase text-zendesk-blue">Signed in as {session.role}</span>
                 <strong className="text-sm text-foreground">{session.name}</strong>
                 <p className="text-xs text-muted-foreground">{guide.guardrail}</p>
               </CardContent>
@@ -207,7 +207,7 @@ export function HubContent({
           {guide.journeys.map((journey) => (
             <Card key={journey.title} className="flex flex-col">
               <CardHeader className="p-4 pb-2">
-                <Badge variant="secondary" className="self-start text-[11px] uppercase font-bold bg-[#fef1ef] text-[#eb6651] border-[#eb6651]/20">
+                <Badge variant="secondary" className="self-start text-[11px] uppercase font-bold bg-zendesk-coral-light text-zendesk-coral border-zendesk-coral/20">
                   {journey.kicker}
                 </Badge>
                 <h3 className="text-sm font-bold text-foreground mt-2">{journey.title}</h3>
@@ -237,7 +237,7 @@ export function HubContent({
           {/* Panel A: Live queues */}
           <Card>
             <CardHeader className="pb-2">
-              <span className="text-[11px] font-bold uppercase text-[#1f73b7]">Live queues</span>
+              <span className="text-[11px] font-bold uppercase text-zendesk-blue">Live queues</span>
               <h3 className="text-sm font-bold text-foreground">What needs attention</h3>
             </CardHeader>
             <CardContent>
@@ -267,7 +267,7 @@ export function HubContent({
           {/* Panel B: Search & Results */}
           <Card>
             <CardHeader className="pb-2">
-              <span className="text-[11px] font-bold uppercase text-[#1f73b7]">{data.scope}</span>
+              <span className="text-[11px] font-bold uppercase text-zendesk-blue">{data.scope}</span>
               <h3 className="text-sm font-bold text-foreground">
                 {data.query ? `Search results for ${data.query}` : "Find a record"}
               </h3>
