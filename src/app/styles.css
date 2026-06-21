@@ -20,6 +20,8 @@
   --color-overlay: var(--overlay);
   --color-border: var(--border);
   --color-input: var(--input);
+  --color-blue: var(--blue);
+  --color-blue-deep: var(--blue-deep);
   --color-ring: var(--ring);
   --radius: var(--radius);
   --font-size-label: 0.8125rem;
