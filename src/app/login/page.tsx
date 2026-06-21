@@ -46,32 +46,30 @@ export default async function LoginPage({
       </nav>
 
       {/* Intro */}
-      <Card className="overflow-hidden border-border" style={{
-        background: "linear-gradient(135deg,color-mix(in srgb,var(--blue) 9%,transparent),transparent 48%),var(--card)"
-      }}>
-        <CardContent className="p-[clamp(22px,4vw,48px)]">
-          <p className="text-[var(--blue)] text-[11px] font-black uppercase">One StudentHub login</p>
-          <h1 className="mt-0 max-w-[760px] text-[clamp(44px,6.4vw,92px)] leading-[0.94] max-sm:text-[40px]">
+      <Card className="overflow-hidden border-border bg-gradient-to-br from-blue/10 via-transparent to-transparent">
+        <CardContent className="p-8 sm:p-10 lg:p-12">
+          <p className="text-blue text-[11px] font-black uppercase">One StudentHub login</p>
+          <h1 className="mt-0 max-w-[760px] text-[clamp(32px,5vw,72px)] leading-[0.94] max-sm:text-[36px]">
             Sign in once. We&rsquo;ll open the right workspace.
           </h1>
           <p className="text-muted-foreground max-w-[620px] leading-relaxed">
             No more guessing whether you are entering as admin, staff, candidate, company, or inspector. Your production
             credentials decide what you can see and do.
           </p>
-          <div className="flex flex-wrap gap-2 mt-[18px]">
+          <div className="flex flex-wrap gap-2 mt-5">
             {["Production-compatible credentials", "Server-side account detection", "Capability-scoped workspaces"].map(
               (item) => (
                 <Badge
                   key={item}
                   variant="outline"
-                  className="text-[var(--blue)] text-[11px] font-black uppercase px-3 py-1.5"
+                  className="text-blue text-[11px] font-black uppercase px-3 py-1.5"
                 >
                   {item}
                 </Badge>
               )
             )}
           </div>
-          <Link href="/" className="inline-block mt-4 text-sm no-underline text-muted-foreground hover:text-[var(--blue)]">
+          <Link href="/" className="inline-block mt-4 text-sm no-underline text-muted-foreground hover:text-blue">
             Back to landing
           </Link>
         </CardContent>
@@ -79,7 +77,7 @@ export default async function LoginPage({
 
       {/* Login panel */}
       <Card
-        className="self-start border-[#c5cfdd] dark:border-border shadow-[0_30px_90px_rgba(16,24,40,0.16)]"
+        className="self-start border-border shadow-xl"
         aria-label="StudentHub sign in"
       >
         {params.error === "expired" ? (
@@ -96,7 +94,7 @@ export default async function LoginPage({
         {roleNotes.map(({ icon: Icon, label, detail }) => (
           <Card key={label}>
             <CardContent className="grid gap-1.5 p-3.5">
-              <Icon className="size-4 text-[var(--blue)] shrink-0" aria-hidden="true" />
+              <Icon className="size-4 text-blue shrink-0" aria-hidden="true" />
               <span className="text-muted-foreground text-xs font-extrabold uppercase">{label}</span>
               <strong className="text-sm text-foreground">{detail}</strong>
             </CardContent>
