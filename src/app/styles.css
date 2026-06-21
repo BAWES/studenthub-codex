@@ -21,7 +21,6 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --color-blue-zendesk: var(--sh-blue);
   --radius: var(--radius);
   --font-size-label: 0.8125rem;
 }
@@ -111,11 +110,6 @@
   --sh-coral-hover: #d45441;
   --sh-coral-light: #fef1ef;
   --sh-coral-glow: 0 0 12px rgba(235, 102, 81, 0.25);
-
-  /* Zendesk blue — nav & link color */
-  --sh-blue: #1f73b7;
-  --sh-blue-hover: #1a5f99;
-  --sh-blue-light: #eef5ff;
 
   /* Glow effects */
   --sh-glow-sm: 0 0 12px rgba(11, 99, 206, 0.20);
@@ -3255,48 +3249,6 @@ tr:last-child td {
   background: #eef5ff;
 }
 
-.detailPanel {
-  margin-top: 20px;
-  border: 1px solid var(--line);
-  background: var(--surface);
-}
-
-.detailPanel > h2 {
-  margin: 0;
-  padding: 18px;
-  border-bottom: 1px solid var(--line);
-}
-
-.factGrid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-}
-
-.fact {
-  min-height: 88px;
-  padding: 16px 18px;
-  border-right: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
-}
-
-.fact:nth-child(4n) {
-  border-right: 0;
-}
-
-.fact span {
-  display: block;
-  margin-bottom: 8px;
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 800;
-  text-transform: uppercase;
-}
-
-.fact strong {
-  display: block;
-  overflow-wrap: anywhere;
-  font-size: 15px;
-}
 
 
 
@@ -5902,53 +5854,6 @@ kbd {
     width: auto;
     padding: 10px 10px 76px;
   }
-
-  .mobileTabBar {
-    position: fixed;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    z-index: 30;
-    display: flex;
-    justify-content: center;
-    border-top: 1px solid var(--line);
-    background: rgba(255, 255, 255, 0.97);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    padding: 6px 4px max(6px, env(safe-area-inset-bottom, 6px));
-  }
-
-  .mobileTabBar a {
-    flex: 1;
-    min-width: 0;
-    max-width: 96px;
-    min-height: 56px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 2px;
-    border: none;
-    border-top: 3px solid transparent;
-    background: transparent;
-    color: var(--faint);
-    padding: 4px 2px;
-    font-size: 11px;
-    font-weight: 600;
-    text-decoration: none;
-    border-radius: 6px;
-    transition: color 0.15s, background 0.15s;
-  }
-
-  .mobileTabBar a svg {
-    flex-shrink: 0;
-  }
-
-  .mobileTabBar a.active {
-    border-top-color: var(--blue);
-    background: transparent;
-    color: var(--blue);
-  }
 }
 
 @media (max-width: 680px) {
@@ -6264,54 +6169,10 @@ kbd {
     padding: 10px 10px 88px;
   }
 
-  .mobileTabBar {
-    position: fixed;
-    right: 10px;
-    bottom: 10px;
-    left: 10px;
-    z-index: 30;
-    display: flex;
-    gap: 6px;
-    overflow-x: auto;
-    border: 1px solid #c5cfdd;
-    background: rgba(255, 255, 255, 0.96);
-    box-shadow: var(--shadow);
-    padding: 8px;
-    scrollbar-width: none;
-  }
-
-  .mobileTabBar::-webkit-scrollbar {
-    display: none;
-  }
-
-  .mobileTabBar a {
-    min-height: 44px;
-    min-width: max-content;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid var(--line);
-    background: #fbfcfe;
-    color: var(--ink);
-    padding: 0 12px;
-    font-size: 13px;
-    font-weight: 800;
-    text-decoration: none;
-  }
-
-  .mobileTabBar a.active {
-    border-color: var(--blue);
-    background: #eef5ff;
-    color: var(--blue);
-  }
-
   .metrics {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 8px;
   }
-
-  .financeStart,
-  
 
 /* Public product entry points */
 
@@ -8301,28 +8162,9 @@ kbd {
 }
 
 /* Staff operating home */
-
-
-
-
-
+/* StaffHome moved to shadcn/Tailwind in StaffHome.tsx */
 
 @media (max-width: 480px) {
-  .mobileTabBar {
-    padding: 4px 2px max(4px, env(safe-area-inset-bottom, 4px));
-  }
-
-  .mobileTabBar a {
-    min-height: 50px;
-    font-size: 10px;
-    gap: 1px;
-  }
-
-  .mobileTabBar a svg {
-    width: 18px;
-    height: 18px;
-  }
-
   .workspaceStage {
     padding: 8px 8px 72px;
   }
