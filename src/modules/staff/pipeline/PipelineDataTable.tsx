@@ -1,14 +1,14 @@
 "use client";
 
 import { DataTablePage } from "@/modules/workspace/DataTablePage";
-import { StatusBadge } from "@/modules/workspace/StatusBadge";
+import { StatusBadge, type StatusBadgeVariant } from "@/modules/workspace/StatusBadge";
 import { pipelineStageColor, pipelineStageLabel } from "./schemas";
 import { useCallback, useState } from "react";
 import type { PipelineItem, PipelineStage } from "@/modules/staff/pipeline";
 
 // ── Stage badge variant mapping ──────────────────────────────────────────
 
-function stageBadgeVariant(stage: PipelineStage): string {
+function stageBadgeVariant(stage: PipelineStage): StatusBadgeVariant {
   switch (stage) {
     case "pending_review": return "warning";
     case "interviewing": return "info";

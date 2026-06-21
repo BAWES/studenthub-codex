@@ -14,7 +14,67 @@ type Row = {
   href?: string;
 };
 
-export function FactPanel({ title, facts }: { title: string; facts: Fact[] }) {
+export function DetailSection({
+  title,
+  facts,
+  rows,
+  type = "fact",
+  loading,
+  error,
+  onRetry,
+  hidden,
+  emptyMessage,
+  sensitive,
+}: {
+  title: string;
+  facts?: Fact[];
+  rows?: Row[];
+  type?: "fact" | "list";
+  loading?: boolean;
+  error?: string | Error | null;
+  onRetry?: () => void;
+  hidden?: boolean;
+  emptyMessage?: string;
+  sensitive?: boolean;
+}) {
+  if (hidden) return null;
+
+  if (loading) {
+    return (
+      <section className="detailPanel loading">
+        <h2>{title}</h2>
+        <div className="skeletonRows">
+          <div className="skeleton" />
+          <div className="skeleton" />
+          <div className="skeleton" />
+        </div>
+      </section>
+    );
+  }
+
+  if (error) {
+    const msg = typeof error === "string" ? error : error.message;
+    return (
+      <section className="detailPanel error">
+        <h2>{title}</h2>
+        <p className="errorMessage">{msg}</p>
+        {onRetry && (
+          <button onClick={onRetry} className="retryBtn">
+            Retry
+          </button>
+        )}
+      </section>
+    );
+  }
+
+  if (type === "list" && rows) {
+    return <CompactList title={title} rows={rows} />;
+  }
+
+  return <FactPanel title={title} facts={facts ?? []} sensitive={sensitive} emptyMessage={emptyMessage} />;
+}
+
+export function FactPanel({ title, facts, sensitive, emptyMessage }: { title: string; facts: Fact[]; sensitive?: boolean; emptyMessage?: string }) {
   return (
     <section className="detailPanel">
       <h2>{title}</h2>
