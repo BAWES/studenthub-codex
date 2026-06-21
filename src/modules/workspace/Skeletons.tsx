@@ -5,15 +5,15 @@ import { Skeleton } from "@/components/ui/skeleton";
 /** Full-page skeleton matching the WorkspaceShell layout for route transitions. */
 export function WorkspaceShellSkeleton({ rowCount = 8 }: { rowCount?: number }) {
   return (
-    <main className="shell shellEmbedded">
-      <section className="workspaceStage">
+    <main className="min-h-svh">
+      <section className="min-w-0 overflow-x-hidden grid content-start gap-3.5 p-3.5">
         {/* Topbar */}
-        <section className="topbar">
+        <section className="grid grid-cols-[1fr_minmax(220px,300px)] items-center gap-4.5 border border-border rounded-lg bg-card p-4">
           <div>
             <Skeleton className="h-3 w-24 mb-2" />
             <Skeleton className="h-7 w-64" />
           </div>
-          <div className="accountBox">
+          <div className="min-w-0 grid gap-1.5 p-3.5 border border-border rounded-lg bg-card">
             <Skeleton className="h-3 w-12" />
             <Skeleton className="h-4 w-28" />
             <Skeleton className="h-3 w-40" />
@@ -21,9 +21,9 @@ export function WorkspaceShellSkeleton({ rowCount = 8 }: { rowCount?: number }) 
         </section>
 
         {/* Metrics */}
-        <section className="metrics" aria-label="Loading metrics">
+        <section className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3" aria-label="Loading metrics">
           {[1, 2, 3, 4].map((i) => (
-            <article className="metric" key={i}>
+            <article key={i} className="border border-border rounded-lg bg-card p-4">
               <Skeleton className="h-3 w-16 mb-2" />
               <Skeleton className="h-9 w-20 mb-1" />
               <Skeleton className="h-3 w-12" />
@@ -38,21 +38,21 @@ export function WorkspaceShellSkeleton({ rowCount = 8 }: { rowCount?: number }) 
         </div>
 
         {/* Data lists */}
-        <section className="lists">
+        <section className="grid grid-cols-2 gap-3">
           {[1, 2].map((col) => (
-            <section className="dataList" key={col}>
-              <div className="listHeader">
+            <section className="grid gap-1" key={col}>
+              <div className="flex items-center gap-2 px-4 py-3.5">
                 <Skeleton className="h-4 w-32" />
                 <Skeleton className="h-5 w-8 rounded-full" />
               </div>
-              <div className="rows">
+              <div className="grid">
                 {Array.from({ length: rowCount }).map((_, i) => (
-                  <article className="row" key={i}>
-                    <div className="rowMain">
+                  <article key={i} className="grid grid-cols-[1fr_minmax(126px,auto)] gap-4 px-4 py-3 border-b border-border last:border-b-0">
+                    <div className="min-w-0 grid gap-1.5 content-center">
                       <Skeleton className="h-4 w-48 mb-1" />
                       <Skeleton className="h-3 w-64" />
                     </div>
-                    <div className="rowMeta">
+                    <div className="flex items-center justify-end">
                       <Skeleton className="h-3 w-16" />
                     </div>
                   </article>
@@ -94,7 +94,7 @@ export function DataTableSkeleton({ rows = 10 }: { rows?: number }) {
         {Array.from({ length: rows }).map((_, i) => (
           <div
             key={i}
-            className="grid grid-cols-[1fr_1fr_120px_100px] gap-3 border-t border-[var(--line)] px-[14px] py-3"
+            className="grid grid-cols-[1fr_1fr_120px_100px] gap-3 border-t border-border px-[14px] py-3"
           >
             <Skeleton className="h-4 w-44" />
             <Skeleton className="h-3 w-56" />
@@ -143,7 +143,7 @@ export function DetailPageSkeleton({ panels = 3 }: { panels?: number }) {
         {[1, 2].map((col) => (
           <div
             key={col}
-            className="grid gap-1 border border-[var(--line)] rounded-[10px] p-4"
+            className="grid gap-1 border border-border rounded-[10px] p-4"
           >
             <Skeleton className="h-4 w-32 mb-2" />
             {[1, 2, 3, 4].map((r) => (
