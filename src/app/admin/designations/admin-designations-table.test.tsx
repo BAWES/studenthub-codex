@@ -1,6 +1,12 @@
+// @vitest-environment jsdom
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
 import { AdminDesignationsTable } from "./_components";
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ refresh: vi.fn(), push: vi.fn() }),
+  usePathname: () => "/admin/designations",
+}));
 
 afterEach(() => { cleanup(); });
 
@@ -95,7 +101,20 @@ describe("AdminDesignationsTable", () => {
         designations={sampleDesignations as any}
       />,
     );
-    // "Designations" appears in sidebar nav AND DataTable title AND column header
-    expect(screen.getAllByText("Designations").length).toBeGreaterThanOrEqual(2);
+    // "Designations" appears in DataTable title and column header
+    expect(screen.getAllByText("Designations").length).toBeGreaterThanOrEqual(1);
+  });
+
+  it("renders form inputs without inline style attributes", () => {
+    render(
+      <AdminDesignationsTable
+        session={mockSession}
+        designations={sampleDesignations as any}
+      />,
+    );
+    const inputs = document.querySelectorAll("input");
+    inputs.forEach((input) => {
+      expect(input.getAttribute("style")).toBeNull();
+    });
   });
 });

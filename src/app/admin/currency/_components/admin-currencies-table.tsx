@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { DataTable } from "@/modules/workspace/DataTable";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
+import { Badge } from "@/components/ui/badge";
 
 import type { SessionUser } from "@/modules/auth/types";
 import type { CurrencyItem } from "../schemas";
@@ -80,15 +81,9 @@ export function AdminCurrenciesTable({ session, currencies }: Props) {
             key: "status",
             label: "Status",
             render: (row) => (
-              <span
-                className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
-                  row.status
-                    ? "bg-green-500/10 text-green-600"
-                    : "bg-red-500/10 text-red-600"
-                }`}
-              >
+              <Badge variant={row.status ? "success" : "secondary"}>
                 {row.status ? "Active" : "Inactive"}
-              </span>
+              </Badge>
             ),
           },
           {
