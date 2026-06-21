@@ -2406,3 +2406,150 @@ export async function getAdminDegreeRows() {
     updated: formatDate(row.degree_updated_at)
   }));
 }
+
+// ---------------------------------------------------------------------------
+// Admin: Webhook rows
+// ---------------------------------------------------------------------------
+export type AdminWebhookRow = {
+  id: number;
+  event: string;
+  endpoint: string;
+  method: string;
+  created_by_name: string;
+  updated: string;
+};
+
+export async function getAdminWebhookRows(): Promise<AdminWebhookRow[]> {
+  const rows = await prisma.webhook.findMany({
+    orderBy: { created_at: "desc" },
+    take: 60,
+    select: {
+      webhook_id: true,
+      event: true,
+      endpoint: true,
+      method: true,
+      created_at: true,
+      updated_at: true,
+      staff_webhook_created_byTostaff: { select: { staff_name: true } }
+    }
+  });
+
+  return rows.map((row) => ({
+    id: row.webhook_id,
+    event: row.event,
+    endpoint: row.endpoint,
+    method: row.method ?? "-",
+    created_by_name: row.staff_webhook_created_byTostaff?.staff_name ?? "System",
+    updated: formatDate(row.updated_at)
+  }));
+}
+
+export async function getAdminWebhookDetail(webhookId: number) {
+  const webhook = await prisma.webhook.findUnique({
+    where: { webhook_id: webhookId },
+    select: {
+      webhook_id: true,
+      event: true,
+      endpoint: true,
+      method: true,
+      created_at: true,
+      updated_at: true,
+      staff_webhook_created_byTostaff: { select: { staff_id: true, staff_name: true } },
+      staff_webhook_updated_byTostaff: { select: { staff_id: true, staff_name: true } }
+    }
+  });
+  return webhook;
+}
+
+// ---------------------------------------------------------------------------
+// Admin: University rows
+// ---------------------------------------------------------------------------
+export type AdminUniversityRow = {
+  id: number;
+  name_en: string;
+  name_ar: string;
+  updated: string;
+};
+
+export async function getAdminUniversityRows(): Promise<AdminUniversityRow[]> {
+  const rows = await prisma.university.findMany({
+    where: { deleted: 0 },
+    orderBy: { university_created_at: "desc" },
+    take: 60,
+    select: {
+      university_id: true,
+      university_name_en: true,
+      university_name_ar: true,
+      university_updated_at: true
+    }
+  });
+
+  return rows.map((row) => ({
+    id: row.university_id,
+    name_en: row.university_name_en ?? "-",
+    name_ar: row.university_name_ar ?? "-",
+    updated: formatDate(row.university_updated_at)
+  }));
+}
+
+export async function getAdminUniversityDetail(universityId: number) {
+  const university = await prisma.university.findUnique({
+    where: { university_id: universityId },
+    select: {
+      university_id: true,
+      university_name_en: true,
+      university_name_ar: true,
+      university_data_source: true,
+      university_created_at: true,
+      university_updated_at: true
+    }
+  });
+  return university;
+}
+
+// ---------------------------------------------------------------------------
+// Admin: Discount Category rows
+// ---------------------------------------------------------------------------
+export type AdminDiscountCategoryRow = {
+  id: number;
+  name_en: string;
+  name_ar: string;
+  updated: string;
+};
+
+export async function getAdminDiscountCategoryRows(): Promise<AdminDiscountCategoryRow[]> {
+  const rows = await prisma.discount_category.findMany({
+    orderBy: { created_at: "desc" },
+    take: 60,
+    select: {
+      category_id: true,
+      name_en: true,
+      name_ar: true,
+      image: true,
+      created_at: true,
+      updated_at: true
+    }
+  });
+
+  return rows.map((row) => ({
+    id: row.category_id,
+    name_en: row.name_en,
+    name_ar: row.name_ar ?? "-",
+    updated: formatDate(row.updated_at)
+  }));
+}
+
+export async function getAdminDiscountCategoryDetail(categoryId: number) {
+  const category = await prisma.discount_category.findUnique({
+    where: { category_id: categoryId },
+    select: {
+      category_id: true,
+      name_en: true,
+      name_ar: true,
+      image: true,
+      created_at: true,
+      updated_at: true
+    }
+  });
+  return category;
+}
