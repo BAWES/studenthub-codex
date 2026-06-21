@@ -14,18 +14,20 @@ export default function AdminExpensesError({ error, reset }: Props) {
   }, [error]);
 
   return (
-    <div className="shell shellEmbedded">
-      <section className="workspaceStage">
-        <section className="topbar">
-          <h1 className="text-lg font-semibold text-destructive">
-            Something went wrong
-          </h1>
-          <p className="text-sm mt-1 text-muted-foreground">
-            {error.message || "Failed to load expenses."}
-          </p>
-          <Button onClick={reset} className="mt-4">
-            Try again
-          </Button>
+    <div className="min-h-svh">
+      <section className="min-w-0 overflow-x-hidden grid content-start gap-3.5 p-3.5">
+        <section className="grid grid-cols-[1fr_minmax(220px,300px)] items-center gap-4.5 border border-border rounded-lg bg-card p-4">
+          <div>
+            <h1 className="text-lg font-semibold text-destructive">
+              Something went wrong
+            </h1>
+            <p className="text-sm mt-1 text-muted-foreground">
+              {error.message || "Failed to load expenses."}
+            </p>
+            <Button onClick={reset} className="mt-4">
+              Try again
+            </Button>
+          </div>
         </section>
       </section>
     </div>
