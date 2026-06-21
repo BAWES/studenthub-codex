@@ -117,13 +117,23 @@ export function WorkTabs({ state }: { state: WorkTabState }) {
   if (!state.tabs.length) return null;
 
   return (
-    <nav className="workTabs" aria-label="Recently opened records">
+    <nav className="flex items-center gap-1 overflow-x-auto scrollbar-none pb-0.5" aria-label="Recently opened records">
       {state.tabs.map((tab) => {
         const active = pathname === tab.path;
         return (
-          <span key={tab.path} className={`workTab ${active ? "active" : ""}`}>
+          <span
+            key={tab.path}
+            className={`inline-flex items-center overflow-hidden shrink-0 border rounded-md ${
+              active
+                ? "border-[#1f73b7] bg-[#1f73b7]/5"
+                : "border-border bg-muted/30"
+            }`}
+          >
             <button
               type="button"
+              className={`min-h-8 inline-flex items-center border-0 bg-none px-2.5 font-bold text-xs cursor-pointer whitespace-nowrap transition-colors ${
+                active ? "text-[#1f73b7]" : "text-foreground hover:text-foreground/80"
+              }`}
               onClick={() => router.push(tab.path as Route)}
               aria-current={active ? "page" : undefined}
             >
@@ -131,7 +141,7 @@ export function WorkTabs({ state }: { state: WorkTabState }) {
             </button>
             <button
               type="button"
-              className="workTabClose"
+              className="min-w-6 min-h-8 inline-flex items-center justify-center border-0 border-l border-border bg-none text-muted-foreground hover:text-foreground cursor-pointer"
               aria-label={`Close ${tab.label}`}
               onClick={(e) => {
                 e.stopPropagation();
@@ -144,7 +154,12 @@ export function WorkTabs({ state }: { state: WorkTabState }) {
         );
       })}
       {state.tabs.length > 1 ? (
-        <button type="button" className="workTabsClear" onClick={state.closeAll} aria-label="Close all tabs">
+        <button
+          type="button"
+          className="inline-flex items-center min-h-8 px-2.5 text-xs font-semibold text-muted-foreground hover:text-foreground border-0 bg-none cursor-pointer whitespace-nowrap ml-1"
+          onClick={state.closeAll}
+          aria-label="Close all tabs"
+        >
           Clear all
         </button>
       ) : null}

@@ -99,13 +99,6 @@
   /* Design system — StudentHub OS aesthetic                             */
   /* ------------------------------------------------------------------ */
 
-  /* Glass morphism */
-  --sh-glass-bg: rgba(255, 255, 255, 0.05);
-  --sh-glass-bg-strong: rgba(255, 255, 255, 0.10);
-  --sh-glass-border: rgba(255, 255, 255, 0.10);
-  --sh-glass-border-strong: rgba(255, 255, 255, 0.18);
-  --sh-glass-blur: 20px;
-
   /* Zendesk coral — primary accent (per DESIGN_SYSTEM.md) */
   --sh-coral: #eb6651;
   --sh-coral-hover: #d45441;
@@ -172,8 +165,6 @@
 
   /* App Header (light mode defaults) */
   --sh-header-h: 64px;
-  --sh-header-glass-bg: rgba(255, 255, 255, 0.78);
-  --sh-header-glass-border: rgba(214, 220, 231, 0.5);
   --sh-header-blur: 18px;
   --sh-header-tab-h: 40px;
   --sh-header-tab-indicator: 3px;
@@ -277,10 +268,6 @@
   --sh-coral-light: rgba(235, 102, 81, 0.15);
   --sh-coral-glow: 0 0 16px rgba(235, 102, 81, 0.30);
 
-  --sh-glass-bg: rgba(255, 255, 255, 0.04);
-  --sh-glass-bg-strong: rgba(255, 255, 255, 0.08);
-  --sh-glass-border: rgba(255, 255, 255, 0.06);
-  --sh-glass-border-strong: rgba(255, 255, 255, 0.12);
   --sh-glow-sm: 0 0 16px rgba(138, 191, 255, 0.18);
   --sh-glow-md: 0 0 32px rgba(138, 191, 255, 0.25);
   --sh-glow-lg: 0 0 56px rgba(138, 191, 255, 0.35);
@@ -305,8 +292,6 @@
   --sh-amber-bg: rgba(251, 191, 36, 0.12);
 
   /* App Header (dark mode) */
-  --sh-header-glass-bg: rgba(17, 24, 36, 0.72);
-  --sh-header-glass-border: rgba(42, 53, 71, 0.5);
 }
 
 * {
@@ -506,23 +491,6 @@ body {
   color: var(--muted-foreground);
 }
 
-.shGlassStrong {
-  background: var(--sh-glass-bg-strong);
-  border-color: var(--sh-glass-border-strong);
-}
-
-.shGlassElevated {
-  background: var(--sh-glass-bg-strong);
-  border-color: var(--sh-glass-border-strong);
-  box-shadow: var(--sh-glow-sm);
-}
-
-.shGlassRadiusSm { border-radius: var(--sh-radius-sm); }
-.shGlassRadiusMd { border-radius: var(--sh-radius-md); }
-.shGlassRadiusLg { border-radius: var(--sh-radius-lg); }
-.shGlassRadiusXl { border-radius: var(--sh-radius-xl); }
-.shGlassRadiusFull { border-radius: 999px; }
-
 /* ── Status Badge — glowing status indicator ───────────────────────── */
 .shStatusBadgeBase {
   display: inline-flex;
@@ -693,8 +661,8 @@ body {
 [data-theme="dark"] .linearBoard,
 [data-theme="dark"] .linearPeek,
 [data-theme="dark"] .linearPanel {
-  border-color: var(--sh-glass-border);
-  background: var(--sh-glass-bg);
+  border-color: var(--line);
+  background: var(--surface);
 }
 
 [data-theme="dark"] .linearCandidateCard,
@@ -702,8 +670,8 @@ body {
 [data-theme="dark"] .linearLaneHeader,
 [data-theme="dark"] .linearWorkflowDock a,
 [data-theme="dark"] .linearFilters a {
-  border-color: var(--sh-glass-border);
-  background: var(--sh-glass-bg-strong);
+  border-color: var(--line);
+  background: var(--surface-soft);
   color: var(--ink);
 }
 
@@ -730,98 +698,6 @@ body {
 
 
 
-
-
-
-/* ── Role Switcher ────────────────────────────────────────────────────── */
-.roleSwitcher {
-  position: relative;
-  width: 100%;
-}
-
-.roleSwitcherCurrent {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  width: 100%;
-  min-height: 32px;
-  padding: 4px 10px;
-  border: 1px solid var(--sh-glass-border);
-  border-radius: var(--sh-radius-sm);
-  background: transparent;
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 600;
-  cursor: default;
-}
-
-.roleSwitcher:hover .roleSwitcherDropdown {
-  display: flex;
-}
-
-.roleSwitcherDropdown {
-  display: none;
-  position: absolute;
-  bottom: 100%;
-  left: 0;
-  right: 0;
-  margin-bottom: 4px;
-  flex-direction: column;
-  gap: 2px;
-  background: var(--surface);
-  border: 1px solid var(--sh-glass-border);
-  border-radius: var(--sh-radius-sm);
-  overflow: hidden;
-  z-index: 50;
-}
-
-.roleSwitcherOption {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  width: 100%;
-  min-height: 32px;
-  padding: 4px 10px;
-  border: none;
-  background: transparent;
-  color: var(--ink);
-  font: inherit;
-  font-size: 12px;
-  cursor: pointer;
-  transition: background 120ms var(--sh-easing);
-}
-
-.roleSwitcherOption:hover {
-  background: color-mix(in srgb, var(--coral) 10%, transparent);
-  color: var(--coral);
-}
-
-.roleSwitcherOption:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* ── Theme toggle in rail ──────────────────────────────────────────── */
-.themeToggle {
-  width: 100%;
-  min-height: 36px;
-  border: 1px solid var(--sh-glass-border);
-  border-radius: var(--sh-radius-sm);
-  background: transparent;
-  color: var(--muted);
-  font: inherit;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition:
-    all 180ms var(--sh-easing);
-}
-
-.themeToggle:hover {
-  border-color: var(--sh-glass-border-strong);
-  background: var(--sh-glass-bg-strong);
-  color: var(--ink);
-}
 
 
 
@@ -856,114 +732,6 @@ body {
 
 
 /* .shMetricCard (glass) — removed (dead CSS) */
-
-.workTabs {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  overflow-x: auto;
-  scrollbar-width: none;
-  padding: 0 0 2px;
-}
-
-.workTabs::-webkit-scrollbar {
-  display: none;
-}
-
-.workTab {
-  display: inline-flex;
-  align-items: center;
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  background: var(--surface-soft);
-  overflow: hidden;
-  flex-shrink: 0;
-}
-
-.workTab.active {
-  border-color: var(--blue);
-  background: #eef5ff;
-}
-
-.workTab button {
-  min-height: 32px;
-  display: inline-flex;
-  align-items: center;
-  border: 0;
-  background: none;
-  color: var(--ink);
-  font: inherit;
-  font-size: 12px;
-  font-weight: 700;
-  padding: 0 10px;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.workTab.active button {
-  color: var(--blue);
-}
-
-.workTabClose {
-  min-width: 24px;
-  min-height: 24px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 0;
-  border-left: 1px solid var(--line);
-  background: none;
-  color: var(--muted);
-  cursor: pointer;
-  padding: 0;
-}
-
-.workTabClose:hover {
-  color: var(--rose);
-  background: rgba(180, 35, 87, 0.08);
-}
-
-.workTabsClear {
-  min-height: 32px;
-  display: inline-flex;
-  align-items: center;
-  border: 1px solid transparent;
-  border-radius: 6px;
-  background: none;
-  color: var(--faint);
-  font: inherit;
-  font-size: 11px;
-  font-weight: 600;
-  padding: 0 10px;
-  cursor: pointer;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.workTabsClear:hover {
-  color: var(--rose);
-  border-color: var(--line);
-}
-
-[data-theme="dark"] .workTab {
-  border-color: var(--line);
-  background: var(--surface-soft);
-}
-
-[data-theme="dark"] .workTab.active {
-  border-color: var(--blue);
-  background: rgba(138, 191, 255, 0.12);
-}
-
-[data-theme="dark"] .workTab.active button {
-  color: var(--blue);
-}
-
-[data-theme="dark"] .workTabClose {
-  border-color: var(--line);
-}
-
-
 
 h1,
 h2,
@@ -3043,169 +2811,6 @@ tr:last-child td {
 .emptyTableRow td {
   padding: 0;
 }
-
-/* ------------------------------------------------------------------ */
-/*  Empty State — StudentHub OS edition (glass, illustration, CTAs)   */
-/* ------------------------------------------------------------------ */
-
-.shEmptyStateOs {
-  display: grid;
-  gap: 10px;
-  justify-items: center;
-  text-align: center;
-  padding: 40px 24px;
-  background: var(--sh-glass-bg);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid var(--sh-glass-border);
-  border-radius: var(--sh-radius-lg);
-  animation: shEmptyEnter 360ms var(--sh-easing) both;
-  transition:
-    background 200ms var(--sh-easing),
-    border-color 200ms var(--sh-easing);
-}
-
-[data-theme="dark"] .shEmptyStateOs {
-  background: var(--sh-glass-bg);
-}
-
-.shEmptyStateOsIllust {
-  display: grid;
-  place-items: center;
-  width: 72px;
-  height: 72px;
-  margin-bottom: 4px;
-  opacity: 0.85;
-}
-
-.shEmptyStateOsMessage {
-  color: var(--ink);
-  font-size: 15px;
-  font-weight: 600;
-  line-height: 1.3;
-  max-width: 380px;
-}
-
-.shEmptyStateOsHint {
-  color: var(--muted);
-  font-size: 13px;
-  line-height: 1.45;
-  margin: 0;
-  max-width: 380px;
-}
-
-.shEmptyStateOsAction {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  margin-top: 8px;
-  min-height: 38px;
-  padding: 0 16px;
-  border: 1px solid var(--sh-glass-border-strong);
-  border-radius: var(--sh-radius-md);
-  background: var(--sh-glass-bg-strong);
-  color: var(--ink);
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition:
-    background 200ms var(--sh-easing),
-    border-color 200ms var(--sh-easing),
-    transform 200ms var(--sh-easing),
-    box-shadow 200ms var(--sh-easing);
-}
-
-.shEmptyStateOsAction:hover {
-  background: var(--sh-glass-bg-strong);
-  border-color: var(--sh-info);
-  transform: translateY(-1px);
-  box-shadow: var(--sh-glow-sm);
-}
-
-.shEmptyStateOsAction:focus-visible {
-  outline: 2px solid var(--ring);
-  outline-offset: 2px;
-}
-
-.shEmptyStateOsActionIcon {
-  display: inline-flex;
-  color: var(--sh-info);
-}
-
-/* ── Entry animation ────────────────────────────────────────── */
-
-@keyframes shEmptyEnter {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* ── Illustration micro-animations ──────────────────────────── */
-
-.shEmptyIllustration {
-  width: 64px;
-  height: 64px;
-}
-
-.shEmptyIllustAnimateSearch {
-  animation: shEmptyPulse 3s ease-in-out infinite;
-  transform-origin: 44px 42px;
-}
-
-.shEmptyIllustAnimatePen {
-  animation: shEmptyNudge 4s ease-in-out infinite;
-  transform-origin: 44px 46px;
-}
-
-.shEmptyIllustAnimateClock {
-  animation: shEmptySpin 12s linear infinite;
-  transform-origin: 44px 44px;
-}
-
-.shEmptyIllustAnimateError {
-  animation: shEmptyTremor 1.5s ease-in-out infinite;
-}
-
-.shEmptyIllustAnimateX {
-  animation: shEmptyFadeInOut 3s ease-in-out infinite;
-}
-
-.shEmptyIllustAnimateSparkle {
-  animation: shEmptyPulse 2.5s ease-in-out infinite;
-}
-
-@keyframes shEmptyPulse {
-  0%, 100% { opacity: 0.5; }
-  50% { opacity: 1; }
-}
-
-@keyframes shEmptyNudge {
-  0%, 100% { transform: rotate(-3deg); }
-  50% { transform: rotate(3deg); }
-}
-
-@keyframes shEmptySpin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-@keyframes shEmptyTremor {
-  0%, 100% { transform: rotate(0deg); }
-  25% { transform: rotate(-2deg); }
-  50% { transform: rotate(2deg); }
-  75% { transform: rotate(-1deg); }
-}
-
-@keyframes shEmptyFadeInOut {
-  0%, 100% { opacity: 0.35; }
-  50% { opacity: 0.75; }
-}
-
 
 
 
