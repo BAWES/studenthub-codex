@@ -28,7 +28,7 @@ export function AdminDesignationsTable({ session, designations }: Props) {
       ]}
     >
       <section className="mb-6">
-        <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
+        <div className="rounded-lg border border-border bg-card p-5">
           <h3 className="text-sm font-semibold mb-3 text-foreground">Add designation</h3>
           <CreateDesignationForm onSuccess={() => router.refresh()} />
         </div>
@@ -121,8 +121,7 @@ function CreateDesignationForm({ onSuccess }: { onSuccess: () => void }) {
           required
           maxLength={255}
           placeholder="e.g. Software Engineer"
-          className="h-9 rounded-lg px-3 text-sm border"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+          className="h-9 rounded-lg px-3 text-sm border bg-card border-border text-foreground"
         />
       </div>
       <div className="grid gap-1">
@@ -131,8 +130,7 @@ function CreateDesignationForm({ onSuccess }: { onSuccess: () => void }) {
           name="nameAr"
           maxLength={255}
           placeholder="مهندس برمجيات"
-          className="h-9 rounded-lg px-3 text-sm border"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+          className="h-9 rounded-lg px-3 text-sm border bg-card border-border text-foreground"
         />
       </div>
       <button
@@ -183,15 +181,13 @@ function EditDesignationForm({
         defaultValue={row.designation_name_en}
         required
         maxLength={255}
-        className="h-8 rounded px-2 text-sm border w-40"
-        style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+        className="h-8 rounded px-2 text-sm border w-40 bg-card border-border text-foreground"
       />
       <input
         name="nameAr"
         defaultValue={row.designation_name_ar ?? ""}
         maxLength={255}
-        className="h-8 rounded px-2 text-sm border w-40"
-        style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+        className="h-8 rounded px-2 text-sm border w-40 bg-card border-border text-foreground"
       />
       <button
         type="submit"
