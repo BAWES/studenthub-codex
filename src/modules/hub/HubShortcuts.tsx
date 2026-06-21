@@ -140,7 +140,7 @@ export function HubShortcuts({ commands }: HubShortcutsProps) {
 
       {open ? (
         <div className="commandOverlay" role="dialog" aria-modal="true" aria-label="Command menu">
-          <button className="commandScrim" aria-label="Close command menu" type="button" onClick={() => setOpen(false)} />
+          <button className="fixed inset-0 z-40 bg-black/40" aria-label="Close command menu" type="button" onClick={() => setOpen(false)} />
           <section className="commandMenu">
             <div className="commandInputWrap">
               <span>⌘</span>

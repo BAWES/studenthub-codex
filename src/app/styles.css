@@ -99,11 +99,11 @@
   /* ------------------------------------------------------------------ */
 
   /* Glass morphism */
-  --sh-glass-bg: rgba(255, 255, 255, 0.05);
-  --sh-glass-bg-strong: rgba(255, 255, 255, 0.10);
-  --sh-glass-border: rgba(255, 255, 255, 0.10);
-  --sh-glass-border-strong: rgba(255, 255, 255, 0.18);
-  --sh-glass-blur: 20px;
+  --sh-glass-bg: var(--surface);
+  --sh-glass-bg-strong: var(--surface-soft);
+  --sh-glass-border: var(--border);
+  --sh-glass-border-strong: var(--line);
+  /* --sh-glass-blur: removed */
 
   /* Zendesk coral — primary accent (per DESIGN_SYSTEM.md) */
   --sh-coral: #eb6651;
@@ -276,10 +276,10 @@
   --sh-coral-light: rgba(235, 102, 81, 0.15);
   --sh-coral-glow: 0 0 16px rgba(235, 102, 81, 0.30);
 
-  --sh-glass-bg: rgba(255, 255, 255, 0.04);
-  --sh-glass-bg-strong: rgba(255, 255, 255, 0.08);
-  --sh-glass-border: rgba(255, 255, 255, 0.06);
-  --sh-glass-border-strong: rgba(255, 255, 255, 0.12);
+  --sh-glass-bg: var(--surface);
+  --sh-glass-bg-strong: var(--surface-soft);
+  --sh-glass-border: var(--border);
+  --sh-glass-border-strong: var(--line);
   --sh-glow-sm: 0 0 16px rgba(138, 191, 255, 0.18);
   --sh-glow-md: 0 0 32px rgba(138, 191, 255, 0.25);
   --sh-glow-lg: 0 0 56px rgba(138, 191, 255, 0.35);
@@ -897,8 +897,6 @@ body {
   background: var(--sh-glass-bg);
   border: 1px solid var(--sh-glass-border);
   border-radius: var(--sh-radius-lg);
-  backdrop-filter: blur(var(--sh-glass-blur));
-  -webkit-backdrop-filter: blur(var(--sh-glass-blur));
   transition:
     transform 200ms var(--sh-easing),
     box-shadow 200ms var(--sh-easing),
@@ -1913,7 +1911,6 @@ h2 {
   margin: 0 -8px;
   padding: 12px 8px;
   background: rgba(245, 247, 250, 0.92);
-  backdrop-filter: blur(10px);
   scrollbar-width: none;
 }
 
@@ -1990,8 +1987,6 @@ h2 {
   min-height: 130px;
   padding: var(--space-4) var(--space-5);
   background: var(--sh-glass-bg);
-  backdrop-filter: blur(var(--sh-glass-blur));
-  -webkit-backdrop-filter: blur(var(--sh-glass-blur));
   border: 1px solid var(--sh-glass-border);
   border-radius: var(--radius-xl);
   transition:
@@ -3272,8 +3267,6 @@ tr:last-child td {
   text-align: center;
   padding: 40px 24px;
   background: var(--sh-glass-bg);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
   border: 1px solid var(--sh-glass-border);
   border-radius: var(--sh-radius-lg);
   animation: shEmptyEnter 360ms var(--sh-easing) both;
@@ -3590,8 +3583,6 @@ tr:last-child td {
   gap: 10px;
   border-bottom: 1px solid var(--sh-glass-border);
   background: var(--sh-glass-bg);
-  backdrop-filter: blur(var(--sh-glass-blur));
-  -webkit-backdrop-filter: blur(var(--sh-glass-blur));
   padding: 10px 14px;
 }
 
@@ -4129,8 +4120,6 @@ tr:last-child td {
   border: 1px solid var(--sh-glass-border);
   border-radius: var(--sh-radius-lg);
   background: var(--sh-glass-bg);
-  backdrop-filter: blur(var(--sh-glass-blur));
-  -webkit-backdrop-filter: blur(var(--sh-glass-blur));
   padding: 20px;
   animation: shSection 360ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
@@ -4217,8 +4206,6 @@ tr:last-child td {
   border: 1px solid var(--sh-glass-border);
   border-radius: var(--sh-radius-lg);
   background: var(--sh-glass-bg);
-  backdrop-filter: blur(var(--sh-glass-blur));
-  -webkit-backdrop-filter: blur(var(--sh-glass-blur));
   padding: 14px;
 }
 
@@ -4245,8 +4232,6 @@ tr:last-child td {
   border: 1px solid var(--sh-glass-border);
   border-radius: var(--sh-radius-lg);
   background: var(--sh-glass-bg);
-  backdrop-filter: blur(var(--sh-glass-blur));
-  -webkit-backdrop-filter: blur(var(--sh-glass-blur));
   animation: shSection 360ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
@@ -5229,8 +5214,6 @@ kbd {
   inset: 0;
   border: 0;
   background: var(--overlay);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
   cursor: default;
 }
 
@@ -5248,8 +5231,6 @@ kbd {
 
 [data-theme="dark"] .shCmdMenu {
   background: rgba(17, 24, 36, 0.92);
-  backdrop-filter: blur(32px);
-  -webkit-backdrop-filter: blur(32px);
 }
 
 /* ── Input row ─────────────────────────────────────── */
@@ -9425,7 +9406,6 @@ kbd {
   letter-spacing: 0.04em;
   background: var(--sh-glass-bg-strong);
   border: 1px solid var(--sh-glass-border-strong);
-  backdrop-filter: blur(var(--sh-glass-blur));
   color: var(--sh-info);
   animation: shBadgeFadeIn 400ms var(--sh-easing) 300ms both;
   pointer-events: none;
@@ -10257,8 +10237,6 @@ body {
   padding: 10px;
   border-radius: 20px;
   background: color-mix(in srgb, var(--sh-glass-bg-strong) 60%, var(--surface-soft) 40%);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
   border: 1px solid var(--sh-glass-border);
   box-shadow:
     0 24px 80px rgba(0, 0, 0, 0.15),
@@ -10579,8 +10557,6 @@ body {
 .shTableGlass {
   border-radius: var(--sh-radius-lg, 12px);
   background: var(--sh-glass-bg, rgba(255,255,255,0.04));
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--sh-glass-border, rgba(255,255,255,0.08));
   box-shadow: 0 12px 48px rgba(16, 24, 40, 0.06);
   overflow: hidden;
@@ -10607,8 +10583,6 @@ body {
   top: 0;
   z-index: 5;
   background: var(--sh-glass-bg-strong, rgba(255,255,255,0.06));
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
   transition: background 250ms var(--sh-easing, cubic-bezier(0.16,1,0.3,1));
 }
 
