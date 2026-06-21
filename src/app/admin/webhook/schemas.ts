@@ -1,1 +1,1 @@
-export * from "@/modules/webhooks/schemas";
+export * from "@/modules/admin/webhook/schemas";
