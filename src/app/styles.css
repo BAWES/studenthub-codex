@@ -1372,21 +1372,6 @@ h2 {
 @media (max-width: 760px) {
 }
 
-.environment span,
-.metric span,
-.rowMain span,
-.rowMeta span,
-.rowMeta small,
-.focus p,
-.rail li {
-  color: var(--muted);
-}
-
-.environment strong {
-  font-size: 15px;
-}
-
-
 
 
 .linearDesk {
@@ -2093,68 +2078,6 @@ h2 {
     transform: translateY(0);
   }
 }
-
-.workspace {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 340px;
-  gap: 12px;
-  margin-bottom: 12px;
-}
-
-.focus,
-.rail,
-
-
-.focus {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 300px;
-  gap: 32px;
-  padding: 24px;
-}
-
-.focus h2 {
-  max-width: 680px;
-  font-size: 30px;
-}
-
-.focus p {
-  max-width: 760px;
-  line-height: 1.6;
-  margin-bottom: 0;
-}
-
-.statusMix {
-  display: grid;
-  align-content: start;
-  gap: 8px;
-}
-
-.statusRow {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  min-height: 44px;
-  border-bottom: 1px solid var(--line);
-}
-
-.statusRow span {
-  color: var(--muted);
-}
-
-.rail {
-  padding: 24px;
-}
-
-.rail ol {
-  display: grid;
-  gap: 13px;
-  padding-left: 22px;
-  margin: 18px 0 0;
-}
-
-
-
 
 
 .tableSurface {
@@ -6118,60 +6041,6 @@ kbd {
     border-color: var(--blue);
     background: #eef5ff;
     color: var(--blue);
-  }
-
-  .shell {
-    display: block;
-  }
-
-  .topbar {
-    grid-template-columns: 1fr;
-    padding: 14px;
-  }
-
-  .topbar h1 {
-    font-size: 28px;
-    line-height: 1.05;
-  }
-
-  .accountBox {
-    min-width: 0;
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: center;
-  }
-
-  .accountBox span,
-  .accountBox small {
-    grid-column: 1;
-  }
-
-  .accountBox form {
-    grid-row: 1 / span 3;
-    grid-column: 2;
-  }
-
-  .accountBox button {
-    min-width: 84px;
-    margin-top: 0;
-    padding: 0 12px;
-  }
-
-  .workspaceNav {
-    display: none;
-  }
-
-  .workspaceRail {
-    display: none;
-  }
-
-  .workspaceStage {
-    width: auto;
-    padding: 10px 10px 88px;
-  }
-
-  .metrics {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
   }
 
 /* Public product entry points */

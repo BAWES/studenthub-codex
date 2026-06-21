@@ -25,7 +25,7 @@ export function navForRole(role: Role): NavItem[] {
       { label: "Countries", href: "/admin/country", icon: Globe },
       { label: "Requests", href: "/admin/requests", icon: FileCheck },
       { label: "Degrees", href: "/admin/degree", icon: GraduationCap },
-      { label: "Daily Standup", href: "/admin/daily-standup", icon: MessageSquareText },
+      { label: "Daily Standup", href: "/admin/daily-standup" as Route, icon: MessageSquareText },
       { label: "Transfers", href: "/admin/transfers", icon: ArrowRightLeft }
     ];
   }
