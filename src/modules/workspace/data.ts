@@ -2406,3 +2406,26 @@ export async function getAdminDegreeRows() {
     updated: formatDate(row.degree_updated_at)
   }));
 }
+
+export async function getAdminWebhookRows() {
+  const rows = await prisma.webhook.findMany({
+    orderBy: { created_at: "desc" },
+    take: 60,
+    select: {
+      webhook_id: true,
+      event: true,
+      endpoint: true,
+      method: true,
+      created_at: true,
+      updated_at: true
+    }
+  });
+
+  return rows.map((row) => ({
+    id: String(row.webhook_id),
+    event: row.event,
+    endpoint: row.endpoint,
+    method: row.method ?? "POST",
+    updated: formatDate(row.updated_at ?? row.created_at)
+  }));
+}
