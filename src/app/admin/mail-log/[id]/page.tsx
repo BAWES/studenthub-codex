@@ -4,7 +4,6 @@ import { FactPanel } from "@/modules/workspace/DetailPanels";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { getMailLog } from "@/modules/mail-logs/actions";
 import { formatDate } from "@/modules/workspace/format";
-import { Badge } from "@/components/ui/badge";
 
 export const dynamic = "force-dynamic";
 
@@ -41,7 +40,7 @@ export default async function AdminMailLogDetailPage({ params }: Props) {
           { label: "Subject", value: record.subject ?? "—" },
           {
             label: "App",
-            value: record.app ? <Badge variant="secondary">{record.app}</Badge> : "—",
+            value: record.app ?? "—",
           },
           {
             label: "Sent at",
