@@ -1,7 +1,7 @@
 import { ErrorBoundary } from "@/modules/workspace/ErrorBoundary";
 import { notFound, redirect } from "next/navigation";
 import { requireRoleCapability } from "@/modules/auth/session";
-import { DetailSection } from "@/modules/workspace/DetailPanels";
+import { FactPanel } from "@/modules/workspace/DetailPanels";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { Button } from "@/components/ui/button";
 import { getExpense, deleteExpense } from "./actions";
@@ -31,7 +31,7 @@ export default async function AdminExpenseDetailPage({
         title={`Expense ${expense.expense_uuid.slice(0, 8)}...`}
         metrics={[]}
       >
-        <DetailSection
+        <FactPanel
           title="Expense Details"
           facts={[
             { label: "UUID", value: expense.expense_uuid },

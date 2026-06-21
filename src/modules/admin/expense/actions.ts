@@ -10,50 +10,22 @@ import {
   deleteExpenseSchema,
   expenseItemSchema,
   listExpensesResultSchema,
+  createExpenseResultSchema,
   operationResultSchema,
-  type ListExpensesParams,
-  type GetExpenseParams,
-  type CreateExpenseParams,
-  type UpdateExpenseParams,
-  type DeleteExpenseParams,
-  type ExpenseItem,
-  type ListExpensesResult,
+} from "./schemas";
+import type {
+  ListExpensesParams,
+  GetExpenseParams,
+  CreateExpenseParams,
+  UpdateExpenseParams,
+  DeleteExpenseParams,
+  ExpenseItem,
+  ListExpensesResult,
+  OperationResult,
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-const expenseSelect = {
-  expense_uuid: true,
-  title: true,
-  type: true,
-  detail: true,
-  amount: true,
-  transaction_datetime: true,
-  created_by: true,
-  updated_by: true,
-  created_at: true,
-  updated_at: true,
-} as const;
-
-function mapExpense(expense: any): ExpenseItem {
-  return {
-    expense_uuid: expense.expense_uuid,
-    title: expense.title,
-    type: expense.type,
-    detail: expense.detail,
-    amount: expense.amount ? expense.amount.toString() : null,
-    transaction_datetime: expense.transaction_datetime,
-    created_by: expense.created_by,
-    updated_by: expense.updated_by,
-    created_at: expense.created_at,
-    updated_at: expense.updated_at,
-  };
-}
-
-// ---------------------------------------------------------------------------
-// Server actions
+// listExpenses
 // ---------------------------------------------------------------------------
 
 /**
@@ -69,46 +41,43 @@ export async function listExpenses(
     throw new Error(parsed.error.issues[0]?.message ?? "Invalid list parameters");
   }
 
-  const {
-    type,
-    title,
-    startDate,
-    endDate,
-    page = 1,
-    limit = 20,
-  } = parsed.data;
+  const { type, title, page, limit, startDate } = parsed.data;
+  const skip = (page - 1) * limit;
 
-  const where: Record<string, unknown> = {};
+  const where: Record<string, any> = {};
 
-  if (type) where.type = type;
-  if (title) where.title = { contains: title } as any;
-  if (startDate || endDate) {
-    const transactionDatetime: Record<string, unknown> = {};
-    if (startDate) transactionDatetime.gte = new Date(startDate);
-    if (endDate) transactionDatetime.lte = new Date(endDate);
-    where.transaction_datetime = transactionDatetime;
+  if (type) {
+    where.type = { contains: type };
   }
 
-  const [expenses, total] = await Promise.all([
+  if (title) {
+    where.title = { contains: title };
+  }
+
+  if (startDate) {
+    where.transaction_datetime = { gte: new Date(startDate) };
+  }
+
+  const [records, total] = await Promise.all([
     prisma.expense.findMany({
-      where: where as any,
-      orderBy: { created_at: "desc" },
-      skip: (page - 1) * limit,
+      where,
+      orderBy: { transaction_datetime: "desc" },
+      skip,
       take: limit,
-      select: expenseSelect,
     }),
-    prisma.expense.count({ where: where as any }),
+    prisma.expense.count({ where }),
   ]);
 
-  const result = {
-    expenses: expenses.map(mapExpense),
+  const expenses = records.map(toExpenseItem);
+
+  const result: ListExpensesResult = {
+    expenses,
     total,
     page,
     limit,
     totalPages: Math.ceil(total / limit),
   };
 
-  // Validate output shape
   const outputParsed = listExpensesResultSchema.safeParse(result);
   if (!outputParsed.success) {
     console.error(
@@ -120,8 +89,13 @@ export async function listExpenses(
   return result;
 }
 
+// ---------------------------------------------------------------------------
+// getExpense
+// ---------------------------------------------------------------------------
+
 /**
- * Get a single expense by UUID.
+ * Get a single expense by ID.
+ * Returns null if not found.
  */
 export async function getExpense(
   params: GetExpenseParams,
@@ -135,26 +109,14 @@ export async function getExpense(
 
   const { id } = parsed.data;
 
-  const expense = await prisma.expense.findFirst({
+  const record = await prisma.expense.findFirst({
     where: { expense_uuid: id },
-    select: expenseSelect,
   });
 
-  if (!expense) {
-    // Validate output shape (null case)
-    const nullOutputParsed = expenseItemSchema.nullable().safeParse(null);
-    if (!nullOutputParsed.success) {
-      console.error(
-        "[modules/admin/expense] getExpense output validation failed:",
-        nullOutputParsed.error.issues,
-      );
-    }
-    return null;
-  }
+  if (!record) return null;
 
-  const result = mapExpense(expense);
+  const result = toExpenseItem(record);
 
-  // Validate output shape
   const outputParsed = expenseItemSchema.safeParse(result);
   if (!outputParsed.success) {
     console.error(
@@ -166,244 +128,202 @@ export async function getExpense(
   return result;
 }
 
+// ---------------------------------------------------------------------------
+// createExpense
+// ---------------------------------------------------------------------------
+
 /**
- * Create a new expense.
+ * Create a new expense record.
+ * Returns operation result compatible with the action-state form pattern.
  */
 export async function createExpense(
-  params: CreateExpenseParams,
-): Promise<{ operation: string; message: string }> {
+  data: CreateExpenseParams,
+): Promise<OperationResult & { expense_uuid?: string }> {
   await requireCapability("admin.write");
 
-  const parsed = createExpenseSchema.safeParse(params);
+  const parsed = createExpenseSchema.safeParse(data);
   if (!parsed.success) {
-    const errorResult = {
+    return {
       operation: "error",
-      message: parsed.error.issues[0]?.message ?? "Invalid create parameters",
+      message: parsed.error.issues[0]?.message ?? "Invalid expense data",
     };
-    // Validate output shape
-    const outputParsed = operationResultSchema.safeParse(errorResult);
-    if (!outputParsed.success) {
-      console.error(
-        "[modules/admin/expense] createExpense output validation failed (input error):",
-        outputParsed.error.issues,
-      );
-    }
-    return errorResult;
   }
 
   const { title, type, detail, amount, transactionDatetime } = parsed.data;
 
   try {
+    const expenseUuid = crypto.randomUUID();
+
     await prisma.expense.create({
       data: {
-        expense_uuid: crypto.randomUUID(),
+        expense_uuid: expenseUuid,
         title,
         type,
-        detail: detail ?? null,
-        amount: amount ?? null,
-        transaction_datetime: transactionDatetime ? new Date(transactionDatetime) : null,
-        created_at: new Date(),
-        updated_at: new Date(),
+        detail: detail || null,
+        amount: amount || null,
+        transaction_datetime: transactionDatetime
+          ? new Date(transactionDatetime)
+          : null,
       },
     });
 
-    const successResult = {
-      operation: "success",
-      message: "Expense created successfully",
-    };
-    // Validate output shape
-    const outputParsed = operationResultSchema.safeParse(successResult);
+    const result = { expense_uuid: expenseUuid };
+
+    const outputParsed = createExpenseResultSchema.safeParse(result);
     if (!outputParsed.success) {
       console.error(
         "[modules/admin/expense] createExpense output validation failed:",
         outputParsed.error.issues,
       );
     }
-    return successResult;
-  } catch (error) {
-    const errorResult = {
-      operation: "error",
-      message: "We've faced a problem creating the Expense, please contact us for assistance.",
+
+    return {
+      operation: "success",
+      message: "Expense created successfully",
+      expense_uuid: expenseUuid,
     };
-    // Validate output shape
-    const outputParsed = operationResultSchema.safeParse(errorResult);
-    if (!outputParsed.success) {
-      console.error(
-        "[modules/admin/expense] createExpense output validation failed (catch):",
-        outputParsed.error.issues,
-      );
-    }
-    return errorResult;
+  } catch (err) {
+    console.error("[modules/admin/expense] createExpense error:", err);
+    return {
+      operation: "error",
+      message: "Failed to create expense",
+    };
   }
 }
 
+// ---------------------------------------------------------------------------
+// updateExpense
+// ---------------------------------------------------------------------------
+
 /**
- * Update an existing expense.
+ * Update an existing expense record.
  */
 export async function updateExpense(
-  params: UpdateExpenseParams,
-): Promise<{ operation: string; message: string }> {
+  data: UpdateExpenseParams,
+): Promise<OperationResult> {
   await requireCapability("admin.write");
 
-  const parsed = updateExpenseSchema.safeParse(params);
+  const parsed = updateExpenseSchema.safeParse(data);
   if (!parsed.success) {
-    const errorResult = {
+    return {
       operation: "error",
-      message: parsed.error.issues[0]?.message ?? "Invalid update parameters",
+      message: parsed.error.issues[0]?.message ?? "Invalid expense data",
     };
-    // Validate output shape
-    const outputParsed = operationResultSchema.safeParse(errorResult);
-    if (!outputParsed.success) {
-      console.error(
-        "[modules/admin/expense] updateExpense output validation failed (input error):",
-        outputParsed.error.issues,
-      );
-    }
-    return errorResult;
   }
 
   const { id, title, type, detail, amount } = parsed.data;
 
-  const existing = await prisma.expense.findFirst({
-    where: { expense_uuid: id },
-  });
-
-  if (!existing) {
-    const notFoundResult = {
-      operation: "error",
-      message: "Expense not found",
-    };
-    // Validate output shape
-    const outputParsed = operationResultSchema.safeParse(notFoundResult);
-    if (!outputParsed.success) {
-      console.error(
-        "[modules/admin/expense] updateExpense output validation failed (not found):",
-        outputParsed.error.issues,
-      );
-    }
-    return notFoundResult;
-  }
-
   try {
-    await prisma.expense.update({
+    const existing = await prisma.expense.findFirst({
       where: { expense_uuid: id },
-      data: {
-        title,
-        type,
-        detail: detail ?? existing.detail,
-        amount: amount ?? existing.amount,
-        updated_at: new Date(),
-      },
     });
 
-    const successResult = {
+    if (!existing) {
+      return {
+        operation: "error",
+        message: `Expense not found: ${id}`,
+      };
+    }
+
+    const updateData: Record<string, any> = {};
+    updateData.title = title;
+    updateData.type = type;
+    if (detail !== undefined) updateData.detail = detail || null;
+    if (amount !== undefined) updateData.amount = amount || null;
+
+    await prisma.expense.update({
+      where: { expense_uuid: id },
+      data: updateData,
+    });
+
+    return {
       operation: "success",
-      message: "Expense successfully updated",
+      message: "Expense updated successfully",
     };
-    // Validate output shape
-    const outputParsed = operationResultSchema.safeParse(successResult);
-    if (!outputParsed.success) {
-      console.error(
-        "[modules/admin/expense] updateExpense output validation failed:",
-        outputParsed.error.issues,
-      );
-    }
-    return successResult;
-  } catch (error) {
-    const errorResult = {
+  } catch (err) {
+    console.error("[modules/admin/expense] updateExpense error:", err);
+    return {
       operation: "error",
-      message: "We've faced a problem updating the Expense, please contact us for assistance.",
+      message: "Failed to update expense",
     };
-    // Validate output shape
-    const outputParsed = operationResultSchema.safeParse(errorResult);
-    if (!outputParsed.success) {
-      console.error(
-        "[modules/admin/expense] updateExpense output validation failed (catch):",
-        outputParsed.error.issues,
-      );
-    }
-    return errorResult;
   }
 }
 
 // ---------------------------------------------------------------------------
-// Delete expense
+// deleteExpense
 // ---------------------------------------------------------------------------
 
 /**
- * Delete an expense by UUID.
+ * Delete an expense record.
  */
 export async function deleteExpense(
   params: DeleteExpenseParams,
-): Promise<{ operation: string; message: string }> {
+): Promise<OperationResult> {
   await requireCapability("admin.write");
 
   const parsed = deleteExpenseSchema.safeParse(params);
   if (!parsed.success) {
-    const errorResult = {
+    return {
       operation: "error",
-      message: parsed.error.issues[0]?.message ?? "Invalid delete parameters",
+      message: parsed.error.issues[0]?.message ?? "Invalid expense ID",
     };
-    const outputParsed = operationResultSchema.safeParse(errorResult);
-    if (!outputParsed.success) {
-      console.error(
-        "[modules/admin/expense] deleteExpense output validation failed (input error):",
-        outputParsed.error.issues,
-      );
-    }
-    return errorResult;
   }
 
   const { id } = parsed.data;
 
-  const existing = await prisma.expense.findFirst({
-    where: { expense_uuid: id },
-  });
-
-  if (!existing) {
-    const notFoundResult = {
-      operation: "error",
-      message: "Expense not found",
-    };
-    const outputParsed = operationResultSchema.safeParse(notFoundResult);
-    if (!outputParsed.success) {
-      console.error(
-        "[modules/admin/expense] deleteExpense output validation failed (not found):",
-        outputParsed.error.issues,
-      );
-    }
-    return notFoundResult;
-  }
-
   try {
+    const existing = await prisma.expense.findFirst({
+      where: { expense_uuid: id },
+    });
+
+    if (!existing) {
+      return {
+        operation: "error",
+        message: `Expense not found: ${id}`,
+      };
+    }
+
     await prisma.expense.delete({
       where: { expense_uuid: id },
     });
 
-    const successResult = {
+    return {
       operation: "success",
       message: "Expense deleted successfully",
     };
-    const outputParsed = operationResultSchema.safeParse(successResult);
-    if (!outputParsed.success) {
-      console.error(
-        "[modules/admin/expense] deleteExpense output validation failed:",
-        outputParsed.error.issues,
-      );
-    }
-    return successResult;
-  } catch (error) {
-    const errorResult = {
+  } catch (err) {
+    console.error("[modules/admin/expense] deleteExpense error:", err);
+    return {
       operation: "error",
-      message: "Failed to delete expense. Please try again.",
+      message: "Failed to delete expense",
     };
-    const outputParsed = operationResultSchema.safeParse(errorResult);
-    if (!outputParsed.success) {
-      console.error(
-        "[modules/admin/expense] deleteExpense output validation failed (catch):",
-        outputParsed.error.issues,
-      );
-    }
-    return errorResult;
   }
+}
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+function toExpenseItem(record: Record<string, unknown>): ExpenseItem {
+  return {
+    expense_uuid: record.expense_uuid as string,
+    title: record.title as string,
+    type: record.type as string,
+    detail: (record.detail as string) ?? null,
+    amount: record.amount != null ? String(record.amount) : null,
+    transaction_datetime:
+      record.transaction_datetime instanceof Date
+        ? record.transaction_datetime.toISOString()
+        : null,
+    created_by: (record.created_by as number) ?? null,
+    updated_by: (record.updated_by as number) ?? null,
+    created_at:
+      record.created_at instanceof Date
+        ? record.created_at.toISOString()
+        : null,
+    updated_at:
+      record.updated_at instanceof Date
+        ? record.updated_at.toISOString()
+        : null,
+  };
 }

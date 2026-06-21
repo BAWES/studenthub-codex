@@ -44,7 +44,7 @@ export function AdminExpensesPage({ session, expenses, total }: Props) {
         title="Expenses"
         description="All expenses across the system. Click an expense to view details."
         rows={expenses.map((e) => ({ ...e, id: e.expense_uuid }))}
-        rowHref={"/admin/expense" as Route}
+        rowHref={(row) => `/admin/expense/${row.expense_uuid}` as Route}
         columns={[
           {
             key: "title",

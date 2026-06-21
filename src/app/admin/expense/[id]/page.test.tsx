@@ -39,7 +39,7 @@ vi.mock("@/modules/workspace/WorkspaceShell", () => ({
 }));
 
 vi.mock("@/modules/workspace/DetailPanels", () => ({
-  DetailSection: ({
+  FactPanel: ({
     title,
     facts,
   }: {
