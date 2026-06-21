@@ -84,7 +84,7 @@ describe("expenseDetailSchema", () => {
 describe("expenseDetailResultSchema", () => {
   it("accepts a valid wrapped result", () => {
     const result = expenseDetailResultSchema.safeParse({
-      expense: validExpenseRow,
+      expense: { ...validExpenseRow, created_by: 1, updated_by: 2 },
     });
     expect(result.success).toBe(true);
   });

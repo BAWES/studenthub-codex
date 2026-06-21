@@ -2406,3 +2406,39 @@ export async function getAdminDegreeRows() {
     updated: formatDate(row.degree_updated_at)
   }));
 }
+
+export type ExpenseRow = {
+  id: string;
+  title: string;
+  type: string;
+  detail: string;
+  amount: string;
+  transaction_datetime: string;
+  updated: string;
+};
+
+export async function getAdminExpenseRows(): Promise<ExpenseRow[]> {
+  const rows = await prisma.expense.findMany({
+    orderBy: { created_at: "desc" },
+    take: 60,
+    select: {
+      expense_uuid: true,
+      title: true,
+      type: true,
+      detail: true,
+      amount: true,
+      transaction_datetime: true,
+      updated_at: true,
+    },
+  });
+
+  return rows.map((row) => ({
+    id: row.expense_uuid,
+    title: row.title,
+    type: row.type,
+    detail: row.detail ?? "-",
+    amount: row.amount != null ? formatMoney(Number(row.amount), "KWD") : "-",
+    transaction_datetime: row.transaction_datetime ? formatDate(row.transaction_datetime) : "-",
+    updated: formatDate(row.updated_at),
+  }));
+}
