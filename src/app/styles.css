@@ -22,6 +22,8 @@
   --color-input: var(--input);
   --color-blue: var(--blue);
   --color-blue-deep: var(--blue-deep);
+  --color-coral: #eb6651;
+  --color-coral-hover: #d45441;
   --color-ring: var(--ring);
   --radius: var(--radius);
   --font-size-label: 0.8125rem;

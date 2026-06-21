@@ -98,16 +98,14 @@ export default function HeroSection({ onCtaClick }: HeroSectionProps) {
 
         {/* Headline — tighter tracking for premium feel */}
         <h1
-          className="text-[clamp(32px,5vw,56px)] font-bold leading-[1.05] tracking-[-0.03em] mb-4"
-          style={{ color: "var(--ink)" }}
+          className="text-[clamp(32px,5vw,56px)] font-bold leading-[1.05] tracking-[-0.03em] mb-4 text-foreground"
         >
           {content.headline}
         </h1>
 
         {/* Subhead */}
         <p
-          className="text-[clamp(15px,1.6vw,17px)] leading-relaxed max-w-[540px] mb-6"
-          style={{ color: "var(--muted)" }}
+          className="text-[clamp(15px,1.6vw,17px)] leading-relaxed max-w-[540px] mb-6 text-muted-foreground"
         >
           {content.subhead}
         </p>
@@ -163,11 +161,7 @@ export default function HeroSection({ onCtaClick }: HeroSectionProps) {
 
         {/* Social proof */}
         <div
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium mb-5"
-          style={{
-            color: "var(--muted)",
-            backgroundColor: "var(--secondary)",
-          }}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium mb-5 text-muted-foreground bg-secondary"
         >
           <Sparkles className="size-3" style={{ color: SH_AMBER }} />
           {content.proof}
@@ -219,8 +213,7 @@ export default function HeroSection({ onCtaClick }: HeroSectionProps) {
             <div className="shLandingMockupDot" style={{ backgroundColor: "#eab308" }} />
             <div className="shLandingMockupDot" style={{ backgroundColor: "#22c55e" }} />
             <span
-              className="ml-2 text-[11px] font-medium"
-              style={{ color: "var(--muted)" }}
+              className="ml-2 text-[11px] font-medium text-muted-foreground"
             >
               StudentHub — Staff-matched roles
             </span>
@@ -230,21 +223,12 @@ export default function HeroSection({ onCtaClick }: HeroSectionProps) {
           <div className="shLandingMockupBody">
             {/* Search bar */}
             <div
-              className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs"
-              style={{
-                backgroundColor: `${SH_BLUE}08`,
-                color: "var(--muted)",
-                border: "1px solid var(--border)",
-              }}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-muted-foreground border border-border bg-blue/[0.08]"
             >
               <Search className="size-3.5 shrink-0" />
               Search open roles, companies, locations...
               <span
-                className="ml-auto text-[10px] px-1.5 py-0.5 rounded font-mono"
-                style={{
-                  backgroundColor: "var(--surface)",
-                  border: "1px solid var(--border)",
-                }}
+                className="ml-auto text-[10px] px-1.5 py-0.5 rounded font-mono bg-card border border-border"
               >
                 ⌘K
               </span>
@@ -279,12 +263,11 @@ export default function HeroSection({ onCtaClick }: HeroSectionProps) {
               </div>
 
               <strong
-                className="block text-[clamp(32px,5vw,48px)] leading-[0.9] mt-1 font-black tracking-tight"
-                style={{ color: "var(--ink)" }}
+                className="block text-[clamp(32px,5vw,48px)] leading-[0.9] mt-1 font-black tracking-tight text-foreground"
               >
                 care assistant
               </strong>
-              <span className="text-xs block mt-1" style={{ color: "var(--muted)" }}>
+              <span className="text-xs block mt-1 text-muted-foreground">
                 12 matching roles · Kuwait City · KWD 3-5/hr
               </span>
 
@@ -321,21 +304,15 @@ export default function HeroSection({ onCtaClick }: HeroSectionProps) {
               ].map((item) => (
                 <div
                   key={item.label}
-                  className="rounded-xl p-3 shLandingCardHover"
-                  style={{
-                    backgroundColor: `${SH_BLUE}06`,
-                    border: "1px solid var(--border)",
-                  }}
+                  className="rounded-xl p-3 shLandingCardHover bg-blue/[0.06] border border-border"
                 >
                   <span
-                    className="text-[9px] font-bold uppercase tracking-wider block"
-                    style={{ color: "var(--muted)" }}
+                    className="text-[9px] font-bold uppercase tracking-wider block text-muted-foreground"
                   >
                     {item.label}
                   </span>
                   <strong
-                    className="text-sm block mt-0.5"
-                    style={{ color: "var(--ink)" }}
+                    className="text-sm block mt-0.5 text-foreground"
                   >
                     {item.value}
                   </strong>
@@ -354,7 +331,7 @@ export default function HeroSection({ onCtaClick }: HeroSectionProps) {
             >
               <Building2 className="size-3.5 shrink-0" />
               <span className="font-medium">Employer view:</span>
-              <span style={{ color: "var(--muted)" }}>
+              <span className="text-muted-foreground">
                 Post jobs, review candidates, approve timesheets
               </span>
             </div>

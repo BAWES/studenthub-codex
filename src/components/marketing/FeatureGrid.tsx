@@ -271,8 +271,7 @@ export default function FeatureGrid({
             "Clear the queue. Stay compliant."}
         </h2>
         <p
-          className="max-w-[520px] mx-auto mt-2 leading-relaxed"
-          style={{ color: "var(--muted)" }}
+          className="max-w-[520px] mx-auto mt-2 leading-relaxed text-muted-foreground"
         >
           {persona === "candidate" &&
             "From discovering the right role to getting paid on time — every step is connected."}
@@ -293,12 +292,8 @@ export default function FeatureGrid({
           return (
             <div
               key={feat.title}
-              className="group shCard rounded-xl p-5 transition-all duration-[280ms] hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(16,24,40,0.1)]"
-              style={{
-                background: "var(--surface)",
-                border: "1px solid var(--border)",
-                animationDelay: `${i * 80 + 100}ms`,
-              }}
+              className="group shCard rounded-xl p-5 transition-all duration-[280ms] hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(16,24,40,0.1)] bg-card border border-border"
+              style={{ animationDelay: `${i * 80 + 100}ms` }}
             >
               {/* Icon with glow */}
               <div
@@ -311,20 +306,16 @@ export default function FeatureGrid({
                 <Icon className="size-5" aria-hidden="true" />
               </div>
 
-              <strong className="block text-sm mb-1.5" style={{ color: "var(--ink)" }}>
+              <strong className="block text-sm mb-1.5 text-foreground">
                 {feat.title}
               </strong>
-              <p className="text-xs leading-relaxed m-0" style={{ color: "var(--muted)" }}>
+              <p className="text-xs leading-relaxed m-0 text-muted-foreground">
                 {feat.body}
               </p>
 
               {feat.stat && (
                 <div
-                  className="mt-3 pt-3 text-[11px] font-semibold"
-                  style={{
-                    color: "var(--sh-info)",
-                    borderTop: "1px solid var(--border)",
-                  }}
+                  className="mt-3 pt-3 text-[11px] font-semibold border-t border-border text-[var(--sh-info)]"
                 >
                   {feat.stat}
                 </div>

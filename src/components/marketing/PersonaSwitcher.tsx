@@ -48,15 +48,11 @@ export default function PersonaSwitcher({
     <div
       className={cn(
         "flex flex-wrap items-center justify-center gap-1.5 p-1 rounded-2xl",
-        "w-fit mx-auto",
+        "w-fit mx-auto bg-card border border-border",
         className,
       )}
       role="tablist"
       aria-label="Select your role to see tailored information"
-      style={{
-        background: "var(--surface)",
-        border: "1px solid var(--border)",
-      }}
     >
       {personas.map((p) => {
         const Icon = p.icon;
@@ -73,8 +69,8 @@ export default function PersonaSwitcher({
               "transition-all duration-200",
               "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)]",
               isActive
-                ? "text-[var(--ink)]"
-                : "text-[var(--muted)] hover:text-[var(--ink)] hover:bg-[var(--border)]",
+                ? "text-foreground"
+                : "text-muted-foreground hover:text-foreground hover:bg-border",
             )}
           >
             {/* Active glow indicator */}
@@ -111,12 +107,8 @@ export default function PersonaSwitcher({
                 "absolute -bottom-7 left-1/2 -translate-x-1/2 whitespace-nowrap",
                 "text-[10px] font-medium px-2 py-0.5 rounded-md",
                 "opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none",
+                "bg-card border border-border text-muted-foreground",
               )}
-              style={{
-                background: "var(--surface)",
-                border: "1px solid var(--border)",
-                color: "var(--muted)",
-              }}
             >
               {p.subtitle}
             </span>

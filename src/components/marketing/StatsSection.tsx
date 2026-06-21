@@ -123,8 +123,7 @@ function AnimatedStat({ stat, visible }: { stat: StatItem; visible: boolean }) {
 
       {/* Label */}
       <div
-        className="text-xs font-medium text-center leading-tight"
-        style={{ color: "var(--muted)" }}
+        className="text-xs font-medium text-center leading-tight text-muted-foreground"
       >
         {stat.label}
       </div>
