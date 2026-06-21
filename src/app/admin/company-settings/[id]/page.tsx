@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { requireRoleCapability } from "@/modules/auth/session";
 import { DetailSection } from "@/modules/workspace/DetailPanels";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
-import { getAdminCompanySettings } from "@/app/admin/company-settings/actions";
+import { getAdminCompanySettings } from "@/modules/admin/company-settings/actions";
 import { AdminCompanySettingsEditForm } from "./_components/admin-company-settings-edit-form";
 
 export const dynamic = "force-dynamic";

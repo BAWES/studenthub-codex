@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
 
@@ -63,7 +64,7 @@ vi.mock("next/navigation", () => ({
 }));
 
 const mockListSettings = vi.fn();
-vi.mock("@/app/admin/company-settings/actions", () => ({
+vi.mock("@/modules/admin/company-settings/actions", () => ({
   listAdminCompanySettings: (...args: unknown[]) => mockListSettings(...args),
   getAdminCompanySettings: vi.fn(),
   updateAdminCompanySettings: vi.fn(),
@@ -131,7 +132,7 @@ describe("AdminCompanySettingsDetailPage", () => {
   beforeEach(async () => {
     vi.clearAllMocks();
     // Re-mock the getAdminCompanySettings import
-    const actions = await import("@/app/admin/company-settings/actions");
+    const actions = await import("@/modules/admin/company-settings/actions");
     vi.mocked(actions.getAdminCompanySettings).mockImplementation((...args) => mockGetSettings(...args));
   });
 
