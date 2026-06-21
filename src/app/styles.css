@@ -712,8 +712,7 @@ body {
 [data-theme="dark"] .commandResult:hover,
 [data-theme="dark"] .commandResult.active,
 [data-theme="dark"] .hubHeader,
-[data-theme="dark"] .hubPanel,
-[data-theme="dark"] .featureTile {
+[data-theme="dark"] .hubPanel {
   border-color: var(--sh-glass-border);
   background: var(--sh-glass-bg);
 }
@@ -1941,42 +1940,6 @@ h2 {
 }
 
 
-
-.featureGrid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
-  padding: 20px 0 0;
-}
-
-.featureTile {
-  min-height: 112px;
-  display: grid;
-  align-content: space-between;
-  border: 1px solid var(--line);
-  border-top: 4px solid var(--blue);
-  background: var(--surface);
-  color: var(--ink);
-  padding: 16px;
-  text-decoration: none;
-  box-shadow: 0 10px 36px rgba(16, 24, 40, 0.04);
-}
-
-.featureTile span {
-  font-size: 18px;
-  font-weight: 700;
-}
-
-.featureTile strong {
-  color: var(--blue);
-  font-size: 13px;
-}
-
-.featureTile:hover {
-  border-color: #9fb9db;
-  box-shadow: 0 18px 54px rgba(16, 24, 40, 0.09);
-  transform: translateY(-1px);
-}
 
 /* ------------------------------------------------------------------ */
 /*  MetricCard — glass card with value, label, sparkline, trend.       */
@@ -4676,7 +4639,6 @@ kbd {
   .focus,
   .loginShell,
   .loginSignal,
-  .featureGrid,
 
   .loginHero h1 {
     max-width: 560px;
