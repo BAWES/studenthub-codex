@@ -273,7 +273,7 @@ export function WorkspaceOS({
         {/* ── Sidebar Rail ─────────────────────────────────── */}
         <aside className="sticky top-0 h-screen grid grid-rows-[auto_1fr_auto] justify-items-center gap-3 border-r border-border bg-card p-3">
           <Link
-            className="w-full min-h-12 flex items-center gap-2.5 px-3 border border-border rounded-lg bg-[var(--ink)] text-[var(--surface)] no-underline transition-opacity hover:opacity-90"
+            className="w-full min-h-12 flex items-center gap-2.5 px-3 border border-border rounded-lg bg-foreground text-card no-underline transition-opacity hover:opacity-90"
             href="/app"
             aria-label="StudentHub app"
           >
