@@ -30,7 +30,7 @@ export function PageTransition({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <div ref={ref} style={{ willChange: "transform, opacity" }}>
+    <div ref={ref} className="will-change-[transform,opacity]">
       {children}
     </div>
   );

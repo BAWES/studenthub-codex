@@ -119,12 +119,12 @@ export function SwipeableRow({
 function getVariantBg(variant: SwipeActionVariant): string {
   switch (variant) {
     case "info":
-      return "#3b82f6";
+      return "var(--sh-info)";
     case "success":
-      return "#22c55e";
+      return "var(--sh-success)";
     case "warning":
-      return "#f59e0b";
+      return "var(--sh-warning)";
     case "error":
-      return "#ef4444";
+      return "var(--sh-error)";
   }
 }

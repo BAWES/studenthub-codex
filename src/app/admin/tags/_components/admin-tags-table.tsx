@@ -133,8 +133,7 @@ function CreateTagForm({ onSuccess }: { onSuccess: () => void }) {
           required
           maxLength={128}
           placeholder="e.g. urgent, featured, top-talent"
-          className="h-9 rounded-lg px-3 text-sm border"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+          className="h-9 rounded-lg px-3 text-sm border bg-[var(--surface)] border-border text-[var(--ink)]"
         />
       </div>
       <button
@@ -180,8 +179,7 @@ function EditTagForm({
         defaultValue={row.tag}
         required
         maxLength={128}
-        className="h-8 rounded px-2 text-sm border w-40"
-        style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+        className="h-8 rounded px-2 text-sm border w-40 bg-[var(--surface)] border-border text-[var(--ink)]"
       />
       <button
         type="submit"

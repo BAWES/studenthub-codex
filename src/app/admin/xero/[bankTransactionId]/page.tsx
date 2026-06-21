@@ -63,7 +63,7 @@ export default async function AdminXeroDetailPage({
             {
               label: "Reconciled",
               value: (
-                <span className="inline-flex items-center gap-1.5 text-xs font-semibold" style={{ color: tx.isReconciled ? "#22c55e" : "#ef4444" }}>
+                <span className={`inline-flex items-center gap-1.5 text-xs font-semibold ${tx.isReconciled ? "text-green-500" : "text-red-500"}`}>
                   {tx.isReconciled ? "Yes" : "No"}
                 </span>
               ),

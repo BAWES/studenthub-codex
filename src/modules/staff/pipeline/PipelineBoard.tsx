@@ -170,11 +170,7 @@ export function PipelineBoard({ items, onStageChange }: PipelineBoardProps) {
 
   return (
     <div
-      className="flex gap-3 overflow-x-auto pb-4"
-      style={{
-        scrollbarWidth: "thin",
-        scrollbarColor: "var(--border) transparent",
-      }}
+      className="flex gap-3 overflow-x-auto pb-4 [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent]"
     >
       {STAGE_ORDER.map((stage) => (
         <PipelineColumn

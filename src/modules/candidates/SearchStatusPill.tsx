@@ -21,19 +21,7 @@ export function SearchStatusPill({
   if (resultsCount === 0 && query) {
     return (
       <span
-        style={{
-          display: "inline-flex",
-          alignItems: "center",
-          gap: 4,
-          padding: "3px 10px",
-          borderRadius: 999,
-          fontSize: 12,
-          fontWeight: 700,
-          whiteSpace: "nowrap",
-          background: "rgba(235, 102, 81, 0.1)",
-          color: "#eb6651",
-          border: "1px solid rgba(235, 102, 81, 0.3)",
-        }}
+        className="inline-flex items-center gap-1 px-[10px] py-[3px] rounded-full text-xs font-bold whitespace-nowrap bg-[rgba(235,102,81,0.1)] text-[#eb6651] border border-[rgba(235,102,81,0.3)]"
         role="status"
       >
         No results
@@ -47,19 +35,7 @@ export function SearchStatusPill({
 
   return (
     <span
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 4,
-        padding: "3px 10px",
-        borderRadius: 999,
-        fontSize: 12,
-        fontWeight: 700,
-        whiteSpace: "nowrap",
-        background: "rgba(235, 102, 81, 0.1)",
-        color: "#eb6651",
-        border: "1px solid rgba(235, 102, 81, 0.3)",
-      }}
+      className="inline-flex items-center gap-1 px-[10px] py-[3px] rounded-full text-xs font-bold whitespace-nowrap bg-[rgba(235,102,81,0.1)] text-[#eb6651] border border-[rgba(235,102,81,0.3)]"
       role="status"
     >
       {formatted} results

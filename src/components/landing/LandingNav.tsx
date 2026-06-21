@@ -45,8 +45,7 @@ export default function LandingNav({ session, persona, onPersonaChange }: Landin
           <div className="hidden md:flex items-center gap-1 ml-8">
             <Link
               href="#how-it-works"
-              className="px-3 py-1.5 rounded-md text-sm no-underline transition-colors"
-              style={{ color: "var(--muted)" }}
+              className="px-3 py-1.5 rounded-md text-sm no-underline transition-colors text-[var(--muted)]"
               onMouseEnter={(e) => e.currentTarget.style.color = "var(--ink)"}
               onMouseLeave={(e) => e.currentTarget.style.color = "var(--muted)"}
             >
@@ -54,8 +53,7 @@ export default function LandingNav({ session, persona, onPersonaChange }: Landin
             </Link>
             <Link
               href="#for-employers"
-              className="px-3 py-1.5 rounded-md text-sm no-underline transition-colors"
-              style={{ color: "var(--muted)" }}
+              className="px-3 py-1.5 rounded-md text-sm no-underline transition-colors text-[var(--muted)]"
               onMouseEnter={(e) => e.currentTarget.style.color = "var(--ink)"}
               onMouseLeave={(e) => e.currentTarget.style.color = "var(--muted)"}
             >
@@ -63,8 +61,7 @@ export default function LandingNav({ session, persona, onPersonaChange }: Landin
             </Link>
             <Link
               href="#testimonials"
-              className="px-3 py-1.5 rounded-md text-sm no-underline transition-colors"
-              style={{ color: "var(--muted)" }}
+              className="px-3 py-1.5 rounded-md text-sm no-underline transition-colors text-[var(--muted)]"
               onMouseEnter={(e) => e.currentTarget.style.color = "var(--ink)"}
               onMouseLeave={(e) => e.currentTarget.style.color = "var(--muted)"}
             >
@@ -72,8 +69,7 @@ export default function LandingNav({ session, persona, onPersonaChange }: Landin
             </Link>
             <Link
               href="#comparison"
-              className="px-3 py-1.5 rounded-md text-sm no-underline transition-colors"
-              style={{ color: "var(--muted)" }}
+              className="px-3 py-1.5 rounded-md text-sm no-underline transition-colors text-[var(--muted)]"
               onMouseEnter={(e) => e.currentTarget.style.color = "var(--ink)"}
               onMouseLeave={(e) => e.currentTarget.style.color = "var(--muted)"}
             >
@@ -94,8 +90,7 @@ export default function LandingNav({ session, persona, onPersonaChange }: Landin
               <>
                 <Link
                   href="/login"
-                  className="hidden sm:inline-flex px-3 py-2 rounded-lg text-sm no-underline transition-colors"
-                  style={{ color: "var(--muted)" }}
+                  className="hidden sm:inline-flex px-3 py-2 rounded-lg text-sm no-underline transition-colors text-[var(--muted)]"
                   onMouseEnter={(e) => e.currentTarget.style.color = "var(--ink)"}
                   onMouseLeave={(e) => e.currentTarget.style.color = "var(--muted)"}
                 >
@@ -118,8 +113,7 @@ export default function LandingNav({ session, persona, onPersonaChange }: Landin
             )}
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
-              className="md:hidden p-1.5 rounded-md"
-              style={{ color: "var(--muted)" }}
+              className="md:hidden p-1.5 rounded-md text-[var(--muted)]"
             >
               {mobileOpen ? <X className="size-5" /> : <Menu className="size-5" />}
             </button>
@@ -155,17 +149,17 @@ export default function LandingNav({ session, persona, onPersonaChange }: Landin
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="md:hidden pb-3 space-y-1 px-6" style={{ borderTop: "1px solid var(--border)" }}>
-          <Link href="#how-it-works" className="block px-3 py-2 rounded-md text-sm no-underline transition-colors" style={{ color: "var(--muted)" }} onMouseEnter={(e) => e.currentTarget.style.color = "var(--ink)"} onMouseLeave={(e) => e.currentTarget.style.color = "var(--muted)"}>
+        <div className="md:hidden pb-3 space-y-1 px-6 border-t border-[var(--border)]">
+          <Link href="#how-it-works" className="block px-3 py-2 rounded-md text-sm no-underline transition-colors text-[var(--muted)]" onMouseEnter={(e) => e.currentTarget.style.color = "var(--ink)"} onMouseLeave={(e) => e.currentTarget.style.color = "var(--muted)"}>
             How it works
           </Link>
-          <Link href="#for-employers" className="block px-3 py-2 rounded-md text-sm no-underline transition-colors" style={{ color: "var(--muted)" }} onMouseEnter={(e) => e.currentTarget.style.color = "var(--ink)"} onMouseLeave={(e) => e.currentTarget.style.color = "var(--muted)"}>
+          <Link href="#for-employers" className="block px-3 py-2 rounded-md text-sm no-underline transition-colors text-[var(--muted)]" onMouseEnter={(e) => e.currentTarget.style.color = "var(--ink)"} onMouseLeave={(e) => e.currentTarget.style.color = "var(--muted)"}>
             For employers
           </Link>
-          <Link href="#testimonials" className="block px-3 py-2 rounded-md text-sm no-underline transition-colors" style={{ color: "var(--muted)" }} onMouseEnter={(e) => e.currentTarget.style.color = "var(--ink)"} onMouseLeave={(e) => e.currentTarget.style.color = "var(--muted)"}>
+          <Link href="#testimonials" className="block px-3 py-2 rounded-md text-sm no-underline transition-colors text-[var(--muted)]" onMouseEnter={(e) => e.currentTarget.style.color = "var(--ink)"} onMouseLeave={(e) => e.currentTarget.style.color = "var(--muted)"}>
             Testimonials
           </Link>
-          <Link href="#comparison" className="block px-3 py-2 rounded-md text-sm no-underline transition-colors" style={{ color: "var(--muted)" }} onMouseEnter={(e) => e.currentTarget.style.color = "var(--ink)"} onMouseLeave={(e) => e.currentTarget.style.color = "var(--muted)"}>
+          <Link href="#comparison" className="block px-3 py-2 rounded-md text-sm no-underline transition-colors text-[var(--muted)]" onMouseEnter={(e) => e.currentTarget.style.color = "var(--ink)"} onMouseLeave={(e) => e.currentTarget.style.color = "var(--muted)"}>
             Comparison
           </Link>
         </div>

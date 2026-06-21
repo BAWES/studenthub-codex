@@ -202,10 +202,8 @@ export default function TestimonialCarousel({
         {/* Testimonial card — solid */}
         <div
           key={active}
-          className="relative rounded-xl p-8 md:p-10 text-center overflow-hidden shLandingCardStrong"
+          className="relative rounded-xl p-8 md:p-10 text-center overflow-hidden shLandingCardStrong bg-[var(--surface)] border border-[var(--border)]"
           style={{
-            backgroundColor: "var(--surface)",
-            border: "1px solid var(--border)",
             animation: "shLandingFadeIn 400ms ease",
           }}
         >
@@ -215,8 +213,7 @@ export default function TestimonialCarousel({
           </div>
 
           <blockquote
-            className="text-[clamp(16px,1.8vw,20px)] leading-relaxed mb-6 font-medium relative z-[1]"
-            style={{ color: "var(--ink)" }}
+            className="text-[clamp(16px,1.8vw,20px)] leading-relaxed mb-6 font-medium relative z-[1] text-[var(--ink)]"
           >
             &ldquo;{t.quote}&rdquo;
           </blockquote>
@@ -248,14 +245,12 @@ export default function TestimonialCarousel({
             </div>
             <div className="text-left">
               <strong
-                className="block text-sm"
-                style={{ color: "var(--ink)" }}
+                className="block text-sm text-[var(--ink)]"
               >
                 {t.name}
               </strong>
               <span
-                className="text-xs"
-                style={{ color: "var(--muted)" }}
+                className="text-xs text-[var(--muted)]"
               >
                 {t.title} — {t.company}
               </span>

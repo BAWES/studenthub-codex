@@ -19,8 +19,7 @@ export default function Error({
       {error.digest ? <small className="text-[var(--muted)]">Error ID: {error.digest}</small> : null}
       <button
         onClick={reset}
-        className="mt-2 h-10 rounded-lg px-4 text-sm font-semibold text-white"
-        style={{ background: "var(--sh-info)" }}
+        className="mt-2 h-10 rounded-lg px-4 text-sm font-semibold text-white bg-[var(--sh-info)]"
       >
         Try again
       </button>

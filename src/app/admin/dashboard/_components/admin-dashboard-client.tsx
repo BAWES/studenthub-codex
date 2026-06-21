@@ -127,8 +127,7 @@ export function AdminDashboardClient({ session, dashboard }: Props) {
             <div className="space-y-4">
               {/* Visual bar */}
               <div
-                className="flex h-2 w-full overflow-hidden rounded-full"
-                style={{ background: "var(--border)" }}
+                className="flex h-2 w-full overflow-hidden rounded-full bg-border"
                 aria-hidden="true"
               >
                 {dashboard.statusMix.map((status) => {
@@ -180,7 +179,7 @@ export function AdminDashboardClient({ session, dashboard }: Props) {
 
       {/* ── PR Merge Metrics ── */}
       <section className="mb-6" aria-label="PR merge time-to-merge metrics">
-        <div className="rounded-lg border border-[var(--border)] bg-card p-5">
+        <div className="rounded-lg border border-border bg-card p-5">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-base font-semibold text-foreground">
               PR Time-to-Merge
@@ -227,7 +226,7 @@ export function AdminDashboardClient({ session, dashboard }: Props) {
                   >
                     Recent merges
                   </h3>
-                  <div className="divide-y divide-[var(--border)]">
+                  <div className="divide-y divide-border">
                     {dashboard.recentPrMergeTimes.map((pr) => {
                       const fmtHours =
                         pr.hours < 1
@@ -318,8 +317,8 @@ function DataListCard({
   emptyMessage?: string;
 }) {
   return (
-    <div className="rounded-lg border border-[var(--border)] bg-card">
-      <div className="flex items-center justify-between border-b border-[var(--border)] px-4 py-3">
+    <div className="rounded-lg border border-border bg-card">
+      <div className="flex items-center justify-between border-b border-border px-4 py-3">
         <div>
           <span
             className="text-xs font-medium uppercase tracking-wider text-muted-foreground"
@@ -331,13 +330,13 @@ function DataListCard({
           </h3>
         </div>
         <span
-          className="text-xs tabular-nums bg-[var(--surface)] rounded-full px-2 py-0.5 text-muted-foreground"
+          className="text-xs tabular-nums bg-card rounded-full px-2 py-0.5 text-muted-foreground"
         >
           {items.length}
         </span>
       </div>
 
-      <div className="divide-y divide-[var(--border)]">
+      <div className="divide-y divide-border">
         {items.length > 0 ? (
           items.map((item) => (
             <Link

@@ -49,14 +49,11 @@ export default function PersonaSwitcher({
       className={cn(
         "flex flex-wrap items-center justify-center gap-1.5 p-1 rounded-2xl",
         "w-fit mx-auto",
+        "bg-[var(--surface)] border border-[var(--border)]",
         className,
       )}
       role="tablist"
       aria-label="Select your role to see tailored information"
-      style={{
-        background: "var(--surface)",
-        border: "1px solid var(--border)",
-      }}
     >
       {personas.map((p) => {
         const Icon = p.icon;
@@ -80,20 +77,14 @@ export default function PersonaSwitcher({
             {/* Active glow indicator */}
             {isActive && (
               <span
-                className="absolute inset-0 rounded-xl pointer-events-none"
-                style={{
-                  background: "var(--sh-info-bg)",
-                  border: "1px solid var(--border)",
-                  boxShadow: "0 2px 8px rgba(16,24,40,0.06)",
-                }}
+                className="absolute inset-0 rounded-xl pointer-events-none bg-[var(--sh-info-bg)] border border-[var(--border)] shadow-[0_2px_8px_rgba(16,24,40,0.06)]"
               />
             )}
 
             {/* Shimmer dot on active */}
             {isActive && (
               <span
-                className="absolute -top-1 left-1/2 -translate-x-1/2 size-1.5 rounded-full"
-                style={{ background: "var(--sh-info)" }}
+                className="absolute -top-1 left-1/2 -translate-x-1/2 size-1.5 rounded-full bg-[var(--sh-info)]"
                 aria-hidden="true"
               />
             )}
@@ -111,12 +102,8 @@ export default function PersonaSwitcher({
                 "absolute -bottom-7 left-1/2 -translate-x-1/2 whitespace-nowrap",
                 "text-[10px] font-medium px-2 py-0.5 rounded-md",
                 "opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none",
+                "bg-[var(--surface)] border border-[var(--border)] text-[var(--muted)]",
               )}
-              style={{
-                background: "var(--surface)",
-                border: "1px solid var(--border)",
-                color: "var(--muted)",
-              }}
             >
               {p.subtitle}
             </span>

@@ -58,7 +58,7 @@ export default async function AdminPaymentDetailPage({
             {
               label: "Status",
               value: (
-                <span style={{ color: statusColor, fontWeight: 600 }}>
+                <span className="font-semibold" style={{ color: statusColor }}>
                   {p.status ?? "Unknown"}
                 </span>
               ),

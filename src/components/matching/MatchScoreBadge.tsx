@@ -52,22 +52,17 @@ export default function MatchScoreBadge({
 
   return (
     <div
+      className="inline-flex items-center gap-2 rounded-full text-[13px] font-semibold"
       style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: "8px",
         padding: score !== null ? "2px 10px 2px 8px" : "2px 10px",
-        borderRadius: "9999px",
         backgroundColor: bg,
         border: `1px solid ${color}20`,
-        fontSize: "0.8125rem",
-        fontWeight: 600,
       }}
       title={`${label}: ${score ?? "N/A"} — ${text}`}
       data-testid="match-score-badge"
     >
       {/* Score number */}
-      <span style={{ color, minWidth: "28px", textAlign: "right" }}>
+      <span className="min-w-[28px] text-right" style={{ color }}>
         {score !== null ? `${score}%` : "—"}
       </span>
 
@@ -88,7 +83,7 @@ export default function MatchScoreBadge({
 
       {/* Status label — only shown for non-null */}
       {score !== null && (
-        <span style={{ color: "var(--muted)", fontWeight: 400 }}>
+        <span className="text-[var(--muted)] font-normal">
           {text}
         </span>
       )}

@@ -30,15 +30,10 @@ function TrustBar() {
   return (
     <section className="scroll-mt-20" aria-label="Trusted organizations">
       <div
-        className="relative overflow-hidden rounded-xl p-6 sm:p-8 text-center"
-        style={{
-          backgroundColor: "var(--surface)",
-          border: "1px solid var(--border)",
-        }}
+        className="relative overflow-hidden rounded-xl p-6 sm:p-8 text-center bg-[var(--surface)] border border-[var(--border)]"
       >
         <p
-          className="text-center text-[11px] font-bold uppercase tracking-wider mb-5"
-          style={{ color: "var(--muted)" }}
+          className="text-center text-[11px] font-bold uppercase tracking-wider mb-5 text-[var(--muted)]"
         >
           Trusted by leading organizations across Kuwait
         </p>
@@ -46,8 +41,7 @@ function TrustBar() {
           {["Alshaya", "KIPCO", "NBK", "Zain", "Kuwait Airways", "GUST"].map((name) => (
             <span
               key={name}
-              className="text-sm font-bold tracking-tight"
-              style={{ color: "var(--ink)" }}
+              className="text-sm font-bold tracking-tight text-[var(--ink)]"
             >
               {name}
             </span>
@@ -83,6 +77,7 @@ export default function LandingPage({ session }: LandingPageProps) {
 
   return (
     <div
+      className="bg-[var(--paper)] min-h-svh"
       style={{
         "--sh-blue": SH_BLUE,
         "--sh-amber": SH_CORAL,
@@ -91,11 +86,10 @@ export default function LandingPage({ session }: LandingPageProps) {
         "--sh-coral-hover": "#d45441",
         "--sh-coral-glow": `0 0 12px ${SH_CORAL}40`,
         "--sh-amber-glow": `0 4px 14px ${SH_CORAL}50`,
-        backgroundColor: "var(--paper)",
-        minHeight: "100svh",
+
       } as React.CSSProperties}
     >
-      <a href="#main-content" className="skipLink" style={{ color: "var(--ink)" }}>
+      <a href="#main-content" className="skipLink text-[var(--ink)]">
         Skip to content
       </a>
       <LandingNav

@@ -28,7 +28,7 @@ export function AdminAwsTable({ session, entries, awsResult }: Props) {
     >
       {/* Summary card */}
       <section className="mb-6">
-        <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
+        <div className="rounded-lg border border-border bg-card p-5">
           <h3 className="text-sm font-semibold mb-3 text-foreground">
             Connection summary
           </h3>
@@ -65,10 +65,10 @@ export function AdminAwsTable({ session, entries, awsResult }: Props) {
 
       {/* Config entries table */}
       {hasEntries ? (
-        <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] overflow-hidden">
+        <div className="rounded-lg border border-border bg-card overflow-hidden">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-[var(--border)]">
+              <tr className="border-b border-border">
                 <th
                   className="text-left px-4 py-3 text-xs font-medium uppercase tracking-wide text-muted-foreground"
                 >
@@ -85,12 +85,12 @@ export function AdminAwsTable({ session, entries, awsResult }: Props) {
               {entries.map((entry) => (
                 <tr
                   key={entry.key}
-                  className="border-t border-[var(--border)] first:border-t-0"
+                  className="border-t border-border first:border-t-0"
                 >
                   <td className="px-4 py-3 font-mono text-xs text-foreground">
                     {entry.key}
                   </td>
-                  <td className="px-4 py-3 font-mono text-xs" style={{ color: entry.value ? "var(--ink)" : "var(--muted)" }}>
+                  <td className={`px-4 py-3 font-mono text-xs ${entry.value ? "text-[var(--ink)]" : "text-muted-foreground"}`}>
                     {entry.value || "—"}
                   </td>
                 </tr>
@@ -99,7 +99,7 @@ export function AdminAwsTable({ session, entries, awsResult }: Props) {
           </table>
         </div>
       ) : (
-        <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-8 text-center">
+        <div className="rounded-lg border border-border bg-card p-8 text-center">
           <p className="text-sm text-muted-foreground">
             No AWS config keys found. Configure them in the server environment.
           </p>
