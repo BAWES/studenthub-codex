@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
 
@@ -85,7 +86,7 @@ const mockSettings = {
 
 const mockGetAdminCompanySettings = vi.fn();
 
-vi.mock("@/app/admin/company-settings/actions", () => ({
+vi.mock("@/modules/admin/company-settings/actions", () => ({
   getAdminCompanySettings: (...args: unknown[]) => mockGetAdminCompanySettings(...args),
 }));
 
