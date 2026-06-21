@@ -1373,9 +1373,6 @@ h2 {
 
 .environment span,
 .metric span,
-.rowMain span,
-.rowMeta span,
-.rowMeta small,
 .focus p,
 .rail li {
   color: var(--muted);
@@ -3392,31 +3389,7 @@ tr:last-child td {
 
 
 
-.rowMain,
-.rowMeta {
-  min-width: 0;
-  display: grid;
-  align-content: center;
-  gap: 6px;
-}
 
-
-
-.rowMain a {
-  color: inherit;
-  text-decoration: none;
-}
-
-.rowMain a:hover {
-  color: var(--blue);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-.rowMeta {
-  justify-items: end;
-  text-align: right;
-}
 
 
 
