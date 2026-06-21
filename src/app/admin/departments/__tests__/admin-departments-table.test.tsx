@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
 import { render, screen, waitFor, cleanup } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -212,6 +213,14 @@ describe("AdminDepartmentsTable", () => {
 
     await waitFor(() => {
       expect(screen.getByText("Department name already exists")).toBeTruthy();
+    });
+  });
+
+  it("renders form inputs without inline style attributes", () => {
+    renderTable();
+    const inputs = document.querySelectorAll("input");
+    inputs.forEach((input) => {
+      expect(input.getAttribute("style")).toBeNull();
     });
   });
 });

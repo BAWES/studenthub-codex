@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { DataTable } from "@/modules/workspace/DataTable";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
+import { Badge } from "@/components/ui/badge";
 
 import type { SessionUser } from "@/modules/auth/types";
 import type { CurrencyItem } from "../schemas";
@@ -37,8 +38,7 @@ export function AdminCurrenciesTable({ session, currencies }: Props) {
             label: "Code",
             render: (row) => (
               <code
-                className="text-sm font-mono font-semibold"
-                style={{ color: "var(--accent)" }}
+                className="text-sm font-mono font-semibold text-[var(--accent)]"
               >
                 {row.code}
               </code>
@@ -81,19 +81,9 @@ export function AdminCurrenciesTable({ session, currencies }: Props) {
             key: "status",
             label: "Status",
             render: (row) => (
-              <span
-                className={`text-xs px-2 py-0.5 rounded-full ${
-                  row.status ? "" : ""
-                }`}
-                style={{
-                  color: row.status ? "var(--sh-success)" : "var(--muted)",
-                  background: row.status
-                    ? "color-mix(in srgb, var(--sh-success) 10%, transparent)"
-                    : "color-mix(in srgb, var(--border) 30%, transparent)",
-                }}
-              >
+              <Badge variant={row.status ? "success" : "secondary"}>
                 {row.status ? "Active" : "Inactive"}
-              </span>
+              </Badge>
             ),
           },
           {
