@@ -215,4 +215,12 @@ describe("AdminDepartmentsTable", () => {
       expect(screen.getByText("Department name already exists")).toBeTruthy();
     });
   });
+
+  it("renders form inputs without inline style attributes", () => {
+    renderTable();
+    const inputs = document.querySelectorAll("input");
+    inputs.forEach((input) => {
+      expect(input.getAttribute("style")).toBeNull();
+    });
+  });
 });
