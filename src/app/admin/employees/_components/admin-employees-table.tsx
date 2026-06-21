@@ -152,6 +152,9 @@ function CreateEmployeeForm({
   );
   const formRef = useRef<HTMLFormElement>(null);
 
+  const inputStyle =
+    "h-9 rounded-lg px-3 text-sm border bg-[var(--surface)] border-[var(--border)] text-[var(--ink)]";
+
   return (
     <form
       ref={formRef}
@@ -167,7 +170,7 @@ function CreateEmployeeForm({
             required
             maxLength={255}
             placeholder="Full name"
-            className="h-9 rounded-lg px-3 text-sm border bg-[var(--surface)] border-[var(--border)] text-[var(--ink)] w-full"
+            className={inputStyle}
           />
         </div>
         <div className="grid gap-1">
@@ -178,7 +181,7 @@ function CreateEmployeeForm({
             required
             maxLength={255}
             placeholder="email@company.com"
-            className="h-9 rounded-lg px-3 text-sm border bg-[var(--surface)] border-[var(--border)] text-[var(--ink)] w-full"
+            className={inputStyle}
           />
         </div>
         <div className="grid gap-1">
@@ -187,7 +190,7 @@ function CreateEmployeeForm({
             name="employeePhone"
             maxLength={45}
             placeholder="+965 9999 9999"
-            className="h-9 rounded-lg px-3 text-sm border bg-[var(--surface)] border-[var(--border)] text-[var(--ink)] w-full"
+            className={inputStyle}
           />
         </div>
         <div className="grid gap-1">
@@ -198,14 +201,14 @@ function CreateEmployeeForm({
             min="0"
             step="0.001"
             placeholder="0.000"
-            className="h-9 rounded-lg px-3 text-sm border bg-[var(--surface)] border-[var(--border)] text-[var(--ink)] w-full"
+            className={inputStyle}
           />
         </div>
         <div className="grid gap-1">
           <label className="text-xs font-medium text-muted-foreground">Department</label>
           <select
             name="departmentUuid"
-            className="h-9 rounded-lg px-3 text-sm border bg-[var(--surface)] border-[var(--border)] text-[var(--ink)] w-full"
+            className={inputStyle}
           >
             <option value="">— None —</option>
             {departments.map((d) => (
@@ -217,7 +220,7 @@ function CreateEmployeeForm({
           <label className="text-xs font-medium text-muted-foreground">Designation</label>
           <select
             name="designationUuid"
-            className="h-9 rounded-lg px-3 text-sm border bg-[var(--surface)] border-[var(--border)] text-[var(--ink)] w-full"
+            className={inputStyle}
           >
             <option value="">— None —</option>
             {designations.map((d) => (

@@ -83,9 +83,7 @@ export function AdminCurrencyTable({ session, records, total }: Props) {
             render: (row) => (
               <span
                 className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
-                  row.status
-                    ? "bg-green-500/10 text-green-600"
-                    : "bg-red-500/10 text-red-600"
+                  row.status ? "bg-green-500/10 text-green-600 dark:text-green-400" : "bg-red-500/10 text-red-600 dark:text-red-400"
                 }`}
               >
                 {row.status ? "Active" : "Inactive"}
