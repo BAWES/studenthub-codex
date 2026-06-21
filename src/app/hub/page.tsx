@@ -1,16 +1,16 @@
-import type { Route } from "next";
-import Link from "next/link";
-import { logoutAction } from "@/modules/auth/actions";
 import { requireSession } from "@/modules/auth/session";
-import { roles, type Role } from "@/modules/auth/types";
 import { getUnifiedHub, parseHubScope } from "@/modules/hub/data";
-import { HubShortcuts, type HubCommand } from "@/modules/hub/HubShortcuts";
-import { ThemeToggle } from "@/modules/theme/ThemeToggle";
+import { HubContent } from "@/modules/hub/HubContent";
+import type { HubContentData } from "@/modules/hub/HubContent";
+import type { HubCommand } from "@/modules/hub/HubShortcuts";
+import type { SessionUser } from "@/modules/auth/types";
+import type { Route } from "next";
+import type { Role } from "@/modules/auth/types";
 
 export const dynamic = "force-dynamic";
 
 export default async function HubPage({
-  searchParams
+  searchParams,
 }: {
   searchParams: Promise<{ q?: string; scope?: string; record?: string; required?: string }>;
 }) {
@@ -19,267 +19,21 @@ export default async function HubPage({
   const scope = parseHubScope(params.scope);
   const requiredRole = parseRequiredRole(params.required);
   const data = await getUnifiedHub(session, { query: params.q, scope, record: params.record });
-  const hubContext = hubContextHref(data.query, data.scope);
   const commands = buildCommands(data);
   const guide = buildRoleGuide(session.role, data);
 
   return (
-    <main className="commandOS">
-      <aside className="commandRail">
-        <Link className="commandBrand" href="/app" aria-label="StudentHub command home">
-          <span>SH</span>
-          <strong>StudentHub</strong>
-        </Link>
-
-        <nav className="commandRailNav" aria-label="Workspace navigation">
-          {data.navigation.map((item) => (
-            <Link
-              className={item.href === hubContext || item.href === "/app" ? "active" : ""}
-              href={item.href}
-              key={item.href}
-              title={`${item.label}: ${item.description}`}
-            >
-              <strong>{item.label}</strong>
-              <small>{item.description}</small>
-            </Link>
-          ))}
-        </nav>
-
-        <div className="commandRailFooter">
-          <ThemeToggle />
-          <form className="commandRailSignout" action={logoutAction}>
-            <button type="submit">Sign out</button>
-          </form>
-        </div>
-      </aside>
-
-      <section className="commandDesk">
-        <header className="commandTopbar">
-          <div className="commandIdentity">
-            <span>{session.role}</span>
-            <strong>{session.name}</strong>
-            <small>{session.email}</small>
-          </div>
-          <form className="commandSearch">
-            <input
-              aria-label="Find records"
-              data-command-search
-              defaultValue={data.query}
-              id="hub-search"
-              name="q"
-              placeholder="Search candidates, companies, requests, transfers, ID batches"
-            />
-            <input type="hidden" name="scope" value={data.scope} />
-            <button type="submit">Search</button>
-          </form>
-          <HubShortcuts commands={commands} />
-        </header>
-
-        <section className="journeyHome">
-          {requiredRole && requiredRole !== session.role ? (
-            <section className="roleBoundaryNotice" aria-label="Role access notice">
-              <div>
-                <span>Access boundary</span>
-                <strong>You are signed in as {session.role}, not {requiredRole}.</strong>
-                <p>Use the matching production credentials to enter that workspace. This keeps candidate, staff, company, and admin data separated.</p>
-              </div>
-              <Link href="/login">Switch account</Link>
-            </section>
-          ) : null}
-
-          <section className="journeyHero">
-            <div>
-              <span className="journeyEyebrow">Start here</span>
-              <h1>{guide.title}</h1>
-              <p>{guide.description}</p>
-              <div className="journeyHeroActions">
-                <Link className="primary" href={guide.primary.href}>
-                  {guide.primary.label}
-                </Link>
-                <Link href={hubContext}>Open focused search</Link>
-              </div>
-            </div>
-            <aside className="journeyGuardrail">
-              <span>Signed in as {session.role}</span>
-              <strong>{session.name}</strong>
-              <p>{guide.guardrail}</p>
-            </aside>
-          </section>
-
-          <section className="journeyGrid" aria-label={`${session.role} workflows`}>
-            {guide.journeys.map((journey) => (
-              <article className="journeyCard" key={journey.title}>
-                <div className="journeyCardHeader">
-                  <span>{journey.kicker}</span>
-                  <strong>{journey.title}</strong>
-                  <p>{journey.description}</p>
-                </div>
-                <ol className="journeySteps">
-                  {journey.steps.map((step, index) => (
-                    <li key={step}>
-                      <span>{index + 1}</span>
-                      <strong>{step}</strong>
-                    </li>
-                  ))}
-                </ol>
-                <Link href={journey.href}>{journey.action}</Link>
-              </article>
-            ))}
-          </section>
-
-          <section className="journeyWorkbench" aria-label="Search and live queues">
-            <div className="journeyPanel">
-              <div className="journeyPanelHeader">
-                <span>Live queues</span>
-                <strong>What needs attention</strong>
-              </div>
-              <div className="journeyQueueGrid">
-                {data.queues.map((queue) => {
-                  const content = (
-                    <>
-                      <span>{queue.label}</span>
-                      <strong>{queue.value.toLocaleString("en-US")}</strong>
-                      <small>{queue.note}</small>
-                    </>
-                  );
-                  return queue.href ? (
-                    <Link className="journeyQueue" href={queue.href as Route} key={queue.label}>
-                      {content}
-                    </Link>
-                  ) : (
-                    <article className="journeyQueue" key={queue.label}>
-                      {content}
-                    </article>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className="journeyPanel">
-              <div className="journeyPanelHeader">
-                <span>{data.scope}</span>
-                <strong>{data.query ? `Search results for ${data.query}` : "Find a record"}</strong>
-              </div>
-              <nav className="journeyScopePills" aria-label="Search scopes">
-                {data.scopes.map((item) => {
-                  const query = data.query ? `&q=${encodeURIComponent(data.query)}` : "";
-                  return (
-                    <Link
-                      className={item.value === data.scope ? "active" : ""}
-                      href={`/app?scope=${item.value}${query}` as Route}
-                      key={item.value}
-                    >
-                      {item.label}
-                    </Link>
-                  );
-                })}
-              </nav>
-              <div className="journeyResults">
-                {data.results.slice(0, 6).map((result) => (
-                  <Link href={hubRecordHref(data.query, data.scope, result.id)} key={result.id}>
-                    <span>{result.type}</span>
-                    <strong>{result.title}</strong>
-                    <small>{result.meta}</small>
-                  </Link>
-                ))}
-                {data.results.length === 0 ? <p>No matching records for this login and scope.</p> : null}
-              </div>
-            </div>
-
-            {data.preview ? <RecordPreview preview={data.preview} /> : null}
-          </section>
-        </section>
-      </section>
-    </main>
+    <HubContent
+      data={data as unknown as HubContentData}
+      guide={guide}
+      commands={commands}
+      session={session}
+      requiredRole={requiredRole}
+    />
   );
 }
 
-function RecordPreview({ preview }: { preview: NonNullable<HubData["preview"]> }) {
-  return (
-    <section className="journeyPanel previewPanel" aria-label="Selected record preview">
-      <div className="previewHeader">
-        <span>{preview.type}</span>
-        <h2>{preview.title}</h2>
-        <p>{preview.subtitle}</p>
-        <small>{preview.meta}</small>
-      </div>
-
-      {preview.flags.length ? (
-        <div className="previewFlags">
-          {preview.flags.map((flag) => (
-            <span key={flag}>{flag}</span>
-          ))}
-        </div>
-      ) : null}
-
-      {preview.actions.length ? (
-        <div className="previewActions">
-          {preview.actions.map((action) => (
-            <a href={action.href} key={`${action.label}-${action.href}`}>
-              {action.label}
-            </a>
-          ))}
-        </div>
-      ) : null}
-
-      <div className="previewFacts">
-        {preview.facts.map((fact) => (
-          <div key={fact.label}>
-            <span>{fact.label}</span>
-            <strong>{fact.value}</strong>
-          </div>
-        ))}
-      </div>
-
-      {preview.related.length ? (
-        <div className="previewRelated">
-          {preview.related.map((section) => (
-            <section key={section.title}>
-              <div className="previewRelatedHeader">
-                <span>Related</span>
-                <h3>{section.title}</h3>
-              </div>
-              {section.rows.length ? (
-                section.rows.map((row) =>
-                  row.href ? (
-                    <Link className="previewRow" href={row.href} key={row.id}>
-                      <strong>{row.title}</strong>
-                      <span>{row.subtitle}</span>
-                      <small>{row.meta}</small>
-                    </Link>
-                  ) : (
-                    <article className="previewRow" key={row.id}>
-                      <strong>{row.title}</strong>
-                      <span>{row.subtitle}</span>
-                      <small>{row.meta}</small>
-                    </article>
-                  )
-                )
-              ) : (
-                <p className="previewEmpty">No related records visible to this login.</p>
-              )}
-            </section>
-          ))}
-        </div>
-      ) : null}
-    </section>
-  );
-}
-
-function hubContextHref(query: string, scope: string) {
-  const params = new URLSearchParams();
-  if (query) params.set("q", query);
-  params.set("scope", scope);
-  return `/app?${params.toString()}` as Route;
-}
-
-function hubRecordHref(query: string, scope: string, record: string) {
-  const params = new URLSearchParams();
-  if (query) params.set("q", query);
-  params.set("scope", scope);
-  params.set("record", record);
-  return `/app?${params.toString()}` as Route;
-}
+const roles: Role[] = ["admin", "staff", "candidate", "company", "inspector"];
 
 function parseRequiredRole(value: string | string[] | undefined): Role | null {
   const role = Array.isArray(value) ? value[0] : value;
@@ -557,4 +311,12 @@ function buildCommands(data: Awaited<ReturnType<typeof getUnifiedHub>>): HubComm
   );
 
   return commands;
+}
+
+function hubRecordHref(query: string, scope: string, record: string) {
+  const params = new URLSearchParams();
+  if (query) params.set("q", query);
+  params.set("scope", scope);
+  params.set("record", record);
+  return `/app?${params.toString()}` as Route;
 }
