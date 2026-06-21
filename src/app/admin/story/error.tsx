@@ -1,26 +1,30 @@
 "use client";
 
-export default function Error({
+import { useEffect } from "react";
+
+export default function AdminStoryError({
   error,
   reset,
 }: {
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  useEffect(() => {
+    console.error("[admin/story] Error:", error);
+  }, [error]);
+
   return (
-    <div className="flex flex-col items-center justify-center py-24 gap-4">
-      <span className="text-4xl" aria-hidden="true">⚠️</span>
-      <h2 className="text-xl font-bold" style={{ color: "var(--ink)" }}>
+    <div className="flex flex-col items-center justify-center min-h-[40vh] gap-4 p-8">
+      <h2 className="text-xl font-semibold text-destructive">
         Something went wrong
       </h2>
-      <p className="text-sm max-w-md text-center" style={{ color: "var(--muted)" }}>
-        {error.message ?? "An unexpected error occurred while loading the stories page."}
+      <p className="text-muted-foreground text-sm max-w-md text-center">
+        An error occurred while loading the story management page. Please try
+        again.
       </p>
-      {error.digest ? <small style={{ color: "var(--muted)" }}>Error ID: {error.digest}</small> : null}
       <button
         onClick={reset}
-        className="mt-2 h-10 rounded-lg px-4 text-sm font-semibold"
-        style={{ background: "var(--sh-info)", color: "#fff" }}
+        className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow hover:bg-primary/90 transition-colors"
       >
         Try again
       </button>

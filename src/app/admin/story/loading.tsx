@@ -1,17 +1,20 @@
-import { DataTableSkeleton } from "@/modules/workspace/Skeletons";
+import { Skeleton } from "@/components/ui/skeleton";
 
-export default function AdminStoriesLoading() {
+export default function AdminStoryLoading() {
   return (
-    <div className="shell shellEmbedded">
-      <section className="workspaceStage">
-        <section className="topbar">
-          <div>
-            <div className="h-3 w-24 mb-2 rounded bg-white/5 animate-pulse" />
-            <div className="h-7 w-48 rounded bg-white/5 animate-pulse" />
-          </div>
-        </section>
-        <DataTableSkeleton rows={6} />
-      </section>
+    <div className="p-6 space-y-6">
+      <div className="space-y-1">
+        <Skeleton className="h-4 w-20" />
+        <Skeleton className="h-8 w-64" />
+      </div>
+      <div className="rounded-lg border">
+        <div className="p-6 space-y-4">
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-10 w-full" />
+        </div>
+      </div>
     </div>
   );
 }
