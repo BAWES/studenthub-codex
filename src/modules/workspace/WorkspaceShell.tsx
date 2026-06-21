@@ -4,6 +4,7 @@ import type { SessionUser } from "@/modules/auth/types";
 import type { Route } from "next";
 import { logoutAction } from "@/modules/auth/actions";
 import { ThemeToggle } from "@/modules/theme/ThemeToggle";
+import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { navForRole } from "./navigation";
 import { WorkspaceMobileNavigation, WorkspaceNavigation } from "./WorkspaceNavigation";
@@ -52,8 +53,10 @@ export function WorkspaceShell({
       <WorkspaceNavigation items={navItems} role={session.role} />
       <div className="w-full grid gap-2">
         <ThemeToggle />
-        <form className="workspaceSignout" action={logoutAction}>
-          <button type="submit">Sign out</button>
+        <form action={logoutAction}>
+          <Button variant="outline" size="sm" type="submit" className="w-full font-black">
+            Sign out
+          </Button>
         </form>
       </div>
     </aside>
