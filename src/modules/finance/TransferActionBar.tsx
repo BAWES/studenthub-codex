@@ -31,8 +31,8 @@ export function TransferActionBar({ data }: { data: TransferDetail }) {
   const isLocked = data.transfer.transfer_status !== 10;
 
   return (
-    <section className="transferActions">
-      <div className="transferActionButtons">
+    <section className="rounded-lg border border-border bg-card p-4 grid gap-4">
+      <div className="flex flex-wrap gap-2 items-center">
         <form action={toggleTransferStatusAction}>
           <input name="transfer_id" type="hidden" value={data.transfer.transfer_id} />
           <Button type="submit" variant={isLocked ? "secondary" : "outline"}>
@@ -58,7 +58,7 @@ export function TransferActionBar({ data }: { data: TransferDetail }) {
             <CardTitle>Candidate Payouts</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="payoutList">
+            <div className="grid gap-2">
               {data.candidates.map((candidate) => (
                 <CandidatePayoutRow key={candidate.id} candidate={candidate} transferId={data.transfer!.transfer_id} />
               ))}
@@ -74,8 +74,8 @@ function CandidatePayoutRow({ candidate, transferId }: { candidate: TransferDeta
   const isPaid = candidate.meta?.includes("Paid");
 
   return (
-    <div className="payoutRow">
-      <div>
+    <div className="flex items-center justify-between gap-4 py-2 border-b border-border last:border-b-0">
+      <div className="grid gap-0.5">
         <strong>{candidate.title}</strong>
         <span>{candidate.subtitle}</span>
         <small>{candidate.meta}</small>
@@ -94,7 +94,7 @@ function CandidatePayoutRow({ candidate, transferId }: { candidate: TransferDeta
 
 function PaymentReceivedForm({ transferId, currentDate }: { transferId: number; currentDate: Date | null }) {
   return (
-    <form action={markPaymentReceivedAction} className="paymentDateForm">
+    <form action={markPaymentReceivedAction} className="flex items-end gap-2">
       <input name="transfer_id" type="hidden" value={transferId} />
       <Input
         name="received_on"

@@ -23,6 +23,7 @@
   --color-ring: var(--ring);
   --radius: var(--radius);
   --font-size-label: 0.8125rem;
+  --color-blue-zendesk: #1f73b7;
 }
 
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
