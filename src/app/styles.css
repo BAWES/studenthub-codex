@@ -3584,62 +3584,6 @@ tr:last-child td {
   min-height: 100svh;
 }
 
-.commandTopbar {
-  position: sticky;
-  top: 0;
-  z-index: 20;
-  min-height: 64px;
-  display: grid;
-  grid-template-columns: 220px minmax(280px, 1fr) auto;
-  align-items: center;
-  gap: 10px;
-  border-bottom: 1px solid var(--sh-glass-border);
-  background: var(--sh-glass-bg);
-  backdrop-filter: blur(var(--sh-glass-blur));
-  -webkit-backdrop-filter: blur(var(--sh-glass-blur));
-  padding: 10px 14px;
-}
-
-.commandIdentity {
-  min-width: 0;
-  display: grid;
-  gap: 2px;
-}
-
-.commandIdentity span,
-.commandSectionTitle span,
-.commandScopeList small,
-.commandQueue span,
-.commandWorklistHeader span,
-.commandMetaStrip span,
-.commandResultType,
-.commandInspectorHeader span,
-.commandFacts span,
-.commandRelatedHeader span {
-  color: var(--sh-info);
-  font-size: 11px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-.commandIdentity strong,
-.commandIdentity small {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.commandIdentity small {
-  color: var(--muted);
-}
-
-.commandTopbar .commandLauncher {
-  min-height: 42px;
-  border-radius: 8px;
-  box-shadow: none;
-}
-
 .commandTabs {
   display: flex;
   gap: 6px;
@@ -5653,11 +5597,6 @@ kbd {
     min-height: 100svh;
   }
 
-  .commandTopbar {
-    grid-template-columns: 170px minmax(260px, 1fr) auto;
-    top: 101px;
-  }
-
   .commandBody {
     grid-template-columns: 160px minmax(280px, 1fr) 280px;
   }
@@ -5875,13 +5814,6 @@ kbd {
 
   .commandDesk {
     display: block;
-  }
-
-  .commandTopbar {
-    position: sticky;
-    top: 100px;
-    z-index: 30;
-    grid-template-columns: 1fr;
   }
 
   .commandTabs {

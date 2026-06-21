@@ -115,11 +115,11 @@ export function HubContent({
 
   const desk = (
     <section className="commandDesk">
-      <header className="commandTopbar">
-        <div className="commandIdentity">
-          <span>{session.role}</span>
-          <strong>{session.name}</strong>
-          <small>{session.email}</small>
+      <header className="sticky top-0 z-20 min-h-16 grid grid-cols-[220px_minmax(280px,1fr)_auto] items-center gap-2.5 border-b border-border bg-card px-3.5 py-2.5">
+        <div className="min-w-0 grid gap-0.5">
+          <span className="text-[11px] font-extrabold uppercase tracking-wide text-blue-500">{session.role}</span>
+          <strong className="text-foreground overflow-hidden text-ellipsis whitespace-nowrap text-sm">{session.name}</strong>
+          <small className="text-muted-foreground overflow-hidden text-ellipsis whitespace-nowrap text-xs">{session.email}</small>
         </div>
         <form className="flex items-center gap-2">
           <Input
