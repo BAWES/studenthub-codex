@@ -4,10 +4,13 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import type { SessionUser } from "@/modules/auth/types";
+import { Badge, type BadgeProps } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
+import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import { StatusBadge } from "@/modules/workspace/StatusBadge";
 import { genericStatusVariant } from "@/modules/workspace/status-mapping";
 
 // ─── Types ────────────────────────────────────────────────────────────
@@ -54,16 +57,18 @@ function useDebounce<T>(value: T, delay: number): T {
 
 function SearchResultSkeleton() {
   return (
-    <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4 flex flex-col gap-3">
-      <div className="flex items-start justify-between gap-3">
-        <Skeleton variant="pulse" className="h-5 w-40" />
-        <Skeleton variant="pulse" className="h-5 w-16 rounded-md" />
-      </div>
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-2">
-        <Skeleton variant="pulse" className="h-8 w-full" />
-        <Skeleton variant="pulse" className="h-8 w-full" />
-      </div>
-    </div>
+    <Card className="p-4">
+      <CardContent className="flex flex-col gap-3 p-0">
+        <div className="flex items-start justify-between gap-3">
+          <Skeleton className="h-5 w-40" />
+          <Skeleton className="h-5 w-16 rounded-md" />
+        </div>
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-2">
+          <Skeleton className="h-8 w-full" />
+          <Skeleton className="h-8 w-full" />
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -173,22 +178,17 @@ export function EmployerJobsSearchPage({
       {/* Search form */}
       <form className="mb-6" onSubmit={handleSubmit}>
         <div className="flex gap-2">
-          <input
+          <Input
             ref={inputRef}
-            type="text"
-            className="flex-1 rounded-lg border border-[var(--border)] bg-[var(--card)] px-4 py-2.5 text-[0.9375rem] text-[var(--ink)] outline-none transition-[border-color] duration-150 focus:border-[#eb6651] focus:shadow-[0_0_0_3px_rgba(235,102,81,0.15)]"
             placeholder="Search job postings by title, description, requirements..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             autoFocus
+            className="flex-1"
           />
-          <button
-            type="submit"
-            className="rounded-lg bg-[#eb6651] px-6 py-2.5 text-[0.9375rem] font-semibold text-white transition-opacity duration-150 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
-            disabled={loading}
-          >
+          <Button type="submit" disabled={loading}>
             {loading ? "Searching..." : "Search"}
-          </button>
+          </Button>
         </div>
       </form>
 
@@ -209,11 +209,11 @@ export function EmployerJobsSearchPage({
       <div>
         {/* Count indicator */}
         {results && (
-          <div className="mb-4 flex items-center justify-between text-xs">
-            <span className="font-semibold text-[var(--ink)]">
+          <div className="mb-4 flex items-center justify-between">
+            <span className="text-xs font-semibold text-foreground">
               {isTyping ? (
                 <>
-                  <span className="inline-block align-middle mr-1.5 h-2 w-2 rounded-full bg-[var(--sh-coral)] animate-pulse" />
+                  <span className="bg-primary/70 mr-1.5 inline-block h-2 w-2 animate-pulse rounded-full align-middle" />
                   Searching...
                 </>
               ) : (
@@ -224,11 +224,7 @@ export function EmployerJobsSearchPage({
               )}
             </span>
             {!isTyping && (
-              <span
-                className="rounded-md px-2 py-0.5 text-[var(--muted)] bg-[var(--accent)]"
-              >
-                {results.source.current}
-              </span>
+              <Badge variant="secondary">{results.source.current}</Badge>
             )}
           </div>
         )}
@@ -261,75 +257,77 @@ export function EmployerJobsSearchPage({
                 <Link
                   key={row.jobListingId}
                   href={`/employer/jobs/${row.jobListingId}`}
-                  className="block rounded-xl border border-[var(--border)] bg-[var(--card)] p-4 transition-all duration-150 hover:shadow-md hover:-translate-y-px"
+                  className="block transition-all duration-150 hover:-translate-y-px hover:shadow-md"
                   onClick={(e) => {
                     if (e.button === 1 || e.metaKey || e.ctrlKey) return;
                   }}
                 >
-                  {/* Result header */}
-                  <div className="mb-2 flex items-start justify-between gap-3">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="m-0 text-base font-semibold text-[var(--ink)]">
-                        {row.title}
-                      </h3>
-                      {row.status && (
-                        <StatusBadge
-                          variant={genericStatusVariant(row.status)}
-                          label={row.status}
-                          size="sm"
-                        />
+                  <Card className="p-4">
+                    <CardContent className="p-0">
+                      {/* Result header */}
+                      <div className="mb-2 flex items-start justify-between gap-3">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h3 className="m-0 text-base font-semibold text-foreground">
+                            {row.title}
+                          </h3>
+                          {row.status && (
+                            <Badge variant={genericStatusVariant(row.status) as BadgeProps["variant"]}>
+                              {row.status}
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Description excerpt */}
+                      {row.description && (
+                        <p className="mb-2 line-clamp-2 text-sm text-muted-foreground">
+                          {row.description}
+                        </p>
                       )}
-                    </div>
-                  </div>
 
-                  {/* Description excerpt */}
-                  {row.description && (
-                    <p className="m-0 mb-2 text-sm line-clamp-2 text-[var(--muted)]">
-                      {row.description}
-                    </p>
-                  )}
-
-                  {/* Details grid */}
-                  <div className="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-2">
-                    {row.employmentType && (
-                      <div className="flex flex-col gap-0.5">
-                        <span className="text-[0.6875rem] font-medium uppercase tracking-wider text-[var(--muted)]">
-                          Type
-                        </span>
-                        <span className="text-xs text-[var(--ink)]">
-                          {row.employmentType}
-                        </span>
+                      {/* Details grid */}
+                      <div className="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-2">
+                        {row.employmentType && (
+                          <div className="flex flex-col gap-0.5">
+                            <span className="text-[0.6875rem] font-medium uppercase tracking-wider text-muted-foreground">
+                              Type
+                            </span>
+                            <span className="text-xs text-foreground">
+                              {row.employmentType}
+                            </span>
+                          </div>
+                        )}
+                        {row.location && (
+                          <div className="flex flex-col gap-0.5">
+                            <span className="text-[0.6875rem] font-medium uppercase tracking-wider text-muted-foreground">
+                              Location
+                            </span>
+                            <span className="text-xs text-foreground">
+                              {row.location}
+                            </span>
+                          </div>
+                        )}
+                        {row.salaryRange && (
+                          <div className="flex flex-col gap-0.5">
+                            <span className="text-[0.6875rem] font-medium uppercase tracking-wider text-muted-foreground">
+                              Salary
+                            </span>
+                            <span className="text-xs text-foreground">
+                              {row.salaryRange}
+                            </span>
+                          </div>
+                        )}
+                        <div className="flex flex-col gap-0.5">
+                          <span className="text-[0.6875rem] font-medium uppercase tracking-wider text-muted-foreground">
+                            Posted
+                          </span>
+                          <span className="text-xs text-foreground">
+                            {row.createdAt}
+                          </span>
+                        </div>
                       </div>
-                    )}
-                    {row.location && (
-                      <div className="flex flex-col gap-0.5">
-                        <span className="text-[0.6875rem] font-medium uppercase tracking-wider text-[var(--muted)]">
-                          Location
-                        </span>
-                        <span className="text-xs text-[var(--ink)]">
-                          {row.location}
-                        </span>
-                      </div>
-                    )}
-                    {row.salaryRange && (
-                      <div className="flex flex-col gap-0.5">
-                        <span className="text-[0.6875rem] font-medium uppercase tracking-wider text-[var(--muted)]">
-                          Salary
-                        </span>
-                        <span className="text-xs text-[var(--ink)]">
-                          {row.salaryRange}
-                        </span>
-                      </div>
-                    )}
-                    <div className="flex flex-col gap-0.5">
-                      <span className="text-[0.6875rem] font-medium uppercase tracking-wider text-[var(--muted)]">
-                        Posted
-                      </span>
-                      <span className="text-xs text-[var(--ink)]">
-                        {row.createdAt}
-                      </span>
-                    </div>
-                  </div>
+                    </CardContent>
+                  </Card>
                 </Link>
               ))}
             </div>
@@ -337,40 +335,38 @@ export function EmployerJobsSearchPage({
             {/* Pagination */}
             {totalPages > 1 && (
               <div className="mt-6 flex items-center justify-center gap-2">
-                <button
-                  type="button"
-                  className="rounded-md border border-[var(--border)] px-3 py-1.5 text-xs font-medium text-[var(--ink)] disabled:opacity-30"
+                <Button
+                  variant="outline"
+                  size="sm"
                   disabled={page <= 1}
                   onClick={() => goToPage(page - 1)}
                 >
                   Previous
-                </button>
+                </Button>
                 {Array.from({ length: Math.min(totalPages, 5) }).map((_, i) => {
                   const p = i + 1;
                   return (
-                    <button
+                    <Button
                       key={p}
-                      type="button"
+                      variant={p === page ? "default" : "outline"}
+                      size="sm"
                       className={cn(
-                        "rounded-md border px-3 py-1.5 text-xs font-medium",
-                        p === page
-                          ? "bg-[#fef1ef] border-[#eb6651] text-[#eb6651]"
-                          : "border-[var(--border)] text-[var(--ink)]",
+                        p === page && "bg-[var(--sh-coral)] text-white hover:bg-[var(--sh-coral-hover)]",
                       )}
                       onClick={() => goToPage(p)}
                     >
                       {p}
-                    </button>
+                    </Button>
                   );
                 })}
-                <button
-                  type="button"
-                  className="rounded-md border border-[var(--border)] px-3 py-1.5 text-xs font-medium text-[var(--ink)] disabled:opacity-30"
+                <Button
+                  variant="outline"
+                  size="sm"
                   disabled={page >= totalPages}
                   onClick={() => goToPage(page + 1)}
                 >
                   Next
-                </button>
+                </Button>
               </div>
             )}
           </>
