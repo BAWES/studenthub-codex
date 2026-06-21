@@ -5,6 +5,8 @@ import Link from "next/link";
 import type { SessionUser } from "@/modules/auth/types";
 import { useWorkspaceOS } from "@/modules/workspace/WorkspaceOSContext";
 import { HubShortcuts, type HubCommand } from "./HubShortcuts";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 type HubNavigationItem = {
   label: string;
@@ -119,17 +121,20 @@ export function HubContent({
           <strong>{session.name}</strong>
           <small>{session.email}</small>
         </div>
-        <form className="commandSearch">
-          <input
+        <form className="flex items-center gap-2">
+          <Input
             aria-label="Find records"
             data-command-search
             defaultValue={data.query}
             id="hub-search"
             name="q"
             placeholder="Search candidates, companies, requests, transfers, ID batches"
+            className="flex-1"
           />
           <input type="hidden" name="scope" value={data.scope} />
-          <button type="submit">Search</button>
+          <Button type="submit" size="sm">
+            Search
+          </Button>
         </form>
         {embedded ? null : <HubShortcuts commands={commands} />}
       </header>

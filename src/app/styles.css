@@ -700,8 +700,6 @@ body {
 [data-theme="dark"] .journeyPanel,
 [data-theme="dark"] .journeyGuardrail,
 [data-theme="dark"] .roleBoundaryNotice,
-[data-theme="dark"] .commandSearch,
-[data-theme="dark"] .commandSearch button,
 [data-theme="dark"] .commandTabs,
 [data-theme="dark"] .commandTabs a,
 [data-theme="dark"] .commandViews,
@@ -3634,50 +3632,6 @@ tr:last-child td {
 
 .commandIdentity small {
   color: var(--muted);
-}
-
-.commandSearch {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  overflow: hidden;
-  border: 1px solid var(--sh-glass-border);
-  border-radius: var(--sh-radius-md);
-  background: var(--sh-glass-bg-strong);
-}
-
-.commandSearch input {
-  min-width: 0;
-  height: 42px;
-  border: 0;
-  background: transparent;
-  color: var(--ink);
-  padding: 0 13px;
-  font: inherit;
-}
-
-.commandSearch input:focus {
-  outline: 0;
-}
-
-.commandSearch:focus-within {
-  border-color: var(--sh-info);
-  box-shadow: var(--sh-glow-sm);
-}
-
-.commandSearch button {
-  border: 0;
-  border-left: 1px solid var(--sh-glass-border);
-  background: transparent;
-  color: var(--muted);
-  padding: 0 14px;
-  font-weight: 700;
-  font-size: 12px;
-  cursor: pointer;
-  transition: color 160ms var(--sh-easing);
-}
-
-.commandSearch button:hover {
-  color: var(--sh-info);
 }
 
 .commandTopbar .commandLauncher {
