@@ -1,7 +1,6 @@
-import { ErrorBoundary } from "@/modules/workspace/ErrorBoundary";
 import { notFound } from "next/navigation";
 import { requireRoleCapability } from "@/modules/auth/session";
-import { DetailSection } from "@/modules/workspace/DetailPanels";
+import { FactPanel } from "@/modules/workspace/DetailPanels";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { getMailLog } from "@/modules/mail-logs/actions";
 import { formatDate } from "@/modules/workspace/format";
@@ -14,7 +13,7 @@ type Props = {
 };
 
 export default async function AdminMailLogDetailPage({ params }: Props) {
-  const session = await requireRoleCapability("admin", "admin.read");
+  const session = await requireRoleCapability("admin", "admin.system");
   const { id } = await params;
 
   const record = await getMailLog(id);
@@ -24,42 +23,40 @@ export default async function AdminMailLogDetailPage({ params }: Props) {
   }
 
   return (
-    <ErrorBoundary>
-      <WorkspaceShell
-        session={session}
-        eyebrow="Admin / Mail log"
-        title={`Email — ${record.subject ?? "(no subject)"}`}
-        metrics={[
-          { label: "Status", value: "Delivered", note: "Outgoing email" },
-          { label: "App", value: record.app ?? "—", note: "Source application" },
+    <WorkspaceShell
+      session={session}
+      eyebrow="Admin / Mail log"
+      title={`Email — ${record.subject ?? "(no subject)"}`}
+      metrics={[
+        { label: "Status", value: "Delivered", note: "Outgoing email" },
+        { label: "App", value: record.app ?? "—", note: "Source application" },
+      ]}
+    >
+      <FactPanel
+        title="Email Details"
+        facts={[
+          { label: "UUID", value: record.mail_uuid },
+          { label: "From", value: record.from ?? "—" },
+          { label: "To", value: record.to ?? "—" },
+          { label: "Subject", value: record.subject ?? "—" },
+          {
+            label: "App",
+            value: record.app ? <Badge variant="secondary">{record.app}</Badge> : "—",
+          },
+          {
+            label: "Sent at",
+            value: record.created_at
+              ? formatDate(new Date(record.created_at))
+              : "—",
+          },
+          {
+            label: "Updated at",
+            value: record.updated_at
+              ? formatDate(new Date(record.updated_at))
+              : "—",
+          },
         ]}
-      >
-        <DetailSection
-          title="Email Details"
-          facts={[
-            { label: "UUID", value: record.mail_uuid },
-            { label: "From", value: record.from ?? "—" },
-            { label: "To", value: record.to ?? "—" },
-            { label: "Subject", value: record.subject ?? "—" },
-            {
-              label: "App",
-              value: record.app ? <Badge variant="secondary">{record.app}</Badge> : "—",
-            },
-            {
-              label: "Sent at",
-              value: record.created_at
-                ? formatDate(new Date(record.created_at))
-                : "—",
-            },
-            {
-              label: "Updated at",
-              value: record.updated_at
-                ? formatDate(new Date(record.updated_at))
-                : "—",
-            },
-          ]}
-        />
-      </WorkspaceShell>
-    </ErrorBoundary>
+      />
+    </WorkspaceShell>
   );
 }
