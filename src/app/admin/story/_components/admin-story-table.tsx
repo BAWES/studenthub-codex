@@ -7,6 +7,7 @@ import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { StatusBadge } from "@/modules/workspace/StatusBadge";
 
 import type { SessionUser } from "@/modules/auth/types";
 import type { StoryItem } from "../schemas";
@@ -20,6 +21,7 @@ type Props = {
 export function AdminStoryTable({ session, stories }: Props) {
   const router = useRouter();
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   return (
     <WorkspaceShell
@@ -31,7 +33,7 @@ export function AdminStoryTable({ session, stories }: Props) {
       ]}
     >
       <section className="mb-6">
-        <div className="rounded-lg border border-border bg-card p-5">
+        <div className="rounded-lg border border-border bg-card p-5 border-l-4 border-l-[var(--sh-coral)]">
           <h3 className="text-sm font-semibold mb-3 text-card-foreground">Add story</h3>
           <CreateStoryForm onSuccess={() => router.refresh()} />
         </div>
@@ -87,9 +89,9 @@ export function AdminStoryTable({ session, stories }: Props) {
             label: "Status",
             render: (row) =>
               editingId === row.story_uuid ? null : (
-                <span className="text-sm text-muted-foreground">
-                  {row.story_status === 1 ? "Active" : row.story_status === 2 ? "Closed" : "Draft"}
-                </span>
+                <StatusBadge
+                  status={row.story_status === 1 ? "active" : row.story_status === 2 ? "completed" : "pending"}
+                />
               ),
           },
           {
@@ -109,21 +111,44 @@ export function AdminStoryTable({ session, stories }: Props) {
             label: "",
             render: (row) =>
               editingId !== row.story_uuid ? (
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={async () => {
-                    if (confirm(`Delete story for "${row.request_position_title ?? "unknown position"}"?`)) {
-                      const result = await deleteStory(row.story_uuid);
-                      if (result.operation === "error") {
-                        alert(result.message);
-                      }
-                      router.refresh();
-                    }
-                  }}
-                >
-                  Delete
-                </Button>
+                deletingId === row.story_uuid ? (
+                  <span className="inline-flex items-center gap-1.5">
+                    <span className="text-xs text-muted-foreground">Delete?</span>
+                    <Button
+                      type="button"
+                      size="sm"
+                      className="h-7 text-xs bg-red-600 text-white hover:bg-red-700"
+                      onClick={async () => {
+                        setDeletingId(null);
+                        const result = await deleteStory(row.story_uuid);
+                        if (result.operation === "error") {
+                          setDeletingId("__error__");
+                        }
+                        router.refresh();
+                      }}
+                    >
+                      Yes, delete
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 text-xs"
+                      onClick={() => setDeletingId(null)}
+                    >
+                      Cancel
+                    </Button>
+                  </span>
+                ) : (
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    className="h-7 text-xs"
+                    onClick={() => setDeletingId(row.story_uuid)}
+                  >
+                    Delete
+                  </Button>
+                )
               ) : null,
           },
         ]}

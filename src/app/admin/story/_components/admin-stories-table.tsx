@@ -2,6 +2,7 @@
 
 import { DataTable } from "@/modules/workspace/DataTable";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
+import { StatusBadge } from "@/modules/workspace/StatusBadge";
 
 import type { SessionUser } from "@/modules/auth/types";
 import type { StoryItem } from "../schemas";
@@ -21,6 +22,13 @@ export function AdminStoriesTable({ session, stories }: Props) {
       3: "Cancelled",
     };
     return labels[status] ?? `Unknown (${status})`;
+  };
+
+  const statusVariant = (status: number): "success" | "warning" | "error" | "info" | "neutral" => {
+    if (status === 2) return "success";
+    if (status === 1) return "warning";
+    if (status === 3) return "error";
+    return "info";
   };
 
   return (
@@ -55,7 +63,14 @@ export function AdminStoriesTable({ session, stories }: Props) {
           {
             key: "story_status",
             label: "Status",
-            render: (row) => statusLabel(row.story_status),
+            render: (row) => {
+              const label = statusLabel(row.story_status);
+              return (
+                <StatusBadge
+                  status={label.toLowerCase().replace(/\s+/g, "_")}
+                />
+              );
+            },
           },
           {
             key: "number_of_employees",

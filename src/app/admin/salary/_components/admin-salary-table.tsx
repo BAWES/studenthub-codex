@@ -23,6 +23,7 @@ type Props = {
 export function AdminSalaryTable({ session, salaries, total, staff }: Props) {
   const router = useRouter();
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   return (
     <WorkspaceShell
@@ -33,7 +34,7 @@ export function AdminSalaryTable({ session, salaries, total, staff }: Props) {
         { label: "Total records", value: total, note: "Salary records in the system" },
       ]}
     >
-      <Card className="mb-6">
+      <Card className="mb-6 border-l-4 border-l-[var(--sh-coral)]">
         <CardContent className="p-5">
           <h3 className="text-sm font-semibold mb-3 text-foreground">Add salary record</h3>
           <CreateSalaryForm staff={staff} onSuccess={() => router.refresh()} />
@@ -109,21 +110,45 @@ export function AdminSalaryTable({ session, salaries, total, staff }: Props) {
             label: "Actions",
             render: (row) =>
               editingId !== row.staff_salary_uuid ? (
-                <Button
-                  type="button"
-                  className="text-xs px-2 py-1 rounded hover:bg-red-500/10 text-destructive"
-                  onClick={async () => {
-                    if (confirm(`Delete salary record for "${row.staff_name ?? "staff #" + row.staff_id}"?`)) {
-                      const result = await deleteSalary(row.staff_salary_uuid);
-                      if (result.operation === "error") {
-                        alert(result.message);
-                      }
-                      router.refresh();
-                    }
-                  }}
-                >
-                  Delete
-                </Button>
+                deletingId === row.staff_salary_uuid ? (
+                  <span className="inline-flex items-center gap-1.5">
+                    <span className="text-xs text-muted-foreground">Delete?</span>
+                    <Button
+                      type="button"
+                      size="sm"
+                      className="h-7 text-xs bg-red-600 text-white hover:bg-red-700"
+                      onClick={async () => {
+                        setDeletingId(null);
+                        const result = await deleteSalary(row.staff_salary_uuid);
+                        if (result.operation === "error") {
+                          setDeletingId("__error__");
+                        }
+                        router.refresh();
+                      }}
+                    >
+                      Yes, delete
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 text-xs"
+                      onClick={() => setDeletingId(null)}
+                    >
+                      Cancel
+                    </Button>
+                  </span>
+                ) : (
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="sm"
+                    className="h-7 text-xs"
+                    onClick={() => setDeletingId(row.staff_salary_uuid)}
+                  >
+                    Delete
+                  </Button>
+                )
               ) : null,
           },
         ]}
