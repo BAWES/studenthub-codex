@@ -44,7 +44,7 @@ export function AdminEmployeesTable({ session, employees, departments, designati
       ]}
     >
       <section className="mb-6">
-        <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
+        <div className="rounded-lg border border-border bg-card p-5">
           <h3 className="text-sm font-semibold mb-3 text-foreground">Add employee</h3>
           <CreateEmployeeForm
             departments={departments}
@@ -167,7 +167,7 @@ function CreateEmployeeForm({
             required
             maxLength={255}
             placeholder="Full name"
-            className="h-9 rounded-lg px-3 text-sm border bg-[var(--surface)] border-[var(--border)] text-[var(--ink)] w-full"
+            className="h-9 rounded-lg px-3 text-sm border bg-background text-foreground border-border w-full"
           />
         </div>
         <div className="grid gap-1">
@@ -178,7 +178,7 @@ function CreateEmployeeForm({
             required
             maxLength={255}
             placeholder="email@company.com"
-            className="h-9 rounded-lg px-3 text-sm border bg-[var(--surface)] border-[var(--border)] text-[var(--ink)] w-full"
+            className="h-9 rounded-lg px-3 text-sm border bg-background text-foreground border-border w-full"
           />
         </div>
         <div className="grid gap-1">
@@ -187,7 +187,7 @@ function CreateEmployeeForm({
             name="employeePhone"
             maxLength={45}
             placeholder="+965 9999 9999"
-            className="h-9 rounded-lg px-3 text-sm border bg-[var(--surface)] border-[var(--border)] text-[var(--ink)] w-full"
+            className="h-9 rounded-lg px-3 text-sm border bg-background text-foreground border-border w-full"
           />
         </div>
         <div className="grid gap-1">
@@ -198,14 +198,14 @@ function CreateEmployeeForm({
             min="0"
             step="0.001"
             placeholder="0.000"
-            className="h-9 rounded-lg px-3 text-sm border bg-[var(--surface)] border-[var(--border)] text-[var(--ink)] w-full"
+            className="h-9 rounded-lg px-3 text-sm border bg-background text-foreground border-border w-full"
           />
         </div>
         <div className="grid gap-1">
           <label className="text-xs font-medium text-muted-foreground">Department</label>
           <select
             name="departmentUuid"
-            className="h-9 rounded-lg px-3 text-sm border bg-[var(--surface)] border-[var(--border)] text-[var(--ink)] w-full"
+            className="h-9 rounded-lg px-3 text-sm border bg-background text-foreground border-border w-full"
           >
             <option value="">— None —</option>
             {departments.map((d) => (
@@ -217,7 +217,7 @@ function CreateEmployeeForm({
           <label className="text-xs font-medium text-muted-foreground">Designation</label>
           <select
             name="designationUuid"
-            className="h-9 rounded-lg px-3 text-sm border bg-[var(--surface)] border-[var(--border)] text-[var(--ink)] w-full"
+            className="h-9 rounded-lg px-3 text-sm border bg-background text-foreground border-border w-full"
           >
             <option value="">— None —</option>
             {designations.map((d) => (

@@ -137,8 +137,7 @@ function CreateDepartmentForm({ onSuccess }: { onSuccess: () => void }) {
           required
           maxLength={255}
           placeholder="e.g. Information Technology"
-          className="h-9 rounded-lg px-3 text-sm border bg-card border-border text-foreground"
-        />
+          className="h-9 rounded-lg px-3 text-sm border bg-background text-foreground"        />
       </div>
       <div className="grid gap-1">
         <label className="text-xs font-medium text-muted-foreground">Arabic name</label>
@@ -146,8 +145,7 @@ function CreateDepartmentForm({ onSuccess }: { onSuccess: () => void }) {
           name="departmentNameAr"
           maxLength={255}
           placeholder="تقنية المعلومات"
-          className="h-9 rounded-lg px-3 text-sm border bg-card border-border text-foreground"
-        />
+          className="h-9 rounded-lg px-3 text-sm border bg-background text-foreground"        />
       </div>
       <button
         type="submit"
@@ -197,14 +195,12 @@ function EditDepartmentForm({
         defaultValue={row.department_name_en}
         required
         maxLength={255}
-        className="h-8 rounded px-2 text-sm border w-40 bg-card border-border text-foreground"
-      />
+        className="h-8 rounded px-2 text-sm border w-40 bg-background text-foreground"      />
       <input
         name="departmentNameAr"
         defaultValue={row.department_name_ar ?? ""}
         maxLength={255}
-        className="h-8 rounded px-2 text-sm border w-40 bg-card border-border text-foreground"
-      />
+        className="h-8 rounded px-2 text-sm border w-40 bg-background text-foreground"      />
       <button
         type="submit"
         disabled={pending}

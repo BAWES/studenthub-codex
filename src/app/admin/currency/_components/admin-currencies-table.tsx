@@ -36,8 +36,9 @@ export function AdminCurrenciesTable({ session, currencies }: Props) {
             key: "code",
             label: "Code",
             render: (row) => (
-              <code className="text-sm font-mono font-semibold text-primary">
-                {row.code}
+              <code
+                className="text-sm font-mono font-semibold text-primary"
+              >                {row.code}
               </code>
             ),
           },
@@ -79,11 +80,10 @@ export function AdminCurrenciesTable({ session, currencies }: Props) {
             label: "Status",
             render: (row) => (
               <span
-                className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
+                className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
                   row.status
-                    ? "bg-green-500/10 text-green-600 dark:text-green-400"
-                    : "bg-neutral-500/10 text-neutral-500"
-                }`}
+                    ? "bg-green-500/10 text-green-600"
+                    : "bg-red-500/10 text-red-600"                }`}
               >
                 {row.status ? "Active" : "Inactive"}
               </span>
