@@ -120,7 +120,7 @@ export function HubContent({
   const desk = (
     <section className="min-w-0 overflow-x-hidden">
       {/* ── Topbar ──────────────────────────────────────── */}
-      <header className="sticky top-0 z-20 flex items-center gap-3 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 py-2.5 min-h-[64px]">
+      <header className="sticky top-0 z-20 flex items-center gap-3 border-b border-border bg-card px-4 py-2.5 min-h-[64px]">
         <div className="min-w-0 grid gap-0.5">
           <span className="text-xs font-black uppercase tracking-wide text-blue-zendesk">
             {session.role}
