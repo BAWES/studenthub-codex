@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { approveIdRequest, rejectIdRequest } from "@/modules/candidates/actions";
+import { Button } from "@/components/ui/button";
 
 export function IdRequestActions({
   requestUuid,
