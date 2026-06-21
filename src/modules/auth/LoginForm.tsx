@@ -13,11 +13,11 @@ export function LoginForm() {
   const accounts = state.accounts ?? [];
 
   return (
-    <div className="grid gap-[14px]">
-      <form action={action} className="grid gap-[18px] p-[30px]">
-        <div className="grid gap-[7px] pb-2">
-          <span className="text-[#1f73b7] text-xs font-black uppercase">Secure sign in</span>
-          <strong className="text-[28px] leading-[1.1]">Continue to StudentHub</strong>
+    <div className="grid gap-3.5">
+      <form action={action} className="grid gap-5 p-8">
+        <div className="grid gap-2 pb-2">
+          <span className="text-blue-600 dark:text-blue-400 text-xs font-black uppercase tracking-wide">Secure sign in</span>
+          <strong className="text-3xl leading-[1.1]">Continue to StudentHub</strong>
           <p className="text-muted-foreground leading-relaxed m-0">
             Use your existing production credentials. StudentHub will detect the right account and permissions after
             your password is verified.
@@ -34,7 +34,7 @@ export function LoginForm() {
             defaultValue={state.email ?? ""}
             placeholder="name@studenthub.app"
             required
-            className="min-h-[46px]"
+            className="h-11"
           />
         </div>
 
@@ -47,13 +47,13 @@ export function LoginForm() {
             autoComplete="current-password"
             placeholder="Your password"
             required
-            className="min-h-[46px]"
+            className="h-11"
           />
         </div>
 
         {state.error ? <p className="text-destructive font-bold m-0">{state.error}</p> : null}
 
-        <Button type="submit" disabled={pending} size="lg" className="min-h-[52px]">
+        <Button type="submit" disabled={pending} size="lg" className="h-13">
           <LogIn className="size-4" />
           {pending ? "Checking credentials..." : "Sign in"}
         </Button>
@@ -66,10 +66,10 @@ export function LoginForm() {
 
 function VerifiedAccountChooser({ accounts }: { accounts: LoginAccountChoice[] }) {
   return (
-    <section className="grid gap-[14px] p-[30px] pt-0 border-t border-border" aria-label="Verified StudentHub accounts">
-      <div className="grid gap-[7px]">
-        <span className="text-[#1f73b7] text-xs font-black uppercase">Verified accounts</span>
-        <strong className="text-[28px] leading-[1.1]">Choose where to continue</strong>
+    <section className="grid gap-3.5 p-8 pt-0 border-t border-border" aria-label="Verified StudentHub accounts">
+      <div className="grid gap-2">
+        <span className="text-blue-600 dark:text-blue-400 text-xs font-black uppercase tracking-wide">Verified accounts</span>
+        <strong className="text-3xl leading-[1.1]">Choose where to continue</strong>
         <p className="text-muted-foreground leading-relaxed m-0">Your password matched more than one active account. Only verified accounts are shown here.</p>
       </div>
       {accounts.map((account) => (
@@ -78,7 +78,7 @@ function VerifiedAccountChooser({ accounts }: { accounts: LoginAccountChoice[] }
           <Button
             type="submit"
             variant="outline"
-            className="w-full min-h-[62px] justify-start h-auto p-3 gap-3 text-left"
+            className="w-full justify-start h-auto p-3 gap-3 text-left"
           >
             <span className="grid gap-1 min-w-0">
               <strong className="text-sm">{account.name}</strong>

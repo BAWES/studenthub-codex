@@ -5,6 +5,8 @@ import Link from "next/link";
 import type { SessionUser } from "@/modules/auth/types";
 import { useWorkspaceOS } from "@/modules/workspace/WorkspaceOSContext";
 import { HubShortcuts, type HubCommand } from "./HubShortcuts";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 type HubNavigationItem = {
   label: string;
@@ -119,8 +121,8 @@ export function HubContent({
           <strong>{session.name}</strong>
           <small>{session.email}</small>
         </div>
-        <form className="commandSearch">
-          <input
+        <form className="commandSearch" action={undefined}>
+          <Input
             aria-label="Find records"
             data-command-search
             defaultValue={data.query}
@@ -129,7 +131,7 @@ export function HubContent({
             placeholder="Search candidates, companies, requests, transfers, ID batches"
           />
           <input type="hidden" name="scope" value={data.scope} />
-          <button type="submit">Search</button>
+          <Button type="submit" variant="ghost" size="sm">Search</Button>
         </form>
         {embedded ? null : <HubShortcuts commands={commands} />}
       </header>
@@ -280,9 +282,9 @@ function RecordPreview({ preview }: { preview: HubPreview }) {
       {preview.actions.length ? (
         <div className="previewActions">
           {preview.actions.map((action) => (
-            <a href={action.href} key={`${action.label}-${action.href}`}>
-              {action.label}
-            </a>
+            <Button key={`${action.label}-${action.href}`} variant="outline" size="sm" asChild>
+              <a href={action.href}>{action.label}</a>
+            </Button>
           ))}
         </div>
       ) : null}

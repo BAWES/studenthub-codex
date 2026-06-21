@@ -1,18 +1,17 @@
-import { requireRoleCapability } from "@/modules/auth/session";
-import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
-import { Skeleton } from "@/components/ui/skeleton";
+import { DataTableSkeleton } from "@/modules/workspace/Skeletons";
 
-export const dynamic = "force-dynamic";
-
-export default async function AdminDegreeGroupLoading() {
-  const session = await requireRoleCapability("admin", "admin.system");
-
+export default function AdminDegreeGroupsLoading() {
   return (
-    <WorkspaceShell session={session} eyebrow="Admin" title="Degree Groups" metrics={[]}>
-      <div className="space-y-4">
-        <Skeleton className="h-8 w-64" />
-        <Skeleton className="h-96 w-full" />
-      </div>
-    </WorkspaceShell>
+    <div className="block">
+      <section className="overflow-x-hidden grid content-start gap-3.5 p-3.5">
+        <section className="sticky top-2.5 z-20 flex items-center justify-between gap-3 min-h-14 px-4 mb-1 rounded-lg bg-card border border-border">
+          <div>
+            <div className="h-3 w-24 mb-2 rounded bg-white/5 animate-pulse" />
+            <div className="h-7 w-48 rounded bg-white/5 animate-pulse" />
+          </div>
+        </section>
+        <DataTableSkeleton rows={6} />
+      </section>
+    </div>
   );
 }
