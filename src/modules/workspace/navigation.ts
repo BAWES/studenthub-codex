@@ -4,8 +4,8 @@ import type { LucideIcon } from "lucide-react";
 import {
   LayoutGrid, User, Mail, ClipboardList, CreditCard,
   Building2, Phone, Store, FileCheck, Search, Users,
-  ArrowRightLeft, Calendar, Globe, GraduationCap, MessageSquareText,
-  BookOpenText, Library, DollarSign
+ ArrowRightLeft, Calendar, Globe, GraduationCap, MessageSquareText,
+ BookOpenText, Library, DollarSign, Briefcase
 } from "lucide-react";
 
 export type NavItem = {
@@ -29,6 +29,7 @@ export function navForRole(role: Role): NavItem[] {
       { label: "Daily Standup", href: "/admin/daily-standup", icon: MessageSquareText },
       { label: "Universities", href: "/admin/university", icon: Library },
       { label: "Majors", href: "/admin/major", icon: BookOpenText },
+      { label: "Jobs", href: "/admin/job", icon: Briefcase },
       { label: "Salaries", href: "/admin/salary", icon: DollarSign }
     ];
   }
