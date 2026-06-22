@@ -2,30 +2,25 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import type { NavItem } from "./navigation";
 
 export function WorkspaceNavigation({ items, role }: { items: NavItem[]; role: string }) {
   const pathname = usePathname();
   return (
-    <nav className="w-full grid content-start gap-1" aria-label={`${role} workspace navigation`}>
+    <nav className="flex flex-col gap-0.5 px-2 py-4" aria-label={`${role} workspace navigation`}>
       {items.map((item) => {
         const active = isActive(pathname, item.href);
         const Icon = item.icon;
         return (
           <Link
             aria-current={active ? "page" : undefined}
-            className={cn(
-              buttonVariants({ variant: "ghost" }),
-              "w-full justify-start gap-3 px-3 no-underline text-sm font-semibold",
+            className={
               active
-                ? "bg-blue-zendesk/10 text-blue-zendesk font-bold"
-                : "text-muted-foreground hover:text-foreground",
-            )}
+                ? "flex items-center gap-3 rounded-md bg-primary/10 px-3 py-2 text-sm font-medium text-primary"
+                : "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            }
             href={item.href}
             key={item.href}
-            title={item.label}
           >
             <Icon size={16} strokeWidth={2.5} aria-hidden="true" />
             <strong>{item.label}</strong>
@@ -40,7 +35,7 @@ export function WorkspaceMobileNavigation({ items, role }: { items: NavItem[]; r
   const pathname = usePathname();
   return (
     <nav
-      className="hidden max-md:flex fixed bottom-0 left-0 right-0 z-50 h-16 border-t border-border bg-card px-1 safe-area-inset-bottom"
+      className="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around border-t border-border bg-card px-2 py-1 md:hidden"
       aria-label={`${role} mobile navigation`}
     >
       {items.map((item) => {
@@ -49,17 +44,15 @@ export function WorkspaceMobileNavigation({ items, role }: { items: NavItem[]; r
         return (
           <Link
             aria-current={active ? "page" : undefined}
-            className={cn(
-              "flex flex-1 flex-col items-center justify-center gap-0.5 px-2 py-1.5 rounded-lg no-underline",
-              "min-h-[56px] max-w-[96px] text-[11px] font-semibold transition-colors",
+            className={
               active
-                ? "bg-blue-zendesk/10 text-blue-zendesk font-bold"
-                : "text-muted-foreground hover:text-foreground",
-            )}
+                ? "flex flex-col items-center gap-0.5 px-3 py-2 text-xs font-medium text-primary"
+                : "flex flex-col items-center gap-0.5 px-3 py-2 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+            }
             href={item.href}
             key={item.href}
           >
-            <Icon size={20} strokeWidth={active ? 2.5 : 2} aria-hidden="true" />
+            <Icon size={20} strokeWidth={2} aria-hidden="true" />
             <span>{item.label}</span>
           </Link>
         );

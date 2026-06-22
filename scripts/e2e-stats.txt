@@ -1,0 +1,4 @@
+E2E Listing via correct CLI: 3009 tests in 137 files
+Local: node node_modules/@playwright/test/cli.js test --list — WORKS
+CI fails: npx playwright test resolves global v1.61.0 vs project @playwright/test v1.60.0
+Fix: change test:e2e script to use node node_modules/@playwright/test/cli.js test

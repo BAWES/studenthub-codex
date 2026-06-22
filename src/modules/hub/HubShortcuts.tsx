@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 export type HubCommand = {
   id: string;
@@ -133,18 +135,18 @@ export function HubShortcuts({ commands }: HubShortcutsProps) {
 
   return (
     <>
-      <button className="commandLauncher" type="button" onClick={() => setOpen(true)}>
+      <Button variant="outline" size="sm" className="commandLauncher" type="button" onClick={() => setOpen(true)}>
         <span>Command</span>
         <kbd>⌘K</kbd>
-      </button>
+      </Button>
 
       {open ? (
         <div className="commandOverlay" role="dialog" aria-modal="true" aria-label="Command menu">
-          <button className="commandScrim" aria-label="Close command menu" type="button" onClick={() => setOpen(false)} />
+          <Button variant="ghost" className="commandScrim" aria-label="Close command menu" type="button" onClick={() => setOpen(false)} />
           <section className="commandMenu">
             <div className="commandInputWrap">
               <span>⌘</span>
-              <input
+              <Input
                 ref={inputRef}
                 autoFocus
                 placeholder="Jump to a view, search visible records, or run an action..."

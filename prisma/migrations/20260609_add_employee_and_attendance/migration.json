@@ -1,0 +1,59 @@
+{
+  "version": "6.19.3",
+  "steps": [
+    {
+      "tag": "CreateTable",
+      "table": "employee",
+      "columns": [
+        { "name": "employee_uuid", "type": "Char(60)", "isRequired": true, "default": null },
+        { "name": "employee_name", "type": "VarChar(255)", "isRequired": true, "default": null },
+        { "name": "employee_email", "type": "VarChar(255)", "isRequired": true, "default": null },
+        { "name": "employee_phone", "type": "VarChar(45)", "isRequired": false, "default": null },
+        { "name": "employee_salary", "type": "Decimal(10,3)", "isRequired": false, "default": 0 },
+        { "name": "employee_status", "type": "SmallInt", "isRequired": true, "default": 10 },
+        { "name": "employee_created_at", "type": "DateTime(0)", "isRequired": true, "default": null },
+        { "name": "employee_updated_at", "type": "DateTime(0)", "isRequired": true, "default": null },
+        { "name": "deleted", "type": "SmallInt", "isRequired": true, "default": 0 },
+        { "name": "designation_uuid", "type": "Char(60)", "isRequired": false, "default": null },
+        { "name": "department_uuid", "type": "Char(60)", "isRequired": false, "default": null }
+      ],
+      "primaryKey": { "columns": ["employee_uuid"] },
+      "foreignKeys": [
+        {
+          "columns": ["designation_uuid"],
+          "referencedTable": "designation",
+          "referencedColumns": ["designation_uuid"]
+        },
+        {
+          "columns": ["department_uuid"],
+          "referencedTable": "department",
+          "referencedColumns": ["department_uuid"]
+        }
+      ]
+    },
+    {
+      "tag": "CreateTable",
+      "table": "attendance",
+      "columns": [
+        { "name": "attendance_uuid", "type": "Char(60)", "isRequired": true, "default": null },
+        { "name": "employee_uuid", "type": "Char(60)", "isRequired": false, "default": null },
+        { "name": "date", "type": "Date", "isRequired": true, "default": null },
+        { "name": "clock_in", "type": "DateTime(0)", "isRequired": false, "default": null },
+        { "name": "clock_out", "type": "DateTime(0)", "isRequired": false, "default": null },
+        { "name": "total_hours", "type": "Decimal(5,2)", "isRequired": false, "default": null },
+        { "name": "status", "type": "SmallInt", "isRequired": true, "default": null },
+        { "name": "note", "type": "VarChar(500)", "isRequired": false, "default": null },
+        { "name": "created_at", "type": "DateTime(0)", "isRequired": true, "default": null },
+        { "name": "updated_at", "type": "DateTime(0)", "isRequired": true, "default": null }
+      ],
+      "primaryKey": { "columns": ["attendance_uuid"] },
+      "foreignKeys": [
+        {
+          "columns": ["employee_uuid"],
+          "referencedTable": "employee",
+          "referencedColumns": ["employee_uuid"]
+        }
+      ]
+    }
+  ]
+}
