@@ -5,6 +5,7 @@ import { DetailSection } from "@/modules/workspace/DetailPanels";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { formatDate } from "@/modules/workspace/format";
 import { getAgency } from "./actions";
+import { Button } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
 
@@ -49,9 +50,11 @@ export default async function CandidateAgencyDetailPage({
       />
 
       <div className="flex items-center gap-3 mt-8">
-        <Link href="/candidate/agencies" className="shButtonOutline">
-          Back to Agencies
-        </Link>
+        <Button asChild variant="outline">
+          <Link href="/candidate/agencies">
+            Back to Agencies
+          </Link>
+        </Button>
       </div>
     </WorkspaceShell>
   );

@@ -4,9 +4,9 @@ export default function Loading() {
       <div className="text-center">
         <div
           className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-t-transparent"
-          style={{ borderColor: "var(--border)", borderTopColor: "#eb6651" }}
+          className="size-10 animate-spin rounded-full border-2 border-border border-t-primary"
         />
-        <p className="text-sm" style={{ color: "var(--muted-foreground)" }}>
+        <p className="text-sm text-muted-foreground">
           Loading applications...
         </p>
       </div>
