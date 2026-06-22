@@ -119,8 +119,7 @@ export function DetailPageSkeleton({ panels = 3 }: { panels?: number }) {
 
       {/* Fact panels */}
       <div
-        className="grid gap-3"
-        style={{ gridTemplateColumns: `repeat(${Math.min(panels, 2)}, 1fr)` }}
+        className="grid gap-3 grid-cols-1 md:grid-cols-2"
       >
         {Array.from({ length: panels }).map((_, i) => (
           <div

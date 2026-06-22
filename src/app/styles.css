@@ -23,6 +23,7 @@
   --color-blue: var(--blue);
   --color-blue-deep: var(--blue-deep);
   --color-ring: var(--ring);
+  --color-blue-zendesk: #1f73b7;
   --radius: var(--radius);
   --font-size-label: 0.8125rem;
 }
@@ -154,4 +155,17 @@ body {
     linear-gradient(180deg, var(--grid-line) 1px, transparent 1px),
     var(--paper);
   background-size: 44px 44px;
+}
+
+/* ── Utility classes ───────────────────────────────────────────────────── */
+
+/* Auto-fill grid for workspace metrics (works like repeat(auto-fill, minmax(200px, 1fr))) */
+.autoFillGrid {
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+}
+
+/* Thin custom scrollbar for pipeline board */
+.pipelineScrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
 }

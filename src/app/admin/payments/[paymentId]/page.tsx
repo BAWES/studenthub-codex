@@ -12,11 +12,11 @@ import { formatDate } from "@/modules/workspace/format";
 export const dynamic = "force-dynamic";
 
 const STATUS_COLORS: Record<string, string> = {
-  AUTHORISED: "#22c55e",
-  PAID: "#3b82f6",
-  VOIDED: "#ef4444",
-  DELETED: "#9ca3af",
-  BILLED: "#f59e0b",
+  AUTHORISED: "text-green-500",
+  PAID: "text-blue-500",
+  VOIDED: "text-red-500",
+  DELETED: "text-gray-400",
+  BILLED: "text-amber-500",
 };
 
 const TYPE_LABELS: Record<string, string> = {
@@ -39,7 +39,7 @@ export default async function AdminPaymentDetailPage({
   }
 
   const p = data.payment;
-  const statusColor = STATUS_COLORS[p.status ?? ""] ?? "#6b7280";
+  const statusColor = STATUS_COLORS[p.status ?? ""] ?? "text-gray-500";
   const typeLabel = TYPE_LABELS[p.type ?? ""] ?? p.type ?? "—";
 
   return (
@@ -58,7 +58,7 @@ export default async function AdminPaymentDetailPage({
             {
               label: "Status",
               value: (
-                <span style={{ color: statusColor, fontWeight: 600 }}>
+                <span className={`${statusColor} font-semibold`}>
                   {p.status ?? "Unknown"}
                 </span>
               ),

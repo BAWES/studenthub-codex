@@ -169,24 +169,18 @@ export function PipelineBoard({ items, onStageChange }: PipelineBoardProps) {
   const itemsByStage = (stage: PipelineStage) => items.filter((i) => i.stage === stage);
 
   return (
-    <div
-      className="flex gap-3 overflow-x-auto pb-4"
-      style={{
-        scrollbarWidth: "thin",
-        scrollbarColor: "var(--border) transparent",
-      }}
-    >
-      {STAGE_ORDER.map((stage) => (
-        <PipelineColumn
-          key={stage}
-          stage={stage}
-          items={itemsByStage(stage)}
-          onDrop={handleDrop}
-          draggedItemId={draggedItemId}
-          onDragStart={handleDragStart}
-          onDragEnd={handleDragEnd}
-        />
-      ))}
-    </div>
-  );
-}
+      <div className="flex gap-3 overflow-x-auto pb-4 pipelineScrollbar">
+        {STAGE_ORDER.map((stage) => (
+          <PipelineColumn
+            key={stage}
+            stage={stage}
+            items={itemsByStage(stage)}
+            onDrop={handleDrop}
+            draggedItemId={draggedItemId}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+          />
+        ))}
+      </div>
+    );
+  }

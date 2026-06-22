@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, type FormEvent } from "react";
+import { StatusBadge } from "@/components/ui/status-badge";
 
 /**
  * SearchFormWrapper — wraps the candidate search form to show a loading
@@ -51,47 +52,31 @@ export function SearchFormWrapper({ children }: { children: React.ReactNode }) {
       {children}
 
       {loading && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            zIndex: 9999,
-            height: 3,
-            background: "rgba(235, 102, 81, 0.2)",
-            overflow: "hidden",
-            pointerEvents: "none",
-          }}
-        >
+        <>
+          {/* Thin coral loading bar at top of viewport */}
           <div
-            style={{
-              height: "100%",
-              background: "#eb6651",
-              animation: "search-progress 30s linear forwards",
-            }}
-          />
-          {elapsed >= 3 && (
+            className="fixed top-0 left-0 right-0 z-[9999] h-[3px] overflow-hidden pointer-events-none"
+            style={{ background: "rgba(235, 102, 81, 0.2)" }}
+          >
             <div
+              className="h-full"
               style={{
-                position: "fixed",
-                top: 4,
-                right: 12,
-                fontSize: 11,
-                fontWeight: 700,
-                color: "#eb6651",
-                background: "var(--surface)",
-                padding: "4px 10px",
-                borderRadius: "0 0 8px 8px",
-                border: "1px solid rgba(235, 102, 81, 0.3)",
-                borderTop: "none",
-                pointerEvents: "none",
+                background: "#eb6651",
+                animation: "search-progress 30s linear forwards",
               }}
-            >
-              Still searching… {elapsed}s
+            />
+            <style>{`@keyframes search-progress { from { width: 100% } to { width: 0% } }`}</style>
+          </div>
+
+          {/* Slow search warning after 3s */}
+          {elapsed >= 3 && (
+            <div className="fixed top-1 right-3 z-[9999] pointer-events-none">
+              <StatusBadge status="warning">
+                Still searching… {elapsed}s
+              </StatusBadge>
             </div>
           )}
-        </div>
+        </>
       )}
     </form>
   );

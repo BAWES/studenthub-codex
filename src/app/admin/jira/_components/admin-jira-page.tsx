@@ -37,7 +37,7 @@ export function AdminJiraPage({ session, issues, users, error }: Props) {
     >
       {error ? (
         <div
-          className="mb-4 rounded-lg border px-4 py-3 text-sm border-[var(--sh-error)] text-[var(--sh-error)] bg-[var(--surface)]"
+          className="mb-4 rounded-lg border px-4 py-3 text-sm border-destructive text-destructive bg-destructive/10"
         >
           {error}
         </div>

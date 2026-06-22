@@ -62,10 +62,10 @@ export default async function AdminXeroDetailPage({
             { label: "Line Amount Types", value: tx.lineAmountTypes ?? "—" },
             {
               label: "Reconciled",
-              value: (
-                <span className="inline-flex items-center gap-1.5 text-xs font-semibold" style={{ color: tx.isReconciled ? "#22c55e" : "#ef4444" }}>
-                  {tx.isReconciled ? "Yes" : "No"}
-                </span>
+              value: tx.isReconciled ? (
+                <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-green-500">Yes</span>
+              ) : (
+                <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-red-500">No</span>
               ),
             },
             { label: "Has Attachments", value: tx.hasAttachments ? "Yes" : "No" },

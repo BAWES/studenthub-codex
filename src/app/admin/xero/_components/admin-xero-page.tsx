@@ -104,15 +104,11 @@ export function AdminXeroPage({ session, transactions, reconciliation }: Props) 
             label: "Status",
             render: (row) => (
               <span
-                className={`text-xs px-2 py-0.5 rounded-full`}
-                style={{
-                  color: row.isReconciled
-                    ? "var(--sh-success)"
-                    : "var(--sh-error)",
-                  background: row.isReconciled
-                    ? "color-mix(in srgb, var(--sh-success) 10%, transparent)"
-                    : "color-mix(in srgb, var(--sh-error) 10%, transparent)",
-                }}
+                className={`text-xs px-2 py-0.5 rounded-full ${
+                  row.isReconciled
+                    ? "text-green-700 bg-green-100"
+                    : "text-red-700 bg-red-100"
+                }`}
               >
                 {row.isReconciled ? "Reconciled" : "Unreconciled"}
               </span>

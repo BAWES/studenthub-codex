@@ -89,8 +89,7 @@ export function WorkspaceShell({
       {/* Metrics grid */}
       {metrics.length ? (
         <section
-          className="grid gap-4 p-6 pb-0"
-          style={{ gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))" }}
+          className="grid gap-4 p-6 pb-0 autoFillGrid"
           aria-label={`${session.role} workspace metrics`}
         >
           {metrics.map((metric) => (

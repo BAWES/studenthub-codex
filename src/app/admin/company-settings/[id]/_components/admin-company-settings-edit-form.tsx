@@ -2,6 +2,7 @@
 
 import { useActionState, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
 import { updateAdminCompanySettings } from "../../actions";
 import type { AdminCompanySettingsItem } from "../../schemas";
 
@@ -77,14 +78,9 @@ export function AdminCompanySettingsEditForm({ settings }: Props) {
   return (
     <section className="mt-6">
       {!expanded ? (
-        <button
-          type="button"
-          onClick={() => setExpanded(true)}
-          className="rounded-lg px-4 py-2 text-sm font-semibold"
-          style={{ background: "var(--sh-primary)", color: "#fff" }}
-        >
+        <Button onClick={() => setExpanded(true)} className="mt-2">
           Edit settings
-        </button>
+        </Button>
       ) : (
         <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
           <h3 className="text-sm font-semibold mb-3" style={{ color: "var(--ink)" }}>
@@ -192,14 +188,9 @@ export function AdminCompanySettingsEditForm({ settings }: Props) {
             </div>
 
             <div className="col-span-full flex items-center gap-3 pt-2">
-              <button
-                type="submit"
-                disabled={pending}
-                className="h-9 rounded-lg px-4 text-sm font-semibold"
-                style={{ background: "var(--sh-primary)", color: "#fff" }}
-              >
-                {pending ? "Saving..." : "Save changes"}
-              </button>
+              <Button type="submit" disabled={pending} className="mt-2">
+                    {pending ? "Saving..." : "Save Changes"}
+                  </Button>
               <button
                 type="button"
                 onClick={() => setExpanded(false)}
@@ -209,7 +200,7 @@ export function AdminCompanySettingsEditForm({ settings }: Props) {
                 Cancel
               </button>
               {state?.error ? (
-                <p className="text-xs" style={{ color: "var(--sh-error)" }}>{state.error}</p>
+                <p className="text-xs text-destructive">{state.error}</p>
               ) : null}
             </div>
           </form>

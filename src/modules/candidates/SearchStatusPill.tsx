@@ -1,5 +1,7 @@
 "use client";
 
+import { StatusBadge } from "@/components/ui/status-badge";
+
 /**
  * SearchStatusPill — displays search result stats as a coral-themed pill badge.
  *
@@ -7,7 +9,7 @@
  * "No results" in coral-red. Designed as a small, self-contained badge
  * that fits in any header or toolbar.
  *
- * Styled with Zendesk coral (#eb6651) accent.
+ * Uses shadcn StatusBadge with warning variant for coral (#eb6651) accent.
  */
 export function SearchStatusPill({
   resultsCount,
@@ -20,24 +22,9 @@ export function SearchStatusPill({
 }) {
   if (resultsCount === 0 && query) {
     return (
-      <span
-        style={{
-          display: "inline-flex",
-          alignItems: "center",
-          gap: 4,
-          padding: "3px 10px",
-          borderRadius: 999,
-          fontSize: 12,
-          fontWeight: 700,
-          whiteSpace: "nowrap",
-          background: "rgba(235, 102, 81, 0.1)",
-          color: "#eb6651",
-          border: "1px solid rgba(235, 102, 81, 0.3)",
-        }}
-        role="status"
-      >
+      <StatusBadge status="warning" showDot role="status">
         No results
-      </span>
+      </StatusBadge>
     );
   }
 
@@ -46,23 +33,8 @@ export function SearchStatusPill({
   const formatted = resultsCount.toLocaleString("en-US");
 
   return (
-    <span
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 4,
-        padding: "3px 10px",
-        borderRadius: 999,
-        fontSize: 12,
-        fontWeight: 700,
-        whiteSpace: "nowrap",
-        background: "rgba(235, 102, 81, 0.1)",
-        color: "#eb6651",
-        border: "1px solid rgba(235, 102, 81, 0.3)",
-      }}
-      role="status"
-    >
+    <StatusBadge status="warning" showDot role="status">
       {formatted} results
-    </span>
+    </StatusBadge>
   );
 }

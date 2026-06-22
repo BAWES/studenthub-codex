@@ -83,10 +83,10 @@ export function AdminWebhooksTable({ session, webhooks }: Props) {
               return row.method ? (
                 <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold text-white ${
                   row.method === "POST"
-                    ? "bg-[var(--sh-primary)]"
+                    ? "bg-blue-600"
                     : row.method === "GET"
-                      ? "bg-[var(--sh-info)]"
-                      : "bg-[var(--sh-warning)]"
+                      ? "bg-emerald-600"
+                      : "bg-amber-600"
                 }`}
                 >
                   {row.method}
