@@ -17,7 +17,7 @@ export default async function SignupPage({
   searchParams: Promise<{ role?: string }>;
 }) {
   // Defensive: wrap session check to prevent crash if cookies() fails
-  let session = null;
+  let session: Awaited<ReturnType<typeof getSession>> | null = null;
   try {
     session = await getSession();
   } catch {

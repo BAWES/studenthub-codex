@@ -26,14 +26,14 @@ export function DiscountCategoryDetailForm({
   const [nameAr, setNameAr] = useState(category.name_ar ?? "");
 
   const updateAction = async (_prevState: unknown, formData: FormData) => {
-    await updateDiscountCategory(category.category_id, {
-      name_en: nameEn,
-      name_ar: nameAr || undefined,
-    });
+    await updateDiscountCategory(category.category_id, nameEn, nameAr || undefined);
     return { success: true };
   };
 
-  const [state, formAction, pending] = useActionState(updateAction, null);
+  const [state, formAction, pending] = useActionState(
+    updateAction,
+    null,
+  ) as unknown as [state: { success?: boolean } | null, formAction: () => void, pending: boolean];
 
   return (
     <div className="space-y-6">

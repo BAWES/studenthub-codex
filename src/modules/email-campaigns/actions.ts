@@ -136,6 +136,21 @@ export async function getEmailCampaign(
  * Also creates child email_campaign_filter records if provided (not
  * implemented here — simplest create first).
  */
+export async function deleteEmailCampaign(
+  campaignUuid: string,
+): Promise<CreateUpdateResult> {
+  await requireCapability("admin.write");
+  try {
+    await prisma.email_campaign.delete({ where: { campaign_uuid: campaignUuid } });
+    return { operation: "success", message: "Email campaign deleted successfully" };
+  } catch (err) {
+    return {
+      operation: "error",
+      message: err instanceof Error ? err.message : "Failed to delete email campaign",
+    };
+  }
+}
+
 export async function createEmailCampaign(
   params: CreateEmailCampaignParams,
 ): Promise<CreateUpdateResult> {

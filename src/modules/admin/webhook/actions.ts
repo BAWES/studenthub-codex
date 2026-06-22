@@ -6,6 +6,8 @@ import { requireCapability } from "@/modules/auth/session";
 import { listWebhooksSchema, createWebhookSchema, updateWebhookSchema, deleteWebhookSchema, listWebhooksResultSchema, webhookActionResponseSchema } from "./schemas";
 import type { ListWebhooksInput, ListWebhooksResult, WebhookActionResponse } from "./schemas";
 
+export type WebhookMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+
 export async function listWebhooks(input: ListWebhooksInput = {}): Promise<ListWebhooksResult> {
   await requireCapability("admin.read");
   const parsed = listWebhooksSchema.safeParse(input);

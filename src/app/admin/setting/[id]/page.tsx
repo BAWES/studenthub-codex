@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { requireRoleCapability } from "@/modules/auth/session";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { formatDate } from "@/modules/workspace/format";
-import { getSettingDetail } from "../actions";
+import { getSetting } from "../actions";
 import { SettingDetailForm } from "./SettingDetailForm";
 
 export const dynamic = "force-dynamic";
@@ -15,7 +15,7 @@ export default async function AdminSettingDetailPage({
   const session = await requireRoleCapability("admin", "admin.system");
   const { id } = await params;
 
-  const setting = await getSettingDetail(id);
+  const setting = await getSetting({ settingUuid: id });
   if (!setting) {
     notFound();
   }

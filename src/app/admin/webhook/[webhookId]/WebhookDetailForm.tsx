@@ -35,15 +35,11 @@ export function WebhookDetailForm({ webhook }: { webhook: WebhookDetail }) {
   ];
 
   const updateAction = async () => {
-    await updateWebhook(webhook.webhook_id, {
-      event,
-      endpoint,
-      method: (method || undefined) as WebhookMethod | undefined,
-    });
+    await updateWebhook(webhook.webhook_id, event, endpoint, (method || undefined) as "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | undefined);
     return { success: true };
   };
 
-  const [state, formAction, pending] = useActionState(updateAction, null);
+  const [state, formAction, pending] = useActionState(updateAction, null as { success?: boolean } | null);
 
   return (
     <div className="space-y-6">
