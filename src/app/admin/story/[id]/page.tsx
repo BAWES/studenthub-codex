@@ -1,7 +1,13 @@
+<<<<<<< HEAD
 import { ErrorBoundary } from "@/modules/workspace/ErrorBoundary";
 import { notFound } from "next/navigation";
 import { requireRoleCapability } from "@/modules/auth/session";
 import { DetailSection } from "@/modules/workspace/DetailPanels";
+=======
+import { notFound } from "next/navigation";
+import { requireRoleCapability } from "@/modules/auth/session";
+import { FactPanel } from "@/modules/workspace/DetailPanels";
+>>>>>>> origin/main
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { getStory } from "./actions";
 import { formatDate } from "@/modules/workspace/format";
@@ -13,7 +19,11 @@ export default async function AdminStoryDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+<<<<<<< HEAD
   const session = await requireRoleCapability("admin", "admin.read");
+=======
+  const session = await requireRoleCapability("admin", "admin.system");
+>>>>>>> origin/main
   const { id } = await params;
 
   const data = await getStory({ storyUuid: id });
@@ -35,7 +45,10 @@ export default async function AdminStoryDetailPage({
   };
 
   return (
+<<<<<<< HEAD
     <ErrorBoundary>
+=======
+>>>>>>> origin/main
       <WorkspaceShell
         session={session}
         eyebrow="Admin / Stories"
@@ -54,7 +67,11 @@ export default async function AdminStoryDetailPage({
           },
         ]}
       >
+<<<<<<< HEAD
         <DetailSection
+=======
+        <FactPanel
+>>>>>>> origin/main
           title="Story Details"
           facts={[
             { label: "Story UUID", value: story.story_uuid },
@@ -101,6 +118,11 @@ export default async function AdminStoryDetailPage({
           ]}
         />
       </WorkspaceShell>
+<<<<<<< HEAD
     </ErrorBoundary>
   );
 }
+=======
+  );
+}
+>>>>>>> origin/main
