@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { buildOfferLetterHtml } from "@/modules/fulltimers/offer-letter-pdf-helpers";
 import { getOfferLetterPdfData } from "@/modules/fulltimers/offer-letter-pdf-actions";
+import { generatePdf } from "@/lib/pdf-renderer";
 
 export const dynamic = "force-dynamic";
 
@@ -61,7 +62,10 @@ export async function GET(
     const format = searchParams.get("format");
 
     if (format === "pdf") {
-      return generatePdf(html, uuid);
+      return generatePdf(html, `offer-letter-${uuid.slice(0, 12)}`, {
+        footerText: "Offer Letter",
+        margins: { top: "25mm", bottom: "25mm", left: "20mm", right: "20mm" },
+      });
     }
 
     // Default: return HTML for browser preview / print-to-PDF
@@ -73,80 +77,5 @@ export async function GET(
   } catch (error) {
     console.error("Offer letter PDF route handler failed:", error);
     return new NextResponse("Failed to generate the offer letter", { status: 500 });
-  }
-}
-
-// ---------------------------------------------------------------------------
-// PDF generation via Playwright (reuses cached browser instance)
-// ---------------------------------------------------------------------------
-
-/** Minimal browser interface for the cached Chromium instance */
-interface BrowserHandle {
-  contexts(): unknown[];
-  isConnected(): boolean;
-  newPage(): Promise<any>;
-  close(): Promise<void>;
-}
-
-let _browser: BrowserHandle | null = null;
-
-async function getBrowser(): Promise<BrowserHandle> {
-  if (_browser) {
-    try {
-      const contexts = _browser.contexts();
-      if (contexts.length > 0 || _browser.isConnected()) {
-        return _browser;
-      }
-    } catch {
-      // Browser is dead — fall through to re-launch
-    }
-  }
-
-  const playwrightModule = await new Function('return import("playwright")')();
-  const { chromium } = playwrightModule;
-  _browser = (await chromium.launch({ headless: true })) as unknown as BrowserHandle;
-
-  process.once("beforeExit", () => {
-    if (_browser) {
-      _browser.close().catch(() => {});
-    }
-  });
-
-  return _browser;
-}
-
-async function generatePdf(html: string, uuid: string): Promise<NextResponse> {
-  let page: any = null;
-  try {
-    const browser = await getBrowser();
-    page = await browser.newPage();
-    await page.setContent(html, { waitUntil: "networkidle" });
-
-    const pdfBuffer = await page.pdf({
-      format: "A4",
-      margin: { top: "25mm", bottom: "25mm", left: "20mm", right: "20mm" },
-      printBackground: true,
-      displayHeaderFooter: true,
-      headerTemplate: "<span></span>",
-      footerTemplate: `
-        <div style="font-size:10px;color:#aaa;text-align:center;width:100%;padding:0 20mm;">
-          Offer Letter &mdash; Page <span class="pageNumber"></span> of <span class="totalPages"></span>
-        </div>`,
-    });
-
-    return new NextResponse(pdfBuffer.toString() as unknown as BodyInit, {
-      headers: {
-        "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="offer-letter-${uuid.slice(0, 12)}.pdf"`,
-        "Content-Length": String(pdfBuffer.length),
-      },
-    });
-  } catch (error) {
-    console.error("Offer letter PDF generation failed:", error);
-    return new NextResponse("Failed to generate PDF", { status: 500 });
-  } finally {
-    if (page) {
-      await page.close().catch(() => {});
-    }
   }
 }

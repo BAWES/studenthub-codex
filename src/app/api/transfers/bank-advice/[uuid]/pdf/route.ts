@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { buildBankAdviceHtml } from "@/modules/admin/transfers/bank-advice/pdf-helpers";
 import { getBankAdvicePdfData } from "@/modules/admin/transfers/bank-advice/pdf-actions";
+import { generatePdf } from "@/lib/pdf-renderer";
 
 export const dynamic = "force-dynamic";
 
@@ -32,9 +33,8 @@ export async function GET(
     const format = _request.nextUrl.searchParams.get("format");
 
     if (format === "pdf") {
-      // Return HTML for Playwright-based PDF generation
-      return new NextResponse(html, {
-        headers: { "Content-Type": "text/html; charset=utf-8" },
+      return generatePdf(html, `bank-advice-${uuid.slice(0, 12)}`, {
+        footerText: "Bank Advice",
       });
     }
 
