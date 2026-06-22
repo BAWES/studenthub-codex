@@ -47,15 +47,9 @@ export default async function LoginPage({
 
       {/* Intro */}
       <Card className="overflow-hidden border-border bg-gradient-to-br from-blue/10 via-transparent to-transparent">
-<<<<<<< HEAD
-        <CardContent className="p-[clamp(22px,4vw,48px)]">
-          <p className="text-blue-zendesk text-[11px] font-black uppercase">One StudentHub login</p>
-          <h1 className="mt-0 max-w-[760px] text-[clamp(44px,6.4vw,92px)] leading-[0.94] max-sm:text-[40px]">
-=======
         <CardContent className="p-8 sm:p-10 lg:p-12">
           <p className="text-blue text-[11px] font-black uppercase">One StudentHub login</p>
           <h1 className="mt-0 max-w-[760px] text-[clamp(32px,5vw,72px)] leading-[0.94] max-sm:text-[36px]">
->>>>>>> origin/develop
             Sign in once. We&rsquo;ll open the right workspace.
           </h1>
           <p className="text-muted-foreground max-w-[620px] leading-relaxed">
@@ -65,14 +59,14 @@ export default async function LoginPage({
           <div className="flex flex-wrap gap-2 mt-5">
             {["Production-compatible credentials", "Server-side account detection", "Capability-scoped workspaces"].map(
               (item) => (
-                <Badge key={item} variant="outline" className="text-blue-zendesk text-[11px] font-black uppercase px-3 py-1.5">
+                <Badge key={item} variant="outline" className="text-blue text-[11px] font-black uppercase px-3 py-1.5">
                   {item}
                 </Badge>
               )
             )}
           </div>
         </CardContent>
-        <Link href="/" className="inline-block mt-4 text-sm no-underline text-muted-foreground hover:text-blue-zendesk px-[clamp(22px,4vw,48px)] pb-[clamp(22px,4vw,48px)]">
+        <Link href="/" className="inline-block mt-4 text-sm no-underline text-muted-foreground hover:text-blue px-8 sm:px-10 lg:px-12 pb-8 sm:pb-10 lg:pb-12">
           Back to landing
         </Link>
       </Card>
@@ -82,17 +76,6 @@ export default async function LoginPage({
         className="self-start border-border shadow-xl"
         aria-label="StudentHub sign in"
       >
-<<<<<<< HEAD
-        <CardContent className="p-0">
-          {params.error === "expired" ? (
-            <p className="text-destructive font-bold m-0 p-4 pb-0">That verified account choice expired. Sign in again to continue.</p>
-          ) : null}
-          {params.error === "account" ? (
-            <p className="text-destructive font-bold m-0 p-4 pb-0">Choose a verified account to continue.</p>
-          ) : null}
-          <LoginForm />
-        </CardContent>
-=======
         {params.error === "expired" ? (
           <p className="text-destructive font-bold m-0 p-4 pb-0">That verified account choice expired. Sign in again to continue.</p>
         ) : null}
@@ -100,7 +83,6 @@ export default async function LoginPage({
           <p className="text-destructive font-bold m-0 p-4 pb-0">Choose a verified account to continue.</p>
         ) : null}
         <LoginForm />
->>>>>>> origin/develop
       </Card>
 
       {/* Role notes - spans full width */}
@@ -108,7 +90,7 @@ export default async function LoginPage({
         {roleNotes.map(({ icon: Icon, label, detail }) => (
           <Card key={label}>
             <CardContent className="grid gap-1.5 p-3.5">
-              <Icon className="size-4 text-blue-zendesk shrink-0" aria-hidden="true" />
+              <Icon className="size-4 text-blue shrink-0" aria-hidden="true" />
               <span className="text-muted-foreground text-xs font-extrabold uppercase">{label}</span>
               <strong className="text-sm text-foreground">{detail}</strong>
             </CardContent>
