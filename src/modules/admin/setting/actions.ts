@@ -24,8 +24,24 @@ export type {
   UpdateSettingResult,
 } from "@/modules/settings/schemas";
 
-import { updateSetting, deleteSetting as deleteSettingFull } from "@/modules/settings/actions";
-import type { UpdateSettingInput, DeleteSettingInput, UpdateSettingResult } from "@/modules/settings/schemas";
+import { updateSetting, deleteSetting as deleteSettingFull, getSetting } from "@/modules/settings/actions";
+import type { UpdateSettingInput, DeleteSettingInput, UpdateSettingResult, GetSettingInput } from "@/modules/settings/schemas";
+
+import { getSettingSchema } from "./schemas";
+
+// Re-export with original names for compatibility with admin detail forms
+export { updateSetting };
+const deleteSetting = deleteSettingFull;
+export { deleteSetting };
+
+/**
+ * Get a setting by UUID — wraps getSetting for admin detail page compatibility.
+ */
+export async function getSettingDetail(id: string) {
+  const parsed = getSettingSchema.safeParse({ settingUuid: id });
+  if (!parsed.success) return null;
+  return getSetting(parsed.data);
+}
 
 /**
  * Update a setting's value.

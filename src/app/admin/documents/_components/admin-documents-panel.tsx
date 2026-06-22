@@ -18,7 +18,7 @@ import {
   buildIdCardDownloadUrl,
   buildCertificateDownloadUrl,
   certificateDownloadSchema,
-} from "./schemas";
+} from "../schemas";
 import { ZodError } from "zod";
 
 type TabValue = "cv" | "id-card" | "certificate" | "evaluation" | "offer-letter" | "bank-advice";

@@ -30,12 +30,12 @@ import {
 import type { Route } from "next";
 
 import type { SessionUser } from "@/modules/auth/types";
-import type { SettingListItem } from "@/modules/admin/setting/schemas";
+import type { SettingItem } from "@/modules/admin/setting/schemas";
 import { createSetting, deleteSetting } from "@/modules/admin/setting/actions";
 
 type Props = {
   session: SessionUser;
-  records: SettingListItem[];
+  records: SettingItem[];
 };
 
 export function AdminSettingTable({ session, records }: Props) {

@@ -5,6 +5,7 @@
 
 export {
   listSettingsSchema,
+  getSettingSchema,
   createSettingSchema,
   deleteSettingSchema,
   settingItemSchema,
@@ -14,6 +15,7 @@ export {
 
 export type {
   ListSettingsInput,
+  GetSettingInput,
   CreateSettingInput,
   DeleteSettingInput,
   SettingItem,
