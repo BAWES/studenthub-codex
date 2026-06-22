@@ -2496,3 +2496,27 @@ export async function getAdminEmailCampaignRows() {
     updated: formatDate(row.updated_at),
   }));
 }
+
+export async function getAdminWebhookRows() {
+  const rows = await prisma.webhook.findMany({
+    orderBy: { webhook_id: "desc" },
+    take: 60,
+    select: {
+      webhook_id: true,
+      event: true,
+      endpoint: true,
+      method: true,
+      created_at: true,
+      updated_at: true,
+    }
+  });
+
+  return rows.map((row) => ({
+    id: row.webhook_id,
+    event: row.event,
+    endpoint: row.endpoint,
+    method: row.method ?? "POST",
+    created: formatDate(row.created_at),
+    updated: formatDate(row.updated_at),
+  }));
+}
