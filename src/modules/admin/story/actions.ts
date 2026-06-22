@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import crypto from "node:crypto";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
 import {
@@ -8,6 +9,8 @@ import {
   listStoriesResultSchema,
 } from "./schemas";
 import type { ListStoriesInput, ListStoriesResult } from "./schemas";
+
+type StoryActionResponse = { operation: string; message: string };
 
 export async function listStories(
   input: ListStoriesInput = {},
@@ -65,4 +68,77 @@ export async function listStories(
   }
 
   return result;
+}
+
+// ── Stub CRUD actions for admin story table ──────────────────────────
+
+export async function createStory(
+  _prevState: unknown,
+  formData: FormData,
+): Promise<StoryActionResponse> {
+  await requireCapability("admin.write");
+  const requestUuid = String(formData.get("requestUuid") ?? "");
+  const staffId = formData.get("staffId") ? Number(formData.get("staffId")) : null;
+  const numberOfEmployees = formData.get("numberOfEmployees")
+    ? Number(formData.get("numberOfEmployees"))
+    : null;
+  const storyStatus = Number(formData.get("storyStatus") ?? 0);
+
+  try {
+    await prisma.story.create({
+      data: {
+        request_uuid: requestUuid,
+        staff_id: staffId,
+        number_of_employees: numberOfEmployees,
+        story_status: storyStatus,
+        story_uuid: crypto.randomUUID(),
+      },
+    });
+    return { operation: "success", message: "Story created" };
+  } catch (err) {
+    return { operation: "error", message: String(err) };
+  }
+}
+
+export async function updateStory(
+  _prevState: unknown,
+  formData: FormData,
+): Promise<StoryActionResponse> {
+  await requireCapability("admin.write");
+  const storyUuid = String(formData.get("storyUuid") ?? "");
+  const requestUuid = String(formData.get("requestUuid") ?? "");
+  const staffId = formData.get("staffId") ? Number(formData.get("staffId")) : null;
+  const numberOfEmployees = formData.get("numberOfEmployees")
+    ? Number(formData.get("numberOfEmployees"))
+    : null;
+  const storyStatus = Number(formData.get("storyStatus") ?? 0);
+  const storyTimeSpent = formData.get("storyTimeSpent")
+    ? Number(formData.get("storyTimeSpent"))
+    : null;
+
+  try {
+    await prisma.story.update({
+      where: { story_uuid: storyUuid },
+      data: {
+        request_uuid: requestUuid,
+        staff_id: staffId,
+        number_of_employees: numberOfEmployees,
+        story_status: storyStatus,
+        story_time_spent: storyTimeSpent,
+      },
+    });
+    return { operation: "success", message: "Story updated" };
+  } catch (err) {
+    return { operation: "error", message: String(err) };
+  }
+}
+
+export async function deleteStory(storyUuid: string): Promise<StoryActionResponse> {
+  await requireCapability("admin.write");
+  try {
+    await prisma.story.delete({ where: { story_uuid: storyUuid } });
+    return { operation: "success", message: "Story deleted" };
+  } catch (err) {
+    return { operation: "error", message: String(err) };
+  }
 }

@@ -34,39 +34,10 @@ export {
   setCandidateApproval,
   setCandidateProfileComplete,
   clearCandidateCivilVerification,
-  changePassword,
-  getCandidateProfile,
-  getCandidate,
-  addCandidateNote
 } from "./actions";
 
 export type {
-  GetCandidateInput,
-  AddCandidateNoteInput,
-  CandidateDetail,
-  CandidateNote,
-  CandidateDetailResult,
-  AddNoteResult,
-  GetCandidateProfileInput
-} from "./schemas";
-
-export {
-  getCandidateProfileSchema,
-  updateCandidateProfileResultSchema,
-  candidateErrorResultSchema,
-  candidateLanguageResultSchema,
-  getCountryOptionsResultSchema,
-  getUniversityOptionsResultSchema,
-  getBankOptionsResultSchema,
-  getDegreeOptionsResultSchema,
-  getMajorOptionsResultSchema,
-  educationStateResultSchema,
-  candidateActionErrorResultSchema,
-  changePasswordResultSchema,
-  getCandidateSchema,
-  addCandidateNoteSchema,
-  candidateNoteOutputSchema,
-  candidateDetailOutputSchema,
-  candidateDetailResultOutputSchema,
-  addNoteResultOutputSchema
-} from "./schemas";
+  ProfileState,
+  EducationState,
+  LanguageState,
+} from "./actions";

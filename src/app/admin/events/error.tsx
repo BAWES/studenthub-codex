@@ -16,15 +16,10 @@ export default function Error({
         Something went wrong
       </h2>
       <p className="text-sm max-w-md text-center text-muted-foreground">
-        {error.message ?? "An unexpected error occurred while loading the story details."}
+        {error.message ?? "An unexpected error occurred while loading the events page."}
       </p>
       {error.digest ? <small className="text-muted-foreground">Error ID: {error.digest}</small> : null}
-      <Button
-        onClick={reset}
-        variant="default"
-      >
-        Try again
-      </Button>
+      <Button onClick={reset} variant="default" className="mt-2">Try again</Button>
     </div>
   );
 }
