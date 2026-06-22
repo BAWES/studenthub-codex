@@ -1,20 +1,7 @@
 import type { ReactNode } from "react";
 import type { Route } from "next";
 import Link from "next/link";
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableHead,
-  TableRow,
-  TableCell,
-} from "@/components/ui/table";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 
 export type DataTableColumn<T> = {
   key: string;
@@ -36,58 +23,62 @@ export function DataTable<T extends { id: string | number }>({
   rowHref?: (row: T) => Route;
 }) {
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between gap-4">
-        <div>
-          <CardTitle>{title}</CardTitle>
-          <CardDescription>{description}</CardDescription>
+    <Card className="min-w-0 overflow-hidden">
+      <div className="flex items-center justify-between gap-4 px-4 py-3.5 border-b border-border">
+        <div className="min-w-0">
+          <h2 className="text-lg font-semibold mb-0.5">{title}</h2>
+          <p className="text-sm text-muted-foreground mb-0">{description}</p>
         </div>
-        <span className="text-sm text-muted-foreground whitespace-nowrap">{rows.length} shown</span>
-      </CardHeader>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            {columns.map((column) => (
-              <TableHead key={column.key}>{column.label}</TableHead>
-            ))}
-            {rowHref ? <TableHead aria-label="Open record" /> : null}
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {rows.length ? (
-            rows.map((row) => (
-              <TableRow key={row.id}>
-                {columns.map((column) => (
-                  <TableCell key={column.key}>
-                    {column.render(row)}
-                  </TableCell>
-                ))}
-                {rowHref ? (
-                  <TableCell>
-                    <Link
-                      href={rowHref(row)}
-                      className="text-sm font-medium text-primary hover:underline"
-                    >
-                      Open
-                    </Link>
-                  </TableCell>
-                ) : null}
-              </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell colSpan={columns.length + (rowHref ? 1 : 0)} className="h-32 text-center">
-                <div className="flex flex-col items-center gap-1 py-8">
-                  <strong className="text-sm font-medium text-foreground">No records found</strong>
-                  <span className="text-sm text-muted-foreground max-w-xs">
-                    This view is connected to the prod clone, but this account has no matching rows yet.
-                  </span>
-                </div>
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+        <span className="text-sm font-bold text-muted-foreground shrink-0">{rows.length} shown</span>
+      </div>
+      <div className="overflow-x-auto">
+        <table className="w-full min-w-[860px] border-collapse">
+          <thead>
+            <tr>
+              {columns.map((column) => (
+                <th key={column.key} className="text-left text-xs font-bold text-muted-foreground uppercase px-4 py-3 border-b border-border">
+                  {column.label}
+                </th>
+              ))}
+              {rowHref ? <th className="px-4 py-3 border-b border-border" aria-label="Open record" /> : null}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.length ? (
+              rows.map((row) => (
+                <tr key={row.id} className="border-b border-border last:border-b-0 hover:bg-muted/30 transition-colors">
+                  {columns.map((column) => (
+                    <td key={column.key} className="px-4 py-3 align-top text-sm">
+                      {column.render(row)}
+                    </td>
+                  ))}
+                  {rowHref ? (
+                    <td className="px-4 py-3 align-middle text-right">
+                      <Link
+                        href={rowHref(row)}
+                        className="text-blue-zendesk text-sm font-semibold hover:underline no-underline"
+                      >
+                        Open &rarr;
+                      </Link>
+                    </td>
+                  ) : null}
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={columns.length + (rowHref ? 1 : 0)} className="p-0">
+                  <div className="grid gap-2 justify-items-center text-center py-12 px-6">
+                    <strong className="text-foreground text-[15px]">No records found</strong>
+                    <span className="text-muted-foreground text-sm max-w-[380px]">
+                      This view is connected to the prod clone, but this account has no matching rows yet.
+                    </span>
+                  </div>
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
     </Card>
   );
 }
