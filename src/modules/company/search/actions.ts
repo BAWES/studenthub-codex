@@ -53,7 +53,7 @@ async function searchCompaniesFromTypesense(
 
     const result = await client.collections<CompanyDocument>(COMPANIES_COLLECTION).documents().search(searchParams);
 
-    return (result.hits ?? []).map((hit) => {
+    return (result.hits ?? []).map((hit: any) => {
       const doc = hit.document;
       return {
         id: doc.company_id,
@@ -93,7 +93,7 @@ async function searchStoresFromTypesense(
 
     const result = await client.collections<StoreDocument>(STORES_COLLECTION).documents().search(searchParams);
 
-    return (result.hits ?? []).map((hit) => {
+    return (result.hits ?? []).map((hit: any) => {
       const doc = hit.document;
       return {
         id: doc.store_id,

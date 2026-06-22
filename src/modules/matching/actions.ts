@@ -292,7 +292,7 @@ export async function listMatchingJobs(
 
   // Score each job
   const scored = await Promise.all(
-    dbRows.map(async (job) => {
+    dbRows.map(async (job: any) => {
       const result = await matchCandidateToJob({
         candidateId,
         jobId: job.jobListingId,
@@ -357,7 +357,7 @@ export async function listMatchingCandidates(
     select: { candidateId: true },
   });
 
-  const applicantIds = applicants.map((a) => a.candidateId);
+  const applicantIds = applicants.map((a: any) => a.candidateId);
 
   // If there are applicants, score them; otherwise score recent candidates with skills
   let candidates;
@@ -402,7 +402,7 @@ export async function listMatchingCandidates(
 
   // Score all filtered candidates
   const scoredResults = await Promise.all(
-    filteredCandidateIds.slice(0, 100).map(async (cid) => {
+    filteredCandidateIds.slice(0, 100).map(async (cid: any) => {
       try {
         const result = await matchCandidateToJob({ candidateId: cid, jobId });
         return { candidateId: cid, score: result.score };
