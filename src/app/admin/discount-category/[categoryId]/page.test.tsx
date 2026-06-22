@@ -104,8 +104,8 @@ describe("AdminDiscountCategoryDetailPage", () => {
 
     expect(screen.getByTestId("fact-Name (EN)")).toHaveTextContent("Early Bird");
     expect(screen.getByTestId("fact-Name (AR)")).toHaveTextContent("تسجيل مبكر");
-    // Image is a link, our mock renders "ReactNode" for non-string values
-    expect(screen.getByTestId("fact-Image")).toBeInTheDocument();
+    // Image is a plain URL string
+    expect(screen.getByTestId("fact-Image")).toHaveTextContent("https://example.com/discounts/early-bird.png");
     expect(screen.getByTestId("fact-Created")).toHaveTextContent("2026-01-01");
     expect(screen.getByTestId("fact-Updated")).toHaveTextContent("2026-06-01");
   });

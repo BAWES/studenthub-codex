@@ -44,18 +44,7 @@ export default async function AdminDiscountCategoryDetailPage({
             { label: "Name (AR)", value: cat.name_ar ?? "—" },
             {
               label: "Image",
-              value: cat.image ? (
-                <a
-                  href={cat.image}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="underline text-primary"
-                >
-                  View Image
-                </a>
-              ) : (
-                "—"
-              ),
+              value: cat.image ?? "—",
             },
             {
               label: "Created",
