@@ -2,8 +2,30 @@
 
 import { redirect } from "next/navigation";
 import { resolveLegacyIdentities } from "./service";
-import { clearPendingAccounts, clearSession, createPendingAccounts, createSession, getPendingAccounts } from "./session";
-import type { LoginState } from "./types";
+import { clearSession, createSession } from "./session";
+import type { LoginState, Role, Capability } from "./types";
+
+/** Role priority for singular experience — auto-select highest privilege. */
+const ROLE_PRIORITY: Record<string, number> = {
+  admin: 5,
+  staff: 4,
+  company: 3,
+  inspector: 2,
+  candidate: 1,
+};
+
+function pickBestAccount(accounts: {
+  role: Role;
+  accountKey: string;
+  label: string;
+  name: string;
+  email: string;
+  id: string;
+  legacyType?: Role;
+  capabilities?: string[];
+}[]) {
+  return accounts.sort((a, b) => (ROLE_PRIORITY[b.role] ?? 0) - (ROLE_PRIORITY[a.role] ?? 0))[0];
+}
 
 export async function loginAction(_state: LoginState, formData: FormData): Promise<LoginState> {
   const email = formData.get("email");
@@ -12,50 +34,25 @@ export async function loginAction(_state: LoginState, formData: FormData): Promi
   if (typeof email !== "string" || typeof password !== "string" || !email.trim() || !password) {
     return {
       error: "Enter your email and password.",
-      email: typeof email === "string" ? email : ""
+      email: typeof email === "string" ? email : "",
     };
   }
 
   const accounts = await resolveLegacyIdentities(email, password);
   if (!accounts.length) {
-    await clearPendingAccounts();
     return { error: "The credentials did not match any active StudentHub account.", email };
   }
 
-  if (accounts.length === 1) {
-    const { accountKey: _accountKey, label: _label, ...user } = accounts[0];
-    await createSession(user);
-    redirect("/app");
-  }
-
-  await createPendingAccounts(accounts);
-  return {
-    email,
-    accounts: accounts.map((account) => ({
-      accountKey: account.accountKey,
-      role: account.role,
-      label: account.label,
-      name: account.name,
-      email: account.email
-    }))
-  };
-}
-
-export async function chooseAccountAction(formData: FormData) {
-  const accountKey = formData.get("accountKey");
-  if (typeof accountKey !== "string") {
-    redirect("/login?error=account");
-  }
-
-  const accounts = await getPendingAccounts();
-  const account = accounts.find((item) => item.accountKey === accountKey);
-  if (!account) {
-    await clearPendingAccounts();
-    redirect("/login?error=expired");
-  }
-
-  const { accountKey: _accountKey, label: _label, ...user } = account;
-  await createSession(user);
+  const best = pickBestAccount(accounts);
+  const { accountKey: _accountKey, label: _label, ...user } = best;
+  await createSession({
+    role: user.role,
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    capabilities: user.capabilities as Capability[] | undefined,
+    legacyType: user.legacyType,
+  });
   redirect("/app");
 }
 
