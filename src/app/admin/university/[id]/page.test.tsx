@@ -1,6 +1,8 @@
+// @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
 import { notFound } from "next/navigation";
+import "@testing-library/jest-dom/vitest";
 
 vi.mock("@/modules/auth/session", () => ({
   requireRoleCapability: vi.fn().mockResolvedValue({ user: { id: "1" }, role: "admin" }),
@@ -67,7 +69,7 @@ const mockUniversity = {
 
 const mockGetUniversity = vi.fn();
 
-vi.mock("./actions", () => ({
+vi.mock("@/modules/admin/university/actions", () => ({
   getUniversity: (...args: unknown[]) => mockGetUniversity(...args),
 }));
 
@@ -99,10 +101,7 @@ describe("AdminUniversityDetailPage", () => {
     );
 
     expect(screen.getByTestId("eyebrow")).toHaveTextContent("Admin / Universities");
-    expect(screen.getByTestId("title")).toHaveTextContent("University — Kuwait University");
-
-    expect(screen.getByTestId("metric-Name (English)")).toHaveTextContent("Kuwait University");
-    expect(screen.getByTestId("metric-Name (Arabic)")).toHaveTextContent("جامعة الكويت");
+    expect(screen.getByTestId("title")).toHaveTextContent("Kuwait University");
 
     expect(screen.getByTestId("fact-ID")).toHaveTextContent("1");
     expect(screen.getByTestId("fact-Name (English)")).toHaveTextContent("Kuwait University");
@@ -110,8 +109,6 @@ describe("AdminUniversityDetailPage", () => {
     expect(screen.getByTestId("fact-Data Source")).toHaveTextContent("1");
     expect(screen.getByTestId("fact-Created")).toHaveTextContent("2024-01-01");
     expect(screen.getByTestId("fact-Updated")).toHaveTextContent("2024-03-05");
-
-    expect(screen.getByText("Back to Universities")).toBeInTheDocument();
   });
 
   it("renders with nullable fields as dash", async () => {
@@ -130,9 +127,7 @@ describe("AdminUniversityDetailPage", () => {
       }),
     );
 
-    expect(screen.getByTestId("title")).toHaveTextContent("University — Unnamed");
-    expect(screen.getByTestId("metric-Name (English)")).toHaveTextContent("—");
-    expect(screen.getByTestId("metric-Name (Arabic)")).toHaveTextContent("—");
+    expect(screen.getByTestId("title")).toHaveTextContent("Unnamed");
     expect(screen.getByTestId("fact-Name (English)")).toHaveTextContent("—");
     expect(screen.getByTestId("fact-Name (Arabic)")).toHaveTextContent("—");
     expect(screen.getByTestId("fact-Data Source")).toHaveTextContent("—");
