@@ -59,7 +59,7 @@ function statusBadge(status: string) {
 export function CompanyRequestsTable({ session, rows }: Props) {
   return (
     <WorkspaceShell session={session} eyebrow="Company" title="Requests" metrics={[]}>
-      <div style={{ marginBottom: "1rem" }}>
+      <div className="mb-4">
         <Link
           href="/company/requests/create"
           className={cn(

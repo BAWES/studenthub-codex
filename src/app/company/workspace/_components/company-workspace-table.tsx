@@ -47,7 +47,7 @@ export function CompanyWorkspaceTable({ session, companies, requests, metrics, w
       title={welcomeTitle}
       metrics={metrics.map((m) => ({ ...m, trend: "flat" as const }))}
     >
-      <div className="space-y-6" style={{ marginTop: "1.5rem" }}>
+      <div className="space-y-6 mt-6">
         {/* Linked Companies */}
         <DataTable
           title="Linked Companies"

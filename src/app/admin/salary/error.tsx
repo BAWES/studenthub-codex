@@ -9,17 +9,16 @@ export default function Error({
 }) {
   return (
     <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4">
-      <p className="text-sm font-medium" style={{ color: "var(--sh-error)" }}>
+      <p className="text-sm font-medium text-destructive">
         Something went wrong loading salary records.
       </p>
-      <p className="text-xs" style={{ color: "var(--muted)" }}>
+      <p className="text-xs text-muted-foreground">
         {error.message}
       </p>
       <button
         type="button"
         onClick={reset}
-        className="px-4 py-2 text-sm rounded-lg font-medium"
-        style={{ background: "var(--sh-primary)", color: "#fff" }}
+        className="px-4 py-2 text-sm rounded-lg font-medium bg-primary text-primary-foreground"
       >
         Try again
       </button>
