@@ -38,13 +38,14 @@ export function SettingDetailForm({
     formData.set("value", value);
     formData.set("serialized", serialized ? "true" : "");
 
-    await updateSetting(setting.setting_uuid, {
+    await updateSetting({
+      settingUuid: setting.setting_uuid,
       code,
       key,
       value: value || null,
       serialized,
     });
-    return { success: true };
+    return { success: true } as const;
   };
 
   const [state, formAction, pending] = useActionState(updateAction, null);
@@ -134,7 +135,7 @@ export function SettingDetailForm({
         <CardContent>
           <form
             action={async () => {
-              await deleteSetting(setting.setting_uuid);
+              await deleteSetting({ settingUuid: setting.setting_uuid });
             }}
           >
             <Button type="submit" variant="destructive">

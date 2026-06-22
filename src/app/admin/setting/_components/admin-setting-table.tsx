@@ -108,7 +108,7 @@ export function AdminSettingTable({ session, records }: Props) {
                 settingUuid={row.setting_uuid}
                 settingKey={`${row.code}.${row.key}`}
                 onDelete={async () => {
-                  await deleteSetting(row.setting_uuid);
+                  await deleteSetting({ settingUuid: row.setting_uuid });
                   router.refresh();
                 }}
               />
