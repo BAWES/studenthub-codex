@@ -75,7 +75,7 @@ export function JobNewForm({ employerId }: Props) {
           type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          className="w-full rounded-lg border border-input bg-card px-4 py-2.5 text-sm outline-none focus:border-[var(--sh-coral)] focus:ring-1 focus:ring-[var(--sh-coral)]/30"
+          className="w-full rounded-lg border border-input bg-card px-4 py-2.5 text-sm outline-none focus:border-[#eb6651] focus:ring-1 focus:ring-[#eb6651]/30"
           placeholder="e.g. Software Engineer Intern"
           maxLength={255}
           required
@@ -92,7 +92,7 @@ export function JobNewForm({ employerId }: Props) {
           id="description"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          className="w-full rounded-lg border border-input bg-card px-4 py-2.5 text-sm outline-none focus:border-[var(--sh-coral)] focus:ring-1 focus:ring-[var(--sh-coral)]/30 min-h-[120px]"
+          className="w-full rounded-lg border border-input bg-card px-4 py-2.5 text-sm outline-none focus:border-[#eb6651] focus:ring-1 focus:ring-[#eb6651]/30 min-h-[120px]"
           placeholder="Describe the role, responsibilities, and day-to-day activities..."
           required
         />
@@ -107,7 +107,7 @@ export function JobNewForm({ employerId }: Props) {
           id="requirements"
           value={requirements}
           onChange={(e) => setRequirements(e.target.value)}
-          className="w-full rounded-lg border border-input bg-card px-4 py-2.5 text-sm outline-none focus:border-[var(--sh-coral)] focus:ring-1 focus:ring-[var(--sh-coral)]/30 min-h-[80px]"
+          className="w-full rounded-lg border border-input bg-card px-4 py-2.5 text-sm outline-none focus:border-[#eb6651] focus:ring-1 focus:ring-[#eb6651]/30 min-h-[80px]"
           placeholder="Required skills, experience, certifications..."
         />
       </div>
@@ -123,7 +123,7 @@ export function JobNewForm({ employerId }: Props) {
             type="text"
             value={location}
             onChange={(e) => setLocation(e.target.value)}
-            className="w-full rounded-lg border border-input bg-card px-4 py-2.5 text-sm outline-none focus:border-[var(--sh-coral)] focus:ring-1 focus:ring-[var(--sh-coral)]/30"
+            className="w-full rounded-lg border border-input bg-card px-4 py-2.5 text-sm outline-none focus:border-[#eb6651] focus:ring-1 focus:ring-[#eb6651]/30"
             placeholder="Kuwait City"
           />
         </div>
@@ -136,7 +136,7 @@ export function JobNewForm({ employerId }: Props) {
             id="employmentType"
             value={employmentType}
             onChange={(e) => setEmploymentType(e.target.value)}
-            className="w-full rounded-lg border border-input bg-card px-4 py-2.5 text-sm outline-none focus:border-[var(--sh-coral)] focus:ring-1 focus:ring-[var(--sh-coral)]/30"
+            className="w-full rounded-lg border border-input bg-card px-4 py-2.5 text-sm outline-none focus:border-[#eb6651] focus:ring-1 focus:ring-[#eb6651]/30"
           >
             <option value="full-time">Full-time</option>
             <option value="part-time">Part-time</option>
@@ -157,7 +157,7 @@ export function JobNewForm({ employerId }: Props) {
               type="number"
               value={salaryMin}
               onChange={(e) => setSalaryMin(e.target.value)}
-              className="w-full rounded-lg border border-input bg-card px-4 py-2.5 text-sm outline-none focus:border-[var(--sh-coral)] focus:ring-1 focus:ring-[var(--sh-coral)]/30"
+              className="w-full rounded-lg border border-input bg-card px-4 py-2.5 text-sm outline-none focus:border-[#eb6651] focus:ring-1 focus:ring-[#eb6651]/30"
               placeholder="Min"
               min={0}
             />
@@ -168,7 +168,7 @@ export function JobNewForm({ employerId }: Props) {
               type="number"
               value={salaryMax}
               onChange={(e) => setSalaryMax(e.target.value)}
-              className="w-full rounded-lg border border-input bg-card px-4 py-2.5 text-sm outline-none focus:border-[var(--sh-coral)] focus:ring-1 focus:ring-[var(--sh-coral)]/30"
+              className="w-full rounded-lg border border-input bg-card px-4 py-2.5 text-sm outline-none focus:border-[#eb6651] focus:ring-1 focus:ring-[#eb6651]/30"
               placeholder="Max"
               min={0}
             />
@@ -185,7 +185,7 @@ export function JobNewForm({ employerId }: Props) {
           id="status"
           value={status}
           onChange={(e) => setStatus(e.target.value)}
-          className="w-full rounded-lg border border-input bg-card px-4 py-2.5 text-sm outline-none focus:border-[var(--sh-coral)] focus:ring-1 focus:ring-[var(--sh-coral)]/30"
+          className="w-full rounded-lg border border-input bg-card px-4 py-2.5 text-sm outline-none focus:border-[#eb6651] focus:ring-1 focus:ring-[#eb6651]/30"
         >
           <option value="active">Active (visible to candidates)</option>
           <option value="draft">Draft (not visible)</option>

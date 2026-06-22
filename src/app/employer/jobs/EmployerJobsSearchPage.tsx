@@ -80,6 +80,54 @@ function SearchResultSkeletons({ count = 3 }: { count?: number }) {
   );
 }
 
+// ─── Pagination component ─────────────────────────────────────────────
+
+function Pagination({
+  page,
+  totalPages,
+  onGoToPage,
+}: {
+  page: number;
+  totalPages: number;
+  onGoToPage: (p: number) => void;
+}) {
+  if (totalPages <= 1) return null;
+
+  const pages = Array.from({ length: Math.min(totalPages, 5) }, (_, i) => i + 1);
+
+  return (
+    <div className="mt-6 flex items-center justify-center gap-2">
+      <Button
+        variant="outline"
+        size="sm"
+        disabled={page <= 1}
+        onClick={() => onGoToPage(page - 1)}
+      >
+        Previous
+      </Button>
+      {pages.map((p) => (
+        <Button
+          key={p}
+          variant={p === page ? "default" : "outline"}
+          size="sm"
+          className={p === page ? "bg-[#eb6651] text-white hover:bg-[#d45441]" : ""}
+          onClick={() => onGoToPage(p)}
+        >
+          {p}
+        </Button>
+      ))}
+      <Button
+        variant="outline"
+        size="sm"
+        disabled={page >= totalPages}
+        onClick={() => onGoToPage(page + 1)}
+      >
+        Next
+      </Button>
+    </div>
+  );
+}
+
 // ─── Component ─────────────────────────────────────────────────────────
 
 export function EmployerJobsSearchPage({
@@ -173,6 +221,7 @@ export function EmployerJobsSearchPage({
   return (
     <div className="mx-auto max-w-7xl">
       <h1 className="sr-only">Job Postings</h1>
+
       {/* Search form */}
       <form className="mb-6" onSubmit={handleSubmit}>
         <div className="flex gap-2">
@@ -277,8 +326,6 @@ export function EmployerJobsSearchPage({
                           size="sm"
                         />
                       )}
-                    </div>
-                  </div>
 
                   {/* Description excerpt */}
                   {row.description && (
