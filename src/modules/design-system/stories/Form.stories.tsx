@@ -37,13 +37,13 @@ const DemoForm = () => {
   return (
     <Form {...(form as any)}>
       <form
-        onSubmit={form.handleSubmit((data) => alert(JSON.stringify(data, null, 2)))}
+        onSubmit={form.handleSubmit((data: any) => alert(JSON.stringify(data, null, 2)))}
         style={{ display: "flex", flexDirection: "column", gap: 16, maxWidth: 400 }}
       >
         <FormField
           control={form.control}
           name="username"
-          render={({ field }) => (
+          render={({ field }: { field: any }) => (
             <FormItem>
               <FormLabel>Username</FormLabel>
               <FormControl>
@@ -59,7 +59,7 @@ const DemoForm = () => {
         <FormField
           control={form.control}
           name="email"
-          render={({ field }) => (
+          render={({ field }: { field: any }) => (
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
@@ -114,7 +114,7 @@ export const WithErrors: Story = {
             <FormField
               control={form.control}
               name="username"
-              render={({ field }) => (
+              render={({ field }: { field: any }) => (
                 <FormItem>
                   <FormLabel>Username</FormLabel>
                   <FormControl>

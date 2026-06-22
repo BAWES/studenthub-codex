@@ -22,18 +22,31 @@ export type DataTableColumn<T> = {
   render: (row: T) => ReactNode;
 };
 
+function resolveHref<T>(href: ((row: T) => Route) | string | undefined, row: T): Route | string | undefined {
+  if (typeof href === "function") return href(row);
+  return href;
+}
+
 export function DataTable<T extends { id: string | number }>({
   title,
   description,
   rows,
   columns,
-  rowHref
+  rowHref,
+  loading,
+  totalPages,
+  page,
+  onPageChange,
 }: {
   title: string;
   description: string;
   rows: T[];
   columns: DataTableColumn<T>[];
-  rowHref?: (row: T) => Route;
+  rowHref?: ((row: T) => Route) | string;
+  loading?: boolean;
+  totalPages?: number;
+  page?: number;
+  onPageChange?: (page: number) => void;
 }) {
   return (
     <Card>
@@ -65,7 +78,7 @@ export function DataTable<T extends { id: string | number }>({
                 {rowHref ? (
                   <TableCell>
                     <Link
-                      href={rowHref(row)}
+                      href={resolveHref(rowHref, row) as Route}
                       className="text-sm font-medium text-primary hover:underline"
                     >
                       Open
