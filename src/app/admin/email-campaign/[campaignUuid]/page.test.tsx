@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
 import { notFound } from "next/navigation";
@@ -102,17 +103,17 @@ describe("AdminEmailCampaignDetailPage", () => {
     );
 
     // Check workspace shell
-    expect(screen.getByTestId("eyebrow")).toHaveTextContent("Admin / Email campaigns");
-    expect(screen.getByTestId("title")).toHaveTextContent("New opportunities available");
+    expect(screen.getByTestId("eyebrow").textContent).toBe("Admin / Email campaigns");
+    expect(screen.getByTestId("title").textContent).toBe("New opportunities available");
 
     // Check metric
-    expect(screen.getByTestId("metric-Progress")).toHaveTextContent("50%");
+    expect(screen.getByTestId("metric-Progress").textContent).toBe("50%");
 
     // Check detail fields
-    expect(screen.getByTestId("fact-Subject")).toHaveTextContent("New opportunities available");
-    expect(screen.getByTestId("fact-Target")).toHaveTextContent("candidate");
-    expect(screen.getByTestId("fact-Status")).toHaveTextContent("Active");
-    expect(screen.getByTestId("fact-Created")).toHaveTextContent("2025-01-15");
+    expect(screen.getByTestId("fact-Subject").textContent).toBe("New opportunities available");
+    expect(screen.getByTestId("fact-Target").textContent).toBe("candidate");
+    expect(screen.getByTestId("fact-Status").textContent).toBe("Active");
+    expect(screen.getByTestId("fact-Created").textContent).toBe("2025-01-15");
   });
 
   it("renders inactive status correctly", async () => {
@@ -128,7 +129,7 @@ describe("AdminEmailCampaignDetailPage", () => {
       }),
     );
 
-    expect(screen.getByTestId("fact-Status")).toHaveTextContent("Inactive");
+    expect(screen.getByTestId("fact-Status").textContent).toBe("Inactive");
   });
 
   it("renders null campaign fields as em-dash", async () => {
@@ -146,9 +147,9 @@ describe("AdminEmailCampaignDetailPage", () => {
       }),
     );
 
-    expect(screen.getByTestId("fact-Subject")).toHaveTextContent("—");
-    expect(screen.getByTestId("fact-Target")).toHaveTextContent("—");
-    expect(screen.getByTestId("fact-Created")).toHaveTextContent("—");
+    expect(screen.getByTestId("fact-Subject").textContent).toBe("—");
+    expect(screen.getByTestId("fact-Target").textContent).toBe("—");
+    expect(screen.getByTestId("fact-Created").textContent).toBe("—");
   });
 
   it("calls notFound when campaign is null", async () => {
