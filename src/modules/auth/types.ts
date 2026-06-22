@@ -31,7 +31,6 @@ export type Capability =
   | "id_review.read"
   | "id_review.mutate"
   | "admin.read"
-  | "admin.write"
   | "admin.system";
 
 export type SessionUser = {
