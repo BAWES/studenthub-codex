@@ -1,9 +1,7 @@
-export const dynamic = "force-dynamic";
-
-export default function Loading() {
+export default function AdminDailyStandupDetailLoading() {
   return (
-    <div className="flex items-center justify-center min-h-[40vh]">
-      <p className="text-sm text-muted-foreground">Loading standup answer...</p>
+    <div className="flex items-center justify-center min-h-[60vh]">
+      <p className="text-muted-foreground text-sm">Loading answer details...</p>
     </div>
   );
 }
