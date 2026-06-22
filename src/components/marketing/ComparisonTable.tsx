@@ -175,11 +175,10 @@ export default function ComparisonTable({ persona = "candidate", className }: Co
                 {cat.rows.map((row, ri) => (
                   <tr
                     key={`${cat.category}-${ri}`}
-                    className="transition-colors duration-150"
-                    style={{
-                      backgroundColor:
-                        ri % 2 === 0 ? "var(--card)" : "transparent",
-                    }}
+                    className={cn(
+                      "transition-colors duration-150",
+                      ri % 2 === 0 && "bg-card"
+                    )}
                   >
                     <td
                       className="p-3 text-xs text-foreground border-b border-border"
@@ -220,11 +219,10 @@ export default function ComparisonTable({ persona = "candidate", className }: Co
             {cat.rows.map((row, ri) => (
               <div
                 key={`${cat.category}-${ri}`}
-                className="p-3"
-                style={{
-                  borderBottom:
-                    ri < cat.rows.length - 1 ? "1px solid var(--border)" : "none",
-                }}
+                className={cn(
+                  "p-3",
+                  ri < cat.rows.length - 1 && "border-b border-border"
+                )}
               >
                 <strong className="text-sm block mb-2 text-foreground">
                   {row.feature}

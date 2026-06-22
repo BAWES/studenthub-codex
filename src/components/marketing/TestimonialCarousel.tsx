@@ -202,10 +202,8 @@ export default function TestimonialCarousel({
         {/* Testimonial card — solid */}
         <div
           key={active}
-          className="relative rounded-xl p-8 md:p-10 text-center overflow-hidden shLandingCardStrong"
+          className="relative rounded-xl p-8 md:p-10 text-center overflow-hidden bg-card border border-border shLandingCardStrong"
           style={{
-            backgroundColor: "var(--surface)",
-            border: "1px solid var(--border)",
             animation: "shLandingFadeIn 400ms ease",
           }}
         >
@@ -215,8 +213,7 @@ export default function TestimonialCarousel({
           </div>
 
           <blockquote
-            className="text-[clamp(16px,1.8vw,20px)] leading-relaxed mb-6 font-medium relative z-[1]"
-            style={{ color: "var(--ink)" }}
+            className="text-[clamp(16px,1.8vw,20px)] leading-relaxed mb-6 font-medium relative z-[1] text-foreground"
           >
             &ldquo;{t.quote}&rdquo;
           </blockquote>
@@ -229,11 +226,12 @@ export default function TestimonialCarousel({
             {Array.from({ length: 5 }).map((_, i) => (
               <Star
                 key={i}
-                className="size-4"
-                style={{
-                  color: i < t.rating ? SH_CORAL : "var(--border)",
-                  fill: i < t.rating ? SH_CORAL : "transparent",
-                }}
+                className={cn(
+                  "size-4",
+                  i < t.rating
+                    ? "text-[#eb6651] fill-[#eb6651]"
+                    : "text-border fill-transparent"
+                )}
               />
             ))}
           </div>
@@ -247,16 +245,10 @@ export default function TestimonialCarousel({
               {t.avatar}
             </div>
             <div className="text-left">
-              <strong
-                className="block text-sm"
-                style={{ color: "var(--ink)" }}
-              >
+              <strong className="block text-sm text-foreground">
                 {t.name}
               </strong>
-              <span
-                className="text-xs"
-                style={{ color: "var(--muted)" }}
-              >
+              <span className="text-xs text-muted-foreground">
                 {t.title} — {t.company}
               </span>
             </div>
@@ -269,11 +261,12 @@ export default function TestimonialCarousel({
             <button
               key={i}
               onClick={() => setActive(i)}
-              className="rounded-full transition-all duration-300"
+              className={cn(
+                "rounded-full transition-all duration-300",
+                i === active ? "bg-[#1f73b7]" : "bg-border"
+              )}
               style={{
                 height: 8,
-                backgroundColor:
-                  i === active ? SH_BLUE : "var(--border)",
                 width: i === active ? 24 : 8,
               }}
               aria-label={`Go to testimonial ${i + 1}`}
