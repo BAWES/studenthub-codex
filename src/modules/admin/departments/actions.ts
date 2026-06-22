@@ -85,7 +85,7 @@ export async function listDepartments(
   ]);
 
   const result = {
-    items: departments.map((d: any): DepartmentRow => ({
+    items: departments.map((d): DepartmentRow => ({
       department_uuid: d.department_uuid,
       department_name_en: d.department_name_en,
       department_name_ar: d.department_name_ar ?? null,

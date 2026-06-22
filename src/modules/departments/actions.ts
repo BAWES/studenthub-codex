@@ -54,7 +54,7 @@ export async function listDepartments(
   ]);
 
   const result = {
-    departments: departments.map((d: any) => ({
+    departments: departments.map((d) => ({
       department_uuid: d.department_uuid,
       department_name_en: d.department_name_en,
       department_name_ar: d.department_name_ar,

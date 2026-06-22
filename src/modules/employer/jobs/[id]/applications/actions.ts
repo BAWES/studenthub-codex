@@ -63,7 +63,7 @@ export async function listJobApplications(
 
   const result = {
     success: true as const,
-    applications: applications.map((app: any) => ({
+    applications: applications.map((app) => ({
       applicationId: app.id,
       candidateId: app.candidateId,
       candidateName: app.candidate?.candidate_name ?? app.candidate?.candidate_name_ar ?? null,
@@ -131,7 +131,7 @@ export async function listJobApplicationsByEmployer(
 
   const result = {
     success: true as const,
-    applications: applications.map((app: any) => ({
+    applications: applications.map((app) => ({
       applicationId: app.id,
       candidateId: app.candidateId,
       candidateName: app.candidate?.candidate_name ?? app.candidate?.candidate_name_ar ?? null,

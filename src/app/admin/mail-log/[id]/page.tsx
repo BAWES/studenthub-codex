@@ -1,10 +1,7 @@
 import { notFound } from "next/navigation";
-import Link from "next/link";
-import type { Route } from "next";
 import { requireRoleCapability } from "@/modules/auth/session";
-import { DetailSection } from "@/modules/workspace/DetailPanels";
+import { FactPanel } from "@/modules/workspace/DetailPanels";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
-import { Button } from "@/components/ui/button";
 import { getMailLog } from "@/modules/mail-logs/actions";
 import { formatDate } from "@/modules/workspace/format";
 
@@ -34,7 +31,7 @@ export default async function AdminMailLogDetailPage({ params }: Props) {
         { label: "App", value: record.app ?? "—", note: "Source application" },
       ]}
     >
-      <DetailSection
+      <FactPanel
         title="Email Details"
         facts={[
           { label: "UUID", value: record.mail_uuid },
@@ -59,12 +56,6 @@ export default async function AdminMailLogDetailPage({ params }: Props) {
           },
         ]}
       />
-
-      <section className="flex gap-2 p-4">
-        <Link href={"/admin/mail-log" as Route}>
-          <Button variant="outline">Back to Mail Log</Button>
-        </Link>
-      </section>
     </WorkspaceShell>
   );
 }

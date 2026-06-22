@@ -68,7 +68,7 @@ export async function listHolidays(
   ]);
 
   const result = {
-    holidays: holidays.map((h: any) => ({
+    holidays: holidays.map((h) => ({
       holiday_uuid: h.holiday_uuid,
       name: h.name,
       date: h.date.toISOString(),

@@ -80,12 +80,12 @@ export async function getEmployerDashboardData(): Promise<EmployerDashboardData>
     }),
   ]);
 
-  const jobStatusBreakdown: JobStatusBreakdown[] = jobStatusRows.map((row: any) => ({
+  const jobStatusBreakdown: JobStatusBreakdown[] = jobStatusRows.map((row) => ({
     status: row.status ?? "unknown",
     count: row._count.status,
   }));
 
-  const recentApplications: RecentApplication[] = recentAppRows.map((r: any) => ({
+  const recentApplications: RecentApplication[] = recentAppRows.map((r) => ({
     applicationId: r.id,
     candidateId: r.candidateId,
     candidateName: r.candidate?.candidate_name ?? r.candidate?.candidate_name_ar ?? null,

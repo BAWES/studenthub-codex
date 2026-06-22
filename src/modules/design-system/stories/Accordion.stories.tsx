@@ -22,7 +22,7 @@ export default meta;
 type Story = StoryObj<typeof Accordion>;
 
 export const Default: Story = {
-  render: (args: any) => (
+  render: (args) => (
     <Accordion {...args} style={{ maxWidth: 400 }}>
       <AccordionItem value="item-1">
         <AccordionTrigger>What is StudentHub?</AccordionTrigger>
@@ -50,7 +50,7 @@ export const Default: Story = {
 };
 
 export const SingleItem: Story = {
-  render: (args: any) => (
+  render: (args) => (
     <Accordion {...args} style={{ maxWidth: 400 }}>
       <AccordionItem value="faq-1">
         <AccordionTrigger>How do I reset my password?</AccordionTrigger>

@@ -217,9 +217,9 @@ async function searchTypesense({
     : [];
 
   const orderedTabs = openTabIds
-    .map((id: number) => openTabs.find((tab: any) => tab.candidate_id === id))
-    .filter((tab: any): tab is NonNullable<(typeof openTabs)[number]> => Boolean(tab))
-    .map((tab: any): { id: number; title: string; subtitle: string; status: string } => ({
+    .map((id: number) => openTabs.find((tab) => tab.candidate_id === id))
+    .filter((tab): tab is NonNullable<(typeof openTabs)[number]> => Boolean(tab))
+    .map((tab): { id: number; title: string; subtitle: string; status: string } => ({
       id: tab.candidate_id,
       title: tab.candidate_name,
       subtitle: tab.candidate_email,

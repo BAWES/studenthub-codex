@@ -16,7 +16,7 @@ export default meta;
 type Story = StoryObj<typeof Label>;
 
 export const Default: Story = {
-  render: (args: any) => (
+  render: (args) => (
     <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
       <Label htmlFor="email" {...args} />
       <Input id="email" placeholder="you@example.com" />

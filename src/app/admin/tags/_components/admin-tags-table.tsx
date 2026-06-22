@@ -4,10 +4,6 @@ import { useActionState, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { DataTable } from "@/modules/workspace/DataTable";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent } from "@/components/ui/card";
 
 import type { SessionUser } from "@/modules/auth/types";
 import type { TagItem } from "../schemas";
@@ -31,12 +27,12 @@ export function AdminTagsTable({ session, tags }: Props) {
         { label: "Total tags", value: tags.length, note: "Tags in the system" },
       ]}
     >
-      <Card className="mb-6">
-        <CardContent className="p-5">
+      <section className="mb-6">
+        <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
           <h3 className="text-sm font-semibold mb-3 text-foreground">Add tag</h3>
           <CreateTagForm onSuccess={() => router.refresh()} />
-        </CardContent>
-      </Card>
+        </div>
+      </section>
 
       <DataTable
         title="Tags"
@@ -85,11 +81,9 @@ export function AdminTagsTable({ session, tags }: Props) {
             label: "Actions",
             render: (row) =>
               editingId !== row.tag_id ? (
-                <Button
+                <button
                   type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                  className="text-xs px-2 py-1 rounded hover:bg-red-500/10 text-destructive"
                   onClick={async () => {
                     if (confirm(`Delete tag "${row.tag}"?`)) {
                       const result = await deleteTag(row.tag_id);
@@ -101,7 +95,7 @@ export function AdminTagsTable({ session, tags }: Props) {
                   }}
                 >
                   Delete
-                </Button>
+                </button>
               ) : null,
           },
         ]}
@@ -132,10 +126,9 @@ function CreateTagForm({ onSuccess }: { onSuccess: () => void }) {
       className="flex flex-wrap items-end gap-3"
       onSubmit={() => setTimeout(() => { formRef.current?.reset(); }, 100)}
     >
-      <div className="grid gap-1.5">
-        <Label htmlFor="tagName">Tag name</Label>
-        <Input
-          id="tagName"
+      <div className="grid gap-1">
+        <label className="text-xs font-medium text-muted-foreground">Tag name</label>
+        <input
           name="tagName"
           required
           maxLength={128}
@@ -143,9 +136,13 @@ function CreateTagForm({ onSuccess }: { onSuccess: () => void }) {
           className="h-9 rounded-lg border border-border bg-card px-3 text-sm text-foreground"
         />
       </div>
-      <Button type="submit" disabled={pending}>
+      <button
+        type="submit"
+        disabled={pending}
+        className="h-9 rounded-lg px-4 text-sm font-semibold bg-primary text-primary-foreground"
+      >
         {pending ? "Adding..." : "Add"}
-      </Button>
+      </button>
       {state?.error ? (
         <p className="text-xs w-full text-destructive">{state.error}</p>
       ) : null}
@@ -177,19 +174,28 @@ function EditTagForm({
 
   return (
     <form action={action} className="flex items-center gap-2">
-      <Input
+      <input
         name="tagName"
         defaultValue={row.tag}
         required
         maxLength={128}
-        className="w-40 h-8"
+        className="h-8 rounded px-2 text-sm border w-40"
+        style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
       />
-      <Button type="submit" size="sm" disabled={pending}>
+      <button
+        type="submit"
+        disabled={pending}
+        className="h-8 rounded px-3 text-xs font-semibold bg-primary text-primary-foreground"
+      >
         {pending ? "..." : "Save"}
-      </Button>
-      <Button type="button" variant="ghost" size="sm" onClick={onCancel}>
+      </button>
+      <button
+        type="button"
+        onClick={onCancel}
+        className="h-8 rounded px-3 text-xs text-muted-foreground"
+      >
         Cancel
-      </Button>
+      </button>
       {state?.error ? (
         <p className="text-xs text-destructive">{state.error}</p>
       ) : null}
