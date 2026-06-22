@@ -84,8 +84,8 @@ export function CandidateSearchPage({
       header: "Name",
       cell: (row) => (
         <div>
-          <div className="font-medium text-[var(--ink)]">{row.name}</div>
-          <div className="text-xs text-[var(--muted-foreground)]">{row.email}</div>
+          <div className="font-medium text-foreground">{row.name}</div>
+          <div className="text-xs text-muted-foreground">{row.email}</div>
         </div>
       ),
     },
@@ -102,7 +102,7 @@ export function CandidateSearchPage({
       header: "Country",
       className: "hidden md:table-cell",
       cell: (row) => (
-        <span className="text-sm text-[var(--muted-foreground)]">
+        <span className="text-sm text-muted-foreground">
           {row.country}
         </span>
       ),
@@ -127,7 +127,7 @@ export function CandidateSearchPage({
       header: "Updated",
       className: "hidden xl:table-cell text-right",
       cell: (row) => (
-        <span className="text-sm text-[var(--muted-foreground)]">
+        <span className="text-sm text-muted-foreground">
           {row.updated}
         </span>
       ),
@@ -135,11 +135,11 @@ export function CandidateSearchPage({
   ];
 
   return (
-    <main className="min-h-screen bg-[var(--background)]">
+    <main className="min-h-screen bg-background">
       {/* ── Header bar ─────────────────────────────────────── */}
-      <header className="sticky top-0 z-10 bg-[var(--background)] border-b border-[var(--border)] px-4 py-3">
+      <header className="sticky top-0 z-10 bg-background border-b border-border px-4 py-3">
         <div className="max-w-7xl mx-auto flex items-center gap-4">
-          <Link href={homePath} className="flex items-center gap-2 text-[var(--foreground)] no-underline">
+          <Link href={homePath} className="flex items-center gap-2 text-foreground no-underline">
             <span className="w-8 h-8 flex items-center justify-center rounded-lg bg-[#1f73b7] text-white text-xs font-bold">
               SH
             </span>
@@ -152,7 +152,7 @@ export function CandidateSearchPage({
                 name="q"
                 placeholder="Search name, email, phone, ID..."
                 defaultValue={data.query}
-                className="w-full h-9 px-3 rounded-lg border border-[var(--border)] bg-[var(--background)] text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:outline-none focus:border-[#1f73b7] focus:ring-2 focus:ring-[#1f73b7]/20"
+                className="w-full h-9 px-3 rounded-lg border border-border bg-background text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#1f73b7] focus:ring-2 focus:ring-[#1f73b7]/20"
               />
               {params.filter && params.filter !== "all" ? (
                 <input name="filter" type="hidden" value={params.filter} />
@@ -169,7 +169,7 @@ export function CandidateSearchPage({
                 className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
                   item.value === data.filter
                     ? "bg-[#1f73b7] text-white"
-                    : "text-[var(--muted-foreground)] hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)]"
+                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                 }`}
               >
                 {item.label}
@@ -182,7 +182,7 @@ export function CandidateSearchPage({
             <form action={logoutAction}>
               <button
                 type="submit"
-                className="text-xs text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
+                className="text-xs text-muted-foreground hover:text-foreground"
               >
                 Sign out
               </button>
@@ -194,7 +194,7 @@ export function CandidateSearchPage({
       {/* ── Results ────────────────────────────────────────── */}
       <div className="max-w-7xl mx-auto p-4">
         <div className="flex items-center justify-between mb-4">
-          <p className="text-sm text-[var(--muted-foreground)]">
+          <p className="text-sm text-muted-foreground">
             {data.matchingCount.toLocaleString("en-US")} total
             {data.query ? ` · results for "${data.query}"` : ""}
           </p>
@@ -218,18 +218,18 @@ export function CandidateSearchPage({
             {data.page && data.page > 1 ? (
               <Link
                 href={candidateSearchHref(basePath, params, { page: String(data.page - 1) })}
-                className="px-3 py-1.5 rounded-md text-sm border border-[var(--border)] text-[var(--foreground)] hover:bg-[var(--accent)]"
+                className="px-3 py-1.5 rounded-md text-sm border border-border text-foreground hover:bg-accent"
               >
                 Previous
               </Link>
             ) : null}
-            <span className="text-sm text-[var(--muted-foreground)]">
+            <span className="text-sm text-muted-foreground">
               Page {data.page ?? 1} of {data.totalPages}
             </span>
             {data.page && data.page < data.totalPages ? (
               <Link
                 href={candidateSearchHref(basePath, params, { page: String((data.page ?? 1) + 1) })}
-                className="px-3 py-1.5 rounded-md text-sm border border-[var(--border)] text-[var(--foreground)] hover:bg-[var(--accent)]"
+                className="px-3 py-1.5 rounded-md text-sm border border-border text-foreground hover:bg-accent"
               >
                 Next
               </Link>
