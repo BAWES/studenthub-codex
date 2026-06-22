@@ -4,6 +4,7 @@ import { getJob } from "../../actions";
 import { getMatchingCandidates } from "./actions";
 import { MatchingCandidatesTable } from "./matching-candidates-table";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
 
@@ -29,12 +30,11 @@ export default async function EmployerMatchingCandidatesPage({ params }: Props) 
             Candidates matched to &ldquo;{job.title}&rdquo;
           </p>
         </div>
-        <Link
-          href={`/employer/jobs/${job.jobListingId}/applications`}
-          className="inline-flex items-center gap-2 px-4 py-2 border border-white/20 rounded-lg text-sm font-medium hover:bg-white/5 transition-colors"
-        >
-          View Applications
-        </Link>
+        <Button asChild variant="outline">
+          <Link href={`/employer/jobs/${job.jobListingId}/applications`}>
+            View Applications
+          </Link>
+        </Button>
       </div>
 
       <MatchingCandidatesTable
