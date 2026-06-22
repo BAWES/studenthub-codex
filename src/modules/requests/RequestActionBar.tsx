@@ -1,8 +1,16 @@
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { transitionRequestStatusAction, assignStaffToRequestAction, updateRequestAction } from "./create-actions";
 
 const statusOptions = [
@@ -23,6 +31,42 @@ interface RequestActionBarProps {
   basePath: string;
 }
 
+/** Client component that bridges shadcn Select (which doesn't support native form
+ *  submission) to a server action via a hidden input + form submit. */
+function StatusSelect({
+  name,
+  options,
+  currentValue,
+}: {
+  name: string;
+  options: { value: string; label: string }[];
+  currentValue: string;
+}) {
+  const [value, setValue] = useState(currentValue);
+
+  return (
+    <>
+      <input name={name} type="hidden" value={value} />
+      <Select value={value} onValueChange={(v) => setValue(v)}>
+        <SelectTrigger className="w-[180px]">
+          <SelectValue placeholder="Change status..." />
+        </SelectTrigger>
+        <SelectContent>
+          {options.map((option) => (
+            <SelectItem
+              key={option.value}
+              value={option.value}
+              disabled={option.value === currentValue}
+            >
+              {option.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </>
+  );
+}
+
 export function RequestActionBar({ requestUuid, currentStatus, currentStaffId, currentTitle, role, basePath }: RequestActionBarProps) {
   return (
     <Card>
@@ -31,24 +75,21 @@ export function RequestActionBar({ requestUuid, currentStatus, currentStaffId, c
         <CardDescription>Manage this request&rsquo;s status, assignment, and details.</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="requestOSActions">
-          <form action={transitionRequestStatusAction} className="requestActionForm">
+        <div className="flex flex-wrap items-end gap-3">
+          <form action={transitionRequestStatusAction} className="flex items-end gap-2">
             <input name="request_uuid" type="hidden" value={requestUuid} />
             <input name="redirect_to" type="hidden" value={basePath} />
-            <select name="to_status" defaultValue={currentStatus ?? ""}>
-              <option value="" disabled>Change status...</option>
-              {statusOptions.map((option) => (
-                <option key={option.value} value={option.value} disabled={option.value === currentStatus}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+            <StatusSelect
+              name="to_status"
+              options={statusOptions}
+              currentValue={currentStatus ?? ""}
+            />
             <Button type="submit" variant="secondary" size="sm">
               Update status
             </Button>
           </form>
 
-          <form action={updateRequestAction} className="requestActionForm">
+          <form action={updateRequestAction} className="flex items-end gap-2">
             <input name="request_uuid" type="hidden" value={requestUuid} />
             <input name="redirect_to" type="hidden" value={basePath} />
             <Input name="position_title" defaultValue={currentTitle ?? ""} placeholder="Update title..." />
@@ -59,7 +100,7 @@ export function RequestActionBar({ requestUuid, currentStatus, currentStaffId, c
           </form>
 
           {role === "admin" ? (
-            <form action={assignStaffToRequestAction} className="requestActionForm">
+            <form action={assignStaffToRequestAction} className="flex items-end gap-2">
               <input name="request_uuid" type="hidden" value={requestUuid} />
               <Input name="staff_id" type="number" placeholder="Staff ID" defaultValue={currentStaffId ?? ""} />
               <Button type="submit" variant="outline" size="sm">

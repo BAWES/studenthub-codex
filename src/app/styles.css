@@ -113,10 +113,6 @@
   --sh-coral-hover: #d45441;
   --sh-coral-light: rgba(235, 102, 81, 0.15);
   --sh-coral-glow: 0 0 16px rgba(235, 102, 81, 0.30);
-  --sh-glass-bg: rgba(255, 255, 255, 0.04);
-  --sh-glass-bg-strong: rgba(255, 255, 255, 0.08);
-  --sh-glass-border: rgba(255, 255, 255, 0.06);
-  --sh-glass-border-strong: rgba(255, 255, 255, 0.12);
   --sh-glow-sm: 0 0 16px rgba(138, 191, 255, 0.18);
   --sh-glow-md: 0 0 32px rgba(138, 191, 255, 0.25);
   --sh-glow-lg: 0 0 56px rgba(138, 191, 255, 0.35);
@@ -137,8 +133,6 @@
   --sh-amber-glow: 0 4px 14px rgba(251, 191, 36, 0.30);
   --sh-amber-glow-hover: 0 8px 28px rgba(251, 191, 36, 0.45);
   --sh-amber-bg: rgba(251, 191, 36, 0.12);
-  --sh-header-glass-bg: rgba(17, 24, 36, 0.72);
-  --sh-header-glass-border: rgba(42, 53, 71, 0.5);
 }
 
 * {
