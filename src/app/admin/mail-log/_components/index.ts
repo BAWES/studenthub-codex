@@ -1,1 +1,1 @@
-export { AdminMailLogTable } from "./admin-mail-log-table";
+export { AdminMailLogsTable } from "./admin-mail-logs-table";

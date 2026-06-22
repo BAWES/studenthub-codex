@@ -1,6 +1,5 @@
 node_modules
 .next
-.next-stale-*
 *.tsbuildinfo
 .env
 .env.local

@@ -1,14 +1,7 @@
-export default function AdminCountryLoading() {
+export default function Loading() {
   return (
-    <div className="flex items-center justify-center min-h-[40vh]">
-      <div className="flex flex-col items-center gap-3">
-        <div
-          className="w-8 h-8 border-2 border-border border-t-primary rounded-full animate-spin"
-        />
-        <p className="text-sm text-muted-foreground">
-          Loading countries…
-        </p>
-      </div>
+    <div className="flex items-center justify-center min-h-[60vh]">
+      <div className="text-sm text-muted-foreground animate-pulse">Loading countries...</div>
     </div>
   );
 }

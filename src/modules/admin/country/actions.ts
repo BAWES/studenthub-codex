@@ -1,223 +1,386 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
 import {
-  listCountriesSchema,
-  createCountrySchema,
-  updateCountrySchema,
-  deleteCountrySchema,
+  countryListItemSchema,
   listCountriesResultSchema,
-  countryActionResponseSchema,
+  countryIdResultSchema,
 } from "./schemas";
 import type {
-  ListCountriesInput,
+  CountryListItem,
   ListCountriesResult,
-  CountryItem,
-  CountryActionResponse,
+  CountryIdResult,
 } from "./schemas";
 
-export async function listCountries(input: ListCountriesInput = {}): Promise<ListCountriesResult> {
-  await requireCapability("admin.read");
-  const parsed = listCountriesSchema.safeParse(input);
-  if (!parsed.success) return { countries: [], total: 0, page: 1, limit: 50, totalPages: 0 };
-  const { page, limit } = parsed.data;
+// ---------------------------------------------------------------------------
+// Internal helpers
+// ---------------------------------------------------------------------------
+
+async function logOutputError(source: string, error: unknown): Promise<void> {
+  console.error(`[modules/admin/country] ${source} output failed:`, error);
+}
+
+// ---------------------------------------------------------------------------
+// Input schemas
+// ---------------------------------------------------------------------------
+
+const listCountriesSchema = z.object({
+  page: z.coerce.number().int().positive().optional().default(1),
+  limit: z.coerce.number().int().min(1).max(200).optional().default(50),
+  search: z.string().optional(),
+});
+
+const getCountrySchema = z.object({
+  countryId: z.coerce.number().int().positive("Country ID is required"),
+});
+
+const createCountrySchema = z.object({
+  country_name_en: z
+    .string()
+    .min(1, "English name is required")
+    .max(100, "English name must be at most 100 characters"),
+  country_name_ar: z
+    .string()
+    .max(100, "Arabic name must be at most 100 characters")
+    .optional()
+    .default(""),
+  country_nationality_name_en: z
+    .string()
+    .min(1, "English nationality name is required")
+    .max(100, "English nationality name must be at most 100 characters"),
+  country_nationality_name_ar: z
+    .string()
+    .max(100, "Arabic nationality name must be at most 100 characters")
+    .optional()
+    .default(""),
+  iso: z
+    .string()
+    .max(3, "ISO code must be at most 3 characters")
+    .optional()
+    .default(""),
+  emoji: z
+    .string()
+    .max(255, "Emoji must be at most 255 characters")
+    .optional()
+    .default(""),
+  country_code: z.coerce.number().int().optional(),
+  currency_code: z
+    .string()
+    .max(3, "Currency code must be at most 3 characters")
+    .optional()
+    .default(""),
+});
+
+const updateCountrySchema = z.object({
+  countryId: z.coerce.number().int().positive(),
+  country_name_en: z
+    .string()
+    .min(1, "English name is required")
+    .max(100)
+    .optional(),
+  country_name_ar: z
+    .string()
+    .max(100)
+    .optional(),
+  country_nationality_name_en: z
+    .string()
+    .min(1, "English nationality name is required")
+    .max(100)
+    .optional(),
+  country_nationality_name_ar: z
+    .string()
+    .max(100)
+    .optional(),
+  iso: z.string().max(3).optional(),
+  emoji: z.string().max(255).optional(),
+  country_code: z.coerce.number().int().optional(),
+  currency_code: z.string().max(3).optional(),
+});
+
+const deleteCountrySchema = z.object({
+  countryId: z.coerce.number().int().positive(),
+});
+
+// ---------------------------------------------------------------------------
+// listCountries
+// ---------------------------------------------------------------------------
+
+/**
+ * List countries with pagination and optional search.
+ */
+export async function listCountries(
+  params: FormData | z.input<typeof listCountriesSchema> = {},
+): Promise<ListCountriesResult> {
+  await requireCapability("admin.system");
+
+  const raw =
+    params instanceof FormData
+      ? {
+          page: params.get("page"),
+          limit: params.get("limit"),
+          search: params.get("search"),
+        }
+      : params;
+
+  const parsed = listCountriesSchema.safeParse(raw);
+  if (!parsed.success) {
+    return { records: [], total: 0, page: 1, limit: 20, totalPages: 0 };
+  }
+
+  const { page, limit, search } = parsed.data;
   const skip = (page - 1) * limit;
-  const [rows, total] = await Promise.all([
+
+  const where: Record<string, unknown> = {};
+  if (search) {
+    where.OR = [
+      { country_name_en: { contains: search } },
+      { country_name_ar: { contains: search } },
+      { country_nationality_name_en: { contains: search } },
+      { country_nationality_name_ar: { contains: search } },
+    ];
+  }
+
+  const [records, total] = await Promise.all([
     prisma.country.findMany({
+      where: where as any,
       orderBy: { country_name_en: "asc" },
       skip,
       take: limit,
-      select: {
-        country_id: true,
-        country_name_en: true,
-        country_name_ar: true,
-        country_nationality_name_en: true,
-        country_nationality_name_ar: true,
-        iso: true,
-        emoji: true,
-        country_code: true,
-        currency_code: true,
-      },
     }),
-    prisma.country.count(),
+    prisma.country.count({ where: where as any }),
   ]);
-  const countries = rows.map((row) => ({
-    country_id: row.country_id,
-    country_name_en: row.country_name_en,
-    country_name_ar: row.country_name_ar,
-    country_nationality_name_en: row.country_nationality_name_en,
-    country_nationality_name_ar: row.country_nationality_name_ar,
-    iso: row.iso,
-    emoji: row.emoji,
-    country_code: row.country_code,
-    currency_code: row.currency_code,
-  }));
-  const result = { countries, total, page, limit, totalPages: Math.ceil(total / limit) };
 
+  const result: ListCountriesResult = {
+    records: records.map((r: any): CountryListItem => ({
+      country_id: r.country_id,
+      country_name_en: r.country_name_en,
+      country_name_ar: r.country_name_ar ?? null,
+      country_nationality_name_en: r.country_nationality_name_en,
+      country_nationality_name_ar: r.country_nationality_name_ar ?? null,
+      iso: r.iso ?? null,
+      emoji: r.emoji ?? null,
+      country_code: r.country_code ?? null,
+      currency_code: r.currency_code ?? null,
+      country_from_google_map: r.country_from_google_map ?? null,
+    })),
+    total,
+    page,
+    limit,
+    totalPages: Math.ceil(total / limit),
+  };
+
+  // Validate output shape
   const outputParsed = listCountriesResultSchema.safeParse(result);
   if (!outputParsed.success) {
-    console.error("[admin/country] listCountries output failed:", outputParsed.error.issues);
+    logOutputError("listCountries", outputParsed.error.issues);
   }
 
   return result;
 }
 
-export async function getCountry(countryId: number): Promise<{ country: CountryItem | null }> {
-  await requireCapability("admin.read");
-  const row = await prisma.country.findUnique({
-    where: { country_id: countryId },
-    select: {
-      country_id: true,
-      country_name_en: true,
-      country_name_ar: true,
-      country_nationality_name_en: true,
-      country_nationality_name_ar: true,
-      iso: true,
-      emoji: true,
-      country_code: true,
-      currency_code: true,
-    },
-  });
-  if (!row) return { country: null };
-  return { country: row };
-}
+// ---------------------------------------------------------------------------
+// getCountry
+// ---------------------------------------------------------------------------
 
-export async function createCountry(
-  nameEn: string,
-  nationalityEn: string,
-  nameAr?: string,
-  nationalityAr?: string,
-  iso?: string,
-  emoji?: string,
-  countryCode?: number,
-  currencyCode?: string,
-): Promise<CountryActionResponse> {
-  await requireCapability("admin.write");
-  const parsed = createCountrySchema.safeParse({
-    countryNameEn: nameEn,
-    countryNameAr: nameAr,
-    nationalityNameEn: nationalityEn,
-    nationalityNameAr: nationalityAr,
-    iso,
-    emoji,
-    countryCode,
-    currencyCode,
-  });
-  if (!parsed.success) {
-    return { operation: "error", message: parsed.error.issues[0]?.message ?? "Invalid country data" };
-  }
-  try {
-    await prisma.country.create({
-      data: {
-        country_name_en: parsed.data.countryNameEn,
-        country_name_ar: parsed.data.countryNameAr ?? null,
-        country_nationality_name_en: parsed.data.nationalityNameEn,
-        country_nationality_name_ar: parsed.data.nationalityNameAr ?? null,
-        iso: parsed.data.iso ?? null,
-        emoji: parsed.data.emoji ?? null,
-        country_code: parsed.data.countryCode ?? null,
-        currency_code: parsed.data.currencyCode ?? null,
-      },
-    });
-    revalidatePath("/admin/country");
-    const result = { operation: "success", message: "Country created successfully" };
-    const outputParsed = countryActionResponseSchema.safeParse(result);
-    if (!outputParsed.success) {
-      console.error("[admin/country] createCountry output failed:", outputParsed.error.issues);
-    }
-    return result;
-  } catch (_e) {
-    const result = { operation: "error", message: "We've faced a problem creating the country, please contact us for assistance." };
-    const outputParsed = countryActionResponseSchema.safeParse(result);
-    if (!outputParsed.success) {
-      console.error("[admin/country] createCountry output failed:", outputParsed.error.issues);
-    }
-    return result;
-  }
-}
-
-export async function updateCountry(
+/**
+ * Get a single country by ID.
+ * Returns null if not found.
+ */
+export async function getCountry(
   countryId: number,
-  nameEn: string,
-  nationalityEn: string,
-  nameAr?: string,
-  nationalityAr?: string,
-  iso?: string,
-  emoji?: string,
-  countryCode?: number,
-  currencyCode?: string,
-): Promise<CountryActionResponse> {
-  await requireCapability("admin.write");
-  const parsed = updateCountrySchema.safeParse({
-    countryId,
-    countryNameEn: nameEn,
-    countryNameAr: nameAr,
-    nationalityNameEn: nationalityEn,
-    nationalityNameAr: nationalityAr,
-    iso,
-    emoji,
-    countryCode,
-    currencyCode,
-  });
+): Promise<CountryListItem | null> {
+  await requireCapability("admin.system");
+
+  const parsed = getCountrySchema.safeParse({ countryId });
   if (!parsed.success) {
-    return { operation: "error", message: parsed.error.issues[0]?.message ?? "Invalid parameters" };
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid country ID");
   }
-  try {
-    const existing = await prisma.country.findUnique({ where: { country_id: parsed.data.countryId }, select: { country_id: true } });
-    if (!existing) return { operation: "error", message: "Country not found" };
-    await prisma.country.update({
-      where: { country_id: parsed.data.countryId },
-      data: {
-        country_name_en: parsed.data.countryNameEn,
-        country_name_ar: parsed.data.countryNameAr ?? null,
-        country_nationality_name_en: parsed.data.nationalityNameEn,
-        country_nationality_name_ar: parsed.data.nationalityNameAr ?? null,
-        iso: parsed.data.iso ?? null,
-        emoji: parsed.data.emoji ?? null,
-        country_code: parsed.data.countryCode ?? null,
-        currency_code: parsed.data.currencyCode ?? null,
-      },
-    });
-    revalidatePath("/admin/country");
-    const result = { operation: "success", message: "Country updated successfully" };
-    const outputParsed = countryActionResponseSchema.safeParse(result);
-    if (!outputParsed.success) {
-      console.error("[admin/country] updateCountry output failed:", outputParsed.error.issues);
-    }
-    return result;
-  } catch (_e) {
-    const result = { operation: "error", message: "We've faced a problem updating the country, please contact us for assistance." };
-    const outputParsed = countryActionResponseSchema.safeParse(result);
-    if (!outputParsed.success) {
-      console.error("[admin/country] updateCountry output failed:", outputParsed.error.issues);
-    }
-    return result;
+
+  const record = await prisma.country.findFirst({
+    where: { country_id: parsed.data.countryId },
+  });
+
+  if (!record) return null;
+
+  const raw = record as any;
+  const result: CountryListItem = {
+    country_id: raw.country_id,
+    country_name_en: raw.country_name_en,
+    country_name_ar: raw.country_name_ar ?? null,
+    country_nationality_name_en: raw.country_nationality_name_en,
+    country_nationality_name_ar: raw.country_nationality_name_ar ?? null,
+    iso: raw.iso ?? null,
+    emoji: raw.emoji ?? null,
+    country_code: raw.country_code ?? null,
+    currency_code: raw.currency_code ?? null,
+    country_from_google_map: raw.country_from_google_map ?? null,
+  };
+
+  // Validate output shape
+  const outputParsed = countryListItemSchema.safeParse(result);
+  if (!outputParsed.success) {
+    logOutputError("getCountry", outputParsed.error.issues);
   }
+
+  return result;
 }
 
-export async function deleteCountry(countryId: number): Promise<CountryActionResponse> {
-  await requireCapability("admin.write");
-  const parsed = deleteCountrySchema.safeParse({ countryId });
-  if (!parsed.success) return { operation: "error", message: parsed.error.issues[0]?.message ?? "Invalid country ID" };
-  try {
-    const existing = await prisma.country.findUnique({ where: { country_id: parsed.data.countryId }, select: { country_id: true } });
-    if (!existing) return { operation: "error", message: "Country not found" };
-    await prisma.country.delete({ where: { country_id: parsed.data.countryId } });
-    revalidatePath("/admin/country");
-    const result = { operation: "success", message: "Country deleted successfully" };
-    const outputParsed = countryActionResponseSchema.safeParse(result);
-    if (!outputParsed.success) {
-      console.error("[admin/country] deleteCountry output failed:", outputParsed.error.issues);
-    }
-    return result;
-  } catch (_e) {
-    const result = { operation: "error", message: "We've faced a problem deleting the country, please contact us for assistance." };
-    const outputParsed = countryActionResponseSchema.safeParse(result);
-    if (!outputParsed.success) {
-      console.error("[admin/country] deleteCountry output failed:", outputParsed.error.issues);
-    }
-    return result;
+// ---------------------------------------------------------------------------
+// createCountry
+// ---------------------------------------------------------------------------
+
+/**
+ * Create a new country record.
+ */
+export async function createCountry(
+  data: z.input<typeof createCountrySchema>,
+): Promise<CountryIdResult> {
+  await requireCapability("admin.system");
+
+  const parsed = createCountrySchema.safeParse(data);
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid country data");
   }
+
+  const {
+    country_name_en,
+    country_name_ar,
+    country_nationality_name_en,
+    country_nationality_name_ar,
+    iso,
+    emoji,
+    country_code,
+    currency_code,
+  } = parsed.data;
+
+  const record = await prisma.country.create({
+    data: {
+      country_name_en,
+      country_name_ar: country_name_ar || null,
+      country_nationality_name_en,
+      country_nationality_name_ar: country_nationality_name_ar || null,
+      iso: iso || null,
+      emoji: emoji || null,
+      country_code: country_code ?? null,
+      currency_code: currency_code || null,
+    } as any,
+  });
+
+  revalidatePath("/admin/country");
+  const result: CountryIdResult = { country_id: record.country_id };
+
+  const outputParsed = countryIdResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    logOutputError("createCountry", outputParsed.error.issues);
+  }
+
+  return result;
+}
+
+// ---------------------------------------------------------------------------
+// updateCountry
+// ---------------------------------------------------------------------------
+
+/**
+ * Update an existing country record.
+ * Throws an error if the record does not exist.
+ */
+export async function updateCountry(
+  data: z.input<typeof updateCountrySchema>,
+): Promise<CountryIdResult> {
+  await requireCapability("admin.system");
+
+  const parsed = updateCountrySchema.safeParse(data);
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid country data");
+  }
+
+  const {
+    countryId,
+    country_name_en,
+    country_name_ar,
+    country_nationality_name_en,
+    country_nationality_name_ar,
+    iso,
+    emoji,
+    country_code,
+    currency_code,
+  } = parsed.data;
+
+  // Verify the record exists
+  const existing = await prisma.country.findFirst({
+    where: { country_id: countryId },
+  });
+  if (!existing) {
+    throw new Error(`Country record not found: ${countryId}`);
+  }
+
+  const updateData: Record<string, unknown> = {};
+  if (country_name_en !== undefined) updateData.country_name_en = country_name_en;
+  if (country_name_ar !== undefined) updateData.country_name_ar = country_name_ar || null;
+  if (country_nationality_name_en !== undefined) updateData.country_nationality_name_en = country_nationality_name_en;
+  if (country_nationality_name_ar !== undefined) updateData.country_nationality_name_ar = country_nationality_name_ar || null;
+  if (iso !== undefined) updateData.iso = iso || null;
+  if (emoji !== undefined) updateData.emoji = emoji || null;
+  if (country_code !== undefined) updateData.country_code = country_code ?? null;
+  if (currency_code !== undefined) updateData.currency_code = currency_code || null;
+
+  await prisma.country.update({
+    where: { country_id: countryId },
+    data: updateData as any,
+  });
+
+  revalidatePath("/admin/country");
+  const result: CountryIdResult = { country_id: countryId };
+
+  const outputParsed = countryIdResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    logOutputError("updateCountry", outputParsed.error.issues);
+  }
+
+  return result;
+}
+
+// ---------------------------------------------------------------------------
+// deleteCountry
+// ---------------------------------------------------------------------------
+
+/**
+ * Delete a country record.
+ * Throws an error if the record does not exist.
+ */
+export async function deleteCountry(
+  countryId: number,
+): Promise<CountryIdResult> {
+  await requireCapability("admin.system");
+
+  const parsed = deleteCountrySchema.safeParse({ countryId });
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid country ID");
+  }
+
+  // Verify the record exists
+  const existing = await prisma.country.findFirst({
+    where: { country_id: parsed.data.countryId },
+  });
+  if (!existing) {
+    throw new Error(`Country record not found: ${parsed.data.countryId}`);
+  }
+
+  await prisma.country.delete({
+    where: { country_id: parsed.data.countryId },
+  });
+
+  revalidatePath("/admin/country");
+  const result: CountryIdResult = { country_id: parsed.data.countryId };
+
+  const outputParsed = countryIdResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    logOutputError("deleteCountry", outputParsed.error.issues);
+  }
+
+  return result;
 }
