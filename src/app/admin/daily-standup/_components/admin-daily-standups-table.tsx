@@ -1,40 +1,40 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { DataTable } from "@/modules/workspace/DataTable";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
-
+import type { Route } from "next";
 import type { SessionUser } from "@/modules/auth/types";
-import type { DailyStandupAnswerItem } from "../schemas";
+import type { DailyStandupAnswerItem } from "@/modules/admin/daily-standup/schemas";
 
 type Props = {
   session: SessionUser;
-  answers: DailyStandupAnswerItem[];
+  records: DailyStandupAnswerItem[];
 };
 
-export function AdminDailyStandupsTable({ session, answers }: Props) {
-  const router = useRouter();
+export function AdminDailyStandupTable({ session, records }: Props) {
+  const uniqueStaffIds = new Set(records.map((r) => r.staff_id).filter(Boolean));
 
   return (
     <WorkspaceShell
       session={session}
-      eyebrow="Admin settings"
-      title="Daily Standup Answers — staff check-ins."
+      eyebrow="Admin"
+      title="Daily Standup — staff check-in answers."
       metrics={[
-        { label: "Total answers", value: answers.length, note: "Standup check-ins in the system" },
+        { label: "Answers", value: records.length, note: "Total standup answers" },
+        { label: "Staff Members", value: uniqueStaffIds.size, note: "Unique staff" },
       ]}
     >
       <DataTable
         title="Daily Standup Answers"
-        description="All staff standup check-in answers."
-        rows={answers.map((a) => ({ ...a, id: a.answer_uuid }))}
-        rowHref={undefined}
+        description="All submitted daily standup answers across staff."
+        rows={records.map((r) => ({ ...r, id: r.answer_uuid }))}
+        rowHref={(row) => `/admin/daily-standup/${row.answer_uuid}` as Route}
         columns={[
           {
             key: "question",
             label: "Question",
             render: (row) => (
-              <span className="text-sm text-foreground">
+              <span className="text-sm font-medium text-foreground max-w-xs truncate">
                 {row.question ?? "—"}
               </span>
             ),
@@ -43,7 +43,7 @@ export function AdminDailyStandupsTable({ session, answers }: Props) {
             key: "answer",
             label: "Answer",
             render: (row) => (
-              <span className="text-sm max-w-[300px] truncate block text-foreground">
+              <span className="text-sm text-muted-foreground max-w-sm truncate">
                 {row.answer ?? "—"}
               </span>
             ),
@@ -53,7 +53,7 @@ export function AdminDailyStandupsTable({ session, answers }: Props) {
             label: "Staff ID",
             render: (row) => (
               <span className="text-sm text-muted-foreground">
-                {row.staff_id ?? "—"}
+                {row.staff_id != null ? `#${row.staff_id}` : "—"}
               </span>
             ),
           },
@@ -62,7 +62,15 @@ export function AdminDailyStandupsTable({ session, answers }: Props) {
             label: "Updated",
             render: (row) => (
               <span className="text-sm text-muted-foreground">
-                {row.updated_at ? new Date(row.updated_at).toLocaleDateString() : "—"}
+                {row.updated_at
+                  ? new Date(row.updated_at).toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })
+                  : "—"}
               </span>
             ),
           },
