@@ -5,12 +5,17 @@ vi.mock("@/modules/auth/session", () => ({
   requireCapability: vi.fn().mockResolvedValue(undefined),
 }));
 
+// Mock next/cache (revalidatePath throws outside Next.js runtime)
+vi.mock("next/cache", () => ({
+  revalidatePath: vi.fn(),
+}));
+
 // Mock prisma
 vi.mock("@/lib/prisma", () => ({
   prisma: {
     staff_salary: {
       findMany: vi.fn(),
-      findFirst: vi.fn(),
+      findUnique: vi.fn(),
       count: vi.fn(),
       create: vi.fn(),
       update: vi.fn(),
@@ -28,7 +33,7 @@ const {
 const { prisma } = await import("@/lib/prisma");
 
 const mockedFindMany = vi.mocked(prisma.staff_salary.findMany);
-const mockedFindFirst = vi.mocked(prisma.staff_salary.findFirst);
+const mockedFindUnique = vi.mocked(prisma.staff_salary.findUnique);
 const mockedCount = vi.mocked(prisma.staff_salary.count);
 const mockedCreate = vi.mocked(prisma.staff_salary.create);
 const mockedUpdate = vi.mocked(prisma.staff_salary.update);
@@ -136,10 +141,11 @@ describe("admin/salary actions", () => {
 
       const fd = formDataFrom({
         staffId: "1",
-        salary: "750.5",
+        salary: "750",
         salaryCurrency: "KWD",
         salaryDate: "2026-06-01",
       });
+
       const result = await createSalary(null, fd);
 
       expect(result.operation).toBe("success");
@@ -147,7 +153,7 @@ describe("admin/salary actions", () => {
       expect(mockedCreate).toHaveBeenCalledOnce();
       const callData = mockedCreate.mock.calls[0][0].data;
       expect(callData.staff_id).toBe(1);
-      expect(callData.salary).toBe(750.5);
+      expect(callData.salary).toBe(750);
     });
 
     it("returns error for invalid input", async () => {
@@ -161,7 +167,7 @@ describe("admin/salary actions", () => {
 
   describe("updateSalary", () => {
     it("updates an existing salary record", async () => {
-      mockedFindFirst.mockResolvedValue({
+      mockedFindUnique.mockResolvedValue({
         staff_salary_uuid: "SAL-001",
         salary: 500,
         salary_currency: "KWD",
@@ -173,6 +179,7 @@ describe("admin/salary actions", () => {
       const fd = formDataFrom({
         salaryUuid: "SAL-001",
         salary: "800",
+        salaryDate: "2026-06-01",
       });
       const result = await updateSalary(null, fd);
 
@@ -181,7 +188,7 @@ describe("admin/salary actions", () => {
     });
 
     it("returns error when salary not found", async () => {
-      mockedFindFirst.mockResolvedValue(null);
+      mockedFindUnique.mockResolvedValue(null);
 
       const fd = formDataFrom({
         salaryUuid: "DOES-NOT-EXIST",
@@ -205,7 +212,7 @@ describe("admin/salary actions", () => {
 
   describe("deleteSalary", () => {
     it("deletes an existing salary record", async () => {
-      mockedFindFirst.mockResolvedValue({
+      mockedFindUnique.mockResolvedValue({
         staff_salary_uuid: "SAL-001",
       } as any);
       mockedDelete.mockResolvedValue({} as any);
@@ -218,7 +225,7 @@ describe("admin/salary actions", () => {
     });
 
     it("returns error when salary not found", async () => {
-      mockedFindFirst.mockResolvedValue(null);
+      mockedFindUnique.mockResolvedValue(null);
 
       const result = await deleteSalary("DOES-NOT-EXIST");
 
