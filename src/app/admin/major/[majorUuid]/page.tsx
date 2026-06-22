@@ -1,6 +1,9 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
+import type { Route } from "next";
 import { requireRoleCapability } from "@/modules/auth/session";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
+import { Button } from "@/components/ui/button";
 import { formatDate } from "@/modules/workspace/format";
 import { getMajorDetail } from "../actions";
 import { MajorDetailForm } from "./MajorDetailForm";
@@ -31,6 +34,12 @@ export default async function AdminMajorDetailPage({
       ]}
     >
       <MajorDetailForm major={major} />
+
+      <section className="flex gap-2 p-4">
+        <Link href={"/admin/major" as Route}>
+          <Button variant="outline">Back to Majors</Button>
+        </Link>
+      </section>
     </WorkspaceShell>
   );
 }

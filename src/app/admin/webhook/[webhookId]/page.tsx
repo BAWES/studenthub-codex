@@ -1,6 +1,9 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
+import type { Route } from "next";
 import { requireRoleCapability } from "@/modules/auth/session";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
+import { Button } from "@/components/ui/button";
 import { formatDate } from "@/modules/workspace/format";
 import { getWebhookDetail } from "../actions";
 import { WebhookDetailForm } from "./WebhookDetailForm";
@@ -25,6 +28,12 @@ export default async function AdminWebhookDetailPage({ params }: { params: Promi
       ]}
     >
       <WebhookDetailForm webhook={webhook} />
+
+      <section className="flex gap-2 p-4">
+        <Link href={"/admin/webhook" as Route}>
+          <Button variant="outline">Back to Webhooks</Button>
+        </Link>
+      </section>
     </WorkspaceShell>
   );
 }

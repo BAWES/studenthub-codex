@@ -1,6 +1,9 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
+import type { Route } from "next";
 import { requireRoleCapability } from "@/modules/auth/session";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
+import { Button } from "@/components/ui/button";
 import { formatDate } from "@/modules/workspace/format";
 import { getDiscountCategoryDetail } from "../actions";
 import { DiscountCategoryDetailForm } from "./DiscountCategoryDetailForm";
@@ -32,6 +35,12 @@ export default async function AdminDiscountCategoryDetailPage({
       ]}
     >
       <DiscountCategoryDetailForm category={category} />
+
+      <section className="flex gap-2 p-4">
+        <Link href={"/admin/discount-category" as Route}>
+          <Button variant="outline">Back to Discount Categories</Button>
+        </Link>
+      </section>
     </WorkspaceShell>
   );
 }

@@ -1,6 +1,9 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
+import type { Route } from "next";
 import { requireRoleCapability } from "@/modules/auth/session";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
+import { Button } from "@/components/ui/button";
 import { formatDate } from "@/modules/workspace/format";
 import { getEmailCampaignDetail } from "../actions";
 import { EmailCampaignDetailForm } from "./EmailCampaignDetailForm";
@@ -26,6 +29,12 @@ export default async function AdminEmailCampaignDetailPage({ params }: { params:
       ]}
     >
       <EmailCampaignDetailForm campaign={campaign} />
+
+      <section className="flex gap-2 p-4">
+        <Link href={"/admin/email-campaign" as Route}>
+          <Button variant="outline">Back to Email Campaigns</Button>
+        </Link>
+      </section>
     </WorkspaceShell>
   );
 }
