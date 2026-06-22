@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 import type { Role } from "@/modules/auth/types";
 
 export interface MobileFABProps {
@@ -23,9 +22,9 @@ export interface MobileFABProps {
 }
 
 /**
- * Floating Action Button for mobile viewports.
+ * Glass-morphism Floating Action Button for mobile viewports.
  *
- * - 56px rounded-full button with Zendesk Coral accent
+ * - 56px glass circle with backdrop blur
  * - Role-aware primary action on tap
  * - Optional speed-dial menu on long-press / external toggle
  * - Hides when keyboard is open
@@ -41,17 +40,12 @@ export function MobileFAB({
     <>
       {/* Speed-dial menu (rendered above FAB when open) */}
       {speedDialOpen && speedDial.length > 0 && (
-        <div
-          className="absolute bottom-20 right-4 flex flex-col gap-2"
-          role="menu"
-          aria-label={`${role} speed dial`}
-        >
+        <div className="shMobileFABSpeedDial" role="menu" aria-label={`${role} speed dial`}>
           {speedDial.map((item) => (
-            <Button
+            <button
               key={item.label}
-              variant="secondary"
-              size="sm"
-              className="rounded-full shadow-lg min-w-[120px]"
+              type="button"
+              className="shMobileFABSpeedDialItem"
               role="menuitem"
               onClick={(e) => {
                 e.stopPropagation();
@@ -60,27 +54,20 @@ export function MobileFAB({
             >
               {item.icon ? <span aria-hidden="true">{item.icon}</span> : null}
               <span>{item.label}</span>
-            </Button>
+            </button>
           ))}
         </div>
       )}
 
       {/* FAB button */}
-      <Button
+      <button
         type="button"
-        size="icon"
-        className={cn(
-          "fixed bottom-6 right-6 z-50 size-14 rounded-full shadow-xl",
-          "bg-[#eb6651] hover:bg-[#d45441] text-white",
-          "transition-all duration-200 ease-in-out",
-          "text-2xl font-light leading-none",
-          hidden && "opacity-0 pointer-events-none scale-0",
-        )}
+        className={cn("shMobileFAB", hidden && "shMobileFABHidden")}
         aria-label={`${role} quick action`}
         onClick={primaryAction}
       >
         +
-      </Button>
+      </button>
     </>
   );
 }

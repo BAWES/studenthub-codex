@@ -10,21 +10,6 @@ type Props = {
   data: DashboardData;
 };
 
-// ─── Bar color variant helper ──────────────────────────────────────────
-
-function barVariant(label: string): string {
-  const l = label.toLowerCase();
-  if (l.includes("approved") || l.includes("completed") || l.includes("active") || l.includes("live"))
-    return "success";
-  if (l.includes("pending") || l.includes("review") || l.includes("draft"))
-    return "warning";
-  if (l.includes("rejected") || l.includes("denied") || l.includes("archived"))
-    return "error";
-  if (l.includes("transferred") || l.includes("assigned"))
-    return "info";
-  return "info";
-}
-
 export function AdminDashboardContent({ session, data }: Props) {
   const { metrics, statusMix, recentCandidates, recentCompanies, recentRequests, recentTransfers, prMergeMetrics } = data;
 
@@ -59,13 +44,13 @@ export function AdminDashboardContent({ session, data }: Props) {
                 {statusMix.map((status) => {
                   const total = statusMix.reduce((s, a) => s + a.value, 0);
                   const pct = total > 0 ? (status.value / total) * 100 : 0;
+                  const colors = ["#eb6651", "#f59e0b", "#22c55e", "#6366f1", "#8b5cf6", "#06b6d4"];
                   return (
                     <div
                       key={status.label}
-                      className="h-full transition-all duration-500"
                       style={{
                         width: `${pct}%`,
-                        backgroundColor: `var(--sh-${barVariant(status.label)}-bg)`,
+                        backgroundColor: colors[statusMix.indexOf(status) % colors.length],
                         minWidth: pct > 0 ? "4px" : "0",
                       }}
                       title={`${status.label}: ${status.value}`}
@@ -79,10 +64,11 @@ export function AdminDashboardContent({ session, data }: Props) {
                 {statusMix.map((status) => (
                   <div
                     key={status.label}
-                    className="flex items-center justify-between rounded-md bg-accent/10 px-3 py-2 text-sm"
+                    className="flex items-center justify-between rounded-md px-3 py-2 text-sm"
+                    style={{ background: "var(--hover)" }}
                   >
                     <span className="text-foreground">{status.label}</span>
-                    <strong className="text-accent-foreground">{status.value}</strong>
+                    <strong style={{ color: "var(--accent)" }}>{status.value}</strong>
                   </div>
                 ))}
               </div>
@@ -97,7 +83,8 @@ export function AdminDashboardContent({ session, data }: Props) {
       {prMergeMetrics.length > 0 && (
         <section className="mb-6">
           <div
-            className="rounded-lg border border-border bg-card p-5"
+            className="rounded-lg border p-5"
+            style={{ borderColor: "var(--border)", background: "var(--surface)" }}
           >
             <div className="mb-1 text-xs font-medium uppercase tracking-wider text-muted-foreground">
               Engineering
@@ -110,10 +97,11 @@ export function AdminDashboardContent({ session, data }: Props) {
               {prMergeMetrics.map((metric, idx) => (
                 <div
                   key={metric.label}
-                  className="rounded-lg border border-border bg-card p-3"
+                  className="rounded-lg border p-3"
+                  style={{ borderColor: "var(--border)", background: "var(--surface)" }}
                 >
                   <div className="text-xs text-muted-foreground">{metric.label}</div>
-                  <div className="mt-1 text-lg font-bold text-accent-foreground">{metric.value}</div>
+                  <div className="mt-1 text-lg font-bold" style={{ color: "var(--accent)" }}>{metric.value}</div>
                   {metric.note && (
                     <div className="mt-0.5 text-xs text-muted-foreground">{metric.note}</div>
                   )}

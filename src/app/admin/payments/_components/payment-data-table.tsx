@@ -2,7 +2,6 @@
 
 import { useState, useMemo, useCallback, type KeyboardEvent } from "react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import type { PaymentRow } from "../schemas";
 
 // ---------------------------------------------------------------------------
@@ -71,7 +70,7 @@ function SkeletonRow() {
   return (
     <div className="flex items-center gap-4 px-4 py-3" aria-hidden="true">
       {Array.from({ length: 8 }).map((_, i) => (
-        <div key={i} className={`h-4 rounded bg-white/5 animate-pulse ${i === 2 ? "flex-1" : ""}`} />
+        <div key={i} className="h-4 rounded bg-white/5 animate-pulse" style={{ width: `${60 + i * 15}px`, flex: i === 2 ? "1" : undefined }} />
       ))}
     </div>
   );
@@ -144,9 +143,9 @@ export function PaymentDataTable({
             <p className="text-lg font-semibold text-foreground">Could not load payments</p>
             <p className="text-sm mt-1 text-muted-foreground">{error}</p>
           </div>
-          <Button variant="default" onClick={onRetry} size="sm">
+          <button onClick={onRetry} className="h-10 rounded-lg px-4 text-sm font-semibold bg-primary text-primary-foreground">
             Retry
-          </Button>
+          </button>
         </div>
       </div>
     );

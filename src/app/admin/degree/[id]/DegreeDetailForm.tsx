@@ -58,10 +58,7 @@ export function DegreeDetailForm({
     return { success: true };
   };
 
-  const [state, formAction, pending] = useActionState(
-    updateAction,
-    null,
-  ) as unknown as [state: { success?: boolean } | null, formAction: () => void, pending: boolean];
+  const [state, formAction, pending] = useActionState(updateAction, null);
 
   return (
     <div className="space-y-6">

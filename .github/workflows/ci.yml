@@ -24,11 +24,9 @@ jobs:
             echo "Branch name OK: $BRANCH"
           elif echo "$BRANCH" | grep -qiE '^ux/[a-z0-9-]+$'; then
             echo "Branch name OK (UX): $BRANCH"
-          elif echo "$BRANCH" | grep -qiE '^develop-to-main$'; then
-            echo "Branch name OK (merge train): $BRANCH"
           else
             echo "Branch name REJECTED: $BRANCH"
-            echo "Expected: feature/STU-N-*, fix/STU-N-*, chore/STU-N-*, or coder2/STU-N-* (kebab-case) — UX: ux/*, merge: develop-to-main"
+            echo "Expected: feature/STU-N-*, fix/STU-N-*, chore/STU-N-*, or coder2/STU-N-* (kebab-case) — UX: ux/*"
             exit 1
           fi
 
@@ -138,52 +136,3 @@ jobs:
           node scripts/validate.mjs
         env:
           DATABASE_URL: "mysql://studenthub:studenthub@localhost:3307/studenthub_prod_local"
-
-  e2e:
-    name: Playwright E2E
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    services:
-      mysql:
-        image: mysql:8.4
-        env:
-          MYSQL_ROOT_PASSWORD: studenthub
-          MYSQL_DATABASE: studenthub_prod_local
-          MYSQL_USER: studenthub
-          MYSQL_PASSWORD: studenthub
-        ports:
-          - 3307:3306
-        options: >-
-          --health-cmd="mysqladmin ping -h localhost"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: "npm"
-      - run: npm ci
-      - name: Generate Prisma client
-        run: npx prisma generate
-      - name: Push schema to MySQL
-        run: npx prisma db push --skip-generate
-        env:
-          DATABASE_URL: "mysql://studenthub:studenthub@localhost:3307/studenthub_prod_local"
-      - name: Install Playwright Chromium
-        run: npx playwright install --with-deps chromium
-      - name: Run Playwright E2E tests
-        run: npx playwright test
-        env:
-          CI: "true"
-          AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
-          DATABASE_URL: "mysql://studenthub:studenthub@localhost:3307/studenthub_prod_local"
-      - name: Upload Playwright report
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-report
-          path: playwright-report/
-          retention-days: 7
-

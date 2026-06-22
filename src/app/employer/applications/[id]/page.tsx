@@ -4,7 +4,6 @@ import { getApplicationDetail } from "./actions";
 import { acceptApplication, revertApplicationStatus } from "./actions.server";
 import { RejectButton } from "./reject-button";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
-import { rejectApplication } from "./actions.server";
 import { StatusBadge } from "@/modules/workspace/StatusBadge";
 import { genericStatusVariant } from "@/modules/workspace/status-mapping";
 import { APPLICATION_STATUS_LABELS } from "@/modules/status-labels";

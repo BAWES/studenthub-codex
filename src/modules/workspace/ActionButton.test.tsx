@@ -23,7 +23,7 @@ describe("ActionButton", () => {
     render(<ActionButton>Default</ActionButton>);
     const btn = screen.getByRole("button", { name: /default/i });
     expect(btn).toBeInTheDocument();
-    expect(btn.className).toMatch(/inline-flex|gap/);
+    expect(btn.className).toContain("uiButton");
   });
 
   it("accepts variant prop", () => {

@@ -34,10 +34,7 @@ export function UniversityDetailForm({ university }: Props) {
     return { success: true };
   };
 
-  const [state, formAction, pending] = useActionState(
-    updateAction,
-    null,
-  ) as unknown as [state: { success?: boolean } | null, formAction: () => void, pending: boolean];
+  const [state, formAction, pending] = useActionState(updateAction, null);
 
   return (
     <div className="space-y-6">
@@ -92,7 +89,7 @@ export function UniversityDetailForm({ university }: Props) {
                 {pending ? "Saving..." : "Save Changes"}
               </Button>
               {state?.success && (
-                <span className="text-sm text-[#2e7d32] font-medium">
+                <span className="text-sm text-[var(--sh-success)] font-medium">
                   Saved successfully
                 </span>
               )}

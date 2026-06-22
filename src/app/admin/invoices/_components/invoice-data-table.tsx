@@ -186,7 +186,7 @@ export function InvoiceDataTable({
           {sortedInvoices.map((invoice, i) => (
             <div
               key={invoice.invoice_id}
-              className="grid gap-0 px-4 py-3 transition-all duration-150 cursor-pointer even:bg-transparent odd:bg-muted/30"
+              className="grid gap-0 px-4 py-3 transition-all duration-150 cursor-pointer even:bg-transparent odd:bg-white/[0.02]"
               style={{
                 gridTemplateColumns: COLUMNS.map((c) => c.width).join(" "),
               }}

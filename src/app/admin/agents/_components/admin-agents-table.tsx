@@ -127,7 +127,7 @@ function LoadingSkeleton() {
       {[1, 2, 3].map((i) => (
         <div
           key={i}
-          className="rounded-lg border border-border bg-white p-5"
+          className="rounded-lg border border-[var(--border)] bg-white p-5"
         >
           <div className="flex items-center justify-between mb-4">
             <div className="space-y-1">

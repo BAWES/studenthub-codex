@@ -9,15 +9,15 @@ import { toggleCandidatePaidAction, toggleTransferStatusAction, markPaymentRecei
 type TransferDetail = {
   transfer: {
     transfer_id: number;
-    total: string | null;
-    company_total: string | null;
-    transfer_cost: string | null;
+    total: any;
+    company_total: any;
+    transfer_cost: any;
     transfer_status: number;
-    start_date: string | null;
-    end_date: string | null;
-    payment_received_on: string | null;
-    transfer_created_at: string | null;
-    transfer_updated_at: string | null;
+    start_date: Date | null;
+    end_date: Date | null;
+    payment_received_on: Date | null;
+    transfer_created_at: Date;
+    transfer_updated_at: Date;
     currency_code: string | null;
     company: { company_name: string | null; company_email: string | null } | null;
   } | null;
@@ -41,7 +41,7 @@ export function TransferActionBar({ data }: { data: TransferDetail }) {
           </Button>
         </form>
 
-        <PaymentReceivedForm transferId={data.transfer.transfer_id} currentDate={data.transfer.payment_received_on ? new Date(data.transfer.payment_received_on) : null} />
+        <PaymentReceivedForm transferId={data.transfer.transfer_id} currentDate={data.transfer.payment_received_on} />
 
         <form action={deleteTransferAction}>
           <input name="transfer_id" type="hidden" value={data.transfer.transfer_id} />

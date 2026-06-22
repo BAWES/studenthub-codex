@@ -8,9 +8,6 @@ import type { SessionUser } from "@/modules/auth/types";
 import { ThemeToggle } from "@/modules/theme/ThemeToggle";
 import { DataTable } from "@/components/ui/data-table";
 import type { DataTableColumn } from "@/components/ui/data-table";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import type { CandidateSearchRow, CandidateSearchParams, getCandidateSearchWorkspace } from "./search";
 import { candidateSearchFilters } from "./search";
 
@@ -78,7 +75,7 @@ export function CandidateSearchPage({
       header: "",
       className: "w-10",
       cell: (row) => (
-        <div className="w-8 h-8 rounded-full bg-coral flex items-center justify-center text-white text-xs font-bold">
+        <div className="w-8 h-8 rounded-full bg-[#1f73b7] flex items-center justify-center text-white text-xs font-bold">
           {candidateInitials(row.name)}
         </div>
       ),
@@ -96,9 +93,9 @@ export function CandidateSearchPage({
       header: "Status",
       className: "hidden sm:table-cell",
       cell: (row) => (
-        <Badge variant="secondary" className="text-xs font-medium">
+        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700">
           {row.status}
-        </Badge>
+        </span>
       ),
     },
     {
@@ -116,9 +113,12 @@ export function CandidateSearchPage({
       cell: (row) => (
         <div className="flex flex-wrap gap-1">
           {row.skills.slice(0, 3).map((skill) => (
-            <Badge key={skill} variant="secondary" className="text-xs">
+            <span
+              key={skill}
+              className="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-gray-100 text-gray-700"
+            >
               {skill}
-            </Badge>
+            </span>
           ))}
         </div>
       ),
@@ -140,40 +140,40 @@ export function CandidateSearchPage({
       <header className="sticky top-0 z-10 bg-background border-b border-border px-4 py-3">
         <div className="max-w-7xl mx-auto flex items-center gap-4">
           <Link href={homePath} className="flex items-center gap-2 text-foreground no-underline">
-            <span className="w-8 h-8 flex items-center justify-center rounded-lg bg-coral text-white text-xs font-bold">
+            <span className="w-8 h-8 flex items-center justify-center rounded-lg bg-[#1f73b7] text-white text-xs font-bold">
               SH
             </span>
             <span className="font-semibold text-sm hidden sm:inline">Candidates</span>
           </Link>
 
           <div className="flex-1 flex items-center gap-2">
-            <div className="flex-1 max-w-xl">
-              <Input
+            <form method="GET" action={basePath} className="flex-1 max-w-xl">
+              <input
                 name="q"
                 placeholder="Search name, email, phone, ID..."
                 defaultValue={data.query}
+                className="w-full h-9 px-3 rounded-lg border border-border bg-background text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#1f73b7] focus:ring-2 focus:ring-[#1f73b7]/20"
               />
               {params.filter && params.filter !== "all" ? (
                 <input name="filter" type="hidden" value={params.filter} />
               ) : null}
-            </div>
+              <button type="submit" className="sr-only">Search</button>
+            </form>
           </div>
 
-          <nav className="flex items-center gap-1">
+          <nav className="flex items-center gap-2">
             {candidateSearchFilters.map((item) => (
-              <Button
+              <Link
                 key={item.value}
-                variant={item.value === data.filter ? "default" : "ghost"}
-                size="sm"
-                className="text-xs"
-                asChild
+                href={candidateSearchHref(basePath, params, { filter: item.value })}
+                className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                  item.value === data.filter
+                    ? "bg-[#1f73b7] text-white"
+                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                }`}
               >
-                <Link
-                  href={candidateSearchHref(basePath, params, { filter: item.value })}
-                >
-                  {item.label}
-                </Link>
-              </Button>
+                {item.label}
+              </Link>
             ))}
           </nav>
 

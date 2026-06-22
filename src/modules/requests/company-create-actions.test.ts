@@ -1,27 +1,8 @@
 import { describe, it, expect } from "vitest";
-import { z } from "zod";
-
-const companyRequestSchema = z.object({
-  company_id: z.coerce.number().int().positive("Select a company"),
-  position_title: z.string().trim().min(1, "Job title is required").max(255),
-  compensation: z.string().trim().min(1, "Compensation type is required"),
-  request_hourly_rate: z.coerce.number().positive("Rate must be > 0"),
-  max_hourly_rate: z.coerce.number().positive("Max rate must be > 0"),
-  number_of_employees: z.coerce.number().int().positive(),
-  request_profession: z.coerce.number().int().positive("Select a profession"),
-  job_description: z.string().optional(),
-  contract_type: z.string().trim().min(1).max(255),
-});
-
-export type CompanyRequestFormState = {
-  message?: string;
-  success: boolean;
-  requestUuid?: string;
-  error?: string;
-  errors?: Record<string, string>;
-};
-
-export { companyRequestSchema };
+import {
+  companyRequestSchema,
+  type CompanyRequestFormState,
+} from "./company-create-actions";
 
 // ---------------------------------------------------------------------------
 // Schema validation tests for company-create-actions.ts

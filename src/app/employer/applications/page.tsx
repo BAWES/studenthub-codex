@@ -12,6 +12,7 @@ export default async function EmployerApplicationsPage() {
     <EmployerApplicationsContent
       session={session}
       applications={result.applications}
+      total={result.total}
       metrics={result.metrics}
     />
   );

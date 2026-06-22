@@ -2,11 +2,6 @@
 
 import { useActionState, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { DataTable } from "@/modules/workspace/DataTable";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 
@@ -34,12 +29,12 @@ export function AdminStoresTable({ session, stores }: Props) {
         { label: "Total candidates", value: totalCandidates, note: "Candidates across all stores" },
       ]}
     >
-      <Card className="mb-6">
-        <CardContent className="p-5">
+      <section className="mb-6">
+        <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
           <h3 className="text-sm font-semibold mb-3 text-foreground">Add store</h3>
           <CreateStoreForm onSuccess={() => router.refresh()} />
-        </CardContent>
-      </Card>
+        </div>
+      </section>
 
       <DataTable
         title="Stores"
@@ -58,14 +53,13 @@ export function AdminStoresTable({ session, stores }: Props) {
                   onCancel={() => setEditingId(null)}
                 />
               ) : (
-                <Button
+                <button
                   type="button"
-                  variant="ghost"
-                  className="text-sm px-0 h-auto hover:underline"
+                  className="text-sm hover:underline text-primary"
                   onClick={() => setEditingId(row.store_id)}
                 >
                   {row.store_name}
-                </Button>
+                </button>
               ),
           },
           {
@@ -102,9 +96,20 @@ export function AdminStoresTable({ session, stores }: Props) {
             key: "store_status",
             label: "Status",
             render: (row) => (
-              <Badge variant={row.store_status === 10 ? "success" : "secondary"}>
+              <span
+                className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
+                  row.store_status === 10
+                    ? "bg-green-500/10 text-green-600"
+                    : "bg-neutral-500/10 text-neutral-500"
+                }`}
+              >
+                <span
+                  className={`inline-block w-1.5 h-1.5 rounded-full ${
+                    row.store_status === 10 ? "bg-green-500" : "bg-neutral-400"
+                  }`}
+                />
                 {row.store_status === 10 ? "Active" : "Inactive"}
-              </Badge>
+              </span>
             ),
           },
           {
@@ -112,10 +117,9 @@ export function AdminStoresTable({ session, stores }: Props) {
             label: "",
             render: (row) =>
               editingId !== row.store_id ? (
-                <Button
+                <button
                   type="button"
-                  variant="destructive"
-                  size="sm"
+                  className="text-xs px-2 py-1 rounded hover:bg-red-500/10 text-destructive"
                   onClick={async () => {
                     if (confirm(`Delete store "${row.store_name}"?`)) {
                       const result = await deleteStore({ storeId: row.store_id });
@@ -126,7 +130,7 @@ export function AdminStoresTable({ session, stores }: Props) {
                   }}
                 >
                   Delete
-                </Button>
+                </button>
               ) : null,
           },
         ]}
@@ -167,46 +171,50 @@ function CreateStoreForm({ onSuccess }: { onSuccess: () => void }) {
       onSubmit={() => setTimeout(() => { formRef.current?.reset(); }, 100)}
     >
       <div className="grid gap-1">
-        <Label className="text-xs font-medium text-muted-foreground">Store name</Label>
-        <Input
+        <label className="text-xs font-medium text-muted-foreground">Store name</label>
+        <input
           name="storeName"
           required
           maxLength={255}
           placeholder="e.g. The Luxury Boutique"
-          className="h-9"
+          className="h-9 rounded-lg px-3 text-sm border bg-[var(--surface)] border-[var(--border)] text-[var(--ink)]"
         />
       </div>
       <div className="grid gap-1">
-        <Label className="text-xs font-medium text-muted-foreground">Location</Label>
-        <Input
+        <label className="text-xs font-medium text-muted-foreground">Location</label>
+        <input
           name="storeLocation"
           required
           maxLength={255}
           placeholder="e.g. The Avenues, Floor 2"
-          className="h-9"
+          className="h-9 rounded-lg px-3 text-sm border bg-[var(--surface)] border-[var(--border)] text-[var(--ink)]"
         />
       </div>
       <div className="grid gap-1">
-        <Label className="text-xs font-medium text-muted-foreground">Brand UUID</Label>
-        <Input
+        <label className="text-xs font-medium text-muted-foreground">Brand UUID</label>
+        <input
           name="brandUuid"
           maxLength={36}
           placeholder="Optional"
-          className="h-9"
+          className="h-9 rounded-lg px-3 text-sm border bg-[var(--surface)] border-[var(--border)] text-[var(--ink)]"
         />
       </div>
       <div className="grid gap-1">
-        <Label className="text-xs font-medium text-muted-foreground">Mall UUID</Label>
-        <Input
+        <label className="text-xs font-medium text-muted-foreground">Mall UUID</label>
+        <input
           name="mallUuid"
           maxLength={36}
           placeholder="Optional"
-          className="h-9"
+          className="h-9 rounded-lg px-3 text-sm border bg-[var(--surface)] border-[var(--border)] text-[var(--ink)]"
         />
       </div>
-      <Button type="submit" disabled={pending}>
+      <button
+        type="submit"
+        disabled={pending}
+        className="h-9 rounded-lg px-4 text-sm font-semibold bg-primary text-primary-foreground"
+      >
         {pending ? "Adding..." : "Add"}
-      </Button>
+      </button>
       {state?.error ? (
         <p className="text-xs w-full text-destructive">{state.error}</p>
       ) : null}
@@ -244,26 +252,34 @@ function EditStoreForm({
 
   return (
     <form action={action} className="flex items-center gap-2">
-      <Input
+      <input
         name="storeName"
         defaultValue={row.store_name}
         required
         maxLength={255}
-        className="w-40 h-8"
+        className="h-8 rounded px-2 text-sm border w-40 bg-[var(--surface)] border-[var(--border)] text-[var(--ink)]"
       />
-      <Input
+      <input
         name="storeLocation"
         defaultValue={row.store_location}
         required
         maxLength={255}
-        className="w-40 h-8"
+        className="h-8 rounded px-2 text-sm border w-40 bg-[var(--surface)] border-[var(--border)] text-[var(--ink)]"
       />
-      <Button type="submit" size="sm" disabled={pending}>
+      <button
+        type="submit"
+        disabled={pending}
+        className="h-8 rounded px-3 text-xs font-semibold bg-primary text-primary-foreground"
+      >
         {pending ? "..." : "Save"}
-      </Button>
-      <Button type="button" variant="ghost" size="sm" onClick={onCancel}>
+      </button>
+      <button
+        type="button"
+        onClick={onCancel}
+        className="h-8 rounded px-3 text-xs text-muted-foreground"
+      >
         Cancel
-      </Button>
+      </button>
       {state?.error ? (
         <p className="text-xs text-destructive">{state.error}</p>
       ) : null}

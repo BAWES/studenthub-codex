@@ -33,7 +33,7 @@ describe("admin story page — data contract", () => {
       is_old: false,
       story_time_spent: 120,
       story_created_at: null,
-      story_last_updated_at: new Date("2025-06-15T10:00:00.000Z"),
+      story_last_updated_at: "2025-06-15T10:00:00.000Z",
     };
     expect(row.story_uuid).toBe("str-abc-123");
     expect(row.story_status).toBe(1);

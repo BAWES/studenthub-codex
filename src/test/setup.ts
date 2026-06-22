@@ -18,16 +18,6 @@ vi.mock("next/navigation", () => ({
   notFound: vi.fn(),
 }));
 
-// Mock ResizeObserver for Radix UI components
-if (typeof globalThis.ResizeObserver === "undefined") {
-  globalThis.ResizeObserver = class MockResizeObserver {
-    constructor() {}
-    observe() {}
-    unobserve() {}
-    disconnect() {}
-  } as unknown as typeof ResizeObserver;
-}
-
 // Mock IntersectionObserver for MetricCard entrance animation
 if (typeof globalThis.IntersectionObserver === "undefined") {
   globalThis.IntersectionObserver = class MockIntersectionObserver {

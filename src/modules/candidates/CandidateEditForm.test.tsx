@@ -1,4 +1,3 @@
-// @vitest-environment jsdom
 import { describe, it, expect, afterEach } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
 import { CandidateEditForm } from "./CandidateEditForm";
@@ -66,12 +65,11 @@ const baseProps = {
 describe("CandidateEditForm", () => {
   it("renders personal info section with fields", () => {
     render(<CandidateEditForm {...baseProps} />);
-    // "Ahmed Al-Sabah" appears in both `name` and `bankAccountName` inputs
-    const ahmedInputs = screen.getAllByDisplayValue("Ahmed Al-Sabah");
-    expect(ahmedInputs.length).toBe(2);
-    expect(screen.getByDisplayValue("أحمد الصباح")).toBeInTheDocument();
-    expect(screen.getByDisplayValue("ahmed@example.com")).toBeInTheDocument();
-    expect(screen.getByDisplayValue("+965 5555-1234")).toBeInTheDocument();
+    // Use input name attribute to find specific fields to avoid duplicate value matches
+    expect(screen.getByLabelText("Name (English)")).toHaveValue("Ahmed Al-Sabah");
+    expect(screen.getByLabelText("Name (Arabic)")).toHaveValue("أحمد الصباح");
+    expect(screen.getByLabelText("Email")).toHaveValue("ahmed@example.com");
+    expect(screen.getByLabelText("Phone")).toHaveValue("+965 5555-1234");
   });
 
   it("renders all form section headings", () => {
@@ -106,17 +104,21 @@ describe("CandidateEditForm", () => {
 
   it("renders language items with proficiency badge", () => {
     render(<CandidateEditForm {...baseProps} />);
-    // "Advanced" appears both in the badge and the proficiency select trigger
+    // "Advanced" appears both in the badge and the proficiency select option
     const advancedElements = screen.getAllByText("Advanced");
     expect(advancedElements.length).toBeGreaterThanOrEqual(1);
+    // Find the one inside the proficiency badge span
+    const badge = document.querySelector(".proficiencyBadge");
+    expect(badge).toHaveTextContent("Advanced");
   });
 
   it("renders education entries", () => {
     render(<CandidateEditForm {...baseProps} />);
-    // "Kuwait University · Bachelor (2015)" is the unique education entry display
-    expect(screen.getByText(/Kuwait University.*Bachelor/)).toBeInTheDocument();
-    // "Bachelor" also appears in a hidden Radix Select <option>
-    expect(screen.getAllByText(/Bachelor/).length).toBeGreaterThanOrEqual(1);
+    // "Kuwait University" appears both in Location & education section and Education section selects
+    const uniElements = screen.getAllByText("Kuwait University");
+    expect(uniElements.length).toBe(2);
+    // The entry display text includes the university label and degree
+    expect(screen.getByText(/\u00b7 Bachelor/)).toBeInTheDocument();
   });
 
   it("renders document upload fields", () => {
@@ -128,11 +130,15 @@ describe("CandidateEditForm", () => {
     expect(screen.getByText("Civil ID (back)")).toBeInTheDocument();
   });
 
-  it("renders country, university, bank selects with option labels", () => {
+  it("renders country, university, bank selects with options", () => {
     render(<CandidateEditForm {...baseProps} />);
-    // "Kuwait" appears in the SelectValue AND a hidden <option> — use getAllBy
-    expect(screen.getAllByText("Kuwait").length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText("CBK").length).toBeGreaterThanOrEqual(1);
+    // "Kuwait" appears once in the country select
+    expect(screen.getByText("Kuwait")).toBeInTheDocument();
+    // "Kuwait University" appears twice (Location & education + Education section)
+    const uniOptions = screen.getAllByText("Kuwait University");
+    expect(uniOptions.length).toBe(2);
+    // "CBK" appears once in bank select
+    expect(screen.getByText("CBK")).toBeInTheDocument();
   });
 
   it("renders save profile button", () => {

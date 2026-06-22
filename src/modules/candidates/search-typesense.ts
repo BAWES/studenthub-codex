@@ -19,7 +19,7 @@ import { candidateIdsForStaff, buildSelectedActions, uniqueCandidateIds } from "
 export { parseFilter, parseCandidateId, parseCandidateIds, parseSearchPage } from "./search";
 
 // Exported for testing
-// buildFlags, buildTypesenseFacets, and resolveSelectedCandidateId are local to this module
+export { buildFlags, buildTypesenseFacets, resolveSelectedCandidateId };
 
 // ---------------------------------------------------------------------------
 // Public entry point
@@ -197,7 +197,6 @@ async function searchTypesense({
     requestedId: params.candidateId,
     rows,
     scopedCandidateIds,
-    visibility: params.visibility,
   });
 
   const selected = selectedId
@@ -378,16 +377,13 @@ async function resolveSelectedCandidateId({
   requestedId,
   rows,
   scopedCandidateIds,
-  visibility,
 }: {
   requestedId?: number;
   rows: CandidateSearchRow[];
   scopedCandidateIds: number[] | null;
-  visibility?: string;
 }): Promise<number | undefined> {
   if (!requestedId) return undefined;
-  // Only enforce scope when the user explicitly filtered to "assigned" candidates
-  if (visibility === "assigned" && scopedCandidateIds && !scopedCandidateIds.includes(requestedId)) return undefined;
+  if (scopedCandidateIds && !scopedCandidateIds.includes(requestedId)) return undefined;
 
   const foundInRows = rows.some((r) => r.id === requestedId);
   if (foundInRows) return requestedId;

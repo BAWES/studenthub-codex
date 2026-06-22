@@ -57,7 +57,7 @@ export default async function CandidateCertificationDetailPage({
               </a>
             ) : (
               "—"
-            ) as any,
+            ),
           },
           { label: "Description", value: certification.description ?? "—" },
         ]}

@@ -5,7 +5,6 @@ import { ThemeToggle } from "@/modules/theme/ThemeToggle";
 import { logoutAction } from "@/modules/auth/actions";
 import { Breadcrumbs } from "./Breadcrumbs";
 import { AppHeader } from "@/components/layout/AppHeader";
-import { Button } from "@/components/ui/button";
 import type { LucideIcon } from "lucide-react";
 import {
   Shield,
@@ -63,15 +62,13 @@ export function RoleLayoutShell({
               <strong>{userEmail}</strong>
             </div>
             <form action={logoutAction}>
-              <Button
+              <button
                 type="submit"
-                variant="ghost"
-                size="sm"
-                className="text-sm"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                 title="Sign out"
               >
                 Sign out
-              </Button>
+              </button>
             </form>
           </div>
         </header>
@@ -104,15 +101,13 @@ export function RoleLayoutShell({
               <strong>{userEmail}</strong>
             </div>
             <form action={logoutAction}>
-              <Button
+              <button
                 type="submit"
-                variant="ghost"
-                size="sm"
-                className="text-sm"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                 title="Sign out"
               >
                 Sign out
-              </Button>
+              </button>
             </form>
           </div>
         </header>

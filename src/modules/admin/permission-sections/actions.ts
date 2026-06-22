@@ -46,45 +46,6 @@ export type PermissionSectionResult = {
 export type ActionError = { error: string };
 
 // ---------------------------------------------------------------------------
-// Delete
-// ---------------------------------------------------------------------------
-
-export async function deletePermissionSection(
-  permissionUuid: string,
-): Promise<{ operation: "success" } | { operation: "error"; message: string }> {
-  await requireRoleCapability("admin", "admin.system");
-
-  const parsed = permissionUuidSchema.safeParse(permissionUuid);
-  if (!parsed.success) {
-    return { operation: "error", message: "Invalid UUID." };
-  }
-
-  try {
-    const existing = await prisma.permission_section.findUnique({
-      where: { permission_uuid: parsed.data },
-      select: { permission_uuid: true },
-    });
-
-    if (!existing) {
-      return { operation: "error", message: "Permission section not found." };
-    }
-
-    await prisma.permission_section.delete({
-      where: { permission_uuid: parsed.data },
-    });
-
-    revalidatePath("/admin/permission-sections");
-    return { operation: "success" };
-  } catch (err) {
-    console.error(
-      "[modules/admin/permission-sections] deletePermissionSection failed:",
-      err,
-    );
-    return { operation: "error", message: "Failed to delete permission section." };
-  }
-}
-
-// ---------------------------------------------------------------------------
 // List
 // ---------------------------------------------------------------------------
 
@@ -189,7 +150,7 @@ export async function createPermissionSection(
       },
     });
 
-    revalidatePath("/admin/permission-sections");
+    revalidatePath("/admin/settings/permission-sections");
 
     return {
       permissionUuid: uuid,
@@ -244,7 +205,7 @@ export async function updatePermissionSection(
       },
     });
 
-    revalidatePath("/admin/permission-sections");
+    revalidatePath("/admin/settings/permission-sections");
 
     return {
       permissionUuid: updated.permission_uuid,

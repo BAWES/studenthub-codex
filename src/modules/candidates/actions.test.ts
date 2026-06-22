@@ -1,76 +1,16 @@
 import { describe, it, expect } from "vitest";
-import { z } from "zod";
-
-// ---------------------------------------------------------------------------
-// Local schema definitions — these mirror schemas consumed by app-layer
-// server actions but are not exported from the candidates barrel schemas.
-// Defined here to avoid circular dependencies and keep barrel clean.
-// ---------------------------------------------------------------------------
-
-const getCandidateProfileSchema = z.object({
-  candidateId: z.coerce.number().int().positive(),
-});
-
-const educationStateResultSchema = z.object({
-  success: z.boolean(),
-  error: z.string().optional(),
-});
-
-const candidateActionErrorResultSchema = z.object({
-  error: z.string(),
-});
-
-const changePasswordResultSchema = z.union([
-  z.object({ success: z.literal(true) }),
-  z.object({ success: z.literal(false), error: z.string() }),
-  z.object({ success: z.literal(false), fieldErrors: z.record(z.array(z.string())) }),
-]);
-
-const getCandidateSchema = z.object({
-  candidateId: z.coerce.number().int().positive(),
-});
-
-const addCandidateNoteSchema = z.object({
-  candidateId: z.coerce.number().int().positive(),
-  noteText: z.string().trim().min(1),
-  noteType: z.string().default("Internal Note"),
-});
-
-const candidateNoteOutputSchema = z.object({
-  uuid: z.string(),
-  text: z.string(),
-  type: z.string(),
-  createdBy: z.number().int().nullable(),
-  createdAt: z.string(),
-});
-
-const candidateDetailOutputSchema = z.object({
-  id: z.number().int(),
-  name: z.string(),
-  email: z.string(),
-  phone: z.string().nullable(),
-  gender: z.number().int().nullable(),
-  objective: z.string().nullable(),
-  intro: z.string().nullable(),
-  photoUrl: z.string().nullable(),
-  civilId: z.string().nullable(),
-  hourlyRate: z.number().nullable(),
-  countryId: z.number().int().nullable(),
-  universityId: z.number().int().nullable(),
-  birthDate: z.string().nullable(),
-  createdAt: z.string(),
-  updatedAt: z.string(),
-});
-
-const candidateDetailResultOutputSchema = z.object({
-  candidate: candidateDetailOutputSchema.nullable(),
-  notes: z.array(candidateNoteOutputSchema),
-});
-
-const addNoteResultOutputSchema = z.discriminatedUnion("success", [
-  z.object({ success: z.literal(true) }),
-  z.object({ success: z.literal(false), error: z.string() }),
-]);
+import {
+  getCandidateProfileSchema,
+  educationStateResultSchema,
+  candidateActionErrorResultSchema,
+  changePasswordResultSchema,
+  getCandidateSchema,
+  addCandidateNoteSchema,
+  candidateNoteOutputSchema,
+  candidateDetailOutputSchema,
+  candidateDetailResultOutputSchema,
+  addNoteResultOutputSchema,
+} from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Schema tests — pure unit tests, no DB required

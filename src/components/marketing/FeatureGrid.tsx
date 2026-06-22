@@ -253,12 +253,12 @@ export default function FeatureGrid({
   const features = personaFeatures[persona] ?? candidateFeatures;
 
   return (
-    <section className={cn(className)} aria-label="Key features">
+    <section className={cn("shSection", className)} aria-label="Key features">
       <div className="text-center mb-8 md:mb-10">
         <p className="text-[#1f73b7] text-[11px] font-black uppercase tracking-wider mb-2">
           Everything you need
         </p>
-        <h2 className="text-[clamp(22px,3.4vw,38px)] font-black leading-[1.08] tracking-tight text-foreground text-center">
+        <h2 className="shBenefitsTitle text-center">
           {persona === "candidate" &&
             "Your career, powered by one platform."}
           {persona === "staff" &&

@@ -1,9 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import Link from "next/link";
-import type { Route } from "next";
 import type { SessionUser } from "@/modules/auth/types";
 import MatchScoreBadge from "@/components/matching/MatchScoreBadge";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -11,7 +10,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 
 // ─── Types ────────────────────────────────────────────────────────────
 
@@ -235,7 +233,7 @@ export function CandidateSearchPage({ session, initialData }: { session: Session
       if (val) params.set(key, val);
     }
     const qs = params.toString();
-    router.replace(`/candidate/search${qs ? `?${qs}` : ""}` as Route, { scroll: false });
+    router.replace(`/candidate/search${qs ? `?${qs}` : ""}`, { scroll: false });
   }, [router]);
 
   const totalPages = results ? Math.ceil(results.matchingCount / ITEMS_PER_PAGE) : 0;
@@ -376,7 +374,7 @@ export function CandidateSearchPage({ session, initialData }: { session: Session
           {/* Results */}
           {!loading && !isTyping && results && results.rows.length > 0 && (
             <>
-              <div className="flex flex-col gap-3" key={`results-${results.matchingCount}-${page}`} style={{ animation: "shFadeIn 300ms ease-out" }}>
+              <div className="flex flex-col gap-3">
                 {results.rows.map((row) => (
                   <Link
                     key={row.id}
@@ -454,24 +452,30 @@ export function CandidateSearchPage({ session, initialData }: { session: Session
                       </div>
                     </div>
 
-                    {/* Skills — shadcn Badge */}
+                    {/* Skills */}
                     {row.skills.length > 0 && (
                       <div className="mb-2 flex flex-wrap gap-1">
                         {row.skills.map((skill) => (
-                          <Badge key={skill} variant="secondary">
+                          <span
+                            key={skill}
+                            className="rounded-md px-2 py-0.5 text-[0.6875rem] font-medium bg-primary/10 text-primary"
+                          >
                             {skill}
-                          </Badge>
+                          </span>
                         ))}
                       </div>
                     )}
 
-                    {/* Flags — shadcn Badge */}
+                    {/* Flags */}
                     {row.flags.length > 0 && (
                       <div className="flex flex-wrap gap-1">
                         {row.flags.map((flag) => (
-                          <Badge key={flag} variant="warning">
+                          <span
+                            key={flag}
+                            className="rounded-md px-2 py-0.5 text-[0.6875rem] font-medium bg-amber-500/10 text-amber-600"
+                          >
                             {flag}
-                          </Badge>
+                          </span>
                         ))}
                       </div>
                     )}

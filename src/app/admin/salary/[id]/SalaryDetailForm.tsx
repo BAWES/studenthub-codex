@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,40 +8,24 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { updateSalary, deleteSalary } from "@/modules/admin/salary/actions";
-import type { SalaryItem, SalaryActionResponse } from "@/modules/admin/salary/schemas";
-
-type SalaryDetail = SalaryItem & {
-  staff_email?: string;
-};
+import type { SalaryItem } from "@/modules/admin/salary/schemas";
+import { formatDate } from "@/modules/workspace/format";
 
 export function SalaryDetailForm({
   salary,
 }: {
-  salary: SalaryDetail;
+  salary: SalaryItem;
 }) {
   const router = useRouter();
-  const [salaryValue, setSalaryValue] = useState(String(salary.salary ?? "0"));
-  const [currency, setCurrency] = useState(salary.salary_currency ?? "KWD");
-  const [comment, setComment] = useState(salary.comment ?? "");
-  const dateStr =
-    typeof salary.salary_date === "string"
-      ? salary.salary_date
-      : salary.salary_date instanceof Date
-        ? salary.salary_date.toISOString().split("T")[0]
-        : "";
-  const [salaryDate, setSalaryDate] = useState(dateStr);
 
-  const updateAction = async (_prevState: unknown, formData: FormData) => {
-    formData.set("salaryUuid", salary.staff_salary_uuid);
-    formData.set("salary", salaryValue);
-    formData.set("salaryCurrency", currency);
-    formData.set("salaryDate", salaryDate);
-    formData.set("comment", comment);
+  const [state, formAction, pending] = useActionState(updateSalary, null);
 
-    return await updateSalary(_prevState as Parameters<typeof updateSalary>[0], formData);
+  const handleDelete = async () => {
+    const result = await deleteSalary(salary.staff_salary_uuid);
+    if (result.operation === "success") {
+      router.push("/admin/salary");
+    }
   };
-
-  const [state, formAction, pending] = useActionState(updateAction, null);
 
   return (
     <div className="space-y-6">
@@ -54,12 +38,11 @@ export function SalaryDetailForm({
         </CardHeader>
         <CardContent>
           <form action={formAction} className="space-y-5">
-            {salary.staff_email && (
+            <input type="hidden" name="salaryUuid" value={salary.staff_salary_uuid} />
+
+            {salary.staff_name && (
               <div className="rounded-lg bg-muted p-3 text-sm">
-                <span className="font-medium">Staff:</span> {salary.staff_name}{" "}
-                <span className="text-muted-foreground">
-                  ({salary.staff_email})
-                </span>
+                <span className="font-medium">Staff:</span> {salary.staff_name}
               </div>
             )}
 
@@ -71,34 +54,35 @@ export function SalaryDetailForm({
                   name="salary"
                   type="number"
                   step="0.001"
-                  value={salaryValue}
-                  onChange={(e) => setSalaryValue(e.target.value)}
+                  defaultValue={salary.salary ?? 0}
                   required
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="salary_currency">Currency</Label>
+                <Label htmlFor="salaryCurrency">Currency</Label>
                 <Input
-                  id="salary_currency"
-                  name="salary_currency"
+                  id="salaryCurrency"
+                  name="salaryCurrency"
                   maxLength={3}
                   placeholder="KWD"
-                  value={currency}
-                  onChange={(e) => setCurrency(e.target.value.toUpperCase())}
+                  defaultValue={salary.salary_currency ?? "KWD"}
                 />
               </div>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="salary_date">Salary Date</Label>
+                <Label htmlFor="salaryDate">Salary Date</Label>
                 <Input
-                  id="salary_date"
-                  name="salary_date"
+                  id="salaryDate"
+                  name="salaryDate"
                   type="date"
-                  value={salaryDate}
-                  onChange={(e) => setSalaryDate(e.target.value)}
+                  defaultValue={
+                    salary.salary_date
+                      ? formatDate(new Date(salary.salary_date))
+                      : ""
+                  }
                 />
               </div>
             </div>
@@ -110,8 +94,7 @@ export function SalaryDetailForm({
                 name="comment"
                 maxLength={255}
                 placeholder="Optional notes about this salary record"
-                value={comment}
-                onChange={(e) => setComment(e.target.value)}
+                defaultValue={salary.comment ?? ""}
               />
             </div>
 
@@ -119,9 +102,14 @@ export function SalaryDetailForm({
               <Button type="submit" disabled={pending}>
                 {pending ? "Saving..." : "Save Changes"}
               </Button>
-              {(state as SalaryActionResponse | null)?.operation === "success" && (
+              {state?.operation === "success" && (
                 <span className="text-sm text-green-700 font-medium">
                   Saved successfully
+                </span>
+              )}
+              {state?.operation === "error" && (
+                <span className="text-sm text-destructive font-medium">
+                  {state.message}
                 </span>
               )}
             </div>
@@ -139,16 +127,9 @@ export function SalaryDetailForm({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form
-            action={async () => {
-              await deleteSalary(salary.staff_salary_uuid);
-              router.push("/admin/salary");
-            }}
-          >
-            <Button type="submit" variant="destructive">
-              Delete Salary Record
-            </Button>
-          </form>
+          <Button type="button" variant="destructive" onClick={handleDelete}>
+            Delete Salary Record
+          </Button>
         </CardContent>
       </Card>
     </div>

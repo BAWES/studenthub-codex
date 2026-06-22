@@ -1,7 +1,6 @@
 "use client";
 
 import type { InvoiceDetail } from "../schemas";
-import { Button } from "@/components/ui/button";
 
 // ---------------------------------------------------------------------------
 // InvoiceDetailDrawer
@@ -57,9 +56,12 @@ export function InvoiceDetailDrawer({
             <div className="flex flex-col items-center justify-center py-16 gap-4">
               <span className="text-4xl">📄</span>
               <p className="text-lg font-semibold text-foreground">Invoice not found</p>
-              <Button variant="default" size="sm" onClick={onClose}>
+              <button
+                onClick={onClose}
+                className="h-10 rounded-lg px-4 text-sm font-semibold bg-primary text-primary-foreground"
+              >
                 Close
-              </Button>
+              </button>
             </div>
           ) : (
             <>

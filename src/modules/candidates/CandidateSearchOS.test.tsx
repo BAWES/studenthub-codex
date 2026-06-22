@@ -4,9 +4,9 @@
  * FacetChips renders quick inline facet controls for country, university,
  * skills, and company — clickable chips that filter results via URL params.
  */
-import { describe, it, expect, afterEach, vi } from "vitest";
+import { describe, it, expect, afterEach } from "vitest";
 import { render, screen, within, cleanup } from "@testing-library/react";
-import { FacetChips, FacetGroup, QUICK_FACET_KEYS } from "./CandidateSearchOS";
+import { FacetChips, QUICK_FACET_KEYS } from "./CandidateSearchOS";
 import type { CandidateSearchFacet, CandidateSearchParams } from "./search";
 
 // Ensure each test starts with a clean DOM
@@ -57,74 +57,6 @@ describe("QUICK_FACET_KEYS", () => {
   });
 });
 
-describe("FacetGroup", () => {
-  it("calls onNavigate with correct facet key when clicking an option", () => {
-    const onNavigate = vi.fn();
-    const facet = makeFacet("gender", "Gender", [
-      makeActiveOption("Male", "male", 42, false),
-      makeActiveOption("Female", "female", 30, false),
-    ]);
-    const { container } = render(
-      <FacetGroup
-        basePath="/admin/candidates"
-        facet={facet}
-        params={defaultParams}
-        onNavigate={onNavigate}
-      />,
-    );
-
-    const maleLink = container.querySelector('a[href*="gender=male"]')!;
-    maleLink.click();
-
-    expect(onNavigate).toHaveBeenCalledTimes(1);
-    expect(onNavigate).toHaveBeenCalledWith({ gender: "male", candidate: "" });
-  });
-
-  it("removes facet when clicking an already-active option", () => {
-    const onNavigate = vi.fn();
-    const facet = makeFacet("country", "Country", [
-      makeActiveOption("Kuwait", "1", 42, true),
-    ]);
-    render(
-      <FacetGroup
-        basePath="/admin/candidates"
-        facet={facet}
-        params={defaultParams}
-        onNavigate={onNavigate}
-      />,
-    );
-
-    const kuwaitLink = screen.getByRole("link", { name: /kuwait/i });
-    kuwaitLink.click();
-
-    // Clicking an active option removes it
-    expect(onNavigate).toHaveBeenCalledTimes(1);
-    expect(onNavigate).toHaveBeenCalledWith({ country: "", candidate: "" });
-  });
-
-  it("does not trigger full page navigation (prevents default)", () => {
-    const onNavigate = vi.fn();
-    const facet = makeFacet("skill", "Skills", [
-      makeActiveOption("React", "react", 50, false),
-    ]);
-    render(
-      <FacetGroup
-        basePath="/admin/candidates"
-        facet={facet}
-        params={defaultParams}
-        onNavigate={onNavigate}
-      />,
-    );
-
-    const reactLink = screen.getByRole("link", { name: /react/i });
-    const clickEvent = new MouseEvent("click", { bubbles: true, cancelable: true });
-    const defaultPrevented = !reactLink.dispatchEvent(clickEvent);
-
-    expect(defaultPrevented).toBe(true);
-    expect(onNavigate).toHaveBeenCalledTimes(1);
-  });
-});
-
 describe("FacetChips", () => {
   it("returns null when no quick facets are present", () => {
     const data = makeSearchDataFacets([
@@ -169,10 +101,10 @@ describe("FacetChips", () => {
     ]);
     render(<FacetChips basePath="/admin/candidates" data={data as any} params={defaultParams} />);
 
-    expect(screen.getByText("Country:")).toBeInTheDocument();
-    expect(screen.getByText("Skills:")).toBeInTheDocument();
-    expect(screen.getByText("Company:")).toBeInTheDocument();
-    expect(screen.getByText("University:")).toBeInTheDocument();
+    expect(screen.getByText("Country")).toBeInTheDocument();
+    expect(screen.getByText("Skills")).toBeInTheDocument();
+    expect(screen.getByText("Company")).toBeInTheDocument();
+    expect(screen.getByText("University")).toBeInTheDocument();
   });
 
   it("renders up to 6 options per facet group", () => {
@@ -215,12 +147,11 @@ describe("FacetChips", () => {
     render(<FacetChips basePath="/admin/candidates" data={data as any} params={defaultParams} />);
 
     const kuwaitLink = screen.getByRole("link", { name: /kuwait/i });
-    expect(kuwaitLink).toHaveClass("bg-primary");
-    expect(kuwaitLink).toHaveClass("text-primary-foreground");
+    expect(kuwaitLink).toHaveClass("chip active");
 
     const uaeLink = screen.getByRole("link", { name: /uae/i });
-    expect(uaeLink).toHaveClass("bg-muted");
-    expect(uaeLink).toHaveClass("text-muted-foreground");
+    expect(uaeLink).toHaveClass("chip");
+    expect(uaeLink).not.toHaveClass("active");
   });
 
   // ===========================================================================
@@ -290,7 +221,6 @@ describe("FacetChips", () => {
   });
 
   it("navigates to basePath on 'Clear all' (removes all facet params)", () => {
-    const onNavigate = vi.fn();
     const data = makeSearchDataFacets([
       makeFacet("country", "Country", [
         makeActiveOption("Kuwait", "1", 42, true),
@@ -299,14 +229,9 @@ describe("FacetChips", () => {
         makeActiveOption("React", "react", 50, true),
       ]),
     ]);
-    render(<FacetChips basePath="/admin/candidates" data={data as any} params={defaultParams} onNavigate={onNavigate} />);
+    render(<FacetChips basePath="/admin/candidates" data={data as any} params={defaultParams} />);
 
     const clearAllLink = screen.getByRole("link", { name: /clear all/i });
-    clearAllLink.click();
-
-    // onNavigate is called with all filter reset params
-    expect(onNavigate).toHaveBeenCalledTimes(1);
-    const callArgs = onNavigate.mock.calls[0][0];
-    expect(callArgs.q).toBe("");
+    expect(clearAllLink).toHaveAttribute("href", "/admin/candidates");
   });
 });

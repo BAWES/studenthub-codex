@@ -46,7 +46,7 @@ export function WorkspaceShell({
   const navItems = navForRole(session.role);
 
   const rail = (
-    <aside className="sticky top-0 h-screen grid grid-rows-[auto_1fr_auto] justify-items-center gap-3 border-r border-border bg-card p-3 max-md:hidden">
+    <aside className="sticky top-0 h-screen grid grid-rows-[auto_1fr_auto] justify-items-center gap-3 border-r border-border bg-card p-3">
       <Link
         className="w-full min-h-12 flex items-center gap-2.5 px-3 border border-border rounded-lg bg-foreground text-card-foreground no-underline transition-opacity hover:opacity-90 font-black text-sm"
         href="/app"
@@ -71,11 +71,11 @@ export function WorkspaceShell({
     <section className="min-w-0 overflow-x-hidden grid content-start gap-3.5 p-3.5">
       <section className="grid grid-cols-[1fr_minmax(220px,300px)] items-center gap-4.5 border border-border rounded-lg bg-card p-4">
         <div>
-          <p className="text-coral text-xs font-bold uppercase tracking-normal mb-2.5">{eyebrow}</p>
+          <p className="text-blue-zendesk text-xs font-bold uppercase tracking-normal mb-2.5">{eyebrow}</p>
           <h1 className="max-w-[800px] mb-0 text-[clamp(27px,2.8vw,42px)] leading-[1.05] tracking-normal">{title}</h1>
         </div>
         <div className="min-w-0 grid gap-1.5 p-3.5 border border-border rounded-lg bg-card">
-          <span className="text-coral text-xs font-bold uppercase">{session.role}</span>
+          <span className="text-blue-zendesk text-xs font-bold uppercase">{session.role}</span>
           <strong className="overflow-hidden text-ellipsis whitespace-nowrap">{session.name}</strong>
           <small className="text-muted-foreground overflow-hidden text-ellipsis">{session.email}</small>
         </div>
@@ -130,7 +130,7 @@ function WorkspaceListCard({ title, count, rows }: { title: string; count: numbe
     <Card className="min-h-[360px]">
       <div className="flex items-center justify-between gap-4 px-4 py-3.5 border-b border-border">
         <h2 className="text-xl mb-0">{title}</h2>
-        <span className="min-w-[30px] min-h-[30px] inline-flex items-center justify-center text-coral border border-coral/20 bg-coral/5 font-bold text-sm rounded">{count}</span>
+        <span className="min-w-[30px] min-h-[30px] inline-flex items-center justify-center text-blue-zendesk border border-blue-zendesk/20 bg-blue-zendesk/5 font-bold text-sm rounded">{count}</span>
       </div>
       <div className="grid">
         {rows.length ? (

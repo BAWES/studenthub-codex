@@ -11,12 +11,12 @@ import { formatDate } from "@/modules/workspace/format";
 
 export const dynamic = "force-dynamic";
 
-const STATUS_CLASS: Record<string, string> = {
-  running: "text-[#22c55e]",
-  idle: "text-muted-foreground",
-  error: "text-destructive",
-  terminated: "text-muted-foreground/60",
-  paused: "text-[#f59e0b]",
+const STATUS_COLORS: Record<string, string> = {
+  running: "#22c55e",
+  idle: "#6b7280",
+  error: "#ef4444",
+  terminated: "#9ca3af",
+  paused: "#f59e0b",
 };
 
 const SUCCESS_LABELS: Record<string, string> = {
@@ -50,7 +50,7 @@ export default async function AdminAgentDetailPage({
 
   const agent = data.agent;
 
-  const statusClass = STATUS_CLASS[agent.status] ?? "text-muted-foreground";
+  const statusColor = STATUS_COLORS[agent.status] ?? "#6b7280";
 
   const hbSuccessLabel =
     agent.heartbeatSuccessRate >= 80
@@ -96,10 +96,10 @@ export default async function AdminAgentDetailPage({
             {
               label: "Status",
               value: (
-                <span className={`font-semibold ${statusClass}`}>
+                <span className="font-semibold" style={{ color: statusColor } as React.CSSProperties}>
                   {agent.status}
                 </span>
-              ) as any,
+              ),
             },
             { label: "Title", value: agent.title ?? "—" },
             { label: "Icon", value: agent.icon ?? "—" },

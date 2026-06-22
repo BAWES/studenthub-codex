@@ -54,7 +54,6 @@ describe("getDegreeResultSchema", () => {
         degree_sort_order: 1,
         degree_created_at: new Date("2026-01-01"),
         degree_updated_at: null,
-        degree_group: null,
       },
     });
     expect(result.success).toBe(true);
@@ -90,14 +89,6 @@ describe("getDegree action", () => {
     expect(mockRequireCapability).toHaveBeenCalledWith("admin.read");
     expect(mockFindUnique).toHaveBeenCalledWith({
       where: { degree_uuid: "deg-001" },
-      include: {
-        degree_group: {
-          select: {
-            degree_group_uuid: true,
-            degree_group_name_en: true,
-          },
-        },
-      },
     });
     expect(result.degree).not.toBeNull();
     expect(result.degree?.degree_uuid).toBe("deg-001");

@@ -33,7 +33,7 @@ export function AdminNotesPage({ session, notes, total }: Props) {
       ]}
     >
       <section className="mb-6">
-        <div className="rounded-lg border border-border bg-card p-5">
+        <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
           <h3 className="text-sm font-semibold mb-3 text-foreground">Add note</h3>
           <CreateNoteForm onSuccess={() => router.refresh()} />
         </div>

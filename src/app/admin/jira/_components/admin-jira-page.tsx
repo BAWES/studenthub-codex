@@ -47,7 +47,7 @@ export function AdminJiraPage({ session, issues, users, error }: Props) {
         <button
           type="button"
           onClick={() => setTab("issues")}
-          className={`text-xs px-3 py-1.5 rounded-md transition-all duration-200 border border-border ${
+          className={`text-xs px-3 py-1.5 rounded-md transition-all duration-200 border border-[var(--border)] ${
             tab === "issues"
               ? "bg-[var(--accent)] text-white"
               : "bg-[var(--surface)] text-[var(--ink)]"
@@ -58,7 +58,7 @@ export function AdminJiraPage({ session, issues, users, error }: Props) {
         <button
           type="button"
           onClick={() => setTab("users")}
-          className={`text-xs px-3 py-1.5 rounded-md transition-all duration-200 border border-border ${
+          className={`text-xs px-3 py-1.5 rounded-md transition-all duration-200 border border-[var(--border)] ${
             tab === "users"
               ? "bg-[var(--accent)] text-white"
               : "bg-[var(--surface)] text-[var(--ink)]"

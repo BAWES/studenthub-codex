@@ -3,15 +3,6 @@
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import type { SessionUser } from "@/modules/auth/types";
 import type { AwsConfigEntry, AwsConfigResult } from "../schemas";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Card, CardContent } from "@/components/ui/card";
 
 type Props = {
   session: SessionUser;
@@ -37,7 +28,7 @@ export function AdminAwsTable({ session, entries, awsResult }: Props) {
     >
       {/* Summary card */}
       <section className="mb-6">
-        <div className="rounded-lg border border-border bg-card p-5">
+        <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
           <h3 className="text-sm font-semibold mb-3 text-foreground">
             Connection summary
           </h3>
@@ -74,28 +65,41 @@ export function AdminAwsTable({ session, entries, awsResult }: Props) {
 
       {/* Config entries table */}
       {hasEntries ? (
-        <div className="rounded-lg border border-border bg-card overflow-hidden">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Config key</TableHead>
-                <TableHead>Value</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
+        <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] overflow-hidden">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-[var(--border)]">
+                <th
+                  className="text-left px-4 py-3 text-xs font-medium uppercase tracking-wide text-muted-foreground"
+                >
+                  Config key
+                </th>
+                <th
+                  className="text-left px-4 py-3 text-xs font-medium uppercase tracking-wide text-muted-foreground"
+                >
+                  Value
+                </th>
+              </tr>
+            </thead>
+            <tbody>
               {entries.map((entry) => (
-                <TableRow key={entry.key}>
-                  <TableCell className="font-mono text-xs">{entry.key}</TableCell>
-                  <TableCell className={`font-mono text-xs ${entry.value ? "text-foreground" : "text-muted-foreground"}`}>
+                <tr
+                  key={entry.key}
+                  className="border-t border-[var(--border)] first:border-t-0"
+                >
+                  <td className="px-4 py-3 font-mono text-xs text-foreground">
+                    {entry.key}
+                  </td>
+                  <td className="px-4 py-3 font-mono text-xs" style={{ color: entry.value ? "var(--ink)" : "var(--muted)" }}>
                     {entry.value || "—"}
-                  </TableCell>
-                </TableRow>
+                  </td>
+                </tr>
               ))}
-            </TableBody>
-          </Table>
+            </tbody>
+          </table>
         </div>
       ) : (
-        <div className="rounded-lg border border-border bg-card p-8 text-center">
+        <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-8 text-center">
           <p className="text-sm text-muted-foreground">
             No AWS config keys found. Configure them in the server environment.
           </p>

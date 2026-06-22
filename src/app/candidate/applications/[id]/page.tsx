@@ -30,7 +30,7 @@ export default async function CandidateApplicationDetailPage({
     notFound();
   }
 
-  const facts: any[] = [
+  const facts = [
     { label: "Job Title", value: application.jobTitle },
     { label: "Employer", value: application.employerName },
     {

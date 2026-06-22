@@ -2,9 +2,6 @@
 
 import { useActionState, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { DataTable } from "@/modules/workspace/DataTable";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 
@@ -33,7 +30,7 @@ export function AdminBankTable({ session, banks }: Props) {
       ]}
     >
       <section className="mb-6">
-        <div className="rounded-lg border border-border bg-card p-5">
+        <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
           <h3 className="text-sm font-semibold mb-3 text-foreground">Add bank</h3>
           <CreateBankForm onSuccess={() => router.refresh()} />
         </div>
@@ -56,14 +53,13 @@ export function AdminBankTable({ session, banks }: Props) {
                   onCancel={() => setEditingId(null)}
                 />
               ) : (
-                <Button
+                <button
                   type="button"
-                  variant="ghost"
-                  className="text-sm px-0 h-auto hover:underline"
+                  className="text-sm hover:underline text-primary"
                   onClick={() => setEditingId(row.bank_id)}
                 >
                   {row.bank_name ?? "—"}
-                </Button>
+                </button>
               ),
           },
           {
@@ -130,11 +126,9 @@ export function AdminBankTable({ session, banks }: Props) {
             label: "",
             render: (row) =>
               editingId !== row.bank_id ? (
-                <Button
+                <button
                   type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="text-destructive hover:bg-destructive/10"
+                  className="text-xs px-2 py-1 rounded hover:bg-red-500/10 text-destructive"
                   onClick={async () => {
                     if (confirm(`Delete bank "${row.bank_name ?? row.bank_iban_code}"?`)) {
                       const result = await deleteBank({ bankId: row.bank_id });
@@ -147,7 +141,7 @@ export function AdminBankTable({ session, banks }: Props) {
                   }}
                 >
                   Delete
-                </Button>
+                </button>
               ) : null,
           },
         ]}
@@ -192,68 +186,68 @@ function CreateBankForm({ onSuccess }: { onSuccess: () => void }) {
       onSubmit={() => setTimeout(() => { formRef.current?.reset(); }, 100)}
     >
       <div className="grid gap-1">
-        <Label className="text-xs font-medium">Bank name</Label>
-        <Input
+        <label className="text-xs font-medium text-muted-foreground">Bank name</label>
+        <input
           name="bankName"
           required
           maxLength={100}
           placeholder="e.g. National Bank of Kuwait"
-          className="h-9"
+          className="h-9 rounded-lg px-3 text-sm border bg-card border-border text-foreground"
         />
       </div>
       <div className="grid gap-1">
-        <Label className="text-xs font-medium">IBAN</Label>
-        <Input
+        <label className="text-xs font-medium text-muted-foreground">IBAN</label>
+        <input
           name="bankIbanCode"
           required
           maxLength={64}
           placeholder="e.g. KW81NBK000000000000123456"
-          className="h-9"
+          className="h-9 rounded-lg px-3 text-sm border bg-card border-border text-foreground"
         />
       </div>
       <div className="grid gap-1">
-        <Label className="text-xs font-medium">SWIFT</Label>
-        <Input
+        <label className="text-xs font-medium text-muted-foreground">SWIFT</label>
+        <input
           name="bankSwiftCode"
           maxLength={100}
           placeholder="Optional"
-          className="h-9"
+          className="h-9 rounded-lg px-3 text-sm border bg-card border-border text-foreground"
         />
       </div>
       <div className="grid gap-1">
-        <Label className="text-xs font-medium">ABK code</Label>
-        <Input
+        <label className="text-xs font-medium text-muted-foreground">ABK code</label>
+        <input
           name="bankCodeAbk"
           type="number"
           placeholder="Optional"
-          className="h-9 w-28"
+          className="h-9 rounded-lg px-3 text-sm border w-28 bg-card border-border text-foreground"
         />
       </div>
       <div className="grid gap-1">
-        <Label className="text-xs font-medium">Address</Label>
-        <Input
+        <label className="text-xs font-medium text-muted-foreground">Address</label>
+        <input
           name="bankAddress"
           maxLength={100}
           placeholder="Optional"
-          className="h-9"
+          className="h-9 rounded-lg px-3 text-sm border bg-card border-border text-foreground"
         />
       </div>
       <div className="grid gap-1">
-        <Label className="text-xs font-medium">Transfer type</Label>
-        <Input
+        <label className="text-xs font-medium text-muted-foreground">Transfer type</label>
+        <input
           name="bankTransferType"
           maxLength={3}
           placeholder="e.g. WIR"
-          className="h-9 w-20"
+          className="h-9 rounded-lg px-3 text-sm border w-20 bg-card border-border text-foreground"
         />
       </div>
-      <Button
+      <button
         type="submit"
         disabled={pending}
-        className="h-9"
+        className="h-9 rounded-lg px-4 text-sm font-semibold bg-primary text-primary-foreground"
       >
         {pending ? "Adding..." : "Add"}
-      </Button>
+      </button>
       {state?.error ? (
         <p className="text-xs w-full text-destructive">{state.error}</p>
       ) : null}
@@ -299,63 +293,62 @@ function EditBankForm({
 
   return (
     <form action={action} className="flex items-center gap-2 flex-wrap">
-      <Input
+      <input
         name="bankName"
         defaultValue={row.bank_name ?? ""}
         maxLength={100}
-        className="h-8 w-36"
+        className="h-8 rounded px-2 text-sm border w-36 bg-card border-border text-foreground"
       />
-      <Input
+      <input
         name="bankIbanCode"
         defaultValue={row.bank_iban_code}
         required
         maxLength={64}
         placeholder="IBAN"
-        className="h-8 w-48"
+        className="h-8 rounded px-2 text-sm border w-48 bg-card border-border text-foreground"
       />
-      <Input
+      <input
         name="bankSwiftCode"
         defaultValue={row.bank_swift_code ?? ""}
         maxLength={100}
         placeholder="SWIFT"
-        className="h-8 w-28"
+        className="h-8 rounded px-2 text-sm border w-28 bg-card border-border text-foreground"
       />
-      <Input
+      <input
         name="bankCodeAbk"
         type="number"
         defaultValue={row.bank_code_abk ?? ""}
         placeholder="ABK"
-        className="h-8 w-20"
+        className="h-8 rounded px-2 text-sm border w-20 bg-card border-border text-foreground"
       />
-      <Input
+      <input
         name="bankAddress"
         defaultValue={row.bank_address ?? ""}
         maxLength={100}
         placeholder="Address"
-        className="h-8 w-36"
+        className="h-8 rounded px-2 text-sm border w-36 bg-card border-border text-foreground"
       />
-      <Input
+      <input
         name="bankTransferType"
         defaultValue={row.bank_transfer_type ?? ""}
         maxLength={3}
         placeholder="Type"
-        className="h-8 w-16"
+        className="h-8 rounded px-2 text-sm border w-16 bg-card border-border text-foreground"
       />
-      <Button
+      <button
         type="submit"
         disabled={pending}
-        size="sm"
+        className="h-8 rounded px-3 text-xs font-semibold bg-primary text-primary-foreground"
       >
         {pending ? "..." : "Save"}
-      </Button>
-      <Button
+      </button>
+      <button
         type="button"
-        variant="ghost"
-        size="sm"
         onClick={onCancel}
+        className="h-8 rounded px-3 text-xs text-muted-foreground"
       >
         Cancel
-      </Button>
+      </button>
       {state?.error ? (
         <p className="text-xs w-full text-destructive">{state.error}</p>
       ) : null}
