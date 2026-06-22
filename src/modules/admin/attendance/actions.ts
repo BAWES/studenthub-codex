@@ -57,7 +57,7 @@ export async function getEmployeeOptions(): Promise<ListEmployeeOptionsResult> {
     orderBy: { employee_name: "asc" },
     select: { employee_uuid: true, employee_name: true },
   });
-  const result = rows.map((r) => ({ uuid: r.employee_uuid, name: r.employee_name }));
+  const result = rows.map((r: any) => ({ uuid: r.employee_uuid, name: r.employee_name }));
 
   const parsed = listEmployeeOptionsResultSchema.safeParse(result);
   if (!parsed.success) {

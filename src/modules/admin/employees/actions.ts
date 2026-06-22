@@ -47,7 +47,7 @@ export async function listAdminEmployees(
       take: limit,
     });
 
-  const employees = rows.map((r) => ({
+  const employees = rows.map((r: any) => ({
     employee_uuid: r.employee_uuid,
     employee_name: r.employee_name,
     employee_email: r.employee_email,
@@ -132,7 +132,7 @@ export async function getDepartments(): Promise<{ uuid: string; name: string }[]
     orderBy: { department_name_en: "asc" },
     select: { department_uuid: true, department_name_en: true },
   });
-  return rows.map((r) => ({ uuid: r.department_uuid, name: r.department_name_en }));
+  return rows.map((r: any) => ({ uuid: r.department_uuid, name: r.department_name_en }));
 }
 
 export async function getDesignations(): Promise<{ uuid: string; nameEn: string }[]> {
@@ -141,7 +141,7 @@ export async function getDesignations(): Promise<{ uuid: string; nameEn: string 
     orderBy: { designation_name_en: "asc" },
     select: { designation_uuid: true, designation_name_en: true },
   });
-  return rows.map((r) => ({ uuid: r.designation_uuid, nameEn: r.designation_name_en }));
+  return rows.map((r: any) => ({ uuid: r.designation_uuid, nameEn: r.designation_name_en }));
 }
 
 // ---------------------------------------------------------------------------
