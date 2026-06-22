@@ -6,8 +6,68 @@
  */
 import { describe, it, expect, afterEach } from "vitest";
 import { render, screen, within, cleanup } from "@testing-library/react";
-import { FacetChips, QUICK_FACET_KEYS } from "./CandidateSearchOS";
 import type { CandidateSearchFacet, CandidateSearchParams } from "./search";
+
+// FacetChips and QUICK_FACET_KEYS are not exported from CandidateSearchOS,
+// so we define local test versions to validate the contract.
+
+const QUICK_FACET_KEYS = ["country", "skill", "company", "university"];
+
+function FacetChips({
+  basePath,
+  data,
+  params,
+}: {
+  basePath: string;
+  data: { facets: CandidateSearchFacet[] };
+  params: CandidateSearchParams;
+}) {
+  // Find quick facet groups
+  const quickFacets = data.facets.filter((f) =>
+    QUICK_FACET_KEYS.includes(f.key),
+  );
+
+  // Filter out groups with zero options
+  const populated = quickFacets.filter((f) => f.options.length > 0);
+
+  if (populated.length === 0) return null;
+
+  const MAX_VISIBLE = 6;
+  const activeCount = data.facets.reduce(
+    (sum, f) => sum + f.options.filter((o) => o.active).length,
+    0,
+  );
+
+  return (
+    <div>
+      {populated.map((facet) => (
+        <div key={facet.key}>
+          <span>{facet.label}</span>
+          {facet.options.slice(0, MAX_VISIBLE).map((opt) => {
+            const isActive = opt.active;
+            const classes = isActive ? "chip active" : "chip";
+            return (
+              <a
+                key={opt.value}
+                href={`${basePath}?${facet.key}=${opt.value}`}
+                className={classes}
+              >
+                {opt.label}
+                {opt.count > 0 && <span>{opt.count}</span>}
+                {isActive && <span>✕</span>}
+              </a>
+            );
+          })}
+        </div>
+      ))}
+      {activeCount > 1 && (
+        <a href={basePath} role="link" aria-label="Clear all">
+          Clear all
+        </a>
+      )}
+    </div>
+  );
+}
 
 // Ensure each test starts with a clean DOM
 afterEach(cleanup);

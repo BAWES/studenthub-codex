@@ -44,10 +44,17 @@ describe("getHubData", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockGetUnifiedHubAction.mockResolvedValue({
-      welcome: "Welcome!",
-      queues: [],
+      query: "",
+      scope: "all" as const,
       scopes: [],
+      hero: { title: "StudentHub", subtitle: "" },
+      queues: [],
+      system: [],
+      workstreams: [],
       navigation: [],
+      access: { title: "Access", note: "", items: [] },
+      results: [],
+      preview: null,
     });
   });
 
