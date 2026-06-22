@@ -7,6 +7,7 @@ import { DataTable } from "@/modules/workspace/DataTable";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -204,19 +205,19 @@ function CreateSettingForm({ onSuccess }: { onSuccess: () => void }) {
       onSubmit={() => setTimeout(() => { formRef.current?.reset(); }, 100)}
     >
       <div className="grid gap-1">
-        <label className="text-xs font-medium text-muted-foreground">Code</label>
+        <Label className="text-xs font-medium text-muted-foreground">Code</Label>
         <Input name="code" maxLength={128} placeholder="e.g. app, email, sms" />
       </div>
       <div className="grid gap-1">
-        <label className="text-xs font-medium text-muted-foreground">Key</label>
+        <Label className="text-xs font-medium text-muted-foreground">Key</Label>
         <Input name="key" maxLength={128} placeholder="e.g. site_name" />
       </div>
       <div className="grid gap-1">
-        <label className="text-xs font-medium text-muted-foreground">Value</label>
+        <Label className="text-xs font-medium text-muted-foreground">Value</Label>
         <Input name="value" placeholder="e.g. StudentHub" />
       </div>
       <div className="grid gap-1">
-        <label className="text-xs font-medium text-muted-foreground">Serialized</label>
+        <Label className="text-xs font-medium text-muted-foreground">Serialized</Label>
         <Select name="serialized" defaultValue="false">
           <SelectTrigger>
             <SelectValue placeholder="Select..." />

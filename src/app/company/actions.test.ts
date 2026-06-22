@@ -4,7 +4,16 @@
 
 import { describe, it, expect } from "vitest";
 import { getCompanyWorkspaceSchema } from "./schemas";
-import type { CompanyMetric, CompanyWorkspaceData, WorkspaceListItem } from "./schemas";
+// Type-only imports — inline definitions to match actual usage since
+// these type names don't exist in the upstream @/modules/company/schemas barrel
+type CompanyMetric = { label: string; value: number; note?: string };
+type WorkspaceListItem = { id: string; title: string; subtitle: string; meta?: string };
+type CompanyWorkspaceData = {
+  contact: { contact_name: string; contact_email: string } | null;
+  metrics: CompanyMetric[];
+  companies: WorkspaceListItem[];
+  requests: WorkspaceListItem[];
+};
 
 describe("getCompanyWorkspaceSchema", () => {
   it("accepts a valid contact UUID", () => {

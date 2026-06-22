@@ -44,12 +44,12 @@ describe("AppHeader", () => {
 
   it("renders the sticky header container", () => {
     const { container } = render(<AppHeader />);
-    expect(container.querySelector(".shAppHeader")).toBeInTheDocument();
+    expect(container.querySelector("header")).toHaveClass("sticky");
   });
 
-  it("renders the glass backdrop element", () => {
+  it("has no glass backdrop (removed per shadcn design system)", () => {
     const { container } = render(<AppHeader />);
-    expect(container.querySelector(".shAppHeaderGlass")).toBeInTheDocument();
+    expect(container.querySelector(".shAppHeaderGlass")).not.toBeInTheDocument();
   });
 
   it("brand logo links to /app", () => {

@@ -23,9 +23,7 @@ import {
   listCompaniesSchema,
   getCompanySchema,
   // Output validation — actions-list
-  companyListItemSchema,
   listCompaniesResultSchema,
-  companyDetailResultSchema,
   // Output validation — admin
   adminCompanyItemSchema,
   adminListCompaniesResultSchema,
@@ -78,6 +76,43 @@ import {
   companyRequestDetailSchema,
   companyRequestCreateResultSchema,
 } from "./schemas";
+import { z } from "zod";
+
+// companyListItemSchema and companyDetailResultSchema are not exported
+// from ./schemas; define locally for validation tests.
+const companyListItemSchema = z.object({
+  company_id: z.number().int(),
+  company_name: z.string(),
+  company_common_name_en: z.string().nullable(),
+  company_common_name_ar: z.string().nullable(),
+  company_email: z.string().nullable(),
+  company_website: z.string().nullable(),
+  company_logo: z.string().nullable(),
+  commission: z.number().nullable(),
+  total_candidate: z.number().nullable(),
+  no_of_active_requests: z.number().nullable(),
+  followup: z.boolean().nullable(),
+  currency_code: z.string().nullable(),
+});
+
+const companyDetailResultSchema = z.object({
+  company_id: z.number().int(),
+  company_name: z.string(),
+  company_common_name_en: z.string().nullable(),
+  company_common_name_ar: z.string().nullable(),
+  company_email: z.string().nullable(),
+  company_website: z.string().nullable(),
+  company_logo: z.string().nullable(),
+  commission: z.number().nullable(),
+  total_candidate: z.number().nullable(),
+  no_of_active_requests: z.number().nullable(),
+  followup: z.boolean().nullable(),
+  currency_code: z.string().nullable(),
+  parent_company_id: z.number().nullable(),
+  staff_id: z.number().nullable(),
+  contact_name: z.string().nullable(),
+  contact_email: z.string().nullable(),
+});
 
 // ===========================================================================
 // Workspace/dashboard schemas
