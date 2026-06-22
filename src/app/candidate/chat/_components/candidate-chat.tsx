@@ -70,7 +70,7 @@ function MessageViewSkeleton() {
             className={`h-16 rounded-lg ${
               i % 2 === 0 ? "w-2/3" : "w-1/2"
             } animate-pulse ${
-              i % 2 === 0 ? "bg-[color-mix(in_srgb,var(--sh-coral)_20%,transparent)]" : "bg-border"
+              i % 2 === 0 ? "bg-coral/20" : "bg-border"
             }`}
           />
         </div>
@@ -210,15 +210,15 @@ export function CandidateChatClient({ session, conversations }: Props) {
   }, [sendMessage]);
 
   return (
-    <div className="flex flex-1 overflow-hidden rounded-lg border border-border bg-surface shadow-sm">
+    <div className="flex flex-1 overflow-hidden rounded-lg border border-border bg-card shadow-sm">
       {/* Conversation list — Slack-style left sidebar */}
-      <div className="w-[260px] shrink-0 overflow-y-auto bg-paper border-r border-border">
+      <div className="w-[260px] shrink-0 overflow-y-auto bg-background border-r border-border">
         {/* Sidebar header */}
         <div className="px-4 py-3 border-b border-border">
-          <h2 className="text-sm font-semibold text-ink uppercase tracking-wide">
+          <h2 className="text-sm font-semibold text-foreground uppercase tracking-wide">
             Conversations
           </h2>
-          <p className="text-xs text-muted-text mt-0.5">
+          <p className="text-xs text-muted-foreground mt-0.5">
             {conversations.length} total
           </p>
         </div>
@@ -250,16 +250,16 @@ export function CandidateChatClient({ session, conversations }: Props) {
                     <div className="flex items-center justify-between gap-2">
                       <span
                         className={`text-sm truncate ${
-                          isActive ? "font-semibold text-ink" : "font-medium text-ink"
+                          isActive ? "font-semibold text-foreground" : "font-medium text-foreground"
                         }`}
                       >
                         {label}
                       </span>
-                      <span className="text-[10px] text-muted-text shrink-0">
+                      <span className="text-[10px] text-muted-foreground shrink-0">
                         {formatDate(conv.created_at)}
                       </span>
                     </div>
-                    <span className="text-xs text-muted-text block mt-0.5">
+                    <span className="text-xs text-muted-foreground block mt-0.5">
                       {conv.company_name ? (
                         <>
                           {conv.store_name ? (
@@ -281,16 +281,16 @@ export function CandidateChatClient({ session, conversations }: Props) {
       </div>
 
       {/* Message view — right panel */}
-      <div className="flex-1 flex flex-col overflow-hidden bg-surface">
+      <div className="flex-1 flex flex-col overflow-hidden bg-card">
         {!selectedConv ? (
           /* Initial state — no conversation selected */
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center max-w-xs">
               <div className="text-3xl mb-3" aria-hidden="true">💬</div>
-              <p className="text-sm font-medium text-ink">
+              <p className="text-sm font-medium text-foreground">
                 Select a conversation
               </p>
-              <p className="text-xs text-muted-text mt-1">
+              <p className="text-xs text-muted-foreground mt-1">
                 Choose a conversation from the sidebar to view messages.
               </p>
             </div>
@@ -305,7 +305,7 @@ export function CandidateChatClient({ session, conversations }: Props) {
               <p className="text-sm font-semibold text-destructive">
                 Failed to load messages
               </p>
-              <p className="text-xs text-muted-text mt-1">{error}</p>
+              <p className="text-xs text-muted-foreground mt-1">{error}</p>
               <button
                 type="button"
                 onClick={() => selectedConv && selectConversation(selectedConv)}
@@ -318,16 +318,16 @@ export function CandidateChatClient({ session, conversations }: Props) {
         ) : (
           <>
             {/* Conversation header */}
-            <div className="px-4 py-3 border-b border-border bg-surface shrink-0">
+            <div className="px-4 py-3 border-b border-border bg-card shrink-0">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-full bg-coral flex items-center justify-center text-white text-sm font-bold shrink-0">
                   {getConversationLabel(selectedConv).charAt(0).toUpperCase()}
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-ink">
+                  <p className="text-sm font-semibold text-foreground">
                     {getConversationLabel(selectedConv)}
                   </p>
-                  <p className="text-xs text-muted-text">
+                  <p className="text-xs text-muted-foreground">
                     {selectedConv.company_name ?? `Company #${selectedConv.company_id}`}
                     {selectedConv.store_name ? ` · ${selectedConv.store_name}` : ""}
                   </p>
@@ -351,7 +351,7 @@ export function CandidateChatClient({ session, conversations }: Props) {
                         className={`max-w-[70%] rounded-lg px-4 py-3 ${
                           isFromCandidate
                             ? "bg-coral text-white rounded-br-sm"
-                            : "bg-surface border border-border text-ink rounded-bl-sm shadow-sm"
+                            : "bg-card border border-border text-foreground rounded-bl-sm shadow-sm"
                         }`}
                       >
                         <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">
@@ -359,7 +359,7 @@ export function CandidateChatClient({ session, conversations }: Props) {
                         </p>
                         <div
                           className={`flex items-center justify-end gap-1.5 mt-1.5 ${
-                            isFromCandidate ? "text-white/70" : "text-muted-text"
+                            isFromCandidate ? "text-white/70" : "text-muted-foreground"
                           }`}
                         >
                           <span className="text-[11px]">
@@ -382,7 +382,7 @@ export function CandidateChatClient({ session, conversations }: Props) {
             )}
 
             {/* Message input bar */}
-            <div className="shrink-0 border-t border-border bg-surface px-4 py-3">
+            <div className="shrink-0 border-t border-border bg-card px-4 py-3">
               <div className="flex items-end gap-2">
                 <textarea
                   value={inputText}
@@ -390,7 +390,7 @@ export function CandidateChatClient({ session, conversations }: Props) {
                   onKeyDown={handleKeyDown}
                   placeholder="Type a message... (Enter to send, Shift+Enter for new line)"
                   rows={1}
-                  className="flex-1 resize-none rounded-lg border border-border bg-surface px-3 py-2.5 text-sm text-ink placeholder:text-muted-text focus:outline-none focus:ring-2 focus:ring-coral focus:border-transparent transition-all"
+                  className="flex-1 resize-none rounded-lg border border-border bg-card px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-coral focus:border-transparent transition-all"
                   disabled={sending}
                 />
                 <button

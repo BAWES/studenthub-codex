@@ -22,14 +22,10 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
   --color-blue-zendesk: #1f73b7;
-  /* Design system — StudentHub OS tokens (for Tailwind utility class use) */
+  /* Design system — coral accent tokens (not in shadcn standard) */
   --color-coral: var(--sh-coral);
   --color-coral-hover: var(--sh-coral-hover);
   --color-coral-light: var(--sh-coral-light);
-  --color-ink: var(--ink);
-  --color-muted-text: var(--muted);
-  --color-paper: var(--paper);
-  --color-surface: var(--surface);
   --radius: var(--radius);
   --font-size-label: 0.8125rem;
 }

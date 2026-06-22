@@ -15,15 +15,15 @@ const MODULES: { dir: string; backTo: string; listPath: string }[] = [
 ];
 
 describe("STU-4327: Admin detail page polish", () => {
-  for (const module of MODULES) {
-    const detailDir = path.join(adminDir, module.dir);
+  for (const mod of MODULES) {
+    const detailDir = path.join(adminDir, mod.dir);
     const idFiles = fs.readdirSync(detailDir).filter((f) => f.startsWith("["));
     if (idFiles.length === 0) continue;
+    const idFile = idFiles[0];
+    const filePath = path.join(detailDir, idFile);
+    const content = fs.readFileSync(filePath, "utf-8");
 
-    const pagePath = path.join(detailDir, idFiles[0], "page.tsx");
-    const content = fs.readFileSync(pagePath, "utf-8");
-
-    describe(`${module.dir}/[id]/page.tsx`, () => {
+    describe(`${mod.dir}/[id]/page.tsx`, () => {
       it("has a back-to-list link", () => {
         expect(content).toContain("Back to");
         expect(content).toContain(`Back to ${module.backTo}`);
