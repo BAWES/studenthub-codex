@@ -18,7 +18,7 @@ export default meta;
 type Story = StoryObj<typeof Alert>;
 
 export const Default: Story = {
-  render: (args: any) => (
+  render: (args) => (
     <Alert {...args}>
       <InfoIcon className="size-4" />
       <AlertTitle>Information</AlertTitle>
@@ -31,7 +31,7 @@ export const Default: Story = {
 
 export const Destructive: Story = {
   args: { variant: "destructive" },
-  render: (args: any) => (
+  render: (args) => (
     <Alert {...args}>
       <TriangleAlertIcon className="size-4" />
       <AlertTitle>Error</AlertTitle>
@@ -43,7 +43,7 @@ export const Destructive: Story = {
 };
 
 export const WithoutTitle: Story = {
-  render: (args: any) => (
+  render: (args) => (
     <Alert {...args}>
       <CircleCheckIcon className="size-4" />
       <AlertDescription>

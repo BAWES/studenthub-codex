@@ -74,7 +74,7 @@ export async function listCandidateJobs(
     prisma.job_listing.count({ where: where as any }),
   ]);
 
-  const items: CandidateJobRow[] = dbRows.map((r: any) => ({
+  const items: CandidateJobRow[] = dbRows.map((r) => ({
     jobListingId: r.jobListingId,
     title: r.title,
     description: r.description,
@@ -262,7 +262,7 @@ export async function listMyApplications(
     prisma.job_listing_application.count({ where: where as any }),
   ]);
 
-  const items: ApplicationRow[] = dbRows.map((r: any) => ({
+  const items: ApplicationRow[] = dbRows.map((r) => ({
     applicationId: r.id,
     jobListingId: r.jobListingId,
     jobTitle: r.jobListing.title,

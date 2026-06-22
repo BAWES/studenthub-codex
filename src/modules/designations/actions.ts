@@ -56,7 +56,7 @@ export async function listDesignations(
   ]);
 
   const result: ListDesignationsResult = {
-    designations: designations.map((d: any) => ({
+    designations: designations.map((d) => ({
       designation_uuid: d.designation_uuid,
       designation_name_en: d.designation_name_en,
       designation_name_ar: d.designation_name_ar,

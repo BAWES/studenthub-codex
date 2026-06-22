@@ -54,7 +54,7 @@ function TestForm({
         <FormField
           control={form.control}
           name="username"
-          render={({ field }: { field: any }) => (
+          render={({ field }) => (
             <FormItem>
               <FormLabel>Username</FormLabel>
               <FormControl>
@@ -68,7 +68,7 @@ function TestForm({
         <FormField
           control={form.control}
           name="email"
-          render={({ field }: { field: any }) => (
+          render={({ field }) => (
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>

@@ -138,7 +138,7 @@ export function AdminCompanySettingsEditForm({ settings }: Props) {
               const name = label === "Description (EN)" ? "companyDescriptionEn" : "companyDescriptionAr";
               return (
                 <div className="grid gap-1" key={name}>
-                <Label htmlFor={name} className="text-xs font-medium">{label}</Label>
+                  <Label htmlFor={name} className="text-xs font-medium">{label}</Label>
                   <Textarea
                     id={name}
                     name={name}

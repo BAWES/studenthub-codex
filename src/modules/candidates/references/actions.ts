@@ -82,7 +82,7 @@ export async function listCandidateReferences(
   ]);
 
   const result = {
-    items: rows.map((r: any) => toItem(r)!),
+    items: rows.map((r) => toItem(r)!),
     total,
     page,
     pageSize: limit,

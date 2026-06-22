@@ -1,23 +1,23 @@
-import { Suspense } from "react";
 import { notFound, redirect } from "next/navigation";
-import Link from "next/link";
-import type { Route } from "next";
 import { requireCapability } from "@/modules/auth/session";
 import { getCandidateDetail } from "@/modules/admin/candidates/[id]";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { DetailSection } from "@/modules/workspace/DetailPanels";
-import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
+import { Separator } from "@/components/ui/separator";
 import {
   Mail,
   Phone,
   MapPin,
   Briefcase,
   FileText,
+  Clock,
+  CreditCard,
   User,
+  GraduationCap,
+  Globe,
 } from "lucide-react";
+import NextLink from "next/link";
 
 export const dynamic = "force-dynamic";
 
@@ -26,7 +26,7 @@ export default async function AdminCandidateDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const session = await requireCapability("candidate.read");
+  await requireCapability("candidate.read");
   const { id } = await params;
   const candidateId = Number(id);
 
@@ -52,12 +52,18 @@ export default async function AdminCandidateDetailPage({
   }
 
   return (
-    <WorkspaceShell
-      session={session}
-      eyebrow="Admin / Candidates"
-      title={c.candidate_name ?? `#${c.candidate_id}`}
-      metrics={detail.metrics}
-    >
+    <div className="p-6 space-y-6">
+      {/* ── Breadcrumb ─────────────────────────────────────── */}
+      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <NextLink href="/admin/candidates" className="hover:text-foreground transition-colors">
+          Candidates
+        </NextLink>
+        <span>/</span>
+        <span className="text-foreground font-medium">
+          {c.candidate_name ?? `#${c.candidate_id}`}
+        </span>
+      </div>
+
       {/* ── Profile Header ──────────────────────────────────── */}
       <Card>
         <CardContent className="p-6">
@@ -96,6 +102,19 @@ export default async function AdminCandidateDetailPage({
                   </span>
                 ) : null}
               </div>
+
+              {/* Metrics */}
+              <div className="flex gap-4 mt-4 flex-wrap">
+                {detail.metrics.map((metric, i) => (
+                  <div
+                    key={i}
+                    className="rounded-lg border border-border bg-muted/30 px-3.5 py-2"
+                  >
+                    <div className="text-xs text-muted-foreground">{metric.label}</div>
+                    <div className="text-sm font-semibold">{metric.value}</div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </CardContent>
@@ -112,28 +131,43 @@ export default async function AdminCandidateDetailPage({
         {/* ── Tab: Details ──────────────────────────────────── */}
         <TabsContent value="details" className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2">
-            <DetailSection
-              title="Personal Info"
-              facts={[
-                { label: "Email", value: c.candidate_email },
-                { label: "Phone", value: c.candidate_phone },
-                { label: "Gender", value: c.candidate_gender === 1 ? "Male" : c.candidate_gender === 2 ? "Female" : null },
-                { label: "Birth date", value: c.candidate_birth_date ? String(c.candidate_birth_date).split("T")[0] : null },
-                { label: "Hourly rate", value: c.candidate_hourly_rate ? `${c.candidate_hourly_rate} ${c.currency_code ?? "KWD"}/hr` : null },
-                { label: "Store", value: c.store?.store_name },
-                { label: "University", value: c.university?.university_name_en },
-                { label: "Objective", value: c.candidate_objective },
-              ]}
-            />
-            <DetailSection
-              title="Record"
-              facts={[
-                { label: "Candidate ID", value: String(c.candidate_id) },
-                { label: "Arabic name", value: c.candidate_name_ar },
-                { label: "Created", value: c.candidate_created_at ? String(c.candidate_created_at).split("T")[0] : null },
-                { label: "Updated", value: c.candidate_updated_at ? String(c.candidate_updated_at).split("T")[0] : null },
-              ]}
-            />
+            {/* Personal Info */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <User className="size-4" />
+                  Personal Info
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3 text-sm">
+                <DetailRow label="Email" value={c.candidate_email} />
+                <DetailRow label="Phone" value={c.candidate_phone} />
+                <DetailRow label="Gender" value={c.candidate_gender === 1 ? "Male" : c.candidate_gender === 2 ? "Female" : null} />
+                <DetailRow label="Birth date" value={c.candidate_birth_date ? String(c.candidate_birth_date).split("T")[0] : null} />
+                <Separator />
+                <DetailRow label="Hourly rate" value={c.candidate_hourly_rate ? `${c.candidate_hourly_rate} ${c.currency_code ?? "KWD"}/hr` : null} />
+                <DetailRow label="Store" value={c.store?.store_name} />
+                <DetailRow label="University" value={c.university?.university_name_en} />
+                <Separator />
+                <DetailRow label="Objective" value={c.candidate_objective} />
+              </CardContent>
+            </Card>
+
+            {/* Record Info */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Clock className="size-4" />
+                  Record
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3 text-sm">
+                <DetailRow label="Candidate ID" value={String(c.candidate_id)} />
+                <DetailRow label="Arabic name" value={c.candidate_name_ar} />
+                <DetailRow label="Created" value={c.candidate_created_at ? String(c.candidate_created_at).split("T")[0] : null} />
+                <DetailRow label="Updated" value={c.candidate_updated_at ? String(c.candidate_updated_at).split("T")[0] : null} />
+              </CardContent>
+            </Card>
           </div>
         </TabsContent>
 
@@ -234,12 +268,20 @@ export default async function AdminCandidateDetailPage({
           )}
         </TabsContent>
       </Tabs>
+    </div>
+  );
+}
 
-      <section className="flex gap-2 p-4">
-        <Link href={"/admin/candidates" as Route}>
-          <Button variant="outline">Back to Candidates</Button>
-        </Link>
-      </section>
-    </WorkspaceShell>
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+function DetailRow({ label, value }: { label: string; value: string | null | undefined }) {
+  if (value == null || value === "") return null;
+  return (
+    <div className="flex justify-between gap-4">
+      <span className="text-muted-foreground shrink-0">{label}</span>
+      <span className="text-foreground text-right">{value}</span>
+    </div>
   );
 }

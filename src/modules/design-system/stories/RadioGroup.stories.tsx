@@ -15,7 +15,7 @@ export default meta;
 type Story = StoryObj<typeof RadioGroup>;
 
 export const Default: Story = {
-  render: (args: any) => (
+  render: (args) => (
     <RadioGroup {...args}>
       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
         <RadioGroupItem value="option-1" id="r1" />
@@ -34,7 +34,7 @@ export const Default: Story = {
 };
 
 export const Horizontal: Story = {
-  render: (args: any) => (
+  render: (args) => (
     <RadioGroup
       {...args}
       defaultValue="horizontal-1"

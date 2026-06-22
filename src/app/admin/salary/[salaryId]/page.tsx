@@ -1,11 +1,8 @@
 import { ErrorBoundary } from "@/modules/workspace/ErrorBoundary";
 import { notFound } from "next/navigation";
-import Link from "next/link";
-import type { Route } from "next";
 import { requireRoleCapability } from "@/modules/auth/session";
-import { DetailSection } from "@/modules/workspace/DetailPanels";
+import { FactPanel } from "@/modules/workspace/DetailPanels";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
-import { Button } from "@/components/ui/button";
 import { getSalary } from "../actions";
 
 export const dynamic = "force-dynamic";
@@ -45,7 +42,7 @@ export default async function AdminSalaryDetailPage({
           },
         ]}
       >
-        <DetailSection
+        <FactPanel
           title="Salary details"
           facts={[
             { label: "Staff name", value: staffName },
@@ -72,12 +69,6 @@ export default async function AdminSalaryDetailPage({
             },
           ]}
         />
-
-        <section className="flex gap-2 p-4">
-          <Link href={"/admin/salary" as Route}>
-            <Button variant="outline">Back to Salary</Button>
-          </Link>
-        </section>
       </WorkspaceShell>
     </ErrorBoundary>
   );
