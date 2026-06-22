@@ -28,18 +28,31 @@ export default async function AdminWebhookDetailPage({
   }
 
   const webhook = data.webhook;
+  const title = `${webhook.event} → ${webhook.endpoint}`;
 
   return (
     <ErrorBoundary>
       <WorkspaceShell
         session={session}
         eyebrow="Admin / Webhooks"
-        title={webhook.event}
-        metrics={[]}
+        title={title}
+        metrics={[
+          {
+            label: "Event",
+            value: webhook.event,
+            note: "Triggering event",
+          },
+          {
+            label: "Method",
+            value: webhook.method ?? "—",
+            note: "HTTP method",
+          },
+        ]}
       >
         <DetailSection
           title="Webhook Details"
           facts={[
+            { label: "ID", value: String(webhook.webhook_id) },
             { label: "Event", value: webhook.event },
             { label: "Endpoint", value: webhook.endpoint },
             { label: "Method", value: webhook.method ?? "—" },
