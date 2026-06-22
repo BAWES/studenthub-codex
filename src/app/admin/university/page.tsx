@@ -1,6 +1,10 @@
 import type { Route } from "next";
 import { requireRoleCapability } from "@/modules/auth/session";
 import { listUniversities } from "@/modules/admin/university/actions";
+import { prisma } from "@/lib/prisma";
+import { formatDate } from "@/modules/workspace/format";
+import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
+import { DataTable } from "@/modules/workspace/DataTable";
 import { AdminUniversityTable } from "./_components";
 
 export const dynamic = "force-dynamic";

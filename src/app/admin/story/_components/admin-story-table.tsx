@@ -46,7 +46,7 @@ export function AdminStoryTable({ session, stories }: Props) {
           {
             key: "position",
             label: "Position",
-            render: (row) => (
+            render: (row: any) => (
               <span className="text-sm text-card-foreground">
                 {row.request_position_title ?? "—"}
               </span>
@@ -55,7 +55,7 @@ export function AdminStoryTable({ session, stories }: Props) {
           {
             key: "staff",
             label: "Staff",
-            render: (row) =>
+            render: (row: any) =>
               editingId === row.story_uuid ? (
                 <EditStoryForm
                   row={row}
@@ -75,7 +75,7 @@ export function AdminStoryTable({ session, stories }: Props) {
           {
             key: "employees",
             label: "Employees",
-            render: (row) =>
+            render: (row: any) =>
               editingId === row.story_uuid ? null : (
                 <span className="text-sm text-card-foreground">
                   {row.number_of_employees ?? "—"}
@@ -113,7 +113,7 @@ export function AdminStoryTable({ session, stories }: Props) {
                   variant="destructive"
                   size="sm"
                   onClick={async () => {
-                    if (confirm(`Delete story for "${row.request_position_title ?? "unknown position"}"?`)) {
+                    if (confirm(`Delete story for "${(row as any).request_position_title ?? "unknown position"}"?`)) {
                       const result = await deleteStory(row.story_uuid);
                       if (result.operation === "error") {
                         alert(result.message);

@@ -29,7 +29,10 @@ export function DiscountCategoryDetailForm({ category }: Props) {
     return { success: true };
   };
 
-  const [state, formAction, pending] = useActionState(updateAction, null);
+  const [state, formAction, pending] = useActionState(
+    updateAction,
+    null,
+  ) as unknown as [state: { success?: boolean; error?: string } | null, formAction: (payload: FormData) => void, pending: boolean];
 
   return (
     <div className="space-y-6">

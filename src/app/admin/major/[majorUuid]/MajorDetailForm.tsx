@@ -22,7 +22,7 @@ export function MajorDetailForm({ major }: { major: MajorDetail }) {
   const [nameAr, setNameAr] = useState(major.major_name_ar);
 
   const updateAction = async () => {
-    await updateMajor(major.major_uuid, { major_name_en: nameEn, major_name_ar: nameAr });
+    await updateMajor(major.major_uuid, nameEn, nameAr);
     return { success: true };
   };
 

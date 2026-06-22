@@ -6,7 +6,7 @@ import {
   listCompaniesSchema,
   getCompanySchema,
   listCompaniesResultSchema,
-  companyDetailResultSchema,
+  adminCompanyDetailResultSchema as companyDetailResultSchema,
   type ListCompaniesParams,
   type GetCompanyParams,
   type CompanyListItem,
