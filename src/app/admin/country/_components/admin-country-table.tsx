@@ -189,30 +189,6 @@ function CreateCountryForm({ onSuccess }: { onSuccess: () => void }) {
       onSubmit={() => setTimeout(() => { formRef.current?.reset(); }, 100)}
     >
       <div className="grid gap-1">
-<<<<<<< HEAD
-        <label className="text-xs font-medium text-muted-foreground">Name (EN) *</label>
-        <Input name="countryNameEn" required maxLength={100} placeholder="e.g. Kuwait" className="w-36" />
-      </div>
-      <div className="grid gap-1">
-        <label className="text-xs font-medium text-muted-foreground">Name (AR)</label>
-        <Input name="countryNameAr" maxLength={100} placeholder="الكويت" className="w-36" />
-      </div>
-      <div className="grid gap-1">
-        <label className="text-xs font-medium text-muted-foreground">Nationality (EN) *</label>
-        <Input name="nationalityNameEn" required maxLength={100} placeholder="e.g. Kuwaiti" className="w-36" />
-      </div>
-      <div className="grid gap-1">
-        <label className="text-xs font-medium text-muted-foreground">ISO</label>
-        <Input name="iso" maxLength={3} placeholder="KWT" className="w-16" />
-      </div>
-      <div className="grid gap-1">
-        <label className="text-xs font-medium text-muted-foreground">Code</label>
-        <Input name="countryCode" type="number" placeholder="965" className="w-20" />
-      </div>
-      <div className="grid gap-1">
-        <label className="text-xs font-medium text-muted-foreground">Currency</label>
-        <Input name="currencyCode" maxLength={3} placeholder="KWD" className="w-16" />
-=======
         <Label className="text-xs font-medium text-muted-foreground">Name (English)</Label>
         <Input name="country_name_en" maxLength={100} placeholder="e.g. Kuwait" />
       </div>
@@ -243,11 +219,6 @@ function CreateCountryForm({ onSuccess }: { onSuccess: () => void }) {
       <div className="grid gap-1">
         <Label className="text-xs font-medium text-muted-foreground">Currency</Label>
         <Input name="currency_code" maxLength={3} placeholder="KWD" />
->>>>>>> origin/main
-      </div>
-      <div className="grid gap-1">
-        <label className="text-xs font-medium text-muted-foreground">Emoji</label>
-        <Input name="emoji" maxLength={255} placeholder="🇰🇼" className="w-16" />
       </div>
       <Button type="submit" disabled={pending}>
         {pending ? "Adding..." : "Add"}
