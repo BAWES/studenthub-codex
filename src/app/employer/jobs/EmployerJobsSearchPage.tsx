@@ -375,6 +375,8 @@ export function EmployerJobsSearchPage({
                       </span>
                     </div>
                   </div>
+                    </div>
+                  </div>
                   </Card>
                 </Link>
               ))}
