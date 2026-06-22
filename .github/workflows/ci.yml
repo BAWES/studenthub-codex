@@ -22,11 +22,11 @@ jobs:
           echo "Checking branch: $BRANCH"
           if echo "$BRANCH" | grep -qiE '^(feature|fix|chore|coder2)/STU-[a-z0-9]+[-a-z0-9]+$'; then
             echo "Branch name OK: $BRANCH"
-          elif echo "$BRANCH" | grep -qiE '^ux/[a-z0-9-]+$'; then
+          elif echo "$BRANCH" | grep -qiE '^(ux|uxdesigner)/[a-z0-9-]+$'; then
             echo "Branch name OK (UX): $BRANCH"
           else
             echo "Branch name REJECTED: $BRANCH"
-            echo "Expected: feature/STU-N-*, fix/STU-N-*, chore/STU-N-*, or coder2/STU-N-* (kebab-case) — UX: ux/*"
+            echo "Expected: feature/STU-N-*, fix/STU-N-*, chore/STU-N-*, or coder2/STU-N-* (kebab-case) — UX: ux/* or uxdesigner/*"
             exit 1
           fi
 
@@ -37,7 +37,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 20
           cache: "npm"
       - run: npm ci
       - name: Check for uncommitted changes
@@ -55,7 +55,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 20
           cache: "npm"
       - run: npm ci
       - run: npx tsc --noEmit
@@ -68,7 +68,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 20
           cache: "npm"
       - run: npm ci
       - name: Generate Prisma client
@@ -83,7 +83,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 20
           cache: "npm"
       - run: npm ci
       - run: npm run lint
@@ -111,7 +111,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 20
           cache: "npm"
       - run: npm ci
       - name: Generate Prisma client

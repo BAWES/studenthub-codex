@@ -2,7 +2,6 @@ import type { ReactNode } from "react";
 import type { Route } from "next";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 
 export type DataTableColumn<T> = {
   key: string;
@@ -24,53 +23,55 @@ export function DataTable<T extends { id: string | number }>({
   rowHref?: (row: T) => Route;
 }) {
   return (
-    <Card className="mt-5">
-      <div className="flex items-center justify-between gap-4.5 px-4.5 py-[18px] border-b border-border">
-        <div>
-          <h2 className="mb-1 text-lg font-semibold">{title}</h2>
-          <p className="text-muted-foreground text-sm mb-0">{description}</p>
+    <Card className="min-w-0 overflow-hidden">
+      <div className="flex items-center justify-between gap-4 px-4 py-3.5 border-b border-border">
+        <div className="min-w-0">
+          <h2 className="text-lg font-semibold mb-0.5">{title}</h2>
+          <p className="text-sm text-muted-foreground mb-0">{description}</p>
         </div>
-        <span className="text-xs font-bold text-muted-foreground whitespace-nowrap">{rows.length} shown</span>
+        <span className="text-sm font-bold text-muted-foreground shrink-0">{rows.length} shown</span>
       </div>
       <div className="overflow-x-auto">
-        <table className="w-full border-collapse min-w-[860px]">
+        <table className="w-full min-w-[860px] border-collapse">
           <thead>
             <tr>
               {columns.map((column) => (
-                <th
-                  key={column.key}
-                  className="text-left text-xs font-bold text-muted-foreground uppercase tracking-wide px-4 py-3 border-b border-border"
-                >
+                <th key={column.key} className="text-left text-xs font-bold text-muted-foreground uppercase px-4 py-3 border-b border-border">
                   {column.label}
                 </th>
               ))}
-              {rowHref ? <th aria-label="Open record" className="w-px whitespace-nowrap px-4 py-3 border-b border-border" /> : null}
+              {rowHref ? <th className="px-4 py-3 border-b border-border" aria-label="Open record" /> : null}
             </tr>
           </thead>
           <tbody>
             {rows.length ? (
               rows.map((row) => (
-                <tr key={row.id} className="border-b border-border last:border-b-0">
+                <tr key={row.id} className="border-b border-border last:border-b-0 hover:bg-muted/30 transition-colors">
                   {columns.map((column) => (
-                    <td data-label={column.label} key={column.key} className="px-4 py-3 text-sm text-foreground align-top border-b border-border last:border-b-0">
+                    <td key={column.key} className="px-4 py-3 align-top text-sm">
                       {column.render(row)}
                     </td>
                   ))}
                   {rowHref ? (
-                    <td data-label="Action" className="w-px whitespace-nowrap px-4 py-3 align-middle">
-                      <Button variant="outline" size="sm" asChild>
-                        <Link href={rowHref(row)}>Open</Link>
-                      </Button>
+                    <td className="px-4 py-3 align-middle text-right">
+                      <Link
+                        href={rowHref(row)}
+                        className="text-blue-zendesk text-sm font-semibold hover:underline no-underline"
+                      >
+                        Open &rarr;
+                      </Link>
                     </td>
                   ) : null}
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan={columns.length + (rowHref ? 1 : 0)} className="px-4 py-8 text-center">
-                  <div className="grid gap-1.5 text-muted-foreground">
+                <td colSpan={columns.length + (rowHref ? 1 : 0)} className="p-0">
+                  <div className="grid gap-2 justify-items-center text-center py-12 px-6">
                     <strong className="text-foreground text-[15px]">No records found</strong>
-                    <span className="text-sm">This view is connected to the prod clone, but this account has no matching rows yet.</span>
+                    <span className="text-muted-foreground text-sm max-w-[380px]">
+                      This view is connected to the prod clone, but this account has no matching rows yet.
+                    </span>
                   </div>
                 </td>
               </tr>

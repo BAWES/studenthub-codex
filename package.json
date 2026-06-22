@@ -28,6 +28,7 @@
     "prepare": "husky"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1073.0",
     "@prisma/client": "^6.6.0",
     "@radix-ui/react-slot": "^1.2.4",
     "bcryptjs": "^3.0.3",
@@ -35,8 +36,9 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "lucide-react": "^1.14.0",
-    "next": "^15.3.1",
+    "next": "15.5.15",
     "next-themes": "^0.4.6",
+    "pdfmake": "^0.3.11",
     "radix-ui": "^1.4.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
