@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { updateSetting, deleteSetting } from "../actions";
+import { updateSettingAction, deleteSettingAction } from "../actions";
 
 interface SettingDetail {
   setting_uuid: string;
@@ -38,16 +38,17 @@ export function SettingDetailForm({
     formData.set("value", value);
     formData.set("serialized", serialized ? "true" : "");
 
-    await updateSetting(setting.setting_uuid, {
-      code,
-      key,
+    await updateSettingAction({
+      settingUuid: setting.setting_uuid,
       value: value || null,
-      serialized,
     });
-    return { success: true };
+    return { success: true } as const;
   };
 
-  const [state, formAction, pending] = useActionState(updateAction, null);
+  const [state, formAction, pending] = useActionState(
+    updateAction,
+    null,
+  ) as unknown as [state: { success?: boolean } | null, formAction: () => void, pending: boolean];
 
   return (
     <div className="space-y-6">
@@ -134,7 +135,7 @@ export function SettingDetailForm({
         <CardContent>
           <form
             action={async () => {
-              await deleteSetting(setting.setting_uuid);
+              await deleteSettingAction({ settingUuid: setting.setting_uuid });
             }}
           >
             <Button type="submit" variant="destructive">

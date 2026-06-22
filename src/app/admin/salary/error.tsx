@@ -18,7 +18,6 @@ export default function Error({
       <button
         type="button"
         onClick={reset}
-        className="px-4 py-2 text-sm rounded-lg font-medium"
         className="h-9 rounded-lg px-4 text-sm font-semibold bg-primary text-primary-foreground"
       >
         Try again

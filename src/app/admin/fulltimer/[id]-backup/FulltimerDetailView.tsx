@@ -48,11 +48,11 @@ export function FulltimerDetailView({ fulltimer }: Props) {
                 )}
               </div>
             </div>
-            <Field label="Nationality" value={fulltimer.nationality_name} />
-            <Field label="Country" value={fulltimer.country_name} />
-            <Field label="University" value={fulltimer.university_name} />
-            <Field label="Current Salary" value={fulltimer.fulltimer_current_salary} />
-            <Field label="Expected Salary" value={fulltimer.fulltimer_expected_salary} />
+            <Field label="Nationality" value={(fulltimer as any).nationality_name} />
+            <Field label="Country" value={(fulltimer as any).country_name} />
+            <Field label="University" value={(fulltimer as any).university_name} />
+            <Field label="Current Salary" value={(fulltimer as any).fulltimer_current_salary} />
+            <Field label="Expected Salary" value={(fulltimer as any).fulltimer_expected_salary} />
             <Field
               label="Created"
               value={

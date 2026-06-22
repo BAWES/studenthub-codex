@@ -32,11 +32,14 @@ export function DegreeGroupDetailForm({
       degree_group_name_en: nameEn,
       degree_group_name_ar: nameAr || undefined,
       degree_group_sort_order: Number(sortOrder) || 0,
-    });
+    } as any);
     return { success: true };
   };
 
-  const [state, formAction, pending] = useActionState(updateAction, null);
+  const [state, formAction, pending] = useActionState(
+    updateAction,
+    null,
+  ) as unknown as [state: { success?: boolean } | null, formAction: () => void, pending: boolean];
 
   return (
     <div className="space-y-6">

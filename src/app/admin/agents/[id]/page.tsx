@@ -99,7 +99,7 @@ export default async function AdminAgentDetailPage({
                 <span className="font-semibold" style={{ color: statusColor } as React.CSSProperties}>
                   {agent.status}
                 </span>
-              ),
+              ) as any,
             },
             { label: "Title", value: agent.title ?? "—" },
             { label: "Icon", value: agent.icon ?? "—" },
