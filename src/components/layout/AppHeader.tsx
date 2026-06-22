@@ -7,14 +7,15 @@ import { NotificationBell } from "./NotificationBell";
 import { UserMenu } from "./UserMenu";
 
 /**
- * App Header — sticky top navigation bar.
+ * OS Glass App Header — sticky top navigation bar.
  *
  * Features:
- * - Clean border-bottom, no glass effects
+ * - Glass-morphism background with backdrop blur
  * - Brand logo (links to /app)
  * - Role-aware navigation tabs
  * - Notification bell
  * - User avatar dropdown menu
+ * - Entrance slide-in animation
  */
 export function AppHeader() {
   const { session } = useWorkspaceOS();
@@ -24,29 +25,46 @@ export function AppHeader() {
   }
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border bg-background">
-      <div className="flex h-[52px] items-center justify-between px-4">
-        {/* Brand Logo */}
-        <div className="flex items-center gap-3">
+    <header className="shAppHeader">
+      <div className="shAppHeaderGlass">
+        <div className="shAppHeaderInner">
+          {/* Brand Logo */}
           <Link
             href="/app"
-            className="flex items-center gap-2 no-underline"
+            className="shAppHeaderBrand"
             aria-label="StudentHub app"
           >
-            <span className="flex size-7 items-center justify-center rounded-md bg-primary text-xs font-bold text-primary-foreground">
-              SH
-            </span>
-            <strong className="text-sm font-semibold text-foreground">StudentHub</strong>
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              aria-hidden="true"
+              className="shAppHeaderLogoIcon"
+            >
+              <rect width="24" height="24" rx="6" fill="currentColor" />
+              <text
+                x="12"
+                y="16"
+                textAnchor="middle"
+                fill="var(--paper)"
+                fontSize="12"
+                fontWeight="700"
+              >
+                SH
+              </text>
+            </svg>
+            <strong>StudentHub</strong>
           </Link>
 
           {/* Role-aware nav tabs */}
           <NavTabs role={session.role} />
-        </div>
 
-        {/* Right actions */}
-        <div className="flex items-center gap-2">
-          <NotificationBell count={0} />
-          <UserMenu name={session.name} email={session.email} />
+          {/* Right actions */}
+          <div className="shAppHeaderActions">
+            <NotificationBell count={0} />
+            <UserMenu name={session.name} email={session.email} />
+          </div>
         </div>
       </div>
     </header>

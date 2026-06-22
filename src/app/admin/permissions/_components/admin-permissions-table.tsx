@@ -144,7 +144,12 @@ function CreateSectionForm({ onSuccess }: { onSuccess: () => void }) {
           required
           maxLength={255}
           placeholder="e.g. Manage Users"
-          className="h-9 rounded-lg border border-border bg-card px-3 text-sm text-foreground"
+          className="h-9 rounded-lg border px-3 text-sm"
+          style={{
+            background: "var(--surface)",
+            borderColor: "var(--border)",
+            color: "var(--ink)",
+          }}
         />
       </div>
       <button
@@ -203,7 +208,12 @@ function EditSectionForm({
         defaultValue={row.section_name ?? ""}
         required
         maxLength={255}
-        className="h-8 w-40 rounded border border-border bg-card px-2 text-sm text-foreground"
+        className="h-8 w-40 rounded border px-2 text-sm"
+        style={{
+          background: "var(--surface)",
+          borderColor: "var(--border)",
+          color: "var(--ink)",
+        }}
       />
       <button
         type="submit"

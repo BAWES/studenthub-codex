@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { Textarea } from "@/components/ui/textarea";
+
 import {
   Select,
   SelectContent,
@@ -146,12 +146,13 @@ export function ExpenseDetailForm({
 
             <div className="space-y-2">
               <Label htmlFor="detail">Detail</Label>
-              <Textarea
+              <textarea
                 id="detail"
                 name="detail"
                 value={detail}
                 onChange={(e) => setDetail(e.target.value)}
                 rows={3}
+                className="flex w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
               />
             </div>
 
@@ -160,7 +161,7 @@ export function ExpenseDetailForm({
                 {pending ? "Saving..." : "Save Changes"}
               </Button>
               {state?.success && (
-                <span className="text-sm text-green-700 font-medium">
+                <span className="text-sm text-[var(--sh-success)] font-medium">
                   Saved successfully
                 </span>
               )}
@@ -171,9 +172,9 @@ export function ExpenseDetailForm({
 
       <Separator />
 
-      <Card className="border-destructive/20">
+      <Card className="border-[var(--sh-error)]/20">
         <CardHeader>
-          <CardTitle className="text-destructive">Danger Zone</CardTitle>
+          <CardTitle className="text-[var(--sh-error)]">Danger Zone</CardTitle>
           <CardDescription>
             Deleting this expense record will permanently remove it. This
             action cannot be undone.

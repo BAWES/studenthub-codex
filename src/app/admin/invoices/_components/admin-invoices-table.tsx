@@ -64,7 +64,10 @@ export function AdminInvoicesTable({ session, invoices }: Props) {
       ]}
     >
       {error ? (
-        <div className="mb-4 rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+        <div
+          className="mb-4 rounded-lg border px-4 py-3 text-sm"
+          style={{ borderColor: "var(--sh-error)", color: "var(--sh-error)", background: "var(--surface)" }}
+        >
           {error}
         </div>
       ) : null}
@@ -112,12 +115,26 @@ export function AdminInvoicesTable({ session, invoices }: Props) {
               <button
                 type="button"
                 onClick={() => toggleStatus(row)}
-                className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition-all duration-200 hover:opacity-80 data-[state=paid]:bg-success/10 data-[state=paid]:text-success data-[state=unpaid]:bg-warning/10 data-[state=unpaid]:text-warning"
-                data-state={row.invoice_status}
+                className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition-all duration-200 hover:opacity-80"
+                style={{
+                  background:
+                    row.invoice_status === "paid"
+                      ? "rgba(34, 197, 94, 0.12)"
+                      : "rgba(234, 179, 8, 0.12)",
+                  color:
+                    row.invoice_status === "paid"
+                      ? "rgb(22, 163, 74)"
+                      : "rgb(161, 98, 7)",
+                }}
               >
                 <span
-                  className="inline-block w-1.5 h-1.5 rounded-full data-[state=paid]:bg-success data-[state=unpaid]:bg-warning"
-                  data-state={row.invoice_status}
+                  className="inline-block w-1.5 h-1.5 rounded-full"
+                  style={{
+                    background:
+                      row.invoice_status === "paid"
+                        ? "rgb(22, 163, 74)"
+                        : "rgb(161, 98, 7)",
+                  }}
                 />
                 {row.invoice_status === "paid" ? "Paid" : "Unpaid"}
               </button>

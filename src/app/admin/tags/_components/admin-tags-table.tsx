@@ -133,7 +133,8 @@ function CreateTagForm({ onSuccess }: { onSuccess: () => void }) {
           required
           maxLength={128}
           placeholder="e.g. urgent, featured, top-talent"
-          className="h-9 rounded-lg border border-border bg-card px-3 text-sm text-foreground"
+          className="h-9 rounded-lg px-3 text-sm border"
+          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
         />
       </div>
       <button

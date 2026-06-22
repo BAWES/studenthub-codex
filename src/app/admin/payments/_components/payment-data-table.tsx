@@ -155,7 +155,9 @@ export function PaymentDataTable({
     <div className="rounded-lg border border-border bg-white overflow-hidden">
       <div
         className="grid gap-0 text-[11px] font-bold uppercase tracking-wider px-4 py-3 text-muted-foreground border-b border-border/10"
-        style={{ gridTemplateColumns: COLUMNS.map((c) => c.width).join(" ") }}
+        style={{
+          gridTemplateColumns: COLUMNS.map((c) => c.width).join(" "),
+        }}
       >
         {COLUMNS.map((col) => (
           <div
