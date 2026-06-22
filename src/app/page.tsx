@@ -9,25 +9,6 @@ import { Card, CardContent } from "@/components/ui/card";
 
 export const dynamic = "force-dynamic";
 
-const benefits = [
-  {
-    title: "Purpose-built portals",
-    body: "Each role gets exactly the right tools — no clutter, no missing features, no one-size-fits-all compromises."
-  },
-  {
-    title: "Smart candidate search",
-    body: "Typo-tolerant, filter-rich search across countries, skills, and statuses. Saved searches for repeat workflows."
-  },
-  {
-    title: "End-to-end workflows",
-    body: "From profile readiness to timesheets and payments — every step is connected in one system."
-  },
-  {
-    title: "Production-grade foundation",
-    body: "Built for real data volumes, real teams, and real compliance — not a prototype."
-  }
-];
-
 const portalRoles = ["candidate", "staff", "company", "admin", "inspector"] as const;
 
 const portalIcons: Record<(typeof portalRoles)[number], React.ComponentType<{ className?: string }>> = {
@@ -128,21 +109,20 @@ export default async function Home() {
         </div>
         {/* Hero copy */}
         <div className="relative z-[2] max-w-[690px] max-lg:max-w-none">
-          <p className="text-[var(--blue)] text-[11px] font-black uppercase">Next-generation StudentHub</p>
           <h1 className="mt-0 text-[clamp(44px,6.4vw,92px)] leading-[0.94] max-sm:text-[40px]">
-            One modern platform, purpose-built portals.
+            Staff-matched placements, streamlined.
           </h1>
           <p className="max-w-[620px] text-[clamp(17px,1.7vw,21px)]">
-            A Silicon Valley-grade rebuild for candidates, staff, companies, inspectors, and admins. One login opens the
-            right workspace, while shared modules keep search, documents, payments, and reporting unified.
+            StudentHub connects staff recruiters with qualified candidates — from profile readiness to timesheets 
+            and payments. One platform, one placement cycle, complete visibility.
           </p>
           <div className="flex flex-wrap items-center gap-3.5 mt-4 max-sm:flex-col max-sm:items-stretch">
             <Button size="lg" asChild>
               <Link href="/login">Sign in</Link>
             </Button>
           </div>
-          <div className="flex flex-wrap gap-2 mt-[18px]" aria-label="StudentHub platform goals">
-            {["Role-specific workspaces", "Shared search and documents", "Production-data migration path"].map(
+          <div className="flex flex-wrap gap-2 mt-[18px]" aria-label="Placement keywords">
+            {["Staff-recruited matching", "End-to-end workflows", "Real-time pay and compliance"].map(
               (stat) => (
                 <span
                   key={stat}
@@ -172,39 +152,11 @@ export default async function Home() {
                   <Icon className="size-5 text-[var(--blue)] shrink-0" aria-hidden="true" />
                   <span className="text-[var(--blue)] text-[11px] font-black uppercase">{portal.label}</span>
                   <strong className="text-sm">{portal.audience}</strong>
-                  <small className="text-[var(--muted)] text-xs leading-relaxed">{portal.promise}</small>
                 </CardContent>
               </Card>
             </Link>
           );
         })}
-      </section>
-
-      {/* Benefits section */}
-      <section
-        className="grid grid-cols-[1fr] lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] items-center rounded-lg bg-[color-mix(in_srgb,var(--surface)_94%,transparent)] p-[clamp(24px,4vw,48px)] gap-[clamp(18px,3vw,38px)] shadow-[0_18px_60px_rgba(16,24,40,0.08)]"
-        aria-label="Why StudentHub"
-      >
-        <div>
-          <p className="text-[var(--blue)] text-[11px] font-black uppercase">Why StudentHub</p>
-          <h2 className="text-[clamp(28px,4vw,42px)] leading-[1.08] m-0">
-            Built for how staffing actually works.
-          </h2>
-          <p className="text-[var(--muted)] leading-relaxed">
-            Not a generic dashboard. Every feature is shaped by real placement workflows — search, shortlisting,
-            document exchange, timesheets, and payments run in one system.
-          </p>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-          {benefits.map((b) => (
-            <Card key={b.title}>
-              <CardContent className="grid content-start gap-1 p-4">
-                <strong className="text-sm">{b.title}</strong>
-                <p className="text-[var(--muted)] text-xs leading-relaxed m-0">{b.body}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
       </section>
     </main>
   );
