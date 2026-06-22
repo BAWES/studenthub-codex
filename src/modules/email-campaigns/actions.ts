@@ -11,10 +11,12 @@ import {
   emailCampaignListItemSchema,
   listEmailCampaignsResultSchema,
   createUpdateResultSchema,
+  deleteEmailCampaignSchema,
   type ListEmailCampaignsParams,
   type GetEmailCampaignParams,
   type CreateEmailCampaignParams,
   type UpdateEmailCampaignParams,
+  type DeleteEmailCampaignParams,
   type EmailCampaignListItem,
   type ListEmailCampaignsResult,
   type CreateUpdateResult,
@@ -295,6 +297,63 @@ export async function updateEmailCampaign(
     if (!outputParsed.success) {
       console.error(
         "[modules/email-campaigns] updateEmailCampaign output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
+  }
+}
+
+/**
+ * Delete an email campaign by UUID.
+ * Mirrors the legacy EmailCampaignController::actionDelete().
+ */
+export async function deleteEmailCampaign(
+  campaignUuid: string,
+): Promise<CreateUpdateResult> {
+  await requireCapability("admin.write");
+
+  const parsed = deleteEmailCampaignSchema.safeParse({ campaignUuid });
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid campaign UUID");
+  }
+
+  try {
+    // Delete associated filters first (FK constraint)
+    await prisma.email_campaign_filter.deleteMany({
+      where: { campaign_uuid: campaignUuid },
+    });
+
+    await prisma.email_campaign.delete({
+      where: { campaign_uuid: campaignUuid },
+    });
+
+    const result: CreateUpdateResult = {
+      operation: "success",
+      message: "Email campaign deleted successfully",
+    };
+
+    const outputParsed = createUpdateResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/email-campaigns] deleteEmailCampaign output validation failed:",
+        outputParsed.error.issues,
+      );
+    }
+
+    return result;
+  } catch (err) {
+    const result: CreateUpdateResult = {
+      operation: "error",
+      message:
+        err instanceof Error ? err.message : "Failed to delete email campaign",
+    };
+
+    const outputParsed = createUpdateResultSchema.safeParse(result);
+    if (!outputParsed.success) {
+      console.error(
+        "[modules/email-campaigns] deleteEmailCampaign output validation failed:",
         outputParsed.error.issues,
       );
     }

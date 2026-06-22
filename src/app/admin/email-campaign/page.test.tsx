@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { listEmailCampaignsSchema } from "./schemas";
+import { listEmailCampaignsSchema, deleteEmailCampaignSchema } from "./schemas";
 import type { EmailCampaignListItem, ListEmailCampaignsResult } from "./schemas";
 
 /**
@@ -113,5 +113,27 @@ describe("admin email-campaign page — data contract", () => {
     };
     expect(result.campaigns).toHaveLength(1);
     expect(result.totalPages).toBe(1);
+  });
+});
+
+describe("deleteEmailCampaignSchema", () => {
+  it("accepts a valid UUID", () => {
+    const r = deleteEmailCampaignSchema.safeParse({
+      campaignUuid: "123e4567-e89b-12d3-a456-426614174000",
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("rejects empty campaignUuid", () => {
+    const r = deleteEmailCampaignSchema.safeParse({ campaignUuid: "" });
+    expect(r.success).toBe(false);
+    if (!r.success) {
+      expect(r.error.issues[0]?.message).toContain("required");
+    }
+  });
+
+  it("rejects missing campaignUuid", () => {
+    const r = deleteEmailCampaignSchema.safeParse({});
+    expect(r.success).toBe(false);
   });
 });

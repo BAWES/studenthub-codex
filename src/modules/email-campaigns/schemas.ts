@@ -32,10 +32,16 @@ export const updateEmailCampaignSchema = z.object({
   triggerDateTime: z.string().datetime().optional(),
   status: z.boolean().optional(),
 });
+
+export const deleteEmailCampaignSchema = z.object({
+  campaignUuid: z.string().min(1, "Campaign UUID is required"),
+});
+
 export type ListEmailCampaignsParams = z.input<typeof listEmailCampaignsSchema>;
 export type GetEmailCampaignParams = z.input<typeof getEmailCampaignSchema>;
 export type CreateEmailCampaignParams = z.input<typeof createEmailCampaignSchema>;
 export type UpdateEmailCampaignParams = z.input<typeof updateEmailCampaignSchema>;
+export type DeleteEmailCampaignParams = z.input<typeof deleteEmailCampaignSchema>;
 // ---------------------------------------------------------------------------
 // Output validation schemas
 // ---------------------------------------------------------------------------

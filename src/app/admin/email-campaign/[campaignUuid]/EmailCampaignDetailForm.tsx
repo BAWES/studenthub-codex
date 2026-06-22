@@ -33,7 +33,7 @@ export function EmailCampaignDetailForm({ campaign }: { campaign: EmailCampaignD
   const [isRecurring, setIsRecurring] = useState(campaign.is_recurring ?? false);
 
   const updateAction = async () => {
-    await updateEmailCampaign(campaign.campaign_uuid, { subject, message, target, is_recurring: isRecurring });
+    await updateEmailCampaign({ campaignUuid: campaign.campaign_uuid, subject, message, target, isRecurring });
     return { success: true };
   };
 
