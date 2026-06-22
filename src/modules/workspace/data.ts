@@ -2459,3 +2459,34 @@ export async function getAdminDiscountCategoryRows() {
     updated: formatDate(row.updated_at),
   }));
 }
+
+export async function getAdminJobRows() {
+  const rows = await prisma.job.findMany({
+    orderBy: { created_at: "desc" },
+    take: 60,
+    select: {
+      job_uuid: true,
+      position: true,
+      status: true,
+      compensation_type: true,
+      compensation_amount: true,
+      hours_per_day: true,
+      created_at: true,
+      updated_at: true,
+      area: { select: { area_name_en: true } },
+    },
+  });
+
+  return rows.map((row) => ({
+    id: row.job_uuid,
+    position: row.position ?? "Untitled",
+    area: row.area?.area_name_en ?? "-",
+    compensation: row.compensation_amount
+      ? `${row.compensation_amount}${row.compensation_type ? ` (${row.compensation_type})` : ""}`
+      : "-",
+    hours: row.hours_per_day ?? "-",
+    status: row.status === true ? "Active" : "Inactive",
+    created_at: formatDate(row.created_at),
+    updated: formatDate(row.updated_at),
+  }));
+}
