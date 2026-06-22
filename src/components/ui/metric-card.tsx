@@ -38,21 +38,6 @@ const trendIcons: Record<TrendDirection, LucideIcon> = {
   flat: Minus,
 };
 
-const trendColors: Record<TrendDirection, string> = {
-  up: "var(--sh-success)",
-  down: "var(--sh-error)",
-  flat: "var(--muted)",
-};
-
-const accentColors: Record<string, { dot: string; glow: string; bg: string }> = {
-  info: { dot: "var(--sh-info)", glow: "var(--sh-info-glow)", bg: "var(--sh-info-bg)" },
-  success: { dot: "var(--sh-success)", glow: "var(--sh-success-glow)", bg: "var(--sh-success-bg)" },
-  warning: { dot: "var(--sh-warning)", glow: "var(--sh-warning-glow)", bg: "var(--sh-warning-bg)" },
-  error: { dot: "var(--sh-error)", glow: "var(--sh-error-glow)", bg: "var(--sh-error-bg)" },
-  primary: { dot: "var(--sh-info)", glow: "var(--sh-info-glow)", bg: "var(--sh-info-bg)" },
-  neutral: { dot: "var(--muted)", glow: "transparent", bg: "transparent" },
-};
-
 function formatValue(v: string | number): string {
   return typeof v === "number" ? v.toLocaleString() : v;
 }
@@ -93,15 +78,14 @@ const MetricCard = React.forwardRef<HTMLDivElement, MetricCardProps>(function Me
   const resolvedSubtitle = subtitle ?? note;
   const resolvedSparkline = sparkline ?? normalizeSparkline(sparklineData);
   const resolvedGlow = glow || (accent && accent !== "neutral");
-  const resolvedAccent = accentColors[accent ?? "info"];
+
 
   const TrendIcon = trendIcons[trend];
-  const trendColor = trendColors[trend];
 
   return (
     <div
       ref={ref}
-      className={cn("rounded-lg border border-[var(--border)] bg-card p-4 grid content-start gap-2", className)}
+      className={cn("rounded-lg border border-border bg-card p-4 grid content-start gap-2", className)}
       style={{
         ...(entranceDelay !== undefined ? { animationDelay: `${entranceDelay}ms` } : {}),
         ...style,
@@ -114,7 +98,7 @@ const MetricCard = React.forwardRef<HTMLDivElement, MetricCardProps>(function Me
           {label}
         </span>
         {Icon && (
-          <Icon className="size-4 shrink-0 text-[var(--sh-info)]" aria-hidden="true" />
+          <Icon className="size-4 shrink-0 text-info" aria-hidden="true" />
         )}
       </div>
 
@@ -133,9 +117,19 @@ const MetricCard = React.forwardRef<HTMLDivElement, MetricCardProps>(function Me
       {/* Trend row */}
       {(trend !== "flat" || trendLabel) && (
         <div className="flex items-center gap-1.5 mt-1">
-          <TrendIcon className="size-3.5 shrink-0" style={{ color: trendColor }} />
+          <TrendIcon className={cn(
+            "size-3.5 shrink-0",
+            trend === "up" && "text-success",
+            trend === "down" && "text-error",
+            trend === "flat" && "text-muted-foreground",
+          )} />
           {trendLabel && (
-            <span className="text-[11px] font-semibold" style={{ color: trendColor }}>
+            <span className={cn(
+              "text-[11px] font-semibold",
+              trend === "up" && "text-success",
+              trend === "down" && "text-error",
+              trend === "flat" && "text-muted-foreground",
+            )}>
               {trendLabel}
             </span>
           )}

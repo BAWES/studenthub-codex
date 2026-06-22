@@ -10,24 +10,24 @@ const statusClasses: Record<StatusLevel, {
   dot: string;
 }> = {
   success: {
-    base: "bg-[var(--sh-success-bg)] text-[var(--sh-success)]",
-    dot: "bg-[var(--sh-success)]",
+    base: "bg-success-bg text-success",
+    dot: "bg-success",
   },
   warning: {
-    base: "bg-[var(--sh-warning-bg)] text-[var(--sh-warning)]",
-    dot: "bg-[var(--sh-warning)]",
+    base: "bg-warning-bg text-warning",
+    dot: "bg-warning",
   },
   error: {
-    base: "bg-[var(--sh-error-bg)] text-[var(--sh-error)]",
-    dot: "bg-[var(--sh-error)]",
+    base: "bg-error-bg text-error",
+    dot: "bg-error",
   },
   info: {
-    base: "bg-[var(--sh-info-bg)] text-[var(--sh-info)]",
-    dot: "bg-[var(--sh-info)]",
+    base: "bg-info-bg text-info",
+    dot: "bg-info",
   },
   neutral: {
-    base: "bg-[var(--surface)] text-[var(--muted)]",
-    dot: "bg-[var(--muted)]",
+    base: "bg-muted text-muted-foreground",
+    dot: "bg-muted-foreground",
   },
 };
 

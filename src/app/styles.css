@@ -25,6 +25,14 @@
   --color-coral: var(--sh-coral);
   --color-coral-hover: var(--sh-coral-hover);
   --color-coral-light: var(--sh-coral-light);
+  --color-success: var(--sh-success);
+  --color-success-bg: var(--sh-success-bg);
+  --color-warning: var(--sh-warning);
+  --color-warning-bg: var(--sh-warning-bg);
+  --color-info: var(--sh-info);
+  --color-info-bg: var(--sh-info-bg);
+  --color-error: var(--sh-error);
+  --color-error-bg: var(--sh-error-bg);
   --radius: var(--radius);
   --font-size-label: 0.8125rem;
 }
