@@ -1,9 +1,11 @@
-export { listFulltimers, getFulltimer } from "./actions";
-export {
-  fulltimerListItemSchema,
-  listFulltimersResultSchema,
-  listFulltimersSchema,
-  getFulltimerSchema,
-  type FulltimerListItem,
-  type ListFulltimersResult,
+export { listFulltimers, getFulltimer, createFulltimer, updateFulltimer, deleteFulltimer } from "./actions";
+export type {
+  FulltimerListItem,
+  FulltimerDetail,
+  ListFulltimersResult,
+  ListFulltimersInput,
+  GetFulltimerInput,
+  CreateFulltimerInput,
+  UpdateFulltimerInput,
+  DeleteFulltimerInput,
 } from "./schemas";
