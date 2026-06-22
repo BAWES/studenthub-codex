@@ -1,7 +1,10 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
+import type { Route } from "next";
 import { requireRoleCapability } from "@/modules/auth/session";
-import { FactPanel } from "@/modules/workspace/DetailPanels";
+import { DetailSection } from "@/modules/workspace/DetailPanels";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
+import { Button } from "@/components/ui/button";
 import { getDailyStandupAnswer } from "./actions";
 import { formatDate } from "@/modules/workspace/format";
 
@@ -29,7 +32,7 @@ export default async function AdminDailyStandupDetailPage({
         title={answer.question ?? "Standup Answer"}
         metrics={[]}
       >
-        <FactPanel
+        <DetailSection
           title="Answer Details"
           facts={[
             { label: "Question", value: answer.question ?? "—" },
@@ -39,6 +42,12 @@ export default async function AdminDailyStandupDetailPage({
             { label: "Updated", value: answer.updated_at ? formatDate(new Date(answer.updated_at)) : "—" },
           ]}
         />
+
+        <section className="flex gap-2 p-4">
+          <Link href={"/admin/daily-standup" as Route}>
+            <Button variant="outline">Back to Daily Standup</Button>
+          </Link>
+        </section>
       </WorkspaceShell>
   );
 }
