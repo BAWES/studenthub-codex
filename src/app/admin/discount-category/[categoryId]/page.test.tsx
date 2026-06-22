@@ -1,13 +1,12 @@
+// @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
+
+const mockGetDiscountCategory = vi.fn();
 
 vi.mock("@/modules/auth/session", () => ({
   requireRoleCapability: vi.fn().mockResolvedValue({ user: { id: "1" }, role: "admin" }),
   requireCapability: vi.fn().mockResolvedValue(undefined),
-}));
-
-vi.mock("@/modules/workspace/ErrorBoundary", () => ({
-  ErrorBoundary: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
 vi.mock("@/modules/workspace/WorkspaceShell", () => ({
@@ -27,7 +26,7 @@ vi.mock("@/modules/workspace/WorkspaceShell", () => ({
       <div data-testid="title">{title}</div>
       {metrics.map((m) => (
         <span key={m.label} data-testid={`metric-${m.label}`}>
-          {String(m.value)}
+          {m.value}
         </span>
       ))}
       {children}
@@ -35,33 +34,17 @@ vi.mock("@/modules/workspace/WorkspaceShell", () => ({
   ),
 }));
 
-vi.mock("@/modules/workspace/DetailPanels", () => ({
-  DetailSection: ({
-    title,
-    facts,
-  }: {
-    title: string;
-    facts: { label: string; value: string | React.ReactNode }[];
-  }) => (
-    <div data-testid="detail-section">
-      <div data-testid="section-title">{title}</div>
-      {facts.map((f) => (
-        <span key={String(f.label)} data-testid={`fact-${f.label}`}>
-          {typeof f.value === "string" ? f.value : "ReactNode"}
-        </span>
-      ))}
-    </div>
-  ),
-}));
+const mockRouter = { push: vi.fn(), refresh: vi.fn() };
 
 vi.mock("next/navigation", () => ({
   notFound: () => {
     throw new Error("NEXT_NOT_FOUND");
   },
+  useRouter: () => mockRouter,
 }));
 
-vi.mock("@/modules/workspace/format", () => ({
-  formatDate: (d: Date) => d.toISOString().split("T")[0],
+vi.mock("@/modules/admin/discount-category/[categoryId]/actions", () => ({
+  getDiscountCategory: (...args: unknown[]) => mockGetDiscountCategory(...args),
 }));
 
 const mockCategory = {
@@ -73,12 +56,6 @@ const mockCategory = {
   updated_at: new Date("2026-06-01T00:00:00Z"),
 };
 
-const mockGetDiscountCategory = vi.fn();
-
-vi.mock("./actions", () => ({
-  getDiscountCategory: (...args: unknown[]) => mockGetDiscountCategory(...args),
-}));
-
 describe("AdminDiscountCategoryDetailPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -88,7 +65,7 @@ describe("AdminDiscountCategoryDetailPage", () => {
     cleanup();
   });
 
-  it("renders discount category detail with all fields", async () => {
+  it("renders discount category detail with edit form", async () => {
     mockGetDiscountCategory.mockResolvedValue({ category: mockCategory });
 
     const Page = (await import("./page")).default;
@@ -98,18 +75,14 @@ describe("AdminDiscountCategoryDetailPage", () => {
       }),
     );
 
-    expect(screen.getByTestId("eyebrow")).toHaveTextContent("Admin / Discount Categories");
-    expect(screen.getByTestId("title")).toHaveTextContent("Early Bird");
-
-    expect(screen.getByTestId("fact-Name (EN)")).toHaveTextContent("Early Bird");
-    expect(screen.getByTestId("fact-Name (AR)")).toHaveTextContent("تسجيل مبكر");
-    // Image is a link, our mock renders "ReactNode" for non-string values
-    expect(screen.getByTestId("fact-Image")).toBeInTheDocument();
-    expect(screen.getByTestId("fact-Created")).toHaveTextContent("2026-01-01");
-    expect(screen.getByTestId("fact-Updated")).toHaveTextContent("2026-06-01");
+    expect(screen.getByTestId("eyebrow").textContent).toBe("Admin / Discount Category");
+    expect(screen.getByTestId("title").textContent).toBe("Early Bird");
+    // The edit form should render with the category name in the input
+    expect(screen.getByDisplayValue("Early Bird")).toBeTruthy();
+    expect(screen.getByDisplayValue("تسجيل مبكر")).toBeTruthy();
   });
 
-  it("renders null fields as em-dash", async () => {
+  it("renders null fields as em-dash in metrics", async () => {
     mockGetDiscountCategory.mockResolvedValue({
       category: {
         ...mockCategory,
@@ -127,10 +100,8 @@ describe("AdminDiscountCategoryDetailPage", () => {
       }),
     );
 
-    expect(screen.getByTestId("fact-Name (AR)")).toHaveTextContent("—");
-    expect(screen.getByTestId("fact-Image")).toHaveTextContent("—");
-    expect(screen.getByTestId("fact-Created")).toHaveTextContent("—");
-    expect(screen.getByTestId("fact-Updated")).toHaveTextContent("—");
+    expect(screen.getByTestId("metric-Created").textContent).toBe("—");
+    expect(screen.getByTestId("metric-Updated").textContent).toBe("—");
   });
 
   it("calls notFound when category is null", async () => {

@@ -6,36 +6,26 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { updateDiscountCategory, deleteDiscountCategory } from "../actions";
+import { useRouter } from "next/navigation";
+import { updateDiscountCategory, deleteDiscountCategory } from "../../actions";
+import type { DiscountCategoryItem } from "@/modules/admin/discount-category/schemas";
 
-interface DiscountCategoryDetail {
-  category_id: number;
-  name_en: string;
-  name_ar: string | null;
-  image: string | null;
-  created_at: Date | null;
-  updated_at: Date | null;
-}
+type Props = {
+  category: DiscountCategoryItem;
+};
 
-export function DiscountCategoryDetailForm({
-  category,
-}: {
-  category: DiscountCategoryDetail;
-}) {
+export function DiscountCategoryDetailForm({ category }: Props) {
+  const router = useRouter();
   const [nameEn, setNameEn] = useState(category.name_en);
   const [nameAr, setNameAr] = useState(category.name_ar ?? "");
   const [image, setImage] = useState(category.image ?? "");
 
   const updateAction = async (_prevState: unknown, formData: FormData) => {
-    formData.set("name_en", nameEn);
-    formData.set("name_ar", nameAr || "");
-    formData.set("image", image || "");
-
-    await updateDiscountCategory(category.category_id, {
-      name_en: nameEn,
-      name_ar: nameAr || undefined,
-      image: image || null,
-    });
+    const result = await updateDiscountCategory(category.category_id, nameEn, nameAr || null, image || null);
+    if (result.operation === "error") {
+      return { success: false, error: result.message };
+    }
+    router.refresh();
     return { success: true };
   };
 
@@ -91,8 +81,13 @@ export function DiscountCategoryDetailForm({
                 {pending ? "Saving..." : "Save Changes"}
               </Button>
               {state?.success && (
-                <span className="text-sm text-[var(--sh-success)] font-medium">
+                <span className="text-sm text-green-600 font-medium">
                   Saved successfully
+                </span>
+              )}
+              {state && "error" in state && state.error && (
+                <span className="text-sm text-destructive font-medium">
+                  {state.error}
                 </span>
               )}
             </div>
@@ -102,9 +97,9 @@ export function DiscountCategoryDetailForm({
 
       <Separator />
 
-      <Card className="border-[var(--sh-error)]/20">
+      <Card className="border-destructive/20">
         <CardHeader>
-          <CardTitle className="text-[var(--sh-error)]">Danger Zone</CardTitle>
+          <CardTitle className="text-destructive">Danger Zone</CardTitle>
           <CardDescription>
             Deleting this discount category will also remove it from all associated
             discounts. This action cannot be undone.
@@ -113,7 +108,11 @@ export function DiscountCategoryDetailForm({
         <CardContent>
           <form
             action={async () => {
-              await deleteDiscountCategory(category.category_id);
+              if (confirm(`Delete discount category "${category.name_en}"?`)) {
+                await deleteDiscountCategory(category.category_id);
+                router.push("/admin/discount-category");
+                router.refresh();
+              }
             }}
           >
             <Button type="submit" variant="destructive">
