@@ -7,10 +7,7 @@ import type { UniversityListItem, ListUniversitiesResult } from "./schemas";
  *
  * Verifies that universityListItemSchema accepts the data returned by the
  * listUniversities server action, and that UniversityListItem fields map
- * correctly to AdminUniversityTable columns.
- *
- * Full rendering tests require Playwright (server component).
- * This validates the data contract between the page and the server action.
+ * correctly to table columns.
  */
 describe("admin university page — data contract", () => {
   it("listUniversitiesResultSchema accepts empty list result", () => {
@@ -33,9 +30,7 @@ describe("admin university page — data contract", () => {
       university_name_en: "Kuwait University",
       university_name_ar: "جامعة الكويت",
       university_data_source: 1,
-      university_created_at: "2026-01-01T00:00:00.000Z",
-      university_updated_at: "2026-06-01T00:00:00.000Z",
-      deleted: 0,
+      candidate_count: 42,
     };
     const parsed = universityListItemSchema.safeParse(r);
     expect(parsed.success).toBe(true);
@@ -43,30 +38,22 @@ describe("admin university page — data contract", () => {
       expect(parsed.data.university_id).toBe(r.university_id);
       expect(parsed.data.university_name_en).toBe(r.university_name_en);
       expect(parsed.data.university_name_ar).toBe(r.university_name_ar);
+      expect(parsed.data.candidate_count).toBe(42);
     }
   });
 
-  it("UniversityListItem fields map correctly to AdminUniversityTable columns", () => {
-    // The page maps UniversityListItem to AdminUniversityTable columns:
-    //   university_id        → row.id              (numeric key, used as row key and delete param)
-    //   university_name_en   → displayed in table
-    //   university_name_ar   → displayed in table (rtl dir)
-    //   university_created_at → date display       (formatted locale date)
-    //   university_id        → deleteUniversity(id) (delete action)
+  it("UniversityListItem fields map correctly to table columns", () => {
     const record: UniversityListItem = {
       university_id: 5,
       university_name_en: "American University of Kuwait",
       university_name_ar: "الجامعة الأميركية في الكويت",
       university_data_source: 2,
-      university_created_at: "2026-02-15T12:00:00.000Z",
-      university_updated_at: "2026-05-20T08:00:00.000Z",
-      deleted: 0,
+      candidate_count: 137,
     };
     expect(record.university_id).toBe(5);
     expect(record.university_name_en).toBe("American University of Kuwait");
     expect(record.university_name_ar).toBe("الجامعة الأميركية في الكويت");
-    expect(record.university_created_at).toBeTruthy();
-    expect(record.university_updated_at).toBeTruthy();
+    expect(record.candidate_count).toBe(137);
   });
 
   it("ListUniversitiesResult has expected shape (matches listUniversities return)", () => {
@@ -89,22 +76,20 @@ describe("admin university page — data contract", () => {
     expect(r.success).toBe(false);
   });
 
-  it("universityListItemSchema accepts nullable name and dates", () => {
+  it("universityListItemSchema accepts nullable fields", () => {
     const r = universityListItemSchema.safeParse({
       university_id: 1,
       university_name_en: null,
       university_name_ar: null,
       university_data_source: null,
-      university_created_at: null,
-      university_updated_at: null,
-      deleted: 0,
+      candidate_count: null,
     });
     expect(r.success).toBe(true);
     if (r.success) {
       expect(r.data.university_name_en).toBeNull();
       expect(r.data.university_name_ar).toBeNull();
-      expect(r.data.university_created_at).toBeNull();
-      expect(r.data.university_updated_at).toBeNull();
+      expect(r.data.university_data_source).toBeNull();
+      expect(r.data.candidate_count).toBeNull();
     }
   });
 });

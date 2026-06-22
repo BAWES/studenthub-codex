@@ -137,10 +137,19 @@ export function WorkspaceShell({
 
 function WorkspaceList({ title, rows }: { title: string; rows: Row[] }) {
   return (
+<<<<<<< HEAD
     <Card className="min-h-[360px]">
       <div className="flex items-center justify-between gap-4 px-4 py-3.5 border-b border-border">
         <h2 className="text-xl mb-0">{title}</h2>
         <span className="min-w-[30px] min-h-[30px] inline-flex items-center justify-center text-blue-zendesk border border-blue-zendesk/20 bg-blue-zendesk/5 font-bold text-sm rounded">{count}</span>
+=======
+    <Card>
+      <div className="flex items-center justify-between border-b border-border px-5 py-3">
+        <h2 className="text-sm font-semibold text-foreground">{title}</h2>
+        <span className="flex size-5 items-center justify-center rounded-full bg-muted text-xs font-medium text-muted-foreground">
+          {rows.length}
+        </span>
+>>>>>>> origin/develop
       </div>
       <div className="divide-y divide-border">
         {rows.length ? (

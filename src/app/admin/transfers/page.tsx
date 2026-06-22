@@ -9,6 +9,7 @@ export default async function AdminTransfersPage() {
   const rows = await getAdminTransferRows();
   const latest = rows[0];
 
+<<<<<<< HEAD
   return (
     <WorkspaceShell
       session={session}
@@ -78,4 +79,7 @@ export default async function AdminTransfersPage() {
       />
     </WorkspaceShell>
   );
+=======
+  return <AdminTransfersTable session={session} rows={rows} latest={latest} />;
+>>>>>>> origin/develop
 }

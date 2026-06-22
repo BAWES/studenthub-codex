@@ -2406,6 +2406,7 @@ export async function getAdminDegreeRows() {
     updated: formatDate(row.degree_updated_at)
   }));
 }
+<<<<<<< HEAD
 
 export async function getAdminExpenseRows() {
   const rows = await prisma.expense.findMany({
@@ -2524,3 +2525,5 @@ export async function getAdminSalaryRows() {
     updated: formatDate(row.updated_at),
   }));
 }
+=======
+>>>>>>> origin/develop

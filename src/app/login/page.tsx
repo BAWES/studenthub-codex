@@ -47,9 +47,15 @@ export default async function LoginPage({
 
       {/* Intro */}
       <Card className="overflow-hidden border-border bg-gradient-to-br from-blue/10 via-transparent to-transparent">
+<<<<<<< HEAD
         <CardContent className="p-[clamp(22px,4vw,48px)]">
           <p className="text-blue-zendesk text-[11px] font-black uppercase">One StudentHub login</p>
           <h1 className="mt-0 max-w-[760px] text-[clamp(44px,6.4vw,92px)] leading-[0.94] max-sm:text-[40px]">
+=======
+        <CardContent className="p-8 sm:p-10 lg:p-12">
+          <p className="text-blue text-[11px] font-black uppercase">One StudentHub login</p>
+          <h1 className="mt-0 max-w-[760px] text-[clamp(32px,5vw,72px)] leading-[0.94] max-sm:text-[36px]">
+>>>>>>> origin/develop
             Sign in once. We&rsquo;ll open the right workspace.
           </h1>
           <p className="text-muted-foreground max-w-[620px] leading-relaxed">
@@ -76,6 +82,7 @@ export default async function LoginPage({
         className="self-start border-border shadow-xl"
         aria-label="StudentHub sign in"
       >
+<<<<<<< HEAD
         <CardContent className="p-0">
           {params.error === "expired" ? (
             <p className="text-destructive font-bold m-0 p-4 pb-0">That verified account choice expired. Sign in again to continue.</p>
@@ -85,6 +92,15 @@ export default async function LoginPage({
           ) : null}
           <LoginForm />
         </CardContent>
+=======
+        {params.error === "expired" ? (
+          <p className="text-destructive font-bold m-0 p-4 pb-0">That verified account choice expired. Sign in again to continue.</p>
+        ) : null}
+        {params.error === "account" ? (
+          <p className="text-destructive font-bold m-0 p-4 pb-0">Choose a verified account to continue.</p>
+        ) : null}
+        <LoginForm />
+>>>>>>> origin/develop
       </Card>
 
       {/* Role notes - spans full width */}

@@ -33,6 +33,7 @@
 :root {
   scroll-behavior: smooth;
   color-scheme: light;
+<<<<<<< HEAD
   /* ------------------------------------------------------------------ */
   /* Typography scale                                                    */
   /* ------------------------------------------------------------------ */
@@ -191,6 +192,8 @@
   /* ------------------------------------------------------------------ */
   /* Legacy tokens — keep until consolidated                              */
   /* ------------------------------------------------------------------ */
+=======
+>>>>>>> origin/develop
   --ink: #182230;
   --muted: #667085;
   --faint: #5c6a7c;
@@ -264,21 +267,30 @@
   --border: var(--line);
   --input: var(--line);
   --ring: #8abfff;
+<<<<<<< HEAD
 
   /* Dark mode shadows */
+=======
+>>>>>>> origin/develop
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.30);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.35);
   --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.40);
   --shadow-xl: 0 24px 90px rgba(0, 0, 0, 0.45);
+<<<<<<< HEAD
 
   /* Dark mode — OS design system */
 
   /* Zendesk coral (dark mode) */
+=======
+>>>>>>> origin/develop
   --sh-coral: #eb6651;
   --sh-coral-hover: #d45441;
   --sh-coral-light: rgba(235, 102, 81, 0.15);
   --sh-coral-glow: 0 0 16px rgba(235, 102, 81, 0.30);
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/develop
   --sh-glass-bg: rgba(255, 255, 255, 0.04);
   --sh-glass-bg-strong: rgba(255, 255, 255, 0.08);
   --sh-glass-border: rgba(255, 255, 255, 0.06);
@@ -298,15 +310,21 @@
   --sh-info: #8abfff;
   --sh-info-bg: rgba(138, 191, 255, 0.10);
   --sh-info-glow: 0 0 14px rgba(138, 191, 255, 0.25);
+<<<<<<< HEAD
 
   /* Amber/accent CTA (dark mode) */
+=======
+>>>>>>> origin/develop
   --sh-amber: #fbbf24;
   --sh-amber-deep: #f59e0b;
   --sh-amber-glow: 0 4px 14px rgba(251, 191, 36, 0.30);
   --sh-amber-glow-hover: 0 8px 28px rgba(251, 191, 36, 0.45);
   --sh-amber-bg: rgba(251, 191, 36, 0.12);
+<<<<<<< HEAD
 
   /* App Header (dark mode) */
+=======
+>>>>>>> origin/develop
   --sh-header-glass-bg: rgba(17, 24, 36, 0.72);
   --sh-header-glass-border: rgba(42, 53, 71, 0.5);
 }
@@ -325,6 +343,7 @@ body {
     var(--paper);
   background-size: 44px 44px;
 }
+<<<<<<< HEAD
 
 .uiButton {
   display: inline-flex;
@@ -10191,3 +10210,5 @@ tr:hover .shTableRowAction,
 @keyframes search-spin {
   to { transform: rotate(360deg); }
 }
+=======
+>>>>>>> origin/develop

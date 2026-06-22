@@ -8,6 +8,7 @@ import { listFulltimers } from "@/modules/admin/fulltimer/actions";
 export const dynamic = "force-dynamic";
 
 export default async function AdminFulltimerPage() {
+<<<<<<< HEAD
   const session = await requireRoleCapability("admin", "admin.system");
   const { records } = await listFulltimers({ limit: 200 });
 
@@ -32,4 +33,10 @@ export default async function AdminFulltimerPage() {
       />
     </WorkspaceShell>
   );
+=======
+  const session = await requireRoleCapability("admin", "admin.read");
+  const result = await listFulltimers({ limit: 100 });
+
+  return <AdminFulltimersTable session={session} fulltimers={result.fulltimers} />;
+>>>>>>> origin/develop
 }

@@ -4,7 +4,12 @@ import type { LucideIcon } from "lucide-react";
 import {
   LayoutGrid, User, Mail, ClipboardList, CreditCard,
   Building2, Phone, Store, FileCheck, Search, Users,
+<<<<<<< HEAD
   ArrowRightLeft, Calendar, Globe, GraduationCap, MessageSquareText
+=======
+  ArrowRightLeft, Calendar, Globe, GraduationCap, MessageSquareText,
+  BookOpenText, Library, DollarSign
+>>>>>>> origin/develop
 } from "lucide-react";
 
 export type NavItem = {
@@ -25,7 +30,14 @@ export function navForRole(role: Role): NavItem[] {
       { label: "Requests", href: "/admin/requests", icon: FileCheck },
       { label: "Degrees", href: "/admin/degree", icon: GraduationCap },
       { label: "Transfers", href: "/admin/transfers", icon: ArrowRightLeft },
+<<<<<<< HEAD
       { label: "Daily Standup", href: "/admin/daily-standup", icon: MessageSquareText }
+=======
+      { label: "Daily Standup", href: "/admin/daily-standup", icon: MessageSquareText },
+      { label: "Universities", href: "/admin/university", icon: Library },
+      { label: "Majors", href: "/admin/major", icon: BookOpenText },
+      { label: "Salaries", href: "/admin/salary", icon: DollarSign }
+>>>>>>> origin/develop
     ];
   }
   if (role === "staff") {

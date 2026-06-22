@@ -8,7 +8,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
 
 // ─── Types ────────────────────────────────────────────────────────────
 
@@ -90,18 +90,19 @@ function SearchResultSkeletons({ count = 5 }: { count?: number }) {
   );
 }
 
-// ─── Type badge ───────────────────────────────────────────────────────
+// ─── Type badge — uses shadcn Badge ───────────────────────────────────
+
+const typeBadgeVariants: Record<string, "default" | "secondary" | "success" | "outline"> = {
+  company: "default",
+  store: "success",
+  contact: "secondary",
+};
 
 function TypeBadge({ type }: { type: string }) {
-  const colors: Record<string, string> = {
-    company: "bg-blue-500/10 text-blue-600",
-    store: "bg-success/10 text-success",
-    contact: "bg-primary/10 text-primary",
-  };
   return (
-    <span className={cn("rounded-full px-2 py-0.5 text-[0.6875rem] font-medium", colors[type] ?? "bg-muted text-muted-foreground")}>
+    <Badge variant={typeBadgeVariants[type] ?? "outline"}>
       {type}
-    </span>
+    </Badge>
   );
 }
 
@@ -256,29 +257,22 @@ export function CompanySearchPage({
                   {group.options.map((option) => {
                     const isActive = option.value === activeType;
                     return (
-                      <button
+                      <Button
                         key={option.value}
                         type="button"
-                        className={cn(
-                          "flex items-center justify-between rounded-md border px-2.5 py-1.5 text-left text-xs transition-all duration-100",
-                          isActive
-                            ? "border-primary bg-primary/10 font-semibold text-primary"
-                            : "border-transparent text-foreground hover:border-border hover:bg-muted",
-                        )}
+                        variant={isActive ? "default" : "ghost"}
+                        size="sm"
+                        className="w-full justify-between px-2.5"
                         onClick={() => setTypeFilter(option.value)}
                       >
-                        <span className="flex-1">{option.label}</span>
-                        <span
-                          className={cn(
-                            "ml-2 rounded-full px-1.5 py-0.5 text-[0.6875rem]",
-                            isActive
-                              ? "bg-primary/10 text-primary"
-                              : "bg-muted text-muted-foreground",
-                          )}
+                        <span>{option.label}</span>
+                        <Badge
+                          variant={isActive ? "secondary" : "outline"}
+                          className="ml-2"
                         >
                           {option.count}
-                        </span>
-                      </button>
+                        </Badge>
+                      </Button>
                     );
                   })}
                 </div>
