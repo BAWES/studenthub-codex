@@ -79,7 +79,7 @@ export async function listCandidateJobs(
 
   // Score each job for this candidate using the matching module
   const scoredJobs = await Promise.all(
-    dbRows.map(async (r) => {
+    dbRows.map(async (r: any) => {
       let matchScore: number | null = null;
       try {
         const result = await matchCandidateToJob({
@@ -295,7 +295,7 @@ export async function listMyApplications(
     prisma.job_listing_application.count({ where: where as any }),
   ]);
 
-  const applications: ApplicationRow[] = dbRows.map((r) => ({
+  const applications: ApplicationRow[] = dbRows.map((r: any) => ({
     applicationId: r.id,
     jobListingId: r.jobListingId,
     jobTitle: r.jobListing.title,

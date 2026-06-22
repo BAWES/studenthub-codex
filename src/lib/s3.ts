@@ -160,21 +160,6 @@ export function isS3Configured(): boolean {
   );
 }
 
-/** Check whether a stored path looks like an S3 key rather than a local path. */
-export function isS3Path(path: string): boolean {
-  return path.startsWith("s3://");
-}
-
-/** Strip S3 prefix to get the raw key. */
-export function toS3Key(path: string): string {
-  return path.startsWith("s3://") ? path.slice(5) : path;
-}
-
-/** Wrap a raw key with the S3 prefix for DB storage. */
-export function toS3StoredPath(key: string): string {
-  return `s3://${key}`;
-}
-
 // ---------------------------------------------------------------------------
 // Candidate documents S3 helpers — used by modules/candidates/documents
 // ---------------------------------------------------------------------------

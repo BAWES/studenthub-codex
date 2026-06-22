@@ -20,7 +20,7 @@ export default meta;
 type Story = StoryObj<typeof Tabs>;
 
 export const Default: Story = {
-  render: (args) => (
+  render: (args: any) => (
     <Tabs {...args} style={{ maxWidth: 400 }}>
       <TabsList>
         <TabsTrigger value="tab-1">Account</TabsTrigger>

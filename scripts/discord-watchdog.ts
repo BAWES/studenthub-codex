@@ -22,7 +22,7 @@ async function main() {
     for (const err of configErrors) {
       console.error(`  ✗ ${err}`);
     }
-    if (configErrors.some((e) => e.includes('DISCORD_BOT_TOKEN') || e.includes('DISCORD_ALERTS_WEBHOOK'))) {
+    if (configErrors.some((e: any) => e.includes('DISCORD_BOT_TOKEN') || e.includes('DISCORD_ALERTS_WEBHOOK'))) {
       console.error('');
       console.error('Set the required environment variables in .env:');
       console.error('  DISCORD_BOT_TOKEN      — Bot token from Discord Developer Portal');
@@ -69,7 +69,7 @@ async function main() {
 
     // Exit with code 1 if there's a critical issue requiring manual intervention
     const hasCritical = result.checkedGuilds.some(
-      (g) => g.missingPermissions.length > 0 && !g.recoveryAction?.success
+      (g: any) => g.missingPermissions.length > 0 && !g.recoveryAction?.success
     );
     process.exit(hasCritical ? 1 : 0);
   } catch (err) {
