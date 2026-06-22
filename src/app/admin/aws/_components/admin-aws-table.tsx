@@ -90,7 +90,7 @@ export function AdminAwsTable({ session, entries, awsResult }: Props) {
                   <td className="px-4 py-3 font-mono text-xs text-foreground">
                     {entry.key}
                   </td>
-                  <td className="px-4 py-3 font-mono text-xs" style={{ color: entry.value ? "var(--ink)" : "var(--muted)" }}>
+                  <td className={`px-4 py-3 font-mono text-xs ${entry.value ? "text-foreground" : "text-muted-foreground"}`}>
                     {entry.value || "—"}
                   </td>
                 </tr>

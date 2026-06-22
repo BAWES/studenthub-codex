@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Plus } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { DataTable } from "@/modules/workspace/DataTable";
@@ -24,42 +25,26 @@ type Props = {
   rows: Row[];
 };
 
-const STATUS_COLORS: Record<string, string> = {
-  pending: "var(--sh-warning)",
-  started: "var(--sh-info)",
-  delivered: "var(--sh-success)",
-  cancelled: "var(--sh-error)",
+const STATUS_VARIANTS: Record<string, "success" | "warning" | "secondary" | "outline"> = {
+  pending: "warning",
+  started: "secondary",
+  delivered: "success",
+  cancelled: "outline",
 };
-const FALLBACK_BG = "var(--surface)";
-const FALLBACK_COLOR = "var(--muted)";
 
 function statusBadge(status: string) {
-  const color = STATUS_COLORS[status] ?? FALLBACK_COLOR;
-  const bg = STATUS_COLORS[status]
-    ? `color-mix(in srgb, ${color} 15%, transparent)`
-    : FALLBACK_BG;
+  const variant = STATUS_VARIANTS[status] ?? "secondary";
   return (
-    <span
-      style={{
-        display: "inline-block",
-        padding: "0.125rem 0.625rem",
-        borderRadius: "9999px",
-        fontSize: "0.75rem",
-        fontWeight: 600,
-        color,
-        background: bg,
-        textTransform: "capitalize",
-      }}
-    >
+    <Badge variant={variant} className="capitalize">
       {status.replace(/_/g, " ")}
-    </span>
+    </Badge>
   );
 }
 
 export function CompanyRequestsTable({ session, rows }: Props) {
   return (
     <WorkspaceShell session={session} eyebrow="Company" title="Requests" metrics={[]}>
-      <div style={{ marginBottom: "1rem" }}>
+      <div className="mb-4">
         <Link
           href="/company/requests/create"
           className={cn(
