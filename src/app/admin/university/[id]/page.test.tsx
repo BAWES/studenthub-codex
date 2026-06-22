@@ -1,6 +1,8 @@
+// @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
 import { notFound } from "next/navigation";
+import "@testing-library/jest-dom/vitest";
 
 vi.mock("@/modules/auth/session", () => ({
   requireRoleCapability: vi.fn().mockResolvedValue({ user: { id: "1" }, role: "admin" }),
@@ -37,14 +39,14 @@ vi.mock("@/modules/workspace/WorkspaceShell", () => ({
 }));
 
 vi.mock("@/modules/workspace/DetailPanels", () => ({
-  DetailSection: ({
+  FactPanel: ({
     title,
     facts,
   }: {
     title: string;
     facts: { label: string; value: string | React.ReactNode }[];
   }) => (
-    <div data-testid="detail-section">
+    <div data-testid="fact-panel">
       <div data-testid="section-title">{title}</div>
       {facts.map((f) => (
         <span key={String(f.label)} data-testid={`fact-${f.label}`}>
