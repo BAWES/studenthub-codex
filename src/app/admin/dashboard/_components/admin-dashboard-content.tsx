@@ -28,8 +28,7 @@ export function AdminDashboardContent({ session, data }: Props) {
       {/* ── Request Pipeline Status ── */}
       <section className="mb-6">
         <div
-          className="rounded-lg border p-5"
-          style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+          className="rounded-lg border border-border bg-card p-5"
         >
           <div className="mb-1 text-xs font-medium uppercase tracking-wider text-muted-foreground">
             Pipeline
@@ -41,7 +40,7 @@ export function AdminDashboardContent({ session, data }: Props) {
           {statusMix.length > 0 ? (
             <div className="space-y-3">
               {/* Visual bar */}
-              <div className="flex h-2 w-full overflow-hidden rounded-full" style={{ background: "var(--border)" }}>
+              <div className="flex h-2 w-full overflow-hidden rounded-full bg-border">
                 {statusMix.map((status) => {
                   const total = statusMix.reduce((s, a) => s + a.value, 0);
                   const pct = total > 0 ? (status.value / total) * 100 : 0;

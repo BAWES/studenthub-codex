@@ -74,7 +74,9 @@ vi.mock("@/modules/admin/university/actions", () => ({
 }));
 
 vi.mock("next/navigation", () => ({
-  notFound: vi.fn(),
+  notFound: vi.fn(() => {
+    throw new Error("NEXT_NOT_FOUND");
+  }),
 }));
 
 vi.mock("@/modules/workspace/format", () => ({

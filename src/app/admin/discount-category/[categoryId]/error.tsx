@@ -20,9 +20,7 @@ export default function DiscountCategoryDetailError({
           <p className="text-sm max-w-md text-center text-muted-foreground">
             {error.message ?? "An unexpected error occurred while loading the discount category details."}
           </p>
-          <Button onClick={reset} variant="outline" className="mt-2">
-            Try again
-          </Button>
+          <Button onClick={reset} variant="default" className="mt-2" >Try again</Button>
         </div>
       </section>
     </div>

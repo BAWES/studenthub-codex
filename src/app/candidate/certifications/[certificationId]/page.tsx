@@ -6,6 +6,7 @@ import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { formatDate } from "@/modules/workspace/format";
 import { getCandidateCertification, deleteCandidateCertification } from "../actions";
 import { DeleteCertificationButton } from "./DeleteCertificationButton";
+import { Button } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
 
@@ -63,13 +64,17 @@ export default async function CandidateCertificationDetailPage({
       />
 
       <div className="flex items-center gap-3 mt-8">
-        <Link href={`/candidate/certifications/${certificationId}/edit`} className="shButtonSecondary">
-          Edit Certification
-        </Link>
+        <Button asChild variant="secondary">
+          <Link href={`/candidate/certifications/${certificationId}/edit`}>
+            Edit Certification
+          </Link>
+        </Button>
         <DeleteCertificationButton certificationId={certification.certification_id} />
-        <Link href="/candidate/certifications" className="shButtonOutline">
-          Back to Certifications
-        </Link>
+        <Button asChild variant="outline">
+          <Link href="/candidate/certifications">
+            Back to Certifications
+          </Link>
+        </Button>
       </div>
     </WorkspaceShell>
   );
