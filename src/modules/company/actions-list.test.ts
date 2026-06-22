@@ -1,23 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { z } from "zod";
 
-import { listCompaniesSchema, getCompanySchema } from "./schemas";
-
-// companyListItemSchema is not exported from ./schemas; define locally.
-const companyListItemSchema = z.object({
-  company_id: z.number().int(),
-  company_name: z.string(),
-  company_common_name_en: z.string().nullable(),
-  company_common_name_ar: z.string().nullable(),
-  company_email: z.string().nullable(),
-  company_website: z.string().nullable(),
-  company_logo: z.string().nullable(),
-  commission: z.number().nullable(),
-  total_candidate: z.number().nullable(),
-  no_of_active_requests: z.number().nullable(),
-  followup: z.boolean().nullable(),
-  currency_code: z.string().nullable(),
-});
+import { listCompaniesSchema, getCompanySchema, companyListItemSchema } from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Schema tests

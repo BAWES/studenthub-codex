@@ -36,7 +36,8 @@ export function ForgotPasswordForm() {
             <button
               type="submit"
               disabled={pending}
-              className="w-full min-h-[52px] inline-flex items-center justify-center gap-2 rounded-[var(--sh-radius-md)] text-[15px] font-semibold cursor-pointer transition-[transform,box-shadow,background] duration-200 ease-[var(--sh-easing)] hover:-translate-y-px hover:shadow-[var(--sh-coral-glow)] active:translate-y-0 disabled:pointer-events-none disabled:opacity-[0.56] bg-transparent border border-border text-foreground"
+              className="w-full min-h-[52px] inline-flex items-center justify-center gap-2 rounded-[var(--sh-radius-md)] text-[15px] font-semibold cursor-pointer transition-[transform,box-shadow,background] duration-200 ease-[var(--sh-easing)] hover:-translate-y-px hover:shadow-[var(--sh-coral-glow)] active:translate-y-0 disabled:pointer-events-none disabled:opacity-[0.56]"
+              style={{ background: "transparent", border: "1px solid var(--line)", color: "var(--ink)" }}
             >
               {pending ? "Sending..." : "Resend link"}
             </button>
@@ -61,7 +62,8 @@ export function ForgotPasswordForm() {
         <div className="grid gap-2 animate-[shLoginFormIn_500ms_var(--sh-easing)_both]">
           <label
             htmlFor="forgot-email"
-            className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+            className="text-xs font-semibold uppercase tracking-wider"
+            style={{ color: "var(--muted)" }}
           >
             Email
           </label>

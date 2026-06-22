@@ -7,7 +7,6 @@ import { DataTable } from "@/modules/workspace/DataTable";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -31,12 +30,12 @@ import {
 import type { Route } from "next";
 
 import type { SessionUser } from "@/modules/auth/types";
-import type { SettingItem } from "@/modules/admin/setting/schemas";
-import { createSetting, deleteSettingAction } from "@/modules/admin/setting/actions";
+import type { SettingListItem } from "@/modules/admin/setting/schemas";
+import { createSetting, deleteSetting } from "@/modules/admin/setting/actions";
 
 type Props = {
   session: SessionUser;
-  records: SettingItem[];
+  records: SettingListItem[];
 };
 
 export function AdminSettingTable({ session, records }: Props) {
@@ -109,7 +108,7 @@ export function AdminSettingTable({ session, records }: Props) {
                 settingUuid={row.setting_uuid}
                 settingKey={`${row.code}.${row.key}`}
                 onDelete={async () => {
-                  await deleteSettingAction({ settingUuid: row.setting_uuid });
+                  await deleteSetting(row.setting_uuid);
                   router.refresh();
                 }}
               />
@@ -205,19 +204,19 @@ function CreateSettingForm({ onSuccess }: { onSuccess: () => void }) {
       onSubmit={() => setTimeout(() => { formRef.current?.reset(); }, 100)}
     >
       <div className="grid gap-1">
-        <Label className="text-xs font-medium text-muted-foreground">Code</Label>
+        <label className="text-xs font-medium text-muted-foreground">Code</label>
         <Input name="code" maxLength={128} placeholder="e.g. app, email, sms" />
       </div>
       <div className="grid gap-1">
-        <Label className="text-xs font-medium text-muted-foreground">Key</Label>
+        <label className="text-xs font-medium text-muted-foreground">Key</label>
         <Input name="key" maxLength={128} placeholder="e.g. site_name" />
       </div>
       <div className="grid gap-1">
-        <Label className="text-xs font-medium text-muted-foreground">Value</Label>
+        <label className="text-xs font-medium text-muted-foreground">Value</label>
         <Input name="value" placeholder="e.g. StudentHub" />
       </div>
       <div className="grid gap-1">
-        <Label className="text-xs font-medium text-muted-foreground">Serialized</Label>
+        <label className="text-xs font-medium text-muted-foreground">Serialized</label>
         <Select name="serialized" defaultValue="false">
           <SelectTrigger>
             <SelectValue placeholder="Select..." />

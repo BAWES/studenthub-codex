@@ -2,13 +2,13 @@
 
 import Link from "next/link";
 import { ChevronRight, Sparkles } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/modules/theme/ThemeToggle";
 import { HeroSection } from "@/components/marketing";
 import { FeatureGrid } from "@/components/marketing";
 import { TestimonialCarousel } from "@/components/marketing";
 import { PricingCard } from "@/components/marketing";
 import { ComparisonTable } from "@/components/marketing";
+import "@/components/landing/landing.css";
 
 // ── Props ─────────────────────────────────────────────────────
 
@@ -67,7 +67,7 @@ export default function CompanyLandingContent({
         id="main-content"
         className="min-h-svh w-[min(1320px,calc(100%_-_28px))] mx-auto grid content-start gap-6 pt-[18px] pb-[42px] max-sm:w-[min(calc(100%_-_20px),720px)]">
       {/* ── Navigation ── */}
-      <nav className="sticky top-[3px] z-20 min-h-[62px] flex items-center justify-between gap-[14px] rounded-xl p-[2px] bg-white shadow-md border border-border" aria-label="StudentHub public navigation">
+      <nav className="sticky top-[3px] z-20 min-h-[62px] flex items-center justify-between gap-[14px] rounded-xl p-[2px] bg-white shadow-md border border-[var(--border)]" aria-label="StudentHub public navigation">
         <div className="w-full min-h-[58px] flex items-center justify-between gap-[14px] px-1">
           <Link
             className="inline-flex items-center gap-2.5 text-[var(--ink)] px-2 no-underline min-h-11"
@@ -80,21 +80,26 @@ export default function CompanyLandingContent({
           </Link>
           <div className="flex items-center gap-3.5 max-sm:flex-col max-sm:items-stretch">
             {isLoggedIn ? (
-              <Button variant="default" size="default" asChild>
-                <Link href="/app">
-                  Open app <ChevronRight className="size-3.5" />
-                </Link>
-              </Button>
+              <Link
+                href="/app"
+                className="uiButton uiButton_default uiButton_defaultSize"
+              >
+                Open app <ChevronRight className="size-3.5" />
+              </Link>
             ) : (
               <>
-                <Button variant="default" size="default" asChild>
-                  <Link href="/signup?role=company">
-                    Set up company account <Sparkles className="size-3.5" />
-                  </Link>
-                </Button>
-                <Button variant="ghost" size="default" asChild>
-                  <Link href="/login">Sign in</Link>
-                </Button>
+                <Link
+                  href="/signup?role=company"
+                  className="uiButton uiButton_default uiButton_defaultSize"
+                >
+                  Set up company account <Sparkles className="size-3.5" />
+                </Link>
+                <Link
+                  href="/login"
+                  className="uiButton uiButton_ghost uiButton_defaultSize"
+                >
+                  Sign in
+                </Link>
               </>
             )}
             <ThemeToggle />
@@ -107,7 +112,7 @@ export default function CompanyLandingContent({
 
       {/* ── Pain-point section — the specific hiring pain points ── */}
       <section
-        className="relative overflow-hidden rounded-xl p-[clamp(24px,5vw,48px)] bg-white border border-border"
+        className="shSection relative overflow-hidden rounded-xl p-[clamp(24px,5vw,48px)] bg-white border border-[var(--border)]"
         aria-label="Hiring pain points and solutions"
       >
         <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-[#fef1ef] via-white to-[var(--paper)] z-0" aria-hidden="true" />
@@ -116,7 +121,7 @@ export default function CompanyLandingContent({
           <p className="text-[var(--sh-coral)] text-[11px] font-black uppercase tracking-wider mb-1">
             The real hiring headache
           </p>
-          <h2 className="text-[clamp(22px,3.4vw,38px)] font-black leading-[1.08] tracking-tight text-[var(--ink)] mb-8">
+          <h2 className="shBenefitsTitle mb-8">
             You don&apos;t have a talent problem.
             <br />
             You have a <em className="text-[var(--sh-coral)]">process</em>{" "}
@@ -127,7 +132,7 @@ export default function CompanyLandingContent({
             {PAIN_POINTS.map((point, i) => (
               <div
                 key={i}
-                className="rounded-xl p-5 flex flex-col gap-3 transition-transform duration-300 hover:-translate-y-[3px] bg-white border border-border"
+                className="rounded-xl p-5 flex flex-col gap-3 transition-transform duration-300 hover:-translate-y-[3px] bg-white border border-[var(--border)]"
               >
                 <div
                   className="size-10 rounded-lg flex items-center justify-center shrink-0 bg-[var(--sh-coral)]/15 text-[var(--sh-coral)]"
@@ -154,7 +159,7 @@ export default function CompanyLandingContent({
 
       {/* ── Stats strip — company authority signals ── */}
       <section
-        className="rounded-xl p-[clamp(20px,4vw,40px)] grid grid-cols-2 sm:grid-cols-4 gap-6 text-center bg-white border border-border"
+        className="shSection rounded-xl p-[clamp(20px,4vw,40px)] grid grid-cols-2 sm:grid-cols-4 gap-6 text-center bg-white border border-[var(--border)]"
         aria-label="Company stats"
       >
         {COMPANY_STATS.map((stat) => (
@@ -185,7 +190,7 @@ export default function CompanyLandingContent({
 
       {/* ── Final CTA — tailored for employers ── */}
       <section
-        className="relative overflow-hidden rounded-xl p-[clamp(24px,5vw,60px)] text-center bg-white border border-border"
+        className="shSection relative overflow-hidden rounded-xl p-[clamp(24px,5vw,60px)] text-center bg-white border border-[var(--border)]"
         aria-label="Get started as a company"
       >
         <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-[#fef1ef] via-white to-[var(--paper)] z-0" aria-hidden="true" />
@@ -194,7 +199,7 @@ export default function CompanyLandingContent({
           <p className="text-[var(--sh-coral)] text-[11px] font-black uppercase tracking-wider mb-2">
             Let StudentHub handle your workforce
           </p>
-          <h2 className="text-[clamp(22px,3.4vw,38px)] font-black leading-[1.08] tracking-tight text-[var(--ink)] text-center">
+          <h2 className="shBenefitsTitle text-center">
             Stop managing staff. Start running your business.
           </h2>
           <p
@@ -205,17 +210,19 @@ export default function CompanyLandingContent({
             No recruitment costs, no HR paperwork, no compliance headaches.
           </p>
           {isLoggedIn ? (
-            <Button variant="default" size="lg" asChild>
-              <Link href="/app">
-                Open app <ChevronRight className="size-4" />
-              </Link>
-            </Button>
+            <Link
+              href="/app"
+              className="uiButton uiButton_default uiButton_lg shGlowButton"
+            >
+              Open app <ChevronRight className="size-4" />
+            </Link>
           ) : (
-            <Button variant="default" size="lg" asChild>
-              <Link href="/signup?role=company">
-                Set up your company account <ChevronRight className="size-4" />
-              </Link>
-            </Button>
+            <Link
+              href="/signup?role=company"
+              className="uiButton uiButton_default uiButton_lg shGlowButton"
+            >
+              Set up your company account <ChevronRight className="size-4" />
+            </Link>
           )}
           <div
             className="flex items-center justify-center gap-4 mt-4 text-xs text-[var(--muted)]"
@@ -228,7 +235,7 @@ export default function CompanyLandingContent({
 
       {/* ── Footer ── */}
       <footer
-        className="flex items-center justify-between pt-4 pb-2 text-xs text-[var(--muted)]"
+        className="shSection flex items-center justify-between pt-4 pb-2 text-xs text-[var(--muted)]"
       >
         <span>&copy; {new Date().getFullYear()} StudentHub. All rights reserved.</span>
         <div className="flex items-center gap-4">

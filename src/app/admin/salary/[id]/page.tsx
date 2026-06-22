@@ -3,7 +3,6 @@ import { requireRoleCapability } from "@/modules/auth/session";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { formatDate } from "@/modules/workspace/format";
 import { getSalary } from "@/modules/admin/salary/actions";
-import type { SalaryDetailResult } from "@/modules/admin/salary/schemas";
 import { SalaryDetailForm } from "./SalaryDetailForm";
 
 export const dynamic = "force-dynamic";
@@ -16,21 +15,18 @@ export default async function AdminSalaryDetailPage({
   const session = await requireRoleCapability("admin", "admin.system");
   const { id } = await params;
 
-  const data: SalaryDetailResult = await getSalary(id);
-  if (!data.salary) {
+  const result = await getSalary(id);
+  if (!result.salary) {
     notFound();
   }
 
-  const salary = {
-    ...data.salary,
-    staff_name: data.staff_name,
-  };
+  const salary = result.salary;
 
   return (
     <WorkspaceShell
       session={session}
       eyebrow="Admin / Salary"
-      title={`Salary — ${salary.staff_name}`}
+      title={`Salary — ${salary.staff_name ?? "Unnamed"}`}
       metrics={[
         {
           label: "Amount",
@@ -41,7 +37,7 @@ export default async function AdminSalaryDetailPage({
         },
         {
           label: "Date",
-          value: salary.salary_date ? formatDate(salary.salary_date) : "—",
+          value: salary.salary_date ? formatDate(new Date(salary.salary_date)) : "—",
           note: "Salary date",
         },
         {

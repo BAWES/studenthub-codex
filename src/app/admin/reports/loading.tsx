@@ -12,7 +12,7 @@ export default function AdminReportsLoading() {
         </section>
         <div className="grid gap-4 md:grid-cols-2 mb-8">
           {[1, 2].map((i) => (
-            <div key={i} className="rounded-lg border border-border bg-card p-5">
+            <div key={i} className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
               <div className="h-4 w-40 mb-2 rounded bg-white/5 animate-pulse" />
               <div className="h-3 w-full mb-4 rounded bg-white/5 animate-pulse" />
               <div className="h-9 w-36 rounded-lg bg-white/5 animate-pulse" />

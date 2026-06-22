@@ -65,7 +65,12 @@ export function AdminEventsTable({ session, events }: Props) {
     >
       {error ? (
         <div
-          className="mb-4 rounded-lg border border-destructive px-4 py-3 text-sm bg-card text-destructive"
+          className="mb-4 rounded-lg border px-4 py-3 text-sm"
+          style={{
+            borderColor: "var(--sh-error)",
+            color: "var(--sh-error)",
+            background: "var(--surface)",
+          }}
         >
           {error}
         </div>
@@ -83,7 +88,12 @@ export function AdminEventsTable({ session, events }: Props) {
             <button
               type="button"
               onClick={closeTimeline}
-              className="text-xs px-3 py-1 rounded-md transition-all duration-200 hover:opacity-80 bg-card text-muted-foreground border border-border"
+              className="text-xs px-3 py-1 rounded-md transition-all duration-200 hover:opacity-80"
+              style={{
+                background: "var(--surface)",
+                color: "var(--muted)",
+                border: "1px solid var(--border)",
+              }}
             >
               Close timeline
             </button>
@@ -105,7 +115,11 @@ export function AdminEventsTable({ session, events }: Props) {
                     {entry.events.map((evt) => (
                       <div
                         key={evt.activity_uuid}
-                        className="rounded-lg border border-border p-3 text-sm bg-card"
+                        className="rounded-lg border p-3 text-sm"
+                        style={{
+                          borderColor: "var(--border)",
+                          background: "var(--surface)",
+                        }}
                       >
                         <p className="text-foreground">
                           {evt.activity_detail}
@@ -154,7 +168,8 @@ export function AdminEventsTable({ session, events }: Props) {
               <button
                 type="button"
                 onClick={() => viewTimeline(row.request_uuid)}
-                className="text-sm font-mono transition-all duration-200 hover:opacity-80 text-accent-foreground cursor-pointer"
+                className="text-sm font-mono transition-all duration-200 hover:opacity-80"
+                style={{ color: "var(--accent)", cursor: "pointer" }}
                 disabled={loadingTimeline}
               >
                 {row.request_uuid.slice(0, 8)}...

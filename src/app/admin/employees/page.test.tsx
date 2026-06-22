@@ -45,7 +45,6 @@ describe("admin employees page — data contract", () => {
       employee_phone: "+965 5555 1234",
       employee_salary: 2500,
       employee_status: 10,
-      employee_role: "staff",
       employee_created_at: new Date("2025-01-15T10:00:00Z"),
       employee_updated_at: new Date("2025-06-01T12:00:00Z"),
       designation_uuid: "desig-uuid-1",

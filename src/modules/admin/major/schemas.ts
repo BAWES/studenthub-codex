@@ -42,10 +42,6 @@ export const majorActionResponseSchema = z.object({
   message: z.string().min(1),
 });
 
-export const majorIdResultSchema = z.object({
-  major_uuid: z.string().min(1),
-});
-
 export type ListMajorsInput = z.input<typeof listMajorsSchema>;
 export type CreateMajorInput = z.input<typeof createMajorSchema>;
 export type UpdateMajorInput = z.input<typeof updateMajorSchema>;

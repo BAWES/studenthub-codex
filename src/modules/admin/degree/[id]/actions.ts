@@ -13,14 +13,6 @@ export async function getDegree(input: GetDegreeInput): Promise<GetDegreeResult>
 
   const row = await prisma.degree.findUnique({
     where: { degree_uuid: parsed.data.degreeUuid },
-    include: {
-      degree_group: {
-        select: {
-          degree_group_uuid: true,
-          degree_group_name_en: true,
-        },
-      },
-    },
   });
 
   if (!row) {
@@ -37,19 +29,10 @@ export async function getDegree(input: GetDegreeInput): Promise<GetDegreeResult>
 
   const result = {
     degree: {
-      degree_uuid: row.degree_uuid,
+      ...row,
       degree_group_uuid: row.degree_group_uuid ?? null,
-      degree_name_en: row.degree_name_en,
       degree_name_ar: row.degree_name_ar ?? null,
       degree_sort_order: row.degree_sort_order ?? null,
-      degree_created_at: row.degree_created_at,
-      degree_updated_at: row.degree_updated_at,
-      degree_group: row.degree_group
-        ? {
-            degree_group_uuid: row.degree_group.degree_group_uuid,
-            degree_group_name_en: row.degree_group.degree_group_name_en,
-          }
-        : null,
     },
   };
 

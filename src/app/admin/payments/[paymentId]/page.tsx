@@ -3,7 +3,6 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Route } from "next";
 import { requireRoleCapability } from "@/modules/auth/session";
-import { Badge } from "@/components/ui/badge";
 import { DetailSection } from "@/modules/workspace/DetailPanels";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { Button } from "@/components/ui/button";
@@ -12,12 +11,12 @@ import { formatDate } from "@/modules/workspace/format";
 
 export const dynamic = "force-dynamic";
 
-const STATUS_BADGE_VARIANTS: Record<string, "success" | "warning" | "secondary" | "default"> = {
-  AUTHORISED: "success",
-  PAID: "success",
-  VOIDED: "warning",
-  DELETED: "warning",
-  BILLED: "warning",
+const STATUS_COLORS: Record<string, string> = {
+  AUTHORISED: "#22c55e",
+  PAID: "#3b82f6",
+  VOIDED: "#ef4444",
+  DELETED: "#9ca3af",
+  BILLED: "#f59e0b",
 };
 
 const TYPE_LABELS: Record<string, string> = {
@@ -40,6 +39,7 @@ export default async function AdminPaymentDetailPage({
   }
 
   const p = data.payment;
+  const statusColor = STATUS_COLORS[p.status ?? ""] ?? "#6b7280";
   const typeLabel = TYPE_LABELS[p.type ?? ""] ?? p.type ?? "—";
 
   return (
@@ -58,10 +58,10 @@ export default async function AdminPaymentDetailPage({
             {
               label: "Status",
               value: (
-                <Badge variant={STATUS_BADGE_VARIANTS[p.status ?? ""] ?? "secondary"}>
+                <span className="font-semibold" style={{ color: statusColor } as React.CSSProperties}>
                   {p.status ?? "Unknown"}
-                </Badge>
-              ) as any,
+                </span>
+              ),
             },
             { label: "Type", value: typeLabel },
             {

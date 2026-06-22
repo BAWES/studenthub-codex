@@ -52,14 +52,23 @@ export function SearchFormWrapper({ children }: { children: React.ReactNode }) {
 
       {loading && (
         <div
-          className="fixed top-0 left-0 right-0 z-[9999] h-[3px] overflow-hidden pointer-events-none bg-coral/10"
+          className="fixed top-0 left-0 right-0 z-[9999] h-[3px] overflow-hidden pointer-events-none"
+          style={{ background: "rgba(235, 102, 81, 0.2)" }}
         >
           <div
-            className="h-full bg-coral animate-[search-progress_30s_linear_forwards]"
+            className="h-full"
+            style={{ background: "#eb6651", animation: "search-progress 30s linear forwards" }}
           />
           {elapsed >= 3 && (
             <div
-              className="fixed top-[4px] right-3 text-[11px] font-bold pointer-events-none bg-card text-coral rounded-b-lg p-[4px_10px] border border-coral/30 border-t-0"
+              className="fixed top-[4px] right-3 text-[11px] font-bold pointer-events-none bg-card"
+              style={{
+                color: "#eb6651",
+                padding: "4px 10px",
+                borderRadius: "0 0 8px 8px",
+                border: "1px solid rgba(235, 102, 81, 0.3)",
+                borderTop: "none",
+              }}
             >
               Still searching… {elapsed}s
             </div>

@@ -65,7 +65,7 @@ function normalizeSparkline(data?: number[]): number[] | undefined {
 }
 
 /**
- * MetricCard — dashboard stat card with label, value, optional sparkline, and trend indicator.
+ * MetricCard — glass panel with label, value, optional sparkline, and trend indicator.
  * Use in dashboards to replace generic shadcn stat cards.
  * Supports both new API (subtitle, sparkline, icon, glow) and legacy API (note, sparklineData, accent, entranceDelay).
  */
@@ -101,7 +101,7 @@ const MetricCard = React.forwardRef<HTMLDivElement, MetricCardProps>(function Me
   return (
     <div
       ref={ref}
-      className={cn("rounded-lg border border-border bg-card p-4 grid content-start gap-2", className)}
+      className={cn("rounded-lg border border-[var(--border)] bg-card p-4 grid content-start gap-2", className)}
       style={{
         ...(entranceDelay !== undefined ? { animationDelay: `${entranceDelay}ms` } : {}),
         ...style,

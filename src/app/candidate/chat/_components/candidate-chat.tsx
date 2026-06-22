@@ -6,8 +6,6 @@ import type {
   ConversationItem,
   ConversationMessageItem,
 } from "../actions";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { EmptyState } from "@/modules/workspace/EmptyState";
 
 type Props = {
@@ -72,7 +70,7 @@ function MessageViewSkeleton() {
             className={`h-16 rounded-lg ${
               i % 2 === 0 ? "w-2/3" : "w-1/2"
             } animate-pulse ${
-              i % 2 === 0 ? "bg-coral/20" : "bg-border"
+              i % 2 === 0 ? "bg-[color-mix(in_srgb,var(--sh-coral)_20%,transparent)]" : "bg-[var(--border)]"
             }`}
           />
         </div>
@@ -212,15 +210,15 @@ export function CandidateChatClient({ session, conversations }: Props) {
   }, [sendMessage]);
 
   return (
-    <div className="flex flex-1 overflow-hidden rounded-lg border border-border bg-card shadow-sm">
+    <div className="flex flex-1 overflow-hidden rounded-lg border border-[var(--border)] bg-[var(--surface)] shadow-sm">
       {/* Conversation list — Slack-style left sidebar */}
-      <div className="w-[260px] shrink-0 overflow-y-auto bg-background border-r border-border">
+      <div className="w-[260px] shrink-0 overflow-y-auto bg-[var(--paper)] border-r border-[var(--border)]">
         {/* Sidebar header */}
-        <div className="px-4 py-3 border-b border-border">
-          <h2 className="text-sm font-semibold text-foreground uppercase tracking-wide">
+        <div className="px-4 py-3 border-b border-[var(--border)]">
+          <h2 className="text-sm font-semibold text-[var(--ink)] uppercase tracking-wide">
             Conversations
           </h2>
-          <p className="text-xs text-muted-foreground mt-0.5">
+          <p className="text-xs text-[var(--muted)] mt-0.5">
             {conversations.length} total
           </p>
         </div>
@@ -245,23 +243,23 @@ export function CandidateChatClient({ session, conversations }: Props) {
                     onClick={() => selectConversation(conv)}
                     className={`w-full text-left px-3 py-2.5 rounded-md transition-colors ${
                       isActive
-                        ? "bg-coral-light border-l-2 border-coral"
-                        : "hover:bg-border border-l-2 border-transparent"
+                        ? "bg-[var(--sh-coral-light)] border-l-2 border-[var(--sh-coral)]"
+                        : "hover:bg-[var(--border)] border-l-2 border-transparent"
                     }`}
                   >
                     <div className="flex items-center justify-between gap-2">
                       <span
                         className={`text-sm truncate ${
-                          isActive ? "font-semibold text-foreground" : "font-medium text-foreground"
+                          isActive ? "font-semibold text-[var(--ink)]" : "font-medium text-[var(--ink)]"
                         }`}
                       >
                         {label}
                       </span>
-                      <span className="text-[10px] text-muted-foreground shrink-0">
+                      <span className="text-[10px] text-[var(--muted)] shrink-0">
                         {formatDate(conv.created_at)}
                       </span>
                     </div>
-                    <span className="text-xs text-muted-foreground block mt-0.5">
+                    <span className="text-xs text-[var(--muted)] block mt-0.5">
                       {conv.company_name ? (
                         <>
                           {conv.store_name ? (
@@ -283,16 +281,16 @@ export function CandidateChatClient({ session, conversations }: Props) {
       </div>
 
       {/* Message view — right panel */}
-      <div className="flex-1 flex flex-col overflow-hidden bg-card">
+      <div className="flex-1 flex flex-col overflow-hidden bg-[var(--surface)]">
         {!selectedConv ? (
           /* Initial state — no conversation selected */
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center max-w-xs">
               <div className="text-3xl mb-3" aria-hidden="true">💬</div>
-              <p className="text-sm font-medium text-foreground">
+              <p className="text-sm font-medium text-[var(--ink)]">
                 Select a conversation
               </p>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-xs text-[var(--muted)] mt-1">
                 Choose a conversation from the sidebar to view messages.
               </p>
             </div>
@@ -304,32 +302,32 @@ export function CandidateChatClient({ session, conversations }: Props) {
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center max-w-xs">
               <div className="text-3xl mb-3" aria-hidden="true">⚠️</div>
-              <p className="text-sm font-semibold text-destructive">
+              <p className="text-sm font-semibold text-[var(--destructive)]">
                 Failed to load messages
               </p>
-              <p className="text-xs text-muted-foreground mt-1">{error}</p>
-              <Button
+              <p className="text-xs text-[var(--muted)] mt-1">{error}</p>
+              <button
                 type="button"
                 onClick={() => selectedConv && selectConversation(selectedConv)}
-                className="mt-3 bg-coral text-white hover:bg-coral-hover"
+                className="mt-3 inline-flex items-center gap-1.5 rounded-md bg-[var(--sh-coral)] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[var(--sh-coral-hover)] transition-colors"
               >
                 Retry
-              </Button>
+              </button>
             </div>
           </div>
         ) : (
           <>
             {/* Conversation header */}
-            <div className="px-4 py-3 border-b border-border bg-card shrink-0">
+            <div className="px-4 py-3 border-b border-[var(--border)] bg-[var(--surface)] shrink-0">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-coral flex items-center justify-center text-white text-sm font-bold shrink-0">
+                <div className="w-8 h-8 rounded-full bg-[var(--sh-coral)] flex items-center justify-center text-white text-sm font-bold shrink-0">
                   {getConversationLabel(selectedConv).charAt(0).toUpperCase()}
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-foreground">
+                  <p className="text-sm font-semibold text-[var(--ink)]">
                     {getConversationLabel(selectedConv)}
                   </p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-[var(--muted)]">
                     {selectedConv.company_name ?? `Company #${selectedConv.company_id}`}
                     {selectedConv.store_name ? ` · ${selectedConv.store_name}` : ""}
                   </p>
@@ -352,8 +350,8 @@ export function CandidateChatClient({ session, conversations }: Props) {
                       <div
                         className={`max-w-[70%] rounded-lg px-4 py-3 ${
                           isFromCandidate
-                            ? "bg-coral text-white rounded-br-sm"
-                            : "bg-card border border-border text-foreground rounded-bl-sm shadow-sm"
+                            ? "bg-[var(--sh-coral)] text-white rounded-br-sm"
+                            : "bg-[var(--surface)] border border-[var(--border)] text-[var(--ink)] rounded-bl-sm shadow-sm"
                         }`}
                       >
                         <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">
@@ -361,7 +359,7 @@ export function CandidateChatClient({ session, conversations }: Props) {
                         </p>
                         <div
                           className={`flex items-center justify-end gap-1.5 mt-1.5 ${
-                            isFromCandidate ? "text-white/70" : "text-muted-foreground"
+                            isFromCandidate ? "text-white/70" : "text-[var(--muted)]"
                           }`}
                         >
                           <span className="text-[11px]">
@@ -384,22 +382,22 @@ export function CandidateChatClient({ session, conversations }: Props) {
             )}
 
             {/* Message input bar */}
-            <div className="shrink-0 border-t border-border bg-card px-4 py-3">
+            <div className="shrink-0 border-t border-[var(--border)] bg-[var(--surface)] px-4 py-3">
               <div className="flex items-end gap-2">
-                <Textarea
+                <textarea
                   value={inputText}
                   onChange={(e) => setInputText(e.target.value)}
                   onKeyDown={handleKeyDown}
                   placeholder="Type a message... (Enter to send, Shift+Enter for new line)"
                   rows={1}
-                  className="flex-1 min-h-0 resize-none focus:ring-coral"
+                  className="flex-1 resize-none rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-sm text-[var(--ink)] placeholder:text-[var(--muted)] focus:outline-none focus:ring-2 focus:ring-[var(--sh-coral)] focus:border-transparent transition-all"
                   disabled={sending}
                 />
-                <Button
+                <button
                   type="button"
                   onClick={sendMessage}
                   disabled={!inputText.trim() || sending}
-                  className="bg-coral text-white hover:bg-coral-hover"
+                  className="inline-flex items-center justify-center rounded-lg bg-[var(--sh-coral)] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[var(--sh-coral-hover)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors shrink-0"
                 >
                   {sending ? (
                     <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
@@ -411,7 +409,7 @@ export function CandidateChatClient({ session, conversations }: Props) {
                       <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
                     </svg>
                   )}
-                </Button>
+                </button>
               </div>
             </div>
           </>

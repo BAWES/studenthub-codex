@@ -38,6 +38,7 @@ export {
   deleteRequest,
   getCompanyList,
 } from "./actions";
+export { listCompanies, getCompany } from "./actions-list";
 export type {
   CompanyListItem,
   CompanyDetailResult,

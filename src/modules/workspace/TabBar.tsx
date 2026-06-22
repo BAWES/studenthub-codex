@@ -217,8 +217,7 @@ function TabItem({
   isDragOver: boolean;
 }) {
   const [showPin, setShowPin] = useState(false);
-  const IconComponent = resolveIcon(tab.icon);
-  const iconEl = <IconComponent size={14} />;
+  const iconEl = resolveIcon(tab.icon);
   const isHome = tab.href === `/${role}`;
 
   const baseClasses = "relative flex items-center gap-0 min-w-0 max-w-[200px] px-[2px] py-1 border-0 rounded-t-sm bg-transparent text-muted-foreground text-xs font-medium whitespace-nowrap select-none cursor-default transition-colors hover:bg-muted hover:text-foreground group/tab";
@@ -226,7 +225,7 @@ function TabItem({
     ? "bg-card text-foreground [&::after]:content-[''] [&::after]:absolute [&::after]:bottom-[-1px] [&::after]:left-2 [&::after]:right-2 [&::after]:h-[2px] [&::after]:rounded-t-[1px] [&::after]:bg-primary"
     : "";
   const dragOverClasses = isDragOver
-    ? "outline-[1px] outline-dashed outline-primary/50"
+    ? "outline-[1px] outline-dashed outline-[hsl(var(--primary)/0.5)]"
     : "";
   const pinnedClasses = tab.pinned ? "opacity-95" : "";
 
@@ -257,7 +256,7 @@ function TabItem({
 
       {/* Tab content — click to activate */}
       <button
-        className={`flex items-center gap-[5px] min-w-0 px-1 py-[3px] border-0 bg-none text-inherit font-inherit text-xs cursor-pointer truncate [&>svg]:shrink-0 [&>svg]:opacity-60 ${isActive ? '[&>svg]:opacity-100 [&>svg]:text-primary' : ''}`}
+        className={`flex items-center gap-[5px] min-w-0 px-1 py-[3px] border-0 bg-none text-inherit font-inherit text-xs cursor-pointer truncate [&>svg]:shrink-0 [&>svg]:opacity-60 ${isActive ? '[&>svg]:opacity-100 [&>svg]:text-[hsl(var(--primary))]' : ''}`}
         type="button"
         onClick={onSelect}
         aria-label={`Navigate to ${tab.label}`}
@@ -269,7 +268,7 @@ function TabItem({
       {/* Pin toggle */}
       {!isHome && (showPin || tab.pinned) && (
         <button
-          className={`inline-flex items-center justify-center shrink-0 w-[18px] h-[18px] p-0 border-0 rounded-sm bg-none text-muted-foreground cursor-pointer opacity-0 group-hover/tab:opacity-100 transition-opacity [&:hover]:opacity-100 [&:hover]:bg-card ${tab.pinned ? 'opacity-100 text-primary' : ''}`}
+          className={`inline-flex items-center justify-center shrink-0 w-[18px] h-[18px] p-0 border-0 rounded-sm bg-none text-muted-foreground cursor-pointer opacity-0 group-hover/tab:opacity-100 transition-opacity [&:hover]:opacity-100 [&:hover]:bg-card ${tab.pinned ? 'opacity-100 text-[hsl(var(--primary))]' : ''}`}
           type="button"
           onClick={(e) => {
             e.stopPropagation();

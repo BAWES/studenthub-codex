@@ -52,6 +52,7 @@ function DocumentPreview({ document }: { document: { type: string; filePath: str
         <img
           src={document.filePath}
           alt={document.label}
+          className="max-w-full object-contain"
           className="max-h-[400px] object-contain"
         />
       </div>

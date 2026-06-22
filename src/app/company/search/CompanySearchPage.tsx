@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import type { Route } from "next";
 import type { SessionUser } from "@/modules/auth/types";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -204,7 +203,7 @@ export function CompanySearchPage({
     if (p > 1) params.set("page", String(p));
     if (typeFilter && typeFilter !== "all") params.set("type", typeFilter);
     const qs = params.toString();
-    router.replace(`/company/search${qs ? `?${qs}` : ""}` as Route, { scroll: false });
+    router.replace(`/company/search${qs ? `?${qs}` : ""}`, { scroll: false });
   };
 
   const totalPages = results ? Math.ceil(results.matchingCount / ITEMS_PER_PAGE) : 0;

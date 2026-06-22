@@ -66,7 +66,7 @@ export default async function AdminXeroDetailPage({
                 <span className={`inline-flex items-center gap-1.5 text-xs font-semibold ${tx.isReconciled ? "text-success" : "text-destructive"}`}>
                   {tx.isReconciled ? "Yes" : "No"}
                 </span>
-              ) as any,
+              ),
             },
             { label: "Has Attachments", value: tx.hasAttachments ? "Yes" : "No" },
             {

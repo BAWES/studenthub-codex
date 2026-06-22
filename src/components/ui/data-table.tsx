@@ -10,6 +10,7 @@ import {
   TableRow,
   TableCell,
 } from "@/components/ui/table";
+import type { TableRowProps } from "@/components/ui/table";
 import { EmptyState } from "@/components/ui/empty-state";
 
 /* ==========================================================================
@@ -55,6 +56,8 @@ export interface DataTableProps<T> {
   emptyActionLabel?: string;
   emptyActionHref?: string;
   onEmptyAction?: () => void;
+  /** Entrance stagger (ms per row, default: 30) */
+  staggerMs?: number;
   /** Extra className */
   className?: string;
   /** Table-level aria-label */
@@ -71,9 +74,9 @@ function DataTableSkeleton({
   rows: number;
 }) {
   return (
-    <Table>
+    <Table staggerMs={0}>
       <TableHeader>
-        <TableRow>
+        <TableRow index={-1}>
           {columns.map((col, i) => (
             <TableHead key={i} className={col.className}>
               {col.header}
@@ -83,7 +86,7 @@ function DataTableSkeleton({
       </TableHeader>
       <TableBody>
         {Array.from({ length: rows }).map((_, rowIdx) => (
-          <TableRow key={rowIdx}>
+          <TableRow key={rowIdx} index={rowIdx}>
             {columns.map((col, colIdx) => (
               <TableCell key={colIdx} className={col.className}>
                 <div
@@ -116,6 +119,7 @@ export function DataTable<T>({
   emptyActionLabel,
   emptyActionHref,
   onEmptyAction,
+  staggerMs = 30,
   className,
   ariaLabel,
 }: DataTableProps<T>) {
@@ -132,9 +136,9 @@ export function DataTable<T>({
   if (error) {
     return (
       <div className={cn("shOsDataTable", className)}>
-        <Table>
+        <Table staggerMs={0}>
           <TableHeader>
-            <TableRow>
+            <TableRow index={-1}>
               {columns.map((col, i) => (
                 <TableHead key={i} className={col.className}>
                   {col.header}
@@ -158,9 +162,9 @@ export function DataTable<T>({
   if (rows.length === 0) {
     return (
       <div className={cn("shOsDataTable", className)}>
-        <Table>
+        <Table staggerMs={0}>
           <TableHeader>
-            <TableRow>
+            <TableRow index={-1}>
               {columns.map((col, i) => (
                 <TableHead key={i} className={col.className}>
                   {col.header}
@@ -186,9 +190,9 @@ export function DataTable<T>({
   // ── Data state ─────────────────────────────────────────────
   return (
     <div className={cn("shOsDataTable", className)} aria-label={ariaLabel}>
-      <Table>
+      <Table staggerMs={staggerMs}>
         <TableHeader>
-          <TableRow>
+          <TableRow index={-1}>
             {columns.map((col, i) => (
               <TableHead key={i} className={col.className}>
                 {col.header}
@@ -200,7 +204,9 @@ export function DataTable<T>({
           {rows.map((row, idx) => (
             <TableRow
               key={rowKey(row)}
+              index={idx}
               onClick={onRowClick ? () => onRowClick(row) : undefined}
+              data-testid={`data-table-row-${rowKey(row)}`}
             >
               {columns.map((col, colIdx) => (
                 <TableCell key={colIdx} className={col.className}>

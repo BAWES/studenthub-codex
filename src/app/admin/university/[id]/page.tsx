@@ -53,14 +53,14 @@ export default async function AdminUniversityDetailPage({
             { label: "Data Source", value: university.university_data_source?.toString() ?? "—" },
             {
               label: "Created",
-              value: (university as any).university_created_at
-                ? formatDate(new Date((university as any).university_created_at))
+              value: university.university_created_at
+                ? formatDate(new Date(university.university_created_at))
                 : "—",
             },
             {
               label: "Updated",
-              value: (university as any).university_updated_at
-                ? formatDate(new Date((university as any).university_updated_at))
+              value: university.university_updated_at
+                ? formatDate(new Date(university.university_updated_at))
                 : "—",
             },
           ]}

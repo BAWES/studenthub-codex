@@ -40,7 +40,7 @@ export function InvoiceFilters({
 
   return (
     <>
-      <div className="rounded-lg border border-border bg-white p-4 mb-6">
+      <div className="rounded-lg border border-[var(--border)] bg-white p-4 mb-6">
         <div className="flex flex-wrap items-end gap-4">
           <div className="flex flex-col gap-1">
             <label

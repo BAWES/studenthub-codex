@@ -1,23 +1,8 @@
-"use client";
-
-import { useRouter } from "next/navigation";
-import { useTransition, useCallback, useRef, useEffect, useState } from "react";
 import type { Route } from "next";
 import Link from "next/link";
 import { logoutAction } from "@/modules/auth/actions";
 import type { SessionUser } from "@/modules/auth/types";
 import { HubShortcuts, type HubCommand } from "@/modules/hub/HubShortcuts";
-import { Button, buttonVariants } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/modules/theme/ThemeToggle";
 import { CandidateProfile } from "./CandidateProfile";
 import { ExportCVsForm } from "./ExportCVsForm";
@@ -25,7 +10,6 @@ import type {
   CandidateSearchFacet,
   CandidateSearchFilter,
   CandidateSearchParams,
-  CandidateSearchFacetKey,
   getCandidateSearchWorkspace
 } from "./search";
 
@@ -46,8 +30,6 @@ type CandidateSearchParamKey =
   | "assignment"
   | "document";
 
-export const QUICK_FACET_KEYS: CandidateSearchFacetKey[] = ["country", "skill", "company", "university"];
-
 export function CandidateSearchOS({
   data,
   basePath,
@@ -61,87 +43,43 @@ export function CandidateSearchOS({
   session: SessionUser;
   params: CandidateSearchParams;
 }) {
-  const router = useRouter();
-  const [isPending, startTransition] = useTransition();
-  const [searchValue, setSearchValue] = useState(data.query ?? "");
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const commands = buildCandidateSearchCommands(data, basePath, params);
   const selectedIds = params.selectedIds ?? [];
   const selectedRows = data.rows.filter((row) => selectedIds.includes(row.id));
   const facetGroups = [...data.facets].sort((a, b) => Number(hasActiveFacet(b)) - Number(hasActiveFacet(a)));
   const activeFacetCount = data.facets.reduce((count, facet) => count + facet.options.filter((option) => option.active).length, 0);
 
-  // Sync searchValue on initial data fetch (SSR navigation)
-  useEffect(() => {
-    setSearchValue(data.query ?? "");
-  }, [data.query]);
-
-  const navigate = useCallback(
-    (overrides: Partial<Record<CandidateSearchParamKey, string>>) => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-      startTransition(() => {
-        router.replace(candidateSearchHref(basePath, params, overrides));
-      });
-    },
-    [basePath, params, router, startTransition]
-  );
-
-  const handleSearchChange = useCallback(
-    (value: string) => {
-      setSearchValue(value);
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-      debounceRef.current = setTimeout(() => {
-        navigate({ q: value || "" });
-      }, 300);
-    },
-    [navigate]
-  );
-
-  // Cleanup debounce on unmount
-  useEffect(() => {
-    return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-    };
-  }, []);
-
   return (
-    <main className="flex flex-col gap-3 min-h-svh bg-background">
-      {/* Topbar */}
-      <header className="flex items-center gap-3 px-4 py-2 border-b bg-card sticky top-0 z-10">
-        <Link className="flex items-center gap-1.5 font-semibold text-sm no-underline shrink-0" href={homePath}>
-          <span className="text-primary">SH</span>
-          <strong className="text-foreground">Candidates</strong>
+    <main className="candidateDesk">
+      <header className="candidateDeskTopbar">
+        <Link className="candidateDeskBrand" href={homePath}>
+          <span>SH</span>
+          <strong>Candidates</strong>
         </Link>
-        <div className="flex flex-1 items-center gap-2 max-w-xl" id="candidate-search">
-          <div className="relative flex-1">
-            <Input
-              data-command-search
-              id="candidate-query"
-              name="q"
-              placeholder="Search name, email, phone, ID, skill, tag"
-              value={searchValue}
-              onChange={(e) => handleSearchChange(e.target.value)}
-              className="flex-1 pr-8"
-            />
-            {isPending && (
-              <span className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground text-xs animate-pulse">
-                ...
-              </span>
-            )}
-          </div>
+        <form className="candidateDeskSearch" id="candidate-search">
+          <input
+            data-command-search
+            id="candidate-query"
+            name="q"
+            placeholder="Search name, email, phone, ID, skill, tag"
+            defaultValue={data.query}
+          />
+          <input name="filter" type="hidden" value={data.filter} />
           {params.visibility === "assigned" ? <input name="view" type="hidden" value="assigned" /> : null}
           {data.openTabs.length ? <input name="tabs" type="hidden" value={data.openTabs.map((tab) => tab.id).join(",")} /> : null}
           {selectedIds.length ? <input name="selected" type="hidden" value={selectedIds.join(",")} /> : null}
-        </div>
-        <div className="flex items-center gap-2 ml-auto">
+          <HiddenFacetInputs data={data} />
+          <button type="submit">Search</button>
+        </form>
+        <div className="candidateDeskTools">
           <HubShortcuts commands={commands} />
           <ThemeToggle />
-          <div className="flex items-center gap-1 text-xs text-muted-foreground" title={session.email}>
-            <Badge variant="secondary" className="text-[10px] px-1.5 py-0">{session.role}</Badge>
-            <strong className="text-foreground text-sm font-medium">{session.name}</strong>
+          <div className="candidateDeskAccount" title={session.email}>
+            <span>{session.role}</span>
+            <strong>{session.name}</strong>
           </div>
           <form action={logoutAction}>
-            <Button type="submit" variant="ghost" size="sm">Sign out</Button>
+            <button type="submit">Sign out</button>
           </form>
         </div>
       </header>
@@ -149,8 +87,8 @@ export function CandidateSearchOS({
       <ActiveSearchContext basePath={basePath} data={data} params={params} />
       <BulkCandidateBar basePath={basePath} params={params} selectedIds={selectedIds} selectedRows={selectedRows} />
 
-      <section className="flex flex-1 gap-0 px-4 pb-4">
-        <section className="flex flex-col flex-1 gap-3" aria-label="Open candidate tabs">
+      <section className="candidateDeskBody">
+        <section className="candidateTabWorkspace" aria-label="Open candidate tabs">
           <CandidateTabs basePath={basePath} data={data} params={params} />
           {data.selected?.candidate ? (
             <CandidateProfile
@@ -166,7 +104,6 @@ export function CandidateSearchOS({
               facetGroups={facetGroups}
               params={params}
               selectedIds={selectedIds}
-              onNavigate={navigate}
             />
           )}
         </section>
@@ -181,8 +118,7 @@ function CandidateSearchTab({
   data,
   facetGroups,
   params,
-  selectedIds,
-  onNavigate
+  selectedIds
 }: {
   activeFacetCount: number;
   basePath: "/admin/candidates" | "/staff/candidates";
@@ -190,127 +126,83 @@ function CandidateSearchTab({
   facetGroups: CandidateSearchFacet[];
   params: CandidateSearchParams;
   selectedIds: number[];
-  onNavigate: (overrides: Partial<Record<CandidateSearchParamKey, string>>) => void;
 }) {
   return (
-    <section className="flex flex-col gap-2" aria-label="Candidate search and filters">
-      <Card className="border-0 shadow-none bg-transparent">
-        <CardHeader className="flex flex-row items-center justify-between px-0 pt-0 pb-2">
-          <div>
-            <span className="text-xs text-muted-foreground">Search tab</span>
-            <strong className="block text-sm">{data.query ? `Results for ${data.query}` : "Candidate search"}</strong>
-          </div>
-          <small className="text-xs text-muted-foreground">
-            {data.rows.length.toLocaleString("en-US")} of {data.matchingCount.toLocaleString("en-US")}
-          </small>
-        </CardHeader>
-      </Card>
-
-      {/* Quick facet chips */}
-      <FacetChips basePath={basePath} data={data} params={params} onNavigate={onNavigate} />
-
-      {/* Power filters */}
-      <Accordion type="single" collapsible className="border rounded-md bg-card">
-        <AccordionItem value="filters" className="border-0">
-          <AccordionTrigger className="px-3 py-2 text-sm font-medium hover:no-underline">
-            <span className="flex items-center gap-2">
-              <span>Filters</span>
-              <Badge variant={activeFacetCount > 0 ? "warning" : "secondary"} className="text-[10px]">
-                {activeFacetCount ? `${activeFacetCount} active` : "Open power filters"}
-              </Badge>
-            </span>
-          </AccordionTrigger>
-          <AccordionContent>
-            <section className="flex flex-wrap gap-3 px-3 pb-3" aria-label="Candidate power filters">
-              {facetGroups.map((facet) => (
-                <FacetGroup basePath={basePath} facet={facet} key={facet.key} onNavigate={onNavigate} params={params} />
-              ))}
-            </section>
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
-
-      {/* Filter nav */}
-      <nav className="flex gap-1 flex-wrap" aria-label="Candidate search filters">
+    <section className="candidateSearchPanel" aria-label="Candidate search and filters">
+      <header className="candidateSearchTabHeader">
+        <div>
+          <span>Search tab</span>
+          <strong>{data.query ? `Results for ${data.query}` : "Candidate search"}</strong>
+        </div>
+        <small>
+          {data.rows.length.toLocaleString("en-US")} of {data.matchingCount.toLocaleString("en-US")}
+        </small>
+      </header>
+      <details className="candidatePowerFilters">
+        <summary>
+          <span>Filters</span>
+          <strong>{activeFacetCount ? `${activeFacetCount} active` : "Open power filters"}</strong>
+        </summary>
+        <section className="candidateFacetRail" aria-label="Candidate power filters">
+          {facetGroups.map((facet) => (
+            <FacetGroup basePath={basePath} facet={facet} key={facet.key} params={params} />
+          ))}
+        </section>
+      </details>
+      <nav className="candidateSearchFilters" aria-label="Candidate search filters">
         {candidateFilterLinks.map((item) => (
-          <a
-            className={cn(
-              buttonVariants({ variant: item.value === data.filter ? "default" : "ghost", size: "sm" }),
-              "text-xs no-underline cursor-pointer"
-            )}
+          <Link
+            className={item.value === data.filter ? "active" : ""}
             href={candidateSearchHref(basePath, params, { filter: item.value, candidate: "" })}
             key={item.value}
-            onClick={(e) => {
-              e.preventDefault();
-              onNavigate({ filter: item.value, candidate: "" });
-            }}
           >
             {item.label}
-          </a>
+          </Link>
         ))}
       </nav>
-
-      {/* Blocked notice */}
       {data.selectedBlocked ? (
-        <Card className="border-destructive/30 bg-destructive/5">
-          <CardContent className="flex flex-col gap-1 p-3 text-sm">
-            <strong className="text-destructive">Candidate unavailable</strong>
-            <span className="text-muted-foreground text-xs">This record is missing, deleted, or outside the candidates visible to this login.</span>
-          </CardContent>
-        </Card>
+        <div className="candidateAccessNotice">
+          <strong>Candidate unavailable</strong>
+          <span>This record is missing, deleted, or outside the candidates visible to this login.</span>
+        </div>
       ) : null}
-
-      {/* Results */}
-      <div className="flex flex-col gap-2">
+      <div className="candidateResultList">
         {data.rows.map((row) => (
           <article
-            className={cn(
-              "flex border rounded-md overflow-hidden bg-card",
-              row.id === data.selectedId && "ring-1 ring-primary"
-            )}
+            className={row.id === data.selectedId ? "candidateResultCard active" : "candidateResultCard"}
             key={row.id}
           >
-            <Link
-              className="flex flex-col items-center justify-center w-8 shrink-0 border-r hover:bg-muted transition-colors no-underline"
-              href={candidateSearchHref(basePath, params, { selected: toggleCandidateId(selectedIds, row.id).join(",") })}
-            >
-              <span aria-hidden="true" className="text-xs">{selectedIds.includes(row.id) ? "✓" : ""}</span>
-              <small className="text-[10px] text-muted-foreground">{selectedIds.includes(row.id) ? "Selected" : "Select"}</small>
+            <Link className="candidateResultSelect" href={candidateSearchHref(basePath, params, { selected: toggleCandidateId(selectedIds, row.id).join(",") })}>
+              <span aria-hidden="true">{selectedIds.includes(row.id) ? "✓" : ""}</span>
+              <small>{selectedIds.includes(row.id) ? "Selected" : "Select"}</small>
             </Link>
-            <Link
-              className="flex flex-col flex-1 p-2 hover:bg-muted/50 transition-colors no-underline gap-0.5"
-              href={candidateSearchHref(basePath, params, { candidate: String(row.id) })}
-            >
-              <div className="flex items-center gap-2">
-                <span className="flex items-center justify-center w-7 h-7 rounded-full bg-primary/10 text-primary text-xs font-semibold shrink-0">
-                  {candidateInitials(row.name)}
-                </span>
-                <div className="flex flex-col leading-tight">
-                  <strong className="text-sm text-foreground">{row.name}</strong>
-                  <small className="text-xs text-muted-foreground">{row.email}</small>
+            <Link className="candidateResultOpen" href={candidateSearchHref(basePath, params, { candidate: String(row.id) })}>
+              <div className="candidateResultMain">
+                <span className="candidateResultAvatar">{candidateInitials(row.name)}</span>
+                <div>
+                  <strong>{row.name}</strong>
+                  <small>{row.email}</small>
                 </div>
-                <Badge variant="secondary" className="ml-auto text-[10px]">{row.status}</Badge>
+                <em>{row.status}</em>
               </div>
-              <div className="flex gap-2 text-[11px] text-muted-foreground mt-1">
+              <div className="candidateResultMeta">
                 <span>{row.signal}</span>
                 <span>{row.country}</span>
                 <span>{row.updated}</span>
               </div>
-              <div className="flex gap-1 mt-1 flex-wrap">
+              <div className="candidateResultTags">
                 {[...row.flags, ...row.skills].slice(0, 3).map((flag) => (
-                  <Badge key={flag} variant="outline" className="text-[10px]">{flag}</Badge>
+                  <span key={flag}>{flag}</span>
                 ))}
               </div>
             </Link>
           </article>
         ))}
         {data.rows.length === 0 ? (
-          <Card className="border-dashed">
-            <CardContent className="flex flex-col items-center gap-1 p-6 text-center">
-              <strong className="text-sm text-muted-foreground">No candidates match this search.</strong>
-              <span className="text-xs text-muted-foreground">Remove a facet or search a different name, email, phone, skill, or candidate ID.</span>
-            </CardContent>
-          </Card>
+          <div className="candidateEmptyState">
+            <strong>No candidates match this search.</strong>
+            <span>Remove a facet or search a different name, email, phone, skill, or candidate ID.</span>
+          </div>
         ) : null}
       </div>
     </section>
@@ -337,22 +229,20 @@ function BulkCandidateBar({
   const loadedEmailRecipients = selectedRows.map((row) => row.email).filter(Boolean).join(",");
 
   return (
-    <Card className="mx-4 border-primary/30">
-      <CardContent className="flex items-center gap-3 p-2 text-sm">
-        <div className="flex items-center gap-1.5 shrink-0">
-          <span className="text-xs text-muted-foreground">Selection</span>
-          <strong>{selectedIds.length.toLocaleString("en-US")} selected</strong>
-        </div>
-        <nav className="flex gap-1 flex-wrap" aria-label="Selected candidate actions">
-          <Link className={buttonVariants({ variant: "link", size: "sm" })} href={candidateSearchHref(basePath, params, { tabs: selectedValue, candidate: String(selectedIds[0] ?? ""), selected: selectedValue })}>Open as tabs</Link>
-          {selectedIds.length === 2 ? <Link className={buttonVariants({ variant: "link", size: "sm" })} href={candidateSearchHref(basePath, params, { selected: selectedValue })}>Merge review</Link> : null}
-          {loadedEmailRecipients ? <a className={buttonVariants({ variant: "link", size: "sm" })} href={`mailto:${loadedEmailRecipients}`}>Email loaded</a> : null}
-          <Link className={buttonVariants({ variant: "link", size: "sm" })} href={candidateSearchHref(basePath, params, { selected: selectedValue })}>Generate ID batch</Link>
-          <ExportCVsForm candidateIds={selectedValue} />
-          <Link className={buttonVariants({ variant: "link", size: "sm" })} href={candidateSearchHref(basePath, params, { selected: "" })}>Deselect</Link>
-        </nav>
-      </CardContent>
-    </Card>
+    <section className="candidateBulkBar" aria-label="Selected candidate actions">
+      <div>
+        <span>Selection</span>
+        <strong>{selectedIds.length.toLocaleString("en-US")} selected</strong>
+      </div>
+      <nav>
+        <Link href={candidateSearchHref(basePath, params, { tabs: selectedValue, candidate: String(selectedIds[0] ?? ""), selected: selectedValue })}>Open as tabs</Link>
+        {selectedIds.length === 2 ? <Link href={candidateSearchHref(basePath, params, { selected: selectedValue })}>Merge review</Link> : null}
+        {loadedEmailRecipients ? <a href={`mailto:${loadedEmailRecipients}`}>Email loaded</a> : null}
+        <Link href={candidateSearchHref(basePath, params, { selected: selectedValue })}>Generate ID batch</Link>
+        <ExportCVsForm candidateIds={selectedValue} />
+        <Link href={candidateSearchHref(basePath, params, { selected: "" })}>Deselect</Link>
+      </nav>
+    </section>
   );
 }
 
@@ -366,33 +256,20 @@ function CandidateTabs({
   params: CandidateSearchParams;
 }) {
   return (
-    <nav className="flex gap-1 border-b pb-1" aria-label="Open candidate tabs">
-      <Link
-        className={cn(
-          buttonVariants({ variant: !data.selectedId ? "default" : "ghost", size: "sm" }),
-          "text-xs"
-        )}
-        href={candidateSearchHref(basePath, params, { candidate: "" })}
-      >
+    <nav className="candidateTabs" aria-label="Open candidate tabs">
+      <Link className={!data.selectedId ? "active" : ""} href={candidateSearchHref(basePath, params, { candidate: "" })}>
         Search
       </Link>
       {data.openTabs.map((tab) => {
         const remainingTabs = data.openTabs.filter((item) => item.id !== tab.id).map((item) => item.id);
         const nextCandidate = data.selectedId === tab.id ? remainingTabs.at(-1) : data.selectedId;
         return (
-          <span className={cn("flex items-center gap-0.5", data.selectedId === tab.id && "border-b-2 border-primary")} key={tab.id}>
-            <Link
-              className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "text-xs")}
-              href={candidateSearchHref(basePath, params, { candidate: String(tab.id), tabs: data.openTabs.map((item) => item.id).join(",") })}
-            >
+          <span className={data.selectedId === tab.id ? "active" : ""} key={tab.id}>
+            <Link href={candidateSearchHref(basePath, params, { candidate: String(tab.id), tabs: data.openTabs.map((item) => item.id).join(",") })}>
               <strong>{tab.title}</strong>
-              <small className="ml-1 text-muted-foreground">{tab.status}</small>
+              <small>{tab.status}</small>
             </Link>
-            <Link
-              aria-label={`Close ${tab.title}`}
-              className={buttonVariants({ variant: "ghost", size: "sm" }) + " px-1 text-muted-foreground hover:text-foreground no-underline"}
-              href={candidateSearchHref(basePath, params, { candidate: nextCandidate ? String(nextCandidate) : "", tabs: remainingTabs.join(",") })}
-            >
+            <Link aria-label={`Close ${tab.title}`} href={candidateSearchHref(basePath, params, { candidate: nextCandidate ? String(nextCandidate) : "", tabs: remainingTabs.join(",") })}>
               x
             </Link>
           </span>
@@ -422,39 +299,33 @@ function ActiveSearchContext({
   ].filter((item): item is { key: Exclude<CandidateSearchParamKey, "candidate" | "tabs" | "selected">; label: string } => Boolean(item));
 
   return (
-    <Card className="mx-4 border-0 shadow-none bg-muted/30">
-      <CardContent className="flex items-center gap-2 p-2 text-sm">
-        <div className="flex items-center gap-1.5 shrink-0">
-          <span className="text-xs text-muted-foreground">{activeItems.length ? "Filtered view" : "Default view"}</span>
-          <strong className="text-xs font-medium">
-            {data.matchingCount.toLocaleString("en-US")} matching candidates from{" "}
-            {data.role === "staff" && data.visibility === "assigned" ? "your assigned production records" : "all production data"}
-          </strong>
-        </div>
-        <nav className="flex gap-1 flex-wrap" aria-label="Active candidate filters">
-          {data.role === "staff" ? (
-            <>
-              <Link className={cn(buttonVariants({ variant: data.visibility === "all" ? "default" : "ghost", size: "sm" }), "text-xs")} href={candidateSearchHref(basePath, params, { view: "", candidate: "" })}>
-                All production
-              </Link>
-              <Link className={cn(buttonVariants({ variant: data.visibility === "assigned" ? "default" : "ghost", size: "sm" }), "text-xs")} href={candidateSearchHref(basePath, params, { view: "assigned", candidate: "" })}>
-                Assigned to me
-              </Link>
-            </>
-          ) : null}
-          {activeItems.map((item) => (
-            <Link className={buttonVariants({ variant: "outline", size: "sm" }) + " text-xs no-underline"} href={candidateSearchHref(basePath, params, { [item.key]: "", candidate: "" })} key={`${item.key}-${item.label}`}>
-              <Badge variant="secondary" className="text-[10px] mr-1">{item.label}</Badge>
+    <section className="candidateSearchContext" aria-label="Candidate search context">
+      <div>
+        <span>{activeItems.length ? "Filtered view" : "Default view"}</span>
+        <strong>
+          {data.matchingCount.toLocaleString("en-US")} matching candidates from{" "}
+          {data.role === "staff" && data.visibility === "assigned" ? "your assigned production records" : "all production data"}
+        </strong>
+      </div>
+      <nav aria-label="Active candidate filters">
+        {data.role === "staff" ? (
+          <>
+            <Link className={data.visibility === "all" ? "active" : ""} href={candidateSearchHref(basePath, params, { view: "", candidate: "" })}>
+              All production
             </Link>
-          ))}
-          {activeItems.length ? (
-            <Link className={buttonVariants({ variant: "link", size: "sm" }) + " text-xs"} href={basePath}>Clear all</Link>
-          ) : (
-            <Link className={buttonVariants({ variant: "link", size: "sm" }) + " text-xs"} href={candidateSearchHref(basePath, params, { filter: "needs-review", candidate: "" })}>Review queue</Link>
-          )}
-        </nav>
-      </CardContent>
-    </Card>
+            <Link className={data.visibility === "assigned" ? "active" : ""} href={candidateSearchHref(basePath, params, { view: "assigned", candidate: "" })}>
+              Assigned to me
+            </Link>
+          </>
+        ) : null}
+        {activeItems.map((item) => (
+          <Link href={candidateSearchHref(basePath, params, { [item.key]: "", candidate: "" })} key={`${item.key}-${item.label}`}>
+            {item.label}
+          </Link>
+        ))}
+        {activeItems.length ? <Link href={basePath}>Clear all</Link> : <Link href={candidateSearchHref(basePath, params, { filter: "needs-review", candidate: "" })}>Review queue</Link>}
+      </nav>
+    </section>
   );
 }
 
@@ -466,140 +337,40 @@ const candidateFilterLinks: { label: string; value: CandidateSearchFilter }[] = 
   { label: "Civil ID", value: "civil-id" }
 ];
 
-export function FacetGroup({
-  basePath,
-  facet,
-  params,
-  onNavigate,
-}: {
-  basePath: "/admin/candidates" | "/staff/candidates";
-  facet: CandidateSearchFacet;
-  params: CandidateSearchParams;
-  onNavigate?: (overrides: Partial<Record<CandidateSearchParamKey, string>>) => void;
-}) {
+function HiddenFacetInputs({ data }: { data: CandidateSearchData }) {
   return (
-    <Card className="min-w-[160px] flex-1">
-      <CardHeader className="p-2 pb-0">
-        <h3 className="text-xs font-semibold text-foreground">{facet.label}</h3>
-      </CardHeader>
-      <CardContent className="p-2 flex flex-col gap-0.5">
-        {facet.options.map((option) => (
-          <a
-            className={cn(
-              buttonVariants({ variant: option.active ? "default" : "ghost", size: "sm" }),
-              "justify-between text-xs w-full no-underline cursor-pointer"
-            )}
-            href={candidateSearchHref(basePath, params, { [facet.key]: option.active ? "" : option.value, candidate: "" })}
-            key={option.value}
-            onClick={(e) => {
-              e.preventDefault();
-              onNavigate?.({ [facet.key]: option.active ? "" : option.value, candidate: "" });
-            }}
-          >
-            <span>{option.label}</span>
-            <strong className="text-[10px] text-muted-foreground">{option.count}</strong>
-          </a>
-        ))}
-      </CardContent>
-    </Card>
+    <>
+      {data.params.country ? <input name="country" type="hidden" value={data.params.country} /> : null}
+      {data.params.university ? <input name="university" type="hidden" value={data.params.university} /> : null}
+      {data.params.company ? <input name="company" type="hidden" value={data.params.company} /> : null}
+      {data.params.skill ? <input name="skill" type="hidden" value={data.params.skill} /> : null}
+      {data.params.gender ? <input name="gender" type="hidden" value={data.params.gender} /> : null}
+      {data.params.profile ? <input name="profile" type="hidden" value={data.params.profile} /> : null}
+      {data.params.assignment ? <input name="assignment" type="hidden" value={data.params.assignment} /> : null}
+      {data.params.document ? <input name="document" type="hidden" value={data.params.document} /> : null}
+    </>
   );
 }
 
-/**
- * FacetChips renders quick inline facet controls for country, university,
- * skills, and company — clickable chips that filter results via URL params.
- */
-export function FacetChips({
-  basePath,
-  data,
-  params,
-  onNavigate,
-}: {
-  basePath: string;
-  data: { facets: CandidateSearchFacet[] };
-  params: CandidateSearchParams;
-  onNavigate?: (overrides: Partial<Record<CandidateSearchParamKey, string>>) => void;
-}) {
-  // Find quick facet groups
-  const quickFacets = data.facets.filter((f) =>
-    QUICK_FACET_KEYS.includes(f.key),
-  );
-
-  // Filter out groups with zero options
-  const populated = quickFacets.filter((f) => f.options.length > 0);
-
-  if (populated.length === 0) return null;
-
-  const MAX_VISIBLE = 6;
-  const activeCount = data.facets.reduce(
-    (sum, f) => sum + f.options.filter((o) => o.active).length,
-    0,
-  );
-
+function FacetGroup({ basePath, facet, params }: { basePath: "/admin/candidates" | "/staff/candidates"; facet: CandidateSearchFacet; params: CandidateSearchParams }) {
   return (
-    <div className="flex flex-wrap gap-1">
-      {populated.map((facet) => (
-        <div key={facet.key} className="flex items-center gap-0.5">
-          <span className="text-xs text-muted-foreground mr-1">{facet.label}:</span>
-          {facet.options.slice(0, MAX_VISIBLE).map((opt) => {
-            const isActive = opt.active;
-            return (
-              <a
-                key={opt.value}
-                href={`${basePath}?${facet.key}=${opt.value}`}
-                onClick={(e) => {
-                  e.preventDefault();
-                  onNavigate?.({ [facet.key]: isActive ? "" : opt.value, candidate: "" });
-                }}
-                className={cn(
-                  "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs border transition-colors no-underline",
-                  isActive
-                    ? "bg-primary text-primary-foreground border-primary"
-                    : "bg-muted text-muted-foreground border-border hover:bg-muted/80"
-                )}
-              >
-                {opt.label}
-                {opt.count > 0 && (
-                  <span className="text-[10px] opacity-70">{opt.count}</span>
-                )}
-                {isActive && (
-                  <span className="text-[10px] ml-0.5" aria-label="Remove filter">✕</span>
-                )}
-              </a>
-            );
-          })}
-        </div>
-      ))}
-      {activeCount > 1 && (
-        <a
-          href={basePath}
-          onClick={(e) => {
-            e.preventDefault();
-            onNavigate?.({
-              q: "",
-              country: "",
-              university: "",
-              company: "",
-              skill: "",
-              gender: "",
-              profile: "",
-              assignment: "",
-              document: "",
-              candidate: "",
-            });
-          }}
-          className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2 ml-1"
-          role="link"
-          aria-label="Clear all"
+    <section className="candidateFacetGroup">
+      <h3>{facet.label}</h3>
+      {facet.options.map((option) => (
+        <Link
+          className={option.active ? "active" : ""}
+          href={candidateSearchHref(basePath, params, { [facet.key]: option.active ? "" : option.value, candidate: "" })}
+          key={option.value}
         >
-          Clear all
-        </a>
-      )}
-    </div>
+          <span>{option.label}</span>
+          <strong>{option.count}</strong>
+        </Link>
+      ))}
+    </section>
   );
 }
 
-export function candidateSearchHref(
+function candidateSearchHref(
   basePath: "/admin/candidates" | "/staff/candidates",
   params: CandidateSearchParams,
   overrides: Partial<Record<CandidateSearchParamKey, string>>
@@ -633,11 +404,11 @@ export function candidateSearchHref(
   return (suffix ? `${basePath}?${suffix}` : basePath) as Route;
 }
 
-export function toggleCandidateId(ids: number[], id: number) {
+function toggleCandidateId(ids: number[], id: number) {
   return ids.includes(id) ? ids.filter((item) => item !== id) : [...ids, id];
 }
 
-export function candidateInitials(name: string) {
+function candidateInitials(name: string) {
   return name
     .split(/\s+/)
     .filter(Boolean)

@@ -1,15 +1,8 @@
 "use client";
 
 import { useTransition } from "react";
-import { useRouter } from "next/navigation";
 import { switchRoleAction } from "@/modules/auth/actions";
 import type { Role } from "@/modules/auth/types";
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from "@/components/ui/dropdown-menu";
 
 const roleDisplayLabels: Record<Role, string> = {
   admin: "Admin",
@@ -35,7 +28,6 @@ export function RoleSwitcher({
   availableRoles: Role[];
 }) {
   const [isPending, startTransition] = useTransition();
-  const router = useRouter();
 
   if (!availableRoles || availableRoles.length <= 1) {
     return null;
@@ -44,40 +36,34 @@ export function RoleSwitcher({
   const otherRoles = availableRoles.filter((r) => r !== currentRole);
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <button
-          type="button"
-          disabled={isPending}
-          className="flex w-full items-center gap-1.5 rounded-[var(--sh-radius-sm)] border border-[var(--sh-glass-border)] bg-transparent px-[10px] py-[4px] text-xs font-semibold text-[var(--muted)] min-h-[32px] cursor-default"
-        >
-          {roleIcons[currentRole]} {roleDisplayLabels[currentRole]}
-        </button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent side="top" sideOffset={4} align="center">
-        {otherRoles.map((role) => (
-          <form
-            key={role}
-            action={(formData) => {
-              startTransition(() => {
-                switchRoleAction(formData);
-                router.refresh();
-              });
-            }}
-          >
-            <input type="hidden" name="targetRole" value={role} />
-            <DropdownMenuItem asChild>
+    <div className="roleSwitcher">
+      <span className="roleSwitcherCurrent">
+        {roleIcons[currentRole]}{" "}
+        {roleDisplayLabels[currentRole]}
+      </span>
+      {otherRoles.length > 0 && (
+        <div className="roleSwitcherDropdown">
+          {otherRoles.map((role) => (
+            <form
+              key={role}
+              action={(formData) => {
+                startTransition(() => {
+                  switchRoleAction(formData);
+                });
+              }}
+            >
+              <input type="hidden" name="targetRole" value={role} />
               <button
                 type="submit"
+                className="roleSwitcherOption"
                 disabled={isPending}
-                className="w-full text-left text-xs gap-1.5"
               >
                 {roleIcons[role]} {roleDisplayLabels[role]}
               </button>
-            </DropdownMenuItem>
-          </form>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
+            </form>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }

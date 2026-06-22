@@ -79,7 +79,7 @@ const PageHeader = React.forwardRef<HTMLDivElement, PageHeaderProps>(
                         {crumb.label}
                       </span>
                     ) : crumb.href ? (
-                      <Link href={crumb.href as any} className="shPageHeader-crumbLink">
+                      <Link href={crumb.href} className="shPageHeader-crumbLink">
                         {crumb.label}
                       </Link>
                     ) : (
@@ -104,7 +104,7 @@ const PageHeader = React.forwardRef<HTMLDivElement, PageHeaderProps>(
           <div className="shPageHeader-titleGroup">
             {backHref && (
               <Link
-                href={backHref as any}
+                href={backHref}
                 className="shPageHeader-back"
                 aria-label="Go back"
               >

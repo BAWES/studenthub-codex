@@ -14,7 +14,7 @@ export default function AdminUserRequestDetailLoading() {
             <div className="h-3 w-20 rounded bg-white/5 animate-pulse" />
           </div>
         </section>
-        <div className="rounded-lg border border-border bg-muted p-5">
+        <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
           <div className="h-5 w-40 mb-4 rounded bg-white/5 animate-pulse" />
           <div className="space-y-3">
             {[1, 2, 3, 4, 5].map((i) => (

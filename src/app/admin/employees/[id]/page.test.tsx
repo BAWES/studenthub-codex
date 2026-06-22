@@ -4,11 +4,7 @@ import { notFound } from "next/navigation";
 
 // Mock dependencies
 vi.mock("@/modules/auth/session", () => ({
-  requireRoleCapability: vi.fn().mockResolvedValue({
-    user: { id: "1" },
-    role: "admin",
-    capabilities: ["admin.read", "admin.write"],
-  }),
+  requireRoleCapability: vi.fn().mockResolvedValue({ user: { id: "1" }, role: "admin" }),
 }));
 
 vi.mock("@/modules/workspace/ErrorBoundary", () => ({
@@ -80,7 +76,6 @@ const validEmployee = {
   employee_phone: "+965 5555 1234",
   employee_salary: 2500.5,
   employee_status: 10,
-  employee_role: "staff",
   employee_created_at: new Date("2026-01-15"),
   employee_updated_at: new Date("2026-06-01"),
   designation_uuid: "des-001",
@@ -111,7 +106,6 @@ describe("AdminEmployeeDetailPage", () => {
     expect(screen.getByTestId("eyebrow")).toHaveTextContent("Admin / Employees");
     expect(screen.getByTestId("title")).toHaveTextContent("John Doe");
     expect(screen.getByTestId("metric-Status")).toHaveTextContent("Active");
-    expect(screen.getByTestId("metric-Role")).toHaveTextContent("Staff");
     expect(screen.getByTestId("metric-Designation")).toHaveTextContent("Software Engineer");
     expect(screen.getByTestId("metric-Department")).toHaveTextContent("Engineering");
     expect(screen.getByTestId("fact-UUID")).toHaveTextContent("emp-001");
@@ -120,82 +114,9 @@ describe("AdminEmployeeDetailPage", () => {
     expect(screen.getByTestId("fact-Phone")).toHaveTextContent("+965 5555 1234");
     expect(screen.getByTestId("fact-Salary")).toHaveTextContent("2500.500 KWD");
     expect(screen.getByTestId("fact-Status")).toHaveTextContent("Active");
-    expect(screen.getByTestId("fact-Role")).toBeInTheDocument();
     expect(screen.getByTestId("fact-Designation")).toHaveTextContent("Software Engineer");
     expect(screen.getByTestId("fact-Department")).toHaveTextContent("Engineering");
     expect(screen.getByText("Back to Employees")).toBeInTheDocument();
-  });
-
-  it("shows Promote to Admin button for staff employee", async () => {
-    mockGetEmployeeById.mockResolvedValue(validEmployee);
-
-    const Page = (await import("./page")).default;
-    render(
-      await Page({
-        params: Promise.resolve({ id: "emp-001" }),
-      }),
-    );
-
-    expect(screen.getByText("Promote to Admin")).toBeInTheDocument();
-    expect(screen.queryByText("Demote to Staff")).not.toBeInTheDocument();
-  });
-
-  it("shows Demote to Staff button for admin employee", async () => {
-    mockGetEmployeeById.mockResolvedValue({
-      ...validEmployee,
-      employee_role: "admin",
-    });
-
-    const Page = (await import("./page")).default;
-    render(
-      await Page({
-        params: Promise.resolve({ id: "emp-admin" }),
-      }),
-    );
-
-    expect(screen.getByText("Demote to Staff")).toBeInTheDocument();
-    expect(screen.queryByText("Promote to Admin")).not.toBeInTheDocument();
-  });
-
-  it("shows Promote to Admin for employee with null role", async () => {
-    mockGetEmployeeById.mockResolvedValue({
-      ...validEmployee,
-      employee_role: null,
-    });
-
-    const Page = (await import("./page")).default;
-    render(
-      await Page({
-        params: Promise.resolve({ id: "emp-norole" }),
-      }),
-    );
-
-    expect(screen.getByText("Promote to Admin")).toBeInTheDocument();
-    expect(screen.getByTestId("metric-Role")).toHaveTextContent("—");
-  });
-
-  it("does not show role change button when user lacks admin.write", async () => {
-    const { requireRoleCapability } = await import("@/modules/auth/session");
-    vi.mocked(requireRoleCapability).mockResolvedValueOnce({
-      role: "admin",
-      id: "1",
-      name: "Admin",
-      email: "admin@test.com",
-      issuedAt: Date.now(),
-      capabilities: ["admin.read"],
-    });
-
-    mockGetEmployeeById.mockResolvedValue(validEmployee);
-
-    const Page = (await import("./page")).default;
-    render(
-      await Page({
-        params: Promise.resolve({ id: "emp-001" }),
-      }),
-    );
-
-    expect(screen.queryByText("Promote to Admin")).not.toBeInTheDocument();
-    expect(screen.queryByText("Demote to Staff")).not.toBeInTheDocument();
   });
 
   it("renders with null phone and null salary", async () => {

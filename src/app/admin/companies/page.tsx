@@ -1,6 +1,6 @@
 import type { Route } from "next";
 import { requireRoleCapability } from "@/modules/auth/session";
-import { SearchableTable } from "@/modules/workspace/SearchableTable";
+import { DataTable } from "@/modules/workspace/DataTable";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { getAdminCompanyRows } from "@/modules/workspace/data";
 
@@ -12,13 +12,11 @@ export default async function AdminCompaniesPage() {
 
   return (
     <WorkspaceShell session={session} eyebrow="Admin" title="Companies" metrics={[]}>
-      <SearchableTable
+      <DataTable
         title="Company Accounts"
         description="Companies, ownership, active request counts, and commercial status."
         rows={rows}
         rowHref={(row) => `/admin/companies/${row.id}` as Route}
-        searchPlaceholder="Search companies…"
-        searchKeys={["name", "email", "owner"]}
         columns={[
           { key: "name", label: "Company", render: (row) => <strong>{row.name}</strong> },
           { key: "email", label: "Email", render: (row) => row.email },

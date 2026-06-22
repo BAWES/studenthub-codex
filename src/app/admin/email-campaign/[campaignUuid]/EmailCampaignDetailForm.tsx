@@ -9,8 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
-import { updateEmailCampaign } from "../actions";
-import { deleteEmailCampaign } from "../actions";
+import { updateEmailCampaign, deleteEmailCampaign } from "../actions";
 
 interface EmailCampaignDetail {
   campaign_uuid: string;
@@ -34,7 +33,7 @@ export function EmailCampaignDetailForm({ campaign }: { campaign: EmailCampaignD
   const [isRecurring, setIsRecurring] = useState(campaign.is_recurring ?? false);
 
   const updateAction = async () => {
-    await updateEmailCampaign({ campaignUuid: campaign.campaign_uuid, subject, message, target, isRecurring: isRecurring });
+    await updateEmailCampaign(campaign.campaign_uuid, { subject, message, target, is_recurring: isRecurring });
     return { success: true };
   };
 

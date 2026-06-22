@@ -6,7 +6,7 @@ import { markNotificationRead } from "@/modules/candidate-notifications/actions"
 export function MarkReadButton({ notificationUuid }: { notificationUuid: string }) {
   const [state, formAction, pending] = useActionState(
     markNotificationRead.bind(null, notificationUuid),
-    null as { success?: boolean; error?: string } | null,
+    null,
   );
 
   return (
