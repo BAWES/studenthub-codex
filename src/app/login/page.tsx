@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { UserRound, Search, Building2, Shield, ClipboardCheck } from "lucide-react";
