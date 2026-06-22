@@ -17,7 +17,7 @@ export type UserMenuProps = {
 };
 
 /**
- * User avatar dropdown menu for the OS Glass App Header.
+ * User avatar dropdown menu for the App Header.
  * Shows user initials in a circular avatar and a dropdown with
  * Profile, Settings, and Sign Out options.
  */
@@ -32,8 +32,12 @@ export function UserMenu({ name, email }: UserMenuProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild aria-label={`${name} menu`}>
-        <button className="shAppHeaderAvatar" type="button" aria-label={`${name} menu`}>
-          <span className="shAppHeaderAvatarFallback">{initials}</span>
+        <button
+          className="flex size-8 items-center justify-center rounded-full bg-muted text-xs font-semibold text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+          type="button"
+          aria-label={`${name} menu`}
+        >
+          {initials}
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
@@ -48,7 +52,7 @@ export function UserMenu({ name, email }: UserMenuProps) {
         <DropdownMenuItem>Settings</DropdownMenuItem>
         <DropdownMenuItem>Help & Feedback</DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem className="text-rose">Sign Out</DropdownMenuItem>
+        <DropdownMenuItem className="text-destructive">Sign Out</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
