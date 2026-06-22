@@ -1,56 +1,52 @@
-import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { generateBankAdvicePdf } from "@/modules/pdf/pdf-service";
+import { NextRequest, NextResponse } from "next/server";
+import { buildBankAdviceHtml } from "@/modules/admin/transfers/bank-advice/pdf-helpers";
+import { getBankAdvicePdfData } from "@/modules/admin/transfers/bank-advice/pdf-actions";
+import { generatePdf } from "@/lib/pdf-renderer";
 
+export const dynamic = "force-dynamic";
+
+/**
+ * GET /api/transfers/bank-advice/[uuid]/pdf
+ *
+ * Renders a bank advice document as a printable HTML page.
+ * - ?format=pdf: returns a downloadable PDF generated via Playwright.
+ * - Default: returns a print-friendly HTML page.
+ */
 export async function GET(
-  request: Request,
-  { params }: { params: Promise<{ uuid: string }> }
+  _request: NextRequest,
+  { params }: { params: Promise<{ uuid: string }> },
 ) {
-  const { uuid } = await params;
+  try {
+    const { uuid } = await params;
 
-  const bankAdvice = await prisma.transfer_bank_advice.findUnique({
-    where: { tba_uuid: uuid },
-  });
-
-  if (!bankAdvice) {
-    return new Response("Bank advice not found", { status: 404 });
-  }
-
-  // Look up transfer details
-  let beneficiaryName: string | undefined;
-  let beneficiaryIban: string | undefined;
-  let amount: string | undefined;
-  let companyName: string | undefined;
-
-  if (bankAdvice.serial_no) {
-    const transferCandidate = await prisma.transfer_candidate.findFirst({
-      where: { transfer_file_id: bankAdvice.serial_no },
-      include: { company: { select: { company_name: true } } },
-    });
-    if (transferCandidate) {
-      beneficiaryName = transferCandidate.transfer_benef_name ?? undefined;
-      beneficiaryIban = transferCandidate.transfer_benef_iban ?? undefined;
-      if (transferCandidate.candidate_total) {
-        amount = `${Number(transferCandidate.candidate_total).toFixed(3)} ${transferCandidate.currency_code || "KWD"}`;
-      }
-      companyName = transferCandidate.company?.company_name ?? undefined;
+    if (!uuid || uuid.trim().length === 0) {
+      return new NextResponse("Missing bank advice UUID", { status: 400 });
     }
+
+    const data = await getBankAdvicePdfData({ uuid });
+    if (!data) {
+      return new NextResponse("Bank advice not found", { status: 404 });
+    }
+
+    const html = buildBankAdviceHtml(data);
+
+    const format = _request.nextUrl.searchParams.get("format");
+
+    if (format === "pdf") {
+      return generatePdf(html, `bank-advice-${uuid.slice(0, 12)}`, {
+        footerText: "Bank Advice",
+      });
+    }
+
+    return new NextResponse(html, {
+      headers: { "Content-Type": "text/html; charset=utf-8" },
+    });
+  } catch (error) {
+    console.error("Error generating bank advice PDF:", error);
+
+    const message =
+      error instanceof Error ? error.message : "Failed to generate bank advice document";
+
+    return new NextResponse(message, { status: 500 });
   }
-
-  const buf = await generateBankAdvicePdf({
-    serial_no: bankAdvice.serial_no ?? undefined,
-    beneficiary_name: beneficiaryName,
-    beneficiary_iban: beneficiaryIban,
-    amount,
-    transfer_date: bankAdvice.created_at?.toISOString().split("T")[0] ?? undefined,
-    company_name: companyName,
-  });
-
-  return new NextResponse(buf as unknown as BodyInit, {
-    status: 200,
-    headers: {
-      "Content-Type": "application/pdf",
-      "Content-Disposition": `attachment; filename="bank-advice-${bankAdvice.serial_no || uuid.slice(0, 8)}.pdf"`,
-    },
-  });
 }

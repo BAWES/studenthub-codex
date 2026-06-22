@@ -1,12 +1,12 @@
 import { requireRoleCapability } from "@/modules/auth/session";
 import { listStories } from "./actions";
-import { AdminStoriesTable } from "./admin-stories-table";
+import { AdminStoriesTable } from "./_components";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminStoryPage() {
-  const session = await requireRoleCapability("admin", "admin.system");
+export default async function AdminStoriesPage() {
+  const session = await requireRoleCapability("admin", "admin.read");
   const result = await listStories({ limit: 100 });
 
-  return <AdminStoriesTable session={session} records={result.records} />;
+  return <AdminStoriesTable session={session} stories={result.stories} />;
 }

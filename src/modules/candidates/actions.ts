@@ -1,5 +1,8 @@
 "use server";
 
+import crypto from "node:crypto";
+import fs from "node:fs/promises";
+import path from "node:path";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
@@ -121,10 +124,10 @@ export async function updateCandidateProfile(
 }
 
 // ---------------------------------------------------------------------------
-// Document upload (S3 with local disk fallback)
+// Document upload
 // ---------------------------------------------------------------------------
 
-import { uploadFile } from "@/lib/s3";
+const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads", "candidates");
 
 const ALLOWED_TYPES: Record<string, { mime: string[]; ext: string[]; maxSize: number }> = {
   photo: {
@@ -155,7 +158,7 @@ const ALLOWED_TYPES: Record<string, { mime: string[]; ext: string[]; maxSize: nu
 };
 
 async function saveUpload(candidateId: number, field: string, file: File, typeConfig: typeof ALLOWED_TYPES[string]): Promise<string> {
-  const ext = file.name.includes(".") ? `.${file.name.split(".").pop()?.toLowerCase() ?? ""}` : "";
+  const ext = path.extname(file.name).toLowerCase();
   if (!typeConfig.ext.includes(ext)) {
     throw new Error(`File type "${ext}" is not allowed for this document type.`);
   }
@@ -164,11 +167,16 @@ async function saveUpload(candidateId: number, field: string, file: File, typeCo
     throw new Error(`File is too large. Maximum size is ${typeConfig.maxSize / 1024 / 1024} MB.`);
   }
 
-  const folder = `candidates/${candidateId}`;
-  const buffer = Buffer.from(await file.arrayBuffer());
-  const result = await uploadFile(buffer, folder, file.name, field);
+  const dir = path.join(UPLOAD_DIR, String(candidateId));
+  await fs.mkdir(dir, { recursive: true });
 
-  return result.url;
+  const filename = `${field}_${crypto.randomUUID()}${ext}`;
+  const filepath = path.join(dir, filename);
+
+  const buffer = Buffer.from(await file.arrayBuffer());
+  await fs.writeFile(filepath, buffer);
+
+  return `/uploads/candidates/${candidateId}/${filename}`;
 }
 
 export async function uploadDocument(_prevState: { error: string }, formData: FormData) {
