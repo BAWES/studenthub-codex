@@ -2,6 +2,8 @@
 
 import { useActionState } from "react";
 import { respondToInvitation } from "@/modules/candidates/actions";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 
 export function InvitationRespondForm({
   invitationUuid,
@@ -14,42 +16,38 @@ export function InvitationRespondForm({
 
   if (currentStatus === 1 || currentStatus === 2) {
     return (
-      <section className="candidateEditForm">
-        <h2>Response</h2>
-        <p className="formNotice">
-          You have already {currentStatus === 1 ? "accepted" : "rejected"} this invitation.
-        </p>
-      </section>
+      <Card className="mb-6">
+        <CardContent className="p-5 grid gap-2">
+          <h2 className="text-lg font-semibold m-0">Response</h2>
+          <p className="text-sm text-muted-foreground m-0">
+            You have already {currentStatus === 1 ? "accepted" : "rejected"} this invitation.
+          </p>
+        </CardContent>
+      </Card>
     );
   }
 
   return (
-    <form action={action} className="candidateEditForm">
-      <h2>Respond to Invitation</h2>
-      {state.error ? <p className="formError">{state.error}</p> : null}
+    <Card className="mb-6">
+      <CardContent className="p-5">
+        <form action={action} className="grid gap-4">
+          <h2 className="text-lg font-semibold m-0">Respond to Invitation</h2>
+          {state.error ? (
+            <p className="text-sm text-destructive font-medium">{state.error}</p>
+          ) : null}
 
-      <input type="hidden" name="invitationUuid" value={invitationUuid} />
+          <input type="hidden" name="invitationUuid" value={invitationUuid} />
 
-      <div className="formActions">
-        <button
-          type="submit"
-          name="action"
-          value="accept"
-          disabled={pending}
-          className="acceptButton"
-        >
-          {pending ? "Sending..." : "Accept invitation"}
-        </button>
-        <button
-          type="submit"
-          name="action"
-          value="reject"
-          disabled={pending}
-          className="rejectButton"
-        >
-          {pending ? "Sending..." : "Reject invitation"}
-        </button>
-      </div>
-    </form>
+          <div className="flex gap-3 pt-1">
+            <Button type="submit" name="action" value="accept" disabled={pending}>
+              {pending ? "Sending..." : "Accept invitation"}
+            </Button>
+            <Button type="submit" name="action" value="reject" disabled={pending} variant="destructive">
+              {pending ? "Sending..." : "Reject invitation"}
+            </Button>
+          </div>
+        </form>
+      </CardContent>
+    </Card>
   );
 }
