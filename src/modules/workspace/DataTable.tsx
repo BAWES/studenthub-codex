@@ -56,7 +56,7 @@ export function DataTable<T extends { id: string | number }>({
                     <td className="px-4 py-3 align-middle text-right">
                       <Link
                         href={rowHref(row)}
-                        className="text-[#1f73b7] text-sm font-semibold hover:underline no-underline"
+                        className="text-blue-zendesk text-sm font-semibold hover:underline no-underline"
                       >
                         Open &rarr;
                       </Link>
