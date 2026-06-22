@@ -50,7 +50,7 @@ export function ForgotPasswordForm() {
 
           <Link
             href="/login"
-            className="inline-flex items-center justify-center gap-1.5 mt-2 text-sm text-muted-foreground hover:text-[#eb6651] transition-colors no-underline"
+            className="inline-flex items-center justify-center gap-1.5 mt-2 text-sm text-muted-foreground hover:text-sh-coral transition-colors no-underline"
           >
             <ArrowLeft className="size-3.5" />
             Back to sign in
@@ -97,7 +97,7 @@ export function ForgotPasswordForm() {
 
         <Link
           href="/login"
-          className="inline-flex items-center justify-center gap-1.5 text-sm text-muted-foreground hover:text-[#eb6651] transition-colors w-full no-underline"
+          className="inline-flex items-center justify-center gap-1.5 text-sm text-muted-foreground hover:text-sh-coral transition-colors w-full no-underline"
         >
           <ArrowLeft className="size-3.5" />
           Back to sign in

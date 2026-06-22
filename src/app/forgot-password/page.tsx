@@ -14,7 +14,7 @@ export default async function ForgotPasswordPage() {
       {/* ── Brand side ──────────────────────────────────────────── */}
       <div className="relative grid content-center gap-4 p-[clamp(32px,5vw,64px)] overflow-hidden max-md:p-5 max-md:pt-5 max-md:pb-2">
         <div
-          className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-[#eb6651]/10"
+          className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-sh-coral/10"
           aria-hidden="true"
         />
 
@@ -30,7 +30,7 @@ export default async function ForgotPasswordPage() {
 
           <h1 className="m-0 text-[clamp(40px,5vw,72px)] leading-[0.92] font-extrabold tracking-[-0.03em] text-foreground max-md:text-[clamp(24px,6vw,32px)]">
             Forgot your password?<br />
-            <span className="bg-gradient-to-br from-foreground to-[#eb6651] bg-clip-text text-transparent">
+            <span className="bg-gradient-to-br from-foreground to-sh-coral bg-clip-text text-transparent">
               Don&apos;t worry — it happens to the best of us.
             </span>
           </h1>
@@ -43,7 +43,7 @@ export default async function ForgotPasswordPage() {
           <div className="flex flex-wrap gap-2 mt-[18px] max-md:hidden">
             {["Encrypted tokens", "One-time use", "15 min expiry"].map(
               (item) => (
-                <Badge key={item} variant="outline" className="text-[#eb6651] text-[11px] font-black uppercase px-3 py-1.5">
+                <Badge key={item} variant="outline" className="text-sh-coral text-[11px] font-black uppercase px-3 py-1.5">
                   {item}
                 </Badge>
               )
