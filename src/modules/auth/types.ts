@@ -31,7 +31,8 @@ export type Capability =
   | "id_review.read"
   | "id_review.mutate"
   | "admin.read"
-  | "admin.system";
+  | "admin.system"
+  | "admin.write";
 
 export type SessionUser = {
   role: Role;
