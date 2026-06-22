@@ -21,7 +21,7 @@ export function ForgotPasswordForm() {
   if (state.sent) {
     return (
       <div className="grid gap-5 text-center px-6 py-8">
-        <div className="justify-self-center size-14 rounded-xl bg-[var(--sh-success-bg)] border border-[var(--sh-success)]/20 flex items-center justify-center text-[var(--sh-success)]">
+        <div className="justify-self-center size-14 rounded-xl bg-[#24835b]/10 border border-[#24835b]/20 flex items-center justify-center text-[#24835b]">
           <CheckCircle className="size-7" />
         </div>
 

@@ -19,8 +19,8 @@ export default async function ForgotPasswordPage() {
           className="absolute inset-0 animate-[shLoginDrift_14s_ease-in-out_infinite_alternate]"
           style={{
             background: [
-              "radial-gradient(ellipse 90% 70% at 0% 100%, color-mix(in srgb, var(--sh-coral) 18%, transparent) 0%, transparent 70%)",
-              "radial-gradient(ellipse 80% 60% at 70% 0%, color-mix(in srgb, var(--sh-coral) 12%, transparent) 0%, transparent 60%)",
+              "radial-gradient(ellipse 90% 70% at 0% 100%, color-mix(in srgb, #eb6651 18%, transparent) 0%, transparent 70%)",
+              "radial-gradient(ellipse 80% 60% at 70% 0%, color-mix(in srgb, #eb6651 12%, transparent) 0%, transparent 60%)",
               "radial-gradient(ellipse 60% 50% at 100% 80%, color-mix(in srgb, var(--ring) 8%, transparent) 0%, transparent 60%)",
             ].join(","),
           }}
