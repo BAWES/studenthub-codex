@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { DataTable } from "@/modules/workspace/DataTable";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { Badge } from "@/components/ui/badge";
-
+import type { Route } from "next";
 import type { SessionUser } from "@/modules/auth/types";
 import type { AdminJobItem } from "@/modules/admin/jobs/schemas";
 
@@ -29,7 +29,7 @@ export function AdminJobsTable({ session, jobs }: Props) {
         title="Jobs"
         description="All job postings. Click a row to view details."
         rows={jobs.map((j) => ({ ...j, id: j.job_uuid }))}
-        rowHref={(row) => `/admin/job/${row.job_uuid}`}
+        rowHref={(row) => `/admin/job/${row.job_uuid}` as Route}
         columns={[
           {
             key: "position",

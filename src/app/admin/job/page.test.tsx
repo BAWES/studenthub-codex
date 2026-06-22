@@ -38,6 +38,12 @@ describe("admin jobs page — data contract", () => {
   });
 
   it("AdminJobItem fields map correctly to DataTable columns", () => {
+    // The page maps AdminJobItem to DataTable columns:
+    //   job_uuid   → row.job_uuid (for keys)
+    //   position   → rendered as span
+    //   status     → Badge (Active/Inactive)
+    //   created_at → formatted date
+    //   updated_at → formatted date
     const row: AdminJobItem = {
       job_uuid: "abc-123",
       position: "Software Engineer",

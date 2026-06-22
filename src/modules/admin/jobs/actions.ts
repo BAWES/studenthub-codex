@@ -1,77 +1,87 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
 import {
-  listAdminJobsSchema,
+  adminJobItemSchema,
   listAdminJobsResultSchema,
+  listAdminJobsSchema,
 } from "./schemas";
-import type { ListAdminJobsInput, ListAdminJobsResult } from "./schemas";
+import type { AdminJobItem, ListAdminJobsResult } from "./schemas";
 
-// ---------------------------------------------------------------------------
-// listAdminJobs
-// ---------------------------------------------------------------------------
+async function logOutputError(source: string, error: unknown): Promise<void> {
+  console.error(`[modules/admin/jobs] ${source} output failed:`, error);
+}
 
+/**
+ * List job records with pagination and optional search.
+ */
 export async function listAdminJobs(
-  input: ListAdminJobsInput = {},
+  params: FormData | Record<string, unknown> = {},
 ): Promise<ListAdminJobsResult> {
   await requireCapability("admin.read");
 
-  const parsed = listAdminJobsSchema.safeParse(input);
+  const raw =
+    params instanceof FormData
+      ? Object.fromEntries(params.entries())
+      : params;
+
+  const parsed = listAdminJobsSchema.safeParse(raw);
   if (!parsed.success) {
-    return { jobs: [], total: 0, page: 1, limit: 50, totalPages: 0 };
+    return { jobs: [], total: 0, page: 1, limit: 20, totalPages: 0 };
   }
 
-  const { search, status, page, limit } = parsed.data;
+  const { page, limit, search, status } = parsed.data;
   const skip = (page - 1) * limit;
 
-  // Build Prisma where clause
-  const where: Record<string, unknown> = { deleted_at: null };
-
+  const where: Record<string, unknown> = {};
+  if (search) {
+    where.OR = [
+      { position: { contains: search } },
+      { position_ar: { contains: search } },
+    ];
+  }
   if (status !== undefined) {
     where.status = status;
   }
 
-  if (search !== undefined && search.trim().length > 0) {
-    const term = search.trim();
-    where.OR = [
-      { position: { contains: term } },
-      { position_ar: { contains: term } },
-      { description: { contains: term } },
-      { description_ar: { contains: term } },
-    ];
-  }
-
-  const [rows, total] = await Promise.all([
+  const [records, total] = await Promise.all([
     prisma.job.findMany({
       where: where as any,
       orderBy: { created_at: "desc" },
       skip,
       take: limit,
-      select: {
-        job_uuid: true,
-        position: true,
-        position_ar: true,
-        description: true,
-        status: true,
-        hours_per_day: true,
-        compensation_type: true,
-        compensation_amount: true,
-        area_uuid: true,
-        request_uuid: true,
-        created_at: true,
-        updated_at: true,
-      },
     }),
     prisma.job.count({ where: where as any }),
   ]);
 
-  const result = { jobs: rows, total, page, limit, totalPages: Math.ceil(total / limit) };
+  const result: ListAdminJobsResult = {
+    jobs: records.map((r: any): AdminJobItem => {
+      const item: AdminJobItem = {
+        job_uuid: r.job_uuid,
+        position: r.position,
+        position_ar: r.position_ar ?? null,
+        description: r.description ?? null,
+        status: r.status ?? null,
+        hours_per_day: r.hours_per_day ?? null,
+        compensation_type: r.compensation_type ?? null,
+        compensation_amount: r.compensation_amount ?? null,
+        area_uuid: r.area_uuid ?? null,
+        request_uuid: r.request_uuid,
+        created_at: r.created_at ?? null,
+        updated_at: r.updated_at ?? null,
+      };
+      return item;
+    }),
+    total,
+    page,
+    limit,
+    totalPages: Math.ceil(total / limit),
+  };
 
   const outputParsed = listAdminJobsResultSchema.safeParse(result);
   if (!outputParsed.success) {
-    console.error("[admin/jobs] listAdminJobs output validation:", outputParsed.error.issues);
+    logOutputError("listAdminJobs", outputParsed.error.issues);
   }
 
   return result;

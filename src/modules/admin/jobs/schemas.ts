@@ -1,15 +1,8 @@
 import { z } from "zod";
 
 // ---------------------------------------------------------------------------
-// Admin job listing schemas
+// Output validation schemas
 // ---------------------------------------------------------------------------
-
-export const listAdminJobsSchema = z.object({
-  search: z.string().optional(),
-  status: z.coerce.boolean().optional(),
-  page: z.coerce.number().int().positive().optional().default(1),
-  limit: z.coerce.number().int().min(1).max(200).optional().default(50),
-});
 
 export const adminJobItemSchema = z.object({
   job_uuid: z.string(),
@@ -34,6 +27,20 @@ export const listAdminJobsResultSchema = z.object({
   totalPages: z.number().int().nonnegative(),
 });
 
-export type ListAdminJobsInput = z.input<typeof listAdminJobsSchema>;
+// Input schema — matches the page params pattern
+export const listAdminJobsSchema = z.object({
+  page: z.coerce.number().int().positive().optional().default(1),
+  limit: z.coerce.number().int().min(1).max(200).optional().default(50),
+  search: z.string().optional(),
+  status: z
+    .string()
+    .optional()
+    .transform((v) => (v === "true" ? true : v === "false" ? false : undefined)),
+});
+
+// ---------------------------------------------------------------------------
+// Types derived from output schemas
+// ---------------------------------------------------------------------------
+
 export type AdminJobItem = z.output<typeof adminJobItemSchema>;
 export type ListAdminJobsResult = z.output<typeof listAdminJobsResultSchema>;

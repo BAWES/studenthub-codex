@@ -1,14 +1,13 @@
+import type { Route } from "next";
 import { requireRoleCapability } from "@/modules/auth/session";
-import { listAdminJobs } from "./actions";
+import { listAdminJobs } from "@/modules/admin/jobs/actions";
 import { AdminJobsTable } from "./_components";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminJobsPage() {
+export default async function AdminJobPage() {
   const session = await requireRoleCapability("admin", "admin.read");
-  const result = await listAdminJobs({ limit: 100 });
+  const { jobs } = await listAdminJobs({ limit: 200 });
 
-  return (
-    <AdminJobsTable session={session} jobs={result.jobs} />
-  );
+  return <AdminJobsTable session={session} jobs={jobs} />;
 }
