@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { DataTablePage } from "@/modules/workspace/DataTablePage";
 import { StatusBadge } from "@/modules/workspace/StatusBadge";
@@ -43,12 +44,14 @@ export function EmployerJobsTable({ session, rows, total }: Props) {
         searchable
         searchPlaceholder="Search by title, description..."
         actions={
-          <Link
-            href="/employer/jobs/new"
-            className="inline-flex items-center gap-2 rounded-lg bg-[#eb6651] px-4 py-2 text-sm font-medium text-white hover:bg-[#d45441] transition-colors"
-          >
-            + New Job Posting
-          </Link>
+          <Button asChild>
+            <Link
+              href="/employer/jobs/new"
+              className="inline-flex items-center gap-2"
+            >
+              + New Job Posting
+            </Link>
+          </Button>
         }
         columns={[
           { key: "title", label: "Title", render: (row) => <strong>{String(row.title)}</strong> },

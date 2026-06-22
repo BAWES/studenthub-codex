@@ -4,10 +4,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import type { SessionUser } from "@/modules/auth/types";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
+import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { StatusBadge } from "@/modules/workspace/StatusBadge";
 import { genericStatusVariant } from "@/modules/workspace/status-mapping";
@@ -57,16 +58,14 @@ function useDebounce<T>(value: T, delay: number): T {
 function SearchResultSkeleton() {
   return (
     <Card className="p-4">
-      <CardContent className="flex flex-col gap-3 p-0">
-        <div className="flex items-start justify-between gap-3">
-          <Skeleton variant="pulse" className="h-5 w-40" />
-          <Skeleton variant="pulse" className="h-5 w-16 rounded-md" />
-        </div>
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-2">
-          <Skeleton variant="pulse" className="h-8 w-full" />
-          <Skeleton variant="pulse" className="h-8 w-full" />
-        </div>
-      </CardContent>
+      <div className="flex items-start justify-between gap-3">
+        <Skeleton variant="pulse" className="h-5 w-40" />
+        <Skeleton variant="pulse" className="h-5 w-16 rounded-md" />
+      </div>
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-2 mt-3">
+        <Skeleton variant="pulse" className="h-8 w-full" />
+        <Skeleton variant="pulse" className="h-8 w-full" />
+      </div>
     </Card>
   );
 }
@@ -235,12 +234,7 @@ export function EmployerJobsSearchPage({
             autoFocus
             className="flex-1"
           />
-          <Button
-            type="submit"
-            style={{ backgroundColor: "#eb6651" }}
-            className="text-white hover:opacity-90"
-            disabled={loading}
-          >
+          <Button type="submit" disabled={loading}>
             {loading ? "Searching..." : "Search"}
           </Button>
         </div>
@@ -264,10 +258,10 @@ export function EmployerJobsSearchPage({
         {/* Count indicator */}
         {results && (
           <div className="mb-4 flex items-center justify-between text-xs">
-            <span className="font-semibold text-foreground">
+            <span className="font-semibold">
               {isTyping ? (
                 <>
-                  <span className="mr-1.5 inline-block h-2 w-2 animate-pulse rounded-full bg-[#eb6651]" />
+                  <span className="inline-block align-middle mr-1.5 h-2 w-2 rounded-full bg-[#eb6651] animate-pulse" />
                   Searching...
                 </>
               ) : (
@@ -278,9 +272,9 @@ export function EmployerJobsSearchPage({
               )}
             </span>
             {!isTyping && (
-              <span className="rounded-md bg-accent px-2 py-0.5 text-muted-foreground">
+              <Badge variant="secondary" className="text-xs">
                 {results.source.current}
-              </span>
+              </Badge>
             )}
           </div>
         )}
@@ -313,82 +307,116 @@ export function EmployerJobsSearchPage({
                 <Link
                   key={row.jobListingId}
                   href={`/employer/jobs/${row.jobListingId}`}
-                  className="block transition-all duration-150 hover:-translate-y-px hover:shadow-md"
+                  className="block transition-all duration-150 hover:shadow-md hover:-translate-y-px"
+                  onClick={(e) => {
+                    if (e.button === 1 || e.metaKey || e.ctrlKey) return;
+                  }}
                 >
                   <Card className="p-4">
-                    <CardContent className="p-0">
-                      {/* Result header */}
-                      <div className="mb-2 flex items-start justify-between gap-3">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <h3 className="m-0 text-base font-semibold text-foreground">
-                            {row.title}
-                          </h3>
-                          {row.status && (
-                            <StatusBadge
-                              variant={genericStatusVariant(row.status)}
-                              label={row.status}
-                              size="sm"
-                            />
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Description excerpt */}
-                      {row.description && (
-                        <p className="m-0 mb-2 line-clamp-2 text-sm text-muted-foreground">
-                          {row.description}
-                        </p>
+                  {/* Result header */}
+                  <div className="mb-2 flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h3 className="m-0 text-base font-semibold">
+                        {row.title}
+                      </h3>
+                      {row.status && (
+                        <StatusBadge
+                          variant={genericStatusVariant(row.status)}
+                          label={row.status}
+                          size="sm"
+                        />
                       )}
 
-                      {/* Details grid */}
-                      <div className="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-2">
-                        {row.employmentType && (
-                          <div className="flex flex-col gap-0.5">
-                            <span className="text-[0.6875rem] font-medium uppercase tracking-wider text-muted-foreground">
-                              Type
-                            </span>
-                            <span className="text-xs text-foreground">
-                              {row.employmentType}
-                            </span>
-                          </div>
-                        )}
-                        {row.location && (
-                          <div className="flex flex-col gap-0.5">
-                            <span className="text-[0.6875rem] font-medium uppercase tracking-wider text-muted-foreground">
-                              Location
-                            </span>
-                            <span className="text-xs text-foreground">
-                              {row.location}
-                            </span>
-                          </div>
-                        )}
-                        {row.salaryRange && (
-                          <div className="flex flex-col gap-0.5">
-                            <span className="text-[0.6875rem] font-medium uppercase tracking-wider text-muted-foreground">
-                              Salary
-                            </span>
-                            <span className="text-xs text-foreground">
-                              {row.salaryRange}
-                            </span>
-                          </div>
-                        )}
-                        <div className="flex flex-col gap-0.5">
-                          <span className="text-[0.6875rem] font-medium uppercase tracking-wider text-muted-foreground">
-                            Posted
-                          </span>
-                          <span className="text-xs text-foreground">
-                            {row.createdAt}
-                          </span>
-                        </div>
+                  {/* Description excerpt */}
+                  {row.description && (
+                    <p className="m-0 mb-2 text-sm line-clamp-2">
+                      {row.description}
+                    </p>
+                  )}
+
+                  {/* Details grid */}
+                  <div className="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-2">
+                    {row.employmentType && (
+                      <div className="flex flex-col gap-0.5">
+                        <span className="text-[0.6875rem] font-medium uppercase tracking-wider">
+                          Type
+                        </span>
+                        <span className="text-xs">
+                          {row.employmentType}
+                        </span>
                       </div>
-                    </CardContent>
+                    )}
+                    {row.location && (
+                      <div className="flex flex-col gap-0.5">
+                        <span className="text-[0.6875rem] font-medium uppercase tracking-wider">
+                          Location
+                        </span>
+                        <span className="text-xs">
+                          {row.location}
+                        </span>
+                      </div>
+                    )}
+                    {row.salaryRange && (
+                      <div className="flex flex-col gap-0.5">
+                        <span className="text-[0.6875rem] font-medium uppercase tracking-wider">
+                          Salary
+                        </span>
+                        <span className="text-xs">
+                          {row.salaryRange}
+                        </span>
+                      </div>
+                    )}
+                    <div className="flex flex-col gap-0.5">
+                      <span className="text-[0.6875rem] font-medium uppercase tracking-wider">
+                        Posted
+                      </span>
+                      <span className="text-xs">
+                        {row.createdAt}
+                      </span>
+                    </div>
+                  </div>
                   </Card>
                 </Link>
               ))}
             </div>
 
             {/* Pagination */}
-            <Pagination page={page} totalPages={totalPages} onGoToPage={goToPage} />
+            {totalPages > 1 && (
+              <div className="mt-6 flex items-center justify-center gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={page <= 1}
+                  onClick={() => goToPage(page - 1)}
+                >
+                  Previous
+                </Button>
+                {Array.from({ length: Math.min(totalPages, 5) }).map((_, i) => {
+                  const p = i + 1;
+                  return (
+                    <Button
+                      key={p}
+                      type="button"
+                      variant={p === page ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => goToPage(p)}
+                    >
+                      {p}
+                    </Button>
+                  );
+                })}
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={page >= totalPages}
+                  onClick={() => goToPage(page + 1)}
+                >
+                  Next
+                </Button>
+              </div>
+            )}
           </>
         )}
       </div>
