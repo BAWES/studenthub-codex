@@ -1,4 +1,5 @@
-import { describe, it, expect } from "vitest";
+// @vitest-environment jsdom
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { universityListItemSchema, listUniversitiesResultSchema } from "./schemas";
 import type { UniversityListItem, ListUniversitiesResult } from "./schemas";
 

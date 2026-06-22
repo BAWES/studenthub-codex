@@ -28,8 +28,8 @@ export type DataTablePageProps<T extends { id: string | number }> = {
   columns: DataTableColumn<T>[];
   /** Row data. */
   rows: T[];
-  /** URL prefix for clickable rows (row.id appended automatically). */
-  rowHref?: Route;
+  /** URL string for clickable rows — passed directly to DataTable. */
+  rowHref?: string;
   /** Loading state — shows skeleton when true. */
   loading?: boolean;
   /** Error message — shows error state when set. */

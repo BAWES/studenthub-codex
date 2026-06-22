@@ -27,6 +27,8 @@ export type CandidateSearchParams = {
   profile?: string;
   assignment?: string;
   document?: string;
+  page?: number;
+  totalPages?: number;
 };
 
 export type CandidateSearchFacet = {
