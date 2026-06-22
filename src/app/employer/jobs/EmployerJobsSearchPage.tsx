@@ -327,6 +327,9 @@ export function EmployerJobsSearchPage({
                         />
                       )}
 
+                    </div>
+                  </div>
+
                   {/* Description excerpt */}
                   {row.description && (
                     <p className="m-0 mb-2 text-sm line-clamp-2">
