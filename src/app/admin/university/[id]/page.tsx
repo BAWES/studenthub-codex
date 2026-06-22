@@ -1,8 +1,10 @@
+import Link from "next/link";
 import { ErrorBoundary } from "@/modules/workspace/ErrorBoundary";
 import { notFound } from "next/navigation";
 import { requireRoleCapability } from "@/modules/auth/session";
 import { DetailSection } from "@/modules/workspace/DetailPanels";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
+import { Button } from "@/components/ui/button";
 import { getUniversity } from "@/modules/admin/university/actions";
 import { formatDate } from "@/modules/workspace/format";
 
@@ -27,13 +29,18 @@ export default async function AdminUniversityDetailPage({
     notFound();
   }
 
+  const displayName = university.university_name_en ?? university.university_name_ar ?? "Unnamed";
+
   return (
     <ErrorBoundary>
       <WorkspaceShell
         session={session}
         eyebrow="Admin / Universities"
-        title={university.university_name_en ?? university.university_name_ar ?? "Unnamed"}
-        metrics={[]}
+        title={`University — ${displayName}`}
+        metrics={[
+          { label: "Name (English)", value: university.university_name_en ?? "—", note: "" },
+          { label: "Name (Arabic)", value: university.university_name_ar ?? "—", note: "" },
+        ]}
       >
         <DetailSection
           title="University Details"
@@ -56,6 +63,11 @@ export default async function AdminUniversityDetailPage({
             },
           ]}
         />
+        <div className="mt-6">
+          <Button variant="outline" asChild>
+            <Link href="/admin/university">Back to Universities</Link>
+          </Button>
+        </div>
       </WorkspaceShell>
     </ErrorBoundary>
   );
