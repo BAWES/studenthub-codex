@@ -6,6 +6,7 @@ import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { formatDate } from "@/modules/workspace/format";
 import { getCandidateSkill, deleteCandidateSkill } from "../actions";
 import { DeleteSkillButton } from "./DeleteSkillButton";
+import { Button } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
 
@@ -44,13 +45,17 @@ export default async function CandidateSkillDetailPage({
       />
 
       <div className="flex items-center gap-3 mt-8">
-        <Link href={`/candidate/skills/${skillId}/edit`} className="shButtonSecondary">
-          Edit Skill
-        </Link>
+        <Button asChild variant="secondary">
+          <Link href={`/candidate/skills/${skillId}/edit`}>
+            Edit Skill
+          </Link>
+        </Button>
         <DeleteSkillButton skillId={skill.candidate_skill_id} />
-        <Link href="/candidate/skills" className="shButtonOutline">
-          Back to Skills
-        </Link>
+        <Button asChild variant="outline">
+          <Link href="/candidate/skills">
+            Back to Skills
+          </Link>
+        </Button>
       </div>
     </WorkspaceShell>
   );

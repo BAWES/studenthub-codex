@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
 import { notFound } from "next/navigation";
@@ -67,12 +68,14 @@ const mockUniversity = {
 
 const mockGetUniversity = vi.fn();
 
-vi.mock("./actions", () => ({
+vi.mock("@/modules/admin/university/actions", () => ({
   getUniversity: (...args: unknown[]) => mockGetUniversity(...args),
 }));
 
 vi.mock("next/navigation", () => ({
-  notFound: vi.fn(),
+  notFound: vi.fn(() => {
+    throw new Error("NEXT_NOT_FOUND");
+  }),
 }));
 
 vi.mock("@/modules/workspace/format", () => ({

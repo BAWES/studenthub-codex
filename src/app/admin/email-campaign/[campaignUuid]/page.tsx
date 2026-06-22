@@ -16,9 +16,7 @@ export default async function AdminEmailCampaignDetailPage({
   const session = await requireRoleCapability("admin", "admin.read");
   const { campaignUuid } = await params;
 
-  if (!campaignUuid) {
-    notFound();
-  }
+  if (!campaignUuid) notFound();
 
   const campaign = await getEmailCampaign({ campaignUuid });
 
@@ -26,29 +24,44 @@ export default async function AdminEmailCampaignDetailPage({
     notFound();
   }
 
+  const statusLabel = (status: boolean | null) => {
+    if (status === null) return "—";
+    return status ? "Active" : "Inactive";
+  };
+
   return (
     <ErrorBoundary>
       <WorkspaceShell
         session={session}
-        eyebrow="Admin / Email campaigns"
-        title={campaign.subject ?? "Email Campaign"}
+        eyebrow="Admin / Email Campaigns"
+        title={campaign.subject ?? "Untitled Campaign"}
         metrics={[
+          {
+            label: "Status",
+            value: statusLabel(campaign.status),
+            note: "Current campaign status",
+          },
           {
             label: "Progress",
             value: campaign.progress != null ? `${campaign.progress}%` : "—",
-            note: "Delivery progress",
+            note: "Completion percentage",
+          },
+          {
+            label: "Target",
+            value: campaign.target ?? "—",
+            note: "Audience segment",
           },
         ]}
       >
         <DetailSection
           title="Campaign Details"
           facts={[
+            { label: "Campaign UUID", value: campaign.campaign_uuid },
             { label: "Subject", value: campaign.subject ?? "—" },
+            { label: "Message", value: campaign.message ?? "—" },
             { label: "Target", value: campaign.target ?? "—" },
-            {
-              label: "Status",
-              value: campaign.status ? "Active" : "Inactive",
-            },
+            { label: "Progress", value: campaign.progress != null ? `${campaign.progress}%` : "—" },
+            { label: "Status", value: statusLabel(campaign.status) },
             {
               label: "Created",
               value: campaign.created_at
