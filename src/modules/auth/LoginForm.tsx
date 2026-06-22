@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import Link from "next/link";
 import { LogIn, Loader2 } from "lucide-react";
 import { chooseAccountAction, loginAction } from "./actions";
 import { Button } from "@/components/ui/button";
@@ -49,6 +50,15 @@ export function LoginForm() {
             required
             className="min-h-[46px]"
           />
+        </div>
+
+        <div className="flex items-center justify-end -mt-1.5">
+          <Link
+            href="/forgot-password"
+            className="text-xs text-muted-foreground hover:text-sh-coral transition-colors no-underline font-medium"
+          >
+            Forgot password?
+          </Link>
         </div>
 
         {state.error ? <p className="text-destructive font-bold m-0">{state.error}</p> : null}

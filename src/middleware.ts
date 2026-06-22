@@ -11,7 +11,7 @@ const protectedPaths = [
   "/inspector"
 ];
 
-const publicPaths = ["/login", "/", "/games"];
+const publicPaths = ["/login", "/", "/games", "/forgot-password"];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
