@@ -132,7 +132,7 @@ export function InvoiceDetailDrawer({
                         
                       >
                         <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{m.label}</p>
-                        <p className="text-lg font-bold mt-1" style={{ color: "var(--accent)" }}>{m.value}</p>
+                        <p className="text-lg font-bold mt-1 text-accent">{m.value}</p>
                         {m.note && (
                           <p className="text-xs mt-0.5 text-muted-foreground">{m.note}</p>
                         )}
