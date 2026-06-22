@@ -2524,3 +2524,141 @@ export async function getAdminSalaryRows() {
     updated: formatDate(row.updated_at),
   }));
 }
+
+export async function getAdminDegreeGroupRows() {
+  const rows = await prisma.degree_group.findMany({
+    orderBy: { degree_group_sort_order: "asc" },
+    take: 60,
+    select: {
+      degree_group_uuid: true,
+      degree_group_name_en: true,
+      degree_group_name_ar: true,
+      degree_group_sort_order: true,
+      degree_group_created_at: true,
+      degree_group_updated_at: true,
+    }
+  });
+
+  return rows.map((row) => ({
+    id: row.degree_group_uuid,
+    name_en: row.degree_group_name_en,
+    name_ar: row.degree_group_name_ar ?? "-",
+    sort_order: row.degree_group_sort_order ?? 0,
+    updated: formatDate(row.degree_group_updated_at)
+  }));
+}
+
+export async function getAdminDiscountCategoryRows() {
+  const rows = await prisma.discount_category.findMany({
+    orderBy: { updated_at: "desc" },
+    take: 60,
+    select: {
+      category_id: true,
+      name_en: true,
+      name_ar: true,
+      image: true,
+      created_at: true,
+      updated_at: true,
+    }
+  });
+
+  return rows.map((row) => ({
+    id: row.category_id,
+    name_en: row.name_en,
+    name_ar: row.name_ar ?? "-",
+    image: row.image ?? "-",
+    updated: formatDate(row.updated_at)
+  }));
+}
+
+export async function getAdminMajorRows() {
+  const rows = await prisma.major.findMany({
+    orderBy: { major_updated_at: "desc" },
+    take: 60,
+    select: {
+      major_uuid: true,
+      major_name_en: true,
+      major_name_ar: true,
+      data_source: true,
+      major_created_at: true,
+      major_updated_at: true,
+    }
+  });
+
+  return rows.map((row) => ({
+    id: row.major_uuid,
+    name_en: row.major_name_en,
+    name_ar: row.major_name_ar,
+    updated: formatDate(row.major_updated_at)
+  }));
+}
+
+export async function getAdminUniversityRows() {
+  const rows = await prisma.university.findMany({
+    where: { deleted: 0 },
+    orderBy: { university_updated_at: "desc" },
+    take: 60,
+    select: {
+      university_id: true,
+      university_name_en: true,
+      university_name_ar: true,
+      university_data_source: true,
+      university_created_at: true,
+      university_updated_at: true,
+    }
+  });
+
+  return rows.map((row) => ({
+    id: row.university_id,
+    name_en: row.university_name_en ?? "-",
+    name_ar: row.university_name_ar ?? "-",
+    updated: formatDate(row.university_updated_at)
+  }));
+}
+
+export async function getAdminWebhookRows() {
+  const rows = await prisma.webhook.findMany({
+    orderBy: { updated_at: "desc" },
+    take: 60,
+    select: {
+      webhook_id: true,
+      event: true,
+      endpoint: true,
+      method: true,
+      created_at: true,
+      updated_at: true,
+    }
+  });
+
+  return rows.map((row) => ({
+    id: row.webhook_id,
+    event: row.event,
+    endpoint: row.endpoint,
+    method: row.method ?? "-",
+    updated: formatDate(row.updated_at)
+  }));
+}
+
+export async function getAdminStoryRows() {
+  const rows = await prisma.story.findMany({
+    orderBy: { story_last_updated_at: "desc" },
+    take: 60,
+    select: {
+      story_uuid: true,
+      request_uuid: true,
+      number_of_employees: true,
+      story_status: true,
+      is_old: true,
+      story_created_at: true,
+      story_last_updated_at: true,
+    }
+  });
+
+  return rows.map((row) => ({
+    id: row.story_uuid,
+    id_short: row.story_uuid.slice(0, 8),
+    status: String(row.story_status),
+    employees: row.number_of_employees ?? 0,
+    updated: formatDate(row.story_last_updated_at)
+  }));
+}
