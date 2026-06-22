@@ -1,6 +1,6 @@
 export interface TestingWatchdogResult {
   timestamp: string;
-  checked: number;
+  checked: string[];
   threadsCreated: number;
   threadsExisting: number;
   skipped: number;
@@ -10,7 +10,7 @@ export interface TestingWatchdogResult {
 export async function runTestingWatchdog(): Promise<TestingWatchdogResult> {
   return {
     timestamp: new Date().toISOString(),
-    checked: 0,
+    checked: [],
     threadsCreated: 0,
     threadsExisting: 0,
     skipped: 0,
