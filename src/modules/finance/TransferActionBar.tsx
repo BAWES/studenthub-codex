@@ -31,8 +31,8 @@ export function TransferActionBar({ data }: { data: TransferDetail }) {
   const isLocked = data.transfer.transfer_status !== 10;
 
   return (
-    <section className="grid gap-6 mb-6">
-      <div className="flex flex-wrap items-center gap-3">
+    <section className="flex flex-col gap-4 mb-6">
+      <div className="flex flex-wrap gap-2 items-center">
         <form action={toggleTransferStatusAction}>
           <input name="transfer_id" type="hidden" value={data.transfer.transfer_id} />
           <Button type="submit" variant={isLocked ? "secondary" : "outline"}>
@@ -57,12 +57,10 @@ export function TransferActionBar({ data }: { data: TransferDetail }) {
           <CardHeader>
             <CardTitle>Candidate Payouts</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="divide-y divide-border">
-              {data.candidates.map((candidate) => (
-                <CandidatePayoutRow key={candidate.id} candidate={candidate} transferId={data.transfer!.transfer_id} />
-              ))}
-            </div>
+          <CardContent className="space-y-3">
+            {data.candidates.map((candidate) => (
+              <CandidatePayoutRow key={candidate.id} candidate={candidate} transferId={data.transfer!.transfer_id} />
+            ))}
           </CardContent>
         </Card>
       ) : null}
@@ -74,9 +72,9 @@ function CandidatePayoutRow({ candidate, transferId }: { candidate: TransferDeta
   const isPaid = candidate.meta?.includes("Paid");
 
   return (
-    <div className="flex items-center justify-between gap-4 py-3 first:pt-0 last:pb-0">
-      <div className="min-w-0 grid gap-0.5">
-        <strong className="text-sm font-semibold text-foreground">{candidate.title}</strong>
+    <div className="flex items-center justify-between gap-3 p-3 rounded-lg border border-border">
+      <div className="grid gap-0.5">
+        <strong className="text-foreground">{candidate.title}</strong>
         <span className="text-sm text-muted-foreground">{candidate.subtitle}</span>
         <small className="text-xs text-muted-foreground">{candidate.meta}</small>
       </div>
@@ -94,18 +92,13 @@ function CandidatePayoutRow({ candidate, transferId }: { candidate: TransferDeta
 
 function PaymentReceivedForm({ transferId, currentDate }: { transferId: number; currentDate: Date | null }) {
   return (
-    <form action={markPaymentReceivedAction} className="flex items-end gap-2">
+    <form action={markPaymentReceivedAction} className="flex gap-2 items-center">
       <input name="transfer_id" type="hidden" value={transferId} />
-      <div className="grid gap-1">
-        <label className="text-xs font-medium text-muted-foreground" htmlFor="received_on">Payment received on</label>
-        <Input
-          id="received_on"
-          name="received_on"
-          type="date"
-          className="w-[160px]"
-          defaultValue={currentDate ? new Date(currentDate).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10)}
-        />
-      </div>
+      <Input
+        name="received_on"
+        type="date"
+        defaultValue={currentDate ? new Date(currentDate).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10)}
+      />
       <Button type="submit" variant="secondary">
         <CheckCircle aria-hidden="true" />
         Payment received
