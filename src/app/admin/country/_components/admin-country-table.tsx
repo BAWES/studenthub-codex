@@ -5,7 +5,20 @@ import { useRouter } from "next/navigation";
 import { DataTable } from "@/modules/workspace/DataTable";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Card } from "@/components/ui/card";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import type { Route } from "next";
 
 import type { SessionUser } from "@/modules/auth/types";
 import type { CountryItem } from "../schemas";
@@ -175,28 +188,36 @@ function CreateCountryForm({ onSuccess }: { onSuccess: () => void }) {
       onSubmit={() => setTimeout(() => { formRef.current?.reset(); }, 100)}
     >
       <div className="grid gap-1">
-        <label className="text-xs font-medium text-muted-foreground">Name (EN) *</label>
-        <Input name="countryNameEn" required maxLength={100} placeholder="e.g. Kuwait" className="w-36" />
+        <Label className="text-xs font-medium text-muted-foreground">Name (English)</Label>
+        <Input name="country_name_en" maxLength={100} placeholder="e.g. Kuwait" />
       </div>
       <div className="grid gap-1">
-        <label className="text-xs font-medium text-muted-foreground">Name (AR)</label>
-        <Input name="countryNameAr" maxLength={100} placeholder="الكويت" className="w-36" />
+        <Label className="text-xs font-medium text-muted-foreground">Name (Arabic)</Label>
+        <Input name="country_name_ar" maxLength={100} placeholder="مثال: الكويت" />
       </div>
       <div className="grid gap-1">
-        <label className="text-xs font-medium text-muted-foreground">Nationality (EN) *</label>
-        <Input name="nationalityNameEn" required maxLength={100} placeholder="e.g. Kuwaiti" className="w-36" />
+        <Label className="text-xs font-medium text-muted-foreground">Nationality (English)</Label>
+        <Input name="country_nationality_name_en" maxLength={100} placeholder="e.g. Kuwaiti" />
       </div>
       <div className="grid gap-1">
-        <label className="text-xs font-medium text-muted-foreground">ISO</label>
-        <Input name="iso" maxLength={3} placeholder="KWT" className="w-16" />
+        <Label className="text-xs font-medium text-muted-foreground">Nationality (Arabic)</Label>
+        <Input name="country_nationality_name_ar" maxLength={100} placeholder="مثال: كويتي" />
       </div>
       <div className="grid gap-1">
-        <label className="text-xs font-medium text-muted-foreground">Code</label>
-        <Input name="countryCode" type="number" placeholder="965" className="w-20" />
+        <Label className="text-xs font-medium text-muted-foreground">ISO</Label>
+        <Input name="iso" maxLength={3} placeholder="KWT" />
       </div>
       <div className="grid gap-1">
-        <label className="text-xs font-medium text-muted-foreground">Currency</label>
-        <Input name="currencyCode" maxLength={3} placeholder="KWD" className="w-16" />
+        <Label className="text-xs font-medium text-muted-foreground">Emoji</Label>
+        <Input name="emoji" maxLength={255} placeholder="🇰🇼" />
+      </div>
+      <div className="grid gap-1">
+        <Label className="text-xs font-medium text-muted-foreground">Phone Code</Label>
+        <Input name="country_code" type="number" placeholder="965" />
+      </div>
+      <div className="grid gap-1">
+        <Label className="text-xs font-medium text-muted-foreground">Currency</Label>
+        <Input name="currency_code" maxLength={3} placeholder="KWD" />
       </div>
       <div className="grid gap-1">
         <label className="text-xs font-medium text-muted-foreground">Emoji</label>
