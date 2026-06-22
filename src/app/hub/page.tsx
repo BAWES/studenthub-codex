@@ -36,7 +36,11 @@ export default async function HubPage({
         <nav className="commandRailNav" aria-label="Workspace navigation">
           {data.navigation.map((item) => (
             <Link
-              className={item.href === hubContext || item.href === "/app" ? "active" : ""}
+              className={cn(
+                buttonVariants({ variant: "ghost" }),
+                "justify-start gap-0.5 no-underline",
+                (item.href === hubContext || item.href === "/app") && "bg-blue-zendesk/10 text-blue-zendesk hover:bg-blue-zendesk/15"
+              )}
               href={item.href}
               key={item.href}
               title={`${item.label}: ${item.description}`}
