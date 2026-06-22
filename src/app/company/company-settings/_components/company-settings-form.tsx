@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export function CompanySettingsForm({
   companyId,
@@ -98,15 +99,9 @@ export function CompanySettingsForm({
       </div>
 
       {feedback && (
-        <div
-          className={`rounded-md px-3 py-2 text-xs ${
-            feedback.type === "success"
-              ? "bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-400"
-              : "bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-400"
-          }`}
-        >
-          {feedback.message}
-        </div>
+        <Alert variant={feedback.type === "success" ? "default" : "destructive"}>
+          <AlertDescription>{feedback.message}</AlertDescription>
+        </Alert>
       )}
 
       {/* Name & Identity */}
@@ -240,13 +235,13 @@ function CheckboxField({
   defaultChecked: boolean;
 }) {
   return (
-    <label className="flex items-center gap-2 cursor-pointer">
+    <Label className="flex items-center gap-2 cursor-pointer text-xs text-foreground">
       <Checkbox
         name={name}
         defaultChecked={defaultChecked}
         className="data-[state=checked]:bg-coral data-[state=checked]:border-coral"
       />
-      <span className="text-xs text-foreground">{label}</span>
-    </label>
+      {label}
+    </Label>
   );
 }

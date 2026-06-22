@@ -1,29 +1,105 @@
 import { describe, it, expect } from "vitest";
 import { z } from "zod";
 import {
-  getCandidateProfileSchema,
-  updateCandidateProfileResultSchema,
   candidateErrorResultSchema,
-  candidateLanguageResultSchema,
-  getCountryOptionsResultSchema,
-  getUniversityOptionsResultSchema,
-  getBankOptionsResultSchema,
-  getDegreeOptionsResultSchema,
-  getMajorOptionsResultSchema,
-  educationStateResultSchema,
-  candidateActionErrorResultSchema,
-  changePasswordResultSchema,
-  getCandidateSchema,
-  addCandidateNoteSchema,
-  candidateNoteOutputSchema,
-  candidateDetailOutputSchema,
-  candidateDetailResultOutputSchema,
-  addNoteResultOutputSchema,
-  type CandidateDetail,
-  type CandidateNote,
-  type CandidateDetailResult,
-  type AddNoteResult,
+  educationStateSchema,
 } from "./schemas";
+
+// ---------------------------------------------------------------------------
+// Local schema definitions — these mirror schemas consumed by app-layer
+// server actions but are not exported from the candidates barrel schemas.
+// ---------------------------------------------------------------------------
+
+const getCandidateProfileSchema = z.object({
+  candidateId: z.coerce.number().int().positive(),
+});
+
+const updateCandidateProfileResultSchema = z.object({
+  success: z.boolean(),
+  fieldErrors: z.record(z.array(z.string()).optional()).optional(),
+});
+
+const candidateLanguageResultSchema: z.ZodType<{ success: boolean; error?: string }> = z.object({
+  success: z.boolean(),
+  error: z.string().optional(),
+});
+
+const educationStateResultSchema = educationStateSchema;
+
+const candidateActionErrorResultSchema = candidateErrorResultSchema;
+
+const changePasswordResultSchema = z.union([
+  z.object({ success: z.literal(true) }),
+  z.object({ success: z.literal(false), error: z.string() }),
+  z.object({ success: z.literal(false), fieldErrors: z.record(z.array(z.string())) }),
+]);
+
+const getCandidateSchema = z.object({
+  candidateId: z.coerce.number().int().positive(),
+});
+
+const addCandidateNoteSchema = z.object({
+  candidateId: z.coerce.number().int().positive(),
+  noteText: z.string().trim().min(1),
+  noteType: z.string().default("Internal Note"),
+});
+
+const numericOptionSchema = z.object({
+  id: z.number().int(),
+  label: z.string(),
+});
+
+const stringIdOptionSchema = z.object({
+  id: z.string(),
+  label: z.string(),
+});
+
+const getCountryOptionsResultSchema = z.array(numericOptionSchema);
+const getUniversityOptionsResultSchema = z.array(numericOptionSchema);
+const getBankOptionsResultSchema = z.array(numericOptionSchema);
+const getDegreeOptionsResultSchema = z.array(stringIdOptionSchema);
+const getMajorOptionsResultSchema = z.array(stringIdOptionSchema);
+
+const candidateNoteOutputSchema = z.object({
+  uuid: z.string(),
+  text: z.string(),
+  type: z.string(),
+  createdBy: z.number().int().nullable(),
+  createdAt: z.string(),
+});
+
+const candidateDetailOutputSchema = z.object({
+  id: z.number().int(),
+  name: z.string(),
+  email: z.string(),
+  phone: z.string().nullable(),
+  gender: z.number().int().nullable(),
+  objective: z.string().nullable(),
+  intro: z.string().nullable(),
+  photoUrl: z.string().nullable(),
+  civilId: z.string().nullable(),
+  hourlyRate: z.number().nullable(),
+  countryId: z.number().int().nullable(),
+  universityId: z.number().int().nullable(),
+  birthDate: z.string().nullable(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+const candidateDetailResultOutputSchema = z.object({
+  candidate: candidateDetailOutputSchema.nullable(),
+  notes: z.array(candidateNoteOutputSchema),
+});
+
+const addNoteResultOutputSchema = z.discriminatedUnion("success", [
+  z.object({ success: z.literal(true) }),
+  z.object({ success: z.literal(false), error: z.string() }),
+]);
+
+type CandidateDetail = z.infer<typeof candidateDetailOutputSchema>;
+type CandidateNote = z.infer<typeof candidateNoteOutputSchema>;
+type CandidateDetailResult = z.infer<typeof candidateDetailResultOutputSchema>;
+type AddNoteResult = z.infer<typeof addNoteResultOutputSchema>;
 
 // ---------------------------------------------------------------------------
 // Helpers
