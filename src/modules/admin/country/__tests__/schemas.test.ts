@@ -1,8 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
-  countryListItemSchema,
+  countryItemSchema,
   listCountriesResultSchema,
-  countryIdResultSchema,
 } from "../schemas";
 
 // ---------------------------------------------------------------------------
@@ -26,9 +25,9 @@ const validCountry = {
   country_from_google_map: false,
 };
 
-describe("countryListItemSchema", () => {
+describe("countryItemSchema", () => {
   it("accepts a valid country with all fields", () => {
-    const result = countryListItemSchema.safeParse(validCountry);
+    const result = countryItemSchema.safeParse(validCountry);
     expect(result.success).toBe(true);
   });
 
@@ -45,19 +44,19 @@ describe("countryListItemSchema", () => {
       currency_code: null,
       country_from_google_map: null,
     };
-    const result = countryListItemSchema.safeParse(minimal);
+    const result = countryItemSchema.safeParse(minimal);
     expect(result.success).toBe(true);
   });
 
   it("rejects missing required fields", () => {
-    const result = countryListItemSchema.safeParse({
+    const result = countryItemSchema.safeParse({
       country_name_en: "Kuwait",
     });
     expect(result.success).toBe(false);
   });
 
   it("rejects non-integer country_id", () => {
-    const result = countryListItemSchema.safeParse({
+    const result = countryItemSchema.safeParse({
       ...validCountry,
       country_id: "abc",
     });
@@ -65,7 +64,7 @@ describe("countryListItemSchema", () => {
   });
 
   it("rejects non-string country_name_en", () => {
-    const result = countryListItemSchema.safeParse({
+    const result = countryItemSchema.safeParse({
       ...validCountry,
       country_name_en: 123,
     });
@@ -108,9 +107,9 @@ describe("listCountriesResultSchema", () => {
   });
 });
 
-describe("countryIdResultSchema", () => {
+describe("countryItemSchema - country_id result", () => {
   it("accepts a valid country_id result", () => {
-    const result = countryIdResultSchema.safeParse({ country_id: 42 });
+    const result = countryItemSchema.safeParse({ country_id: 42 });
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data.country_id).toBe(42);
@@ -118,12 +117,12 @@ describe("countryIdResultSchema", () => {
   });
 
   it("rejects non-integer country_id", () => {
-    const result = countryIdResultSchema.safeParse({ country_id: "abc" });
+    const result = countryItemSchema.safeParse({ country_id: "abc" });
     expect(result.success).toBe(false);
   });
 
   it("rejects missing country_id", () => {
-    const result = countryIdResultSchema.safeParse({});
+    const result = countryItemSchema.safeParse({});
     expect(result.success).toBe(false);
   });
 });

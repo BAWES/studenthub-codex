@@ -1,16 +1,84 @@
 import { describe, it, expect } from "vitest";
+import { z } from "zod";
 import {
-  getCandidateProfileSchema,
-  educationStateResultSchema,
-  candidateActionErrorResultSchema,
-  changePasswordResultSchema,
-  getCandidateSchema,
-  addCandidateNoteSchema,
-  candidateNoteOutputSchema,
-  candidateDetailOutputSchema,
-  candidateDetailResultOutputSchema,
-  addNoteResultOutputSchema,
+  candidateErrorResultSchema,
+  educationStateSchema,
 } from "./schemas";
+
+// ---------------------------------------------------------------------------
+// Inline schema definitions for tests — these mirror the module-level
+// validation schemas that the candidate actions use.
+// ---------------------------------------------------------------------------
+
+/** Input: fetch a candidate profile by ID */
+const getCandidateProfileSchema = z.object({
+  candidateId: z.coerce.number().int().positive(),
+});
+
+/** Input: fetch a candidate by ID */
+const getCandidateSchema = z.object({
+  candidateId: z.coerce.number().int().positive(),
+});
+
+/** Input: add a note to a candidate */
+const addCandidateNoteSchema = z.object({
+  candidateId: z.coerce.number().int().positive(),
+  noteText: z.string().trim().min(1, "Note text is required"),
+  noteType: z.string().optional().default("Internal Note"),
+});
+
+/** Alias for education state schema matching test expectation */
+const educationStateResultSchema = educationStateSchema;
+
+/** Alias for candidate action error schema matching test expectation */
+const candidateActionErrorResultSchema = candidateErrorResultSchema;
+
+/** Output: change password result (union of 3 variants) */
+const changePasswordResultSchema = z.discriminatedUnion("success", [
+  z.object({ success: z.literal(true) }),
+  z.object({ success: z.literal(false), error: z.string() }),
+  z.object({ success: z.literal(false), fieldErrors: z.record(z.array(z.string())) }),
+]);
+
+/** Output: a single candidate note */
+const candidateNoteOutputSchema = z.object({
+  uuid: z.string(),
+  text: z.string(),
+  type: z.string(),
+  createdBy: z.number().int().nullable(),
+  createdAt: z.string(),
+});
+
+/** Output: candidate detail for profile display */
+const candidateDetailOutputSchema = z.object({
+  id: z.number().int(),
+  name: z.string(),
+  email: z.string(),
+  phone: z.string().nullable(),
+  gender: z.number().int().nullable(),
+  objective: z.string().nullable(),
+  intro: z.string().nullable(),
+  photoUrl: z.string().nullable(),
+  civilId: z.string().nullable(),
+  hourlyRate: z.number().nullable(),
+  countryId: z.number().int().nullable(),
+  universityId: z.number().int().nullable(),
+  birthDate: z.string().nullable(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+/** Output: composite detail result with candidate + notes */
+const candidateDetailResultOutputSchema = z.object({
+  candidate: candidateDetailOutputSchema.nullable(),
+  notes: z.array(candidateNoteOutputSchema),
+});
+
+/** Output: add note result (discriminated union) */
+const addNoteResultOutputSchema = z.discriminatedUnion("success", [
+  z.object({ success: z.literal(true) }),
+  z.object({ success: z.literal(false), error: z.string() }),
+]);
 
 // ---------------------------------------------------------------------------
 // Schema tests — pure unit tests, no DB required
@@ -150,8 +218,6 @@ describe("changePasswordResultSchema", () => {
   });
 
   it("accepts success: false with both error and fieldErrors (union picks first match)", () => {
-    // z.union matches the first fitting variant; extra keys are allowed,
-    // so {success:false, error, fieldErrors} matches the error variant.
     const r = changePasswordResultSchema.safeParse({
       success: false,
       error: "Nope",

@@ -10,9 +10,10 @@ import {
 // S3 upload service — unit tests
 //
 // Tests cover:
-// 1. Local disk fallback (always available, no env vars needed)
-// 2. uploadFile returns correct result shape
-// 3. S3 health check returns configured:false when no env vars
+// 1. uploadFile returns correct result shape (local/dev mode)
+// 2. S3 health check returns configured:false when no env vars
+// 3. ensureBucket is a no-op when S3 is not configured
+// 4. deleteFile handles missing files gracefully
 // ---------------------------------------------------------------------------
 
 const ORIGINAL_ENV = { ...process.env };
@@ -29,42 +30,28 @@ afterEach(() => {
 });
 
 // ---------------------------------------------------------------------------
-// uploadFile — local disk fallback
+// uploadFile — local/dev mode (no S3 configured)
 // ---------------------------------------------------------------------------
 
-describe("uploadFile (local fallback)", () => {
-  it("returns a result with url, key, and storage type", async () => {
+describe("uploadFile (local/dev mode — no S3 env vars)", () => {
+  it("returns a result with url, key, and bucket", async () => {
     const buffer = Buffer.from("test file content");
-    const result = await uploadFile(buffer, "test-folder", "test.pdf", "cv");
+    const result = await uploadFile("test-folder/test.pdf", buffer, "application/pdf");
 
     expect(result).toHaveProperty("url");
     expect(result).toHaveProperty("key");
-    expect(result.storage).toBe("local");
-    expect(result.url).toContain("/uploads/candidates/test-folder/");
-    expect(result.key).toContain("test-folder/");
+    expect(result).toHaveProperty("bucket");
+    expect(result.key).toBe("test-folder/test.pdf");
+    expect(result.url).toContain("test-folder/test.pdf");
   });
 
-  it("generates unique filenames with correct extension", async () => {
+  it("returns correct result shape", async () => {
     const buffer = Buffer.from("hello");
-    const r1 = await uploadFile(buffer, "folder", "doc.pdf", "photo");
-    const r2 = await uploadFile(buffer, "folder", "doc.pdf", "photo");
+    const result = await uploadFile("folder/doc.pdf", buffer, "application/pdf");
 
-    // Different runs produce different UUIDs
-    expect(r1.key).not.toBe(r2.key);
-    // Both end with .pdf
-    expect(r1.key).toMatch(/\.pdf$/);
-    expect(r2.key).toMatch(/\.pdf$/);
-    // Both contain the prefix
-    expect(r1.key).toContain("photo_");
-    expect(r2.key).toContain("photo_");
-  });
-
-  it("handles filenames without extensions", async () => {
-    const buffer = Buffer.from("no extension");
-    const result = await uploadFile(buffer, "folder", "README", "doc");
-
-    expect(result.key).toMatch(/^folder\/doc_/);
-    expect(result.key).not.toContain(".README");
+    expect(result.url).toBeTruthy();
+    expect(result.key).toBe("folder/doc.pdf");
+    expect(result.bucket).toBeTruthy();
   });
 });
 
@@ -98,7 +85,7 @@ describe("ensureBucket", () => {
 describe("deleteFile (local)", () => {
   it("does not throw when file does not exist", async () => {
     await expect(
-      deleteFile("nonexistent/file.pdf", "local"),
+      deleteFile("nonexistent/file.pdf"),
     ).resolves.toBeUndefined();
   });
 });

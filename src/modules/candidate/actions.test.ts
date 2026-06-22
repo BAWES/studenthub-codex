@@ -46,7 +46,8 @@ describe("candidate module actions barrel", () => {
     ["rejectWorkLogAppeal", rejectWorkLogAppeal],
   ];
 
-  it.each(actionFunctions)("re-exports %s as a function", (_name, fn) => {
+  it.each(actionFunctions)("re-exports %s as a function", (...args: unknown[]) => {
+    const fn = args[1];
     expect(typeof fn).toBe("function");
   });
 });

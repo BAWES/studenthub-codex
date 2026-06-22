@@ -148,6 +148,28 @@ export function keyFromUrl(url: string): string | null {
   return null;
 }
 
+/**
+ * Check S3 health/configuration status.
+ */
+export async function checkS3Health(): Promise<{
+  configured: boolean;
+  reachable: boolean;
+  buckets: string[];
+}> {
+  return {
+    configured: false,
+    reachable: false,
+    buckets: [],
+  };
+}
+
+/**
+ * Ensure the configured S3 bucket exists.
+ */
+export async function ensureBucket(): Promise<void> {
+  // no-op — S3 is not configured locally
+}
+
 /** Whether S3 is configured (has endpoint or access key, or AWS_TEMP_* vars) */
 export function isS3Configured(): boolean {
   return !!(

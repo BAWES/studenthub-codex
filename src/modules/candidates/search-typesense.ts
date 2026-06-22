@@ -19,7 +19,7 @@ import { candidateIdsForStaff, buildSelectedActions, uniqueCandidateIds } from "
 export { parseFilter, parseCandidateId, parseCandidateIds, parseSearchPage } from "./search";
 
 // Exported for testing
-// buildFlags, buildTypesenseFacets, and resolveSelectedCandidateId are local to this module
+export { buildFlags, buildTypesenseFacets, resolveSelectedCandidateId };
 
 // ---------------------------------------------------------------------------
 // Public entry point

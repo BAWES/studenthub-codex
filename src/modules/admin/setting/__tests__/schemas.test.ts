@@ -1,9 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
-  settingListItemSchema,
+  settingItemSchema,
   listSettingsResultSchema,
-  settingDetailSchema,
-  settingCreateResultSchema,
 } from "../schemas";
 
 // ---------------------------------------------------------------------------
@@ -23,36 +21,26 @@ const validSettingListItem = {
   updated: "2025-01-15 10:30:00",
 };
 
-const validSettingDetail = {
-  setting_uuid: "abc-123",
-  code: "general",
-  key: "site_name",
-  value: "StudentHub",
-  serialized: false,
-  created_at: new Date("2025-01-01"),
-  updated_at: new Date("2025-01-15"),
-};
-
-describe("settingListItemSchema", () => {
+describe("settingItemSchema", () => {
   it("accepts a valid setting list item", () => {
-    const result = settingListItemSchema.safeParse(validSettingListItem);
+    const result = settingItemSchema.safeParse(validSettingListItem);
     expect(result.success).toBe(true);
   });
 
   it("rejects missing required id", () => {
     const { id, ...incomplete } = validSettingListItem;
-    const result = settingListItemSchema.safeParse(incomplete);
+    const result = settingItemSchema.safeParse(incomplete);
     expect(result.success).toBe(false);
   });
 
   it("rejects missing required code", () => {
     const { code, ...incomplete } = validSettingListItem;
-    const result = settingListItemSchema.safeParse(incomplete);
+    const result = settingItemSchema.safeParse(incomplete);
     expect(result.success).toBe(false);
   });
 
   it("rejects non-string value", () => {
-    const result = settingListItemSchema.safeParse({
+    const result = settingItemSchema.safeParse({
       ...validSettingListItem,
       value: 123,
     });
@@ -73,50 +61,6 @@ describe("listSettingsResultSchema", () => {
 
   it("rejects non-array input", () => {
     const result = listSettingsResultSchema.safeParse(validSettingListItem);
-    expect(result.success).toBe(false);
-  });
-});
-
-describe("settingDetailSchema", () => {
-  it("accepts a valid setting detail object", () => {
-    const result = settingDetailSchema.safeParse(validSettingDetail);
-    expect(result.success).toBe(true);
-  });
-
-  it("accepts null optional fields", () => {
-    const result = settingDetailSchema.safeParse({
-      ...validSettingDetail,
-      value: null,
-      serialized: null,
-      created_at: null,
-      updated_at: null,
-    });
-    expect(result.success).toBe(true);
-  });
-
-  it("rejects missing required fields", () => {
-    const result = settingDetailSchema.safeParse({
-      code: "general",
-    });
-    expect(result.success).toBe(false);
-  });
-});
-
-describe("settingCreateResultSchema", () => {
-  it("accepts a valid create result", () => {
-    const result = settingCreateResultSchema.safeParse({
-      uuid: "new-uuid-here",
-    });
-    expect(result.success).toBe(true);
-  });
-
-  it("rejects missing uuid", () => {
-    const result = settingCreateResultSchema.safeParse({});
-    expect(result.success).toBe(false);
-  });
-
-  it("rejects non-string uuid", () => {
-    const result = settingCreateResultSchema.safeParse({ uuid: 123 });
     expect(result.success).toBe(false);
   });
 });

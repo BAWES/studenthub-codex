@@ -26,7 +26,7 @@ describe("STU-4327: Admin detail page polish", () => {
     describe(`${mod.dir}/[id]/page.tsx`, () => {
       it("has a back-to-list link", () => {
         expect(content).toContain("Back to");
-        expect(content).toContain(`Back to ${module.backTo}`);
+        expect(content).toContain(`Back to ${mod.backTo}`);
       });
 
       it("imports Link from next/link", () => {

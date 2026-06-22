@@ -3,10 +3,11 @@ import { describe, it, expect, afterEach } from "vitest";
 import { render, screen, within, cleanup } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { DataTablePage } from "./DataTablePage";
+import type { DataTableColumn } from "./DataTablePage";
 
-const mockColumns = [
-  { key: "name", label: "Name", render: (r: { name: string }) => r.name },
-  { key: "email", label: "Email", render: (r: { email: string }) => r.email },
+const mockColumns: DataTableColumn<{ id: number; name: string; email: string }>[] = [
+  { key: "name", label: "Name", render: (r) => r.name },
+  { key: "email", label: "Email", render: (r) => r.email },
 ];
 
 const mockRows = [

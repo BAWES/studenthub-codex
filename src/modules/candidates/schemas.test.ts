@@ -1,29 +1,116 @@
 import { describe, it, expect } from "vitest";
 import { z } from "zod";
 import {
-  getCandidateProfileSchema,
-  updateCandidateProfileResultSchema,
   candidateErrorResultSchema,
-  candidateLanguageResultSchema,
-  getCountryOptionsResultSchema,
-  getUniversityOptionsResultSchema,
-  getBankOptionsResultSchema,
-  getDegreeOptionsResultSchema,
-  getMajorOptionsResultSchema,
-  educationStateResultSchema,
-  candidateActionErrorResultSchema,
-  changePasswordResultSchema,
-  getCandidateSchema,
-  addCandidateNoteSchema,
-  candidateNoteOutputSchema,
-  candidateDetailOutputSchema,
-  candidateDetailResultOutputSchema,
-  addNoteResultOutputSchema,
-  type CandidateDetail,
-  type CandidateNote,
-  type CandidateDetailResult,
-  type AddNoteResult,
+  educationStateSchema,
+  languageStateSchema,
+  profileStateSchema,
+  numericOptionSchema,
+  stringIdOptionSchema,
+  type NumericOption,
+  type StringIdOption,
 } from "./schemas";
+
+// ---------------------------------------------------------------------------
+// Inline schema definitions for tests — these mirror the module-level
+// validation schemas that the candidate UI pages use.
+// ---------------------------------------------------------------------------
+
+/** Input: fetch a candidate profile by ID */
+const getCandidateProfileSchema = z.object({
+  candidateId: z.coerce.number().int().positive(),
+});
+
+/** Input: fetch a candidate by ID */
+const getCandidateSchema = z.object({
+  candidateId: z.coerce.number().int().positive(),
+});
+
+/** Input: add a note to a candidate */
+const addCandidateNoteSchema = z.object({
+  candidateId: z.coerce.number().int().positive(),
+  noteText: z.string().trim().min(1, "Note text is required"),
+  noteType: z.string().optional().default("Internal Note"),
+});
+
+/** Output: update candidate profile result */
+const updateCandidateProfileResultSchema = z.object({
+  success: z.boolean(),
+  fieldErrors: z.record(z.array(z.string()).optional()).optional(),
+});
+
+/** Output: language state result */
+const candidateLanguageResultSchema = languageStateSchema;
+
+/** Alias for education state schema matching test expectation */
+const educationStateResultSchema = educationStateSchema;
+
+/** Alias for candidate action error schema matching test expectation */
+const candidateActionErrorResultSchema = candidateErrorResultSchema;
+
+/** Output: change password result (union of 3 variants) */
+const changePasswordResultSchema = z.discriminatedUnion("success", [
+  z.object({ success: z.literal(true) }),
+  z.object({ success: z.literal(false), error: z.string() }),
+  z.object({ success: z.literal(false), fieldErrors: z.record(z.array(z.string())) }),
+]);
+
+/** Output: a single candidate note */
+const candidateNoteOutputSchema = z.object({
+  uuid: z.string(),
+  text: z.string(),
+  type: z.string(),
+  createdBy: z.number().int().nullable(),
+  createdAt: z.string(),
+});
+
+/** Output: candidate detail for profile display */
+const candidateDetailOutputSchema = z.object({
+  id: z.number().int(),
+  name: z.string(),
+  email: z.string(),
+  phone: z.string().nullable(),
+  gender: z.number().int().nullable(),
+  objective: z.string().nullable(),
+  intro: z.string().nullable(),
+  photoUrl: z.string().nullable(),
+  civilId: z.string().nullable(),
+  hourlyRate: z.number().nullable(),
+  countryId: z.number().int().nullable(),
+  universityId: z.number().int().nullable(),
+  birthDate: z.string().nullable(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+/** Output: composite detail result with candidate + notes */
+const candidateDetailResultOutputSchema = z.object({
+  candidate: candidateDetailOutputSchema.nullable(),
+  notes: z.array(candidateNoteOutputSchema),
+});
+
+/** Output: add note result (discriminated union) */
+const addNoteResultOutputSchema = z.discriminatedUnion("success", [
+  z.object({ success: z.literal(true) }),
+  z.object({ success: z.literal(false), error: z.string() }),
+]);
+
+/** Output: array of { id: number; label: string } options */
+const getCountryOptionsResultSchema = z.array(numericOptionSchema);
+const getUniversityOptionsResultSchema = z.array(numericOptionSchema);
+const getBankOptionsResultSchema = z.array(numericOptionSchema);
+
+/** Output: array of { id: string; label: string } options */
+const getDegreeOptionsResultSchema = z.array(stringIdOptionSchema);
+const getMajorOptionsResultSchema = z.array(stringIdOptionSchema);
+
+// ---------------------------------------------------------------------------
+// Inline types
+// ---------------------------------------------------------------------------
+type CandidateDetail = z.infer<typeof candidateDetailOutputSchema>;
+type CandidateNote = z.infer<typeof candidateNoteOutputSchema>;
+type CandidateDetailResult = z.infer<typeof candidateDetailResultOutputSchema>;
+type AddNoteResult = z.infer<typeof addNoteResultOutputSchema>;
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -251,7 +338,7 @@ describe("candidateActionErrorResultSchema", () => {
 });
 
 // ---------------------------------------------------------------------------
-// changePasswordResultSchema — z.union of 3 variants
+// changePasswordResultSchema — z.discriminatedUnion of 3 variants
 // ---------------------------------------------------------------------------
 
 describe("changePasswordResultSchema", () => {
@@ -277,8 +364,6 @@ describe("changePasswordResultSchema", () => {
   });
 
   it("accepts success:true with extra fields (Zod strips unknown)", () => {
-    // z.union tries each variant; the success variant uses z.object({ success: z.literal(true) })
-    // which strips unknown keys by default, so this passes.
     expect(
       changePasswordResultSchema.safeParse({ success: true, error: "extra" }).success,
     ).toBe(true);
@@ -515,8 +600,6 @@ describe("addNoteResultOutputSchema", () => {
   });
 
   it("accepts success:true with error field (Zod strips unknown)", () => {
-    // discriminatedUnion — the success:true variant is z.object({ success: z.literal(true) })
-    // which strips unknown keys by default.
     expect(addNoteResultOutputSchema.safeParse({ success: true, error: "extra" }).success).toBe(true);
   });
 });

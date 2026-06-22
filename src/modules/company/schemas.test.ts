@@ -23,9 +23,7 @@ import {
   listCompaniesSchema,
   getCompanySchema,
   // Output validation — actions-list
-  companyListItemSchema,
   listCompaniesResultSchema,
-  companyDetailResultSchema,
   // Output validation — admin
   adminCompanyItemSchema,
   adminListCompaniesResultSchema,
@@ -937,9 +935,9 @@ describe("getCompanySchema", () => {
 // ===========================================================================
 
 // ---------------------------------------------------------------------------
-// companyListItemSchema
+// companyNoteListItemSchema
 // ---------------------------------------------------------------------------
-describe("companyListItemSchema", () => {
+describe("companyNoteListItemSchema", () => {
   const valid = {
     company_id: 1,
     company_name: "Acme Corp",
@@ -956,12 +954,12 @@ describe("companyListItemSchema", () => {
   };
 
   it("accepts a valid company list item", () => {
-    expect(companyListItemSchema.safeParse(valid).success).toBe(true);
+    expect(companyNoteListItemSchema.safeParse(valid).success).toBe(true);
   });
 
   it("accepts non-null common names", () => {
     expect(
-      companyListItemSchema.safeParse({
+      companyNoteListItemSchema.safeParse({
         ...valid,
         company_common_name_en: "Acme",
         company_common_name_ar: "أكمي",
@@ -971,7 +969,7 @@ describe("companyListItemSchema", () => {
 
   it("accepts non-null commission and totals", () => {
     expect(
-      companyListItemSchema.safeParse({
+      companyNoteListItemSchema.safeParse({
         ...valid,
         commission: 15,
         total_candidate: 42,
@@ -982,13 +980,13 @@ describe("companyListItemSchema", () => {
 
   it("accepts non-null followup boolean", () => {
     expect(
-      companyListItemSchema.safeParse({ ...valid, followup: true }).success,
+      companyNoteListItemSchema.safeParse({ ...valid, followup: true }).success,
     ).toBe(true);
   });
 
   it("accepts optional detail fields", () => {
     expect(
-      companyListItemSchema.safeParse({
+      companyNoteListItemSchema.safeParse({
         ...valid,
         company_description_en: "Desc EN",
         company_description_ar: "Desc AR",
@@ -1003,23 +1001,23 @@ describe("companyListItemSchema", () => {
 
   it("rejects missing company_id", () => {
     const { company_id: _, ...rest } = valid;
-    expect(companyListItemSchema.safeParse(rest).success).toBe(false);
+    expect(companyNoteListItemSchema.safeParse(rest).success).toBe(false);
   });
 
   it("rejects missing company_name", () => {
     const { company_name: _, ...rest } = valid;
-    expect(companyListItemSchema.safeParse(rest).success).toBe(false);
+    expect(companyNoteListItemSchema.safeParse(rest).success).toBe(false);
   });
 
   it("rejects wrong type for company_id (string)", () => {
     expect(
-      companyListItemSchema.safeParse({ ...valid, company_id: "abc" }).success,
+      companyNoteListItemSchema.safeParse({ ...valid, company_id: "abc" }).success,
     ).toBe(false);
   });
 
   it("rejects wrong type for followup (number)", () => {
     expect(
-      companyListItemSchema.safeParse({ ...valid, followup: 1 }).success,
+      companyNoteListItemSchema.safeParse({ ...valid, followup: 1 }).success,
     ).toBe(false);
   });
 });
@@ -1104,12 +1102,12 @@ describe("listCompaniesResultSchema", () => {
 });
 
 // ---------------------------------------------------------------------------
-// companyDetailResultSchema (nullable)
+// adminCompanyDetailResultSchema (nullable)
 // ---------------------------------------------------------------------------
-describe("companyDetailResultSchema", () => {
+describe("adminCompanyDetailResultSchema", () => {
   it("accepts a valid company detail", () => {
     expect(
-      companyDetailResultSchema.safeParse({
+      adminCompanyDetailResultSchema.safeParse({
         company_id: 1,
         company_name: "Acme",
         company_common_name_en: null,
@@ -1127,12 +1125,12 @@ describe("companyDetailResultSchema", () => {
   });
 
   it("accepts null", () => {
-    expect(companyDetailResultSchema.safeParse(null).success).toBe(true);
+    expect(adminCompanyDetailResultSchema.safeParse(null).success).toBe(true);
   });
 
   it("rejects invalid data", () => {
     expect(
-      companyDetailResultSchema.safeParse({ company_id: "abc" }).success,
+      adminCompanyDetailResultSchema.safeParse({ company_id: "abc" }).success,
     ).toBe(false);
   });
 });

@@ -1,10 +1,5 @@
-// ---------------------------------------------------------------------------
-// Company workspace — schema validation tests
-// ---------------------------------------------------------------------------
-
 import { describe, it, expect } from "vitest";
 import { getCompanyWorkspaceSchema } from "./schemas";
-import type { CompanyMetric, CompanyWorkspaceData, WorkspaceListItem } from "./schemas";
 
 describe("getCompanyWorkspaceSchema", () => {
   it("accepts a valid contact UUID", () => {
@@ -28,7 +23,7 @@ describe("getCompanyWorkspaceSchema", () => {
 
 describe("CompanyMetric type", () => {
   it("has required shape", () => {
-    const m: CompanyMetric = { label: "Companies", value: 5, note: "Linked to this contact" };
+    const m: { label: string; value: number; note: string } = { label: "Companies", value: 5, note: "Linked to this contact" };
     expect(m.label).toBe("Companies");
     expect(m.value).toBe(5);
   });
@@ -36,20 +31,25 @@ describe("CompanyMetric type", () => {
 
 describe("WorkspaceListItem type", () => {
   it("has required shape", () => {
-    const item: WorkspaceListItem = { id: "uuid-1", title: "Acme Corp", subtitle: "Owner" };
+    const item: { id: string; title: string; subtitle: string } = { id: "uuid-1", title: "Acme Corp", subtitle: "Owner" };
     expect(item.id).toBe("uuid-1");
     expect(item.subtitle).toBe("Owner");
   });
 
   it("accepts optional meta", () => {
-    const item: WorkspaceListItem = { id: "uuid-2", title: "Beta Inc", subtitle: "Manager", meta: "Access allowed" };
+    const item: { id: string; title: string; subtitle: string; meta?: string } = { id: "uuid-2", title: "Beta Inc", subtitle: "Manager", meta: "Access allowed" };
     expect(item.meta).toBe("Access allowed");
   });
 });
 
 describe("CompanyWorkspaceData type", () => {
   it("has correct shape with all fields", () => {
-    const data: CompanyWorkspaceData = {
+    const data: {
+      contact: { contact_name: string; contact_email: string } | null;
+      metrics: { label: string; value: number; note: string }[];
+      companies: { id: string; title: string; subtitle: string; meta?: string }[];
+      requests: { id: string; title: string; subtitle: string; meta?: string }[];
+    } = {
       contact: { contact_name: "John", contact_email: "john@test.com" },
       metrics: [
         { label: "Companies", value: 2, note: "Linked" },
@@ -71,7 +71,12 @@ describe("CompanyWorkspaceData type", () => {
   });
 
   it("accepts null contact for missing contact", () => {
-    const data: CompanyWorkspaceData = {
+    const data: {
+      contact: { contact_name: string; contact_email: string } | null;
+      metrics: { label: string; value: number; note: string }[];
+      companies: { id: string; title: string; subtitle: string; meta?: string }[];
+      requests: { id: string; title: string; subtitle: string; meta?: string }[];
+    } = {
       contact: null,
       metrics: [],
       companies: [],

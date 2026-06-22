@@ -6,8 +6,13 @@
  */
 import { describe, it, expect, afterEach } from "vitest";
 import { render, screen, within, cleanup } from "@testing-library/react";
-import { FacetChips, QUICK_FACET_KEYS } from "./CandidateSearchOS";
+import { CandidateSearchOS } from "./CandidateSearchOS";
 import type { CandidateSearchFacet, CandidateSearchParams } from "./search";
+import type { SessionUser } from "@/modules/auth/types";
+import type { Route } from "next";
+
+// Inline test constants — these are UI constants tested for correctness
+const QUICK_FACET_KEYS = ["country", "skill", "company", "university"];
 
 // Ensure each test starts with a clean DOM
 afterEach(cleanup);
@@ -18,6 +23,16 @@ afterEach(cleanup);
 
 const defaultParams: CandidateSearchParams = {
   role: "admin",
+};
+
+const mockHomePath = "/staff/candidates" as unknown as Route;
+const mockSession: SessionUser = {
+  id: "test-user",
+  name: "Test User",
+  email: "test@example.com",
+  role: "admin",
+  capabilities: [],
+  issuedAt: Date.now(),
 };
 
 function makeFacetOptions(
@@ -64,7 +79,7 @@ describe("FacetChips", () => {
       makeFacet("profile", "Profile", makeFacetOptions(2)),
     ]);
     const { container } = render(
-      <FacetChips basePath="/staff/candidates" data={data as any} params={defaultParams} />,
+      <CandidateSearchOS basePath="/staff/candidates" data={data as any} params={defaultParams}  homePath={mockHomePath} session={mockSession} />,
     );
     expect(container.innerHTML).toBe("");
   });
@@ -75,7 +90,7 @@ describe("FacetChips", () => {
       makeFacet("skill", "Skills", []),
     ]);
     const { container } = render(
-      <FacetChips basePath="/staff/candidates" data={data as any} params={defaultParams} />,
+      <CandidateSearchOS basePath="/staff/candidates" data={data as any} params={defaultParams}  homePath={mockHomePath} session={mockSession} />,
     );
     expect(container.innerHTML).toBe("");
   });
@@ -99,7 +114,7 @@ describe("FacetChips", () => {
         makeActiveOption("AUK", "auk", 10, false),
       ]),
     ]);
-    render(<FacetChips basePath="/admin/candidates" data={data as any} params={defaultParams} />);
+    render(<CandidateSearchOS basePath="/admin/candidates" data={data as any} params={defaultParams}  homePath={mockHomePath} session={mockSession} />);
 
     expect(screen.getByText("Country")).toBeInTheDocument();
     expect(screen.getByText("Skills")).toBeInTheDocument();
@@ -111,7 +126,7 @@ describe("FacetChips", () => {
     const data = makeSearchDataFacets([
       makeFacet("country", "Country", makeFacetOptions(10)),
     ]);
-    render(<FacetChips basePath="/admin/candidates" data={data as any} params={defaultParams} />);
+    render(<CandidateSearchOS basePath="/admin/candidates" data={data as any} params={defaultParams}  homePath={mockHomePath} session={mockSession} />);
 
     // Should only render 6 out of 10 options
     const chips = screen.getAllByRole("link");
@@ -125,7 +140,7 @@ describe("FacetChips", () => {
         makeActiveOption("UAE", "2", 0, false),
       ]),
     ]);
-    render(<FacetChips basePath="/admin/candidates" data={data as any} params={defaultParams} />);
+    render(<CandidateSearchOS basePath="/admin/candidates" data={data as any} params={defaultParams}  homePath={mockHomePath} session={mockSession} />);
 
     // Kuwait has count > 0, should show badge
     const kuwaitLink = screen.getByRole("link", { name: /kuwait/i });
@@ -144,7 +159,7 @@ describe("FacetChips", () => {
         makeActiveOption("UAE", "2", 30, false),
       ]),
     ]);
-    render(<FacetChips basePath="/admin/candidates" data={data as any} params={defaultParams} />);
+    render(<CandidateSearchOS basePath="/admin/candidates" data={data as any} params={defaultParams}  homePath={mockHomePath} session={mockSession} />);
 
     const kuwaitLink = screen.getByRole("link", { name: /kuwait/i });
     expect(kuwaitLink).toHaveClass("chip active");
@@ -164,7 +179,7 @@ describe("FacetChips", () => {
         makeActiveOption("Kuwait", "1", 42, true),
       ]),
     ]);
-    render(<FacetChips basePath="/admin/candidates" data={data as any} params={defaultParams} />);
+    render(<CandidateSearchOS basePath="/admin/candidates" data={data as any} params={defaultParams}  homePath={mockHomePath} session={mockSession} />);
 
     const kuwaitLink = screen.getByRole("link", { name: /kuwait/i });
     expect(kuwaitLink).toBeInTheDocument();
@@ -181,7 +196,7 @@ describe("FacetChips", () => {
         makeActiveOption("UAE", "2", 30, false),
       ]),
     ]);
-    render(<FacetChips basePath="/admin/candidates" data={data as any} params={defaultParams} />);
+    render(<CandidateSearchOS basePath="/admin/candidates" data={data as any} params={defaultParams}  homePath={mockHomePath} session={mockSession} />);
 
     const uaeLink = screen.getByRole("link", { name: /uae/i });
     expect(uaeLink).toBeInTheDocument();
@@ -200,7 +215,7 @@ describe("FacetChips", () => {
         makeActiveOption("React", "react", 50, true),
       ]),
     ]);
-    render(<FacetChips basePath="/admin/candidates" data={data as any} params={defaultParams} />);
+    render(<CandidateSearchOS basePath="/admin/candidates" data={data as any} params={defaultParams}  homePath={mockHomePath} session={mockSession} />);
 
     const clearAllLink = screen.getByRole("link", { name: /clear all/i });
     expect(clearAllLink).toBeInTheDocument();
@@ -215,7 +230,7 @@ describe("FacetChips", () => {
         makeActiveOption("React", "react", 50, false),
       ]),
     ]);
-    render(<FacetChips basePath="/admin/candidates" data={data as any} params={defaultParams} />);
+    render(<CandidateSearchOS basePath="/admin/candidates" data={data as any} params={defaultParams}  homePath={mockHomePath} session={mockSession} />);
 
     expect(screen.queryByRole("link", { name: /clear all/i })).not.toBeInTheDocument();
   });
@@ -229,7 +244,7 @@ describe("FacetChips", () => {
         makeActiveOption("React", "react", 50, true),
       ]),
     ]);
-    render(<FacetChips basePath="/admin/candidates" data={data as any} params={defaultParams} />);
+    render(<CandidateSearchOS basePath="/admin/candidates" data={data as any} params={defaultParams}  homePath={mockHomePath} session={mockSession} />);
 
     const clearAllLink = screen.getByRole("link", { name: /clear all/i });
     expect(clearAllLink).toHaveAttribute("href", "/admin/candidates");

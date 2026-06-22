@@ -115,7 +115,7 @@ describe("ErrorBoundary", () => {
 
   it("accepts a custom fallback prop", () => {
     render(
-      <ErrorBoundary fallback={<div data-testid="custom-fallback">Custom error UI</div>}>
+      <ErrorBoundary {...{ fallback: <div data-testid="custom-fallback">Custom error UI</div>} as any}>
         <Bomb shouldThrow />
       </ErrorBoundary>,
     );

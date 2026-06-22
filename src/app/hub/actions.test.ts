@@ -44,11 +44,10 @@ describe("getHubData", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockGetUnifiedHubAction.mockResolvedValue({
-      welcome: "Welcome!",
       queues: [],
       scopes: [],
       navigation: [],
-    });
+    } as any);
   });
 
   it("delegates to getUnifiedHubAction with empty input", async () => {

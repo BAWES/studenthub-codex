@@ -6,7 +6,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireRoleCapability } from "@/modules/auth/session";
 
-const companyRequestSchema = z.object({
+export const companyRequestSchema = z.object({
   company_id: z.coerce.number().int().positive("Select a company"),
   position_title: z.string().trim().min(1, "Job title is required").max(255),
   compensation: z.string().trim().min(1, "Compensation type is required"),

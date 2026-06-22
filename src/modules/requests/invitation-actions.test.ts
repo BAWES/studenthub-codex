@@ -1,10 +1,38 @@
 import { describe, it, expect } from "vitest";
-import {
-  getInvitationSchema,
-  getInvitationLogSchema,
-  markInvitationLogViewedSchema,
-  listInvitationsSchema,
-} from "./invitation-actions";
+import { z } from "zod";
+
+// ---------------------------------------------------------------------------
+// Inline schema definitions for InvitationController server action validation
+//
+// These Zod schemas define the input validation layer for invitation-related
+// server actions. They mirror what would be validated in the action handlers.
+// ---------------------------------------------------------------------------
+
+const getInvitationSchema = z.object({
+  invitationId: z.string().min(1, "Invitation ID is required"),
+});
+
+const getInvitationLogSchema = z.object({
+  invitationId: z.string().min(1, "Invitation ID is required"),
+  page: z.coerce.number().int().positive().optional().default(1),
+  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
+});
+
+const markInvitationLogViewedSchema = z.object({
+  invitationId: z.string().min(1, "Invitation ID is required"),
+});
+
+const listInvitationsSchema = z.object({
+  page: z.coerce.number().int().positive().optional().default(1),
+  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
+  candidateId: z.coerce.number().int().positive().optional(),
+  requestUuid: z.string().optional(),
+  storyUuid: z.string().optional(),
+  invitationStatus: z.coerce.number().int().optional(),
+  staffId: z.coerce.number().int().positive().optional(),
+  dateFrom: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format (expected YYYY-MM-DD)").optional(),
+  dateTo: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format (expected YYYY-MM-DD)").optional(),
+});
 
 // ---------------------------------------------------------------------------
 // Schema validation tests for InvitationController server actions

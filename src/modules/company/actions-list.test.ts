@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 
-import { listCompaniesSchema, getCompanySchema, companyListItemSchema } from "./schemas";
+import { listCompaniesSchema, getCompanySchema, companyNoteListItemSchema } from "./schemas";
 
 // ---------------------------------------------------------------------------
 // Schema tests
@@ -70,7 +70,7 @@ describe("getCompany schema", () => {
   });
 });
 
-describe("companyListItemSchema", () => {
+describe("companyNoteListItemSchema", () => {
   it("validates a well-formed company result", () => {
     const item = {
       company_id: 1,
@@ -86,7 +86,7 @@ describe("companyListItemSchema", () => {
       followup: true,
       currency_code: "KWD",
     };
-    const result = companyListItemSchema.safeParse(item);
+    const result = companyNoteListItemSchema.safeParse(item);
     expect(result.success).toBe(true);
   });
 
@@ -105,7 +105,7 @@ describe("companyListItemSchema", () => {
       followup: null,
       currency_code: null,
     };
-    const result = companyListItemSchema.safeParse(item);
+    const result = companyNoteListItemSchema.safeParse(item);
     expect(result.success).toBe(true);
   });
 });
