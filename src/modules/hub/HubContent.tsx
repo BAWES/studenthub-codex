@@ -6,11 +6,10 @@ import { ArrowUpRight, Search } from "lucide-react";
 import type { SessionUser } from "@/modules/auth/types";
 import { useWorkspaceOS } from "@/modules/workspace/WorkspaceOSContext";
 import { HubShortcuts, type HubCommand } from "./HubShortcuts";
-import { Button, buttonVariants } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 
 type HubNavigationItem = {
   label: string;
@@ -118,36 +117,25 @@ export function HubContent({
   const hubContext = hubContextHref(data.query, data.scope);
 
   const desk = (
-    <section className="min-w-0 overflow-x-hidden">
-      {/* ── Topbar ──────────────────────────────────────── */}
-      <header className="sticky top-0 z-20 flex items-center gap-3 border-b border-border bg-card px-4 py-2.5 min-h-[64px]">
+    <section className="min-w-0 grid grid-rows-[auto_1fr] min-h-svh">
+      <header className="sticky top-0 z-20 min-h-16 grid grid-cols-[220px_minmax(280px,1fr)_auto] items-center gap-2.5 border-b border-border bg-card px-3.5 py-2.5">
         <div className="min-w-0 grid gap-0.5">
-          <span className="text-xs font-black uppercase tracking-wide text-blue-zendesk">
-            {session.role}
-          </span>
-          <strong className="text-sm text-foreground truncate">{session.name}</strong>
-          <small className="text-xs text-muted-foreground truncate">{session.email}</small>
+          <span className="text-[11px] font-extrabold uppercase tracking-[0.04em] text-muted-foreground">{session.role}</span>
+          <strong className="overflow-hidden text-ellipsis whitespace-nowrap text-foreground">{session.name}</strong>
+          <small className="overflow-hidden text-ellipsis whitespace-nowrap text-muted-foreground">{session.email}</small>
         </div>
-
-        <form className="flex items-center flex-1 max-w-lg">
-          <div className="relative w-full">
-            <Search
-              aria-hidden="true"
-              size={16}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-            />
-            <Input
-              aria-label="Find records"
-              data-command-search
-              defaultValue={data.query}
-              id="hub-search"
-              name="q"
-              placeholder="Search candidates, companies, requests, transfers, ID batches"
-              className="h-10 pl-9 pr-3"
-            />
-          </div>
+        <form className="grid grid-cols-[1fr_auto] overflow-hidden rounded-lg border border-input bg-background has-[input:focus]:border-primary has-[input:focus]:shadow-[0_0_0_2px_hsl(var(--primary)/0.15)]" action={undefined}>
+          <Input
+            aria-label="Find records"
+            data-command-search
+            defaultValue={data.query}
+            id="hub-search"
+            name="q"
+            placeholder="Search candidates, companies, requests, transfers, ID batches"
+            className="h-[42px] border-0 bg-transparent px-3.5 text-foreground shadow-none focus-visible:ring-0"
+          />
           <input type="hidden" name="scope" value={data.scope} />
-          <Button type="submit" variant="ghost" size="sm" className="ml-2 shrink-0">
+          <Button type="submit" variant="ghost" size="sm" className="border-l border-input rounded-none h-[42px] font-bold text-xs text-muted-foreground hover:text-primary">
             Search
           </Button>
         </form>
@@ -155,194 +143,140 @@ export function HubContent({
         {embedded ? null : <HubShortcuts commands={commands} />}
       </header>
 
-      <section className="grid content-start gap-4 p-4">
-        {/* ── Role Access Boundary ────────────────────────── */}
+      <section className="w-full max-w-[1500px] min-w-0 min-h-0 overflow-y-auto grid content-start gap-3 mx-auto p-3.5">
         {requiredRole && requiredRole !== session.role ? (
-          <section className="border border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-800 rounded-lg p-4 grid gap-2" aria-label="Role access notice">
+          <section className="flex items-center justify-between gap-3.5 rounded-xl border border-destructive/30 bg-destructive/10 p-3.5" aria-label="Role access notice">
             <div className="grid gap-1">
-              <span className="text-xs font-black uppercase tracking-wide text-amber-600 dark:text-amber-400">
-                Access boundary
-              </span>
-              <strong className="text-sm text-foreground">
+              <span className="text-[11px] font-bold uppercase tracking-[0.04em] text-destructive">Access boundary</span>
+              <strong className="text-foreground">
                 You are signed in as {session.role}, not {requiredRole}.
               </strong>
-              <p className="text-sm text-muted-foreground m-0">
-                Use the matching production credentials to enter that workspace. This keeps candidate, staff, company, and admin data separated.
+              <p className="text-muted-foreground m-0">
+                Use the matching production credentials to enter that workspace. This keeps candidate, staff, company, and
+                admin data separated.
               </p>
             </div>
-            <Link
-              href="/login"
-              className={buttonVariants({ variant: "outline", size: "sm" })}
-            >
-              Switch account
-            </Link>
+            <Button variant="outline" size="sm" asChild>
+              <Link href="/login">Switch account</Link>
+            </Button>
           </section>
         ) : null}
 
-        {/* ── Hero ─────────────────────────────────────────── */}
-        <section className="grid md:grid-cols-[1fr_260px] gap-4 items-stretch">
-          <Card className="p-5 grid content-center gap-3">
-            <span className="text-xs font-black uppercase tracking-wide text-blue-zendesk">
-              Start here
-            </span>
-            <h1 className="text-2xl md:text-3xl font-bold leading-tight m-0 text-foreground">
-              {guide.title}
-            </h1>
-            <p className="text-muted-foreground text-sm leading-relaxed max-w-[640px] m-0">
-              {guide.description}
-            </p>
-            <div className="flex flex-wrap gap-3 mt-1">
-              <Link
-                href={guide.primary.href}
-                className={buttonVariants({ variant: "default", size: "default" })}
-              >
-                {guide.primary.label}
-              </Link>
-              <Link
-                href={hubContext}
-                className={buttonVariants({ variant: "outline", size: "default" })}
-              >
-                Open focused search
-              </Link>
+        <section className="grid grid-cols-[1fr_minmax(250px,340px)] gap-3.5 rounded-xl border border-border bg-card p-5">
+          <div>
+            <span className="text-[11px] font-extrabold uppercase tracking-[0.04em] text-muted-foreground">Start here</span>
+            <h1 className="max-w-[860px] text-foreground text-[30px] leading-[1.06] mt-1.5 mb-2.5">{guide.title}</h1>
+            <p className="max-w-[780px] text-muted-foreground text-[15px] leading-relaxed m-0">{guide.description}</p>
+            <div className="flex flex-wrap gap-2.5 mt-[18px]">
+              <Button variant="default" asChild>
+                <Link href={guide.primary.href}>{guide.primary.label}</Link>
+              </Button>
+              <Button variant="outline" asChild>
+                <Link href={hubContext}>Open focused search</Link>
+              </Button>
             </div>
-          </Card>
-
-          <aside className="border border-border rounded-lg bg-card p-4 grid content-start gap-2">
-            <span className="text-xs font-black uppercase tracking-wide text-blue-zendesk">
-              Signed in as {session.role}
-            </span>
-            <strong className="text-lg font-bold text-foreground">{session.name}</strong>
-            <p className="text-sm text-muted-foreground m-0 leading-relaxed">{guide.guardrail}</p>
+          </div>
+          <aside className="grid content-start gap-1.5 rounded-xl border border-border bg-card p-3.5">
+            <span className="text-[11px] font-extrabold uppercase tracking-[0.04em] text-muted-foreground">Signed in as {session.role}</span>
+            <strong className="text-foreground text-lg">{session.name}</strong>
+            <p className="text-muted-foreground text-[13px] leading-relaxed">{guide.guardrail}</p>
           </aside>
         </section>
 
-        {/* ── Journey Grid ──────────────────────────────────── */}
-        <section
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3"
-          aria-label={`${session.role} workflows`}
-        >
+        <section className="grid grid-cols-[repeat(auto-fit,minmax(230px,1fr))] gap-2.5" aria-label={`${session.role} workflows`}>
           {guide.journeys.map((journey) => (
-            <Card key={journey.title} className="grid content-start gap-0 overflow-hidden">
-              <CardContent className="grid gap-2 p-4">
-                <span className="text-xs font-black uppercase tracking-wide text-blue-zendesk">
-                  {journey.kicker}
-                </span>
-                <strong className="text-base font-bold text-foreground">{journey.title}</strong>
-                <p className="text-sm text-muted-foreground leading-relaxed m-0">
-                  {journey.description}
-                </p>
-              </CardContent>
-              <ol className="grid gap-px px-4 pb-2 m-0 list-none">
+            <Card key={journey.title} className="grid grid-rows-[auto_1fr_auto] gap-2.5 p-4">
+              <div className="grid gap-1.5">
+                <span className="text-[11px] font-extrabold uppercase tracking-[0.04em] text-muted-foreground">{journey.kicker}</span>
+                <strong className="text-foreground text-[17px] leading-[1.15]">{journey.title}</strong>
+                <p className="text-muted-foreground text-[13px] leading-relaxed m-0">{journey.description}</p>
+              </div>
+              <ol className="grid gap-2 list-none m-0 p-0">
                 {journey.steps.map((step, index) => (
-                  <li key={step} className="flex items-start gap-2 text-sm text-muted-foreground py-1">
-                    <span className="flex items-center justify-center w-5 h-5 rounded-full bg-muted text-[11px] font-bold text-muted-foreground shrink-0 mt-0.5">
-                      {index + 1}
-                    </span>
-                    <span>{step}</span>
+                  <li key={step} className="min-w-0 grid grid-cols-[24px_1fr] items-center gap-2">
+                    <span className="w-6 h-6 inline-flex items-center justify-center rounded-full bg-primary/10 text-primary text-xs font-extrabold">{index + 1}</span>
+                    <strong className="min-w-0 text-foreground text-[13px] leading-[1.3]">{step}</strong>
                   </li>
                 ))}
               </ol>
-              <div className="px-4 pb-4">
-                <Link
-                  href={journey.href}
-                  className="text-blue-zendesk text-sm font-semibold gap-1 hover:underline inline-flex items-center no-underline"
-                >
-                  {journey.action}
-                  <ArrowUpRight size={14} aria-hidden="true" />
-                </Link>
-              </div>
+              <Button variant="default" className="w-full" asChild>
+                <Link href={journey.href}>{journey.action}</Link>
+              </Button>
             </Card>
           ))}
         </section>
 
-        {/* ── Workbench ─────────────────────────────────────── */}
-        <section className="grid lg:grid-cols-2 gap-3" aria-label="Search and live queues">
-          {/* Live queues */}
-          <Card>
-            <div className="flex items-center justify-between gap-4 px-4 py-3 border-b border-border">
-              <div className="grid gap-0.5">
-                <span className="text-xs font-black uppercase tracking-wide text-blue-zendesk">
-                  Live queues
-                </span>
-                <strong className="text-sm font-semibold text-foreground">What needs attention</strong>
-              </div>
+        <section className="grid grid-cols-[minmax(260px,0.68fr)_minmax(380px,1.32fr)] gap-2.5" aria-label="Search and live queues">
+          <Card className="overflow-hidden">
+            <div className="grid gap-1 border-b border-border px-3.5 py-3">
+              <span className="text-[11px] font-extrabold uppercase tracking-[0.04em] text-muted-foreground">Live queues</span>
+              <strong className="text-foreground text-[17px] leading-[1.15]">What needs attention</strong>
             </div>
-            <CardContent className="grid grid-cols-2 gap-3 p-4">
+            <div className="grid grid-cols-2">
               {data.queues.map((queue) => {
                 const content = (
-                  <div className="grid gap-1 p-3 rounded-lg border border-border bg-card">
-                    <span className="text-xs font-semibold text-muted-foreground uppercase">
-                      {queue.label}
-                    </span>
-                    <strong className="text-2xl font-bold text-foreground">
-                      {queue.value.toLocaleString("en-US")}
-                    </strong>
-                    <small className="text-xs text-muted-foreground">{queue.note}</small>
-                  </div>
+                  <>
+                    <span className="text-[11px] font-extrabold uppercase tracking-[0.04em] text-muted-foreground">{queue.label}</span>
+                    <strong className="text-foreground text-2xl leading-none">{queue.value.toLocaleString("en-US")}</strong>
+                    <small className="text-muted-foreground text-xs leading-[1.35]">{queue.note}</small>
+                  </>
                 );
                 return queue.href ? (
-                  <Link href={queue.href as Route} key={queue.label} className="no-underline">
+                  <Link
+                    className="min-w-0 min-h-[104px] grid content-center gap-[5px] border-r border-b border-border p-3 text-foreground no-underline transition-colors hover:bg-muted/50 [&:nth-child(2n)]:border-r-0"
+                    href={queue.href as Route}
+                    key={queue.label}
+                  >
                     {content}
                   </Link>
                 ) : (
-                  <article key={queue.label}>{content}</article>
+                  <article
+                    className="min-w-0 min-h-[104px] grid content-center gap-[5px] border-r border-b border-border p-3 text-foreground [&:nth-child(2n)]:border-r-0"
+                    key={queue.label}
+                  >
+                    {content}
+                  </article>
                 );
               })}
-            </CardContent>
+            </div>
           </Card>
 
-          {/* Search results */}
-          <Card>
-            <div className="flex items-center justify-between gap-4 px-4 py-3 border-b border-border">
-              <div className="grid gap-0.5">
-                <span className="text-xs font-black uppercase tracking-wide text-blue-zendesk">
-                  {data.scope}
-                </span>
-                <strong className="text-sm font-semibold text-foreground">
-                  {data.query ? `Search results for ${data.query}` : "Find a record"}
-                </strong>
-              </div>
+          <Card className="overflow-hidden">
+            <div className="grid gap-1 border-b border-border px-3.5 py-3">
+              <span className="text-[11px] font-extrabold uppercase tracking-[0.04em] text-muted-foreground">{data.scope}</span>
+              <strong className="text-foreground text-[17px] leading-[1.15]">
+                {data.query ? `Search results for ${data.query}` : "Find a record"}
+              </strong>
             </div>
-
-            <div className="px-4 py-3 border-b border-border">
-              <nav className="flex flex-wrap gap-2" aria-label="Search scopes">
-                {data.scopes.map((item) => {
-                  const query = data.query ? `&q=${encodeURIComponent(data.query)}` : "";
-                  return (
-                    <Link
-                      className={cn(
-                        buttonVariants({ variant: item.value === data.scope ? "secondary" : "ghost" }),
-                        "text-xs h-7 px-3"
-                      )}
-                      href={`/app?scope=${item.value}${query}` as Route}
-                      key={item.value}
-                    >
-                      {item.label}
-                    </Link>
-                  );
-                })}
-              </nav>
-            </div>
-
-            <div className="grid divide-y divide-border">
+            <nav className="flex gap-2 overflow-x-auto border-b border-border px-3 py-2.5" aria-label="Search scopes">
+              {data.scopes.map((item) => {
+                const query = data.query ? `&q=${encodeURIComponent(data.query)}` : "";
+                return (
+                  <Button
+                    key={item.value}
+                    variant={item.value === data.scope ? "default" : "outline"}
+                    size="sm"
+                    className="shrink-0"
+                    asChild
+                  >
+                    <Link href={`/app?scope=${item.value}${query}` as Route}>{item.label}</Link>
+                  </Button>
+                );
+              })}
+            </nav>
+            <div className="grid p-2">
               {data.results.slice(0, 6).map((result) => (
                 <Link
                   href={hubRecordHref(data.query, data.scope, result.id)}
                   key={result.id}
-                  className="grid gap-0.5 px-4 py-3 hover:bg-muted/50 transition-colors no-underline"
+                  className="min-w-0 grid grid-cols-[90px_1fr_minmax(120px,230px)] items-center gap-3 rounded-md text-foreground p-2.5 no-underline transition-colors hover:bg-muted/50"
                 >
-                  <span className="text-xs font-black uppercase tracking-wide text-muted-foreground">
-                    {result.type}
-                  </span>
-                  <strong className="text-sm font-medium text-foreground">{result.title}</strong>
-                  <small className="text-xs text-muted-foreground">{result.meta}</small>
+                  <span className="text-[11px] font-extrabold uppercase tracking-[0.04em] text-muted-foreground">{result.type}</span>
+                  <strong className="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap">{result.title}</strong>
+                  <small className="text-muted-foreground text-xs overflow-hidden text-ellipsis whitespace-nowrap">{result.meta}</small>
                 </Link>
               ))}
-              {data.results.length === 0 ? (
-                <p className="px-4 py-6 text-sm text-muted-foreground text-center m-0">
-                  No matching records for this login and scope.
-                </p>
-              ) : null}
+              {data.results.length === 0 ? <p className="text-muted-foreground text-sm p-2">No matching records for this login and scope.</p> : null}
             </div>
           </Card>
 
@@ -357,82 +291,74 @@ export function HubContent({
 
 function RecordPreview({ preview }: { preview: HubPreview }) {
   return (
-    <Card className="lg:col-span-2" aria-label="Selected record preview">
-      <div className="grid gap-2 px-4 py-3 border-b border-border">
-        <span className="text-xs font-black uppercase tracking-wide text-blue-zendesk">
-          {preview.type}
-        </span>
-        <h2 className="text-lg font-bold m-0 text-foreground">{preview.title}</h2>
-        <p className="text-sm text-muted-foreground m-0">{preview.subtitle}</p>
-        <small className="text-xs text-muted-foreground">{preview.meta}</small>
-      </div>
-
-      {preview.flags.length ? (
-        <div className="flex flex-wrap gap-2 px-4 py-3 border-b border-border">
-          {preview.flags.map((flag) => (
-            <Badge key={flag} variant="secondary">
-              {flag}
-            </Badge>
-          ))}
+    <Card className="overflow-hidden">
+      <CardContent className="p-0">
+        <div className="grid gap-1.5 p-4 border-b border-border">
+          <span className="text-[11px] font-extrabold uppercase tracking-[0.04em] text-muted-foreground">{preview.type}</span>
+          <h2 className="text-foreground text-[22px] break-words m-0">{preview.title}</h2>
+          <p className="text-muted-foreground break-words m-0">{preview.subtitle}</p>
+          <small className="text-muted-foreground break-words">{preview.meta}</small>
         </div>
-      ) : null}
 
-      {preview.actions.length ? (
-        <div className="flex flex-wrap gap-2 px-4 py-3 border-b border-border">
-          {preview.actions.map((action) => (
-            <Button key={`${action.label}-${action.href}`} variant="outline" size="sm" asChild>
-              <a href={action.href}>{action.label}</a>
-            </Button>
-          ))}
-        </div>
-      ) : null}
-
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 px-4 py-3 border-b border-border">
-        {preview.facts.map((fact) => (
-          <div key={fact.label} className="grid gap-0.5">
-            <span className="text-xs font-semibold text-muted-foreground uppercase">{fact.label}</span>
-            <strong className="text-sm font-medium text-foreground">{fact.value}</strong>
+        {preview.flags.length ? (
+          <div className="flex flex-wrap gap-2 p-4 border-b border-border">
+            {preview.flags.map((flag) => (
+              <Badge key={flag} variant="secondary">{flag}</Badge>
+            ))}
           </div>
-        ))}
-      </div>
+        ) : null}
 
-      {preview.related.length ? (
-        <div className="grid gap-0">
-          {preview.related.map((section) => (
-            <div key={section.title} className="border-b border-border last:border-b-0">
-              <div className="flex items-center justify-between gap-4 px-4 py-2.5">
-                <span className="text-xs font-black uppercase tracking-wide text-muted-foreground">
-                  Related
-                </span>
-                <h3 className="text-sm font-semibold text-foreground m-0">{section.title}</h3>
-              </div>
-              <div className="grid divide-y divide-border">
+        {preview.actions.length ? (
+          <div className="flex flex-wrap gap-2 p-4 border-b border-border">
+            {preview.actions.map((action) => (
+              <Button key={`${action.label}-${action.href}`} variant="outline" size="sm" asChild>
+                <a href={action.href}>{action.label}</a>
+              </Button>
+            ))}
+          </div>
+        ) : null}
+
+        <div className="grid grid-cols-2 border-b border-border">
+          {preview.facts.map((fact) => (
+            <div key={fact.label} className="min-w-0 min-h-[72px] grid content-center gap-[5px] p-2.5 px-3 border-r border-b border-border [&:nth-child(2n)]:border-r-0">
+              <span className="text-[11px] font-extrabold uppercase tracking-[0.04em] text-muted-foreground">{fact.label}</span>
+              <strong className="overflow-hidden text-ellipsis whitespace-nowrap text-foreground text-sm">{fact.value}</strong>
+            </div>
+          ))}
+        </div>
+
+        {preview.related.length ? (
+          <div className="grid">
+            {preview.related.map((section) => (
+              <section key={section.title} className="border-b border-border last:border-b-0">
+                <div className="min-h-[42px] flex items-center justify-between gap-3 px-3">
+                  <span className="text-[11px] font-extrabold uppercase tracking-[0.04em] text-muted-foreground">Related</span>
+                  <h3 className="text-sm m-0 text-foreground">{section.title}</h3>
+                </div>
                 {section.rows.length ? (
                   section.rows.map((row) =>
                     row.href ? (
-                      <Link className="grid gap-0.5 px-4 py-2.5 hover:bg-muted/50 transition-colors no-underline" href={row.href} key={row.id}>
-                        <strong className="text-sm font-medium text-foreground">{row.title}</strong>
-                        <span className="text-xs text-muted-foreground">{row.subtitle}</span>
-                        <small className="text-xs text-muted-foreground/70">{row.meta}</small>
+                      <Link className="min-h-[58px] grid gap-1 text-foreground p-[9px_12px] no-underline hover:bg-muted/50" href={row.href} key={row.id}>
+                        <strong className="overflow-hidden text-ellipsis whitespace-nowrap">{row.title}</strong>
+                        <span className="overflow-hidden text-ellipsis whitespace-nowrap text-muted-foreground text-xs">{row.subtitle}</span>
+                        <small className="overflow-hidden text-ellipsis whitespace-nowrap text-muted-foreground text-xs">{row.meta}</small>
                       </Link>
                     ) : (
-                      <article key={row.id} className="grid gap-0.5 px-4 py-2.5">
-                        <strong className="text-sm font-medium text-foreground">{row.title}</strong>
-                        <span className="text-xs text-muted-foreground">{row.subtitle}</span>
-                        <small className="text-xs text-muted-foreground/70">{row.meta}</small>
+                      <article className="min-h-[58px] grid gap-1 p-[9px_12px]" key={row.id}>
+                        <strong className="overflow-hidden text-ellipsis whitespace-nowrap text-foreground">{row.title}</strong>
+                        <span className="overflow-hidden text-ellipsis whitespace-nowrap text-muted-foreground text-xs">{row.subtitle}</span>
+                        <small className="overflow-hidden text-ellipsis whitespace-nowrap text-muted-foreground text-xs">{row.meta}</small>
                       </article>
                     )
                   )
                 ) : (
-                  <p className="px-4 py-3 text-sm text-muted-foreground m-0">
-                    No related records visible to this login.
-                  </p>
+                  <p className="text-muted-foreground text-xs grid gap-1.5 p-3.5">No related records visible to this login.</p>
                 )}
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : null}
+              </section>
+            ))}
+          </div>
+        ) : null}
+      </CardContent>
     </Card>
   );
 }
