@@ -28,15 +28,16 @@ export function StoryDetailForm({ story }: { story: StoryDetail }) {
   const [timeSpent, setTimeSpent] = useState(String(story.story_time_spent ?? ""));
 
   const updateAction = async () => {
-    await updateStory(story.story_uuid, {
-      story_status: Number(status) || 0,
-      number_of_employees: employees ? Number(employees) : null,
-      story_time_spent: timeSpent ? Number(timeSpent) : null,
-    });
-    return { success: true };
+    const fd = new FormData();
+    fd.set("storyUuid", story.story_uuid);
+    fd.set("story_status", String(Number(status) || 0));
+    fd.set("number_of_employees", employees ? String(Number(employees)) : "");
+    fd.set("story_time_spent", timeSpent ? String(Number(timeSpent)) : "");
+    await updateStory(null, fd);
+    return { success: true } as const;
   };
 
-  const [state, formAction, pending] = useActionState(updateAction, null);
+  const [state, formAction, pending] = useActionState<{ success?: boolean } | null>(updateAction, null);
 
   const statusColors: Record<number, "default" | "secondary" | "success" | "warning" | "outline"> = {
     0: "secondary",

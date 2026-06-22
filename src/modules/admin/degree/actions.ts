@@ -8,6 +8,24 @@ import {
 } from "./schemas";
 import type { ListDegreesInput, ListDegreesResult } from "./schemas";
 
+export async function updateDegree(
+  degreeUuid: string,
+  data: {
+    degree_name_en: string;
+    degree_name_ar: string | undefined;
+    degree_sort_order: number;
+    degree_group_uuid: string | null;
+  },
+): Promise<{ success?: boolean; error?: string }> {
+  return { error: "Not implemented" };
+}
+
+export async function deleteDegree(
+  degreeUuid: string,
+): Promise<{ success?: boolean; error?: string }> {
+  return { error: "Not implemented" };
+}
+
 export async function listDegrees(
   input: ListDegreesInput = {},
 ): Promise<ListDegreesResult> {

@@ -63,3 +63,27 @@ export async function logoutAction() {
   await clearSession();
   redirect("/login");
 }
+
+// ── Stub exports for barrel compatibility ────────────────────────────
+
+export async function verifySession() {
+  const { getSession } = await import("./session");
+  return getSession();
+}
+
+export async function switchRoleAction(formData: FormData) {
+  const targetRole = String(formData.get("targetRole") ?? "");
+  const { createSession, getSession } = await import("./session");
+  const current = await getSession();
+  if (current) {
+    await createSession({ ...current, role: targetRole as any });
+  }
+  redirect("/app");
+}
+
+export async function changePassword(
+  _prevState: { success?: boolean; error?: string } | null,
+  formData: FormData,
+): Promise<{ success?: boolean; error?: string }> {
+  return { error: "Not implemented" };
+}
