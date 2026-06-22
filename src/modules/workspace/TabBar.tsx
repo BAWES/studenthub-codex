@@ -217,7 +217,8 @@ function TabItem({
   isDragOver: boolean;
 }) {
   const [showPin, setShowPin] = useState(false);
-  const iconEl = resolveIcon(tab.icon);
+  const IconComponent = resolveIcon(tab.icon);
+  const iconEl = <IconComponent size={14} />;
   const isHome = tab.href === `/${role}`;
 
   const baseClasses = "relative flex items-center gap-0 min-w-0 max-w-[200px] px-[2px] py-1 border-0 rounded-t-sm bg-transparent text-muted-foreground text-xs font-medium whitespace-nowrap select-none cursor-default transition-colors hover:bg-muted hover:text-foreground group/tab";

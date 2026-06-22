@@ -64,17 +64,20 @@ export function ExpenseDetailForm({
     formData.set("amount", amount);
     formData.set("transaction_datetime", transactionDatetime);
 
-    await updateExpense(expense.expense_uuid, {
+    await updateExpense({
+      id: expense.expense_uuid,
       title,
       type,
       detail: detail || undefined,
-      amount: amount ? Number(amount) : undefined,
-      transaction_datetime: transactionDatetime || undefined,
+      amount: amount || undefined,
     });
     return { success: true };
   };
 
-  const [state, formAction, pending] = useActionState(updateAction, null);
+  const [state, formAction, pending] = useActionState(
+    updateAction,
+    null,
+  ) as unknown as [state: { success?: boolean } | null, formAction: () => void, pending: boolean];
 
   return (
     <div className="space-y-6">
@@ -182,7 +185,7 @@ export function ExpenseDetailForm({
         <CardContent>
           <form
             action={async () => {
-              await deleteExpense(expense.expense_uuid);
+              await deleteExpense({ id: expense.expense_uuid });
             }}
           >
             <Button type="submit" variant="destructive">

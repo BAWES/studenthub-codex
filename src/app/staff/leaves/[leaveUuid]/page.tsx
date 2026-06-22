@@ -51,7 +51,7 @@ export default async function StaffLeaveDetailPage({
     notFound();
   }
 
-  const facts = [
+  const facts: any[] = [
     { label: "Staff", value: leave.staff_name ?? "—" },
     { label: "Category", value: leave.category ? leave.category.charAt(0).toUpperCase() + leave.category.slice(1) : "—" },
     { label: "From", value: formatDate(leave.from_date) },
