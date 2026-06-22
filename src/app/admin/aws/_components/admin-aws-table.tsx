@@ -37,39 +37,41 @@ export function AdminAwsTable({ session, entries, awsResult }: Props) {
     >
       {/* Summary card */}
       <section className="mb-6">
-        <div className="rounded-lg border border-border bg-card p-5">
-          <h3 className="text-sm font-semibold mb-3 text-foreground">
-            Connection summary
-          </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div>
-              <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                Region
-              </span>
-              <p className="text-sm mt-1 font-mono text-foreground">
-                {awsResult.region || <span className="text-muted-foreground">Not configured</span>}
-              </p>
+        <Card>
+          <CardContent className="p-5">
+            <h3 className="text-sm font-semibold mb-3 text-foreground">
+              Connection summary
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  Region
+                </span>
+                <p className="text-sm mt-1 font-mono text-foreground">
+                  {awsResult.region || <span className="text-muted-foreground">Not configured</span>}
+                </p>
+              </div>
+              <div>
+                <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  S3 Bucket
+                </span>
+                <p className="text-sm mt-1 font-mono text-foreground">
+                  {awsResult.bucket || <span className="text-muted-foreground">Not configured</span>}
+                </p>
+              </div>
+              <div>
+                <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  Access Key
+                </span>
+                <p className="text-sm mt-1 font-mono text-foreground">
+                  {awsResult.key
+                    ? `••••••••${awsResult.key.slice(-4)}`
+                    : <span className="text-muted-foreground">Not configured</span>}
+                </p>
+              </div>
             </div>
-            <div>
-              <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                S3 Bucket
-              </span>
-              <p className="text-sm mt-1 font-mono text-foreground">
-                {awsResult.bucket || <span className="text-muted-foreground">Not configured</span>}
-              </p>
-            </div>
-            <div>
-              <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                Access Key
-              </span>
-              <p className="text-sm mt-1 font-mono text-foreground">
-                {awsResult.key
-                  ? `••••••••${awsResult.key.slice(-4)}`
-                  : <span className="text-muted-foreground">Not configured</span>}
-              </p>
-            </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       </section>
 
       {/* Config entries table */}
