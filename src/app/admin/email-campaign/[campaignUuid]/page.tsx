@@ -1,40 +1,76 @@
+import { ErrorBoundary } from "@/modules/workspace/ErrorBoundary";
 import { notFound } from "next/navigation";
-import Link from "next/link";
-import type { Route } from "next";
 import { requireRoleCapability } from "@/modules/auth/session";
+import { DetailSection } from "@/modules/workspace/DetailPanels";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
-import { Button } from "@/components/ui/button";
+import { getEmailCampaign } from "./actions";
 import { formatDate } from "@/modules/workspace/format";
-import { getEmailCampaignDetail } from "../actions";
-import { EmailCampaignDetailForm } from "./EmailCampaignDetailForm";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminEmailCampaignDetailPage({ params }: { params: Promise<{ campaignUuid: string }> }) {
-  const session = await requireRoleCapability("admin", "admin.system");
+export default async function AdminEmailCampaignDetailPage({
+  params,
+}: {
+  params: Promise<{ campaignUuid: string }>;
+}) {
+  const session = await requireRoleCapability("admin", "admin.read");
   const { campaignUuid } = await params;
 
-  const campaign = await getEmailCampaignDetail(campaignUuid);
-  if (!campaign) notFound();
+  if (!campaignUuid) notFound();
+
+  const campaign = await getEmailCampaign({ campaignUuid });
+
+  if (!campaign) {
+    notFound();
+  }
+
+  const statusLabel = (status: boolean | null) => {
+    if (status === null) return "—";
+    return status ? "Active" : "Inactive";
+  };
 
   return (
-    <WorkspaceShell
-      session={session}
-      eyebrow="Admin / Email Campaigns"
-      title={campaign.subject ?? "Email Campaign"}
-      metrics={[
-        { label: "Progress", value: `${campaign.progress ?? 0}%`, note: "Campaign progress" },
-        { label: "Recurring", value: campaign.is_recurring ? "Yes" : "No", note: "Recurring campaign" },
-        { label: "Created", value: formatDate(campaign.created_at), note: "Record created" }
-      ]}
-    >
-      <EmailCampaignDetailForm campaign={campaign} />
-
-      <section className="flex gap-2 p-4">
-        <Link href={"/admin/email-campaign" as Route}>
-          <Button variant="outline">Back to Email Campaigns</Button>
-        </Link>
-      </section>
-    </WorkspaceShell>
+    <ErrorBoundary>
+      <WorkspaceShell
+        session={session}
+        eyebrow="Admin / Email Campaigns"
+        title={campaign.subject ?? "Untitled Campaign"}
+        metrics={[
+          {
+            label: "Status",
+            value: statusLabel(campaign.status),
+            note: "Current campaign status",
+          },
+          {
+            label: "Progress",
+            value: campaign.progress != null ? `${campaign.progress}%` : "—",
+            note: "Completion percentage",
+          },
+          {
+            label: "Target",
+            value: campaign.target ?? "—",
+            note: "Audience segment",
+          },
+        ]}
+      >
+        <DetailSection
+          title="Campaign Details"
+          facts={[
+            { label: "Campaign UUID", value: campaign.campaign_uuid },
+            { label: "Subject", value: campaign.subject ?? "—" },
+            { label: "Message", value: campaign.message ?? "—" },
+            { label: "Target", value: campaign.target ?? "—" },
+            { label: "Progress", value: campaign.progress != null ? `${campaign.progress}%` : "—" },
+            { label: "Status", value: statusLabel(campaign.status) },
+            {
+              label: "Created",
+              value: campaign.created_at
+                ? formatDate(new Date(campaign.created_at))
+                : "—",
+            },
+          ]}
+        />
+      </WorkspaceShell>
+    </ErrorBoundary>
   );
 }

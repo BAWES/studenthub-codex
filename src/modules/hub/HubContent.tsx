@@ -5,8 +5,9 @@ import Link from "next/link";
 import type { SessionUser } from "@/modules/auth/types";
 import { useWorkspaceOS } from "@/modules/workspace/WorkspaceOSContext";
 import { HubShortcuts, type HubCommand } from "./HubShortcuts";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -26,7 +27,7 @@ type HubQueue = {
   label: string;
   value: number;
   note: string;
-  href?: string;
+  href?: Route;
   tone: string;
 };
 
@@ -36,7 +37,7 @@ type HubResult = {
   title: string;
   subtitle: string;
   meta: string;
-  href?: string;
+  href?: Route;
 };
 
 type HubPreviewAction = { label: string; href: string };
@@ -46,7 +47,7 @@ type HubPreviewRelatedRow = {
   title: string;
   subtitle: string;
   meta: string;
-  href?: string;
+  href?: Route;
 };
 type HubPreviewRelated = {
   title: string;
@@ -59,7 +60,7 @@ type HubPreview = {
   title: string;
   subtitle: string;
   meta: string;
-  href?: string;
+  href?: Route;
   actions: HubPreviewAction[];
   flags: string[];
   facts: HubPreviewFact[];
@@ -77,7 +78,7 @@ type RoleJourney = {
   title: string;
   description: string;
   steps: string[];
-  href: string;
+  href: Route;
   action: string;
 };
 
@@ -85,7 +86,7 @@ type RoleGuide = {
   title: string;
   description: string;
   guardrail: string;
-  primary: { label: string; href: string };
+  primary: { label: string; href: Route };
   journeys: RoleJourney[];
 };
 
@@ -117,18 +118,19 @@ export function HubContent({
   const hubContext = hubContextHref(data.query, data.scope);
 
   const desk = (
-    <div className="flex flex-col gap-0 min-h-svh bg-background">
-      {/* Topbar — replaces commandTopbar + commandIdentity + commandSearch */}
-      <header className="sticky top-0 z-40 flex items-center gap-3 border-b border-border bg-card px-4 py-2.5">
-        <div className="flex items-center gap-2.5 min-w-0">
-          <div className="flex flex-col items-end text-right leading-tight">
-            <span className="text-[11px] font-bold uppercase text-[#1f73b7]">{session.role}</span>
-            <strong className="text-sm text-foreground truncate max-w-[140px]">{session.name}</strong>
-            <small className="text-[11px] text-muted-foreground truncate max-w-[140px]">{session.email}</small>
+    <section className="flex flex-1 flex-col min-w-0">
+      {/* Top Bar */}
+      <header className="flex items-center justify-between border-b border-border bg-card px-6 py-3">
+        <div className="flex items-center gap-3">
+          <Badge variant="secondary" className="uppercase text-xs tracking-wider">
+            {session.role}
+          </Badge>
+          <div className="flex flex-col">
+            <strong className="text-sm text-foreground">{session.name}</strong>
+            <small className="text-xs text-muted-foreground">{session.email}</small>
           </div>
         </div>
-
-        <form className="flex flex-1 items-center gap-2" id="hub-search-form">
+        <form className="flex items-center gap-2" action={undefined}>
           <Input
             aria-label="Find records"
             data-command-search
@@ -136,186 +138,176 @@ export function HubContent({
             id="hub-search"
             name="q"
             placeholder="Search candidates, companies, requests, transfers, ID batches"
-            className="max-w-md"
+            className="w-80"
           />
           <input type="hidden" name="scope" value={data.scope} />
-          <Button type="submit" size="sm" className="bg-[#eb6651] hover:bg-[#d45441] text-white">
+          <Button type="submit" variant="ghost" size="sm">
             Search
           </Button>
         </form>
-
         {embedded ? null : <HubShortcuts commands={commands} />}
       </header>
 
-      {/* Content area */}
-      <div className="flex-1 p-4 flex flex-col gap-4">
-        {/* Role boundary notice */}
+      {/* Journey Home */}
+      <section className="flex-1 overflow-y-auto p-6">
         {requiredRole && requiredRole !== session.role ? (
-          <Card className="border-destructive/50 bg-destructive/5">
-            <CardContent className="flex items-center justify-between gap-4 p-4">
-              <div>
-                <span className="text-[11px] font-bold uppercase text-destructive">Access boundary</span>
-                <strong className="block text-sm text-foreground mt-1">
-                  You are signed in as {session.role}, not {requiredRole}.
-                </strong>
-                <p className="text-sm text-muted-foreground mt-0.5">
-                  Use the matching production credentials to enter that workspace. This keeps candidate, staff, company, and
-                  admin data separated.
-                </p>
-              </div>
-              <Link className={cn(buttonVariants({ variant: "outline", size: "sm" }), "shrink-0 no-underline")} href="/login">
-                Switch account
-              </Link>
-            </CardContent>
-          </Card>
+          <Alert variant="destructive" className="mb-6">
+            <AlertTitle>Access boundary</AlertTitle>
+            <AlertDescription className="flex items-center justify-between">
+              <span>
+                You are signed in as <strong>{session.role}</strong>, not <strong>{requiredRole}</strong>. Use the
+                matching production credentials to enter that workspace. This keeps candidate, staff, company, and admin
+                data separated.
+              </span>
+              <Button variant="outline" size="sm" asChild>
+                <Link href="/login">Switch account</Link>
+              </Button>
+            </AlertDescription>
+          </Alert>
         ) : null}
 
-        {/* Hero section — replaces journeyHero + journeyGuardrail */}
-        <Card>
-          <CardContent className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,280px)] gap-4 p-6">
-            <div>
-              <span className="text-[11px] font-bold uppercase text-[#1f73b7]">Start here</span>
-              <h1 className="text-2xl font-bold text-foreground mt-1 mb-1">{guide.title}</h1>
+        {/* Hero Section */}
+        <Card className="mb-6 border-l-4 border-l-[#eb6651]">
+          <CardContent className="flex items-start justify-between p-6">
+            <div className="space-y-3">
+              <span className="text-xs font-medium uppercase tracking-wider text-[#eb6651]">
+                Start here
+              </span>
+              <h1 className="text-2xl font-bold text-foreground">{guide.title}</h1>
               <p className="text-sm text-muted-foreground">{guide.description}</p>
-              <div className="flex flex-wrap items-center gap-2 mt-4">
-                <Link
-                  className={cn(
-                    buttonVariants({ variant: "default", size: "default" }),
-                    "no-underline bg-[#eb6651] hover:bg-[#d45441] text-white"
-                  )}
-                  href={guide.primary.href as Route}
-                >
-                  {guide.primary.label}
-                </Link>
-                <Link className={cn(buttonVariants({ variant: "outline", size: "sm" }), "no-underline")} href={hubContext as Route}>
-                  Open focused search
-                </Link>
+              <div className="flex gap-2">
+                <Button asChild>
+                  <Link href={guide.primary.href}>{guide.primary.label}</Link>
+                </Button>
+                <Button variant="outline" asChild>
+                  <Link href={hubContext}>Open focused search</Link>
+                </Button>
               </div>
             </div>
-            <Card className="bg-muted/30 border-dashed">
-              <CardContent className="p-4 flex flex-col gap-1">
-                <span className="text-[11px] font-bold uppercase text-[#1f73b7]">Signed in as {session.role}</span>
-                <strong className="text-sm text-foreground">{session.name}</strong>
-                <p className="text-xs text-muted-foreground">{guide.guardrail}</p>
-              </CardContent>
-            </Card>
+            <aside className="w-64 rounded-lg bg-muted p-4 text-sm">
+              <span className="text-xs font-medium text-muted-foreground">Signed in as {session.role}</span>
+              <p className="mt-1 font-semibold text-foreground">{session.name}</p>
+              <p className="mt-2 text-xs text-muted-foreground">{guide.guardrail}</p>
+            </aside>
           </CardContent>
         </Card>
 
-        {/* Workflow journey cards — replaces journeyGrid + journeyCard */}
-        <section className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3" aria-label={`${session.role} workflows`}>
+        {/* Journey Cards */}
+        <section className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3" aria-label={`${session.role} workflows`}>
           {guide.journeys.map((journey) => (
-            <Card key={journey.title} className="flex flex-col">
-              <CardHeader className="p-4 pb-2">
-                <Badge variant="secondary" className="self-start text-[11px] uppercase font-bold bg-[#fef1ef] text-[#eb6651] border-[#eb6651]/20">
-                  {journey.kicker}
-                </Badge>
-                <h3 className="text-sm font-bold text-foreground mt-2">{journey.title}</h3>
-                <p className="text-xs text-muted-foreground">{journey.description}</p>
+            <Card key={journey.title}>
+              <CardHeader>
+                <span className="text-xs font-medium text-[#eb6651]">{journey.kicker}</span>
+                <h3 className="font-semibold text-foreground">{journey.title}</h3>
+                <p className="text-sm text-muted-foreground">{journey.description}</p>
               </CardHeader>
-              <CardContent className="p-4 pt-0 flex-1 flex flex-col justify-between gap-3">
-                <ol className="list-decimal list-inside text-xs text-muted-foreground space-y-1">
-                  {journey.steps.map((step) => (
-                    <li key={step} className="text-foreground/80">
-                      {step}
+              <CardContent className="space-y-3">
+                <ol className="space-y-2">
+                  {journey.steps.map((step, index) => (
+                    <li key={step} className="flex items-start gap-2 text-sm">
+                      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-medium">
+                        {index + 1}
+                      </span>
+                      <strong className="text-foreground">{step}</strong>
                     </li>
                   ))}
                 </ol>
-                <Link
-                  className={cn(buttonVariants({ variant: "outline", size: "sm" }), "no-underline w-full")}
-                  href={journey.href as Route}
-                >
-                  {journey.action}
-                </Link>
+                <Button variant="ghost" className="px-0 text-[#eb6651] hover:text-[#d45441]" asChild>
+                  <Link href={journey.href}>{journey.action} →</Link>
+                </Button>
               </CardContent>
             </Card>
           ))}
         </section>
 
-        {/* Workbench panels — replaces journeyWorkbench */}
-        <section className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-3" aria-label="Search and live queues">
-          {/* Panel A: Live queues */}
+        {/* Workbench */}
+        <section className="grid grid-cols-1 gap-4 lg:grid-cols-2" aria-label="Search and live queues">
+          {/* Live Queues */}
           <Card>
-            <CardHeader className="pb-2">
-              <span className="text-[11px] font-bold uppercase text-[#1f73b7]">Live queues</span>
-              <h3 className="text-sm font-bold text-foreground">What needs attention</h3>
+            <CardHeader>
+              <span className="text-xs font-medium text-muted-foreground">Live queues</span>
+              <h3 className="font-semibold text-foreground">What needs attention</h3>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 {data.queues.map((queue) => {
                   const content = (
-                    <Card key={queue.label} className="border-border/60">
-                      <CardContent className="p-3 flex flex-col gap-0.5">
-                        <span className="text-[10px] font-bold uppercase text-muted-foreground">{queue.label}</span>
-                        <strong className="text-lg text-foreground">{queue.value.toLocaleString("en-US")}</strong>
-                        <small className="text-[11px] text-muted-foreground">{queue.note}</small>
-                      </CardContent>
-                    </Card>
+                    <div className="rounded-lg border border-border bg-card p-3 transition-colors hover:bg-muted/50">
+                      <span className="text-xs text-muted-foreground">{queue.label}</span>
+                      <p className="text-2xl font-bold text-foreground">
+                        {queue.value.toLocaleString("en-US")}
+                      </p>
+                      <small className="text-xs text-muted-foreground">{queue.note}</small>
+                    </div>
                   );
                   return queue.href ? (
-                    <Link className="no-underline hover:opacity-80 transition-opacity" href={queue.href as Route} key={queue.label}>
+                    <Link className="block" href={queue.href as Route} key={queue.label}>
                       {content}
                     </Link>
                   ) : (
-                    content
+                    <div key={queue.label}>{content}</div>
                   );
                 })}
               </div>
             </CardContent>
           </Card>
 
-          {/* Panel B: Search & Results */}
+          {/* Search Results */}
           <Card>
-            <CardHeader className="pb-2">
-              <span className="text-[11px] font-bold uppercase text-[#1f73b7]">{data.scope}</span>
-              <h3 className="text-sm font-bold text-foreground">
-                {data.query ? `Search results for ${data.query}` : "Find a record"}
-              </h3>
+            <CardHeader>
+              <div>
+                <span className="text-xs font-medium text-muted-foreground">{data.scope}</span>
+                <h3 className="font-semibold text-foreground">
+                  {data.query ? `Search results for ${data.query}` : "Find a record"}
+                </h3>
+              </div>
             </CardHeader>
-            <CardContent>
-              <nav className="flex flex-wrap items-center gap-1 mb-3" aria-label="Search scopes">
+            <CardContent className="space-y-3">
+              <nav className="flex flex-wrap gap-1" aria-label="Search scopes">
                 {data.scopes.map((item) => {
                   const query = data.query ? `&q=${encodeURIComponent(data.query)}` : "";
                   return (
-                    <Link
-                      className={cn(
-                        buttonVariants({ variant: item.value === data.scope ? "secondary" : "ghost" }),
-                        "text-[11px] no-underline"
-                      )}
-                      href={`/app?scope=${item.value}${query}` as Route}
+                    <Button
                       key={item.value}
+                      variant={item.value === data.scope ? "default" : "outline"}
+                      size="sm"
+                      asChild
                     >
-                      {item.label}
-                    </Link>
+                      <Link href={`/app?scope=${item.value}${query}` as Route}>{item.label}</Link>
+                    </Button>
                   );
                 })}
               </nav>
-              <div className="grid">
+              <div className="space-y-2">
                 {data.results.slice(0, 6).map((result) => (
                   <Link
-                    className="flex items-center gap-2 px-2 py-2 border-b border-border last:border-b-0 hover:bg-muted/50 no-underline transition-colors"
-                    href={hubRecordHref(data.query, data.scope, result.id) as Route}
+                    href={hubRecordHref(data.query, data.scope, result.id)}
                     key={result.id}
+                    className="flex items-center gap-3 rounded-lg border border-border p-3 transition-colors hover:bg-muted/50"
                   >
-                    <Badge variant="outline" className="text-[10px] uppercase shrink-0">{result.type}</Badge>
-                    <strong className="text-sm text-foreground truncate">{result.title}</strong>
-                    <small className="text-xs text-muted-foreground truncate ml-auto">{result.meta}</small>
+                    <Badge variant="secondary" className="shrink-0">
+                      {result.type}
+                    </Badge>
+                    <div className="min-w-0 flex-1">
+                      <strong className="block truncate text-sm text-foreground">{result.title}</strong>
+                      <small className="text-xs text-muted-foreground">{result.meta}</small>
+                    </div>
                   </Link>
                 ))}
                 {data.results.length === 0 ? (
-                  <p className="text-sm text-muted-foreground py-4 text-center">
+                  <p className="py-4 text-center text-sm text-muted-foreground">
                     No matching records for this login and scope.
                   </p>
                 ) : null}
               </div>
             </CardContent>
           </Card>
-        </section>
 
-        {/* Record preview */}
-        {data.preview ? <RecordPreview preview={data.preview} /> : null}
-      </div>
-    </div>
+          {/* Record Preview */}
+          {data.preview ? <RecordPreview preview={data.preview} /> : null}
+        </section>
+      </section>
+    </section>
   );
 
   return desk;
@@ -323,78 +315,88 @@ export function HubContent({
 
 function RecordPreview({ preview }: { preview: HubPreview }) {
   return (
-    <Card aria-label="Selected record preview">
-      <CardHeader className="pb-2">
-        <Badge variant="outline" className="text-[10px] uppercase self-start">{preview.type}</Badge>
-        <h2 className="text-lg font-bold text-foreground mt-1">{preview.title}</h2>
-        <p className="text-sm text-muted-foreground">{preview.subtitle}</p>
-        <small className="text-xs text-muted-foreground">{preview.meta}</small>
-      </CardHeader>
-
-      <CardContent className="flex flex-col gap-4">
-        {preview.flags.length ? (
-          <div className="flex flex-wrap gap-1">
-            {preview.flags.map((flag) => (
-              <Badge key={flag} variant="secondary">{flag}</Badge>
-            ))}
+    <section className="lg:col-span-2" aria-label="Selected record preview">
+      <Card>
+        <CardHeader>
+          <div>
+            <Badge variant="secondary" className="mb-2">
+              {preview.type}
+            </Badge>
+            <h2 className="text-lg font-semibold text-foreground">{preview.title}</h2>
+            <p className="text-sm text-muted-foreground">{preview.subtitle}</p>
+            <small className="text-xs text-muted-foreground">{preview.meta}</small>
           </div>
-        ) : null}
-
-        {preview.actions.length ? (
-          <div className="flex flex-wrap items-center gap-1.5 border-t border-border pt-3" aria-label="Record actions">
-            {preview.actions.map((action) => (
-              <Button key={`${action.label}-${action.href}`} variant="outline" size="sm" asChild>
-                <a href={action.href}>{action.label}</a>
-              </Button>
-            ))}
-          </div>
-        ) : null}
-
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 border-t border-border pt-3">
-          {preview.facts.map((fact) => (
-            <div key={fact.label}>
-              <span className="text-[10px] font-bold uppercase text-muted-foreground">{fact.label}</span>
-              <strong className="block text-sm text-foreground">{fact.value}</strong>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {preview.flags.length ? (
+            <div className="flex flex-wrap gap-1">
+              {preview.flags.map((flag) => (
+                <Badge key={flag} variant="secondary">
+                  {flag}
+                </Badge>
+              ))}
             </div>
-          ))}
-        </div>
+          ) : null}
 
-        {preview.related.length ? (
-          <div className="border-t border-border pt-3 space-y-3">
-            {preview.related.map((section) => (
-              <section key={section.title}>
-                <h3 className="text-sm font-bold text-foreground mb-2">{section.title}</h3>
-                {section.rows.length ? (
-                  <div className="grid">
-                    {section.rows.map((row) =>
-                      row.href ? (
-                        <Link
-                          className="flex items-center gap-2 px-2 py-2 border-b border-border last:border-b-0 hover:bg-muted/50 no-underline transition-colors"
-                          href={row.href as Route}
-                          key={row.id}
-                        >
-                          <strong className="text-sm text-foreground truncate">{row.title}</strong>
-                          <span className="text-xs text-muted-foreground truncate">{row.subtitle}</span>
-                          <small className="text-xs text-muted-foreground ml-auto">{row.meta}</small>
-                        </Link>
-                      ) : (
-                        <article className="flex items-center gap-2 px-2 py-2 border-b border-border last:border-b-0" key={row.id}>
-                          <strong className="text-sm text-foreground truncate">{row.title}</strong>
-                          <span className="text-xs text-muted-foreground truncate">{row.subtitle}</span>
-                          <small className="text-xs text-muted-foreground ml-auto">{row.meta}</small>
-                        </article>
-                      )
-                    )}
-                  </div>
-                ) : (
-                  <p className="text-xs text-muted-foreground">No related records visible to this login.</p>
-                )}
-              </section>
+          {preview.actions.length ? (
+            <div className="flex flex-wrap gap-2">
+              {preview.actions.map((action) => (
+                <Button key={`${action.label}-${action.href}`} variant="outline" size="sm" asChild>
+                  <a href={action.href}>{action.label}</a>
+                </Button>
+              ))}
+            </div>
+          ) : null}
+
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+            {preview.facts.map((fact) => (
+              <div key={fact.label} className="rounded-lg bg-muted p-2">
+                <span className="text-xs text-muted-foreground">{fact.label}</span>
+                <p className="font-semibold text-foreground">{fact.value}</p>
+              </div>
             ))}
           </div>
-        ) : null}
-      </CardContent>
-    </Card>
+
+          {preview.related.length ? (
+            <div className="space-y-4 border-t border-border pt-4">
+              {preview.related.map((section) => (
+                <section key={section.title}>
+                  <div className="mb-2 flex items-center gap-2">
+                    <span className="text-xs font-medium text-muted-foreground">Related</span>
+                    <h3 className="text-sm font-semibold text-foreground">{section.title}</h3>
+                  </div>
+                  {section.rows.length ? (
+                    <div className="space-y-1">
+                      {section.rows.map((row) =>
+                        row.href ? (
+                          <Link
+                            className="flex items-center justify-between rounded-md px-3 py-2 text-sm transition-colors hover:bg-muted"
+                            href={row.href}
+                            key={row.id}
+                          >
+                            <strong className="text-foreground">{row.title}</strong>
+                            <span className="text-xs text-muted-foreground">{row.subtitle}</span>
+                            <small className="text-xs text-muted-foreground">{row.meta}</small>
+                          </Link>
+                        ) : (
+                          <div className="flex items-center justify-between rounded-md px-3 py-2 text-sm" key={row.id}>
+                            <strong className="text-foreground">{row.title}</strong>
+                            <span className="text-xs text-muted-foreground">{row.subtitle}</span>
+                            <small className="text-xs text-muted-foreground">{row.meta}</small>
+                          </div>
+                        )
+                      )}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">No related records visible to this login.</p>
+                  )}
+                </section>
+              ))}
+            </div>
+          ) : null}
+        </CardContent>
+      </Card>
+    </section>
   );
 }
 
@@ -402,7 +404,7 @@ function hubContextHref(query: string, scope: string) {
   const params = new URLSearchParams();
   if (query) params.set("q", query);
   params.set("scope", scope);
-  return `/app?${params.toString()}`;
+  return `/app?${params.toString()}` as Route;
 }
 
 function hubRecordHref(query: string, scope: string, record: string) {
@@ -410,5 +412,5 @@ function hubRecordHref(query: string, scope: string, record: string) {
   if (query) params.set("q", query);
   params.set("scope", scope);
   params.set("record", record);
-  return `/app?${params.toString()}`;
+  return `/app?${params.toString()}` as Route;
 }

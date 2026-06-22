@@ -1,3 +1,14 @@
-export default function Loading() {
-  return <div className="flex items-center justify-center min-h-[400px]"><div className="animate-pulse text-muted-foreground">Loading...</div></div>;
+export default function AdminEmailCampaignsLoading() {
+  return (
+    <div className="flex items-center justify-center min-h-[40vh]">
+      <div className="flex flex-col items-center gap-3">
+        <div
+          className="w-8 h-8 border-2 border-border border-t-primary rounded-full animate-spin"
+        />
+        <p className="text-sm text-muted-foreground">
+          Loading email campaigns…
+        </p>
+      </div>
+    </div>
+  );
 }

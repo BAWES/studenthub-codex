@@ -1,46 +1,67 @@
+import { ErrorBoundary } from "@/modules/workspace/ErrorBoundary";
 import { notFound } from "next/navigation";
-import Link from "next/link";
-import type { Route } from "next";
 import { requireRoleCapability } from "@/modules/auth/session";
+import { DetailSection } from "@/modules/workspace/DetailPanels";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
-import { Button } from "@/components/ui/button";
+import { getDiscountCategory } from "./actions";
 import { formatDate } from "@/modules/workspace/format";
-import { getDiscountCategoryDetail } from "../actions";
-import { DiscountCategoryDetailForm } from "./DiscountCategoryDetailForm";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminDiscountCategoryDetailPage({
-  params
+  params,
 }: {
   params: Promise<{ categoryId: string }>;
 }) {
   const session = await requireRoleCapability("admin", "admin.system");
   const { categoryId } = await params;
-  const id = Number(categoryId);
+  const categoryIdNum = Number(categoryId);
 
-  const category = await getDiscountCategoryDetail(id);
-  if (!category) {
+  if (Number.isNaN(categoryIdNum)) {
     notFound();
   }
 
-  return (
-    <WorkspaceShell
-      session={session}
-      eyebrow="Admin / Discount Categories"
-      title={category.name_en}
-      metrics={[
-        { label: "Created", value: formatDate(category.created_at), note: "Record created" },
-        { label: "Updated", value: formatDate(category.updated_at), note: "Last modified" }
-      ]}
-    >
-      <DiscountCategoryDetailForm category={category} />
+  const data = await getDiscountCategory({ categoryId: categoryIdNum });
 
-      <section className="flex gap-2 p-4">
-        <Link href={"/admin/discount-category" as Route}>
-          <Button variant="outline">Back to Discount Categories</Button>
-        </Link>
-      </section>
-    </WorkspaceShell>
+  if (!data.category) {
+    notFound();
+  }
+
+  const category = data.category;
+
+  return (
+    <ErrorBoundary>
+      <WorkspaceShell
+        session={session}
+        eyebrow="Admin / Discount Categories"
+        title={category.name_en}
+        metrics={[]}
+      >
+        <DetailSection
+          title="Discount Category Details"
+          facts={[
+            { label: "ID", value: String(category.category_id) },
+            { label: "Name (EN)", value: category.name_en },
+            { label: "Name (AR)", value: category.name_ar ?? "—" },
+            {
+              label: "Image",
+              value: category.image ?? "—",
+            },
+            {
+              label: "Created",
+              value: category.created_at
+                ? formatDate(new Date(category.created_at))
+                : "—",
+            },
+            {
+              label: "Updated",
+              value: category.updated_at
+                ? formatDate(new Date(category.updated_at))
+                : "—",
+            },
+          ]}
+        />
+      </WorkspaceShell>
+    </ErrorBoundary>
   );
 }

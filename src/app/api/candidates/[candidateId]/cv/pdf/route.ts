@@ -1,65 +1,54 @@
-import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { generateCandidateCvPdf } from "@/modules/pdf/pdf-service";
+import { NextRequest, NextResponse } from "next/server";
+import { buildCvHtml } from "@/modules/candidates/cv-pdf-helpers";
+import { getCvPdfData } from "@/modules/candidates/cv-pdf-actions";
+import { generatePdf } from "@/lib/pdf-renderer";
 
+export const dynamic = "force-dynamic";
+
+/**
+ * GET /api/candidates/[candidateId]/cv/pdf
+ *
+ * Renders a candidate's CV as a printable HTML page.
+ * - ?format=pdf: returns a downloadable PDF generated via Playwright.
+ * - Default: returns a print-friendly HTML page.
+ *
+ * Maps to legacy profile viewing functionality.
+ */
 export async function GET(
-  request: Request,
-  { params }: { params: Promise<{ candidateId: string }> }
+  _request: NextRequest,
+  { params }: { params: Promise<{ candidateId: string }> },
 ) {
-  const { candidateId } = await params;
-  const id = Number(candidateId);
+  try {
+    const { candidateId } = await params;
 
-  if (isNaN(id)) {
-    return new Response("Invalid candidate ID", { status: 400 });
-  }
+    if (!candidateId || candidateId.trim().length === 0) {
+      return new NextResponse("Missing candidate ID", { status: 400 });
+    }
 
-  const candidate = await prisma.candidate.findUnique({
-    where: { candidate_id: id },
-    include: {
-      candidate_education: {
-        include: { degree: true, university: true },
+    const data = await getCvPdfData({ candidateId: Number(candidateId) });
+    if (!data) {
+      return new NextResponse("Candidate not found", { status: 404 });
+    }
+
+    const html = buildCvHtml(data);
+
+    // Check if PDF format was requested
+    const format = _request.nextUrl.searchParams.get("format");
+
+    if (format === "pdf") {
+      return generatePdf(html, `cv-candidate-${candidateId}`, {
+        footerText: "Candidate CV",
+      });
+    }
+
+    // Default: return HTML for browser preview / print-to-PDF
+    return new NextResponse(html, {
+      headers: {
+        "Content-Type": "text/html; charset=utf-8",
       },
-      candidate_experience: { where: { deleted: 0 } },
-      candidate_skill: { where: { deleted: 0 } },
-      candidate_language: { where: { deleted: 0 } },
-    },
-  });
-
-  if (!candidate) {
-    return new Response("Candidate not found", { status: 404 });
+    });
+  } catch (error) {
+    console.error("CV PDF route handler failed:", error);
+    return new NextResponse("Failed to generate the CV PDF", { status: 500 });
   }
-
-  const buf = await generateCandidateCvPdf({
-    candidate_name: candidate.candidate_name,
-    candidate_name_ar: candidate.candidate_name_ar ?? undefined,
-    candidate_email: candidate.candidate_email ?? undefined,
-    candidate_phone: candidate.candidate_phone ?? undefined,
-    candidate_objective: candidate.candidate_objective ?? undefined,
-    candidate_intro: candidate.candidate_intro ?? undefined,
-    candidate_education: candidate.candidate_education.map((e) => ({
-      degree: e.degree?.degree_name_en ?? undefined,
-      institution: e.university?.university_name_en ?? undefined,
-      year: e.graduation_year ?? undefined,
-    })),
-    candidate_experience: candidate.candidate_experience.map((e) => ({
-      employer: e.employer ?? undefined,
-      role: e.experience ?? undefined,
-      start_year: e.start_year ?? undefined,
-      end_year: e.end_year ?? undefined,
-    })),
-    candidate_skills: candidate.candidate_skill
-      .filter((s) => s.skill)
-      .map((s) => s.skill!),
-    candidate_languages: candidate.candidate_language
-      .filter((l) => l.language)
-      .map((l) => l.language!),
-  });
-
-  return new NextResponse(buf as unknown as BodyInit, {
-    status: 200,
-    headers: {
-      "Content-Type": "application/pdf",
-      "Content-Disposition": `attachment; filename="cv-${candidate.candidate_uid || candidateId}.pdf"`,
-    },
-  });
 }
