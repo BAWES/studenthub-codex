@@ -4,6 +4,8 @@ import { UserRound, Search, Building2, Shield, ClipboardCheck } from "lucide-rea
 import { getSession } from "@/modules/auth/session";
 import { LoginForm } from "@/modules/auth/LoginForm";
 import { ThemeToggle } from "@/modules/theme/ThemeToggle";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 
 export const dynamic = "force-dynamic";
 
@@ -44,7 +46,7 @@ export default async function LoginPage({
       </nav>
 
       {/* Intro */}
-      <section className="overflow-hidden rounded-lg border border-[var(--border)] bg-[linear-gradient(135deg,color-mix(in_srgb,var(--sh-blue)_9%,transparent),transparent_48%),var(--card)] p-[clamp(22px,4vw,48px)]">
+      <section className="overflow-hidden rounded-lg border border-border bg-[linear-gradient(135deg,color-mix(in_srgb,var(--primary)_9%,transparent),transparent_48%),var(--card)] p-[clamp(22px,4vw,48px)]">
         <div>
           <p className="text-blue-zendesk text-[11px] font-black uppercase">One StudentHub login</p>
           <h1 className="mt-0 max-w-[760px] text-[clamp(44px,6.4vw,92px)] leading-[0.94] max-sm:text-[40px]">
@@ -57,12 +59,9 @@ export default async function LoginPage({
           <div className="flex flex-wrap gap-2 mt-[18px]">
             {["Production-compatible credentials", "Server-side account detection", "Capability-scoped workspaces"].map(
               (item) => (
-                <span
-                  key={item}
-                  className="min-h-8 inline-flex items-center border border-[var(--border)] rounded-full bg-[color-mix(in_srgb,var(--card)_88%,transparent)] px-3 text-blue-zendesk text-[11px] font-black uppercase"
-                >
+                <Badge key={item} variant="outline" className="text-blue-zendesk text-[11px] font-black uppercase">
                   {item}
-                </span>
+                </Badge>
               )
             )}
           </div>
@@ -89,14 +88,13 @@ export default async function LoginPage({
       {/* Role notes - spans full width */}
       <section className="col-span-full grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5" aria-label="Account detection notes">
         {roleNotes.map(({ icon: Icon, label, detail }) => (
-          <article
-            key={label}
-            className="grid gap-1.5 border-border rounded-lg bg-card p-3.5"
-          >
-            <Icon className="size-4 text-blue-zendesk shrink-0" aria-hidden="true" />
-            <span className="text-muted-foreground text-xs font-extrabold uppercase">{label}</span>
-            <strong className="text-sm">{detail}</strong>
-          </article>
+          <Card key={label}>
+            <CardContent className="grid gap-1.5 p-3.5">
+              <Icon className="size-4 text-blue-zendesk shrink-0" aria-hidden="true" />
+              <span className="text-muted-foreground text-xs font-extrabold uppercase">{label}</span>
+              <strong className="text-sm">{detail}</strong>
+            </CardContent>
+          </Card>
         ))}
       </section>
     </main>
