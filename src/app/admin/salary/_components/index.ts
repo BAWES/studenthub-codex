@@ -1,1 +1,1 @@
-export { AdminSalariesTable } from "./admin-salaries-table";
+export { AdminSalaryTable } from "./admin-salary-table";

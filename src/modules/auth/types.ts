@@ -30,8 +30,9 @@ export type Capability =
   | "document.export"
   | "id_review.read"
   | "id_review.mutate"
+  | "admin.system"
   | "admin.read"
-  | "admin.system";
+  | "admin.write";
 
 export type SessionUser = {
   role: Role;
@@ -60,4 +61,19 @@ export type LoginState = {
 
 export function isRole(value: FormDataEntryValue | null): value is Role {
   return typeof value === "string" && roles.includes(value as Role);
+}
+
+/**
+ * Maps a user role to its default workspace route.
+ * Used for role-agnostic login redirects.
+ */
+export function roleDefaultRoute(role: Role): string {
+  const routes: Record<Role, string> = {
+    admin: "/admin",
+    staff: "/staff",
+    candidate: "/candidate",
+    company: "/company",
+    inspector: "/inspector",
+  };
+  return routes[role];
 }
