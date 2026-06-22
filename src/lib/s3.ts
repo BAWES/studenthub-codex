@@ -1,176 +1,213 @@
 /**
- * S3-compatible file storage client.
+ * S3/MinIO file upload service.
  *
- * Supports MinIO (local dev) and AWS S3 (production).
- * Configure via environment variables in .env.local:
- *   S3_ENDPOINT=http://127.0.0.1:9000      (MinIO endpoint — omit for AWS S3)
- *   S3_REGION=us-east-1                     (default)
- *   S3_ACCESS_KEY=minioadmin
- *   S3_SECRET_KEY=minioadmin
- *   S3_BUCKET=studenthub-uploads
- *   S3_PUBLIC_URL_BASE=http://127.0.0.1:9000/studenthub-uploads  (public URL prefix, optional)
+ * Provides S3-compatible upload/download/delete operations using @aws-sdk/client-s3.
+ * Falls back to local disk storage when S3 is not configured/available.
  *
- * When S3_ENDPOINT is set, the client uses path-style addressing (MinIO-compatible).
- * When omitted, AWS S3 virtual-hosted-style is used.
+ * Env vars:
+ *   S3_ENDPOINT          - S3 endpoint URL (e.g. http://127.0.0.1:9000 for MinIO)
+ *   S3_REGION            - AWS region (default: us-east-1)
+ *   S3_ACCESS_KEY        - Access key ID
+ *   S3_SECRET_KEY        - Secret access key
+ *   S3_BUCKET            - Bucket name
+ *   S3_PUBLIC_URL_BASE   - Public URL base for accessing files
  */
 
-import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
-import { Upload } from "@aws-sdk/lib-storage";
-import { Readable } from "node:stream";
+import {
+  S3Client,
+  PutObjectCommand,
+  DeleteObjectCommand,
+  GetObjectCommand,
+  HeadBucketCommand,
+  CreateBucketCommand,
+  ListBucketsCommand,
+} from "@aws-sdk/client-s3";
+import crypto from "node:crypto";
+import fs from "node:fs/promises";
+import path from "node:path";
 
-function getConfig() {
-  const endpoint = process.env.S3_ENDPOINT || "";
-  const region = process.env.S3_REGION || "us-east-1";
-  const accessKeyId = process.env.S3_ACCESS_KEY || "minioadmin";
-  const secretAccessKey = process.env.S3_SECRET_KEY || "minioadmin";
-  const bucket = process.env.S3_BUCKET || "studenthub-uploads";
-  const publicUrlBase = process.env.S3_PUBLIC_URL_BASE || "";
+// ---------------------------------------------------------------------------
+// Configuration
+// ---------------------------------------------------------------------------
 
-  return { endpoint, region, accessKeyId, secretAccessKey, bucket, publicUrlBase };
+const config = {
+  endpoint: process.env.S3_ENDPOINT || "",
+  region: process.env.S3_REGION || "us-east-1",
+  accessKey: process.env.S3_ACCESS_KEY || "",
+  secretKey: process.env.S3_SECRET_KEY || "",
+  bucket: process.env.S3_BUCKET || "studenthub-uploads",
+  publicUrlBase: process.env.S3_PUBLIC_URL_BASE || "",
+};
+
+const LOCAL_UPLOAD_DIR = path.join(process.cwd(), "public", "uploads", "candidates");
+
+/** Whether S3/MinIO is configured with all required credentials. */
+const s3Configured = Boolean(config.endpoint && config.accessKey && config.secretKey && config.bucket);
+
+// ---------------------------------------------------------------------------
+// S3 Client
+// ---------------------------------------------------------------------------
+
+let s3Client: S3Client | null = null;
+
+function getS3Client(): S3Client {
+  if (!s3Client) {
+    s3Client = new S3Client({
+      endpoint: config.endpoint,
+      region: config.region,
+      credentials: {
+        accessKeyId: config.accessKey,
+        secretAccessKey: config.secretKey,
+      },
+      forcePathStyle: true, // Required for MinIO
+    });
+  }
+  return s3Client;
 }
 
-let _client: S3Client | null = null;
-
-function getClient(): S3Client {
-  if (_client) return _client;
-
-  const config = getConfig();
-
-  _client = new S3Client({
-    region: config.region,
-    credentials: {
-      accessKeyId: config.accessKeyId,
-      secretAccessKey: config.secretAccessKey,
-    },
-    ...(config.endpoint
-      ? {
-          endpoint: config.endpoint,
-          forcePathStyle: true, // Required for MinIO
-        }
-      : {}),
-  });
-
-  return _client;
-}
+// ---------------------------------------------------------------------------
+// Upload
+// ---------------------------------------------------------------------------
 
 export interface UploadResult {
-  /** Public URL to access the file */
   url: string;
-  /** S3 key (path within bucket) */
   key: string;
-  /** Bucket name */
-  bucket: string;
+  storage: "s3" | "local";
 }
 
 /**
- * Upload a file to S3-compatible storage.
+ * Upload a file buffer to S3 (or local disk as fallback).
  *
- * @param key      - The S3 object key (e.g. "candidates/123/photo_uuid.jpg")
- * @param body     - File contents as Buffer, Uint8Array, Blob, or Readable stream
- * @param mimeType - Content-Type (e.g. "image/jpeg")
- * @returns UploadResult with public URL and key
+ * @param buffer    File contents as Buffer
+ * @param folder    Subfolder within the uploads root (e.g. "candidates/123")
+ * @param filename  Original filename (used to derive extension)
+ * @param prefix    Optional prefix for the stored filename (e.g. "photo", "cv")
+ * @returns         UploadResult with public URL, storage key, and type
  */
 export async function uploadFile(
-  key: string,
-  body: Buffer | Uint8Array | Blob | Readable,
-  mimeType: string,
+  buffer: Buffer,
+  folder: string,
+  filename: string,
+  prefix?: string,
 ): Promise<UploadResult> {
-  const config = getConfig();
-  const client = getClient();
+  const ext = path.extname(filename).toLowerCase();
+  const uniqueName = prefix ? `${prefix}_${crypto.randomUUID()}${ext}` : `${crypto.randomUUID()}${ext}`;
+  const key = `${folder}/${uniqueName}`;
 
-  // Convert Blob to Buffer if needed
-  let uploadBody: Buffer | Uint8Array | Readable;
-  if (body instanceof Blob) {
-    uploadBody = Buffer.from(await body.arrayBuffer());
-  } else {
-    uploadBody = body;
+  if (s3Configured) {
+    return uploadToS3(buffer, key);
   }
 
-  const upload = new Upload({
-    client,
-    params: {
-      Bucket: config.bucket,
-      Key: key,
-      Body: uploadBody,
-      ContentType: mimeType,
-    },
-  });
-
-  await upload.done();
-
-  // Build public URL
-  let url: string;
-  if (config.publicUrlBase) {
-    url = `${config.publicUrlBase.replace(/\/+$/, "")}/${key}`;
-  } else if (config.endpoint) {
-    // MinIO: http://host:port/bucket/key
-    url = `${config.endpoint.replace(/\/+$/, "")}/${config.bucket}/${key}`;
-  } else {
-    // AWS S3: https://bucket.s3.region.amazonaws.com/key
-    url = `https://${config.bucket}.s3.${config.region}.amazonaws.com/${key}`;
-  }
-
-  return { url, key, bucket: config.bucket };
+  return uploadToLocal(buffer, folder, uniqueName);
 }
 
-/**
- * Delete a file from S3.
- */
-export async function deleteFile(key: string): Promise<void> {
-  const config = getConfig();
-  const client = getClient();
+async function uploadToS3(buffer: Buffer, key: string): Promise<UploadResult> {
+  const client = getS3Client();
 
   await client.send(
-    new DeleteObjectCommand({
+    new PutObjectCommand({
       Bucket: config.bucket,
       Key: key,
+      Body: buffer,
     }),
   );
+
+  const url = config.publicUrlBase
+    ? `${config.publicUrlBase.replace(/\/+$/, "")}/${key}`
+    : `${config.endpoint.replace(/\/+$/, "")}/${config.bucket}/${key}`;
+
+  return { url, key, storage: "s3" };
 }
 
+async function uploadToLocal(buffer: Buffer, folder: string, uniqueName: string): Promise<UploadResult> {
+  const dir = path.join(LOCAL_UPLOAD_DIR, folder.replace("candidates/", ""));
+  await fs.mkdir(dir, { recursive: true });
+
+  const filepath = path.join(dir, uniqueName);
+  await fs.writeFile(filepath, buffer);
+
+  const url = `/uploads/candidates/${folder.replace("candidates/", "")}/${uniqueName}`;
+  const s3key = `${folder}/${uniqueName}`;
+  return { url, key: s3key, storage: "local" };
+}
+
+// ---------------------------------------------------------------------------
+// Delete
+// ---------------------------------------------------------------------------
+
 /**
- * Generate a unique S3 key for a candidate document.
+ * Delete a file by its storage key.
  *
- * Example: candidates/42/photo_a1b2c3d4-e5f6-7890-abcd-ef1234567890.jpg
+ * @param key      Storage key (e.g. "candidates/123/photo_uuid.pdf")
+ * @param storage  Type of storage ("s3" or "local")
  */
-export function candidateKey(candidateId: number, field: string, ext: string): string {
-  const uuid = crypto.randomUUID();
-  return `candidates/${candidateId}/${field}_${uuid}${ext}`;
+export async function deleteFile(key: string, storage: "s3" | "local"): Promise<void> {
+  if (storage === "s3") {
+    const client = getS3Client();
+    await client.send(
+      new DeleteObjectCommand({
+        Bucket: config.bucket,
+        Key: key,
+      }),
+    );
+  } else {
+    const filepath = path.join(LOCAL_UPLOAD_DIR, key.replace("candidates/", ""));
+    await fs.unlink(filepath).catch(() => {});
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Health Check
+// ---------------------------------------------------------------------------
+
+export interface S3Health {
+  configured: boolean;
+  reachable: boolean;
+  buckets: string[];
+  error?: string;
 }
 
 /**
- * Extract the S3 key from a stored URL.
- * Useful if you need to delete/replace a previously uploaded file.
+ * Check if S3/MinIO is reachable and list available buckets.
  */
-export function keyFromUrl(url: string): string | null {
-  const s3Match = url.match(/\/candidates\/\d+\/\w+_[a-f0-9-]+\.[a-z0-9]+/i);
-  if (s3Match) return s3Match[0].replace(/^\//, "");
-  return null;
+export async function checkS3Health(): Promise<S3Health> {
+  if (!s3Configured) {
+    return { configured: false, reachable: false, buckets: [] };
+  }
+
+  try {
+    const client = getS3Client();
+    const { Buckets } = await client.send(new ListBucketsCommand({}));
+    const names = (Buckets || []).map((b: { Name?: string }) => b.Name || "").filter(Boolean);
+    return {
+      configured: true,
+      reachable: true,
+      buckets: names,
+    };
+  } catch (e) {
+    return {
+      configured: true,
+      reachable: false,
+      buckets: [],
+      error: e instanceof Error ? e.message : "Unknown error",
+    };
+  }
 }
 
-/** Whether S3 is configured (has endpoint or access key, or AWS_TEMP_* vars) */
-export function isS3Configured(): boolean {
-  return !!(
-    process.env.S3_ENDPOINT ||
-    process.env.S3_ACCESS_KEY ||
-    (process.env.AWS_TEMP_BUCKET_REGION &&
-      process.env.AWS_TEMP_ACCESS_KEY_ID &&
-      process.env.AWS_TEMP_SECRET_ACCESS_KEY &&
-      process.env.AWS_TEMP_BUCKET_NAME)
-  );
-}
+// ---------------------------------------------------------------------------
+// Ensure bucket exists (call at startup)
+// ---------------------------------------------------------------------------
 
-/** Check whether a stored path looks like an S3 key rather than a local path. */
-export function isS3Path(path: string): boolean {
-  return path.startsWith("s3://");
-}
+/**
+ * Ensure the configured S3 bucket exists, creating it if necessary.
+ */
+export async function ensureBucket(): Promise<void> {
+  if (!s3Configured) return;
 
-/** Strip S3 prefix to get the raw key. */
-export function toS3Key(path: string): string {
-  return path.startsWith("s3://") ? path.slice(5) : path;
-}
-
-/** Wrap a raw key with the S3 prefix for DB storage. */
-export function toS3StoredPath(key: string): string {
-  return `s3://${key}`;
+  const client = getS3Client();
+  try {
+    await client.send(new HeadBucketCommand({ Bucket: config.bucket }));
+  } catch {
+    await client.send(new CreateBucketCommand({ Bucket: config.bucket }));
+  }
 }

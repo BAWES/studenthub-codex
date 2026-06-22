@@ -23,7 +23,7 @@ import {
 export async function listMailLogs(
   params: FormData | z.input<typeof listMailLogsSchema> = {},
 ): Promise<ListMailLogsResult> {
-  await requireCapability("admin.read");
+  await requireCapability("admin.system");
 
   const raw =
     params instanceof FormData
@@ -101,7 +101,7 @@ export async function listMailLogs(
 export async function getMailLog(
   mailUuid: string,
 ): Promise<MailLogListItem | null> {
-  await requireCapability("admin.read");
+  await requireCapability("admin.system");
 
   const parsed = getMailLogSchema.safeParse({ mailUuid });
   if (!parsed.success) {

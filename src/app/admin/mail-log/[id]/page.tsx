@@ -1,20 +1,18 @@
-import { ErrorBoundary } from "@/modules/workspace/ErrorBoundary";
 import { notFound } from "next/navigation";
 import { requireRoleCapability } from "@/modules/auth/session";
-import { DetailSection } from "@/modules/workspace/DetailPanels";
+import { FactPanel } from "@/modules/workspace/DetailPanels";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
-import { getMailLog } from "@/modules/mail-logs/actions";
+import { getMailLog } from "./actions";
 import { formatDate } from "@/modules/workspace/format";
-import { Badge } from "@/components/ui/badge";
 
 export const dynamic = "force-dynamic";
 
-type Props = {
+export default async function AdminMailLogDetailPage({
+  params,
+}: {
   params: Promise<{ id: string }>;
-};
-
-export default async function AdminMailLogDetailPage({ params }: Props) {
-  const session = await requireRoleCapability("admin", "admin.read");
+}) {
+  const session = await requireRoleCapability("admin", "admin.system");
   const { id } = await params;
 
   const record = await getMailLog(id);
@@ -24,35 +22,28 @@ export default async function AdminMailLogDetailPage({ params }: Props) {
   }
 
   return (
-    <ErrorBoundary>
-      <WorkspaceShell
-        session={session}
-        eyebrow="Admin / Mail log"
-        title={`Email — ${record.subject ?? "(no subject)"}`}
-        metrics={[
-          { label: "Status", value: "Delivered", note: "Outgoing email" },
-          { label: "App", value: record.app ?? "—", note: "Source application" },
-        ]}
-      >
-        <DetailSection
-          title="Email Details"
-          facts={[
-            { label: "UUID", value: record.mail_uuid },
+    <WorkspaceShell
+      session={session}
+      eyebrow="Admin / Mail Log"
+      title={`Mail: ${record.subject ?? "(no subject)"}`}
+      metrics={[]}
+    >
+      <FactPanel
+        title="Mail Details"
+        facts={[
+          { label: "Mail UUID", value: record.mail_uuid },
             { label: "From", value: record.from ?? "—" },
             { label: "To", value: record.to ?? "—" },
             { label: "Subject", value: record.subject ?? "—" },
+            { label: "App", value: record.app ?? "—" },
             {
-              label: "App",
-              value: record.app ? <Badge variant="secondary">{record.app}</Badge> : "—",
-            },
-            {
-              label: "Sent at",
+              label: "Created",
               value: record.created_at
                 ? formatDate(new Date(record.created_at))
                 : "—",
             },
             {
-              label: "Updated at",
+              label: "Updated",
               value: record.updated_at
                 ? formatDate(new Date(record.updated_at))
                 : "—",
@@ -60,6 +51,5 @@ export default async function AdminMailLogDetailPage({ params }: Props) {
           ]}
         />
       </WorkspaceShell>
-    </ErrorBoundary>
   );
 }

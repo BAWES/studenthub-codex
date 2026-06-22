@@ -94,7 +94,7 @@ export function DataTableSkeleton({ rows = 10 }: { rows?: number }) {
         {Array.from({ length: rows }).map((_, i) => (
           <div
             key={i}
-            className="grid grid-cols-[1fr_1fr_120px_100px] gap-3 border-t border-[var(--line)] px-[14px] py-3"
+            className="grid grid-cols-[1fr_1fr_120px_100px] gap-3 px-[14px] py-3 border-t border-border"
           >
             <Skeleton className="h-4 w-44" />
             <Skeleton className="h-3 w-56" />
@@ -123,10 +123,7 @@ export function DetailPageSkeleton({ panels = 3 }: { panels?: number }) {
         style={{ gridTemplateColumns: `repeat(${Math.min(panels, 2)}, 1fr)` }}
       >
         {Array.from({ length: panels }).map((_, i) => (
-          <div
-            key={i}
-            className="grid gap-2 border border-[var(--line)] rounded-[10px] p-4"
-          >
+          <div key={i} className="grid gap-2 p-4 border border-border rounded-[10px]">
             <Skeleton className="h-4 w-24" />
             {[1, 2, 3, 4].map((r) => (
               <div key={r} className="flex justify-between">
@@ -141,10 +138,7 @@ export function DetailPageSkeleton({ panels = 3 }: { panels?: number }) {
       {/* Related lists */}
       <div className="grid grid-cols-2 gap-3">
         {[1, 2].map((col) => (
-          <div
-            key={col}
-            className="grid gap-1 border border-[var(--line)] rounded-[10px] p-4"
-          >
+          <div key={col} className="grid gap-1 p-4 border border-border rounded-[10px]">
             <Skeleton className="h-4 w-32 mb-2" />
             {[1, 2, 3, 4].map((r) => (
               <Skeleton key={r} className="h-10 w-full" />
