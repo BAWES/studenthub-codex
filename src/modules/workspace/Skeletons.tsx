@@ -120,7 +120,7 @@ export function DetailPageSkeleton({ panels = 3 }: { panels?: number }) {
       {/* Fact panels */}
       <div className={`grid ${Math.min(panels, 2) === 2 ? 'grid-cols-2' : 'grid-cols-1'} gap-3`}>
         {Array.from({ length: panels }).map((_, i) => (
-          <div key={i} className="grid gap-2 p-4 border border-border rounded-lg">
+          <div key={i} className="grid gap-2 p-4 border border-border rounded-[10px]">
             <Skeleton className="h-4 w-24" />
             {[1, 2, 3, 4].map((r) => (
               <div key={r} className="flex justify-between">
@@ -135,7 +135,7 @@ export function DetailPageSkeleton({ panels = 3 }: { panels?: number }) {
       {/* Related lists */}
       <div className="grid grid-cols-2 gap-3">
         {[1, 2].map((col) => (
-          <div key={col} className="grid gap-1 p-4 border border-border rounded-lg">
+          <div key={col} className="grid gap-1 p-4 border border-border rounded-[10px]">
             <Skeleton className="h-4 w-32 mb-2" />
             {[1, 2, 3, 4].map((r) => (
               <Skeleton key={r} className="h-10 w-full" />

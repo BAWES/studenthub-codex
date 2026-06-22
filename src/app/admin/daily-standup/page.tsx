@@ -1,12 +1,12 @@
 import { requireRoleCapability } from "@/modules/auth/session";
-import { listDailyStandups } from "./actions";
-import { AdminDailyStandupsTable } from "./_components";
+import { listDailyStandups } from "@/modules/admin/daily-standup/actions";
+import { AdminDailyStandupTable } from "./_components";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminDailyStandupPage() {
   const session = await requireRoleCapability("admin", "admin.read");
-  const result = await listDailyStandups({ limit: 100 });
+  const { records } = await listDailyStandups({ limit: 200 });
 
-  return <AdminDailyStandupsTable session={session} answers={result.answers} />;
+  return <AdminDailyStandupTable session={session} records={records} />;
 }
