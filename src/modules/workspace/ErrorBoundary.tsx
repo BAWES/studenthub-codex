@@ -11,6 +11,8 @@ export interface ErrorBoundaryProps {
   label?: string;
   /** Optional retry handler */
   onRetry?: () => void;
+  /** Optional custom fallback element */
+  fallback?: ReactNode;
 }
 
 interface ErrorBoundaryState {
