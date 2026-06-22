@@ -8,8 +8,13 @@ import {
   getSalarySchema,
   listSalariesResultSchema,
   salaryListItemSchema,
+  createSalarySchema,
+  updateSalarySchema,
+  deleteSalarySchema,
+  salaryIdResultSchema,
   type SalaryListItem,
   type ListSalariesResult,
+  type SalaryIdResult,
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
@@ -135,6 +140,153 @@ export async function getSalary(
   if (!outputParsed.success) {
     console.error(
       "[modules/salaries] getSalary output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
+}
+
+// ---------------------------------------------------------------------------
+// createSalary — create a new salary record
+// ---------------------------------------------------------------------------
+
+export async function createSalary(
+  data: z.input<typeof createSalarySchema>,
+): Promise<SalaryIdResult> {
+  await requireCapability("admin.system");
+
+  const parsed = createSalarySchema.safeParse(data);
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid salary data");
+  }
+
+  const { staff_id, salary, salary_currency, comment, salary_date } =
+    parsed.data;
+
+  const record = await prisma.staff_salary.create({
+    data: {
+      staff_salary_uuid: crypto.randomUUID(),
+      staff_id: staff_id ?? null,
+      salary: salary ?? null,
+      salary_currency: salary_currency || "KWD",
+      comment: comment || null,
+      salary_date: salary_date ?? null,
+      created_at: new Date(),
+      updated_at: new Date(),
+    },
+  });
+
+  revalidatePath("/admin/salary");
+  const result: SalaryIdResult = {
+    staff_salary_uuid: record.staff_salary_uuid,
+  };
+
+  const outputParsed = salaryIdResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/salaries] createSalary output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
+}
+
+// ---------------------------------------------------------------------------
+// updateSalary — update an existing salary record
+// ---------------------------------------------------------------------------
+
+export async function updateSalary(
+  data: z.input<typeof updateSalarySchema>,
+): Promise<SalaryIdResult> {
+  await requireCapability("admin.system");
+
+  const parsed = updateSalarySchema.safeParse(data);
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid salary data");
+  }
+
+  const {
+    staff_salary_uuid,
+    staff_id,
+    salary,
+    salary_currency,
+    comment,
+    salary_date,
+  } = parsed.data;
+
+  const existing = await prisma.staff_salary.findFirst({
+    where: { staff_salary_uuid },
+  });
+  if (!existing) {
+    throw new Error(`Salary record not found: ${staff_salary_uuid}`);
+  }
+
+  const updateData: Record<string, unknown> = {};
+  if (staff_id !== undefined) updateData.staff_id = staff_id ?? null;
+  if (salary !== undefined) updateData.salary = salary ?? null;
+  if (salary_currency !== undefined)
+    updateData.salary_currency = salary_currency || "KWD";
+  if (comment !== undefined) updateData.comment = comment || null;
+  if (salary_date !== undefined) updateData.salary_date = salary_date ?? null;
+  updateData.updated_at = new Date();
+
+  await prisma.staff_salary.update({
+    where: { staff_salary_uuid },
+    data: updateData as any,
+  });
+
+  revalidatePath("/admin/salary");
+  const result: SalaryIdResult = { staff_salary_uuid };
+
+  const outputParsed = salaryIdResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/salaries] updateSalary output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
+}
+
+// ---------------------------------------------------------------------------
+// deleteSalary — delete a salary record
+// ---------------------------------------------------------------------------
+
+export async function deleteSalary(
+  staff_salary_uuid: string,
+): Promise<SalaryIdResult> {
+  await requireCapability("admin.system");
+
+  const parsed = deleteSalarySchema.safeParse({ staff_salary_uuid });
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid salary UUID");
+  }
+
+  const existing = await prisma.staff_salary.findFirst({
+    where: { staff_salary_uuid: parsed.data.staff_salary_uuid },
+  });
+  if (!existing) {
+    throw new Error(
+      `Salary record not found: ${parsed.data.staff_salary_uuid}`,
+    );
+  }
+
+  await prisma.staff_salary.delete({
+    where: { staff_salary_uuid: parsed.data.staff_salary_uuid },
+  });
+
+  revalidatePath("/admin/salary");
+  const result: SalaryIdResult = {
+    staff_salary_uuid: parsed.data.staff_salary_uuid,
+  };
+
+  const outputParsed = salaryIdResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/salaries] deleteSalary output validation failed:",
       outputParsed.error.issues,
     );
   }
