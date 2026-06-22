@@ -1,14 +1,32 @@
+import type { Route } from "next";
 import { requireRoleCapability } from "@/modules/auth/session";
-import { listEmailCampaigns } from "./actions";
-import { AdminEmailCampaignsTable } from "./_components";
+import { DataTable } from "@/modules/workspace/DataTable";
+import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
+import { getAdminEmailCampaignRows } from "@/modules/workspace/data";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminEmailCampaignsPage() {
-  const session = await requireRoleCapability("admin", "admin.read");
-  const result = await listEmailCampaigns({ limit: 100 });
+export default async function AdminEmailCampaignPage() {
+  const session = await requireRoleCapability("admin", "admin.system");
+  const rows = await getAdminEmailCampaignRows();
 
   return (
-    <AdminEmailCampaignsTable session={session} campaigns={result.campaigns} />
+    <WorkspaceShell session={session} eyebrow="Admin" title="Email Campaigns" metrics={[]}>
+      <DataTable
+        title="Email Campaigns"
+        description="Manage email marketing campaigns"
+        rows={rows}
+        rowHref={(row) => `/admin/email-campaign/${row.id}` as Route}
+        columns={[
+          { key: "subject", label: "Subject", render: (row) => <strong>{row.subject}</strong> },
+          { key: "status", label: "Status", render: (row) => row.status },
+          { key: "target", label: "Target", render: (row) => row.target },
+          { key: "progress", label: "Progress", render: (row) => `${row.progress}%` },
+          { key: "recurring", label: "Recurring", render: (row) => row.is_recurring },
+          { key: "trigger", label: "Trigger", render: (row) => row.trigger_date },
+          { key: "updated", label: "Updated", render: (row) => row.updated }
+        ]}
+      />
+    </WorkspaceShell>
   );
 }

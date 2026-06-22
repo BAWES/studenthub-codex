@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
 
@@ -61,7 +62,8 @@ vi.mock("next/navigation", () => ({
 }));
 
 vi.mock("@/modules/workspace/format", () => ({
-  formatDate: (d: Date) => d.toISOString().split("T")[0],
+  formatDate: (d: Date | null | undefined) =>
+    d ? d.toISOString().split("T")[0] : "—",
 }));
 
 const mockDegreeGroup = {
@@ -74,10 +76,10 @@ const mockDegreeGroup = {
   degree_group_updated_at: new Date("2026-06-20T12:00:00Z"),
 };
 
-const mockGetDegreeGroup = vi.fn();
+const mockGetDegreeGroupDetail = vi.fn();
 
 vi.mock("../actions", () => ({
-  getDegreeGroup: (...args: unknown[]) => mockGetDegreeGroup(...args),
+  getDegreeGroupDetail: (...args: unknown[]) => mockGetDegreeGroupDetail(...args),
 }));
 
 describe("AdminDegreeGroupDetailPage", () => {
@@ -90,7 +92,7 @@ describe("AdminDegreeGroupDetailPage", () => {
   });
 
   it("renders degree group detail with all fields", async () => {
-    mockGetDegreeGroup.mockResolvedValue({ degree_group: mockDegreeGroup });
+    mockGetDegreeGroupDetail.mockResolvedValue(mockDegreeGroup);
 
     const Page = (await import("./page")).default;
     render(
@@ -114,14 +116,12 @@ describe("AdminDegreeGroupDetailPage", () => {
   });
 
   it("renders null fields as em-dash", async () => {
-    mockGetDegreeGroup.mockResolvedValue({
-      degree_group: {
-        ...mockDegreeGroup,
-        degree_group_name_ar: null,
-        degree_group_sort_order: null,
-        degree_group_created_at: null,
-        degree_group_updated_at: null,
-      },
+    mockGetDegreeGroupDetail.mockResolvedValue({
+      ...mockDegreeGroup,
+      degree_group_name_ar: null,
+      degree_group_sort_order: null,
+      degree_group_created_at: null,
+      degree_group_updated_at: null,
     });
 
     const Page = (await import("./page")).default;
@@ -138,7 +138,7 @@ describe("AdminDegreeGroupDetailPage", () => {
   });
 
   it("calls notFound when degree group is null", async () => {
-    mockGetDegreeGroup.mockResolvedValue({ degree_group: null });
+    mockGetDegreeGroupDetail.mockResolvedValue({ degree_group: null });
 
     const Page = (await import("./page")).default;
     await expect(
@@ -147,7 +147,7 @@ describe("AdminDegreeGroupDetailPage", () => {
   });
 
   it("shows Yes for skip_major when true", async () => {
-    mockGetDegreeGroup.mockResolvedValue({
+    mockGetDegreeGroupDetail.mockResolvedValue({
       degree_group: { ...mockDegreeGroup, skip_major: true },
     });
 

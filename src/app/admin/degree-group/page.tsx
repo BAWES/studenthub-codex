@@ -1,14 +1,30 @@
+import type { Route } from "next";
 import { requireRoleCapability } from "@/modules/auth/session";
-import { listDegreeGroups } from "./actions";
-import { AdminDegreeGroupsTable } from "./_components";
+import { DataTable } from "@/modules/workspace/DataTable";
+import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
+import { getAdminDegreeGroupRows } from "@/modules/workspace/data";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminDegreeGroupsPage() {
-  const session = await requireRoleCapability("admin", "admin.read");
-  const result = await listDegreeGroups({ limit: 100 });
+export default async function AdminDegreeGroupPage() {
+  const session = await requireRoleCapability("admin", "admin.system");
+  const rows = await getAdminDegreeGroupRows();
 
   return (
-    <AdminDegreeGroupsTable session={session} degreeGroups={result.degree_groups} />
+    <WorkspaceShell session={session} eyebrow="Admin" title="Degree Groups" metrics={[]}>
+      <DataTable
+        title="Degree Groups"
+        description="Manage degree group categories across the platform"
+        rows={rows}
+        rowHref={(row) => `/admin/degree-group/${row.id}` as Route}
+        columns={[
+          { key: "name_en", label: "Name (EN)", render: (row) => <strong>{row.name_en}</strong> },
+          { key: "name_ar", label: "Name (AR)", render: (row) => row.name_ar },
+          { key: "sort_order", label: "Sort", render: (row) => row.sort_order },
+          { key: "skip_major", label: "Skip Major", render: (row) => row.skip_major ? "Yes" : "No" },
+          { key: "updated", label: "Updated", render: (row) => row.updated }
+        ]}
+      />
+    </WorkspaceShell>
   );
 }
