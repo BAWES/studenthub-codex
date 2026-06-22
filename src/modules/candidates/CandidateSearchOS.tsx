@@ -6,6 +6,9 @@ import { HubShortcuts, type HubCommand } from "@/modules/hub/HubShortcuts";
 import { ThemeToggle } from "@/modules/theme/ThemeToggle";
 import { CandidateProfile } from "./CandidateProfile";
 import { ExportCVsForm } from "./ExportCVsForm";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import type {
   CandidateSearchFacet,
   CandidateSearchFilter,
@@ -57,7 +60,7 @@ export function CandidateSearchOS({
           <strong>Candidates</strong>
         </Link>
         <form className="candidateDeskSearch" id="candidate-search">
-          <input
+          <Input
             data-command-search
             id="candidate-query"
             name="q"
@@ -69,7 +72,7 @@ export function CandidateSearchOS({
           {data.openTabs.length ? <input name="tabs" type="hidden" value={data.openTabs.map((tab) => tab.id).join(",")} /> : null}
           {selectedIds.length ? <input name="selected" type="hidden" value={selectedIds.join(",")} /> : null}
           <HiddenFacetInputs data={data} />
-          <button type="submit">Search</button>
+          <Button type="submit" variant="default" size="sm">Search</Button>
         </form>
         <div className="candidateDeskTools">
           <HubShortcuts commands={commands} />
@@ -79,7 +82,7 @@ export function CandidateSearchOS({
             <strong>{session.name}</strong>
           </div>
           <form action={logoutAction}>
-            <button type="submit">Sign out</button>
+            <Button type="submit" variant="ghost" size="sm">Sign out</Button>
           </form>
         </div>
       </header>
@@ -192,7 +195,7 @@ function CandidateSearchTab({
               </div>
               <div className="candidateResultTags">
                 {[...row.flags, ...row.skills].slice(0, 3).map((flag) => (
-                  <span key={flag}>{flag}</span>
+                  <Badge key={flag} variant="outline" className="text-xs">{flag}</Badge>
                 ))}
               </div>
             </Link>
