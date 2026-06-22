@@ -9,10 +9,11 @@ export const dynamic = "force-dynamic";
 export default async function AdminFulltimerDetailPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
+  const { id } = await params;
   const session = await requireRoleCapability("admin", "admin.system");
-  const fulltimer = await getFulltimer(params.id);
+  const fulltimer = await getFulltimer(id);
 
   if (!fulltimer) {
     notFound();
