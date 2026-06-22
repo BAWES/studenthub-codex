@@ -99,7 +99,6 @@ export function RejectButton({ applicationId, candidateName }: Props) {
               </p>
             )}
           </div>
-          </div>
 
           <DialogFooter>
             <Button

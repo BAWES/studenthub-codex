@@ -326,6 +326,8 @@ export function EmployerJobsSearchPage({
                           size="sm"
                         />
                       )}
+                    </div>
+                  </div>
 
                   {/* Description excerpt */}
                   {row.description && (
