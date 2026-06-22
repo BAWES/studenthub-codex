@@ -41,8 +41,8 @@ export function WorkspaceTabs({ role }: { role: Role }) {
             className={cn(
               "relative flex items-center gap-[5px] min-w-0 px-[6px] py-[4px] border-0 rounded-t-[calc(var(--radius)-2px)] text-xs font-medium whitespace-nowrap cursor-pointer transition-colors no-underline",
               active
-                ? "bg-card text-foreground after:absolute after:bottom-[-1px] after:left-2 after:right-2 after:h-[2px] after:rounded-t-[1px] after:bg-[#eb6651]"
-                : "text-muted-foreground hover:bg-[#fef1ef] hover:text-foreground",
+                ? "bg-card text-foreground after:absolute after:bottom-[-1px] after:left-2 after:right-2 after:h-[2px] after:rounded-t-[1px] after:bg-coral"
+                : "text-muted-foreground hover:bg-coral-light hover:text-foreground",
             )}
           >
             <Icon size={16} strokeWidth={2} aria-hidden="true" />
