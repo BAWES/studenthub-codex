@@ -11,6 +11,14 @@ import {
 } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 // ---------------------------------------------------------------------------
 // PaymentDetailDrawer
@@ -145,31 +153,31 @@ export function PaymentDetailDrawer({ payment, lineItems, loading, open, onClose
                 </div>
 
                 {lineItems.length > 0 && (
-                  <div className="rounded-lg border border-border bg-white p-4">
+                  <div className="rounded-lg border border-border bg-card p-4">
                     <p className="text-[11px] font-bold uppercase tracking-wider mb-2 text-muted-foreground">Line Items</p>
                     <div className="overflow-x-auto">
-                      <table className="w-full text-sm">
-                        <thead>
-                          <tr className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
-                            <th className="text-left py-1 pr-2">Code</th>
-                            <th className="text-left py-1 pr-2">Description</th>
-                            <th className="text-right py-1 pr-2">Qty</th>
-                            <th className="text-right py-1 pr-2">Unit</th>
-                            <th className="text-right py-1">Amount</th>
-                          </tr>
-                        </thead>
-                        <tbody>
+                      <Table>
+                        <TableHeader>
+                          <TableRow className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                            <TableHead>Code</TableHead>
+                            <TableHead>Description</TableHead>
+                            <TableHead className="text-right">Qty</TableHead>
+                            <TableHead className="text-right">Unit</TableHead>
+                            <TableHead className="text-right">Amount</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
                           {lineItems.map((li) => (
-                            <tr key={li.line_item_id} className="border-t border-border/5">
-                              <td className="py-1.5 pr-2 font-mono text-xs text-muted-foreground">{li.account_code ?? "—"}</td>
-                              <td className="py-1.5 pr-2 text-foreground">{li.description ?? "—"}</td>
-                              <td className="py-1.5 pr-2 text-right text-foreground">{li.quantity ?? "—"}</td>
-                              <td className="py-1.5 pr-2 text-right text-foreground">{li.unit_amount != null ? formatAmount(li.unit_amount) : "—"}</td>
-                              <td className="py-1.5 text-right font-medium text-foreground">{li.line_amount != null ? formatAmount(li.line_amount) : "—"}</td>
-                            </tr>
+                            <TableRow key={li.line_item_id}>
+                              <TableCell className="font-mono text-xs text-muted-foreground">{li.account_code ?? "—"}</TableCell>
+                              <TableCell className="text-foreground">{li.description ?? "—"}</TableCell>
+                              <TableCell className="text-right text-foreground">{li.quantity ?? "—"}</TableCell>
+                              <TableCell className="text-right text-foreground">{li.unit_amount != null ? formatAmount(li.unit_amount) : "—"}</TableCell>
+                              <TableCell className="text-right font-medium text-foreground">{li.line_amount != null ? formatAmount(li.line_amount) : "—"}</TableCell>
+                            </TableRow>
                           ))}
-                        </tbody>
-                      </table>
+                        </TableBody>
+                      </Table>
                     </div>
                   </div>
                 )}
