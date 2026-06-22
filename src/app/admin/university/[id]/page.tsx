@@ -7,8 +7,6 @@ import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { Button } from "@/components/ui/button";
 import { getUniversity } from "@/modules/admin/university/actions";
 import { formatDate } from "@/modules/workspace/format";
-import { prisma } from "@/lib/prisma";
-import { UniversityDetailForm } from "./UniversityDetailForm";
 
 export const dynamic = "force-dynamic";
 
@@ -21,7 +19,7 @@ export default async function AdminUniversityDetailPage({
   const { id } = await params;
   const universityId = Number(id);
 
-  if (Number.isNaN(universityId) || universityId < 1) {
+  if (Number.isNaN(universityId)) {
     notFound();
   }
 

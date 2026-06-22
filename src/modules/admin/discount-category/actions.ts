@@ -186,22 +186,6 @@ export async function updateDiscountCategory(
   }
 }
 
-export async function getDiscountCategoryDetail(categoryId: number) {
-  await requireCapability("admin.read");
-  const category = await prisma.discount_category.findUnique({
-    where: { category_id: categoryId },
-    select: {
-      category_id: true,
-      name_en: true,
-      name_ar: true,
-      image: true,
-      created_at: true,
-      updated_at: true,
-    },
-  });
-  return category;
-}
-
 export async function deleteDiscountCategory(
   categoryId: number,
 ): Promise<DiscountCategoryActionResponse> {

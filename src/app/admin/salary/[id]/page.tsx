@@ -1,9 +1,8 @@
 import { notFound } from "next/navigation";
 import { requireRoleCapability } from "@/modules/auth/session";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
-import { formatDate } from "@/modules/workspace/format";
-import { getSalary } from "@/modules/admin/salary/actions";
-import { SalaryDetailForm } from "./SalaryDetailForm";
+import { getSalary } from "./actions";
+import { SalaryDetailView } from "./SalaryDetailView";
 
 export const dynamic = "force-dynamic";
 
@@ -15,44 +14,23 @@ export default async function AdminSalaryDetailPage({
   const session = await requireRoleCapability("admin", "admin.system");
   const { id } = await params;
 
-  const result = await getSalary(id);
-  if (!result.salary) {
+  const record = await getSalary(id);
+
+  if (!record) {
     notFound();
   }
-
-  const salary = result.salary;
 
   return (
     <WorkspaceShell
       session={session}
       eyebrow="Admin / Salary"
-      title={`Salary — ${salary.staff_name ?? "Unnamed"}`}
+      title={record.staff_name ? `Salary: ${record.staff_name}` : "Salary details"}
       metrics={[
-        {
-          label: "Amount",
-          value: salary.salary
-            ? `${salary.salary.toFixed(3)} ${salary.salary_currency ?? "KWD"}`
-            : "—",
-          note: "Salary amount",
-        },
-        {
-          label: "Date",
-          value: salary.salary_date ? formatDate(new Date(salary.salary_date)) : "—",
-          note: "Salary date",
-        },
-        {
-          label: "Created",
-          value: salary.created_at ? formatDate(new Date(salary.created_at)) : "—",
-          note: "Record created",
-        },
-        {
-          label: "Updated",
-          value: salary.updated_at ? formatDate(new Date(salary.updated_at)) : "—",
-          note: "Last modified",
-        },
+        { label: "Amount", value: record.salary != null ? `${record.salary_currency ?? "KWD"} ${record.salary}` : "—", note: "Salary amount" },
+        { label: "Date", value: record.salary_date ? new Date(record.salary_date).toLocaleDateString() : "—", note: "Salary date" },
       ]}
     >
-      <SalaryDetailForm salary={salary} />
+      <SalaryDetailView record={record} />
     </WorkspaceShell>
   );
 }

@@ -48,12 +48,12 @@ function DocumentPreview({ document }: { document: { type: string; filePath: str
   // Show thumbnail for image types
   if (["photo", "civilFront", "civilBack"].includes(document.type)) {
     return (
-      <div className="flex items-center justify-center rounded-lg overflow-hidden w-full bg-card max-h-[400px]">
+      <div className="flex items-center justify-center rounded-lg overflow-hidden w-full bg-card" style={{ maxHeight: 400 }}>
         <img
           src={document.filePath}
           alt={document.label}
           className="max-w-full object-contain"
-          className="max-h-[400px] object-contain"
+          style={{ maxHeight: 400 }}
         />
       </div>
     );

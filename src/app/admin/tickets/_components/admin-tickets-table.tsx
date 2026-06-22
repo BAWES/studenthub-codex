@@ -21,11 +21,14 @@ const STATUS_LABELS: Record<number, string> = {
   3: "Closed",
 };
 
-const STATUS_CLASSES: Record<number, string> = {
-  0: "data-[status=0]:bg-blue/10 data-[status=0]:text-blue data-[status=0]:[&_.dot]:bg-blue",
-  1: "data-[status=1]:bg-warning/10 data-[status=1]:text-warning data-[status=1]:[&_.dot]:bg-warning",
-  2: "data-[status=2]:bg-success/10 data-[status=2]:text-success data-[status=2]:[&_.dot]:bg-success",
-  3: "data-[status=3]:bg-muted/10 data-[status=3]:text-muted-foreground data-[status=3]:[&_.dot]:bg-muted-foreground",
+const STATUS_COLORS: Record<
+  number,
+  { bg: string; text: string; dot: string }
+> = {
+  0: { bg: "rgba(59, 130, 246, 0.12)", text: "rgb(37, 99, 235)", dot: "rgb(37, 99, 235)" },
+  1: { bg: "rgba(234, 179, 8, 0.12)", text: "rgb(161, 98, 7)", dot: "rgb(161, 98, 7)" },
+  2: { bg: "rgba(34, 197, 94, 0.12)", text: "rgb(22, 163, 74)", dot: "rgb(22, 163, 74)" },
+  3: { bg: "rgba(107, 114, 128, 0.12)", text: "rgb(75, 85, 99)", dot: "rgb(75, 85, 99)" },
 };
 
 function nextStatus(current: number | null): number {
@@ -149,16 +152,17 @@ export function AdminTicketsTable({ session, tickets }: Props) {
             label: "Status",
             render: (row) => {
               const status = row.ticket_status ?? 0;
-              const cls = STATUS_CLASSES[status] ?? STATUS_CLASSES[0];
+              const colors = STATUS_COLORS[status] ?? STATUS_COLORS[0];
               return (
                 <button
                   type="button"
                   onClick={() => toggleStatus(row)}
-                  data-status={status}
-                  className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition-all duration-200 hover:opacity-80 ${cls}`}
+                  className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition-all duration-200 hover:opacity-80"
+                  style={{ background: colors.bg, color: colors.text }}
                 >
                   <span
-                    className="dot inline-block w-1.5 h-1.5 rounded-full"
+                    className="inline-block w-1.5 h-1.5 rounded-full"
+                    style={{ background: colors.dot }}
                   />
                   {STATUS_LABELS[status] ?? `Status ${status}`}
                 </button>
