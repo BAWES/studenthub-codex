@@ -10,7 +10,7 @@ export default function Error({
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
       <h2 className="text-lg font-semibold text-destructive">Something went wrong</h2>
-      <p className="text-sm text-muted-foreground">Failed to load university details.</p>
+      <p className="text-sm text-muted-foreground">Failed to load majors.</p>
       <button
         onClick={reset}
         className="h-9 rounded-lg px-4 text-sm font-semibold bg-primary text-primary-foreground"

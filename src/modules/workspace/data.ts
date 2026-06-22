@@ -2496,3 +2496,55 @@ export async function getAdminEmailCampaignRows() {
     updated: formatDate(row.updated_at),
   }));
 }
+
+export async function getAdminWebhookRows() {
+  const rows = await prisma.webhook.findMany({
+    orderBy: { created_at: "desc" },
+    take: 60,
+    select: {
+      webhook_id: true,
+      event: true,
+      endpoint: true,
+      method: true,
+      created_at: true,
+      updated_at: true,
+    },
+  });
+
+  return rows.map((row) => ({
+    id: row.webhook_id,
+    event: row.event,
+    endpoint: row.endpoint,
+    method: row.method ?? "-",
+    created: formatDate(row.created_at),
+    updated: formatDate(row.updated_at),
+  }));
+}
+
+export async function getAdminSalaryRows() {
+  const rows = await prisma.staff_salary.findMany({
+    orderBy: { salary_date: "desc" },
+    take: 60,
+    select: {
+      staff_salary_uuid: true,
+      staff_id: true,
+      salary: true,
+      salary_currency: true,
+      comment: true,
+      salary_date: true,
+      created_at: true,
+      updated_at: true,
+      staff: { select: { staff_name: true } },
+    },
+  });
+
+  return rows.map((row) => ({
+    id: row.staff_salary_uuid,
+    staff: row.staff?.staff_name ?? "-",
+    salary: row.salary ? Number(row.salary) : 0,
+    currency: row.salary_currency ?? "KWD",
+    comment: row.comment ?? "-",
+    salary_date: row.salary_date ? formatDate(row.salary_date) : "-",
+    updated: formatDate(row.updated_at),
+  }));
+}

@@ -7,29 +7,29 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { updateUniversity, deleteUniversity } from "@/modules/admin/university/actions";
-import type { UniversityListItem } from "@/modules/admin/university/schemas";
+import { updateMajor, deleteMajor } from "@/modules/admin/major/actions";
+import type { MajorListItem } from "@/modules/admin/major/schemas";
 
 type Props = {
-  university: UniversityListItem;
+  major: MajorListItem;
 };
 
-export function UniversityDetailForm({ university }: Props) {
+export function MajorDetailForm({ major }: Props) {
   const router = useRouter();
-  const [nameEn, setNameEn] = useState(university.university_name_en ?? "");
-  const [nameAr, setNameAr] = useState(university.university_name_ar ?? "");
-  const [dataSource, setDataSource] = useState(String(university.university_data_source ?? 0));
+  const [nameEn, setNameEn] = useState(major.major_name_en);
+  const [nameAr, setNameAr] = useState(major.major_name_ar ?? "");
+  const [dataSource, setDataSource] = useState(String(major.data_source ?? ""));
 
   const updateAction = async (_prevState: unknown, formData: FormData) => {
-    formData.set("university_name_en", nameEn);
-    formData.set("university_name_ar", nameAr || "");
-    formData.set("university_data_source", dataSource);
+    formData.set("major_name_en", nameEn);
+    formData.set("major_name_ar", nameAr || "");
+    formData.set("data_source", dataSource);
 
-    await updateUniversity({
-      university_id: university.university_id,
-      university_name_en: nameEn,
-      university_name_ar: nameAr || undefined,
-      university_data_source: Number(dataSource) || undefined,
+    await updateMajor({
+      majorUuid: major.major_uuid,
+      major_name_en: nameEn,
+      major_name_ar: nameAr || undefined,
+      data_source: dataSource ? Number(dataSource) : undefined,
     });
     return { success: true };
   };
@@ -40,19 +40,19 @@ export function UniversityDetailForm({ university }: Props) {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Edit University</CardTitle>
+          <CardTitle>Edit Major</CardTitle>
           <CardDescription>
-            Update the university name and data source information.
+            Update the major name and data source.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form action={formAction} className="space-y-5">
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="university_name_en">Name (English)</Label>
+                <Label htmlFor="major_name_en">Name (English)</Label>
                 <Input
-                  id="university_name_en"
-                  name="university_name_en"
+                  id="major_name_en"
+                  name="major_name_en"
                   value={nameEn}
                   onChange={(e) => setNameEn(e.target.value)}
                   required
@@ -60,26 +60,27 @@ export function UniversityDetailForm({ university }: Props) {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="university_name_ar">Name (Arabic)</Label>
+                <Label htmlFor="major_name_ar">Name (Arabic)</Label>
                 <Input
-                  id="university_name_ar"
-                  name="university_name_ar"
+                  id="major_name_ar"
+                  name="major_name_ar"
                   value={nameAr}
                   onChange={(e) => setNameAr(e.target.value)}
+                  required
                 />
               </div>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="university_data_source">Data Source</Label>
+                <Label htmlFor="data_source">Data Source</Label>
                 <Input
-                  id="university_data_source"
-                  name="university_data_source"
+                  id="data_source"
+                  name="data_source"
                   type="number"
                   value={dataSource}
                   onChange={(e) => setDataSource(e.target.value)}
-                  placeholder="0"
+                  placeholder="0 or 1"
                 />
               </div>
             </div>
@@ -89,7 +90,7 @@ export function UniversityDetailForm({ university }: Props) {
                 {pending ? "Saving..." : "Save Changes"}
               </Button>
               {state?.success && (
-                <span className="text-sm text-[#2e7d32] font-medium">
+                <span className="text-sm text-[var(--sh-success)] font-medium">
                   Saved successfully
                 </span>
               )}
@@ -104,20 +105,20 @@ export function UniversityDetailForm({ university }: Props) {
         <CardHeader>
           <CardTitle className="text-destructive">Danger Zone</CardTitle>
           <CardDescription>
-            Deleting this university will unlink it from candidate profiles.
-            This action cannot be undone.
+            Deleting this major will remove it from all candidate education
+            records. This action cannot be undone.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form
             action={async () => {
-              await deleteUniversity(university.university_id);
-              router.push("/admin/university");
+              await deleteMajor(major.major_uuid);
+              router.push("/admin/major");
               router.refresh();
             }}
           >
             <Button type="submit" variant="destructive">
-              Delete University
+              Delete Major
             </Button>
           </form>
         </CardContent>

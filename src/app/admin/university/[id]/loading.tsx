@@ -1,11 +1,3 @@
-import { DetailPageSkeleton } from "@/modules/workspace/Skeletons";
-
-export default function UniversityDetailLoading() {
-  return (
-    <div className="block">
-      <section className="overflow-x-hidden grid content-start gap-3.5 p-3.5">
-        <DetailPageSkeleton panels={3} />
-      </section>
-    </div>
-  );
+export default function Loading() {
+  return <div className="p-8 text-muted-foreground">Loading university details...</div>;
 }
