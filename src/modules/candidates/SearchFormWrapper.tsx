@@ -44,7 +44,7 @@ export function SearchFormWrapper({ children }: { children: React.ReactNode }) {
     <form
       ref={formRef}
       id="candidate-search"
-      className="candidateDeskSearch"
+      className="flex items-center gap-2 flex-1"
       onSubmit={handleSubmit}
       onReset={handleReset}
     >
