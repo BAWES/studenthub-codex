@@ -12,6 +12,17 @@ export const cvDownloadSchema = z.object({
 });
 
 /**
+ * Schema for certificate download — requires candidateId + certificate UUID.
+ */
+export const certificateDownloadSchema = z.object({
+  candidateId: z
+    .union([z.number(), z.string()])
+    .transform((v) => (typeof v === "string" ? Number(v) : v))
+    .pipe(z.number().int().positive("Candidate ID must be a positive integer")),
+  certificateUuid: z.string().uuid("Must be a valid UUID"),
+});
+
+/**
  * Validates a UUID for evaluation report or offer letter download.
  */
 export const uuidDownloadSchema = z.object({
@@ -28,6 +39,7 @@ export const downloadUrlResultSchema = z.object({
 
 export type CvDownloadInput = z.input<typeof cvDownloadSchema>;
 export type UuidDownloadInput = z.input<typeof uuidDownloadSchema>;
+export type CertificateDownloadInput = z.input<typeof certificateDownloadSchema>;
 export type DownloadUrlResult = z.output<typeof downloadUrlResultSchema>;
 
 /**
@@ -56,6 +68,20 @@ export function buildOfferLetterDownloadUrl(uuid: string): string {
  */
 export function buildBankAdviceDownloadUrl(uuid: string): string {
   return `/api/transfers/bank-advice/${uuid}/pdf?format=pdf`;
+}
+
+/**
+ * Builds a download URL for a candidate civil ID card PDF.
+ */
+export function buildIdCardDownloadUrl(candidateId: number): string {
+  return `/api/candidates/${candidateId}/id-card/pdf?format=pdf`;
+}
+
+/**
+ * Builds a download URL for a candidate certificate PDF.
+ */
+export function buildCertificateDownloadUrl(candidateId: number, certificateUuid: string): string {
+  return `/api/candidates/${candidateId}/certificates/${certificateUuid}/pdf?format=pdf`;
 }
 
 /**
@@ -88,5 +114,27 @@ export function validateAndBuildOfferLetterUrl(input: UuidDownloadInput): Downlo
   return {
     url: buildOfferLetterDownloadUrl(parsed.uuid),
     filename: `offer-letter-${parsed.uuid.slice(0, 12)}.pdf`,
+  };
+}
+
+/**
+ * Validates and builds a download URL for a candidate civil ID card PDF.
+ */
+export function validateAndBuildIdCardUrl(input: CvDownloadInput): DownloadUrlResult {
+  const parsed = cvDownloadSchema.parse(input);
+  return {
+    url: buildIdCardDownloadUrl(parsed.candidateId),
+    filename: `id-card-${parsed.candidateId}.pdf`,
+  };
+}
+
+/**
+ * Validates and builds a download URL for a candidate certificate PDF.
+ */
+export function validateAndBuildCertificateUrl(input: CertificateDownloadInput): DownloadUrlResult {
+  const parsed = certificateDownloadSchema.parse(input);
+  return {
+    url: buildCertificateDownloadUrl(parsed.candidateId, parsed.certificateUuid),
+    filename: `certificate-${parsed.certificateUuid.slice(0, 12)}.pdf`,
   };
 }

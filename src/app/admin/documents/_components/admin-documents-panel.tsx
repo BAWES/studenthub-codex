@@ -15,10 +15,13 @@ import {
   buildEvaluationDownloadUrl,
   buildOfferLetterDownloadUrl,
   buildBankAdviceDownloadUrl,
+  buildIdCardDownloadUrl,
+  buildCertificateDownloadUrl,
+  certificateDownloadSchema,
 } from "./schemas";
 import { ZodError } from "zod";
 
-type TabValue = "cv" | "evaluation" | "offer-letter" | "bank-advice";
+type TabValue = "cv" | "id-card" | "certificate" | "evaluation" | "offer-letter" | "bank-advice";
 
 export function AdminDocumentsPanel() {
   const [activeTab, setActiveTab] = useState<TabValue>("cv");
@@ -26,6 +29,8 @@ export function AdminDocumentsPanel() {
   const [evalUuid, setEvalUuid] = useState("");
   const [offerUuid, setOfferUuid] = useState("");
   const [bankAdviceUuid, setBankAdviceUuid] = useState("");
+  const [certCandidateId, setCertCandidateId] = useState("");
+  const [certUuid, setCertUuid] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<TabValue | null>(null);
 
@@ -79,6 +84,20 @@ export function AdminDocumentsPanel() {
     });
   }
 
+  function handleIdCardDownload() {
+    handleDownload("id-card", () => {
+      const parsed = cvDownloadSchema.parse({ candidateId });
+      return buildIdCardDownloadUrl(parsed.candidateId);
+    });
+  }
+
+  function handleCertificateDownload() {
+    handleDownload("certificate", () => {
+      const parsed = certificateDownloadSchema.parse({ candidateId: certCandidateId, certificateUuid: certUuid });
+      return buildCertificateDownloadUrl(parsed.candidateId, parsed.certificateUuid);
+    });
+  }
+
   return (
     <div className="p-6 space-y-6">
       <div>
@@ -100,6 +119,14 @@ export function AdminDocumentsPanel() {
           <TabsTrigger value="cv" className="gap-2">
             <FileText className="size-4" />
             CV Export
+          </TabsTrigger>
+          <TabsTrigger value="id-card" className="gap-2">
+            <FileText className="size-4" />
+            ID Card
+          </TabsTrigger>
+          <TabsTrigger value="certificate" className="gap-2">
+            <FileText className="size-4" />
+            Certificate
           </TabsTrigger>
           <TabsTrigger value="evaluation" className="gap-2">
             <UserCheck className="size-4" />
@@ -166,6 +193,135 @@ export function AdminDocumentsPanel() {
                   <span className="font-mono text-xs bg-muted px-1.5 py-0.5 rounded">GET</span>{" "}
                   <code className="text-xs bg-muted px-1.5 py-0.5 rounded break-all">
                     /api/candidates/{`{candidateId}`}/cv/pdf?format=pdf
+                  </code>
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* ─── ID Card Tab ──────────────────────────────── */}
+        <TabsContent value="id-card" className="space-y-4 mt-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="size-5 text-primary" />
+                Candidate Civil ID Card
+              </CardTitle>
+              <CardDescription>
+                Generate a PDF of a candidate&apos;s civil ID card by entering their candidate ID.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="id-card-candidate-id">Candidate ID</Label>
+                <Input
+                  id="id-card-candidate-id"
+                  type="number"
+                  min={1}
+                  placeholder="e.g. 12345"
+                  value={candidateId}
+                  onChange={(e) => setCandidateId(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter") handleIdCardDownload(); }}
+                />
+                <p className="text-xs text-muted-foreground">
+                  The numeric ID of the candidate whose civil ID card you want to export.
+                </p>
+              </div>
+            </CardContent>
+            <CardFooter>
+              <Button
+                onClick={handleIdCardDownload}
+                disabled={loading === "id-card" || !candidateId.trim()}
+                className="gap-2"
+              >
+                <Download className="size-4" />
+                {loading === "id-card" ? "Downloading..." : "Download ID Card PDF"}
+              </Button>
+            </CardFooter>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">API Details</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-sm text-muted-foreground space-y-1">
+                <p>
+                  <span className="font-mono text-xs bg-muted px-1.5 py-0.5 rounded">GET</span>{" "}
+                  <code className="text-xs bg-muted px-1.5 py-0.5 rounded break-all">
+                    /api/candidates/{`{candidateId}`}/id-card/pdf?format=pdf
+                  </code>
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* ─── Certificate Tab ──────────────────────────── */}
+        <TabsContent value="certificate" className="space-y-4 mt-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="size-5 text-primary" />
+                Candidate Certificate
+              </CardTitle>
+              <CardDescription>
+                Generate a PDF of a candidate&apos;s certificate by entering their candidate ID and certificate UUID.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="cert-candidate-id">Candidate ID</Label>
+                <Input
+                  id="cert-candidate-id"
+                  type="number"
+                  min={1}
+                  placeholder="e.g. 12345"
+                  value={certCandidateId}
+                  onChange={(e) => setCertCandidateId(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter") handleCertificateDownload(); }}
+                />
+                <p className="text-xs text-muted-foreground">
+                  The numeric ID of the candidate.
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="cert-uuid">Certificate UUID</Label>
+                <Input
+                  id="cert-uuid"
+                  placeholder="e.g. 550e8400-e29b-41d4-a716-446655440000"
+                  value={certUuid}
+                  onChange={(e) => setCertUuid(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter") handleCertificateDownload(); }}
+                />
+                <p className="text-xs text-muted-foreground">
+                  The UUID of the certificate record.
+                </p>
+              </div>
+            </CardContent>
+            <CardFooter>
+              <Button
+                onClick={handleCertificateDownload}
+                disabled={loading === "certificate" || !certCandidateId.trim() || !certUuid.trim()}
+                className="gap-2"
+              >
+                <Download className="size-4" />
+                {loading === "certificate" ? "Downloading..." : "Download Certificate PDF"}
+              </Button>
+            </CardFooter>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">API Details</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-sm text-muted-foreground space-y-1">
+                <p>
+                  <span className="font-mono text-xs bg-muted px-1.5 py-0.5 rounded">GET</span>{" "}
+                  <code className="text-xs bg-muted px-1.5 py-0.5 rounded break-all">
+                    /api/candidates/{`{candidateId}`}/certificates/{`{uuid}`}/pdf?format=pdf
                   </code>
                 </p>
               </div>

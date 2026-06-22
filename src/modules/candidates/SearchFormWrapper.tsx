@@ -44,7 +44,7 @@ export function SearchFormWrapper({ children }: { children: React.ReactNode }) {
     <form
       ref={formRef}
       id="candidate-search"
-      className="candidateDeskSearch"
+      className="relative"
       onSubmit={handleSubmit}
       onReset={handleReset}
     >
@@ -52,40 +52,22 @@ export function SearchFormWrapper({ children }: { children: React.ReactNode }) {
 
       {loading && (
         <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            zIndex: 9999,
-            height: 3,
-            background: "rgba(235, 102, 81, 0.2)",
-            overflow: "hidden",
-            pointerEvents: "none",
-          }}
+          className="fixed top-0 left-0 right-0 z-[9999] h-[3px] overflow-hidden pointer-events-none"
+          style={{ background: "rgba(235, 102, 81, 0.2)" }}
         >
           <div
-            style={{
-              height: "100%",
-              background: "#eb6651",
-              animation: "search-progress 30s linear forwards",
-            }}
+            className="h-full"
+            style={{ background: "#eb6651", animation: "search-progress 30s linear forwards" }}
           />
           {elapsed >= 3 && (
             <div
+              className="fixed top-[4px] right-3 text-[11px] font-bold pointer-events-none bg-card"
               style={{
-                position: "fixed",
-                top: 4,
-                right: 12,
-                fontSize: 11,
-                fontWeight: 700,
                 color: "#eb6651",
-                background: "var(--surface)",
                 padding: "4px 10px",
                 borderRadius: "0 0 8px 8px",
                 border: "1px solid rgba(235, 102, 81, 0.3)",
                 borderTop: "none",
-                pointerEvents: "none",
               }}
             >
               Still searching… {elapsed}s

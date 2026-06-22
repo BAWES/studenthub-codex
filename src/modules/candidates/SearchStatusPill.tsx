@@ -1,5 +1,7 @@
 "use client";
 
+import { Badge } from "@/components/ui/badge";
+
 /**
  * SearchStatusPill — displays search result stats as a coral-themed pill badge.
  *
@@ -20,24 +22,17 @@ export function SearchStatusPill({
 }) {
   if (resultsCount === 0 && query) {
     return (
-      <span
+      <Badge
+        variant="outline"
+        className="inline-flex items-center gap-1 px-[10px] py-[3px] text-xs font-bold whitespace-nowrap"
         style={{
-          display: "inline-flex",
-          alignItems: "center",
-          gap: 4,
-          padding: "3px 10px",
-          borderRadius: 999,
-          fontSize: 12,
-          fontWeight: 700,
-          whiteSpace: "nowrap",
           background: "rgba(235, 102, 81, 0.1)",
           color: "#eb6651",
-          border: "1px solid rgba(235, 102, 81, 0.3)",
+          borderColor: "rgba(235, 102, 81, 0.3)",
         }}
-        role="status"
       >
         No results
-      </span>
+      </Badge>
     );
   }
 
@@ -46,23 +41,16 @@ export function SearchStatusPill({
   const formatted = resultsCount.toLocaleString("en-US");
 
   return (
-    <span
+    <Badge
+      variant="outline"
+      className="inline-flex items-center gap-1 px-[10px] py-[3px] text-xs font-bold whitespace-nowrap"
       style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 4,
-        padding: "3px 10px",
-        borderRadius: 999,
-        fontSize: 12,
-        fontWeight: 700,
-        whiteSpace: "nowrap",
         background: "rgba(235, 102, 81, 0.1)",
         color: "#eb6651",
-        border: "1px solid rgba(235, 102, 81, 0.3)",
+        borderColor: "rgba(235, 102, 81, 0.3)",
       }}
-      role="status"
     >
       {formatted} results
-    </span>
+    </Badge>
   );
 }
