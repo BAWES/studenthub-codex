@@ -1,12 +1,9 @@
 import { notFound } from "next/navigation";
-import Link from "next/link";
-import type { Route } from "next";
 import { requireRoleCapability } from "@/modules/auth/session";
-import { FactPanel } from "@/modules/workspace/DetailPanels";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
-import { Button } from "@/components/ui/button";
-import { getUniversity } from "./actions";
 import { formatDate } from "@/modules/workspace/format";
+import { prisma } from "@/lib/prisma";
+import { UniversityDetailForm } from "./UniversityDetailForm";
 
 export const dynamic = "force-dynamic";
 
@@ -19,60 +16,40 @@ export default async function AdminUniversityDetailPage({
   const { id } = await params;
   const universityId = Number(id);
 
-  if (Number.isNaN(universityId)) {
+  if (Number.isNaN(universityId) || universityId < 1) {
     notFound();
   }
 
-  const uni = await getUniversity(universityId);
+  const record = await prisma.university.findFirst({
+    where: { university_id: universityId, deleted: 0 },
+    include: {
+      _count: { select: { candidate: true } },
+    },
+  });
 
-  if (!uni) {
+  if (!record) {
     notFound();
   }
+
+  const university = {
+    university_id: record.university_id,
+    university_name_en: record.university_name_en ?? null,
+    university_name_ar: record.university_name_ar ?? null,
+    university_data_source: record.university_data_source ?? null,
+    candidate_count: record._count.candidate,
+  };
 
   return (
     <WorkspaceShell
       session={session}
       eyebrow="Admin / Universities"
-      title={`University — ${uni.university_name_en ?? uni.university_name_ar ?? "Unnamed"}`}
+      title={university.university_name_en ?? `University #${university.university_id}`}
       metrics={[
-        {
-          label: "Name (English)",
-          value: uni.university_name_en ?? "—",
-          note: "English name",
-        },
-        {
-          label: "Name (Arabic)",
-          value: uni.university_name_ar ?? "—",
-          note: "Arabic name",
-        },
+        { label: "Candidates", value: university.candidate_count, note: "Candidates from this university" },
+        { label: "Source", value: university.university_data_source ?? "—", note: "Data source ID" },
       ]}
     >
-      <FactPanel
-        title="University Details"
-        facts={[
-          { label: "ID", value: String(uni.university_id) },
-          { label: "Name (English)", value: uni.university_name_en ?? "—" },
-          { label: "Name (Arabic)", value: uni.university_name_ar ?? "—" },
-          {
-            label: "Data Source",
-            value: uni.university_data_source != null ? String(uni.university_data_source) : "—",
-          },
-          {
-            label: "Created",
-            value: uni.university_created_at ? formatDate(new Date(uni.university_created_at)) : "—",
-          },
-          {
-            label: "Updated",
-            value: uni.university_updated_at ? formatDate(new Date(uni.university_updated_at)) : "—",
-          },
-        ]}
-      />
-
-      <section className="flex gap-2 p-4">
-        <Link href={"/admin/university" as Route}>
-          <Button variant="outline">Back to Universities</Button>
-        </Link>
-      </section>
+      <UniversityDetailForm university={university} />
     </WorkspaceShell>
   );
 }

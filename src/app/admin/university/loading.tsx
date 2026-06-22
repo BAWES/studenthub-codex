@@ -1,5 +1,3 @@
-import { DataTableSkeleton } from "@/modules/workspace/Skeletons";
-
-export default function AdminUniversityLoading() {
-  return <DataTableSkeleton rows={5} />;
+export default function Loading() {
+  return <div className="p-8 text-muted-foreground">Loading universities...</div>;
 }

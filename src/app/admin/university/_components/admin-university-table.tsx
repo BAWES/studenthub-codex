@@ -39,7 +39,7 @@ export function AdminUniversityTable({ session, records }: Props) {
         title="Universities"
         description="List of all active university records."
         rows={records.map((r) => ({ ...r, id: String(r.university_id) }))}
-        rowHref={"/admin/university" as Route}
+        rowHref={(row) => `/admin/university/${row.university_id}` as Route}
         columns={[
           {
             key: "university_name_en",
@@ -60,17 +60,11 @@ export function AdminUniversityTable({ session, records }: Props) {
             ),
           },
           {
-            key: "university_created_at",
-            label: "Created",
+            key: "candidate_count",
+            label: "Candidates",
             render: (row) => (
               <span className="text-sm text-muted-foreground">
-                {row.university_created_at
-                  ? new Date(row.university_created_at).toLocaleDateString("en-KW", {
-                      year: "numeric",
-                      month: "short",
-                      day: "numeric",
-                    })
-                  : "—"}
+                {row.candidate_count ?? "—"}
               </span>
             ),
           },
@@ -111,7 +105,7 @@ function CreateUniversityForm({ onSuccess }: { onSuccess: () => void }) {
 
       try {
         await createUniversity({
-          university_name_en: university_name_en || undefined,
+          university_name_en: university_name_en || "",
           university_name_ar: university_name_ar || undefined,
         });
         onSuccess();

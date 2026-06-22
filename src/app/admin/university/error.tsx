@@ -1,8 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-
-export default function AdminUniversityError({
+export default function Error({
   error,
   reset,
 }: {
@@ -10,19 +8,15 @@ export default function AdminUniversityError({
   reset: () => void;
 }) {
   return (
-    <div className="block">
-      <section className="overflow-x-hidden grid content-start gap-3.5 p-3.5">
-        <div className="flex flex-col items-center justify-center py-24 gap-4">
-          <span className="text-4xl" aria-hidden="true">⚠️</span>
-          <h2 className="text-xl font-bold text-foreground">
-            Failed to load universities
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            {error.message ?? "An unexpected error occurred."}
-          </p>
-          <Button onClick={reset} variant="default" className="px-4 py-2 rounded-lg text-sm font-semibold bg-primary text-white" >Try again</Button>
-        </div>
-      </section>
+    <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+      <h2 className="text-lg font-semibold text-destructive">Something went wrong</h2>
+      <p className="text-sm text-muted-foreground">Failed to load universities.</p>
+      <button
+        onClick={reset}
+        className="h-9 rounded-lg px-4 text-sm font-semibold bg-primary text-primary-foreground"
+      >
+        Try again
+      </button>
     </div>
   );
 }
