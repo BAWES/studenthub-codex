@@ -2406,3 +2406,28 @@ export async function getAdminDegreeRows() {
     updated: formatDate(row.degree_updated_at)
   }));
 }
+
+export async function getAdminDiscountCategoryRows() {
+  const rows = await prisma.discount_category.findMany({
+    orderBy: { created_at: "desc" },
+    take: 60,
+    select: {
+      category_id: true,
+      name_en: true,
+      name_ar: true,
+      image: true,
+      created_at: true,
+      updated_at: true,
+    },
+  });
+
+  return rows.map((row) => ({
+    id: String(row.category_id),
+    category_id: row.category_id,
+    name_en: row.name_en,
+    name_ar: row.name_ar ?? "-",
+    image: row.image ?? "-",
+    created_at: formatDate(row.created_at),
+    updated: formatDate(row.updated_at),
+  }));
+}
