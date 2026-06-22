@@ -6,6 +6,8 @@ import type {
   ConversationItem,
   ConversationMessageItem,
 } from "../actions";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import { EmptyState } from "@/modules/workspace/EmptyState";
 
 type Props = {
@@ -306,13 +308,13 @@ export function CandidateChatClient({ session, conversations }: Props) {
                 Failed to load messages
               </p>
               <p className="text-xs text-muted-foreground mt-1">{error}</p>
-              <button
+              <Button
                 type="button"
                 onClick={() => selectedConv && selectConversation(selectedConv)}
-                className="mt-3 inline-flex items-center gap-1.5 rounded-md bg-coral px-3 py-1.5 text-xs font-semibold text-white hover:bg-coral-hover transition-colors"
+                className="mt-3 bg-coral text-white hover:bg-coral-hover"
               >
                 Retry
-              </button>
+              </Button>
             </div>
           </div>
         ) : (
@@ -384,20 +386,20 @@ export function CandidateChatClient({ session, conversations }: Props) {
             {/* Message input bar */}
             <div className="shrink-0 border-t border-border bg-card px-4 py-3">
               <div className="flex items-end gap-2">
-                <textarea
+                <Textarea
                   value={inputText}
                   onChange={(e) => setInputText(e.target.value)}
                   onKeyDown={handleKeyDown}
                   placeholder="Type a message... (Enter to send, Shift+Enter for new line)"
                   rows={1}
-                  className="flex-1 resize-none rounded-lg border border-border bg-card px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-coral focus:border-transparent transition-all"
+                  className="flex-1 min-h-0 resize-none focus:ring-coral"
                   disabled={sending}
                 />
-                <button
+                <Button
                   type="button"
                   onClick={sendMessage}
                   disabled={!inputText.trim() || sending}
-                  className="inline-flex items-center justify-center rounded-lg bg-coral px-4 py-2.5 text-sm font-semibold text-white hover:bg-coral-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors shrink-0"
+                  className="bg-coral text-white hover:bg-coral-hover"
                 >
                   {sending ? (
                     <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
@@ -409,7 +411,7 @@ export function CandidateChatClient({ session, conversations }: Props) {
                       <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
                     </svg>
                   )}
-                </button>
+                </Button>
               </div>
             </div>
           </>
