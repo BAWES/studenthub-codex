@@ -5,6 +5,7 @@ import { DetailSection } from "@/modules/workspace/DetailPanels";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { formatDate } from "@/modules/workspace/format";
 import { getCertificate } from "./actions";
+import { Button } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
 
@@ -70,9 +71,11 @@ export default async function CandidateCertificateDetailPage({
       />
 
       <div className="flex items-center gap-3 mt-8">
-        <Link href="/candidate/certificates" className="shButtonOutline">
-          Back to Certificates
-        </Link>
+        <Button asChild variant="outline">
+          <Link href="/candidate/certificates">
+            Back to Certificates
+          </Link>
+        </Button>
       </div>
     </WorkspaceShell>
   );

@@ -9,6 +9,11 @@ import {
   validateAndBuildCvUrl,
   validateAndBuildEvaluationUrl,
   validateAndBuildOfferLetterUrl,
+  buildIdCardDownloadUrl,
+  buildCertificateDownloadUrl,
+  certificateDownloadSchema,
+  validateAndBuildIdCardUrl,
+  validateAndBuildCertificateUrl,
 } from "./schemas";
 
 /**
@@ -110,6 +115,17 @@ describe("admin documents — URL builders", () => {
       `/api/transfers/bank-advice/${uuid}/pdf?format=pdf`,
     );
   });
+
+  it("buildIdCardDownloadUrl constructs correct URL", () => {
+    expect(buildIdCardDownloadUrl(555)).toBe("/api/candidates/555/id-card/pdf?format=pdf");
+  });
+
+  it("buildCertificateDownloadUrl constructs correct URL", () => {
+    const uuid = "550e8400-e29b-41d4-a716-446655440000";
+    expect(buildCertificateDownloadUrl(555, uuid)).toBe(
+      `/api/candidates/555/certificates/${uuid}/pdf?format=pdf`,
+    );
+  });
 });
 
 describe("admin documents — validate and build", () => {
@@ -143,5 +159,41 @@ describe("admin documents — validate and build", () => {
 
   it("validateAndBuildOfferLetterUrl throws on invalid UUID", () => {
     expect(() => validateAndBuildOfferLetterUrl({ uuid: "bad" })).toThrow();
+  });
+
+  it("validateAndBuildIdCardUrl returns URL and filename", () => {
+    const result = validateAndBuildIdCardUrl({ candidateId: 777 });
+    expect(result.url).toBe("/api/candidates/777/id-card/pdf?format=pdf");
+    expect(result.filename).toBe("id-card-777.pdf");
+  });
+
+  it("validateAndBuildIdCardUrl throws on invalid candidate ID", () => {
+    expect(() => validateAndBuildIdCardUrl({ candidateId: -1 })).toThrow();
+  });
+
+  it("validateAndBuildCertificateUrl returns URL and filename", () => {
+    const uuid = "550e8400-e29b-41d4-a716-446655440000";
+    const result = validateAndBuildCertificateUrl({ candidateId: 777, certificateUuid: uuid });
+    expect(result.url).toBe(`/api/candidates/777/certificates/${uuid}/pdf?format=pdf`);
+    expect(result.filename).toBe("certificate-550e8400-e29.pdf");
+  });
+
+  it("validateAndBuildCertificateUrl throws on invalid candidate ID", () => {
+    const uuid = "550e8400-e29b-41d4-a716-446655440000";
+    expect(() => validateAndBuildCertificateUrl({ candidateId: -1, certificateUuid: uuid })).toThrow();
+  });
+
+  it("validateAndBuildCertificateUrl throws on invalid UUID", () => {
+    expect(() => validateAndBuildCertificateUrl({ candidateId: 777, certificateUuid: "bad" })).toThrow();
+  });
+
+  it("certificateDownloadSchema rejects missing fields", () => {
+    const r = certificateDownloadSchema.safeParse({ candidateId: 777 });
+    expect(r.success).toBe(false);
+  });
+
+  it("certificateDownloadSchema rejects empty UUID", () => {
+    const r = certificateDownloadSchema.safeParse({ candidateId: 777, certificateUuid: "" });
+    expect(r.success).toBe(false);
   });
 });

@@ -4,22 +4,14 @@ import { z } from "zod";
 // Output validation schemas
 // ---------------------------------------------------------------------------
 
-/**
- * Schema for a single university list item.
- */
 export const universityListItemSchema = z.object({
-  university_id: z.number().int(),
+  university_id: z.number().int().positive(),
   university_name_en: z.string().nullable(),
   university_name_ar: z.string().nullable(),
   university_data_source: z.number().int().nullable(),
-  university_created_at: z.string().nullable(),
-  university_updated_at: z.string().nullable(),
-  deleted: z.number().int(),
+  candidate_count: z.number().int().nullable(),
 });
 
-/**
- * Schema for the listUniversities response.
- */
 export const listUniversitiesResultSchema = z.object({
   records: z.array(universityListItemSchema),
   total: z.number().int().nonnegative(),
@@ -28,11 +20,8 @@ export const listUniversitiesResultSchema = z.object({
   totalPages: z.number().int().nonnegative(),
 });
 
-/**
- * Schema for mutation responses returning { university_id }.
- */
 export const universityIdResultSchema = z.object({
-  university_id: z.number().int(),
+  university_id: z.number().int().positive(),
 });
 
 // ---------------------------------------------------------------------------

@@ -6,6 +6,7 @@ import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { formatDate } from "@/modules/workspace/format";
 import { getReferenceEntry } from "./actions";
 import { DeleteReferenceButton } from "./DeleteReferenceButton";
+import { Button } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
 
@@ -47,9 +48,11 @@ export default async function CandidateReferenceDetailPage({
 
       <div className="flex items-center gap-3 mt-8">
         <DeleteReferenceButton referenceUuid={reference.reference_uuid} />
-        <Link href="/candidate/references" className="shButtonOutline">
-          Back to References
-        </Link>
+        <Button asChild variant="outline">
+          <Link href="/candidate/references">
+            Back to References
+          </Link>
+        </Button>
       </div>
     </WorkspaceShell>
   );

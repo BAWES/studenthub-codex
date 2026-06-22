@@ -47,8 +47,7 @@ export function RejectButton({ applicationId, candidateName }: Props) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-2 h-10 rounded-lg px-5 text-sm font-semibold transition-colors"
-        style={{ backgroundColor: "var(--destructive)", color: "white" }}
+        className="inline-flex items-center gap-2 h-10 rounded-lg px-5 text-sm font-semibold transition-colors bg-destructive text-destructive-foreground"
       >
         Reject Application
       </button>
@@ -64,16 +63,12 @@ export function RejectButton({ applicationId, candidateName }: Props) {
 
           {/* Dialog */}
           <div
-            className="relative w-full max-w-md rounded-xl border p-6 shadow-lg"
-            style={{
-              backgroundColor: "var(--card)",
-              borderColor: "var(--border)",
-            }}
+            className="relative w-full max-w-md rounded-xl border border-border bg-card p-6 shadow-lg"
           >
-            <h3 className="text-base font-semibold mb-1" style={{ color: "var(--ink)" }}>
+            <h3 className="text-base font-semibold mb-1 text-foreground">
               Reject Application
             </h3>
-            <p className="text-sm mb-4" style={{ color: "var(--muted-foreground)" }}>
+            <p className="text-sm mb-4 text-muted-foreground">
               {candidateName
                 ? `Reject the application from ${candidateName}`
                 : "Reject this application"}
@@ -82,16 +77,15 @@ export function RejectButton({ applicationId, candidateName }: Props) {
             <form ref={formRef} onSubmit={(e) => { e.preventDefault(); handleConfirm(); }}>
               <label
                 htmlFor="rejectionReason"
-                className="block text-sm font-medium mb-1.5"
-                style={{ color: "var(--ink)" }}
+                className="block text-sm font-medium mb-1.5 text-foreground"
               >
-                Reason for rejection <span style={{ color: "var(--destructive)" }}>*</span>
+                Reason for rejection <span className="text-destructive">*</span>
               </label>
               <textarea
                 id="rejectionReason"
                 name="rejectionReason"
                 rows={4}
-                className="w-full rounded-lg border px-3 py-2 text-sm resize-none transition-colors focus:outline-none focus:ring-2"
+                className="w-full rounded-lg border px-3 py-2 text-sm resize-none transition-colors focus:outline-none focus:ring-2 border-border bg-card text-foreground"
                 placeholder="Explain why this application is being rejected..."
                 value={reason}
                 onChange={(e) => {
@@ -99,16 +93,13 @@ export function RejectButton({ applicationId, candidateName }: Props) {
                   if (error) setError("");
                 }}
                 style={{
-                  backgroundColor: "var(--surface)",
-                  borderColor: error ? "var(--destructive)" : "var(--border)",
-                  color: "var(--ink)",
-                  outlineColor: "var(--accent)",
-                }}
+                  borderColor: error ? "var(--destructive)" : "",
+                } as React.CSSProperties}
                 autoFocus
               />
 
               {error && (
-                <p className="text-xs mt-1.5" style={{ color: "var(--destructive)" }}>
+                <p className="text-xs mt-1.5 text-destructive">
                   {error}
                 </p>
               )}
@@ -118,16 +109,14 @@ export function RejectButton({ applicationId, candidateName }: Props) {
                   type="button"
                   onClick={() => setOpen(false)}
                   disabled={submitting}
-                  className="inline-flex items-center h-9 rounded-lg px-4 text-sm font-medium transition-colors disabled:opacity-50"
-                  style={{ backgroundColor: "var(--surface)", color: "var(--ink)" }}
+                  className="inline-flex items-center h-9 rounded-lg px-4 text-sm font-medium transition-colors disabled:opacity-50 bg-card text-foreground"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="inline-flex items-center h-9 rounded-lg px-4 text-sm font-semibold transition-colors disabled:opacity-50"
-                  style={{ backgroundColor: "var(--destructive)", color: "white" }}
+                  className="inline-flex items-center h-9 rounded-lg px-4 text-sm font-semibold transition-colors disabled:opacity-50 bg-destructive text-destructive-foreground"
                 >
                   {submitting ? "Rejecting..." : "Confirm Rejection"}
                 </button>

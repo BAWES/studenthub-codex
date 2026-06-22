@@ -67,7 +67,7 @@ function DocumentCard({
         </p>
       )}
 
-      <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+      <div className="flex flex-wrap gap-2">
         <form action={uploadAction}>
           <input type="hidden" name="type" value={doc.type} />
           <input
@@ -122,7 +122,7 @@ export function DocumentsClient({
     <section>
       {error && <p className="formError">{error}</p>}
 
-      <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+      <div className="flex flex-col gap-4">
         {items.map((doc) => (
           <DocumentCard
             key={doc.type}

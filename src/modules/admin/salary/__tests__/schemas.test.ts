@@ -35,22 +35,34 @@ describe("admin/salary schemas", () => {
     it("validates a complete salary item", () => {
       const result = salaryItemSchema.parse({
         staff_salary_uuid: "SAL-001",
+        staff_id: 42,
         staff_name: "John Doe",
         salary: 2500,
         salary_currency: "KWD",
         comment: "Monthly",
         salary_date: new Date("2026-06-01"),
+        created_at: new Date("2026-06-01"),
+        updated_at: new Date("2026-06-01"),
       });
       expect(result.staff_salary_uuid).toBe("SAL-001");
       expect(result.salary).toBe(2500);
+      expect(result.staff_id).toBe(42);
     });
 
     it("accepts null fields", () => {
       const result = salaryItemSchema.parse({
         staff_salary_uuid: "SAL-002",
+        staff_id: null,
+        staff_name: null,
+        salary: null,
+        salary_currency: null,
+        comment: null,
+        salary_date: null,
+        created_at: null,
+        updated_at: null,
       });
       expect(result.staff_salary_uuid).toBe("SAL-002");
-      expect(result.salary).toBeUndefined();
+      expect(result.salary).toBeNull();
     });
   });
 
@@ -58,7 +70,7 @@ describe("admin/salary schemas", () => {
     it("validates a complete list result", () => {
       const result = listSalaryResultSchema.parse({
         salaries: [
-          { staff_salary_uuid: "SAL-001", salary: 2500, salary_currency: "KWD" },
+          { staff_salary_uuid: "SAL-001", staff_id: null, staff_name: null, salary: 2500, salary_currency: "KWD", comment: null, salary_date: null, created_at: null, updated_at: null },
         ],
         total: 1,
         page: 1,
