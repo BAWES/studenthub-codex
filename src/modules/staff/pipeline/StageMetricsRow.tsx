@@ -47,9 +47,7 @@ export function StageMetricsRow({ metrics }: StageMetricsRowProps) {
           <Card
             key={stage}
             className="relative overflow-hidden transition-all duration-200 hover:-translate-y-0.5"
-            style={{
-              borderLeft: `4px solid ${color}`,
-            }}
+            style={{ borderLeft: `4px solid ${color}` }}
           >
             <div className="p-4 space-y-2">
               {/* Count */}
