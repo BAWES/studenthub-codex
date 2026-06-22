@@ -142,7 +142,7 @@ export async function createSalary(
 }
 
 export async function updateSalary(
-  _prev: unknown,
+  _prev: SalaryActionResponse | null,
   formData: FormData,
 ): Promise<SalaryActionResponse> {
   await requireCapability("admin.write");
