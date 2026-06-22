@@ -1,68 +1,99 @@
-import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { generateEvaluationPdf } from "@/modules/pdf/pdf-service";
+import { NextRequest, NextResponse } from "next/server";
+import {
+  escapeHtml,
+  validateUuid,
+  calculateAverageRating,
+  renderStars,
+  buildReportHtml,
+} from "@/modules/candidates/evaluation/pdf-helpers";
+import { getEvaluationPdfData } from "@/modules/candidates/evaluation/actions";
+import { generatePdf } from "@/lib/pdf-renderer";
 
+export const dynamic = "force-dynamic";
+
+/**
+ * GET /api/evaluations/[uuid]/pdf
+ *
+ * Renders a candidate evaluation report.
+ * - Default (?format=html or no format): returns a print-friendly HTML page.
+ * - ?format=pdf: returns a downloadable PDF generated via Playwright.
+ *
+ * Maps to legacy GET /staff/v1/candidate-evaluation/pdf/{id}
+ */
 export async function GET(
-  request: Request,
-  { params }: { params: Promise<{ uuid: string }> }
+  _request: NextRequest,
+  { params }: { params: Promise<{ uuid: string }> },
 ) {
   const { uuid } = await params;
+  try {
+    const valid = validateUuid(uuid);
+    if (!valid.valid) {
+      return new NextResponse(valid.error ?? "Missing evaluation UUID", { status: 400 });
+    }
 
-  const evaluation = await prisma.candidate_evaluation.findUnique({
-    where: { can_eval_uuid: uuid },
-  });
+    const data = await getEvaluationPdfData({ evaluationUuid: uuid });
+    if (!data) {
+      return new NextResponse("Evaluation not found", { status: 404 });
+    }
 
-  if (!evaluation) {
-    return new Response("Evaluation not found", { status: 404 });
+    const candidateName = data.candidate?.candidate_name ?? "Unknown Candidate";
+    const candidateEmail = data.candidate?.candidate_email ?? "";
+    const staffName = data.staff?.staff_name ?? "N/A";
+    const evalDate = data.created_at
+      ? new Date(data.created_at).toLocaleDateString("en-KW", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        })
+      : "N/A";
+    const period =
+      data.start_date && data.end_date
+        ? `${new Date(data.start_date).toLocaleDateString("en-KW")} → ${new Date(data.end_date).toLocaleDateString("en-KW")}`
+        : "N/A";
+
+    const answerRows = (data.answers ?? [])
+      .map(
+        (a, i) => `
+    <tr>
+      <td class="num">${i + 1}</td>
+      <td>${escapeHtml(a.question ?? "—")}</td>
+      <td>${escapeHtml(a.answer ?? "—")}</td>
+      <td class="rating">${renderStars(a.rating)}</td>
+    </tr>`,
+      )
+      .join("\n");
+
+    const avgRating = calculateAverageRating(data.answers ?? []);
+
+    const html = buildReportHtml({
+      candidateName,
+      candidateEmail,
+      staffName,
+      period,
+      evalDate,
+      uuid,
+      answerRows,
+      answersCount: (data.answers ?? []).length,
+      avgRating,
+    });
+
+    // Check if PDF format was requested
+    const format = _request.nextUrl.searchParams.get("format");
+
+    if (format === "pdf") {
+      return generatePdf(html, `evaluation-report-${uuid.slice(0, 12)}`, {
+        footerText: "Candidate Evaluation Report",
+      });
+    }
+
+    // Default: return HTML for browser preview / print-to-PDF
+    return new NextResponse(html, {
+      headers: {
+        "Content-Type": "text/html; charset=utf-8",
+      },
+    });
+  } catch (error) {
+    console.error(`[evaluation-pdf] Route handler failed for evaluation ${uuid}:`, error);
+    return new NextResponse("Failed to generate the evaluation report", { status: 500 });
   }
-
-  const [candidate, staff] = await Promise.all([
-    evaluation.candidate_id
-      ? prisma.candidate.findUnique({
-          where: { candidate_id: evaluation.candidate_id },
-          select: { candidate_name: true },
-        })
-      : null,
-    evaluation.staff_id
-      ? prisma.staff.findUnique({
-          where: { staff_id: evaluation.staff_id },
-          select: { staff_name: true },
-        })
-      : null,
-  ]);
-
-  // Raw query — candidate_evaluation_answer model has @@ignore
-  const rows: Array<{ question: string | null; answer: string | null; rating: number | null }> =
-    await prisma.$queryRaw`
-      SELECT ceq.question, cea.answer, cea.rating
-      FROM candidate_evaluation_answer cea
-      LEFT JOIN candidate_eval_ques ceq ON cea.ceq_uuid = ceq.ceq_uuid
-      WHERE cea.can_eval_uuid = ${uuid}
-    `;
-
-  const ratings = rows.filter((r) => r.rating != null).map((r) => r.rating!);
-
-  const buf = await generateEvaluationPdf({
-    candidate_name: candidate?.candidate_name ?? "Unknown",
-    staff_name: staff?.staff_name ?? undefined,
-    department: undefined,
-    start_date: evaluation.start_date?.toISOString().split("T")[0] ?? undefined,
-    end_date: evaluation.end_date?.toISOString().split("T")[0] ?? undefined,
-    score: ratings.length > 0
-      ? Math.round((ratings.reduce((a: number, b: number) => a + b, 0) / ratings.length) * 20)
-      : undefined,
-    answers: rows.map((r: { question: string | null; answer: string | null; rating: number | null }) => ({
-      question: r.question ?? undefined,
-      answer: r.answer ?? undefined,
-      rating: r.rating ?? undefined,
-    })),
-  });
-
-  return new NextResponse(buf as unknown as BodyInit, {
-    status: 200,
-    headers: {
-      "Content-Type": "application/pdf",
-      "Content-Disposition": `attachment; filename="evaluation-${uuid.slice(0, 8)}.pdf"`,
-    },
-  });
 }

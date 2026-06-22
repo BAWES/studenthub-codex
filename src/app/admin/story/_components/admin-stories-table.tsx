@@ -3,8 +3,6 @@
 import { DataTable } from "@/modules/workspace/DataTable";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 
-import type { Route } from "next";
-
 import type { SessionUser } from "@/modules/auth/types";
 import type { StoryItem } from "../schemas";
 
@@ -38,7 +36,7 @@ export function AdminStoriesTable({ session, stories }: Props) {
         title="Stories"
         description="All consultancy stories. Click a row to view details."
         rows={stories.map((s) => ({ ...s, id: s.story_uuid }))}
-        rowHref={(row) => `/admin/story/${row.story_uuid}` as Route}
+        rowHref="/admin/story/"
         columns={[
           {
             key: "story_uuid",

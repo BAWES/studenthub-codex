@@ -1,0 +1,1 @@
+export { getDesignation } from "./actions";
