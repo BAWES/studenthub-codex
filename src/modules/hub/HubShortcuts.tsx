@@ -1,6 +1,16 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  CommandDialog,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandShortcut,
+} from "@/components/ui/command";
+import { Button } from "@/components/ui/button";
 
 export type HubCommand = {
   id: string;
@@ -16,42 +26,25 @@ type HubShortcutsProps = {
 };
 
 const shortcutRows = [
-  { keys: "Cmd/Ctrl K", label: "Open command menu" },
+  { keys: "⌘K", label: "Open command menu" },
   { keys: "/", label: "Focus workspace search" },
   { keys: "G then H", label: "Go to command workspace" },
   { keys: "G then R", label: "Go to requests" },
   { keys: "G then C", label: "Go to candidates or company" },
-  { keys: "Esc", label: "Close menu or clear focus" }
+  { keys: "Esc", label: "Close menu or clear focus" },
 ];
 
 export function HubShortcuts({ commands }: HubShortcutsProps) {
   const [open, setOpen] = useState(false);
-  const [query, setQuery] = useState("");
-  const [activeIndex, setActiveIndex] = useState(0);
   const sequenceRef = useRef("");
-  const inputRef = useRef<HTMLInputElement | null>(null);
-
-  const filteredCommands = useMemo(() => {
-    const normalized = query.trim().toLowerCase();
-    if (!normalized) return commands.slice(0, 18);
-    return commands
-      .filter((command) =>
-        [command.title, command.subtitle, command.section, command.shortcut]
-          .filter(Boolean)
-          .join(" ")
-          .toLowerCase()
-          .includes(normalized)
-      )
-      .slice(0, 18);
-  }, [commands, query]);
 
   const groupedCommands = useMemo(() => {
     const groups = new Map<string, HubCommand[]>();
-    for (const command of filteredCommands) {
+    for (const command of commands) {
       groups.set(command.section, [...(groups.get(command.section) ?? []), command]);
     }
     return [...groups.entries()];
-  }, [filteredCommands]);
+  }, [commands]);
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
@@ -62,36 +55,9 @@ export function HubShortcuts({ commands }: HubShortcutsProps) {
       const wantsShortcuts = !isTyping && event.key === "?";
       const wantsSearch = !isTyping && event.key === "/";
 
-      if (open) {
-        if (event.key === "Escape") {
-          event.preventDefault();
-          setOpen(false);
-          setQuery("");
-          return;
-        }
-        if (event.key === "ArrowDown") {
-          event.preventDefault();
-          setActiveIndex((index) => Math.min(index + 1, filteredCommands.length - 1));
-          return;
-        }
-        if (event.key === "ArrowUp") {
-          event.preventDefault();
-          setActiveIndex((index) => Math.max(index - 1, 0));
-          return;
-        }
-        if (event.key === "Enter" && filteredCommands[activeIndex]) {
-          event.preventDefault();
-          visit(filteredCommands[activeIndex].href);
-          return;
-        }
-      }
-
       if (wantsCommand || wantsShortcuts) {
         event.preventDefault();
         setOpen(true);
-        setActiveIndex(0);
-        setQuery(wantsShortcuts ? "shortcut" : "");
-        window.setTimeout(() => inputRef.current?.focus(), 0);
         return;
       }
 
@@ -125,77 +91,66 @@ export function HubShortcuts({ commands }: HubShortcutsProps) {
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [activeIndex, commands, filteredCommands, open]);
-
-  useEffect(() => {
-    setActiveIndex(0);
-  }, [query]);
+  }, [commands]);
 
   return (
     <>
-      <button className="commandLauncher" type="button" onClick={() => setOpen(true)}>
-        <span>Command</span>
-        <kbd>⌘K</kbd>
-      </button>
+      <Button variant="outline" size="sm" onClick={() => setOpen(true)} className="gap-2">
+        <span>Commands</span>
+        <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border border-border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+          ⌘K
+        </kbd>
+      </Button>
 
-      {open ? (
-        <div className="commandOverlay" role="dialog" aria-modal="true" aria-label="Command menu">
-          <button className="commandScrim" aria-label="Close command menu" type="button" onClick={() => setOpen(false)} />
-          <section className="commandMenu">
-            <div className="commandInputWrap">
-              <span>⌘</span>
-              <input
-                ref={inputRef}
-                autoFocus
-                placeholder="Jump to a view, search visible records, or run an action..."
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-              />
-              <kbd>Esc</kbd>
-            </div>
-            <div className="commandList">
-              {groupedCommands.length ? (
-                groupedCommands.map(([section, items]) => (
-                  <div className="commandGroup" key={section}>
-                    <h3>{section}</h3>
-                    {items.map((command) => {
-                      const absoluteIndex = filteredCommands.findIndex((item) => item.id === command.id);
-                      return (
-                        <button
-                          className={absoluteIndex === activeIndex ? "active" : ""}
-                          key={command.id}
-                          type="button"
-                          onMouseEnter={() => setActiveIndex(absoluteIndex)}
-                          onClick={() => visit(command.href)}
-                        >
-                          <span>
-                            <strong>{command.title}</strong>
-                            <small>{command.subtitle}</small>
-                          </span>
-                          {command.shortcut ? <kbd>{command.shortcut}</kbd> : null}
-                        </button>
-                      );
-                    })}
-                  </div>
-                ))
-              ) : (
-                <div className="commandEmpty">
-                  <strong>No command found</strong>
-                  <span>Try a view, record name, scope, or shortcut.</span>
-                </div>
-              )}
-            </div>
-            <div className="shortcutGrid">
-              {shortcutRows.map((row) => (
-                <div key={row.keys}>
-                  <kbd>{row.keys}</kbd>
-                  <span>{row.label}</span>
-                </div>
-              ))}
-            </div>
-          </section>
+      <CommandDialog open={open} onOpenChange={setOpen}>
+        <CommandInput placeholder="Jump to a view, search visible records, or run an action..." />
+        <CommandList>
+          {groupedCommands.length ? (
+            groupedCommands.map(([section, items]) => (
+              <CommandGroup key={section} heading={section}>
+                {items.map((command) => (
+                  <CommandItem
+                    key={command.id}
+                    onSelect={() => {
+                      visit(command.href);
+                      setOpen(false);
+                    }}
+                  >
+                    <span>
+                      <strong>{command.title}</strong>
+                      {command.subtitle ? (
+                        <span className="ml-1 text-xs text-muted-foreground">{command.subtitle}</span>
+                      ) : null}
+                    </span>
+                    {command.shortcut ? <CommandShortcut>{command.shortcut}</CommandShortcut> : null}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            ))
+          ) : (
+            <CommandEmpty>
+              <strong>No command found</strong>
+              <span className="ml-1 text-xs text-muted-foreground">
+                Try a view, record name, scope, or shortcut.
+              </span>
+            </CommandEmpty>
+          )}
+        </CommandList>
+
+        {/* Shortcut reference grid */}
+        <div className="border-t border-border p-3">
+          <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+            {shortcutRows.map((row) => (
+              <div key={row.keys} className="flex items-center gap-2 text-xs">
+                <kbd className="inline-flex h-5 select-none items-center gap-1 rounded border border-border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
+                  {row.keys}
+                </kbd>
+                <span className="text-muted-foreground">{row.label}</span>
+              </div>
+            ))}
+          </div>
         </div>
-      ) : null}
+      </CommandDialog>
     </>
   );
 }
