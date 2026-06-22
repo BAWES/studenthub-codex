@@ -22,6 +22,9 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
   --color-blue-zendesk: #1f73b7;
+  --color-coral: #eb6651;
+  --color-coral-hover: #d45441;
+  --color-coral-light: #fef1ef;
   --radius: var(--radius);
   --font-size-label: 0.8125rem;
 }
