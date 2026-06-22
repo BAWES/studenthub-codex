@@ -92,10 +92,10 @@ function StatusBreakdownBar({ breakdown }: { breakdown: JobStatusBreakdown[] }) 
             </span>
             <div className="flex-1 rounded-full h-2.5 bg-muted">
               <div
-                className={`rounded-full h-2.5 transition-[width] duration-300 ease-in-out ${
+                className={`rounded-full h-2.5 transition-all duration-300 ease-in-out ${
                   isActive ? "bg-[#eb6651]" : "bg-primary"
                 }`}
-                style={{ width: `${pct}%` }}
+                className="h-full rounded-full bg-primary transition-all duration-500" style={{ width: `${pct}%` }}
               />
             </div>
             <span className="w-20 text-right text-sm font-medium text-muted-foreground">

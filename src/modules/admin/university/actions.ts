@@ -19,7 +19,7 @@ import type {
 // Internal helpers
 // ---------------------------------------------------------------------------
 
-function logOutputError(source: string, error: unknown): void {
+async function logOutputError(source: string, error: unknown): Promise<void> {
   console.error(`[modules/admin/university] ${source} output failed:`, error);
 }
 
@@ -29,7 +29,7 @@ function logOutputError(source: string, error: unknown): void {
 
 const listUniversitiesSchema = z.object({
   page: z.coerce.number().int().positive().optional().default(1),
-  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
+  limit: z.coerce.number().int().min(1).max(200).optional().default(50),
   search: z.string().optional(),
 });
 
@@ -40,30 +40,32 @@ const getUniversitySchema = z.object({
 const createUniversitySchema = z.object({
   university_name_en: z
     .string()
-    .max(100, "English name must be at most 100 characters")
-    .optional()
-    .default(""),
+    .min(1, "English name is required")
+    .max(100, "English name must be at most 100 characters"),
   university_name_ar: z
     .string()
     .max(100, "Arabic name must be at most 100 characters")
     .optional()
     .default(""),
+  university_data_source: z.coerce.number().int().optional(),
 });
 
 const updateUniversitySchema = z.object({
-  universityId: z.coerce.number().int().positive(),
+  university_id: z.coerce.number().int().positive(),
   university_name_en: z
     .string()
-    .max(100, "English name must be at most 100 characters")
+    .min(1)
+    .max(100)
     .optional(),
   university_name_ar: z
     .string()
-    .max(100, "Arabic name must be at most 100 characters")
+    .max(100)
     .optional(),
+  university_data_source: z.coerce.number().int().optional(),
 });
 
 const deleteUniversitySchema = z.object({
-  universityId: z.coerce.number().int().positive(),
+  university_id: z.coerce.number().int().positive(),
 });
 
 // ---------------------------------------------------------------------------
@@ -72,12 +74,11 @@ const deleteUniversitySchema = z.object({
 
 /**
  * List universities with pagination and optional search.
- * Filters out soft-deleted records (deleted = 0).
  */
 export async function listUniversities(
   params: FormData | z.input<typeof listUniversitiesSchema> = {},
 ): Promise<ListUniversitiesResult> {
-  await requireCapability("admin.read");
+  await requireCapability("admin.system");
 
   const raw =
     params instanceof FormData
@@ -107,9 +108,12 @@ export async function listUniversities(
   const [records, total] = await Promise.all([
     prisma.university.findMany({
       where: where as any,
-      orderBy: { university_name_en: "asc" },
+      orderBy: [{ university_name_en: "asc" }],
       skip,
       take: limit,
+      include: {
+        _count: { select: { candidate: true } },
+      },
     }),
     prisma.university.count({ where: where as any }),
   ]);
@@ -120,9 +124,7 @@ export async function listUniversities(
       university_name_en: r.university_name_en ?? null,
       university_name_ar: r.university_name_ar ?? null,
       university_data_source: r.university_data_source ?? null,
-      university_created_at: r.university_created_at?.toISOString() ?? null,
-      university_updated_at: r.university_updated_at?.toISOString() ?? null,
-      deleted: r.deleted ?? 0,
+      candidate_count: r._count?.candidate ?? 0,
     })),
     total,
     page,
@@ -145,12 +147,12 @@ export async function listUniversities(
 
 /**
  * Get a single university by ID.
- * Returns null if not found or soft-deleted.
+ * Returns null if not found.
  */
 export async function getUniversity(
   universityId: number,
 ): Promise<UniversityListItem | null> {
-  await requireCapability("admin.read");
+  await requireCapability("admin.system");
 
   const parsed = getUniversitySchema.safeParse({ universityId });
   if (!parsed.success) {
@@ -159,6 +161,9 @@ export async function getUniversity(
 
   const record = await prisma.university.findFirst({
     where: { university_id: parsed.data.universityId, deleted: 0 },
+    include: {
+      _count: { select: { candidate: true } },
+    },
   });
 
   if (!record) return null;
@@ -169,12 +174,9 @@ export async function getUniversity(
     university_name_en: raw.university_name_en ?? null,
     university_name_ar: raw.university_name_ar ?? null,
     university_data_source: raw.university_data_source ?? null,
-    university_created_at: raw.university_created_at?.toISOString() ?? null,
-    university_updated_at: raw.university_updated_at?.toISOString() ?? null,
-    deleted: raw.deleted ?? 0,
+    candidate_count: raw._count?.candidate ?? 0,
   };
 
-  // Validate output shape
   const outputParsed = universityListItemSchema.safeParse(result);
   if (!outputParsed.success) {
     logOutputError("getUniversity", outputParsed.error.issues);
@@ -188,24 +190,25 @@ export async function getUniversity(
 // ---------------------------------------------------------------------------
 
 /**
- * Create a new university.
+ * Create a new university record.
  */
 export async function createUniversity(
   data: z.input<typeof createUniversitySchema>,
 ): Promise<UniversityIdResult> {
-  await requireCapability("admin.write");
+  await requireCapability("admin.system");
 
   const parsed = createUniversitySchema.safeParse(data);
   if (!parsed.success) {
     throw new Error(parsed.error.issues[0]?.message ?? "Invalid university data");
   }
 
-  const { university_name_en, university_name_ar } = parsed.data;
+  const { university_name_en, university_name_ar, university_data_source } = parsed.data;
 
   const record = await prisma.university.create({
     data: {
-      university_name_en: university_name_en || null,
+      university_name_en,
       university_name_ar: university_name_ar || null,
+      university_data_source: university_data_source ?? null,
       university_created_at: new Date(),
       university_updated_at: new Date(),
     } as any,
@@ -227,40 +230,44 @@ export async function createUniversity(
 // ---------------------------------------------------------------------------
 
 /**
- * Update an existing university.
+ * Update an existing university record.
  * Throws an error if the record does not exist.
  */
 export async function updateUniversity(
   data: z.input<typeof updateUniversitySchema>,
 ): Promise<UniversityIdResult> {
-  await requireCapability("admin.write");
+  await requireCapability("admin.system");
 
   const parsed = updateUniversitySchema.safeParse(data);
   if (!parsed.success) {
     throw new Error(parsed.error.issues[0]?.message ?? "Invalid university data");
   }
 
-  const { universityId, university_name_en, university_name_ar } = parsed.data;
+  const { university_id, university_name_en, university_name_ar, university_data_source } =
+    parsed.data;
 
   // Verify the record exists
   const existing = await prisma.university.findFirst({
-    where: { university_id: universityId, deleted: 0 },
+    where: { university_id, deleted: 0 },
   });
   if (!existing) {
-    throw new Error(`University record not found: ${universityId}`);
+    throw new Error(`University record not found: ${university_id}`);
   }
 
-  const updateData: Record<string, unknown> = { university_updated_at: new Date() };
-  if (university_name_en !== undefined) updateData.university_name_en = university_name_en || null;
+  const updateData: Record<string, unknown> = {
+    university_updated_at: new Date(),
+  };
+  if (university_name_en !== undefined) updateData.university_name_en = university_name_en;
   if (university_name_ar !== undefined) updateData.university_name_ar = university_name_ar || null;
+  if (university_data_source !== undefined) updateData.university_data_source = university_data_source;
 
   await prisma.university.update({
-    where: { university_id: universityId },
+    where: { university_id },
     data: updateData as any,
   });
 
   revalidatePath("/admin/university");
-  const result: UniversityIdResult = { university_id: universityId };
+  const result: UniversityIdResult = { university_id };
 
   const outputParsed = universityIdResultSchema.safeParse(result);
   if (!outputParsed.success) {
@@ -271,38 +278,39 @@ export async function updateUniversity(
 }
 
 // ---------------------------------------------------------------------------
-// deleteUniversity (soft-delete)
+// deleteUniversity
 // ---------------------------------------------------------------------------
 
 /**
- * Soft-delete a university by setting deleted = 1.
+ * Soft-delete a university record by setting deleted=1.
  * Throws an error if the record does not exist.
  */
 export async function deleteUniversity(
   universityId: number,
 ): Promise<UniversityIdResult> {
-  await requireCapability("admin.write");
+  await requireCapability("admin.system");
 
-  const parsed = deleteUniversitySchema.safeParse({ universityId });
+  const parsed = deleteUniversitySchema.safeParse({ university_id: universityId });
   if (!parsed.success) {
     throw new Error(parsed.error.issues[0]?.message ?? "Invalid university ID");
   }
 
   // Verify the record exists
   const existing = await prisma.university.findFirst({
-    where: { university_id: parsed.data.universityId, deleted: 0 },
+    where: { university_id: parsed.data.university_id, deleted: 0 },
   });
   if (!existing) {
-    throw new Error(`University record not found: ${parsed.data.universityId}`);
+    throw new Error(`University record not found: ${universityId}`);
   }
 
+  // Soft delete
   await prisma.university.update({
-    where: { university_id: parsed.data.universityId },
-    data: { deleted: 1, university_updated_at: new Date() } as any,
+    where: { university_id: parsed.data.university_id },
+    data: { deleted: 1 } as any,
   });
 
   revalidatePath("/admin/university");
-  const result: UniversityIdResult = { university_id: parsed.data.universityId };
+  const result: UniversityIdResult = { university_id: parsed.data.university_id };
 
   const outputParsed = universityIdResultSchema.safeParse(result);
   if (!outputParsed.success) {

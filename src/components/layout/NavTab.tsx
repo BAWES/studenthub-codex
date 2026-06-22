@@ -13,23 +13,28 @@ export type NavTabProps = {
 };
 
 /**
- * Individual navigation tab for the OS Glass App Header.
- * Renders as a link with icon, label, and animated active indicator.
+ * Individual navigation tab for the App Header.
+ * Renders as a link with icon, label, and active indicator.
+ * Uses shadcn button-like styling with Zendesk Coral accents.
  */
 export function NavTab({ href, label, icon: Icon, active }: NavTabProps) {
   return (
     <Link
       href={href}
       className={cn(
-        "shAppHeaderTab",
-        active ? "shAppHeaderTabActive" : "shAppHeaderTabInactive",
+        "relative flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm font-medium no-underline transition-colors",
+        active
+          ? "bg-[#fef1ef] text-[#eb6651]"
+          : "text-muted-foreground hover:bg-muted hover:text-foreground",
       )}
       aria-current={active ? "page" : undefined}
       aria-label={label}
     >
       <Icon size={16} strokeWidth={active ? 2.5 : 2} aria-hidden="true" />
       <span>{label}</span>
-      {active && <span className="shAppHeaderTabActiveIndicator" />}
+      {active && (
+        <span className="absolute bottom-0 left-2 right-2 h-[2px] rounded-t-[1px] bg-[#eb6651]" />
+      )}
     </Link>
   );
 }

@@ -1,8 +1,11 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
+import Link from "next/link";
+import type { Route } from "next";
 import { requireRoleCapability } from "@/modules/auth/session";
-import { CompactList, FactPanel } from "@/modules/workspace/DetailPanels";
+import { CompactList, DetailSection } from "@/modules/workspace/DetailPanels";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
+import { Button } from "@/components/ui/button";
 import { getAdminTransferDetail } from "@/modules/workspace/data";
 import { TransferActionBar } from "@/modules/finance/TransferActionBar";
 import { formatDate, formatMoney } from "@/modules/workspace/format";
@@ -31,7 +34,7 @@ export default async function AdminTransferDetailPage({ params }: { params: Prom
         <TransferActionBar data={data} />
       </Suspense>
 
-      <FactPanel
+      <DetailSection
         title="Transfer Run"
         facts={[
           { label: "Company", value: data.transfer.company?.company_name },
@@ -46,6 +49,12 @@ export default async function AdminTransferDetailPage({ params }: { params: Prom
       />
       <section className="grid grid-cols-1 gap-4">
         <CompactList title="Transfer File Entries" rows={data.fileEntries} />
+      </section>
+
+      <section className="flex gap-2 p-4">
+        <Link href={"/admin/transfers" as Route}>
+          <Button variant="outline">Back to Transfers</Button>
+        </Link>
       </section>
     </WorkspaceShell>
   );
