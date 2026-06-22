@@ -76,13 +76,13 @@ export function WorkspaceShell({
       {/* Top bar */}
       <section className="flex items-center justify-between border-b border-border bg-card px-6 py-3">
         <div>
-          <p className="text-xs font-medium text-muted-foreground">{eyebrow}</p>
-          <h1 className="text-xl font-bold text-foreground">{title}</h1>
+          <p className="text-blue-zendesk text-xs font-bold uppercase tracking-normal mb-2.5">{eyebrow}</p>
+          <h1 className="max-w-[800px] mb-0 text-[clamp(27px,2.8vw,42px)] leading-[1.05] tracking-normal">{title}</h1>
         </div>
-        <div className="flex flex-col items-end text-right">
-          <span className="text-xs font-medium uppercase text-muted-foreground">{session.role}</span>
-          <strong className="text-sm text-foreground">{session.name}</strong>
-          <small className="text-xs text-muted-foreground">{session.email}</small>
+        <div className="min-w-0 grid gap-1.5 p-3.5 border border-border rounded-lg bg-card">
+          <span className="text-blue-zendesk text-xs font-bold uppercase">{session.role}</span>
+          <strong className="overflow-hidden text-ellipsis whitespace-nowrap">{session.name}</strong>
+          <small className="text-muted-foreground overflow-hidden text-ellipsis">{session.email}</small>
         </div>
       </section>
 
@@ -137,12 +137,10 @@ export function WorkspaceShell({
 
 function WorkspaceList({ title, rows }: { title: string; rows: Row[] }) {
   return (
-    <Card>
-      <div className="flex items-center justify-between border-b border-border px-5 py-3">
-        <h2 className="text-sm font-semibold text-foreground">{title}</h2>
-        <span className="flex size-5 items-center justify-center rounded-full bg-muted text-xs font-medium text-muted-foreground">
-          {rows.length}
-        </span>
+    <Card className="min-h-[360px]">
+      <div className="flex items-center justify-between gap-4 px-4 py-3.5 border-b border-border">
+        <h2 className="text-xl mb-0">{title}</h2>
+        <span className="min-w-[30px] min-h-[30px] inline-flex items-center justify-center text-blue-zendesk border border-blue-zendesk/20 bg-blue-zendesk/5 font-bold text-sm rounded">{count}</span>
       </div>
       <div className="divide-y divide-border">
         {rows.length ? (
