@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
+import "@testing-library/jest-dom/vitest";
 
 vi.mock("@/modules/auth/session", () => ({
   requireRoleCapability: vi.fn().mockResolvedValue({ user: { id: "1" }, role: "admin" }),
