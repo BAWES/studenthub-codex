@@ -13,60 +13,50 @@ export default async function AdminDiscountCategoryDetailPage({
 }: {
   params: Promise<{ categoryId: string }>;
 }) {
-  const session = await requireRoleCapability("admin", "admin.read");
+  const session = await requireRoleCapability("admin", "admin.system");
   const { categoryId } = await params;
-  const catIdNum = Number(categoryId);
+  const categoryIdNum = Number(categoryId);
 
-  if (Number.isNaN(catIdNum)) {
+  if (Number.isNaN(categoryIdNum)) {
     notFound();
   }
 
-  const data = await getDiscountCategory({ categoryId: catIdNum });
+  const data = await getDiscountCategory({ categoryId: categoryIdNum });
 
   if (!data.category) {
     notFound();
   }
 
-  const cat = data.category;
+  const category = data.category;
 
   return (
     <ErrorBoundary>
       <WorkspaceShell
         session={session}
         eyebrow="Admin / Discount Categories"
-        title={cat.name_en}
+        title={category.name_en}
         metrics={[]}
       >
         <DetailSection
           title="Discount Category Details"
           facts={[
-            { label: "Name (EN)", value: cat.name_en },
-            { label: "Name (AR)", value: cat.name_ar ?? "—" },
+            { label: "ID", value: String(category.category_id) },
+            { label: "Name (EN)", value: category.name_en },
+            { label: "Name (AR)", value: category.name_ar ?? "—" },
             {
               label: "Image",
-              value: cat.image ? (
-                <a
-                  href={cat.image}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="underline text-primary"
-                >
-                  View Image
-                </a>
-              ) : (
-                "—"
-              ),
+              value: category.image ?? "—",
             },
             {
               label: "Created",
-              value: cat.created_at
-                ? formatDate(new Date(cat.created_at))
+              value: category.created_at
+                ? formatDate(new Date(category.created_at))
                 : "—",
             },
             {
               label: "Updated",
-              value: cat.updated_at
-                ? formatDate(new Date(cat.updated_at))
+              value: category.updated_at
+                ? formatDate(new Date(category.updated_at))
                 : "—",
             },
           ]}
