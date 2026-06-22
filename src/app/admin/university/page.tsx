@@ -1,9 +1,7 @@
 import type { Route } from "next";
 import { requireRoleCapability } from "@/modules/auth/session";
-import { DataTable } from "@/modules/workspace/DataTable";
-import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
-import { formatDate } from "@/modules/workspace/format";
-import { prisma } from "@/lib/prisma";
+import { listUniversities } from "@/modules/admin/university/actions";
+import { AdminUniversityTable } from "./_components";
 
 export const dynamic = "force-dynamic";
 
@@ -17,7 +15,8 @@ type UniversityRow = {
 };
 
 export default async function AdminUniversityPage() {
-  const session = await requireRoleCapability("admin", "admin.system");
+  const session = await requireRoleCapability("admin", "admin.read");
+  const { records } = await listUniversities({ limit: 200 });
 
   const rows = await prisma.university.findMany({
     where: { deleted: 0 },

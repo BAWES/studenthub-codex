@@ -1,15 +1,28 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useActionState, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { useActionState } from "react";
 import { DataTable } from "@/modules/workspace/DataTable";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
-import type { Route } from "next";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 import type { SessionUser } from "@/modules/auth/types";
-import type { UniversityListItem } from "../schemas";
-import { createUniversity, deleteUniversity } from "../actions";
+import type { UniversityListItem } from "@/modules/admin/university/schemas";
+import { createUniversity, deleteUniversity } from "@/modules/admin/university/actions";
 
 type Props = {
   session: SessionUser;
@@ -23,23 +36,22 @@ export function AdminUniversityTable({ session, records }: Props) {
     <WorkspaceShell
       session={session}
       eyebrow="Admin settings"
-      title="Universities — manage institution records."
+      title="Universities — manage university records."
       metrics={[
-        { label: "Universities", value: records.length, note: "Active institutions" },
+        { label: "Universities", value: records.length, note: "Active universities" },
       ]}
     >
-      <section className="mb-6">
-        <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
-          <h3 className="text-sm font-semibold mb-3 text-foreground">Add a university</h3>
+      <Card className="mb-6">
+        <CardContent className="p-5">
+          <h3 className="text-sm font-semibold mb-3 text-foreground">Add university</h3>
           <CreateUniversityForm onSuccess={() => router.refresh()} />
-        </div>
-      </section>
+        </CardContent>
+      </Card>
 
       <DataTable
         title="Universities"
-        description="List of all active university records."
+        description="List of all university records. Click a name to view details."
         rows={records.map((r) => ({ ...r, id: String(r.university_id) }))}
-        rowHref={(row) => `/admin/university/${row.university_id}` as Route}
         columns={[
           {
             key: "university_name_en",
@@ -60,11 +72,11 @@ export function AdminUniversityTable({ session, records }: Props) {
             ),
           },
           {
-            key: "candidate_count",
-            label: "Candidates",
+            key: "university_data_source",
+            label: "Data Source",
             render: (row) => (
               <span className="text-sm text-muted-foreground">
-                {row.candidate_count ?? "—"}
+                {row.university_data_source ?? "—"}
               </span>
             ),
           },
@@ -72,28 +84,75 @@ export function AdminUniversityTable({ session, records }: Props) {
             key: "actions",
             label: "",
             render: (row) => (
-              <button
-                type="button"
-                className="text-xs px-2 py-1 rounded hover:bg-red-500/10 text-destructive"
-                onClick={async (e) => {
-                  e.stopPropagation();
-                  if (confirm(`Delete university "${row.university_name_en || row.university_name_ar || "Unnamed"}"?`)) {
-                    try {
-                      await deleteUniversity(row.university_id);
-                      router.refresh();
-                    } catch {
-                      alert("Failed to delete university");
-                    }
-                  }
+              <DeleteUniversityButton
+                universityId={row.university_id}
+                universityName={row.university_name_en || row.university_name_ar || "Unnamed"}
+                onDelete={async () => {
+                  await deleteUniversity(row.university_id);
+                  router.refresh();
                 }}
-              >
-                Delete
-              </button>
+              />
             ),
           },
         ]}
       />
     </WorkspaceShell>
+  );
+}
+
+function DeleteUniversityButton({
+  universityId,
+  universityName,
+  onDelete,
+}: {
+  universityId: number;
+  universityName: string;
+  onDelete: () => Promise<void>;
+}) {
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  return (
+    <AlertDialog open={open} onOpenChange={setOpen}>
+      <AlertDialogTrigger asChild>
+        <Button variant="destructive" size="sm">
+          Delete
+        </Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Delete university</AlertDialogTitle>
+          <AlertDialogDescription>
+            Are you sure you want to delete <strong>{universityName}</strong>? This action cannot be undone.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        {error && (
+          <p className="text-sm text-destructive font-medium">{error}</p>
+        )}
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            disabled={loading}
+            onClick={async (e) => {
+              e.preventDefault();
+              setLoading(true);
+              setError(null);
+              try {
+                await onDelete();
+                setOpen(false);
+              } catch {
+                setError("Failed to delete university");
+              } finally {
+                setLoading(false);
+              }
+            }}
+          >
+            {loading ? "Deleting..." : "Delete"}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }
 
@@ -106,7 +165,7 @@ function CreateUniversityForm({ onSuccess }: { onSuccess: () => void }) {
       try {
         await createUniversity({
           university_name_en: university_name_en || "",
-          university_name_ar: university_name_ar || undefined,
+          university_name_ar: university_name_ar || "",
         });
         onSuccess();
         return { error: undefined };
@@ -125,33 +184,29 @@ function CreateUniversityForm({ onSuccess }: { onSuccess: () => void }) {
       className="flex flex-wrap items-end gap-3"
       onSubmit={() => setTimeout(() => { formRef.current?.reset(); }, 100)}
     >
-      <div className="grid gap-1">
-        <label className="text-xs font-medium text-muted-foreground">Name (English)</label>
-        <input
+      <div className="grid gap-1.5">
+        <Label htmlFor="university_name_en">Name (English)</Label>
+        <Input
+          id="university_name_en"
           name="university_name_en"
           maxLength={100}
           placeholder="e.g. Kuwait University"
-          className="h-9 rounded-lg px-3 text-sm border"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+          className="w-60"
         />
       </div>
-      <div className="grid gap-1">
-        <label className="text-xs font-medium text-muted-foreground">Name (Arabic)</label>
-        <input
+      <div className="grid gap-1.5">
+        <Label htmlFor="university_name_ar">Name (Arabic)</Label>
+        <Input
+          id="university_name_ar"
           name="university_name_ar"
           maxLength={100}
           placeholder="مثال: جامعة الكويت"
-          className="h-9 rounded-lg px-3 text-sm border"
-          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--ink)" }}
+          className="w-60"
         />
       </div>
-      <button
-        type="submit"
-        disabled={pending}
-        className="h-9 rounded-lg px-4 text-sm font-semibold bg-primary text-primary-foreground"
-      >
+      <Button type="submit" disabled={pending}>
         {pending ? "Adding..." : "Add University"}
-      </button>
+      </Button>
       {state?.error ? (
         <p className="text-xs w-full text-destructive">{state.error}</p>
       ) : null}

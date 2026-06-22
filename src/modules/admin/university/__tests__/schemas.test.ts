@@ -5,12 +5,22 @@ import {
   universityIdResultSchema,
 } from "../schemas";
 
+// ---------------------------------------------------------------------------
+// Pure logic: university schema validation
+//
+// All admin actions in actions.ts use these zod schemas internally.
+// Testing them separately avoids mocking "use server" dependencies (prisma,
+// session, next/cache).
+// ---------------------------------------------------------------------------
+
 const validUniversity = {
   university_id: 1,
   university_name_en: "Kuwait University",
   university_name_ar: "جامعة الكويت",
   university_data_source: 1,
-  candidate_count: 42,
+  university_created_at: "2024-01-01T00:00:00.000Z",
+  university_updated_at: "2024-06-15T12:30:00.000Z",
+  deleted: 0,
 };
 
 describe("universityListItemSchema", () => {
@@ -25,7 +35,9 @@ describe("universityListItemSchema", () => {
       university_name_en: null,
       university_name_ar: null,
       university_data_source: null,
-      candidate_count: null,
+      university_created_at: null,
+      university_updated_at: null,
+      deleted: 0,
     };
     const result = universityListItemSchema.safeParse(minimal);
     expect(result.success).toBe(true);
@@ -38,18 +50,18 @@ describe("universityListItemSchema", () => {
     expect(result.success).toBe(false);
   });
 
-  it("rejects negative university_id", () => {
+  it("rejects non-integer university_id", () => {
     const result = universityListItemSchema.safeParse({
       ...validUniversity,
-      university_id: -1,
+      university_id: "abc",
     });
     expect(result.success).toBe(false);
   });
 
-  it("rejects non-numeric university_id", () => {
+  it("rejects non-string university_name_en", () => {
     const result = universityListItemSchema.safeParse({
       ...validUniversity,
-      university_id: "abc",
+      university_name_en: 123,
     });
     expect(result.success).toBe(false);
   });
@@ -91,20 +103,16 @@ describe("listUniversitiesResultSchema", () => {
 });
 
 describe("universityIdResultSchema", () => {
-  it("accepts a valid id result", () => {
-    const result = universityIdResultSchema.safeParse({
-      university_id: 1,
-    });
+  it("accepts a valid university_id result", () => {
+    const result = universityIdResultSchema.safeParse({ university_id: 42 });
     expect(result.success).toBe(true);
     if (result.success) {
-      expect(result.data.university_id).toBe(1);
+      expect(result.data.university_id).toBe(42);
     }
   });
 
-  it("rejects zero id", () => {
-    const result = universityIdResultSchema.safeParse({
-      university_id: 0,
-    });
+  it("rejects non-integer university_id", () => {
+    const result = universityIdResultSchema.safeParse({ university_id: "abc" });
     expect(result.success).toBe(false);
   });
 
