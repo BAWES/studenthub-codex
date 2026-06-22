@@ -2,7 +2,7 @@ name: StudentHub CI
 
 on:
   pull_request:
-    branches: [main]
+    branches: [main, develop]
   push:
     branches: [main]
 
@@ -24,9 +24,11 @@ jobs:
             echo "Branch name OK: $BRANCH"
           elif echo "$BRANCH" | grep -qiE '^ux/[a-z0-9-]+$'; then
             echo "Branch name OK (UX): $BRANCH"
+          elif echo "$BRANCH" | grep -qiE '^develop-to-main$'; then
+            echo "Branch name OK (merge train): $BRANCH"
           else
             echo "Branch name REJECTED: $BRANCH"
-            echo "Expected: feature/STU-N-*, fix/STU-N-*, chore/STU-N-*, or coder2/STU-N-* (kebab-case) — UX: ux/*"
+            echo "Expected: feature/STU-N-*, fix/STU-N-*, chore/STU-N-*, or coder2/STU-N-* (kebab-case) — UX: ux/*, merge: develop-to-main"
             exit 1
           fi
 

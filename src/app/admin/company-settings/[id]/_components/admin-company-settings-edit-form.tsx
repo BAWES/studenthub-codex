@@ -110,8 +110,7 @@ export function AdminCompanySettingsEditForm({ settings }: Props) {
           <form
             ref={formRef}
             action={action}
-            className="grid gap-4"
-            style={{ gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))" }}
+            className="grid gap-4 grid-cols-[repeat(auto-fill,minmax(280px,1fr))]"
           >
             {/* Text fields */}
             {[
@@ -139,7 +138,7 @@ export function AdminCompanySettingsEditForm({ settings }: Props) {
               const name = label === "Description (EN)" ? "companyDescriptionEn" : "companyDescriptionAr";
               return (
                 <div className="grid gap-1" key={name}>
-                  <Label htmlFor={name} className="text-xs font-medium">{label}</Label>
+                <Label htmlFor={name} className="text-xs font-medium">{label}</Label>
                   <Textarea
                     id={name}
                     name={name}

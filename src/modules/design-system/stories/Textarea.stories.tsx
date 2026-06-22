@@ -23,7 +23,7 @@ export const Disabled: Story = {
 };
 
 export const WithLabel: Story = {
-  render: (args) => (
+  render: (args: any) => (
     <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
       <Label htmlFor="bio">Bio</Label>
       <Textarea id="bio" {...args} />
