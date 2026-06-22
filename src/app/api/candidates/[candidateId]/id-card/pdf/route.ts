@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { buildIdCardHtml } from "@/modules/candidates/id-card-pdf-helpers";
 import { getIdCardPdfData } from "@/modules/candidates/id-card-pdf-actions";
+import { generatePdf } from "@/lib/pdf-renderer";
 
 export const dynamic = "force-dynamic";
 
@@ -33,7 +34,9 @@ export async function GET(
     const format = _request.nextUrl.searchParams.get("format");
 
     if (format === "pdf") {
-      return generatePdf(html, candidateId);
+      return generatePdf(html, `id-card-candidate-${candidateId}`, {
+        footerText: "Civil ID Card",
+      });
     }
 
     // Default: return HTML for browser preview / print-to-PDF
@@ -47,80 +50,5 @@ export async function GET(
     return new NextResponse("Failed to generate the ID Card PDF", {
       status: 500,
     });
-  }
-}
-
-// ---------------------------------------------------------------------------
-// PDF generation via Playwright (reuses cached browser instance)
-// ---------------------------------------------------------------------------
-
-/** Minimal browser interface for the cached Chromium instance */
-interface BrowserHandle {
-  contexts(): unknown[];
-  isConnected(): boolean;
-  newPage(): Promise<any>;
-  close(): Promise<void>;
-}
-
-let _browser: BrowserHandle | null = null;
-
-async function getBrowser(): Promise<BrowserHandle> {
-  if (_browser) {
-    try {
-      const contexts = _browser.contexts();
-      if (contexts.length > 0 || _browser.isConnected()) {
-        return _browser;
-      }
-    } catch {
-      // Browser is dead — fall through to re-launch
-    }
-  }
-
-  const playwrightModule = await new Function('return import("playwright")')();
-  const { chromium } = playwrightModule;
-  _browser = (await chromium.launch({ headless: true })) as unknown as BrowserHandle;
-
-  process.once("beforeExit", () => {
-    if (_browser) {
-      _browser.close().catch(() => {});
-    }
-  });
-
-  return _browser;
-}
-
-async function generatePdf(html: string, candidateId: string): Promise<NextResponse> {
-  let page: any = null;
-  try {
-    const browser = await getBrowser();
-    page = await browser.newPage();
-    await page.setContent(html, { waitUntil: "networkidle" });
-
-    const pdfBuffer = await page.pdf({
-      format: "A4",
-      margin: { top: "20mm", bottom: "20mm", left: "15mm", right: "15mm" },
-      printBackground: true,
-      displayHeaderFooter: true,
-      headerTemplate: "<span></span>",
-      footerTemplate: `
-        <div style="font-size:10px;color:#aaa;text-align:center;width:100%;padding:0 15mm;">
-          Civil ID Card &mdash; Page <span class="pageNumber"></span> of <span class="totalPages"></span>
-        </div>`,
-    });
-
-    return new NextResponse(pdfBuffer.toString() as unknown as BodyInit, {
-      headers: {
-        "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="id-card-candidate-${candidateId}.pdf"`,
-        "Content-Length": String(pdfBuffer.length),
-      },
-    });
-  } catch (error) {
-    console.error("ID Card PDF generation failed:", error);
-    return new NextResponse("Failed to generate PDF", { status: 500 });
-  } finally {
-    if (page) {
-      await page.close().catch(() => {});
-    }
   }
 }
