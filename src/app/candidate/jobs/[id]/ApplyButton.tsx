@@ -2,6 +2,7 @@
 
 import { useCallback, useState } from "react";
 import { applyToJob } from "../actions";
+import { Button } from "@/components/ui/button";
 
 type Props = {
   jobListingId: number;
@@ -26,15 +27,15 @@ export function ApplyButton({ jobListingId }: Props) {
 
   return (
     <div>
-      <button
+      <Button
         onClick={handleApply}
         disabled={applying}
-        className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-3 text-sm font-medium text-white hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        className="bg-[#eb6651] hover:bg-[#d45441] text-white"
       >
         {applying ? "Applying..." : "Apply Now"}
-      </button>
+      </Button>
       {result && (
-        <p className={`mt-2 text-sm ${result.success ? "text-green-500" : "text-red-500"}`}>
+        <p className={`mt-2 text-sm ${result.success ? "text-[#2e7d32]" : "text-[#d32f2f]"}`}>
           {result.message}
         </p>
       )}
