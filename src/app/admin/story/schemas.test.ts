@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+// @vitest-environment jsdom
 import {
   listStoriesSchema,
   storyItemSchema,
