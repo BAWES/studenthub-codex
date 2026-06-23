@@ -58,7 +58,7 @@ export default async function AdminPaymentDetailPage({
             {
               label: "Status",
               value: (
-                <span className="font-semibold" style={{ color: statusColor } as React.CSSProperties}>
+                <span className="font-semibold text-foreground">
                   {p.status ?? "Unknown"}
                 </span>
               ) as any,

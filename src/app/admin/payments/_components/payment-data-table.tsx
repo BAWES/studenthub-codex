@@ -2,10 +2,15 @@
 
 import { useState, useMemo, useCallback, type KeyboardEvent } from "react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { CreditCard, AlertTriangle, SearchX, ChevronLeft, ChevronRight } from "lucide-react";
 import type { PaymentRow } from "../schemas";
 
 // ---------------------------------------------------------------------------
 // PaymentDataTable
+// Refactored to use shadcn Badge, Button, Skeleton — no inline styles,
+// no emoji, no raw HTML buttons, no custom bg-white/5 patterns.
 // ---------------------------------------------------------------------------
 
 export type PaymentDataTableProps = {
@@ -49,8 +54,6 @@ function formatAmount(total: number | null, currency: string | null): string {
   return `${total.toLocaleString("en-US", { maximumFractionDigits: 3 })} ${currency ?? "KWD"}`;
 }
 
-
-
 function ReconciledCheck({ reconciled }: { reconciled: boolean | null }) {
   return (
     <span
@@ -70,7 +73,7 @@ function SkeletonRow() {
   return (
     <div className="flex items-center gap-4 px-4 py-3" aria-hidden="true">
       {Array.from({ length: 8 }).map((_, i) => (
-        <div key={i} className="h-4 rounded bg-white/5 animate-pulse" style={{ width: `${60 + i * 15}px`, flex: i === 2 ? "1" : undefined }} />
+        <Skeleton key={i} className="h-4 flex-1" />
       ))}
     </div>
   );
@@ -79,7 +82,7 @@ function SkeletonRow() {
 const COLUMNS = [
   { key: "date" as const, label: "Date", width: "120px", align: "left" as const, sortable: true },
   { key: "reference" as const, label: "Reference", width: "160px", align: "left" as const, sortable: true },
-  { key: "contact_name" as const, label: "Contact", width: "1fr", align: "left" as const, sortable: false },
+  { key: "contact_name" as const, label: "Contact", flex: true, align: "left" as const, sortable: false },
   { key: "type" as const, label: "Type", width: "100px", align: "center" as const, sortable: false },
   { key: "total" as const, label: "Amount", width: "140px", align: "right" as const, sortable: true },
   { key: "currency_code" as const, label: "Currency", width: "70px", align: "center" as const, sortable: false },
@@ -134,103 +137,138 @@ export function PaymentDataTable({
     [onRowClick],
   );
 
+  // ── Error state ─────────────────────────────────────────────────
   if (error && !loading) {
     return (
-      <div className="rounded-lg border border-border bg-white p-8" role="alert">
+      <div className="rounded-lg border border-border bg-card p-8" role="alert">
         <div className="flex flex-col items-center gap-4 text-center">
-          <span className="text-3xl" aria-hidden="true">⚠️</span>
+          <AlertTriangle className="h-10 w-10 text-destructive" aria-hidden="true" />
           <div>
             <p className="text-lg font-semibold text-foreground">Could not load payments</p>
             <p className="text-sm mt-1 text-muted-foreground">{error}</p>
           </div>
-          <button onClick={onRetry} className="h-10 rounded-lg px-4 text-sm font-semibold bg-primary text-primary-foreground">
+          <Button onClick={onRetry} variant="default" size="sm">
             Retry
-          </button>
+          </Button>
         </div>
       </div>
     );
   }
 
-  return (
-    <div className="rounded-lg border border-border bg-white overflow-hidden">
-      <div
-        className="grid gap-0 text-[11px] font-bold uppercase tracking-wider px-4 py-3 text-muted-foreground border-b border-border/10"
-        style={{ gridTemplateColumns: COLUMNS.map((c) => c.width).join(" ") }}
-      >
-        {COLUMNS.map((col) => (
-          <div
-            key={col.key}
-            className={`flex items-center gap-1 ${col.align === "right" ? "justify-end" : col.align === "center" ? "justify-center" : ""} ${col.sortable ? "cursor-pointer" : "cursor-default"}`}
-            onClick={() => col.sortable && handleSort(col.key)}
-          >
-            {col.label}
-            {sortKey === col.key && <span>{sortDir === "asc" ? "▲" : "▼"}</span>}
-          </div>
-        ))}
+  // ── Loading state ───────────────────────────────────────────────
+  if (loading) {
+    return (
+      <div className="rounded-lg border border-border bg-card overflow-hidden">
+        {Array.from({ length: 8 }).map((_, i) => (<SkeletonRow key={i} />))}
       </div>
+    );
+  }
 
-      {loading ? (
-        <div>
-          {Array.from({ length: 10 }).map((_, i) => (<SkeletonRow key={i} />))}
-        </div>
-      ) : !sortedPayments.length ? (
-        <div className="flex flex-col items-center justify-center py-16 gap-4" role="status">
-          <span className="text-4xl" aria-hidden="true">💳</span>
+  // ── Empty state (no results after filter) ───────────────────────
+  if (!sortedPayments.length) {
+    return (
+      <div className="rounded-lg border border-border bg-card p-12">
+        <div className="flex flex-col items-center justify-center gap-4" role="status">
+          <CreditCard className="h-12 w-12 text-muted-foreground" aria-hidden="true" />
           <p className="text-lg font-semibold text-foreground">No payments yet</p>
           <p className="text-sm text-center max-w-md text-muted-foreground">
             Payments will appear here once bank transactions are synced from Xero.
           </p>
         </div>
-      ) : (
-        <div>
-          {sortedPayments.map((payment, i) => (
-            <div
-              key={payment.bank_transaction_id}
-              className="grid gap-0 px-4 py-3 transition-all duration-150 cursor-pointer even:bg-transparent odd:bg-muted/5"
-              style={{
-                gridTemplateColumns: COLUMNS.map((c) => c.width).join(" "),
-              }}
-              role="button"
-              tabIndex={0}
-              aria-label={`Payment ${payment.reference ?? payment.bank_transaction_id}`}
-              onClick={() => onRowClick(payment)}
-              onKeyDown={(e) => handleKeyDown(e, payment)}
+      </div>
+    );
+  }
+
+  // ── Data + empty filter result ──────────────────────────────────
+  return (
+    <div className="rounded-lg border border-border bg-card overflow-hidden">
+      {/* Table header */}
+      <div className="grid grid-cols-[120px_160px_1fr_100px_140px_70px_120px_90px] gap-0 text-xs font-bold uppercase tracking-wider px-4 py-3 text-muted-foreground border-b border-border">
+        {COLUMNS.map((col) => (
+          <div
+            key={col.key}
+            className={`flex items-center gap-1 ${
+              col.align === "right" ? "justify-end" : col.align === "center" ? "justify-center" : ""
+            } cursor-pointer`}
+            onClick={() => col.sortable && handleSort(col.key)}
+          >
+            {col.label}
+            {sortKey === col.key && (
+              <span className="text-xs">{sortDir === "asc" ? "▲" : "▼"}</span>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* Table rows */}
+      <div>
+        {sortedPayments.map((payment, i) => (
+          <div
+            key={payment.bank_transaction_id}
+            className={`grid grid-cols-[120px_160px_1fr_100px_140px_70px_120px_90px] gap-0 px-4 py-3 transition-colors duration-150 cursor-pointer ${
+              i % 2 === 0 ? "bg-card" : "bg-muted/30"
+            } hover:bg-muted/50`}
+            role="button"
+            tabIndex={0}
+            aria-label={`Payment ${payment.reference ?? payment.bank_transaction_id}`}
+            onClick={() => onRowClick(payment)}
+            onKeyDown={(e) => handleKeyDown(e, payment)}
+          >
+            <span className="text-sm text-foreground">{formatDate(payment.date)}</span>
+            <span className="text-sm font-medium text-foreground truncate">{payment.reference ?? "—"}</span>
+            <span className="text-sm truncate text-foreground">{payment.contact_name ?? "—"}</span>
+            <span className="text-sm text-center text-muted-foreground">{payment.type ?? "—"}</span>
+            <span className="text-sm text-right font-medium text-foreground">{formatAmount(payment.total, payment.currency_code)}</span>
+            <span className="text-sm text-center text-muted-foreground">{payment.currency_code ?? "—"}</span>
+            <span className="flex justify-center"><StatusBadge status={payment.status} /></span>
+            <span className="flex justify-center"><ReconciledCheck reconciled={payment.is_reconciled} /></span>
+          </div>
+        ))}
+      </div>
+
+      {/* Pagination */}
+      {!loading && !error && total > 0 && onPageChange && (
+        <div className="flex items-center justify-between px-4 py-3 text-sm border-t border-border text-muted-foreground">
+          <span>
+            Showing {1 + (page - 1) * 20}–{Math.min(page * 20, total)} of {total}
+          </span>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              disabled={page <= 1}
+              onClick={() => onPageChange(page - 1)}
+              aria-label="Previous page"
             >
-              <span className="text-sm text-foreground">{formatDate(payment.date)}</span>
-              <span className="text-sm font-medium text-foreground">{payment.reference ?? "—"}</span>
-              <span className="text-sm truncate text-foreground">{payment.contact_name ?? "—"}</span>
-              <span className="text-sm text-center text-muted-foreground">{payment.type ?? "—"}</span>
-              <span className="text-sm text-right font-medium text-foreground">{formatAmount(payment.total, payment.currency_code)}</span>
-              <span className="text-sm text-center text-muted-foreground">{payment.currency_code ?? "—"}</span>
-              <span className="flex justify-center"><StatusBadge status={payment.status} /></span>
-              <span className="flex justify-center"><ReconciledCheck reconciled={payment.is_reconciled} /></span>
-            </div>
-          ))}
+              <ChevronLeft className="h-4 w-4 mr-1" />
+              Prev
+            </Button>
+            <span className="text-xs text-muted-foreground">
+              Page {page} of {totalPages}
+            </span>
+            <Button
+              variant="ghost"
+              size="sm"
+              disabled={page >= totalPages}
+              onClick={() => onPageChange(page + 1)}
+              aria-label="Next page"
+            >
+              Next
+              <ChevronRight className="h-4 w-4 ml-1" />
+            </Button>
+          </div>
         </div>
       )}
 
-      {!loading && !error && total > 0 && onPageChange && (
-        <div className="flex items-center justify-between px-4 py-3 text-sm border-t border-border/10 text-muted-foreground">
-          <span>Showing {1 + (page - 1) * 20}-{Math.min(page * 20, total)} of {total}</span>
-          <div className="flex items-center gap-2">
-            <button
-              disabled={page <= 1}
-              onClick={() => onPageChange(page - 1)}
-              className="px-3 py-1.5 rounded-md text-sm font-medium disabled:opacity-30 bg-muted/10"
-              aria-label="Previous page"
-            >
-              ← Prev
-            </button>
-            <span>Page {page} of {totalPages}</span>
-            <button
-              disabled={page >= totalPages}
-              onClick={() => onPageChange(page + 1)}
-              className="px-3 py-1.5 rounded-md text-sm font-medium disabled:opacity-30 bg-muted/10"
-              aria-label="Next page"
-            >
-              Next →
-            </button>
-          </div>
+      {/* Empty filter result */}
+      {!loading && !error && total === 0 && (
+        <div className="flex flex-col items-center justify-center py-16 gap-4" role="status">
+          <SearchX className="h-12 w-12 text-muted-foreground" aria-hidden="true" />
+          <p className="text-lg font-semibold text-foreground">No payments match your filters</p>
+          <p className="text-sm text-muted-foreground">Try adjusting your search or filter criteria</p>
+          <Button onClick={onRetry} variant="outline" size="sm">
+            Clear Filters
+          </Button>
         </div>
       )}
     </div>

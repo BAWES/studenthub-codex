@@ -11,9 +11,21 @@ import {
 } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Search, AlertCircle } from "lucide-react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 // ---------------------------------------------------------------------------
 // PaymentDetailDrawer
+// Refactored to use shadcn Table, Badge, Button, Skeleton.
+// No inline styles, no emoji, no raw HTML table, no bg-white/5.
 // ---------------------------------------------------------------------------
 
 export type PaymentDetailDrawerProps = {
@@ -90,19 +102,19 @@ export function PaymentDetailDrawer({ payment, lineItems, loading, open, onClose
             <SheetTitle className="text-xl font-bold text-foreground">
               {loading ? "Loading..." : payment?.reference ?? "No Reference"}
             </SheetTitle>
-            <SheetClose className="p-2 rounded-lg hover:bg-white/10" aria-label="Close payment detail" />
+            <SheetClose className="p-2 rounded-lg hover:bg-muted/50" aria-label="Close payment detail" />
           </SheetHeader>
 
           <SheetBody>
             {loading ? (
-              <div className="space-y-6" aria-hidden="true">
+              <div className="space-y-3" aria-hidden="true">
                 {Array.from({ length: 6 }).map((_, i) => (
-                  <div key={i} className="h-6 rounded bg-white/5 animate-pulse" />
+                  <Skeleton key={i} className="h-6 w-full" />
                 ))}
               </div>
             ) : !payment ? (
               <div className="flex flex-col items-center justify-center h-full gap-4 text-center">
-                <span className="text-4xl">🔍</span>
+                <AlertCircle className="h-10 w-10 text-muted-foreground" aria-hidden="true" />
                 <p className="text-lg font-semibold text-foreground">Payment not found</p>
                 <Button onClick={onClose} variant="default" size="sm">
                   Close
@@ -118,23 +130,23 @@ export function PaymentDetailDrawer({ payment, lineItems, loading, open, onClose
                 </Badge>
 
                 {payment.contact && (
-                  <div className="rounded-lg border border-border bg-white p-4">
-                    <p className="text-[11px] font-bold uppercase tracking-wider mb-2 text-muted-foreground">Contact</p>
+                  <div className="rounded-lg border border-border bg-card p-4">
+                    <p className="text-xs font-bold uppercase tracking-wider mb-2 text-muted-foreground">Contact</p>
                     <p className="text-sm font-medium text-foreground">{payment.contact.name ?? "Unknown"}</p>
                     <p className="text-xs text-muted-foreground">ID: {payment.contact.contact_id}</p>
                   </div>
                 )}
 
-                <div className="rounded-lg border border-border bg-white p-4 space-y-1">
-                  <p className="text-[11px] font-bold uppercase tracking-wider mb-2 text-muted-foreground">Financial Summary</p>
+                <div className="rounded-lg border border-border bg-card p-4 space-y-1">
+                  <p className="text-xs font-bold uppercase tracking-wider mb-2 text-muted-foreground">Financial Summary</p>
                   <DetailRow label="Total" value={formatAmount(payment.total, payment.currency_code)} />
                   <DetailRow label="Sub-total" value={formatAmount(payment.sub_total, payment.currency_code)} />
                   <DetailRow label="Tax" value={formatAmount(payment.total_tax, payment.currency_code)} />
                   {payment.currency_rate != null && <DetailRow label="Currency Rate" value={String(payment.currency_rate)} />}
                 </div>
 
-                <div className="rounded-lg border border-border bg-white p-4 space-y-1">
-                  <p className="text-[11px] font-bold uppercase tracking-wider mb-2 text-muted-foreground">Details</p>
+                <div className="rounded-lg border border-border bg-card p-4 space-y-1">
+                  <p className="text-xs font-bold uppercase tracking-wider mb-2 text-muted-foreground">Details</p>
                   <DetailRow label="Type" value={payment.type ?? "—"} />
                   <DetailRow label="Date" value={formatDate(payment.date)} />
                   <DetailRow label="Created" value={formatDate(payment.created_at)} />
@@ -145,32 +157,36 @@ export function PaymentDetailDrawer({ payment, lineItems, loading, open, onClose
                 </div>
 
                 {lineItems.length > 0 && (
-                  <div className="rounded-lg border border-border bg-white p-4">
-                    <p className="text-[11px] font-bold uppercase tracking-wider mb-2 text-muted-foreground">Line Items</p>
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-sm">
-                        <thead>
-                          <tr className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
-                            <th className="text-left py-1 pr-2">Code</th>
-                            <th className="text-left py-1 pr-2">Description</th>
-                            <th className="text-right py-1 pr-2">Qty</th>
-                            <th className="text-right py-1 pr-2">Unit</th>
-                            <th className="text-right py-1">Amount</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {lineItems.map((li) => (
-                            <tr key={li.line_item_id} className="border-t border-border/5">
-                              <td className="py-1.5 pr-2 font-mono text-xs text-muted-foreground">{li.account_code ?? "—"}</td>
-                              <td className="py-1.5 pr-2 text-foreground">{li.description ?? "—"}</td>
-                              <td className="py-1.5 pr-2 text-right text-foreground">{li.quantity ?? "—"}</td>
-                              <td className="py-1.5 pr-2 text-right text-foreground">{li.unit_amount != null ? formatAmount(li.unit_amount) : "—"}</td>
-                              <td className="py-1.5 text-right font-medium text-foreground">{li.line_amount != null ? formatAmount(li.line_amount) : "—"}</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
+                  <div className="rounded-lg border border-border bg-card p-4">
+                    <p className="text-xs font-bold uppercase tracking-wider mb-2 text-muted-foreground">Line Items</p>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Code</TableHead>
+                          <TableHead>Description</TableHead>
+                          <TableHead className="text-right">Qty</TableHead>
+                          <TableHead className="text-right">Unit</TableHead>
+                          <TableHead className="text-right">Amount</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {lineItems.map((li) => (
+                          <TableRow key={li.line_item_id}>
+                            <TableCell className="font-mono text-xs text-muted-foreground">
+                              {li.account_code ?? "—"}
+                            </TableCell>
+                            <TableCell className="text-foreground">{li.description ?? "—"}</TableCell>
+                            <TableCell className="text-right text-foreground">{li.quantity ?? "—"}</TableCell>
+                            <TableCell className="text-right text-foreground">
+                              {li.unit_amount != null ? formatAmount(li.unit_amount) : "—"}
+                            </TableCell>
+                            <TableCell className="text-right font-medium text-foreground">
+                              {li.line_amount != null ? formatAmount(li.line_amount) : "—"}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
                   </div>
                 )}
 
