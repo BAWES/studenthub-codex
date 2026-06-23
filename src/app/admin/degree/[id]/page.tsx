@@ -4,6 +4,8 @@ import { requireRoleCapability } from "@/modules/auth/session";
 import { DetailSection } from "@/modules/workspace/DetailPanels";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { getDegree } from "./actions";
+import { listDegreeGroups } from "@/app/admin/degree-group/actions";
+import { DegreeDetailForm } from "./DegreeDetailForm";
 import { formatDate } from "@/modules/workspace/format";
 
 export const dynamic = "force-dynamic";
@@ -23,6 +25,13 @@ export default async function AdminDegreeDetailPage({
   }
 
   const degree = data.degree;
+
+  // Fetch degree groups for the edit form select
+  const groupsResult = await listDegreeGroups({ limit: 200 });
+  const groups = groupsResult.degree_groups.map((g) => ({
+    degree_group_uuid: g.degree_group_uuid,
+    degree_group_name_en: g.degree_group_name_en,
+  }));
 
   return (
     <ErrorBoundary>
@@ -56,8 +65,8 @@ export default async function AdminDegreeDetailPage({
               value: degree.degree_name_ar ?? "—",
             },
             {
-              label: "Degree Group UUID",
-              value: degree.degree_group_uuid ?? "—",
+              label: "Degree Group",
+              value: degree.degree_group?.degree_group_name_en ?? "—",
             },
             {
               label: "Sort order",
@@ -80,6 +89,10 @@ export default async function AdminDegreeDetailPage({
             },
           ]}
         />
+
+        <div className="mt-6">
+          <DegreeDetailForm degree={degree} groups={groups} />
+        </div>
       </WorkspaceShell>
     </ErrorBoundary>
   );
