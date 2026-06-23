@@ -1,0 +1,17 @@
+{
+  "version": "6.19.3",
+  "steps": [
+    {
+      "tag": "AlterTable",
+      "table": "employee",
+      "columns": [
+        {
+          "name": "employee_role",
+          "type": "VarChar(60)",
+          "isRequired": false,
+          "default": "staff"
+        }
+      ]
+    }
+  ]
+}

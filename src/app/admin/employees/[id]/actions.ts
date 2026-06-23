@@ -6,5 +6,8 @@
 // current import paths without duplicating the "use server" directive.
 // ---------------------------------------------------------------------------
 
-export { getEmployeeById } from "@/modules/admin/employees/actions";
-export type { GetEmployeeByIdInput } from "@/modules/admin/employees/schemas";
+export { getEmployeeById, updateEmployeeRole } from "@/modules/admin/employees/actions";
+export type {
+  GetEmployeeByIdInput,
+  UpdateEmployeeRoleInput,
+} from "@/modules/admin/employees/schemas";

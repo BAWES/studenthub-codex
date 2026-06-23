@@ -112,6 +112,7 @@ describe("employeeRowSchema", () => {
       employee_phone: null,
       employee_salary: null,
       employee_status: 10,
+      employee_role: null,
       employee_created_at: new Date(),
       employee_updated_at: new Date(),
       designation_uuid: null,

@@ -12,11 +12,13 @@ import {
   actionResponseSchema,
   getEmployeeByIdSchema,
   employeeDetailSchema,
+  updateEmployeeRoleSchema,
   type ListEmployeesInput,
   type ListEmployeesResult,
   type CreateEmployeeInput,
   type ActionResponse,
   type GetEmployeeByIdInput,
+  type UpdateEmployeeRoleInput,
 } from "./schemas";
 
 function generateUuid(): string {
@@ -54,6 +56,7 @@ export async function listAdminEmployees(
     employee_phone: r.employee_phone,
     employee_salary: r.employee_salary ? Number(r.employee_salary) : null,
     employee_status: r.employee_status,
+    employee_role: r.employee_role ?? null,
     employee_created_at: r.employee_created_at,
     employee_updated_at: r.employee_updated_at,
     designation_uuid: r.designation_uuid,
@@ -92,6 +95,7 @@ export async function createAdminEmployee(
         employee_phone: parsed.data.employeePhone ?? null,
         employee_salary: parsed.data.employeeSalary ?? 0,
         employee_status: parsed.data.employeeStatus,
+        employee_role: parsed.data.employeeRole ?? "staff",
         employee_created_at: now,
         employee_updated_at: now,
         deleted: 0,
@@ -179,6 +183,7 @@ export async function getEmployeeById(
     employee_phone: row.employee_phone,
     employee_salary: row.employee_salary ? Number(row.employee_salary) : null,
     employee_status: row.employee_status,
+    employee_role: row.employee_role ?? null,
     employee_created_at: row.employee_created_at,
     employee_updated_at: row.employee_updated_at,
     designation_uuid: row.designation_uuid,
@@ -197,4 +202,42 @@ export async function getEmployeeById(
   }
 
   return result;
+}
+
+// ---------------------------------------------------------------------------
+// updateEmployeeRole
+// ---------------------------------------------------------------------------
+
+/**
+ * Update an employee's role (staff/admin).
+ * Requires `admin.write` capability.
+ * Returns { operation, message } on success/failure.
+ */
+export async function updateEmployeeRole(
+  input: UpdateEmployeeRoleInput,
+): Promise<ActionResponse> {
+  await requireCapability("admin.write");
+
+  const parsed = updateEmployeeRoleSchema.safeParse(input);
+  if (!parsed.success) {
+    return { operation: "error", message: parsed.error.issues[0]?.message ?? "Invalid input" };
+  }
+
+  try {
+    await prisma.employee.update({
+      where: { employee_uuid: parsed.data.uuid },
+      data: {
+        employee_role: parsed.data.role,
+        employee_updated_at: new Date(),
+      },
+    });
+    revalidatePath("/admin/employees");
+    revalidatePath(`/admin/employees/${parsed.data.uuid}`);
+
+    const result: ActionResponse = { operation: "success", message: `Role updated to ${parsed.data.role}` };
+    actionResponseSchema.parse(result);
+    return result;
+  } catch {
+    return { operation: "error", message: "Failed to update employee role" };
+  }
 }

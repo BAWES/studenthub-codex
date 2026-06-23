@@ -5,6 +5,8 @@ import {
   actionResponseSchema,
   listEmployeesSchema,
   createEmployeeSchema,
+  updateEmployeeRoleSchema,
+  ROLES,
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
@@ -18,6 +20,7 @@ describe("employeeRowSchema", () => {
     employee_phone: null,
     employee_salary: null,
     employee_status: 10,
+    employee_role: "staff",
     employee_created_at: new Date(),
     employee_updated_at: new Date(),
     designation_uuid: null,
@@ -28,12 +31,25 @@ describe("employeeRowSchema", () => {
     expect(employeeRowSchema.safeParse(validRow).success).toBe(true);
   });
 
+  it("accepts admin role", () => {
+    expect(
+      employeeRowSchema.safeParse({ ...validRow, employee_role: "admin" }).success,
+    ).toBe(true);
+  });
+
+  it("accepts null role", () => {
+    expect(
+      employeeRowSchema.safeParse({ ...validRow, employee_role: null }).success,
+    ).toBe(true);
+  });
+
   it("accepts null nullable fields", () => {
     expect(
       employeeRowSchema.safeParse({
         ...validRow,
         employee_phone: null,
         employee_salary: null,
+        employee_role: null,
         designation_uuid: null,
         department_uuid: null,
       }).success,
@@ -75,6 +91,7 @@ describe("listEmployeesResultSchema", () => {
         employee_phone: null,
         employee_salary: null,
         employee_status: 10,
+        employee_role: "staff",
         employee_created_at: new Date(),
         employee_updated_at: new Date(),
         designation_uuid: null,
@@ -182,14 +199,34 @@ describe("createEmployeeSchema", () => {
     expect(createEmployeeSchema.safeParse(validMinimal).success).toBe(true);
   });
 
+  it("defaults role to staff", () => {
+    const r = createEmployeeSchema.safeParse(validMinimal);
+    expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data.employeeRole).toBe("staff");
+    }
+  });
+
+  it("accepts explicit admin role", () => {
+    const r = createEmployeeSchema.safeParse({
+      ...validMinimal,
+      employeeRole: "admin",
+    });
+    expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data.employeeRole).toBe("admin");
+    }
+  });
+
   it("accepts full input", () => {
     expect(
       createEmployeeSchema.safeParse({
         employeeName: "John Doe",
         employeeEmail: "john@example.com",
-        employeePhone: "+96512345678",
+        employeePhone: "+965****5678",
         employeeSalary: 50000,
         employeeStatus: 10,
+        employeeRole: "admin",
         designationUuid: "des-1",
         departmentUuid: "dept-1",
       }).success,
@@ -266,5 +303,63 @@ describe("createEmployeeSchema", () => {
         employeeSalary: -500,
       }).success,
     ).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// ROLES constant
+// ---------------------------------------------------------------------------
+describe("ROLES", () => {
+  it("contains staff and admin", () => {
+    expect(ROLES).toEqual(["staff", "admin"]);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// updateEmployeeRoleSchema
+// ---------------------------------------------------------------------------
+describe("updateEmployeeRoleSchema", () => {
+  it("accepts valid staff role", () => {
+    expect(
+      updateEmployeeRoleSchema.safeParse({ uuid: "emp-1", role: "staff" }).success,
+    ).toBe(true);
+  });
+
+  it("accepts valid admin role", () => {
+    expect(
+      updateEmployeeRoleSchema.safeParse({ uuid: "emp-1", role: "admin" }).success,
+    ).toBe(true);
+  });
+
+  it("rejects empty uuid", () => {
+    expect(
+      updateEmployeeRoleSchema.safeParse({ uuid: "", role: "staff" }).success,
+    ).toBe(false);
+  });
+
+  it("rejects invalid role", () => {
+    expect(
+      updateEmployeeRoleSchema.safeParse({ uuid: "emp-1", role: "manager" }).success,
+    ).toBe(false);
+  });
+
+  it("rejects missing uuid", () => {
+    expect(
+      updateEmployeeRoleSchema.safeParse({ role: "staff" }).success,
+    ).toBe(false);
+  });
+
+  it("rejects missing role", () => {
+    expect(
+      updateEmployeeRoleSchema.safeParse({ uuid: "emp-1" }).success,
+    ).toBe(false);
+  });
+
+  it("provides clear error message for invalid role", () => {
+    const r = updateEmployeeRoleSchema.safeParse({ uuid: "emp-1", role: "superadmin" });
+    expect(r.success).toBe(false);
+    if (!r.success) {
+      expect(r.error.issues[0]?.message).toContain("staff");
+    }
   });
 });
