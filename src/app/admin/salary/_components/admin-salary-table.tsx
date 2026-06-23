@@ -8,53 +8,101 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 import type { SessionUser } from "@/modules/auth/types";
-import type { SalaryItem } from "../schemas";
-import { createSalary, updateSalary, deleteSalary, listStaff } from "../actions";
+import type { SalaryItem } from "@/modules/admin/salary/schemas";
+import {
+  createSalary,
+  updateSalary,
+  deleteSalary,
+  listStaff,
+} from "@/modules/admin/salary/actions";
+
+type StaffOption = { staff_id: number; staff_name: string };
 
 type Props = {
   session: SessionUser;
   salaries: SalaryItem[];
-  total: number;
-  staff: { staff_id: number; staff_name: string }[];
 };
 
-export function AdminSalaryTable({ session, salaries, total, staff }: Props) {
+function staffName(
+  salary: SalaryItem,
+  staffList: StaffOption[],
+): string {
+  if (!salary.staff_id) return "—";
+  return staffList.find((s) => s.staff_id === salary.staff_id)
+    ?.staff_name ?? "—";
+}
+
+export function AdminSalaryTable({ session, salaries }: Props) {
   const router = useRouter();
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [staffList, setStaffList] = useState<StaffOption[]>([]);
+  const [staffLoaded, setStaffLoaded] = useState(false);
+
+  // Lazy-load staff list for inline edit form
+  if (!staffLoaded && salaries.length > 0) {
+    listStaff()
+      .then((s) => {
+        setStaffList(s);
+        setStaffLoaded(true);
+      })
+      .catch(() => {
+        setStaffList([]);
+        setStaffLoaded(true);
+      });
+  }
 
   return (
     <WorkspaceShell
       session={session}
       eyebrow="Admin settings"
-      title="Manage salary records"
+      title="Manage salary records — track staff salary payments across the system."
       metrics={[
-        { label: "Total records", value: total, note: "Salary records in the system" },
+        {
+          label: "Total records",
+          value: salaries.length,
+          note: "Salary records in the system",
+        },
       ]}
     >
       <Card className="mb-6">
         <CardContent className="p-5">
-          <h3 className="text-sm font-semibold mb-3 text-foreground">Add salary record</h3>
-          <CreateSalaryForm staff={staff} onSuccess={() => router.refresh()} />
+          <h3 className="text-sm font-semibold mb-3 text-foreground">
+            Add salary record
+          </h3>
+          <CreateSalaryForm
+            staffList={staffList}
+            onSuccess={() => router.refresh()}
+          />
         </CardContent>
       </Card>
 
       <DataTable
-        title="Salary records"
+        title="Salary Records"
         description="All salary records. Click a row to edit or delete."
         rows={salaries.map((s) => ({ ...s, id: s.staff_salary_uuid }))}
         rowHref={undefined}
         columns={[
           {
-            key: "staff_name",
+            key: "staff",
             label: "Staff",
             render: (row) =>
               editingId === row.staff_salary_uuid ? (
                 <EditSalaryForm
-                  row={row}
-                  staff={staff}
-                  onDone={() => { setEditingId(null); router.refresh(); }}
+                  row={row as unknown as SalaryItem}
+                  staffList={staffList}
+                  onDone={() => {
+                    setEditingId(null);
+                    router.refresh();
+                  }}
                   onCancel={() => setEditingId(null)}
                 />
               ) : (
@@ -63,67 +111,63 @@ export function AdminSalaryTable({ session, salaries, total, staff }: Props) {
                   className="text-sm hover:underline text-primary"
                   onClick={() => setEditingId(row.staff_salary_uuid)}
                 >
-                  {row.staff_name ?? `Staff #${row.staff_id}`}
+                  {row.staff_name || "—"}
                 </button>
               ),
           },
           {
             key: "salary",
-            label: "Salary",
-            render: (row) => {
-              if (row.salary === null || row.salary === undefined) return "—";
-              return (
-                <span className="text-sm font-medium text-foreground">
-                  {Number(row.salary).toLocaleString()} {row.salary_currency ?? "KWD"}
-                </span>
-              );
-            },
+            label: "Amount",
+            render: (row) =>
+              editingId === row.staff_salary_uuid
+                ? null
+                : row.salary != null
+                  ? `${row.salary.toFixed(3)} ${row.salary_currency ?? "KWD"}`
+                  : "—",
           },
           {
             key: "salary_date",
             label: "Date",
             render: (row) => {
               if (!row.salary_date) return "—";
-              return <span className="text-sm text-foreground">{new Date(row.salary_date).toLocaleDateString()}</span>;
+              const d =
+                typeof row.salary_date === "string"
+                  ? row.salary_date
+                  : row.salary_date instanceof Date
+                    ? row.salary_date.toISOString().split("T")[0]
+                    : "—";
+              return d;
             },
           },
           {
             key: "comment",
             label: "Comment",
-            render: (row) => (
-              <span className="text-sm text-muted-foreground truncate max-w-[200px] inline-block">
-                {row.comment ?? "—"}
-              </span>
-            ),
-          },
-          {
-            key: "updated_at",
-            label: "Updated",
-            render: (row) => {
-              if (!row.updated_at) return "—";
-              return <span className="text-sm text-foreground">{new Date(row.updated_at).toLocaleDateString()}</span>;
-            },
+            render: (row) =>
+              editingId === row.staff_salary_uuid
+                ? null
+                : row.comment || "—",
           },
           {
             key: "actions",
             label: "Actions",
             render: (row) =>
               editingId !== row.staff_salary_uuid ? (
-                <Button
+                <button
                   type="button"
                   className="text-xs px-2 py-1 rounded hover:bg-red-500/10 text-destructive"
                   onClick={async () => {
-                    if (confirm(`Delete salary record for "${row.staff_name ?? "staff #" + row.staff_id}"?`)) {
-                      const result = await deleteSalary(row.staff_salary_uuid);
-                      if (result.operation === "error") {
-                        alert(result.message);
-                      }
+                    if (
+                      confirm(
+                        `Delete salary record for "${row.staff_name || "Unknown staff"}"?`,
+                      )
+                    ) {
+                      await deleteSalary(row.staff_salary_uuid);
                       router.refresh();
                     }
                   }}
                 >
                   Delete
-                </Button>
+                </button>
               ) : null,
           },
         ]}
@@ -133,20 +177,26 @@ export function AdminSalaryTable({ session, salaries, total, staff }: Props) {
 }
 
 function CreateSalaryForm({
-  staff,
+  staffList,
   onSuccess,
 }: {
-  staff: { staff_id: number; staff_name: string }[];
+  staffList: StaffOption[];
   onSuccess: () => void;
 }) {
   const [state, action, pending] = useActionState(
     async (_prev: { error?: string } | null, formData: FormData) => {
-      const result = await createSalary(null, formData);
-      if (result.operation === "success") {
+      try {
+        const result = await createSalary(null, formData);
+        if (result.operation === "error") {
+          return { error: result.message };
+        }
         onSuccess();
         return { error: undefined };
+      } catch (e: unknown) {
+        return {
+          error: e instanceof Error ? e.message : "Failed to create salary record",
+        };
       }
-      return { error: result.message };
     },
     null,
   );
@@ -157,49 +207,62 @@ function CreateSalaryForm({
       ref={formRef}
       action={action}
       className="flex flex-wrap items-end gap-3"
-      onSubmit={() => setTimeout(() => { formRef.current?.reset(); }, 100)}
+      onSubmit={() =>
+        setTimeout(() => {
+          formRef.current?.reset();
+        }, 100)
+      }
     >
       <div className="grid gap-1.5">
-        <Label htmlFor="staffId">Staff</Label>
-        <select
-          id="staffId"
-          name="staffId"
-          required
-          className="flex h-9 w-full rounded-lg border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring min-w-[180px]"
-        >
-          <option value="">Select staff...</option>
-          {staff.map((s) => (
-            <option key={s.staff_id} value={s.staff_id}>{s.staff_name}</option>
-          ))}
-        </select>
+        <Label htmlFor="staffId">Staff *</Label>
+        {staffList.length > 0 ? (
+          <Select name="staffId" required>
+            <SelectTrigger className="w-44">
+              <SelectValue placeholder="Select staff..." />
+            </SelectTrigger>
+            <SelectContent>
+              {staffList.map((s) => (
+                <SelectItem key={s.staff_id} value={String(s.staff_id)}>
+                  {s.staff_name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        ) : (
+          <Input
+            id="staffId"
+            name="staffId"
+            type="number"
+            required
+            placeholder="Staff ID"
+            className="w-44"
+          />
+        )}
       </div>
       <div className="grid gap-1.5">
-        <Label htmlFor="salary">Salary</Label>
+        <Label htmlFor="salary">Amount *</Label>
         <Input
           id="salary"
           name="salary"
           type="number"
           step="0.001"
-          min="0"
           required
-          placeholder="e.g. 500.000"
-          className="w-32"
+          placeholder="0.000"
+          className="w-28"
         />
       </div>
       <div className="grid gap-1.5">
         <Label htmlFor="salaryCurrency">Currency</Label>
-        <select
+        <Input
           id="salaryCurrency"
           name="salaryCurrency"
-          defaultValue="KWD"
-          className="flex h-9 w-20 rounded-lg border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-        >
-          <option value="KWD">KWD</option>
-          <option value="USD">USD</option>
-        </select>
+          maxLength={3}
+          placeholder="KWD"
+          className="w-16"
+        />
       </div>
       <div className="grid gap-1.5">
-        <Label htmlFor="salaryDate">Date</Label>
+        <Label htmlFor="salaryDate">Date *</Label>
         <Input
           id="salaryDate"
           name="salaryDate"
@@ -214,8 +277,8 @@ function CreateSalaryForm({
           id="comment"
           name="comment"
           maxLength={255}
-          placeholder="Optional note"
-          className="w-44"
+          placeholder="Note"
+          className="w-36"
         />
       </div>
       <Button type="submit" disabled={pending}>
@@ -230,64 +293,92 @@ function CreateSalaryForm({
 
 function EditSalaryForm({
   row,
-  staff,
+  staffList,
   onDone,
   onCancel,
 }: {
   row: SalaryItem;
-  staff: { staff_id: number; staff_name: string }[];
+  staffList: StaffOption[];
   onDone: () => void;
   onCancel: () => void;
 }) {
   const [state, action, pending] = useActionState(
     async (_prev: { error?: string } | null, formData: FormData) => {
       formData.set("salaryUuid", row.staff_salary_uuid);
-      const result = await updateSalary(null, formData);
-      if (result.operation === "success") {
+      try {
+        const result = await updateSalary(null, formData);
+        if (result.operation === "error") {
+          return { error: result.message };
+        }
         onDone();
         return { error: undefined };
+      } catch (e: unknown) {
+        return {
+          error: e instanceof Error ? e.message : "Failed to update salary record",
+        };
       }
-      return { error: result.message };
     },
     null,
   );
 
-  const salaryDate = row.salary_date
-    ? new Date(row.salary_date).toISOString().split("T")[0]
-    : "";
+  const defaultDate =
+    row.salary_date instanceof Date
+      ? row.salary_date.toISOString().split("T")[0]
+      : typeof row.salary_date === "string"
+        ? row.salary_date
+        : "";
 
   return (
     <form action={action} className="flex items-center gap-2 flex-wrap">
+      {staffList.length > 0 ? (
+        <Select
+          name="staffId"
+          defaultValue={row.staff_id != null ? String(row.staff_id) : ""}
+        >
+          <SelectTrigger className="w-28 h-8">
+            <SelectValue placeholder="Staff" />
+          </SelectTrigger>
+          <SelectContent>
+            {staffList.map((s) => (
+              <SelectItem key={s.staff_id} value={String(s.staff_id)}>
+                {s.staff_name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      ) : (
+        <Input
+          name="staffId"
+          defaultValue={row.staff_id ?? ""}
+          type="number"
+          className="w-16 h-8"
+        />
+      )}
       <Input
         name="salary"
+        defaultValue={row.salary ?? ""}
         type="number"
         step="0.001"
-        min="0"
-        required
-        defaultValue={row.salary ?? ""}
-        className="w-24 h-8"
+        className="w-20 h-8"
       />
-      <select
+      <Input
         name="salaryCurrency"
         defaultValue={row.salary_currency ?? "KWD"}
-        className="flex h-8 w-16 rounded border border-input bg-transparent px-2 text-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-      >
-        <option value="KWD">KWD</option>
-        <option value="USD">USD</option>
-      </select>
+        maxLength={3}
+        className="w-12 h-8"
+      />
       <Input
         name="salaryDate"
+        defaultValue={defaultDate}
         type="date"
-        required
-        defaultValue={salaryDate}
         className="w-32 h-8"
       />
       <Input
         name="comment"
-        maxLength={255}
         defaultValue={row.comment ?? ""}
+        maxLength={255}
         placeholder="Comment"
-        className="w-36 h-8"
+        className="w-28 h-8"
       />
       <Button type="submit" size="sm" disabled={pending}>
         {pending ? "..." : "Save"}
