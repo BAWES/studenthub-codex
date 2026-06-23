@@ -45,7 +45,7 @@ export function WorkspaceShell({
   const navItems = navForRole(session.role);
 
   const rail = (
-    <aside className="flex w-[236px] shrink-0 flex-col border-r border-border bg-card">
+    <aside className="sticky top-0 h-screen grid grid-rows-[auto_1fr_auto] justify-items-center gap-3 border-r border-border bg-card p-3 max-md:hidden">
       <Link
         className="flex items-center gap-2 border-b border-border px-5 py-4 font-semibold text-foreground"
         href="/app"
