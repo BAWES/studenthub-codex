@@ -43,6 +43,7 @@ export function AdminSalaryTable({ session, salaries, total, staff }: Props) {
       <DataTable
         title="Salary records"
         description="All salary records. Click a row to edit or delete."
+        searchable={true}
         rows={salaries.map((s) => ({ ...s, id: s.staff_salary_uuid }))}
         rowHref={undefined}
         columns={[

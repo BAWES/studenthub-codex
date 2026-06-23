@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect, afterEach } from "vitest";
-import { render, screen, within, cleanup } from "@testing-library/react";
+import { render, screen, cleanup } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { DataTablePage } from "./DataTablePage";
 
@@ -78,15 +78,6 @@ describe("DataTablePage", () => {
     expect(bodyRows[0]?.textContent).toContain("Alice");
   });
 
-  it("renders pagination controls when totalPages > 1", () => {
-    renderPage({
-      totalPages: 3,
-      page: 1,
-      onPageChange: () => {},
-    });
-    expect(screen.getByText("Page 1 of 3")).toBeDefined();
-  });
-
   it("renders action buttons when provided", () => {
     renderPage({ actions: <button>Create</button> });
     expect(screen.getByText("Create")).toBeDefined();
@@ -100,25 +91,5 @@ describe("DataTablePage", () => {
   it("does not render search bar when searchable is false", () => {
     renderPage({ searchable: false });
     expect(screen.queryByPlaceholderText("Search...")).toBeNull();
-  });
-
-  it("disables previous button on first page", () => {
-    renderPage({
-      totalPages: 3,
-      page: 1,
-      onPageChange: () => {},
-    });
-    const prev = screen.getByText("Previous").closest("button");
-    expect(prev?.disabled).toBe(true);
-  });
-
-  it("disables next button on last page", () => {
-    renderPage({
-      totalPages: 3,
-      page: 3,
-      onPageChange: () => {},
-    });
-    const next = screen.getByText("Next").closest("button");
-    expect(next?.disabled).toBe(true);
   });
 });

@@ -27,6 +27,7 @@ export function AdminDailyStandupsTable({ session, answers }: Props) {
       <DataTable
         title="Daily Standup Answers"
         description="All staff standup check-in answers."
+        searchable={true}
         rows={answers.map((a) => ({ ...a, id: a.answer_uuid }))}
         rowHref={undefined}
         columns={[

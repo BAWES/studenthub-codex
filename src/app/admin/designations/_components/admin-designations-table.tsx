@@ -37,6 +37,7 @@ export function AdminDesignationsTable({ session, designations }: Props) {
       <DataTable
         title="Designations"
         description="All job titles. Click a row to edit or archive."
+        searchable={true}
         rows={designations.map((d) => ({ ...d, id: d.designation_uuid }))}
         rowHref={undefined}
         columns={[

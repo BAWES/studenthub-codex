@@ -26,6 +26,7 @@ export function AdminCandidateAccountRequestsTable({ session, rows, loading }: P
       <DataTable
         title="Candidate ID Requests"
         description="Requests for candidate account identification, with status tracking."
+        searchable={true}
         rows={rows}
         rowHref="/admin/candidate-account-requests/"
         loading={loading}

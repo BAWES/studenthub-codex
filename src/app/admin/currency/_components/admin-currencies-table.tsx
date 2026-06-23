@@ -30,6 +30,7 @@ export function AdminCurrenciesTable({ session, currencies }: Props) {
       <DataTable
         title="Currencies"
         description="Currency codes, symbols, and exchange rates used across the system."
+        searchable={true}
         rows={currencies.map((c) => ({ ...c, id: String(c.currency_id) }))}
         rowHref={undefined}
         columns={[

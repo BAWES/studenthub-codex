@@ -35,6 +35,7 @@ export function AdminStoriesTable({ session, stories }: Props) {
       <DataTable
         title="Stories"
         description="All consultancy stories. Click a row to view details."
+        searchable={true}
         rows={stories.map((s) => ({ ...s, id: s.story_uuid }))}
         rowHref="/admin/story/"
         columns={[

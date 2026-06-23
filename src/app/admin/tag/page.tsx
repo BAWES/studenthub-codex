@@ -26,6 +26,7 @@ export default async function AdminTagPage() {
       <DataTable
         title="Tags"
         description="Manage tags used across candidates and companies"
+        searchable={true}
         rows={rows}
         rowHref={(row) => `/admin/tag/${row.id}` as Route}
         columns={[

@@ -42,6 +42,7 @@ export function AdminBankTable({ session, banks }: Props) {
       <DataTable
         title="Banks"
         description="All financial institutions. Click a row to edit or remove."
+        searchable={true}
         rows={banks.map((b) => ({ ...b, id: b.bank_id }))}
         rowHref={undefined}
         columns={[

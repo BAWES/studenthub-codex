@@ -72,6 +72,7 @@ export function AdminJiraPage({ session, issues, users, error }: Props) {
         <DataTable
           title="Jira Issues"
           description="Issues from the connected Jira Cloud instance."
+        searchable={true}
           rows={issues.map((i) => ({ ...i, id: i.id }))}
           rowHref={undefined}
           columns={[
@@ -139,6 +140,7 @@ export function AdminJiraPage({ session, issues, users, error }: Props) {
         <DataTable
           title="Jira Users"
           description="Active users in the connected Jira Cloud instance."
+        searchable={true}
           rows={users.map((u) => ({ ...u, id: u.accountId }))}
           rowHref={undefined}
           columns={[

@@ -28,6 +28,7 @@ export function AdminJobsTable({ session, jobs }: Props) {
       <DataTable
         title="Jobs"
         description="All job postings. Click a row to view details."
+        searchable={true}
         rows={jobs.map((j) => ({ ...j, id: j.job_uuid }))}
         rowHref={(row) => `/admin/job/${row.job_uuid}` as Route}
         columns={[

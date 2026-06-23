@@ -26,6 +26,7 @@ export function AdminUserRequestsTable({ session, rows, loading }: Props) {
       <DataTable
         title="Store Assignment Requests"
         description="User requests across candidates and stores."
+        searchable={true}
         rows={rows}
         rowHref="/admin/user-requests/"
         loading={loading}

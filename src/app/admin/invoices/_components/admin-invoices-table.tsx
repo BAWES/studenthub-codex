@@ -72,6 +72,7 @@ export function AdminInvoicesTable({ session, invoices }: Props) {
       <DataTable
         title="Invoices"
         description="All payment invoices. Click status to toggle between paid/unpaid."
+        searchable={true}
         rows={invoices.map((inv) => ({ ...inv, id: inv.invoice_id }))}
         rowHref={undefined}
         columns={[

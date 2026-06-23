@@ -85,6 +85,7 @@ export function AdminTransfersTable({ session, rows, latest, loading }: Props) {
       <DataTable
         title="Transfer Runs"
         description="Open a run to review candidate payouts, employer totals, invoices, and supporting PDF actions."
+        searchable={true}
         rows={rows}
         rowHref={(row) => `/admin/transfers/${row.id}` as Route}
         loading={loading}

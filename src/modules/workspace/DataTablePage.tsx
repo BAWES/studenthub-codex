@@ -1,16 +1,18 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import type { ReactNode } from "react";
 import type { Route } from "next";
+import { Search, X } from "lucide-react";
 import { DataTable, type DataTableColumn } from "./DataTable";
 import { DataTableSkeleton } from "./Skeletons";
-import { Search, X } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
+import { Input } from "@/components/ui/input";
+import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import {
   EMPTY_NO_RECORDS,
   EMPTY_HINT_DEFAULT,
-  emptyNoResults,
 } from "./emptyStates";
 
 // ── Types ──────────────────────────────────────────────────
@@ -54,18 +56,6 @@ export type DataTablePageProps<T extends { id: string | number }> = {
   className?: string;
 };
 
-// ── Default filter function ─────────────────────────────────
-
-function defaultFilter<T>(rows: T[], query: string): T[] {
-  if (!query.trim()) return rows;
-  const q = query.toLowerCase();
-  return rows.filter((row) =>
-    Object.values(row as Record<string, unknown>)
-      .filter((v): v is string | number => typeof v === "string" || typeof v === "number")
-      .some((v) => String(v).toLowerCase().includes(q))
-  );
-}
-
 // ── Component ──────────────────────────────────────────────
 
 export function DataTablePage<T extends { id: string | number }>({
@@ -78,28 +68,12 @@ export function DataTablePage<T extends { id: string | number }>({
   error = null,
   searchable = false,
   searchPlaceholder = "Search...",
-  searchValue: externalSearchValue,
-  onSearchChange: externalOnSearchChange,
   totalPages,
   page = 1,
   onPageChange,
   actions,
   className,
 }: DataTablePageProps<T>) {
-  // Internal search state when uncontrolled
-  const [internalSearch, setInternalSearch] = useState("");
-  const isControlled = externalSearchValue !== undefined;
-  const searchValue = isControlled ? externalSearchValue : internalSearch;
-  const setSearchValue = isControlled
-    ? (externalOnSearchChange ?? (() => {}))
-    : setInternalSearch;
-
-  // Filter rows by search
-  const filtered = useMemo(
-    () => defaultFilter(rows, searchValue),
-    [rows, searchValue]
-  );
-
   // ── Loading state ────────────────────────────────────────
   if (loading) {
     return (
@@ -113,16 +87,10 @@ export function DataTablePage<T extends { id: string | number }>({
   if (error) {
     return (
       <section className={className}>
-        <div className="shTableGlass">
-          <div className="shTableHeader">
-            <div>
-              <h2>{title}</h2>
-              <p>{description}</p>
-            </div>
-          </div>
+        <Card>
           <div className="flex flex-col items-center justify-center gap-3 py-16 px-6 text-center">
-            <div className="size-12 rounded-xl bg-red-500/10 flex items-center justify-center">
-              <X size={24} className="text-red-400" />
+            <div className="size-12 rounded-xl bg-destructive/10 flex items-center justify-center">
+              <X size={24} className="text-destructive" />
             </div>
             <strong className="text-sm text-foreground">
               Error loading data
@@ -131,72 +99,30 @@ export function DataTablePage<T extends { id: string | number }>({
               {error}
             </span>
           </div>
-        </div>
+        </Card>
       </section>
     );
   }
 
   return (
     <section className={className}>
-      <div className="shTableGlass">
-        {/* Glass header */}
-        <div className="shTableHeader">
-          <div>
-            <h2>{title}</h2>
-            <p>{description}</p>
-          </div>
-          {actions ? <div className="flex items-center gap-2">{actions}</div> : null}
+      <DataTable
+        title={title}
+        description={description}
+        rows={rows}
+        columns={columns}
+        rowHref={rowHref}
+        searchable={searchable}
+        searchPlaceholder={searchPlaceholder}
+        totalPages={totalPages}
+        page={page}
+        onPageChange={onPageChange}
+      />
+      {actions ? (
+        <div className="flex items-center gap-2 mt-4">
+          {actions}
         </div>
-
-        {/* Glass search bar */}
-        {searchable ? (
-          <div className="shTableSearch">
-            <div className="shTableSearchWrap">
-              <Search size={15} className="shTableSearchIcon" aria-hidden="true" />
-              <input
-                data-command-search
-                type="text"
-                placeholder={searchPlaceholder}
-                value={searchValue}
-                onChange={(e) => setSearchValue(e.target.value)}
-                className="shTableSearchInput"
-              />
-              {searchValue ? (
-                <button
-                  type="button"
-                  className="shTableSearchClear"
-                  onClick={() => setSearchValue("")}
-                  aria-label="Clear search"
-                >
-                  <X size={14} />
-                </button>
-              ) : null}
-            </div>
-          </div>
-        ) : null}
-
-        {/* Table or filtered empty state */}
-        {filtered.length > 0 ? (
-          <DataTable
-            title={title}
-            description={description}
-            rows={filtered}
-            columns={columns}
-            rowHref={rowHref}
-            totalPages={totalPages}
-            page={page}
-            onPageChange={onPageChange}
-          />
-        ) : (
-          <div className="py-14 px-6">
-            <EmptyState
-              variant={searchValue ? "search" : "empty"}
-              title={searchValue ? `No results for "${searchValue}"` : EMPTY_NO_RECORDS}
-              description={searchValue ? "Try a different search term or clear your filter." : EMPTY_HINT_DEFAULT}
-            />
-          </div>
-        )}
-      </div>
+      ) : null}
     </section>
   );
 }

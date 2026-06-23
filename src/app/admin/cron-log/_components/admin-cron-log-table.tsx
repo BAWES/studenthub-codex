@@ -27,6 +27,7 @@ export function AdminCronLogTable({ session, records }: Props) {
       <DataTable
         title="Cron Logs"
         description="Scheduled task execution history. Click a row to view details."
+        searchable={true}
         rows={rows}
         columns={[
           {

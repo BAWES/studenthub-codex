@@ -78,6 +78,7 @@ export function AdminAttendanceTable({ session, attendance, employees }: Props) 
       <DataTable
         title="Attendance records"
         description="All attendance entries, most recent first."
+        searchable={true}
         rows={filtered.map((a) => ({ ...a, id: a.attendance_uuid }))}
         columns={[
           {

@@ -23,6 +23,7 @@ export function AdminCompanySettingsTable({ session, items }: Props) {
       <DataTable
         title="Company Settings"
         description="All companies and their settings. Click a company to view or edit."
+        searchable={true}
         rows={items.map((item) => ({ ...item, id: String(item.company_id) }))}
         rowHref="/admin/company-settings/"
         columns={[

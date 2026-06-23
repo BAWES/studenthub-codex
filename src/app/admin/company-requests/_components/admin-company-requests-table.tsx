@@ -26,6 +26,7 @@ export function AdminCompanyRequestsTable({ session, rows, loading }: Props) {
       <DataTable
         title="Company Registration Requests"
         description="Company registration requests from candidates and contacts."
+        searchable={true}
         rows={rows}
         rowHref="/admin/company-requests/"
         loading={loading}

@@ -53,6 +53,7 @@ export function AdminContractsTable({ session, contracts }: Props) {
       <DataTable
         title="Contracts"
         description="All employment agreements. Click a row to edit."
+        searchable={true}
         rows={contracts.map((c) => ({ ...c, id: c.contract_uuid }))}
         rowHref={undefined}
         columns={[

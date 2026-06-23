@@ -133,6 +133,7 @@ export function AdminEventsTable({ session, events }: Props) {
       <DataTable
         title="Events"
         description="Request activity events. Click on a request UUID to view its timeline."
+        searchable={true}
         rows={events.map((e) => ({ ...e, id: e.activity_uuid }))}
         rowHref={undefined}
         columns={[

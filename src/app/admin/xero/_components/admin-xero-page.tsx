@@ -39,6 +39,7 @@ export function AdminXeroPage({ session, transactions, reconciliation }: Props) 
       <DataTable
         title="Bank Transactions"
         description="Xero-synced bank transactions with reconciliation status."
+        searchable={true}
         rows={transactions.map((t) => ({ ...t, id: t.bankTransactionId }))}
         rowHref={undefined}
         columns={[

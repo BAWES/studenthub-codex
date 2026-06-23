@@ -57,6 +57,7 @@ export function AdminEmployeesTable({ session, employees, departments, designati
       <DataTable
         title="Employees"
         description="All employee records. Active and inactive staff."
+        searchable={true}
         rows={employees.map((e) => ({ ...e, id: e.employee_uuid }))}
         columns={[
           {

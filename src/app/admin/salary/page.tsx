@@ -15,6 +15,7 @@ export default async function AdminSalaryPage() {
       <DataTable
         title="Salary Records"
         description="View staff salary records across the platform"
+        searchable={true}
         rows={rows}
         rowHref={(row) => `/admin/salary/${row.id}` as Route}
         columns={[

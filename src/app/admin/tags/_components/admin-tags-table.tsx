@@ -41,6 +41,7 @@ export function AdminTagsTable({ session, tags }: Props) {
       <DataTable
         title="Tags"
         description="All tags. Click a row to edit or delete."
+        searchable={true}
         rows={tags.map((t) => ({ ...t, id: t.tag_id }))}
         rowHref={undefined}
         columns={[

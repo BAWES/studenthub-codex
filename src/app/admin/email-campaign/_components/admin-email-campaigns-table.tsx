@@ -46,6 +46,7 @@ export function AdminEmailCampaignsTable({ session, campaigns }: Props) {
       <DataTable
         title="Email campaigns"
         description="All email campaigns. Click a campaign name to edit details."
+        searchable={true}
         rows={campaigns.map((c) => ({ ...c, id: c.campaign_uuid }))}
         rowHref={undefined}
         columns={[

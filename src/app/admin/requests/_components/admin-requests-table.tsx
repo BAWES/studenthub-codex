@@ -27,6 +27,7 @@ export function AdminRequestsTable({ session, rows, loading }: Props) {
       <DataTable
         title="Request Pipeline"
         description="Newest operational demand across companies and assigned staff."
+        searchable={true}
         rows={rows}
         rowHref="/admin/requests/"
         loading={loading}

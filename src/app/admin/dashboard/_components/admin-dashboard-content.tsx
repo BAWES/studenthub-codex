@@ -130,6 +130,7 @@ export function AdminDashboardContent({ session, data }: Props) {
         <DataTable
           title="Recent Candidates"
           description="Latest candidate registrations"
+        searchable={true}
           rows={recentCandidates.slice(0, 5).map((c) => ({
             id: c.id,
             name: c.title,
@@ -148,6 +149,7 @@ export function AdminDashboardContent({ session, data }: Props) {
         <DataTable
           title="Recent Companies"
           description="Latest company registrations"
+        searchable={true}
           rows={recentCompanies.slice(0, 5).map((c) => ({
             id: c.id,
             name: c.title,
@@ -166,6 +168,7 @@ export function AdminDashboardContent({ session, data }: Props) {
         <DataTable
           title="Recent Requests"
           description="Latest hiring requests"
+        searchable={true}
           rows={recentRequests.slice(0, 5).map((r) => ({
             id: r.id,
             title: r.title,
@@ -184,6 +187,7 @@ export function AdminDashboardContent({ session, data }: Props) {
         <DataTable
           title="Recent Transfers"
           description="Latest payroll runs"
+        searchable={true}
           rows={recentTransfers.slice(0, 5).map((t) => ({
             id: t.id,
             company: t.title,

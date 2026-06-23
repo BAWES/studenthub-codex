@@ -37,6 +37,7 @@ export function AdminDepartmentsTable({ session, departments }: Props) {
       <DataTable
         title="Departments"
         description="All departments. Click a row to edit or delete."
+        searchable={true}
         rows={departments.map((d) => ({ ...d, id: d.department_uuid }))}
         rowHref={undefined}
         columns={[

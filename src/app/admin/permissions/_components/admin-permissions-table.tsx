@@ -48,6 +48,7 @@ export function AdminPermissionsTable({ session, sections }: Props) {
       <DataTable
         title="Permission Sections"
         description="All permission sections. Click a section name to edit."
+        searchable={true}
         rows={sections.map((s) => ({ ...s, id: s.permission_uuid }))}
         rowHref={undefined}
         columns={[

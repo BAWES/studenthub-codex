@@ -42,6 +42,7 @@ export function AdminWebhooksTable({ session, webhooks }: Props) {
       <DataTable
         title="Webhooks"
         description="All configured webhooks. Click an event name to edit."
+        searchable={true}
         rows={webhooks.map((w) => ({ ...w, id: w.webhook_id }))}
         rowHref={undefined}
         columns={[

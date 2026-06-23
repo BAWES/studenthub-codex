@@ -42,6 +42,7 @@ export function AdminDiscountCategoriesTable({ session, categories }: Props) {
       <DataTable
         title="Discount Categories"
         description="All discount categories. Click a row to edit or delete."
+        searchable={true}
         rows={categories.map((c) => ({ ...c, id: c.category_id }))}
         rowHref={undefined}
         columns={[

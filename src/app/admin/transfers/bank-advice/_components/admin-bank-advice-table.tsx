@@ -29,6 +29,7 @@ export function AdminBankAdviceTable({ session, advices }: Props) {
       <DataTable
         title="Bank Advice Records"
         description="All uploaded bank advice documents. Each entry links to an uploaded file path."
+        searchable={true}
         rows={advices.map((a) => ({ ...a, id: a.tba_uuid }))}
         rowHref={undefined}
         columns={[

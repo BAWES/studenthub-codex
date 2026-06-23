@@ -41,6 +41,7 @@ export function AdminDegreeGroupsTable({ session, degreeGroups }: Props) {
       <DataTable
         title="Degree Groups"
         description="All degree groups. Click a row to edit or delete."
+        searchable={true}
         rows={degreeGroups.map((g) => ({ ...g, id: g.degree_group_uuid }))}
         rowHref={undefined}
         columns={[

@@ -27,6 +27,7 @@ export function AdminCandidateEducationTable({ session, education }: Props) {
       <DataTable
         title="Candidate Education"
         description="All education records. Search or filter by candidate name, university, degree, or major."
+        searchable={true}
         rows={education.map((e) => ({ ...e, id: e.education_uuid }))}
         rowHref={undefined}
         columns={[

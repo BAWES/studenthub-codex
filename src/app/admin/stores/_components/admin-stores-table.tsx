@@ -39,6 +39,7 @@ export function AdminStoresTable({ session, stores }: Props) {
       <DataTable
         title="Stores"
         description="All retail locations. Click a row to edit or remove."
+        searchable={true}
         rows={stores.map((s) => ({ ...s, id: s.store_id }))}
         rowHref={undefined}
         columns={[

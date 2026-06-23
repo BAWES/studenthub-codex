@@ -52,6 +52,7 @@ export function AdminDiscountCategoryTable({ session, records }: Props) {
       <DataTable
         title="Discount Categories"
         description="List of all discount category records."
+        searchable={true}
         rows={records.map((r) => ({ ...r, id: String(r.category_id) }))}
         rowHref={(row) => `/admin/discount-category/${row.category_id}` as Route}
         columns={[

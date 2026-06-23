@@ -27,6 +27,7 @@ export function AdminFulltimersTable({ session, fulltimers }: Props) {
       <DataTable
         title="Fulltimers"
         description="All registered full-time job seekers. Click a name to view details."
+        searchable={true}
         rows={fulltimers.map((f) => ({ ...f, id: f.fulltimer_uuid }))}
         rowHref={undefined}
         columns={[

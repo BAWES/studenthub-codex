@@ -28,6 +28,7 @@ export function AdminDegreesTable({ session, degrees }: Props) {
       <DataTable
         title="Degrees"
         description="All academic degrees. Click a row to view details."
+        searchable={true}
         rows={degrees.map((d) => ({ ...d, id: d.degree_uuid }))}
         rowHref="/admin/degree/"
         columns={[

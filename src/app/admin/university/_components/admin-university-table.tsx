@@ -51,6 +51,7 @@ export function AdminUniversityTable({ session, records }: Props) {
       <DataTable
         title="Universities"
         description="List of all university records. Click a name to view details."
+        searchable={true}
         rows={records.map((r) => ({ ...r, id: String(r.university_id) }))}
         columns={[
           {

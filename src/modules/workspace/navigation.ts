@@ -2,7 +2,7 @@ import type { Route } from "next";
 import type { Role } from "@/modules/auth/types";
 import type { LucideIcon } from "lucide-react";
 import {
-  LayoutGrid, User, Mail, ClipboardList, CreditCard,
+  LayoutGrid, LayoutDashboard, User, Mail, ClipboardList, CreditCard,
   Building2, Phone, Store, FileCheck, Search, Users,
   ArrowRightLeft, Calendar, Globe, GraduationCap, MessageSquareText, BookOpen
 } from "lucide-react";
@@ -19,7 +19,7 @@ export function navForRole(role: Role): NavItem[] {
   if (role === "admin") {
     return [
       SHARED_APP,
-      { label: "Overview", href: "/admin", icon: User },
+      { label: "Overview", href: "/admin", icon: LayoutDashboard },
       { label: "Candidates", href: "/admin/candidates", icon: Users },
       { label: "Companies", href: "/admin/companies", icon: Building2 },
       { label: "Countries", href: "/admin/country", icon: Globe },

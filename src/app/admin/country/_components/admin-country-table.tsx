@@ -39,6 +39,7 @@ export function AdminCountryTable({ session, countries }: Props) {
       <DataTable
         title="Countries"
         description="All countries. Click a row to edit or delete."
+        searchable={true}
         rows={countries.map((c) => ({ ...c, id: c.country_id }))}
         rowHref={undefined}
         columns={[

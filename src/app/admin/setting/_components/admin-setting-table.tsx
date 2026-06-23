@@ -61,6 +61,7 @@ export function AdminSettingTable({ session, records }: Props) {
       <DataTable
         title="Settings"
         description="List of all application settings."
+        searchable={true}
         rows={records.map((r) => ({ ...r, id: r.setting_uuid }))}
         rowHref={(row) => `/admin/setting/${row.setting_uuid}` as Route}
         columns={[

@@ -37,6 +37,7 @@ export function AdminBlockedIpsTable({ session, records }: Props) {
       <DataTable
         title="Blocked IP addresses"
         description="IPs that are prevented from accessing the system."
+        searchable={true}
         rows={records.map((r) => ({ ...r, id: r.ip_uuid }))}
         rowHref={undefined}
         columns={[

@@ -28,6 +28,7 @@ export function AdminMailLogsTable({ session, records }: Props) {
       <DataTable
         title="Mail Logs"
         description="All mail log entries. Click a row to view details."
+        searchable={true}
         rows={records.map((r) => ({ ...r, id: r.mail_uuid }))}
         rowHref={(row) => `/admin/mail-log/${row.mail_uuid}` as Route}
         columns={[

@@ -15,6 +15,7 @@ export default async function AdminRequestsPage() {
       <DataTable
         title="Request Pipeline"
         description="Newest operational demand across companies and assigned staff."
+        searchable={true}
         rows={rows}
         rowHref={(row) => `/admin/requests/${row.id}` as Route}
         columns={[

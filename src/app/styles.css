@@ -8294,59 +8294,8 @@ body {
   }
 }
 
-.shTableGlass {
-  border-radius: var(--sh-radius-lg, 12px);
-  background: var(--sh-glass-bg, rgba(255,255,255,0.04));
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid var(--sh-glass-border, rgba(255,255,255,0.08));
-  box-shadow: 0 12px 48px rgba(16, 24, 40, 0.06);
-  overflow: hidden;
-  transition:
-    background 250ms var(--sh-easing, cubic-bezier(0.16,1,0.3,1)),
-    border-color 250ms var(--sh-easing, cubic-bezier(0.16,1,0.3,1)),
-    box-shadow 250ms var(--sh-easing, cubic-bezier(0.16,1,0.3,1));
-}
 
-[data-theme="dark"] .shTableGlass {
-  background: var(--sh-glass-bg, rgba(255,255,255,0.03));
-  border-color: var(--sh-glass-border, rgba(255,255,255,0.06));
-  box-shadow: 0 12px 48px rgba(0,0,0,0.3);
-}
-
-.shTableHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 16px 20px;
-  border-bottom: 1px solid var(--sh-glass-border, rgba(255,255,255,0.06));
-  position: sticky;
-  top: 0;
-  z-index: 5;
-  background: var(--sh-glass-bg-strong, rgba(255,255,255,0.06));
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  transition: background 250ms var(--sh-easing, cubic-bezier(0.16,1,0.3,1));
-}
-
-.shTableHeader h2 {
-  font-size: 15px;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  margin-bottom: 2px;
-}
-
-.shTableHeader p {
-  font-size: 13px;
-  color: var(--muted, #60646c);
-  margin-bottom: 0;
-}
-
-.shTableHeader span {
-  font-size: 12px;
-  color: var(--muted, #60646c);
-  font-weight: 600;
+/* ── Password Reset specific ──────────────────────────────────── */
 }
 
 .shTableScroller {
@@ -8532,78 +8481,7 @@ tr:hover .shTableRowAction,
   padding: 0 4px;
 }
 
-/* Glass search bar */
-.shTableSearch {
-  padding: 12px 20px;
-  border-bottom: 1px solid var(--sh-glass-border, rgba(255,255,255,0.06));
-  animation: shFadeSlideUp 300ms var(--sh-easing, cubic-bezier(0.16,1,0.3,1)) both;
-}
-
-.shTableSearchWrap {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.shTableSearchIcon {
-  position: absolute;
-  left: 12px;
-  color: var(--muted, #60646c);
-  pointer-events: none;
-}
-
-.shTableSearchInput {
-  width: 100%;
-  min-height: 36px;
-  padding: 0 34px 0 36px;
-  border-radius: 10px;
-  border: 1px solid var(--sh-glass-border, rgba(255,255,255,0.08));
-  background: var(--sh-glass-bg, rgba(255,255,255,0.04));
-  color: var(--ink, #e1e4e8);
-  font-size: 13px;
-  font-family: inherit;
-  outline: none;
-  transition:
-    border-color 200ms var(--sh-easing, cubic-bezier(0.16,1,0.3,1)),
-    background 200ms var(--sh-easing, cubic-bezier(0.16,1,0.3,1)),
-    box-shadow 200ms var(--sh-easing, cubic-bezier(0.16,1,0.3,1));
-}
-
-.shTableSearchInput::placeholder {
-  color: var(--muted, #60646c);
-  opacity: 0.6;
-}
-
-.shTableSearchInput:focus {
-  border-color: var(--sh-info, #3b82f6);
-  background: var(--sh-glass-bg-strong, rgba(255,255,255,0.06));
-  box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
-}
-
-.shTableSearchClear {
-  position: absolute;
-  right: 6px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 26px;
-  height: 26px;
-  border-radius: 6px;
-  border: 0;
-  background: transparent;
-  color: var(--muted, #60646c);
-  cursor: pointer;
-  transition:
-    background 150ms var(--sh-easing, cubic-bezier(0.16,1,0.3,1)),
-    color 150ms var(--sh-easing, cubic-bezier(0.16,1,0.3,1));
-}
-
-.shTableSearchClear:hover {
-  background: rgba(255,255,255,0.08);
-  color: var(--ink, #e1e4e8);
-}
-
-/* OS empty state inside table */
+/* ── Password Reset specific ──────────────────────────────────── */
 .shTableEmptyCell {
   padding: 0 !important;
 }

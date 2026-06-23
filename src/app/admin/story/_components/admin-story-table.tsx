@@ -40,6 +40,7 @@ export function AdminStoryTable({ session, stories }: Props) {
       <DataTable
         title="Stories"
         description="All staffing stories. Click a row field to edit or delete."
+        searchable={true}
         rows={stories.map((s) => ({ ...s, id: s.story_uuid }))}
         rowHref={undefined}
         columns={[

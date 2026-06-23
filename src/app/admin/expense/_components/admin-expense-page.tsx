@@ -43,6 +43,7 @@ export function AdminExpensesPage({ session, expenses, total }: Props) {
       <DataTable
         title="Expenses"
         description="All expenses across the system. Click an expense to view details."
+        searchable={true}
         rows={expenses.map((e) => ({ ...e, id: e.expense_uuid }))}
         rowHref={"/admin/expense" as Route}
         columns={[

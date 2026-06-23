@@ -132,6 +132,7 @@ export function AdminEvaluationsTable({
       <DataTable
         title="Evaluations"
         description="All candidate evaluations."
+        searchable={true}
         rows={evaluations.map((e) => ({ ...e, id: e.can_eval_uuid }))}
         rowHref="/admin/evaluations/"
         columns={[

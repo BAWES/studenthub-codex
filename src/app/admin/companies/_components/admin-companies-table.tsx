@@ -18,6 +18,7 @@ export function AdminCompaniesTable({ session, rows, loading }: Props) {
       <DataTable
         title="Company Accounts"
         description="Companies, ownership, active request counts, and commercial status."
+        searchable={true}
         rows={rows}
         rowHref="/admin/companies/"
         loading={loading}

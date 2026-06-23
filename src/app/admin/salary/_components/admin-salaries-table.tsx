@@ -52,6 +52,7 @@ export function AdminSalariesTable({ session, records }: Props) {
       <DataTable
         title="Salaries"
         description="All staff salary records. Click a row to view details."
+        searchable={true}
         rows={records.map((r) => ({ ...r, id: r.staff_salary_uuid }))}
         rowHref={(row) => `/admin/salary/${row.staff_salary_uuid}` as Route}
         columns={[

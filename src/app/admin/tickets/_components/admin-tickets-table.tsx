@@ -91,6 +91,7 @@ export function AdminTicketsTable({ session, tickets }: Props) {
       <DataTable
         title="Tickets"
         description="All support tickets. Click status to cycle through Open → In Progress → Resolved → Closed."
+        searchable={true}
         rows={tickets.map((t) => ({ ...t, id: t.ticket_uuid }))}
         rowHref={undefined}
         columns={[

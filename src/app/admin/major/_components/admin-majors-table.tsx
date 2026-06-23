@@ -42,6 +42,7 @@ export function AdminMajorsTable({ session, majors }: Props) {
       <DataTable
         title="Majors"
         description="All fields of study. Click a major name to edit or delete."
+        searchable={true}
         rows={majors.map((m) => ({ ...m, id: m.major_uuid }))}
         rowHref={undefined}
         columns={[

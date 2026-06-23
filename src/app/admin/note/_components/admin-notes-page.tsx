@@ -42,6 +42,7 @@ export function AdminNotesPage({ session, notes, total }: Props) {
       <DataTable
         title="Notes"
         description="All notes across the system. Click a note ID to view details."
+        searchable={true}
         rows={notes.map((n) => ({ ...n, id: n.note_uuid }))}
         rowHref={undefined}
         columns={[

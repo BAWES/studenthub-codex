@@ -55,6 +55,7 @@ export default async function AdminUniversityPage() {
       <DataTable
         title="Universities"
         description="Manage university records used in candidate profiles and education"
+        searchable={true}
         rows={mapped}
         rowHref={(row) => `/admin/university/${row.id}` as Route}
         columns={[
