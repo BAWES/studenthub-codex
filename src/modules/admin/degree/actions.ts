@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
 import {
@@ -17,13 +18,62 @@ export async function updateDegree(
     degree_group_uuid: string | null;
   },
 ): Promise<{ success?: boolean; error?: string }> {
-  return { error: "Not implemented" };
+  try {
+    await requireCapability("admin.write");
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "Unauthorized" };
+  }
+
+  if (!data.degree_name_en || data.degree_name_en.trim().length === 0) {
+    return { error: "Degree name (English) is required" };
+  }
+
+  try {
+    const updateData: Record<string, unknown> = {
+      degree_name_en: data.degree_name_en,
+      degree_sort_order: data.degree_sort_order,
+      degree_name_ar: data.degree_name_ar || null,
+      degree_group_uuid: data.degree_group_uuid || null,
+    };
+
+    await prisma.degree.update({
+      where: { degree_uuid: degreeUuid },
+      data: updateData as any,
+    });
+
+    revalidatePath("/admin/degree");
+    revalidatePath(`/admin/degree/${degreeUuid}`);
+
+    return { success: true };
+  } catch (err) {
+    return {
+      error: err instanceof Error ? err.message : "Failed to update degree",
+    };
+  }
 }
 
 export async function deleteDegree(
   degreeUuid: string,
 ): Promise<{ success?: boolean; error?: string }> {
-  return { error: "Not implemented" };
+  try {
+    await requireCapability("admin.write");
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "Unauthorized" };
+  }
+
+  try {
+    await prisma.degree.delete({
+      where: { degree_uuid: degreeUuid },
+    });
+
+    revalidatePath("/admin/degree");
+
+    return { success: true };
+  } catch (err) {
+    return {
+      error: err instanceof Error ? err.message : "Failed to delete degree",
+    };
+  }
 }
 
 export async function listDegrees(
