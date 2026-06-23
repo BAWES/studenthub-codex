@@ -65,7 +65,7 @@ export function DataTable<T extends { id: string | number }>({
                   {columns.map((column) => (
                     <TableCell key={column.key}>
                       {column.render(row)}
-                    </TableCell>
+                    </td>
                   ))}
                   {rowHref ? (
                     <TableCell className="w-[1%] whitespace-nowrap">
@@ -74,7 +74,7 @@ export function DataTable<T extends { id: string | number }>({
                       </Button>
                     </TableCell>
                   ) : null}
-                </TableRow>
+                </tr>
               ))
             ) : (
               <TableRow>
@@ -91,8 +91,8 @@ export function DataTable<T extends { id: string | number }>({
                       has no matching rows yet.
                     </span>
                   </div>
-                </TableCell>
-              </TableRow>
+              </td>
+              </tr>
             )}
           </TableBody>
         </Table>
