@@ -4793,9 +4793,7 @@ kbd {
 /* Public product entry points */
 
 
-.portalChooserPromise span,
-
-
+.portalChooserPromise span {
   max-width: 900px;
 }
 
