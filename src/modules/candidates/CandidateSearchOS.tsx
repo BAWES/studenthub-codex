@@ -213,7 +213,7 @@ function CandidateSearchTab({
         </summary>
         <section className="flex flex-wrap gap-3 pt-3" aria-label="Candidate power filters">
           {facetGroups.map((facet) => (
-            <FacetGroup basePath={basePath} facet={facet} key={facet.key} params={params} />
+            <FacetGroup basePath={basePath} facet={facet} key={facet.key} onNavigate={onNavigate} params={params} />
           ))}
         </section>
       </details>
@@ -221,16 +221,20 @@ function CandidateSearchTab({
       {/* Filter nav */}
       <nav className="flex gap-1 flex-wrap" aria-label="Candidate search filters">
         {candidateFilterLinks.map((item) => (
-          <Link
+          <a
             className={cn(
               buttonVariants({ variant: item.value === data.filter ? "default" : "ghost", size: "sm" }),
-              "text-xs"
+              "text-xs no-underline cursor-pointer"
             )}
             href={candidateSearchHref(basePath, params, { filter: item.value, candidate: "" })}
             key={item.value}
+            onClick={(e) => {
+              e.preventDefault();
+              onNavigate({ filter: item.value, candidate: "" });
+            }}
           >
             {item.label}
-          </Link>
+          </a>
         ))}
       </nav>
 
@@ -450,7 +454,17 @@ const candidateFilterLinks: { label: string; value: CandidateSearchFilter }[] = 
   { label: "Civil ID", value: "civil-id" }
 ];
 
-function FacetGroup({ basePath, facet, params }: { basePath: "/admin/candidates" | "/staff/candidates"; facet: CandidateSearchFacet; params: CandidateSearchParams }) {
+export function FacetGroup({
+  basePath,
+  facet,
+  params,
+  onNavigate,
+}: {
+  basePath: "/admin/candidates" | "/staff/candidates";
+  facet: CandidateSearchFacet;
+  params: CandidateSearchParams;
+  onNavigate?: (overrides: Partial<Record<CandidateSearchParamKey, string>>) => void;
+}) {
   return (
     <Card className="min-w-[160px] flex-1">
       <CardHeader className="p-2 pb-0">
@@ -458,17 +472,21 @@ function FacetGroup({ basePath, facet, params }: { basePath: "/admin/candidates"
       </CardHeader>
       <CardContent className="p-2 flex flex-col gap-0.5">
         {facet.options.map((option) => (
-          <Link
+          <a
             className={cn(
               buttonVariants({ variant: option.active ? "default" : "ghost", size: "sm" }),
-              "justify-between text-xs w-full no-underline"
+              "justify-between text-xs w-full no-underline cursor-pointer"
             )}
             href={candidateSearchHref(basePath, params, { [facet.key]: option.active ? "" : option.value, candidate: "" })}
             key={option.value}
+            onClick={(e) => {
+              e.preventDefault();
+              onNavigate?.({ [facet.key]: option.active ? "" : option.value, candidate: "" });
+            }}
           >
             <span>{option.label}</span>
             <strong className="text-[10px] text-muted-foreground">{option.count}</strong>
-          </Link>
+          </a>
         ))}
       </CardContent>
     </Card>
