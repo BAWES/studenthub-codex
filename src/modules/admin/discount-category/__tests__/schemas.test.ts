@@ -1,8 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
-  discountCategoryListItemSchema,
+  discountCategoryItemSchema,
   listDiscountCategoriesResultSchema,
-  discountCategoryDetailSchema,
   discountCategoryIdResultSchema,
 } from "../schemas";
 
@@ -15,24 +14,22 @@ const validDiscountCategoryListItem = {
   name_en: "Student Discount",
   name_ar: "خصم طلاب",
   image: "/images/discount.png",
-  discount_count: 5,
   created_at: new Date("2025-01-01"),
   updated_at: new Date("2025-01-15"),
 };
 
-describe("discountCategoryListItemSchema", () => {
+describe("discountCategoryItemSchema", () => {
   it("accepts a valid discount category list item", () => {
-    const result = discountCategoryListItemSchema.safeParse(validDiscountCategoryListItem);
+    const result = discountCategoryItemSchema.safeParse(validDiscountCategoryListItem);
     expect(result.success).toBe(true);
   });
 
   it("accepts null optional fields", () => {
-    const result = discountCategoryListItemSchema.safeParse({
+    const result = discountCategoryItemSchema.safeParse({
       category_id: 1,
       name_en: "Student Discount",
       name_ar: null,
       image: null,
-      discount_count: 0,
       created_at: null,
       updated_at: null,
     });
@@ -41,18 +38,18 @@ describe("discountCategoryListItemSchema", () => {
 
   it("rejects missing required category_id", () => {
     const { category_id, ...incomplete } = validDiscountCategoryListItem;
-    const result = discountCategoryListItemSchema.safeParse(incomplete);
+    const result = discountCategoryItemSchema.safeParse(incomplete);
     expect(result.success).toBe(false);
   });
 
   it("rejects missing required name_en", () => {
     const { name_en, ...incomplete } = validDiscountCategoryListItem;
-    const result = discountCategoryListItemSchema.safeParse(incomplete);
+    const result = discountCategoryItemSchema.safeParse(incomplete);
     expect(result.success).toBe(false);
   });
 
   it("rejects non-number category_id", () => {
-    const result = discountCategoryListItemSchema.safeParse({
+    const result = discountCategoryItemSchema.safeParse({
       ...validDiscountCategoryListItem,
       category_id: "not-a-number",
     });
@@ -96,9 +93,9 @@ describe("listDiscountCategoriesResultSchema", () => {
   });
 });
 
-describe("discountCategoryDetailSchema", () => {
+describe("discountCategoryItemSchema (detail)", () => {
   it("accepts a valid detail object", () => {
-    const result = discountCategoryDetailSchema.safeParse(validDiscountCategoryListItem);
+    const result = discountCategoryItemSchema.safeParse(validDiscountCategoryListItem);
     expect(result.success).toBe(true);
   });
 });
