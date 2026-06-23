@@ -11,6 +11,7 @@ import { WorkspaceOSContext } from "./WorkspaceOSContext";
 import { WorkspaceMobileNavigation, WorkspaceNavigation } from "./WorkspaceNavigation";
 import { navForRole } from "./navigation";
 import type { NavItem } from "./navigation";
+import { searchCandidatesForPalette, type CandidatePaletteResult } from "./searchPalette";
 import {
   CommandDialog,
   CommandEmpty,
@@ -139,9 +140,26 @@ export function WorkspaceOS({
 
   // ── Command palette state ────────────────────────────────────
   const [cmdOpen, setCmdOpen] = useState(false);
+  const [cmdQuery, setCmdQuery] = useState("");
+  const [cmdCandidates, setCmdCandidates] = useState<CandidatePaletteResult[]>([]);
   const seqRef = useRef("");
 
   const commands = useMemo(() => buildOSCommands(navItems, session.role), [navItems, session.role]);
+
+  // Debounced candidate search for CMD+K
+  useEffect(() => {
+    if (!cmdOpen || !cmdQuery || cmdQuery.length < 2) {
+      setCmdCandidates([]);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      try {
+        const results = await searchCandidatesForPalette(cmdQuery);
+        setCmdCandidates(results);
+      } catch { setCmdCandidates([]); }
+    }, 200);
+    return () => clearTimeout(timer);
+  }, [cmdQuery, cmdOpen]);
 
   const visit = useCallback(
     (href: string) => {
@@ -270,6 +288,8 @@ export function WorkspaceOS({
         <CommandInput
           placeholder="Jump to a view, search records, or run an action..."
           data-command-search
+          value={cmdQuery}
+          onValueChange={setCmdQuery}
         />
         <CommandList>
           <CommandEmpty>
@@ -315,6 +335,22 @@ export function WorkspaceOS({
                 </CommandItem>
               ))}
           </CommandGroup>
+          {cmdCandidates.length > 0 && (
+            <CommandGroup heading="Candidates">
+              {cmdCandidates.map((c) => (
+                <CommandItem
+                  key={c.id}
+                  value={`candidate-${c.name}`}
+                  onSelect={() => visit(`/${session.role}/candidates/${c.id}`)}
+                >
+                  <span className="flex flex-col">
+                    <strong className="text-sm">{c.name}</strong>
+                    <small className="text-xs text-muted-foreground">{c.email || c.uid}</small>
+                  </span>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          )}
         </CommandList>
 
         {/* ── Shortcut footer ─────────────────────────────── */}

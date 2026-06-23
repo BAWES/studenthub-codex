@@ -8,7 +8,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { updateSalary, deleteSalary } from "@/modules/admin/salary/actions";
-import type { SalaryDetail } from "@/modules/admin/salary/schemas";
+import type { SalaryItem, SalaryActionResponse } from "@/modules/admin/salary/schemas";
+
+type SalaryDetail = SalaryItem & {
+  staff_email?: string;
+};
 
 export function SalaryDetailForm({
   salary,
@@ -19,22 +23,22 @@ export function SalaryDetailForm({
   const [salaryValue, setSalaryValue] = useState(String(salary.salary ?? "0"));
   const [currency, setCurrency] = useState(salary.salary_currency ?? "KWD");
   const [comment, setComment] = useState(salary.comment ?? "");
-  const [salaryDate, setSalaryDate] = useState(salary.salary_date ?? "");
+  const dateStr =
+    typeof salary.salary_date === "string"
+      ? salary.salary_date
+      : salary.salary_date instanceof Date
+        ? salary.salary_date.toISOString().split("T")[0]
+        : "";
+  const [salaryDate, setSalaryDate] = useState(dateStr);
 
   const updateAction = async (_prevState: unknown, formData: FormData) => {
+    formData.set("salaryUuid", salary.staff_salary_uuid);
     formData.set("salary", salaryValue);
-    formData.set("salary_currency", currency);
+    formData.set("salaryCurrency", currency);
+    formData.set("salaryDate", salaryDate);
     formData.set("comment", comment);
-    formData.set("salary_date", salaryDate);
 
-    await updateSalary({
-      uuid: salary.staff_salary_uuid,
-      salary: Number(salaryValue) || 0,
-      salary_currency: currency,
-      comment,
-      salary_date: salaryDate,
-    });
-    return { success: true };
+    return await updateSalary(_prevState as Parameters<typeof updateSalary>[0], formData);
   };
 
   const [state, formAction, pending] = useActionState(updateAction, null);
@@ -115,7 +119,7 @@ export function SalaryDetailForm({
               <Button type="submit" disabled={pending}>
                 {pending ? "Saving..." : "Save Changes"}
               </Button>
-              {state?.success && (
+              {(state as SalaryActionResponse | null)?.operation === "success" && (
                 <span className="text-sm text-green-700 font-medium">
                   Saved successfully
                 </span>

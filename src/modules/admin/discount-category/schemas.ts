@@ -44,6 +44,10 @@ export const discountCategoryActionResponseSchema = z.object({
   message: z.string().min(1),
 });
 
+export const discountCategoryIdResultSchema = z.object({
+  category_id: z.number().int().positive(),
+});
+
 export type ListDiscountCategoriesInput = z.input<typeof listDiscountCategoriesSchema>;
 export type CreateDiscountCategoryInput = z.input<typeof createDiscountCategorySchema>;
 export type UpdateDiscountCategoryInput = z.input<typeof updateDiscountCategorySchema>;

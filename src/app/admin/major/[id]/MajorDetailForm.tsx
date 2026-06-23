@@ -8,10 +8,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { updateMajor, deleteMajor } from "@/modules/admin/major/actions";
-import type { MajorListItem } from "@/modules/admin/major/schemas";
+import type { MajorItem } from "@/modules/admin/major/schemas";
 
 type Props = {
-  major: MajorListItem;
+  major: MajorItem;
 };
 
 export function MajorDetailForm({ major }: Props) {
@@ -20,21 +20,19 @@ export function MajorDetailForm({ major }: Props) {
   const [nameAr, setNameAr] = useState(major.major_name_ar ?? "");
   const [dataSource, setDataSource] = useState(String(major.data_source ?? ""));
 
-  const updateAction = async (_prevState: unknown, formData: FormData) => {
+  const updateAction = async (
+    _prevState: { success?: boolean },
+    formData: FormData,
+  ): Promise<{ success?: boolean }> => {
     formData.set("major_name_en", nameEn);
     formData.set("major_name_ar", nameAr || "");
     formData.set("data_source", dataSource);
 
-    await updateMajor({
-      majorUuid: major.major_uuid,
-      major_name_en: nameEn,
-      major_name_ar: nameAr || undefined,
-      data_source: dataSource ? Number(dataSource) : undefined,
-    });
+    await updateMajor(major.major_uuid, nameEn, nameAr);
     return { success: true };
   };
 
-  const [state, formAction, pending] = useActionState(updateAction, null);
+  const [state, formAction, pending] = useActionState<{ success?: boolean }, FormData>(updateAction, {});
 
   return (
     <div className="space-y-6">
