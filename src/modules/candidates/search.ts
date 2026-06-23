@@ -27,6 +27,8 @@ export type CandidateSearchParams = {
   profile?: string;
   assignment?: string;
   document?: string;
+  page?: number;
+  totalPages?: number;
 };
 
 export type CandidateSearchFacet = {
@@ -157,6 +159,8 @@ export async function getCandidateSearchWorkspace(params: CandidateSearchParams)
     query,
     filter,
     visibility,
+    page: params.page ?? 1,
+    totalPages: Math.max(1, Math.ceil(matchingCount / 60)),
     assignedCount: staffCandidateIds?.length ?? null,
     matchingCount,
     selectedId,
@@ -388,7 +392,7 @@ function buildFacets(
         topFacet(
           rows
             .filter((row) => row.country_id && row.country?.country_name_en)
-            .map((row) => ({ value: String(row.country_id), label: row.country?.country_name_en ?? "Country" })),
+            .map((row) => ({ value: String(row.country_id), label: row.country?.country_name_en ?? "Country" }) as { value: string; label: string }),
           params.country
         ),
         params.country
@@ -402,7 +406,7 @@ function buildFacets(
         topFacet(
           rows
             .filter((row) => row.university_id && row.university?.university_name_en)
-            .map((row) => ({ value: String(row.university_id), label: row.university?.university_name_en ?? "University" })),
+            .map((row) => ({ value: String(row.university_id), label: row.university?.university_name_en ?? "University" }) as { value: string; label: string }),
           params.university
         ),
         params.university
@@ -456,10 +460,10 @@ async function getExactFacetCounts(where: Prisma.candidateWhereInput) {
   const [countryNames, universityNames] = await Promise.all([
     countryIds.length
       ? prisma.country.findMany({ where: { country_id: { in: countryIds } }, select: { country_id: true, country_name_en: true } })
-      : [],
+      : [] as { country_id: number; country_name_en: string }[],
     universityIds.length
       ? prisma.university.findMany({ where: { university_id: { in: universityIds } }, select: { university_id: true, university_name_en: true } })
-      : []
+      : [] as { university_id: number; university_name_en: string | null }[]
   ]);
   const countryNameById = new Map(countryNames.map((item) => [item.country_id, item.country_name_en]));
   const universityNameById = new Map(universityNames.map((item) => [item.university_id, item.university_name_en ?? "University"]));
@@ -468,7 +472,7 @@ async function getExactFacetCounts(where: Prisma.candidateWhereInput) {
     country: countries
       .map((item) => ({
         value: String(item.country_id),
-        label: countryNameById.get(item.country_id ?? 0) ?? "Country",
+        label: (countryNameById.get(item.country_id ?? 0) ?? "Country") as string,
         count: item._count._all
       }))
       .sort(sortFacetOption)
@@ -476,7 +480,7 @@ async function getExactFacetCounts(where: Prisma.candidateWhereInput) {
     university: universities
       .map((item) => ({
         value: String(item.university_id),
-        label: universityNameById.get(item.university_id ?? 0) ?? "University",
+        label: (universityNameById.get(item.university_id ?? 0) ?? "University") as string,
         count: item._count._all
       }))
       .sort(sortFacetOption)
@@ -550,7 +554,7 @@ async function resolveSelectedCandidateId({
   return null;
 }
 
-function buildSelectedActions(role: CandidateSearchRole, candidate: Awaited<ReturnType<typeof getCandidateDetail>>["candidate"]) {
+export function buildSelectedActions(role: CandidateSearchRole, candidate: Awaited<ReturnType<typeof getCandidateDetail>>["candidate"]) {
   if (!candidate) return [];
   const base = role === "admin" ? "/admin/candidates" : "/staff/candidates";
   return [
@@ -560,7 +564,7 @@ function buildSelectedActions(role: CandidateSearchRole, candidate: Awaited<Retu
   ].filter((item): item is { label: string; href: string } => Boolean(item));
 }
 
-async function candidateIdsForStaff(staffId: number) {
+export async function candidateIdsForStaff(staffId: number) {
   if (!staffId) return [];
   const rows = await prisma.candidate_work_history.findMany({
     where: { staff_id: staffId, candidate_id: { not: null } },
@@ -585,6 +589,61 @@ function parseEnum<T extends string>(value: string | undefined, allowed: T[]) {
   return allowed.includes(value as T) ? (value as T) : undefined;
 }
 
-function uniqueCandidateIds(ids: number[]) {
+export function uniqueCandidateIds(ids: number[]) {
   return [...new Set(ids.filter((id) => Number.isInteger(id) && id > 0))];
+}
+
+// ── Parse helpers (used by both search.ts and search-typesense.ts) ────
+
+const VALID_FILTERS = ["active", "needs-review", "incomplete", "civil-id", "all"] as const;
+type ValidFilter = (typeof VALID_FILTERS)[number];
+
+export function parseFilter(value: unknown): ValidFilter {
+  if (typeof value === "string" && (VALID_FILTERS as readonly string[]).includes(value)) {
+    return value as ValidFilter;
+  }
+  if (Array.isArray(value) && value.length > 0) {
+    return parseFilter(value[0]);
+  }
+  return "all";
+}
+
+export function parseCandidateId(value: unknown): number | undefined {
+  if (Array.isArray(value) && value.length > 0) {
+    return parseCandidateId(value[0]);
+  }
+  const str = String(value ?? "");
+  const num = Number(str);
+  if (Number.isInteger(num) && num > 0) {
+    return num;
+  }
+  return undefined;
+}
+
+export function parseCandidateIds(value: unknown, maxCount?: number): number[] {
+  const str = Array.isArray(value) ? String(value[0] ?? "") : String(value ?? "");
+  if (!str) return [];
+  const ids = str
+    .split(",")
+    .map((s) => Number(s.trim()))
+    .filter((n) => Number.isInteger(n) && n > 0);
+  return maxCount != null ? ids.slice(0, maxCount) : ids;
+}
+
+export function parseSearchPage(value: unknown): number {
+  const num = Number(value);
+  return Number.isInteger(num) && num > 0 ? num : 1;
+}
+
+const VALID_VISIBILITY = ["assigned", "all"] as const;
+type ValidVisibility = (typeof VALID_VISIBILITY)[number];
+
+export function parseVisibility(value: unknown): ValidVisibility {
+  if (typeof value === "string" && (VALID_VISIBILITY as readonly string[]).includes(value)) {
+    return value as ValidVisibility;
+  }
+  if (Array.isArray(value) && value.length > 0) {
+    return parseVisibility(value[0]);
+  }
+  return "all";
 }

@@ -88,3 +88,23 @@ export async function addCandidateSuggestionAction(formData: FormData) {
   revalidatePath(basePath);
   redirect(`${detailPath}?notice=suggestion-added` as Route);
 }
+
+// ── Stub exports for barrel compatibility ────────────────────────────
+
+export async function listRequests(_params?: { status?: string; page?: number; limit?: number }) {
+  const { listRequests: adminList } = await import("@/modules/admin/requests/actions");
+  return adminList((_params ?? {}) as Parameters<typeof adminList>[0]);
+}
+
+export async function getRequest(requestUuid: string) {
+  const { getRequest: adminGet } = await import("@/modules/admin/requests/actions");
+  return adminGet(requestUuid);
+}
+
+export async function createRequest(_prevState: unknown, formData: FormData): Promise<{ success?: boolean; error?: string }> {
+  return { error: "Not implemented" };
+}
+
+export async function updateRequest(_prevState: unknown, formData: FormData): Promise<{ success?: boolean; error?: string }> {
+  return { error: "Not implemented" };
+}

@@ -6,7 +6,6 @@ import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { getJob } from "./actions";
 import { formatDate } from "@/modules/workspace/format";
 
-
 export const dynamic = "force-dynamic";
 
 export default async function AdminJobDetailPage({

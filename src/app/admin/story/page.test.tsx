@@ -27,19 +27,15 @@ describe("admin story page — data contract", () => {
       story_uuid: "str-abc-123",
       request_uuid: "req-def-456",
       suggestion_uuid: null,
-      request_position_title: "Software Engineer",
       staff_id: 42,
-      staff_name: "John Doe",
       number_of_employees: 5,
       story_status: 1,
       is_old: false,
       story_time_spent: 120,
-      story_created_at: "2025-06-15T10:00:00.000Z",
-      story_last_updated_at: "2025-06-15T10:00:00.000Z",
+      story_created_at: null,
+      story_last_updated_at: new Date("2025-06-15T10:00:00.000Z"),
     };
     expect(row.story_uuid).toBe("str-abc-123");
-    expect(row.request_position_title).toBe("Software Engineer");
-    expect(row.staff_name).toBe("John Doe");
     expect(row.story_status).toBe(1);
   });
 
@@ -47,10 +43,8 @@ describe("admin story page — data contract", () => {
     const r = storyItemSchema.safeParse({
       story_uuid: "str-null-test",
       request_uuid: "req-null-test",
-      request_position_title: null,
       suggestion_uuid: null,
       staff_id: null,
-      staff_name: null,
       number_of_employees: null,
       story_status: 0,
       is_old: null,
@@ -78,9 +72,18 @@ describe("admin story page — data contract", () => {
 
   it("StoryItem status values match table component expectations", () => {
     // Draft = 0, Active = 1, Closed = 2
-    const draft: StoryItem = { story_uuid: "d", request_uuid: "r", request_position_title: null, suggestion_uuid: null, staff_id: null, staff_name: null, number_of_employees: null, story_status: 0, is_old: false, story_time_spent: null, story_created_at: null, story_last_updated_at: null };
-    const active: StoryItem = { story_uuid: "a", request_uuid: "r", request_position_title: null, suggestion_uuid: null, staff_id: null, staff_name: null, number_of_employees: null, story_status: 1, is_old: false, story_time_spent: null, story_created_at: null, story_last_updated_at: null };
-    const closed: StoryItem = { story_uuid: "c", request_uuid: "r", request_position_title: null, suggestion_uuid: null, staff_id: null, staff_name: null, number_of_employees: null, story_status: 2, is_old: false, story_time_spent: null, story_created_at: null, story_last_updated_at: null };
+    const base: Omit<StoryItem, "story_uuid" | "request_uuid" | "story_status"> = {
+      suggestion_uuid: null,
+      staff_id: null,
+      number_of_employees: null,
+      is_old: false,
+      story_time_spent: null,
+      story_created_at: null,
+      story_last_updated_at: null,
+    };
+    const draft: StoryItem = { story_uuid: "d", request_uuid: "r", story_status: 0, ...base };
+    const active: StoryItem = { story_uuid: "a", request_uuid: "r", story_status: 1, ...base };
+    const closed: StoryItem = { story_uuid: "c", request_uuid: "r", story_status: 2, ...base };
     expect(draft.story_status).toBe(0);
     expect(active.story_status).toBe(1);
     expect(closed.story_status).toBe(2);

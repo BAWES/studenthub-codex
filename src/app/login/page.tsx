@@ -1,21 +1,13 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { UserRound, Search, Building2, Shield, ClipboardCheck } from "lucide-react";
 import { getSession } from "@/modules/auth/session";
 import { LoginForm } from "@/modules/auth/LoginForm";
 import { ThemeToggle } from "@/modules/theme/ThemeToggle";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import LoginRoleCards from "./LoginRoleCards";
 
 export const dynamic = "force-dynamic";
-
-const roleNotes = [
-  { icon: UserRound, label: "Students", detail: "Profile, jobs, hours, pay" },
-  { icon: Search, label: "Staff", detail: "Requests, candidates, CVs, time" },
-  { icon: Building2, label: "Companies", detail: "Requests, candidates, invoices" },
-  { icon: Shield, label: "Admin", detail: "Finance, approvals, migration" },
-  { icon: ClipboardCheck, label: "Inspectors", detail: "ID review, document queues" }
-];
 
 export default async function LoginPage({
   searchParams
@@ -37,7 +29,7 @@ export default async function LoginPage({
           className="inline-flex items-center gap-2.5 text-foreground px-2 no-underline"
           href="/"
         >
-          <span className="size-9 inline-flex items-center justify-center rounded-lg bg-card text-white font-black">
+          <span className="size-9 inline-flex items-center justify-center rounded-lg bg-foreground text-card font-black">
             SH
           </span>
           <strong>StudentHub</strong>
@@ -56,7 +48,7 @@ export default async function LoginPage({
             No more guessing whether you are entering as admin, staff, candidate, company, or inspector. Your production
             credentials decide what you can see and do.
           </p>
-          <div className="flex flex-wrap gap-2 mt-[18px]">
+          <div className="flex flex-wrap gap-2 mt-5">
             {["Production-compatible credentials", "Server-side account detection", "Capability-scoped workspaces"].map(
               (item) => (
                 <Badge key={item} variant="outline" className="text-blue-zendesk text-[11px] font-black uppercase px-3 py-1.5">
@@ -88,17 +80,7 @@ export default async function LoginPage({
       </Card>
 
       {/* Role notes - spans full width */}
-      <section className="col-span-full grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5" aria-label="Account detection notes">
-        {roleNotes.map(({ icon: Icon, label, detail }) => (
-          <Card key={label}>
-            <CardContent className="grid gap-1.5 p-3.5">
-              <Icon className="size-4 text-blue-zendesk shrink-0" aria-hidden="true" />
-              <span className="text-muted-foreground text-xs font-extrabold uppercase">{label}</span>
-              <strong className="text-sm text-foreground">{detail}</strong>
-            </CardContent>
-          </Card>
-        ))}
-      </section>
+      <LoginRoleCards />
     </main>
   );
 }
