@@ -14,14 +14,12 @@ export function LoginForm() {
 
   return (
     <div className="grid gap-[14px]">
-      <form action={action} className="grid gap-5 p-8">
-        <div className="grid gap-2 pb-2">
-          <span className="text-blue text-xs font-black uppercase">Secure sign in</span>
-          <strong className="text-[28px] leading-[1.1]">Continue to StudentHub</strong>
-          <p className="text-muted-foreground leading-relaxed m-0">
-            Use your existing production credentials. StudentHub will detect the right account and permissions after
-            your password is verified.
-          </p>
+      <form action={action} className="grid gap-5 p-6">
+        <div className="flex flex-col items-center text-center gap-1 pb-2">
+          <span className="size-10 inline-flex items-center justify-center rounded-xl bg-foreground text-card font-black text-lg mb-1">
+            SH
+          </span>
+          <strong className="text-xl leading-snug">Sign in to StudentHub</strong>
         </div>
 
         <div className="grid gap-2">
@@ -34,7 +32,6 @@ export function LoginForm() {
             defaultValue={state.email ?? ""}
             placeholder="name@studenthub.app"
             required
-            className="min-h-[46px]"
           />
         </div>
 
@@ -47,13 +44,12 @@ export function LoginForm() {
             autoComplete="current-password"
             placeholder="Your password"
             required
-            className="min-h-[46px]"
           />
         </div>
 
-        {state.error ? <p className="text-destructive font-bold m-0">{state.error}</p> : null}
+        {state.error ? <p className="text-destructive font-medium text-sm m-0">{state.error}</p> : null}
 
-        <Button type="submit" disabled={pending} size="lg" className="min-h-[52px]">
+        <Button type="submit" disabled={pending} className="w-full">
           {pending ? <Loader2 className="size-4 animate-spin" /> : <LogIn className="size-4" />}
           {pending ? "Checking credentials..." : "Sign in"}
         </Button>
