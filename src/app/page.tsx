@@ -20,7 +20,7 @@ export default async function Home() {
             <h1 className="text-2xl font-bold">Welcome back</h1>
             <p className="text-muted-foreground">You are signed in.</p>
             <Button asChild>
-              <Link href="/workspace">Go to workspace</Link>
+              <Link href={"/workspace" as Route}>Go to workspace</Link>
             </Button>
           </CardContent>
         </Card>
