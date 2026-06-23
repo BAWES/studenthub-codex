@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import type { Route } from "next";
 import type { SessionUser } from "@/modules/auth/types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -213,7 +214,7 @@ export function EmployerJobsSearchPage({
     if (q) params.set("q", q);
     if (p > 1) params.set("page", String(p));
     const qs = params.toString();
-    router.replace(`/employer/jobs${qs ? `?${qs}` : ""}`, { scroll: false });
+    router.replace(`/employer/jobs${qs ? `?${qs}` : ""}` as Route, { scroll: false });
   };
 
   const totalPages = results ? Math.ceil(results.matchingCount / ITEMS_PER_PAGE) : 0;
