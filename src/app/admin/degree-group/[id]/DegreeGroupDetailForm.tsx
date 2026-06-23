@@ -1,67 +1,43 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { updateDegreeGroup, deleteDegreeGroup } from "../actions";
+import { updateDegreeGroup, deleteDegreeGroup } from "@/modules/admin/degree-group/actions";
+import type { DegreeGroupListItem } from "@/modules/admin/degree-group/schemas";
 
-interface DegreeGroupDetail {
-  degree_group_uuid: string;
-  degree_group_name_en: string;
-  degree_group_name_ar: string | null;
-  degree_group_sort_order: number | null;
-  skip_major: number | null;
-  degree_group_created_at: Date | null;
-  degree_group_updated_at: Date | null;
-}
+type Props = {
+  group: DegreeGroupListItem;
+};
 
-export function DegreeGroupDetailForm({
-  group
-}: {
-  group: DegreeGroupDetail;
-}) {
+export function DegreeGroupDetailForm({ group }: Props) {
+  const router = useRouter();
   const [nameEn, setNameEn] = useState(group.degree_group_name_en);
   const [nameAr, setNameAr] = useState(group.degree_group_name_ar ?? "");
   const [sortOrder, setSortOrder] = useState(String(group.degree_group_sort_order ?? 0));
-  const [skipMajor, setSkipMajor] = useState((group.skip_major ?? 0) === 1);
-
-  const [deleteError, setDeleteError] = useState("");
+  const [skipMajor, setSkipMajor] = useState(String(group.skip_major ?? 0));
 
   const updateAction = async (_prevState: unknown, formData: FormData) => {
     formData.set("degree_group_name_en", nameEn);
     formData.set("degree_group_name_ar", nameAr || "");
     formData.set("degree_group_sort_order", sortOrder);
-    formData.set("skip_major", skipMajor ? "1" : "0");
+    formData.set("skip_major", skipMajor);
 
-    await updateDegreeGroup(group.degree_group_uuid, {
+    await updateDegreeGroup({
+      degreeGroupUuid: group.degree_group_uuid,
       degree_group_name_en: nameEn,
       degree_group_name_ar: nameAr || undefined,
-      degree_group_sort_order: Number(sortOrder) || 0,
-      skip_major: skipMajor ? 1 : 0,
+      degree_group_sort_order: Number(sortOrder) || undefined,
+      skip_major: Number(skipMajor) || undefined,
     });
     return { success: true };
   };
 
   const [state, formAction, pending] = useActionState(updateAction, null);
-
-  const handleDelete = async () => {
-    try {
-      setDeleteError("");
-      await deleteDegreeGroup(group.degree_group_uuid);
-    } catch (err) {
-      setDeleteError(err instanceof Error ? err.message : "Delete failed");
-    }
-  };
 
   return (
     <div className="space-y-6">
@@ -111,18 +87,14 @@ export function DegreeGroupDetailForm({
 
               <div className="space-y-2">
                 <Label htmlFor="skip_major">Skip Major</Label>
-                <Select
-                  value={skipMajor ? "1" : "0"}
-                  onValueChange={(val) => setSkipMajor(val === "1")}
-                >
-                  <SelectTrigger id="skip_major" className="w-full">
-                    <SelectValue placeholder="No" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="0">No</SelectItem>
-                    <SelectItem value="1">Yes</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Input
+                  id="skip_major"
+                  name="skip_major"
+                  type="number"
+                  value={skipMajor}
+                  onChange={(e) => setSkipMajor(e.target.value)}
+                  placeholder="0 or 1"
+                />
               </div>
             </div>
 
@@ -131,7 +103,7 @@ export function DegreeGroupDetailForm({
                 {pending ? "Saving..." : "Save Changes"}
               </Button>
               {state?.success && (
-                <span className="text-sm text-[#2e7d32] font-medium">
+                <span className="text-sm text-[var(--sh-success)] font-medium">
                   Saved successfully
                 </span>
               )}
@@ -142,22 +114,26 @@ export function DegreeGroupDetailForm({
 
       <Separator />
 
-      <Card className="border-[#d32f2f]/20">
+      <Card className="border-destructive/20">
         <CardHeader>
-          <CardTitle className="text-[#d32f2f]">Danger Zone</CardTitle>
+          <CardTitle className="text-destructive">Danger Zone</CardTitle>
           <CardDescription>
-            Delete this degree group. Only possible if no degrees are assigned to it.
+            Deleting this degree group will unlink all degrees in this group.
+            This action cannot be undone.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form action={handleDelete}>
+          <form
+            action={async () => {
+              await deleteDegreeGroup(group.degree_group_uuid);
+              router.push("/admin/degree-group");
+              router.refresh();
+            }}
+          >
             <Button type="submit" variant="destructive">
               Delete Degree Group
             </Button>
           </form>
-          {deleteError && (
-            <p className="text-sm text-[#d32f2f] mt-2">{deleteError}</p>
-          )}
         </CardContent>
       </Card>
     </div>

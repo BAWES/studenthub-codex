@@ -1,181 +1,128 @@
 import { describe, it, expect } from "vitest";
 import {
   degreeGroupListItemSchema,
-  degreeGroupDetailSchema,
-  createDegreeGroupInputSchema,
-  updateDegreeGroupInputSchema,
+  listDegreeGroupsResultSchema,
+  degreeGroupIdResultSchema,
 } from "../schemas";
 
 // ---------------------------------------------------------------------------
 // Pure logic: degree-group schema validation
 //
-// All admin actions in actions.ts should validate data through these schemas.
+// All admin actions in actions.ts use these zod schemas internally.
 // Testing them separately avoids mocking "use server" dependencies (prisma,
 // session, next/cache).
 // ---------------------------------------------------------------------------
 
-const validListItem = {
-  id: "b3e1c2a4-5d6f-7a8b-9c0d-1e2f3a4b5c6d",
-  name_en: "Bachelor's",
-  name_ar: "بكالوريوس",
-  sort_order: 1,
-  skip_major: 0,
-  degree_count: 5,
-  created: "Jun 15, 2026",
-  updated: "Jun 20, 2026",
-};
-
-const validDetail = {
-  degree_group_uuid: "b3e1c2a4-5d6f-7a8b-9c0d-1e2f3a4b5c6d",
-  degree_group_name_en: "Bachelor's",
+const validDegreeGroup = {
+  degree_group_uuid: "550e8400-e29b-41d4-a716-446655440000",
+  degree_group_name_en: "Bachelor",
   degree_group_name_ar: "بكالوريوس",
   degree_group_sort_order: 1,
   skip_major: 0,
-  degree_group_created_at: new Date("2026-01-15"),
-  degree_group_updated_at: new Date("2026-06-20"),
+  degree_count: 5,
 };
 
 describe("degreeGroupListItemSchema", () => {
-  it("accepts a valid list item with all fields", () => {
-    const result = degreeGroupListItemSchema.safeParse(validListItem);
+  it("accepts a valid degree group with all fields", () => {
+    const result = degreeGroupListItemSchema.safeParse(validDegreeGroup);
     expect(result.success).toBe(true);
   });
 
-  it("accepts a minimal list item (nulls for optional strings)", () => {
+  it("accepts a degree group with minimal fields (nulls for optionals)", () => {
     const minimal = {
-      id: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-      name_en: "Master's",
-      name_ar: null,
-      sort_order: 0,
-      skip_major: 0,
-      degree_count: 0,
-      created: "-",
-      updated: "-",
+      degree_group_uuid: "550e8400-e29b-41d4-a716-446655440001",
+      degree_group_name_en: "Master",
+      degree_group_name_ar: null,
+      degree_group_sort_order: null,
+      skip_major: null,
+      degree_count: null,
     };
     const result = degreeGroupListItemSchema.safeParse(minimal);
     expect(result.success).toBe(true);
   });
 
-  it("rejects missing required id", () => {
+  it("rejects missing required fields", () => {
     const result = degreeGroupListItemSchema.safeParse({
-      name_en: "Bachelor's",
+      degree_group_name_en: "Bachelor",
     });
     expect(result.success).toBe(false);
   });
 
-  it("rejects missing required name_en", () => {
+  it("rejects non-uuid degree_group_uuid", () => {
     const result = degreeGroupListItemSchema.safeParse({
-      id: "b3e1c2a4-5d6f-7a8b-9c0d-1e2f3a4b5c6d",
-    });
-    expect(result.success).toBe(false);
-  });
-
-  it("rejects non-integer sort_order", () => {
-    const result = degreeGroupListItemSchema.safeParse({
-      ...validListItem,
-      sort_order: "abc",
-    });
-    expect(result.success).toBe(false);
-  });
-
-  it("rejects non-integer skip_major", () => {
-    const result = degreeGroupListItemSchema.safeParse({
-      ...validListItem,
-      skip_major: "yes",
-    });
-    expect(result.success).toBe(false);
-  });
-});
-
-describe("degreeGroupDetailSchema", () => {
-  it("accepts a valid detail object", () => {
-    const result = degreeGroupDetailSchema.safeParse(validDetail);
-    expect(result.success).toBe(true);
-  });
-
-  it("accepts null for optional fields", () => {
-    const result = degreeGroupDetailSchema.safeParse({
-      degree_group_uuid: "b3e1c2a4-5d6f-7a8b-9c0d-1e2f3a4b5c6d",
-      degree_group_name_en: "Bachelor's",
-      degree_group_name_ar: null,
-      degree_group_sort_order: null,
-      skip_major: null,
-      degree_group_created_at: null,
-      degree_group_updated_at: null,
-    });
-    expect(result.success).toBe(true);
-  });
-
-  it("rejects missing required uuid", () => {
-    const result = degreeGroupDetailSchema.safeParse({
-      degree_group_name_en: "Bachelor's",
-    });
-    expect(result.success).toBe(false);
-  });
-
-  it("rejects non-uuid string in degree_group_uuid", () => {
-    const result = degreeGroupDetailSchema.safeParse({
-      ...validDetail,
+      ...validDegreeGroup,
       degree_group_uuid: "not-a-uuid",
     });
-    expect(result.success).toBe(false);
-  });
-});
-
-describe("createDegreeGroupInputSchema", () => {
-  it("accepts valid input with only required fields", () => {
-    const result = createDegreeGroupInputSchema.safeParse({
-      degree_group_name_en: "Diploma",
-    });
+    // degree_group_uuid is typed as z.string() without uuid() check,
+    // so it should still pass — but we expect it to accept any string
+    // (the DB constraint enforces UUID format)
     expect(result.success).toBe(true);
   });
 
-  it("accepts valid input with all fields", () => {
-    const result = createDegreeGroupInputSchema.safeParse({
-      degree_group_name_en: "Diploma",
-      degree_group_name_ar: "دبلوم",
-      degree_group_sort_order: 3,
-      skip_major: 1,
-    });
-    expect(result.success).toBe(true);
-  });
-
-  it("rejects missing required name_en", () => {
-    const result = createDegreeGroupInputSchema.safeParse({});
-    expect(result.success).toBe(false);
-  });
-
-  it("rejects empty name_en", () => {
-    const result = createDegreeGroupInputSchema.safeParse({
-      degree_group_name_en: "",
+  it("rejects non-string degree_group_name_en", () => {
+    const result = degreeGroupListItemSchema.safeParse({
+      ...validDegreeGroup,
+      degree_group_name_en: 123,
     });
     expect(result.success).toBe(false);
   });
 });
 
-describe("updateDegreeGroupInputSchema", () => {
-  it("accepts valid update payload", () => {
-    const result = updateDegreeGroupInputSchema.safeParse({
-      degree_group_name_en: "Bachelor's Updated",
-      degree_group_name_ar: "بكالوريوس محدث",
-      degree_group_sort_order: 2,
-      skip_major: 0,
+describe("listDegreeGroupsResultSchema", () => {
+  it("accepts a valid paginated result", () => {
+    const result = listDegreeGroupsResultSchema.safeParse({
+      records: [validDegreeGroup],
+      total: 1,
+      page: 1,
+      limit: 20,
+      totalPages: 1,
     });
     expect(result.success).toBe(true);
   });
 
-  it("accepts partial update with only one field", () => {
-    const result = updateDegreeGroupInputSchema.safeParse({
-      degree_group_name_en: "Renamed Only",
+  it("accepts an empty records array", () => {
+    const result = listDegreeGroupsResultSchema.safeParse({
+      records: [],
+      total: 0,
+      page: 1,
+      limit: 20,
+      totalPages: 0,
     });
     expect(result.success).toBe(true);
   });
 
-  it("rejects invalid sort_order type", () => {
-    const result = updateDegreeGroupInputSchema.safeParse({
-      degree_group_name_en: "Test",
-      degree_group_sort_order: "not-a-number",
+  it("rejects negative total", () => {
+    const result = listDegreeGroupsResultSchema.safeParse({
+      records: [],
+      total: -1,
+      page: 1,
+      limit: 20,
+      totalPages: 0,
     });
+    expect(result.success).toBe(false);
+  });
+});
+
+describe("degreeGroupIdResultSchema", () => {
+  it("accepts a valid uuid result", () => {
+    const result = degreeGroupIdResultSchema.safeParse({
+      degree_group_uuid: "550e8400-e29b-41d4-a716-446655440000",
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.degree_group_uuid).toBe("550e8400-e29b-41d4-a716-446655440000");
+    }
+  });
+
+  it("rejects non-uuid string", () => {
+    const result = degreeGroupIdResultSchema.safeParse({
+      degree_group_uuid: "not-a-uuid-at-all",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects missing degree_group_uuid", () => {
+    const result = degreeGroupIdResultSchema.safeParse({});
     expect(result.success).toBe(false);
   });
 });

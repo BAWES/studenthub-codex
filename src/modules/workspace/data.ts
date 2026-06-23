@@ -2407,6 +2407,66 @@ export async function getAdminDegreeRows() {
   }));
 }
 
+export async function getAdminExpenseRows() {
+  const rows = await prisma.expense.findMany({
+    orderBy: { created_at: "desc" },
+    take: 60,
+    select: {
+      expense_uuid: true,
+      title: true,
+      type: true,
+      detail: true,
+      amount: true,
+      transaction_datetime: true,
+      created_at: true,
+      updated_at: true,
+      admin_expense_created_byToadmin: { select: { admin_name: true } },
+      admin_expense_updated_byToadmin: { select: { admin_name: true } }
+    }
+  });
+
+  return rows.map((row) => ({
+    id: row.expense_uuid,
+    title: row.title,
+    type: row.type,
+    detail: row.detail ?? "-",
+    amount: row.amount ? Number(row.amount) : 0,
+    amount_formatted: formatMoney(row.amount ? Number(row.amount) : 0),
+    transaction_datetime: row.transaction_datetime
+      ? formatDate(row.transaction_datetime)
+      : "-",
+    created_by: row.admin_expense_created_byToadmin?.admin_name ?? "-",
+    updated_by: row.admin_expense_updated_byToadmin?.admin_name ?? "-",
+    created_at: formatDate(row.created_at),
+    updated_at: formatDate(row.updated_at)
+  }));
+}
+
+export async function getAdminSettingRows() {
+  const rows = await prisma.setting.findMany({
+    orderBy: [{ code: "asc" }, { key: "asc" }],
+    take: 100,
+    select: {
+      setting_uuid: true,
+      code: true,
+      key: true,
+      value: true,
+      serialized: true,
+      created_at: true,
+      updated_at: true,
+    }
+  });
+
+  return rows.map((row) => ({
+    id: row.setting_uuid,
+    code: row.code,
+    key: row.key,
+    value: row.value ? (row.value.length > 80 ? row.value.slice(0, 80) + "..." : row.value) : "—",
+    serialized: row.serialized ? "Yes" : "No",
+    updated: formatDate(row.updated_at),
+  }));
+}
+
 export async function getAdminEmailCampaignRows() {
   const rows = await prisma.email_campaign.findMany({
     orderBy: { created_at: "desc" },
@@ -2414,11 +2474,12 @@ export async function getAdminEmailCampaignRows() {
     select: {
       campaign_uuid: true,
       subject: true,
+      message: true,
       progress: true,
       trigger_date_time: true,
       is_recurring: true,
-      target: true,
       status: true,
+      target: true,
       created_at: true,
       updated_at: true,
     }
@@ -2427,38 +2488,63 @@ export async function getAdminEmailCampaignRows() {
   return rows.map((row) => ({
     id: row.campaign_uuid,
     subject: row.subject ?? "(no subject)",
-    target: row.target ?? "both",
-    status: row.status ?? false,
     progress: row.progress ?? 0,
-    is_recurring: row.is_recurring ?? false,
-    trigger_date: row.trigger_date_time ? formatDate(row.trigger_date_time) : "Not scheduled",
-    updated: formatDate(row.updated_at)
+    trigger_at: row.trigger_date_time ? formatDate(row.trigger_date_time) : "Not scheduled",
+    recurring: row.is_recurring ? "Yes" : "No",
+    target: row.target ?? "both",
+    status: row.status ? "Active" : "Inactive",
+    updated: formatDate(row.updated_at),
   }));
 }
 
-export async function getAdminDegreeGroupRows() {
-  const rows = await prisma.degree_group.findMany({
-    orderBy: { degree_group_sort_order: "asc" },
+export async function getAdminWebhookRows() {
+  const rows = await prisma.webhook.findMany({
+    orderBy: { created_at: "desc" },
     take: 60,
     select: {
-      degree_group_uuid: true,
-      degree_group_name_en: true,
-      degree_group_name_ar: true,
-      degree_group_sort_order: true,
-      skip_major: true,
-      degree_group_created_at: true,
-      degree_group_updated_at: true,
-      _count: { select: { degree: true } }
-    }
+      webhook_id: true,
+      event: true,
+      endpoint: true,
+      method: true,
+      created_at: true,
+      updated_at: true,
+    },
   });
 
   return rows.map((row) => ({
-    id: row.degree_group_uuid,
-    name_en: row.degree_group_name_en,
-    name_ar: row.degree_group_name_ar ?? "-",
-    sort_order: row.degree_group_sort_order ?? 0,
-    skip_major: row.skip_major ?? 0,
-    degree_count: row._count.degree,
-    updated: formatDate(row.degree_group_updated_at)
+    id: row.webhook_id,
+    event: row.event,
+    endpoint: row.endpoint,
+    method: row.method ?? "-",
+    created: formatDate(row.created_at),
+    updated: formatDate(row.updated_at),
+  }));
+}
+
+export async function getAdminSalaryRows() {
+  const rows = await prisma.staff_salary.findMany({
+    orderBy: { salary_date: "desc" },
+    take: 60,
+    select: {
+      staff_salary_uuid: true,
+      staff_id: true,
+      salary: true,
+      salary_currency: true,
+      comment: true,
+      salary_date: true,
+      created_at: true,
+      updated_at: true,
+      staff: { select: { staff_name: true } },
+    },
+  });
+
+  return rows.map((row) => ({
+    id: row.staff_salary_uuid,
+    staff: row.staff?.staff_name ?? "-",
+    salary: row.salary ? Number(row.salary) : 0,
+    currency: row.salary_currency ?? "KWD",
+    comment: row.comment ?? "-",
+    salary_date: row.salary_date ? formatDate(row.salary_date) : "-",
+    updated: formatDate(row.updated_at),
   }));
 }
