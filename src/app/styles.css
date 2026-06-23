@@ -201,7 +201,8 @@ body {
 
 
 /* ── Glass Metric Card ────────────────────────────────────────────────── */
-.shMetricCard .workTabs {
+.shMetricCard {
+  .workTabs {
   display: flex;
   align-items: center;
   gap: 4px;
