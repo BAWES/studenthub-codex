@@ -15,41 +15,15 @@ vi.mock("@/modules/workspace/WorkspaceShell", () => ({
     children,
     eyebrow,
     title,
-    metrics,
   }: {
     children: React.ReactNode;
     eyebrow: string;
     title: string;
-    metrics: { label: string; value: string | number; note: string }[];
   }) => (
     <div data-testid="workspace-shell">
       <div data-testid="eyebrow">{eyebrow}</div>
       <div data-testid="title">{title}</div>
-      {metrics.map((m) => (
-        <span key={m.label} data-testid={`metric-${m.label}`}>
-          {String(m.value)}
-        </span>
-      ))}
       {children}
-    </div>
-  ),
-}));
-
-vi.mock("@/modules/workspace/DetailPanels", () => ({
-  DetailSection: ({
-    title,
-    facts,
-  }: {
-    title: string;
-    facts: { label: string; value: string | React.ReactNode }[];
-  }) => (
-    <div data-testid="detail-section">
-      <div data-testid="section-title">{title}</div>
-      {facts.map((f) => (
-        <span key={String(f.label)} data-testid={`fact-${f.label}`}>
-          {String(f.value)}
-        </span>
-      ))}
     </div>
   ),
 }));
@@ -60,8 +34,19 @@ vi.mock("next/navigation", () => ({
   },
 }));
 
-vi.mock("@/modules/workspace/format", () => ({
-  formatDate: (d: Date) => d.toISOString().split("T")[0],
+const mockGroups = [
+  { degree_group_uuid: "g1", degree_group_name_en: "Undergraduate" },
+  { degree_group_uuid: "g2", degree_group_name_en: "Postgraduate" },
+];
+
+vi.mock("@/modules/admin/degree-group/actions", () => ({
+  listDegreeGroups: vi.fn().mockResolvedValue({
+    degree_groups: mockGroups,
+    total: 2,
+    page: 1,
+    limit: 200,
+    totalPages: 1,
+  }),
 }));
 
 const mockDegree = {
@@ -80,6 +65,22 @@ vi.mock("./actions", () => ({
   getDegree: (...args: unknown[]) => mockGetDegree(...args),
 }));
 
+// Mock the DegreeDetailForm component
+vi.mock("./DegreeDetailForm", () => ({
+  DegreeDetailForm: ({
+    degree,
+    groups,
+  }: {
+    degree: Record<string, unknown>;
+    groups: { degree_group_uuid: string; degree_group_name_en: string }[];
+  }) => (
+    <div data-testid="degree-detail-form">
+      <span data-testid="form-degree-name">{degree.degree_name_en as string}</span>
+      <span data-testid="form-groups-count">{groups.length}</span>
+    </div>
+  ),
+}));
+
 describe("AdminDegreeDetailPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -89,7 +90,7 @@ describe("AdminDegreeDetailPage", () => {
     cleanup();
   });
 
-  it("renders degree detail with all fields", async () => {
+  it("renders DegreeDetailForm with degree data and groups", async () => {
     mockGetDegree.mockResolvedValue({ degree: mockDegree });
 
     const Page = (await import("./page")).default;
@@ -101,49 +102,9 @@ describe("AdminDegreeDetailPage", () => {
 
     expect(screen.getByTestId("eyebrow")).toHaveTextContent("Admin / Degrees");
     expect(screen.getByTestId("title")).toHaveTextContent("Bachelor of Science");
-
-    expect(screen.getByTestId("metric-Sort order")).toHaveTextContent("1");
-    expect(screen.getByTestId("metric-Name (Arabic)")).toHaveTextContent("بكالوريوس علوم");
-
-    expect(screen.getByTestId("fact-Degree UUID")).toHaveTextContent(
-      "550e8400-e29b-41d4-a716-446655440000",
-    );
-    expect(screen.getByTestId("fact-Name (English)")).toHaveTextContent("Bachelor of Science");
-    expect(screen.getByTestId("fact-Name (Arabic)")).toHaveTextContent("بكالوريوس علوم");
-    expect(screen.getByTestId("fact-Degree Group UUID")).toHaveTextContent(
-      "660e8400-e29b-41d4-a716-446655440001",
-    );
-    expect(screen.getByTestId("fact-Sort order")).toHaveTextContent("1");
-    expect(screen.getByTestId("fact-Created")).toHaveTextContent("2026-01-15");
-    expect(screen.getByTestId("fact-Last updated")).toHaveTextContent("2026-06-20");
-  });
-
-  it("renders null fields as em-dash", async () => {
-    mockGetDegree.mockResolvedValue({
-      degree: {
-        ...mockDegree,
-        degree_name_ar: null,
-        degree_group_uuid: null,
-        degree_sort_order: null,
-        degree_created_at: null,
-        degree_updated_at: null,
-      },
-    });
-
-    const Page = (await import("./page")).default;
-    render(
-      await Page({
-        params: Promise.resolve({ id: "550e8400-e29b-41d4-a716-446655440000" }),
-      }),
-    );
-
-    expect(screen.getByTestId("metric-Sort order")).toHaveTextContent("—");
-    expect(screen.getByTestId("metric-Name (Arabic)")).toHaveTextContent("—");
-    expect(screen.getByTestId("fact-Name (Arabic)")).toHaveTextContent("—");
-    expect(screen.getByTestId("fact-Degree Group UUID")).toHaveTextContent("—");
-    expect(screen.getByTestId("fact-Sort order")).toHaveTextContent("—");
-    expect(screen.getByTestId("fact-Created")).toHaveTextContent("—");
-    expect(screen.getByTestId("fact-Last updated")).toHaveTextContent("—");
+    expect(screen.getByTestId("degree-detail-form")).toBeInTheDocument();
+    expect(screen.getByTestId("form-degree-name")).toHaveTextContent("Bachelor of Science");
+    expect(screen.getByTestId("form-groups-count")).toHaveTextContent("2");
   });
 
   it("calls notFound when degree is null", async () => {

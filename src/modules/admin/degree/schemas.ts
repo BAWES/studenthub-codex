@@ -23,6 +23,17 @@ export const listDegreesResultSchema = z.object({
   totalPages: z.number().int().nonnegative(),
 });
 
+export const updateDegreeSchema = z.object({
+  degree_name_en: z.string().min(1, "English name is required").max(255),
+  degree_name_ar: z.string().max(255).optional().nullable(),
+  degree_sort_order: z.coerce.number().int().optional().nullable(),
+  degree_group_uuid: z.string().nullable().optional(),
+});
+
+export const deleteDegreeSchema = z.object({
+  degree_uuid: z.string().min(1, "UUID is required"),
+});
+
 export const degreeActionResponseSchema = z.object({
   operation: z.string().min(1),
   message: z.string().min(1),
@@ -31,4 +42,6 @@ export const degreeActionResponseSchema = z.object({
 export type ListDegreesInput = z.input<typeof listDegreesSchema>;
 export type DegreeItem = z.output<typeof degreeItemSchema>;
 export type ListDegreesResult = z.output<typeof listDegreesResultSchema>;
+export type UpdateDegreeInput = z.input<typeof updateDegreeSchema>;
+export type DeleteDegreeInput = z.input<typeof deleteDegreeSchema>;
 export type DegreeActionResponse = z.output<typeof degreeActionResponseSchema>;

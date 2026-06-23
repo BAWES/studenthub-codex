@@ -54,6 +54,7 @@ describe("getDegreeResultSchema", () => {
         degree_sort_order: 1,
         degree_created_at: new Date("2026-01-01"),
         degree_updated_at: null,
+        degree_group: null,
       },
     });
     expect(result.success).toBe(true);
@@ -79,6 +80,7 @@ describe("getDegree action", () => {
       degree_sort_order: 1,
       degree_created_at: new Date("2026-01-01"),
       degree_updated_at: null,
+      degree_group: null,
     };
 
     mockRequireCapability.mockResolvedValue({ user: { id: 1 } });
@@ -89,10 +91,12 @@ describe("getDegree action", () => {
     expect(mockRequireCapability).toHaveBeenCalledWith("admin.read");
     expect(mockFindUnique).toHaveBeenCalledWith({
       where: { degree_uuid: "deg-001" },
+      include: { degree_group: true },
     });
     expect(result.degree).not.toBeNull();
     expect(result.degree?.degree_uuid).toBe("deg-001");
     expect(result.degree?.degree_name_en).toBe("Bachelor of Science");
+    expect(result.degree?.degree_group).toBeNull();
   });
 
   it("returns null when degree not found", async () => {

@@ -3,17 +3,27 @@ import {
   listDegreesSchema,
   degreeItemSchema,
   listDegreesResultSchema,
+  updateDegreeSchema,
+  deleteDegreeSchema,
 } from "./schemas";
 import type { DegreeItem, ListDegreesResult } from "./schemas";
 
 // ── Hoisted mock functions ──────────────────────────────────
-const { mockRequireCapability, mockFindMany, mockCount } = vi.hoisted(
-  () => ({
-    mockRequireCapability: vi.fn(),
-    mockFindMany: vi.fn(),
-    mockCount: vi.fn(),
-  }),
-);
+const {
+  mockRequireCapability,
+  mockFindMany,
+  mockCount,
+  mockFindUnique,
+  mockUpdate,
+  mockDelete,
+} = vi.hoisted(() => ({
+  mockRequireCapability: vi.fn(),
+  mockFindMany: vi.fn(),
+  mockCount: vi.fn(),
+  mockFindUnique: vi.fn(),
+  mockUpdate: vi.fn(),
+  mockDelete: vi.fn(),
+}));
 
 // ── Mock session module ─────────────────────────────────────
 vi.mock("@/modules/auth/session", () => ({
@@ -26,11 +36,19 @@ vi.mock("@/lib/prisma", () => ({
     degree: {
       findMany: mockFindMany,
       count: mockCount,
+      findUnique: mockFindUnique,
+      update: mockUpdate,
+      delete: mockDelete,
     },
   },
 }));
 
-import { listDegrees } from "./actions";
+// ── Mock next/cache (revalidatePath needs request context) ──
+vi.mock("next/cache", () => ({
+  revalidatePath: vi.fn(),
+}));
+
+import { listDegrees, updateDegree, deleteDegree } from "./actions";
 
 // ---------------------------------------------------------------------------
 // Input schema validation
@@ -238,5 +256,169 @@ describe("listDegrees action", () => {
 
     await expect(listDegrees({})).rejects.toThrow("Unauthorized");
     expect(mockFindMany).not.toHaveBeenCalled();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Schema validation — updateDegreeSchema
+// ---------------------------------------------------------------------------
+
+describe("updateDegreeSchema", () => {
+  it("accepts valid update input", () => {
+    const result = updateDegreeSchema.safeParse({
+      degree_name_en: "Bachelor of Science",
+      degree_name_ar: "بكالوريوس علوم",
+      degree_sort_order: 1,
+      degree_group_uuid: "group-123",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts minimal input (name only)", () => {
+    const result = updateDegreeSchema.safeParse({
+      degree_name_en: "Bachelor",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects empty English name", () => {
+    const result = updateDegreeSchema.safeParse({ degree_name_en: "" });
+    expect(result.success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Schema validation — deleteDegreeSchema
+// ---------------------------------------------------------------------------
+
+describe("deleteDegreeSchema", () => {
+  it("accepts valid degree UUID", () => {
+    const result = deleteDegreeSchema.safeParse({ degree_uuid: "deg-001" });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects empty UUID", () => {
+    const result = deleteDegreeSchema.safeParse({ degree_uuid: "" });
+    expect(result.success).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Action-level tests — updateDegree
+// ---------------------------------------------------------------------------
+
+describe("updateDegree action", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("updates a degree successfully", async () => {
+    mockRequireCapability.mockResolvedValue({ user: { id: 1 } });
+    mockFindUnique.mockResolvedValue({ degree_uuid: "deg-001" });
+    mockUpdate.mockResolvedValue({ degree_uuid: "deg-001" });
+
+    const result = await updateDegree("deg-001", {
+      degree_name_en: "Bachelor of Science",
+      degree_name_ar: null,
+      degree_sort_order: 2,
+      degree_group_uuid: "group-1",
+    });
+
+    expect(mockRequireCapability).toHaveBeenCalledWith("admin.write");
+    expect(mockFindUnique).toHaveBeenCalledWith({
+      where: { degree_uuid: "deg-001" },
+      select: { degree_uuid: true },
+    });
+    expect(mockUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { degree_uuid: "deg-001" },
+        data: expect.objectContaining({
+          degree_name_en: "Bachelor of Science",
+        }),
+      }),
+    );
+    expect(result).toEqual({ success: true });
+  });
+
+  it("returns error when degree not found", async () => {
+    mockRequireCapability.mockResolvedValue({ user: { id: 1 } });
+    mockFindUnique.mockResolvedValue(null);
+
+    const result = await updateDegree("nonexistent", {
+      degree_name_en: "Test",
+    });
+
+    expect(result).toEqual({ error: "Degree not found" });
+    expect(mockUpdate).not.toHaveBeenCalled();
+  });
+
+  it("returns error on invalid input", async () => {
+    mockRequireCapability.mockResolvedValue({ user: { id: 1 } });
+
+    const result = await updateDegree("deg-001", {
+      degree_name_en: "",
+    });
+
+    expect(result.error).toBeTruthy();
+    expect(mockUpdate).not.toHaveBeenCalled();
+  });
+
+  it("throws when session fails", async () => {
+    mockRequireCapability.mockRejectedValue(new Error("Unauthorized"));
+
+    await expect(
+      updateDegree("deg-001", {
+        degree_name_en: "Test",
+      }),
+    ).rejects.toThrow("Unauthorized");
+    expect(mockUpdate).not.toHaveBeenCalled();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Action-level tests — deleteDegree
+// ---------------------------------------------------------------------------
+
+describe("deleteDegree action", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("deletes a degree successfully", async () => {
+    mockRequireCapability.mockResolvedValue({ user: { id: 1 } });
+    mockFindUnique.mockResolvedValue({ degree_uuid: "deg-001" });
+    mockDelete.mockResolvedValue({ degree_uuid: "deg-001" });
+
+    const result = await deleteDegree("deg-001");
+
+    expect(mockRequireCapability).toHaveBeenCalledWith("admin.write");
+    expect(mockFindUnique).toHaveBeenCalledWith({
+      where: { degree_uuid: "deg-001" },
+      select: { degree_uuid: true },
+    });
+    expect(mockDelete).toHaveBeenCalledWith({
+      where: { degree_uuid: "deg-001" },
+    });
+    expect(result).toEqual({
+      operation: "success",
+      message: "Degree deleted successfully",
+    });
+  });
+
+  it("returns error when degree not found", async () => {
+    mockRequireCapability.mockResolvedValue({ user: { id: 1 } });
+    mockFindUnique.mockResolvedValue(null);
+
+    const result = await deleteDegree("nonexistent");
+
+    expect(result).toEqual({ operation: "error", message: "Degree not found" });
+    expect(mockDelete).not.toHaveBeenCalled();
+  });
+
+  it("throws when session fails", async () => {
+    mockRequireCapability.mockRejectedValue(new Error("Unauthorized"));
+
+    await expect(deleteDegree("deg-001")).rejects.toThrow("Unauthorized");
+    expect(mockDelete).not.toHaveBeenCalled();
   });
 });

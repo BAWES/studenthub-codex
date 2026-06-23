@@ -30,10 +30,23 @@ describe("degreeDetailItemSchema", () => {
     degree_sort_order: 1,
     degree_created_at: new Date("2026-01-01"),
     degree_updated_at: null,
+    degree_group: null,
   };
 
   it("accepts a valid detail item", () => {
     expect(degreeDetailItemSchema.safeParse(validItem).success).toBe(true);
+  });
+
+  it("accepts a detail item with degree_group", () => {
+    expect(
+      degreeDetailItemSchema.safeParse({
+        ...validItem,
+        degree_group: {
+          degree_group_uuid: "g1",
+          degree_group_name_en: "Undergraduate",
+        },
+      }).success,
+    ).toBe(true);
   });
 
   it("rejects missing degree_uuid", () => {
@@ -53,6 +66,7 @@ describe("getDegreeResultSchema", () => {
         degree_sort_order: 1,
         degree_created_at: new Date("2026-01-01"),
         degree_updated_at: null,
+        degree_group: null,
       },
     });
     expect(result.success).toBe(true);

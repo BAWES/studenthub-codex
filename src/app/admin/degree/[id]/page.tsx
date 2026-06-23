@@ -1,10 +1,10 @@
 import { ErrorBoundary } from "@/modules/workspace/ErrorBoundary";
 import { notFound } from "next/navigation";
 import { requireRoleCapability } from "@/modules/auth/session";
-import { DetailSection } from "@/modules/workspace/DetailPanels";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { getDegree } from "./actions";
-import { formatDate } from "@/modules/workspace/format";
+import { listDegreeGroups } from "@/modules/admin/degree-group/actions";
+import { DegreeDetailForm } from "./DegreeDetailForm";
 
 export const dynamic = "force-dynamic";
 
@@ -23,6 +23,13 @@ export default async function AdminDegreeDetailPage({
   }
 
   const degree = data.degree;
+
+  // Fetch degree groups for the form's dropdown
+  const groupsResult = await listDegreeGroups({ limit: 200 });
+  const groups = groupsResult.degree_groups.map((g) => ({
+    degree_group_uuid: g.degree_group_uuid,
+    degree_group_name_en: g.degree_group_name_en,
+  }));
 
   return (
     <ErrorBoundary>
@@ -46,40 +53,7 @@ export default async function AdminDegreeDetailPage({
           },
         ]}
       >
-        <DetailSection
-          title="Degree Details"
-          facts={[
-            { label: "Degree UUID", value: degree.degree_uuid },
-            { label: "Name (English)", value: degree.degree_name_en },
-            {
-              label: "Name (Arabic)",
-              value: degree.degree_name_ar ?? "—",
-            },
-            {
-              label: "Degree Group UUID",
-              value: degree.degree_group_uuid ?? "—",
-            },
-            {
-              label: "Sort order",
-              value:
-                degree.degree_sort_order != null
-                  ? String(degree.degree_sort_order)
-                  : "—",
-            },
-            {
-              label: "Created",
-              value: degree.degree_created_at
-                ? formatDate(new Date(degree.degree_created_at))
-                : "—",
-            },
-            {
-              label: "Last updated",
-              value: degree.degree_updated_at
-                ? formatDate(new Date(degree.degree_updated_at))
-                : "—",
-            },
-          ]}
-        />
+        <DegreeDetailForm degree={degree} groups={groups} />
       </WorkspaceShell>
     </ErrorBoundary>
   );

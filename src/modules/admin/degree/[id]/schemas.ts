@@ -18,6 +18,12 @@ export const degreeDetailItemSchema = z.object({
   degree_sort_order: z.number().int().nullable(),
   degree_created_at: z.date().nullable(),
   degree_updated_at: z.date().nullable(),
+  degree_group: z
+    .object({
+      degree_group_uuid: z.string(),
+      degree_group_name_en: z.string(),
+    })
+    .nullable(),
 });
 
 /**
