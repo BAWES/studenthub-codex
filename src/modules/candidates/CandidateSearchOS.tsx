@@ -11,6 +11,12 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/modules/theme/ThemeToggle";
 import { CandidateProfile } from "./CandidateProfile";
@@ -204,19 +210,25 @@ function CandidateSearchTab({
       <FacetChips basePath={basePath} data={data} params={params} onNavigate={onNavigate} />
 
       {/* Power filters */}
-      <details className="border rounded-md px-3 py-2 text-sm bg-card">
-        <summary className="cursor-pointer font-medium flex items-center gap-2">
-          <span>Filters</span>
-          <Badge variant={activeFacetCount > 0 ? "warning" : "secondary"} className="text-[10px]">
-            {activeFacetCount ? `${activeFacetCount} active` : "Open power filters"}
-          </Badge>
-        </summary>
-        <section className="flex flex-wrap gap-3 pt-3" aria-label="Candidate power filters">
-          {facetGroups.map((facet) => (
-            <FacetGroup basePath={basePath} facet={facet} key={facet.key} onNavigate={onNavigate} params={params} />
-          ))}
-        </section>
-      </details>
+      <Accordion type="single" collapsible className="border rounded-md bg-card">
+        <AccordionItem value="filters" className="border-0">
+          <AccordionTrigger className="px-3 py-2 text-sm font-medium hover:no-underline">
+            <span className="flex items-center gap-2">
+              <span>Filters</span>
+              <Badge variant={activeFacetCount > 0 ? "warning" : "secondary"} className="text-[10px]">
+                {activeFacetCount ? `${activeFacetCount} active` : "Open power filters"}
+              </Badge>
+            </span>
+          </AccordionTrigger>
+          <AccordionContent>
+            <section className="flex flex-wrap gap-3 px-3 pb-3" aria-label="Candidate power filters">
+              {facetGroups.map((facet) => (
+                <FacetGroup basePath={basePath} facet={facet} key={facet.key} onNavigate={onNavigate} params={params} />
+              ))}
+            </section>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
 
       {/* Filter nav */}
       <nav className="flex gap-1 flex-wrap" aria-label="Candidate search filters">
