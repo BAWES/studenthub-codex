@@ -1,5 +1,7 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+import { useTransition, useCallback, useRef, useEffect, useState } from "react";
 import type { Route } from "next";
 import Link from "next/link";
 import { logoutAction } from "@/modules/auth/actions";
@@ -17,6 +19,7 @@ import type {
   CandidateSearchFacet,
   CandidateSearchFilter,
   CandidateSearchParams,
+  CandidateSearchFacetKey,
   getCandidateSearchWorkspace
 } from "./search";
 
@@ -37,6 +40,8 @@ type CandidateSearchParamKey =
   | "assignment"
   | "document";
 
+export const QUICK_FACET_KEYS: CandidateSearchFacetKey[] = ["country", "skill", "company", "university"];
+
 export function CandidateSearchOS({
   data,
   basePath,
@@ -50,11 +55,48 @@ export function CandidateSearchOS({
   session: SessionUser;
   params: CandidateSearchParams;
 }) {
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+  const [searchValue, setSearchValue] = useState(data.query ?? "");
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const commands = buildCandidateSearchCommands(data, basePath, params);
   const selectedIds = params.selectedIds ?? [];
   const selectedRows = data.rows.filter((row) => selectedIds.includes(row.id));
   const facetGroups = [...data.facets].sort((a, b) => Number(hasActiveFacet(b)) - Number(hasActiveFacet(a)));
   const activeFacetCount = data.facets.reduce((count, facet) => count + facet.options.filter((option) => option.active).length, 0);
+
+  // Sync searchValue on initial data fetch (SSR navigation)
+  useEffect(() => {
+    setSearchValue(data.query ?? "");
+  }, [data.query]);
+
+  const navigate = useCallback(
+    (overrides: Partial<Record<CandidateSearchParamKey, string>>) => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      startTransition(() => {
+        router.replace(candidateSearchHref(basePath, params, overrides));
+      });
+    },
+    [basePath, params, router, startTransition]
+  );
+
+  const handleSearchChange = useCallback(
+    (value: string) => {
+      setSearchValue(value);
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      debounceRef.current = setTimeout(() => {
+        navigate({ q: value || "" });
+      }, 300);
+    },
+    [navigate]
+  );
+
+  // Cleanup debounce on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, []);
 
   return (
     <main className="flex flex-col gap-3 min-h-svh bg-background">
@@ -64,22 +106,27 @@ export function CandidateSearchOS({
           <span className="text-primary">SH</span>
           <strong className="text-foreground">Candidates</strong>
         </Link>
-        <form className="flex flex-1 items-center gap-2 max-w-xl" id="candidate-search">
-          <Input
-            data-command-search
-            id="candidate-query"
-            name="q"
-            placeholder="Search name, email, phone, ID, skill, tag"
-            defaultValue={data.query}
-            className="flex-1"
-          />
-          <input name="filter" type="hidden" value={data.filter} />
+        <div className="flex flex-1 items-center gap-2 max-w-xl" id="candidate-search">
+          <div className="relative flex-1">
+            <Input
+              data-command-search
+              id="candidate-query"
+              name="q"
+              placeholder="Search name, email, phone, ID, skill, tag"
+              value={searchValue}
+              onChange={(e) => handleSearchChange(e.target.value)}
+              className="flex-1 pr-8"
+            />
+            {isPending && (
+              <span className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground text-xs animate-pulse">
+                ...
+              </span>
+            )}
+          </div>
           {params.visibility === "assigned" ? <input name="view" type="hidden" value="assigned" /> : null}
           {data.openTabs.length ? <input name="tabs" type="hidden" value={data.openTabs.map((tab) => tab.id).join(",")} /> : null}
           {selectedIds.length ? <input name="selected" type="hidden" value={selectedIds.join(",")} /> : null}
-          <HiddenFacetInputs data={data} />
-          <Button type="submit" size="sm">Search</Button>
-        </form>
+        </div>
         <div className="flex items-center gap-2 ml-auto">
           <HubShortcuts commands={commands} />
           <ThemeToggle />
@@ -113,6 +160,7 @@ export function CandidateSearchOS({
               facetGroups={facetGroups}
               params={params}
               selectedIds={selectedIds}
+              onNavigate={navigate}
             />
           )}
         </section>
@@ -127,7 +175,8 @@ function CandidateSearchTab({
   data,
   facetGroups,
   params,
-  selectedIds
+  selectedIds,
+  onNavigate
 }: {
   activeFacetCount: number;
   basePath: "/admin/candidates" | "/staff/candidates";
@@ -135,6 +184,7 @@ function CandidateSearchTab({
   facetGroups: CandidateSearchFacet[];
   params: CandidateSearchParams;
   selectedIds: number[];
+  onNavigate: (overrides: Partial<Record<CandidateSearchParamKey, string>>) => void;
 }) {
   return (
     <section className="flex flex-col gap-2" aria-label="Candidate search and filters">
@@ -150,6 +200,9 @@ function CandidateSearchTab({
         </CardHeader>
       </Card>
 
+      {/* Quick facet chips */}
+      <FacetChips basePath={basePath} data={data} params={params} onNavigate={onNavigate} />
+
       {/* Power filters */}
       <details className="border rounded-md px-3 py-2 text-sm bg-card">
         <summary className="cursor-pointer font-medium flex items-center gap-2">
@@ -160,7 +213,7 @@ function CandidateSearchTab({
         </summary>
         <section className="flex flex-wrap gap-3 pt-3" aria-label="Candidate power filters">
           {facetGroups.map((facet) => (
-            <FacetGroup basePath={basePath} facet={facet} key={facet.key} params={params} />
+            <FacetGroup basePath={basePath} facet={facet} key={facet.key} onNavigate={onNavigate} params={params} />
           ))}
         </section>
       </details>
@@ -168,16 +221,20 @@ function CandidateSearchTab({
       {/* Filter nav */}
       <nav className="flex gap-1 flex-wrap" aria-label="Candidate search filters">
         {candidateFilterLinks.map((item) => (
-          <Link
+          <a
             className={cn(
               buttonVariants({ variant: item.value === data.filter ? "default" : "ghost", size: "sm" }),
-              "text-xs"
+              "text-xs no-underline cursor-pointer"
             )}
             href={candidateSearchHref(basePath, params, { filter: item.value, candidate: "" })}
             key={item.value}
+            onClick={(e) => {
+              e.preventDefault();
+              onNavigate({ filter: item.value, candidate: "" });
+            }}
           >
             {item.label}
-          </Link>
+          </a>
         ))}
       </nav>
 
@@ -397,22 +454,17 @@ const candidateFilterLinks: { label: string; value: CandidateSearchFilter }[] = 
   { label: "Civil ID", value: "civil-id" }
 ];
 
-function HiddenFacetInputs({ data }: { data: CandidateSearchData }) {
-  return (
-    <>
-      {data.params.country ? <input name="country" type="hidden" value={data.params.country} /> : null}
-      {data.params.university ? <input name="university" type="hidden" value={data.params.university} /> : null}
-      {data.params.company ? <input name="company" type="hidden" value={data.params.company} /> : null}
-      {data.params.skill ? <input name="skill" type="hidden" value={data.params.skill} /> : null}
-      {data.params.gender ? <input name="gender" type="hidden" value={data.params.gender} /> : null}
-      {data.params.profile ? <input name="profile" type="hidden" value={data.params.profile} /> : null}
-      {data.params.assignment ? <input name="assignment" type="hidden" value={data.params.assignment} /> : null}
-      {data.params.document ? <input name="document" type="hidden" value={data.params.document} /> : null}
-    </>
-  );
-}
-
-function FacetGroup({ basePath, facet, params }: { basePath: "/admin/candidates" | "/staff/candidates"; facet: CandidateSearchFacet; params: CandidateSearchParams }) {
+export function FacetGroup({
+  basePath,
+  facet,
+  params,
+  onNavigate,
+}: {
+  basePath: "/admin/candidates" | "/staff/candidates";
+  facet: CandidateSearchFacet;
+  params: CandidateSearchParams;
+  onNavigate?: (overrides: Partial<Record<CandidateSearchParamKey, string>>) => void;
+}) {
   return (
     <Card className="min-w-[160px] flex-1">
       <CardHeader className="p-2 pb-0">
@@ -420,24 +472,122 @@ function FacetGroup({ basePath, facet, params }: { basePath: "/admin/candidates"
       </CardHeader>
       <CardContent className="p-2 flex flex-col gap-0.5">
         {facet.options.map((option) => (
-          <Link
+          <a
             className={cn(
               buttonVariants({ variant: option.active ? "default" : "ghost", size: "sm" }),
-              "justify-between text-xs w-full no-underline"
+              "justify-between text-xs w-full no-underline cursor-pointer"
             )}
             href={candidateSearchHref(basePath, params, { [facet.key]: option.active ? "" : option.value, candidate: "" })}
             key={option.value}
+            onClick={(e) => {
+              e.preventDefault();
+              onNavigate?.({ [facet.key]: option.active ? "" : option.value, candidate: "" });
+            }}
           >
             <span>{option.label}</span>
             <strong className="text-[10px] text-muted-foreground">{option.count}</strong>
-          </Link>
+          </a>
         ))}
       </CardContent>
     </Card>
   );
 }
 
-function candidateSearchHref(
+/**
+ * FacetChips renders quick inline facet controls for country, university,
+ * skills, and company — clickable chips that filter results via URL params.
+ */
+export function FacetChips({
+  basePath,
+  data,
+  params,
+  onNavigate,
+}: {
+  basePath: string;
+  data: { facets: CandidateSearchFacet[] };
+  params: CandidateSearchParams;
+  onNavigate?: (overrides: Partial<Record<CandidateSearchParamKey, string>>) => void;
+}) {
+  // Find quick facet groups
+  const quickFacets = data.facets.filter((f) =>
+    QUICK_FACET_KEYS.includes(f.key),
+  );
+
+  // Filter out groups with zero options
+  const populated = quickFacets.filter((f) => f.options.length > 0);
+
+  if (populated.length === 0) return null;
+
+  const MAX_VISIBLE = 6;
+  const activeCount = data.facets.reduce(
+    (sum, f) => sum + f.options.filter((o) => o.active).length,
+    0,
+  );
+
+  return (
+    <div className="flex flex-wrap gap-1">
+      {populated.map((facet) => (
+        <div key={facet.key} className="flex items-center gap-0.5">
+          <span className="text-xs text-muted-foreground mr-1">{facet.label}:</span>
+          {facet.options.slice(0, MAX_VISIBLE).map((opt) => {
+            const isActive = opt.active;
+            return (
+              <a
+                key={opt.value}
+                href={`${basePath}?${facet.key}=${opt.value}`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  onNavigate?.({ [facet.key]: isActive ? "" : opt.value, candidate: "" });
+                }}
+                className={cn(
+                  "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs border transition-colors no-underline",
+                  isActive
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "bg-muted text-muted-foreground border-border hover:bg-muted/80"
+                )}
+              >
+                {opt.label}
+                {opt.count > 0 && (
+                  <span className="text-[10px] opacity-70">{opt.count}</span>
+                )}
+                {isActive && (
+                  <span className="text-[10px] ml-0.5" aria-label="Remove filter">✕</span>
+                )}
+              </a>
+            );
+          })}
+        </div>
+      ))}
+      {activeCount > 1 && (
+        <a
+          href={basePath}
+          onClick={(e) => {
+            e.preventDefault();
+            onNavigate?.({
+              q: "",
+              country: "",
+              university: "",
+              company: "",
+              skill: "",
+              gender: "",
+              profile: "",
+              assignment: "",
+              document: "",
+              candidate: "",
+            });
+          }}
+          className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2 ml-1"
+          role="link"
+          aria-label="Clear all"
+        >
+          Clear all
+        </a>
+      )}
+    </div>
+  );
+}
+
+export function candidateSearchHref(
   basePath: "/admin/candidates" | "/staff/candidates",
   params: CandidateSearchParams,
   overrides: Partial<Record<CandidateSearchParamKey, string>>
@@ -471,11 +621,11 @@ function candidateSearchHref(
   return (suffix ? `${basePath}?${suffix}` : basePath) as Route;
 }
 
-function toggleCandidateId(ids: number[], id: number) {
+export function toggleCandidateId(ids: number[], id: number) {
   return ids.includes(id) ? ids.filter((item) => item !== id) : [...ids, id];
 }
 
-function candidateInitials(name: string) {
+export function candidateInitials(name: string) {
   return name
     .split(/\s+/)
     .filter(Boolean)
