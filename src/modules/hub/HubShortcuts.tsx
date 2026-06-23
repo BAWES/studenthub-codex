@@ -11,6 +11,7 @@ import {
   CommandList,
   CommandShortcut,
 } from "@/components/ui/command";
+import { searchCandidatesForPalette, type CandidatePaletteResult } from "@/modules/workspace/searchPalette";
 
 export type HubCommand = {
   id: string;
@@ -36,7 +37,26 @@ const builtinShortcuts = [
 
 export function HubShortcuts({ commands }: HubShortcutsProps) {
   const [open, setOpen] = useState(false);
+  const [cmdQuery, setCmdQuery] = useState("");
+  const [cmdCandidates, setCmdCandidates] = useState<CandidatePaletteResult[]>([]);
   const sequenceRef = useRef("");
+
+  // Debounced candidate search via Typesense
+  useEffect(() => {
+    if (!open || !cmdQuery || cmdQuery.length < 2) {
+      setCmdCandidates([]);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      try {
+        const results = await searchCandidatesForPalette(cmdQuery);
+        setCmdCandidates(results);
+      } catch {
+        setCmdCandidates([]);
+      }
+    }, 200);
+    return () => clearTimeout(timer);
+  }, [cmdQuery, open]);
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
@@ -100,7 +120,12 @@ export function HubShortcuts({ commands }: HubShortcutsProps) {
       </Button>
 
       <CommandDialog open={open} onOpenChange={setOpen}>
-        <CommandInput placeholder="Jump to a view, search visible records, or run an action..." />
+        <CommandInput
+          placeholder="Search candidates globally, jump to a view, or run an action..."
+          data-command-search
+          value={cmdQuery}
+          onValueChange={setCmdQuery}
+        />
         <CommandList>
           <CommandEmpty>
             <div className="py-4 text-center">
@@ -130,6 +155,25 @@ export function HubShortcuts({ commands }: HubShortcutsProps) {
               ))}
             </CommandGroup>
           ))}
+          {cmdCandidates.length > 0 && (
+            <CommandGroup heading="Candidates">
+              {cmdCandidates.map((c) => (
+                <CommandItem
+                  key={c.id}
+                  value={`candidate-${c.name} ${c.email}`}
+                  onSelect={() => {
+                    setOpen(false);
+                    visit(`/staff/candidates/${c.id}`);
+                  }}
+                >
+                  <div className="flex flex-col">
+                    <strong className="text-sm text-foreground">{c.name}</strong>
+                    <small className="text-xs text-muted-foreground">{c.email || c.uid}</small>
+                  </div>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          )}
           <CommandGroup heading="Shortcuts">
             {builtinShortcuts.map((shortcut) => (
               <CommandItem key={shortcut.keys} value={shortcut.label} onSelect={() => setOpen(false)}>
