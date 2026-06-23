@@ -1,0 +1,21 @@
+// ---------------------------------------------------------------------------
+// Barrel re-export — delegates to module-level implementation
+// ---------------------------------------------------------------------------
+// All business logic lives in src/modules/admin/salary-scales/actions.ts (which
+// has "use server"). This barrel re-exports so page consumers keep their
+// current import paths without duplicating the "use server" directive.
+// ---------------------------------------------------------------------------
+
+export {
+  listSalaryScales,
+  createSalaryScale,
+  updateSalaryScale,
+  deleteSalaryScale,
+  getSalaryScale,
+} from "@/modules/admin/salary-scales/actions";
+
+export type {
+  SalaryScaleListItem,
+  ListSalaryScalesResult,
+  SalaryScaleIdResult,
+} from "@/modules/admin/salary-scales/schemas";
