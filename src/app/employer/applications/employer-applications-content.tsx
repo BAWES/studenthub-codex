@@ -4,6 +4,8 @@ import { DataTablePage } from "@/modules/workspace/DataTablePage";
 import { StatusBadge } from "@/modules/workspace/StatusBadge";
 import { genericStatusVariant } from "@/modules/workspace/status-mapping";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
+import { MetricCard } from "@/components/ui/metric-card";
+import { Users, Clock, CheckCircle2, XCircle } from "lucide-react";
 import type { SessionUser } from "@/modules/auth/types";
 
 type ApplicationRow = Record<string, unknown> & {
@@ -28,26 +30,6 @@ type Props = {
   metrics: Metrics;
 };
 
-function MetricCard({ label, value, note }: { label: string; value: number; note?: string }) {
-  return (
-    <div
-      className="flex flex-col gap-1 rounded-xl border border-[var(--border)] bg-[var(--card)] p-5"
-    >
-      <span className="text-sm font-medium text-[var(--muted-foreground)]">
-        {label}
-      </span>
-      <span className="text-3xl font-bold text-[var(--ink)]">
-        {value.toLocaleString()}
-      </span>
-      {note && (
-        <span className="text-xs text-[var(--muted-foreground)]">
-          {note}
-        </span>
-      )}
-    </div>
-  );
-}
-
 export function EmployerApplicationsContent({ session, applications, total, metrics }: Props) {
   return (
     <WorkspaceShell
@@ -60,27 +42,35 @@ export function EmployerApplicationsContent({ session, applications, total, metr
         { label: "Accepted", value: metrics.accepted, note: "approved" },
       ]}
     >
-      {/* Metrics grid */}
+      {/* Metrics grid — shadcn MetricCard */}
       <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <MetricCard
           label="Total"
           value={metrics.total}
           note="all applications"
+          icon={Users}
+          accent="info"
         />
         <MetricCard
           label="Pending"
           value={metrics.pending}
           note="awaiting review"
+          icon={Clock}
+          accent="warning"
         />
         <MetricCard
           label="Accepted"
           value={metrics.accepted}
           note="approved offers"
+          icon={CheckCircle2}
+          accent="success"
         />
         <MetricCard
           label="Rejected"
           value={metrics.rejected}
           note="did not proceed"
+          icon={XCircle}
+          accent="error"
         />
       </div>
 
@@ -104,7 +94,7 @@ export function EmployerApplicationsContent({ session, applications, total, metr
           {
             key: "candidateName",
             label: "Candidate",
-            render: (row) => row.candidateName ? String(row.candidateName) : <span className="text-[var(--muted-foreground)]">—</span>,
+            render: (row) => row.candidateName ? String(row.candidateName) : <span className="text-muted-foreground">—</span>,
           },
           {
             key: "status",
