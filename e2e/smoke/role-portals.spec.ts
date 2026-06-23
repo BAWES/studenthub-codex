@@ -24,7 +24,7 @@ test.describe("Role portal smoke tests", () => {
   for (const { key, label, expectedUrl, expectedText } of ROLES) {
     test(`${label} portal loads`, async ({ browser }) => {
       const user = fixtures.get(key)!;
-      const context = await browser.newContext();
+      const context = await browser.newContext({ baseURL: "http://127.0.0.1:3000" });
       await context.addCookies(cookieArgs(user));
       const page = await context.newPage();
       await page.goto(`/${expectedUrl}`);
@@ -42,7 +42,7 @@ test.describe("Role portal smoke tests", () => {
   for (const route of adminRoutes) {
     test(`admin can access ${route}`, async ({ browser }) => {
       const admin = fixtures.get("admin")!;
-      const context = await browser.newContext();
+      const context = await browser.newContext({ baseURL: "http://127.0.0.1:3000" });
       await context.addCookies(cookieArgs(admin));
       const page = await context.newPage();
       await page.goto(route);
@@ -55,7 +55,7 @@ test.describe("Role portal smoke tests", () => {
   // ── Staff sub-routes ──
   test("staff can access requests list", async ({ browser }) => {
     const staff = fixtures.get("staff")!;
-    const context = await browser.newContext();
+    const context = await browser.newContext({ baseURL: "http://127.0.0.1:3000" });
     await context.addCookies(cookieArgs(staff));
     const page = await context.newPage();
     await page.goto("/staff/requests");
@@ -69,7 +69,7 @@ test.describe("Role portal smoke tests", () => {
   for (const route of candidateRoutes) {
     test(`candidate can access ${route}`, async ({ browser }) => {
       const candidate = fixtures.get("candidate")!;
-      const context = await browser.newContext();
+      const context = await browser.newContext({ baseURL: "http://127.0.0.1:3000" });
       await context.addCookies(cookieArgs(candidate));
       const page = await context.newPage();
       await page.goto(route);
@@ -82,7 +82,7 @@ test.describe("Role portal smoke tests", () => {
   // ── Company sub-routes ──
   test("company can access linked companies", async ({ browser }) => {
     const company = fixtures.get("company")!;
-    const context = await browser.newContext();
+    const context = await browser.newContext({ baseURL: "http://127.0.0.1:3000" });
     await context.addCookies(cookieArgs(company));
     const page = await context.newPage();
     await page.goto("/company/companies");
@@ -106,7 +106,7 @@ test.describe("Role portal smoke tests", () => {
   // ── Cross-role guards ──
   test("admin cannot access staff portal", async ({ browser }) => {
     const admin = fixtures.get("admin")!;
-    const context = await browser.newContext();
+    const context = await browser.newContext({ baseURL: "http://127.0.0.1:3000" });
     await context.addCookies(cookieArgs(admin));
     const page = await context.newPage();
     await page.goto("/staff");
@@ -116,7 +116,7 @@ test.describe("Role portal smoke tests", () => {
 
   test("staff cannot access admin portal", async ({ browser }) => {
     const staff = fixtures.get("staff")!;
-    const context = await browser.newContext();
+    const context = await browser.newContext({ baseURL: "http://127.0.0.1:3000" });
     await context.addCookies(cookieArgs(staff));
     const page = await context.newPage();
     await page.goto("/admin");
@@ -126,7 +126,7 @@ test.describe("Role portal smoke tests", () => {
 
   test("company cannot access candidate portal", async ({ browser }) => {
     const company = fixtures.get("company")!;
-    const context = await browser.newContext();
+    const context = await browser.newContext({ baseURL: "http://127.0.0.1:3000" });
     await context.addCookies(cookieArgs(company));
     const page = await context.newPage();
     await page.goto("/candidate");
@@ -136,7 +136,7 @@ test.describe("Role portal smoke tests", () => {
 
   test("candidate cannot access admin portal", async ({ browser }) => {
     const candidate = fixtures.get("candidate")!;
-    const context = await browser.newContext();
+    const context = await browser.newContext({ baseURL: "http://127.0.0.1:3000" });
     await context.addCookies(cookieArgs(candidate));
     const page = await context.newPage();
     await page.goto("/admin");
@@ -147,7 +147,7 @@ test.describe("Role portal smoke tests", () => {
   // ── App shell ──
   test("authenticated user can access /app shell", async ({ browser }) => {
     const admin = fixtures.get("admin")!;
-    const context = await browser.newContext();
+    const context = await browser.newContext({ baseURL: "http://127.0.0.1:3000" });
     await context.addCookies(cookieArgs(admin));
     const page = await context.newPage();
     await page.goto("/app");
@@ -158,7 +158,7 @@ test.describe("Role portal smoke tests", () => {
 
   test("authenticated user can access /hub shell", async ({ browser }) => {
     const admin = fixtures.get("admin")!;
-    const context = await browser.newContext();
+    const context = await browser.newContext({ baseURL: "http://127.0.0.1:3000" });
     await context.addCookies(cookieArgs(admin));
     const page = await context.newPage();
     await page.goto("/hub");
