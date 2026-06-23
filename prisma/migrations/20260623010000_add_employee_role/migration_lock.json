@@ -1,0 +1,5 @@
+{
+  "version": "6.19.3",
+  "migration_name": "20260623010000_add_employee_role",
+  "started_at": "2026-06-23T00:00:00.000Z"
+}
