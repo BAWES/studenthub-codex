@@ -131,12 +131,27 @@ function getBucketName(): string {
 // Helpers
 // ---------------------------------------------------------------------------
 
-function toDocumentItem(type: DocumentType, filePath: string | null): CandidateDocumentItem {
+async function toDocumentItem(type: DocumentType, filePath: string | null): Promise<CandidateDocumentItem> {
+  let fileUrl: string | null = filePath;
+
+  if (filePath && isS3Key(filePath) && s3ConfigAvailable()) {
+    try {
+      const command = new GetObjectCommand({
+        Bucket: getBucketName(),
+        Key: filePath,
+      });
+      fileUrl = await getSignedUrl(getS3Client(), command, { expiresIn: 900 });
+    } catch {
+      // Presigned URL generation failed — fall back to raw key
+      fileUrl = filePath;
+    }
+  }
+
   return {
     type,
     label: DOCUMENT_LABELS[type],
     filePath,
-    fileUrl: filePath ? filePath : null,
+    fileUrl,
   };
 }
 
@@ -181,11 +196,13 @@ export async function listCandidateDocuments(
     return result;
   }
 
-  const items: CandidateDocumentItem[] = DOCUMENT_TYPES.map((type) => {
-    const field = DOCUMENT_FIELD_MAP[type];
-    const filePath = (candidate as Record<string, unknown>)[field] as string | null;
-    return toDocumentItem(type, filePath);
-  });
+  const items: CandidateDocumentItem[] = await Promise.all(
+    DOCUMENT_TYPES.map(async (type) => {
+      const field = DOCUMENT_FIELD_MAP[type];
+      const filePath = (candidate as Record<string, unknown>)[field] as string | null;
+      return toDocumentItem(type, filePath);
+    }),
+  );
 
   const result: ListCandidateDocumentsResult = { items, candidateId: candidate.candidate_id };
 
@@ -229,7 +246,7 @@ export async function getCandidateDocument(
   }
 
   const filePath = (candidate as Record<string, unknown>)[field] as string | null;
-  const result: CandidateDocumentItem = toDocumentItem(documentType, filePath);
+  const result: CandidateDocumentItem = await toDocumentItem(documentType, filePath);
 
   const outputParsed = getCandidateDocumentResultSchema.safeParse(result);
   if (!outputParsed.success) {

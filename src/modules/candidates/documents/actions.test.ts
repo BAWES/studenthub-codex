@@ -420,3 +420,97 @@ describe("toS3StoredPath", () => {
     );
   });
 });
+
+// ---------------------------------------------------------------------------
+// Presigned URL generation in document listing/getting
+// ---------------------------------------------------------------------------
+
+describe("listCandidateDocuments with S3 presigned URLs", () => {
+  let listCandidateDocuments: any;
+
+  beforeEach(async () => {
+    vi.clearAllMocks();
+    setValidS3Env();
+    mockRequireCapability.mockResolvedValue({ id: "42" });
+
+    (prisma.candidate.findUnique as any).mockResolvedValue({
+      candidate_id: 42,
+      candidate_personal_photo: "candidates/42/photo_uuid.jpg",
+      candidate_resume: null,
+      candidate_video: null,
+      candidate_civil_photo_front: null,
+      candidate_civil_photo_back: null,
+    });
+
+    const mod = await import("./actions");
+    listCandidateDocuments = mod.listCandidateDocuments;
+  });
+
+  afterEach(() => {
+    clearS3Env();
+  });
+
+  it("returns presigned URL for S3-stored documents", async () => {
+    const result = await listCandidateDocuments({ candidateId: 42 });
+
+    expect(result.items).toHaveLength(5);
+    const photoItem = result.items.find((i: any) => i.type === "photo");
+    expect(photoItem).toBeDefined();
+    // fileUrl should be the presigned URL, not the raw S3 key
+    expect(photoItem.fileUrl).toBe("https://s3.example.com/presigned-url");
+    // filePath still has the raw S3 key
+    expect(photoItem.filePath).toBe("candidates/42/photo_uuid.jpg");
+  });
+
+  it("returns null fileUrl for document types with no file", async () => {
+    const result = await listCandidateDocuments({ candidateId: 42 });
+
+    const cvItem = result.items.find((i: any) => i.type === "cv");
+    expect(cvItem).toBeDefined();
+    expect(cvItem.filePath).toBeNull();
+    expect(cvItem.fileUrl).toBeNull();
+  });
+});
+
+describe("getCandidateDocument with S3 presigned URLs", () => {
+  let getCandidateDocument: any;
+
+  beforeEach(async () => {
+    vi.clearAllMocks();
+    setValidS3Env();
+    mockRequireCapability.mockResolvedValue({ id: "42" });
+
+    (prisma.candidate.findUnique as any).mockResolvedValue({
+      candidate_personal_photo: "candidates/42/photo_uuid.jpg",
+    });
+
+    const mod = await import("./actions");
+    getCandidateDocument = mod.getCandidateDocument;
+  });
+
+  afterEach(() => {
+    clearS3Env();
+  });
+
+  it("returns presigned URL when S3 key is stored", async () => {
+    const result = await getCandidateDocument({
+      candidateId: 42,
+      documentType: "photo",
+    });
+
+    expect(result).not.toBeNull();
+    expect(result!.fileUrl).toBe("https://s3.example.com/presigned-url");
+    expect(result!.filePath).toBe("candidates/42/photo_uuid.jpg");
+  });
+
+  it("returns null when candidate not found", async () => {
+    (prisma.candidate.findUnique as any).mockResolvedValue(null);
+
+    const result = await getCandidateDocument({
+      candidateId: 999,
+      documentType: "photo",
+    });
+
+    expect(result).toBeNull();
+  });
+});
