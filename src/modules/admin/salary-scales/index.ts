@@ -1,13 +1,13 @@
 export {
-  listSalaryScalesSchema,
-  salaryScaleItemSchema,
-  listSalaryScalesResultSchema,
-  createSalaryScaleSchema,
-} from "./schemas";
+  listSalaryScales,
+  createSalaryScale,
+  updateSalaryScale,
+  deleteSalaryScale,
+  getSalaryScale,
+} from "./actions";
+
 export type {
-  ListSalaryScalesInput,
-  SalaryScaleItem,
+  SalaryScaleListItem,
   ListSalaryScalesResult,
-  CreateSalaryScaleInput,
+  SalaryScaleIdResult,
 } from "./schemas";
-export { listSalaryScales, createSalaryScale, updateSalaryScale, deleteSalaryScale } from "./actions";

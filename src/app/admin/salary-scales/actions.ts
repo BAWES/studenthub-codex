@@ -6,4 +6,16 @@
 // current import paths without duplicating the "use server" directive.
 // ---------------------------------------------------------------------------
 
-export * from "@/modules/admin/salary-scales/actions";
+export {
+  listSalaryScales,
+  createSalaryScale,
+  updateSalaryScale,
+  deleteSalaryScale,
+  getSalaryScale,
+} from "@/modules/admin/salary-scales/actions";
+
+export type {
+  SalaryScaleListItem,
+  ListSalaryScalesResult,
+  SalaryScaleIdResult,
+} from "@/modules/admin/salary-scales/schemas";
