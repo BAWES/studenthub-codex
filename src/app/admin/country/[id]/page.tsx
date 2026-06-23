@@ -22,13 +22,11 @@ export default async function AdminCountryDetailPage({
     notFound();
   }
 
-  const result = await getCountry(countryId);
+  const country = await getCountry(countryId);
 
-  if (!result.country) {
+  if (!country) {
     notFound();
   }
-
-  const country = result.country;
 
   return (
     <WorkspaceShell
@@ -60,6 +58,7 @@ export default async function AdminCountryDetailPage({
           { label: "Emoji", value: country.emoji ?? "—" },
           { label: "Phone Code", value: country.country_code != null ? `+${country.country_code}` : "—" },
           { label: "Currency", value: country.currency_code ?? "—" },
+          { label: "Google Map Data", value: country.country_from_google_map ? "Yes" : "No" },
         ]}
       />
 
