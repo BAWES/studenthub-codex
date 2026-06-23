@@ -10,13 +10,21 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 
 import type { SessionUser } from "@/modules/auth/types";
-import type { SalaryScaleListItem } from "@/modules/admin/salary-scales/schemas";
+import type { SalaryScaleItem } from "@/modules/admin/salary-scales/schemas";
 import { createSalaryScale, updateSalaryScale, deleteSalaryScale } from "@/modules/admin/salary-scales/actions";
 
 type Props = {
   session: SessionUser;
-  records: SalaryScaleListItem[];
+  records: SalaryScaleItem[];
 };
+
+function formatAmount(val: number | null): string {
+  if (val === null || val === undefined) return "—";
+  return Number(val).toLocaleString("en-US", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 3,
+  });
+}
 
 export function AdminSalaryScalesTable({ session, records }: Props) {
   const router = useRouter();
@@ -26,9 +34,9 @@ export function AdminSalaryScalesTable({ session, records }: Props) {
     <WorkspaceShell
       session={session}
       eyebrow="Admin settings"
-      title="Salary scales — manage salary grade ranges."
+      title="Salary Scales — manage salary ranges."
       metrics={[
-        { label: "Scales", value: records.length, note: "Salary scales defined" },
+        { label: "Salary Scales", value: records.length, note: "Active salary scales" },
       ]}
     >
       <Card className="mb-6">
@@ -39,7 +47,7 @@ export function AdminSalaryScalesTable({ session, records }: Props) {
       </Card>
 
       <DataTable
-        title="Salary scales"
+        title="Salary Scales"
         description="All salary scales. Click a name to edit in-line."
         rows={records.map((r) => ({ ...r, id: String(r.salary_scale_id) }))}
         columns={[
@@ -49,7 +57,7 @@ export function AdminSalaryScalesTable({ session, records }: Props) {
             render: (row) =>
               editingId === row.salary_scale_id ? (
                 <EditSalaryScaleForm
-                  row={row as unknown as SalaryScaleListItem}
+                  row={row as unknown as SalaryScaleItem}
                   onDone={() => { setEditingId(null); router.refresh(); }}
                   onCancel={() => setEditingId(null)}
                 />
@@ -74,23 +82,28 @@ export function AdminSalaryScalesTable({ session, records }: Props) {
           },
           {
             key: "salary_scale_min_amount",
-            label: "Min Amount",
+            label: "Min (KWD)",
             render: (row) => (
               <span className="text-sm text-muted-foreground">
-                {row.salary_scale_min_amount != null
-                  ? Number(row.salary_scale_min_amount).toFixed(3)
-                  : "—"}
+                {formatAmount(row.salary_scale_min_amount)}
               </span>
             ),
           },
           {
             key: "salary_scale_max_amount",
-            label: "Max Amount",
+            label: "Max (KWD)",
             render: (row) => (
               <span className="text-sm text-muted-foreground">
-                {row.salary_scale_max_amount != null
-                  ? Number(row.salary_scale_max_amount).toFixed(3)
-                  : "—"}
+                {formatAmount(row.salary_scale_max_amount)}
+              </span>
+            ),
+          },
+          {
+            key: "candidate_count",
+            label: "Candidates",
+            render: (row) => (
+              <span className="text-sm text-muted-foreground">
+                {row.candidate_count ?? 0}
               </span>
             ),
           },
@@ -103,7 +116,7 @@ export function AdminSalaryScalesTable({ session, records }: Props) {
                   type="button"
                   className="text-xs px-2 py-1 rounded hover:bg-red-500/10 text-destructive"
                   onClick={async () => {
-                    if (confirm(`Delete scale "${row.salary_scale_name_en}"?`)) {
+                    if (confirm(`Delete salary scale "${row.salary_scale_name_en}"?`)) {
                       await deleteSalaryScale(row.salary_scale_id);
                       router.refresh();
                     }
@@ -122,18 +135,18 @@ export function AdminSalaryScalesTable({ session, records }: Props) {
 function CreateSalaryScaleForm({ onSuccess }: { onSuccess: () => void }) {
   const [state, action, pending] = useActionState(
     async (_prev: { error?: string } | null, formData: FormData) => {
-      const nameEn = formData.get("nameEn") as string;
-      const nameAr = formData.get("nameAr") as string;
-      const minAmount = formData.get("minAmount") as string;
-      const maxAmount = formData.get("maxAmount") as string;
+      const nameEn = formData.get("salary_scale_name_en") as string;
+      const nameAr = formData.get("salary_scale_name_ar") as string;
+      const minAmt = formData.get("salary_scale_min_amount") as string;
+      const maxAmt = formData.get("salary_scale_max_amount") as string;
 
       try {
         await createSalaryScale({
           salary_scale_name_en: nameEn || "",
           salary_scale_name_ar: nameAr || "",
-          salary_scale_min_amount: minAmount ? Number(minAmount) : undefined,
-          salary_scale_max_amount: maxAmount ? Number(maxAmount) : undefined,
-        } as any);
+          salary_scale_min_amount: minAmt ? Number(minAmt) : undefined,
+          salary_scale_max_amount: maxAmt ? Number(maxAmt) : undefined,
+        });
         onSuccess();
         return { error: undefined };
       } catch (e) {
@@ -152,44 +165,45 @@ function CreateSalaryScaleForm({ onSuccess }: { onSuccess: () => void }) {
       onSubmit={() => setTimeout(() => { formRef.current?.reset(); }, 100)}
     >
       <div className="grid gap-1.5">
-        <Label htmlFor="nameEn">Name (English)</Label>
+        <Label htmlFor="salary_scale_name_en">Name (English) *</Label>
         <Input
-          id="nameEn"
-          name="nameEn"
+          id="salary_scale_name_en"
+          name="salary_scale_name_en"
+          required
           maxLength={255}
-          placeholder="e.g. Grade A"
-          className="w-44"
+          placeholder="e.g. Entry Level"
+          className="w-48"
         />
       </div>
       <div className="grid gap-1.5">
-        <Label htmlFor="nameAr">Name (Arabic)</Label>
+        <Label htmlFor="salary_scale_name_ar">Name (Arabic)</Label>
         <Input
-          id="nameAr"
-          name="nameAr"
+          id="salary_scale_name_ar"
+          name="salary_scale_name_ar"
           maxLength={255}
-          placeholder="مثال: الدرجة أ"
-          className="w-44"
+          placeholder="مثال: مبتدئ"
+          className="w-48"
         />
       </div>
       <div className="grid gap-1.5">
-        <Label htmlFor="minAmount">Min (KWD)</Label>
+        <Label htmlFor="salary_scale_min_amount">Min (KWD)</Label>
         <Input
-          id="minAmount"
-          name="minAmount"
+          id="salary_scale_min_amount"
+          name="salary_scale_min_amount"
           type="number"
           step="0.001"
-          placeholder="0.000"
+          placeholder="0"
           className="w-24"
         />
       </div>
       <div className="grid gap-1.5">
-        <Label htmlFor="maxAmount">Max (KWD)</Label>
+        <Label htmlFor="salary_scale_max_amount">Max (KWD)</Label>
         <Input
-          id="maxAmount"
-          name="maxAmount"
+          id="salary_scale_max_amount"
+          name="salary_scale_max_amount"
           type="number"
           step="0.001"
-          placeholder="0.000"
+          placeholder="0"
           className="w-24"
         />
       </div>
@@ -208,7 +222,7 @@ function EditSalaryScaleForm({
   onDone,
   onCancel,
 }: {
-  row: SalaryScaleListItem;
+  row: SalaryScaleItem;
   onDone: () => void;
   onCancel: () => void;
 }) {
@@ -216,16 +230,16 @@ function EditSalaryScaleForm({
     async (_prev: { error?: string } | null, formData: FormData) => {
       const nameEn = formData.get("nameEn") as string;
       const nameAr = formData.get("nameAr") as string;
-      const minAmount = formData.get("minAmount") as string;
-      const maxAmount = formData.get("maxAmount") as string;
+      const minAmt = formData.get("minAmt") as string;
+      const maxAmt = formData.get("maxAmt") as string;
       try {
         await updateSalaryScale({
           salary_scale_id: row.salary_scale_id,
           salary_scale_name_en: nameEn,
-          salary_scale_name_ar: nameAr || undefined,
-          salary_scale_min_amount: minAmount ? Number(minAmount) : undefined,
-          salary_scale_max_amount: maxAmount ? Number(maxAmount) : undefined,
-        } as any);
+          salary_scale_name_ar: nameAr || null,
+          salary_scale_min_amount: minAmt ? Number(minAmt) : null,
+          salary_scale_max_amount: maxAmt ? Number(maxAmt) : null,
+        });
         onDone();
         return { error: undefined };
       } catch (e: unknown) {
@@ -249,10 +263,10 @@ function EditSalaryScaleForm({
         defaultValue={row.salary_scale_name_ar ?? ""}
         maxLength={255}
         placeholder="Name (AR)"
-        className="w-28 h-8"
+        className="w-24 h-8"
       />
       <Input
-        name="minAmount"
+        name="minAmt"
         defaultValue={row.salary_scale_min_amount != null ? String(row.salary_scale_min_amount) : ""}
         type="number"
         step="0.001"
@@ -260,7 +274,7 @@ function EditSalaryScaleForm({
         className="w-20 h-8"
       />
       <Input
-        name="maxAmount"
+        name="maxAmt"
         defaultValue={row.salary_scale_max_amount != null ? String(row.salary_scale_max_amount) : ""}
         type="number"
         step="0.001"

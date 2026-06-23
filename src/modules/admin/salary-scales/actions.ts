@@ -1,19 +1,19 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/modules/auth/session";
-import type { Prisma } from "@prisma/client";
 import {
-  salaryScaleListItemSchema,
+  salaryScaleItemSchema,
   listSalaryScalesResultSchema,
   salaryScaleIdResultSchema,
-  listSalaryScalesSchema,
-  createSalaryScaleSchema,
-  updateSalaryScaleSchema,
+  listSalaryScalesInputSchema,
+  createSalaryScaleInputSchema,
+  updateSalaryScaleInputSchema,
 } from "./schemas";
 import type {
-  SalaryScaleListItem,
+  SalaryScaleItem,
   ListSalaryScalesResult,
   SalaryScaleIdResult,
 } from "./schemas";
@@ -31,7 +31,7 @@ async function logOutputError(source: string, error: unknown): Promise<void> {
 // ---------------------------------------------------------------------------
 
 export async function listSalaryScales(
-  params: FormData | Record<string, unknown> = {},
+  params: FormData | z.input<typeof listSalaryScalesInputSchema> = {},
 ): Promise<ListSalaryScalesResult> {
   await requireCapability("admin.system");
 
@@ -44,7 +44,7 @@ export async function listSalaryScales(
         }
       : params;
 
-  const parsed = listSalaryScalesSchema.safeParse(raw);
+  const parsed = listSalaryScalesInputSchema.safeParse(raw);
   if (!parsed.success) {
     return { records: [], total: 0, page: 1, limit: 20, totalPages: 0 };
   }
@@ -62,26 +62,22 @@ export async function listSalaryScales(
 
   const [records, total] = await Promise.all([
     prisma.salary_scale.findMany({
-      where: where as Prisma.salary_scaleWhereInput,
+      where: where as any,
       orderBy: [{ salary_scale_name_en: "asc" }],
       skip,
       take: limit,
     }),
-    prisma.salary_scale.count({ where: where as Prisma.salary_scaleWhereInput }),
+    prisma.salary_scale.count({ where: where as any }),
   ]);
 
   const result: ListSalaryScalesResult = {
-    records: records.map((r): SalaryScaleListItem => ({
+    records: records.map((r: any): SalaryScaleItem => ({
       salary_scale_id: r.salary_scale_id,
-      salary_scale_name_en: r.salary_scale_name_en ?? "",
+      salary_scale_name_en: r.salary_scale_name_en,
       salary_scale_name_ar: r.salary_scale_name_ar ?? null,
-      salary_scale_min_amount: r.salary_scale_min_amount
-        ? Number(r.salary_scale_min_amount)
-        : null,
-      salary_scale_max_amount: r.salary_scale_max_amount
-        ? Number(r.salary_scale_max_amount)
-        : null,
-      candidate_count: null,
+      salary_scale_min_amount: r.salary_scale_min_amount != null ? Number(r.salary_scale_min_amount) : null,
+      salary_scale_max_amount: r.salary_scale_max_amount != null ? Number(r.salary_scale_max_amount) : null,
+      candidate_count: 0,
     })),
     total,
     page,
@@ -103,8 +99,12 @@ export async function listSalaryScales(
 
 export async function getSalaryScale(
   salaryScaleId: number,
-): Promise<SalaryScaleListItem | null> {
+): Promise<SalaryScaleItem | null> {
   await requireCapability("admin.system");
+
+  if (!Number.isInteger(salaryScaleId) || salaryScaleId < 1) {
+    throw new Error("Invalid salary scale ID");
+  }
 
   const record = await prisma.salary_scale.findFirst({
     where: { salary_scale_id: salaryScaleId },
@@ -112,20 +112,17 @@ export async function getSalaryScale(
 
   if (!record) return null;
 
-  const result: SalaryScaleListItem = {
-    salary_scale_id: record.salary_scale_id,
-    salary_scale_name_en: record.salary_scale_name_en ?? "",
-    salary_scale_name_ar: record.salary_scale_name_ar ?? null,
-    salary_scale_min_amount: record.salary_scale_min_amount
-      ? Number(record.salary_scale_min_amount)
-      : null,
-    salary_scale_max_amount: record.salary_scale_max_amount
-      ? Number(record.salary_scale_max_amount)
-      : null,
-    candidate_count: null,
+  const raw = record as any;
+  const result: SalaryScaleItem = {
+    salary_scale_id: raw.salary_scale_id,
+    salary_scale_name_en: raw.salary_scale_name_en,
+    salary_scale_name_ar: raw.salary_scale_name_ar ?? null,
+    salary_scale_min_amount: raw.salary_scale_min_amount != null ? Number(raw.salary_scale_min_amount) : null,
+    salary_scale_max_amount: raw.salary_scale_max_amount != null ? Number(raw.salary_scale_max_amount) : null,
+    candidate_count: raw._count?.candidate ?? 0,
   };
 
-  const outputParsed = salaryScaleListItemSchema.safeParse(result);
+  const outputParsed = salaryScaleItemSchema.safeParse(result);
   if (!outputParsed.success) {
     logOutputError("getSalaryScale", outputParsed.error.issues);
   }
@@ -138,21 +135,16 @@ export async function getSalaryScale(
 // ---------------------------------------------------------------------------
 
 export async function createSalaryScale(
-  data: Record<string, unknown>,
+  data: z.input<typeof createSalaryScaleInputSchema>,
 ): Promise<SalaryScaleIdResult> {
   await requireCapability("admin.system");
 
-  const parsed = createSalaryScaleSchema.safeParse(data);
+  const parsed = createSalaryScaleInputSchema.safeParse(data);
   if (!parsed.success) {
     throw new Error(parsed.error.issues[0]?.message ?? "Invalid salary scale data");
   }
 
-  const {
-    salary_scale_name_en,
-    salary_scale_name_ar,
-    salary_scale_min_amount,
-    salary_scale_max_amount,
-  } = parsed.data;
+  const { salary_scale_name_en, salary_scale_name_ar, salary_scale_min_amount, salary_scale_max_amount } = parsed.data;
 
   const record = await prisma.salary_scale.create({
     data: {
@@ -181,11 +173,11 @@ export async function createSalaryScale(
 // ---------------------------------------------------------------------------
 
 export async function updateSalaryScale(
-  data: Record<string, unknown>,
+  data: z.input<typeof updateSalaryScaleInputSchema>,
 ): Promise<SalaryScaleIdResult> {
   await requireCapability("admin.system");
 
-  const parsed = updateSalaryScaleSchema.safeParse(data);
+  const parsed = updateSalaryScaleInputSchema.safeParse(data);
   if (!parsed.success) {
     throw new Error(parsed.error.issues[0]?.message ?? "Invalid salary scale data");
   }
@@ -198,6 +190,7 @@ export async function updateSalaryScale(
     salary_scale_max_amount,
   } = parsed.data;
 
+  // Verify the record exists
   const existing = await prisma.salary_scale.findFirst({
     where: { salary_scale_id },
   });
@@ -209,7 +202,7 @@ export async function updateSalaryScale(
     salary_scale_updated_at: new Date(),
   };
   if (salary_scale_name_en !== undefined) updateData.salary_scale_name_en = salary_scale_name_en;
-  if (salary_scale_name_ar !== undefined) updateData.salary_scale_name_ar = salary_scale_name_ar || null;
+  if (salary_scale_name_ar !== undefined) updateData.salary_scale_name_ar = salary_scale_name_ar;
   if (salary_scale_min_amount !== undefined) updateData.salary_scale_min_amount = salary_scale_min_amount;
   if (salary_scale_max_amount !== undefined) updateData.salary_scale_max_amount = salary_scale_max_amount;
 
@@ -238,6 +231,11 @@ export async function deleteSalaryScale(
 ): Promise<SalaryScaleIdResult> {
   await requireCapability("admin.system");
 
+  if (!Number.isInteger(salaryScaleId) || salaryScaleId < 1) {
+    throw new Error("Invalid salary scale ID");
+  }
+
+  // Verify the record exists
   const existing = await prisma.salary_scale.findFirst({
     where: { salary_scale_id: salaryScaleId },
   });

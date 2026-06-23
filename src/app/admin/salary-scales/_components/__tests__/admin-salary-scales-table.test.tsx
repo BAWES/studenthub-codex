@@ -14,13 +14,11 @@ vi.mock("@/modules/admin/salary-scales/actions", () => ({
   deleteSalaryScale: (...args: unknown[]) => mockDelete(...args),
 }));
 
-// Mock next/navigation
 const mockRefresh = vi.fn();
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ refresh: mockRefresh }),
 }));
 
-// Mock WorkspaceShell
 vi.mock("@/modules/workspace/WorkspaceShell", () => ({
   WorkspaceShell: ({
     children,
@@ -46,7 +44,6 @@ vi.mock("@/modules/workspace/WorkspaceShell", () => ({
   ),
 }));
 
-// Mock DataTable
 vi.mock("@/modules/workspace/DataTable", () => ({
   DataTable: ({
     title,
@@ -82,13 +79,23 @@ vi.mock("@/components/ui/button", () => ({
     type,
     disabled,
     onClick,
+    variant,
+    size,
   }: {
     children: React.ReactNode;
     type?: "button" | "submit" | "reset";
     disabled?: boolean;
     onClick?: () => void;
+    variant?: string;
+    size?: string;
   }) => (
-    <button type={type ?? "button"} disabled={disabled} onClick={onClick}>
+    <button
+      type={type ?? "button"}
+      disabled={disabled}
+      onClick={onClick}
+      data-variant={variant}
+      data-size={size}
+    >
       {children}
     </button>
   ),
@@ -101,8 +108,10 @@ vi.mock("@/components/ui/input", () => ({
 }));
 
 vi.mock("@/components/ui/label", () => ({
-  Label: ({ children, htmlFor }: { children: React.ReactNode; htmlFor?: string }) => (
-    <label htmlFor={htmlFor}>{children}</label>
+  Label: ({ children, htmlFor, ...props }: { children: React.ReactNode; htmlFor?: string }) => (
+    <label htmlFor={htmlFor} {...props}>
+      {children}
+    </label>
   ),
 }));
 
@@ -115,26 +124,26 @@ vi.mock("@/components/ui/card", () => ({
 
 import { AdminSalaryScalesTable } from "../admin-salary-scales-table";
 import type { SessionUser } from "@/modules/auth/types";
-import type { SalaryScaleListItem } from "@/modules/admin/salary-scales/schemas";
+import type { SalaryScaleItem } from "@/modules/admin/salary-scales/schemas";
 
 const mockSession = { user: { id: "1" }, role: "admin" } as unknown as SessionUser;
 
-const baseRecords: SalaryScaleListItem[] = [
+const baseRecords: SalaryScaleItem[] = [
   {
     salary_scale_id: 1,
-    salary_scale_name_en: "Grade A",
-    salary_scale_name_ar: "الدرجة أ",
-    salary_scale_min_amount: 500,
-    salary_scale_max_amount: 1500,
-    candidate_count: 0,
+    salary_scale_name_en: "Entry Level",
+    salary_scale_name_ar: "مبتدئ",
+    salary_scale_min_amount: 300,
+    salary_scale_max_amount: 800,
+    candidate_count: 10,
   },
   {
     salary_scale_id: 2,
-    salary_scale_name_en: "Grade B",
-    salary_scale_name_ar: null,
-    salary_scale_min_amount: null,
-    salary_scale_max_amount: null,
-    candidate_count: null,
+    salary_scale_name_en: "Senior",
+    salary_scale_name_ar: "كبير",
+    salary_scale_min_amount: 1500,
+    salary_scale_max_amount: 3000,
+    candidate_count: 5,
   },
 ];
 
@@ -151,32 +160,33 @@ describe("AdminSalaryScalesTable", () => {
     render(<AdminSalaryScalesTable session={mockSession} records={baseRecords} />);
 
     expect(screen.getByTestId("eyebrow")).toHaveTextContent("Admin settings");
-    expect(screen.getByTestId("metric-Scales")).toHaveTextContent("2");
+    expect(screen.getByTestId("title")).toHaveTextContent("Salary Scales");
+    expect(screen.getByTestId("metric-Salary Scales")).toHaveTextContent("2");
   });
 
   it("renders all records in the data table", () => {
     render(<AdminSalaryScalesTable session={mockSession} records={baseRecords} />);
 
     expect(screen.getByTestId("table-rows-count")).toHaveTextContent("2");
-    expect(screen.getByTestId("cell-1-salary_scale_name_en")).toHaveTextContent("Grade A");
-    expect(screen.getByTestId("cell-2-salary_scale_name_en")).toHaveTextContent("Grade B");
+    expect(screen.getByTestId("cell-1-salary_scale_name_en")).toHaveTextContent("Entry Level");
+    expect(screen.getByTestId("cell-2-salary_scale_name_en")).toHaveTextContent("Senior");
   });
 
   it("renders Arabic names", () => {
     render(<AdminSalaryScalesTable session={mockSession} records={baseRecords} />);
 
-    expect(screen.getByTestId("cell-1-salary_scale_name_ar")).toHaveTextContent("الدرجة أ");
-    expect(screen.getByTestId("cell-2-salary_scale_name_ar")).toHaveTextContent("—");
+    expect(screen.getByTestId("cell-1-salary_scale_name_ar")).toHaveTextContent("مبتدئ");
+    expect(screen.getByTestId("cell-2-salary_scale_name_ar")).toHaveTextContent("كبير");
   });
 
   it("shows create form with all inputs", () => {
     render(<AdminSalaryScalesTable session={mockSession} records={baseRecords} />);
 
     expect(screen.getByText("Add salary scale")).toBeInTheDocument();
-    expect(screen.getByTestId("input-nameEn")).toBeInTheDocument();
-    expect(screen.getByTestId("input-nameAr")).toBeInTheDocument();
-    expect(screen.getByTestId("input-minAmount")).toBeInTheDocument();
-    expect(screen.getByTestId("input-maxAmount")).toBeInTheDocument();
+    expect(screen.getByTestId("input-salary_scale_name_en")).toBeInTheDocument();
+    expect(screen.getByTestId("input-salary_scale_name_ar")).toBeInTheDocument();
+    expect(screen.getByTestId("input-salary_scale_min_amount")).toBeInTheDocument();
+    expect(screen.getByTestId("input-salary_scale_max_amount")).toBeInTheDocument();
     expect(screen.getByText("Add")).toBeInTheDocument();
   });
 
@@ -187,36 +197,59 @@ describe("AdminSalaryScalesTable", () => {
     expect(deleteButtons).toHaveLength(2);
   });
 
-  it("shows inline edit form when clicking a name", () => {
+  it("shows inline edit form when clicking a salary scale name", () => {
     render(<AdminSalaryScalesTable session={mockSession} records={baseRecords} />);
 
-    fireEvent.click(screen.getByText("Grade A"));
+    fireEvent.click(screen.getByText("Entry Level"));
 
     expect(screen.getByText("Save")).toBeInTheDocument();
     expect(screen.getByText("Cancel")).toBeInTheDocument();
+
+    const allDeleteButtons = screen.getAllByText("Delete");
+    expect(allDeleteButtons).toHaveLength(1);
   });
 
   it("hides Save/Cancel when clicking Cancel", () => {
     render(<AdminSalaryScalesTable session={mockSession} records={baseRecords} />);
 
-    fireEvent.click(screen.getByText("Grade A"));
+    fireEvent.click(screen.getByText("Entry Level"));
     expect(screen.getByText("Save")).toBeInTheDocument();
 
     fireEvent.click(screen.getByText("Cancel"));
     expect(screen.queryByText("Save")).not.toBeInTheDocument();
   });
 
-  it("renders dash for null min/max amounts", () => {
+  it("calls deleteSalaryScale when delete is confirmed", async () => {
+    const mockConfirm = vi.spyOn(window, "confirm").mockReturnValue(true);
+    mockDelete.mockResolvedValue({ salary_scale_id: 1 });
+
     render(<AdminSalaryScalesTable session={mockSession} records={baseRecords} />);
 
-    expect(screen.getByTestId("cell-2-salary_scale_min_amount")).toHaveTextContent("—");
-    expect(screen.getByTestId("cell-2-salary_scale_max_amount")).toHaveTextContent("—");
+    const deleteButtons = screen.getAllByText("Delete");
+    fireEvent.click(deleteButtons[0]);
+
+    await vi.waitFor(() => {
+      expect(mockDelete).toHaveBeenCalledWith(1);
+    });
+
+    mockConfirm.mockRestore();
   });
 
-  it("renders formatted amount for valid min/max", () => {
-    render(<AdminSalaryScalesTable session={mockSession} records={baseRecords} />);
+  it("renders dash for null amount", () => {
+    const nullRecords: SalaryScaleItem[] = [
+      {
+        salary_scale_id: 3,
+        salary_scale_name_en: "Test Scale",
+        salary_scale_name_ar: null,
+        salary_scale_min_amount: null,
+        salary_scale_max_amount: null,
+        candidate_count: 0,
+      },
+    ];
 
-    expect(screen.getByTestId("cell-1-salary_scale_min_amount")).toHaveTextContent("500.000");
-    expect(screen.getByTestId("cell-1-salary_scale_max_amount")).toHaveTextContent("1500.000");
+    render(<AdminSalaryScalesTable session={mockSession} records={nullRecords} />);
+
+    expect(screen.getByTestId("cell-3-salary_scale_min_amount")).toHaveTextContent("—");
+    expect(screen.getByTestId("cell-3-salary_scale_max_amount")).toHaveTextContent("—");
   });
 });

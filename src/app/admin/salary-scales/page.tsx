@@ -5,7 +5,7 @@ import { AdminSalaryScalesTable } from "./_components";
 export const dynamic = "force-dynamic";
 
 export default async function AdminSalaryScalesPage() {
-  const session = await requireRoleCapability("admin", "admin.system");
+  const session = await requireRoleCapability("admin", "admin.read");
   const { records } = await listSalaryScales({ limit: 200 });
 
   return <AdminSalaryScalesTable session={session} records={records} />;
