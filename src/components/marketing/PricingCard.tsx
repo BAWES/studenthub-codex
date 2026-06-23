@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Check, ArrowUpRight, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 // ── Types ────────────────────────────────────────────────
 
@@ -196,13 +197,13 @@ export default function PricingCard({ persona = "candidate", className }: Pricin
   const tiers = personaTiers[persona] ?? candidateTiers;
 
   return (
-    <section className={cn("shSection", className)} aria-label="Pricing plans">
+    <section className={cn(className)} aria-label="Pricing plans">
       {/* Header */}
       <div className="text-center mb-8 md:mb-10">
         <p className="text-[#1f73b7] text-[11px] font-black uppercase tracking-wider mb-2">
           Simple pricing
         </p>
-        <h2 className="shBenefitsTitle text-center">
+        <h2 className="text-[clamp(22px,3.4vw,38px)] font-black leading-[1.08] tracking-tight text-foreground text-center">
           {persona === "candidate"
             ? "Completely free for students. Always."
             : "Plans that scale with your team."}
@@ -308,22 +309,22 @@ export default function PricingCard({ persona = "candidate", className }: Pricin
 
               {/* CTA */}
               {isEnterprise ? (
-                <Link
-                  href={tier.ctaHref as any}
-                  className="uiButton uiButton_ghost uiButton_defaultSize w-full justify-center"
-                >
-                  {tier.cta} <ArrowUpRight className="size-4" />
-                </Link>
+                <Button variant="ghost" size="default" asChild className="w-full justify-center">
+                  <Link href={tier.ctaHref as any}>
+                    {tier.cta} <ArrowUpRight className="size-4" />
+                  </Link>
+                </Button>
               ) : (
-                <Link
-                  href={tier.ctaHref as any}
-                  className={cn(
-                    "uiButton uiButton_defaultSize w-full justify-center",
-                    tier.popular ? "uiButton_default" : "uiButton_ghost",
-                  )}
+                <Button
+                  variant={tier.popular ? "default" : "ghost"}
+                  size="default"
+                  asChild
+                  className="w-full justify-center"
                 >
-                  {tier.cta} <ArrowUpRight className="size-4" />
-                </Link>
+                  <Link href={tier.ctaHref as any}>
+                    {tier.cta} <ArrowUpRight className="size-4" />
+                  </Link>
+                </Button>
               )}
             </div>
           );
