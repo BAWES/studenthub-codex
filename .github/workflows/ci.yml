@@ -119,7 +119,7 @@ jobs:
       - name: Push schema to MySQL
         run: npx prisma db push --skip-generate
         env:
-          DATABASE_URL: "mysql://studenthub:***@localhost:3307/studenthub_prod_local"
+          DATABASE_URL: "mysql://studenthub:studenthub@localhost:3307/studenthub_prod_local"
       - name: Build
         run: npx next build
       - name: Start and validate
@@ -135,7 +135,7 @@ jobs:
           done
           node scripts/validate.mjs
         env:
-          DATABASE_URL: "mysql://studenthub:***@localhost:3307/studenthub_prod_local"
+          DATABASE_URL: "mysql://studenthub:studenthub@localhost:3307/studenthub_prod_local"
 
   e2e:
     name: Playwright E2E
@@ -168,7 +168,7 @@ jobs:
       - name: Push schema to MySQL
         run: npx prisma db push --skip-generate
         env:
-          DATABASE_URL: "mysql://studenthub:***@localhost:3307/studenthub_prod_local"
+          DATABASE_URL: "mysql://studenthub:studenthub@localhost:3307/studenthub_prod_local"
       - name: Seed E2E test data
         run: mysql -h 127.0.0.1 -P 3307 -u studenthub -pstudenthub studenthub_prod_local < scripts/seed-e2e.sql
       - name: Install Playwright Chromium
@@ -176,13 +176,13 @@ jobs:
       - name: Build Next.js
         run: npx next build
         env:
-          DATABASE_URL: "mysql://studenthub:***@localhost:3307/studenthub_prod_local"
+          DATABASE_URL: "mysql://studenthub:studenthub@localhost:3307/studenthub_prod_local"
       - name: Run Playwright E2E tests
         run: npx playwright test
         env:
           CI: "true"
           AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
-          DATABASE_URL: "mysql://studenthub:***@localhost:3307/studenthub_prod_local"
+          DATABASE_URL: "mysql://studenthub:studenthub@localhost:3307/studenthub_prod_local"
       - name: Upload Playwright report
         if: failure()
         uses: actions/upload-artifact@v4
