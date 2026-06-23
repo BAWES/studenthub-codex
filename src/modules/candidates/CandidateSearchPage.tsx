@@ -78,7 +78,7 @@ export function CandidateSearchPage({
       header: "",
       className: "w-10",
       cell: (row) => (
-        <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold">
+        <div className="w-8 h-8 rounded-full bg-coral flex items-center justify-center text-white text-xs font-bold">
           {candidateInitials(row.name)}
         </div>
       ),
@@ -140,7 +140,7 @@ export function CandidateSearchPage({
       <header className="sticky top-0 z-10 bg-background border-b border-border px-4 py-3">
         <div className="max-w-7xl mx-auto flex items-center gap-4">
           <Link href={homePath} className="flex items-center gap-2 text-foreground no-underline">
-            <span className="w-8 h-8 flex items-center justify-center rounded-lg bg-primary text-primary-foreground text-xs font-bold">
+            <span className="w-8 h-8 flex items-center justify-center rounded-lg bg-coral text-white text-xs font-bold">
               SH
             </span>
             <span className="font-semibold text-sm hidden sm:inline">Candidates</span>
@@ -180,7 +180,12 @@ export function CandidateSearchPage({
           <div className="flex items-center gap-2 ml-2">
             <ThemeToggle />
             <form action={logoutAction}>
-              <Button type="submit" variant="ghost" size="sm">Sign out</Button>
+              <button
+                type="submit"
+                className="text-xs text-muted-foreground hover:text-foreground"
+              >
+                Sign out
+              </button>
             </form>
           </div>
         </div>
@@ -211,21 +216,23 @@ export function CandidateSearchPage({
         {data.totalPages && data.totalPages > 1 ? (
           <nav className="flex items-center justify-center gap-2 mt-6" aria-label="Pagination">
             {data.page && data.page > 1 ? (
-              <Button variant="outline" size="sm" asChild>
-                <Link href={candidateSearchHref(basePath, params, { page: String(data.page - 1) })}>
-                  Previous
-                </Link>
-              </Button>
+              <Link
+                href={candidateSearchHref(basePath, params, { page: String(data.page - 1) })}
+                className="px-3 py-1.5 rounded-md text-sm border border-border text-foreground hover:bg-accent"
+              >
+                Previous
+              </Link>
             ) : null}
             <span className="text-sm text-muted-foreground">
               Page {data.page ?? 1} of {data.totalPages}
             </span>
             {data.page && data.page < data.totalPages ? (
-              <Button variant="outline" size="sm" asChild>
-                <Link href={candidateSearchHref(basePath, params, { page: String((data.page ?? 1) + 1) })}>
-                  Next
-                </Link>
-              </Button>
+              <Link
+                href={candidateSearchHref(basePath, params, { page: String((data.page ?? 1) + 1) })}
+                className="px-3 py-1.5 rounded-md text-sm border border-border text-foreground hover:bg-accent"
+              >
+                Next
+              </Link>
             ) : null}
           </nav>
         ) : null}

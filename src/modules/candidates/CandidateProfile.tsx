@@ -3,7 +3,6 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Alert } from "@/components/ui/alert";
 import type { getCandidateDetail } from "@/modules/workspace/data";
 import { formatDate } from "@/modules/workspace/format";
 import { WorkLogStaffActions } from "./WorkLogStaffActions";
@@ -52,13 +51,13 @@ export function CandidateProfile({
       <Card>
         <CardHeader className="flex flex-row items-center gap-4 border-b pb-4">
           <div
-            className="w-16 h-16 rounded-lg bg-primary text-primary-foreground flex items-center justify-center text-lg font-bold shrink-0"
+            className="w-16 h-16 rounded-lg bg-coral text-white flex items-center justify-center text-lg font-bold shrink-0"
             aria-hidden="true"
           >
             {initials(candidate.candidate_name)}
           </div>
           <div className="min-w-0 flex flex-col gap-1">
-            <span className="text-xs uppercase font-bold text-primary">
+            <span className="text-xs uppercase font-bold text-coral">
               {candidate.candidate_uid ?? `#${candidate.candidate_id}`}
             </span>
             <CardTitle className={`break-words leading-[0.98] ${compact ? "text-3xl" : "text-[clamp(28px,3vw,44px)]"}`}>
@@ -100,13 +99,13 @@ export function CandidateProfile({
 
         {/* ── Readiness ── */}
         <CardContent className="border-b pb-4">
-          <div className="grid grid-cols-1 sm:grid-cols-[150px_1fr] gap-3">
+          <div className="grid grid-cols-[150px_1fr] gap-3">
             <Card className="border p-3 bg-muted/30">
-              <span className="text-xs uppercase font-bold text-primary">Readiness</span>
+              <span className="text-xs uppercase font-bold text-coral">Readiness</span>
               <p className="text-3xl font-bold leading-none mt-1">{readiness.score}%</p>
               <p className="text-xs text-muted-foreground mt-1">{readiness.summary}</p>
             </Card>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+            <div className="grid grid-cols-2 gap-1.5">
               {readiness.items.map((item) => (
                 <Card key={item.label} className="border p-2">
                   <Badge variant={item.done ? "success" : "warning"} className="text-[10px] px-1 py-0">
@@ -118,7 +117,7 @@ export function CandidateProfile({
             </div>
           </div>
           {readiness.missing?.length ? (
-            <Alert className="mt-3 border-amber-300">
+            <Card className="border-amber-300 bg-amber-50 dark:bg-amber-950/10 mt-3 p-3">
               <span className="text-xs uppercase font-bold text-amber-700 dark:text-amber-400">Missing fields</span>
               <ul className="text-sm list-disc pl-4 mt-1 text-muted-foreground">
                 {readiness.missing.map((item) => (
@@ -127,7 +126,7 @@ export function CandidateProfile({
                   </li>
                 ))}
               </ul>
-            </Alert>
+            </Card>
           ) : null}
         </CardContent>
 
@@ -152,7 +151,7 @@ export function CandidateProfile({
         {!compact && candidate.candidate_intro ? (
           <CardContent className="pb-0">
             <Card className="border p-4">
-              <span className="text-xs uppercase font-bold text-primary">Profile intro</span>
+              <span className="text-xs uppercase font-bold text-coral">Profile intro</span>
               <p className="text-sm text-muted-foreground mt-1 max-w-[980px] leading-relaxed">
                 {candidate.candidate_intro}
               </p>
@@ -162,10 +161,10 @@ export function CandidateProfile({
       </Card>
 
       {/* ── Skills & timeline ── */}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+      <div className="grid grid-cols-2 gap-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between border-b px-3 py-2.5">
-            <span className="text-xs uppercase font-bold text-primary">Skills and tags</span>
+            <span className="text-xs uppercase font-bold text-coral">Skills and tags</span>
             <span className="text-xs font-bold">{(detail.skills.length + detail.tags.length).toLocaleString("en-US")}</span>
           </CardHeader>
           <CardContent className="flex flex-wrap gap-2 p-3">
@@ -185,7 +184,7 @@ export function CandidateProfile({
 
       {/* ── Detail panels ── */}
       {!compact ? (
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div className="grid grid-cols-2 gap-3">
           <RowsPanel title="Education" rows={detail.education} />
           <RowsPanel title="Experience" rows={detail.experiences} />
           <RowsPanel title="Applications" rows={detail.applications} />
@@ -210,7 +209,7 @@ export function CandidateProfile({
 function Fact({ label, value }: { label: string; value: string | number }) {
   return (
     <div className="min-w-0 flex flex-col gap-1.5 border-r border-b p-3 odd:border-r even:border-r-0">
-      <span className="text-xs uppercase font-bold text-primary">{label}</span>
+      <span className="text-xs uppercase font-bold text-coral">{label}</span>
       <strong className="text-sm break-words">{value}</strong>
     </div>
   );
@@ -235,7 +234,7 @@ function CivilIdPanel({ candidate, viewerRole }: { candidate: NonNullable<Candid
   return (
     <Card className="mx-0 border-t-0 border-x-0 rounded-none shadow-none">
       <CardHeader className="flex flex-row items-center justify-between border-b px-4 py-2.5">
-        <span className="text-xs uppercase font-bold text-primary">Civil ID</span>
+        <span className="text-xs uppercase font-bold text-coral">Civil ID</span>
         <span className="text-xs font-bold">{badges.length ? badges.join(" · ") : "On file"}</span>
       </CardHeader>
       <CardContent className="grid gap-3 p-3">
@@ -284,7 +283,7 @@ function RowsPanel({
   return (
     <Card className="min-w-0">
       <CardHeader className="flex flex-row items-center justify-between border-b px-3 py-2.5">
-        <span className="text-xs uppercase font-bold text-primary">{title}</span>
+        <span className="text-xs uppercase font-bold text-coral">{title}</span>
         <span className="text-xs font-bold">{rows.length.toLocaleString("en-US")}</span>
       </CardHeader>
       <CardContent className="grid gap-2 p-3">
@@ -344,7 +343,7 @@ function WorkLogStaffPanel({ hours }: { hours: WorkLogRow[] }) {
   return (
     <Card className="min-w-0">
       <CardHeader className="flex flex-row items-center justify-between border-b px-3 py-2.5">
-        <span className="text-xs uppercase font-bold text-primary">Work logs</span>
+        <span className="text-xs uppercase font-bold text-coral">Work logs</span>
         <span className="text-xs font-bold">{hours.length.toLocaleString("en-US")}</span>
       </CardHeader>
       <CardContent className="grid gap-2 p-3">

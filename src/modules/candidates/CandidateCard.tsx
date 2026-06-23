@@ -108,9 +108,9 @@ export function CandidateCard({
       <Link
         className={cn(
           "grid gap-1.5 border border-border rounded-lg bg-card text-foreground p-2.5 no-underline",
-          "hover:border-blue hover:shadow-[0_8px_24px_rgba(16,24,40,0.08)]",
+          "hover:border-coral hover:shadow-[0_8px_24px_rgba(16,24,40,0.08)]",
           isSelectedEffective &&
-            "shadow-[inset_3px_0_0_var(--blue),0_8px_24px_rgba(16,24,40,0.08)] border-blue",
+            "shadow-[inset_3px_0_0_var(--coral),0_8px_24px_rgba(16,24,40,0.08)] border-coral",
           onSelect && "cursor-pointer",
         )}
         href={onSelect ? "#" : (href as Route)}
@@ -144,9 +144,9 @@ export function CandidateCard({
       <Link
         className={cn(
           "grid gap-2 border border-border rounded-lg bg-card text-foreground p-4 no-underline",
-          "hover:border-blue hover:shadow-[0_8px_24px_rgba(16,24,40,0.08)]",
+          "hover:border-coral hover:shadow-[0_8px_24px_rgba(16,24,40,0.08)]",
           isSelectedEffective &&
-            "shadow-[inset_3px_0_0_var(--blue),0_8px_24px_rgba(16,24,40,0.08)] border-blue",
+            "shadow-[inset_3px_0_0_var(--coral),0_8px_24px_rgba(16,24,40,0.08)] border-coral",
         )}
         href={href as Route}
       >
@@ -159,7 +159,7 @@ export function CandidateCard({
                 className={cn(
                   "w-4 h-4 rounded border shrink-0 flex items-center justify-center text-[10px]",
                   isSelectedEffective
-                    ? "bg-blue border-blue text-white"
+                    ? "bg-coral border-coral text-white"
                     : "border-border bg-background",
                 )}
                 onClick={(e) => {
@@ -236,7 +236,11 @@ export function CandidateCard({
         {data.flags.length > 0 && (
           <div className="flex flex-wrap gap-1.5">
             {data.flags.slice(0, 3).map((flag) => (
-              <Badge key={flag} variant="outline" className="text-xs">
+              <Badge
+                key={flag}
+                variant="secondary"
+                className="text-xs"
+              >
                 {flag}
               </Badge>
             ))}
@@ -332,7 +336,11 @@ export function CandidateCard({
       {data.flags.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
           {data.flags.slice(0, 3).map((flag) => (
-            <Badge key={flag} variant="outline" className="text-xs">
+            <Badge
+              key={flag}
+              variant="secondary"
+              className="text-xs"
+            >
               {flag}
             </Badge>
           ))}
