@@ -26,21 +26,16 @@ type Metrics = {
 type Props = {
   session: SessionUser;
   applications: ApplicationRow[];
-  total: number;
   metrics: Metrics;
 };
 
-export function EmployerApplicationsContent({ session, applications, total, metrics }: Props) {
+export function EmployerApplicationsContent({ session, applications, metrics }: Props) {
   return (
     <WorkspaceShell
       session={session}
       eyebrow="Employer"
       title="Applications"
-      metrics={[
-        { label: "Total Applications", value: total, note: "all time" },
-        { label: "Pending Review", value: metrics.pending, note: "awaiting decision" },
-        { label: "Accepted", value: metrics.accepted, note: "approved" },
-      ]}
+      metrics={[]}
     >
       {/* Metrics grid — shadcn MetricCard */}
       <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
