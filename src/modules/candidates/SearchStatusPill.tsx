@@ -24,12 +24,8 @@ export function SearchStatusPill({
     return (
       <Badge
         variant="outline"
-        className="inline-flex items-center gap-1 px-[10px] py-[3px] text-xs font-bold whitespace-nowrap"
-        style={{
-          background: "rgba(235, 102, 81, 0.1)",
-          color: "#eb6651",
-          borderColor: "rgba(235, 102, 81, 0.3)",
-        }}
+        className="inline-flex items-center gap-1 px-[10px] py-[3px] text-xs font-bold whitespace-nowrap bg-[rgba(235,102,81,0.1)] text-[#eb6651] border-[rgba(235,102,81,0.3)]"
+        role="status"
       >
         No results
       </Badge>
@@ -43,12 +39,8 @@ export function SearchStatusPill({
   return (
     <Badge
       variant="outline"
-      className="inline-flex items-center gap-1 px-[10px] py-[3px] text-xs font-bold whitespace-nowrap"
-      style={{
-        background: "rgba(235, 102, 81, 0.1)",
-        color: "#eb6651",
-        borderColor: "rgba(235, 102, 81, 0.3)",
-      }}
+      className="inline-flex items-center gap-1 px-[10px] py-[3px] text-xs font-bold whitespace-nowrap bg-[rgba(235,102,81,0.1)] text-[#eb6651] border-[rgba(235,102,81,0.3)]"
+      role="status"
     >
       {formatted} results
     </Badge>
