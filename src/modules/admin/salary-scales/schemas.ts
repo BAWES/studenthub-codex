@@ -1,62 +1,73 @@
 import { z } from "zod";
 
 // ---------------------------------------------------------------------------
-// List schemas (backward-compatible paginated list)
+// Output validation schemas
 // ---------------------------------------------------------------------------
 
-export const listSalaryScalesSchema = z.object({
-  page: z.coerce.number().int().positive().optional().default(1),
-  limit: z.coerce.number().int().min(1).max(200).optional().default(50),
-});
-
-export const salaryScaleItemSchema = z.object({
-  salary_scale_uuid: z.string().min(1),
-  salary_scale_name_en: z.string().min(1),
+export const salaryScaleListItemSchema = z.object({
+  salary_scale_id: z.number().int().positive(),
+  salary_scale_name_en: z.string(),
   salary_scale_name_ar: z.string().nullable(),
-  salary_scale_min_salary: z.number().nullable(),
-  salary_scale_mid_salary: z.number().nullable(),
-  salary_scale_max_salary: z.number().nullable(),
-  salary_scale_currency: z.string().nullable(),
-  salary_scale_sort_order: z.number().int().nullable(),
-  salary_scale_created_at: z.date().nullable(),
-  salary_scale_updated_at: z.date().nullable(),
+  salary_scale_min_amount: z.number().nullable(),
+  salary_scale_max_amount: z.number().nullable(),
+  candidate_count: z.number().int().nullable(),
 });
 
 export const listSalaryScalesResultSchema = z.object({
-  items: z.array(salaryScaleItemSchema),
+  records: z.array(salaryScaleListItemSchema),
   total: z.number().int().nonnegative(),
   page: z.number().int().positive(),
   limit: z.number().int().positive(),
   totalPages: z.number().int().nonnegative(),
 });
 
-export type ListSalaryScalesInput = z.input<typeof listSalaryScalesSchema>;
-export type SalaryScaleItem = z.output<typeof salaryScaleItemSchema>;
-export type ListSalaryScalesResult = z.output<typeof listSalaryScalesResultSchema>;
+export const salaryScaleIdResultSchema = z.object({
+  salary_scale_id: z.number().int().positive(),
+});
 
 // ---------------------------------------------------------------------------
-// Inline CRUD schemas
+// Input schemas
 // ---------------------------------------------------------------------------
+
+export const listSalaryScalesSchema = z.object({
+  page: z.coerce.number().int().positive().optional().default(1),
+  limit: z.coerce.number().int().min(1).max(200).optional().default(50),
+  search: z.string().optional(),
+});
 
 export const createSalaryScaleSchema = z.object({
   salary_scale_name_en: z
     .string()
-    .min(1, "Name (English) is required")
-    .max(255, "Name must be at most 255 characters"),
+    .min(1, "English name is required")
+    .max(255, "English name must be at most 255 characters"),
   salary_scale_name_ar: z
     .string()
-    .max(255, "Name (Arabic) must be at most 255 characters")
+    .max(255, "Arabic name must be at most 255 characters")
     .optional()
     .default(""),
-  salary_scale_min_salary: z.coerce.number().min(0).optional(),
-  salary_scale_mid_salary: z.coerce.number().min(0).optional(),
-  salary_scale_max_salary: z.coerce.number().min(0).optional(),
-  salary_scale_currency: z
-    .string()
-    .max(3)
-    .optional()
-    .default("KWD"),
-  salary_scale_sort_order: z.coerce.number().int().optional(),
+  salary_scale_min_amount: z.coerce.number().optional(),
+  salary_scale_max_amount: z.coerce.number().optional(),
 });
 
-export type CreateSalaryScaleInput = z.input<typeof createSalaryScaleSchema>;
+export const updateSalaryScaleSchema = z.object({
+  salary_scale_id: z.coerce.number().int().positive(),
+  salary_scale_name_en: z
+    .string()
+    .min(1)
+    .max(255)
+    .optional(),
+  salary_scale_name_ar: z
+    .string()
+    .max(255)
+    .optional(),
+  salary_scale_min_amount: z.coerce.number().optional(),
+  salary_scale_max_amount: z.coerce.number().optional(),
+});
+
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
+
+export type SalaryScaleListItem = z.output<typeof salaryScaleListItemSchema>;
+export type ListSalaryScalesResult = z.output<typeof listSalaryScalesResultSchema>;
+export type SalaryScaleIdResult = z.output<typeof salaryScaleIdResultSchema>;
