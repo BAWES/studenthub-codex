@@ -26,22 +26,31 @@ export default async function LoginPage({
           <strong className="text-xl text-foreground">StudentHub</strong>
         </div>
 
-        {/* Login card */}
-        <Card className="border-border shadow-xl" aria-label="StudentHub sign in">
-          <CardContent className="p-6">
-            {params.error === "expired" ? (
-              <p className="text-destructive font-bold text-sm mb-4 pb-2 border-b border-border">
-                That verified account choice expired. Sign in again to continue.
-              </p>
-            ) : null}
-            {params.error === "account" ? (
-              <p className="text-destructive font-bold text-sm mb-4 pb-2 border-b border-border">
-                Choose a verified account to continue.
-              </p>
-            ) : null}
-            <LoginForm />
-          </CardContent>
-        </Card>
+      {/* Intro */}
+      <Card className="overflow-hidden border-border bg-gradient-to-br from-blue/10 via-transparent to-transparent">
+        <CardContent className="p-[clamp(22px,4vw,48px)]">
+          <p className="text-coral text-[11px] font-black uppercase">One StudentHub login</p>
+          <h1 className="mt-0 max-w-[760px] text-[clamp(44px,6.4vw,92px)] leading-[0.94] max-sm:text-[40px]">
+            Sign in once. We&rsquo;ll open the right workspace.
+          </h1>
+          <p className="text-muted-foreground max-w-[620px] leading-relaxed">
+            No more guessing whether you are entering as admin, staff, candidate, company, or inspector. Your production
+            credentials decide what you can see and do.
+          </p>
+          <div className="flex flex-wrap gap-2 mt-5">
+            {["Production-compatible credentials", "Server-side account detection", "Capability-scoped workspaces"].map(
+              (item) => (
+                <Badge key={item} variant="outline" className="text-coral text-[11px] font-black uppercase px-3 py-1.5">
+                  {item}
+                </Badge>
+              )
+            )}
+          </div>
+        </CardContent>
+        <Link href="/" className="inline-block mt-4 text-sm no-underline text-muted-foreground hover:text-coral px-[clamp(22px,4vw,48px)] pb-[clamp(22px,4vw,48px)]">
+          Back to landing
+        </Link>
+      </Card>
 
         {/* Footer link */}
         <p className="text-center text-sm text-muted-foreground">
