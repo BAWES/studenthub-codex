@@ -6,7 +6,8 @@ import { requireRoleCapability } from "@/modules/auth/session";
 import { DetailSection } from "@/modules/workspace/DetailPanels";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { Button } from "@/components/ui/button";
-import { getEmployeeById } from "./actions";
+import { Badge } from "@/components/ui/badge";
+import { getEmployeeById, updateEmployeeRole } from "./actions";
 import { formatDate } from "@/modules/workspace/format";
 
 export const dynamic = "force-dynamic";
@@ -17,8 +18,24 @@ const STATUS_LABELS: Record<number, string> = {
   20: "Suspended",
 };
 
+const ROLE_LABELS: Record<string, string> = {
+  admin: "Admin",
+  staff: "Staff",
+};
+
 function getStatusLabel(status: number): string {
   return STATUS_LABELS[status] ?? `Unknown (${status})`;
+}
+
+function roleBadge(role: string | null): React.ReactNode {
+  if (role === "admin") return <Badge className="bg-blue-600">Admin</Badge>;
+  if (role === "staff") return <Badge variant="secondary">Staff</Badge>;
+  return <Badge variant="outline">—</Badge>;
+}
+
+function oppositeRole(current: string | null): "admin" | "staff" {
+  if (current === "admin") return "staff";
+  return "admin";
 }
 
 export default async function AdminEmployeeDetailPage({
@@ -35,6 +52,9 @@ export default async function AdminEmployeeDetailPage({
     notFound();
   }
 
+  const canWrite = session.capabilities?.includes("admin.write") ?? false;
+  const newRole = oppositeRole(employee.employee_role);
+
   return (
     <ErrorBoundary>
       <WorkspaceShell
@@ -45,6 +65,11 @@ export default async function AdminEmployeeDetailPage({
           {
             label: "Status",
             value: getStatusLabel(employee.employee_status),
+            note: "",
+          },
+          {
+            label: "Role",
+            value: ROLE_LABELS[employee.employee_role ?? ""] ?? "—",
             note: "",
           },
           {
@@ -78,6 +103,10 @@ export default async function AdminEmployeeDetailPage({
               value: getStatusLabel(employee.employee_status),
             },
             {
+              label: "Role",
+              value: employee.employee_role ?? "—",
+            },
+            {
               label: "Designation",
               value: employee.designation_name_en ?? "—",
             },
@@ -96,11 +125,31 @@ export default async function AdminEmployeeDetailPage({
           ]}
         />
 
-        <section className="flex gap-2 p-4">
-          <Link href={"/admin/employees" as Route}>
-            <Button variant="outline">Back to Employees</Button>
-          </Link>
-        </section>
+        {canWrite ? (
+          <section className="flex gap-2 p-4">
+            <form
+              action={async () => {
+                "use server";
+                await updateEmployeeRole({ uuid: id, role: newRole });
+              }}
+            >
+              <Button type="submit" variant="outline">
+                {employee.employee_role === "admin"
+                  ? "Demote to Staff"
+                  : "Promote to Admin"}
+              </Button>
+            </form>
+            <Link href={"/admin/employees" as Route}>
+              <Button variant="outline">Back to Employees</Button>
+            </Link>
+          </section>
+        ) : (
+          <section className="flex gap-2 p-4">
+            <Link href={"/admin/employees" as Route}>
+              <Button variant="outline">Back to Employees</Button>
+            </Link>
+          </section>
+        )}
       </WorkspaceShell>
     </ErrorBoundary>
   );
