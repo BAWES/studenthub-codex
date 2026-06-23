@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Alert } from "@/components/ui/alert";
 import type { getCandidateDetail } from "@/modules/workspace/data";
 import { formatDate } from "@/modules/workspace/format";
 import { WorkLogStaffActions } from "./WorkLogStaffActions";
@@ -117,7 +118,7 @@ export function CandidateProfile({
             </div>
           </div>
           {readiness.missing?.length ? (
-            <Card className="border-amber-300 bg-amber-50 dark:bg-amber-950/10 mt-3 p-3">
+            <Alert className="mt-3 border-amber-300">
               <span className="text-xs uppercase font-bold text-amber-700 dark:text-amber-400">Missing fields</span>
               <ul className="text-sm list-disc pl-4 mt-1 text-muted-foreground">
                 {readiness.missing.map((item) => (
@@ -126,7 +127,7 @@ export function CandidateProfile({
                   </li>
                 ))}
               </ul>
-            </Card>
+            </Alert>
           ) : null}
         </CardContent>
 

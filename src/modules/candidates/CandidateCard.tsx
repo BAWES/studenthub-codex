@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Route } from "next";
 import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
 
 /**
  * Data shape for a candidate card shown in queue/grid/console views.
@@ -235,12 +236,9 @@ export function CandidateCard({
         {data.flags.length > 0 && (
           <div className="flex flex-wrap gap-1.5">
             {data.flags.slice(0, 3).map((flag) => (
-              <span
-                key={flag}
-                className="min-h-6 inline-flex items-center rounded-full px-2 py-0.5 text-xs bg-gray-100 text-muted-foreground"
-              >
+              <Badge key={flag} variant="outline" className="text-xs">
                 {flag}
-              </span>
+              </Badge>
             ))}
           </div>
         )}
@@ -334,12 +332,9 @@ export function CandidateCard({
       {data.flags.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
           {data.flags.slice(0, 3).map((flag) => (
-            <span
-              key={flag}
-              className="min-h-6 inline-flex items-center rounded-full px-2 py-0.5 text-xs bg-gray-100 text-muted-foreground"
-            >
+            <Badge key={flag} variant="outline" className="text-xs">
               {flag}
-            </span>
+            </Badge>
           ))}
         </div>
       )}
