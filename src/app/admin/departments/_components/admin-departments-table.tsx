@@ -28,7 +28,7 @@ export function AdminDepartmentsTable({ session, departments }: Props) {
       ]}
     >
       <section className="mb-6">
-        <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
+        <div className="rounded-lg border border-border bg-muted p-5">
           <h3 className="text-sm font-semibold mb-3 text-foreground">Add department</h3>
           <CreateDepartmentForm onSuccess={() => router.refresh()} />
         </div>
@@ -195,13 +195,13 @@ function EditDepartmentForm({
         defaultValue={row.department_name_en}
         required
         maxLength={255}
-        className="h-8 rounded px-2 text-sm border w-40 bg-[var(--surface)] border-[var(--border)] text-[var(--ink)]"
+        className="h-8 rounded px-2 text-sm border w-40 bg-muted border-border text-foreground"
       />
       <input
         name="departmentNameAr"
         defaultValue={row.department_name_ar ?? ""}
         maxLength={255}
-        className="h-8 rounded px-2 text-sm border w-40 bg-[var(--surface)] border-[var(--border)] text-[var(--ink)]"
+        className="h-8 rounded px-2 text-sm border w-40 bg-muted border-border text-foreground"
       />
       <button
         type="submit"
