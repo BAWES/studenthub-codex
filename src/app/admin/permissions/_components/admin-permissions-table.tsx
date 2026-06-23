@@ -35,7 +35,7 @@ export function AdminPermissionsTable({ session, sections }: Props) {
       ]}
     >
       <section className="mb-6">
-        <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
+        <div className="rounded-lg border border-border bg-muted p-5">
           <h3
             className="mb-3 text-sm font-semibold text-foreground"
           >

@@ -30,7 +30,7 @@ export function AdminStoresTable({ session, stores }: Props) {
       ]}
     >
       <section className="mb-6">
-        <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
+        <div className="rounded-lg border border-border bg-muted p-5">
           <h3 className="text-sm font-semibold mb-3 text-foreground">Add store</h3>
           <CreateStoreForm onSuccess={() => router.refresh()} />
         </div>
@@ -177,7 +177,7 @@ function CreateStoreForm({ onSuccess }: { onSuccess: () => void }) {
           required
           maxLength={255}
           placeholder="e.g. The Luxury Boutique"
-          className="h-9 rounded-lg px-3 text-sm border bg-[var(--surface)] border-[var(--border)] text-[var(--ink)]"
+          className="h-9 rounded-lg px-3 text-sm border bg-muted border-border text-foreground"
         />
       </div>
       <div className="grid gap-1">
@@ -187,7 +187,7 @@ function CreateStoreForm({ onSuccess }: { onSuccess: () => void }) {
           required
           maxLength={255}
           placeholder="e.g. The Avenues, Floor 2"
-          className="h-9 rounded-lg px-3 text-sm border bg-[var(--surface)] border-[var(--border)] text-[var(--ink)]"
+          className="h-9 rounded-lg px-3 text-sm border bg-muted border-border text-foreground"
         />
       </div>
       <div className="grid gap-1">
@@ -196,7 +196,7 @@ function CreateStoreForm({ onSuccess }: { onSuccess: () => void }) {
           name="brandUuid"
           maxLength={36}
           placeholder="Optional"
-          className="h-9 rounded-lg px-3 text-sm border bg-[var(--surface)] border-[var(--border)] text-[var(--ink)]"
+          className="h-9 rounded-lg px-3 text-sm border bg-muted border-border text-foreground"
         />
       </div>
       <div className="grid gap-1">
@@ -205,7 +205,7 @@ function CreateStoreForm({ onSuccess }: { onSuccess: () => void }) {
           name="mallUuid"
           maxLength={36}
           placeholder="Optional"
-          className="h-9 rounded-lg px-3 text-sm border bg-[var(--surface)] border-[var(--border)] text-[var(--ink)]"
+          className="h-9 rounded-lg px-3 text-sm border bg-muted border-border text-foreground"
         />
       </div>
       <button
@@ -257,14 +257,14 @@ function EditStoreForm({
         defaultValue={row.store_name}
         required
         maxLength={255}
-        className="h-8 rounded px-2 text-sm border w-40 bg-[var(--surface)] border-[var(--border)] text-[var(--ink)]"
+        className="h-8 rounded px-2 text-sm border w-40 bg-muted border-border text-foreground"
       />
       <input
         name="storeLocation"
         defaultValue={row.store_location}
         required
         maxLength={255}
-        className="h-8 rounded px-2 text-sm border w-40 bg-[var(--surface)] border-[var(--border)] text-[var(--ink)]"
+        className="h-8 rounded px-2 text-sm border w-40 bg-muted border-border text-foreground"
       />
       <button
         type="submit"
