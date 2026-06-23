@@ -396,8 +396,6 @@ body {
   background: var(--sh-glass-bg);
   border: 1px solid var(--sh-glass-border);
   border-radius: var(--sh-radius-lg);
-  backdrop-filter: blur(var(--sh-glass-blur));
-  -webkit-backdrop-filter: blur(var(--sh-glass-blur));
   transition:
     transform 200ms var(--sh-easing),
     box-shadow 200ms var(--sh-easing),
@@ -2753,8 +2751,6 @@ tr:last-child td {
   text-align: center;
   padding: 40px 24px;
   background: var(--sh-glass-bg);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
   border: 1px solid var(--sh-glass-border);
   border-radius: var(--sh-radius-lg);
   animation: shEmptyEnter 360ms var(--sh-easing) both;
