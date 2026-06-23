@@ -36,7 +36,7 @@ export function AdminStoriesTable({ session, stories }: Props) {
         title="Stories"
         description="All consultancy stories. Click a row to view details."
         rows={stories.map((s) => ({ ...s, id: s.story_uuid }))}
-        rowHref="/admin/story/"
+        rowHref={(row) => `/admin/story/${row.story_uuid}`}
         columns={[
           {
             key: "story_uuid",
