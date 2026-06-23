@@ -58,6 +58,7 @@
     "@hookform/resolvers": "^5.4.0",
     "@commitlint/cli": "^21.0.1",
     "@commitlint/config-conventional": "^21.0.1",
+    "@hookform/resolvers": "^5.4.0",
     "@playwright/test": "^1.60.0",
     "@storybook/nextjs": "^10.4.6",
     "@tailwindcss/postcss": "^4.3.0",
