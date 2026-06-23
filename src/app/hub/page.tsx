@@ -6,6 +6,7 @@ import { HubShortcuts, type HubCommand } from "@/modules/hub/HubShortcuts";
 import { ThemeToggle } from "@/modules/theme/ThemeToggle";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { roles, type Role } from "@/modules/auth/types";
 
 export const dynamic = "force-dynamic";
 
@@ -46,7 +47,7 @@ export default async function HubPage({
               className={cn(
                 buttonVariants({ variant: "ghost" }),
                 "justify-start gap-0.5 no-underline",
-                (item.href === hubContext || item.href === "/app") && "bg-blue-zendesk/10 text-blue-zendesk hover:bg-blue-zendesk/15"
+                (item.href === "/app") && "bg-blue-zendesk/10 text-blue-zendesk hover:bg-blue-zendesk/15"
               )}
               href={item.href}
               key={item.href}
@@ -354,12 +355,4 @@ function buildCommands(data: Awaited<ReturnType<typeof getUnifiedHub>>): HubComm
   }
 
   return commands;
-}
-
-function hubRecordHref(query: string, scope: string, record: string) {
-  const params = new URLSearchParams();
-  if (query) params.set("q", query);
-  params.set("scope", scope);
-  params.set("record", record);
-  return `/app?${params.toString()}` as Route;
 }
