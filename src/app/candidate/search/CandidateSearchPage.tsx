@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, useMemo } from "react";
+import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import Link from "next/link";
 import type { Route } from "next";
@@ -11,18 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-
-// ─── Staggered reveal animation ───────────────────────────────────────
-
-const fadeUpStyle = `
-@keyframes si-fade-up {
-  from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-.si-card {
-  animation: si-fade-up 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-`;
+import { Badge } from "@/components/ui/badge";
 
 // ─── Types ────────────────────────────────────────────────────────────
 
@@ -118,118 +107,6 @@ function SearchResultSkeletons({ count = 5 }: { count?: number }) {
         <SearchResultSkeleton key={i} />
       ))}
     </div>
-  );
-}
-
-// ─── Result card with staggered reveal ────────────────────────────────
-
-function SearchResultCard({ row, href, index }: { row: SearchResultRow; href: Route; index: number }) {
-  return (
-    <Link
-      key={row.id}
-      href={href}
-      className="block rounded-xl border border-border bg-card p-4 transition-all duration-150 hover:shadow-md hover:-translate-y-px si-card"
-      style={{ animationDelay: `${index * 0.04}s` }}
-      onClick={(e) => {
-        // Allow middle-click / cmd+click for new tab
-        if (e.button === 1 || e.metaKey || e.ctrlKey) return;
-      }}
-    >
-      {/* Result header */}
-      <div className="mb-3 flex items-start justify-between gap-3">
-        <div className="flex items-center gap-2 flex-wrap">
-          <h3 className="m-0 text-base font-semibold text-foreground">
-            {row.name}
-          </h3>
-          <span className="font-mono text-[0.6875rem] text-muted-foreground">
-            {row.uid}
-          </span>
-        </div>
-        <MatchScoreBadge score={row.score} />
-      </div>
-
-      {/* Details grid */}
-      <div className="mb-3 grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2">
-        <div className="flex flex-col gap-0.5">
-          <span className="text-[0.6875rem] font-medium uppercase tracking-wider text-muted-foreground">
-            Email
-          </span>
-          <span className="text-xs text-foreground">
-            {row.email}
-          </span>
-        </div>
-        <div className="flex flex-col gap-0.5">
-          <span className="text-[0.6875rem] font-medium uppercase tracking-wider text-muted-foreground">
-            Phone
-          </span>
-          <span className="text-xs text-foreground">
-            {row.phone}
-          </span>
-        </div>
-        <div className="flex flex-col gap-0.5">
-          <span className="text-[0.6875rem] font-medium uppercase tracking-wider text-muted-foreground">
-            Location
-          </span>
-          <span className="text-xs text-foreground">
-            {row.country}
-          </span>
-        </div>
-        <div className="flex flex-col gap-0.5">
-          <span className="text-[0.6875rem] font-medium uppercase tracking-wider text-muted-foreground">
-            University
-          </span>
-          <span className="text-xs text-foreground">
-            {row.university}
-          </span>
-        </div>
-        {row.company !== "No company" && (
-          <div className="flex flex-col gap-0.5">
-            <span className="text-[0.6875rem] font-medium uppercase tracking-wider text-muted-foreground">
-              Company
-            </span>
-            <span className="text-xs text-foreground">
-              {row.company}
-            </span>
-          </div>
-        )}
-        <div className="flex flex-col gap-0.5">
-          <span className="text-[0.6875rem] font-medium uppercase tracking-wider text-muted-foreground">
-            Rate
-          </span>
-          <span className="text-xs text-foreground">
-            {row.rate}
-          </span>
-        </div>
-      </div>
-
-      {/* Skills */}
-      {row.skills.length > 0 && (
-        <div className="mb-2 flex flex-wrap gap-1">
-          {row.skills.map((skill) => (
-            <span
-              key={skill}
-              className="rounded-md px-2 py-0.5 text-[0.6875rem] font-medium bg-primary/10 text-primary"
-            >
-              {skill}
-            </span>
-          ))}
-        </div>
-      )}
-
-      {/* Flags */}
-      {row.flags.length > 0 && (
-        <div className="flex flex-wrap gap-1">
-          {row.flags.map((flag) => (
-            <span
-              key={flag}
-              className="rounded-md px-2 py-0.5 text-[0.6875rem] font-medium bg-amber-500/10 text-amber-600"
-            >
-              {flag}
-            </span>
-          ))}
-        </div>
-      )}
-    </Link>
   );
 }
 
@@ -366,181 +243,270 @@ export function CandidateSearchPage({ session, initialData }: { session: Session
   const [focused, setFocused] = useState(false);
 
   return (
-    <>
-      <style>{fadeUpStyle}</style>
-      <div className="mx-auto max-w-7xl p-6">
-        {/* Search header */}
-        <div className="mb-6">
-          <h1 className="text-[1.625rem] font-bold text-foreground m-0">
-            Search Candidates
-          </h1>
-          <p className="text-sm text-muted-foreground m-0 mt-1">
-            Find candidates by name, skills, or keyword — powered by Typesense
-          </p>
+    <div className="mx-auto max-w-7xl p-6">
+      {/* Search header */}
+      <div className="mb-6">
+        <h1 className="text-[1.625rem] font-bold text-foreground m-0">
+          Search Candidates
+        </h1>
+        <p className="text-sm text-muted-foreground m-0 mt-1">
+          Find candidates by name, skills, or keyword — powered by Typesense
+        </p>
+      </div>
+
+      {/* Search form */}
+      <form className="mb-6" onSubmit={handleSubmit}>
+        <div className="flex gap-2">
+          <Input
+            ref={inputRef}
+            placeholder="Search by name, email, skills..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onFocus={() => setFocused(true)}
+            onBlur={() => setFocused(false)}
+            className="flex-1"
+            autoFocus
+          />
+          <Button type="submit" disabled={loading}>
+            {loading ? "Searching..." : "Search"}
+          </Button>
         </div>
+      </form>
 
-        {/* Search form */}
-        <form className="mb-6" onSubmit={handleSubmit}>
-          <div className="flex gap-2">
-            <Input
-              ref={inputRef}
-              placeholder="Search by name, email, skills..."
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onFocus={() => setFocused(true)}
-              onBlur={() => setFocused(false)}
-              className="flex-1"
-              autoFocus
-            />
-            <Button type="submit" disabled={loading}>
-              {loading ? "Searching..." : "Search"}
-            </Button>
-          </div>
-        </form>
+      {/* Error state */}
+      {error && (
+        <div className="mb-4">
+          <EmptyState
+            variant="error"
+            title="Search error"
+            description={error}
+            actionLabel="Retry"
+            onAction={() => doSearch(query, page, activeFacets)}
+          />
+        </div>
+      )}
 
-        {/* Error state */}
-        {error && (
-          <div className="mb-4">
-            <EmptyState
-              variant="error"
-              title="Search error"
-              description={error}
-              actionLabel="Retry"
-              onAction={() => doSearch(query, page, activeFacets)}
-            />
-          </div>
-        )}
-
-        {/* Results area */}
-        <div className="grid grid-cols-[240px_1fr] gap-6 max-md:grid-cols-1">
-          {/* Facet sidebar */}
-          {results && results.facets.length > 0 && (
-            <aside className="sticky top-6 self-start rounded-xl border border-border bg-card p-4">
-              {results.facets.map((group) => (
-                <div key={group.key} className="mb-5 last:mb-0">
-                  <h3 className="m-0 mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                    {group.label}
-                  </h3>
-                  <div className="flex flex-col gap-1">
-                    {group.options.map((option) => (
-                      <button
-                        key={option.value}
-                        type="button"
+      {/* Results area */}
+      <div className="grid grid-cols-[240px_1fr] gap-6 max-md:grid-cols-1">
+        {/* Facet sidebar */}
+        {results && results.facets.length > 0 && (
+          <aside className="sticky top-6 self-start rounded-xl border border-border bg-card p-4">
+            {results.facets.map((group) => (
+              <div key={group.key} className="mb-5 last:mb-0">
+                <h3 className="m-0 mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  {group.label}
+                </h3>
+                <div className="flex flex-col gap-1">
+                  {group.options.map((option) => (
+                    <button
+                      key={option.value}
+                      type="button"
+                      className={cn(
+                        "flex items-center justify-between rounded-md border px-2.5 py-1.5 text-left text-xs transition-all duration-100",
+                        option.active
+                          ? "border-primary bg-primary/10 font-semibold text-primary"
+                          : "border-transparent text-foreground hover:border-border hover:bg-muted",
+                      )}
+                      onClick={() => toggleFacet(group.key, option.value)}
+                    >
+                      <span className="flex-1">{option.label}</span>
+                      <span
                         className={cn(
-                          "flex items-center justify-between rounded-md border px-2.5 py-1.5 text-left text-xs transition-all duration-100",
+                          "ml-2 rounded-full px-1.5 py-0.5 text-[0.6875rem]",
                           option.active
-                            ? "border-primary bg-primary/10 font-semibold text-primary"
-                            : "border-transparent text-foreground hover:border-border hover:bg-muted",
+                            ? "bg-primary/10 text-primary"
+                            : "bg-muted text-muted-foreground",
                         )}
-                        onClick={() => toggleFacet(group.key, option.value)}
                       >
-                        <span className="flex-1">{option.label}</span>
-                        <span
-                          className={cn(
-                            "ml-2 rounded-full px-1.5 py-0.5 text-[0.6875rem]",
-                            option.active
-                              ? "bg-primary/10 text-primary"
-                              : "bg-muted text-muted-foreground",
-                          )}
-                        >
-                          {option.count}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </aside>
-          )}
-
-          {/* Results list */}
-          <main className="min-h-[400px]">
-            {/* Source indicator / typing indicator */}
-            {results && (
-              <div className="mb-4 flex items-center justify-between text-xs">
-                <span className="font-semibold text-foreground">
-                  {isTyping ? (
-                    <>
-                      <span className="inline-block align-middle mr-1.5 h-2 w-2 rounded-full bg-primary animate-pulse" />
-                      Searching...
-                    </>
-                  ) : (
-                    <>
-                      {results.matchingCount.toLocaleString()} candidate
-                      {results.matchingCount !== 1 ? "s" : ""} found
-                    </>
-                  )}
-                </span>
-                {!isTyping && (
-                  <span className="rounded-md px-2 py-0.5 text-muted-foreground bg-muted">
-                    {results.source.current}
-                  </span>
-                )}
-              </div>
-            )}
-
-            {/* Loading state — skeleton cards */}
-            {loading && <SearchResultSkeletons count={5} />}
-
-            {/* Empty state */}
-            {!loading && !isTyping && results && results.rows.length === 0 && (
-              <EmptyState
-                variant="search"
-                title="No candidates found"
-                description="Try adjusting your search query or clearing facet filters."
-                actionLabel="Clear filters"
-                onAction={() => {
-                  setActiveFacets({});
-                  setPage(1);
-                  doSearch(query, 1, {});
-                  updateUrl(query, 1, {});
-                }}
-              />
-            )}
-
-            {/* Results */}
-            {!loading && !isTyping && results && results.rows.length > 0 && (
-              <>
-                <div className="flex flex-col gap-3">
-                  {results.rows.map((row, i) => (
-                    <SearchResultCard
-                      key={row.id}
-                      row={row}
-                      href={`${candidateProfilePrefix}/${row.id}` as unknown as Route}
-                      index={i}
-                    />
+                        {option.count}
+                      </span>
+                    </button>
                   ))}
                 </div>
+              </div>
+            ))}
+          </aside>
+        )}
 
-                {/* Pagination */}
-                {totalPages > 1 && (
-                  <div className="mt-6 flex items-center justify-center gap-4 py-4">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => goToPage(page - 1)}
-                      disabled={page <= 1}
-                    >
-                      &larr; Previous
-                    </Button>
-                    <div className="text-sm text-muted-foreground">
-                      Page {page} of {totalPages}
-                    </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => goToPage(page + 1)}
-                      disabled={page >= totalPages}
-                    >
-                      Next &rarr;
-                    </Button>
-                  </div>
+        {/* Results list */}
+        <main className="min-h-[400px]">
+          {/* Source indicator / typing indicator */}
+          {results && (
+            <div className="mb-4 flex items-center justify-between text-xs">
+              <span className="font-semibold text-foreground">
+                {isTyping ? (
+                  <>
+                    <span className="inline-block align-middle mr-1.5 h-2 w-2 rounded-full bg-primary animate-pulse" />
+                    Searching...
+                  </>
+                ) : (
+                  <>
+                    {results.matchingCount.toLocaleString()} candidate
+                    {results.matchingCount !== 1 ? "s" : ""} found
+                  </>
                 )}
-              </>
-            )}
-          </main>
-        </div>
+              </span>
+              {!isTyping && (
+                <span className="rounded-md px-2 py-0.5 text-muted-foreground bg-muted">
+                  {results.source.current}
+                </span>
+              )}
+            </div>
+          )}
+
+          {/* Loading state — skeleton cards */}
+          {loading && <SearchResultSkeletons count={5} />}
+
+          {/* Empty state */}
+          {!loading && !isTyping && results && results.rows.length === 0 && (
+            <EmptyState
+              variant="search"
+              title="No candidates found"
+              description="Try adjusting your search query or clearing facet filters."
+              actionLabel="Clear filters"
+              onAction={() => {
+                setActiveFacets({});
+                setPage(1);
+                doSearch(query, 1, {});
+                updateUrl(query, 1, {});
+              }}
+            />
+          )}
+
+          {/* Results */}
+          {!loading && !isTyping && results && results.rows.length > 0 && (
+            <>
+              <div className="flex flex-col gap-3 animate-[shFadeIn_300ms_ease-out]" key={`results-${results.matchingCount}-${page}`}>
+                {results.rows.map((row) => (
+                  <Link
+                    key={row.id}
+                    href={`${candidateProfilePrefix}/${row.id}`}
+                    className="block rounded-xl border border-border bg-card p-4 transition-all duration-150 hover:shadow-md hover:-translate-y-px"
+                    onClick={(e) => {
+                      // Allow middle-click / cmd+click for new tab
+                      if (e.button === 1 || e.metaKey || e.ctrlKey) return;
+                    }}
+                  >
+                    {/* Result header */}
+                    <div className="mb-3 flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h3 className="m-0 text-base font-semibold text-foreground">
+                          {row.name}
+                        </h3>
+                        <span className="font-mono text-[0.6875rem] text-muted-foreground">
+                          {row.uid}
+                        </span>
+                      </div>
+                      <MatchScoreBadge score={row.score} />
+                    </div>
+
+                    {/* Details grid */}
+                    <div className="mb-3 grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2">
+                      <div className="flex flex-col gap-0.5">
+                        <span className="text-[0.6875rem] font-medium uppercase tracking-wider text-muted-foreground">
+                          Email
+                        </span>
+                        <span className="text-xs text-foreground">
+                          {row.email}
+                        </span>
+                      </div>
+                      <div className="flex flex-col gap-0.5">
+                        <span className="text-[0.6875rem] font-medium uppercase tracking-wider text-muted-foreground">
+                          Phone
+                        </span>
+                        <span className="text-xs text-foreground">
+                          {row.phone}
+                        </span>
+                      </div>
+                      <div className="flex flex-col gap-0.5">
+                        <span className="text-[0.6875rem] font-medium uppercase tracking-wider text-muted-foreground">
+                          Location
+                        </span>
+                        <span className="text-xs text-foreground">
+                          {row.country}
+                        </span>
+                      </div>
+                      <div className="flex flex-col gap-0.5">
+                        <span className="text-[0.6875rem] font-medium uppercase tracking-wider text-muted-foreground">
+                          University
+                        </span>
+                        <span className="text-xs text-foreground">
+                          {row.university}
+                        </span>
+                      </div>
+                      {row.company !== "No company" && (
+                        <div className="flex flex-col gap-0.5">
+                          <span className="text-[0.6875rem] font-medium uppercase tracking-wider text-muted-foreground">
+                            Company
+                          </span>
+                          <span className="text-xs text-foreground">
+                            {row.company}
+                          </span>
+                        </div>
+                      )}
+                      <div className="flex flex-col gap-0.5">
+                        <span className="text-[0.6875rem] font-medium uppercase tracking-wider text-muted-foreground">
+                          Rate
+                        </span>
+                        <span className="text-xs text-foreground">
+                          {row.rate}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Skills — shadcn Badge */}
+                    {row.skills.length > 0 && (
+                      <div className="mb-2 flex flex-wrap gap-1">
+                        {row.skills.map((skill) => (
+                          <Badge key={skill} variant="secondary">
+                            {skill}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Flags — shadcn Badge */}
+                    {row.flags.length > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        {row.flags.map((flag) => (
+                          <Badge key={flag} variant="warning">
+                            {flag}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
+                  </Link>
+                ))}
+              </div>
+
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="mt-6 flex items-center justify-center gap-4 py-4">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => goToPage(page - 1)}
+                    disabled={page <= 1}
+                  >
+                    &larr; Previous
+                  </Button>
+                  <div className="text-sm text-muted-foreground">
+                    Page {page} of {totalPages}
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => goToPage(page + 1)}
+                    disabled={page >= totalPages}
+                  >
+                    Next &rarr;
+                  </Button>
+                </div>
+              )}
+            </>
+          )}
+        </main>
       </div>
-    </>
+    </div>
   );
 }
