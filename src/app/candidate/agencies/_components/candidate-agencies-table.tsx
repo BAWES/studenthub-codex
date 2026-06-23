@@ -56,12 +56,12 @@ export function CandidateAgenciesTable({ session, rows, total }: Props) {
               return email ? (
                 <a
                   href={`mailto:${email}`}
-                  className="text-[var(--sh-coral)] hover:underline"
+                  className="text-[#eb6651] hover:underline"
                 >
                   {email}
                 </a>
               ) : (
-                <span className="text-[var(--muted)]">—</span>
+                <span className="text-muted-foreground">—</span>
               );
             },
           },
