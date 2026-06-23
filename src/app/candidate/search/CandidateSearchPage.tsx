@@ -8,6 +8,7 @@ import type { SessionUser } from "@/modules/auth/types";
 import MatchScoreBadge from "@/components/matching/MatchScoreBadge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -248,7 +249,8 @@ export function CandidateSearchPage({ session, initialData }: { session: Session
         <h1 className="text-[1.625rem] font-bold text-foreground m-0">
           Search Candidates
         </h1>
-        <p className="text-sm text-muted-foreground m-0 mt-1">
+        <div className="mt-1.5 h-0.5 w-12 rounded-full bg-[#eb6651]" />
+        <p className="text-sm text-muted-foreground m-0 mt-2">
           Find candidates by name, skills, or keyword — powered by Typesense
         </p>
       </div>
@@ -295,16 +297,16 @@ export function CandidateSearchPage({ session, initialData }: { session: Session
                 <h3 className="m-0 mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                   {group.label}
                 </h3>
-                <div className="flex flex-col gap-1">
+                <div className="flex flex-col gap-0.5">
                   {group.options.map((option) => (
                     <button
                       key={option.value}
                       type="button"
                       className={cn(
-                        "flex items-center justify-between rounded-md border px-2.5 py-1.5 text-left text-xs transition-all duration-100",
+                        "flex items-center justify-between rounded-md px-2.5 py-1.5 text-left text-xs transition-colors duration-100",
                         option.active
-                          ? "border-primary bg-primary/10 font-semibold text-primary"
-                          : "border-transparent text-foreground hover:border-border hover:bg-muted",
+                          ? "bg-primary/10 font-semibold text-primary"
+                          : "text-foreground hover:bg-muted",
                       )}
                       onClick={() => toggleFacet(group.key, option.value)}
                     >
@@ -457,12 +459,9 @@ export function CandidateSearchPage({ session, initialData }: { session: Session
                     {row.skills.length > 0 && (
                       <div className="mb-2 flex flex-wrap gap-1">
                         {row.skills.map((skill) => (
-                          <span
-                            key={skill}
-                            className="rounded-md px-2 py-0.5 text-[0.6875rem] font-medium bg-primary/10 text-primary"
-                          >
+                          <Badge key={skill} variant="secondary" className="text-[0.6875rem] font-medium">
                             {skill}
-                          </span>
+                          </Badge>
                         ))}
                       </div>
                     )}
@@ -471,12 +470,9 @@ export function CandidateSearchPage({ session, initialData }: { session: Session
                     {row.flags.length > 0 && (
                       <div className="flex flex-wrap gap-1">
                         {row.flags.map((flag) => (
-                          <span
-                            key={flag}
-                            className="rounded-md px-2 py-0.5 text-[0.6875rem] font-medium bg-amber-500/10 text-amber-600"
-                          >
+                          <Badge key={flag} variant="warning" className="text-[0.6875rem] font-medium">
                             {flag}
-                          </span>
+                          </Badge>
                         ))}
                       </div>
                     )}
