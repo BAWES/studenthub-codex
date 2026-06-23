@@ -3,6 +3,8 @@ import Link from "next/link";
 import type { getCandidateDetail } from "@/modules/workspace/data";
 import { formatDate } from "@/modules/workspace/format";
 import { WorkLogStaffActions } from "./WorkLogStaffActions";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 type CandidateDetailData = Awaited<ReturnType<typeof getCandidateDetail>>;
 
@@ -72,46 +74,56 @@ export function CandidateProfile({
         )}
       </div>
 
-      <section className="candidateReadiness" aria-label="Candidate readiness">
-        <div className="candidateReadinessScore">
-          <span>Readiness</span>
-          <strong>{readiness.score}%</strong>
-          <small>{readiness.summary}</small>
-        </div>
-        <div className="candidateReadinessItems">
-          {readiness.items.map((item) => (
-            <div className={item.done ? "done" : "open"} key={item.label}>
-              <span>{item.done ? "Done" : "Open"}</span>
-              <strong>{item.label}</strong>
-            </div>
-          ))}
-        </div>
-        {readiness.missing?.length ? (
-          <div className="candidateMissingFields">
-            <span>Missing fields</span>
-            <ul>
-              {readiness.missing.map((item) => (
-                <li key={item.label}>
-                  <Link href="/candidate/edit">{item.label}</Link>
-                </li>
-              ))}
-            </ul>
+      <Card className="overflow-hidden">
+        <CardHeader className="py-3 px-4">
+          <CardTitle className="text-sm font-semibold">Readiness</CardTitle>
+        </CardHeader>
+        <CardContent className="px-4 pb-4">
+          <div className="flex items-baseline gap-2 mb-3">
+            <span className="text-3xl font-bold">{readiness.score}%</span>
+            <span className="text-sm text-muted-foreground">{readiness.summary}</span>
           </div>
-        ) : null}
-      </section>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            {readiness.items.map((item) => (
+              <div key={item.label} className={`flex items-center gap-1.5 text-sm ${item.done ? "text-muted-foreground" : "text-destructive"}`}>
+                <span className="text-xs">{item.done ? "✓" : "○"}</span>
+                <span>{item.label}</span>
+              </div>
+            ))}
+          </div>
+          {readiness.missing?.length ? (
+            <div className="mt-3 pt-3 border-t border-border">
+              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Missing fields</span>
+              <ul className="flex flex-wrap gap-1.5 mt-1">
+                {readiness.missing.map((item) => (
+                  <li key={item.label}>
+                    <Link href="/candidate/edit" className="text-xs text-primary hover:underline">
+                      {item.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+        </CardContent>
+      </Card>
 
-      <section className="candidateFactGrid" aria-label="Candidate facts">
-        <Fact label="Email" value={candidate.candidate_email} />
-        <Fact label="Phone" value={candidate.candidate_phone ?? "No phone"} />
-        <Fact label="Country" value={candidate.country?.country_name_en ?? "Not set"} />
-        <Fact label="University" value={candidate.university?.university_name_en ?? "Not set"} />
-        <Fact label="Company" value={candidate.store?.company?.company_name ?? "Not assigned"} />
-        <Fact label="Store" value={candidate.store?.store_name ?? "Not assigned"} />
-        <Fact label="Rate" value={detail.metrics[1]?.value ?? "0"} />
-        <Fact label="Revenue" value={detail.stats?.totalRevenue ?? "No revenue stats"} />
-        <Fact label="Civil ID" value={candidate.candidate_civil_id ?? (candidate.candidate_civil_need_verification ? "Needs verification" : "Not set")} />
-        <Fact label="Updated" value={formatDate(candidate.candidate_updated_at)} />
-      </section>
+      <Card>
+        <CardContent className="p-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+            <Fact label="Email" value={candidate.candidate_email} />
+            <Fact label="Phone" value={candidate.candidate_phone ?? "No phone"} />
+            <Fact label="Country" value={candidate.country?.country_name_en ?? "Not set"} />
+            <Fact label="University" value={candidate.university?.university_name_en ?? "Not set"} />
+            <Fact label="Company" value={candidate.store?.company?.company_name ?? "Not assigned"} />
+            <Fact label="Store" value={candidate.store?.store_name ?? "Not assigned"} />
+            <Fact label="Rate" value={detail.metrics[1]?.value ?? "0"} />
+            <Fact label="Revenue" value={detail.stats?.totalRevenue ?? "No revenue stats"} />
+            <Fact label="Civil ID" value={candidate.candidate_civil_id ?? (candidate.candidate_civil_need_verification ? "Needs verification" : "Not set")} />
+            <Fact label="Updated" value={formatDate(candidate.candidate_updated_at)} />
+          </div>
+        </CardContent>
+      </Card>
 
       <CivilIdPanel candidate={candidate} viewerRole={viewerRole} />
 
@@ -161,9 +173,9 @@ export function CandidateProfile({
 
 function Fact({ label, value }: { label: string; value: string | number }) {
   return (
-    <div>
-      <span>{label}</span>
-      <strong>{value}</strong>
+    <div className="space-y-0.5">
+      <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide">{label}</span>
+      <strong className="block text-sm font-semibold truncate">{value}</strong>
     </div>
   );
 }
@@ -186,51 +198,57 @@ function CivilIdPanel({ candidate, viewerRole }: { candidate: NonNullable<Candid
   else if (isNearExpiry) badges.push("Expires soon");
 
   return (
-    <section className="civilIdPanel">
-      <div className="candidatePanelHeader">
-        <span>Civil ID</span>
-        <strong>{badges.length ? badges.join(" · ") : "On file"}</strong>
-      </div>
-      <div className="civilIdPanelBody">
-        <div className="civilIdPanelFields">
+    <Card className="overflow-hidden">
+      <CardHeader className="py-3 px-4 border-b border-border">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-sm font-semibold">Civil ID</CardTitle>
+          <Badge variant={badges.length ? "warning" : "secondary"} className="text-xs">
+            {badges.length ? badges.join(" · ") : "On file"}
+          </Badge>
+        </div>
+      </CardHeader>
+      <CardContent className="p-4">
+        <div className="grid grid-cols-2 gap-4 mb-4">
           <div>
-            <span>ID Number</span>
-            <strong>{candidate.candidate_civil_id || "—"}</strong>
+            <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide">ID Number</span>
+            <strong className="block text-sm font-semibold">{candidate.candidate_civil_id || "—"}</strong>
           </div>
           <div>
-            <span>Expiry date</span>
-            <strong className={isExpired ? "civilIdExpired" : isNearExpiry ? "civilIdWarning" : ""}>
+            <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide">Expiry date</span>
+            <strong className={`block text-sm font-semibold ${isExpired ? "text-destructive" : isNearExpiry ? "text-amber-500" : ""}`}>
               {expiryDate ? formatDate(expiryDate) : "—"}
             </strong>
           </div>
         </div>
         {candidate.candidate_civil_photo_front || candidate.candidate_civil_photo_back ? (
-          <div className="civilIdPhotos">
+          <div className="grid grid-cols-2 gap-3">
             {candidate.candidate_civil_photo_front ? (
               <div>
-                <span>Photo (front)</span>
-                <img src={candidate.candidate_civil_photo_front} alt="Civil ID front" loading="lazy" />
+                <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide">Photo (front)</span>
+                <img src={candidate.candidate_civil_photo_front} alt="Civil ID front" loading="lazy" className="mt-1 rounded-md border border-border" />
               </div>
             ) : null}
             {candidate.candidate_civil_photo_back ? (
               <div>
-                <span>Photo (back)</span>
-                <img src={candidate.candidate_civil_photo_back} alt="Civil ID back" loading="lazy" />
+                <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide">Photo (back)</span>
+                <img src={candidate.candidate_civil_photo_back} alt="Civil ID back" loading="lazy" className="mt-1 rounded-md border border-border" />
               </div>
             ) : null}
           </div>
         ) : null}
-      </div>
-    </section>
+      </CardContent>
+    </Card>
   );
 }
 
 function PanelHeader({ title, count }: { title: string; count: number }) {
   return (
-    <div className="candidatePanelHeader">
-      <span>{title}</span>
-      <strong>{count.toLocaleString("en-US")}</strong>
-    </div>
+    <CardHeader className="py-3 px-4 border-b border-border">
+      <div className="flex items-center justify-between">
+        <CardTitle className="text-sm font-semibold">{title}</CardTitle>
+        <Badge variant="secondary" className="text-xs">{count}</Badge>
+      </div>
+    </CardHeader>
   );
 }
 
@@ -244,29 +262,31 @@ function RowsPanel({
   limit?: number;
 }) {
   return (
-    <section className="candidateProfilePanel">
+    <Card className="overflow-hidden">
       <PanelHeader title={title} count={rows.length} />
-      <div className="candidateRows">
-        {rows.slice(0, limit).map((row) =>
-          row.href ? (
-            row.href.startsWith("/") ? (
-              <Link href={row.href as Route} key={`${title}-${row.id}`}>
-                <RowContent row={row} />
-              </Link>
+      <CardContent className="p-0">
+        <div className="divide-y divide-border">
+          {rows.slice(0, limit).map((row) =>
+            row.href ? (
+              row.href.startsWith("/") ? (
+                <Link href={row.href as Route} key={`${title}-${row.id}`} className="block px-4 py-3 hover:bg-muted/50 transition-colors no-underline">
+                  <RowContent row={row} />
+                </Link>
+              ) : (
+                <a href={row.href} key={`${title}-${row.id}`} className="block px-4 py-3 hover:bg-muted/50 transition-colors no-underline">
+                  <RowContent row={row} />
+                </a>
+              )
             ) : (
-              <a href={row.href} key={`${title}-${row.id}`}>
+              <article key={`${title}-${row.id}`} className="px-4 py-3">
                 <RowContent row={row} />
-              </a>
+              </article>
             )
-          ) : (
-            <article key={`${title}-${row.id}`}>
-              <RowContent row={row} />
-            </article>
-          )
-        )}
-        {!rows.length ? <small>No imported rows visible for this login.</small> : null}
-      </div>
-    </section>
+          )}
+          {!rows.length ? <div className="px-4 py-6 text-center text-sm text-muted-foreground">No imported rows visible for this login.</div> : null}
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -290,18 +310,20 @@ type WorkLogRow = {
 
 function WorkLogStaffPanel({ hours }: { hours: WorkLogRow[] }) {
   return (
-    <section className="candidateProfilePanel">
+    <Card className="overflow-hidden">
       <PanelHeader title="Work logs" count={hours.length} />
-      <div className="candidateRows">
-        {hours.slice(0, 8).map((hour) => (
-          <article key={`worklog-${hour.id}`} className="workLogRow">
-            <RowContent row={hour} />
-            <WorkLogStaffActions workLogUuid={String(hour.id)} currentStatus={hour.status} />
-          </article>
-        ))}
-        {!hours.length ? <small>No work log records for this candidate.</small> : null}
-      </div>
-    </section>
+      <CardContent className="p-0">
+        <div className="divide-y divide-border">
+          {hours.slice(0, 8).map((hour) => (
+            <div key={`worklog-${hour.id}`} className="px-4 py-3 flex items-center justify-between gap-3">
+              <RowContent row={hour} />
+              <WorkLogStaffActions workLogUuid={String(hour.id)} currentStatus={hour.status} />
+            </div>
+          ))}
+          {!hours.length ? <div className="px-4 py-6 text-center text-sm text-muted-foreground">No work log records for this candidate.</div> : null}
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 

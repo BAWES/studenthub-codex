@@ -224,9 +224,9 @@ export function WorkspaceOS({
 
   return (
     <WorkspaceOSContext.Provider value={{ embedded: true, session }}>
-      <main className="min-h-svh grid grid-cols-[236px_minmax(0,1fr)] bg-background">
+      <main className="min-h-svh grid grid-cols-1 md:grid-cols-[236px_minmax(0,1fr)] bg-background">
         {/* ── Sidebar Rail ─────────────────────────────────── */}
-        <aside className="sticky top-0 h-screen grid grid-rows-[auto_1fr_auto] justify-items-center gap-3 border-r border-border bg-card p-3">
+        <aside className="hidden md:grid sticky top-0 h-screen grid-rows-[auto_1fr_auto] justify-items-center gap-3 border-r border-border bg-card p-3">
           <Link
             className="w-full min-h-12 flex items-center gap-2.5 px-3 border border-border rounded-lg bg-foreground text-card-foreground no-underline transition-opacity hover:opacity-90 font-black text-sm"
             href="/app"
@@ -250,7 +250,7 @@ export function WorkspaceOS({
         </aside>
 
         {/* ── Content Stage ───────────────────────────────── */}
-        <section className="min-w-0 overflow-x-hidden grid content-start gap-3.5 p-3.5">
+        <section className="min-w-0 overflow-x-hidden grid content-start gap-3.5 p-3.5 pb-20 md:pb-3.5">
           {children}
         </section>
 
