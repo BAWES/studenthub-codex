@@ -335,29 +335,9 @@ body {
 /* ── Role Switcher ────────────────────────────────────────────────────── */
 
 /* ── Theme toggle in rail ──────────────────────────────────────────── */
-.themeToggle {
-  width: 100%;
-  min-height: 36px;
-  border: 1px solid var(--sh-glass-border);
-  border-radius: var(--sh-radius-sm);
-  background: transparent;
-  color: var(--muted);
-  font: inherit;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition:
-    all 180ms var(--sh-easing);
-}
-
-.themeToggle:hover {
-  border-color: var(--sh-glass-border-strong);
-  background: var(--sh-glass-bg-strong);
-  color: var(--ink);
-}
 
 
-
+/* ── Page transitions
 
 /* ── Page transitions ─────────────────────────────────────────────────── */
 @keyframes shFadeSlideIn {
@@ -390,49 +370,7 @@ body {
 
 /* ── Glass Metric Card ────────────────────────────────────────────────── */
 .shMetricCard {
-  display: grid;
-  gap: 4px;
-  padding: var(--sh-space-lg);
-  background: var(--sh-glass-bg);
-  border: 1px solid var(--sh-glass-border);
-  border-radius: var(--sh-radius-lg);
-  backdrop-filter: blur(var(--sh-glass-blur));
-  -webkit-backdrop-filter: blur(var(--sh-glass-blur));
-  transition:
-    transform 200ms var(--sh-easing),
-    box-shadow 200ms var(--sh-easing),
-    border-color 200ms var(--sh-easing);
-}
-
-.shMetricCard:hover {
-  transform: translateY(-1px);
-  border-color: var(--sh-glass-border-strong);
-  box-shadow: var(--sh-glow-sm);
-}
-
-.shMetricCard-label {
-  font-size: var(--sh-fs-sm);
-  font-weight: 500;
-  color: var(--muted);
-}
-
-.shMetricCard-value {
-  font-size: var(--sh-fs-2xl);
-  font-weight: 700;
-  color: var(--ink);
-  line-height: 1.1;
-}
-
-.shMetricCard-trend {
-  font-size: var(--sh-fs-sm);
-  font-weight: 600;
-}
-
-.shMetricCard-trend[data-direction="up"] { color: var(--sh-success); }
-.shMetricCard-trend[data-direction="down"] { color: var(--sh-error); }
-.shMetricCard-trend[data-direction="flat"] { color: var(--muted); }
-
-.workTabs {
+  .workTabs {
   display: flex;
   align-items: center;
   gap: 4px;
@@ -560,191 +498,6 @@ h2 {
   margin-bottom: 10px;
 }
 
-.environment {
-  min-width: 220px;
-  display: grid;
-  gap: 6px;
-  padding: 14px 16px;
-  border: 1px solid var(--line);
-  background: var(--surface);
-}
-
-
-
-.loginShell {
-  min-height: 100svh;
-  width: min(1240px, calc(100% - 32px));
-  margin: 0 auto;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(420px, 500px);
-  align-items: center;
-  gap: 28px;
-  padding: 28px 0;
-}
-
-
-.brandMark {
-  width: 44px;
-  height: 44px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--ink);
-  color: #fff;
-  font-weight: 900;
-}
-
-
-.loginSignal span,
-.loginProof span {
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 800;
-  text-transform: uppercase;
-}
-
-.loginHero {
-  max-width: 720px;
-}
-
-.loginHero h1 {
-  max-width: 660px;
-  font-size: clamp(38px, 4.5vw, 64px);
-  line-height: 0.98;
-}
-
-.loginHero p {
-  max-width: 580px;
-  color: var(--muted);
-  font-size: 17px;
-  line-height: 1.55;
-  margin: 18px 0 0;
-}
-
-.loginProof {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0;
-  border: 1px solid var(--line);
-  background: #fff;
-}
-
-
-.loginProof div {
-  min-height: 104px;
-  display: grid;
-  align-content: space-between;
-  border-right: 1px solid var(--line);
-  padding: 18px;
-}
-
-.loginProof div:last-child {
-  border-right: 0;
-}
-
-.loginProof strong {
-  font-size: 34px;
-  line-height: 1;
-}
-
-.loginSignal {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
-
-.loginSignal div {
-  min-height: 72px;
-  display: grid;
-  align-content: center;
-  gap: 6px;
-  border-left: 4px solid var(--green);
-  background: #f7fbf8;
-  padding: 12px 14px;
-}
-
-.loginSignal strong {
-  overflow-wrap: anywhere;
-  font-size: 14px;
-}
-
-
-.rolePicker {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 8px;
-  border: 0;
-  padding: 0;
-  margin: 0;
-}
-
-.rolePicker legend {
-  grid-column: 1 / -1;
-  color: var(--muted);
-  font-size: 13px;
-  font-weight: 700;
-  margin-bottom: 2px;
-}
-
-.roleOption {
-  min-height: 62px;
-  position: relative;
-  display: flex !important;
-  align-items: center;
-  justify-content: flex-start;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--surface-soft);
-  color: var(--ink) !important;
-  cursor: pointer;
-  padding: 12px;
-}
-
-.roleOption:nth-of-type(1),
-.roleOption:nth-of-type(2),
-.roleOption:nth-of-type(3) {
-  grid-column: auto;
-}
-
-.roleOption:nth-of-type(4),
-.roleOption:nth-of-type(5) {
-  grid-column: auto;
-  border-top: 1px solid var(--line);
-}
-
-.roleOption:nth-of-type(3),
-.roleOption:nth-of-type(5) {
-  border-right: 1px solid var(--line);
-}
-
-.roleOption input {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.roleOption:has(input:checked) {
-  border-color: var(--blue);
-  background: color-mix(in srgb, var(--blue) 12%, var(--surface));
-  box-shadow: inset 0 0 0 1px var(--blue);
-}
-
-.roleOption span {
-  min-width: 0;
-  display: grid;
-  gap: 4px;
-}
-
-.roleOption strong {
-  font-size: 14px;
-}
-
-.roleOption small {
-  color: var(--muted);
-  font-size: 12px;
-}
-
-
 .formError {
   color: var(--rose);
   font-weight: 700;
@@ -754,11 +507,6 @@ h2 {
 .formNotice {
   color: var(--muted-foreground);
   margin: 0;
-}
-
-.candidateEditLayout {
-  display: grid;
-  gap: 1.5rem;
 }
 
 .candidateEditForm {
@@ -1422,42 +1170,6 @@ h2 {
 }
 
 
-
-.featureGrid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
-  padding: 20px 0 0;
-}
-
-.featureTile {
-  min-height: 112px;
-  display: grid;
-  align-content: space-between;
-  border: 1px solid var(--line);
-  border-top: 4px solid var(--blue);
-  background: var(--surface);
-  color: var(--ink);
-  padding: 16px;
-  text-decoration: none;
-  box-shadow: 0 10px 36px rgba(16, 24, 40, 0.04);
-}
-
-.featureTile span {
-  font-size: 18px;
-  font-weight: 700;
-}
-
-.featureTile strong {
-  color: var(--blue);
-  font-size: 13px;
-}
-
-.featureTile:hover {
-  border-color: #9fb9db;
-  box-shadow: 0 18px 54px rgba(16, 24, 40, 0.09);
-  transform: translateY(-1px);
-}
 
 /* ------------------------------------------------------------------ */
 /*  MetricCard — glass card with value, label, sparkline, trend.       */
@@ -4155,9 +3867,6 @@ kbd {
   .lists,
   .workspace,
   .focus,
-  .loginShell,
-  .loginSignal,
-  .featureGrid,
 
   .loginHero h1 {
     max-width: 560px;
@@ -4169,25 +3878,6 @@ kbd {
     font-size: 16px;
     line-height: 1.45;
     margin-top: 10px;
-  }
-
-  .loginProof div {
-    min-height: 62px;
-    padding: 11px 16px;
-  }
-
-  .loginProof strong {
-    font-size: 24px;
-  }
-
-  .loginSignal {
-    display: none;
-  }
-
-  .loginShell {
-    align-items: start;
-    gap: 14px;
-    padding: 16px 0 32px;
   }
 
 
