@@ -1,6 +1,19 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
+import type { Route } from "next";
+import { Button } from "@/components/ui/button";
+import {
+  CommandDialog,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandShortcut,
+} from "@/components/ui/command";
+import { searchCandidatesForPalette, type PaletteCandidateResult } from "./searchPalette";
 
 export type HubCommand = {
   id: string;
@@ -15,43 +28,60 @@ type HubShortcutsProps = {
   commands: HubCommand[];
 };
 
-const shortcutRows = [
+const builtinShortcuts = [
   { keys: "Cmd/Ctrl K", label: "Open command menu" },
   { keys: "/", label: "Focus workspace search" },
   { keys: "G then H", label: "Go to command workspace" },
   { keys: "G then R", label: "Go to requests" },
   { keys: "G then C", label: "Go to candidates or company" },
-  { keys: "Esc", label: "Close menu or clear focus" }
+  { keys: "Esc", label: "Close menu or clear focus" },
 ];
 
 export function HubShortcuts({ commands }: HubShortcutsProps) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
-  const [activeIndex, setActiveIndex] = useState(0);
+  const [candidates, setCandidates] = useState<PaletteCandidateResult[]>([]);
+  const [searching, setSearching] = useState(false);
   const sequenceRef = useRef("");
-  const inputRef = useRef<HTMLInputElement | null>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>(null);
 
-  const filteredCommands = useMemo(() => {
-    const normalized = query.trim().toLowerCase();
-    if (!normalized) return commands.slice(0, 18);
-    return commands
-      .filter((command) =>
-        [command.title, command.subtitle, command.section, command.shortcut]
-          .filter(Boolean)
-          .join(" ")
-          .toLowerCase()
-          .includes(normalized)
-      )
-      .slice(0, 18);
-  }, [commands, query]);
+  const visit = useCallback(
+    (href: string) => {
+      setOpen(false);
+      setQuery("");
+      setCandidates([]);
+      router.push(href as Route);
+    },
+    [router],
+  );
 
-  const groupedCommands = useMemo(() => {
-    const groups = new Map<string, HubCommand[]>();
-    for (const command of filteredCommands) {
-      groups.set(command.section, [...(groups.get(command.section) ?? []), command]);
+  // Debounced candidate search
+  useEffect(() => {
+    if (!open || !query.trim()) {
+      setCandidates([]);
+      setSearching(false);
+      return;
     }
-    return [...groups.entries()];
-  }, [filteredCommands]);
+
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+
+    debounceRef.current = setTimeout(async () => {
+      setSearching(true);
+      try {
+        const results = await searchCandidatesForPalette(query.trim());
+        setCandidates(results);
+      } catch {
+        setCandidates([]);
+      } finally {
+        setSearching(false);
+      }
+    }, 250);
+
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [open, query]);
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
@@ -60,42 +90,14 @@ export function HubShortcuts({ commands }: HubShortcutsProps) {
         target?.tagName === "INPUT" || target?.tagName === "TEXTAREA" || target?.isContentEditable === true;
       const wantsCommand = (event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k";
       const wantsShortcuts = !isTyping && event.key === "?";
-      const wantsSearch = !isTyping && event.key === "/";
-
-      if (open) {
-        if (event.key === "Escape") {
-          event.preventDefault();
-          setOpen(false);
-          setQuery("");
-          return;
-        }
-        if (event.key === "ArrowDown") {
-          event.preventDefault();
-          setActiveIndex((index) => Math.min(index + 1, filteredCommands.length - 1));
-          return;
-        }
-        if (event.key === "ArrowUp") {
-          event.preventDefault();
-          setActiveIndex((index) => Math.max(index - 1, 0));
-          return;
-        }
-        if (event.key === "Enter" && filteredCommands[activeIndex]) {
-          event.preventDefault();
-          visit(filteredCommands[activeIndex].href);
-          return;
-        }
-      }
 
       if (wantsCommand || wantsShortcuts) {
         event.preventDefault();
         setOpen(true);
-        setActiveIndex(0);
-        setQuery(wantsShortcuts ? "shortcut" : "");
-        window.setTimeout(() => inputRef.current?.focus(), 0);
         return;
       }
 
-      if (wantsSearch) {
+      if (!isTyping && event.key === "/") {
         const input = document.querySelector<HTMLInputElement>("[data-command-search]");
         if (!input) return;
         event.preventDefault();
@@ -125,81 +127,103 @@ export function HubShortcuts({ commands }: HubShortcutsProps) {
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [activeIndex, commands, filteredCommands, open]);
-
-  useEffect(() => {
-    setActiveIndex(0);
-  }, [query]);
+  }, [commands, open, visit]);
 
   return (
     <>
-      <button className="commandLauncher" type="button" onClick={() => setOpen(true)}>
+      <Button
+        variant="outline"
+        size="sm"
+        type="button"
+        onClick={() => setOpen(true)}
+        className="gap-2"
+      >
         <span>Command</span>
-        <kbd>⌘K</kbd>
-      </button>
+        <kbd className="rounded border border-border bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">
+          ⌘K
+        </kbd>
+      </Button>
 
-      {open ? (
-        <div className="commandOverlay" role="dialog" aria-modal="true" aria-label="Command menu">
-          <button className="commandScrim" aria-label="Close command menu" type="button" onClick={() => setOpen(false)} />
-          <section className="commandMenu">
-            <div className="commandInputWrap">
-              <span>⌘</span>
-              <input
-                ref={inputRef}
-                autoFocus
-                placeholder="Jump to a view, search visible records, or run an action..."
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-              />
-              <kbd>Esc</kbd>
-            </div>
-            <div className="commandList">
-              {groupedCommands.length ? (
-                groupedCommands.map(([section, items]) => (
-                  <div className="commandGroup" key={section}>
-                    <h3>{section}</h3>
-                    {items.map((command) => {
-                      const absoluteIndex = filteredCommands.findIndex((item) => item.id === command.id);
-                      return (
-                        <button
-                          className={absoluteIndex === activeIndex ? "active" : ""}
-                          key={command.id}
-                          type="button"
-                          onMouseEnter={() => setActiveIndex(absoluteIndex)}
-                          onClick={() => visit(command.href)}
-                        >
-                          <span>
-                            <strong>{command.title}</strong>
-                            <small>{command.subtitle}</small>
-                          </span>
-                          {command.shortcut ? <kbd>{command.shortcut}</kbd> : null}
-                        </button>
-                      );
-                    })}
+      <CommandDialog open={open} onOpenChange={(o) => { if (!o) { setOpen(false); setQuery(""); setCandidates([]); } }}>
+        <CommandInput
+          placeholder="Jump to a view, search visible records, or run an action..."
+          value={query}
+          onValueChange={setQuery}
+        />
+        <CommandList>
+          {/* Candidate search results */}
+          {query.trim() && candidates.length > 0 && (
+            <CommandGroup heading="Candidates">
+              {candidates.map((c) => (
+                <CommandItem
+                  key={c.id}
+                  onSelect={() => visit(`/app?scope=people&record=candidate-${c.id}&q=${encodeURIComponent(query)}` as Route)}
+                >
+                  <div className="grid gap-0.5 min-w-0">
+                    <strong className="truncate">{c.name}</strong>
+                    <span className="text-xs text-muted-foreground truncate">{c.email}</span>
                   </div>
-                ))
-              ) : (
-                <div className="commandEmpty">
-                  <strong>No command found</strong>
-                  <span>Try a view, record name, scope, or shortcut.</span>
-                </div>
-              )}
-            </div>
-            <div className="shortcutGrid">
-              {shortcutRows.map((row) => (
-                <div key={row.keys}>
-                  <kbd>{row.keys}</kbd>
-                  <span>{row.label}</span>
-                </div>
+                  <CommandShortcut>{c.status}</CommandShortcut>
+                </CommandItem>
               ))}
+            </CommandGroup>
+          )}
+
+          {/* Searching indicator */}
+          {query.trim() && searching && candidates.length === 0 && (
+            <CommandGroup heading="Candidates">
+              <CommandItem disabled>
+                <span className="text-muted-foreground">Searching...</span>
+              </CommandItem>
+            </CommandGroup>
+          )}
+
+          <CommandEmpty>
+            <div className="py-4 text-center">
+              <strong className="block text-sm text-foreground">No command found</strong>
+              <span className="text-xs text-muted-foreground">Try a view, record name, scope, or shortcut.</span>
             </div>
-          </section>
-        </div>
-      ) : null}
+          </CommandEmpty>
+
+          {groupBySection(commands).map(([section, items]) => (
+            <CommandGroup heading={section} key={section}>
+              {items.map((command) => (
+                <CommandItem
+                  key={command.id}
+                  value={`${command.title} ${command.subtitle} ${command.section}`}
+                  onSelect={() => visit(command.href)}
+                >
+                  <div className="flex flex-col">
+                    <strong className="text-sm text-foreground">{command.title}</strong>
+                    <small className="text-xs text-muted-foreground">{command.subtitle}</small>
+                  </div>
+                  {command.shortcut ? (
+                    <CommandShortcut>{command.shortcut}</CommandShortcut>
+                  ) : null}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          ))}
+          <CommandGroup heading="Shortcuts">
+            {builtinShortcuts.map((shortcut) => (
+              <CommandItem key={shortcut.keys} value={shortcut.label} onSelect={() => setOpen(false)}>
+                <span className="text-sm text-foreground">{shortcut.label}</span>
+                <CommandShortcut>{shortcut.keys}</CommandShortcut>
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        </CommandList>
+      </CommandDialog>
     </>
   );
 }
 
-function visit(href: string) {
-  window.location.href = href;
+function groupBySection(commands: HubCommand[]): [string, HubCommand[]][] {
+  const groups = new Map<string, HubCommand[]>();
+  for (const command of commands) {
+    const list = groups.get(command.section) ?? [];
+    list.push(command);
+    groups.set(command.section, list);
+  }
+  return [...groups.entries()];
 }
