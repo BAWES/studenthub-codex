@@ -8,6 +8,11 @@ import Link from "next/link";
 import { logoutAction } from "@/modules/auth/actions";
 import type { SessionUser } from "@/modules/auth/types";
 import { HubShortcuts, type HubCommand } from "@/modules/hub/HubShortcuts";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/modules/theme/ThemeToggle";
 import { CandidateProfile } from "./CandidateProfile";
 import { ExportCVsForm } from "./ExportCVsForm";
@@ -17,7 +22,6 @@ import type {
   CandidateSearchParams,
   getCandidateSearchWorkspace
 } from "./search";
-import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 
 type CandidateSearchData = Awaited<ReturnType<typeof getCandidateSearchWorkspace>>;
@@ -81,11 +85,12 @@ export function CandidateSearchOS({
   const activeFacetCount = data.facets.reduce((count, facet) => count + facet.options.filter((option) => option.active).length, 0);
 
   return (
-    <main className="candidateDesk">
-      <header className="candidateDeskTopbar">
-        <Link className="candidateDeskBrand" href={homePath}>
-          <span>SH</span>
-          <strong>Candidates</strong>
+    <main className="flex flex-col gap-3 min-h-svh bg-background">
+      {/* Topbar */}
+      <header className="flex items-center gap-3 px-4 py-2 border-b bg-card sticky top-0 z-10">
+        <Link className="flex items-center gap-1.5 font-semibold text-sm no-underline shrink-0" href={homePath}>
+          <span className="text-primary">SH</span>
+          <strong className="text-foreground">Candidates</strong>
         </Link>
         <div className="candidateDeskSearch">
           <Input
@@ -103,12 +108,12 @@ export function CandidateSearchOS({
         <div className="candidateDeskTools">
           <HubShortcuts commands={commands} />
           <ThemeToggle />
-          <div className="candidateDeskAccount" title={session.email}>
-            <span>{session.role}</span>
-            <strong>{session.name}</strong>
+          <div className="flex items-center gap-1 text-xs text-muted-foreground" title={session.email}>
+            <Badge variant="secondary" className="text-[10px] px-1.5 py-0">{session.role}</Badge>
+            <strong className="text-foreground text-sm font-medium">{session.name}</strong>
           </div>
           <form action={logoutAction}>
-            <button type="submit">Sign out</button>
+            <Button type="submit" variant="ghost" size="sm">Sign out</Button>
           </form>
         </div>
       </header>
@@ -116,8 +121,8 @@ export function CandidateSearchOS({
       <ActiveSearchContext basePath={basePath} data={data} params={params} />
       <BulkCandidateBar basePath={basePath} params={params} selectedIds={selectedIds} selectedRows={selectedRows} />
 
-      <section className="candidateDeskBody">
-        <section className="candidateTabWorkspace" aria-label="Open candidate tabs">
+      <section className="flex flex-1 gap-0 px-4 pb-4">
+        <section className="flex flex-col flex-1 gap-3" aria-label="Open candidate tabs">
           <CandidateTabs basePath={basePath} data={data} params={params} />
           {data.selected?.candidate ? (
             <CandidateProfile
@@ -157,31 +162,42 @@ function CandidateSearchTab({
   selectedIds: number[];
 }) {
   return (
-    <section className="candidateSearchPanel" aria-label="Candidate search and filters">
-      <header className="candidateSearchTabHeader">
-        <div>
-          <span>Search tab</span>
-          <strong>{data.query ? `Results for ${data.query}` : "Candidate search"}</strong>
-        </div>
-        <small>
-          {data.rows.length.toLocaleString("en-US")} of {data.matchingCount.toLocaleString("en-US")}
-        </small>
-      </header>
-      <details className="candidatePowerFilters">
-        <summary>
+    <section className="flex flex-col gap-2" aria-label="Candidate search and filters">
+      <Card className="border-0 shadow-none bg-transparent">
+        <CardHeader className="flex flex-row items-center justify-between px-0 pt-0 pb-2">
+          <div>
+            <span className="text-xs text-muted-foreground">Search tab</span>
+            <strong className="block text-sm">{data.query ? `Results for ${data.query}` : "Candidate search"}</strong>
+          </div>
+          <small className="text-xs text-muted-foreground">
+            {data.rows.length.toLocaleString("en-US")} of {data.matchingCount.toLocaleString("en-US")}
+          </small>
+        </CardHeader>
+      </Card>
+
+      {/* Power filters */}
+      <details className="border rounded-md px-3 py-2 text-sm bg-card">
+        <summary className="cursor-pointer font-medium flex items-center gap-2">
           <span>Filters</span>
-          <strong>{activeFacetCount ? `${activeFacetCount} active` : "Open power filters"}</strong>
+          <Badge variant={activeFacetCount > 0 ? "warning" : "secondary"} className="text-[10px]">
+            {activeFacetCount ? `${activeFacetCount} active` : "Open power filters"}
+          </Badge>
         </summary>
-        <section className="candidateFacetRail" aria-label="Candidate power filters">
+        <section className="flex flex-wrap gap-3 pt-3" aria-label="Candidate power filters">
           {facetGroups.map((facet) => (
             <FacetGroup basePath={basePath} facet={facet} key={facet.key} params={params} />
           ))}
         </section>
       </details>
-      <nav className="candidateSearchFilters" aria-label="Candidate search filters">
+
+      {/* Filter nav */}
+      <nav className="flex gap-1 flex-wrap" aria-label="Candidate search filters">
         {candidateFilterLinks.map((item) => (
           <Link
-            className={item.value === data.filter ? "active" : ""}
+            className={cn(
+              buttonVariants({ variant: item.value === data.filter ? "default" : "ghost", size: "sm" }),
+              "text-xs"
+            )}
             href={candidateSearchHref(basePath, params, { filter: item.value, candidate: "" })}
             key={item.value}
           >
@@ -189,49 +205,68 @@ function CandidateSearchTab({
           </Link>
         ))}
       </nav>
+
+      {/* Blocked notice */}
       {data.selectedBlocked ? (
-        <div className="candidateAccessNotice">
-          <strong>Candidate unavailable</strong>
-          <span>This record is missing, deleted, or outside the candidates visible to this login.</span>
-        </div>
+        <Card className="border-destructive/30 bg-destructive/5">
+          <CardContent className="flex flex-col gap-1 p-3 text-sm">
+            <strong className="text-destructive">Candidate unavailable</strong>
+            <span className="text-muted-foreground text-xs">This record is missing, deleted, or outside the candidates visible to this login.</span>
+          </CardContent>
+        </Card>
       ) : null}
-      <div className="candidateResultList">
+
+      {/* Results */}
+      <div className="flex flex-col gap-2">
         {data.rows.map((row) => (
           <article
-            className={row.id === data.selectedId ? "candidateResultCard active" : "candidateResultCard"}
+            className={cn(
+              "flex border rounded-md overflow-hidden bg-card",
+              row.id === data.selectedId && "ring-1 ring-primary"
+            )}
             key={row.id}
           >
-            <Link className="candidateResultSelect" href={candidateSearchHref(basePath, params, { selected: toggleCandidateId(selectedIds, row.id).join(",") })}>
-              <span aria-hidden="true">{selectedIds.includes(row.id) ? "✓" : ""}</span>
-              <small>{selectedIds.includes(row.id) ? "Selected" : "Select"}</small>
+            <Link
+              className="flex flex-col items-center justify-center w-8 shrink-0 border-r hover:bg-muted transition-colors no-underline"
+              href={candidateSearchHref(basePath, params, { selected: toggleCandidateId(selectedIds, row.id).join(",") })}
+            >
+              <span aria-hidden="true" className="text-xs">{selectedIds.includes(row.id) ? "✓" : ""}</span>
+              <small className="text-[10px] text-muted-foreground">{selectedIds.includes(row.id) ? "Selected" : "Select"}</small>
             </Link>
-            <Link className="candidateResultOpen" href={candidateSearchHref(basePath, params, { candidate: String(row.id) })}>
-              <div className="candidateResultMain">
-                <span className="candidateResultAvatar">{candidateInitials(row.name)}</span>
-                <div>
-                  <strong>{row.name}</strong>
-                  <small>{row.email}</small>
+            <Link
+              className="flex flex-col flex-1 p-2 hover:bg-muted/50 transition-colors no-underline gap-0.5"
+              href={candidateSearchHref(basePath, params, { candidate: String(row.id) })}
+            >
+              <div className="flex items-center gap-2">
+                <span className="flex items-center justify-center w-7 h-7 rounded-full bg-primary/10 text-primary text-xs font-semibold shrink-0">
+                  {candidateInitials(row.name)}
+                </span>
+                <div className="flex flex-col leading-tight">
+                  <strong className="text-sm text-foreground">{row.name}</strong>
+                  <small className="text-xs text-muted-foreground">{row.email}</small>
                 </div>
-                <em>{row.status}</em>
+                <Badge variant="secondary" className="ml-auto text-[10px]">{row.status}</Badge>
               </div>
-              <div className="candidateResultMeta">
+              <div className="flex gap-2 text-[11px] text-muted-foreground mt-1">
                 <span>{row.signal}</span>
                 <span>{row.country}</span>
                 <span>{row.updated}</span>
               </div>
-              <div className="candidateResultTags">
+              <div className="flex gap-1 mt-1 flex-wrap">
                 {[...row.flags, ...row.skills].slice(0, 3).map((flag) => (
-                  <span key={flag}>{flag}</span>
+                  <Badge key={flag} variant="outline" className="text-[10px]">{flag}</Badge>
                 ))}
               </div>
             </Link>
           </article>
         ))}
         {data.rows.length === 0 ? (
-          <div className="candidateEmptyState">
-            <strong>No candidates match this search.</strong>
-            <span>Remove a facet or search a different name, email, phone, skill, or candidate ID.</span>
-          </div>
+          <Card className="border-dashed">
+            <CardContent className="flex flex-col items-center gap-1 p-6 text-center">
+              <strong className="text-sm text-muted-foreground">No candidates match this search.</strong>
+              <span className="text-xs text-muted-foreground">Remove a facet or search a different name, email, phone, skill, or candidate ID.</span>
+            </CardContent>
+          </Card>
         ) : null}
       </div>
     </section>
@@ -258,20 +293,22 @@ function BulkCandidateBar({
   const loadedEmailRecipients = selectedRows.map((row) => row.email).filter(Boolean).join(",");
 
   return (
-    <section className="candidateBulkBar" aria-label="Selected candidate actions">
-      <div>
-        <span>Selection</span>
-        <strong>{selectedIds.length.toLocaleString("en-US")} selected</strong>
-      </div>
-      <nav>
-        <Link href={candidateSearchHref(basePath, params, { tabs: selectedValue, candidate: String(selectedIds[0] ?? ""), selected: selectedValue })}>Open as tabs</Link>
-        {selectedIds.length === 2 ? <Link href={candidateSearchHref(basePath, params, { selected: selectedValue })}>Merge review</Link> : null}
-        {loadedEmailRecipients ? <a href={`mailto:${loadedEmailRecipients}`}>Email loaded</a> : null}
-        <Link href={candidateSearchHref(basePath, params, { selected: selectedValue })}>Generate ID batch</Link>
-        <ExportCVsForm candidateIds={selectedValue} />
-        <Link href={candidateSearchHref(basePath, params, { selected: "" })}>Deselect</Link>
-      </nav>
-    </section>
+    <Card className="mx-4 border-primary/30">
+      <CardContent className="flex items-center gap-3 p-2 text-sm">
+        <div className="flex items-center gap-1.5 shrink-0">
+          <span className="text-xs text-muted-foreground">Selection</span>
+          <strong>{selectedIds.length.toLocaleString("en-US")} selected</strong>
+        </div>
+        <nav className="flex gap-1 flex-wrap" aria-label="Selected candidate actions">
+          <Link className={buttonVariants({ variant: "link", size: "sm" })} href={candidateSearchHref(basePath, params, { tabs: selectedValue, candidate: String(selectedIds[0] ?? ""), selected: selectedValue })}>Open as tabs</Link>
+          {selectedIds.length === 2 ? <Link className={buttonVariants({ variant: "link", size: "sm" })} href={candidateSearchHref(basePath, params, { selected: selectedValue })}>Merge review</Link> : null}
+          {loadedEmailRecipients ? <a className={buttonVariants({ variant: "link", size: "sm" })} href={`mailto:${loadedEmailRecipients}`}>Email loaded</a> : null}
+          <Link className={buttonVariants({ variant: "link", size: "sm" })} href={candidateSearchHref(basePath, params, { selected: selectedValue })}>Generate ID batch</Link>
+          <ExportCVsForm candidateIds={selectedValue} />
+          <Link className={buttonVariants({ variant: "link", size: "sm" })} href={candidateSearchHref(basePath, params, { selected: "" })}>Deselect</Link>
+        </nav>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -285,20 +322,33 @@ function CandidateTabs({
   params: CandidateSearchParams;
 }) {
   return (
-    <nav className="candidateTabs" aria-label="Open candidate tabs">
-      <Link className={!data.selectedId ? "active" : ""} href={candidateSearchHref(basePath, params, { candidate: "" })}>
+    <nav className="flex gap-1 border-b pb-1" aria-label="Open candidate tabs">
+      <Link
+        className={cn(
+          buttonVariants({ variant: !data.selectedId ? "default" : "ghost", size: "sm" }),
+          "text-xs"
+        )}
+        href={candidateSearchHref(basePath, params, { candidate: "" })}
+      >
         Search
       </Link>
       {data.openTabs.map((tab) => {
         const remainingTabs = data.openTabs.filter((item) => item.id !== tab.id).map((item) => item.id);
         const nextCandidate = data.selectedId === tab.id ? remainingTabs.at(-1) : data.selectedId;
         return (
-          <span className={data.selectedId === tab.id ? "active" : ""} key={tab.id}>
-            <Link href={candidateSearchHref(basePath, params, { candidate: String(tab.id), tabs: data.openTabs.map((item) => item.id).join(",") })}>
+          <span className={cn("flex items-center gap-0.5", data.selectedId === tab.id && "border-b-2 border-primary")} key={tab.id}>
+            <Link
+              className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "text-xs")}
+              href={candidateSearchHref(basePath, params, { candidate: String(tab.id), tabs: data.openTabs.map((item) => item.id).join(",") })}
+            >
               <strong>{tab.title}</strong>
-              <small>{tab.status}</small>
+              <small className="ml-1 text-muted-foreground">{tab.status}</small>
             </Link>
-            <Link aria-label={`Close ${tab.title}`} href={candidateSearchHref(basePath, params, { candidate: nextCandidate ? String(nextCandidate) : "", tabs: remainingTabs.join(",") })}>
+            <Link
+              aria-label={`Close ${tab.title}`}
+              className={buttonVariants({ variant: "ghost", size: "sm" }) + " px-1 text-muted-foreground hover:text-foreground no-underline"}
+              href={candidateSearchHref(basePath, params, { candidate: nextCandidate ? String(nextCandidate) : "", tabs: remainingTabs.join(",") })}
+            >
               x
             </Link>
           </span>
@@ -328,33 +378,39 @@ function ActiveSearchContext({
   ].filter((item): item is { key: Exclude<CandidateSearchParamKey, "candidate" | "tabs" | "selected">; label: string } => Boolean(item));
 
   return (
-    <section className="candidateSearchContext" aria-label="Candidate search context">
-      <div>
-        <span>{activeItems.length ? "Filtered view" : "Default view"}</span>
-        <strong>
-          {data.matchingCount.toLocaleString("en-US")} matching candidates from{" "}
-          {data.role === "staff" && data.visibility === "assigned" ? "your assigned production records" : "all production data"}
-        </strong>
-      </div>
-      <nav aria-label="Active candidate filters">
-        {data.role === "staff" ? (
-          <>
-            <Link className={data.visibility === "all" ? "active" : ""} href={candidateSearchHref(basePath, params, { view: "", candidate: "" })}>
-              All production
+    <Card className="mx-4 border-0 shadow-none bg-muted/30">
+      <CardContent className="flex items-center gap-2 p-2 text-sm">
+        <div className="flex items-center gap-1.5 shrink-0">
+          <span className="text-xs text-muted-foreground">{activeItems.length ? "Filtered view" : "Default view"}</span>
+          <strong className="text-xs font-medium">
+            {data.matchingCount.toLocaleString("en-US")} matching candidates from{" "}
+            {data.role === "staff" && data.visibility === "assigned" ? "your assigned production records" : "all production data"}
+          </strong>
+        </div>
+        <nav className="flex gap-1 flex-wrap" aria-label="Active candidate filters">
+          {data.role === "staff" ? (
+            <>
+              <Link className={cn(buttonVariants({ variant: data.visibility === "all" ? "default" : "ghost", size: "sm" }), "text-xs")} href={candidateSearchHref(basePath, params, { view: "", candidate: "" })}>
+                All production
+              </Link>
+              <Link className={cn(buttonVariants({ variant: data.visibility === "assigned" ? "default" : "ghost", size: "sm" }), "text-xs")} href={candidateSearchHref(basePath, params, { view: "assigned", candidate: "" })}>
+                Assigned to me
+              </Link>
+            </>
+          ) : null}
+          {activeItems.map((item) => (
+            <Link className={buttonVariants({ variant: "outline", size: "sm" }) + " text-xs no-underline"} href={candidateSearchHref(basePath, params, { [item.key]: "", candidate: "" })} key={`${item.key}-${item.label}`}>
+              <Badge variant="secondary" className="text-[10px] mr-1">{item.label}</Badge>
             </Link>
-            <Link className={data.visibility === "assigned" ? "active" : ""} href={candidateSearchHref(basePath, params, { view: "assigned", candidate: "" })}>
-              Assigned to me
-            </Link>
-          </>
-        ) : null}
-        {activeItems.map((item) => (
-          <Link href={candidateSearchHref(basePath, params, { [item.key]: "", candidate: "" })} key={`${item.key}-${item.label}`}>
-            {item.label}
-          </Link>
-        ))}
-        {activeItems.length ? <Link href={basePath}>Clear all</Link> : <Link href={candidateSearchHref(basePath, params, { filter: "needs-review", candidate: "" })}>Review queue</Link>}
-      </nav>
-    </section>
+          ))}
+          {activeItems.length ? (
+            <Link className={buttonVariants({ variant: "link", size: "sm" }) + " text-xs"} href={basePath}>Clear all</Link>
+          ) : (
+            <Link className={buttonVariants({ variant: "link", size: "sm" }) + " text-xs"} href={candidateSearchHref(basePath, params, { filter: "needs-review", candidate: "" })}>Review queue</Link>
+          )}
+        </nav>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -368,19 +424,26 @@ const candidateFilterLinks: { label: string; value: CandidateSearchFilter }[] = 
 
 function FacetGroup({ basePath, facet, params }: { basePath: "/admin/candidates" | "/staff/candidates"; facet: CandidateSearchFacet; params: CandidateSearchParams }) {
   return (
-    <section className="candidateFacetGroup">
-      <h3>{facet.label}</h3>
-      {facet.options.map((option) => (
-        <Link
-          className={option.active ? "active" : ""}
-          href={candidateSearchHref(basePath, params, { [facet.key]: option.active ? "" : option.value, candidate: "" })}
-          key={option.value}
-        >
-          <span>{option.label}</span>
-          <strong>{option.count}</strong>
-        </Link>
-      ))}
-    </section>
+    <Card className="min-w-[160px] flex-1">
+      <CardHeader className="p-2 pb-0">
+        <h3 className="text-xs font-semibold text-foreground">{facet.label}</h3>
+      </CardHeader>
+      <CardContent className="p-2 flex flex-col gap-0.5">
+        {facet.options.map((option) => (
+          <Link
+            className={cn(
+              buttonVariants({ variant: option.active ? "default" : "ghost", size: "sm" }),
+              "justify-between text-xs w-full no-underline"
+            )}
+            href={candidateSearchHref(basePath, params, { [facet.key]: option.active ? "" : option.value, candidate: "" })}
+            key={option.value}
+          >
+            <span>{option.label}</span>
+            <strong className="text-[10px] text-muted-foreground">{option.count}</strong>
+          </Link>
+        ))}
+      </CardContent>
+    </Card>
   );
 }
 
