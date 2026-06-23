@@ -5,7 +5,7 @@ import { requireRoleCapability } from "@/modules/auth/session";
 import { FactPanel } from "@/modules/workspace/DetailPanels";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { Button } from "@/components/ui/button";
-import { getDiscountCategoryDetail } from "@/modules/admin/discount-category/actions";
+import { getDiscountCategory } from "@/modules/admin/discount-category/actions";
 
 export const dynamic = "force-dynamic";
 
@@ -22,7 +22,7 @@ export default async function AdminDiscountCategoryDetailPage({
     notFound();
   }
 
-  const category = await getDiscountCategoryDetail(categoryId);
+  const category = await getDiscountCategory(categoryId);
 
   if (!category) {
     notFound();
@@ -53,6 +53,7 @@ export default async function AdminDiscountCategoryDetailPage({
           { label: "Name (English)", value: category.name_en ?? "—" },
           { label: "Name (Arabic)", value: category.name_ar ?? "—" },
           { label: "Image", value: category.image ?? "—" },
+          { label: "Discounts", value: String(category.discount_count) },
         ]}
       />
 

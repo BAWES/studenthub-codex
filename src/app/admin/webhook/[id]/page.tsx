@@ -6,7 +6,7 @@ import { FactPanel } from "@/modules/workspace/DetailPanels";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { Button } from "@/components/ui/button";
 import { formatDate } from "@/modules/workspace/format";
-import { getWebhook } from "@/modules/admin/webhook/[id]/actions";
+import { getWebhookDetail } from "../actions";
 
 export const dynamic = "force-dynamic";
 
@@ -23,13 +23,11 @@ export default async function AdminWebhookDetailPage({
     notFound();
   }
 
-  const result = await getWebhook({ webhookId });
+  const webhook = await getWebhookDetail(webhookId);
 
-  if (!result.webhook) {
+  if (!webhook) {
     notFound();
   }
-
-  const webhook = result.webhook;
 
   return (
     <WorkspaceShell

@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
-  majorItemSchema,
-  listMajorsResultSchema,
+  majorListItemSchema,
+  listMajorResultSchema,
   majorIdResultSchema,
 } from "../schemas";
 
@@ -14,13 +14,14 @@ const validMajor = {
   major_name_en: "Computer Science",
   major_name_ar: "علوم الحاسب",
   data_source: 1,
-  major_created_at: new Date("2024-01-15T00:00:00.000Z"),
-  major_updated_at: new Date("2024-06-20T00:00:00.000Z"),
+  major_created_at: "2024-01-15T00:00:00.000Z",
+  major_updated_at: "2024-06-20T00:00:00.000Z",
+  candidate_count: 42,
 };
 
-describe("majorItemSchema", () => {
+describe("majorListItemSchema", () => {
   it("accepts a valid major with all fields", () => {
-    const result = majorItemSchema.safeParse(validMajor);
+    const result = majorListItemSchema.safeParse(validMajor);
     expect(result.success).toBe(true);
   });
 
@@ -32,20 +33,21 @@ describe("majorItemSchema", () => {
       data_source: null,
       major_created_at: null,
       major_updated_at: null,
+      candidate_count: null,
     };
-    const result = majorItemSchema.safeParse(minimal);
+    const result = majorListItemSchema.safeParse(minimal);
     expect(result.success).toBe(true);
   });
 
   it("rejects missing required fields", () => {
-    const result = majorItemSchema.safeParse({
+    const result = majorListItemSchema.safeParse({
       major_name_en: "Physics",
     });
     expect(result.success).toBe(false);
   });
 
   it("rejects non-string name_en", () => {
-    const result = majorItemSchema.safeParse({
+    const result = majorListItemSchema.safeParse({
       ...validMajor,
       major_name_en: 123,
     });
@@ -53,7 +55,7 @@ describe("majorItemSchema", () => {
   });
 
   it("rejects non-numeric data_source", () => {
-    const result = majorItemSchema.safeParse({
+    const result = majorListItemSchema.safeParse({
       ...validMajor,
       data_source: "abc",
     });
@@ -61,10 +63,10 @@ describe("majorItemSchema", () => {
   });
 });
 
-describe("listMajorsResultSchema", () => {
+describe("listMajorResultSchema", () => {
   it("accepts a valid paginated result", () => {
-    const result = listMajorsResultSchema.safeParse({
-      majors: [validMajor],
+    const result = listMajorResultSchema.safeParse({
+      records: [validMajor],
       total: 1,
       page: 1,
       limit: 20,
@@ -74,8 +76,8 @@ describe("listMajorsResultSchema", () => {
   });
 
   it("accepts an empty records array", () => {
-    const result = listMajorsResultSchema.safeParse({
-      majors: [],
+    const result = listMajorResultSchema.safeParse({
+      records: [],
       total: 0,
       page: 1,
       limit: 20,
@@ -85,8 +87,8 @@ describe("listMajorsResultSchema", () => {
   });
 
   it("rejects negative total", () => {
-    const result = listMajorsResultSchema.safeParse({
-      majors: [],
+    const result = listMajorResultSchema.safeParse({
+      records: [],
       total: -1,
       page: 1,
       limit: 20,
