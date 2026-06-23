@@ -4,7 +4,7 @@ import type { LucideIcon } from "lucide-react";
 import {
   LayoutGrid, User, Mail, ClipboardList, CreditCard,
   Building2, Phone, Store, FileCheck, Search, Users,
-  ArrowRightLeft, Calendar, FileText, Globe, GraduationCap, Layers, MessageSquareText, Settings
+  ArrowRightLeft, Calendar, FileText, Globe, GraduationCap, Layers, MessageSquareText, Settings, Tags
 } from "lucide-react";
 
 export type NavItem = {
@@ -27,6 +27,7 @@ export function navForRole(role: Role): NavItem[] {
       { label: "Degrees", href: "/admin/degree", icon: GraduationCap },
       { label: "Degree Groups", href: "/admin/degree-group", icon: Layers },
       { label: "Universities", href: "/admin/university" as Route, icon: Building2 },
+      { label: "Tags", href: "/admin/tag", icon: Tags },
       { label: "Daily Standup", href: "/admin/daily-standup", icon: MessageSquareText },
       { label: "Transfers", href: "/admin/transfers", icon: ArrowRightLeft },
       { label: "Cron Log", href: "/admin/cron-log", icon: Calendar },
