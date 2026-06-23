@@ -1,4 +1,6 @@
 import { describe, it, expect } from "vitest";
+import { candidateInitials, toggleCandidateId, candidateSearchHref } from "./CandidateSearchOS";
+import type { CandidateSearchParams } from "./search";
 
 // Test pure utility functions extracted from CandidateSearchOS
 
@@ -56,52 +58,38 @@ describe("toggleCandidateId", () => {
   });
 });
 
-// Duplicate the source functions here for testing
-function toggleCandidateId(ids: number[], id: number) {
-  return ids.includes(id) ? ids.filter((item) => item !== id) : [...ids, id];
-}
-
-function candidateInitials(name: string) {
-  return name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
-    .join("");
-}
-
 describe("candidateSearchHref", () => {
   const basePath = "/admin/candidates" as const;
 
   it("returns base path when no params or overrides", () => {
-    const result = candidateSearchHref(basePath, emptyParams(), {});
+    const result = candidateSearchHref(basePath, emptyParams() as any, {});
     expect(result).toBe("/admin/candidates");
   });
 
   it("includes query param", () => {
-    const result = candidateSearchHref(basePath, emptyParams(), { q: "john" });
+    const result = candidateSearchHref(basePath, emptyParams() as any, { q: "john" });
     expect(result).toBe("/admin/candidates?q=john");
   });
 
   it("includes filter override", () => {
-    const result = candidateSearchHref(basePath, emptyParams(), { filter: "active" });
+    const result = candidateSearchHref(basePath, emptyParams() as any, { filter: "active" });
     expect(result).toBe("/admin/candidates?filter=active");
   });
 
   it("adds candidate to tabs when opening a candidate", () => {
-    const result = candidateSearchHref(basePath, emptyParams(), { candidate: "42" });
+    const result = candidateSearchHref(basePath, emptyParams() as any, { candidate: "42" });
     expect(result).toContain("candidate=42");
     expect(result).toContain("tabs=42");
   });
 
   it("preserves existing tabs when opening a candidate", () => {
-    const result = candidateSearchHref(basePath, paramsWith({ tabIds: [1, 2] }), { candidate: "3" });
+    const result = candidateSearchHref(basePath, paramsWith({ tabIds: [1, 2] }) as any, { candidate: "3" });
     expect(result).toContain("tabs=1%2C2%2C3");
     expect(result).toContain("candidate=3");
   });
 
   it("encodes multiple parameters", () => {
-    const result = candidateSearchHref(basePath, emptyParams(), { q: "john", filter: "active", country: "kw" });
+    const result = candidateSearchHref(basePath, emptyParams() as any, { q: "john", filter: "active", country: "kw" });
     expect(result).toContain("q=john");
     expect(result).toContain("filter=active");
     expect(result).toContain("country=kw");
@@ -109,12 +97,8 @@ describe("candidateSearchHref", () => {
 });
 
 // Helper types and function
-type CandidateSearchParamKey =
-  | "q" | "filter" | "view" | "candidate" | "tabs" | "selected"
-  | "country" | "university" | "company" | "skill" | "gender"
-  | "profile" | "assignment" | "document";
-
 interface SearchParams {
+  role?: string;
   query?: string;
   filter?: string;
   visibility?: string;
@@ -133,6 +117,7 @@ interface SearchParams {
 
 function emptyParams(): SearchParams {
   return {
+    role: "admin" as const,
     query: "",
     filter: "all",
     visibility: "all",
@@ -152,38 +137,4 @@ function emptyParams(): SearchParams {
 
 function paramsWith(overrides: Partial<SearchParams>): SearchParams {
   return { ...emptyParams(), ...overrides };
-}
-
-function candidateSearchHref(
-  basePath: "/admin/candidates" | "/staff/candidates",
-  params: SearchParams,
-  overrides: Partial<Record<CandidateSearchParamKey, string>>
-) {
-  const next = new URLSearchParams();
-  const existingTabs = (params.tabIds ?? []).join(",");
-  const values: Record<string, string> = {
-    q: params.query ?? "",
-    filter: params.filter && params.filter !== "all" ? params.filter : "",
-    view: params.visibility === "assigned" ? "assigned" : "",
-    candidate: params.candidateId ? String(params.candidateId) : "",
-    tabs: existingTabs,
-    selected: (params.selectedIds ?? []).join(","),
-    country: params.country ?? "",
-    university: params.university ?? "",
-    company: params.company ?? "",
-    skill: params.skill ?? "",
-    gender: params.gender ?? "",
-    profile: params.profile ?? "",
-    assignment: params.assignment ?? "",
-    document: params.document ?? "",
-    ...overrides
-  };
-  if (values.candidate && overrides.tabs === undefined) {
-    values.tabs = [...new Set([...(values.tabs ? values.tabs.split(",") : []), values.candidate])].filter(Boolean).join(",");
-  }
-  for (const [key, value] of Object.entries(values)) {
-    if (value) next.set(key, value);
-  }
-  const suffix = next.toString();
-  return (suffix ? `${basePath}?${suffix}` : basePath);
 }
