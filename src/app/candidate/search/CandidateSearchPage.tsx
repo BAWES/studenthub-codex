@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, useMemo } from "react";
+import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import Link from "next/link";
 import type { Route } from "next";
@@ -11,6 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 // ─── Types ────────────────────────────────────────────────────────────
 
@@ -453,30 +454,24 @@ export function CandidateSearchPage({ session, initialData }: { session: Session
                       </div>
                     </div>
 
-                    {/* Skills */}
+                    {/* Skills — shadcn Badge */}
                     {row.skills.length > 0 && (
                       <div className="mb-2 flex flex-wrap gap-1">
                         {row.skills.map((skill) => (
-                          <span
-                            key={skill}
-                            className="rounded-md px-2 py-0.5 text-[0.6875rem] font-medium bg-primary/10 text-primary"
-                          >
+                          <Badge key={skill} variant="secondary">
                             {skill}
-                          </span>
+                          </Badge>
                         ))}
                       </div>
                     )}
 
-                    {/* Flags */}
+                    {/* Flags — shadcn Badge */}
                     {row.flags.length > 0 && (
                       <div className="flex flex-wrap gap-1">
                         {row.flags.map((flag) => (
-                          <span
-                            key={flag}
-                            className="rounded-md px-2 py-0.5 text-[0.6875rem] font-medium bg-amber-500/10 text-amber-600"
-                          >
+                          <Badge key={flag} variant="warning">
                             {flag}
-                          </span>
+                          </Badge>
                         ))}
                       </div>
                     )}
