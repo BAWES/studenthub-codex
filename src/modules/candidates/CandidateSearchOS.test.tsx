@@ -4,70 +4,10 @@
  * FacetChips renders quick inline facet controls for country, university,
  * skills, and company — clickable chips that filter results via URL params.
  */
-import { describe, it, expect, afterEach } from "vitest";
+import { describe, it, expect, afterEach, vi } from "vitest";
 import { render, screen, within, cleanup } from "@testing-library/react";
+import { FacetChips, QUICK_FACET_KEYS } from "./CandidateSearchOS";
 import type { CandidateSearchFacet, CandidateSearchParams } from "./search";
-
-// FacetChips and QUICK_FACET_KEYS are not exported from CandidateSearchOS,
-// so we define local test versions to validate the contract.
-
-const QUICK_FACET_KEYS = ["country", "skill", "company", "university"];
-
-function FacetChips({
-  basePath,
-  data,
-  params,
-}: {
-  basePath: string;
-  data: { facets: CandidateSearchFacet[] };
-  params: CandidateSearchParams;
-}) {
-  // Find quick facet groups
-  const quickFacets = data.facets.filter((f) =>
-    QUICK_FACET_KEYS.includes(f.key),
-  );
-
-  // Filter out groups with zero options
-  const populated = quickFacets.filter((f) => f.options.length > 0);
-
-  if (populated.length === 0) return null;
-
-  const MAX_VISIBLE = 6;
-  const activeCount = data.facets.reduce(
-    (sum, f) => sum + f.options.filter((o) => o.active).length,
-    0,
-  );
-
-  return (
-    <div>
-      {populated.map((facet) => (
-        <div key={facet.key}>
-          <span>{facet.label}</span>
-          {facet.options.slice(0, MAX_VISIBLE).map((opt) => {
-            const isActive = opt.active;
-            const classes = isActive ? "chip active" : "chip";
-            return (
-              <a
-                key={opt.value}
-                href={`${basePath}?${facet.key}=${opt.value}`}
-                className={classes}
-              >
-                {opt.label}
-                {opt.count > 0 && <span>{opt.count}</span>}
-                {isActive && <span>✕</span>}
-              </a>
-            );
-          })}
-        </div>
-      ))}
-      {activeCount > 1 && (
-        <a href={basePath} role="link" aria-label="Clear all">
-          Clear all
-        </a>
-      )}
-    </div>
-  );
-}
 
 // Ensure each test starts with a clean DOM
 afterEach(cleanup);
@@ -161,10 +101,10 @@ describe("FacetChips", () => {
     ]);
     render(<FacetChips basePath="/admin/candidates" data={data as any} params={defaultParams} />);
 
-    expect(screen.getByText("Country")).toBeInTheDocument();
-    expect(screen.getByText("Skills")).toBeInTheDocument();
-    expect(screen.getByText("Company")).toBeInTheDocument();
-    expect(screen.getByText("University")).toBeInTheDocument();
+    expect(screen.getByText("Country:")).toBeInTheDocument();
+    expect(screen.getByText("Skills:")).toBeInTheDocument();
+    expect(screen.getByText("Company:")).toBeInTheDocument();
+    expect(screen.getByText("University:")).toBeInTheDocument();
   });
 
   it("renders up to 6 options per facet group", () => {
@@ -207,11 +147,12 @@ describe("FacetChips", () => {
     render(<FacetChips basePath="/admin/candidates" data={data as any} params={defaultParams} />);
 
     const kuwaitLink = screen.getByRole("link", { name: /kuwait/i });
-    expect(kuwaitLink).toHaveClass("chip active");
+    expect(kuwaitLink).toHaveClass("bg-primary");
+    expect(kuwaitLink).toHaveClass("text-primary-foreground");
 
     const uaeLink = screen.getByRole("link", { name: /uae/i });
-    expect(uaeLink).toHaveClass("chip");
-    expect(uaeLink).not.toHaveClass("active");
+    expect(uaeLink).toHaveClass("bg-muted");
+    expect(uaeLink).toHaveClass("text-muted-foreground");
   });
 
   // ===========================================================================
@@ -281,6 +222,7 @@ describe("FacetChips", () => {
   });
 
   it("navigates to basePath on 'Clear all' (removes all facet params)", () => {
+    const onNavigate = vi.fn();
     const data = makeSearchDataFacets([
       makeFacet("country", "Country", [
         makeActiveOption("Kuwait", "1", 42, true),
@@ -289,9 +231,14 @@ describe("FacetChips", () => {
         makeActiveOption("React", "react", 50, true),
       ]),
     ]);
-    render(<FacetChips basePath="/admin/candidates" data={data as any} params={defaultParams} />);
+    render(<FacetChips basePath="/admin/candidates" data={data as any} params={defaultParams} onNavigate={onNavigate} />);
 
     const clearAllLink = screen.getByRole("link", { name: /clear all/i });
-    expect(clearAllLink).toHaveAttribute("href", "/admin/candidates");
+    clearAllLink.click();
+
+    // onNavigate is called with all filter reset params
+    expect(onNavigate).toHaveBeenCalledTimes(1);
+    const callArgs = onNavigate.mock.calls[0][0];
+    expect(callArgs.q).toBe("");
   });
 });
