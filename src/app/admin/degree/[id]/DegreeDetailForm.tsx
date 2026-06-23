@@ -58,7 +58,10 @@ export function DegreeDetailForm({
     return { success: true };
   };
 
-  const [state, formAction, pending] = useActionState(updateAction, null);
+  const [state, formAction, pending] = useActionState(
+    updateAction,
+    null,
+  ) as unknown as [state: { success?: boolean } | null, formAction: () => void, pending: boolean];
 
   return (
     <div className="space-y-6">
@@ -135,7 +138,7 @@ export function DegreeDetailForm({
                 {pending ? "Saving..." : "Save Changes"}
               </Button>
               {state?.success && (
-                <span className="text-sm text-green-700 font-medium">
+                <span className="text-sm text-[#2e7d32] font-medium">
                   Saved successfully
                 </span>
               )}
@@ -146,9 +149,9 @@ export function DegreeDetailForm({
 
       <Separator />
 
-      <Card className="border-destructive/20">
+      <Card className="border-[#d32f2f]/20">
         <CardHeader>
-          <CardTitle className="text-destructive">Danger Zone</CardTitle>
+          <CardTitle className="text-[#d32f2f]">Danger Zone</CardTitle>
           <CardDescription>
             Deleting this degree will also remove it from all candidate education
             records. This action cannot be undone.

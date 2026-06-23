@@ -1,5 +1,7 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+
 export default function Error({
   error,
   reset,
@@ -8,15 +10,16 @@ export default function Error({
   reset: () => void;
 }) {
   return (
-    <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
-      <h2 className="text-lg font-semibold text-destructive">Something went wrong</h2>
-      <p className="text-sm text-muted-foreground">Failed to load university details.</p>
-      <button
-        onClick={reset}
-        className="h-9 rounded-lg px-4 text-sm font-semibold bg-primary text-primary-foreground"
-      >
-        Try again
-      </button>
+    <div className="flex flex-col items-center justify-center py-24 gap-4">
+      <span className="text-4xl" aria-hidden="true">⚠️</span>
+      <h2 className="text-xl font-bold text-foreground">
+        Something went wrong
+      </h2>
+      <p className="text-sm max-w-md text-center text-muted-foreground">
+        {error.message ?? "An unexpected error occurred while loading the university details."}
+      </p>
+      {error.digest ? <small className="text-muted-foreground">Error ID: {error.digest}</small> : null}
+      <Button onClick={reset} variant="default" className="mt-2">Try again</Button>
     </div>
   );
 }

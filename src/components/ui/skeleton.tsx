@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils"
 
-function Skeleton({ className, ...props }: React.ComponentProps<"div">) {
+function Skeleton({ className, variant: _variant, ...props }: React.ComponentProps<"div"> & { variant?: string }) {
   return (
     <div
       data-slot="skeleton"

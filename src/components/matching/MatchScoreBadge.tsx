@@ -1,5 +1,3 @@
-import { Badge } from "@/components/ui/badge";
-
 // ---------------------------------------------------------------------------
 // MatchScoreBadge — color-coded match percentage indicator
 // ---------------------------------------------------------------------------
@@ -19,19 +17,28 @@ type Props = {
   showBar?: boolean;
 };
 
-const SCORE_COLORS: Record<"strong" | "moderate" | "low" | "weak", { text: string; bg: string; bar: string }> = {
-  strong: { text: "text-yellow-600", bg: "bg-yellow-100", bar: "#eab308" },
-  moderate: { text: "text-green-600", bg: "bg-green-100", bar: "#16a34a" },
-  low: { text: "text-blue-600", bg: "bg-blue-100", bar: "#2563eb" },
-  weak: { text: "text-muted-foreground", bg: "bg-transparent", bar: "#9ca3af" },
-};
+function scoreColor(score: number | null): string {
+  if (score === null) return "var(--muted)";
+  if (score >= 75) return "#eab308"; // gold-500 (yellow-500)
+  if (score >= 50) return "#16a34a"; // green-600
+  if (score >= 25) return "#2563eb"; // blue-600
+  return "var(--muted)"; // gray — weak
+}
 
-function scoreConfig(score: number | null) {
-  if (score === null) return { ...SCORE_COLORS.weak, label: "Not scored" };
-  if (score >= 75) return { ...SCORE_COLORS.strong, label: "Strong match" };
-  if (score >= 50) return { ...SCORE_COLORS.moderate, label: "Moderate" };
-  if (score >= 25) return { ...SCORE_COLORS.low, label: "Low" };
-  return { ...SCORE_COLORS.weak, label: "Weak" };
+function scoreBgColor(score: number | null): string {
+  if (score === null) return "transparent";
+  if (score >= 75) return "#fef9c3"; // gold-100
+  if (score >= 50) return "#dcfce7"; // green-50
+  if (score >= 25) return "#dbeafe"; // blue-50
+  return "transparent";
+}
+
+function scoreLabel(score: number | null): string {
+  if (score === null) return "Not scored";
+  if (score >= 75) return "Strong match";
+  if (score >= 50) return "Moderate";
+  if (score >= 25) return "Low";
+  return "Weak";
 }
 
 export default function MatchScoreBadge({
@@ -39,21 +46,32 @@ export default function MatchScoreBadge({
   label = "Match",
   showBar = true,
 }: Props) {
-  const config = scoreConfig(score);
+  const color = scoreColor(score);
+  const bg = scoreBgColor(score);
+  const text = scoreLabel(score);
 
   return (
-    <Badge
-      variant="outline"
-      className={`inline-flex items-center gap-2 px-2.5 py-1 text-xs font-semibold rounded-full ${config.bg} ${config.text} border-transparent`}
-      title={`${label}: ${score ?? "N/A"} — ${config.label}`}
+    <div
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: "8px",
+        padding: score !== null ? "2px 10px 2px 8px" : "2px 10px",
+        borderRadius: "9999px",
+        backgroundColor: bg,
+        border: `1px solid ${color}20`,
+        fontSize: "0.8125rem",
+        fontWeight: 600,
+      }}
+      title={`${label}: ${score ?? "N/A"} — ${text}`}
       data-testid="match-score-badge"
     >
       {/* Score number */}
-      <span className={`min-w-[28px] text-right ${config.text}`}>
+      <span style={{ color, minWidth: "28px", textAlign: "right" }}>
         {score !== null ? `${score}%` : "—"}
       </span>
 
-      {/* Progress bar */}
+      {/* Short label */}
       {showBar && score !== null && (
         <svg width="40" height="6" viewBox="0 0 40 6" aria-hidden="true">
           <rect x="0" y="0" width="40" height="6" rx="3" fill="#e5e7eb" />
@@ -63,17 +81,17 @@ export default function MatchScoreBadge({
             width={Math.min(Math.max((score / 100) * 40, 2), 40)}
             height="6"
             rx="3"
-            fill={config.bar}
+            fill={color}
           />
         </svg>
       )}
 
-      {/* Status label */}
+      {/* Status label — only shown for non-null */}
       {score !== null && (
-        <span className="text-muted-foreground font-normal">
-          {config.label}
+        <span style={{ color: "var(--muted)", fontWeight: 400 }}>
+          {text}
         </span>
       )}
-    </Badge>
+    </div>
   );
 }

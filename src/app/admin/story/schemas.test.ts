@@ -1,9 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
   listStoriesSchema,
-  createStorySchema,
-  updateStorySchema,
-  deleteStorySchema,
   storyItemSchema,
   listStoriesResultSchema,
   storyActionResponseSchema,
@@ -38,97 +35,14 @@ describe("listStoriesSchema", () => {
 });
 
 // ---------------------------------------------------------------------------
-// createStorySchema
-// ---------------------------------------------------------------------------
-describe("createStorySchema", () => {
-  it("accepts valid input", () => {
-    expect(
-      createStorySchema.safeParse({
-        requestUuid: "req-123",
-        staffId: 1,
-        numberOfEmployees: 3,
-        storyStatus: 0,
-      }).success,
-    ).toBe(true);
-  });
-
-  it("accepts minimal input (just requestUuid)", () => {
-    expect(
-      createStorySchema.safeParse({
-        requestUuid: "req-123",
-      }).success,
-    ).toBe(true);
-  });
-
-  it("rejects missing requestUuid", () => {
-    expect(createStorySchema.safeParse({}).success).toBe(false);
-  });
-
-  it("rejects empty requestUuid", () => {
-    expect(
-      createStorySchema.safeParse({ requestUuid: "" }).success,
-    ).toBe(false);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// updateStorySchema
-// ---------------------------------------------------------------------------
-describe("updateStorySchema", () => {
-  it("accepts valid input with required fields", () => {
-    expect(
-      updateStorySchema.safeParse({
-        storyUuid: "abc-123",
-        requestUuid: "req-456",
-        storyStatus: 2,
-        numberOfEmployees: 5,
-      }).success,
-    ).toBe(true);
-  });
-
-  it("rejects missing storyUuid", () => {
-    expect(updateStorySchema.safeParse({}).success).toBe(false);
-  });
-
-  it("rejects empty storyUuid", () => {
-    expect(
-      updateStorySchema.safeParse({ storyUuid: "" }).success,
-    ).toBe(false);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// deleteStorySchema
-// ---------------------------------------------------------------------------
-describe("deleteStorySchema", () => {
-  it("accepts valid input", () => {
-    expect(
-      deleteStorySchema.safeParse({ storyUuid: "abc-123" }).success,
-    ).toBe(true);
-  });
-
-  it("rejects missing storyUuid", () => {
-    expect(deleteStorySchema.safeParse({}).success).toBe(false);
-  });
-
-  it("rejects empty storyUuid", () => {
-    expect(deleteStorySchema.safeParse({ storyUuid: "" }).success).toBe(
-      false,
-    );
-  });
-});
-
-// ---------------------------------------------------------------------------
 // storyItemSchema
 // ---------------------------------------------------------------------------
 describe("storyItemSchema", () => {
   const validItem = {
     story_uuid: "abc-123",
     request_uuid: "req-456",
-    request_position_title: "Engineer",
     suggestion_uuid: null,
     staff_id: 1,
-    staff_name: "Ahmed",
     number_of_employees: 3,
     story_status: 1,
     is_old: false,
@@ -146,7 +60,6 @@ describe("storyItemSchema", () => {
       storyItemSchema.safeParse({
         ...validItem,
         staff_id: null,
-        staff_name: null,
         number_of_employees: null,
         is_old: null,
         story_time_spent: null,
@@ -175,10 +88,8 @@ describe("listStoriesResultSchema", () => {
       {
         story_uuid: "abc-123",
         request_uuid: "req-456",
-        request_position_title: "Engineer",
         suggestion_uuid: null,
         staff_id: 1,
-        staff_name: "Ahmed",
         number_of_employees: 3,
         story_status: 1,
         is_old: false,

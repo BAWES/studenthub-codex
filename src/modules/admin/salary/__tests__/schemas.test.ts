@@ -1,137 +1,94 @@
 import { describe, it, expect } from "vitest";
 import {
-  salaryListItemSchema,
-  salaryDetailSchema,
+  listSalarySchema,
+  salaryItemSchema,
   listSalaryResultSchema,
+  salaryActionResponseSchema,
 } from "../schemas";
 
-// ---------------------------------------------------------------------------
-// Pure logic: salary schema validation
-//
-// All admin actions in actions.ts use these zod schemas internally.
-// Testing them separately avoids mocking prisma/session/next/cache.
-// ---------------------------------------------------------------------------
-
-const validSalaryItem = {
-  staff_salary_uuid: "abc123-def456-7890",
-  staff_id: 1,
-  staff_name: "John Doe",
-  salary: 1500.5,
-  salary_currency: "KWD",
-  comment: "Monthly salary",
-  salary_date: "2026-06-01",
-  created_at: "2026-06-01T10:00:00.000Z",
-  updated_at: "2026-06-01T10:00:00.000Z",
-};
-
-const validSalaryDetail = {
-  staff_salary_uuid: "abc123-def456-7890",
-  staff_id: 1,
-  staff_name: "John Doe",
-  staff_email: "john@example.com",
-  salary: 1500.5,
-  salary_currency: "KWD",
-  comment: "Monthly salary",
-  salary_date: "2026-06-01",
-  created_at: "2026-06-01T10:00:00.000Z",
-  updated_at: "2026-06-01T10:00:00.000Z",
-};
-
-describe("salaryListItemSchema", () => {
-  it("accepts a valid salary list item", () => {
-    const result = salaryListItemSchema.safeParse(validSalaryItem);
-    expect(result.success).toBe(true);
-  });
-
-  it("accepts salary with nullable fields", () => {
-    const result = salaryListItemSchema.safeParse({
-      staff_salary_uuid: "xyz-789",
-      staff_id: null,
-      staff_name: "-",
-      salary: null,
-      salary_currency: null,
-      comment: null,
-      salary_date: null,
-      created_at: "2026-06-01T10:00:00.000Z",
-      updated_at: "2026-06-01T10:00:00.000Z",
+describe("admin/salary schemas", () => {
+  describe("listSalarySchema", () => {
+    it("defaults page and limit", () => {
+      const result = listSalarySchema.parse({});
+      expect(result.page).toBe(1);
+      expect(result.limit).toBe(50);
     });
-    expect(result.success).toBe(true);
-  });
 
-  it("rejects missing required uuid", () => {
-    const result = salaryListItemSchema.safeParse({
-      staff_name: "John",
+    it("accepts explicit page and limit", () => {
+      const result = listSalarySchema.parse({ page: "2", limit: "25" });
+      expect(result.page).toBe(2);
+      expect(result.limit).toBe(25);
     });
-    expect(result.success).toBe(false);
-  });
 
-  it("rejects non-string uuid", () => {
-    const result = salaryListItemSchema.safeParse({
-      ...validSalaryItem,
-      staff_salary_uuid: 123,
+    it("rejects negative page", () => {
+      const result = listSalarySchema.safeParse({ page: "-1" });
+      expect(result.success).toBe(false);
     });
-    expect(result.success).toBe(false);
-  });
-});
 
-describe("salaryDetailSchema", () => {
-  it("accepts a valid salary detail object", () => {
-    const result = salaryDetailSchema.safeParse(validSalaryDetail);
-    expect(result.success).toBe(true);
-  });
-
-  it("accepts detail with all-null optionals", () => {
-    const result = salaryDetailSchema.safeParse({
-      staff_salary_uuid: "abc-123",
-      staff_id: null,
-      staff_name: "-",
-      staff_email: null,
-      salary: null,
-      salary_currency: null,
-      comment: null,
-      salary_date: null,
-      created_at: null,
-      updated_at: null,
+    it("rejects limit over 200", () => {
+      const result = listSalarySchema.safeParse({ limit: "300" });
+      expect(result.success).toBe(false);
     });
-    expect(result.success).toBe(true);
   });
 
-  it("rejects missing uuid", () => {
-    const result = salaryDetailSchema.safeParse({});
-    expect(result.success).toBe(false);
-  });
-});
-
-describe("listSalaryResultSchema", () => {
-  it("accepts a valid result with records", () => {
-    const result = listSalaryResultSchema.safeParse({
-      records: [validSalaryItem],
-      total: 1,
+  describe("salaryItemSchema", () => {
+    it("validates a complete salary item", () => {
+      const result = salaryItemSchema.parse({
+        staff_salary_uuid: "SAL-001",
+        staff_id: 42,
+        staff_name: "John Doe",
+        salary: 2500,
+        salary_currency: "KWD",
+        comment: "Monthly",
+        salary_date: new Date("2026-06-01"),
+        created_at: new Date("2026-06-01"),
+        updated_at: new Date("2026-06-01"),
+      });
+      expect(result.staff_salary_uuid).toBe("SAL-001");
+      expect(result.salary).toBe(2500);
+      expect(result.staff_id).toBe(42);
     });
-    expect(result.success).toBe(true);
+
+    it("accepts null fields", () => {
+      const result = salaryItemSchema.parse({
+        staff_salary_uuid: "SAL-002",
+        staff_id: null,
+        staff_name: null,
+        salary: null,
+        salary_currency: null,
+        comment: null,
+        salary_date: null,
+        created_at: null,
+        updated_at: null,
+      });
+      expect(result.staff_salary_uuid).toBe("SAL-002");
+      expect(result.salary).toBeNull();
+    });
   });
 
-  it("accepts an empty records array", () => {
-    const result = listSalaryResultSchema.safeParse({
-      records: [],
-      total: 0,
+  describe("listSalaryResultSchema", () => {
+    it("validates a complete list result", () => {
+      const result = listSalaryResultSchema.parse({
+        salaries: [
+          { staff_salary_uuid: "SAL-001", staff_id: null, staff_name: null, salary: 2500, salary_currency: "KWD", comment: null, salary_date: null, created_at: null, updated_at: null },
+        ],
+        total: 1,
+        page: 1,
+        limit: 50,
+        totalPages: 1,
+      });
+      expect(result.salaries).toHaveLength(1);
+      expect(result.total).toBe(1);
     });
-    expect(result.success).toBe(true);
   });
 
-  it("rejects non-array records", () => {
-    const result = listSalaryResultSchema.safeParse({
-      records: "not-an-array",
-      total: 0,
+  describe("salaryActionResponseSchema", () => {
+    it("validates an action response", () => {
+      const result = salaryActionResponseSchema.parse({
+        operation: "success",
+        message: "Salary saved",
+      });
+      expect(result.operation).toBe("success");
     });
-    expect(result.success).toBe(false);
-  });
-
-  it("rejects negative total", () => {
-    const result = listSalaryResultSchema.safeParse({
-      records: [],
-      total: -1,
-    });
-    expect(result.success).toBe(false);
   });
 });

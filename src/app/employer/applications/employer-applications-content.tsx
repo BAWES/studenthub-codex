@@ -1,13 +1,13 @@
 "use client";
 
-import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { DataTablePage } from "@/modules/workspace/DataTablePage";
 import { StatusBadge } from "@/modules/workspace/StatusBadge";
 import { genericStatusVariant } from "@/modules/workspace/status-mapping";
+import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import type { SessionUser } from "@/modules/auth/types";
 
 type ApplicationRow = Record<string, unknown> & {
-  id: string;
+  id: number;
   jobTitle: string;
   candidateName: string | null;
   status: string;
@@ -28,6 +28,26 @@ type Props = {
   metrics: Metrics;
 };
 
+function MetricCard({ label, value, note }: { label: string; value: number; note?: string }) {
+  return (
+    <div
+      className="flex flex-col gap-1 rounded-xl border border-[var(--border)] bg-[var(--card)] p-5"
+    >
+      <span className="text-sm font-medium text-[var(--muted-foreground)]">
+        {label}
+      </span>
+      <span className="text-3xl font-bold text-[var(--ink)]">
+        {value.toLocaleString()}
+      </span>
+      {note && (
+        <span className="text-xs text-[var(--muted-foreground)]">
+          {note}
+        </span>
+      )}
+    </div>
+  );
+}
+
 export function EmployerApplicationsContent({ session, applications, total, metrics }: Props) {
   return (
     <WorkspaceShell
@@ -37,10 +57,34 @@ export function EmployerApplicationsContent({ session, applications, total, metr
       metrics={[
         { label: "Total Applications", value: total, note: "all time" },
         { label: "Pending Review", value: metrics.pending, note: "awaiting decision" },
-        { label: "Accepted", value: metrics.accepted, note: "approved offers" },
-        { label: "Rejected", value: metrics.rejected, note: "did not proceed" },
+        { label: "Accepted", value: metrics.accepted, note: "approved" },
       ]}
     >
+      {/* Metrics grid */}
+      <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <MetricCard
+          label="Total"
+          value={metrics.total}
+          note="all applications"
+        />
+        <MetricCard
+          label="Pending"
+          value={metrics.pending}
+          note="awaiting review"
+        />
+        <MetricCard
+          label="Accepted"
+          value={metrics.accepted}
+          note="approved offers"
+        />
+        <MetricCard
+          label="Rejected"
+          value={metrics.rejected}
+          note="did not proceed"
+        />
+      </div>
+
+      {/* DataTable */}
       <DataTablePage
         title="All Applications"
         description="Review and manage candidate applications across all your job listings."
@@ -60,12 +104,7 @@ export function EmployerApplicationsContent({ session, applications, total, metr
           {
             key: "candidateName",
             label: "Candidate",
-            render: (row) =>
-              row.candidateName ? (
-                String(row.candidateName)
-              ) : (
-                <span className="text-muted-foreground">&mdash;</span>
-              ),
+            render: (row) => row.candidateName ? String(row.candidateName) : <span className="text-[var(--muted-foreground)]">—</span>,
           },
           {
             key: "status",

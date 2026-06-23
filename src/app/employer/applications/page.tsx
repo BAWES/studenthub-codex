@@ -1,19 +1,19 @@
 import { requireRoleCapability } from "@/modules/auth/session";
+import { listEmployerApplications } from "./actions";
 import { EmployerApplicationsContent } from "./employer-applications-content";
-import { getEmployerApplicationsData } from "@/modules/employer/data";
 
 export const dynamic = "force-dynamic";
 
 export default async function EmployerApplicationsPage() {
-  const session = await requireRoleCapability("company", "request.read.linked");
-  const data = await getEmployerApplicationsData(session.id);
+  const session = await requireRoleCapability("company", "company.read.linked");
+  const result = await listEmployerApplications({ limit: 50 });
 
   return (
     <EmployerApplicationsContent
       session={session}
-      applications={data.applications}
-      total={data.total}
-      metrics={data.metrics}
+      applications={result.applications}
+      total={result.total}
+      metrics={result.metrics}
     />
   );
 }

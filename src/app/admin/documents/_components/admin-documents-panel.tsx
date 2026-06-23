@@ -2,11 +2,12 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AlertCircle, Download, FileText, UserCheck, FileSignature, Landmark } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   cvDownloadSchema,
   uuidDownloadSchema,
@@ -17,7 +18,7 @@ import {
   buildIdCardDownloadUrl,
   buildCertificateDownloadUrl,
   certificateDownloadSchema,
-} from "../schemas";
+} from "./schemas";
 import { ZodError } from "zod";
 
 type TabValue = "cv" | "id-card" | "certificate" | "evaluation" | "offer-letter" | "bank-advice";
@@ -107,10 +108,10 @@ export function AdminDocumentsPanel() {
       </div>
 
       {error && (
-        <div className="border border-red-200 bg-red-50 text-red-800 rounded-lg p-4 flex items-start gap-3">
-          <AlertCircle className="size-4 mt-0.5 shrink-0" />
-          <p className="text-sm">{error}</p>
-        </div>
+        <Alert variant="destructive">
+          <AlertCircle className="size-4" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
 
       <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v as TabValue); setError(null); }}>
@@ -170,7 +171,7 @@ export function AdminDocumentsPanel() {
                 </p>
               </div>
             </CardContent>
-            <div className="p-6 pt-0">
+            <CardFooter>
               <Button
                 onClick={handleCvDownload}
                 disabled={loading === "cv" || !candidateId.trim()}
@@ -179,7 +180,7 @@ export function AdminDocumentsPanel() {
                 <Download className="size-4" />
                 {loading === "cv" ? "Downloading..." : "Download CV PDF"}
               </Button>
-            </div>
+            </CardFooter>
           </Card>
 
           <Card>
@@ -228,7 +229,7 @@ export function AdminDocumentsPanel() {
                 </p>
               </div>
             </CardContent>
-            <div className="p-6 pt-0">
+            <CardFooter>
               <Button
                 onClick={handleIdCardDownload}
                 disabled={loading === "id-card" || !candidateId.trim()}
@@ -237,7 +238,7 @@ export function AdminDocumentsPanel() {
                 <Download className="size-4" />
                 {loading === "id-card" ? "Downloading..." : "Download ID Card PDF"}
               </Button>
-            </div>
+            </CardFooter>
           </Card>
 
           <Card>
@@ -299,7 +300,7 @@ export function AdminDocumentsPanel() {
                 </p>
               </div>
             </CardContent>
-            <div className="p-6 pt-0">
+            <CardFooter>
               <Button
                 onClick={handleCertificateDownload}
                 disabled={loading === "certificate" || !certCandidateId.trim() || !certUuid.trim()}
@@ -308,7 +309,7 @@ export function AdminDocumentsPanel() {
                 <Download className="size-4" />
                 {loading === "certificate" ? "Downloading..." : "Download Certificate PDF"}
               </Button>
-            </div>
+            </CardFooter>
           </Card>
 
           <Card>
@@ -355,7 +356,7 @@ export function AdminDocumentsPanel() {
                 </p>
               </div>
             </CardContent>
-            <div className="p-6 pt-0">
+            <CardFooter>
               <Button
                 onClick={handleEvaluationDownload}
                 disabled={loading === "evaluation" || !evalUuid.trim()}
@@ -364,7 +365,7 @@ export function AdminDocumentsPanel() {
                 <Download className="size-4" />
                 {loading === "evaluation" ? "Downloading..." : "Download Evaluation PDF"}
               </Button>
-            </div>
+            </CardFooter>
           </Card>
 
           <Card>
@@ -411,7 +412,7 @@ export function AdminDocumentsPanel() {
                 </p>
               </div>
             </CardContent>
-            <div className="p-6 pt-0">
+            <CardFooter>
               <Button
                 onClick={handleOfferLetterDownload}
                 disabled={loading === "offer-letter" || !offerUuid.trim()}
@@ -420,7 +421,7 @@ export function AdminDocumentsPanel() {
                 <Download className="size-4" />
                 {loading === "offer-letter" ? "Downloading..." : "Download Offer Letter PDF"}
               </Button>
-            </div>
+            </CardFooter>
           </Card>
 
           <Card>
@@ -467,7 +468,7 @@ export function AdminDocumentsPanel() {
                 </p>
               </div>
             </CardContent>
-            <div className="p-6 pt-0">
+            <CardFooter>
               <Button
                 onClick={handleBankAdviceDownload}
                 disabled={loading === "bank-advice" || !bankAdviceUuid.trim()}
@@ -476,7 +477,7 @@ export function AdminDocumentsPanel() {
                 <Download className="size-4" />
                 {loading === "bank-advice" ? "Downloading..." : "Download Bank Advice PDF"}
               </Button>
-            </div>
+            </CardFooter>
           </Card>
 
           <Card>

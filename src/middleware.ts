@@ -1,17 +1,45 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { roleDefaultRoute } from "@/modules/auth/types";
 
-const protectedPaths = [
-  "/app",
-  "/hub",
-  "/admin",
-  "/staff",
-  "/candidate",
-  "/company",
-  "/inspector"
+// ── Session cookie decoding (duplicated from session.ts for edge compatibility) ──
+
+function decodeSession(value: string | undefined): { role: string; roles?: string[] } | null {
+  if (!value) return null;
+  const parts = value.split(".");
+  if (parts.length !== 2) return null;
+  try {
+    const parsed = JSON.parse(
+      Buffer.from(parts[0], "base64url").toString("utf8")
+    ) as { role: string; roles?: string[] };
+    if (!parsed.role) return null;
+    return { role: parsed.role, roles: parsed.roles };
+  } catch {
+    return null;
+  }
+}
+
+// ── Role-to-path mapping for cross-role guard ──
+// Paths that are role-specific (prefix → allowed user role)
+const rolePaths: Record<string, string> = {
+  "/admin": "admin",
+  "/staff": "staff",
+  "/candidate": "candidate",
+  "/company": "company",
+  "/employer": "company",
+  "/inspector": "inspector",
+};
+
+const publicPaths = [
+  "/login",
+  "/signup",
+  "/",
+  "/games",
+  "/for",
+  "/for-candidates",
+  "/forgot-password",
+  "/reset-password",
 ];
-
-const publicPaths = ["/login", "/", "/games"];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -38,6 +66,38 @@ export function middleware(request: NextRequest) {
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("redirect", pathname);
     return NextResponse.redirect(loginUrl);
+  }
+
+  // ── Cross-role guard ──
+  // After confirming the user is authenticated, decode the session role
+  // and verify they aren't accessing another role's route prefix.
+  const session = decodeSession(sessionCookie?.value);
+
+  // Check if the current path matches a role-specific prefix
+  for (const [prefix, allowedRole] of Object.entries(rolePaths)) {
+    if (pathname === prefix || pathname.startsWith(`${prefix}/`)) {
+      // User is on a role-specific path — verify they have this role
+      if (session) {
+        const userRoles = session.roles ?? [session.role];
+        if (!userRoles.includes(allowedRole)) {
+          const loginUrl = new URL("/login", request.url);
+          // Redirect to their correct default route
+          loginUrl.searchParams.set(
+            "redirect",
+            roleDefaultRoute(session.role as any)
+          );
+          return NextResponse.redirect(loginUrl);
+        }
+      }
+      break; // Found a match, no need to check further prefixes
+    }
+  }
+
+  // Route authenticated users from / to their role-specific workspace
+  if (pathname === "/") {
+    if (session && session.role) {
+      return NextResponse.redirect(new URL(roleDefaultRoute(session.role as any), request.url));
+    }
   }
 
   // Add security headers for authenticated routes

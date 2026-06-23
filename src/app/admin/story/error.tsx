@@ -19,7 +19,10 @@ export default function Error({
         {error.message ?? "An unexpected error occurred while loading the stories page."}
       </p>
       {error.digest ? <small className="text-muted-foreground">Error ID: {error.digest}</small> : null}
-      <Button variant="outline" onClick={reset} className="mt-2">
+      <Button
+        onClick={reset}
+        variant="default"
+      >
         Try again
       </Button>
     </div>

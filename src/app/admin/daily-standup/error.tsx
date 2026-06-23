@@ -1,6 +1,8 @@
 "use client";
 
-export default function AdminDailyStandupError({
+import { Button } from "@/components/ui/button";
+
+export default function Error({
   error,
   reset,
 }: {
@@ -8,19 +10,14 @@ export default function AdminDailyStandupError({
   reset: () => void;
 }) {
   return (
-    <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
-      <p className="text-destructive text-sm font-medium">
-        Failed to load daily standup answers.
+    <div className="flex flex-col items-center justify-center min-h-[40vh] gap-4">
+      <h2 className="text-lg font-semibold text-destructive">
+        Something went wrong
+      </h2>
+      <p className="text-sm text-muted-foreground">
+        {error.message ?? "Failed to load daily standup answers."}
       </p>
-      <p className="text-muted-foreground text-xs">
-        Please try again or contact support if the issue persists.
-      </p>
-      <button
-        onClick={reset}
-        className="text-sm text-primary underline underline-offset-4 hover:text-primary/80"
-      >
-        Try again
-      </button>
+      <Button onClick={reset} variant="default" className="rounded-lg px-4 py-2 text-sm font-semibold bg-primary text-white" type="button">Try again</Button>
     </div>
   );
 }

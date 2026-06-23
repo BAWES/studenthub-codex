@@ -2,7 +2,6 @@
 
 import { useActionState, useState } from "react";
 import { approveIdRequest, rejectIdRequest } from "@/modules/candidates/actions";
-import { Button } from "@/components/ui/button";
 
 export function IdRequestActions({
   requestUuid,
@@ -28,20 +27,24 @@ export function IdRequestActions({
         }}
       >
         <input type="hidden" name="requestUuid" value={requestUuid} />
-        <Button type="submit" disabled={approvePending}>
-          {approvePending ? "Approving..." : "Approve request"}
-        </Button>
+        <div className="formActions">
+          <button type="submit" className="acceptButton" disabled={approvePending}>
+            {approvePending ? "Approving..." : "Approve request"}
+          </button>
+        </div>
         {approveState.error && (
-          <p className="text-destructive text-sm mt-1">{approveState.error}</p>
+          <p className="text-sm text-destructive mt-1">{approveState.error}</p>
         )}
       </form>
 
       <form action={rejectAction}>
         <input type="hidden" name="requestUuid" value={requestUuid} />
         {!showReject ? (
-          <Button type="button" variant="destructive" onClick={() => setShowReject(true)}>
-            Reject request
-          </Button>
+          <div className="formActions">
+            <button type="button" className="rejectButton" onClick={() => setShowReject(true)}>
+              Reject request
+            </button>
+          </div>
         ) : (
           <>
             <label>
@@ -53,19 +56,18 @@ export function IdRequestActions({
                 minLength={10}
                 maxLength={500}
                 placeholder="Explain why this ID verification request is being rejected (min 10 characters)..."
-                className="border border-border rounded-lg p-2 text-sm w-full mt-1"
               />
             </label>
             {rejectState.error && (
-              <p className="text-destructive text-sm mt-1">{rejectState.error}</p>
+              <p className="text-sm text-destructive mt-1">{rejectState.error}</p>
             )}
-            <div className="flex gap-2 mt-2">
-              <Button type="submit" variant="destructive" disabled={rejectPending}>
+            <div className="formActions">
+              <button type="submit" className="rejectButton" disabled={rejectPending}>
                 {rejectPending ? "Rejecting..." : "Confirm rejection"}
-              </Button>
-              <Button type="button" variant="outline" onClick={() => setShowReject(false)} disabled={rejectPending}>
+              </button>
+              <button type="button" onClick={() => setShowReject(false)} disabled={rejectPending}>
                 Cancel
-              </Button>
+              </button>
             </div>
           </>
         )}

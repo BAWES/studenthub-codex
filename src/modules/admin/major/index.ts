@@ -1,13 +1,2 @@
-export {
-  listMajors,
-  createMajor,
-  updateMajor,
-  deleteMajor,
-  getMajor,
-} from "./actions";
-
-export type {
-  MajorListItem,
-  ListMajorResult,
-  MajorIdResult,
-} from "./schemas";
+export * from "./actions";
+export * from "./schemas";

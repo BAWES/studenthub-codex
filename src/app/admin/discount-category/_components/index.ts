@@ -1,1 +1,1 @@
-export { AdminDiscountCategoryTable } from "./admin-discount-category-table";
+export { AdminDiscountCategoriesTable } from "./admin-discount-categories-table";

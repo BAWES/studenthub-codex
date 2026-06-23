@@ -1,9 +1,13 @@
 import { describe, it, expect } from "vitest";
 import {
-  countryListItemSchema,
+  countryItemSchema as countryListItemSchema,
   listCountriesResultSchema,
-  countryIdResultSchema,
 } from "../schemas";
+import { z } from "zod";
+
+const countryIdResultSchema = z.object({
+  country_id: z.number().int().positive(),
+});
 
 // ---------------------------------------------------------------------------
 // Pure logic: country schema validation
