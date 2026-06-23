@@ -1,8 +1,8 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useRouter } from "next/navigation";
+
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
@@ -13,31 +13,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { updateDegree, deleteDegree } from "../actions";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { updateDegree, deleteDegree } from "@/modules/admin/degree/actions";
+import { useActionState, useState } from "react";
+import type { DegreeListItem } from "@/modules/admin/degree/schemas";
 
-interface DegreeGroup {
-  degree_group_uuid: string;
-  degree_group_name_en: string;
-}
+type Props = {
+  degree: DegreeListItem;
+  groups: { degree_group_uuid: string; degree_group_name_en: string }[];
+};
 
-interface DegreeDetail {
-  degree_uuid: string;
-  degree_name_en: string;
-  degree_name_ar: string | null;
-  degree_sort_order: number | null;
-  degree_group_uuid: string | null;
-  degree_created_at: Date | null;
-  degree_updated_at: Date | null;
-  degree_group: DegreeGroup | null;
-}
-
-export function DegreeDetailForm({
-  degree,
-  groups,
-}: {
-  degree: DegreeDetail;
-  groups: DegreeGroup[];
-}) {
+export function DegreeDetailForm({ degree, groups }: Props) {
+  const router = useRouter();
   const [nameEn, setNameEn] = useState(degree.degree_name_en);
   const [nameAr, setNameAr] = useState(degree.degree_name_ar ?? "");
   const [sortOrder, setSortOrder] = useState(String(degree.degree_sort_order ?? 0));
@@ -49,11 +36,12 @@ export function DegreeDetailForm({
     formData.set("degree_sort_order", sortOrder);
     formData.set("degree_group_uuid", groupUuid || "");
 
-    await updateDegree(degree.degree_uuid, {
+    await updateDegree({
+      degreeUuid: degree.degree_uuid,
       degree_name_en: nameEn,
       degree_name_ar: nameAr || undefined,
-      degree_sort_order: Number(sortOrder) || 0,
-      degree_group_uuid: groupUuid || null,
+      degree_sort_order: Number(sortOrder) || undefined,
+      degree_group_uuid: groupUuid || undefined,
     });
     return { success: true };
   };
@@ -135,7 +123,7 @@ export function DegreeDetailForm({
                 {pending ? "Saving..." : "Save Changes"}
               </Button>
               {state?.success && (
-                <span className="text-sm text-green-700 font-medium">
+                <span className="text-sm text-[var(--sh-success)] font-medium">
                   Saved successfully
                 </span>
               )}
@@ -158,6 +146,8 @@ export function DegreeDetailForm({
           <form
             action={async () => {
               await deleteDegree(degree.degree_uuid);
+              router.push("/admin/degree");
+              router.refresh();
             }}
           >
             <Button type="submit" variant="destructive">
