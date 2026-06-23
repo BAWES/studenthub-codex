@@ -2,9 +2,10 @@
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 /* ------------------------------------------------------------------ */
-/*  EmptyState — custom illustration + CTA per state                   */
+/*  EmptyState — shadcn-based illustration + CTA per state             */
 /*  Each variant has a unique inline SVG illustration designed for the  */
 /*  StudentHub OS aesthetic — playful, purposeful, never apologetic.    */
 /*  Inspired by Linear"s empty states.                                  */
@@ -15,7 +16,7 @@ export type EmptyStateVariant =
   | "empty"       // List/view has no items yet
   | "error"       // Something went wrong
   | "success"     // Action completed (e.g. form submitted)
-  | "loading"     // Initial loading state (glass skeleton style)
+  | "loading"     // Initial loading state (skeleton style)
   | "idle";       // Feature not yet started (default)
 
 export interface EmptyStateProps {
@@ -217,20 +218,13 @@ function EmptyState({
       {actionLabel && (onAction || actionHref) && (
         <div className="shEmptyStateAction">
           {actionHref ? (
-            <a
-              href={actionHref}
-              className="uiButton uiButton_default uiButton_sm"
-            >
-              {actionLabel}
-            </a>
+            <Button asChild size="sm">
+              <a href={actionHref}>{actionLabel}</a>
+            </Button>
           ) : (
-            <button
-              type="button"
-              onClick={onAction}
-              className="uiButton uiButton_default uiButton_sm"
-            >
+            <Button type="button" size="sm" onClick={onAction}>
               {actionLabel}
-            </button>
+            </Button>
           )}
         </div>
       )}

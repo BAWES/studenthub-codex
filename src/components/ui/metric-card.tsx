@@ -65,7 +65,7 @@ function normalizeSparkline(data?: number[]): number[] | undefined {
 }
 
 /**
- * MetricCard — glass panel with label, value, optional sparkline, and trend indicator.
+ * MetricCard — dashboard stat card with label, value, optional sparkline, and trend indicator.
  * Use in dashboards to replace generic shadcn stat cards.
  * Supports both new API (subtitle, sparkline, icon, glow) and legacy API (note, sparklineData, accent, entranceDelay).
  */
