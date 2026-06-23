@@ -8,21 +8,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 
 import type { SessionUser } from "@/modules/auth/types";
 import type { UniversityListItem } from "@/modules/admin/university/schemas";
-import { createUniversity, deleteUniversity } from "@/modules/admin/university/actions";
+import { createUniversity, updateUniversity, deleteUniversity } from "@/modules/admin/university/actions";
 
 type Props = {
   session: SessionUser;
@@ -31,6 +20,7 @@ type Props = {
 
 export function AdminUniversityTable({ session, records }: Props) {
   const router = useRouter();
+  const [editingId, setEditingId] = useState<number | null>(null);
 
   return (
     <WorkspaceShell
@@ -50,17 +40,28 @@ export function AdminUniversityTable({ session, records }: Props) {
 
       <DataTable
         title="Universities"
-        description="List of all university records. Click a name to view details."
+        description="All universities. Click a name to edit in-line."
         rows={records.map((r) => ({ ...r, id: String(r.university_id) }))}
         columns={[
           {
             key: "university_name_en",
             label: "Name (English)",
-            render: (row) => (
-              <span className="text-sm font-medium text-foreground">
-                {row.university_name_en ?? "—"}
-              </span>
-            ),
+            render: (row) =>
+              editingId === row.university_id ? (
+                <EditUniversityForm
+                  row={row as unknown as UniversityListItem}
+                  onDone={() => { setEditingId(null); router.refresh(); }}
+                  onCancel={() => setEditingId(null)}
+                />
+              ) : (
+                <button
+                  type="button"
+                  className="text-sm hover:underline text-primary"
+                  onClick={() => setEditingId(row.university_id)}
+                >
+                  {row.university_name_en ?? "—"}
+                </button>
+              ),
           },
           {
             key: "university_name_ar",
@@ -82,77 +83,26 @@ export function AdminUniversityTable({ session, records }: Props) {
           },
           {
             key: "actions",
-            label: "",
-            render: (row) => (
-              <DeleteUniversityButton
-                universityId={row.university_id}
-                universityName={row.university_name_en || row.university_name_ar || "Unnamed"}
-                onDelete={async () => {
-                  await deleteUniversity(row.university_id);
-                  router.refresh();
-                }}
-              />
-            ),
+            label: "Delete",
+            render: (row) =>
+              editingId !== row.university_id ? (
+                <button
+                  type="button"
+                  className="text-xs px-2 py-1 rounded hover:bg-red-500/10 text-destructive"
+                  onClick={async () => {
+                    if (confirm(`Delete university "${row.university_name_en ?? "Unnamed"}"?`)) {
+                      await deleteUniversity(row.university_id);
+                      router.refresh();
+                    }
+                  }}
+                >
+                  Delete
+                </button>
+              ) : null,
           },
         ]}
       />
     </WorkspaceShell>
-  );
-}
-
-function DeleteUniversityButton({
-  universityId,
-  universityName,
-  onDelete,
-}: {
-  universityId: number;
-  universityName: string;
-  onDelete: () => Promise<void>;
-}) {
-  const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  return (
-    <AlertDialog open={open} onOpenChange={setOpen}>
-      <AlertDialogTrigger asChild>
-        <Button variant="destructive" size="sm">
-          Delete
-        </Button>
-      </AlertDialogTrigger>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Delete university</AlertDialogTitle>
-          <AlertDialogDescription>
-            Are you sure you want to delete <strong>{universityName}</strong>? This action cannot be undone.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        {error && (
-          <p className="text-sm text-destructive font-medium">{error}</p>
-        )}
-        <AlertDialogFooter>
-          <AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
-          <AlertDialogAction
-            disabled={loading}
-            onClick={async (e) => {
-              e.preventDefault();
-              setLoading(true);
-              setError(null);
-              try {
-                await onDelete();
-                setOpen(false);
-              } catch {
-                setError("Failed to delete university");
-              } finally {
-                setLoading(false);
-              }
-            }}
-          >
-            {loading ? "Deleting..." : "Delete"}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
   );
 }
 
@@ -209,6 +159,63 @@ function CreateUniversityForm({ onSuccess }: { onSuccess: () => void }) {
       </Button>
       {state?.error ? (
         <p className="text-xs w-full text-destructive">{state.error}</p>
+      ) : null}
+    </form>
+  );
+}
+
+function EditUniversityForm({
+  row,
+  onDone,
+  onCancel,
+}: {
+  row: UniversityListItem;
+  onDone: () => void;
+  onCancel: () => void;
+}) {
+  const [state, action, pending] = useActionState(
+    async (_prev: { error?: string } | null, formData: FormData) => {
+      const nameEn = formData.get("nameEn") as string;
+      const nameAr = formData.get("nameAr") as string;
+      try {
+        await updateUniversity({
+          university_id: row.university_id,
+          university_name_en: nameEn,
+          university_name_ar: nameAr || undefined,
+        });
+        onDone();
+        return { error: undefined };
+      } catch (e: unknown) {
+        return { error: e instanceof Error ? e.message : "Failed to update university" };
+      }
+    },
+    null,
+  );
+
+  return (
+    <form action={action} className="flex items-center gap-2 flex-wrap">
+      <Input
+        name="nameEn"
+        defaultValue={row.university_name_en ?? ""}
+        required
+        maxLength={100}
+        className="w-28 h-8"
+      />
+      <Input
+        name="nameAr"
+        defaultValue={row.university_name_ar ?? ""}
+        maxLength={100}
+        placeholder="Name (AR)"
+        className="w-28 h-8"
+      />
+      <Button type="submit" size="sm" disabled={pending}>
+        {pending ? "..." : "Save"}
+      </Button>
+      <Button type="button" variant="ghost" size="sm" onClick={onCancel}>
+        Cancel
+      </Button>
+      {state?.error ? (
+        <p className="text-xs text-destructive">{state.error}</p>
       ) : null}
     </form>
   );
