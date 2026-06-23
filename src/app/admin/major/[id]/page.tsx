@@ -15,11 +15,10 @@ export default async function AdminMajorDetailPage({
   const session = await requireRoleCapability("admin", "admin.system");
   const { id } = await params;
 
-  const result = await getMajor(id);
-  if (!result.major) {
+  const major = await getMajor(id);
+  if (!major) {
     notFound();
   }
-  const { major } = result;
 
   return (
     <WorkspaceShell
@@ -27,6 +26,7 @@ export default async function AdminMajorDetailPage({
       eyebrow="Admin / Majors"
       title={major.major_name_en}
       metrics={[
+        { label: "Candidates", value: major.candidate_count ?? 0, note: "Education records with this major" },
         { label: "Created", value: major.major_created_at ? formatDate(new Date(major.major_created_at)) : "—", note: "Record created" },
       ]}
     >

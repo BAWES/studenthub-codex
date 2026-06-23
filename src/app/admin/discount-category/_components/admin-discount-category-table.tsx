@@ -22,12 +22,12 @@ import {
 import type { Route } from "next";
 
 import type { SessionUser } from "@/modules/auth/types";
-import type { DiscountCategoryItem } from "@/modules/admin/discount-category/schemas";
+import type { DiscountCategoryListItem } from "@/modules/admin/discount-category/schemas";
 import { createDiscountCategory, deleteDiscountCategory } from "@/modules/admin/discount-category/actions";
 
 type Props = {
   session: SessionUser;
-  records: DiscountCategoryItem[];
+  records: DiscountCategoryListItem[];
 };
 
 export function AdminDiscountCategoryTable({ session, records }: Props) {
@@ -70,6 +70,15 @@ export function AdminDiscountCategoryTable({ session, records }: Props) {
             render: (row) => (
               <span className="text-sm text-muted-foreground" dir="rtl">
                 {row.name_ar ?? "—"}
+              </span>
+            ),
+          },
+          {
+            key: "discount_count",
+            label: "Discounts",
+            render: (row) => (
+              <span className="text-sm text-muted-foreground">
+                {row.discount_count}
               </span>
             ),
           },
@@ -166,7 +175,11 @@ function CreateDiscountCategoryForm({ onSuccess }: { onSuccess: () => void }) {
       const image = formData.get("image") as string;
 
       try {
-        await createDiscountCategory(name_en, name_ar || null, image || null);
+        await createDiscountCategory({
+          name_en,
+          name_ar: name_ar || "",
+          image: image || "",
+        });
         onSuccess();
         return { error: undefined };
       } catch (e) {
