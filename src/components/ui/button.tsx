@@ -3,27 +3,32 @@ import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
-const buttonVariants = cva("uiButton", {
-  variants: {
-    variant: {
-      default: "uiButton_default",
-      secondary: "uiButton_secondary",
-      ghost: "uiButton_ghost",
-      outline: "uiButton_outline",
-      destructive: "uiButton_destructive"
+const buttonVariants = cva(
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[var(--radius)] text-sm font-[760] leading-none transition-all duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring/30 disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0",
+  {
+    variants: {
+      variant: {
+        default:
+          "bg-primary text-primary-foreground shadow-[0_10px_28px_color-mix(in_srgb,var(--primary)_14%,transparent)] hover:-translate-y-0.5",
+        secondary: "bg-secondary text-secondary-foreground hover:bg-accent hover:text-accent-foreground",
+        ghost: "bg-transparent text-foreground hover:bg-accent hover:text-accent-foreground",
+        outline:
+          "border border-border bg-card text-foreground hover:bg-accent hover:text-accent-foreground",
+        destructive: "bg-destructive text-destructive-foreground",
+      },
+      size: {
+        default: "min-h-[44px] px-[14px]",
+        sm: "min-h-[34px] px-[11px] text-[0.86rem]",
+        lg: "min-h-[46px] px-[18px]",
+        icon: "size-10",
+      },
     },
-    size: {
-      default: "uiButton_defaultSize",
-      sm: "uiButton_sm",
-      lg: "uiButton_lg",
-      icon: "uiButton_icon"
-    }
-  },
-  defaultVariants: {
-    variant: "default",
-    size: "default"
+    defaultVariants: {
+      variant: "default",
+      size: "default",
+    },
   }
-});
+);
 
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,

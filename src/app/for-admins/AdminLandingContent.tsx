@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { ChevronRight, Sparkles } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/modules/theme/ThemeToggle";
 import { HeroSection } from "@/components/marketing";
 import { FeatureGrid } from "@/components/marketing";
@@ -80,26 +81,21 @@ export default function AdminLandingContent({
             </Link>
             <div className="flex items-center gap-3.5 max-sm:flex-col max-sm:items-stretch">
               {isLoggedIn ? (
-                <Link
-                  href="/app"
-                  className="uiButton uiButton_default uiButton_defaultSize"
-                >
-                  Open app <ChevronRight className="size-3.5" />
-                </Link>
+                <Button variant="default" size="default" asChild>
+                  <Link href="/app">
+                    Open app <ChevronRight className="size-3.5" />
+                  </Link>
+                </Button>
               ) : (
                 <>
-                  <Link
-                    href="/signup?role=admin"
-                    className="uiButton uiButton_default uiButton_defaultSize"
-                  >
-                    Request admin access <Sparkles className="size-3.5" />
-                  </Link>
-                  <Link
-                    href="/login"
-                    className="uiButton uiButton_ghost uiButton_defaultSize"
-                  >
-                    Sign in
-                  </Link>
+                  <Button variant="default" size="default" asChild>
+                    <Link href="/signup?role=admin">
+                      Request admin access <Sparkles className="size-3.5" />
+                    </Link>
+                  </Button>
+                  <Button variant="ghost" size="default" asChild>
+                    <Link href="/login">Sign in</Link>
+                  </Button>
                 </>
               )}
               <ThemeToggle />
@@ -201,19 +197,17 @@ export default function AdminLandingContent({
               no minimum commitment.
             </p>
             {isLoggedIn ? (
-              <Link
-                href="/app"
-                className="uiButton uiButton_default uiButton_lg shGlowButton"
-              >
-                Open app <ChevronRight className="size-4" />
-              </Link>
+              <Button variant="default" size="lg" asChild>
+                <Link href="/app">
+                  Open app <ChevronRight className="size-4" />
+                </Link>
+              </Button>
             ) : (
-              <Link
-                href="/signup?role=admin"
-                className="uiButton uiButton_default uiButton_lg shGlowButton"
-              >
-                Get admin access <ChevronRight className="size-4" />
-              </Link>
+              <Button variant="default" size="lg" asChild>
+                <Link href="/signup?role=admin">
+                  Get admin access <ChevronRight className="size-4" />
+                </Link>
+              </Button>
             )}
             <div className="flex items-center justify-center gap-4 mt-4 text-xs text-gray-500">
               <span>15,000+ worker records managed</span>

@@ -2,13 +2,13 @@
 
 import Link from "next/link";
 import { ChevronRight, Sparkles } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/modules/theme/ThemeToggle";
 import { HeroSection } from "@/components/marketing";
 import { FeatureGrid } from "@/components/marketing";
 import { TestimonialCarousel } from "@/components/marketing";
 import { PricingCard } from "@/components/marketing";
 import { ComparisonTable } from "@/components/marketing";
-import "@/components/landing/landing.css";
 
 // ── Props ─────────────────────────────────────────────────────
 
@@ -81,26 +81,21 @@ export default function StaffLandingContent({
             </Link>
             <div className="flex items-center gap-3.5 max-sm:flex-col max-sm:items-stretch">
               {isLoggedIn ? (
-                <Link
-                  href="/app"
-                  className="uiButton uiButton_default uiButton_defaultSize"
-                >
-                  Open app <ChevronRight className="size-3.5" />
-                </Link>
+                <Button variant="default" size="default" asChild>
+                  <Link href="/app">
+                    Open app <ChevronRight className="size-3.5" />
+                  </Link>
+                </Button>
               ) : (
                 <>
-                  <Link
-                    href="/signup?role=staff"
-                    className="uiButton uiButton_default uiButton_defaultSize"
-                  >
-                    Request staff access <Sparkles className="size-3.5" />
-                  </Link>
-                  <Link
-                    href="/login"
-                    className="uiButton uiButton_ghost uiButton_defaultSize"
-                  >
-                    Sign in
-                  </Link>
+                  <Button variant="default" size="default" asChild>
+                    <Link href="/signup?role=staff">
+                      Request staff access <Sparkles className="size-3.5" />
+                    </Link>
+                  </Button>
+                  <Button variant="ghost" size="default" asChild>
+                    <Link href="/login">Sign in</Link>
+                  </Button>
                 </>
               )}
               <ThemeToggle />
@@ -113,7 +108,7 @@ export default function StaffLandingContent({
 
         {/* ── Pain-point section — the staffing frustrations ── */}
         <section
-          className="shSection relative overflow-hidden rounded-xl p-[clamp(24px,5vw,48px)] bg-white border border-[var(--border)]"
+          className="relative overflow-hidden rounded-xl p-[clamp(24px,5vw,48px)] bg-white border border-[var(--border)]"
           aria-label="Staffing pain points and solutions"
         >
           <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-[#fef1ef] via-white to-[var(--paper)] z-0" aria-hidden="true" />
@@ -122,7 +117,7 @@ export default function StaffLandingContent({
             <p className="text-[var(--sh-coral)] text-[11px] font-black uppercase tracking-wider mb-1">
               The real staffing headache
             </p>
-            <h2 className="shBenefitsTitle mb-8">
+            <h2 className="text-[clamp(22px,3.4vw,38px)] font-black leading-[1.08] tracking-tight text-[var(--ink)] mb-8">
               You don&apos;t need another spreadsheet.
               <br />
               You need a{" "}
@@ -161,7 +156,7 @@ export default function StaffLandingContent({
 
         {/* ── Stats strip — staff authority signals ── */}
         <section
-          className="shSection rounded-xl p-[clamp(20px,4vw,40px)] grid grid-cols-2 sm:grid-cols-4 gap-6 text-center bg-white border border-[var(--border)]"
+          className="rounded-xl p-[clamp(20px,4vw,40px)] grid grid-cols-2 sm:grid-cols-4 gap-6 text-center bg-white border border-[var(--border)]"
           aria-label="Staffing stats"
         >
           {STAFF_STATS.map((stat) => (
@@ -192,7 +187,7 @@ export default function StaffLandingContent({
 
         {/* ── Final CTA — tailored for staffing agencies ── */}
         <section
-          className="shSection relative overflow-hidden rounded-xl p-[clamp(24px,5vw,60px)] text-center bg-white border border-[var(--border)]"
+          className="relative overflow-hidden rounded-xl p-[clamp(24px,5vw,60px)] text-center bg-white border border-[var(--border)]"
           aria-label="Get started as staff"
         >
           <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-[#fef1ef] via-white to-[var(--paper)] z-0" aria-hidden="true" />
@@ -201,7 +196,7 @@ export default function StaffLandingContent({
             <p className="text-[#eb6651] text-[11px] font-black uppercase tracking-wider mb-2">
               Start placing faster
             </p>
-            <h2 className="shBenefitsTitle text-center">
+            <h2 className="text-[clamp(22px,3.4vw,38px)] font-black leading-[1.08] tracking-tight text-[var(--ink)] text-center">
               Your next placement is one search away.
             </h2>
             <p
@@ -212,19 +207,17 @@ export default function StaffLandingContent({
               setup fee, no minimum commitment.
             </p>
             {isLoggedIn ? (
-              <Link
-                href="/app"
-                className="uiButton uiButton_default uiButton_lg shGlowButton"
-              >
-                Open app <ChevronRight className="size-4" />
-              </Link>
+              <Button variant="default" size="lg" asChild>
+                <Link href="/app">
+                  Open app <ChevronRight className="size-4" />
+                </Link>
+              </Button>
             ) : (
-              <Link
-                href="/signup?role=staff"
-                className="uiButton uiButton_default uiButton_lg shGlowButton"
-              >
-                Get staff access <ChevronRight className="size-4" />
-              </Link>
+              <Button variant="default" size="lg" asChild>
+                <Link href="/signup?role=staff">
+                  Get staff access <ChevronRight className="size-4" />
+                </Link>
+              </Button>
             )}
             <div
               className="flex items-center justify-center gap-4 mt-4 text-xs text-[var(--muted)]"
@@ -237,7 +230,7 @@ export default function StaffLandingContent({
 
         {/* ── Footer ── */}
         <footer
-          className="shSection flex items-center justify-between pt-4 pb-2 text-xs text-[var(--muted)]"
+          className="flex items-center justify-between pt-4 pb-2 text-xs text-[var(--muted)]"
         >
           <span>&copy; {new Date().getFullYear()} StudentHub. All rights reserved.</span>
           <div className="flex items-center gap-4">
