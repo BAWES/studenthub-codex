@@ -1,3 +1,8 @@
+"use client";
+
+import { useTransition, useState, useEffect, type ChangeEvent } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useDebounce } from "@/hooks/use-debounce";
 import type { Route } from "next";
 import Link from "next/link";
 import { logoutAction } from "@/modules/auth/actions";
@@ -12,6 +17,8 @@ import type {
   CandidateSearchParams,
   getCandidateSearchWorkspace
 } from "./search";
+import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type CandidateSearchData = Awaited<ReturnType<typeof getCandidateSearchWorkspace>>;
 type CandidateSearchParamKey =
@@ -43,6 +50,30 @@ export function CandidateSearchOS({
   session: SessionUser;
   params: CandidateSearchParams;
 }) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [isPending, startTransition] = useTransition();
+  const [searchValue, setSearchValue] = useState(data.query ?? "");
+  const debouncedQuery = useDebounce(searchValue, 300);
+
+  const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setSearchValue(e.target.value);
+  };
+
+  // Update URL when debounced query settles
+  useEffect(() => {
+    const next = new URLSearchParams(searchParams.toString());
+    if (debouncedQuery) {
+      next.set("q", debouncedQuery);
+    } else {
+      next.delete("q");
+    }
+
+    startTransition(() => {
+      router.replace(`${basePath}?${next.toString()}`);
+    });
+  }, [debouncedQuery]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const commands = buildCandidateSearchCommands(data, basePath, params);
   const selectedIds = params.selectedIds ?? [];
   const selectedRows = data.rows.filter((row) => selectedIds.includes(row.id));
@@ -56,21 +87,19 @@ export function CandidateSearchOS({
           <span>SH</span>
           <strong>Candidates</strong>
         </Link>
-        <form className="candidateDeskSearch" id="candidate-search">
-          <input
+        <div className="candidateDeskSearch">
+          <Input
             data-command-search
             id="candidate-query"
-            name="q"
             placeholder="Search name, email, phone, ID, skill, tag"
             defaultValue={data.query}
+            onChange={handleSearchChange}
+            className="candidateSearchInput"
           />
-          <input name="filter" type="hidden" value={data.filter} />
-          {params.visibility === "assigned" ? <input name="view" type="hidden" value="assigned" /> : null}
-          {data.openTabs.length ? <input name="tabs" type="hidden" value={data.openTabs.map((tab) => tab.id).join(",")} /> : null}
-          {selectedIds.length ? <input name="selected" type="hidden" value={selectedIds.join(",")} /> : null}
-          <HiddenFacetInputs data={data} />
-          <button type="submit">Search</button>
-        </form>
+          {isPending && (
+            <Skeleton className="candidateSearchLoading h-5 w-5 rounded-full" />
+          )}
+        </div>
         <div className="candidateDeskTools">
           <HubShortcuts commands={commands} />
           <ThemeToggle />
@@ -337,21 +366,6 @@ const candidateFilterLinks: { label: string; value: CandidateSearchFilter }[] = 
   { label: "Civil ID", value: "civil-id" }
 ];
 
-function HiddenFacetInputs({ data }: { data: CandidateSearchData }) {
-  return (
-    <>
-      {data.params.country ? <input name="country" type="hidden" value={data.params.country} /> : null}
-      {data.params.university ? <input name="university" type="hidden" value={data.params.university} /> : null}
-      {data.params.company ? <input name="company" type="hidden" value={data.params.company} /> : null}
-      {data.params.skill ? <input name="skill" type="hidden" value={data.params.skill} /> : null}
-      {data.params.gender ? <input name="gender" type="hidden" value={data.params.gender} /> : null}
-      {data.params.profile ? <input name="profile" type="hidden" value={data.params.profile} /> : null}
-      {data.params.assignment ? <input name="assignment" type="hidden" value={data.params.assignment} /> : null}
-      {data.params.document ? <input name="document" type="hidden" value={data.params.document} /> : null}
-    </>
-  );
-}
-
 function FacetGroup({ basePath, facet, params }: { basePath: "/admin/candidates" | "/staff/candidates"; facet: CandidateSearchFacet; params: CandidateSearchParams }) {
   return (
     <section className="candidateFacetGroup">
@@ -423,7 +437,7 @@ function buildCandidateSearchCommands(
   params: CandidateSearchParams
 ): HubCommand[] {
   return [
-    { id: "candidate-search-focus", title: "Focus candidate search", subtitle: "Search production candidates", section: "Search", href: "#candidate-search", shortcut: "/" },
+    { id: "candidate-search-focus", title: "Focus candidate search", subtitle: "Search production candidates", section: "Search", href: "#candidate-query", shortcut: "/" },
     { id: "candidate-clear", title: "Clear candidate filters", subtitle: "Return to the default search view", section: "Search", href: basePath },
     ...candidateFilterLinks.map((filter) => ({
       id: `filter-${filter.value}`,
