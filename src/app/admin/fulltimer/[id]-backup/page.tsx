@@ -11,8 +11,9 @@ export default async function AdminFulltimerDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const session = await requireRoleCapability("admin", "admin.system");
   const { id } = await params;
+  const session = await requireRoleCapability("admin", "admin.system");
+
   const fulltimer = await getFulltimer(id);
 
   if (!fulltimer) {
