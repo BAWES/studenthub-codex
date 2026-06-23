@@ -27,7 +27,7 @@ export function CreateWebhookForm() {
       const endpoint = formData.get("endpoint") as string;
 
       try {
-        await createWebhook({ event, endpoint, method });
+        await createWebhook(event, endpoint, method);
         router.refresh();
         formRef.current?.reset();
         setMethod("POST");

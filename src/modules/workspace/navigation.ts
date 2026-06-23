@@ -27,6 +27,7 @@ export function navForRole(role: Role): NavItem[] {
       { label: "Degrees", href: "/admin/degree", icon: GraduationCap },
       { label: "Daily Standup", href: "/admin/daily-standup", icon: MessageSquareText },
       { label: "Transfers", href: "/admin/transfers", icon: ArrowRightLeft },
+      { label: "Employees", href: "/admin/employees", icon: Users },
       { label: "Story", href: "/admin/story", icon: BookOpen }
     ];
   }

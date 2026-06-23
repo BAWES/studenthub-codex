@@ -82,7 +82,7 @@ export async function getCandidateSearchWorkspace(params: CandidateSearchParams)
     document: parseEnum(params.document, ["resume", "no-resume", "civil-id"])
   };
   const where = buildCandidateWhere({ scopeWhere, query, filter, ...facetParams });
-  const facetWhere = buildCandidateWhere({ scopeWhere, query, filter });
+  const facetWhere = buildCandidateWhere({ scopeWhere, query, filter, ...facetParams });
 
   const [rows, metrics, matchingCount, facetRows, exactFacets] = await Promise.all([
     prisma.candidate.findMany({
@@ -122,7 +122,8 @@ export async function getCandidateSearchWorkspace(params: CandidateSearchParams)
   const selectedId = await resolveSelectedCandidateId({
     requestedId: params.candidateId,
     rows: searchRows,
-    staffCandidateIds
+    staffCandidateIds,
+    visibility: params.visibility,
   });
   const selected = selectedId
     ? await getCandidateDetail(selectedId, params.role === "admin" ? "/admin/requests" : "/staff/requests")
@@ -539,15 +540,17 @@ function topFacet(values: { value: string; label: string }[], activeValue?: stri
 async function resolveSelectedCandidateId({
   requestedId,
   rows,
-  staffCandidateIds
+  staffCandidateIds,
+  visibility,
 }: {
   requestedId?: number;
   rows: CandidateSearchRow[];
   staffCandidateIds: number[] | null;
+  visibility?: string;
 }) {
   if (requestedId) {
-    // Staff must always pass scope enforcement, even when row visibility is "all"
-    if (staffCandidateIds && !staffCandidateIds.includes(requestedId)) return null;
+    // Only enforce scope when the user explicitly filtered to "assigned" candidates
+    if (visibility === "assigned" && staffCandidateIds && !staffCandidateIds.includes(requestedId)) return null;
     const exists = await prisma.candidate.findFirst({ where: { candidate_id: requestedId, deleted: 0 }, select: { candidate_id: true } });
     return exists?.candidate_id ?? null;
   }

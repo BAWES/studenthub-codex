@@ -171,7 +171,22 @@ export async function getAdminTransferDetail(transferId: number) {
   ]);
 
   return {
-    transfer,
+    transfer: transfer ? {
+      transfer_id: transfer.transfer_id,
+      total: transfer.total?.toString() ?? null,
+      company_total: transfer.company_total?.toString() ?? null,
+      transfer_cost: transfer.transfer_cost?.toString() ?? null,
+      transfer_status: transfer.transfer_status,
+      start_date: transfer.start_date?.toISOString() ?? null,
+      end_date: transfer.end_date?.toISOString() ?? null,
+      payment_received_on: transfer.payment_received_on?.toISOString() ?? null,
+      transfer_created_at: transfer.transfer_created_at?.toISOString() ?? null,
+      transfer_updated_at: transfer.transfer_updated_at?.toISOString() ?? null,
+      currency_code: transfer.currency_code ?? null,
+      company: transfer.company ? { company_name: transfer.company.company_name, company_email: transfer.company.company_email } : null,
+      staff_transfer_transfer_created_byTostaff: transfer.staff_transfer_transfer_created_byTostaff ? { staff_name: transfer.staff_transfer_transfer_created_byTostaff.staff_name } : null,
+      staff_transfer_transfer_updated_byTostaff: transfer.staff_transfer_transfer_updated_byTostaff ? { staff_name: transfer.staff_transfer_transfer_updated_byTostaff.staff_name } : null,
+    } : null,
     metrics: [
       { label: "Status", value: `Status ${transfer?.transfer_status ?? 0}`, note: "Legacy transfer status" },
       { label: "Total", value: formatMoney(transfer?.total ?? transfer?.company_total, transfer?.currency_code ?? "KWD"), note: "Transfer total" },
