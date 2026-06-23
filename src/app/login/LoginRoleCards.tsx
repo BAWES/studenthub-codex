@@ -17,7 +17,7 @@ export default function LoginRoleCards() {
       {roleNotes.map(({ icon: Icon, label, detail }) => (
         <Card key={label}>
           <CardContent className="grid gap-1.5 p-3.5">
-            <Icon className="size-4 text-blue-zendesk shrink-0" aria-hidden="true" />
+            <Icon className="size-4 text-coral shrink-0" aria-hidden="true" />
             <span className="text-muted-foreground text-xs font-extrabold uppercase">{label}</span>
             <strong className="text-sm text-foreground">{detail}</strong>
           </CardContent>

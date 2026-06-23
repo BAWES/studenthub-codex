@@ -40,7 +40,7 @@ export default async function LoginPage({
       {/* Intro */}
       <Card className="overflow-hidden border-border bg-gradient-to-br from-blue/10 via-transparent to-transparent">
         <CardContent className="p-[clamp(22px,4vw,48px)]">
-          <p className="text-blue-zendesk text-[11px] font-black uppercase">One StudentHub login</p>
+          <p className="text-coral text-[11px] font-black uppercase">One StudentHub login</p>
           <h1 className="mt-0 max-w-[760px] text-[clamp(44px,6.4vw,92px)] leading-[0.94] max-sm:text-[40px]">
             Sign in once. We&rsquo;ll open the right workspace.
           </h1>
@@ -51,14 +51,14 @@ export default async function LoginPage({
           <div className="flex flex-wrap gap-2 mt-5">
             {["Production-compatible credentials", "Server-side account detection", "Capability-scoped workspaces"].map(
               (item) => (
-                <Badge key={item} variant="outline" className="text-blue-zendesk text-[11px] font-black uppercase px-3 py-1.5">
+                <Badge key={item} variant="outline" className="text-coral text-[11px] font-black uppercase px-3 py-1.5">
                   {item}
                 </Badge>
               )
             )}
           </div>
         </CardContent>
-        <Link href="/" className="inline-block mt-4 text-sm no-underline text-muted-foreground hover:text-blue-zendesk px-[clamp(22px,4vw,48px)] pb-[clamp(22px,4vw,48px)]">
+        <Link href="/" className="inline-block mt-4 text-sm no-underline text-muted-foreground hover:text-coral px-[clamp(22px,4vw,48px)] pb-[clamp(22px,4vw,48px)]">
           Back to landing
         </Link>
       </Card>

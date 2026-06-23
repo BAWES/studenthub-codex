@@ -55,7 +55,7 @@ export function AdminCountryTable({ session, countries }: Props) {
               ) : (
                 <button
                   type="button"
-                  className="text-sm hover:underline text-blue-zendesk"
+                  className="text-sm hover:underline text-coral"
                   onClick={() => setEditingId(row.country_id)}
                 >
                   {row.country_name_en}
